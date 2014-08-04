@@ -38,6 +38,7 @@ import com.sap.sailing.domain.common.Tack;
 import com.sap.sailing.domain.common.TimePoint;
 import com.sap.sailing.domain.common.impl.KnotSpeedImpl;
 import com.sap.sailing.domain.common.impl.MeterDistance;
+import com.sap.sailing.domain.common.impl.MillisecondsDurationImpl;
 import com.sap.sailing.domain.common.impl.MillisecondsTimePoint;
 import com.sap.sailing.domain.leaderboard.Leaderboard;
 import com.sap.sailing.domain.tracking.GPSFixMoving;
@@ -539,7 +540,13 @@ public class LeaderboardData extends ExportAction {
         TimePoint endOfRaceForLastTrackedRaceInLeaderboard = null;
         if (lastRaceColumnWithTrackedRace != null) {
             TrackedRace lastTrackedRace = lastRaceColumnWithTrackedRace.getTrackedRace(competitor);
-            endOfRaceForLastTrackedRaceInLeaderboard = lastTrackedRace.getEndOfRace();
+            if (lastTrackedRace != null) {
+                endOfRaceForLastTrackedRaceInLeaderboard = lastTrackedRace.getEndOfRace();
+            } else {
+                // can happen that for this competitor there is no tracked race
+                // leave time null so that leaderboard latest modification time
+                // will kick in
+            }
         }
         if (endOfRaceForLastTrackedRaceInLeaderboard != null) {
             timePointOfLatestModification = endOfRaceForLastTrackedRaceInLeaderboard;
@@ -622,7 +629,11 @@ public class LeaderboardData extends ExportAction {
             addNamedElementWithValue(competitorLegDataElement, "average_velocity_made_good_in_knots", averageVelocityMadeGood != null ? averageVelocityMadeGood.getKnots() : 0);
             addNamedElementWithValue(competitorLegDataElement, "leg_finished_time_as_millis", handleValue(legFinishTime));
             addNamedElementWithValue(competitorLegDataElement, "total_race_time_elapsed_as_millis", handleValue(legFinishTime)-handleValue(trackedLeg.getTrackedRace().getStartOfRace()));
-            addNamedElementWithValue(competitorLegDataElement, "time_spend_in_this_leg_as_millis", competitorLeg.getTime(legFinishTime).asMillis());
+            Duration timeSpentInThisLeg = competitorLeg.getTime(legFinishTime);
+            if (timeSpentInThisLeg == null) {
+                legConfidenceAndErrorMessages = updateConfidence("Competitor " + competitor.getName() + " seems to not have finished this leg before end of tracking time.", 0.1, legConfidenceAndErrorMessages);
+            }
+            addNamedElementWithValue(competitorLegDataElement, "time_spend_in_this_leg_as_millis", timeSpentInThisLeg != null ? timeSpentInThisLeg.asMillis() : new MillisecondsDurationImpl(0).asMillis());
             addNamedElementWithValue(competitorLegDataElement, "gap_to_leader_at_finish_in_seconds", competitorLeg.getGapToLeaderInSeconds(legFinishTime, WindPositionMode.LEG_MIDDLE));
             Distance windwardDistanceToOverallLeader = competitorLeg.getWindwardDistanceToOverallLeader(legFinishTime, WindPositionMode.LEG_MIDDLE);
             addNamedElementWithValue(competitorLegDataElement, "windward_distance_to_overall_leader_that_has_finished_this_leg_in_meters", windwardDistanceToOverallLeader != null ? windwardDistanceToOverallLeader.getMeters() : 0);

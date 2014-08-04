@@ -93,7 +93,7 @@ public class RaceColumnDTO extends NamedDTO implements Serializable {
         this.racesPerFleet.put(fleet, race);
     }
     
-    public Iterable<FleetDTO> getFleets() {
+    public List<FleetDTO> getFleets() {
         return fleets;
     }
     
@@ -178,18 +178,16 @@ public class RaceColumnDTO extends NamedDTO implements Serializable {
         return result;
     }
     
-    /**
-     * Returns live state for the current server time
-     * @see RaceColumnDTO#isLive(FleetDTO, long)
-     * @param fleet
-     * @return
-     */
-    public boolean isLiveInServerTime(FleetDTO fleet) {
-        return isLive(fleet, 0);
-    }
-
     public boolean containsRace(RaceIdentifier preSelectedRace) {
         return trackedRaceIdentifiersPerFleet.values().contains(preSelectedRace);
+    }
+
+    public boolean hasLiveRaces(long serverTimePointAsMillis) {
+        boolean result = false;
+        for(FleetDTO fleet: fleets) {
+            result |= isLive(fleet, serverTimePointAsMillis);
+        }
+        return result;
     }
 
     public boolean hasTrackedRaces() {

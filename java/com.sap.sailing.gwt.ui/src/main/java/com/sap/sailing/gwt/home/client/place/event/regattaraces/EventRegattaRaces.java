@@ -29,15 +29,11 @@ public class EventRegattaRaces extends Composite {
     @UiField HTMLPanel regattaPhasesPanel;
     @UiField HTMLPanel rootPanel;
     
-    @SuppressWarnings("unused")
-    private final EventDTO event;
-
     private final Timer timerForClientServerOffset;
     private final EventPageNavigator pageNavigator;
     private final List<EventRegattaRacesPhase> phaseElements;
 
     public EventRegattaRaces(EventDTO event, Timer timerForClientServerOffset, EventPageNavigator pageNavigator) {
-        this.event = event;
         this.timerForClientServerOffset = timerForClientServerOffset;
         this.pageNavigator = pageNavigator;
         
