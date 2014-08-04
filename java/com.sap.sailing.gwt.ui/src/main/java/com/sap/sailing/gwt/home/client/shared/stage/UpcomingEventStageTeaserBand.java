@@ -7,13 +7,13 @@ import com.sap.sailing.gwt.home.client.shared.EventDatesFormatterUtil;
 import com.sap.sailing.gwt.ui.shared.EventBaseDTO;
 
 /**
- * Teaser band for a live event on the homepage stage
+ * Teaser band for an upcoming event on the homepage stage
  * @author Frank
  *
  */
-public class LiveStageTeaserBand extends StageTeaserBand {
+public class UpcomingEventStageTeaserBand extends StageTeaserBand {
 
-    public LiveStageTeaserBand(EventBaseDTO event, PlaceNavigator placeNavigator) {
+    public UpcomingEventStageTeaserBand(EventBaseDTO event, PlaceNavigator placeNavigator) {
         super(event, placeNavigator);
  
         bandTitle.setInnerText(event.getName());
