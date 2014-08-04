@@ -42,6 +42,8 @@ import com.sap.sailing.gwt.ui.client.StringMessages;
 import com.sap.sailing.gwt.ui.client.shared.components.AbstractLazyComponent;
 import com.sap.sailing.gwt.ui.client.shared.components.Component;
 import com.sap.sse.common.Util;
+import com.sap.sse.common.filter.Filter;
+import com.sap.sse.common.filter.FilterSet;
 import com.sap.sse.gwt.client.async.AsyncActionsExecutor;
 import com.sap.sse.gwt.client.player.TimeListener;
 import com.sap.sse.gwt.client.player.Timer;
@@ -380,5 +382,10 @@ public abstract class AbstractCompetitorLeaderboardChart<SettingsType> extends A
 
     @Override
     public void filteredCompetitorsListChanged(Iterable<CompetitorDTO> filteredCompetitors) {
+    }
+
+    @Override
+    public void filterChanged(FilterSet<CompetitorDTO, ? extends Filter<CompetitorDTO>> oldFilterSet,
+            FilterSet<CompetitorDTO, ? extends Filter<CompetitorDTO>> newFilterSet) {
     }
 }

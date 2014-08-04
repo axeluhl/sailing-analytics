@@ -298,45 +298,50 @@ public class RaceBoardPanel extends SimplePanel implements RegattasDisplayer, Ra
                 .createNewSettingsForPlayMode(timer.getPlayMode(),
                         /* nameOfRaceToSort */ selectedRaceIdentifier.getRaceName(),
                         /* nameOfRaceColumnToShow */ null, /* nameOfRaceToShow */ selectedRaceIdentifier.getRaceName(),
-                        new ExplicitRaceColumnSelectionWithPreselectedRace(selectedRaceIdentifier));
+                        new ExplicitRaceColumnSelectionWithPreselectedRace(selectedRaceIdentifier), /* showRegattaRank */ false);
         return new LeaderboardPanel(sailingService, asyncActionsExecutor, leaderBoardSettings, selectedRaceIdentifier,
                 competitorSelectionModel, timer, leaderboardGroupName, leaderboardName, errorReporter, stringMessages,
-                userAgent, /* showRaceDetails */ true, raceTimesInfoProvider, /* autoExpandLastRaceColumn */ false,
+                userAgent, /* showRaceDetails */ true, /* showCompetitorSearchBox */ true, /* showSelectionCheckbox */ true,
+                raceTimesInfoProvider, /* autoExpandLastRaceColumn */ false,
                 /* don't adjust the timer's delay from the leaderboard; control it solely from the RaceTimesInfoProvider */ false);
     }
 
     private void updateCompetitorsFilterContexts(CompetitorsFilterSets filterSets) {
-        for(FilterSet<CompetitorDTO, FilterWithUI<CompetitorDTO>> filterSet: filterSets.getFilterSets()) {
-            for(Filter<CompetitorDTO> filter: filterSet.getFilters()) {
-               if(filter instanceof LeaderboardFilterContext) {
-                   ((LeaderboardFilterContext) filter).setLeaderboardFetcher(leaderboardPanel);
-               }
-               if(filter instanceof SelectedRaceFilterContext) {
-                   ((SelectedRaceFilterContext) filter).setSelectedRace(selectedRaceIdentifier);
-               }
-               if(filter instanceof CompetitorSelectionProviderFilterContext) {
-                   ((CompetitorSelectionProviderFilterContext) filter).setCompetitorSelectionProvider(competitorSelectionModel);
-               }
+        for (FilterSet<CompetitorDTO, FilterWithUI<CompetitorDTO>> filterSet : filterSets.getFilterSets()) {
+            for (Filter<CompetitorDTO> filter : filterSet.getFilters()) {
+                if (filter instanceof LeaderboardFilterContext) {
+                    ((LeaderboardFilterContext) filter).setLeaderboardFetcher(leaderboardPanel);
+                }
+                if (filter instanceof SelectedRaceFilterContext) {
+                    ((SelectedRaceFilterContext) filter).setSelectedRace(selectedRaceIdentifier);
+                }
+                if (filter instanceof CompetitorSelectionProviderFilterContext) {
+                    ((CompetitorSelectionProviderFilterContext) filter)
+                            .setCompetitorSelectionProvider(competitorSelectionModel);
+                }
             }
         }
     }
 
+    /**
+     * Updates the competitor filter checkbox state by setting its check mark and updating its labal according to the
+     * current filter selected
+     */
     private void updateCompetitorsFilterControlState(CompetitorsFilterSets filterSets) {
         String competitorsFilterTitle = stringMessages.competitorsFilter();
         FilterSet<CompetitorDTO, FilterWithUI<CompetitorDTO>> activeFilterSet = filterSets.getActiveFilterSet();
-        if(activeFilterSet != null) {
+        if (activeFilterSet != null) {
             lastActiveCompetitorFilterSet = activeFilterSet;
         } else {
-            if(filterSets.getFilterSets().size() == 0) {
+            if (filterSets.getFilterSets().size() == 0) {
                 lastActiveCompetitorFilterSet = null;
             }
         }
-        competitorsFilterCheckBox.setValue(activeFilterSet != null, false /* fireChangeValue*/);
-        
-        if(lastActiveCompetitorFilterSet != null) {
-            competitorsFilterCheckBox.setText(competitorsFilterTitle + " (" + lastActiveCompetitorFilterSet.getName() + ")");
+        competitorsFilterCheckBox.setValue(activeFilterSet != null, false /* fireChangeValue */);
+        if (lastActiveCompetitorFilterSet != null) {
+            competitorsFilterCheckBox.setText(competitorsFilterTitle+" ("+lastActiveCompetitorFilterSet.getName()+")");
         } else {
-            competitorsFilterCheckBox.setText(competitorsFilterTitle);            
+            competitorsFilterCheckBox.setText(competitorsFilterTitle);
         }
     }
     
@@ -351,7 +356,7 @@ public class RaceBoardPanel extends SimplePanel implements RegattasDisplayer, Ra
             public void onValueChange(ValueChangeEvent<Boolean> newValue) {
                 boolean isChecked = competitorsFilterCheckBox.getValue();
                 if (isChecked) {
-                    if(lastActiveCompetitorFilterSet != null) {
+                    if (lastActiveCompetitorFilterSet != null) {
                         competitorsFilterSets.setActiveFilterSet(lastActiveCompetitorFilterSet);
                         competitorSelectionModel.setCompetitorsFilterSet(competitorsFilterSets.getActiveFilterSet());
                         updateCompetitorsFilterControlState(competitorsFilterSets);

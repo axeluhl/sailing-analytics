@@ -136,10 +136,6 @@ body ::-webkit-scrollbar-track {
   color:#A1A1A1;
   }
 
-.gwt-SplitLayoutPanel-HDragger {
-  width: 20px;
-}
-
 .gwt-ToggleButton {
   background: url(images/btn-cta-orangeleft.png) center top repeat-x;
   padding: 8px;
@@ -153,17 +149,35 @@ body ::-webkit-scrollbar-track {
 }
 
 .gwt-SplitLayoutPanel-HDragger {
-  width: 12px;
+	width: 25px !important;
+	height: 50px !important;
+	left: 3px !important;
+	top: 50% !important;
+	background: #ffffff url(images/thumb_vertical.png) center no-repeat;
+	cursor: col-resize;
+	border-top-right-radius: 25px;
+	border-bottom-right-radius: 25px;
+	z-index: 1;
 }
 
-.gwt-SplitLayoutPanel-HDragger {
-  background: #cbcaca url(images/thumb_vertical.png) center center no-repeat;
-  cursor: col-resize;
+.SplitLayoutPanel-Divider-Horizontal {
+	background: #ffffff;
+}
+
+.SplitLayoutPanel-Divider-Vertical {
+	background: #ffffff;
 }
 
 .gwt-SplitLayoutPanel-VDragger {
-  background: #cbcaca url(images/thumb_horz.png) center center no-repeat;
-  cursor: row-resize;
+	width: 50px !important;
+	height: 25px !important;
+	top: -25px !important;
+	left: 50% !important;
+	background: #ffffff url(images/thumb_horz.png) center no-repeat;
+	cursor: row-resize;
+	border-top-left-radius: 25px;
+	border-top-right-radius: 25px;
+	z-index: 1;
 }
 
 .gwt-ToggleButton-up-hovering, .gwt-ToggleButton-down-hovering {
