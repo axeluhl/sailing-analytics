@@ -28,6 +28,7 @@ import com.google.gwt.dom.client.Touch;
 import com.google.gwt.user.client.Event;
 import com.google.gwt.user.client.Window;
 import com.google.gwt.user.client.ui.DockLayoutPanel;
+import com.google.gwt.user.client.ui.Label;
 import com.google.gwt.user.client.ui.Widget;
 
 /**
@@ -67,6 +68,9 @@ public class TouchSplitLayoutPanelWithBetterDraggers extends DockLayoutPanel {
       super(target, reverse);
       getElement().getStyle().setPropertyPx("width", splitterSize);
       setStyleName("gwt-SplitLayoutPanel-HDragger");
+      Label splitterLabel = new Label(target.getTitle());
+      splitterLabel.setStyleName("gwt-SplitLayoutPanel-HDragger-Label");
+      getElement().appendChild(splitterLabel.getElement());
     }
 
     @Override

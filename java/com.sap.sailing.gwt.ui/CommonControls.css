@@ -149,15 +149,23 @@ body ::-webkit-scrollbar-track {
 }
 
 .gwt-SplitLayoutPanel-HDragger {
-	width: 25px !important;
-	height: 50px !important;
+	width: 35px !important;
+	height: 80px !important;
 	left: 3px !important;
 	top: 50% !important;
-	background: #ffffff url(images/thumb_vertical.png) center no-repeat;
+	background: #ffffff url(images/thumb_vertical.png) 70% 50% no-repeat;
 	cursor: col-resize;
 	border-top-right-radius: 25px;
 	border-bottom-right-radius: 25px;
 	z-index: 1;
+}
+
+.gwt-SplitLayoutPanel-HDragger-Label {
+	-webkit-transform: rotate(90deg);
+    font-size: 10px;
+    position: absolute;
+    top: 35px;
+    left: -20px;
 }
 
 .SplitLayoutPanel-Divider-Horizontal {
