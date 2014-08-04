@@ -28,6 +28,11 @@ public interface LeaderboardTableResources extends CellTable.Resources {
          * Applied to race columns
          */
         String cellTableRaceColumn();
+        
+        /**
+         * Applied to checkbox column
+         */
+        String cellTableCheckboxColumnCell();
 
         /**
          * Applied to leg columns

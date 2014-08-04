@@ -758,3 +758,10 @@ video {
   cursor: pointer;
   cursor: hand;
 }
+
+.betterCheckboxCell {
+	margin: 0px;
+	height: 18px;
+	width: 18px;
+	vertical-align: middle;
+}
