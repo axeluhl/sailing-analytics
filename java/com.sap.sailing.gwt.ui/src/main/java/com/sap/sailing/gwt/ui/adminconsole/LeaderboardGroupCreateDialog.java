@@ -17,7 +17,7 @@ public class LeaderboardGroupCreateDialog extends LeaderboardGroupDialog {
         descriptionEntryField = createTextArea(null);
         descriptionEntryField.ensureDebugId("DescriptionTextArea");
         
-        displayNameEntryField = createTextArea(null);
+        displayNameEntryField = createTextBox("");
         displayNameEntryField.ensureDebugId("DisplayNameTextArea");
         
         displayLeaderboardsInReverseOrderCheckBox.setValue(false);

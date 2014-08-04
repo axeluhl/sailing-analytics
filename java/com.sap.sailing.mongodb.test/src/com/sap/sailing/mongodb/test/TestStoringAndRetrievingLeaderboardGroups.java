@@ -336,6 +336,7 @@ public class TestStoringAndRetrievingLeaderboardGroups extends AbstractMongoDBTe
 
         final String groupName = "Leaderboard Group";
         final String groupDescription = "A leaderboard group";
+        final String groupDisplayName = "Some short name";
         final ArrayList<Leaderboard> leaderboards = new ArrayList<>();
 
         Leaderboard leaderboard = new FlexibleLeaderboardImpl(leaderboardNames[0], new ThresholdBasedResultDiscardingRuleImpl(discardIndexResultsStartingWithHowManyRaces),
@@ -351,7 +352,7 @@ public class TestStoringAndRetrievingLeaderboardGroups extends AbstractMongoDBTe
                 new LowPoint(), null);
         leaderboards.add(leaderboard);
 
-        final LeaderboardGroup leaderboardGroup = new LeaderboardGroupImpl(groupName, groupDescription, /* displayName */ null, false, leaderboards);
+        final LeaderboardGroup leaderboardGroup = new LeaderboardGroupImpl(groupName, groupDescription, groupDisplayName, false, leaderboards);
         mongoObjectFactory.storeLeaderboardGroup(leaderboardGroup);
 
         final LeaderboardGroup loadedLeaderboardGroup = domainObjectFactory.loadLeaderboardGroup(groupName, /* regattaRegistry */ null,
@@ -359,6 +360,7 @@ public class TestStoringAndRetrievingLeaderboardGroups extends AbstractMongoDBTe
 
         Assert.assertEquals(groupName, loadedLeaderboardGroup.getName());
         Assert.assertEquals(groupDescription, loadedLeaderboardGroup.getDescription());
+        Assert.assertEquals(groupDisplayName, loadedLeaderboardGroup.getDisplayName());
 
         int c = 0;
         for (Leaderboard board : leaderboardGroup.getLeaderboards()) {

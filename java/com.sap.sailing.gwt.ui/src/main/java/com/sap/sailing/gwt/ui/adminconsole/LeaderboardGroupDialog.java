@@ -27,7 +27,7 @@ public class LeaderboardGroupDialog extends DataEntryDialog<LeaderboardGroupDial
     protected StringMessages stringMessages;
     protected TextBox nameEntryField;
     protected TextArea descriptionEntryField;
-    protected TextArea displayNameEntryField;
+    protected TextBox displayNameEntryField;
     protected CheckBox displayLeaderboardsInReverseOrderCheckBox;
     protected CheckBox useOverallLeaderboardCheckBox;
     private Panel overallLeaderboardConfigPanel;
@@ -180,8 +180,6 @@ public class LeaderboardGroupDialog extends DataEntryDialog<LeaderboardGroupDial
         descriptionEntryField.getElement().getStyle().setProperty("resize", "none");
         panel.add(descriptionEntryField);
         panel.add(new Label(stringMessages.displayName()));
-        displayNameEntryField.setCharacterWidth(30);
-        displayNameEntryField.setVisibleLines(6);
         displayNameEntryField.getElement().getStyle().setProperty("resize", "none");
         panel.add(displayNameEntryField);
         panel.add(displayLeaderboardsInReverseOrderCheckBox);
