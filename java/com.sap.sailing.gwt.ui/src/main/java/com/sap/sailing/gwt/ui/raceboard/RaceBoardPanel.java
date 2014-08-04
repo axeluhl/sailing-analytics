@@ -273,7 +273,7 @@ public class RaceBoardPanel extends SimplePanel implements RegattasDisplayer, Ra
      * Consequently, media selector will also NOT react on media added newly during a race board session.
      */
     private void addMediaSelectorToNavigationMenu() {
-        MediaSelector mediaSelector = new MediaSelector(selectedRaceIdentifier, raceTimesInfoProvider, timer, mediaService, stringMessages, errorReporter, this.user, getConfiguration().isAutoSelectMedia());
+        MediaSelector mediaSelector = new MediaSelector(selectedRaceIdentifier, raceTimesInfoProvider, timer, mediaService, stringMessages, errorReporter, userAgent, this.user, getConfiguration().isAutoSelectMedia());
         timer.addPlayStateListener(mediaSelector);
         timer.addTimeListener(mediaSelector);
         mediaService.getMediaTracksForRace(selectedRaceIdentifier, mediaSelector);
@@ -417,13 +417,13 @@ public class RaceBoardPanel extends SimplePanel implements RegattasDisplayer, Ra
     private CompetitorsFilterSets loadCompetitorsFilterSets() {
         CompetitorsFilterSets result = null;
         Storage localStorage = Storage.getLocalStorageIfSupported();
-        if(localStorage != null) {
+        if (localStorage != null) {
             try {
                 String jsonAsLocalStore = localStorage.getItem(LOCAL_STORAGE_COMPETITORS_FILTER_SETS_KEY);
-                if(jsonAsLocalStore != null && !jsonAsLocalStore.isEmpty()) {
+                if (jsonAsLocalStore != null && !jsonAsLocalStore.isEmpty()) {
                     CompetitorsFilterSetsJsonDeSerializer deserializer = new CompetitorsFilterSetsJsonDeSerializer();
                     JSONValue value = JSONParser.parseStrict(jsonAsLocalStore);
-                    if(value.isObject() != null) {
+                    if (value.isObject() != null) {
                         result = deserializer.deserialize((JSONObject) value);
                     }
                 }

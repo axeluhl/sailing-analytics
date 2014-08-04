@@ -5,9 +5,7 @@ import com.google.gwt.dom.client.AnchorElement;
 import com.google.gwt.dom.client.DivElement;
 import com.google.gwt.dom.client.Element;
 import com.google.gwt.dom.client.SpanElement;
-import com.google.gwt.dom.client.Style.BorderStyle;
 import com.google.gwt.dom.client.Style.Display;
-import com.google.gwt.dom.client.Style.Unit;
 import com.google.gwt.dom.client.Style.Visibility;
 import com.google.gwt.i18n.shared.DateTimeFormat;
 import com.google.gwt.uibinder.client.UiBinder;
@@ -58,10 +56,10 @@ public class EventRegattaRacesRace extends UIObject {
     @UiField DivElement featureAudio;
     @UiField DivElement featureVideo;
     
-    // local_res.css.eventregattarace_featureunavailable
+    @UiField SpanElement currentLegNo;
+    @UiField SpanElement totalLegsCount;
     
     private final DateTimeFormat raceTimeFormat = DateTimeFormat.getFormat("EEE, h:mm a");
-//    private final TextMessages textMessages = GWT.create(TextMessages.class);
     
     private final StrippedLeaderboardDTO leaderboard;
     private final FleetDTO fleet;
@@ -84,7 +82,7 @@ public class EventRegattaRacesRace extends UIObject {
         setElement(uiBinder.createAndBindUi(this));
 
         allConditionalElements = new Element[] {raceWinnerDiv, raceLeaderDiv, watchRaceDiv, analyzeRaceDiv, raceNotTrackedDiv,
-                raceFeaturesDiv, legProgressDiv, raceFlagDiv, windStatusDiv };
+                raceFeaturesDiv, legProgressDiv, raceFlagDiv, windStatusDiv, currentLegNo, totalLegsCount };
 
         if(fleet.getColor() != null) {
             fleetColor.getStyle().setBackgroundColor(fleet.getColor().getAsHtml());
@@ -143,8 +141,12 @@ public class EventRegattaRacesRace extends UIObject {
                 showElement(watchRaceDiv);
                 showElement(raceLeaderDiv);
                 showElement(legProgressDiv);
+                showElement(currentLegNo);
+                showElement(totalLegsCount);
 
                 raceTime.setInnerText(raceTimeFormat.format(race.startOfRace));
+                currentLegNo.setInnerText(String.valueOf(race.trackedRace.currentLegNo));
+                totalLegsCount.setInnerText(String.valueOf(race.trackedRace.totalLegsCount));
 
                 break;
             case TRACKED_AND_NOT_LIVE:
@@ -160,25 +162,17 @@ public class EventRegattaRacesRace extends UIObject {
     }
 
     private void updateRaceFeatures() {
-        if(race.trackedRace.hasGPSData) {
-            featureGPS.getStyle().setBorderColor("red");
-            featureGPS.getStyle().setBorderStyle(BorderStyle.SOLID);
-            featureGPS.getStyle().setBorderWidth(1, Unit.PX);
+        if(!race.trackedRace.hasGPSData) {
+            featureGPS.addClassName(EventRegattaRacesResources.INSTANCE.css().eventregattarace_featureunavailable());
         }
-        if(race.trackedRace.hasMeasuredWindData) {
-            featureWind.getStyle().setBorderColor("red");
-            featureWind.getStyle().setBorderStyle(BorderStyle.SOLID);
-            featureWind.getStyle().setBorderWidth(1, Unit.PX);
+        if(!race.trackedRace.hasMeasuredWindData) {
+            featureWind.addClassName(EventRegattaRacesResources.INSTANCE.css().eventregattarace_featureunavailable());
         }
-        if(race.trackedRace.hasVideoData) {
-            featureVideo.getStyle().setBorderColor("red");
-            featureVideo.getStyle().setBorderStyle(BorderStyle.SOLID);
-            featureVideo.getStyle().setBorderWidth(1, Unit.PX);
+        if(!race.trackedRace.hasVideoData) {
+            featureVideo.addClassName(EventRegattaRacesResources.INSTANCE.css().eventregattarace_featureunavailable());
         }
-        if(race.trackedRace.hasAudioData) {
-            featureAudio.getStyle().setBorderColor("red");
-            featureAudio.getStyle().setBorderStyle(BorderStyle.SOLID);
-            featureAudio.getStyle().setBorderWidth(1, Unit.PX);
+        if(!race.trackedRace.hasAudioData) {
+            featureAudio.addClassName(EventRegattaRacesResources.INSTANCE.css().eventregattarace_featureunavailable());
         }
     }
     
