@@ -7,8 +7,10 @@ import java.util.Collections;
 import java.util.Date;
 import java.util.HashMap;
 import java.util.HashSet;
+import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
+import java.util.Map.Entry;
 import java.util.Set;
 
 import com.google.gwt.cell.client.Cell;
@@ -21,6 +23,7 @@ import com.google.gwt.cell.client.TextCell;
 import com.google.gwt.core.client.GWT;
 import com.google.gwt.core.client.Scheduler;
 import com.google.gwt.core.client.Scheduler.ScheduledCommand;
+import com.google.gwt.dom.client.BrowserEvents;
 import com.google.gwt.dom.client.Element;
 import com.google.gwt.dom.client.Style.FontWeight;
 import com.google.gwt.event.dom.client.ClickEvent;
@@ -1511,9 +1514,11 @@ public class LeaderboardPanel extends SimplePanel implements TimeListener, PlayS
 
         private void redrawRow(final LeaderboardRowDTO row) {
             final List<LeaderboardRowDTO> leaderboardDataList = getData().getList();
-            int rowIndex = leaderboardDataList.indexOf(row);
-            if (rowIndex >= 0) {
-                leaderboardDataList.set(rowIndex, row); // trigger row redraw to have check box shown in correct state
+            synchronized (leaderboardDataList) {
+                int rowIndex = leaderboardDataList.indexOf(row);
+                if (rowIndex >= 0) {
+                    leaderboardDataList.set(rowIndex, row); // trigger row redraw to have check box shown in correct state
+                }
             }
         }
 
@@ -1663,7 +1668,7 @@ public class LeaderboardPanel extends SimplePanel implements TimeListener, PlayS
         leaderboardTable.addCellPreviewHandler(new CellPreviewEvent.Handler<LeaderboardRowDTO>() {
             @Override
             public void onCellPreview(CellPreviewEvent<LeaderboardRowDTO> event) {
-                if ("focus".equals(event.getNativeEvent().getType())) {
+                if (BrowserEvents.FOCUS.equals(event.getNativeEvent().getType())) {
                     elementToBlur = event.getNativeEvent().getEventTarget().cast();
                     elementToBlur.blur();
                     blurInOnSelectionChanged = 2; // blur a couple of times; doing it one time only doesn't seem to work reliably
@@ -1682,7 +1687,6 @@ public class LeaderboardPanel extends SimplePanel implements TimeListener, PlayS
                     selection.add(row.competitor);
                 }
                 LeaderboardPanel.this.competitorSelectionProvider.setSelection(selection, /* listenersNotToNotify */LeaderboardPanel.this);
-                updateLeaderboard(getLeaderboard());
                 if (blurInOnSelectionChanged > 0) {
                     blurInOnSelectionChanged--;
                     blurFocusedElementAfterSelectionChange();
@@ -2096,8 +2100,31 @@ public class LeaderboardPanel extends SimplePanel implements TimeListener, PlayS
                 columnToCollapseAndExpandAgain.toggleExpansion();
             }
             adjustDelayToLive();
-            getData().getList().clear();
-            getData().getList().addAll(getRowsToDisplay());
+            final Map<CompetitorDTO, LeaderboardRowDTO> rowsToDisplay = getRowsToDisplay();
+            Set<LeaderboardRowDTO> rowsToAdd = new HashSet<>(rowsToDisplay.values());
+            Map<Integer, LeaderboardRowDTO> rowsToUpdate = new HashMap<>();
+            synchronized (getData().getList()) {
+                int index = 0;
+                for (Iterator<LeaderboardRowDTO> i = getData().getList().iterator(); i.hasNext(); ) {
+                    LeaderboardRowDTO oldRow = i.next();
+                    LeaderboardRowDTO newRow = rowsToDisplay.get(oldRow.competitor);
+                    if (newRow != null) {
+                        rowsToUpdate.put(index++, newRow); // update row in place, preserving its selection state
+                        rowsToAdd.remove(newRow); // no need to add this row when it was updated in-place
+                    } else {
+                        i.remove(); // old row's competitor not found in new rows' competitors; remove old row from table
+                    }
+                }
+                for (Entry<Integer, LeaderboardRowDTO> updateEntry : rowsToUpdate.entrySet()) {
+                    LeaderboardRowDTO oldElement = getData().getList().set(updateEntry.getKey(), updateEntry.getValue());
+                    leaderboardSelectionModel.setSelected(oldElement, false); // make sure the old element is no longer part of the selection
+                    updateSelection(updateEntry.getValue());
+                }
+                for (LeaderboardRowDTO rowToAdd : rowsToAdd) {
+                    getData().getList().add(rowToAdd);
+                    updateSelection(rowToAdd);
+                }
+            }
             RaceColumn<?> lastRaceColumn = null;
             for (int i=getLeaderboardTable().getColumnCount()-1; i>=0; i--) {
                 if (getLeaderboardTable().getColumn(i) instanceof RaceColumn<?>) {
@@ -2124,14 +2151,6 @@ public class LeaderboardPanel extends SimplePanel implements TimeListener, PlayS
             } else {
                 SortableColumn<LeaderboardRowDTO, ?> columnToSortFor = getDefaultSortColumn();
                 leaderboardTable.sortColumn(columnToSortFor, columnToSortFor.getPreferredSortingOrder().isAscending());
-            }
-            // Reselect the selected rows
-            clearSelection();
-            for (CompetitorDTO selectedCompetitor : competitorSelectionProvider.getSelectedCompetitors()) {
-                LeaderboardRowDTO row = getRow(selectedCompetitor);
-                if (row != null) {
-                    leaderboardSelectionModel.setSelected(row, true);
-                }
             }
             
             scoreCorrectionCommentLabel.setText(leaderboard.getComment() != null ? leaderboard.getComment() : "");
@@ -2166,6 +2185,17 @@ public class LeaderboardPanel extends SimplePanel implements TimeListener, PlayS
             }
             scoreCorrectionLastUpdateTimeLabel.setVisible(!hasLiveRace);
             liveRaceLabel.setVisible(hasLiveRace);
+        }
+    }
+
+    /**
+     * Adjusts the row's selection in the {@link #leaderboardSelectionModel} so it matches its selection state in
+     * the {@link #competitorSelectionProvider}.
+     */
+    private void updateSelection(LeaderboardRowDTO row) {
+        final boolean shallBeSelected = competitorSelectionProvider.isSelected(row.competitor);
+        if (leaderboardSelectionModel.isSelected(row) != shallBeSelected) {
+            leaderboardSelectionModel.setSelected(row, shallBeSelected);
         }
     }
 
@@ -2236,20 +2266,20 @@ public class LeaderboardPanel extends SimplePanel implements TimeListener, PlayS
      * the race identified by {@link #preSelectedRace} otherwise.
      */
     @Override
-    public Collection<LeaderboardRowDTO> getRowsToDisplay() {
-        Collection<LeaderboardRowDTO> result;
+    public Map<CompetitorDTO, LeaderboardRowDTO> getRowsToDisplay() {
+        Map<CompetitorDTO, LeaderboardRowDTO> result;
         Iterable<CompetitorDTO> allFilteredCompetitors = competitorSelectionProvider.getFilteredCompetitors();
-        result = new ArrayList<LeaderboardRowDTO>();
+        result = new HashMap<CompetitorDTO, LeaderboardRowDTO>();
         if (preSelectedRace == null) {
             for (CompetitorDTO competitor : leaderboard.rows.keySet()) {
                 if (Util.contains(allFilteredCompetitors, competitor)) {
-                    result.add(leaderboard.rows.get(competitor));
+                    result.put(competitor, leaderboard.rows.get(competitor));
                 }
             }
         } else {
             for (CompetitorDTO competitorInPreSelectedRace : getCompetitors(preSelectedRace)) {
                 if (Util.contains(allFilteredCompetitors, competitorInPreSelectedRace)) {
-                    result.add(leaderboard.rows.get(competitorInPreSelectedRace));
+                    result.put(competitorInPreSelectedRace, leaderboard.rows.get(competitorInPreSelectedRace));
                 }
             }
         }
@@ -2297,13 +2327,6 @@ public class LeaderboardPanel extends SimplePanel implements TimeListener, PlayS
             defaultSortColumn = getRankColumn();
         }
         return defaultSortColumn;
-    }
-
-    private void clearSelection() {
-        Set<LeaderboardRowDTO> selectedSet = new HashSet<>(leaderboardSelectionModel.getSelectedSet());
-        for (LeaderboardRowDTO row : selectedSet) {
-            leaderboardSelectionModel.setSelected(row, false);
-        }
     }
 
     private TotalRankColumn getRankColumn() {
@@ -2840,9 +2863,11 @@ public class LeaderboardPanel extends SimplePanel implements TimeListener, PlayS
     }
 
     private LeaderboardRowDTO getRow(CompetitorDTO competitor) {
-        for (LeaderboardRowDTO row : getData().getList()) {
-            if (row.competitor.equals(competitor)) {
-                return row;
+        synchronized (getData().getList()) {
+            for (LeaderboardRowDTO row : getData().getList()) {
+                if (row.competitor.equals(competitor)) {
+                    return row;
+                }
             }
         }
         return null;
@@ -2875,13 +2900,7 @@ public class LeaderboardPanel extends SimplePanel implements TimeListener, PlayS
     }
     
     private Iterable<LeaderboardRowDTO> getSelectedRows() {
-        ArrayList<LeaderboardRowDTO> selectedRows = new ArrayList<LeaderboardRowDTO>();
-        for (LeaderboardRowDTO row : getData().getList()) {
-            if (leaderboardSelectionModel.isSelected(row)) {
-                selectedRows.add(row);
-            }
-        }
-        return selectedRows;
+        return leaderboardSelectionModel.getSelectedSet();
     }
 
     @Override
