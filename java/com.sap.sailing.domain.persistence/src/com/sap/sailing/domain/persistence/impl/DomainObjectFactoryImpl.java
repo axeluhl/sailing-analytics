@@ -1425,7 +1425,13 @@ public class DomainObjectFactoryImpl implements DomainObjectFactory {
 
     private RaceLogEvent loadRaceLogAdditionalScoringInformationEvent(TimePoint createdAt, RaceLogEventAuthor author, TimePoint logicalTimePoint,
             Serializable id, Integer passId, List<Competitor> competitors, DBObject dbObject) {
-        AdditionalScoringInformationType informationType = AdditionalScoringInformationType.valueOf(dbObject.get(FieldNames.RACE_LOG_ADDITIONAL_SCORING_INFORMATION_TYPE.name()).toString());
+        Object additionalScoringInformationTypeInfo = dbObject.get(FieldNames.RACE_LOG_ADDITIONAL_SCORING_INFORMATION_TYPE.name());
+        AdditionalScoringInformationType informationType = AdditionalScoringInformationType.UNKNOWN;
+        if (additionalScoringInformationTypeInfo != null) {
+            informationType = AdditionalScoringInformationType.valueOf(additionalScoringInformationTypeInfo.toString());
+        } else {
+            logger.warning("Could not find additional scoring information attached to db log for " + dbObject.toString());
+        }
         return raceLogEventFactory.createAdditionalScoringInformationEvent(createdAt, author, logicalTimePoint, id, competitors, passId, informationType);
     }
 

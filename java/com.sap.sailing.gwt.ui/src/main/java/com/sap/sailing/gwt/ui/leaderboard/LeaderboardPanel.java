@@ -54,7 +54,6 @@ import com.google.gwt.view.client.ListDataProvider;
 import com.google.gwt.view.client.MultiSelectionModel;
 import com.google.gwt.view.client.SelectionChangeEvent;
 import com.google.gwt.view.client.SelectionChangeEvent.Handler;
-import com.google.gwt.view.client.SelectionModel;
 import com.sap.sailing.domain.common.DetailType;
 import com.sap.sailing.domain.common.InvertibleComparator;
 import com.sap.sailing.domain.common.MaxPointsReason;
@@ -149,7 +148,7 @@ public class LeaderboardPanel extends SimplePanel implements TimeListener, PlayS
 
     private final SortedCellTable<LeaderboardRowDTO> leaderboardTable;
 
-    private final SelectionModel<LeaderboardRowDTO> leaderboardSelectionModel;
+    private final MultiSelectionModel<LeaderboardRowDTO> leaderboardSelectionModel;
 
     private LeaderboardDTO leaderboard;
 
@@ -1448,22 +1447,24 @@ public class LeaderboardPanel extends SimplePanel implements TimeListener, PlayS
         }
     }
 
-    private class SelectionCheckboxColumn extends SortableColumn<LeaderboardRowDTO, Boolean> {
+    private class SelectionCheckboxColumn extends SortableColumn<LeaderboardRowDTO, Boolean> implements CompetitorSelectionChangeListener {
         private CheckboxCell cell;
         
-        protected SelectionCheckboxColumn(DisplayedLeaderboardRowsProvider displayedLeaderboardRowsProvider) {
-            this(new CheckboxCell(/* depends on selection */ true, /* handles selection */ false), SortingOrder.DESCENDING, displayedLeaderboardRowsProvider);
+        protected SelectionCheckboxColumn(DisplayedLeaderboardRowsProvider displayedLeaderboardRowsProvider,
+                CompetitorSelectionProvider competitorSelectionProvider) {
+            this(new CheckboxCell(/* depends on selection */false, /* handles selection */false),
+                    SortingOrder.DESCENDING, displayedLeaderboardRowsProvider, competitorSelectionProvider);
         }
 
-        public SelectionCheckboxColumn(CheckboxCell checkboxCell, SortingOrder descending,
-                DisplayedLeaderboardRowsProvider displayedLeaderboardRowsProvider) {
+        private SelectionCheckboxColumn(CheckboxCell checkboxCell, SortingOrder descending,
+                DisplayedLeaderboardRowsProvider displayedLeaderboardRowsProvider, final CompetitorSelectionProvider competitorSelectionProvider) {
             super(checkboxCell, descending, displayedLeaderboardRowsProvider);
+            competitorSelectionProvider.addCompetitorSelectionChangeListener(this);
             this.cell = checkboxCell;
             this.setFieldUpdater(new FieldUpdater<LeaderboardRowDTO, Boolean>() {
                 @Override
                 public void update(int index, LeaderboardRowDTO row, Boolean selected) {
                     competitorSelectionProvider.setSelected(row.competitor, selected);
-                    cell.setViewData(row, selected);
                 }
             });
         }
@@ -1478,7 +1479,7 @@ public class LeaderboardPanel extends SimplePanel implements TimeListener, PlayS
             return new InvertibleComparatorAdapter<LeaderboardRowDTO>() {
                 @Override
                 public int compare(LeaderboardRowDTO a, LeaderboardRowDTO b) {
-                    return cell.getViewData(a) ? cell.getViewData(b) ? 0 : 1 : cell.getViewData(b) ? -1 : 0;
+                    return getValue(a) ? getValue(b) ? 0 : 1 : getValue(b) ? -1 : 0;
                 }
             };
         }
@@ -1489,10 +1490,43 @@ public class LeaderboardPanel extends SimplePanel implements TimeListener, PlayS
         }
 
         @Override
-        public Boolean getValue(LeaderboardRowDTO object) {
-            return cell.getViewData(object);
+        public Boolean getValue(LeaderboardRowDTO row) {
+            return competitorSelectionProvider.isSelected(row.competitor);
         }
-        
+
+        @Override public void competitorsListChanged(Iterable<CompetitorDTO> competitors) {}
+        @Override public void filterChanged(FilterSet<CompetitorDTO, ? extends Filter<CompetitorDTO>> oldFilterSet, FilterSet<CompetitorDTO, ? extends Filter<CompetitorDTO>> newFilterSet) {}
+        @Override public void filteredCompetitorsListChanged(Iterable<CompetitorDTO> filteredCompetitors) {}
+
+        /**
+         * Ensure that the checkbox is redrawn when the competitor selection changes
+         */
+        @Override
+        public void addedToSelection(CompetitorDTO competitor) {
+            final LeaderboardRowDTO row = getRow(competitor);
+            if (row != null) {
+                redrawRow(row);
+            }
+        }
+
+        private void redrawRow(final LeaderboardRowDTO row) {
+            final List<LeaderboardRowDTO> leaderboardDataList = getData().getList();
+            int rowIndex = leaderboardDataList.indexOf(row);
+            if (rowIndex >= 0) {
+                leaderboardDataList.set(rowIndex, row); // trigger row redraw to have check box shown in correct state
+            }
+        }
+
+        /**
+         * Ensure that the checkbox is redrawn when the competitor selection changes
+         */
+        @Override
+        public void removedFromSelection(CompetitorDTO competitor) {
+            final LeaderboardRowDTO row = getRow(competitor);
+            if (row != null) {
+                redrawRow(row);
+            }
+        }
     }
     
     private class TotalRankColumn extends SortableColumn<LeaderboardRowDTO, String> {
@@ -1616,7 +1650,7 @@ public class LeaderboardPanel extends SimplePanel implements TimeListener, PlayS
             break;
         }
         totalRankColumn = new TotalRankColumn();
-        selectionCheckboxColumn = new SelectionCheckboxColumn(this);
+        selectionCheckboxColumn = new SelectionCheckboxColumn(this, competitorSelectionProvider);
         RACE_COLUMN_HEADER_STYLE = tableResources.cellTableStyle().cellTableRaceColumnHeader();
         LEG_COLUMN_HEADER_STYLE = tableResources.cellTableStyle().cellTableLegColumnHeader();
         LEG_DETAIL_COLUMN_HEADER_STYLE = tableResources.cellTableStyle().cellTableLegDetailColumnHeader();
@@ -1648,12 +1682,6 @@ public class LeaderboardPanel extends SimplePanel implements TimeListener, PlayS
                     selection.add(row.competitor);
                 }
                 LeaderboardPanel.this.competitorSelectionProvider.setSelection(selection, /* listenersNotToNotify */LeaderboardPanel.this);
-                if (LeaderboardPanel.this.showSelectionCheckbox) {
-                    // update selection checkboxes
-                    for (LeaderboardRowDTO row : getData().getList()) {
-                        selectionCheckboxColumn.getCell().setViewData(row, selection.contains(row.competitor));
-                    }
-                }
                 updateLeaderboard(getLeaderboard());
                 if (blurInOnSelectionChanged > 0) {
                     blurInOnSelectionChanged--;
@@ -2099,8 +2127,9 @@ public class LeaderboardPanel extends SimplePanel implements TimeListener, PlayS
             }
             // Reselect the selected rows
             clearSelection();
-            for (LeaderboardRowDTO row : getLeaderboardTable().getDataProvider().getList()) {
-                if (competitorSelectionProvider.isSelected(row.competitor)) {
+            for (CompetitorDTO selectedCompetitor : competitorSelectionProvider.getSelectedCompetitors()) {
+                LeaderboardRowDTO row = getRow(selectedCompetitor);
+                if (row != null) {
                     leaderboardSelectionModel.setSelected(row, true);
                 }
             }
@@ -2150,7 +2179,7 @@ public class LeaderboardPanel extends SimplePanel implements TimeListener, PlayS
     			raceColumn.setRace(newRace);
     		}
     	}
-	}
+    }
 
 	/**
      * Due to a course change, a race may change its number of legs. All expanded race columns that show leg columns and
@@ -2271,7 +2300,8 @@ public class LeaderboardPanel extends SimplePanel implements TimeListener, PlayS
     }
 
     private void clearSelection() {
-        for (LeaderboardRowDTO row : getData().getList()) {
+        Set<LeaderboardRowDTO> selectedSet = new HashSet<>(leaderboardSelectionModel.getSelectedSet());
+        for (LeaderboardRowDTO row : selectedSet) {
             leaderboardSelectionModel.setSelected(row, false);
         }
     }
