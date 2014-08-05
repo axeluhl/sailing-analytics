@@ -26,6 +26,7 @@ import com.google.gwt.dom.client.Element;
 import com.google.gwt.dom.client.Style.FontWeight;
 import com.google.gwt.event.dom.client.ClickEvent;
 import com.google.gwt.event.dom.client.ClickHandler;
+import com.google.gwt.event.shared.HandlerRegistration;
 import com.google.gwt.i18n.client.DateTimeFormat;
 import com.google.gwt.i18n.client.NumberFormat;
 import com.google.gwt.resources.client.ImageResource;
@@ -236,6 +237,21 @@ public class LeaderboardPanel extends SimplePanel implements TimeListener, PlayS
     private final Anchor playPause;
 
     private final CompetitorSelectionProvider competitorSelectionProvider;
+    
+    /**
+     * The handler for changes in the leaderboard table's selection; its registration is kept in
+     * {@link #leaderboardAsTableSelectionModelRegistration} while it is registered as a selection handler
+     * on the {@link #leaderboardTable}.
+     */
+    private final Handler selectionChangeHandler;
+    
+    /**
+     * While the {@link #selectionChangeHandler} is registered as a selection change handler on the
+     * {@link #leaderboardTable}'s selection model, this field holds the registration which can be used to
+     * remove the registration again. We'll use this to temporarily suspend selection events when actively
+     * modifying / adjusting the table selection to match the {@link #competitorSelectionProvider}.
+     */
+    private HandlerRegistration leaderboardAsTableSelectionModelRegistration;
 
     /**
      * If this is <code>null</code>, all leaderboard columns added by updating the leaderboard from the server are
@@ -1648,7 +1664,8 @@ public class LeaderboardPanel extends SimplePanel implements TimeListener, PlayS
         leaderboardTable.ensureDebugId("LeaderboardCellTable");
         getLeaderboardTable().setWidth("100%");
         leaderboardSelectionModel = new MultiSelectionModel<LeaderboardRowDTO>();
-        leaderboardSelectionModel.addSelectionChangeHandler(new Handler() {
+        // remember handler registration so we can temporarily remove it and re-add it to suspend selection events while we're actively changing it
+        selectionChangeHandler = new Handler() {
             @Override
             public void onSelectionChange(SelectionChangeEvent event) {
                 List<CompetitorDTO> selection = new ArrayList<CompetitorDTO>();
@@ -1661,7 +1678,8 @@ public class LeaderboardPanel extends SimplePanel implements TimeListener, PlayS
                     blurFocusedElementAfterSelectionChange();
                 }
             }
-        });
+        };
+        leaderboardAsTableSelectionModelRegistration = leaderboardSelectionModel.addSelectionChangeHandler(selectionChangeHandler);
         leaderboardTable.setSelectionModel(leaderboardSelectionModel, selectionCheckboxColumn.getSelectionManager());
         setShowAddedScores(settings.isShowAddedScores());
         setShowOverallColumnWithNumberOfRacesCompletedPerCompetitor(settings.isShowOverallColumnWithNumberOfRacesCompletedPerCompetitor());
@@ -2156,9 +2174,16 @@ public class LeaderboardPanel extends SimplePanel implements TimeListener, PlayS
      */
     private void updateSelection(LeaderboardRowDTO row) {
         final boolean shallBeSelected = competitorSelectionProvider.isSelected(row.competitor);
+        if (leaderboardAsTableSelectionModelRegistration != null) {
+            // suspend selection events while actively adjusting the leaderboardSelectionModel to match the competitorSelectionProvider
+            leaderboardAsTableSelectionModelRegistration.removeHandler();
+            leaderboardAsTableSelectionModelRegistration = null;
+        }
         if (leaderboardSelectionModel.isSelected(row) != shallBeSelected) {
             leaderboardSelectionModel.setSelected(row, shallBeSelected);
         }
+        // register the selection change handler again
+        leaderboardAsTableSelectionModelRegistration = leaderboardTable.getSelectionModel().addSelectionChangeHandler(selectionChangeHandler);
     }
 
     /**
