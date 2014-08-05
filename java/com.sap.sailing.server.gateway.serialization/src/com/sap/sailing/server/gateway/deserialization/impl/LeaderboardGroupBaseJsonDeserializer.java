@@ -21,9 +21,9 @@ public class LeaderboardGroupBaseJsonDeserializer implements JsonDeserializer<Le
         String name = (String) object.get(LeaderboardGroupBaseJsonSerializer.FIELD_NAME);
         String description = (String) object.get(LeaderboardGroupBaseJsonSerializer.FIELD_DESCRIPTION);
         String displayName = (String) object.get(LeaderboardGroupBaseJsonSerializer.FIELD_DISPLAY_NAME);
-        String hasOverallLeaderboard = (String) object.get(LeaderboardGroupBaseJsonSerializer.FIELD_HAS_OVERALL_LEADERBOARD);
-        LeaderboardGroupBase result = new StrippedLeaderboardGroupImpl(id, name, description, displayName,
-                hasOverallLeaderboard == null ? false : Boolean.valueOf(hasOverallLeaderboard));
+        Boolean hasOverallLeaderboard = (Boolean) object.get(LeaderboardGroupBaseJsonSerializer.FIELD_HAS_OVERALL_LEADERBOARD);
+        LeaderboardGroupBase result = new StrippedLeaderboardGroupImpl(id, name, description, displayName, 
+                hasOverallLeaderboard == null ? false : hasOverallLeaderboard);
         return result;
     }
 }
