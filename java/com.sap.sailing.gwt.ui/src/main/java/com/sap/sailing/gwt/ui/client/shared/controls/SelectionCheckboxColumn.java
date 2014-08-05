@@ -3,8 +3,6 @@ package com.sap.sailing.gwt.ui.client.shared.controls;
 import java.util.List;
 
 import com.google.gwt.cell.client.Cell.Context;
-import com.google.gwt.core.client.Scheduler;
-import com.google.gwt.core.client.Scheduler.ScheduledCommand;
 import com.google.gwt.dom.client.BrowserEvents;
 import com.google.gwt.dom.client.NativeEvent;
 import com.google.gwt.safehtml.shared.SafeHtmlBuilder;
@@ -218,15 +216,10 @@ public abstract class SelectionCheckboxColumn<T> extends AbstractSortableColumnW
      *            actually a list wrapper where updates to which are reflected in the table display
      */
     protected void redrawRow(final T row, final List<T> dataList) {
-        Scheduler.get().scheduleDeferred(new ScheduledCommand() {
-            @Override
-            public void execute() {
-                int rowIndex = dataList.indexOf(row);
-                if (rowIndex >= 0) {
-                    dataList.set(rowIndex, row); // trigger row redraw to have check box shown in correct state
-                }
-                getListDataProvider().flush();
-            }
-        });
+        int rowIndex = dataList.indexOf(row);
+        if (rowIndex >= 0) {
+            dataList.set(rowIndex, row); // trigger row redraw to have check box shown in correct state
+        }
+        getListDataProvider().flush();
     }
 }
