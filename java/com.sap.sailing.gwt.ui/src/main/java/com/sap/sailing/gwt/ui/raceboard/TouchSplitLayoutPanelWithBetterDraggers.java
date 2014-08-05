@@ -487,9 +487,7 @@ public class TouchSplitLayoutPanelWithBetterDraggers extends DockLayoutPanel {
               }
               splitter.setAssociatedWidgetSize(size);
           }
-          if (splitter instanceof VSplitter) {
-              splitter.setVisible(!hidden);
-          }
+          splitter.setVisible(!hidden);
       }
       forceLayout();
   }
