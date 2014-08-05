@@ -10,6 +10,7 @@ import com.google.gwt.dom.client.NodeList;
 import com.google.gwt.safehtml.shared.SafeHtmlBuilder;
 import com.google.gwt.user.cellview.client.DefaultCellTableBuilder;
 import com.google.gwt.view.client.SelectionModel;
+import com.sap.sailing.gwt.ui.client.shared.controls.SortableColumn;
 
 /**
  * Uses {@link LeaderboardSortableColumnWithMinMax#getHeaderStyle()} to optionally add a custom CSS style to the &lt;th&gt; table
@@ -47,7 +48,7 @@ public class SortedCellTableWithStylableHeaders<T> extends SortedCellTable<T> {
         NodeList<Node> headerColumns = header.getChildNodes();
         for (int i=0; i<headerColumns.getLength(); i++) {
             Element headerCell = Element.as(headerColumns.getItem(i));
-            String headerStyle = ((LeaderboardSortableColumnWithMinMax<T, ?>) getColumn(i)).getHeaderStyle();
+            String headerStyle = ((SortableColumn<T, ?>) getColumn(i)).getHeaderStyle();
             if (headerStyle != null) {
                 headerCell.addClassName(headerStyle);
             }
