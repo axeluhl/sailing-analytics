@@ -23,7 +23,6 @@ import com.google.gwt.core.client.Scheduler;
 import com.google.gwt.core.client.Scheduler.ScheduledCommand;
 import com.google.gwt.dom.client.BrowserEvents;
 import com.google.gwt.dom.client.Element;
-import com.google.gwt.dom.client.NativeEvent;
 import com.google.gwt.dom.client.Style.FontWeight;
 import com.google.gwt.event.dom.client.ClickEvent;
 import com.google.gwt.event.dom.client.ClickHandler;
@@ -34,7 +33,6 @@ import com.google.gwt.safehtml.client.SafeHtmlTemplates;
 import com.google.gwt.safehtml.shared.SafeHtml;
 import com.google.gwt.safehtml.shared.SafeHtmlBuilder;
 import com.google.gwt.safehtml.shared.SafeHtmlUtils;
-import com.google.gwt.user.cellview.client.CellTable;
 import com.google.gwt.user.cellview.client.Column;
 import com.google.gwt.user.cellview.client.Header;
 import com.google.gwt.user.cellview.client.SafeHtmlHeader;
@@ -52,9 +50,6 @@ import com.google.gwt.user.client.ui.SimplePanel;
 import com.google.gwt.user.client.ui.VerticalPanel;
 import com.google.gwt.user.client.ui.Widget;
 import com.google.gwt.view.client.CellPreviewEvent;
-import com.google.gwt.view.client.DefaultSelectionEventManager;
-import com.google.gwt.view.client.DefaultSelectionEventManager.EventTranslator;
-import com.google.gwt.view.client.DefaultSelectionEventManager.SelectAction;
 import com.google.gwt.view.client.ListDataProvider;
 import com.google.gwt.view.client.MultiSelectionModel;
 import com.google.gwt.view.client.SelectionChangeEvent;
@@ -91,6 +86,7 @@ import com.sap.sailing.gwt.ui.client.shared.components.Component;
 import com.sap.sailing.gwt.ui.client.shared.components.IsEmbeddableComponent;
 import com.sap.sailing.gwt.ui.client.shared.components.SettingsDialogComponent;
 import com.sap.sailing.gwt.ui.client.shared.controls.AbstractSortableColumnWithMinMax;
+import com.sap.sailing.gwt.ui.client.shared.controls.SelectionCheckboxColumn;
 import com.sap.sailing.gwt.ui.client.shared.filter.LeaderboardFetcher;
 import com.sap.sailing.gwt.ui.leaderboard.DetailTypeColumn.LegDetailField;
 import com.sap.sailing.gwt.ui.leaderboard.LeaderboardSettings.RaceColumnSelectionStrategies;
@@ -160,7 +156,7 @@ public class LeaderboardPanel extends SimplePanel implements TimeListener, PlayS
 
     private final TotalRankColumn totalRankColumn;
     
-    private final SelectionCheckboxColumn selectionCheckboxColumn;
+    private final SelectionCheckboxColumn<LeaderboardRowDTO> selectionCheckboxColumn;
 
     /**
      * Passed to the {@link ManeuverCountRaceColumn}. Modifications to this list will modify the column's children list
@@ -1453,9 +1449,9 @@ public class LeaderboardPanel extends SimplePanel implements TimeListener, PlayS
         }
     }
 
-    private class SelectionCheckboxColumn extends com.sap.sailing.gwt.ui.client.shared.controls.SelectionCheckboxColumn<LeaderboardRowDTO>
+    private class LeaderboardSelectionCheckboxColumn extends com.sap.sailing.gwt.ui.client.shared.controls.SelectionCheckboxColumn<LeaderboardRowDTO>
     implements CompetitorSelectionChangeListener {
-        protected SelectionCheckboxColumn(final CompetitorSelectionProvider competitorSelectionProvider) {
+        protected LeaderboardSelectionCheckboxColumn(final CompetitorSelectionProvider competitorSelectionProvider) {
             super(tableResources.cellTableStyle().cellTableCheckboxSelected(), tableResources.cellTableStyle().cellTableCheckboxDeselected(), tableResources.cellTableStyle().cellTableCheckboxColumnCell());
             competitorSelectionProvider.addCompetitorSelectionChangeListener(this);
         }
@@ -1483,10 +1479,7 @@ public class LeaderboardPanel extends SimplePanel implements TimeListener, PlayS
         private void redrawRow(final LeaderboardRowDTO row) {
             final List<LeaderboardRowDTO> leaderboardDataList = getData().getList();
             synchronized (leaderboardDataList) {
-                int rowIndex = leaderboardDataList.indexOf(row);
-                if (rowIndex >= 0) {
-                    leaderboardDataList.set(rowIndex, row); // trigger row redraw to have check box shown in correct state
-                }
+                redrawRow(row, leaderboardDataList);
             }
         }
 
@@ -1503,6 +1496,11 @@ public class LeaderboardPanel extends SimplePanel implements TimeListener, PlayS
 
         @Override
         public void updateMinMax() {}
+
+        @Override
+        protected ListDataProvider<LeaderboardRowDTO> getListDataProvider() {
+            return getData();
+        }
     }
     
     private class TotalRankColumn extends LeaderboardSortableColumnWithMinMax<LeaderboardRowDTO, String> {
@@ -1626,7 +1624,7 @@ public class LeaderboardPanel extends SimplePanel implements TimeListener, PlayS
             break;
         }
         totalRankColumn = new TotalRankColumn();
-        selectionCheckboxColumn = new SelectionCheckboxColumn(competitorSelectionProvider);
+        selectionCheckboxColumn = new LeaderboardSelectionCheckboxColumn(competitorSelectionProvider);
         RACE_COLUMN_HEADER_STYLE = tableResources.cellTableStyle().cellTableRaceColumnHeader();
         LEG_COLUMN_HEADER_STYLE = tableResources.cellTableStyle().cellTableLegColumnHeader();
         LEG_DETAIL_COLUMN_HEADER_STYLE = tableResources.cellTableStyle().cellTableLegDetailColumnHeader();
@@ -1664,38 +1662,7 @@ public class LeaderboardPanel extends SimplePanel implements TimeListener, PlayS
                 }
             }
         });
-        leaderboardTable.setSelectionModel(leaderboardSelectionModel, DefaultSelectionEventManager.createCustomManager(new EventTranslator<LeaderboardRowDTO>() {
-            /**
-             * Don't clear the selection when the user has clicked on the checkbox column
-             */
-            @Override
-            public boolean clearCurrentSelection(CellPreviewEvent<LeaderboardRowDTO> event) {
-                NativeEvent nativeEvent = event.getNativeEvent();
-                boolean ctrlOrMeta = nativeEvent.getCtrlKey() || nativeEvent.getMetaKey();
-                return !isSelectionCheckboxColumn(event) && !ctrlOrMeta;
-            }
-
-            private boolean isSelectionCheckboxColumn(CellPreviewEvent<LeaderboardRowDTO> event) {
-                Column<?, ?> column = getColumn(event);
-                return column == selectionCheckboxColumn;
-            }
-            
-            private Column<?, ?> getColumn(CellPreviewEvent<LeaderboardRowDTO> event) {
-                CellTable<LeaderboardRowDTO> table = (CellTable<LeaderboardRowDTO>) event.getDisplay();
-                return table.getColumn(event.getContext().getColumn());
-            }
-
-            @Override
-            public SelectAction translateSelectionEvent(CellPreviewEvent<LeaderboardRowDTO> event) {
-                final SelectAction result;
-                if (BrowserEvents.CLICK.equals(event.getNativeEvent().getType()) && isSelectionCheckboxColumn(event)) {
-                    result = SelectAction.TOGGLE;
-                } else {
-                    result = SelectAction.DEFAULT;
-                }
-                return result;
-            }
-        }));
+        leaderboardTable.setSelectionModel(leaderboardSelectionModel, selectionCheckboxColumn.getSelectionManager());
         setShowAddedScores(settings.isShowAddedScores());
         setShowOverallColumnWithNumberOfRacesCompletedPerCompetitor(settings.isShowOverallColumnWithNumberOfRacesCompletedPerCompetitor());
         if (timer.isInitialized()) {

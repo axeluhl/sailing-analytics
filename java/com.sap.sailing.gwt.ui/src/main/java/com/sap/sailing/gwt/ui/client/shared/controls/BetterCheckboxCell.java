@@ -61,17 +61,6 @@ public class BetterCheckboxCell extends AbstractEditableCell<Boolean, Boolean> {
                 isChecked = !isChecked;
                 input.setChecked(isChecked);
             }
-
-            /*
-             * Save the new value. However, if the cell depends on the selection, then do not save the value because we
-             * can get into an inconsistent state.
-             */
-            if (value != isChecked && !dependsOnSelection()) {
-                setViewData(context.getKey(), isChecked);
-            } else {
-                clearViewData(context.getKey());
-            }
-
             if (valueUpdater != null) {
                 valueUpdater.update(isChecked);
             }
@@ -81,14 +70,7 @@ public class BetterCheckboxCell extends AbstractEditableCell<Boolean, Boolean> {
 
     @Override
     public void render(com.google.gwt.cell.client.Cell.Context context, Boolean value, SafeHtmlBuilder sb) {
-        // Get the view data.
-        Object key = context.getKey();
-        Boolean viewData = getViewData(key);
-        if (viewData != null && viewData.equals(value)) {
-          clearViewData(key);
-          viewData = null;
-        }
-        if (value != null && ((viewData != null) ? viewData : value)) {
+        if (value != null && value) {
           sb.append(INPUT_CHECKED);
         } else {
           sb.append(INPUT_UNCHECKED);
