@@ -22,6 +22,7 @@ public interface TextMessages extends Messages {
     String leader();
     String races();
     String showEvent();
+    String overallLeaderboard();
     
     String countdownDays();
     String countdownHours();
