@@ -23,7 +23,6 @@ import com.google.gwt.core.client.Scheduler;
 import com.google.gwt.core.client.Scheduler.ScheduledCommand;
 import com.google.gwt.dom.client.BrowserEvents;
 import com.google.gwt.dom.client.Element;
-import com.google.gwt.dom.client.NativeEvent;
 import com.google.gwt.dom.client.Style.FontWeight;
 import com.google.gwt.event.dom.client.ClickEvent;
 import com.google.gwt.event.dom.client.ClickHandler;
@@ -34,7 +33,6 @@ import com.google.gwt.safehtml.client.SafeHtmlTemplates;
 import com.google.gwt.safehtml.shared.SafeHtml;
 import com.google.gwt.safehtml.shared.SafeHtmlBuilder;
 import com.google.gwt.safehtml.shared.SafeHtmlUtils;
-import com.google.gwt.user.cellview.client.CellTable;
 import com.google.gwt.user.cellview.client.Column;
 import com.google.gwt.user.cellview.client.Header;
 import com.google.gwt.user.cellview.client.SafeHtmlHeader;
@@ -52,9 +50,6 @@ import com.google.gwt.user.client.ui.SimplePanel;
 import com.google.gwt.user.client.ui.VerticalPanel;
 import com.google.gwt.user.client.ui.Widget;
 import com.google.gwt.view.client.CellPreviewEvent;
-import com.google.gwt.view.client.DefaultSelectionEventManager;
-import com.google.gwt.view.client.DefaultSelectionEventManager.EventTranslator;
-import com.google.gwt.view.client.DefaultSelectionEventManager.SelectAction;
 import com.google.gwt.view.client.ListDataProvider;
 import com.google.gwt.view.client.MultiSelectionModel;
 import com.google.gwt.view.client.SelectionChangeEvent;
@@ -1664,38 +1659,7 @@ public class LeaderboardPanel extends SimplePanel implements TimeListener, PlayS
                 }
             }
         });
-        leaderboardTable.setSelectionModel(leaderboardSelectionModel, DefaultSelectionEventManager.createCustomManager(new EventTranslator<LeaderboardRowDTO>() {
-            /**
-             * Don't clear the selection when the user has clicked on the checkbox column
-             */
-            @Override
-            public boolean clearCurrentSelection(CellPreviewEvent<LeaderboardRowDTO> event) {
-                NativeEvent nativeEvent = event.getNativeEvent();
-                boolean ctrlOrMeta = nativeEvent.getCtrlKey() || nativeEvent.getMetaKey();
-                return !isSelectionCheckboxColumn(event) && !ctrlOrMeta;
-            }
-
-            private boolean isSelectionCheckboxColumn(CellPreviewEvent<LeaderboardRowDTO> event) {
-                Column<?, ?> column = getColumn(event);
-                return column == selectionCheckboxColumn;
-            }
-            
-            private Column<?, ?> getColumn(CellPreviewEvent<LeaderboardRowDTO> event) {
-                CellTable<LeaderboardRowDTO> table = (CellTable<LeaderboardRowDTO>) event.getDisplay();
-                return table.getColumn(event.getContext().getColumn());
-            }
-
-            @Override
-            public SelectAction translateSelectionEvent(CellPreviewEvent<LeaderboardRowDTO> event) {
-                final SelectAction result;
-                if (BrowserEvents.CLICK.equals(event.getNativeEvent().getType()) && isSelectionCheckboxColumn(event)) {
-                    result = SelectAction.TOGGLE;
-                } else {
-                    result = SelectAction.DEFAULT;
-                }
-                return result;
-            }
-        }));
+        leaderboardTable.setSelectionModel(leaderboardSelectionModel, selectionCheckboxColumn.getSelectionManager());
         setShowAddedScores(settings.isShowAddedScores());
         setShowOverallColumnWithNumberOfRacesCompletedPerCompetitor(settings.isShowOverallColumnWithNumberOfRacesCompletedPerCompetitor());
         if (timer.isInitialized()) {
