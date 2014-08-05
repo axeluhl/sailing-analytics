@@ -27,13 +27,14 @@ import com.sap.sailing.domain.common.impl.InvertibleComparatorAdapter;
  * A column to be used in a {@link CellTable} that controls and reflects a table's selection model using stylable
  * "check boxes". To make things work, clients have to also call
  * {@link CellTable#setSelectionModel(com.google.gwt.view.client.SelectionModel, com.google.gwt.view.client.CellPreviewEvent.Handler)}
- * with the result of this columns {@link #getSelectionManager()} method as second argument. This will ensure that the
- * event handling and selection updates work properly.
+ * with the result of this columns {@link #getSelectionModel} as the first and the result of the
+ * {@link #getSelectionManager()} method as second argument. This will ensure that the event handling and selection
+ * updates work properly.
  * <p>
  * 
- * Subclasses need to ensure that for each row whose selection status changes, a call to
- * {@link #redrawRow(LeaderboardRowDTO, List)} is issued. Otherwise, the checkboxes will run out of sync with the
- * selection status.
+ * If clients don't choose to use this columns own {@link #getSelectionModel() selection model}, they have to ensure
+ * that selection changes with subsequent {@link #redrawRow(Object, List) redraw requests} are triggered properly upon
+ * selection status changes. Otherwise, the checkboxes will run out of sync with the selection status.
  * <p>
  * 
  * The column uses the {@link BetterCheckboxCell} cell to implement the display properties. Three CSS styles can be used
