@@ -67,20 +67,17 @@ public class LeaderboardGroupJsonExportTest extends AbstractJsonExportTest {
         List<String> leaderboardNames = new ArrayList<String>();
         leaderboardNames.add(regatta.getName());
         leaderboardGroup = racingEventService.addLeaderboardGroup(UUID.randomUUID(), leaderboardGroupName, "description", 
-                /* displayGroupsInReverseOrder */ false, leaderboardNames, /* overallLeaderboardDiscardThresholds */ null, /* overallLeaderboardScoringSchemeType */ null);
+                "The LG displayName", /* displayGroupsInReverseOrder */ false,
+                leaderboardNames, /* overallLeaderboardDiscardThresholds */ null, /* overallLeaderboardScoringSchemeType */ null);
     }
 
     @Test
     public void testExportLeaderboardGroupsAsJson() throws Exception {   
         String jsonString = callJsonHttpServlet(new LeaderboardGroupsJsonGetServlet(), "GET", null);
-        
-        Object obj= JSONValue.parse(jsonString);
-        JSONArray array= (JSONArray) obj;
-        
+        Object obj = JSONValue.parse(jsonString);
+        JSONArray array = (JSONArray) obj;
         assertTrue(array.size() == 1);
-
         String jsonFirstLeaderboardGroup = (String) array.get(0);
-
         assertTrue(leaderboardGroup.getName().equals(jsonFirstLeaderboardGroup));
     }
 }
