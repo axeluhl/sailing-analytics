@@ -20,6 +20,7 @@ import java.util.HashMap;
 import java.util.List;
 
 import com.google.gwt.core.client.Duration;
+import com.google.gwt.core.client.GWT;
 import com.google.gwt.core.client.JsArray;
 import com.google.gwt.core.client.Scheduler;
 import com.google.gwt.core.client.Scheduler.ScheduledCommand;
@@ -83,6 +84,7 @@ public class TouchSplitLayoutPanelWithBetterDraggers extends DockLayoutPanel {
 
     private boolean toggleDisplayAllowed = false;
     private double lastClick = 0;
+    private double lastTouchEnd = 0;
     
     private final Component<?> associatedComponent;
     protected Button togglerButton;
@@ -105,6 +107,7 @@ public class TouchSplitLayoutPanelWithBetterDraggers extends DockLayoutPanel {
 
     @Override
     public void onBrowserEvent(Event event) {
+      GWT.log(event.getType());
       switch (event.getTypeInt()) {
         case Event.ONCLICK:
             if (supportsClick()) {
@@ -113,7 +116,10 @@ public class TouchSplitLayoutPanelWithBetterDraggers extends DockLayoutPanel {
                   // Restore the old size.
                   setWidgetVisibilityAndPossiblyShowSplitter(target, getAssociatedComponent(), /*hidden*/false, (int)layoutData.oldSize);
                 } else {
-                  setWidgetVisibilityAndPossiblyShowSplitter(target, getAssociatedComponent(), /*hidden*/true, (int)layoutData.oldSize);
+                    double now = Duration.currentTimeMillis();
+                    if (now - this.lastTouchEnd > DOUBLE_CLICK_TIMEOUT) {
+                        setWidgetVisibilityAndPossiblyShowSplitter(target, getAssociatedComponent(), /*hidden*/true, (int)layoutData.oldSize);
+                    }
                 }
                 event.preventDefault();
             }
@@ -168,6 +174,7 @@ public class TouchSplitLayoutPanelWithBetterDraggers extends DockLayoutPanel {
             this.lastClick = now;
           }
 
+          this.lastTouchEnd = Duration.currentTimeMillis();
           Event.releaseCapture(getElement());
           event.preventDefault();
           break;
@@ -503,17 +510,17 @@ public class TouchSplitLayoutPanelWithBetterDraggers extends DockLayoutPanel {
           LayoutData layoutData = (LayoutData) widget.getLayoutData();
           if (hidden) {
               layoutData.oldSize = size;
-              splitter.setAssociatedWidgetSize(0);
               widget.setVisible(false);
               if (associatedComponentToWidget != null) {
                   associatedComponentToWidget.setVisible(false);
               }
+              splitter.setAssociatedWidgetSize(0);
           } else {
-              splitter.setAssociatedWidgetSize(size);
               widget.setVisible(true);
               if (associatedComponentToWidget != null) {
                   associatedComponentToWidget.setVisible(true);
               }
+              splitter.setAssociatedWidgetSize(size);
           }
           if (splitter instanceof VSplitter) {
               splitter.setVisible(!hidden);

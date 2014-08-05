@@ -218,6 +218,19 @@ body ::-webkit-scrollbar-track {
     text-align: center;
 }
 
+.gwt-SplitLayoutPanel-CloseButton {
+	position: absolute;
+	left: 90%;
+	margin-left: 10px;
+	z-index: 200;
+}
+
+.gwt-SplitLayoutPanel-SettingsButton {
+	position: absolute;
+	left: 85%;
+	z-index: 200;
+}
+
 .gwt-ToggleButton-up-hovering, .gwt-ToggleButton-down-hovering {
   background: url(images/btn-cta-orangeleft-down.png) center top repeat-x;
   color: #fff;
