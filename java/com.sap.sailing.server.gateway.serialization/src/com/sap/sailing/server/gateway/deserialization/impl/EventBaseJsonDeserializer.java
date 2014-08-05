@@ -30,7 +30,7 @@ public class EventBaseJsonDeserializer implements JsonDeserializer<EventBase> {
 
     public EventBase deserialize(JSONObject object) throws JsonDeserializationException {
         UUID id = UUID.fromString((String) object.get(EventBaseJsonSerializer.FIELD_ID));
-        String name = object.get(EventBaseJsonSerializer.FIELD_NAME).toString();
+        String name = (String) object.get(EventBaseJsonSerializer.FIELD_NAME);
         String description = (String) object.get(EventBaseJsonSerializer.FIELD_DESCRIPTION);
         String officialWebsiteURLAsString = (String) object.get(EventBaseJsonSerializer.FIELD_OFFICIAL_WEBSITE_URL);
         String logoImageURLAsString = (String) object.get(EventBaseJsonSerializer.FIELD_LOGO_IMAGE_URL);

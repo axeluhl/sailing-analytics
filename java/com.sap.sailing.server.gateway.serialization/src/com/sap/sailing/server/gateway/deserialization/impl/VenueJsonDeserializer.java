@@ -17,21 +17,15 @@ public class VenueJsonDeserializer implements JsonDeserializer<Venue> {
         this.courseAreaDeserializer = courseAreaDeserializer;
     }
 
-    public Venue deserialize(JSONObject object)
-            throws JsonDeserializationException {
-
-        String name = object.get(VenueJsonSerializer.FIELD_NAME).toString();
+    public Venue deserialize(JSONObject object) throws JsonDeserializationException {
+        String name = (String) object.get(VenueJsonSerializer.FIELD_NAME);
         Venue venue = new VenueImpl(name);
 
-        JSONArray courseAreaArray = Helpers.getNestedArraySafe(
-                object, 
-                VenueJsonSerializer.FIELD_COURSE_AREAS);
+        JSONArray courseAreaArray = Helpers.getNestedArraySafe(object, VenueJsonSerializer.FIELD_COURSE_AREAS);
         for (Object element : courseAreaArray) {
             JSONObject courseAreaObject = Helpers.toJSONObjectSafe(element);
             venue.addCourseArea(courseAreaDeserializer.deserialize(courseAreaObject));
         }
-
         return venue;
     }
-
 }
