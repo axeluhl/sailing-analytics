@@ -14,7 +14,6 @@ import com.google.gwt.user.client.ui.HorizontalPanel;
 import com.google.gwt.user.client.ui.LayoutPanel;
 import com.google.gwt.user.client.ui.Panel;
 import com.google.gwt.user.client.ui.ScrollPanel;
-import com.google.gwt.user.client.ui.VerticalPanel;
 import com.google.gwt.user.client.ui.Widget;
 import com.sap.sailing.gwt.ui.client.StringMessages;
 import com.sap.sailing.gwt.ui.client.shared.components.Component;
@@ -29,9 +28,8 @@ public class SideBySideComponentViewer implements ComponentViewer {
         public PanelWithCloseAndSettingsButton(Widget containedPanel) {
             this.containedPanel = containedPanel;
             HorizontalPanel panelForCloseAndSettingsButton = new HorizontalPanel();
-            Button closeButton = new Button("X");
+            Button closeButton = new Button();
             closeButton.setStyleName("gwt-SplitLayoutPanel-CloseButton");
-            closeButton.addStyleName("gwt-Button");
             closeButton.addClickHandler(new ClickHandler() {
                 @Override
                 public void onClick(ClickEvent event) {
@@ -39,9 +37,8 @@ public class SideBySideComponentViewer implements ComponentViewer {
                 }
             });
             panelForCloseAndSettingsButton.add(closeButton);
-            Button settingsButton = new Button("S");
+            Button settingsButton = new Button();
             settingsButton.setStyleName("gwt-SplitLayoutPanel-SettingsButton");
-            settingsButton.addStyleName("gwt-Button");
             settingsButton.addClickHandler(new ClickHandler() {
                 @Override
                 public void onClick(ClickEvent event) {
@@ -66,13 +63,16 @@ public class SideBySideComponentViewer implements ComponentViewer {
     private final Map<Component<?>, Panel> componentPanels;
     private final Panel leftPanel;
     private final StringMessages stringMessages;
+
+    private final HorizontalPanel panelForTogglingSouthLayoutPanelComponents;
+    private final HorizontalPanel panelForTogglingEastLayoutPanelComponents;
     
     private LayoutPanel mainPanel;
     
     private TouchSplitLayoutPanelWithBetterDraggers splitLayoutPanel; 
     private int savedSplitPosition = -1;
     
-    public SideBySideComponentViewer(Component<?> leftComponentP, Component<?> rightComponentP, List<Component<?>> components, StringMessages stringMessages) {
+    public SideBySideComponentViewer(final Component<?> leftComponentP, final Component<?> rightComponentP, List<Component<?>> components, final StringMessages stringMessages) {
         this.stringMessages = stringMessages;
         this.leftComponent = leftComponentP;
         this.rightComponent = rightComponentP;
@@ -86,11 +86,38 @@ public class SideBySideComponentViewer implements ComponentViewer {
         splitLayoutPanel = new TouchSplitLayoutPanelWithBetterDraggers(/* splitter width */ 3);
         mainPanel.add(splitLayoutPanel);
         
+        AbsolutePanel absoluteMapAndToggleButtonsPanel = new AbsolutePanel();
+        panelForTogglingSouthLayoutPanelComponents = new HorizontalPanel();
+        panelForTogglingSouthLayoutPanelComponents.setStyleName("gwt-SplitLayoutPanel-NorthSouthToggleButton-Panel");
+        
+        panelForTogglingEastLayoutPanelComponents = new HorizontalPanel();
+        panelForTogglingEastLayoutPanelComponents.setStyleName("gwt-SplitLayoutPanel-EastToggleButton-Panel");
+        
+        absoluteMapAndToggleButtonsPanel.add(rightComponent.getEntryWidget());
+        absoluteMapAndToggleButtonsPanel.add(panelForTogglingSouthLayoutPanelComponents);
+        absoluteMapAndToggleButtonsPanel.add(panelForTogglingEastLayoutPanelComponents);
+
+        final Button leaderboardTogglerButton = new Button(leftComponentP.getEntryWidget().getTitle());
+        leaderboardTogglerButton.addClickHandler(new ClickHandler() {
+            @Override
+            public void onClick(ClickEvent event) {
+                  leftComponentP.setVisible(!leftComponentP.isVisible());
+                  forceLayout();
+                  if (leftComponentP.isVisible() && leftComponentP instanceof TimeListener) {
+                      ((TimeListener)leftComponentP).timeChanged(new Date(), null);
+                  }
+                  leaderboardTogglerButton.setVisible(false);
+            }
+        });
+        leaderboardTogglerButton.setStyleName("gwt-SplitLayoutPanel-EastToggleButton");
+        panelForTogglingEastLayoutPanelComponents.add(leaderboardTogglerButton);
+
         // add a panel for close and settings buttons in leaderboard
         leftPanel = new PanelWithCloseAndSettingsButton(leftScrollPanel) {
             @Override
             public void closeClicked() {
                 splitLayoutPanel.setWidgetVisibilityAndPossiblyShowSplitter(this, leftComponent, true, 500);
+                leaderboardTogglerButton.setVisible(true);
             }
             @Override
             public void settingsClicked() {
@@ -100,18 +127,13 @@ public class SideBySideComponentViewer implements ComponentViewer {
         
         savedSplitPosition = 500;
         splitLayoutPanel.insert(leftPanel, leftComponentP, Direction.WEST, savedSplitPosition, null);
-
+        
         initializeComponents();
+        splitLayoutPanel.insert(absoluteMapAndToggleButtonsPanel, rightComponent, Direction.CENTER, 0, null);
     }
     
     private void initializeComponents() {
         // add a panel for split pane toggle buttons
-        AbsolutePanel absoluteMapAndToggleButtonsPanel = new AbsolutePanel();
-        VerticalPanel panelForTogglingLayoutPanelComponents = new VerticalPanel();
-        panelForTogglingLayoutPanelComponents.setStyleName("gwt-SplitLayoutPanel-NorthSouthToggleButton-Panel");
-        absoluteMapAndToggleButtonsPanel.add(rightComponent.getEntryWidget());
-        absoluteMapAndToggleButtonsPanel.add(panelForTogglingLayoutPanelComponents);
-
         for (final Component<?> component : components) {
             final Button togglerButton = new Button(component.getEntryWidget().getTitle());
             togglerButton.addClickHandler(new ClickHandler() {
@@ -126,7 +148,7 @@ public class SideBySideComponentViewer implements ComponentViewer {
               }
             });
             togglerButton.setStyleName("gwt-SplitLayoutPanel-NorthSouthToggleButton");
-            panelForTogglingLayoutPanelComponents.add(togglerButton);
+            panelForTogglingSouthLayoutPanelComponents.add(togglerButton);
             final Panel componentPanel = new PanelWithCloseAndSettingsButton(component.getEntryWidget()) {
                 @Override
                 public void settingsClicked() {
@@ -141,7 +163,6 @@ public class SideBySideComponentViewer implements ComponentViewer {
             componentPanels.put(component, componentPanel);
             splitLayoutPanel.insert(componentPanel, component, Direction.SOUTH, 200, null);
         }
-        splitLayoutPanel.insert(absoluteMapAndToggleButtonsPanel, rightComponent, Direction.CENTER, 0, null);
     }
     
     public <SettingsType> void showSettingsDialog(Component<SettingsType> component) {

@@ -20,7 +20,6 @@ import java.util.HashMap;
 import java.util.List;
 
 import com.google.gwt.core.client.Duration;
-import com.google.gwt.core.client.GWT;
 import com.google.gwt.core.client.JsArray;
 import com.google.gwt.core.client.Scheduler;
 import com.google.gwt.core.client.Scheduler.ScheduledCommand;
@@ -34,7 +33,6 @@ import com.google.gwt.user.client.Event;
 import com.google.gwt.user.client.Window;
 import com.google.gwt.user.client.ui.Button;
 import com.google.gwt.user.client.ui.DockLayoutPanel;
-import com.google.gwt.user.client.ui.Label;
 import com.google.gwt.user.client.ui.Widget;
 import com.sap.sailing.gwt.ui.client.shared.components.Component;
 
@@ -84,7 +82,6 @@ public class TouchSplitLayoutPanelWithBetterDraggers extends DockLayoutPanel {
 
     private boolean toggleDisplayAllowed = false;
     private double lastClick = 0;
-    private double lastTouchEnd = 0;
     
     private final Component<?> associatedComponent;
     protected Button togglerButton;
@@ -103,27 +100,9 @@ public class TouchSplitLayoutPanelWithBetterDraggers extends DockLayoutPanel {
         return associatedComponent;
     }
     
-    protected abstract boolean supportsClick();
-
     @Override
     public void onBrowserEvent(Event event) {
-      GWT.log(event.getType());
       switch (event.getTypeInt()) {
-        case Event.ONCLICK:
-            if (supportsClick()) {
-                LayoutData layoutData = (LayoutData) target.getLayoutData();
-                if (layoutData.size == 0) {
-                  // Restore the old size.
-                  setWidgetVisibilityAndPossiblyShowSplitter(target, getAssociatedComponent(), /*hidden*/false, (int)layoutData.oldSize);
-                } else {
-                    double now = Duration.currentTimeMillis();
-                    if (now - this.lastTouchEnd > DOUBLE_CLICK_TIMEOUT) {
-                        setWidgetVisibilityAndPossiblyShowSplitter(target, getAssociatedComponent(), /*hidden*/true, (int)layoutData.oldSize);
-                    }
-                }
-                event.preventDefault();
-            }
-            break;
         case Event.ONMOUSEDOWN:
         case Event.ONTOUCHSTART:
           mouseDown = true;
@@ -174,7 +153,6 @@ public class TouchSplitLayoutPanelWithBetterDraggers extends DockLayoutPanel {
             this.lastClick = now;
           }
 
-          this.lastTouchEnd = Duration.currentTimeMillis();
           Event.releaseCapture(getElement());
           event.preventDefault();
           break;
@@ -279,9 +257,6 @@ public class TouchSplitLayoutPanelWithBetterDraggers extends DockLayoutPanel {
       super(target, associatedComponent, reverse);
       getElement().getStyle().setPropertyPx("width", splitterSize);
       setStyleName("gwt-SplitLayoutPanel-HDragger");
-      Label splitterLabel = new Label(target.getTitle());
-      splitterLabel.setStyleName("gwt-SplitLayoutPanel-HDragger-Label");
-      getElement().appendChild(splitterLabel.getElement());
     }
 
     @Override
@@ -314,11 +289,6 @@ public class TouchSplitLayoutPanelWithBetterDraggers extends DockLayoutPanel {
     @Override
     protected int getTargetSize() {
       return target.getOffsetWidth();
-    }
-
-    @Override
-    protected boolean supportsClick() {
-        return true;
     }
   }
 
@@ -359,11 +329,6 @@ public class TouchSplitLayoutPanelWithBetterDraggers extends DockLayoutPanel {
     @Override
     protected int getTargetSize() {
       return target.getOffsetHeight();
-    }
-
-    @Override
-    protected boolean supportsClick() {
-        return false;
     }
   }
 
@@ -625,16 +590,16 @@ public class TouchSplitLayoutPanelWithBetterDraggers extends DockLayoutPanel {
         break;
       case NORTH:
         splitter = new VSplitter(widget, associatedComponent, false);
-        // hide initially
-        splitter.setVisible(false);
         break;
       case SOUTH:
         splitter = new VSplitter(widget, associatedComponent, true);
-        // hide initially
-        splitter.setVisible(false);
         break;
       default:
         assert false : "Unexpected direction";
+    }
+    // hide dragger initially
+    if (splitter != null) {
+      splitter.setVisible(false);
     }
 
     createdSplittersForDirection.add(splitter);
