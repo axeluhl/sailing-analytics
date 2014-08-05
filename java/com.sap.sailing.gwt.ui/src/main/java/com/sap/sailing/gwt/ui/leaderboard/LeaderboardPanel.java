@@ -17,7 +17,6 @@ import com.google.gwt.cell.client.Cell;
 import com.google.gwt.cell.client.Cell.Context;
 import com.google.gwt.cell.client.CompositeCell;
 import com.google.gwt.cell.client.EditTextCell;
-import com.google.gwt.cell.client.FieldUpdater;
 import com.google.gwt.cell.client.TextCell;
 import com.google.gwt.core.client.GWT;
 import com.google.gwt.core.client.Scheduler;
@@ -1468,12 +1467,6 @@ public class LeaderboardPanel extends SimplePanel implements TimeListener, PlayS
             super(checkboxCell, descending, displayedLeaderboardRowsProvider);
             competitorSelectionProvider.addCompetitorSelectionChangeListener(this);
             this.cell = checkboxCell;
-            this.setFieldUpdater(new FieldUpdater<LeaderboardRowDTO, Boolean>() {
-                @Override
-                public void update(int index, LeaderboardRowDTO row, Boolean selected) {
-                    competitorSelectionProvider.setSelected(row.competitor, selected);
-                }
-            });
         }
         
         @Override
