@@ -23,7 +23,6 @@ import com.google.gwt.user.client.ui.FlowPanel;
 import com.google.gwt.user.client.ui.MenuBar;
 import com.google.gwt.user.client.ui.Panel;
 import com.google.gwt.user.client.ui.SimplePanel;
-import com.google.gwt.user.client.ui.Widget;
 import com.sap.sailing.domain.common.RaceIdentifier;
 import com.sap.sailing.domain.common.RegattaAndRaceIdentifier;
 import com.sap.sailing.domain.common.dto.CompetitorDTO;
@@ -67,7 +66,6 @@ import com.sap.sse.common.filter.Filter;
 import com.sap.sse.common.filter.FilterSet;
 import com.sap.sse.gwt.client.async.AsyncActionsExecutor;
 import com.sap.sse.gwt.client.dialog.DataEntryDialog.DialogCallback;
-import com.sap.sse.gwt.client.player.TimeListener;
 import com.sap.sse.gwt.client.player.TimeRangeWithZoomModel;
 import com.sap.sse.gwt.client.player.Timer;
 import com.sap.sse.gwt.client.useragent.UserAgentDetails;
@@ -96,9 +94,9 @@ public class RaceBoardPanel extends SimplePanel implements RegattasDisplayer, Ra
     private final Map<RaceIdentifier, RaceDTO> racesByIdentifier;
     
     private final List<ComponentViewer> componentViewers;
-    private final FlowPanel componentControlsPanel;
-    private final FlowPanel viewControlsPanel;
-    private final FlowPanel toolbarPanel;
+    //private final FlowPanel componentControlsPanel;
+    //private final FlowPanel viewControlsPanel;
+    //private final FlowPanel toolbarPanel;
     private RaceTimePanel timePanel;
     private final Timer timer;
     private final RaceSelectionProvider raceSelectionProvider;
@@ -152,15 +150,15 @@ public class RaceBoardPanel extends SimplePanel implements RegattasDisplayer, Ra
         componentViewers = new ArrayList<ComponentViewer>();
         competitorSelectionModel = new CompetitorSelectionModel(/* hasMultiSelection */ true);
                 
-        toolbarPanel = new FlowPanel();
-        toolbarPanel.setWidth("100%");
-        componentControlsPanel = new FlowPanel();
-        componentControlsPanel.addStyleName("raceBoardNavigation");
-        toolbarPanel.add(componentControlsPanel);
+        //toolbarPanel = new FlowPanel();
+        //toolbarPanel.setWidth("100%");
+        //componentControlsPanel = new FlowPanel();
+        //componentControlsPanel.addStyleName("raceBoardNavigation");
+        //toolbarPanel.add(componentControlsPanel);
 
-        viewControlsPanel = new FlowPanel();
-        viewControlsPanel.addStyleName("raceBoardControls");
-        toolbarPanel.add(viewControlsPanel);
+        //viewControlsPanel = new FlowPanel();
+        //viewControlsPanel.addStyleName("raceBoardControls");
+        //toolbarPanel.add(viewControlsPanel);
         
         leaderboardPanel = createLeaderboardPanel(leaderboardName, leaderboardGroupName);
         createOneScreenView(leaderboardName, leaderboardGroupName, mainPanel, showMapControls);
@@ -171,7 +169,7 @@ public class RaceBoardPanel extends SimplePanel implements RegattasDisplayer, Ra
         getElement().getStyle().setMarginRight(12, Unit.PX);
 
         // add busy indicator to toolbar panel because the embedded leaderboard has no space for it
-        toolbarPanel.add(leaderboardPanel.getBusyIndicator());
+        //toolbarPanel.add(leaderboardPanel.getBusyIndicator());
 
         CompetitorsFilterSets loadedCompetitorsFilterSets = loadCompetitorsFilterSets();
         if (loadedCompetitorsFilterSets != null) {
@@ -232,12 +230,7 @@ public class RaceBoardPanel extends SimplePanel implements RegattasDisplayer, Ra
         setWindChartVisible(getConfiguration().isShowWindChart());
         setCompetitorChartVisible(getConfiguration().isShowCompetitorsChart());
         
-        addComponentToNavigationMenu(leaderboardAndMapViewer, leaderboardPanel, true);
-        addComponentToNavigationMenu(leaderboardAndMapViewer, windChart,  true);
-        addComponentToNavigationMenu(leaderboardAndMapViewer, competitorChart, true);
-        addComponentToNavigationMenu(leaderboardAndMapViewer, raceMap, false);
-        addCompetitorsFilterControl(viewControlsPanel);
-        addMediaSelectorToNavigationMenu();
+        //addMediaSelectorToNavigationMenu();
     }
  
     private CompetitorsFilterSets createAndAddDefaultCompetitorsFilter() {
@@ -284,9 +277,9 @@ public class RaceBoardPanel extends SimplePanel implements RegattasDisplayer, Ra
         timer.addPlayStateListener(mediaSelector);
         timer.addTimeListener(mediaSelector);
         mediaService.getMediaTracksForRace(selectedRaceIdentifier, mediaSelector);
-        for (Widget widget : mediaSelector.widgets()) {
+        /*for (Widget widget : mediaSelector.widgets()) {
             componentControlsPanel.add(widget);
-        }
+        }*/
     }
 
     @SuppressWarnings("unused")
@@ -459,7 +452,7 @@ public class RaceBoardPanel extends SimplePanel implements RegattasDisplayer, Ra
         }
     }
     
-    private <SettingsType> void addComponentToNavigationMenu(final ComponentViewer componentViewer,
+    /*private <SettingsType> void addComponentToNavigationMenu(final ComponentViewer componentViewer,
             final Component<SettingsType> component, boolean isToogleCheckboxEnabled) {
         final CheckBox checkBox = new CheckBox(component.getLocalizedShortName());
         checkBox.getElement().getStyle().setFloat(Style.Float.LEFT);
@@ -503,7 +496,7 @@ public class RaceBoardPanel extends SimplePanel implements RegattasDisplayer, Ra
             
             componentControlsPanel.add(settingsButton);
         }
-    }
+    }*/
     
     private void setComponentVisible(ComponentViewer componentViewer, Component<?> component, boolean visible) {
         component.setVisible(visible);      
@@ -546,10 +539,6 @@ public class RaceBoardPanel extends SimplePanel implements RegattasDisplayer, Ra
         setComponentVisible(leaderboardAndMapViewer, competitorChart, visible);
     }
     
-    public Panel getToolbarPanel() {
-        return toolbarPanel; 
-    }
-
     public RaceTimePanel getTimePanel() {
         return timePanel; 
     }
@@ -588,10 +577,6 @@ public class RaceBoardPanel extends SimplePanel implements RegattasDisplayer, Ra
 
     public RaceBoardViewConfiguration getConfiguration() {
         return raceboardViewConfiguration;
-    }
-    
-    public FlowPanel getComponentControlsPanel() {
-        return componentControlsPanel;
     }
 }
 

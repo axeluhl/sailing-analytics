@@ -194,7 +194,7 @@ public class TVViewController implements RaceTimesInfoProviderListener {
             }
             if (showNavigationPanel) {
                 FlowPanel toolbarPanel = new FlowPanel();
-                toolbarPanel.add(raceBoardPanel.getComponentControlsPanel());
+                //toolbarPanel.add(raceBoardPanel.getComponentControlsPanel());
                 dockPanel.addNorth(toolbarPanel, 40);
             }
             FlowPanel timePanel = createTimePanel(raceBoardPanel);
