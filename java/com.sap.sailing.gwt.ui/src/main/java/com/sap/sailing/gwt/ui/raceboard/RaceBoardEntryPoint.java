@@ -235,28 +235,28 @@ public class RaceBoardEntryPoint extends AbstractEntryPoint {
             RaceBoardViewConfiguration raceboardViewConfiguration) {
         final DockLayoutPanel p = new DockLayoutPanel(Unit.PX);
         RootLayoutPanel.get().add(p);
-        /*final Panel toolbarPanel = raceBoardPanel.getToolbarPanel();
+        final Panel toolbarPanel = raceBoardPanel.getToolbarPanel();
         if (!UserAgentChecker.INSTANCE.isUserAgentSupported(userAgent)) {
             HTML lbl = new HTML(stringMessages.warningBrowserUnsupported());
             lbl.setStyleName("browserOptimizedMessage");
             toolbarPanel.add(lbl);
-        }*/
+        }
         final FlowPanel logoAndTitlePanel = createLogoAndTitlePanel(raceBoardPanel);
         FlowPanel timePanel = createTimePanel(raceBoardPanel);
         p.addNorth(logoAndTitlePanel, 68);
-        //p.addNorth(toolbarPanel, 40);
+        p.addNorth(toolbarPanel, 40);
         toolbarAndLogoAndTitleBarHidden = false;
-        /*if (!raceboardViewConfiguration.isShowNavigationPanel()) {
+        if (!raceboardViewConfiguration.isShowNavigationPanel()) {
             p.setWidgetHidden(toolbarPanel, true);
             globalNavigationPanel.setVisible(false);
             toolbarAndLogoAndTitleBarHidden = true;
-        }*/
+        }
 
         p.addSouth(timePanel, 90);
         p.add(raceBoardPanel);
         p.addStyleName("dockLayoutPanel");
 
-        //addModeratorShortkeyFunctionality(p, toolbarPanel, raceBoardPanel, timePanel);
+        addModeratorShortkeyFunctionality(p, toolbarPanel, raceBoardPanel, timePanel);
     }
 
     private void addModeratorShortkeyFunctionality(final DockLayoutPanel p, final Panel toolbarPanel,
