@@ -16,8 +16,10 @@ import com.google.gwt.user.client.ui.Panel;
 import com.google.gwt.user.client.ui.ScrollPanel;
 import com.google.gwt.user.client.ui.VerticalPanel;
 import com.google.gwt.user.client.ui.Widget;
+import com.sap.sailing.gwt.ui.client.StringMessages;
 import com.sap.sailing.gwt.ui.client.shared.components.Component;
 import com.sap.sailing.gwt.ui.client.shared.components.ComponentViewer;
+import com.sap.sailing.gwt.ui.client.shared.components.SettingsDialog;
 import com.sap.sse.gwt.client.player.TimeListener;
 
 public class SideBySideComponentViewer implements ComponentViewer {
@@ -63,13 +65,15 @@ public class SideBySideComponentViewer implements ComponentViewer {
     private final List<Component<?>> components;
     private final Map<Component<?>, Panel> componentPanels;
     private final Panel leftPanel;
+    private final StringMessages stringMessages;
     
     private LayoutPanel mainPanel;
     
     private TouchSplitLayoutPanelWithBetterDraggers splitLayoutPanel; 
     private int savedSplitPosition = -1;
     
-    public SideBySideComponentViewer(Component<?> leftComponentP, Component<?> rightComponentP, List<Component<?>> components) {
+    public SideBySideComponentViewer(Component<?> leftComponentP, Component<?> rightComponentP, List<Component<?>> components, StringMessages stringMessages) {
+        this.stringMessages = stringMessages;
         this.leftComponent = leftComponentP;
         this.rightComponent = rightComponentP;
         this.components = components;
@@ -86,10 +90,11 @@ public class SideBySideComponentViewer implements ComponentViewer {
         leftPanel = new PanelWithCloseAndSettingsButton(leftScrollPanel) {
             @Override
             public void closeClicked() {
+                splitLayoutPanel.setWidgetVisibilityAndPossiblyShowSplitter(this, leftComponent, true, 500);
             }
             @Override
             public void settingsClicked() {
-                splitLayoutPanel.setWidgetVisibilityAndPossiblyShowSplitter(this, leftComponent, true, 500);
+                showSettingsDialog(leftComponent);
             }
         };
         
@@ -125,6 +130,7 @@ public class SideBySideComponentViewer implements ComponentViewer {
             final Panel componentPanel = new PanelWithCloseAndSettingsButton(component.getEntryWidget()) {
                 @Override
                 public void settingsClicked() {
+                    showSettingsDialog(component);
                 }
                 @Override
                 public void closeClicked() {
@@ -136,6 +142,12 @@ public class SideBySideComponentViewer implements ComponentViewer {
             splitLayoutPanel.insert(componentPanel, component, Direction.SOUTH, 200, null);
         }
         splitLayoutPanel.insert(absoluteMapAndToggleButtonsPanel, rightComponent, Direction.CENTER, 0, null);
+    }
+    
+    public <SettingsType> void showSettingsDialog(Component<SettingsType> component) {
+        if (component.hasSettings()) {
+            new SettingsDialog<SettingsType>(component, stringMessages).show();
+        }
     }
 
     public void forceLayout() {

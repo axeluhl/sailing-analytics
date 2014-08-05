@@ -223,7 +223,7 @@ public class RaceBoardPanel extends SimplePanel implements RegattasDisplayer, Ra
         windChart.getEntryWidget().setTitle(stringMessages.wind());
         components.add(windChart);
         leaderboardPanel.setTitle(stringMessages.leaderboard());
-        leaderboardAndMapViewer = new SideBySideComponentViewer(leaderboardPanel, raceMap, components);
+        leaderboardAndMapViewer = new SideBySideComponentViewer(leaderboardPanel, raceMap, components, stringMessages);
         componentViewers.add(leaderboardAndMapViewer);
         for (ComponentViewer componentViewer : componentViewers) {
             mainPanel.add(componentViewer.getViewerWidget());
