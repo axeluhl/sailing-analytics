@@ -12,7 +12,7 @@ import com.google.gwt.user.cellview.client.DefaultCellTableBuilder;
 import com.google.gwt.view.client.SelectionModel;
 
 /**
- * Uses {@link SortableColumn#getHeaderStyle()} to optionally add a custom CSS style to the &lt;th&gt; table
+ * Uses {@link LeaderboardSortableColumnWithMinMax#getHeaderStyle()} to optionally add a custom CSS style to the &lt;th&gt; table
  * header cell for the respective column.<p>
  * 
  * The implementation works by overriding {@link #renderRowValues(SafeHtmlBuilder, List, int, SelectionModel)} which
@@ -47,7 +47,7 @@ public class SortedCellTableWithStylableHeaders<T> extends SortedCellTable<T> {
         NodeList<Node> headerColumns = header.getChildNodes();
         for (int i=0; i<headerColumns.getLength(); i++) {
             Element headerCell = Element.as(headerColumns.getItem(i));
-            String headerStyle = ((SortableColumn<T, ?>) getColumn(i)).getHeaderStyle();
+            String headerStyle = ((LeaderboardSortableColumnWithMinMax<T, ?>) getColumn(i)).getHeaderStyle();
             if (headerStyle != null) {
                 headerCell.addClassName(headerStyle);
             }

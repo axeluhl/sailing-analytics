@@ -10,7 +10,7 @@ import com.sap.sailing.domain.common.impl.InvertibleComparatorAdapter;
 import com.sap.sailing.gwt.ui.client.DetailTypeFormatter;
 
 public abstract class DetailTypeColumn<FieldType extends Comparable<?>, RenderingType> extends
-        SortableColumn<LeaderboardRowDTO, RenderingType> {
+        LeaderboardSortableColumnWithMinMax<LeaderboardRowDTO, RenderingType> {
     
     private static final String HtmlConstantToInlineHeadersWithAndWithoutUnit = "&nbsp;";
     
