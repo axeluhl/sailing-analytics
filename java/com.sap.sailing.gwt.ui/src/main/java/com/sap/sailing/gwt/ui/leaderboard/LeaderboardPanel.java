@@ -86,6 +86,7 @@ import com.sap.sailing.gwt.ui.client.shared.components.Component;
 import com.sap.sailing.gwt.ui.client.shared.components.IsEmbeddableComponent;
 import com.sap.sailing.gwt.ui.client.shared.components.SettingsDialogComponent;
 import com.sap.sailing.gwt.ui.client.shared.controls.AbstractSortableColumnWithMinMax;
+import com.sap.sailing.gwt.ui.client.shared.controls.SelectionCheckboxColumn;
 import com.sap.sailing.gwt.ui.client.shared.filter.LeaderboardFetcher;
 import com.sap.sailing.gwt.ui.leaderboard.DetailTypeColumn.LegDetailField;
 import com.sap.sailing.gwt.ui.leaderboard.LeaderboardSettings.RaceColumnSelectionStrategies;
@@ -155,7 +156,7 @@ public class LeaderboardPanel extends SimplePanel implements TimeListener, PlayS
 
     private final TotalRankColumn totalRankColumn;
     
-    private final LeaderboardSelectionCheckboxColumn selectionCheckboxColumn;
+    private final SelectionCheckboxColumn<LeaderboardRowDTO> selectionCheckboxColumn;
 
     /**
      * Passed to the {@link ManeuverCountRaceColumn}. Modifications to this list will modify the column's children list
@@ -1478,10 +1479,7 @@ public class LeaderboardPanel extends SimplePanel implements TimeListener, PlayS
         private void redrawRow(final LeaderboardRowDTO row) {
             final List<LeaderboardRowDTO> leaderboardDataList = getData().getList();
             synchronized (leaderboardDataList) {
-                int rowIndex = leaderboardDataList.indexOf(row);
-                if (rowIndex >= 0) {
-                    leaderboardDataList.set(rowIndex, row); // trigger row redraw to have check box shown in correct state
-                }
+                redrawRow(row, leaderboardDataList);
             }
         }
 
@@ -1498,6 +1496,11 @@ public class LeaderboardPanel extends SimplePanel implements TimeListener, PlayS
 
         @Override
         public void updateMinMax() {}
+
+        @Override
+        protected ListDataProvider<LeaderboardRowDTO> getListDataProvider() {
+            return getData();
+        }
     }
     
     private class TotalRankColumn extends LeaderboardSortableColumnWithMinMax<LeaderboardRowDTO, String> {

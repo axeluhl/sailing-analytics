@@ -1,6 +1,10 @@
 package com.sap.sailing.gwt.ui.client.shared.controls;
 
+import java.util.List;
+
 import com.google.gwt.cell.client.Cell.Context;
+import com.google.gwt.core.client.Scheduler;
+import com.google.gwt.core.client.Scheduler.ScheduledCommand;
 import com.google.gwt.dom.client.BrowserEvents;
 import com.google.gwt.dom.client.NativeEvent;
 import com.google.gwt.safehtml.shared.SafeHtmlBuilder;
@@ -12,8 +16,11 @@ import com.google.gwt.view.client.CellPreviewEvent;
 import com.google.gwt.view.client.DefaultSelectionEventManager;
 import com.google.gwt.view.client.DefaultSelectionEventManager.EventTranslator;
 import com.google.gwt.view.client.DefaultSelectionEventManager.SelectAction;
+import com.google.gwt.view.client.ListDataProvider;
+import com.google.gwt.view.client.MultiSelectionModel;
 import com.sap.sailing.domain.common.InvertibleComparator;
 import com.sap.sailing.domain.common.SortingOrder;
+import com.sap.sailing.domain.common.dto.LeaderboardRowDTO;
 import com.sap.sailing.domain.common.impl.InvertibleComparatorAdapter;
 
 /**
@@ -22,6 +29,11 @@ import com.sap.sailing.domain.common.impl.InvertibleComparatorAdapter;
  * {@link CellTable#setSelectionModel(com.google.gwt.view.client.SelectionModel, com.google.gwt.view.client.CellPreviewEvent.Handler)}
  * with the result of this columns {@link #getSelectionManager()} method as second argument. This will ensure that the
  * event handling and selection updates work properly.
+ * <p>
+ * 
+ * Subclasses need to ensure that for each row whose selection status changes, a call to
+ * {@link #redrawRow(LeaderboardRowDTO, List)} is issued. Otherwise, the checkboxes will run out of sync with the
+ * selection status.
  * <p>
  * 
  * The column uses the {@link BetterCheckboxCell} cell to implement the display properties. Three CSS styles can be used
@@ -58,6 +70,13 @@ public abstract class SelectionCheckboxColumn<T> extends AbstractSortableColumnW
     }
     
     /**
+     * Subclasses need to tell this column what the data list is. This is necessary in order to reach all rows after the
+     * selection is cleared, as well as to trigger the redraw of a row by setting it again in the list data provider which
+     * triggers the necessary redraw operation.
+     */
+    protected abstract ListDataProvider<T> getListDataProvider();
+    
+    /**
      * @return a selection manager that should be used for the table to which this column is added; use
      *         {@link CellTable#setSelectionModel(com.google.gwt.view.client.SelectionModel, com.google.gwt.view.client.CellPreviewEvent.Handler)}
      *         to set the selection manager together with the selection model on the table.
@@ -66,6 +85,35 @@ public abstract class SelectionCheckboxColumn<T> extends AbstractSortableColumnW
         return DefaultSelectionEventManager.createCustomManager(getSelectionEventTranslator());
     }
 
+    /**
+     * Clients should use the multi-selection model returned by this method for the {@link CellTable} to which they add this column.
+     * If they do so, the {@link #redrawRow(LeaderboardRowDTO, List)} method will be triggered correctly for all selection changes.
+     * Otherwise, clients or subclasses are responsible to issue the necessary calls to {@link #redrawRow(LeaderboardRowDTO, List)}
+     * after selection changes.
+     */
+    public MultiSelectionModel<T> getSelectionModel() {
+        return new MultiSelectionModel<T>() {
+            @Override
+            public void clear() {
+                super.clear();
+                final List<T> list = getListDataProvider().getList();
+                for (T item : list) {
+                    redrawRow(item, list);
+                }
+            }
+
+            @Override
+            public void setSelected(T item, boolean selected) {
+                final boolean redrawRequired = isSelected(item) != selected;
+                super.setSelected(item, selected);
+                if (redrawRequired) {
+                    redrawRow(item, getListDataProvider().getList());
+                }
+            }
+            
+        };
+    }
+    
     /**
      * @return a selection event translator that works nicely with
      *         {@link DefaultSelectionEventManager#createCustomManager(EventTranslator)} to ensure that this selection
@@ -150,5 +198,28 @@ public abstract class SelectionCheckboxColumn<T> extends AbstractSortableColumnW
                 return result;
             }
         };
+    }
+
+    /**
+     * Subclasses shall use this after an update to the selection state of a row to ensure the checkboxes are
+     * displayed correctly and consistently again.
+     * 
+     * @param row
+     *            the row object to be re-drawn
+     * @param dataList
+     *            the result of calling {@link ListDataProvider#getList()} on the table's data provider which is
+     *            actually a list wrapper where updates to which are reflected in the table display
+     */
+    protected void redrawRow(final T row, final List<T> dataList) {
+        Scheduler.get().scheduleDeferred(new ScheduledCommand() {
+            @Override
+            public void execute() {
+                int rowIndex = dataList.indexOf(row);
+                if (rowIndex >= 0) {
+                    dataList.set(rowIndex, row); // trigger row redraw to have check box shown in correct state
+                }
+                getListDataProvider().flush();
+            }
+        });
     }
 }
