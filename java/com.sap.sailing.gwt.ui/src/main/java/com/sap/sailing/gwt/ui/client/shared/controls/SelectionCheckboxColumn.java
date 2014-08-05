@@ -48,6 +48,7 @@ public abstract class SelectionCheckboxColumn<T> extends AbstractSortableColumnW
     private final BetterCheckboxCell cell;
     private final String checkboxColumnCellCSSClass;
     private final EventTranslator<T> selectionEventTranslator;
+    private final MultiSelectionModel<T> selectionModel;
     
     /**
      * @param selectedCheckboxCSSClass
@@ -67,6 +68,7 @@ public abstract class SelectionCheckboxColumn<T> extends AbstractSortableColumnW
         this.cell = checkboxCell;
         this.checkboxColumnCellCSSClass = checkboxColumnCellCSSClass;
         this.selectionEventTranslator = createSelectionEventTranslator();
+        this.selectionModel = createSelectionModel();
     }
     
     /**
@@ -85,13 +87,17 @@ public abstract class SelectionCheckboxColumn<T> extends AbstractSortableColumnW
         return DefaultSelectionEventManager.createCustomManager(getSelectionEventTranslator());
     }
 
+    public MultiSelectionModel<T> getSelectionModel() {
+        return selectionModel;
+    }
+
     /**
      * Clients should use the multi-selection model returned by this method for the {@link CellTable} to which they add this column.
      * If they do so, the {@link #redrawRow(LeaderboardRowDTO, List)} method will be triggered correctly for all selection changes.
      * Otherwise, clients or subclasses are responsible to issue the necessary calls to {@link #redrawRow(LeaderboardRowDTO, List)}
      * after selection changes.
      */
-    public MultiSelectionModel<T> getSelectionModel() {
+    private MultiSelectionModel<T> createSelectionModel() {
         return new MultiSelectionModel<T>() {
             @Override
             public void clear() {
