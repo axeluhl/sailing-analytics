@@ -9,7 +9,7 @@ import com.sap.sailing.gwt.ui.client.SailingServiceAsync;
 import com.sap.sailing.gwt.ui.client.StringMessages;
 import com.sap.sailing.gwt.ui.leaderboard.LeaderboardPanel;
 import com.sap.sailing.gwt.ui.leaderboard.LeaderboardSettingsFactory;
-import com.sap.sailing.gwt.ui.leaderboard.SortableColumn;
+import com.sap.sailing.gwt.ui.leaderboard.LeaderboardSortableColumnWithMinMax;
 import com.sap.sailing.gwt.ui.leaderboard.SortedCellTable;
 import com.sap.sse.gwt.client.async.AsyncActionsExecutor;
 import com.sap.sse.gwt.client.useragent.UserAgentDetails;
@@ -25,7 +25,7 @@ public class LeaderboardPanelMock extends LeaderboardPanel {
     }
 
     @Override
-    public void addColumn(SortableColumn<LeaderboardRowDTO, ?> column) {
+    public void addColumn(LeaderboardSortableColumnWithMinMax<LeaderboardRowDTO, ?> column) {
         // TODO Auto-generated method stub
         super.addColumn(column);
     }
