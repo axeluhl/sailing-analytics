@@ -745,8 +745,21 @@ video {
   cursor: hand;
 }
 
-.betterCheckboxCell {
+.betterCheckboxCellSelected {
 	margin: 0px;
+	height: 18px;
+	width: 18px;
+	border: 1px;
+	background-color: #acacac;
+	vertical-align: middle;
+}
+
+.betterCheckboxCellDeselected {
+	margin-left: 2px; /* account for the selection border that pushes a selected checkbox to the side */
+	margin-top: 0px;
+	margin-bottom: 0px;
+	margin-right: 0px;
+	border: 1px;
 	height: 18px;
 	width: 18px;
 	vertical-align: middle;

@@ -1458,7 +1458,7 @@ public class LeaderboardPanel extends SimplePanel implements TimeListener, PlayS
         
         protected SelectionCheckboxColumn(DisplayedLeaderboardRowsProvider displayedLeaderboardRowsProvider,
                 CompetitorSelectionProvider competitorSelectionProvider) {
-            this(new BetterCheckboxCell(),
+            this(new BetterCheckboxCell(tableResources.cellTableStyle().cellTableCheckboxSelected(), tableResources.cellTableStyle().cellTableCheckboxDeselected()),
                     SortingOrder.DESCENDING, displayedLeaderboardRowsProvider, competitorSelectionProvider);
         }
 

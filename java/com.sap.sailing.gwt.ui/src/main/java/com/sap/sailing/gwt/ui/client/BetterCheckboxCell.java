@@ -18,7 +18,8 @@ import com.google.gwt.safehtml.shared.SafeHtmlUtils;
  *
  */
 public class BetterCheckboxCell extends AbstractEditableCell<Boolean, Boolean> {
-    public final static String DEFAULT_CSS_CLASS = "betterCheckboxCell";
+    public final static String DEFAULT_CSS_CLASS_SELECTED = "betterCheckboxCellSelected";
+    public final static String DEFAULT_CSS_CLASS_DESELECTED = "betterCheckboxCellDeselected";
     
     /**
      * An html string representation of a checked input box.
@@ -31,13 +32,13 @@ public class BetterCheckboxCell extends AbstractEditableCell<Boolean, Boolean> {
     private final SafeHtml INPUT_UNCHECKED;
 
     public BetterCheckboxCell() {
-        this(DEFAULT_CSS_CLASS);
+        this(DEFAULT_CSS_CLASS_SELECTED, DEFAULT_CSS_CLASS_DESELECTED);
     }
     
-    public BetterCheckboxCell(String cssClass) {
+    public BetterCheckboxCell(String cssClassSelected, String cssClassDeselected) {
         super(BrowserEvents.CHANGE, BrowserEvents.KEYDOWN, BrowserEvents.CLICK);
-        INPUT_CHECKED = SafeHtmlUtils.fromSafeConstant("<input type=\"checkbox\" tabindex=\"-1\" checked class=\""+cssClass+"\"/>");
-        INPUT_UNCHECKED = SafeHtmlUtils.fromSafeConstant("<input type=\"checkbox\" tabindex=\"-1\" class=\""+cssClass+"\"/>");
+        INPUT_CHECKED = SafeHtmlUtils.fromSafeConstant("<div class=\""+cssClassSelected+"\"/>");
+        INPUT_UNCHECKED = SafeHtmlUtils.fromSafeConstant("<div class=\""+cssClassDeselected+"\"/>");
     }
 
     
