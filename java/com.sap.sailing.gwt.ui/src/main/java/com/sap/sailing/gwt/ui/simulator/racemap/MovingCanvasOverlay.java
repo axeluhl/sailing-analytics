@@ -63,4 +63,7 @@ public abstract class MovingCanvasOverlay extends FullCanvasOverlay {
         setCanvasPosition(getWidgetPosLeft(), getWidgetPosTop());
     }
 
+    @Override
+    protected void draw() {
+    }
 }

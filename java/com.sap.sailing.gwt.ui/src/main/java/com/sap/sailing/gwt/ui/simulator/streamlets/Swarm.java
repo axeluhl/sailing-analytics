@@ -129,12 +129,12 @@ public class Swarm implements TimeListener {
         return newParticles;
     }
 
-    public void onBoundsChanged(boolean zoomChanged) {
+    public void onBoundsChanged(boolean zoomChanged, int swarmPause) {
         this.zoomChanged |= zoomChanged;
         if (this.zoomChanged) {
             projection.clearCanvas();
         }
-        swarmPause = 5;
+        this.swarmPause = swarmPause;
     }
 
     private void updateBounds() {
@@ -161,12 +161,14 @@ public class Swarm implements TimeListener {
                     swarmPause--;
                 } else if (swarmPause == 1) {
                     fullcanvas.setCanvasSettings();
-                    diffPx = fullcanvas.getDiffPx();
                     projection.calibrate();
                     updateBounds();
                     if (zoomChanged) {
+                        diffPx = new Vector(0,0);
                         particles = createParticles();
                         zoomChanged = false;
+                    } else {
+                        diffPx = fullcanvas.getDiffPx();
                     }
                     swarmPause = 0;
                 }

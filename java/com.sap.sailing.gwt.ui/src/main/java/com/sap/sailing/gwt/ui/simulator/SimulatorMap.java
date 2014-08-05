@@ -477,7 +477,7 @@ public class SimulatorMap extends AbsolutePanel implements RequiresDataInitializ
             			  Scheduler.get().scheduleDeferred(new Scheduler.ScheduledCommand() {
             				  public void execute() {
             					  if (windStreamletsCanvasOverlay.getSwarm() != null) {
-            						  windStreamletsCanvasOverlay.getSwarm().onBoundsChanged(true);
+            						  windStreamletsCanvasOverlay.getSwarm().onBoundsChanged(true, 5);
             					  }
             				  }
             			  });
