@@ -8,8 +8,8 @@ import com.google.gwt.maps.client.base.Point;
 import com.sap.sailing.gwt.ui.simulator.streamlets.Vector;
 
 /**
- * This class extends @FullCanvasOverlay to provide the functionality that the canvas covers the
- * full viewable area of the map and moves previously drawn content according to drag and zoom
+ * This class extends {@link FullCanvasOverlay} to provide the functionality that the canvas covers the
+ * full viewable area of the map and moves previously drawn content according to drag and zoom.
  * 
  * @author Christopher Ronnewinkel (D036654)
  *
