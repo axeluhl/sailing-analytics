@@ -1581,7 +1581,7 @@ public class LeaderboardPanel extends SimplePanel implements TimeListener, PlayS
                 // perform the first request as "live" but don't by default auto-play
                 PlayModes.Live, PlayStates.Paused, /* delayBetweenAutoAdvancesInMilliseconds */3000l), leaderboardGroupName,
                 leaderboardName, errorReporter, stringMessages, userAgent, showRaceDetails,
-                /* showCompetitorSearchBox */ false, /* showSelectionCheckbox */ true, /* optionalRaceTimesInfoProvider */ null,
+                /* competitorSearchTextBox */ null, /* showSelectionCheckbox */ true, /* optionalRaceTimesInfoProvider */ null,
                 /* autoExpandLastRaceColumn */ false, /* adjustTimerDelay */ true);
     }
 
@@ -1589,7 +1589,7 @@ public class LeaderboardPanel extends SimplePanel implements TimeListener, PlayS
             LeaderboardSettings settings, RaceIdentifier preSelectedRace,
             CompetitorSelectionProvider competitorSelectionProvider, Timer timer, String leaderboardGroupName,
             String leaderboardName, ErrorReporter errorReporter, final StringMessages stringMessages,
-            final UserAgentDetails userAgent, boolean showRaceDetails, boolean showCompetitorSearchBox,
+            final UserAgentDetails userAgent, boolean showRaceDetails, CompetitorSearchTextBox competitorSearchTextBox,
             boolean showSelectionCheckbox, RaceTimesInfoProvider optionalRaceTimesInfoProvider,
             boolean autoExpandLastRaceColumn, boolean adjustTimerDelay) {
         this.setTitle(stringMessages.leaderboard());
@@ -1758,8 +1758,8 @@ public class LeaderboardPanel extends SimplePanel implements TimeListener, PlayS
         if (!isEmbedded) {
             contentPanel.add(toolbarPanel);
         }
-        if (showCompetitorSearchBox) {
-            contentPanel.add(new CompetitorSearchTextBox(competitorSelectionProvider, stringMessages));
+        if (competitorSearchTextBox != null) {
+            contentPanel.add(competitorSearchTextBox);
         }
         contentPanel.add(getLeaderboardTable());
         setWidget(contentPanel);

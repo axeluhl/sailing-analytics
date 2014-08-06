@@ -47,7 +47,7 @@ public class LeaderboardViewer extends AbstractLeaderboardViewer {
         super(competitorSelectionModel, asyncActionsExecutor, timer, stringMessages, hideToolbar, new LeaderboardPanel(
                 sailingService, asyncActionsExecutor, leaderboardSettings, preselectedRace,
                 competitorSelectionModel, timer, leaderboardGroupName, leaderboardName, errorReporter,
-                stringMessages, userAgent, showRaceDetails, /* showCompetitorSearchBox */ false, /* showSelectionCheckbox */ true, /* adjustTimerDelay */
+                stringMessages, userAgent, showRaceDetails, /* competitorSearchTextBox */ null, /* showSelectionCheckbox */ true, /* adjustTimerDelay */
                 /* raceTimesInfoProvider */null, autoExpandLastRaceColumn, true));
         final FlowPanel mainPanel = createViewerPanel();
         setWidget(mainPanel);
@@ -78,7 +78,7 @@ public class LeaderboardViewer extends AbstractLeaderboardViewer {
                                 overallLeaderboardPanel = new LeaderboardPanel(sailingService, asyncActionsExecutor,
                                         leaderboardSettings, preselectedRace, competitorSelectionProvider, timer,
                                         leaderboardGroupName, overallLeaderboardName, errorReporter, stringMessages, userAgent,
-                                        false, /* showCompetitorSearchBox */ false, /* showSelectionCheckbox */ true,  /* raceTimesInfoProvider */null,
+                                        false, /* competitorSearchTextBox */ null, /* showSelectionCheckbox */ true,  /* raceTimesInfoProvider */null,
                                         false, /* adjustTimerDelay */ true);
                                 mainPanel.add(overallLeaderboardPanel);
                                 addComponentToNavigationMenu(overallLeaderboardPanel, true, stringMessages.seriesLeaderboard(),

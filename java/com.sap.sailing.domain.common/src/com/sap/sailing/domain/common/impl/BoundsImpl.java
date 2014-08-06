@@ -98,6 +98,16 @@ public class BoundsImpl implements Bounds {
         }
         return new BoundsImpl(new DegreePosition(minLatDeg, bestWest), new DegreePosition(maxLatDeg, bestEast));
     }
+    
+    @Override
+    public Bounds extend(Bounds other) {
+        return union(other);
+    }
+    
+    @Override
+    public Bounds extend(Position p) {
+        return union(new BoundsImpl(p, p));
+    }
 
     private boolean spansLngDeg(double westLngDeg, double eastLngDeg, double lngDeg) {
         return isCrossingDateLine(westLngDeg, eastLngDeg)

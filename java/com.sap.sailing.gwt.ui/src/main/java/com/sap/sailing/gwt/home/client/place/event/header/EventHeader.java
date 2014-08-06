@@ -43,6 +43,8 @@ public class EventHeader extends Composite {
 //    @UiField Anchor scheduleLink3;
 //    @UiField Anchor mediaLink3;
       @UiField Anchor officalWebsiteAnchor;
+      @UiField Anchor twitterAnchor;
+      @UiField Anchor facebookAnchor;
       @UiField DivElement seriesLeaderboardDiv;
       @UiField Anchor seriesLeaderboardAnchor;
       
@@ -159,6 +161,16 @@ public class EventHeader extends Composite {
             officalWebsiteAnchor.setHref(event.getOfficialWebsiteURL());
         } else {
             officalWebsiteAnchor.setVisible(false);
+        }
+        if(event.getTwitterURL() != null) {
+            twitterAnchor.setHref(event.getTwitterURL());
+        } else {
+            twitterAnchor.setVisible(false);
+        }
+        if(event.getFacebookURL() != null) {
+            facebookAnchor.setHref(event.getFacebookURL());
+        } else {
+            facebookAnchor.setVisible(false);
         }
         
         String logoUrl = event.getLogoImageURL() != null ? event.getLogoImageURL() : defaultLogoUrl;

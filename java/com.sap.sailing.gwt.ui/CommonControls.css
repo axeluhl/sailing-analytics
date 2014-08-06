@@ -263,7 +263,8 @@ body ::-webkit-scrollbar-track {
 
 .gwt-SplitLayoutPanel-CloseAndSettingsButton-Panel {
 	position: absolute;
-	right: 10px;
+	right: 2px;
+	top: 2px;
 	z-index: 250;
 }
 

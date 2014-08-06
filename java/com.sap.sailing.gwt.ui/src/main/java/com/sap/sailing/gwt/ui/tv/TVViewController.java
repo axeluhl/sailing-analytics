@@ -115,7 +115,7 @@ public class TVViewController implements RaceTimesInfoProviderListener {
         LeaderboardPanel leaderboardPanel = new LeaderboardPanel(sailingService, asyncActionsExecutor,
                 leaderboardSettings,
                 /* preSelectedRace */null, selectionModel, leaderboardTimer, leaderboardGroupName, leaderboardName,
-                errorReporter, stringMessages, userAgent, showRaceDetails, /* showCompetitorSearchBox */false, /* showRegattaRank */
+                errorReporter, stringMessages, userAgent, showRaceDetails, /* competitorSearchTextBox */ null, /* showRegattaRank */
                 /* showSelectionCheckbox */false, /* raceTimesInfoProvider */null, false, /* autoExpandLastRaceColumn */
                 /* adjustTimerDelay */true) {
             @Override
