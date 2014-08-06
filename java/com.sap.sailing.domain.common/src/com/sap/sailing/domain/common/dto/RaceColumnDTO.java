@@ -54,6 +54,17 @@ public class RaceColumnDTO extends NamedDTO implements Serializable {
         return trackedRaceIdentifiersPerFleet.values().contains(raceIdentifier);
     }
     
+    public FleetDTO getFleet(RaceIdentifier raceIdentifier) {
+        FleetDTO result = null;
+        for (FleetDTO identifier : trackedRaceIdentifiersPerFleet.keySet()) {
+            if (trackedRaceIdentifiersPerFleet.get(identifier).equals(raceIdentifier)) {
+                result = identifier;
+                break;
+            }
+        }
+        return result;
+    }
+    
     public boolean isMedalRace() {
         return medalRace;
     }

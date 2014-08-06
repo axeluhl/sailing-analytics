@@ -79,6 +79,7 @@ import com.sap.sailing.gwt.ui.client.CompetitorSelectionChangeListener;
 import com.sap.sailing.gwt.ui.client.CompetitorSelectionProvider;
 import com.sap.sailing.gwt.ui.client.ErrorReporter;
 import com.sap.sailing.gwt.ui.client.FlagImageResolver;
+import com.sap.sailing.gwt.ui.client.LeaderboardUpdateListener;
 import com.sap.sailing.gwt.ui.client.RaceTimesInfoProvider;
 import com.sap.sailing.gwt.ui.client.RaceTimesInfoProviderListener;
 import com.sap.sailing.gwt.ui.client.SailingServiceAsync;
@@ -312,6 +313,8 @@ public class LeaderboardPanel extends SimplePanel implements TimeListener, PlayS
      */
     private Element elementToBlur;
     private boolean showSelectionCheckbox;
+    
+    private List<LeaderboardUpdateListener> leaderboardUpdateListener;
 
     protected StringMessages getStringMessages() {
         return stringMessages;
@@ -1584,6 +1587,7 @@ public class LeaderboardPanel extends SimplePanel implements TimeListener, PlayS
         this.adjustTimerDelay = adjustTimerDelay;
         overallDetailColumnMap = createOverallDetailColumnMap();
         settingsUpdatedExplicitly = !settings.isUpdateUponPlayStateChange();
+        this.leaderboardUpdateListener = new ArrayList<LeaderboardUpdateListener>();
         if (settings.getLegDetailsToShow() != null) {
             selectedLegDetails.addAll(settings.getLegDetailsToShow());
         }
@@ -2091,6 +2095,10 @@ public class LeaderboardPanel extends SimplePanel implements TimeListener, PlayS
                         autoExpandPerformedOnce = true;
                     }
                 }
+                if (c instanceof RaceColumn && ((RaceColumn<?>) c).getRace().hasTrackedRace(preSelectedRace)) {
+                    RaceColumnDTO raceColumn = ((RaceColumn<?>) c).getRace();
+                    informLeaderboardUpdateListenersAboutRaceSelected(preSelectedRace, raceColumn);
+                }
             }
             if (leaderboardTable.getCurrentlySortedColumn() != null) {
                 leaderboardTable.sort();
@@ -2138,6 +2146,7 @@ public class LeaderboardPanel extends SimplePanel implements TimeListener, PlayS
             }
             scoreCorrectionLastUpdateTimeLabel.setVisible(!hasLiveRace);
             liveRaceLabel.setVisible(hasLiveRace);
+            informLeaderboardUpdateListenersAboutLeaderboardReceived(leaderboard);
         }
     }
 
@@ -2918,6 +2927,22 @@ public class LeaderboardPanel extends SimplePanel implements TimeListener, PlayS
         super.setVisible(visible);
         if (visible) {
             timeChanged(getLeaderboardDisplayDate(), null);
+        }
+    }
+    
+    public void addLeaderboardUpdateListener(LeaderboardUpdateListener listener) {
+        this.leaderboardUpdateListener.add(listener);
+    }
+    
+    private void informLeaderboardUpdateListenersAboutLeaderboardReceived(LeaderboardDTO leaderboard) {
+        for (LeaderboardUpdateListener listener : this.leaderboardUpdateListener) {
+            listener.updatedLeaderboard(leaderboard);
+        }
+    }
+    
+    private void informLeaderboardUpdateListenersAboutRaceSelected(RaceIdentifier raceIdentifier, RaceColumnDTO raceColumn) {
+        for (LeaderboardUpdateListener listener : this.leaderboardUpdateListener) {
+           listener.currentRaceSelected(raceIdentifier, raceColumn);
         }
     }
 }
