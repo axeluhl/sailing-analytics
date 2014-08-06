@@ -13,6 +13,7 @@ import com.google.gwt.user.client.ui.Widget;
 import com.sap.sailing.gwt.home.client.place.event.EventPageNavigator;
 import com.sap.sailing.gwt.home.client.place.event.regatta.Regatta;
 import com.sap.sailing.gwt.ui.shared.EventDTO;
+import com.sap.sailing.gwt.ui.shared.LeaderboardGroupDTO;
 import com.sap.sailing.gwt.ui.shared.RaceGroupDTO;
 import com.sap.sailing.gwt.ui.shared.RaceGroupSeriesDTO;
 import com.sap.sailing.gwt.ui.shared.StrippedLeaderboardDTO;
@@ -46,12 +47,12 @@ public class EventRegattaRaces extends Composite {
         initWidget(uiBinder.createAndBindUi(this));
     }
     
-    public void setRacesFromRaceGroup(RaceGroupDTO raceGroup, StrippedLeaderboardDTO leaderboard) {
+    public void setRaces(LeaderboardGroupDTO leaderboardGroup, StrippedLeaderboardDTO leaderboard, RaceGroupDTO raceGroup) {
         // clear all existing child elements first
         regattaPhasesPanel.getElement().removeAllChildren();
         phaseElements.clear();
        
-        regatta.setData(raceGroup, leaderboard, null);
+        regatta.setData(leaderboardGroup, leaderboard, raceGroup);
         
         int regattaPhases = raceGroup.getSeries().size();
         if(regattaPhases > 1) {

@@ -713,6 +713,7 @@ public class DomainObjectFactoryImpl implements DomainObjectFactory {
             // migration: leaderboard groups that don't yet have a UUID receive a random one
         }
         String description = (String) o.get(FieldNames.LEADERBOARD_GROUP_DESCRIPTION.name());
+        String displayName = (String) o.get(FieldNames.LEADERBOARD_GROUP_DISPLAY_NAME.name());
         boolean displayGroupsInReverseOrder = false; // default value 
         Object displayGroupsInReverseOrderObj = o.get(FieldNames.LEADERBOARD_GROUP_DISPLAY_IN_REVERSE_ORDER.name());
         if (displayGroupsInReverseOrderObj != null) {
@@ -734,7 +735,7 @@ public class DomainObjectFactoryImpl implements DomainObjectFactory {
             }
         }
         logger.info("loaded leaderboard group "+name);
-        LeaderboardGroupImpl result = new LeaderboardGroupImpl(uuid, name, description, displayGroupsInReverseOrder, leaderboards);
+        LeaderboardGroupImpl result = new LeaderboardGroupImpl(uuid, name, description, displayName, displayGroupsInReverseOrder, leaderboards);
         Object overallLeaderboardIdOrName = o.get(FieldNames.LEADERBOARD_GROUP_OVERALL_LEADERBOARD.name());
         if (overallLeaderboardIdOrName != null) {
             final DBObject dbOverallLeaderboard;

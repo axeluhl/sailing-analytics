@@ -115,7 +115,8 @@ public class InitialLoadReplicationObjectIdentityTest extends AbstractServerRepl
         leaderboardNames.add(leaderboardName);
         int[] overallLeaderboardDiscardThresholds = new int[] {};
         ScoringSchemeType overallLeaderboardScoringSchemeType = ScoringSchemeType.HIGH_POINT;
-        LeaderboardGroup leaderboardGroup = master.addLeaderboardGroup(UUID.randomUUID(), leaderBoardGroupName, "Some descriptive Description", false, leaderboardNames, overallLeaderboardDiscardThresholds, overallLeaderboardScoringSchemeType);
+        LeaderboardGroup leaderboardGroup = master.addLeaderboardGroup(UUID.randomUUID(), leaderBoardGroupName, "Some descriptive Description",
+                "displayName", false, leaderboardNames, overallLeaderboardDiscardThresholds, overallLeaderboardScoringSchemeType);
         assertNotNull(master.getLeaderboardGroupByName(leaderBoardGroupName));
         assertNull(replica.getLeaderboardGroupByName(leaderBoardGroupName));
         

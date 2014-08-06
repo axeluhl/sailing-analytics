@@ -57,9 +57,9 @@ public class EventReplicationTest extends AbstractServerReplicationTest {
         final Event masterEvent = master.addEvent(eventName, null, null, venueName, isPublic, UUID.randomUUID());
         final String leaderboardGroupName = "LGName";
         LeaderboardGroup lg = master.apply(new CreateLeaderboardGroup(leaderboardGroupName, "LGDescription", /* displayGroupsInReverseOrder */
-                false, /* leaderboardNames */
-                Collections.<String> emptyList(), /* overallLeaderboardDiscardThresholds */null, /* overallLeaderboardScoringSchemeType */
-                null));
+                "displayName", /* leaderboardNames */
+                false, Collections.<String> emptyList(), /* overallLeaderboardScoringSchemeType */
+                /* overallLeaderboardDiscardThresholds */null, null));
         master.apply(new AddLeaderboardGroupToEvent(masterEvent.getId(), lg.getId()));
         Thread.sleep(1000);
         Event replicatedEvent = replica.getEvent(masterEvent.getId());

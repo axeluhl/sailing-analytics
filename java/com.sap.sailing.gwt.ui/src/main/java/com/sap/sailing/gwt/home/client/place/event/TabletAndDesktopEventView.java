@@ -28,7 +28,7 @@ import com.sap.sailing.gwt.ui.shared.LeaderboardGroupDTO;
 import com.sap.sailing.gwt.ui.shared.RaceGroupDTO;
 import com.sap.sailing.gwt.ui.shared.RegattaOverviewEntryDTO;
 import com.sap.sailing.gwt.ui.shared.StrippedLeaderboardDTO;
-import com.sap.sse.common.Util.Pair;
+import com.sap.sse.common.Util.Triple;
 import com.sap.sse.gwt.client.player.Timer;
 
 public class TabletAndDesktopEventView extends Composite implements EventView, EventPageNavigator {
@@ -47,19 +47,13 @@ public class TabletAndDesktopEventView extends Composite implements EventView, E
     @UiField EventSponsors eventSponsors;
 
     private final List<Widget> pageElements;
-    private final Map<String, Pair<StrippedLeaderboardDTO, LeaderboardGroupDTO>> leaderboardsWithLeaderboardGroup;
     
     public TabletAndDesktopEventView(SailingServiceAsync sailingService, EventDTO event, List<RaceGroupDTO> raceGroups, String leaderboardName,   
             Timer timerForClientServerOffset) {
-        leaderboardsWithLeaderboardGroup = new HashMap<String, Pair<StrippedLeaderboardDTO, LeaderboardGroupDTO>>();
-        for(LeaderboardGroupDTO leaderboardGroup: event.getLeaderboardGroups()) {
-            for(StrippedLeaderboardDTO leaderboard: leaderboardGroup.getLeaderboards()) {
-                leaderboardsWithLeaderboardGroup.put(leaderboard.name, new Pair<StrippedLeaderboardDTO, LeaderboardGroupDTO>(leaderboard, leaderboardGroup));
-            }
-        }
-        
+        Map<String, Triple<RaceGroupDTO, StrippedLeaderboardDTO, LeaderboardGroupDTO>> regattaStructure = getRegattaStructure(event, raceGroups);
+
         eventHeader = new EventHeader(event, this);
-        eventRegattaList = new EventRegattaList(event, raceGroups, leaderboardsWithLeaderboardGroup, timerForClientServerOffset, this);
+        eventRegattaList = new EventRegattaList(event, regattaStructure, timerForClientServerOffset, this);
         eventRegattaRaces = new EventRegattaRaces(event, timerForClientServerOffset, this);
         eventOverview = new EventOverview(event);
         eventSchedule = new EventSchedule(event);
@@ -69,40 +63,27 @@ public class TabletAndDesktopEventView extends Composite implements EventView, E
         
         pageElements = Arrays.asList(new Widget[] { eventOverview, eventRegattaList, eventRegattaRaces, eventMedia, eventSchedule });
 
-        int leaderboardsCount = raceGroups.size();
-        if(leaderboardsCount == 0) {
-            Window.alert("There is no data available for this event.");
+        Triple<RaceGroupDTO, StrippedLeaderboardDTO, LeaderboardGroupDTO> selectedRegatta = null;
+        if(leaderboardName != null) {
+            selectedRegatta = regattaStructure.get(leaderboardName);
+        }
+        
+        // in case we only have one regatta/leaderboard we go directly to the 'races' page
+        if(selectedRegatta == null && regattaStructure.size() == 1) {
+            selectedRegatta = regattaStructure.get(0);
+        }
+
+        if(selectedRegatta != null) {
+            goToRegattaRaces(selectedRegatta.getC(), selectedRegatta.getB(), selectedRegatta.getA());
         } else {
-            RaceGroupDTO selectedRaceGroup = null;
-
-            // find the preselected leaderboard (if one exist)
-            if (leaderboardName != null) {
-                for (RaceGroupDTO raceGroup : raceGroups) {
-                    if(raceGroup.getName().equals(leaderboardName)) {
-                        selectedRaceGroup = raceGroup;
-                        break;
-                    }
-                }
-            }
-
-            // in case we only have one regatta/leaderboard we go directly to the 'races' page
-            if(selectedRaceGroup == null && leaderboardsCount == 1) {
-                selectedRaceGroup = raceGroups.get(0);
-            }
-
-            if(selectedRaceGroup != null) {
-                goToRegattaRaces(selectedRaceGroup, leaderboardsWithLeaderboardGroup.get(selectedRaceGroup.getName()).getA());
-            } else {
-                goToRegattas();
-            }
-            if(event.getSponsorImageURLs() != null && event.getSponsorImageURLs().size() > 0) {
-                eventSponsors.setVisible(false);
-                eventSponsors.setEventSponsors(event.getSponsorImageURLs());
-            } else {
-                eventSponsors.setVisible(false);
-                eventSponsors.setEventSponsors(null);
-            }
-            
+            goToRegattas();
+        }
+        if(event.getSponsorImageURLs() != null && event.getSponsorImageURLs().size() > 0) {
+            eventSponsors.setVisible(false);
+            eventSponsors.setEventSponsors(event.getSponsorImageURLs());
+        } else {
+            eventSponsors.setVisible(false);
+            eventSponsors.setEventSponsors(null);
         }
     }
 
@@ -124,8 +105,8 @@ public class TabletAndDesktopEventView extends Composite implements EventView, E
     }
 
     @Override
-    public void goToRegattaRaces(RaceGroupDTO raceGroup, StrippedLeaderboardDTO leaderboard) {
-        eventRegattaRaces.setRacesFromRaceGroup(raceGroup, leaderboard);
+    public void goToRegattaRaces(LeaderboardGroupDTO leaderboardGroup, StrippedLeaderboardDTO leaderboard, RaceGroupDTO raceGroup) {
+        eventRegattaRaces.setRaces(leaderboardGroup, leaderboard, raceGroup);
         eventHeader.setDataNavigationType("compact");
         setVisibleEventElement(eventRegattaRaces);
     }
@@ -185,4 +166,20 @@ public class TabletAndDesktopEventView extends Composite implements EventView, E
         }
     }
 
+    private Map<String, Triple<RaceGroupDTO, StrippedLeaderboardDTO, LeaderboardGroupDTO>> getRegattaStructure(EventDTO event, List<RaceGroupDTO> raceGroups) {
+        Map<String, Triple<RaceGroupDTO, StrippedLeaderboardDTO, LeaderboardGroupDTO>> result = new HashMap<>();
+        Map<String, RaceGroupDTO> raceGroupsMap = new HashMap<>();
+        for (RaceGroupDTO raceGroup: raceGroups) {
+            raceGroupsMap.put(raceGroup.getName(), raceGroup);
+        }            
+        
+        for (LeaderboardGroupDTO leaderboardGroup : event.getLeaderboardGroups()) {
+            for(StrippedLeaderboardDTO leaderboard: leaderboardGroup.getLeaderboards()) {
+                String leaderboardName = leaderboard.name;
+                result.put(leaderboardName, new Triple<RaceGroupDTO, StrippedLeaderboardDTO, LeaderboardGroupDTO>(raceGroupsMap.get(leaderboardName),
+                        leaderboard, leaderboardGroup));
+            }
+        }
+        return result;
+    }
 }
