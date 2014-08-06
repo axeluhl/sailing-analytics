@@ -397,3 +397,15 @@ img.openColumn {
 	left: 10px;
 	z-index: 10;
 }
+
+.SideBySideComponentViewer-MainPanel {
+	top: 7px;
+}
+
+.TimePanel-ShowExtended-Button {
+	background: url(images/settings_white.png) center no-repeat;
+	width: 28px;
+	height: 25px;
+	float: left;
+	cursor: pointer;
+}

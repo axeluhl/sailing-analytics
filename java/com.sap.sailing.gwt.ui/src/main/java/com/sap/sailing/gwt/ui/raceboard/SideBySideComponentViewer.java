@@ -14,6 +14,7 @@ import com.google.gwt.user.client.ui.DockLayoutPanel.Direction;
 import com.google.gwt.user.client.ui.HorizontalPanel;
 import com.google.gwt.user.client.ui.LayoutPanel;
 import com.google.gwt.user.client.ui.Panel;
+import com.google.gwt.user.client.ui.RequiresResize;
 import com.google.gwt.user.client.ui.ScrollPanel;
 import com.google.gwt.user.client.ui.Widget;
 import com.sap.sailing.gwt.ui.client.StringMessages;
@@ -35,7 +36,7 @@ public class SideBySideComponentViewer implements ComponentViewer {
      * 
      * @author Simon Marcel Pamies
      */
-    abstract class PanelWithCloseAndSettingsButton extends AbsolutePanel {
+    abstract class PanelWithCloseAndSettingsButton extends AbsolutePanel implements RequiresResize {
         private final Widget containedPanel;
         private final HorizontalPanel panelForCloseAndSettingsButton;
         public PanelWithCloseAndSettingsButton(Widget containedPanel) {
@@ -67,9 +68,17 @@ public class SideBySideComponentViewer implements ComponentViewer {
             setVisible(this.containedPanel.isVisible());
         }
         
+        public void onResize() {
+            if (this.containedPanel instanceof RequiresResize) {
+                ((RequiresResize) this.containedPanel).onResize();
+            }
+        }
+        
         public abstract void closeClicked();
         public abstract void settingsClicked();
     }
+    
+    private final int MAX_LEADERBOARD_WIDTH = 500;
     
     private final LeaderboardPanel leftComponent;
     private final Panel leaderboardContentPanel;
@@ -99,6 +108,7 @@ public class SideBySideComponentViewer implements ComponentViewer {
         leftScrollPanel.setTitle(leftComponentP.getEntryWidget().getTitle());
         mainPanel = new LayoutPanel();
         mainPanel.setSize("100%", "100%");
+        mainPanel.setStyleName("SideBySideComponentViewer-MainPanel");
         splitLayoutPanel = new TouchSplitLayoutPanelWithBetterDraggers(/* splitter width */ 3);
         mainPanel.add(splitLayoutPanel);
         
@@ -235,5 +245,12 @@ public class SideBySideComponentViewer implements ComponentViewer {
 
     public String getViewerName() {
         return "";
+    }
+    
+    public void setLeaderboardWidth(int width) {
+        if (width > 0 && savedSplitPosition != width) {
+            savedSplitPosition = Math.min(width, MAX_LEADERBOARD_WIDTH);
+            forceLayout();
+        }
     }
 }

@@ -8,12 +8,15 @@ import com.google.gwt.core.client.GWT;
 import com.google.gwt.core.client.Scheduler;
 import com.google.gwt.dom.client.NativeEvent;
 import com.google.gwt.dom.client.Style.Unit;
+import com.google.gwt.event.dom.client.ClickEvent;
+import com.google.gwt.event.dom.client.ClickHandler;
 import com.google.gwt.user.client.Command;
 import com.google.gwt.user.client.Event;
 import com.google.gwt.user.client.Event.NativePreviewEvent;
 import com.google.gwt.user.client.Event.NativePreviewHandler;
 import com.google.gwt.user.client.Window;
 import com.google.gwt.user.client.rpc.ServiceDefTarget;
+import com.google.gwt.user.client.ui.Button;
 import com.google.gwt.user.client.ui.DockLayoutPanel;
 import com.google.gwt.user.client.ui.FlowPanel;
 import com.google.gwt.user.client.ui.Panel;
@@ -207,13 +210,26 @@ public class RaceBoardEntryPoint extends AbstractEntryPoint {
         return timelinePanel;
     }
 
-    private void createRaceBoardInOneScreenMode(RaceBoardPanel raceBoardPanel,
+    private void createRaceBoardInOneScreenMode(final RaceBoardPanel raceBoardPanel,
             RaceBoardViewConfiguration raceboardViewConfiguration) {
         final DockLayoutPanel p = new DockLayoutPanel(Unit.PX);
         RootLayoutPanel.get().add(p);
-        FlowPanel timePanel = createTimePanel(raceBoardPanel);
+        final FlowPanel timePanel = createTimePanel(raceBoardPanel);
         toolbarAndLogoAndTitleBarHidden = false;
-        raceBoardPanel.getTimePanel().hideControlsPanelAndMovePlayButtonUp();
+        final Button toggleButton = new Button();
+        toggleButton.addStyleName("TimePanel-ShowExtended-Button");
+        toggleButton.addClickHandler(new ClickHandler() {
+            @Override
+            public void onClick(ClickEvent event) {
+                boolean advancedModeShown = raceBoardPanel.getTimePanel().toggleAdvancedMode(toggleButton);
+                if (advancedModeShown) {
+                    p.setWidgetSize(timePanel, 90);
+                } else {
+                    p.setWidgetSize(timePanel, 53);
+                }
+            }
+        });
+        raceBoardPanel.getTimePanel().hideControlsPanelAndMovePlayButtonUp(toggleButton);
         p.addSouth(timePanel, 53);
         p.add(raceBoardPanel);
         p.addStyleName("dockLayoutPanel");

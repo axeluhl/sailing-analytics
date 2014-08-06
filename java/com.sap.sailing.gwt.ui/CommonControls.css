@@ -212,6 +212,7 @@ body ::-webkit-scrollbar-track {
 	border: 1px solid #cecece;
 	border-left: 0px;
 	cursor: col-resize;
+	opacity: .7;
 	border-top-right-radius: 25px;
 	border-bottom-right-radius: 25px;
 	z-index: 1;

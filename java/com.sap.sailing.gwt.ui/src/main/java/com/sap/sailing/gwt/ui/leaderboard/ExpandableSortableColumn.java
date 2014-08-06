@@ -8,6 +8,8 @@ import java.util.Map;
 
 import com.google.gwt.cell.client.Cell;
 import com.google.gwt.cell.client.Cell.Context;
+import com.google.gwt.core.client.Scheduler;
+import com.google.gwt.core.client.Scheduler.ScheduledCommand;
 import com.google.gwt.safehtml.shared.SafeHtml;
 import com.google.gwt.safehtml.shared.SafeHtmlBuilder;
 import com.google.gwt.user.cellview.client.CellTable;
@@ -161,6 +163,12 @@ public abstract class ExpandableSortableColumn<C> extends LeaderboardSortableCol
                 setTogglingInProcess(false);
                 // important: toggle expanded state after asking for all visible children
                 setExpanded(!isExpanded());
+                Scheduler.get().scheduleFinally(new ScheduledCommand() {
+                    @Override
+                    public void execute() {
+                        getLeaderboardPanel().informLeaderboardUpdateListenersAboutLeaderboardUpdated(getLeaderboardPanel().getLeaderboard());
+                    }
+                });
             } else {
                 // important: toggle expanded state before asking for all visible children
                 setExpanded(!isExpanded());
@@ -176,6 +184,12 @@ public abstract class ExpandableSortableColumn<C> extends LeaderboardSortableCol
                                 getLeaderboardPanel().insertColumn(insertIndex++, column);
                             }
                             getLeaderboardPanel().getLeaderboardTable().redraw();
+                            Scheduler.get().scheduleFinally(new ScheduledCommand() {
+                                @Override
+                                public void execute() {
+                                    getLeaderboardPanel().informLeaderboardUpdateListenersAboutLeaderboardUpdated(getLeaderboardPanel().getLeaderboard());
+                                }
+                            });
                         }
                         getLeaderboardPanel().getBusyIndicator().setBusy(oldBusyState);
                         setTogglingInProcess(false);
