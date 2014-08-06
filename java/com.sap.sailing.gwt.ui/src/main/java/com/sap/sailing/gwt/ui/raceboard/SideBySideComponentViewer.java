@@ -5,11 +5,9 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
-import com.google.gwt.dom.client.Document;
 import com.google.gwt.dom.client.Style.Unit;
 import com.google.gwt.event.dom.client.ClickEvent;
 import com.google.gwt.event.dom.client.ClickHandler;
-import com.google.gwt.user.client.Window;
 import com.google.gwt.user.client.ui.AbsolutePanel;
 import com.google.gwt.user.client.ui.Button;
 import com.google.gwt.user.client.ui.DockLayoutPanel.Direction;
@@ -38,19 +36,13 @@ public class SideBySideComponentViewer implements ComponentViewer {
      * @author Simon Marcel Pamies
      */
     abstract class PanelWithCloseAndSettingsButton extends AbsolutePanel {
-        final Widget containedPanel;
+        private final Widget containedPanel;
+        private final HorizontalPanel panelForCloseAndSettingsButton;
         public PanelWithCloseAndSettingsButton(Widget containedPanel) {
             this.containedPanel = containedPanel;
-            HorizontalPanel panelForCloseAndSettingsButton = new HorizontalPanel();
-            Button closeButton = new Button();
-            closeButton.setStyleName("gwt-SplitLayoutPanel-CloseButton");
-            closeButton.addClickHandler(new ClickHandler() {
-                @Override
-                public void onClick(ClickEvent event) {
-                    closeClicked();
-                }
-            });
-            panelForCloseAndSettingsButton.add(closeButton);
+            this.containedPanel.getElement().getStyle().setMarginTop(10, Unit.PX); // make some room for buttons
+            this.panelForCloseAndSettingsButton = new HorizontalPanel();
+            this.panelForCloseAndSettingsButton.setStyleName("gwt-SplitLayoutPanel-CloseAndSettingsButton-Panel");
             Button settingsButton = new Button();
             settingsButton.setStyleName("gwt-SplitLayoutPanel-SettingsButton");
             settingsButton.addClickHandler(new ClickHandler() {
@@ -60,6 +52,15 @@ public class SideBySideComponentViewer implements ComponentViewer {
                 }
             });
             panelForCloseAndSettingsButton.add(settingsButton);
+            Button closeButton = new Button();
+            closeButton.setStyleName("gwt-SplitLayoutPanel-CloseButton");
+            closeButton.addClickHandler(new ClickHandler() {
+                @Override
+                public void onClick(ClickEvent event) {
+                    closeClicked();
+                }
+            });
+            panelForCloseAndSettingsButton.add(closeButton);
             add(panelForCloseAndSettingsButton);
             add(this.containedPanel);
             setTitle(this.containedPanel.getTitle());
@@ -122,7 +123,6 @@ public class SideBySideComponentViewer implements ComponentViewer {
                       ((TimeListener)leftComponentP).timeChanged(new Date(), null);
                   }
                   leaderboardTogglerButton.removeFromParent();
-                  resizePanelWithButtons(panelForTogglingSouthLayoutPanelComponents);
             }
         });
         leaderboardTogglerButton.setStyleName("gwt-SplitLayoutPanel-EastToggleButton");
@@ -134,7 +134,6 @@ public class SideBySideComponentViewer implements ComponentViewer {
             public void closeClicked() {
                 splitLayoutPanel.setWidgetVisibility(this, leftComponent, leaderboardContentPanel, true, 500);
                 panelForTogglingEastLayoutPanelComponents.add(leaderboardTogglerButton);
-                resizePanelWithButtons(panelForTogglingSouthLayoutPanelComponents);
             }
             @Override
             public void settingsClicked() {
@@ -142,10 +141,10 @@ public class SideBySideComponentViewer implements ComponentViewer {
             }
         };
         
+        initializeComponents();
         savedSplitPosition = 500;
         splitLayoutPanel.insert(leftPanel, leftComponentP, Direction.WEST, savedSplitPosition, null);
         
-        initializeComponents();
         splitLayoutPanel.insert(absoluteMapAndToggleButtonsPanel, rightComponent, Direction.CENTER, 0, null);
     }
     
@@ -162,7 +161,6 @@ public class SideBySideComponentViewer implements ComponentViewer {
                       ((TimeListener)component).timeChanged(new Date(), null);
                   }
                   panelForTogglingSouthLayoutPanelComponents.remove(togglerButton);
-                  resizePanelWithButtons(panelForTogglingSouthLayoutPanelComponents);
               }
             });
             togglerButton.setStyleName("gwt-SplitLayoutPanel-NorthSouthToggleButton");
@@ -176,21 +174,11 @@ public class SideBySideComponentViewer implements ComponentViewer {
                 public void closeClicked() {
                     splitLayoutPanel.setWidgetVisibility(this, component, this, true, 200);
                     panelForTogglingSouthLayoutPanelComponents.add(togglerButton);
-                    resizePanelWithButtons(panelForTogglingSouthLayoutPanelComponents);
                 }
             };
             componentPanels.put(component, componentPanel);
             splitLayoutPanel.insert(componentPanel, component, Direction.SOUTH, 200, null);
         }
-        resizePanelWithButtons(panelForTogglingSouthLayoutPanelComponents);
-    }
-    
-    private void resizePanelWithButtons(HorizontalPanel panel) {
-        int screenWidth = Math.max(Window.getClientWidth(), Document.get().getScrollWidth());
-        int numberOfComponents = panel.getWidgetCount();
-        int widthOfLeftComponent = leftComponent.getEntryWidget().getOffsetWidth();
-        double left = screenWidth-(numberOfComponents*120.0)-50.0-widthOfLeftComponent;
-        panel.getElement().getStyle().setLeft(left, Unit.PX);
     }
     
     public <SettingsType> void showSettingsDialog(Component<SettingsType> component) {

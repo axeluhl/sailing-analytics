@@ -151,7 +151,7 @@ body ::-webkit-scrollbar-track {
 .gwt-SplitLayoutPanel-NorthSouthToggleButton-Panel {
 	position: absolute;
 	top: 88%;
-	/*left: 80%; determined in code */
+	right: 20px;
 }
 
 .gwt-SplitLayoutPanel-EastToggleButton-Panel {
@@ -206,8 +206,8 @@ body ::-webkit-scrollbar-track {
 }
 
 .gwt-SplitLayoutPanel-HDragger {
-	width: 15px !important;
-	height: 60px !important;
+	width: 25px !important;
+	height: 80px !important;
 	left: 3px !important;
 	top: 50% !important;
 	background: #ffffff url(images/thumb_vertical.png) 70% 50% no-repeat;
@@ -236,8 +236,8 @@ body ::-webkit-scrollbar-track {
 
 .gwt-SplitLayoutPanel-VDragger {
 	width: 60px !important;
-	height: 15px !important;
-	top: -15px !important;
+	height: 25px !important;
+	top: -25px !important;
 	left: 50% !important;
 	background: #ffffff url(images/thumb_horz.png) 50% 30% no-repeat;
 	cursor: row-resize;
@@ -257,9 +257,13 @@ body ::-webkit-scrollbar-track {
     text-align: center;
 }
 
-.gwt-SplitLayoutPanel-CloseButton {
+.gwt-SplitLayoutPanel-CloseAndSettingsButton-Panel {
 	position: absolute;
-	left: 90%;
+	right: 10px;
+	z-index: 250;
+}
+
+.gwt-SplitLayoutPanel-CloseButton {
 	margin-left: 10px;
 	border-top-left-radius: 25px;
 	border-top-right-radius: 25px;
@@ -272,13 +276,15 @@ body ::-webkit-scrollbar-track {
 	cursor: pointer;
 }
 
+.gwt-SplitLayoutPanel-CloseButton:focus {
+	outline:0 !important;
+}
+
 .gwt-SplitLayoutPanel-CloseButton:hover {
 	background-color: #ececec;
 }
 
 .gwt-SplitLayoutPanel-SettingsButton {
-	position: absolute;
-	left: 85%;
 	border-top-left-radius: 25px;
 	border-top-right-radius: 25px;
 	border-bottom-left-radius: 25px;
@@ -292,6 +298,10 @@ body ::-webkit-scrollbar-track {
 
 .gwt-SplitLayoutPanel-SettingsButton:hover {
 	background-color: #cecece;
+}
+
+.gwt-SplitLayoutPanel-SettingsButton:focus {
+	outline:0 !important;
 }
 
 .gwt-ToggleButton-up-hovering, .gwt-ToggleButton-down-hovering {
