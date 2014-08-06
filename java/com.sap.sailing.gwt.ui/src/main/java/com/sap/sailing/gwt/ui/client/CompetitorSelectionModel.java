@@ -114,6 +114,13 @@ public class CompetitorSelectionModel implements CompetitorSelectionProvider {
     }
 
     @Override
+    public Iterable<CompetitorDTO> getSelectedFilteredCompetitors() {
+        Set<CompetitorDTO> result = new HashSet<>(selectedCompetitors);
+        result.retainAll(getFilteredCompetitors());
+        return result;
+    }
+
+    @Override
     public Iterable<CompetitorDTO> getAllCompetitors() {
         return Collections.unmodifiableCollection(allCompetitors);
     }

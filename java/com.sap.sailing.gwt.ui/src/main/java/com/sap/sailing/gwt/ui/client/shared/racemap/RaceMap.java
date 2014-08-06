@@ -601,7 +601,7 @@ public class RaceMap extends AbsolutePanel implements TimeListener, CompetitorSe
                         long timeForPositionTransitionMillis = calculateTimeForPositionTransition(newTime, oldTime);
                         fixesAndTails.updateFixes(boatData, hasTailOverlapForCompetitor, RaceMap.this, timeForPositionTransitionMillis);
                         showBoatsOnMap(newTime, timeForPositionTransitionMillis, getCompetitorsToShow());
-                        showCompetitorInfoOnMap(newTime, timeForPositionTransitionMillis, competitorSelection.getSelectedCompetitors());
+                        showCompetitorInfoOnMap(newTime, timeForPositionTransitionMillis, competitorSelection.getSelectedFilteredCompetitors());
                         if (douglasMarkers != null) {
                             removeAllMarkDouglasPeuckerpoints();
                         }
@@ -1668,7 +1668,7 @@ public class RaceMap extends AbsolutePanel implements TimeListener, CompetitorSe
                         i.remove(); // only this way a ConcurrentModificationException while looping can be avoided
                     }
                 }
-                showCompetitorInfoOnMap(timer.getTime(), -1, competitorSelection.getSelectedCompetitors());
+                showCompetitorInfoOnMap(timer.getTime(), -1, competitorSelection.getSelectedFilteredCompetitors());
             } else {
                 // adding a single competitor; may need to re-load data, so refresh:
                 timeChanged(timer.getTime(), null);
@@ -1679,7 +1679,7 @@ public class RaceMap extends AbsolutePanel implements TimeListener, CompetitorSe
             if (boatCanvas != null) {
                 boatCanvas.setSelected(displayHighlighted(competitor));
                 boatCanvas.draw();
-                showCompetitorInfoOnMap(timer.getTime(), -1, competitorSelection.getSelectedCompetitors());
+                showCompetitorInfoOnMap(timer.getTime(), -1, competitorSelection.getSelectedFilteredCompetitors());
             } else {
                 // seems like an internal error not to find the lowlighted marker; but maybe the
                 // competitor was added late to the race;
@@ -1721,7 +1721,7 @@ public class RaceMap extends AbsolutePanel implements TimeListener, CompetitorSe
                         removedBoatOverlay.removeFromMap();
                     }
                     fixesAndTails.removeTail(competitor);
-                    showCompetitorInfoOnMap(timer.getTime(), -1, competitorSelection.getSelectedCompetitors());
+                    showCompetitorInfoOnMap(timer.getTime(), -1, competitorSelection.getSelectedFilteredCompetitors());
                 }
             } else {
                 // "lowlight" currently selected competitor
@@ -1730,7 +1730,7 @@ public class RaceMap extends AbsolutePanel implements TimeListener, CompetitorSe
                     boatCanvas.setSelected(displayHighlighted(competitor));
                     boatCanvas.draw();
                 }
-                showCompetitorInfoOnMap(timer.getTime(), -1, competitorSelection.getSelectedCompetitors());
+                showCompetitorInfoOnMap(timer.getTime(), -1, competitorSelection.getSelectedFilteredCompetitors());
             }
         }
         //Trigger auto-zoom if needed
