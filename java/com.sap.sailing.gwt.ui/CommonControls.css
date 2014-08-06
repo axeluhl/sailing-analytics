@@ -151,7 +151,7 @@ body ::-webkit-scrollbar-track {
 .gwt-SplitLayoutPanel-NorthSouthToggleButton-Panel {
 	position: absolute;
 	bottom: -12px;
-	right: 310px;
+	right: 320px;
 }
 
 .gwt-SplitLayoutPanel-EastToggleButton-Panel {
@@ -190,7 +190,7 @@ body ::-webkit-scrollbar-track {
     margin-left: 5px;
 	background: white url(images/arrows_top_black_small.png) 50% 15% no-repeat;
 	padding-top: 16px;
-	border-bottom: 1px solid #cecece;
+	border-top: 1px solid #cecece;
 	border-right: 1px solid #cecece;
 	border-left: 1px solid #cecece;
 }
@@ -209,6 +209,8 @@ body ::-webkit-scrollbar-track {
 	left: 3px !important;
 	top: 50% !important;
 	background: #ffffff url(images/thumb_vertical.png) 70% 50% no-repeat;
+	border: 1px solid #cecece;
+	border-left: 0px;
 	cursor: col-resize;
 	border-top-right-radius: 25px;
 	border-bottom-right-radius: 25px;
@@ -239,8 +241,11 @@ body ::-webkit-scrollbar-track {
 	left: 50% !important;
 	background: #ffffff url(images/thumb_horz.png) 50% 30% no-repeat;
 	cursor: row-resize;
+	border: 1px solid #cecece;
+	border-bottom: 0px;
 	border-top-left-radius: 25px;
 	border-top-right-radius: 25px;
+	opacity: .7;
 	z-index: 1;
 }
 
