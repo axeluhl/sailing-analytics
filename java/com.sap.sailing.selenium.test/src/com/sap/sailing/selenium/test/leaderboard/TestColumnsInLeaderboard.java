@@ -69,17 +69,17 @@ public class TestColumnsInLeaderboard extends AbstractSeleniumTest {
             stateHasChanged = false;
             // Since this test is very expensive we iterate from the end to the beginning because the lower
             // indexes are still valid after the expansion of a column.
-            for(int i = headers.size() - 1; i >= 0; i--) {
-                if(leaderboardTable.isColumnExpandable(i) && !leaderboardTable.isColumnExpanded(i)) {
+            for (int i = headers.size() - 1; i >= 0; i--) {
+                if (leaderboardTable.isColumnExpandable(i) && !leaderboardTable.isColumnExpanded(i)) {
                     leaderboardTable.expandColumn(i);
                     stateHasChanged = true;
                     List<LeaderboardEntry> entries = leaderboardTable.getEntries();
                     // NOTE: We have to resolve the headers again for the assertion since there should be more now
-                    //       because of the expansion
+                    // because of the expansion
                     assertThat(entries.get(0).getNumberOfColumns(), equalTo(leaderboardTable.getColumnHeaders().size()));
                 }
             }
-        } while(stateHasChanged);
+        } while (stateHasChanged);
     }
     
     private void configureLeaderboard() {
