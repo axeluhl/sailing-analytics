@@ -57,7 +57,9 @@ import com.google.gwt.user.client.ui.Label;
 import com.google.gwt.user.client.ui.RequiresResize;
 import com.google.gwt.user.client.ui.VerticalPanel;
 import com.google.gwt.user.client.ui.Widget;
+import com.sap.sailing.domain.common.Bounds;
 import com.sap.sailing.domain.common.ManeuverType;
+import com.sap.sailing.domain.common.Position;
 import com.sap.sailing.domain.common.RaceIdentifier;
 import com.sap.sailing.domain.common.RegattaAndRaceIdentifier;
 import com.sap.sailing.domain.common.Tack;
@@ -65,6 +67,7 @@ import com.sap.sailing.domain.common.WindSource;
 import com.sap.sailing.domain.common.WindSourceType;
 import com.sap.sailing.domain.common.dto.CompetitorDTO;
 import com.sap.sailing.domain.common.dto.PositionDTO;
+import com.sap.sailing.domain.common.impl.BoundsImpl;
 import com.sap.sailing.domain.common.impl.DegreeBearingImpl;
 import com.sap.sailing.domain.common.impl.RGBColor;
 import com.sap.sailing.domain.common.scalablevalue.impl.ScalableBearing;
@@ -592,7 +595,7 @@ public class RaceMap extends AbsolutePanel implements TimeListener, CompetitorSe
                         // Rezoom the map
                         // TODO make this a loop across the LatLngBoundsCalculators, pulling them from a collection updated in updateSettings
                         if (!settings.getZoomSettings().containsZoomType(ZoomTypes.NONE)) { // Auto zoom if setting is not manual
-                            LatLngBounds bounds = settings.getZoomSettings().getNewBounds(RaceMap.this);
+                            Bounds bounds = settings.getZoomSettings().getNewBounds(RaceMap.this);
                             zoomMapToNewBounds(bounds);
                             mapFirstZoomDone = true;
                         } else if (!mapFirstZoomDone) { // Zoom once to the marks
@@ -1177,17 +1180,38 @@ public class RaceMap extends AbsolutePanel implements TimeListener, CompetitorSe
         }
     }
 
-    private void zoomMapToNewBounds(LatLngBounds newBounds) {
+    private void zoomMapToNewBounds(Bounds newBounds) {
         if (newBounds != null) {
-            List<ZoomTypes> oldZoomSettings = settings.getZoomSettings().getTypesToConsiderOnZoom();
-            setAutoZoomInProgress(true);
-            map.setCenter(newBounds.getCenter());
-            map.fitBounds(newBounds);
-            settings.getZoomSettings().setTypesToConsiderOnZoom(oldZoomSettings);
-            setAutoZoomInProgress(false);
+            Bounds currentMapBounds = BoundsUtil.getAsBounds(map.getBounds());
+            if (!currentMapBounds.contains(newBounds) || isTwiceTheGraticuleArea(currentMapBounds, newBounds)) {
+                // only change bounds if the new bounds don't fit into the current map zoom
+                // TODO check if we need to shrink every once in a while...
+                List<ZoomTypes> oldZoomSettings = settings.getZoomSettings().getTypesToConsiderOnZoom();
+                setAutoZoomInProgress(true);
+//                map.setCenter(newBounds.getCenter()); // TODO try without this to avoid frequent suspension of CSS boat animation
+                LatLngBounds newLatLngBounds = BoundsUtil.getAsLatLngBounds(newBounds);
+                map.fitBounds(newLatLngBounds);
+                settings.getZoomSettings().setTypesToConsiderOnZoom(oldZoomSettings);
+                setAutoZoomInProgress(false);
+            }
         }
     }
     
+    private boolean isTwiceTheGraticuleArea(Bounds containing, Bounds contained) {
+        assert containing.contains(contained);
+        double containingAreaRatio = getGraticuleArea(containing) / getGraticuleArea(contained);
+        return containingAreaRatio >= 2.0;
+    }
+
+    /**
+     * A much simplified "area" calculation for a {@link Bounds} object, multiplying the differences in latitude and longitude degrees.
+     * The result therefore is in the order of magnitude of 60*60 square nautical miles.
+     */
+    private double getGraticuleArea(Bounds bounds) {
+        return ((bounds.isCrossesDateLine() ? bounds.getNorthEast().getLngDeg()+360 : bounds.getNorthEast().getLngDeg())-bounds.getSouthWest().getLngDeg()) *
+                (bounds.getNorthEast().getLatDeg() - bounds.getSouthWest().getLatDeg());
+    }
+
     private void setAutoZoomInProgress(boolean autoZoomInProgress) {
         this.autoZoomInProgress = autoZoomInProgress;
     }
@@ -1781,8 +1805,8 @@ public class RaceMap extends AbsolutePanel implements TimeListener, CompetitorSe
     public static class BoatsBoundsCalculator extends LatLngBoundsCalculatorForSelected {
 
         @Override
-        public LatLngBounds calculateNewBounds(RaceMap forMap) {
-            LatLngBounds newBounds = null;
+        public Bounds calculateNewBounds(RaceMap forMap) {
+            Bounds newBounds = null;
             Iterable<CompetitorDTO> selectedCompetitors = forMap.competitorSelection.getSelectedCompetitors();
             Iterable<CompetitorDTO> competitors = new ArrayList<CompetitorDTO>();
             if (selectedCompetitors == null || !selectedCompetitors.iterator().hasNext()) {
@@ -1794,16 +1818,11 @@ public class RaceMap extends AbsolutePanel implements TimeListener, CompetitorSe
                 try {
                     GPSFixDTO competitorFix = forMap.getBoatFix(competitor, forMap.timer.getTime());
                     PositionDTO competitorPosition = competitorFix != null ? competitorFix.position : null;
-                    LatLng competitorLatLng = competitorPosition != null ? LatLng.newInstance(competitorPosition.latDeg,
-                            competitorPosition.lngDeg) : null;
-                    LatLngBounds bounds = competitorLatLng != null ? LatLngBounds.newInstance(competitorLatLng,
-                            competitorLatLng) : null;
-                    if (bounds != null) {
+                    if (competitorPosition != null) {
                         if (newBounds == null) {
-                            newBounds = bounds;
+                            newBounds = BoundsUtil.getAsBounds(competitorPosition);
                         } else {
-                            newBounds.extend(bounds.getNorthEast());
-                            newBounds.extend(bounds.getSouthWest());
+                            newBounds = newBounds.extend(BoundsUtil.getAsPosition(competitorPosition));
                         }
                     }
                 } catch (IndexOutOfBoundsException e) {
@@ -1819,27 +1838,26 @@ public class RaceMap extends AbsolutePanel implements TimeListener, CompetitorSe
     public static class TailsBoundsCalculator extends LatLngBoundsCalculatorForSelected {
 
         @Override
-        public LatLngBounds calculateNewBounds(RaceMap racemap) {
-            LatLngBounds newBounds = null;
+        public Bounds calculateNewBounds(RaceMap racemap) {
+            Bounds newBounds = null;
             Iterable<CompetitorDTO> competitors = isZoomOnlyToSelectedCompetitors(racemap) ? racemap.competitorSelection.getSelectedCompetitors() : racemap.getCompetitorsToShow();
             for (CompetitorDTO competitor : competitors) {
                 Polyline tail = racemap.fixesAndTails.getTail(competitor);
-                LatLngBounds bounds = null;
+                Bounds bounds = null;
                 // TODO: Find a replacement for missing Polyline function getBounds() from v2
                 // see also http://stackoverflow.com/questions/3284808/getting-the-bounds-of-a-polyine-in-google-maps-api-v3; 
                 // optionally, consider providing a bounds cache with two sorted sets that organize the LatLng objects for O(1) bounds calculation and logarithmic add, ideally O(1) remove
-                if(tail != null && tail.getPath().getLength() >= 2) {
-                    bounds = LatLngBounds.newInstance(tail.getPath().get(0), tail.getPath().get(1));
-                    for(int i = 2; i < tail.getPath().getLength(); i++) {
-                        bounds.extend(tail.getPath().get(i));
+                if (tail != null && tail.getPath().getLength() >= 1) {
+                    bounds = BoundsUtil.getAsBounds(BoundsUtil.getAsPosition(tail.getPath().get(0)));
+                    for(int i = 1; i < tail.getPath().getLength(); i++) {
+                        bounds = bounds.extend(BoundsUtil.getAsPosition(tail.getPath().get(i)));
                     }
                 }
                 if (bounds != null) {
                     if (newBounds == null) {
                         newBounds = bounds;
                     } else {
-                        newBounds.extend(bounds.getNorthEast());
-                        newBounds.extend(bounds.getSouthWest());
+                        newBounds = newBounds.extend(bounds);
                     }
                 }
             }
@@ -1850,17 +1868,16 @@ public class RaceMap extends AbsolutePanel implements TimeListener, CompetitorSe
     
     public static class CourseMarksBoundsCalculator implements LatLngBoundsCalculator {
         @Override
-        public LatLngBounds calculateNewBounds(RaceMap forMap) {
-            LatLngBounds newBounds = null;
+        public Bounds calculateNewBounds(RaceMap forMap) {
+            Bounds newBounds = null;
             Iterable<MarkDTO> marksToZoom = forMap.markDTOs.values();
             if (marksToZoom != null) {
                 for (MarkDTO markDTO : marksToZoom) {
-                    LatLng markLatLng = LatLng.newInstance(markDTO.position.latDeg, markDTO.position.lngDeg);
-                    LatLngBounds bounds = LatLngBounds.newInstance(markLatLng, markLatLng);
+                    Bounds bounds = BoundsUtil.getAsBounds(markDTO.position);
                     if (newBounds == null) {
                         newBounds = bounds;
                     } else {
-                        newBounds.extend(markLatLng);
+                        newBounds = newBounds.extend(bounds);
                     }
                 }
             }
@@ -1870,18 +1887,18 @@ public class RaceMap extends AbsolutePanel implements TimeListener, CompetitorSe
 
     public static class WindSensorsBoundsCalculator implements LatLngBoundsCalculator {
         @Override
-        public LatLngBounds calculateNewBounds(RaceMap forMap) {
-            LatLngBounds newBounds = null;
+        public Bounds calculateNewBounds(RaceMap forMap) {
+            Bounds newBounds = null;
             Collection<WindSensorOverlay> marksToZoom = forMap.windSensorOverlays.values();
             if (marksToZoom != null) {
-                for (WindSensorOverlay windSensorOverlay: marksToZoom) {
-                    LatLng windSensorLatLng = windSensorOverlay.getLatLngPosition();
-                    if(windSensorLatLng != null) {
-                        LatLngBounds bounds = LatLngBounds.newInstance(windSensorLatLng, windSensorLatLng);
+                for (WindSensorOverlay windSensorOverlay : marksToZoom) {
+                    Position windSensorPosition = BoundsUtil.getAsPosition(windSensorOverlay.getLatLngPosition());
+                    if (windSensorPosition != null) {
+                        Bounds bounds = new BoundsImpl(windSensorPosition, windSensorPosition);
                         if (newBounds == null) {
                             newBounds = bounds;
                         } else {
-                            newBounds.extend(windSensorLatLng);
+                            newBounds = newBounds.extend(windSensorPosition);
                         }
                     }
                 }
