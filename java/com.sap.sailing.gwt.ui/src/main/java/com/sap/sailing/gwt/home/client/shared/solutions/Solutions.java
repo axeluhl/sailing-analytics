@@ -19,11 +19,11 @@ public class Solutions extends Composite {
     @UiField Anchor trainingDiaryAnchor;
     @UiField Anchor simulatorAnchor;
 
-    @UiField DivElement sailingAnalytics;
-    @UiField DivElement race;
-    @UiField DivElement postRace;
-    @UiField DivElement trainingDiary;
-    @UiField DivElement simulator;
+    @UiField DivElement sailingAnalyticsDiv;
+    @UiField DivElement raceDiv;
+    @UiField DivElement postRaceDiv;
+    @UiField DivElement trainingDiaryDiv;
+    @UiField DivElement simulatorDiv;
 
     interface SolutionsUiBinder extends UiBinder<Widget, Solutions> {
     }
@@ -41,25 +41,25 @@ public class Solutions extends Composite {
 
     @UiHandler("sailingAnalyticsAnchor")
     public void scrollToSailingAnalytics(ClickEvent e) {
-        sailingAnalytics.scrollIntoView();
+        sailingAnalyticsDiv.scrollIntoView();
     }
     
     @UiHandler("raceAnchor")
     public void scrollToRace(ClickEvent e) {
-        race.scrollIntoView();
+        raceDiv.scrollIntoView();
     }
     @UiHandler("postRaceAnchor")
     public void scrollToPostRace(ClickEvent e) {
-        postRace.scrollIntoView();
+        postRaceDiv.scrollIntoView();
     }
     @UiHandler("trainingDiaryAnchor")
     public void scrollToTrainingDiary(ClickEvent e) {
-        trainingDiary.scrollIntoView();
+        trainingDiaryDiv.scrollIntoView();
     }
 
     @UiHandler("simulatorAnchor")
     public void scrollToSimulator(ClickEvent e) {
-        simulator.scrollIntoView();
+        simulatorDiv.scrollIntoView();
     }
 
 }

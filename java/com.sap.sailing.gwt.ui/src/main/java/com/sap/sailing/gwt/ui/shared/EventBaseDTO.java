@@ -23,6 +23,9 @@ public class EventBaseDTO extends NamedDTO implements IsSerializable {
     private List<String> sponsorImageURLs = new ArrayList<>();
     private String logoImageURL;
     private String officialWebsiteURL;
+    /** placeholder for social media URL's -> attributes will be implemented later on */
+    private String facebookURL;
+    private String twitterURL;
     
     /**
      * The base URL for the server instance on which the data for this event can be reached. Could be something like
@@ -141,6 +144,22 @@ public class EventBaseDTO extends NamedDTO implements IsSerializable {
 
     public void setIsOnRemoteServer(boolean isOnRemoteServer) {
         this.isOnRemoteServer = isOnRemoteServer;
+    }
+
+    public String getFacebookURL() {
+        return facebookURL;
+    }
+
+    public void setFacebookURL(String facebookURL) {
+        this.facebookURL = facebookURL;
+    }
+
+    public String getTwitterURL() {
+        return twitterURL;
+    }
+
+    public void setTwitterURL(String twitterURL) {
+        this.twitterURL = twitterURL;
     }
 
 }

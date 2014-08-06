@@ -13,6 +13,7 @@ import com.google.gwt.uibinder.client.UiField;
 import com.google.gwt.user.client.Event;
 import com.google.gwt.user.client.EventListener;
 import com.google.gwt.user.client.ui.UIObject;
+import com.sap.sailing.domain.common.dto.CompetitorDTO;
 import com.sap.sailing.domain.common.dto.FleetDTO;
 import com.sap.sailing.domain.common.dto.RaceColumnDTO;
 import com.sap.sailing.domain.common.dto.RaceDTO;
@@ -139,19 +140,27 @@ public class EventRegattaRacesRace extends UIObject {
                 break;
             case TRACKED_AND_LIVE:
                 showElement(watchRaceDiv);
-                showElement(raceLeaderDiv);
                 showElement(legProgressDiv);
                 showElement(currentLegNo);
                 showElement(totalLegsCount);
 
                 raceTime.setInnerText(raceTimeFormat.format(race.startOfRace));
-                currentLegNo.setInnerText(String.valueOf(race.trackedRace.currentLegNo));
-                totalLegsCount.setInnerText(String.valueOf(race.trackedRace.totalLegsCount));
+                currentLegNo.setInnerText(String.valueOf(race.trackedRaceStatistics.currentLegNo));
+                totalLegsCount.setInnerText(String.valueOf(race.trackedRaceStatistics.totalLegsCount));
+
+                if(race.trackedRaceStatistics.hasLeaderData && race.trackedRaceStatistics.leaderOrWinner != null) {
+                    showElement(raceLeaderDiv);
+                    updateWinnerOrLeader(raceLeader, race.trackedRaceStatistics.leaderOrWinner);
+                }
 
                 break;
             case TRACKED_AND_NOT_LIVE:
                 showElement(analyzeRaceDiv);
-                showElement(raceWinnerDiv);
+                
+                if(race.trackedRaceStatistics.hasLeaderData && race.trackedRaceStatistics.leaderOrWinner != null) {
+                    showElement(raceWinnerDiv);
+                    updateWinnerOrLeader(raceWinner, race.trackedRaceStatistics.leaderOrWinner);
+                }
                 showElement(raceFeaturesDiv);
                 
                 raceTime.setInnerText(raceTimeFormat.format(race.startOfRace));
@@ -160,18 +169,26 @@ public class EventRegattaRacesRace extends UIObject {
                 break;
         }
     }
-
+    
+    private void updateWinnerOrLeader(SpanElement winnerOrLeaderElement, CompetitorDTO winnerOrLeader) {
+        String winnerOrLeaderName = winnerOrLeader.getName();
+        if(winnerOrLeader.getThreeLetterIocCountryCode() != null) {
+            winnerOrLeaderName += " (" + winnerOrLeader.getThreeLetterIocCountryCode() + ")";
+        }
+        winnerOrLeaderElement.setInnerText(winnerOrLeaderName);
+    }
+        
     private void updateRaceFeatures() {
-        if(!race.trackedRace.hasGPSData) {
+        if(!race.trackedRaceStatistics.hasGPSData) {
             featureGPS.addClassName(EventRegattaRacesResources.INSTANCE.css().eventregattarace_featureunavailable());
         }
-        if(!race.trackedRace.hasMeasuredWindData) {
+        if(!race.trackedRaceStatistics.hasMeasuredWindData) {
             featureWind.addClassName(EventRegattaRacesResources.INSTANCE.css().eventregattarace_featureunavailable());
         }
-        if(!race.trackedRace.hasVideoData) {
+        if(!race.trackedRaceStatistics.hasVideoData) {
             featureVideo.addClassName(EventRegattaRacesResources.INSTANCE.css().eventregattarace_featureunavailable());
         }
-        if(!race.trackedRace.hasAudioData) {
+        if(!race.trackedRaceStatistics.hasAudioData) {
             featureAudio.addClassName(EventRegattaRacesResources.INSTANCE.css().eventregattarace_featureunavailable());
         }
     }
