@@ -14,6 +14,7 @@ import com.google.gwt.user.client.ui.DockLayoutPanel.Direction;
 import com.google.gwt.user.client.ui.HorizontalPanel;
 import com.google.gwt.user.client.ui.LayoutPanel;
 import com.google.gwt.user.client.ui.Panel;
+import com.google.gwt.user.client.ui.RequiresResize;
 import com.google.gwt.user.client.ui.ScrollPanel;
 import com.google.gwt.user.client.ui.Widget;
 import com.sap.sailing.gwt.ui.client.StringMessages;
@@ -35,7 +36,7 @@ public class SideBySideComponentViewer implements ComponentViewer {
      * 
      * @author Simon Marcel Pamies
      */
-    abstract class PanelWithCloseAndSettingsButton extends AbsolutePanel {
+    abstract class PanelWithCloseAndSettingsButton extends AbsolutePanel implements RequiresResize {
         private final Widget containedPanel;
         private final HorizontalPanel panelForCloseAndSettingsButton;
         public PanelWithCloseAndSettingsButton(Widget containedPanel) {
@@ -65,6 +66,12 @@ public class SideBySideComponentViewer implements ComponentViewer {
             add(this.containedPanel);
             setTitle(this.containedPanel.getTitle());
             setVisible(this.containedPanel.isVisible());
+        }
+        
+        public void onResize() {
+            if (this.containedPanel instanceof RequiresResize) {
+                ((RequiresResize) this.containedPanel).onResize();
+            }
         }
         
         public abstract void closeClicked();
