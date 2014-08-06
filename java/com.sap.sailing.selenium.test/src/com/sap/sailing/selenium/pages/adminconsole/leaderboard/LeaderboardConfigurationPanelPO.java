@@ -32,7 +32,7 @@ public class LeaderboardConfigurationPanelPO extends PageArea {
         }
         
         public String getName() {
-            return getColumnContent(0);
+            return getColumnContent("Name");
         }
         
         public String getLeaderboardURL() {
