@@ -21,7 +21,7 @@ public class CourseAreaJsonDeserializer implements JsonDeserializer<CourseArea> 
 
     public CourseArea deserialize(JSONObject object)
             throws JsonDeserializationException {
-        String name = object.get(CourseAreaJsonSerializer.FIELD_NAME).toString();
+        String name = (String) object.get(CourseAreaJsonSerializer.FIELD_NAME);
         Serializable id = (Serializable) object.get(CourseAreaJsonSerializer.FIELD_ID);
 
         return factory.getOrCreateCourseArea((UUID) Helpers.tryUuidConversion(id), name);

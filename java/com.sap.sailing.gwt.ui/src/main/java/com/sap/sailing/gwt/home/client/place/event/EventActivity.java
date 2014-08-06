@@ -59,16 +59,18 @@ public class EventActivity extends AbstractActivity {
                     clientFactory.getSailingService().getRegattaStructureForEvent(event.id, new AsyncCallback<List<RaceGroupDTO>>() {
                         @Override
                         public void onSuccess(List<RaceGroupDTO> raceGroups) {
-                            for(LeaderboardGroupDTO leaderboardGroupDTO: event.getLeaderboardGroups()) {
-                                final long clientTimeWhenResponseWasReceived = System.currentTimeMillis();
-                                if (leaderboardGroupDTO.getAverageDelayToLiveInMillis() != null) {
-                                    timerForClientServerOffset.setLivePlayDelayInMillis(leaderboardGroupDTO.getAverageDelayToLiveInMillis());
+                            if(raceGroups.size() > 0) {
+                                for(LeaderboardGroupDTO leaderboardGroupDTO: event.getLeaderboardGroups()) {
+                                    final long clientTimeWhenResponseWasReceived = System.currentTimeMillis();
+                                    if (leaderboardGroupDTO.getAverageDelayToLiveInMillis() != null) {
+                                        timerForClientServerOffset.setLivePlayDelayInMillis(leaderboardGroupDTO.getAverageDelayToLiveInMillis());
+                                    }
+                                    timerForClientServerOffset.adjustClientServerOffset(clientTimeWhenRequestWasSent, leaderboardGroupDTO.getCurrentServerTime(), clientTimeWhenResponseWasReceived);
                                 }
-                                timerForClientServerOffset.adjustClientServerOffset(clientTimeWhenRequestWasSent, leaderboardGroupDTO.getCurrentServerTime(), clientTimeWhenResponseWasReceived);
+                                createEventView(event, raceGroups, panel);
+                            } else {
+                                createEventWithoutRegattasView(event, panel);
                             }
-                            
-                            view = clientFactory.createEventView(event, raceGroups, eventPlace.getLeaderboardIdAsNameString(), timerForClientServerOffset);
-                            panel.setWidget(view.asWidget());
                         }
                         
                         @Override
@@ -77,9 +79,7 @@ public class EventActivity extends AbstractActivity {
                         }
                     });
                 } else {
-                    // no leaderboard groups defined yet -> show a teaser page
-                    EventWithoutRegattasView view = clientFactory.createEventWithoutRegattasView(event);
-                    panel.setWidget(view.asWidget());
+                    createEventWithoutRegattasView(event, panel);
                 }
             }
 
@@ -90,6 +90,17 @@ public class EventActivity extends AbstractActivity {
         }); 
     }
 
+    private void createEventView(EventDTO event, List<RaceGroupDTO> raceGroups, AcceptsOneWidget panel) {
+        view = clientFactory.createEventView(event, raceGroups, eventPlace.getLeaderboardIdAsNameString(), timerForClientServerOffset);
+        panel.setWidget(view.asWidget());
+    }
+
+    private void createEventWithoutRegattasView(EventDTO event, AcceptsOneWidget panel) {
+        // no leaderboard groups defined yet -> show a teaser page
+        EventWithoutRegattasView view = clientFactory.createEventWithoutRegattasView(event);
+        panel.setWidget(view.asWidget());
+    }
+    
     protected void loadAndUpdateEventRaceStatesLog() {
         final long clientTimeWhenRequestWasSent = System.currentTimeMillis();
         UUID eventUUID = UUID.fromString(eventPlace.getEventUuidAsString());
