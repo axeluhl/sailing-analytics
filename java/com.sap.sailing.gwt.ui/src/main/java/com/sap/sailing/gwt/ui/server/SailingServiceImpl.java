@@ -3277,6 +3277,7 @@ public class SailingServiceImpl extends ProxiedRemoteServiceServlet implements S
         return courseAreaDTO;
     }
     
+    /** for backward compatibility with the regatta overview */
     @Override
     public List<RaceGroupDTO> getRegattaStructureForEvent(UUID eventId) {
         List<RaceGroupDTO> raceGroups = new ArrayList<RaceGroupDTO>();
@@ -3323,6 +3324,57 @@ public class SailingServiceImpl extends ProxiedRemoteServiceServlet implements S
         return raceGroups;
     }
 
+    /** the replacement service for getRegattaStructureForEvent() */
+    @Override
+    public List<RaceGroupDTO> getRegattaStructureOfEvent(UUID eventId) {
+        List<RaceGroupDTO> raceGroups = new ArrayList<RaceGroupDTO>();
+        Event event = getService().getEvent(eventId);
+        Map<Leaderboard, LeaderboardGroup> leaderboardWithLeaderboardGroups = new HashMap<Leaderboard, LeaderboardGroup>();
+        for(LeaderboardGroup leaderboardGroup: event.getLeaderboardGroups()) {
+            for(Leaderboard leaderboard: leaderboardGroup.getLeaderboards()) {
+                leaderboardWithLeaderboardGroups.put(leaderboard, leaderboardGroup);
+            }
+        }
+        if (event != null) {
+            for(LeaderboardGroup leaderboardGroup: event.getLeaderboardGroups()) {
+                for(Leaderboard leaderboard: leaderboardGroup.getLeaderboards()) {
+                    RaceGroupDTO raceGroup = new RaceGroupDTO(leaderboard.getName());
+                    for (CourseArea courseArea : event.getVenue().getCourseAreas()) {
+                        if (leaderboard.getDefaultCourseArea() != null && leaderboard.getDefaultCourseArea() == courseArea) {
+                            raceGroup.courseAreaIdAsString = courseArea.getId().toString();
+                            break;
+                        }
+                    }
+                    raceGroup.displayName = getRegattaNameFromLeaderboard(leaderboard);
+                    if(leaderboardWithLeaderboardGroups.containsKey(leaderboard)) {
+                        raceGroup.leaderboardGroupName = leaderboardWithLeaderboardGroups.get(leaderboard).getName(); 
+                    }
+                    if (leaderboard instanceof RegattaLeaderboard) {
+                        RegattaLeaderboard regattaLeaderboard = (RegattaLeaderboard) leaderboard;
+                        for (Series series : regattaLeaderboard.getRegatta().getSeries()) {
+                            RaceGroupSeriesDTO seriesDTO = new RaceGroupSeriesDTO(series.getName());
+                            raceGroup.getSeries().add(seriesDTO);
+                            for (Fleet fleet : series.getFleets()) {
+                                FleetDTO fleetDTO = new FleetDTO(fleet.getName(), fleet.getOrdering(), fleet.getColor());
+                                seriesDTO.getFleets().add(fleetDTO);
+                            }
+                            seriesDTO.getRaceColumns().addAll(convertToRaceColumnDTOs(series.getRaceColumns()));
+                        }
+                    } else {
+                        RaceGroupSeriesDTO seriesDTO = new RaceGroupSeriesDTO(LeaderboardNameConstants.DEFAULT_SERIES_NAME);
+                        raceGroup.getSeries().add(seriesDTO);
+                        FleetDTO fleetDTO = new FleetDTO(LeaderboardNameConstants.DEFAULT_FLEET_NAME, 0, null);
+                        seriesDTO.getFleets().add(fleetDTO);
+                        seriesDTO.getRaceColumns().addAll(convertToRaceColumnDTOs(leaderboard.getRaceColumns()));
+                    }
+                    raceGroups.add(raceGroup);
+                }
+            }
+        }
+        return raceGroups;
+    }
+
+    
     /**
      * The name of the regatta to be shown on the regatta overview webpage is retrieved from the name of the {@link Leaderboard}. Since regattas are
      * not always represented by a {@link Regatta} object in the Sailing Suite but need to be shown on the regatta overview page, the leaderboard is

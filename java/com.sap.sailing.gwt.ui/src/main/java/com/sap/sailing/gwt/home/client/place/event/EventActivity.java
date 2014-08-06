@@ -56,7 +56,7 @@ public class EventActivity extends AbstractActivity {
             @Override
             public void onSuccess(final EventDTO event) {
                 if(event.getLeaderboardGroups().size() > 0) {
-                    clientFactory.getSailingService().getRegattaStructureForEvent(event.id, new AsyncCallback<List<RaceGroupDTO>>() {
+                    clientFactory.getSailingService().getRegattaStructureOfEvent(event.id, new AsyncCallback<List<RaceGroupDTO>>() {
                         @Override
                         public void onSuccess(List<RaceGroupDTO> raceGroups) {
                             if(raceGroups.size() > 0) {

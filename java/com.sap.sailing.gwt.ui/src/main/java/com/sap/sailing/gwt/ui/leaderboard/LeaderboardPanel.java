@@ -7,24 +7,26 @@ import java.util.Collections;
 import java.util.Date;
 import java.util.HashMap;
 import java.util.HashSet;
+import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
+import java.util.Map.Entry;
 import java.util.Set;
 
 import com.google.gwt.cell.client.Cell;
 import com.google.gwt.cell.client.Cell.Context;
-import com.google.gwt.cell.client.CheckboxCell;
 import com.google.gwt.cell.client.CompositeCell;
 import com.google.gwt.cell.client.EditTextCell;
-import com.google.gwt.cell.client.FieldUpdater;
 import com.google.gwt.cell.client.TextCell;
 import com.google.gwt.core.client.GWT;
 import com.google.gwt.core.client.Scheduler;
 import com.google.gwt.core.client.Scheduler.ScheduledCommand;
+import com.google.gwt.dom.client.BrowserEvents;
 import com.google.gwt.dom.client.Element;
 import com.google.gwt.dom.client.Style.FontWeight;
 import com.google.gwt.event.dom.client.ClickEvent;
 import com.google.gwt.event.dom.client.ClickHandler;
+import com.google.gwt.event.shared.HandlerRegistration;
 import com.google.gwt.i18n.client.DateTimeFormat;
 import com.google.gwt.i18n.client.NumberFormat;
 import com.google.gwt.resources.client.ImageResource;
@@ -49,12 +51,10 @@ import com.google.gwt.user.client.ui.SimplePanel;
 import com.google.gwt.user.client.ui.VerticalPanel;
 import com.google.gwt.user.client.ui.Widget;
 import com.google.gwt.view.client.CellPreviewEvent;
-import com.google.gwt.view.client.DefaultSelectionEventManager;
 import com.google.gwt.view.client.ListDataProvider;
 import com.google.gwt.view.client.MultiSelectionModel;
 import com.google.gwt.view.client.SelectionChangeEvent;
 import com.google.gwt.view.client.SelectionChangeEvent.Handler;
-import com.google.gwt.view.client.SelectionModel;
 import com.sap.sailing.domain.common.DetailType;
 import com.sap.sailing.domain.common.InvertibleComparator;
 import com.sap.sailing.domain.common.MaxPointsReason;
@@ -87,6 +87,8 @@ import com.sap.sailing.gwt.ui.client.StringMessages;
 import com.sap.sailing.gwt.ui.client.shared.components.Component;
 import com.sap.sailing.gwt.ui.client.shared.components.IsEmbeddableComponent;
 import com.sap.sailing.gwt.ui.client.shared.components.SettingsDialogComponent;
+import com.sap.sailing.gwt.ui.client.shared.controls.AbstractSortableColumnWithMinMax;
+import com.sap.sailing.gwt.ui.client.shared.controls.SelectionCheckboxColumn;
 import com.sap.sailing.gwt.ui.client.shared.filter.LeaderboardFetcher;
 import com.sap.sailing.gwt.ui.leaderboard.DetailTypeColumn.LegDetailField;
 import com.sap.sailing.gwt.ui.leaderboard.LeaderboardSettings.RaceColumnSelectionStrategies;
@@ -150,13 +152,13 @@ public class LeaderboardPanel extends SimplePanel implements TimeListener, PlayS
 
     private final SortedCellTable<LeaderboardRowDTO> leaderboardTable;
 
-    private final SelectionModel<LeaderboardRowDTO> leaderboardSelectionModel;
+    private final MultiSelectionModel<LeaderboardRowDTO> leaderboardSelectionModel;
 
     private LeaderboardDTO leaderboard;
 
     private final TotalRankColumn totalRankColumn;
     
-    private final SelectionCheckboxColumn selectionCheckboxColumn;
+    private final SelectionCheckboxColumn<LeaderboardRowDTO> selectionCheckboxColumn;
 
     /**
      * Passed to the {@link ManeuverCountRaceColumn}. Modifications to this list will modify the column's children list
@@ -178,7 +180,7 @@ public class LeaderboardPanel extends SimplePanel implements TimeListener, PlayS
 
     private final List<DetailType> selectedOverallDetailColumns;
     
-    private final Map<DetailType, SortableColumn<LeaderboardRowDTO, ?>> overallDetailColumnMap;
+    private final Map<DetailType, AbstractSortableColumnWithMinMax<LeaderboardRowDTO, ?>> overallDetailColumnMap;
 
     private RaceColumnSelection raceColumnSelection;
 
@@ -236,6 +238,21 @@ public class LeaderboardPanel extends SimplePanel implements TimeListener, PlayS
     private final Anchor playPause;
 
     private final CompetitorSelectionProvider competitorSelectionProvider;
+    
+    /**
+     * The handler for changes in the leaderboard table's selection; its registration is kept in
+     * {@link #leaderboardAsTableSelectionModelRegistration} while it is registered as a selection handler
+     * on the {@link #leaderboardTable}.
+     */
+    private final Handler selectionChangeHandler;
+    
+    /**
+     * While the {@link #selectionChangeHandler} is registered as a selection change handler on the
+     * {@link #leaderboardTable}'s selection model, this field holds the registration which can be used to
+     * remove the registration again. We'll use this to temporarily suspend selection events when actively
+     * modifying / adjusting the table selection to match the {@link #competitorSelectionProvider}.
+     */
+    private HandlerRegistration leaderboardAsTableSelectionModelRegistration;
 
     /**
      * If this is <code>null</code>, all leaderboard columns added by updating the leaderboard from the server are
@@ -542,7 +559,7 @@ public class LeaderboardPanel extends SimplePanel implements TimeListener, PlayS
         return raceTimesInfoProvider;
     }
 
-    protected class CompetitorColumn extends SortableColumn<LeaderboardRowDTO, LeaderboardRowDTO> {
+    protected class CompetitorColumn extends LeaderboardSortableColumnWithMinMax<LeaderboardRowDTO, LeaderboardRowDTO> {
         private final CompetitorColumnBase<LeaderboardRowDTO> base;
         
         protected CompetitorColumn(CompetitorColumnBase<LeaderboardRowDTO> base) {
@@ -599,7 +616,7 @@ public class LeaderboardPanel extends SimplePanel implements TimeListener, PlayS
      * @author Axel Uhl (d043530)
      * 
      */
-    private class SailIDColumn<T> extends SortableColumn<T, String> {
+    private class SailIDColumn<T> extends LeaderboardSortableColumnWithMinMax<T, String> {
         private final CompetitorFetcher<T> competitorFetcher;
         
         protected SailIDColumn(CompetitorFetcher<T> competitorFetcher) {
@@ -860,10 +877,10 @@ public class LeaderboardPanel extends SimplePanel implements TimeListener, PlayS
         }
 
         @Override
-        protected Map<DetailType, SortableColumn<LeaderboardRowDTO, ?>> getDetailColumnMap(
+        protected Map<DetailType, AbstractSortableColumnWithMinMax<LeaderboardRowDTO, ?>> getDetailColumnMap(
                 LeaderboardPanel leaderboardPanel, StringMessages stringMessages, String detailHeaderStyle,
                 String detailColumnStyle) {
-            Map<DetailType, SortableColumn<LeaderboardRowDTO, ?>> result = new HashMap<DetailType, SortableColumn<LeaderboardRowDTO, ?>>();
+            Map<DetailType, AbstractSortableColumnWithMinMax<LeaderboardRowDTO, ?>> result = new HashMap<>();
             result.put(DetailType.RACE_RATIO_BETWEEN_TIME_SINCE_LAST_POSITION_FIX_AND_AVERAGE_SAMPLING_INTERVAL,
                     new TimeSinceLastGpsFixColumn(DetailType.RACE_RATIO_BETWEEN_TIME_SINCE_LAST_POSITION_FIX_AND_AVERAGE_SAMPLING_INTERVAL, 
                             new RaceRatioBetweenTimeSinceLastPositionFixAndAverageSamplingInterval(), LEG_COLUMN_HEADER_STYLE, LEG_COLUMN_STYLE, LeaderboardPanel.this));
@@ -927,9 +944,9 @@ public class LeaderboardPanel extends SimplePanel implements TimeListener, PlayS
         }
 
         @Override
-        protected Iterable<SortableColumn<LeaderboardRowDTO, ?>> getDirectChildren() {
-            List<SortableColumn<LeaderboardRowDTO, ?>> result = new ArrayList<SortableColumn<LeaderboardRowDTO, ?>>();
-            for (SortableColumn<LeaderboardRowDTO, ?> column : super.getDirectChildren()) {
+        protected Iterable<AbstractSortableColumnWithMinMax<LeaderboardRowDTO, ?>> getDirectChildren() {
+            List<AbstractSortableColumnWithMinMax<LeaderboardRowDTO, ?>> result = new ArrayList<>();
+            for (AbstractSortableColumnWithMinMax<LeaderboardRowDTO, ?> column : super.getDirectChildren()) {
                 result.add(column);
             }
             if (isExpanded() && selectedRaceDetails.contains(DetailType.DISPLAY_LEGS)) {
@@ -1296,7 +1313,7 @@ public class LeaderboardPanel extends SimplePanel implements TimeListener, PlayS
      * 
      * @author Simon Marcel Pamies
      */
-    private class TotalRacesCompletedColumn extends SortableColumn<LeaderboardRowDTO, String> {
+    private class TotalRacesCompletedColumn extends LeaderboardSortableColumnWithMinMax<LeaderboardRowDTO, String> {
         private final String columnStyle;
         private final MaxPointsReason[] MAX_POINTS_REASONS_THAT_IDENTIFY_NON_FINISHED_RACES = 
                 new MaxPointsReason[] {MaxPointsReason.DNS, MaxPointsReason.DNF, MaxPointsReason.DNC};
@@ -1365,7 +1382,7 @@ public class LeaderboardPanel extends SimplePanel implements TimeListener, PlayS
      * @author Axel Uhl (D043530)
      * 
      */
-    private class TotalsColumn extends SortableColumn<LeaderboardRowDTO, String> {
+    private class TotalsColumn extends LeaderboardSortableColumnWithMinMax<LeaderboardRowDTO, String> {
         private final String columnStyle;
 
         protected TotalsColumn(String columnStyle) {
@@ -1411,7 +1428,7 @@ public class LeaderboardPanel extends SimplePanel implements TimeListener, PlayS
         }
     }
 
-    protected class CarryColumn extends SortableColumn<LeaderboardRowDTO, String> {
+    protected class CarryColumn extends LeaderboardSortableColumnWithMinMax<LeaderboardRowDTO, String> {
         public CarryColumn() {
             super(new TextCell(), SortingOrder.ASCENDING, LeaderboardPanel.this);
             setSortable(true);
@@ -1451,54 +1468,61 @@ public class LeaderboardPanel extends SimplePanel implements TimeListener, PlayS
         }
     }
 
-    private class SelectionCheckboxColumn extends SortableColumn<LeaderboardRowDTO, Boolean> {
-        private CheckboxCell cell;
-        
-        protected SelectionCheckboxColumn(DisplayedLeaderboardRowsProvider displayedLeaderboardRowsProvider) {
-            this(new CheckboxCell(/* depends on selection */ true, /* handles selection */ false), SortingOrder.DESCENDING, displayedLeaderboardRowsProvider);
-        }
-
-        public SelectionCheckboxColumn(CheckboxCell checkboxCell, SortingOrder descending,
-                DisplayedLeaderboardRowsProvider displayedLeaderboardRowsProvider) {
-            super(checkboxCell, descending, displayedLeaderboardRowsProvider);
-            this.cell = checkboxCell;
-            this.setFieldUpdater(new FieldUpdater<LeaderboardRowDTO, Boolean>() {
-                @Override
-                public void update(int index, LeaderboardRowDTO row, Boolean selected) {
-                    competitorSelectionProvider.setSelected(row.competitor, selected);
-                    cell.setViewData(row, selected);
-                }
-            });
+    private class LeaderboardSelectionCheckboxColumn extends com.sap.sailing.gwt.ui.client.shared.controls.SelectionCheckboxColumn<LeaderboardRowDTO>
+    implements CompetitorSelectionChangeListener {
+        protected LeaderboardSelectionCheckboxColumn(final CompetitorSelectionProvider competitorSelectionProvider) {
+            super(tableResources.cellTableStyle().cellTableCheckboxSelected(), tableResources.cellTableStyle().cellTableCheckboxDeselected(), tableResources.cellTableStyle().cellTableCheckboxColumnCell());
+            competitorSelectionProvider.addCompetitorSelectionChangeListener(this);
         }
         
         @Override
-        public CheckboxCell getCell() {
-            return cell;
+        public Boolean getValue(LeaderboardRowDTO row) {
+            return competitorSelectionProvider.isSelected(row.competitor);
+        }
+
+        @Override public void competitorsListChanged(Iterable<CompetitorDTO> competitors) {}
+        @Override public void filterChanged(FilterSet<CompetitorDTO, ? extends Filter<CompetitorDTO>> oldFilterSet, FilterSet<CompetitorDTO, ? extends Filter<CompetitorDTO>> newFilterSet) {}
+        @Override public void filteredCompetitorsListChanged(Iterable<CompetitorDTO> filteredCompetitors) {}
+
+        /**
+         * Ensure that the checkbox is redrawn when the competitor selection changes
+         */
+        @Override
+        public void addedToSelection(CompetitorDTO competitor) {
+            final LeaderboardRowDTO row = getRow(competitor);
+            if (row != null) {
+                redrawRow(row);
+            }
+        }
+
+        private void redrawRow(final LeaderboardRowDTO row) {
+            final List<LeaderboardRowDTO> leaderboardDataList = getData().getList();
+            synchronized (leaderboardDataList) {
+                redrawRow(row, leaderboardDataList);
+            }
+        }
+
+        /**
+         * Ensure that the checkbox is redrawn when the competitor selection changes
+         */
+        @Override
+        public void removedFromSelection(CompetitorDTO competitor) {
+            final LeaderboardRowDTO row = getRow(competitor);
+            if (row != null) {
+                redrawRow(row);
+            }
         }
 
         @Override
-        public InvertibleComparator<LeaderboardRowDTO> getComparator() {
-            return new InvertibleComparatorAdapter<LeaderboardRowDTO>() {
-                @Override
-                public int compare(LeaderboardRowDTO a, LeaderboardRowDTO b) {
-                    return cell.getViewData(a) ? cell.getViewData(b) ? 0 : 1 : cell.getViewData(b) ? -1 : 0;
-                }
-            };
-        }
+        public void updateMinMax() {}
 
         @Override
-        public Header<?> getHeader() {
-            return new SafeHtmlHeader(new SafeHtmlBuilder().appendEscaped("").toSafeHtml());
+        protected ListDataProvider<LeaderboardRowDTO> getListDataProvider() {
+            return getData();
         }
-
-        @Override
-        public Boolean getValue(LeaderboardRowDTO object) {
-            return cell.getViewData(object);
-        }
-        
     }
     
-    private class TotalRankColumn extends SortableColumn<LeaderboardRowDTO, String> {
+    private class TotalRankColumn extends LeaderboardSortableColumnWithMinMax<LeaderboardRowDTO, String> {
         public TotalRankColumn() {
             super(new TextCell(), SortingOrder.ASCENDING, LeaderboardPanel.this);
             setHorizontalAlignment(ALIGN_CENTER);
@@ -1621,7 +1645,7 @@ public class LeaderboardPanel extends SimplePanel implements TimeListener, PlayS
             break;
         }
         totalRankColumn = new TotalRankColumn();
-        selectionCheckboxColumn = new SelectionCheckboxColumn(this);
+        selectionCheckboxColumn = new LeaderboardSelectionCheckboxColumn(competitorSelectionProvider);
         RACE_COLUMN_HEADER_STYLE = tableResources.cellTableStyle().cellTableRaceColumnHeader();
         LEG_COLUMN_HEADER_STYLE = tableResources.cellTableStyle().cellTableLegColumnHeader();
         LEG_DETAIL_COLUMN_HEADER_STYLE = tableResources.cellTableStyle().cellTableLegDetailColumnHeader();
@@ -1634,7 +1658,7 @@ public class LeaderboardPanel extends SimplePanel implements TimeListener, PlayS
         leaderboardTable.addCellPreviewHandler(new CellPreviewEvent.Handler<LeaderboardRowDTO>() {
             @Override
             public void onCellPreview(CellPreviewEvent<LeaderboardRowDTO> event) {
-                if ("focus".equals(event.getNativeEvent().getType())) {
+                if (BrowserEvents.FOCUS.equals(event.getNativeEvent().getType())) {
                     elementToBlur = event.getNativeEvent().getEventTarget().cast();
                     elementToBlur.blur();
                     blurInOnSelectionChanged = 2; // blur a couple of times; doing it one time only doesn't seem to work reliably
@@ -1645,7 +1669,8 @@ public class LeaderboardPanel extends SimplePanel implements TimeListener, PlayS
         leaderboardTable.ensureDebugId("LeaderboardCellTable");
         getLeaderboardTable().setWidth("100%");
         leaderboardSelectionModel = new MultiSelectionModel<LeaderboardRowDTO>();
-        leaderboardSelectionModel.addSelectionChangeHandler(new Handler() {
+        // remember handler registration so we can temporarily remove it and re-add it to suspend selection events while we're actively changing it
+        selectionChangeHandler = new Handler() {
             @Override
             public void onSelectionChange(SelectionChangeEvent event) {
                 List<CompetitorDTO> selection = new ArrayList<CompetitorDTO>();
@@ -1653,27 +1678,14 @@ public class LeaderboardPanel extends SimplePanel implements TimeListener, PlayS
                     selection.add(row.competitor);
                 }
                 LeaderboardPanel.this.competitorSelectionProvider.setSelection(selection, /* listenersNotToNotify */LeaderboardPanel.this);
-                if (LeaderboardPanel.this.showSelectionCheckbox) {
-                    // update selection checkboxes
-                    for (LeaderboardRowDTO row : getData().getList()) {
-                        selectionCheckboxColumn.getCell().setViewData(row, selection.contains(row.competitor));
-                    }
-                }
-                updateLeaderboard(getLeaderboard());
                 if (blurInOnSelectionChanged > 0) {
                     blurInOnSelectionChanged--;
                     blurFocusedElementAfterSelectionChange();
                 }
             }
-        });
-        if (userAgent.isMobile() == UserAgentDetails.PlatformTypes.MOBILE) {
-            // Setting up the toggle selection
-            leaderboardTable.addCellPreviewHandler(new ToggleSelectionCellPreviewHandler<LeaderboardRowDTO>());
-            DefaultSelectionEventManager<LeaderboardRowDTO> selectionEventManager = DefaultSelectionEventManager.createCheckboxManager();
-            leaderboardTable.setSelectionModel(leaderboardSelectionModel, selectionEventManager);
-        } else {
-            leaderboardTable.setSelectionModel(leaderboardSelectionModel);
-        }
+        };
+        leaderboardAsTableSelectionModelRegistration = leaderboardSelectionModel.addSelectionChangeHandler(selectionChangeHandler);
+        leaderboardTable.setSelectionModel(leaderboardSelectionModel, selectionCheckboxColumn.getSelectionManager());
         setShowAddedScores(settings.isShowAddedScores());
         setShowOverallColumnWithNumberOfRacesCompletedPerCompetitor(settings.isShowOverallColumnWithNumberOfRacesCompletedPerCompetitor());
         if (timer.isInitialized()) {
@@ -1774,8 +1786,8 @@ public class LeaderboardPanel extends SimplePanel implements TimeListener, PlayS
         }
     }
 
-    private Map<DetailType, SortableColumn<LeaderboardRowDTO, ?>> createOverallDetailColumnMap() {
-        Map<DetailType, SortableColumn<LeaderboardRowDTO, ?>> result = new HashMap<DetailType, SortableColumn<LeaderboardRowDTO, ?>>();
+    private Map<DetailType, AbstractSortableColumnWithMinMax<LeaderboardRowDTO, ?>> createOverallDetailColumnMap() {
+        Map<DetailType, AbstractSortableColumnWithMinMax<LeaderboardRowDTO, ?>> result = new HashMap<>();
         result.put(DetailType.TOTAL_DISTANCE_TRAVELED,
                 new FormattedDoubleDetailTypeColumn(DetailType.TOTAL_DISTANCE_TRAVELED,
                         new TotalDistanceTraveledInMetersField(), RACE_COLUMN_HEADER_STYLE, RACE_COLUMN_STYLE, this));
@@ -1919,9 +1931,9 @@ public class LeaderboardPanel extends SimplePanel implements TimeListener, PlayS
 
     /**
      * adds the <code>column</code> to the right end of the {@link #getLeaderboardTable() leaderboard table} and sets
-     * the column style according to the {@link SortableColumn#getColumnStyle() column's style definition}.
+     * the column style according to the {@link LeaderboardSortableColumnWithMinMax#getColumnStyle() column's style definition}.
      */
-    protected void addColumn(SortableColumn<LeaderboardRowDTO, ?> column) {
+    protected void addColumn(LeaderboardSortableColumnWithMinMax<LeaderboardRowDTO, ?> column) {
         leaderboardTable.addColumn(column, column.getHeader(), column.getComparator(), column
                 .getPreferredSortingOrder().isAscending());
         String columnStyle = column.getColumnStyle();
@@ -1930,7 +1942,7 @@ public class LeaderboardPanel extends SimplePanel implements TimeListener, PlayS
         }
     }
 
-    protected void insertColumn(int beforeIndex, SortableColumn<LeaderboardRowDTO, ?> column) {
+    protected void insertColumn(int beforeIndex, AbstractSortableColumnWithMinMax<LeaderboardRowDTO, ?> column) {
         // remove column styles of those columns whose index will shift right by
         // one:
         removeColumnStyles(beforeIndex);
@@ -1941,7 +1953,7 @@ public class LeaderboardPanel extends SimplePanel implements TimeListener, PlayS
 
     private void addColumnStyles(int startColumn) {
         for (int i = startColumn; i < getLeaderboardTable().getColumnCount(); i++) {
-            SortableColumn<LeaderboardRowDTO, ?> columnToRemoveStyleFor = (SortableColumn<LeaderboardRowDTO, ?>) getLeaderboardTable()
+            AbstractSortableColumnWithMinMax<LeaderboardRowDTO, ?> columnToRemoveStyleFor = (AbstractSortableColumnWithMinMax<LeaderboardRowDTO, ?>) getLeaderboardTable()
                     .getColumn(i);
             String columnStyle = columnToRemoveStyleFor.getColumnStyle();
             if (columnStyle != null) {
@@ -1952,7 +1964,7 @@ public class LeaderboardPanel extends SimplePanel implements TimeListener, PlayS
 
     private void removeColumnStyles(int startColumn) {
         for (int i = startColumn; i < getLeaderboardTable().getColumnCount(); i++) {
-            SortableColumn<LeaderboardRowDTO, ?> columnToRemoveStyleFor = (SortableColumn<LeaderboardRowDTO, ?>) getLeaderboardTable()
+            AbstractSortableColumnWithMinMax<LeaderboardRowDTO, ?> columnToRemoveStyleFor = (AbstractSortableColumnWithMinMax<LeaderboardRowDTO, ?>) getLeaderboardTable()
                     .getColumn(i);
             String columnStyle = columnToRemoveStyleFor.getColumnStyle();
             if (columnStyle != null) {
@@ -2073,8 +2085,31 @@ public class LeaderboardPanel extends SimplePanel implements TimeListener, PlayS
                 columnToCollapseAndExpandAgain.toggleExpansion();
             }
             adjustDelayToLive();
-            getData().getList().clear();
-            getData().getList().addAll(getRowsToDisplay());
+            final Map<CompetitorDTO, LeaderboardRowDTO> rowsToDisplay = getRowsToDisplay();
+            Set<LeaderboardRowDTO> rowsToAdd = new HashSet<>(rowsToDisplay.values());
+            Map<Integer, LeaderboardRowDTO> rowsToUpdate = new HashMap<>();
+            synchronized (getData().getList()) {
+                int index = 0;
+                for (Iterator<LeaderboardRowDTO> i = getData().getList().iterator(); i.hasNext(); ) {
+                    LeaderboardRowDTO oldRow = i.next();
+                    LeaderboardRowDTO newRow = rowsToDisplay.get(oldRow.competitor);
+                    if (newRow != null) {
+                        rowsToUpdate.put(index++, newRow); // update row in place, preserving its selection state
+                        rowsToAdd.remove(newRow); // no need to add this row when it was updated in-place
+                    } else {
+                        i.remove(); // old row's competitor not found in new rows' competitors; remove old row from table
+                    }
+                }
+                for (Entry<Integer, LeaderboardRowDTO> updateEntry : rowsToUpdate.entrySet()) {
+                    LeaderboardRowDTO oldElement = getData().getList().set(updateEntry.getKey(), updateEntry.getValue());
+                    leaderboardSelectionModel.setSelected(oldElement, false); // make sure the old element is no longer part of the selection
+                    updateSelection(updateEntry.getValue());
+                }
+                for (LeaderboardRowDTO rowToAdd : rowsToAdd) {
+                    getData().getList().add(rowToAdd);
+                    updateSelection(rowToAdd);
+                }
+            }
             RaceColumn<?> lastRaceColumn = null;
             for (int i=getLeaderboardTable().getColumnCount()-1; i>=0; i--) {
                 if (getLeaderboardTable().getColumn(i) instanceof RaceColumn<?>) {
@@ -2083,7 +2118,7 @@ public class LeaderboardPanel extends SimplePanel implements TimeListener, PlayS
                 }
             }
             for (int i = 0; i < getLeaderboardTable().getColumnCount(); i++) {
-                SortableColumn<?, ?> c = (SortableColumn<?, ?>) getLeaderboardTable().getColumn(i);
+                AbstractSortableColumnWithMinMax<?, ?> c = (AbstractSortableColumnWithMinMax<?, ?>) getLeaderboardTable().getColumn(i);
                 c.updateMinMax();
                 // Toggle pre-selected race, if the setting is set and it isn't open yet, or the last race column if that was requested
                 if ((!autoExpandPerformedOnce && isAutoExpandPreSelectedRace() && c instanceof RaceColumn<?>
@@ -2103,15 +2138,8 @@ public class LeaderboardPanel extends SimplePanel implements TimeListener, PlayS
             if (leaderboardTable.getCurrentlySortedColumn() != null) {
                 leaderboardTable.sort();
             } else {
-                SortableColumn<LeaderboardRowDTO, ?> columnToSortFor = getDefaultSortColumn();
+                AbstractSortableColumnWithMinMax<LeaderboardRowDTO, ?> columnToSortFor = getDefaultSortColumn();
                 leaderboardTable.sortColumn(columnToSortFor, columnToSortFor.getPreferredSortingOrder().isAscending());
-            }
-            // Reselect the selected rows
-            clearSelection();
-            for (LeaderboardRowDTO row : getLeaderboardTable().getDataProvider().getList()) {
-                if (competitorSelectionProvider.isSelected(row.competitor)) {
-                    leaderboardSelectionModel.setSelected(row, true);
-                }
             }
             
             scoreCorrectionCommentLabel.setText(leaderboard.getComment() != null ? leaderboard.getComment() : "");
@@ -2151,6 +2179,24 @@ public class LeaderboardPanel extends SimplePanel implements TimeListener, PlayS
     }
 
     /**
+     * Adjusts the row's selection in the {@link #leaderboardSelectionModel} so it matches its selection state in
+     * the {@link #competitorSelectionProvider}.
+     */
+    private void updateSelection(LeaderboardRowDTO row) {
+        final boolean shallBeSelected = competitorSelectionProvider.isSelected(row.competitor);
+        if (leaderboardAsTableSelectionModelRegistration != null) {
+            // suspend selection events while actively adjusting the leaderboardSelectionModel to match the competitorSelectionProvider
+            leaderboardAsTableSelectionModelRegistration.removeHandler();
+            leaderboardAsTableSelectionModelRegistration = null;
+        }
+        if (leaderboardSelectionModel.isSelected(row) != shallBeSelected) {
+            leaderboardSelectionModel.setSelected(row, shallBeSelected);
+        }
+        // register the selection change handler again
+        leaderboardAsTableSelectionModelRegistration = leaderboardTable.getSelectionModel().addSelectionChangeHandler(selectionChangeHandler);
+    }
+
+    /**
      * The race columns hold a now outdated copy of a {@link RaceColumnDTO} which needs to be updated from the {@link LeaderboardDTO} just received
      */
     private void updateRaceColumnDTOsToRaceColumns(LeaderboardDTO leaderboard) {
@@ -2160,7 +2206,7 @@ public class LeaderboardPanel extends SimplePanel implements TimeListener, PlayS
     			raceColumn.setRace(newRace);
     		}
     	}
-	}
+    }
 
 	/**
      * Due to a course change, a race may change its number of legs. All expanded race columns that show leg columns and
@@ -2217,20 +2263,20 @@ public class LeaderboardPanel extends SimplePanel implements TimeListener, PlayS
      * the race identified by {@link #preSelectedRace} otherwise.
      */
     @Override
-    public Collection<LeaderboardRowDTO> getRowsToDisplay() {
-        Collection<LeaderboardRowDTO> result;
+    public Map<CompetitorDTO, LeaderboardRowDTO> getRowsToDisplay() {
+        Map<CompetitorDTO, LeaderboardRowDTO> result;
         Iterable<CompetitorDTO> allFilteredCompetitors = competitorSelectionProvider.getFilteredCompetitors();
-        result = new ArrayList<LeaderboardRowDTO>();
+        result = new HashMap<CompetitorDTO, LeaderboardRowDTO>();
         if (preSelectedRace == null) {
             for (CompetitorDTO competitor : leaderboard.rows.keySet()) {
                 if (Util.contains(allFilteredCompetitors, competitor)) {
-                    result.add(leaderboard.rows.get(competitor));
+                    result.put(competitor, leaderboard.rows.get(competitor));
                 }
             }
         } else {
             for (CompetitorDTO competitorInPreSelectedRace : getCompetitors(preSelectedRace)) {
                 if (Util.contains(allFilteredCompetitors, competitorInPreSelectedRace)) {
-                    result.add(leaderboard.rows.get(competitorInPreSelectedRace));
+                    result.put(competitorInPreSelectedRace, leaderboard.rows.get(competitorInPreSelectedRace));
                 }
             }
         }
@@ -2269,8 +2315,8 @@ public class LeaderboardPanel extends SimplePanel implements TimeListener, PlayS
         return result;
     }
 
-    private SortableColumn<LeaderboardRowDTO, ?> getDefaultSortColumn() {
-        SortableColumn<LeaderboardRowDTO, ?> defaultSortColumn = null;
+    private AbstractSortableColumnWithMinMax<LeaderboardRowDTO, ?> getDefaultSortColumn() {
+        AbstractSortableColumnWithMinMax<LeaderboardRowDTO, ?> defaultSortColumn = null;
         if (raceNameForDefaultSorting != null) {
             defaultSortColumn = getRaceColumnByRaceName(raceNameForDefaultSorting);
         }
@@ -2278,12 +2324,6 @@ public class LeaderboardPanel extends SimplePanel implements TimeListener, PlayS
             defaultSortColumn = getRankColumn();
         }
         return defaultSortColumn;
-    }
-
-    private void clearSelection() {
-        for (LeaderboardRowDTO row : getData().getList()) {
-            leaderboardSelectionModel.setSelected(row, false);
-        }
     }
 
     private TotalRankColumn getRankColumn() {
@@ -2324,7 +2364,7 @@ public class LeaderboardPanel extends SimplePanel implements TimeListener, PlayS
      *            tells the column index for the first overall details column
      */
     private void adjustOverallDetailColumns(LeaderboardDTO leaderboard, int indexOfFirstOverallDetailsColumn) {
-        List<SortableColumn<LeaderboardRowDTO, ?>> overallDetailColumnsToShow = new ArrayList<SortableColumn<LeaderboardRowDTO,?>>();
+        List<AbstractSortableColumnWithMinMax<LeaderboardRowDTO, ?>> overallDetailColumnsToShow = new ArrayList<AbstractSortableColumnWithMinMax<LeaderboardRowDTO,?>>();
         // ensure the ordering in overallDetailColumnsToShow conforms to the ordering of getAvailableOverallDetailColumnTypes()
         for (DetailType overallDetailType : getAvailableOverallDetailColumnTypes()) {
             if (selectedOverallDetailColumns.contains(overallDetailType) && overallDetailColumnMap.containsKey(overallDetailType)) {
@@ -2820,9 +2860,11 @@ public class LeaderboardPanel extends SimplePanel implements TimeListener, PlayS
     }
 
     private LeaderboardRowDTO getRow(CompetitorDTO competitor) {
-        for (LeaderboardRowDTO row : getData().getList()) {
-            if (row.competitor.equals(competitor)) {
-                return row;
+        synchronized (getData().getList()) {
+            for (LeaderboardRowDTO row : getData().getList()) {
+                if (row.competitor.equals(competitor)) {
+                    return row;
+                }
             }
         }
         return null;
@@ -2855,13 +2897,7 @@ public class LeaderboardPanel extends SimplePanel implements TimeListener, PlayS
     }
     
     private Iterable<LeaderboardRowDTO> getSelectedRows() {
-        ArrayList<LeaderboardRowDTO> selectedRows = new ArrayList<LeaderboardRowDTO>();
-        for (LeaderboardRowDTO row : getData().getList()) {
-            if (leaderboardSelectionModel.isSelected(row)) {
-                selectedRows.add(row);
-            }
-        }
-        return selectedRows;
+        return leaderboardSelectionModel.getSelectedSet();
     }
 
     @Override
