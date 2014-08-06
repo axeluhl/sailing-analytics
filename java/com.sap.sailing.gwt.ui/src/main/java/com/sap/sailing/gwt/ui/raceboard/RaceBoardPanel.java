@@ -188,7 +188,6 @@ public class RaceBoardPanel extends SimplePanel implements RegattasDisplayer, Ra
         updateCompetitorsFilterControlState(competitorsFilterSets);*/
 
         timePanel = new RaceTimePanel(timer, timeRangeWithZoomModel, stringMessages, raceTimesInfoProvider, raceboardViewConfiguration.isCanReplayDuringLiveRaces());
-        timePanel.hideControlsPanelAndMovePlayButtonUp();
         timeRangeWithZoomModel.addTimeZoomChangeListener(timePanel);
         raceTimesInfoProvider.addRaceTimesInfoProviderListener(timePanel);
         raceSelectionProvider.addRaceSelectionChangeListener(timePanel);
