@@ -9,6 +9,7 @@ import com.google.gwt.event.dom.client.ClickEvent;
 import com.google.gwt.event.dom.client.ClickHandler;
 import com.google.gwt.event.dom.client.KeyUpEvent;
 import com.google.gwt.event.dom.client.KeyUpHandler;
+import com.google.gwt.user.client.Window;
 import com.google.gwt.user.client.ui.Button;
 import com.google.gwt.user.client.ui.HorizontalPanel;
 import com.google.gwt.user.client.ui.TextBox;
@@ -16,10 +17,13 @@ import com.sap.sailing.domain.common.dto.CompetitorDTO;
 import com.sap.sailing.gwt.ui.client.CompetitorSelectionChangeListener;
 import com.sap.sailing.gwt.ui.client.CompetitorSelectionProvider;
 import com.sap.sailing.gwt.ui.client.StringMessages;
+import com.sap.sailing.gwt.ui.client.shared.filter.CompetitorsFilterSets;
+import com.sap.sailing.gwt.ui.client.shared.filter.CompetitorsFilterSetsDialog;
 import com.sap.sse.common.Util;
 import com.sap.sse.common.filter.AbstractListFilter;
 import com.sap.sse.common.filter.Filter;
 import com.sap.sse.common.filter.FilterSet;
+import com.sap.sse.gwt.client.dialog.DataEntryDialog.DialogCallback;
 
 /**
  * A text box that belongs to a {@link LeaderboardPanel} and allows the user to search for competitors by sail number
@@ -33,12 +37,14 @@ import com.sap.sse.common.filter.FilterSet;
 public class CompetitorSearchTextBox extends HorizontalPanel implements KeyUpHandler, Filter<CompetitorDTO>, CompetitorSelectionChangeListener {
     private final TextBox searchTextBox;
     private final Button clearTextBoxButton;
+    private final Button filterTop30Button;
+    private final Button advancedSettingsButton;
     private final StringMessages stringMessages;
     private final AbstractListFilter<CompetitorDTO> filter;
     private final CompetitorSelectionProvider competitorSelectionProvider;
     private String lastFilterSetNameWithoutThis;
     
-    public CompetitorSearchTextBox(CompetitorSelectionProvider competitorSelectionProvider, StringMessages stringMessages) {
+    public CompetitorSearchTextBox(final CompetitorSelectionProvider competitorSelectionProvider, final StringMessages stringMessages) {
         this.stringMessages = stringMessages;
         this.competitorSelectionProvider = competitorSelectionProvider;
         filter = new AbstractListFilter<CompetitorDTO>() {
@@ -57,8 +63,19 @@ public class CompetitorSearchTextBox extends HorizontalPanel implements KeyUpHan
                 onKeyUp(null);
             }
         });
+        filterTop30Button = new Button("T30");
+        advancedSettingsButton = new Button("");
+        advancedSettingsButton.addStyleName("raceBoardNavigation-filterButton");
+        advancedSettingsButton.addClickHandler(new ClickHandler() {
+            @Override
+            public void onClick(ClickEvent event) {
+                Window.alert("Not yet implemented");
+            }
+        });
         add(searchTextBox);
         add(clearTextBoxButton);
+        add(filterTop30Button);
+        add(advancedSettingsButton);
     }
 
     /**
