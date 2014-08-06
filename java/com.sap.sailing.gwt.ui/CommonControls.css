@@ -295,7 +295,7 @@ body ::-webkit-scrollbar-track {
 	border-bottom-left-radius: 25px;
 	border-bottom-right-radius: 25px;
 	background: white url(images/settings_black.png) center no-repeat;
-	z-index: 200;
+	z-index: 1;
 	width: 28px;
 	height: 28px;
 	cursor: pointer;
@@ -312,8 +312,8 @@ body ::-webkit-scrollbar-track {
 .gwt-SplitLayoutPanel-MapSettingsButton {
 	position: absolute;
 	right: 29px;
-	top: 320px;
-	z-index: 250;
+	top: 140px;
+	z-index: 1;
 	border-top-left-radius: 25px;
 	border-top-right-radius: 25px;
 	border-bottom-left-radius: 25px;
