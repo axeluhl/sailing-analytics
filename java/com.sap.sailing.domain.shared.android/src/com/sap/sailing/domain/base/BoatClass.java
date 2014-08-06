@@ -1,5 +1,6 @@
 package com.sap.sailing.domain.base;
 
+import com.sap.sailing.domain.common.BoatHullType;
 import com.sap.sailing.domain.common.Distance;
 import com.sap.sailing.domain.common.TimePoint;
 import com.sap.sse.common.Named;

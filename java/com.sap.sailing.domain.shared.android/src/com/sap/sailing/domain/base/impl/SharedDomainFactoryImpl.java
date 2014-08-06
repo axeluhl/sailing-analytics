@@ -26,6 +26,7 @@ import com.sap.sailing.domain.base.Waypoint;
 import com.sap.sailing.domain.base.configuration.DeviceConfigurationMatcher;
 import com.sap.sailing.domain.base.configuration.impl.DeviceConfigurationMatcherMulti;
 import com.sap.sailing.domain.base.configuration.impl.DeviceConfigurationMatcherSingle;
+import com.sap.sailing.domain.common.BoatClassMasterdata;
 import com.sap.sailing.domain.common.Color;
 import com.sap.sailing.domain.common.MarkType;
 import com.sap.sailing.domain.common.PassingInstruction;
@@ -118,6 +119,14 @@ public class SharedDomainFactoryImpl implements SharedDomainFactory {
         this.competitorStore = competitorStore;
         waypointCache = new ConcurrentHashMap<Serializable, WeakWaypointReference>();
         mayStartWithNoUpwindLeg = new HashSet<String>(Arrays.asList(new String[] { "extreme40", "ess", "ess40" }));
+        for (BoatClassMasterdata boatClassMasterdata : BoatClassMasterdata.values()) {
+            BoatClass boatClass = new BoatClassImpl(boatClassMasterdata.getDisplayName(), boatClassMasterdata);
+            boatClassCache.put(boatClassMasterdata.getDisplayName(), boatClass);
+            for (String alternativeName : boatClassMasterdata.getAlternativeNames()) {
+                BoatClass boatClassWithAlternativeName = new BoatClassImpl(alternativeName, boatClassMasterdata);
+                boatClassCache.put(alternativeName, boatClassWithAlternativeName);
+            }
+        }
         courseAreaCache = new HashMap<Serializable, CourseArea>();
         configurationMatcherCache = new HashMap<Serializable, DeviceConfigurationMatcher>();
     }

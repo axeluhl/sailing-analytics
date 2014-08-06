@@ -1,6 +1,7 @@
-package com.sap.sailing.domain.base.impl;
+package com.sap.sailing.domain.common;
 
-import com.sap.sailing.domain.base.BoatHullType;
+import com.sap.sailing.domain.common.impl.MeterDistance;
+
 
 public enum BoatClassMasterdata {
     _2_4M ("2.4 Meter", true, 4.11, 0.81, BoatHullType.MONOHULL, "2.4M", "2.4mR"),
@@ -52,7 +53,7 @@ public enum BoatClassMasterdata {
     X_99 ("X-99", true, 9.96, 2.95, BoatHullType.MONOHULL, "X99"),
     CONTENDER ("Contender", true, 4.88, 1.42, BoatHullType.MONOHULL),
     FLYING_DUTCHMAN ("Flying Dutchman", true, 6.10, 1.80, BoatHullType.MONOHULL);
-    
+
     private final String displayName;
     private final String[] alternativeNames;
     private final double hullLengthInMeter;
@@ -60,8 +61,8 @@ public enum BoatClassMasterdata {
     private final BoatHullType hullType;
     private final boolean typicallyStartsUpwind;
 
-    private BoatClassMasterdata(String displayName, boolean typicallyStartsUpwind, double hullLengthInMeter, double hullBeamInMeter,
-            BoatHullType hullType, String... alternativeNames) {
+    private BoatClassMasterdata(String displayName, boolean typicallyStartsUpwind, double hullLengthInMeter,
+            double hullBeamInMeter, BoatHullType hullType, String... alternativeNames) {
         this.displayName = displayName;
         this.typicallyStartsUpwind = typicallyStartsUpwind;
         this.hullLengthInMeter = hullLengthInMeter;
@@ -69,33 +70,33 @@ public enum BoatClassMasterdata {
         this.hullType = hullType;
         this.alternativeNames = alternativeNames;
     }
-    
-    private BoatClassMasterdata(String displayName, boolean typicallyStartsUpwind, double hullLengthInMeter, double hullBeamInMeter,
-            BoatHullType hullType) {
+
+    private BoatClassMasterdata(String displayName, boolean typicallyStartsUpwind, double hullLengthInMeter,
+            double hullBeamInMeter, BoatHullType hullType) {
         this.displayName = displayName;
         this.typicallyStartsUpwind = typicallyStartsUpwind;
         this.hullLengthInMeter = hullLengthInMeter;
         this.hullBeamInMeter = hullBeamInMeter;
         this.hullType = hullType;
         this.alternativeNames = null;
-    }    
-    
+    }
+
     public BoatClassMasterdata resolveBoatClass(String boatClassName) {
-        for(BoatClassMasterdata boatClass: values()) {
-            if(boatClass.displayName.toUpperCase().equals(boatClassName.toUpperCase())) {
+        for (BoatClassMasterdata boatClass : values()) {
+            if (boatClass.displayName.toUpperCase().equals(boatClassName.toUpperCase())) {
                 return boatClass;
             }
-            for(String name: boatClass.alternativeNames) {
-                if(name.toUpperCase().equals(boatClassName.toUpperCase())) {
+            for (String name : boatClass.alternativeNames) {
+                if (name.toUpperCase().equals(boatClassName.toUpperCase())) {
                     return boatClass;
                 }
             }
         }
         return null;
     }
-    
-    public double getHullLengthInMeter() {
-        return hullLengthInMeter;
+
+    public Distance getHullLength() {
+        return new MeterDistance(hullLengthInMeter);
     }
 
     public String getDisplayName() {
@@ -103,11 +104,11 @@ public enum BoatClassMasterdata {
     }
 
     public String[] getAlternativeNames() {
-        return alternativeNames;
+        return alternativeNames == null ? new String[0] : alternativeNames;
     }
 
-    public double getHullBeamInMeter() {
-        return hullBeamInMeter;
+    public Distance getHullBeam() {
+        return new MeterDistance(hullBeamInMeter);
     }
 
     public BoatHullType getHullType() {
