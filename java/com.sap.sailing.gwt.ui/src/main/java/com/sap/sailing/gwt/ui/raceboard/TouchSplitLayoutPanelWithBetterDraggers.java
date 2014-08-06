@@ -139,7 +139,7 @@ public class TouchSplitLayoutPanelWithBetterDraggers extends DockLayoutPanel {
               LayoutData layout = (LayoutData) target.getLayoutData();
               if (layout.size == 0) {
                 // Restore the old size.
-                setAssociatedWidgetSize(layout.oldSize);
+                setAssociatedWidgetSize(layout.oldSize, /*defer*/true);
               } else {
                 /*
                  * Collapse to size 0. We change the size instead of hiding the
@@ -147,7 +147,7 @@ public class TouchSplitLayoutPanelWithBetterDraggers extends DockLayoutPanel {
                  * widget contains a flash component.
                  */
                 layout.oldSize = layout.size;
-                setAssociatedWidgetSize(0);
+                setAssociatedWidgetSize(0, /*defer*/true);
               }
             }
             this.lastClick = now;
@@ -168,7 +168,7 @@ public class TouchSplitLayoutPanelWithBetterDraggers extends DockLayoutPanel {
               size = getEventPosition(event) - getTargetPosition() - offset;
             }
             ((LayoutData) target.getLayoutData()).hidden = false;
-            setAssociatedWidgetSize(size);
+            setAssociatedWidgetSize(size, /*defer*/true);
             event.preventDefault();
           }
           break;
@@ -181,7 +181,7 @@ public class TouchSplitLayoutPanelWithBetterDraggers extends DockLayoutPanel {
 
       // Try resetting the associated widget's size, which will enforce the new
       // minSize value.
-      setAssociatedWidgetSize((int) layout.size);
+      setAssociatedWidgetSize((int) layout.size, /*defer*/true);
     }
 
     public void setSnapClosedSize(int snapClosedSize) {
@@ -216,7 +216,7 @@ public class TouchSplitLayoutPanelWithBetterDraggers extends DockLayoutPanel {
                 0);
     }
 
-    private void setAssociatedWidgetSize(double size) {
+    private void setAssociatedWidgetSize(double size, boolean defer) {
       double maxSize = getMaxSize();
       if (size > maxSize) {
         size = maxSize;
@@ -239,7 +239,7 @@ public class TouchSplitLayoutPanelWithBetterDraggers extends DockLayoutPanel {
 
       // Defer actually updating the layout, so that if we receive many
       // mouse events before layout/paint occurs, we'll only update once.
-      if (layoutCommand == null) {
+      if (layoutCommand == null && defer) {
         layoutCommand = new ScheduledCommand() {
           @Override
           public void execute() {
@@ -248,6 +248,8 @@ public class TouchSplitLayoutPanelWithBetterDraggers extends DockLayoutPanel {
           }
         };
         Scheduler.get().scheduleDeferred(layoutCommand);
+      } else {
+          forceLayout();
       }
     }
   }
@@ -468,7 +470,7 @@ public class TouchSplitLayoutPanelWithBetterDraggers extends DockLayoutPanel {
     }
   }
   
-  public void setWidgetVisibilityAndPossiblyShowSplitter(Widget widget, Component<?> associatedComponentToWidget, boolean hidden, int size) {
+  public void setWidgetVisibility(Widget widget, Component<?> associatedComponentToWidget, Widget widgetThatDeterminesSize, boolean hidden, int size) {
       super.setWidgetHidden(widget, hidden);
       Splitter splitter = getAssociatedSplitter(widget);
       if (splitter != null) {
@@ -479,17 +481,23 @@ public class TouchSplitLayoutPanelWithBetterDraggers extends DockLayoutPanel {
               if (associatedComponentToWidget != null) {
                   associatedComponentToWidget.setVisible(false);
               }
-              splitter.setAssociatedWidgetSize(0);
+              splitter.setAssociatedWidgetSize(0, /*defer*/false);
           } else {
               widget.setVisible(true);
               if (associatedComponentToWidget != null) {
                   associatedComponentToWidget.setVisible(true);
               }
-              splitter.setAssociatedWidgetSize(size);
+              splitter.setAssociatedWidgetSize(size, /*defer*/false);
           }
           splitter.setVisible(!hidden);
       }
-      forceLayout();
+      if (splitter != null && !hidden && splitter instanceof HSplitter) {
+          int widthOfWidget = widgetThatDeterminesSize.getOffsetWidth();
+          if (size > widthOfWidget && widthOfWidget > 0) {
+              size = widthOfWidget;
+              splitter.setAssociatedWidgetSize(size, /*defer*/false);
+          }
+      }
   }
 
     private void assertIsChild2(Widget widget) {

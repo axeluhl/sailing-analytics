@@ -347,7 +347,7 @@ public class LeaderboardPanel extends SimplePanel implements TimeListener, PlayS
         return isEmbedded;
     }
 
-    protected VerticalPanel getContentPanel() {
+    public VerticalPanel getContentPanel() {
         return contentPanel;
     }
     

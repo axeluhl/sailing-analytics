@@ -22,6 +22,7 @@ import com.sap.sailing.gwt.ui.client.StringMessages;
 import com.sap.sailing.gwt.ui.client.shared.components.Component;
 import com.sap.sailing.gwt.ui.client.shared.components.ComponentViewer;
 import com.sap.sailing.gwt.ui.client.shared.components.SettingsDialog;
+import com.sap.sailing.gwt.ui.leaderboard.LeaderboardPanel;
 import com.sap.sse.gwt.client.player.TimeListener;
 
 /**
@@ -69,8 +70,8 @@ public class SideBySideComponentViewer implements ComponentViewer {
         public abstract void settingsClicked();
     }
     
-    /** there is no easy replacement for the HorizontalSplitPanel available */ 
-    private final Component<?> leftComponent;
+    private final LeaderboardPanel leftComponent;
+    private final Panel leaderboardContentPanel;
     private final Component<?> rightComponent;
     private final List<Component<?>> components;
     private final Map<Component<?>, Panel> componentPanels;
@@ -85,9 +86,10 @@ public class SideBySideComponentViewer implements ComponentViewer {
     private TouchSplitLayoutPanelWithBetterDraggers splitLayoutPanel; 
     private int savedSplitPosition = -1;
     
-    public SideBySideComponentViewer(final Component<?> leftComponentP, final Component<?> rightComponentP, List<Component<?>> components, final StringMessages stringMessages) {
+    public SideBySideComponentViewer(final LeaderboardPanel leftComponentP, final Component<?> rightComponentP, List<Component<?>> components, final StringMessages stringMessages) {
         this.stringMessages = stringMessages;
         this.leftComponent = leftComponentP;
+        this.leaderboardContentPanel = leftComponentP.getContentPanel();
         this.rightComponent = rightComponentP;
         this.components = components;
         this.componentPanels = new HashMap<Component<?>, Panel>();
@@ -130,8 +132,9 @@ public class SideBySideComponentViewer implements ComponentViewer {
         leftPanel = new PanelWithCloseAndSettingsButton(leftScrollPanel) {
             @Override
             public void closeClicked() {
-                splitLayoutPanel.setWidgetVisibilityAndPossiblyShowSplitter(this, leftComponent, true, 500);
+                splitLayoutPanel.setWidgetVisibility(this, leftComponent, leaderboardContentPanel, true, 500);
                 panelForTogglingEastLayoutPanelComponents.add(leaderboardTogglerButton);
+                resizePanelWithButtons(panelForTogglingSouthLayoutPanelComponents);
             }
             @Override
             public void settingsClicked() {
@@ -171,7 +174,7 @@ public class SideBySideComponentViewer implements ComponentViewer {
                 }
                 @Override
                 public void closeClicked() {
-                    splitLayoutPanel.setWidgetVisibilityAndPossiblyShowSplitter(this, component, true, 200);
+                    splitLayoutPanel.setWidgetVisibility(this, component, this, true, 200);
                     panelForTogglingSouthLayoutPanelComponents.add(togglerButton);
                     resizePanelWithButtons(panelForTogglingSouthLayoutPanelComponents);
                 }
@@ -205,17 +208,17 @@ public class SideBySideComponentViewer implements ComponentViewer {
         } else if (!leftComponent.isVisible() && rightComponent.isVisible()) {
             // the leaderboard is not visible, but the map is
             if (isWidgetInSplitPanel(leftPanel)) {
-                splitLayoutPanel.setWidgetVisibilityAndPossiblyShowSplitter(leftPanel, leftComponent, /*hidden*/true, savedSplitPosition);
+                splitLayoutPanel.setWidgetVisibility(leftPanel, leftComponent, leaderboardContentPanel, /*hidden*/true, savedSplitPosition);
             }
         } else if (leftComponent.isVisible() && rightComponent.isVisible()) {
             // the leaderboard and the map are visible
-            splitLayoutPanel.setWidgetVisibilityAndPossiblyShowSplitter(leftPanel, leftComponent, /*hidden*/false, savedSplitPosition);
+            splitLayoutPanel.setWidgetVisibility(leftPanel, leftComponent, leaderboardContentPanel, /*hidden*/false, savedSplitPosition);
         } else if (!leftComponent.isVisible() && !rightComponent.isVisible()) {
         }
 
         for (Component<?> component : components) {
             final boolean isComponentVisible = component.isVisible();
-            splitLayoutPanel.setWidgetVisibilityAndPossiblyShowSplitter(componentPanels.get(component), component, !isComponentVisible, 200);
+            splitLayoutPanel.setWidgetVisibility(componentPanels.get(component), component, componentPanels.get(component), !isComponentVisible, 200);
         }
         splitLayoutPanel.forceLayout();
     }
