@@ -57,7 +57,6 @@ public class CompetitorSearchTextBox extends HorizontalPanel implements KeyUpHan
 
     private final TextBox searchTextBox;
     private final Button clearTextBoxButton;
-    private final Button filterTop30Button;
     private final Button advancedSettingsButton;
     private final StringMessages stringMessages;
     private final AbstractListFilter<CompetitorDTO> filter;
@@ -102,7 +101,6 @@ public class CompetitorSearchTextBox extends HorizontalPanel implements KeyUpHan
                 onKeyUp(null);
             }
         });
-        filterTop30Button = new Button("T30");
         advancedSettingsButton = new Button("");
         advancedSettingsButton.addStyleName(ADVANCED_FILTER_BUTTON);
         advancedSettingsButton.addClickHandler(new ClickHandler() {
@@ -125,7 +123,6 @@ public class CompetitorSearchTextBox extends HorizontalPanel implements KeyUpHan
             });
         add(searchTextBox);
         add(clearTextBoxButton);
-        add(filterTop30Button);
         add(advancedSettingsButton);
     }
 
