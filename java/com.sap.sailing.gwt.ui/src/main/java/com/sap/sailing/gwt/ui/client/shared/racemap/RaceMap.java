@@ -1183,12 +1183,10 @@ public class RaceMap extends AbsolutePanel implements TimeListener, CompetitorSe
     private void zoomMapToNewBounds(Bounds newBounds) {
         if (newBounds != null) {
             Bounds currentMapBounds = BoundsUtil.getAsBounds(map.getBounds());
-            if (!currentMapBounds.contains(newBounds) || isTwiceTheGraticuleArea(currentMapBounds, newBounds)) {
+            if (!currentMapBounds.contains(newBounds) || graticuleAreaRation(currentMapBounds, newBounds) > 10) {
                 // only change bounds if the new bounds don't fit into the current map zoom
-                // TODO check if we need to shrink every once in a while...
                 List<ZoomTypes> oldZoomSettings = settings.getZoomSettings().getTypesToConsiderOnZoom();
                 setAutoZoomInProgress(true);
-//                map.setCenter(newBounds.getCenter()); // TODO try without this to avoid frequent suspension of CSS boat animation
                 LatLngBounds newLatLngBounds = BoundsUtil.getAsLatLngBounds(newBounds);
                 map.fitBounds(newLatLngBounds);
                 settings.getZoomSettings().setTypesToConsiderOnZoom(oldZoomSettings);
@@ -1197,10 +1195,10 @@ public class RaceMap extends AbsolutePanel implements TimeListener, CompetitorSe
         }
     }
     
-    private boolean isTwiceTheGraticuleArea(Bounds containing, Bounds contained) {
+    private double graticuleAreaRation(Bounds containing, Bounds contained) {
         assert containing.contains(contained);
         double containingAreaRatio = getGraticuleArea(containing) / getGraticuleArea(contained);
-        return containingAreaRatio >= 2.0;
+        return containingAreaRatio;
     }
 
     /**
@@ -1849,7 +1847,7 @@ public class RaceMap extends AbsolutePanel implements TimeListener, CompetitorSe
                 // optionally, consider providing a bounds cache with two sorted sets that organize the LatLng objects for O(1) bounds calculation and logarithmic add, ideally O(1) remove
                 if (tail != null && tail.getPath().getLength() >= 1) {
                     bounds = BoundsUtil.getAsBounds(BoundsUtil.getAsPosition(tail.getPath().get(0)));
-                    for(int i = 1; i < tail.getPath().getLength(); i++) {
+                    for (int i = 1; i < tail.getPath().getLength(); i++) {
                         bounds = bounds.extend(BoundsUtil.getAsPosition(tail.getPath().get(i)));
                     }
                 }
