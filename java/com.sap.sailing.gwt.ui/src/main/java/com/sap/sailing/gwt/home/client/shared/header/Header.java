@@ -66,11 +66,13 @@ public class Header extends Composite {
     @UiHandler("eventsPageLink")
     public void goToEvents(ClickEvent e) {
         navigator.goToEvents();
+        setActiveLink(eventsPageLink);
     }
 
     @UiHandler("solutionsPageLink")
     public void goToSolutions(ClickEvent e) {
         navigator.goToSolutions();
+        setActiveLink(solutionsPageLink);
     }
 
 //    @UiHandler("sponsoringPageLink")
