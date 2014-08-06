@@ -34,4 +34,7 @@ public interface ClientResources extends ClientBundle {
 
     @Source("com/sap/sailing/gwt/ui/client/images/timeslider-playstate-replay-inactive.png")
     ImageResource timesliderPlayStateReplayInactiveIcon();
+
+    @Source("com/sap/sailing/gwt/ui/client/images/sap-logo-overlay.png")
+    ImageResource sapLogoOverlay();
 }

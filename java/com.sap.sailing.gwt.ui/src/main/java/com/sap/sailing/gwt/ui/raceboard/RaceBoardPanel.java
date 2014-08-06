@@ -6,8 +6,13 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
+import com.google.gwt.core.client.GWT;
 import com.google.gwt.dom.client.Style.Unit;
+import com.google.gwt.event.dom.client.ClickEvent;
+import com.google.gwt.event.dom.client.ClickHandler;
+import com.google.gwt.resources.client.ImageResource;
 import com.google.gwt.user.client.Command;
+import com.google.gwt.user.client.Window;
 import com.google.gwt.user.client.ui.FlowPanel;
 import com.google.gwt.user.client.ui.HasHorizontalAlignment;
 import com.google.gwt.user.client.ui.Image;
@@ -21,6 +26,7 @@ import com.sap.sailing.domain.common.dto.CompetitorDTO;
 import com.sap.sailing.domain.common.dto.LeaderboardDTO;
 import com.sap.sailing.domain.common.dto.RaceColumnDTO;
 import com.sap.sailing.domain.common.dto.RaceDTO;
+import com.sap.sailing.gwt.ui.client.ClientResources;
 import com.sap.sailing.gwt.ui.client.CompetitorSelectionModel;
 import com.sap.sailing.gwt.ui.client.ErrorReporter;
 import com.sap.sailing.gwt.ui.client.GlobalNavigationPanel;
@@ -66,8 +72,9 @@ import com.sap.sse.gwt.client.useragent.UserAgentDetails;
  */
 public class RaceBoardPanel extends SimplePanel implements RegattasDisplayer, RaceSelectionChangeListener, LeaderboardUpdateListener {
     private final SailingServiceAsync sailingService;
-    // TODO media service and user currently unused because the audio/video checkbox button is currently under redesign and will get its own panel and show-button
+    @SuppressWarnings("unused")     // TODO media service and user currently unused because the audio/video checkbox button is currently under redesign and will get its own panel and show-button
     private final MediaServiceAsync mediaService;
+    @SuppressWarnings("unused")     // TODO media service and user currently unused because the audio/video checkbox button is currently under redesign and will get its own panel and show-button
     private final UserDTO user;
     private final StringMessages stringMessages;
     private final ErrorReporter errorReporter;
@@ -130,6 +137,8 @@ public class RaceBoardPanel extends SimplePanel implements RegattasDisplayer, Ra
         componentViewers = new ArrayList<ComponentViewer>();
         competitorSelectionModel = new CompetitorSelectionModel(/* hasMultiSelection */ true);
                 
+        raceMap = new RaceMap(sailingService, asyncActionsExecutor, errorReporter, timer,
+                competitorSelectionModel, stringMessages, showMapControls, getConfiguration().isShowViewStreamlets(), selectedRaceIdentifier);
         CompetitorSearchTextBox competitorSearchTextBox = new CompetitorSearchTextBox(competitorSelectionModel, stringMessages, raceMap,
                 new LeaderboardFetcher() {
                     @Override
@@ -138,7 +147,7 @@ public class RaceBoardPanel extends SimplePanel implements RegattasDisplayer, Ra
                     }
                 }, selectedRaceIdentifier);
         leaderboardPanel = createLeaderboardPanel(leaderboardName, leaderboardGroupName, competitorSearchTextBox);
-        createOneScreenView(leaderboardName, leaderboardGroupName, mainPanel, showMapControls); // initializes the raceMap field
+        createOneScreenView(leaderboardName, leaderboardGroupName, mainPanel, showMapControls, raceMap); // initializes the raceMap field
         // these calls make sure that leaderboard and competitor map data are loaded
         leaderboardPanel.addLeaderboardUpdateListener(this);
         getElement().getStyle().setMarginLeft(12, Unit.PX);
@@ -168,10 +177,9 @@ public class RaceBoardPanel extends SimplePanel implements RegattasDisplayer, Ra
         timePanel.onRaceSelectionChange(raceSelectionProvider.getSelectedRaces());
     }
     
-    private void createOneScreenView(String leaderboardName, String leaderboardGroupName, FlowPanel mainPanel, boolean showMapControls) {
+    private void createOneScreenView(String leaderboardName, String leaderboardGroupName, FlowPanel mainPanel, boolean showMapControls,
+            RaceMap raceMap) {
         // create the default leaderboard and select the right race
-        raceMap = new RaceMap(sailingService, asyncActionsExecutor, errorReporter, timer,
-                competitorSelectionModel, stringMessages, showMapControls, getConfiguration().isShowViewStreamlets(), selectedRaceIdentifier);
         raceTimesInfoProvider.addRaceTimesInfoProviderListener(raceMap);
         raceMap.onRaceSelectionChange(Collections.singletonList(selectedRaceIdentifier));
         List<Component<?>> components = new ArrayList<Component<?>>();
@@ -196,7 +204,15 @@ public class RaceBoardPanel extends SimplePanel implements RegattasDisplayer, Ra
         setWindChartVisible(getConfiguration().isShowWindChart());
         setCompetitorChartVisible(getConfiguration().isShowCompetitorsChart());
 
-        Image sapLogo = new Image("images/sap_66_transparent.png");
+        ClientResources resources = GWT.create(ClientResources.class);
+        ImageResource sapLogoResource = resources.sapLogoOverlay();
+        Image sapLogo = new Image(sapLogoResource);
+        sapLogo.addClickHandler(new ClickHandler() {
+            @Override
+            public void onClick(ClickEvent event) {
+                Window.open("http://www.sap.com", "_blank", null);
+            }
+        });
         sapLogo.setStyleName("raceBoard-Logo");
         raceMap.add(sapLogo);
         
