@@ -12,6 +12,7 @@ import com.google.gwt.event.dom.client.ClickEvent;
 import com.google.gwt.event.dom.client.ClickHandler;
 import com.google.gwt.event.logical.shared.ValueChangeEvent;
 import com.google.gwt.event.logical.shared.ValueChangeHandler;
+import com.google.gwt.i18n.client.HasDirection.Direction;
 import com.google.gwt.json.client.JSONObject;
 import com.google.gwt.json.client.JSONParser;
 import com.google.gwt.json.client.JSONValue;
@@ -20,15 +21,21 @@ import com.google.gwt.user.client.Command;
 import com.google.gwt.user.client.ui.Button;
 import com.google.gwt.user.client.ui.CheckBox;
 import com.google.gwt.user.client.ui.FlowPanel;
+import com.google.gwt.user.client.ui.HasHorizontalAlignment;
+import com.google.gwt.user.client.ui.HasHorizontalAlignment.HorizontalAlignmentConstant;
+import com.google.gwt.user.client.ui.Image;
+import com.google.gwt.user.client.ui.Label;
 import com.google.gwt.user.client.ui.MenuBar;
 import com.google.gwt.user.client.ui.Panel;
 import com.google.gwt.user.client.ui.SimplePanel;
+import com.google.gwt.user.client.ui.VerticalPanel;
 import com.sap.sailing.domain.common.RaceIdentifier;
 import com.sap.sailing.domain.common.RegattaAndRaceIdentifier;
 import com.sap.sailing.domain.common.dto.CompetitorDTO;
 import com.sap.sailing.domain.common.dto.RaceDTO;
 import com.sap.sailing.gwt.ui.client.CompetitorSelectionModel;
 import com.sap.sailing.gwt.ui.client.ErrorReporter;
+import com.sap.sailing.gwt.ui.client.GlobalNavigationPanel;
 import com.sap.sailing.gwt.ui.client.MediaServiceAsync;
 import com.sap.sailing.gwt.ui.client.RaceSelectionChangeListener;
 import com.sap.sailing.gwt.ui.client.RaceSelectionProvider;
@@ -179,6 +186,7 @@ public class RaceBoardPanel extends SimplePanel implements RegattasDisplayer, Ra
         updateCompetitorsFilterControlState(competitorsFilterSets);*/
 
         timePanel = new RaceTimePanel(timer, timeRangeWithZoomModel, stringMessages, raceTimesInfoProvider, raceboardViewConfiguration.isCanReplayDuringLiveRaces());
+        timePanel.hideControlsPanelAndMovePlayButtonUp();
         timeRangeWithZoomModel.addTimeZoomChangeListener(timePanel);
         raceTimesInfoProvider.addRaceTimesInfoProviderListener(timePanel);
         raceSelectionProvider.addRaceSelectionChangeListener(timePanel);
@@ -212,6 +220,23 @@ public class RaceBoardPanel extends SimplePanel implements RegattasDisplayer, Ra
         setLeaderboardVisible(getConfiguration().isShowLeaderboard());
         setWindChartVisible(getConfiguration().isShowWindChart());
         setCompetitorChartVisible(getConfiguration().isShowCompetitorsChart());
+        createTitleAndLogo(raceMap, leaderboardName, leaderboardGroupName);
+    }
+    
+    private void createTitleAndLogo(RaceMap raceMap, String leaderboardName, String leaderboardGroupName) {
+        VerticalPanel titlePanel = new VerticalPanel();
+        titlePanel.setHorizontalAlignment(HasHorizontalAlignment.ALIGN_CENTER);
+        titlePanel.setStyleName("raceBoard-TitlePanel");
+        Label raceNameLabel = new Label(selectedRaceIdentifier.getRaceName());
+        raceNameLabel.setStyleName("raceBoard-TitlePanel-RaceNameLabel");
+        titlePanel.add(raceNameLabel);
+        GlobalNavigationPanel globalNavigationPanel = new GlobalNavigationPanel(stringMessages, true, leaderboardName, leaderboardGroupName);
+        titlePanel.add(globalNavigationPanel);
+        raceMap.add(titlePanel);
+        
+        Image sapLogo = new Image("images/sap_66_transparent.png");
+        sapLogo.setStyleName("raceBoard-Logo");
+        raceMap.add(sapLogo);
     }
  
     private CompetitorsFilterSets createAndAddDefaultCompetitorsFilter() {

@@ -207,67 +207,15 @@ public class RaceBoardEntryPoint extends AbstractEntryPoint {
         return timelinePanel;
     }
 
-    private FlowPanel createLogoAndTitlePanel(RaceBoardPanel raceBoardPanel) {
-        globalNavigationPanel = new GlobalNavigationPanel(stringMessages, true, leaderboardName, leaderboardGroupName);
-        LogoAndTitlePanel logoAndTitlePanel = new LogoAndTitlePanel(regattaName, selectedRace.getName(), stringMessages, this) {
-            @Override
-            public void onResize() {
-                super.onResize();
-                if (isSmallWidth()) {
-                    remove(globalNavigationPanel);
-                } else {
-                    add(globalNavigationPanel);
-                }
-            }
-        };
-        logoAndTitlePanel.addStyleName("LogoAndTitlePanel");
-        if (!isSmallWidth()) {
-            logoAndTitlePanel.add(globalNavigationPanel);
-        }
-        return logoAndTitlePanel;
-    }
-    
     private void createRaceBoardInOneScreenMode(RaceBoardPanel raceBoardPanel,
             RaceBoardViewConfiguration raceboardViewConfiguration) {
         final DockLayoutPanel p = new DockLayoutPanel(Unit.PX);
         RootLayoutPanel.get().add(p);
-        final FlowPanel logoAndTitlePanel = createLogoAndTitlePanel(raceBoardPanel);
         FlowPanel timePanel = createTimePanel(raceBoardPanel);
-        p.addNorth(logoAndTitlePanel, 68);
         toolbarAndLogoAndTitleBarHidden = false;
-        p.addSouth(timePanel, 90);
+        raceBoardPanel.getTimePanel().hideControlsPanelAndMovePlayButtonUp();
+        p.addSouth(timePanel, 53);
         p.add(raceBoardPanel);
         p.addStyleName("dockLayoutPanel");
-    }
-
-    private void addModeratorShortkeyFunctionality(final DockLayoutPanel p, final Panel toolbarPanel,
-            final RaceBoardPanel raceBoardPanel, final Panel timeWrapperPanel) {
-        Event.addNativePreviewHandler(new NativePreviewHandler() {
-            @Override
-            public void onPreviewNativeEvent(NativePreviewEvent event) {
-                NativeEvent ne = event.getNativeEvent();
-                if ("keydown".equals(ne.getType()) && ne.getCtrlKey()
-                        && (ne.getKeyCode() == 'm' || ne.getKeyCode() == 'M')) {
-                    ne.preventDefault();
-                    Scheduler.get().scheduleDeferred(new Command() {
-                        @Override
-                        public void execute() {
-                            p.setWidgetHidden(toolbarPanel, !toolbarAndLogoAndTitleBarHidden);
-                            globalNavigationPanel.setVisible(toolbarAndLogoAndTitleBarHidden);
-                            toolbarAndLogoAndTitleBarHidden = !toolbarAndLogoAndTitleBarHidden;
-                            RaceTimePanel timePanel = raceBoardPanel.getTimePanel();
-                            if (toolbarAndLogoAndTitleBarHidden) {
-                                timePanel.hideControlsPanelAndMovePlayButtonUp();
-                                p.setWidgetSize(timeWrapperPanel, 53);
-                            } else {
-                                timePanel.showControlsPanelAndMovePlayButtonDown();
-                                p.setWidgetSize(timeWrapperPanel, 90);
-                            }
-                        }
-                    });
-
-                }
-            }
-        });
     }
 }
