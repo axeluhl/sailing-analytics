@@ -384,7 +384,17 @@ public class RaceMap extends AbsolutePanel implements TimeListener, CompetitorSe
               map.addBoundsChangeHandler(new BoundsChangeMapHandler() {
                   @Override
                   public void onEvent(BoundsChangeMapEvent event) {
-                      int newZoomLevel = map.getZoom();
+                      int newZoomLevel = map.getZoom(); 
+                      if (!isAutoZoomInProgress() && (newZoomLevel != currentZoomLevel)) {
+                          // remove the canvas animations for boats 
+                          for (BoatOverlay boatOverlay : RaceMap.this.getBoatOverlays().values()) {
+                              boatOverlay.removeCanvasPositionAndRotationTransition();
+                          }
+                          // remove the canvas animations for the info overlays of the selected boats 
+                          for(CompetitorInfoOverlay infoOverlay: competitorInfoOverlays.values()) {
+                              infoOverlay.removeCanvasPositionAndRotationTransition();
+                          }
+                      }
                       if ((streamletOverlay != null) && !map.getBounds().equals(currentMapBounds)) {
                           streamletOverlay.onBoundsChanged(newZoomLevel != currentZoomLevel);
                       }
