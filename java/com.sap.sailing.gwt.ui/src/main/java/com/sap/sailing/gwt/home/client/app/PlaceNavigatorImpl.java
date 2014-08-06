@@ -51,26 +51,22 @@ public class PlaceNavigatorImpl implements PlaceNavigator {
 
     @Override
     public void goToAboutUs() {
-        gotoPlace(new AboutUsPlace());
+        gotoPlace(getLocationURL(), new AboutUsPlace(), new AboutUsPlace.Tokenizer());
     }
 
     @Override
     public void goToContact() {
-        gotoPlace(new ContactPlace());
+        gotoPlace(getLocationURL(), new ContactPlace(), new ContactPlace.Tokenizer());
     }
 
     @Override
     public void goToSolutions() {
-        gotoPlace(new SolutionsPlace());
+        gotoPlace(getLocationURL(), new SolutionsPlace(), new SolutionsPlace.Tokenizer());
     }
 
     @Override
     public void goToSponsoring() {
-        gotoPlace(new SponsoringPlace());
-    }
-
-    private <T extends Place> void gotoPlace(T destinationPlace) {
-        placeController.goTo(destinationPlace); 
+        gotoPlace(getLocationURL(), new SponsoringPlace(), new SponsoringPlace.Tokenizer());
     }
 
     private <T extends Place> void gotoPlace(String baseUrl, T destinationPlace, PlaceTokenizer<T> tokenizer) {
