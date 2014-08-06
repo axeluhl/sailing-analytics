@@ -31,6 +31,7 @@ import com.google.gwt.maps.client.controls.MapTypeStyle;
 import com.google.gwt.maps.client.controls.PanControlOptions;
 import com.google.gwt.maps.client.controls.ScaleControlOptions;
 import com.google.gwt.maps.client.controls.ZoomControlOptions;
+import com.google.gwt.maps.client.controls.ZoomControlStyle;
 import com.google.gwt.maps.client.events.bounds.BoundsChangeMapEvent;
 import com.google.gwt.maps.client.events.bounds.BoundsChangeMapHandler;
 import com.google.gwt.maps.client.events.click.ClickMapEvent;
@@ -363,6 +364,7 @@ public class RaceMap extends AbsolutePanel implements TimeListener, CompetitorSe
               if (showMapControls) {
                   ZoomControlOptions zoomControlOptions = ZoomControlOptions.newInstance();
                   zoomControlOptions.setPosition(ControlPosition.TOP_RIGHT);
+                  zoomControlOptions.setStyle(ZoomControlStyle.SMALL);
                   mapOptions.setZoomControlOptions(zoomControlOptions);
                   PanControlOptions panControlOptions = PanControlOptions.newInstance();
                   panControlOptions.setPosition(ControlPosition.TOP_RIGHT);
