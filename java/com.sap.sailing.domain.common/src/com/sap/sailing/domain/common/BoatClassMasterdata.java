@@ -52,6 +52,7 @@ public enum BoatClassMasterdata {
     TORNADO ("Tornado Catamaran", true, 6.10, 3.02, BoatHullType.CATAMARAN, "Tornado", "Tornado Cat"),
     X_99 ("X-99", true, 9.96, 2.95, BoatHullType.MONOHULL, "X99"),
     CONTENDER ("Contender", true, 4.88, 1.42, BoatHullType.MONOHULL),
+    RC44 ("RC44", true, 13.35, 2.75, BoatHullType.MONOHULL),
     FLYING_DUTCHMAN ("Flying Dutchman", true, 6.10, 1.80, BoatHullType.MONOHULL);
 
     private final String displayName;
