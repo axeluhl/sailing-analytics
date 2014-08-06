@@ -1,29 +1,30 @@
 .solutions_nav_link {
-  margin-right: 0.8125em;
+  margin-right: 1em;
 }
-.solutions_content .global-grid {
-  padding: 4.6875em 0;
+.solutions_content .gridalternator {
+  padding: 5em 0;
 }
-.solutions_contentsap .global-grid {
-  padding: 4.6875em 0 5.3125em;
+.solutions_contentsap .gridalternator {
+  padding: 5em 0 5.666666666666667em;
 }
-.solutions_contentrace .global-grid {
-  padding: 3.75em 0 15%;
+.solutions_contentrace .gridalternator {
+  padding: 4em 0 15%;
 }
 .solutions_contentrace .parallax .background {
-  background-position: center 15.625em;
+  background-position: center 16.666666666666668em;
 }
-.solutions_contentpost .global-grid {
-  padding: 3.125em 0;
+.solutions_contentpost .gridalternator {
+  padding: 3.333333333333333em 0;
 }
-.solutions_contenttraining .global-grid {
-  padding-top: 6.25em;
+.solutions_contenttraining .gridalternator {
+  padding-top: 6.666666666666667em;
 }
-.solutions_contentsimulator .global-grid {
-  padding: 4.6875em 0 6.25em;
+.solutions_contentsimulator .gridalternator {
+  padding: 5em 0 6.666666666666667em;
 }
-
 .solutions_content_linkappstore{}
 .noparallax{}
 .solutions{}
 .solutions_nav{}
+.solutions_nav_linkactive{}
+.solutions_navsticky{}
