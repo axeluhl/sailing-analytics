@@ -6,25 +6,13 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
-import com.google.gwt.dom.client.Style;
 import com.google.gwt.dom.client.Style.Unit;
-import com.google.gwt.event.dom.client.ClickEvent;
-import com.google.gwt.event.dom.client.ClickHandler;
-import com.google.gwt.event.logical.shared.ValueChangeEvent;
-import com.google.gwt.event.logical.shared.ValueChangeHandler;
-import com.google.gwt.json.client.JSONObject;
-import com.google.gwt.json.client.JSONParser;
-import com.google.gwt.json.client.JSONValue;
-import com.google.gwt.storage.client.Storage;
 import com.google.gwt.user.client.Command;
-import com.google.gwt.user.client.ui.Button;
-import com.google.gwt.user.client.ui.CheckBox;
 import com.google.gwt.user.client.ui.FlowPanel;
 import com.google.gwt.user.client.ui.HasHorizontalAlignment;
 import com.google.gwt.user.client.ui.Image;
 import com.google.gwt.user.client.ui.Label;
 import com.google.gwt.user.client.ui.MenuBar;
-import com.google.gwt.user.client.ui.Panel;
 import com.google.gwt.user.client.ui.SimplePanel;
 import com.google.gwt.user.client.ui.VerticalPanel;
 import com.sap.sailing.domain.common.RaceIdentifier;
@@ -51,28 +39,18 @@ import com.sap.sailing.gwt.ui.client.shared.charts.WindChartSettings;
 import com.sap.sailing.gwt.ui.client.shared.components.Component;
 import com.sap.sailing.gwt.ui.client.shared.components.ComponentViewer;
 import com.sap.sailing.gwt.ui.client.shared.components.SettingsDialog;
-import com.sap.sailing.gwt.ui.client.shared.filter.CompetitorRaceRankFilter;
-import com.sap.sailing.gwt.ui.client.shared.filter.CompetitorSelectionProviderFilterContext;
-import com.sap.sailing.gwt.ui.client.shared.filter.CompetitorTotalRankFilter;
-import com.sap.sailing.gwt.ui.client.shared.filter.CompetitorsFilterSets;
-import com.sap.sailing.gwt.ui.client.shared.filter.CompetitorsFilterSetsDialog;
-import com.sap.sailing.gwt.ui.client.shared.filter.CompetitorsFilterSetsJsonDeSerializer;
 import com.sap.sailing.gwt.ui.client.shared.filter.FilterWithUI;
-import com.sap.sailing.gwt.ui.client.shared.filter.LeaderboardFilterContext;
-import com.sap.sailing.gwt.ui.client.shared.filter.SelectedCompetitorsFilter;
-import com.sap.sailing.gwt.ui.client.shared.filter.SelectedRaceFilterContext;
+import com.sap.sailing.gwt.ui.client.shared.filter.LeaderboardFetcher;
 import com.sap.sailing.gwt.ui.client.shared.racemap.RaceMap;
+import com.sap.sailing.gwt.ui.leaderboard.CompetitorSearchTextBox;
 import com.sap.sailing.gwt.ui.leaderboard.ExplicitRaceColumnSelectionWithPreselectedRace;
 import com.sap.sailing.gwt.ui.leaderboard.LeaderboardPanel;
 import com.sap.sailing.gwt.ui.leaderboard.LeaderboardSettings;
 import com.sap.sailing.gwt.ui.leaderboard.LeaderboardSettingsFactory;
 import com.sap.sailing.gwt.ui.shared.RegattaDTO;
 import com.sap.sailing.gwt.ui.shared.UserDTO;
-import com.sap.sse.common.filter.BinaryOperator;
-import com.sap.sse.common.filter.Filter;
 import com.sap.sse.common.filter.FilterSet;
 import com.sap.sse.gwt.client.async.AsyncActionsExecutor;
-import com.sap.sse.gwt.client.dialog.DataEntryDialog.DialogCallback;
 import com.sap.sse.gwt.client.player.TimeRangeWithZoomModel;
 import com.sap.sse.gwt.client.player.Timer;
 import com.sap.sse.gwt.client.useragent.UserAgentDetails;
@@ -88,6 +66,7 @@ import com.sap.sse.gwt.client.useragent.UserAgentDetails;
  */
 public class RaceBoardPanel extends SimplePanel implements RegattasDisplayer, RaceSelectionChangeListener, LeaderboardUpdateListener {
     private final SailingServiceAsync sailingService;
+    // TODO media service and user currently unused because the audio/video checkbox button is currently under redesign and will get its own panel and show-button
     private final MediaServiceAsync mediaService;
     private final UserDTO user;
     private final StringMessages stringMessages;
@@ -108,15 +87,11 @@ public class RaceBoardPanel extends SimplePanel implements RegattasDisplayer, Ra
     private final CompetitorSelectionModel competitorSelectionModel;
     private final TimeRangeWithZoomModel timeRangeWithZoomModel; 
     private final RegattaAndRaceIdentifier selectedRaceIdentifier;
-    private final CompetitorsFilterSets competitorsFilterSets;
 
     private final LeaderboardPanel leaderboardPanel;
     private WindChart windChart;
     private MultiCompetitorRaceChart competitorChart;
     private Label raceNameLabel;
-    
-    private CheckBox competitorsFilterCheckBox;
-    private FilterSet<CompetitorDTO, FilterWithUI<CompetitorDTO>> lastActiveCompetitorFilterSet;
     
     /**
      * The component viewer in <code>ONESCREEN</code> view mode. <code>null</code> if in <code>CASCADE</code> view mode
@@ -128,8 +103,6 @@ public class RaceBoardPanel extends SimplePanel implements RegattasDisplayer, Ra
     private final RaceTimesInfoProvider raceTimesInfoProvider;
     private RaceMap raceMap;
     
-    private final static String LOCAL_STORAGE_COMPETITORS_FILTER_SETS_KEY = "sailingAnalytics.raceBoard.competitorsFilterSets";
-
     public RaceBoardPanel(SailingServiceAsync sailingService, MediaServiceAsync mediaService, AsyncActionsExecutor asyncActionsExecutor, UserDTO theUser, Timer timer,
             RaceSelectionProvider theRaceSelectionProvider, String leaderboardName, String leaderboardGroupName,
             RaceBoardViewConfiguration raceboardViewConfiguration, ErrorReporter errorReporter, final StringMessages stringMessages, 
@@ -157,27 +130,26 @@ public class RaceBoardPanel extends SimplePanel implements RegattasDisplayer, Ra
         componentViewers = new ArrayList<ComponentViewer>();
         competitorSelectionModel = new CompetitorSelectionModel(/* hasMultiSelection */ true);
                 
-        leaderboardPanel = createLeaderboardPanel(leaderboardName, leaderboardGroupName);
-        createOneScreenView(leaderboardName, leaderboardGroupName, mainPanel, showMapControls);
+        CompetitorSearchTextBox competitorSearchTextBox = new CompetitorSearchTextBox(competitorSelectionModel, stringMessages, raceMap,
+                new LeaderboardFetcher() {
+                    @Override
+                    public LeaderboardDTO getLeaderboard() {
+                        return leaderboardPanel.getLeaderboard();
+                    }
+                }, selectedRaceIdentifier);
+        leaderboardPanel = createLeaderboardPanel(leaderboardName, leaderboardGroupName, competitorSearchTextBox);
+        createOneScreenView(leaderboardName, leaderboardGroupName, mainPanel, showMapControls); // initializes the raceMap field
         // these calls make sure that leaderboard and competitor map data are loaded
         leaderboardPanel.addLeaderboardUpdateListener(this);
         getElement().getStyle().setMarginLeft(12, Unit.PX);
         getElement().getStyle().setMarginRight(12, Unit.PX);
-
-        CompetitorsFilterSets loadedCompetitorsFilterSets = loadCompetitorsFilterSets();
-        if (loadedCompetitorsFilterSets != null) {
-            competitorsFilterSets = loadedCompetitorsFilterSets;
-            insertSelectedCompetitorsFilter(competitorsFilterSets);
-        } else {
-            competitorsFilterSets = createAndAddDefaultCompetitorsFilter();
-            storeCompetitorsFilterSets(competitorsFilterSets);
-        }
-        
-        // in case the URL configuration contains the name of a competitors filter set we try to activate it  
+        // in case the URL configuration contains the name of a competitors filter set we try to activate it
+        // FIXME the competitorsFilterSets has now moved to CompetitorSearchTextBox (which should probably be renamed); pass on the parameters to the LeaderboardPanel and see what it does with it
         if (raceboardViewConfiguration.getActiveCompetitorsFilterSetName() != null) {
-            for (FilterSet<CompetitorDTO, FilterWithUI<CompetitorDTO>> filterSet: competitorsFilterSets.getFilterSets()) {
+            for (FilterSet<CompetitorDTO, FilterWithUI<CompetitorDTO>> filterSet : competitorSearchTextBox.getCompetitorsFilterSets()
+                    .getFilterSets()) {
                 if (filterSet.getName().equals(raceboardViewConfiguration.getActiveCompetitorsFilterSetName())) {
-                    competitorsFilterSets.setActiveFilterSet(filterSet);
+                    competitorSearchTextBox.getCompetitorsFilterSets().setActiveFilterSet(filterSet);
                     break;
                 }
             }
@@ -188,7 +160,8 @@ public class RaceBoardPanel extends SimplePanel implements RegattasDisplayer, Ra
         updateCompetitorsFilterContexts(competitorsFilterSets);
         updateCompetitorsFilterControlState(competitorsFilterSets);*/
 
-        timePanel = new RaceTimePanel(timer, timeRangeWithZoomModel, stringMessages, raceTimesInfoProvider, raceboardViewConfiguration.isCanReplayDuringLiveRaces());
+        timePanel = new RaceTimePanel(timer, timeRangeWithZoomModel, stringMessages, raceTimesInfoProvider,
+                raceboardViewConfiguration.isCanReplayDuringLiveRaces());
         timeRangeWithZoomModel.addTimeZoomChangeListener(timePanel);
         raceTimesInfoProvider.addRaceTimesInfoProviderListener(timePanel);
         raceSelectionProvider.addRaceSelectionChangeListener(timePanel);
@@ -245,38 +218,6 @@ public class RaceBoardPanel extends SimplePanel implements RegattasDisplayer, Ra
         raceMap.add(titlePanel);
     }
  
-    private CompetitorsFilterSets createAndAddDefaultCompetitorsFilter() {
-        CompetitorsFilterSets filterSets = new CompetitorsFilterSets();
-        
-        // 1. selected competitors filter
-        insertSelectedCompetitorsFilter(filterSets);
-        
-        // 2. Top 50 competitors by race rank
-        int maxRaceRank = 50;
-        FilterSet<CompetitorDTO, FilterWithUI<CompetitorDTO>> topNRaceRankCompetitorsFilterSet = 
-                new FilterSet<CompetitorDTO, FilterWithUI<CompetitorDTO>>(stringMessages.topNCompetitorsByRaceRank(maxRaceRank));
-        CompetitorRaceRankFilter raceRankFilter = new CompetitorRaceRankFilter();
-        raceRankFilter.setOperator(new BinaryOperator<Integer>(BinaryOperator.Operators.LessThanEquals));
-        raceRankFilter.setValue(maxRaceRank);
-        topNRaceRankCompetitorsFilterSet.addFilter(raceRankFilter);
-        filterSets.addFilterSet(topNRaceRankCompetitorsFilterSet);
-
-        // 3. Top 50 competitors by total rank
-        int maxTotalRank = 50;
-        FilterSet<CompetitorDTO, FilterWithUI<CompetitorDTO>> topNTotalRankCompetitorsFilterSet =
-                new FilterSet<CompetitorDTO, FilterWithUI<CompetitorDTO>>(stringMessages.topNCompetitorsByTotalRank(maxTotalRank));
-        CompetitorTotalRankFilter totalRankFilter = new CompetitorTotalRankFilter();
-        totalRankFilter.setOperator(new BinaryOperator<Integer>(BinaryOperator.Operators.LessThanEquals));
-        totalRankFilter.setValue(50);
-        topNTotalRankCompetitorsFilterSet.addFilter(totalRankFilter);
-        filterSets.addFilterSet(topNTotalRankCompetitorsFilterSet);
-        
-        // set default active filter
-        filterSets.setActiveFilterSet(topNRaceRankCompetitorsFilterSet);
-        
-        return filterSets;
-    }
-    
     @SuppressWarnings("unused")
     private <SettingsType> void addSettingsMenuItem(MenuBar settingsMenu, final Component<SettingsType> component) {
         if (component.hasSettings()) {
@@ -288,7 +229,7 @@ public class RaceBoardPanel extends SimplePanel implements RegattasDisplayer, Ra
         }
     }
     
-    private LeaderboardPanel createLeaderboardPanel(String leaderboardName, String leaderboardGroupName) {
+    private LeaderboardPanel createLeaderboardPanel(String leaderboardName, String leaderboardGroupName, CompetitorSearchTextBox competitorSearchTextBox) {
         LeaderboardSettings leaderBoardSettings = LeaderboardSettingsFactory.getInstance()
                 .createNewSettingsForPlayMode(timer.getPlayMode(),
                         /* nameOfRaceToSort */ selectedRaceIdentifier.getRaceName(),
@@ -296,158 +237,11 @@ public class RaceBoardPanel extends SimplePanel implements RegattasDisplayer, Ra
                         new ExplicitRaceColumnSelectionWithPreselectedRace(selectedRaceIdentifier), /* showRegattaRank */ false);
         return new LeaderboardPanel(sailingService, asyncActionsExecutor, leaderBoardSettings, selectedRaceIdentifier,
                 competitorSelectionModel, timer, leaderboardGroupName, leaderboardName, errorReporter, stringMessages,
-                userAgent, /* showRaceDetails */ true, /* showCompetitorSearchBox */ true, /* showSelectionCheckbox */ true,
-                raceTimesInfoProvider, /* autoExpandLastRaceColumn */ false,
+                userAgent, /* showRaceDetails */ true, competitorSearchTextBox,
+                /* showSelectionCheckbox */ true, raceTimesInfoProvider, /* autoExpandLastRaceColumn */ false,
                 /* don't adjust the timer's delay from the leaderboard; control it solely from the RaceTimesInfoProvider */ false);
     }
 
-    private void updateCompetitorsFilterContexts(CompetitorsFilterSets filterSets) {
-        for (FilterSet<CompetitorDTO, FilterWithUI<CompetitorDTO>> filterSet : filterSets.getFilterSets()) {
-            for (Filter<CompetitorDTO> filter : filterSet.getFilters()) {
-                if (filter instanceof LeaderboardFilterContext) {
-                    ((LeaderboardFilterContext) filter).setLeaderboardFetcher(leaderboardPanel);
-                }
-                if (filter instanceof SelectedRaceFilterContext) {
-                    ((SelectedRaceFilterContext) filter).setSelectedRace(selectedRaceIdentifier);
-                    ((SelectedRaceFilterContext) filter).setQuickRankProvider(raceMap);
-                }
-                if (filter instanceof CompetitorSelectionProviderFilterContext) {
-                    ((CompetitorSelectionProviderFilterContext) filter)
-                            .setCompetitorSelectionProvider(competitorSelectionModel);
-                }
-            }
-        }
-    }
-
-    /**
-     * Updates the competitor filter checkbox state by setting its check mark and updating its labal according to the
-     * current filter selected
-     */
-    private void updateCompetitorsFilterControlState(CompetitorsFilterSets filterSets) {
-        String competitorsFilterTitle = stringMessages.competitorsFilter();
-        FilterSet<CompetitorDTO, FilterWithUI<CompetitorDTO>> activeFilterSet = filterSets.getActiveFilterSet();
-        if (activeFilterSet != null) {
-            lastActiveCompetitorFilterSet = activeFilterSet;
-        } else {
-            if (filterSets.getFilterSets().size() == 0) {
-                lastActiveCompetitorFilterSet = null;
-            }
-        }
-        competitorsFilterCheckBox.setValue(activeFilterSet != null, false /* fireChangeValue */);
-        if (lastActiveCompetitorFilterSet != null) {
-            competitorsFilterCheckBox.setText(competitorsFilterTitle+" ("+lastActiveCompetitorFilterSet.getName()+")");
-        } else {
-            competitorsFilterCheckBox.setText(competitorsFilterTitle);
-        }
-    }
-    
-    private void addCompetitorsFilterControl(Panel parentPanel) {
-        String competitorsFilterTitle = stringMessages.competitorsFilter();
-        competitorsFilterCheckBox = new CheckBox(competitorsFilterTitle);
-        competitorsFilterCheckBox.getElement().getStyle().setFloat(Style.Float.LEFT);
-        competitorsFilterCheckBox.setTitle(competitorsFilterTitle);
-        competitorsFilterCheckBox.addStyleName("raceBoardNavigation-innerElement");
-        competitorsFilterCheckBox.addValueChangeHandler(new ValueChangeHandler<Boolean>() {
-            @Override
-            public void onValueChange(ValueChangeEvent<Boolean> newValue) {
-                boolean isChecked = competitorsFilterCheckBox.getValue();
-                if (isChecked) {
-                    if (lastActiveCompetitorFilterSet != null) {
-                        competitorsFilterSets.setActiveFilterSet(lastActiveCompetitorFilterSet);
-                        competitorSelectionModel.setCompetitorsFilterSet(competitorsFilterSets.getActiveFilterSet());
-                        updateCompetitorsFilterControlState(competitorsFilterSets);
-                    } else {
-                        showEditCompetitorsFiltersDialog();
-                    }
-                } else {
-                    competitorsFilterSets.setActiveFilterSet(null);
-                    competitorSelectionModel.setCompetitorsFilterSet(competitorsFilterSets.getActiveFilterSet());
-                    updateCompetitorsFilterControlState(competitorsFilterSets);
-                }
-            }
-        });
-        parentPanel.add(competitorsFilterCheckBox);
-        Button filterButton = new Button("");
-        filterButton.addClickHandler(new ClickHandler() {
-            @Override
-            public void onClick(ClickEvent event) {
-                showEditCompetitorsFiltersDialog();
-            }
-        });
-        filterButton.addStyleName("raceBoardNavigation-filterButton");
-        filterButton.getElement().getStyle().setFloat(Style.Float.LEFT);
-        filterButton.setTitle(competitorsFilterTitle);
-        parentPanel.add(filterButton);
-    }
-    
-    private void showEditCompetitorsFiltersDialog() {
-        CompetitorsFilterSetsDialog competitorsFilterSetsDialog = new CompetitorsFilterSetsDialog(competitorsFilterSets,
-                stringMessages, new DialogCallback<CompetitorsFilterSets>() {
-            @Override
-            public void ok(final CompetitorsFilterSets newCompetitorsFilterSets) {
-                competitorsFilterSets.getFilterSets().clear();
-                competitorsFilterSets.getFilterSets().addAll(newCompetitorsFilterSets.getFilterSets());
-                competitorsFilterSets.setActiveFilterSet(newCompetitorsFilterSets.getActiveFilterSet());
-                
-                updateCompetitorsFilterContexts(newCompetitorsFilterSets);
-                competitorSelectionModel.setCompetitorsFilterSet(newCompetitorsFilterSets.getActiveFilterSet());
-                updateCompetitorsFilterControlState(newCompetitorsFilterSets);
-                storeCompetitorsFilterSets(newCompetitorsFilterSets);
-             }
-
-            @Override
-            public void cancel() { 
-            }
-        });
-        
-        competitorsFilterSetsDialog .show();
-    }
-
-    private void insertSelectedCompetitorsFilter(CompetitorsFilterSets filterSet) {
-        // selected competitors filter
-        FilterSet<CompetitorDTO, FilterWithUI<CompetitorDTO>> selectedCompetitorsFilterSet = 
-                new FilterSet<CompetitorDTO, FilterWithUI<CompetitorDTO>>(stringMessages.selectedCompetitors());
-        selectedCompetitorsFilterSet.setEditable(false);
-        SelectedCompetitorsFilter selectedCompetitorsFilter = new SelectedCompetitorsFilter();
-        selectedCompetitorsFilter.setCompetitorSelectionProvider(competitorSelectionModel);
-        selectedCompetitorsFilterSet.addFilter(selectedCompetitorsFilter);
-        
-        filterSet.addFilterSet(0, selectedCompetitorsFilterSet);
-    }
-    
-    private CompetitorsFilterSets loadCompetitorsFilterSets() {
-        CompetitorsFilterSets result = null;
-        Storage localStorage = Storage.getLocalStorageIfSupported();
-        if (localStorage != null) {
-            try {
-                String jsonAsLocalStore = localStorage.getItem(LOCAL_STORAGE_COMPETITORS_FILTER_SETS_KEY);
-                if (jsonAsLocalStore != null && !jsonAsLocalStore.isEmpty()) {
-                    CompetitorsFilterSetsJsonDeSerializer deserializer = new CompetitorsFilterSetsJsonDeSerializer();
-                    JSONValue value = JSONParser.parseStrict(jsonAsLocalStore);
-                    if (value.isObject() != null) {
-                        result = deserializer.deserialize((JSONObject) value);
-                    }
-                }
-            } catch (Exception e) {
-                // exception during loading of competitor filters from local storage
-            }
-        }
-        return result;
-    }
-
-    private void storeCompetitorsFilterSets(CompetitorsFilterSets newCompetitorsFilterSets) {
-        Storage localStorage = Storage.getLocalStorageIfSupported();
-        if(localStorage != null) {
-            // delete old value
-            localStorage.removeItem(LOCAL_STORAGE_COMPETITORS_FILTER_SETS_KEY);
-            
-            // store the competiors filter set 
-            CompetitorsFilterSetsJsonDeSerializer serializer = new CompetitorsFilterSetsJsonDeSerializer();
-            JSONObject jsonObject = serializer.serialize(newCompetitorsFilterSets);
-            localStorage.setItem(LOCAL_STORAGE_COMPETITORS_FILTER_SETS_KEY, jsonObject.toString());
-        }
-    }
-    
     private void setComponentVisible(ComponentViewer componentViewer, Component<?> component, boolean visible) {
         component.setVisible(visible);      
         componentViewer.forceLayout();
