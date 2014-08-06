@@ -49,7 +49,8 @@
       </div>
       <div class="{res.mediaCss.small3} {res.mediaCss.large4} {res.mediaCss.columns}">
         <div class="{local_res.css.eventheader_sharing}">
-            <a href="https://twitter.com/event" title="{i18n.sharingTwitter}" target="_blank" class="{local_res.css.eventheader_sharing_item} {local_res.css.eventheader_sharing_itemtwitter}"></a><a href="https://facebook.com/event" title="{i18n.sharingFacebook}" target="_blank" class="{local_res.css.eventheader_sharing_item} {local_res.css.eventheader_sharing_itemfacebook}"></a>
+            <g:Anchor ui:field="twitterAnchor" title="{i18n.sharingTwitter}" target="_blank" styleName="{local_res.css.eventheader_sharing_item} {local_res.css.eventheader_sharing_itemtwitter}"></g:Anchor>
+            <g:Anchor ui:field="facebookAnchor" title="{i18n.sharingFacebook}" target="_blank" styleName="{local_res.css.eventheader_sharing_item} {local_res.css.eventheader_sharing_itemfacebook}"></g:Anchor>
         </div>
         <div ui:field="seriesLeaderboardDiv" class="{local_res.css.eventheader_sharing}">
             <div class="{style.action}">
