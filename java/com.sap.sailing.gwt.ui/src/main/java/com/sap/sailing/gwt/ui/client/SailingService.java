@@ -358,8 +358,12 @@ public interface SailingService extends RemoteService {
 
     Util.Pair<String, LeaderboardType> checkLeaderboardName(String leaderboardName);
 
+    /** for backward compatibility with the regatta overview */
     List<RaceGroupDTO> getRegattaStructureForEvent(UUID eventId);
-    
+
+    /** the replacement service for getRegattaStructureForEvent() */
+    List<RaceGroupDTO> getRegattaStructureOfEvent(UUID eventId);
+
     List<RegattaOverviewEntryDTO> getRaceStateEntriesForRaceGroup(UUID eventId, List<UUID> visibleCourseAreas,
             List<String> visibleRegattas, boolean showOnlyCurrentlyRunningRaces, boolean showOnlyRacesOfSameDay)
             throws Exception;

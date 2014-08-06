@@ -11,6 +11,7 @@ import com.google.gwt.uibinder.client.UiField;
 import com.google.gwt.user.client.Window;
 import com.google.gwt.user.client.ui.Composite;
 import com.google.gwt.user.client.ui.Widget;
+import com.sap.sailing.domain.common.LeaderboardNameConstants;
 import com.sap.sailing.domain.common.RegattaAndRaceIdentifier;
 import com.sap.sailing.domain.common.dto.RaceDTO;
 import com.sap.sailing.gwt.home.client.place.event.header.EventHeader;
@@ -134,6 +135,23 @@ public class TabletAndDesktopEventView extends Composite implements EventView, E
     public void openLeaderboardViewer(LeaderboardGroupDTO leaderboardGroup, StrippedLeaderboardDTO leaderboard) {
         String link = EntryPointLinkFactory.createLeaderboardLink(createLeaderboardLinkParameters(leaderboardGroup, leaderboard));
         Window.open(link, "_blank", "");
+    }
+
+    @Override
+    public void openOverallLeaderboardViewer(LeaderboardGroupDTO leaderboardGroup) {
+        String link = EntryPointLinkFactory.createLeaderboardLink(createOverallLeaderboardLinkParameters(leaderboardGroup));
+        Window.open(link, "_blank", "");
+    }
+
+    private Map<String, String> createOverallLeaderboardLinkParameters(LeaderboardGroupDTO leaderboardGroup) {
+        Map<String, String> linkParams = new HashMap<String, String>();
+        linkParams.put("name", leaderboardGroup.getName() + " " + LeaderboardNameConstants.OVERALL);
+        linkParams.put("showRaceDetails", "true");
+        if(leaderboardGroup.getDisplayName() != null) {
+            linkParams.put("displayName", leaderboardGroup.getDisplayName());
+        }
+        linkParams.put("leaderboardGroupName", leaderboardGroup.getName());
+        return linkParams;
     }
 
     private Map<String, String> createRaceBoardLinkParameters(String leaderboardName, RegattaAndRaceIdentifier raceIdentifier) {
