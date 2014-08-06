@@ -5,8 +5,11 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
+import com.google.gwt.dom.client.Document;
+import com.google.gwt.dom.client.Style.Unit;
 import com.google.gwt.event.dom.client.ClickEvent;
 import com.google.gwt.event.dom.client.ClickHandler;
+import com.google.gwt.user.client.Window;
 import com.google.gwt.user.client.ui.AbsolutePanel;
 import com.google.gwt.user.client.ui.Button;
 import com.google.gwt.user.client.ui.DockLayoutPanel.Direction;
@@ -116,7 +119,8 @@ public class SideBySideComponentViewer implements ComponentViewer {
                   if (leftComponentP.isVisible() && leftComponentP instanceof TimeListener) {
                       ((TimeListener)leftComponentP).timeChanged(new Date(), null);
                   }
-                  leaderboardTogglerButton.setVisible(false);
+                  leaderboardTogglerButton.removeFromParent();
+                  resizePanelWithButtons(panelForTogglingSouthLayoutPanelComponents);
             }
         });
         leaderboardTogglerButton.setStyleName("gwt-SplitLayoutPanel-EastToggleButton");
@@ -127,7 +131,7 @@ public class SideBySideComponentViewer implements ComponentViewer {
             @Override
             public void closeClicked() {
                 splitLayoutPanel.setWidgetVisibilityAndPossiblyShowSplitter(this, leftComponent, true, 500);
-                leaderboardTogglerButton.setVisible(true);
+                panelForTogglingEastLayoutPanelComponents.add(leaderboardTogglerButton);
             }
             @Override
             public void settingsClicked() {
@@ -154,7 +158,8 @@ public class SideBySideComponentViewer implements ComponentViewer {
                   if (component.isVisible() && component instanceof TimeListener) {
                       ((TimeListener)component).timeChanged(new Date(), null);
                   }
-                  togglerButton.setVisible(false);
+                  panelForTogglingSouthLayoutPanelComponents.remove(togglerButton);
+                  resizePanelWithButtons(panelForTogglingSouthLayoutPanelComponents);
               }
             });
             togglerButton.setStyleName("gwt-SplitLayoutPanel-NorthSouthToggleButton");
@@ -167,12 +172,22 @@ public class SideBySideComponentViewer implements ComponentViewer {
                 @Override
                 public void closeClicked() {
                     splitLayoutPanel.setWidgetVisibilityAndPossiblyShowSplitter(this, component, true, 200);
-                    togglerButton.setVisible(true);
+                    panelForTogglingSouthLayoutPanelComponents.add(togglerButton);
+                    resizePanelWithButtons(panelForTogglingSouthLayoutPanelComponents);
                 }
             };
             componentPanels.put(component, componentPanel);
             splitLayoutPanel.insert(componentPanel, component, Direction.SOUTH, 200, null);
         }
+        resizePanelWithButtons(panelForTogglingSouthLayoutPanelComponents);
+    }
+    
+    private void resizePanelWithButtons(HorizontalPanel panel) {
+        int screenWidth = Math.max(Window.getClientWidth(), Document.get().getScrollWidth());
+        int numberOfComponents = panel.getWidgetCount();
+        int widthOfLeftComponent = leftComponent.getEntryWidget().getOffsetWidth();
+        double left = screenWidth-(numberOfComponents*120.0)-50.0-widthOfLeftComponent;
+        panel.getElement().getStyle().setLeft(left, Unit.PX);
     }
     
     public <SettingsType> void showSettingsDialog(Component<SettingsType> component) {

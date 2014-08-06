@@ -151,16 +151,17 @@ body ::-webkit-scrollbar-track {
 .gwt-SplitLayoutPanel-NorthSouthToggleButton-Panel {
 	position: absolute;
 	top: 88%;
-	left: 80%;
+	/*left: 80%; determined in code */
 }
 
 .gwt-SplitLayoutPanel-EastToggleButton-Panel {
 	position: absolute;
 	top: 50%;
+	margin-left: -10px;
 }
 
 .gwt-SplitLayoutPanel-EastToggleButton {
-	height: 40px;
+	height: 50px;
     width: 120px;
     background-color: white;
     border: none;
@@ -171,6 +172,14 @@ body ::-webkit-scrollbar-track {
     -webkit-transform: rotate(-90deg);
 	background: white url(images/arrows_bottom_black_small.png) 50% 85% no-repeat;
 	padding-bottom: 13px;
+}
+
+.gwt-SplitLayoutPanel-EastToggleButton:hover {
+	background-color: #ececec;
+}
+
+.gwt-SplitLayoutPanel-EastToggleButton:focus {
+	outline:0 !important;
 }
 
 .gwt-SplitLayoutPanel-NorthSouthToggleButton {
@@ -186,6 +195,14 @@ body ::-webkit-scrollbar-track {
     margin-left: 5px;
 	background: white url(images/arrows_top_black_small.png) 50% 15% no-repeat;
 	padding-top: 20px;
+}
+
+.gwt-SplitLayoutPanel-NorthSouthToggleButton:focus {
+	outline:0 !important;
+}
+
+.gwt-SplitLayoutPanel-NorthSouthToggleButton:hover {
+	background-color: #ececec;
 }
 
 .gwt-SplitLayoutPanel-HDragger {
