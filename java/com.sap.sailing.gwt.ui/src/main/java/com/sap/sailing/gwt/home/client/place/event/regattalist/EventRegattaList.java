@@ -33,6 +33,9 @@ public class EventRegattaList extends Composite {
     interface EventRegattaHeaderUiBinder extends UiBinder<Widget, EventRegattaList> {
     }
 
+//    @UiField DivElement seriesLeaderboardDiv;
+//    @UiField AnchorElement seriesLeaderboardAnchor;
+    
     @UiField DivElement regattaGroupsNavigationPanel;
     @UiField DivElement regattaListNavigationDiv;
     @UiField DivElement regattaListItemsDiv;
@@ -50,23 +53,29 @@ public class EventRegattaList extends Composite {
 
         regattaElementsByLeaderboardGroup = new HashMap<>();
 
-        boolean hasMultipleLeaderboardGroups = event.getLeaderboardGroups().size() > 1; 
-        if(hasMultipleLeaderboardGroups) {
-            // fill the navigation panel
-            registerFilterLeaderboardGroupEvent(filterNoLeaderboardGroupsAnchor, null);
-            for(LeaderboardGroupDTO leaderboardGroup: event.getLeaderboardGroups()) {
-                AnchorElement filterLeaderboardGroupAnchor = Document.get().createAnchorElement();
-                filterLeaderboardGroupAnchor.setClassName(HomeResources.INSTANCE.mainCss().navbar_button());
-                filterLeaderboardGroupAnchor.setHref("javascript:;");
-                
-                String leaderboardGroupName = LongNamesUtil.shortenLeaderboardGroupName(event.getName(), leaderboardGroup.getName());
-                filterLeaderboardGroupAnchor.setInnerText(leaderboardGroupName);
-                regattaGroupsNavigationPanel.appendChild(filterLeaderboardGroupAnchor);
-                
-                registerFilterLeaderboardGroupEvent(filterLeaderboardGroupAnchor, leaderboardGroup);
-            }
-        } else {
+        boolean isSeries = event.isFakeSeries(); 
+        boolean hasMultipleLeaderboardGroups = event.getLeaderboardGroups().size() > 1;
+        
+        if(isSeries) {
             regattaListNavigationDiv.getStyle().setDisplay(Display.NONE);
+        } else {
+            if(hasMultipleLeaderboardGroups) {
+                // fill the navigation panel
+                registerFilterLeaderboardGroupEvent(filterNoLeaderboardGroupsAnchor, null);
+                for(LeaderboardGroupDTO leaderboardGroup: event.getLeaderboardGroups()) {
+                    AnchorElement filterLeaderboardGroupAnchor = Document.get().createAnchorElement();
+                    filterLeaderboardGroupAnchor.setClassName(HomeResources.INSTANCE.mainCss().navbar_button());
+                    filterLeaderboardGroupAnchor.setHref("javascript:;");
+                    
+                    String leaderboardGroupName = LongNamesUtil.shortenLeaderboardGroupName(event.getName(), leaderboardGroup.getName());
+                    filterLeaderboardGroupAnchor.setInnerText(leaderboardGroupName);
+                    regattaGroupsNavigationPanel.appendChild(filterLeaderboardGroupAnchor);
+                    
+                    registerFilterLeaderboardGroupEvent(filterLeaderboardGroupAnchor, leaderboardGroup);
+                }
+            } else {
+                regattaListNavigationDiv.getStyle().setDisplay(Display.NONE);
+            }
         }
 
         for (LeaderboardGroupDTO leaderboardGroup : event.getLeaderboardGroups()) {
