@@ -21,8 +21,18 @@ import com.sap.sailing.gwt.ui.client.shared.components.ComponentViewer;
 import com.sap.sailing.gwt.ui.client.shared.components.SettingsDialog;
 import com.sap.sse.gwt.client.player.TimeListener;
 
+/**
+ *  Component Viewer that uses a {@link TouchSplitLayoutPanelWithBetterDraggers}
+ *  to display its components.
+ */
 public class SideBySideComponentViewer implements ComponentViewer {
     
+    /**
+     * Panel that combines another Panel and associated close and
+     * settings buttons.
+     * 
+     * @author Simon Marcel Pamies
+     */
     abstract class PanelWithCloseAndSettingsButton extends AbsolutePanel {
         final Widget containedPanel;
         public PanelWithCloseAndSettingsButton(Widget containedPanel) {
