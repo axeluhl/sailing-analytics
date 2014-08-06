@@ -18,7 +18,7 @@ import com.sap.sse.datamining.AdditionalResultDataBuilder;
 import com.sap.sse.datamining.Query;
 import com.sap.sse.datamining.components.Processor;
 import com.sap.sse.datamining.i18n.DataMiningStringMessages;
-import com.sap.sse.datamining.impl.components.SumBuildingAndOverwritingResultDataBuilder;
+import com.sap.sse.datamining.impl.components.OverwritingResultDataBuilder;
 import com.sap.sse.datamining.shared.GroupKey;
 import com.sap.sse.datamining.shared.QueryResult;
 import com.sap.sse.datamining.shared.impl.QueryResultImpl;
@@ -99,7 +99,7 @@ public abstract class ProcessorQuery<AggregatedType, DataSourceType> implements 
         logOccuredFailures();
 
         long calculationTimeInNanos = endTime - startTime;
-        AdditionalResultDataBuilder additionalDataBuilder = new SumBuildingAndOverwritingResultDataBuilder();
+        AdditionalResultDataBuilder additionalDataBuilder = new OverwritingResultDataBuilder();
         additionalDataBuilder = firstProcessor.getAdditionalResultData(additionalDataBuilder);
         Map<GroupKey, AggregatedType> results = resultReceiver.getResult();
         return new QueryResultImpl<>(results, additionalDataBuilder.build(calculationTimeInNanos, stringMessages, locale));

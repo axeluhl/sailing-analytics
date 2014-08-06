@@ -18,7 +18,7 @@ import com.sap.sse.datamining.shared.impl.AdditionalResultDataImpl;
  *      <li>Other values are overwritten</li>
  * </ul>
  */
-public class SumBuildingAndOverwritingResultDataBuilder implements AdditionalResultDataBuilder {
+public class OverwritingResultDataBuilder implements AdditionalResultDataBuilder {
 
     private int retrievedDataAmount;
     private Function<?> extractionFunction;
@@ -29,7 +29,7 @@ public class SumBuildingAndOverwritingResultDataBuilder implements AdditionalRes
     /**
      * Creates a new builder with standard values for the additional data.
      */
-    public SumBuildingAndOverwritingResultDataBuilder() {
+    public OverwritingResultDataBuilder() {
         retrievedDataAmount = 0;
         unit = Unit.None;
         resultDecimals = 0;
@@ -52,7 +52,7 @@ public class SumBuildingAndOverwritingResultDataBuilder implements AdditionalRes
 
     @Override
     public void setRetrievedDataAmount(int retrievedDataAmount) {
-        this.retrievedDataAmount += retrievedDataAmount;
+        this.retrievedDataAmount = retrievedDataAmount;
     }
 
     @Override

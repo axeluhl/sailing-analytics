@@ -62,7 +62,7 @@ public class TestProcessorQuery {
     private Collection<Number> createDataSource() {
         Collection<Number> dataSource = new ArrayList<>();
         
-        //Results in <1> = 8
+        //Should be removed after filtering the data
         dataSource.add(new Number(1));
         dataSource.add(new Number(7));
 
@@ -142,7 +142,7 @@ public class TestProcessorQuery {
         results.put(new GenericGroupKey<Integer>(3), 3.0);
         results.put(new GenericGroupKey<Integer>(4), 10.0);
         
-        QueryResultImpl<Double> result = new QueryResultImpl<>(results, new AdditionalResultDataImpl(dataSource.size(), "Cross Sum (Sum)", Unit.None, 0, 0));
+        QueryResultImpl<Double> result = new QueryResultImpl<>(results, new AdditionalResultDataImpl(dataSource.size() - 2, "Cross Sum (Sum)", Unit.None, 0, 0));
         return result;
     }
 

@@ -3,9 +3,12 @@ package com.sap.sse.datamining.impl.components;
 import static org.hamcrest.Matchers.is;
 import static org.junit.Assert.assertThat;
 
+import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collection;
 import java.util.HashSet;
+import java.util.List;
+import java.util.Set;
 
 import org.junit.Before;
 import org.junit.Test;
@@ -20,7 +23,7 @@ public class TestAbstractFilteringRetrievalProcessor {
     private Processor<Iterable<Integer>> filteringRetrievalProcessor;
     private Collection<Integer> dataSource;
     
-    private Collection<Integer> receivedResults = new HashSet<>();
+    private Collection<Integer> receivedResults = new ArrayList<>();
     
     @Before
     public void setUpDataSource() {
@@ -33,35 +36,53 @@ public class TestAbstractFilteringRetrievalProcessor {
         filteringRetrievalProcessor.finish();
         ConcurrencyTestsUtil.sleepFor(500); //Giving the processor time to finish
 
-        Collection<Integer> expectedResults = new HashSet<>(Arrays.asList(0, 1, 2));
-        assertThat(receivedResults, is(expectedResults));
+        Collection<Integer> expectedResults = Arrays.asList(0, 1, 2);
+        assertThatResultsAreEqualIgnoringOrder(receivedResults, expectedResults);
     }
     
+    private void assertThatResultsAreEqualIgnoringOrder(Collection<Integer> receivedResults,
+                                                        Collection<Integer> expectedResults) {
+        Set<Integer> receivedResultsAsSet = new HashSet<>(receivedResults);
+        Set<Integer> expectedResultsAsSet = new HashSet<>(expectedResults);
+        assertThat(receivedResultsAsSet, is(expectedResultsAsSet));
+    }
+
     @Test
     public void testProvidedAdditionalData() throws InterruptedException {
         filteringRetrievalProcessor.processElement(dataSource);
         filteringRetrievalProcessor.finish();
         ConcurrencyTestsUtil.sleepFor(500); //Giving the processor time to finish
         
-        int expectedRetrievedDataAmount = 5;
+        int expectedRetrievedDataAmount = receivedResults.size();
         
-        SumBuildingAndOverwritingResultDataBuilder resultDataBuilder = new SumBuildingAndOverwritingResultDataBuilder();
+        OverwritingResultDataBuilder resultDataBuilder = new OverwritingResultDataBuilder();
         filteringRetrievalProcessor.getAdditionalResultData(resultDataBuilder);
         assertThat(resultDataBuilder.getRetrievedDataAmount(), is(expectedRetrievedDataAmount));
     }
     
     @Test
     public void testProvidedAdditionalDataWithMultipleRetrievalLayers() throws InterruptedException {
-//        fail("Not yet implemented");
-//        filteringRetrievalProcessor.processElement(dataSource);
-//        filteringRetrievalProcessor.finish();
-//        ConcurrencyTestsUtil.sleepFor(500); //Giving the processor time to finish
-//        
-//        int expectedRetrievedDataAmount = 5;
-//        
-//        SumBuildingAndOverwritingResultDataBuilder resultDataBuilder = new SumBuildingAndOverwritingResultDataBuilder();
-//        filteringRetrievalProcessor.getAdditionalResultData(resultDataBuilder);
-//        assertThat(resultDataBuilder.getRetrievedDataAmount(), is(expectedRetrievedDataAmount));
+        List<Iterable<Integer>> layeredDataSource = new ArrayList<>();
+        layeredDataSource.add(dataSource);
+        layeredDataSource.add(dataSource);
+        layeredDataSource.add(dataSource);
+        
+        Processor<Iterable<Iterable<Integer>>> layeredRetrievalProcessor = new AbstractSimpleRetrievalProcessor<Iterable<Iterable<Integer>>, Iterable<Integer>>(ConcurrencyTestsUtil.getExecutor(), Arrays.asList(filteringRetrievalProcessor)) {
+            @Override
+            protected Iterable<Iterable<Integer>> retrieveData(Iterable<Iterable<Integer>> element) {
+                return element;
+            }
+        };
+        
+        layeredRetrievalProcessor.processElement(layeredDataSource);
+        layeredRetrievalProcessor.finish();
+        ConcurrencyTestsUtil.sleepFor(500); //Giving the processor time to finish
+        
+        int expectedRetrievedDataAmount = receivedResults.size();
+        
+        OverwritingResultDataBuilder resultDataBuilder = new OverwritingResultDataBuilder();
+        layeredRetrievalProcessor.getAdditionalResultData(resultDataBuilder);
+        assertThat(resultDataBuilder.getRetrievedDataAmount(), is(expectedRetrievedDataAmount));
     }
     
     @Before
