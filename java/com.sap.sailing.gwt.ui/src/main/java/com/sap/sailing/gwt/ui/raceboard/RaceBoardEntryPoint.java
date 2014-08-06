@@ -16,7 +16,6 @@ import com.google.gwt.user.client.Window;
 import com.google.gwt.user.client.rpc.ServiceDefTarget;
 import com.google.gwt.user.client.ui.DockLayoutPanel;
 import com.google.gwt.user.client.ui.FlowPanel;
-import com.google.gwt.user.client.ui.HTML;
 import com.google.gwt.user.client.ui.Panel;
 import com.google.gwt.user.client.ui.RootLayoutPanel;
 import com.sap.sailing.domain.common.RegattaAndRaceIdentifier;
@@ -44,7 +43,6 @@ import com.sap.sse.gwt.client.EntryPointHelper;
 import com.sap.sse.gwt.client.async.AsyncActionsExecutor;
 import com.sap.sse.gwt.client.player.Timer;
 import com.sap.sse.gwt.client.player.Timer.PlayModes;
-import com.sap.sse.gwt.client.useragent.UserAgentChecker;
 import com.sap.sse.gwt.shared.GwtHttpRequestUtils;
 
 public class RaceBoardEntryPoint extends AbstractEntryPoint {
@@ -103,10 +101,8 @@ public class RaceBoardEntryPoint extends AbstractEntryPoint {
         final boolean canReplayWhileLiveIsPossible = GwtHttpRequestUtils.getBooleanParameter(RaceBoardViewConfiguration.PARAM_CAN_REPLAY_DURING_LIVE_RACES, false);
         final boolean autoSelectMedia = GwtHttpRequestUtils.getBooleanParameter(RaceBoardViewConfiguration.PARAM_AUTOSELECT_MEDIA, false);
         final boolean showMapControls = GwtHttpRequestUtils.getBooleanParameter(RaceBoardViewConfiguration.PARAM_VIEW_SHOW_MAPCONTROLS, true /* default*/);
-        final boolean showNavigationPanel = GwtHttpRequestUtils.getBooleanParameter(RaceBoardViewConfiguration.PARAM_VIEW_SHOW_NAVIGATION_PANEL, true /* default */);
         raceboardViewConfig = new RaceBoardViewConfiguration(activeCompetitorsFilterSetName, showLeaderboard,
-                showWindChart, showCompetitorsChart, showViewStreamlets, canReplayWhileLiveIsPossible, autoSelectMedia,
-                showNavigationPanel);
+                showWindChart, showCompetitorsChart, showViewStreamlets, canReplayWhileLiveIsPossible, autoSelectMedia);
 
         final ParallelExecutionCallback<List<String>> getLeaderboardNamesCallback = new ParallelExecutionCallback<List<String>>();  
         final ParallelExecutionCallback<List<RegattaDTO>> getRegattasCallback = new ParallelExecutionCallback<List<RegattaDTO>>();  
@@ -235,28 +231,13 @@ public class RaceBoardEntryPoint extends AbstractEntryPoint {
             RaceBoardViewConfiguration raceboardViewConfiguration) {
         final DockLayoutPanel p = new DockLayoutPanel(Unit.PX);
         RootLayoutPanel.get().add(p);
-        final Panel toolbarPanel = raceBoardPanel.getToolbarPanel();
-        if (!UserAgentChecker.INSTANCE.isUserAgentSupported(userAgent)) {
-            HTML lbl = new HTML(stringMessages.warningBrowserUnsupported());
-            lbl.setStyleName("browserOptimizedMessage");
-            toolbarPanel.add(lbl);
-        }
         final FlowPanel logoAndTitlePanel = createLogoAndTitlePanel(raceBoardPanel);
         FlowPanel timePanel = createTimePanel(raceBoardPanel);
         p.addNorth(logoAndTitlePanel, 68);
-        p.addNorth(toolbarPanel, 40);
         toolbarAndLogoAndTitleBarHidden = false;
-        if (!raceboardViewConfiguration.isShowNavigationPanel()) {
-            p.setWidgetHidden(toolbarPanel, true);
-            globalNavigationPanel.setVisible(false);
-            toolbarAndLogoAndTitleBarHidden = true;
-        }
-
         p.addSouth(timePanel, 90);
         p.add(raceBoardPanel);
         p.addStyleName("dockLayoutPanel");
-
-        addModeratorShortkeyFunctionality(p, toolbarPanel, raceBoardPanel, timePanel);
     }
 
     private void addModeratorShortkeyFunctionality(final DockLayoutPanel p, final Panel toolbarPanel,

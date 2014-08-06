@@ -17,13 +17,10 @@ import com.sap.sailing.domain.common.dto.CompetitorDTO;
 import com.sap.sailing.gwt.ui.client.CompetitorSelectionChangeListener;
 import com.sap.sailing.gwt.ui.client.CompetitorSelectionProvider;
 import com.sap.sailing.gwt.ui.client.StringMessages;
-import com.sap.sailing.gwt.ui.client.shared.filter.CompetitorsFilterSets;
-import com.sap.sailing.gwt.ui.client.shared.filter.CompetitorsFilterSetsDialog;
 import com.sap.sse.common.Util;
 import com.sap.sse.common.filter.AbstractListFilter;
 import com.sap.sse.common.filter.Filter;
 import com.sap.sse.common.filter.FilterSet;
-import com.sap.sse.gwt.client.dialog.DataEntryDialog.DialogCallback;
 
 /**
  * A text box that belongs to a {@link LeaderboardPanel} and allows the user to search for competitors by sail number

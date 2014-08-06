@@ -23,7 +23,6 @@ import com.google.gwt.user.client.ui.FlowPanel;
 import com.google.gwt.user.client.ui.MenuBar;
 import com.google.gwt.user.client.ui.Panel;
 import com.google.gwt.user.client.ui.SimplePanel;
-import com.google.gwt.user.client.ui.Widget;
 import com.sap.sailing.domain.common.RaceIdentifier;
 import com.sap.sailing.domain.common.RegattaAndRaceIdentifier;
 import com.sap.sailing.domain.common.dto.CompetitorDTO;
@@ -38,7 +37,6 @@ import com.sap.sailing.gwt.ui.client.RaceTimesInfoProvider;
 import com.sap.sailing.gwt.ui.client.RegattasDisplayer;
 import com.sap.sailing.gwt.ui.client.SailingServiceAsync;
 import com.sap.sailing.gwt.ui.client.StringMessages;
-import com.sap.sailing.gwt.ui.client.media.MediaSelector;
 import com.sap.sailing.gwt.ui.client.shared.charts.MultiCompetitorRaceChart;
 import com.sap.sailing.gwt.ui.client.shared.charts.WindChart;
 import com.sap.sailing.gwt.ui.client.shared.charts.WindChartSettings;
@@ -67,7 +65,6 @@ import com.sap.sse.common.filter.Filter;
 import com.sap.sse.common.filter.FilterSet;
 import com.sap.sse.gwt.client.async.AsyncActionsExecutor;
 import com.sap.sse.gwt.client.dialog.DataEntryDialog.DialogCallback;
-import com.sap.sse.gwt.client.player.TimeListener;
 import com.sap.sse.gwt.client.player.TimeRangeWithZoomModel;
 import com.sap.sse.gwt.client.player.Timer;
 import com.sap.sse.gwt.client.useragent.UserAgentDetails;
@@ -96,9 +93,6 @@ public class RaceBoardPanel extends SimplePanel implements RegattasDisplayer, Ra
     private final Map<RaceIdentifier, RaceDTO> racesByIdentifier;
     
     private final List<ComponentViewer> componentViewers;
-    private final FlowPanel componentControlsPanel;
-    private final FlowPanel viewControlsPanel;
-    private final FlowPanel toolbarPanel;
     private RaceTimePanel timePanel;
     private final Timer timer;
     private final RaceSelectionProvider raceSelectionProvider;
@@ -152,16 +146,6 @@ public class RaceBoardPanel extends SimplePanel implements RegattasDisplayer, Ra
         componentViewers = new ArrayList<ComponentViewer>();
         competitorSelectionModel = new CompetitorSelectionModel(/* hasMultiSelection */ true);
                 
-        toolbarPanel = new FlowPanel();
-        toolbarPanel.setWidth("100%");
-        componentControlsPanel = new FlowPanel();
-        componentControlsPanel.addStyleName("raceBoardNavigation");
-        toolbarPanel.add(componentControlsPanel);
-
-        viewControlsPanel = new FlowPanel();
-        viewControlsPanel.addStyleName("raceBoardControls");
-        toolbarPanel.add(viewControlsPanel);
-        
         leaderboardPanel = createLeaderboardPanel(leaderboardName, leaderboardGroupName);
         createOneScreenView(leaderboardName, leaderboardGroupName, mainPanel, showMapControls);
         // these calls make sure that leaderboard and competitor map data are loaded
@@ -169,9 +153,6 @@ public class RaceBoardPanel extends SimplePanel implements RegattasDisplayer, Ra
         leaderboardPanel.setVisible(false);
         getElement().getStyle().setMarginLeft(12, Unit.PX);
         getElement().getStyle().setMarginRight(12, Unit.PX);
-
-        // add busy indicator to toolbar panel because the embedded leaderboard has no space for it
-        toolbarPanel.add(leaderboardPanel.getBusyIndicator());
 
         CompetitorsFilterSets loadedCompetitorsFilterSets = loadCompetitorsFilterSets();
         if (loadedCompetitorsFilterSets != null) {
@@ -231,13 +212,6 @@ public class RaceBoardPanel extends SimplePanel implements RegattasDisplayer, Ra
         setLeaderboardVisible(getConfiguration().isShowLeaderboard());
         setWindChartVisible(getConfiguration().isShowWindChart());
         setCompetitorChartVisible(getConfiguration().isShowCompetitorsChart());
-        
-        addComponentToNavigationMenu(leaderboardAndMapViewer, leaderboardPanel, true);
-        addComponentToNavigationMenu(leaderboardAndMapViewer, windChart,  true);
-        addComponentToNavigationMenu(leaderboardAndMapViewer, competitorChart, true);
-        addComponentToNavigationMenu(leaderboardAndMapViewer, raceMap, false);
-        addCompetitorsFilterControl(viewControlsPanel);
-        addMediaSelectorToNavigationMenu();
     }
  
     private CompetitorsFilterSets createAndAddDefaultCompetitorsFilter() {
@@ -272,23 +246,6 @@ public class RaceBoardPanel extends SimplePanel implements RegattasDisplayer, Ra
         return filterSets;
     }
     
-    /**
-     * Adds the media selector drop down and fills it with media for the current race.
-     * NOTE:
-     * Media selector will NOT listen and react to changes of the start time during a race board session.
-     * This case and its consequences are considered negligible.
-     * Consequently, media selector will also NOT react on media added newly during a race board session.
-     */
-    private void addMediaSelectorToNavigationMenu() {
-        MediaSelector mediaSelector = new MediaSelector(selectedRaceIdentifier, raceTimesInfoProvider, timer, mediaService, stringMessages, errorReporter, userAgent, this.user, getConfiguration().isAutoSelectMedia());
-        timer.addPlayStateListener(mediaSelector);
-        timer.addTimeListener(mediaSelector);
-        mediaService.getMediaTracksForRace(selectedRaceIdentifier, mediaSelector);
-        for (Widget widget : mediaSelector.widgets()) {
-            componentControlsPanel.add(widget);
-        }
-    }
-
     @SuppressWarnings("unused")
     private <SettingsType> void addSettingsMenuItem(MenuBar settingsMenu, final Component<SettingsType> component) {
         if (component.hasSettings()) {
@@ -459,52 +416,6 @@ public class RaceBoardPanel extends SimplePanel implements RegattasDisplayer, Ra
         }
     }
     
-    private <SettingsType> void addComponentToNavigationMenu(final ComponentViewer componentViewer,
-            final Component<SettingsType> component, boolean isToogleCheckboxEnabled) {
-        final CheckBox checkBox = new CheckBox(component.getLocalizedShortName());
-        checkBox.getElement().getStyle().setFloat(Style.Float.LEFT);
-
-        checkBox.setEnabled(isToogleCheckboxEnabled);
-        checkBox.setValue(component.isVisible());
-        checkBox.setTitle(stringMessages.showHideComponent(component.getLocalizedShortName()));
-        checkBox.addStyleName("raceBoardNavigation-innerElement");
-
-        checkBox.addValueChangeHandler(new ValueChangeHandler<Boolean>() {
-            @Override
-            public void onValueChange(ValueChangeEvent<Boolean> newValue) {
-                // make the map invisible is this is not supported yet due to problems with disabling the center element
-                // of a DockPanel
-                if (component instanceof RaceMap)
-                    return;
-
-                boolean visible = checkBox.getValue();
-                setComponentVisible(componentViewer, component, visible);
-
-                if (visible && component instanceof TimeListener) {
-                    // trigger the component to update its data
-                    ((TimeListener) component).timeChanged(timer.getTime(), null);
-                }
-            }
-        });
-
-        componentControlsPanel.add(checkBox);
-
-        if (component.hasSettings()) {
-            Button settingsButton = new Button("");
-            settingsButton.addClickHandler(new ClickHandler() {
-                @Override
-                public void onClick(ClickEvent event) {
-                    new SettingsDialog<SettingsType>(component, stringMessages).show();
-                }
-            });
-            settingsButton.addStyleName("raceBoardNavigation-settingsButton");
-            settingsButton.getElement().getStyle().setFloat(Style.Float.LEFT);
-            settingsButton.setTitle(stringMessages.settingsForComponent(component.getLocalizedShortName()));
-            
-            componentControlsPanel.add(settingsButton);
-        }
-    }
-    
     private void setComponentVisible(ComponentViewer componentViewer, Component<?> component, boolean visible) {
         component.setVisible(visible);      
         componentViewer.forceLayout();
@@ -584,14 +495,6 @@ public class RaceBoardPanel extends SimplePanel implements RegattasDisplayer, Ra
 
     public RaceBoardViewConfiguration getConfiguration() {
         return raceboardViewConfiguration;
-    }
-    
-    public Panel getToolbarPanel() {
-        return toolbarPanel;
-    }
-    
-    public FlowPanel getComponentControlsPanel() {
-        return componentControlsPanel;
     }
 }
 
