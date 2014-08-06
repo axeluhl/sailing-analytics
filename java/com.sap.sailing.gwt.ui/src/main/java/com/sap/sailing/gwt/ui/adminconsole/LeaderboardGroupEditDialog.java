@@ -13,6 +13,7 @@ public class LeaderboardGroupEditDialog extends LeaderboardGroupDialog {
         getOverallLeaderboardScoringSchemeListBox().setEnabled(!group.hasOverallLeaderboard());
         nameEntryField = createTextBox(group.getName(), 50);
         descriptionEntryField = createTextArea(group.description);
+        displayNameEntryField = createTextBox(group.getDisplayName());
         displayLeaderboardsInReverseOrderCheckBox.setValue(group.displayLeaderboardsInReverseOrder);
         displayLeaderboardsInReverseOrderCheckBox.setEnabled(false);
         useOverallLeaderboardCheckBox.setValue(group.hasOverallLeaderboard());

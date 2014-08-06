@@ -11,6 +11,7 @@ import com.google.gwt.uibinder.client.UiField;
 import com.google.gwt.user.client.ui.UIObject;
 import com.sap.sailing.domain.common.LeaderboardNameConstants;
 import com.sap.sailing.domain.common.dto.FleetDTO;
+import com.sap.sailing.gwt.home.client.i18n.TextMessages;
 import com.sap.sailing.gwt.home.client.place.event.EventPageNavigator;
 import com.sap.sailing.gwt.ui.shared.RaceGroupSeriesDTO;
 import com.sap.sailing.gwt.ui.shared.StrippedLeaderboardDTO;
@@ -30,7 +31,7 @@ public class EventRegattaRacesPhase extends UIObject {
         setElement(uiBinder.createAndBindUi(this));
         
         if(series.getName().equals(LeaderboardNameConstants.DEFAULT_SERIES_NAME)) {
-            phaseName.setInnerText("Races");
+            phaseName.setInnerText(TextMessages.INSTANCE.races());
         } else {
             phaseName.setInnerText(series.getName());
         }

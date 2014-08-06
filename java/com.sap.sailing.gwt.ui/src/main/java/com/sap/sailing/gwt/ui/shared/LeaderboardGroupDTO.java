@@ -38,25 +38,26 @@ public class LeaderboardGroupDTO extends LeaderboardGroupBaseDTO {
      * <p>
      * The additional data (start dates and places for the races) will be initialized but empty.
      */
-    public LeaderboardGroupDTO(UUID id) {
-        this(id, "");
+    public LeaderboardGroupDTO(UUID id, String displayName) {
+        this(id, "", displayName);
     }
     
-    public LeaderboardGroupDTO(UUID id, String name) {
-        this(id, name, "");
+    public LeaderboardGroupDTO(UUID id, String name, String displayName) {
+        this(id, name, displayName, "");
     }
 
-    public LeaderboardGroupDTO(UUID id, String name, String description) {
-        this(id, name, description, new ArrayList<StrippedLeaderboardDTO>());
+    public LeaderboardGroupDTO(UUID id, String name, String displayName, String description) {
+        this(id, name, description, displayName, new ArrayList<StrippedLeaderboardDTO>());
     }
 
     /**
      * Creates a new LeaderboardGroupDTO with the given parameters as attributes.<br />
      * All parameters can be <code>null</code> but then the attributes will also be <code>null</code>.<br />
      * The additional data (start dates and places for the races) will be initialized but empty.
+     * @param displayName TODO
      */
-    private LeaderboardGroupDTO(UUID id, String name, String description, List<StrippedLeaderboardDTO> leaderboards) {
-        super(id, name);
+    private LeaderboardGroupDTO(UUID id, String name, String description, String displayName, List<StrippedLeaderboardDTO> leaderboards) {
+        super(id, name, displayName);
         currentServerTime = new Date();
         this.description = description;
         this.leaderboards = leaderboards;

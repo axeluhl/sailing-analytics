@@ -13,9 +13,6 @@ public class TrackedRaceDTO implements Serializable {
     
     public boolean hasWindData;
     public boolean hasGPSData;
-    public boolean hasAudioData;
-    public boolean hasVideoData;
-    public boolean hasMeasuredWindData;
 
     public Date startOfTracking;
     public Date endOfTracking;
@@ -30,9 +27,6 @@ public class TrackedRaceDTO implements Serializable {
         result = prime * result + ((endOfTracking == null) ? 0 : endOfTracking.hashCode());
         result = prime * result + (hasGPSData ? 1231 : 1237);
         result = prime * result + (hasWindData ? 1231 : 1237);
-        result = prime * result + (hasAudioData ? 1231 : 1237);
-        result = prime * result + (hasVideoData ? 1231 : 1237);
-        result = prime * result + (hasMeasuredWindData ? 1231 : 1237);
         result = prime * result + ((startOfTracking == null) ? 0 : startOfTracking.hashCode());
         result = prime * result + ((timePointOfNewestEvent == null) ? 0 : timePointOfNewestEvent.hashCode());
         return result;
@@ -57,12 +51,6 @@ public class TrackedRaceDTO implements Serializable {
         if (hasGPSData != other.hasGPSData)
             return false;
         if (hasWindData != other.hasWindData)
-            return false;
-        if (hasAudioData != other.hasAudioData)
-            return false;
-        if (hasVideoData != other.hasVideoData)
-            return false;
-        if (hasMeasuredWindData != other.hasMeasuredWindData)
             return false;
         if (startOfTracking == null) {
             if (other.startOfTracking != null)

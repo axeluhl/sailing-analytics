@@ -8,6 +8,7 @@ import java.util.Date;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Iterator;
+import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
@@ -56,7 +57,9 @@ import com.google.gwt.user.client.ui.Label;
 import com.google.gwt.user.client.ui.RequiresResize;
 import com.google.gwt.user.client.ui.VerticalPanel;
 import com.google.gwt.user.client.ui.Widget;
+import com.sap.sailing.domain.common.Bounds;
 import com.sap.sailing.domain.common.ManeuverType;
+import com.sap.sailing.domain.common.Position;
 import com.sap.sailing.domain.common.RaceIdentifier;
 import com.sap.sailing.domain.common.RegattaAndRaceIdentifier;
 import com.sap.sailing.domain.common.Tack;
@@ -64,6 +67,7 @@ import com.sap.sailing.domain.common.WindSource;
 import com.sap.sailing.domain.common.WindSourceType;
 import com.sap.sailing.domain.common.dto.CompetitorDTO;
 import com.sap.sailing.domain.common.dto.PositionDTO;
+import com.sap.sailing.domain.common.impl.BoundsImpl;
 import com.sap.sailing.domain.common.impl.DegreeBearingImpl;
 import com.sap.sailing.domain.common.impl.RGBColor;
 import com.sap.sailing.domain.common.scalablevalue.impl.ScalableBearing;
@@ -81,6 +85,7 @@ import com.sap.sailing.gwt.ui.client.StringMessages;
 import com.sap.sailing.gwt.ui.client.WindSourceTypeFormatter;
 import com.sap.sailing.gwt.ui.client.shared.components.Component;
 import com.sap.sailing.gwt.ui.client.shared.components.SettingsDialogComponent;
+import com.sap.sailing.gwt.ui.client.shared.filter.QuickRankProvider;
 import com.sap.sailing.gwt.ui.client.shared.racemap.RaceMapHelpLinesSettings.HelpLineTypes;
 import com.sap.sailing.gwt.ui.client.shared.racemap.RaceMapZoomSettings.ZoomTypes;
 import com.sap.sailing.gwt.ui.common.client.DateAndTimeFormatterUtil;
@@ -108,7 +113,7 @@ import com.sap.sse.gwt.client.player.Timer;
 import com.sap.sse.gwt.client.player.Timer.PlayStates;
 
 public class RaceMap extends AbsolutePanel implements TimeListener, CompetitorSelectionChangeListener, RaceSelectionChangeListener,
-        RaceTimesInfoProviderListener, TailFactory, Component<RaceMapSettings>, RequiresDataInitialization, RequiresResize {
+        RaceTimesInfoProviderListener, TailFactory, Component<RaceMapSettings>, RequiresDataInitialization, RequiresResize, QuickRankProvider {
     public static final String GET_RACE_MAP_DATA_CATEGORY = "getRaceMapData";
     public static final String GET_WIND_DATA_CATEGORY = "getWindData";
     
@@ -262,7 +267,7 @@ public class RaceMap extends AbsolutePanel implements TimeListener, CompetitorSe
      * The last quick ranks received from a call to {@link SailingServiceAsync#getQuickRanks(RaceIdentifier, Date, AsyncCallback)} upon
      * the last {@link #timeChanged(Date, Date)} event. Therefore, the ranks listed here correspond to the {@link #timer}'s time.
      */
-    private List<QuickRankDTO> quickRanks;
+    private LinkedHashMap<CompetitorDTO, QuickRankDTO> quickRanks;
 
     private final CombinedWindPanel combinedWindPanel;
     
@@ -272,6 +277,8 @@ public class RaceMap extends AbsolutePanel implements TimeListener, CompetitorSe
      * The map bounds as last received by map callbacks; used to determine whether to suppress the boat animation during zoom/pan
      */
     private LatLngBounds currentMapBounds;
+    
+    private int currentZoomLevel;
     
     private WindStreamletsRaceboardOverlay streamletOverlay;
     private final boolean showViewStreamlets;
@@ -387,10 +394,12 @@ public class RaceMap extends AbsolutePanel implements TimeListener, CompetitorSe
                               infoOverlay.removeCanvasPositionAndRotationTransition();
                           }
                       }
-                      if (streamletOverlay != null) {
-                          streamletOverlay.onBoundsChanged();
+                      int newZoomLevel = map.getZoom();
+                      if ((streamletOverlay != null) && !map.getBounds().equals(currentMapBounds)) {
+                          streamletOverlay.onBoundsChanged(newZoomLevel != currentZoomLevel);
                       }
                       currentMapBounds = map.getBounds();
+                      currentZoomLevel = newZoomLevel;
                   }
               });
               
@@ -571,7 +580,7 @@ public class RaceMap extends AbsolutePanel implements TimeListener, CompetitorSe
                         long timeForPositionTransitionMillis = calculateTimeForPositionTransition(newTime, oldTime);
                         fixesAndTails.updateFixes(boatData, hasTailOverlapForCompetitor, RaceMap.this, timeForPositionTransitionMillis);
                         showBoatsOnMap(newTime, timeForPositionTransitionMillis, getCompetitorsToShow());
-                        showCompetitorInfoOnMap(newTime, timeForPositionTransitionMillis, competitorSelection.getSelectedCompetitors());
+                        showCompetitorInfoOnMap(newTime, timeForPositionTransitionMillis, competitorSelection.getSelectedFilteredCompetitors());
                         if (douglasMarkers != null) {
                             removeAllMarkDouglasPeuckerpoints();
                         }
@@ -590,7 +599,7 @@ public class RaceMap extends AbsolutePanel implements TimeListener, CompetitorSe
                         // Rezoom the map
                         // TODO make this a loop across the LatLngBoundsCalculators, pulling them from a collection updated in updateSettings
                         if (!settings.getZoomSettings().containsZoomType(ZoomTypes.NONE)) { // Auto zoom if setting is not manual
-                            LatLngBounds bounds = settings.getZoomSettings().getNewBounds(RaceMap.this);
+                            Bounds bounds = settings.getZoomSettings().getNewBounds(RaceMap.this);
                             zoomMapToNewBounds(bounds);
                             mapFirstZoomDone = true;
                         } else if (!mapFirstZoomDone) { // Zoom once to the marks
@@ -847,7 +856,7 @@ public class RaceMap extends AbsolutePanel implements TimeListener, CompetitorSe
         CompetitorDTO leadingCompetitorDTO = null;
         int legOfLeaderCompetitor = -1;
         // this only works because the quickRanks are sorted
-        for (QuickRankDTO quickRank : quickRanks) {
+        for (QuickRankDTO quickRank : quickRanks.values()) {
             if (Util.contains(competitorsToShow, quickRank.competitor)) {
                 leadingCompetitorDTO = quickRank.competitor;
                 legOfLeaderCompetitor = quickRank.legNumberOneBased;
@@ -1175,17 +1184,36 @@ public class RaceMap extends AbsolutePanel implements TimeListener, CompetitorSe
         }
     }
 
-    private void zoomMapToNewBounds(LatLngBounds newBounds) {
+    private void zoomMapToNewBounds(Bounds newBounds) {
         if (newBounds != null) {
-            List<ZoomTypes> oldZoomSettings = settings.getZoomSettings().getTypesToConsiderOnZoom();
-            setAutoZoomInProgress(true);
-            map.setCenter(newBounds.getCenter());
-            map.fitBounds(newBounds);
-            settings.getZoomSettings().setTypesToConsiderOnZoom(oldZoomSettings);
-            setAutoZoomInProgress(false);
+            Bounds currentMapBounds = BoundsUtil.getAsBounds(map.getBounds());
+            if (!currentMapBounds.contains(newBounds) || graticuleAreaRation(currentMapBounds, newBounds) > 10) {
+                // only change bounds if the new bounds don't fit into the current map zoom
+                List<ZoomTypes> oldZoomSettings = settings.getZoomSettings().getTypesToConsiderOnZoom();
+                setAutoZoomInProgress(true);
+                LatLngBounds newLatLngBounds = BoundsUtil.getAsLatLngBounds(newBounds);
+                map.fitBounds(newLatLngBounds);
+                settings.getZoomSettings().setTypesToConsiderOnZoom(oldZoomSettings);
+                setAutoZoomInProgress(false);
+            }
         }
     }
     
+    private double graticuleAreaRation(Bounds containing, Bounds contained) {
+        assert containing.contains(contained);
+        double containingAreaRatio = getGraticuleArea(containing) / getGraticuleArea(contained);
+        return containingAreaRatio;
+    }
+
+    /**
+     * A much simplified "area" calculation for a {@link Bounds} object, multiplying the differences in latitude and longitude degrees.
+     * The result therefore is in the order of magnitude of 60*60 square nautical miles.
+     */
+    private double getGraticuleArea(Bounds bounds) {
+        return ((bounds.isCrossesDateLine() ? bounds.getNorthEast().getLngDeg()+360 : bounds.getNorthEast().getLngDeg())-bounds.getSouthWest().getLngDeg()) *
+                (bounds.getNorthEast().getLatDeg() - bounds.getSouthWest().getLatDeg());
+    }
+
     private void setAutoZoomInProgress(boolean autoZoomInProgress) {
         this.autoZoomInProgress = autoZoomInProgress;
     }
@@ -1381,11 +1409,9 @@ public class RaceMap extends AbsolutePanel implements TimeListener, CompetitorSe
         vPanel.add(createInfoWindowLabelAndValue(stringMessages.sailNumber(), competitorDTO.getSailID()));
         Integer rank = null;
         if (quickRanks != null) {
-            for (QuickRankDTO quickRank : quickRanks) {
-                if (quickRank.competitor.equals(competitorDTO)) {
-                    rank = quickRank.rank;
-                    break;
-                }
+            QuickRankDTO quickRank = quickRanks.get(competitorDTO);
+            if (quickRank != null) {
+                rank = quickRank.rank;
             }
         }
         if (rank != null) {
@@ -1621,7 +1647,7 @@ public class RaceMap extends AbsolutePanel implements TimeListener, CompetitorSe
                         i.remove(); // only this way a ConcurrentModificationException while looping can be avoided
                     }
                 }
-                showCompetitorInfoOnMap(timer.getTime(), -1, competitorSelection.getSelectedCompetitors());
+                showCompetitorInfoOnMap(timer.getTime(), -1, competitorSelection.getSelectedFilteredCompetitors());
             } else {
                 // adding a single competitor; may need to re-load data, so refresh:
                 timeChanged(timer.getTime(), null);
@@ -1632,7 +1658,7 @@ public class RaceMap extends AbsolutePanel implements TimeListener, CompetitorSe
             if (boatCanvas != null) {
                 boatCanvas.setSelected(displayHighlighted(competitor));
                 boatCanvas.draw();
-                showCompetitorInfoOnMap(timer.getTime(), -1, competitorSelection.getSelectedCompetitors());
+                showCompetitorInfoOnMap(timer.getTime(), -1, competitorSelection.getSelectedFilteredCompetitors());
             } else {
                 // seems like an internal error not to find the lowlighted marker; but maybe the
                 // competitor was added late to the race;
@@ -1674,7 +1700,7 @@ public class RaceMap extends AbsolutePanel implements TimeListener, CompetitorSe
                         removedBoatOverlay.removeFromMap();
                     }
                     fixesAndTails.removeTail(competitor);
-                    showCompetitorInfoOnMap(timer.getTime(), -1, competitorSelection.getSelectedCompetitors());
+                    showCompetitorInfoOnMap(timer.getTime(), -1, competitorSelection.getSelectedFilteredCompetitors());
                 }
             } else {
                 // "lowlight" currently selected competitor
@@ -1683,7 +1709,7 @@ public class RaceMap extends AbsolutePanel implements TimeListener, CompetitorSe
                     boatCanvas.setSelected(displayHighlighted(competitor));
                     boatCanvas.draw();
                 }
-                showCompetitorInfoOnMap(timer.getTime(), -1, competitorSelection.getSelectedCompetitors());
+                showCompetitorInfoOnMap(timer.getTime(), -1, competitorSelection.getSelectedFilteredCompetitors());
             }
         }
         //Trigger auto-zoom if needed
@@ -1781,8 +1807,8 @@ public class RaceMap extends AbsolutePanel implements TimeListener, CompetitorSe
     public static class BoatsBoundsCalculator extends LatLngBoundsCalculatorForSelected {
 
         @Override
-        public LatLngBounds calculateNewBounds(RaceMap forMap) {
-            LatLngBounds newBounds = null;
+        public Bounds calculateNewBounds(RaceMap forMap) {
+            Bounds newBounds = null;
             Iterable<CompetitorDTO> selectedCompetitors = forMap.competitorSelection.getSelectedCompetitors();
             Iterable<CompetitorDTO> competitors = new ArrayList<CompetitorDTO>();
             if (selectedCompetitors == null || !selectedCompetitors.iterator().hasNext()) {
@@ -1794,16 +1820,11 @@ public class RaceMap extends AbsolutePanel implements TimeListener, CompetitorSe
                 try {
                     GPSFixDTO competitorFix = forMap.getBoatFix(competitor, forMap.timer.getTime());
                     PositionDTO competitorPosition = competitorFix != null ? competitorFix.position : null;
-                    LatLng competitorLatLng = competitorPosition != null ? LatLng.newInstance(competitorPosition.latDeg,
-                            competitorPosition.lngDeg) : null;
-                    LatLngBounds bounds = competitorLatLng != null ? LatLngBounds.newInstance(competitorLatLng,
-                            competitorLatLng) : null;
-                    if (bounds != null) {
+                    if (competitorPosition != null) {
                         if (newBounds == null) {
-                            newBounds = bounds;
+                            newBounds = BoundsUtil.getAsBounds(competitorPosition);
                         } else {
-                            newBounds.extend(bounds.getNorthEast());
-                            newBounds.extend(bounds.getSouthWest());
+                            newBounds = newBounds.extend(BoundsUtil.getAsPosition(competitorPosition));
                         }
                     }
                 } catch (IndexOutOfBoundsException e) {
@@ -1819,27 +1840,26 @@ public class RaceMap extends AbsolutePanel implements TimeListener, CompetitorSe
     public static class TailsBoundsCalculator extends LatLngBoundsCalculatorForSelected {
 
         @Override
-        public LatLngBounds calculateNewBounds(RaceMap racemap) {
-            LatLngBounds newBounds = null;
+        public Bounds calculateNewBounds(RaceMap racemap) {
+            Bounds newBounds = null;
             Iterable<CompetitorDTO> competitors = isZoomOnlyToSelectedCompetitors(racemap) ? racemap.competitorSelection.getSelectedCompetitors() : racemap.getCompetitorsToShow();
             for (CompetitorDTO competitor : competitors) {
                 Polyline tail = racemap.fixesAndTails.getTail(competitor);
-                LatLngBounds bounds = null;
+                Bounds bounds = null;
                 // TODO: Find a replacement for missing Polyline function getBounds() from v2
                 // see also http://stackoverflow.com/questions/3284808/getting-the-bounds-of-a-polyine-in-google-maps-api-v3; 
                 // optionally, consider providing a bounds cache with two sorted sets that organize the LatLng objects for O(1) bounds calculation and logarithmic add, ideally O(1) remove
-                if(tail != null && tail.getPath().getLength() >= 2) {
-                    bounds = LatLngBounds.newInstance(tail.getPath().get(0), tail.getPath().get(1));
-                    for(int i = 2; i < tail.getPath().getLength(); i++) {
-                        bounds.extend(tail.getPath().get(i));
+                if (tail != null && tail.getPath().getLength() >= 1) {
+                    bounds = BoundsUtil.getAsBounds(BoundsUtil.getAsPosition(tail.getPath().get(0)));
+                    for (int i = 1; i < tail.getPath().getLength(); i++) {
+                        bounds = bounds.extend(BoundsUtil.getAsPosition(tail.getPath().get(i)));
                     }
                 }
                 if (bounds != null) {
                     if (newBounds == null) {
                         newBounds = bounds;
                     } else {
-                        newBounds.extend(bounds.getNorthEast());
-                        newBounds.extend(bounds.getSouthWest());
+                        newBounds = newBounds.extend(bounds);
                     }
                 }
             }
@@ -1850,17 +1870,16 @@ public class RaceMap extends AbsolutePanel implements TimeListener, CompetitorSe
     
     public static class CourseMarksBoundsCalculator implements LatLngBoundsCalculator {
         @Override
-        public LatLngBounds calculateNewBounds(RaceMap forMap) {
-            LatLngBounds newBounds = null;
+        public Bounds calculateNewBounds(RaceMap forMap) {
+            Bounds newBounds = null;
             Iterable<MarkDTO> marksToZoom = forMap.markDTOs.values();
             if (marksToZoom != null) {
                 for (MarkDTO markDTO : marksToZoom) {
-                    LatLng markLatLng = LatLng.newInstance(markDTO.position.latDeg, markDTO.position.lngDeg);
-                    LatLngBounds bounds = LatLngBounds.newInstance(markLatLng, markLatLng);
+                    Bounds bounds = BoundsUtil.getAsBounds(markDTO.position);
                     if (newBounds == null) {
                         newBounds = bounds;
                     } else {
-                        newBounds.extend(markLatLng);
+                        newBounds = newBounds.extend(bounds);
                     }
                 }
             }
@@ -1870,18 +1889,18 @@ public class RaceMap extends AbsolutePanel implements TimeListener, CompetitorSe
 
     public static class WindSensorsBoundsCalculator implements LatLngBoundsCalculator {
         @Override
-        public LatLngBounds calculateNewBounds(RaceMap forMap) {
-            LatLngBounds newBounds = null;
+        public Bounds calculateNewBounds(RaceMap forMap) {
+            Bounds newBounds = null;
             Collection<WindSensorOverlay> marksToZoom = forMap.windSensorOverlays.values();
             if (marksToZoom != null) {
-                for (WindSensorOverlay windSensorOverlay: marksToZoom) {
-                    LatLng windSensorLatLng = windSensorOverlay.getLatLngPosition();
-                    if(windSensorLatLng != null) {
-                        LatLngBounds bounds = LatLngBounds.newInstance(windSensorLatLng, windSensorLatLng);
+                for (WindSensorOverlay windSensorOverlay : marksToZoom) {
+                    Position windSensorPosition = BoundsUtil.getAsPosition(windSensorOverlay.getLatLngPosition());
+                    if (windSensorPosition != null) {
+                        Bounds bounds = new BoundsImpl(windSensorPosition, windSensorPosition);
                         if (newBounds == null) {
                             newBounds = bounds;
                         } else {
-                            newBounds.extend(windSensorLatLng);
+                            newBounds = newBounds.extend(windSensorPosition);
                         }
                     }
                 }
@@ -1965,6 +1984,18 @@ public class RaceMap extends AbsolutePanel implements TimeListener, CompetitorSe
                 map.setTitle("");
             }
         });
+        return result;
+    }
+
+    @Override
+    public Integer getRank(CompetitorDTO competitor) {
+        final Integer result;
+        QuickRankDTO quickRank = quickRanks.get(competitor);
+        if (quickRank != null) {
+            result = quickRank.rank;
+        } else {
+            result = null;
+        }
         return result;
     }
 }

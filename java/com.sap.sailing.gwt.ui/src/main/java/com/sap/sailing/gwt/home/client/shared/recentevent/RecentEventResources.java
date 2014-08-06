@@ -16,6 +16,6 @@ public interface RecentEventResources extends ClientBundle {
         String eventteaser_image();
         String eventteaser_series();
         String eventteaser_location();
-        String eventsoverviewrecent();
+        String eventteasercontainer();
     }
 }

@@ -12,6 +12,13 @@ import com.google.gwt.dom.client.Style.Visibility;
 import com.sap.sse.gwt.client.controls.slider.TimeTicksCalculator.NormalizedInterval;
 import com.sap.sse.gwt.client.controls.slider.TimeTicksCalculator.TickPosition;
 
+/**
+ * A slider bar whose values are assumed to be Unix time stamps (milliseconds since the epoch, Jan 1st 1970 00:00:00 UTC).
+ * The ticks are correspondingly rendered as HH:mm time points.
+ * 
+ * @author Axel Uhl (D043530)
+ *
+ */
 public class TimeSlider extends SliderBar {
 
     private final TimeTicksCalculator calc = new TimeTicksCalculator();

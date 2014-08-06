@@ -13,7 +13,7 @@ import com.sap.sailing.gwt.ui.client.StringMessages;
 import com.sap.sse.common.filter.AbstractNumberFilter;
 
 /**
- * A filter filtering competitors by their race rank
+ * A filter filtering competitors by their net points in a race
  * 
  * @author Frank
  * 
@@ -24,6 +24,12 @@ public class CompetitorRaceRankFilter extends AbstractNumberFilter<CompetitorDTO
 
     private LeaderboardFetcher leaderboardFetcher;
     private RaceIdentifier selectedRace;
+    
+    /**
+     * An optional quick rank provider; if <code>null</code>, a more expensive algorithm based on the {@link #selectedRace}
+     * and the leaderboard that can be obtained through the {@link #leaderboardFetcher} needs to be employed to obtain the rank.
+     */
+    private QuickRankProvider quickRankProvider;
 
     public CompetitorRaceRankFilter() {
     }
@@ -34,50 +40,78 @@ public class CompetitorRaceRankFilter extends AbstractNumberFilter<CompetitorDTO
 
     @Override
     public boolean matches(CompetitorDTO competitorDTO) {
-        boolean result = false;
-        if (value != null && operator != null && getLeaderboard() != null && getSelectedRace() != null) {
-            RaceColumnDTO theRaceColumnDTOThatContainsCompetitorRace = null;
-            for (RaceColumnDTO raceColumnDTO : getLeaderboard().getRaceList()) {
-                if (raceColumnDTO.containsRace(getSelectedRace())) {
-                    theRaceColumnDTOThatContainsCompetitorRace = raceColumnDTO;
+        final boolean result;
+        Integer raceRank = null;
+        if (value != null && operator != null) {
+            if (quickRankProvider != null) {
+                // obtain the quick rank
+                raceRank = quickRankProvider.getRank(competitorDTO);
+            } else {
+                if (getLeaderboard() != null && getSelectedRace() != null) {
+                    raceRank = getRankFromLeaderboard(competitorDTO);
+                }
+            }
+        }
+        if (raceRank != null) {
+            result = operator.matchValues(value, raceRank);
+        } else {
+            result = false;
+        }
+        return result;
+    }
+
+    /**
+     * @return <code>null</code> if no rank could be determined for <code>competitorDTO</code>, a 1-based rank otherwise
+     */
+    private Integer getRankFromLeaderboard(CompetitorDTO competitorDTO) {
+        Integer raceRank = null;
+        RaceColumnDTO theRaceColumnDTOThatContainsCompetitorRace = null;
+        for (RaceColumnDTO raceColumnDTO : getLeaderboard().getRaceList()) {
+            if (raceColumnDTO.containsRace(getSelectedRace())) {
+                theRaceColumnDTOThatContainsCompetitorRace = raceColumnDTO;
+                break;
+            }
+        }
+        // There may be competitors that have no tracked race assigned in that column and therefore won't
+        // have a fleet;
+        // those competitors are to be considered "worse". However, in one column it may also be the case
+        // that the "selected race"
+        // has no scores yet (e.g., not yet started) and that other races in the column do have a score. The
+        // competitorsFromBestToWorst then would not contain those competitors that don't have a score
+        // assigned yet.
+        final LeaderboardRowDTO competitorRow = getLeaderboard().rows.get(competitorDTO);
+        LinkedHashSet<CompetitorDTO> competitorsRankedInColumn = new LinkedHashSet<CompetitorDTO>();
+        if (theRaceColumnDTOThatContainsCompetitorRace != null && competitorRow != null) {
+            LeaderboardEntryDTO entryDTO = competitorRow.fieldsByRaceColumnName
+                    .get(theRaceColumnDTOThatContainsCompetitorRace.getName());
+            // first collect those competitors in their order that have a rank
+            for (CompetitorDTO competitor : getLeaderboard().getCompetitorsFromBestToWorst(
+                    theRaceColumnDTOThatContainsCompetitorRace)) {
+                competitorsRankedInColumn.add(competitor);
+            }
+            // then add all competitors for which no ranking has been provided
+            for (CompetitorDTO competitor : getLeaderboard().competitors) {
+                if (!competitorsRankedInColumn.contains(competitor)) {
+                    competitorsRankedInColumn.add(competitor);
+                }
+            }
+            raceRank = 1;
+            for (Iterator<CompetitorDTO> competitorIter = competitorsRankedInColumn.iterator(); competitorIter
+                    .hasNext();) {
+                CompetitorDTO competitor = competitorIter.next();
+                LeaderboardEntryDTO entryDTOIterated = getLeaderboard().rows.get(competitor).fieldsByRaceColumnName
+                        .get(theRaceColumnDTOThatContainsCompetitorRace.getName());
+                // the competitor counts for the selected race if the fleet matches or is unknown
+                if (entryDTOIterated.fleet == null || entryDTO.fleet == null
+                        || entryDTOIterated.fleet.equals(entryDTO.fleet)) {
+                    raceRank++;
+                }
+                if (competitor.equals(competitorDTO)) {
                     break;
                 }
             }
-            // There may be competitors that have no tracked race assigned in that column and therefore won't have a fleet;
-            // those competitors are to be considered "worse". However, in one column it may also be the case that the "selected race"
-            // has no scores yet (e.g., not yet started) and that other races in the column do have a score. The
-            // competitorsFromBestToWorst then would not contain those competitors that don't have a score assigned yet.
-            LinkedHashSet<CompetitorDTO> competitorsRankedInColumn = new LinkedHashSet<CompetitorDTO>();
-            final LeaderboardRowDTO competitorRow = getLeaderboard().rows.get(competitorDTO);
-            if (theRaceColumnDTOThatContainsCompetitorRace != null && competitorRow != null) {
-                LeaderboardEntryDTO entryDTO = competitorRow.fieldsByRaceColumnName.get(theRaceColumnDTOThatContainsCompetitorRace.getName());
-                // first collect those competitors in their order that have a rank
-                for (CompetitorDTO competitor : getLeaderboard().getCompetitorsFromBestToWorst(theRaceColumnDTOThatContainsCompetitorRace)) {
-                    competitorsRankedInColumn.add(competitor);
-                }
-                // then add all competitors for which no ranking has been provided 
-                for (CompetitorDTO competitor : getLeaderboard().competitors) {
-                    if (!competitorsRankedInColumn.contains(competitor)) {
-                        competitorsRankedInColumn.add(competitor);
-                    }
-                }
-                int raceRank = 1;
-                for (Iterator<CompetitorDTO> competitorIter=competitorsRankedInColumn.iterator(); competitorIter.hasNext(); ) {
-                    CompetitorDTO competitor = competitorIter.next();
-                    LeaderboardEntryDTO entryDTOIterated = getLeaderboard().rows.get(competitor).fieldsByRaceColumnName
-                            .get(theRaceColumnDTOThatContainsCompetitorRace.getName());
-                    // the competitor counts for the selected race if the fleet matches or is unknown
-                    if (entryDTOIterated.fleet == null || entryDTO.fleet == null || entryDTOIterated.fleet.equals(entryDTO.fleet)) {
-                        raceRank++;
-                    }
-                    if (competitor.equals(competitorDTO)) {
-                        break;
-                    }
-                }
-                result = operator.matchValues(value, raceRank);
-            }
         }
-        return result;
+        return raceRank;
     }
 
     @Override
@@ -135,6 +169,11 @@ public class CompetitorRaceRankFilter extends AbstractNumberFilter<CompetitorDTO
     @Override
     public void setSelectedRace(RaceIdentifier selectedRace) {
         this.selectedRace = selectedRace;
+    }
+
+    @Override
+    public void setQuickRankProvider(QuickRankProvider quickRankProvider) {
+        this.quickRankProvider = quickRankProvider;
     }
 
     @Override

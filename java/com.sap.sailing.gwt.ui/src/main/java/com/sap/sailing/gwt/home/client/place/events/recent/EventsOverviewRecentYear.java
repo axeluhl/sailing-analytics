@@ -3,6 +3,7 @@ package com.sap.sailing.gwt.home.client.place.events.recent;
 import java.util.List;
 
 import com.google.gwt.core.client.GWT;
+import com.google.gwt.dom.client.DivElement;
 import com.google.gwt.dom.client.SpanElement;
 import com.google.gwt.event.dom.client.ClickEvent;
 import com.google.gwt.event.dom.client.ClickHandler;
@@ -27,7 +28,7 @@ public class EventsOverviewRecentYear extends Composite {
 //    @UiField SpanElement countriesCount;
 //    @UiField SpanElement sailorsCount;
 //    @UiField SpanElement trackedRacesCount;
-    @UiField HTMLPanel recentEventsTeaserPanel;
+    @UiField DivElement recentEventsTeaserPanel;
     @UiField HTMLPanel contentDiv;
     @UiField HTMLPanel headerDiv;
     
@@ -46,7 +47,7 @@ public class EventsOverviewRecentYear extends Composite {
         for(EventBaseDTO eventDTO: events) {
             RecentEvent recentEvent = new RecentEvent(navigator);
             recentEvent.setEvent(eventDTO);
-            recentEventsTeaserPanel.add(recentEvent);
+            recentEventsTeaserPanel.appendChild(recentEvent.getElement());
         }
         isContentVisible = true;
      

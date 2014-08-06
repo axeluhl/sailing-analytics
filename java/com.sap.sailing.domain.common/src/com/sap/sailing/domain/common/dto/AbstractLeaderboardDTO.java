@@ -190,6 +190,14 @@ public abstract class AbstractLeaderboardDTO implements Serializable {
         return races.size();
     }
 
+    public int getRacesCount() {
+        int result = 0;
+        for (RaceColumnDTO race : getRaceList()) {
+            result += race.getFleets().size();
+        }
+        return result;
+    }
+
     public int getTrackedRacesCount() {
         int result = 0;
         for (RaceColumnDTO race : getRaceList()) {

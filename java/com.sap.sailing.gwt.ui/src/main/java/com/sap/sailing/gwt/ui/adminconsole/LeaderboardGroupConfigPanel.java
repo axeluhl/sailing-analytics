@@ -492,6 +492,13 @@ public class LeaderboardGroupConfigPanel extends AbstractRegattaPanel implements
                 return group.description.length() <= 100 ? group.description : group.description.substring(0, 98) + "...";
             }
         };
+        TextColumn<LeaderboardGroupDTO> groupDisplayNameColumn = new TextColumn<LeaderboardGroupDTO>() {
+            @Override
+            public String getValue(LeaderboardGroupDTO group) {
+                return group.getDisplayName() == null ? "" :
+                    group.getDisplayName().length() <= 100 ? group.getDisplayName() : group.getDisplayName().substring(0, 98) + "...";
+            }
+        };
         TextColumn<LeaderboardGroupDTO> hasOverallLeaderboardColumn = new TextColumn<LeaderboardGroupDTO>() {
             @Override
             public String getValue(LeaderboardGroupDTO group) {
@@ -533,6 +540,7 @@ public class LeaderboardGroupConfigPanel extends AbstractRegattaPanel implements
         groupsTable.setWidth("100%");
         groupsTable.addColumn(groupNameColumn, stringMessages.name());
         groupsTable.addColumn(groupDescriptionColumn, stringMessages.description());
+        groupsTable.addColumn(groupDisplayNameColumn, stringMessages.displayName());
         groupsTable.addColumn(hasOverallLeaderboardColumn, stringMessages.useOverallLeaderboard());
         groupsTable.addColumn(groupActionsColumn, stringMessages.actions());
         groupsTable.addColumnSortHandler(leaderboardGroupsListHandler);
@@ -629,8 +637,8 @@ public class LeaderboardGroupConfigPanel extends AbstractRegattaPanel implements
 
     private void createNewGroup(final LeaderboardGroupDescriptor newGroup) {
         sailingService.createLeaderboardGroup(newGroup.getName(), newGroup.getDescription(),
-                newGroup.isDisplayLeaderboardsInReverseOrder(), newGroup.getOverallLeaderboardDiscardThresholds(),
-                newGroup.getOverallLeaderboardScoringSchemeType(), new MarkedAsyncCallback<LeaderboardGroupDTO>(
+                newGroup.getDisplayName(), newGroup.isDisplayLeaderboardsInReverseOrder(),
+                newGroup.getOverallLeaderboardDiscardThresholds(), newGroup.getOverallLeaderboardScoringSchemeType(), new MarkedAsyncCallback<LeaderboardGroupDTO>(
                         new AsyncCallback<LeaderboardGroupDTO>() {
                             @Override
                             public void onFailure(Throwable t) {
@@ -654,6 +662,7 @@ public class LeaderboardGroupConfigPanel extends AbstractRegattaPanel implements
             leaderboardNames.add(leaderboardDTO.name);
         }
         sailingService.updateLeaderboardGroup(oldGroupName, updateDescriptor.getName(), updateDescriptor.getDescription(),
+                updateDescriptor.getDisplayName(),
                 leaderboardNames, updateDescriptor.getOverallLeaderboardDiscardThresholds(),
                 updateDescriptor.getOverallLeaderboardScoringSchemeType(), new MarkedAsyncCallback<Void>(
                         new AsyncCallback<Void>() {
@@ -670,6 +679,7 @@ public class LeaderboardGroupConfigPanel extends AbstractRegattaPanel implements
                                     if (oldGroupName.equals(group.getName())) {
                                         groupToUpdate.setName(updateDescriptor.getName());
                                         groupToUpdate.description = updateDescriptor.getDescription();
+                                        groupToUpdate.setDisplayName(updateDescriptor.getDisplayName());
                                         groupToUpdate.displayLeaderboardsInReverseOrder = updateDescriptor.isDisplayLeaderboardsInReverseOrder();
                                         groupToUpdate.setOverallLeaderboardDiscardThresholds(updateDescriptor.getOverallLeaderboardDiscardThresholds());
                                         groupToUpdate.setOverallLeaderboardScoringSchemeType(updateDescriptor.getOverallLeaderboardScoringSchemeType());
@@ -696,6 +706,7 @@ public class LeaderboardGroupConfigPanel extends AbstractRegattaPanel implements
             leaderboardNames.add(leaderboardDTO.name);
         }
         sailingService.updateLeaderboardGroup(group.getName(), group.getName(), group.description,
+                group.getDisplayName(),
                 leaderboardNames, group.getOverallLeaderboardDiscardThresholds(),
                 group.getOverallLeaderboardScoringSchemeType(), new MarkedAsyncCallback<Void>(
                         new AsyncCallback<Void>() {

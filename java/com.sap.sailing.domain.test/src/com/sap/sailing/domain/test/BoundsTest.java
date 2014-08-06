@@ -89,6 +89,28 @@ public class BoundsTest {
     }
     
     @Test
+    public void unionTestWithEmptyBounds() {
+        Bounds b1 = new BoundsImpl(new DegreePosition(1, 1), new DegreePosition(3, 3));
+        Bounds b2 = new BoundsImpl(new DegreePosition(4, 4), new DegreePosition(4, 4));
+        Bounds u = b1.union(b2);
+        assertEquals(1.0, u.getSouthWest().getLatDeg(), 0.00000001);
+        assertEquals(1.0, u.getSouthWest().getLngDeg(), 0.00000001);
+        assertEquals(4.0, u.getNorthEast().getLatDeg(), 0.00000001);
+        assertEquals(4.0, u.getNorthEast().getLngDeg(), 0.00000001);
+    }
+    
+    @Test
+    public void unionTestWithTwoEmptyBounds() {
+        Bounds b1 = new BoundsImpl(new DegreePosition(1, 1), new DegreePosition(1, 1));
+        Bounds b2 = new BoundsImpl(new DegreePosition(4, 4), new DegreePosition(4, 4));
+        Bounds u = b1.union(b2);
+        assertEquals(1.0, u.getSouthWest().getLatDeg(), 0.00000001);
+        assertEquals(1.0, u.getSouthWest().getLngDeg(), 0.00000001);
+        assertEquals(4.0, u.getNorthEast().getLatDeg(), 0.00000001);
+        assertEquals(4.0, u.getNorthEast().getLngDeg(), 0.00000001);
+    }
+    
+    @Test
     public void simpleIntersectsTest() {
         Bounds b1 = new BoundsImpl(new DegreePosition(1, 1), new DegreePosition(3, 3));
         Bounds b2 = new BoundsImpl(new DegreePosition(2, 2), new DegreePosition(5, 5));

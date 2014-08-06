@@ -10,7 +10,8 @@ public interface EventPageNavigator {
     void goToRegattas();
     void goToSchedule();
     void goToMedia();
-    void goToRegattaRaces(RaceGroupDTO raceGroup, StrippedLeaderboardDTO leaderboard);
+    void goToRegattaRaces(LeaderboardGroupDTO leaderboardGroup, StrippedLeaderboardDTO leaderboard, RaceGroupDTO raceGroup);
     void openRaceViewer(StrippedLeaderboardDTO leaderboard, RaceDTO race);
+    void openOverallLeaderboardViewer(LeaderboardGroupDTO leaderboardGroup);
     void openLeaderboardViewer(LeaderboardGroupDTO leaderboardGroup, StrippedLeaderboardDTO leaderboard);
 }

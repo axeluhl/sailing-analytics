@@ -123,6 +123,7 @@ public class RaceBoardPanel extends SimplePanel implements RegattasDisplayer, Ra
     private final AsyncActionsExecutor asyncActionsExecutor;
     
     private final RaceTimesInfoProvider raceTimesInfoProvider;
+    private RaceMap raceMap;
     
     private final static String LOCAL_STORAGE_COMPETITORS_FILTER_SETS_KEY = "sailingAnalytics.raceBoard.competitorsFilterSets";
 
@@ -203,7 +204,7 @@ public class RaceBoardPanel extends SimplePanel implements RegattasDisplayer, Ra
     
     private void createOneScreenView(String leaderboardName, String leaderboardGroupName, FlowPanel mainPanel, boolean showMapControls) {
         // create the default leaderboard and select the right race
-        RaceMap raceMap = new RaceMap(sailingService, asyncActionsExecutor, errorReporter, timer,
+        raceMap = new RaceMap(sailingService, asyncActionsExecutor, errorReporter, timer,
                 competitorSelectionModel, stringMessages, showMapControls, getConfiguration().isShowViewStreamlets(), selectedRaceIdentifier);
         raceTimesInfoProvider.addRaceTimesInfoProviderListener(raceMap);
         raceMap.onRaceSelectionChange(Collections.singletonList(selectedRaceIdentifier));
@@ -273,7 +274,7 @@ public class RaceBoardPanel extends SimplePanel implements RegattasDisplayer, Ra
      * Consequently, media selector will also NOT react on media added newly during a race board session.
      */
     private void addMediaSelectorToNavigationMenu() {
-        MediaSelector mediaSelector = new MediaSelector(selectedRaceIdentifier, raceTimesInfoProvider, timer, mediaService, stringMessages, errorReporter, this.user, getConfiguration().isAutoSelectMedia());
+        MediaSelector mediaSelector = new MediaSelector(selectedRaceIdentifier, raceTimesInfoProvider, timer, mediaService, stringMessages, errorReporter, userAgent, this.user, getConfiguration().isAutoSelectMedia());
         timer.addPlayStateListener(mediaSelector);
         timer.addTimeListener(mediaSelector);
         mediaService.getMediaTracksForRace(selectedRaceIdentifier, mediaSelector);
@@ -306,17 +307,19 @@ public class RaceBoardPanel extends SimplePanel implements RegattasDisplayer, Ra
     }
 
     private void updateCompetitorsFilterContexts(CompetitorsFilterSets filterSets) {
-        for(FilterSet<CompetitorDTO, FilterWithUI<CompetitorDTO>> filterSet: filterSets.getFilterSets()) {
-            for(Filter<CompetitorDTO> filter: filterSet.getFilters()) {
-               if(filter instanceof LeaderboardFilterContext) {
-                   ((LeaderboardFilterContext) filter).setLeaderboardFetcher(leaderboardPanel);
-               }
-               if(filter instanceof SelectedRaceFilterContext) {
-                   ((SelectedRaceFilterContext) filter).setSelectedRace(selectedRaceIdentifier);
-               }
-               if(filter instanceof CompetitorSelectionProviderFilterContext) {
-                   ((CompetitorSelectionProviderFilterContext) filter).setCompetitorSelectionProvider(competitorSelectionModel);
-               }
+        for (FilterSet<CompetitorDTO, FilterWithUI<CompetitorDTO>> filterSet : filterSets.getFilterSets()) {
+            for (Filter<CompetitorDTO> filter : filterSet.getFilters()) {
+                if (filter instanceof LeaderboardFilterContext) {
+                    ((LeaderboardFilterContext) filter).setLeaderboardFetcher(leaderboardPanel);
+                }
+                if (filter instanceof SelectedRaceFilterContext) {
+                    ((SelectedRaceFilterContext) filter).setSelectedRace(selectedRaceIdentifier);
+                    ((SelectedRaceFilterContext) filter).setQuickRankProvider(raceMap);
+                }
+                if (filter instanceof CompetitorSelectionProviderFilterContext) {
+                    ((CompetitorSelectionProviderFilterContext) filter)
+                            .setCompetitorSelectionProvider(competitorSelectionModel);
+                }
             }
         }
     }
@@ -417,13 +420,13 @@ public class RaceBoardPanel extends SimplePanel implements RegattasDisplayer, Ra
     private CompetitorsFilterSets loadCompetitorsFilterSets() {
         CompetitorsFilterSets result = null;
         Storage localStorage = Storage.getLocalStorageIfSupported();
-        if(localStorage != null) {
+        if (localStorage != null) {
             try {
                 String jsonAsLocalStore = localStorage.getItem(LOCAL_STORAGE_COMPETITORS_FILTER_SETS_KEY);
-                if(jsonAsLocalStore != null && !jsonAsLocalStore.isEmpty()) {
+                if (jsonAsLocalStore != null && !jsonAsLocalStore.isEmpty()) {
                     CompetitorsFilterSetsJsonDeSerializer deserializer = new CompetitorsFilterSetsJsonDeSerializer();
                     JSONValue value = JSONParser.parseStrict(jsonAsLocalStore);
-                    if(value.isObject() != null) {
+                    if (value.isObject() != null) {
                         result = deserializer.deserialize((JSONObject) value);
                     }
                 }

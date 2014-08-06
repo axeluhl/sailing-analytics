@@ -9,4 +9,6 @@ import com.sap.sse.gwt.client.player.Timer;
 
 public interface EventClientFactory extends SailingClientFactory {
     EventView createEventView(EventDTO event, List<RaceGroupDTO> raceGroups, String leaderboardName, Timer timerForClientServerOffset);
+
+    EventWithoutRegattasView createEventWithoutRegattasView(EventDTO event);
 }
