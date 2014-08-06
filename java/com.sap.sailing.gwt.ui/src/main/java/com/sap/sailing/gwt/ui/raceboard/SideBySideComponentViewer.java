@@ -5,6 +5,7 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
+import com.google.gwt.dom.client.Style.Overflow;
 import com.google.gwt.dom.client.Style.Unit;
 import com.google.gwt.event.dom.client.ClickEvent;
 import com.google.gwt.event.dom.client.ClickHandler;
@@ -17,6 +18,7 @@ import com.google.gwt.user.client.ui.Panel;
 import com.google.gwt.user.client.ui.RequiresResize;
 import com.google.gwt.user.client.ui.ScrollPanel;
 import com.google.gwt.user.client.ui.Widget;
+import com.google.gwt.user.client.ui.WidgetCollection;
 import com.sap.sailing.gwt.ui.client.StringMessages;
 import com.sap.sailing.gwt.ui.client.shared.components.Component;
 import com.sap.sailing.gwt.ui.client.shared.components.ComponentViewer;
@@ -33,6 +35,8 @@ public class SideBySideComponentViewer implements ComponentViewer {
     /**
      * Panel that combines another Panel and associated close and
      * settings buttons.
+     * 
+     * This panel does not work in combination with {@link ScrollPanel}
      * 
      * @author Simon Marcel Pamies
      */
@@ -78,6 +82,17 @@ public class SideBySideComponentViewer implements ComponentViewer {
         public abstract void settingsClicked();
     }
     
+    class ResizableAbsolutePanel extends AbsolutePanel implements RequiresResize {
+        public void onResize() {
+            WidgetCollection children = getChildren();
+            for (Widget widget : children) {
+                if (widget instanceof RequiresResize) {
+                    ((RequiresResize)widget).onResize();
+                }
+            }
+        }
+    }
+    
     private final int MAX_LEADERBOARD_WIDTH = 500;
     
     private final LeaderboardPanel leftComponent;
@@ -112,7 +127,7 @@ public class SideBySideComponentViewer implements ComponentViewer {
         splitLayoutPanel = new TouchSplitLayoutPanelWithBetterDraggers(/* splitter width */ 3);
         mainPanel.add(splitLayoutPanel);
         
-        AbsolutePanel absoluteMapAndToggleButtonsPanel = new AbsolutePanel();
+        ResizableAbsolutePanel absoluteMapAndToggleButtonsPanel = new ResizableAbsolutePanel();
         panelForTogglingSouthLayoutPanelComponents = new HorizontalPanel();
         panelForTogglingSouthLayoutPanelComponents.setStyleName("gwt-SplitLayoutPanel-NorthSouthToggleButton-Panel");
         
@@ -153,7 +168,7 @@ public class SideBySideComponentViewer implements ComponentViewer {
         
         initializeComponents();
 
-        savedSplitPosition = 400;
+        savedSplitPosition = 350;
         splitLayoutPanel.insert(leftPanel, leftComponentP, Direction.WEST, savedSplitPosition, null);
         splitLayoutPanel.insert(absoluteMapAndToggleButtonsPanel, rightComponent, Direction.CENTER, 0, null);
 
