@@ -142,14 +142,13 @@ public class TestProcessorQuery {
         results.put(new GenericGroupKey<Integer>(3), 3.0);
         results.put(new GenericGroupKey<Integer>(4), 10.0);
         
-        QueryResultImpl<Double> result = new QueryResultImpl<>(results, new AdditionalResultDataImpl(dataSource.size(), 18, "Cross Sum (Sum)", Unit.None, 0, 0));
+        QueryResultImpl<Double> result = new QueryResultImpl<>(results, new AdditionalResultDataImpl(dataSource.size(), "Cross Sum (Sum)", Unit.None, 0, 0));
         return result;
     }
 
     private void verifyResult(QueryResult<Double> result, QueryResult<Double> expectedResult) {
         assertThat("Result values aren't correct.", result.getResults(), is(expectedResult.getResults()));
         assertThat("Retrieved data amount isn't correct.", result.getRetrievedDataAmount(), is(expectedResult.getRetrievedDataAmount()));
-        assertThat("Filtered data amount isn't correct.", result.getFilteredDataAmount(), is(expectedResult.getFilteredDataAmount()));
         assertThat("Result signifier isn't correct.", result.getResultSignifier(), is(expectedResult.getResultSignifier()));
         assertThat("Unit isn't correct.", result.getUnit(), is(expectedResult.getUnit()));
         assertThat("Value decimals aren't correct.", result.getValueDecimals(), is(expectedResult.getValueDecimals()));

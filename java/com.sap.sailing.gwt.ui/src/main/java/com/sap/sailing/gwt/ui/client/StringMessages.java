@@ -836,7 +836,7 @@ public interface StringMessages extends Messages {
     String selectSheet();
     String groupBy();
     String statisticToCalculate();
-    String queryResultsChartSubtitle(int retrievedDataAmount, int filteredDataAmount, double calculationTime);
+    String queryResultsChartSubtitle(int retrievedDataAmount, double calculationTime);
     String noQuerySelected();
     String runAutomatically();
     String noStatisticSelectedError();

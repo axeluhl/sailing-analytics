@@ -28,7 +28,7 @@ public class PlainResultsPresenter implements ResultsPresenter<Number> {
     @Override
     public void showResult(QueryResult<Number> result) {
         StringBuilder resultsBuilder = new StringBuilder("<b>" + result.getResultSignifier() + "</b></ br>");
-        resultsBuilder.append(stringMessages.queryResultsChartSubtitle(result.getRetrievedDataAmount(), result.getFilteredDataAmount(), result.getCalculationTimeInSeconds()));
+        resultsBuilder.append(stringMessages.queryResultsChartSubtitle(result.getRetrievedDataAmount(), result.getCalculationTimeInSeconds()));
         
         resultsBuilder.append("<ul>");
         for (Entry<GroupKey, Number> resultEntry : result.getResults().entrySet()) {

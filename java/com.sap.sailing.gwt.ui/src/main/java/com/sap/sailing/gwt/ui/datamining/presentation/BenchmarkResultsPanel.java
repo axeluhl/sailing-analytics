@@ -68,7 +68,7 @@ public class BenchmarkResultsPanel extends FlowPanel {
 
     private void updateResults(final ClientBenchmarkData benchmarkData, double overallTimeInSeconds, QueryResult<? extends Number> result) {
         resultsChart.addResult(new BenchmarkResult(stringMessages.runAsSubstantive() + " " + benchmarkData.getCurrentRun(),
-                                                        result.getFilteredDataAmount(), result.getCalculationTimeInSeconds(), overallTimeInSeconds));
+                                                        result.getRetrievedDataAmount(), result.getCalculationTimeInSeconds(), overallTimeInSeconds));
         
         if (benchmarkData.isFinished()) {
             benchmarkStatusLabel.setText(" | " + stringMessages.done());

@@ -21,6 +21,11 @@ public class TestAbstractFilteringRetrievalProcessor {
     private Collection<Integer> dataSource;
     
     private Collection<Integer> receivedResults = new HashSet<>();
+    
+    @Before
+    public void setUpDataSource() {
+        dataSource = Arrays.asList(-2, -1, 0, 1, 2);
+    }
 
     @Test
     public void testFiltration() throws InterruptedException {
@@ -39,12 +44,24 @@ public class TestAbstractFilteringRetrievalProcessor {
         ConcurrencyTestsUtil.sleepFor(500); //Giving the processor time to finish
         
         int expectedRetrievedDataAmount = 5;
-        int expectedFilteredDataAmount = 3;
         
         SumBuildingAndOverwritingResultDataBuilder resultDataBuilder = new SumBuildingAndOverwritingResultDataBuilder();
         filteringRetrievalProcessor.getAdditionalResultData(resultDataBuilder);
         assertThat(resultDataBuilder.getRetrievedDataAmount(), is(expectedRetrievedDataAmount));
-        assertThat(resultDataBuilder.getFilteredDataAmount(), is(expectedFilteredDataAmount));
+    }
+    
+    @Test
+    public void testProvidedAdditionalDataWithMultipleRetrievalLayers() throws InterruptedException {
+//        fail("Not yet implemented");
+//        filteringRetrievalProcessor.processElement(dataSource);
+//        filteringRetrievalProcessor.finish();
+//        ConcurrencyTestsUtil.sleepFor(500); //Giving the processor time to finish
+//        
+//        int expectedRetrievedDataAmount = 5;
+//        
+//        SumBuildingAndOverwritingResultDataBuilder resultDataBuilder = new SumBuildingAndOverwritingResultDataBuilder();
+//        filteringRetrievalProcessor.getAdditionalResultData(resultDataBuilder);
+//        assertThat(resultDataBuilder.getRetrievedDataAmount(), is(expectedRetrievedDataAmount));
     }
     
     @Before
@@ -71,23 +88,18 @@ public class TestAbstractFilteringRetrievalProcessor {
             }
         };
         
-        FilterCriteria<Integer> filterCriteria = new FilterCriteria<Integer>() {
+        FilterCriteria<Integer> elementGreaterZeroFilterCriteria = new FilterCriteria<Integer>() {
             @Override
             public boolean matches(Integer element) {
                 return element >= 0;
             }
         };
-        filteringRetrievalProcessor = new AbstractSimpleFilteringRetrievalProcessor<Iterable<Integer>, Integer>(ConcurrencyTestsUtil.getExecutor(), Arrays.asList(resultReceiver), filterCriteria) {
+        filteringRetrievalProcessor = new AbstractSimpleFilteringRetrievalProcessor<Iterable<Integer>, Integer>(ConcurrencyTestsUtil.getExecutor(), Arrays.asList(resultReceiver), elementGreaterZeroFilterCriteria) {
             @Override
             protected Iterable<Integer> retrieveData(Iterable<Integer> element) {
                 return element;
             }
         };
-    }
-    
-    @Before
-    public void setUpDataSource() {
-        dataSource = Arrays.asList(-2, -1, 0, 1, 2);
     }
 
 }

@@ -21,7 +21,6 @@ import com.sap.sse.datamining.shared.impl.AdditionalResultDataImpl;
 public class SumBuildingAndOverwritingResultDataBuilder implements AdditionalResultDataBuilder {
 
     private int retrievedDataAmount;
-    private int filteredDataAmount;
     private Function<?> extractionFunction;
     private String aggregationNameMessageKey;
     private Unit unit;
@@ -32,14 +31,13 @@ public class SumBuildingAndOverwritingResultDataBuilder implements AdditionalRes
      */
     public SumBuildingAndOverwritingResultDataBuilder() {
         retrievedDataAmount = 0;
-        filteredDataAmount = 0;
         unit = Unit.None;
         resultDecimals = 0;
     }
 
     @Override
     public AdditionalResultData build(long calculationTimeInNanos, DataMiningStringMessages stringMessages, Locale locale) {
-        return new AdditionalResultDataImpl(retrievedDataAmount, filteredDataAmount, buildResultSignifier(stringMessages, locale), unit, resultDecimals, calculationTimeInNanos);
+        return new AdditionalResultDataImpl(retrievedDataAmount, buildResultSignifier(stringMessages, locale), unit, resultDecimals, calculationTimeInNanos);
     }
 
     private String buildResultSignifier(DataMiningStringMessages stringMessages, Locale locale) {
@@ -58,11 +56,6 @@ public class SumBuildingAndOverwritingResultDataBuilder implements AdditionalRes
     }
 
     @Override
-    public void setFilteredDataAmount(int filteredDataAmount) {
-        this.filteredDataAmount += filteredDataAmount;
-    }
-
-    @Override
     public void setExtractionFunction(Function<?> extractionFunction) {
         this.extractionFunction = extractionFunction;
         unit = extractionFunction.getResultUnit();
@@ -76,10 +69,6 @@ public class SumBuildingAndOverwritingResultDataBuilder implements AdditionalRes
 
     protected int getRetrievedDataAmount() {
         return retrievedDataAmount;
-    }
-
-    protected int getFilteredDataAmount() {
-        return filteredDataAmount;
     }
 
     protected Function<?> getExtractionFunction() {

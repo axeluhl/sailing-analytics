@@ -6,7 +6,6 @@ import java.util.concurrent.ExecutorService;
 import java.util.concurrent.locks.Lock;
 import java.util.concurrent.locks.ReentrantLock;
 
-import com.sap.sse.datamining.AdditionalResultDataBuilder;
 import com.sap.sse.datamining.components.FilterCriteria;
 import com.sap.sse.datamining.components.Processor;
 
@@ -48,12 +47,6 @@ public abstract class AbstractFilteringRetrievalProcessor<InputType, WorkingType
         } finally {
             filteredDataAmountLock.unlock();
         }
-    }
-    
-    @Override
-    protected void setAdditionalData(AdditionalResultDataBuilder additionalDataBuilder) {
-        super.setAdditionalData(additionalDataBuilder);
-        additionalDataBuilder.setFilteredDataAmount(filteredDataAmount);
     }
 
 }

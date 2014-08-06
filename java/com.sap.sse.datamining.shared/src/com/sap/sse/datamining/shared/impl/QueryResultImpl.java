@@ -31,11 +31,6 @@ public class QueryResultImpl<AggregatedType> implements QueryResult<AggregatedTy
     }
 
     @Override
-    public int getFilteredDataAmount() {
-        return additionalData.getFilteredDataAmount();
-    }
-
-    @Override
     public double getCalculationTimeInSeconds() {
         return additionalData.getCalculationTimeInSeconds();
     }

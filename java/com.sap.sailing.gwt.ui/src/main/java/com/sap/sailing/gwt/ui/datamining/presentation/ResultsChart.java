@@ -140,7 +140,7 @@ public class ResultsChart implements ResultsPresenter<Number> {
 
     private void updateChartSubtitleAndSetChartAsWidget(QueryResult<? extends Number> result) {
         chart.setChartSubtitle(new ChartSubtitle().setText(stringMessages.queryResultsChartSubtitle(
-                result.getRetrievedDataAmount(), result.getFilteredDataAmount(), result.getCalculationTimeInSeconds())));
+                result.getRetrievedDataAmount(), result.getCalculationTimeInSeconds())));
         // This is needed, so that the subtitle is updated. Otherwise the text would stay empty
         mainPanel.setWidget(null);
         mainPanel.setWidget(chart);
