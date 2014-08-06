@@ -17,7 +17,7 @@ public class DataMiningServerImpl implements DataMiningServer {
     
     private final FunctionRegistry functionRegistry;
     private final FunctionProvider functionProvider;
-    private ClassesWithFunctionsProvider classesWithFunctionsProvider;
+    private final ClassesWithFunctionsProvider classesWithFunctionsProvider;
 
     public DataMiningServerImpl(FunctionRegistry functionRegistry, FunctionProvider functionProvider, ClassesWithFunctionsProvider classesWithFunctionsProvider) {
         registeredInternalClassesWithMarkedMethods = new HashSet<>();
