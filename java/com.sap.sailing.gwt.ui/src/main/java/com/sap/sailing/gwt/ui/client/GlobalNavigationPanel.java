@@ -30,7 +30,7 @@ public class GlobalNavigationPanel extends FlowPanel {
                 String leaderBoardGroupLink = EntryPointLinkFactory.createLeaderboardGroupLink(leaderboardGroupLinkParameters);
                 addNavigationLink(leaderboardGroupName, leaderBoardGroupLink, "leaderBoardGroup", "Go to the Event overview.");
             } else {
-                addNavigationLink(stringMessages.home(), "/", "home", "Go to the Event overview.");
+                addNavigationLink(stringMessages.home(), "/", "home", "Go to the Event overview");
             }
         }
         
