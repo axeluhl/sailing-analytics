@@ -19,7 +19,6 @@ public interface TextMessages extends Messages {
     String fullEventSchedule();
     String officalEventWebsite();
     String leg();
-    String leader();
     String races();
     String showEvent();
     String overallLeaderboard();
