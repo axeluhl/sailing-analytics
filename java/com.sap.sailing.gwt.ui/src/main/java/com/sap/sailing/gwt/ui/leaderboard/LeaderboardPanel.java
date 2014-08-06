@@ -2146,7 +2146,7 @@ public class LeaderboardPanel extends SimplePanel implements TimeListener, PlayS
             }
             scoreCorrectionLastUpdateTimeLabel.setVisible(!hasLiveRace);
             liveRaceLabel.setVisible(hasLiveRace);
-            informLeaderboardUpdateListenersAboutLeaderboardReceived(leaderboard);
+            informLeaderboardUpdateListenersAboutLeaderboardUpdated(leaderboard);
         }
     }
 
@@ -2934,13 +2934,13 @@ public class LeaderboardPanel extends SimplePanel implements TimeListener, PlayS
         this.leaderboardUpdateListener.add(listener);
     }
     
-    private void informLeaderboardUpdateListenersAboutLeaderboardReceived(LeaderboardDTO leaderboard) {
+    protected void informLeaderboardUpdateListenersAboutLeaderboardUpdated(LeaderboardDTO leaderboard) {
         for (LeaderboardUpdateListener listener : this.leaderboardUpdateListener) {
             listener.updatedLeaderboard(leaderboard);
         }
     }
     
-    private void informLeaderboardUpdateListenersAboutRaceSelected(RaceIdentifier raceIdentifier, RaceColumnDTO raceColumn) {
+    protected void informLeaderboardUpdateListenersAboutRaceSelected(RaceIdentifier raceIdentifier, RaceColumnDTO raceColumn) {
         for (LeaderboardUpdateListener listener : this.leaderboardUpdateListener) {
            listener.currentRaceSelected(raceIdentifier, raceColumn);
         }

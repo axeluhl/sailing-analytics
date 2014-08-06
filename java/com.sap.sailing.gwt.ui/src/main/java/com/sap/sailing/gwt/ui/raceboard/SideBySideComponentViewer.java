@@ -78,6 +78,8 @@ public class SideBySideComponentViewer implements ComponentViewer {
         public abstract void settingsClicked();
     }
     
+    private final int MAX_LEADERBOARD_WIDTH = 500;
+    
     private final LeaderboardPanel leftComponent;
     private final Panel leaderboardContentPanel;
     private final Component<?> rightComponent;
@@ -106,6 +108,7 @@ public class SideBySideComponentViewer implements ComponentViewer {
         leftScrollPanel.setTitle(leftComponentP.getEntryWidget().getTitle());
         mainPanel = new LayoutPanel();
         mainPanel.setSize("100%", "100%");
+        mainPanel.setStyleName("SideBySideComponentViewer-MainPanel");
         splitLayoutPanel = new TouchSplitLayoutPanelWithBetterDraggers(/* splitter width */ 3);
         mainPanel.add(splitLayoutPanel);
         
@@ -242,5 +245,12 @@ public class SideBySideComponentViewer implements ComponentViewer {
 
     public String getViewerName() {
         return "";
+    }
+    
+    public void setLeaderboardWidth(int width) {
+        if (width > 0 && savedSplitPosition != width) {
+            savedSplitPosition = Math.min(width, MAX_LEADERBOARD_WIDTH);
+            forceLayout();
+        }
     }
 }

@@ -160,8 +160,6 @@ public class RaceBoardPanel extends SimplePanel implements RegattasDisplayer, Ra
         createOneScreenView(leaderboardName, leaderboardGroupName, mainPanel, showMapControls);
         // these calls make sure that leaderboard and competitor map data are loaded
         leaderboardPanel.addLeaderboardUpdateListener(this);
-        leaderboardPanel.setVisible(true);
-        leaderboardPanel.setVisible(false);
         getElement().getStyle().setMarginLeft(12, Unit.PX);
         getElement().getStyle().setMarginRight(12, Unit.PX);
 
@@ -230,6 +228,10 @@ public class RaceBoardPanel extends SimplePanel implements RegattasDisplayer, Ra
         raceMap.add(sapLogo);
         
         createGeneralInformation(raceMap, leaderboardName, leaderboardGroupName);
+        
+        // needed to ensure that competitor data is loaded
+        leaderboardPanel.setVisible(true);
+        leaderboardPanel.setVisible(false);
     }
     
     private void createGeneralInformation(RaceMap raceMap, String leaderboardName, String leaderboardGroupName) {
@@ -528,6 +530,7 @@ public class RaceBoardPanel extends SimplePanel implements RegattasDisplayer, Ra
 
     @Override
     public void updatedLeaderboard(LeaderboardDTO leaderboard) {
+        leaderboardAndMapViewer.setLeaderboardWidth(leaderboardPanel.getContentPanel().getOffsetWidth());
     }
 
     @Override

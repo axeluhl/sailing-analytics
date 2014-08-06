@@ -397,3 +397,7 @@ img.openColumn {
 	left: 10px;
 	z-index: 10;
 }
+
+.SideBySideComponentViewer-MainPanel {
+	top: 7px;
+}
