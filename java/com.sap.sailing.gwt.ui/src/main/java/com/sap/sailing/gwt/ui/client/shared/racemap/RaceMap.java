@@ -8,6 +8,7 @@ import java.util.Date;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Iterator;
+import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
@@ -81,6 +82,7 @@ import com.sap.sailing.gwt.ui.client.StringMessages;
 import com.sap.sailing.gwt.ui.client.WindSourceTypeFormatter;
 import com.sap.sailing.gwt.ui.client.shared.components.Component;
 import com.sap.sailing.gwt.ui.client.shared.components.SettingsDialogComponent;
+import com.sap.sailing.gwt.ui.client.shared.filter.QuickRankProvider;
 import com.sap.sailing.gwt.ui.client.shared.racemap.RaceMapHelpLinesSettings.HelpLineTypes;
 import com.sap.sailing.gwt.ui.client.shared.racemap.RaceMapZoomSettings.ZoomTypes;
 import com.sap.sailing.gwt.ui.common.client.DateAndTimeFormatterUtil;
@@ -108,7 +110,7 @@ import com.sap.sse.gwt.client.player.Timer;
 import com.sap.sse.gwt.client.player.Timer.PlayStates;
 
 public class RaceMap extends AbsolutePanel implements TimeListener, CompetitorSelectionChangeListener, RaceSelectionChangeListener,
-        RaceTimesInfoProviderListener, TailFactory, Component<RaceMapSettings>, RequiresDataInitialization, RequiresResize {
+        RaceTimesInfoProviderListener, TailFactory, Component<RaceMapSettings>, RequiresDataInitialization, RequiresResize, QuickRankProvider {
     public static final String GET_RACE_MAP_DATA_CATEGORY = "getRaceMapData";
     public static final String GET_WIND_DATA_CATEGORY = "getWindData";
     
@@ -262,7 +264,7 @@ public class RaceMap extends AbsolutePanel implements TimeListener, CompetitorSe
      * The last quick ranks received from a call to {@link SailingServiceAsync#getQuickRanks(RaceIdentifier, Date, AsyncCallback)} upon
      * the last {@link #timeChanged(Date, Date)} event. Therefore, the ranks listed here correspond to the {@link #timer}'s time.
      */
-    private List<QuickRankDTO> quickRanks;
+    private LinkedHashMap<CompetitorDTO, QuickRankDTO> quickRanks;
 
     private final CombinedWindPanel combinedWindPanel;
     
@@ -847,7 +849,7 @@ public class RaceMap extends AbsolutePanel implements TimeListener, CompetitorSe
         CompetitorDTO leadingCompetitorDTO = null;
         int legOfLeaderCompetitor = -1;
         // this only works because the quickRanks are sorted
-        for (QuickRankDTO quickRank : quickRanks) {
+        for (QuickRankDTO quickRank : quickRanks.values()) {
             if (Util.contains(competitorsToShow, quickRank.competitor)) {
                 leadingCompetitorDTO = quickRank.competitor;
                 legOfLeaderCompetitor = quickRank.legNumberOneBased;
@@ -1381,11 +1383,9 @@ public class RaceMap extends AbsolutePanel implements TimeListener, CompetitorSe
         vPanel.add(createInfoWindowLabelAndValue(stringMessages.sailNumber(), competitorDTO.getSailID()));
         Integer rank = null;
         if (quickRanks != null) {
-            for (QuickRankDTO quickRank : quickRanks) {
-                if (quickRank.competitor.equals(competitorDTO)) {
-                    rank = quickRank.rank;
-                    break;
-                }
+            QuickRankDTO quickRank = quickRanks.get(competitorDTO);
+            if (quickRank != null) {
+                rank = quickRank.rank;
             }
         }
         if (rank != null) {
@@ -1965,6 +1965,18 @@ public class RaceMap extends AbsolutePanel implements TimeListener, CompetitorSe
                 map.setTitle("");
             }
         });
+        return result;
+    }
+
+    @Override
+    public Integer getRank(CompetitorDTO competitor) {
+        final Integer result;
+        QuickRankDTO quickRank = quickRanks.get(competitor);
+        if (quickRank != null) {
+            result = quickRank.rank;
+        } else {
+            result = null;
+        }
         return result;
     }
 }
