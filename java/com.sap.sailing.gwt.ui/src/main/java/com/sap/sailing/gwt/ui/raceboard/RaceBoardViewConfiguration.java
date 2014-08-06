@@ -27,7 +27,7 @@ public class RaceBoardViewConfiguration {
     public static final String PARAM_AUTOSELECT_MEDIA = "autoSelectMedia";
 
     public RaceBoardViewConfiguration() {
-        this(/* activeCompetitorsFilterSetName */ null, /* showLeaderboard */ true,
+        this(/* activeCompetitorsFilterSetName */ null, /* showLeaderboard */ false,
                 /* showWindChart */ false, /* showCompetitorsChart */ false, /* showViewStreamlets */ false,
         /* canReplayDuringLiveRaces */false, /* autoSelectMedia */false, /* showNavigationPanel */true);
     }	

@@ -364,7 +364,7 @@ public class LeaderboardPanel extends SimplePanel implements TimeListener, PlayS
         return isEmbedded;
     }
 
-    protected VerticalPanel getContentPanel() {
+    public VerticalPanel getContentPanel() {
         return contentPanel;
     }
     
@@ -1589,6 +1589,7 @@ public class LeaderboardPanel extends SimplePanel implements TimeListener, PlayS
             final UserAgentDetails userAgent, boolean showRaceDetails, boolean showCompetitorSearchBox,
             boolean showSelectionCheckbox, RaceTimesInfoProvider optionalRaceTimesInfoProvider,
             boolean autoExpandLastRaceColumn, boolean adjustTimerDelay) {
+        this.setTitle(stringMessages.leaderboard());
         this.showSelectionCheckbox = showSelectionCheckbox;
         this.showRaceDetails = showRaceDetails;
         this.sailingService = sailingService;
@@ -2945,6 +2946,14 @@ public class LeaderboardPanel extends SimplePanel implements TimeListener, PlayS
     private void blur() {
         if (elementToBlur != null) {
             elementToBlur.blur();
+        }
+    }
+    
+    @Override
+    public void setVisible(boolean visible) {
+        super.setVisible(visible);
+        if (visible) {
+            timeChanged(getLeaderboardDisplayDate(), null);
         }
     }
 }

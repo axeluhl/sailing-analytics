@@ -15,6 +15,10 @@
  */
 package com.sap.sailing.gwt.ui.raceboard;
 
+import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.List;
+
 import com.google.gwt.core.client.Duration;
 import com.google.gwt.core.client.JsArray;
 import com.google.gwt.core.client.Scheduler;
@@ -27,8 +31,10 @@ import com.google.gwt.dom.client.Style.Unit;
 import com.google.gwt.dom.client.Touch;
 import com.google.gwt.user.client.Event;
 import com.google.gwt.user.client.Window;
+import com.google.gwt.user.client.ui.Button;
 import com.google.gwt.user.client.ui.DockLayoutPanel;
 import com.google.gwt.user.client.ui.Widget;
+import com.sap.sailing.gwt.ui.client.shared.components.Component;
 
 /**
  * A panel that adds user-positioned splitters between each of its child
@@ -62,46 +68,6 @@ import com.google.gwt.user.client.ui.Widget;
  */
 public class TouchSplitLayoutPanelWithBetterDraggers extends DockLayoutPanel {
 
-  class HSplitter extends Splitter {
-    public HSplitter(Widget target, boolean reverse) {
-      super(target, reverse);
-      getElement().getStyle().setPropertyPx("width", splitterSize);
-      setStyleName("gwt-SplitLayoutPanel-HDragger");
-    }
-
-    @Override
-    protected int getAbsolutePosition() {
-      return getAbsoluteLeft();
-    }
-
-    @Override
-    protected double getCenterSize() {
-      return getCenterWidth();
-    }
-
-    @Override
-    protected int getEventPosition(Event event) {
-        JsArray<Touch> touches = event.getTouches();
-        if (touches != null) {
-            Touch touch = touches.get(0).cast();
-            if (touch != null) {
-                return touch.getClientX();
-            }
-        }
-        return event.getClientX();
-    }
-
-    @Override
-    protected int getTargetPosition() {
-      return target.getAbsoluteLeft();
-    }
-
-    @Override
-    protected int getTargetSize() {
-      return target.getOffsetWidth();
-    }
-  }
-
   abstract class Splitter extends Widget {
     protected final Widget target;
 
@@ -116,16 +82,24 @@ public class TouchSplitLayoutPanelWithBetterDraggers extends DockLayoutPanel {
 
     private boolean toggleDisplayAllowed = false;
     private double lastClick = 0;
+    
+    private final Component<?> associatedComponent;
+    protected Button togglerButton;
 
-    public Splitter(Widget target, boolean reverse) {
+    public Splitter(Widget target, Component<?> associatedComponent, boolean reverse) {
       this.target = target;
       this.reverse = reverse;
+      this.associatedComponent = associatedComponent;
 
       setElement(Document.get().createDivElement());
       sinkEvents(Event.ONMOUSEDOWN | Event.ONMOUSEUP | Event.ONMOUSEMOVE
-          | Event.ONDBLCLICK | Event.ONTOUCHSTART | Event.ONTOUCHEND | Event.ONTOUCHMOVE);
+          | Event.ONDBLCLICK | Event.ONTOUCHSTART | Event.ONTOUCHEND | Event.ONTOUCHMOVE | Event.ONCLICK);
     }
-
+    
+    public Component<?> getAssociatedComponent() {
+        return associatedComponent;
+    }
+    
     @Override
     public void onBrowserEvent(Event event) {
       switch (event.getTypeInt()) {
@@ -165,7 +139,7 @@ public class TouchSplitLayoutPanelWithBetterDraggers extends DockLayoutPanel {
               LayoutData layout = (LayoutData) target.getLayoutData();
               if (layout.size == 0) {
                 // Restore the old size.
-                setAssociatedWidgetSize(layout.oldSize);
+                setAssociatedWidgetSize(layout.oldSize, /*defer*/true);
               } else {
                 /*
                  * Collapse to size 0. We change the size instead of hiding the
@@ -173,7 +147,7 @@ public class TouchSplitLayoutPanelWithBetterDraggers extends DockLayoutPanel {
                  * widget contains a flash component.
                  */
                 layout.oldSize = layout.size;
-                setAssociatedWidgetSize(0);
+                setAssociatedWidgetSize(0, /*defer*/true);
               }
             }
             this.lastClick = now;
@@ -194,7 +168,7 @@ public class TouchSplitLayoutPanelWithBetterDraggers extends DockLayoutPanel {
               size = getEventPosition(event) - getTargetPosition() - offset;
             }
             ((LayoutData) target.getLayoutData()).hidden = false;
-            setAssociatedWidgetSize(size);
+            setAssociatedWidgetSize(size, /*defer*/true);
             event.preventDefault();
           }
           break;
@@ -207,7 +181,7 @@ public class TouchSplitLayoutPanelWithBetterDraggers extends DockLayoutPanel {
 
       // Try resetting the associated widget's size, which will enforce the new
       // minSize value.
-      setAssociatedWidgetSize((int) layout.size);
+      setAssociatedWidgetSize((int) layout.size, /*defer*/true);
     }
 
     public void setSnapClosedSize(int snapClosedSize) {
@@ -242,7 +216,7 @@ public class TouchSplitLayoutPanelWithBetterDraggers extends DockLayoutPanel {
                 0);
     }
 
-    private void setAssociatedWidgetSize(double size) {
+    private void setAssociatedWidgetSize(double size, boolean defer) {
       double maxSize = getMaxSize();
       if (size > maxSize) {
         size = maxSize;
@@ -265,7 +239,7 @@ public class TouchSplitLayoutPanelWithBetterDraggers extends DockLayoutPanel {
 
       // Defer actually updating the layout, so that if we receive many
       // mouse events before layout/paint occurs, we'll only update once.
-      if (layoutCommand == null) {
+      if (layoutCommand == null && defer) {
         layoutCommand = new ScheduledCommand() {
           @Override
           public void execute() {
@@ -274,13 +248,55 @@ public class TouchSplitLayoutPanelWithBetterDraggers extends DockLayoutPanel {
           }
         };
         Scheduler.get().scheduleDeferred(layoutCommand);
+      } else {
+          forceLayout();
       }
     }
   }
 
+  class HSplitter extends Splitter {
+    public HSplitter(Widget target, Component<?> associatedComponent, boolean reverse) {
+      super(target, associatedComponent, reverse);
+      getElement().getStyle().setPropertyPx("width", splitterSize);
+      setStyleName("gwt-SplitLayoutPanel-HDragger");
+    }
+
+    @Override
+    protected int getAbsolutePosition() {
+      return getAbsoluteLeft();
+    }
+
+    @Override
+    protected double getCenterSize() {
+      return getCenterWidth();
+    }
+
+    @Override
+    protected int getEventPosition(Event event) {
+        JsArray<Touch> touches = event.getTouches();
+        if (touches != null) {
+            Touch touch = touches.get(0).cast();
+            if (touch != null) {
+                return touch.getClientX();
+            }
+        }
+        return event.getClientX();
+    }
+
+    @Override
+    protected int getTargetPosition() {
+      return target.getAbsoluteLeft();
+    }
+
+    @Override
+    protected int getTargetSize() {
+      return target.getOffsetWidth();
+    }
+  }
+
   class VSplitter extends Splitter {
-    public VSplitter(Widget target, boolean reverse) {
-      super(target, reverse);
+    public VSplitter(final Widget target, final Component<?> associatedComponent, boolean reverse) {
+      super(target, associatedComponent, reverse);
       getElement().getStyle().setPropertyPx("height", splitterSize);
       setStyleName("gwt-SplitLayoutPanel-VDragger");
     }
@@ -328,7 +344,9 @@ public class TouchSplitLayoutPanelWithBetterDraggers extends DockLayoutPanel {
   private static Element glassElem = null;
 
   private final int splitterSize;
-
+  
+  private HashMap<Direction, List<Splitter>> directionToSplitterMap;
+  
   /**
    * Construct a new {@link TouchSplitLayoutPanelWithBetterDraggers} with the default splitter size of
    * 8px.
@@ -345,6 +363,7 @@ public class TouchSplitLayoutPanelWithBetterDraggers extends DockLayoutPanel {
    */
   public TouchSplitLayoutPanelWithBetterDraggers(int splitterSize) {
     super(Unit.PX);
+    this.directionToSplitterMap = new HashMap<DockLayoutPanel.Direction, List<Splitter>>();
     this.splitterSize = splitterSize;
     setStyleName("gwt-SplitLayoutPanel");
 
@@ -376,13 +395,20 @@ public class TouchSplitLayoutPanelWithBetterDraggers extends DockLayoutPanel {
 
   @Override
   public void insert(Widget child, Direction direction, double size, Widget before) {
+      this.insert(child, null, direction, size, before);
+  }
+  
+  public void insert(Widget child, Component<?> associatedComponent, Direction direction, double size, Widget before) {
     super.insert(child, direction, size, before);
     if (direction != Direction.CENTER) {
-      Splitter splitter = insertSplitter(child, before);
-      DockLayoutPanel.LayoutData layoutData = (LayoutData) splitter.getLayoutData();
-      Element container = layoutData.layer.getContainerElement();
-      container.getStyle().setOverflow(Overflow.VISIBLE);
-      container.addClassName(getSplitterClassName(direction));
+        super.insert(child, direction, size, before);
+        Splitter splitter = insertSplitter(child, before, associatedComponent);
+        DockLayoutPanel.LayoutData layoutData = (LayoutData) splitter.getLayoutData();
+        Element container = layoutData.layer.getContainerElement();
+        container.getStyle().setOverflow(Overflow.VISIBLE);
+        container.addClassName(getSplitterClassName(direction));
+        LayoutData widgetLayoutData = (LayoutData) child.getLayoutData();
+        widgetLayoutData.oldSize = size;
     }
   }
 
@@ -407,6 +433,14 @@ public class TouchSplitLayoutPanelWithBetterDraggers extends DockLayoutPanel {
       default:
           throw new RuntimeException("Unexpected direction: "+direction);
       }
+  }
+  
+  public boolean hidePanelContaining(Widget child) {
+      int idx = getWidgetIndex(child);
+      if (idx >= 0) {
+          return true;
+      }
+      return false;
   }
 
   @Override
@@ -434,6 +468,35 @@ public class TouchSplitLayoutPanelWithBetterDraggers extends DockLayoutPanel {
       // The splitter is null for the center element.
       super.setWidgetHidden(splitter, hidden);
     }
+  }
+  
+  public void setWidgetVisibility(Widget widget, Component<?> associatedComponentToWidget, final Widget widgetThatDeterminesSize, final boolean hidden, final int size) {
+      super.setWidgetHidden(widget, hidden);
+      final Splitter splitter = getAssociatedSplitter(widget);
+      if (splitter != null) {
+          LayoutData layoutData = (LayoutData) widget.getLayoutData();
+          if (hidden) {
+              layoutData.oldSize = size;
+              widget.setVisible(false);
+              if (associatedComponentToWidget != null) {
+                  associatedComponentToWidget.setVisible(false);
+              }
+              splitter.setAssociatedWidgetSize(0, /*defer*/false);
+          } else {
+              widget.setVisible(true);
+              if (associatedComponentToWidget != null) {
+                  associatedComponentToWidget.setVisible(true);
+              }
+              splitter.setAssociatedWidgetSize(size, /*defer*/false);
+          }
+          splitter.setVisible(!hidden);
+      }
+      if (splitter != null && !hidden && splitter instanceof HSplitter) {
+          int widthOfWidget = widgetThatDeterminesSize.getOffsetWidth();
+          if (size > widthOfWidget && widthOfWidget > 0) {
+              splitter.setAssociatedWidgetSize(widthOfWidget, /*defer*/false);
+          }
+      }
   }
 
     private void assertIsChild2(Widget widget) {
@@ -514,27 +577,38 @@ public class TouchSplitLayoutPanelWithBetterDraggers extends DockLayoutPanel {
     return null;
   }
 
-  private Splitter insertSplitter(Widget widget, Widget before) {
+  private Splitter insertSplitter(Widget widget, Widget before, Component<?> associatedComponent) {
     assert getChildren().size() > 0 : "Can't add a splitter before any children";
 
     LayoutData layout = (LayoutData) widget.getLayoutData();
     Splitter splitter = null;
+    List<Splitter> createdSplittersForDirection = directionToSplitterMap.get(getResolvedDirection(layout.direction));
+    if (createdSplittersForDirection == null) {
+        createdSplittersForDirection = new ArrayList<TouchSplitLayoutPanelWithBetterDraggers.Splitter>();
+    }
     switch (getResolvedDirection(layout.direction)) {
       case WEST:
-        splitter = new HSplitter(widget, false);
+        splitter = new HSplitter(widget, associatedComponent, false);
         break;
       case EAST:
-        splitter = new HSplitter(widget, true);
+        splitter = new HSplitter(widget, associatedComponent, true);
         break;
       case NORTH:
-        splitter = new VSplitter(widget, false);
+        splitter = new VSplitter(widget, associatedComponent, false);
         break;
       case SOUTH:
-        splitter = new VSplitter(widget, true);
+        splitter = new VSplitter(widget, associatedComponent, true);
         break;
       default:
         assert false : "Unexpected direction";
     }
+    // hide dragger initially
+    if (splitter != null) {
+      splitter.setVisible(false);
+    }
+
+    createdSplittersForDirection.add(splitter);
+    directionToSplitterMap.put(getResolvedDirection(layout.direction), createdSplittersForDirection);
 
     super.insert(splitter, layout.direction, splitterSize, before);
     return splitter;

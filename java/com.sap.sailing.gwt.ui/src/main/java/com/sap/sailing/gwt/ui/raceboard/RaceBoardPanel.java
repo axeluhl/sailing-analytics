@@ -165,6 +165,9 @@ public class RaceBoardPanel extends SimplePanel implements RegattasDisplayer, Ra
         
         leaderboardPanel = createLeaderboardPanel(leaderboardName, leaderboardGroupName);
         createOneScreenView(leaderboardName, leaderboardGroupName, mainPanel, showMapControls);
+        // these calls make sure that leaderboard and competitor map data are loaded
+        leaderboardPanel.setVisible(true);
+        leaderboardPanel.setVisible(false);
         getElement().getStyle().setMarginLeft(12, Unit.PX);
         getElement().getStyle().setMarginRight(12, Unit.PX);
 
@@ -212,12 +215,16 @@ public class RaceBoardPanel extends SimplePanel implements RegattasDisplayer, Ra
         competitorChart = new MultiCompetitorRaceChart(sailingService, asyncActionsExecutor, competitorSelectionModel, raceSelectionProvider,
                     timer, timeRangeWithZoomModel, stringMessages, errorReporter, true, true, leaderboardGroupName, leaderboardName);
         competitorChart.onRaceSelectionChange(raceSelectionProvider.getSelectedRaces());
+        competitorChart.getEntryWidget().setTitle(stringMessages.competitorCharts());
         components.add(competitorChart);
         windChart = new WindChart(sailingService, raceSelectionProvider, timer, timeRangeWithZoomModel, new WindChartSettings(),
                 stringMessages, asyncActionsExecutor, errorReporter, /* compactChart */ true);
+        windChart.setVisible(false);
         windChart.onRaceSelectionChange(raceSelectionProvider.getSelectedRaces());
+        windChart.getEntryWidget().setTitle(stringMessages.wind());
         components.add(windChart);
-        leaderboardAndMapViewer = new SideBySideComponentViewer(leaderboardPanel, raceMap, components);
+        leaderboardPanel.setTitle(stringMessages.leaderboard());
+        leaderboardAndMapViewer = new SideBySideComponentViewer(leaderboardPanel, raceMap, components, stringMessages);
         componentViewers.add(leaderboardAndMapViewer);
         for (ComponentViewer componentViewer : componentViewers) {
             mainPanel.add(componentViewer.getViewerWidget());
@@ -541,10 +548,6 @@ public class RaceBoardPanel extends SimplePanel implements RegattasDisplayer, Ra
         setComponentVisible(leaderboardAndMapViewer, competitorChart, visible);
     }
     
-    public Panel getToolbarPanel() {
-        return toolbarPanel; 
-    }
-
     public RaceTimePanel getTimePanel() {
         return timePanel; 
     }
@@ -583,6 +586,10 @@ public class RaceBoardPanel extends SimplePanel implements RegattasDisplayer, Ra
 
     public RaceBoardViewConfiguration getConfiguration() {
         return raceboardViewConfiguration;
+    }
+    
+    public Panel getToolbarPanel() {
+        return toolbarPanel;
     }
     
     public FlowPanel getComponentControlsPanel() {
