@@ -21,7 +21,7 @@ import com.sap.sailing.gwt.ui.shared.WindDTO;
 import com.sap.sailing.gwt.ui.shared.WindInfoForRaceDTO;
 import com.sap.sailing.gwt.ui.shared.WindTrackInfoDTO;
 import com.sap.sailing.gwt.ui.simulator.StreamletParameters;
-import com.sap.sailing.gwt.ui.simulator.racemap.FullCanvasOverlay;
+import com.sap.sailing.gwt.ui.simulator.racemap.MovingCanvasOverlay;
 import com.sap.sailing.gwt.ui.simulator.streamlets.Swarm;
 import com.sap.sailing.gwt.ui.simulator.streamlets.VectorField;
 import com.sap.sailing.gwt.ui.simulator.streamlets.WindInfoForRaceVectorField;
@@ -38,7 +38,7 @@ import com.sap.sse.gwt.client.player.Timer;
  * @author Axel Uhl (D043530)
  * 
  */
-public class WindStreamletsRaceboardOverlay extends FullCanvasOverlay {
+public class WindStreamletsRaceboardOverlay extends MovingCanvasOverlay {
     public static final String LODA_WIND_STREAMLET_DATA_CATEGORY = "loadWindStreamletData";
     private static final int animationIntervalMillis = 40;
     private static final long RESOLUTION_IN_MILLIS = 5000;
@@ -232,9 +232,10 @@ public class WindStreamletsRaceboardOverlay extends FullCanvasOverlay {
     protected void drawCenterChanged() {
     }
 
-    public void onBoundsChanged() {
+    public void onBoundsChanged(boolean zoomChanged) {
         if (swarm != null) {
-            swarm.onBoundsChanged();
+            int swarmPause = (zoomChanged ? 5 : 1);
+            swarm.onBoundsChanged(zoomChanged, swarmPause);
         }
     }
 }
