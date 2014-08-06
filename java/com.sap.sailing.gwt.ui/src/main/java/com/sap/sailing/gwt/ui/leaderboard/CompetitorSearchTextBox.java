@@ -259,12 +259,10 @@ public class CompetitorSearchTextBox extends HorizontalPanel implements KeyUpHan
             }
             lastActiveCompetitorFilterSet = activeFilterSet;
         } else {
-            if (filterSets.getFilterSets().isEmpty()) {
-                if (lastActiveCompetitorFilterSet != null) {
-                    advancedSettingsButton.removeStyleName(ADVANCED_FILTER_BUTTON_FILTERED);
-                }
-                lastActiveCompetitorFilterSet = null;
+            if (lastActiveCompetitorFilterSet != null) {
+                advancedSettingsButton.removeStyleName(ADVANCED_FILTER_BUTTON_FILTERED);
             }
+            lastActiveCompetitorFilterSet = null;
         }
         if (lastActiveCompetitorFilterSet != null) {
             advancedSettingsButton.setTitle(competitorsFilterTitle+" ("+lastActiveCompetitorFilterSet.getName()+")");
