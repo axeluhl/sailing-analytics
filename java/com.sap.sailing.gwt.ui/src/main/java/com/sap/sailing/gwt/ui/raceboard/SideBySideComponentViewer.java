@@ -146,6 +146,15 @@ public class SideBySideComponentViewer implements ComponentViewer {
         splitLayoutPanel.insert(leftPanel, leftComponentP, Direction.WEST, savedSplitPosition, null);
         
         splitLayoutPanel.insert(absoluteMapAndToggleButtonsPanel, rightComponent, Direction.CENTER, 0, null);
+        Button showMapControlButton = new Button();
+        showMapControlButton.setStyleName("gwt-SplitLayoutPanel-MapSettingsButton");
+        showMapControlButton.addClickHandler(new ClickHandler() {
+            @Override
+            public void onClick(ClickEvent event) {
+                showSettingsDialog(rightComponent);
+            }
+        });
+        absoluteMapAndToggleButtonsPanel.add(showMapControlButton);
     }
     
     private void initializeComponents() {
