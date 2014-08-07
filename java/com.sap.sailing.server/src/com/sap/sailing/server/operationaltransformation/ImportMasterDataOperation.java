@@ -38,6 +38,7 @@ import com.sap.sailing.domain.tracking.TrackedRace;
 import com.sap.sailing.domain.tracking.TrackedRegatta;
 import com.sap.sailing.domain.tracking.Wind;
 import com.sap.sailing.domain.tracking.WindTrack;
+import com.sap.sailing.domain.tracking.impl.EmptyWindStore;
 import com.sap.sailing.server.RacingEventService;
 import com.sap.sailing.server.RacingEventServiceOperation;
 import com.sap.sailing.server.masterdata.DummyTrackedRace;
@@ -280,7 +281,7 @@ public class ImportMasterDataOperation extends
             Iterator<? extends Fleet> fleetIterator = fleets.iterator();
             if (fleetIterator.hasNext()) {
                 fleet = fleetIterator.next();
-                DummyTrackedRace dummy = new DummyTrackedRace(leaderboard.getAllCompetitors(), regatta, null);
+                DummyTrackedRace dummy = new DummyTrackedRace(UUID.randomUUID(), leaderboard.getAllCompetitors(), regatta, null, EmptyWindStore.INSTANCE);
                 raceColumn.setTrackedRace(fleet, dummy);
             }
         }
