@@ -405,17 +405,17 @@ public class RaceMap extends AbsolutePanel implements TimeListener, CompetitorSe
               map.addBoundsChangeHandler(new BoundsChangeMapHandler() {
                   @Override
                   public void onEvent(BoundsChangeMapEvent event) {
-                      if (!isAutoZoomInProgress() && !map.getBounds().equals(currentMapBounds)) {
+                      int newZoomLevel = map.getZoom(); 
+                      if (!isAutoZoomInProgress() && (newZoomLevel != currentZoomLevel)) {
                           // remove the canvas animations for boats 
                           for (BoatOverlay boatOverlay : RaceMap.this.getBoatOverlays().values()) {
                               boatOverlay.removeCanvasPositionAndRotationTransition();
                           }
                           // remove the canvas animations for the info overlays of the selected boats 
-                          for(CompetitorInfoOverlay infoOverlay: competitorInfoOverlays.values()) {
+                          for (CompetitorInfoOverlay infoOverlay : competitorInfoOverlays.values()) {
                               infoOverlay.removeCanvasPositionAndRotationTransition();
                           }
                       }
-                      int newZoomLevel = map.getZoom();
                       if ((streamletOverlay != null) && !map.getBounds().equals(currentMapBounds)) {
                           streamletOverlay.onBoundsChanged(newZoomLevel != currentZoomLevel);
                       }
@@ -1205,22 +1205,43 @@ public class RaceMap extends AbsolutePanel implements TimeListener, CompetitorSe
         }
     }
 
+    private int getZoomLevel(LatLngBounds bounds) {
+        int GLOBE_PXSIZE = 256; // a constant in Google's map projection
+        int MAX_ZOOM = 30; // currently max-zoom is 24, but Google may extend it
+        double LOG2 = Math.log(2.0);
+        double deltaLng = bounds.getNorthEast().getLongitude() - bounds.getSouthWest().getLongitude();
+        double deltaLat = bounds.getNorthEast().getLatitude() - bounds.getSouthWest().getLatitude();
+        if ((deltaLng == 0) && (deltaLat == 0)) {
+            return MAX_ZOOM;
+        }
+        if (deltaLng < 0) {
+            deltaLng += 360;
+        }
+        int zoomLng = (int) Math.floor(Math.log(map.getDiv().getClientWidth() * 360 / deltaLng / GLOBE_PXSIZE) / LOG2);
+        if (deltaLat < 0) {
+            deltaLat += 360;
+        }
+        int zoomLat = (int) Math.floor(Math.log(map.getDiv().getClientHeight() * 180 / deltaLat / GLOBE_PXSIZE) / LOG2);
+        return Math.min(zoomLat, zoomLng);
+    }
+    
     private void zoomMapToNewBounds(Bounds newBounds) {
         if (newBounds != null) {
             Bounds currentMapBounds = BoundsUtil.getAsBounds(map.getBounds());
-            if (!currentMapBounds.contains(newBounds) || graticuleAreaRation(currentMapBounds, newBounds) > 10) {
+            if (!currentMapBounds.contains(newBounds) || graticuleAreaRatio(currentMapBounds, newBounds) > 10) {
                 // only change bounds if the new bounds don't fit into the current map zoom
                 List<ZoomTypes> oldZoomSettings = settings.getZoomSettings().getTypesToConsiderOnZoom();
                 setAutoZoomInProgress(true);
                 LatLngBounds newLatLngBounds = BoundsUtil.getAsLatLngBounds(newBounds);
-                map.fitBounds(newLatLngBounds);
+                map.panTo(newLatLngBounds.getCenter());
+                map.setZoom(getZoomLevel(newLatLngBounds));
                 settings.getZoomSettings().setTypesToConsiderOnZoom(oldZoomSettings);
                 setAutoZoomInProgress(false);
             }
         }
     }
     
-    private double graticuleAreaRation(Bounds containing, Bounds contained) {
+    private double graticuleAreaRatio(Bounds containing, Bounds contained) {
         assert containing.contains(contained);
         double containingAreaRatio = getGraticuleArea(containing) / getGraticuleArea(contained);
         return containingAreaRatio;
@@ -1859,7 +1880,6 @@ public class RaceMap extends AbsolutePanel implements TimeListener, CompetitorSe
     }
     
     public static class TailsBoundsCalculator extends LatLngBoundsCalculatorForSelected {
-
         @Override
         public Bounds calculateNewBounds(RaceMap racemap) {
             Bounds newBounds = null;
@@ -1886,7 +1906,6 @@ public class RaceMap extends AbsolutePanel implements TimeListener, CompetitorSe
             }
             return newBounds;
         }
-        
     }
     
     public static class CourseMarksBoundsCalculator implements LatLngBoundsCalculator {
