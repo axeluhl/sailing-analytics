@@ -9,6 +9,7 @@ import com.google.gwt.core.client.GWT;
 import com.google.gwt.dom.client.AnchorElement;
 import com.google.gwt.dom.client.DivElement;
 import com.google.gwt.dom.client.Document;
+import com.google.gwt.dom.client.SpanElement;
 import com.google.gwt.dom.client.Style.Display;
 import com.google.gwt.uibinder.client.UiBinder;
 import com.google.gwt.uibinder.client.UiField;
@@ -40,7 +41,8 @@ public class EventRegattaList extends Composite {
     @UiField DivElement regattaListNavigationDiv;
     @UiField DivElement regattaListItemsDiv;
     @UiField AnchorElement filterNoLeaderboardGroupsAnchor;
-
+    @UiField SpanElement allBoatClassesSelected;
+    
     private final EventDTO event;
     private final Map<String, List<Regatta>> regattaElementsByLeaderboardGroup;
     
@@ -108,6 +110,7 @@ public class EventRegattaList extends Composite {
 
     private void filterRegattaListByLeaderboardGroup(LeaderboardGroupDTO leaderboardGroup) {
         if (leaderboardGroup != null) {
+            allBoatClassesSelected.getStyle().setDisplay(Display.NONE);
             // hide all regattas of the not selected leaderboardgroup
             for (LeaderboardGroupDTO lg : event.getLeaderboardGroups()) {
                 boolean isVisible = leaderboardGroup.getName().equals(lg.getName());
@@ -118,6 +121,7 @@ public class EventRegattaList extends Composite {
             }
         } else {
             // make all regattas visible
+            allBoatClassesSelected.getStyle().setDisplay(Display.INLINE_BLOCK);
             for (LeaderboardGroupDTO lg : event.getLeaderboardGroups()) {
                 List<Regatta> regattaElements = regattaElementsByLeaderboardGroup.get(lg.getName());
                 for (Regatta regatta : regattaElements) {

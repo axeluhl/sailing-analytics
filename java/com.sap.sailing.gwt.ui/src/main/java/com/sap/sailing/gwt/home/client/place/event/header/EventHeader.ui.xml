@@ -29,7 +29,8 @@
   <div class="{local_res.css.eventheader}">
     <div class="{res.mainCss.grid}">
       <div class="{res.mediaCss.small9} {res.mediaCss.large8} {res.mediaCss.columns}">
-        <div class="{local_res.css.eventheader_intro}"><img ui:field='eventLogo' alt="" class="{local_res.css.eventheader_intro_logo}"></img>
+        <div class="{local_res.css.eventheader_intro}">
+          <img ui:field="eventLogo" alt="" class="{local_res.css.eventheader_intro_logo}"></img>
           <h3 class="{local_res.css.eventheader_intro_name}"><span ui:field='eventNameSpan' /></h3>
           <div ui:field="isLiveDiv" data-labeltype="live" class="{res.mainCss.label}"><ui:text from='{i18n.live}'/></div>
           <div ui:field="isFinishedDiv" data-labeltype="finished" class="{res.mainCss.label}"><ui:text from='{i18n.finished}'/></div>
@@ -40,9 +41,7 @@
                 <img src="images/location-icon.png" class="{local_res.css.locationicon}"></img>
                 <span ui:field='venueNameSpan' />
             </div>
-           	<g:Anchor ui:field="officalWebsiteAnchor" href="javascript:;" target="_blank" styleName="{local_res.css.eventheader_intro_details_item} {local_res.css.eventheader_intro_details_itemlink}">
-           	    <ui:text from='{i18n.officalEventWebsite}'/>
-           	</g:Anchor>
+           	<g:Anchor ui:field="officalWebsiteAnchor" href="javascript:;" target="_blank" styleName="{local_res.css.eventheader_intro_details_item} {local_res.css.eventheader_intro_details_itemlink}" />
           </div>
           <div ui:field="eventDescriptionDiv" class="{local_res.css.eventheader_intro"></div>
         </div>
