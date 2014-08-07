@@ -299,6 +299,19 @@ body ::-webkit-scrollbar-track {
 	cursor: pointer;
 }
 
+.gwt-MapSettingsButton {
+	margin-right: 30px;
+	border-top-left-radius: 25px;
+	border-top-right-radius: 25px;
+	border-bottom-left-radius: 25px;
+	border-bottom-right-radius: 25px;
+	background: white url(images/settings_black.png) center no-repeat;
+	z-index: 1;
+	width: 28px;
+	height: 28px;
+	cursor: pointer;
+}
+
 .gwt-SplitLayoutPanel-SettingsButton:hover {
 	background-color: #cecece;
 }

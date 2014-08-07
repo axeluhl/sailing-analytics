@@ -58,6 +58,7 @@ import com.google.gwt.resources.client.ImageResource;
 import com.google.gwt.user.client.Window;
 import com.google.gwt.user.client.rpc.AsyncCallback;
 import com.google.gwt.user.client.ui.AbsolutePanel;
+import com.google.gwt.user.client.ui.Button;
 import com.google.gwt.user.client.ui.FlowPanel;
 import com.google.gwt.user.client.ui.Image;
 import com.google.gwt.user.client.ui.Label;
@@ -92,6 +93,7 @@ import com.sap.sailing.gwt.ui.client.SailingServiceAsync;
 import com.sap.sailing.gwt.ui.client.StringMessages;
 import com.sap.sailing.gwt.ui.client.WindSourceTypeFormatter;
 import com.sap.sailing.gwt.ui.client.shared.components.Component;
+import com.sap.sailing.gwt.ui.client.shared.components.SettingsDialog;
 import com.sap.sailing.gwt.ui.client.shared.components.SettingsDialogComponent;
 import com.sap.sailing.gwt.ui.client.shared.filter.QuickRankProvider;
 import com.sap.sailing.gwt.ui.client.shared.racemap.RaceMapHelpLinesSettings.HelpLineTypes;
@@ -437,12 +439,27 @@ public class RaceMap extends AbsolutePanel implements TimeListener, CompetitorSe
                   streamletOverlay.setVisible(true);
               }
               //Data has been initialized
+              createSettingsButton(map);
               RaceMap.this.isMapInitialized = true;
               RaceMap.this.redraw();
           }
         };
 
         LoadApi.go(onLoad, loadLibraries, sensor, "key="+GoogleMapAPIKey.V3_APIKey); 
+    }
+    
+    
+    private void createSettingsButton(MapWidget map) {
+        final Component<RaceMapSettings> component = this;
+        Button settingsButton = new Button();
+        settingsButton.setStyleName("gwt-MapSettingsButton");
+        settingsButton.addClickHandler(new ClickHandler() {
+            @Override
+            public void onClick(ClickEvent event) {
+                new SettingsDialog<RaceMapSettings>(component, stringMessages).show();
+            }
+        });
+        map.setControls(ControlPosition.RIGHT_TOP, settingsButton);
     }
         
     public void redraw() {
