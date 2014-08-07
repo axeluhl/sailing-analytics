@@ -281,8 +281,10 @@ public class RaceMap extends AbsolutePanel implements TimeListener, CompetitorSe
     private LatLngBounds currentMapBounds;
     
     private int currentZoomLevel;
-    private boolean autoZooming = false;
-    private LatLngBounds newLatLngBounds;
+    private boolean autoZoomIn = false;
+    private boolean autoZoomOut = false;
+    private int autoZoomLevel;
+    LatLngBounds autoZoomLatLngBounds;
     
     private WindStreamletsRaceboardOverlay streamletOverlay;
     private final boolean showViewStreamlets;
@@ -372,9 +374,11 @@ public class RaceMap extends AbsolutePanel implements TimeListener, CompetitorSe
               map.addZoomChangeHandler(new ZoomChangeMapHandler() {
                   @Override
                   public void onEvent(ZoomChangeMapEvent event) {
-                      // stop automatic zoom after a manual zoom event; automatic zoom in zoomMapToNewBounds will restore old settings
-                      final List<RaceMapZoomSettings.ZoomTypes> emptyList = Collections.emptyList();
-                      settings.getZoomSettings().setTypesToConsiderOnZoom(emptyList);
+                      if (!autoZoomIn && !autoZoomOut) {
+                          // stop automatic zoom after a manual zoom event; automatic zoom in zoomMapToNewBounds will restore old settings
+                          final List<RaceMapZoomSettings.ZoomTypes> emptyList = Collections.emptyList();
+                          settings.getZoomSettings().setTypesToConsiderOnZoom(emptyList);
+                      }
                   }
               });
               map.addDragEndHandler(new DragEndMapHandler() {
@@ -388,9 +392,13 @@ public class RaceMap extends AbsolutePanel implements TimeListener, CompetitorSe
               map.addIdleHandler(new IdleMapHandler() {
                   @Override
                   public void onEvent(IdleMapEvent event) {
-                      if (autoZooming) {
-                          map.panTo(newLatLngBounds.getCenter());
-                          autoZooming = false;
+                      if (autoZoomIn) {
+                          map.setZoom(autoZoomLevel);
+                          autoZoomIn = false;
+                      }
+                      if (autoZoomOut) {
+                          map.panTo(autoZoomLatLngBounds.getCenter());
+                          autoZoomOut = false;
                       }
                   }
               });
@@ -1224,8 +1232,8 @@ public class RaceMap extends AbsolutePanel implements TimeListener, CompetitorSe
                 // only change bounds if the new bounds don't fit into the current map zoom
                 List<ZoomTypes> oldZoomSettings = settings.getZoomSettings().getTypesToConsiderOnZoom();
                 setAutoZoomInProgress(true);
-                newLatLngBounds = BoundsUtil.getAsLatLngBounds(newBounds);
-                int newZoomLevel = getZoomLevel(newLatLngBounds); 
+                autoZoomLatLngBounds = BoundsUtil.getAsLatLngBounds(newBounds);
+                int newZoomLevel = getZoomLevel(autoZoomLatLngBounds); 
                 if (newZoomLevel != map.getZoom()) {
                     // remove the canvas animations for boats 
                     for (BoatOverlay boatOverlay : RaceMap.this.getBoatOverlays().values()) {
@@ -1235,10 +1243,16 @@ public class RaceMap extends AbsolutePanel implements TimeListener, CompetitorSe
                     for(CompetitorInfoOverlay infoOverlay: competitorInfoOverlays.values()) {
                         infoOverlay.removeCanvasPositionAndRotationTransition();
                     }
-                    autoZooming = true;
-                    map.setZoom(newZoomLevel);
+                    autoZoomIn = newZoomLevel > map.getZoom();
+                    autoZoomOut = !autoZoomIn;
+                    autoZoomLevel = newZoomLevel;
+                    if (autoZoomIn) {
+                        map.panTo(autoZoomLatLngBounds.getCenter());
+                    } else {
+                        map.setZoom(autoZoomLevel);
+                    }
                 } else {
-                    map.panTo(newLatLngBounds.getCenter());
+                    map.panTo(autoZoomLatLngBounds.getCenter());
                 }
                 settings.getZoomSettings().setTypesToConsiderOnZoom(oldZoomSettings);
                 setAutoZoomInProgress(false);
