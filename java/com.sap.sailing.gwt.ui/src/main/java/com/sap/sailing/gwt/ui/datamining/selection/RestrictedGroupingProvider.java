@@ -42,32 +42,38 @@ public class RestrictedGroupingProvider implements GroupingProvider {
         mainPanel = new HorizontalPanel();
         mainPanel.setSpacing(5);
         mainPanel.add(new Label(this.stringMessages.groupBy() + ":"));
-        mainPanel.add(createDimensionToGroupByBox());
+        
+        ValueListBox<DimensionIdentifier> firstDimensionToGroupByBox = createDimensionToGroupByBox();
+        addDimensionToGroupByBox(firstDimensionToGroupByBox);
     }
 
     private ValueListBox<DimensionIdentifier> createDimensionToGroupByBox() {
         ValueListBox<DimensionIdentifier> dimensionToGroupByBox = new SimpleValueListBox<DimensionIdentifier>();
-        dimensionToGroupByBoxes.add(dimensionToGroupByBox);
         dimensionToGroupByBox.addValueChangeHandler(new ValueChangeHandler<DimensionIdentifier>() {
             private boolean firstChange = true;
 
             @Override
             public void onValueChange(ValueChangeEvent<DimensionIdentifier> event) {
                 if (firstChange && event.getValue() != null) {
-                    ValueListBox<DimensionIdentifier> newBox = createDimensionToGroupByBox();
-                    mainPanel.add(newBox);
-                    dimensionToGroupByBoxes.add(newBox);
+                    ValueListBox<DimensionIdentifier> newDimensionToGroupByBox = createDimensionToGroupByBox();
+                    addDimensionToGroupByBox(newDimensionToGroupByBox);
                     firstChange = false;
                 } else if (event.getValue() == null) {
-                    mainPanel.remove((Widget) event.getSource());
-                    dimensionToGroupByBoxes.remove(event.getSource());
+                    Widget changedDimensionToGroupByBox = (Widget) event.getSource();
+                    mainPanel.remove(changedDimensionToGroupByBox);
+                    dimensionToGroupByBoxes.remove(changedDimensionToGroupByBox);
                     updateAcceptableValues();
                 }
                 notifyListeners();
             }
         });
-        updateAcceptableValues();
         return dimensionToGroupByBox;
+    }
+
+    private void addDimensionToGroupByBox(ValueListBox<DimensionIdentifier> dimensionToGroupByBox) {
+        mainPanel.add(dimensionToGroupByBox);
+        dimensionToGroupByBoxes.add(dimensionToGroupByBox);
+        updateAcceptableValues();
     }
 
     private void updateAcceptableValues() {
