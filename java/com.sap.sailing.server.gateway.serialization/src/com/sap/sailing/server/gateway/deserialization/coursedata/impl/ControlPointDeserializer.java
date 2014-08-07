@@ -24,7 +24,7 @@ public class ControlPointDeserializer implements JsonDeserializer<ControlPoint> 
 
     @Override
     public ControlPoint deserialize(JSONObject object) throws JsonDeserializationException {
-        String classFieldValue = object.get(BaseControlPointJsonSerializer.FIELD_CLASS).toString();
+        String classFieldValue = (String) object.get(BaseControlPointJsonSerializer.FIELD_CLASS);
         ControlPoint controlPoint = null;
         
         if (classFieldValue.equals(ControlPointWithTwoMarks.class.getSimpleName())) {

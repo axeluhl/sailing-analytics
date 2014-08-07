@@ -3,13 +3,20 @@ package com.sap.sailing.gwt.home.client.place.event.regatta;
 import com.google.gwt.core.client.GWT;
 import com.google.gwt.resources.client.ClientBundle;
 import com.google.gwt.resources.client.CssResource;
+import com.google.gwt.resources.client.CssResource.Shared;
 
 public interface RegattaResources extends ClientBundle {
     public static final RegattaResources INSTANCE = GWT.create(RegattaResources.class);
 
     @Source("com/sap/sailing/gwt/home/client/place/event/regatta/Regatta.css")
     LocalCss css();
+    public interface MinWidth50emCss extends LocalCss {
+    }
 
+    @Source("com/sap/sailing/gwt/home/client/place/event/regatta/RegattaLarge.css")
+    MinWidth50emCss largeCss();
+
+    @Shared
     public interface LocalCss extends CssResource {
         String regatta();
         String regatta_intro_details_itemhideoncompact();

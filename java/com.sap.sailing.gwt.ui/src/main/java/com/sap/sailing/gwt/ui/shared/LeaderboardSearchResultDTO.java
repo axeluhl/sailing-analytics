@@ -17,6 +17,7 @@ import com.sap.sailing.domain.base.RemoteSailingServerReference;
  */
 public class LeaderboardSearchResultDTO implements IsSerializable {
     private String baseURL;
+    private boolean isOnRemoteServer;
     private String leaderboardName;
     private String leaderboardDisplayName;
     private String regattaName;
@@ -26,11 +27,12 @@ public class LeaderboardSearchResultDTO implements IsSerializable {
     
     LeaderboardSearchResultDTO() {} // for GWT RPC serialization only
     
-    public LeaderboardSearchResultDTO(String baseURL, String leaderboardName, String leaderboardDisplayName,
+    public LeaderboardSearchResultDTO(String baseURL, boolean isOnRemoteServer, String leaderboardName, String leaderboardDisplayName,
             String regattaName, String boatClassName, EventBaseDTO event,
             Iterable<LeaderboardGroupBaseDTO> leaderboardGroups) {
         super();
         this.baseURL = baseURL;
+        this.isOnRemoteServer = isOnRemoteServer;
         this.leaderboardName = leaderboardName;
         this.leaderboardDisplayName = leaderboardDisplayName;
         this.regattaName = regattaName;
@@ -90,5 +92,9 @@ public class LeaderboardSearchResultDTO implements IsSerializable {
         sb.append("Regatta Name: ");
         sb.append(getRegattaName());
         return sb.toString();
+    }
+
+    public boolean isOnRemoteServer() {
+        return isOnRemoteServer;
     }
 }

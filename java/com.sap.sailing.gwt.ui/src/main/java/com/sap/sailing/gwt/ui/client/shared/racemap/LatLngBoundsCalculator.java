@@ -1,7 +1,7 @@
 package com.sap.sailing.gwt.ui.client.shared.racemap;
 
-import com.google.gwt.maps.client.base.LatLngBounds;
+import com.sap.sailing.domain.common.Bounds;
 
 public interface LatLngBoundsCalculator {
-    LatLngBounds calculateNewBounds(RaceMap forMap);
+    Bounds calculateNewBounds(RaceMap forMap);
 }

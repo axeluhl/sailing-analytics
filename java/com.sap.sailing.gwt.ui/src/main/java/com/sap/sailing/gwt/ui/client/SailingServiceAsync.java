@@ -303,22 +303,16 @@ public interface SailingServiceAsync {
 
     /**
      * Creates a new group with the name <code>groupname</code>, the description <code>description</code> and an empty list of leaderboards.<br/>
+     * @param displayName TODO
      * @param displayGroupsInReverseOrder TODO
      */
     void createLeaderboardGroup(String groupName, String description,
-            boolean displayGroupsInReverseOrder, int[] overallLeaderboardDiscardThresholds,
-            ScoringSchemeType overallLeaderboardScoringSchemeType, AsyncCallback<LeaderboardGroupDTO> callback);
+            String displayName, boolean displayGroupsInReverseOrder,
+            int[] overallLeaderboardDiscardThresholds, ScoringSchemeType overallLeaderboardScoringSchemeType, AsyncCallback<LeaderboardGroupDTO> callback);
 
-    /**
-     * Updates the data of the group with the name <code>oldName</code>.
-     * 
-     * @param oldName The old name of the group
-     * @param newName The new name of the group
-     * @param description The new description of the group
-     * @param leaderboardNames The list of names of the new leaderboards of the group
-     */
-    void updateLeaderboardGroup(String oldName, String newName, String description,
-            List<String> leaderboardNames, int[] overallLeaderboardDiscardThresholds, ScoringSchemeType overallLeaderboardScoringSchemeType, AsyncCallback<Void> callback);
+    void updateLeaderboardGroup(String oldName, String newName, String description, String newDisplayName,
+            List<String> leaderboardNames, int[] overallLeaderboardDiscardThresholds,
+            ScoringSchemeType overallLeaderboardScoringSchemeType, AsyncCallback<Void> callback);
 
 
     void setRaceIsKnownToStartUpwind(RegattaAndRaceIdentifier raceIdentifier, boolean raceIsKnownToStartUpwind,
@@ -477,7 +471,7 @@ public interface SailingServiceAsync {
     void getLeaderboardDataEntriesForAllRaceColumns(String leaderboardName, Date date, DetailType detailType,
             AsyncCallback<List<Util.Triple<String, List<CompetitorDTO>, List<Double>>>> callback);
 
-    void getLeaderboardsNamesOfMetaleaderboard(String metaLeaderboardName,
+    void getLeaderboardsNamesOfMetaLeaderboard(String metaLeaderboardName,
             AsyncCallback<List<Util.Pair<String, String>>> callback);
 
     void checkLeaderboardName(String leaderboardName, AsyncCallback<Util.Pair<String, LeaderboardType>> callback);
@@ -487,6 +481,8 @@ public interface SailingServiceAsync {
     void stopReplicatingFromMaster(AsyncCallback<Void> asyncCallback);
 
     void getRegattaStructureForEvent(UUID eventId, AsyncCallback<List<RaceGroupDTO>> asyncCallback);
+
+    void getRegattaStructureOfEvent(UUID eventId, AsyncCallback<List<RaceGroupDTO>> callback);
 
     void getRaceStateEntriesForRaceGroup(UUID eventId, List<UUID> visibleCourseAreas,
             List<String> visibleRegattas, boolean showOnlyCurrentlyRunningRaces, boolean showOnlyRacesOfSameDay,

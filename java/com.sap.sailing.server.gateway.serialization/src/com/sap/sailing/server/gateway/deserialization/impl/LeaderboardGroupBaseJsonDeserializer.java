@@ -18,10 +18,12 @@ public class LeaderboardGroupBaseJsonDeserializer implements JsonDeserializer<Le
 
     public LeaderboardGroupBase deserialize(JSONObject object) throws JsonDeserializationException {
         UUID id = UUID.fromString((String) object.get(EventBaseJsonSerializer.FIELD_ID));
-        String name = object.get(LeaderboardGroupBaseJsonSerializer.FIELD_NAME).toString();
-        String description = object.get(LeaderboardGroupBaseJsonSerializer.FIELD_DESCRIPTION).toString();
-        String hasOverallLeaderboard = object.get(LeaderboardGroupBaseJsonSerializer.FIELD_HAS_OVERALL_LEADERBOARD).toString();
-        LeaderboardGroupBase result = new StrippedLeaderboardGroupImpl(id, name, description, hasOverallLeaderboard == null ? false : Boolean.valueOf(hasOverallLeaderboard));
+        String name = (String) object.get(LeaderboardGroupBaseJsonSerializer.FIELD_NAME);
+        String description = (String) object.get(LeaderboardGroupBaseJsonSerializer.FIELD_DESCRIPTION);
+        String displayName = (String) object.get(LeaderboardGroupBaseJsonSerializer.FIELD_DISPLAY_NAME);
+        Boolean hasOverallLeaderboard = (Boolean) object.get(LeaderboardGroupBaseJsonSerializer.FIELD_HAS_OVERALL_LEADERBOARD);
+        LeaderboardGroupBase result = new StrippedLeaderboardGroupImpl(id, name, description, displayName, 
+                hasOverallLeaderboard == null ? false : hasOverallLeaderboard);
         return result;
     }
 }

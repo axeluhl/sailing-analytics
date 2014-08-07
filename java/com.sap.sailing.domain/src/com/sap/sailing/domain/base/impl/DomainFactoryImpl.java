@@ -3,6 +3,7 @@ package com.sap.sailing.domain.base.impl;
 import java.io.IOException;
 import java.io.InputStream;
 import java.util.ArrayList;
+import java.util.Collection;
 import java.util.Iterator;
 import java.util.List;
 import java.util.logging.Logger;
@@ -13,8 +14,10 @@ import com.sap.sailing.domain.base.DomainFactory;
 import com.sap.sailing.domain.base.Fleet;
 import com.sap.sailing.domain.base.Mark;
 import com.sap.sailing.domain.base.ObjectInputStreamResolvingAgainstDomainFactory;
+import com.sap.sailing.domain.base.RaceDefinition;
 import com.sap.sailing.domain.base.Waypoint;
 import com.sap.sailing.domain.common.Distance;
+import com.sap.sailing.domain.common.NoWindException;
 import com.sap.sailing.domain.common.Placemark;
 import com.sap.sailing.domain.common.Position;
 import com.sap.sailing.domain.common.RegattaAndRaceIdentifier;
@@ -29,6 +32,9 @@ import com.sap.sailing.domain.common.dto.PositionDTO;
 import com.sap.sailing.domain.common.dto.RaceDTO;
 import com.sap.sailing.domain.common.dto.RaceStatusDTO;
 import com.sap.sailing.domain.common.dto.TrackedRaceDTO;
+import com.sap.sailing.domain.common.dto.TrackedRaceStatisticsDTO;
+import com.sap.sailing.domain.common.impl.MillisecondsTimePoint;
+import com.sap.sailing.domain.common.media.MediaTrack;
 import com.sap.sailing.domain.leaderboard.ScoringScheme;
 import com.sap.sailing.domain.leaderboard.impl.HighPoint;
 import com.sap.sailing.domain.leaderboard.impl.HighPointExtremeSailingSeriesOverall;
@@ -42,7 +48,10 @@ import com.sap.sailing.domain.leaderboard.impl.HighPointWinnerGetsSix;
 import com.sap.sailing.domain.leaderboard.impl.LowPoint;
 import com.sap.sailing.domain.leaderboard.impl.LowPointWinnerGetsZero;
 import com.sap.sailing.domain.tracking.GPSFix;
+import com.sap.sailing.domain.tracking.GPSFixMoving;
+import com.sap.sailing.domain.tracking.GPSFixTrack;
 import com.sap.sailing.domain.tracking.MarkPassing;
+import com.sap.sailing.domain.tracking.TrackedLeg;
 import com.sap.sailing.domain.tracking.TrackedRace;
 import com.sap.sailing.domain.tracking.TrackedRegattaRegistry;
 import com.sap.sailing.domain.tracking.impl.MarkPassingImpl;
@@ -144,9 +153,63 @@ public class DomainFactoryImpl extends SharedDomainFactoryImpl implements Domain
         trackedRaceDTO.timePointOfNewestEvent = trackedRace.getTimePointOfNewestEvent() == null ? null : trackedRace.getTimePointOfNewestEvent().asDate();
         trackedRaceDTO.hasWindData = trackedRace.hasWindData();
         trackedRaceDTO.hasGPSData = trackedRace.hasGPSData();
-        trackedRaceDTO.hasMeasuredWindData = Util.size(trackedRace.getWindSources(WindSourceType.EXPEDITION)) != 0; 
         trackedRaceDTO.delayToLiveInMs = trackedRace.getDelayToLiveInMillis();
         return trackedRaceDTO;
+    }
+
+    @Override
+    public TrackedRaceStatisticsDTO createTrackedRaceStatisticsDTO(TrackedRace trackedRace, Collection<MediaTrack> mediaTracks) {
+        TrackedRaceStatisticsDTO statisticsDTO = new TrackedRaceStatisticsDTO();
+        
+        // GPS data
+        statisticsDTO.hasGPSData = trackedRace.hasGPSData();
+        try {
+            Competitor overallLeader = trackedRace.getOverallLeader(MillisecondsTimePoint.now());
+            if(overallLeader != null) {
+                statisticsDTO.hasLeaderData = true;
+                statisticsDTO.leaderOrWinner = convertToCompetitorDTO(overallLeader);
+                GPSFixTrack<Competitor, GPSFixMoving> track = trackedRace.getTrack(overallLeader);
+                if(track != null) {
+                    statisticsDTO.averageGPSDataSampleInterval = track.getAverageIntervalBetweenFixes();
+                }
+            }
+        } catch (NoWindException e) {
+        }
+        
+        // Measured wind sources data
+        statisticsDTO.measuredWindSourcesCount = Util.size(trackedRace.getWindSources(WindSourceType.EXPEDITION));
+        statisticsDTO.hasMeasuredWindData = statisticsDTO.measuredWindSourcesCount > 0; 
+
+        // leg progress data
+        RaceDefinition race = trackedRace.getRace();
+        if(race.getCourse() != null) {
+            statisticsDTO.hasLegProgressData = true;
+            statisticsDTO.totalLegsCount = race.getCourse().getLegs().size();
+            TrackedLeg currentLeg = trackedRace.getCurrentLeg(MillisecondsTimePoint.now());
+            if(currentLeg != null) {
+                statisticsDTO.currentLegNo = race.getCourse().getIndexOfWaypoint(currentLeg.getLeg().getFrom());
+            } else {
+                statisticsDTO.currentLegNo = 0;
+            }
+        }
+        
+        // media data
+        if(mediaTracks != null) {
+            statisticsDTO.hasAudioData = true;
+            statisticsDTO.hasVideoData = true;
+            for(MediaTrack track: mediaTracks) {
+                switch(track.mimeType.mediaType) {
+                case audio:
+                    statisticsDTO.audioTracksCount = statisticsDTO.audioTracksCount == null ? 1 : statisticsDTO.audioTracksCount++;   
+                    break;
+                case video:
+                    statisticsDTO.audioTracksCount = statisticsDTO.audioTracksCount == null ? 1 : statisticsDTO.audioTracksCount++;   
+                    break;
+                }
+            }
+        }
+
+        return statisticsDTO;
     }
 
     private PlacemarkOrderDTO getRacePlaces(TrackedRace trackedRace) {

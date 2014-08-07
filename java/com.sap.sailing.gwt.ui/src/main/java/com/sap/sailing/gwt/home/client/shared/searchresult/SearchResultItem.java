@@ -55,12 +55,12 @@ public class SearchResultItem extends Composite {
     @UiHandler("regattaLink")
     public void goToRegatta(ClickEvent e) {
         EventBaseDTO event = searchResult.getEvent();
-        placeNavigator.goToRegattaOfEvent(event.id.toString(),  searchResult.getLeaderboardName(), searchResult.getBaseURL());
+        placeNavigator.goToRegattaOfEvent(event.id.toString(),  searchResult.getLeaderboardName(), searchResult.getBaseURL(), searchResult.isOnRemoteServer());
     }
 
     @UiHandler("eventOverviewLink")
     public void goToEventPlace(ClickEvent e) {
         EventBaseDTO event = searchResult.getEvent();
-        placeNavigator.goToEvent(event.id.toString(), searchResult.getBaseURL());
+        placeNavigator.goToEvent(event.id.toString(), searchResult.getBaseURL(), searchResult.isOnRemoteServer());
     }
 }
