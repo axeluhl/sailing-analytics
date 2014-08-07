@@ -52,26 +52,27 @@ public class TrackedRaceWithContext implements HasTrackedRaceContext {
     
     @Override
     public RaceDefinition getRace() {
-        return trackedRace.getRace();
+        return getTrackedRace().getRace();
     }
 
     @Override
     public Integer getYear() {
         if (!yearHasBeenInitialized) {
-            initializeYear();
+            year = calculateYear();
+            yearHasBeenInitialized = true;
         }
         return year;
     }
 
-    private void initializeYear() {
-        TimePoint time = getTrackedRace().getStartOfRace() != null ? getTrackedRace().getStartOfRace() : getTrackedRace().getStartOfTracking();
+    private Integer calculateYear() {
+        TimePoint startOfRace = getTrackedRace().getStartOfRace();
+        TimePoint time = startOfRace != null ? startOfRace : getTrackedRace().getStartOfTracking();
         if (time == null) {
             year = 0;
         }
         Calendar calendar = Calendar.getInstance();
         calendar.setTime(time.asDate());
-        year = calendar.get(Calendar.YEAR);
-        yearHasBeenInitialized = true;
+        return calendar.get(Calendar.YEAR);
     }
 
 }

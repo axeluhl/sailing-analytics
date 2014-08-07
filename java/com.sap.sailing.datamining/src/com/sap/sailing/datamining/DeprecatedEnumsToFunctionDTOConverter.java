@@ -78,8 +78,6 @@ public class DeprecatedEnumsToFunctionDTOConverter {
                 functionDTO = new FunctionDTOImpl("getCompetitor -> getBoat -> getSailID", HasTrackedLegOfCompetitorContext.class.getSimpleName(),
                         String.class.getSimpleName(), new ArrayList<String>(), "Sail ID", true);
                 break;
-            case WindStrength:
-                break;
             case Year:
                 functionDTO = new FunctionDTOImpl("getYear", HasTrackedRaceContext.class.getSimpleName(),
                         "Integer", new ArrayList<String>(), "Year", true);
