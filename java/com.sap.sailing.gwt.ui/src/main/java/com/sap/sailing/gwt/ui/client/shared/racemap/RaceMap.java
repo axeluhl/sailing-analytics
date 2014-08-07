@@ -1859,7 +1859,6 @@ public class RaceMap extends AbsolutePanel implements TimeListener, CompetitorSe
     }
     
     public static class TailsBoundsCalculator extends LatLngBoundsCalculatorForSelected {
-
         @Override
         public Bounds calculateNewBounds(RaceMap racemap) {
             Bounds newBounds = null;
@@ -1886,7 +1885,6 @@ public class RaceMap extends AbsolutePanel implements TimeListener, CompetitorSe
             }
             return newBounds;
         }
-        
     }
     
     public static class CourseMarksBoundsCalculator implements LatLngBoundsCalculator {
