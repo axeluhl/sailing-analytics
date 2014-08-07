@@ -282,7 +282,7 @@ public class RaceMap extends AbsolutePanel implements TimeListener, CompetitorSe
     
     private int currentZoomLevel;
     private boolean autoZooming = false;
-    private LatLngBounds newLatLngBounds;
+    private int autoZoomLevel;
     
     private WindStreamletsRaceboardOverlay streamletOverlay;
     private final boolean showViewStreamlets;
@@ -372,9 +372,11 @@ public class RaceMap extends AbsolutePanel implements TimeListener, CompetitorSe
               map.addZoomChangeHandler(new ZoomChangeMapHandler() {
                   @Override
                   public void onEvent(ZoomChangeMapEvent event) {
-                      // stop automatic zoom after a manual zoom event; automatic zoom in zoomMapToNewBounds will restore old settings
-                      final List<RaceMapZoomSettings.ZoomTypes> emptyList = Collections.emptyList();
-                      settings.getZoomSettings().setTypesToConsiderOnZoom(emptyList);
+                      if (!autoZooming) {
+                          // stop automatic zoom after a manual zoom event; automatic zoom in zoomMapToNewBounds will restore old settings
+                          final List<RaceMapZoomSettings.ZoomTypes> emptyList = Collections.emptyList();
+                          settings.getZoomSettings().setTypesToConsiderOnZoom(emptyList);
+                      }
                   }
               });
               map.addDragEndHandler(new DragEndMapHandler() {
@@ -389,7 +391,7 @@ public class RaceMap extends AbsolutePanel implements TimeListener, CompetitorSe
                   @Override
                   public void onEvent(IdleMapEvent event) {
                       if (autoZooming) {
-                          map.panTo(newLatLngBounds.getCenter());
+                          map.setZoom(autoZoomLevel);
                           autoZooming = false;
                       }
                   }
@@ -1224,7 +1226,7 @@ public class RaceMap extends AbsolutePanel implements TimeListener, CompetitorSe
                 // only change bounds if the new bounds don't fit into the current map zoom
                 List<ZoomTypes> oldZoomSettings = settings.getZoomSettings().getTypesToConsiderOnZoom();
                 setAutoZoomInProgress(true);
-                newLatLngBounds = BoundsUtil.getAsLatLngBounds(newBounds);
+                LatLngBounds newLatLngBounds = BoundsUtil.getAsLatLngBounds(newBounds);
                 int newZoomLevel = getZoomLevel(newLatLngBounds); 
                 if (newZoomLevel != map.getZoom()) {
                     // remove the canvas animations for boats 
@@ -1236,7 +1238,8 @@ public class RaceMap extends AbsolutePanel implements TimeListener, CompetitorSe
                         infoOverlay.removeCanvasPositionAndRotationTransition();
                     }
                     autoZooming = true;
-                    map.setZoom(newZoomLevel);
+                    autoZoomLevel = newZoomLevel;
+                    map.panTo(newLatLngBounds.getCenter());
                 } else {
                     map.panTo(newLatLngBounds.getCenter());
                 }
