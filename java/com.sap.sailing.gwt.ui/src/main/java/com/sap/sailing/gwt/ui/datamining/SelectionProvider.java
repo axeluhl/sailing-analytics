@@ -1,5 +1,6 @@
 package com.sap.sailing.gwt.ui.datamining;
 
+import java.io.Serializable;
 import java.util.Collection;
 import java.util.Map;
 
@@ -11,7 +12,7 @@ public interface SelectionProvider<SettingsType> extends Component<SettingsType>
 
     public void addSelectionChangedListener(SelectionChangedListener listener);
 
-    public Map<DimensionIdentifier, Collection<?>> getSelection();
+    public Map<DimensionIdentifier, Collection<? extends Serializable>> getSelection();
 
     public void applySelection(QueryDefinitionDeprecated queryDefinition);
 

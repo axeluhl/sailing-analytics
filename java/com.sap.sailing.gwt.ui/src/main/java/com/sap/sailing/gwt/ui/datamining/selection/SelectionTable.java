@@ -1,5 +1,6 @@
 package com.sap.sailing.gwt.ui.datamining.selection;
 
+import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.HashSet;
@@ -15,7 +16,7 @@ import com.google.gwt.view.client.SelectionChangeEvent;
 import com.sap.sailing.datamining.shared.DimensionIdentifier;
 import com.sap.sse.gwt.client.panels.AbstractFilterablePanel;
 
-public abstract class SelectionTable<ContentType, ValueType> extends FlowPanel {
+public abstract class SelectionTable<ContentType, ValueType extends Serializable> extends FlowPanel {
     
     private DimensionIdentifier dimension;
     private Collection<ContentType> allData;
@@ -125,7 +126,7 @@ public abstract class SelectionTable<ContentType, ValueType> extends FlowPanel {
         return newContentKeys;
     }
 
-    public Collection<?> getSelectionAsValues() {
+    public Collection<? extends Serializable> getSelectionAsValues() {
         Collection<ValueType> selectionAsValues = new HashSet<ValueType>();
         for (ContentType content : selectionModel.getSelectedSet()) {
             selectionAsValues.add(getValue(content));

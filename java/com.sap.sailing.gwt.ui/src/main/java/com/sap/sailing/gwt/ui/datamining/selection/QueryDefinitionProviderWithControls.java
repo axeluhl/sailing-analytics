@@ -1,5 +1,6 @@
 package com.sap.sailing.gwt.ui.datamining.selection;
 
+import java.io.Serializable;
 import java.util.Collection;
 import java.util.Map.Entry;
 
@@ -79,7 +80,7 @@ public class QueryDefinitionProviderWithControls extends AbstractQueryDefinition
             break;
         }
         
-        for (Entry<DimensionIdentifier, Collection<?>> selectionEntry : selectionProvider.getSelection().entrySet()) {
+        for (Entry<DimensionIdentifier, Collection<? extends Serializable>> selectionEntry : selectionProvider.getSelection().entrySet()) {
             queryDTO.setSelectionFor(selectionEntry.getKey(), selectionEntry.getValue());
         }
         

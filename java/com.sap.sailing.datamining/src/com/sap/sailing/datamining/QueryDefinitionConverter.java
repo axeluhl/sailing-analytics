@@ -1,5 +1,6 @@
 package com.sap.sailing.datamining;
 
+import java.io.Serializable;
 import java.util.Map.Entry;
 
 import com.sap.sailing.datamining.shared.DimensionIdentifier;
@@ -14,7 +15,7 @@ public class QueryDefinitionConverter {
                 DeprecatedEnumsToFunctionDTOConverter.getFunctionDTOFor(queryDefinitionDeprecated.getStatisticType()),
                 queryDefinitionDeprecated.getAggregatorType());
 
-        for (Entry<DimensionIdentifier, Iterable<?>> filterSelectionEntry : queryDefinitionDeprecated.getSelection()
+        for (Entry<DimensionIdentifier, Iterable<? extends Serializable>> filterSelectionEntry : queryDefinitionDeprecated.getSelection()
                 .entrySet()) {
             queryDefinition.setFilterSelectionFor(
                     DeprecatedEnumsToFunctionDTOConverter.getFunctionDTOFor(filterSelectionEntry.getKey()),

@@ -1,5 +1,6 @@
 package com.sap.sse.datamining.shared.impl;
 
+import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
@@ -12,20 +13,20 @@ import com.sap.sse.datamining.shared.dto.FunctionDTO;
 public class QueryDefinitionImpl implements QueryDefinition {
 
     private final String localeInfoName;
-    private final Map<FunctionDTO, Iterable<?>> filterSelection;
+    private final Map<FunctionDTO, Iterable<? extends Serializable>> filterSelection;
     private final List<FunctionDTO> dimensionsToGroupBy;
     private final FunctionDTO extractionFunction;
     private final AggregatorType aggregatorType;
 
     public QueryDefinitionImpl(String localeInfoName, FunctionDTO extractionFunction, AggregatorType aggregatorType) {
         this.localeInfoName = localeInfoName;
-        this.filterSelection = new HashMap<FunctionDTO, Iterable<?>>();
+        this.filterSelection = new HashMap<FunctionDTO, Iterable<? extends Serializable>>();
         this.dimensionsToGroupBy = new ArrayList<FunctionDTO>();
         this.extractionFunction = extractionFunction;
         this.aggregatorType = aggregatorType;
     }
     
-    public void setFilterSelectionFor(FunctionDTO dimension, Iterable<?> selection) {
+    public void setFilterSelectionFor(FunctionDTO dimension, Iterable<? extends Serializable> selection) {
         filterSelection.put(dimension, selection);
     }
     
@@ -39,7 +40,7 @@ public class QueryDefinitionImpl implements QueryDefinition {
     }
 
     @Override
-    public Map<FunctionDTO, Iterable<?>> getFilterSelection() {
+    public Map<FunctionDTO, Iterable<? extends Serializable>> getFilterSelection() {
         return filterSelection;
     }
 

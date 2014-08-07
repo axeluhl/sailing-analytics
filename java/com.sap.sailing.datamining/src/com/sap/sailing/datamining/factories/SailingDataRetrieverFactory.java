@@ -1,5 +1,6 @@
 package com.sap.sailing.datamining.factories;
 
+import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collection;
@@ -43,7 +44,7 @@ public final class SailingDataRetrieverFactory {
      * @return The first processor of the retrieval chain.
      */
     @SuppressWarnings("unchecked")
-    public static <DataSourceType, ElementType> Processor<DataSourceType> createRetrievalProcessorChain(SailingDataRetrievalLevels dataRetrievalLevel, Processor<ElementType> groupingProcessor, Map<FunctionDTO, Iterable<?>> filterSelection, FunctionProvider functionProvider) {
+    public static <DataSourceType, ElementType> Processor<DataSourceType> createRetrievalProcessorChain(SailingDataRetrievalLevels dataRetrievalLevel, Processor<ElementType> groupingProcessor, Map<FunctionDTO, Iterable<? extends Serializable>> filterSelection, FunctionProvider functionProvider) {
         Processor<?> resultReceiver = groupingProcessor;
         for (int i = dataRetrievalLevel.ordinal(); i >= 0; i--) {
             resultReceiver = createDataRetrieverFor(SailingDataRetrievalLevels.values()[i], resultReceiver, filterSelection, functionProvider);
@@ -55,7 +56,7 @@ public final class SailingDataRetrieverFactory {
     /* The way this method is used should guarantee, that the result receiver matches the new processor 
      */
     private static Processor<?> createDataRetrieverFor(SailingDataRetrievalLevels dataRetrievalLevel,
-            Processor<?> resultReceiver, Map<FunctionDTO, Iterable<?>> filterSelection, FunctionProvider functionProvider) {
+            Processor<?> resultReceiver, Map<FunctionDTO, Iterable<? extends Serializable>> filterSelection, FunctionProvider functionProvider) {
         ThreadPoolExecutor executor = DataMiningActivator.getExecutor();
         
         switch (dataRetrievalLevel) {
@@ -83,9 +84,9 @@ public final class SailingDataRetrieverFactory {
     }
 
     private static <BaseDataType> FilterCriteria<BaseDataType> getFilterCriteriaForBaseDataType(Class<BaseDataType> baseDataType,
-            Map<FunctionDTO, Iterable<?>> filterSelection, FunctionProvider functionProvider) {
+            Map<FunctionDTO, Iterable<? extends Serializable>> filterSelection, FunctionProvider functionProvider) {
         CompoundFilterCriteria<BaseDataType> criteria = null;
-        for (Entry<FunctionDTO, Iterable<?>> filterSelectionEntry : filterSelection.entrySet()) {
+        for (Entry<FunctionDTO, Iterable<? extends Serializable>> filterSelectionEntry : filterSelection.entrySet()) {
             Function<?> function = functionProvider.getFunctionForDTO(filterSelectionEntry.getKey());
             if (baseDataType.equals(function.getDeclaringType())) {
                 if (criteria == null) {

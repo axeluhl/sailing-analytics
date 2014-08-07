@@ -21,6 +21,6 @@ public interface QueryDefinitionDeprecated extends Serializable {
 
     public List<DimensionIdentifier> getDimensionsToGroupBy();
 
-    public Map<DimensionIdentifier, Iterable<?>> getSelection();
+    public Map<DimensionIdentifier, Iterable<? extends Serializable>> getSelection();
 
 }

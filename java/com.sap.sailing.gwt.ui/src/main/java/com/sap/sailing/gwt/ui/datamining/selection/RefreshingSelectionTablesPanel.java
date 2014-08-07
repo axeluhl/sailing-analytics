@@ -1,5 +1,6 @@
 package com.sap.sailing.gwt.ui.datamining.selection;
 
+import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collection;
@@ -127,10 +128,10 @@ public class RefreshingSelectionTablesPanel implements SelectionProvider<Refresh
     }
 
     @Override
-    public Map<DimensionIdentifier, Collection<?>> getSelection() {
-        Map<DimensionIdentifier, Collection<?>> selection = new HashMap<DimensionIdentifier, Collection<?>>();
+    public Map<DimensionIdentifier, Collection<? extends Serializable>> getSelection() {
+        Map<DimensionIdentifier, Collection<? extends Serializable>> selection = new HashMap<DimensionIdentifier, Collection<? extends Serializable>>();
         for (SelectionTable<?, ?> table : tablesMappedByDimension.values()) {
-            Collection<?> specificSelection = table.getSelectionAsValues();
+            Collection<? extends Serializable> specificSelection = table.getSelectionAsValues();
             if (!specificSelection.isEmpty()) {
                 selection.put(table.getDimension(), specificSelection);
             }
@@ -140,7 +141,7 @@ public class RefreshingSelectionTablesPanel implements SelectionProvider<Refresh
 
     @Override
     public void applySelection(QueryDefinitionDeprecated queryDefinition) {
-        for (Entry<DimensionIdentifier, Iterable<?>> selectionEntry : queryDefinition.getSelection().entrySet()) {
+        for (Entry<DimensionIdentifier, Iterable<? extends Serializable>> selectionEntry : queryDefinition.getSelection().entrySet()) {
             SelectionTable<?, ?> selectionTable = tablesMappedByDimension.get(selectionEntry.getKey());
             selectionTable.setSelection((Iterable<?>) selectionEntry.getValue());
         }

@@ -1,5 +1,6 @@
 package com.sap.sse.datamining.shared;
 
+import java.io.Serializable;
 import java.util.List;
 import java.util.Map;
 
@@ -10,7 +11,7 @@ public interface QueryDefinition {
     
     public String getLocaleInfoName();
     
-    public Map<FunctionDTO, Iterable<?>> getFilterSelection();
+    public Map<FunctionDTO, Iterable<? extends Serializable>> getFilterSelection();
     
     public List<FunctionDTO> getDimensionsToGroupBy();
     

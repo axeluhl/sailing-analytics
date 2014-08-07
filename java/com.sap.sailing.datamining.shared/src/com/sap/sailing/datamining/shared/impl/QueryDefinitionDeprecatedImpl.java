@@ -1,7 +1,7 @@
 package com.sap.sailing.datamining.shared.impl;
 
+import java.io.Serializable;
 import java.util.ArrayList;
-import java.util.Collection;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -24,7 +24,7 @@ public class QueryDefinitionDeprecatedImpl implements QueryDefinitionDeprecated 
     private DataTypes dataType;
 
     private List<DimensionIdentifier> dimensionsToGroupBy;
-    private Map<DimensionIdentifier, Iterable<?>> selectionMappedByDimension;
+    private Map<DimensionIdentifier, Iterable<? extends Serializable>> selectionMappedByDimension;
     
     /**
      * Constructor for the GWT-Serialization. Don't use this!
@@ -40,7 +40,7 @@ public class QueryDefinitionDeprecatedImpl implements QueryDefinitionDeprecated 
         this.dataType = dataType;
 
         dimensionsToGroupBy = new ArrayList<DimensionIdentifier>();
-        selectionMappedByDimension = new HashMap<DimensionIdentifier, Iterable<?>>();
+        selectionMappedByDimension = new HashMap<DimensionIdentifier, Iterable<? extends Serializable>>();
     }
     
     @Override
@@ -74,7 +74,7 @@ public class QueryDefinitionDeprecatedImpl implements QueryDefinitionDeprecated 
     }
 
     @Override
-    public Map<DimensionIdentifier, Iterable<?>> getSelection() {
+    public Map<DimensionIdentifier, Iterable<? extends Serializable>> getSelection() {
         return selectionMappedByDimension;
     }
 
@@ -82,7 +82,7 @@ public class QueryDefinitionDeprecatedImpl implements QueryDefinitionDeprecated 
         dimensionsToGroupBy.add(dimension);
     }
 
-    public void setSelectionFor(DimensionIdentifier dimension, Collection<?> selection) {
+    public void setSelectionFor(DimensionIdentifier dimension, Iterable<? extends Serializable> selection) {
         selectionMappedByDimension.put(dimension, selection);
     }
 
