@@ -123,7 +123,7 @@ public class SideBySideComponentViewer implements ComponentViewer {
         mainPanel = new LayoutPanel();
         mainPanel.setSize("100%", "100%");
         mainPanel.setStyleName("SideBySideComponentViewer-MainPanel");
-        splitLayoutPanel = new TouchSplitLayoutPanelWithBetterDraggers(/* splitter width */ 3);
+        splitLayoutPanel = new TouchSplitLayoutPanelWithBetterDraggers(/* horizontal splitter width */ 3, /*vertical splitter height*/ 20);
         mainPanel.add(splitLayoutPanel);
         
         ResizableAbsolutePanel absoluteMapAndToggleButtonsPanel = new ResizableAbsolutePanel();
@@ -184,7 +184,7 @@ public class SideBySideComponentViewer implements ComponentViewer {
     
     private void initializeComponents() {
         for (final Component<?> component : components) {
-            final Button togglerButton = new Button(component.getEntryWidget().getTitle());
+            /*final Button togglerButton = new Button(component.getEntryWidget().getTitle());
             togglerButton.addClickHandler(new ClickHandler() {
               @Override
               public void onClick(ClickEvent event) {
@@ -197,7 +197,7 @@ public class SideBySideComponentViewer implements ComponentViewer {
               }
             });
             togglerButton.setStyleName("gwt-SplitLayoutPanel-NorthSouthToggleButton");
-            panelForTogglingSouthLayoutPanelComponents.add(togglerButton);
+            //panelForTogglingSouthLayoutPanelComponents.add(togglerButton);*/
             final Panel componentPanel = new PanelWithCloseAndSettingsButton(component.getEntryWidget()) {
                 @Override
                 public void settingsClicked() {
@@ -206,12 +206,13 @@ public class SideBySideComponentViewer implements ComponentViewer {
                 @Override
                 public void closeClicked() {
                     splitLayoutPanel.setWidgetVisibility(this, component, this, true, 200);
-                    panelForTogglingSouthLayoutPanelComponents.add(togglerButton);
+                    //panelForTogglingSouthLayoutPanelComponents.add(togglerButton);
                 }
             };
             componentPanels.put(component, componentPanel);
             splitLayoutPanel.insert(componentPanel, component, Direction.SOUTH, 200, null);
         }
+        splitLayoutPanel.lastComponentHasBeenAdded(this);
     }
     
     public <SettingsType> void showSettingsDialog(Component<SettingsType> component) {
