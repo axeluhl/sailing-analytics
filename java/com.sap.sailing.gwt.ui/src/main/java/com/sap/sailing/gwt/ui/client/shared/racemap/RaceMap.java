@@ -29,9 +29,7 @@ import com.google.gwt.maps.client.base.LatLngBounds;
 import com.google.gwt.maps.client.controls.ControlPosition;
 import com.google.gwt.maps.client.controls.MapTypeStyle;
 import com.google.gwt.maps.client.controls.PanControlOptions;
-import com.google.gwt.maps.client.controls.ScaleControlOptions;
 import com.google.gwt.maps.client.controls.ZoomControlOptions;
-import com.google.gwt.maps.client.controls.ZoomControlStyle;
 import com.google.gwt.maps.client.events.bounds.BoundsChangeMapEvent;
 import com.google.gwt.maps.client.events.bounds.BoundsChangeMapHandler;
 import com.google.gwt.maps.client.events.click.ClickMapEvent;
@@ -356,15 +354,11 @@ public class RaceMap extends AbsolutePanel implements TimeListener, CompetitorSe
               mapTypeStyles[3] = GoogleMapStyleHelper.createColorStyle(MapTypeStyleFeatureType.WATER, new RGBColor(0, 136, 255), -35, -34);
               
               mapOptions.setMapTypeStyles(mapTypeStyles);
-              
-              ScaleControlOptions scaleControlOptions = ScaleControlOptions.newInstance();
-              scaleControlOptions.setPosition(ControlPosition.BOTTOM_LEFT);
-              mapOptions.setScaleControlOptions(scaleControlOptions);
+              // no need to try to position the scale control; it always ends up at the right bottom corner
               mapOptions.setStreetViewControl(false);
               if (showMapControls) {
                   ZoomControlOptions zoomControlOptions = ZoomControlOptions.newInstance();
                   zoomControlOptions.setPosition(ControlPosition.TOP_RIGHT);
-                  zoomControlOptions.setStyle(ZoomControlStyle.SMALL);
                   mapOptions.setZoomControlOptions(zoomControlOptions);
                   PanControlOptions panControlOptions = PanControlOptions.newInstance();
                   panControlOptions.setPosition(ControlPosition.TOP_RIGHT);
@@ -372,16 +366,7 @@ public class RaceMap extends AbsolutePanel implements TimeListener, CompetitorSe
               }
               map = new MapWidget(mapOptions);
               RaceMap.this.add(map, 0, 0);
-              ClientResources resources = GWT.create(ClientResources.class);
-              ImageResource sapLogoResource = resources.sapLogoOverlay();
-              Image sapLogo = new Image(sapLogoResource);
-              sapLogo.addClickHandler(new ClickHandler() {
-                  @Override
-                  public void onClick(ClickEvent event) {
-                      Window.open("http://www.sap.com", "_blank", null);
-                  }
-              });
-              sapLogo.setStyleName("raceBoard-Logo");
+              Image sapLogo = createSAPLogo();
               RaceMap.this.add(sapLogo);
               RaceMap.this.add(combinedWindPanel, 10, 10+sapLogo.getHeight()+/*spacing*/5);
               RaceMap.this.raceMapImageManager.loadMapIcons(map);
@@ -2043,5 +2028,19 @@ public class RaceMap extends AbsolutePanel implements TimeListener, CompetitorSe
             result = null;
         }
         return result;
+    }
+
+    private Image createSAPLogo() {
+        ClientResources resources = GWT.create(ClientResources.class);
+          ImageResource sapLogoResource = resources.sapLogoOverlay();
+          Image sapLogo = new Image(sapLogoResource);
+          sapLogo.addClickHandler(new ClickHandler() {
+              @Override
+              public void onClick(ClickEvent event) {
+                  Window.open("http://www.sap.com", "_blank", null);
+              }
+          });
+          sapLogo.setStyleName("raceBoard-Logo");
+        return sapLogo;
     }
 }
