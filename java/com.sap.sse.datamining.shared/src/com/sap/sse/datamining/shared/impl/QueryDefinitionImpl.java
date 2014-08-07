@@ -11,12 +11,19 @@ import com.sap.sse.datamining.shared.components.AggregatorType;
 import com.sap.sse.datamining.shared.dto.FunctionDTO;
 
 public class QueryDefinitionImpl implements QueryDefinition {
-
-    private final String localeInfoName;
-    private final Map<FunctionDTO, Iterable<? extends Serializable>> filterSelection;
-    private final List<FunctionDTO> dimensionsToGroupBy;
-    private final FunctionDTO extractionFunction;
-    private final AggregatorType aggregatorType;
+    private static final long serialVersionUID = -6438771277564908352L;
+    
+    private String localeInfoName;
+    private Map<FunctionDTO, Iterable<? extends Serializable>> filterSelection;
+    private List<FunctionDTO> dimensionsToGroupBy;
+    private FunctionDTO extractionFunction;
+    private AggregatorType aggregatorType;
+    
+    /**
+     * <b>Constructor for the GWT-Serialization. Don't use this!</b>
+     */
+    @Deprecated
+    QueryDefinitionImpl() { }
 
     public QueryDefinitionImpl(String localeInfoName, FunctionDTO extractionFunction, AggregatorType aggregatorType) {
         this.localeInfoName = localeInfoName;

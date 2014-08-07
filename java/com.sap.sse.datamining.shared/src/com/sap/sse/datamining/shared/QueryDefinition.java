@@ -7,7 +7,7 @@ import java.util.Map;
 import com.sap.sse.datamining.shared.components.AggregatorType;
 import com.sap.sse.datamining.shared.dto.FunctionDTO;
 
-public interface QueryDefinition {
+public interface QueryDefinition extends Serializable {
     
     public String getLocaleInfoName();
     
