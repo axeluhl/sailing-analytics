@@ -366,7 +366,6 @@ public class RaceMap extends AbsolutePanel implements TimeListener, CompetitorSe
               if (showMapControls) {
                   ZoomControlOptions zoomControlOptions = ZoomControlOptions.newInstance();
                   zoomControlOptions.setPosition(ControlPosition.TOP_RIGHT);
-                  zoomControlOptions.setStyle(ZoomControlStyle.SMALL);
                   mapOptions.setZoomControlOptions(zoomControlOptions);
                   PanControlOptions panControlOptions = PanControlOptions.newInstance();
                   panControlOptions.setPosition(ControlPosition.TOP_RIGHT);
@@ -438,7 +437,7 @@ public class RaceMap extends AbsolutePanel implements TimeListener, CompetitorSe
               if (showViewStreamlets) {
                   streamletOverlay.setVisible(true);
               }
-              //Data has been initialized
+              // Data has been initialized
               createSettingsButton(map);
               RaceMap.this.isMapInitialized = true;
               RaceMap.this.redraw();
@@ -453,6 +452,7 @@ public class RaceMap extends AbsolutePanel implements TimeListener, CompetitorSe
         final Component<RaceMapSettings> component = this;
         Button settingsButton = new Button();
         settingsButton.setStyleName("gwt-MapSettingsButton");
+        settingsButton.setTitle(stringMessages.settings());
         settingsButton.addClickHandler(new ClickHandler() {
             @Override
             public void onClick(ClickEvent event) {
