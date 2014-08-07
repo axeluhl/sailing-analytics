@@ -55,15 +55,20 @@ public class DummyTrackedRace extends TrackedRaceWithWindEssentials {
     private static final long serialVersionUID = -11522605089325440L;
     private Regatta regatta;
 
-    public DummyTrackedRace(final Iterable<? extends Competitor> competitors, final Regatta regatta, final TrackedRegatta trackedRegatta) {
+    public DummyTrackedRace(final Serializable raceId, final Iterable<? extends Competitor> competitors, final Regatta regatta, final TrackedRegatta trackedRegatta, final WindStore windStore) {
         this(competitors, regatta, trackedRegatta, new RaceDefinitionImpl("DummyRace", new CourseImpl("Dummy Course", Collections.<Waypoint>emptyList()),
-                regatta.getBoatClass(), competitors));
+                regatta.getBoatClass(), competitors, raceId), windStore);
     }
     
     public DummyTrackedRace(final Iterable<? extends Competitor> competitors, final Regatta regatta, final TrackedRegatta trackedRegatta,
-            RaceDefinition race) {
-        super(race, trackedRegatta, EmptyWindStore.INSTANCE, -1);
+            RaceDefinition race, WindStore windStore) {
+        super(race, trackedRegatta, windStore, -1);
         this.regatta = regatta;
+    }
+    public DummyTrackedRace(final Iterable<? extends Competitor> competitors, final Regatta regatta, final TrackedRegatta trackedRegatta,
+            RaceDefinition race) {
+       this(competitors, regatta, trackedRegatta, race, EmptyWindStore.INSTANCE);
+        
     }
     
     public DummyTrackedRace(final String raceName, final Serializable raceId) {
