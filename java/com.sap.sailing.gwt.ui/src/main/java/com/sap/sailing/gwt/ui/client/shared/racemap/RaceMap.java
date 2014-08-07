@@ -391,7 +391,7 @@ public class RaceMap extends AbsolutePanel implements TimeListener, CompetitorSe
                               boatOverlay.removeCanvasPositionAndRotationTransition();
                           }
                           // remove the canvas animations for the info overlays of the selected boats 
-                          for(CompetitorInfoOverlay infoOverlay: competitorInfoOverlays.values()) {
+                          for (CompetitorInfoOverlay infoOverlay : competitorInfoOverlays.values()) {
                               infoOverlay.removeCanvasPositionAndRotationTransition();
                           }
                       }
@@ -1207,7 +1207,7 @@ public class RaceMap extends AbsolutePanel implements TimeListener, CompetitorSe
     private void zoomMapToNewBounds(Bounds newBounds) {
         if (newBounds != null) {
             Bounds currentMapBounds = BoundsUtil.getAsBounds(map.getBounds());
-            if (!currentMapBounds.contains(newBounds) || graticuleAreaRation(currentMapBounds, newBounds) > 10) {
+            if (!currentMapBounds.contains(newBounds) || graticuleAreaRatio(currentMapBounds, newBounds) > 10) {
                 // only change bounds if the new bounds don't fit into the current map zoom
                 List<ZoomTypes> oldZoomSettings = settings.getZoomSettings().getTypesToConsiderOnZoom();
                 setAutoZoomInProgress(true);
@@ -1220,7 +1220,7 @@ public class RaceMap extends AbsolutePanel implements TimeListener, CompetitorSe
         }
     }
     
-    private double graticuleAreaRation(Bounds containing, Bounds contained) {
+    private double graticuleAreaRatio(Bounds containing, Bounds contained) {
         assert containing.contains(contained);
         double containingAreaRatio = getGraticuleArea(containing) / getGraticuleArea(contained);
         return containingAreaRatio;
