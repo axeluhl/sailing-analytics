@@ -34,6 +34,8 @@ import com.google.gwt.maps.client.events.click.ClickMapEvent;
 import com.google.gwt.maps.client.events.click.ClickMapHandler;
 import com.google.gwt.maps.client.events.dragend.DragEndMapEvent;
 import com.google.gwt.maps.client.events.dragend.DragEndMapHandler;
+import com.google.gwt.maps.client.events.idle.IdleMapEvent;
+import com.google.gwt.maps.client.events.idle.IdleMapHandler;
 import com.google.gwt.maps.client.events.mouseout.MouseOutMapEvent;
 import com.google.gwt.maps.client.events.mouseout.MouseOutMapHandler;
 import com.google.gwt.maps.client.events.mouseover.MouseOverMapEvent;
@@ -279,6 +281,8 @@ public class RaceMap extends AbsolutePanel implements TimeListener, CompetitorSe
     private LatLngBounds currentMapBounds;
     
     private int currentZoomLevel;
+    private boolean autoZooming = false;
+    private LatLngBounds newLatLngBounds;
     
     private WindStreamletsRaceboardOverlay streamletOverlay;
     private final boolean showViewStreamlets;
@@ -381,20 +385,29 @@ public class RaceMap extends AbsolutePanel implements TimeListener, CompetitorSe
                       settings.getZoomSettings().setTypesToConsiderOnZoom(emptyList);
                   }
               });
+              map.addIdleHandler(new IdleMapHandler() {
+                  @Override
+                  public void onEvent(IdleMapEvent event) {
+                      if (autoZooming) {
+                          map.panTo(newLatLngBounds.getCenter());
+                          autoZooming = false;
+                      }
+                  }
+              });
               map.addBoundsChangeHandler(new BoundsChangeMapHandler() {
                   @Override
                   public void onEvent(BoundsChangeMapEvent event) {
-                      if (!isAutoZoomInProgress() && !map.getBounds().equals(currentMapBounds)) {
+                      int newZoomLevel = map.getZoom(); 
+                      if (!isAutoZoomInProgress() && (newZoomLevel != currentZoomLevel)) {
                           // remove the canvas animations for boats 
                           for (BoatOverlay boatOverlay : RaceMap.this.getBoatOverlays().values()) {
                               boatOverlay.removeCanvasPositionAndRotationTransition();
                           }
                           // remove the canvas animations for the info overlays of the selected boats 
-                          for(CompetitorInfoOverlay infoOverlay: competitorInfoOverlays.values()) {
+                          for (CompetitorInfoOverlay infoOverlay : competitorInfoOverlays.values()) {
                               infoOverlay.removeCanvasPositionAndRotationTransition();
                           }
                       }
-                      int newZoomLevel = map.getZoom();
                       if ((streamletOverlay != null) && !map.getBounds().equals(currentMapBounds)) {
                           streamletOverlay.onBoundsChanged(newZoomLevel != currentZoomLevel);
                       }
@@ -1184,22 +1197,56 @@ public class RaceMap extends AbsolutePanel implements TimeListener, CompetitorSe
         }
     }
 
+    private int getZoomLevel(LatLngBounds bounds) {
+        int GLOBE_PXSIZE = 256; // a constant in Google's map projection
+        int MAX_ZOOM = 30; // currently max-zoom is 24, but Google may extend it
+        double LOG2 = Math.log(2.0);
+        double deltaLng = bounds.getNorthEast().getLongitude() - bounds.getSouthWest().getLongitude();
+        double deltaLat = bounds.getNorthEast().getLatitude() - bounds.getSouthWest().getLatitude();
+        if ((deltaLng == 0) && (deltaLat == 0)) {
+            return MAX_ZOOM;
+        }
+        if (deltaLng < 0) {
+            deltaLng += 360;
+        }
+        int zoomLng = (int) Math.floor(Math.log(map.getDiv().getClientWidth() * 360 / deltaLng / GLOBE_PXSIZE) / LOG2);
+        if (deltaLat < 0) {
+            deltaLat += 360;
+        }
+        int zoomLat = (int) Math.floor(Math.log(map.getDiv().getClientHeight() * 180 / deltaLat / GLOBE_PXSIZE) / LOG2);
+        return Math.min(zoomLat, zoomLng);
+    }
+    
     private void zoomMapToNewBounds(Bounds newBounds) {
         if (newBounds != null) {
             Bounds currentMapBounds = BoundsUtil.getAsBounds(map.getBounds());
-            if (!currentMapBounds.contains(newBounds) || graticuleAreaRation(currentMapBounds, newBounds) > 10) {
+            if (!currentMapBounds.contains(newBounds) || graticuleAreaRatio(currentMapBounds, newBounds) > 10) {
                 // only change bounds if the new bounds don't fit into the current map zoom
                 List<ZoomTypes> oldZoomSettings = settings.getZoomSettings().getTypesToConsiderOnZoom();
                 setAutoZoomInProgress(true);
-                LatLngBounds newLatLngBounds = BoundsUtil.getAsLatLngBounds(newBounds);
-                map.fitBounds(newLatLngBounds);
+                newLatLngBounds = BoundsUtil.getAsLatLngBounds(newBounds);
+                int newZoomLevel = getZoomLevel(newLatLngBounds); 
+                if (newZoomLevel != map.getZoom()) {
+                    // remove the canvas animations for boats 
+                    for (BoatOverlay boatOverlay : RaceMap.this.getBoatOverlays().values()) {
+                        boatOverlay.removeCanvasPositionAndRotationTransition();
+                    }
+                    // remove the canvas animations for the info overlays of the selected boats 
+                    for(CompetitorInfoOverlay infoOverlay: competitorInfoOverlays.values()) {
+                        infoOverlay.removeCanvasPositionAndRotationTransition();
+                    }
+                    autoZooming = true;
+                    map.setZoom(newZoomLevel);
+                } else {
+                    map.panTo(newLatLngBounds.getCenter());
+                }
                 settings.getZoomSettings().setTypesToConsiderOnZoom(oldZoomSettings);
                 setAutoZoomInProgress(false);
             }
         }
     }
     
-    private double graticuleAreaRation(Bounds containing, Bounds contained) {
+    private double graticuleAreaRatio(Bounds containing, Bounds contained) {
         assert containing.contains(contained);
         double containingAreaRatio = getGraticuleArea(containing) / getGraticuleArea(contained);
         return containingAreaRatio;
@@ -1838,7 +1885,6 @@ public class RaceMap extends AbsolutePanel implements TimeListener, CompetitorSe
     }
     
     public static class TailsBoundsCalculator extends LatLngBoundsCalculatorForSelected {
-
         @Override
         public Bounds calculateNewBounds(RaceMap racemap) {
             Bounds newBounds = null;
@@ -1865,7 +1911,6 @@ public class RaceMap extends AbsolutePanel implements TimeListener, CompetitorSe
             }
             return newBounds;
         }
-        
     }
     
     public static class CourseMarksBoundsCalculator implements LatLngBoundsCalculator {
