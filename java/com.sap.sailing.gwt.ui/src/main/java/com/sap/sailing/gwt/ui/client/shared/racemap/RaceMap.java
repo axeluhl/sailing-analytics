@@ -404,7 +404,7 @@ public class RaceMap extends AbsolutePanel implements TimeListener, CompetitorSe
                               boatOverlay.removeCanvasPositionAndRotationTransition();
                           }
                           // remove the canvas animations for the info overlays of the selected boats 
-                          for(CompetitorInfoOverlay infoOverlay: competitorInfoOverlays.values()) {
+                          for (CompetitorInfoOverlay infoOverlay : competitorInfoOverlays.values()) {
                               infoOverlay.removeCanvasPositionAndRotationTransition();
                           }
                       }
@@ -593,7 +593,7 @@ public class RaceMap extends AbsolutePanel implements TimeListener, CompetitorSe
                         long timeForPositionTransitionMillis = calculateTimeForPositionTransition(newTime, oldTime);
                         fixesAndTails.updateFixes(boatData, hasTailOverlapForCompetitor, RaceMap.this, timeForPositionTransitionMillis);
                         showBoatsOnMap(newTime, timeForPositionTransitionMillis, getCompetitorsToShow());
-                        showCompetitorInfoOnMap(newTime, timeForPositionTransitionMillis, competitorSelection.getSelectedCompetitors());
+                        showCompetitorInfoOnMap(newTime, timeForPositionTransitionMillis, competitorSelection.getSelectedFilteredCompetitors());
                         if (douglasMarkers != null) {
                             removeAllMarkDouglasPeuckerpoints();
                         }
@@ -1220,7 +1220,7 @@ public class RaceMap extends AbsolutePanel implements TimeListener, CompetitorSe
     private void zoomMapToNewBounds(Bounds newBounds) {
         if (newBounds != null) {
             Bounds currentMapBounds = BoundsUtil.getAsBounds(map.getBounds());
-            if (!currentMapBounds.contains(newBounds) || graticuleAreaRation(currentMapBounds, newBounds) > 10) {
+            if (!currentMapBounds.contains(newBounds) || graticuleAreaRatio(currentMapBounds, newBounds) > 10) {
                 // only change bounds if the new bounds don't fit into the current map zoom
                 List<ZoomTypes> oldZoomSettings = settings.getZoomSettings().getTypesToConsiderOnZoom();
                 setAutoZoomInProgress(true);
@@ -1246,7 +1246,7 @@ public class RaceMap extends AbsolutePanel implements TimeListener, CompetitorSe
         }
     }
     
-    private double graticuleAreaRation(Bounds containing, Bounds contained) {
+    private double graticuleAreaRatio(Bounds containing, Bounds contained) {
         assert containing.contains(contained);
         double containingAreaRatio = getGraticuleArea(containing) / getGraticuleArea(contained);
         return containingAreaRatio;
@@ -1694,7 +1694,7 @@ public class RaceMap extends AbsolutePanel implements TimeListener, CompetitorSe
                         i.remove(); // only this way a ConcurrentModificationException while looping can be avoided
                     }
                 }
-                showCompetitorInfoOnMap(timer.getTime(), -1, competitorSelection.getSelectedCompetitors());
+                showCompetitorInfoOnMap(timer.getTime(), -1, competitorSelection.getSelectedFilteredCompetitors());
             } else {
                 // adding a single competitor; may need to re-load data, so refresh:
                 timeChanged(timer.getTime(), null);
@@ -1705,7 +1705,7 @@ public class RaceMap extends AbsolutePanel implements TimeListener, CompetitorSe
             if (boatCanvas != null) {
                 boatCanvas.setSelected(displayHighlighted(competitor));
                 boatCanvas.draw();
-                showCompetitorInfoOnMap(timer.getTime(), -1, competitorSelection.getSelectedCompetitors());
+                showCompetitorInfoOnMap(timer.getTime(), -1, competitorSelection.getSelectedFilteredCompetitors());
             } else {
                 // seems like an internal error not to find the lowlighted marker; but maybe the
                 // competitor was added late to the race;
@@ -1747,7 +1747,7 @@ public class RaceMap extends AbsolutePanel implements TimeListener, CompetitorSe
                         removedBoatOverlay.removeFromMap();
                     }
                     fixesAndTails.removeTail(competitor);
-                    showCompetitorInfoOnMap(timer.getTime(), -1, competitorSelection.getSelectedCompetitors());
+                    showCompetitorInfoOnMap(timer.getTime(), -1, competitorSelection.getSelectedFilteredCompetitors());
                 }
             } else {
                 // "lowlight" currently selected competitor
@@ -1756,7 +1756,7 @@ public class RaceMap extends AbsolutePanel implements TimeListener, CompetitorSe
                     boatCanvas.setSelected(displayHighlighted(competitor));
                     boatCanvas.draw();
                 }
-                showCompetitorInfoOnMap(timer.getTime(), -1, competitorSelection.getSelectedCompetitors());
+                showCompetitorInfoOnMap(timer.getTime(), -1, competitorSelection.getSelectedFilteredCompetitors());
             }
         }
         //Trigger auto-zoom if needed
@@ -1885,7 +1885,6 @@ public class RaceMap extends AbsolutePanel implements TimeListener, CompetitorSe
     }
     
     public static class TailsBoundsCalculator extends LatLngBoundsCalculatorForSelected {
-
         @Override
         public Bounds calculateNewBounds(RaceMap racemap) {
             Bounds newBounds = null;
@@ -1912,7 +1911,6 @@ public class RaceMap extends AbsolutePanel implements TimeListener, CompetitorSe
             }
             return newBounds;
         }
-        
     }
     
     public static class CourseMarksBoundsCalculator implements LatLngBoundsCalculator {
