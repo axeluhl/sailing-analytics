@@ -73,7 +73,7 @@ public class DummyTrackedRace extends TrackedRaceWithWindEssentials {
     
     public DummyTrackedRace(final String raceName, final Serializable raceId) {
         super(new RaceDefinitionImpl(raceName, new CourseImpl("Dummy Course", Collections.<Waypoint> emptyList()),
-                /* boatClass */ null, new HashSet<Competitor>()), null, EmptyWindStore.INSTANCE, -1);
+                /* boatClass */ null, new HashSet<Competitor>(), raceId), null, EmptyWindStore.INSTANCE, -1);
     }
 
     @Override
