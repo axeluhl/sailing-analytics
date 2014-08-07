@@ -24,6 +24,7 @@ import com.google.gwt.core.client.Scheduler.ScheduledCommand;
 import com.google.gwt.dom.client.BrowserEvents;
 import com.google.gwt.dom.client.Element;
 import com.google.gwt.dom.client.Style.FontWeight;
+import com.google.gwt.dom.client.Style.Unit;
 import com.google.gwt.event.dom.client.ClickEvent;
 import com.google.gwt.event.dom.client.ClickHandler;
 import com.google.gwt.event.shared.HandlerRegistration;
@@ -40,6 +41,8 @@ import com.google.gwt.user.cellview.client.SafeHtmlHeader;
 import com.google.gwt.user.client.rpc.AsyncCallback;
 import com.google.gwt.user.client.ui.AbstractImagePrototype;
 import com.google.gwt.user.client.ui.Anchor;
+import com.google.gwt.user.client.ui.Button;
+import com.google.gwt.user.client.ui.ClickListener;
 import com.google.gwt.user.client.ui.DockPanel;
 import com.google.gwt.user.client.ui.FlowPanel;
 import com.google.gwt.user.client.ui.HasHorizontalAlignment;
@@ -86,6 +89,7 @@ import com.sap.sailing.gwt.ui.client.SailingServiceAsync;
 import com.sap.sailing.gwt.ui.client.StringMessages;
 import com.sap.sailing.gwt.ui.client.shared.components.Component;
 import com.sap.sailing.gwt.ui.client.shared.components.IsEmbeddableComponent;
+import com.sap.sailing.gwt.ui.client.shared.components.SettingsDialog;
 import com.sap.sailing.gwt.ui.client.shared.components.SettingsDialogComponent;
 import com.sap.sailing.gwt.ui.client.shared.controls.AbstractSortableColumnWithMinMax;
 import com.sap.sailing.gwt.ui.client.shared.controls.SelectionCheckboxColumn;
@@ -1761,9 +1765,24 @@ public class LeaderboardPanel extends SimplePanel implements TimeListener, PlayS
         if (competitorSearchTextBox != null) {
             contentPanel.add(competitorSearchTextBox);
         }
-        contentPanel.add(getLeaderboardTable());
+        contentPanel.add(createSettingsButton(this));
+        SortedCellTable<LeaderboardRowDTO> leaderboardTable = getLeaderboardTable();
+        leaderboardTable.getElement().getStyle().setMarginTop(10, Unit.PX);
+        contentPanel.add(leaderboardTable);
         setWidget(contentPanel);
         raceNameForDefaultSorting = settings.getNameOfRaceToSort();
+    }
+    
+    private Button createSettingsButton(final Component<LeaderboardSettings> component) {
+        Button settingsButton = new Button();
+        settingsButton.setStyleName("gwt-SettingsButton");
+        settingsButton.addClickHandler(new ClickHandler() {
+            @Override
+            public void onClick(ClickEvent event) {
+                new SettingsDialog<LeaderboardSettings>(component, stringMessages).show();
+            }
+        });
+        return settingsButton;
     }
     
     private static class TotalDistanceTraveledInMetersField implements LegDetailField<Double> {

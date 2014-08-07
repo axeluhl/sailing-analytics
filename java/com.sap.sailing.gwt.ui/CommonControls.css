@@ -284,7 +284,10 @@ body ::-webkit-scrollbar-track {
 	background-color: #ececec;
 }
 
-.gwt-SplitLayoutPanel-SettingsButton {
+.gwt-SettingsButton {
+	position: absolute;
+	top: 0px;
+	right: 1px;
 	border-top-left-radius: 25px;
 	border-top-right-radius: 25px;
 	border-bottom-left-radius: 25px;
