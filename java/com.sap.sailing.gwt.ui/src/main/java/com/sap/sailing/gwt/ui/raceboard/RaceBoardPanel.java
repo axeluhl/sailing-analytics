@@ -193,13 +193,11 @@ public class RaceBoardPanel extends SimplePanel implements RegattasDisplayer, Ra
         for (ComponentViewer componentViewer : componentViewers) {
             mainPanel.add(componentViewer.getViewerWidget());
         }
-        setLeaderboardVisible(getConfiguration().isShowLeaderboard());
+        //setLeaderboardVisible(getConfiguration().isShowLeaderboard());
+        setLeaderboardVisible(true);
         setWindChartVisible(getConfiguration().isShowWindChart());
         setCompetitorChartVisible(getConfiguration().isShowCompetitorsChart());
         createGeneralInformation(raceMap, leaderboardName, leaderboardGroupName);
-        // needed to ensure that competitor data is loaded
-        leaderboardPanel.setVisible(true);
-        leaderboardPanel.setVisible(false);
     }
     
     private void createGeneralInformation(RaceMap raceMap, String leaderboardName, String leaderboardGroupName) {

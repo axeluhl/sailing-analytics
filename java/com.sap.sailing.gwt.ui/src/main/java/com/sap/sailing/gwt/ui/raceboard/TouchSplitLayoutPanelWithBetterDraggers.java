@@ -16,6 +16,7 @@
 package com.sap.sailing.gwt.ui.raceboard;
 
 import java.util.ArrayList;
+import java.util.Date;
 import java.util.List;
 
 import com.google.gwt.core.client.Duration;
@@ -37,9 +38,11 @@ import com.google.gwt.user.client.ui.Button;
 import com.google.gwt.user.client.ui.DockLayoutPanel;
 import com.google.gwt.user.client.ui.FlowPanel;
 import com.google.gwt.user.client.ui.Panel;
+import com.google.gwt.user.client.ui.RequiresResize;
 import com.google.gwt.user.client.ui.Widget;
 import com.google.gwt.user.client.ui.WidgetCollection;
 import com.sap.sailing.gwt.ui.client.shared.components.Component;
+import com.sap.sse.gwt.client.player.TimeListener;
 
 /**
  * A panel that adds user-positioned splitters between each of its child
@@ -176,6 +179,8 @@ public class TouchSplitLayoutPanelWithBetterDraggers extends DockLayoutPanel {
     private final Component<?> associatedComponent;
     protected Button togglerButton;
     private final Widget dragger;
+
+    private boolean hasToggleButtonsAssociated;
     
     /**
      * A splitter is {@link AbsolutePanel} that contains a horizontal line and a dragger
@@ -183,7 +188,6 @@ public class TouchSplitLayoutPanelWithBetterDraggers extends DockLayoutPanel {
     public Splitter(Widget target, Component<?> associatedComponent, boolean reverse) {
       super();
       
-      // set overflow for container element - style will be set by subclasses
       getElement().getStyle().setOverflow(Overflow.VISIBLE);
       
       // add dragger - style will be set by implementing classes
@@ -193,6 +197,7 @@ public class TouchSplitLayoutPanelWithBetterDraggers extends DockLayoutPanel {
       this.target = target;
       this.reverse = reverse;
       this.associatedComponent = associatedComponent;
+      this.hasToggleButtonsAssociated = false;
     }
     
     public Component<?> getAssociatedComponent() {
@@ -209,6 +214,15 @@ public class TouchSplitLayoutPanelWithBetterDraggers extends DockLayoutPanel {
     
     public Widget getDragger() {
         return this.dragger;
+    }
+    
+    public void addToogleButtons(Panel panel) {
+        add(panel);
+        hasToggleButtonsAssociated = true;
+    }
+    
+    public boolean hasToggleButtonsAssociated() {
+        return this.hasToggleButtonsAssociated;
     }
     
     public void setMinSize(int minSize) {
@@ -289,6 +303,14 @@ public class TouchSplitLayoutPanelWithBetterDraggers extends DockLayoutPanel {
       } else {
           forceLayout();
       }
+      if (getAssociatedComponent() instanceof RequiresResize) {
+          Scheduler.get().scheduleFinally(new ScheduledCommand() {
+            @Override
+            public void execute() {
+              ((RequiresResize)getAssociatedComponent()).onResize();
+            }
+          });
+      }
     }
   }
 
@@ -339,24 +361,13 @@ public class TouchSplitLayoutPanelWithBetterDraggers extends DockLayoutPanel {
   }
 
   class VSplitter extends Splitter {
-    private boolean hasToggleButtonsAssociated = false;
     public VSplitter(final Widget target, final Component<?> associatedComponent, boolean reverse) {
       super(target, associatedComponent, reverse);
       addStyleName("SplitLayoutPanel-Divider-Vertical");
       getDragger().getElement().getStyle().setPropertyPx("height", verticalSplitterSize);
       getDragger().setStyleName("gwt-SplitLayoutPanel-VDragger");
-      hasToggleButtonsAssociated = false;
     }
 
-    public void addToogleButtons(Panel panel) {
-        add(panel);
-        hasToggleButtonsAssociated = true;
-    }
-    
-    public boolean hasToggleButtonsAssociated() {
-        return this.hasToggleButtonsAssociated;
-    }
-    
     @Override
     protected int getAbsolutePosition() {
       return getAbsoluteTop();
@@ -472,40 +483,61 @@ public class TouchSplitLayoutPanelWithBetterDraggers extends DockLayoutPanel {
     }
   }
   
-  public void lastComponentHasBeenAdded(final SideBySideComponentViewer cm) {
+  public void lastComponentHasBeenAdded(final SideBySideComponentViewer cm, AbsolutePanel panelForAdditionalButtons) {
     WidgetCollection splitterChildren = super.getChildren();
-    VSplitter lastSplitter = null;
-    List<VSplitter> allVerticalSplitters = new ArrayList<TouchSplitLayoutPanelWithBetterDraggers.VSplitter>();
+    VSplitter lastVerticalSplitter = null;
+    HSplitter lastHorizontalSplitter = null;
+    List<Splitter> allVerticalSplitters = new ArrayList<TouchSplitLayoutPanelWithBetterDraggers.Splitter>();
+    List<Splitter> allHorizontalSplitters = new ArrayList<TouchSplitLayoutPanelWithBetterDraggers.Splitter>();
     for (Widget widget : splitterChildren) {
         if (widget instanceof VSplitter) {
-            lastSplitter = (VSplitter)widget;
+            lastVerticalSplitter = (VSplitter)widget;
             allVerticalSplitters.add((VSplitter)widget);
+        } else if (widget instanceof HSplitter) {
+            lastHorizontalSplitter = (HSplitter)widget;
+            allHorizontalSplitters.add((HSplitter)widget);
         }
     }
-    if (lastSplitter != null) {
-        FlowPanel buttonFlowPanel = new FlowPanel();
-        buttonFlowPanel.setStyleName("gwt-SplitLayoutPanel-NorthSouthToggleButton-Panel");
-        for (final VSplitter splitter : allVerticalSplitters) {
-            Button splitterTogglerButton = new Button(splitter.getTarget().getTitle());
-            splitterTogglerButton.setStyleName("gwt-SplitLayoutPanel-NorthSouthToggleButton");
-            splitterTogglerButton.addClickHandler(new ClickHandler() {
-                @Override
-                public void onClick(ClickEvent event) {
-                    boolean componentIsVisible = splitter.getAssociatedComponent().isVisible();
-                    splitter.getAssociatedComponent().setVisible(!componentIsVisible);
-                    if (!splitter.hasToggleButtonsAssociated) {
-                        splitter.setVisible(!componentIsVisible);
-                    }
-                    splitter.setDraggerVisible(!componentIsVisible);
-                    cm.forceLayout();
+    if (lastVerticalSplitter != null) {
+        Panel panel = addSplitterToggleButtons(allVerticalSplitters, "gwt-SplitLayoutPanel-NorthSouthToggleButton-Panel", "gwt-SplitLayoutPanel-NorthSouthToggleButton", cm);
+        lastVerticalSplitter.addToogleButtons(panel);
+        lastVerticalSplitter.setVisible(true);
+        lastVerticalSplitter.setDraggerVisible(false);
+    }
+    if (lastHorizontalSplitter != null) {
+        Panel horizontalButtonsPanel = addSplitterToggleButtons(allHorizontalSplitters, "gwt-SplitLayoutPanel-EastToggleButton-Panel", "gwt-SplitLayoutPanel-EastToggleButton", cm);
+        panelForAdditionalButtons.add(horizontalButtonsPanel);
+        lastHorizontalSplitter.setVisible(false);
+        lastHorizontalSplitter.setDraggerVisible(false);
+    }
+  }
+  
+  private Panel addSplitterToggleButtons(List<Splitter> splitters, String panelStyleName, String buttonStyleName, final SideBySideComponentViewer componentViewer) {
+    FlowPanel buttonFlowPanel = new FlowPanel();
+    buttonFlowPanel.setStyleName(panelStyleName);
+    for (final Splitter splitter : splitters) {
+        Button splitterTogglerButton = new Button(splitter.getTarget().getTitle());
+        splitterTogglerButton.setStyleName(buttonStyleName);
+        splitterTogglerButton.addClickHandler(new ClickHandler() {
+            @Override
+            public void onClick(ClickEvent event) {
+                boolean componentIsVisible = splitter.getAssociatedComponent().isVisible();
+                splitter.getAssociatedComponent().setVisible(!componentIsVisible);
+                if (!splitter.hasToggleButtonsAssociated) {
+                    splitter.setVisible(!componentIsVisible);
                 }
-            });
-            buttonFlowPanel.add(splitterTogglerButton);
-        }
-        lastSplitter.addToogleButtons(buttonFlowPanel);
-        lastSplitter.setVisible(true);
-        lastSplitter.setDraggerVisible(false);
+                splitter.setDraggerVisible(!componentIsVisible);
+                if (!componentIsVisible == true) {
+                    if (splitter.getAssociatedComponent() instanceof TimeListener) {
+                        ((TimeListener)splitter.getAssociatedComponent()).timeChanged(new Date(), null);
+                    }
+                }
+                componentViewer.forceLayout();
+            }
+        });
+        buttonFlowPanel.add(splitterTogglerButton);
     }
+    return buttonFlowPanel;
   }
 
   public boolean hidePanelContaining(Widget child) {
@@ -636,7 +668,7 @@ public class TouchSplitLayoutPanelWithBetterDraggers extends DockLayoutPanel {
     }
   }
 
-  private Splitter getAssociatedSplitter(Widget child) {
+  public Splitter getAssociatedSplitter(Widget child) {
     // If a widget has a next sibling, it must be a splitter, because the only
     // widget that *isn't* followed by a splitter must be the CENTER, which has
     // no associated splitter.
@@ -670,12 +702,8 @@ public class TouchSplitLayoutPanelWithBetterDraggers extends DockLayoutPanel {
       default:
         assert false : "Unexpected direction";
     }
-    // hide dragger initially
-    if (splitter != null) {
-      splitter.setVisible(false);
-    }
-
     super.insert(splitter, layout.direction, splitter.getSplitterSize(), before);
+    ((LayoutData)splitter.getLayoutData()).layer.getContainerElement().getStyle().setOverflow(Overflow.VISIBLE);
     return splitter;
   }
 }

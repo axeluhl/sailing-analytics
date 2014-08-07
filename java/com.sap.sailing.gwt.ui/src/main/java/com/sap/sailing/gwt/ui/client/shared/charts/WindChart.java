@@ -244,7 +244,7 @@ public class WindChart extends AbstractRaceChart implements Component<WindChartS
                 }
             }
         }
-        chart.redraw();
+        onResize();
     }
 
     /**
