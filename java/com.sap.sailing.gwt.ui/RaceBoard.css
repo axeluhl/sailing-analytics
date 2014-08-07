@@ -393,7 +393,7 @@ img.openColumn {
 
 .raceBoard-TitlePanel {
 	position: relative;
-	top: 20px;
+	top: 5px;
 	z-index: 10;
 	color: white;
 	margin-left: auto;
