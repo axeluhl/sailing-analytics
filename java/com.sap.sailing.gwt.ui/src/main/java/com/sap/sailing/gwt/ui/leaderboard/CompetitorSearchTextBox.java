@@ -326,13 +326,18 @@ public class CompetitorSearchTextBox extends HorizontalPanel implements KeyUpHan
         totalRankFilter.setValue(50);
         topNTotalRankCompetitorsFilterSet.addFilter(totalRankFilter);
         filterSets.addFilterSet(topNTotalRankCompetitorsFilterSet);
-        
         // set default active filter
         filterSets.setActiveFilterSet(topNRaceRankCompetitorsFilterSet);
-        
         return filterSets;
     }
     
+    /**
+     * A settings button will be added to the left of the panel
+     */
+    public void addSettingsButton(Button settingsButton) {
+        insert(settingsButton, 0);
+    }
+
     @Override
     public void filterChanged(FilterSet<CompetitorDTO, ? extends Filter<CompetitorDTO>> oldFilterSet,
             FilterSet<CompetitorDTO, ? extends Filter<CompetitorDTO>> newFilterSet) {
@@ -349,4 +354,5 @@ public class CompetitorSearchTextBox extends HorizontalPanel implements KeyUpHan
     @Override public void filteredCompetitorsListChanged(Iterable<CompetitorDTO> filteredCompetitors) {}
     @Override public void addedToSelection(CompetitorDTO competitor) {}
     @Override public void removedFromSelection(CompetitorDTO competitor) {}
+
 }

@@ -41,7 +41,6 @@ import com.google.gwt.user.cellview.client.SafeHtmlHeader;
 import com.google.gwt.user.client.rpc.AsyncCallback;
 import com.google.gwt.user.client.ui.AbstractImagePrototype;
 import com.google.gwt.user.client.ui.Anchor;
-import com.google.gwt.user.client.ui.Button;
 import com.google.gwt.user.client.ui.DockPanel;
 import com.google.gwt.user.client.ui.FlowPanel;
 import com.google.gwt.user.client.ui.HasHorizontalAlignment;
@@ -1764,25 +1763,13 @@ public class LeaderboardPanel extends SimplePanel implements TimeListener, PlayS
         if (competitorSearchTextBox != null) {
             contentPanel.add(competitorSearchTextBox);
             contentPanel.add(busyIndicator);
+            competitorSearchTextBox.addSettingsButton(SettingsDialog.createSettingsButton(this, stringMessages));
         }
-        contentPanel.add(createSettingsButton(this));
         SortedCellTable<LeaderboardRowDTO> leaderboardTable = getLeaderboardTable();
         leaderboardTable.getElement().getStyle().setMarginTop(10, Unit.PX);
         contentPanel.add(leaderboardTable);
         setWidget(contentPanel);
         raceNameForDefaultSorting = settings.getNameOfRaceToSort();
-    }
-    
-    private Button createSettingsButton(final Component<LeaderboardSettings> component) {
-        Button settingsButton = new Button();
-        settingsButton.setStyleName("gwt-SettingsButton");
-        settingsButton.addClickHandler(new ClickHandler() {
-            @Override
-            public void onClick(ClickEvent event) {
-                new SettingsDialog<LeaderboardSettings>(component, stringMessages).show();
-            }
-        });
-        return settingsButton;
     }
     
     private static class TotalDistanceTraveledInMetersField implements LegDetailField<Double> {

@@ -285,9 +285,6 @@ body ::-webkit-scrollbar-track {
 }
 
 .gwt-SettingsButton {
-	position: absolute;
-	top: 0px;
-	right: 1px;
 	border: none;
 	background: grey url(images/SAP_RV_Settings.png) center no-repeat;
 	z-index: 1;
