@@ -1763,6 +1763,7 @@ public class LeaderboardPanel extends SimplePanel implements TimeListener, PlayS
         }
         if (competitorSearchTextBox != null) {
             contentPanel.add(competitorSearchTextBox);
+            contentPanel.add(busyIndicator);
         }
         contentPanel.add(createSettingsButton(this));
         SortedCellTable<LeaderboardRowDTO> leaderboardTable = getLeaderboardTable();

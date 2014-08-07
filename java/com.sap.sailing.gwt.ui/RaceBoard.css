@@ -383,7 +383,9 @@ img.openColumn {
 }
 
 .busyIndicator-Simple {
-	margin-top: 7px;	
+	position: absolute;
+	top: 0px;
+	right: 40px;
 }
 
 .busyIndicator-Circle {
