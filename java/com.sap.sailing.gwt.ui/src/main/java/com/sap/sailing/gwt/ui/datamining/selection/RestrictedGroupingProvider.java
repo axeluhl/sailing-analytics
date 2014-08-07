@@ -44,7 +44,7 @@ public class RestrictedGroupingProvider implements GroupingProvider {
         mainPanel.add(new Label(this.stringMessages.groupBy() + ":"));
         
         ValueListBox<DimensionIdentifier> firstDimensionToGroupByBox = createDimensionToGroupByBox();
-        addDimensionToGroupByBox(firstDimensionToGroupByBox);
+        addDimensionToGroupByBoxAndUpdateAcceptableValues(firstDimensionToGroupByBox);
     }
 
     private ValueListBox<DimensionIdentifier> createDimensionToGroupByBox() {
@@ -62,18 +62,22 @@ public class RestrictedGroupingProvider implements GroupingProvider {
                     Widget changedDimensionToGroupByBox = (Widget) event.getSource();
                     mainPanel.remove(changedDimensionToGroupByBox);
                     dimensionToGroupByBoxes.remove(changedDimensionToGroupByBox);
-                    updateAcceptableValues();
                 }
+                updateAcceptableValues();
                 notifyListeners();
             }
         });
         return dimensionToGroupByBox;
     }
 
+    private void addDimensionToGroupByBoxAndUpdateAcceptableValues(ValueListBox<DimensionIdentifier> dimensionToGroupByBox) {
+        addDimensionToGroupByBox(dimensionToGroupByBox);
+        updateAcceptableValues();
+    }
+
     private void addDimensionToGroupByBox(ValueListBox<DimensionIdentifier> dimensionToGroupByBox) {
         mainPanel.add(dimensionToGroupByBox);
         dimensionToGroupByBoxes.add(dimensionToGroupByBox);
-        updateAcceptableValues();
     }
 
     private void updateAcceptableValues() {
