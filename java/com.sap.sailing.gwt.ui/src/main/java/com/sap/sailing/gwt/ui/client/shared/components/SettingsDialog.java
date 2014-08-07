@@ -24,6 +24,7 @@ public class SettingsDialog<SettingsType> extends DataEntryDialog<SettingsType> 
     public static Button createSettingsButton(final Component<LeaderboardSettings> component, final StringMessages stringMessages) {
         Button settingsButton = new Button();
         settingsButton.setStyleName("gwt-SettingsButton");
+        settingsButton.setTitle(stringMessages.settings());
         settingsButton.addClickHandler(new ClickHandler() {
             @Override
             public void onClick(ClickEvent event) {
