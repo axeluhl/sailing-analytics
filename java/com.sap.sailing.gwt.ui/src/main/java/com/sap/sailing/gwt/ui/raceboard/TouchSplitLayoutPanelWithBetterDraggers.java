@@ -181,6 +181,7 @@ public class TouchSplitLayoutPanelWithBetterDraggers extends DockLayoutPanel {
     private final Widget dragger;
 
     private boolean hasToggleButtonsAssociated;
+    private final Button splitterToggleButton;
     
     /**
      * A splitter is {@link AbsolutePanel} that contains a horizontal line and a dragger
@@ -198,10 +199,15 @@ public class TouchSplitLayoutPanelWithBetterDraggers extends DockLayoutPanel {
       this.reverse = reverse;
       this.associatedComponent = associatedComponent;
       this.hasToggleButtonsAssociated = false;
+      this.splitterToggleButton = new Button(target.getTitle());
     }
     
     public Component<?> getAssociatedComponent() {
         return associatedComponent;
+    }
+    
+    public Button getToggleButton() {
+        return this.splitterToggleButton;
     }
     
     public Widget getTarget() {
@@ -516,8 +522,9 @@ public class TouchSplitLayoutPanelWithBetterDraggers extends DockLayoutPanel {
     FlowPanel buttonFlowPanel = new FlowPanel();
     buttonFlowPanel.setStyleName(panelStyleName);
     for (final Splitter splitter : splitters) {
-        Button splitterTogglerButton = new Button(splitter.getTarget().getTitle());
+        final Button splitterTogglerButton = splitter.getToggleButton();
         splitterTogglerButton.setStyleName(buttonStyleName);
+        splitterTogglerButton.addStyleDependentName("Closed");
         splitterTogglerButton.addClickHandler(new ClickHandler() {
             @Override
             public void onClick(ClickEvent event) {
@@ -531,6 +538,13 @@ public class TouchSplitLayoutPanelWithBetterDraggers extends DockLayoutPanel {
                     if (splitter.getAssociatedComponent() instanceof TimeListener) {
                         ((TimeListener)splitter.getAssociatedComponent()).timeChanged(new Date(), null);
                     }
+                }
+                if (!componentIsVisible) {
+                    splitterTogglerButton.removeStyleDependentName("Closed");
+                    splitterTogglerButton.addStyleDependentName("Open");
+                } else {
+                    splitterTogglerButton.removeStyleDependentName("Open");
+                    splitterTogglerButton.addStyleDependentName("Closed");
                 }
                 componentViewer.forceLayout();
             }
@@ -593,6 +607,10 @@ public class TouchSplitLayoutPanelWithBetterDraggers extends DockLayoutPanel {
                   associatedComponentToWidget.setVisible(true);
               }
               splitter.setAssociatedWidgetSize(size, /*defer*/false);
+              splitter.setDraggerVisible(!hidden);
+              splitter.setVisible(!hidden);
+              splitter.getToggleButton().removeStyleDependentName("Closed");
+              splitter.getToggleButton().addStyleDependentName("Open");
           }
       }
       if (splitter != null && !hidden && splitter instanceof HSplitter) {
