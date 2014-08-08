@@ -335,6 +335,9 @@ img.openColumn {
 .backToLivePlayButton {
 	background: url(images/btn-cta-greenleft.png) center top repeat-x;
     margin: 0 0 0 5px;
+    position: relative;
+    right: 15px;
+    top: 12px;
 }
 
 .backToLivePlayButton:hover {
@@ -417,9 +420,30 @@ img.openColumn {
 }
 
 .TimePanel-ShowExtended-Button {
-	background: url(images/settings_white.png) center no-repeat;
 	width: 28px;
 	height: 25px;
 	float: left;
 	cursor: pointer;
+	margin-left: 4px;
+  	border-top-left-radius: 5px;
+  	border-top-right-radius: 5px;
+  	border-bottom-left-radius: 5px;
+  	border-bottom-right-radius: 5px;
+  	border: none;
+}
+
+.TimePanel-ShowExtended-Button-Closed {
+	background: white url(images/arrows_bottom_black.png) center no-repeat;
+}
+
+.TimePanel-ShowExtended-Button-Open {
+	background: white url(images/arrows_top_black.png) center no-repeat;
+}
+
+.TimePanel-ShowExtended-Button:hover {
+	background-color: #cecece;
+}
+
+.TimePanel-ShowExtended-Button:focus {
+	outline: 0 !important;
 }

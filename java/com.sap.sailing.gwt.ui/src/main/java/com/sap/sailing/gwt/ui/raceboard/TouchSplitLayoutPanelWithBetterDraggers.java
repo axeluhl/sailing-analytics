@@ -706,13 +706,6 @@ public class TouchSplitLayoutPanelWithBetterDraggers extends DockLayoutPanel {
                 splitter.getToggleButton().addStyleDependentName("Open");
             }
         }
-        if (splitter != null && !hidden && splitter instanceof HSplitter) {
-            int widthOfWidget = widgetThatDeterminesSize.getOffsetWidth();
-            if (size > widthOfWidget && widthOfWidget > 0) {
-                int additionalWidthForScroller = 8;
-                splitter.setAssociatedWidgetSize(widthOfWidget+additionalWidthForScroller, /* defer */false);
-            }
-        }
     }
 
     private void assertIsChild2(Widget widget) {
