@@ -29,7 +29,6 @@ import com.google.gwt.maps.client.base.LatLngBounds;
 import com.google.gwt.maps.client.controls.ControlPosition;
 import com.google.gwt.maps.client.controls.MapTypeStyle;
 import com.google.gwt.maps.client.controls.PanControlOptions;
-import com.google.gwt.maps.client.controls.ScaleControlOptions;
 import com.google.gwt.maps.client.controls.ZoomControlOptions;
 import com.google.gwt.maps.client.events.bounds.BoundsChangeMapEvent;
 import com.google.gwt.maps.client.events.bounds.BoundsChangeMapHandler;
@@ -357,10 +356,7 @@ public class RaceMap extends AbsolutePanel implements TimeListener, CompetitorSe
               mapTypeStyles[3] = GoogleMapStyleHelper.createColorStyle(MapTypeStyleFeatureType.WATER, new RGBColor(0, 136, 255), -35, -34);
               
               mapOptions.setMapTypeStyles(mapTypeStyles);
-              
-              ScaleControlOptions scaleControlOptions = ScaleControlOptions.newInstance();
-              scaleControlOptions.setPosition(ControlPosition.BOTTOM_LEFT);
-              mapOptions.setScaleControlOptions(scaleControlOptions);
+              // no need to try to position the scale control; it always ends up at the right bottom corner
               mapOptions.setStreetViewControl(false);
               if (showMapControls) {
                   ZoomControlOptions zoomControlOptions = ZoomControlOptions.newInstance();
@@ -1243,8 +1239,10 @@ public class RaceMap extends AbsolutePanel implements TimeListener, CompetitorSe
     
     private void zoomMapToNewBounds(Bounds newBounds) {
         if (newBounds != null) {
-            Bounds currentMapBounds = BoundsUtil.getAsBounds(map.getBounds());
-            if (!currentMapBounds.contains(newBounds) || graticuleAreaRatio(currentMapBounds, newBounds) > 10) {
+            Bounds currentMapBounds;
+            if (map.getBounds() == null
+                    || !(currentMapBounds = BoundsUtil.getAsBounds(map.getBounds())).contains(newBounds)
+                    || graticuleAreaRatio(currentMapBounds, newBounds) > 10) {
                 // only change bounds if the new bounds don't fit into the current map zoom
                 List<ZoomTypes> oldZoomSettings = settings.getZoomSettings().getTypesToConsiderOnZoom();
                 setAutoZoomInProgress(true);
@@ -2059,5 +2057,19 @@ public class RaceMap extends AbsolutePanel implements TimeListener, CompetitorSe
             result = null;
         }
         return result;
+    }
+
+    private Image createSAPLogo() {
+        ClientResources resources = GWT.create(ClientResources.class);
+          ImageResource sapLogoResource = resources.sapLogoOverlay();
+          Image sapLogo = new Image(sapLogoResource);
+          sapLogo.addClickHandler(new ClickHandler() {
+              @Override
+              public void onClick(ClickEvent event) {
+                  Window.open("http://www.sap.com", "_blank", null);
+              }
+          });
+          sapLogo.setStyleName("raceBoard-Logo");
+        return sapLogo;
     }
 }

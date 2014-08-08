@@ -198,7 +198,6 @@ public class RaceBoardPanel extends SimplePanel implements RegattasDisplayer, Ra
         setWindChartVisible(getConfiguration().isShowWindChart());
         setCompetitorChartVisible(getConfiguration().isShowCompetitorsChart());
         createGeneralInformation(raceMap, leaderboardName, leaderboardGroupName);
-        
         // make sure to load leaderboard data for filtering to work
         if (!getConfiguration().isShowLeaderboard()) {
             leaderboardPanel.setVisible(true);
