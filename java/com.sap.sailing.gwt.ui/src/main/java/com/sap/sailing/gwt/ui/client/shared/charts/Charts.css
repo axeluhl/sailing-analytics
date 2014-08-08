@@ -5,12 +5,17 @@
 }
 
 .busyIndicatorImageStyle {
+	
 }
 
 .settingsButtonStyle {
 	position: absolute;
 	right: 0px;
 	z-index: 1;
+}
+
+.settingsButtonStyle:focus,.settingsButtonStyle:hover {
+	background-color: #e2e2e2;
 }
 
 .chartStyle {
@@ -20,8 +25,9 @@
 }
 
 @sprite .settingsButtonBackgroundImage {
-  gwt-image: "settingsButton";
-  width: 2em;
-  height: 2em;
-  background-size: contain;
+	gwt-image: "settingsButton";
+	width: 2em;
+	height: 2em;
+	background-size: contain;
+	background-color: #ffffff;
 }
