@@ -187,9 +187,13 @@ public class EventRegattaRacesRace extends UIObject {
         }
         if(!race.trackedRaceStatistics.hasVideoData) {
             featureVideo.addClassName(EventRegattaRacesResources.INSTANCE.css().eventregattarace_featureunavailable());
+        } else {
+            featureVideo.setTitle(String.valueOf(race.trackedRaceStatistics.videoTracksCount));
         }
         if(!race.trackedRaceStatistics.hasAudioData) {
             featureAudio.addClassName(EventRegattaRacesResources.INSTANCE.css().eventregattarace_featureunavailable());
+        } else {
+            featureAudio.setTitle(String.valueOf(race.trackedRaceStatistics.audioTracksCount));
         }
     }
     

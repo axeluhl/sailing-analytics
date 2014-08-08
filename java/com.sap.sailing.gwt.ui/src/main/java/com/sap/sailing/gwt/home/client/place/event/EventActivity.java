@@ -52,7 +52,7 @@ public class EventActivity extends AbstractActivity {
     public void start(final AcceptsOneWidget panel, final EventBus eventBus) {
         final long clientTimeWhenRequestWasSent = System.currentTimeMillis();
         UUID eventUUID = UUID.fromString(eventPlace.getEventUuidAsString());
-        clientFactory.getSailingService().getEventById(eventUUID, new AsyncCallback<EventDTO>() {
+        clientFactory.getSailingService().getEventById(eventUUID, true, new AsyncCallback<EventDTO>() {
             @Override
             public void onSuccess(final EventDTO event) {
                 if(event.getLeaderboardGroups().size() > 0) {

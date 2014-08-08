@@ -36,6 +36,8 @@ import com.google.gwt.maps.client.events.click.ClickMapEvent;
 import com.google.gwt.maps.client.events.click.ClickMapHandler;
 import com.google.gwt.maps.client.events.dragend.DragEndMapEvent;
 import com.google.gwt.maps.client.events.dragend.DragEndMapHandler;
+import com.google.gwt.maps.client.events.idle.IdleMapEvent;
+import com.google.gwt.maps.client.events.idle.IdleMapHandler;
 import com.google.gwt.maps.client.events.mouseout.MouseOutMapEvent;
 import com.google.gwt.maps.client.events.mouseout.MouseOutMapHandler;
 import com.google.gwt.maps.client.events.mouseover.MouseOverMapEvent;
@@ -289,6 +291,8 @@ public class RaceMap extends AbsolutePanel implements TimeListener, CompetitorSe
     private LatLngBounds currentMapBounds;
     
     private int currentZoomLevel;
+    private boolean autoZooming = false;
+    private LatLngBounds newLatLngBounds;
     
     private WindStreamletsRaceboardOverlay streamletOverlay;
     private final boolean showViewStreamlets;
@@ -396,6 +400,15 @@ public class RaceMap extends AbsolutePanel implements TimeListener, CompetitorSe
                       // stop automatic zoom after a manual drag event
                       final List<RaceMapZoomSettings.ZoomTypes> emptyList = Collections.emptyList();
                       settings.getZoomSettings().setTypesToConsiderOnZoom(emptyList);
+                  }
+              });
+              map.addIdleHandler(new IdleMapHandler() {
+                  @Override
+                  public void onEvent(IdleMapEvent event) {
+                      if (autoZooming) {
+                          map.panTo(newLatLngBounds.getCenter());
+                          autoZooming = false;
+                      }
                   }
               });
               map.addBoundsChangeHandler(new BoundsChangeMapHandler() {
@@ -1246,9 +1259,22 @@ public class RaceMap extends AbsolutePanel implements TimeListener, CompetitorSe
                 // only change bounds if the new bounds don't fit into the current map zoom
                 List<ZoomTypes> oldZoomSettings = settings.getZoomSettings().getTypesToConsiderOnZoom();
                 setAutoZoomInProgress(true);
-                LatLngBounds newLatLngBounds = BoundsUtil.getAsLatLngBounds(newBounds);
-                map.panTo(newLatLngBounds.getCenter());
-                map.setZoom(getZoomLevel(newLatLngBounds));
+                newLatLngBounds = BoundsUtil.getAsLatLngBounds(newBounds);
+                int newZoomLevel = getZoomLevel(newLatLngBounds); 
+                if (newZoomLevel != map.getZoom()) {
+                    // remove the canvas animations for boats 
+                    for (BoatOverlay boatOverlay : RaceMap.this.getBoatOverlays().values()) {
+                        boatOverlay.removeCanvasPositionAndRotationTransition();
+                    }
+                    // remove the canvas animations for the info overlays of the selected boats 
+                    for(CompetitorInfoOverlay infoOverlay: competitorInfoOverlays.values()) {
+                        infoOverlay.removeCanvasPositionAndRotationTransition();
+                    }
+                    autoZooming = true;
+                    map.setZoom(newZoomLevel);
+                } else {
+                    map.panTo(newLatLngBounds.getCenter());
+                }
                 settings.getZoomSettings().setTypesToConsiderOnZoom(oldZoomSettings);
                 setAutoZoomInProgress(false);
             }

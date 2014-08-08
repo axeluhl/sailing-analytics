@@ -13,6 +13,7 @@ import com.google.gwt.uibinder.client.UiHandler;
 import com.google.gwt.user.client.ui.Anchor;
 import com.google.gwt.user.client.ui.Composite;
 import com.google.gwt.user.client.ui.Widget;
+import com.sap.sailing.gwt.home.client.i18n.TextMessages;
 import com.sap.sailing.gwt.home.client.place.event.EventPageNavigator;
 import com.sap.sailing.gwt.home.client.shared.EventDatesFormatterUtil;
 import com.sap.sailing.gwt.ui.shared.CourseAreaDTO;
@@ -91,6 +92,9 @@ public class EventHeader extends Composite {
             isFinishedDiv.getStyle().setDisplay(Display.NONE);
         } else if (event.isFinished()) {
             isLiveDiv.getStyle().setDisplay(Display.NONE);
+        } else {
+            isFinishedDiv.getStyle().setDisplay(Display.NONE);
+            isLiveDiv.getStyle().setDisplay(Display.NONE);
         }
         
         setDataNavigationType("normal");
@@ -146,6 +150,7 @@ public class EventHeader extends Composite {
             }
         } else {
             seriesLeaderboardDiv.getStyle().setDisplay(Display.NONE);
+            regattaNameInSeriesDiv.getStyle().setDisplay(Display.NONE);
         }
         
         eventNameSpan.setInnerHTML(eventName);
@@ -158,6 +163,14 @@ public class EventHeader extends Composite {
             eventDescriptionDiv.setInnerHTML(event.getDescription());
         }
         if(event.getOfficialWebsiteURL() != null) {
+            String title = event.getOfficialWebsiteURL();
+            if(title.startsWith("http://")) {
+                title = title.substring("http://".length(), title.length());
+            }
+            if(title.length() > 35) {
+                title = TextMessages.INSTANCE.officalEventWebsite();
+            }
+            officalWebsiteAnchor.setText(title);
             officalWebsiteAnchor.setHref(event.getOfficialWebsiteURL());
         } else {
             officalWebsiteAnchor.setVisible(false);

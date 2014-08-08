@@ -294,9 +294,7 @@ public interface SailingService extends RemoteService {
 
     void renameEvent(UUID eventId, String newName);
 
-    EventDTO getEventByName(String eventName);
-    
-    EventDTO getEventById(UUID id);
+    EventDTO getEventById(UUID id, boolean withStatisticalData);
 
     Iterable<String> getScoreCorrectionProviderNames();
 
