@@ -7,130 +7,130 @@ import com.google.gwt.resources.client.ImageResource;
 public interface BoatClassImageResources extends ClientBundle {
     public static final BoatClassImageResources INSTANCE = GWT.create(BoatClassImageResources.class);
 
-    @Source("com/sap/sailing/gwt/ui/client/svg/boatclass/12MR.svg")
+    @Source("com/sap/sailing/gwt/ui/client/images/boatclass/12MR.png")
     ImageResource _12mRIcon();
     
-    @Source("com/sap/sailing/gwt/ui/client/svg/boatclass/2_4M.svg")
+    @Source("com/sap/sailing/gwt/ui/client/images/boatclass/2_4M.png")
     ImageResource _2_4mIcon();
     
-    @Source("com/sap/sailing/gwt/ui/client/svg/boatclass/29ER.svg")
+    @Source("com/sap/sailing/gwt/ui/client/images/boatclass/29ER.png")
     ImageResource _29erIcon();
     
-    @Source("com/sap/sailing/gwt/ui/client/svg/boatclass/420.svg")
+    @Source("com/sap/sailing/gwt/ui/client/images/boatclass/420.png")
     ImageResource _420Icon();
     
-    @Source("com/sap/sailing/gwt/ui/client/svg/boatclass/470.svg")
+    @Source("com/sap/sailing/gwt/ui/client/images/boatclass/470.png")
     ImageResource _470Icon();
     
-    @Source("com/sap/sailing/gwt/ui/client/svg/boatclass/49ER_FX.svg")
+    @Source("com/sap/sailing/gwt/ui/client/images/boatclass/49ER_FX.png")
     ImageResource _49erFXIcon();
 
-    @Source("com/sap/sailing/gwt/ui/client/svg/boatclass/49ER.svg")
+    @Source("com/sap/sailing/gwt/ui/client/images/boatclass/49ER.png")
     ImageResource _49erIcon();
     
-    @Source("com/sap/sailing/gwt/ui/client/svg/boatclass/505.svg")
+    @Source("com/sap/sailing/gwt/ui/client/images/boatclass/505.png")
     ImageResource _505mIcon();
     
-    @Source("com/sap/sailing/gwt/ui/client/svg/boatclass/A_CAT.svg")
+    @Source("com/sap/sailing/gwt/ui/client/images/boatclass/A_CAT.png")
     ImageResource A_CatIcon();
     
-    @Source("com/sap/sailing/gwt/ui/client/svg/boatclass/ALBIN_EXPRESS.svg")
+    @Source("com/sap/sailing/gwt/ui/client/images/boatclass/ALBIN_EXPRESS.png")
     ImageResource AlbinExpressIcon();
     
-    @Source("com/sap/sailing/gwt/ui/client/svg/boatclass/B_ONE.svg")
+    @Source("com/sap/sailing/gwt/ui/client/images/boatclass/B_ONE.png")
     ImageResource BOne();
     
-    @Source("com/sap/sailing/gwt/ui/client/svg/boatclass/CONTENDER.svg")
+    @Source("com/sap/sailing/gwt/ui/client/images/boatclass/CONTENDER.png")
     ImageResource ContenderIcon();
     
-    @Source("com/sap/sailing/gwt/ui/client/svg/boatclass/DRAGON.svg")
+    @Source("com/sap/sailing/gwt/ui/client/images/boatclass/DRAGON.png")
     ImageResource DragonIcon();
     
-    @Source("com/sap/sailing/gwt/ui/client/svg/boatclass/EUROPE.svg")
+    @Source("com/sap/sailing/gwt/ui/client/images/boatclass/EUROPE.png")
     ImageResource EuropeIcon();
     
-    @Source("com/sap/sailing/gwt/ui/client/svg/boatclass/EXTREME40.svg")
+    @Source("com/sap/sailing/gwt/ui/client/images/boatclass/EXTREME40.png")
     ImageResource Extreme40Icon();
     
-    @Source("com/sap/sailing/gwt/ui/client/svg/boatclass/F16.svg")
+    @Source("com/sap/sailing/gwt/ui/client/images/boatclass/F16.png")
     ImageResource F16Icon();
     
-    @Source("com/sap/sailing/gwt/ui/client/svg/boatclass/F18.svg")
+    @Source("com/sap/sailing/gwt/ui/client/images/boatclass/F18.png")
     ImageResource F18Icon();
     
-    @Source("com/sap/sailing/gwt/ui/client/svg/boatclass/FARR_30.svg")
+    @Source("com/sap/sailing/gwt/ui/client/images/boatclass/FARR_30.png")
     ImageResource Farr30Icon();
     
-    @Source("com/sap/sailing/gwt/ui/client/svg/boatclass/FINN.svg")
+    @Source("com/sap/sailing/gwt/ui/client/images/boatclass/FINN.png")
     ImageResource FinnIcon();
     
-    @Source("com/sap/sailing/gwt/ui/client/svg/boatclass/FLYING_DUTCHMAN.svg")
+    @Source("com/sap/sailing/gwt/ui/client/images/boatclass/FLYING_DUTCHMAN.png")
     ImageResource FlyingDutchmanIcon();
     
-    @Source("com/sap/sailing/gwt/ui/client/svg/boatclass/FOLKBOAT.svg")
+    @Source("com/sap/sailing/gwt/ui/client/images/boatclass/FOLKBOAT.png")
     ImageResource FolkBoatIcon();
     
-    @Source("com/sap/sailing/gwt/ui/client/svg/boatclass/H_BOAT.svg")
+    @Source("com/sap/sailing/gwt/ui/client/images/boatclass/H_BOAT.png")
     ImageResource H_BoatIcon();
     
-    @Source("com/sap/sailing/gwt/ui/client/svg/boatclass/HOBIE.svg")
+    @Source("com/sap/sailing/gwt/ui/client/images/boatclass/HOBIE.png")
     ImageResource HobieIcon(); 
     
-    @Source("com/sap/sailing/gwt/ui/client/svg/boatclass/J24.svg")
+    @Source("com/sap/sailing/gwt/ui/client/images/boatclass/J24.png")
     ImageResource J24Icon();
     
-    @Source("com/sap/sailing/gwt/ui/client/svg/boatclass/J70.svg")
+    @Source("com/sap/sailing/gwt/ui/client/images/boatclass/J70.png")
     ImageResource J70Icon(); 
     
-    @Source("com/sap/sailing/gwt/ui/client/svg/boatclass/J80.svg")
+    @Source("com/sap/sailing/gwt/ui/client/images/boatclass/J80.png")
     ImageResource J80Icon();
     
-    @Source("com/sap/sailing/gwt/ui/client/svg/boatclass/LASER_SB3.svg")
+    @Source("com/sap/sailing/gwt/ui/client/images/boatclass/LASER_SB3.png")
     ImageResource LaserSB3Icon();
    
-    @Source("com/sap/sailing/gwt/ui/client/svg/boatclass/LASER.svg")
+    @Source("com/sap/sailing/gwt/ui/client/images/boatclass/LASER.png")
     ImageResource LaserIcon();
     
-    @Source("com/sap/sailing/gwt/ui/client/svg/boatclass/MELGES_24.svg")
+    @Source("com/sap/sailing/gwt/ui/client/images/boatclass/MELGES_24.png")
     ImageResource Melges24Icon();
     
-    @Source("com/sap/sailing/gwt/ui/client/svg/boatclass/MINI_TRANSAT.svg")
+    @Source("com/sap/sailing/gwt/ui/client/images/boatclass/MINI_TRANSAT.png")
     ImageResource MiniTransatIcon();
     
-    @Source("com/sap/sailing/gwt/ui/client/svg/boatclass/MUSTO_SKIFF.svg")
+    @Source("com/sap/sailing/gwt/ui/client/images/boatclass/MUSTO_SKIFF.png")
     ImageResource MustoSkiffIcon();
     
-    @Source("com/sap/sailing/gwt/ui/client/svg/boatclass/NACRA_17.svg")
+    @Source("com/sap/sailing/gwt/ui/client/images/boatclass/NACRA_17.png")
     ImageResource Nacra17Icon();
     
-    @Source("com/sap/sailing/gwt/ui/client/svg/boatclass/OK.svg")
+    @Source("com/sap/sailing/gwt/ui/client/images/boatclass/OK.png")
     ImageResource OKIcon();
     
-    @Source("com/sap/sailing/gwt/ui/client/svg/boatclass/OPTIMIST.svg")
+    @Source("com/sap/sailing/gwt/ui/client/images/boatclass/OPTIMIST.png")
     ImageResource OptimistIcon();
     
-    @Source("com/sap/sailing/gwt/ui/client/svg/boatclass/PLATU_25.svg")
+    @Source("com/sap/sailing/gwt/ui/client/images/boatclass/PLATU_25.png")
     ImageResource Platu25Icon();
     
-    @Source("com/sap/sailing/gwt/ui/client/svg/boatclass/RS_X.svg")
+    @Source("com/sap/sailing/gwt/ui/client/images/boatclass/RS_X.png")
     ImageResource RSXIcon();
     
-    @Source("com/sap/sailing/gwt/ui/client/svg/boatclass/SONAR.svg")
+    @Source("com/sap/sailing/gwt/ui/client/images/boatclass/SONAR.png")
     ImageResource SonarIcon();
     
-    @Source("com/sap/sailing/gwt/ui/client/svg/boatclass/STAR.svg")
+    @Source("com/sap/sailing/gwt/ui/client/images/boatclass/STAR.png")
     ImageResource StarIcon();
     
-    @Source("com/sap/sailing/gwt/ui/client/svg/boatclass/STREAMLINE.svg")
+    @Source("com/sap/sailing/gwt/ui/client/images/boatclass/STREAMLINE.png")
     ImageResource StreamlineIcon();
     
-    @Source("com/sap/sailing/gwt/ui/client/svg/boatclass/SWAN_45.svg")
+    @Source("com/sap/sailing/gwt/ui/client/images/boatclass/SWAN_45.png")
     ImageResource Swan45Icon();
     
-    @Source("com/sap/sailing/gwt/ui/client/svg/boatclass/TORNADO.svg")
+    @Source("com/sap/sailing/gwt/ui/client/images/boatclass/TORNADO.png")
     ImageResource TornadoIcon();
     
-    @Source("com/sap/sailing/gwt/ui/client/svg/boatclass/X_99.svg")
+    @Source("com/sap/sailing/gwt/ui/client/images/boatclass/X_99.png")
     ImageResource X99Icon();
 
 }
