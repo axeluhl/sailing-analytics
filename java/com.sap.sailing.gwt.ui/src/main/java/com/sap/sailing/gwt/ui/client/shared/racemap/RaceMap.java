@@ -1207,7 +1207,7 @@ public class RaceMap extends AbsolutePanel implements TimeListener, CompetitorSe
 
     private int getZoomLevel(LatLngBounds bounds) {
         int GLOBE_PXSIZE = 256; // a constant in Google's map projection
-        int MAX_ZOOM = 30; // currently max-zoom is 24, but Google may extend it
+        int MAX_ZOOM = 20; // maximum zoom-level that should be automatically selected
         double LOG2 = Math.log(2.0);
         double deltaLng = bounds.getNorthEast().getLongitude() - bounds.getSouthWest().getLongitude();
         double deltaLat = bounds.getNorthEast().getLatitude() - bounds.getSouthWest().getLatitude();
@@ -1219,10 +1219,10 @@ public class RaceMap extends AbsolutePanel implements TimeListener, CompetitorSe
         }
         int zoomLng = (int) Math.floor(Math.log(map.getDiv().getClientWidth() * 360 / deltaLng / GLOBE_PXSIZE) / LOG2);
         if (deltaLat < 0) {
-            deltaLat += 360;
+            deltaLat += 180;
         }
         int zoomLat = (int) Math.floor(Math.log(map.getDiv().getClientHeight() * 180 / deltaLat / GLOBE_PXSIZE) / LOG2);
-        return Math.min(zoomLat, zoomLng);
+        return Math.min(Math.min(zoomLat, zoomLng), MAX_ZOOM);
     }
     
     private void zoomMapToNewBounds(Bounds newBounds) {

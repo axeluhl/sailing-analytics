@@ -35,7 +35,7 @@ public class RectField implements VectorField {
         this.x1 = x1;
         this.y0 = y0;
         this.y1 = y1;
-		this.motionFactor = 0.9 * parameters.motionScale;
+		this.motionFactor = 0.009 * parameters.motionScale;
         this.field = field;
         this.w = field.length;
         this.h = field[0].length;
