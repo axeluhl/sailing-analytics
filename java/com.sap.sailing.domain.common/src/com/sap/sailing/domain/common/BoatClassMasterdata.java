@@ -19,11 +19,11 @@ public enum BoatClassMasterdata {
     DRAGON_INT ("Dragon Int.", true, 8.89, 1.96, BoatHullType.MONOHULL, "Drachen", "Dragon"),
     EXTREME_40 ("Extreme 40", false, 12.2, 6.60, BoatHullType.CATAMARAN, "Extreme-40", "Extreme40", "ESS40"),
     EUROPE_INT ("Europe Int.", false, 3.35, 1.35, BoatHullType.MONOHULL, "Europe"),
-    F_18 ("F 18", false, 6.85, 2.25, BoatHullType.CATAMARAN, "F-18"),
+    F_18 ("Formula 18", false, 6.85, 2.25, BoatHullType.CATAMARAN, "F18", "F-18"),
     FARR_30 ("Farr 30", false, 9.42, 3.08, BoatHullType.MONOHULL, "F30", "F-30", "Farr-30"),
     FINN ("Finn", false, 4.50, 1.51, BoatHullType.MONOHULL),
     FOLKBOAT ("Folkboat", false, 7.68, 2.20, BoatHullType.MONOHULL, "Folke", "Folkeboot"),
-    F_16 ("Formula 16", false, 5.00, 2.50, BoatHullType.MONOHULL, "F16", "F-16"),
+    F_16 ("Formula 16", false, 5.00, 2.50, BoatHullType.CATAMARAN, "F16", "F-16"),
     HOBIE_16 ("Hobie 16", false, 5.05, 2.41, BoatHullType.CATAMARAN, "H16"),
     H_BOAT ("H-Boat", false, 8.28, 2.18, BoatHullType.MONOHULL, "HB"),
     HOBIE_TIGER ("Hobie Tiger", false, 5.51, 2.60, BoatHullType.CATAMARAN),
@@ -36,7 +36,7 @@ public enum BoatClassMasterdata {
     LASER_RADIAL ("Laser Radial", true, 4.19, 1.41, BoatHullType.MONOHULL, "LAR", "Laser RAD", "RAD", "Radial"),
     LASER_INT ("Laser Int.", true, 4.19, 1.39, BoatHullType.MONOHULL, "Laser", "LSR"),
     LASER_SB3 ("Laser SB3", true, 6.15, 2.15, BoatHullType.MONOHULL, "LSB3", "SB20"),
-    MELGES_24 ("Melges 24", true, 7.32, 2.50, BoatHullType.MONOHULL, "Melges-24"),
+    MELGES_24 ("Melges 24", true, 7.32, 2.50, BoatHullType.MONOHULL, "Melges-24", "M24"),
     MINI_TRANSAT ("Mini Transat 6.50", true, 6.50, 3.00, BoatHullType.MONOHULL, "Mini Transat"),
     MUSTO_SKIFF ("Musto Skiff", true, 4.55, 1.35, BoatHullType.MONOHULL, "Musto Performance Skiff", "MPS", "Musto"),
     NACRA_17 ("Nacra 17", true, 5.25, 2.59, BoatHullType.CATAMARAN, "N17", "Nacra-17"),
@@ -82,20 +82,28 @@ public enum BoatClassMasterdata {
         this.alternativeNames = null;
     }
 
-    public BoatClassMasterdata resolveBoatClass(String boatClassName) {
+    public static BoatClassMasterdata resolveBoatClass(String boatClassName) {
+        String boatClassNameToResolve = unifyBoatClassName(boatClassName);
+        
         for (BoatClassMasterdata boatClass : values()) {
-            if (boatClass.displayName.toUpperCase().equals(boatClassName.toUpperCase())) {
+            if (unifyBoatClassName(boatClass.displayName).equals(boatClassNameToResolve)) {
                 return boatClass;
             }
-            for (String name : boatClass.alternativeNames) {
-                if (name.toUpperCase().equals(boatClassName.toUpperCase())) {
-                    return boatClass;
+            if(boatClass.alternativeNames != null) {
+                for (String name : boatClass.alternativeNames) {
+                    if (unifyBoatClassName(name).equals(boatClassNameToResolve)) {
+                        return boatClass;
+                    }
                 }
             }
         }
         return null;
     }
 
+    private static String unifyBoatClassName(String boatClassName) {
+        return boatClassName.toUpperCase().replaceAll("\\s+","");
+    }
+    
     public Distance getHullLength() {
         return new MeterDistance(hullLengthInMeter);
     }

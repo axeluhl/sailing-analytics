@@ -119,14 +119,6 @@ public class SharedDomainFactoryImpl implements SharedDomainFactory {
         this.competitorStore = competitorStore;
         waypointCache = new ConcurrentHashMap<Serializable, WeakWaypointReference>();
         mayStartWithNoUpwindLeg = new HashSet<String>(Arrays.asList(new String[] { "extreme40", "ess", "ess40" }));
-        for (BoatClassMasterdata boatClassMasterdata : BoatClassMasterdata.values()) {
-            BoatClass boatClass = new BoatClassImpl(boatClassMasterdata.getDisplayName(), boatClassMasterdata);
-            boatClassCache.put(boatClassMasterdata.getDisplayName(), boatClass);
-            for (String alternativeName : boatClassMasterdata.getAlternativeNames()) {
-                BoatClass boatClassWithAlternativeName = new BoatClassImpl(alternativeName, boatClassMasterdata);
-                boatClassCache.put(alternativeName, boatClassWithAlternativeName);
-            }
-        }
         courseAreaCache = new HashMap<Serializable, CourseArea>();
         configurationMatcherCache = new HashMap<Serializable, DeviceConfigurationMatcher>();
     }
@@ -277,6 +269,13 @@ public class SharedDomainFactoryImpl implements SharedDomainFactory {
     public BoatClass getOrCreateBoatClass(String name, boolean typicallyStartsUpwind) {
         synchronized (boatClassCache) {
             BoatClass result = boatClassCache.get(name);
+            if(result == null) {
+                BoatClassMasterdata boatClassMasterdata = BoatClassMasterdata.resolveBoatClass(name);
+                if(boatClassMasterdata != null) {
+                    result = new BoatClassImpl(name, boatClassMasterdata);
+                    boatClassCache.put(name, result);
+                }
+            }
             if (result == null) {
                 result = new BoatClassImpl(name, typicallyStartsUpwind);
                 boatClassCache.put(name, result);
