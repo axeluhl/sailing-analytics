@@ -1,8 +1,8 @@
 package com.sap.sailing.gwt.home.client;
 
+import java.util.HashMap;
 import java.util.Map;
 
-import com.google.gwt.dev.util.collect.HashMap;
 import com.google.gwt.resources.client.ImageResource;
 import com.sap.sailing.domain.common.BoatClassMasterdata;
 
