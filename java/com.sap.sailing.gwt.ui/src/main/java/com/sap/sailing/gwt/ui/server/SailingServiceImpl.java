@@ -777,7 +777,7 @@ public class SailingServiceImpl extends ProxiedRemoteServiceServlet implements S
         regattaDTO.series = convertToSeriesDTOs(regatta);
         BoatClass boatClass = regatta.getBoatClass();
         if (boatClass != null) {
-            regattaDTO.boatClass = new BoatClassDTO(boatClass.getName(), boatClass.getHullLength().getMeters());
+            regattaDTO.boatClass = new BoatClassDTO(boatClass.getName(), boatClass.getDisplayName(), boatClass.getHullLength().getMeters());
         }
         if (regatta.getDefaultCourseArea() != null) {
             regattaDTO.defaultCourseAreaUuid = regatta.getDefaultCourseArea().getId();
@@ -3320,6 +3320,7 @@ public class SailingServiceImpl extends ProxiedRemoteServiceServlet implements S
                     }
                     if (leaderboard instanceof RegattaLeaderboard) {
                         RegattaLeaderboard regattaLeaderboard = (RegattaLeaderboard) leaderboard;
+                        raceGroup.boatClass = regattaLeaderboard.getRegatta().getBoatClass().getDisplayName();
                         for (Series series : regattaLeaderboard.getRegatta().getSeries()) {
                             RaceGroupSeriesDTO seriesDTO = new RaceGroupSeriesDTO(series.getName());
                             raceGroup.getSeries().add(seriesDTO);
@@ -3335,6 +3336,11 @@ public class SailingServiceImpl extends ProxiedRemoteServiceServlet implements S
                         FleetDTO fleetDTO = new FleetDTO(LeaderboardNameConstants.DEFAULT_FLEET_NAME, 0, null);
                         seriesDTO.getFleets().add(fleetDTO);
                         seriesDTO.getRaceColumns().addAll(convertToRaceColumnDTOs(leaderboard.getRaceColumns()));
+                        for(Competitor c: leaderboard.getCompetitors()) {
+                            if(c.getBoat() != null && c.getBoat().getBoatClass() != null) {
+                                raceGroup.boatClass = c.getBoat().getBoatClass().getDisplayName();
+                            }
+                        }
                     }
                     raceGroups.add(raceGroup);
                 }

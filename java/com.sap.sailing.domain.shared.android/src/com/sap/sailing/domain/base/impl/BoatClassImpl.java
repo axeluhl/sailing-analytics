@@ -48,17 +48,13 @@ public class BoatClassImpl extends NamedImpl implements BoatClass {
 
     public BoatClassImpl(String name, boolean typicallyStartsUpwind) {
         this(name, typicallyStartsUpwind, /* displayName */ null,
-                /* hull length */ name.toLowerCase().contains("extreme") && name.contains("40")
-                ? new MeterDistance(40*12*2.54/100)
-                : new MeterDistance(5), /* hullBeam */ null, /* hullType */ null);
+                /* hull length */ new MeterDistance(5), /* hullBeam */ null, /* hullType */ null);
     }
     
     public BoatClassImpl(String name, BoatClassMasterdata masterData) {
         this(name, masterData.isTypicallyStartsUpwind(), masterData.getDisplayName(), masterData.getHullLength(),
                 masterData.getHullBeam(), masterData.getHullType());
     }
-    
-    // return new BoatClassImpl(boatClassName, typicallyStartsUpwind, displayName, hullLengthInMeter, hullBeamInMeter, hullType);
     
     public BoatClassImpl(String name, boolean typicallyStartsUpwind, String displayName, 
             Distance hullLength, Distance hullBeam, BoatHullType hullType) {

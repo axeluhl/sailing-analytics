@@ -7,6 +7,9 @@ import com.google.gwt.resources.client.ImageResource;
 public interface BoatClassImageResources extends ClientBundle {
     public static final BoatClassImageResources INSTANCE = GWT.create(BoatClassImageResources.class);
 
+    @Source("com/sap/sailing/gwt/ui/client/images/boatclass/GENERIC_BOATCLASS.png")
+    ImageResource genericBoatClass();
+
     @Source("com/sap/sailing/gwt/ui/client/images/boatclass/12MR.png")
     ImageResource _12mRIcon();
     
