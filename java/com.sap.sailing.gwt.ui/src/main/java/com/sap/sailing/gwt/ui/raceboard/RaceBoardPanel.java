@@ -41,7 +41,7 @@ import com.sap.sailing.gwt.ui.client.shared.components.SettingsDialog;
 import com.sap.sailing.gwt.ui.client.shared.filter.FilterWithUI;
 import com.sap.sailing.gwt.ui.client.shared.filter.LeaderboardFetcher;
 import com.sap.sailing.gwt.ui.client.shared.racemap.RaceMap;
-import com.sap.sailing.gwt.ui.leaderboard.CompetitorSearchTextBox;
+import com.sap.sailing.gwt.ui.leaderboard.CompetitorFilterPanel;
 import com.sap.sailing.gwt.ui.leaderboard.ExplicitRaceColumnSelectionWithPreselectedRace;
 import com.sap.sailing.gwt.ui.leaderboard.LeaderboardPanel;
 import com.sap.sailing.gwt.ui.leaderboard.LeaderboardSettings;
@@ -132,7 +132,7 @@ public class RaceBoardPanel extends SimplePanel implements RegattasDisplayer, Ra
                 
         raceMap = new RaceMap(sailingService, asyncActionsExecutor, errorReporter, timer,
                 competitorSelectionModel, stringMessages, showMapControls, getConfiguration().isShowViewStreamlets(), selectedRaceIdentifier);
-        CompetitorSearchTextBox competitorSearchTextBox = new CompetitorSearchTextBox(competitorSelectionModel, stringMessages, raceMap,
+        CompetitorFilterPanel competitorSearchTextBox = new CompetitorFilterPanel(competitorSelectionModel, stringMessages, raceMap,
                 new LeaderboardFetcher() {
                     @Override
                     public LeaderboardDTO getLeaderboard() {
@@ -227,7 +227,7 @@ public class RaceBoardPanel extends SimplePanel implements RegattasDisplayer, Ra
         }
     }
     
-    private LeaderboardPanel createLeaderboardPanel(String leaderboardName, String leaderboardGroupName, CompetitorSearchTextBox competitorSearchTextBox) {
+    private LeaderboardPanel createLeaderboardPanel(String leaderboardName, String leaderboardGroupName, CompetitorFilterPanel competitorSearchTextBox) {
         LeaderboardSettings leaderBoardSettings = LeaderboardSettingsFactory.getInstance()
                 .createNewSettingsForPlayMode(timer.getPlayMode(),
                         /* nameOfRaceToSort */ selectedRaceIdentifier.getRaceName(),

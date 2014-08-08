@@ -49,7 +49,7 @@ import com.sap.sse.gwt.client.dialog.DataEntryDialog.DialogCallback;
  * @author Axel Uhl (D043530)
  * 
  */
-public class CompetitorSearchTextBox extends HorizontalPanel implements KeyUpHandler, Filter<CompetitorDTO>, CompetitorSelectionChangeListener {
+public class CompetitorFilterPanel extends HorizontalPanel implements KeyUpHandler, Filter<CompetitorDTO>, CompetitorSelectionChangeListener {
     private static final String ADVANCED_FILTER_BUTTON = "raceBoardNavigation-filterButton";
     private static final String ADVANCED_FILTER_BUTTON_FILTERED = "raceBoardNavigation-filterButton-filtered";
 
@@ -68,7 +68,7 @@ public class CompetitorSearchTextBox extends HorizontalPanel implements KeyUpHan
     private final RaceMap raceMap;
     private final RaceIdentifier selectedRaceIdentifier;
 
-    public CompetitorSearchTextBox(final CompetitorSelectionProvider competitorSelectionProvider,
+    public CompetitorFilterPanel(final CompetitorSelectionProvider competitorSelectionProvider,
             final StringMessages stringMessages, RaceMap raceMap, LeaderboardFetcher leaderboardFetcher,
             RaceIdentifier selectedRaceIdentifier) {
         this.stringMessages = stringMessages;

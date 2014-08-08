@@ -36,6 +36,8 @@ import com.google.gwt.maps.client.events.click.ClickMapEvent;
 import com.google.gwt.maps.client.events.click.ClickMapHandler;
 import com.google.gwt.maps.client.events.dragend.DragEndMapEvent;
 import com.google.gwt.maps.client.events.dragend.DragEndMapHandler;
+import com.google.gwt.maps.client.events.idle.IdleMapEvent;
+import com.google.gwt.maps.client.events.idle.IdleMapHandler;
 import com.google.gwt.maps.client.events.mouseout.MouseOutMapEvent;
 import com.google.gwt.maps.client.events.mouseout.MouseOutMapHandler;
 import com.google.gwt.maps.client.events.mouseover.MouseOverMapEvent;
@@ -131,6 +133,8 @@ public class RaceMap extends AbsolutePanel implements TimeListener, CompetitorSe
 
     private final SailingServiceAsync sailingService;
     private final ErrorReporter errorReporter;
+
+    private final static ClientResources resources = GWT.create(ClientResources.class);
 
     /**
      * Polyline for the start line (connecting two marks representing the start gate).
@@ -289,6 +293,10 @@ public class RaceMap extends AbsolutePanel implements TimeListener, CompetitorSe
     private LatLngBounds currentMapBounds;
     
     private int currentZoomLevel;
+    private boolean autoZoomIn = false;
+    private boolean autoZoomOut = false;
+    private int autoZoomLevel;
+    LatLngBounds autoZoomLatLngBounds;
     
     private WindStreamletsRaceboardOverlay streamletOverlay;
     private final boolean showViewStreamlets;
@@ -368,16 +376,7 @@ public class RaceMap extends AbsolutePanel implements TimeListener, CompetitorSe
               }
               map = new MapWidget(mapOptions);
               RaceMap.this.add(map, 0, 0);
-              ClientResources resources = GWT.create(ClientResources.class);
-              ImageResource sapLogoResource = resources.sapLogoOverlay();
-              Image sapLogo = new Image(sapLogoResource);
-              sapLogo.addClickHandler(new ClickHandler() {
-                  @Override
-                  public void onClick(ClickEvent event) {
-                      Window.open("http://www.sap.com", "_blank", null);
-                  }
-              });
-              sapLogo.setStyleName("raceBoard-Logo");
+              Image sapLogo = createSAPLogo();
               RaceMap.this.add(sapLogo);
               RaceMap.this.add(combinedWindPanel, 10, 10+sapLogo.getHeight()+/*spacing*/5);
               RaceMap.this.raceMapImageManager.loadMapIcons(map);
@@ -385,9 +384,11 @@ public class RaceMap extends AbsolutePanel implements TimeListener, CompetitorSe
               map.addZoomChangeHandler(new ZoomChangeMapHandler() {
                   @Override
                   public void onEvent(ZoomChangeMapEvent event) {
-                      // stop automatic zoom after a manual zoom event; automatic zoom in zoomMapToNewBounds will restore old settings
-                      final List<RaceMapZoomSettings.ZoomTypes> emptyList = Collections.emptyList();
-                      settings.getZoomSettings().setTypesToConsiderOnZoom(emptyList);
+                      if (!autoZoomIn && !autoZoomOut) {
+                          // stop automatic zoom after a manual zoom event; automatic zoom in zoomMapToNewBounds will restore old settings
+                          final List<RaceMapZoomSettings.ZoomTypes> emptyList = Collections.emptyList();
+                          settings.getZoomSettings().setTypesToConsiderOnZoom(emptyList);
+                      }
                   }
               });
               map.addDragEndHandler(new DragEndMapHandler() {
@@ -396,6 +397,19 @@ public class RaceMap extends AbsolutePanel implements TimeListener, CompetitorSe
                       // stop automatic zoom after a manual drag event
                       final List<RaceMapZoomSettings.ZoomTypes> emptyList = Collections.emptyList();
                       settings.getZoomSettings().setTypesToConsiderOnZoom(emptyList);
+                  }
+              });
+              map.addIdleHandler(new IdleMapHandler() {
+                  @Override
+                  public void onEvent(IdleMapEvent event) {
+                      if (autoZoomIn) {
+                          map.setZoom(autoZoomLevel);
+                          autoZoomIn = false;
+                      }
+                      if (autoZoomOut) {
+                          map.panTo(autoZoomLatLngBounds.getCenter());
+                          autoZoomOut = false;
+                      }
                   }
               });
               map.addBoundsChangeHandler(new BoundsChangeMapHandler() {
@@ -1246,9 +1260,28 @@ public class RaceMap extends AbsolutePanel implements TimeListener, CompetitorSe
                 // only change bounds if the new bounds don't fit into the current map zoom
                 List<ZoomTypes> oldZoomSettings = settings.getZoomSettings().getTypesToConsiderOnZoom();
                 setAutoZoomInProgress(true);
-                LatLngBounds newLatLngBounds = BoundsUtil.getAsLatLngBounds(newBounds);
-                map.panTo(newLatLngBounds.getCenter());
-                map.setZoom(getZoomLevel(newLatLngBounds));
+                autoZoomLatLngBounds = BoundsUtil.getAsLatLngBounds(newBounds);
+                int newZoomLevel = getZoomLevel(autoZoomLatLngBounds); 
+                if (newZoomLevel != map.getZoom()) {
+                    // remove the canvas animations for boats 
+                    for (BoatOverlay boatOverlay : RaceMap.this.getBoatOverlays().values()) {
+                        boatOverlay.removeCanvasPositionAndRotationTransition();
+                    }
+                    // remove the canvas animations for the info overlays of the selected boats 
+                    for(CompetitorInfoOverlay infoOverlay: competitorInfoOverlays.values()) {
+                        infoOverlay.removeCanvasPositionAndRotationTransition();
+                    }
+                    autoZoomIn = newZoomLevel > map.getZoom();
+                    autoZoomOut = !autoZoomIn;
+                    autoZoomLevel = newZoomLevel;
+                    if (autoZoomIn) {
+                        map.panTo(autoZoomLatLngBounds.getCenter());
+                    } else {
+                        map.setZoom(autoZoomLevel);
+                    }
+                } else {
+                    map.panTo(autoZoomLatLngBounds.getCenter());
+                }
                 settings.getZoomSettings().setTypesToConsiderOnZoom(oldZoomSettings);
                 setAutoZoomInProgress(false);
             }
@@ -2060,16 +2093,15 @@ public class RaceMap extends AbsolutePanel implements TimeListener, CompetitorSe
     }
 
     private Image createSAPLogo() {
-        ClientResources resources = GWT.create(ClientResources.class);
-          ImageResource sapLogoResource = resources.sapLogoOverlay();
-          Image sapLogo = new Image(sapLogoResource);
-          sapLogo.addClickHandler(new ClickHandler() {
-              @Override
-              public void onClick(ClickEvent event) {
-                  Window.open("http://www.sap.com", "_blank", null);
-              }
-          });
-          sapLogo.setStyleName("raceBoard-Logo");
+        ImageResource sapLogoResource = resources.sapLogoOverlay();
+        Image sapLogo = new Image(sapLogoResource);
+        sapLogo.addClickHandler(new ClickHandler() {
+            @Override
+            public void onClick(ClickEvent event) {
+                Window.open("http://www.sap.com", "_blank", null);
+            }
+        });
+        sapLogo.setStyleName("raceBoard-Logo");
         return sapLogo;
     }
 }

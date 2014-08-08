@@ -53,7 +53,7 @@ public class Regatta extends Composite {
     @UiField SpanElement trackedRacesCount;
     @UiField DivElement isLiveDiv;
 //    @UiField TableElement isLiveDiv2;
-    @UiField DivElement isFinishedDiv;
+//    @UiField DivElement isFinishedDiv;
 //    @UiField DivElement isFinishedDiv2;
 //    @UiField DivElement isScheduledDiv;
     @UiField AnchorElement leaderboardLink;
@@ -107,7 +107,7 @@ public class Regatta extends Composite {
         
         boolean isFinished = !hasLiveRace;
         if(!isFinished) {
-            isFinishedDiv.getStyle().setDisplay(Display.NONE);
+//            isFinishedDiv.getStyle().setDisplay(Display.NONE);
 //            isFinishedDiv2.getStyle().setDisplay(Display.NONE);
         }
         
