@@ -37,6 +37,7 @@ import com.google.gwt.i18n.client.DateTimeFormat;
 import com.google.gwt.i18n.client.NumberFormat;
 import com.google.gwt.text.client.DateTimeFormatRenderer;
 import com.google.gwt.user.client.rpc.AsyncCallback;
+import com.google.gwt.user.client.ui.Button;
 import com.google.gwt.user.client.ui.RequiresResize;
 import com.google.gwt.user.client.ui.Widget;
 import com.sap.sailing.domain.common.RegattaAndRaceIdentifier;
@@ -49,6 +50,7 @@ import com.sap.sailing.gwt.ui.client.SailingServiceAsync;
 import com.sap.sailing.gwt.ui.client.StringMessages;
 import com.sap.sailing.gwt.ui.client.WindSourceTypeFormatter;
 import com.sap.sailing.gwt.ui.client.shared.components.Component;
+import com.sap.sailing.gwt.ui.client.shared.components.SettingsDialog;
 import com.sap.sailing.gwt.ui.client.shared.components.SettingsDialogComponent;
 import com.sap.sailing.gwt.ui.shared.WindDTO;
 import com.sap.sailing.gwt.ui.shared.WindInfoForRaceDTO;
@@ -78,7 +80,6 @@ public class WindChart extends AbstractRaceChart implements Component<WindChartS
     private Long timeOfLatestRequestInMillis;
 
     private final ColorMapImpl<WindSource> colorMap;
-
 
     /**
      * @param raceSelectionProvider
@@ -115,6 +116,7 @@ public class WindChart extends AbstractRaceChart implements Component<WindChartS
                         new Marker().setEnabled(false).setHoverState(
                                 new Marker().setEnabled(true).setRadius(4))).setShadow(false)
                                     .setHoverStateLineWidth(LINE_WIDTH));
+        chart.setStyleName(chartsCss.chartStyle());
         ChartUtil.useCheckboxesToShowAndHide(chart);
         final NumberFormat numberFormat = NumberFormat.getFormat("0");
         chart.setToolTip(new ToolTip().setEnabled(true).setFormatter(new ToolTipFormatter() {
@@ -184,6 +186,11 @@ public class WindChart extends AbstractRaceChart implements Component<WindChartS
         setSize("100%", "100%");
         raceSelectionProvider.addRaceSelectionChangeListener(this);
     }
+    
+    @Override
+    protected Button createSettingsButton() {
+        return  SettingsDialog.createSettingsButton(this, stringMessages);
+    }
 
     @Override
     public String getLocalizedShortName() {
@@ -244,7 +251,7 @@ public class WindChart extends AbstractRaceChart implements Component<WindChartS
                 }
             }
         }
-        chart.redraw();
+        onResize();
     }
 
     /**

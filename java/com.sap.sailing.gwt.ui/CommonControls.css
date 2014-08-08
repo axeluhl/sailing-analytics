@@ -150,27 +150,35 @@ body ::-webkit-scrollbar-track {
 
 .gwt-SplitLayoutPanel-NorthSouthToggleButton-Panel {
 	position: absolute;
-	bottom: -12px;
-	right: 320px;
+	right: 10px;
 }
 
 .gwt-SplitLayoutPanel-EastToggleButton-Panel {
 	position: absolute;
-	top: 50%;
+	bottom: 70px;
 	margin-left: -35px;
 }
 
 .gwt-SplitLayoutPanel-EastToggleButton {
-	height: 50px;
-    width: 120px;
+	height: 40px;
     background-color: white;
     border: none;
     -webkit-transform: rotate(-90deg);
-	background: white url(images/arrows_bottom_black_small.png) 50% 85% no-repeat;
-	padding-bottom: 13px;
+	padding-right: 19px;
+	margin-left: -4px;
 	border-bottom: 1px solid #cecece;
 	border-right: 1px solid #cecece;
 	border-left: 1px solid #cecece;
+	border-bottom-right-radius: 10px;
+    border-bottom-left-radius: 10px;
+}
+
+.gwt-SplitLayoutPanel-EastToggleButton-Open {
+	background: white url(images/arrows_top_black_small.png) 96% 50% no-repeat;
+}
+
+.gwt-SplitLayoutPanel-EastToggleButton-Closed {
+	background: white url(images/arrows_bottom_black_small.png) 96% 50% no-repeat;
 }
 
 .gwt-SplitLayoutPanel-EastToggleButton:hover {
@@ -182,19 +190,25 @@ body ::-webkit-scrollbar-track {
 }
 
 .gwt-SplitLayoutPanel-NorthSouthToggleButton {
-    height: 40px;
-    width: 160px;
-    margin-bottom: 12px;
+    height: 16px;
     background-color: white;
-    border: none;
+    border: 1px solid #cecece;
+    border-bottom: none;
     margin-left: 5px;
-	background: white url(images/arrows_top_black_small.png) 50% 15% no-repeat;
-	padding-top: 16px;
-	border-top: 1px solid #cecece;
-	border-right: 1px solid #cecece;
-	border-left: 1px solid #cecece;
+    margin-top: 2px;
+	padding: 2px 40px;
+	border-top-right-radius: 10px;
+    border-top-left-radius: 10px;
 }
 
+.gwt-SplitLayoutPanel-NorthSouthToggleButton-Closed {
+	background: white url(images/arrows_top_black_small.png) 95% 50% no-repeat;
+}
+	
+.gwt-SplitLayoutPanel-NorthSouthToggleButton-Open {
+	background: white url(images/arrows_bottom_black_small.png) 95% 50% no-repeat;
+}
+	
 .gwt-SplitLayoutPanel-NorthSouthToggleButton:focus {
 	outline:0 !important;
 }
@@ -204,10 +218,10 @@ body ::-webkit-scrollbar-track {
 }
 
 .gwt-SplitLayoutPanel-HDragger {
+	position: absolute;
+	height: 60px !important;
 	width: 25px !important;
-	height: 80px !important;
-	left: 3px !important;
-	top: 50% !important;
+	top: 40% !important;
 	background: #ffffff url(images/thumb_vertical.png) 70% 50% no-repeat;
 	border: 1px solid #cecece;
 	border-left: 0px;
@@ -216,15 +230,6 @@ body ::-webkit-scrollbar-track {
 	border-top-right-radius: 25px;
 	border-bottom-right-radius: 25px;
 	z-index: 1;
-}
-
-.gwt-SplitLayoutPanel-HDragger-Label {
-	-webkit-transform: rotate(90deg);
-	-moz-transform: rotate(90deg);
-    font-size: 10px;
-    position: absolute;
-    top: 35px;
-    left: -20px;
 }
 
 .SplitLayoutPanel-Divider-Horizontal {
@@ -236,10 +241,10 @@ body ::-webkit-scrollbar-track {
 }
 
 .gwt-SplitLayoutPanel-VDragger {
+	position: absolute;
 	width: 60px !important;
-	height: 25px !important;
-	top: -25px !important;
-	left: 50% !important;
+	height: 20px !important;
+	left: 48% !important;
 	background: #ffffff url(images/thumb_horz.png) 50% 30% no-repeat;
 	cursor: row-resize;
 	border: 1px solid #cecece;
@@ -250,22 +255,11 @@ body ::-webkit-scrollbar-track {
 	z-index: 1;
 }
 
-.gwt-SplitLayoutPanel-VDragger-Additional {
-	left: 70% !important;
-}
-
-.gwt-SplitLayoutPanel-VDragger-Label {
-    font-size: 10px;
-    position: relative;
-    top: 18px;
-    text-align: center;
-}
-
 .gwt-SplitLayoutPanel-CloseAndSettingsButton-Panel {
 	position: absolute;
 	right: 2px;
 	top: 2px;
-	z-index: 250;
+	z-index: 1;
 }
 
 .gwt-SplitLayoutPanel-CloseButton {
@@ -275,7 +269,7 @@ body ::-webkit-scrollbar-track {
 	border-bottom-left-radius: 25px;
 	border-bottom-right-radius: 25px;
 	background: white url(images/close_black.png) center no-repeat;
-	z-index: 200;
+	z-index: 1;
 	width: 28px;
 	height: 28px;
 	cursor: pointer;
@@ -289,43 +283,36 @@ body ::-webkit-scrollbar-track {
 	background-color: #ececec;
 }
 
-.gwt-SplitLayoutPanel-SettingsButton {
-	border-top-left-radius: 25px;
-	border-top-right-radius: 25px;
-	border-bottom-left-radius: 25px;
-	border-bottom-right-radius: 25px;
-	background: white url(images/settings_black.png) center no-repeat;
+.gwt-SettingsButton {
+	border: none;
+	background: grey url(images/SAP_RV_Settings.png) center no-repeat;
 	z-index: 1;
 	width: 28px;
 	height: 28px;
 	cursor: pointer;
 }
 
-.gwt-SplitLayoutPanel-SettingsButton:hover {
+.gwt-SettingsButton:hover {
 	background-color: #cecece;
 }
 
-.gwt-SplitLayoutPanel-SettingsButton:focus {
-	outline:0 !important;
+.gwt-SettingsButton:focus {
+	outline: 0 !important;
 }
 
-.gwt-SplitLayoutPanel-MapSettingsButton {
-	position: absolute;
-	right: 29px;
-	top: 140px;
-	z-index: 1;
+.gwt-MapSettingsButton {
+	margin-right: 30px;
+	margin-top: 5px;
 	border-top-left-radius: 25px;
 	border-top-right-radius: 25px;
 	border-bottom-left-radius: 25px;
 	border-bottom-right-radius: 25px;
-	background: white url(images/settings_black.png) center no-repeat;
+	border: none;
+	background: white url(images/SAP_RV_SettingsBlack.png) center no-repeat;
+	z-index: 1;
 	width: 28px;
 	height: 28px;
 	cursor: pointer;
-}
-
-gwt-SplitLayoutPanel-SettingsButton:focus {
-	outline:0 !important;
 }
 
 .gwt-ToggleButton-up-hovering, .gwt-ToggleButton-down-hovering {

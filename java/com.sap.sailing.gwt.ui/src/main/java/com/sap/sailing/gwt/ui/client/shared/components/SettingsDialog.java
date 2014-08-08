@@ -1,5 +1,8 @@
 package com.sap.sailing.gwt.ui.client.shared.components;
 
+import com.google.gwt.event.dom.client.ClickEvent;
+import com.google.gwt.event.dom.client.ClickHandler;
+import com.google.gwt.user.client.ui.Button;
 import com.google.gwt.user.client.ui.FocusWidget;
 import com.google.gwt.user.client.ui.Widget;
 import com.sap.sailing.gwt.ui.client.StringMessages;
@@ -11,6 +14,25 @@ public class SettingsDialog<SettingsType> extends DataEntryDialog<SettingsType> 
     public SettingsDialog(final Component<SettingsType> component, StringMessages stringMessages) {
         this(component, stringMessages, /* animationEnabled */ true);
     }
+
+    /**
+     * Creates a settings button for <code>component</code> that, when clicked, opens a settings dialog for that
+     * component and when confirmed, updates that component's settings. The button style uses CSS class
+     * <code>gwt-SettingsButton</code>.
+     */
+    public static <T> Button createSettingsButton(final Component<T> component, final StringMessages stringMessages) {
+        Button settingsButton = new Button();
+        settingsButton.setStyleName("gwt-SettingsButton");
+        settingsButton.setTitle(stringMessages.settings());
+        settingsButton.addClickHandler(new ClickHandler() {
+            @Override
+            public void onClick(ClickEvent event) {
+                new SettingsDialog<T>(component, stringMessages).show();
+            }
+        });
+        return settingsButton;
+    }
+    
 
     /**
      * This auxiliary constructor is required to avoid duplicate calls to {@link Component#getSettingsDialogComponent()}

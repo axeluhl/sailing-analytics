@@ -24,6 +24,7 @@ import com.google.gwt.core.client.Scheduler.ScheduledCommand;
 import com.google.gwt.dom.client.BrowserEvents;
 import com.google.gwt.dom.client.Element;
 import com.google.gwt.dom.client.Style.FontWeight;
+import com.google.gwt.dom.client.Style.Unit;
 import com.google.gwt.event.dom.client.ClickEvent;
 import com.google.gwt.event.dom.client.ClickHandler;
 import com.google.gwt.event.shared.HandlerRegistration;
@@ -86,6 +87,7 @@ import com.sap.sailing.gwt.ui.client.SailingServiceAsync;
 import com.sap.sailing.gwt.ui.client.StringMessages;
 import com.sap.sailing.gwt.ui.client.shared.components.Component;
 import com.sap.sailing.gwt.ui.client.shared.components.IsEmbeddableComponent;
+import com.sap.sailing.gwt.ui.client.shared.components.SettingsDialog;
 import com.sap.sailing.gwt.ui.client.shared.components.SettingsDialogComponent;
 import com.sap.sailing.gwt.ui.client.shared.controls.AbstractSortableColumnWithMinMax;
 import com.sap.sailing.gwt.ui.client.shared.controls.SelectionCheckboxColumn;
@@ -1760,8 +1762,12 @@ public class LeaderboardPanel extends SimplePanel implements TimeListener, PlayS
         }
         if (competitorSearchTextBox != null) {
             contentPanel.add(competitorSearchTextBox);
+            contentPanel.add(busyIndicator);
+            competitorSearchTextBox.addSettingsButton(SettingsDialog.createSettingsButton(this, stringMessages));
         }
-        contentPanel.add(getLeaderboardTable());
+        SortedCellTable<LeaderboardRowDTO> leaderboardTable = getLeaderboardTable();
+        leaderboardTable.getElement().getStyle().setMarginTop(10, Unit.PX);
+        contentPanel.add(leaderboardTable);
         setWidget(contentPanel);
         raceNameForDefaultSorting = settings.getNameOfRaceToSort();
     }

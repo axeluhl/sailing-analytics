@@ -383,7 +383,9 @@ img.openColumn {
 }
 
 .busyIndicator-Simple {
-	margin-top: 7px;	
+	position: absolute;
+	top: 0px;
+	right: 40px;
 }
 
 .busyIndicator-Circle {
@@ -391,7 +393,7 @@ img.openColumn {
 
 .raceBoard-TitlePanel {
 	position: relative;
-	top: 20px;
+	top: 5px;
 	z-index: 10;
 	color: white;
 	margin-left: auto;

@@ -1,6 +1,7 @@
 package com.sap.sailing.gwt.ui.client.shared.charts;
 
 import com.google.gwt.user.client.rpc.AsyncCallback;
+import com.google.gwt.user.client.ui.Button;
 import com.sap.sailing.domain.common.DetailType;
 import com.sap.sailing.gwt.ui.client.CompetitorSelectionProvider;
 import com.sap.sailing.gwt.ui.client.ErrorReporter;
@@ -8,6 +9,7 @@ import com.sap.sailing.gwt.ui.client.RaceSelectionProvider;
 import com.sap.sailing.gwt.ui.client.SailingServiceAsync;
 import com.sap.sailing.gwt.ui.client.StringMessages;
 import com.sap.sailing.gwt.ui.client.shared.components.Component;
+import com.sap.sailing.gwt.ui.client.shared.components.SettingsDialog;
 import com.sap.sailing.gwt.ui.client.shared.components.SettingsDialogComponent;
 import com.sap.sailing.gwt.ui.shared.LeaderboardGroupDTO;
 import com.sap.sse.gwt.client.async.AsyncActionsExecutor;
@@ -53,6 +55,11 @@ public class MultiCompetitorRaceChart extends AbstractCompetitorRaceChart<MultiC
         } else {
             hasOverallLeaderboard = false;
         }
+    }
+    
+    @Override
+    protected Button createSettingsButton() {
+        return SettingsDialog.createSettingsButton(this, stringMessages);
     }
 
     @Override

@@ -180,6 +180,7 @@ public class RaceBoardPanel extends SimplePanel implements RegattasDisplayer, Ra
                     timer, timeRangeWithZoomModel, stringMessages, errorReporter, true, true, leaderboardGroupName, leaderboardName);
         competitorChart.onRaceSelectionChange(raceSelectionProvider.getSelectedRaces());
         competitorChart.getEntryWidget().setTitle(stringMessages.competitorCharts());
+        competitorChart.setVisible(false);
         components.add(competitorChart);
         windChart = new WindChart(sailingService, raceSelectionProvider, timer, timeRangeWithZoomModel, new WindChartSettings(),
                 stringMessages, asyncActionsExecutor, errorReporter, /* compactChart */ true);
@@ -197,9 +198,11 @@ public class RaceBoardPanel extends SimplePanel implements RegattasDisplayer, Ra
         setWindChartVisible(getConfiguration().isShowWindChart());
         setCompetitorChartVisible(getConfiguration().isShowCompetitorsChart());
         createGeneralInformation(raceMap, leaderboardName, leaderboardGroupName);
-        // needed to ensure that competitor data is loaded
-        leaderboardPanel.setVisible(true);
-        leaderboardPanel.setVisible(false);
+        // make sure to load leaderboard data for filtering to work
+        if (!getConfiguration().isShowLeaderboard()) {
+            leaderboardPanel.setVisible(true);
+            leaderboardPanel.setVisible(false);
+        }
     }
     
     private void createGeneralInformation(RaceMap raceMap, String leaderboardName, String leaderboardGroupName) {
