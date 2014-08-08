@@ -84,7 +84,7 @@ public abstract class AbstractRaceChart extends AbsolutePanel implements RaceSel
         chartsCss.ensureInjected();
         busyIndicator = new SimpleBusyIndicator(/* busy */ true, 2.0f, chartsCss.busyIndicatorStyle(), chartsCss.busyIndicatorImageStyle());
         settingsButton = createSettingsButton();
-        settingsButton.addStyleName(chartsCss.settingsButtonStyle());
+        settingsButton.setStyleName(chartsCss.settingsButtonStyle());
         settingsButton.addStyleName(chartsCss.settingsButtonBackgroundImage());
         add(settingsButton);
     }

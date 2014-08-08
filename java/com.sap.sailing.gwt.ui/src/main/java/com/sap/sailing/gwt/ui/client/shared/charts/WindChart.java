@@ -190,8 +190,6 @@ public class WindChart extends AbstractRaceChart implements Component<WindChartS
     @Override
     protected Button createSettingsButton() {
         Button settingsButton = SettingsDialog.createSettingsButton(this, stringMessages);
-        settingsButton.setStyleName(chartsCss.settingsButtonStyle());
-        settingsButton.addStyleName(chartsCss.settingsButtonBackgroundImage());
         return settingsButton;
     }
 
