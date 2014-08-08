@@ -111,16 +111,18 @@
   background-color: #f0ab00;
 }
 .regatta_intro_phases_leaderboardlink {
-  font-size: 0.933333333333333em;
-  font-weight: 700;
-  border: 1px solid #ccc;
-  padding: 0.714285714285714em 0.928571428571429em;
   text-transform: uppercase;
   z-index: 2;
   position: absolute;
   top: 0;
   right: 0;
+  background-color: #008FCC;
+  color: white;
 }
+.regatta_intro_phases_leaderboardlink:hover {
+  background-color: #0177ab;
+}
+
 .regatta_intro_scheduled {
   padding-top: 0.8em;
 }
