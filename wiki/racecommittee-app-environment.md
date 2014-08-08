@@ -19,6 +19,12 @@ On Ubuntu, use the following instead:
     apt-get update
     apt-get install libncurses5:i386 libstdc++6:i386 zlib1g:i386
 
+On a Debian version I succeeded with the following:
+
+    dpkg --add-architecture i386
+    apt-get update
+    apt-get install ia32-libs lib32asound2 lib32v4l-0 libv4l-0=0.8.0-1 libasound2=1.0.23-2.1
+
 Now we are ready to install the SDK. Pick up the [SDK Tools](http://developer.android.com/sdk/index.html) and install them on your server. Set an environment variable _ANDROID_HOME_ pointing to the install directory. It's a good idea to append some of the tools to your path:
 
     PATH=$PATH:$ANDROID_HOME/tools
