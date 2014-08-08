@@ -598,13 +598,17 @@ public class TouchSplitLayoutPanelWithBetterDraggers extends DockLayoutPanel {
                 layoutData.oldSize = size;
                 widget.setVisible(false);
                 if (associatedComponentToWidget != null) {
-                    associatedComponentToWidget.setVisible(false);
+                    if (associatedComponentToWidget.isVisible()) {
+                        associatedComponentToWidget.setVisible(false);
+                    }
                 }
                 splitter.setAssociatedWidgetSize(0, /* defer */false);
             } else {
                 widget.setVisible(true);
                 if (associatedComponentToWidget != null) {
-                    associatedComponentToWidget.setVisible(true);
+                    if (!associatedComponentToWidget.isVisible()) {
+                        associatedComponentToWidget.setVisible(true);
+                    }
                 }
                 splitter.setAssociatedWidgetSize(size, /* defer */false);
                 splitter.setDraggerVisible(!hidden);
@@ -647,7 +651,7 @@ public class TouchSplitLayoutPanelWithBetterDraggers extends DockLayoutPanel {
             splitter.setMinSize(minSize);
         }
     }
-
+    
     /**
      * Sets a size below which the slider will close completely. This can be used in conjunction with
      * {@link #setWidgetMinSize} to provide a speed-bump effect where the slider will stick to a preferred minimum size
