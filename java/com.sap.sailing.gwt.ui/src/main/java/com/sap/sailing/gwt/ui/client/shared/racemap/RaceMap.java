@@ -134,6 +134,8 @@ public class RaceMap extends AbsolutePanel implements TimeListener, CompetitorSe
     private final SailingServiceAsync sailingService;
     private final ErrorReporter errorReporter;
 
+    private final static ClientResources resources = GWT.create(ClientResources.class);
+
     /**
      * Polyline for the start line (connecting two marks representing the start gate).
      */
@@ -374,16 +376,7 @@ public class RaceMap extends AbsolutePanel implements TimeListener, CompetitorSe
               }
               map = new MapWidget(mapOptions);
               RaceMap.this.add(map, 0, 0);
-              ClientResources resources = GWT.create(ClientResources.class);
-              ImageResource sapLogoResource = resources.sapLogoOverlay();
-              Image sapLogo = new Image(sapLogoResource);
-              sapLogo.addClickHandler(new ClickHandler() {
-                  @Override
-                  public void onClick(ClickEvent event) {
-                      Window.open("http://www.sap.com", "_blank", null);
-                  }
-              });
-              sapLogo.setStyleName("raceBoard-Logo");
+              Image sapLogo = createSAPLogo();
               RaceMap.this.add(sapLogo);
               RaceMap.this.add(combinedWindPanel, 10, 10+sapLogo.getHeight()+/*spacing*/5);
               RaceMap.this.raceMapImageManager.loadMapIcons(map);
@@ -2100,16 +2093,15 @@ public class RaceMap extends AbsolutePanel implements TimeListener, CompetitorSe
     }
 
     private Image createSAPLogo() {
-        ClientResources resources = GWT.create(ClientResources.class);
-          ImageResource sapLogoResource = resources.sapLogoOverlay();
-          Image sapLogo = new Image(sapLogoResource);
-          sapLogo.addClickHandler(new ClickHandler() {
-              @Override
-              public void onClick(ClickEvent event) {
-                  Window.open("http://www.sap.com", "_blank", null);
-              }
-          });
-          sapLogo.setStyleName("raceBoard-Logo");
+        ImageResource sapLogoResource = resources.sapLogoOverlay();
+        Image sapLogo = new Image(sapLogoResource);
+        sapLogo.addClickHandler(new ClickHandler() {
+            @Override
+            public void onClick(ClickEvent event) {
+                Window.open("http://www.sap.com", "_blank", null);
+            }
+        });
+        sapLogo.setStyleName("raceBoard-Logo");
         return sapLogo;
     }
 }
