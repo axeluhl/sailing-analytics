@@ -1,0 +1,99 @@
+.search { 
+	font-size: 1rem;
+	padding-bottom: 0.3em;
+	padding-top: 0.3em;
+	position: relative;
+	border-bottom: 1px solid #ccc;
+	overflow: hidden;
+}
+
+.searchInput {
+	font-size: .933333333333333em;
+	width: auto;
+	height: 2.142857142857143em;
+	border: none;
+	-webkit-border-radius: 4px;
+	border-radius: 4px;
+	background-color: #FFFFFF;
+	padding: 0 6.4em;
+	margin-left: 0px;
+	margin-right: 0px;
+}
+
+.button {
+	position: absolute;
+	top: .4em;
+	width: 2em;
+	height: 2em;
+	background-repeat: no-repeat;
+	background-position: center;
+	border: none;
+	-webkit-border-radius: 4px;
+	border-radius: 4px;
+	text-indent: -9999em;
+	-webkit-transition: background-color .2s;
+	-moz-transition: background-color .2s;
+	-o-transition: background-color .2s;
+	-ms-transition: background-color .2s;
+	transition: background-color .2s;
+}
+
+.button:focus, .button:hover {
+	background-color: #e2e2e2;
+}
+
+.clearButton {
+	right: .4em;
+}
+
+.settingsButton {
+	left: .4em;
+}
+
+.filterButton {
+	left: 2.4em;
+}
+
+.searchButton {
+	left: 4.4em;
+	opacity: 0.3;
+}
+
+.hiddenButton {
+	display: none;
+}
+
+@sprite .clearButtonBackgroundImage {
+  gwt-image: "clearButton";
+  width: 2em;
+  height: 2em;
+  background-size: contain;
+}
+
+@sprite .filterInactiveButtonBackgroundImage {
+  gwt-image: "filterInactiveButton";
+  width: 2em;
+  height: 2em;
+  background-size: contain;
+}
+
+@sprite .filterActiveButtonBackgroundImage {
+  gwt-image: "filterActiveButton";
+  width: 2em;
+  height: 2em;
+  background-size: contain;
+}
+
+@sprite .searchButtonBackgroundImage {
+  gwt-image: "searchButton";
+  width: 2em;
+  height: 2em;
+  background-size: contain;
+}
+
+@sprite .settingsButtonBackgroundImage {
+  gwt-image: "settingsButton";
+  width: 2em;
+  height: 2em;
+  background-size: contain;
+}

@@ -22,6 +22,7 @@ import com.sap.sailing.gwt.ui.client.RaceSelectionChangeListener;
 import com.sap.sailing.gwt.ui.client.SailingServiceAsync;
 import com.sap.sailing.gwt.ui.client.StringMessages;
 import com.sap.sailing.gwt.ui.client.shared.charts.ChartCssResources.ChartsCss;
+import com.sap.sailing.gwt.ui.client.shared.components.SettingsDialog;
 import com.sap.sse.gwt.client.async.AsyncActionsExecutor;
 import com.sap.sse.gwt.client.controls.busyindicator.SimpleBusyIndicator;
 import com.sap.sse.gwt.client.player.TimeListener;
@@ -84,9 +85,14 @@ public abstract class AbstractRaceChart extends AbsolutePanel implements RaceSel
         busyIndicator = new SimpleBusyIndicator(/* busy */ true, 2.0f, chartsCss.busyIndicatorStyle(), chartsCss.busyIndicatorImageStyle());
         settingsButton = createSettingsButton();
         settingsButton.addStyleName(chartsCss.settingsButtonStyle());
+        settingsButton.addStyleName(chartsCss.settingsButtonBackgroundImage());
         add(settingsButton);
     }
     
+    /**
+     * Subclasses implement this, e.g., by calling {@link SettingsDialog#createSettingsButton(com.sap.sailing.gwt.ui.client.shared.components.Component, StringMessages)}.
+     * This class's constructor will add the {@link ChartsCss#settingsButtonStyle()} and the {@link ChartsCss#settingsButtonBackgroundImage()}.
+     */
     protected abstract Button createSettingsButton();
     
     /**

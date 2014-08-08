@@ -17,12 +17,11 @@ public class SettingsDialog<SettingsType> extends DataEntryDialog<SettingsType> 
 
     /**
      * Creates a settings button for <code>component</code> that, when clicked, opens a settings dialog for that
-     * component and when confirmed, updates that component's settings. The button style uses CSS class
-     * <code>gwt-SettingsButton</code>.
+     * component and when confirmed, updates that component's settings. The button has no CSS style attached to
+     * give callers full flexibility as to how to style the button.
      */
     public static <T> Button createSettingsButton(final Component<T> component, final StringMessages stringMessages) {
         Button settingsButton = new Button();
-        settingsButton.setStyleName("gwt-SettingsButton");
         settingsButton.setTitle(stringMessages.settings());
         settingsButton.addClickHandler(new ClickHandler() {
             @Override

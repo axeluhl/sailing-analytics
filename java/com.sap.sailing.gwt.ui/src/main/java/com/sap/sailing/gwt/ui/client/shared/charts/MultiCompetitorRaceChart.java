@@ -59,7 +59,8 @@ public class MultiCompetitorRaceChart extends AbstractCompetitorRaceChart<MultiC
     
     @Override
     protected Button createSettingsButton() {
-        return SettingsDialog.createSettingsButton(this, stringMessages);
+        Button settingsButton = SettingsDialog.createSettingsButton(this, stringMessages);
+        return settingsButton;
     }
 
     @Override

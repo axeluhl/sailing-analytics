@@ -37,4 +37,5 @@ public interface ClientResources extends ClientBundle {
 
     @Source("com/sap/sailing/gwt/ui/client/images/sap-logo-overlay.png")
     ImageResource sapLogoOverlay();
+
 }

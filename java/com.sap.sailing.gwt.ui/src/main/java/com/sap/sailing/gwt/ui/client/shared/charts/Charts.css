@@ -10,10 +10,18 @@
 .settingsButtonStyle {
 	position: absolute;
 	right: 0px;
+	z-index: 1;
 }
 
 .chartStyle {
 	position: absolute;
 	left: 0px;
 	top: 0px;
+}
+
+@sprite .settingsButtonBackgroundImage {
+  gwt-image: "settingsButton";
+  width: 2em;
+  height: 2em;
+  background-size: contain;
 }

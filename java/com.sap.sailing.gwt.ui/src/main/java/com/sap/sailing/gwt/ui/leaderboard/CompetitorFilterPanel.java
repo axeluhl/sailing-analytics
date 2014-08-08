@@ -14,7 +14,7 @@ import com.google.gwt.json.client.JSONParser;
 import com.google.gwt.json.client.JSONValue;
 import com.google.gwt.storage.client.Storage;
 import com.google.gwt.user.client.ui.Button;
-import com.google.gwt.user.client.ui.HorizontalPanel;
+import com.google.gwt.user.client.ui.FlowPanel;
 import com.google.gwt.user.client.ui.TextBox;
 import com.sap.sailing.domain.common.RaceIdentifier;
 import com.sap.sailing.domain.common.dto.CompetitorDTO;
@@ -33,6 +33,7 @@ import com.sap.sailing.gwt.ui.client.shared.filter.LeaderboardFilterContext;
 import com.sap.sailing.gwt.ui.client.shared.filter.SelectedCompetitorsFilter;
 import com.sap.sailing.gwt.ui.client.shared.filter.SelectedRaceFilterContext;
 import com.sap.sailing.gwt.ui.client.shared.racemap.RaceMap;
+import com.sap.sailing.gwt.ui.leaderboard.CompetitorFilterResources.CompetitorFilterCss;
 import com.sap.sse.common.Util;
 import com.sap.sse.common.filter.AbstractListFilter;
 import com.sap.sse.common.filter.BinaryOperator;
@@ -49,12 +50,9 @@ import com.sap.sse.gwt.client.dialog.DataEntryDialog.DialogCallback;
  * @author Axel Uhl (D043530)
  * 
  */
-public class CompetitorFilterPanel extends HorizontalPanel implements KeyUpHandler, Filter<CompetitorDTO>, CompetitorSelectionChangeListener {
-    private static final String ADVANCED_FILTER_BUTTON = "raceBoardNavigation-filterButton";
-    private static final String ADVANCED_FILTER_BUTTON_FILTERED = "raceBoardNavigation-filterButton-filtered";
-
+public class CompetitorFilterPanel extends FlowPanel implements KeyUpHandler, Filter<CompetitorDTO>, CompetitorSelectionChangeListener {
     private final static String LOCAL_STORAGE_COMPETITORS_FILTER_SETS_KEY = "sailingAnalytics.raceBoard.competitorsFilterSets";
-
+    private final static CompetitorFilterCss css = CompetitorFilterResources.INSTANCE.css();
     private final TextBox searchTextBox;
     private final Button clearTextBoxButton;
     private final Button advancedSettingsButton;
@@ -67,15 +65,18 @@ public class CompetitorFilterPanel extends HorizontalPanel implements KeyUpHandl
     private final LeaderboardFetcher leaderboardFetcher;
     private final RaceMap raceMap;
     private final RaceIdentifier selectedRaceIdentifier;
+    private final Button settingsButton;
 
     public CompetitorFilterPanel(final CompetitorSelectionProvider competitorSelectionProvider,
             final StringMessages stringMessages, RaceMap raceMap, LeaderboardFetcher leaderboardFetcher,
             RaceIdentifier selectedRaceIdentifier) {
+        css.ensureInjected();
         this.stringMessages = stringMessages;
         this.raceMap = raceMap;
         this.leaderboardFetcher = leaderboardFetcher;
         this.selectedRaceIdentifier = selectedRaceIdentifier;
         this.competitorSelectionProvider = competitorSelectionProvider;
+        this.setStyleName(css.search());
         CompetitorsFilterSets loadedCompetitorsFilterSets = loadCompetitorsFilterSets();
         if (loadedCompetitorsFilterSets != null) {
             competitorsFilterSets = loadedCompetitorsFilterSets;
@@ -91,36 +92,45 @@ public class CompetitorFilterPanel extends HorizontalPanel implements KeyUpHandl
                 return Arrays.asList(competitor.getName().toLowerCase(), competitor.getSailID().toLowerCase());
             }
         };
+        settingsButton = new Button();
+        settingsButton.setTitle(stringMessages.settings());
+        settingsButton.setStyleName(css.button());
+        settingsButton.addStyleName(css.settingsButton());
+        settingsButton.addStyleName(css.settingsButtonBackgroundImage());
+        Button submitButton = new Button();
+        submitButton.setStyleName(css.button());
+        submitButton.addStyleName(css.searchButton());
+        submitButton.addStyleName(css.searchButtonBackgroundImage());
         searchTextBox = new TextBox();
+        searchTextBox.getElement().setAttribute("placeholder", stringMessages.searchCompetitorsBySailNumberOrName());
         searchTextBox.addKeyUpHandler(this);
-        clearTextBoxButton = new Button("x");
+        searchTextBox.setStyleName(css.searchInput());
+        clearTextBoxButton = new Button();
+        clearTextBoxButton.setStyleName(css.button());
+        clearTextBoxButton.addStyleName(css.clearButton());
+        clearTextBoxButton.addStyleName(css.clearButtonBackgroundImage());
+        clearTextBoxButton.addStyleName(css.hiddenButton());
         clearTextBoxButton.addClickHandler(new ClickHandler() {
             @Override
             public void onClick(ClickEvent event) {
                 searchTextBox.setText("");
+                clearTextBoxButton.addStyleName(css.hiddenButton());
                 onKeyUp(null);
             }
         });
         advancedSettingsButton = new Button("");
-        advancedSettingsButton.addStyleName(ADVANCED_FILTER_BUTTON);
+        advancedSettingsButton.setStyleName(css.button());
+        advancedSettingsButton.addStyleName(css.filterButton());
+        advancedSettingsButton.setTitle(stringMessages.competitorsFilter());
+        advancedSettingsButton.addStyleName(css.filterInactiveButtonBackgroundImage());
         advancedSettingsButton.addClickHandler(new ClickHandler() {
             @Override
             public void onClick(ClickEvent event) {
                 showEditCompetitorsFiltersDialog();
-                    /* Code that would turn on the lastActiveCompetitorFilterSet again
-                    if (lastActiveCompetitorFilterSet != null) {
-                        competitorsFilterSets.setActiveFilterSet(lastActiveCompetitorFilterSet);
-                        competitorSelectionProvider.setCompetitorsFilterSet(competitorsFilterSets.getActiveFilterSet());
-                        updateCompetitorsFilterControlState(competitorsFilterSets);
-                    }
-                    */
-                    /* Code that would remove / turn off the filter:
-                    competitorsFilterSets.setActiveFilterSet(null);
-                    competitorSelectionProvider.setCompetitorsFilterSet(competitorsFilterSets.getActiveFilterSet());
-                    updateCompetitorsFilterControlState(competitorsFilterSets);
-                    */
-                }
-            });
+            }
+        });
+        add(settingsButton);
+        add(submitButton);
         add(searchTextBox);
         add(clearTextBoxButton);
         add(advancedSettingsButton);
@@ -138,7 +148,9 @@ public class CompetitorFilterPanel extends HorizontalPanel implements KeyUpHandl
         String newValue = searchTextBox.getValue();
         if (newValue.trim().isEmpty()) {
             removeSearchFilter();
+            clearTextBoxButton.addStyleName(css.hiddenButton());
         } else {
+            clearTextBoxButton.removeStyleName(css.hiddenButton());
             ensureSearchFilterIsSet();
             competitorSelectionProvider.setCompetitorsFilterSet(competitorSelectionProvider.getCompetitorsFilterSet()); // 
         }
@@ -252,12 +264,14 @@ public class CompetitorFilterPanel extends HorizontalPanel implements KeyUpHandl
         FilterSet<CompetitorDTO, FilterWithUI<CompetitorDTO>> activeFilterSet = filterSets.getActiveFilterSet();
         if (activeFilterSet != null) {
             if (lastActiveCompetitorFilterSet == null) {
-                advancedSettingsButton.addStyleName(ADVANCED_FILTER_BUTTON_FILTERED);
+                advancedSettingsButton.removeStyleName(css.filterInactiveButtonBackgroundImage());
+                advancedSettingsButton.addStyleName(css.filterActiveButtonBackgroundImage());
             }
             lastActiveCompetitorFilterSet = activeFilterSet;
         } else {
             if (lastActiveCompetitorFilterSet != null) {
-                advancedSettingsButton.removeStyleName(ADVANCED_FILTER_BUTTON_FILTERED);
+                advancedSettingsButton.removeStyleName(css.filterActiveButtonBackgroundImage());
+                advancedSettingsButton.addStyleName(css.filterInactiveButtonBackgroundImage());
             }
             lastActiveCompetitorFilterSet = null;
         }
@@ -332,10 +346,10 @@ public class CompetitorFilterPanel extends HorizontalPanel implements KeyUpHandl
     }
     
     /**
-     * A settings button will be added to the left of the panel
+     * Provides the settings button shown in the panel for clients to add an event handler to it
      */
-    public void addSettingsButton(Button settingsButton) {
-        insert(settingsButton, 0);
+    public Button getSettingsButton() {
+        return settingsButton;
     }
 
     @Override
