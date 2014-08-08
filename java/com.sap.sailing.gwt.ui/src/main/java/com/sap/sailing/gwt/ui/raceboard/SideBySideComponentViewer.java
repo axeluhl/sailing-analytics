@@ -32,7 +32,8 @@ public class SideBySideComponentViewer implements ComponentViewer {
             }
         }
     }
-    
+
+    private final int MAX_LEADERBOARD_WIDTH = 450;
     private final int MIN_LEADERBOARD_WIDTH = 340;
     
     private final LeaderboardPanel leftComponent;
@@ -125,7 +126,6 @@ public class SideBySideComponentViewer implements ComponentViewer {
     public void setLeftComponentWidth(int width) {
         // TODO: The information provided by width is wrong
         // need to find a way to get the correct information
-        savedSplitPosition = MIN_LEADERBOARD_WIDTH;
         forceLayout();
     }
 }
