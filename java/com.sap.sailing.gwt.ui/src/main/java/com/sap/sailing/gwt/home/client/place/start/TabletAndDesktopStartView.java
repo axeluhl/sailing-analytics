@@ -25,7 +25,6 @@ public class TabletAndDesktopStartView extends Composite implements StartView {
 //    @UiField(provided=true) MainSponsors mainSponsors;
     @UiField(provided=true) MainEvents mainEvents;
     @UiField(provided=true) MainMedia mainMedia;
-//    @UiField SocialFooter socialFooter;
     
     public TabletAndDesktopStartView(PlaceNavigator navigator) {
         stage = new Stage(navigator);

@@ -28,9 +28,6 @@
 
    	    <p:recent.EventsOverviewRecent ui:field='recentEventsWidget'/>
    	    <p:upcoming.EventsOverviewUpcoming ui:field='upcomingEventsWidget'/>
-<!-- 
-   	    <s:socialfooter.SocialFooter ui:field='socialFooter'/>
- -->
 	</g:HTMLPanel>
    		
 </ui:UiBinder>    
