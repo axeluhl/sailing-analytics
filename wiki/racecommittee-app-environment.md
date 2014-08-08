@@ -19,7 +19,7 @@ On Ubuntu, use the following instead:
     apt-get update
     apt-get install libncurses5:i386 libstdc++6:i386 zlib1g:i386
 
-On a Debian version I succeeded with the following:
+On a Debian version 7.6 I succeeded with the following:
 
     dpkg --add-architecture i386
     apt-get update
