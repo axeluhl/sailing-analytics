@@ -59,7 +59,7 @@ public class SideBySideComponentViewer implements ComponentViewer {
         mainPanel = new LayoutPanel();
         mainPanel.setSize("100%", "100%");
         mainPanel.setStyleName("SideBySideComponentViewer-MainPanel");
-        splitLayoutPanel = new TouchSplitLayoutPanelWithBetterDraggers(/* horizontal splitter width */ 3, /*vertical splitter height*/ 20);
+        splitLayoutPanel = new TouchSplitLayoutPanelWithBetterDraggers(/* horizontal splitter width */ 3, /*vertical splitter height*/ 21);
         mainPanel.add(splitLayoutPanel);
         
         initializeComponents();

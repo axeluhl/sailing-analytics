@@ -171,6 +171,7 @@ body ::-webkit-scrollbar-track {
 	border-left: 1px solid #cecece;
 	border-bottom-right-radius: 10px;
     border-bottom-left-radius: 10px;
+    opacity: .7;
 }
 
 .gwt-SplitLayoutPanel-EastToggleButton-Open {
@@ -190,15 +191,13 @@ body ::-webkit-scrollbar-track {
 }
 
 .gwt-SplitLayoutPanel-NorthSouthToggleButton {
-    height: 16px;
-    background-color: white;
+    height: 19px;
+    background-color: #fc9d00;
     border: 1px solid #cecece;
-    border-bottom: none;
     margin-left: 5px;
-    margin-top: 2px;
 	padding: 2px 40px;
-	border-top-right-radius: 10px;
-    border-top-left-radius: 10px;
+	border-radius: 7px;
+	margin-top: 1px;
 }
 
 .gwt-SplitLayoutPanel-NorthSouthToggleButton-Closed {
@@ -238,6 +237,7 @@ body ::-webkit-scrollbar-track {
 
 .SplitLayoutPanel-Divider-Vertical {
 	background: #ffffff;
+	border-top: 1px solid #cecece;
 }
 
 .gwt-SplitLayoutPanel-VDragger {

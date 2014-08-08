@@ -492,6 +492,8 @@ public class TouchSplitLayoutPanelWithBetterDraggers extends DockLayoutPanel {
             if (widget instanceof VSplitter) {
                 lastVerticalSplitter = (VSplitter) widget;
                 allVerticalSplitters.add((VSplitter) widget);
+                ((Splitter)widget).setVisible(false);
+                ((Splitter)widget).setDraggerVisible(false);
             } else if (widget instanceof HSplitter) {
                 lastHorizontalSplitter = (HSplitter) widget;
                 allHorizontalSplitters.add((HSplitter) widget);
