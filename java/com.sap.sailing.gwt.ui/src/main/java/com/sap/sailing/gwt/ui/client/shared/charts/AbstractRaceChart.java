@@ -17,7 +17,9 @@ import com.sap.sailing.gwt.ui.client.ErrorReporter;
 import com.sap.sailing.gwt.ui.client.RaceSelectionChangeListener;
 import com.sap.sailing.gwt.ui.client.SailingServiceAsync;
 import com.sap.sailing.gwt.ui.client.StringMessages;
+import com.sap.sailing.gwt.ui.client.shared.charts.ChartCssResources.ChartsCss;
 import com.sap.sse.gwt.client.async.AsyncActionsExecutor;
+import com.sap.sse.gwt.client.controls.busyindicator.SimpleBusyIndicator;
 import com.sap.sse.gwt.client.player.TimeListener;
 import com.sap.sse.gwt.client.player.TimeRangeChangeListener;
 import com.sap.sse.gwt.client.player.TimeRangeWithZoomProvider;
@@ -52,6 +54,8 @@ public abstract class AbstractRaceChart extends SimplePanel implements RaceSelec
     protected boolean isLoading = false;
     protected boolean isZoomed = false;
     
+    protected static ChartsCss chartsCss = ChartCssResources.INSTANCE.css();
+    
     /** the tick count must be the same as TimeSlider.TICKCOUNT, otherwise the time ticks will be not synchronized */  
     private final int TICKCOUNT = 10;
 
@@ -72,7 +76,13 @@ public abstract class AbstractRaceChart extends SimplePanel implements RaceSelec
 
     protected void showLoading(String message) {
         if (timer.getPlayMode() != PlayModes.Live) {
-            chart.showLoading(message);
+            if (chart.isRendered()) {
+                chart.showLoading(message);
+            } else {
+                chartsCss.ensureInjected();
+                final SimpleBusyIndicator busyIndicator = new SimpleBusyIndicator(/* busy */ true, 2.0f, chartsCss.busyIndicatorStyle(), chartsCss.busyIndicatorImageStyle());
+                setWidget(busyIndicator);
+            }
         }
         isLoading = true;
     }

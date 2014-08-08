@@ -73,7 +73,7 @@ import com.sap.sse.gwt.client.player.Timer.PlayModes;
  */
 public abstract class AbstractCompetitorRaceChart<SettingsType extends ChartSettings> extends AbstractRaceChart implements
         CompetitorSelectionChangeListener, RequiresResize {
-    public static final String LODA_COMPETITOR_CHART_DATA_CATEGORY = "loadCompetitorChartData";
+    public static final String LOAD_COMPETITOR_CHART_DATA_CATEGORY = "loadCompetitorChartData";
     
     private static final int LINE_WIDTH = 1;
     
@@ -222,7 +222,7 @@ public abstract class AbstractCompetitorRaceChart<SettingsType extends ChartSett
         GetCompetitorsRaceDataAction getCompetitorsRaceDataAction = new GetCompetitorsRaceDataAction(sailingService,
                 selectedRaceIdentifier, competitorsToLoad, from, to, getStepSize(), getSelectedDetailType(),
                 leaderboardGroupName, leaderboardName);
-        asyncActionsExecutor.execute(getCompetitorsRaceDataAction, LODA_COMPETITOR_CHART_DATA_CATEGORY,
+        asyncActionsExecutor.execute(getCompetitorsRaceDataAction, LOAD_COMPETITOR_CHART_DATA_CATEGORY,
                 new AsyncCallback<CompetitorsRaceDataDTO>() {
                     @Override
                     public void onSuccess(final CompetitorsRaceDataDTO result) {
@@ -282,7 +282,7 @@ public abstract class AbstractCompetitorRaceChart<SettingsType extends ChartSett
         }
         
         if (isVisible()) {
-             if(hasSelectedCompetitors()) {
+             if (hasSelectedCompetitors()) {
                  chart.redraw();
              } else {
                  setWidget(noCompetitorsSelectedLabel);
