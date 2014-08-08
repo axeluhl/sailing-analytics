@@ -33,7 +33,7 @@ public class SideBySideComponentViewer implements ComponentViewer {
         }
     }
     
-    private final int MAX_LEADERBOARD_WIDTH = 500;
+    private final int MIN_LEADERBOARD_WIDTH = 340;
     
     private final LeaderboardPanel leftComponent;
     private final Panel leaderboardContentPanel;
@@ -64,7 +64,7 @@ public class SideBySideComponentViewer implements ComponentViewer {
         
         initializeComponents();
 
-        savedSplitPosition = 350;
+        savedSplitPosition = MIN_LEADERBOARD_WIDTH;
         splitLayoutPanel.insert(leftScrollPanel, leftComponent, Direction.WEST, savedSplitPosition, null);
         
         ResizableAbsolutePanel panelForMapAndHorizontalToggleButtons = new ResizableAbsolutePanel();
@@ -122,10 +122,10 @@ public class SideBySideComponentViewer implements ComponentViewer {
         return "";
     }
     
-    public void setLeaderboardWidth(int width) {
-        if (width > 0 && savedSplitPosition != width) {
-            savedSplitPosition = Math.min(width, MAX_LEADERBOARD_WIDTH);
-            forceLayout();
-        }
+    public void setLeftComponentWidth(int width) {
+        // TODO: The information provided by width is wrong
+        // need to find a way to get the correct information
+        savedSplitPosition = MIN_LEADERBOARD_WIDTH;
+        forceLayout();
     }
 }

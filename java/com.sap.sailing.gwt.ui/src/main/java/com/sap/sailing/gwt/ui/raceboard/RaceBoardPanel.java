@@ -323,7 +323,7 @@ public class RaceBoardPanel extends SimplePanel implements RegattasDisplayer, Ra
 
     @Override
     public void updatedLeaderboard(LeaderboardDTO leaderboard) {
-        leaderboardAndMapViewer.setLeaderboardWidth(leaderboardPanel.getContentPanel().getOffsetWidth());
+        leaderboardAndMapViewer.setLeftComponentWidth(leaderboardPanel.getContentPanel().getOffsetWidth());
     }
 
     @Override
