@@ -161,7 +161,6 @@ body ::-webkit-scrollbar-track {
 
 .gwt-SplitLayoutPanel-EastToggleButton {
 	height: 40px;
-	width: 110%;
     background-color: white;
     border: none;
     -webkit-transform: rotate(-90deg);
