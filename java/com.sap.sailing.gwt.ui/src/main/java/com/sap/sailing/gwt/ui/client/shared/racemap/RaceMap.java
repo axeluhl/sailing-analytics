@@ -1239,8 +1239,10 @@ public class RaceMap extends AbsolutePanel implements TimeListener, CompetitorSe
     
     private void zoomMapToNewBounds(Bounds newBounds) {
         if (newBounds != null) {
-            Bounds currentMapBounds = BoundsUtil.getAsBounds(map.getBounds());
-            if (!currentMapBounds.contains(newBounds) || graticuleAreaRatio(currentMapBounds, newBounds) > 10) {
+            Bounds currentMapBounds;
+            if (map.getBounds() == null
+                    || !(currentMapBounds = BoundsUtil.getAsBounds(map.getBounds())).contains(newBounds)
+                    || graticuleAreaRatio(currentMapBounds, newBounds) > 10) {
                 // only change bounds if the new bounds don't fit into the current map zoom
                 List<ZoomTypes> oldZoomSettings = settings.getZoomSettings().getTypesToConsiderOnZoom();
                 setAutoZoomInProgress(true);
