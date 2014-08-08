@@ -14,11 +14,12 @@
 }
 
 .searchInput {
+	width: 100%;
 	font-size: .933333333333333em;
 	height: 2.142857142857143em;
 	border: none;
 	background-color: #FFFFFF;
-	padding: 0 .4em;
+	padding: 0;
 	margin-left: 0px;
 	margin-right: 0px;
 }
