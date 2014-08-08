@@ -252,14 +252,14 @@ body ::-webkit-scrollbar-track {
 	border-top-left-radius: 25px;
 	border-top-right-radius: 25px;
 	opacity: .7;
-	z-index: 260;
+	z-index: 1;
 }
 
 .gwt-SplitLayoutPanel-CloseAndSettingsButton-Panel {
 	position: absolute;
 	right: 2px;
 	top: 2px;
-	z-index: 250;
+	z-index: 1;
 }
 
 .gwt-SplitLayoutPanel-CloseButton {
@@ -269,7 +269,7 @@ body ::-webkit-scrollbar-track {
 	border-bottom-left-radius: 25px;
 	border-bottom-right-radius: 25px;
 	background: white url(images/close_black.png) center no-repeat;
-	z-index: 200;
+	z-index: 1;
 	width: 28px;
 	height: 28px;
 	cursor: pointer;

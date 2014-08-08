@@ -14,5 +14,9 @@ public interface ChartCssResources extends ClientBundle {
         String busyIndicatorStyle();
 
         String busyIndicatorImageStyle();
+        
+        String settingsButtonStyle();
+        
+        String chartStyle();
     }
 }

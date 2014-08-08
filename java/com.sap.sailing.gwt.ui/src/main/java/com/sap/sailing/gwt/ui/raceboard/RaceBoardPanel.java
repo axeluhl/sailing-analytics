@@ -8,7 +8,6 @@ import java.util.Map;
 
 import com.google.gwt.dom.client.Style.Unit;
 import com.google.gwt.user.client.Command;
-import com.google.gwt.user.client.ui.Button;
 import com.google.gwt.user.client.ui.FlowPanel;
 import com.google.gwt.user.client.ui.HasHorizontalAlignment;
 import com.google.gwt.user.client.ui.Label;
@@ -182,16 +181,12 @@ public class RaceBoardPanel extends SimplePanel implements RegattasDisplayer, Ra
         competitorChart.onRaceSelectionChange(raceSelectionProvider.getSelectedRaces());
         competitorChart.getEntryWidget().setTitle(stringMessages.competitorCharts());
         competitorChart.setVisible(false);
-        Button competitorChartSettingsButton = SettingsDialog.createSettingsButton(competitorChart, stringMessages);
-        // TODO add settings button to competitor chart
         components.add(competitorChart);
         windChart = new WindChart(sailingService, raceSelectionProvider, timer, timeRangeWithZoomModel, new WindChartSettings(),
                 stringMessages, asyncActionsExecutor, errorReporter, /* compactChart */ true);
         windChart.setVisible(false);
         windChart.onRaceSelectionChange(raceSelectionProvider.getSelectedRaces());
         windChart.getEntryWidget().setTitle(stringMessages.wind());
-        Button windChartSettingsButton = SettingsDialog.createSettingsButton(windChart, stringMessages);
-        // TODO add settings button to competitor chart
         components.add(windChart);
         leaderboardPanel.setTitle(stringMessages.leaderboard());
         leaderboardAndMapViewer = new SideBySideComponentViewer(leaderboardPanel, raceMap, components, stringMessages);

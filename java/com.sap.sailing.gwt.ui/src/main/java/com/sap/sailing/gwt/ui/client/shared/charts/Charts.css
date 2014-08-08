@@ -6,3 +6,14 @@
 
 .busyIndicatorImageStyle {
 }
+
+.settingsButtonStyle {
+	position: absolute;
+	right: 0px;
+}
+
+.chartStyle {
+	position: absolute;
+	left: 0px;
+	top: 0px;
+}
