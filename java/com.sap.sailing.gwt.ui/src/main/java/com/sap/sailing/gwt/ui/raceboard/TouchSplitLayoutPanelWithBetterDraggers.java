@@ -615,7 +615,7 @@ public class TouchSplitLayoutPanelWithBetterDraggers extends DockLayoutPanel {
             int widthOfWidget = widgetThatDeterminesSize.getOffsetWidth();
             if (size > widthOfWidget && widthOfWidget > 0) {
                 int additionalWidthForScroller = 8;
-                splitter.setAssociatedWidgetSize(widthOfWidget+additionalWidthOfWidget, /* defer */false);
+                splitter.setAssociatedWidgetSize(widthOfWidget+additionalWidthForScroller, /* defer */false);
             }
         }
     }
