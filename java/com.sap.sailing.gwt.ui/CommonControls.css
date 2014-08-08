@@ -30,6 +30,8 @@ body ::-webkit-scrollbar-track {
   background: #b6b6b6;
   -webkit-border-radius: 5px;
   -moz-border-radius: 5px;
+  -o-border-radius: 5px;
+  -ms-border-radius: 5px;
   border-radius: 5px;
   overflow: hidden;
   border: 1px solid #aaaaaa;
@@ -41,6 +43,8 @@ body ::-webkit-scrollbar-track {
   margin: 12px;
   -webkit-border-radius: 5px;
   -moz-border-radius: 5px;
+  -o-border-radius: 5px;
+  -ms-border-radius: 5px;
   border-radius: 5px;
   width: auto !important;
   border: 1px solid #aaaaaa;
@@ -54,9 +58,13 @@ body ::-webkit-scrollbar-track {
   position: relative;
   -webkit-border-top-left-radius: 4px;
   -moz-border-top-left-radius: 4px;
+  -o-border-top-left-radius: 4px;
+  -ms-border-top-left-radius: 4px;
   border-top-left-radius: 4px;
   -webkit-border-top-right-radius: 4px;
   -moz-border-top-right-radius: 4px;
+  -o-border-top-right-radius: 4px;
+  -ms-border-top-right-radius: 4px;
   border-top-right-radius: 4px;
 }
 
@@ -164,6 +172,27 @@ body ::-webkit-scrollbar-track {
     background-color: white;
     border: none;
     -webkit-transform: rotate(-90deg);
+	padding-right: 19px;
+	margin-left: -4px;
+	border-bottom: 1px solid #cecece;
+	border-right: 1px solid #cecece;
+	border-left: 1px solid #cecece;
+	border-bottom-right-radius: 10px;
+    -moz-transform: rotate(-90deg);
+	padding-right: 19px;
+	margin-left: -4px;
+	border-bottom: 1px solid #cecece;
+	border-right: 1px solid #cecece;
+	border-left: 1px solid #cecece;
+	border-bottom-right-radius: 10px;
+    -o-transform: rotate(-90deg);
+	padding-right: 19px;
+	margin-left: -4px;
+	border-bottom: 1px solid #cecece;
+	border-right: 1px solid #cecece;
+	border-left: 1px solid #cecece;
+	border-bottom-right-radius: 10px;
+    -ms-transform: rotate(-90deg);
 	padding-right: 19px;
 	margin-left: -4px;
 	border-bottom: 1px solid #cecece;
@@ -470,6 +499,8 @@ body ::-webkit-scrollbar-track {
   box-shadow: 0 0 20px #858585;
   -webkit-box-shadow: 0 0 20px #858585;
   -moz-box-shadow: 0 0 20px #858585;
+  -o-box-shadow: 0 0 20px #858585;
+  -ms-box-shadow: 0 0 20px #858585;
 }
 
 .timeLineInnerBgPanel {
@@ -489,6 +520,9 @@ body ::-webkit-scrollbar-track {
     margin: 0;
     padding: 7px 12px 0 12px;
     -webkit-box-shadow: 0px -7px 8px 0px rgba(84, 84, 84, 1);
+    -moz-box-shadow: 0px -7px 8px 0px rgba(84, 84, 84, 1);
+    -o-box-shadow: 0px -7px 8px 0px rgba(84, 84, 84, 1);
+    -ms-box-shadow: 0px -7px 8px 0px rgba(84, 84, 84, 1);
     box-shadow: 0px -7px 8px 0px rgba(84, 84, 84, 1);
     height: 29px;
 }
@@ -573,6 +607,9 @@ body ::-webkit-scrollbar-track {
 
 .timePanelInnerWrapper {
     -webkit-box-shadow: inset 0px -7px 13px 0px rgba(84, 84, 84, 1);
+    -moz-box-shadow: inset 0px -7px 13px 0px rgba(84, 84, 84, 1);
+    -o-box-shadow: inset 0px -7px 13px 0px rgba(84, 84, 84, 1);
+    -ms-box-shadow: inset 0px -7px 13px 0px rgba(84, 84, 84, 1);
     box-shadow: inset 0px -7px 13px 0px rgba(84, 84, 84, 1);
 }
 
@@ -589,6 +626,8 @@ body ::-webkit-scrollbar-track {
     box-shadow: 0 0 20px #858585;
     -moz-box-shadow: 0 0 20px #858585;
     -webkit-box-shadow: 0 0 20px #858585;
+    -o-box-shadow: 0 0 20px #858585;
+    -ms-box-shadow: 0 0 20px #858585;
     z-index: 1;
 }
 
@@ -645,6 +684,10 @@ body ::-webkit-scrollbar-track {
   -webkit-border-top-right-radius: 5px;
   -moz-border-radius-topleft: 5px;
   -moz-border-radius-topright: 5px;
+  -o-border-radius-topleft: 5px;
+  -o-border-radius-topright: 5px;
+  -ms-border-radius-topleft: 5px;
+  -ms-border-radius-topright: 5px;
   border-top-left-radius: 5px;
   border-top-right-radius: 5px;
   font-family: OpenSansSemiBold, Verdana, Arial, sans-serif;
@@ -656,6 +699,10 @@ body ::-webkit-scrollbar-track {
     border: 10px solid #a6a6a6;
   -webkit-border-bottom-right-radius: 5px;
   -webkit-border-bottom-left-radius: 5px;
+  -o-border-bottom-right-radius: 5px;
+  -o-border-bottom-left-radius: 5px;
+  -ms-border-bottom-right-radius: 5px;
+  -ms-border-bottom-left-radius: 5px;
   -moz-border-radius-bottomright: 5px;
   -moz-border-radius-bottomleft: 5px;
   border-bottom-right-radius: 5px;
@@ -673,9 +720,13 @@ body ::-webkit-scrollbar-track {
     text-decoration: none;
     -moz-border-radius: 5px;
     -webkit-border-radius: 5px;
+    -o-border-radius: 5px;
+    -ms-border-radius: 5px;
     border-radius: 5px;
     -moz-box-shadow: 0 1px 3px rgba(0, 0, 0, 0.3);
     -webkit-box-shadow: 0 1px 3px rgba(0, 0, 0, 0.3);
+    -o-box-shadow: 0 1px 3px rgba(0, 0, 0, 0.3);
+    -ms-box-shadow: 0 1px 3px rgba(0, 0, 0, 0.3);
     box-shadow: 0 1px 3px rgba(0, 0, 0, 0.3);
     text-shadow: 0 -1px 1px rgba(0, 0, 0, 0.25);
     border-bottom: 1px solid rgba(0, 0, 0, 0.25);
@@ -702,6 +753,8 @@ body ::-webkit-scrollbar-track {
   border: 1px solid #919090;
   -moz-box-shadow: none;
   -webkit-box-shadow: none;
+  -o-box-shadow: none;
+  -ms-box-shadow: none;
   box-shadow: none;
   border: none;
   text-shadow: none;
@@ -769,6 +822,8 @@ body ::-webkit-scrollbar-track {
     border-radius: 3px;
     -moz-border-radius: 3px;
     -webkit-border-radius: 3px;
+    -o-border-radius: 3px;
+    -ms-border-radius: 3px;
     margin: 0 0 10px 0;
 }
 
