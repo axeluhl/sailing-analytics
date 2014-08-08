@@ -103,7 +103,7 @@ public class RemoteSailingServerSet {
                 logger.fine("Updating events for remote server "+ref+" from URL "+eventsURL);
                 URLConnection urlConnection = eventsURL.openConnection();
                 urlConnection.connect();
-                bufferedReader = new BufferedReader(new InputStreamReader(urlConnection.getInputStream()));
+                bufferedReader = new BufferedReader(new InputStreamReader(urlConnection.getInputStream(), "UTF-8"));
                 JSONParser parser = new JSONParser();
                 Object eventsAsObject = parser.parse(bufferedReader);
                 EventBaseJsonDeserializer deserializer = new EventBaseJsonDeserializer(new VenueJsonDeserializer(
