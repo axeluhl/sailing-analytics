@@ -202,15 +202,20 @@ public class RaceBoardEntryPoint extends AbstractEntryPoint {
         RootLayoutPanel.get().add(p);
         final FlowPanel timePanel = createTimePanel(raceBoardPanel);
         final Button toggleButton = new Button();
-        toggleButton.addStyleName("TimePanel-ShowExtended-Button");
+        toggleButton.setStyleName("TimePanel-ShowExtended-Button");
+        toggleButton.addStyleDependentName("Closed");
         toggleButton.addClickHandler(new ClickHandler() {
             @Override
             public void onClick(ClickEvent event) {
                 boolean advancedModeShown = raceBoardPanel.getTimePanel().toggleAdvancedMode(toggleButton);
                 if (advancedModeShown) {
                     p.setWidgetSize(timePanel, 90);
+                    toggleButton.removeStyleDependentName("Closed");
+                    toggleButton.addStyleDependentName("Open");
                 } else {
                     p.setWidgetSize(timePanel, 53);
+                    toggleButton.addStyleDependentName("Closed");
+                    toggleButton.removeStyleDependentName("Open");
                 }
             }
         });

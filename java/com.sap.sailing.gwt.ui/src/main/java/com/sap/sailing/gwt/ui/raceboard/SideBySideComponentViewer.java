@@ -32,7 +32,7 @@ public class SideBySideComponentViewer implements ComponentViewer {
             }
         }
     }
-    
+
     private final int MIN_LEADERBOARD_WIDTH = 340;
     
     private final LeaderboardPanel leftComponent;
@@ -46,6 +46,7 @@ public class SideBySideComponentViewer implements ComponentViewer {
     
     private TouchSplitLayoutPanelWithBetterDraggers splitLayoutPanel; 
     private int savedSplitPosition = -1;
+    private boolean layoutForLeftComponentForcedOnce = false;
     
     public SideBySideComponentViewer(final LeaderboardPanel leftComponentP, final Component<?> rightComponentP, List<Component<?>> components, final StringMessages stringMessages) {
         this.stringMessages = stringMessages;
@@ -59,7 +60,7 @@ public class SideBySideComponentViewer implements ComponentViewer {
         mainPanel = new LayoutPanel();
         mainPanel.setSize("100%", "100%");
         mainPanel.setStyleName("SideBySideComponentViewer-MainPanel");
-        splitLayoutPanel = new TouchSplitLayoutPanelWithBetterDraggers(/* horizontal splitter width */ 3, /*vertical splitter height*/ 21);
+        splitLayoutPanel = new TouchSplitLayoutPanelWithBetterDraggers(/* horizontal splitter width */ 3, /*vertical splitter height*/ 25);
         mainPanel.add(splitLayoutPanel);
         
         initializeComponents();
@@ -125,7 +126,10 @@ public class SideBySideComponentViewer implements ComponentViewer {
     public void setLeftComponentWidth(int width) {
         // TODO: The information provided by width is wrong
         // need to find a way to get the correct information
-        savedSplitPosition = MIN_LEADERBOARD_WIDTH;
-        forceLayout();
+        if (!layoutForLeftComponentForcedOnce) {
+            savedSplitPosition = MIN_LEADERBOARD_WIDTH;
+            forceLayout();
+        }
+        layoutForLeftComponentForcedOnce = true;
     }
 }
