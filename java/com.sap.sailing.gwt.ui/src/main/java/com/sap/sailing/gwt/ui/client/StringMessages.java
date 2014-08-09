@@ -1068,4 +1068,6 @@ public interface StringMessages extends Messages {
     String scoringSchemeHighPointFirstGetsTenOrEight();
     String competitorSearchFilter();
     String searchCompetitorsBySailNumberOrName();
+    String goToEventOverview();
+    String goToOverviewAndSeeLeaderboard();
 }
