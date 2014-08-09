@@ -3,6 +3,7 @@
     xmlns:s="urn:import:com.sap.sailing.gwt.home.client.shared"
     xmlns:p="urn:import:com.sap.sailing.gwt.home.client.place.events"
 	xmlns:g="urn:import:com.google.gwt.user.client.ui">
+	<ui:with field="i18n" type="com.sap.sailing.gwt.home.client.i18n.TextMessages"/>
 	<ui:with field="res" type="com.sap.sailing.gwt.home.client.HomeResources" />
 	<ui:style>
 	    .eventsoverviewnavigation {
@@ -20,8 +21,8 @@
 		<div class="{style.eventsoverviewnavigation}">
 		  <div class="{res.mainCss.grid}">
 		    <div class="{res.mediaCss.small6} {res.mediaCss.columns}">
-		        <g:Anchor href="javascript:;" ui:field="recentEventsLink" text="Recent Events" styleName="{res.mainCss.button} {style.eventsoverviewnavigation_button}" />
-		        <g:Anchor href="javascript:;" ui:field="upcomingEventsLink" text="Upcoming Schedule" styleName="{res.mainCss.button} {res.mainCss.buttoninactive} {style.eventsoverviewnavigation_button}" />
+		        <g:Anchor href="javascript:;" ui:field="recentEventsLink" styleName="{res.mainCss.button} {style.eventsoverviewnavigation_button}" ><ui:text from='{i18n.eventOverviewRecentEvents}'/></g:Anchor>
+		        <g:Anchor href="javascript:;" ui:field="upcomingEventsLink" styleName="{res.mainCss.button} {res.mainCss.buttoninactive} {style.eventsoverviewnavigation_button}" ><ui:text from='{i18n.eventOverviewUpcomingSchedule}'/></g:Anchor>
 	        </div>
 		  </div>
 		</div>
