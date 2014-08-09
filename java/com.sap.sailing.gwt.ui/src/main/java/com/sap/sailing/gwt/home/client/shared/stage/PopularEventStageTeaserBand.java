@@ -7,21 +7,20 @@ import com.sap.sailing.gwt.home.client.shared.EventDatesFormatterUtil;
 import com.sap.sailing.gwt.ui.shared.EventBaseDTO;
 
 /**
- * Teaser band for a live event on the homepage stage
+ * Teaser band for a popular but finished event on the homepage stage
  * @author Frank
  *
  */
-public class LiveStageTeaserBand extends StageTeaserBand {
+public class PopularEventStageTeaserBand extends StageTeaserBand {
 
-    public LiveStageTeaserBand(EventBaseDTO event, PlaceNavigator placeNavigator) {
+    public PopularEventStageTeaserBand(EventBaseDTO event, PlaceNavigator placeNavigator) {
         super(event, placeNavigator);
  
         bandTitle.setInnerText(event.getName());
         bandSubtitle.setInnerText(EventDatesFormatterUtil.formatDateRangeWithYear(event.startDate, event.endDate));
 
-        isLiveDiv.getStyle().setDisplay(Display.INLINE_BLOCK);
         actionLink.getStyle().setDisplay(Display.INLINE_BLOCK);
-        actionLink.setInnerText(TextMessages.INSTANCE.watchNow());
+        actionLink.setInnerText(TextMessages.INSTANCE.viewAnalysis());
     }
 
     @Override
