@@ -320,7 +320,7 @@ public class SimulatorServiceImpl extends RemoteServiceServlet implements Simula
         }
 
         for (BoatClassProperties tuple : ConfigurationManager.INSTANCE.getBoatClassesInfo()) {
-            boatClassesDTOs.add(new BoatClassDTO(tuple.getName(), tuple.getLength()));
+            boatClassesDTOs.add(new BoatClassDTO(tuple.getName(), null, tuple.getLength()));
         }
 
         result.setBoatClassDTOs(boatClassesDTOs.toArray(new BoatClassDTO[boatClassesDTOs.size()]));
