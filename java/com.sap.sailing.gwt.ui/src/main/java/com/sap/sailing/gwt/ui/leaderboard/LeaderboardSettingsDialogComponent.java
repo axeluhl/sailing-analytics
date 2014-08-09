@@ -397,6 +397,24 @@ public class LeaderboardSettingsDialogComponent implements SettingsDialogCompone
 
     @Override
     public FocusWidget getFocusWidget() {
-        return refreshIntervalInSecondsBox;
+        final FocusWidget result;
+        if (raceDetailCheckboxes.isEmpty()) {
+            if (legDetailCheckboxes.isEmpty()) {
+                if (maneuverDetailCheckboxes.isEmpty()) {
+                    if (overallDetailCheckboxes.isEmpty()) {
+                        result = refreshIntervalInSecondsBox;
+                    } else {
+                        result = overallDetailCheckboxes.values().iterator().next();
+                    }
+                } else {
+                    result = maneuverDetailCheckboxes.values().iterator().next();
+                }
+            } else {
+                result = legDetailCheckboxes.values().iterator().next();
+            }
+        } else {
+            result = raceDetailCheckboxes.values().iterator().next();
+        }
+        return result;
     }
 }

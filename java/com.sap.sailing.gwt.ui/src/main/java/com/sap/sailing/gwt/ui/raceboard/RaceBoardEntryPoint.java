@@ -5,31 +5,23 @@ import java.util.Collections;
 import java.util.List;
 
 import com.google.gwt.core.client.GWT;
-import com.google.gwt.core.client.Scheduler;
-import com.google.gwt.dom.client.NativeEvent;
 import com.google.gwt.dom.client.Style.Unit;
-import com.google.gwt.user.client.Command;
-import com.google.gwt.user.client.Event;
-import com.google.gwt.user.client.Event.NativePreviewEvent;
-import com.google.gwt.user.client.Event.NativePreviewHandler;
+import com.google.gwt.event.dom.client.ClickEvent;
+import com.google.gwt.event.dom.client.ClickHandler;
 import com.google.gwt.user.client.Window;
 import com.google.gwt.user.client.rpc.ServiceDefTarget;
+import com.google.gwt.user.client.ui.Button;
 import com.google.gwt.user.client.ui.DockLayoutPanel;
 import com.google.gwt.user.client.ui.FlowPanel;
-import com.google.gwt.user.client.ui.HTML;
-import com.google.gwt.user.client.ui.Panel;
 import com.google.gwt.user.client.ui.RootLayoutPanel;
 import com.sap.sailing.domain.common.RegattaAndRaceIdentifier;
 import com.sap.sailing.domain.common.dto.RaceDTO;
 import com.sap.sailing.gwt.ui.client.AbstractEntryPoint;
-import com.sap.sailing.gwt.ui.client.GlobalNavigationPanel;
-import com.sap.sailing.gwt.ui.client.LogoAndTitlePanel;
 import com.sap.sailing.gwt.ui.client.MediaService;
 import com.sap.sailing.gwt.ui.client.MediaServiceAsync;
 import com.sap.sailing.gwt.ui.client.ParallelExecutionCallback;
 import com.sap.sailing.gwt.ui.client.ParallelExecutionHolder;
 import com.sap.sailing.gwt.ui.client.RaceSelectionModel;
-import com.sap.sailing.gwt.ui.client.RaceTimePanel;
 import com.sap.sailing.gwt.ui.client.RaceTimesInfoProvider;
 import com.sap.sailing.gwt.ui.client.RemoteServiceMappingConstants;
 import com.sap.sailing.gwt.ui.client.SailingService;
@@ -44,7 +36,6 @@ import com.sap.sse.gwt.client.EntryPointHelper;
 import com.sap.sse.gwt.client.async.AsyncActionsExecutor;
 import com.sap.sse.gwt.client.player.Timer;
 import com.sap.sse.gwt.client.player.Timer.PlayModes;
-import com.sap.sse.gwt.client.useragent.UserAgentChecker;
 import com.sap.sse.gwt.shared.GwtHttpRequestUtils;
 
 public class RaceBoardEntryPoint extends AbstractEntryPoint {
@@ -61,13 +52,9 @@ public class RaceBoardEntryPoint extends AbstractEntryPoint {
     private String leaderboardGroupName;
     private RaceBoardViewConfiguration raceboardViewConfig;
 
-    private GlobalNavigationPanel globalNavigationPanel;
-
     private final SailingServiceAsync sailingService = GWT.create(SailingService.class);
     private final MediaServiceAsync mediaService = GWT.create(MediaService.class);
     private final UserManagementServiceAsync userManagementService = GWT.create(UserManagementService.class);
-
-    private boolean toolbarAndLogoAndTitleBarHidden;
 
     @Override
     protected void doOnModuleLoad() {    
@@ -103,10 +90,8 @@ public class RaceBoardEntryPoint extends AbstractEntryPoint {
         final boolean canReplayWhileLiveIsPossible = GwtHttpRequestUtils.getBooleanParameter(RaceBoardViewConfiguration.PARAM_CAN_REPLAY_DURING_LIVE_RACES, false);
         final boolean autoSelectMedia = GwtHttpRequestUtils.getBooleanParameter(RaceBoardViewConfiguration.PARAM_AUTOSELECT_MEDIA, false);
         final boolean showMapControls = GwtHttpRequestUtils.getBooleanParameter(RaceBoardViewConfiguration.PARAM_VIEW_SHOW_MAPCONTROLS, true /* default*/);
-        final boolean showNavigationPanel = GwtHttpRequestUtils.getBooleanParameter(RaceBoardViewConfiguration.PARAM_VIEW_SHOW_NAVIGATION_PANEL, true /* default */);
         raceboardViewConfig = new RaceBoardViewConfiguration(activeCompetitorsFilterSetName, showLeaderboard,
-                showWindChart, showCompetitorsChart, showViewStreamlets, canReplayWhileLiveIsPossible, autoSelectMedia,
-                showNavigationPanel);
+                showWindChart, showCompetitorsChart, showViewStreamlets, canReplayWhileLiveIsPossible, autoSelectMedia);
 
         final ParallelExecutionCallback<List<String>> getLeaderboardNamesCallback = new ParallelExecutionCallback<List<String>>();  
         final ParallelExecutionCallback<List<RegattaDTO>> getRegattasCallback = new ParallelExecutionCallback<List<RegattaDTO>>();  
@@ -211,82 +196,32 @@ public class RaceBoardEntryPoint extends AbstractEntryPoint {
         return timelinePanel;
     }
 
-    private FlowPanel createLogoAndTitlePanel(RaceBoardPanel raceBoardPanel) {
-        globalNavigationPanel = new GlobalNavigationPanel(stringMessages, true, leaderboardName, leaderboardGroupName);
-        LogoAndTitlePanel logoAndTitlePanel = new LogoAndTitlePanel(regattaName, selectedRace.getName(), stringMessages, this) {
-            @Override
-            public void onResize() {
-                super.onResize();
-                if (isSmallWidth()) {
-                    remove(globalNavigationPanel);
-                } else {
-                    add(globalNavigationPanel);
-                }
-            }
-        };
-        logoAndTitlePanel.addStyleName("LogoAndTitlePanel");
-        if (!isSmallWidth()) {
-            logoAndTitlePanel.add(globalNavigationPanel);
-        }
-        return logoAndTitlePanel;
-    }
-    
-    private void createRaceBoardInOneScreenMode(RaceBoardPanel raceBoardPanel,
+    private void createRaceBoardInOneScreenMode(final RaceBoardPanel raceBoardPanel,
             RaceBoardViewConfiguration raceboardViewConfiguration) {
         final DockLayoutPanel p = new DockLayoutPanel(Unit.PX);
         RootLayoutPanel.get().add(p);
-        final Panel toolbarPanel = raceBoardPanel.getToolbarPanel();
-        if (!UserAgentChecker.INSTANCE.isUserAgentSupported(userAgent)) {
-            HTML lbl = new HTML(stringMessages.warningBrowserUnsupported());
-            lbl.setStyleName("browserOptimizedMessage");
-            toolbarPanel.add(lbl);
-        }
-        final FlowPanel logoAndTitlePanel = createLogoAndTitlePanel(raceBoardPanel);
-        FlowPanel timePanel = createTimePanel(raceBoardPanel);
-        p.addNorth(logoAndTitlePanel, 68);
-        p.addNorth(toolbarPanel, 40);
-        toolbarAndLogoAndTitleBarHidden = false;
-        if (!raceboardViewConfiguration.isShowNavigationPanel()) {
-            p.setWidgetHidden(toolbarPanel, true);
-            globalNavigationPanel.setVisible(false);
-            toolbarAndLogoAndTitleBarHidden = true;
-        }
-
-        p.addSouth(timePanel, 90);
-        p.add(raceBoardPanel);
-        p.addStyleName("dockLayoutPanel");
-
-        addModeratorShortkeyFunctionality(p, toolbarPanel, raceBoardPanel, timePanel);
-    }
-
-    private void addModeratorShortkeyFunctionality(final DockLayoutPanel p, final Panel toolbarPanel,
-            final RaceBoardPanel raceBoardPanel, final Panel timeWrapperPanel) {
-        Event.addNativePreviewHandler(new NativePreviewHandler() {
+        final FlowPanel timePanel = createTimePanel(raceBoardPanel);
+        final Button toggleButton = new Button();
+        toggleButton.setStyleName("TimePanel-ShowExtended-Button");
+        toggleButton.addStyleDependentName("Closed");
+        toggleButton.addClickHandler(new ClickHandler() {
             @Override
-            public void onPreviewNativeEvent(NativePreviewEvent event) {
-                NativeEvent ne = event.getNativeEvent();
-                if ("keydown".equals(ne.getType()) && ne.getCtrlKey()
-                        && (ne.getKeyCode() == 'm' || ne.getKeyCode() == 'M')) {
-                    ne.preventDefault();
-                    Scheduler.get().scheduleDeferred(new Command() {
-                        @Override
-                        public void execute() {
-                            p.setWidgetHidden(toolbarPanel, !toolbarAndLogoAndTitleBarHidden);
-                            globalNavigationPanel.setVisible(toolbarAndLogoAndTitleBarHidden);
-                            toolbarAndLogoAndTitleBarHidden = !toolbarAndLogoAndTitleBarHidden;
-                            RaceTimePanel timePanel = raceBoardPanel.getTimePanel();
-                            if (toolbarAndLogoAndTitleBarHidden) {
-                                timePanel.hideControlsPanelAndMovePlayButtonUp();
-                                p.setWidgetSize(timeWrapperPanel, 53);
-                            } else {
-                                timePanel.showControlsPanelAndMovePlayButtonDown();
-                                p.setWidgetSize(timeWrapperPanel, 90);
-                            }
-                        }
-                    });
-
+            public void onClick(ClickEvent event) {
+                boolean advancedModeShown = raceBoardPanel.getTimePanel().toggleAdvancedMode(toggleButton);
+                if (advancedModeShown) {
+                    p.setWidgetSize(timePanel, 90);
+                    toggleButton.removeStyleDependentName("Closed");
+                    toggleButton.addStyleDependentName("Open");
+                } else {
+                    p.setWidgetSize(timePanel, 53);
+                    toggleButton.addStyleDependentName("Closed");
+                    toggleButton.removeStyleDependentName("Open");
                 }
             }
         });
+        raceBoardPanel.getTimePanel().hideControlsPanelAndMovePlayButtonUp(toggleButton);
+        p.addSouth(timePanel, 53);
+        p.add(raceBoardPanel);
+        p.addStyleName("dockLayoutPanel");
     }
 }

@@ -28,9 +28,9 @@ public class GlobalNavigationPanel extends FlowPanel {
                 leaderboardGroupLinkParameters.put("showRaceDetails", "true");
                 leaderboardGroupLinkParameters.put("leaderboardGroupName", leaderboardGroupName);
                 String leaderBoardGroupLink = EntryPointLinkFactory.createLeaderboardGroupLink(leaderboardGroupLinkParameters);
-                addNavigationLink(leaderboardGroupName, leaderBoardGroupLink, "leaderBoardGroup", "Go to the Event overview.");
+                addNavigationLink(leaderboardGroupName, leaderBoardGroupLink, "leaderBoardGroup", stringMessages.goToEventOverview());
             } else {
-                addNavigationLink(stringMessages.home(), "/", "home", "Go to the Event overview.");
+                addNavigationLink(stringMessages.home(), "/", "home", stringMessages.goToEventOverview());
             }
         }
         
@@ -42,7 +42,7 @@ public class GlobalNavigationPanel extends FlowPanel {
                 leaderboardLinkParameters.put("leaderboardGroupName", leaderboardGroupName);
             }
             String leaderBoardLink = EntryPointLinkFactory.createLeaderboardLink(leaderboardLinkParameters);
-            addNavigationLink(leaderboardName, leaderBoardLink, "leaderBoard", "Go to the overview and see all Races in one Leaderboard");
+            addNavigationLink(leaderboardName, leaderBoardLink, "leaderBoard", stringMessages.goToOverviewAndSeeLeaderboard());
         }        
     }
 

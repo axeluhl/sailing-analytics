@@ -1066,4 +1066,8 @@ public interface StringMessages extends Messages {
     String currentOrAverageSpeedOverGroundInKnotsTooltip();
     String currentOrAverageSpeedOverGroundInKnots();
     String scoringSchemeHighPointFirstGetsTenOrEight();
+    String competitorSearchFilter();
+    String searchCompetitorsBySailNumberOrName();
+    String goToEventOverview();
+    String goToOverviewAndSeeLeaderboard();
 }
