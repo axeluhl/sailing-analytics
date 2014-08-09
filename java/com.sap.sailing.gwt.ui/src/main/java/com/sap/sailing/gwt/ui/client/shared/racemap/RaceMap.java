@@ -385,6 +385,8 @@ public class RaceMap extends AbsolutePanel implements TimeListener, CompetitorSe
                   @Override
                   public void onEvent(DragEndMapEvent event) {
                       // stop automatic zoom after a manual drag event
+                      autoZoomIn = false;
+                      autoZoomOut = false;
                       final List<RaceMapZoomSettings.ZoomTypes> emptyList = Collections.emptyList();
                       settings.getZoomSettings().setTypesToConsiderOnZoom(emptyList);
                   }
@@ -407,14 +409,7 @@ public class RaceMap extends AbsolutePanel implements TimeListener, CompetitorSe
                   public void onEvent(BoundsChangeMapEvent event) {
                       int newZoomLevel = map.getZoom(); 
                       if (!isAutoZoomInProgress() && (newZoomLevel != currentZoomLevel)) {
-                          // remove the canvas animations for boats 
-                          for (BoatOverlay boatOverlay : RaceMap.this.getBoatOverlays().values()) {
-                              boatOverlay.removeCanvasPositionAndRotationTransition();
-                          }
-                          // remove the canvas animations for the info overlays of the selected boats 
-                          for (CompetitorInfoOverlay infoOverlay : competitorInfoOverlays.values()) {
-                              infoOverlay.removeCanvasPositionAndRotationTransition();
-                          }
+                          removeTransitions();
                       }
                       if ((streamletOverlay != null) && !map.getBounds().equals(currentMapBounds)) {
                           streamletOverlay.onBoundsChanged(newZoomLevel != currentZoomLevel);
@@ -444,7 +439,18 @@ public class RaceMap extends AbsolutePanel implements TimeListener, CompetitorSe
 
         LoadApi.go(onLoad, loadLibraries, sensor, "key="+GoogleMapAPIKey.V3_APIKey); 
     }
-        
+
+    private void removeTransitions() {
+        // remove the canvas animations for boats
+        for (BoatOverlay boatOverlay : RaceMap.this.getBoatOverlays().values()) {
+            boatOverlay.removeCanvasPositionAndRotationTransition();
+        }
+        // remove the canvas animations for the info overlays of the selected boats
+        for (CompetitorInfoOverlay infoOverlay : competitorInfoOverlays.values()) {
+            infoOverlay.removeCanvasPositionAndRotationTransition();
+        }
+    }
+
     public void redraw() {
         timeChanged(timer.getTime(), null);
     }
@@ -1235,17 +1241,10 @@ public class RaceMap extends AbsolutePanel implements TimeListener, CompetitorSe
                 autoZoomLatLngBounds = BoundsUtil.getAsLatLngBounds(newBounds);
                 int newZoomLevel = getZoomLevel(autoZoomLatLngBounds); 
                 if (newZoomLevel != map.getZoom()) {
-                    // remove the canvas animations for boats 
-                    for (BoatOverlay boatOverlay : RaceMap.this.getBoatOverlays().values()) {
-                        boatOverlay.removeCanvasPositionAndRotationTransition();
-                    }
-                    // remove the canvas animations for the info overlays of the selected boats 
-                    for(CompetitorInfoOverlay infoOverlay: competitorInfoOverlays.values()) {
-                        infoOverlay.removeCanvasPositionAndRotationTransition();
-                    }
                     autoZoomIn = newZoomLevel > map.getZoom();
                     autoZoomOut = !autoZoomIn;
                     autoZoomLevel = newZoomLevel;
+                    removeTransitions();
                     if (autoZoomIn) {
                         map.panTo(autoZoomLatLngBounds.getCenter());
                     } else {
@@ -1847,8 +1846,9 @@ public class RaceMap extends AbsolutePanel implements TimeListener, CompetitorSe
             requiredRedraw = true;
         }
         if (!newSettings.getZoomSettings().equals(settings.getZoomSettings())) {
-            settings.setZoomSettings(newSettings.getZoomSettings());
+            settings.setZoomSettings(newSettings.getZoomSettings());                    
             if (!settings.getZoomSettings().containsZoomType(ZoomTypes.NONE)) {
+                removeTransitions();
                 zoomMapToNewBounds(settings.getZoomSettings().getNewBounds(this));
             }
         }

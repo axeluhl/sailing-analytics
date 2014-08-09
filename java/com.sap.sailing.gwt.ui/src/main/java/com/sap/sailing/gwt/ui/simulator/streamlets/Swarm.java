@@ -66,18 +66,17 @@ public class Swarm implements TimeListener {
     }
 
     public void start(int animationIntervalMillis) {
+        fullcanvas.setCanvasSettings();
         projection = new Mercator(fullcanvas, map);
         projection.calibrate();
-        this.updateBounds();
-        Context2d ctxt = canvas.getContext2d();
-        ctxt.setFillStyle("red");
+        updateBounds();
         particles = this.createParticles();
-        this.swarmContinue = true;
+        swarmContinue = true;
         startLoop(animationIntervalMillis);
     }
 
     public void stop() {
-        this.swarmContinue = false;
+        swarmContinue = false;
     }
 
     private Particle createParticle() {
