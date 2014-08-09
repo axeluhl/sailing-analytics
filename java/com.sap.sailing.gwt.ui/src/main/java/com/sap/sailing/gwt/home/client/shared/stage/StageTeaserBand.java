@@ -23,6 +23,7 @@ public abstract class StageTeaserBand extends UIObject {
     @UiField SpanElement bandTitle;
     @UiField SpanElement bandSubtitle;
     @UiField AnchorElement actionLink;
+    @UiField DivElement isLiveDiv;
 
     private final PlaceNavigator placeNavigator;
     private final EventBaseDTO event;
@@ -34,6 +35,8 @@ public abstract class StageTeaserBand extends UIObject {
         StageResources.INSTANCE.css().ensureInjected();
         setElement(uiBinder.createAndBindUi(this));
         
+        isLiveDiv.getStyle().setDisplay(Display.NONE);
+
         Event.sinkEvents(actionLink, Event.ONCLICK);
         Event.setEventListener(actionLink, new EventListener() {
             @Override
