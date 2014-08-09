@@ -12,6 +12,7 @@ import java.util.Set;
 import com.sap.sailing.domain.common.RaceIdentifier;
 import com.sap.sailing.domain.common.RegattaAndRaceIdentifier;
 import com.sap.sailing.domain.common.TimingConstants;
+import com.sap.sse.common.Util;
 
 public class RaceColumnDTO extends NamedDTO implements Serializable {
     private static final long serialVersionUID = -3228244237400937852L;
@@ -57,7 +58,7 @@ public class RaceColumnDTO extends NamedDTO implements Serializable {
     public FleetDTO getFleet(RaceIdentifier raceIdentifier) {
         FleetDTO result = null;
         for (FleetDTO identifier : trackedRaceIdentifiersPerFleet.keySet()) {
-            if (trackedRaceIdentifiersPerFleet.get(identifier).equals(raceIdentifier)) {
+            if (Util.equalsWithNull(trackedRaceIdentifiersPerFleet.get(identifier), raceIdentifier)) {
                 result = identifier;
                 break;
             }

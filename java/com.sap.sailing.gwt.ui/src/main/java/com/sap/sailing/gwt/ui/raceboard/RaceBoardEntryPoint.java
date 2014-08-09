@@ -1,8 +1,10 @@
 
 package com.sap.sailing.gwt.ui.raceboard;
 
+import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
+import java.util.UUID;
 
 import com.google.gwt.core.client.GWT;
 import com.google.gwt.dom.client.Style.Unit;
@@ -15,6 +17,7 @@ import com.google.gwt.user.client.ui.DockLayoutPanel;
 import com.google.gwt.user.client.ui.FlowPanel;
 import com.google.gwt.user.client.ui.RootLayoutPanel;
 import com.sap.sailing.domain.common.RegattaAndRaceIdentifier;
+import com.sap.sailing.domain.common.dto.FleetDTO;
 import com.sap.sailing.domain.common.dto.RaceDTO;
 import com.sap.sailing.gwt.ui.client.AbstractEntryPoint;
 import com.sap.sailing.gwt.ui.client.MediaService;
@@ -28,10 +31,14 @@ import com.sap.sailing.gwt.ui.client.SailingService;
 import com.sap.sailing.gwt.ui.client.SailingServiceAsync;
 import com.sap.sailing.gwt.ui.client.UserManagementService;
 import com.sap.sailing.gwt.ui.client.UserManagementServiceAsync;
+import com.sap.sailing.gwt.ui.shared.EventDTO;
 import com.sap.sailing.gwt.ui.shared.LeaderboardGroupDTO;
 import com.sap.sailing.gwt.ui.shared.RegattaDTO;
+import com.sap.sailing.gwt.ui.shared.SeriesDTO;
 import com.sap.sailing.gwt.ui.shared.StrippedLeaderboardDTO;
 import com.sap.sailing.gwt.ui.shared.UserDTO;
+import com.sap.sse.common.Util.Pair;
+import com.sap.sse.common.Util.Triple;
 import com.sap.sse.gwt.client.EntryPointHelper;
 import com.sap.sse.gwt.client.async.AsyncActionsExecutor;
 import com.sap.sse.gwt.client.player.Timer;
@@ -40,16 +47,20 @@ import com.sap.sse.gwt.shared.GwtHttpRequestUtils;
 
 public class RaceBoardEntryPoint extends AbstractEntryPoint {
     private RaceDTO selectedRace;
+    private FleetDTO fleet;
+    private SeriesDTO series;
 
     private static final String PARAM_REGATTA_NAME = "regattaName";
     private static final String PARAM_RACE_NAME = "raceName";
     private static final String PARAM_LEADERBOARD_NAME = "leaderboardName";
     private static final String PARAM_LEADERBOARD_GROUP_NAME = "leaderboardGroupName";
+    private static final String PARAM_EVENT_ID = "eventId";
     
     private String regattaName;
     private String raceName;
     private String leaderboardName;
     private String leaderboardGroupName;
+    private UUID eventId;
     private RaceBoardViewConfiguration raceboardViewConfig;
 
     private final SailingServiceAsync sailingService = GWT.create(SailingService.class);
@@ -75,6 +86,13 @@ public class RaceBoardEntryPoint extends AbstractEntryPoint {
         if (leaderboardGroupNameParamValue != null && !leaderboardGroupNameParamValue.isEmpty()) {
             leaderboardGroupName = leaderboardGroupNameParamValue; 
         }
+        String eventIdParamValue = Window.Location.getParameter(PARAM_EVENT_ID);
+        if (eventIdParamValue != null && !eventIdParamValue.isEmpty()) {
+            eventId = UUID.fromString(eventIdParamValue);
+        }
+        if (leaderboardGroupNameParamValue != null && !leaderboardGroupNameParamValue.isEmpty()) {
+            leaderboardGroupName = leaderboardGroupNameParamValue; 
+        }
         if (regattaName == null || regattaName.isEmpty() || raceName == null || raceName.isEmpty() ||
                 leaderboardName == null || leaderboardName.isEmpty()) {
             createErrorPage("This page requires a valid regatta name, race name and leaderboard name.");
@@ -93,68 +111,91 @@ public class RaceBoardEntryPoint extends AbstractEntryPoint {
         raceboardViewConfig = new RaceBoardViewConfiguration(activeCompetitorsFilterSetName, showLeaderboard,
                 showWindChart, showCompetitorsChart, showViewStreamlets, canReplayWhileLiveIsPossible, autoSelectMedia);
 
-        final ParallelExecutionCallback<List<String>> getLeaderboardNamesCallback = new ParallelExecutionCallback<List<String>>();  
-        final ParallelExecutionCallback<List<RegattaDTO>> getRegattasCallback = new ParallelExecutionCallback<List<RegattaDTO>>();  
-        final ParallelExecutionCallback<LeaderboardGroupDTO> getLeaderboardGroupByNameCallback = new ParallelExecutionCallback<LeaderboardGroupDTO>();  
-        final ParallelExecutionCallback<UserDTO> getUserCallback = new ParallelExecutionCallback<UserDTO>();  
+        final ParallelExecutionCallback<List<String>> getLeaderboardNamesCallback = new ParallelExecutionCallback<List<String>>();
+        final ParallelExecutionCallback<List<RegattaDTO>> getRegattasCallback = new ParallelExecutionCallback<List<RegattaDTO>>();
+        final ParallelExecutionCallback<LeaderboardGroupDTO> getLeaderboardGroupByNameCallback = new ParallelExecutionCallback<LeaderboardGroupDTO>();
+        final ParallelExecutionCallback<EventDTO> getEventByIdCallback = new ParallelExecutionCallback<EventDTO>();
+        final ParallelExecutionCallback<UserDTO> getUserCallback = new ParallelExecutionCallback<UserDTO>();
+        List<ParallelExecutionCallback<?>> callbacks = new ArrayList<>();
+        callbacks.add(getLeaderboardNamesCallback);
+        callbacks.add(getRegattasCallback);
+        callbacks.add(getUserCallback);
         if (leaderboardGroupName != null) {
-            new ParallelExecutionHolder(getLeaderboardNamesCallback, getLeaderboardGroupByNameCallback, getRegattasCallback, getUserCallback) {
-                @Override
-                public void handleSuccess() {
-                    checkUrlParameters(getLeaderboardNamesCallback.getData(),
-                            getLeaderboardGroupByNameCallback.getData(), canReplayWhileLiveIsPossible, getRegattasCallback.getData(), getUserCallback.getData(), showMapControls);
-                }
-                @Override
-                public void handleFailure(Throwable t) {
-                    reportError("Error trying to create the raceboard: " + t.getMessage());
-                }
-            };
-        } else {
-            new ParallelExecutionHolder(getLeaderboardNamesCallback, getRegattasCallback, getUserCallback) {
-                @Override
-                public void handleSuccess() {
-                    checkUrlParameters(getLeaderboardNamesCallback.getData(), null, canReplayWhileLiveIsPossible, getRegattasCallback.getData(), getUserCallback.getData(), showMapControls);
-                }
-                @Override
-                public void handleFailure(Throwable t) {
-                    reportError("Error trying to create the raceboard: " + t.getMessage());
-                }
-            };
+            callbacks.add(getLeaderboardGroupByNameCallback);
         }
+        if (eventId != null) {
+            callbacks.add(getEventByIdCallback);
+        }
+        ParallelExecutionCallback<?>[] callbackArray = callbacks.toArray(new ParallelExecutionCallback<?>[0]);
+        new ParallelExecutionHolder(callbackArray) {
+            @Override
+            public void handleSuccess() {
+                checkUrlParameters(getLeaderboardNamesCallback.getData(),
+                        leaderboardGroupName == null ? null : getLeaderboardGroupByNameCallback.getData(),
+                        canReplayWhileLiveIsPossible, getRegattasCallback.getData(), eventId == null ? null : getEventByIdCallback.getData(),
+                        getUserCallback.getData(), showMapControls);
+            }
+
+            @Override
+            public void handleFailure(Throwable t) {
+                reportError("Error trying to create the raceboard: " + t.getMessage());
+            }
+        };
         sailingService.getRegattas(getRegattasCallback);
         sailingService.getLeaderboardNames(getLeaderboardNamesCallback);
+        if (eventId != null) {
+            sailingService.getEventById(eventId, /* withStatisticalData */ false, getEventByIdCallback);
+        }
         if (leaderboardGroupName != null) {
             sailingService.getLeaderboardGroupByName(leaderboardGroupNameParamValue, false /*withGeoLocationData*/, getLeaderboardGroupByNameCallback);
         }
         userManagementService.getUser(getUserCallback);
     }
 
-    private void checkUrlParameters(List<String> leaderboardNames, LeaderboardGroupDTO leaderboardGroup, boolean canReplayWhileLiveIsPossible, List<RegattaDTO> regattas, UserDTO user, boolean showMapControls) {
+    private void checkUrlParameters(List<String> leaderboardNames, LeaderboardGroupDTO leaderboardGroup,
+            boolean canReplayWhileLiveIsPossible, List<RegattaDTO> regattas, EventDTO event, UserDTO user,
+            boolean showMapControls) {
         if (!leaderboardNames.contains(leaderboardName)) {
-          createErrorPage(stringMessages.noSuchLeaderboard());
+            createErrorPage(stringMessages.noSuchLeaderboard());
           return;
         }
+        if (eventId != null && event == null) {
+            createErrorPage(stringMessages.noSuchEvent());
+        }
         if (leaderboardGroupName != null && leaderboardGroup != null) {
-            boolean foundLeaderboard = false; 
-            for(StrippedLeaderboardDTO leaderBoard:  leaderboardGroup.leaderboards) {
-                if(leaderBoard.name.equals(leaderboardName)) {
+            boolean foundLeaderboard = false;
+            for (StrippedLeaderboardDTO leaderboard : leaderboardGroup.leaderboards) {
+                if (leaderboard.name.equals(leaderboardName)) {
                     foundLeaderboard = true;
                     break;
                 }
             }
             if (!foundLeaderboard) {
-                createErrorPage("the leaderboard is not contained in this leaderboard group.");
+                createErrorPage(stringMessages.leaderboardNotContainedInLeaderboardGroup(leaderboardName, leaderboardGroupName));
                 return;
             }
+            if (event != null) {
+                boolean foundLeaderboardGroupInEvent = false;
+                for (LeaderboardGroupDTO lg : event.getLeaderboardGroups()) {
+                    if (lg.getId().equals(leaderboardGroup.getId())) {
+                        foundLeaderboardGroupInEvent = true;
+                        break;
+                    }
+                }
+                if (!foundLeaderboardGroupInEvent) {
+                    createErrorPage(stringMessages.leaderboardGroupNotContainedInEvent(leaderboardGroupName, event.getName()));
+                }
+            }
         }
-        selectedRace = findRace(regattaName, raceName, regattas);
+        Triple<RaceDTO, SeriesDTO, FleetDTO> raceAndSeriesAndFleet = findRace(regattaName, raceName, regattas);
+        selectedRace = raceAndSeriesAndFleet.getA();
+        series = raceAndSeriesAndFleet.getB();
+        fleet = raceAndSeriesAndFleet.getC();
         if (selectedRace == null) {
             createErrorPage("Could not obtain a race with name " + raceName + " for a regatta with name " + regattaName);
             return;
         }
-        
         Window.setTitle(selectedRace.getName());
-
         RaceSelectionModel raceSelectionModel = new RaceSelectionModel();
         List<RegattaAndRaceIdentifier> singletonList = Collections.singletonList(selectedRace.getRaceIdentifier());
         raceSelectionModel.setSelection(singletonList);
@@ -167,12 +208,15 @@ public class RaceBoardEntryPoint extends AbstractEntryPoint {
         createRaceBoardInOneScreenMode(raceBoardPanel, raceboardViewConfig);
     }  
 
-    private RaceDTO findRace(String regattaName, String raceName, List<RegattaDTO> regattas) {
+    private Triple<RaceDTO, SeriesDTO, FleetDTO> findRace(String regattaName, String raceName, List<RegattaDTO> regattas) {
         for (RegattaDTO regattaDTO : regattas) {
             if (regattaDTO.getName().equals(regattaName)) {
                 for (RaceDTO raceDTO : regattaDTO.races) {
                     if (raceDTO.getName().equals(raceName)) {
-                        return raceDTO;
+                        Pair<SeriesDTO, FleetDTO> seriesAndFleet = regattaDTO.getSeriesAndFleet(raceDTO.getRaceIdentifier());
+                        return new Triple<RaceDTO, SeriesDTO, FleetDTO>(raceDTO,
+                                seriesAndFleet == null ? null : seriesAndFleet.getA(),
+                                seriesAndFleet == null ? null : seriesAndFleet.getB());
                     }
                 }
             }

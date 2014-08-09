@@ -1070,4 +1070,7 @@ public interface StringMessages extends Messages {
     String searchCompetitorsBySailNumberOrName();
     String goToEventOverview();
     String goToOverviewAndSeeLeaderboard();
+    String noSuchEvent();
+    String leaderboardNotContainedInLeaderboardGroup(String leaderboardName, String leaderboardGroupName);
+    String leaderboardGroupNotContainedInEvent(String leaderboardGroupName, String name);
 }
