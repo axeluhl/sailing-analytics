@@ -35,15 +35,20 @@ public class GlobalNavigationPanel extends FlowPanel {
             this.styleName = "globalNavigation";
         }
         setStyleName(this.styleName);
-        if (showHomeNavigation) {
-            if (leaderboardGroupName != null && !leaderboardGroupName.isEmpty()) {
-                Map<String, String> leaderboardGroupLinkParameters = new HashMap<String, String>();
-                leaderboardGroupLinkParameters.put("showRaceDetails", "true");
-                leaderboardGroupLinkParameters.put("leaderboardGroupName", leaderboardGroupName);
-                String leaderBoardGroupLink = EntryPointLinkFactory.createLeaderboardGroupLink(leaderboardGroupLinkParameters);
-                addNavigationLink(leaderboardGroupName, leaderBoardGroupLink, "leaderBoardGroup", stringMessages.goToEventOverview());
-            } else {
-                addNavigationLink(stringMessages.home(), "/", "home", stringMessages.goToEventOverview());
+        if (event != null  && event.getName() != null) {
+            String eventLink = EntryPointLinkFactory.createEventLink(new HashMap<String, String>(), event.id.toString());
+            addNavigationLink(event.getName(), eventLink, "event", stringMessages.goToEventOverview());
+        } else {
+            if (showHomeNavigation) {
+                if (leaderboardGroupName != null && !leaderboardGroupName.isEmpty()) {
+                    Map<String, String> leaderboardGroupLinkParameters = new HashMap<String, String>();
+                    leaderboardGroupLinkParameters.put("showRaceDetails", "true");
+                    leaderboardGroupLinkParameters.put("leaderboardGroupName", leaderboardGroupName);
+                    String leaderBoardGroupLink = EntryPointLinkFactory.createLeaderboardGroupLink(leaderboardGroupLinkParameters);
+                    addNavigationLink(leaderboardGroupName, leaderBoardGroupLink, "leaderBoardGroup", stringMessages.goToEventOverview());
+                } else {
+                    addNavigationLink(stringMessages.home(), "/", "home", stringMessages.goToEventOverview());
+                }
             }
         }
         
