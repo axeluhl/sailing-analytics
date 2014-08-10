@@ -34,8 +34,9 @@
 	<extend-property name="locale" values="ru"/>
 	
 	<!-- Uncomment this to get clear-text CSS style/class names in generated output -->
+	<!-- 
 	<set-configuration-property name="CssResource.style" value="pretty" />
-	
+	-->
 	<source path='common'/>
 	<source path='client'/>
 	<source path='controls'/>
