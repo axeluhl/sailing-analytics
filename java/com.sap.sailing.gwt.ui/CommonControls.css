@@ -221,7 +221,7 @@ body ::-webkit-scrollbar-track {
 }
 
 .gwt-SplitLayoutPanel-NorthSouthToggleButton {
-    height: 23px;
+    height: 33px;
     background-color: #fc9d00;
     border: 1px solid #cecece;
     margin-left: 5px;
@@ -238,6 +238,7 @@ body ::-webkit-scrollbar-track {
 .gwt-SplitLayoutPanel-NorthSouthToggleButton-Open {
 	background: white url(images/arrows_bottom_black_small.png) 95% 50% no-repeat;
 	font-weight: bold;
+	border-width: 3px;
 }
 	
 .gwt-SplitLayoutPanel-NorthSouthToggleButton:focus {
@@ -255,7 +256,7 @@ body ::-webkit-scrollbar-track {
 	margin-left: 3px;
 	top: 40% !important;
 	background: #ffffff url(images/thumb_vertical.png) 70% 50% no-repeat;
-	border: 1px solid #cecece;
+	border: 2px solid #cecece;
 	border-left: 0px;
 	cursor: col-resize;
 	opacity: .7;
@@ -276,11 +277,12 @@ body ::-webkit-scrollbar-track {
 .gwt-SplitLayoutPanel-VDragger {
 	position: absolute;
 	width: 60px !important;
-	height: 20px !important;
+	height: 21px !important;
 	left: 48% !important;
+	top: 2px !important;
 	background: #ffffff url(images/thumb_horz.png) 50% 30% no-repeat;
 	cursor: row-resize;
-	border: 1px solid #cecece;
+	border: 2px solid #cecece;
 	border-bottom: 0px;
 	border-top-left-radius: 25px;
 	border-top-right-radius: 25px;
@@ -716,7 +718,8 @@ body ::-webkit-scrollbar-track {
 .gwt-DialogBox .Caption {
     font-size: 14px;
     padding: 14px 10px;
-    background: url(images/dialogBox-bg.png) 0 0 repeat-x;
+    background-color: #cecece;
+    border: 1px solid #cecece;
     -webkit-border-top-left-radius: 5px;
   -webkit-border-top-right-radius: 5px;
   -moz-border-radius-topleft: 5px;
@@ -733,7 +736,7 @@ body ::-webkit-scrollbar-track {
 .gwt-DialogBox .dialogContent {
     background: #ffffff;
     padding: 10px;
-    border: 10px solid #a6a6a6;
+    border: 1px solid #cecece;
   -webkit-border-bottom-right-radius: 5px;
   -webkit-border-bottom-left-radius: 5px;
   -o-border-bottom-right-radius: 5px;
@@ -851,7 +854,6 @@ body ::-webkit-scrollbar-track {
 }
 
 .SettingsDialogComponent .dialogInnerHeadline {
-    background: url(images/settingsDialog_bg.png) repeat-x 0 0 #E5E5E5;
     border: 1px solid #CCCCCC;
     font-family: OpenSansSemiBold,Arial,Verdana,sans-serif;
     height: 21px;
