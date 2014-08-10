@@ -256,7 +256,7 @@ body ::-webkit-scrollbar-track {
 	margin-left: 3px;
 	top: 40% !important;
 	background: #ffffff url(images/thumb_vertical.png) 70% 50% no-repeat;
-	border: 1px solid #cecece;
+	border: 2px solid #cecece;
 	border-left: 0px;
 	cursor: col-resize;
 	opacity: .7;
