@@ -252,7 +252,7 @@ public class RaceBoardEntryPoint extends AbstractEntryPoint {
                 }
             }
         });
-        raceBoardPanel.getTimePanel().hideControlsPanelAndMovePlayButtonUp(toggleButton);
+        raceBoardPanel.getTimePanel().hideControlsPanel(toggleButton);
         p.addSouth(timePanel, 53);
         p.add(raceBoardPanel);
         p.addStyleName("dockLayoutPanel");

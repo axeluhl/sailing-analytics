@@ -337,7 +337,6 @@ img.openColumn {
 }
 
 .dockLayoutPanel div[style="position: absolute; overflow: hidden; left: 0px; right: 0px; bottom: 0px; height: 90px;"] {
-	box-shadow: 0 0 8px #424242;
 	z-index: 10;
 }
 
@@ -430,15 +429,15 @@ img.openColumn {
   	border-top-right-radius: 5px;
   	border-bottom-left-radius: 5px;
   	border-bottom-right-radius: 5px;
-  	border: none;
+  	border: 1px solid #ececec;
 }
 
 .TimePanel-ShowExtended-Button-Closed {
-	background: white url(images/arrows_bottom_black.png) center no-repeat;
+	background: white url(images/arrows_top_black.png) center no-repeat;
 }
 
 .TimePanel-ShowExtended-Button-Open {
-	background: white url(images/arrows_top_black.png) center no-repeat;
+	background: white url(images/arrows_bottom_black.png) center no-repeat;
 }
 
 .TimePanel-ShowExtended-Button:hover {
@@ -461,4 +460,19 @@ img.openColumn {
 
 .RaceBoard-globalNavigation-Link+.RaceBoard-globalNavigation-Link:before {
 	content: ' \00bb\00a0';
+}
+
+.TimePanel-settingsButtonStyle {
+	position: absolute;
+	right: 0px;
+	z-index: 1;
+	border: none;
+}
+
+.TimePanel-settingsButtonStyle:focus {
+	outline: 0 !important;
+}
+
+.TimePanel-settingsButtonStyle:hover {
+	border: 1px solid gray;
 }

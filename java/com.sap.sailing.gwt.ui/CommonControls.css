@@ -227,7 +227,7 @@ body ::-webkit-scrollbar-track {
     margin-left: 5px;
 	padding: 2px 40px;
 	border-radius: 7px;
-	margin-top: 1px;
+	margin-top: 0px;
 }
 
 .gwt-SplitLayoutPanel-NorthSouthToggleButton-Closed {
@@ -252,6 +252,7 @@ body ::-webkit-scrollbar-track {
 	position: absolute;
 	height: 60px !important;
 	width: 25px !important;
+	margin-left: 3px;
 	top: 40% !important;
 	background: #ffffff url(images/thumb_vertical.png) 70% 50% no-repeat;
 	border: 1px solid #cecece;
@@ -491,17 +492,13 @@ body ::-webkit-scrollbar-track {
 }
 
 .timeLinePanel {
-  color: #fff;
+  color: black;
   width: 100%;
   position: fixed;
   bottom: 0;
   z-index: 9;
-  background: #7c7b7c;
-  box-shadow: 0 0 20px #858585;
-  -webkit-box-shadow: 0 0 20px #858585;
-  -moz-box-shadow: 0 0 20px #858585;
-  -o-box-shadow: 0 0 20px #858585;
-  -ms-box-shadow: 0 0 20px #858585;
+  background: white;
+  border-top: 1px solid #cecece;
 }
 
 .timeLineInnerBgPanel {
@@ -520,11 +517,6 @@ body ::-webkit-scrollbar-track {
 .timePanel-controls {
     margin: 0;
     padding: 7px 12px 0 12px;
-    -webkit-box-shadow: 0px -7px 8px 0px rgba(84, 84, 84, 1);
-    -moz-box-shadow: 0px -7px 8px 0px rgba(84, 84, 84, 1);
-    -o-box-shadow: 0px -7px 8px 0px rgba(84, 84, 84, 1);
-    -ms-box-shadow: 0px -7px 8px 0px rgba(84, 84, 84, 1);
-    box-shadow: 0px -7px 8px 0px rgba(84, 84, 84, 1);
     height: 29px;
 }
 
@@ -607,11 +599,6 @@ body ::-webkit-scrollbar-track {
 }
 
 .timePanelInnerWrapper {
-    -webkit-box-shadow: inset 0px -7px 13px 0px rgba(84, 84, 84, 1);
-    -moz-box-shadow: inset 0px -7px 13px 0px rgba(84, 84, 84, 1);
-    -o-box-shadow: inset 0px -7px 13px 0px rgba(84, 84, 84, 1);
-    -ms-box-shadow: inset 0px -7px 13px 0px rgba(84, 84, 84, 1);
-    box-shadow: inset 0px -7px 13px 0px rgba(84, 84, 84, 1);
 }
 
 
