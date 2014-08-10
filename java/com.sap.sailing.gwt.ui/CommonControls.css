@@ -282,7 +282,7 @@ body ::-webkit-scrollbar-track {
 	top: 2px !important;
 	background: #ffffff url(images/thumb_horz.png) 50% 30% no-repeat;
 	cursor: row-resize;
-	border: 1px solid #cecece;
+	border: 2px solid #cecece;
 	border-bottom: 0px;
 	border-top-left-radius: 25px;
 	border-top-right-radius: 25px;
