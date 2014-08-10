@@ -1073,4 +1073,6 @@ public interface StringMessages extends Messages {
     String noSuchEvent();
     String leaderboardNotContainedInLeaderboardGroup(String leaderboardName, String leaderboardGroupName);
     String leaderboardGroupNotContainedInEvent(String leaderboardGroupName, String name);
+    String raceIsInLiveTimePanelMode();
+    String backToLiveTimePanelMode();
 }
