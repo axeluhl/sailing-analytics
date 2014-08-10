@@ -400,6 +400,7 @@ img.openColumn {
 	color: white;
 	margin-left: auto;
 	margin-right: auto;
+	opacity: .8;
 }
 
 .raceBoard-TitlePanel-RaceNameLabel {
@@ -446,4 +447,18 @@ img.openColumn {
 
 .TimePanel-ShowExtended-Button:focus {
 	outline: 0 !important;
+}
+
+.RaceBoard-globalNavigation-Link {
+	display: inline;
+	margin-right: 3px;
+}
+
+.RaceBoard-globalNavigation-Link a {
+	color: white;
+	cursor: pointer;
+}
+
+.RaceBoard-globalNavigation-Link+.RaceBoard-globalNavigation-Link:before {
+	content: ' \00bb\00a0';
 }
