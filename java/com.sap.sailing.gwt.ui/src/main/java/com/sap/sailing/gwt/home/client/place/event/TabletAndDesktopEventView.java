@@ -48,9 +48,11 @@ public class TabletAndDesktopEventView extends Composite implements EventView, E
     @UiField EventSponsors eventSponsors;
 
     private final List<Widget> pageElements;
+    private final EventDTO event;
     
     public TabletAndDesktopEventView(SailingServiceAsync sailingService, EventDTO event, List<RaceGroupDTO> raceGroups, String leaderboardName,   
             Timer timerForClientServerOffset) {
+        this.event = event;
         Map<String, Triple<RaceGroupDTO, StrippedLeaderboardDTO, LeaderboardGroupDTO>> regattaStructure = getRegattaStructure(event, raceGroups);
 
         eventHeader = new EventHeader(event, this);
@@ -145,6 +147,7 @@ public class TabletAndDesktopEventView extends Composite implements EventView, E
 
     private Map<String, String> createOverallLeaderboardLinkParameters(LeaderboardGroupDTO leaderboardGroup) {
         Map<String, String> linkParams = new HashMap<String, String>();
+        linkParams.put("eventId", event.id.toString());
         linkParams.put("name", leaderboardGroup.getName() + " " + LeaderboardNameConstants.OVERALL);
         linkParams.put("showRaceDetails", "true");
         if(leaderboardGroup.getDisplayName() != null) {
@@ -156,6 +159,7 @@ public class TabletAndDesktopEventView extends Composite implements EventView, E
 
     private Map<String, String> createRaceBoardLinkParameters(String leaderboardName, RegattaAndRaceIdentifier raceIdentifier) {
         Map<String, String> linkParams = new HashMap<String, String>();
+        linkParams.put("eventId", event.id.toString());
         linkParams.put("leaderboardName", leaderboardName);
         linkParams.put("raceName", raceIdentifier.getRaceName());
         linkParams.put(RaceBoardViewConfiguration.PARAM_CAN_REPLAY_DURING_LIVE_RACES, "true");
@@ -167,6 +171,7 @@ public class TabletAndDesktopEventView extends Composite implements EventView, E
 
     private Map<String, String> createLeaderboardLinkParameters(LeaderboardGroupDTO leaderboardGroup, StrippedLeaderboardDTO leaderboard) {
         Map<String, String> linkParams = new HashMap<String, String>();
+        linkParams.put("eventId", event.id.toString());
         linkParams.put("name", leaderboard.name);
         linkParams.put("showRaceDetails", "true");
         if (leaderboard.displayName != null) {
