@@ -7,6 +7,7 @@ import com.google.gwt.dom.client.SpanElement;
 import com.google.gwt.dom.client.Style.Display;
 import com.google.gwt.uibinder.client.UiBinder;
 import com.google.gwt.uibinder.client.UiField;
+import com.google.gwt.user.client.DOM;
 import com.google.gwt.user.client.Event;
 import com.google.gwt.user.client.EventListener;
 import com.google.gwt.user.client.ui.UIObject;
@@ -41,7 +42,11 @@ public abstract class StageTeaserBand extends UIObject {
         Event.setEventListener(actionLink, new EventListener() {
             @Override
             public void onBrowserEvent(Event event) {
-                actionLinkClicked();
+                switch (DOM.eventGetType(event)) {
+                case Event.ONCLICK:
+                    actionLinkClicked();
+                    break;
+                }
             }
         });
 
