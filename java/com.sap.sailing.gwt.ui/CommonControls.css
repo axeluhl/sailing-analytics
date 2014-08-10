@@ -716,7 +716,8 @@ body ::-webkit-scrollbar-track {
 .gwt-DialogBox .Caption {
     font-size: 14px;
     padding: 14px 10px;
-    background: url(images/dialogBox-bg.png) 0 0 repeat-x;
+    background-color: #cecece;
+    border: 1px solid #cecece;
     -webkit-border-top-left-radius: 5px;
   -webkit-border-top-right-radius: 5px;
   -moz-border-radius-topleft: 5px;
@@ -733,7 +734,7 @@ body ::-webkit-scrollbar-track {
 .gwt-DialogBox .dialogContent {
     background: #ffffff;
     padding: 10px;
-    border: 10px solid #a6a6a6;
+    border: 1px solid #cecece;
   -webkit-border-bottom-right-radius: 5px;
   -webkit-border-bottom-left-radius: 5px;
   -o-border-bottom-right-radius: 5px;
@@ -851,7 +852,6 @@ body ::-webkit-scrollbar-track {
 }
 
 .SettingsDialogComponent .dialogInnerHeadline {
-    background: url(images/settingsDialog_bg.png) repeat-x 0 0 #E5E5E5;
     border: 1px solid #CCCCCC;
     font-family: OpenSansSemiBold,Arial,Verdana,sans-serif;
     height: 21px;
