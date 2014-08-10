@@ -55,7 +55,7 @@
 	border-left: none;
 	border-top: none !important;
 	border-bottom: 1px solid #c9caca !important;
-	padding: 5px 5px 5px;
+	padding: 7px 7px 7px;
 	white-space: nowrap;
 	font-family: 'OpenSansCondensedLight', 'OpenSansRegular', Arial, Verdana, sans-serif;
 }
@@ -99,7 +99,7 @@
 	border-right: 1px solid #c9caca !important;
 	border-top: none !important;
 	border-bottom: 1px solid #c9caca !important;
-	padding: 5px 5px 5px;
+	padding: 7px 7px 7px;
 	white-space: nowrap;
 	font-family: 'OpenSansCondensedLight', 'OpenSansRegular', Arial, Verdana, sans-serif;
 }

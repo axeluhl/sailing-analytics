@@ -159,6 +159,7 @@ body ::-webkit-scrollbar-track {
 .gwt-SplitLayoutPanel-NorthSouthToggleButton-Panel {
 	position: absolute;
 	right: 10px;
+	top: 3px;
 }
 
 .gwt-SplitLayoutPanel-EastToggleButton-Panel {
@@ -226,7 +227,7 @@ body ::-webkit-scrollbar-track {
     margin-left: 5px;
 	padding: 2px 40px;
 	border-radius: 7px;
-	margin-top: 1px;
+	margin-top: 0px;
 }
 
 .gwt-SplitLayoutPanel-NorthSouthToggleButton-Closed {
@@ -251,6 +252,7 @@ body ::-webkit-scrollbar-track {
 	position: absolute;
 	height: 60px !important;
 	width: 25px !important;
+	margin-left: 3px;
 	top: 40% !important;
 	background: #ffffff url(images/thumb_vertical.png) 70% 50% no-repeat;
 	border: 1px solid #cecece;
@@ -490,17 +492,13 @@ body ::-webkit-scrollbar-track {
 }
 
 .timeLinePanel {
-  color: #fff;
+  color: black;
   width: 100%;
   position: fixed;
   bottom: 0;
   z-index: 9;
-  background: #7c7b7c;
-  box-shadow: 0 0 20px #858585;
-  -webkit-box-shadow: 0 0 20px #858585;
-  -moz-box-shadow: 0 0 20px #858585;
-  -o-box-shadow: 0 0 20px #858585;
-  -ms-box-shadow: 0 0 20px #858585;
+  background: white;
+  border-top: 1px solid #cecece;
 }
 
 .timeLineInnerBgPanel {
@@ -519,11 +517,6 @@ body ::-webkit-scrollbar-track {
 .timePanel-controls {
     margin: 0;
     padding: 7px 12px 0 12px;
-    -webkit-box-shadow: 0px -7px 8px 0px rgba(84, 84, 84, 1);
-    -moz-box-shadow: 0px -7px 8px 0px rgba(84, 84, 84, 1);
-    -o-box-shadow: 0px -7px 8px 0px rgba(84, 84, 84, 1);
-    -ms-box-shadow: 0px -7px 8px 0px rgba(84, 84, 84, 1);
-    box-shadow: 0px -7px 8px 0px rgba(84, 84, 84, 1);
     height: 29px;
 }
 
@@ -606,11 +599,6 @@ body ::-webkit-scrollbar-track {
 }
 
 .timePanelInnerWrapper {
-    -webkit-box-shadow: inset 0px -7px 13px 0px rgba(84, 84, 84, 1);
-    -moz-box-shadow: inset 0px -7px 13px 0px rgba(84, 84, 84, 1);
-    -o-box-shadow: inset 0px -7px 13px 0px rgba(84, 84, 84, 1);
-    -ms-box-shadow: inset 0px -7px 13px 0px rgba(84, 84, 84, 1);
-    box-shadow: inset 0px -7px 13px 0px rgba(84, 84, 84, 1);
 }
 
 
@@ -640,18 +628,67 @@ body ::-webkit-scrollbar-track {
   visibility: hidden;
 }
 
-.globalNavigationLink {
-	display: inline;
-	margin-right: 3px;
+.globalNavigation {
+    position:absolute;
+    top:0;
+    right:0;
 }
 
-.globalNavigationLink a {
-	color: white;
-	cursor: pointer;
+.globalNavigation-Link, .globalNavigation-Link:visited {
+  font-family: OpenSansSemiBold, Verdana, Arial, sans-serif;
+    border: none;
+    display: inline-block;
+    padding: 2px 10px 4px;
+    color: #fff;
+    text-decoration: none;
+    -moz-border-radius: 5px;
+    -webkit-border-radius: 5px;
+    border-radius: 5px;
+    -moz-box-shadow: 0 1px 3px rgba(0, 0, 0, 0.3);
+    -webkit-box-shadow: 0 1px 3px rgba(0, 0, 0, 0.3);
+    box-shadow: 0 1px 3px rgba(0, 0, 0, 0.3);
+    text-shadow: 0 -1px 1px rgba(0, 0, 0, 0.25);
+    border-bottom: 1px solid rgba(0, 0, 0, 0.25);
+    cursor: pointer;
+    height: 24px;
+    white-space: nowrap;
 }
 
-.globalNavigationLink+.globalNavigationLink:before {
-	content: ' \00bb\00a0';
+.globalNavigation-Link:active {
+    top: 1px;
+    position: relative;
+    border: none;
+}
+
+.globalNavigation-Link:hover {
+  background: url(images/btn-cta-orangeleft.png) center -30px repeat-x;
+    cursor: pointer;
+}
+
+.globalNavigation-leaderBoardGroup a, .globalNavigation-home a {
+    background: url(images/globalNavigation-home_bg.png) 11px 8px no-repeat;
+}
+
+.globalNavigation-leaderBoard a {
+  background: url(images/globalNavigation-leaderBoard_bg.png) 11px 8px no-repeat;
+}
+
+.globalNavigation-leaderBoardGroup, .globalNavigation-leaderBoard, .globalNavigation-home {
+    margin: -4px 10px 0 0;
+    padding: 0px 0px 4px;
+    float: left;
+    background: #7c7b7c url(images/alert-overlay.png) repeat-x;
+}
+
+.globalNavigation-leaderBoard {
+  margin-right: 5px;
+}
+
+.globalNavigation-leaderBoardGroup a, .globalNavigation-leaderBoard a, .globalNavigation-home a {
+  color: #fff;
+  text-decoration: none;
+    display: block;
+    padding: 8px 13px 6px 36px;
 }
 
 .sapLogo {

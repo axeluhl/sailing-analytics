@@ -30,7 +30,7 @@ iframe {display: block; width: 100%; height: 100%; border: none; overflow-y: aut
 }
 
 body {
-	background: #ebebeb;
+	background: white;
 	font-family: 'OpenSansRegular', Arial, Verdana, sans-serif;
 	line-height: 1;
 	font-size: 14px;
@@ -324,20 +324,43 @@ img.openColumn {
 }
 
 .backToLivePlayButton {
-	background: url(images/btn-cta-greenleft.png) center top repeat-x;
-    margin: 0 0 0 5px;
-    position: relative;
+    position: absolute;
     right: 15px;
-    top: 12px;
+    bottom: 10px;
+    width: 42px;
+    height: 38px;
+	font-size: 8px;
+	white-space: normal;
+    -moz-border-radius: 5px;
+    -webkit-border-radius: 5px;
+    -o-border-radius: 5px;
+    -ms-border-radius: 5px;
+    border-radius: 5px;
+    border: none;
+    cursor: pointer;
+}
+
+.backToLivePlayButton-Inactive {
+	color: #6dc021;
+	background-color: white;
+	font-weight: bold;
+}
+
+.backToLivePlayButton-Active {
+	background-color: #6dc021;
+	color: white;
+	font-weight: normal;
 }
 
 .backToLivePlayButton:hover {
-    background: url(images/btn-cta-greenleft.png) center -30px repeat-x;
-    margin: 0 0 0 5px;
+	border: 2px solid gray;
+}
+
+.backToLivePlayButton:focus {
+	outline: 0 !important;
 }
 
 .dockLayoutPanel div[style="position: absolute; overflow: hidden; left: 0px; right: 0px; bottom: 0px; height: 90px;"] {
-	box-shadow: 0 0 8px #424242;
 	z-index: 10;
 }
 
@@ -400,6 +423,7 @@ img.openColumn {
 	color: white;
 	margin-left: auto;
 	margin-right: auto;
+	opacity: .8;
 }
 
 .raceBoard-TitlePanel-RaceNameLabel {
@@ -429,15 +453,15 @@ img.openColumn {
   	border-top-right-radius: 5px;
   	border-bottom-left-radius: 5px;
   	border-bottom-right-radius: 5px;
-  	border: none;
+  	border: 1px solid #ececec;
 }
 
 .TimePanel-ShowExtended-Button-Closed {
-	background: white url(images/arrows_bottom_black.png) center no-repeat;
+	background: white url(images/arrows_top_black.png) center no-repeat;
 }
 
 .TimePanel-ShowExtended-Button-Open {
-	background: white url(images/arrows_top_black.png) center no-repeat;
+	background: white url(images/arrows_bottom_black.png) center no-repeat;
 }
 
 .TimePanel-ShowExtended-Button:hover {
@@ -446,4 +470,33 @@ img.openColumn {
 
 .TimePanel-ShowExtended-Button:focus {
 	outline: 0 !important;
+}
+
+.RaceBoard-globalNavigation-Link {
+	display: inline;
+	margin-right: 3px;
+}
+
+.RaceBoard-globalNavigation-Link a {
+	color: white;
+	cursor: pointer;
+}
+
+.RaceBoard-globalNavigation-Link+.RaceBoard-globalNavigation-Link:before {
+	content: ' \00bb\00a0';
+}
+
+.TimePanel-settingsButtonStyle {
+	position: absolute;
+	right: 0px;
+	z-index: 1;
+	border: none;
+}
+
+.TimePanel-settingsButtonStyle:focus {
+	outline: 0 !important;
+}
+
+.TimePanel-settingsButtonStyle:hover {
+	border: 1px solid gray;
 }
