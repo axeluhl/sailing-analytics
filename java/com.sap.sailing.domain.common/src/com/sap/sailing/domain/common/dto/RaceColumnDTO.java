@@ -21,23 +21,15 @@ public class RaceColumnDTO extends NamedDTO implements Serializable {
     private List<FleetDTO> fleets;
     private Map<FleetDTO, RegattaAndRaceIdentifier> trackedRaceIdentifiersPerFleet;
     private Map<FleetDTO, RaceDTO> racesPerFleet;
-    private Boolean isValidInTotalScore;
     private Double explicitFactor;
     private double effectiveFactor;
 
     private Map<FleetDTO, RaceLogTrackingInfoDTO> raceLogTrackingInfos = new HashMap<FleetDTO, RaceLogTrackingInfoDTO>();
     
-    RaceColumnDTO() {} // for GWT serialization
-    
-    public RaceColumnDTO(Boolean isValidInTotalScore) {
-        this.isValidInTotalScore = isValidInTotalScore;
+    public RaceColumnDTO() {
         trackedRaceIdentifiersPerFleet = new HashMap<FleetDTO, RegattaAndRaceIdentifier>();
         racesPerFleet = new HashMap<FleetDTO, RaceDTO>();
         fleets = new ArrayList<FleetDTO>();
-    }
-    
-    public boolean isValidInTotalScore() {
-        return isValidInTotalScore;
     }
     
     public String getRaceColumnName() {
@@ -240,7 +232,6 @@ public class RaceColumnDTO extends NamedDTO implements Serializable {
         result = prime * result + (int) (temp ^ (temp >>> 32));
         result = prime * result + ((explicitFactor == null) ? 0 : explicitFactor.hashCode());
         result = prime * result + ((fleets == null) ? 0 : fleets.hashCode());
-        result = prime * result + ((isValidInTotalScore == null) ? 0 : isValidInTotalScore.hashCode());
         result = prime * result + (medalRace ? 1231 : 1237);
         result = prime * result + ((racesPerFleet == null) ? 0 : racesPerFleet.hashCode());
         result = prime * result
@@ -268,11 +259,6 @@ public class RaceColumnDTO extends NamedDTO implements Serializable {
             if (other.fleets != null)
                 return false;
         } else if (!fleets.equals(other.fleets))
-            return false;
-        if (isValidInTotalScore == null) {
-            if (other.isValidInTotalScore != null)
-                return false;
-        } else if (!isValidInTotalScore.equals(other.isValidInTotalScore))
             return false;
         if (medalRace != other.medalRace)
             return false;
