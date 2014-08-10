@@ -149,8 +149,11 @@ public abstract class AbstractLeaderboardDTO implements Serializable {
     public RaceColumnDTO addRace(String raceColumnName, Double explicitFactor, double effectiveFactor,
             String regattaName, String seriesName, FleetDTO fleetDTO, boolean medalRace, RegattaAndRaceIdentifier trackedRaceIdentifier, RaceDTO race) {
         assert fleetDTO != null;
-        RaceColumnDTO raceColumnDTO = RaceColumnDTOFactory.INSTANCE.createRaceColumnDTO(raceColumnName, medalRace,
+        RaceColumnDTO raceColumnDTO = getRaceColumnByName(raceColumnName);
+        if (raceColumnDTO == null) {
+            raceColumnDTO = RaceColumnDTOFactory.INSTANCE.createRaceColumnDTO(raceColumnName, medalRace,
                 explicitFactor, regattaName, seriesName);
+        }
         races.add(raceColumnDTO);
         raceColumnDTO.setEffectiveFactor(effectiveFactor);
         boolean contains = false;
