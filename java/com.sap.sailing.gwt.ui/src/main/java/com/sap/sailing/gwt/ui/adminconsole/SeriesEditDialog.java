@@ -25,6 +25,7 @@ import com.google.gwt.user.client.ui.TabPanel;
 import com.google.gwt.user.client.ui.TextBox;
 import com.google.gwt.user.client.ui.VerticalPanel;
 import com.google.gwt.user.client.ui.Widget;
+import com.sap.sailing.domain.common.LeaderboardNameConstants;
 import com.sap.sailing.domain.common.dto.RaceColumnDTO;
 import com.sap.sailing.gwt.ui.client.StringMessages;
 import com.sap.sailing.gwt.ui.client.shared.controls.listedit.StringListEditorComposite;
@@ -371,7 +372,7 @@ public class SeriesEditDialog extends DataEntryDialog<SeriesDescriptor> {
             addRacesPanel.add(new Label(stringMessages.withNamePrefix()));
 
             raceNamePrefixTextBox.setWidth("20px");
-            if ("Default".equals(seriesName)) {
+            if (LeaderboardNameConstants.DEFAULT_SERIES_NAME.equals(seriesName)) {
                 raceNamePrefixTextBox.setText("R");
             } else {
                 raceNamePrefixTextBox.setText(seriesName.substring(0, 1).toUpperCase());
