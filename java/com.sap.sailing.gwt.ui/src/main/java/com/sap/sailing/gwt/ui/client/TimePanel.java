@@ -175,7 +175,7 @@ public class TimePanel<T extends TimePanelSettings> extends SimplePanel implemen
                 TimePanel.this.timer.play();
             }
         });
-        backToLivePlayButton.addStyleName("backToLivePlayButton");
+        backToLivePlayButton.setStyleName("backToLivePlayButton");
         backToLivePlayButton.setTitle(stringMessages.backToLive());
         playControlPanel.add(backToLivePlayButton);
 
@@ -503,6 +503,15 @@ public class TimePanel<T extends TimePanelSettings> extends SimplePanel implemen
      */
     protected void setJumpToLiveEnablement(boolean enabled) {
         backToLivePlayButton.setEnabled(enabled);
+        if (enabled) {
+            backToLivePlayButton.setText("Back to Live");
+            backToLivePlayButton.removeStyleDependentName("Inactive");
+            backToLivePlayButton.addStyleDependentName("Active");
+        } else {
+            backToLivePlayButton.setText("Race is Live");
+            backToLivePlayButton.removeStyleDependentName("Active");
+            backToLivePlayButton.addStyleDependentName("Inactive");
+        }
     }
     
     /**

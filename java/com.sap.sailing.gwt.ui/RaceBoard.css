@@ -324,16 +324,39 @@ img.openColumn {
 }
 
 .backToLivePlayButton {
-	background: url(images/btn-cta-greenleft.png) center top repeat-x;
-    margin: 0 0 0 5px;
-    position: relative;
+    position: absolute;
     right: 15px;
-    top: 12px;
+    bottom: 10px;
+    width: 42px;
+    height: 38px;
+	font-size: 8px;
+	white-space: normal;
+    -moz-border-radius: 5px;
+    -webkit-border-radius: 5px;
+    -o-border-radius: 5px;
+    -ms-border-radius: 5px;
+    border-radius: 5px;
+    border: none;
+}
+
+.backToLivePlayButton-Inactive {
+	color: #6dc021;
+	background-color: white;
+	font-weight: bold;
+}
+
+.backToLivePlayButton-Active {
+	background-color: #6dc021;
+	color: white;
+	font-weight: normal;
 }
 
 .backToLivePlayButton:hover {
-    background: url(images/btn-cta-greenleft.png) center -30px repeat-x;
-    margin: 0 0 0 5px;
+	border: 1px solid gray;
+}
+
+.backToLivePlayButton:focus {
+	outline: 0 !important;
 }
 
 .dockLayoutPanel div[style="position: absolute; overflow: hidden; left: 0px; right: 0px; bottom: 0px; height: 90px;"] {
