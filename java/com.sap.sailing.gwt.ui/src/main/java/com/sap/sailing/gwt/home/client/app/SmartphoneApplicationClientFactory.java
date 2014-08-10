@@ -72,6 +72,6 @@ public class SmartphoneApplicationClientFactory extends AbstractApplicationClien
 
     @Override
     public SearchResultView createSearchResultView() {
-        return new TabletAndDesktopSearchResultView(getPlaceNavigator(), getEventBus());
+        return new TabletAndDesktopSearchResultView(getPlaceNavigator());
     }
 }
