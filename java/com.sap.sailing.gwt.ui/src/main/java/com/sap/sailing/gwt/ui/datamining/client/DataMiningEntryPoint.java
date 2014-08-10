@@ -64,7 +64,7 @@ public class DataMiningEntryPoint extends AbstractEntryPoint {
     private LogoAndTitlePanel createLogoAndTitlePanel() {
         LogoAndTitlePanel logoAndTitlePanel = new LogoAndTitlePanel(stringMessages.dataMining(), stringMessages, this);
         logoAndTitlePanel.addStyleName("LogoAndTitlePanel");
-        FlowPanel globalNavigationPanel = new GlobalNavigationPanel(stringMessages, true, null, null);
+        FlowPanel globalNavigationPanel = new GlobalNavigationPanel(stringMessages, true, null, null, /* event */ null);
         logoAndTitlePanel.add(globalNavigationPanel);
         return logoAndTitlePanel;
     }

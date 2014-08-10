@@ -8,6 +8,7 @@ import com.google.gwt.safehtml.client.SafeHtmlTemplates;
 import com.google.gwt.safehtml.shared.SafeHtml;
 import com.google.gwt.user.client.ui.FlowPanel;
 import com.google.gwt.user.client.ui.HTML;
+import com.sap.sailing.gwt.ui.shared.EventDTO;
 
 public class GlobalNavigationPanel extends FlowPanel {
 
@@ -19,7 +20,11 @@ public class GlobalNavigationPanel extends FlowPanel {
     public static final AnchorTemplates ANCHORTEMPLATE = GWT.create(AnchorTemplates.class);
     public static final String STYLE_NAME_PREFIX = "globalNavigation-";
 
-    public GlobalNavigationPanel(StringMessages stringMessages, boolean showHomeNavigation, String leaderboardName, String leaderboardGroupName) {
+    /**
+     * @param event an optional event; may be <code>null</code>.
+     */
+    public GlobalNavigationPanel(StringMessages stringMessages, boolean showHomeNavigation, String leaderboardName,
+            String leaderboardGroupName, EventDTO event) {
         super();
         setStyleName("globalNavigation");
         if (showHomeNavigation) {
