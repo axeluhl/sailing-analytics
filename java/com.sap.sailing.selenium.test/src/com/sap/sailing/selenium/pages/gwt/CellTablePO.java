@@ -232,13 +232,13 @@ public abstract class CellTablePO<T extends DataEntryPO> extends PageArea {
      */
     public void selectEntries(List<T> entries) {
         // First deselect all selected entries
-        for(T entry : getSelectedEntries()) {
+        for (T entry : getSelectedEntries()) {
             entry.deselect();
         }
-        
+
         // Select all specified entries
-        for(T entry : entries) {
-            if(this.getWebElement().equals(entry.table.getWebElement())) {
+        for (T entry : entries) {
+            if (this.getWebElement().equals(entry.table.getWebElement())) {
                 entry.appendToSelection();
             }
         }
