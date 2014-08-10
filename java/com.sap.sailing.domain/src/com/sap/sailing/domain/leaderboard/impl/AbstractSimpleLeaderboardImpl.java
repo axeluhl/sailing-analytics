@@ -1261,6 +1261,7 @@ public abstract class AbstractSimpleLeaderboardImpl implements Leaderboard, Race
                 }
                 // Note: the RaceColumnDTO won't be created by the following addRace call because it has been created
                 // above by the result.createEmptyRaceColumn call
+                // FIXME when raceColumn is a RaceColumnInSeries, a RaceColumnInSeriesDTO must be added; the existing code adds a RaceColumnDTO...
                 result.addRace(raceColumn.getName(), raceColumn.getExplicitFactor(), raceColumn.getFactor(), fleetDTO,
                         raceColumn.isMedalRace(), raceIdentifier, race);
             }
