@@ -48,6 +48,7 @@ import com.sap.sailing.gwt.ui.leaderboard.ExplicitRaceColumnSelectionWithPresele
 import com.sap.sailing.gwt.ui.leaderboard.LeaderboardPanel;
 import com.sap.sailing.gwt.ui.leaderboard.LeaderboardSettings;
 import com.sap.sailing.gwt.ui.leaderboard.LeaderboardSettingsFactory;
+import com.sap.sailing.gwt.ui.shared.EventDTO;
 import com.sap.sailing.gwt.ui.shared.RegattaDTO;
 import com.sap.sailing.gwt.ui.shared.UserDTO;
 import com.sap.sse.common.filter.FilterSet;
@@ -105,10 +106,17 @@ public class RaceBoardPanel extends SimplePanel implements RegattasDisplayer, Ra
     private final RaceTimesInfoProvider raceTimesInfoProvider;
     private RaceMap raceMap;
     
-    public RaceBoardPanel(SailingServiceAsync sailingService, MediaServiceAsync mediaService, AsyncActionsExecutor asyncActionsExecutor, UserDTO theUser, Timer timer,
+    /**
+     * @param event
+     *            an optional event that can be used for "back"-navigation in case the race board shows a race in the
+     *            context of an event; may be <code>null</code>.
+     */
+    public RaceBoardPanel(SailingServiceAsync sailingService, MediaServiceAsync mediaService,
+            AsyncActionsExecutor asyncActionsExecutor, UserDTO theUser, Timer timer,
             RaceSelectionProvider theRaceSelectionProvider, String leaderboardName, String leaderboardGroupName,
-            RaceBoardViewConfiguration raceboardViewConfiguration, ErrorReporter errorReporter, final StringMessages stringMessages, 
-            UserAgentDetails userAgent, RaceTimesInfoProvider raceTimesInfoProvider, boolean showMapControls) {
+            EventDTO event, RaceBoardViewConfiguration raceboardViewConfiguration, ErrorReporter errorReporter,
+            final StringMessages stringMessages, UserAgentDetails userAgent,
+            RaceTimesInfoProvider raceTimesInfoProvider, boolean showMapControls) {
         this.sailingService = sailingService;
         this.mediaService = mediaService;
         this.user = theUser;
@@ -142,7 +150,7 @@ public class RaceBoardPanel extends SimplePanel implements RegattasDisplayer, Ra
                     }
                 }, selectedRaceIdentifier);
         leaderboardPanel = createLeaderboardPanel(leaderboardName, leaderboardGroupName, competitorSearchTextBox);
-        createOneScreenView(leaderboardName, leaderboardGroupName, mainPanel, showMapControls, raceMap); // initializes the raceMap field
+        createOneScreenView(leaderboardName, leaderboardGroupName, event, mainPanel, showMapControls, raceMap); // initializes the raceMap field
         // these calls make sure that leaderboard and competitor map data are loaded
         leaderboardPanel.addLeaderboardUpdateListener(this);
         getElement().getStyle().setMarginLeft(12, Unit.PX);
@@ -172,8 +180,12 @@ public class RaceBoardPanel extends SimplePanel implements RegattasDisplayer, Ra
         timePanel.onRaceSelectionChange(raceSelectionProvider.getSelectedRaces());
     }
     
-    private void createOneScreenView(String leaderboardName, String leaderboardGroupName, FlowPanel mainPanel, boolean showMapControls,
-            RaceMap raceMap) {
+    /**
+     * @param event an optional event; may be <code>null</code> or else can be used to show some context information in
+     * the {@link GlobalNavigationPanel}.
+     */
+    private void createOneScreenView(String leaderboardName, String leaderboardGroupName, EventDTO event, FlowPanel mainPanel,
+            boolean showMapControls, RaceMap raceMap) {
         // create the default leaderboard and select the right race
         raceTimesInfoProvider.addRaceTimesInfoProviderListener(raceMap);
         raceMap.onRaceSelectionChange(Collections.singletonList(selectedRaceIdentifier));
@@ -199,7 +211,7 @@ public class RaceBoardPanel extends SimplePanel implements RegattasDisplayer, Ra
         setLeaderboardVisible(getConfiguration().isShowLeaderboard());
         setWindChartVisible(getConfiguration().isShowWindChart());
         setCompetitorChartVisible(getConfiguration().isShowCompetitorsChart());
-        createGeneralInformation(raceMap, leaderboardName, leaderboardGroupName);
+        createGeneralInformation(raceMap, leaderboardName, leaderboardGroupName, event);
         // make sure to load leaderboard data for filtering to work
         if (!getConfiguration().isShowLeaderboard()) {
             leaderboardPanel.setVisible(true);
@@ -207,7 +219,10 @@ public class RaceBoardPanel extends SimplePanel implements RegattasDisplayer, Ra
         }
     }
     
-    private void createGeneralInformation(RaceMap raceMap, String leaderboardName, String leaderboardGroupName) {
+    /**
+     * @param event an optional event; may be <code>null</code>.
+     */
+    private void createGeneralInformation(RaceMap raceMap, String leaderboardName, String leaderboardGroupName, EventDTO event) {
         VerticalPanel titlePanel = new VerticalPanel();
         titlePanel.setHorizontalAlignment(HasHorizontalAlignment.ALIGN_CENTER);
         titlePanel.setStyleName("raceBoard-TitlePanel");
