@@ -33,7 +33,7 @@ public class SideBySideComponentViewer implements ComponentViewer {
         }
     }
 
-    private final int MIN_LEADERBOARD_WIDTH = 340;
+    private final int MIN_LEADERBOARD_WIDTH = 370;
     
     private final LeaderboardPanel leftComponent;
     private final Panel leaderboardContentPanel;
