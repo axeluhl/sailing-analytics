@@ -18,9 +18,7 @@ import com.google.gwt.user.client.ui.Composite;
 import com.google.gwt.user.client.ui.HTMLPanel;
 import com.google.gwt.user.client.ui.TextBox;
 import com.google.gwt.user.client.ui.Widget;
-import com.google.web.bindery.event.shared.EventBus;
 import com.sap.sailing.gwt.home.client.app.PlaceNavigator;
-import com.sap.sailing.gwt.home.client.place.searchresult.SearchEvent;
 import com.sap.sailing.gwt.ui.shared.LeaderboardSearchResultDTO;
 
 public class SearchResult extends Composite {
@@ -40,11 +38,9 @@ public class SearchResult extends Composite {
 
     private final List<SearchResultItem> searchResultItemComposites;
     private final PlaceNavigator navigator;
-    private final EventBus eventBus;
 
-    public SearchResult(PlaceNavigator navigator, EventBus eventBus) {
+    public SearchResult(PlaceNavigator navigator) {
         this.navigator = navigator;
-        this.eventBus = eventBus;
         this.searchResultItemComposites = new ArrayList<SearchResultItem>();
         
         SearchResultResources.INSTANCE.css().ensureInjected();
@@ -84,7 +80,7 @@ public class SearchResult extends Composite {
         if(searchText.isEmpty()) {
             Window.alert("Please enter a search term.");
         } else {
-            eventBus.fireEvent(new SearchEvent(searchText));
+            navigator.goToSearchResult(searchText);
         }
     }
 
