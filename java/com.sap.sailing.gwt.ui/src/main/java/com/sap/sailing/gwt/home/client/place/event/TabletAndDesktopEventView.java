@@ -76,7 +76,7 @@ public class TabletAndDesktopEventView extends Composite implements EventView, E
             selectedRegatta = regattaStructure.get(0);
         }
 
-        if(selectedRegatta != null) {
+        if(selectedRegatta != null && !event.isFakeSeries()) {
             goToRegattaRaces(selectedRegatta.getC(), selectedRegatta.getB(), selectedRegatta.getA());
         } else {
             goToRegattas();
