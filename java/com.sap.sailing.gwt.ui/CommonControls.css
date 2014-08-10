@@ -238,6 +238,7 @@ body ::-webkit-scrollbar-track {
 .gwt-SplitLayoutPanel-NorthSouthToggleButton-Open {
 	background: white url(images/arrows_bottom_black_small.png) 95% 50% no-repeat;
 	font-weight: bold;
+	border-width: 3px;
 }
 	
 .gwt-SplitLayoutPanel-NorthSouthToggleButton:focus {
