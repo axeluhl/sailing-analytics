@@ -17,6 +17,10 @@ public class EntryPointLinkFactory {
     public static String createLeaderboardGroupLink(Map<String, String> parameters) {
         return createEntryPointLink("/gwt/Spectator.html", parameters);
     }
+    
+    public static String createEventLink(Map<String, String> parameters, String eventId) {
+        return createEntryPointLink("/gwt/Home.html#EventPlace:eventId="+eventId, parameters);
+    }
 
     private static String createEntryPointLink(String baseLink, Map<String, String> parameters) {
         String debugParam = Window.Location.getParameter("gwt.codesvr");

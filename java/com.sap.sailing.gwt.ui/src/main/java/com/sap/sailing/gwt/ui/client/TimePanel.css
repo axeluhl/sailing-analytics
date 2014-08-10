@@ -1,19 +1,10 @@
-.busyIndicatorStyle {
-	display: table-cell;
-	vertical-align: middle;
-	text-align: center;
-}
-
-.busyIndicatorImageStyle {
-	
-}
-
 .settingsButtonStyle {
 	position: absolute;
 	right: 0px;
+	top: 0px;
 	z-index: 1;
-	margin-top: 14px;
-	margin-right: 4px;
+	margin-top: 4px;
+	margin-right: 15px;
 	border: none;
 }
 
@@ -22,13 +13,7 @@
 }
 
 .settingsButtonStyle:hover {
-	border: 1px solid #ececec;
-}
-
-.chartStyle {
-	position: absolute;
-	left: 0px;
-	top: 0px;
+	border: 1px solid gray;
 }
 
 @sprite .settingsButtonBackgroundImage {

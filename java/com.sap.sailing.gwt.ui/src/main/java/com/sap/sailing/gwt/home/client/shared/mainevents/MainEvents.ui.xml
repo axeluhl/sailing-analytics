@@ -19,7 +19,9 @@
 	<!-- the recent events will be inserted here -->
   </div>
   <div class="{res.mainCss.grid} {res.mainCss.mainsection_navigation}">
-    <div class="{res.mediaCss.small12} {res.mediaCss.columns}"><a href="#" class="{res.mainCss.button}"><ui:text from='{i18n.mainEventShowAll}'/></a></div>
+    <div class="{res.mediaCss.small12} {res.mediaCss.columns}">
+        <g:Anchor ui:field="showAllEventsAnchor" href="javascript:;" styleName="{res.mainCss.button}"><ui:text from='{i18n.mainEventShowAll}'/></g:Anchor>
+    </div>
   </div>
 </div>
     </g:HTMLPanel>

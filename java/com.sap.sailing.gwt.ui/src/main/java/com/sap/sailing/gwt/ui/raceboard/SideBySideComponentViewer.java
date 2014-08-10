@@ -2,6 +2,7 @@ package com.sap.sailing.gwt.ui.raceboard;
 
 import java.util.List;
 
+import com.google.gwt.dom.client.Style.Unit;
 import com.google.gwt.user.client.ui.AbsolutePanel;
 import com.google.gwt.user.client.ui.DockLayoutPanel.Direction;
 import com.google.gwt.user.client.ui.LayoutPanel;
@@ -33,7 +34,7 @@ public class SideBySideComponentViewer implements ComponentViewer {
         }
     }
 
-    private final int MIN_LEADERBOARD_WIDTH = 340;
+    private final int MIN_LEADERBOARD_WIDTH = 370;
     
     private final LeaderboardPanel leftComponent;
     private final Panel leaderboardContentPanel;
@@ -59,6 +60,7 @@ public class SideBySideComponentViewer implements ComponentViewer {
         leftScrollPanel.setTitle(leftComponentP.getEntryWidget().getTitle());
         mainPanel = new LayoutPanel();
         mainPanel.setSize("100%", "100%");
+        mainPanel.getElement().getStyle().setMarginTop(-11, Unit.PX);
         mainPanel.setStyleName("SideBySideComponentViewer-MainPanel");
         splitLayoutPanel = new TouchSplitLayoutPanelWithBetterDraggers(/* horizontal splitter width */ 3, /*vertical splitter height*/ 25);
         mainPanel.add(splitLayoutPanel);

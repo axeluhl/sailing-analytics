@@ -12,6 +12,7 @@ import com.google.gwt.dom.client.Style.Display;
 import com.google.gwt.dom.client.StyleInjector;
 import com.google.gwt.uibinder.client.UiBinder;
 import com.google.gwt.uibinder.client.UiField;
+import com.google.gwt.user.client.DOM;
 import com.google.gwt.user.client.Event;
 import com.google.gwt.user.client.EventListener;
 import com.google.gwt.user.client.ui.Composite;
@@ -164,24 +165,38 @@ public class Regatta extends Composite {
         Event.setEventListener(leaderboardLink, new EventListener() {
             @Override
             public void onBrowserEvent(Event event) {
-                pageNavigator.openLeaderboardViewer(null, leaderboard);
+                switch (DOM.eventGetType(event)) {
+                    case Event.ONCLICK:
+                        pageNavigator.openLeaderboardViewer(null, leaderboard);
+                        break;
+                }
             }
         });
 
-        Event.sinkEvents(regattaImageWithLink, Event.ONCLICK);
-        Event.setEventListener(regattaImageWithLink, new EventListener() {
-            @Override
-            public void onBrowserEvent(Event event) {
-                pageNavigator.goToRegattaRaces(leaderboardGroup, leaderboard, raceGroup);
-            }
-        });
+        if(isNavigatable) {
+            Event.sinkEvents(regattaImageWithLink, Event.ONCLICK);
+            Event.setEventListener(regattaImageWithLink, new EventListener() {
+                @Override
+                public void onBrowserEvent(Event event) {
+                    switch (DOM.eventGetType(event)) {
+                        case Event.ONCLICK:
+                            pageNavigator.goToRegattaRaces(leaderboardGroup, leaderboard, raceGroup);
+                            break;
+                    }
+                }
+            });
 
-        Event.sinkEvents(regattaNameLink, Event.ONCLICK);
-        Event.setEventListener(regattaNameLink, new EventListener() {
-            @Override
-            public void onBrowserEvent(Event event) {
-                pageNavigator.goToRegattaRaces(leaderboardGroup, leaderboard, raceGroup);
-            }
-        });
+            Event.sinkEvents(regattaNameLink, Event.ONCLICK);
+            Event.setEventListener(regattaNameLink, new EventListener() {
+                @Override
+                public void onBrowserEvent(Event event) {
+                    switch (DOM.eventGetType(event)) {
+                        case Event.ONCLICK:
+                            pageNavigator.goToRegattaRaces(leaderboardGroup, leaderboard, raceGroup);
+                            break;
+                    }
+                }
+            });
+        }
     }
 }

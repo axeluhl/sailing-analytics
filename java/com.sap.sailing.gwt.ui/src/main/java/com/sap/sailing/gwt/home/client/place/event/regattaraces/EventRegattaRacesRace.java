@@ -10,6 +10,7 @@ import com.google.gwt.dom.client.Style.Visibility;
 import com.google.gwt.i18n.shared.DateTimeFormat;
 import com.google.gwt.uibinder.client.UiBinder;
 import com.google.gwt.uibinder.client.UiField;
+import com.google.gwt.user.client.DOM;
 import com.google.gwt.user.client.Event;
 import com.google.gwt.user.client.EventListener;
 import com.google.gwt.user.client.ui.UIObject;
@@ -101,7 +102,11 @@ public class EventRegattaRacesRace extends UIObject {
         Event.setEventListener(analyzeRaceLink, new EventListener() {
             @Override
             public void onBrowserEvent(Event event) {
-                openRaceViewer();
+                switch (DOM.eventGetType(event)) {
+                    case Event.ONCLICK:
+                        openRaceViewer();
+                        break;
+                }
             }
         });
 
@@ -109,7 +114,11 @@ public class EventRegattaRacesRace extends UIObject {
         Event.setEventListener(watchRaceLink, new EventListener() {
             @Override
             public void onBrowserEvent(Event event) {
-                openRaceViewer();
+                switch (DOM.eventGetType(event)) {
+                    case Event.ONCLICK:
+                        openRaceViewer();
+                        break;
+                }
             }
         });
     }

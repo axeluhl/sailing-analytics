@@ -8,6 +8,7 @@ import com.google.gwt.safehtml.client.SafeHtmlTemplates;
 import com.google.gwt.safehtml.shared.SafeHtml;
 import com.google.gwt.user.client.ui.FlowPanel;
 import com.google.gwt.user.client.ui.HTML;
+import com.sap.sailing.gwt.ui.shared.EventDTO;
 
 public class GlobalNavigationPanel extends FlowPanel {
 
@@ -17,20 +18,37 @@ public class GlobalNavigationPanel extends FlowPanel {
     }
     
     public static final AnchorTemplates ANCHORTEMPLATE = GWT.create(AnchorTemplates.class);
-    public static final String STYLE_NAME_PREFIX = "globalNavigation-";
+    
+    private final String styleName;
 
-    public GlobalNavigationPanel(StringMessages stringMessages, boolean showHomeNavigation, String leaderboardName, String leaderboardGroupName) {
+    /**
+     * @param event an optional event; may be <code>null</code>.
+     * @param styleNamePrefix an optional prefix for the style name; may be null - if not null the prefix
+     *         is prepended to the style settings.
+     */
+    public GlobalNavigationPanel(StringMessages stringMessages, boolean showHomeNavigation, String leaderboardName,
+            String leaderboardGroupName, EventDTO event, String styleNamePrefix) {
         super();
-        setStyleName("globalNavigation");
-        if (showHomeNavigation) {
-            if (leaderboardGroupName != null && !leaderboardGroupName.isEmpty()) {
-                Map<String, String> leaderboardGroupLinkParameters = new HashMap<String, String>();
-                leaderboardGroupLinkParameters.put("showRaceDetails", "true");
-                leaderboardGroupLinkParameters.put("leaderboardGroupName", leaderboardGroupName);
-                String leaderBoardGroupLink = EntryPointLinkFactory.createLeaderboardGroupLink(leaderboardGroupLinkParameters);
-                addNavigationLink(leaderboardGroupName, leaderBoardGroupLink, "leaderBoardGroup", stringMessages.goToEventOverview());
-            } else {
-                addNavigationLink(stringMessages.home(), "/", "home", stringMessages.goToEventOverview());
+        if (styleNamePrefix != null && !styleNamePrefix.equalsIgnoreCase("")) {
+            this.styleName = styleNamePrefix+"-globalNavigation";
+        } else {
+            this.styleName = "globalNavigation";
+        }
+        setStyleName(this.styleName);
+        if (event != null  && event.getName() != null) {
+            String eventLink = EntryPointLinkFactory.createEventLink(new HashMap<String, String>(), event.id.toString());
+            addNavigationLink(event.getName(), eventLink, "event", stringMessages.goToEventOverview());
+        } else {
+            if (showHomeNavigation) {
+                if (leaderboardGroupName != null && !leaderboardGroupName.isEmpty()) {
+                    Map<String, String> leaderboardGroupLinkParameters = new HashMap<String, String>();
+                    leaderboardGroupLinkParameters.put("showRaceDetails", "true");
+                    leaderboardGroupLinkParameters.put("leaderboardGroupName", leaderboardGroupName);
+                    String leaderBoardGroupLink = EntryPointLinkFactory.createLeaderboardGroupLink(leaderboardGroupLinkParameters);
+                    addNavigationLink(leaderboardGroupName, leaderBoardGroupLink, "leaderBoardGroup", stringMessages.goToEventOverview());
+                } else {
+                    addNavigationLink(stringMessages.home(), "/", "home", stringMessages.goToEventOverview());
+                }
             }
         }
         
@@ -49,8 +67,8 @@ public class GlobalNavigationPanel extends FlowPanel {
     private void addNavigationLink(String linkName, String linkUrl, String styleNameExtension, String htmlTitle) {
     	String setHtmlTitle = htmlTitle;
         HTML linkHtml = new HTML(ANCHORTEMPLATE.anchor(linkUrl, linkName));
-        linkHtml.addStyleName("globalNavigationLink");
-        linkHtml.addStyleName(STYLE_NAME_PREFIX + styleNameExtension);
+        linkHtml.addStyleName(styleName+"-"+"Link");
+        linkHtml.addStyleName(styleName+"-"+styleNameExtension);
         linkHtml.setTitle(setHtmlTitle);
         add(linkHtml);
     }
