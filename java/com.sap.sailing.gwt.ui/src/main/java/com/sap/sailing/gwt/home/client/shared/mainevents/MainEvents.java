@@ -5,8 +5,11 @@ import java.util.List;
 
 import com.google.gwt.core.client.GWT;
 import com.google.gwt.dom.client.DivElement;
+import com.google.gwt.event.dom.client.ClickEvent;
 import com.google.gwt.uibinder.client.UiBinder;
 import com.google.gwt.uibinder.client.UiField;
+import com.google.gwt.uibinder.client.UiHandler;
+import com.google.gwt.user.client.ui.Anchor;
 import com.google.gwt.user.client.ui.Composite;
 import com.google.gwt.user.client.ui.Widget;
 import com.sap.sailing.gwt.home.client.app.PlaceNavigator;
@@ -22,6 +25,7 @@ public class MainEvents extends Composite {
     private List<EventBaseDTO> recentEvents;
     
     @UiField DivElement recentEventsDiv;
+    @UiField Anchor showAllEventsAnchor;
     
     private final PlaceNavigator navigator;
     
@@ -56,4 +60,10 @@ public class MainEvents extends Composite {
         event.setEvent(eventBase);
         recentEventsDiv.appendChild(event.getElement());
     }
+    
+    @UiHandler("showAllEventsAnchor")
+    public void showAllEvents(ClickEvent e) {
+        navigator.goToEvents();;
+    }
+
 }
