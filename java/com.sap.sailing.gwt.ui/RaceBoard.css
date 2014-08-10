@@ -352,7 +352,7 @@ img.openColumn {
 }
 
 .backToLivePlayButton:hover {
-	border: 1px solid gray;
+	border: 2px solid gray;
 }
 
 .backToLivePlayButton:focus {
