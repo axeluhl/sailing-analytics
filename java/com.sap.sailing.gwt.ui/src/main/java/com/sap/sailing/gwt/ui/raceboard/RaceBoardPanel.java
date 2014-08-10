@@ -228,7 +228,7 @@ public class RaceBoardPanel extends SimplePanel implements RegattasDisplayer, Ra
         titlePanel.setStyleName("raceBoard-TitlePanel");
         raceNameLabel.setStyleName("raceBoard-TitlePanel-RaceNameLabel");
         titlePanel.add(raceNameLabel);
-        GlobalNavigationPanel globalNavigationPanel = new GlobalNavigationPanel(stringMessages, true, leaderboardName, leaderboardGroupName, event);
+        GlobalNavigationPanel globalNavigationPanel = new GlobalNavigationPanel(stringMessages, true, leaderboardName, leaderboardGroupName, event, "RaceBoard");
         titlePanel.add(globalNavigationPanel);
         raceMap.add(titlePanel);
     }

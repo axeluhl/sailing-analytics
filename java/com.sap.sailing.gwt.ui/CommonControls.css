@@ -640,17 +640,80 @@ body ::-webkit-scrollbar-track {
   visibility: hidden;
 }
 
-.globalNavigationLink {
+.globalNavigation {
+    position:absolute;
+    top:0;
+    right:0;
+}
+
+.globalNavigation-Link, .globalNavigation-Link:visited {
+  font-family: OpenSansSemiBold, Verdana, Arial, sans-serif;
+    border: none;
+    display: inline-block;
+    padding: 2px 10px 4px;
+    color: #fff;
+    text-decoration: none;
+    -moz-border-radius: 5px;
+    -webkit-border-radius: 5px;
+    border-radius: 5px;
+    -moz-box-shadow: 0 1px 3px rgba(0, 0, 0, 0.3);
+    -webkit-box-shadow: 0 1px 3px rgba(0, 0, 0, 0.3);
+    box-shadow: 0 1px 3px rgba(0, 0, 0, 0.3);
+    text-shadow: 0 -1px 1px rgba(0, 0, 0, 0.25);
+    border-bottom: 1px solid rgba(0, 0, 0, 0.25);
+    cursor: pointer;
+    height: 24px;
+    white-space: nowrap;
+}
+
+.globalNavigation-Link:active {
+    top: 1px;
+    position: relative;
+    border: none;
+}
+
+.globalNavigation-Link:hover {
+  background: url(images/btn-cta-orangeleft.png) center -30px repeat-x;
+    cursor: pointer;
+}
+
+.globalNavigation-leaderBoardGroup a, .globalNavigation-home a {
+    background: url(images/globalNavigation-home_bg.png) 11px 8px no-repeat;
+}
+
+.globalNavigation-leaderBoard a {
+  background: url(images/globalNavigation-leaderBoard_bg.png) 11px 8px no-repeat;
+}
+
+.globalNavigation-leaderBoardGroup, .globalNavigation-leaderBoard, .globalNavigation-home {
+    margin: -4px 10px 0 0;
+    padding: 0px 0px 4px;
+    float: left;
+    background: #7c7b7c url(images/alert-overlay.png) repeat-x;
+}
+
+.globalNavigation-leaderBoard {
+  margin-right: 5px;
+}
+
+.globalNavigation-leaderBoardGroup a, .globalNavigation-leaderBoard a, .globalNavigation-home a {
+  color: #fff;
+  text-decoration: none;
+    display: block;
+    padding: 8px 13px 6px 36px;
+}
+
+.RaceBoard-globalNavigation-Link {
 	display: inline;
 	margin-right: 3px;
 }
 
-.globalNavigationLink a {
+.RaceBoard-globalNavigation-Link a {
 	color: white;
 	cursor: pointer;
 }
 
-.globalNavigationLink+.globalNavigationLink:before {
+.RaceBoard-globalNavigation-Link+.RaceBoard-globalNavigation-Link:before {
 	content: ' \00bb\00a0';
 }
 

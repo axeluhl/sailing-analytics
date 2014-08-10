@@ -18,15 +18,23 @@ public class GlobalNavigationPanel extends FlowPanel {
     }
     
     public static final AnchorTemplates ANCHORTEMPLATE = GWT.create(AnchorTemplates.class);
-    public static final String STYLE_NAME_PREFIX = "globalNavigation-";
+    
+    private final String styleName;
 
     /**
      * @param event an optional event; may be <code>null</code>.
+     * @param styleNamePrefix an optional prefix for the style name; may be null - if not null the prefix
+     *         is prepended to the style settings.
      */
     public GlobalNavigationPanel(StringMessages stringMessages, boolean showHomeNavigation, String leaderboardName,
-            String leaderboardGroupName, EventDTO event) {
+            String leaderboardGroupName, EventDTO event, String styleNamePrefix) {
         super();
-        setStyleName("globalNavigation");
+        if (styleNamePrefix != null && !styleNamePrefix.equalsIgnoreCase("")) {
+            this.styleName = styleNamePrefix+"-globalNavigation";
+        } else {
+            this.styleName = "globalNavigation";
+        }
+        setStyleName(this.styleName);
         if (showHomeNavigation) {
             if (leaderboardGroupName != null && !leaderboardGroupName.isEmpty()) {
                 Map<String, String> leaderboardGroupLinkParameters = new HashMap<String, String>();
@@ -54,8 +62,8 @@ public class GlobalNavigationPanel extends FlowPanel {
     private void addNavigationLink(String linkName, String linkUrl, String styleNameExtension, String htmlTitle) {
     	String setHtmlTitle = htmlTitle;
         HTML linkHtml = new HTML(ANCHORTEMPLATE.anchor(linkUrl, linkName));
-        linkHtml.addStyleName("globalNavigationLink");
-        linkHtml.addStyleName(STYLE_NAME_PREFIX + styleNameExtension);
+        linkHtml.addStyleName(styleName+"-"+"Link");
+        linkHtml.addStyleName(styleName+"-"+styleNameExtension);
         linkHtml.setTitle(setHtmlTitle);
         add(linkHtml);
     }

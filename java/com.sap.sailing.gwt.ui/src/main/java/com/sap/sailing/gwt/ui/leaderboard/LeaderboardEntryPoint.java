@@ -168,7 +168,7 @@ public class LeaderboardEntryPoint extends AbstractEntryPoint {
             if (leaderboardDisplayName == null || leaderboardDisplayName.isEmpty()) {
                 leaderboardDisplayName = leaderboardName;
             }
-            globalNavigationPanel = new GlobalNavigationPanel(stringMessages, true, null, leaderboardGroupName, event);
+            globalNavigationPanel = new GlobalNavigationPanel(stringMessages, true, null, leaderboardGroupName, event, null);
             logoAndTitlePanel = new LogoAndTitlePanel(leaderboardGroupName, leaderboardDisplayName, stringMessages, this) {
                 @Override
                 public void onResize() {
