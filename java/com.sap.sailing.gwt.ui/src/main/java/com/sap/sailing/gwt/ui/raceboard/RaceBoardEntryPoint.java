@@ -17,7 +17,6 @@ import com.google.gwt.user.client.ui.DockLayoutPanel;
 import com.google.gwt.user.client.ui.FlowPanel;
 import com.google.gwt.user.client.ui.RootLayoutPanel;
 import com.sap.sailing.domain.common.RegattaAndRaceIdentifier;
-import com.sap.sailing.domain.common.dto.FleetDTO;
 import com.sap.sailing.domain.common.dto.RaceDTO;
 import com.sap.sailing.gwt.ui.client.AbstractEntryPoint;
 import com.sap.sailing.gwt.ui.client.MediaService;
@@ -34,11 +33,8 @@ import com.sap.sailing.gwt.ui.client.UserManagementServiceAsync;
 import com.sap.sailing.gwt.ui.shared.EventDTO;
 import com.sap.sailing.gwt.ui.shared.LeaderboardGroupDTO;
 import com.sap.sailing.gwt.ui.shared.RegattaDTO;
-import com.sap.sailing.gwt.ui.shared.SeriesDTO;
 import com.sap.sailing.gwt.ui.shared.StrippedLeaderboardDTO;
 import com.sap.sailing.gwt.ui.shared.UserDTO;
-import com.sap.sse.common.Util.Pair;
-import com.sap.sse.common.Util.Triple;
 import com.sap.sse.gwt.client.EntryPointHelper;
 import com.sap.sse.gwt.client.async.AsyncActionsExecutor;
 import com.sap.sse.gwt.client.player.Timer;
@@ -47,8 +43,6 @@ import com.sap.sse.gwt.shared.GwtHttpRequestUtils;
 
 public class RaceBoardEntryPoint extends AbstractEntryPoint {
     private RaceDTO selectedRace;
-    private FleetDTO fleet;
-    private SeriesDTO series;
 
     private static final String PARAM_REGATTA_NAME = "regattaName";
     private static final String PARAM_RACE_NAME = "raceName";
@@ -187,10 +181,8 @@ public class RaceBoardEntryPoint extends AbstractEntryPoint {
                 }
             }
         }
-        Triple<RaceDTO, SeriesDTO, FleetDTO> raceAndSeriesAndFleet = findRace(regattaName, raceName, regattas);
-        selectedRace = raceAndSeriesAndFleet.getA();
-        series = raceAndSeriesAndFleet.getB();
-        fleet = raceAndSeriesAndFleet.getC();
+        RaceDTO race = findRace(regattaName, raceName, regattas);
+        selectedRace = race;
         if (selectedRace == null) {
             createErrorPage("Could not obtain a race with name " + raceName + " for a regatta with name " + regattaName);
             return;
@@ -208,15 +200,12 @@ public class RaceBoardEntryPoint extends AbstractEntryPoint {
         createRaceBoardInOneScreenMode(raceBoardPanel, raceboardViewConfig);
     }  
 
-    private Triple<RaceDTO, SeriesDTO, FleetDTO> findRace(String regattaName, String raceName, List<RegattaDTO> regattas) {
+    private RaceDTO findRace(String regattaName, String raceName, List<RegattaDTO> regattas) {
         for (RegattaDTO regattaDTO : regattas) {
             if (regattaDTO.getName().equals(regattaName)) {
                 for (RaceDTO raceDTO : regattaDTO.races) {
                     if (raceDTO.getName().equals(raceName)) {
-                        Pair<SeriesDTO, FleetDTO> seriesAndFleet = regattaDTO.getSeriesAndFleet(raceDTO.getRaceIdentifier());
-                        return new Triple<RaceDTO, SeriesDTO, FleetDTO>(raceDTO,
-                                seriesAndFleet == null ? null : seriesAndFleet.getA(),
-                                seriesAndFleet == null ? null : seriesAndFleet.getB());
+                        return raceDTO;
                     }
                 }
             }

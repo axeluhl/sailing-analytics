@@ -18,6 +18,7 @@ import com.sap.sailing.domain.common.LeaderboardNameConstants;
 import com.sap.sailing.domain.common.RaceIdentifier;
 import com.sap.sailing.domain.common.RegattaAndRaceIdentifier;
 import com.sap.sailing.domain.common.dto.CompetitorDTO;
+import com.sap.sailing.domain.common.dto.FleetDTO;
 import com.sap.sailing.domain.common.dto.LeaderboardDTO;
 import com.sap.sailing.domain.common.dto.RaceColumnDTO;
 import com.sap.sailing.domain.common.dto.RaceDTO;
@@ -329,13 +330,20 @@ public class RaceBoardPanel extends SimplePanel implements RegattasDisplayer, Ra
 
     @Override
     public void currentRaceSelected(RaceIdentifier raceIdentifier, RaceColumnDTO raceColumn) {
-        String fleetForRaceName = raceColumn.getFleet(raceIdentifier).getName();
+        FleetDTO fleet = raceColumn.getFleet(raceIdentifier);
+        String seriesName = raceColumn.getSeriesName();
+        if (LeaderboardNameConstants.DEFAULT_SERIES_NAME.equals(seriesName)) {
+            seriesName = "";
+        } else {
+            seriesName += " - ";
+        }
+        String fleetForRaceName = fleet==null?"":fleet.getName();
         if (fleetForRaceName.equals(LeaderboardNameConstants.DEFAULT_FLEET_NAME)) {
             fleetForRaceName = "";
         } else {
             fleetForRaceName += " ";
         }
-        raceNameLabel.setText(fleetForRaceName + raceColumn.getRaceColumnName());
+        raceNameLabel.setText(seriesName + fleetForRaceName + raceColumn.getRaceColumnName());
     }
 }
 

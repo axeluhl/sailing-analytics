@@ -812,11 +812,16 @@ public class SailingServiceImpl extends ProxiedRemoteServiceServlet implements S
     private List<RaceColumnDTO> convertToRaceColumnDTOs(Iterable<? extends RaceColumn> raceColumns) {
         List<RaceColumnDTO> raceColumnDTOs = new ArrayList<RaceColumnDTO>();
         for (RaceColumn raceColumn : raceColumns) {
-            RaceColumnDTO raceColumnDTO = new RaceColumnDTO(/* isValidInTotalScore not relevant here because no scores conveyed */ null);
-            raceColumnDTO.setName(raceColumn.getName());
-            raceColumnDTO.setMedalRace(raceColumn.isMedalRace());
-            raceColumnDTO.setExplicitFactor(raceColumn.getExplicitFactor());
-            raceColumnDTOs.add(raceColumnDTO);
+            final RaceColumnDTO raceColumnDTO;
+            if (raceColumn instanceof RaceColumnInSeries) {
+                raceColumnDTO = convertToRaceColumnInSeriesDTO((RaceColumnInSeries) raceColumn);
+            } else {
+                raceColumnDTO = new RaceColumnDTO(/* isValidInTotalScore not relevant here because no scores conveyed */null);
+                raceColumnDTO.setName(raceColumn.getName());
+                raceColumnDTO.setMedalRace(raceColumn.isMedalRace());
+                raceColumnDTO.setExplicitFactor(raceColumn.getExplicitFactor());
+                raceColumnDTOs.add(raceColumnDTO);
+            }
         }
         return raceColumnDTOs;
     }

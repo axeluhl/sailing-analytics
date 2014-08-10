@@ -9,6 +9,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
+import com.sap.sailing.domain.common.LeaderboardNameConstants;
 import com.sap.sailing.domain.common.RaceIdentifier;
 import com.sap.sailing.domain.common.RegattaAndRaceIdentifier;
 import com.sap.sailing.domain.common.TimingConstants;
@@ -302,5 +303,9 @@ public class RaceColumnDTO extends NamedDTO implements Serializable {
     
     public void setRaceLogTrackingInfo(FleetDTO fleet, RaceLogTrackingInfoDTO info) {
         raceLogTrackingInfos.put(fleet, info);
+    }
+    
+    public String getSeriesName() {
+        return LeaderboardNameConstants.DEFAULT_SERIES_NAME;
     }
 }
