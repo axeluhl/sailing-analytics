@@ -337,6 +337,7 @@ img.openColumn {
     -ms-border-radius: 5px;
     border-radius: 5px;
     border: none;
+    cursor: pointer;
 }
 
 .backToLivePlayButton-Inactive {
