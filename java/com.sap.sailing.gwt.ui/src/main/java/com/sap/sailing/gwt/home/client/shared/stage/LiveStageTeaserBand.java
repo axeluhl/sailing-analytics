@@ -19,8 +19,9 @@ public class LiveStageTeaserBand extends StageTeaserBand {
         bandTitle.setInnerText(event.getName());
         bandSubtitle.setInnerText(EventDatesFormatterUtil.formatDateRangeWithYear(event.startDate, event.endDate));
 
+        isLiveDiv.getStyle().setDisplay(Display.INLINE_BLOCK);
         actionLink.getStyle().setDisplay(Display.INLINE_BLOCK);
-        actionLink.setInnerText(TextMessages.INSTANCE.showEvent());
+        actionLink.setInnerText(TextMessages.INSTANCE.watchNow());
     }
 
     @Override

@@ -12,6 +12,7 @@ public class RaceGroupDTO extends NamedDTO implements IsSerializable {
     public String courseAreaIdAsString;
     public String displayName;
     public String leaderboardGroupName;
+    public String boatClass;
     private List<RaceGroupSeriesDTO> series = new ArrayList<RaceGroupSeriesDTO>();
     
     public RaceGroupDTO() {}

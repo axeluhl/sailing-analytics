@@ -26,6 +26,7 @@ import com.sap.sailing.domain.base.Waypoint;
 import com.sap.sailing.domain.base.configuration.DeviceConfigurationMatcher;
 import com.sap.sailing.domain.base.configuration.impl.DeviceConfigurationMatcherMulti;
 import com.sap.sailing.domain.base.configuration.impl.DeviceConfigurationMatcherSingle;
+import com.sap.sailing.domain.common.BoatClassMasterdata;
 import com.sap.sailing.domain.common.Color;
 import com.sap.sailing.domain.common.MarkType;
 import com.sap.sailing.domain.common.PassingInstruction;
@@ -268,6 +269,13 @@ public class SharedDomainFactoryImpl implements SharedDomainFactory {
     public BoatClass getOrCreateBoatClass(String name, boolean typicallyStartsUpwind) {
         synchronized (boatClassCache) {
             BoatClass result = boatClassCache.get(name);
+            if(result == null) {
+                BoatClassMasterdata boatClassMasterdata = BoatClassMasterdata.resolveBoatClass(name);
+                if(boatClassMasterdata != null) {
+                    result = new BoatClassImpl(name, boatClassMasterdata);
+                    boatClassCache.put(name, result);
+                }
+            }
             if (result == null) {
                 result = new BoatClassImpl(name, typicallyStartsUpwind);
                 boatClassCache.put(name, result);
