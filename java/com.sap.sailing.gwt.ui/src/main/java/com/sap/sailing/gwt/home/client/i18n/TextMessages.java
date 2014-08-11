@@ -13,7 +13,6 @@ public interface TextMessages extends Messages {
     String contact();
     String sponsoring();
     String solutions();
-    String search();
     String german();
     String english();
     String fullEventSchedule();
@@ -23,6 +22,7 @@ public interface TextMessages extends Messages {
     String moreInfo();
     String viewAnalysis();
     String overallLeaderboard();
+    String pleaseEnterASearchTerm();
     
     String countdownDays();
     String countdownHours();
