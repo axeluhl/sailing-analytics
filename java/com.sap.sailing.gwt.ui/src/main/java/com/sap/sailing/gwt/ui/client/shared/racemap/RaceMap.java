@@ -54,13 +54,10 @@ import com.google.gwt.maps.client.overlays.Polygon;
 import com.google.gwt.maps.client.overlays.PolygonOptions;
 import com.google.gwt.maps.client.overlays.Polyline;
 import com.google.gwt.maps.client.overlays.PolylineOptions;
-import com.google.gwt.resources.client.ImageResource;
-import com.google.gwt.user.client.Window;
 import com.google.gwt.user.client.rpc.AsyncCallback;
 import com.google.gwt.user.client.ui.AbsolutePanel;
 import com.google.gwt.user.client.ui.Button;
 import com.google.gwt.user.client.ui.FlowPanel;
-import com.google.gwt.user.client.ui.Image;
 import com.google.gwt.user.client.ui.Label;
 import com.google.gwt.user.client.ui.RequiresResize;
 import com.google.gwt.user.client.ui.VerticalPanel;
@@ -133,8 +130,6 @@ public class RaceMap extends AbsolutePanel implements TimeListener, CompetitorSe
 
     private final SailingServiceAsync sailingService;
     private final ErrorReporter errorReporter;
-
-    private final static ClientResources resources = GWT.create(ClientResources.class);
 
     /**
      * Polyline for the start line (connecting two marks representing the start gate).
@@ -376,9 +371,7 @@ public class RaceMap extends AbsolutePanel implements TimeListener, CompetitorSe
               }
               map = new MapWidget(mapOptions);
               RaceMap.this.add(map, 0, 0);
-              Image sapLogo = createSAPLogo();
-              RaceMap.this.add(sapLogo);
-              RaceMap.this.add(combinedWindPanel, 10, 10+sapLogo.getHeight()+/*spacing*/5);
+              RaceMap.this.add(combinedWindPanel, 10, 10+/*spacing*/5);
               RaceMap.this.raceMapImageManager.loadMapIcons(map);
               map.setSize("100%", "100%");
               map.addZoomChangeHandler(new ZoomChangeMapHandler() {
@@ -2090,18 +2083,5 @@ public class RaceMap extends AbsolutePanel implements TimeListener, CompetitorSe
             result = null;
         }
         return result;
-    }
-
-    private Image createSAPLogo() {
-        ImageResource sapLogoResource = resources.sapLogoOverlay();
-        Image sapLogo = new Image(sapLogoResource);
-        sapLogo.addClickHandler(new ClickHandler() {
-            @Override
-            public void onClick(ClickEvent event) {
-                Window.open("http://www.sap.com", "_blank", null);
-            }
-        });
-        sapLogo.setStyleName("raceBoard-Logo");
-        return sapLogo;
     }
 }

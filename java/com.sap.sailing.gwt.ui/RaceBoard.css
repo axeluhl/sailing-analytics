@@ -509,3 +509,19 @@ img.openColumn {
 .TimePanel-settingsButtonStyle:hover {
 	border: 1px solid gray;
 }
+
+.RaceBoard-LeaderboardHeader {
+	height: 60px;
+	background: #333 url(images/sap_logo_header.png) 2% 50% no-repeat;
+	border-bottom: 5px solid #f0ab00;
+	color: white;
+	font-size: 25px;
+	background-size: 90px;
+}
+
+.RaceBoard-LeaderboardHeader-Label {
+    position: absolute;
+    left: 97px;
+    top: 20px;
+    -webkit-font-smoothing: antialiased;	
+}
