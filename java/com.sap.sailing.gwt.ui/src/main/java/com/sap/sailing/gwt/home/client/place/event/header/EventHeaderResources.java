@@ -36,6 +36,7 @@ public interface EventHeaderResources extends ClientBundle {
         String eventheader_intro();
         String eventheader_intro_description();
         String eventheader_intro_logo();
+        String eventheader_intro_logo_image();
         String eventheader_intro_name();
         String eventheader_intro_details();
         String eventheader_intro_details_item();

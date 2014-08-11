@@ -10,6 +10,7 @@ import com.google.gwt.dom.client.SpanElement;
 import com.google.gwt.safehtml.shared.SafeHtml;
 import com.google.gwt.uibinder.client.UiBinder;
 import com.google.gwt.uibinder.client.UiField;
+import com.google.gwt.user.client.DOM;
 import com.google.gwt.user.client.Event;
 import com.google.gwt.user.client.EventListener;
 import com.google.gwt.user.client.ui.UIObject;
@@ -44,7 +45,11 @@ public class RecentEvent extends UIObject {
         Event.setEventListener(eventOverviewLink, new EventListener() {
             @Override
             public void onBrowserEvent(Event browserEvent) {
-                navigator.goToEvent(event.id.toString(), event.getBaseURL(), event.isOnRemoteServer());
+                switch (DOM.eventGetType(browserEvent)) {
+                    case Event.ONCLICK:
+                        navigator.goToEvent(event.id.toString(), event.getBaseURL(), event.isOnRemoteServer());
+                        break;
+                }
             }
         });
 
