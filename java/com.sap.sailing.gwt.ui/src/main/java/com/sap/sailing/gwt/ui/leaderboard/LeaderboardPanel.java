@@ -2992,4 +2992,9 @@ public class LeaderboardPanel extends SimplePanel implements TimeListener, PlayS
            listener.currentRaceSelected(raceIdentifier, raceColumn);
         }
     }
+
+    @Override
+    public String getDependentCssClassName() {
+        return "leaderboard";
+    }
 }

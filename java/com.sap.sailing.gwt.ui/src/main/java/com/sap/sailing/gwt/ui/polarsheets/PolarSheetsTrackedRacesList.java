@@ -89,4 +89,9 @@ public class PolarSheetsTrackedRacesList extends AbstractFilteredTrackedRacesLis
         btnPolarSheetGeneration.setEnabled(enable);
     }
 
+    @Override
+    public String getDependentCssClassName() {
+        return "polarSheetsTrackedRacesList";
+    }
+
 }

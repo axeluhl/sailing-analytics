@@ -540,27 +540,33 @@ public class TouchSplitLayoutPanelWithBetterDraggers extends DockLayoutPanel {
         FlowPanel buttonFlowPanel = new FlowPanel();
         buttonFlowPanel.setStyleName(panelStyleName);
         for (final Splitter splitter : splitters) {
+            final Component<?> associatedComponent = splitter.getAssociatedComponent();
             final Button splitterTogglerButton = splitter.getToggleButton();
             splitterTogglerButton.setStyleName(buttonStyleName);
             splitterTogglerButton.addStyleDependentName("Closed");
+            splitterTogglerButton.addStyleDependentName("Closed-"+associatedComponent.getDependentCssClassName());
             splitterTogglerButton.addClickHandler(new ClickHandler() {
                 @Override
                 public void onClick(ClickEvent event) {
-                    boolean componentIsVisible = splitter.getAssociatedComponent().isVisible();
-                    splitter.getAssociatedComponent().setVisible(!componentIsVisible);
+                    boolean componentIsVisible = associatedComponent.isVisible();
+                    associatedComponent.setVisible(!componentIsVisible);
                     splitter.setVisible(!componentIsVisible);
                     splitter.setDraggerVisible(!componentIsVisible);
                     if (!componentIsVisible == true) {
-                        if (splitter.getAssociatedComponent() instanceof TimeListener) {
-                            ((TimeListener) splitter.getAssociatedComponent()).timeChanged(new Date(), null);
+                        if (associatedComponent instanceof TimeListener) {
+                            ((TimeListener) associatedComponent).timeChanged(new Date(), null);
                         }
                     }
                     if (!componentIsVisible) {
                         splitterTogglerButton.removeStyleDependentName("Closed");
+                        splitterTogglerButton.removeStyleDependentName("Closed-"+associatedComponent.getDependentCssClassName());
                         splitterTogglerButton.addStyleDependentName("Open");
+                        splitterTogglerButton.addStyleDependentName("Open-"+associatedComponent.getDependentCssClassName());
                     } else {
                         splitterTogglerButton.removeStyleDependentName("Open");
+                        splitterTogglerButton.removeStyleDependentName("Open-"+associatedComponent.getDependentCssClassName());
                         splitterTogglerButton.addStyleDependentName("Closed");
+                        splitterTogglerButton.addStyleDependentName("Closed-"+associatedComponent.getDependentCssClassName());
                     }
                     ensureVerticalToggleButtonPosition();
                     componentViewer.forceLayout();
@@ -703,7 +709,9 @@ public class TouchSplitLayoutPanelWithBetterDraggers extends DockLayoutPanel {
                 splitter.setDraggerVisible(!hidden);
                 splitter.setVisible(!hidden);
                 splitter.getToggleButton().removeStyleDependentName("Closed");
+                splitter.getToggleButton().removeStyleDependentName("Closed-"+associatedComponentToWidget.getDependentCssClassName());
                 splitter.getToggleButton().addStyleDependentName("Open");
+                splitter.getToggleButton().addStyleDependentName("Open-"+associatedComponentToWidget.getDependentCssClassName());
             }
         }
     }

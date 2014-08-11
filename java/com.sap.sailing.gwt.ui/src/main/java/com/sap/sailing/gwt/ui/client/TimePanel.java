@@ -577,4 +577,9 @@ public class TimePanel<T extends TimePanelSettings> extends SimplePanel implemen
     protected boolean canReplayWhileLiveIsPossible() {
         return canReplayWhileLiveIsPossible;
     }
+
+    @Override
+    public String getDependentCssClassName() {
+        return "timePanel";
+    }
 }
