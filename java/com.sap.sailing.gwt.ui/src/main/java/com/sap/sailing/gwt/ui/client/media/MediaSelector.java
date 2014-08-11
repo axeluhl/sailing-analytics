@@ -50,14 +50,7 @@ import com.sap.sse.gwt.client.player.Timer.PlayStates;
 import com.sap.sse.gwt.client.useragent.UserAgentDetails;
 import com.sap.sse.gwt.client.useragent.UserAgentDetails.AgentTypes;
 
-/**
- * The media selector is used as an {@link AsyncCallback} that receives a collection of {@link MediaTrack}s in case the
- * call was successful. This could, e.g., be a call to
- * {@link MediaServiceAsync#getMediaTracksForRace(RegattaAndRaceIdentifier, AsyncCallback)}. When the call returns the
- * track collection, the UI is updated accordingly.
- */
-public class MediaSelector implements PlayStateListener, TimeListener,
-        AsyncCallback<Collection<MediaTrack>>, MediaSelectionListener, CloseHandler<Window>, ClosingHandler {
+public class MediaSelector implements PlayStateListener, TimeListener, MediaSelectionListener, CloseHandler<Window>, ClosingHandler {
 
     private final CheckBox toggleMediaButton;
     private final Button manageMediaButton;
@@ -289,27 +282,38 @@ public class MediaSelector implements PlayStateListener, TimeListener,
             ensurePlayState(videoPlayer);
         }
     }
+    
+    /**
+     * Wraps the callback handling functions in an object to better document their purpose.
+     * onSuccess and onError are simply too generic to tell about their concrete use.   
+     * @return
+     */
+    public AsyncCallback<Collection<MediaTrack>> getMediaLibraryCallback() {
 
-    @Override
-    public void onFailure(Throwable caught) {
-        setWidgetsVisible((this.user != null));
-        errorReporter.reportError("Remote Procedure Call getMediaTracksForRace(...) - Failure: " + caught.getMessage());
-    }
-
-    @Override
-    public void onSuccess(Collection<MediaTrack> mediaTracks) {
-        this.mediaTracks.clear();
-        this.mediaTracks.addAll(mediaTracks);
-        for (MediaTrack mediaTrack : this.mediaTracks) {
-            setStatus(mediaTrack);
-        }
-        setWidgetsVisible((this.mediaTracks.size() > 0) || (this.user != null));
+        return new  AsyncCallback<Collection<MediaTrack>>() {
+            
+            @Override
+            public void onFailure(Throwable caught) {
+                setWidgetsVisible((MediaSelector.this.user != null));
+                errorReporter.reportError("Remote Procedure Call getMediaTracksForRace(...) - Failure: " + caught.getMessage());
+            }
         
-        toggleMediaButton.setValue(autoSelectMedia);
-        if (autoSelectMedia) {
-            playDefault();
-        }
-    }
+            @Override
+            public void onSuccess(Collection<MediaTrack> mediaTracks) {
+                MediaSelector.this.mediaTracks.clear();
+                MediaSelector.this.mediaTracks.addAll(mediaTracks);
+                for (MediaTrack mediaTrack : MediaSelector.this.mediaTracks) {
+                    setStatus(mediaTrack);
+                }
+                setWidgetsVisible((MediaSelector.this.mediaTracks.size() > 0) || (MediaSelector.this.user != null));
+                
+                toggleMediaButton.setValue(autoSelectMedia);
+                if (autoSelectMedia) {
+                    playDefault();
+                }
+            }
+        };
+     }
 
     private void setWidgetsVisible(boolean isVisible) {
         manageMediaButton.setVisible(isVisible);

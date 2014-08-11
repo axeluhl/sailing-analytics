@@ -24,7 +24,6 @@ import com.google.gwt.user.client.ui.MenuBar;
 import com.google.gwt.user.client.ui.Panel;
 import com.google.gwt.user.client.ui.SimplePanel;
 import com.google.gwt.user.client.ui.Widget;
-import com.sap.sailing.domain.common.LeaderboardNameConstants;
 import com.sap.sailing.domain.common.RaceIdentifier;
 import com.sap.sailing.domain.common.RegattaAndRaceIdentifier;
 import com.sap.sailing.domain.common.dto.CompetitorDTO;
@@ -278,7 +277,7 @@ public class RaceBoardPanel extends SimplePanel implements RegattasDisplayer, Ra
         MediaSelector mediaSelector = new MediaSelector(selectedRaceIdentifier, raceTimesInfoProvider, timer, mediaService, stringMessages, errorReporter, userAgent, this.user, getConfiguration().isAutoSelectMedia());
         timer.addPlayStateListener(mediaSelector);
         timer.addTimeListener(mediaSelector);
-        mediaService.getMediaTracksForRace(selectedRaceIdentifier, mediaSelector);
+        mediaService.getMediaTracksForRace(selectedRaceIdentifier, mediaSelector.getMediaLibraryCallback());
         for (Widget widget : mediaSelector.widgets()) {
             componentControlsPanel.add(widget);
         }
