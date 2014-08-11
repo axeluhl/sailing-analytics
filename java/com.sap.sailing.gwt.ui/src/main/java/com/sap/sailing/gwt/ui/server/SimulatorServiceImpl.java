@@ -747,7 +747,7 @@ public class SimulatorServiceImpl extends RemoteServiceServlet implements Simula
         }
         windFieldDTO.curBearing = wf.getWindParameters().curBearing;
         windFieldDTO.curSpeed = wf.getWindParameters().curSpeed;
-        if (params.isShowStreamlets2()) {
+        if (params.isShowStreamlets()) {
             WindData windData = new WindData();
             windData.rcStart = params.getNorthWest();
             windData.rcEnd = params.getSouthEast();
