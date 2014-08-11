@@ -334,13 +334,6 @@ public interface SailingServiceAsync {
     void getPublicEventsOfAllSailingServers(AsyncCallback<List<EventBaseDTO>> callback);
 
     /**
-     * Creates a {@link EventDTO} for the {@link com.sap.sailing.domain.base.Event} with the name <code>eventName</code>, which contains the
-     * name, the description and a list with {@link RegattaDTO RegattaDTOs} contained in the event.<br />
-     * If no event with the name <code>eventName</code> is known, an {@link IllegalArgumentException} is thrown.
-     */
-    void getEventByName(String eventName, AsyncCallback<EventDTO> callback);
-
-    /**
      * Renames the event with the name <code>oldName</code> to the <code>newName</code>.<br />
      * If there's no event with the name <code>oldName</code> or there's already a event with the name
      * <code>newName</code> a {@link IllegalArgumentException} is thrown.
@@ -482,6 +475,8 @@ public interface SailingServiceAsync {
 
     void getRegattaStructureForEvent(UUID eventId, AsyncCallback<List<RaceGroupDTO>> asyncCallback);
 
+    void getRegattaStructureOfEvent(UUID eventId, AsyncCallback<List<RaceGroupDTO>> callback);
+
     void getRaceStateEntriesForRaceGroup(UUID eventId, List<UUID> visibleCourseAreas,
             List<String> visibleRegattas, boolean showOnlyCurrentlyRunningRaces, boolean showOnlyRacesOfSameDay,
             AsyncCallback<List<RegattaOverviewEntryDTO>> markedAsyncCallback);
@@ -548,7 +543,7 @@ public interface SailingServiceAsync {
 
     void importWindFromIgtimi(List<RaceDTO> selectedRaces, boolean correctByDeclination, AsyncCallback<Map<RegattaAndRaceIdentifier, Integer>> asyncCallback);
 
-    void getEventById(UUID id, AsyncCallback<EventDTO> callback);
+    void getEventById(UUID id, boolean withStatisticalData, AsyncCallback<EventDTO> callback);
 
     void getLeaderboardsByEvent(EventDTO event, AsyncCallback<List<StrippedLeaderboardDTO>> callback);
 

@@ -15,7 +15,8 @@ import com.sap.sailing.gwt.home.client.place.start.StartPlace;
 
 public class PlaceNavigatorImpl implements PlaceNavigator {
     private final PlaceController placeController;
-    private final static String DEFAULT_SAPSAILING_SERVER = "newhome.sapsailing.com"; // www.sapsailing.com 
+    private final static String DEFAULT_SAPSAILING_SERVER = "www.sapsailing.com"; // newhome.sapsailing.com 
+    private final static String DEFAULT_SAPSAILING_SERVER_URL = "http://" + DEFAULT_SAPSAILING_SERVER;  
     
     protected PlaceNavigatorImpl(PlaceController placeController) {
         super();
@@ -51,33 +52,29 @@ public class PlaceNavigatorImpl implements PlaceNavigator {
 
     @Override
     public void goToAboutUs() {
-        gotoPlace(new AboutUsPlace());
+        gotoPlace(getLocationURL(), new AboutUsPlace(), new AboutUsPlace.Tokenizer());
     }
 
     @Override
     public void goToContact() {
-        gotoPlace(new ContactPlace());
+        gotoPlace(getLocationURL(), new ContactPlace(), new ContactPlace.Tokenizer());
     }
 
     @Override
     public void goToSolutions() {
-        gotoPlace(new SolutionsPlace());
+        gotoPlace(getLocationURL(), new SolutionsPlace(), new SolutionsPlace.Tokenizer());
     }
 
     @Override
     public void goToSponsoring() {
-        gotoPlace(new SponsoringPlace());
-    }
-
-    private <T extends Place> void gotoPlace(T destinationPlace) {
-        placeController.goTo(destinationPlace); 
+        gotoPlace(getLocationURL(), new SponsoringPlace(), new SponsoringPlace.Tokenizer());
     }
 
     private <T extends Place> void gotoPlace(String baseUrl, T destinationPlace, PlaceTokenizer<T> tokenizer) {
         if(isLocationOnLocalhost(baseUrl) || isLocationOnDefaultSapSailingServer(baseUrl)) {
             placeController.goTo(destinationPlace); 
         } else {
-            String homeUrl = buildRemotePlaceUrl(DEFAULT_SAPSAILING_SERVER, destinationPlace, tokenizer);
+            String homeUrl = buildRemotePlaceUrl(DEFAULT_SAPSAILING_SERVER_URL, destinationPlace, tokenizer);
             Window.Location.replace(homeUrl);
         }
     }

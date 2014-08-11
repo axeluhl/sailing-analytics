@@ -15,6 +15,11 @@ public interface CompetitorSelectionProvider {
     Iterable<CompetitorDTO> getSelectedCompetitors();
     
     /**
+     * The intersection of {@link #getSelectedCompetitors()} and {@link #getFilteredCompetitors()}
+     */
+    Iterable<CompetitorDTO> getSelectedFilteredCompetitors();
+    
+    /**
      * @return a non-<code>null</code> sequence of all competitors which may be empty.
      */
     Iterable<CompetitorDTO> getAllCompetitors();

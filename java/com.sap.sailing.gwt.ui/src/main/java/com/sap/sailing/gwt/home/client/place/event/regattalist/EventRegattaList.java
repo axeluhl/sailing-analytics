@@ -9,9 +9,11 @@ import com.google.gwt.core.client.GWT;
 import com.google.gwt.dom.client.AnchorElement;
 import com.google.gwt.dom.client.DivElement;
 import com.google.gwt.dom.client.Document;
+import com.google.gwt.dom.client.SpanElement;
 import com.google.gwt.dom.client.Style.Display;
 import com.google.gwt.uibinder.client.UiBinder;
 import com.google.gwt.uibinder.client.UiField;
+import com.google.gwt.user.client.DOM;
 import com.google.gwt.user.client.Event;
 import com.google.gwt.user.client.EventListener;
 import com.google.gwt.user.client.ui.Composite;
@@ -33,11 +35,15 @@ public class EventRegattaList extends Composite {
     interface EventRegattaHeaderUiBinder extends UiBinder<Widget, EventRegattaList> {
     }
 
+//    @UiField DivElement seriesLeaderboardDiv;
+//    @UiField AnchorElement seriesLeaderboardAnchor;
+    
     @UiField DivElement regattaGroupsNavigationPanel;
     @UiField DivElement regattaListNavigationDiv;
     @UiField DivElement regattaListItemsDiv;
     @UiField AnchorElement filterNoLeaderboardGroupsAnchor;
-
+    @UiField SpanElement allBoatClassesSelected;
+    
     private final EventDTO event;
     private final Map<String, List<Regatta>> regattaElementsByLeaderboardGroup;
     
@@ -50,23 +56,29 @@ public class EventRegattaList extends Composite {
 
         regattaElementsByLeaderboardGroup = new HashMap<>();
 
-        boolean hasMultipleLeaderboardGroups = event.getLeaderboardGroups().size() > 1; 
-        if(hasMultipleLeaderboardGroups) {
-            // fill the navigation panel
-            registerFilterLeaderboardGroupEvent(filterNoLeaderboardGroupsAnchor, null);
-            for(LeaderboardGroupDTO leaderboardGroup: event.getLeaderboardGroups()) {
-                AnchorElement filterLeaderboardGroupAnchor = Document.get().createAnchorElement();
-                filterLeaderboardGroupAnchor.setClassName(HomeResources.INSTANCE.mainCss().navbar_button());
-                filterLeaderboardGroupAnchor.setHref("javascript:;");
-                
-                String leaderboardGroupName = LongNamesUtil.shortenLeaderboardGroupName(event.getName(), leaderboardGroup.getName());
-                filterLeaderboardGroupAnchor.setInnerText(leaderboardGroupName);
-                regattaGroupsNavigationPanel.appendChild(filterLeaderboardGroupAnchor);
-                
-                registerFilterLeaderboardGroupEvent(filterLeaderboardGroupAnchor, leaderboardGroup);
-            }
-        } else {
+        boolean isSeries = event.isFakeSeries(); 
+        boolean hasMultipleLeaderboardGroups = event.getLeaderboardGroups().size() > 1;
+        
+        if(isSeries) {
             regattaListNavigationDiv.getStyle().setDisplay(Display.NONE);
+        } else {
+            if(hasMultipleLeaderboardGroups) {
+                // fill the navigation panel
+                registerFilterLeaderboardGroupEvent(filterNoLeaderboardGroupsAnchor, null);
+                for(LeaderboardGroupDTO leaderboardGroup: event.getLeaderboardGroups()) {
+                    AnchorElement filterLeaderboardGroupAnchor = Document.get().createAnchorElement();
+                    filterLeaderboardGroupAnchor.setClassName(HomeResources.INSTANCE.mainCss().navbar_button());
+                    filterLeaderboardGroupAnchor.setHref("javascript:;");
+                    
+                    String leaderboardGroupName = LongNamesUtil.shortenLeaderboardGroupName(event.getName(), leaderboardGroup.getName());
+                    filterLeaderboardGroupAnchor.setInnerText(leaderboardGroupName);
+                    regattaGroupsNavigationPanel.appendChild(filterLeaderboardGroupAnchor);
+                    
+                    registerFilterLeaderboardGroupEvent(filterLeaderboardGroupAnchor, leaderboardGroup);
+                }
+            } else {
+                regattaListNavigationDiv.getStyle().setDisplay(Display.NONE);
+            }
         }
 
         for (LeaderboardGroupDTO leaderboardGroup : event.getLeaderboardGroups()) {
@@ -92,13 +104,18 @@ public class EventRegattaList extends Composite {
         Event.setEventListener(filterLeaderboardGroupAnchor, new EventListener() {
             @Override
             public void onBrowserEvent(Event event) {
-                filterRegattaListByLeaderboardGroup(leaderboardGroup);
+                switch (DOM.eventGetType(event)) {
+                    case Event.ONCLICK:
+                         filterRegattaListByLeaderboardGroup(leaderboardGroup);
+                         break;
+                }
             }
         });
     }
 
     private void filterRegattaListByLeaderboardGroup(LeaderboardGroupDTO leaderboardGroup) {
         if (leaderboardGroup != null) {
+            allBoatClassesSelected.getStyle().setDisplay(Display.NONE);
             // hide all regattas of the not selected leaderboardgroup
             for (LeaderboardGroupDTO lg : event.getLeaderboardGroups()) {
                 boolean isVisible = leaderboardGroup.getName().equals(lg.getName());
@@ -109,6 +126,7 @@ public class EventRegattaList extends Composite {
             }
         } else {
             // make all regattas visible
+            allBoatClassesSelected.getStyle().setDisplay(Display.INLINE_BLOCK);
             for (LeaderboardGroupDTO lg : event.getLeaderboardGroups()) {
                 List<Regatta> regattaElements = regattaElementsByLeaderboardGroup.get(lg.getName());
                 for (Regatta regatta : regattaElements) {

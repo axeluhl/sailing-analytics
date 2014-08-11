@@ -123,6 +123,7 @@ public class WindStreamletsCanvasOverlay extends FullCanvasOverlay implements Ti
         super.draw();
         if (mapProjection != null) {
             if ((nParticles > 0) && (swarm == null)) {
+                nParticles = 0;
                 SimulatorJSBundle bundle = GWT.create(SimulatorJSBundle.class);
                 String jsonStr = bundle.windStreamletsDataJS().getText();
                 RectField f = RectField.read(jsonStr.substring(19, jsonStr.length() - 1), false, streamletPars);

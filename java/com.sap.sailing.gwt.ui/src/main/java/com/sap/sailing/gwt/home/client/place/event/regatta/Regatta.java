@@ -12,10 +12,14 @@ import com.google.gwt.dom.client.Style.Display;
 import com.google.gwt.dom.client.StyleInjector;
 import com.google.gwt.uibinder.client.UiBinder;
 import com.google.gwt.uibinder.client.UiField;
+import com.google.gwt.user.client.DOM;
 import com.google.gwt.user.client.Event;
 import com.google.gwt.user.client.EventListener;
 import com.google.gwt.user.client.ui.Composite;
+import com.google.gwt.user.client.ui.Image;
 import com.google.gwt.user.client.ui.Widget;
+import com.sap.sailing.gwt.home.client.BoatClassImageResolver;
+import com.sap.sailing.gwt.home.client.BoatClassImageResources;
 import com.sap.sailing.gwt.home.client.place.event.EventPageNavigator;
 import com.sap.sailing.gwt.home.client.shared.LongNamesUtil;
 import com.sap.sailing.gwt.ui.shared.EventDTO;
@@ -31,6 +35,7 @@ public class Regatta extends Composite {
     interface RegattaUiBinder extends UiBinder<Widget, Regatta> {
     }
 
+    private final boolean isNavigatable;
     private final EventDTO event;
     private final Timer timerForClientServerOffset;
     private final EventPageNavigator pageNavigator;
@@ -53,7 +58,7 @@ public class Regatta extends Composite {
     @UiField SpanElement trackedRacesCount;
     @UiField DivElement isLiveDiv;
 //    @UiField TableElement isLiveDiv2;
-    @UiField DivElement isFinishedDiv;
+//    @UiField DivElement isFinishedDiv;
 //    @UiField DivElement isFinishedDiv2;
 //    @UiField DivElement isScheduledDiv;
     @UiField AnchorElement leaderboardLink;
@@ -64,11 +69,14 @@ public class Regatta extends Composite {
     
     @UiField DivElement regattaImageWithoutLink;
     @UiField AnchorElement regattaImageWithLink;
-
     @UiField AnchorElement regattaNameLink;
 
+    @UiField Image boatClassImage1;
+    @UiField Image boatClassImage2;
+    
     public Regatta(EventDTO event, boolean isNavigatable, Timer timerForClientServerOffset, EventPageNavigator pageNavigator) {
         this.event = event;
+        this.isNavigatable = isNavigatable;
         this.timerForClientServerOffset = timerForClientServerOffset;
         this.pageNavigator = pageNavigator;
         
@@ -105,10 +113,12 @@ public class Regatta extends Composite {
             isLiveDiv.getStyle().setDisplay(Display.NONE);
         }
         
-        boolean isFinished = !hasLiveRace;
-        if(!isFinished) {
-            isFinishedDiv.getStyle().setDisplay(Display.NONE);
-//            isFinishedDiv2.getStyle().setDisplay(Display.NONE);
+        // boolean isFinished... TODO
+        Image boatClassImageToSet = isNavigatable ? boatClassImage1 : boatClassImage2;  
+        if(raceGroup.boatClass != null) {
+            boatClassImageToSet.setResource(BoatClassImageResolver.getBoatClassIconResource(raceGroup.boatClass));
+        } else {
+            boatClassImageToSet.setResource(BoatClassImageResources.INSTANCE.genericBoatClass());
         }
         
         String regattaDisplayName = leaderboard.displayName != null ? leaderboard.displayName : leaderboard.name;
@@ -155,24 +165,38 @@ public class Regatta extends Composite {
         Event.setEventListener(leaderboardLink, new EventListener() {
             @Override
             public void onBrowserEvent(Event event) {
-                pageNavigator.openLeaderboardViewer(null, leaderboard);
+                switch (DOM.eventGetType(event)) {
+                    case Event.ONCLICK:
+                        pageNavigator.openLeaderboardViewer(null, leaderboard);
+                        break;
+                }
             }
         });
 
-        Event.sinkEvents(regattaImageWithLink, Event.ONCLICK);
-        Event.setEventListener(regattaImageWithLink, new EventListener() {
-            @Override
-            public void onBrowserEvent(Event event) {
-                pageNavigator.goToRegattaRaces(leaderboardGroup, leaderboard, raceGroup);
-            }
-        });
+        if(isNavigatable) {
+            Event.sinkEvents(regattaImageWithLink, Event.ONCLICK);
+            Event.setEventListener(regattaImageWithLink, new EventListener() {
+                @Override
+                public void onBrowserEvent(Event event) {
+                    switch (DOM.eventGetType(event)) {
+                        case Event.ONCLICK:
+                            pageNavigator.goToRegattaRaces(leaderboardGroup, leaderboard, raceGroup);
+                            break;
+                    }
+                }
+            });
 
-        Event.sinkEvents(regattaNameLink, Event.ONCLICK);
-        Event.setEventListener(regattaNameLink, new EventListener() {
-            @Override
-            public void onBrowserEvent(Event event) {
-                pageNavigator.goToRegattaRaces(leaderboardGroup, leaderboard, raceGroup);
-            }
-        });
+            Event.sinkEvents(regattaNameLink, Event.ONCLICK);
+            Event.setEventListener(regattaNameLink, new EventListener() {
+                @Override
+                public void onBrowserEvent(Event event) {
+                    switch (DOM.eventGetType(event)) {
+                        case Event.ONCLICK:
+                            pageNavigator.goToRegattaRaces(leaderboardGroup, leaderboard, raceGroup);
+                            break;
+                    }
+                }
+            });
+        }
     }
 }
