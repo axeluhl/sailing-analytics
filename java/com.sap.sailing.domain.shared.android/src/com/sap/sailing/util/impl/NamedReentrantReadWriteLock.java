@@ -3,8 +3,8 @@ package com.sap.sailing.util.impl;
 import java.io.IOException;
 import java.io.ObjectInputStream;
 import java.util.ArrayList;
-import java.util.Collections;
 import java.util.List;
+import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.locks.Condition;
 import java.util.concurrent.locks.ReentrantReadWriteLock;
@@ -35,7 +35,7 @@ public class NamedReentrantReadWriteLock extends ReentrantReadWriteLock implemen
     private final String writeLockName;
     private final WriteLockWrapper writeLockWrapper;
     private final ReadLockWrapper readLockWrapper;
-    private transient List<Thread> readers;
+    private transient ConcurrentHashMap<Thread, Thread> readers;
     
     private class WriteLockWrapper extends WriteLock {
         private static final long serialVersionUID = -4234819025137348944L;
@@ -110,7 +110,8 @@ public class NamedReentrantReadWriteLock extends ReentrantReadWriteLock implemen
         public void lockInterruptibly() throws InterruptedException {
             try {
                 readLock.lockInterruptibly();
-                readers.add(Thread.currentThread());
+                final Thread currentThread = Thread.currentThread();
+                readers.put(currentThread, currentThread);
             } catch (InterruptedException ie) {
                 throw ie;
             }
@@ -120,7 +121,8 @@ public class NamedReentrantReadWriteLock extends ReentrantReadWriteLock implemen
         public boolean tryLock() {
             boolean result = readLock.tryLock();
             if (result) {
-                readers.add(Thread.currentThread());
+                final Thread currentThread = Thread.currentThread();
+                readers.put(currentThread, currentThread);
             }
             return result;
         }
@@ -129,7 +131,8 @@ public class NamedReentrantReadWriteLock extends ReentrantReadWriteLock implemen
         public boolean tryLock(long timeout, TimeUnit unit) throws InterruptedException {
             boolean result = readLock.tryLock(timeout, unit);
             if (result) {
-                readers.add(Thread.currentThread());
+                final Thread currentThread = Thread.currentThread();
+                readers.put(currentThread, currentThread);
             }
             return result;
         }
@@ -159,12 +162,12 @@ public class NamedReentrantReadWriteLock extends ReentrantReadWriteLock implemen
         this.writeLockName = "writeLock "+name;
         this.writeLockWrapper = new WriteLockWrapper(super.writeLock());
         this.readLockWrapper = new ReadLockWrapper(super.readLock());
-        this.readers = Collections.synchronizedList(new ArrayList<Thread>());
+        this.readers = new ConcurrentHashMap<Thread, Thread>();
     }
     
     private void readObject(ObjectInputStream ois) throws ClassNotFoundException, IOException {
         ois.defaultReadObject();
-        this.readers = Collections.synchronizedList(new ArrayList<Thread>());
+        this.readers = new ConcurrentHashMap<Thread, Thread>();
     }
     
     @Override
@@ -187,7 +190,7 @@ public class NamedReentrantReadWriteLock extends ReentrantReadWriteLock implemen
      * successfully acquired the read lock re-entrantly.
      */
     public List<Thread> getReaders() {
-        return new ArrayList<Thread>(readers);
+        return new ArrayList<Thread>(readers.values());
     }
     
     /**
