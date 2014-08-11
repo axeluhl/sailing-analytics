@@ -246,14 +246,14 @@ public class RaceBoardEntryPoint extends AbstractEntryPoint {
                     toggleButton.removeStyleDependentName("Closed");
                     toggleButton.addStyleDependentName("Open");
                 } else {
-                    p.setWidgetSize(timePanel, 60);
+                    p.setWidgetSize(timePanel, 67);
                     toggleButton.addStyleDependentName("Closed");
                     toggleButton.removeStyleDependentName("Open");
                 }
             }
         });
         raceBoardPanel.getTimePanel().hideControlsPanel(toggleButton);
-        p.addSouth(timePanel, 60);
+        p.addSouth(timePanel, 67);
         p.add(raceBoardPanel);
         p.addStyleName("dockLayoutPanel");
     }

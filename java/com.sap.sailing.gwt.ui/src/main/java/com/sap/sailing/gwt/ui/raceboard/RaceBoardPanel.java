@@ -150,11 +150,11 @@ public class RaceBoardPanel extends SimplePanel implements RegattasDisplayer, Ra
                     }
                 }, selectedRaceIdentifier);
         leaderboardPanel = createLeaderboardPanel(leaderboardName, leaderboardGroupName, competitorSearchTextBox);
+        leaderboardPanel.getElement().getStyle().setMarginLeft(6, Unit.PX);
+        leaderboardPanel.getElement().getStyle().setMarginTop(4, Unit.PX);
         createOneScreenView(leaderboardName, leaderboardGroupName, event, mainPanel, showMapControls, raceMap); // initializes the raceMap field
         // these calls make sure that leaderboard and competitor map data are loaded
         leaderboardPanel.addLeaderboardUpdateListener(this);
-        getElement().getStyle().setMarginLeft(12, Unit.PX);
-        getElement().getStyle().setMarginRight(12, Unit.PX);
         // in case the URL configuration contains the name of a competitors filter set we try to activate it
         // FIXME the competitorsFilterSets has now moved to CompetitorSearchTextBox (which should probably be renamed); pass on the parameters to the LeaderboardPanel and see what it does with it
         if (raceboardViewConfiguration.getActiveCompetitorsFilterSetName() != null) {
