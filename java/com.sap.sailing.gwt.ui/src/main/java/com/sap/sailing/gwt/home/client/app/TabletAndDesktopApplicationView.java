@@ -1,8 +1,6 @@
 package com.sap.sailing.gwt.home.client.app;
 
 import com.google.gwt.core.client.GWT;
-import com.google.gwt.dom.client.Element;
-import com.google.gwt.dom.client.Style.Visibility;
 import com.google.gwt.uibinder.client.UiBinder;
 import com.google.gwt.uibinder.client.UiField;
 import com.google.gwt.user.client.ui.AcceptsOneWidget;
@@ -11,6 +9,7 @@ import com.google.gwt.user.client.ui.SimplePanel;
 import com.google.gwt.user.client.ui.Widget;
 import com.sap.sailing.gwt.home.client.shared.footer.Footer;
 import com.sap.sailing.gwt.home.client.shared.header.Header;
+import com.sap.sailing.gwt.home.client.shared.placeholder.Placeholder;
 
 /**
  * This is the top-level view of the application. Every time another presenter wants to reveal itself,
@@ -31,12 +30,12 @@ public class TabletAndDesktopApplicationView extends Composite implements Applic
     @UiField
     SimplePanel mainContentPanel;
 
-    @UiField
-    Element loadingMessage;
-
     public TabletAndDesktopApplicationView(PlaceNavigator navigator) {
         headerPanel = new Header(navigator);
         initWidget(uiBinder.createAndBindUi(this));
+        
+        Placeholder placeHolder = new Placeholder();
+        mainContentPanel.setWidget(placeHolder);
     }
 
     @Override
@@ -45,7 +44,6 @@ public class TabletAndDesktopApplicationView extends Composite implements Applic
     }
     
     @Override
-    public void showLoading(boolean visibile) {
-        loadingMessage.getStyle().setVisibility(visibile ? Visibility.VISIBLE : Visibility.HIDDEN);
+    public void showLoading(boolean visible) {
     }
 }

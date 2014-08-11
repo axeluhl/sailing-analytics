@@ -9,6 +9,7 @@ import com.google.gwt.event.shared.EventBus;
 import com.google.gwt.user.client.Window;
 import com.google.gwt.user.client.rpc.AsyncCallback;
 import com.google.gwt.user.client.ui.AcceptsOneWidget;
+import com.sap.sailing.gwt.home.client.shared.placeholder.Placeholder;
 import com.sap.sailing.gwt.ui.regattaoverview.RegattaRaceStatesSettings;
 import com.sap.sailing.gwt.ui.shared.EventDTO;
 import com.sap.sailing.gwt.ui.shared.LeaderboardGroupDTO;
@@ -50,6 +51,8 @@ public class EventActivity extends AbstractActivity {
 
     @Override
     public void start(final AcceptsOneWidget panel, final EventBus eventBus) {
+        panel.setWidget(new Placeholder());
+
         final long clientTimeWhenRequestWasSent = System.currentTimeMillis();
         UUID eventUUID = UUID.fromString(eventPlace.getEventUuidAsString());
         clientFactory.getSailingService().getEventById(eventUUID, true, new AsyncCallback<EventDTO>() {

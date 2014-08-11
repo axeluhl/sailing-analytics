@@ -5,6 +5,7 @@ import com.google.gwt.event.shared.EventBus;
 import com.google.gwt.user.client.Window;
 import com.google.gwt.user.client.rpc.AsyncCallback;
 import com.google.gwt.user.client.ui.AcceptsOneWidget;
+import com.sap.sailing.gwt.home.client.shared.placeholder.Placeholder;
 import com.sap.sailing.gwt.ui.shared.LeaderboardSearchResultDTO;
 import com.sap.sse.common.search.KeywordQuery;
 
@@ -32,6 +33,8 @@ public class SearchResultActivity extends AbstractActivity {
 
     @Override
     public void start(final AcceptsOneWidget panel, final EventBus eventBus) {
+        panel.setWidget(new Placeholder());
+
         view = clientFactory.createSearchResultView();
         panel.setWidget(view.asWidget());
         doSearch(searchResultPlace.getSearchText());
