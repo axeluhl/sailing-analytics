@@ -73,7 +73,7 @@ public class WindStreamletsRaceboardOverlay extends MovingCanvasOverlay {
         windInfoForRace.windSourcesToExclude = new HashSet<>();
         windInfoForRace.windTrackInfoByWindSource = new HashMap<>();
         updateAverageLatitudeDeg(windInfoForRace);
-        this.windField = new WindInfoForRaceVectorField(windInfoForRace);
+        this.windField = new WindInfoForRaceVectorField(windInfoForRace, /* frames per second */ 1000.0/animationIntervalMillis);
         this.timer = timer;
         getCanvas().getElement().setId("swarm-display");
     }
@@ -102,6 +102,7 @@ public class WindStreamletsRaceboardOverlay extends MovingCanvasOverlay {
             setCanvasSettings();
             this.swarm = new Swarm(this, map, timer, windField, new StreamletParameters());
         }
+        initCanvasOrigin();
         this.swarm.start(animationIntervalMillis);
     }
 

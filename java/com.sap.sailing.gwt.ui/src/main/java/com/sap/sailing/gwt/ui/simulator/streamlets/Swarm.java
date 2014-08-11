@@ -66,18 +66,17 @@ public class Swarm implements TimeListener {
     }
 
     public void start(int animationIntervalMillis) {
+        fullcanvas.setCanvasSettings();
         projection = new Mercator(fullcanvas, map);
         projection.calibrate();
-        this.updateBounds();
-        Context2d ctxt = canvas.getContext2d();
-        ctxt.setFillStyle("red");
+        updateBounds();
         particles = this.createParticles();
-        this.swarmContinue = true;
+        swarmContinue = true;
         startLoop(animationIntervalMillis);
     }
 
     public void stop() {
-        this.swarmContinue = false;
+        swarmContinue = false;
     }
 
     private Particle createParticle() {
@@ -152,6 +151,10 @@ public class Swarm implements TimeListener {
         cosineOfAverageLatitude = Math.cos((visibleBoundsOfField.getSouthWest().getLatRad()+visibleBoundsOfField.getNorthEast().getLatRad())/2);
     };
 
+    //native void log(String message) /*-{
+    //    console.log( message );
+    //}-*/;
+    
     private void startLoop(final int animationIntervalMillis) {
         // Create animation-loop based on timer timeout
         loopTimer = new com.google.gwt.user.client.Timer() {
@@ -179,7 +182,9 @@ public class Swarm implements TimeListener {
                 Date time1 = new Date();
                 if (swarmContinue) {
                     // wait at least 10ms for the next iteration; try to get one iteration done every animationIntervalMillis if possible
-                    loopTimer.schedule((int) Math.max(10, animationIntervalMillis - (time1.getTime() - time0.getTime())));
+                    long timeDelta = time1.getTime() - time0.getTime();
+                    //log("fps: "+(1000.0/timeDelta));
+                    loopTimer.schedule((int) Math.max(10, animationIntervalMillis - timeDelta));
                 } else {
                     projection.clearCanvas();
                 }
@@ -217,7 +222,7 @@ public class Swarm implements TimeListener {
      * {@link VectorField#getMotionScale(int)} at the map's current zoom level.
      */
     private boolean execute(Vector diffPx) {
-        double speed = 0.01 * field.getMotionScale(map.getZoom());
+        double speed = field.getMotionScale(map.getZoom());
         for (int idx = 0; idx < particles.length; idx++) {
             Particle particle = particles[idx];
             if (particle != null && particle.stepsToLive > 0 && particle.v != null) {

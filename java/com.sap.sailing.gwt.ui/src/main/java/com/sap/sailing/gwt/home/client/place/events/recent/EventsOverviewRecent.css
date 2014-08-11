@@ -3,6 +3,7 @@
   font-size: 1rem;
   text-align: center;
   width: 100%;
+  height: 24em;
 }
 .eventteaser {
   font-size: 15px;
@@ -52,7 +53,6 @@
 .eventsoverviewrecent {
   font-size: 15px;
   font-size: 1rem;
-  padding-top: 2em;
 }
 .eventsoverviewrecent_year {
   border-bottom: 1px solid #ccc;

@@ -15,6 +15,27 @@ It contains also some files:
 
  - test.sh -> script that compiles the code in the src folder, creates the test.jar library and execute the code of the example.
  - Manifest.txt -> manifest used to create the test.jar file
+ 
+********************************************
+************* TracAPI 3.0.5 ****************
+********************************************
+This is a final version. Only fixes bugs in the implementation
+
+Release date: 05/08/2014
+
+1) Bugs
+
+- The previous version 3.0.4 added only changes in the synchronization. The lists were synchronized by hand
+ but the implementation continued using synchronized lists. The result was that we had a double
+ synchronization for all the lists of the model: the synchronization by hand and the synchronization of
+ the list. (Reported by Axel Uhl, 04/08/2014)   
+ 
+ - The new subscription library sends the static positions (from the parameters file) as positions events.
+ The problem here is that the subscription library retrieves the positions from the model of control 
+ points and  when some races are loaded in parallel these values can be invalid (values loaded by 
+ other race). Now the subscription library sends the static positions from the parameters file. 
+ (Reported by Jorge Piera, 04/08/2014)  
+  
 
 ********************************************
 ************* TracAPI 3.0.4 ****************
