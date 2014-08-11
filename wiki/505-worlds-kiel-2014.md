@@ -1,4 +1,20 @@
-# 505 worlds Kiel 2014
+# 505 Worlds 2014, Kiel
+
+## Server Landscape
+
+We run two servers for the event, A and B, for fast and available switching. The DB they use is called 505WORLDS2014, and so is the replication channel.
+
+### A server
+
+Admin Console at http://ec2-54-77-58-65.eu-west-1.compute.amazonaws.com:8888/gwt/AdminConsole.html
+External IP: 54.77.58.65
+Internal IP: 172.31.30.45
+
+### B server
+
+Admin Console at http://ec2-54-77-33-52.eu-west-1.compute.amazonaws.com:8888/gwt/AdminConsole.html
+External IP: 54.77.33.52
+Internal IP: 172.31.31.62
 
 ### Touch Computer (Lenovo) Setup 
 
