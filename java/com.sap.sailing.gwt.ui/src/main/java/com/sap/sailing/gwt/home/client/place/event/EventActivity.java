@@ -43,7 +43,7 @@ public class EventActivity extends AbstractActivity {
             
             @Override
             public void timeChanged(Date newTime, Date oldTime) {
-                // loadAndUpdateEventRaceStatesLog();
+                loadAndUpdateEventRaceStatesLog();
             }
         });
     }
