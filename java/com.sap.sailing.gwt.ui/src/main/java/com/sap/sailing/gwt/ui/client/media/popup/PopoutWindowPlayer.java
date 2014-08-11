@@ -3,21 +3,22 @@ package com.sap.sailing.gwt.ui.client.media.popup;
 import com.google.gwt.core.client.JavaScriptObject;
 import com.google.gwt.user.client.Window;
 import com.sap.sailing.domain.common.media.MediaTrack;
+import com.sap.sailing.gwt.ui.client.media.VideoContainer;
 import com.sap.sailing.gwt.ui.client.media.shared.AbstractMediaPlayer;
 import com.sap.sailing.gwt.ui.client.media.shared.VideoPlayer;
 
-public abstract class PopupWindowPlayer extends AbstractMediaPlayer implements VideoPlayer {
+public abstract class PopoutWindowPlayer extends AbstractMediaPlayer implements VideoPlayer, VideoContainer {
 
-    public interface PopupCloseListener {
-        void popupClosed();
+    public interface PopoutCloseListener {
+        void popoutClosed();
 
-        void setPopoutPlayer(VideoPlayer popoutPlayer);
+        void setVideoContainer(VideoContainer videoContainer);
     }
 
     private final JavaScriptObject playerWindow;
-    private final PopupCloseListener popupCloseHandler;
+    private final PopoutCloseListener popupCloseHandler;
 
-    protected PopupWindowPlayer(MediaTrack mediaTrack, PopupCloseListener popupCloseListener) {
+    protected PopoutWindowPlayer(MediaTrack mediaTrack, PopoutCloseListener popupCloseListener) {
         super(mediaTrack);
         this.popupCloseHandler = popupCloseListener;
         
@@ -39,8 +40,8 @@ public abstract class PopupWindowPlayer extends AbstractMediaPlayer implements V
     }-*/;
 
     @Override
-    public native void close() /*-{
-            var playerWindow = this.@com.sap.sailing.gwt.ui.client.media.popup.PopupWindowPlayer::playerWindow;
+    public native void shutDown() /*-{
+            var playerWindow = this.@com.sap.sailing.gwt.ui.client.media.popup.PopoutWindowPlayer::playerWindow;
             if (!playerWindow.closed) {
                 playerWindow.close();
             }
@@ -48,9 +49,9 @@ public abstract class PopupWindowPlayer extends AbstractMediaPlayer implements V
 
     native JavaScriptObject registerNativeStuff() /*-{
                 var that = this;
-                var window = that.@com.sap.sailing.gwt.ui.client.media.popup.PopupWindowPlayer::playerWindow; 
+                var window = that.@com.sap.sailing.gwt.ui.client.media.popup.PopoutWindowPlayer::playerWindow; 
                 window.onbeforeunload = function() {
-                        that.@com.sap.sailing.gwt.ui.client.media.popup.PopupWindowPlayer::onClosingPopup()();
+                        that.@com.sap.sailing.gwt.ui.client.media.popup.PopoutWindowPlayer::onClosingPopup()();
                 }
                 window.parent.deferredPlayState = {
                     deferredIsPlaying: false,
@@ -62,12 +63,12 @@ public abstract class PopupWindowPlayer extends AbstractMediaPlayer implements V
 
     private void onClosingPopup() {
         pauseMedia();
-        popupCloseHandler.popupClosed();
+        popupCloseHandler.popoutClosed();
     }
 
     @Override
     public native void playMedia() /*-{
-                var window = this.@com.sap.sailing.gwt.ui.client.media.popup.PopupWindowPlayer::playerWindow; 
+                var window = this.@com.sap.sailing.gwt.ui.client.media.popup.PopoutWindowPlayer::playerWindow; 
                 if (!window.parent.videoPlayer) {
                         window.parent.deferredPlayState.deferredIsPlaying = true;
                 } else {
@@ -78,7 +79,7 @@ public abstract class PopupWindowPlayer extends AbstractMediaPlayer implements V
 
     @Override
     public native void pauseMedia() /*-{
-                var window = this.@com.sap.sailing.gwt.ui.client.media.popup.PopupWindowPlayer::playerWindow; 
+                var window = this.@com.sap.sailing.gwt.ui.client.media.popup.PopoutWindowPlayer::playerWindow; 
                 if (!window.parent.videoPlayer) {
                         window.parent.deferredPlayState.deferredIsPlaying = false;
                 } else {
@@ -89,7 +90,7 @@ public abstract class PopupWindowPlayer extends AbstractMediaPlayer implements V
 
     @Override
     public native void setCurrentMediaTime(double mediaTime) /*-{
-                var window = this.@com.sap.sailing.gwt.ui.client.media.popup.PopupWindowPlayer::playerWindow; 
+                var window = this.@com.sap.sailing.gwt.ui.client.media.popup.PopoutWindowPlayer::playerWindow; 
                 if (!window.parent.videoPlayer) {
                         window.parent.deferredPlayState.deferredMediaTime = mediaTime;
                 } else {
@@ -100,7 +101,7 @@ public abstract class PopupWindowPlayer extends AbstractMediaPlayer implements V
 
     @Override
     public native void setMuted(boolean muted) /*-{
-                var window = this.@com.sap.sailing.gwt.ui.client.media.popup.PopupWindowPlayer::playerWindow; 
+                var window = this.@com.sap.sailing.gwt.ui.client.media.popup.PopoutWindowPlayer::playerWindow; 
                 if (!window.parent.videoPlayer) {
                         window.parent.deferredPlayState.deferredIsMuted = muted;
                 } else {
@@ -110,7 +111,7 @@ public abstract class PopupWindowPlayer extends AbstractMediaPlayer implements V
 
     @Override
     public native boolean isMediaPaused() /*-{
-                var window = this.@com.sap.sailing.gwt.ui.client.media.popup.PopupWindowPlayer::playerWindow;
+                var window = this.@com.sap.sailing.gwt.ui.client.media.popup.PopoutWindowPlayer::playerWindow;
                 if (!window.parent.videoPlayer) {
                         return !window.parent.deferredPlayState.deferredIsPlaying;
                 } else {
@@ -120,7 +121,7 @@ public abstract class PopupWindowPlayer extends AbstractMediaPlayer implements V
 
     @Override
     public native double getDuration() /*-{
-                var window = this.@com.sap.sailing.gwt.ui.client.media.popup.PopupWindowPlayer::playerWindow;
+                var window = this.@com.sap.sailing.gwt.ui.client.media.popup.PopoutWindowPlayer::playerWindow;
                 if (!window.parent.videoPlayer) {
                         return NaN;
                 } else {
@@ -130,7 +131,7 @@ public abstract class PopupWindowPlayer extends AbstractMediaPlayer implements V
 
     @Override
     public native double getCurrentMediaTime() /*-{
-                var window = this.@com.sap.sailing.gwt.ui.client.media.popup.PopupWindowPlayer::playerWindow;
+                var window = this.@com.sap.sailing.gwt.ui.client.media.popup.PopoutWindowPlayer::playerWindow;
                 if (!window.parent.videoPlayer) {
                         return window.parent.deferredPlayState.deferredMediaTime;
                 } else {
@@ -140,12 +141,18 @@ public abstract class PopupWindowPlayer extends AbstractMediaPlayer implements V
 
     @Override
     public native void setPlaybackSpeed(double playbackSpeed) /*-{
-                var window = this.@com.sap.sailing.gwt.ui.client.media.popup.PopupWindowPlayer::playerWindow;
+                var window = this.@com.sap.sailing.gwt.ui.client.media.popup.PopoutWindowPlayer::playerWindow;
                 if (!window.parent.videoPlayer) {
                         window.parent.deferredPlayState.deferredPlaybackSpeed = playbackSpeed;
                 } else {
                         window.parent.videoPlayer.setPlaybackSpeed(playbackSpeed);
                 }
     }-*/;
+    
+    
+    @Override
+    public VideoPlayer getVideoPlayer() {
+        return this;
+    }
 
 }

@@ -5,7 +5,7 @@ import com.google.gwt.media.client.MediaBase;
 import com.sap.sailing.domain.common.media.MediaTrack;
 import com.sap.sailing.gwt.ui.client.media.shared.AbstractMediaPlayer;
 
-abstract public class AbstractEmbeddedMediaPlayer extends AbstractMediaPlayer {
+abstract public class AbstractHtmlMediaPlayer extends AbstractMediaPlayer {
     
     /**
      * isReady and the ..Cache fields are required because setting the audio element's play state 
@@ -17,29 +17,29 @@ abstract public class AbstractEmbeddedMediaPlayer extends AbstractMediaPlayer {
     private boolean deferredIsPlaying;
     private boolean deferredIsMuted;
     
-    protected final MediaBase mediaControl;
+    protected final MediaBase mediaElement;
 
-    public AbstractEmbeddedMediaPlayer(MediaTrack mediaTrack) {
+    public AbstractHtmlMediaPlayer(MediaTrack mediaTrack) {
         super(mediaTrack);
-        mediaControl = createMediaControl();
-        if (mediaControl != null) {
-            mediaControl.setControls(false);
-            mediaControl.setAutoplay(false);
-            mediaControl.setLoop(false);
-            mediaControl.setMuted(false);
-            mediaControl.setPreload(MediaElement.PRELOAD_AUTO);
-            addNativeEventHandlers(mediaControl.getMediaElement());
-            mediaControl.setSrc(mediaTrack.url);
-            mediaControl.setTitle(mediaTrack.title);
+        mediaElement = createMediaElement();
+        if (mediaElement != null) {
+            mediaElement.setControls(false);
+            mediaElement.setAutoplay(false);
+            mediaElement.setLoop(false);
+            mediaElement.setMuted(false);
+            mediaElement.setPreload(MediaElement.PRELOAD_AUTO);
+            addNativeEventHandlers(mediaElement.getMediaElement());
+            mediaElement.setSrc(mediaTrack.url);
+            mediaElement.setTitle(mediaTrack.title);
         }
     }
     
-    abstract protected MediaBase createMediaControl();
+    abstract protected MediaBase createMediaElement();
 
     native void addNativeEventHandlers(MediaElement mediaElement) /*-{
         var that = this;
         mediaElement.addEventListener('canplay', function() {
-            that.@com.sap.sailing.gwt.ui.client.media.AbstractEmbeddedMediaPlayer::initPlayState()();
+            that.@com.sap.sailing.gwt.ui.client.media.AbstractHtmlMediaPlayer::initPlayState()();
         });
         mediaElement.addEventListener('timeupdate', function(event) {
             that.@com.sap.sailing.gwt.ui.client.media.shared.AbstractMediaPlayer::onMediaTimeUpdate()();
@@ -47,14 +47,14 @@ abstract public class AbstractEmbeddedMediaPlayer extends AbstractMediaPlayer {
     }-*/;
     
     private void initPlayState() {
-        if (!isReady && (mediaControl != null)) {
-            mediaControl.setCurrentTime(deferredMediaTime);
-            mediaControl.setMuted(deferredIsMuted);
-            mediaControl.setPlaybackRate(deferredPlaybackSpeed);
+        if (!isReady && (mediaElement != null)) {
+            mediaElement.setCurrentTime(deferredMediaTime);
+            mediaElement.setMuted(deferredIsMuted);
+            mediaElement.setPlaybackRate(deferredPlaybackSpeed);
             if (deferredIsPlaying) {
-                mediaControl.play();
+                mediaElement.play();
             } else {
-                mediaControl.pause();
+                mediaElement.pause();
             }
         }
         isReady = true;
@@ -63,7 +63,7 @@ abstract public class AbstractEmbeddedMediaPlayer extends AbstractMediaPlayer {
     @Override
     public boolean isMediaPaused() {
         if (isReady) {
-            return mediaControl.isPaused();
+            return mediaElement.isPaused();
         } else {
             return !deferredIsPlaying;
         }
@@ -72,39 +72,39 @@ abstract public class AbstractEmbeddedMediaPlayer extends AbstractMediaPlayer {
     @Override
     public void pauseMedia() {
         deferredIsPlaying = false;
-        if (isReady && mediaControl != null) {
-            mediaControl.pause();
+        if (isReady && mediaElement != null) {
+            mediaElement.pause();
         }
     }
 
     @Override
     public void playMedia() {
         deferredIsPlaying = true;
-        if (isReady && mediaControl != null) {
-            mediaControl.play();
+        if (isReady && mediaElement != null) {
+            mediaElement.play();
         }
     }
 
     @Override
     public void setPlaybackSpeed(double playbackSpeed) {
         this.deferredPlaybackSpeed = playbackSpeed; 
-        if (isReady && mediaControl != null) {
-            mediaControl.setPlaybackRate(playbackSpeed);
+        if (isReady && mediaElement != null) {
+            mediaElement.setPlaybackRate(playbackSpeed);
         }
     }
     
     @Override
     public void setMuted(boolean isToBeMuted) {
         deferredIsMuted = isToBeMuted;
-        if (isReady && mediaControl != null) {
-            mediaControl.setMuted(isToBeMuted);
+        if (isReady && mediaElement != null) {
+            mediaElement.setMuted(isToBeMuted);
         }
     }
 
     @Override
     public double getDuration() {
         if (isReady) {
-            return mediaControl.getDuration();
+            return mediaElement.getDuration();
         } else {
             return Double.NaN;
         }
@@ -113,7 +113,7 @@ abstract public class AbstractEmbeddedMediaPlayer extends AbstractMediaPlayer {
     @Override
     public double getCurrentMediaTime() {
         if (isReady) {
-            return mediaControl.getCurrentTime();
+            return mediaElement.getCurrentTime();
         } else {
             return Double.NaN;
         }
@@ -122,15 +122,15 @@ abstract public class AbstractEmbeddedMediaPlayer extends AbstractMediaPlayer {
     @Override
     public void setCurrentMediaTime(double mediaTime) {
         this.deferredMediaTime = mediaTime;
-        if (isReady && mediaControl != null) {
-            mediaControl.setCurrentTime(mediaTime);
+        if (isReady && mediaElement != null) {
+            mediaElement.setCurrentTime(mediaTime);
         }
     }
 
     @Override
-    public void close() {
-        mediaControl.pause();
-        mediaControl.setSrc(null);
+    public void shutDown() {
+        mediaElement.pause();
+        mediaElement.setSrc(null);
     }
 
 }

@@ -33,11 +33,12 @@ import com.sap.sailing.gwt.ui.client.MediaServiceAsync;
 import com.sap.sailing.gwt.ui.client.RaceTimesInfoProvider;
 import com.sap.sailing.gwt.ui.client.StringMessages;
 import com.sap.sailing.gwt.ui.client.media.MediaSelectionDialog.MediaSelectionListener;
-import com.sap.sailing.gwt.ui.client.media.popup.PopupWindowPlayer;
+import com.sap.sailing.gwt.ui.client.media.popup.PopoutWindowPlayer;
 import com.sap.sailing.gwt.ui.client.media.popup.VideoWindowPlayer;
 import com.sap.sailing.gwt.ui.client.media.popup.YoutubeWindowPlayer;
 import com.sap.sailing.gwt.ui.client.media.shared.MediaPlayer;
 import com.sap.sailing.gwt.ui.client.media.shared.VideoPlayer;
+import com.sap.sailing.gwt.ui.client.media.shared.VideoSynchPlayer;
 import com.sap.sailing.gwt.ui.shared.RaceTimesInfoDTO;
 import com.sap.sailing.gwt.ui.shared.UserDTO;
 import com.sap.sse.gwt.client.dialog.DataEntryDialog.DialogCallback;
@@ -63,7 +64,7 @@ public class MediaSelector implements PlayStateListener, TimeListener,
 
     private final MediaSelectionDialog mediaSelectionDialog;
 
-    private final Map<MediaTrack, MediaPlayer> videoPlayers = new HashMap<MediaTrack, MediaPlayer>();
+    private final Map<MediaTrack, VideoContainer> activeVideoContainers = new HashMap<MediaTrack, VideoContainer>();
     private final Collection<MediaTrack> mediaTracks = new ArrayList<MediaTrack>();
 
     private final RegattaAndRaceIdentifier raceIdentifier;
@@ -244,7 +245,8 @@ public class MediaSelector implements PlayStateListener, TimeListener,
         if (activeAudioPlayer != null) {
             activeAudioPlayer.setPlaybackSpeed(this.currentPlaybackSpeed);
         }
-        for (MediaPlayer videoPlayer : videoPlayers.values()) {
+        for (VideoContainer videoContainer : activeVideoContainers.values()) {
+            VideoPlayer videoPlayer = videoContainer.getVideoPlayer();
             videoPlayer.setPlaybackSpeed(this.currentPlaybackSpeed);
         }
     }
@@ -254,9 +256,10 @@ public class MediaSelector implements PlayStateListener, TimeListener,
             activeAudioPlayer.pauseMedia();
         }
 
-        for (MediaPlayer player : videoPlayers.values()) {
-            if (!player.isMediaPaused()) {
-                player.pauseMedia();
+        for (VideoContainer videoContainer : activeVideoContainers.values()) {
+            VideoPlayer videoPlayer = videoContainer.getVideoPlayer();
+            if (!videoPlayer.isMediaPaused()) {
+                videoPlayer.pauseMedia();
             }
         }
     }
@@ -265,7 +268,8 @@ public class MediaSelector implements PlayStateListener, TimeListener,
         if ((activeAudioPlayer != null) && activeAudioPlayer.isCoveringCurrentRaceTime()) {
             activeAudioPlayer.playMedia();
         }
-        for (MediaPlayer videoPlayer : videoPlayers.values()) {
+        for (VideoContainer videoContainer : activeVideoContainers.values()) {
+            VideoPlayer videoPlayer = videoContainer.getVideoPlayer();
             if (videoPlayer.isMediaPaused() && videoPlayer.isCoveringCurrentRaceTime()) {
                 videoPlayer.playMedia();
             }
@@ -279,9 +283,10 @@ public class MediaSelector implements PlayStateListener, TimeListener,
             activeAudioPlayer.raceTimeChanged(this.currentRaceTime);
             ensurePlayState(activeAudioPlayer);
         }
-        for (MediaPlayer player : videoPlayers.values()) {
-            player.raceTimeChanged(this.currentRaceTime);
-            ensurePlayState(player);
+        for (VideoContainer videoContainer : activeVideoContainers.values()) {
+            VideoPlayer videoPlayer = videoContainer.getVideoPlayer();
+            videoPlayer.raceTimeChanged(this.currentRaceTime);
+            ensurePlayState(videoPlayer);
         }
     }
 
@@ -325,11 +330,11 @@ public class MediaSelector implements PlayStateListener, TimeListener,
                 return; // nothing changed
             }
 
-            if (videoPlayers.containsKey(activeAudioPlayer.getMediaTrack())) { // pre-change audioPlayer is one of the
+            if (activeVideoContainers.containsKey(activeAudioPlayer.getMediaTrack())) { // pre-change audioPlayer is one of the
                                                                                // videoPlayers
                 activeAudioPlayer.setMuted(true);
             } else { // pre-change audioPlayer is a dedicated audio-only player
-                activeAudioPlayer.close();
+                activeAudioPlayer.shutDown();
             }
             activeAudioPlayer = null;
         }
@@ -338,9 +343,10 @@ public class MediaSelector implements PlayStateListener, TimeListener,
             videoSelected(audioTrack);
             mediaSelectionDialog.selectVideo(audioTrack);
         }
-        MediaPlayer playingVideo = videoPlayers.get(audioTrack);
-        if (playingVideo != null) {
-            activeAudioPlayer = playingVideo;
+        VideoContainer playingVideoContainer = activeVideoContainers.get(audioTrack);
+        if (playingVideoContainer != null) {
+            VideoPlayer playingVideoPlayer = playingVideoContainer.getVideoPlayer();
+            activeAudioPlayer = playingVideoPlayer;
             activeAudioPlayer.setMuted(false);
         } else {
             assignNewAudioPlayer(audioTrack);
@@ -352,74 +358,75 @@ public class MediaSelector implements PlayStateListener, TimeListener,
 
     @Override
     public void videoSelected(final MediaTrack videoTrack) {
-        MediaPlayer playingVideo = videoPlayers.get(videoTrack);
-        if (playingVideo == null) {
-            final PopupWindowPlayer.PopupCloseListener popupCloseListener = new PopupWindowPlayer.PopupCloseListener() {
+        VideoContainer activeVideoContainer = activeVideoContainers.get(videoTrack);
+        if (activeVideoContainer == null) {
+            final PopoutWindowPlayer.PopoutCloseListener popupCloseListener = new PopoutWindowPlayer.PopoutCloseListener() {
                 
-                private VideoPlayer popoutPlayer;
+                private VideoContainer videoContainer;
                 
                 @Override
-                public void popupClosed() {
-                    if (popoutPlayer == null) {
+                public void popoutClosed() {
+                    if (videoContainer == null) {
                         videoDeselected(videoTrack);
                     } else {
                         mediaSelectionDialog.hide();
-                        registerVideoPlayer(videoTrack, popoutPlayer);
-                        popoutPlayer = null;
+                        registerVideoContainer(videoTrack, videoContainer);
+                        videoContainer = null;
                     }
                 }
 
                 @Override
-                public void setPopoutPlayer(VideoPlayer popoutPlayer) {
-                    this.popoutPlayer = popoutPlayer; 
+                public void setVideoContainer(VideoContainer videoContainer) {
+                    this.videoContainer = videoContainer; 
                 }
             };
             PopoutListener popoutListener = new PopoutListener() {
 
                 @Override
                 public void popoutVideo(MediaTrack videoTrack) {
-                    VideoPlayer popoutPlayer;
+                    VideoContainer videoContainer;
                     if (videoTrack.isYoutube()) {
-                        popoutPlayer = new YoutubeWindowPlayer(videoTrack, popupCloseListener);
+                        videoContainer = new YoutubeWindowPlayer(videoTrack, popupCloseListener);
                     } else {
-                        popoutPlayer = new VideoWindowPlayer(videoTrack, popupCloseListener);
+                        videoContainer = new VideoWindowPlayer(videoTrack, popupCloseListener);
                     }
-                    popupCloseListener.setPopoutPlayer(popoutPlayer);
+                    popupCloseListener.setVideoContainer(videoContainer);
                     videoDeselected(videoTrack);
                 }
             };
 
-            final VideoPlayer popupPlayer;
-
+            final VideoSynchPlayer videoPlayer;
             boolean showSynchControls = this.user != null;
+            
             if (videoTrack.isYoutube()) {
                 // popupPlayer = new YoutubeWindowPlayer(videoTrack, popCloseListener);
-                popupPlayer = new YoutubeEmbeddedPlayer(videoTrack, getRaceStartTime(), showSynchControls, raceTimer,
-                        mediaService, errorReporter, popupCloseListener, popoutListener);
+                videoPlayer = new VideoYoutubePlayer(videoTrack, getRaceStartTime(), showSynchControls, raceTimer, errorReporter, popupCloseListener, popoutListener);
             } else {
                 // popupPlayer = new VideoWindowPlayer(videoTrack, popCloseListener);
-                popupPlayer = new VideoEmbeddedPlayer(videoTrack, getRaceStartTime(), showSynchControls, raceTimer,
-                        mediaService, errorReporter, popupCloseListener, popoutListener);
+                videoPlayer = new VideoHtmlPlayer(videoTrack, getRaceStartTime(), showSynchControls, raceTimer, errorReporter, popupCloseListener, popoutListener);
             }
-            registerVideoPlayer(videoTrack, popupPlayer);
+            VideoFloatingContainer videoFloatingContainer = new VideoFloatingContainer(videoPlayer, videoTrack, showSynchControls, mediaService, errorReporter, popupCloseListener, popoutListener);
+            
+            registerVideoContainer(videoTrack, videoFloatingContainer);
         } else {
             // nothing changed
         }
 
     }
 
-    private void registerVideoPlayer(final MediaTrack videoTrack, final VideoPlayer popupPlayer) {
-        videoPlayers.put(videoTrack, popupPlayer);
+    private void registerVideoContainer(final MediaTrack videoTrack, final VideoContainer videoContainer) {
+        VideoPlayer videoPlayer = videoContainer.getVideoPlayer();
+        activeVideoContainers.put(videoTrack, videoContainer);
         if ((activeAudioPlayer != null) && (activeAudioPlayer.getMediaTrack() == videoTrack)) { // selected video track
                                                                                                 // has been playing as
                                                                                                 // audio-only
             activeAudioPlayer.pauseMedia();
-            activeAudioPlayer = popupPlayer;
-            popupPlayer.setMuted(false);
+            activeAudioPlayer = videoContainer.getVideoPlayer();
+            videoPlayer.setMuted(false);
         } else {
-            popupPlayer.setMuted(true);
+            videoPlayer.setMuted(true);
         }
-        synchPlayState(popupPlayer);
+        synchPlayState(videoPlayer);
         updateToggleButton();
     }
 
@@ -430,9 +437,10 @@ public class MediaSelector implements PlayStateListener, TimeListener,
     @Override
     public void videoDeselected(MediaTrack videoTrack) {
         mediaSelectionDialog.unselectVideo(videoTrack);
-        MediaPlayer removedVideoPlayer = videoPlayers.remove(videoTrack);
-        if (removedVideoPlayer != null) {
-            removedVideoPlayer.close();
+        VideoContainer removedVideoContainer = activeVideoContainers.remove(videoTrack);
+        if (removedVideoContainer != null) {
+            removedVideoContainer.shutDown();
+            VideoPlayer removedVideoPlayer = removedVideoContainer.getVideoPlayer(); 
             if (removedVideoPlayer == activeAudioPlayer) { // in case this video has been the sound source, replace the
                                                            // video player with a dedicated audio player
                 if (removedVideoPlayer.getMediaTrack().isYoutube()) {
@@ -448,12 +456,12 @@ public class MediaSelector implements PlayStateListener, TimeListener,
     }
 
     private void updateToggleButton() {
-        toggleMediaButton.setValue((activeAudioPlayer != null) || (!videoPlayers.isEmpty()));
+        toggleMediaButton.setValue((activeAudioPlayer != null) || (!activeVideoContainers.isEmpty()));
     }
 
     private void assignNewAudioPlayer(MediaTrack audioTrack) {
         if (audioTrack != null) {
-            activeAudioPlayer = new AudioPlayer(audioTrack);
+            activeAudioPlayer = new AudioHtmlPlayer(audioTrack);
 
             synchPlayState(activeAudioPlayer);
         } else {
@@ -499,15 +507,15 @@ public class MediaSelector implements PlayStateListener, TimeListener,
 
     private void clear() {
         if (activeAudioPlayer != null) {
-            videoPlayers.remove(activeAudioPlayer); // just to ensure that a potentially audio-playing video player is
+            activeVideoContainers.remove(activeAudioPlayer.getMediaTrack()); // just to ensure that a potentially audio-playing video player is
                                                     // not destroyed a second time in the following video loop.
-            activeAudioPlayer.close();
+            activeAudioPlayer.shutDown();
             activeAudioPlayer = null;
         }
-        for (MediaPlayer videoControl : videoPlayers.values()) {
-            videoControl.close();
+        for (VideoContainer videoContainer : activeVideoContainers.values()) {
+            videoContainer.shutDown();
         }
-        videoPlayers.clear();
+        activeVideoContainers.clear();
         updateToggleButton();
     }
 
@@ -572,7 +580,7 @@ public class MediaSelector implements PlayStateListener, TimeListener,
 
     private void showSelectionDialog() {
         MediaTrack playingAudioTrack = activeAudioPlayer != null ? activeAudioPlayer.getMediaTrack() : null;
-        Set<MediaTrack> playingVideoTracks = videoPlayers.keySet();
+        Set<MediaTrack> playingVideoTracks = activeVideoContainers.keySet();
 
         Collection<MediaTrack> reachableVideoTracks = new ArrayList<MediaTrack>();
         Collection<MediaTrack> reachableAudioTracks = new ArrayList<MediaTrack>();
