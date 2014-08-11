@@ -2,6 +2,7 @@ package com.sap.sailing.util.impl;
 
 import java.io.IOException;
 import java.io.ObjectInputStream;
+import java.util.ArrayList;
 import java.util.concurrent.ConcurrentLinkedQueue;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.locks.Condition;
@@ -185,10 +186,10 @@ public class NamedReentrantReadWriteLock extends ReentrantReadWriteLock implemen
 
     /**
      * Contains the threads currently holding a read lock. Each thread is contained as many times as it
-     * successfully acquired the read lock re-entrantly.
+     * successfully acquired the read lock re-entrantly. The result is a snapshot that is not live.
      */
     public Iterable<Thread> getReaders() {
-        return readers;
+        return new ArrayList<Thread>(readers);
     }
     
     /**
