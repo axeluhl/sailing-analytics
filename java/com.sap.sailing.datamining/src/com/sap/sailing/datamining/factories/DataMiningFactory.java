@@ -5,7 +5,9 @@ import java.util.List;
 
 import com.sap.sailing.datamining.QueryDefinitionConverter;
 import com.sap.sailing.datamining.data.HasGPSFixContext;
+import com.sap.sailing.datamining.data.HasTrackedLegContext;
 import com.sap.sailing.datamining.data.HasTrackedLegOfCompetitorContext;
+import com.sap.sailing.datamining.data.HasTrackedRaceContext;
 import com.sap.sailing.datamining.shared.QueryDefinitionDeprecated;
 import com.sap.sse.datamining.Query;
 import com.sap.sse.datamining.components.Processor;
@@ -62,11 +64,17 @@ public final class DataMiningFactory {
     }
     
     private static SailingDataRetrievalLevels calculateDataRetrievalLevel(Function<Double> extractionFunction) {
-        if (extractionFunction.getDeclaringType().equals(HasGPSFixContext.class)) {
-            return SailingDataRetrievalLevels.GPSFix;
+        if (extractionFunction.getDeclaringType().equals(HasTrackedRaceContext.class)) {
+            return SailingDataRetrievalLevels.TrackedRace;
+        }
+        if (extractionFunction.getDeclaringType().equals(HasTrackedLegContext.class)) {
+            return SailingDataRetrievalLevels.TrackedLeg;
         }
         if (extractionFunction.getDeclaringType().equals(HasTrackedLegOfCompetitorContext.class)) {
             return SailingDataRetrievalLevels.TrackedLegOfCompetitor;
+        }
+        if (extractionFunction.getDeclaringType().equals(HasGPSFixContext.class)) {
+            return SailingDataRetrievalLevels.GPSFix;
         }
         return SailingDataRetrievalLevels.GPSFix;
     }
