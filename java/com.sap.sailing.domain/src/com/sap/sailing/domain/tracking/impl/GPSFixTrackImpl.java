@@ -606,8 +606,10 @@ public class GPSFixTrackImpl<ItemType, FixType extends GPSFix> extends TrackImpl
                     // use a minimum confidence to avoid the bearing to flip to 270deg in case all is zero
                             getMillisecondsOverWhichToAverageSpeed()/2, /* minimumConfidence */ 0.00000001)); // half confidence if half averaging interval apart
                 result = estimatedSpeed == null ? null : estimatedSpeed.getObject();
-                if (ceil != null && ceil.getTimePoint().equals(at)) {
-                    ceil.cacheEstimatedSpeed(result);
+                if (estimatedSpeed != null) {
+                    if (ceil != null && ceil.getTimePoint().equals(at)) {
+                        ceil.cacheEstimatedSpeed(result);
+                    }
                 }
             }
             return result;
