@@ -69,6 +69,7 @@ public class TimePanel<T extends TimePanelSettings> extends SimplePanel implemen
     protected Date lastReceivedDataTimepoint;
     private final Button slowDownButton;
     private final Button speedUpButton;
+    private final Button toggleAdvancedModeButton;
 
     private final FlowPanel controlsPanel;
     private final SimplePanel timePanelSlider;
@@ -150,6 +151,9 @@ public class TimePanel<T extends TimePanelSettings> extends SimplePanel implemen
         playControlPanel.setStyleName("timePanel-controls-play");
         controlsPanel.add(playControlPanel);
         
+        toggleAdvancedModeButton = createToggleAdvancedModeButton();
+        playControlPanel.add(toggleAdvancedModeButton);
+        
         playPauseButton.addClickHandler(new ClickHandler() {
             @Override
             public void onClick(ClickEvent event) {
@@ -164,7 +168,7 @@ public class TimePanel<T extends TimePanelSettings> extends SimplePanel implemen
             }
         });
         playPauseButton.setTitle(stringMessages.startStopPlaying());
-        playPauseButton.getElement().addClassName("playPauseButton");
+        playPauseButton.setStyleName("playPauseButton");
         playControlPanel.add(playPauseButton);
 
         backToLivePlayButton = new Button(stringMessages.raceIsInLiveTimePanelMode());
@@ -212,7 +216,6 @@ public class TimePanel<T extends TimePanelSettings> extends SimplePanel implemen
         FlowPanel playSpeedControlPanel = new FlowPanel();
         playSpeedControlPanel.setStyleName("timePanel-controls-playSpeed");
         
-
         playSpeedBox = new IntegerBox();
         playSpeedBox.setVisibleLength(3);
         playSpeedBox.setWidth("25px");
@@ -282,6 +285,8 @@ public class TimePanel<T extends TimePanelSettings> extends SimplePanel implemen
         controlsPanel.add(timeDelayPanel);
         controlsPanel.add(timeControlPanel);
         controlsPanel.add(timeToStartControlPanel);
+        
+        hideControlsPanel();
     }
     
     private Button createSettingsButton() {
@@ -291,9 +296,16 @@ public class TimePanel<T extends TimePanelSettings> extends SimplePanel implemen
         return settingsButton;
     }
     
-    public boolean toggleAdvancedMode(Button toggleButton) {
+    private Button createToggleAdvancedModeButton() {
+        Button toggleAdvancedModeButton = new Button();
+        toggleAdvancedModeButton.setStyleName("TimePanel-ShowExtended-Button");
+        toggleAdvancedModeButton.addStyleDependentName("Closed");
+        return toggleAdvancedModeButton;
+    }
+    
+    public boolean toggleAdvancedMode() {
         if (advancedModeShown) {
-            hideControlsPanel(toggleButton);
+            hideControlsPanel();
         } else {
             showControlsPanel();
         }
@@ -301,20 +313,15 @@ public class TimePanel<T extends TimePanelSettings> extends SimplePanel implemen
         return this.advancedModeShown;
     }
 
-    public void hideControlsPanel(Button toggleButton) {
+    protected void hideControlsPanel() {
         controlsPanel.remove(playControlPanel);
         timePanelInnerWrapper.remove(controlsPanel);
-        playControlPanel.remove(toggleButton);
-        playControlPanel.add(toggleButton);
         timePanelSliderFlowWrapper.insert(playControlPanel, 0);
         playControlPanel.setStyleName("timePanel-timeslider-play");
     }
 
-    public void showControlsPanel() {
+    protected void showControlsPanel() {
         timePanelInnerWrapper.add(controlsPanel);
-        timePanelSliderFlowWrapper.remove(playControlPanel);
-        controlsPanel.insert(playControlPanel, 0);
-        playControlPanel.setStyleName("timePanel-controls-play");
     }
 
     @Override
@@ -576,5 +583,9 @@ public class TimePanel<T extends TimePanelSettings> extends SimplePanel implemen
 
     protected boolean canReplayWhileLiveIsPossible() {
         return canReplayWhileLiveIsPossible;
+    }
+    
+    public Button getAdvancedToggleButton() {
+        return this.toggleAdvancedModeButton;
     }
 }
