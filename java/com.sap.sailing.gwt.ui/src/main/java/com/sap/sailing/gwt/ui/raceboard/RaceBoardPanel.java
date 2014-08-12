@@ -200,7 +200,7 @@ public class RaceBoardPanel extends SimplePanel implements RegattasDisplayer, Ra
                 stringMessages, asyncActionsExecutor, errorReporter, /* compactChart */ true);
         windChart.setVisible(false);
         windChart.onRaceSelectionChange(raceSelectionProvider.getSelectedRaces());
-        windChart.getEntryWidget().setTitle(stringMessages.wind());
+        windChart.getEntryWidget().setTitle(stringMessages.windChart());
         components.add(windChart);
         leaderboardPanel.setTitle(stringMessages.leaderboard());
         leaderboardAndMapViewer = new SideBySideComponentViewer(leaderboardPanel, raceMap, components, stringMessages);
