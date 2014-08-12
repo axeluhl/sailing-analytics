@@ -17,7 +17,6 @@ import com.google.gwt.user.client.ui.Button;
 import com.google.gwt.user.client.ui.FlowPanel;
 import com.google.gwt.user.client.ui.Label;
 import com.google.gwt.user.client.ui.TextBox;
-import com.google.gwt.user.client.ui.VerticalPanel;
 import com.sap.sailing.domain.common.RaceIdentifier;
 import com.sap.sailing.domain.common.dto.CompetitorDTO;
 import com.sap.sailing.gwt.ui.client.CompetitorSelectionChangeListener;
@@ -133,7 +132,7 @@ public class CompetitorFilterPanel extends FlowPanel implements KeyUpHandler, Fi
         });
         FlowPanel headerPanel = new FlowPanel();
         headerPanel.setStyleName(css.headerPanel());
-        headerPanel.add(new Label("Race Leaderboard"));
+        headerPanel.add(new Label(stringMessages.leaderboard()));
         add(headerPanel);
         FlowPanel searchBoxPanel = new FlowPanel();
         searchBoxPanel.setStyleName(css.searchBox());
