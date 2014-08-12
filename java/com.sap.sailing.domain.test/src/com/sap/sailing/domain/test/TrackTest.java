@@ -1065,9 +1065,23 @@ public class TrackTest {
         final KnotSpeedWithBearingImpl estimatedSpeed = new KnotSpeedWithBearingImpl(9.1, new DegreeBearingImpl(124));
         fix.cacheEstimatedSpeed(estimatedSpeed);
         assertTrue(fix.isEstimatedSpeedCached());
-        SpeedWithBearing cachedEstimatedSpeed = fix.getEstimatedSpeed();
+        SpeedWithBearing cachedEstimatedSpeed = fix.getCachedEstimatedSpeed();
         assertEquals(estimatedSpeed, cachedEstimatedSpeed);
         fix.invalidateEstimatedSpeedCache();
         assertFalse(fix.isEstimatedSpeedCached());
+    }
+    
+    @Test
+    public void testEstimatedSpeedCachingOnTrack() {
+        GPSFixMoving compactFix3 = track.getFirstFixAtOrAfter(gpsFix3.getTimePoint());
+        assertFalse(compactFix3.isEstimatedSpeedCached());
+        SpeedWithBearing fix3EstimatedSpeed = track.getEstimatedSpeed(gpsFix3.getTimePoint());
+        assertTrue(compactFix3.isEstimatedSpeedCached());
+        assertEquals(fix3EstimatedSpeed, compactFix3.getCachedEstimatedSpeed());
+        assertEquals(fix3EstimatedSpeed, track.getEstimatedSpeed(gpsFix3.getTimePoint())); // fetch again from the cache
+        // assuming that all test fixes are within a few milliseconds and the averaging interval is much larger than that,
+        // adding a single fix in the middle should invalidate the cache
+        track.add(new GPSFixMovingImpl(gpsFix3.getPosition(), gpsFix3.getTimePoint().plus(1), gpsFix3.getSpeed()));
+        assertFalse(compactFix3.isEstimatedSpeedCached());
     }
 }

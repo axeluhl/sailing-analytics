@@ -230,7 +230,7 @@ public class GPSFixTrackImpl<ItemType, FixType extends GPSFix> extends TrackImpl
         }
         
         @Override
-        public boolean isValid() {
+        public boolean isValidCached() {
             return false;
         }
         
@@ -248,7 +248,7 @@ public class GPSFixTrackImpl<ItemType, FixType extends GPSFix> extends TrackImpl
         }
         
         @Override
-        public SpeedWithBearing getEstimatedSpeed() {
+        public SpeedWithBearing getCachedEstimatedSpeed() {
             return null;
         }
         
@@ -595,12 +595,22 @@ public class GPSFixTrackImpl<ItemType, FixType extends GPSFix> extends TrackImpl
     @Override
     public SpeedWithBearing getEstimatedSpeed(TimePoint at) {
         lockForRead();
+        FixType ceil = getInternalFixes().ceiling(createDummyGPSFix(at));
         try {
-            SpeedWithBearingWithConfidence<TimePoint> estimatedSpeed = getEstimatedSpeed(at, getInternalFixes(),
+            final SpeedWithBearing result;
+            if (ceil != null && ceil.getTimePoint().equals(at) && ceil.isEstimatedSpeedCached()) {
+                result = ceil.getCachedEstimatedSpeed();
+            } else {
+                SpeedWithBearingWithConfidence<TimePoint> estimatedSpeed = getEstimatedSpeed(at, getInternalFixes(),
                     ConfidenceFactory.INSTANCE.createExponentialTimeDifferenceWeigher(
                     // use a minimum confidence to avoid the bearing to flip to 270deg in case all is zero
                             getMillisecondsOverWhichToAverageSpeed()/2, /* minimumConfidence */ 0.00000001)); // half confidence if half averaging interval apart
-            return estimatedSpeed == null ? null : estimatedSpeed.getObject();
+                result = estimatedSpeed == null ? null : estimatedSpeed.getObject();
+                if (ceil != null && ceil.getTimePoint().equals(at)) {
+                    ceil.cacheEstimatedSpeed(result);
+                }
+            }
+            return result;
         } finally {
             unlockAfterRead();
         }
@@ -787,6 +797,9 @@ public class GPSFixTrackImpl<ItemType, FixType extends GPSFix> extends TrackImpl
      * 
      * But even for a track with {@link GPSFixMoving} fixes this is a good algorithm because in case the speed changes
      * significantly between fixes, it is important to know the next fix to understand and consider the trend.
+     * 
+     * @see #getMillisecondsOverWhichToAverage()
+     * @see #getMillisecondsOverWhichToAverageSpeed()
      */
     protected List<FixType> getFixesRelevantForSpeedEstimation(TimePoint at, NavigableSet<FixType> fixesToUseForSpeedEstimation) {
         lockForRead();
@@ -893,7 +906,7 @@ public class GPSFixTrackImpl<ItemType, FixType extends GPSFix> extends TrackImpl
             isValid = true;
         } else {
             if (e.isValidityCached()) {
-                isValid = e.isValid();
+                isValid = e.isValidCached();
             } else {
                 FixType previous = rawFixes.lower(e);
                 final boolean atLeastOnePreviousFixInRange = previous != null && e.getTimePoint().asMillis() - previous.getTimePoint().asMillis() <= getMillisecondsOverWhichToAverageSpeed();

@@ -140,7 +140,7 @@ public class CompactGPSFixImpl extends AbstractGPSFixImpl {
     }
 
     @Override
-    public boolean isValid() {
+    public boolean isValidCached() {
         assert isValidityCached();
         return (whatIsCached & VALIDITY) != 0;
     }
@@ -166,7 +166,7 @@ public class CompactGPSFixImpl extends AbstractGPSFixImpl {
     }
 
     @Override
-    public SpeedWithBearing getEstimatedSpeed() {
+    public SpeedWithBearing getCachedEstimatedSpeed() {
         assert isEstimatedSpeedCached();
         return new CompactEstimatedSpeed();
     }

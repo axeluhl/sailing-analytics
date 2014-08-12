@@ -62,7 +62,7 @@ public abstract class AbstractGPSFixImpl implements GPSFix {
      * override {@link #isValidityCached()} also need to override this method accordingly.
      */
     @Override
-    public boolean isValid() {
+    public boolean isValidCached() {
         return false;
     }
     
@@ -75,7 +75,7 @@ public abstract class AbstractGPSFixImpl implements GPSFix {
     }
 
     /**
-     * Subclasses overriding this method also need to override {@link #getEstimatedSpeed()} with a useful implementation.
+     * Subclasses overriding this method also need to override {@link #getCachedEstimatedSpeed()} with a useful implementation.
      */
     @Override
     public boolean isEstimatedSpeedCached() {
@@ -87,7 +87,7 @@ public abstract class AbstractGPSFixImpl implements GPSFix {
      * override {@link #isEstimatedSpeedCached()} also need to override this method accordingly.
      */
     @Override
-    public SpeedWithBearing getEstimatedSpeed() {
+    public SpeedWithBearing getCachedEstimatedSpeed() {
         return null;
     }
 

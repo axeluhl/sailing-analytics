@@ -123,7 +123,7 @@ public class DynamicGPSFixMovingTrackImpl<ItemType> extends GPSFixTrackImpl<Item
         assertReadLock();
         final boolean isValid;
         if (e.isValidityCached()) {
-            isValid = e.isValid();
+            isValid = e.isValidCached();
         } else {
             boolean fixHasValidSogAndCog = (e.getSpeed().getMetersPerSecond() != 0.0 || e.getSpeed().getBearing().getDegrees() != 0.0) &&
                     (maxSpeedForSmoothing == null || e.getSpeed().compareTo(maxSpeedForSmoothing) <= 0);
