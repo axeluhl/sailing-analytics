@@ -321,6 +321,11 @@ public interface SailingServiceAsync {
     void setWindSourcesToExclude(RegattaAndRaceIdentifier raceIdentifier, Iterable<WindSource> windSourcesToExclude,
             AsyncCallback<Void> callback);
 
+    /**
+     * @param date
+     *            use <code>null</code> to indicate "live" in which case the server live time stamp for the race
+     *            identified by <code>raceIdentifier</code> will be used, considering that race's delay.
+     */
     void getRaceMapData(RegattaAndRaceIdentifier raceIdentifier, Date date, Map<String, Date> fromPerCompetitorIdAsString,
             Map<String, Date> toPerCompetitorIdAsString, boolean extrapolate, AsyncCallback<CompactRaceMapDataDTO> callback);
 
