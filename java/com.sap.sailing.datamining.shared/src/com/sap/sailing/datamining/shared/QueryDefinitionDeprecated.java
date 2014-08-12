@@ -18,7 +18,7 @@ public interface QueryDefinitionDeprecated extends Serializable {
 
     public AggregatorType getAggregatorType();
 
-    public List<DimensionIdentifier> getDimensionsToGroupBy();
+    public List<FunctionDTO> getDimensionsToGroupBy();
 
     public Map<DimensionIdentifier, Iterable<? extends Serializable>> getSelection();
 

@@ -3,7 +3,6 @@ package com.sap.sailing.gwt.ui.datamining;
 import java.util.Collection;
 
 import com.google.gwt.user.client.rpc.AsyncCallback;
-import com.sap.sailing.datamining.shared.DataTypes;
 import com.sap.sailing.datamining.shared.QueryDefinitionDeprecated;
 import com.sap.sailing.datamining.shared.SailingDataMiningSerializationDummy;
 import com.sap.sse.datamining.shared.QueryResult;
@@ -15,7 +14,7 @@ public interface DataMiningServiceAsync {
 
     void getAllStatistics(String localeInfoName, AsyncCallback<Collection<FunctionDTO>> callback);
 
-    void getDimensionsFor(DataTypes dataType, String localeInfoName, AsyncCallback<Collection<FunctionDTO>> callback);
+    void getDimensionsFor(FunctionDTO extractionFunction, String localeInfoName, AsyncCallback<Collection<FunctionDTO>> callback);
 
     <ResultType extends Number> void runQuery(QueryDefinitionDeprecated queryDefinition, AsyncCallback<QueryResult<ResultType>> callback);
     

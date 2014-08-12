@@ -1,61 +1,91 @@
 package com.sap.sailing.gwt.ui.datamining.selection;
 
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.Collection;
-import java.util.Collections;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
 
 import com.google.gwt.event.logical.shared.ValueChangeEvent;
 import com.google.gwt.event.logical.shared.ValueChangeHandler;
+import com.google.gwt.i18n.client.LocaleInfo;
+import com.google.gwt.user.client.rpc.AsyncCallback;
 import com.google.gwt.user.client.ui.HorizontalPanel;
 import com.google.gwt.user.client.ui.Label;
 import com.google.gwt.user.client.ui.ValueListBox;
 import com.google.gwt.user.client.ui.Widget;
-import com.sap.sailing.datamining.shared.DimensionIdentifier;
-import com.sap.sailing.datamining.shared.DimensionIdentifier.OrdinalComparator;
 import com.sap.sailing.datamining.shared.QueryDefinitionDeprecated;
+import com.sap.sailing.gwt.ui.client.ErrorReporter;
 import com.sap.sailing.gwt.ui.client.StringMessages;
+import com.sap.sailing.gwt.ui.client.shared.components.AbstractObjectRenderer;
 import com.sap.sailing.gwt.ui.client.shared.components.SettingsDialogComponent;
-import com.sap.sailing.gwt.ui.client.shared.components.SimpleObjectRenderer;
+import com.sap.sailing.gwt.ui.datamining.DataMiningServiceAsync;
 import com.sap.sailing.gwt.ui.datamining.GroupingChangedListener;
 import com.sap.sailing.gwt.ui.datamining.GroupingProvider;
 import com.sap.sse.datamining.shared.components.GrouperType;
+import com.sap.sse.datamining.shared.dto.FunctionDTO;
 
-public class RestrictedGroupingProvider implements GroupingProvider {
-    
-    private static final OrdinalComparator dimensionComparator = new DimensionIdentifier.OrdinalComparator();
+public class MultiDimensionalGroupingProvider implements GroupingProvider {
     
     private final StringMessages stringMessages;
+    private final DataMiningServiceAsync dataMiningService;
+    private final ErrorReporter errorReporter;
     private final Set<GroupingChangedListener> listeners;
     
     private final HorizontalPanel mainPanel;
-    private final List<ValueListBox<DimensionIdentifier>> dimensionToGroupByBoxes;
+    private Collection<FunctionDTO> availableDimensions;
+    private final List<ValueListBox<FunctionDTO>> dimensionToGroupByBoxes;
 
-    public RestrictedGroupingProvider(StringMessages stringMessages) {
+    public MultiDimensionalGroupingProvider(StringMessages stringMessages, DataMiningServiceAsync dataMiningService, ErrorReporter errorReporter) {
         this.stringMessages = stringMessages;
+        this.dataMiningService = dataMiningService;
+        this.errorReporter = errorReporter;
         listeners = new HashSet<GroupingChangedListener>();
-        dimensionToGroupByBoxes = new ArrayList<ValueListBox<DimensionIdentifier>>();
+        dimensionToGroupByBoxes = new ArrayList<ValueListBox<FunctionDTO>>();
         
         mainPanel = new HorizontalPanel();
         mainPanel.setSpacing(5);
         mainPanel.add(new Label(this.stringMessages.groupBy() + ":"));
-        
-        ValueListBox<DimensionIdentifier> firstDimensionToGroupByBox = createDimensionToGroupByBox();
-        addDimensionToGroupByBoxAndUpdateAcceptableValues(firstDimensionToGroupByBox);
     }
 
-    private ValueListBox<DimensionIdentifier> createDimensionToGroupByBox() {
-        ValueListBox<DimensionIdentifier> dimensionToGroupByBox = new ValueListBox<DimensionIdentifier>(new SimpleObjectRenderer<DimensionIdentifier>());
-        dimensionToGroupByBox.addValueChangeHandler(new ValueChangeHandler<DimensionIdentifier>() {
+    public void updateAvailableDimensions(FunctionDTO forExtractionFunction) {
+        //Removing all list boxes
+        //TODO implement a smarter algorithm to handle the loss of selected dimensions
+        for (ValueListBox<FunctionDTO> dimensionToGroupByBox : dimensionToGroupByBoxes) {
+            mainPanel.remove(dimensionToGroupByBox);
+        }
+        dimensionToGroupByBoxes.clear();
+        
+        dataMiningService.getDimensionsFor(forExtractionFunction, LocaleInfo.getCurrentLocale().getLocaleName(), new AsyncCallback<Collection<FunctionDTO>>() {
+            @Override
+            public void onSuccess(Collection<FunctionDTO> dimensions) {
+                //TODO implement a smarter algorithm to handle the loss of selected dimensions
+                availableDimensions = dimensions;
+                ValueListBox<FunctionDTO> firstDimensionToGroupByBox = createDimensionToGroupByBox();
+                addDimensionToGroupByBoxAndUpdateAcceptableValues(firstDimensionToGroupByBox);
+            }
+            @Override
+            public void onFailure(Throwable caught) {
+                errorReporter.reportError("Error fetching the dimensions from the server: " + caught.getMessage());
+            }
+        });
+    }
+
+    private ValueListBox<FunctionDTO> createDimensionToGroupByBox() {
+        ValueListBox<FunctionDTO> dimensionToGroupByBox = new ValueListBox<FunctionDTO>(new AbstractObjectRenderer<FunctionDTO>() {
+            @Override
+            protected String convertObjectToString(FunctionDTO function) {
+                return function.getDisplayName();
+            }
+            
+        });
+        dimensionToGroupByBox.addValueChangeHandler(new ValueChangeHandler<FunctionDTO>() {
             private boolean firstChange = true;
 
             @Override
-            public void onValueChange(ValueChangeEvent<DimensionIdentifier> event) {
+            public void onValueChange(ValueChangeEvent<FunctionDTO> event) {
                 if (firstChange && event.getValue() != null) {
-                    ValueListBox<DimensionIdentifier> newDimensionToGroupByBox = createDimensionToGroupByBox();
+                    ValueListBox<FunctionDTO> newDimensionToGroupByBox = createDimensionToGroupByBox();
                     addDimensionToGroupByBox(newDimensionToGroupByBox);
                     firstChange = false;
                 } else if (event.getValue() == null) {
@@ -70,24 +100,23 @@ public class RestrictedGroupingProvider implements GroupingProvider {
         return dimensionToGroupByBox;
     }
 
-    private void addDimensionToGroupByBoxAndUpdateAcceptableValues(ValueListBox<DimensionIdentifier> dimensionToGroupByBox) {
+    private void addDimensionToGroupByBoxAndUpdateAcceptableValues(ValueListBox<FunctionDTO> dimensionToGroupByBox) {
         addDimensionToGroupByBox(dimensionToGroupByBox);
         updateAcceptableValues();
     }
 
-    private void addDimensionToGroupByBox(ValueListBox<DimensionIdentifier> dimensionToGroupByBox) {
+    private void addDimensionToGroupByBox(ValueListBox<FunctionDTO> dimensionToGroupByBox) {
         mainPanel.add(dimensionToGroupByBox);
         dimensionToGroupByBoxes.add(dimensionToGroupByBox);
     }
 
     private void updateAcceptableValues() {
-        for (ValueListBox<DimensionIdentifier> dimensionToGroupByBox : dimensionToGroupByBoxes) {
-            List<DimensionIdentifier> acceptableValues = new ArrayList<DimensionIdentifier>(Arrays.asList(DimensionIdentifier.values()));
+        for (ValueListBox<FunctionDTO> dimensionToGroupByBox : dimensionToGroupByBoxes) {
+            List<FunctionDTO> acceptableValues = new ArrayList<FunctionDTO>(availableDimensions);
             acceptableValues.removeAll(getDimensionsToGroupBy());
             if (dimensionToGroupByBox.getValue() != null) {
                 acceptableValues.add(dimensionToGroupByBox.getValue());
             }
-            Collections.sort(acceptableValues, dimensionComparator);
             acceptableValues.add(null);
             dimensionToGroupByBox.setAcceptableValues(acceptableValues);
         }
@@ -99,9 +128,9 @@ public class RestrictedGroupingProvider implements GroupingProvider {
     }
 
     @Override
-    public Collection<DimensionIdentifier> getDimensionsToGroupBy() {
-        Collection<DimensionIdentifier> dimensionsToGroupBy = new ArrayList<DimensionIdentifier>();
-        for (ValueListBox<DimensionIdentifier> dimensionListBox : dimensionToGroupByBoxes) {
+    public Collection<FunctionDTO> getDimensionsToGroupBy() {
+        Collection<FunctionDTO> dimensionsToGroupBy = new ArrayList<FunctionDTO>();
+        for (ValueListBox<FunctionDTO> dimensionListBox : dimensionToGroupByBoxes) {
             if (dimensionListBox.getValue() != null) {
                 dimensionsToGroupBy.add(dimensionListBox.getValue());
             }
@@ -118,7 +147,7 @@ public class RestrictedGroupingProvider implements GroupingProvider {
     public void applyQueryDefinition(QueryDefinitionDeprecated queryDefinition) {
         if (queryDefinition.getGrouperType() == GrouperType.Dimensions) {
             int index = 0;
-            for (DimensionIdentifier dimension : queryDefinition.getDimensionsToGroupBy()) {
+            for (FunctionDTO dimension : queryDefinition.getDimensionsToGroupBy()) {
                 dimensionToGroupByBoxes.get(index).setValue(dimension, true);
                 index++;
             }

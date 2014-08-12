@@ -6,6 +6,7 @@ import java.util.Map.Entry;
 import com.sap.sailing.datamining.shared.DimensionIdentifier;
 import com.sap.sailing.datamining.shared.QueryDefinitionDeprecated;
 import com.sap.sse.datamining.shared.QueryDefinition;
+import com.sap.sse.datamining.shared.dto.FunctionDTO;
 import com.sap.sse.datamining.shared.impl.QueryDefinitionImpl;
 
 public class QueryDefinitionConverter {
@@ -22,9 +23,8 @@ public class QueryDefinitionConverter {
                     filterSelectionEntry.getValue());
         }
 
-        for (DimensionIdentifier dimensionIdentifier : queryDefinitionDeprecated.getDimensionsToGroupBy()) {
-            queryDefinition.appendDimensionToGroupBy(DeprecatedEnumsToFunctionDTOConverter
-                    .getFunctionDTOFor(dimensionIdentifier));
+        for (FunctionDTO dimension : queryDefinitionDeprecated.getDimensionsToGroupBy()) {
+            queryDefinition.appendDimensionToGroupBy(dimension);
         }
 
         return queryDefinition;

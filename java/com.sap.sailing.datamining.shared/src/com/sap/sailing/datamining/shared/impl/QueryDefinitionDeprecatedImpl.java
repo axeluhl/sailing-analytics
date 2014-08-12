@@ -21,7 +21,7 @@ public class QueryDefinitionDeprecatedImpl implements QueryDefinitionDeprecated 
     private GrouperType grouperType;
     private AggregatorType aggregatorType;
 
-    private List<DimensionIdentifier> dimensionsToGroupBy;
+    private List<FunctionDTO> dimensionsToGroupBy;
     private Map<DimensionIdentifier, Iterable<? extends Serializable>> selectionMappedByDimension;
     
     /**
@@ -36,7 +36,7 @@ public class QueryDefinitionDeprecatedImpl implements QueryDefinitionDeprecated 
         this.extractionFunction = extractionFunction;
         this.aggregatorType = aggregatorType;
 
-        dimensionsToGroupBy = new ArrayList<DimensionIdentifier>();
+        dimensionsToGroupBy = new ArrayList<FunctionDTO>();
         selectionMappedByDimension = new HashMap<DimensionIdentifier, Iterable<? extends Serializable>>();
     }
     
@@ -61,7 +61,7 @@ public class QueryDefinitionDeprecatedImpl implements QueryDefinitionDeprecated 
     }
 
     @Override
-    public List<DimensionIdentifier> getDimensionsToGroupBy() {
+    public List<FunctionDTO> getDimensionsToGroupBy() {
         return dimensionsToGroupBy;
     }
 
@@ -70,7 +70,7 @@ public class QueryDefinitionDeprecatedImpl implements QueryDefinitionDeprecated 
         return selectionMappedByDimension;
     }
 
-    public void appendDimensionToGroupBy(DimensionIdentifier dimension) {
+    public void appendDimensionToGroupBy(FunctionDTO dimension) {
         dimensionsToGroupBy.add(dimension);
     }
 

@@ -5,7 +5,6 @@ import java.util.Collection;
 import java.util.HashSet;
 import java.util.Set;
 
-import com.sap.sailing.datamining.shared.DimensionIdentifier;
 import com.sap.sailing.datamining.shared.QueryDefinitionDeprecated;
 import com.sap.sailing.gwt.ui.client.ErrorReporter;
 import com.sap.sailing.gwt.ui.client.SailingServiceAsync;
@@ -14,6 +13,7 @@ import com.sap.sailing.gwt.ui.datamining.DataMiningServiceAsync;
 import com.sap.sailing.gwt.ui.datamining.QueryDefinitionChangedListener;
 import com.sap.sailing.gwt.ui.datamining.QueryDefinitionProvider;
 import com.sap.sse.datamining.shared.components.GrouperType;
+import com.sap.sse.datamining.shared.dto.FunctionDTO;
 
 public abstract class AbstractQueryDefinitionProvider implements QueryDefinitionProvider {
 
@@ -62,7 +62,7 @@ public abstract class AbstractQueryDefinitionProvider implements QueryDefinition
         
         ValidateGrouper: switch (grouper) {
         case Dimensions:
-            for (DimensionIdentifier dimension : queryDefinition.getDimensionsToGroupBy()) {
+            for (FunctionDTO dimension : queryDefinition.getDimensionsToGroupBy()) {
                 if (dimension != null) {
                     break ValidateGrouper;
                 }

@@ -8,10 +8,7 @@ import org.osgi.framework.BundleContext;
 import org.osgi.util.tracker.ServiceTracker;
 
 import com.google.gwt.user.server.rpc.RemoteServiceServlet;
-import com.sap.sailing.datamining.data.HasGPSFixContext;
-import com.sap.sailing.datamining.data.HasTrackedLegOfCompetitorContext;
 import com.sap.sailing.datamining.factories.DataMiningFactory;
-import com.sap.sailing.datamining.shared.DataTypes;
 import com.sap.sailing.datamining.shared.QueryDefinitionDeprecated;
 import com.sap.sailing.datamining.shared.SailingDataMiningSerializationDummy;
 import com.sap.sailing.gwt.ui.datamining.DataMiningService;
@@ -69,20 +66,15 @@ public class DataMiningServiceImpl extends RemoteServiceServlet implements DataM
     }
 
     @Override
-    public Collection<FunctionDTO> getDimensionsFor(DataTypes dataType, String localeInfoName) {
-        Class<?> dataTypeBaseClass = getBaseClassFor(dataType);
+    public Collection<FunctionDTO> getDimensionsFor(FunctionDTO extractionFunction, String localeInfoName) {
+        Class<?> dataTypeBaseClass = getBaseClassFor(extractionFunction);
         Collection<Function<?>> dimensions = getDataMiningServer().getFunctionProvider().getDimensionsFor(dataTypeBaseClass);
         return functionsAsFunctionDTOs(dimensions, localeInfoName);
     }
     
-    private Class<?> getBaseClassFor(DataTypes dataType) {
-        switch (dataType) {
-        case GPSFix:
-            return HasGPSFixContext.class;
-        case TrackedLegOfCompetitor:
-            return HasTrackedLegOfCompetitorContext.class;
-        }
-        throw new IllegalArgumentException("No base class for data type " + dataType);
+    private Class<?> getBaseClassFor(FunctionDTO extractionFunction) {
+        Function<?> function = getDataMiningServer().getFunctionProvider().getFunctionForDTO(extractionFunction);
+        return function.getDeclaringType();
     }
 
     private Collection<FunctionDTO> functionsAsFunctionDTOs(Collection<Function<?>> functions, String localeInfoName) {

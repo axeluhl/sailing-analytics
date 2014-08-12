@@ -23,11 +23,11 @@ import com.sap.sailing.gwt.ui.client.shared.panels.ResizingFlowPanel;
 import com.sap.sailing.gwt.ui.datamining.DataMiningControls;
 import com.sap.sailing.gwt.ui.datamining.DataMiningServiceAsync;
 import com.sap.sailing.gwt.ui.datamining.GroupingChangedListener;
-import com.sap.sailing.gwt.ui.datamining.GroupingProvider;
 import com.sap.sailing.gwt.ui.datamining.SelectionChangedListener;
 import com.sap.sailing.gwt.ui.datamining.SelectionProvider;
 import com.sap.sailing.gwt.ui.datamining.StatisticChangedListener;
 import com.sap.sailing.gwt.ui.datamining.StatisticProvider;
+import com.sap.sse.datamining.shared.dto.FunctionDTO;
 
 public class QueryDefinitionProviderWithControls extends AbstractQueryDefinitionProvider implements DataMiningControls {
 
@@ -38,7 +38,7 @@ public class QueryDefinitionProviderWithControls extends AbstractQueryDefinition
     
     private StatisticProvider statisticProvider;
 
-    private GroupingProvider groupBySelectionPanel;
+    private MultiDimensionalGroupingProvider groupBySelectionPanel;
 
     public QueryDefinitionProviderWithControls(StringMessages stringMessages, SailingServiceAsync sailingService, DataMiningServiceAsync dataMiningService, ErrorReporter errorReporter) {
         super(stringMessages, sailingService, dataMiningService, errorReporter);
@@ -74,12 +74,13 @@ public class QueryDefinitionProviderWithControls extends AbstractQueryDefinition
         statisticProvider.addStatisticChangedListener(new StatisticChangedListener() {
             @Override
             public void statisticChanged() {
+                groupBySelectionPanel.updateAvailableDimensions(statisticProvider.getExtractionFunction());
                 notifyQueryDefinitionChanged();
             }
         });
         functionsPanel.add(statisticProvider.getEntryWidget());
 
-        groupBySelectionPanel = new RestrictedGroupingProvider(getStringMessages());
+        groupBySelectionPanel = new MultiDimensionalGroupingProvider(getStringMessages(), getDataMiningService(), getErrorReporter());
         groupBySelectionPanel.addGroupingChangedListener(new GroupingChangedListener() {
             @Override
             public void groupingChanged() {
@@ -112,7 +113,7 @@ public class QueryDefinitionProviderWithControls extends AbstractQueryDefinition
         switch (queryDTO.getGrouperType()) {
         case Dimensions:
         default:
-            for (DimensionIdentifier dimension : groupBySelectionPanel.getDimensionsToGroupBy()) {
+            for (FunctionDTO dimension : groupBySelectionPanel.getDimensionsToGroupBy()) {
                 queryDTO.appendDimensionToGroupBy(dimension);
             }
             break;

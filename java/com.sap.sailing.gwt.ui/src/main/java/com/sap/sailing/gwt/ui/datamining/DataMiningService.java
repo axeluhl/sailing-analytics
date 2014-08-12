@@ -3,7 +3,6 @@ package com.sap.sailing.gwt.ui.datamining;
 import java.util.Collection;
 
 import com.google.gwt.user.client.rpc.RemoteService;
-import com.sap.sailing.datamining.shared.DataTypes;
 import com.sap.sailing.datamining.shared.QueryDefinitionDeprecated;
 import com.sap.sailing.datamining.shared.SailingDataMiningSerializationDummy;
 import com.sap.sse.datamining.shared.QueryResult;
@@ -14,7 +13,7 @@ public interface DataMiningService extends RemoteService {
 
     Collection<FunctionDTO> getAllStatistics(String localeInfoName);
     
-    Collection<FunctionDTO> getDimensionsFor(DataTypes dataType, String localeInfoName);
+    Collection<FunctionDTO> getDimensionsFor(FunctionDTO extractionFunction, String localeInfoName);
     
     <ResultType extends Number> QueryResult<ResultType> runQuery(QueryDefinitionDeprecated queryDefinition) throws Exception;
 

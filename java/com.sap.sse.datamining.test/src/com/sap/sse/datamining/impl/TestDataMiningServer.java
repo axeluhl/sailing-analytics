@@ -20,6 +20,7 @@ import com.sap.sse.datamining.impl.functions.SimpleFunctionRegistry;
 import com.sap.sse.datamining.test.functions.registry.test_contexts.Test_HasLegContext;
 import com.sap.sse.datamining.test.functions.registry.test_contexts.Test_HasRaceContext;
 import com.sap.sse.datamining.test.util.ExpectedFunctionRegistryUtil;
+import com.sap.sse.datamining.test.util.TestsUtil;
 
 public class TestDataMiningServer {
     
@@ -35,7 +36,7 @@ public class TestDataMiningServer {
         FunctionRegistry registry = new SimpleFunctionRegistry();
         FunctionProvider provider = new RegistryFunctionProvider(registry);
         OpenClassesWithFunctionsProvider classesWithFunctionsProvider = new OpenClassesWithFunctionsProvider();
-        DataMiningServer server = new DataMiningServerImpl(registry, provider, classesWithFunctionsProvider);
+        DataMiningServer server = new DataMiningServerImpl(TestsUtil.getTestStringMessages(), registry, provider, classesWithFunctionsProvider);
         
         assertThat("The function registry should be empty.",
                    server.getFunctionRegistry().getAllFunctions().isEmpty(),
@@ -58,7 +59,7 @@ public class TestDataMiningServer {
         FunctionRegistry registry = new SimpleFunctionRegistry();
         FunctionProvider provider = new RegistryFunctionProvider(registry);
         OpenClassesWithFunctionsProvider classesWithFunctionsProvider = new OpenClassesWithFunctionsProvider();
-        DataMiningServer server = new DataMiningServerImpl(registry, provider, classesWithFunctionsProvider);
+        DataMiningServer server = new DataMiningServerImpl(TestsUtil.getTestStringMessages(), registry, provider, classesWithFunctionsProvider);
         
         classesWithFunctionsProvider.internalClassesWithMarkedMethods = null;
         classesWithFunctionsProvider.externalLibraryClasses = null;
