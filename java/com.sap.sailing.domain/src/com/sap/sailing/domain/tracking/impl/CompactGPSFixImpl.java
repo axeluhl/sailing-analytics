@@ -1,8 +1,12 @@
 package com.sap.sailing.domain.tracking.impl;
 
+import com.sap.sailing.domain.common.AbstractBearing;
 import com.sap.sailing.domain.common.AbstractPosition;
+import com.sap.sailing.domain.common.Bearing;
 import com.sap.sailing.domain.common.Position;
+import com.sap.sailing.domain.common.SpeedWithBearing;
 import com.sap.sailing.domain.common.TimePoint;
+import com.sap.sailing.domain.common.impl.AbstractSpeedWithAbstractBearingImpl;
 import com.sap.sailing.domain.common.impl.AbstractTimePoint;
 import com.sap.sailing.domain.tracking.GPSFix;
 
@@ -19,6 +23,23 @@ import com.sap.sailing.domain.tracking.GPSFix;
  */
 public class CompactGPSFixImpl extends AbstractGPSFixImpl {
     private static final long serialVersionUID = 8167588584536992501L;
+    
+    /**
+     * Bit mask for {@link #whatIsCached}, telling whether validity is currently cached
+     */
+    private static final byte IS_VALIDITY_CACHED = 1<<0;
+
+    /**
+     * Bit mask for {@link #whatIsCached}, telling whether the estimated speed is currently cached
+     */
+    private static final byte IS_ESTIMATED_SPEED_CACHED = 1<<1;
+    
+    /**
+     * Bit mask for {@link #whatIsCached}, telling the validity of the fix; only relevant if
+     * <code>{@link #whatIsCached}&amp;{@link #IS_VALIDITY_CACHED} != 0</code>
+     */
+    private static final byte VALIDITY = 1<<2;
+    
     private final double latDeg;
     private final double lngDeg;
     private final long timePointAsMillis;
@@ -28,7 +49,19 @@ public class CompactGPSFixImpl extends AbstractGPSFixImpl {
      * needs to be invalidated as soon as fixes are added to the containing track which may have an impact
      * on this fix's validity. -1 means "no value"; 0 means invalid, 1 means valid.
      */
-    private byte validityCache = -1;
+    private byte whatIsCached = 0;
+    
+    /**
+     * When <code>{@link #whatIsCached}&amp;{@link #IS_ESTIMATED_SPEED_CACHED} != 0</code>, this field tells the estimated speed's
+     * true "bearing" (true course over ground) in degrees.
+     */
+    private double cachedEstimatedSpeedBearingInDegrees;
+
+    /**
+     * When <code>{@link #whatIsCached}&amp;{@link #IS_ESTIMATED_SPEED_CACHED} != 0</code>, this field tells the estimated speed
+     * in knots.
+     */
+    private double cachedEstimatedSpeedInKnots;
     
     private class CompactPosition extends AbstractPosition {
         private static final long serialVersionUID = 5621506820766614178L;
@@ -50,6 +83,29 @@ public class CompactGPSFixImpl extends AbstractGPSFixImpl {
         @Override
         public long asMillis() {
             return timePointAsMillis;
+        }
+    }
+    
+    private class CompactEstimatedSpeedBearing extends AbstractBearing {
+        private static final long serialVersionUID = 8549231429037883121L;
+
+        @Override
+        public double getDegrees() {
+            return cachedEstimatedSpeedBearingInDegrees;
+        }
+    }
+    
+    private class CompactEstimatedSpeed extends AbstractSpeedWithAbstractBearingImpl {
+        private static final long serialVersionUID = -5871855443391817248L;
+
+        @Override
+        public Bearing getBearing() {
+            return new CompactEstimatedSpeedBearing();
+        }
+
+        @Override
+        public double getKnots() {
+            return cachedEstimatedSpeedInKnots;
         }
     }
     
@@ -80,22 +136,52 @@ public class CompactGPSFixImpl extends AbstractGPSFixImpl {
 
     @Override
     public boolean isValidityCached() {
-        return validityCache != -1;
+        return (whatIsCached & IS_VALIDITY_CACHED) != 0;
     }
 
     @Override
     public boolean isValid() {
-        return validityCache == 1;
+        assert isValidityCached();
+        return (whatIsCached & VALIDITY) != 0;
     }
 
     @Override
     public void invalidateCache() {
-        validityCache = -1;
+        whatIsCached &= ~IS_VALIDITY_CACHED;
     }
 
     @Override
     public void cacheValidity(boolean isValid) {
-        validityCache = (byte) (isValid ? 1 : 0);
+        if (isValid) {
+            whatIsCached |= IS_VALIDITY_CACHED | VALIDITY;
+        } else {
+            whatIsCached |= IS_VALIDITY_CACHED;
+            whatIsCached &= ~VALIDITY;
+        }
     }
+
+    @Override
+    public boolean isEstimatedSpeedCached() {
+        return (whatIsCached & IS_ESTIMATED_SPEED_CACHED) != 0;
+    }
+
+    @Override
+    public SpeedWithBearing getEstimatedSpeed() {
+        assert isEstimatedSpeedCached();
+        return new CompactEstimatedSpeed();
+    }
+
+    @Override
+    public void invalidateEstimatedSpeedCache() {
+        whatIsCached &= ~IS_ESTIMATED_SPEED_CACHED;
+    }
+
+    @Override
+    public void cacheEstimatedSpeed(SpeedWithBearing estimatedSpeed) {
+        cachedEstimatedSpeedBearingInDegrees = estimatedSpeed.getBearing().getDegrees();
+        cachedEstimatedSpeedInKnots = estimatedSpeed.getKnots();
+        whatIsCached |= IS_ESTIMATED_SPEED_CACHED;
+    }
+    
     
 }

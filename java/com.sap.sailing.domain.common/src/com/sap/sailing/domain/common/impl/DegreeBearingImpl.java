@@ -20,10 +20,5 @@ public class DegreeBearingImpl extends AbstractBearing implements Bearing {
     public double getDegrees() {
         return bearingDeg;
     }
-
-    @Override
-    public double getRadians() {
-        return getDegrees() / 180. * Math.PI;
-    }
     
 }

@@ -241,6 +241,24 @@ public class GPSFixTrackImpl<ItemType, FixType extends GPSFix> extends TrackImpl
         @Override
         public void cacheValidity(boolean isValid) {
         }
+        
+        @Override
+        public boolean isEstimatedSpeedCached() {
+            return false;
+        }
+        
+        @Override
+        public SpeedWithBearing getEstimatedSpeed() {
+            return null;
+        }
+        
+        @Override
+        public void invalidateEstimatedSpeedCache() {
+        }
+        
+        @Override
+        public void cacheEstimatedSpeed(SpeedWithBearing estimatedSpeed) {
+        }
     }
     
     
@@ -858,7 +876,7 @@ public class GPSFixTrackImpl<ItemType, FixType extends GPSFix> extends TrackImpl
     }
 
     /**
-     * When redefining this method, make sure to redefine {@link #invalidateValidityAndDistanceCaches(GPSFix)}
+     * When redefining this method, make sure to redefine {@link #invalidateValidityAndEstimatedSpeedAndDistanceCaches(GPSFix)}
      * accordingly. This implementation checks the immediate previous and next fix for <code>e</code>. Therefore, when
      * adding a fix, only immediately adjacent fix's validity caches need to be invalidated.
      * <p>
@@ -918,7 +936,7 @@ public class GPSFixTrackImpl<ItemType, FixType extends GPSFix> extends TrackImpl
      * of the <code>gpsFix</code> "upwards." However, if the adjacent earlier fixes have changed their validity by the addition
      * of <code>gpsFix</code>, the distance cache must be invalidated starting with the first fix whose validity changed.
      */
-    protected void invalidateValidityAndDistanceCaches(FixType gpsFix) {
+    protected void invalidateValidityAndEstimatedSpeedAndDistanceCaches(FixType gpsFix) {
         assertWriteLock();
         TimePoint distanceCacheInvalidationStart = gpsFix.getTimePoint();
         // see also bug 968: cache entries for intervals ending after the last fix need to be removed because they are
@@ -930,6 +948,10 @@ public class GPSFixTrackImpl<ItemType, FixType extends GPSFix> extends TrackImpl
             distanceCacheInvalidationStart = last.getTimePoint().plus(1); // add one millisecond to invalidate *after* the last fix only
         }
         gpsFix.invalidateCache();
+        for (FixType fixOnWhichToInvalidateEstimatedSpeed : getFixesRelevantForSpeedEstimation(gpsFix.getTimePoint(),
+                getInternalRawFixes())) {
+            fixOnWhichToInvalidateEstimatedSpeed.invalidateEstimatedSpeedCache();
+        }
         Iterable<FixType> lowers = getEarlierFixesWhoseValidityMayBeAffected(gpsFix);
         for (FixType lower : lowers) {
             boolean lowerWasValid = isValid(getRawFixes(), lower);
@@ -1014,7 +1036,7 @@ public class GPSFixTrackImpl<ItemType, FixType extends GPSFix> extends TrackImpl
         try {
             firstFixInTrack = getRawFixes().isEmpty();
             result = addWithoutLocking(fix);
-            invalidateValidityAndDistanceCaches(fix);
+            invalidateValidityAndEstimatedSpeedAndDistanceCaches(fix);
         } finally {
             unlockAfterWrite();
         }

@@ -60,5 +60,10 @@ public abstract class AbstractBearing implements Bearing {
         return object != null && object instanceof Bearing && getDegrees() == ((Bearing) object).getDegrees();
     }
 
+    @Override
+    public double getRadians() {
+        return getDegrees() / 180. * Math.PI;
+    }
+
     
 }
