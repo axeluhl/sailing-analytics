@@ -530,9 +530,9 @@ public class RaceMap extends AbsolutePanel implements TimeListener, CompetitorSe
                     // next, do the full thing; being the later call, if request throttling kicks in, the later call
                     // supersedes the earlier call which may get dropped then
                     GetRaceMapDataAction getRaceMapDataAction = new GetRaceMapDataAction(sailingService, competitorSelection.getAllCompetitors(), race,
-                            newTime, fromAndToAndOverlap.getA(), fromAndToAndOverlap.getB(), /* extrapolate */ true);
+                            useNullAsTimePoint() ? null : newTime, fromAndToAndOverlap.getA(), fromAndToAndOverlap.getB(), /* extrapolate */ true);
                     asyncActionsExecutor.execute(getRaceMapDataAction, GET_RACE_MAP_DATA_CATEGORY,
-                            getRaceMapDataCallback(oldTime, useNullAsTimePoint() ? null : newTime, fromAndToAndOverlap.getC(), competitorsToShow, requestID));
+                            getRaceMapDataCallback(oldTime, newTime, fromAndToAndOverlap.getC(), competitorsToShow, requestID));
                     
                     // draw the wind into the map, get the combined wind
                     // TODO bug2057 also fetch wind for LEG_MIDDLE for all legs because this needs to be the basis for the advantage line display
