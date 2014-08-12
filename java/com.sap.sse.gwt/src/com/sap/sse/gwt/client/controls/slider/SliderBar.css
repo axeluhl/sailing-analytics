@@ -34,11 +34,12 @@
 }
 
 .gwt-SliderBar-shell .gwt-SliderBar-mark {
-  top: 18px;
-  width: 5px;
-  height: 12px;
+  top: 13px;
+  width: 24px;
+  height: 24px;
   background: #fcbb22;
   overflow: hidden;
+  border-radius: 15px;
 }
 
 .gwt-SliderBar-shell .gwt-SliderBar-tick-disabled {
@@ -53,9 +54,9 @@
 }
 
 .gwt-SliderBar-shell .gwt-SliderBar-markerlabel {
-  top: 31px;
+  top: 20px;
   font-size: 12px;
-  color: #fcbb22;
+  color: #333;
   cursor: default;
   font-family: 'OpenSansSemiBold',Arial,Verdana,sans-serif;
 }
