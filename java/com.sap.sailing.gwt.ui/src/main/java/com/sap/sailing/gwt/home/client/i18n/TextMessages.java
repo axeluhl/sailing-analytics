@@ -23,6 +23,9 @@ public interface TextMessages extends Messages {
     String viewAnalysis();
     String overallLeaderboard();
     String pleaseEnterASearchTerm();
+    String pleaseTryAgain();
+    String reloadPage();
+    String errorMessageLoadingData();
     
     String countdownDays();
     String countdownHours();

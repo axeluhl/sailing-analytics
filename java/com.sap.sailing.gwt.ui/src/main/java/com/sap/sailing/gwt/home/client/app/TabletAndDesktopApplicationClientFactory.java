@@ -5,6 +5,7 @@ import java.util.List;
 import com.google.gwt.event.shared.SimpleEventBus;
 import com.google.gwt.place.shared.PlaceController;
 import com.google.web.bindery.event.shared.EventBus;
+import com.sap.sailing.gwt.home.client.place.error.TabletAndDesktopErrorView;
 import com.sap.sailing.gwt.home.client.place.event.EventView;
 import com.sap.sailing.gwt.home.client.place.event.EventWithoutRegattasView;
 import com.sap.sailing.gwt.home.client.place.event.TabletAndDesktopEventView;
@@ -43,6 +44,11 @@ public class TabletAndDesktopApplicationClientFactory extends AbstractApplicatio
     @Override
     public EventView createEventView(EventDTO event, List<RaceGroupDTO> raceGroups, String leaderboardName, Timer timerForClientServerOffset) {
         return new TabletAndDesktopEventView(getSailingService(), event, raceGroups, leaderboardName, timerForClientServerOffset);
+    }
+
+    @Override
+    public TabletAndDesktopErrorView createErrorView(String errorMessage, Throwable errorReason) {
+        return new TabletAndDesktopErrorView(errorMessage, errorReason);
     }
 
     @Override

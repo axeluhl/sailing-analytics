@@ -9,6 +9,7 @@ import com.google.gwt.event.shared.EventBus;
 import com.google.gwt.user.client.Window;
 import com.google.gwt.user.client.rpc.AsyncCallback;
 import com.google.gwt.user.client.ui.AcceptsOneWidget;
+import com.sap.sailing.gwt.home.client.place.error.ErrorView;
 import com.sap.sailing.gwt.home.client.shared.placeholder.Placeholder;
 import com.sap.sailing.gwt.ui.regattaoverview.RegattaRaceStatesSettings;
 import com.sap.sailing.gwt.ui.shared.EventDTO;
@@ -78,7 +79,7 @@ public class EventActivity extends AbstractActivity {
                         
                         @Override
                         public void onFailure(Throwable caught) {
-                            Window.alert("Shit happens at getRegattaStructureForEvent()");
+                            createErrorView("Error while loading the regatta structure with service getRegattaStructureOfEvent()", caught, panel);
                         }
                     });
                 } else {
@@ -88,11 +89,16 @@ public class EventActivity extends AbstractActivity {
 
             @Override
             public void onFailure(Throwable caught) {
-                Window.alert("Shit happens at getRegattaStructureForEvent()");
+                createErrorView("Error while loading the event with service getEventById()", caught, panel);
             }
         }); 
     }
 
+    private void createErrorView(String errorMessage, Throwable errorReason, AcceptsOneWidget panel) {
+        ErrorView view = clientFactory.createErrorView(errorMessage, errorReason);
+        panel.setWidget(view.asWidget());
+    }
+    
     private void createEventView(EventDTO event, List<RaceGroupDTO> raceGroups, AcceptsOneWidget panel) {
         view = clientFactory.createEventView(event, raceGroups, eventPlace.getLeaderboardIdAsNameString(), timerForClientServerOffset);
         panel.setWidget(view.asWidget());
@@ -114,7 +120,7 @@ public class EventActivity extends AbstractActivity {
                         new AsyncCallback<List<RegattaOverviewEntryDTO>>() {
                             @Override
                             public void onFailure(Throwable cause) {
-                                Window.alert("Shit happens at getRaceStateEntriesForRaceGroup()");
+                                Window.setStatus("Error while loading the race states with service getRaceStateEntriesForRaceGroup()");
                             }
                 
                             @Override
