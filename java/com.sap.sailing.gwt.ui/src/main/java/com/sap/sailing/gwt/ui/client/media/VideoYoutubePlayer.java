@@ -10,8 +10,6 @@ import com.google.gwt.user.client.ui.Panel;
 import com.google.gwt.user.client.ui.SimplePanel;
 import com.google.gwt.user.client.ui.Widget;
 import com.sap.sailing.domain.common.media.MediaTrack;
-import com.sap.sailing.gwt.ui.client.ErrorReporter;
-import com.sap.sailing.gwt.ui.client.media.popup.PopoutWindowPlayer.PopoutCloseListener;
 import com.sap.sailing.gwt.ui.client.media.shared.AbstractMediaPlayer;
 import com.sap.sailing.gwt.ui.client.media.shared.VideoSynchPlayer;
 import com.sap.sailing.gwt.ui.client.media.shared.WithWidget;
@@ -46,7 +44,7 @@ public class VideoYoutubePlayer extends AbstractMediaPlayer implements VideoSync
     private final List<DeferredAction> deferredActions = new ArrayList<DeferredAction>();
 
 
-    public VideoYoutubePlayer(final MediaTrack videoTrack, long raceStartTimeMillis, final boolean showControls, Timer raceTimer, ErrorReporter errorReporter, PopoutCloseListener popupCloseListener, PopoutListener popoutListener) {
+    public VideoYoutubePlayer(final MediaTrack videoTrack, long raceStartTimeMillis, final boolean showControls, Timer raceTimer) {
         super(videoTrack);
         this.raceTimer = raceTimer;
         this.raceStartTimeMillis = raceStartTimeMillis;

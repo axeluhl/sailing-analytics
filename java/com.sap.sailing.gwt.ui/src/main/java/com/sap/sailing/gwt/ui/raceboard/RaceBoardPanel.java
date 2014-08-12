@@ -38,6 +38,7 @@ import com.sap.sailing.gwt.ui.client.RaceTimesInfoProvider;
 import com.sap.sailing.gwt.ui.client.RegattasDisplayer;
 import com.sap.sailing.gwt.ui.client.SailingServiceAsync;
 import com.sap.sailing.gwt.ui.client.StringMessages;
+import com.sap.sailing.gwt.ui.client.media.MediaComponent;
 import com.sap.sailing.gwt.ui.client.media.MediaSelector;
 import com.sap.sailing.gwt.ui.client.shared.charts.MultiCompetitorRaceChart;
 import com.sap.sailing.gwt.ui.client.shared.charts.WindChart;
@@ -216,6 +217,8 @@ public class RaceBoardPanel extends SimplePanel implements RegattasDisplayer, Ra
         windChart = new WindChart(sailingService, raceSelectionProvider, timer, timeRangeWithZoomModel, new WindChartSettings(),
                 stringMessages, asyncActionsExecutor, errorReporter, /* compactChart */ true);
         windChart.onRaceSelectionChange(raceSelectionProvider.getSelectedRaces());
+        MediaComponent mediaComponent = createMediaComponent();
+        components.add(mediaComponent);
         components.add(windChart);
         leaderboardAndMapViewer = new SideBySideComponentViewer(leaderboardPanel, raceMap, components);
         componentViewers.add(leaderboardAndMapViewer);
@@ -233,7 +236,7 @@ public class RaceBoardPanel extends SimplePanel implements RegattasDisplayer, Ra
         addCompetitorsFilterControl(viewControlsPanel);
         addMediaSelectorToNavigationMenu();
     }
- 
+
     private CompetitorsFilterSets createAndAddDefaultCompetitorsFilter() {
         CompetitorsFilterSets filterSets = new CompetitorsFilterSets();
         
@@ -266,6 +269,15 @@ public class RaceBoardPanel extends SimplePanel implements RegattasDisplayer, Ra
         return filterSets;
     }
     
+    private MediaComponent createMediaComponent() {
+        boolean autoSelectMedia = true;//getConfiguration().isAutoSelectMedia();
+        MediaComponent mediaComponent = new MediaComponent(selectedRaceIdentifier, raceTimesInfoProvider, timer, mediaService, stringMessages, errorReporter, userAgent, this.user, autoSelectMedia);
+        timer.addPlayStateListener(mediaComponent);
+        timer.addTimeListener(mediaComponent);
+        mediaService.getMediaTracksForRace(selectedRaceIdentifier, mediaComponent.getMediaLibraryCallback());
+        return mediaComponent;
+    }
+ 
     /**
      * Adds the media selector drop down and fills it with media for the current race.
      * NOTE:

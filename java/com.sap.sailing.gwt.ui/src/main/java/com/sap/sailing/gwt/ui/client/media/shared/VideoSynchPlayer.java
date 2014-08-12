@@ -2,7 +2,7 @@ package com.sap.sailing.gwt.ui.client.media.shared;
 
 import com.sap.sailing.gwt.ui.client.media.MediaSynchAdapter;
 
-public interface VideoSynchPlayer extends VideoPlayer, MediaSynchAdapter, WithWidget {
+public interface VideoSynchPlayer extends VideoPlayerWithWidget, MediaSynchAdapter {
     
     void setEditFlag(EditFlag editFlag);
 

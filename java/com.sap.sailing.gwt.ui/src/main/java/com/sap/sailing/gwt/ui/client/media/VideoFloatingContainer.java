@@ -4,7 +4,6 @@ import com.google.gwt.event.logical.shared.CloseEvent;
 import com.google.gwt.event.logical.shared.CloseHandler;
 import com.google.gwt.user.client.ui.FlowPanel;
 import com.google.gwt.user.client.ui.PopupPanel;
-import com.sap.sailing.domain.common.media.MediaTrack;
 import com.sap.sailing.gwt.ui.client.ErrorReporter;
 import com.sap.sailing.gwt.ui.client.MediaServiceAsync;
 import com.sap.sailing.gwt.ui.client.media.popup.PopoutWindowPlayer.PopoutCloseListener;
@@ -21,7 +20,7 @@ public class VideoFloatingContainer implements VideoContainer {
     private final PopoutListener popoutListener;
     private final VideoSynchPlayer videoPlayer;
 
-    public VideoFloatingContainer(VideoSynchPlayer videoPlayer, final MediaTrack videoTrack, boolean showSynchControls, MediaServiceAsync mediaService, ErrorReporter errorReporter, PopoutCloseListener popCloseListener, PopoutListener popoutListener) {
+    public VideoFloatingContainer(VideoSynchPlayer videoPlayer, boolean showSynchControls, MediaServiceAsync mediaService, ErrorReporter errorReporter, PopoutCloseListener popCloseListener, PopoutListener popoutListener) {
         this.videoPlayer = videoPlayer;
         this.popoutListener = popoutListener;
         
@@ -42,11 +41,11 @@ public class VideoFloatingContainer implements VideoContainer {
             
         videoPlayer.setEditFlag(mediaSynchControl);
 
-        this.dialogBox = new WindowBox(videoTrack.title, videoTrack.toString(), rootPanel, new WindowBox.PopoutHandler() {
+        this.dialogBox = new WindowBox(videoPlayer.getMediaTrack().title, videoPlayer.getMediaTrack().toString(), rootPanel, new WindowBox.PopoutHandler() {
             
             @Override
             public void popout() {
-                VideoFloatingContainer.this.popoutListener.popoutVideo(videoTrack);
+                VideoFloatingContainer.this.popoutListener.popoutVideo(VideoFloatingContainer.this.videoPlayer.getMediaTrack());
                 
             }
         });        

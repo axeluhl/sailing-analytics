@@ -6,8 +6,6 @@ import com.google.gwt.media.client.MediaBase;
 import com.google.gwt.media.client.Video;
 import com.google.gwt.user.client.ui.Widget;
 import com.sap.sailing.domain.common.media.MediaTrack;
-import com.sap.sailing.gwt.ui.client.ErrorReporter;
-import com.sap.sailing.gwt.ui.client.media.popup.PopoutWindowPlayer.PopoutCloseListener;
 import com.sap.sailing.gwt.ui.client.media.shared.VideoSynchPlayer;
 import com.sap.sailing.gwt.ui.client.media.shared.WithWidget;
 import com.sap.sse.gwt.client.player.Timer;
@@ -18,7 +16,7 @@ public class VideoHtmlPlayer extends AbstractHtmlMediaPlayer implements VideoSyn
     private final Timer raceTimer;
     private EditFlag editFlag;
     
-    public VideoHtmlPlayer(final MediaTrack videoTrack, long raceStartTimeMillis, boolean showSynchControls, Timer raceTimer, ErrorReporter errorReporter, PopoutCloseListener popCloseListener, PopoutListener popoutListener) {
+    public VideoHtmlPlayer(final MediaTrack videoTrack, long raceStartTimeMillis, boolean showSynchControls, Timer raceTimer) {
         super(videoTrack);
         this.raceTimer = raceTimer;
         this.raceStartTimeMillis = raceStartTimeMillis;

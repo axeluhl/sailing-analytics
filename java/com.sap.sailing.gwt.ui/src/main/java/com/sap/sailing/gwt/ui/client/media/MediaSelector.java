@@ -39,7 +39,6 @@ import com.sap.sailing.gwt.ui.client.media.popup.YoutubeWindowPlayer;
 import com.sap.sailing.gwt.ui.client.media.shared.MediaPlayer;
 import com.sap.sailing.gwt.ui.client.media.shared.VideoPlayer;
 import com.sap.sailing.gwt.ui.client.media.shared.VideoSynchPlayer;
-import com.sap.sailing.gwt.ui.shared.RaceTimesInfoDTO;
 import com.sap.sailing.gwt.ui.shared.UserDTO;
 import com.sap.sse.gwt.client.dialog.DataEntryDialog.DialogCallback;
 import com.sap.sse.gwt.client.player.PlayStateListener;
@@ -62,9 +61,9 @@ public class MediaSelector implements PlayStateListener, TimeListener, MediaSele
 
     private final RegattaAndRaceIdentifier raceIdentifier;
     private final RaceTimesInfoProvider raceTimesInfoProvider;
-    private Timer raceTimer;
+    private final Timer raceTimer;
     private final MediaServiceAsync mediaService;
-    private StringMessages stringMessages;
+    private final StringMessages stringMessages;
     private final ErrorReporter errorReporter;
     private final UserAgentDetails userAgent;
     private final UserDTO user;
@@ -320,12 +319,6 @@ public class MediaSelector implements PlayStateListener, TimeListener, MediaSele
         toggleMediaButton.setVisible(isVisible);
     }
 
-    // @Override
-    public void _raceTimesInfosReceived(Map<RegattaAndRaceIdentifier, RaceTimesInfoDTO> raceTimesInfo) {
-        // TODO Auto-generated method stub
-
-    }
-
     @Override
     public void audioChanged(MediaTrack audioTrack) {
         if (activeAudioPlayer != null) { // --> then reset active audio player
@@ -404,12 +397,12 @@ public class MediaSelector implements PlayStateListener, TimeListener, MediaSele
             
             if (videoTrack.isYoutube()) {
                 // popupPlayer = new YoutubeWindowPlayer(videoTrack, popCloseListener);
-                videoPlayer = new VideoYoutubePlayer(videoTrack, getRaceStartTime(), showSynchControls, raceTimer, errorReporter, popupCloseListener, popoutListener);
+                videoPlayer = new VideoYoutubePlayer(videoTrack, getRaceStartTime(), showSynchControls, raceTimer);
             } else {
                 // popupPlayer = new VideoWindowPlayer(videoTrack, popCloseListener);
-                videoPlayer = new VideoHtmlPlayer(videoTrack, getRaceStartTime(), showSynchControls, raceTimer, errorReporter, popupCloseListener, popoutListener);
+                videoPlayer = new VideoHtmlPlayer(videoTrack, getRaceStartTime(), showSynchControls, raceTimer);
             }
-            VideoFloatingContainer videoFloatingContainer = new VideoFloatingContainer(videoPlayer, videoTrack, showSynchControls, mediaService, errorReporter, popupCloseListener, popoutListener);
+            VideoFloatingContainer videoFloatingContainer = new VideoFloatingContainer(videoPlayer, showSynchControls, mediaService, errorReporter, popupCloseListener, popoutListener);
             
             registerVideoContainer(videoTrack, videoFloatingContainer);
         } else {
