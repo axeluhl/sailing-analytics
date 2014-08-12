@@ -500,3 +500,45 @@ img.openColumn {
 .TimePanel-settingsButtonStyle:hover {
 	border: 1px solid gray;
 }
+
+.gwt-SplitLayoutPanel-NorthSouthToggleButton-Closed-multiCompetitorRaceChart {
+	background-color: white;
+	background-image: url(images/viewicons/@1x/img/SAP_RV_CompetitorCharts_ACTIVE.png), url(images/arrows_top_black_small.png);
+	background-repeat: no-repeat, no-repeat;
+	background-position: 5% 50%, 95% 50%
+}
+
+.gwt-SplitLayoutPanel-NorthSouthToggleButton-Open-multiCompetitorRaceChart {
+	background-color: white;
+	background-image: url(images/viewicons/@1x/img/SAP_RV_CompetitorCharts_INACTIVE.png), url(images/arrows_top_black_small.png);
+	background-repeat: no-repeat, no-repeat;
+	background-position: 5% 50%, 95% 50%
+}
+
+.gwt-SplitLayoutPanel-NorthSouthToggleButton-Closed-windChart {
+	background-color: white;
+	background-image: url(images/viewicons/@1x/img/SAP_RV_CompetitorCharts_ACTIVE.png), url(images/arrows_top_black_small.png);
+	background-repeat: no-repeat, no-repeat;
+	background-position: 5% 50%, 95% 50%
+}
+
+.gwt-SplitLayoutPanel-NorthSouthToggleButton-Open-windChart {
+	background-color: white;
+	background-image: url(images/viewicons/@1x/img/SAP_RV_CompetitorCharts_INACTIVE.png), url(images/arrows_top_black_small.png);
+	background-repeat: no-repeat, no-repeat;
+	background-position: 5% 50%, 95% 50%
+}
+
+.gwt-SplitLayoutPanel-EastToggleButton-Open-leaderboard {
+	background-color: white;
+	background-image: url(images/viewicons/@1x/img/SAP_RV_Leaderboard_ACTIVE.png), url(images/arrows_top_black_small.png);
+	background-repeat: no-repeat, no-repeat;
+	background-position: 4% 50%, 96% 50%
+}
+
+.gwt-SplitLayoutPanel-EastToggleButton-Closed-leaderboard {
+	background-color: white;
+	background-image: url(images/viewicons/@1x/img/SAP_RV_Leaderboard_INACTIVE.png), url(images/arrows_top_black_small.png);
+	background-repeat: no-repeat, no-repeat;
+	background-position: 4% 50%, 96% 50%
+}

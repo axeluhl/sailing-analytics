@@ -618,5 +618,10 @@ public class WindChart extends AbstractRaceChart implements Component<WindChartS
         buffer.append("\n");
         return buffer.toString();
     }
+
+    @Override
+    public String getDependentCssClassName() {
+        return "windChart";
+    }
     
 }

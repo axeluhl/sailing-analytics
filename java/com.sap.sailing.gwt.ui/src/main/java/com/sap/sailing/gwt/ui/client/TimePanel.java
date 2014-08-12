@@ -587,5 +587,9 @@ public class TimePanel<T extends TimePanelSettings> extends SimplePanel implemen
     
     public Button getAdvancedToggleButton() {
         return this.toggleAdvancedModeButton;
+
+    @Override
+    public String getDependentCssClassName() {
+        return "timePanel";
     }
 }

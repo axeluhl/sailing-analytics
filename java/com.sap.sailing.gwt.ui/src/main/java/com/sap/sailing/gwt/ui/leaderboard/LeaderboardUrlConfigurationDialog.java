@@ -70,6 +70,11 @@ public class LeaderboardUrlConfigurationDialog extends SettingsDialog<Leaderboar
         public void setVisible(boolean visibility) {
             // no-op
         }
+
+        @Override
+        public String getDependentCssClassName() {
+            return "leaderboardUrlConfigurationDialog";
+        }
     }
     
     private static class LeaderboardUrlConfigurationDialogComponent implements SettingsDialogComponent<LeaderboardUrlSettings> {

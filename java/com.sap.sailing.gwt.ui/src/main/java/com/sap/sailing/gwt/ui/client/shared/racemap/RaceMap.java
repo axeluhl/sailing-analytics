@@ -2104,4 +2104,9 @@ public class RaceMap extends AbsolutePanel implements TimeListener, CompetitorSe
         sapLogo.setStyleName("raceBoard-Logo");
         return sapLogo;
     }
+
+    @Override
+    public String getDependentCssClassName() {
+        return "raceMap";
+    }
 }
