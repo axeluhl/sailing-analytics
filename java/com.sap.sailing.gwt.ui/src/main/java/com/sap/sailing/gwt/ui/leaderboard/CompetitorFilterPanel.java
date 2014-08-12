@@ -76,7 +76,7 @@ public class CompetitorFilterPanel extends FlowPanel implements KeyUpHandler, Fi
         this.leaderboardFetcher = leaderboardFetcher;
         this.selectedRaceIdentifier = selectedRaceIdentifier;
         this.competitorSelectionProvider = competitorSelectionProvider;
-        this.setStyleName(css.search());
+        this.setStyleName(css.competitorFilterContainer());
         CompetitorsFilterSets loadedCompetitorsFilterSets = loadCompetitorsFilterSets();
         if (loadedCompetitorsFilterSets != null) {
             competitorsFilterSets = loadedCompetitorsFilterSets;
@@ -129,10 +129,13 @@ public class CompetitorFilterPanel extends FlowPanel implements KeyUpHandler, Fi
                 showEditCompetitorsFiltersDialog();
             }
         });
+        FlowPanel searchBoxPanel = new FlowPanel();
+        searchBoxPanel.setStyleName(css.searchBox());
+        searchBoxPanel.add(submitButton);
+        searchBoxPanel.add(searchTextBox);
+        searchBoxPanel.add(clearTextBoxButton);
+        add(searchBoxPanel);
         add(settingsButton);
-        add(submitButton);
-        add(searchTextBox);
-        add(clearTextBoxButton);
         add(advancedSettingsButton);
     }
 
