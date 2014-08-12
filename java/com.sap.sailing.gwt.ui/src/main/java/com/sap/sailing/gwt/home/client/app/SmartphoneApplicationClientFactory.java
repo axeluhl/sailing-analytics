@@ -5,6 +5,7 @@ import java.util.List;
 import com.google.gwt.event.shared.SimpleEventBus;
 import com.google.gwt.place.shared.PlaceController;
 import com.google.web.bindery.event.shared.EventBus;
+import com.sap.sailing.gwt.home.client.place.error.TabletAndDesktopErrorView;
 import com.sap.sailing.gwt.home.client.place.event.EventView;
 import com.sap.sailing.gwt.home.client.place.event.EventWithoutRegattasView;
 import com.sap.sailing.gwt.home.client.place.event.TabletAndDesktopEventView;
@@ -53,6 +54,11 @@ public class SmartphoneApplicationClientFactory extends AbstractApplicationClien
     @Override
     public EventsView createEventsView(EventsActivity activity) {
         return new TabletAndDesktopEventsView(getPlaceNavigator());
+    }
+
+    @Override
+    public TabletAndDesktopErrorView createErrorView(String errorMessage, Throwable errorReason) {
+        return new TabletAndDesktopErrorView(errorMessage, errorReason);
     }
 
     @Override

@@ -7,9 +7,9 @@ import com.google.gwt.core.client.GWT;
 import com.google.gwt.dom.client.StyleInjector;
 import com.google.gwt.uibinder.client.UiBinder;
 import com.google.gwt.uibinder.client.UiField;
-import com.google.gwt.user.client.ui.Composite;
 import com.google.gwt.user.client.ui.HTMLPanel;
 import com.google.gwt.user.client.ui.Widget;
+import com.sap.sailing.gwt.home.client.place.event.AbstractEventComposite;
 import com.sap.sailing.gwt.home.client.place.event.EventPageNavigator;
 import com.sap.sailing.gwt.home.client.place.event.regatta.Regatta;
 import com.sap.sailing.gwt.ui.shared.EventDTO;
@@ -19,7 +19,7 @@ import com.sap.sailing.gwt.ui.shared.RaceGroupSeriesDTO;
 import com.sap.sailing.gwt.ui.shared.StrippedLeaderboardDTO;
 import com.sap.sse.gwt.client.player.Timer;
 
-public class EventRegattaRaces extends Composite {
+public class EventRegattaRaces extends AbstractEventComposite {
     private static EventRegattaRacesUiBinder uiBinder = GWT.create(EventRegattaRacesUiBinder.class);
 
     interface EventRegattaRacesUiBinder extends UiBinder<Widget, EventRegattaRaces> {
@@ -31,12 +31,11 @@ public class EventRegattaRaces extends Composite {
     @UiField HTMLPanel rootPanel;
     
     private final Timer timerForClientServerOffset;
-    private final EventPageNavigator pageNavigator;
     private final List<EventRegattaRacesPhase> phaseElements;
 
     public EventRegattaRaces(EventDTO event, Timer timerForClientServerOffset, EventPageNavigator pageNavigator) {
+        super(event, pageNavigator);
         this.timerForClientServerOffset = timerForClientServerOffset;
-        this.pageNavigator = pageNavigator;
         
         phaseElements = new ArrayList<EventRegattaRacesPhase>();
         
@@ -57,13 +56,13 @@ public class EventRegattaRaces extends Composite {
         int regattaPhases = raceGroup.getSeries().size();
         if(regattaPhases > 1) {
             for(RaceGroupSeriesDTO series: raceGroup.getSeries()) {
-                EventRegattaRacesPhase regattaPhase = new EventRegattaRacesPhase(leaderboard, series, timerForClientServerOffset, pageNavigator); 
+                EventRegattaRacesPhase regattaPhase = new EventRegattaRacesPhase(leaderboard, series, timerForClientServerOffset, getPageNavigator()); 
                 regattaPhasesPanel.getElement().appendChild(regattaPhase.getElement());
                 phaseElements.add(regattaPhase);
             }
         } else {
             RaceGroupSeriesDTO raceGroupSeriesDTO = raceGroup.getSeries().get(0);
-            EventRegattaRacesPhase regattaPhase = new EventRegattaRacesPhase(leaderboard, raceGroupSeriesDTO, timerForClientServerOffset, pageNavigator); 
+            EventRegattaRacesPhase regattaPhase = new EventRegattaRacesPhase(leaderboard, raceGroupSeriesDTO, timerForClientServerOffset, getPageNavigator()); 
             regattaPhasesPanel.getElement().appendChild(regattaPhase.getElement());
             phaseElements.add(regattaPhase);
         }

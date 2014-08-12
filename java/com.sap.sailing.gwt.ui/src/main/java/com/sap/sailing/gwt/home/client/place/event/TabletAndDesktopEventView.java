@@ -58,9 +58,9 @@ public class TabletAndDesktopEventView extends Composite implements EventView, E
         eventHeader = new EventHeader(event, this);
         eventRegattaList = new EventRegattaList(event, regattaStructure, timerForClientServerOffset, this);
         eventRegattaRaces = new EventRegattaRaces(event, timerForClientServerOffset, this);
-        eventOverview = new EventOverview(event);
-        eventSchedule = new EventSchedule(event);
-        eventMedia = new EventMedia(event);
+        eventOverview = new EventOverview(event, this);
+        eventSchedule = new EventSchedule(event, this);
+        eventMedia = new EventMedia(event, this);
         
         initWidget(uiBinder.createAndBindUi(this));
         
