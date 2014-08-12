@@ -19,7 +19,7 @@ public class TrackedRaceStatisticsDTO implements Serializable {
     public Integer measuredWindSourcesCount;
     public Duration averageWindDataSampleInterval;
     public Integer audioTracksCount;
-    public Integer mediaTracksCount;
+    public Integer videoTracksCount;
     
     public Integer totalLegsCount;
     public Integer currentLegNo;

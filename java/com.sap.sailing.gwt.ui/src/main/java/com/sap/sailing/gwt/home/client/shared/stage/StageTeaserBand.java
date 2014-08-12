@@ -7,6 +7,7 @@ import com.google.gwt.dom.client.SpanElement;
 import com.google.gwt.dom.client.Style.Display;
 import com.google.gwt.uibinder.client.UiBinder;
 import com.google.gwt.uibinder.client.UiField;
+import com.google.gwt.user.client.DOM;
 import com.google.gwt.user.client.Event;
 import com.google.gwt.user.client.EventListener;
 import com.google.gwt.user.client.ui.UIObject;
@@ -23,6 +24,7 @@ public abstract class StageTeaserBand extends UIObject {
     @UiField SpanElement bandTitle;
     @UiField SpanElement bandSubtitle;
     @UiField AnchorElement actionLink;
+    @UiField DivElement isLiveDiv;
 
     private final PlaceNavigator placeNavigator;
     private final EventBaseDTO event;
@@ -34,11 +36,17 @@ public abstract class StageTeaserBand extends UIObject {
         StageResources.INSTANCE.css().ensureInjected();
         setElement(uiBinder.createAndBindUi(this));
         
+        isLiveDiv.getStyle().setDisplay(Display.NONE);
+
         Event.sinkEvents(actionLink, Event.ONCLICK);
         Event.setEventListener(actionLink, new EventListener() {
             @Override
             public void onBrowserEvent(Event event) {
-                actionLinkClicked();
+                switch (DOM.eventGetType(event)) {
+                case Event.ONCLICK:
+                    actionLinkClicked();
+                    break;
+                }
             }
         });
 

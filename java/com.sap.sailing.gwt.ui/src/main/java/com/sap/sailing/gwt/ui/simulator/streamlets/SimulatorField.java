@@ -69,7 +69,7 @@ public class SimulatorField implements VectorField {
         this.bdB = new DegreePosition((this.rcStart.getLatDeg() - this.rcEnd.getLatDeg()) * bdPhi,
                 (this.rcStart.getLngDeg() - this.rcEnd.getLngDeg()) * bdPhi);
         this.xScale = windData.windData.xScale;
-		this.motionFactor = 0.07 * parameters.motionScale;
+		this.motionFactor = 0.0007 * parameters.motionScale;
 		this.lineBase = parameters.lineBase;
 		this.lineScale = parameters.lineScale;
         List<SimulatorWindDTO> gridData = windData.getMatrix();
