@@ -146,6 +146,7 @@ import com.sap.sailing.domain.common.dto.IncrementalOrFullLeaderboardDTO;
 import com.sap.sailing.domain.common.dto.LeaderboardDTO;
 import com.sap.sailing.domain.common.dto.PositionDTO;
 import com.sap.sailing.domain.common.dto.RaceColumnDTO;
+import com.sap.sailing.domain.common.dto.RaceColumnDTOFactory;
 import com.sap.sailing.domain.common.dto.RaceColumnInSeriesDTO;
 import com.sap.sailing.domain.common.dto.RaceDTO;
 import com.sap.sailing.domain.common.dto.RaceLogTrackingInfoDTO;
@@ -809,13 +810,20 @@ public class SailingServiceImpl extends ProxiedRemoteServiceServlet implements S
         return result;
     }
 
+    private void fillRaceColumnDTO(RaceColumn raceColumn, RaceColumnDTO raceColumnDTO) {
+        raceColumnDTO.setName(raceColumn.getName());
+        raceColumnDTO.setMedalRace(raceColumn.isMedalRace());
+        raceColumnDTO.setExplicitFactor(raceColumn.getExplicitFactor());
+    }
+    
     private List<RaceColumnDTO> convertToRaceColumnDTOs(Iterable<? extends RaceColumn> raceColumns) {
         List<RaceColumnDTO> raceColumnDTOs = new ArrayList<RaceColumnDTO>();
+        RaceColumnDTOFactory columnFactory = RaceColumnDTOFactory.INSTANCE;
         for (RaceColumn raceColumn : raceColumns) {
-            RaceColumnDTO raceColumnDTO = new RaceColumnDTO(/* isValidInTotalScore not relevant here because no scores conveyed */ null);
-            raceColumnDTO.setName(raceColumn.getName());
-            raceColumnDTO.setMedalRace(raceColumn.isMedalRace());
-            raceColumnDTO.setExplicitFactor(raceColumn.getExplicitFactor());
+            final RaceColumnDTO raceColumnDTO = columnFactory.createRaceColumnDTO(raceColumn.getName(),
+                    raceColumn.isMedalRace(), raceColumn.getExplicitFactor(),
+                    raceColumn instanceof RaceColumnInSeries ? ((RaceColumnInSeries) raceColumn).getRegatta().getName() : null,
+                    raceColumn instanceof RaceColumnInSeries ? ((RaceColumnInSeries) raceColumn).getSeries().getName() : null);
             raceColumnDTOs.add(raceColumnDTO);
         }
         return raceColumnDTOs;
@@ -2168,8 +2176,10 @@ public class SailingServiceImpl extends ProxiedRemoteServiceServlet implements S
                     }
                 }    
                 final FleetDTO fleetDTO = baseDomainFactory.convertToFleetDTO(fleet);
-                RaceColumnDTO raceColumnDTO = leaderboardDTO.addRace(raceColumn.getName(), raceColumn.getExplicitFactor(),
-                        raceColumn.getFactor(), fleetDTO, raceColumn.isMedalRace(), raceIdentifier, raceDTO);
+                RaceColumnDTO raceColumnDTO = leaderboardDTO.addRace(raceColumn.getName(), raceColumn.getExplicitFactor(), raceColumn.getFactor(),
+                        raceColumn instanceof RaceColumnInSeries ? ((RaceColumnInSeries) raceColumn).getRegatta().getName() : null,
+                        raceColumn instanceof RaceColumnInSeries ? ((RaceColumnInSeries) raceColumn).getSeries().getName() : null,
+                        fleetDTO, raceColumn.isMedalRace(), raceIdentifier, raceDTO);
                 RaceLog raceLog = raceColumn.getRaceLog(fleet);
                 RaceLogTrackingState raceLogTrackingState = raceLog == null ? RaceLogTrackingState.NOT_A_RACELOG_TRACKED_RACE :
                     new RaceLogTrackingStateAnalyzer(raceLog).analyze();
@@ -3396,8 +3406,7 @@ public class SailingServiceImpl extends ProxiedRemoteServiceServlet implements S
     private RaceColumnInSeriesDTO convertToRaceColumnInSeriesDTO(RaceColumnInSeries raceColumnInSeries) {
         RaceColumnInSeriesDTO raceColumnInSeriesDTO = new RaceColumnInSeriesDTO(raceColumnInSeries.getSeries().getName(),
                 raceColumnInSeries.getRegatta().getName());
-        raceColumnInSeriesDTO.setName(raceColumnInSeries.getName());
-        raceColumnInSeriesDTO.setMedalRace(raceColumnInSeries.isMedalRace());
+        fillRaceColumnDTO(raceColumnInSeries, raceColumnInSeriesDTO);
         return raceColumnInSeriesDTO;
     }
 

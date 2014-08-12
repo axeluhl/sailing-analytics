@@ -9,7 +9,7 @@ import com.sap.sailing.gwt.ui.client.SailingServiceAsync;
 import com.sap.sailing.gwt.ui.client.StringMessages;
 import com.sap.sailing.gwt.ui.leaderboard.LeaderboardPanel;
 import com.sap.sailing.gwt.ui.leaderboard.LeaderboardSettingsFactory;
-import com.sap.sailing.gwt.ui.leaderboard.SortableColumn;
+import com.sap.sailing.gwt.ui.leaderboard.LeaderboardSortableColumnWithMinMax;
 import com.sap.sailing.gwt.ui.leaderboard.SortedCellTable;
 import com.sap.sse.gwt.client.async.AsyncActionsExecutor;
 import com.sap.sse.gwt.client.useragent.UserAgentDetails;
@@ -20,12 +20,12 @@ public class LeaderboardPanelMock extends LeaderboardPanel {
             String leaderboardName, ErrorReporter errorReporter,
             StringMessages stringMessages) {
         super(sailingService, new AsyncActionsExecutor(), LeaderboardSettingsFactory.getInstance().createNewDefaultSettings(
-        /* racesToShow */null, /* namesOfRacesToShow */ null, null, /* autoExpandFirstRace */ false), new CompetitorSelectionModel(
+        /* racesToShow */null, /* namesOfRacesToShow */ null, null, /* autoExpandFirstRace */ false, /* showRegattaRank */ true), new CompetitorSelectionModel(
                 /* hasMultiSelection */true), leaderboardName, errorReporter, stringMessages, new UserAgentDetails("gecko1_8"), /* showRaceDetails */ true);
     }
 
     @Override
-    public void addColumn(SortableColumn<LeaderboardRowDTO, ?> column) {
+    public void addColumn(LeaderboardSortableColumnWithMinMax<LeaderboardRowDTO, ?> column) {
         // TODO Auto-generated method stub
         super.addColumn(column);
     }

@@ -10,9 +10,10 @@ import com.google.gwt.dom.client.NodeList;
 import com.google.gwt.safehtml.shared.SafeHtmlBuilder;
 import com.google.gwt.user.cellview.client.DefaultCellTableBuilder;
 import com.google.gwt.view.client.SelectionModel;
+import com.sap.sailing.gwt.ui.client.shared.controls.SortableColumn;
 
 /**
- * Uses {@link SortableColumn#getHeaderStyle()} to optionally add a custom CSS style to the &lt;th&gt; table
+ * Uses {@link LeaderboardSortableColumnWithMinMax#getHeaderStyle()} to optionally add a custom CSS style to the &lt;th&gt; table
  * header cell for the respective column.<p>
  * 
  * The implementation works by overriding {@link #renderRowValues(SafeHtmlBuilder, List, int, SelectionModel)} which

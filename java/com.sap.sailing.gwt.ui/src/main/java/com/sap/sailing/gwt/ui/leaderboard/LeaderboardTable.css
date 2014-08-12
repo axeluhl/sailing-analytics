@@ -55,9 +55,38 @@
 	border-left: none;
 	border-top: none !important;
 	border-bottom: 1px solid #c9caca !important;
-	padding: 5px 5px 5px !important;
+	padding: 7px 7px 7px;
 	white-space: nowrap;
 	font-family: 'OpenSansCondensedLight', 'OpenSansRegular', Arial, Verdana, sans-serif;
+}
+
+.cellTableCheckboxColumnCell {
+	padding: 1px 1px 1px !important;
+	vertical-align: middle !important;
+	text-align: center;
+}
+
+.cellTableCheckboxSelected {
+	margin-left: 0px; /* account for the selection border that pushes a selected checkbox to the side */
+	margin-top: 0px;
+	margin-bottom: 0px;
+	margin-right: 2px;
+	height: 18px;
+	width: 18px;
+	border: solid 1px #acacac;
+	background-color: #cacaca;
+	vertical-align: middle;
+}
+
+.cellTableCheckboxDeselected {
+	margin-left: 2px; /* account for the selection border that pushes a selected checkbox to the side */
+	margin-top: 0px;
+	margin-bottom: 0px;
+	margin-right: 2px;
+	border: solid 1px #acacac;
+	height: 18px;
+	width: 18px;
+	vertical-align: middle;
 }
 
 .cellTableOddRow {
@@ -70,7 +99,7 @@
 	border-right: 1px solid #c9caca !important;
 	border-top: none !important;
 	border-bottom: 1px solid #c9caca !important;
-	padding: 5px 5px 5px !important;
+	padding: 7px 7px 7px;
 	white-space: nowrap;
 	font-family: 'OpenSansCondensedLight', 'OpenSansRegular', Arial, Verdana, sans-serif;
 }

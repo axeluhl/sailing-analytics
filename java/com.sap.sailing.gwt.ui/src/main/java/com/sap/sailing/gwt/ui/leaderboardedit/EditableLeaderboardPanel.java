@@ -65,7 +65,7 @@ import com.sap.sailing.gwt.ui.leaderboard.CompetitorFetcher;
 import com.sap.sailing.gwt.ui.leaderboard.LeaderboardPanel;
 import com.sap.sailing.gwt.ui.leaderboard.LeaderboardSettings;
 import com.sap.sailing.gwt.ui.leaderboard.LeaderboardSettingsFactory;
-import com.sap.sailing.gwt.ui.leaderboard.SortableColumn;
+import com.sap.sailing.gwt.ui.leaderboard.LeaderboardSortableColumnWithMinMax;
 import com.sap.sse.common.Util;
 import com.sap.sse.gwt.client.async.AsyncActionsExecutor;
 import com.sap.sse.gwt.client.dialog.DataEntryDialog.DialogCallback;
@@ -146,7 +146,7 @@ public class EditableLeaderboardPanel extends LeaderboardPanel {
      * @author Axel Uhl (d043530)
      * 
      */
-    private class SuppressedSailIDColumn extends SortableColumn<CompetitorDTO, String> {
+    private class SuppressedSailIDColumn extends LeaderboardSortableColumnWithMinMax<CompetitorDTO, String> {
         protected SuppressedSailIDColumn() {
             super(new TextCell(), SortingOrder.ASCENDING, EditableLeaderboardPanel.this);
         }
@@ -189,7 +189,7 @@ public class EditableLeaderboardPanel extends LeaderboardPanel {
         }
     }
 
-    protected class SuppressedCompetitorColumn extends SortableColumn<CompetitorDTO, CompetitorDTO> {
+    protected class SuppressedCompetitorColumn extends LeaderboardSortableColumnWithMinMax<CompetitorDTO, CompetitorDTO> {
         private final CompetitorColumnBase<CompetitorDTO> base;
 
         protected SuppressedCompetitorColumn(CompetitorColumnBase<CompetitorDTO> base) {
@@ -605,7 +605,7 @@ public class EditableLeaderboardPanel extends LeaderboardPanel {
             String leaderboardName, String leaderboardGroupName, final ErrorReporter errorReporter,
             final StringMessages stringMessages, UserAgentDetails userAgent) {
         super(sailingService, asyncActionsExecutor, LeaderboardSettingsFactory.getInstance().createNewDefaultSettings(
-                /* racesToShow */ null, /* namesOfRacesToShow */ null, null, /* autoExpandFirstRace */ false),
+                /* racesToShow */ null, /* namesOfRacesToShow */ null, null, /* autoExpandFirstRace */ false, /* showRegattaRank */ true),
                 new CompetitorSelectionModel(/* hasMultiSelection */true),
                 leaderboardName, errorReporter, stringMessages, userAgent, /* showRaceDetails */ true);
         suppressedCompetitorsShown = new ListDataProvider<CompetitorDTO>(new ArrayList<CompetitorDTO>());
@@ -761,9 +761,9 @@ public class EditableLeaderboardPanel extends LeaderboardPanel {
      * the column must always be shown.
      */
     @Override
-    protected boolean updateCarryColumn(LeaderboardDTO leaderboard) {
-        ensureCarryColumn();
-        return true;
+    protected int updateCarryColumn(LeaderboardDTO leaderboard, int zeroBasedIndexOfCarryColumn) {
+        ensureCarryColumn(zeroBasedIndexOfCarryColumn);
+        return zeroBasedIndexOfCarryColumn+1;
     }
 
     @Override

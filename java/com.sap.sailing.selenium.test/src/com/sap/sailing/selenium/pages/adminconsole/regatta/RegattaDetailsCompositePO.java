@@ -75,7 +75,7 @@ public class RegattaDetailsCompositePO extends PageArea {
     private DataEntryPO findSeries(String series) {
         CellTablePO<DataEntryPO> table = getSeriesTable();
         for (DataEntryPO entry : table.getEntries()) {
-            String name = entry.getColumnContent(0);
+            String name = entry.getColumnContent("Series");
             if (series.equals(name)) {
                 return entry;
             }

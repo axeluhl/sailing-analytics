@@ -1,0 +1,24 @@
+.settingsButtonStyle {
+	position: absolute;
+	right: 0px;
+	top: 0px;
+	z-index: 1;
+	margin-top: 4px;
+	margin-right: 15px;
+	border: none;
+}
+
+.settingsButtonStyle:focus {
+	outline: 0 !important;
+}
+
+.settingsButtonStyle:hover {
+	border: 1px solid gray;
+}
+
+@sprite .settingsButtonBackgroundImage {
+	gwt-image: "settingsButton";
+	width: 2em;
+	height: 2em;
+	background-size: contain;
+}

@@ -15,7 +15,10 @@ import java.util.Map.Entry;
 import java.util.Set;
 
 import com.google.gwt.canvas.dom.client.CssColor;
+import com.google.gwt.core.client.GWT;
 import com.google.gwt.dom.client.Style;
+import com.google.gwt.event.dom.client.ClickEvent;
+import com.google.gwt.event.dom.client.ClickHandler;
 import com.google.gwt.i18n.client.NumberFormat;
 import com.google.gwt.maps.client.LoadApi;
 import com.google.gwt.maps.client.LoadApi.LoadLibrary;
@@ -26,7 +29,6 @@ import com.google.gwt.maps.client.base.LatLngBounds;
 import com.google.gwt.maps.client.controls.ControlPosition;
 import com.google.gwt.maps.client.controls.MapTypeStyle;
 import com.google.gwt.maps.client.controls.PanControlOptions;
-import com.google.gwt.maps.client.controls.ScaleControlOptions;
 import com.google.gwt.maps.client.controls.ZoomControlOptions;
 import com.google.gwt.maps.client.events.bounds.BoundsChangeMapEvent;
 import com.google.gwt.maps.client.events.bounds.BoundsChangeMapHandler;
@@ -52,9 +54,13 @@ import com.google.gwt.maps.client.overlays.Polygon;
 import com.google.gwt.maps.client.overlays.PolygonOptions;
 import com.google.gwt.maps.client.overlays.Polyline;
 import com.google.gwt.maps.client.overlays.PolylineOptions;
+import com.google.gwt.resources.client.ImageResource;
+import com.google.gwt.user.client.Window;
 import com.google.gwt.user.client.rpc.AsyncCallback;
 import com.google.gwt.user.client.ui.AbsolutePanel;
+import com.google.gwt.user.client.ui.Button;
 import com.google.gwt.user.client.ui.FlowPanel;
+import com.google.gwt.user.client.ui.Image;
 import com.google.gwt.user.client.ui.Label;
 import com.google.gwt.user.client.ui.RequiresResize;
 import com.google.gwt.user.client.ui.VerticalPanel;
@@ -75,6 +81,7 @@ import com.sap.sailing.domain.common.impl.RGBColor;
 import com.sap.sailing.domain.common.scalablevalue.impl.ScalableBearing;
 import com.sap.sailing.gwt.ui.actions.GetRaceMapDataAction;
 import com.sap.sailing.gwt.ui.actions.GetWindInfoAction;
+import com.sap.sailing.gwt.ui.client.ClientResources;
 import com.sap.sailing.gwt.ui.client.CompetitorSelectionChangeListener;
 import com.sap.sailing.gwt.ui.client.CompetitorSelectionProvider;
 import com.sap.sailing.gwt.ui.client.ErrorReporter;
@@ -86,6 +93,7 @@ import com.sap.sailing.gwt.ui.client.SailingServiceAsync;
 import com.sap.sailing.gwt.ui.client.StringMessages;
 import com.sap.sailing.gwt.ui.client.WindSourceTypeFormatter;
 import com.sap.sailing.gwt.ui.client.shared.components.Component;
+import com.sap.sailing.gwt.ui.client.shared.components.SettingsDialog;
 import com.sap.sailing.gwt.ui.client.shared.components.SettingsDialogComponent;
 import com.sap.sailing.gwt.ui.client.shared.filter.QuickRankProvider;
 import com.sap.sailing.gwt.ui.client.shared.racemap.RaceMapHelpLinesSettings.HelpLineTypes;
@@ -109,6 +117,8 @@ import com.sap.sailing.gwt.ui.shared.racemap.GoogleMapStyleHelper;
 import com.sap.sailing.gwt.ui.shared.racemap.WindStreamletsRaceboardOverlay;
 import com.sap.sse.common.Util;
 import com.sap.sse.common.Util.Triple;
+import com.sap.sse.common.filter.Filter;
+import com.sap.sse.common.filter.FilterSet;
 import com.sap.sse.gwt.client.async.AsyncActionsExecutor;
 import com.sap.sse.gwt.client.player.TimeListener;
 import com.sap.sse.gwt.client.player.Timer;
@@ -123,6 +133,8 @@ public class RaceMap extends AbsolutePanel implements TimeListener, CompetitorSe
 
     private final SailingServiceAsync sailingService;
     private final ErrorReporter errorReporter;
+
+    private final static ClientResources resources = GWT.create(ClientResources.class);
 
     /**
      * Polyline for the start line (connecting two marks representing the start gate).
@@ -352,23 +364,21 @@ public class RaceMap extends AbsolutePanel implements TimeListener, CompetitorSe
               mapTypeStyles[3] = GoogleMapStyleHelper.createColorStyle(MapTypeStyleFeatureType.WATER, new RGBColor(0, 136, 255), -35, -34);
               
               mapOptions.setMapTypeStyles(mapTypeStyles);
-              
-              ScaleControlOptions scaleControlOptions = ScaleControlOptions.newInstance();
-              scaleControlOptions.setPosition(ControlPosition.BOTTOM_RIGHT);
-              mapOptions.setScaleControlOptions(scaleControlOptions);
+              // no need to try to position the scale control; it always ends up at the right bottom corner
               mapOptions.setStreetViewControl(false);
               if (showMapControls) {
                   ZoomControlOptions zoomControlOptions = ZoomControlOptions.newInstance();
                   zoomControlOptions.setPosition(ControlPosition.TOP_RIGHT);
                   mapOptions.setZoomControlOptions(zoomControlOptions);
-
                   PanControlOptions panControlOptions = PanControlOptions.newInstance();
                   panControlOptions.setPosition(ControlPosition.TOP_RIGHT);
                   mapOptions.setPanControlOptions(panControlOptions);
               }
               map = new MapWidget(mapOptions);
               RaceMap.this.add(map, 0, 0);
-              RaceMap.this.add(combinedWindPanel, 10, 10);
+              Image sapLogo = createSAPLogo();
+              RaceMap.this.add(sapLogo);
+              RaceMap.this.add(combinedWindPanel, 10, 10+sapLogo.getHeight()+/*spacing*/5);
               RaceMap.this.raceMapImageManager.loadMapIcons(map);
               map.setSize("100%", "100%");
               map.addZoomChangeHandler(new ZoomChangeMapHandler() {
@@ -436,13 +446,29 @@ public class RaceMap extends AbsolutePanel implements TimeListener, CompetitorSe
               if (showViewStreamlets) {
                   streamletOverlay.setVisible(true);
               }
-              //Data has been initialized
+              // Data has been initialized
+              createSettingsButton(map);
               RaceMap.this.isMapInitialized = true;
               RaceMap.this.redraw();
           }
         };
 
         LoadApi.go(onLoad, loadLibraries, sensor, "key="+GoogleMapAPIKey.V3_APIKey); 
+    }
+    
+    
+    private void createSettingsButton(MapWidget map) {
+        final Component<RaceMapSettings> component = this;
+        Button settingsButton = new Button();
+        settingsButton.setStyleName("gwt-MapSettingsButton");
+        settingsButton.setTitle(stringMessages.settings());
+        settingsButton.addClickHandler(new ClickHandler() {
+            @Override
+            public void onClick(ClickEvent event) {
+                new SettingsDialog<RaceMapSettings>(component, stringMessages).show();
+            }
+        });
+        map.setControls(ControlPosition.RIGHT_TOP, settingsButton);
     }
         
     public void redraw() {
@@ -1227,8 +1253,10 @@ public class RaceMap extends AbsolutePanel implements TimeListener, CompetitorSe
     
     private void zoomMapToNewBounds(Bounds newBounds) {
         if (newBounds != null) {
-            Bounds currentMapBounds = BoundsUtil.getAsBounds(map.getBounds());
-            if (!currentMapBounds.contains(newBounds) || graticuleAreaRatio(currentMapBounds, newBounds) > 10) {
+            Bounds currentMapBounds;
+            if (map.getBounds() == null
+                    || !(currentMapBounds = BoundsUtil.getAsBounds(map.getBounds())).contains(newBounds)
+                    || graticuleAreaRatio(currentMapBounds, newBounds) > 10) {
                 // only change bounds if the new bounds don't fit into the current map zoom
                 List<ZoomTypes> oldZoomSettings = settings.getZoomSettings().getTypesToConsiderOnZoom();
                 setAutoZoomInProgress(true);
@@ -1995,6 +2023,12 @@ public class RaceMap extends AbsolutePanel implements TimeListener, CompetitorSe
     public void filteredCompetitorsListChanged(Iterable<CompetitorDTO> filteredCompetitors) {
         timeChanged(timer.getTime(), null);
     }
+    
+    @Override
+    public void filterChanged(FilterSet<CompetitorDTO, ? extends Filter<CompetitorDTO>> oldFilterSet,
+            FilterSet<CompetitorDTO, ? extends Filter<CompetitorDTO>> newFilterSet) {
+        // nothing to do; if the list of filtered competitors has changed, a separate call to filteredCompetitorsListChanged will occur
+    }
 
     @Override
     public PolylineOptions createTailStyle(CompetitorDTO competitor, boolean isHighlighted) {
@@ -2056,5 +2090,18 @@ public class RaceMap extends AbsolutePanel implements TimeListener, CompetitorSe
             result = null;
         }
         return result;
+    }
+
+    private Image createSAPLogo() {
+        ImageResource sapLogoResource = resources.sapLogoOverlay();
+        Image sapLogo = new Image(sapLogoResource);
+        sapLogo.addClickHandler(new ClickHandler() {
+            @Override
+            public void onClick(ClickEvent event) {
+                Window.open("http://www.sap.com", "_blank", null);
+            }
+        });
+        sapLogo.setStyleName("raceBoard-Logo");
+        return sapLogo;
     }
 }
