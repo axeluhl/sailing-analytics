@@ -19,7 +19,7 @@ import com.sap.sailing.datamining.shared.DimensionIdentifier.OrdinalComparator;
 import com.sap.sailing.datamining.shared.QueryDefinitionDeprecated;
 import com.sap.sailing.gwt.ui.client.StringMessages;
 import com.sap.sailing.gwt.ui.client.shared.components.SettingsDialogComponent;
-import com.sap.sailing.gwt.ui.client.shared.components.SimpleValueListBox;
+import com.sap.sailing.gwt.ui.client.shared.components.SimpleObjectRenderer;
 import com.sap.sailing.gwt.ui.datamining.GroupingChangedListener;
 import com.sap.sailing.gwt.ui.datamining.GroupingProvider;
 import com.sap.sse.datamining.shared.components.GrouperType;
@@ -48,7 +48,7 @@ public class RestrictedGroupingProvider implements GroupingProvider {
     }
 
     private ValueListBox<DimensionIdentifier> createDimensionToGroupByBox() {
-        ValueListBox<DimensionIdentifier> dimensionToGroupByBox = new SimpleValueListBox<DimensionIdentifier>();
+        ValueListBox<DimensionIdentifier> dimensionToGroupByBox = new ValueListBox<DimensionIdentifier>(new SimpleObjectRenderer<DimensionIdentifier>());
         dimensionToGroupByBox.addValueChangeHandler(new ValueChangeHandler<DimensionIdentifier>() {
             private boolean firstChange = true;
 

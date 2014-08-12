@@ -21,6 +21,7 @@ import com.sap.sailing.gwt.ui.client.StringMessages;
 import com.sap.sailing.gwt.ui.client.shared.components.SettingsDialogComponent;
 import com.sap.sailing.gwt.ui.client.shared.panels.ResizingFlowPanel;
 import com.sap.sailing.gwt.ui.datamining.DataMiningControls;
+import com.sap.sailing.gwt.ui.datamining.DataMiningServiceAsync;
 import com.sap.sailing.gwt.ui.datamining.GroupingChangedListener;
 import com.sap.sailing.gwt.ui.datamining.GroupingProvider;
 import com.sap.sailing.gwt.ui.datamining.SelectionChangedListener;
@@ -39,8 +40,8 @@ public class QueryDefinitionProviderWithControls extends AbstractQueryDefinition
 
     private GroupingProvider groupBySelectionPanel;
 
-    public QueryDefinitionProviderWithControls(StringMessages stringMessages, SailingServiceAsync sailingService, ErrorReporter errorReporter) {
-        super(stringMessages, sailingService, errorReporter);
+    public QueryDefinitionProviderWithControls(StringMessages stringMessages, SailingServiceAsync sailingService, DataMiningServiceAsync dataMiningService, ErrorReporter errorReporter) {
+        super(stringMessages, sailingService, dataMiningService, errorReporter);
         
         mainPanel = new ResizingFlowPanel() {
             @Override
@@ -64,48 +65,15 @@ public class QueryDefinitionProviderWithControls extends AbstractQueryDefinition
         mainPanel.add(selectionProvider.getEntryWidget());
         
     }
-    
-    @Override
-    public QueryDefinitionDeprecated getQueryDefinition() {
-        QueryDefinitionDeprecatedImpl queryDTO = new QueryDefinitionDeprecatedImpl(LocaleInfo.getCurrentLocale().getLocaleName(), groupBySelectionPanel.getGrouperType(),
-                                                                   statisticProvider.getStatisticType(), statisticProvider.getAggregatorType(), 
-                                                                   statisticProvider.getDataType());
-        
-        switch (queryDTO.getGrouperType()) {
-        case Dimensions:
-        default:
-            for (DimensionIdentifier dimension : groupBySelectionPanel.getDimensionsToGroupBy()) {
-                queryDTO.appendDimensionToGroupBy(dimension);
-            }
-            break;
-        }
-        
-        for (Entry<DimensionIdentifier, Collection<? extends Serializable>> selectionEntry : selectionProvider.getSelection().entrySet()) {
-            queryDTO.setSelectionFor(selectionEntry.getKey(), selectionEntry.getValue());
-        }
-        
-        return queryDTO;
-    }
-
-    @Override
-    public void applyQueryDefinition(QueryDefinitionDeprecated queryDefinition) {
-        setBlockChangeNotification(true);
-        selectionProvider.applySelection(queryDefinition);
-        groupBySelectionPanel.applyQueryDefinition(queryDefinition);
-        statisticProvider.applyQueryDefinition(queryDefinition);
-        setBlockChangeNotification(false);
-        
-        notifyQueryDefinitionChanged();
-    }
 
     private Widget createFunctionsPanel() {
         HorizontalPanel functionsPanel = new HorizontalPanel();
         functionsPanel.setSpacing(5);
 
-        statisticProvider = new ComplexStatisticProvider(getStringMessages(), SimpleStatisticsManager.createManagerWithStandardStatistics());
+        statisticProvider = new SimpleStatisticProvider(getStringMessages(), getDataMiningService(), getErrorReporter());
         statisticProvider.addStatisticChangedListener(new StatisticChangedListener() {
             @Override
-            public void statisticChanged(SimpleStatistic newStatistic) {
+            public void statisticChanged() {
                 notifyQueryDefinitionChanged();
             }
         });
@@ -134,6 +102,38 @@ public class QueryDefinitionProviderWithControls extends AbstractQueryDefinition
         functionsPanel.add(controlsPanel);
 
         return functionsPanel;
+    }
+    
+    @Override
+    public QueryDefinitionDeprecated getQueryDefinition() {
+        QueryDefinitionDeprecatedImpl queryDTO = new QueryDefinitionDeprecatedImpl(LocaleInfo.getCurrentLocale().getLocaleName(), groupBySelectionPanel.getGrouperType(),
+                                                                   statisticProvider.getExtractionFunction(), statisticProvider.getAggregatorType());
+        
+        switch (queryDTO.getGrouperType()) {
+        case Dimensions:
+        default:
+            for (DimensionIdentifier dimension : groupBySelectionPanel.getDimensionsToGroupBy()) {
+                queryDTO.appendDimensionToGroupBy(dimension);
+            }
+            break;
+        }
+        
+        for (Entry<DimensionIdentifier, Collection<? extends Serializable>> selectionEntry : selectionProvider.getSelection().entrySet()) {
+            queryDTO.setSelectionFor(selectionEntry.getKey(), selectionEntry.getValue());
+        }
+        
+        return queryDTO;
+    }
+
+    @Override
+    public void applyQueryDefinition(QueryDefinitionDeprecated queryDefinition) {
+        setBlockChangeNotification(true);
+        selectionProvider.applySelection(queryDefinition);
+        groupBySelectionPanel.applyQueryDefinition(queryDefinition);
+        statisticProvider.applyQueryDefinition(queryDefinition);
+        setBlockChangeNotification(false);
+        
+        notifyQueryDefinitionChanged();
     }
 
     @Override

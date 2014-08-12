@@ -6,18 +6,17 @@ import java.util.Map;
 
 import com.sap.sse.datamining.shared.components.AggregatorType;
 import com.sap.sse.datamining.shared.components.GrouperType;
+import com.sap.sse.datamining.shared.dto.FunctionDTO;
 
 public interface QueryDefinitionDeprecated extends Serializable {
 
     public String getLocaleInfoName();
 
+    public FunctionDTO getExtractionFunction();
+
     public GrouperType getGrouperType();
 
-    public StatisticType getStatisticType();
-
     public AggregatorType getAggregatorType();
-
-    public DataTypes getDataType();
 
     public List<DimensionIdentifier> getDimensionsToGroupBy();
 

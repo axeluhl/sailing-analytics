@@ -6,22 +6,20 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
-import com.sap.sailing.datamining.shared.DataTypes;
 import com.sap.sailing.datamining.shared.DimensionIdentifier;
 import com.sap.sailing.datamining.shared.QueryDefinitionDeprecated;
-import com.sap.sailing.datamining.shared.StatisticType;
 import com.sap.sse.datamining.shared.components.AggregatorType;
 import com.sap.sse.datamining.shared.components.GrouperType;
+import com.sap.sse.datamining.shared.dto.FunctionDTO;
 
 public class QueryDefinitionDeprecatedImpl implements QueryDefinitionDeprecated {
     private static final long serialVersionUID = 8408302866342877839L;
 
     private String localeInfoName;
-    
+
+    private FunctionDTO extractionFunction;
     private GrouperType grouperType;
-    private StatisticType statisticType;
     private AggregatorType aggregatorType;
-    private DataTypes dataType;
 
     private List<DimensionIdentifier> dimensionsToGroupBy;
     private Map<DimensionIdentifier, Iterable<? extends Serializable>> selectionMappedByDimension;
@@ -32,12 +30,11 @@ public class QueryDefinitionDeprecatedImpl implements QueryDefinitionDeprecated 
     @Deprecated
     QueryDefinitionDeprecatedImpl() { }
 
-    public QueryDefinitionDeprecatedImpl(String localeInfoName, GrouperType grouperType, StatisticType statisticType, AggregatorType aggregatorType, DataTypes dataType) {
+    public QueryDefinitionDeprecatedImpl(String localeInfoName, GrouperType grouperType, FunctionDTO extractionFunction, AggregatorType aggregatorType) {
         this.localeInfoName = localeInfoName;
         this.grouperType = grouperType;
-        this.statisticType = statisticType;
+        this.extractionFunction = extractionFunction;
         this.aggregatorType = aggregatorType;
-        this.dataType = dataType;
 
         dimensionsToGroupBy = new ArrayList<DimensionIdentifier>();
         selectionMappedByDimension = new HashMap<DimensionIdentifier, Iterable<? extends Serializable>>();
@@ -54,18 +51,13 @@ public class QueryDefinitionDeprecatedImpl implements QueryDefinitionDeprecated 
     }
 
     @Override
-    public StatisticType getStatisticType() {
-        return statisticType;
+    public FunctionDTO getExtractionFunction() {
+        return extractionFunction;
     }
 
     @Override
     public AggregatorType getAggregatorType() {
         return aggregatorType;
-    }
-    
-    @Override
-    public DataTypes getDataType() {
-        return dataType;
     }
 
     @Override

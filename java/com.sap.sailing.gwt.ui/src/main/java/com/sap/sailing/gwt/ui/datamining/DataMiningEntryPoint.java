@@ -4,7 +4,6 @@ import com.google.gwt.core.client.GWT;
 import com.google.gwt.dom.client.Style.Unit;
 import com.google.gwt.event.dom.client.ClickEvent;
 import com.google.gwt.event.dom.client.ClickHandler;
-import com.google.gwt.i18n.client.LocaleInfo;
 import com.google.gwt.user.client.rpc.ServiceDefTarget;
 import com.google.gwt.user.client.ui.AbstractImagePrototype;
 import com.google.gwt.user.client.ui.Anchor;
@@ -15,10 +14,6 @@ import com.google.gwt.user.client.ui.Label;
 import com.google.gwt.user.client.ui.RootLayoutPanel;
 import com.google.gwt.user.client.ui.SplitLayoutPanel;
 import com.google.gwt.user.client.ui.Widget;
-import com.sap.sailing.datamining.shared.DataTypes;
-import com.sap.sailing.datamining.shared.DimensionIdentifier;
-import com.sap.sailing.datamining.shared.StatisticType;
-import com.sap.sailing.datamining.shared.impl.QueryDefinitionDeprecatedImpl;
 import com.sap.sailing.gwt.ui.client.AbstractEntryPoint;
 import com.sap.sailing.gwt.ui.client.GlobalNavigationPanel;
 import com.sap.sailing.gwt.ui.client.LogoAndTitlePanel;
@@ -32,8 +27,6 @@ import com.sap.sailing.gwt.ui.datamining.presentation.ResultsChart;
 import com.sap.sailing.gwt.ui.datamining.selection.QueryDefinitionProviderWithControls;
 import com.sap.sailing.gwt.ui.datamining.settings.QueryRunnerSettings;
 import com.sap.sailing.gwt.ui.datamining.settings.RefreshingSelectionTablesSettings;
-import com.sap.sse.datamining.shared.components.AggregatorType;
-import com.sap.sse.datamining.shared.components.GrouperType;
 import com.sap.sse.gwt.client.EntryPointHelper;
 
 public class DataMiningEntryPoint extends AbstractEntryPoint {
@@ -56,24 +49,25 @@ public class DataMiningEntryPoint extends AbstractEntryPoint {
 
         DockLayoutPanel dockPanel = new DockLayoutPanel(Unit.PX);
         dockPanel.addNorth(createLogoAndTitlePanel(), 68);
-        QueryDefinitionProviderWithControls queryDefinitionProviderWithControls = new QueryDefinitionProviderWithControls(stringMessages, sailingService, this);
-        QueryDefinitionProvider queryDefinitionProvider = queryDefinitionProviderWithControls;
-        queryDefinitionProvider.getEntryWidget().addStyleName("dataMiningPanel");
-        dockPanel.add(queryDefinitionProvider.getEntryWidget());
+        QueryDefinitionProviderWithControls queryDefinitionProviderWithControls = new QueryDefinitionProviderWithControls(stringMessages, sailingService, dataMiningService, this);
+        queryDefinitionProviderWithControls.getEntryWidget().addStyleName("dataMiningPanel");
+        dockPanel.add(queryDefinitionProviderWithControls.getEntryWidget());
         
         ResultsPresenter<Number> resultsPresenter = new ResultsChart(stringMessages);
         splitPanel.addSouth(resultsPresenter.getWidget(), 400);
         
         splitPanel.add(dockPanel);
         
-        QueryRunner queryRunner = new SimpleQueryRunner(stringMessages, dataMiningService, this, queryDefinitionProvider, resultsPresenter);
+        QueryRunner queryRunner = new SimpleQueryRunner(stringMessages, dataMiningService, this, queryDefinitionProviderWithControls, resultsPresenter);
         queryDefinitionProviderWithControls.addControl(queryRunner.getEntryWidget());
-        queryDefinitionProviderWithControls.addControl(createSettingsControlWidget(queryRunner, queryDefinitionProvider));
+        queryDefinitionProviderWithControls.addControl(createSettingsControlWidget(queryRunner, queryDefinitionProviderWithControls));
         
-        QueryDefinitionDeprecatedImpl queryDefinition = new QueryDefinitionDeprecatedImpl(LocaleInfo.getCurrentLocale().getLocaleName(), GrouperType.Dimensions, StatisticType.Speed, AggregatorType.Average, DataTypes.GPSFix);
-        queryDefinition.appendDimensionToGroupBy(DimensionIdentifier.RegattaName);
-        queryDefinitionProvider.applyQueryDefinition(queryDefinition);
-        queryRunner.run(queryDefinitionProvider.getQueryDefinition());
+        //TODO Is it possible to define a 'standard' query, when the available query definition parts are fetched from the server?
+        
+//        QueryDefinitionDeprecatedImpl queryDefinition = new QueryDefinitionDeprecatedImpl(LocaleInfo.getCurrentLocale().getLocaleName(), GrouperType.Dimensions, StatisticType.Speed, AggregatorType.Average, DataTypes.GPSFix);
+//        queryDefinition.appendDimensionToGroupBy(DimensionIdentifier.RegattaName);
+//        queryDefinitionProviderWithControls.applyQueryDefinition(queryDefinition);
+//        queryRunner.run(queryDefinitionProviderWithControls.getQueryDefinition());
     }
 
     private LogoAndTitlePanel createLogoAndTitlePanel() {
