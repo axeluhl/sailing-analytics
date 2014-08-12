@@ -420,20 +420,15 @@ img.openColumn {
 	position: relative;
 	top: 10px;
 	z-index: 10;
-	color: black;
+	color: #FFFFFF;
 	margin-left: auto;
 	margin-right: auto;
-	opacity: .6;
-	border-radius: 6px;
-	border: none;
-	background-color: white;
-	height: 55px;
 }
 
 .raceBoard-TitlePanel-RaceNameLabel {
 	font-size: 28px;
 	font-weight: bold;
-	padding: 3px;
+	padding: 7px;
 }
 
 .raceBoard-Logo {
@@ -477,17 +472,13 @@ img.openColumn {
 	outline: 0 !important;
 }
 
-.RaceBoard-globalNavigation {
-	padding: 0px 25px;
-}
-
 .RaceBoard-globalNavigation-Link {
 	display: inline;
 	margin-right: 3px;
 }
 
 .RaceBoard-globalNavigation-Link a {
-	color: black;
+	color: #FFFFFF;
 	cursor: pointer;
 }
 
