@@ -44,7 +44,7 @@ public class DataMiningActivator implements BundleActivator, ClassesWithFunction
 
         FunctionRegistry functionRegistry = new SimpleFunctionRegistry();
         FunctionProvider functionProvider = new RegistryFunctionProvider(functionRegistry);
-        dataMiningServer = new DataMiningServerImpl(functionRegistry, functionProvider, this);
+        dataMiningServer = new DataMiningServerImpl(stringMessages, functionRegistry, functionProvider, this);
         registerDataMiningServer();
     }
 

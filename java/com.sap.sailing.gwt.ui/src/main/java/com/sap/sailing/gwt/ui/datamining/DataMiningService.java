@@ -12,9 +12,9 @@ import com.sap.sse.datamining.shared.dto.FunctionDTO;
 
 public interface DataMiningService extends RemoteService {
 
-    Collection<FunctionDTO> getAllStatistics();
+    Collection<FunctionDTO> getAllStatistics(String localeInfoName);
     
-    Collection<FunctionDTO> getDimensionsFor(DataTypes dataType);
+    Collection<FunctionDTO> getDimensionsFor(DataTypes dataType, String localeInfoName);
     
     <ResultType extends Number> QueryResult<ResultType> runQuery(QueryDefinitionDeprecated queryDefinition) throws Exception;
 

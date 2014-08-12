@@ -13,9 +13,9 @@ import com.sap.sse.datamining.shared.impl.GenericGroupKey;
 
 public interface DataMiningServiceAsync {
 
-    void getAllStatistics(AsyncCallback<Collection<FunctionDTO>> callback);
+    void getAllStatistics(String localeInfoName, AsyncCallback<Collection<FunctionDTO>> callback);
 
-    void getDimensionsFor(DataTypes dataType, AsyncCallback<Collection<FunctionDTO>> callback);
+    void getDimensionsFor(DataTypes dataType, String localeInfoName, AsyncCallback<Collection<FunctionDTO>> callback);
 
     <ResultType extends Number> void runQuery(QueryDefinitionDeprecated queryDefinition, AsyncCallback<QueryResult<ResultType>> callback);
     

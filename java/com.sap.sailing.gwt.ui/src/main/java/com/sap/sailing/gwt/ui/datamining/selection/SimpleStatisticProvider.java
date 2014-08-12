@@ -9,6 +9,7 @@ import java.util.Set;
 
 import com.google.gwt.event.logical.shared.ValueChangeEvent;
 import com.google.gwt.event.logical.shared.ValueChangeHandler;
+import com.google.gwt.i18n.client.LocaleInfo;
 import com.google.gwt.user.client.rpc.AsyncCallback;
 import com.google.gwt.user.client.ui.HorizontalPanel;
 import com.google.gwt.user.client.ui.Label;
@@ -58,7 +59,7 @@ public class SimpleStatisticProvider implements StatisticProvider {
     }
 
     private void updateExtractionFunctions() {
-        dataMiningService.getAllStatistics(new AsyncCallback<Collection<FunctionDTO>>() {
+        dataMiningService.getAllStatistics(LocaleInfo.getCurrentLocale().getLocaleName(), new AsyncCallback<Collection<FunctionDTO>>() {
             
             @Override
             public void onSuccess(Collection<FunctionDTO> extractionFunctions) {
