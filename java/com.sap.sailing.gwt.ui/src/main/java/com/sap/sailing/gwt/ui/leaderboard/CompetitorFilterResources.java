@@ -41,6 +41,7 @@ public interface CompetitorFilterResources extends ClientBundle {
         String clearButtonBackgroundImage();
         String searchButtonBackgroundImage();
         String settingsButtonBackgroundImage();
+        String headerPanel();
     }
 
 }

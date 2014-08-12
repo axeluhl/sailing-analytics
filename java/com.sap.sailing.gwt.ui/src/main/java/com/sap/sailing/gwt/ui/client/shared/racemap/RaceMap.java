@@ -17,6 +17,7 @@ import java.util.Set;
 import com.google.gwt.canvas.dom.client.CssColor;
 import com.google.gwt.core.client.GWT;
 import com.google.gwt.dom.client.Style;
+import com.google.gwt.dom.client.Style.Unit;
 import com.google.gwt.event.dom.client.ClickEvent;
 import com.google.gwt.event.dom.client.ClickHandler;
 import com.google.gwt.i18n.client.NumberFormat;
@@ -130,6 +131,9 @@ public class RaceMap extends AbsolutePanel implements TimeListener, CompetitorSe
     public static final String GET_WIND_DATA_CATEGORY = "getWindData";
     
     private MapWidget map;
+    private FlowPanel headerPanel;
+    private AbsolutePanel panelForLeftHeaderLabels;
+    private AbsolutePanel panelForRightHeaderLabels;
 
     private final SailingServiceAsync sailingService;
     private final ErrorReporter errorReporter;
@@ -328,6 +332,10 @@ public class RaceMap extends AbsolutePanel implements TimeListener, CompetitorSe
         lastTimeChangeBeforeInitialization = null;
         isMapInitialized = false;
         this.showViewStreamlets = showViewStreamlets;
+        headerPanel = new FlowPanel();
+        headerPanel.setStyleName("RaceMap-HeaderPanel");
+        panelForLeftHeaderLabels = new AbsolutePanel();
+        panelForRightHeaderLabels = new AbsolutePanel();
         initializeData(showMapControls);
         
         combinedWindPanel = new CombinedWindPanel(raceMapImageManager, stringMessages);
@@ -347,7 +355,7 @@ public class RaceMap extends AbsolutePanel implements TimeListener, CompetitorSe
           public void run() {
               MapOptions mapOptions = MapOptions.newInstance();
               mapOptions.setScrollWheel(true);
-              mapOptions.setMapTypeControl(showMapControls);
+              mapOptions.setMapTypeControl(!showMapControls); //FIXME
               mapOptions.setPanControl(showMapControls);
               mapOptions.setZoomControl(showMapControls);
               mapOptions.setScaleControl(true);
@@ -368,17 +376,17 @@ public class RaceMap extends AbsolutePanel implements TimeListener, CompetitorSe
               mapOptions.setStreetViewControl(false);
               if (showMapControls) {
                   ZoomControlOptions zoomControlOptions = ZoomControlOptions.newInstance();
-                  zoomControlOptions.setPosition(ControlPosition.TOP_RIGHT);
+                  zoomControlOptions.setPosition(ControlPosition.RIGHT_TOP);
                   mapOptions.setZoomControlOptions(zoomControlOptions);
                   PanControlOptions panControlOptions = PanControlOptions.newInstance();
-                  panControlOptions.setPosition(ControlPosition.TOP_RIGHT);
+                  panControlOptions.setPosition(ControlPosition.RIGHT_TOP);
                   mapOptions.setPanControlOptions(panControlOptions);
               }
               map = new MapWidget(mapOptions);
               RaceMap.this.add(map, 0, 0);
               Image sapLogo = createSAPLogo();
               RaceMap.this.add(sapLogo);
-              RaceMap.this.add(combinedWindPanel, 10, 10+sapLogo.getHeight()+/*spacing*/5);
+              RaceMap.this.add(combinedWindPanel, 10, 10+sapLogo.getHeight()+/*spacing*/15);
               RaceMap.this.raceMapImageManager.loadMapIcons(map);
               map.setSize("100%", "100%");
               map.addZoomChangeHandler(new ZoomChangeMapHandler() {
@@ -431,6 +439,7 @@ public class RaceMap extends AbsolutePanel implements TimeListener, CompetitorSe
                       }
                       currentMapBounds = map.getBounds();
                       currentZoomLevel = newZoomLevel;
+                      headerPanel.getElement().getStyle().setWidth(map.getOffsetWidth(), Unit.PX);
                   }
               });
               
@@ -446,8 +455,10 @@ public class RaceMap extends AbsolutePanel implements TimeListener, CompetitorSe
               if (showViewStreamlets) {
                   streamletOverlay.setVisible(true);
               }
-              // Data has been initialized
+              createHeaderPanel(map);
               createSettingsButton(map);
+
+              // Data has been initialized
               RaceMap.this.isMapInitialized = true;
               RaceMap.this.redraw();
           }
@@ -456,6 +467,24 @@ public class RaceMap extends AbsolutePanel implements TimeListener, CompetitorSe
         LoadApi.go(onLoad, loadLibraries, sensor, "key="+GoogleMapAPIKey.V3_APIKey); 
     }
     
+    private void createHeaderPanel(MapWidget map) {
+        // we need a panel that does not have any transparency to have the
+        // labels shown in the right color. This panel also needs to have
+        // a higher z-index than other elements on the map
+        map.setControls(ControlPosition.TOP_LEFT, panelForLeftHeaderLabels);
+        panelForLeftHeaderLabels.getElement().getParentElement().getStyle().setProperty("zIndex", "1");
+        panelForLeftHeaderLabels.getElement().getStyle().setProperty("overflow", "visible");
+        add(panelForRightHeaderLabels);
+        panelForRightHeaderLabels.getElement().getStyle().setProperty("zIndex", "1");
+        panelForRightHeaderLabels.getElement().getStyle().setProperty("overflow", "visible");
+        // need to initialize size before css kicks in to make sure
+        // that controls get positioned right
+        headerPanel.getElement().getStyle().setHeight(60, Unit.PX);
+        headerPanel.getElement().getStyle().setWidth(map.getOffsetWidth(), Unit.PX);
+        // some sort of hack: not positioning TOP_LEFT because then the
+        // controls at RIGHT would not get the correct top setting
+        map.setControls(ControlPosition.TOP_RIGHT, headerPanel);
+    }
     
     private void createSettingsButton(MapWidget map) {
         final Component<RaceMapSettings> component = this;
@@ -470,7 +499,7 @@ public class RaceMap extends AbsolutePanel implements TimeListener, CompetitorSe
         });
         map.setControls(ControlPosition.RIGHT_TOP, settingsButton);
     }
-        
+    
     public void redraw() {
         timeChanged(timer.getTime(), null);
     }
@@ -481,6 +510,17 @@ public class RaceMap extends AbsolutePanel implements TimeListener, CompetitorSe
     
     public MapWidget getMap() {
         return map;
+    }
+    
+    /**
+     * @return the Panel where labels or other controls for the header can be positioned
+     */
+    public AbsolutePanel getLeftHeaderPanel() {
+        return panelForLeftHeaderLabels;
+    }
+    
+    public AbsolutePanel getRightHeaderPanel() {
+        return panelForRightHeaderLabels;
     }
     
     @Override
