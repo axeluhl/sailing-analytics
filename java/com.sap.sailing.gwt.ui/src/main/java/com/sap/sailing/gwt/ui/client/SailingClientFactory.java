@@ -1,5 +1,6 @@
 package com.sap.sailing.gwt.ui.client;
 
+import com.sap.sailing.gwt.home.client.place.error.ErrorView;
 import com.sap.sse.gwt.client.mvp.ClientFactory;
 
 /**
@@ -10,4 +11,6 @@ import com.sap.sse.gwt.client.mvp.ClientFactory;
  */
 public interface SailingClientFactory extends ClientFactory {
     SailingServiceAsync getSailingService();
+    
+    ErrorView createErrorView(String errorMessage, Throwable errorReason);
 }

@@ -290,13 +290,13 @@ public class RaceMap extends AbsolutePanel implements TimeListener, CompetitorSe
     /**
      * The map bounds as last received by map callbacks; used to determine whether to suppress the boat animation during zoom/pan
      */
-    private LatLngBounds currentMapBounds;
+    private LatLngBounds currentMapBounds; // bounds to which bounds-changed-handler compares
+    private int currentZoomLevel;          // zoom-level to which bounds-changed-handler compares
     
-    private int currentZoomLevel;
-    private boolean autoZoomIn = false;
-    private boolean autoZoomOut = false;
-    private int autoZoomLevel;
-    LatLngBounds autoZoomLatLngBounds;
+    private boolean autoZoomIn = false;  // flags auto-zoom-in in progress
+    private boolean autoZoomOut = false; // flags auto-zoom-out in progress
+    private int autoZoomLevel;           // zoom-level to which auto-zoom-in/-out is zooming
+    LatLngBounds autoZoomLatLngBounds;   // bounds to which auto-zoom-in/-out is panning&zooming
     
     private WindStreamletsRaceboardOverlay streamletOverlay;
     private final boolean showViewStreamlets;
@@ -395,6 +395,8 @@ public class RaceMap extends AbsolutePanel implements TimeListener, CompetitorSe
                   @Override
                   public void onEvent(DragEndMapEvent event) {
                       // stop automatic zoom after a manual drag event
+                      autoZoomIn = false;
+                      autoZoomOut = false;
                       final List<RaceMapZoomSettings.ZoomTypes> emptyList = Collections.emptyList();
                       settings.getZoomSettings().setTypesToConsiderOnZoom(emptyList);
                   }
@@ -402,11 +404,14 @@ public class RaceMap extends AbsolutePanel implements TimeListener, CompetitorSe
               map.addIdleHandler(new IdleMapHandler() {
                   @Override
                   public void onEvent(IdleMapEvent event) {
+                      // the "idle"-event is raised at the end of map-animations
                       if (autoZoomIn) {
+                          // finalize zoom-in that was started with panTo() in zoomMapToNewBounds()
                           map.setZoom(autoZoomLevel);
                           autoZoomIn = false;
                       }
                       if (autoZoomOut) {
+                          // finalize zoom-out that was started with setZoom() in zoomMapToNewBounds()
                           map.panTo(autoZoomLatLngBounds.getCenter());
                           autoZoomOut = false;
                       }
@@ -417,14 +422,7 @@ public class RaceMap extends AbsolutePanel implements TimeListener, CompetitorSe
                   public void onEvent(BoundsChangeMapEvent event) {
                       int newZoomLevel = map.getZoom(); 
                       if (!isAutoZoomInProgress() && (newZoomLevel != currentZoomLevel)) {
-                          // remove the canvas animations for boats 
-                          for (BoatOverlay boatOverlay : RaceMap.this.getBoatOverlays().values()) {
-                              boatOverlay.removeCanvasPositionAndRotationTransition();
-                          }
-                          // remove the canvas animations for the info overlays of the selected boats 
-                          for (CompetitorInfoOverlay infoOverlay : competitorInfoOverlays.values()) {
-                              infoOverlay.removeCanvasPositionAndRotationTransition();
-                          }
+                          removeTransitions();
                       }
                       if ((streamletOverlay != null) && !map.getBounds().equals(currentMapBounds)) {
                           streamletOverlay.onBoundsChanged(newZoomLevel != currentZoomLevel);
@@ -455,8 +453,7 @@ public class RaceMap extends AbsolutePanel implements TimeListener, CompetitorSe
 
         LoadApi.go(onLoad, loadLibraries, sensor, "key="+GoogleMapAPIKey.V3_APIKey); 
     }
-    
-    
+
     private void createSettingsButton(MapWidget map) {
         final Component<RaceMapSettings> component = this;
         Button settingsButton = new Button();
@@ -470,7 +467,18 @@ public class RaceMap extends AbsolutePanel implements TimeListener, CompetitorSe
         });
         map.setControls(ControlPosition.RIGHT_TOP, settingsButton);
     }
-        
+
+    private void removeTransitions() {
+        // remove the canvas animations for boats
+        for (BoatOverlay boatOverlay : RaceMap.this.getBoatOverlays().values()) {
+            boatOverlay.removeCanvasPositionAndRotationTransition();
+        }
+        // remove the canvas animations for the info overlays of the selected boats
+        for (CompetitorInfoOverlay infoOverlay : competitorInfoOverlays.values()) {
+            infoOverlay.removeCanvasPositionAndRotationTransition();
+        }
+    }
+
     public void redraw() {
         timeChanged(timer.getTime(), null);
     }
@@ -1263,17 +1271,15 @@ public class RaceMap extends AbsolutePanel implements TimeListener, CompetitorSe
                 autoZoomLatLngBounds = BoundsUtil.getAsLatLngBounds(newBounds);
                 int newZoomLevel = getZoomLevel(autoZoomLatLngBounds); 
                 if (newZoomLevel != map.getZoom()) {
-                    // remove the canvas animations for boats 
-                    for (BoatOverlay boatOverlay : RaceMap.this.getBoatOverlays().values()) {
-                        boatOverlay.removeCanvasPositionAndRotationTransition();
-                    }
-                    // remove the canvas animations for the info overlays of the selected boats 
-                    for(CompetitorInfoOverlay infoOverlay: competitorInfoOverlays.values()) {
-                        infoOverlay.removeCanvasPositionAndRotationTransition();
-                    }
+                    // distinguish between zoom-in and zoom-out, because the sequence of panTo() and setZoom()
+                    // appears different on the screen due to map-animations
+                    // following sequences keep the selected boats allways visible:
+                    //   zoom-in : 1. panTo(), 2. setZoom()
+                    //   zoom-out: 1. setZoom(), 2. panTo() 
                     autoZoomIn = newZoomLevel > map.getZoom();
                     autoZoomOut = !autoZoomIn;
                     autoZoomLevel = newZoomLevel;
+                    removeTransitions();
                     if (autoZoomIn) {
                         map.panTo(autoZoomLatLngBounds.getCenter());
                     } else {
@@ -1875,8 +1881,9 @@ public class RaceMap extends AbsolutePanel implements TimeListener, CompetitorSe
             requiredRedraw = true;
         }
         if (!newSettings.getZoomSettings().equals(settings.getZoomSettings())) {
-            settings.setZoomSettings(newSettings.getZoomSettings());
+            settings.setZoomSettings(newSettings.getZoomSettings());                    
             if (!settings.getZoomSettings().containsZoomType(ZoomTypes.NONE)) {
+                removeTransitions();
                 zoomMapToNewBounds(settings.getZoomSettings().getNewBounds(this));
             }
         }
