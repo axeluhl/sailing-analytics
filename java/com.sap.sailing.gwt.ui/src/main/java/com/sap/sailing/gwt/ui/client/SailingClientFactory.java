@@ -1,7 +1,7 @@
 package com.sap.sailing.gwt.ui.client;
 
-import com.sap.sailing.gwt.home.client.place.error.ErrorView;
 import com.sap.sse.gwt.client.mvp.ClientFactory;
+import com.sap.sse.gwt.client.mvp.ErrorView;
 
 /**
  * A client factory that can deliver the sailing-specific services.
