@@ -1941,26 +1941,29 @@ public class SailingServiceImpl extends ProxiedRemoteServiceServlet implements S
      *            <code>null</code> means "live" and is then replaced by "now" minus the tracked race's
      *            {@link TrackedRace#getDelayToLiveInMillis() delay}.
      */
-    public List<QuickRankDTO> computeQuickRanks(RegattaAndRaceIdentifier raceIdentifier, TimePoint timePoint) throws NoWindException {
+    public List<QuickRankDTO> computeQuickRanks(RegattaAndRaceIdentifier raceIdentifier, TimePoint timePoint)
+            throws NoWindException {
         List<QuickRankDTO> result = new ArrayList<QuickRankDTO>();
         TrackedRace trackedRace = getExistingTrackedRace(raceIdentifier);
-        final TimePoint actualTimePoint;
-        if (timePoint == null) {
-            actualTimePoint = MillisecondsTimePoint.now().minus(trackedRace.getDelayToLiveInMillis());
-        } else {
-            actualTimePoint = timePoint;
-        }
-        RaceDefinition race = trackedRace.getRace();
-        int rank = 1;
-        for (Competitor competitor : trackedRace.getCompetitorsFromBestToWorst(actualTimePoint)) {
-            TrackedLegOfCompetitor trackedLeg = trackedRace.getTrackedLeg(competitor, actualTimePoint);
-            if (trackedLeg != null) {
-                int legNumberOneBased = race.getCourse().getLegs().indexOf(trackedLeg.getLeg()) + 1;
-                QuickRankDTO quickRankDTO = new QuickRankDTO(baseDomainFactory.convertToCompetitorDTO(competitor),
-                        rank, legNumberOneBased);
-                result.add(quickRankDTO);
+        if (trackedRace != null) {
+            final TimePoint actualTimePoint;
+            if (timePoint == null) {
+                actualTimePoint = MillisecondsTimePoint.now().minus(trackedRace.getDelayToLiveInMillis());
+            } else {
+                actualTimePoint = timePoint;
             }
-            rank++;
+            RaceDefinition race = trackedRace.getRace();
+            int rank = 1;
+            for (Competitor competitor : trackedRace.getCompetitorsFromBestToWorst(actualTimePoint)) {
+                TrackedLegOfCompetitor trackedLeg = trackedRace.getTrackedLeg(competitor, actualTimePoint);
+                if (trackedLeg != null) {
+                    int legNumberOneBased = race.getCourse().getLegs().indexOf(trackedLeg.getLeg()) + 1;
+                    QuickRankDTO quickRankDTO = new QuickRankDTO(baseDomainFactory.convertToCompetitorDTO(competitor),
+                            rank, legNumberOneBased);
+                    result.add(quickRankDTO);
+                }
+                rank++;
+            }
         }
         return result;
     }

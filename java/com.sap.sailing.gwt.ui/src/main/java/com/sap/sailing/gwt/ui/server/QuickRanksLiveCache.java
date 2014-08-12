@@ -88,6 +88,7 @@ public class QuickRanksLiveCache extends AbstractRaceChangeListener {
                     @Override
                     public List<QuickRankDTO> computeCacheUpdate(RegattaAndRaceIdentifier key,
                             CalculateOrPurge updateInterval) throws Exception {
+                        logger.fine("Computing cache update for live QuickRanks of race "+key);
                         final List<QuickRankDTO> result;
                         if (updateInterval == CalculateOrPurge.PURGE) {
                             result = null;
