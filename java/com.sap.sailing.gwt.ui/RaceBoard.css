@@ -303,23 +303,26 @@ img.openColumn {
 .playPauseButton {
 	padding: 0;
 	float: left;
-	width: 28px;
-	height: 25px;
-	background: url(images/timeslider-play-active-icon.png) 0 0 no-repeat;
+	width: 32px;
+	height: 28px;
+	background: url(images/viewicons/@1x/img/SAP_RV_Play_INACTIVE.png) center no-repeat;
     cursor: pointer;
+    border: 1px solid #cecece;
+    border-radius: 4px;
+    outline: 0;
 }
 
 .playPauseButton:hover{
-  background: url(images/playbutton-hover.png) 0 0 no-repeat !important;
   cursor: pointer;
+  background-color: #cecece;
 }
 
 .playPauseButtonPause {
-	background: url(images/timeslider-pause-icon.png) 0 0 no-repeat;
+	background: url(images/images/viewicons/@1x/img/SAP_RV_Pause_INACTIVE.png) 0 0 no-repeat;
+	outline: 0;
 }
 
 .playPauseButtonPause:hover {
-  background: url(images/playbuttonPause-hover.png) 0 0 no-repeat !important;
   cursor: pointer;
 }
 
@@ -456,11 +459,11 @@ img.openColumn {
   	border: 1px solid #ececec;
 }
 
-.TimePanel-ShowExtended-Button-Closed {
+.TimePanel-ShowExtended-Button-Open {
 	background: white url(images/arrows_top_black.png) center no-repeat;
 }
 
-.TimePanel-ShowExtended-Button-Open {
+.TimePanel-ShowExtended-Button-Closed {
 	background: white url(images/arrows_bottom_black.png) center no-repeat;
 }
 
@@ -503,7 +506,7 @@ img.openColumn {
 
 .gwt-SplitLayoutPanel-NorthSouthToggleButton-Closed-multiCompetitorRaceChart {
 	background-color: white;
-	background-image: url(images/viewicons/@1x/img/SAP_RV_CompetitorCharts_ACTIVE.png), url(images/arrows_top_black_small.png);
+	background-image: url(images/viewicons/@1x/img/SAP_RV_CompetitorCharts_INACTIVE.png), url(images/arrows_top_black_small.png);
 	background-repeat: no-repeat, no-repeat;
 	background-position: 5% 50%, 95% 50%
 }
@@ -517,7 +520,7 @@ img.openColumn {
 
 .gwt-SplitLayoutPanel-NorthSouthToggleButton-Closed-windChart {
 	background-color: white;
-	background-image: url(images/viewicons/@1x/img/SAP_RV_CompetitorCharts_ACTIVE.png), url(images/arrows_top_black_small.png);
+	background-image: url(images/viewicons/@1x/img/SAP_RV_CompetitorCharts_INACTIVE.png), url(images/arrows_top_black_small.png);
 	background-repeat: no-repeat, no-repeat;
 	background-position: 5% 50%, 95% 50%
 }
@@ -531,7 +534,7 @@ img.openColumn {
 
 .gwt-SplitLayoutPanel-EastToggleButton-Open-leaderboard {
 	background-color: white;
-	background-image: url(images/viewicons/@1x/img/SAP_RV_Leaderboard_ACTIVE.png), url(images/arrows_top_black_small.png);
+	background-image: url(images/viewicons/@1x/img/SAP_RV_Leaderboard_INACTIVE.png), url(images/arrows_top_black_small.png);
 	background-repeat: no-repeat, no-repeat;
 	background-position: 4% 50%, 96% 50%
 }
