@@ -2,13 +2,12 @@ package com.sap.sailing.gwt.home.client.place.searchresult;
 
 import com.google.gwt.activity.shared.AbstractActivity;
 import com.google.gwt.event.shared.EventBus;
-import com.google.gwt.user.client.Window;
 import com.google.gwt.user.client.rpc.AsyncCallback;
 import com.google.gwt.user.client.ui.AcceptsOneWidget;
-import com.sap.sailing.gwt.home.client.place.error.ErrorView;
 import com.sap.sailing.gwt.home.client.shared.placeholder.Placeholder;
 import com.sap.sailing.gwt.ui.shared.LeaderboardSearchResultDTO;
 import com.sap.sse.common.search.KeywordQuery;
+import com.sap.sse.gwt.client.mvp.ErrorView;
 
 public class SearchResultActivity extends AbstractActivity {
     private final SearchResultClientFactory clientFactory;
