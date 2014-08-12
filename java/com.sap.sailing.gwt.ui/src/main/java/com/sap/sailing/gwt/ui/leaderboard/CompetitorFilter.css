@@ -4,6 +4,7 @@
 	font-size: 22px;
 	font-weight: bold;
 	margin-bottom: 5px;
+	margin-top: 5px;
 }
 
 .competitorFilterContainer { 
@@ -60,21 +61,21 @@
 
 .clearButton {
 	right: 5px;
-    top: 37px;
+    top: 42px;
 }
 
 .settingsButton {
 	right: .4em;
-	top: 1px;
+	top: 3px;
 }
 
 .filterButton {
 	right: 2.4em;
-	top: 1px;
+	top: 3px;
 }
 
 .searchButton {
-	top: 37px;
+	top: 42px;
 	left: 0.2em;
 	opacity: 0.3;
 }
