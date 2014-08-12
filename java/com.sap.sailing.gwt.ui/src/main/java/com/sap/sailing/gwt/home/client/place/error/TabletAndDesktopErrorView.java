@@ -6,6 +6,7 @@ import com.google.gwt.uibinder.client.UiField;
 import com.google.gwt.user.client.ui.Composite;
 import com.google.gwt.user.client.ui.Widget;
 import com.sap.sailing.gwt.home.client.shared.error.ErrorMessage;
+import com.sap.sse.gwt.client.mvp.ErrorView;
 
 public class TabletAndDesktopErrorView extends Composite implements ErrorView {
     private static ErrorViewUiBinder uiBinder = GWT.create(ErrorViewUiBinder.class);
