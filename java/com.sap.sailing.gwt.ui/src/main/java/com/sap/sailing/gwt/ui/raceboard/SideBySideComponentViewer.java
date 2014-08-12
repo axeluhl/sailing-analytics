@@ -5,17 +5,16 @@ import java.util.List;
 import com.google.gwt.dom.client.Style.Unit;
 import com.google.gwt.user.client.ui.AbsolutePanel;
 import com.google.gwt.user.client.ui.DockLayoutPanel.Direction;
-import com.google.gwt.user.client.ui.Label;
 import com.google.gwt.user.client.ui.LayoutPanel;
 import com.google.gwt.user.client.ui.Panel;
 import com.google.gwt.user.client.ui.RequiresResize;
 import com.google.gwt.user.client.ui.ScrollPanel;
-import com.google.gwt.user.client.ui.SimplePanel;
 import com.google.gwt.user.client.ui.Widget;
 import com.google.gwt.user.client.ui.WidgetCollection;
 import com.sap.sailing.gwt.ui.client.StringMessages;
 import com.sap.sailing.gwt.ui.client.shared.components.Component;
 import com.sap.sailing.gwt.ui.client.shared.components.ComponentViewer;
+import com.sap.sailing.gwt.ui.client.shared.components.SettingsDialog;
 import com.sap.sailing.gwt.ui.leaderboard.LeaderboardPanel;
 
 /**
@@ -32,18 +31,6 @@ public class SideBySideComponentViewer implements ComponentViewer {
                     ((RequiresResize)widget).onResize();
                 }
             }
-        }
-    }
-    
-    class ScrollPanelWithHeader extends ScrollPanel {
-        public ScrollPanelWithHeader() {
-            super();
-            SimplePanel headerPanel = new SimplePanel();
-            Label sailingAnalyticsLabel = new Label("Sailing Analytics");
-            sailingAnalyticsLabel.setStyleName("RaceBoard-LeaderboardHeader-Label");
-            headerPanel.add(sailingAnalyticsLabel);
-            headerPanel.setStyleName("RaceBoard-LeaderboardHeader");
-            getContainerElement().appendChild(headerPanel.getElement());
         }
     }
 
@@ -68,13 +55,12 @@ public class SideBySideComponentViewer implements ComponentViewer {
         this.leaderboardContentPanel = leftComponentP.getContentPanel();
         this.rightComponent = rightComponentP;
         this.components = components;
-        leftScrollPanel = new ScrollPanelWithHeader();
+        leftScrollPanel = new ScrollPanel();
         leftScrollPanel.add(leftComponentP.getEntryWidget());
         leftScrollPanel.setTitle(leftComponentP.getEntryWidget().getTitle());
-
         mainPanel = new LayoutPanel();
         mainPanel.setSize("100%", "100%");
-        mainPanel.getElement().getStyle().setMarginTop(-12, Unit.PX); // somehow this is needed to make sure there is no top white border
+        mainPanel.getElement().getStyle().setMarginTop(-12, Unit.PX);
         mainPanel.setStyleName("SideBySideComponentViewer-MainPanel");
         splitLayoutPanel = new TouchSplitLayoutPanelWithBetterDraggers(/* horizontal splitter width */ 3, /*vertical splitter height*/ 25);
         mainPanel.add(splitLayoutPanel);
@@ -97,6 +83,12 @@ public class SideBySideComponentViewer implements ComponentViewer {
         }
     }
     
+    public <SettingsType> void showSettingsDialog(Component<SettingsType> component) {
+        if (component.hasSettings()) {
+            new SettingsDialog<SettingsType>(component, stringMessages).show();
+        }
+    }
+
     public void forceLayout() {
         if (!leftComponent.isVisible() && rightComponent.isVisible()) {
             // the leaderboard is not visible, but the map is
