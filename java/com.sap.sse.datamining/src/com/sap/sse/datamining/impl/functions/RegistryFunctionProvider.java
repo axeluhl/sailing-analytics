@@ -50,6 +50,15 @@ public class RegistryFunctionProvider implements FunctionProvider {
     public RegistryFunctionProvider(Collection<FunctionRegistry> functionRegistries) {
         this.functionRegistries = new HashSet<>(functionRegistries);
     }
+    
+    @Override
+    public Collection<Function<?>> getAllStatistics() {
+        Collection<Function<?>> allStatistics = new HashSet<>();
+        for (FunctionRegistry registry : functionRegistries) {
+            allStatistics.addAll(registry.getStatistics());
+        }
+        return allStatistics;
+    }
 
     @Override
     public Collection<Function<?>> getFunctionsFor(Class<?> sourceType) {

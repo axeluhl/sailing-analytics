@@ -11,6 +11,8 @@ import com.sap.sse.datamining.shared.SSEDataMiningSerializationDummy;
 import com.sap.sse.datamining.shared.dto.FunctionDTO;
 
 public interface DataMiningService extends RemoteService {
+
+    Collection<FunctionDTO> getAllStatistics();
     
     Collection<FunctionDTO> getDimensionsFor(DataTypes dataType);
     

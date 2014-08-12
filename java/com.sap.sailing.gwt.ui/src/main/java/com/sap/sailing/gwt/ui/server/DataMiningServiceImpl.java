@@ -59,6 +59,12 @@ public class DataMiningServiceImpl extends RemoteServiceServlet implements DataM
     private RacingEventService getRacingEventService() {
         return racingEventServiceTracker.getService();
     }
+    
+    @Override
+    public Collection<FunctionDTO> getAllStatistics() {
+        Collection<Function<?>> statistics = getDataMiningServer().getFunctionProvider().getAllStatistics();
+        return functionsAsFunctionDTOs(statistics);
+    }
 
     @Override
     public Collection<FunctionDTO> getDimensionsFor(DataTypes dataType) {
