@@ -450,11 +450,10 @@ img.openColumn {
 }
 
 .TimePanel-ShowExtended-Button {
-	width: 32px;
+	width: 29px;
 	height: 28px;
 	float: left;
 	cursor: pointer;
-	margin-left: 4px;
   	border-top-left-radius: 5px;
   	border-top-right-radius: 5px;
   	border-bottom-left-radius: 5px;
