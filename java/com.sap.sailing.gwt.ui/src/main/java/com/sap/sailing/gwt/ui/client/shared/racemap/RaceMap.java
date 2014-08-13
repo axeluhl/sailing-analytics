@@ -124,6 +124,7 @@ import com.sap.sse.common.filter.FilterSet;
 import com.sap.sse.gwt.client.async.AsyncActionsExecutor;
 import com.sap.sse.gwt.client.player.TimeListener;
 import com.sap.sse.gwt.client.player.Timer;
+import com.sap.sse.gwt.client.player.Timer.PlayModes;
 import com.sap.sse.gwt.client.player.Timer.PlayStates;
 
 public class RaceMap extends AbsolutePanel implements TimeListener, CompetitorSelectionChangeListener, RaceSelectionChangeListener,
@@ -559,6 +560,16 @@ public class RaceMap extends AbsolutePanel implements TimeListener, CompetitorSe
         this.lastRaceTimesInfo = raceTimesInfos.get(selectedRaces.get(0));        
     }
 
+    /**
+     * In {@link PlayModes#Live live mode}, when {@link #loadCompleteLeaderboard(Date) loading the leaderboard contents}, <code>null</code>
+     * is used as time point. The condition for this is encapsulated in this method so others can find out. For example, when a time change
+     * is signaled due to local offset / delay adjustments, no additional call to {@link #loadCompleteLeaderboard(Date)} would be required
+     * as <code>null</code> will be passed in any case, not being affected by local time offsets.
+     */
+    private boolean useNullAsTimePoint() {
+        return timer.getPlayMode() == PlayModes.Live;
+    }
+
     @Override
     public void timeChanged(final Date newTime, final Date oldTime) {
         if (newTime != null && isMapInitialized) {
@@ -582,7 +593,7 @@ public class RaceMap extends AbsolutePanel implements TimeListener, CompetitorSe
                     // next, do the full thing; being the later call, if request throttling kicks in, the later call
                     // supersedes the earlier call which may get dropped then
                     GetRaceMapDataAction getRaceMapDataAction = new GetRaceMapDataAction(sailingService, competitorSelection.getAllCompetitors(), race,
-                            newTime, fromAndToAndOverlap.getA(), fromAndToAndOverlap.getB(), /* extrapolate */ true);
+                            useNullAsTimePoint() ? null : newTime, fromAndToAndOverlap.getA(), fromAndToAndOverlap.getB(), /* extrapolate */ true);
                     asyncActionsExecutor.execute(getRaceMapDataAction, GET_RACE_MAP_DATA_CATEGORY,
                             getRaceMapDataCallback(oldTime, newTime, fromAndToAndOverlap.getC(), competitorsToShow, requestID));
                     
@@ -660,7 +671,7 @@ public class RaceMap extends AbsolutePanel implements TimeListener, CompetitorSe
         final GetRaceMapDataAction result;
         if (!fromTimes.isEmpty()) {
             result = new GetRaceMapDataAction(sailingService, competitorSelection.getAllCompetitors(),
-                race, newTime, fromTimes, toTimes, /* extrapolate */true);
+                race, useNullAsTimePoint() ? null : newTime, fromTimes, toTimes, /* extrapolate */true);
         } else {
             result = null;
         }
