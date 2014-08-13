@@ -88,4 +88,9 @@ public class MultiCompetitorRaceChart extends AbstractCompetitorRaceChart<MultiC
         return stringMessages.competitorCharts();
     }
 
+    @Override
+    public String getDependentCssClassName() {
+        return "multiCompetitorRaceChart";
+    }
+
 }

@@ -33,7 +33,8 @@ public interface CompetitorFilterResources extends ClientBundle {
         String searchButton();
         String settingsButton();
         String filterButton();
-        String search();
+        String competitorFilterContainer();
+        String searchBox();
         String searchInput();
         String filterInactiveButtonBackgroundImage();
         String filterActiveButtonBackgroundImage();

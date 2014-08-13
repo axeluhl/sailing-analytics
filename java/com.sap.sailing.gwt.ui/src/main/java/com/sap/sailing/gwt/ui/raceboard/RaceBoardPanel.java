@@ -7,7 +7,9 @@ import java.util.List;
 import java.util.Map;
 
 import com.google.gwt.dom.client.Style.Unit;
+import com.google.gwt.i18n.client.DateTimeFormat;
 import com.google.gwt.user.client.Command;
+import com.google.gwt.user.client.ui.Anchor;
 import com.google.gwt.user.client.ui.FlowPanel;
 import com.google.gwt.user.client.ui.HasHorizontalAlignment;
 import com.google.gwt.user.client.ui.Label;
@@ -94,7 +96,6 @@ public class RaceBoardPanel extends SimplePanel implements RegattasDisplayer, Ra
     private final LeaderboardPanel leaderboardPanel;
     private WindChart windChart;
     private MultiCompetitorRaceChart competitorChart;
-    private Label raceNameLabel;
     
     /**
      * The component viewer in <code>ONESCREEN</code> view mode. <code>null</code> if in <code>CASCADE</code> view mode
@@ -105,6 +106,9 @@ public class RaceBoardPanel extends SimplePanel implements RegattasDisplayer, Ra
     
     private final RaceTimesInfoProvider raceTimesInfoProvider;
     private RaceMap raceMap;
+    
+    private final FlowPanel raceInformationHeader;
+    private final FlowPanel regattaAndRaceTimeInformationHeader;
     
     /**
      * @param event
@@ -127,7 +131,6 @@ public class RaceBoardPanel extends SimplePanel implements RegattasDisplayer, Ra
         this.errorReporter = errorReporter;
         this.userAgent = userAgent;
         this.timer = timer;
-        this.raceNameLabel = new Label();
         raceSelectionProvider.addRaceSelectionChangeListener(this);
         racesByIdentifier = new HashMap<RaceIdentifier, RaceDTO>();
         selectedRaceIdentifier = raceSelectionProvider.getSelectedRaces().iterator().next();
@@ -136,6 +139,10 @@ public class RaceBoardPanel extends SimplePanel implements RegattasDisplayer, Ra
         FlowPanel mainPanel = new FlowPanel();
         mainPanel.setSize("100%", "100%");
         setWidget(mainPanel);
+        raceInformationHeader = new FlowPanel();
+        raceInformationHeader.setStyleName("RegattaRaceInformation-Header");
+        regattaAndRaceTimeInformationHeader = new FlowPanel();
+        regattaAndRaceTimeInformationHeader.setStyleName("RegattaAndRaceTime-Header");
         timeRangeWithZoomModel = new TimeRangeWithZoomModel();
         componentViewers = new ArrayList<ComponentViewer>();
         competitorSelectionModel = new CompetitorSelectionModel(/* hasMultiSelection */ true);
@@ -149,12 +156,14 @@ public class RaceBoardPanel extends SimplePanel implements RegattasDisplayer, Ra
                         return leaderboardPanel.getLeaderboard();
                     }
                 }, selectedRaceIdentifier);
+        raceMap.getLeftHeaderPanel().add(raceInformationHeader);
+        raceMap.getRightHeaderPanel().add(regattaAndRaceTimeInformationHeader);
+
         leaderboardPanel = createLeaderboardPanel(leaderboardName, leaderboardGroupName, competitorSearchTextBox);
+        leaderboardPanel.getElement().getStyle().setMarginLeft(6, Unit.PX);
+        leaderboardPanel.getElement().getStyle().setMarginTop(4, Unit.PX);
         createOneScreenView(leaderboardName, leaderboardGroupName, event, mainPanel, showMapControls, raceMap); // initializes the raceMap field
-        // these calls make sure that leaderboard and competitor map data are loaded
         leaderboardPanel.addLeaderboardUpdateListener(this);
-        getElement().getStyle().setMarginLeft(12, Unit.PX);
-        getElement().getStyle().setMarginRight(12, Unit.PX);
         // in case the URL configuration contains the name of a competitors filter set we try to activate it
         // FIXME the competitorsFilterSets has now moved to CompetitorSearchTextBox (which should probably be renamed); pass on the parameters to the LeaderboardPanel and see what it does with it
         if (raceboardViewConfiguration.getActiveCompetitorsFilterSetName() != null) {
@@ -200,7 +209,7 @@ public class RaceBoardPanel extends SimplePanel implements RegattasDisplayer, Ra
                 stringMessages, asyncActionsExecutor, errorReporter, /* compactChart */ true);
         windChart.setVisible(false);
         windChart.onRaceSelectionChange(raceSelectionProvider.getSelectedRaces());
-        windChart.getEntryWidget().setTitle(stringMessages.wind());
+        windChart.getEntryWidget().setTitle(stringMessages.windChart());
         components.add(windChart);
         leaderboardPanel.setTitle(stringMessages.leaderboard());
         leaderboardAndMapViewer = new SideBySideComponentViewer(leaderboardPanel, raceMap, components, stringMessages);
@@ -226,11 +235,8 @@ public class RaceBoardPanel extends SimplePanel implements RegattasDisplayer, Ra
         VerticalPanel titlePanel = new VerticalPanel();
         titlePanel.setHorizontalAlignment(HasHorizontalAlignment.ALIGN_CENTER);
         titlePanel.setStyleName("raceBoard-TitlePanel");
-        raceNameLabel.setStyleName("raceBoard-TitlePanel-RaceNameLabel");
-        titlePanel.add(raceNameLabel);
         GlobalNavigationPanel globalNavigationPanel = new GlobalNavigationPanel(stringMessages, true, leaderboardName, leaderboardGroupName, event, "RaceBoard");
         titlePanel.add(globalNavigationPanel);
-        raceMap.add(titlePanel);
     }
  
     @SuppressWarnings("unused")
@@ -349,16 +355,35 @@ public class RaceBoardPanel extends SimplePanel implements RegattasDisplayer, Ra
         String seriesName = raceColumn.getSeriesName();
         if (LeaderboardNameConstants.DEFAULT_SERIES_NAME.equals(seriesName)) {
             seriesName = "";
-        } else {
-            seriesName += " - ";
-        }
+        } 
         String fleetForRaceName = fleet==null?"":fleet.getName();
         if (fleetForRaceName.equals(LeaderboardNameConstants.DEFAULT_FLEET_NAME)) {
             fleetForRaceName = "";
         } else {
-            fleetForRaceName += " ";
+            fleetForRaceName = " - "+fleetForRaceName;
         }
-        raceNameLabel.setText(seriesName + fleetForRaceName + raceColumn.getRaceColumnName());
+        Label raceNameLabel = new Label(stringMessages.race() + " " + raceColumn.getRaceColumnName());
+        raceNameLabel.setStyleName("RaceName-Label");
+        Label raceAdditionalInformationLabel = new Label(seriesName + fleetForRaceName);
+        raceAdditionalInformationLabel.setStyleName("RaceSeriesAndFleet-Label");
+        raceInformationHeader.clear();
+        raceInformationHeader.add(raceNameLabel);
+        raceInformationHeader.add(raceAdditionalInformationLabel);
+        Anchor regattaNameAnchor = new Anchor(raceIdentifier.getRegattaName());
+        regattaNameAnchor.setStyleName("RegattaName-Anchor");
+        Label raceTimeLabel = computeRaceInformation(raceColumn, fleet);
+        raceTimeLabel.setStyleName("RaceTime-Label");
+        regattaAndRaceTimeInformationHeader.clear();
+        regattaAndRaceTimeInformationHeader.add(regattaNameAnchor);
+        regattaAndRaceTimeInformationHeader.add(raceTimeLabel);
+    }
+    
+    private Label computeRaceInformation(RaceColumnDTO raceColumn, FleetDTO fleet) {
+        Label raceInformationLabel = new Label();
+        raceInformationLabel.setStyleName("Race-Time-Label");
+        DateTimeFormat formatter = DateTimeFormat.getFormat("E d/M/y");
+        raceInformationLabel.setText(formatter.format(raceColumn.getStartDate(fleet)));
+        return raceInformationLabel;
     }
 }
 

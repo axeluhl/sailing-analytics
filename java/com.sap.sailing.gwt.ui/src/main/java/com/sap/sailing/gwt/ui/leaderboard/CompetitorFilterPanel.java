@@ -66,6 +66,7 @@ public class CompetitorFilterPanel extends FlowPanel implements KeyUpHandler, Fi
     private final RaceMap raceMap;
     private final RaceIdentifier selectedRaceIdentifier;
     private final Button settingsButton;
+    private final FlowPanel searchBoxPanel;
 
     public CompetitorFilterPanel(final CompetitorSelectionProvider competitorSelectionProvider,
             final StringMessages stringMessages, RaceMap raceMap, LeaderboardFetcher leaderboardFetcher,
@@ -76,7 +77,7 @@ public class CompetitorFilterPanel extends FlowPanel implements KeyUpHandler, Fi
         this.leaderboardFetcher = leaderboardFetcher;
         this.selectedRaceIdentifier = selectedRaceIdentifier;
         this.competitorSelectionProvider = competitorSelectionProvider;
-        this.setStyleName(css.search());
+        this.setStyleName(css.competitorFilterContainer());
         CompetitorsFilterSets loadedCompetitorsFilterSets = loadCompetitorsFilterSets();
         if (loadedCompetitorsFilterSets != null) {
             competitorsFilterSets = loadedCompetitorsFilterSets;
@@ -129,13 +130,16 @@ public class CompetitorFilterPanel extends FlowPanel implements KeyUpHandler, Fi
                 showEditCompetitorsFiltersDialog();
             }
         });
+        searchBoxPanel = new FlowPanel();
+        searchBoxPanel.setStyleName(css.searchBox());
+        searchBoxPanel.add(submitButton);
+        searchBoxPanel.add(searchTextBox);
+        searchBoxPanel.add(clearTextBoxButton);
+        add(searchBoxPanel);
         add(settingsButton);
-        add(submitButton);
-        add(searchTextBox);
-        add(clearTextBoxButton);
         add(advancedSettingsButton);
     }
-
+    
     public CompetitorsFilterSets getCompetitorsFilterSets() {
         return competitorsFilterSets;
     }
