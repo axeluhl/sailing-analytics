@@ -440,36 +440,38 @@ public class WindChart extends AbstractRaceChart implements Component<WindChartS
      *            of overwriting the existing series.
      */
     private void loadData(final Date from, final Date to, final boolean append) {
-        if (selectedRaceIdentifier == null) {
-            clearChart();
-        } else if (needsDataLoading() && from != null && to != null) {
-            setWidget(chart);
-            showLoading("Loading wind data...");
-            GetWindInfoAction getWindInfoAction = new GetWindInfoAction(sailingService, selectedRaceIdentifier,
-                    from, to, settings.getResolutionInMilliseconds(), null, /* onlyUpToNewestEvent==true because we don't want
-                    to overshoot the evidence so far */ true);
-            asyncActionsExecutor.execute(getWindInfoAction, LODA_WIND_CHART_DATA_CATEGORY,
-                    new AsyncCallback<WindInfoForRaceDTO>() {
-                        @Override
-                        public void onSuccess(WindInfoForRaceDTO result) {
-                            if (result != null) {
-                                updateChartSeries(result, append);
-                                updateVisibleSeries();
-                            } else {
-                                if (!append) {
-                                    clearChart(); // no wind known for untracked race
+        if (isVisible()) {
+            if (selectedRaceIdentifier == null) {
+                clearChart();
+            } else if (needsDataLoading() && from != null && to != null) {
+                setWidget(chart);
+                showLoading("Loading wind data...");
+                GetWindInfoAction getWindInfoAction = new GetWindInfoAction(sailingService, selectedRaceIdentifier,
+                        from, to, settings.getResolutionInMilliseconds(), null, /* onlyUpToNewestEvent==true because we don't want
+                        to overshoot the evidence so far */ true);
+                asyncActionsExecutor.execute(getWindInfoAction, LODA_WIND_CHART_DATA_CATEGORY,
+                        new AsyncCallback<WindInfoForRaceDTO>() {
+                            @Override
+                            public void onSuccess(WindInfoForRaceDTO result) {
+                                if (result != null) {
+                                    updateChartSeries(result, append);
+                                    updateVisibleSeries();
+                                } else {
+                                    if (!append) {
+                                        clearChart(); // no wind known for untracked race
+                                    }
                                 }
+                                hideLoading();
                             }
-                            hideLoading();
-                        }
-        
-                        @Override
-                        public void onFailure(Throwable caught) {
-                            errorReporter.reportError(stringMessages.errorFetchingWindInformationForRace() + " "
-                                    + selectedRaceIdentifier + ": " + caught.getMessage(), timer.getPlayMode() == PlayModes.Live);
-                            hideLoading();
-                        }
-                    });
+            
+                            @Override
+                            public void onFailure(Throwable caught) {
+                                errorReporter.reportError(stringMessages.errorFetchingWindInformationForRace() + " "
+                                        + selectedRaceIdentifier + ": " + caught.getMessage(), timer.getPlayMode() == PlayModes.Live);
+                                hideLoading();
+                            }
+                        });
+            }
         }
     }
     
