@@ -84,7 +84,7 @@ public class EventRegattaRacesRace extends UIObject {
         setElement(uiBinder.createAndBindUi(this));
 
         allConditionalElements = new Element[] {raceWinnerDiv, raceLeaderDiv, watchRaceDiv, analyzeRaceDiv, raceNotTrackedDiv,
-                raceFeaturesDiv, legProgressDiv, raceFlagDiv, windStatusDiv, currentLegNo, totalLegsCount };
+                raceFeaturesDiv, legProgressDiv, raceFlagDiv, windStatusDiv };
 
         if(fleet.getColor() != null) {
             fleetColor.getStyle().setBackgroundColor(fleet.getColor().getAsHtml());
@@ -149,14 +149,15 @@ public class EventRegattaRacesRace extends UIObject {
                 break;
             case TRACKED_AND_LIVE:
                 showElement(watchRaceDiv);
-                showElement(legProgressDiv);
-                showElement(currentLegNo);
-                showElement(totalLegsCount);
 
-                raceTime.setInnerText(raceTimeFormat.format(race.startOfRace));
-                currentLegNo.setInnerText(String.valueOf(race.trackedRaceStatistics.currentLegNo));
-                totalLegsCount.setInnerText(String.valueOf(race.trackedRaceStatistics.totalLegsCount));
-
+                if(race.startOfRace != null) {
+                    raceTime.setInnerText(raceTimeFormat.format(race.startOfRace));
+                }
+                if(race.trackedRaceStatistics.hasLegProgressData) {
+                    showElement(legProgressDiv);
+                    currentLegNo.setInnerText(String.valueOf(race.trackedRaceStatistics.currentLegNo));
+                    totalLegsCount.setInnerText(String.valueOf(race.trackedRaceStatistics.totalLegsCount));
+                }
                 if(race.trackedRaceStatistics.hasLeaderData && race.trackedRaceStatistics.leaderOrWinner != null) {
                     showElement(raceLeaderDiv);
                     updateWinnerOrLeader(raceLeader, race.trackedRaceStatistics.leaderOrWinner);
@@ -170,9 +171,10 @@ public class EventRegattaRacesRace extends UIObject {
                     showElement(raceWinnerDiv);
                     updateWinnerOrLeader(raceWinner, race.trackedRaceStatistics.leaderOrWinner);
                 }
+                if(race.startOfRace != null) {
+                    raceTime.setInnerText(raceTimeFormat.format(race.startOfRace));
+                }
                 showElement(raceFeaturesDiv);
-                
-                raceTime.setInnerText(raceTimeFormat.format(race.startOfRace));
                 updateRaceFeatures();
 
                 break;
