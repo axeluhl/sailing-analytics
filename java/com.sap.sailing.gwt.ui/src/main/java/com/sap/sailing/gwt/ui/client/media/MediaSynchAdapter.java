@@ -3,6 +3,10 @@ package com.sap.sailing.gwt.ui.client.media;
 import com.sap.sailing.domain.common.media.MediaTrack;
 
 public interface MediaSynchAdapter {
+    
+    public interface EditFlag {
+        boolean isEditing();
+    }
 
     long getOffset();
 

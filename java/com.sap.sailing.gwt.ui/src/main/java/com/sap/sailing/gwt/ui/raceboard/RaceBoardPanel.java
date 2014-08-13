@@ -36,6 +36,7 @@ import com.sap.sailing.gwt.ui.client.RaceTimesInfoProvider;
 import com.sap.sailing.gwt.ui.client.RegattasDisplayer;
 import com.sap.sailing.gwt.ui.client.SailingServiceAsync;
 import com.sap.sailing.gwt.ui.client.StringMessages;
+import com.sap.sailing.gwt.ui.client.media.MediaComponent;
 import com.sap.sailing.gwt.ui.client.shared.charts.MultiCompetitorRaceChart;
 import com.sap.sailing.gwt.ui.client.shared.charts.WindChart;
 import com.sap.sailing.gwt.ui.client.shared.charts.WindChartSettings;
@@ -70,9 +71,7 @@ import com.sap.sse.gwt.client.useragent.UserAgentDetails;
  */
 public class RaceBoardPanel extends SimplePanel implements RegattasDisplayer, RaceSelectionChangeListener, LeaderboardUpdateListener {
     private final SailingServiceAsync sailingService;
-    @SuppressWarnings("unused")     // TODO media service and user currently unused because the audio/video checkbox button is currently under redesign and will get its own panel and show-button
     private final MediaServiceAsync mediaService;
-    @SuppressWarnings("unused")     // TODO media service and user currently unused because the audio/video checkbox button is currently under redesign and will get its own panel and show-button
     private final UserDTO user;
     private final StringMessages stringMessages;
     private final ErrorReporter errorReporter;
@@ -213,6 +212,8 @@ public class RaceBoardPanel extends SimplePanel implements RegattasDisplayer, Ra
         windChart.onRaceSelectionChange(raceSelectionProvider.getSelectedRaces());
         windChart.getEntryWidget().setTitle(stringMessages.windChart());
         components.add(windChart);
+        MediaComponent mediaComponent = createMediaComponent();
+        components.add(mediaComponent);
         leaderboardPanel.setTitle(stringMessages.leaderboard());
         leaderboardAndMapViewer = new SideBySideComponentViewer(leaderboardPanel, raceMap, components, stringMessages);
         componentViewers.add(leaderboardAndMapViewer);
@@ -228,6 +229,15 @@ public class RaceBoardPanel extends SimplePanel implements RegattasDisplayer, Ra
             leaderboardPanel.setVisible(true);
             leaderboardPanel.setVisible(false);
         }
+    }
+    
+    private MediaComponent createMediaComponent() {
+        boolean autoSelectMedia = true;//getConfiguration().isAutoSelectMedia();
+        MediaComponent mediaComponent = new MediaComponent(selectedRaceIdentifier, raceTimesInfoProvider, timer, mediaService, stringMessages, errorReporter, userAgent, this.user, autoSelectMedia);
+        timer.addPlayStateListener(mediaComponent);
+        timer.addTimeListener(mediaComponent);
+        mediaService.getMediaTracksForRace(selectedRaceIdentifier, mediaComponent.getMediaLibraryCallback());
+        return mediaComponent;
     }
     
     /**
