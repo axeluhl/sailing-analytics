@@ -321,8 +321,9 @@ img.openColumn {
 }
 
 .playPauseButtonPause {
-	background: url(images/images/viewicons/@1x/img/SAP_RV_Pause_INACTIVE.png) 0 0 no-repeat;
+	background: url(images/viewicons/@2x/img/SAP_RV_Pause_INACTIVE.png) 2px 0 no-repeat;
 	outline: 0;
+	background-size: contain;
 }
 
 .playPauseButtonPause:hover {
