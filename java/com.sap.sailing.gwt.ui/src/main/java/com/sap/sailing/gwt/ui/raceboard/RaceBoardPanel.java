@@ -109,6 +109,7 @@ public class RaceBoardPanel extends SimplePanel implements RegattasDisplayer, Ra
     
     private final FlowPanel raceInformationHeader;
     private final FlowPanel regattaAndRaceTimeInformationHeader;
+    private boolean currentRaceHasBeenSelectedOnce;
     
     /**
      * @param event
@@ -131,6 +132,7 @@ public class RaceBoardPanel extends SimplePanel implements RegattasDisplayer, Ra
         this.errorReporter = errorReporter;
         this.userAgent = userAgent;
         this.timer = timer;
+        this.currentRaceHasBeenSelectedOnce = false;
         raceSelectionProvider.addRaceSelectionChangeListener(this);
         racesByIdentifier = new HashMap<RaceIdentifier, RaceDTO>();
         selectedRaceIdentifier = raceSelectionProvider.getSelectedRaces().iterator().next();
@@ -351,31 +353,34 @@ public class RaceBoardPanel extends SimplePanel implements RegattasDisplayer, Ra
 
     @Override
     public void currentRaceSelected(RaceIdentifier raceIdentifier, RaceColumnDTO raceColumn) {
-        FleetDTO fleet = raceColumn.getFleet(raceIdentifier);
-        String seriesName = raceColumn.getSeriesName();
-        if (LeaderboardNameConstants.DEFAULT_SERIES_NAME.equals(seriesName)) {
-            seriesName = "";
-        } 
-        String fleetForRaceName = fleet==null?"":fleet.getName();
-        if (fleetForRaceName.equals(LeaderboardNameConstants.DEFAULT_FLEET_NAME)) {
-            fleetForRaceName = "";
-        } else {
-            fleetForRaceName = " - "+fleetForRaceName;
+        if (!currentRaceHasBeenSelectedOnce) {
+            FleetDTO fleet = raceColumn.getFleet(raceIdentifier);
+            String seriesName = raceColumn.getSeriesName();
+            if (LeaderboardNameConstants.DEFAULT_SERIES_NAME.equals(seriesName)) {
+                seriesName = "";
+            } 
+            String fleetForRaceName = fleet==null?"":fleet.getName();
+            if (fleetForRaceName.equals(LeaderboardNameConstants.DEFAULT_FLEET_NAME)) {
+                fleetForRaceName = "";
+            } else {
+                fleetForRaceName = " - "+fleetForRaceName;
+            }
+            Label raceNameLabel = new Label(stringMessages.race() + " " + raceColumn.getRaceColumnName());
+            raceNameLabel.setStyleName("RaceName-Label");
+            Label raceAdditionalInformationLabel = new Label(seriesName + fleetForRaceName);
+            raceAdditionalInformationLabel.setStyleName("RaceSeriesAndFleet-Label");
+            raceInformationHeader.clear();
+            raceInformationHeader.add(raceNameLabel);
+            raceInformationHeader.add(raceAdditionalInformationLabel);
+            Anchor regattaNameAnchor = new Anchor(raceIdentifier.getRegattaName());
+            regattaNameAnchor.setStyleName("RegattaName-Anchor");
+            Label raceTimeLabel = computeRaceInformation(raceColumn, fleet);
+            raceTimeLabel.setStyleName("RaceTime-Label");
+            regattaAndRaceTimeInformationHeader.clear();
+            regattaAndRaceTimeInformationHeader.add(regattaNameAnchor);
+            regattaAndRaceTimeInformationHeader.add(raceTimeLabel);
+            currentRaceHasBeenSelectedOnce = true;
         }
-        Label raceNameLabel = new Label(stringMessages.race() + " " + raceColumn.getRaceColumnName());
-        raceNameLabel.setStyleName("RaceName-Label");
-        Label raceAdditionalInformationLabel = new Label(seriesName + fleetForRaceName);
-        raceAdditionalInformationLabel.setStyleName("RaceSeriesAndFleet-Label");
-        raceInformationHeader.clear();
-        raceInformationHeader.add(raceNameLabel);
-        raceInformationHeader.add(raceAdditionalInformationLabel);
-        Anchor regattaNameAnchor = new Anchor(raceIdentifier.getRegattaName());
-        regattaNameAnchor.setStyleName("RegattaName-Anchor");
-        Label raceTimeLabel = computeRaceInformation(raceColumn, fleet);
-        raceTimeLabel.setStyleName("RaceTime-Label");
-        regattaAndRaceTimeInformationHeader.clear();
-        regattaAndRaceTimeInformationHeader.add(regattaNameAnchor);
-        regattaAndRaceTimeInformationHeader.add(raceTimeLabel);
     }
     
     private Label computeRaceInformation(RaceColumnDTO raceColumn, FleetDTO fleet) {
