@@ -7,12 +7,15 @@ import com.google.gwt.dom.client.Document;
 import com.google.gwt.dom.client.Style.Unit;
 import com.google.gwt.event.dom.client.ClickEvent;
 import com.google.gwt.event.dom.client.ClickHandler;
+import com.google.gwt.event.logical.shared.CloseEvent;
+import com.google.gwt.event.logical.shared.CloseHandler;
 import com.google.gwt.user.client.Window;
 import com.google.gwt.user.client.ui.AbsolutePanel;
 import com.google.gwt.user.client.ui.Button;
 import com.google.gwt.user.client.ui.DockLayoutPanel.Direction;
 import com.google.gwt.user.client.ui.LayoutPanel;
 import com.google.gwt.user.client.ui.Panel;
+import com.google.gwt.user.client.ui.PopupPanel;
 import com.google.gwt.user.client.ui.RequiresResize;
 import com.google.gwt.user.client.ui.ScrollPanel;
 import com.google.gwt.user.client.ui.Widget;
@@ -95,14 +98,20 @@ public class SideBySideComponentViewer implements ComponentViewer {
         closeButton.setStyleName("VideoPopup-Close-Button");
         final DialogBoxExt dialog = new DialogBoxExt(closeButton, stringMessages.videoComponentShortName(), /*modal*/false);
         dialog.add(mediaComponent.getEntryWidget());
-
+        dialog.addCloseHandler(new CloseHandler<PopupPanel>() {
+            @Override
+            public void onClose(CloseEvent<PopupPanel> event) {
+                    mediaComponent.setVisible(false);
+                    videoControlButton.setText(stringMessages.showVideoPopup());
+            }
+        });
         videoControlButton.addClickHandler(new ClickHandler() {
             @Override
             public void onClick(ClickEvent event) {
                 if (!dialog.isShowing()) {
                     if (mediaComponent.isPotentiallyPlayable(mediaComponent.getDefaultVideo())) {
                         mediaComponent.setVisible(true);
-                        dialog.setPopupPosition(10, Document.get().getClientHeight()-400);
+                        dialog.setPopupPosition(10, Document.get().getClientHeight()-370);
                         dialog.show();
                         videoControlButton.setText(stringMessages.hideVideoPopup());
                     } else {
