@@ -1077,4 +1077,6 @@ public interface StringMessages extends Messages {
     String raceIsInLiveTimePanelMode();
     String backToLiveTimePanelMode();
     String windChart();
+    String showVideoPopup();
+    String hideVideoPopup();
 }

@@ -42,6 +42,7 @@ import com.google.gwt.user.client.ui.RequiresResize;
 import com.google.gwt.user.client.ui.Widget;
 import com.google.gwt.user.client.ui.WidgetCollection;
 import com.sap.sailing.gwt.ui.client.shared.components.Component;
+import com.sap.sse.common.Util.Pair;
 import com.sap.sse.gwt.client.player.TimeListener;
 
 /**
@@ -500,7 +501,7 @@ public class TouchSplitLayoutPanelWithBetterDraggers extends DockLayoutPanel {
         }
     }
 
-    public void lastComponentHasBeenAdded(final SideBySideComponentViewer cm, AbsolutePanel panelForAdditionalButtons) {
+    public void lastComponentHasBeenAdded(final SideBySideComponentViewer cm, AbsolutePanel panelForAdditionalButtons, List<Pair<Button, Component<?>>> additionalVerticalButtons) {
         WidgetCollection splitterChildren = super.getChildren();
         HSplitter lastHorizontalSplitter = null;
         VSplitter lastVerticalSplitter = null;
@@ -518,27 +519,35 @@ public class TouchSplitLayoutPanelWithBetterDraggers extends DockLayoutPanel {
             }
         }
         if (lastVerticalSplitter != null) {
-            Panel panel = addSplitterToggleButtons(allVerticalSplitters,
+            Panel panel = createToggleButtonPanel(allVerticalSplitters,
                     "gwt-SplitLayoutPanel-NorthSouthToggleButton-Panel", "gwt-SplitLayoutPanel-NorthSouthToggleButton",
-                    cm);
+                    cm, additionalVerticalButtons);
             lastVerticalSplitter.addToogleButtons(panel);
             lastVerticalSplitter.setVisible(true);
             lastVerticalSplitter.setDraggerVisible(false);
         }
         ensureVerticalToggleButtonPosition();
         if (lastHorizontalSplitter != null) {
-            Panel horizontalButtonsPanel = addSplitterToggleButtons(allHorizontalSplitters,
-                    "gwt-SplitLayoutPanel-EastToggleButton-Panel", "gwt-SplitLayoutPanel-EastToggleButton", cm);
+            Panel horizontalButtonsPanel = createToggleButtonPanel(allHorizontalSplitters,
+                    "gwt-SplitLayoutPanel-EastToggleButton-Panel", "gwt-SplitLayoutPanel-EastToggleButton", cm, null);
             panelForAdditionalButtons.add(horizontalButtonsPanel);
             lastHorizontalSplitter.setVisible(false);
             lastHorizontalSplitter.setDraggerVisible(false);
         }
     }
 
-    private Panel addSplitterToggleButtons(List<Splitter> splitters, String panelStyleName, String buttonStyleName,
-            final SideBySideComponentViewer componentViewer) {
+    private Panel createToggleButtonPanel(List<Splitter> splitters, String panelStyleName, String buttonStyleName,
+            final SideBySideComponentViewer componentViewer, List<Pair<Button, Component<?>>> additionalButtons) {
         FlowPanel buttonFlowPanel = new FlowPanel();
         buttonFlowPanel.setStyleName(panelStyleName);
+        if (additionalButtons != null) {
+            for (Pair<Button, Component<?>> buttonAndComponentPair : additionalButtons) {
+                Button button = buttonAndComponentPair.getA();
+                button.setStyleName(buttonStyleName);
+                button.addStyleDependentName("Closed-"+buttonAndComponentPair.getB().getDependentCssClassName());
+                buttonFlowPanel.add(button);
+            }
+        }
         for (final Splitter splitter : splitters) {
             final Component<?> associatedComponent = splitter.getAssociatedComponent();
             final Button splitterTogglerButton = splitter.getToggleButton();

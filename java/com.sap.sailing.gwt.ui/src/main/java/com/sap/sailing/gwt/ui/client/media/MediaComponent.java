@@ -44,6 +44,7 @@ public class MediaComponent implements Component<Void>, PlayStateListener, TimeL
     private final ErrorReporter errorReporter;
     private final UserAgentDetails userAgent;
     private final UserDTO user;
+    private final MediaServiceAsync mediaService;
     private final boolean autoSelectMedia;
 
     private Date currentRaceTime;
@@ -61,11 +62,16 @@ public class MediaComponent implements Component<Void>, PlayStateListener, TimeL
         this.userAgent = userAgent;
         this.user = user;
         this.autoSelectMedia = autoSelectMedia;
+        this.mediaService = mediaService;
     }
 
-    private boolean isPotentiallyPlayable(MediaTrack mediaTrack) {
-        return MediaTrack.Status.REACHABLE.equals(mediaTrack.status)
+    public boolean isPotentiallyPlayable(MediaTrack mediaTrack) {
+        boolean result = false;
+        if (mediaTrack != null) {
+            result = MediaTrack.Status.REACHABLE.equals(mediaTrack.status)
                 || MediaTrack.Status.UNDEFINED.equals(mediaTrack.status);
+        }
+        return result;
     }
 
     private void setStatus(final MediaTrack mediaTrack) {
@@ -119,7 +125,7 @@ public class MediaComponent implements Component<Void>, PlayStateListener, TimeL
         videoChanged(defaultVideo);
     }
 
-    private MediaTrack getDefaultVideo() {
+    public MediaTrack getDefaultVideo() {
         for (MediaTrack mediaTrack : mediaTracks) {
             if (MediaType.video.equals(mediaTrack.mimeType.mediaType) && isPotentiallyPlayable(mediaTrack)) {
                 return mediaTrack;
@@ -297,6 +303,14 @@ public class MediaComponent implements Component<Void>, PlayStateListener, TimeL
     @Override
     public void setVisible(boolean visibility) {
         rootPanel.setVisible(visibility);
+        if (visibility) {
+            playDefault();
+        }
+    }
+
+    @Override
+    public String getDependentCssClassName() {
+        return "media";
     }
 
 }

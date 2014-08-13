@@ -1,9 +1,15 @@
 package com.sap.sailing.gwt.ui.raceboard;
 
+import java.util.ArrayList;
 import java.util.List;
 
+import com.google.gwt.dom.client.Document;
 import com.google.gwt.dom.client.Style.Unit;
+import com.google.gwt.event.dom.client.ClickEvent;
+import com.google.gwt.event.dom.client.ClickHandler;
+import com.google.gwt.user.client.Window;
 import com.google.gwt.user.client.ui.AbsolutePanel;
+import com.google.gwt.user.client.ui.Button;
 import com.google.gwt.user.client.ui.DockLayoutPanel.Direction;
 import com.google.gwt.user.client.ui.LayoutPanel;
 import com.google.gwt.user.client.ui.Panel;
@@ -12,10 +18,13 @@ import com.google.gwt.user.client.ui.ScrollPanel;
 import com.google.gwt.user.client.ui.Widget;
 import com.google.gwt.user.client.ui.WidgetCollection;
 import com.sap.sailing.gwt.ui.client.StringMessages;
+import com.sap.sailing.gwt.ui.client.media.MediaComponent;
 import com.sap.sailing.gwt.ui.client.shared.components.Component;
 import com.sap.sailing.gwt.ui.client.shared.components.ComponentViewer;
 import com.sap.sailing.gwt.ui.client.shared.components.SettingsDialog;
+import com.sap.sailing.gwt.ui.leaderboard.DialogBoxExt;
 import com.sap.sailing.gwt.ui.leaderboard.LeaderboardPanel;
+import com.sap.sse.common.Util.Pair;
 
 /**
  *  Component Viewer that uses a {@link TouchSplitLayoutPanelWithBetterDraggers}
@@ -49,7 +58,7 @@ public class SideBySideComponentViewer implements ComponentViewer {
     private int savedSplitPosition = -1;
     private boolean layoutForLeftComponentForcedOnce = false;
     
-    public SideBySideComponentViewer(final LeaderboardPanel leftComponentP, final Component<?> rightComponentP, List<Component<?>> components, final StringMessages stringMessages) {
+    public SideBySideComponentViewer(final LeaderboardPanel leftComponentP, final Component<?> rightComponentP, final MediaComponent mediaComponent, List<Component<?>> components, final StringMessages stringMessages) {
         this.stringMessages = stringMessages;
         this.leftComponent = leftComponentP;
         this.leaderboardContentPanel = leftComponentP.getContentPanel();
@@ -74,7 +83,39 @@ public class SideBySideComponentViewer implements ComponentViewer {
         panelForMapAndHorizontalToggleButtons.add(rightComponent.getEntryWidget());
         
         splitLayoutPanel.insert(panelForMapAndHorizontalToggleButtons, rightComponent, Direction.CENTER, 0, null);
-        splitLayoutPanel.lastComponentHasBeenAdded(this, panelForMapAndHorizontalToggleButtons);
+        
+        List<Pair<Button, Component<?>>> additionalVerticalButtons = new ArrayList<Pair<Button,Component<?>>>();
+        additionalVerticalButtons.add(new Pair<Button, Component<?>>(createVideoButton(mediaComponent), mediaComponent));
+        splitLayoutPanel.lastComponentHasBeenAdded(this, panelForMapAndHorizontalToggleButtons, additionalVerticalButtons);
+    }
+    
+    private Button createVideoButton(final MediaComponent mediaComponent) {
+        final Button videoControlButton = new Button(stringMessages.showVideoPopup());
+        Button closeButton = new Button();
+        closeButton.setStyleName("VideoPopup-Close-Button");
+        final DialogBoxExt dialog = new DialogBoxExt(closeButton, stringMessages.videoComponentShortName(), /*modal*/false);
+        dialog.add(mediaComponent.getEntryWidget());
+
+        videoControlButton.addClickHandler(new ClickHandler() {
+            @Override
+            public void onClick(ClickEvent event) {
+                if (!dialog.isShowing()) {
+                    if (mediaComponent.isPotentiallyPlayable(mediaComponent.getDefaultVideo())) {
+                        mediaComponent.setVisible(true);
+                        dialog.setPopupPosition(10, Document.get().getClientHeight()-400);
+                        dialog.show();
+                        videoControlButton.setText(stringMessages.hideVideoPopup());
+                    } else {
+                        Window.alert("This race has no default video associated.");
+                    }
+                } else {
+                    mediaComponent.setVisible(false);
+                    dialog.hide();
+                    videoControlButton.setText(stringMessages.showVideoPopup());
+                }
+            }
+        });
+        return videoControlButton;
     }
     
     private void initializeComponents() {

@@ -25,14 +25,14 @@ public class DialogBoxExt extends DialogBox {
      * You have to provide a widget here. If click on the widget the dialog box will be closed.
      * @param closeDialogBox
      */
-    public DialogBoxExt(Widget closeDialogBox) {
-        super();
+    public DialogBoxExt(Widget closeDialogBox, String title, boolean modal) {
+        super(/*autohide*/false, /*modal*/modal);
         assert closeDialogBox != null;
         captionPanel = new HorizontalPanel();
         closeWidget = closeDialogBox;
         closeWidget.getElement().addClassName("chartCloseButton");
         // an empty header could cause a problem!
-        setHTML("&nbsp;");
+        setHTML(title);
     }
 
     @Override
