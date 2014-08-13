@@ -9,12 +9,14 @@ import com.google.gwt.event.shared.EventBus;
 import com.google.gwt.user.client.Window;
 import com.google.gwt.user.client.rpc.AsyncCallback;
 import com.google.gwt.user.client.ui.AcceptsOneWidget;
+import com.sap.sailing.gwt.home.client.shared.placeholder.Placeholder;
 import com.sap.sailing.gwt.ui.regattaoverview.RegattaRaceStatesSettings;
 import com.sap.sailing.gwt.ui.shared.EventDTO;
 import com.sap.sailing.gwt.ui.shared.LeaderboardGroupDTO;
 import com.sap.sailing.gwt.ui.shared.RaceGroupDTO;
 import com.sap.sailing.gwt.ui.shared.RegattaOverviewEntryDTO;
 import com.sap.sse.gwt.client.async.MarkedAsyncCallback;
+import com.sap.sse.gwt.client.mvp.ErrorView;
 import com.sap.sse.gwt.client.player.TimeListener;
 import com.sap.sse.gwt.client.player.Timer;
 import com.sap.sse.gwt.client.player.Timer.PlayModes;
@@ -50,6 +52,8 @@ public class EventActivity extends AbstractActivity {
 
     @Override
     public void start(final AcceptsOneWidget panel, final EventBus eventBus) {
+        panel.setWidget(new Placeholder());
+
         final long clientTimeWhenRequestWasSent = System.currentTimeMillis();
         UUID eventUUID = UUID.fromString(eventPlace.getEventUuidAsString());
         clientFactory.getSailingService().getEventById(eventUUID, true, new AsyncCallback<EventDTO>() {
@@ -75,7 +79,7 @@ public class EventActivity extends AbstractActivity {
                         
                         @Override
                         public void onFailure(Throwable caught) {
-                            Window.alert("Shit happens at getRegattaStructureForEvent()");
+                            createErrorView("Error while loading the regatta structure with service getRegattaStructureOfEvent()", caught, panel);
                         }
                     });
                 } else {
@@ -85,11 +89,16 @@ public class EventActivity extends AbstractActivity {
 
             @Override
             public void onFailure(Throwable caught) {
-                Window.alert("Shit happens at getRegattaStructureForEvent()");
+                createErrorView("Error while loading the event with service getEventById()", caught, panel);
             }
         }); 
     }
 
+    private void createErrorView(String errorMessage, Throwable errorReason, AcceptsOneWidget panel) {
+        ErrorView view = clientFactory.createErrorView(errorMessage, errorReason);
+        panel.setWidget(view.asWidget());
+    }
+    
     private void createEventView(EventDTO event, List<RaceGroupDTO> raceGroups, AcceptsOneWidget panel) {
         view = clientFactory.createEventView(event, raceGroups, eventPlace.getLeaderboardIdAsNameString(), timerForClientServerOffset);
         panel.setWidget(view.asWidget());
@@ -111,7 +120,7 @@ public class EventActivity extends AbstractActivity {
                         new AsyncCallback<List<RegattaOverviewEntryDTO>>() {
                             @Override
                             public void onFailure(Throwable cause) {
-                                Window.alert("Shit happens at getRaceStateEntriesForRaceGroup()");
+                                Window.setStatus("Error while loading the race states with service getRaceStateEntriesForRaceGroup()");
                             }
                 
                             @Override
