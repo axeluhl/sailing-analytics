@@ -28,6 +28,7 @@ import com.google.gwt.maps.client.MapWidget;
 import com.google.gwt.maps.client.base.LatLng;
 import com.google.gwt.maps.client.base.LatLngBounds;
 import com.google.gwt.maps.client.controls.ControlPosition;
+import com.google.gwt.maps.client.controls.MapTypeControlOptions;
 import com.google.gwt.maps.client.controls.MapTypeStyle;
 import com.google.gwt.maps.client.controls.PanControlOptions;
 import com.google.gwt.maps.client.controls.ZoomControlOptions;
@@ -355,7 +356,7 @@ public class RaceMap extends AbsolutePanel implements TimeListener, CompetitorSe
           public void run() {
               MapOptions mapOptions = MapOptions.newInstance();
               mapOptions.setScrollWheel(true);
-              mapOptions.setMapTypeControl(!showMapControls); //FIXME
+              mapOptions.setMapTypeControl(showMapControls);
               mapOptions.setPanControl(showMapControls);
               mapOptions.setZoomControl(showMapControls);
               mapOptions.setScaleControl(true);
@@ -371,6 +372,10 @@ public class RaceMap extends AbsolutePanel implements TimeListener, CompetitorSe
               // set water color
               mapTypeStyles[3] = GoogleMapStyleHelper.createColorStyle(MapTypeStyleFeatureType.WATER, new RGBColor(0, 136, 255), -35, -34);
               
+              MapTypeControlOptions mapTypeControlOptions = MapTypeControlOptions.newInstance();
+              mapTypeControlOptions.setPosition(ControlPosition.BOTTOM_CENTER);
+              mapOptions.setMapTypeControlOptions(mapTypeControlOptions);
+
               mapOptions.setMapTypeStyles(mapTypeStyles);
               // no need to try to position the scale control; it always ends up at the right bottom corner
               mapOptions.setStreetViewControl(false);
@@ -467,6 +472,16 @@ public class RaceMap extends AbsolutePanel implements TimeListener, CompetitorSe
         LoadApi.go(onLoad, loadLibraries, sensor, "key="+GoogleMapAPIKey.V3_APIKey); 
     }
     
+    /**
+     * Creates a header panel where additional information can be displayed by using 
+     * {@link #getLeftHeaderPanel()} or {@link #getRightHeaderPanel()}. 
+     * 
+     * This panel is transparent and configured in such a way that it moves other controls
+     * down by its height. To achieve the goal of not having added widgets transparent
+     * this widget consists of two parts: First one is the transparent panel and the
+     * second one is the panel for the controls. The controls then need to moved onto
+     * the panel by using CSS.
+     */
     private void createHeaderPanel(MapWidget map) {
         // we need a panel that does not have any transparency to have the
         // labels shown in the right color. This panel also needs to have
