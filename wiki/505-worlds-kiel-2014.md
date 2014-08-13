@@ -4,6 +4,10 @@
 
 We run two servers for the event, A and B, for fast and available switching. The DB they use is called 505WORLDS2014, and so is the replication channel. The git branch we use to merge the features we want to deploy to the event servers is called `505worlds2014` and the git tag used to build a release for it is called `505worlds2014-release`. See http://hudson.sapsailing.com/job/SAPSailingAnalytics-505worlds2014/ and http://hudson.sapsailing.com/job/SAPSailingAnalytics-505worlds2014-release/, respectively, for their Hudson jobs.
 
+Regatta Overview: http://505worlds2014ro.sapsailing.com
+
+Event Page (newhome): http://505worlds2014.sapsailing.com/gwt/Home.html#EventPlace:eventId=94e1e240-8a3d-466b-9f39-419f311eaace
+
 ### A server
 
 Admin Console at http://ec2-54-77-58-65.eu-west-1.compute.amazonaws.com:8888/gwt/AdminConsole.html
@@ -15,6 +19,10 @@ Internal IP: 172.31.30.45
 Admin Console at http://ec2-54-77-33-52.eu-west-1.compute.amazonaws.com:8888/gwt/AdminConsole.html
 External IP: 54.77.33.52
 Internal IP: 172.31.31.62
+
+## TracTrac URL
+
+http://secondary.traclive.dk/events/event_20140813_Worlds/jsonservice.php
 
 ### Touch Computer (Lenovo) Setup 
 
