@@ -102,6 +102,7 @@ public class WindStreamletsRaceboardOverlay extends MovingCanvasOverlay {
             setCanvasSettings();
             this.swarm = new Swarm(this, map, timer, windField, new StreamletParameters());
         }
+        initCanvasOrigin();
         this.swarm.start(animationIntervalMillis);
     }
 
