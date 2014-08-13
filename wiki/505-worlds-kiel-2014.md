@@ -6,6 +6,8 @@ We run two servers for the event, A and B, for fast and available switching. The
 
 Regatta Overview: http://505worlds2014ro.sapsailing.com
 
+Manage2Sail Event URL: http://manage2sail.com/api/public/links/event/d70bee3e-9f65-46f4-96a1-9fd467712ce0?accesstoken=bDAv8CwsTM94ujZ&mediaType=json
+
 Event Page (newhome): http://505worlds2014.sapsailing.com/gwt/Home.html#EventPlace:eventId=94e1e240-8a3d-466b-9f39-419f311eaace
 
 ### A server
