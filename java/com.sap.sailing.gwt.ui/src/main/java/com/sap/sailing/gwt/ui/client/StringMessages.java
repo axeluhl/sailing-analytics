@@ -1066,6 +1066,7 @@ public interface StringMessages extends Messages {
     String currentOrAverageSpeedOverGroundInKnotsTooltip();
     String currentOrAverageSpeedOverGroundInKnots();
     String scoringSchemeHighPointFirstGetsTenOrEight();
+    String videoComponentShortName();
     String competitorSearchFilter();
     String searchCompetitorsBySailNumberOrName();
     String goToEventOverview();
@@ -1076,4 +1077,6 @@ public interface StringMessages extends Messages {
     String raceIsInLiveTimePanelMode();
     String backToLiveTimePanelMode();
     String windChart();
+    String showVideoPopup();
+    String hideVideoPopup();
 }

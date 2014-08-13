@@ -11,11 +11,9 @@ import com.google.gwt.i18n.client.DateTimeFormat;
 import com.google.gwt.user.client.Command;
 import com.google.gwt.user.client.ui.Anchor;
 import com.google.gwt.user.client.ui.FlowPanel;
-import com.google.gwt.user.client.ui.HasHorizontalAlignment;
 import com.google.gwt.user.client.ui.Label;
 import com.google.gwt.user.client.ui.MenuBar;
 import com.google.gwt.user.client.ui.SimplePanel;
-import com.google.gwt.user.client.ui.VerticalPanel;
 import com.sap.sailing.domain.common.LeaderboardNameConstants;
 import com.sap.sailing.domain.common.RaceIdentifier;
 import com.sap.sailing.domain.common.RegattaAndRaceIdentifier;
@@ -36,6 +34,7 @@ import com.sap.sailing.gwt.ui.client.RaceTimesInfoProvider;
 import com.sap.sailing.gwt.ui.client.RegattasDisplayer;
 import com.sap.sailing.gwt.ui.client.SailingServiceAsync;
 import com.sap.sailing.gwt.ui.client.StringMessages;
+import com.sap.sailing.gwt.ui.client.media.MediaComponent;
 import com.sap.sailing.gwt.ui.client.shared.charts.MultiCompetitorRaceChart;
 import com.sap.sailing.gwt.ui.client.shared.charts.WindChart;
 import com.sap.sailing.gwt.ui.client.shared.charts.WindChartSettings;
@@ -70,9 +69,7 @@ import com.sap.sse.gwt.client.useragent.UserAgentDetails;
  */
 public class RaceBoardPanel extends SimplePanel implements RegattasDisplayer, RaceSelectionChangeListener, LeaderboardUpdateListener {
     private final SailingServiceAsync sailingService;
-    @SuppressWarnings("unused")     // TODO media service and user currently unused because the audio/video checkbox button is currently under redesign and will get its own panel and show-button
     private final MediaServiceAsync mediaService;
-    @SuppressWarnings("unused")     // TODO media service and user currently unused because the audio/video checkbox button is currently under redesign and will get its own panel and show-button
     private final UserDTO user;
     private final StringMessages stringMessages;
     private final ErrorReporter errorReporter;
@@ -213,8 +210,9 @@ public class RaceBoardPanel extends SimplePanel implements RegattasDisplayer, Ra
         windChart.onRaceSelectionChange(raceSelectionProvider.getSelectedRaces());
         windChart.getEntryWidget().setTitle(stringMessages.windChart());
         components.add(windChart);
+        MediaComponent mediaComponent = createMediaComponent();
         leaderboardPanel.setTitle(stringMessages.leaderboard());
-        leaderboardAndMapViewer = new SideBySideComponentViewer(leaderboardPanel, raceMap, components, stringMessages);
+        leaderboardAndMapViewer = new SideBySideComponentViewer(leaderboardPanel, raceMap, mediaComponent, components, stringMessages);
         componentViewers.add(leaderboardAndMapViewer);
         for (ComponentViewer componentViewer : componentViewers) {
             mainPanel.add(componentViewer.getViewerWidget());
@@ -222,7 +220,6 @@ public class RaceBoardPanel extends SimplePanel implements RegattasDisplayer, Ra
         setLeaderboardVisible(getConfiguration().isShowLeaderboard());
         setWindChartVisible(getConfiguration().isShowWindChart());
         setCompetitorChartVisible(getConfiguration().isShowCompetitorsChart());
-        createGeneralInformation(raceMap, leaderboardName, leaderboardGroupName, event);
         // make sure to load leaderboard data for filtering to work
         if (!getConfiguration().isShowLeaderboard()) {
             leaderboardPanel.setVisible(true);
@@ -230,17 +227,16 @@ public class RaceBoardPanel extends SimplePanel implements RegattasDisplayer, Ra
         }
     }
     
-    /**
-     * @param event an optional event; may be <code>null</code>.
-     */
-    private void createGeneralInformation(RaceMap raceMap, String leaderboardName, String leaderboardGroupName, EventDTO event) {
-        VerticalPanel titlePanel = new VerticalPanel();
-        titlePanel.setHorizontalAlignment(HasHorizontalAlignment.ALIGN_CENTER);
-        titlePanel.setStyleName("raceBoard-TitlePanel");
-        GlobalNavigationPanel globalNavigationPanel = new GlobalNavigationPanel(stringMessages, true, leaderboardName, leaderboardGroupName, event, "RaceBoard");
-        titlePanel.add(globalNavigationPanel);
+    private MediaComponent createMediaComponent() {
+        boolean autoSelectMedia = false; // do not autoplay media
+        MediaComponent mediaComponent = new MediaComponent(selectedRaceIdentifier, raceTimesInfoProvider, timer, mediaService, stringMessages, errorReporter, userAgent, this.user, autoSelectMedia);
+        timer.addPlayStateListener(mediaComponent);
+        timer.addTimeListener(mediaComponent);
+        mediaComponent.setVisible(false);
+        mediaService.getMediaTracksForRace(selectedRaceIdentifier, mediaComponent.getMediaLibraryCallback()); // load media tracks
+        return mediaComponent;
     }
- 
+    
     @SuppressWarnings("unused")
     private <SettingsType> void addSettingsMenuItem(MenuBar settingsMenu, final Component<SettingsType> component) {
         if (component.hasSettings()) {

@@ -10,8 +10,9 @@ import com.google.gwt.user.client.ui.Widget;
 import com.sap.sailing.domain.common.media.MediaTrack;
 import com.sap.sailing.gwt.ui.client.ErrorReporter;
 import com.sap.sailing.gwt.ui.client.MediaServiceAsync;
+import com.sap.sailing.gwt.ui.client.media.MediaSynchAdapter.EditFlag;
 
-public class MediaSynchControl {
+public class MediaSynchControl implements EditFlag {
 
     private static final int FAST = 1000;
     private static final int SLOW = 100;
@@ -208,6 +209,7 @@ public class MediaSynchControl {
         return mainPanel;
     }
 
+    @Override
     public boolean isEditing() {
         return isEditing;
     }

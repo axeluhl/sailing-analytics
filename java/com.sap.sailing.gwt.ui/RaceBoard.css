@@ -549,6 +549,20 @@ img.openColumn {
 	background-position: 4% 50%, 96% 50%
 }
 
+.gwt-SplitLayoutPanel-NorthSouthToggleButton-Closed-media {
+	background-color: white;
+	background-image: url(images/viewicons/@1x/img/SAP_RV_AudioVideo_INACTIVE.png);
+	background-repeat: no-repeat, no-repeat;
+	background-position: 4% 50%, 96% 50%
+}
+
+.gwt-SplitLayoutPanel-NorthSouthToggleButton-Open-media {
+	background-color: white;
+	background-image: url(images/viewicons/@1x/img/SAP_RV_AudioVideo_INACTIVE.png);
+	background-repeat: no-repeat, no-repeat;
+	background-position: 4% 50%, 96% 50%
+}
+
 .RegattaRaceInformation-Header {
 	position: relative;
     left: 140px;
@@ -594,4 +608,8 @@ img.openColumn {
 .RegattaAndRaceTime-Header .RaceTime-Label {
 	font-size: 15px;
 	margin-top: 5px;
+}
+
+.VideoPopup-Close-Button {
+	border: none;
 }
