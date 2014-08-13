@@ -178,7 +178,7 @@ body ::-webkit-scrollbar-track {
     -ms-transform: rotate(-90deg);
 	padding-right: 25px;
 	padding-left: 30px;
-	margin-left: -13px;
+	margin-left: -14px;
 	border-bottom: 1px solid #cecece;
 	border-right: 1px solid #cecece;
 	border-left: 1px solid #cecece;
