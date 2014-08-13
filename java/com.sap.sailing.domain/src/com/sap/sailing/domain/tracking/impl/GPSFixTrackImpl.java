@@ -166,6 +166,9 @@ public class GPSFixTrackImpl<ItemType, FixType extends GPSFix> extends TrackImpl
     
     private transient MaxSpeedCache<ItemType, FixType> maxSpeedCache;
     
+    private int estimatedSpeedCacheHits;
+    private int estimatedSpeedCacheMisses;
+    
     public GPSFixTrackImpl(ItemType trackedItem, long millisecondsOverWhichToAverage) {
         this(trackedItem, millisecondsOverWhichToAverage, DEFAULT_MAX_SPEED_FOR_SMOOTHING);
     }
@@ -599,8 +602,10 @@ public class GPSFixTrackImpl<ItemType, FixType extends GPSFix> extends TrackImpl
         try {
             final SpeedWithBearing result;
             if (ceil != null && ceil.getTimePoint().equals(at) && ceil.isEstimatedSpeedCached()) {
+                estimatedSpeedCacheHits++;
                 result = ceil.getCachedEstimatedSpeed();
             } else {
+                estimatedSpeedCacheMisses++;
                 SpeedWithBearingWithConfidence<TimePoint> estimatedSpeed = getEstimatedSpeed(at, getInternalFixes(),
                     ConfidenceFactory.INSTANCE.createExponentialTimeDifferenceWeigher(
                     // use a minimum confidence to avoid the bearing to flip to 270deg in case all is zero
@@ -611,6 +616,9 @@ public class GPSFixTrackImpl<ItemType, FixType extends GPSFix> extends TrackImpl
                         ceil.cacheEstimatedSpeed(result);
                     }
                 }
+            }
+            if (logger.isLoggable(Level.FINE) && (estimatedSpeedCacheHits + estimatedSpeedCacheMisses) % 1000 == 0) {
+                logger.fine("estimated speed cache hits/misses: "+estimatedSpeedCacheHits+"/"+estimatedSpeedCacheMisses);
             }
             return result;
         } finally {
