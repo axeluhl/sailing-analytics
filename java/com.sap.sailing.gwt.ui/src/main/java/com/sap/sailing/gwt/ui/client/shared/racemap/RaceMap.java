@@ -373,7 +373,7 @@ public class RaceMap extends AbsolutePanel implements TimeListener, CompetitorSe
               mapTypeStyles[3] = GoogleMapStyleHelper.createColorStyle(MapTypeStyleFeatureType.WATER, new RGBColor(0, 136, 255), -35, -34);
               
               MapTypeControlOptions mapTypeControlOptions = MapTypeControlOptions.newInstance();
-              mapTypeControlOptions.setPosition(ControlPosition.BOTTOM_CENTER);
+              mapTypeControlOptions.setPosition(ControlPosition.BOTTOM_RIGHT);
               mapOptions.setMapTypeControlOptions(mapTypeControlOptions);
 
               mapOptions.setMapTypeStyles(mapTypeStyles);
