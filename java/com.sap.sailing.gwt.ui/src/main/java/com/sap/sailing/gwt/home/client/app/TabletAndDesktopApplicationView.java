@@ -9,7 +9,6 @@ import com.google.gwt.user.client.ui.SimplePanel;
 import com.google.gwt.user.client.ui.Widget;
 import com.sap.sailing.gwt.home.client.shared.footer.Footer;
 import com.sap.sailing.gwt.home.client.shared.header.Header;
-import com.sap.sailing.gwt.home.client.shared.placeholder.Placeholder;
 
 /**
  * This is the top-level view of the application. Every time another presenter wants to reveal itself,
@@ -33,9 +32,6 @@ public class TabletAndDesktopApplicationView extends Composite implements Applic
     public TabletAndDesktopApplicationView(PlaceNavigator navigator) {
         headerPanel = new Header(navigator);
         initWidget(uiBinder.createAndBindUi(this));
-        
-        Placeholder placeHolder = new Placeholder();
-        mainContentPanel.setWidget(placeHolder);
     }
 
     @Override
