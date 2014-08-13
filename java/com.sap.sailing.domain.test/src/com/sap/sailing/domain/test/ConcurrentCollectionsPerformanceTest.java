@@ -2,17 +2,15 @@ package com.sap.sailing.domain.test;
 
 import static org.junit.Assert.assertEquals;
 
-import java.util.AbstractCollection;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Collections;
-import java.util.Iterator;
 import java.util.List;
-import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ConcurrentLinkedQueue;
 
 import org.junit.Test;
 
+import com.sap.sailing.util.impl.ConcurrentHashBag;
 import com.sap.sse.common.Util;
 
 /**
@@ -24,57 +22,8 @@ import com.sap.sse.common.Util;
  *
  */
 public class ConcurrentCollectionsPerformanceTest {
-    private static final int COUNT = 100000;
+    private static final int COUNT = 10000;
     
-    private static class ConcurrentHashBag<T> extends AbstractCollection<T> {
-        private ConcurrentHashMap<T, Integer> map = new ConcurrentHashMap<>();
-        private int size;
-        
-        @Override
-        public boolean contains(Object o) {
-            return map.containsKey(o);
-        }
-
-        @Override
-        public boolean remove(Object o) {
-            @SuppressWarnings("unchecked")
-            T t = (T) o;
-            Integer oldCount = map.remove(t);
-            if (oldCount != null && oldCount != 1) {
-                map.put(t, oldCount-1);
-            }
-            if (oldCount != null) {
-                size--;
-            }
-            return oldCount != null;
-        }
-
-        @Override
-        public boolean add(T e) {
-            Integer oldCount = map.put(e, 1);
-            if (oldCount != null && oldCount != 0) {
-                map.put(e, oldCount+1);
-            }
-            size++;
-            return true;
-        }
-
-        @Override
-        public Iterator<T> iterator() {
-            return map.keySet().iterator();
-        }
-
-        @Override
-        public int size() {
-            return size;
-        }
-
-        @Override
-        public boolean isEmpty() {
-            return map.isEmpty();
-        }
-    }
-
     @Test
     public void testConcurrentLinkedQueue() {
         Collection<Object> c = new ConcurrentLinkedQueue<Object>();
