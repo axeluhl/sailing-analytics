@@ -1,6 +1,7 @@
 package com.sap.sailing.gwt.ui.raceboard;
 
 import java.util.ArrayList;
+import java.util.Collection;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
@@ -9,6 +10,7 @@ import java.util.Map;
 import com.google.gwt.dom.client.Style.Unit;
 import com.google.gwt.i18n.client.DateTimeFormat;
 import com.google.gwt.user.client.Command;
+import com.google.gwt.user.client.rpc.AsyncCallback;
 import com.google.gwt.user.client.ui.Anchor;
 import com.google.gwt.user.client.ui.FlowPanel;
 import com.google.gwt.user.client.ui.Label;
@@ -22,6 +24,7 @@ import com.sap.sailing.domain.common.dto.FleetDTO;
 import com.sap.sailing.domain.common.dto.LeaderboardDTO;
 import com.sap.sailing.domain.common.dto.RaceColumnDTO;
 import com.sap.sailing.domain.common.dto.RaceDTO;
+import com.sap.sailing.domain.common.media.MediaTrack;
 import com.sap.sailing.gwt.ui.client.CompetitorSelectionModel;
 import com.sap.sailing.gwt.ui.client.ErrorReporter;
 import com.sap.sailing.gwt.ui.client.GlobalNavigationPanel;
@@ -159,6 +162,7 @@ public class RaceBoardPanel extends SimplePanel implements RegattasDisplayer, Ra
         raceMap.getRightHeaderPanel().add(regattaAndRaceTimeInformationHeader);
 
         leaderboardPanel = createLeaderboardPanel(leaderboardName, leaderboardGroupName, competitorSearchTextBox);
+        leaderboardPanel.setTitle(stringMessages.leaderboard());
         leaderboardPanel.getElement().getStyle().setMarginLeft(6, Unit.PX);
         leaderboardPanel.getElement().getStyle().setMarginTop(4, Unit.PX);
         createOneScreenView(leaderboardName, leaderboardGroupName, event, mainPanel, showMapControls, raceMap); // initializes the raceMap field
@@ -211,7 +215,6 @@ public class RaceBoardPanel extends SimplePanel implements RegattasDisplayer, Ra
         windChart.getEntryWidget().setTitle(stringMessages.windChart());
         components.add(windChart);
         MediaComponent mediaComponent = createMediaComponent();
-        leaderboardPanel.setTitle(stringMessages.leaderboard());
         leaderboardAndMapViewer = new SideBySideComponentViewer(leaderboardPanel, raceMap, mediaComponent, components, stringMessages);
         componentViewers.add(leaderboardAndMapViewer);
         for (ComponentViewer componentViewer : componentViewers) {
@@ -229,11 +232,26 @@ public class RaceBoardPanel extends SimplePanel implements RegattasDisplayer, Ra
     
     private MediaComponent createMediaComponent() {
         boolean autoSelectMedia = false; // do not autoplay media
-        MediaComponent mediaComponent = new MediaComponent(selectedRaceIdentifier, raceTimesInfoProvider, timer, mediaService, stringMessages, errorReporter, userAgent, this.user, autoSelectMedia);
+        final MediaComponent mediaComponent = new MediaComponent(selectedRaceIdentifier, raceTimesInfoProvider, timer, mediaService, stringMessages, errorReporter, userAgent, this.user, autoSelectMedia);
         timer.addPlayStateListener(mediaComponent);
         timer.addTimeListener(mediaComponent);
         mediaComponent.setVisible(false);
-        mediaService.getMediaTracksForRace(selectedRaceIdentifier, mediaComponent.getMediaLibraryCallback()); // load media tracks
+        mediaService.getMediaTracksForRace(selectedRaceIdentifier, new AsyncCallback<Collection<MediaTrack>>() {
+            @Override
+            public void onSuccess(Collection<MediaTrack> result) {
+                mediaComponent.getMediaLibraryCallback().onSuccess(result);
+                if (mediaComponent.isPotentiallyPlayable(mediaComponent.getDefaultVideo())) {
+                    if (leaderboardAndMapViewer != null) {
+                        leaderboardAndMapViewer.getVideoControlButton().setVisible(true);
+                    }
+                }
+            }
+            
+            @Override
+            public void onFailure(Throwable caught) {
+                mediaComponent.getMediaLibraryCallback().onFailure(caught);
+            }
+        }); // load media tracks
         return mediaComponent;
     }
     

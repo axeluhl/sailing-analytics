@@ -53,6 +53,7 @@ public class SideBySideComponentViewer implements ComponentViewer {
     private final Component<?> rightComponent;
     private final List<Component<?>> components;
     private final ScrollPanel leftScrollPanel;
+    private final Button videoControlButton;
     private final StringMessages stringMessages;
 
     private LayoutPanel mainPanel;
@@ -67,6 +68,7 @@ public class SideBySideComponentViewer implements ComponentViewer {
         this.leaderboardContentPanel = leftComponentP.getContentPanel();
         this.rightComponent = rightComponentP;
         this.components = components;
+        this.videoControlButton = createVideoControlButton(mediaComponent);
         leftScrollPanel = new ScrollPanel();
         leftScrollPanel.add(leftComponentP.getEntryWidget());
         leftScrollPanel.setTitle(leftComponentP.getEntryWidget().getTitle());
@@ -88,11 +90,11 @@ public class SideBySideComponentViewer implements ComponentViewer {
         splitLayoutPanel.insert(panelForMapAndHorizontalToggleButtons, rightComponent, Direction.CENTER, 0, null);
         
         List<Pair<Button, Component<?>>> additionalVerticalButtons = new ArrayList<Pair<Button,Component<?>>>();
-        additionalVerticalButtons.add(new Pair<Button, Component<?>>(createVideoButton(mediaComponent), mediaComponent));
+        additionalVerticalButtons.add(new Pair<Button, Component<?>>(videoControlButton, mediaComponent));
         splitLayoutPanel.lastComponentHasBeenAdded(this, panelForMapAndHorizontalToggleButtons, additionalVerticalButtons);
     }
     
-    private Button createVideoButton(final MediaComponent mediaComponent) {
+    private Button createVideoControlButton(final MediaComponent mediaComponent) {
         final Button videoControlButton = new Button(stringMessages.showVideoPopup());
         Button closeButton = new Button();
         closeButton.setStyleName("VideoPopup-Close-Button");
@@ -111,7 +113,7 @@ public class SideBySideComponentViewer implements ComponentViewer {
                 if (!dialog.isShowing()) {
                     if (mediaComponent.isPotentiallyPlayable(mediaComponent.getDefaultVideo())) {
                         mediaComponent.setVisible(true);
-                        dialog.setPopupPosition(10, Document.get().getClientHeight()-370);
+                        dialog.setPopupPosition(10, Document.get().getClientHeight()-360);
                         dialog.show();
                         videoControlButton.setText(stringMessages.hideVideoPopup());
                     } else {
@@ -124,6 +126,9 @@ public class SideBySideComponentViewer implements ComponentViewer {
                 }
             }
         });
+        // hide button initially as we defer showing the button to the asynchroneous
+        // task that gets launched by the media service to get video tracks
+        videoControlButton.setVisible(false);
         return videoControlButton;
     }
     
@@ -137,6 +142,10 @@ public class SideBySideComponentViewer implements ComponentViewer {
         if (component.hasSettings()) {
             new SettingsDialog<SettingsType>(component, stringMessages).show();
         }
+    }
+    
+    public Button getVideoControlButton() {
+        return videoControlButton;
     }
 
     public void forceLayout() {
