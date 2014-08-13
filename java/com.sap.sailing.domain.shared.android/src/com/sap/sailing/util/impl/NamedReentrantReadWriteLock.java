@@ -3,7 +3,6 @@ package com.sap.sailing.util.impl;
 import java.io.IOException;
 import java.io.ObjectInputStream;
 import java.util.ArrayList;
-import java.util.concurrent.ConcurrentLinkedQueue;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.locks.Condition;
 import java.util.concurrent.locks.ReentrantReadWriteLock;
@@ -34,7 +33,7 @@ public class NamedReentrantReadWriteLock extends ReentrantReadWriteLock implemen
     private final String writeLockName;
     private final WriteLockWrapper writeLockWrapper;
     private final ReadLockWrapper readLockWrapper;
-    private transient ConcurrentLinkedQueue<Thread> readers;
+    private transient ConcurrentHashBag<Thread> readers;
     
     private class WriteLockWrapper extends WriteLock {
         private static final long serialVersionUID = -4234819025137348944L;
@@ -161,12 +160,12 @@ public class NamedReentrantReadWriteLock extends ReentrantReadWriteLock implemen
         this.writeLockName = "writeLock "+name;
         this.writeLockWrapper = new WriteLockWrapper(super.writeLock());
         this.readLockWrapper = new ReadLockWrapper(super.readLock());
-        this.readers = new ConcurrentLinkedQueue<Thread>();
+        this.readers = new ConcurrentHashBag<Thread>();
     }
     
     private void readObject(ObjectInputStream ois) throws ClassNotFoundException, IOException {
         ois.defaultReadObject();
-        this.readers = new ConcurrentLinkedQueue<Thread>();
+        this.readers = new ConcurrentHashBag<Thread>();
     }
     
     @Override
