@@ -556,7 +556,7 @@ body ::-webkit-scrollbar-track {
 
 .timePanel-controls-timeDelay {
   float: right;
-  margin: 0 10px 0 0;
+  margin: 0 50px 0 0;
 }
 
 .timePanel-controls-playmode{
