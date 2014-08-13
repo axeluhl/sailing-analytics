@@ -15,7 +15,6 @@ import com.google.gwt.json.client.JSONValue;
 import com.google.gwt.storage.client.Storage;
 import com.google.gwt.user.client.ui.Button;
 import com.google.gwt.user.client.ui.FlowPanel;
-import com.google.gwt.user.client.ui.Label;
 import com.google.gwt.user.client.ui.TextBox;
 import com.sap.sailing.domain.common.RaceIdentifier;
 import com.sap.sailing.domain.common.dto.CompetitorDTO;
@@ -67,6 +66,7 @@ public class CompetitorFilterPanel extends FlowPanel implements KeyUpHandler, Fi
     private final RaceMap raceMap;
     private final RaceIdentifier selectedRaceIdentifier;
     private final Button settingsButton;
+    private final FlowPanel searchBoxPanel;
 
     public CompetitorFilterPanel(final CompetitorSelectionProvider competitorSelectionProvider,
             final StringMessages stringMessages, RaceMap raceMap, LeaderboardFetcher leaderboardFetcher,
@@ -130,11 +130,7 @@ public class CompetitorFilterPanel extends FlowPanel implements KeyUpHandler, Fi
                 showEditCompetitorsFiltersDialog();
             }
         });
-        FlowPanel headerPanel = new FlowPanel();
-        headerPanel.setStyleName(css.headerPanel());
-        headerPanel.add(new Label(stringMessages.leaderboard()));
-        add(headerPanel);
-        FlowPanel searchBoxPanel = new FlowPanel();
+        searchBoxPanel = new FlowPanel();
         searchBoxPanel.setStyleName(css.searchBox());
         searchBoxPanel.add(submitButton);
         searchBoxPanel.add(searchTextBox);
@@ -143,7 +139,7 @@ public class CompetitorFilterPanel extends FlowPanel implements KeyUpHandler, Fi
         add(settingsButton);
         add(advancedSettingsButton);
     }
-
+    
     public CompetitorsFilterSets getCompetitorsFilterSets() {
         return competitorsFilterSets;
     }
