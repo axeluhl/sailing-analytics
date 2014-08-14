@@ -141,14 +141,18 @@ public class SideBySideComponentViewer implements ComponentViewer {
                         mediaComponent.setVisible(true);
                         dialog.setPopupPosition(10, Document.get().getClientHeight()-360);
                         dialog.show();
-                        videoControlButton.setText(stringMessages.hideVideoPopup());
+                        if (Document.get().getClientWidth() > 1024) {
+                            videoControlButton.setText(stringMessages.hideVideoPopup());
+                        }
                     } else {
                         Window.alert("This race has no default video associated.");
                     }
                 } else {
                     mediaComponent.setVisible(false);
                     dialog.hide();
-                    videoControlButton.setText(stringMessages.showVideoPopup());
+                    if (Document.get().getClientWidth() > 1024) {
+                        videoControlButton.setText(stringMessages.showVideoPopup());
+                    }
                 }
             }
         });
