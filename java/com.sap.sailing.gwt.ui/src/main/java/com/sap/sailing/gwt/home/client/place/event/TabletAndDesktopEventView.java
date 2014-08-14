@@ -14,6 +14,7 @@ import com.google.gwt.user.client.ui.Widget;
 import com.sap.sailing.domain.common.LeaderboardNameConstants;
 import com.sap.sailing.domain.common.RegattaAndRaceIdentifier;
 import com.sap.sailing.domain.common.dto.RaceDTO;
+import com.sap.sailing.gwt.home.client.app.PlaceNavigator;
 import com.sap.sailing.gwt.home.client.place.event.header.EventHeader;
 import com.sap.sailing.gwt.home.client.place.event.media.EventMedia;
 import com.sap.sailing.gwt.home.client.place.event.overview.EventOverview;
@@ -51,13 +52,13 @@ public class TabletAndDesktopEventView extends Composite implements EventView, E
     private final EventDTO event;
     
     public TabletAndDesktopEventView(SailingServiceAsync sailingService, EventDTO event, List<RaceGroupDTO> raceGroups, String leaderboardName,   
-            Timer timerForClientServerOffset) {
+            Timer timerForClientServerOffset, PlaceNavigator navigator) {
         this.event = event;
         Map<String, Triple<RaceGroupDTO, StrippedLeaderboardDTO, LeaderboardGroupDTO>> regattaStructure = getRegattaStructure(event, raceGroups);
 
         eventHeader = new EventHeader(event, this);
-        eventRegattaList = new EventRegattaList(event, regattaStructure, timerForClientServerOffset, this);
-        eventRegattaRaces = new EventRegattaRaces(event, timerForClientServerOffset, this);
+        eventRegattaList = new EventRegattaList(event, regattaStructure, timerForClientServerOffset, navigator, this);
+        eventRegattaRaces = new EventRegattaRaces(event, timerForClientServerOffset, navigator, this);
         eventOverview = new EventOverview(event, this);
         eventSchedule = new EventSchedule(event, this);
         eventMedia = new EventMedia(event, this);
