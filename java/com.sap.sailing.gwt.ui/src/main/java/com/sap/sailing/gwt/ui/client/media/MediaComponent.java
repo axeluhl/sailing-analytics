@@ -191,14 +191,11 @@ public class MediaComponent implements Component<Void>, PlayStateListener, TimeL
      * @return
      */
     public AsyncCallback<Collection<MediaTrack>> getMediaLibraryCallback() {
-
         return new  AsyncCallback<Collection<MediaTrack>>() {
-            
             @Override
             public void onFailure(Throwable caught) {
                 errorReporter.reportError("Remote Procedure Call getMediaTracksForRace(...) - Failure: " + caught.getMessage());
             }
-        
             @Override
             public void onSuccess(Collection<MediaTrack> mediaTracks) {
                 MediaComponent.this.mediaTracks.clear();

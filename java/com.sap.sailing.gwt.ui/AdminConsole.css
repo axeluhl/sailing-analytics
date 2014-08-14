@@ -151,6 +151,8 @@ fieldset legend {
 
 .gwt-Button {
 	margin: 3px 2px 3px 5px;
+	background-image: none;
+	outline: 0;
 }
 
 .gwt-Button:hover {
