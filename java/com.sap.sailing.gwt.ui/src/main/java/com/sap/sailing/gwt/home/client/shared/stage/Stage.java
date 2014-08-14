@@ -67,22 +67,23 @@ public class Stage extends Composite {
             stageTeaserComposites.add(stageTeaser);
         }
         
-        this.swiper = Swiper.createWithoutLoopOption(StageResources.INSTANCE.css().stage_teasers(), 
-                StageResources.INSTANCE.css().swiperwrapper(),
-                StageResources.INSTANCE.css().swiperslide(), new Swiper.PageChangeListener() {
-                    
-                    @Override
-                    public void pageChanged(int newPageIndex, int pageCount) {
-                        boolean isFirstSlide = newPageIndex == 0;
-                        boolean isLastSlide = newPageIndex == pageCount - 1;
-                        nextStageTeaserLink.setVisible(!isLastSlide);
-                        prevStageTeaserLink.setVisible(!isFirstSlide);
-                    }
-                });
         if (featuredEvents.size() <= 1) {
             prevStageTeaserLink.setVisible(false);
             nextStageTeaserLink.setVisible(false);
         } else {
+            swiper = Swiper.createWithoutLoopOption(StageResources.INSTANCE.css().stage_teasers(), 
+                    StageResources.INSTANCE.css().swiperwrapper(),
+                    StageResources.INSTANCE.css().swiperslide(), new Swiper.PageChangeListener() {
+                        
+                        @Override
+                        public void pageChanged(int newPageIndex, int pageCount) {
+                            boolean isFirstSlide = newPageIndex == 0;
+                            boolean isLastSlide = newPageIndex == pageCount - 1;
+                            nextStageTeaserLink.setVisible(!isLastSlide);
+                            prevStageTeaserLink.setVisible(!isFirstSlide);
+                        }
+                    });
+            
             prevStageTeaserLink.setVisible(false);
         }
     }
