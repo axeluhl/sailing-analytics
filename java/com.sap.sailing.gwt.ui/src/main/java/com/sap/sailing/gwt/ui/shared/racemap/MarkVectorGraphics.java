@@ -38,18 +38,13 @@ public class MarkVectorGraphics {
     
     public void drawMarkToCanvas(Context2d ctx, boolean isSelected, 
             double width, double height, double scaleFactor) {
-
         ctx.save();
         ctx.clearRect(0,  0,  width, height);
-
         ctx.translate(width / 2.0, height / 2.0);
         ctx.scale(scaleFactor, scaleFactor);
-
         ctx.translate(-anchorPointX * 100,- anchorPointY * 100);
-
         String markColor = color != null ? color : DEFAULT_MARK_COLOR; 
         drawMark(ctx, isSelected, markColor);
-        
         ctx.restore();
     }
 

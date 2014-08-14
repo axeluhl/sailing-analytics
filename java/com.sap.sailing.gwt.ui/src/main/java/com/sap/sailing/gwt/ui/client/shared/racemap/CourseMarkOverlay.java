@@ -56,50 +56,42 @@ public class CourseMarkOverlay extends CanvasOverlayV3 {
     protected void draw() {
         if (mapProjection != null && mark != null && position != null) {
             int zoom = map.getZoom();
-
             Util.Pair<Double, Size> markScaleAndSize = markScaleAndSizePerZoomCache.get(zoom);
-            if(markScaleAndSize == null) {
+            if (markScaleAndSize == null) {
                 markScaleAndSize = getMarkScaleAndSize(position);
                 markScaleAndSizePerZoomCache.put(zoom, markScaleAndSize);
             }
             double markSizeScaleFactor = markScaleAndSize.getA();
-            
             getCanvas().setTitle(getTitle());
-            
             LatLng latLngPosition = LatLng.newInstance(position.latDeg, position.lngDeg);
-
             // calculate canvas size
             double canvasWidth = markScaleAndSize.getB().getWidth();
             double canvasHeight = markScaleAndSize.getB().getHeight();
             double buoyZoneRadiusInPixel = -1;
-            if(showBuoyZone && mark.type == MarkType.BUOY) {
-                buoyZoneRadiusInPixel = calculateRadiusOfBoundingBox(mapProjection, latLngPosition, buoyZoneRadiusInMeter);
-                if(buoyZoneRadiusInPixel > MIN_BUOYZONE_RADIUS_IN_PX) {
-                    canvasWidth = (buoyZoneRadiusInPixel + 1)* 2;
+            if (showBuoyZone && mark.type == MarkType.BUOY) {
+                buoyZoneRadiusInPixel = calculateRadiusOfBoundingBox(mapProjection, latLngPosition,
+                        buoyZoneRadiusInMeter);
+                if (buoyZoneRadiusInPixel > MIN_BUOYZONE_RADIUS_IN_PX) {
+                    canvasWidth = (buoyZoneRadiusInPixel + 1) * 2;
                     canvasHeight = (buoyZoneRadiusInPixel + 1) * 2;
                 }
             }
             setCanvasSize((int) canvasWidth, (int) canvasHeight);
-            
             Context2d context2d = getCanvas().getContext2d();
-
             // draw the course mark
             markVectorGraphics.drawMarkToCanvas(context2d, showBuoyZone, canvasWidth, canvasHeight, markSizeScaleFactor);
-            
             Point buoyPositionInPx = mapProjection.fromLatLngToDivPixel(latLngPosition);
-
-            // draw the buoy zone 
-            if(showBuoyZone && mark.type == MarkType.BUOY && buoyZoneRadiusInPixel > MIN_BUOYZONE_RADIUS_IN_PX) {
+            // draw the buoy zone
+            if (showBuoyZone && mark.type == MarkType.BUOY && buoyZoneRadiusInPixel > MIN_BUOYZONE_RADIUS_IN_PX) {
                 CssColor grayTransparentColor = CssColor.make("rgba(50,90,135,0.75)");
-
                 // this translation is important for drawing lines with a real line width of 1 pixel
                 context2d.setStrokeStyle(grayTransparentColor);
                 context2d.setLineWidth(1.0);
                 context2d.beginPath();
-                context2d.arc(buoyZoneRadiusInPixel+1, buoyZoneRadiusInPixel+1, buoyZoneRadiusInPixel, 0, Math.PI*2, true); 
+                context2d.arc(buoyZoneRadiusInPixel + 1, buoyZoneRadiusInPixel + 1, buoyZoneRadiusInPixel, 0,
+                        Math.PI * 2, true);
                 context2d.closePath();
                 context2d.stroke();
-                
                 setCanvasPosition(buoyPositionInPx.getX() - buoyZoneRadiusInPixel, buoyPositionInPx.getY() - buoyZoneRadiusInPixel);
             } else {
                 setCanvasPosition(buoyPositionInPx.getX() - canvasWidth / 2.0, buoyPositionInPx.getY() - canvasHeight / 2.0);
