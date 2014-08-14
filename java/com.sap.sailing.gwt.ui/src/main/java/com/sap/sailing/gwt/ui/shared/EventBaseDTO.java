@@ -52,6 +52,14 @@ public class EventBaseDTO extends NamedDTO implements IsSerializable {
         this.leaderboardGroups = leaderboardGroups;
     }
 
+    public boolean isRunning() {
+        Date now = new Date();
+        if(startDate != null && endDate != null && (now.after(startDate) && now.before(endDate))) {
+            return true;
+        }
+        return false;
+    }
+    
     public String getDescription() {
         return description;
     }
