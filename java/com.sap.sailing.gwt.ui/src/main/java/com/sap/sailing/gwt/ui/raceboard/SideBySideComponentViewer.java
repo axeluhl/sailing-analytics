@@ -9,6 +9,7 @@ import com.google.gwt.event.dom.client.ClickEvent;
 import com.google.gwt.event.dom.client.ClickHandler;
 import com.google.gwt.event.logical.shared.CloseEvent;
 import com.google.gwt.event.logical.shared.CloseHandler;
+import com.google.gwt.safehtml.shared.SafeHtml;
 import com.google.gwt.user.client.Window;
 import com.google.gwt.user.client.ui.AbsolutePanel;
 import com.google.gwt.user.client.ui.Button;
@@ -40,6 +41,7 @@ import com.sap.sse.common.Util.Pair;
 public class SideBySideComponentViewer implements ComponentViewer {
     
     private static final int DEFAULT_SOUTH_SPLIT_PANEL_HEIGHT = 200;
+    private final int MIN_LEADERBOARD_WIDTH = 428; // works well for 505 and ESS
 
     /**
      * Absolute Panel that informs its children about a resize
@@ -55,8 +57,6 @@ public class SideBySideComponentViewer implements ComponentViewer {
         }
     }
 
-    private final int MIN_LEADERBOARD_WIDTH = 428;
-    
     private final LeaderboardPanel leftComponent;
     private final Component<?> rightComponent;
     private final List<Component<?>> components;
@@ -110,7 +110,18 @@ public class SideBySideComponentViewer implements ComponentViewer {
      * Create the video control button that shows or hides the video popup
      */
     private Button createVideoControlButton(final MediaComponent mediaComponent) {
-        final Button videoControlButton = new Button(stringMessages.showVideoPopup());
+        final Button videoControlButton = new Button(new SafeHtml() {
+            private static final long serialVersionUID = 8679639887708833213L;
+            @Override
+            public String asString() {
+                if (Document.get().getClientWidth() <= 1024) {
+                    return "&nbsp;";
+                } else {
+                    return stringMessages.showVideoPopup();
+                }
+            }
+        });
+        videoControlButton.setTitle(stringMessages.showVideoPopup());
         Button closeButton = new Button();
         closeButton.setStyleName("VideoPopup-Close-Button");
         final DialogBoxExt dialog = new DialogBoxExt(closeButton, stringMessages.videoComponentShortName(), /*modal*/false);
