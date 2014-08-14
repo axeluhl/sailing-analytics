@@ -26,6 +26,7 @@ public interface TextMessages extends Messages {
     String pleaseTryAgain();
     String reloadPage();
     String errorMessageLoadingData();
+    String raceNotScheduled();
     
     String countdownDays();
     String countdownHours();
