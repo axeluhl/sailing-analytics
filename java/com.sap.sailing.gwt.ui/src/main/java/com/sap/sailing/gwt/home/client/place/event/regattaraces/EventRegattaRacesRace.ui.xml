@@ -41,6 +41,9 @@
   <div ui:field="raceNotTrackedDiv" class="{local_res.css.eventregattarace_action} {local_res.css.eventregattarace_actiondisabled}">
       <ui:text from='{i18n.eventRegattaRaceNotTracked}'/>
   </div>
+  <div ui:field="raceNotScheduledDiv" class="{local_res.css.eventregattarace_action} {local_res.css.eventregattarace_actiondisabled}">
+      <ui:text from='{i18n.raceNotScheduled}'/>
+  </div>
   <div ui:field="watchRaceDiv" class="{local_res.css.eventregattarace_action}">
       <a ui:field="watchRaceLink" class="{res.mainCss.button} {local_res.css.eventregattarace_action_watch}"><ui:text from='{i18n.eventRegattaRaceWatch}'/></a>
   </div>
