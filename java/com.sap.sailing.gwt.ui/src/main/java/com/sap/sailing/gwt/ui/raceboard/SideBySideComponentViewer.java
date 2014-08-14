@@ -130,7 +130,9 @@ public class SideBySideComponentViewer implements ComponentViewer {
             @Override
             public void onClose(CloseEvent<PopupPanel> event) {
                     mediaComponent.setVisible(false);
-                    videoControlButton.setText(stringMessages.showVideoPopup());
+                    if (Document.get().getClientWidth() > 1024) {
+                        videoControlButton.setText(stringMessages.showVideoPopup());
+                    }
             }
         });
         videoControlButton.addClickHandler(new ClickHandler() {
