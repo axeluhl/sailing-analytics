@@ -56,19 +56,19 @@ public class MarkVectorGraphics {
                     if(Shape.CYLINDER.name().equalsIgnoreCase(shape) && pattern != null && Pattern.CHECKERED.name().equalsIgnoreCase(pattern)) {
                         drawBuoyWithFinishFlag(ctx, isSelected, color);
                     } else if (Shape.CONICAL.name().equalsIgnoreCase(shape)) {
-                        drawConicalBuoy(ctx, isSelected, color);
+                        drawConicalBuoy(ctx, color);
                     } else {
-                        drawSimpleBuoy(ctx, isSelected, color);
+                        drawSimpleBuoy(ctx, color);
                     }
                 } else {
-                    drawSimpleBuoy(ctx, isSelected, color);
+                    drawSimpleBuoy(ctx, color);
                 }
                 break;
             case FINISHBOAT:
                 drawFinishBoat(ctx, isSelected, color);
                 break;
             case LANDMARK:
-                drawLandmark(ctx, isSelected, color);
+                drawLandmark(ctx, color);
                 break;
             case STARTBOAT:
                 drawStartBoat(ctx, isSelected, color);
@@ -82,7 +82,7 @@ public class MarkVectorGraphics {
         }
     }
 
-    protected void drawSimpleBuoy(Context2d ctx, boolean isSelected, String color) {
+    void drawSimpleBuoy(Context2d ctx, String color) {
         ctx.setStrokeStyle("rgba(0,0,0,0)");
     
         ctx.save();
@@ -331,7 +331,7 @@ public class MarkVectorGraphics {
         ctx.restore();
     }
     
-    protected void drawLandmark(Context2d ctx, boolean isSelected, String color) {
+    protected void drawLandmark(Context2d ctx, String color) {
         ctx.setStrokeStyle("rgba(0,0,0,0)");
 
         ctx.save();
@@ -396,7 +396,7 @@ public class MarkVectorGraphics {
         ctx.restore();
     }
 
-    protected void drawConicalBuoy(Context2d ctx, boolean isSelected, String color) {
+    protected void drawConicalBuoy(Context2d ctx, String color) {
         ctx.setStrokeStyle("rgba(0,0,0,0)");
 
         ctx.save();
