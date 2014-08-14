@@ -9,7 +9,7 @@
 	    <div class="{local_res.css.eventteasercontainer}">
 	        <a href="javascript:;" ui:field="eventOverviewLink" class="{local_res.css.eventteaser}">
 		        <figure class="{local_res.css.eventteaser_image}"><img ui:field="eventImage" />
-		          <div class="{local_res.css.eventteaser_series} {res.mainCss.label}"></div>
+		          <div ui:field="isLiveDiv" data-labeltype="live" class="{local_res.css.eventteaser_series} {res.mainCss.label}"><ui:text from='{i18n.live}'/></div>
 		        </figure>
 		        <div class="{local_res.css.eventteaser_name}"><span ui:field="eventName" /></div>
 		        <div class="{local_res.css.eventteaser_location}">
