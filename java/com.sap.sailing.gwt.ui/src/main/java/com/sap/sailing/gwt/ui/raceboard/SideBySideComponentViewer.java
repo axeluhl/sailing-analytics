@@ -26,9 +26,9 @@ import com.sap.sailing.gwt.ui.client.media.MediaComponent;
 import com.sap.sailing.gwt.ui.client.shared.components.Component;
 import com.sap.sailing.gwt.ui.client.shared.components.ComponentViewer;
 import com.sap.sailing.gwt.ui.client.shared.components.SettingsDialog;
-import com.sap.sailing.gwt.ui.leaderboard.DialogBoxExt;
 import com.sap.sailing.gwt.ui.leaderboard.LeaderboardPanel;
 import com.sap.sse.common.Util.Pair;
+import com.sap.sse.gwt.client.dialog.WindowBox;
 
 /**
  *  Component Viewer that uses a {@link TouchSplitLayoutPanel}
@@ -124,8 +124,7 @@ public class SideBySideComponentViewer implements ComponentViewer {
         videoControlButton.setTitle(stringMessages.showVideoPopup());
         Button closeButton = new Button();
         closeButton.setStyleName("VideoPopup-Close-Button");
-        final DialogBoxExt dialog = new DialogBoxExt(closeButton, stringMessages.videoComponentShortName(), /*modal*/false);
-        dialog.add(mediaComponent.getEntryWidget());
+        final WindowBox dialog = new WindowBox(stringMessages.videoComponentShortName(), stringMessages.videoComponentShortName(), mediaComponent.getEntryWidget(), null);
         dialog.addCloseHandler(new CloseHandler<PopupPanel>() {
             @Override
             public void onClose(CloseEvent<PopupPanel> event) {
@@ -141,7 +140,7 @@ public class SideBySideComponentViewer implements ComponentViewer {
                 if (!dialog.isShowing()) {
                     if (mediaComponent.isPotentiallyPlayable(mediaComponent.getDefaultVideo())) {
                         mediaComponent.setVisible(true);
-                        dialog.setPopupPosition(10, Document.get().getClientHeight()-360);
+                        dialog.setPopupPosition(47, Document.get().getClientHeight()-355);
                         dialog.show();
                         if (Document.get().getClientWidth() > 1024) {
                             videoControlButton.setText(stringMessages.hideVideoPopup());

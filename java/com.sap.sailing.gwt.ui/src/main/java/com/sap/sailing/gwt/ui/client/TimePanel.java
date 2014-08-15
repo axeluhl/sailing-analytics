@@ -243,6 +243,7 @@ public class TimePanel<T extends TimePanelSettings> extends SimplePanel implemen
             }
         });
         slowDownButton.setTitle(stringMessages.slowPlaySpeedDown());
+        slowDownButton.addStyleName("timePanelButton-SlowDown");
         playSpeedControlPanel.add(slowDownButton);
 
         speedUpButton = new Button("+1");
@@ -254,6 +255,7 @@ public class TimePanel<T extends TimePanelSettings> extends SimplePanel implemen
             }
         });
         speedUpButton.setTitle(stringMessages.speedPlaySpeedUp());
+        speedUpButton.addStyleName("timePanelButton-SpeedUp");
         playSpeedControlPanel.add(speedUpButton);
 
         playSpeedImage.getElement().getStyle().setFloat(Style.Float.LEFT);
