@@ -142,6 +142,7 @@ public abstract class AbstractCompetitorRaceChart<SettingsType extends ChartSett
                 .setMarginRight(65)
                 .setBorderColor(new Color("#CACACA"))
                 .setBackgroundColor(new Color("#FFFFFF"))
+                .setPlotBackgroundColor("#f8f8f8")
                 .setBorderWidth(0)
                 .setBorderRadius(0)
                 .setPlotBorderWidth(0)
