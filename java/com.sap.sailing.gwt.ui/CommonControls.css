@@ -481,7 +481,7 @@ body ::-webkit-scrollbar-track {
   bottom: 0;
   z-index: 9;
   background: white;
-  border-top: 1px solid #cecece;
+  border-top: 2px solid #cecece;
 }
 
 .timeLineInnerBgPanel {

@@ -108,6 +108,7 @@ public class WindChart extends AbstractRaceChart implements Component<WindChartS
                 .setBorderWidth(0)
                 .setBorderRadius(0)
                 .setBackgroundColor(new Color("#FFFFFF"))
+                .setPlotBackgroundColor("#f8f8f8")
                 .setPlotBorderWidth(0)
                 .setCredits(new Credits().setEnabled(false))
                 .setChartTitle(new ChartTitle().setText(stringMessages.wind()))
