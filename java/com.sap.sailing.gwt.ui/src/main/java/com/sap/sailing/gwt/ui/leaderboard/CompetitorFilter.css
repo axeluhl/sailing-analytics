@@ -22,6 +22,7 @@
 .searchInput {
 	font-size: .933333333333333em;
 	height: 2.142857142857143em;
+	width: 280px;
 	border: none;
 	background-color: #eaeaea;
 	padding: 0;
@@ -47,6 +48,7 @@
 	-o-transition: background-color .2s;
 	-ms-transition: background-color .2s;
 	transition: background-color .2s;
+	cursor: pointer;
 }
 
 .button:focus, .button:hover {
