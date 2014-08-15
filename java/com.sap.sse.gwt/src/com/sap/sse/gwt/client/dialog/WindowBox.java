@@ -23,6 +23,7 @@ import com.google.gwt.core.client.GWT;
 import com.google.gwt.dom.client.Element;
 import com.google.gwt.dom.client.NativeEvent;
 import com.google.gwt.dom.client.Style.Cursor;
+import com.google.gwt.dom.client.Touch;
 import com.google.gwt.event.dom.client.ClickEvent;
 import com.google.gwt.event.dom.client.ClickHandler;
 import com.google.gwt.event.dom.client.DomEvent;
@@ -183,9 +184,15 @@ public class WindowBox extends DialogBox {
             }
         });
 
-        Grid ctrlGrid = new Grid(1, 2);
-        ctrlGrid.setWidget(0, 0, this.minimize);
-        ctrlGrid.setWidget(0, 1, this.close);
+        Grid ctrlGrid = null;
+        if (popoutHandler != null) {
+            ctrlGrid = new Grid(1, 2);
+            ctrlGrid.setWidget(0, 0, this.minimize);
+            ctrlGrid.setWidget(0, 1, this.close);
+        } else {
+            ctrlGrid = new Grid(1, 1);
+            ctrlGrid.setWidget(0, 0, this.close);
+        }
 
         this.controlsPanel = new FlowPanel();
         this.controlsPanel.setStyleName("gwt-extras-dialog-controls");
