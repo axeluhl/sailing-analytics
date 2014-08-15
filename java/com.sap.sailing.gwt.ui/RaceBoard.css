@@ -563,6 +563,12 @@ img.openColumn {
 	background-position: 4% 50%, 96% 50%
 }
 
+.gwt-SplitLayoutPanel-NorthSouthToggleButton-Small-media {
+	background-position: 50% 50%, 100% 50% !important;
+    margin-left: 0px !important;
+    padding: 2px 20px !important;
+}
+
 .RegattaRaceInformation-Header {
 	position: relative;
     left: 140px;

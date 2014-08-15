@@ -7,6 +7,7 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
+import com.google.gwt.dom.client.Document;
 import com.google.gwt.dom.client.Style.Unit;
 import com.google.gwt.i18n.client.DateTimeFormat;
 import com.google.gwt.user.client.Command;
@@ -220,11 +221,15 @@ public class RaceBoardPanel extends SimplePanel implements RegattasDisplayer, Ra
         for (ComponentViewer componentViewer : componentViewers) {
             mainPanel.add(componentViewer.getViewerWidget());
         }
-        setLeaderboardVisible(getConfiguration().isShowLeaderboard());
+        boolean showLeaderboard = getConfiguration().isShowLeaderboard();
+        if (Document.get().getClientWidth() <= 1024) {
+            showLeaderboard = false;
+        }
+        setLeaderboardVisible(showLeaderboard);
         setWindChartVisible(getConfiguration().isShowWindChart());
         setCompetitorChartVisible(getConfiguration().isShowCompetitorsChart());
         // make sure to load leaderboard data for filtering to work
-        if (!getConfiguration().isShowLeaderboard()) {
+        if (!showLeaderboard) {
             leaderboardPanel.setVisible(true);
             leaderboardPanel.setVisible(false);
         }
