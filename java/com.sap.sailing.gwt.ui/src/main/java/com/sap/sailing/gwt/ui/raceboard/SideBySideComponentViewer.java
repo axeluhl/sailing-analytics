@@ -9,6 +9,7 @@ import com.google.gwt.event.dom.client.ClickEvent;
 import com.google.gwt.event.dom.client.ClickHandler;
 import com.google.gwt.event.logical.shared.CloseEvent;
 import com.google.gwt.event.logical.shared.CloseHandler;
+import com.google.gwt.safehtml.shared.SafeHtml;
 import com.google.gwt.user.client.Window;
 import com.google.gwt.user.client.ui.AbsolutePanel;
 import com.google.gwt.user.client.ui.Button;
@@ -30,11 +31,21 @@ import com.sap.sailing.gwt.ui.leaderboard.LeaderboardPanel;
 import com.sap.sse.common.Util.Pair;
 
 /**
- *  Component Viewer that uses a {@link TouchSplitLayoutPanelWithBetterDraggers}
+ *  Component Viewer that uses a {@link TouchSplitLayoutPanel}
  *  to display its components.
+ *  
+ *  TODO: Refactor to make sure it is really only performing operations
+ *  that are related to view. Currently it is digging too deep into
+ *  components and setting titles or even creating video buttons.
  */
 public class SideBySideComponentViewer implements ComponentViewer {
     
+    private static final int DEFAULT_SOUTH_SPLIT_PANEL_HEIGHT = 200;
+    private final int MIN_LEADERBOARD_WIDTH = 428; // works well for 505 and ESS
+
+    /**
+     * Absolute Panel that informs its children about a resize
+     */
     class ResizableAbsolutePanel extends AbsolutePanel implements RequiresResize {
         public void onResize() {
             WidgetCollection children = getChildren();
@@ -46,10 +57,7 @@ public class SideBySideComponentViewer implements ComponentViewer {
         }
     }
 
-    private final int MIN_LEADERBOARD_WIDTH = 428;
-    
     private final LeaderboardPanel leftComponent;
-    private final Panel leaderboardContentPanel;
     private final Component<?> rightComponent;
     private final List<Component<?>> components;
     private final ScrollPanel leftScrollPanel;
@@ -58,44 +66,62 @@ public class SideBySideComponentViewer implements ComponentViewer {
 
     private LayoutPanel mainPanel;
     
-    private TouchSplitLayoutPanelWithBetterDraggers splitLayoutPanel; 
+    private TouchSplitLayoutPanel splitLayoutPanel; 
     private int savedSplitPosition = -1;
     private boolean layoutForLeftComponentForcedOnce = false;
     
     public SideBySideComponentViewer(final LeaderboardPanel leftComponentP, final Component<?> rightComponentP, final MediaComponent mediaComponent, List<Component<?>> components, final StringMessages stringMessages) {
         this.stringMessages = stringMessages;
         this.leftComponent = leftComponentP;
-        this.leaderboardContentPanel = leftComponentP.getContentPanel();
         this.rightComponent = rightComponentP;
         this.components = components;
         this.videoControlButton = createVideoControlButton(mediaComponent);
-        leftScrollPanel = new ScrollPanel();
-        leftScrollPanel.add(leftComponentP.getEntryWidget());
-        leftScrollPanel.setTitle(leftComponentP.getEntryWidget().getTitle());
-        mainPanel = new LayoutPanel();
-        mainPanel.setSize("100%", "100%");
-        mainPanel.getElement().getStyle().setMarginTop(-12, Unit.PX);
-        mainPanel.setStyleName("SideBySideComponentViewer-MainPanel");
-        splitLayoutPanel = new TouchSplitLayoutPanelWithBetterDraggers(/* horizontal splitter width */ 3, /*vertical splitter height*/ 25);
-        mainPanel.add(splitLayoutPanel);
+        this.leftScrollPanel = new ScrollPanel();
+        this.leftScrollPanel.add(leftComponentP.getEntryWidget());
+        this.leftScrollPanel.setTitle(leftComponentP.getEntryWidget().getTitle());
+        this.mainPanel = new LayoutPanel();
+        this.mainPanel.setSize("100%", "100%");
+        this.mainPanel.getElement().getStyle().setMarginTop(-12, Unit.PX);
+        this.mainPanel.setStyleName("SideBySideComponentViewer-MainPanel");
+        this.splitLayoutPanel = new TouchSplitLayoutPanel(/* horizontal splitter width */ 3, /*vertical splitter height*/ 25);
+        this.mainPanel.add(splitLayoutPanel);
         
+        // initialize components - they need to be added before other widgets to get the right width
         initializeComponents();
 
+        // initialize the leaderboard component
         savedSplitPosition = MIN_LEADERBOARD_WIDTH;
-        splitLayoutPanel.insert(leftScrollPanel, leftComponent, Direction.WEST, savedSplitPosition, null);
+        splitLayoutPanel.insert(leftScrollPanel, leftComponent, Direction.WEST, savedSplitPosition);
         
+        // create a panel that will contain the horizontal toggle buttons
         ResizableAbsolutePanel panelForMapAndHorizontalToggleButtons = new ResizableAbsolutePanel();
         panelForMapAndHorizontalToggleButtons.add(rightComponent.getEntryWidget());
+        splitLayoutPanel.insert(panelForMapAndHorizontalToggleButtons, rightComponent, Direction.CENTER, 0);
         
-        splitLayoutPanel.insert(panelForMapAndHorizontalToggleButtons, rightComponent, Direction.CENTER, 0, null);
-        
+        // add additional toggle buttons panel that currently only contains the video button
         List<Pair<Button, Component<?>>> additionalVerticalButtons = new ArrayList<Pair<Button,Component<?>>>();
         additionalVerticalButtons.add(new Pair<Button, Component<?>>(videoControlButton, mediaComponent));
+        
+        // ensure that toggle buttons are positioned right
         splitLayoutPanel.lastComponentHasBeenAdded(this, panelForMapAndHorizontalToggleButtons, additionalVerticalButtons);
     }
     
+    /**
+     * Create the video control button that shows or hides the video popup
+     */
     private Button createVideoControlButton(final MediaComponent mediaComponent) {
-        final Button videoControlButton = new Button(stringMessages.showVideoPopup());
+        final Button videoControlButton = new Button(new SafeHtml() {
+            private static final long serialVersionUID = 8679639887708833213L;
+            @Override
+            public String asString() {
+                if (Document.get().getClientWidth() <= 1024) {
+                    return "&nbsp;";
+                } else {
+                    return stringMessages.showVideoPopup();
+                }
+            }
+        });
+        videoControlButton.setTitle(stringMessages.showVideoPopup());
         Button closeButton = new Button();
         closeButton.setStyleName("VideoPopup-Close-Button");
         final DialogBoxExt dialog = new DialogBoxExt(closeButton, stringMessages.videoComponentShortName(), /*modal*/false);
@@ -104,7 +130,9 @@ public class SideBySideComponentViewer implements ComponentViewer {
             @Override
             public void onClose(CloseEvent<PopupPanel> event) {
                     mediaComponent.setVisible(false);
-                    videoControlButton.setText(stringMessages.showVideoPopup());
+                    if (Document.get().getClientWidth() > 1024) {
+                        videoControlButton.setText(stringMessages.showVideoPopup());
+                    }
             }
         });
         videoControlButton.addClickHandler(new ClickHandler() {
@@ -115,14 +143,18 @@ public class SideBySideComponentViewer implements ComponentViewer {
                         mediaComponent.setVisible(true);
                         dialog.setPopupPosition(10, Document.get().getClientHeight()-360);
                         dialog.show();
-                        videoControlButton.setText(stringMessages.hideVideoPopup());
+                        if (Document.get().getClientWidth() > 1024) {
+                            videoControlButton.setText(stringMessages.hideVideoPopup());
+                        }
                     } else {
                         Window.alert("This race has no default video associated.");
                     }
                 } else {
                     mediaComponent.setVisible(false);
                     dialog.hide();
-                    videoControlButton.setText(stringMessages.showVideoPopup());
+                    if (Document.get().getClientWidth() > 1024) {
+                        videoControlButton.setText(stringMessages.showVideoPopup());
+                    }
                 }
             }
         });
@@ -134,7 +166,7 @@ public class SideBySideComponentViewer implements ComponentViewer {
     
     private void initializeComponents() {
         for (final Component<?> component : components) {
-            splitLayoutPanel.insert(component.getEntryWidget(), component, Direction.SOUTH, 200, null);
+            splitLayoutPanel.insert(component.getEntryWidget(), component, Direction.SOUTH, 200);
         }
     }
     
@@ -148,21 +180,27 @@ public class SideBySideComponentViewer implements ComponentViewer {
         return videoControlButton;
     }
 
+    /**
+     * Called whenever the layout of {@link TouchSplitLayoutPanel} or other components
+     * change. Controls the visibility based on the {@link Component}s visibility.
+     * Each {@link Component} is in charge to not display any data or update itself
+     * when it is not visible.
+     */
     public void forceLayout() {
         if (!leftComponent.isVisible() && rightComponent.isVisible()) {
             // the leaderboard is not visible, but the map is
             if (isWidgetInSplitPanel(leftScrollPanel)) {
-                splitLayoutPanel.setWidgetVisibility(leftScrollPanel, leftComponent, leaderboardContentPanel, /*hidden*/true, savedSplitPosition);
+                splitLayoutPanel.setWidgetVisibility(leftScrollPanel, leftComponent, /*hidden*/true, savedSplitPosition);
             }
         } else if (leftComponent.isVisible() && rightComponent.isVisible()) {
             // the leaderboard and the map are visible
-            splitLayoutPanel.setWidgetVisibility(leftScrollPanel, leftComponent, leaderboardContentPanel, /*hidden*/false, savedSplitPosition);
+            splitLayoutPanel.setWidgetVisibility(leftScrollPanel, leftComponent, /*hidden*/false, savedSplitPosition);
         } else if (!leftComponent.isVisible() && !rightComponent.isVisible()) {
         }
 
         for (Component<?> component : components) {
             final boolean isComponentVisible = component.isVisible();
-            splitLayoutPanel.setWidgetVisibility(component.getEntryWidget(), component, component.getEntryWidget(), !isComponentVisible, 200);
+            splitLayoutPanel.setWidgetVisibility(component.getEntryWidget(), component, !isComponentVisible, DEFAULT_SOUTH_SPLIT_PANEL_HEIGHT);
         }
         splitLayoutPanel.forceLayout();
     }
