@@ -1008,7 +1008,7 @@ public class SliderBar extends FocusPanel implements RequiresResize, HasValue<Do
                     if (lastMarkerOffsetLeft > 0 && (markerLeftOffset-lastMarkerOffsetLeft) <= markerWidth) {
                         if (lastMarkerElement != null) {
                             lastMarkerElement.setPropertyString("className", "gwt-SliderBar-mark-tooClose");
-                            lastMarkerElement.getStyle().setLeft(lastMarkerOffsetLeft-2, Unit.PX);
+                            lastMarkerElement.getStyle().setLeft(markerLeftOffset-10, Unit.PX);
                         }
                     }
                     lastMarkerElement = markerElem;
@@ -1079,7 +1079,8 @@ public class SliderBar extends FocusPanel implements RequiresResize, HasValue<Do
                         if (lastMarkerLabel != null) {
                             lastMarkerLabel.setPropertyString("className", "gwt-SliderBar-markerlabel-tooClose");
                             lastMarkerLabel.setPropertyString("innerHTML", "M"); // no space for more
-                            lastMarkerLabel.getStyle().setLeft(lastMarkerLabelOffsetLeft-3, Unit.PX);
+                            int currentMarkerOffsetLeft = Integer.parseInt(markerElements.get(i).getStyle().getLeft().replace("px", ""));
+                            lastMarkerLabel.getStyle().setLeft(currentMarkerOffsetLeft-8, Unit.PX);
                         }
                     }
                     lastMarkerLabel = label;

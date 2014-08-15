@@ -43,7 +43,7 @@
 }
 
 .gwt-SliderBar-shell .gwt-SliderBar-mark-tooClose {
-  top: 10px;
+  top: 9px;
   width: 16px;
   height: 16px;
   background: #fcbb22;
@@ -71,7 +71,7 @@
 }
 
 .gwt-SliderBar-shell .gwt-SliderBar-markerlabel-tooClose {
-  top: 12px;
+  top: 11px;
   font-size: 8px;
   color: #333;
   cursor: default;
