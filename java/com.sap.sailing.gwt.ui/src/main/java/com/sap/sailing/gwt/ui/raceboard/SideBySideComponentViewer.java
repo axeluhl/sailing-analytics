@@ -141,7 +141,7 @@ public class SideBySideComponentViewer implements ComponentViewer {
                 if (!dialog.isShowing()) {
                     if (mediaComponent.isPotentiallyPlayable(mediaComponent.getDefaultVideo())) {
                         mediaComponent.setVisible(true);
-                        dialog.setPopupPosition(10, Document.get().getClientHeight()-360);
+                        dialog.setPopupPosition(47, Document.get().getClientHeight()-355);
                         dialog.show();
                         if (Document.get().getClientWidth() > 1024) {
                             videoControlButton.setText(stringMessages.hideVideoPopup());
