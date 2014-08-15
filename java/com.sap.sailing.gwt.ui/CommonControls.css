@@ -178,7 +178,7 @@ body ::-webkit-scrollbar-track {
     -ms-transform: rotate(-90deg);
 	padding-right: 25px;
 	padding-left: 30px;
-	margin-left: -14px;
+	margin-left: -15px;
 	border-bottom: 1px solid #cecece;
 	border-right: 1px solid #cecece;
 	border-left: 1px solid #cecece;
@@ -951,12 +951,13 @@ video {
 	border: none;
     box-shadow: #333 1px 1px 1px;
     margin-top: 2px;
-    color: white;
+    color: #333;
     padding: 5px;
     font-size: 10px;
     font-family: OpenSansSemiBold, Verdana, Arial, sans-serif;
     outline: 0;
     width: 60px;
+    background-color: #ececec;
     margin-right: 1px;
 }
 
