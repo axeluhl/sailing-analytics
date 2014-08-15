@@ -93,6 +93,7 @@ import com.sap.sailing.gwt.ui.client.shared.components.SettingsDialogComponent;
 import com.sap.sailing.gwt.ui.client.shared.controls.AbstractSortableColumnWithMinMax;
 import com.sap.sailing.gwt.ui.client.shared.controls.SelectionCheckboxColumn;
 import com.sap.sailing.gwt.ui.client.shared.filter.CompetitorRaceRankFilter;
+import com.sap.sailing.gwt.ui.client.shared.filter.FilterWithUI;
 import com.sap.sailing.gwt.ui.client.shared.filter.LeaderboardFetcher;
 import com.sap.sailing.gwt.ui.leaderboard.DetailTypeColumn.LegDetailField;
 import com.sap.sailing.gwt.ui.leaderboard.LeaderboardSettings.RaceColumnSelectionStrategies;
@@ -1818,7 +1819,7 @@ public class LeaderboardPanel extends SimplePanel implements TimeListener, PlayS
         if (filtersActive) {
             String labelText = "";
             for (Filter<CompetitorDTO> filter : competitorSelectionProvider.getCompetitorsFilterSet().getFilters()) {
-                labelText += filter.getName() + ", ";
+                labelText += ((FilterWithUI<CompetitorDTO>)filter).getLocalizedDescription(stringMessages) + ", ";
             }
             filterStatusLabel.setText("Active Filter(s): " + labelText.substring(0, labelText.length()-2));
             filterClearButton.setVisible(true);

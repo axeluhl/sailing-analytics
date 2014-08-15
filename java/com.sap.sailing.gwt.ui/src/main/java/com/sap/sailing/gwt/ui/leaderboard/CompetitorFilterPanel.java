@@ -27,6 +27,7 @@ import com.sap.sailing.gwt.ui.client.shared.filter.CompetitorTotalRankFilter;
 import com.sap.sailing.gwt.ui.client.shared.filter.CompetitorsFilterSets;
 import com.sap.sailing.gwt.ui.client.shared.filter.CompetitorsFilterSetsDialog;
 import com.sap.sailing.gwt.ui.client.shared.filter.CompetitorsFilterSetsJsonDeSerializer;
+import com.sap.sailing.gwt.ui.client.shared.filter.FilterUIFactory;
 import com.sap.sailing.gwt.ui.client.shared.filter.FilterWithUI;
 import com.sap.sailing.gwt.ui.client.shared.filter.LeaderboardFetcher;
 import com.sap.sailing.gwt.ui.client.shared.filter.LeaderboardFilterContext;
@@ -50,7 +51,7 @@ import com.sap.sse.gwt.client.dialog.DataEntryDialog.DialogCallback;
  * @author Axel Uhl (D043530)
  * 
  */
-public class CompetitorFilterPanel extends FlowPanel implements KeyUpHandler, Filter<CompetitorDTO>, CompetitorSelectionChangeListener {
+public class CompetitorFilterPanel extends FlowPanel implements KeyUpHandler, FilterWithUI<CompetitorDTO>, CompetitorSelectionChangeListener {
     private final static String LOCAL_STORAGE_COMPETITORS_FILTER_SETS_KEY = "sailingAnalytics.raceBoard.competitorsFilterSets";
     private final static CompetitorFilterCss css = CompetitorFilterResources.INSTANCE.css();
     private final TextBox searchTextBox;
@@ -378,5 +379,30 @@ public class CompetitorFilterPanel extends FlowPanel implements KeyUpHandler, Fi
     @Override public void filteredCompetitorsListChanged(Iterable<CompetitorDTO> filteredCompetitors) {}
     @Override public void addedToSelection(CompetitorDTO competitor) {}
     @Override public void removedFromSelection(CompetitorDTO competitor) {}
+
+    @Override
+    public String validate(StringMessages stringMessages) {
+        return null;
+    }
+
+    @Override
+    public String getLocalizedName(StringMessages stringMessages) {
+        return getName();
+    }
+
+    @Override
+    public String getLocalizedDescription(StringMessages stringMessages) {
+        return getName();
+    }
+
+    @Override
+    public FilterWithUI<CompetitorDTO> copy() {
+        return null;
+    }
+
+    @Override
+    public FilterUIFactory<CompetitorDTO> createUIFactory() {
+        return null;
+    }
 
 }
