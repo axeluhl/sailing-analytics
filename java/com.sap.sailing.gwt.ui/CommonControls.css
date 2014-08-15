@@ -940,3 +940,27 @@ video {
 	width: 18px;
 	vertical-align: middle;
 }
+
+.LeaderboardPanel-FilterControl-Panel {
+	width: 100%;
+	border-top: 1px solid #ececec;
+    margin-top: 3px;
+}
+
+.LeaderboardPanel-FilterClear-Button {
+	border: none;
+    box-shadow: #333 1px 1px 1px;
+    margin-top: 2px;
+    color: white;
+    padding: 5px;
+    font-size: 10px;
+    font-family: OpenSansSemiBold, Verdana, Arial, sans-serif;
+    outline: 0;
+    width: 60px;
+    margin-right: 1px;
+}
+
+.LeaderboardPanel-FilterControl-StatusLabel {
+	padding: 8px 2px;
+	font-size: 10px;
+}

@@ -154,9 +154,11 @@ public class CompetitorFilterPanel extends FlowPanel implements KeyUpHandler, Fi
             removeSearchFilter();
             clearTextBoxButton.addStyleName(css.hiddenButton());
         } else {
-            clearTextBoxButton.removeStyleName(css.hiddenButton());
-            ensureSearchFilterIsSet();
-            competitorSelectionProvider.setCompetitorsFilterSet(competitorSelectionProvider.getCompetitorsFilterSet()); // 
+            if (newValue.length() >= 2) {
+                clearTextBoxButton.removeStyleName(css.hiddenButton());
+                ensureSearchFilterIsSet();
+                competitorSelectionProvider.setCompetitorsFilterSet(competitorSelectionProvider.getCompetitorsFilterSet()); // 
+            }
         }
     }
 
@@ -212,7 +214,7 @@ public class CompetitorFilterPanel extends FlowPanel implements KeyUpHandler, Fi
                 competitorsFilterSets.setActiveFilterSet(newCompetitorsFilterSets.getActiveFilterSet());
                 
                 updateCompetitorsFilterContexts(newCompetitorsFilterSets);
-                competitorSelectionProvider.setCompetitorsFilterSet(newCompetitorsFilterSets.getActiveFilterSet());
+                competitorSelectionProvider.setCompetitorsFilterSet(newCompetitorsFilterSets.getActiveFilterSetWithGeneralizedType());
                 updateCompetitorsFilterControlState(newCompetitorsFilterSets);
                 storeCompetitorsFilterSets(newCompetitorsFilterSets);
              }
@@ -325,8 +327,8 @@ public class CompetitorFilterPanel extends FlowPanel implements KeyUpHandler, Fi
         // 1. selected competitors filter
         insertSelectedCompetitorsFilter(filterSets);
         
-        // 2. Top 50 competitors by race rank
-        int maxRaceRank = 50;
+        // 2. Top 30 competitors by race rank
+        int maxRaceRank = 30;
         FilterSet<CompetitorDTO, FilterWithUI<CompetitorDTO>> topNRaceRankCompetitorsFilterSet = 
                 new FilterSet<CompetitorDTO, FilterWithUI<CompetitorDTO>>(stringMessages.topNCompetitorsByRaceRank(maxRaceRank));
         CompetitorRaceRankFilter raceRankFilter = new CompetitorRaceRankFilter();
@@ -335,8 +337,8 @@ public class CompetitorFilterPanel extends FlowPanel implements KeyUpHandler, Fi
         topNRaceRankCompetitorsFilterSet.addFilter(raceRankFilter);
         filterSets.addFilterSet(topNRaceRankCompetitorsFilterSet);
 
-        // 3. Top 50 competitors by total rank
-        int maxTotalRank = 50;
+        // 3. Top 30 competitors by total rank
+        int maxTotalRank = 30;
         FilterSet<CompetitorDTO, FilterWithUI<CompetitorDTO>> topNTotalRankCompetitorsFilterSet =
                 new FilterSet<CompetitorDTO, FilterWithUI<CompetitorDTO>>(stringMessages.topNCompetitorsByTotalRank(maxTotalRank));
         CompetitorTotalRankFilter totalRankFilter = new CompetitorTotalRankFilter();
