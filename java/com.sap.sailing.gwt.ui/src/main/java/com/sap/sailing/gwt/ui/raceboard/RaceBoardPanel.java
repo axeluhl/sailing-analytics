@@ -95,6 +95,7 @@ public class RaceBoardPanel extends SimplePanel implements RegattasDisplayer, Ra
     private final TimeRangeWithZoomModel timeRangeWithZoomModel; 
     private final RegattaAndRaceIdentifier selectedRaceIdentifier;
 
+    private final String leaderboardName;
     private final LeaderboardPanel leaderboardPanel;
     private WindChart windChart;
     private MultiCompetitorRaceChart competitorChart;
@@ -136,6 +137,7 @@ public class RaceBoardPanel extends SimplePanel implements RegattasDisplayer, Ra
         this.timer = timer;
         this.event = event;
         this.currentRaceHasBeenSelectedOnce = false;
+        this.leaderboardName = leaderboardName;
         raceSelectionProvider.addRaceSelectionChangeListener(this);
         racesByIdentifier = new HashMap<RaceIdentifier, RaceDTO>();
         selectedRaceIdentifier = raceSelectionProvider.getSelectedRaces().iterator().next();
@@ -389,7 +391,7 @@ public class RaceBoardPanel extends SimplePanel implements RegattasDisplayer, Ra
             raceInformationHeader.add(raceAdditionalInformationLabel);
             Anchor regattaNameAnchor = new Anchor(raceIdentifier.getRegattaName());
             if (event != null) {
-                regattaNameAnchor.setHref("/gwt/Home.html#EventPlace:eventId="+event.id.toString()+"&navigationTab=Regattas");
+                regattaNameAnchor.setHref("/gwt/Home.html#EventPlace:eventId="+event.id.toString()+"&navigationTab=Regattas&leaderboardName="+leaderboardName);
             } else {
                 regattaNameAnchor.setHref("javascript:window.history.back();"); 
             }
