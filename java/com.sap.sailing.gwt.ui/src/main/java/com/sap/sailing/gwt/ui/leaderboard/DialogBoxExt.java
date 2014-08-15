@@ -33,6 +33,7 @@ public class DialogBoxExt extends DialogBox {
         closeWidget.getElement().addClassName("chartCloseButton");
         // an empty header could cause a problem!
         setHTML(title);
+
     }
 
     @Override

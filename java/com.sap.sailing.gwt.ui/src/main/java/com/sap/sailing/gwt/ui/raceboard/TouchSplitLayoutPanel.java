@@ -656,16 +656,16 @@ public class TouchSplitLayoutPanel extends DockLayoutPanel {
             splitterTogglerButton.addClickHandler(new ClickHandler() {
                 @Override
                 public void onClick(ClickEvent event) {
-                    boolean componentIsVisible = associatedComponent.isVisible();
-                    associatedComponent.setVisible(!componentIsVisible);
-                    splitter.setVisible(!componentIsVisible);
-                    splitter.setDraggerVisible(!componentIsVisible);
-                    if (!componentIsVisible == true) {
+                    boolean componentWasVisibleUntilNow = associatedComponent.isVisible();
+                    associatedComponent.setVisible(!componentWasVisibleUntilNow);
+                    splitter.setVisible(!componentWasVisibleUntilNow);
+                    splitter.setDraggerVisible(!componentWasVisibleUntilNow);
+                    if (!componentWasVisibleUntilNow == true) {
                         if (associatedComponent instanceof TimeListener) {
                             ((TimeListener) associatedComponent).timeChanged(new Date(), null);
                         }
                     }
-                    if (!componentIsVisible) {
+                    if (!componentWasVisibleUntilNow) {
                         splitterTogglerButton.removeStyleDependentName("Closed");
                         splitterTogglerButton.removeStyleDependentName("Closed-"+associatedComponent.getDependentCssClassName());
                         splitterTogglerButton.addStyleDependentName("Open");
@@ -817,7 +817,7 @@ public class TouchSplitLayoutPanel extends DockLayoutPanel {
         if (splitter != null) {
             LayoutData layoutData = (LayoutData) widget.getLayoutData();
             if (hidden) {
-                layoutData.oldSize = size;
+                layoutData.oldSize = layoutData.size;
                 widget.setVisible(false);
                 if (associatedComponentToWidget != null) {
                     if (associatedComponentToWidget.isVisible()) {
@@ -832,7 +832,7 @@ public class TouchSplitLayoutPanel extends DockLayoutPanel {
                         associatedComponentToWidget.setVisible(true);
                     }
                 }
-                splitter.setAssociatedWidgetSize(size, /* defer */false);
+                splitter.setAssociatedWidgetSize((layoutData.oldSize > 0 ? layoutData.oldSize : size), /* defer */false);
                 splitter.setDraggerVisible(!hidden);
                 splitter.setVisible(!hidden);
                 splitter.getToggleButton().removeStyleDependentName("Closed");
