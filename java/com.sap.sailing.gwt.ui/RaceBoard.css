@@ -638,3 +638,7 @@ img.openColumn {
 	box-shadow: none;
 	text-shadow: none;
 }
+
+.gwt-Button:hover {
+	background-color: #fcbb22 !important;
+}

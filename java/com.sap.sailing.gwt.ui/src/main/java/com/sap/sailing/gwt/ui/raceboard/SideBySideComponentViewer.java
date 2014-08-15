@@ -189,6 +189,9 @@ public class SideBySideComponentViewer implements ComponentViewer {
         if (!leftComponent.isVisible() && rightComponent.isVisible()) {
             // the leaderboard is not visible, but the map is
             if (isWidgetInSplitPanel(leftScrollPanel)) {
+                if (leftScrollPanel.getOffsetWidth() > 0) {
+                    savedSplitPosition = leftScrollPanel.getOffsetWidth();
+                }
                 splitLayoutPanel.setWidgetVisibility(leftScrollPanel, leftComponent, /*hidden*/true, savedSplitPosition);
             }
         } else if (leftComponent.isVisible() && rightComponent.isVisible()) {
