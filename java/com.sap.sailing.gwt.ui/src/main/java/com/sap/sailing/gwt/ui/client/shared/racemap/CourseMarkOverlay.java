@@ -99,6 +99,8 @@ public class CourseMarkOverlay extends CanvasOverlayV3 {
                 lastBuoyZoneRadiusInMeter = buoyZoneRadiusInMeter;
                 lastScaleFactor = markSizeScaleFactor;
                 lastShowBuoyZone = showBuoyZone;
+                lastWidth = canvasWidth;
+                lastHeight = canvasHeight;
             }
             Point buoyPositionInPx = mapProjection.fromLatLngToDivPixel(latLngPosition);
             if (showBuoyZone && mark.type == MarkType.BUOY && buoyZoneRadiusInPixel > MIN_BUOYZONE_RADIUS_IN_PX) {
