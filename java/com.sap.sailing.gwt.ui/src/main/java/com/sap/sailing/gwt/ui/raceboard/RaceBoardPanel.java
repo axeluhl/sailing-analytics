@@ -75,6 +75,7 @@ public class RaceBoardPanel extends SimplePanel implements RegattasDisplayer, Ra
     private final SailingServiceAsync sailingService;
     private final MediaServiceAsync mediaService;
     private final UserDTO user;
+    private final EventDTO event;
     private final StringMessages stringMessages;
     private final ErrorReporter errorReporter;
     private final RaceBoardViewConfiguration raceboardViewConfiguration;
@@ -133,6 +134,7 @@ public class RaceBoardPanel extends SimplePanel implements RegattasDisplayer, Ra
         this.errorReporter = errorReporter;
         this.userAgent = userAgent;
         this.timer = timer;
+        this.event = event;
         this.currentRaceHasBeenSelectedOnce = false;
         raceSelectionProvider.addRaceSelectionChangeListener(this);
         racesByIdentifier = new HashMap<RaceIdentifier, RaceDTO>();
@@ -179,12 +181,6 @@ public class RaceBoardPanel extends SimplePanel implements RegattasDisplayer, Ra
                 }
             }
         }
-        /* TODO: Disabling automatic filter loading for now. Do NOT enable before
-           there are tests especially for the pre-start phase!
-        competitorSelectionModel.setCompetitorsFilterSet(competitorsFilterSets.getActiveFilterSet());
-        updateCompetitorsFilterContexts(competitorsFilterSets);
-        updateCompetitorsFilterControlState(competitorsFilterSets);*/
-
         timePanel = new RaceTimePanel(timer, timeRangeWithZoomModel, stringMessages, raceTimesInfoProvider,
                 raceboardViewConfiguration.isCanReplayDuringLiveRaces());
         timeRangeWithZoomModel.addTimeZoomChangeListener(timePanel);
@@ -392,6 +388,11 @@ public class RaceBoardPanel extends SimplePanel implements RegattasDisplayer, Ra
             raceInformationHeader.add(raceNameLabel);
             raceInformationHeader.add(raceAdditionalInformationLabel);
             Anchor regattaNameAnchor = new Anchor(raceIdentifier.getRegattaName());
+            if (event != null) {
+                regattaNameAnchor.setHref("/gwt/Home.html#EventPlace:eventId="+event.id.toString()+"&navigationTab=Regattas");
+            } else {
+                regattaNameAnchor.setHref("javascript:window.history.back();"); 
+            }
             regattaNameAnchor.setStyleName("RegattaName-Anchor");
             Label raceTimeLabel = computeRaceInformation(raceColumn, fleet);
             raceTimeLabel.setStyleName("RaceTime-Label");
