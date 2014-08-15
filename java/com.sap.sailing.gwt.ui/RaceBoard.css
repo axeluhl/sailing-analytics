@@ -619,3 +619,8 @@ img.openColumn {
 .VideoPopup-Close-Button {
 	border: none;
 }
+
+.gwt-Button, .gwt-Button:visited {
+	background-color: #fcbb22 !important;
+	background-image: none;
+}
