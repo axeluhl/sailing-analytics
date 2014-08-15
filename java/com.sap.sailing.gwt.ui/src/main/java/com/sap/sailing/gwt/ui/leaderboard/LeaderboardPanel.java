@@ -1819,7 +1819,11 @@ public class LeaderboardPanel extends SimplePanel implements TimeListener, PlayS
         if (filtersActive) {
             String labelText = "";
             for (Filter<CompetitorDTO> filter : competitorSelectionProvider.getCompetitorsFilterSet().getFilters()) {
-                labelText += ((FilterWithUI<CompetitorDTO>)filter).getLocalizedDescription(stringMessages) + ", ";
+                if (filter instanceof FilterWithUI<?>) {
+                    labelText += ((FilterWithUI<CompetitorDTO>)filter).getLocalizedDescription(stringMessages) + ", ";
+                } else {
+                    labelText += filter.getName() + ", ";
+                }
             }
             filterStatusLabel.setText("Active Filter(s): " + labelText.substring(0, labelText.length()-2));
             filterClearButton.setVisible(true);
