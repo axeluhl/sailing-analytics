@@ -3041,7 +3041,9 @@ public class SailingServiceImpl extends ProxiedRemoteServiceServlet implements S
     public List<EventBaseDTO> getPublicEventsOfAllSailingServers() throws MalformedURLException {
         List<EventBaseDTO> result = new ArrayList<>();
         for (EventDTO localEvent : getEvents()) {
-            result.add(localEvent);
+            if(localEvent.isPublic) {
+                result.add(localEvent);
+            }
         }
         for (Entry<RemoteSailingServerReference, com.sap.sse.common.Util.Pair<Iterable<EventBase>, Exception>> serverRefAndEventsOrException :
                         getService().getPublicEventsOfAllSailingServers().entrySet()) {
