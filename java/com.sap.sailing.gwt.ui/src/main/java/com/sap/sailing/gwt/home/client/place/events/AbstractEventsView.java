@@ -23,9 +23,9 @@ public abstract class AbstractEventsView extends Composite implements EventsView
     @Override
     public void setEvents(List<EventBaseDTO> events) {
         for(EventBaseDTO event: events) {
-            if(event.startDate != null) {
-                if(DateUtil.isDayInPast(event.startDate)) { 
-                    // recent event
+            if(event.startDate != null && event.endDate != null) {
+                if(DateUtil.isDayInPast(event.startDate) || event.isRunning()) {
+                    // recent event or live event
                     int year = DateUtil.getYear(event.startDate);
                     List<EventBaseDTO> eventsOfYear = recentEventsOrderedByYear.get(year);
                     if(eventsOfYear == null) {
