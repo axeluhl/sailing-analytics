@@ -747,6 +747,12 @@ body ::-webkit-scrollbar-track {
     cursor: pointer;
     height: 24px;
     white-space: nowrap;
+    -moz-box-shadow: 0 1px 3px rgba(0, 0, 0, 0.3);
+	-webkit-box-shadow: 0 1px 3px rgba(0, 0, 0, 0.3);
+	-o-box-shadow: 0 1px 3px rgba(0, 0, 0, 0.3);
+	-ms-box-shadow: 0 1px 3px rgba(0, 0, 0, 0.3);
+	box-shadow: 0 1px 3px rgba(0, 0, 0, 0.3);
+	text-shadow: 0 -1px 1px rgba(0, 0, 0, 0.25);
 }
 
 .gwt-Button:active {
