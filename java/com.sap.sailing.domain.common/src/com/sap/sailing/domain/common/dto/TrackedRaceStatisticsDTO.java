@@ -13,7 +13,7 @@ public class TrackedRaceStatisticsDTO implements Serializable {
     public boolean hasVideoData;
     public boolean hasMeasuredWindData;
     public boolean hasLegProgressData;
-    public boolean hasLeaderData;
+    public boolean hasLeaderOrWinnerData;
 
     public Duration averageGPSDataSampleInterval;
     public Integer measuredWindSourcesCount;
@@ -33,6 +33,6 @@ public class TrackedRaceStatisticsDTO implements Serializable {
         hasVideoData= false;
         hasMeasuredWindData = false;
         hasLegProgressData = false;
-        hasLeaderData = false;
+        hasLeaderOrWinnerData = false;
     }
 }

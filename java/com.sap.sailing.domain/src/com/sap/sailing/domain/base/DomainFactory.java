@@ -17,6 +17,7 @@ import com.sap.sailing.domain.common.dto.RaceDTO;
 import com.sap.sailing.domain.common.dto.TrackedRaceDTO;
 import com.sap.sailing.domain.common.dto.TrackedRaceStatisticsDTO;
 import com.sap.sailing.domain.common.media.MediaTrack;
+import com.sap.sailing.domain.leaderboard.Leaderboard;
 import com.sap.sailing.domain.leaderboard.ScoringScheme;
 import com.sap.sailing.domain.tracking.MarkPassing;
 import com.sap.sailing.domain.tracking.TrackedRace;
@@ -56,7 +57,8 @@ public interface DomainFactory extends SharedDomainFactory {
 
     TrackedRaceDTO createTrackedRaceDTO(TrackedRace trackedRace);
 
-    TrackedRaceStatisticsDTO createTrackedRaceStatisticsDTO(TrackedRace trackedRace, Collection<MediaTrack> mediatracks);
+    TrackedRaceStatisticsDTO createTrackedRaceStatisticsDTO(TrackedRace trackedRace, Leaderboard leaderboard, RaceColumn raceColumn,
+            Fleet fleet, Collection<MediaTrack> mediatracks);
 
     /**
      * @param trackedRace must not be <code>null</code>
