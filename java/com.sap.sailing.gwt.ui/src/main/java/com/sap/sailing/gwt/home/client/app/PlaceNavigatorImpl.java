@@ -16,7 +16,7 @@ import com.sap.sailing.gwt.home.client.place.start.StartPlace;
 
 public class PlaceNavigatorImpl implements PlaceNavigator {
     private final PlaceController placeController;
-    private final static String DEFAULT_SAPSAILING_SERVER = "newhome.sapsailing.com"; // www.sapsailing.com 
+    private final static String DEFAULT_SAPSAILING_SERVER = "www.sapsailing.com"; 
     private final static String DEFAULT_SAPSAILING_SERVER_URL = "http://" + DEFAULT_SAPSAILING_SERVER;  
     
     protected PlaceNavigatorImpl(PlaceController placeController) {
