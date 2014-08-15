@@ -1079,7 +1079,12 @@ public class SliderBar extends FocusPanel implements RequiresResize, HasValue<Do
                         if (lastMarkerLabel != null) {
                             lastMarkerLabel.setPropertyString("className", "gwt-SliderBar-markerlabel-tooClose");
                             lastMarkerLabel.setPropertyString("innerHTML", "M"); // no space for more
-                            int currentMarkerOffsetLeft = Integer.parseInt(markerElements.get(i).getStyle().getLeft().replace("px", ""));
+                            int currentMarkerOffsetLeft = labelLeftOffset;
+                            try {
+                                currentMarkerOffsetLeft = Integer.parseInt(markerElements.get(i).getStyle().getLeft().replace("px", ""));
+                            } catch (NumberFormatException ex) {
+                                // ignore, can't do anything
+                            }
                             lastMarkerLabel.getStyle().setLeft(currentMarkerOffsetLeft-8, Unit.PX);
                         }
                     }
