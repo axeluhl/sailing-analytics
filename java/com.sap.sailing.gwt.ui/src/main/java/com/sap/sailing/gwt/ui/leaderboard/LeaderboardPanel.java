@@ -343,6 +343,8 @@ public class LeaderboardPanel extends SimplePanel implements TimeListener, PlayS
 
     private boolean initialCompetitorFilterHasBeenApplied = false;
 
+    private CompetitorFilterPanel competitorFilterPanel;
+
     protected StringMessages getStringMessages() {
         return stringMessages;
     }
@@ -1778,6 +1780,7 @@ public class LeaderboardPanel extends SimplePanel implements TimeListener, PlayS
                     new SettingsDialog<LeaderboardSettings>(LeaderboardPanel.this, stringMessages).show();
                 }
             });
+            this.competitorFilterPanel = competitorSearchTextBox;
         }
         SortedCellTable<LeaderboardRowDTO> leaderboardTable = getLeaderboardTable();
         leaderboardTable.getElement().getStyle().setMarginTop(5, Unit.PX);
@@ -1824,6 +1827,9 @@ public class LeaderboardPanel extends SimplePanel implements TimeListener, PlayS
             filterStatusLabel.setText("");
             filterClearButton.setVisible(false);
             filterControlPanel.setVisible(false);
+            if (competitorFilterPanel != null) {
+                competitorFilterPanel.clearSelection();
+            }
         }
     }
     

@@ -114,9 +114,7 @@ public class CompetitorFilterPanel extends FlowPanel implements KeyUpHandler, Fi
         clearTextBoxButton.addClickHandler(new ClickHandler() {
             @Override
             public void onClick(ClickEvent event) {
-                searchTextBox.setText("");
-                clearTextBoxButton.addStyleName(css.hiddenButton());
-                onKeyUp(null);
+                clearSelection();
             }
         });
         advancedSettingsButton = new Button("");
@@ -187,6 +185,12 @@ public class CompetitorFilterPanel extends FlowPanel implements KeyUpHandler, Fi
             }
             competitorSelectionProvider.setCompetitorsFilterSet(newFilterSetWithThis);
         }
+    }
+    
+    public void clearSelection() {
+        searchTextBox.setText("");
+        clearTextBoxButton.addStyleName(css.hiddenButton());
+        onKeyUp(null);
     }
 
     @Override
