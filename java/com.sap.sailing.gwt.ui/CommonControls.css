@@ -733,7 +733,7 @@ body ::-webkit-scrollbar-track {
 .gwt-Button, .gwt-Button:visited {
   font-family: OpenSansSemiBold, Verdana, Arial, sans-serif;
   border: none;
-	background-color: #fcbb22;
+  background: url(images/btn-cta-orangeleft.png) center top repeat-x;
     display: inline-block;
     padding: 2px 10px 4px;
     color: #fff;
