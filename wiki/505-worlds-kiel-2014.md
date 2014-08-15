@@ -4,7 +4,10 @@
 
 We run two servers for the event, A and B, for fast and available switching. The DB they use is called 505WORLDS2014, and so is the replication channel. The git branch we use to merge the features we want to deploy to the event servers is called `505worlds2014` and the git tag used to build a release for it is called `505worlds2014-release`. See http://hudson.sapsailing.com/job/SAPSailingAnalytics-505worlds2014/ and http://hudson.sapsailing.com/job/SAPSailingAnalytics-505worlds2014-release/, respectively, for their Hudson jobs.
 
+## Replication
+
 RabbitMQ server for replication: 54.246.250.138
+Replication Exchange Name: 505WORLDS2014
 
 Regatta Overview: http://505worlds2014ro.sapsailing.com
 
