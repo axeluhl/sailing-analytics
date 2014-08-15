@@ -79,9 +79,9 @@ public class CourseMarkOverlay extends CanvasOverlayV3 {
                     canvasHeight = (buoyZoneRadiusInPixel + 1) * 2;
                 }
             }
-            setCanvasSize((int) canvasWidth, (int) canvasHeight);
-            Context2d context2d = getCanvas().getContext2d();
             if (needToDraw(showBuoyZone, buoyZoneRadiusInMeter, canvasWidth, canvasHeight, markSizeScaleFactor)) {
+                setCanvasSize((int) canvasWidth, (int) canvasHeight);
+                Context2d context2d = getCanvas().getContext2d();
                 // draw the course mark
                 markVectorGraphics.drawMarkToCanvas(context2d, showBuoyZone, canvasWidth, canvasHeight, markSizeScaleFactor);
                 // draw the buoy zone
