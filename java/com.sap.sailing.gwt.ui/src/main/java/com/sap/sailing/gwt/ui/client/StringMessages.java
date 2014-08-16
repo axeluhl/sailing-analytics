@@ -1079,4 +1079,6 @@ public interface StringMessages extends Messages {
     String windChart();
     String showVideoPopup();
     String hideVideoPopup();
+    String manageMedia();
+    String manageMediaTooltip();
 }
