@@ -93,7 +93,7 @@ public class MediaSelector implements PlayStateListener, TimeListener, MediaSele
 
         mediaSelectionDialog = new MediaSelectionDialog(this);
 
-        manageMediaButton = new Button("Manage Media");
+        manageMediaButton = new Button(stringMessages.manageMedia());
         manageMediaButton.addClickHandler(new ClickHandler() {
             @Override
             public void onClick(ClickEvent event) {
@@ -106,7 +106,7 @@ public class MediaSelector implements PlayStateListener, TimeListener, MediaSele
         });
         manageMediaButton.addStyleName("raceBoardNavigation-settingsButton");
         manageMediaButton.getElement().getStyle().setFloat(Style.Float.LEFT);
-        manageMediaButton.setTitle("Configure Media");
+        manageMediaButton.setTitle(stringMessages.manageMediaTooltip());
 
         toggleMediaButton = new CheckBox("Audio & Video");
         toggleMediaButton.addStyleName("raceBoardNavigation-innerElement");
