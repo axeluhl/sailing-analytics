@@ -1787,8 +1787,8 @@ public class LeaderboardPanel extends SimplePanel implements TimeListener, PlayS
         leaderboardTable.getElement().getStyle().setMarginTop(5, Unit.PX);
         filterControlPanel = new HorizontalPanel();
         filterControlPanel.setStyleName("LeaderboardPanel-FilterControl-Panel");
-        contentPanel.add(createFilterDeselectionControl());
         contentPanel.add(leaderboardTable);
+        contentPanel.add(createFilterDeselectionControl());
         setWidget(contentPanel);
         raceNameForDefaultSorting = settings.getNameOfRaceToSort();
     }

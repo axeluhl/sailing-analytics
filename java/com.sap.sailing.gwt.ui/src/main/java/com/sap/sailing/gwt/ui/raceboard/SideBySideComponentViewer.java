@@ -42,7 +42,7 @@ import com.sap.sse.gwt.client.dialog.WindowBox;
 public class SideBySideComponentViewer implements ComponentViewer {
     
     private static final int DEFAULT_SOUTH_SPLIT_PANEL_HEIGHT = 200;
-    private final int MIN_LEADERBOARD_WIDTH = 428; // works well for 505 and ESS
+    private final int MIN_LEADERBOARD_WIDTH = 432; // works well for 505 and ESS
 
     /**
      * Absolute Panel that informs its children about a resize

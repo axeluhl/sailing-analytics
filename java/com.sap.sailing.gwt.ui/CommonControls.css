@@ -942,7 +942,7 @@ video {
 }
 
 .LeaderboardPanel-FilterControl-Panel {
-	width: 100%;
+	width: 380px;
 	border-top: 1px solid #ececec;
     margin-top: 3px;
 }
