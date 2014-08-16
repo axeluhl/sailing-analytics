@@ -8,6 +8,7 @@ import com.google.gwt.dom.client.AudioElement;
 import com.google.gwt.dom.client.MediaElement;
 import com.google.gwt.media.client.Audio;
 import com.google.gwt.user.client.rpc.AsyncCallback;
+import com.google.gwt.user.client.ui.Button;
 import com.google.gwt.user.client.ui.SimplePanel;
 import com.google.gwt.user.client.ui.Widget;
 import com.sap.sailing.domain.common.RegattaAndRaceIdentifier;
@@ -46,6 +47,8 @@ public class MediaComponent implements Component<Void>, PlayStateListener, TimeL
     private final UserDTO user;
     private final MediaServiceAsync mediaService;
     private final boolean autoSelectMedia;
+    
+    private final MediaSelector mediaSelector;
 
     private Date currentRaceTime;
     private double currentPlaybackSpeed = 1.0d;
@@ -63,6 +66,11 @@ public class MediaComponent implements Component<Void>, PlayStateListener, TimeL
         this.user = user;
         this.autoSelectMedia = autoSelectMedia;
         this.mediaService = mediaService;
+        this.mediaSelector = new MediaSelector(selectedRaceIdentifier, raceTimesInfoProvider, raceTimer, mediaService, stringMessages, errorReporter, userAgent, user, autoSelectMedia);
+    }
+    
+    public Button getMediaSelectionButton() {
+        return this.mediaSelector.getManageMediaButton();
     }
 
     public boolean isPotentiallyPlayable(MediaTrack mediaTrack) {
@@ -198,6 +206,7 @@ public class MediaComponent implements Component<Void>, PlayStateListener, TimeL
             }
             @Override
             public void onSuccess(Collection<MediaTrack> mediaTracks) {
+                mediaSelector.setMediaTracks(mediaTracks);
                 MediaComponent.this.mediaTracks.clear();
                 MediaComponent.this.mediaTracks.addAll(mediaTracks);
                 for (MediaTrack mediaTrack : MediaComponent.this.mediaTracks) {

@@ -73,6 +73,7 @@ public class MediaSelector implements PlayStateListener, TimeListener, MediaSele
     private Date currentRaceTime;
     private double currentPlaybackSpeed = 1.0d;
     private PlayStates currentPlayState = PlayStates.Paused;
+    private boolean showingMediaSelection;
 
     public MediaSelector(RegattaAndRaceIdentifier selectedRaceIdentifier, RaceTimesInfoProvider raceTimesInfoProvider,
             Timer raceTimer, MediaServiceAsync mediaService, StringMessages stringMessages,
@@ -92,7 +93,7 @@ public class MediaSelector implements PlayStateListener, TimeListener, MediaSele
 
         mediaSelectionDialog = new MediaSelectionDialog(this);
 
-        manageMediaButton = new Button();
+        manageMediaButton = new Button(stringMessages.manageMedia());
         manageMediaButton.addClickHandler(new ClickHandler() {
             @Override
             public void onClick(ClickEvent event) {
@@ -105,7 +106,7 @@ public class MediaSelector implements PlayStateListener, TimeListener, MediaSele
         });
         manageMediaButton.addStyleName("raceBoardNavigation-settingsButton");
         manageMediaButton.getElement().getStyle().setFloat(Style.Float.LEFT);
-        manageMediaButton.setTitle("Configure Media");
+        manageMediaButton.setTitle(stringMessages.manageMediaTooltip());
 
         toggleMediaButton = new CheckBox("Audio & Video");
         toggleMediaButton.addStyleName("raceBoardNavigation-innerElement");
@@ -126,6 +127,20 @@ public class MediaSelector implements PlayStateListener, TimeListener, MediaSele
         });
         setWidgetsVisible(false);
 
+    }
+    
+    public Button getManageMediaButton() {
+        return this.manageMediaButton;
+    }
+    
+    public void setMediaTracks(Collection<MediaTrack> mediaTracks) {
+        this.mediaTracks.clear();
+        this.mediaTracks.addAll(mediaTracks);
+        for (MediaTrack mediaTrack : MediaSelector.this.mediaTracks) {
+            setStatus(mediaTrack);
+        }
+        setWidgetsVisible((MediaSelector.this.mediaTracks.size() > 0) || (MediaSelector.this.user != null));
+        timeChanged(raceTimesInfoProvider.getRaceTimesInfo(raceIdentifier).startOfRace, null);
     }
 
     private boolean isPotentiallyPlayable(MediaTrack mediaTrack) {
@@ -602,10 +617,12 @@ public class MediaSelector implements PlayStateListener, TimeListener, MediaSele
         boolean showAddButton = MediaSelector.this.user != null;
         mediaSelectionDialog.show(reachableVideoTracks, playingVideoTracks, reachableAudioTracks,
                 playingAudioTrack, showAddButton, toggleMediaButton);
+        showingMediaSelection = true;
     }
 
     private void hideSelectionDialog() {
         mediaSelectionDialog.hide();
+        showingMediaSelection = false;
     }
 
 }

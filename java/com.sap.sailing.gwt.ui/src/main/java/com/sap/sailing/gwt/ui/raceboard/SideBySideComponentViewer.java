@@ -27,6 +27,7 @@ import com.sap.sailing.gwt.ui.client.shared.components.Component;
 import com.sap.sailing.gwt.ui.client.shared.components.ComponentViewer;
 import com.sap.sailing.gwt.ui.client.shared.components.SettingsDialog;
 import com.sap.sailing.gwt.ui.leaderboard.LeaderboardPanel;
+import com.sap.sailing.gwt.ui.shared.UserDTO;
 import com.sap.sse.common.Util.Pair;
 import com.sap.sse.gwt.client.dialog.WindowBox;
 
@@ -70,7 +71,7 @@ public class SideBySideComponentViewer implements ComponentViewer {
     private int savedSplitPosition = -1;
     private boolean layoutForLeftComponentForcedOnce = false;
     
-    public SideBySideComponentViewer(final LeaderboardPanel leftComponentP, final Component<?> rightComponentP, final MediaComponent mediaComponent, List<Component<?>> components, final StringMessages stringMessages) {
+    public SideBySideComponentViewer(final LeaderboardPanel leftComponentP, final Component<?> rightComponentP, final MediaComponent mediaComponent, List<Component<?>> components, final StringMessages stringMessages, UserDTO user) {
         this.stringMessages = stringMessages;
         this.leftComponent = leftComponentP;
         this.rightComponent = rightComponentP;
@@ -101,6 +102,9 @@ public class SideBySideComponentViewer implements ComponentViewer {
         // add additional toggle buttons panel that currently only contains the video button
         List<Pair<Button, Component<?>>> additionalVerticalButtons = new ArrayList<Pair<Button,Component<?>>>();
         additionalVerticalButtons.add(new Pair<Button, Component<?>>(videoControlButton, mediaComponent));
+        if (user != null) {
+            additionalVerticalButtons.add(new Pair<Button, Component<?>>(mediaComponent.getMediaSelectionButton(), mediaComponent));
+        }
         
         // ensure that toggle buttons are positioned right
         splitLayoutPanel.lastComponentHasBeenAdded(this, panelForMapAndHorizontalToggleButtons, additionalVerticalButtons);
