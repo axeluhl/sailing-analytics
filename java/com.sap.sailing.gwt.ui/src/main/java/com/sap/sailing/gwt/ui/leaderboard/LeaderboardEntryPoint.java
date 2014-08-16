@@ -4,7 +4,6 @@ import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
 import java.util.Map;
-import java.util.UUID;
 import java.util.logging.Logger;
 
 import com.google.gwt.core.client.GWT;
@@ -68,49 +67,27 @@ public class LeaderboardEntryPoint extends AbstractEntryPoint {
         leaderboardGroupName = Window.Location.getParameter(LeaderboardUrlSettings.PARAM_LEADERBOARD_GROUP_NAME);
 
         if (leaderboardName != null) {
-            final Runnable checkLeaderboardNameAndCreateUI = new Runnable() {
-                @Override
-                public void run() {
-                    sailingService.checkLeaderboardName(leaderboardName,
-                            new MarkedAsyncCallback<Util.Pair<String, LeaderboardType>>(
-                                    new AsyncCallback<Util.Pair<String, LeaderboardType>>() {
-                                        @Override
-                                        public void onSuccess(Util.Pair<String, LeaderboardType> leaderboardNameAndType) {
-                                            if (leaderboardNameAndType != null
-                                                    && leaderboardName.equals(leaderboardNameAndType.getA())) {
-                                                Window.setTitle(leaderboardName);
-                                                leaderboardType = leaderboardNameAndType.getB();
-                                                createUI(showRaceDetails, embedded, hideToolbar, event);
-                                            } else {
-                                                RootPanel.get().add(new Label(stringMessages.noSuchLeaderboard()));
-                                            }
-                                        }
+            sailingService.checkLeaderboardName(leaderboardName,
+                    new MarkedAsyncCallback<Util.Pair<String, LeaderboardType>>(
+                            new AsyncCallback<Util.Pair<String, LeaderboardType>>() {
+                                @Override
+                                public void onSuccess(Util.Pair<String, LeaderboardType> leaderboardNameAndType) {
+                                    if (leaderboardNameAndType != null
+                                            && leaderboardName.equals(leaderboardNameAndType.getA())) {
+                                        Window.setTitle(leaderboardName);
+                                        leaderboardType = leaderboardNameAndType.getB();
+                                        createUI(showRaceDetails, embedded, hideToolbar, event);
+                                    } else {
+                                        RootPanel.get().add(new Label(stringMessages.noSuchLeaderboard()));
+                                    }
+                                }
 
-                                        @Override
-                                        public void onFailure(Throwable t) {
-                                            reportError("Error trying to obtain list of leaderboard names: "
-                                                    + t.getMessage());
-                                        }
-                                    }));
-                }
-            };
-            if (eventId == null) {
-                checkLeaderboardNameAndCreateUI.run(); // use null-initialized event field
-            } else {
-                sailingService.getEventById(eventId, /* withStatisticalData */false, new MarkedAsyncCallback<EventDTO>(
-                        new AsyncCallback<EventDTO>() {
-                            @Override
-                            public void onFailure(Throwable caught) {
-                                reportError("Error trying to obtain event "+eventId+": " + caught.getMessage());
-                            }
-
-                            @Override
-                            public void onSuccess(EventDTO result) {
-                                event = result;
-                                checkLeaderboardNameAndCreateUI.run();
-                            }
-                        }));
-            }
+                                @Override
+                                public void onFailure(Throwable t) {
+                                    reportError("Error trying to obtain list of leaderboard names: "
+                                            + t.getMessage());
+                                }
+            }));
         } else {
             RootPanel.get().add(new Label(stringMessages.noSuchLeaderboard()));
         }

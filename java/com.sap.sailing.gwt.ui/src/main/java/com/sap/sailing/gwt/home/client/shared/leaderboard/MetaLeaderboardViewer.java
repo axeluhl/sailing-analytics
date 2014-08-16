@@ -42,7 +42,7 @@ public class MetaLeaderboardViewer extends AbstractLeaderboardViewer {
         super(competitorSelectionModel, asyncActionsExecutor,  timer, stringMessages, new LeaderboardPanel(sailingService, asyncActionsExecutor,
                         leaderboardSettings, preselectedRace, competitorSelectionModel, timer,
                         leaderboardGroupName, metaLeaderboardName, errorReporter, stringMessages, userAgent,
-                        showRaceDetails, /* raceTimesInfoProvider */null, autoExpandLastRaceColumn,  /* adjustTimerDelay */ true));
+                        showRaceDetails, /* raceTimesInfoProvider */null, false, null, autoExpandLastRaceColumn,  /* adjustTimerDelay */ true, false));
         final FlowPanel mainPanel = new FlowPanel();
         setWidget(mainPanel);
         final Label overallStandingsLabel = new Label(stringMessages.overallStandings());
