@@ -43,6 +43,7 @@ public class TabletAndDesktopLeaderboardView extends Composite implements Leader
     // temp fields --> will be moved to a leaderboard partial later on
     @UiField HeadingElement title;
     @UiField Anchor settingsAnchor;
+    @UiField Anchor reloadAnchor;
     
     private AbstractLeaderboardViewer leaderboardViewer;
     
@@ -53,6 +54,7 @@ public class TabletAndDesktopLeaderboardView extends Composite implements Leader
         
         initWidget(uiBinder.createAndBindUi(this));
         
+        reloadAnchor.setVisible(false);
         title.setInnerText(TextMessages.INSTANCE.leaderboard() + ": " + leaderboardName);
     }
     
@@ -82,6 +84,10 @@ public class TabletAndDesktopLeaderboardView extends Composite implements Leader
         ScrollPanel contentScrollPanel = new ScrollPanel();
         contentScrollPanel.setWidget(leaderboardViewer);
         leaderboardPanel.add(contentScrollPanel);
+    }
+
+    @UiHandler("reloadAnchor")
+    void reloadClicked(ClickEvent event) {
     }
     
     @UiHandler("settingsAnchor")

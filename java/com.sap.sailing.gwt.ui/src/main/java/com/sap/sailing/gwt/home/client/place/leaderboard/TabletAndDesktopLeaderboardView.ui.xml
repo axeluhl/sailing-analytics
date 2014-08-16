@@ -6,6 +6,12 @@
     <ui:with field="i18n" type="com.sap.sailing.gwt.home.client.i18n.TextMessages"/>
 	<ui:with field="res" type="com.sap.sailing.gwt.home.client.HomeResources" />
     <ui:with field="local_res" type="com.sap.sailing.gwt.home.client.place.event.regattaleaderboard.EventRegattaLeaderboardResources" />
+    <ui:style>
+        .leaderboardPanel {
+        background-color:#f8f8f8;
+		padding: 0 10px 10px 10px;
+    }
+	</ui:style>
 	<g:HTMLPanel>
 		<s:header.CompactEventHeader ui:field='eventHeader'/>
 		<!-- The leaderboard of a regatta-->
@@ -19,12 +25,10 @@
 		  </div>
 		  <div class="{res.mediaCss.small3} {res.mediaCss.columns}">
  			<g:Anchor ui:field="settingsAnchor" href="javascript:;" styleName="{res.mainCss.button} {local_res.css.eventregattaleaderboard_meta_settings}"></g:Anchor>
- 			<!-- 
-			<a href="#" class="{res.mainCss.button} {local_res.css.eventregattaleaderboard_meta_reload}"></a>
- 			 -->
+			<g:Anchor ui:field="reloadAnchor" href="javascript:;" styleName="{res.mainCss.button} {local_res.css.eventregattaleaderboard_meta_reload}"></g:Anchor>
      	  </div>
-          <div class="{res.mediaCss.large12} {res.mediaCss.columns}" style="background-color:#f8f8f8;">
-				<g:HTMLPanel ui:field="leaderboardPanel">
+          <div class="{res.mediaCss.large12} {res.mediaCss.columns}">
+				<g:HTMLPanel ui:field="leaderboardPanel" styleName="{style.leaderboardPanel}">
         		</g:HTMLPanel>
 		   </div>
 		</div>
