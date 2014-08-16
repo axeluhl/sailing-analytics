@@ -26,6 +26,7 @@ public interface TextMessages extends Messages {
     String pleaseTryAgain();
     String reloadPage();
     String errorMessageLoadingData();
+    String errorMessageNoSuchLeaderboard();
     String raceNotScheduled();
     
     String countdownDays();
@@ -40,7 +41,7 @@ public interface TextMessages extends Messages {
     String finished();
     String watchNow();
     String lastUpdate();
-    String leaderBoard();
+    String leaderboard();
     String boxNewsUpdateMoreLink();
     String boxNewsUpdateTitle();
     String boxUpcomingRacesCountdownStarted1();

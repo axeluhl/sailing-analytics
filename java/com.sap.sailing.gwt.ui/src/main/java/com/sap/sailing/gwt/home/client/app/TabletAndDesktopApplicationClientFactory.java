@@ -13,6 +13,8 @@ import com.sap.sailing.gwt.home.client.place.event.TabletAndDesktopEventWithoutR
 import com.sap.sailing.gwt.home.client.place.events.EventsActivity;
 import com.sap.sailing.gwt.home.client.place.events.EventsView;
 import com.sap.sailing.gwt.home.client.place.events.TabletAndDesktopEventsView;
+import com.sap.sailing.gwt.home.client.place.leaderboard.LeaderboardView;
+import com.sap.sailing.gwt.home.client.place.leaderboard.TabletAndDesktopLeaderboardView;
 import com.sap.sailing.gwt.home.client.place.searchresult.SearchResultView;
 import com.sap.sailing.gwt.home.client.place.searchresult.TabletAndDesktopSearchResultView;
 import com.sap.sailing.gwt.home.client.place.solutions.SolutionsActivity;
@@ -43,7 +45,7 @@ public class TabletAndDesktopApplicationClientFactory extends AbstractApplicatio
 
     @Override
     public EventView createEventView(EventDTO event, List<RaceGroupDTO> raceGroups, String leaderboardName, Timer timerForClientServerOffset) {
-        return new TabletAndDesktopEventView(getSailingService(), event, raceGroups, leaderboardName, timerForClientServerOffset);
+        return new TabletAndDesktopEventView(getSailingService(), event, raceGroups, leaderboardName, timerForClientServerOffset, getPlaceNavigator());
     }
 
     @Override
@@ -74,6 +76,11 @@ public class TabletAndDesktopApplicationClientFactory extends AbstractApplicatio
     @Override
     public SolutionsView createSolutionsView(SolutionsActivity activity) {
         return new TabletAndDesktopSolutionsView();
+    }
+
+    @Override
+    public LeaderboardView createLeaderboardView(EventDTO event, String leaderboardName, Timer timerForClientServerOffset) {
+        return new TabletAndDesktopLeaderboardView(event, leaderboardName, timerForClientServerOffset, getPlaceNavigator());
     }
 
     @Override
