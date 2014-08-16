@@ -1796,9 +1796,9 @@ public class LeaderboardPanel extends SimplePanel implements TimeListener, PlayS
     private Widget createFilterDeselectionControl() {
         filterStatusLabel = new Label();
         filterStatusLabel.setStyleName("LeaderboardPanel-FilterControl-StatusLabel");
-        filterStatusLabel.setText("No filter active");
+        filterStatusLabel.setText("");
         filterControlPanel.add(filterStatusLabel);
-        filterClearButton = new Button("Reset All");
+        filterClearButton = new Button(stringMessages.showAll());
         filterClearButton.setStyleName("LeaderboardPanel-FilterClear-Button");
         filterClearButton.addClickHandler(new ClickHandler() {
             @Override

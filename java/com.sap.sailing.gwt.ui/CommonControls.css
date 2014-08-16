@@ -948,17 +948,17 @@ video {
 }
 
 .LeaderboardPanel-FilterClear-Button {
-	border: none;
-    box-shadow: #333 1px 1px 1px;
     margin-top: 2px;
-    color: #333;
-    padding: 5px;
     font-size: 10px;
-    font-family: OpenSansSemiBold, Verdana, Arial, sans-serif;
     outline: 0;
-    width: 60px;
-    background-color: #ececec;
-    margin-right: 1px;
+    height: 23px;
+	background-color: #fff;
+    border: 1px solid #cecece;
+    border-radius: 7px;
+}
+
+.LeaderboardPanel-FilterClear-Button:hover {
+	background-color: #ececec;
 }
 
 .LeaderboardPanel-FilterControl-StatusLabel {
