@@ -6,17 +6,29 @@ import com.sap.sailing.gwt.home.client.AbstractBasePlace;
 public class LeaderboardPlace extends AbstractBasePlace {
     private final String eventUuidAsString;
     private final String leaderboardIdAsNameString;
+    private final Boolean showRaceDetails;
+    private final Boolean showSettings;
+    
+    private final static String PARAM_EVENTID = "eventId";
+    private final static String PARAM_LEADERBOARD_NAME = "leaderboardName";
+    private final static String PARAM_SHOW_RACE_DETAILS = "showRaceDetails";
+    private final static String PARAM_SHOW_SETTINGS = "showSettings";
     
     public LeaderboardPlace(String url) {
         super(url);
-        eventUuidAsString = getParameter("eventId");
-        leaderboardIdAsNameString = getParameter("leaderboardName");
+        eventUuidAsString = getParameter(PARAM_EVENTID);
+        leaderboardIdAsNameString = getParameter(PARAM_LEADERBOARD_NAME);
+        showRaceDetails = Boolean.valueOf(getParameter(PARAM_SHOW_RACE_DETAILS));
+        showSettings = Boolean.valueOf(getParameter(PARAM_SHOW_SETTINGS));
     }
 
-    public LeaderboardPlace(String eventUuidAsString, String leaderboardIdAsNameString) {
-        super("eventId", eventUuidAsString, "leaderboardName", leaderboardIdAsNameString);
+    public LeaderboardPlace(String eventUuidAsString, String leaderboardIdAsNameString, Boolean showRaceDetails, Boolean showSettings) {
+        super(PARAM_EVENTID, eventUuidAsString, PARAM_LEADERBOARD_NAME, leaderboardIdAsNameString, 
+                PARAM_SHOW_RACE_DETAILS, String.valueOf(showRaceDetails), PARAM_SHOW_SETTINGS,  String.valueOf(showSettings));
         this.eventUuidAsString = eventUuidAsString;
         this.leaderboardIdAsNameString = leaderboardIdAsNameString;
+        this.showRaceDetails = showRaceDetails;
+        this.showSettings = showSettings;
     }
 
     public String getEventUuidAsString() {
@@ -25,6 +37,14 @@ public class LeaderboardPlace extends AbstractBasePlace {
 
     public String getLeaderboardIdAsNameString() {
         return leaderboardIdAsNameString;
+    }
+
+    public Boolean getShowRaceDetails() {
+        return showRaceDetails;
+    }
+
+    public Boolean getShowSettings() {
+        return showSettings;
     }
 
     public static class Tokenizer implements PlaceTokenizer<LeaderboardPlace> {
