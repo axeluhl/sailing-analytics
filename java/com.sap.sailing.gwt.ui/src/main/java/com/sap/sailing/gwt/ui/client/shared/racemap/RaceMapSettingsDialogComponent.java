@@ -212,7 +212,10 @@ public class RaceMapSettingsDialogComponent implements SettingsDialogComponent<R
             result.setTailLengthInMilliseconds(tailLengthBox.getValue() == null ? -1 : tailLengthBox.getValue() * 1000l);
         }
         if (helpLinesSettings.isVisible(HelpLineTypes.BUOYZONE)) {
-            result.setBuoyZoneRadiusInMeters(buoyZoneRadiusBox.getValue());
+            final Double value = buoyZoneRadiusBox.getValue();
+            if (value != null) {
+                result.setBuoyZoneRadiusInMeters(value);
+            }
         }
         return result;
     }
