@@ -1659,7 +1659,8 @@ public abstract class AbstractSimpleLeaderboardImpl implements Leaderboard, Race
             boolean waitForLatestAnalyses, Map<Leg, LinkedHashMap<Competitor, Integer>> legRanksCache,
             LeaderboardDTOCalculationReuseCache cache) throws NoWindException {
         LegEntryDTO result;
-        if (trackedLeg == null || trackedLeg.getTime(timePoint) == null) {
+        final Duration time = trackedLeg.getTime(timePoint);
+        if (trackedLeg == null || time == null) {
             result = null;
         } else {
             result = new LegEntryDTO();
@@ -1681,7 +1682,7 @@ public abstract class AbstractSimpleLeaderboardImpl implements Leaderboard, Race
             Distance distanceTraveled = trackedLeg.getDistanceTraveled(timePoint);
             result.distanceTraveledInMeters = distanceTraveled == null ? null : distanceTraveled.getMeters();
             result.estimatedTimeToNextWaypointInSeconds = trackedLeg.getEstimatedTimeToNextMarkInSeconds(timePoint, WindPositionMode.EXACT, cache);
-            result.timeInMilliseconds = trackedLeg.getTime(timePoint).asMillis();
+            result.timeInMilliseconds = time.asMillis();
             result.finished = trackedLeg.hasFinishedLeg(timePoint);
             result.gapToLeaderInSeconds = trackedLeg.getGapToLeaderInSeconds(timePoint,
                     legRanksCache.get(trackedLeg.getLeg()).entrySet().iterator().next().getKey(), WindPositionMode.LEG_MIDDLE);
