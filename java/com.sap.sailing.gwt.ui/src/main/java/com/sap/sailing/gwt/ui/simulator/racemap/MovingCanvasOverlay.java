@@ -16,8 +16,7 @@ import com.sap.sailing.gwt.ui.simulator.streamlets.Vector;
  */
 public abstract class MovingCanvasOverlay extends FullCanvasOverlay {
 
-    private LatLng ne;
-    private LatLng sw;
+    private LatLng nw;
 
     public MovingCanvasOverlay(MapWidget map, int zIndex) {
         super(map, zIndex);
@@ -35,21 +34,23 @@ public abstract class MovingCanvasOverlay extends FullCanvasOverlay {
 
         // calculate pixel-positions of old and new canvas-bounds using the same, current mapProjection
         // start from LatLng, as the canvas might have jumped to new bounds that do not intersect with the old bounds
-        Point swOldPx = mapProjection.fromLatLngToDivPixel(sw);
-        Point neOldPx = mapProjection.fromLatLngToDivPixel(ne);
-        sw = getMap().getBounds().getSouthWest();
-        ne = getMap().getBounds().getNorthEast();
-        Point swNewPx = mapProjection.fromLatLngToDivPixel(sw);
-        Point neNewPx = mapProjection.fromLatLngToDivPixel(ne);
-        widgetPosLeft = Math.min(swNewPx.getX(), neNewPx.getX());
-        widgetPosTop = Math.min(swNewPx.getY(), neNewPx.getY());
+        Point nwOldPx;
+        if (nw == null) {
+            nwOldPx = null;
+        } else {
+            nwOldPx = mapProjection.fromLatLngToDivPixel(nw);
+        }
+        nw = LatLng.newInstance(getMap().getBounds().getNorthEast().getLatitude(), getMap().getBounds().getSouthWest().getLongitude());
+        Point nwNewPx = mapProjection.fromLatLngToDivPixel(nw);
+        widgetPosLeft = Math.round(nwNewPx.getX());
+        widgetPosTop = Math.round(nwNewPx.getY());
 
         // calculate the translation-vector between old and new origin in pixels
-        if (swOldPx == null) {
+        if (nwOldPx == null) {
             diffPx = new Vector(0, 0);
         } else {
-            double oldPosLeft = Math.min(swOldPx.getX(), neOldPx.getX());
-            double oldPosTop = Math.min(swOldPx.getY(), neOldPx.getY());
+            double oldPosLeft = Math.round(nwOldPx.getX());
+            double oldPosTop = Math.round(nwOldPx.getY());
             diffPx = new Vector(oldPosLeft - widgetPosLeft, oldPosTop - widgetPosTop);
         }
         
@@ -74,7 +75,6 @@ public abstract class MovingCanvasOverlay extends FullCanvasOverlay {
     }
     
     public void initCanvasOrigin() {
-        sw = null;
-        ne = null;
+        nw = null;
     }
 }

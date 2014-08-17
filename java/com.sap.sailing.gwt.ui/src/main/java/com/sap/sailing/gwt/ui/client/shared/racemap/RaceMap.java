@@ -278,13 +278,13 @@ public class RaceMap extends AbsolutePanel implements TimeListener, CompetitorSe
     /**
      * The map bounds as last received by map callbacks; used to determine whether to suppress the boat animation during zoom/pan
      */
-    private LatLngBounds currentMapBounds;
+    private LatLngBounds currentMapBounds; // bounds to which bounds-changed-handler compares
+    private int currentZoomLevel;          // zoom-level to which bounds-changed-handler compares
     
-    private int currentZoomLevel;
-    private boolean autoZoomIn = false;
-    private boolean autoZoomOut = false;
-    private int autoZoomLevel;
-    LatLngBounds autoZoomLatLngBounds;
+    private boolean autoZoomIn = false;  // flags auto-zoom-in in progress
+    private boolean autoZoomOut = false; // flags auto-zoom-out in progress
+    private int autoZoomLevel;           // zoom-level to which auto-zoom-in/-out is zooming
+    LatLngBounds autoZoomLatLngBounds;   // bounds to which auto-zoom-in/-out is panning&zooming
     
     private WindStreamletsRaceboardOverlay streamletOverlay;
     private final boolean showViewStreamlets;
@@ -394,11 +394,14 @@ public class RaceMap extends AbsolutePanel implements TimeListener, CompetitorSe
               map.addIdleHandler(new IdleMapHandler() {
                   @Override
                   public void onEvent(IdleMapEvent event) {
+                      // the "idle"-event is raised at the end of map-animations
                       if (autoZoomIn) {
+                          // finalize zoom-in that was started with panTo() in zoomMapToNewBounds()
                           map.setZoom(autoZoomLevel);
                           autoZoomIn = false;
                       }
                       if (autoZoomOut) {
+                          // finalize zoom-out that was started with setZoom() in zoomMapToNewBounds()
                           map.panTo(autoZoomLatLngBounds.getCenter());
                           autoZoomOut = false;
                       }
@@ -1241,6 +1244,11 @@ public class RaceMap extends AbsolutePanel implements TimeListener, CompetitorSe
                 autoZoomLatLngBounds = BoundsUtil.getAsLatLngBounds(newBounds);
                 int newZoomLevel = getZoomLevel(autoZoomLatLngBounds); 
                 if (newZoomLevel != map.getZoom()) {
+                    // distinguish between zoom-in and zoom-out, because the sequence of panTo() and setZoom()
+                    // appears different on the screen due to map-animations
+                    // following sequences keep the selected boats allways visible:
+                    //   zoom-in : 1. panTo(), 2. setZoom()
+                    //   zoom-out: 1. setZoom(), 2. panTo() 
                     autoZoomIn = newZoomLevel > map.getZoom();
                     autoZoomOut = !autoZoomIn;
                     autoZoomLevel = newZoomLevel;

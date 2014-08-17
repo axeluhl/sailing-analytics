@@ -297,7 +297,7 @@ public class RegattaOverviewPanel extends SimplePanel {
     }
     
     private void retrieveEvent() {
-        sailingService.getEventById(eventId, new MarkedAsyncCallback<EventDTO>(
+        sailingService.getEventById(eventId, false, new MarkedAsyncCallback<EventDTO>(
                 new AsyncCallback<EventDTO>() {
                     @Override
                     public void onFailure(Throwable cause) {
