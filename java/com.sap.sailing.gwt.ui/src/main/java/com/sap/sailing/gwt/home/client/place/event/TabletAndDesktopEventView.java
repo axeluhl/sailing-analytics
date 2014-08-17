@@ -120,7 +120,7 @@ public class TabletAndDesktopEventView extends Composite implements EventView, E
 
     @Override
     public void goToRegattaRaces(LeaderboardGroupDTO leaderboardGroup, StrippedLeaderboardDTO leaderboard, RaceGroupDTO raceGroup) {
-        eventRegattaRaces.setRaces(leaderboardGroup, leaderboard, raceGroup);
+        eventRegattaRaces.setRaces(leaderboardGroup, false, leaderboard, raceGroup);
         eventHeader.setDataNavigationType("compact");
         setVisibleEventElement(eventRegattaRaces);
         

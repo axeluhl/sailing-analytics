@@ -85,8 +85,8 @@ public class EventRegattaList extends AbstractEventComposite {
             for (StrippedLeaderboardDTO leaderboard : leaderboardGroup.getLeaderboards()) {
                 Triple<RaceGroupDTO, StrippedLeaderboardDTO, LeaderboardGroupDTO> r = regattaStructure.get(leaderboard.name);
                 if (r != null) {
-                    Regatta regatta = new Regatta(event, true, timerForClientServerOffset, placeNavigator, pageNavigator);
-                    regatta.setData(r.getC(), r.getB(), r.getA());
+                    Regatta regatta = new Regatta(event, timerForClientServerOffset, false, placeNavigator, pageNavigator);
+                    regatta.setData(r.getC(), hasMultipleLeaderboardGroups, r.getB(), r.getA());
                     regattaListItemsDiv.appendChild(regatta.getElement());
                     List<Regatta> regattaElements = regattaElementsByLeaderboardGroup.get(leaderboardGroup.getName());
                     if (regattaElements == null) {

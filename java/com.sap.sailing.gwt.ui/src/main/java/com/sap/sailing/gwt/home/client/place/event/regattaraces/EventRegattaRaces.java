@@ -40,19 +40,19 @@ public class EventRegattaRaces extends AbstractEventComposite {
         
         phaseElements = new ArrayList<EventRegattaRacesPhase>();
         
-        regatta = new Regatta(event, false, timerForClientServerOffset, placeNavigator, pageNavigator);
+        regatta = new Regatta(event, timerForClientServerOffset, true, placeNavigator, pageNavigator);
         
         EventRegattaRacesResources.INSTANCE.css().ensureInjected();
         StyleInjector.injectAtEnd("@media (min-width: 25em) { "+EventRegattaRacesResources.INSTANCE.mediumCss().getText()+"}");
         initWidget(uiBinder.createAndBindUi(this));
     }
     
-    public void setRaces(LeaderboardGroupDTO leaderboardGroup, StrippedLeaderboardDTO leaderboard, RaceGroupDTO raceGroup) {
+    public void setRaces(LeaderboardGroupDTO leaderboardGroup, boolean hasMultipleLeaderboardGroups, StrippedLeaderboardDTO leaderboard, RaceGroupDTO raceGroup) {
         // clear all existing child elements first
         regattaPhasesPanel.getElement().removeAllChildren();
         phaseElements.clear();
        
-        regatta.setData(leaderboardGroup, leaderboard, raceGroup);
+        regatta.setData(leaderboardGroup, hasMultipleLeaderboardGroups, leaderboard, raceGroup);
         
         int regattaPhases = raceGroup.getSeries().size();
         if(regattaPhases > 1) {

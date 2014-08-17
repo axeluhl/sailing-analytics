@@ -28,6 +28,7 @@ public interface TextMessages extends Messages {
     String errorMessageLoadingData();
     String errorMessageNoSuchLeaderboard();
     String raceNotScheduled();
+    String regattaDetails();
     
     String countdownDays();
     String countdownHours();
