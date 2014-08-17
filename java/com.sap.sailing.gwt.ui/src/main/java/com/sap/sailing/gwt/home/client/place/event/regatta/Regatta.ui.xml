@@ -12,10 +12,10 @@
     <div class="{res.mediaCss.small12} {res.mediaCss.columns}">
       <div class="{local_res.css.regatta_intro}">
           <a href="javascript:;" ui:field="regattaImageWithLink">
-	          <img src="images/home/regatta-boatclass_sample.png" alt="" height="140" width="140"  class="{local_res.css.regatta_intro_image}"></img>
+	          <g:Image ui:field="boatClassImage1" height="140" width="140" styleName="{local_res.css.regatta_intro_image}"></g:Image>
           </a>
           <div ui:field="regattaImageWithoutLink">
-	          <img src="images/home/regatta-boatclass_sample.png" alt="" height="140" width="140"  class="{local_res.css.regatta_intro_image}"></img>
+	          <g:Image ui:field="boatClassImage2" height="140" width="140" styleName="{local_res.css.regatta_intro_image}"></g:Image>
           </div>
         <div class="{local_res.css.regatta_intro_header}">
           <div class="{res.mainCss.grid}">
@@ -43,9 +43,7 @@
         </div>
         <div ui:field="regattaPhasesInfoDiv" class="{local_res.css.regatta_intro_phases}">
             <div ui:field="regattaPhasesPanel" />
-            <div class="{local_res.css.regatta_intro_phases_leaderboardlink}">
-                <a href="javascript:;" ui:field="leaderboardLink"><ui:text from='{i18n.leaderBoard}'/></a>
-			</div>
+			<a href="javascript:;" ui:field="leaderboardLink" class="{local_res.css.regatta_intro_phases_leaderboardlink} {res.mainCss.button}"><ui:text from='{i18n.leaderBoard}'/></a>
         </div>
         <!-- 
         <div ui:field="isScheduledDiv" class="{local_res.css.regatta_intro_scheduled}">
