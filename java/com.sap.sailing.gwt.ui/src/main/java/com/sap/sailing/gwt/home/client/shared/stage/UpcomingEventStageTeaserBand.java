@@ -20,7 +20,7 @@ public class UpcomingEventStageTeaserBand extends StageTeaserBand {
         bandSubtitle.setInnerText(EventDatesFormatterUtil.formatDateRangeWithYear(event.startDate, event.endDate));
 
         actionLink.getStyle().setDisplay(Display.INLINE_BLOCK);
-        actionLink.setInnerText(TextMessages.INSTANCE.showEvent());
+        actionLink.setInnerText(TextMessages.INSTANCE.moreInfo());
     }
 
     @Override

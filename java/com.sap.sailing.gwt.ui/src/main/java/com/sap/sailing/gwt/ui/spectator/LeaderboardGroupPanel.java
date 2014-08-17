@@ -327,7 +327,7 @@ public class LeaderboardGroupPanel extends SimplePanel implements HasWelcomeWidg
                 int seriesRow = 0;
                 for (SeriesDTO series : regatta.series) {
                     // render the series name
-                    if (! "Default".equals(series.getName())) {
+                    if (!LeaderboardNameConstants.DEFAULT_SERIES_NAME.equals(series.getName())) {
                         seriesGrid.setHTML(seriesRow, 0, TEXTTEMPLATE.textWithClass(series.getName(), 50, STYLE_TABLE_TEXT));
                     }
                     seriesGridFormatter.setVerticalAlignment(seriesRow, 0, HasVerticalAlignment.ALIGN_MIDDLE);
@@ -355,7 +355,7 @@ public class LeaderboardGroupPanel extends SimplePanel implements HasWelcomeWidg
                         FleetDTO fleet = series.getFleets().get(0);
                         List<RaceColumnDTO> raceColumnsOfSeries = getRacesOfFleet(leaderboard, series, fleet);
                         String displayName = fleet.getName();
-                        if (! "Default".equals(fleet.getName())) {
+                        if (!LeaderboardNameConstants.DEFAULT_FLEET_NAME.equals(fleet.getName())) {
                             Grid fleetsGrid = new Grid(1, 2);
                             CellFormatter fleetGridsFormatter = fleetsGrid.getCellFormatter();
                             fleetsGrid.setHTML(0, 0, TEXTTEMPLATE.textWithClass(displayName, 50, STYLE_TABLE_TEXT));
