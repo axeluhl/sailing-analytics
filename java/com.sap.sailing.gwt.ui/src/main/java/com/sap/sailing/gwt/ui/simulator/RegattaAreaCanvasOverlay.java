@@ -126,7 +126,7 @@ public class RegattaAreaCanvasOverlay extends FullCanvasOverlay {
 
         String bgColor;
         
-        if (simulatorMap.getWindParams().isShowStreamlets2()) {
+        if (simulatorMap.getWindParams().isShowStreamlets()) {
         	bgColor = "#505050";
         } else {
         	bgColor = "#DEDEDE";
