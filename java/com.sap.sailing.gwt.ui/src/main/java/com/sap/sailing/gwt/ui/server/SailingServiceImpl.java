@@ -2172,7 +2172,7 @@ public class SailingServiceImpl extends ProxiedRemoteServiceServlet implements S
                     raceDTO = baseDomainFactory.createRaceDTO(getService(), withGeoLocationData, raceIdentifier, trackedRace);
                     if(withStatisticalData) {
                         Collection<MediaTrack> mediaTracksForRace = getService().getMediaTracksForRace(raceIdentifier);
-                        raceDTO.trackedRaceStatistics = baseDomainFactory.createTrackedRaceStatisticsDTO(trackedRace, mediaTracksForRace); 
+                        raceDTO.trackedRaceStatistics = baseDomainFactory.createTrackedRaceStatisticsDTO(trackedRace, leaderboard, raceColumn, fleet, mediaTracksForRace); 
                     }
                 }    
                 final FleetDTO fleetDTO = baseDomainFactory.convertToFleetDTO(fleet);

@@ -18,7 +18,8 @@ public class CompetitorFilterWithUIFactory {
             return new CompetitorSailNumbersFilter();
         } else if(SelectedCompetitorsFilter.FILTER_NAME.equals(filterName)) {
             return new SelectedCompetitorsFilter();
+        } else {
+            throw new UnsupportedOperationException();
         }
-        return null;
     }
 }

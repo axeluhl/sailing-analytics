@@ -27,6 +27,7 @@ import com.sap.sailing.gwt.ui.client.shared.filter.CompetitorTotalRankFilter;
 import com.sap.sailing.gwt.ui.client.shared.filter.CompetitorsFilterSets;
 import com.sap.sailing.gwt.ui.client.shared.filter.CompetitorsFilterSetsDialog;
 import com.sap.sailing.gwt.ui.client.shared.filter.CompetitorsFilterSetsJsonDeSerializer;
+import com.sap.sailing.gwt.ui.client.shared.filter.FilterUIFactory;
 import com.sap.sailing.gwt.ui.client.shared.filter.FilterWithUI;
 import com.sap.sailing.gwt.ui.client.shared.filter.LeaderboardFetcher;
 import com.sap.sailing.gwt.ui.client.shared.filter.LeaderboardFilterContext;
@@ -50,7 +51,7 @@ import com.sap.sse.gwt.client.dialog.DataEntryDialog.DialogCallback;
  * @author Axel Uhl (D043530)
  * 
  */
-public class CompetitorFilterPanel extends FlowPanel implements KeyUpHandler, Filter<CompetitorDTO>, CompetitorSelectionChangeListener {
+public class CompetitorFilterPanel extends FlowPanel implements KeyUpHandler, FilterWithUI<CompetitorDTO>, CompetitorSelectionChangeListener {
     private final static String LOCAL_STORAGE_COMPETITORS_FILTER_SETS_KEY = "sailingAnalytics.raceBoard.competitorsFilterSets";
     private final static CompetitorFilterCss css = CompetitorFilterResources.INSTANCE.css();
     private final TextBox searchTextBox;
@@ -114,9 +115,7 @@ public class CompetitorFilterPanel extends FlowPanel implements KeyUpHandler, Fi
         clearTextBoxButton.addClickHandler(new ClickHandler() {
             @Override
             public void onClick(ClickEvent event) {
-                searchTextBox.setText("");
-                clearTextBoxButton.addStyleName(css.hiddenButton());
-                onKeyUp(null);
+                clearSelection();
             }
         });
         advancedSettingsButton = new Button("");
@@ -154,9 +153,11 @@ public class CompetitorFilterPanel extends FlowPanel implements KeyUpHandler, Fi
             removeSearchFilter();
             clearTextBoxButton.addStyleName(css.hiddenButton());
         } else {
-            clearTextBoxButton.removeStyleName(css.hiddenButton());
-            ensureSearchFilterIsSet();
-            competitorSelectionProvider.setCompetitorsFilterSet(competitorSelectionProvider.getCompetitorsFilterSet()); // 
+            if (newValue.length() >= 2) {
+                clearTextBoxButton.removeStyleName(css.hiddenButton());
+                ensureSearchFilterIsSet();
+                competitorSelectionProvider.setCompetitorsFilterSet(competitorSelectionProvider.getCompetitorsFilterSet()); // 
+            }
         }
     }
 
@@ -186,6 +187,12 @@ public class CompetitorFilterPanel extends FlowPanel implements KeyUpHandler, Fi
             competitorSelectionProvider.setCompetitorsFilterSet(newFilterSetWithThis);
         }
     }
+    
+    public void clearSelection() {
+        searchTextBox.setText("");
+        clearTextBoxButton.addStyleName(css.hiddenButton());
+        onKeyUp(null);
+    }
 
     @Override
     public boolean matches(CompetitorDTO competitor) {
@@ -212,7 +219,7 @@ public class CompetitorFilterPanel extends FlowPanel implements KeyUpHandler, Fi
                 competitorsFilterSets.setActiveFilterSet(newCompetitorsFilterSets.getActiveFilterSet());
                 
                 updateCompetitorsFilterContexts(newCompetitorsFilterSets);
-                competitorSelectionProvider.setCompetitorsFilterSet(newCompetitorsFilterSets.getActiveFilterSet());
+                competitorSelectionProvider.setCompetitorsFilterSet(newCompetitorsFilterSets.getActiveFilterSetWithGeneralizedType());
                 updateCompetitorsFilterControlState(newCompetitorsFilterSets);
                 storeCompetitorsFilterSets(newCompetitorsFilterSets);
              }
@@ -325,8 +332,8 @@ public class CompetitorFilterPanel extends FlowPanel implements KeyUpHandler, Fi
         // 1. selected competitors filter
         insertSelectedCompetitorsFilter(filterSets);
         
-        // 2. Top 50 competitors by race rank
-        int maxRaceRank = 50;
+        // 2. Top 30 competitors by race rank
+        int maxRaceRank = 30;
         FilterSet<CompetitorDTO, FilterWithUI<CompetitorDTO>> topNRaceRankCompetitorsFilterSet = 
                 new FilterSet<CompetitorDTO, FilterWithUI<CompetitorDTO>>(stringMessages.topNCompetitorsByRaceRank(maxRaceRank));
         CompetitorRaceRankFilter raceRankFilter = new CompetitorRaceRankFilter();
@@ -335,8 +342,8 @@ public class CompetitorFilterPanel extends FlowPanel implements KeyUpHandler, Fi
         topNRaceRankCompetitorsFilterSet.addFilter(raceRankFilter);
         filterSets.addFilterSet(topNRaceRankCompetitorsFilterSet);
 
-        // 3. Top 50 competitors by total rank
-        int maxTotalRank = 50;
+        // 3. Top 30 competitors by total rank
+        int maxTotalRank = 30;
         FilterSet<CompetitorDTO, FilterWithUI<CompetitorDTO>> topNTotalRankCompetitorsFilterSet =
                 new FilterSet<CompetitorDTO, FilterWithUI<CompetitorDTO>>(stringMessages.topNCompetitorsByTotalRank(maxTotalRank));
         CompetitorTotalRankFilter totalRankFilter = new CompetitorTotalRankFilter();
@@ -372,5 +379,30 @@ public class CompetitorFilterPanel extends FlowPanel implements KeyUpHandler, Fi
     @Override public void filteredCompetitorsListChanged(Iterable<CompetitorDTO> filteredCompetitors) {}
     @Override public void addedToSelection(CompetitorDTO competitor) {}
     @Override public void removedFromSelection(CompetitorDTO competitor) {}
+
+    @Override
+    public String validate(StringMessages stringMessages) {
+        return null;
+    }
+
+    @Override
+    public String getLocalizedName(StringMessages stringMessages) {
+        return getName();
+    }
+
+    @Override
+    public String getLocalizedDescription(StringMessages stringMessages) {
+        return getName();
+    }
+
+    @Override
+    public FilterWithUI<CompetitorDTO> copy() {
+        return null;
+    }
+
+    @Override
+    public FilterUIFactory<CompetitorDTO> createUIFactory() {
+        return null;
+    }
 
 }

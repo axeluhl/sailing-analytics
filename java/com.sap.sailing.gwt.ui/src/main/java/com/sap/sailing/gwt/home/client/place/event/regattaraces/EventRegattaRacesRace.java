@@ -25,7 +25,7 @@ import com.sap.sse.gwt.client.player.Timer;
 public class EventRegattaRacesRace extends UIObject {
     private static EventRegattaRacesRaceUiBinder uiBinder = GWT.create(EventRegattaRacesRaceUiBinder.class);
 
-    private enum SimpleRaceStates { NOT_TRACKED, TRACKED_AND_FINISHED, TRACKED_AND_RUNNING, TRACKED_BUT_NOT_SCHEDULED };
+    private enum SimpleRaceStates { NOT_TRACKED, TRACKED, TRACKED_AND_LIVE, TRACKED_BUT_NOT_SCHEDULED };
     
     interface EventRegattaRacesRaceUiBinder extends UiBinder<DivElement, EventRegattaRacesRace> {
     }
@@ -128,18 +128,11 @@ public class EventRegattaRacesRace extends UIObject {
         SimpleRaceStates simpleRaceState = SimpleRaceStates.NOT_TRACKED;
         
         if(race != null && race.trackedRace != null) {
+            simpleRaceState = SimpleRaceStates.TRACKED;
             if(isLive()) {
-                simpleRaceState = SimpleRaceStates.TRACKED_AND_RUNNING;
+                simpleRaceState = SimpleRaceStates.TRACKED_AND_LIVE;
                 if(race.startOfRace == null) {
                     simpleRaceState = SimpleRaceStates.TRACKED_BUT_NOT_SCHEDULED;
-                } else if (race.endOfRace != null) { 
-                    simpleRaceState = SimpleRaceStates.TRACKED_AND_FINISHED;
-                }                    
-            } else {
-                if(race.startOfRace == null) {
-                    simpleRaceState = SimpleRaceStates.TRACKED_BUT_NOT_SCHEDULED;
-                } else if (race.endOfRace != null) { 
-                    simpleRaceState = SimpleRaceStates.TRACKED_AND_FINISHED;
                 }                    
             }
         }
@@ -164,7 +157,7 @@ public class EventRegattaRacesRace extends UIObject {
             case TRACKED_BUT_NOT_SCHEDULED:
                 showElement(raceNotScheduledDiv);
                 break;
-            case TRACKED_AND_RUNNING:
+            case TRACKED_AND_LIVE:
                 showElement(watchRaceDiv);
 
                 if(race.startOfRace != null) {
@@ -175,16 +168,16 @@ public class EventRegattaRacesRace extends UIObject {
                     currentLegNo.setInnerText(String.valueOf(race.trackedRaceStatistics.currentLegNo));
                     totalLegsCount.setInnerText(String.valueOf(race.trackedRaceStatistics.totalLegsCount));
                 }
-                if(race.trackedRaceStatistics.hasLeaderData && race.trackedRaceStatistics.leaderOrWinner != null) {
+                if(race.trackedRaceStatistics.hasLeaderOrWinnerData && race.trackedRaceStatistics.leaderOrWinner != null) {
                     showElement(raceLeaderDiv);
                     updateWinnerOrLeader(raceLeader, race.trackedRaceStatistics.leaderOrWinner);
                 }
 
                 break;
-            case TRACKED_AND_FINISHED:
+            case TRACKED:
                 showElement(analyzeRaceDiv);
                 
-                if(race.trackedRaceStatistics.hasLeaderData && race.trackedRaceStatistics.leaderOrWinner != null) {
+                if(race.trackedRaceStatistics.hasLeaderOrWinnerData && race.trackedRaceStatistics.leaderOrWinner != null) {
                     showElement(raceWinnerDiv);
                     updateWinnerOrLeader(raceWinner, race.trackedRaceStatistics.leaderOrWinner);
                 }

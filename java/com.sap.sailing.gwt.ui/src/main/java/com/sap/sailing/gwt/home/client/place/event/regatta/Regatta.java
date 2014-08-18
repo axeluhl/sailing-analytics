@@ -20,6 +20,7 @@ import com.google.gwt.user.client.ui.Image;
 import com.google.gwt.user.client.ui.Widget;
 import com.sap.sailing.gwt.home.client.BoatClassImageResolver;
 import com.sap.sailing.gwt.home.client.BoatClassImageResources;
+import com.sap.sailing.gwt.home.client.app.PlaceNavigator;
 import com.sap.sailing.gwt.home.client.place.event.EventPageNavigator;
 import com.sap.sailing.gwt.home.client.shared.LongNamesUtil;
 import com.sap.sailing.gwt.ui.shared.EventDTO;
@@ -39,6 +40,7 @@ public class Regatta extends Composite {
     private final EventDTO event;
     private final Timer timerForClientServerOffset;
     private final EventPageNavigator pageNavigator;
+    private final PlaceNavigator placeNavigator;
     private StrippedLeaderboardDTO leaderboard;
     private RaceGroupDTO raceGroup;
     private final List<RegattaPhase> phasesElements;
@@ -74,10 +76,11 @@ public class Regatta extends Composite {
     @UiField Image boatClassImage1;
     @UiField Image boatClassImage2;
     
-    public Regatta(EventDTO event, boolean isNavigatable, Timer timerForClientServerOffset, EventPageNavigator pageNavigator) {
+    public Regatta(EventDTO event, boolean isNavigatable, Timer timerForClientServerOffset, PlaceNavigator placeNavigator, EventPageNavigator pageNavigator) {
         this.event = event;
         this.isNavigatable = isNavigatable;
         this.timerForClientServerOffset = timerForClientServerOffset;
+        this.placeNavigator = placeNavigator;
         this.pageNavigator = pageNavigator;
         
         phasesElements = new ArrayList<RegattaPhase>();
@@ -164,10 +167,11 @@ public class Regatta extends Composite {
         Event.sinkEvents(leaderboardLink, Event.ONCLICK);
         Event.setEventListener(leaderboardLink, new EventListener() {
             @Override
-            public void onBrowserEvent(Event event) {
-                switch (DOM.eventGetType(event)) {
+            public void onBrowserEvent(Event browserEvent) {
+                switch (DOM.eventGetType(browserEvent)) {
                     case Event.ONCLICK:
-                        pageNavigator.openLeaderboardViewer(null, leaderboard);
+                        placeNavigator.goToLeaderboard(event.id.toString(), leaderboard.name, event.getBaseURL(), event.isOnRemoteServer());
+                        // pageNavigator.openLeaderboardViewer(null, leaderboard);
                         break;
                 }
             }

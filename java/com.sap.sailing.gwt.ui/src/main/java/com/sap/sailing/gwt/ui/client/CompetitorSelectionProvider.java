@@ -66,7 +66,24 @@ public interface CompetitorSelectionProvider {
 
     void removeCompetitorSelectionChangeListener(CompetitorSelectionChangeListener listener);
     
-    public FilterSet<CompetitorDTO, ? extends Filter<CompetitorDTO>> getCompetitorsFilterSet();
+    public FilterSet<CompetitorDTO, Filter<CompetitorDTO>> getCompetitorsFilterSet();
 
-    public void setCompetitorsFilterSet(FilterSet<CompetitorDTO, ? extends Filter<CompetitorDTO>> competitorsFilterSet);
+    public void setCompetitorsFilterSet(FilterSet<CompetitorDTO, Filter<CompetitorDTO>> competitorsFilterSet);
+
+    FilterSet<CompetitorDTO, Filter<CompetitorDTO>> getOrCreateCompetitorsFilterSet(String nameToAssignToNewFilterSet);
+    
+    /**
+     * Returns <code>true</code> if the provider has any filters that will restrain the selection.
+     */
+    public boolean hasActiveFilters();
+    
+    /**
+     * Removes all filters and notifies listeners about the change.
+     */
+    public void clearAllFilters();
+    
+    /**
+     * @return the size of all filtered competitors
+     */
+    public int getFilteredCompetitorsListSize();
 }
