@@ -9,6 +9,7 @@ import com.google.gwt.uibinder.client.UiBinder;
 import com.google.gwt.uibinder.client.UiField;
 import com.google.gwt.user.client.ui.HTMLPanel;
 import com.google.gwt.user.client.ui.Widget;
+import com.sap.sailing.gwt.home.client.app.PlaceNavigator;
 import com.sap.sailing.gwt.home.client.place.event.AbstractEventComposite;
 import com.sap.sailing.gwt.home.client.place.event.EventPageNavigator;
 import com.sap.sailing.gwt.home.client.place.event.regatta.Regatta;
@@ -33,25 +34,25 @@ public class EventRegattaRaces extends AbstractEventComposite {
     private final Timer timerForClientServerOffset;
     private final List<EventRegattaRacesPhase> phaseElements;
 
-    public EventRegattaRaces(EventDTO event, Timer timerForClientServerOffset, EventPageNavigator pageNavigator) {
+    public EventRegattaRaces(EventDTO event, Timer timerForClientServerOffset, PlaceNavigator placeNavigator, EventPageNavigator pageNavigator) {
         super(event, pageNavigator);
         this.timerForClientServerOffset = timerForClientServerOffset;
         
         phaseElements = new ArrayList<EventRegattaRacesPhase>();
         
-        regatta = new Regatta(event, false, timerForClientServerOffset, pageNavigator);
+        regatta = new Regatta(event, timerForClientServerOffset, true, placeNavigator, pageNavigator);
         
         EventRegattaRacesResources.INSTANCE.css().ensureInjected();
         StyleInjector.injectAtEnd("@media (min-width: 25em) { "+EventRegattaRacesResources.INSTANCE.mediumCss().getText()+"}");
         initWidget(uiBinder.createAndBindUi(this));
     }
     
-    public void setRaces(LeaderboardGroupDTO leaderboardGroup, StrippedLeaderboardDTO leaderboard, RaceGroupDTO raceGroup) {
+    public void setRaces(LeaderboardGroupDTO leaderboardGroup, boolean hasMultipleLeaderboardGroups, StrippedLeaderboardDTO leaderboard, RaceGroupDTO raceGroup) {
         // clear all existing child elements first
         regattaPhasesPanel.getElement().removeAllChildren();
         phaseElements.clear();
        
-        regatta.setData(leaderboardGroup, leaderboard, raceGroup);
+        regatta.setData(leaderboardGroup, hasMultipleLeaderboardGroups, leaderboard, raceGroup);
         
         int regattaPhases = raceGroup.getSeries().size();
         if(regattaPhases > 1) {

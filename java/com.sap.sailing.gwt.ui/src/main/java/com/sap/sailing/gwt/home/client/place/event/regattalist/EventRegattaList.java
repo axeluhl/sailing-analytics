@@ -18,6 +18,7 @@ import com.google.gwt.user.client.Event;
 import com.google.gwt.user.client.EventListener;
 import com.google.gwt.user.client.ui.Widget;
 import com.sap.sailing.gwt.home.client.HomeResources;
+import com.sap.sailing.gwt.home.client.app.PlaceNavigator;
 import com.sap.sailing.gwt.home.client.place.event.AbstractEventComposite;
 import com.sap.sailing.gwt.home.client.place.event.EventPageNavigator;
 import com.sap.sailing.gwt.home.client.place.event.regatta.Regatta;
@@ -47,7 +48,7 @@ public class EventRegattaList extends AbstractEventComposite {
     private final Map<String, List<Regatta>> regattaElementsByLeaderboardGroup;
     
     public EventRegattaList(EventDTO event, Map<String, Triple<RaceGroupDTO, StrippedLeaderboardDTO, LeaderboardGroupDTO>> regattaStructure, 
-            Timer timerForClientServerOffset, EventPageNavigator pageNavigator) {
+            Timer timerForClientServerOffset,  PlaceNavigator placeNavigator, EventPageNavigator pageNavigator) {
         super(event, pageNavigator);
         
         EventRegattaListResources.INSTANCE.css().ensureInjected();
@@ -84,8 +85,8 @@ public class EventRegattaList extends AbstractEventComposite {
             for (StrippedLeaderboardDTO leaderboard : leaderboardGroup.getLeaderboards()) {
                 Triple<RaceGroupDTO, StrippedLeaderboardDTO, LeaderboardGroupDTO> r = regattaStructure.get(leaderboard.name);
                 if (r != null) {
-                    Regatta regatta = new Regatta(event, true, timerForClientServerOffset, pageNavigator);
-                    regatta.setData(r.getC(), r.getB(), r.getA());
+                    Regatta regatta = new Regatta(event, timerForClientServerOffset, false, placeNavigator, pageNavigator);
+                    regatta.setData(r.getC(), hasMultipleLeaderboardGroups, r.getB(), r.getA());
                     regattaListItemsDiv.appendChild(regatta.getElement());
                     List<Regatta> regattaElements = regattaElementsByLeaderboardGroup.get(leaderboardGroup.getName());
                     if (regattaElements == null) {
