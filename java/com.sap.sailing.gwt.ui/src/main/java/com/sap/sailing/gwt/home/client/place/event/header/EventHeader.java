@@ -11,9 +11,9 @@ import com.google.gwt.uibinder.client.UiBinder;
 import com.google.gwt.uibinder.client.UiField;
 import com.google.gwt.uibinder.client.UiHandler;
 import com.google.gwt.user.client.ui.Anchor;
-import com.google.gwt.user.client.ui.Composite;
 import com.google.gwt.user.client.ui.Widget;
 import com.sap.sailing.gwt.home.client.i18n.TextMessages;
+import com.sap.sailing.gwt.home.client.place.event.AbstractEventComposite;
 import com.sap.sailing.gwt.home.client.place.event.EventPageNavigator;
 import com.sap.sailing.gwt.home.client.shared.EventDatesFormatterUtil;
 import com.sap.sailing.gwt.ui.shared.CourseAreaDTO;
@@ -21,13 +21,11 @@ import com.sap.sailing.gwt.ui.shared.EventDTO;
 import com.sap.sailing.gwt.ui.shared.LeaderboardGroupDTO;
 import com.sap.sailing.gwt.ui.shared.StrippedLeaderboardDTO;
 
-public class EventHeader extends Composite {
+public class EventHeader extends AbstractEventComposite {
     private static EventHeaderUiBinder uiBinder = GWT.create(EventHeaderUiBinder.class);
 
     interface EventHeaderUiBinder extends UiBinder<Widget, EventHeader> {
     }
-
-    private final EventDTO event;
 
 //    @UiField Anchor overviewLink;
       @UiField Anchor regattasLink;
@@ -69,12 +67,9 @@ public class EventHeader extends Composite {
 //    private final List<Anchor> links1;
 //    private final List<Anchor> links2;
 //    private final List<Anchor> links3;
-    
-    private final EventPageNavigator pageNavigator;
 
     public EventHeader(EventDTO event, EventPageNavigator pageNavigator) {
-        this.event = event;
-        this.pageNavigator = pageNavigator;
+        super(event, pageNavigator);
         
         EventHeaderResources.INSTANCE.css().ensureInjected();
         StyleInjector.injectAtEnd("@media (min-width: 50em) { "+EventHeaderResources.INSTANCE.largeCss().getText()+"}");
@@ -102,8 +97,7 @@ public class EventHeader extends Composite {
     }
 
     public EventHeader(EventDTO event) {
-        this.event = event;
-        this.pageNavigator = null;
+        super(event, null);
         
         EventHeaderResources.INSTANCE.css().ensureInjected();
         StyleInjector.injectAtEnd("@media (min-width: 50em) { "+EventHeaderResources.INSTANCE.largeCss().getText()+"}");
@@ -135,6 +129,7 @@ public class EventHeader extends Composite {
     }
     
     private void updateUI() {
+        EventDTO event = getEvent();
         boolean isSeries = event.isFakeSeries(); 
 
         String eventName = event.getName();
@@ -226,8 +221,8 @@ public class EventHeader extends Composite {
 
     @UiHandler("seriesLeaderboardAnchor")
     void seriesLeaderboardClicked(ClickEvent clickevent) {
-        if(event.isFakeSeries()) {
-            pageNavigator.openOverallLeaderboardViewer(event.getLeaderboardGroups().get(0));
+        if(getEvent().isFakeSeries()) {
+            getPageNavigator().openOverallLeaderboardViewer(getEvent().getLeaderboardGroups().get(0));
         }
     }
     
@@ -237,7 +232,7 @@ public class EventHeader extends Composite {
 //    }
 //
     private void showRegattas() {
-        pageNavigator.goToRegattas();
+        getPageNavigator().goToRegattas();
 //        setActiveLink(links1, regattasLink);
 //        setActiveLink(links2, regattasLink2);
 //        setActiveLink(links3, regattasLink3);
