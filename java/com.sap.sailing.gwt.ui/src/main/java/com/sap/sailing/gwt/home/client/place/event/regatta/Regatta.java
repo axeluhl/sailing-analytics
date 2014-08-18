@@ -39,6 +39,7 @@ public class Regatta extends Composite {
     private final EventDTO event;
     private final Timer timerForClientServerOffset;
     private final EventPageNavigator pageNavigator;
+    @SuppressWarnings("unused")
     private final PlaceNavigator placeNavigator;
     private StrippedLeaderboardDTO leaderboard;
     private RaceGroupDTO raceGroup;
@@ -91,8 +92,6 @@ public class Regatta extends Composite {
         StyleInjector.injectAtEnd("@media (min-width: 50em) { "+RegattaResources.INSTANCE.largeCss().getText()+"}");
 
         initWidget(uiBinder.createAndBindUi(this));
-
-        registerEvents();
     }
 
     public void setData(LeaderboardGroupDTO leaderboardGroup, boolean hasMultipleLeaderboardGroups, StrippedLeaderboardDTO leaderboard,
@@ -100,7 +99,9 @@ public class Regatta extends Composite {
         this.raceGroup = raceGroup;
         this.leaderboard = leaderboard;
         this.leaderboardGroup = leaderboardGroup;
-        
+
+        registerEvents(leaderboardGroup);
+
         boolean hasLiveRace = leaderboard.hasLiveRace(timerForClientServerOffset.getLiveTimePointInMillis());
         if(!hasLiveRace) {
             isLiveDiv.getStyle().setDisplay(Display.NONE);
@@ -152,7 +153,7 @@ public class Regatta extends Composite {
         trackedRacesCount.setInnerText(String.valueOf(leaderboard.getTrackedRacesCount()));
     }
 
-    private void registerEvents() {
+    private void registerEvents(final LeaderboardGroupDTO leaderboardGroup) {
         if(isSingleView) {
             regattaDetailsLink.getStyle().setDisplay(Display.NONE);
 
@@ -162,7 +163,7 @@ public class Regatta extends Composite {
                 public void onBrowserEvent(Event browserEvent) {
                     switch (DOM.eventGetType(browserEvent)) {
                         case Event.ONCLICK:
-                            pageNavigator.openLeaderboardViewer(null, leaderboard);
+                            pageNavigator.openLeaderboardViewer(leaderboardGroup, leaderboard);
                             
                             // the new leaderboard view integrated into the new design
                             //placeNavigator.goToLeaderboard(event.id.toString(), leaderboard.name, event.getBaseURL(), event.isOnRemoteServer());
