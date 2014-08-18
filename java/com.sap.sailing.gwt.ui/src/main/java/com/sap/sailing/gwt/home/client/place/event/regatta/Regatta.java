@@ -162,7 +162,10 @@ public class Regatta extends Composite {
                 public void onBrowserEvent(Event browserEvent) {
                     switch (DOM.eventGetType(browserEvent)) {
                         case Event.ONCLICK:
-                            placeNavigator.goToLeaderboard(event.id.toString(), leaderboard.name, event.getBaseURL(), event.isOnRemoteServer());
+                            pageNavigator.openLeaderboardViewer(null, leaderboard);
+                            
+                            // the new leaderboard view integrated into the new design
+                            //placeNavigator.goToLeaderboard(event.id.toString(), leaderboard.name, event.getBaseURL(), event.isOnRemoteServer());
                             break;
                     }
                 }
