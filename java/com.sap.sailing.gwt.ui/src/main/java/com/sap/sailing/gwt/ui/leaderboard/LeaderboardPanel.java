@@ -343,6 +343,7 @@ public class LeaderboardPanel extends SimplePanel implements TimeListener, PlayS
     private List<LeaderboardUpdateListener> leaderboardUpdateListener;
 
     private boolean initialCompetitorFilterHasBeenApplied = false;
+    private final boolean showCompetitorFilterStatus;
 
     private CompetitorFilterPanel competitorFilterPanel;
 
@@ -1595,7 +1596,7 @@ public class LeaderboardPanel extends SimplePanel implements TimeListener, PlayS
                 PlayModes.Live, PlayStates.Paused, /* delayBetweenAutoAdvancesInMilliseconds */3000l), leaderboardGroupName,
                 leaderboardName, errorReporter, stringMessages, userAgent, showRaceDetails,
                 /* competitorSearchTextBox */ null, /* showSelectionCheckbox */ true, /* optionalRaceTimesInfoProvider */ null,
-                /* autoExpandLastRaceColumn */ false, /* adjustTimerDelay */ true, /*autoApplyTop30Filter*/ false);
+                /* autoExpandLastRaceColumn */ false, /* adjustTimerDelay */ true, /*autoApplyTop30Filter*/ false, false);
     }
 
     public LeaderboardPanel(SailingServiceAsync sailingService, AsyncActionsExecutor asyncActionsExecutor,
@@ -1604,7 +1605,7 @@ public class LeaderboardPanel extends SimplePanel implements TimeListener, PlayS
             String leaderboardName, ErrorReporter errorReporter, final StringMessages stringMessages,
             final UserAgentDetails userAgent, boolean showRaceDetails, CompetitorFilterPanel competitorSearchTextBox,
             boolean showSelectionCheckbox, RaceTimesInfoProvider optionalRaceTimesInfoProvider,
-            boolean autoExpandLastRaceColumn, boolean adjustTimerDelay, boolean autoApplyTopNFilter) {
+            boolean autoExpandLastRaceColumn, boolean adjustTimerDelay, boolean autoApplyTopNFilter, boolean showCompetitorFilterStatus) {
         this.setTitle(stringMessages.leaderboard());
         this.showSelectionCheckbox = showSelectionCheckbox;
         this.showRaceDetails = showRaceDetails;
@@ -1623,6 +1624,7 @@ public class LeaderboardPanel extends SimplePanel implements TimeListener, PlayS
         this.selectedManeuverDetails = new ArrayList<DetailType>();
         this.adjustTimerDelay = adjustTimerDelay;
         this.initialCompetitorFilterHasBeenApplied = !autoApplyTopNFilter;
+        this.showCompetitorFilterStatus = showCompetitorFilterStatus;
         overallDetailColumnMap = createOverallDetailColumnMap();
         settingsUpdatedExplicitly = !settings.isUpdateUponPlayStateChange();
         this.leaderboardUpdateListener = new ArrayList<LeaderboardUpdateListener>();
@@ -1816,7 +1818,7 @@ public class LeaderboardPanel extends SimplePanel implements TimeListener, PlayS
     
     private void setFilterControlStatus() {
         boolean filtersActive = competitorSelectionProvider.hasActiveFilters();
-        if (filtersActive) {
+        if (filtersActive && showCompetitorFilterStatus) {
             String labelText = "";
             for (Filter<CompetitorDTO> filter : competitorSelectionProvider.getCompetitorsFilterSet().getFilters()) {
                 if (filter instanceof FilterWithUI<?>) {

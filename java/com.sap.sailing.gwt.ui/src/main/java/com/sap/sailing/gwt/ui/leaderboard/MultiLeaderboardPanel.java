@@ -203,7 +203,7 @@ public class MultiLeaderboardPanel extends AbstractLazyComponent<LeaderboardSett
                     /* preselectedRace*/ null, new CompetitorSelectionModel(true), timer,
                     null, newSelectedLeaderboardName, errorReporter, stringMessages, userAgent,
                     showRaceDetails, /* competitorSearchTextBox */ null, /* showSelectionCheckbox */ true,  /* raceTimesInfoProvider */null, 
-                    false, /* adjustTimerDelay */ true, /*autoApplyTopNFilter*/ false);
+                    false, /* adjustTimerDelay */ true, /*autoApplyTopNFilter*/ false, false);
             selectedLeaderboardFlowPanel.add(selectedLeaderboardPanel);
         } else {
             if(selectedLeaderboardPanel != null && selectedLeaderboardFlowPanel != null) {
