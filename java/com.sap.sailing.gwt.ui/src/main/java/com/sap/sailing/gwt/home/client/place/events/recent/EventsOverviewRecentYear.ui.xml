@@ -38,8 +38,7 @@
     </div>
   </g:HTMLPanel>
   <g:HTMLPanel ui:field="contentDiv" styleName="{local_res.css.eventsoverviewrecent_year_content}">
-    <div class="{res.mainCss.grid}">
-        <g:HTMLPanel ui:field="recentEventsTeaserPanel" />
+    <div ui:field="recentEventsTeaserPanel" class="{res.mainCss.grid}">
     </div>
   </g:HTMLPanel>
 </div>

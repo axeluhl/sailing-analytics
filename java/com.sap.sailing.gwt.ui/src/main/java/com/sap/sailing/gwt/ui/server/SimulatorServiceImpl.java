@@ -320,7 +320,7 @@ public class SimulatorServiceImpl extends RemoteServiceServlet implements Simula
         }
 
         for (BoatClassProperties tuple : ConfigurationManager.INSTANCE.getBoatClassesInfo()) {
-            boatClassesDTOs.add(new BoatClassDTO(tuple.getName(), tuple.getLength()));
+            boatClassesDTOs.add(new BoatClassDTO(tuple.getName(), null, tuple.getLength()));
         }
 
         result.setBoatClassDTOs(boatClassesDTOs.toArray(new BoatClassDTO[boatClassesDTOs.size()]));
@@ -747,7 +747,7 @@ public class SimulatorServiceImpl extends RemoteServiceServlet implements Simula
         }
         windFieldDTO.curBearing = wf.getWindParameters().curBearing;
         windFieldDTO.curSpeed = wf.getWindParameters().curSpeed;
-        if (params.isShowStreamlets2()) {
+        if (params.isShowStreamlets()) {
             WindData windData = new WindData();
             windData.rcStart = params.getNorthWest();
             windData.rcEnd = params.getSouthEast();

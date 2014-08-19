@@ -1,11 +1,17 @@
-/**
- * Events on the main page
- */
+.eventteasercontainer {
+  font-size: 15px;
+  font-size: 1rem;
+  text-align: center;
+  width: 100%;
+  height: 24em;
+}
 .eventteaser {
-  font-size: 16px;
+  font-size: 15px;
   font-size: 1rem;
   display: inline-block;
-  margin-bottom: 2.8125em;
+  margin-bottom: 3em;
+  text-align: left;
+  max-width: 100%;
 }
 .eventteaser:hover {
   text-decoration: none;
@@ -19,7 +25,9 @@
   filter: literal("alpha(opacity=90)");
 }
 .eventteaser_image {
-    height: auto;
+  position: relative;
+  display: inline-block;
+  max-width: 100%;
 }
 .eventteaser_series {
   position: absolute;
@@ -27,16 +35,11 @@
   right: 0;
 }
 .eventteaser_name {
-  font-size: 1.375em;
+  font-size: 1.466666666666667em;
   font-weight: bold;
   color: #008fcc;
-  margin-top: 0.3125em;
+  margin-top: 0.333333333333333em;
 }
 .eventteaser_location {
   color: #222;
-}
-
-.eventsoverviewrecent {
-  font-size: 16px;
-  font-size: 1rem;
 }

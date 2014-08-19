@@ -11,17 +11,17 @@
   <div class="{res.mainCss.grid}">
     <div class="{res.mediaCss.small12} {res.mediaCss.columns}">
       <header class="{res.mainCss.mainsection_header}">
-        <h3 class="{local_res.css.mainsection_header_title}">Recommend SAP Sailing Analytics</h3>
+        <h3 class="{local_res.css.mainsection_header_title}">Follow SAP Sports</h3>
       </header>
       <div class="{res.mainCss.mainsection_navigation}">
-        <div class="{local_res.css.socialfooter_button} {local_res.css.socialfooter_buttontwitter}">
-          <div class="{local_res.css.socialfooter_button_text}">Share this on <span>Twitter</span></div>
-          <div class="{local_res.css.socialfooter_button_widget}"><img src="images/temp--twitter-badge.png" /></div>
-        </div>
-        <div class="{local_res.css.socialfooter_button} {local_res.css.socialfooter_buttonfacebook}">
-          <div class="{local_res.css.socialfooter_button_text}">Share this on <span>Facebook</span></div>
-          <div class="{local_res.css.socialfooter_button_widget}"><img src="images/temp--facebook-badge.png" /></div>
-        </div>
+        <a href="http://twitter.com/SAPSports" target="_blank" class="{local_res.css.socialfooter_button} {local_res.css.socialfooter_buttontwitter}" style="color:white;">
+          <div class="{local_res.css.socialfooter_button_text}">SAP Sports on <span>Twitter</span></div>
+          <div class="{local_res.css.socialfooter_button_widget}"></div>
+        </a>
+        <a href="http://www.facebook.com/SAPSports" target="_blank" class="{local_res.css.socialfooter_button} {local_res.css.socialfooter_buttonfacebook}" style="color:white;">
+            <div class="{local_res.css.socialfooter_button_text}">SAP Sports on <span>Facebook</span></div>
+          <div class="{local_res.css.socialfooter_button_widget}"></div>
+        </a>
       </div>
     </div>
   </div>

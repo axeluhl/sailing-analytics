@@ -1,6 +1,8 @@
 package com.sap.sailing.gwt.home.client.place.start;
 
 import java.util.ArrayList;
+import java.util.Collections;
+import java.util.Comparator;
 import java.util.Date;
 import java.util.List;
 
@@ -8,6 +10,7 @@ import com.google.gwt.activity.shared.AbstractActivity;
 import com.google.gwt.event.shared.EventBus;
 import com.google.gwt.user.client.rpc.AsyncCallback;
 import com.google.gwt.user.client.ui.AcceptsOneWidget;
+import com.sap.sailing.gwt.home.client.shared.placeholder.Placeholder;
 import com.sap.sailing.gwt.home.client.shared.stage.StageEventType;
 import com.sap.sailing.gwt.ui.shared.EventBaseDTO;
 import com.sap.sse.common.Util.Pair;
@@ -20,13 +23,15 @@ public class StartActivity extends AbstractActivity {
     }
 
     @Override
-    public void start(AcceptsOneWidget panel, EventBus eventBus) {
-        final StartView view = clientFactory.createStartView();
-        panel.setWidget(view.asWidget());
+    public void start(final AcceptsOneWidget panel, EventBus eventBus) {
+        panel.setWidget(new Placeholder());
         
         clientFactory.getSailingService().getPublicEventsOfAllSailingServers(new AsyncCallback<List<EventBaseDTO>>() {
             @Override
             public void onSuccess(List<EventBaseDTO> result) {
+                final StartView view = clientFactory.createStartView();
+                panel.setWidget(view.asWidget());
+
                 fillStartPageEvents(view, result);
             }
             
@@ -71,6 +76,8 @@ public class StartActivity extends AbstractActivity {
             fillingUpEventsList(MAX_STAGE_EVENTS, featuredEvents, StageEventType.POPULAR, recentEventsOfSameYear);
         }
 
+        Collections.sort(featuredEvents, new FeaturedEventsComparator());
+
         view.setFeaturedEvents(featuredEvents);
         view.setRecentEvents(recentEventsOfSameYear);
     }
@@ -82,4 +89,25 @@ public class StartActivity extends AbstractActivity {
             resultList.add(new Pair<StageEventType, EventBaseDTO>(type, listToTakeElementsFrom.get(i)));
         }
     }
+    
+    /**
+     * Comparator for sorting a pair of event and stageType first by order number of stage type and then by event start date.
+     * @author Frank
+     *
+     */
+    private class FeaturedEventsComparator implements Comparator<Pair<StageEventType, EventBaseDTO>> {
+
+        @Override
+        public int compare(Pair<StageEventType, EventBaseDTO> eventAndStageType1, Pair<StageEventType, EventBaseDTO> eventAndStageType2) {
+            int result;
+            if(eventAndStageType1.getA().ordinal() == eventAndStageType2.getA().ordinal()) {
+                result = eventAndStageType1.getB().startDate.compareTo(eventAndStageType2.getB().startDate); 
+            } else {
+                result = eventAndStageType1.getA().ordinal() - eventAndStageType2.getA().ordinal();  
+            }
+            
+            return result;
+        }
+    }
+
 }

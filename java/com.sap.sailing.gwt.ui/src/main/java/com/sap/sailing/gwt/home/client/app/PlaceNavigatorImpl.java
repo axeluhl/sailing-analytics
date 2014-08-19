@@ -7,7 +7,9 @@ import com.google.gwt.user.client.Window;
 import com.sap.sailing.gwt.home.client.place.aboutus.AboutUsPlace;
 import com.sap.sailing.gwt.home.client.place.contact.ContactPlace;
 import com.sap.sailing.gwt.home.client.place.event.EventPlace;
+import com.sap.sailing.gwt.home.client.place.event.EventPlace.NavigationTabs;
 import com.sap.sailing.gwt.home.client.place.events.EventsPlace;
+import com.sap.sailing.gwt.home.client.place.leaderboard.LeaderboardPlace;
 import com.sap.sailing.gwt.home.client.place.searchresult.SearchResultPlace;
 import com.sap.sailing.gwt.home.client.place.solutions.SolutionsPlace;
 import com.sap.sailing.gwt.home.client.place.sponsoring.SponsoringPlace;
@@ -15,8 +17,8 @@ import com.sap.sailing.gwt.home.client.place.start.StartPlace;
 
 public class PlaceNavigatorImpl implements PlaceNavigator {
     private final PlaceController placeController;
-    private final static String SAPSAILING_DOMAIN = "www.sapsailing.com"; 
-    private final static String NEW_HOME_TEST_DOMAIN = "newhome.sapsailing.com"; 
+    private final static String DEFAULT_SAPSAILING_SERVER = "www.sapsailing.com"; // newhome.sapsailing.com 
+    private final static String DEFAULT_SAPSAILING_SERVER_URL = "http://" + DEFAULT_SAPSAILING_SERVER;  
     
     protected PlaceNavigatorImpl(PlaceController placeController) {
         super();
@@ -29,15 +31,21 @@ public class PlaceNavigatorImpl implements PlaceNavigator {
     }
 
     @Override
-    public void goToEvent(String eventUuidAsString, String baseUrl) {
-        EventPlace eventPlace = new EventPlace(eventUuidAsString, null);
-        gotoPlace(baseUrl, eventPlace, new EventPlace.Tokenizer());
+    public void goToEvent(String eventUuidAsString, String baseUrl, boolean isOnRemoteServer) {
+        EventPlace eventPlace = new EventPlace(eventUuidAsString, NavigationTabs.Regattas, null);
+        gotoPlace(baseUrl, isOnRemoteServer, eventPlace, new EventPlace.Tokenizer());
     }
 
     @Override
-    public void goToRegattaOfEvent(String eventUuidAsString, String leaderboardIdAsNameString, String baseUrl) {
-        EventPlace eventPlace = new EventPlace(eventUuidAsString, leaderboardIdAsNameString);
-        gotoPlace(baseUrl, eventPlace, new EventPlace.Tokenizer());
+    public void goToRegattaOfEvent(String eventUuidAsString, String leaderboardIdAsNameString, String baseUrl, boolean isOnRemoteServer) {
+        EventPlace eventPlace = new EventPlace(eventUuidAsString, NavigationTabs.Regatta, leaderboardIdAsNameString);
+        gotoPlace(baseUrl, isOnRemoteServer, eventPlace, new EventPlace.Tokenizer());
+    }
+
+    @Override
+    public void goToLeaderboard(String eventUuidAsString, String leaderboardIdAsNameString, String baseUrl, boolean isOnRemoteServer) {
+        LeaderboardPlace leaderboardPlace = new LeaderboardPlace(eventUuidAsString, leaderboardIdAsNameString, true, true);
+        gotoPlace(baseUrl, isOnRemoteServer, leaderboardPlace, new LeaderboardPlace.Tokenizer());
     }
 
     @Override
@@ -52,30 +60,35 @@ public class PlaceNavigatorImpl implements PlaceNavigator {
 
     @Override
     public void goToAboutUs() {
-        gotoPlace(new AboutUsPlace());
+        gotoPlace(getLocationURL(), new AboutUsPlace(), new AboutUsPlace.Tokenizer());
     }
 
     @Override
     public void goToContact() {
-        gotoPlace(new ContactPlace());
+        gotoPlace(getLocationURL(), new ContactPlace(), new ContactPlace.Tokenizer());
     }
 
     @Override
     public void goToSolutions() {
-        gotoPlace(new SolutionsPlace());
+        gotoPlace(getLocationURL(), new SolutionsPlace(), new SolutionsPlace.Tokenizer());
     }
 
     @Override
     public void goToSponsoring() {
-        gotoPlace(new SponsoringPlace());
+        gotoPlace(getLocationURL(), new SponsoringPlace(), new SponsoringPlace.Tokenizer());
     }
 
-    private <T extends Place> void gotoPlace(T destinationPlace) {
-        placeController.goTo(destinationPlace); 
-    }
-    
     private <T extends Place> void gotoPlace(String baseUrl, T destinationPlace, PlaceTokenizer<T> tokenizer) {
-        if(isLocationOnLocalhost(baseUrl) || isLocationOnSapSailingCom(baseUrl) || isLocationOnNewHomeTest(baseUrl)) {
+        if(isLocationOnLocalhost(baseUrl) || isLocationOnDefaultSapSailingServer(baseUrl)) {
+            placeController.goTo(destinationPlace); 
+        } else {
+            String homeUrl = buildRemotePlaceUrl(DEFAULT_SAPSAILING_SERVER_URL, destinationPlace, tokenizer);
+            Window.Location.replace(homeUrl);
+        }
+    }
+
+    private <T extends Place> void gotoPlace(String baseUrl, boolean isOnRemoteServer, T destinationPlace, PlaceTokenizer<T> tokenizer) {
+        if((baseUrl != null && isLocationOnLocalhost(baseUrl)) || !isOnRemoteServer) {
             placeController.goTo(destinationPlace); 
         } else {
             String homeUrl = buildRemotePlaceUrl(baseUrl, destinationPlace, tokenizer);
@@ -84,19 +97,15 @@ public class PlaceNavigatorImpl implements PlaceNavigator {
     }
 
     private String getLocationURL() {
-        return Window.Location.getProtocol() + "//" + Window.Location.getHost();
+        return Window.Location.getProtocol() + "//" + Window.Location.getHostName();
     }
     
     private  <T extends Place> String buildRemotePlaceUrl(String baseUrl, T destinationPlace, PlaceTokenizer<T> tokenizer) {
         return baseUrl + "/gwt/Home.html#" + destinationPlace.getClass().getSimpleName() + ":" + tokenizer.getToken(destinationPlace);
     }
 
-    private boolean isLocationOnNewHomeTest(String urlToCheck) {
-        return urlToCheck.contains(NEW_HOME_TEST_DOMAIN);
-    }
-
-    private boolean isLocationOnSapSailingCom(String urlToCheck) {
-        return urlToCheck.contains(SAPSAILING_DOMAIN);
+    private boolean isLocationOnDefaultSapSailingServer(String urlToCheck) {
+        return urlToCheck.contains(DEFAULT_SAPSAILING_SERVER);
     }
 
     private boolean isLocationOnLocalhost(String urlToCheck) {

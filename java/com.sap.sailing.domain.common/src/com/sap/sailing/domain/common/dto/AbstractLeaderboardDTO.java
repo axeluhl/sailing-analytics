@@ -41,8 +41,10 @@ public abstract class AbstractLeaderboardDTO implements Serializable {
     
     public Set<BoatClassDTO> getBoatClasses() {
         Set<BoatClassDTO> result = new HashSet<BoatClassDTO>();
-        for (CompetitorDTO competitor : rows.keySet()) {
-            result.add(competitor.getBoatClass());
+        if(rows != null) {
+            for (CompetitorDTO competitor : rows.keySet()) {
+                result.add(competitor.getBoatClass());
+            }
         }
         return result;
     }
@@ -188,6 +190,14 @@ public abstract class AbstractLeaderboardDTO implements Serializable {
 
     public int getRaceColumnsCount() {
         return races.size();
+    }
+
+    public int getRacesCount() {
+        int result = 0;
+        for (RaceColumnDTO race : getRaceList()) {
+            result += race.getFleets().size();
+        }
+        return result;
     }
 
     public int getTrackedRacesCount() {

@@ -18,7 +18,7 @@ import com.sap.sailing.gwt.ui.client.StringMessages;
 import com.sap.sailing.gwt.ui.client.shared.components.Component;
 import com.sap.sailing.gwt.ui.client.shared.components.SettingsDialog;
 import com.sap.sailing.gwt.ui.client.shared.components.SettingsDialogComponent;
-import com.sap.sailing.gwt.ui.leaderboard.LeaderboardEntryPoint.LeaderboardUrlSettings;
+import com.sap.sailing.gwt.ui.leaderboard.LeaderboardUrlSettings;
 import com.sap.sse.gwt.client.dialog.DataEntryDialog;
 
 public class LeaderboardUrlConfigurationDialog extends SettingsDialog<LeaderboardUrlSettings> {
@@ -113,7 +113,7 @@ public class LeaderboardUrlConfigurationDialog extends SettingsDialog<Leaderboar
         }
 
         private void updateURL(LeaderboardUrlSettings settings, String leaderboardName, String leaderboardDisplayName) {
-            resultingUrl.setHref(LeaderboardEntryPoint.getUrl(leaderboardName, leaderboardDisplayName, settings));
+            resultingUrl.setHref(LeaderboardUrlSettings.getUrl(leaderboardName, leaderboardDisplayName, settings));
         }
 
         /**

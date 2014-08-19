@@ -66,11 +66,11 @@ public class TestLeaderboardGroupFilteringRetrievalProcessor {
 
     private Map<String, LeaderboardGroup> getGroupsInService() {
         Map<String, LeaderboardGroup> groups = new HashMap<>();
-        groups.put("LG1", new LeaderboardGroupImpl("LG1", "", false, new ArrayList<Leaderboard>()));
-        groups.put("LG2", new LeaderboardGroupImpl("LG2", "", false, new ArrayList<Leaderboard>()));
-        groups.put("LG3", new LeaderboardGroupImpl("LG3", "", false, new ArrayList<Leaderboard>()));
-        groups.put("LG4", new LeaderboardGroupImpl("LG4", "", false, new ArrayList<Leaderboard>()));
-        groups.put("LG5", new LeaderboardGroupImpl("LG5", "", false, new ArrayList<Leaderboard>()));
+        groups.put("LG1", new LeaderboardGroupImpl("LG1", "", /* displayName */ null, false, new ArrayList<Leaderboard>()));
+        groups.put("LG2", new LeaderboardGroupImpl("LG2", "", /* displayName */ null, false, new ArrayList<Leaderboard>()));
+        groups.put("LG3", new LeaderboardGroupImpl("LG3", "", /* displayName */ null, false, new ArrayList<Leaderboard>()));
+        groups.put("LG4", new LeaderboardGroupImpl("LG4", "", /* displayName */ null, false, new ArrayList<Leaderboard>()));
+        groups.put("LG5", new LeaderboardGroupImpl("LG5", "", /* displayName */ null, false, new ArrayList<Leaderboard>()));
         return groups;
     }
 
@@ -86,11 +86,11 @@ public class TestLeaderboardGroupFilteringRetrievalProcessor {
 
     private Collection<LeaderboardGroup> getExpectedRetrievedGroups() {
         Collection<LeaderboardGroup> groups = new HashSet<>();
-        groups.add(new LeaderboardGroupImpl("LG1", "", false, new ArrayList<Leaderboard>()));
-        groups.add(new LeaderboardGroupImpl("LG2", "", false, new ArrayList<Leaderboard>()));
-        groups.add(new LeaderboardGroupImpl("LG3", "", false, new ArrayList<Leaderboard>()));
-        groups.add(new LeaderboardGroupImpl("LG4", "", false, new ArrayList<Leaderboard>()));
-        groups.add(new LeaderboardGroupImpl("LG5", "", false, new ArrayList<Leaderboard>()));
+        groups.add(new LeaderboardGroupImpl("LG1", "", /* displayName */ null, false, new ArrayList<Leaderboard>()));
+        groups.add(new LeaderboardGroupImpl("LG2", "", /* displayName */ null, false, new ArrayList<Leaderboard>()));
+        groups.add(new LeaderboardGroupImpl("LG3", "", /* displayName */ null, false, new ArrayList<Leaderboard>()));
+        groups.add(new LeaderboardGroupImpl("LG4", "", /* displayName */ null, false, new ArrayList<Leaderboard>()));
+        groups.add(new LeaderboardGroupImpl("LG5", "", /* displayName */ null, false, new ArrayList<Leaderboard>()));
         return groups;
     }
 

@@ -23,6 +23,9 @@ public class EventBaseDTO extends NamedDTO implements IsSerializable {
     private List<String> sponsorImageURLs = new ArrayList<>();
     private String logoImageURL;
     private String officialWebsiteURL;
+    /** placeholder for social media URL's -> attributes will be implemented later on */
+    private String facebookURL;
+    private String twitterURL;
     
     /**
      * The base URL for the server instance on which the data for this event can be reached. Could be something like
@@ -32,6 +35,11 @@ public class EventBaseDTO extends NamedDTO implements IsSerializable {
      * resolve to the correct host IP and Java server instance.
      */
     private String baseURL;
+    
+    /**
+     * Indicates whether the event is hosted on a remote server or not 
+     */
+    private boolean isOnRemoteServer;
 
     EventBaseDTO() {} // for serialization only
     
@@ -44,6 +52,14 @@ public class EventBaseDTO extends NamedDTO implements IsSerializable {
         this.leaderboardGroups = leaderboardGroups;
     }
 
+    public boolean isRunning() {
+        Date now = new Date();
+        if(startDate != null && endDate != null && (now.after(startDate) && now.before(endDate))) {
+            return true;
+        }
+        return false;
+    }
+    
     public String getDescription() {
         return description;
     }
@@ -128,6 +144,30 @@ public class EventBaseDTO extends NamedDTO implements IsSerializable {
 
     public Iterable<? extends LeaderboardGroupBaseDTO> getLeaderboardGroups() {
         return leaderboardGroups;
+    }
+
+    public boolean isOnRemoteServer() {
+        return isOnRemoteServer;
+    }
+
+    public void setIsOnRemoteServer(boolean isOnRemoteServer) {
+        this.isOnRemoteServer = isOnRemoteServer;
+    }
+
+    public String getFacebookURL() {
+        return facebookURL;
+    }
+
+    public void setFacebookURL(String facebookURL) {
+        this.facebookURL = facebookURL;
+    }
+
+    public String getTwitterURL() {
+        return twitterURL;
+    }
+
+    public void setTwitterURL(String twitterURL) {
+        this.twitterURL = twitterURL;
     }
 
 }

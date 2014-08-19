@@ -22,12 +22,12 @@
       <span class="{local_res.css.eventregattarace_wind_strength}"><span ui:field="averageRaceWind" /></span>
   </div>
   <div ui:field="raceWinnerDiv" class="{local_res.css.eventregattarace_details} {local_res.css.eventregattarace_leader}">
-      <ui:text from='{i18n.eventRegattaRaceWinner}'/><br></br> - &nbsp;<span ui:field="raceWinner" class="{local_res.css.eventregattarace_leader_name}"></span>
+      <ui:text from="{i18n.eventRegattaRaceWinner}"/><br></br><span ui:field="raceWinner" class="{local_res.css.eventregattarace_leader_name}"></span>
   </div>
   <div ui:field="raceLeaderDiv" class="{local_res.css.eventregattarace_details} {local_res.css.eventregattarace_leader}">
-      Leader:<br></br> - &nbsp;<span ui:field="raceLeader" class="{local_res.css.eventregattarace_leader_name}"></span>
+      <ui:text from="{i18n.eventRegattaRaceLeader}"/><br></br><span ui:field="raceLeader" class="{local_res.css.eventregattarace_leader_name}"></span>
   </div>
-  <div ui:field="legProgressDiv" class="{local_res.css.eventregattarace_details} {local_res.css.eventregattarace_legs}">Leg (race.leg of race.totalLegs):
+  <div ui:field="legProgressDiv" class="{local_res.css.eventregattarace_details} {local_res.css.eventregattarace_legs}"><ui:text from='{i18n.leg}'/>&nbsp;<span ui:field="currentLegNo" />/<span ui:field="totalLegsCount" />
     <div class="{local_res.css.eventregattarace_legs_list}">
       <div data-status="r" class="{local_res.css.eventregattarace_legs_leg}"></div>
     </div>
@@ -40,6 +40,9 @@
   </div>
   <div ui:field="raceNotTrackedDiv" class="{local_res.css.eventregattarace_action} {local_res.css.eventregattarace_actiondisabled}">
       <ui:text from='{i18n.eventRegattaRaceNotTracked}'/>
+  </div>
+  <div ui:field="raceNotScheduledDiv" class="{local_res.css.eventregattarace_action} {local_res.css.eventregattarace_actiondisabled}">
+      <ui:text from='{i18n.raceNotScheduled}'/>
   </div>
   <div ui:field="watchRaceDiv" class="{local_res.css.eventregattarace_action}">
       <a ui:field="watchRaceLink" class="{res.mainCss.button} {local_res.css.eventregattarace_action_watch}"><ui:text from='{i18n.eventRegattaRaceWatch}'/></a>

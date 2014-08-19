@@ -126,6 +126,7 @@ public class RaceBoardPanel extends SimplePanel implements RegattasDisplayer, Ra
     private final AsyncActionsExecutor asyncActionsExecutor;
     
     private final RaceTimesInfoProvider raceTimesInfoProvider;
+    private RaceMap raceMap;
     
     private final static String LOCAL_STORAGE_COMPETITORS_FILTER_SETS_KEY = "sailingAnalytics.raceBoard.competitorsFilterSets";
 
@@ -206,7 +207,7 @@ public class RaceBoardPanel extends SimplePanel implements RegattasDisplayer, Ra
     
     private void createOneScreenView(String leaderboardName, String leaderboardGroupName, FlowPanel mainPanel, boolean showMapControls) {
         // create the default leaderboard and select the right race
-        RaceMap raceMap = new RaceMap(sailingService, asyncActionsExecutor, errorReporter, timer,
+        raceMap = new RaceMap(sailingService, asyncActionsExecutor, errorReporter, timer,
                 competitorSelectionModel, stringMessages, showMapControls, getConfiguration().isShowViewStreamlets(), selectedRaceIdentifier);
         raceTimesInfoProvider.addRaceTimesInfoProviderListener(raceMap);
         raceMap.onRaceSelectionChange(Collections.singletonList(selectedRaceIdentifier));
@@ -324,17 +325,19 @@ public class RaceBoardPanel extends SimplePanel implements RegattasDisplayer, Ra
     }
 
     private void updateCompetitorsFilterContexts(CompetitorsFilterSets filterSets) {
-        for(FilterSet<CompetitorDTO, FilterWithUI<CompetitorDTO>> filterSet: filterSets.getFilterSets()) {
-            for(Filter<CompetitorDTO> filter: filterSet.getFilters()) {
-               if(filter instanceof LeaderboardFilterContext) {
-                   ((LeaderboardFilterContext) filter).setLeaderboardFetcher(leaderboardPanel);
-               }
-               if(filter instanceof SelectedRaceFilterContext) {
-                   ((SelectedRaceFilterContext) filter).setSelectedRace(selectedRaceIdentifier);
-               }
-               if(filter instanceof CompetitorSelectionProviderFilterContext) {
-                   ((CompetitorSelectionProviderFilterContext) filter).setCompetitorSelectionProvider(competitorSelectionModel);
-               }
+        for (FilterSet<CompetitorDTO, FilterWithUI<CompetitorDTO>> filterSet : filterSets.getFilterSets()) {
+            for (Filter<CompetitorDTO> filter : filterSet.getFilters()) {
+                if (filter instanceof LeaderboardFilterContext) {
+                    ((LeaderboardFilterContext) filter).setLeaderboardFetcher(leaderboardPanel);
+                }
+                if (filter instanceof SelectedRaceFilterContext) {
+                    ((SelectedRaceFilterContext) filter).setSelectedRace(selectedRaceIdentifier);
+                    ((SelectedRaceFilterContext) filter).setQuickRankProvider(raceMap);
+                }
+                if (filter instanceof CompetitorSelectionProviderFilterContext) {
+                    ((CompetitorSelectionProviderFilterContext) filter)
+                            .setCompetitorSelectionProvider(competitorSelectionModel);
+                }
             }
         }
     }

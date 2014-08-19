@@ -5,16 +5,16 @@ import com.google.gwt.dom.client.AnchorElement;
 import com.google.gwt.dom.client.DivElement;
 import com.google.gwt.dom.client.Element;
 import com.google.gwt.dom.client.SpanElement;
-import com.google.gwt.dom.client.Style.BorderStyle;
 import com.google.gwt.dom.client.Style.Display;
-import com.google.gwt.dom.client.Style.Unit;
 import com.google.gwt.dom.client.Style.Visibility;
 import com.google.gwt.i18n.shared.DateTimeFormat;
 import com.google.gwt.uibinder.client.UiBinder;
 import com.google.gwt.uibinder.client.UiField;
+import com.google.gwt.user.client.DOM;
 import com.google.gwt.user.client.Event;
 import com.google.gwt.user.client.EventListener;
 import com.google.gwt.user.client.ui.UIObject;
+import com.sap.sailing.domain.common.dto.CompetitorDTO;
 import com.sap.sailing.domain.common.dto.FleetDTO;
 import com.sap.sailing.domain.common.dto.RaceColumnDTO;
 import com.sap.sailing.domain.common.dto.RaceDTO;
@@ -25,7 +25,7 @@ import com.sap.sse.gwt.client.player.Timer;
 public class EventRegattaRacesRace extends UIObject {
     private static EventRegattaRacesRaceUiBinder uiBinder = GWT.create(EventRegattaRacesRaceUiBinder.class);
 
-    private enum SimpleRaceStates { NOT_TRACKED, TRACKED_AND_NOT_LIVE, TRACKED_AND_LIVE };
+    private enum SimpleRaceStates { NOT_TRACKED, TRACKED, TRACKED_AND_LIVE, TRACKED_BUT_NOT_SCHEDULED };
     
     interface EventRegattaRacesRaceUiBinder extends UiBinder<DivElement, EventRegattaRacesRace> {
     }
@@ -38,6 +38,7 @@ public class EventRegattaRacesRace extends UIObject {
     @UiField SpanElement averageRaceWind;
     
     @UiField DivElement raceNotTrackedDiv;
+    @UiField DivElement raceNotScheduledDiv;
     @UiField DivElement watchRaceDiv;
     @UiField DivElement analyzeRaceDiv;
     @UiField AnchorElement watchRaceLink;
@@ -58,10 +59,10 @@ public class EventRegattaRacesRace extends UIObject {
     @UiField DivElement featureAudio;
     @UiField DivElement featureVideo;
     
-    // local_res.css.eventregattarace_featureunavailable
+    @UiField SpanElement currentLegNo;
+    @UiField SpanElement totalLegsCount;
     
     private final DateTimeFormat raceTimeFormat = DateTimeFormat.getFormat("EEE, h:mm a");
-//    private final TextMessages textMessages = GWT.create(TextMessages.class);
     
     private final StrippedLeaderboardDTO leaderboard;
     private final FleetDTO fleet;
@@ -83,7 +84,7 @@ public class EventRegattaRacesRace extends UIObject {
         EventRegattaRacesResources.INSTANCE.css().ensureInjected();
         setElement(uiBinder.createAndBindUi(this));
 
-        allConditionalElements = new Element[] {raceWinnerDiv, raceLeaderDiv, watchRaceDiv, analyzeRaceDiv, raceNotTrackedDiv,
+        allConditionalElements = new Element[] {raceWinnerDiv, raceLeaderDiv, watchRaceDiv, analyzeRaceDiv, raceNotTrackedDiv, raceNotScheduledDiv,
                 raceFeaturesDiv, legProgressDiv, raceFlagDiv, windStatusDiv };
 
         if(fleet.getColor() != null) {
@@ -102,7 +103,11 @@ public class EventRegattaRacesRace extends UIObject {
         Event.setEventListener(analyzeRaceLink, new EventListener() {
             @Override
             public void onBrowserEvent(Event event) {
-                openRaceViewer();
+                switch (DOM.eventGetType(event)) {
+                    case Event.ONCLICK:
+                        openRaceViewer();
+                        break;
+                }
             }
         });
 
@@ -110,7 +115,11 @@ public class EventRegattaRacesRace extends UIObject {
         Event.setEventListener(watchRaceLink, new EventListener() {
             @Override
             public void onBrowserEvent(Event event) {
-                openRaceViewer();
+                switch (DOM.eventGetType(event)) {
+                    case Event.ONCLICK:
+                        openRaceViewer();
+                        break;
+                }
             }
         });
     }
@@ -119,7 +128,13 @@ public class EventRegattaRacesRace extends UIObject {
         SimpleRaceStates simpleRaceState = SimpleRaceStates.NOT_TRACKED;
         
         if(race != null && race.trackedRace != null) {
-            simpleRaceState = isLive() ? SimpleRaceStates.TRACKED_AND_LIVE : SimpleRaceStates.TRACKED_AND_NOT_LIVE; 
+            simpleRaceState = SimpleRaceStates.TRACKED;
+            if(isLive()) {
+                simpleRaceState = SimpleRaceStates.TRACKED_AND_LIVE;
+                if(race.startOfRace == null) {
+                    simpleRaceState = SimpleRaceStates.TRACKED_BUT_NOT_SCHEDULED;
+                }                    
+            }
         }
         return simpleRaceState;
     }
@@ -139,46 +154,67 @@ public class EventRegattaRacesRace extends UIObject {
             case NOT_TRACKED:
                 showElement(raceNotTrackedDiv);
                 break;
+            case TRACKED_BUT_NOT_SCHEDULED:
+                showElement(raceNotScheduledDiv);
+                break;
             case TRACKED_AND_LIVE:
                 showElement(watchRaceDiv);
-                showElement(raceLeaderDiv);
-                showElement(legProgressDiv);
 
-                raceTime.setInnerText(raceTimeFormat.format(race.startOfRace));
+                if(race.startOfRace != null) {
+                    raceTime.setInnerText(raceTimeFormat.format(race.startOfRace));
+                }
+                if(race.trackedRaceStatistics.hasLegProgressData) {
+                    showElement(legProgressDiv);
+                    currentLegNo.setInnerText(String.valueOf(race.trackedRaceStatistics.currentLegNo));
+                    totalLegsCount.setInnerText(String.valueOf(race.trackedRaceStatistics.totalLegsCount));
+                }
+                if(race.trackedRaceStatistics.hasLeaderOrWinnerData && race.trackedRaceStatistics.leaderOrWinner != null) {
+                    showElement(raceLeaderDiv);
+                    updateWinnerOrLeader(raceLeader, race.trackedRaceStatistics.leaderOrWinner);
+                }
 
                 break;
-            case TRACKED_AND_NOT_LIVE:
+            case TRACKED:
                 showElement(analyzeRaceDiv);
-                showElement(raceWinnerDiv);
-                showElement(raceFeaturesDiv);
                 
-                raceTime.setInnerText(raceTimeFormat.format(race.startOfRace));
+                if(race.trackedRaceStatistics.hasLeaderOrWinnerData && race.trackedRaceStatistics.leaderOrWinner != null) {
+                    showElement(raceWinnerDiv);
+                    updateWinnerOrLeader(raceWinner, race.trackedRaceStatistics.leaderOrWinner);
+                }
+                if(race.startOfRace != null) {
+                    raceTime.setInnerText(raceTimeFormat.format(race.startOfRace));
+                }
+                showElement(raceFeaturesDiv);
                 updateRaceFeatures();
 
                 break;
         }
     }
-
+    
+    private void updateWinnerOrLeader(SpanElement winnerOrLeaderElement, CompetitorDTO winnerOrLeader) {
+        String winnerOrLeaderName = winnerOrLeader.getName();
+        if(winnerOrLeader.getThreeLetterIocCountryCode() != null) {
+            winnerOrLeaderName += " (" + winnerOrLeader.getThreeLetterIocCountryCode() + ")";
+        }
+        winnerOrLeaderElement.setInnerText(winnerOrLeaderName);
+    }
+        
     private void updateRaceFeatures() {
-        if(race.trackedRace.hasGPSData) {
-            featureGPS.getStyle().setBorderColor("red");
-            featureGPS.getStyle().setBorderStyle(BorderStyle.SOLID);
-            featureGPS.getStyle().setBorderWidth(1, Unit.PX);
+        if(!race.trackedRaceStatistics.hasGPSData) {
+            featureGPS.addClassName(EventRegattaRacesResources.INSTANCE.css().eventregattarace_featureunavailable());
         }
-        if(race.trackedRace.hasMeasuredWindData) {
-            featureWind.getStyle().setBorderColor("red");
-            featureWind.getStyle().setBorderStyle(BorderStyle.SOLID);
-            featureWind.getStyle().setBorderWidth(1, Unit.PX);
+        if(!race.trackedRaceStatistics.hasMeasuredWindData) {
+            featureWind.addClassName(EventRegattaRacesResources.INSTANCE.css().eventregattarace_featureunavailable());
         }
-        if(race.trackedRace.hasVideoData) {
-            featureVideo.getStyle().setBorderColor("red");
-            featureVideo.getStyle().setBorderStyle(BorderStyle.SOLID);
-            featureVideo.getStyle().setBorderWidth(1, Unit.PX);
+        if(!race.trackedRaceStatistics.hasVideoData) {
+            featureVideo.addClassName(EventRegattaRacesResources.INSTANCE.css().eventregattarace_featureunavailable());
+        } else {
+            featureVideo.setTitle(String.valueOf(race.trackedRaceStatistics.videoTracksCount));
         }
-        if(race.trackedRace.hasAudioData) {
-            featureAudio.getStyle().setBorderColor("red");
-            featureAudio.getStyle().setBorderStyle(BorderStyle.SOLID);
-            featureAudio.getStyle().setBorderWidth(1, Unit.PX);
+        if(!race.trackedRaceStatistics.hasAudioData) {
+            featureAudio.addClassName(EventRegattaRacesResources.INSTANCE.css().eventregattarace_featureunavailable());
+        } else {
+            featureAudio.setTitle(String.valueOf(race.trackedRaceStatistics.audioTracksCount));
         }
     }
     

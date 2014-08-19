@@ -13,6 +13,7 @@ import com.google.gwt.user.client.ui.RequiresResize;
 import com.sap.sailing.domain.common.dto.PositionDTO;
 import com.sap.sailing.gwt.ui.shared.SimulatorWindDTO;
 import com.sap.sailing.gwt.ui.shared.racemap.CanvasOverlayV3;
+import com.sap.sailing.gwt.ui.simulator.streamlets.Vector;
 
 /**
  * This class extends @CanvasOverlayV3 to provide the functionality that the canvas always covers the
@@ -25,10 +26,12 @@ import com.sap.sailing.gwt.ui.shared.racemap.CanvasOverlayV3;
 public abstract class FullCanvasOverlay extends CanvasOverlayV3 implements RequiresResize {
 
     /** the x coordinate where the canvas is placed */
-    private double widgetPosLeft = 0;
+    protected double widgetPosLeft = 0;
     
     /** the y coordinate where the canvas element is placed */
-    private double widgetPosTop = 0;
+    protected double widgetPosTop = 0;
+    
+    protected Vector diffPx;
 
     public String pointColor = "Red";
     public String textColor = "Black";
@@ -43,6 +46,7 @@ public abstract class FullCanvasOverlay extends CanvasOverlayV3 implements Requi
                 drawCenterChanged();
             };
         });
+        diffPx = new Vector(0, 0);
     }
     
     /**
@@ -267,5 +271,9 @@ public abstract class FullCanvasOverlay extends CanvasOverlayV3 implements Requi
 
     public void setWidgetPosTop(double widgetPosTop) {
         this.widgetPosTop = widgetPosTop;
+    }
+    
+    public Vector getDiffPx() {
+        return diffPx;
     }
 }

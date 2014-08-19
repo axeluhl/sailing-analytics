@@ -229,17 +229,26 @@
 .eventregattarace_featuregps {
   background-position: 0 0;
 }
+.eventregattarace_featuregps.eventregattarace_featureunavailable {
+  background-position: 0 100%;
+}
 .eventregattarace_featurewind {
   background-position: 33% 0;
+}
+.eventregattarace_featurewind.eventregattarace_featureunavailable {
+  background-position: 33% 100%;
 }
 .eventregattarace_featurevideo {
   background-position: 66% 0;
 }
+.eventregattarace_featurevideo.eventregattarace_featureunavailable {
+  background-position: 66% 100%;
+}
 .eventregattarace_featureaudio {
   background-position: 100% 0;
 }
-.eventregattarace_featureunavailable {
-  background-position-y: 100%;
+.eventregattarace_featureaudio.eventregattarace_featureunavailable {
+  background-position: 100% 100%;
 }
 .regattanavigation {
   font-size: 15px;

@@ -21,10 +21,10 @@ public class EventLeaderboardGroupLinkTest {
     @Test
     public void testLivelinessAndIteratorStabilityOfUnmodifiableLeaderboardGroupCollection() {
         Event e = new EventImpl("E", null, null, "Venue", /* public */ true, UUID.randomUUID());
-        LeaderboardGroupImpl lg1 = new LeaderboardGroupImpl("lg1", "LG1", /* displayGroupsInReverseOrder */ false, Collections.<Leaderboard>emptyList());
-        LeaderboardGroupImpl lg2 = new LeaderboardGroupImpl("lg2", "LG2", /* displayGroupsInReverseOrder */ false, Collections.<Leaderboard>emptyList());
-        LeaderboardGroupImpl lg3 = new LeaderboardGroupImpl("lg3", "LG3", /* displayGroupsInReverseOrder */ false, Collections.<Leaderboard>emptyList());
-        LeaderboardGroupImpl lg4 = new LeaderboardGroupImpl("lg4", "LG4", /* displayGroupsInReverseOrder */ false, Collections.<Leaderboard>emptyList());
+        LeaderboardGroupImpl lg1 = new LeaderboardGroupImpl("lg1", "LG1", /* displayName */ null, /* displayGroupsInReverseOrder */ false, Collections.<Leaderboard>emptyList());
+        LeaderboardGroupImpl lg2 = new LeaderboardGroupImpl("lg2", "LG2", /* displayName */ null, /* displayGroupsInReverseOrder */ false, Collections.<Leaderboard>emptyList());
+        LeaderboardGroupImpl lg3 = new LeaderboardGroupImpl("lg3", "LG3", /* displayName */ null, /* displayGroupsInReverseOrder */ false, Collections.<Leaderboard>emptyList());
+        LeaderboardGroupImpl lg4 = new LeaderboardGroupImpl("lg4", "LG4", /* displayName */ null, /* displayGroupsInReverseOrder */ false, Collections.<Leaderboard>emptyList());
         e.addLeaderboardGroup(lg1);
         Iterable<LeaderboardGroup> lgs = e.getLeaderboardGroups();
         Iterator<LeaderboardGroup> iter = lgs.iterator();
