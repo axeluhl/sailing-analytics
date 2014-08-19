@@ -47,6 +47,7 @@ public class MediaComponent implements Component<Void>, PlayStateListener, TimeL
     private final UserDTO user;
     private final MediaServiceAsync mediaService;
     private final boolean autoSelectMedia;
+    private final String defaultMediaId;
     
     private final MediaSelector mediaSelector;
 
@@ -54,9 +55,10 @@ public class MediaComponent implements Component<Void>, PlayStateListener, TimeL
     private double currentPlaybackSpeed = 1.0d;
     private PlayStates currentPlayState = PlayStates.Paused;
 
+
     public MediaComponent(RegattaAndRaceIdentifier selectedRaceIdentifier, RaceTimesInfoProvider raceTimesInfoProvider,
             Timer raceTimer, MediaServiceAsync mediaService, StringMessages stringMessages,
-            ErrorReporter errorReporter, UserAgentDetails userAgent, UserDTO user, boolean autoSelectMedia) {
+            ErrorReporter errorReporter, UserAgentDetails userAgent, UserDTO user, boolean autoSelectMedia, String defaultMedia) {
         this.raceIdentifier = selectedRaceIdentifier;
         this.raceTimesInfoProvider = raceTimesInfoProvider;
         this.raceTimer = raceTimer;
@@ -64,8 +66,9 @@ public class MediaComponent implements Component<Void>, PlayStateListener, TimeL
         this.errorReporter = errorReporter;
         this.userAgent = userAgent;
         this.user = user;
-        this.autoSelectMedia = autoSelectMedia;
         this.mediaService = mediaService;
+        this.autoSelectMedia = autoSelectMedia;
+        this.defaultMediaId = defaultMedia;
         this.mediaSelector = new MediaSelector(selectedRaceIdentifier, raceTimesInfoProvider, raceTimer, mediaService, stringMessages, errorReporter, userAgent, user, autoSelectMedia);
     }
     
@@ -135,8 +138,14 @@ public class MediaComponent implements Component<Void>, PlayStateListener, TimeL
 
     public MediaTrack getDefaultVideo() {
         for (MediaTrack mediaTrack : mediaTracks) {
-            if (MediaType.video.equals(mediaTrack.mimeType.mediaType) && isPotentiallyPlayable(mediaTrack)) {
-                return mediaTrack;
+            if (defaultMediaId != null) {
+                if (mediaTrack.dbId.equals(defaultMediaId)) {
+                    return mediaTrack;
+                }
+            } else {
+                if (MediaType.video.equals(mediaTrack.mimeType.mediaType) && isPotentiallyPlayable(mediaTrack)) {
+                    return mediaTrack;
+                }
             }
         }
         return null;
@@ -214,7 +223,7 @@ public class MediaComponent implements Component<Void>, PlayStateListener, TimeL
                 }
                 
                 if (autoSelectMedia) {
-                    playDefault();
+                    setVisible(true);
                 }
             }
         };

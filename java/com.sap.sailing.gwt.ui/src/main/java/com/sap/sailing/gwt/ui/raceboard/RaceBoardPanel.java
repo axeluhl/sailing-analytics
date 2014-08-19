@@ -234,8 +234,9 @@ public class RaceBoardPanel extends SimplePanel implements RegattasDisplayer, Ra
     }
     
     private MediaComponent createMediaComponent() {
-        boolean autoSelectMedia = false; // do not autoplay media
-        final MediaComponent mediaComponent = new MediaComponent(selectedRaceIdentifier, raceTimesInfoProvider, timer, mediaService, stringMessages, errorReporter, userAgent, this.user, autoSelectMedia);
+        boolean autoSelectMedia = getConfiguration().isAutoSelectMedia();
+        String defaultMedia = getConfiguration().getDefaultMedia();
+        final MediaComponent mediaComponent = new MediaComponent(selectedRaceIdentifier, raceTimesInfoProvider, timer, mediaService, stringMessages, errorReporter, userAgent, this.user, autoSelectMedia, defaultMedia);
         timer.addPlayStateListener(mediaComponent);
         timer.addTimeListener(mediaComponent);
         mediaComponent.setVisible(false);
