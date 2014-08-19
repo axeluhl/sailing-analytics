@@ -281,7 +281,7 @@ public class RaceBoardPanel extends SimplePanel implements RegattasDisplayer, Ra
                 userAgent, /* showRaceDetails */ true, competitorSearchTextBox,
                 /* showSelectionCheckbox */ true, raceTimesInfoProvider, /* autoExpandLastRaceColumn */ false,
                 /* don't adjust the timer's delay from the leaderboard; control it solely from the RaceTimesInfoProvider */ false,
-                /*autoApplyTopNFilter*/false, /*showCompetitorFilterStatus*/false);
+                /*autoApplyTopNFilter*/ true, /*showCompetitorFilterStatus*/ true);
     }
 
     private void setComponentVisible(ComponentViewer componentViewer, Component<?> component, boolean visible) {

@@ -18,11 +18,14 @@ public class CompetitorsFilterSets {
     }
     
     public FilterSet<CompetitorDTO, Filter<CompetitorDTO>> getActiveFilterSetWithGeneralizedType() {
-        FilterSet<CompetitorDTO, Filter<CompetitorDTO>> activeFilterSetConv = new FilterSet<CompetitorDTO, Filter<CompetitorDTO>>(activeFilterSet.getName());
-        for (Filter<CompetitorDTO> filter : activeFilterSet.getFilters()) {
-            activeFilterSetConv.addFilter(filter);
+        FilterSet<CompetitorDTO, Filter<CompetitorDTO>> result = null;
+        if(activeFilterSet != null) {
+            result = new FilterSet<CompetitorDTO, Filter<CompetitorDTO>>(activeFilterSet.getName());
+            for (Filter<CompetitorDTO> filter : activeFilterSet.getFilters()) {
+                result.addFilter(filter);
+            }
         }
-        return activeFilterSetConv;
+        return result;
     }
     
     public FilterSet<CompetitorDTO, FilterWithUI<CompetitorDTO>> getActiveFilterSet() {

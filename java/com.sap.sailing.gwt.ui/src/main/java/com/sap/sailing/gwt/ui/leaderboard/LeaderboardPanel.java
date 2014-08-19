@@ -1806,7 +1806,7 @@ public class LeaderboardPanel extends SimplePanel implements TimeListener, PlayS
             @Override
             public void onClick(ClickEvent event) {
                 getBusyIndicator().setBusy(true);
-                competitorSelectionProvider.clearAllFilters();
+                competitorFilterPanel.clearAllActiveFilters();
                 timeChanged(new Date(), null);
             }
         });

@@ -209,6 +209,11 @@ public class CompetitorFilterPanel extends FlowPanel implements KeyUpHandler, Fi
         return stringMessages.competitorSearchFilter();
     }
 
+    public void clearAllActiveFilters() {
+        competitorsFilterSets.setActiveFilterSet(null);
+        competitorSelectionProvider.clearAllFilters();
+    }
+    
     private void showEditCompetitorsFiltersDialog() {
         CompetitorsFilterSetsDialog competitorsFilterSetsDialog = new CompetitorsFilterSetsDialog(competitorsFilterSets,
                 stringMessages, new DialogCallback<CompetitorsFilterSets>() {
