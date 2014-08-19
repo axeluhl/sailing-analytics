@@ -41,6 +41,7 @@ import com.google.gwt.user.cellview.client.SafeHtmlHeader;
 import com.google.gwt.user.client.rpc.AsyncCallback;
 import com.google.gwt.user.client.ui.AbstractImagePrototype;
 import com.google.gwt.user.client.ui.Anchor;
+import com.google.gwt.user.client.ui.Button;
 import com.google.gwt.user.client.ui.DockPanel;
 import com.google.gwt.user.client.ui.FlowPanel;
 import com.google.gwt.user.client.ui.HasHorizontalAlignment;
@@ -91,11 +92,14 @@ import com.sap.sailing.gwt.ui.client.shared.components.SettingsDialog;
 import com.sap.sailing.gwt.ui.client.shared.components.SettingsDialogComponent;
 import com.sap.sailing.gwt.ui.client.shared.controls.AbstractSortableColumnWithMinMax;
 import com.sap.sailing.gwt.ui.client.shared.controls.SelectionCheckboxColumn;
+import com.sap.sailing.gwt.ui.client.shared.filter.CompetitorRaceRankFilter;
+import com.sap.sailing.gwt.ui.client.shared.filter.FilterWithUI;
 import com.sap.sailing.gwt.ui.client.shared.filter.LeaderboardFetcher;
 import com.sap.sailing.gwt.ui.leaderboard.DetailTypeColumn.LegDetailField;
 import com.sap.sailing.gwt.ui.leaderboard.LeaderboardSettings.RaceColumnSelectionStrategies;
 import com.sap.sailing.gwt.ui.shared.RaceTimesInfoDTO;
 import com.sap.sse.common.Util;
+import com.sap.sse.common.filter.BinaryOperator;
 import com.sap.sse.common.filter.Filter;
 import com.sap.sse.common.filter.FilterSet;
 import com.sap.sse.gwt.client.async.AsyncActionsExecutor;
@@ -240,6 +244,9 @@ public class LeaderboardPanel extends SimplePanel implements TimeListener, PlayS
     private final Anchor playPause;
 
     private final CompetitorSelectionProvider competitorSelectionProvider;
+    private final HorizontalPanel filterControlPanel;
+    private Label filterStatusLabel;
+    private Button filterClearButton;
     
     /**
      * The handler for changes in the leaderboard table's selection; its registration is kept in
@@ -334,6 +341,11 @@ public class LeaderboardPanel extends SimplePanel implements TimeListener, PlayS
     private boolean showSelectionCheckbox;
     
     private List<LeaderboardUpdateListener> leaderboardUpdateListener;
+
+    private boolean initialCompetitorFilterHasBeenApplied = false;
+    private final boolean showCompetitorFilterStatus;
+
+    private CompetitorFilterPanel competitorFilterPanel;
 
     protected StringMessages getStringMessages() {
         return stringMessages;
@@ -1584,7 +1596,7 @@ public class LeaderboardPanel extends SimplePanel implements TimeListener, PlayS
                 PlayModes.Live, PlayStates.Paused, /* delayBetweenAutoAdvancesInMilliseconds */3000l), leaderboardGroupName,
                 leaderboardName, errorReporter, stringMessages, userAgent, showRaceDetails,
                 /* competitorSearchTextBox */ null, /* showSelectionCheckbox */ true, /* optionalRaceTimesInfoProvider */ null,
-                /* autoExpandLastRaceColumn */ false, /* adjustTimerDelay */ true);
+                /* autoExpandLastRaceColumn */ false, /* adjustTimerDelay */ true, /*autoApplyTop30Filter*/ false, false);
     }
 
     public LeaderboardPanel(SailingServiceAsync sailingService, AsyncActionsExecutor asyncActionsExecutor,
@@ -1593,7 +1605,7 @@ public class LeaderboardPanel extends SimplePanel implements TimeListener, PlayS
             String leaderboardName, ErrorReporter errorReporter, final StringMessages stringMessages,
             final UserAgentDetails userAgent, boolean showRaceDetails, CompetitorFilterPanel competitorSearchTextBox,
             boolean showSelectionCheckbox, RaceTimesInfoProvider optionalRaceTimesInfoProvider,
-            boolean autoExpandLastRaceColumn, boolean adjustTimerDelay) {
+            boolean autoExpandLastRaceColumn, boolean adjustTimerDelay, boolean autoApplyTopNFilter, boolean showCompetitorFilterStatus) {
         this.setTitle(stringMessages.leaderboard());
         this.showSelectionCheckbox = showSelectionCheckbox;
         this.showRaceDetails = showRaceDetails;
@@ -1611,6 +1623,8 @@ public class LeaderboardPanel extends SimplePanel implements TimeListener, PlayS
         this.raceTimesInfoProvider = optionalRaceTimesInfoProvider;
         this.selectedManeuverDetails = new ArrayList<DetailType>();
         this.adjustTimerDelay = adjustTimerDelay;
+        this.initialCompetitorFilterHasBeenApplied = !autoApplyTopNFilter;
+        this.showCompetitorFilterStatus = showCompetitorFilterStatus;
         overallDetailColumnMap = createOverallDetailColumnMap();
         settingsUpdatedExplicitly = !settings.isUpdateUponPlayStateChange();
         this.leaderboardUpdateListener = new ArrayList<LeaderboardUpdateListener>();
@@ -1769,12 +1783,61 @@ public class LeaderboardPanel extends SimplePanel implements TimeListener, PlayS
                     new SettingsDialog<LeaderboardSettings>(LeaderboardPanel.this, stringMessages).show();
                 }
             });
+            this.competitorFilterPanel = competitorSearchTextBox;
         }
         SortedCellTable<LeaderboardRowDTO> leaderboardTable = getLeaderboardTable();
-        leaderboardTable.getElement().getStyle().setMarginTop(10, Unit.PX);
+        leaderboardTable.getElement().getStyle().setMarginTop(5, Unit.PX);
+        filterControlPanel = new HorizontalPanel();
+        filterControlPanel.setStyleName("LeaderboardPanel-FilterControl-Panel");
         contentPanel.add(leaderboardTable);
+        contentPanel.add(createFilterDeselectionControl());
         setWidget(contentPanel);
         raceNameForDefaultSorting = settings.getNameOfRaceToSort();
+    }
+    
+    private Widget createFilterDeselectionControl() {
+        filterStatusLabel = new Label();
+        filterStatusLabel.setStyleName("LeaderboardPanel-FilterControl-StatusLabel");
+        filterStatusLabel.setText("");
+        filterControlPanel.add(filterStatusLabel);
+        filterClearButton = new Button(stringMessages.showAll());
+        filterClearButton.setStyleName("LeaderboardPanel-FilterClear-Button");
+        filterClearButton.addClickHandler(new ClickHandler() {
+            @Override
+            public void onClick(ClickEvent event) {
+                getBusyIndicator().setBusy(true);
+                competitorFilterPanel.clearAllActiveFilters();
+                timeChanged(new Date(), null);
+            }
+        });
+        filterControlPanel.add(filterClearButton);
+        filterControlPanel.setCellHorizontalAlignment(filterClearButton, HasHorizontalAlignment.ALIGN_RIGHT);
+        setFilterControlStatus();
+        return filterControlPanel;
+    }
+    
+    private void setFilterControlStatus() {
+        boolean filtersActive = competitorSelectionProvider.hasActiveFilters();
+        if (filtersActive && showCompetitorFilterStatus) {
+            String labelText = "";
+            for (Filter<CompetitorDTO> filter : competitorSelectionProvider.getCompetitorsFilterSet().getFilters()) {
+                if (filter instanceof FilterWithUI<?>) {
+                    labelText += ((FilterWithUI<CompetitorDTO>)filter).getLocalizedDescription(stringMessages) + ", ";
+                } else {
+                    labelText += filter.getName() + ", ";
+                }
+            }
+            filterStatusLabel.setText("Active Filter(s): " + labelText.substring(0, labelText.length()-2));
+            filterClearButton.setVisible(true);
+            filterControlPanel.setVisible(true);
+        } else {
+            filterStatusLabel.setText("");
+            filterClearButton.setVisible(false);
+            filterControlPanel.setVisible(false);
+            if (competitorFilterPanel != null) {
+                competitorFilterPanel.clearSelection();
+            }
+        }
     }
     
     private static class TotalDistanceTraveledInMetersField implements LegDetailField<Double> {
@@ -2076,6 +2139,21 @@ public class LeaderboardPanel extends SimplePanel implements TimeListener, PlayS
     private boolean shallAddOverallDetails() {
         return !selectedOverallDetailColumns.isEmpty();
     }
+    
+    private void applyTop30FilterIfCompetitorSizeGreaterEqual40(LeaderboardDTO leaderboard) {
+        int maxRaceRank = 30;
+        if (leaderboard.competitors.size() >= 40) {
+            CompetitorRaceRankFilter raceRankFilter = new CompetitorRaceRankFilter();
+            raceRankFilter.setLeaderboardFetcher(this);
+            raceRankFilter.setSelectedRace(preSelectedRace);
+            raceRankFilter.setOperator(new BinaryOperator<Integer>(BinaryOperator.Operators.LessThanEquals));
+            raceRankFilter.setValue(maxRaceRank);
+            FilterSet<CompetitorDTO, Filter<CompetitorDTO>> activeFilterSet = 
+                    competitorSelectionProvider.getOrCreateCompetitorsFilterSet(stringMessages.topNCompetitorsByRaceRank(maxRaceRank));
+            activeFilterSet.addFilter(raceRankFilter);
+            competitorSelectionProvider.setCompetitorsFilterSet(activeFilterSet);
+        }
+    }
 
     /**
      * Assigns <code>leaderboard</code> to {@link #leaderboard} and updates the UI accordingly. Also updates the min/max
@@ -2088,6 +2166,10 @@ public class LeaderboardPanel extends SimplePanel implements TimeListener, PlayS
                 columnToCollapseAndExpandAgain.toggleExpansion();
             }
             competitorSelectionProvider.setCompetitors(leaderboard.competitors, /* listenersNotToNotify */this);
+            if (!initialCompetitorFilterHasBeenApplied) {
+                applyTop30FilterIfCompetitorSizeGreaterEqual40(leaderboard);
+                initialCompetitorFilterHasBeenApplied = true;
+            }
             raceColumnSelection.autoUpdateRaceColumnSelectionForUpdatedLeaderboard(getLeaderboard(), leaderboard);
             setLeaderboard(leaderboard);
             adjustColumnLayout(leaderboard);
@@ -2186,6 +2268,7 @@ public class LeaderboardPanel extends SimplePanel implements TimeListener, PlayS
             scoreCorrectionLastUpdateTimeLabel.setVisible(!hasLiveRace);
             liveRaceLabel.setVisible(hasLiveRace);
             informLeaderboardUpdateListenersAboutLeaderboardUpdated(leaderboard);
+            getBusyIndicator().setBusy(false);
         }
     }
 
@@ -2913,6 +2996,7 @@ public class LeaderboardPanel extends SimplePanel implements TimeListener, PlayS
 
     @Override
     public void competitorsListChanged(Iterable<CompetitorDTO> competitors) {
+        setFilterControlStatus();
         if (timer.isInitialized()) {
             timeChanged(timer.getTime(), null);
         }
@@ -2920,6 +3004,7 @@ public class LeaderboardPanel extends SimplePanel implements TimeListener, PlayS
 
     @Override
     public void filteredCompetitorsListChanged(Iterable<CompetitorDTO> filteredCompetitors) {
+        setFilterControlStatus();
         updateLeaderboard(getLeaderboard());
     }
 
@@ -2927,6 +3012,7 @@ public class LeaderboardPanel extends SimplePanel implements TimeListener, PlayS
     public void filterChanged(FilterSet<CompetitorDTO, ? extends Filter<CompetitorDTO>> oldFilterSet,
             FilterSet<CompetitorDTO, ? extends Filter<CompetitorDTO>> newFilterSet) {
         // nothing to do; if the list of filtered competitors has changed, a separate call to filteredCompetitorsListChanged will occur
+        setFilterControlStatus();
     }
 
     public RaceColumnSelection getRaceColumnSelection() {
