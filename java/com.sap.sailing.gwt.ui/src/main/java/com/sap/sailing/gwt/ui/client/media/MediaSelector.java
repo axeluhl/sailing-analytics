@@ -39,6 +39,7 @@ import com.sap.sailing.gwt.ui.client.media.popup.YoutubeWindowPlayer;
 import com.sap.sailing.gwt.ui.client.media.shared.MediaPlayer;
 import com.sap.sailing.gwt.ui.client.media.shared.VideoPlayer;
 import com.sap.sailing.gwt.ui.client.media.shared.VideoSynchPlayer;
+import com.sap.sailing.gwt.ui.shared.RaceTimesInfoDTO;
 import com.sap.sailing.gwt.ui.shared.UserDTO;
 import com.sap.sse.gwt.client.dialog.DataEntryDialog.DialogCallback;
 import com.sap.sse.gwt.client.player.PlayStateListener;
@@ -140,7 +141,10 @@ public class MediaSelector implements PlayStateListener, TimeListener, MediaSele
             setStatus(mediaTrack);
         }
         setWidgetsVisible((MediaSelector.this.mediaTracks.size() > 0) || (MediaSelector.this.user != null));
-        timeChanged(raceTimesInfoProvider.getRaceTimesInfo(raceIdentifier).startOfRace, null);
+        RaceTimesInfoDTO raceTimesInfo = raceTimesInfoProvider.getRaceTimesInfo(raceIdentifier);
+        if(raceTimesInfo != null && raceTimesInfo.startOfRace != null) {
+            timeChanged(raceTimesInfoProvider.getRaceTimesInfo(raceIdentifier).startOfRace, null);
+        }
     }
 
     private boolean isPotentiallyPlayable(MediaTrack mediaTrack) {
