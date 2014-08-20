@@ -64,14 +64,19 @@ public class SimpleStatisticProvider implements StatisticProvider {
             @Override
             public void onSuccess(Collection<FunctionDTO> extractionFunctions) {
                 if (!extractionFunctions.isEmpty()) {
-                    FunctionDTO extractionFunction = getStatisticToCalculate();
-                    FunctionDTO valueToBeSelected = extractionFunctions.contains(extractionFunction) ? extractionFunction
+                    FunctionDTO currentExtractionFunction = getStatisticToCalculate();
+                    FunctionDTO valueToBeSelected = extractionFunctions.contains(currentExtractionFunction) ? currentExtractionFunction
                                                                                                      : extractionFunctions.iterator().next();
                     extractionFunctionListBox.setValue(valueToBeSelected);
                     extractionFunctionListBox.setAcceptableValues(extractionFunctions);
+                    
+                    if (!valueToBeSelected.equals(currentExtractionFunction)) {
+                        notifyListeners();
+                    }
                 } else {
                     extractionFunctionListBox.setValue(null);
                     extractionFunctionListBox.setAcceptableValues(new ArrayList<FunctionDTO>());
+                    notifyListeners();
                 }
             }
             
@@ -92,7 +97,7 @@ public class SimpleStatisticProvider implements StatisticProvider {
         extractionFunctionListBox.addValueChangeHandler(new ValueChangeHandler<FunctionDTO>() {
             @Override
             public void onValueChange(ValueChangeEvent<FunctionDTO> event) {
-                notifyHandlers();
+                notifyListeners();
             }
         });
         return extractionFunctionListBox;
@@ -103,7 +108,7 @@ public class SimpleStatisticProvider implements StatisticProvider {
         aggregatorListBox.addValueChangeHandler(new ValueChangeHandler<AggregatorType>() {
             @Override
             public void onValueChange(ValueChangeEvent<AggregatorType> event) {
-                notifyHandlers();
+                notifyListeners();
             }
         });
         
@@ -131,9 +136,9 @@ public class SimpleStatisticProvider implements StatisticProvider {
         aggregatorListBox.setValue(queryDefinition.getAggregatorType(), false);
     }
 
-    private void notifyHandlers() {
+    private void notifyListeners() {
         for (StatisticChangedListener listener : listeners) {
-            listener.statisticChanged();
+            listener.statisticChanged(getStatisticToCalculate(), getAggregatorType());
         }
     }
 

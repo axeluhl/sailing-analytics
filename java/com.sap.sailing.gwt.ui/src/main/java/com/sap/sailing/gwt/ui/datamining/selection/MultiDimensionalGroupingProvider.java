@@ -4,6 +4,7 @@ import java.util.ArrayList;
 import java.util.Collection;
 import java.util.HashSet;
 import java.util.List;
+import java.util.Objects;
 import java.util.Set;
 
 import com.google.gwt.event.logical.shared.ValueChangeEvent;
@@ -22,10 +23,13 @@ import com.sap.sailing.gwt.ui.client.shared.components.SettingsDialogComponent;
 import com.sap.sailing.gwt.ui.datamining.DataMiningServiceAsync;
 import com.sap.sailing.gwt.ui.datamining.GroupingChangedListener;
 import com.sap.sailing.gwt.ui.datamining.GroupingProvider;
+import com.sap.sailing.gwt.ui.datamining.StatisticChangedListener;
+import com.sap.sailing.gwt.ui.datamining.StatisticProvider;
+import com.sap.sse.datamining.shared.components.AggregatorType;
 import com.sap.sse.datamining.shared.components.GrouperType;
 import com.sap.sse.datamining.shared.dto.FunctionDTO;
 
-public class MultiDimensionalGroupingProvider implements GroupingProvider {
+public class MultiDimensionalGroupingProvider implements GroupingProvider, StatisticChangedListener {
     
     private final StringMessages stringMessages;
     private final DataMiningServiceAsync dataMiningService;
@@ -33,42 +37,70 @@ public class MultiDimensionalGroupingProvider implements GroupingProvider {
     private final Set<GroupingChangedListener> listeners;
     
     private final HorizontalPanel mainPanel;
-    private Collection<FunctionDTO> availableDimensions;
     private final List<ValueListBox<FunctionDTO>> dimensionToGroupByBoxes;
 
-    public MultiDimensionalGroupingProvider(StringMessages stringMessages, DataMiningServiceAsync dataMiningService, ErrorReporter errorReporter) {
+    private FunctionDTO currentStatisticToCalculate;
+    private Collection<FunctionDTO> availableDimensions;
+
+    public MultiDimensionalGroupingProvider(StringMessages stringMessages, DataMiningServiceAsync dataMiningService, ErrorReporter errorReporter,
+                                            StatisticProvider statisticProvider) {
         this.stringMessages = stringMessages;
         this.dataMiningService = dataMiningService;
         this.errorReporter = errorReporter;
         listeners = new HashSet<GroupingChangedListener>();
+        currentStatisticToCalculate = null;
+        availableDimensions = new ArrayList<>();
         dimensionToGroupByBoxes = new ArrayList<ValueListBox<FunctionDTO>>();
         
         mainPanel = new HorizontalPanel();
         mainPanel.setSpacing(5);
         mainPanel.add(new Label(this.stringMessages.groupBy() + ":"));
+
+        ValueListBox<FunctionDTO> firstDimensionToGroupByBox = createDimensionToGroupByBox();
+        addDimensionToGroupByBoxAndUpdateAcceptableValues(firstDimensionToGroupByBox);
+        statisticProvider.addStatisticChangedListener(this);
+    }
+    
+    @Override
+    public void statisticChanged(FunctionDTO newStatisticToCalculate, AggregatorType newAggregatorType) {
+        if (!Objects.equals(currentStatisticToCalculate, newStatisticToCalculate)) {
+            currentStatisticToCalculate = newStatisticToCalculate;
+            updateAvailableDimensionsFor();
+        }
     }
 
-    public void updateAvailableDimensionsFor(FunctionDTO statisticToCalculate) {
+    private void updateAvailableDimensionsFor() {
         //Removing all list boxes
         //TODO implement a smarter algorithm to handle the loss of selected dimensions
         for (ValueListBox<FunctionDTO> dimensionToGroupByBox : dimensionToGroupByBoxes) {
             mainPanel.remove(dimensionToGroupByBox);
         }
         dimensionToGroupByBoxes.clear();
+        availableDimensions.clear();
         
-        dataMiningService.getDimensionsFor(statisticToCalculate, LocaleInfo.getCurrentLocale().getLocaleName(), new AsyncCallback<Collection<FunctionDTO>>() {
-            @Override
-            public void onSuccess(Collection<FunctionDTO> dimensions) {
-                //TODO implement a smarter algorithm to handle the loss of selected dimensions
-                availableDimensions = dimensions;
-                ValueListBox<FunctionDTO> firstDimensionToGroupByBox = createDimensionToGroupByBox();
-                addDimensionToGroupByBoxAndUpdateAcceptableValues(firstDimensionToGroupByBox);
-            }
-            @Override
-            public void onFailure(Throwable caught) {
-                errorReporter.reportError("Error fetching the dimensions from the server: " + caught.getMessage());
-            }
-        });
+        if (currentStatisticToCalculate != null) {
+            dataMiningService.getDimensionsFor(currentStatisticToCalculate, LocaleInfo.getCurrentLocale()
+                    .getLocaleName(), new AsyncCallback<Collection<FunctionDTO>>() {
+                @Override
+                public void onSuccess(Collection<FunctionDTO> dimensions) {
+                    //TODO implement a smarter algorithm to handle the loss of selected dimensions
+                    availableDimensions.addAll(dimensions);
+                    ValueListBox<FunctionDTO> firstDimensionToGroupByBox = createDimensionToGroupByBox();
+                    addDimensionToGroupByBoxAndUpdateAcceptableValues(firstDimensionToGroupByBox);
+                    if (!availableDimensions.isEmpty()) {
+                        firstDimensionToGroupByBox.setValue(availableDimensions.iterator().next(), true);
+                    }
+                }
+
+                @Override
+                public void onFailure(Throwable caught) {
+                    errorReporter.reportError("Error fetching the dimensions from the server: " + caught.getMessage());
+                }
+            });
+        } else {
+            ValueListBox<FunctionDTO> firstDimensionToGroupByBox = createDimensionToGroupByBox();
+            addDimensionToGroupByBoxAndUpdateAcceptableValues(firstDimensionToGroupByBox);
+        }
     }
 
     private ValueListBox<FunctionDTO> createDimensionToGroupByBox() {

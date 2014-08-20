@@ -27,6 +27,7 @@ import com.sap.sailing.gwt.ui.datamining.SelectionChangedListener;
 import com.sap.sailing.gwt.ui.datamining.SelectionProvider;
 import com.sap.sailing.gwt.ui.datamining.StatisticChangedListener;
 import com.sap.sailing.gwt.ui.datamining.StatisticProvider;
+import com.sap.sse.datamining.shared.components.AggregatorType;
 import com.sap.sse.datamining.shared.dto.FunctionDTO;
 
 public class QueryDefinitionProviderWithControls extends AbstractQueryDefinitionProvider implements DataMiningControls {
@@ -73,14 +74,13 @@ public class QueryDefinitionProviderWithControls extends AbstractQueryDefinition
         statisticProvider = new SimpleStatisticProvider(getStringMessages(), getDataMiningService(), getErrorReporter());
         statisticProvider.addStatisticChangedListener(new StatisticChangedListener() {
             @Override
-            public void statisticChanged() {
-                groupBySelectionPanel.updateAvailableDimensionsFor(statisticProvider.getStatisticToCalculate());
+            public void statisticChanged(FunctionDTO newStatisticToCalculate, AggregatorType newAggregatorType) {
                 notifyQueryDefinitionChanged();
             }
         });
         functionsPanel.add(statisticProvider.getEntryWidget());
 
-        groupBySelectionPanel = new MultiDimensionalGroupingProvider(getStringMessages(), getDataMiningService(), getErrorReporter());
+        groupBySelectionPanel = new MultiDimensionalGroupingProvider(getStringMessages(), getDataMiningService(), getErrorReporter(), statisticProvider);
         groupBySelectionPanel.addGroupingChangedListener(new GroupingChangedListener() {
             @Override
             public void groupingChanged() {
