@@ -523,4 +523,6 @@ public interface SailingService extends RemoteService {
      * @return The RaceDTO of the modified race or <code>null</code>, if the given newStartTimeReceived was null.
      */
     RaceDTO setStartTimeReceivedForRace(RaceIdentifier raceIdentifier, Date newStartTimeReceived);
+
+    Set<Pair<String, Date>> getCompetitorMarkPassings(RegattaAndRaceIdentifier race, CompetitorDTO competitorDTO);
 }

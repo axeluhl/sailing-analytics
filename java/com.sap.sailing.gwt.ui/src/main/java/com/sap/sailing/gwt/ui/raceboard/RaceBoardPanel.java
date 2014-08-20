@@ -220,8 +220,10 @@ public class RaceBoardPanel extends SimplePanel implements RegattasDisplayer, Ra
                 stringMessages, asyncActionsExecutor, errorReporter, /* compactChart */ true);
         windChart.onRaceSelectionChange(raceSelectionProvider.getSelectedRaces());
         components.add(windChart);
-        markPassingsPanel = new EditMarkPassingsPanel(sailingService, timer, timeRangeWithZoomModel, stringMessages, asyncActionsExecutor, errorReporter);
-        componentControlsPanel.add(markPassingsPanel);
+        Button editMarkPassingsButton = new Button("Edit MarkPassings");
+        markPassingsPanel = new EditMarkPassingsPanel(sailingService, asyncActionsExecutor, selectedRaceIdentifier, stringMessages,
+                editMarkPassingsButton, competitorSelectionModel, errorReporter, timer);
+        mainPanel.add(markPassingsPanel);
         leaderboardAndMapViewer = new SideBySideComponentViewer(leaderboardPanel, raceMap, components);
         componentViewers.add(leaderboardAndMapViewer);
         for (ComponentViewer componentViewer : componentViewers) {
@@ -237,7 +239,7 @@ public class RaceBoardPanel extends SimplePanel implements RegattasDisplayer, Ra
         addComponentToNavigationMenu(leaderboardAndMapViewer, raceMap, false);
         addCompetitorsFilterControl(viewControlsPanel);
         addMediaSelectorToNavigationMenu();
-        addEditMarkPassingsMenuToNavigationMenu();
+        addEditMarkPassingsMenuToNavigationMenu(editMarkPassingsButton);
     }
  
     private CompetitorsFilterSets createAndAddDefaultCompetitorsFilter() {
@@ -289,8 +291,7 @@ public class RaceBoardPanel extends SimplePanel implements RegattasDisplayer, Ra
         }
     }
 
-    private void addEditMarkPassingsMenuToNavigationMenu() {
-        Button editMarkPassingsButton = new Button("Edit MarkPassings");
+    private void addEditMarkPassingsMenuToNavigationMenu(Button editMarkPassingsButton) {
         editMarkPassingsButton.addClickHandler(new ClickHandler() {
             @Override
             public void onClick(ClickEvent event) {
