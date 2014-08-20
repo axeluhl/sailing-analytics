@@ -1790,7 +1790,9 @@ public class LeaderboardPanel extends SimplePanel implements TimeListener, PlayS
         filterControlPanel = new HorizontalPanel();
         filterControlPanel.setStyleName("LeaderboardPanel-FilterControl-Panel");
         contentPanel.add(leaderboardTable);
-        contentPanel.add(createFilterDeselectionControl());
+        if (showCompetitorFilterStatus) {
+            contentPanel.add(createFilterDeselectionControl());
+        }
         setWidget(contentPanel);
         raceNameForDefaultSorting = settings.getNameOfRaceToSort();
     }
@@ -1817,25 +1819,27 @@ public class LeaderboardPanel extends SimplePanel implements TimeListener, PlayS
     }
     
     private void setFilterControlStatus() {
-        boolean filtersActive = competitorSelectionProvider.hasActiveFilters();
-        if (filtersActive && showCompetitorFilterStatus) {
-            String labelText = "";
-            for (Filter<CompetitorDTO> filter : competitorSelectionProvider.getCompetitorsFilterSet().getFilters()) {
-                if (filter instanceof FilterWithUI<?>) {
-                    labelText += ((FilterWithUI<CompetitorDTO>)filter).getLocalizedDescription(stringMessages) + ", ";
-                } else {
-                    labelText += filter.getName() + ", ";
+        if (showCompetitorFilterStatus) {
+            boolean filtersActive = competitorSelectionProvider.hasActiveFilters();
+            if (filtersActive) {
+                String labelText = "";
+                for (Filter<CompetitorDTO> filter : competitorSelectionProvider.getCompetitorsFilterSet().getFilters()) {
+                    if (filter instanceof FilterWithUI<?>) {
+                        labelText += ((FilterWithUI<CompetitorDTO>)filter).getLocalizedDescription(stringMessages) + ", ";
+                    } else {
+                        labelText += filter.getName() + ", ";
+                    }
                 }
-            }
-            filterStatusLabel.setText("Active Filter(s): " + labelText.substring(0, labelText.length()-2));
-            filterClearButton.setVisible(true);
-            filterControlPanel.setVisible(true);
-        } else {
-            filterStatusLabel.setText("");
-            filterClearButton.setVisible(false);
-            filterControlPanel.setVisible(false);
-            if (competitorFilterPanel != null) {
-                competitorFilterPanel.clearSelection();
+                filterStatusLabel.setText("Active Filter(s): " + labelText.substring(0, labelText.length()-2));
+                filterClearButton.setVisible(true);
+                filterControlPanel.setVisible(true);
+            } else {
+                filterStatusLabel.setText("");
+                filterClearButton.setVisible(false);
+                filterControlPanel.setVisible(false);
+                if (competitorFilterPanel != null) {
+                    competitorFilterPanel.clearSelection();
+                }
             }
         }
     }
