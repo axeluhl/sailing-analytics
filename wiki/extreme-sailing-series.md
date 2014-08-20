@@ -390,6 +390,8 @@ live2.local.sapsailing.com.	A	192.168.1.201
 www.sapsailing.com.	        A	192.168.1.201
 </pre>
 
+The tool to show configuration and manage entries at runtime is called `rndc`. If you want to see stats then you have to dump them using `rndc stats`. They will then get dumped to `/var/named/data/named_stats.txt`.
+
 #### Caching Proxy
 The transparent caching proxy (Squid) intercepts all connections on port 80 (configured by the firewall script that forwards all connections on port 80 to port 3128 where the proxy runs) and caches some information bits like images or stylesheets. This helps reducing the bandwith. The configuration can be found at `/etc/squid/squid.conf`. The configuration is optimized for high traffic - make sure you understand what you're doing before changing anything.
 
@@ -480,14 +482,15 @@ There is a web interface that is configued in `/etc/httpd/conf.d/squid.conf` tha
 
 ## Additional information bits
 
-### Useful tools to monitor network
+### Useful tools to get information about system
 
 * (Traffic) iptraf
+* (CPU) htop
+* (DHCP) dhcpstatus -s 192.168.1.0 | grep Active
 * (General) multitail /var/log/messages /var/log/squid/access.log /var/log/squid/cache.log /var/named/data/named.run
 * (Caching) squidclient -h 192.168.1.202 cache_object://localhost/ mgr:utilization
 * (Caching) squidclient -h 192.168.1.202 cache_object://localhost/ mgr:info
 * (Caching) http://192.168.1.202/Squid/cgi-bin/cachemgr.cgi?host=localhost&port=3128&user_name=&operation=counters&auth=
-
 
 ### Mapping of URLs for iPhone application
 
