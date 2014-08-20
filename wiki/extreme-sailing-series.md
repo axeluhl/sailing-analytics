@@ -107,7 +107,7 @@ In addition to the servers some switches make sure to have enough space for conn
 ### CLOUD
 The cloud consists of one or more Sailing Analytics servers that present the data to the general public not being on premise. The on-premise servers replicate their data constantly to the cloud.
 
-### Target (Singapore 2013?)
+### Detailed Setup
 The following image depicts the setup that is currently implemented. It features a local setup where the dependency on a reliable and fast internet connection is minimized as much as possible.
 
 The core of this setup is a server that not only hosts a SAP Sailing Analytics but also the TracTrac server. This way the distribution of analytical information is not dependent on the speed and bandwidth of the local internet connection. By adding a DNS server in front of this analytics server local requests can be directed to the local server even when guests use a public internet address (e.g. www.sapsailing.com). 
@@ -125,6 +125,8 @@ In case of a problem with the local server requests can be redirected to the ext
 To not be dependent on a shaky power source that can be restored by "wiggling pieces a little to fix the generator" it has been decided to introduce UPS that can fed important hardware with power up to half an hour. The following picture depicts a quick shot on how this looks:
 
 <img src="/wiki/images/ESSSetupUPS.jpg"/>
+
+## Additional information bits
 
 ### Mapping of URLs for iPhone application
 
