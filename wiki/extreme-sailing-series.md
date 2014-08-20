@@ -224,6 +224,36 @@ echo "Started query logging for named"
 
 On interface `p1p2` in most cases there is a 4G router connected that provides an internet connection in case the main internet on `em2` is failing. In case of a failure on `em2` it does make sense to only provide internet to selected clients because the bandwidth on the backup line is very limited. In order to achieve this there is a script at `/root/activate_4gmodem.sh` that can be used to reroute some clients to the 4g line. This script needs the `iproute` package installed.
 
+
+<pre>
+[root@SAPDNS ~]# more configuration 
+# Hosts that are routed via 4G modem
+MODEM_4G_HOSTS="192.168.1.184 192.168.1.201"
+
+[root@SAPDNS ~]# more activate_4gmodem.sh 
+source /root/configuration
+echo "Activating redirection for hosts $MODEM_4G_HOSTS to 4G modem (192.168.200.1)..."
+ip route add default via 192.168.200.1 dev p1p2 table 4gmodem
+for host in $MODEM_4G_HOSTS; do
+    echo "  $host"
+    ip rule add from $host lookup 4gmodem prio 1000
+done
+ip route flush table 4gmodem
+ip route flush table main
+sh /root/restart_firewall.sh
+
+[root@SAPDNS ~]# more deactivate_4gmodem.sh 
+source /root/configuration
+echo "Removing all configured connections to 4G modem line..."
+for host in $MODEM_4G_HOSTS; do
+    echo "  $host"
+    ip rule del from $host
+done
+ip route flush table 4gmodem
+ip route flush table main
+sh /root/restart_firewall.sh
+</pre>
+
 #### Nameserver
 The nameserver makes sure to redirect some urls to the local server. In the current configuration it will redirect all ess40-2014.sapsailing.com requests to local servers unless disabled. The basic configuration can be found in `/etc/named.conf`
 
@@ -360,37 +390,104 @@ live2.local.sapsailing.com.	A	192.168.1.201
 www.sapsailing.com.	        A	192.168.1.201
 </pre>
 
+#### Caching Proxy
+The transparent caching proxy (Squid) intercepts all connections on port 80 (configured by the firewall script that forwards all connections on port 80 to port 3128 where the proxy runs) and caches some information bits like images or stylesheets. This helps reducing the bandwith. The configuration can be found at `/etc/squid/squid.conf`. The configuration is optimized for high traffic - make sure you understand what you're doing before changing anything.
+
 <pre>
-[root@SAPDNS ~]# more configuration 
-# Hosts that are routed via 4G modem
-MODEM_4G_HOSTS="192.168.1.184 192.168.1.201"
-
-[root@SAPDNS ~]# more activate_4gmodem.sh 
-source /root/configuration
-echo "Activating redirection for hosts $MODEM_4G_HOSTS to 4G modem (192.168.200.1)..."
-ip route add default via 192.168.200.1 dev p1p2 table 4gmodem
-for host in $MODEM_4G_HOSTS; do
-    echo "  $host"
-    ip rule add from $host lookup 4gmodem prio 1000
-done
-ip route flush table 4gmodem
-ip route flush table main
-sh /root/restart_firewall.sh
-
-[root@SAPDNS ~]# more deactivate_4gmodem.sh 
-source /root/configuration
-echo "Removing all configured connections to 4G modem line..."
-for host in $MODEM_4G_HOSTS; do
-    echo "  $host"
-    ip rule del from $host
-done
-ip route flush table 4gmodem
-ip route flush table main
-sh /root/restart_firewall.sh
+http_port 3128 transparent
+cache_mem 2048 MB
+cache_store_log none
+cache_swap_high 100%
+cache_swap_low 80%
+half_closed_clients off
+maximum_object_size 512 KB
+memory_pools on
+memory_pools_limit 2048 MB
+maximum_object_size_in_memory 512 KB
+ipcache_size 16000
+ipcache_low 90
+ipcache_high 97
+debug_options ALL,2
+dns_nameservers 192.168.1.202
+positive_dns_ttl 8 hours
+negative_dns_ttl 120 seconds
+fqdncache_size 10000
+#hierarchy_stoplist cgi-bin ?
+#acl QUERY urlpath_regex cgi-bin \?
+#cache deny QUERY
+acl ads dstdomain "/etc/squid/ads.txt"
+http_access deny ads
+acl apache rep_header Server ^Apache
+access_log /var/log/squid/access.log squid
+hosts_file /etc/hosts
+refresh_pattern ^ftp: 1440 20% 10080
+refresh_pattern ^gopher: 1440 0% 1440
+refresh_pattern -i (/cgi-bin/|\?.+) 0 0% 0
+refresh_pattern .*?\?$ 14400 50% 18000 override-expire override-lastmod reload-into-ims ignore-reload ignore-no-cache ignore-private ignore-auth
+refresh_pattern -i \.jpg$ 14400 50% 18000 override-expire override-lastmod reload-into-ims ignore-reload ignore-no-cache ignore-private ignore-auth
+refresh_pattern -i \.gif$ 14400 50% 18000 override-expire override-lastmod reload-into-ims ignore-reload ignore-no-cache ignore-private ignore-auth
+refresh_pattern -i \.png$ 14400 50% 18000 override-expire override-lastmod reload-into-ims ignore-reload ignore-no-cache ignore-private ignore-auth
+refresh_pattern -i \.css$ 14400 50% 18000 override-expire override-lastmod reload-into-ims ignore-reload ignore-no-cache ignore-private ignore-auth
+refresh_pattern -i \.js$ 14400 50% 18000 override-expire override-lastmod reload-into-ims ignore-reload ignore-no-cache ignore-private ignore-auth
+refresh_pattern -i \.woff$ 14400 50% 18000 override-expire override-lastmod reload-into-ims ignore-reload ignore-no-cache ignore-private ignore-auth
+refresh_pattern -i . 0 20% 4320
+acl all src all
+#0.0.0.0/0.0.0.0
+acl manager proto cache_object
+acl localhost src 127.0.0.1/32
+acl to_localhost dst 127.0.0.0/8
+acl lan src 192.168.1.0/24
+acl lan src 192.168.4.0/24
+acl doNotCacheDestinationIP dst 192.168.1.201 192.168.1.203
+acl doNotCacheDomains dstdomain .sapsailing.com
+acl SSL_ports port 443 563 # https, snews
+acl SSL_ports port 873 # rsync
+acl Safe_ports port 80 # http
+acl Safe_ports port 21 # ftp
+acl Safe_ports port 443 563 # https, snews
+acl Safe_ports port 70 # gopher
+acl Safe_ports port 210 # wais
+acl Safe_ports port 1025-65535 # unregistered ports
+acl Safe_ports port 280 # http-mgmt
+acl Safe_ports port 488 # gss-http
+acl Safe_ports port 591 # filemaker
+acl Safe_ports port 777 # multiling http
+acl Safe_ports port 631 # cups
+acl Safe_ports port 873 # rsync
+acl Safe_ports port 901 # SWAT
+acl purge method PURGE
+acl CONNECT method CONNECT
+http_access allow manager localhost
+http_access deny manager
+http_access allow purge localhost
+http_access deny purge
+http_access deny !Safe_ports
+http_access deny CONNECT !SSL_ports
+http_access allow localhost
+http_access allow localhost
+http_access allow lan
+http_access deny all
+http_reply_access allow all
+cache deny doNotCacheDestinationIP
+cache deny doNotCacheDomains
+icp_access allow all
+visible_hostname ocsportmobileproxy
+always_direct allow all
+coredump_dir /var/spool/squid
 </pre>
 
+There is a web interface that is configued in `/etc/httpd/conf.d/squid.conf` that enables you to access some stats from http://192.168.1.202/Squid/cgi-bin/cachemgr.cgi. 
 
 ## Additional information bits
+
+### Useful tools to monitor network
+
+* (Traffic) iptraf
+* (General) multitail /var/log/messages /var/log/squid/access.log /var/log/squid/cache.log /var/named/data/named.run
+* (Caching) squidclient -h 192.168.1.202 cache_object://localhost/ mgr:utilization
+* (Caching) squidclient -h 192.168.1.202 cache_object://localhost/ mgr:info
+* (Caching) http://192.168.1.202/Squid/cgi-bin/cachemgr.cgi?host=localhost&port=3128&user_name=&operation=counters&auth=
+
 
 ### Mapping of URLs for iPhone application
 
