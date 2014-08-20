@@ -64,7 +64,7 @@ public class SimpleStatisticProvider implements StatisticProvider {
             @Override
             public void onSuccess(Collection<FunctionDTO> extractionFunctions) {
                 if (!extractionFunctions.isEmpty()) {
-                    FunctionDTO extractionFunction = getExtractionFunction();
+                    FunctionDTO extractionFunction = getStatisticToCalculate();
                     FunctionDTO valueToBeSelected = extractionFunctions.contains(extractionFunction) ? extractionFunction
                                                                                                      : extractionFunctions.iterator().next();
                     extractionFunctionListBox.setValue(valueToBeSelected);
@@ -127,7 +127,7 @@ public class SimpleStatisticProvider implements StatisticProvider {
 
     @Override
     public void applyQueryDefinition(QueryDefinitionDeprecated queryDefinition) {
-        extractionFunctionListBox.setValue(queryDefinition.getExtractionFunction(), false);
+        extractionFunctionListBox.setValue(queryDefinition.getStatisticToCalculate(), false);
         aggregatorListBox.setValue(queryDefinition.getAggregatorType(), false);
     }
 
@@ -143,7 +143,7 @@ public class SimpleStatisticProvider implements StatisticProvider {
     }
 
     @Override
-    public FunctionDTO getExtractionFunction() {
+    public FunctionDTO getStatisticToCalculate() {
         return extractionFunctionListBox.getValue();
     }
 

@@ -17,7 +17,7 @@ public class QueryDefinitionDeprecatedImpl implements QueryDefinitionDeprecated 
 
     private String localeInfoName;
 
-    private FunctionDTO extractionFunction;
+    private FunctionDTO statisticToCalculate;
     private GrouperType grouperType;
     private AggregatorType aggregatorType;
 
@@ -30,10 +30,10 @@ public class QueryDefinitionDeprecatedImpl implements QueryDefinitionDeprecated 
     @Deprecated
     QueryDefinitionDeprecatedImpl() { }
 
-    public QueryDefinitionDeprecatedImpl(String localeInfoName, GrouperType grouperType, FunctionDTO extractionFunction, AggregatorType aggregatorType) {
+    public QueryDefinitionDeprecatedImpl(String localeInfoName, GrouperType grouperType, FunctionDTO statisticToCalculate, AggregatorType aggregatorType) {
         this.localeInfoName = localeInfoName;
         this.grouperType = grouperType;
-        this.extractionFunction = extractionFunction;
+        this.statisticToCalculate = statisticToCalculate;
         this.aggregatorType = aggregatorType;
 
         dimensionsToGroupBy = new ArrayList<FunctionDTO>();
@@ -51,8 +51,8 @@ public class QueryDefinitionDeprecatedImpl implements QueryDefinitionDeprecated 
     }
 
     @Override
-    public FunctionDTO getExtractionFunction() {
-        return extractionFunction;
+    public FunctionDTO getStatisticToCalculate() {
+        return statisticToCalculate;
     }
 
     @Override

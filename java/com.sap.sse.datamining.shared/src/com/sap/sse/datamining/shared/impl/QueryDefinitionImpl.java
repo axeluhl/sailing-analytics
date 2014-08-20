@@ -16,7 +16,7 @@ public class QueryDefinitionImpl implements QueryDefinition {
     private String localeInfoName;
     private Map<FunctionDTO, Iterable<? extends Serializable>> filterSelection;
     private List<FunctionDTO> dimensionsToGroupBy;
-    private FunctionDTO extractionFunction;
+    private FunctionDTO statisticToCalculate;
     private AggregatorType aggregatorType;
     
     /**
@@ -25,11 +25,11 @@ public class QueryDefinitionImpl implements QueryDefinition {
     @Deprecated
     QueryDefinitionImpl() { }
 
-    public QueryDefinitionImpl(String localeInfoName, FunctionDTO extractionFunction, AggregatorType aggregatorType) {
+    public QueryDefinitionImpl(String localeInfoName, FunctionDTO statisticToCalculate, AggregatorType aggregatorType) {
         this.localeInfoName = localeInfoName;
         this.filterSelection = new HashMap<FunctionDTO, Iterable<? extends Serializable>>();
         this.dimensionsToGroupBy = new ArrayList<FunctionDTO>();
-        this.extractionFunction = extractionFunction;
+        this.statisticToCalculate = statisticToCalculate;
         this.aggregatorType = aggregatorType;
     }
     
@@ -57,8 +57,8 @@ public class QueryDefinitionImpl implements QueryDefinition {
     }
 
     @Override
-    public FunctionDTO getExtractionFunction() {
-        return extractionFunction;
+    public FunctionDTO getStatisticToCalculate() {
+        return statisticToCalculate;
     }
 
     @Override

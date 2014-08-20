@@ -48,7 +48,7 @@ public class MultiDimensionalGroupingProvider implements GroupingProvider {
         mainPanel.add(new Label(this.stringMessages.groupBy() + ":"));
     }
 
-    public void updateAvailableDimensions(FunctionDTO forExtractionFunction) {
+    public void updateAvailableDimensionsFor(FunctionDTO statisticToCalculate) {
         //Removing all list boxes
         //TODO implement a smarter algorithm to handle the loss of selected dimensions
         for (ValueListBox<FunctionDTO> dimensionToGroupByBox : dimensionToGroupByBoxes) {
@@ -56,7 +56,7 @@ public class MultiDimensionalGroupingProvider implements GroupingProvider {
         }
         dimensionToGroupByBoxes.clear();
         
-        dataMiningService.getDimensionsFor(forExtractionFunction, LocaleInfo.getCurrentLocale().getLocaleName(), new AsyncCallback<Collection<FunctionDTO>>() {
+        dataMiningService.getDimensionsFor(statisticToCalculate, LocaleInfo.getCurrentLocale().getLocaleName(), new AsyncCallback<Collection<FunctionDTO>>() {
             @Override
             public void onSuccess(Collection<FunctionDTO> dimensions) {
                 //TODO implement a smarter algorithm to handle the loss of selected dimensions

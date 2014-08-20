@@ -66,14 +66,14 @@ public class DataMiningServiceImpl extends RemoteServiceServlet implements DataM
     }
 
     @Override
-    public Collection<FunctionDTO> getDimensionsFor(FunctionDTO extractionFunction, String localeInfoName) {
-        Class<?> dataTypeBaseClass = getBaseClassFor(extractionFunction);
+    public Collection<FunctionDTO> getDimensionsFor(FunctionDTO statisticToCalculate, String localeInfoName) {
+        Class<?> dataTypeBaseClass = getBaseClassFor(statisticToCalculate);
         Collection<Function<?>> dimensions = getDataMiningServer().getFunctionProvider().getDimensionsFor(dataTypeBaseClass);
         return functionsAsFunctionDTOs(dimensions, localeInfoName);
     }
     
-    private Class<?> getBaseClassFor(FunctionDTO extractionFunction) {
-        Function<?> function = getDataMiningServer().getFunctionProvider().getFunctionForDTO(extractionFunction);
+    private Class<?> getBaseClassFor(FunctionDTO statisticToCalculate) {
+        Function<?> function = getDataMiningServer().getFunctionProvider().getFunctionForDTO(statisticToCalculate);
         return function.getDeclaringType();
     }
 

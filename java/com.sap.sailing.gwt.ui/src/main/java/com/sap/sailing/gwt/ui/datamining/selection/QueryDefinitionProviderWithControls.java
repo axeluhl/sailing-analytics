@@ -74,7 +74,7 @@ public class QueryDefinitionProviderWithControls extends AbstractQueryDefinition
         statisticProvider.addStatisticChangedListener(new StatisticChangedListener() {
             @Override
             public void statisticChanged() {
-                groupBySelectionPanel.updateAvailableDimensions(statisticProvider.getExtractionFunction());
+                groupBySelectionPanel.updateAvailableDimensionsFor(statisticProvider.getStatisticToCalculate());
                 notifyQueryDefinitionChanged();
             }
         });
@@ -108,7 +108,7 @@ public class QueryDefinitionProviderWithControls extends AbstractQueryDefinition
     @Override
     public QueryDefinitionDeprecated getQueryDefinition() {
         QueryDefinitionDeprecatedImpl queryDTO = new QueryDefinitionDeprecatedImpl(LocaleInfo.getCurrentLocale().getLocaleName(), groupBySelectionPanel.getGrouperType(),
-                                                                   statisticProvider.getExtractionFunction(), statisticProvider.getAggregatorType());
+                                                                   statisticProvider.getStatisticToCalculate(), statisticProvider.getAggregatorType());
         
         switch (queryDTO.getGrouperType()) {
         case Dimensions:

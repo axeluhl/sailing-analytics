@@ -41,7 +41,7 @@ public final class DataMiningFactory {
                 Processor<GroupedDataEntry<Double>> aggregationProcessor = ProcessorFactory.createAggregationProcessor(/*query*/ this, queryDefinition.getAggregatorType());
                 
                 @SuppressWarnings("unchecked") // TODO Clean, after the deprecated components have been removed
-                Function<Double> extractionFunction = (Function<Double>) functionProvider.getFunctionForDTO(queryDefinition.getExtractionFunction());
+                Function<Double> extractionFunction = (Function<Double>) functionProvider.getFunctionForDTO(queryDefinition.getStatisticToCalculate());
                 Processor<GroupedDataEntry<ElementType>> extractionProcessor = ProcessorFactory.createExtractionProcessor(aggregationProcessor, extractionFunction);
                 
                 List<Function<?>> dimensionsToGroupBy = getDimensionsToGroupBy(queryDefinition, functionProvider);

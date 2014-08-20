@@ -14,7 +14,7 @@ public interface DataMiningServiceAsync {
 
     void getAllStatistics(String localeInfoName, AsyncCallback<Collection<FunctionDTO>> callback);
 
-    void getDimensionsFor(FunctionDTO extractionFunction, String localeInfoName, AsyncCallback<Collection<FunctionDTO>> callback);
+    void getDimensionsFor(FunctionDTO statisticToCalculate, String localeInfoName, AsyncCallback<Collection<FunctionDTO>> callback);
 
     <ResultType extends Number> void runQuery(QueryDefinitionDeprecated queryDefinition, AsyncCallback<QueryResult<ResultType>> callback);
     

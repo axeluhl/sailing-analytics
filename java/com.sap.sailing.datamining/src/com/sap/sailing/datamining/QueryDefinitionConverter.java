@@ -13,7 +13,7 @@ public class QueryDefinitionConverter {
 
     public static QueryDefinition convertDeprecatedQueryDefinition(QueryDefinitionDeprecated queryDefinitionDeprecated) {
         QueryDefinitionImpl queryDefinition = new QueryDefinitionImpl(queryDefinitionDeprecated.getLocaleInfoName(),
-                queryDefinitionDeprecated.getExtractionFunction(),
+                queryDefinitionDeprecated.getStatisticToCalculate(),
                 queryDefinitionDeprecated.getAggregatorType());
 
         for (Entry<DimensionIdentifier, Iterable<? extends Serializable>> filterSelectionEntry : queryDefinitionDeprecated.getSelection()

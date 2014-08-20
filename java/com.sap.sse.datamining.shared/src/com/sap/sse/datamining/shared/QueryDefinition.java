@@ -15,7 +15,7 @@ public interface QueryDefinition extends Serializable {
     
     public List<FunctionDTO> getDimensionsToGroupBy();
     
-    public FunctionDTO getExtractionFunction();
+    public FunctionDTO getStatisticToCalculate();
     
     public AggregatorType getAggregatorType();
 

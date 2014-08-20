@@ -76,7 +76,7 @@ public abstract class AbstractQueryDefinitionProvider implements QueryDefinition
     }
 
     private String validateStatisticAndAggregator(QueryDefinitionDeprecated queryDefinition) {
-        return queryDefinition.getExtractionFunction() == null || queryDefinition.getAggregatorType() == null ? stringMessages.noStatisticSelectedError() : null;
+        return queryDefinition.getStatisticToCalculate() == null || queryDefinition.getAggregatorType() == null ? stringMessages.noStatisticSelectedError() : null;
     }
 
     @Override

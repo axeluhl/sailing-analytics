@@ -12,7 +12,7 @@ public interface QueryDefinitionDeprecated extends Serializable {
 
     public String getLocaleInfoName();
 
-    public FunctionDTO getExtractionFunction();
+    public FunctionDTO getStatisticToCalculate();
 
     public GrouperType getGrouperType();
 

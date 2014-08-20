@@ -7,7 +7,7 @@ import com.sap.sse.datamining.shared.dto.FunctionDTO;
 
 public interface StatisticProvider extends Component<Object> {
     
-    public FunctionDTO getExtractionFunction();
+    public FunctionDTO getStatisticToCalculate();
     public AggregatorType getAggregatorType();
 
     public void addStatisticChangedListener(StatisticChangedListener listener);
