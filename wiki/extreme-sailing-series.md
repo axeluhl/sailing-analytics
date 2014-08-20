@@ -507,3 +507,32 @@ There is a web interface that is configued in `/etc/httpd/conf.d/squid.conf` tha
 #990099 Red Bull
 #16A6ED The Wave
 </pre>
+
+### Opening replication channel for Sailing Analytics server
+
+The local server acts as a master and replicates data through a RabbitMQ running locally to an external server. The external server needs to connect to localhost on 9087.
+
+<pre>
+autossh -M 20000 -R 5672:localhost:5672 -R 9087:localhost:8887 -L 2012:localhost:2012 sailing@54.194.10.242
+</pre>
+
+### Replicate Race Logs
+
+<pre>
+#/bin/bash
+EVENT_NAME="ESS 2014 Qingdao (Extreme40)"
+REMOTE_USER=mongodb
+REMOTE_SERVER=54.246.250.138
+PARAM=$EVENT_NAME
+
+echo "Exporting RACE_LOGS for $PARAM"
+mongoexport --port 10201 -d winddb -c RACE_LOGS -q "{\"RACE_LOG_IDENTIFIER.a\" : \"$PARAM\"}" > race_logs.json
+mongoexport --port 10201 -d winddb -c LEADERBOARDS -q "{\"REGATTA_NAME\" : \"$PARAM\"}" > leaderboards.json
+ssh $REMOTE_USER@$REMOTE_SERVER 'rm /tmp/*.json'
+scp race_logs.json $REMOTE_USER@$REMOTE_SERVER:/tmp 
+scp leaderboards.json $REMOTE_USER@$REMOTE_SERVER:/tmp 
+echo "Saved race logs and leaderboard"
+ssh $REMOTE_USER@$REMOTE_SERVER '/opt/mongodb-linux-x86_64-1.8.1/bin/mongoimport --port 10201 --upsert -d winddb -c RACE_LOGS < /tmp/race_logs.json' 
+ssh $REMOTE_USER@$REMOTE_SERVER '/opt/mongodb-linux-x86_64-1.8.1/bin/mongoimport --port 10201 --upsert -d winddb -c LEADERBOARDS < /tmp/leaderboards.json' 
+echo "Finished"
+</pre>
