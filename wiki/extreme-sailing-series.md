@@ -126,6 +126,270 @@ To not be dependent on a shaky power source that can be restored by "wiggling pi
 
 <img src="/wiki/images/ESSSetupUPS.jpg"/>
 
+### DNS Server Setup
+The DNS Server acts as a gateway/router, caching proxy and nameserver. 
+
+#### Gateway
+All traffic to and from the internet is going through this server. To achieve that goal it routes all internal connections by default to an interface called `em2`. This interface is in most cases connected to an external router and must be configured according to the specifications sent over by the ISP. The routing is achieved by first having the right configuration for the interface (example from Cardiff ISP):
+
+<pre>
+[root@SAPDNS ~]# more /etc/sysconfig/network-scripts/ifcfg-em2
+DEVICE="em2"
+BOOTPROTO="static"
+HWADDR="D4:AE:52:C9:F4:78"
+NM_CONTROLLED="no"
+TYPE="Ethernet"
+UUID="e72740f5-ce09-4d3f-becf-a58f605211db"
+ONBOOT="yes"
+IPADDR=188.164.228.178
+NETMASK=255.255.255.240
+GATEWAY=188.164.228.177
+DNS1=192.168.1.202
+NAMESERVER=194.150.200.22
+</pre>
+
+Then the firewall needs to be configured to act as a router. There is a script at `/root/start_proxy.sh` that takes care of activating the right settings for the firewall but also for the proxy:
+
+<pre>
+#!/bin/sh
+# Squid server IP
+SQUID_SERVER="192.168.1.202"
+# Interface connected to Internet
+INTERNET="em2"
+NETWORK="rename4"
+MOBILE="p1p2"
+# Address connected to LAN
+LOCAL="192.168.1.0/24"
+LOCAL2="192.168.4.0/24"
+# Squid port
+SQUID_PORT="3128"
+# Clean old firewall
+iptables -F
+iptables -X
+iptables -t nat -F
+iptables -t nat -X
+iptables -t mangle -F
+iptables -t mangle -X
+# Enable Forwarding
+echo 1 > /proc/sys/net/ipv4/ip_forward
+echo 1024 32768 > /proc/sys/net/ipv4/ip_local_port_range
+echo 8192 > /proc/sys/net/ipv4/tcp_max_syn_backlog
+ulimit -HSd unlimited
+ulimit -HSn 16384
+# Setting default filter policy
+iptables -P INPUT DROP
+iptables -P OUTPUT ACCEPT
+# Unlimited access to loop back
+iptables -A INPUT -i lo -j ACCEPT
+iptables -A OUTPUT -o lo -j ACCEPT
+# Allow UDP, DNS and Passive FTP
+iptables -A INPUT -i $INTERNET -m state --state ESTABLISHED,RELATED -j ACCEPT
+iptables -A INPUT -i $NETWORK -m state --state ESTABLISHED,RELATED -j ACCEPT
+iptables -A INPUT -i $MOBILE -m state --state ESTABLISHED,RELATED -j ACCEPT
+# set this system as a router for Rest of LAN
+iptables -t nat -A POSTROUTING -o $INTERNET -j MASQUERADE
+iptables -t nat -A POSTROUTING -o $NETWORK -j MASQUERADE
+iptables -t nat -A POSTROUTING -o $MOBILE -j MASQUERADE
+iptables -A FORWARD -s $LOCAL -j ACCEPT
+iptables -A FORWARD -s $LOCAL2 -j ACCEPT
+# unlimited access to LAN
+iptables -A INPUT -s $LOCAL -j ACCEPT
+iptables -A OUTPUT -s $LOCAL -j ACCEPT
+iptables -A INPUT -s $LOCAL2 -j ACCEPT
+iptables -A OUTPUT -s $LOCAL2 -j ACCEPT
+# DNAT port 80 request comming from LAN systems to squid 3128 ($SQUID_PORT) aka transparent proxy
+iptables -t nat -A PREROUTING -s $LOCAL -p tcp --dport 80 -j DNAT --to $SQUID_SERVER:$SQUID_PORT
+# if it is same system
+iptables -t nat -A PREROUTING -i $INTERNET -p tcp --dport 80 -j REDIRECT --to-port $SQUID_PORT
+#open everything
+iptables -A INPUT -i $INTERNET -j ACCEPT
+iptables -A OUTPUT -o $INTERNET  -j ACCEPT
+iptables -A INPUT -i $NETWORK -j ACCEPT
+iptables -A OUTPUT -o $NETWORK  -j ACCEPT
+iptables -A INPUT -i $MOBILE -j ACCEPT
+iptables -A OUTPUT -o $MOBILE  -j ACCEPT
+# udp DNS
+iptables -A OUTPUT -p udp --dport 53 -m state --state NEW,ESTABLISHED -j ACCEPT
+iptables -A INPUT -p udp --sport 53 -m state --state NEW,ESTABLISHED -j ACCEPT
+# tcp DNS
+iptables -A OUTPUT -p tcp --dport 53 -m state --state NEW,ESTABLISHED -j ACCEPT
+iptables -A INPUT -p tcp --sport 53 -m state --state NEW,ESTABLISHED -j ACCEPT
+# DROP everything and Log it
+iptables -A INPUT -j LOG
+iptables -A INPUT -j DROP
+echo "Started firewall"
+rndc querylog
+echo "Started query logging for named"
+</pre>
+
+On interface `p1p2` in most cases there is a 4G router connected that provides an internet connection in case the main internet on `em2` is failing. In case of a failure on `em2` it does make sense to only provide internet to selected clients because the bandwidth on the backup line is very limited. In order to achieve this there is a script at `/root/activate_4gmodem.sh` that can be used to reroute some clients to the 4g line. This script needs the `iproute` package installed.
+
+#### Nameserver
+The nameserver makes sure to redirect some urls to the local server. In the current configuration it will redirect all ess40-2014.sapsailing.com requests to local servers unless disabled. The basic configuration can be found in `/etc/named.conf`
+
+<pre>
+options {
+	listen-on port 53 { 192.168.1.202; 192.168.4.202; };
+	listen-on-v6 port 53 { ::1; };
+	directory 	"/var/named";
+	dump-file 	"/var/named/data/cache_dump.db";
+        statistics-file "/var/named/data/named_stats.txt";
+        memstatistics-file "/var/named/data/named_mem_stats.txt";
+	allow-query     { any; };
+	recursion yes;
+
+	dnssec-enable yes;
+	dnssec-validation yes;
+	dnssec-lookaside auto;
+
+	/* Path to ISC DLV key */
+	bindkeys-file "/etc/named.iscdlv.key";
+
+	managed-keys-directory "/var/named/dynamic";
+};
+logging {
+        channel default_debug {
+                file "data/named.run";
+                severity dynamic;
+        };
+};
+zone "." IN {
+	type hint;
+	file "named.ca";
+};
+zone "0.0.127.in-addr.arpa" IN {
+	type master;
+	allow-query { any; };
+	allow-update { none; };
+	file "localhost.db";
+};
+zone "1.168.192.in-addr.arpa" IN {
+	type master;
+	allow-query { any; };
+	allow-update { none; };
+	file "1.168.192.in-addr.arpa.db";
+};
+zone "4.168.192.in-addr.arpa" IN {
+	type master;
+	allow-query { any; };
+	allow-update { none; };
+	file "4.168.192.in-addr.arpa.db";
+};
+zone "portal.extremesailingseries.com" IN {
+	type master;
+	allow-query { any; };
+	allow-update { none; };
+	file "portal.extremesailingseries.com.db";
+};
+
+zone "www.sapsailing.com" IN {
+	type master;
+	allow-query { any; };
+	allow-update { none; };
+	file "sapsailing.com.db";
+};
+zone "ess40-2014.sapsailing.com" IN {
+	type master;
+	allow-query { any; };
+	allow-update { none; };
+	file "sapsailing.com.db";
+};
+
+zone "live.ess40-2014.sapsailing.com" IN {
+	type master;
+	allow-query { any; };
+	allow-update { none; };
+	file "sapsailing.com.db";
+};
+zone "ess40-mobile.sapsailing.com" IN {
+	type master;
+	allow-query { any; };
+	allow-update { none; };
+	file "sapsailing.com.db";
+};
+zone "ess40.local.sapsailing.com" IN {
+	type master;
+	allow-query { any; };
+	allow-update { none; };
+	file "sapsailing.com.db";
+};
+zone "live1.local.sapsailing.com" IN {
+	type master;
+	allow-query { any; };
+	allow-update { none; };
+	file "sapsailing.com.db";
+};
+zone "live2.local.sapsailing.com" IN {
+	type master;
+	allow-query { any; };
+	allow-update { none; };
+	file "sapsailing.com.db";
+};
+zone "ocsportmobile" IN {
+	type master;
+	allow-query { any; };
+	allow-update { none; };
+	file "portal.extremesailingseries.com.db";
+};
+include "/etc/named.rfc1912.zones";
+include "/etc/named.root.key";
+</pre>
+
+That basic configuration only specifies the urls the nameserver will answer requests. For each url you then need to configure the answer at `/var/named/sapsailing.com.db`. Make absolutely sure to end each url entry with a dot!
+
+<pre>
+$TTL 86400
+@ 	IN 	SOA ns.ocsportmobile. admin.ocsportmobile. (
+			201304131
+			1H
+			7200
+			1D
+			1H)
+		NS 	ns.ocsportmobile.
+		TXT	"ESS DNS"
+
+ess40-2014.sapsailing.com.	A	192.168.1.201
+live.ess40-2014.sapsailing.com.	A	192.168.1.201
+ess40-2014.ru.sapsailing.com.	A	192.168.1.201
+live.ru.ess40-2014.sapsailing.com.	A	192.168.1.201
+ess40-mobile.sapsailing.com.	A	192.168.1.201
+ess40-local.sapsailing.com.	A	192.168.1.201
+ess40.local.sapsailing.com.	A	192.168.1.201
+live1.local.sapsailing.com.	A	192.168.1.201
+live2.local.sapsailing.com.	A	192.168.1.201
+www.sapsailing.com.	        A	192.168.1.201
+</pre>
+
+<pre>
+[root@SAPDNS ~]# more configuration 
+# Hosts that are routed via 4G modem
+MODEM_4G_HOSTS="192.168.1.184 192.168.1.201"
+
+[root@SAPDNS ~]# more activate_4gmodem.sh 
+source /root/configuration
+echo "Activating redirection for hosts $MODEM_4G_HOSTS to 4G modem (192.168.200.1)..."
+ip route add default via 192.168.200.1 dev p1p2 table 4gmodem
+for host in $MODEM_4G_HOSTS; do
+    echo "  $host"
+    ip rule add from $host lookup 4gmodem prio 1000
+done
+ip route flush table 4gmodem
+ip route flush table main
+sh /root/restart_firewall.sh
+
+[root@SAPDNS ~]# more deactivate_4gmodem.sh 
+source /root/configuration
+echo "Removing all configured connections to 4G modem line..."
+for host in $MODEM_4G_HOSTS; do
+    echo "  $host"
+    ip rule del from $host
+done
+ip route flush table 4gmodem
+ip route flush table main
+sh /root/restart_firewall.sh
+</pre>
+
+
 ## Additional information bits
 
 ### Mapping of URLs for iPhone application
