@@ -492,38 +492,6 @@ There is a web interface that is configued in `/etc/httpd/conf.d/squid.conf` tha
 * (Caching) squidclient -h 192.168.1.202 cache_object://localhost/ mgr:info
 * (Caching) http://192.168.1.202/Squid/cgi-bin/cachemgr.cgi?host=localhost&port=3128&user_name=&operation=counters&auth=
 
-### Mapping of URLs for iPhone application
-
-We've just mapped the event names to the CSV URLs from your system. The mappings are as follows:
-
-'rio' = "http://ess40-2013.sapsailing.com/gateway-ess40/csv/leaderboard?leaderboardName=ESS%202013%20Rio%20%28Extreme40%29"
-
-'nice' = "http://ess40-2013.sapsailing.com/gateway-ess40/csv/leaderboard?leaderboardName=ESS%202013%20Nice%20%28Extreme40%29"
-
-'cardiff' = "http://ess40-2013.sapsailing.com/gateway-ess40/csv/leaderboard?leaderboardName=ESS%202013%20Cardiff%20%28Extreme40%29"
-
-'porto' = "http://ess40-2013.sapsailing.com/gateway-ess40/csv/leaderboard?leaderboardName=ESS%202013%20Porto%20%28Extreme40%29"
-
-'istanbul' = "http://ess40-2013.sapsailing.com/gateway-ess40/csv/leaderboard?leaderboardName=ESS%202013%20Istanbul%20%28Extreme40%29"
-
-'qingdao' = "http://ess40-2013.sapsailing.com/gateway-ess40/csv/leaderboard?leaderboardName=ESS%202013%20Qingdao%20%28Extreme40%29"
-
-'muscat' = "http://ess40-2013.sapsailing.com/gateway-ess40/csv/leaderboard?leaderboardName=ESS%202013%20Muscat%20%28Extreme40%29"
-
-'singapore' = "http://ess40-2013.sapsailing.com/gateway-ess40/csv/leaderboard?leaderboardName=ESS%202013%20Singapore%20%28Extreme40%29"
-
-'total' = "http://ess40-2013.sapsailing.com/gateway-ess40/csv/leaderboard?leaderboardName=Extreme%20Sailing%20Series%202013%20Overall"
-
-To update the results for a given event simply access the URL:
-
-http://www.extremesailingseries.com/app/results/sap_results.php?event=istanbul
-
-Replacing istanbul with whatever the event name is for the results that you want to update. To update the overall series results just hit:
-
-http://www.extremesailingseries.com/app/results/sap_results.php?event=total
-
-http://www.extremesailingseries.com/app/results/csv_uploads/
-
 ### Competitor colors for 2014
 
 <pre>
