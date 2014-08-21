@@ -31,7 +31,7 @@ public class PathGeneratorTreeGrowWind extends PathGeneratorBase {
     private static Logger logger = Logger.getLogger("com.sap.sailing");
     private boolean debugMsgOn = false;
 
-    double oobFact = 0.75; // out-of-bounds factor
+    double oobFact = 2.0; // out-of-bounds factor
     int maxTurns = 0;
     boolean upwindLeg = false;
     String initPathStr = "0";
@@ -560,7 +560,6 @@ public class PathGeneratorTreeGrowWind extends PathGeneratorBase {
             System.out.println("Horizontal Bin Size: "+hrzBinSize);
         }
 
-        //double oobFact = 0.75; // out-of-bounds factor
         boolean reachedEnd = false;
         int addSteps = 0;
         int finalSteps = 0; // maximum number of additional steps after first target-path found
