@@ -12,6 +12,7 @@ import com.google.gwt.uibinder.client.UiField;
 import com.google.gwt.uibinder.client.UiHandler;
 import com.google.gwt.user.client.ui.Anchor;
 import com.google.gwt.user.client.ui.Widget;
+import com.sap.sailing.gwt.home.client.app.PlaceNavigator;
 import com.sap.sailing.gwt.home.client.i18n.TextMessages;
 import com.sap.sailing.gwt.home.client.place.event.AbstractEventComposite;
 import com.sap.sailing.gwt.home.client.place.event.EventPageNavigator;
@@ -71,10 +72,7 @@ public class EventHeader extends AbstractEventComposite {
     public EventHeader(EventDTO event, EventPageNavigator pageNavigator) {
         super(event, pageNavigator);
         
-        EventHeaderResources.INSTANCE.css().ensureInjected();
-        StyleInjector.injectAtEnd("@media (min-width: 50em) { "+EventHeaderResources.INSTANCE.largeCss().getText()+"}");
-        
-        initWidget(uiBinder.createAndBindUi(this));
+        initResources();
 
 //        links1 = Arrays.asList(new Anchor[] { overviewLink, regattasLink, scheduleLink, mediaLink });
 //        links2 = Arrays.asList(new Anchor[] { overviewLink2, regattasLink2, scheduleLink2, mediaLink2 });
@@ -99,16 +97,32 @@ public class EventHeader extends AbstractEventComposite {
     public EventHeader(EventDTO event) {
         super(event, null);
         
-        EventHeaderResources.INSTANCE.css().ensureInjected();
-        StyleInjector.injectAtEnd("@media (min-width: 50em) { "+EventHeaderResources.INSTANCE.largeCss().getText()+"}");
-        
-        initWidget(uiBinder.createAndBindUi(this));
+        initResources();
         
         isFinishedDiv.getStyle().setDisplay(Display.NONE);
         isLiveDiv.getStyle().setDisplay(Display.NONE);
         
         setDataNavigationType("normal");
         updateUI();
+    }
+
+    public EventHeader(EventDTO event, PlaceNavigator placeNavigator) {
+        super(event, null);
+        
+        initResources();
+        
+        isFinishedDiv.getStyle().setDisplay(Display.NONE);
+        isLiveDiv.getStyle().setDisplay(Display.NONE);
+        
+        setDataNavigationType("normal");
+        updateUI();
+    }
+
+    private void initResources() {
+        EventHeaderResources.INSTANCE.css().ensureInjected();
+        StyleInjector.injectAtEnd("@media (min-width: 50em) { "+EventHeaderResources.INSTANCE.largeCss().getText()+"}");
+        
+        initWidget(uiBinder.createAndBindUi(this));
     }
     
     public void setDataNavigationType(String dataNavigationType) {

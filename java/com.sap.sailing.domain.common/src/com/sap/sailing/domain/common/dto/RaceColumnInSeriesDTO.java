@@ -45,6 +45,7 @@ public class RaceColumnInSeriesDTO extends RaceColumnDTO {
         return true;
     }
 
+    @Override
     public String getSeriesName() {
         return seriesName;
     }

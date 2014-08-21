@@ -3,6 +3,7 @@ package com.sap.sailing.gwt.ui.client.shared.charts;
 import java.util.ArrayList;
 import java.util.List;
 
+import com.google.gwt.user.client.ui.FocusWidget;
 import com.google.gwt.user.client.ui.Label;
 import com.google.gwt.user.client.ui.ListBox;
 import com.google.gwt.user.client.ui.VerticalPanel;
@@ -76,6 +77,11 @@ public class MultiCompetitorRaceChartSettingsComponent extends AbstractChartSett
             }
         }
         return new MultiCompetitorRaceChartSettings(getAbstractResult(), newDetailType);
+    }
+
+    @Override
+    public FocusWidget getFocusWidget() {
+        return chartTypeSelectionListBox;
     }
 
 }
