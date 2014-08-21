@@ -156,9 +156,6 @@ public class EditMarkPassingsPanel extends FlexTable implements RaceSelectionCha
             @Override
             public void onClick(ClickEvent event) {
                 setVisible(false);
-                if (!oneCompetitorIsSelected()) {
-                    editMarkPassingsButton.setEnabled(false);
-                }
             }
         });
         refreshWaypoints();
@@ -178,25 +175,17 @@ public class EditMarkPassingsPanel extends FlexTable implements RaceSelectionCha
     }
 
     @Override
-    public void competitorsListChanged(Iterable<CompetitorDTO> competitors) {
-    }
-
-    @Override
-    public void filteredCompetitorsListChanged(Iterable<CompetitorDTO> filteredCompetitors) {
-    }
-
-    @Override
     public void addedToSelection(CompetitorDTO competitor) {
-        if (oneCompetitorIsSelected()) {
-            refillList();
-        } else {
-            disableEditing();
-        }
+        processCompetitorSelectionChange();
     }
 
     @Override
     public void removedFromSelection(CompetitorDTO competitor) {
-        if (oneCompetitorIsSelected()) {
+        processCompetitorSelectionChange();
+    }
+
+    private void processCompetitorSelectionChange() {
+        if (Util.size(competitorSelectionModel.getSelectedCompetitors()) == 1) {
             refillList();
         } else {
             disableEditing();
@@ -205,6 +194,45 @@ public class EditMarkPassingsPanel extends FlexTable implements RaceSelectionCha
 
     private void disableEditing() {
         waypointList.setList(new ArrayList<Util.Pair<WaypointDTO, Date>>());
+        editMarkPassingsButton.setEnabled(false);
+    }
+
+    private void refillList() {
+        editMarkPassingsButton.setEnabled(true);
+        final CompetitorDTO competitor = competitorSelectionModel.getSelectedCompetitors().iterator().next();
+        AsyncCallback<Set<Util.Pair<String, Date>>> markPassingCallback = new AsyncCallback<Set<Util.Pair<String, Date>>>() {
+            @Override
+            public void onFailure(Throwable caught) {
+                errorReporter.reportError("Error obtaining mark passings", /* silent Mode */true);
+            }
+    
+            @Override
+            public void onSuccess(Set<Util.Pair<String, Date>> result) {
+                Set<Util.Pair<String, Date>> sortedPassings = new TreeSet<>(new Comparator<Util.Pair<String, Date>>() {
+                    @Override
+                    public int compare(Pair<String, Date> o1, Pair<String, Date> o2) {
+                        return o1.getB().compareTo(o2.getB());
+                    }
+                });
+                sortedPassings.addAll(result);
+                List<Util.Pair<WaypointDTO, Date>> newMarkPassings = new ArrayList<>();
+                for (WaypointDTO waypoint : currentWaypoints) {
+                    Util.Pair<String, Date> toAdd = null;
+                    for (Iterator<Util.Pair<String, Date>> it = sortedPassings.iterator(); it.hasNext() && toAdd == null;) {
+                        Util.Pair<String, Date> markPassing = it.next();
+                        if (markPassing.getA().equals(waypoint.getName())) {
+                            toAdd = markPassing;
+                        }
+                    }
+                    if (toAdd != null) {
+                        newMarkPassings.add(new Util.Pair<WaypointDTO, Date>(waypoint, toAdd.getB()));
+                        sortedPassings.remove(toAdd);
+                    }
+                }
+                waypointList.setList(newMarkPassings);
+            }
+        };
+        sailingService.getCompetitorMarkPassings(raceIdentifier, competitor, markPassingCallback);
     }
 
     private void refreshWaypoints() {
@@ -221,51 +249,18 @@ public class EditMarkPassingsPanel extends FlexTable implements RaceSelectionCha
         };
         sailingService.getRaceCourse(raceIdentifier, new Date(), courseCallback);
     }
-
-    private void refillList() {
-        editMarkPassingsButton.setEnabled(true);
-        final CompetitorDTO competitor = competitorSelectionModel.getSelectedCompetitors().iterator().next();
-        AsyncCallback<Set<Util.Pair<String, Date>>> markPassingCallback = new AsyncCallback<Set<Util.Pair<String, Date>>>() {
-            @Override
-            public void onFailure(Throwable caught) {
-                errorReporter.reportError("Error obtaining mark passings", /* silent Mode */true);
-            }
-
-            @Override
-            public void onSuccess(Set<Util.Pair<String, Date>> result) {
-                Set<Util.Pair<String, Date>> sortedPassings = new TreeSet<>(new Comparator<Util.Pair<String, Date>>() {
-                    @Override
-                    public int compare(Pair<String, Date> o1, Pair<String, Date> o2) {
-                        return o1.getB().compareTo(o2.getB());
-                    }
-                });
-                List<Util.Pair<WaypointDTO, Date>> newMarkPassings = new ArrayList<>();
-                for (WaypointDTO waypoint : currentWaypoints) {
-                    Util.Pair<String, Date> toAdd = null;
-                    for (Iterator<Util.Pair<String, Date>> it = sortedPassings.iterator(); it.hasNext() && toAdd == null;) {
-                        Util.Pair<String, Date> markPassing = it.next();
-                        if (markPassing.getA().equals(waypoint.getName())) {
-                            toAdd = markPassing;
-                        }
-                    }
-                    if (toAdd != null) {
-                        newMarkPassings.add(new Util.Pair<WaypointDTO, Date>(waypoint, toAdd.getB()));
-                        result.remove(toAdd);
-                    }
-                }
-                waypointList.setList(newMarkPassings);
-            }
-        };
-        sailingService.getCompetitorMarkPassings(raceIdentifier, competitor, markPassingCallback);
-    }
-
-    private boolean oneCompetitorIsSelected() {
-        return Util.size(competitorSelectionModel.getSelectedCompetitors()) == 1;
-    }
-
+    
     @Override
     public void onRaceSelectionChange(List<RegattaAndRaceIdentifier> selectedRaces) {
         raceIdentifier = selectedRaces.iterator().next();
         refreshWaypoints();
+    }
+
+    @Override
+    public void filteredCompetitorsListChanged(Iterable<CompetitorDTO> filteredCompetitors) {
+    }
+
+    @Override
+    public void competitorsListChanged(Iterable<CompetitorDTO> competitors) {
     }
 }
