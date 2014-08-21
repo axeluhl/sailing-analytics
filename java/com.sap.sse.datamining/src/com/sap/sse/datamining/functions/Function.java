@@ -16,6 +16,12 @@ public interface Function<ReturnType> {
     
     public String getSimpleName();
     
+    /**
+     * @return <code>true</code>, if the method {@link #getLocalizedName(Locale, DataMiningStringMessages) getLocalizedName} would return something
+     * other than the method {@link #getSimpleName() getSimpleName}.
+     */
+    public boolean isLocatable();
+    
     public String getLocalizedName(Locale locale, DataMiningStringMessages stringMessages);
     
     /**

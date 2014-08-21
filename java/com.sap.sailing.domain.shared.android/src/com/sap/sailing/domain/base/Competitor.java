@@ -6,10 +6,10 @@ import com.sap.sse.datamining.shared.annotations.Connector;
 import com.sap.sse.common.Named;
 
 public interface Competitor extends Named, WithID, IsManagedBySharedDomainFactory {
-    @Connector
+    @Connector(messageKey="Team")
     Team getTeam();
 
-    @Connector
+    @Connector(messageKey="Boat")
     Boat getBoat();
     
     Color getColor();

@@ -10,7 +10,7 @@ public interface HasTrackedLegOfCompetitorContext extends HasTrackedLegContext {
     
     public TrackedLegOfCompetitor getTrackedLegOfCompetitor();
 
-    @Connector
+    @Connector(messageKey="Competitor")
     public Competitor getCompetitor();
     
     @Statistic(messageKey="DistanceTraveled", resultUnit=Unit.Meters, resultDecimals=0)

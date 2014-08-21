@@ -11,10 +11,11 @@ import com.sap.sse.datamining.shared.Unit;
 
 public class CompoundFunction<ReturnType> extends AbstractFunction<ReturnType> {
 
-    private static final String METHOD_CHAIN_CONNECTOR = " -> ";
+    private static final String SIMPLE_NAME_CHAIN_CONNECTOR = " -> ";
+    private static final String LOCALIZED_NAME_CHAIN_CONNECTOR = " ";
     
     private String name;
-    private ArrayList<Function<?>> functions;
+    private List<Function<?>> functions;
 
     public CompoundFunction(String name, List<Function<?>> functions, Class<ReturnType> returnType) throws IllegalArgumentException {
         super(isLastFunctionADimension(functions));
@@ -54,7 +55,7 @@ public class CompoundFunction<ReturnType> extends AbstractFunction<ReturnType> {
     
     @Override
     public String getSimpleName() {
-        if (name != null && name.length() > 0) {
+        if (name != null && !name.isEmpty()) {
             return name;
         }
         
@@ -66,26 +67,44 @@ public class CompoundFunction<ReturnType> extends AbstractFunction<ReturnType> {
         StringBuilder builder = new StringBuilder(functionsIterator.next().getSimpleName());
         while (functionsIterator.hasNext()) {
             Function<?> function = functionsIterator.next();
-            builder.append(METHOD_CHAIN_CONNECTOR + function.getSimpleName());
+            builder.append(SIMPLE_NAME_CHAIN_CONNECTOR + function.getSimpleName());
         }
         return builder.toString();
     }
 
     @Override
     public String getLocalizedName(Locale locale, DataMiningStringMessages stringMessages) {
-        if (name != null && name.length() > 0) {
+        if (name != null && !name.isEmpty()) {
             return name;
+        }
+        if (!isLocatable()) {
+            return getSimpleName();
         }
         
         return buildLocalizedNameChain(locale, stringMessages);
     }
+    
+    @Override
+    public boolean isLocatable() {
+        for (Function<?> function : functions) {
+            if (function.isLocatable()) {
+                return true;
+            }
+        }
+        return false;
+    }
 
     private String buildLocalizedNameChain(Locale locale, DataMiningStringMessages stringMessages) {
-        Iterator<Function<?>> functionsIterator = functions.iterator();
-        StringBuilder builder = new StringBuilder(functionsIterator.next().getLocalizedName(locale, stringMessages));
-        while (functionsIterator.hasNext()) {
-            Function<?> function = functionsIterator.next();
-            builder.append(METHOD_CHAIN_CONNECTOR + function.getLocalizedName(locale, stringMessages));
+        StringBuilder builder = new StringBuilder();
+        boolean first = true;
+        for (Function<?> function : functions) {
+            if (function.isLocatable()) {
+                if (!first) {
+                    builder.append(LOCALIZED_NAME_CHAIN_CONNECTOR);
+                }
+                builder.append(function.getLocalizedName(locale, stringMessages));
+                first = false;
+            }
         }
         return builder.toString();
     }

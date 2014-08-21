@@ -70,8 +70,6 @@ public class MultiDimensionalGroupingProvider implements GroupingProvider, Stati
     }
 
     private void updateAvailableDimensionsFor() {
-        //Removing all list boxes
-        //TODO implement a smarter algorithm to handle the loss of selected dimensions
         for (ValueListBox<FunctionDTO> dimensionToGroupByBox : dimensionToGroupByBoxes) {
             mainPanel.remove(dimensionToGroupByBox);
         }
@@ -83,7 +81,6 @@ public class MultiDimensionalGroupingProvider implements GroupingProvider, Stati
                     .getLocaleName(), new AsyncCallback<Collection<FunctionDTO>>() {
                 @Override
                 public void onSuccess(Collection<FunctionDTO> dimensions) {
-                    //TODO implement a smarter algorithm to handle the loss of selected dimensions
                     availableDimensions.addAll(dimensions);
                     ValueListBox<FunctionDTO> firstDimensionToGroupByBox = createDimensionToGroupByBox();
                     addDimensionToGroupByBoxAndUpdateAcceptableValues(firstDimensionToGroupByBox);

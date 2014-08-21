@@ -8,6 +8,7 @@ import java.util.logging.Level;
 
 import com.sap.sse.datamining.i18n.DataMiningStringMessages;
 import com.sap.sse.datamining.shared.Unit;
+import com.sap.sse.datamining.shared.annotations.Connector;
 import com.sap.sse.datamining.shared.annotations.Dimension;
 import com.sap.sse.datamining.shared.annotations.Statistic;
 
@@ -47,8 +48,12 @@ public class MethodWrappingFunction<ReturnType> extends AbstractFunction<ReturnT
             additionalData = new AdditionalFunctionData(dimensionData.messageKey(), Unit.None, 0);
         }
         if (method.getAnnotation(Statistic.class) != null) {
-            Statistic valueData = method.getAnnotation(Statistic.class);
-            additionalData = new AdditionalFunctionData(valueData.messageKey(), valueData.resultUnit(), valueData.resultDecimals());
+            Statistic statisticData = method.getAnnotation(Statistic.class);
+            additionalData = new AdditionalFunctionData(statisticData.messageKey(), statisticData.resultUnit(), statisticData.resultDecimals());
+        }
+        if (method.getAnnotation(Connector.class) != null) {
+            Connector connectorData = method.getAnnotation(Connector.class);
+            additionalData = new AdditionalFunctionData(connectorData.messageKey(), Unit.None, 0);
         }
     }
 
@@ -79,7 +84,7 @@ public class MethodWrappingFunction<ReturnType> extends AbstractFunction<ReturnT
             try {
                 return (ReturnType) method.invoke(instance, parameters);
             } catch (IllegalAccessException | IllegalArgumentException | InvocationTargetException e) {
-                getLogger().log(Level.FINER, "Error invoking the Function " + getMethodName(), e);
+                getLogger().log(Level.FINER, "Error invoking the Function " + method.getName(), e);
             }
         }
         return null;
@@ -102,19 +107,20 @@ public class MethodWrappingFunction<ReturnType> extends AbstractFunction<ReturnT
     
     @Override
     public String getLocalizedName(Locale locale, DataMiningStringMessages stringMessages) {
-        if (additionalData == null || additionalData.getMessageKey().isEmpty()) {
+        if (!isLocatable()) {
             return getSimpleName();
         }
         return stringMessages.get(locale, additionalData.getMessageKey());
     }
-    
-    private String getMethodName() {
-        return method.getName();
-    }
 
     @Override
+    public boolean isLocatable() {
+        return additionalData != null && !additionalData.getMessageKey().isEmpty();
+    }
+    
+    @Override
     public String toString() {
-        return getDeclaringType().getSimpleName() + "." + getMethodName() + "(" + parametersAsString() + ") : " + method.getReturnType().getSimpleName();
+        return getDeclaringType().getSimpleName() + "." + method.getName() + "(" + parametersAsString() + ") : " + method.getReturnType().getSimpleName();
     }
 
     private String parametersAsString() {
