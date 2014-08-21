@@ -2150,6 +2150,7 @@ public class LeaderboardPanel extends SimplePanel implements TimeListener, PlayS
             CompetitorRaceRankFilter raceRankFilter = new CompetitorRaceRankFilter();
             raceRankFilter.setLeaderboardFetcher(this);
             raceRankFilter.setSelectedRace(preSelectedRace);
+            raceRankFilter.setQuickRankProvider(this.competitorFilterPanel.getQuickRankProvider());
             raceRankFilter.setOperator(new BinaryOperator<Integer>(BinaryOperator.Operators.LessThanEquals));
             raceRankFilter.setValue(maxRaceRank);
             FilterSet<CompetitorDTO, Filter<CompetitorDTO>> activeFilterSet = 
