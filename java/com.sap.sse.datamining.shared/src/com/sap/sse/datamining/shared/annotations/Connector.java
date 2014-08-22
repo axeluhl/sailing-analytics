@@ -17,5 +17,7 @@ import java.lang.annotation.Target;
 public @interface Connector {
     
     public String messageKey() default "";
+    
+    public int ordinal() default Integer.MAX_VALUE;
 
 }

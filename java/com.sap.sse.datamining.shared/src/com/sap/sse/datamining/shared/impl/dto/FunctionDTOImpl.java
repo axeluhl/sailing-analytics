@@ -15,6 +15,7 @@ public class FunctionDTOImpl implements FunctionDTO {
 
     private String displayName;
     private boolean isDimension;
+    private int ordinal;
 
     /**
      * Constructor for the GWT-Serialization. Don't use this!
@@ -23,7 +24,8 @@ public class FunctionDTOImpl implements FunctionDTO {
     FunctionDTOImpl() {
     }
     
-    public FunctionDTOImpl(String functionName, String sourceTypeName, String returnTypeName, List<String> parameterTypeNames, String displayName, boolean isDimension) {
+    public FunctionDTOImpl(String functionName, String sourceTypeName, String returnTypeName, List<String> parameterTypeNames,
+                           String displayName, boolean isDimension, int ordinal) {
         this.functionName = functionName;
         this.sourceTypeName = sourceTypeName;
         this.returnTypeName = returnTypeName;
@@ -31,6 +33,7 @@ public class FunctionDTOImpl implements FunctionDTO {
         
         this.displayName = displayName;
         this.isDimension = isDimension;
+        this.ordinal = ordinal;
     }
 
     @Override
@@ -56,6 +59,16 @@ public class FunctionDTOImpl implements FunctionDTO {
     @Override
     public boolean isDimension() {
         return isDimension;
+    }
+    
+    @Override
+    public int getOrdinal() {
+        return ordinal;
+    }
+    
+    @Override
+    public int compareTo(FunctionDTO f) {
+        return Integer.compare(this.getOrdinal(), f.getOrdinal());
     }
     
     @Override

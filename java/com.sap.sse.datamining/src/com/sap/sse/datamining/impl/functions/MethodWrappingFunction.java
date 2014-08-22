@@ -16,7 +16,7 @@ public class MethodWrappingFunction<ReturnType> extends AbstractFunction<ReturnT
 
     private final Method method;
     private Class<ReturnType> returnType;
-    private AdditionalFunctionData additionalData;
+    private AdditionalMethodWrappingFunctionData additionalData;
     
     /**
      * Throws an {@link IllegalArgumentException}, if the return type of the method and the given <code>returnType</code>
@@ -43,17 +43,21 @@ public class MethodWrappingFunction<ReturnType> extends AbstractFunction<ReturnT
     }
 
     private void initializeAdditionalData() {
+        additionalData = new AdditionalMethodWrappingFunctionData("", Unit.None, 0, Integer.MAX_VALUE);
+        
         if (method.getAnnotation(Dimension.class) != null) {
             Dimension dimensionData = method.getAnnotation(Dimension.class);
-            additionalData = new AdditionalFunctionData(dimensionData.messageKey(), Unit.None, 0);
+            additionalData = new AdditionalMethodWrappingFunctionData(dimensionData.messageKey(), Unit.None, 0, dimensionData.ordinal());
         }
+        
         if (method.getAnnotation(Statistic.class) != null) {
             Statistic statisticData = method.getAnnotation(Statistic.class);
-            additionalData = new AdditionalFunctionData(statisticData.messageKey(), statisticData.resultUnit(), statisticData.resultDecimals());
+            additionalData = new AdditionalMethodWrappingFunctionData(statisticData.messageKey(), statisticData.resultUnit(), statisticData.resultDecimals(), statisticData.ordinal());
         }
+        
         if (method.getAnnotation(Connector.class) != null) {
             Connector connectorData = method.getAnnotation(Connector.class);
-            additionalData = new AdditionalFunctionData(connectorData.messageKey(), Unit.None, 0);
+            additionalData = new AdditionalMethodWrappingFunctionData(connectorData.messageKey(), Unit.None, 0, connectorData.ordinal());
         }
     }
 
@@ -98,6 +102,11 @@ public class MethodWrappingFunction<ReturnType> extends AbstractFunction<ReturnT
     @Override
     public int getResultDecimals() {
         return additionalData.getResultDecimals();
+    }
+    
+    @Override
+    public int getOrdinal() {
+        return additionalData.getOrdinal();
     }
 
     @Override

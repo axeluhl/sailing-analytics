@@ -13,7 +13,7 @@ public interface HasTrackedLegOfCompetitorContext extends HasTrackedLegContext {
     @Connector(messageKey="Competitor")
     public Competitor getCompetitor();
     
-    @Statistic(messageKey="DistanceTraveled", resultUnit=Unit.Meters, resultDecimals=0)
+    @Statistic(messageKey="DistanceTraveled", resultUnit=Unit.Meters, resultDecimals=0, ordinal=0)
     public Double getDistanceTraveled();
 
 }

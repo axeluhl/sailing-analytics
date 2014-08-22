@@ -14,8 +14,9 @@ public class CompoundFunction<ReturnType> extends AbstractFunction<ReturnType> {
     private static final String SIMPLE_NAME_CHAIN_CONNECTOR = " -> ";
     private static final String LOCALIZED_NAME_CHAIN_CONNECTOR = " ";
     
-    private String name;
-    private List<Function<?>> functions;
+    private final String name;
+    private final List<Function<?>> functions;
+    private final int ordinal;
 
     public CompoundFunction(String name, List<Function<?>> functions, Class<ReturnType> returnType) throws IllegalArgumentException {
         super(isLastFunctionADimension(functions));
@@ -23,6 +24,18 @@ public class CompoundFunction<ReturnType> extends AbstractFunction<ReturnType> {
         
         this.name = name;
         this.functions = new ArrayList<>(functions);
+        this.ordinal = calculateOrdinal();
+    }
+
+    private int calculateOrdinal() {
+        int ordinal = Integer.MAX_VALUE;
+        for (Function<?> function : functions) {
+            int functionOrdinal = function.getOrdinal();
+            if (functionOrdinal < ordinal) {
+                ordinal = functionOrdinal;
+            }
+        }
+        return ordinal;
     }
 
     private static boolean isLastFunctionADimension(List<Function<?>> functions) {
@@ -137,6 +150,11 @@ public class CompoundFunction<ReturnType> extends AbstractFunction<ReturnType> {
     @Override
     public int getResultDecimals() {
         return getLastFunction().getResultDecimals();
+    }
+    
+    @Override
+    public int getOrdinal() {
+        return ordinal;
     }
 
     private Function<?> getFirstFunction() {

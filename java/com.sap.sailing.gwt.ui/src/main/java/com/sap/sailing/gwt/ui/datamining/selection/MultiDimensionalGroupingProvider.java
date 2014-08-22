@@ -2,6 +2,7 @@ package com.sap.sailing.gwt.ui.datamining.selection;
 
 import java.util.ArrayList;
 import java.util.Collection;
+import java.util.Collections;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Objects;
@@ -40,7 +41,7 @@ public class MultiDimensionalGroupingProvider implements GroupingProvider, Stati
     private final List<ValueListBox<FunctionDTO>> dimensionToGroupByBoxes;
 
     private FunctionDTO currentStatisticToCalculate;
-    private Collection<FunctionDTO> availableDimensions;
+    private List<FunctionDTO> availableDimensions;
 
     public MultiDimensionalGroupingProvider(StringMessages stringMessages, DataMiningServiceAsync dataMiningService, ErrorReporter errorReporter,
                                             StatisticProvider statisticProvider) {
@@ -82,6 +83,7 @@ public class MultiDimensionalGroupingProvider implements GroupingProvider, Stati
                 @Override
                 public void onSuccess(Collection<FunctionDTO> dimensions) {
                     availableDimensions.addAll(dimensions);
+                    Collections.sort(availableDimensions);
                     ValueListBox<FunctionDTO> firstDimensionToGroupByBox = createDimensionToGroupByBox();
                     addDimensionToGroupByBoxAndUpdateAcceptableValues(firstDimensionToGroupByBox);
                     if (!availableDimensions.isEmpty()) {
@@ -146,6 +148,7 @@ public class MultiDimensionalGroupingProvider implements GroupingProvider, Stati
             if (dimensionToGroupByBox.getValue() != null) {
                 acceptableValues.add(dimensionToGroupByBox.getValue());
             }
+            Collections.sort(acceptableValues);
             acceptableValues.add(null);
             dimensionToGroupByBox.setAcceptableValues(acceptableValues);
         }

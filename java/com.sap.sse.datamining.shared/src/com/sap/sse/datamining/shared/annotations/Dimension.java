@@ -29,5 +29,7 @@ import java.lang.annotation.Target;
 public @interface Dimension {
     
     public String messageKey();
+    
+    public int ordinal() default Integer.MAX_VALUE;
 
 }

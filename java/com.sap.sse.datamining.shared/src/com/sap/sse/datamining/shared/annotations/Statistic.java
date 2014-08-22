@@ -18,5 +18,7 @@ public @interface Statistic {
     public Unit resultUnit() default Unit.None;
         
     public int resultDecimals() default 0;
+    
+    public int ordinal() default Integer.MAX_VALUE;
 
 }

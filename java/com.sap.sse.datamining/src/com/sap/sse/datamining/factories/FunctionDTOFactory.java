@@ -35,7 +35,7 @@ public class FunctionDTOFactory {
         String sourceTypeName = function.getDeclaringType().getSimpleName();
         String returnTypeName = function.getReturnType().getSimpleName();
         List<String> parameterTypeNames = getParameterTypeNames(function);
-        return new FunctionDTOImpl(functionName, sourceTypeName, returnTypeName, parameterTypeNames, displayName, function.isDimension());
+        return new FunctionDTOImpl(functionName, sourceTypeName, returnTypeName, parameterTypeNames, displayName, function.isDimension(), function.getOrdinal());
     }
 
     private static List<String> getParameterTypeNames(Function<?> function) {

@@ -43,5 +43,7 @@ public interface Function<ReturnType> {
     public Unit getResultUnit();
     
     public int getResultDecimals();
+    
+    public int getOrdinal();
 
 }

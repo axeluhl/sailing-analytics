@@ -3,6 +3,7 @@ package com.sap.sailing.gwt.ui.datamining.selection;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collection;
+import java.util.Collections;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
@@ -64,11 +65,14 @@ public class SimpleStatisticProvider implements StatisticProvider {
             @Override
             public void onSuccess(Collection<FunctionDTO> extractionFunctions) {
                 if (!extractionFunctions.isEmpty()) {
+                    List<FunctionDTO> acceptableValues = new ArrayList<>(extractionFunctions);
+                    Collections.sort(acceptableValues);
+                    
                     FunctionDTO currentExtractionFunction = getStatisticToCalculate();
-                    FunctionDTO valueToBeSelected = extractionFunctions.contains(currentExtractionFunction) ? currentExtractionFunction
-                                                                                                     : extractionFunctions.iterator().next();
+                    FunctionDTO valueToBeSelected = acceptableValues.contains(currentExtractionFunction) ? currentExtractionFunction
+                                                                                                         : acceptableValues.iterator().next();
                     extractionFunctionListBox.setValue(valueToBeSelected);
-                    extractionFunctionListBox.setAcceptableValues(extractionFunctions);
+                    extractionFunctionListBox.setAcceptableValues(acceptableValues);
                     
                     if (!valueToBeSelected.equals(currentExtractionFunction)) {
                         notifyListeners();
