@@ -6,6 +6,7 @@ import com.sap.sailing.gwt.ui.client.URLEncoder;
 
 public class LeaderboardUrlSettings {
     public static final String PARAM_LEADERBOARD_GROUP_NAME = "leaderboardGroupName";
+    public static final String PARAM_EVENT_ID = "eventId";
     public static final String PARAM_EMBEDDED = "embedded";
     public static final String PARAM_HIDE_TOOLBAR = "hideToolbar";
     public static final String PARAM_SHOW_RACE_DETAILS = "showRaceDetails";

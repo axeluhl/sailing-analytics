@@ -453,10 +453,15 @@ public class SailingServiceImpl extends ProxiedRemoteServiceServlet implements S
 
     private final SwissTimingReplayService swissTimingReplayService;
 
-    private final BundleContext context;
+    private final QuickRanksLiveCache quickRanksLiveCache;
 
     public SailingServiceImpl() {
-        context = Activator.getDefault();
+        BundleContext context = Activator.getDefault();
+        Activator activator = Activator.getInstance();
+        if (context != null) {
+            activator.setSailingService(this); // register so this service is informed when the bundle shuts down
+        }
+        quickRanksLiveCache = new QuickRanksLiveCache(this);
         racingEventServiceTracker = createAndOpenRacingEventServiceTracker(context);
         replicationServiceTracker = createAndOpenReplicationServiceTracker(context);
         resultUrlRegistryServiceTracker = createAndOpenResultUrlRegistryServiceTracker(context);
@@ -500,6 +505,14 @@ public class SailingServiceImpl extends ProxiedRemoteServiceServlet implements S
                 /* maximumPoolSize */ THREAD_POOL_SIZE,
                 /* keepAliveTime */ 60, TimeUnit.SECONDS,
                 /* workQueue */ new LinkedBlockingQueue<Runnable>());
+    }
+    
+    /**
+     * Stops this service and frees its resources. In particular, caching services and threads owned by this service will be
+     * notified to stop their jobs.
+     */
+    public void stop() {
+        quickRanksLiveCache.stop();
     }
 
     protected SwissTimingReplayService getSwissTimingReplayService(BundleContext context) {
@@ -1719,21 +1732,24 @@ public class SailingServiceImpl extends ProxiedRemoteServiceServlet implements S
 
     private List<SidelineDTO> getCourseSidelines(RegattaAndRaceIdentifier raceIdentifier, Date date) {
         List<SidelineDTO> result = new ArrayList<SidelineDTO>();
-        if (date != null) {
-            TimePoint dateAsTimePoint = new MillisecondsTimePoint(date);
-            TrackedRace trackedRace = getExistingTrackedRace(raceIdentifier);
-            if (trackedRace != null) {
-                for (Sideline sideline : trackedRace.getCourseSidelines()) {
-                    List<MarkDTO> markDTOs = new ArrayList<MarkDTO>();
-                    for (Mark mark : sideline.getMarks()) {
-                        GPSFixTrack<Mark, GPSFix> track = trackedRace.getOrCreateTrack(mark);
-                        Position positionAtDate = track.getEstimatedPosition(dateAsTimePoint, /* extrapolate */false);
-                        if (positionAtDate != null) {
-                            markDTOs.add(convertToMarkDTO(mark, positionAtDate));
-                        }
+        final TimePoint dateAsTimePoint;
+        TrackedRace trackedRace = getExistingTrackedRace(raceIdentifier);
+        if (trackedRace != null) {
+            if (date == null) {
+                dateAsTimePoint = MillisecondsTimePoint.now().minus(trackedRace.getDelayToLiveInMillis());
+            } else {
+                dateAsTimePoint = new MillisecondsTimePoint(date);
+            }
+            for (Sideline sideline : trackedRace.getCourseSidelines()) {
+                List<MarkDTO> markDTOs = new ArrayList<MarkDTO>();
+                for (Mark mark : sideline.getMarks()) {
+                    GPSFixTrack<Mark, GPSFix> track = trackedRace.getOrCreateTrack(mark);
+                    Position positionAtDate = track.getEstimatedPosition(dateAsTimePoint, /* extrapolate */false);
+                    if (positionAtDate != null) {
+                        markDTOs.add(convertToMarkDTO(mark, positionAtDate));
                     }
-                    result.add(new SidelineDTO(sideline.getName(), markDTOs));
                 }
+                result.add(new SidelineDTO(sideline.getName(), markDTOs));
             }
         }
         return result;
@@ -1742,59 +1758,71 @@ public class SailingServiceImpl extends ProxiedRemoteServiceServlet implements S
     @Override
     public CoursePositionsDTO getCoursePositions(RegattaAndRaceIdentifier raceIdentifier, Date date) {
         CoursePositionsDTO result = new CoursePositionsDTO();
-        if (date != null) {
-            TimePoint dateAsTimePoint = new MillisecondsTimePoint(date);
-            TrackedRace trackedRace = getExistingTrackedRace(raceIdentifier);
-            if (trackedRace != null) {
-                result.marks = new HashSet<MarkDTO>();
-                result.waypointPositions = new ArrayList<PositionDTO>();
-                Set<Mark> marks = new HashSet<Mark>();
-                Course course = trackedRace.getRace().getCourse();
-                for (Waypoint waypoint : course.getWaypoints()) {
-                    Position waypointPosition = trackedRace.getApproximatePosition(waypoint, dateAsTimePoint);
-                    if (waypointPosition != null) {
-                        result.waypointPositions.add(new PositionDTO(waypointPosition.getLatDeg(), waypointPosition.getLngDeg()));
-                    }
-                    for (Mark b : waypoint.getMarks()) {
-                        marks.add(b);
-                    }
+        TrackedRace trackedRace = getExistingTrackedRace(raceIdentifier);
+        if (trackedRace != null) {
+            final TimePoint dateAsTimePoint;
+            if (date == null) {
+                dateAsTimePoint = MillisecondsTimePoint.now().minus(trackedRace.getDelayToLiveInMillis());
+            } else {
+                dateAsTimePoint = new MillisecondsTimePoint(date);
+            }
+            result.marks = new HashSet<MarkDTO>();
+            result.waypointPositions = new ArrayList<PositionDTO>();
+            Set<Mark> marks = new HashSet<Mark>();
+            Course course = trackedRace.getRace().getCourse();
+            for (Waypoint waypoint : course.getWaypoints()) {
+                Position waypointPosition = trackedRace.getApproximatePosition(waypoint, dateAsTimePoint);
+                if (waypointPosition != null) {
+                    result.waypointPositions.add(new PositionDTO(waypointPosition.getLatDeg(), waypointPosition
+                            .getLngDeg()));
                 }
-                for (Mark mark : marks) {
-                    GPSFixTrack<Mark, GPSFix> track = trackedRace.getOrCreateTrack(mark);
-                    Position positionAtDate = track.getEstimatedPosition(dateAsTimePoint, /* extrapolate */false);
-                    if (positionAtDate != null) {
-                        result.marks.add(convertToMarkDTO(mark, positionAtDate));
-                    }
+                for (Mark b : waypoint.getMarks()) {
+                    marks.add(b);
                 }
+            }
+            for (Mark mark : marks) {
+                GPSFixTrack<Mark, GPSFix> track = trackedRace.getOrCreateTrack(mark);
+                Position positionAtDate = track.getEstimatedPosition(dateAsTimePoint, /* extrapolate */false);
+                if (positionAtDate != null) {
+                    result.marks.add(convertToMarkDTO(mark, positionAtDate));
+                }
+            }
 
-                // set the positions of start and finish
-                Waypoint firstWaypoint = course.getFirstWaypoint();
-                if (firstWaypoint != null && Util.size(firstWaypoint.getMarks())==2) {
-                    final LineDetails markPositionDTOsAndLineAdvantage = trackedRace.getStartLine(dateAsTimePoint);
-                    if (markPositionDTOsAndLineAdvantage != null) {
-                        final List<PositionDTO> startMarkPositionDTOs = getMarkPositionDTOs(dateAsTimePoint, trackedRace, firstWaypoint);
-                        result.startMarkPositions = startMarkPositionDTOs;
-                        result.startLineLengthInMeters = markPositionDTOsAndLineAdvantage.getLength().getMeters();
-                        Bearing absoluteAngleDifferenceToTrueWind = markPositionDTOsAndLineAdvantage.getAbsoluteAngleDifferenceToTrueWind();
-                        result.startLineAngleToCombinedWind = absoluteAngleDifferenceToTrueWind==null?null:absoluteAngleDifferenceToTrueWind.getDegrees();
-                        result.startLineAdvantageousSide = markPositionDTOsAndLineAdvantage.getAdvantageousSideWhileApproachingLine();
-                        Distance advantage = markPositionDTOsAndLineAdvantage.getAdvantage();
-                        result.startLineAdvantageInMeters = advantage==null?null:advantage.getMeters();
-                    }
-                }                    
-                Waypoint lastWaypoint = course.getLastWaypoint();
-                if (lastWaypoint != null && Util.size(lastWaypoint.getMarks())==2) {
-                    final LineDetails markPositionDTOsAndLineAdvantage = trackedRace.getFinishLine(dateAsTimePoint);
-                    if (markPositionDTOsAndLineAdvantage != null) {
-                        final List<PositionDTO> finishMarkPositionDTOs = getMarkPositionDTOs(dateAsTimePoint, trackedRace, lastWaypoint);
-                        result.finishMarkPositions = finishMarkPositionDTOs;
-                        result.finishLineLengthInMeters = markPositionDTOsAndLineAdvantage.getLength().getMeters();
-                        Bearing absoluteAngleDifferenceToTrueWind = markPositionDTOsAndLineAdvantage.getAbsoluteAngleDifferenceToTrueWind();
-                        result.finishLineAngleToCombinedWind = absoluteAngleDifferenceToTrueWind==null?null:absoluteAngleDifferenceToTrueWind.getDegrees();
-                        result.finishLineAdvantageousSide = markPositionDTOsAndLineAdvantage.getAdvantageousSideWhileApproachingLine();
-                        Distance advantage = markPositionDTOsAndLineAdvantage.getAdvantage();
-                        result.finishLineAdvantageInMeters = advantage==null?null:advantage.getMeters();
-                    }
+            // set the positions of start and finish
+            Waypoint firstWaypoint = course.getFirstWaypoint();
+            if (firstWaypoint != null && Util.size(firstWaypoint.getMarks()) == 2) {
+                final LineDetails markPositionDTOsAndLineAdvantage = trackedRace.getStartLine(dateAsTimePoint);
+                if (markPositionDTOsAndLineAdvantage != null) {
+                    final List<PositionDTO> startMarkPositionDTOs = getMarkPositionDTOs(dateAsTimePoint, trackedRace,
+                            firstWaypoint);
+                    result.startMarkPositions = startMarkPositionDTOs;
+                    result.startLineLengthInMeters = markPositionDTOsAndLineAdvantage.getLength().getMeters();
+                    Bearing absoluteAngleDifferenceToTrueWind = markPositionDTOsAndLineAdvantage
+                            .getAbsoluteAngleDifferenceToTrueWind();
+                    result.startLineAngleToCombinedWind = absoluteAngleDifferenceToTrueWind == null ? null
+                            : absoluteAngleDifferenceToTrueWind.getDegrees();
+                    result.startLineAdvantageousSide = markPositionDTOsAndLineAdvantage
+                            .getAdvantageousSideWhileApproachingLine();
+                    Distance advantage = markPositionDTOsAndLineAdvantage.getAdvantage();
+                    result.startLineAdvantageInMeters = advantage == null ? null : advantage.getMeters();
+                }
+            }
+            Waypoint lastWaypoint = course.getLastWaypoint();
+            if (lastWaypoint != null && Util.size(lastWaypoint.getMarks()) == 2) {
+                final LineDetails markPositionDTOsAndLineAdvantage = trackedRace.getFinishLine(dateAsTimePoint);
+                if (markPositionDTOsAndLineAdvantage != null) {
+                    final List<PositionDTO> finishMarkPositionDTOs = getMarkPositionDTOs(dateAsTimePoint, trackedRace,
+                            lastWaypoint);
+                    result.finishMarkPositions = finishMarkPositionDTOs;
+                    result.finishLineLengthInMeters = markPositionDTOsAndLineAdvantage.getLength().getMeters();
+                    Bearing absoluteAngleDifferenceToTrueWind = markPositionDTOsAndLineAdvantage
+                            .getAbsoluteAngleDifferenceToTrueWind();
+                    result.finishLineAngleToCombinedWind = absoluteAngleDifferenceToTrueWind == null ? null
+                            : absoluteAngleDifferenceToTrueWind.getDegrees();
+                    result.finishLineAdvantageousSide = markPositionDTOsAndLineAdvantage
+                            .getAdvantageousSideWhileApproachingLine();
+                    Distance advantage = markPositionDTOsAndLineAdvantage.getAdvantage();
+                    result.finishLineAdvantageInMeters = advantage == null ? null : advantage.getMeters();
                 }
             }
         }
@@ -1908,24 +1936,44 @@ public class SailingServiceImpl extends ProxiedRemoteServiceServlet implements S
         return markPositionDTOs;
     }
 
-    private List<QuickRankDTO> getQuickRanks(RegattaAndRaceIdentifier raceIdentifier, Date date) throws NoWindException {
+    /**
+     * @param timePoint
+     *            <code>null</code> means "live" and is then replaced by "now" minus the tracked race's
+     *            {@link TrackedRace#getDelayToLiveInMillis() delay}.
+     */
+    public List<QuickRankDTO> computeQuickRanks(RegattaAndRaceIdentifier raceIdentifier, TimePoint timePoint)
+            throws NoWindException {
         List<QuickRankDTO> result = new ArrayList<QuickRankDTO>();
-        if (date != null) {
-            TimePoint dateAsTimePoint = new MillisecondsTimePoint(date);
-            TrackedRace trackedRace = getExistingTrackedRace(raceIdentifier);
-            if (trackedRace != null) {
-                RaceDefinition race = trackedRace.getRace();
-                int rank = 1;
-                for (Competitor competitor : trackedRace.getCompetitorsFromBestToWorst(dateAsTimePoint)) {
-                    TrackedLegOfCompetitor trackedLeg = trackedRace.getTrackedLeg(competitor, dateAsTimePoint);
-                    if (trackedLeg != null) {
-                        int legNumberOneBased = race.getCourse().getLegs().indexOf(trackedLeg.getLeg()) + 1;
-                        QuickRankDTO quickRankDTO = new QuickRankDTO(baseDomainFactory.convertToCompetitorDTO(competitor), rank, legNumberOneBased);
-                        result.add(quickRankDTO);
-                    }
-                    rank++;
-                }
+        TrackedRace trackedRace = getExistingTrackedRace(raceIdentifier);
+        if (trackedRace != null) {
+            final TimePoint actualTimePoint;
+            if (timePoint == null) {
+                actualTimePoint = MillisecondsTimePoint.now().minus(trackedRace.getDelayToLiveInMillis());
+            } else {
+                actualTimePoint = timePoint;
             }
+            RaceDefinition race = trackedRace.getRace();
+            int rank = 1;
+            for (Competitor competitor : trackedRace.getCompetitorsFromBestToWorst(actualTimePoint)) {
+                TrackedLegOfCompetitor trackedLeg = trackedRace.getTrackedLeg(competitor, actualTimePoint);
+                if (trackedLeg != null) {
+                    int legNumberOneBased = race.getCourse().getLegs().indexOf(trackedLeg.getLeg()) + 1;
+                    QuickRankDTO quickRankDTO = new QuickRankDTO(baseDomainFactory.convertToCompetitorDTO(competitor),
+                            rank, legNumberOneBased);
+                    result.add(quickRankDTO);
+                }
+                rank++;
+            }
+        }
+        return result;
+    }
+
+    private List<QuickRankDTO> getQuickRanks(RegattaAndRaceIdentifier raceIdentifier, Date date) throws NoWindException {
+        final List<QuickRankDTO> result;
+        if (date == null) {
+            result = quickRanksLiveCache.get(raceIdentifier);
+        } else {
+            result = computeQuickRanks(raceIdentifier, date == null ? null : new MillisecondsTimePoint(date));
         }
         return result;
     }

@@ -26,6 +26,7 @@ import com.sap.sailing.domain.base.Boat;
 import com.sap.sailing.domain.base.Timed;
 import com.sap.sailing.domain.base.impl.BoatClassImpl;
 import com.sap.sailing.domain.base.impl.BoatImpl;
+import com.sap.sailing.domain.common.AbstractBearing;
 import com.sap.sailing.domain.common.Bearing;
 import com.sap.sailing.domain.common.Distance;
 import com.sap.sailing.domain.common.Position;
@@ -43,6 +44,7 @@ import com.sap.sailing.domain.tracking.DynamicGPSFixTrack;
 import com.sap.sailing.domain.tracking.GPSFix;
 import com.sap.sailing.domain.tracking.GPSFixMoving;
 import com.sap.sailing.domain.tracking.GPSFixTrack;
+import com.sap.sailing.domain.tracking.impl.CompactGPSFixMovingImpl;
 import com.sap.sailing.domain.tracking.impl.DistanceCache;
 import com.sap.sailing.domain.tracking.impl.DynamicGPSFixMovingTrackImpl;
 import com.sap.sailing.domain.tracking.impl.DynamicGPSFixTrackImpl;
@@ -852,7 +854,7 @@ public class TrackTest {
                 true), null), /* millisecondsOverWhichToAverage */5000, /* no smoothening */null);
         TimePoint now1 = MillisecondsTimePoint.now();
         TimePoint now2 = addMillisToTimepoint(now1, 1000); // 1s
-        DegreeBearingImpl bearing = new DegreeBearingImpl(90);
+        AbstractBearing bearing = new DegreeBearingImpl(90);
         Position position1 = new DegreePosition(1, 2);
         Position position2 = position1.translateGreatCircle(bearing, new MeterDistance(1));
         GPSFixMovingImpl myGpsFix1 = new GPSFixMovingImpl(position1, now1, new MeterPerSecondSpeedWithDegreeBearingImpl(1, bearing));
@@ -873,7 +875,7 @@ public class TrackTest {
                 true), null), /* millisecondsOverWhichToAverage */5000, /* no smoothening */null);
         TimePoint now1 = MillisecondsTimePoint.now();
         TimePoint now2 = addMillisToTimepoint(now1, 1000); // 1s
-        DegreeBearingImpl bearing = new DegreeBearingImpl(90);
+        AbstractBearing bearing = new DegreeBearingImpl(90);
         Position position1 = new DegreePosition(1, 2);
         Position position2 = position1.translateGreatCircle(bearing, new MeterDistance(1));
         GPSFixMovingImpl myGpsFix1 = new GPSFixMovingImpl(position1, now1, new MeterPerSecondSpeedWithDegreeBearingImpl(10, bearing));
@@ -894,7 +896,7 @@ public class TrackTest {
                 true), null), /* millisecondsOverWhichToAverage */5000, /* no smoothening */null);
         TimePoint now1 = MillisecondsTimePoint.now();
         TimePoint now2 = addMillisToTimepoint(now1, 1000); // 1s
-        DegreeBearingImpl bearing = new DegreeBearingImpl(90);
+        AbstractBearing bearing = new DegreeBearingImpl(90);
         Position position1 = new DegreePosition(1, 2);
         Position position2 = position1.translateGreatCircle(bearing, new MeterDistance(1));
         GPSFixMovingImpl myGpsFix1 = new GPSFixMovingImpl(position1, now1, new MeterPerSecondSpeedWithDegreeBearingImpl(0.1, bearing));
@@ -1052,5 +1054,34 @@ public class TrackTest {
     public void testFrequency() {
         assertEquals(3, track.getAverageIntervalBetweenFixes().asMillis());
         assertEquals(3, track.getAverageIntervalBetweenRawFixes().asMillis());
+    }
+    
+    @Test
+    public void testEstimatedSpeedCaching() {
+        GPSFixMoving originalFix = new GPSFixMovingImpl(new DegreePosition(12, 34), MillisecondsTimePoint.now(),
+                new KnotSpeedWithBearingImpl(9, new DegreeBearingImpl(123)));
+        GPSFixMoving fix = new CompactGPSFixMovingImpl(originalFix);
+        assertFalse(fix.isEstimatedSpeedCached());
+        final KnotSpeedWithBearingImpl estimatedSpeed = new KnotSpeedWithBearingImpl(9.1, new DegreeBearingImpl(124));
+        fix.cacheEstimatedSpeed(estimatedSpeed);
+        assertTrue(fix.isEstimatedSpeedCached());
+        SpeedWithBearing cachedEstimatedSpeed = fix.getCachedEstimatedSpeed();
+        assertEquals(estimatedSpeed, cachedEstimatedSpeed);
+        fix.invalidateEstimatedSpeedCache();
+        assertFalse(fix.isEstimatedSpeedCached());
+    }
+    
+    @Test
+    public void testEstimatedSpeedCachingOnTrack() {
+        GPSFixMoving compactFix3 = track.getFirstFixAtOrAfter(gpsFix3.getTimePoint());
+        assertFalse(compactFix3.isEstimatedSpeedCached());
+        SpeedWithBearing fix3EstimatedSpeed = track.getEstimatedSpeed(gpsFix3.getTimePoint());
+        assertTrue(compactFix3.isEstimatedSpeedCached());
+        assertEquals(fix3EstimatedSpeed, compactFix3.getCachedEstimatedSpeed());
+        assertEquals(fix3EstimatedSpeed, track.getEstimatedSpeed(gpsFix3.getTimePoint())); // fetch again from the cache
+        // assuming that all test fixes are within a few milliseconds and the averaging interval is much larger than that,
+        // adding a single fix in the middle should invalidate the cache
+        track.add(new GPSFixMovingImpl(gpsFix3.getPosition(), gpsFix3.getTimePoint().plus(1), gpsFix3.getSpeed()));
+        assertFalse(compactFix3.isEstimatedSpeedCached());
     }
 }
