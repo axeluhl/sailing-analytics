@@ -4,6 +4,7 @@ import java.util.ArrayList;
 import java.util.List;
 
 import com.sap.sailing.domain.common.dto.CompetitorDTO;
+import com.sap.sse.common.filter.Filter;
 import com.sap.sse.common.filter.FilterSet;
 
 public class CompetitorsFilterSets {
@@ -14,6 +15,17 @@ public class CompetitorsFilterSets {
     public CompetitorsFilterSets() {
         filterSets = new ArrayList<FilterSet<CompetitorDTO, FilterWithUI<CompetitorDTO>>>();
         activeFilterSet = null;
+    }
+    
+    public FilterSet<CompetitorDTO, Filter<CompetitorDTO>> getActiveFilterSetWithGeneralizedType() {
+        FilterSet<CompetitorDTO, Filter<CompetitorDTO>> result = null;
+        if(activeFilterSet != null) {
+            result = new FilterSet<CompetitorDTO, Filter<CompetitorDTO>>(activeFilterSet.getName());
+            for (Filter<CompetitorDTO> filter : activeFilterSet.getFilters()) {
+                result.addFilter(filter);
+            }
+        }
+        return result;
     }
     
     public FilterSet<CompetitorDTO, FilterWithUI<CompetitorDTO>> getActiveFilterSet() {

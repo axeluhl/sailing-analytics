@@ -101,9 +101,10 @@ public class RaceBoardEntryPoint extends AbstractEntryPoint {
         String activeCompetitorsFilterSetName = GwtHttpRequestUtils.getStringParameter(RaceBoardViewConfiguration.PARAM_VIEW_COMPETITOR_FILTER, null /* default*/);
         final boolean canReplayWhileLiveIsPossible = GwtHttpRequestUtils.getBooleanParameter(RaceBoardViewConfiguration.PARAM_CAN_REPLAY_DURING_LIVE_RACES, false);
         final boolean autoSelectMedia = GwtHttpRequestUtils.getBooleanParameter(RaceBoardViewConfiguration.PARAM_AUTOSELECT_MEDIA, false);
+        final String defaultMedia = GwtHttpRequestUtils.getStringParameter(RaceBoardViewConfiguration.PARAM_DEFAULT_MEDIA, null /* default*/);
         final boolean showMapControls = GwtHttpRequestUtils.getBooleanParameter(RaceBoardViewConfiguration.PARAM_VIEW_SHOW_MAPCONTROLS, true /* default*/);
         raceboardViewConfig = new RaceBoardViewConfiguration(activeCompetitorsFilterSetName, showLeaderboard,
-                showWindChart, showCompetitorsChart, showViewStreamlets, canReplayWhileLiveIsPossible, autoSelectMedia);
+                showWindChart, showCompetitorsChart, showViewStreamlets, canReplayWhileLiveIsPossible, autoSelectMedia, defaultMedia);
 
         final ParallelExecutionCallback<List<String>> getLeaderboardNamesCallback = new ParallelExecutionCallback<List<String>>();
         final ParallelExecutionCallback<List<RegattaDTO>> getRegattasCallback = new ParallelExecutionCallback<List<RegattaDTO>>();
@@ -234,26 +235,23 @@ public class RaceBoardEntryPoint extends AbstractEntryPoint {
         final DockLayoutPanel p = new DockLayoutPanel(Unit.PX);
         RootLayoutPanel.get().add(p);
         final FlowPanel timePanel = createTimePanel(raceBoardPanel);
-        final Button toggleButton = new Button();
-        toggleButton.setStyleName("TimePanel-ShowExtended-Button");
-        toggleButton.addStyleDependentName("Closed");
+        final Button toggleButton = raceBoardPanel.getTimePanel().getAdvancedToggleButton();
         toggleButton.addClickHandler(new ClickHandler() {
             @Override
             public void onClick(ClickEvent event) {
-                boolean advancedModeShown = raceBoardPanel.getTimePanel().toggleAdvancedMode(toggleButton);
+                boolean advancedModeShown = raceBoardPanel.getTimePanel().toggleAdvancedMode();
                 if (advancedModeShown) {
                     p.setWidgetSize(timePanel, 96);
                     toggleButton.removeStyleDependentName("Closed");
                     toggleButton.addStyleDependentName("Open");
                 } else {
-                    p.setWidgetSize(timePanel, 60);
+                    p.setWidgetSize(timePanel, 67);
                     toggleButton.addStyleDependentName("Closed");
                     toggleButton.removeStyleDependentName("Open");
                 }
             }
         });
-        raceBoardPanel.getTimePanel().hideControlsPanel(toggleButton);
-        p.addSouth(timePanel, 60);
+        p.addSouth(timePanel, 67);
         p.add(raceBoardPanel);
         p.addStyleName("dockLayoutPanel");
     }

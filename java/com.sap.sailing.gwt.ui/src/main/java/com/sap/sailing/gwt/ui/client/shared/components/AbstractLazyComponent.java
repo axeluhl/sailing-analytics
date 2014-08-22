@@ -10,4 +10,9 @@ public abstract class AbstractLazyComponent<SettingsType> extends LazyPanel impl
         ensureWidget();
         return getWidget();
     }
+
+    @Override
+    public String getDependentCssClassName() {
+        return null;
+    }
 }

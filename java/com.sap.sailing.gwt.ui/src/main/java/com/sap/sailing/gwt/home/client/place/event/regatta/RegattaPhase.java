@@ -1,13 +1,20 @@
 package com.sap.sailing.gwt.home.client.place.event.regatta;
 
 import com.google.gwt.core.client.GWT;
+import com.google.gwt.dom.client.AnchorElement;
 import com.google.gwt.dom.client.DivElement;
 import com.google.gwt.dom.client.SpanElement;
 import com.google.gwt.uibinder.client.UiBinder;
 import com.google.gwt.uibinder.client.UiField;
+import com.google.gwt.user.client.DOM;
+import com.google.gwt.user.client.Event;
+import com.google.gwt.user.client.EventListener;
 import com.google.gwt.user.client.ui.UIObject;
 import com.sap.sailing.domain.common.LeaderboardNameConstants;
 import com.sap.sailing.domain.common.dto.RaceColumnDTO;
+import com.sap.sailing.gwt.home.client.place.event.EventPageNavigator;
+import com.sap.sailing.gwt.ui.shared.LeaderboardGroupDTO;
+import com.sap.sailing.gwt.ui.shared.RaceGroupDTO;
 import com.sap.sailing.gwt.ui.shared.RaceGroupSeriesDTO;
 import com.sap.sailing.gwt.ui.shared.StrippedLeaderboardDTO;
 import com.sap.sse.gwt.client.player.Timer;
@@ -19,9 +26,11 @@ public class RegattaPhase extends UIObject {
     }
 
     @UiField SpanElement phaseName;
-    @UiField DivElement phaseRacesPanel;
+    @UiField DivElement phaseRacesDiv;
+    @UiField AnchorElement phaseRacesAnchor;
     
-    public RegattaPhase(RaceGroupSeriesDTO series, StrippedLeaderboardDTO leaderboard, Timer timerForClientServerOffset) {
+    public RegattaPhase(RaceGroupSeriesDTO series, final LeaderboardGroupDTO leaderboardGroup,
+            final StrippedLeaderboardDTO leaderboard, final RaceGroupDTO raceGroup, final EventPageNavigator pageNavigator, Timer timerForClientServerOffset) {
         RegattaResources.INSTANCE.css().ensureInjected();
         setElement(uiBinder.createAndBindUi(this));
 
@@ -37,7 +46,19 @@ public class RegattaPhase extends UIObject {
             // TODO: try to have only one RaceColumnDTO 
             RaceColumnDTO raceColumn2 = leaderboard.getRaceColumnByName(raceColumn.getName());
             RegattaPhaseRace race = new RegattaPhaseRace(raceColumn2, timerForClientServerOffset);
-            phaseRacesPanel.appendChild(race.getElement());
+            phaseRacesDiv.appendChild(race.getElement());
+           
+            Event.sinkEvents(phaseRacesAnchor, Event.ONCLICK);
+            Event.setEventListener(phaseRacesAnchor, new EventListener() {
+                @Override
+                public void onBrowserEvent(Event browserEvent) {
+                    switch (DOM.eventGetType(browserEvent)) {
+                        case Event.ONCLICK:
+                            pageNavigator.goToRegattaRaces(leaderboardGroup, leaderboard, raceGroup);
+                            break;
+                    }
+                }
+            });
         }
     }
     

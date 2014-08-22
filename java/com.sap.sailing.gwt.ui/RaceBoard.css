@@ -75,8 +75,11 @@ table {
 	border: 1px solid #C9CACA;
 }
 
-.RaceBoardHeaderPanel {
-	margin: 0 12px 14px 12px;
+.RaceMap-HeaderPanel {
+	height: 60px;
+	width: 100%;
+	background-color: #333;
+	opacity: .5;
 }
 
 .leaderboardLabel {
@@ -300,33 +303,45 @@ img.openColumn {
 	margin: 0 0 0 5px;
 }
 
+.timePanelButton-SlowDown {
+	background-color: red !important;
+}
+
+.timePanelButton-SpeedUp {
+	background-color: green !important;
+}
+
 .playPauseButton {
 	padding: 0;
 	float: left;
-	width: 28px;
-	height: 25px;
-	background: url(images/timeslider-play-active-icon.png) 0 0 no-repeat;
+	width: 32px;
+	height: 28px;
+	background: url(images/viewicons/@1x/img/SAP_RV_Play_INACTIVE.png) center no-repeat;
     cursor: pointer;
+    border: 1px solid #cecece;
+    border-radius: 4px;
+    outline: 0;
 }
 
 .playPauseButton:hover{
-  background: url(images/playbutton-hover.png) 0 0 no-repeat !important;
   cursor: pointer;
+  background-color: #cecece;
 }
 
 .playPauseButtonPause {
-	background: url(images/timeslider-pause-icon.png) 0 0 no-repeat;
+	background: url(images/viewicons/@2x/img/SAP_RV_Pause_INACTIVE.png) 2px 0 no-repeat;
+	outline: 0;
+	background-size: contain;
 }
 
 .playPauseButtonPause:hover {
-  background: url(images/playbuttonPause-hover.png) 0 0 no-repeat !important;
   cursor: pointer;
 }
 
 .backToLivePlayButton {
     position: absolute;
     right: 15px;
-    bottom: 10px;
+    top: 8px;
     width: 42px;
     height: 38px;
 	font-size: 8px;
@@ -409,8 +424,8 @@ img.openColumn {
 
 .busyIndicator-Simple {
 	position: absolute;
-	top: 0px;
-	right: 40px;
+	top: 0.7em;
+	right: 7.4em;
 }
 
 .busyIndicator-Circle {
@@ -418,22 +433,22 @@ img.openColumn {
 
 .raceBoard-TitlePanel {
 	position: relative;
-	top: 5px;
+	top: 10px;
 	z-index: 10;
-	color: white;
+	color: #fff;
 	margin-left: auto;
 	margin-right: auto;
-	opacity: .8;
 }
 
 .raceBoard-TitlePanel-RaceNameLabel {
-	font-size: 28px;
+	font-size: 32px;
+	font-weight: bold;
 	padding: 7px;
 }
 
 .raceBoard-Logo {
 	position: absolute;
-	top: 10px;
+	top: 6px;
 	left: 10px;
 	z-index: 10;
 	cursor: pointer;
@@ -444,11 +459,10 @@ img.openColumn {
 }
 
 .TimePanel-ShowExtended-Button {
-	width: 28px;
-	height: 25px;
+	width: 29px;
+	height: 28px;
 	float: left;
 	cursor: pointer;
-	margin-left: 4px;
   	border-top-left-radius: 5px;
   	border-top-right-radius: 5px;
   	border-bottom-left-radius: 5px;
@@ -456,11 +470,11 @@ img.openColumn {
   	border: 1px solid #ececec;
 }
 
-.TimePanel-ShowExtended-Button-Closed {
+.TimePanel-ShowExtended-Button-Open {
 	background: white url(images/arrows_top_black.png) center no-repeat;
 }
 
-.TimePanel-ShowExtended-Button-Open {
+.TimePanel-ShowExtended-Button-Closed {
 	background: white url(images/arrows_bottom_black.png) center no-repeat;
 }
 
@@ -478,7 +492,7 @@ img.openColumn {
 }
 
 .RaceBoard-globalNavigation-Link a {
-	color: white;
+	color: #fff;
 	cursor: pointer;
 }
 
@@ -499,4 +513,132 @@ img.openColumn {
 
 .TimePanel-settingsButtonStyle:hover {
 	border: 1px solid gray;
+}
+
+.gwt-SplitLayoutPanel-NorthSouthToggleButton-Closed-multiCompetitorRaceChart {
+	background-color: white;
+	background-image: url(images/viewicons/@1x/img/SAP_RV_CompetitorCharts_INACTIVE.png), url(images/arrows_top_black_small.png);
+	background-repeat: no-repeat, no-repeat;
+	background-position: 5% 50%, 95% 50%
+}
+
+.gwt-SplitLayoutPanel-NorthSouthToggleButton-Open-multiCompetitorRaceChart {
+	background-color: white;
+	background-image: url(images/viewicons/@1x/img/SAP_RV_CompetitorCharts_GHOSTED.png), url(images/arrows_bottom_black_small.png);
+	background-repeat: no-repeat, no-repeat;
+	background-position: 5% 50%, 95% 50%
+}
+
+.gwt-SplitLayoutPanel-NorthSouthToggleButton-Closed-windChart {
+	background-color: white;
+	background-image: url(images/viewicons/@1x/img/SAP_RV_CompetitorCharts_INACTIVE.png), url(images/arrows_top_black_small.png);
+	background-repeat: no-repeat, no-repeat;
+	background-position: 5% 50%, 95% 50%
+}
+
+.gwt-SplitLayoutPanel-NorthSouthToggleButton-Open-windChart {
+	background-color: white;
+	background-image: url(images/viewicons/@1x/img/SAP_RV_CompetitorCharts_GHOSTED.png), url(images/arrows_bottom_black_small.png);
+	background-repeat: no-repeat, no-repeat;
+	background-position: 5% 50%, 95% 50%
+}
+
+.gwt-SplitLayoutPanel-EastToggleButton-Open-leaderboard {
+	background-color: white;
+	background-image: url(images/viewicons/@1x/img/SAP_RV_Leaderboard_GHOSTED.png), url(images/arrows_top_black_small.png);
+	background-repeat: no-repeat, no-repeat;
+	background-position: 4% 50%, 96% 50%
+}
+
+.gwt-SplitLayoutPanel-EastToggleButton-Closed-leaderboard {
+	background-color: white;
+	background-image: url(images/viewicons/@1x/img/SAP_RV_Leaderboard_INACTIVE.png), url(images/arrows_bottom_black_small.png);
+	background-repeat: no-repeat, no-repeat;
+	background-position: 4% 50%, 96% 50%
+}
+
+.gwt-SplitLayoutPanel-NorthSouthToggleButton-Closed-media {
+	background-color: white;
+	background-image: url(images/viewicons/@1x/img/SAP_RV_AudioVideo_INACTIVE.png);
+	background-repeat: no-repeat, no-repeat;
+	background-position: 4% 50%, 96% 50%
+}
+
+.gwt-SplitLayoutPanel-NorthSouthToggleButton-Open-media {
+	background-color: white;
+	background-image: url(images/viewicons/@1x/img/SAP_RV_AudioVideo_INACTIVE.png);
+	background-repeat: no-repeat, no-repeat;
+	background-position: 4% 50%, 96% 50%
+}
+
+.gwt-SplitLayoutPanel-NorthSouthToggleButton-Small-media {
+	background-position: 50% 50%, 100% 50% !important;
+    margin-left: 0px !important;
+    padding: 2px 20px !important;
+}
+
+.RegattaRaceInformation-Header {
+	position: relative;
+    left: 140px;
+    top: 11px;
+}
+
+.RegattaRaceInformation-Header .RaceName-Label {
+	display: inline;
+    color: white;
+    margin-right: 10px;
+    font-size: 36px;
+}
+
+.RegattaRaceInformation-Header .RaceSeriesAndFleet-Label {
+	display: inline;
+    color: white;
+    font-size: 15px;
+}
+
+.RegattaAndRaceTime-Header {
+	position: absolute;
+    right: 10px;
+    top: 13px;
+    text-align: right;
+    color: white;
+}
+
+.RegattaAndRaceTime-Header .RegattaName-Anchor {
+	font-size: 15px;
+	color: white;
+	text-decoration: none;
+	padding-left: 25px;
+    background-image: url(images/home.png);
+    background-repeat: no-repeat;
+    background-size: 17px;
+    background-position: 4px 1px;
+}
+
+.RegattaAndRaceTime-Header .RegattaName-Anchor:hover {
+	text-decoration: underline;
+}
+	
+.RegattaAndRaceTime-Header .RaceTime-Label {
+	font-size: 15px;
+	margin-top: 5px;
+}
+
+.VideoPopup-Close-Button {
+	border: none;
+}
+
+.gwt-Button, .gwt-Button:visited {
+	background-color: #fcbb22;
+	background-image: none !important;
+    -moz-box-shadow: none;
+	-webkit-box-shadow: none;
+	-o-box-shadow: none;
+	-ms-box-shadow: none;
+	box-shadow: none;
+	text-shadow: none;
+}
+
+.gwt-Button:hover {
+	background-color: #fcbb22 !important;
 }

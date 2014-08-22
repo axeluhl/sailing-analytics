@@ -124,4 +124,9 @@ public class SimpleQueryRunner implements QueryRunner {
         return new QueryRunnerSettingsDialogComponent(dataMiningSettings, stringMessages);
     }
 
+    @Override
+    public String getDependentCssClassName() {
+        return "simpleQueryRunner";
+    }
+
 }

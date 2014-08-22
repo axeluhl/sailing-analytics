@@ -16,8 +16,7 @@ import com.sap.sailing.gwt.ui.simulator.streamlets.Vector;
  */
 public abstract class MovingCanvasOverlay extends FullCanvasOverlay {
 
-    private LatLng ne;
-    private LatLng sw;
+    private LatLng nw;
 
     public MovingCanvasOverlay(MapWidget map, int zIndex) {
         super(map, zIndex);
@@ -25,45 +24,57 @@ public abstract class MovingCanvasOverlay extends FullCanvasOverlay {
     
     @Override
     public void setCanvasSettings() {
+        
+        // do nothing, if mapProjection is not available
+        if (mapProjection == null)
+            return;
+        
         int canvasWidth = getMap().getDiv().getClientWidth();
         int canvasHeight = getMap().getDiv().getClientHeight();
-   
+
+        // calculate pixel-positions of old and new canvas-bounds using the same, current mapProjection
+        // start from LatLng, as the canvas might have jumped to new bounds that do not intersect with the old bounds
+        Point nwOldPx;
+        if (nw == null) {
+            nwOldPx = null;
+        } else {
+            nwOldPx = mapProjection.fromLatLngToDivPixel(nw);
+        }
+        nw = LatLng.newInstance(getMap().getBounds().getNorthEast().getLatitude(), getMap().getBounds().getSouthWest().getLongitude());
+        Point nwNewPx = mapProjection.fromLatLngToDivPixel(nw);
+        widgetPosLeft = Math.round(nwNewPx.getX());
+        widgetPosTop = Math.round(nwNewPx.getY());
+
+        // calculate the translation-vector between old and new origin in pixels
+        if (nwOldPx == null) {
+            diffPx = new Vector(0, 0);
+        } else {
+            double oldPosLeft = Math.round(nwOldPx.getX());
+            double oldPosTop = Math.round(nwOldPx.getY());
+            diffPx = new Vector(oldPosLeft - widgetPosLeft, oldPosTop - widgetPosTop);
+        }
+        
+        // store canvas-content, because setWidth() and setHeight() will clear canvas and change Context2d 
         Context2d ctxt = canvas.getContext2d();
         ImageData canvasContent = ctxt.getImageData(0, 0, canvas.getElement().getClientWidth(), canvas.getElement().getClientHeight());
         canvas.setWidth(String.valueOf(canvasWidth));
         canvas.setHeight(String.valueOf(canvasHeight));
         canvas.setCoordinateSpaceWidth(canvasWidth);
         canvas.setCoordinateSpaceHeight(canvasHeight);
-        
-        Point oldSWpx = mapProjection.fromLatLngToDivPixel(sw);
-        Point oldNEpx = mapProjection.fromLatLngToDivPixel(ne);
-        
-        sw = getMap().getBounds().getSouthWest();
-        ne = getMap().getBounds().getNorthEast();
-        Point swPx = mapProjection.fromLatLngToDivPixel(sw);
-        Point nePx = mapProjection.fromLatLngToDivPixel(ne);
-        widgetPosLeft = Math.min(swPx.getX(), nePx.getX());
-        widgetPosTop = Math.min(swPx.getY(), nePx.getY());
-
-        double oldLeftpx;
-        double oldToppx;
-        if (oldSWpx == null) {
-            oldLeftpx = widgetPosLeft;            
-            oldToppx = widgetPosTop;
-        } else {
-            oldLeftpx = Math.min(oldSWpx.getX(), oldNEpx.getX());
-            oldToppx = Math.min(oldSWpx.getY(), oldNEpx.getY());
-        }
-
-        diffPx = new Vector(oldLeftpx - widgetPosLeft, oldToppx - widgetPosTop);
-        
+        // get updated Context2d and restore canvas-content moved by translation-vector
         ctxt = canvas.getContext2d();
         ctxt.putImageData(canvasContent, diffPx.x, diffPx.y);
 
-        setCanvasPosition(getWidgetPosLeft(), getWidgetPosTop());
+        // update canvas position
+        setCanvasPosition(widgetPosLeft, widgetPosTop);
     }
 
     @Override
     protected void draw() {
+        // do nothing; setCanvasSettings() is called directly
+    }
+    
+    public void initCanvasOrigin() {
+        nw = null;
     }
 }

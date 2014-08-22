@@ -4,10 +4,11 @@ import java.util.List;
 
 import com.google.gwt.activity.shared.AbstractActivity;
 import com.google.gwt.event.shared.EventBus;
-import com.google.gwt.user.client.Window;
 import com.google.gwt.user.client.rpc.AsyncCallback;
 import com.google.gwt.user.client.ui.AcceptsOneWidget;
+import com.sap.sailing.gwt.home.client.shared.placeholder.Placeholder;
 import com.sap.sailing.gwt.ui.shared.EventBaseDTO;
+import com.sap.sse.gwt.client.mvp.ErrorView;
 
 public class EventsActivity extends AbstractActivity {
 
@@ -19,17 +20,21 @@ public class EventsActivity extends AbstractActivity {
 
     @Override
     public void start(final AcceptsOneWidget panel, EventBus eventBus) {
-        final EventsView eventsView = clientFactory.createEventsView(EventsActivity.this);
-        panel.setWidget(eventsView.asWidget());
+        panel.setWidget(new Placeholder());
+
         clientFactory.getSailingService().getPublicEventsOfAllSailingServers(new AsyncCallback<List<EventBaseDTO>>() {
             @Override
             public void onSuccess(List<EventBaseDTO> events) {
+                final EventsView eventsView = clientFactory.createEventsView(EventsActivity.this);
+                panel.setWidget(eventsView.asWidget());
+
                 eventsView.setEvents(events);
             }
 
             @Override
             public void onFailure(Throwable caught) {
-                Window.alert("Shit happens");
+                final ErrorView view = clientFactory.createErrorView("Error while loading the sailing server instances with service getPublicEventsOfAllSailingServers()", caught);
+                panel.setWidget(view.asWidget());
             }
         });
     }

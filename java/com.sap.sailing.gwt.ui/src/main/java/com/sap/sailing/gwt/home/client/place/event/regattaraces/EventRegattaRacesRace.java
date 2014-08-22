@@ -25,7 +25,7 @@ import com.sap.sse.gwt.client.player.Timer;
 public class EventRegattaRacesRace extends UIObject {
     private static EventRegattaRacesRaceUiBinder uiBinder = GWT.create(EventRegattaRacesRaceUiBinder.class);
 
-    private enum SimpleRaceStates { NOT_TRACKED, TRACKED_AND_NOT_LIVE, TRACKED_AND_LIVE };
+    private enum SimpleRaceStates { NOT_TRACKED, TRACKED, TRACKED_AND_LIVE, TRACKED_BUT_NOT_SCHEDULED };
     
     interface EventRegattaRacesRaceUiBinder extends UiBinder<DivElement, EventRegattaRacesRace> {
     }
@@ -38,6 +38,7 @@ public class EventRegattaRacesRace extends UIObject {
     @UiField SpanElement averageRaceWind;
     
     @UiField DivElement raceNotTrackedDiv;
+    @UiField DivElement raceNotScheduledDiv;
     @UiField DivElement watchRaceDiv;
     @UiField DivElement analyzeRaceDiv;
     @UiField AnchorElement watchRaceLink;
@@ -83,8 +84,8 @@ public class EventRegattaRacesRace extends UIObject {
         EventRegattaRacesResources.INSTANCE.css().ensureInjected();
         setElement(uiBinder.createAndBindUi(this));
 
-        allConditionalElements = new Element[] {raceWinnerDiv, raceLeaderDiv, watchRaceDiv, analyzeRaceDiv, raceNotTrackedDiv,
-                raceFeaturesDiv, legProgressDiv, raceFlagDiv, windStatusDiv, currentLegNo, totalLegsCount };
+        allConditionalElements = new Element[] {raceWinnerDiv, raceLeaderDiv, watchRaceDiv, analyzeRaceDiv, raceNotTrackedDiv, raceNotScheduledDiv,
+                raceFeaturesDiv, legProgressDiv, raceFlagDiv, windStatusDiv };
 
         if(fleet.getColor() != null) {
             fleetColor.getStyle().setBackgroundColor(fleet.getColor().getAsHtml());
@@ -127,7 +128,13 @@ public class EventRegattaRacesRace extends UIObject {
         SimpleRaceStates simpleRaceState = SimpleRaceStates.NOT_TRACKED;
         
         if(race != null && race.trackedRace != null) {
-            simpleRaceState = isLive() ? SimpleRaceStates.TRACKED_AND_LIVE : SimpleRaceStates.TRACKED_AND_NOT_LIVE; 
+            simpleRaceState = SimpleRaceStates.TRACKED;
+            if(isLive()) {
+                simpleRaceState = SimpleRaceStates.TRACKED_AND_LIVE;
+                if(race.startOfRace == null) {
+                    simpleRaceState = SimpleRaceStates.TRACKED_BUT_NOT_SCHEDULED;
+                }                    
+            }
         }
         return simpleRaceState;
     }
@@ -147,32 +154,37 @@ public class EventRegattaRacesRace extends UIObject {
             case NOT_TRACKED:
                 showElement(raceNotTrackedDiv);
                 break;
+            case TRACKED_BUT_NOT_SCHEDULED:
+                showElement(raceNotScheduledDiv);
+                break;
             case TRACKED_AND_LIVE:
                 showElement(watchRaceDiv);
-                showElement(legProgressDiv);
-                showElement(currentLegNo);
-                showElement(totalLegsCount);
 
-                raceTime.setInnerText(raceTimeFormat.format(race.startOfRace));
-                currentLegNo.setInnerText(String.valueOf(race.trackedRaceStatistics.currentLegNo));
-                totalLegsCount.setInnerText(String.valueOf(race.trackedRaceStatistics.totalLegsCount));
-
-                if(race.trackedRaceStatistics.hasLeaderData && race.trackedRaceStatistics.leaderOrWinner != null) {
+                if(race.startOfRace != null) {
+                    raceTime.setInnerText(raceTimeFormat.format(race.startOfRace));
+                }
+                if(race.trackedRaceStatistics.hasLegProgressData) {
+                    showElement(legProgressDiv);
+                    currentLegNo.setInnerText(String.valueOf(race.trackedRaceStatistics.currentLegNo));
+                    totalLegsCount.setInnerText(String.valueOf(race.trackedRaceStatistics.totalLegsCount));
+                }
+                if(race.trackedRaceStatistics.hasLeaderOrWinnerData && race.trackedRaceStatistics.leaderOrWinner != null) {
                     showElement(raceLeaderDiv);
                     updateWinnerOrLeader(raceLeader, race.trackedRaceStatistics.leaderOrWinner);
                 }
 
                 break;
-            case TRACKED_AND_NOT_LIVE:
+            case TRACKED:
                 showElement(analyzeRaceDiv);
                 
-                if(race.trackedRaceStatistics.hasLeaderData && race.trackedRaceStatistics.leaderOrWinner != null) {
+                if(race.trackedRaceStatistics.hasLeaderOrWinnerData && race.trackedRaceStatistics.leaderOrWinner != null) {
                     showElement(raceWinnerDiv);
                     updateWinnerOrLeader(raceWinner, race.trackedRaceStatistics.leaderOrWinner);
                 }
+                if(race.startOfRace != null) {
+                    raceTime.setInnerText(raceTimeFormat.format(race.startOfRace));
+                }
                 showElement(raceFeaturesDiv);
-                
-                raceTime.setInnerText(raceTimeFormat.format(race.startOfRace));
                 updateRaceFeatures();
 
                 break;

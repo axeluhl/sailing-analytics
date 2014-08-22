@@ -11,6 +11,7 @@ import org.moxieapps.gwt.highcharts.client.XAxis;
 import org.moxieapps.gwt.highcharts.client.events.ChartClickEvent;
 import org.moxieapps.gwt.highcharts.client.events.ChartSelectionEvent;
 
+import com.google.gwt.dom.client.Style.Unit;
 import com.google.gwt.i18n.client.DateTimeFormat;
 import com.google.gwt.user.client.ui.AbsolutePanel;
 import com.google.gwt.user.client.ui.Button;
@@ -87,6 +88,8 @@ public abstract class AbstractRaceChart extends AbsolutePanel implements RaceSel
         settingsButton.setStyleName(chartsCss.settingsButtonStyle());
         settingsButton.addStyleName(chartsCss.settingsButtonBackgroundImage());
         add(settingsButton);
+        getElement().getStyle().setMarginRight(12, Unit.PX);
+        getElement().getStyle().setMarginLeft(12, Unit.PX);
     }
     
     /**

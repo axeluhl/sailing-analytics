@@ -20,7 +20,7 @@ import com.sap.sse.common.filter.AbstractNumberFilter;
  */
 public class CompetitorRaceRankFilter extends AbstractNumberFilter<CompetitorDTO, Integer> implements
         LeaderboardFilterContext, SelectedRaceFilterContext, FilterWithUI<CompetitorDTO> {
-    public static final String FILTER_NAME = "CompetitorRaceRankFilter";
+    public static final String FILTER_NAME = "Race Rank";
 
     private LeaderboardFetcher leaderboardFetcher;
     private RaceIdentifier selectedRace;
@@ -84,6 +84,7 @@ public class CompetitorRaceRankFilter extends AbstractNumberFilter<CompetitorDTO
         if (theRaceColumnDTOThatContainsCompetitorRace != null && competitorRow != null) {
             LeaderboardEntryDTO entryDTO = competitorRow.fieldsByRaceColumnName
                     .get(theRaceColumnDTOThatContainsCompetitorRace.getName());
+
             // first collect those competitors in their order that have a rank
             for (CompetitorDTO competitor : getLeaderboard().getCompetitorsFromBestToWorst(
                     theRaceColumnDTOThatContainsCompetitorRace)) {
@@ -95,7 +96,7 @@ public class CompetitorRaceRankFilter extends AbstractNumberFilter<CompetitorDTO
                     competitorsRankedInColumn.add(competitor);
                 }
             }
-            raceRank = 1;
+            raceRank = 0;
             for (Iterator<CompetitorDTO> competitorIter = competitorsRankedInColumn.iterator(); competitorIter
                     .hasNext();) {
                 CompetitorDTO competitor = competitorIter.next();
@@ -124,7 +125,10 @@ public class CompetitorRaceRankFilter extends AbstractNumberFilter<CompetitorDTO
 
     @Override
     public String getName() {
-        return FILTER_NAME;
+        if (this.getOperator() != null) {
+            return FILTER_NAME + " " + this.getOperator().getName() + " " + this.getValue();
+        }
+        return FILTER_NAME + " " + this.getValue();
     }
 
     @Override
@@ -134,7 +138,7 @@ public class CompetitorRaceRankFilter extends AbstractNumberFilter<CompetitorDTO
 
     @Override
     public String getLocalizedDescription(StringMessages stringMessages) {
-        return stringMessages.raceRank();
+        return "Top " + this.getValue() + " " + stringMessages.raceRank();
     }
 
     @Override

@@ -8,6 +8,7 @@ import com.google.gwt.dom.client.AudioElement;
 import com.google.gwt.dom.client.MediaElement;
 import com.google.gwt.media.client.Audio;
 import com.google.gwt.user.client.rpc.AsyncCallback;
+import com.google.gwt.user.client.ui.Button;
 import com.google.gwt.user.client.ui.SimplePanel;
 import com.google.gwt.user.client.ui.Widget;
 import com.sap.sailing.domain.common.RegattaAndRaceIdentifier;
@@ -44,15 +45,20 @@ public class MediaComponent implements Component<Void>, PlayStateListener, TimeL
     private final ErrorReporter errorReporter;
     private final UserAgentDetails userAgent;
     private final UserDTO user;
+    private final MediaServiceAsync mediaService;
     private final boolean autoSelectMedia;
+    private final String defaultMediaId;
+    
+    private final MediaSelector mediaSelector;
 
     private Date currentRaceTime;
     private double currentPlaybackSpeed = 1.0d;
     private PlayStates currentPlayState = PlayStates.Paused;
 
+
     public MediaComponent(RegattaAndRaceIdentifier selectedRaceIdentifier, RaceTimesInfoProvider raceTimesInfoProvider,
             Timer raceTimer, MediaServiceAsync mediaService, StringMessages stringMessages,
-            ErrorReporter errorReporter, UserAgentDetails userAgent, UserDTO user, boolean autoSelectMedia) {
+            ErrorReporter errorReporter, UserAgentDetails userAgent, UserDTO user, boolean autoSelectMedia, String defaultMedia) {
         this.raceIdentifier = selectedRaceIdentifier;
         this.raceTimesInfoProvider = raceTimesInfoProvider;
         this.raceTimer = raceTimer;
@@ -60,12 +66,23 @@ public class MediaComponent implements Component<Void>, PlayStateListener, TimeL
         this.errorReporter = errorReporter;
         this.userAgent = userAgent;
         this.user = user;
+        this.mediaService = mediaService;
         this.autoSelectMedia = autoSelectMedia;
+        this.defaultMediaId = defaultMedia;
+        this.mediaSelector = new MediaSelector(selectedRaceIdentifier, raceTimesInfoProvider, raceTimer, mediaService, stringMessages, errorReporter, userAgent, user, autoSelectMedia);
+    }
+    
+    public Button getMediaSelectionButton() {
+        return this.mediaSelector.getManageMediaButton();
     }
 
-    private boolean isPotentiallyPlayable(MediaTrack mediaTrack) {
-        return MediaTrack.Status.REACHABLE.equals(mediaTrack.status)
+    public boolean isPotentiallyPlayable(MediaTrack mediaTrack) {
+        boolean result = false;
+        if (mediaTrack != null) {
+            result = MediaTrack.Status.REACHABLE.equals(mediaTrack.status)
                 || MediaTrack.Status.UNDEFINED.equals(mediaTrack.status);
+        }
+        return result;
     }
 
     private void setStatus(final MediaTrack mediaTrack) {
@@ -119,10 +136,16 @@ public class MediaComponent implements Component<Void>, PlayStateListener, TimeL
         videoChanged(defaultVideo);
     }
 
-    private MediaTrack getDefaultVideo() {
+    public MediaTrack getDefaultVideo() {
         for (MediaTrack mediaTrack : mediaTracks) {
-            if (MediaType.video.equals(mediaTrack.mimeType.mediaType) && isPotentiallyPlayable(mediaTrack)) {
-                return mediaTrack;
+            if (defaultMediaId != null) {
+                if (mediaTrack.dbId.equals(defaultMediaId)) {
+                    return mediaTrack;
+                }
+            } else {
+                if (MediaType.video.equals(mediaTrack.mimeType.mediaType) && isPotentiallyPlayable(mediaTrack)) {
+                    return mediaTrack;
+                }
             }
         }
         return null;
@@ -185,16 +208,14 @@ public class MediaComponent implements Component<Void>, PlayStateListener, TimeL
      * @return
      */
     public AsyncCallback<Collection<MediaTrack>> getMediaLibraryCallback() {
-
         return new  AsyncCallback<Collection<MediaTrack>>() {
-            
             @Override
             public void onFailure(Throwable caught) {
                 errorReporter.reportError("Remote Procedure Call getMediaTracksForRace(...) - Failure: " + caught.getMessage());
             }
-        
             @Override
             public void onSuccess(Collection<MediaTrack> mediaTracks) {
+                mediaSelector.setMediaTracks(mediaTracks);
                 MediaComponent.this.mediaTracks.clear();
                 MediaComponent.this.mediaTracks.addAll(mediaTracks);
                 for (MediaTrack mediaTrack : MediaComponent.this.mediaTracks) {
@@ -202,7 +223,7 @@ public class MediaComponent implements Component<Void>, PlayStateListener, TimeL
                 }
                 
                 if (autoSelectMedia) {
-                    playDefault();
+                    setVisible(true);
                 }
             }
         };
@@ -297,6 +318,14 @@ public class MediaComponent implements Component<Void>, PlayStateListener, TimeL
     @Override
     public void setVisible(boolean visibility) {
         rootPanel.setVisible(visibility);
+        if (visibility) {
+            playDefault();
+        }
+    }
+
+    @Override
+    public String getDependentCssClassName() {
+        return "media";
     }
 
 }

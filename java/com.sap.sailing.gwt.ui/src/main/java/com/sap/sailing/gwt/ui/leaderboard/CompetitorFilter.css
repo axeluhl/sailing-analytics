@@ -1,27 +1,35 @@
-.search { 
-	width: auto;
-	height: 2.142857142857143em;
-	border: none;
-	border-radius: 4px;
+.competitorFilterContainer { 
+	width: 400px;
+	height: 2.14em;
 	background-color: #FFFFFF;
-	padding: .4em 2.4em 0em 6.4em;
 	margin-left: 0px;
 	margin-right: 0px;
+	margin-top: 5px;
 	font-size: 1rem;
 	position: relative;
-	border-bottom: 1px solid #ccc;
 	overflow: hidden;
+	border: none;
+	outline: 0;
+}
+
+.searchBox {
+	border: 1px solid #ccc;
+	background-color: #eaeaea;
+	border-radius: 4px;
+	margin-right: 4.4em;
 }
 
 .searchInput {
-	width: 100%;
 	font-size: .933333333333333em;
 	height: 2.142857142857143em;
+	width: 280px;
 	border: none;
-	background-color: #FFFFFF;
+	background-color: #eaeaea;
 	padding: 0;
-	margin-left: 0px;
+	margin-left: 2.4em;
 	margin-right: 0px;
+	margin-bottom: 1px;
+	outline: 0 !important;
 }
 
 .button {
@@ -40,6 +48,7 @@
 	-o-transition: background-color .2s;
 	-ms-transition: background-color .2s;
 	transition: background-color .2s;
+	cursor: pointer;
 }
 
 .button:focus, .button:hover {
@@ -47,19 +56,23 @@
 }
 
 .clearButton {
-	right: .4em;
+	right: 5.3em;
+    top: 0.2em;
 }
 
 .settingsButton {
-	left: .4em;
+	right: .4em;
+	top: 0.2em;
 }
 
 .filterButton {
-	left: 2.4em;
+	right: 2.4em;
+	top: 0.2em;
 }
 
 .searchButton {
-	left: 4.4em;
+	top: 0.2em;
+	left: 0.2em;
 	opacity: 0.3;
 }
 

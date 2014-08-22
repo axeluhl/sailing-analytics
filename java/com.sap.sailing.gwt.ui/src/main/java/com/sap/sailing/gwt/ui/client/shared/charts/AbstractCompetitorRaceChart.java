@@ -141,7 +141,8 @@ public abstract class AbstractCompetitorRaceChart<SettingsType extends ChartSett
                 .setMarginLeft(65)
                 .setMarginRight(65)
                 .setBorderColor(new Color("#CACACA"))
-                .setBackgroundColor(new Color("#EBEBEB"))
+                .setBackgroundColor(new Color("#FFFFFF"))
+                .setPlotBackgroundColor("#f8f8f8")
                 .setBorderWidth(0)
                 .setBorderRadius(0)
                 .setPlotBorderWidth(0)
@@ -202,7 +203,7 @@ public abstract class AbstractCompetitorRaceChart<SettingsType extends ChartSett
      * If no data needs to be {@link #needsDataLoading() loaded}, the "no competitors selected" label is displayed.
      */
     private void updateChart(Date from, Date to, boolean append) {
-        if (hasSelectedCompetitors()) {
+        if (hasSelectedCompetitors() && isVisible()) {
             remove(noCompetitorsSelectedLabel);
             if (!getChildren().contains(chart)) {
                 add(chart);
@@ -221,41 +222,42 @@ public abstract class AbstractCompetitorRaceChart<SettingsType extends ChartSett
     }
 
     private void loadData(final Date from, final Date to, final List<CompetitorDTO> competitors, final boolean append) {
-        showLoading(stringMessages.loadingCompetitorData());
-        ArrayList<CompetitorDTO> competitorsToLoad = new ArrayList<CompetitorDTO>();
-        for (CompetitorDTO competitorDTO : competitors) {
-            competitorsToLoad.add(competitorDTO);
-        }
+        if (isVisible()) {
+            showLoading(stringMessages.loadingCompetitorData());
+            ArrayList<CompetitorDTO> competitorsToLoad = new ArrayList<CompetitorDTO>();
+            for (CompetitorDTO competitorDTO : competitors) {
+                competitorsToLoad.add(competitorDTO);
+            }
 
-        GetCompetitorsRaceDataAction getCompetitorsRaceDataAction = new GetCompetitorsRaceDataAction(sailingService,
-                selectedRaceIdentifier, competitorsToLoad, from, to, getStepSize(), getSelectedDetailType(),
-                leaderboardGroupName, leaderboardName);
-        asyncActionsExecutor.execute(getCompetitorsRaceDataAction, LOAD_COMPETITOR_CHART_DATA_CATEGORY,
-                new AsyncCallback<CompetitorsRaceDataDTO>() {
-                    @Override
-                    public void onSuccess(final CompetitorsRaceDataDTO result) {
-                        hideLoading();
-                        if (result != null) {
-                            if (result.isEmpty() && chartContainsNoData()) {
-                                setWidget(noDataFoundLabel);
+            GetCompetitorsRaceDataAction getCompetitorsRaceDataAction = new GetCompetitorsRaceDataAction(sailingService,
+                    selectedRaceIdentifier, competitorsToLoad, from, to, getStepSize(), getSelectedDetailType(),
+                    leaderboardGroupName, leaderboardName);
+            asyncActionsExecutor.execute(getCompetitorsRaceDataAction, LOAD_COMPETITOR_CHART_DATA_CATEGORY,
+                    new AsyncCallback<CompetitorsRaceDataDTO>() {
+                        @Override
+                        public void onSuccess(final CompetitorsRaceDataDTO result) {
+                            hideLoading();
+                            if (result != null) {
+                                if (result.isEmpty() && chartContainsNoData()) {
+                                    setWidget(noDataFoundLabel);
+                                } else {
+                                    updateChartSeries(result, append);
+                                }
                             } else {
-                                updateChartSeries(result, append);
-                            }
-                        } else {
-                            if (!append) {
-                                clearChart();
+                                if (!append) {
+                                    clearChart();
+                                }
                             }
                         }
-                    }
-        
-                    @Override
-                    public void onFailure(Throwable caught) {
-                        hideLoading();
-                        errorReporter.reportError(stringMessages.errorFetchingChartData(caught.getMessage()),
-                                timer.getPlayMode() == PlayModes.Live);
-                    }
-                });
-
+            
+                        @Override
+                        public void onFailure(Throwable caught) {
+                            hideLoading();
+                            errorReporter.reportError(stringMessages.errorFetchingChartData(caught.getMessage()),
+                                    timer.getPlayMode() == PlayModes.Live);
+                        }
+                    });
+        }
     }
     
     private boolean chartContainsNoData() {
