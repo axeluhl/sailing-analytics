@@ -179,4 +179,9 @@ public class QueryDefinitionProviderWithControls extends AbstractQueryDefinition
     @Override
     public void updateSettings(Object newSettings) { }
 
+    @Override
+    public String getDependentCssClassName() {
+        return "queryDefinitionProviderWithControls";
+    }
+
 }

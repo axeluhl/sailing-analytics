@@ -976,6 +976,8 @@ public class SliderBar extends FocusPanel implements RequiresResize, HasValue<Do
             int lineWidth = lineElement.getOffsetWidth();
             if (numMarkers > 0) {
                 // Create the markers or make them visible
+                Element lastMarkerElement = null;
+                int lastMarkerOffsetLeft = 0;
                 for (int i = 0; i < numMarkers; i++) {
                     Marker marker = markers.get(i);
                     Element markerElem = null;
@@ -1002,6 +1004,15 @@ public class SliderBar extends FocusPanel implements RequiresResize, HasValue<Do
                     markerLeftOffset = Math.min(markerLeftOffset, lineLeftOffset + lineWidth - markerWidth);
                     markerElem.getStyle().setLeft(markerLeftOffset, Unit.PX);
                     markerElem.getStyle().setVisibility(Visibility.VISIBLE);
+                    // change class of last marker if it is too close to the one just created
+                    if (lastMarkerOffsetLeft > 0 && (markerLeftOffset-lastMarkerOffsetLeft) <= markerWidth) {
+                        if (lastMarkerElement != null) {
+                            lastMarkerElement.setPropertyString("className", "gwt-SliderBar-mark-tooClose");
+                            lastMarkerElement.getStyle().setLeft(markerLeftOffset-10, Unit.PX);
+                        }
+                    }
+                    lastMarkerElement = markerElem;
+                    lastMarkerOffsetLeft = markerLeftOffset;
                 }
 
                 // Hide unused markers
@@ -1025,6 +1036,8 @@ public class SliderBar extends FocusPanel implements RequiresResize, HasValue<Do
             // Draw the marker labels
             int lineWidth = lineElement.getOffsetWidth();
             if (numMarkers > 0) {
+                Element lastMarkerLabel = null;
+                int lastMarkerLabelOffsetLeft = 0;
                 // Create the labels or make them visible
                 for (int i = 0; i < numMarkers; i++) {
                     Marker marker = markers.get(i);
@@ -1060,6 +1073,23 @@ public class SliderBar extends FocusPanel implements RequiresResize, HasValue<Do
 
                     label.getStyle().setLeft(labelLeftOffset, Unit.PX);
                     label.getStyle().setVisibility(Visibility.VISIBLE);
+
+                    // hide last marker label if it is too close to the one just created
+                    if (lastMarkerLabelOffsetLeft > 0 && (labelLeftOffset-lastMarkerLabelOffsetLeft) <= 20) {
+                        if (lastMarkerLabel != null) {
+                            lastMarkerLabel.setPropertyString("className", "gwt-SliderBar-markerlabel-tooClose");
+                            lastMarkerLabel.setPropertyString("innerHTML", "M"); // no space for more
+                            int currentMarkerOffsetLeft = labelLeftOffset;
+                            try {
+                                currentMarkerOffsetLeft = Integer.parseInt(markerElements.get(i).getStyle().getLeft().replace("px", ""));
+                            } catch (NumberFormatException ex) {
+                                // ignore, can't do anything
+                            }
+                            lastMarkerLabel.getStyle().setLeft(currentMarkerOffsetLeft-8, Unit.PX);
+                        }
+                    }
+                    lastMarkerLabel = label;
+                    lastMarkerLabelOffsetLeft = labelLeftOffset;
                 }
 
                 // Hide unused labels

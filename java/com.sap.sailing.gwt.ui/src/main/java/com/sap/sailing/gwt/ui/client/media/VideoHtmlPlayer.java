@@ -1,0 +1,90 @@
+package com.sap.sailing.gwt.ui.client.media;
+
+import java.util.Date;
+
+import com.google.gwt.media.client.MediaBase;
+import com.google.gwt.media.client.Video;
+import com.google.gwt.user.client.ui.Widget;
+import com.sap.sailing.domain.common.media.MediaTrack;
+import com.sap.sailing.gwt.ui.client.media.shared.VideoSynchPlayer;
+import com.sap.sailing.gwt.ui.client.media.shared.WithWidget;
+import com.sap.sse.gwt.client.player.Timer;
+
+public class VideoHtmlPlayer extends AbstractHtmlMediaPlayer implements VideoSynchPlayer, MediaSynchAdapter, WithWidget {
+
+    private final long raceStartTimeMillis;
+    private final Timer raceTimer;
+    private EditFlag editFlag;
+    
+    public VideoHtmlPlayer(final MediaTrack videoTrack, long raceStartTimeMillis, boolean showSynchControls, Timer raceTimer) {
+        super(videoTrack);
+        this.raceTimer = raceTimer;
+        this.raceStartTimeMillis = raceStartTimeMillis;
+    }
+    
+    @Override
+    protected MediaBase createMediaElement() {
+        return Video.createIfSupported();
+    }
+
+    @Override
+    public long getOffset() {
+        return getMediaTrack().startTime.getTime() - raceStartTimeMillis;
+    }
+
+    @Override
+    public void changeOffsetBy(long delta) {
+        getMediaTrack().startTime = new Date(getMediaTrack().startTime.getTime() + delta);
+        forceAlign();
+    }
+
+    @Override
+    public void updateOffset() {
+        getMediaTrack().startTime = new Date(raceTimer.getTime().getTime() - getCurrentMediaTimeMillis());
+    }
+
+    @Override
+    public void setControlsVisible(boolean isVisible) {
+        mediaElement.setControls(isVisible);
+    }
+
+    @Override
+    public void pauseRace() {
+        raceTimer.pause();
+    }
+    
+    @Override
+    public void playMedia() {
+        if (!isEditing()) {
+            super.playMedia();
+        }
+    }
+    
+    @Override
+    public void pauseMedia() {
+        if (!isEditing()) {
+            super.pauseMedia();
+        }
+    }
+
+    @Override
+    protected void alignTime() {
+        if (!isEditing()) {
+            super.alignTime();
+        } 
+    }
+
+    @Override
+    public Widget getWidget() {
+        return mediaElement;
+    }
+
+    private boolean isEditing() {
+        return editFlag != null && editFlag.isEditing();
+    }
+    
+    public void setEditFlag(EditFlag editFlag) {
+        this.editFlag = editFlag;
+    }
+    
+}

@@ -1,8 +1,11 @@
 package com.sap.sailing.gwt.ui.client;
 
+import com.google.gwt.core.client.GWT;
 import com.google.gwt.i18n.client.Messages;
 
 public interface StringMessages extends Messages {
+    public static final StringMessages INSTANCE = GWT.create(StringMessages.class);
+    
     String helloWorld();
     String kielWeel2011();
     String stgAccount();
@@ -1067,4 +1070,20 @@ public interface StringMessages extends Messages {
     String currentOrAverageSpeedOverGroundInKnotsTooltip();
     String currentOrAverageSpeedOverGroundInKnots();
     String scoringSchemeHighPointFirstGetsTenOrEight();
+    String videoComponentShortName();
+    String competitorSearchFilter();
+    String searchCompetitorsBySailNumberOrName();
+    String goToEventOverview();
+    String goToOverviewAndSeeLeaderboard();
+    String noSuchEvent();
+    String leaderboardNotContainedInLeaderboardGroup(String leaderboardName, String leaderboardGroupName);
+    String leaderboardGroupNotContainedInEvent(String leaderboardGroupName, String name);
+    String raceIsInLiveTimePanelMode();
+    String backToLiveTimePanelMode();
+    String windChart();
+    String showVideoPopup();
+    String hideVideoPopup();
+    String manageMedia();
+    String manageMediaTooltip();
+    String showAll();
 }

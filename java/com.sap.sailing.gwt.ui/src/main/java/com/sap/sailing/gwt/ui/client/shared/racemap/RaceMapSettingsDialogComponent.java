@@ -261,6 +261,6 @@ public class RaceMapSettingsDialogComponent implements SettingsDialogComponent<R
 
     @Override
     public FocusWidget getFocusWidget() {
-        return tailLengthBox;
+        return showWindStreamletOverlayCheckbox;
     }
 }

@@ -16,9 +16,10 @@ import com.google.gwt.uibinder.client.UiField;
 import com.google.gwt.user.client.DOM;
 import com.google.gwt.user.client.Event;
 import com.google.gwt.user.client.EventListener;
-import com.google.gwt.user.client.ui.Composite;
 import com.google.gwt.user.client.ui.Widget;
 import com.sap.sailing.gwt.home.client.HomeResources;
+import com.sap.sailing.gwt.home.client.app.PlaceNavigator;
+import com.sap.sailing.gwt.home.client.place.event.AbstractEventComposite;
 import com.sap.sailing.gwt.home.client.place.event.EventPageNavigator;
 import com.sap.sailing.gwt.home.client.place.event.regatta.Regatta;
 import com.sap.sailing.gwt.home.client.shared.LongNamesUtil;
@@ -29,7 +30,7 @@ import com.sap.sailing.gwt.ui.shared.StrippedLeaderboardDTO;
 import com.sap.sse.common.Util.Triple;
 import com.sap.sse.gwt.client.player.Timer;
 
-public class EventRegattaList extends Composite {
+public class EventRegattaList extends AbstractEventComposite {
     private static EventRegattaHeaderUiBinder uiBinder = GWT.create(EventRegattaHeaderUiBinder.class);
 
     interface EventRegattaHeaderUiBinder extends UiBinder<Widget, EventRegattaList> {
@@ -44,12 +45,11 @@ public class EventRegattaList extends Composite {
     @UiField AnchorElement filterNoLeaderboardGroupsAnchor;
     @UiField SpanElement allBoatClassesSelected;
     
-    private final EventDTO event;
     private final Map<String, List<Regatta>> regattaElementsByLeaderboardGroup;
     
     public EventRegattaList(EventDTO event, Map<String, Triple<RaceGroupDTO, StrippedLeaderboardDTO, LeaderboardGroupDTO>> regattaStructure, 
-            Timer timerForClientServerOffset, EventPageNavigator pageNavigator) {
-        this.event = event;
+            Timer timerForClientServerOffset,  PlaceNavigator placeNavigator, EventPageNavigator pageNavigator) {
+        super(event, pageNavigator);
         
         EventRegattaListResources.INSTANCE.css().ensureInjected();
         initWidget(uiBinder.createAndBindUi(this));
@@ -85,8 +85,8 @@ public class EventRegattaList extends Composite {
             for (StrippedLeaderboardDTO leaderboard : leaderboardGroup.getLeaderboards()) {
                 Triple<RaceGroupDTO, StrippedLeaderboardDTO, LeaderboardGroupDTO> r = regattaStructure.get(leaderboard.name);
                 if (r != null) {
-                    Regatta regatta = new Regatta(event, true, timerForClientServerOffset, pageNavigator);
-                    regatta.setData(r.getC(), r.getB(), r.getA());
+                    Regatta regatta = new Regatta(event, timerForClientServerOffset, false, placeNavigator, pageNavigator);
+                    regatta.setData(r.getC(), hasMultipleLeaderboardGroups, r.getB(), r.getA());
                     regattaListItemsDiv.appendChild(regatta.getElement());
                     List<Regatta> regattaElements = regattaElementsByLeaderboardGroup.get(leaderboardGroup.getName());
                     if (regattaElements == null) {
@@ -117,7 +117,7 @@ public class EventRegattaList extends Composite {
         if (leaderboardGroup != null) {
             allBoatClassesSelected.getStyle().setDisplay(Display.NONE);
             // hide all regattas of the not selected leaderboardgroup
-            for (LeaderboardGroupDTO lg : event.getLeaderboardGroups()) {
+            for (LeaderboardGroupDTO lg : getEvent().getLeaderboardGroups()) {
                 boolean isVisible = leaderboardGroup.getName().equals(lg.getName());
                 List<Regatta> regattaElements = regattaElementsByLeaderboardGroup.get(lg.getName());
                 for (Regatta regatta : regattaElements) {
@@ -127,7 +127,7 @@ public class EventRegattaList extends Composite {
         } else {
             // make all regattas visible
             allBoatClassesSelected.getStyle().setDisplay(Display.INLINE_BLOCK);
-            for (LeaderboardGroupDTO lg : event.getLeaderboardGroups()) {
+            for (LeaderboardGroupDTO lg : getEvent().getLeaderboardGroups()) {
                 List<Regatta> regattaElements = regattaElementsByLeaderboardGroup.get(lg.getName());
                 for (Regatta regatta : regattaElements) {
                     regatta.setVisible(true);

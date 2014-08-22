@@ -191,4 +191,9 @@ public class ComplexStatisticProvider implements StatisticProvider {
     @Override
     public void updateSettings(Object newSettings) { }
 
+    @Override
+    public String getDependentCssClassName() {
+        return "complexStatisticProvider";
+    }
+
 }

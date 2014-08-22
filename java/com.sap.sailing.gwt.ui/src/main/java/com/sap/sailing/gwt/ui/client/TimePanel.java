@@ -11,8 +11,6 @@ import com.google.gwt.event.logical.shared.ValueChangeEvent;
 import com.google.gwt.event.logical.shared.ValueChangeHandler;
 import com.google.gwt.i18n.client.DateTimeFormat;
 import com.google.gwt.resources.client.ImageResource;
-import com.google.gwt.user.client.ui.AbstractImagePrototype;
-import com.google.gwt.user.client.ui.Anchor;
 import com.google.gwt.user.client.ui.Button;
 import com.google.gwt.user.client.ui.FlowPanel;
 import com.google.gwt.user.client.ui.Image;
@@ -21,6 +19,7 @@ import com.google.gwt.user.client.ui.Label;
 import com.google.gwt.user.client.ui.RequiresResize;
 import com.google.gwt.user.client.ui.SimplePanel;
 import com.google.gwt.user.client.ui.Widget;
+import com.sap.sailing.gwt.ui.client.TimePanelCssResources.TimePanelCss;
 import com.sap.sailing.gwt.ui.client.shared.components.Component;
 import com.sap.sailing.gwt.ui.client.shared.components.SettingsDialog;
 import com.sap.sailing.gwt.ui.client.shared.components.SettingsDialogComponent;
@@ -70,6 +69,7 @@ public class TimePanel<T extends TimePanelSettings> extends SimplePanel implemen
     protected Date lastReceivedDataTimepoint;
     private final Button slowDownButton;
     private final Button speedUpButton;
+    private final Button toggleAdvancedModeButton;
 
     private final FlowPanel controlsPanel;
     private final SimplePanel timePanelSlider;
@@ -81,21 +81,10 @@ public class TimePanel<T extends TimePanelSettings> extends SimplePanel implemen
      * the minimum time the slider extends it's time when the end of the slider is reached
      */
     private long MINIMUM_AUTO_ADVANCE_TIME_IN_MS = 5 * 60 * 1000; // 5 minutes
+    private boolean advancedModeShown;
     
     private static ClientResources resources = GWT.create(ClientResources.class);
-
-    private class SettingsClickHandler implements ClickHandler {
-        private final StringMessages stringConstants;
-
-        private SettingsClickHandler(StringMessages stringConstants) {
-            this.stringConstants = stringConstants;
-        }
-
-        @Override
-        public void onClick(ClickEvent event) {
-            new SettingsDialog<T>(TimePanel.this, stringConstants).show();
-        }
-    }
+    protected static TimePanelCss timePanelCss = TimePanelCssResources.INSTANCE.css();
 
     public TimePanel(Timer timer, TimeRangeWithZoomProvider timeRangeProvider, StringMessages stringMessages, boolean canReplayWhileLiveIsPossible) {
         this.timer = timer;
@@ -162,6 +151,9 @@ public class TimePanel<T extends TimePanelSettings> extends SimplePanel implemen
         playControlPanel.setStyleName("timePanel-controls-play");
         controlsPanel.add(playControlPanel);
         
+        toggleAdvancedModeButton = createToggleAdvancedModeButton();
+        playControlPanel.add(toggleAdvancedModeButton);
+        
         playPauseButton.addClickHandler(new ClickHandler() {
             @Override
             public void onClick(ClickEvent event) {
@@ -176,10 +168,10 @@ public class TimePanel<T extends TimePanelSettings> extends SimplePanel implemen
             }
         });
         playPauseButton.setTitle(stringMessages.startStopPlaying());
-        playPauseButton.getElement().addClassName("playPauseButton");
+        playPauseButton.setStyleName("playPauseButton");
         playControlPanel.add(playPauseButton);
 
-        backToLivePlayButton = new Button(stringMessages.playModeLive());
+        backToLivePlayButton = new Button(stringMessages.raceIsInLiveTimePanelMode());
         backToLivePlayButton.addClickHandler(new ClickHandler() {
             @Override
             public void onClick(ClickEvent event) {
@@ -187,7 +179,7 @@ public class TimePanel<T extends TimePanelSettings> extends SimplePanel implemen
                 TimePanel.this.timer.play();
             }
         });
-        backToLivePlayButton.addStyleName("backToLivePlayButton");
+        backToLivePlayButton.setStyleName("backToLivePlayButton");
         backToLivePlayButton.setTitle(stringMessages.backToLive());
         playControlPanel.add(backToLivePlayButton);
 
@@ -224,7 +216,6 @@ public class TimePanel<T extends TimePanelSettings> extends SimplePanel implemen
         FlowPanel playSpeedControlPanel = new FlowPanel();
         playSpeedControlPanel.setStyleName("timePanel-controls-playSpeed");
         
-
         playSpeedBox = new IntegerBox();
         playSpeedBox.setVisibleLength(3);
         playSpeedBox.setWidth("25px");
@@ -252,6 +243,7 @@ public class TimePanel<T extends TimePanelSettings> extends SimplePanel implemen
             }
         });
         slowDownButton.setTitle(stringMessages.slowPlaySpeedDown());
+        slowDownButton.addStyleName("timePanelButton-SlowDown");
         playSpeedControlPanel.add(slowDownButton);
 
         speedUpButton = new Button("+1");
@@ -263,6 +255,7 @@ public class TimePanel<T extends TimePanelSettings> extends SimplePanel implemen
             }
         });
         speedUpButton.setTitle(stringMessages.speedPlaySpeedUp());
+        speedUpButton.addStyleName("timePanelButton-SpeedUp");
         playSpeedControlPanel.add(speedUpButton);
 
         playSpeedImage.getElement().getStyle().setFloat(Style.Float.LEFT);
@@ -283,14 +276,9 @@ public class TimePanel<T extends TimePanelSettings> extends SimplePanel implemen
         
         timeDelayLabel.getElement().getStyle().setFloat(Style.Float.LEFT);
         timeDelayLabel.getElement().getStyle().setPadding(3, Style.Unit.PX);
-        
-        // settings
-        ImageResource settingsIcon = resources.settingsIcon();
-        Anchor settingsAnchor = new Anchor(AbstractImagePrototype.create(settingsIcon).getSafeHtml());
-        settingsAnchor.setTitle(stringMessages.settings());
-        settingsAnchor.setStyleName("timePanelSettings");
-        settingsAnchor.addClickHandler(new SettingsClickHandler(stringMessages));
-        controlsPanel.add(settingsAnchor);
+       
+        timePanelCss.ensureInjected();
+        controlsPanel.add(createSettingsButton());
         setWidget(timePanelInnerWrapper);
         playStateChanged(timer.getPlayState(), timer.getPlayMode());
         
@@ -299,20 +287,43 @@ public class TimePanel<T extends TimePanelSettings> extends SimplePanel implemen
         controlsPanel.add(timeDelayPanel);
         controlsPanel.add(timeControlPanel);
         controlsPanel.add(timeToStartControlPanel);
+        
+        hideControlsPanel();
+    }
+    
+    private Button createSettingsButton() {
+        Button settingsButton = SettingsDialog.<T>createSettingsButton(this, stringMessages);
+        settingsButton.setStyleName(timePanelCss.settingsButtonStyle());
+        settingsButton.addStyleName(timePanelCss.settingsButtonBackgroundImage());
+        return settingsButton;
+    }
+    
+    private Button createToggleAdvancedModeButton() {
+        Button toggleAdvancedModeButton = new Button();
+        toggleAdvancedModeButton.setStyleName("TimePanel-ShowExtended-Button");
+        toggleAdvancedModeButton.addStyleDependentName("Closed");
+        return toggleAdvancedModeButton;
+    }
+    
+    public boolean toggleAdvancedMode() {
+        if (advancedModeShown) {
+            hideControlsPanel();
+        } else {
+            showControlsPanel();
+        }
+        this.advancedModeShown = !advancedModeShown;
+        return this.advancedModeShown;
     }
 
-    public void hideControlsPanelAndMovePlayButtonUp() {
+    protected void hideControlsPanel() {
         controlsPanel.remove(playControlPanel);
         timePanelInnerWrapper.remove(controlsPanel);
         timePanelSliderFlowWrapper.insert(playControlPanel, 0);
         playControlPanel.setStyleName("timePanel-timeslider-play");
     }
 
-    public void showControlsPanelAndMovePlayButtonDown() {
+    protected void showControlsPanel() {
         timePanelInnerWrapper.add(controlsPanel);
-        timePanelSliderFlowWrapper.remove(playControlPanel);
-        controlsPanel.insert(playControlPanel, 0);
-        playControlPanel.setStyleName("timePanel-controls-play");
     }
 
     @Override
@@ -501,6 +512,15 @@ public class TimePanel<T extends TimePanelSettings> extends SimplePanel implemen
      */
     protected void setJumpToLiveEnablement(boolean enabled) {
         backToLivePlayButton.setEnabled(enabled);
+        if (enabled) {
+            backToLivePlayButton.setText(stringMessages.backToLiveTimePanelMode());
+            backToLivePlayButton.removeStyleDependentName("Inactive");
+            backToLivePlayButton.addStyleDependentName("Active");
+        } else {
+            backToLivePlayButton.setText(stringMessages.raceIsInLiveTimePanelMode());
+            backToLivePlayButton.removeStyleDependentName("Active");
+            backToLivePlayButton.addStyleDependentName("Inactive");
+        }
     }
     
     /**
@@ -565,5 +585,14 @@ public class TimePanel<T extends TimePanelSettings> extends SimplePanel implemen
 
     protected boolean canReplayWhileLiveIsPossible() {
         return canReplayWhileLiveIsPossible;
+    }
+    
+    public Button getAdvancedToggleButton() {
+        return this.toggleAdvancedModeButton;
+    }
+
+    @Override
+    public String getDependentCssClassName() {
+        return "timePanel";
     }
 }

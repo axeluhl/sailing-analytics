@@ -23,13 +23,16 @@ public class SimpleBusyIndicator extends BusyIndicator {
      * @param scale Scales the displayed image. 1.0 is 100%, 0.50 is 50%, ...
      */
     public SimpleBusyIndicator(boolean busy, float scale) {
-        this.setStyleName(STYLE_NAME_PREFIX + "Simple");
+        this(busy, scale, STYLE_NAME_PREFIX + "Simple", STYLE_NAME_PREFIX + "Circle");
+    }
+    
+    public SimpleBusyIndicator(boolean busy, float scale, String panelCssClass, String imageCssClass) {
+        this.setStyleName(panelCssClass);
         ImageResource resource = RESOURCES.busyIndicatorCircle();
         busyIndicator = new Image(resource.getSafeUri());
-        busyIndicator.setStyleName(STYLE_NAME_PREFIX + "Circle");
+        busyIndicator.setStyleName(imageCssClass);
         busyIndicator.setPixelSize((int) (resource.getWidth() * scale), (int) (resource.getHeight() * scale));
         add(busyIndicator);
-        
         setBusy(busy);
     }
 
@@ -38,5 +41,4 @@ public class SimpleBusyIndicator extends BusyIndicator {
         super.setBusy(busy);
         busyIndicator.setVisible(busy);
     }
-
 }

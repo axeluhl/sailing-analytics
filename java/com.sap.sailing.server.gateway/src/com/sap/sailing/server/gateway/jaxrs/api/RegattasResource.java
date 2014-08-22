@@ -667,5 +667,85 @@ public class RegattasResource extends AbstractSailingServerResource {
         return response;
     }
 
+    @GET
+    @Produces("application/json;charset=UTF-8")
+    @Path("{regattaname}/races/{racename}/competitors/live")
+    public Response getCompetitorLiveRanks(@PathParam("regattaname") String regattaName, @PathParam("racename") String raceName,
+            @DefaultValue("-1") @QueryParam("topN") Integer topN) {
+        Response response;
+        Regatta regatta = findRegattaByName(regattaName);
+        if (regatta == null) {
+            response = Response.status(Status.NOT_FOUND).entity("Could not find a regatta with name '" + regattaName + "'.").type(MediaType.TEXT_PLAIN).build();
+        } else {
+            RaceDefinition race = findRaceByName(regatta, raceName);
+            if (race == null) {
+                response = Response.status(Status.NOT_FOUND).entity("Could not find a race with name '" + raceName + "'.").type(MediaType.TEXT_PLAIN).build();
+            } else {     
+                TrackedRace trackedRace = findTrackedRace(regattaName, raceName);
+                Course course = trackedRace.getRace().getCourse();
+                TimePoint timePoint = trackedRace.getTimePointOfNewestEvent() == null ? MillisecondsTimePoint.now()
+                        : trackedRace.getTimePointOfNewestEvent();
+                // if(trackedRace.isLive(timePoint)) {
+
+                JSONObject jsonLiveData = new JSONObject();
+                jsonLiveData.put("name", trackedRace.getRace().getName());
+                jsonLiveData.put("regatta", regatta.getName());
+
+                JSONArray jsonCompetitors = new JSONArray();
+                try {
+                    List<Competitor> competitorsFromBestToWorst = trackedRace.getCompetitorsFromBestToWorst(timePoint);
+                    Integer rank = 1;
+                    for (Competitor competitor : competitorsFromBestToWorst) {
+                        JSONObject jsonCompetitorInLeg = new JSONObject();
+                        
+                        if(topN != null && topN > 0 && rank > topN) {
+                            break;
+                        }
+                        TrackedLegOfCompetitor currentLegOfCompetitor = trackedRace.getCurrentLeg(competitor, timePoint);
+                        if (currentLegOfCompetitor != null) {
+                            jsonCompetitorInLeg.put("id", competitor.getId() != null ? competitor.getId().toString() : null);
+                            jsonCompetitorInLeg.put("name", competitor.getName());
+                            jsonCompetitorInLeg.put("sailNumber", competitor.getBoat().getSailID());
+                            jsonCompetitorInLeg.put("color", competitor.getColor() != null ? competitor.getColor().getAsHtml() : null);
+
+                            jsonCompetitorInLeg.put("rank", rank++);
+
+                            int indexOfWaypoint = course.getIndexOfWaypoint(currentLegOfCompetitor.getLeg().getFrom());
+                            jsonCompetitorInLeg.put("leg", indexOfWaypoint);
+
+                            Speed speedOverGround = currentLegOfCompetitor.getSpeedOverGround(timePoint);
+                            if(speedOverGround != null) {
+                                jsonCompetitorInLeg.put("speedOverGround-kts", roundDouble(speedOverGround.getKnots(), 2));
+                            }
+    
+                            Distance distanceTraveled = currentLegOfCompetitor.getDistanceTraveled(timePoint);
+                            if (distanceTraveled != null) {
+                                jsonCompetitorInLeg.put("distanceTraveled-m", roundDouble(distanceTraveled.getMeters(), 2));
+                            }
+                            
+                            Double gapToLeaderInSeconds = currentLegOfCompetitor.getGapToLeaderInSeconds(timePoint, WindPositionMode.LEG_MIDDLE);
+                            if(gapToLeaderInSeconds != null) {
+                                jsonCompetitorInLeg.put("gapToLeader-s", roundDouble(gapToLeaderInSeconds, 2));
+                            }
+                            
+                            Distance windwardDistanceToOverallLeader = currentLegOfCompetitor.getWindwardDistanceToOverallLeader(timePoint, WindPositionMode.LEG_MIDDLE);
+                            if(windwardDistanceToOverallLeader != null) {
+                                jsonCompetitorInLeg.put("gapToLeader-m", roundDouble(windwardDistanceToOverallLeader.getMeters(), 2));
+                            }
+
+                            jsonCompetitors.add(jsonCompetitorInLeg);
+                        }
+                    }
+                } catch (NoWindException e1) {
+                    // well, we don't know the wind direction... then no gap to leader will be shown...
+                }
+                jsonLiveData.put("competitors", jsonCompetitors);
+                
+                String json = jsonLiveData.toJSONString();
+                return Response.ok(json, MediaType.APPLICATION_JSON).build();
+            }
+        }
+        return response;
+    }
 }
  
