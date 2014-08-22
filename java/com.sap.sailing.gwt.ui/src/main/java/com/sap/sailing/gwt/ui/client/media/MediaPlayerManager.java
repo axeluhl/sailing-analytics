@@ -1,0 +1,54 @@
+package com.sap.sailing.gwt.ui.client.media;
+
+import java.util.Collection;
+import java.util.List;
+import java.util.Set;
+
+import com.sap.sailing.domain.common.media.MediaTrack;
+
+interface MediaPlayerManager {
+    
+    interface PlayerChangeListener {
+
+        void notifyStateChange();
+
+    }
+    
+    void setPlayerChangeListener(PlayerChangeListener playerChangeListener);
+    
+    void playAudio(MediaTrack audioTrack);
+
+    void muteAudio();
+    
+    void playFloatingVideo(MediaTrack videoTrack);
+    
+    void closeFloatingVideo(MediaTrack videoTrack);
+    
+    void playDockedVideo(MediaTrack videoTrack);
+    
+    void closeDockedVideo();
+    
+    void addMediaTrack();
+    
+    boolean deleteMediaTrack(MediaTrack mediaTrack);
+    
+    boolean allowsEditing();
+
+    void playDefault();
+
+    void stopAll();
+
+    Boolean isPlaying();
+
+    MediaTrack getPlayingAudioTrack();
+
+    Set<MediaTrack> getPlayingVideoTracks();
+
+    Collection<MediaTrack> getMediaTracks();
+
+    List<MediaTrack> getVideoTracks();
+
+    MediaTrack getDockedVideoTrack();
+    
+}
+

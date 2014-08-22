@@ -96,13 +96,13 @@ public class MediaComponent implements Component<Void>, PlayStateListener, TimeL
 				.addEventListener(
 						'loadedmetadata',
 						function() {
-							that.@com.sap.sailing.gwt.ui.client.media.MediaSelector::loadedmetadata(Lcom/sap/sailing/domain/common/media/MediaTrack;)(mediaTrack);
+							that.@com.sap.sailing.gwt.ui.client.media.MediaComponent::loadedmetadata(Lcom/sap/sailing/domain/common/media/MediaTrack;)(mediaTrack);
 						});
 		mediaElement
 				.addEventListener(
 						'error',
 						function() {
-							that.@com.sap.sailing.gwt.ui.client.media.MediaSelector::mediaError(Lcom/sap/sailing/domain/common/media/MediaTrack;)(mediaTrack);
+							that.@com.sap.sailing.gwt.ui.client.media.MediaComponent::mediaError(Lcom/sap/sailing/domain/common/media/MediaTrack;)(mediaTrack);
 						});
     }-*/;
 

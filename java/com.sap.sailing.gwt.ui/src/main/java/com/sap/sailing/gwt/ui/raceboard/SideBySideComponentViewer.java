@@ -49,7 +49,7 @@ public class SideBySideComponentViewer implements ComponentViewer {
     private int savedSplitPosition = -1;
     private boolean layoutForLeftComponentForcedOnce = false;
     
-    public SideBySideComponentViewer(final LeaderboardPanel leftComponentP, final Component<?> rightComponentP, List<Component<?>> components, final StringMessages stringMessages) {
+    public SideBySideComponentViewer(final LeaderboardPanel leftComponentP, final Component<?> rightComponentP, List<Component<?>> components, final StringMessages stringMessages, Widget... additionalButtons) {
         this.stringMessages = stringMessages;
         this.leftComponent = leftComponentP;
         this.leaderboardContentPanel = leftComponentP.getContentPanel();
@@ -74,6 +74,9 @@ public class SideBySideComponentViewer implements ComponentViewer {
         panelForMapAndHorizontalToggleButtons.add(rightComponent.getEntryWidget());
         
         splitLayoutPanel.insert(panelForMapAndHorizontalToggleButtons, rightComponent, Direction.CENTER, 0, null);
+        for (Widget widget : additionalButtons) {
+            panelForMapAndHorizontalToggleButtons.add(widget);
+        }
         splitLayoutPanel.lastComponentHasBeenAdded(this, panelForMapAndHorizontalToggleButtons);
     }
     

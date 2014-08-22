@@ -6,6 +6,7 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
+import com.github.gwtbootstrap.client.ui.Button;
 import com.google.gwt.dom.client.Style.Unit;
 import com.google.gwt.user.client.Command;
 import com.google.gwt.user.client.ui.FlowPanel;
@@ -34,7 +35,8 @@ import com.sap.sailing.gwt.ui.client.RaceTimesInfoProvider;
 import com.sap.sailing.gwt.ui.client.RegattasDisplayer;
 import com.sap.sailing.gwt.ui.client.SailingServiceAsync;
 import com.sap.sailing.gwt.ui.client.StringMessages;
-import com.sap.sailing.gwt.ui.client.media.MediaComponent;
+import com.sap.sailing.gwt.ui.client.media.MediaPlayerManagerComponent;
+import com.sap.sailing.gwt.ui.client.media.MediaSingleSelectionControl;
 import com.sap.sailing.gwt.ui.client.shared.charts.MultiCompetitorRaceChart;
 import com.sap.sailing.gwt.ui.client.shared.charts.WindChart;
 import com.sap.sailing.gwt.ui.client.shared.charts.WindChartSettings;
@@ -75,47 +77,43 @@ public class RaceBoardPanel extends SimplePanel implements RegattasDisplayer, Ra
     private final ErrorReporter errorReporter;
     private final RaceBoardViewConfiguration raceboardViewConfiguration;
     private String raceBoardName;
-    
+
     /**
      * Updated upon each {@link #fillRegattas(List)}
      */
     private final Map<RaceIdentifier, RaceDTO> racesByIdentifier;
-    
+
     private final List<ComponentViewer> componentViewers;
     private RaceTimePanel timePanel;
     private final Timer timer;
     private final RaceSelectionProvider raceSelectionProvider;
     private final UserAgentDetails userAgent;
     private final CompetitorSelectionModel competitorSelectionModel;
-    private final TimeRangeWithZoomModel timeRangeWithZoomModel; 
+    private final TimeRangeWithZoomModel timeRangeWithZoomModel;
     private final RegattaAndRaceIdentifier selectedRaceIdentifier;
 
     private final LeaderboardPanel leaderboardPanel;
     private WindChart windChart;
     private MultiCompetitorRaceChart competitorChart;
     private Label raceNameLabel;
-    
+
     /**
      * The component viewer in <code>ONESCREEN</code> view mode. <code>null</code> if in <code>CASCADE</code> view mode
      */
     private SideBySideComponentViewer leaderboardAndMapViewer;
 
     private final AsyncActionsExecutor asyncActionsExecutor;
-    
+
     private final RaceTimesInfoProvider raceTimesInfoProvider;
     private RaceMap raceMap;
-    
+
     /**
      * @param event
      *            an optional event that can be used for "back"-navigation in case the race board shows a race in the
      *            context of an event; may be <code>null</code>.
      */
-    public RaceBoardPanel(SailingServiceAsync sailingService, MediaServiceAsync mediaService,
-            AsyncActionsExecutor asyncActionsExecutor, UserDTO theUser, Timer timer,
-            RaceSelectionProvider theRaceSelectionProvider, String leaderboardName, String leaderboardGroupName,
-            EventDTO event, RaceBoardViewConfiguration raceboardViewConfiguration, ErrorReporter errorReporter,
-            final StringMessages stringMessages, UserAgentDetails userAgent,
-            RaceTimesInfoProvider raceTimesInfoProvider, boolean showMapControls) {
+    public RaceBoardPanel(SailingServiceAsync sailingService, MediaServiceAsync mediaService, AsyncActionsExecutor asyncActionsExecutor, UserDTO theUser, Timer timer, RaceSelectionProvider theRaceSelectionProvider, String leaderboardName, String leaderboardGroupName, EventDTO event, RaceBoardViewConfiguration raceboardViewConfiguration, ErrorReporter errorReporter, final StringMessages stringMessages, UserAgentDetails userAgent, RaceTimesInfoProvider raceTimesInfoProvider,
+            boolean showMapControls) {
         this.sailingService = sailingService;
         this.mediaService = mediaService;
         this.user = theUser;
@@ -137,17 +135,15 @@ public class RaceBoardPanel extends SimplePanel implements RegattasDisplayer, Ra
         setWidget(mainPanel);
         timeRangeWithZoomModel = new TimeRangeWithZoomModel();
         componentViewers = new ArrayList<ComponentViewer>();
-        competitorSelectionModel = new CompetitorSelectionModel(/* hasMultiSelection */ true);
-                
-        raceMap = new RaceMap(sailingService, asyncActionsExecutor, errorReporter, timer,
-                competitorSelectionModel, stringMessages, showMapControls, getConfiguration().isShowViewStreamlets(), selectedRaceIdentifier);
-        CompetitorFilterPanel competitorSearchTextBox = new CompetitorFilterPanel(competitorSelectionModel, stringMessages, raceMap,
-                new LeaderboardFetcher() {
-                    @Override
-                    public LeaderboardDTO getLeaderboard() {
-                        return leaderboardPanel.getLeaderboard();
-                    }
-                }, selectedRaceIdentifier);
+        competitorSelectionModel = new CompetitorSelectionModel(/* hasMultiSelection */true);
+
+        raceMap = new RaceMap(sailingService, asyncActionsExecutor, errorReporter, timer, competitorSelectionModel, stringMessages, showMapControls, getConfiguration().isShowViewStreamlets(), selectedRaceIdentifier);
+        CompetitorFilterPanel competitorSearchTextBox = new CompetitorFilterPanel(competitorSelectionModel, stringMessages, raceMap, new LeaderboardFetcher() {
+            @Override
+            public LeaderboardDTO getLeaderboard() {
+                return leaderboardPanel.getLeaderboard();
+            }
+        }, selectedRaceIdentifier);
         leaderboardPanel = createLeaderboardPanel(leaderboardName, leaderboardGroupName, competitorSearchTextBox);
         createOneScreenView(leaderboardName, leaderboardGroupName, event, mainPanel, showMapControls, raceMap); // initializes the raceMap field
         // these calls make sure that leaderboard and competitor map data are loaded
@@ -157,8 +153,7 @@ public class RaceBoardPanel extends SimplePanel implements RegattasDisplayer, Ra
         // in case the URL configuration contains the name of a competitors filter set we try to activate it
         // FIXME the competitorsFilterSets has now moved to CompetitorSearchTextBox (which should probably be renamed); pass on the parameters to the LeaderboardPanel and see what it does with it
         if (raceboardViewConfiguration.getActiveCompetitorsFilterSetName() != null) {
-            for (FilterSet<CompetitorDTO, FilterWithUI<CompetitorDTO>> filterSet : competitorSearchTextBox.getCompetitorsFilterSets()
-                    .getFilterSets()) {
+            for (FilterSet<CompetitorDTO, FilterWithUI<CompetitorDTO>> filterSet : competitorSearchTextBox.getCompetitorsFilterSets().getFilterSets()) {
                 if (filterSet.getName().equals(raceboardViewConfiguration.getActiveCompetitorsFilterSetName())) {
                     competitorSearchTextBox.getCompetitorsFilterSets().setActiveFilterSet(filterSet);
                     break;
@@ -171,39 +166,46 @@ public class RaceBoardPanel extends SimplePanel implements RegattasDisplayer, Ra
         updateCompetitorsFilterContexts(competitorsFilterSets);
         updateCompetitorsFilterControlState(competitorsFilterSets);*/
 
-        timePanel = new RaceTimePanel(timer, timeRangeWithZoomModel, stringMessages, raceTimesInfoProvider,
-                raceboardViewConfiguration.isCanReplayDuringLiveRaces());
+        timePanel = new RaceTimePanel(timer, timeRangeWithZoomModel, stringMessages, raceTimesInfoProvider, raceboardViewConfiguration.isCanReplayDuringLiveRaces());
         timeRangeWithZoomModel.addTimeZoomChangeListener(timePanel);
         raceTimesInfoProvider.addRaceTimesInfoProviderListener(timePanel);
         raceSelectionProvider.addRaceSelectionChangeListener(timePanel);
         timePanel.onRaceSelectionChange(raceSelectionProvider.getSelectedRaces());
     }
-    
+
     /**
      * @param event an optional event; may be <code>null</code> or else can be used to show some context information in
      * the {@link GlobalNavigationPanel}.
      */
-    private void createOneScreenView(String leaderboardName, String leaderboardGroupName, EventDTO event, FlowPanel mainPanel,
-            boolean showMapControls, RaceMap raceMap) {
+    private void createOneScreenView(String leaderboardName, String leaderboardGroupName, EventDTO event, FlowPanel mainPanel, boolean showMapControls, RaceMap raceMap) {
         // create the default leaderboard and select the right race
         raceTimesInfoProvider.addRaceTimesInfoProviderListener(raceMap);
         raceMap.onRaceSelectionChange(Collections.singletonList(selectedRaceIdentifier));
         List<Component<?>> components = new ArrayList<Component<?>>();
-        competitorChart = new MultiCompetitorRaceChart(sailingService, asyncActionsExecutor, competitorSelectionModel, raceSelectionProvider,
-                    timer, timeRangeWithZoomModel, stringMessages, errorReporter, true, true, leaderboardGroupName, leaderboardName);
+        competitorChart = new MultiCompetitorRaceChart(sailingService, asyncActionsExecutor, competitorSelectionModel, raceSelectionProvider, timer, timeRangeWithZoomModel, stringMessages, errorReporter, true, true, leaderboardGroupName, leaderboardName);
         competitorChart.onRaceSelectionChange(raceSelectionProvider.getSelectedRaces());
         competitorChart.getEntryWidget().setTitle(stringMessages.competitorCharts());
         competitorChart.setVisible(false);
         components.add(competitorChart);
-        windChart = new WindChart(sailingService, raceSelectionProvider, timer, timeRangeWithZoomModel, new WindChartSettings(),
-                stringMessages, asyncActionsExecutor, errorReporter, /* compactChart */ true);
+        windChart = new WindChart(sailingService, raceSelectionProvider, timer, timeRangeWithZoomModel, new WindChartSettings(), stringMessages, asyncActionsExecutor, errorReporter, /* compactChart */true);
         windChart.setVisible(false);
         windChart.onRaceSelectionChange(raceSelectionProvider.getSelectedRaces());
-        MediaComponent mediaComponent = createMediaComponent();
-        components.add(mediaComponent);
+        MediaPlayerManagerComponent mediaPlayerManagerComponent = createMediaPlayerManagerComponent();
+        components.add(mediaPlayerManagerComponent);
         components.add(windChart);
         leaderboardPanel.setTitle(stringMessages.leaderboard());
-        leaderboardAndMapViewer = new SideBySideComponentViewer(leaderboardPanel, raceMap, components, stringMessages);
+
+        Button button = new Button("Test");
+
+        leaderboardAndMapViewer = new SideBySideComponentViewer(leaderboardPanel, raceMap, components, stringMessages, button);
+
+        //--debug 
+
+        //        MediaSingleSelectionControl mediaSingleSelectionControl = new MediaSingleSelectionControl(mediaPlayerManagerComponent, userAgent.getType());
+        //        Button button = new Button("Test");  
+        //        leaderboardAndMapViewer.getViewerWidget().add(button);
+        //debug-- 
+
         componentViewers.add(leaderboardAndMapViewer);
         for (ComponentViewer componentViewer : componentViewers) {
             mainPanel.add(componentViewer.getViewerWidget());
@@ -218,16 +220,13 @@ public class RaceBoardPanel extends SimplePanel implements RegattasDisplayer, Ra
             leaderboardPanel.setVisible(false);
         }
     }
-    
-    private MediaComponent createMediaComponent() {
-        boolean autoSelectMedia = true;//getConfiguration().isAutoSelectMedia();
-        MediaComponent mediaComponent = new MediaComponent(selectedRaceIdentifier, raceTimesInfoProvider, timer, mediaService, stringMessages, errorReporter, userAgent, this.user, autoSelectMedia);
-        timer.addPlayStateListener(mediaComponent);
-        timer.addTimeListener(mediaComponent);
-        mediaService.getMediaTracksForRace(selectedRaceIdentifier, mediaComponent.getMediaLibraryCallback());
-        return mediaComponent;
+
+    private MediaPlayerManagerComponent createMediaPlayerManagerComponent() {
+        boolean autoSelectMedia = getConfiguration().isAutoSelectMedia();
+        MediaPlayerManagerComponent mediaPlayerManagerComponent = new MediaPlayerManagerComponent(selectedRaceIdentifier, raceTimesInfoProvider, timer, mediaService, stringMessages, errorReporter, userAgent, this.user, autoSelectMedia);
+        return mediaPlayerManagerComponent;
     }
-    
+
     /**
      * @param event an optional event; may be <code>null</code>.
      */
@@ -241,36 +240,32 @@ public class RaceBoardPanel extends SimplePanel implements RegattasDisplayer, Ra
         titlePanel.add(globalNavigationPanel);
         raceMap.add(titlePanel);
     }
- 
+
     @SuppressWarnings("unused")
     private <SettingsType> void addSettingsMenuItem(MenuBar settingsMenu, final Component<SettingsType> component) {
         if (component.hasSettings()) {
             settingsMenu.addItem(component.getLocalizedShortName(), new Command() {
                 public void execute() {
                     new SettingsDialog<SettingsType>(component, stringMessages).show();
-                  }
+                }
             });
         }
     }
-    
+
     private LeaderboardPanel createLeaderboardPanel(String leaderboardName, String leaderboardGroupName, CompetitorFilterPanel competitorSearchTextBox) {
-        LeaderboardSettings leaderBoardSettings = LeaderboardSettingsFactory.getInstance()
-                .createNewSettingsForPlayMode(timer.getPlayMode(),
-                        /* nameOfRaceToSort */ selectedRaceIdentifier.getRaceName(),
-                        /* nameOfRaceColumnToShow */ null, /* nameOfRaceToShow */ selectedRaceIdentifier.getRaceName(),
-                        new ExplicitRaceColumnSelectionWithPreselectedRace(selectedRaceIdentifier), /* showRegattaRank */ false);
-        return new LeaderboardPanel(sailingService, asyncActionsExecutor, leaderBoardSettings, selectedRaceIdentifier,
-                competitorSelectionModel, timer, leaderboardGroupName, leaderboardName, errorReporter, stringMessages,
-                userAgent, /* showRaceDetails */ true, competitorSearchTextBox,
-                /* showSelectionCheckbox */ true, raceTimesInfoProvider, /* autoExpandLastRaceColumn */ false,
-                /* don't adjust the timer's delay from the leaderboard; control it solely from the RaceTimesInfoProvider */ false);
+        LeaderboardSettings leaderBoardSettings = LeaderboardSettingsFactory.getInstance().createNewSettingsForPlayMode(timer.getPlayMode(),
+        /* nameOfRaceToSort */selectedRaceIdentifier.getRaceName(),
+        /* nameOfRaceColumnToShow */null, /* nameOfRaceToShow */selectedRaceIdentifier.getRaceName(), new ExplicitRaceColumnSelectionWithPreselectedRace(selectedRaceIdentifier), /* showRegattaRank */false);
+        return new LeaderboardPanel(sailingService, asyncActionsExecutor, leaderBoardSettings, selectedRaceIdentifier, competitorSelectionModel, timer, leaderboardGroupName, leaderboardName, errorReporter, stringMessages, userAgent, /* showRaceDetails */true, competitorSearchTextBox,
+        /* showSelectionCheckbox */true, raceTimesInfoProvider, /* autoExpandLastRaceColumn */false,
+        /* don't adjust the timer's delay from the leaderboard; control it solely from the RaceTimesInfoProvider */false);
     }
 
     private void setComponentVisible(ComponentViewer componentViewer, Component<?> component, boolean visible) {
-        component.setVisible(visible);      
+        component.setVisible(visible);
         componentViewer.forceLayout();
     }
-    
+
     /**
      * Sets the collapsable panel for the leaderboard open or close, if in <code>CASCADE</code> view mode.<br />
      * Displays or hides the leaderboard, if in <code>ONESCREEN</code> view mode.<br /><br />
@@ -306,9 +301,9 @@ public class RaceBoardPanel extends SimplePanel implements RegattasDisplayer, Ra
     public void setCompetitorChartVisible(boolean visible) {
         setComponentVisible(leaderboardAndMapViewer, competitorChart, visible);
     }
-    
+
     public RaceTimePanel getTimePanel() {
-        return timePanel; 
+        return timePanel;
     }
 
     protected SailingServiceAsync getSailingService() {
@@ -326,7 +321,7 @@ public class RaceBoardPanel extends SimplePanel implements RegattasDisplayer, Ra
     protected ErrorReporter getErrorReporter() {
         return errorReporter;
     }
-    
+
     @Override
     public void fillRegattas(List<RegattaDTO> regattas) {
         racesByIdentifier.clear();
@@ -361,7 +356,7 @@ public class RaceBoardPanel extends SimplePanel implements RegattasDisplayer, Ra
         } else {
             seriesName += " - ";
         }
-        String fleetForRaceName = fleet==null?"":fleet.getName();
+        String fleetForRaceName = fleet == null ? "" : fleet.getName();
         if (fleetForRaceName.equals(LeaderboardNameConstants.DEFAULT_FLEET_NAME)) {
             fleetForRaceName = "";
         } else {
@@ -370,4 +365,3 @@ public class RaceBoardPanel extends SimplePanel implements RegattasDisplayer, Ra
         raceNameLabel.setText(seriesName + fleetForRaceName + raceColumn.getRaceColumnName());
     }
 }
-
