@@ -1,5 +1,8 @@
 package com.sap.sailing.server.gateway.jaxrs;
 
+import java.math.BigDecimal;
+import java.math.RoundingMode;
+
 import javax.servlet.ServletContext;
 import javax.ws.rs.core.Context;
 
@@ -62,5 +65,11 @@ public abstract class AbstractSailingServerResource {
             }
         }
         return trackedRace;
+    }
+    
+    protected static Double roundDouble(Double value, int places) {
+        BigDecimal bigDecimal = new BigDecimal(value);
+        bigDecimal = bigDecimal.setScale(places, RoundingMode.HALF_UP);
+        return bigDecimal.doubleValue();
     }
 }
