@@ -226,5 +226,10 @@ public class MultiDimensionalGroupingProvider implements GroupingProvider, Stati
 
     @Override
     public void updateSettings(Object newSettings) { }
+    
+    @Override
+    public String getDependentCssClassName() {
+        return "multiDimensionalGroupingProvider";
+    }
 
 }

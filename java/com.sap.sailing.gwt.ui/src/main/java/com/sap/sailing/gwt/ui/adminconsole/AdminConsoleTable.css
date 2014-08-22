@@ -131,3 +131,32 @@
 .cellTableTotalColumn {
 	background-color: #e0e0e0 !important;
 }
+
+.cellTableCheckboxColumnCell {
+	padding: 1px 1px 1px !important;
+	vertical-align: middle !important;
+	text-align: center;
+}
+
+.cellTableCheckboxSelected {
+	margin-left: 0px; /* account for the selection border that pushes a selected checkbox to the side */
+	margin-top: 0px;
+	margin-bottom: 0px;
+	margin-right: 2px;
+	height: 18px;
+	width: 18px;
+	border: solid 1px #acacac;
+	background-color: #cacaca;
+	vertical-align: middle;
+}
+
+.cellTableCheckboxDeselected {
+	margin-left: 2px; /* account for the selection border that pushes a selected checkbox to the side */
+	margin-top: 0px;
+	margin-bottom: 0px;
+	margin-right: 2px;
+	border: solid 1px #acacac;
+	height: 18px;
+	width: 18px;
+	vertical-align: middle;
+}

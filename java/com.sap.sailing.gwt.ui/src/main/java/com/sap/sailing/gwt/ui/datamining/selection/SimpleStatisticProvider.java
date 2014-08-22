@@ -189,5 +189,10 @@ public class SimpleStatisticProvider implements StatisticProvider {
 
     @Override
     public void updateSettings(Object newSettings) { }
+    
+    @Override
+    public String getDependentCssClassName() {
+        return "simpleStatisticsProvider";
+    }
 
 }

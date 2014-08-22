@@ -1,0 +1,39 @@
+.busyIndicatorStyle {
+	display: table-cell;
+	vertical-align: middle;
+	text-align: center;
+}
+
+.busyIndicatorImageStyle {
+	
+}
+
+.settingsButtonStyle {
+	position: absolute;
+	right: 0px;
+	z-index: 1;
+	margin-top: 14px;
+	margin-right: 4px;
+	border: none;
+}
+
+.settingsButtonStyle:focus {
+	outline: 0 !important;
+}
+
+.settingsButtonStyle:hover {
+	border: 1px solid #ececec;
+}
+
+.chartStyle {
+	position: absolute;
+	left: 0px;
+	top: 0px;
+}
+
+@sprite .settingsButtonBackgroundImage {
+	gwt-image: "settingsButton";
+	width: 2em;
+	height: 2em;
+	background-size: contain;
+}

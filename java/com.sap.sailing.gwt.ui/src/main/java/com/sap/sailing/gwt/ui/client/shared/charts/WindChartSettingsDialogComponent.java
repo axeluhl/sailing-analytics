@@ -150,7 +150,7 @@ public class WindChartSettingsDialogComponent implements SettingsDialogComponent
 
     @Override
     public FocusWidget getFocusWidget() {
-        return resolutionInSecondsBox;
+        return windDirectionsCheckboxes.values().iterator().next();
     }
 
 }

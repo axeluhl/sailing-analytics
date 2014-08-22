@@ -19,11 +19,12 @@ Like businesses, sailors need the latest information to make strategic decisions
   * [[Monitoring Apache and RabbitMQ|wiki/monitoring-apache-and-rabbitmq]]
   * [[JMX Support|wiki/jmx]]
 * Information for Developers
-  * [[Cook Book|wiki/cook-book]]
   * [[OnBoarding Information|wiki/onboarding]]
+  * [[Cook Book|wiki/cook-book]]
   * [[Building and Deploying|wiki/building-and-deploying]]
   * [[Continuous Integration with Hudson/Jenkins|wiki/ci]]
   * [[UI Tests with Selenium|wiki/selenium-ui-tests]]
+  * [[Profiling|wiki/profiling]]
   * [[Typical Development Scenarios|wiki/typical-development-scenarios]]
   * [[Load Tests|wiki/server-load-tests]]
   * [[Server Replication|wiki/server-replication]]

@@ -10,6 +10,7 @@ import com.google.gwt.activity.shared.AbstractActivity;
 import com.google.gwt.event.shared.EventBus;
 import com.google.gwt.user.client.rpc.AsyncCallback;
 import com.google.gwt.user.client.ui.AcceptsOneWidget;
+import com.sap.sailing.gwt.home.client.shared.placeholder.Placeholder;
 import com.sap.sailing.gwt.home.client.shared.stage.StageEventType;
 import com.sap.sailing.gwt.ui.shared.EventBaseDTO;
 import com.sap.sse.common.Util.Pair;
@@ -22,13 +23,15 @@ public class StartActivity extends AbstractActivity {
     }
 
     @Override
-    public void start(AcceptsOneWidget panel, EventBus eventBus) {
-        final StartView view = clientFactory.createStartView();
-        panel.setWidget(view.asWidget());
+    public void start(final AcceptsOneWidget panel, EventBus eventBus) {
+        panel.setWidget(new Placeholder());
         
         clientFactory.getSailingService().getPublicEventsOfAllSailingServers(new AsyncCallback<List<EventBaseDTO>>() {
             @Override
             public void onSuccess(List<EventBaseDTO> result) {
+                final StartView view = clientFactory.createStartView();
+                panel.setWidget(view.asWidget());
+
                 fillStartPageEvents(view, result);
             }
             
@@ -47,7 +50,7 @@ public class StartActivity extends AbstractActivity {
         List<EventBaseDTO> popularEvents = new ArrayList<EventBaseDTO>();
         Date now = new Date();
         int currentYear = now.getYear();
-        final int MAX_STAGE_EVENTS = 2;
+        final int MAX_STAGE_EVENTS = 4;
         final long FOUR_WEEK_IN_MS = 4L * (1000 * 60 * 60 * 24 * 7);
         
         for(EventBaseDTO event: events) {

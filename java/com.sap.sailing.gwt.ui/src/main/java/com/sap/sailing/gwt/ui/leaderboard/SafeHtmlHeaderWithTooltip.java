@@ -17,8 +17,6 @@ public class SafeHtmlHeaderWithTooltip extends SafeHtmlHeader {
     /**
      * Creates a new html header with the given title and tooltip.<br>
      * Use '\n', if you want a line break in the tooltip.
-     * @param title
-     * @param tooltip
      */
     public SafeHtmlHeaderWithTooltip(SafeHtml title, String tooltip) {
         super(buildHeader(title, tooltip));

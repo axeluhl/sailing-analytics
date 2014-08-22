@@ -31,7 +31,7 @@ public class PathGeneratorTreeGrowWind extends PathGeneratorBase {
     private static Logger logger = Logger.getLogger("com.sap.sailing");
     private boolean debugMsgOn = false;
 
-    double oobFact = 0.75; // out-of-bounds factor
+    double oobFact = 2.0; // out-of-bounds factor
     int maxTurns = 0;
     boolean upwindLeg = false;
     String initPathStr = "0";
@@ -560,7 +560,6 @@ public class PathGeneratorTreeGrowWind extends PathGeneratorBase {
             System.out.println("Horizontal Bin Size: "+hrzBinSize);
         }
 
-        //double oobFact = 0.75; // out-of-bounds factor
         boolean reachedEnd = false;
         int addSteps = 0;
         int finalSteps = 0; // maximum number of additional steps after first target-path found
@@ -609,7 +608,7 @@ public class PathGeneratorTreeGrowWind extends PathGeneratorBase {
                     if (curPath.reached) {
                         //logger.info("\ntPath: " + curPath.path + "\n      Time: " + (Math.round((curPath.pos.getTimePoint().asMillis()-startTime.asMillis())/1000.0/60.0*10.0)/10.0)+", Height: "+curPath.vrt+" of "+(Math.round(startPos.getDistance(endPos).getMeters()*100.0)/100.0)+", Dist: "+curPath.hrz+"m ~ "+(Math.round(curPath.pos.getPosition().getDistance(endPos).getMeters()*100.0)/100.0)+"m");
                         int curBin = (int)Math.round(Math.floor( (curPath.hrz + hrzBinSize/2.0) / hrzBinSize ));
-                        if ((Math.abs(curBin) <= 2)) {
+                        if ((Math.abs(curBin) <= 4)) {
                             reachedEnd = true;
                             trgPaths.add(curPath); // add path to list of target-paths
                         }
