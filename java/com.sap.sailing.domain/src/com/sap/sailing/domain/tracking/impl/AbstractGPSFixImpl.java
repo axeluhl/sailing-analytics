@@ -48,14 +48,21 @@ public abstract class AbstractGPSFixImpl implements GPSFix {
         Speed speed = distance.inTime(to.getTimePoint().asMillis()-getTimePoint().asMillis());
         return new KnotSpeedWithBearingImpl(speed.getKnots(), bearing);
     }
-    
+
+    /**
+     * Subclasses overriding this method also need to override {@link #isValid} with a useful implementation.
+     */
     @Override
     public boolean isValidityCached() {
         return false;
     }
     
+    /**
+     * Only evaluated if {@link #isValidityCached()} returns <code>true</code>. Therefore, subclassess that
+     * override {@link #isValidityCached()} also need to override this method accordingly.
+     */
     @Override
-    public boolean isValid() {
+    public boolean isValidCached() {
         return false;
     }
     
@@ -65,5 +72,30 @@ public abstract class AbstractGPSFixImpl implements GPSFix {
     
     @Override
     public void cacheValidity(boolean isValid) {
+    }
+
+    /**
+     * Subclasses overriding this method also need to override {@link #getCachedEstimatedSpeed()} with a useful implementation.
+     */
+    @Override
+    public boolean isEstimatedSpeedCached() {
+        return false;
+    }
+
+    /**
+     * Only evaluated if {@link #isEstimatedSpeedCached()} returns <code>true</code>. Therefore, subclassess that
+     * override {@link #isEstimatedSpeedCached()} also need to override this method accordingly.
+     */
+    @Override
+    public SpeedWithBearing getCachedEstimatedSpeed() {
+        return null;
+    }
+
+    @Override
+    public void invalidateEstimatedSpeedCache() {
+    }
+
+    @Override
+    public void cacheEstimatedSpeed(SpeedWithBearing estimatedSpeed) {
     }
 }

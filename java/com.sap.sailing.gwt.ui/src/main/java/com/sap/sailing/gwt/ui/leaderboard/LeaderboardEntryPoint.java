@@ -4,6 +4,7 @@ import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
 import java.util.Map;
+import java.util.UUID;
 import java.util.logging.Logger;
 
 import com.google.gwt.core.client.GWT;
@@ -30,6 +31,7 @@ import com.sap.sailing.gwt.ui.client.SailingService;
 import com.sap.sailing.gwt.ui.client.SailingServiceAsync;
 import com.sap.sailing.gwt.ui.client.StringMessages;
 import com.sap.sailing.gwt.ui.leaderboard.LeaderboardSettings.RaceColumnSelectionStrategies;
+import com.sap.sailing.gwt.ui.shared.EventDTO;
 import com.sap.sse.common.Util;
 import com.sap.sse.gwt.client.EntryPointHelper;
 import com.sap.sse.gwt.client.async.AsyncActionsExecutor;
@@ -48,6 +50,7 @@ public class LeaderboardEntryPoint extends AbstractEntryPoint {
     private String leaderboardGroupName;
     private LeaderboardType leaderboardType;
     private GlobalNavigationPanel globalNavigationPanel;
+    private EventDTO event;
     
     private final SailingServiceAsync sailingService = GWT.create(SailingService.class);
 
@@ -60,29 +63,56 @@ public class LeaderboardEntryPoint extends AbstractEntryPoint {
         final boolean showRaceDetails = GwtHttpRequestUtils.getBooleanParameter(LeaderboardUrlSettings.PARAM_SHOW_RACE_DETAILS, false /* default*/);
         final boolean embedded = GwtHttpRequestUtils.getBooleanParameter(LeaderboardUrlSettings.PARAM_EMBEDDED, false /* default*/); 
         final boolean hideToolbar = GwtHttpRequestUtils.getBooleanParameter(LeaderboardUrlSettings.PARAM_HIDE_TOOLBAR, false /* default*/); 
+        final String eventIdAsString = GwtHttpRequestUtils.getStringParameter(LeaderboardUrlSettings.PARAM_EVENT_ID, null /* default*/);
+        final UUID eventId = eventIdAsString == null ? null : UUID.fromString(eventIdAsString);
 
         leaderboardName = Window.Location.getParameter("name");
         leaderboardGroupName = Window.Location.getParameter(LeaderboardUrlSettings.PARAM_LEADERBOARD_GROUP_NAME);
 
         if (leaderboardName != null) {
-            sailingService.checkLeaderboardName(leaderboardName, new MarkedAsyncCallback<Util.Pair<String, LeaderboardType>>(
-                    new AsyncCallback<Util.Pair<String, LeaderboardType>>() {
-                        @Override
-                        public void onSuccess(Util.Pair<String, LeaderboardType> leaderboardNameAndType) {
-                            if (leaderboardNameAndType != null && leaderboardName.equals(leaderboardNameAndType.getA())) {
-                                Window.setTitle(leaderboardName);
-                                leaderboardType = leaderboardNameAndType.getB();
-                                createUI(showRaceDetails, embedded, hideToolbar);
-                            } else {
-                                RootPanel.get().add(new Label(stringMessages.noSuchLeaderboard()));
+            final Runnable checkLeaderboardNameAndCreateUI = new Runnable() {
+                @Override
+                public void run() {
+                    sailingService.checkLeaderboardName(leaderboardName,
+                            new MarkedAsyncCallback<Util.Pair<String, LeaderboardType>>(
+                                    new AsyncCallback<Util.Pair<String, LeaderboardType>>() {
+                                        @Override
+                                        public void onSuccess(Util.Pair<String, LeaderboardType> leaderboardNameAndType) {
+                                            if (leaderboardNameAndType != null
+                                                    && leaderboardName.equals(leaderboardNameAndType.getA())) {
+                                                Window.setTitle(leaderboardName);
+                                                leaderboardType = leaderboardNameAndType.getB();
+                                                createUI(showRaceDetails, embedded, hideToolbar, event);
+                                            } else {
+                                                RootPanel.get().add(new Label(stringMessages.noSuchLeaderboard()));
+                                            }
+                                        }
+
+                                        @Override
+                                        public void onFailure(Throwable t) {
+                                            reportError("Error trying to obtain list of leaderboard names: "
+                                                    + t.getMessage());
+                                        }
+                                    }));
+                }
+            };
+            if (eventId == null) {
+                checkLeaderboardNameAndCreateUI.run(); // use null-initialized event field
+            } else {
+                sailingService.getEventById(eventId, /* withStatisticalData */false, new MarkedAsyncCallback<EventDTO>(
+                        new AsyncCallback<EventDTO>() {
+                            @Override
+                            public void onFailure(Throwable caught) {
+                                reportError("Error trying to obtain event "+eventId+": " + caught.getMessage());
                             }
-                        }
-        
-                        @Override
-                        public void onFailure(Throwable t) {
-                            reportError("Error trying to obtain list of leaderboard names: " + t.getMessage());
-                        }
-                    }));
+
+                            @Override
+                            public void onSuccess(EventDTO result) {
+                                event = result;
+                                checkLeaderboardNameAndCreateUI.run();
+                            }
+                        }));
+            }
         } else {
             RootPanel.get().add(new Label(stringMessages.noSuchLeaderboard()));
         }
@@ -92,7 +122,7 @@ public class LeaderboardEntryPoint extends AbstractEntryPoint {
         }
     }
     
-    private void createUI(boolean showRaceDetails, boolean embedded, boolean hideToolbar) {
+    private void createUI(boolean showRaceDetails, boolean embedded, boolean hideToolbar, EventDTO event) {
         DockLayoutPanel mainPanel = new DockLayoutPanel(Unit.PX);
         RootLayoutPanel.get().add(mainPanel);
         LogoAndTitlePanel logoAndTitlePanel = null;
@@ -102,7 +132,7 @@ public class LeaderboardEntryPoint extends AbstractEntryPoint {
             if (leaderboardDisplayName == null || leaderboardDisplayName.isEmpty()) {
                 leaderboardDisplayName = leaderboardName;
             }
-            globalNavigationPanel = new GlobalNavigationPanel(stringMessages, true, null, leaderboardGroupName);
+            globalNavigationPanel = new GlobalNavigationPanel(stringMessages, true, null, leaderboardGroupName, event, null);
             logoAndTitlePanel = new LogoAndTitlePanel(leaderboardGroupName, leaderboardDisplayName, stringMessages, this) {
                 @Override
                 public void onResize() {
@@ -212,7 +242,7 @@ public class LeaderboardEntryPoint extends AbstractEntryPoint {
                                     raceColumnSelectionStrategy, showAddedScores, showOverallColumnWithNumberOfRacesSailedPerCompetitor);
 
         } else {
-            final List<DetailType> overallDetails = Collections.emptyList();
+            final List<DetailType> overallDetails = Collections.singletonList(DetailType.REGATTA_RANK);
             result = LeaderboardSettingsFactory.getInstance().createNewDefaultSettings(null, null,
                     /* overallDetails */ overallDetails, null,
                     /* autoExpandFirstRace */false, refreshIntervalMillis, numberOfLastRacesToShow,

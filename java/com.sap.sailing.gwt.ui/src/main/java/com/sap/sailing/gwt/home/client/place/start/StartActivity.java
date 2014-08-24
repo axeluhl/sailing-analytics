@@ -50,7 +50,7 @@ public class StartActivity extends AbstractActivity {
         List<EventBaseDTO> popularEvents = new ArrayList<EventBaseDTO>();
         Date now = new Date();
         int currentYear = now.getYear();
-        final int MAX_STAGE_EVENTS = 2;
+        final int MAX_STAGE_EVENTS = 4;
         final long FOUR_WEEK_IN_MS = 4L * (1000 * 60 * 60 * 24 * 7);
         
         for(EventBaseDTO event: events) {

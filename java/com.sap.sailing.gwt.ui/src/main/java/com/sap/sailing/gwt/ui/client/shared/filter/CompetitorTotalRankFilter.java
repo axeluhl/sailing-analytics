@@ -47,7 +47,7 @@ public class CompetitorTotalRankFilter extends AbstractNumberFilter<CompetitorDT
 
     @Override
     public String getLocalizedDescription(StringMessages stringMessages) {
-        return stringMessages.totalRegattaRank();
+        return "Top "  + this.getValue() + " " + stringMessages.totalRegattaRank();
     }
 
     @Override
