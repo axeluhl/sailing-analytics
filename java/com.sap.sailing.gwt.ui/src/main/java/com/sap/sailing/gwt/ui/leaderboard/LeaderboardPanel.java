@@ -89,6 +89,7 @@ import com.sap.sailing.gwt.ui.client.shared.components.SettingsDialogComponent;
 import com.sap.sailing.gwt.ui.client.shared.filter.LeaderboardFetcher;
 import com.sap.sailing.gwt.ui.leaderboard.DetailTypeColumn.LegDetailField;
 import com.sap.sailing.gwt.ui.leaderboard.LeaderboardSettings.RaceColumnSelectionStrategies;
+import com.sap.sailing.gwt.ui.shared.RaceLogDTO;
 import com.sap.sailing.gwt.ui.shared.RaceTimesInfoDTO;
 import com.sap.sse.common.Util;
 import com.sap.sse.gwt.client.async.AsyncActionsExecutor;
@@ -1515,7 +1516,7 @@ public class LeaderboardPanel extends SimplePanel implements TimeListener, PlayS
     public LeaderboardPanel(SailingServiceAsync sailingService, AsyncActionsExecutor asyncActionsExecutor,
             LeaderboardSettings settings, RegattaAndRaceIdentifier preSelectedRace,
             CompetitorSelectionProvider competitorSelectionProvider, Timer timer, String leaderboardGroupName,
-            String leaderboardName, ErrorReporter errorReporter, final StringMessages stringMessages,
+            String leaderboardName, final ErrorReporter errorReporter, final StringMessages stringMessages,
             final UserAgentDetails userAgent, boolean showRaceDetails,
             RaceTimesInfoProvider optionalRaceTimesInfoProvider, boolean autoExpandLastRaceColumn, boolean adjustTimerDelay) {
         this.showRaceDetails = showRaceDetails;
@@ -1631,6 +1632,25 @@ public class LeaderboardPanel extends SimplePanel implements TimeListener, PlayS
         // the mark passings panel
         Button editMarkPassingsButton = new Button("Edit MarkPassings");
         editMarkPassingsButton.setEnabled(false);
+        RaceColumnDTO raceColumnDTO = null;
+        for(RaceColumnDTO race : getLeaderboard().getRaceList()){
+            if(race.containsRace(preSelectedRace)){
+                raceColumnDTO = race;
+            }
+        }
+        if(raceColumnDTO!= null){
+            FleetDTO fleet = raceColumnDTO.getFleets().iterator().next();
+            sailingService.getRaceLog(leaderboardName, raceColumnDTO, fleet, new AsyncCallback<RaceLogDTO>() {
+                @Override
+                public void onFailure(Throwable caught) {
+                    errorReporter.reportError("Error retrieving RaceLog", true);
+                }
+                @Override
+                public void onSuccess(RaceLogDTO result) {
+                    // TODO Auto-generated method stub
+                }
+            });
+        }
         markPassingsPanel = new EditMarkPassingsPanel(sailingService, asyncActionsExecutor, preSelectedRace, stringMessages,
                 editMarkPassingsButton, competitorSelectionProvider, errorReporter, timer);
         
