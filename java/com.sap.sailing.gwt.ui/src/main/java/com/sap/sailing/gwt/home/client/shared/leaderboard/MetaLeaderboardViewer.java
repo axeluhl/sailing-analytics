@@ -2,7 +2,7 @@ package com.sap.sailing.gwt.home.client.shared.leaderboard;
 
 import com.google.gwt.user.client.ui.FlowPanel;
 import com.google.gwt.user.client.ui.Label;
-import com.sap.sailing.domain.common.RaceIdentifier;
+import com.sap.sailing.domain.common.RegattaAndRaceIdentifier;
 import com.sap.sailing.gwt.ui.client.CompetitorSelectionModel;
 import com.sap.sailing.gwt.ui.client.ErrorReporter;
 import com.sap.sailing.gwt.ui.client.SailingServiceAsync;
@@ -25,7 +25,7 @@ public class MetaLeaderboardViewer extends AbstractLeaderboardViewer {
     private final MultiLeaderboardPanel multiLeaderboardPanel;
     
     public MetaLeaderboardViewer(SailingServiceAsync sailingService, AsyncActionsExecutor asyncActionsExecutor, 
-            Timer timer, LeaderboardSettings leaderboardSettings, String preselectedLeaderboardName, RaceIdentifier preselectedRace,
+            Timer timer, LeaderboardSettings leaderboardSettings, String preselectedLeaderboardName, RegattaAndRaceIdentifier preselectedRace,
             String leaderboardGroupName, String metaLeaderboardName, ErrorReporter errorReporter,
             StringMessages stringMessages, UserAgentDetails userAgent, boolean showRaceDetails, 
             boolean autoExpandLastRaceColumn, boolean showSeriesLeaderboards) {
@@ -36,7 +36,7 @@ public class MetaLeaderboardViewer extends AbstractLeaderboardViewer {
     
     private MetaLeaderboardViewer(CompetitorSelectionModel competitorSelectionModel, SailingServiceAsync sailingService,
             AsyncActionsExecutor asyncActionsExecutor, Timer timer, LeaderboardSettings leaderboardSettings,
-            String preselectedLeaderboardName, RaceIdentifier preselectedRace, String leaderboardGroupName,
+            String preselectedLeaderboardName, RegattaAndRaceIdentifier preselectedRace, String leaderboardGroupName,
             String metaLeaderboardName, ErrorReporter errorReporter, StringMessages stringMessages,
             UserAgentDetails userAgent, boolean showRaceDetails, boolean autoExpandLastRaceColumn, boolean showSeriesLeaderboards) {
         super(competitorSelectionModel, asyncActionsExecutor,  timer, stringMessages, new LeaderboardPanel(sailingService, asyncActionsExecutor,

@@ -39,7 +39,6 @@ import com.sap.sailing.gwt.ui.client.RegattasDisplayer;
 import com.sap.sailing.gwt.ui.client.SailingServiceAsync;
 import com.sap.sailing.gwt.ui.client.StringMessages;
 import com.sap.sailing.gwt.ui.client.media.MediaSelector;
-import com.sap.sailing.gwt.ui.client.shared.charts.EditMarkPassingsPanel;
 import com.sap.sailing.gwt.ui.client.shared.charts.MultiCompetitorRaceChart;
 import com.sap.sailing.gwt.ui.client.shared.charts.WindChart;
 import com.sap.sailing.gwt.ui.client.shared.charts.WindChartSettings;
@@ -112,8 +111,6 @@ public class RaceBoardPanel extends SimplePanel implements RegattasDisplayer, Ra
     private final LeaderboardPanel leaderboardPanel;
     private WindChart windChart;
     private MultiCompetitorRaceChart competitorChart;
-    
-    private EditMarkPassingsPanel markPassingsPanel;
     
     private CheckBox competitorsFilterCheckBox;
     private FilterSet<CompetitorDTO, FilterWithUI<CompetitorDTO>> lastActiveCompetitorFilterSet;
@@ -220,10 +217,7 @@ public class RaceBoardPanel extends SimplePanel implements RegattasDisplayer, Ra
                 stringMessages, asyncActionsExecutor, errorReporter, /* compactChart */ true);
         windChart.onRaceSelectionChange(raceSelectionProvider.getSelectedRaces());
         components.add(windChart);
-        Button editMarkPassingsButton = new Button("Edit MarkPassings");
-        markPassingsPanel = new EditMarkPassingsPanel(sailingService, asyncActionsExecutor, selectedRaceIdentifier, stringMessages,
-                editMarkPassingsButton, competitorSelectionModel, errorReporter, timer);
-        mainPanel.add(markPassingsPanel);
+        
         leaderboardAndMapViewer = new SideBySideComponentViewer(leaderboardPanel, raceMap, components);
         componentViewers.add(leaderboardAndMapViewer);
         for (ComponentViewer componentViewer : componentViewers) {
@@ -239,7 +233,6 @@ public class RaceBoardPanel extends SimplePanel implements RegattasDisplayer, Ra
         addComponentToNavigationMenu(leaderboardAndMapViewer, raceMap, false);
         addCompetitorsFilterControl(viewControlsPanel);
         addMediaSelectorToNavigationMenu();
-        addEditMarkPassingsMenuToNavigationMenu(editMarkPassingsButton);
     }
  
     private CompetitorsFilterSets createAndAddDefaultCompetitorsFilter() {
@@ -289,17 +282,6 @@ public class RaceBoardPanel extends SimplePanel implements RegattasDisplayer, Ra
         for (Widget widget : mediaSelector.widgets()) {
             componentControlsPanel.add(widget);
         }
-    }
-
-    private void addEditMarkPassingsMenuToNavigationMenu(Button editMarkPassingsButton) {
-        editMarkPassingsButton.addClickHandler(new ClickHandler() {
-            @Override
-            public void onClick(ClickEvent event) {
-                markPassingsPanel.setVisible(true);
-            }
-        });
-        editMarkPassingsButton.setVisible(user != null);
-        componentControlsPanel.add(editMarkPassingsButton);
     }
 
     @SuppressWarnings("unused")

@@ -29,7 +29,7 @@ import com.google.gwt.view.client.SingleSelectionModel;
 import com.sap.sailing.domain.common.RegattaAndRaceIdentifier;
 import com.sap.sailing.domain.common.dto.CompetitorDTO;
 import com.sap.sailing.gwt.ui.client.CompetitorSelectionChangeListener;
-import com.sap.sailing.gwt.ui.client.CompetitorSelectionModel;
+import com.sap.sailing.gwt.ui.client.CompetitorSelectionProvider;
 import com.sap.sailing.gwt.ui.client.ErrorReporter;
 import com.sap.sailing.gwt.ui.client.RaceSelectionChangeListener;
 import com.sap.sailing.gwt.ui.client.SailingServiceAsync;
@@ -43,8 +43,7 @@ import com.sap.sse.gwt.client.player.Timer;
 
 public class EditMarkPassingsPanel extends FlexTable implements RaceSelectionChangeListener, CompetitorSelectionChangeListener {
 
-    public static class AnchorCell extends AbstractCell<SafeHtml> {
-
+    private static class AnchorCell extends AbstractCell<SafeHtml> {
         @Override
         public void render(com.google.gwt.cell.client.Cell.Context context, SafeHtml safeHtml, SafeHtmlBuilder sb) {
             sb.append(safeHtml);
@@ -55,7 +54,7 @@ public class EditMarkPassingsPanel extends FlexTable implements RaceSelectionCha
     private RegattaAndRaceIdentifier raceIdentifier;
     private final AsyncActionsExecutor asyncExecutor;
     private final ErrorReporter errorReporter;
-    private final CompetitorSelectionModel competitorSelectionModel;
+    private final CompetitorSelectionProvider competitorSelectionModel;
     private final Timer timer;
 
     private final Button editMarkPassingsButton;
@@ -75,7 +74,7 @@ public class EditMarkPassingsPanel extends FlexTable implements RaceSelectionCha
 
     public EditMarkPassingsPanel(SailingServiceAsync sailingService, AsyncActionsExecutor asyncActionsExecutor,
             RegattaAndRaceIdentifier raceIdentifier, StringMessages stringMessages, final Button editMarkPassingsButton,
-            CompetitorSelectionModel competitorSelectionModel, ErrorReporter errorReporter, final Timer timer) {
+            CompetitorSelectionProvider competitorSelectionModel, ErrorReporter errorReporter, final Timer timer) {
 
         this.sailingService = sailingService;
         this.raceIdentifier = raceIdentifier;
@@ -88,6 +87,13 @@ public class EditMarkPassingsPanel extends FlexTable implements RaceSelectionCha
 
         editMarkPassingsButton.setEnabled(false);
         competitorSelectionModel.addCompetitorSelectionChangeListener(this);
+        editMarkPassingsButton.addClickHandler(new ClickHandler() {
+            @Override
+            public void onClick(ClickEvent event) {
+                setVisible(true);
+                editMarkPassingsButton.setVisible(false);
+            }
+        });
 
         removeSetMarkPassingsButton = new Button("Remove fixed mark passing");
         setTimeAsMarkPassingsButton = new Button("Set time as mark passing");
@@ -109,7 +115,6 @@ public class EditMarkPassingsPanel extends FlexTable implements RaceSelectionCha
             public SafeHtml getValue(final Util.Pair<WaypointDTO, Date> object) {
                 return new SafeHtml() {
                     private static final long serialVersionUID = 1L;
-
                     @Override
                     public String asString() {
                         return object.getA().getName();
@@ -119,18 +124,16 @@ public class EditMarkPassingsPanel extends FlexTable implements RaceSelectionCha
         }, "Waypoint");
         wayPointSelectionTable.addColumn(new Column<Util.Pair<WaypointDTO, Date>, SafeHtml>(new AnchorCell()) {
             @Override
-            public SafeHtml getValue(final Util.Pair<WaypointDTO, Date> object) {
+            public SafeHtml getValue(final Pair<WaypointDTO, Date> object) {
                 return new SafeHtml() {
                     private static final long serialVersionUID = 1L;
-
                     @Override
                     public String asString() {
-                        Date date = object.getB();
-                        return date != null ? date.toString() : "No mark passing";
+                        return object.getB().toString();
                     }
                 };
             }
-        }, "Time point of current mark passing");
+        }, "Mark passing");
 
         waypointList.addDataDisplay(wayPointSelectionTable);
         wayPointSelectionTable.setSelectionModel(waypointSelectionModel);
@@ -156,6 +159,7 @@ public class EditMarkPassingsPanel extends FlexTable implements RaceSelectionCha
             @Override
             public void onClick(ClickEvent event) {
                 setVisible(false);
+                editMarkPassingsButton.setVisible(true);
             }
         });
         refreshWaypoints();
@@ -205,7 +209,7 @@ public class EditMarkPassingsPanel extends FlexTable implements RaceSelectionCha
             public void onFailure(Throwable caught) {
                 errorReporter.reportError("Error obtaining mark passings", /* silent Mode */true);
             }
-    
+
             @Override
             public void onSuccess(Set<Util.Pair<String, Date>> result) {
                 Set<Util.Pair<String, Date>> sortedPassings = new TreeSet<>(new Comparator<Util.Pair<String, Date>>() {
@@ -249,7 +253,7 @@ public class EditMarkPassingsPanel extends FlexTable implements RaceSelectionCha
         };
         sailingService.getRaceCourse(raceIdentifier, new Date(), courseCallback);
     }
-    
+
     @Override
     public void onRaceSelectionChange(List<RegattaAndRaceIdentifier> selectedRaces) {
         raceIdentifier = selectedRaces.iterator().next();

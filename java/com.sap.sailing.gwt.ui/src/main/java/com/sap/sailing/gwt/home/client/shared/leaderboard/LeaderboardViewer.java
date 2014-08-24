@@ -4,7 +4,7 @@ import java.util.List;
 
 import com.google.gwt.user.client.rpc.AsyncCallback;
 import com.google.gwt.user.client.ui.FlowPanel;
-import com.sap.sailing.domain.common.RaceIdentifier;
+import com.sap.sailing.domain.common.RegattaAndRaceIdentifier;
 import com.sap.sailing.gwt.ui.client.CompetitorSelectionModel;
 import com.sap.sailing.gwt.ui.client.ErrorReporter;
 import com.sap.sailing.gwt.ui.client.SailingServiceAsync;
@@ -25,7 +25,7 @@ public class LeaderboardViewer extends AbstractLeaderboardViewer {
     private LeaderboardPanel overallLeaderboardPanel;
     
     public LeaderboardViewer(final SailingServiceAsync sailingService, final AsyncActionsExecutor asyncActionsExecutor,
-            final Timer timer, final LeaderboardSettings leaderboardSettings, final RaceIdentifier preselectedRace,
+            final Timer timer, final LeaderboardSettings leaderboardSettings, final RegattaAndRaceIdentifier preselectedRace,
             final String leaderboardGroupName, String leaderboardName, final ErrorReporter errorReporter,
             final StringMessages stringMessages, final UserAgentDetails userAgent, boolean showRaceDetails, 
             boolean autoExpandLastRaceColumn, boolean showOverallLeaderboard) {
@@ -36,7 +36,7 @@ public class LeaderboardViewer extends AbstractLeaderboardViewer {
 
     private LeaderboardViewer(CompetitorSelectionModel competitorSelectionModel,
             final SailingServiceAsync sailingService, final AsyncActionsExecutor asyncActionsExecutor,
-            final Timer timer, final LeaderboardSettings leaderboardSettings, final RaceIdentifier preselectedRace,
+            final Timer timer, final LeaderboardSettings leaderboardSettings, final RegattaAndRaceIdentifier preselectedRace,
             final String leaderboardGroupName, String leaderboardName, final ErrorReporter errorReporter,
             final StringMessages stringMessages, final UserAgentDetails userAgent, boolean showRaceDetails,
             boolean autoExpandLastRaceColumn, boolean showOverallLeaderboard) {

@@ -4878,4 +4878,5 @@ public class SailingServiceImpl extends ProxiedRemoteServiceServlet implements S
         }
         return null;
     }
+    
 }

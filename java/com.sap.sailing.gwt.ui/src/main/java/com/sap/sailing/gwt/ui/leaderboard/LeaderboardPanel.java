@@ -36,6 +36,7 @@ import com.google.gwt.user.cellview.client.SafeHtmlHeader;
 import com.google.gwt.user.client.rpc.AsyncCallback;
 import com.google.gwt.user.client.ui.AbstractImagePrototype;
 import com.google.gwt.user.client.ui.Anchor;
+import com.google.gwt.user.client.ui.Button;
 import com.google.gwt.user.client.ui.DockPanel;
 import com.google.gwt.user.client.ui.FlowPanel;
 import com.google.gwt.user.client.ui.HasHorizontalAlignment;
@@ -81,6 +82,7 @@ import com.sap.sailing.gwt.ui.client.RaceTimesInfoProvider;
 import com.sap.sailing.gwt.ui.client.RaceTimesInfoProviderListener;
 import com.sap.sailing.gwt.ui.client.SailingServiceAsync;
 import com.sap.sailing.gwt.ui.client.StringMessages;
+import com.sap.sailing.gwt.ui.client.shared.charts.EditMarkPassingsPanel;
 import com.sap.sailing.gwt.ui.client.shared.components.Component;
 import com.sap.sailing.gwt.ui.client.shared.components.IsEmbeddableComponent;
 import com.sap.sailing.gwt.ui.client.shared.components.SettingsDialogComponent;
@@ -155,6 +157,9 @@ public class LeaderboardPanel extends SimplePanel implements TimeListener, PlayS
     private LeaderboardDTO leaderboard;
 
     private final TotalRankColumn totalRankColumn;
+    
+    private final EditMarkPassingsPanel markPassingsPanel;
+    
 
     /**
      * Passed to the {@link ManeuverCountRaceColumn}. Modifications to this list will modify the column's children list
@@ -1496,7 +1501,7 @@ public class LeaderboardPanel extends SimplePanel implements TimeListener, PlayS
     }
 
     public LeaderboardPanel(SailingServiceAsync sailingService, AsyncActionsExecutor asyncActionsExecutor,
-            LeaderboardSettings settings, RaceIdentifier preSelectedRace,
+            LeaderboardSettings settings, RegattaAndRaceIdentifier preSelectedRace,
             CompetitorSelectionProvider competitorSelectionProvider, String leaderboardGroupName,
             String leaderboardName, ErrorReporter errorReporter, final StringMessages stringMessages,
             final UserAgentDetails userAgent, boolean showRaceDetails) {
@@ -1508,7 +1513,7 @@ public class LeaderboardPanel extends SimplePanel implements TimeListener, PlayS
     }
 
     public LeaderboardPanel(SailingServiceAsync sailingService, AsyncActionsExecutor asyncActionsExecutor,
-            LeaderboardSettings settings, RaceIdentifier preSelectedRace,
+            LeaderboardSettings settings, RegattaAndRaceIdentifier preSelectedRace,
             CompetitorSelectionProvider competitorSelectionProvider, Timer timer, String leaderboardGroupName,
             String leaderboardName, ErrorReporter errorReporter, final StringMessages stringMessages,
             final UserAgentDetails userAgent, boolean showRaceDetails,
@@ -1623,6 +1628,12 @@ public class LeaderboardPanel extends SimplePanel implements TimeListener, PlayS
         contentPanel = new VerticalPanel();
         contentPanel.setStyleName(STYLE_LEADERBOARD_CONTENT);
         
+        // the mark passings panel
+        Button editMarkPassingsButton = new Button("Edit MarkPassings");
+        editMarkPassingsButton.setEnabled(false);
+        markPassingsPanel = new EditMarkPassingsPanel(sailingService, asyncActionsExecutor, preSelectedRace, stringMessages,
+                editMarkPassingsButton, competitorSelectionProvider, errorReporter, timer);
+        
         // the information panel
         informationPanel = new FlowPanel();
         informationPanel.setStyleName(STYLE_LEADERBOARD_INFO);
@@ -1681,7 +1692,9 @@ public class LeaderboardPanel extends SimplePanel implements TimeListener, PlayS
         if (!isEmbedded) {
             contentPanel.add(toolbarPanel);
         }
+        contentPanel.add(markPassingsPanel);
         contentPanel.add(getLeaderboardTable());
+        contentPanel.add(editMarkPassingsButton);
         setWidget(contentPanel);
         raceNameForDefaultSorting = settings.getNameOfRaceToSort();
     }
