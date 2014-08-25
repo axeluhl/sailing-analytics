@@ -3271,15 +3271,30 @@ public class SailingServiceImpl extends ProxiedRemoteServiceServlet implements S
         eventDTO.id = (UUID) event.getId();
         eventDTO.setDescription(event.getDescription());
         eventDTO.setOfficialWebsiteURL(event.getOfficialWebsiteURL() != null ? event.getOfficialWebsiteURL().toString() : null);
-        eventDTO.setLogoImageURL(event.getLogoImageURL() != null ? event.getLogoImageURL().toString() : null);
+        if (event.getLogoImageURL() == null) {
+            eventDTO.setLogoImageURL(null);
+        } else {
+            eventDTO.setLogoImageURL(event.getLogoImageURL().toString());
+            setImageSize(event, eventDTO, event.getLogoImageURL());
+        }
         for(URL url: event.getSponsorImageURLs()) {
             eventDTO.addSponsorImageURL(url.toString());
+            setImageSize(event, eventDTO, url);
         }
         for(URL url: event.getImageURLs()) {
             eventDTO.addImageURL(url.toString());
+            setImageSize(event, eventDTO, url);
         }
         for(URL url: event.getVideoURLs()) {
             eventDTO.addVideoURL(url.toString());
+        }
+    }
+
+    private void setImageSize(EventBase event, EventBaseDTO eventDTO, URL imageURL) {
+        try {
+            eventDTO.setImageSize(imageURL.toString(), event.getImageSize(imageURL));
+        } catch (InterruptedException | ExecutionException e) {
+            logger.log(Level.FINE, "Was unable to obtain image size for "+imageURL+" earlier.", e);
         }
     }
     

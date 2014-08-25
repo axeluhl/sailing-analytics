@@ -12,8 +12,8 @@ import org.json.simple.JSONObject;
 import com.sap.sailing.domain.base.EventBase;
 import com.sap.sailing.domain.base.LeaderboardGroupBase;
 import com.sap.sailing.domain.base.Venue;
-import com.sap.sailing.domain.base.impl.EventBaseImpl;
 import com.sap.sailing.domain.base.impl.StrippedEventImpl;
+import com.sap.sailing.domain.common.impl.ImageSizeImpl;
 import com.sap.sailing.domain.common.impl.MillisecondsTimePoint;
 import com.sap.sailing.server.gateway.deserialization.JsonDeserializationException;
 import com.sap.sailing.server.gateway.deserialization.JsonDeserializer;
@@ -95,7 +95,7 @@ public class EventBaseJsonDeserializer implements JsonDeserializer<EventBase> {
                 try {
                     result.setImageSize(
                             new URL((String) imageURLAndSizeJson.get(EventBaseJsonSerializer.FIELD_IMAGE_URL)),
-                            new EventBaseImpl.ImageSizeImpl(
+                            new ImageSizeImpl(
                                     ((Number) imageURLAndSizeJson.get(EventBaseJsonSerializer.FIELD_IMAGE_WIDTH)).intValue(),
                                     ((Number) imageURLAndSizeJson.get(EventBaseJsonSerializer.FIELD_IMAGE_HEIGHT)).intValue()));
                 } catch (MalformedURLException e) {

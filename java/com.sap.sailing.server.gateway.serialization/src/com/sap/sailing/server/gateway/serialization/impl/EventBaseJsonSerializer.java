@@ -9,9 +9,9 @@ import org.json.simple.JSONArray;
 import org.json.simple.JSONObject;
 
 import com.sap.sailing.domain.base.EventBase;
-import com.sap.sailing.domain.base.EventBase.ImageSize;
 import com.sap.sailing.domain.base.LeaderboardGroupBase;
 import com.sap.sailing.domain.base.Venue;
+import com.sap.sailing.domain.common.ImageSize;
 import com.sap.sailing.server.gateway.serialization.JsonSerializer;
 
 public class EventBaseJsonSerializer implements JsonSerializer<EventBase> {

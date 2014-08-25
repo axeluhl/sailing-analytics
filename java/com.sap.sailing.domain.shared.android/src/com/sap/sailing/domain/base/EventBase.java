@@ -3,6 +3,7 @@ package com.sap.sailing.domain.base;
 import java.net.URL;
 import java.util.concurrent.ExecutionException;
 
+import com.sap.sailing.domain.common.ImageSize;
 import com.sap.sailing.domain.common.Renamable;
 import com.sap.sailing.domain.common.TimePoint;
 import com.sap.sailing.domain.common.WithID;
@@ -121,11 +122,6 @@ public interface EventBase extends Named, WithDescription, Renamable, WithID {
 
     Iterable<? extends LeaderboardGroupBase> getLeaderboardGroups();
 
-    public static interface ImageSize {
-        int getWidth();
-        int getHeight();
-    }
-    
     /**
      * For the images references by the image URLs in {@link #getImageURLs()}, {@link #getSponsorImageURLs()} and {@link #getLogoImageURL()}
      * determines the image dimensions.

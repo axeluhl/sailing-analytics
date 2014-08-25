@@ -9,6 +9,7 @@ import java.util.concurrent.ExecutionException;
 import com.sap.sailing.domain.base.EventBase;
 import com.sap.sailing.domain.base.LeaderboardGroupBase;
 import com.sap.sailing.domain.base.Venue;
+import com.sap.sailing.domain.common.ImageSize;
 import com.sap.sailing.domain.common.TimePoint;
 
 /**
@@ -33,7 +34,7 @@ public class StrippedEventImpl extends EventBaseImpl {
             boolean isPublic, UUID id, Iterable<LeaderboardGroupBase> leaderboardGroups) {
         super(name, startDate, endDate, venue, isPublic, id);
         this.leaderboardGroups = leaderboardGroups;
-        this.imageSizes = new HashMap<URL, EventBase.ImageSize>();
+        this.imageSizes = new HashMap<URL, ImageSize>();
     }
 
     @Override

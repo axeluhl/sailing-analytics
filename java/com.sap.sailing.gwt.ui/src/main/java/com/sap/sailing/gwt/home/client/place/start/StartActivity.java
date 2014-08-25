@@ -1,15 +1,14 @@
 package com.sap.sailing.gwt.home.client.place.start;
 
 import java.util.ArrayList;
-import java.util.Calendar;
 import java.util.Collections;
 import java.util.Comparator;
 import java.util.Date;
-import java.util.GregorianCalendar;
 import java.util.List;
 
 import com.google.gwt.activity.shared.AbstractActivity;
 import com.google.gwt.event.shared.EventBus;
+import com.google.gwt.i18n.client.DateTimeFormat;
 import com.google.gwt.user.client.rpc.AsyncCallback;
 import com.google.gwt.user.client.ui.AcceptsOneWidget;
 import com.sap.sailing.gwt.home.client.shared.placeholder.Placeholder;
@@ -50,9 +49,8 @@ public class StartActivity extends AbstractActivity {
         List<EventBaseDTO> upcomingSoonEvents = new ArrayList<EventBaseDTO>();
         List<EventBaseDTO> popularEvents = new ArrayList<EventBaseDTO>();
         Date now = new Date();
-        Calendar cal = new GregorianCalendar();
-        cal.setTime(now);
-        int currentYear = cal.get(Calendar.YEAR);
+        DateTimeFormat yearFetcher = DateTimeFormat.getFormat("yyyy");
+        String currentYear = yearFetcher.format(now);
         final int MAX_STAGE_EVENTS = 10;
         final long FOUR_WEEK_IN_MS = 4L * (1000 * 60 * 60 * 24 * 7);
         
@@ -62,11 +60,8 @@ public class StartActivity extends AbstractActivity {
                     featuredEvents.add(new Pair<StageEventType, EventBaseDTO>(StageEventType.RUNNING, event));
                 } else if (event.startDate.after(now) && event.startDate.getTime() - now.getTime() < FOUR_WEEK_IN_MS) {
                     upcomingSoonEvents.add(event);
-                } else {
-                    cal.setTime(event.endDate);
-                    if (event.endDate.before(now) && cal.get(Calendar.YEAR) == currentYear) {
-                        recentEventsOfSameYear.add(event);
-                    }
+                } else if (event.endDate.before(now) && yearFetcher.format(event.endDate).equals(currentYear)) {
+                    recentEventsOfSameYear.add(event);
                 }
             }
         }

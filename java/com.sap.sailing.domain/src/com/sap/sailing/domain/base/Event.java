@@ -4,6 +4,7 @@ import java.net.URL;
 import java.util.UUID;
 import java.util.concurrent.ExecutionException;
 
+import com.sap.sailing.domain.common.ImageSize;
 import com.sap.sailing.domain.leaderboard.LeaderboardGroup;
 
 /**
