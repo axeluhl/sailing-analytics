@@ -17,6 +17,7 @@ import java.net.URLEncoder;
 import java.net.UnknownHostException;
 import java.text.ParseException;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Calendar;
 import java.util.Collection;
 import java.util.Collections;
@@ -196,7 +197,9 @@ import com.sap.sailing.domain.racelog.RaceLogFlagEvent;
 import com.sap.sailing.domain.racelog.RaceStateOfSameDayHelper;
 import com.sap.sailing.domain.racelog.Revokable;
 import com.sap.sailing.domain.racelog.analyzing.impl.AbortingFlagFinder;
+import com.sap.sailing.domain.racelog.analyzing.impl.FixedMarkPassingsFinder;
 import com.sap.sailing.domain.racelog.analyzing.impl.LastPublishedCourseDesignFinder;
+import com.sap.sailing.domain.racelog.analyzing.impl.SuppressedMarkPassingsFinder;
 import com.sap.sailing.domain.racelog.state.ReadonlyRaceState;
 import com.sap.sailing.domain.racelog.state.impl.ReadonlyRaceStateImpl;
 import com.sap.sailing.domain.racelog.state.racingprocedure.FlagPoleState;
@@ -4931,4 +4934,39 @@ public class SailingServiceImpl extends ProxiedRemoteServiceServlet implements S
         return null;
     }
     
+    @Override
+    public List<Triple<CompetitorDTO, Integer, TimePoint>> getRaceLogMarkPassingData(String leaderboardName, RaceColumnDTO raceColumnDTO,
+            FleetDTO fleet) {
+        List<Triple<CompetitorDTO, Integer, TimePoint>> result = new ArrayList<>();
+        RaceLog raceLog = getService().getRaceLog(leaderboardName, raceColumnDTO.getName(), fleet.getName());
+        for (Triple<Competitor, Integer, TimePoint> fixedEvent : new FixedMarkPassingsFinder(raceLog).analyze()) {
+            result.add(new Triple<CompetitorDTO, Integer, TimePoint>(baseDomainFactory.convertToCompetitorDTO(fixedEvent.getA()),
+                    fixedEvent.getB(), fixedEvent.getC()));
+        }
+        for (Pair<Competitor, Integer> suppressedEvent : new SuppressedMarkPassingsFinder(raceLog).analyze()) {
+            result.add(new Triple<CompetitorDTO, Integer, TimePoint>(baseDomainFactory.convertToCompetitorDTO(suppressedEvent.getA()),
+                    suppressedEvent.getB(), null));
+        }
+        return result;
+    }
+    
+    @Override
+    public void updateRaceLogMarkPassingData(String leaderboardName, RaceColumnDTO raceColumnDTO,
+            FleetDTO fleet, List<Triple<CompetitorDTO, Integer, TimePoint>> update) {
+        RaceLog raceLog = getService().getRaceLog(leaderboardName, raceColumnDTO.getName(), fleet.getName());
+        TimePoint now = MillisecondsTimePoint.now();
+        for (Triple<CompetitorDTO, Integer, TimePoint> info : update) {
+            RaceLogEvent event = null;
+            Competitor c = getCompetitor(info.getA());
+            if (info.getC() == null) {
+                event = RaceLogEventFactory.INSTANCE.createSuppressedMarkPassingsEvent(now, getService().getServerAuthor(),
+                        UUID.randomUUID(), Arrays.asList(c), raceLog.getCurrentPassId(), info.getB());
+            } else {
+                event = RaceLogEventFactory.INSTANCE.createFixedMarkPassingEvent(now, getService().getServerAuthor(), UUID.randomUUID(),
+                        Arrays.asList(c), raceLog.getCurrentPassId(), info.getC(), info.getB());
+            }
+            raceLog.add(event);
+        }
+    }
+
 }

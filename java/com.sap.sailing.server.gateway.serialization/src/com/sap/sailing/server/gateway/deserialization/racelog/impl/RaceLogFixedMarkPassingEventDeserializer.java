@@ -27,7 +27,7 @@ public class RaceLogFixedMarkPassingEventDeserializer extends BaseRaceLogEventDe
                 (Long) object.get(RaceLogFixedMarkPassingEventSerializer.FIELD_TIMEPOINT_OF_MARKPASSING));
         Integer zeroBasedIndexOfPassedWaypoint = (Integer) object
                 .get(RaceLogFixedMarkPassingEventSerializer.FIELD_INDEX_OF_PASSED_WAYPOINT);
-        return factory.createFixedMarkPassingEvent(createdAt, author, timePoint, id, competitors, passId, ofPassing,
+        return factory.createFixedMarkPassingEvent(timePoint, author, id, competitors, passId, ofPassing,
                 zeroBasedIndexOfPassedWaypoint);
     }
 }

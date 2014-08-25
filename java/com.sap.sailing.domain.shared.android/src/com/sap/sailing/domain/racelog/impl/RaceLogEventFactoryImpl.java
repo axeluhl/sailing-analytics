@@ -284,16 +284,16 @@ public class RaceLogEventFactoryImpl implements RaceLogEventFactory {
     }
 
     @Override
-    public RaceLogEvent createFixedMarkPassingEvent(TimePoint createdAt, RaceLogEventAuthor author, TimePoint logicalTimePoint,
+    public RaceLogEvent createFixedMarkPassingEvent(TimePoint logicalTimePoint, RaceLogEventAuthor author,
             Serializable id, List<Competitor> competitors, Integer passId, TimePoint ofFixedPassing, Integer zeroBasedIndexOfWaypoint) {
-        return new FixedMarkPassingEventImpl(createdAt, author, logicalTimePoint, id, competitors, passId, ofFixedPassing,
+        return new FixedMarkPassingEventImpl(MillisecondsTimePoint.now(), author, logicalTimePoint, id, competitors, passId, ofFixedPassing,
                 zeroBasedIndexOfWaypoint);
     }
 
     @Override
-    public RaceLogEvent createSuppressedMarkPassingsEvent(TimePoint createdAt, RaceLogEventAuthor author, TimePoint logicalTimePoint,
-            Serializable id, List<Competitor> competitors, Integer passId, Integer zeroBasedIndexOfFirstSuppressedWaypoint) {
-        return new SuppressedMarkPassingsEventImpl(createdAt, author, logicalTimePoint, id, competitors, passId,
+    public RaceLogEvent createSuppressedMarkPassingsEvent(TimePoint logicalTimePoint, RaceLogEventAuthor author, Serializable id,
+            List<Competitor> competitors, Integer passId, Integer zeroBasedIndexOfFirstSuppressedWaypoint) {
+        return new SuppressedMarkPassingsEventImpl(MillisecondsTimePoint.now(), author, logicalTimePoint, id, competitors, passId,
                 zeroBasedIndexOfFirstSuppressedWaypoint);
     }
 }

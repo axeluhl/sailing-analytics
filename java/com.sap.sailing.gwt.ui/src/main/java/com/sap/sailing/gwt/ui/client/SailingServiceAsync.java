@@ -22,6 +22,7 @@ import com.sap.sailing.domain.common.RegattaAndRaceIdentifier;
 import com.sap.sailing.domain.common.RegattaIdentifier;
 import com.sap.sailing.domain.common.RegattaNameAndRaceName;
 import com.sap.sailing.domain.common.ScoringSchemeType;
+import com.sap.sailing.domain.common.TimePoint;
 import com.sap.sailing.domain.common.WindSource;
 import com.sap.sailing.domain.common.configuration.DeviceConfigurationMatcherType;
 import com.sap.sailing.domain.common.dto.CompetitorDTO;
@@ -76,6 +77,7 @@ import com.sap.sailing.gwt.ui.shared.WindDTO;
 import com.sap.sailing.gwt.ui.shared.WindInfoForRaceDTO;
 import com.sap.sse.common.Util;
 import com.sap.sse.common.Util.Pair;
+import com.sap.sse.common.Util.Triple;
 import com.sap.sse.common.search.KeywordQuery;
 
 /**
@@ -499,8 +501,7 @@ public interface SailingServiceAsync {
     void reloadRaceLog(String leaderboardName, RaceColumnDTO raceColumnDTO, FleetDTO fleet,
             AsyncCallback<Void> asyncCallback);
 
-    void getRaceLog(String leaderboardName, RaceColumnDTO raceColumnDTO, FleetDTO fleet,
-            AsyncCallback<RaceLogDTO> callback);
+    void getRaceLog(String leaderboardName, RaceColumnDTO raceColumnDTO, FleetDTO fleet, AsyncCallback<RaceLogDTO> callback);
 
     void importMasterData(String host, String[] names, boolean override, boolean compress,
  boolean exportWind,
@@ -642,4 +643,10 @@ public interface SailingServiceAsync {
 
     void getCompetitorMarkPassings(RegattaAndRaceIdentifier race, CompetitorDTO competitorDTO,
             AsyncCallback<Set<Pair<String, Date>>> callback);
+
+    void updateRaceLogMarkPassingData(String leaderboardName, RaceColumnDTO raceColumnDTO, FleetDTO fleet,
+            List<Triple<CompetitorDTO, Integer, TimePoint>> update, AsyncCallback<Void> callback);
+
+    void getRaceLogMarkPassingData(String leaderboardName, RaceColumnDTO raceColumnDTO, FleetDTO fleet,
+            AsyncCallback<List<Triple<CompetitorDTO, Integer, TimePoint>>> callback);
 }

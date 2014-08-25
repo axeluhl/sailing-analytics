@@ -120,12 +120,12 @@ public interface RaceLogEventFactory {
     CloseOpenEndedDeviceMappingEvent createCloseOpenEndedDeviceMappingEvent(TimePoint logicalTimePoint, RaceLogEventAuthor author, int passId,
             Serializable deviceMappingEventId, TimePoint closingTimePoint);
     
-    RaceLogEvent createFixedMarkPassingEvent(TimePoint createdAt, RaceLogEventAuthor author, TimePoint logicalTimePoint, Serializable id,
+    RaceLogEvent createFixedMarkPassingEvent(TimePoint logicalTimePoint, RaceLogEventAuthor author, Serializable id,
             List<Competitor> competitors, Integer passId, TimePoint ofFixedPassing, Integer zeroBasedIndexOfWaypoint);
 
     AdditionalScoringInformationEvent createAdditionalScoringInformationEvent(TimePoint timePoint, Serializable id, RaceLogEventAuthor author, int currentPassId,
             AdditionalScoringInformationType informationType);
 
-    RaceLogEvent createSuppressedMarkPassingsEvent(TimePoint createdAt, RaceLogEventAuthor author, TimePoint logicalTimePoint, Serializable id,
+    RaceLogEvent createSuppressedMarkPassingsEvent(TimePoint logicalTimePoint, RaceLogEventAuthor author, Serializable id,
             List<Competitor> competitors, Integer passId, Integer zeroBasedIndexOfFirstSuppressedWaypoint);
 }

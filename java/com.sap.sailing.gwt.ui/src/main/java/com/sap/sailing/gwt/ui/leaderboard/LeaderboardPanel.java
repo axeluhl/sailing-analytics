@@ -98,7 +98,6 @@ import com.sap.sailing.gwt.ui.client.shared.filter.FilterWithUI;
 import com.sap.sailing.gwt.ui.client.shared.filter.LeaderboardFetcher;
 import com.sap.sailing.gwt.ui.leaderboard.DetailTypeColumn.LegDetailField;
 import com.sap.sailing.gwt.ui.leaderboard.LeaderboardSettings.RaceColumnSelectionStrategies;
-import com.sap.sailing.gwt.ui.shared.RaceLogDTO;
 import com.sap.sailing.gwt.ui.shared.RaceTimesInfoDTO;
 import com.sap.sse.common.Util;
 import com.sap.sse.common.filter.BinaryOperator;
@@ -1723,29 +1722,6 @@ public class LeaderboardPanel extends SimplePanel implements TimeListener, PlayS
         
         // the mark passings panel
         Button editMarkPassingsButton = new Button("Edit MarkPassings");
-        editMarkPassingsButton.setEnabled(false);
-        if (leaderboard != null) {
-            RaceColumnDTO raceColumnDTO = null;
-            for (RaceColumnDTO race : leaderboard.getRaceList()) {
-                if (race.containsRace(preSelectedRace)) {
-                    raceColumnDTO = race;
-                }
-            }
-            if (raceColumnDTO != null) {
-                FleetDTO fleet = raceColumnDTO.getFleets().iterator().next();
-                sailingService.getRaceLog(leaderboardName, raceColumnDTO, fleet, new AsyncCallback<RaceLogDTO>() {
-                    @Override
-                    public void onFailure(Throwable caught) {
-                        errorReporter.reportError("Error retrieving RaceLog", true);
-                    }
-
-                    @Override
-                    public void onSuccess(RaceLogDTO result) {
-                        // TODO Auto-generated method stub
-                    }
-                });
-            }
-        }
         markPassingsPanel = new EditMarkPassingsPanel(sailingService, asyncActionsExecutor, preSelectedRace, stringMessages,
       editMarkPassingsButton, competitorSelectionProvider, errorReporter, timer);
         
@@ -2212,6 +2188,7 @@ public class LeaderboardPanel extends SimplePanel implements TimeListener, PlayS
             }
             raceColumnSelection.autoUpdateRaceColumnSelectionForUpdatedLeaderboard(getLeaderboard(), leaderboard);
             setLeaderboard(leaderboard);
+            markPassingsPanel.setLeaderboard(leaderboard);
             adjustColumnLayout(leaderboard);
             updateRaceColumnDTOsToRaceColumns(leaderboard);
             for (RaceColumn<?> columnToCollapseAndExpandAgain : columnsToCollapseAndExpandAgain) {
