@@ -660,4 +660,9 @@ public class MediaPlayerManagerComponent implements Component<Void>, PlayStateLi
         rootPanel.setVisible(visibility);
     }
 
+    @Override
+    public String getDependentCssClassName() {
+        return "media";
+    }
+
 }

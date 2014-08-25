@@ -23,6 +23,7 @@ import com.google.gwt.user.client.ui.Widget;
 import com.google.gwt.user.client.ui.WidgetCollection;
 import com.sap.sailing.gwt.ui.client.StringMessages;
 import com.sap.sailing.gwt.ui.client.media.MediaComponent;
+import com.sap.sailing.gwt.ui.client.media.MediaPlayerManagerComponent;
 import com.sap.sailing.gwt.ui.client.shared.components.Component;
 import com.sap.sailing.gwt.ui.client.shared.components.ComponentViewer;
 import com.sap.sailing.gwt.ui.client.shared.components.SettingsDialog;
@@ -71,12 +72,12 @@ public class SideBySideComponentViewer implements ComponentViewer {
     private int savedSplitPosition = -1;
     private boolean layoutForLeftComponentForcedOnce = false;
     
-    public SideBySideComponentViewer(final LeaderboardPanel leftComponentP, final Component<?> rightComponentP, final MediaComponent mediaComponent, List<Component<?>> components, final StringMessages stringMessages, UserDTO user) {
+    public SideBySideComponentViewer(final LeaderboardPanel leftComponentP, final Component<?> rightComponentP, final MediaPlayerManagerComponent mediaPlayerManagerComponent, List<Component<?>> components, final StringMessages stringMessages, UserDTO user) {
         this.stringMessages = stringMessages;
         this.leftComponent = leftComponentP;
         this.rightComponent = rightComponentP;
         this.components = components;
-        this.videoControlButton = createVideoControlButton(mediaComponent);
+        this.videoControlButton = createVideoControlButton(mediaPlayerManagerComponent);
         this.leftScrollPanel = new ScrollPanel();
         this.leftScrollPanel.add(leftComponentP.getEntryWidget());
         this.leftScrollPanel.setTitle(leftComponentP.getEntryWidget().getTitle());
@@ -113,7 +114,7 @@ public class SideBySideComponentViewer implements ComponentViewer {
     /**
      * Create the video control button that shows or hides the video popup
      */
-    private Button createVideoControlButton(final MediaComponent mediaComponent) {
+    private Button createVideoControlButton(final MediaPlayerManagerComponent mediaPlayerManagerComponent) {
         final Button videoControlButton = new Button(new SafeHtml() {
             private static final long serialVersionUID = 8679639887708833213L;
             @Override
@@ -132,7 +133,7 @@ public class SideBySideComponentViewer implements ComponentViewer {
         dialog.addCloseHandler(new CloseHandler<PopupPanel>() {
             @Override
             public void onClose(CloseEvent<PopupPanel> event) {
-                    mediaComponent.setVisible(false);
+                mediaPlayerManagerComponent.setVisible(false);
                     if (Document.get().getClientWidth() > 1024) {
                         videoControlButton.setText(stringMessages.showVideoPopup());
                     }
