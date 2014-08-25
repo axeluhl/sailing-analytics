@@ -1724,27 +1724,30 @@ public class LeaderboardPanel extends SimplePanel implements TimeListener, PlayS
         // the mark passings panel
         Button editMarkPassingsButton = new Button("Edit MarkPassings");
         editMarkPassingsButton.setEnabled(false);
-        RaceColumnDTO raceColumnDTO = null;
-        for(RaceColumnDTO race : getLeaderboard().getRaceList()){
-            if(race.containsRace(preSelectedRace)){
-                raceColumnDTO = race;
+        if (leaderboard != null) {
+            RaceColumnDTO raceColumnDTO = null;
+            for (RaceColumnDTO race : leaderboard.getRaceList()) {
+                if (race.containsRace(preSelectedRace)) {
+                    raceColumnDTO = race;
+                }
+            }
+            if (raceColumnDTO != null) {
+                FleetDTO fleet = raceColumnDTO.getFleets().iterator().next();
+                sailingService.getRaceLog(leaderboardName, raceColumnDTO, fleet, new AsyncCallback<RaceLogDTO>() {
+                    @Override
+                    public void onFailure(Throwable caught) {
+                        errorReporter.reportError("Error retrieving RaceLog", true);
+                    }
+
+                    @Override
+                    public void onSuccess(RaceLogDTO result) {
+                        // TODO Auto-generated method stub
+                    }
+                });
             }
         }
-        if(raceColumnDTO!= null){
-            FleetDTO fleet = raceColumnDTO.getFleets().iterator().next();
-            sailingService.getRaceLog(leaderboardName, raceColumnDTO, fleet, new AsyncCallback<RaceLogDTO>() {
-                @Override
-                public void onFailure(Throwable caught) {
-                    errorReporter.reportError("Error retrieving RaceLog", true);
-                }
-                @Override
-                public void onSuccess(RaceLogDTO result) {
-                    // TODO Auto-generated method stub
-                }
-            });
-        }
         markPassingsPanel = new EditMarkPassingsPanel(sailingService, asyncActionsExecutor, preSelectedRace, stringMessages,
-                editMarkPassingsButton, competitorSelectionProvider, errorReporter, timer);
+      editMarkPassingsButton, competitorSelectionProvider, errorReporter, timer);
         
         // the information panel
         informationPanel = new FlowPanel();

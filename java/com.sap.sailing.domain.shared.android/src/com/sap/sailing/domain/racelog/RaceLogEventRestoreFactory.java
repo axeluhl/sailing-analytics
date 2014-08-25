@@ -96,4 +96,4 @@ public interface RaceLogEventRestoreFactory extends RaceLogEventFactory {
     AdditionalScoringInformationEvent createAdditionalScoringInformationEvent(TimePoint createdAt, RaceLogEventAuthor author,
             TimePoint logicalTimePoint, Serializable pId, List<Competitor> competitors, int passId,
             AdditionalScoringInformationType informationType);
-   }
+}
