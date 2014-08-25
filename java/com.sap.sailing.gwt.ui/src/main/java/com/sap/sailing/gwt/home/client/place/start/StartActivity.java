@@ -1,9 +1,11 @@
 package com.sap.sailing.gwt.home.client.place.start;
 
 import java.util.ArrayList;
+import java.util.Calendar;
 import java.util.Collections;
 import java.util.Comparator;
 import java.util.Date;
+import java.util.GregorianCalendar;
 import java.util.List;
 
 import com.google.gwt.activity.shared.AbstractActivity;
@@ -41,7 +43,6 @@ public class StartActivity extends AbstractActivity {
         });
     }
 
-    @SuppressWarnings("deprecation")
     protected void fillStartPageEvents(StartView view, List<EventBaseDTO> events) {
         List<Pair<StageEventType, EventBaseDTO>> featuredEvents = new ArrayList<Pair<StageEventType, EventBaseDTO>>();
         
@@ -49,8 +50,10 @@ public class StartActivity extends AbstractActivity {
         List<EventBaseDTO> upcomingSoonEvents = new ArrayList<EventBaseDTO>();
         List<EventBaseDTO> popularEvents = new ArrayList<EventBaseDTO>();
         Date now = new Date();
-        int currentYear = now.getYear();
-        final int MAX_STAGE_EVENTS = 4;
+        Calendar cal = new GregorianCalendar();
+        cal.setTime(now);
+        int currentYear = cal.get(Calendar.YEAR);
+        final int MAX_STAGE_EVENTS = 10;
         final long FOUR_WEEK_IN_MS = 4L * (1000 * 60 * 60 * 24 * 7);
         
         for(EventBaseDTO event: events) {
@@ -59,8 +62,11 @@ public class StartActivity extends AbstractActivity {
                     featuredEvents.add(new Pair<StageEventType, EventBaseDTO>(StageEventType.RUNNING, event));
                 } else if (event.startDate.after(now) && event.startDate.getTime() - now.getTime() < FOUR_WEEK_IN_MS) {
                     upcomingSoonEvents.add(event);
-                } else if (event.endDate.before(now) && event.endDate.getYear() == currentYear) {
-                    recentEventsOfSameYear.add(event);
+                } else {
+                    cal.setTime(event.endDate);
+                    if (event.endDate.before(now) && cal.get(Calendar.YEAR) == currentYear) {
+                        recentEventsOfSameYear.add(event);
+                    }
                 }
             }
         }
