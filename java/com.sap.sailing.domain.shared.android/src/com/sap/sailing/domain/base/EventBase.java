@@ -1,6 +1,7 @@
 package com.sap.sailing.domain.base;
 
 import java.net.URL;
+import java.util.concurrent.ExecutionException;
 
 import com.sap.sailing.domain.common.Renamable;
 import com.sap.sailing.domain.common.TimePoint;
@@ -119,4 +120,15 @@ public interface EventBase extends Named, WithDescription, Renamable, WithID {
     void setOfficialWebsiteURL(URL officialWebsiteURL);
 
     Iterable<? extends LeaderboardGroupBase> getLeaderboardGroups();
+
+    public static interface ImageSize {
+        int getWidth();
+        int getHeight();
+    }
+    
+    /**
+     * For the images references by the image URLs in {@link #getImageURLs()}, {@link #getSponsorImageURLs()} and {@link #getLogoImageURL()}
+     * determines the image dimensions.
+     */
+    ImageSize getImageSize(URL imageURL) throws InterruptedException, ExecutionException;
 }

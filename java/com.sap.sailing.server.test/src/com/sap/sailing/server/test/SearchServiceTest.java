@@ -118,7 +118,9 @@ public class SearchServiceTest {
         cal.set(2014, 5, 8, 16, 00);
         final TimePoint pfingstbuschEndDate = new MillisecondsTimePoint(cal.getTime());
         pfingstbusch = server.apply(new CreateEvent("Pfingsbusch", pfingstbuschStartDate, pfingstbuschEndDate, "Kiel", /* isPublic */
-                true, UUID.randomUUID(), Collections.<URL>emptySet(), Collections.<URL>emptySet(), createURLsFromString(sponsorImageURLs), (logoimageURL)AsString == null ? null : new URL(logoimageURLAsString), officialWebsiteURLAsString == null ? null : new URL(officialWebsiteURLAsString)));
+                true, UUID.randomUUID(), Collections.<URL>emptySet(), Collections.<URL>emptySet(),
+                /* sponsorImageURLs */ Collections.<URL>emptySet(),
+                /* logoImageURLAsString */ null, /* officialWebsiteURLAsString */ null));
         kiel = pfingstbusch.getVenue();
         final CourseAreaImpl kielAlpha = new CourseAreaImpl("Alpha", UUID.randomUUID());
         kiel.addCourseArea(kielAlpha);
@@ -149,7 +151,9 @@ public class SearchServiceTest {
         cal.set(2014, 5, 8, 18, 00);
         final TimePoint aalEndDate = new MillisecondsTimePoint(cal.getTime());
         aalEvent = server.apply(new CreateEvent("Aalregatta", aalStartDate, aalEndDate, "Flensburg", /* isPublic */
-                true, UUID.randomUUID(), Collections.<URL>emptySet(), Collections.<URL>emptySet(), createURLsFromString(sponsorImageURLs), (logoimageURL)AsString == null ? null : new URL(logoimageURLAsString), officialWebsiteURLAsString == null ? null : new URL(officialWebsiteURLAsString)));
+                true, UUID.randomUUID(), Collections.<URL>emptySet(), Collections.<URL>emptySet(),
+                /* sponsorImageURLs */ Collections.<URL>emptySet(), /* logoimageURL */ null,
+                /* officialWebsiteURLAsString */ null));
         flensburg = aalEvent.getVenue();
         final CourseAreaImpl flensburgStandard = new CourseAreaImpl("Standard", UUID.randomUUID());
         flensburg.addCourseArea(flensburgStandard);

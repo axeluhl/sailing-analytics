@@ -220,4 +220,27 @@ public abstract class EventBaseImpl implements EventBase {
     public void setOfficialWebsiteURL(URL officialWebsiteURL) {
         this.officialWebsiteURL = officialWebsiteURL;
     }
+
+    public static class ImageSizeImpl implements ImageSize {
+        private final int width;
+        private final int height;
+        public ImageSizeImpl(int width, int height) {
+            super();
+            this.width = width;
+            this.height = height;
+        }
+        @Override
+        public int getWidth() {
+            return width;
+        }
+        @Override
+        public int getHeight() {
+            return height;
+        }
+        @Override
+        public String toString() {
+            return "("+getWidth()+"x"+getHeight()+")";
+        }
+    }
+    
 }

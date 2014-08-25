@@ -116,6 +116,8 @@ public class EventBaseDTO extends NamedDTO implements IsSerializable {
     public String getStageImageURL() {
         String result = null;
         for(String imageUrl: imageURLs) {
+            // FIXME consolidate with getPhotoGalleryImageURLs, removing redundant "STAGE" code
+            // TODO use image size to find largest image(s) in case none is explicitly marked with "state" in its URL
             if(imageUrl.contains("stage") || imageUrl.contains("STAGE")) {
                 result = imageUrl;
                 break;
@@ -127,6 +129,7 @@ public class EventBaseDTO extends NamedDTO implements IsSerializable {
     public List<String> getPhotoGalleryImageURLs() {
         List<String> result = new ArrayList<String>();
         for(String imageUrl: imageURLs) {
+            // FIXME consolidate with getStageImageURL, removing redundant "STAGE" code
             if(!imageUrl.contains("stage") && !imageUrl.contains("STAGE")) {
                 result.add(imageUrl);
             }
