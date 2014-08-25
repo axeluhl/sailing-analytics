@@ -61,6 +61,14 @@ public interface EventBase extends Named, WithDescription, Renamable, WithID {
     
     void removeSponsorImageURL(URL sponsorImageURL);
     
+    /**
+     * Replaces the {@link #getSponsorImageURLs() current contents of the sponsorship image URL sequence} by the image URLs in
+     * <code>sponsorImageURLs</code>.
+     * 
+     * @param sponsorImageURLs
+     *            if <code>null</code>, the internal sequence of sponsorship image URLs is cleared but remains valid (non-
+     *            <code>null</code>)
+     */
     void setSponsorImageURLs(Iterable<URL> sponsorImageURLs);
     
     /**

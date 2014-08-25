@@ -146,7 +146,9 @@ public abstract class EventBaseImpl implements EventBase {
     @Override
     public void setImageURLs(Iterable<URL> imageURLs) {
         this.imageURLs.clear();
-        Util.addAll(imageURLs, this.imageURLs);
+        if (imageURLs != null) {
+            Util.addAll(imageURLs, this.imageURLs);
+        }
     }
 
     @Override
@@ -169,7 +171,9 @@ public abstract class EventBaseImpl implements EventBase {
     @Override
     public void setVideoURLs(Iterable<URL> videoURLs) {
         this.videoURLs.clear();
-        Util.addAll(videoURLs, this.videoURLs);
+        if (videoURLs != null) {
+            Util.addAll(videoURLs, this.videoURLs);
+        }
     }
 
     @Override
@@ -192,7 +196,9 @@ public abstract class EventBaseImpl implements EventBase {
     @Override
     public void setSponsorImageURLs(Iterable<URL> sponsorImageURLs) {
         this.sponsorImageURLs.clear();
-        Util.addAll(sponsorImageURLs, this.sponsorImageURLs);
+        if (sponsorImageURLs != null) {
+            Util.addAll(sponsorImageURLs, this.sponsorImageURLs);
+        }
     }
 
     @Override

@@ -171,8 +171,10 @@ public class EventImpl extends EventBaseImpl implements Event {
     @Override
     public void setImageURLs(Iterable<URL> imageURLs) {
         super.setImageURLs(imageURLs);
-        for (URL imageURL : imageURLs) {
-            refreshImageSizeFetcher(imageURL);
+        if (imageURLs != null) {
+            for (URL imageURL : imageURLs) {
+                refreshImageSizeFetcher(imageURL);
+            }
         }
     }
 
@@ -191,8 +193,10 @@ public class EventImpl extends EventBaseImpl implements Event {
     @Override
     public void setSponsorImageURLs(Iterable<URL> sponsorImageURLs) {
         super.setSponsorImageURLs(sponsorImageURLs);
-        for (URL imageURL : sponsorImageURLs) {
-            refreshImageSizeFetcher(imageURL);
+        if (sponsorImageURLs != null) {
+            for (URL imageURL : sponsorImageURLs) {
+                refreshImageSizeFetcher(imageURL);
+            }
         }
     }
 
