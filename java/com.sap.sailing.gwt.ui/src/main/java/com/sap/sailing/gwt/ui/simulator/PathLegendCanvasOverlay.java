@@ -9,6 +9,7 @@ import com.google.gwt.canvas.dom.client.TextMetrics;
 import com.google.gwt.i18n.client.DateTimeFormat;
 import com.google.gwt.i18n.client.TimeZone;
 import com.google.gwt.maps.client.MapWidget;
+import com.sap.sailing.domain.common.AbstractBearing;
 import com.sap.sailing.domain.common.impl.DegreeBearingImpl;
 import com.sap.sailing.gwt.ui.simulator.racemap.FullCanvasOverlay;
 import com.sap.sailing.simulator.util.SailingSimulatorConstants;
@@ -102,7 +103,7 @@ public class PathLegendCanvasOverlay extends FullCanvasOverlay {
             //
             // TODO: draw current arrow
             //
-            DegreeBearingImpl curBear = new DegreeBearingImpl(this.curBearing);
+            AbstractBearing curBear = new DegreeBearingImpl(this.curBearing);
     
             //Context2d context2d = canvas.getContext2d();
     

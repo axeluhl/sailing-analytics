@@ -19,6 +19,7 @@ import com.sap.sailing.util.SmartFutureCache;
 import com.sap.sailing.util.SmartFutureCache.EmptyUpdateInterval;
 import com.sap.sailing.util.impl.LockUtil;
 import com.sap.sailing.util.impl.NamedReentrantReadWriteLock;
+import com.sap.sse.common.Util;
 
 /**
  * When the thread reading a value from the cache holds a fair read lock, and another thread is trying to obtain the
@@ -88,15 +89,15 @@ public class SmartFutureCacheDeadlockTest {
     @Test
     public void testBasicLockingAndUnlockingWithScripts() throws InterruptedException {
         logger.info("starting testBasicLockingAndUnlockingWithScripts");
-        assertFalse(lock.getReaders().contains(readerThread));
+        assertFalse(Util.contains(lock.getReaders(), readerThread));
         try {
             reader.performAndWait(Command.LOCK_FOR_READ);
-            assertTrue(lock.getReaders().contains(readerThread));
+            assertTrue(Util.contains(lock.getReaders(), readerThread));
             writer.perform(Command.LOCK_FOR_WRITE);
             assertNull(lock.getWriter());
         } finally {
             reader.performAndWait(Command.UNLOCK_AFTER_READ);
-            assertFalse(lock.getReaders().contains(readerThread));
+            assertFalse(Util.contains(lock.getReaders(), readerThread));
             writer.performAndWait(Command.UNLOCK_AFTER_WRITE);
         }
     }
@@ -195,7 +196,7 @@ public class SmartFutureCacheDeadlockTest {
         writerThread.join();
         assertFalse(reader.isRunning());
         assertFalse(writer.isRunning());
-        assertTrue(lock.getReaders().isEmpty());
+        assertTrue(Util.isEmpty(lock.getReaders()));
         assertNull(lock.getWriter());
     }
     

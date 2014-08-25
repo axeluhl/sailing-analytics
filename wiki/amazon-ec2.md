@@ -266,14 +266,15 @@ A closer look reveals that an ELB instance consists itself of many other invisib
 Here are the steps to create a load balanced setup:
 
 - Create a master instance holding all data (see http://wiki.sapsailing.com/wiki/amazon-ec2#Setting-up-Master-and-Replica)
+- When using the Race Committee App (RCApp), make sure the app is configured to send its data to the master instance and not the ELB (otherwise, write requests may end up at replicas which they wouldn't know how to handle). You may want to configure a separate URL for the master server for this purpose, so you don't have to re-configure the RCApp devices when switching to a different master server.
 - Create `n` instances that are configured to connect to the master server
 - Create a load balancer that redirects everything from HTTP port 8888 to HTTP port 8888 and leave the other switches and checkboxes on their default value
 - As "Ping Port" enter HTTP port 8888 and use /index.html as the "Ping Path." Leave the other values on their defaults again.
 - Put the ELB into the "Sailing Analytics App" security group as it will appear in the landscape as a regular sailing analytics application server.
 - Associate all your instances
-- Connect your domain with the IP of the load balancer. It could be a good idea to use an Elastic IP that always stays the same for the domain and associate it with your load balancer. That way you can also easily switch between a load balancer and a single instance setup.
+- Connect your domain with the IP of the load balancer. It could be a good idea to use an Elastic IP that always stays the same for the domain and associate it with your load balancer. That way you can also easily switch between a load balancer and a single instance setup. Again, remember not to let the RCApp devices point to the ELB domain as their updates could hit a replica which wouldn't know how to handle!
 
-Amazon ELB is designed to handle unlimited concurrent requests per second with “gradually increasing” load pattern (although it's initial capacity is described to reach 20k requests/secs). It is not designed to handle heavy sudden spike of load or flash traffic because of it's internal structure where it needs to fire up more instances when load increases. ELB's can be pre-warmed though by writing to the AWS Support Team.
+Amazon ELB is designed to handle unlimited concurrent requests per second with “gradually increasing” load pattern (although it's initial capacity is described to reach 20k requests/secs). It is not designed to handle heavy sudden spike of load or flash traffic because of its internal structure where it needs to fire up more instances when load increases. ELB's can be pre-warmed though by writing to the AWS Support Team.
 
 ### Access MongoDB database
 

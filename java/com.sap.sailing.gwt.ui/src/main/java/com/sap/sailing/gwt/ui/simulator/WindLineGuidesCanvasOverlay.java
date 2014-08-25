@@ -15,6 +15,7 @@ import com.google.gwt.canvas.dom.client.Context2d;
 import com.google.gwt.maps.client.MapWidget;
 import com.google.gwt.maps.client.base.LatLng;
 import com.google.gwt.maps.client.base.Point;
+import com.sap.sailing.domain.common.AbstractBearing;
 import com.sap.sailing.domain.common.dto.PositionDTO;
 import com.sap.sailing.domain.common.impl.DegreeBearingImpl;
 import com.sap.sailing.gwt.ui.shared.SimulatorWindDTO;
@@ -158,7 +159,7 @@ public class WindLineGuidesCanvasOverlay extends FullCanvasOverlay implements Ti
                 SimulatorWindDTO windDTO = windDTOIter.next();
                 //System.out.println("wind angle: "+index+", "+windDTO.trueWindBearingDeg);
                 if (((index % xRes) > 0)&&((index % xRes) < (xRes-1))) {
-                    DegreeBearingImpl dbi = new DegreeBearingImpl(windDTO.trueWindBearingDeg);
+                    AbstractBearing dbi = new DegreeBearingImpl(windDTO.trueWindBearingDeg);
                     drawScaledArrow(windDTO, dbi.getRadians(), index, pxLength, drawHead);
                 }
                 index++;
