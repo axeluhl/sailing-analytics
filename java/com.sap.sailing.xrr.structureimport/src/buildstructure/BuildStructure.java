@@ -33,7 +33,7 @@ public class BuildStructure {
         }
         
         
-        structure = new RegattaStructure();
+        structure = new RegattaStructure(new GuessSeriesFromRaceName());
         
         for(int i=0;i<races.size();i++){
             structure.addRace(races.get(i), numberOfRaces);

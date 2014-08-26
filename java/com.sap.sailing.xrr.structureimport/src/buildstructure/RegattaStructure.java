@@ -8,33 +8,15 @@ import com.sap.sailing.xrr.schema.Race;
 public class RegattaStructure {
     
     ArrayList<RaceType> raceTypes = new ArrayList<RaceType>();
+    GuessSeries guessSeries;
     
-    public RegattaStructure(){
-        
+    public RegattaStructure(GuessSeries guessSeries){
+        this.guessSeries = guessSeries;
     }
     
     public void addRace(Race race, int[] numberOfRaces){
         
-        String[] raceName = race.getRaceName().split(" ");
-        String raceType = raceName[0];
-        
-        switch (raceType.charAt(0)){
-            case 'Q':
-                raceType = "Qualification";
-                break;
-            case 'R':
-                raceType = "Opening Series";
-                break;
-            case 'F':
-                raceType = "Finals";
-                break;
-            case 'M':
-                raceType = "Medal";
-                break;
-            default:
-                raceType = "Default";
-                break;
-        }
+        String raceType = guessSeries.guessSeries(race.getRaceName());
 
         boolean added = false;
         
