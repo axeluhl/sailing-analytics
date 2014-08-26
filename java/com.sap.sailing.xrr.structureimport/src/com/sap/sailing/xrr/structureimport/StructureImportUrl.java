@@ -16,7 +16,7 @@ import javax.xml.bind.JAXBException;
 
 import buildstructure.BuildStructure;
 import buildstructure.Fleet;
-import buildstructure.SetRacenumber;
+import buildstructure.SetRacenumberStrategy;
 import buildstructure.RaceType;
 import buildstructure.RegattaStructure;
 
@@ -57,11 +57,11 @@ public class StructureImportUrl {
     private ArrayList<Regattas> regattas;
     private LinkedHashMap<String, Boat> boatForPerson;
     private DomainFactory baseDomainFactory;
-    private SetRacenumber setRacenumber;
+    private SetRacenumberStrategy setRacenumberStrategy;
 
-    public StructureImportUrl(String url, SetRacenumber setRacenumber) {
+    public StructureImportUrl(String url, SetRacenumberStrategy setRacenumber) {
 
-    	this.setRacenumber = setRacenumber;
+    	this.setRacenumberStrategy = setRacenumber;
         regattas = new EventImport().getRegattas(url);
 
         for (int i = 0; i < regattas.size(); i++) {
@@ -148,7 +148,7 @@ public class StructureImportUrl {
                 Race[] races = fleets.get(raceType.getMaxIndex()).getRaces();
                 for (int j = 0; j < races.length; j++) {
                 	Race race = races[j];
-                    setRacenumber.setRacenumber(race, raceType, i, raceNames);
+                    setRacenumberStrategy.setRacenumber(race, raceType, i, raceNames);
                 }
                 series.add(raceNames);
 

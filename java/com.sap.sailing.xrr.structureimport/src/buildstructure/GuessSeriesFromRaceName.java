@@ -2,7 +2,7 @@ package buildstructure;
 
 import com.sap.sailing.xrr.schema.Race;
 
-public class GuessSeriesFromRaceName implements GuessSeries {
+public class GuessSeriesFromRaceName implements GuessSeriesStrategy {
 
 	@Override
 	public String guessSeries(String race) {

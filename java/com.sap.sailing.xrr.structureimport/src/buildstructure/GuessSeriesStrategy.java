@@ -1,6 +1,6 @@
 package buildstructure;
 
-public interface GuessSeries {
+public interface GuessSeriesStrategy {
 	
 	public String guessSeries(String race);
 

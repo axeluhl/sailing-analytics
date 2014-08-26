@@ -8,15 +8,15 @@ import com.sap.sailing.xrr.schema.Race;
 public class RegattaStructure {
     
     ArrayList<RaceType> raceTypes = new ArrayList<RaceType>();
-    GuessSeries guessSeries;
+    GuessSeriesStrategy guessSeriesStrategy;
     
-    public RegattaStructure(GuessSeries guessSeries){
-        this.guessSeries = guessSeries;
+    public RegattaStructure(GuessSeriesStrategy guessSeries){
+        this.guessSeriesStrategy = guessSeries;
     }
     
     public void addRace(Race race, int[] numberOfRaces){
         
-        String raceType = guessSeries.guessSeries(race.getRaceName());
+        String raceType = guessSeriesStrategy.guessSeries(race.getRaceName());
 
         boolean added = false;
         
