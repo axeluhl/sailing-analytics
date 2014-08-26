@@ -54,7 +54,6 @@ public class RecentEvent extends UIObject {
                 }
             }
         });
-
     }
     
     public void setEvent(EventBaseDTO event) {
@@ -64,17 +63,17 @@ public class RecentEvent extends UIObject {
     
     private void updateUI() {
         SafeHtml safeHtmlEventName = LongNamesUtil.breakLongName(event.getName());
-        eventName.setInnerSafeHtml(safeHtmlEventName); 
-        
-        if(!event.isRunning()) {
+        eventName.setInnerSafeHtml(safeHtmlEventName);
+
+        if (!event.isRunning()) {
             isLiveDiv.getStyle().setDisplay(Display.NONE);
         }
-            
+
         venueName.setInnerText(event.venue.getName());
         eventStartDate.setInnerText(EventDatesFormatterUtil.formatDateRangeWithoutYear(event.startDate, event.endDate));
-        
+
         List<String> photoGalleryImageURLs = event.getPhotoGalleryImageURLs();
-        if(photoGalleryImageURLs.size() == 0) {
+        if (photoGalleryImageURLs.size() == 0) {
             eventImage.setSrc(defaultImageUrl);
         } else {
             eventImage.setSrc(photoGalleryImageURLs.get(0));
