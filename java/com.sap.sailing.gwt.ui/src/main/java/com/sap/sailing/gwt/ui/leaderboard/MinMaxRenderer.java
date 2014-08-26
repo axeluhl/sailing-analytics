@@ -87,7 +87,7 @@ public class MinMaxRenderer {
     public void updateMinMax(DisplayedLeaderboardRowsProvider displayedLeaderboardRowsProvider) {
         LeaderboardRowDTO minimumRow = null;
         LeaderboardRowDTO maximumRow = null;
-        for (LeaderboardRowDTO row : displayedLeaderboardRowsProvider.getRowsToDisplay()) {
+        for (LeaderboardRowDTO row : displayedLeaderboardRowsProvider.getRowsToDisplay().values()) {
             if (valueProvider.getDoubleValue(row) != null
                     && (minimumRow == null || comparator.compare(minimumRow, row) > 0)) {
                 minimumRow = row;

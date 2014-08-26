@@ -170,9 +170,9 @@ public class TracTracEventManagementPanelPO extends PageArea {
         CellTablePO<DataEntryPO> table = getTrackableRacesTable();
         
         for(DataEntryPO entry : table.getEntries()) {
-            String event = entry.getColumnContent(0);
-            String race = entry.getColumnContent(1);
-            String boatClass = entry.getColumnContent(2);
+            String event = entry.getColumnContent("Event");
+            String race = entry.getColumnContent("Race");
+            String boatClass = entry.getColumnContent("Boat Class");
             
             descriptors.add(new TrackableRaceDescriptor(event, race, boatClass));
         }
@@ -239,9 +239,9 @@ public class TracTracEventManagementPanelPO extends PageArea {
         Iterator<DataEntryPO> iterator = entries.iterator();
         while (iterator.hasNext()) {
             DataEntryPO entry = iterator.next();
-            String event = entry.getColumnContent(0);
-            String race = entry.getColumnContent(1);
-            String boatClass = entry.getColumnContent(2);
+            String event = entry.getColumnContent("Event");
+            String race = entry.getColumnContent("Race");
+            String boatClass = entry.getColumnContent("Boat Class");
             TrackableRaceDescriptor descriptor = new TrackableRaceDescriptor(event, race, boatClass);
             if (!races.contains(descriptor)) {
                 iterator.remove();

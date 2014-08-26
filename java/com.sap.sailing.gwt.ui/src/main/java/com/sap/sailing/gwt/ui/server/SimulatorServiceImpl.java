@@ -55,6 +55,7 @@ import com.sap.sailing.gwt.ui.simulator.windpattern.WindPatternDisplayManager;
 import com.sap.sailing.gwt.ui.simulator.windpattern.WindPatternNotFoundException;
 import com.sap.sailing.gwt.ui.simulator.windpattern.WindPatternSetting;
 import com.sap.sailing.simulator.BoatClassProperties;
+import com.sap.sailing.simulator.Grid;
 import com.sap.sailing.simulator.Path;
 import com.sap.sailing.simulator.PolarDiagram;
 import com.sap.sailing.simulator.SailingSimulator;
@@ -62,11 +63,11 @@ import com.sap.sailing.simulator.SimulationParameters;
 import com.sap.sailing.simulator.TimedPosition;
 import com.sap.sailing.simulator.TimedPositionWithSpeed;
 import com.sap.sailing.simulator.impl.ConfigurationManager;
+import com.sap.sailing.simulator.impl.CurvedGrid;
 import com.sap.sailing.simulator.impl.PathGenerator1Turner;
 import com.sap.sailing.simulator.impl.PathImpl;
 import com.sap.sailing.simulator.impl.PolarDiagramCSV;
 import com.sap.sailing.simulator.impl.ReadingConfigurationFileStatus;
-import com.sap.sailing.simulator.impl.RectangularBoundary;
 import com.sap.sailing.simulator.impl.SailingSimulatorImpl;
 import com.sap.sailing.simulator.impl.SimulationParametersImpl;
 import com.sap.sailing.simulator.impl.TimedPositionImpl;
@@ -185,9 +186,7 @@ public class SimulatorServiceImpl extends RemoteServiceServlet implements Simula
         course.add(nw);
         course.add(se);
 
-        RectangularBoundary bd = new RectangularBoundary(nw, se, 0.1);
-        // List<Position> lattice = bd.extractLattice(params.getxRes(),
-        // params.getyRes());
+        Grid bd = new CurvedGrid(nw, se);
 
         controlParameters.resetBlastRandomStream = params.isKeepState();
         retreiveWindControlParameters(pattern);
@@ -201,7 +200,7 @@ public class SimulatorServiceImpl extends RemoteServiceServlet implements Simula
             throw new WindPatternNotFoundException("Please select a valid wind pattern.");
         }
 
-        Position[][] grid = bd.extractGrid(params.getxRes(), params.getyRes(), params.getBorderY(), params.getBorderX());
+        Position[][] grid = bd.generatePositions(params.getxRes(), params.getyRes(), params.getBorderY(), params.getBorderX());
         wf.setPositionGrid(grid);
 
         TimePoint startTime = new MillisecondsTimePoint(params.getStartTime().getTime());
@@ -321,7 +320,7 @@ public class SimulatorServiceImpl extends RemoteServiceServlet implements Simula
         }
 
         for (BoatClassProperties tuple : ConfigurationManager.INSTANCE.getBoatClassesInfo()) {
-            boatClassesDTOs.add(new BoatClassDTO(tuple.getName(), tuple.getLength()));
+            boatClassesDTOs.add(new BoatClassDTO(tuple.getName(), null, tuple.getLength()));
         }
 
         result.setBoatClassDTOs(boatClassesDTOs.toArray(new BoatClassDTO[boatClassesDTOs.size()]));
@@ -549,9 +548,9 @@ public class SimulatorServiceImpl extends RemoteServiceServlet implements Simula
         SailingSimulator sailingSimulator = new SailingSimulatorImpl(simulationParameters);
         Path gpsWind = sailingSimulator.getLegGPSTrack(SimulatorServiceUtils.toSimulatorUISelection(requestData.selection));
 
-        RectangularBoundary rectangularBoundry = new RectangularBoundary(oldMovedPosition, newMovedPosition, 0.1);
-        this.controlParameters.baseWindBearing += rectangularBoundry.getSouth().getDegrees();
-        WindFieldGeneratorMeasured windFieldGenerator = new WindFieldGeneratorMeasured(rectangularBoundry, this.controlParameters);
+        Grid grid = new CurvedGrid(oldMovedPosition, newMovedPosition);
+        this.controlParameters.baseWindBearing += grid.getSouth().getDegrees();
+        WindFieldGeneratorMeasured windFieldGenerator = new WindFieldGeneratorMeasured(grid, this.controlParameters);
         windFieldGenerator.setGPSWind(gpsWind);
 
         TimePoint startTime = new MillisecondsTimePoint(requestData.oldMovedPointTimePoint);
@@ -748,7 +747,7 @@ public class SimulatorServiceImpl extends RemoteServiceServlet implements Simula
         }
         windFieldDTO.curBearing = wf.getWindParameters().curBearing;
         windFieldDTO.curSpeed = wf.getWindParameters().curSpeed;
-        if (params.isShowStreamlets2()) {
+        if (params.isShowStreamlets()) {
             WindData windData = new WindData();
             windData.rcStart = params.getNorthWest();
             windData.rcEnd = params.getSouthEast();

@@ -23,7 +23,9 @@
        </div>
     </div>
     <div class="{res.mediaCss.small12} {res.mediaCss.medium4} {res.mediaCss.columns} {local_res.css.sitefooter_language}">
-		<ui:text from='{i18n.footerLanguage}'/>:<g:Anchor ui:field="changeLanguageLink" styleName="{local_res.css.sitefooter_language_link}" />
+        <div ui:field="languageSelectionDiv">
+			<ui:text from='{i18n.footerLanguage}'/>:<g:Anchor ui:field="changeLanguageLink" styleName="{local_res.css.sitefooter_language_link}" />
+		</div>	
 	</div>
   </div>
 </footer>

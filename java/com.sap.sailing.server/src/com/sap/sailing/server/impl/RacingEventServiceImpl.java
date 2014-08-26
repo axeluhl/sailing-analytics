@@ -558,7 +558,7 @@ public class RacingEventServiceImpl implements RacingEventServiceWithTestSupport
     private void loadMediaLibary() {
         Collection<DBMediaTrack> allDBMediaTracks = mediaDB.loadAllMediaTracks();
         for (DBMediaTrack dbMediaTrack : allDBMediaTracks) {
-            MimeType mimeType = dbMediaTrack.mimeType != null ? MimeType.valueOf(dbMediaTrack.mimeType) : null;
+            MimeType mimeType = dbMediaTrack.mimeType != null ? MimeType.byName(dbMediaTrack.mimeType) : null;
             MediaTrack mediaTrack = new MediaTrack(dbMediaTrack.dbId, dbMediaTrack.title, dbMediaTrack.url,
                     dbMediaTrack.startTime, dbMediaTrack.durationInMillis, mimeType);
             mediaTrackAdded(mediaTrack);
@@ -1892,8 +1892,8 @@ public class RacingEventServiceImpl implements RacingEventServiceWithTestSupport
 
     @Override
     public LeaderboardGroup addLeaderboardGroup(UUID id, String groupName,
-            String description, boolean displayGroupsInReverseOrder,
-            List<String> leaderboardNames, int[] overallLeaderboardDiscardThresholds, ScoringSchemeType overallLeaderboardScoringSchemeType) {
+            String description, String displayName,
+            boolean displayGroupsInReverseOrder, List<String> leaderboardNames, int[] overallLeaderboardDiscardThresholds, ScoringSchemeType overallLeaderboardScoringSchemeType) {
         ArrayList<Leaderboard> leaderboards = new ArrayList<>();
         for (String leaderboardName : leaderboardNames) {
             Leaderboard leaderboard = leaderboardsByName.get(leaderboardName);
@@ -1903,8 +1903,8 @@ public class RacingEventServiceImpl implements RacingEventServiceWithTestSupport
                 leaderboards.add(leaderboard);
             }
         }
-        LeaderboardGroup result = new LeaderboardGroupImpl(id, groupName, description, displayGroupsInReverseOrder,
-                leaderboards);
+        LeaderboardGroup result = new LeaderboardGroupImpl(id, groupName, description, displayName,
+                displayGroupsInReverseOrder, leaderboards);
         if (overallLeaderboardScoringSchemeType != null) {
             // create overall leaderboard and its discards settings
             addOverallLeaderboardToLeaderboardGroup(result,
@@ -1984,14 +1984,17 @@ public class RacingEventServiceImpl implements RacingEventServiceWithTestSupport
 
     @Override
     public void updateLeaderboardGroup(String oldName, String newName, String description,
-            List<String> leaderboardNames, int[] overallLeaderboardDiscardThresholds,
-            ScoringSchemeType overallLeaderboardScoringSchemeType) {
+            String displayName, List<String> leaderboardNames,
+            int[] overallLeaderboardDiscardThresholds, ScoringSchemeType overallLeaderboardScoringSchemeType) {
         if (!oldName.equals(newName)) {
             renameLeaderboardGroup(oldName, newName);
         }
         LeaderboardGroup group = getLeaderboardGroupByName(newName);
         if (!description.equals(group.getDescription())) {
             group.setDescriptiom(description);
+        }
+        if (!Util.equalsWithNull(displayName, group.getDisplayName())) {
+            group.setDisplayName(displayName);
         }
         group.clearLeaderboards();
         for (String leaderboardName : leaderboardNames) {

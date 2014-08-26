@@ -74,6 +74,11 @@ public class CompositeTabbedSettingsDialog extends SettingsDialog<CompositeSetti
             public void setVisible(boolean visibility) {
                 throw new RuntimeException("Virtual composite component doesn't know how to make itself visible");
             }
+
+            @Override
+            public String getDependentCssClassName() {
+                return null;
+            }
         }, stringConstants);
         settingsDialogComponents = new HashMap<Component<?>, SettingsDialogComponent<?>>();
         for (Component<?> component : components) {

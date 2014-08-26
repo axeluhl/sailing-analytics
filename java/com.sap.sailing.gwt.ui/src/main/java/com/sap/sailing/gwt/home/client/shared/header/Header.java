@@ -4,6 +4,7 @@ import java.util.Arrays;
 import java.util.List;
 
 import com.google.gwt.core.client.GWT;
+import com.google.gwt.dom.client.AnchorElement;
 import com.google.gwt.dom.client.StyleInjector;
 import com.google.gwt.event.dom.client.ClickEvent;
 import com.google.gwt.event.dom.client.KeyCodes;
@@ -12,6 +13,9 @@ import com.google.gwt.event.dom.client.KeyPressHandler;
 import com.google.gwt.uibinder.client.UiBinder;
 import com.google.gwt.uibinder.client.UiField;
 import com.google.gwt.uibinder.client.UiHandler;
+import com.google.gwt.user.client.DOM;
+import com.google.gwt.user.client.Event;
+import com.google.gwt.user.client.EventListener;
 import com.google.gwt.user.client.Window;
 import com.google.gwt.user.client.ui.Anchor;
 import com.google.gwt.user.client.ui.Button;
@@ -19,11 +23,13 @@ import com.google.gwt.user.client.ui.Composite;
 import com.google.gwt.user.client.ui.TextBox;
 import com.google.gwt.user.client.ui.Widget;
 import com.sap.sailing.gwt.home.client.app.PlaceNavigator;
+import com.sap.sailing.gwt.home.client.i18n.TextMessages;
 
 public class Header extends Composite {
     @UiField Anchor startPageLink;
     @UiField Anchor eventsPageLink;
     @UiField Anchor solutionsPageLink;
+    @UiField AnchorElement homeLink;
 //    @UiField Anchor sponsoringPageLink;
     
     @UiField TextBox searchText;
@@ -37,7 +43,7 @@ public class Header extends Composite {
     
     private static HeaderUiBinder uiBinder = GWT.create(HeaderUiBinder.class);
 
-    public Header(PlaceNavigator navigator) {
+    public Header(final PlaceNavigator navigator) {
         this.navigator = navigator;
 
         HeaderResources.INSTANCE.css().ensureInjected();
@@ -46,12 +52,24 @@ public class Header extends Composite {
         initWidget(uiBinder.createAndBindUi(this));
         links = Arrays.asList(new Anchor[] { startPageLink, eventsPageLink, solutionsPageLink });
         
-        searchText.getElement().setAttribute("placeholder", "Search SAPSailing.com");
+        searchText.getElement().setAttribute("placeholder", TextMessages.INSTANCE.headerSearchPlaceholder());
         searchText.addKeyPressHandler(new KeyPressHandler() {
             @Override
             public void onKeyPress(KeyPressEvent event) {
                 if (event.getNativeEvent().getKeyCode() == KeyCodes.KEY_ENTER) {
                     searchButton.click();
+                }
+            }
+        });
+        
+        Event.sinkEvents(homeLink, Event.ONCLICK);
+        Event.setEventListener(homeLink, new EventListener() {
+            @Override
+            public void onBrowserEvent(Event event) {
+                switch (DOM.eventGetType(event)) {
+                    case Event.ONCLICK:
+                       navigator.goToHome();
+                       break;
                 }
             }
         });
@@ -66,11 +84,13 @@ public class Header extends Composite {
     @UiHandler("eventsPageLink")
     public void goToEvents(ClickEvent e) {
         navigator.goToEvents();
+        setActiveLink(eventsPageLink);
     }
 
     @UiHandler("solutionsPageLink")
     public void goToSolutions(ClickEvent e) {
         navigator.goToSolutions();
+        setActiveLink(solutionsPageLink);
     }
 
 //    @UiHandler("sponsoringPageLink")
@@ -81,7 +101,7 @@ public class Header extends Composite {
     @UiHandler("searchButton")
     void searchButtonClick(ClickEvent event) {
         if(searchText.getText().isEmpty()) {
-            Window.alert("Please enter a search term.");
+            Window.alert(TextMessages.INSTANCE.pleaseEnterASearchTerm());
         } else {
             navigator.goToSearchResult(searchText.getText());
         }

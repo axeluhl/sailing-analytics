@@ -80,7 +80,7 @@ public class MultiLeaderboardPanel extends AbstractLazyComponent<LeaderboardSett
     private LeaderboardSettings getOrCreateLeaderboardSettings(String leaderboardName, LeaderboardSettings currentLeaderboardSettings) {
         LeaderboardSettings newLeaderboardSettings = leaderboardNamesAndSettings.get(leaderboardName);
         if(newLeaderboardSettings == null) {
-            newLeaderboardSettings = LeaderboardSettingsFactory.getInstance().createNewDefaultSettings(null, null, null, false);
+            newLeaderboardSettings = LeaderboardSettingsFactory.getInstance().createNewDefaultSettings(null, null, null, false, /* showRegattaRank */ true);
         }
         if(currentLeaderboardSettings != null) {
             newLeaderboardSettings = LeaderboardSettingsFactory.getInstance().mergeLeaderboardSettings(newLeaderboardSettings, currentLeaderboardSettings);
@@ -150,7 +150,7 @@ public class MultiLeaderboardPanel extends AbstractLazyComponent<LeaderboardSett
     }
 
     private void readAndUpdateLeaderboardsOfMetaleaderboard() {
-        sailingService.getLeaderboardsNamesOfMetaleaderboard(metaLeaderboardName, new AsyncCallback<List<Util.Pair<String, String>>>() {
+        sailingService.getLeaderboardsNamesOfMetaLeaderboard(metaLeaderboardName, new AsyncCallback<List<Util.Pair<String, String>>>() {
             
             @Override
             public void onSuccess(List<Util.Pair<String, String>> leaderboardNamesAndDisplayNames) {
@@ -202,7 +202,8 @@ public class MultiLeaderboardPanel extends AbstractLazyComponent<LeaderboardSett
             selectedLeaderboardPanel = new LeaderboardPanel(sailingService, asyncActionsExecutor, newLeaderboardSettings,
                     /* preselectedRace*/ null, new CompetitorSelectionModel(true), timer,
                     null, newSelectedLeaderboardName, errorReporter, stringMessages, userAgent,
-                    showRaceDetails, /* raceTimesInfoProvider */null, false,  /* adjustTimerDelay */ true);
+                    showRaceDetails, /* competitorSearchTextBox */ null, /* showSelectionCheckbox */ true,  /* raceTimesInfoProvider */null, 
+                    false, /* adjustTimerDelay */ true, /*autoApplyTopNFilter*/ false, false);
             selectedLeaderboardFlowPanel.add(selectedLeaderboardPanel);
         } else {
             if(selectedLeaderboardPanel != null && selectedLeaderboardFlowPanel != null) {

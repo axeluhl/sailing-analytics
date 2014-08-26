@@ -24,7 +24,7 @@ public class FormattedDoubleDetailTypeColumn extends DetailTypeColumn<Double, St
         formatter = createNumberFormatter(detailType);
         this.minMaxRenderer = createMinMaxRenderer();
     }
-
+    
     protected MinMaxRenderer createMinMaxRenderer() {
         return new MinMaxRenderer(this, getComparator());
     }
@@ -38,7 +38,7 @@ public class FormattedDoubleDetailTypeColumn extends DetailTypeColumn<Double, St
     }
 
     @Override
-    protected void updateMinMax() {
+    public void updateMinMax() {
         getMinMaxRenderer().updateMinMax(getDisplayedLeaderboardRowsProvider());
     }
 

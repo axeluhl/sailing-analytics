@@ -9,7 +9,9 @@ import com.google.gwt.dom.client.SpanElement;
 import com.google.gwt.uibinder.client.UiBinder;
 import com.google.gwt.uibinder.client.UiField;
 import com.google.gwt.user.client.ui.UIObject;
+import com.sap.sailing.domain.common.LeaderboardNameConstants;
 import com.sap.sailing.domain.common.dto.FleetDTO;
+import com.sap.sailing.gwt.home.client.i18n.TextMessages;
 import com.sap.sailing.gwt.home.client.place.event.EventPageNavigator;
 import com.sap.sailing.gwt.ui.shared.RaceGroupSeriesDTO;
 import com.sap.sailing.gwt.ui.shared.StrippedLeaderboardDTO;
@@ -28,7 +30,11 @@ public class EventRegattaRacesPhase extends UIObject {
         EventRegattaRacesResources.INSTANCE.css().ensureInjected();
         setElement(uiBinder.createAndBindUi(this));
         
-        phaseName.setInnerText(series.getName());
+        if(series.getName().equals(LeaderboardNameConstants.DEFAULT_SERIES_NAME)) {
+            phaseName.setInnerText(TextMessages.INSTANCE.races());
+        } else {
+            phaseName.setInnerText(series.getName());
+        }
         
         int numberOfFleets = series.getFleets().size();
         if(numberOfFleets > 1) {

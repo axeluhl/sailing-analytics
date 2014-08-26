@@ -387,7 +387,11 @@ public class EventManagementPanel extends SimplePanel implements EventsRefresher
         TextColumn<LeaderboardGroupDTO> leaderboardGroupDescriptionColumn = new TextColumn<LeaderboardGroupDTO>() {
             @Override
             public String getValue(LeaderboardGroupDTO event) {
-                return event.description;
+                String result = event.description;
+                if(event.description != null && event.description.length() > 40) {
+                    result = event.description.substring(0, 40) + "...";
+                }
+                return result;
             }
         };
         final SafeHtmlCell leaderboardsCell = new SafeHtmlCell();
@@ -468,7 +472,11 @@ public class EventManagementPanel extends SimplePanel implements EventsRefresher
         TextColumn<LeaderboardGroupDTO> leaderboardGroupDescriptionColumn = new TextColumn<LeaderboardGroupDTO>() {
             @Override
             public String getValue(LeaderboardGroupDTO event) {
-                return event.description;
+                String result = event.description;
+                if(event.description != null && event.description.length() > 40) {
+                    result = event.description.substring(0, 40) + "...";
+                }
+                return result;
             }
         };
         final SafeHtmlCell leaderboardsCell = new SafeHtmlCell();

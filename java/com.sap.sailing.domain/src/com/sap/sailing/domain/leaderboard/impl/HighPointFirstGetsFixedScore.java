@@ -32,11 +32,11 @@ public abstract class HighPointFirstGetsFixedScore extends HighPoint {
         this.minimumScoreFromRank = minimumScoreFromRank;
     }
     
-    protected double getScoreForRaceWinner() {
+    double getScoreForRaceWinner() {
         return scoreForRaceWinner;
     }
     
-    private double getMinimumScoreFromRank() {
+    double getMinimumScoreFromRank() {
         return minimumScoreFromRank;
     }
 

@@ -258,12 +258,12 @@ public interface SailingService extends RemoteService {
     
     void removeLeaderboardGroups(Set<String> groupNames);
     
-    LeaderboardGroupDTO createLeaderboardGroup(String groupName, String description,
+    LeaderboardGroupDTO createLeaderboardGroup(String groupName, String description, String displayName,
             boolean displayGroupsInReverseOrder, int[] overallLeaderboardDiscardThresholds,
             ScoringSchemeType overallLeaderboardScoringSchemeType);
     
-    void updateLeaderboardGroup(String oldName, String newName, String description, List<String> leaderboardNames,
-            int[] overallLeaderboardDiscardThresholds, ScoringSchemeType overallLeaderboardScoringSchemeType);
+    void updateLeaderboardGroup(String oldName, String newName, String description, String newDisplayName,
+            List<String> leaderboardNames, int[] overallLeaderboardDiscardThresholds, ScoringSchemeType overallLeaderboardScoringSchemeType);
 
     CompetitorsRaceDataDTO getCompetitorsRaceData(RegattaAndRaceIdentifier race, List<CompetitorDTO> competitors, Date from, Date to,
             long stepSizeInMs, DetailType detailType, String leaderboardGroupName, String leaderboardName) throws NoWindException;
@@ -294,9 +294,7 @@ public interface SailingService extends RemoteService {
 
     void renameEvent(UUID eventId, String newName);
 
-    EventDTO getEventByName(String eventName);
-    
-    EventDTO getEventById(UUID id);
+    EventDTO getEventById(UUID id, boolean withStatisticalData);
 
     Iterable<String> getScoreCorrectionProviderNames();
 
@@ -354,12 +352,16 @@ public interface SailingService extends RemoteService {
     
     CourseAreaDTO createCourseArea(UUID eventId, String courseAreaName);
     
-    List<Util.Pair<String, String>> getLeaderboardsNamesOfMetaleaderboard(String metaLeaderboardName);
+    List<Util.Pair<String, String>> getLeaderboardsNamesOfMetaLeaderboard(String metaLeaderboardName);
 
     Util.Pair<String, LeaderboardType> checkLeaderboardName(String leaderboardName);
 
+    /** for backward compatibility with the regatta overview */
     List<RaceGroupDTO> getRegattaStructureForEvent(UUID eventId);
-    
+
+    /** the replacement service for getRegattaStructureForEvent() */
+    List<RaceGroupDTO> getRegattaStructureOfEvent(UUID eventId);
+
     List<RegattaOverviewEntryDTO> getRaceStateEntriesForRaceGroup(UUID eventId, List<UUID> visibleCourseAreas,
             List<String> visibleRegattas, boolean showOnlyCurrentlyRunningRaces, boolean showOnlyRacesOfSameDay)
             throws Exception;

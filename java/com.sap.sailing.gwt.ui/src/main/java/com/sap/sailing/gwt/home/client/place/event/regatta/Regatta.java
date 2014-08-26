@@ -1,20 +1,28 @@
 package com.sap.sailing.gwt.home.client.place.event.regatta;
 
+import java.util.ArrayList;
+import java.util.List;
+
 import com.google.gwt.core.client.GWT;
+import com.google.gwt.dom.client.AnchorElement;
 import com.google.gwt.dom.client.DivElement;
+import com.google.gwt.dom.client.HeadingElement;
 import com.google.gwt.dom.client.SpanElement;
 import com.google.gwt.dom.client.Style.Display;
-import com.google.gwt.dom.client.Style.Visibility;
-import com.google.gwt.dom.client.TableElement;
-import com.google.gwt.event.dom.client.ClickEvent;
+import com.google.gwt.dom.client.StyleInjector;
 import com.google.gwt.uibinder.client.UiBinder;
 import com.google.gwt.uibinder.client.UiField;
-import com.google.gwt.uibinder.client.UiHandler;
-import com.google.gwt.user.client.ui.Anchor;
+import com.google.gwt.user.client.DOM;
+import com.google.gwt.user.client.Event;
+import com.google.gwt.user.client.EventListener;
 import com.google.gwt.user.client.ui.Composite;
-import com.google.gwt.user.client.ui.HTMLPanel;
+import com.google.gwt.user.client.ui.Image;
 import com.google.gwt.user.client.ui.Widget;
+import com.sap.sailing.gwt.home.client.BoatClassImageResolver;
+import com.sap.sailing.gwt.home.client.BoatClassImageResources;
+import com.sap.sailing.gwt.home.client.app.PlaceNavigator;
 import com.sap.sailing.gwt.home.client.place.event.EventPageNavigator;
+import com.sap.sailing.gwt.home.client.shared.LongNamesUtil;
 import com.sap.sailing.gwt.ui.shared.EventDTO;
 import com.sap.sailing.gwt.ui.shared.LeaderboardGroupDTO;
 import com.sap.sailing.gwt.ui.shared.RaceGroupDTO;
@@ -28,116 +36,155 @@ public class Regatta extends Composite {
     interface RegattaUiBinder extends UiBinder<Widget, Regatta> {
     }
 
-    @SuppressWarnings("unused")
     private final EventDTO event;
     private final Timer timerForClientServerOffset;
     private final EventPageNavigator pageNavigator;
+    @SuppressWarnings("unused")
+    private final PlaceNavigator placeNavigator;
     private StrippedLeaderboardDTO leaderboard;
     private RaceGroupDTO raceGroup;
-
-    @SuppressWarnings("unused")
+    private final List<RegattaPhase> phasesElements;
     private LeaderboardGroupDTO leaderboardGroup;
+    private final boolean isSingleView;
 
-    @UiField SpanElement regattaName1;
-    @UiField SpanElement regattaName2;
+    @UiField DivElement regattaDiv;
+    @UiField HeadingElement regattaNameHeading;
     @UiField DivElement leaderboardGroupName;
-    @UiField SpanElement scheduledStart;
+    @UiField DivElement leaderboardGroupNameDiv;
+//  @UiField SpanElement scheduledStart;
     @UiField DivElement regattaPhasesPanel;
+    @UiField DivElement regattaPhasesInfoDiv;
+    
     @UiField SpanElement competitorsCount;
+    @UiField DivElement competitorsCountDiv;
     @UiField SpanElement racesCount;
     @UiField SpanElement trackedRacesCount;
     @UiField DivElement isLiveDiv;
-    @UiField TableElement isLiveDiv2;
-    @UiField DivElement isFinishedDiv;
-    @UiField DivElement isFinishedDiv2;
-    @UiField DivElement isScheduledDiv;
-    @UiField Anchor leaderboardLink;
-    @UiField HTMLPanel liveRaceInfosPerFleetPanel;
-    @UiField(provided=true) RegattaCompetitor competitorWithRank1;
-    @UiField(provided=true) RegattaCompetitor competitorWithRank2;
-    @UiField(provided=true) RegattaCompetitor competitorWithRank3;
+//    @UiField TableElement isLiveDiv2;
+//    @UiField DivElement isFinishedDiv;
+//    @UiField DivElement isFinishedDiv2;
+//    @UiField DivElement isScheduledDiv;
+//    @UiField AnchorElement leaderboardLink;
+//    @UiField DivElement liveRaceInfosPerFleetPanel;
+//    @UiField(provided=true) RegattaCompetitor competitorWithRank1;
+//    @UiField(provided=true) RegattaCompetitor competitorWithRank2;
+//    @UiField(provided=true) RegattaCompetitor competitorWithRank3;
+
+    @UiField AnchorElement regattaDetailsLink;
+    @UiField AnchorElement leaderboardLink;
     
-    @UiField HTMLPanel regattaImage;
-    @UiField Anchor regattaImageWithLink;
-
-    @UiField HTMLPanel regattaNameDiv;
-    @UiField Anchor regattaNameWithLink;
-
-    public Regatta(EventDTO event, boolean isNavigatable, Timer timerForClientServerOffset, EventPageNavigator pageNavigator) {
+    @UiField Image boatClassImage;
+    
+    public Regatta(EventDTO event, Timer timerForClientServerOffset, boolean isSingleView, PlaceNavigator placeNavigator, EventPageNavigator pageNavigator) {
         this.event = event;
         this.timerForClientServerOffset = timerForClientServerOffset;
+        this.isSingleView = isSingleView;
+        this.placeNavigator = placeNavigator;
         this.pageNavigator = pageNavigator;
         
-        competitorWithRank1 = new RegattaCompetitor(1, null);
-        competitorWithRank2 = new RegattaCompetitor(2, null);
-        competitorWithRank3 = new RegattaCompetitor(3, null);
+        phasesElements = new ArrayList<RegattaPhase>();
+        
+//        competitorWithRank1 = new RegattaCompetitor(1, null);
+//        competitorWithRank2 = new RegattaCompetitor(2, null);
+//        competitorWithRank3 = new RegattaCompetitor(3, null);
         
         RegattaResources.INSTANCE.css().ensureInjected();
-        initWidget(uiBinder.createAndBindUi(this));
-        
-        regattaImageWithLink.getElement().setAttribute("data-rendermode", "link");
-        regattaImageWithLink.setVisible(isNavigatable);
-        regattaImage.setVisible(!isNavigatable);
+        StyleInjector.injectAtEnd("@media (min-width: 50em) { "+RegattaResources.INSTANCE.largeCss().getText()+"}");
 
-        regattaNameWithLink.getElement().setAttribute("data-rendermode", "link");
-        regattaNameWithLink.setVisible(isNavigatable);
-        regattaNameDiv.setVisible(!isNavigatable);
+        initWidget(uiBinder.createAndBindUi(this));
     }
 
-    public void setData(RaceGroupDTO raceGroup, StrippedLeaderboardDTO leaderboard, LeaderboardGroupDTO leaderboardGroup) {
+    public void setData(LeaderboardGroupDTO leaderboardGroup, boolean hasMultipleLeaderboardGroups, StrippedLeaderboardDTO leaderboard,
+            RaceGroupDTO raceGroup) {
         this.raceGroup = raceGroup;
         this.leaderboard = leaderboard;
         this.leaderboardGroup = leaderboardGroup;
-        
+
+        registerEvents(leaderboardGroup);
+
         boolean hasLiveRace = leaderboard.hasLiveRace(timerForClientServerOffset.getLiveTimePointInMillis());
-        isLiveDiv.setAttribute("data-labeltype", hasLiveRace ? "live" : "");
+        if(!hasLiveRace) {
+            isLiveDiv.getStyle().setDisplay(Display.NONE);
+        }
         
-        boolean isFinished = !hasLiveRace;
-        if(!isFinished) {
-            isFinishedDiv.getStyle().setDisplay(Display.NONE);
+        // boolean isFinished... TODO
+        if(raceGroup.boatClass != null) {
+            boatClassImage.setResource(BoatClassImageResolver.getBoatClassIconResource(raceGroup.boatClass));
+        } else {
+            boatClassImage.setResource(BoatClassImageResources.INSTANCE.genericBoatClass());
         }
         
         String regattaDisplayName = leaderboard.displayName != null ? leaderboard.displayName : leaderboard.name;
-        regattaName1.setInnerText(regattaDisplayName);
-        regattaName2.setInnerText(regattaDisplayName);
-        if(raceGroup.leaderboardGroupName != null) {
-            leaderboardGroupName.setInnerText(raceGroup.leaderboardGroupName);
+        regattaNameHeading.setInnerText(regattaDisplayName);
+        if(hasMultipleLeaderboardGroups && leaderboardGroup.getName() != null) {
+            leaderboardGroupName.setInnerText(LongNamesUtil.shortenLeaderboardGroupName(event.getName(), leaderboardGroup.getName()));
             leaderboardGroupName.setAttribute("data-labeltype", "group1");
         } else {
-            leaderboardGroupName.getStyle().setDisplay(Display.NONE);
+            leaderboardGroupNameDiv.getStyle().setDisplay(Display.NONE);
         }
         
-        if(leaderboard.rows != null) {
-            competitorsCount.setInnerText(String.valueOf(leaderboard.rows.size()));
+        if(leaderboard.competitorsCount > 0) {
+            competitorsCount.setInnerText(String.valueOf(leaderboard.competitorsCount));
         } else {
-            competitorsCount.getStyle().setVisibility(Visibility.HIDDEN);
+            competitorsCountDiv.getStyle().setDisplay(Display.NONE);
         }
-        racesCount.setInnerText("tbd");
-        trackedRacesCount.setInnerText("tbd");
+        setRegattaProgress(leaderboard);
+    }
+    
+    private void setRegattaProgress(StrippedLeaderboardDTO leaderboard) {
+        // clear first 
+        regattaPhasesPanel.removeAllChildren();
+        phasesElements.clear();
+
+        if(raceGroup != null) {
+            if(raceGroup.getSeries().size() == 0) {
+                regattaPhasesInfoDiv.getStyle().setDisplay(Display.NONE);
+            } else {
+                for(RaceGroupSeriesDTO series: raceGroup.getSeries()) {
+                    RegattaPhase regattaPhase = new RegattaPhase(series, leaderboardGroup,
+                            leaderboard, raceGroup, pageNavigator, timerForClientServerOffset); 
+                    regattaPhasesPanel.appendChild(regattaPhase.getElement());
+                    phasesElements.add(regattaPhase);
+                }
+            }
+        }
         
-//        regattaPhasesPanel.add(xxx);
-        setRegattaProgress();
+        racesCount.setInnerText(String.valueOf(leaderboard.getRacesCount()));
+        trackedRacesCount.setInnerText(String.valueOf(leaderboard.getTrackedRacesCount()));
     }
-    
-    private void setRegattaProgress() {
-        for(RaceGroupSeriesDTO series: raceGroup.getSeries()) {
-            RegattaPhase regattaPhase = new RegattaPhase(series); 
-            regattaPhasesPanel.appendChild(regattaPhase.getElement());
+
+    private void registerEvents(final LeaderboardGroupDTO leaderboardGroup) {
+        if(isSingleView) {
+            regattaDetailsLink.getStyle().setDisplay(Display.NONE);
+
+            Event.sinkEvents(leaderboardLink, Event.ONCLICK);
+            Event.setEventListener(leaderboardLink, new EventListener() {
+                @Override
+                public void onBrowserEvent(Event browserEvent) {
+                    switch (DOM.eventGetType(browserEvent)) {
+                        case Event.ONCLICK:
+                            pageNavigator.openLeaderboardViewer(leaderboardGroup, leaderboard);
+                            
+                            // the new leaderboard view integrated into the new design
+                            //placeNavigator.goToLeaderboard(event.id.toString(), leaderboard.name, event.getBaseURL(), event.isOnRemoteServer());
+                            break;
+                    }
+                }
+            });
+        } else {
+            leaderboardLink.getStyle().setDisplay(Display.NONE);
+
+            Event.sinkEvents(regattaDetailsLink, Event.ONCLICK);
+            Event.setEventListener(regattaDetailsLink, new EventListener() {
+                @Override
+                public void onBrowserEvent(Event browserEvent) {
+                    switch (DOM.eventGetType(browserEvent)) {
+                        case Event.ONCLICK:
+                            pageNavigator.goToRegattaRaces(leaderboardGroup, leaderboard, raceGroup);
+                            break;
+                    }
+                }
+            });
         }
-    }
-
-    @UiHandler("leaderboardLink")
-    public void goToLeaderboard(ClickEvent e) {
-        pageNavigator.openLeaderboardViewer(null, leaderboard);
-    }
-    
-    @UiHandler("regattaImageWithLink")
-    public void goToRegattaRaces(ClickEvent e) {
-        pageNavigator.goToRegattaRaces(raceGroup, leaderboard);
-    }
-
-    @UiHandler("regattaNameWithLink")
-    public void goToRegattaRaces2(ClickEvent e) {
-        pageNavigator.goToRegattaRaces(raceGroup, leaderboard);
     }
 }

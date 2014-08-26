@@ -14,8 +14,11 @@ import java.io.ObjectInputStream;
 import java.lang.reflect.Field;
 import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
+import java.util.Map.Entry;
+import java.util.Set;
 
 import org.junit.Before;
 import org.junit.Test;
@@ -71,6 +74,39 @@ public class LeaderboardDTODiffingTest {
             }
         }
         return null;
+    }
+
+    @Test
+    public void testEmptyLegDetailsGetFilled() throws FileNotFoundException, IOException, ClassNotFoundException {
+        // remove legDetails for R9 for all competitors from previousVersion; remember which ones did contain data
+        Set<CompetitorDTO> hadLegDetailsInR9 = new HashSet<>();
+        Map<CompetitorDTO, LeaderboardRowDTO> newRows = new HashMap<>();
+        for (CompetitorDTO competitor : previousVersion.rows.keySet()) {
+            LeaderboardRowDTO competitorRow = new LeaderboardRowDTO();
+            cloner.clone(newVersion.rows.get(competitor), competitorRow);
+            Map<String, LeaderboardEntryDTO> newFieldsByRaceColumnName = new HashMap<>();
+            for (Entry<String, LeaderboardEntryDTO> e : competitorRow.fieldsByRaceColumnName.entrySet()) {
+                LeaderboardEntryDTO newEntry = new LeaderboardEntryDTO();
+                cloner.clone(e.getValue(), newEntry);
+                newFieldsByRaceColumnName.put(e.getKey(), newEntry);
+            }
+            competitorRow.fieldsByRaceColumnName = newFieldsByRaceColumnName;
+            newRows.put(competitor, competitorRow); // use a copy of the row so we can null out legDetails for R9 in previousVersion only
+            LeaderboardRowDTO previousRow = previousVersion.rows.get(competitor);
+            assertNotSame(previousRow, competitorRow);
+            if (previousRow.fieldsByRaceColumnName.get("R9").legDetails != null) {
+                hadLegDetailsInR9.add(competitor);
+                previousRow.fieldsByRaceColumnName.get("R9").legDetails = null;
+                assertNotNull(competitorRow.fieldsByRaceColumnName.get("R9").legDetails != null);
+            }
+        }
+        newVersion.rows = newRows;
+        newVersion.strip(previousVersion); // should contain the leg details now
+        LeaderboardDTO applied = newVersion.getLeaderboardDTO(previousVersion);
+        // now applied must contain the leg details
+        for (CompetitorDTO competitor : hadLegDetailsInR9) {
+            assertNotNull(applied.rows.get(competitor).fieldsByRaceColumnName.get("R9").legDetails);
+        }
     }
     
     @Test
@@ -301,7 +337,7 @@ public class LeaderboardDTODiffingTest {
     public void testPartialRaceColumnDTOCompaction() throws IllegalArgumentException, IllegalAccessException, NoSuchFieldException, SecurityException {
         // create a modified R9 RaceDTO clone in newVersion to make sure that even changing a property in the RaceDTO will keep the RaceColumnDTO from being omitted
         RaceColumnDTO r9 = newVersion.getRaceColumnByName("R9");
-        RaceColumnDTO clonedR9 = new RaceColumnDTO(r9.isValidInTotalScore());
+        RaceColumnDTO clonedR9 = new RaceColumnDTO();
         cloner.clone(r9, clonedR9);
         // also clone the racesPerFleet map, or else we'd be modifying the previous version's one too
         final Field racesPerFleetField = clonedR9.getClass().getDeclaredField("racesPerFleet");

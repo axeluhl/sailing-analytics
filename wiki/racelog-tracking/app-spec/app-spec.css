@@ -1,0 +1,47 @@
+div.admonition {
+    font-size: 0.9em;
+    margin: 1em 0 1em 0;
+    border: 1px solid #555;
+    border-radius: 2px;
+    padding: 0;
+}
+
+div.admonition p {
+    margin: 0.5em 1em 0.5em 1em;
+    padding: 0;
+}
+
+div.admonition pre {
+    margin: 0.4em 1em 0.4em 1em;
+}
+
+div.admonition p.admonition-title {
+    padding-top: 0.5em;
+    font-weight: bold;
+}
+
+div.admonition ul, div.admonition ol {
+    margin: 0.1em 0.5em 0.5em 3em;
+    padding: 0;
+}
+
+div.app {
+    background-color: #99D6FF;
+}
+
+div.server {
+    background-color: #FFFF66;
+}
+
+div.both {
+    background-color: #99E699;
+}
+
+div.image {
+    text-align: center;
+    margin: 2em 0 1em 0;
+}
+
+dt {
+    font-style: italic;
+}

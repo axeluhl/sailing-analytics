@@ -386,4 +386,9 @@ public class RefreshingSelectionTablesPanel implements SelectionProvider<Refresh
         return tablesPanel;
     }
 
+    @Override
+    public String getDependentCssClassName() {
+        return "refreshingSelectionTables";
+    }
+
 }

@@ -1,8 +1,6 @@
 package com.sap.sailing.gwt.home.client.app;
 
 import com.google.gwt.core.client.GWT;
-import com.google.gwt.dom.client.Element;
-import com.google.gwt.dom.client.Style.Visibility;
 import com.google.gwt.uibinder.client.UiBinder;
 import com.google.gwt.uibinder.client.UiField;
 import com.google.gwt.user.client.ui.AcceptsOneWidget;
@@ -31,9 +29,6 @@ public class TabletAndDesktopApplicationView extends Composite implements Applic
     @UiField
     SimplePanel mainContentPanel;
 
-    @UiField
-    Element loadingMessage;
-
     public TabletAndDesktopApplicationView(PlaceNavigator navigator) {
         headerPanel = new Header(navigator);
         initWidget(uiBinder.createAndBindUi(this));
@@ -45,7 +40,6 @@ public class TabletAndDesktopApplicationView extends Composite implements Applic
     }
     
     @Override
-    public void showLoading(boolean visibile) {
-        loadingMessage.getStyle().setVisibility(visibile ? Visibility.VISIBLE : Visibility.HIDDEN);
+    public void showLoading(boolean visible) {
     }
 }

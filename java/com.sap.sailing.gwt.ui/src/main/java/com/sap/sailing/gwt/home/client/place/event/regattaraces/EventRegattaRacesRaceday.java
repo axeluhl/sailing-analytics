@@ -9,6 +9,11 @@ import com.google.gwt.user.client.ui.HTMLPanel;
 import com.google.gwt.user.client.ui.Widget;
 import com.sap.sailing.gwt.ui.shared.RaceGroupSeriesDTO;
 
+/**
+ * Not used yet
+ * @author Frank
+ *
+ */
 public class EventRegattaRacesRaceday extends Composite {
     private static EventRegattaRacesRacedayUiBinder uiBinder = GWT.create(EventRegattaRacesRacedayUiBinder.class);
 
@@ -19,7 +24,6 @@ public class EventRegattaRacesRaceday extends Composite {
     @UiField HTMLPanel racesPanel;
 
     public EventRegattaRacesRaceday(RaceGroupSeriesDTO series) {
-//    private final EventPageNavigator pageNavigator;
         EventRegattaRacesResources.INSTANCE.css().ensureInjected();
         initWidget(uiBinder.createAndBindUi(this));
         

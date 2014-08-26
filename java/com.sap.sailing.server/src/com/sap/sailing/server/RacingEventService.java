@@ -236,15 +236,15 @@ public interface RacingEventService extends TrackedRegattaRegistry, RegattaFetch
      *            The name of the new group
      * @param description
      *            The description of the new group
+     * @param displayName TODO
      * @param displayGroupsInReverseOrder TODO
      * @param leaderboardNames
      *            The names of the leaderboards, which should be contained by the new group.<br />
      *            If there isn't a leaderboard with one of these names an {@link IllegalArgumentException} is thrown.
-     * 
      * @return The new leaderboard group
      */
     LeaderboardGroup addLeaderboardGroup(UUID id, String groupName, String description,
-            boolean displayGroupsInReverseOrder, List<String> leaderboardNames, int[] overallLeaderboardDiscardThresholds, ScoringSchemeType overallLeaderboardScoringSchemeType);
+            String displayName, boolean displayGroupsInReverseOrder, List<String> leaderboardNames, int[] overallLeaderboardDiscardThresholds, ScoringSchemeType overallLeaderboardScoringSchemeType);
 
     /**
      * Removes the group with the name <code>groupName</code> from the service and the database.
@@ -289,8 +289,8 @@ public interface RacingEventService extends TrackedRegattaRegistry, RegattaFetch
      */
     void addRace(RegattaIdentifier addToRegatta, RaceDefinition raceDefinition);
 
-    void updateLeaderboardGroup(String oldName, String newName, String description, List<String> leaderboardNames,
-            int[] overallLeaderboardDiscardThresholds, ScoringSchemeType overallLeaderboardScoringSchemeType);
+    void updateLeaderboardGroup(String oldName, String newName, String description, String displayName,
+            List<String> leaderboardNames, int[] overallLeaderboardDiscardThresholds, ScoringSchemeType overallLeaderboardScoringSchemeType);
 
     /**
      * Executes an operation whose effects need to be replicated to any replica of this service known and

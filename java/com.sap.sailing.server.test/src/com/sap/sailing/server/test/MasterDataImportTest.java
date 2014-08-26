@@ -63,12 +63,16 @@ import com.sap.sailing.domain.common.MasterDataImportObjectCreationCount;
 import com.sap.sailing.domain.common.MaxPointsReason;
 import com.sap.sailing.domain.common.Position;
 import com.sap.sailing.domain.common.RegattaAndRaceIdentifier;
+import com.sap.sailing.domain.common.SpeedWithBearing;
 import com.sap.sailing.domain.common.TimePoint;
+import com.sap.sailing.domain.common.WindSource;
+import com.sap.sailing.domain.common.WindSourceType;
 import com.sap.sailing.domain.common.impl.DataImportProgressImpl;
 import com.sap.sailing.domain.common.impl.DegreeBearingImpl;
 import com.sap.sailing.domain.common.impl.DegreePosition;
 import com.sap.sailing.domain.common.impl.KnotSpeedWithBearingImpl;
 import com.sap.sailing.domain.common.impl.MillisecondsTimePoint;
+import com.sap.sailing.domain.common.impl.WindSourceWithAdditionalID;
 import com.sap.sailing.domain.common.media.MediaTrack;
 import com.sap.sailing.domain.leaderboard.FlexibleLeaderboard;
 import com.sap.sailing.domain.leaderboard.Leaderboard;
@@ -92,8 +96,10 @@ import com.sap.sailing.domain.racelog.impl.CompetitorResultsImpl;
 import com.sap.sailing.domain.racelog.impl.RaceLogEventAuthorImpl;
 import com.sap.sailing.domain.racelog.impl.RaceLogEventFactoryImpl;
 import com.sap.sailing.domain.racelog.tracking.EmptyGPSFixStore;
+import com.sap.sailing.domain.tracking.DynamicTrackedRegatta;
 import com.sap.sailing.domain.tracking.TrackedRace;
 import com.sap.sailing.domain.tracking.Wind;
+import com.sap.sailing.domain.tracking.WindTrack;
 import com.sap.sailing.domain.tracking.impl.EmptyWindStore;
 import com.sap.sailing.domain.tracking.impl.WindImpl;
 import com.sap.sailing.mongodb.MongoDBConfiguration;
@@ -120,6 +126,8 @@ public class MasterDataImportTest {
 
     private final TimePoint eventStartDate = new MillisecondsTimePoint(new Date());
     private final TimePoint eventEndDate = new MillisecondsTimePoint(new Date());
+    
+    private final UUID raceId = UUID.randomUUID();
 
     /**
      * Log Events created when running test. Will be removed from db at teardown
@@ -188,7 +196,7 @@ public class MasterDataImportTest {
         List<String> leaderboardNames = new ArrayList<String>();
         leaderboardNames.add(leaderboard.getName());
         LeaderboardGroup group = sourceService.addLeaderboardGroup(UUID.randomUUID(), TEST_GROUP_NAME, "testGroupDesc",
-                false, leaderboardNames, null, null);
+                /* displayName */ null, false, leaderboardNames, null, null);
         event.addLeaderboardGroup(group);
 
         // Set tracked Race with competitors
@@ -216,7 +224,7 @@ public class MasterDataImportTest {
                 boat2);
         competitors.add(competitorToSuppress);
         RaceColumn raceColumn = leaderboard.getRaceColumnByName(raceColumnName);
-        TrackedRace trackedRace = new DummyTrackedRace(competitors, regatta, null);
+        TrackedRace trackedRace = new DummyTrackedRace(raceId, competitors, regatta, null, sourceService.getWindStore());
 
         raceColumn.setTrackedRace(testFleet1, trackedRace);
 
@@ -306,8 +314,8 @@ public class MasterDataImportTest {
         Assert.assertNotNull(raceColumnOnTarget);
         Assert.assertNull(raceColumnOnTarget.getTrackedRace(raceColumnOnTarget.getFleetByName(testFleet1Name)));
 
-        raceColumnOnTarget.setTrackedRace(raceColumnOnTarget.getFleets().iterator().next(), new DummyTrackedRace(
-                competitors, regattaOnTarget, null));
+        raceColumnOnTarget.setTrackedRace(raceColumnOnTarget.getFleets().iterator().next(), new DummyTrackedRace(raceId, 
+                competitors, regattaOnTarget, null, sourceService.getWindStore()));
 
         Assert.assertTrue(leaderboardOnTarget.getScoreCorrection().hasCorrectionFor(raceColumnOnTarget));
         Competitor competitorOnTarget = domainFactory.getExistingCompetitorById(competitorUUID);
@@ -315,7 +323,7 @@ public class MasterDataImportTest {
         competitorsCreatedOnTarget.add(competitorOnTarget);
 
         Fleet fleet1OnTarget = raceColumnOnTarget.getFleetByName(testFleet1.getName());
-        TrackedRace trackedRaceForTarget = new DummyTrackedRace(competitorsCreatedOnTarget, regattaOnTarget, null);
+        TrackedRace trackedRaceForTarget = new DummyTrackedRace(raceId, competitorsCreatedOnTarget, regattaOnTarget, null, sourceService.getWindStore());
 
         raceColumnOnTarget.setTrackedRace(fleet1OnTarget, trackedRaceForTarget);
 
@@ -401,7 +409,7 @@ public class MasterDataImportTest {
         List<String> leaderboardNames = new ArrayList<String>();
         leaderboardNames.add(leaderboard.getName());
         LeaderboardGroup group = sourceService.addLeaderboardGroup(UUID.randomUUID(), TEST_GROUP_NAME, "testGroupDesc",
-                false, leaderboardNames, null, null);
+                /* displayName */ null, false, leaderboardNames, null, null);
 
         // Set tracked Race with competitors
         Set<Competitor> competitors = new HashSet<Competitor>();
@@ -425,7 +433,7 @@ public class MasterDataImportTest {
         CompetitorImpl competitor2 = new CompetitorImpl(competitor2UUID, "Froderik", Color.RED, team2, boat2);
         competitors.add(competitor2);
         RaceColumn raceColumn = leaderboard.getRaceColumnByName(raceColumnName);
-        TrackedRace trackedRace = new DummyTrackedRace(competitors, regatta, null);
+        TrackedRace trackedRace = new DummyTrackedRace(raceId, competitors, regatta, null, sourceService.getWindStore());
 
         raceColumn.setTrackedRace(testFleet1, trackedRace);
 
@@ -497,7 +505,7 @@ public class MasterDataImportTest {
         competitorsCreatedOnTarget.add(competitorOnTarget);
 
         Fleet fleet1OnTarget = raceColumnOnTarget.getFleetByName(testFleet1.getName());
-        TrackedRace trackedRaceForTarget = new DummyTrackedRace(competitorsCreatedOnTarget, regattaOnTarget, null);
+        TrackedRace trackedRaceForTarget = new DummyTrackedRace(raceId, competitorsCreatedOnTarget, regattaOnTarget, null, sourceService.getWindStore());
 
         raceColumnOnTarget.setTrackedRace(fleet1OnTarget, trackedRaceForTarget);
 
@@ -555,7 +563,7 @@ public class MasterDataImportTest {
         List<String> leaderboardNames = new ArrayList<String>();
         leaderboardNames.add(leaderboard.getName());
         LeaderboardGroup group = sourceService.addLeaderboardGroup(UUID.randomUUID(), TEST_GROUP_NAME, "testGroupDesc",
-                false, leaderboardNames, null, null);
+                /* displayName */ null, false, leaderboardNames, null, null);
 
         // Set tracked Race with competitors
         Set<Competitor> competitors = new HashSet<Competitor>();
@@ -570,11 +578,20 @@ public class MasterDataImportTest {
         DynamicBoat boat = new BoatImpl("Wingy", boatClass, "GER70133");
         CompetitorImpl competitor = new CompetitorImpl(competitorUUID, "Froderik", Color.RED, team, boat);
         competitors.add(competitor);
-
+        
         RaceColumn raceColumn = leaderboard.getRaceColumnByName(raceColumnName);
-        TrackedRace trackedRace = new DummyTrackedRace(competitors, regatta, null);
+        DynamicTrackedRegatta trackedRegatta = sourceService.getOrCreateTrackedRegatta(regatta);
+        TrackedRace trackedRace = new DummyTrackedRace(raceId, competitors, regatta, trackedRegatta, sourceService.getWindStore());
         regatta.addRace(trackedRace.getRace()); // make sure the competitor is serialized together with the regatta
         raceColumn.setTrackedRace(testFleet1, trackedRace);
+        WindSource windSource = new WindSourceWithAdditionalID(WindSourceType.EXPEDITION, "Igtimi1");
+        WindTrack windTrackOnSource = trackedRace.getOrCreateWindTrack(windSource);
+
+        Position p = new DegreePosition(54, 30);
+        TimePoint at = new MillisecondsTimePoint(20000);
+        SpeedWithBearing windSpeedWithBearing = new KnotSpeedWithBearingImpl(20, new DegreeBearingImpl(12));
+        windTrackOnSource.add(new WindImpl(p, at, windSpeedWithBearing));
+
         // Serialize
         List<String> groupNamesToExport = new ArrayList<String>();
         groupNamesToExport.add(group.getName());
@@ -628,11 +645,25 @@ public class MasterDataImportTest {
         competitorsCreatedOnTarget.add(competitorOnTarget);
 
         Fleet fleet1OnTarget = raceColumnOnTarget.getFleetByName(testFleet1.getName());
-        TrackedRace trackedRaceForTarget = new DummyTrackedRace(competitorsCreatedOnTarget, regattaOnTarget, null);
+        DynamicTrackedRegatta trackedRegattaForTarget = destService.getOrCreateTrackedRegatta(regattaOnTarget);
+        TrackedRace trackedRaceForTarget = new DummyTrackedRace(raceId, competitorsCreatedOnTarget, regattaOnTarget, trackedRegattaForTarget, sourceService.getWindStore());
 
         raceColumnOnTarget.setTrackedRace(fleet1OnTarget, trackedRaceForTarget);
 
-        // TODO Somehow have check if wind was really imported. DummyTrackedRace not sufficient
+        WindTrack windTrackOnDest = trackedRaceForTarget.getOrCreateWindTrack(windSource);
+        windTrackOnDest.lockForRead();
+        try {
+            Iterable<Wind> fixes = windTrackOnDest.getFixes();
+            Assert.assertNotNull(fixes);
+            Iterator<Wind> iterator = fixes.iterator();
+            Assert.assertTrue(iterator.hasNext());
+            Wind firstWindFix = iterator.next();
+            Assert.assertNotNull(firstWindFix);
+
+            Assert.assertFalse(iterator.hasNext());
+        } finally {
+            windTrackOnDest.unlockAfterRead();
+        }
 
     }
 
@@ -676,7 +707,7 @@ public class MasterDataImportTest {
         List<String> leaderboardNames = new ArrayList<String>();
         leaderboardNames.add(leaderboard.getName());
         LeaderboardGroup group = sourceService.addLeaderboardGroup(UUID.randomUUID(), TEST_GROUP_NAME, "testGroupDesc",
-                false, leaderboardNames, null, null);
+                /* displayName */ null, false, leaderboardNames, null, null);
 
         // Set tracked Race with competitors
         Set<Competitor> competitors = new HashSet<Competitor>();
@@ -702,7 +733,7 @@ public class MasterDataImportTest {
                 "Froderik", Color.RED, team2, boat2);
         competitors.add(competitor2);
         RaceColumn raceColumn = leaderboard.getRaceColumnByName(raceColumnName);
-        TrackedRace trackedRace = new DummyTrackedRace(competitors, regatta, null);
+        TrackedRace trackedRace = new DummyTrackedRace(raceId, competitors, regatta, null, sourceService.getWindStore());
 
         raceColumn.setTrackedRace(testFleet1, trackedRace);
 
@@ -779,7 +810,7 @@ public class MasterDataImportTest {
         competitorsCreatedOnTarget.add(competitorOnTarget);
 
         Fleet fleet1OnTarget = raceColumnOnTarget.getFleetByName(testFleet1.getName());
-        TrackedRace trackedRaceForTarget = new DummyTrackedRace(competitorsCreatedOnTarget, regattaOnTarget, null);
+        TrackedRace trackedRaceForTarget = new DummyTrackedRace(raceId, competitorsCreatedOnTarget, regattaOnTarget, null, sourceService.getWindStore());
 
         raceColumnOnTarget.setTrackedRace(fleet1OnTarget, trackedRaceForTarget);
 
@@ -831,7 +862,7 @@ public class MasterDataImportTest {
         List<String> leaderboardNames = new ArrayList<String>();
         leaderboardNames.add(leaderboard.getName());
         LeaderboardGroup group = sourceService.addLeaderboardGroup(UUID.randomUUID(), TEST_GROUP_NAME, "testGroupDesc",
-                false, leaderboardNames, null, null);
+                /* displayName */ null, false, leaderboardNames, null, null);
 
         // Set tracked Race with competitors
         Set<Competitor> competitors = new HashSet<Competitor>();
@@ -858,7 +889,7 @@ public class MasterDataImportTest {
                 boat2);
         competitors.add(competitorToSuppress);
         RaceColumn raceColumn = leaderboard.getRaceColumnByName(raceColumnName);
-        TrackedRace trackedRace = new DummyTrackedRace(competitors, regatta, null);
+        TrackedRace trackedRace = new DummyTrackedRace(raceId, competitors, regatta, null, sourceService.getWindStore());
 
         raceColumn.setTrackedRace(testFleet1, trackedRace);
 
@@ -944,7 +975,7 @@ public class MasterDataImportTest {
             List<String> leaderboardNamesNotToOverride = new ArrayList<String>();
             leaderboardNamesNotToOverride.add(leaderboardNotToOverride.getName());
             groupNotToOverride = destService.addLeaderboardGroup(UUID.randomUUID(),
-                    TEST_GROUP_NAME, "testGroupDescNotToOverride", false, leaderboardNamesNotToOverride, null, null);
+                    TEST_GROUP_NAME, "testGroupDescNotToOverride", /* displayName */ null, false, leaderboardNamesNotToOverride, null, null);
             inputStream = new ByteArrayInputStream(os.toByteArray());
 
             MasterDataImporter importer = new MasterDataImporter(domainFactory, destService);
@@ -1029,7 +1060,7 @@ public class MasterDataImportTest {
         List<String> leaderboardNames = new ArrayList<String>();
         leaderboardNames.add(leaderboard.getName());
         LeaderboardGroup group = sourceService.addLeaderboardGroup(UUID.randomUUID(), TEST_GROUP_NAME, "testGroupDesc",
-                false, leaderboardNames, null, null);
+                /* displayName */ null, false, leaderboardNames, null, null);
 
         // Set tracked Race with competitors
         Set<Competitor> competitors = new HashSet<Competitor>();
@@ -1056,7 +1087,7 @@ public class MasterDataImportTest {
                 boat2);
         competitors.add(competitorToSuppress);
         RaceColumn raceColumn = leaderboard.getRaceColumnByName(raceColumnName);
-        TrackedRace trackedRace = new DummyTrackedRace(competitors, regatta, null);
+        TrackedRace trackedRace = new DummyTrackedRace(raceId, competitors, regatta, null, sourceService.getWindStore());
 
         raceColumn.setTrackedRace(testFleet1, trackedRace);
 
@@ -1149,14 +1180,14 @@ public class MasterDataImportTest {
 
             Leaderboard leaderboardToOverride = destService.addRegattaLeaderboard(
                     regattaToOverride.getRegattaIdentifier(), "testDisplayNameNotToOverride", discardRule);
-            TrackedRace trackedRace2 = new DummyTrackedRace(competitorsToOverride, regattaToOverride, null);
+            TrackedRace trackedRace2 = new DummyTrackedRace(raceId, competitorsToOverride, regattaToOverride, null, sourceService.getWindStore());
             RaceColumn columnToOverride = leaderboardToOverride.getRaceColumns().iterator().next();
             columnToOverride.setTrackedRace(testFleet1ToOverride, trackedRace2);
             identifierOfRegattaTrackedRace = regattaToOverride
                     .getRaceIdentifier(columnToOverride.getRaceDefinition(testFleet1ToOverride));
 
-            destService.addLeaderboardGroup(UUID.randomUUID(), TEST_GROUP_NAME, "testGroupDescToOverride", false,
-                    new ArrayList<String>(), null, null);
+            destService.addLeaderboardGroup(UUID.randomUUID(), TEST_GROUP_NAME, "testGroupDescToOverride", /* displayName */ null,
+                    false, new ArrayList<String>(), null, null);
             destService.getLeaderboardGroupByName(TEST_GROUP_NAME).addLeaderboard(leaderboardToOverride);
             destService.addLeaderboard(leaderboardToOverride);
             inputStream = new ByteArrayInputStream(os.toByteArray());
@@ -1241,7 +1272,7 @@ public class MasterDataImportTest {
         List<String> leaderboardNames = new ArrayList<String>();
         leaderboardNames.add(leaderboard.getName());
         LeaderboardGroup group = sourceService.addLeaderboardGroup(UUID.randomUUID(), TEST_GROUP_NAME, "testGroupDesc",
-                false, leaderboardNames, null, null);
+                /* displayName */ null, false, leaderboardNames, null, null);
 
         // Serialize
         List<String> groupNamesToExport = new ArrayList<String>();
@@ -1318,7 +1349,7 @@ public class MasterDataImportTest {
         List<String> leaderboardNames = new ArrayList<String>();
         leaderboardNames.add(leaderboard.getName());
         LeaderboardGroup group = sourceService.addLeaderboardGroup(UUID.randomUUID(), TEST_GROUP_NAME, "testGroupDesc",
-                false, leaderboardNames, null, null);
+                /* displayName */ null, false, leaderboardNames, null, null);
 
         // Set tracked Race with competitors
         Set<Competitor> competitors = new HashSet<Competitor>();
@@ -1345,7 +1376,7 @@ public class MasterDataImportTest {
                 boat2);
         competitors.add(competitorToSuppress);
         RaceColumn raceColumn = leaderboard.getRaceColumnByName(raceColumnName);
-        TrackedRace trackedRace = new DummyTrackedRace(competitors, regatta, null);
+        TrackedRace trackedRace = new DummyTrackedRace(raceId, competitors, regatta, null, sourceService.getWindStore());
 
         raceColumn.setTrackedRace(testFleet1, trackedRace);
 
@@ -1451,7 +1482,7 @@ public class MasterDataImportTest {
         List<String> leaderboardNames = new ArrayList<String>();
         leaderboardNames.add(leaderboard.getName());
         LeaderboardGroup group = sourceService.addLeaderboardGroup(UUID.randomUUID(), TEST_GROUP_NAME, "testGroupDesc",
-                false, leaderboardNames, null, null);
+                /* displayName */ null, false, leaderboardNames, null, null);
 
         // Set tracked Race with competitors
         Set<Competitor> competitors = new HashSet<Competitor>();
@@ -1478,7 +1509,7 @@ public class MasterDataImportTest {
                 boat2);
         competitors.add(competitorToSuppress);
         RaceColumn raceColumn = leaderboard.getRaceColumnByName(raceColumnName);
-        TrackedRace trackedRace = new DummyTrackedRace(competitors, regatta, null);
+        TrackedRace trackedRace = new DummyTrackedRace(raceId, competitors, regatta, null, sourceService.getWindStore());
 
         raceColumn.setTrackedRace(testFleet1, trackedRace);
         sourceService.setRegattaForRace(regatta, "dummy");
@@ -1656,9 +1687,9 @@ public class MasterDataImportTest {
         List<String> leaderboardNames = new ArrayList<String>();
         leaderboardNames.add(leaderboard.getName());
         LeaderboardGroup group1 = sourceService.addLeaderboardGroup(UUID.randomUUID(), TEST_GROUP_NAME, "testGroupDesc",
-                false, leaderboardNames, null, null);
+                /* displayName */ null, false, leaderboardNames, null, null);
         LeaderboardGroup group2 = sourceService.addLeaderboardGroup(UUID.randomUUID(), TEST_GROUP_NAME2, "testGroupDesc2",
-                false, leaderboardNames, null, null);
+                /* displayName */ null, false, leaderboardNames, null, null);
 
         // Set tracked Race with competitors
         Set<Competitor> competitors = new HashSet<Competitor>();
@@ -1686,7 +1717,7 @@ public class MasterDataImportTest {
         competitors.add(competitorToSuppress);
         RaceColumn raceColumn = leaderboard.getRaceColumnByName(raceColumnName);
 
-        TrackedRace trackedRace = new DummyTrackedRace(competitors, regatta, null);
+        TrackedRace trackedRace = new DummyTrackedRace(raceId, competitors, regatta, null, sourceService.getWindStore());
 
         raceColumn.setTrackedRace(testFleet1, trackedRace);
 
@@ -1752,7 +1783,7 @@ public class MasterDataImportTest {
         ScoringScheme scheme = new LowPoint();
         List<String> leaderboardNames = new ArrayList<String>();
         LeaderboardGroup sourceGroup = sourceService.addLeaderboardGroup(UUID.randomUUID(), TEST_GROUP_NAME, "testGroupDesc",
-                false, leaderboardNames, discardRule, scheme.getType());
+                /* displayName */ null, false, leaderboardNames, discardRule, scheme.getType());
         FlexibleLeaderboard sourceLeaderboard1 = new FlexibleLeaderboardImpl("Leaderboard1", null, scheme, null);
         sourceService.addLeaderboard(sourceLeaderboard1);
         sourceGroup.addLeaderboard(sourceLeaderboard1);
@@ -1884,7 +1915,7 @@ public class MasterDataImportTest {
         List<String> leaderboardNames = new ArrayList<String>();
         leaderboardNames.add(leaderboard.getName());
         LeaderboardGroup group = sourceService.addLeaderboardGroup(UUID.randomUUID(), TEST_GROUP_NAME, "testGroupDesc",
-                false, leaderboardNames, null, null);
+                /* displayName */ null, false, leaderboardNames, null, null);
 
 
         // Set tracked Race with competitors
@@ -1911,7 +1942,7 @@ public class MasterDataImportTest {
         CompetitorImpl competitorToSuppress = new CompetitorImpl(competitorToSuppressUUID, "Merkel", Color.RED, team2,
                 boat2);
         competitors.add(competitorToSuppress);
-        TrackedRace trackedRace = new DummyTrackedRace(competitors, regatta, null);
+        TrackedRace trackedRace = new DummyTrackedRace(raceId, competitors, regatta, null, sourceService.getWindStore());
 
         leaderboard.addRace(trackedRace, raceColumnName, false);
         RaceColumn raceColumnOnLeaderboard = leaderboard.getRaceColumnByName(raceColumnName);
@@ -2001,8 +2032,8 @@ public class MasterDataImportTest {
                 series, true, new LowPoint(), courseAreaUUID, /* useStartTimeInference */true);
 
         raceColumnOnTarget.setTrackedRace(defaultFleetOnTarget,
-                new DummyTrackedRace(
-                competitors, regattaOnTarget, null));
+                new DummyTrackedRace(raceId, 
+                competitors, regattaOnTarget, null, sourceService.getWindStore()));
 
         Assert.assertTrue(leaderboardOnTarget.getScoreCorrection().hasCorrectionFor(raceColumnOnTarget));
         Competitor competitorOnTarget = domainFactory.getExistingCompetitorById(competitorUUID);
@@ -2010,7 +2041,7 @@ public class MasterDataImportTest {
         competitorsCreatedOnTarget.add(competitorOnTarget);
 
         Assert.assertEquals(defaultFleetOnTarget, leaderboardOnTarget.getFleet(null));
-        TrackedRace trackedRaceForTarget = new DummyTrackedRace(competitorsCreatedOnTarget, regattaOnTarget, null);
+        TrackedRace trackedRaceForTarget = new DummyTrackedRace(raceId, competitorsCreatedOnTarget, regattaOnTarget, null, sourceService.getWindStore());
 
         raceColumnOnTarget.setTrackedRace(defaultFleetOnTarget, trackedRaceForTarget);
 

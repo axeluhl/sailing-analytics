@@ -29,7 +29,7 @@ public interface MediaPlayer {
 
     void setMuted(boolean isToBeMuted);
 
-    void close();
+    void shutDown();
 
 	boolean isCoveringCurrentRaceTime();
 

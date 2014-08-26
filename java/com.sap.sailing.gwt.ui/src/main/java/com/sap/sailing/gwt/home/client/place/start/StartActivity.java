@@ -1,6 +1,8 @@
 package com.sap.sailing.gwt.home.client.place.start;
 
 import java.util.ArrayList;
+import java.util.Collections;
+import java.util.Comparator;
 import java.util.Date;
 import java.util.List;
 
@@ -8,8 +10,9 @@ import com.google.gwt.activity.shared.AbstractActivity;
 import com.google.gwt.event.shared.EventBus;
 import com.google.gwt.user.client.rpc.AsyncCallback;
 import com.google.gwt.user.client.ui.AcceptsOneWidget;
+import com.sap.sailing.gwt.home.client.shared.placeholder.Placeholder;
 import com.sap.sailing.gwt.home.client.shared.stage.StageEventType;
-import com.sap.sailing.gwt.ui.shared.EventDTO;
+import com.sap.sailing.gwt.ui.shared.EventBaseDTO;
 import com.sap.sse.common.Util.Pair;
 
 public class StartActivity extends AbstractActivity {
@@ -20,13 +23,15 @@ public class StartActivity extends AbstractActivity {
     }
 
     @Override
-    public void start(AcceptsOneWidget panel, EventBus eventBus) {
-        final StartView view = clientFactory.createStartView();
-        panel.setWidget(view.asWidget());
+    public void start(final AcceptsOneWidget panel, EventBus eventBus) {
+        panel.setWidget(new Placeholder());
         
-        clientFactory.getSailingService().getEvents(new AsyncCallback<List<EventDTO>>() {
+        clientFactory.getSailingService().getPublicEventsOfAllSailingServers(new AsyncCallback<List<EventBaseDTO>>() {
             @Override
-            public void onSuccess(List<EventDTO> result) {
+            public void onSuccess(List<EventBaseDTO> result) {
+                final StartView view = clientFactory.createStartView();
+                panel.setWidget(view.asWidget());
+
                 fillStartPageEvents(view, result);
             }
             
@@ -37,22 +42,21 @@ public class StartActivity extends AbstractActivity {
     }
 
     @SuppressWarnings("deprecation")
-    protected void fillStartPageEvents(StartView view, List<EventDTO> events) {
-        List<Pair<StageEventType, EventDTO>> featuredEvents = new ArrayList<Pair<StageEventType, EventDTO>>();
+    protected void fillStartPageEvents(StartView view, List<EventBaseDTO> events) {
+        List<Pair<StageEventType, EventBaseDTO>> featuredEvents = new ArrayList<Pair<StageEventType, EventBaseDTO>>();
         
-        List<EventDTO> recentEventsOfSameYear = new ArrayList<EventDTO>();
-        List<EventDTO> upcomingSoonEvents = new ArrayList<EventDTO>();
-        List<EventDTO> popularEvents = new ArrayList<EventDTO>();
+        List<EventBaseDTO> recentEventsOfSameYear = new ArrayList<EventBaseDTO>();
+        List<EventBaseDTO> upcomingSoonEvents = new ArrayList<EventBaseDTO>();
+        List<EventBaseDTO> popularEvents = new ArrayList<EventBaseDTO>();
         Date now = new Date();
         int currentYear = now.getYear();
-        final int MAX_STAGE_EVENTS = 2;
+        final int MAX_STAGE_EVENTS = 4;
         final long FOUR_WEEK_IN_MS = 4L * (1000 * 60 * 60 * 24 * 7);
         
-        for(EventDTO event: events) {
-            // ignore events with no start and end date
+        for(EventBaseDTO event: events) {
             if(event.startDate != null && event.endDate != null) {
                 if (now.after(event.startDate) && now.before(event.endDate)) {
-                    featuredEvents.add(new Pair<StageEventType, EventDTO>(StageEventType.RUNNING, event));
+                    featuredEvents.add(new Pair<StageEventType, EventBaseDTO>(StageEventType.RUNNING, event));
                 } else if (event.startDate.after(now) && event.startDate.getTime() - now.getTime() < FOUR_WEEK_IN_MS) {
                     upcomingSoonEvents.add(event);
                 } else if (event.endDate.before(now) && event.endDate.getYear() == currentYear) {
@@ -72,15 +76,38 @@ public class StartActivity extends AbstractActivity {
             fillingUpEventsList(MAX_STAGE_EVENTS, featuredEvents, StageEventType.POPULAR, recentEventsOfSameYear);
         }
 
+        Collections.sort(featuredEvents, new FeaturedEventsComparator());
+
         view.setFeaturedEvents(featuredEvents);
         view.setRecentEvents(recentEventsOfSameYear);
     }
     
-    private void fillingUpEventsList(int maxAmountOfElements, List<Pair<StageEventType, EventDTO>> resultList, StageEventType type, List<EventDTO> listToTakeElementsFrom) {
+    private void fillingUpEventsList(int maxAmountOfElements, List<Pair<StageEventType, EventBaseDTO>> resultList, StageEventType type, List<EventBaseDTO> listToTakeElementsFrom) {
         int maxElementsToFill = maxAmountOfElements - resultList.size();
         int elementsToTransfer = listToTakeElementsFrom.size() > maxElementsToFill ? maxElementsToFill : listToTakeElementsFrom.size();
         for(int i = 0; i < elementsToTransfer; i++) {
-            resultList.add(new Pair<StageEventType, EventDTO>(type, listToTakeElementsFrom.get(i)));
+            resultList.add(new Pair<StageEventType, EventBaseDTO>(type, listToTakeElementsFrom.get(i)));
         }
     }
+    
+    /**
+     * Comparator for sorting a pair of event and stageType first by order number of stage type and then by event start date.
+     * @author Frank
+     *
+     */
+    private class FeaturedEventsComparator implements Comparator<Pair<StageEventType, EventBaseDTO>> {
+
+        @Override
+        public int compare(Pair<StageEventType, EventBaseDTO> eventAndStageType1, Pair<StageEventType, EventBaseDTO> eventAndStageType2) {
+            int result;
+            if(eventAndStageType1.getA().ordinal() == eventAndStageType2.getA().ordinal()) {
+                result = eventAndStageType1.getB().startDate.compareTo(eventAndStageType2.getB().startDate); 
+            } else {
+                result = eventAndStageType1.getA().ordinal() - eventAndStageType2.getA().ordinal();  
+            }
+            
+            return result;
+        }
+    }
+
 }

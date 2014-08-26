@@ -8,15 +8,14 @@
     <g:HTMLPanel>
 <!-- A list of regattas-->
 <div class="{local_res.css.eventregattalist}">
-  <div ui:field="regattaListNavgiationDiv" class="{local_res.css.eventregattalist_navigation} {res.mainCss.navbar}">
+    <div ui:field="regattaListNavigationDiv" class="{local_res.css.eventregattalist_navigation} {res.mainCss.navbar}">
     <div class="{res.mainCss.grid}">
-      <div class="{res.mediaCss.small12} {res.mediaCss.columns}">
-          <a ui:field="allRegattasLink" href="#" class="{res.mainCss.navbar_button} {res.mainCss.navbar_buttonactive}"><ui:text from='{i18n.eventRegattaListAllBoatClasses}'/></a>
-  		  <div ui:field="regattaGroupsNavigationPanel" />
+      <div ui:field="regattaGroupsNavigationPanel" class="{res.mediaCss.small12} {res.mediaCss.columns}">
+          <a ui:field="filterNoLeaderboardGroupsAnchor" href="javascript:;" class="{res.mainCss.navbar_button} {res.mainCss.navbar_buttonactive}"><span ui:field="allBoatClassesSelected">&#10003;&nbsp;</span><ui:text from='{i18n.eventRegattaListAllBoatClasses}'/></a>
       </div>
     </div>
   </div>
-  <g:HTMLPanel ui:field="regattaListItemPanel" />
+  <div ui:field="regattaListItemsDiv" />
 </div>        
     </g:HTMLPanel>
 </ui:UiBinder>

@@ -1,17 +1,19 @@
 package com.sap.sailing.gwt.ui.common.client;
 
+import static org.hamcrest.Matchers.is;
+import static org.hamcrest.Matchers.notNullValue;
+import static org.hamcrest.Matchers.nullValue;
+import static org.junit.Assert.assertThat;
+
 import org.junit.Test;
 
 import com.sap.sailing.domain.common.Duration;
 import com.sap.sailing.domain.common.TimePoint;
 import com.sap.sailing.domain.common.impl.MillisecondsTimePoint;
-import com.sap.sailing.gwt.ui.common.client.Countdown.CountdownListener;
-import com.sap.sailing.gwt.ui.common.client.Countdown.RemainingTime;
-import com.sap.sailing.gwt.ui.common.client.Countdown.Unit;
-
-import static org.junit.Assert.*;
-
-import static org.hamcrest.Matchers.*;
+import com.sap.sailing.gwt.home.client.shared.Countdown;
+import com.sap.sailing.gwt.home.client.shared.Countdown.CountdownListener;
+import com.sap.sailing.gwt.home.client.shared.Countdown.RemainingTime;
+import com.sap.sailing.gwt.home.client.shared.Countdown.Unit;
 
 public class CountdownTest {
     
