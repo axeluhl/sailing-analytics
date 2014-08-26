@@ -16,6 +16,7 @@ import com.sap.sailing.domain.test.measurements.MeasurementCase;
 import com.sap.sailing.domain.test.measurements.MeasurementXMLFile;
 import com.sap.sailing.util.impl.LockUtil;
 import com.sap.sailing.util.impl.NamedReentrantReadWriteLock;
+import com.sap.sse.common.Util;
 
 public class LockTraceTest {
     private static class LockingThread extends Thread {
@@ -47,18 +48,18 @@ public class LockTraceTest {
     public void testReentrantReadLocking() {
         NamedReentrantReadWriteLock lock = new NamedReentrantReadWriteLock("testReentrantReadLocking-Lock", /* fair */ true);
         LockUtil.lockForRead(lock);
-        assertTrue(lock.getReaders().contains(Thread.currentThread()));
-        assertEquals(1, lock.getReaders().size());
+        assertTrue(Util.contains(lock.getReaders(), Thread.currentThread()));
+        assertEquals(1, Util.size(lock.getReaders()));
         LockUtil.lockForRead(lock);
-        assertTrue(lock.getReaders().contains(Thread.currentThread()));
-        assertEquals(2, lock.getReaders().size());
+        assertTrue(Util.contains(lock.getReaders(), Thread.currentThread()));
+        assertEquals(2, Util.size(lock.getReaders()));
         LockUtil.unlockAfterRead(lock);
-        assertTrue(lock.getReaders().contains(Thread.currentThread()));
-        assertEquals(1, lock.getReaders().size());
+        assertTrue(Util.contains(lock.getReaders(), Thread.currentThread()));
+        assertEquals(1, Util.size(lock.getReaders()));
         LockUtil.unlockAfterRead(lock);
-        assertFalse(lock.getReaders().contains(Thread.currentThread()));
+        assertFalse(Util.contains(lock.getReaders(), Thread.currentThread()));
         assertEquals(0, lock.getReadHoldCount());
-        assertEquals(0, lock.getReaders().size());
+        assertEquals(0, Util.size(lock.getReaders()));
     }
     
     @Test
@@ -67,15 +68,15 @@ public class LockTraceTest {
         LockUtil.lockForWrite(lock);
         assertTrue(lock.getWriter() == Thread.currentThread());
         LockUtil.lockForRead(lock); // reentrant read while holding write
-        assertTrue(lock.getReaders().contains(Thread.currentThread()));
+        assertTrue(Util.contains(lock.getReaders(), Thread.currentThread()));
         LockUtil.lockForWrite(lock); // reentrant write
         assertTrue(lock.getWriter() == Thread.currentThread());
-        assertTrue(lock.getReaders().contains(Thread.currentThread()));
+        assertTrue(Util.contains(lock.getReaders(), Thread.currentThread()));
         LockUtil.unlockAfterRead(lock);
-        assertFalse(lock.getReaders().contains(Thread.currentThread()));
+        assertFalse(Util.contains(lock.getReaders(), Thread.currentThread()));
         assertEquals(0, lock.getReadHoldCount());
         assertTrue(lock.getWriter() == Thread.currentThread());
-        assertFalse(lock.getReaders().contains(Thread.currentThread()));
+        assertFalse(Util.contains(lock.getReaders(), Thread.currentThread()));
         assertEquals(0, lock.getReadHoldCount());
         LockUtil.unlockAfterWrite(lock);
         assertTrue(lock.getWriter() == Thread.currentThread());

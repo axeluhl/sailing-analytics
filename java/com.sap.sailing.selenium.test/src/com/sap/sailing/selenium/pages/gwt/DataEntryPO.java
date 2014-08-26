@@ -67,14 +67,14 @@ public class DataEntryPO extends CellTableRowPO {
     }
     
     public void deselect() {
-        if(isSelected()) {
+        if (isSelected()) {
             Action action = getModifiedSelectAction();
             action.perform();
         }
     }
     
     public void appendToSelection() {
-        if(!isSelected()) {
+        if (!isSelected()) {
             Action action = getModifiedSelectAction();
             action.perform();
         }
@@ -97,7 +97,14 @@ public class DataEntryPO extends CellTableRowPO {
      *   The element on which to click to select or deselect the data entry in the table.
      */
     protected WebElement getElementForSelect() {
-        return (this.columns.isEmpty() ? getWebElement() : this.columns.get(0));
+        final int columnToUseForSelection;
+        if (this.columns.size() > 1) {
+            // could be a selection checkbox column in the first column, so use second column to be on the safe side:
+            columnToUseForSelection = 1;
+        } else {
+            columnToUseForSelection = 0;
+        }
+        return (this.columns.isEmpty() ? getWebElement() : this.columns.get(columnToUseForSelection));
     }
     
     protected Action getModifiedSelectAction() {

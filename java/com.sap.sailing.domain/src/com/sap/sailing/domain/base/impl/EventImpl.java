@@ -1,6 +1,5 @@
 package com.sap.sailing.domain.base.impl;
 
-import java.awt.Dimension;
 import java.io.IOException;
 import java.io.ObjectInputStream;
 import java.net.URL;
@@ -25,7 +24,9 @@ import javax.imageio.stream.ImageInputStream;
 import com.sap.sailing.domain.base.Event;
 import com.sap.sailing.domain.base.Regatta;
 import com.sap.sailing.domain.base.Venue;
+import com.sap.sailing.domain.common.ImageSize;
 import com.sap.sailing.domain.common.TimePoint;
+import com.sap.sailing.domain.common.impl.ImageSizeImpl;
 import com.sap.sailing.domain.leaderboard.LeaderboardGroup;
 import com.sap.sse.common.Util;
 
@@ -36,7 +37,7 @@ public class EventImpl extends EventBaseImpl implements Event {
     
     private ConcurrentLinkedQueue<LeaderboardGroup> leaderboardGroups;
     
-    private transient ConcurrentHashMap<URL, Future<Dimension>> imageSizeFetchers;
+    private transient ConcurrentHashMap<URL, Future<ImageSize>> imageSizeFetchers;
     private transient ExecutorService executor;
     
     public EventImpl(String name, TimePoint startDate, TimePoint endDate, String venueName, boolean isPublic, UUID id) {
@@ -103,13 +104,13 @@ public class EventImpl extends EventBaseImpl implements Event {
         return leaderboardGroups.remove(leaderboardGroup);
     }
     
-    private Future<Dimension> getOrCreateImageSizeCalculator(final URL imageURL) {
-        Future<Dimension> imageSizeFetcher = imageSizeFetchers.get(imageURL);
+    private Future<ImageSize> getOrCreateImageSizeCalculator(final URL imageURL) {
+        Future<ImageSize> imageSizeFetcher = imageSizeFetchers.get(imageURL);
         if (imageSizeFetcher == null) {
-            imageSizeFetcher = executor.submit(new Callable<Dimension>() {
+            imageSizeFetcher = executor.submit(new Callable<ImageSize>() {
                 @Override
-                public Dimension call() throws IOException {
-                    Dimension result = null;
+                public ImageSize call() throws IOException {
+                    ImageSize result = null;
                     ImageInputStream in = null;
                     try {
                         URLConnection conn = imageURL.openConnection();
@@ -119,7 +120,7 @@ public class EventImpl extends EventBaseImpl implements Event {
                             ImageReader reader = readers.next();
                             try {
                                 reader.setInput(in);
-                                result = new Dimension(reader.getWidth(0), reader.getHeight(0));
+                                result = new ImageSizeImpl(reader.getWidth(0), reader.getHeight(0));
                             } finally {
                                 reader.dispose();
                             }
@@ -138,8 +139,8 @@ public class EventImpl extends EventBaseImpl implements Event {
     }
     
     @Override
-    public Dimension getImageSize(URL imageURL) throws InterruptedException, ExecutionException {
-        Future<Dimension> imageSizeCalculator = getOrCreateImageSizeCalculator(imageURL);
+    public ImageSize getImageSize(URL imageURL) throws InterruptedException, ExecutionException {
+        Future<ImageSize> imageSizeCalculator = getOrCreateImageSizeCalculator(imageURL);
         return imageSizeCalculator.get();
     }
 
@@ -171,8 +172,10 @@ public class EventImpl extends EventBaseImpl implements Event {
     @Override
     public void setImageURLs(Iterable<URL> imageURLs) {
         super.setImageURLs(imageURLs);
-        for (URL imageURL : imageURLs) {
-            refreshImageSizeFetcher(imageURL);
+        if (imageURLs != null) {
+            for (URL imageURL : imageURLs) {
+                refreshImageSizeFetcher(imageURL);
+            }
         }
     }
 
@@ -191,8 +194,10 @@ public class EventImpl extends EventBaseImpl implements Event {
     @Override
     public void setSponsorImageURLs(Iterable<URL> sponsorImageURLs) {
         super.setSponsorImageURLs(sponsorImageURLs);
-        for (URL imageURL : sponsorImageURLs) {
-            refreshImageSizeFetcher(imageURL);
+        if (sponsorImageURLs != null) {
+            for (URL imageURL : sponsorImageURLs) {
+                refreshImageSizeFetcher(imageURL);
+            }
         }
     }
 

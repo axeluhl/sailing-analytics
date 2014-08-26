@@ -576,4 +576,11 @@ public class SmartFutureCache<K, V, U extends UpdateInterval<U>> {
         return smartFutureCacheTaskReuseCounter;
     }
 
+    /**
+     * Removes the key from the cache. If any updates are still running, they may again insert the key into hte cache.
+     */
+    public void remove(K key) {
+        cache(key, null);
+    }
+
 }

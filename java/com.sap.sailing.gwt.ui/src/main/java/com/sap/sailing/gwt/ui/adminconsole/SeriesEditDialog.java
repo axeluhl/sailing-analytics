@@ -27,6 +27,7 @@ import com.google.gwt.user.client.ui.VerticalPanel;
 import com.google.gwt.user.client.ui.Widget;
 import com.sap.sailing.domain.common.LeaderboardNameConstants;
 import com.sap.sailing.domain.common.dto.RaceColumnDTO;
+import com.sap.sailing.domain.common.dto.RaceColumnInSeriesDTO;
 import com.sap.sailing.gwt.ui.client.StringMessages;
 import com.sap.sailing.gwt.ui.client.shared.controls.listedit.StringListEditorComposite;
 import com.sap.sailing.gwt.ui.client.shared.controls.listedit.StringListInlineEditorComposite;
@@ -128,7 +129,7 @@ public class SeriesEditDialog extends DataEntryDialog<SeriesDescriptor> {
         for (String name : raceNamesEditor.getValue()) {
             RaceColumnDTO raceColumnDTO = findRaceColumnInSeriesByName(selectedSeries, name);
             if (raceColumnDTO == null) {
-                raceColumnDTO = new RaceColumnDTO(/* isValidInTotalScore not relevant here; not in scope of a leaderboard */ null);
+                raceColumnDTO = new RaceColumnInSeriesDTO(selectedSeries.getName(), regatta.getName());
                 raceColumnDTO.setName(name);
             }
             races.add(raceColumnDTO);

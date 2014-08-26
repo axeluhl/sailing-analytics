@@ -1256,12 +1256,15 @@ public class MasterDataImportTest {
 
         Iterable<URL> imageURLs = new HashSet<>();
         Iterable<URL> videoURLs = new HashSet<>();
+        Iterable<URL> sponsorImageURLs = new HashSet<>();
         Event event = sourceService.createEventWithoutReplication("Test Event", new MillisecondsTimePoint(0),
-                new MillisecondsTimePoint(10), "testvenue", false, UUID.randomUUID(), imageURLs, videoURLs);
+                new MillisecondsTimePoint(10), "testvenue", false, UUID.randomUUID(), imageURLs, videoURLs,
+                sponsorImageURLs, /* logoImageURL */ null, /* officialWebsiteURL */ null);
         CourseArea defaultCourseArea = sourceService.addCourseArea(event.getId(), "ECHO", UUID.randomUUID());
 
-        Regatta regatta = sourceService.createRegatta(RegattaImpl.getDefaultName(TEST_REGATTA_NAME, TEST_BOAT_CLASS_NAME), TEST_BOAT_CLASS_NAME, UUID.randomUUID(),
-                new ArrayList<Series>(), true, new LowPoint(), defaultCourseArea.getId(), /* useStartTimeInference */ true);
+        Regatta regatta = sourceService.createRegatta(
+                RegattaImpl.getDefaultName(TEST_REGATTA_NAME, TEST_BOAT_CLASS_NAME), TEST_BOAT_CLASS_NAME,
+                UUID.randomUUID(), new ArrayList<Series>(), true, new LowPoint(), defaultCourseArea.getId(), /* useStartTimeInference */ true);
         // Let's use the setters directly because we are not testing replication
         RegattaConfigurationImpl configuration = new RegattaConfigurationImpl();
         configuration.setDefaultCourseDesignerMode(CourseDesignerMode.BY_MAP);
@@ -1320,8 +1323,10 @@ public class MasterDataImportTest {
 
         Iterable<URL> imageURLs = new HashSet<>();
         Iterable<URL> videoURLs = new HashSet<>();
+        Iterable<URL> sponsorImageURLs = new HashSet<>();
         Event event = sourceService.createEventWithoutReplication("Test Event", new MillisecondsTimePoint(0),
-                new MillisecondsTimePoint(10), "testvenue", false, UUID.randomUUID(), imageURLs, videoURLs);
+                new MillisecondsTimePoint(10), "testvenue", false, UUID.randomUUID(), imageURLs, videoURLs,
+                sponsorImageURLs, /* logoImageURL */ null, /* officialWebsiteURL */ null);
         CourseArea defaultCourseArea = sourceService.addCourseArea(event.getId(), "ECHO", UUID.randomUUID());
 
         List<String> raceColumnNames = new ArrayList<String>();

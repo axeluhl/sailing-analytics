@@ -1,10 +1,10 @@
 package com.sap.sailing.domain.base;
 
-import java.awt.Dimension;
 import java.net.URL;
 import java.util.UUID;
 import java.util.concurrent.ExecutionException;
 
+import com.sap.sailing.domain.common.ImageSize;
 import com.sap.sailing.domain.leaderboard.LeaderboardGroup;
 
 /**
@@ -59,6 +59,6 @@ public interface Event extends EventBase {
      * Note that exceptions may result should the image be unavailable. If the image URL leads to a document that is not an image,
      * <code>null</code> will result.
      */
-    Dimension getImageSize(URL imageURL) throws InterruptedException, ExecutionException;
+    ImageSize getImageSize(URL imageURL) throws InterruptedException, ExecutionException;
     
 }

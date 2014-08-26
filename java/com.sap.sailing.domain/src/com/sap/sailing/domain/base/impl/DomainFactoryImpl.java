@@ -14,6 +14,7 @@ import com.sap.sailing.domain.base.DomainFactory;
 import com.sap.sailing.domain.base.Fleet;
 import com.sap.sailing.domain.base.Mark;
 import com.sap.sailing.domain.base.ObjectInputStreamResolvingAgainstDomainFactory;
+import com.sap.sailing.domain.base.RaceColumn;
 import com.sap.sailing.domain.base.RaceDefinition;
 import com.sap.sailing.domain.base.Waypoint;
 import com.sap.sailing.domain.common.Distance;
@@ -35,6 +36,7 @@ import com.sap.sailing.domain.common.dto.TrackedRaceDTO;
 import com.sap.sailing.domain.common.dto.TrackedRaceStatisticsDTO;
 import com.sap.sailing.domain.common.impl.MillisecondsTimePoint;
 import com.sap.sailing.domain.common.media.MediaTrack;
+import com.sap.sailing.domain.leaderboard.Leaderboard;
 import com.sap.sailing.domain.leaderboard.ScoringScheme;
 import com.sap.sailing.domain.leaderboard.impl.HighPoint;
 import com.sap.sailing.domain.leaderboard.impl.HighPointExtremeSailingSeriesOverall;
@@ -45,6 +47,7 @@ import com.sap.sailing.domain.leaderboard.impl.HighPointLastBreaksTie;
 import com.sap.sailing.domain.leaderboard.impl.HighPointWinnerGetsFive;
 import com.sap.sailing.domain.leaderboard.impl.HighPointWinnerGetsFiveIgnoringRaceCount;
 import com.sap.sailing.domain.leaderboard.impl.HighPointWinnerGetsSix;
+import com.sap.sailing.domain.leaderboard.impl.HighPointWinnerGetsSixIgnoringRaceCount;
 import com.sap.sailing.domain.leaderboard.impl.LowPoint;
 import com.sap.sailing.domain.leaderboard.impl.LowPointWinnerGetsZero;
 import com.sap.sailing.domain.tracking.GPSFix;
@@ -106,6 +109,8 @@ public class DomainFactoryImpl extends SharedDomainFactoryImpl implements Domain
             return new HighPointWinnerGetsFiveIgnoringRaceCount();
         case HIGH_POINT_WINNER_GETS_SIX:
             return new HighPointWinnerGetsSix();
+        case HIGH_POINT_WINNER_GETS_SIX_IGNORING_RACE_COUNT:
+            return new HighPointWinnerGetsSixIgnoringRaceCount();
         case HIGH_POINT_FIRST_GETS_TEN_OR_EIGHT:
             return new HighPointFirstGets10Or8AndLastBreaksTie();
         }
@@ -158,17 +163,31 @@ public class DomainFactoryImpl extends SharedDomainFactoryImpl implements Domain
     }
 
     @Override
-    public TrackedRaceStatisticsDTO createTrackedRaceStatisticsDTO(TrackedRace trackedRace, Collection<MediaTrack> mediaTracks) {
+    public TrackedRaceStatisticsDTO createTrackedRaceStatisticsDTO(TrackedRace trackedRace, Leaderboard leaderboard,
+            RaceColumn raceColumn, Fleet fleet, Collection<MediaTrack> mediaTracks) {
         TrackedRaceStatisticsDTO statisticsDTO = new TrackedRaceStatisticsDTO();
         
         // GPS data
         statisticsDTO.hasGPSData = trackedRace.hasGPSData();
+
+        Competitor leaderOrWinner = null;
+        TimePoint now = MillisecondsTimePoint.now();
         try {
-            Competitor overallLeader = trackedRace.getOverallLeader(MillisecondsTimePoint.now());
-            if(overallLeader != null) {
-                statisticsDTO.hasLeaderData = true;
-                statisticsDTO.leaderOrWinner = convertToCompetitorDTO(overallLeader);
-                GPSFixTrack<Competitor, GPSFixMoving> track = trackedRace.getTrack(overallLeader);
+            if(trackedRace.isLive(now)) {
+                leaderOrWinner = trackedRace.getOverallLeader(now);
+            } else if (trackedRace.getEndOfRace() != null) {
+                for(Competitor competitor: leaderboard.getCompetitorsFromBestToWorst(raceColumn, now)) {
+                    Fleet fleetOfCompetitor = raceColumn.getFleetOfCompetitor(competitor);
+                    if(fleetOfCompetitor != null && fleetOfCompetitor.equals(fleet)) {
+                        leaderOrWinner = competitor;
+                        break;
+                    }
+                }
+            }                
+            if(leaderOrWinner != null) {
+                statisticsDTO.hasLeaderOrWinnerData = true;
+                statisticsDTO.leaderOrWinner = convertToCompetitorDTO(leaderOrWinner);
+                GPSFixTrack<Competitor, GPSFixMoving> track = trackedRace.getTrack(leaderOrWinner);
                 if(track != null) {
                     statisticsDTO.averageGPSDataSampleInterval = track.getAverageIntervalBetweenFixes();
                 }

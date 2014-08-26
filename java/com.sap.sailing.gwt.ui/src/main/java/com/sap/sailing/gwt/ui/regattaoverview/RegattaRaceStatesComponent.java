@@ -772,4 +772,9 @@ public class RegattaRaceStatesComponent extends SimplePanel implements Component
             return "";
         }
     }
+
+    @Override
+    public String getDependentCssClassName() {
+        return "regattaRaceStates";
+    }
 }

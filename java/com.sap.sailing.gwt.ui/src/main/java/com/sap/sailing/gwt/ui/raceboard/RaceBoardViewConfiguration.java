@@ -12,8 +12,8 @@ public class RaceBoardViewConfiguration {
     private final String activeCompetitorsFilterSetName;
     private final boolean canReplayDuringLiveRaces;
     private final boolean autoSelectMedia;
+    private final String defaultMedia;
     private final boolean showViewStreamlets;
-    private boolean showNavigationPanel;
     
     public static final String PARAM_VIEW_MODE = "viewMode";
     public static final String PARAM_VIEW_SHOW_LEADERBOARD = "viewShowLeaderboard";
@@ -25,16 +25,17 @@ public class RaceBoardViewConfiguration {
     public static final String PARAM_VIEW_COMPETITOR_FILTER = "viewCompetitorFilter";
     public static final String PARAM_CAN_REPLAY_DURING_LIVE_RACES = "canReplayDuringLiveRaces";
     public static final String PARAM_AUTOSELECT_MEDIA = "autoSelectMedia";
+    public static final String PARAM_DEFAULT_MEDIA = "defaultMedia";
 
     public RaceBoardViewConfiguration() {
         this(/* activeCompetitorsFilterSetName */ null, /* showLeaderboard */ true,
                 /* showWindChart */ false, /* showCompetitorsChart */ false, /* showViewStreamlets */ false,
-        /* canReplayDuringLiveRaces */false, /* autoSelectMedia */false, /* showNavigationPanel */true);
+        /* canReplayDuringLiveRaces */false, /* autoSelectMedia */false, null);
     }	
     
     public RaceBoardViewConfiguration(String activeCompetitorsFilterSetName, boolean showLeaderboard,
             boolean showWindChart, boolean showCompetitorsChart, boolean showViewStreamlets, boolean canReplayDuringLiveRaces,
-            boolean autoSelectMedia, boolean showNavigationPanel) {
+            boolean autoSelectMedia, String defaultMedia) {
         this.activeCompetitorsFilterSetName = activeCompetitorsFilterSetName;
         this.showLeaderboard = showLeaderboard;
         this.showWindChart = showWindChart;
@@ -42,7 +43,7 @@ public class RaceBoardViewConfiguration {
         this.showViewStreamlets = showViewStreamlets;
         this.canReplayDuringLiveRaces = canReplayDuringLiveRaces;
         this.autoSelectMedia = autoSelectMedia;
-        this.showNavigationPanel = showNavigationPanel;
+        this.defaultMedia = defaultMedia;
     }
 
     public boolean isShowLeaderboard() {
@@ -73,8 +74,8 @@ public class RaceBoardViewConfiguration {
 		return autoSelectMedia;
 	}
 
-    public boolean isShowNavigationPanel() {
-        return showNavigationPanel;
+    public String getDefaultMedia() {
+        return defaultMedia;
     }
 
 }

@@ -2296,9 +2296,12 @@ public class RacingEventServiceImpl implements RacingEventServiceWithTestSupport
     @Override
     public Event addEvent(String eventName, TimePoint startDate, TimePoint endDate, String venue, boolean isPublic, UUID id) {
         Event result = createEventWithoutReplication(eventName, startDate, endDate, venue, isPublic, id,
-                /* imageURLs */ Collections.<URL>emptyList(), /* videoURLs */ Collections.<URL>emptyList());
+                /* imageURLs */ Collections.<URL>emptyList(), /* videoURLs */ Collections.<URL>emptyList(),
+                /* sponsorImageURLs */ Collections.<URL>emptyList(), /* logoImageURL */ null, /* officialWebsiteURL */ null);
         replicate(new CreateEvent(eventName, startDate, endDate, venue, isPublic, id, /* imageURLs */
-                Collections.<URL> emptyList(), /* videoURLs */Collections.<URL> emptyList()));
+                Collections.<URL> emptyList(), /* videoURLs */Collections.<URL> emptyList(),
+                /* sponsorImageURLs */ Collections.<URL> emptyList(), /* logoimageURL */ null,
+                /* officialWebsiteURLAsString */ null));
         return result;
     }
 
@@ -2309,11 +2312,15 @@ public class RacingEventServiceImpl implements RacingEventServiceWithTestSupport
 
     @Override
     public Event createEventWithoutReplication(String eventName, TimePoint startDate, TimePoint endDate, String venue,
-            boolean isPublic, UUID id, Iterable<URL> imageURLs, Iterable<URL> videoURLs) {
+            boolean isPublic, UUID id, Iterable<URL> imageURLs, Iterable<URL> videoURLs,
+            Iterable<URL> sponsorImageURLs, URL logoImageURL, URL officialWebsiteURL) {
         Event result = new EventImpl(eventName, startDate, endDate, venue, isPublic, id);
         addEvent(result);
         result.setImageURLs(imageURLs);
         result.setVideoURLs(videoURLs);
+        result.setSponsorImageURLs(sponsorImageURLs);
+        result.setLogoImageURL(logoImageURL);
+        result.setOfficialWebsiteURL(officialWebsiteURL);
         return result;
     }
 

@@ -16,6 +16,7 @@ import com.sap.sailing.domain.common.DetailType;
 import com.sap.sailing.domain.common.SortingOrder;
 import com.sap.sailing.domain.common.dto.LeaderboardRowDTO;
 import com.sap.sailing.gwt.ui.client.StringMessages;
+import com.sap.sailing.gwt.ui.client.shared.controls.AbstractSortableColumnWithMinMax;
 
 /**
  * A column that is sortable and offers an expand/collapse button in its column header.
@@ -23,12 +24,12 @@ import com.sap.sailing.gwt.ui.client.StringMessages;
  * @author Axel Uhl (D043530)
  *
  */
-public abstract class ExpandableSortableColumn<C> extends SortableColumn<LeaderboardRowDTO, C> {
+public abstract class ExpandableSortableColumn<C> extends LeaderboardSortableColumnWithMinMax<LeaderboardRowDTO, C> {
     private boolean enableExpansion;
     private boolean togglingInProcess;
     private boolean suppressSortingOnce;
     private final LeaderboardPanel leaderboardPanel;
-    private final Map<DetailType, SortableColumn<LeaderboardRowDTO, ?>> detailColumnsMap;
+    private final Map<DetailType, AbstractSortableColumnWithMinMax<LeaderboardRowDTO, ?>> detailColumnsMap;
     private final List<DetailType> detailSelection;
     
     /**
@@ -38,7 +39,7 @@ public abstract class ExpandableSortableColumn<C> extends SortableColumn<Leaderb
      * collection and are dynamically inserted to and removed from the {@link CellTable} to the right
      * of this column.
      */
-    protected List<SortableColumn<LeaderboardRowDTO, ?>> directChildren;
+    protected List<AbstractSortableColumnWithMinMax<LeaderboardRowDTO, ?>> directChildren;
     
     /**
      * Tells if this race column is currently displayed in expanded form which includes a visualization
@@ -60,7 +61,7 @@ public abstract class ExpandableSortableColumn<C> extends SortableColumn<Leaderb
      * By default, an expandable sortable column has no detail columns. Subclasses that want to offer detail columns must
      * override this method.
      */
-    protected Map<DetailType, SortableColumn<LeaderboardRowDTO, ?>> getDetailColumnMap(
+    protected Map<DetailType, AbstractSortableColumnWithMinMax<LeaderboardRowDTO, ?>> getDetailColumnMap(
             LeaderboardPanel leaderboardPanel, StringMessages stringConstants, String detailHeaderStyle,
             String detailColumnStyle) {
         return Collections.emptyMap();
@@ -89,12 +90,12 @@ public abstract class ExpandableSortableColumn<C> extends SortableColumn<Leaderb
      * ManeuverCountRaceColumn is not known at this point because it will be later set in the constructor of
      * TextRaceColumn
      */
-    protected Iterable<SortableColumn<LeaderboardRowDTO, ?>> getDirectChildren() {
-        List<SortableColumn<LeaderboardRowDTO, ?>> result;
+    protected Iterable<AbstractSortableColumnWithMinMax<LeaderboardRowDTO, ?>> getDirectChildren() {
+        List<AbstractSortableColumnWithMinMax<LeaderboardRowDTO, ?>> result;
         if (isExpanded()) {
-            result = new ArrayList<SortableColumn<LeaderboardRowDTO,?>>();
+            result = new ArrayList<AbstractSortableColumnWithMinMax<LeaderboardRowDTO,?>>();
             for (DetailType detailColumnType : detailSelection) {
-                SortableColumn<LeaderboardRowDTO, ?> selectedColumn = detailColumnsMap.get(detailColumnType);
+                AbstractSortableColumnWithMinMax<LeaderboardRowDTO, ?> selectedColumn = detailColumnsMap.get(detailColumnType);
                 if (selectedColumn != null) {
                     result.add(selectedColumn);
                 }
@@ -105,7 +106,7 @@ public abstract class ExpandableSortableColumn<C> extends SortableColumn<Leaderb
         return result;
     }
     
-    protected SortableColumn<LeaderboardRowDTO, ?> createExpansionColumn(DetailType detailColumnType) {
+    protected AbstractSortableColumnWithMinMax<LeaderboardRowDTO, ?> createExpansionColumn(DetailType detailColumnType) {
         throw new RuntimeException("Detail column type "+detailColumnType+" not supported by column of type "+getClass().getName());
     }
     
@@ -122,10 +123,10 @@ public abstract class ExpandableSortableColumn<C> extends SortableColumn<Leaderb
      * the column collection returned does not necessarily contain only columns really part of the {@link CellTable}
      * used to display this column. 
      */
-    private Collection<SortableColumn<LeaderboardRowDTO, ?>> getAllVisibleChildren() {
-        List<SortableColumn<LeaderboardRowDTO, ?>> transitiveChildren = new ArrayList<SortableColumn<LeaderboardRowDTO,?>>();
+    private Collection<AbstractSortableColumnWithMinMax<LeaderboardRowDTO, ?>> getAllVisibleChildren() {
+        List<AbstractSortableColumnWithMinMax<LeaderboardRowDTO, ?>> transitiveChildren = new ArrayList<>();
         if (isExpanded()) {
-            for (SortableColumn<LeaderboardRowDTO, ?> childColumn : getDirectChildren()) {
+            for (AbstractSortableColumnWithMinMax<LeaderboardRowDTO, ?> childColumn : getDirectChildren()) {
                 transitiveChildren.add(childColumn);
                 if (childColumn instanceof ExpandableSortableColumn<?>) {
                     @SuppressWarnings("unchecked")
@@ -153,7 +154,7 @@ public abstract class ExpandableSortableColumn<C> extends SortableColumn<Leaderb
             setTogglingInProcess(true);
             final CellTable<LeaderboardRowDTO> table = getLeaderboardPanel().getLeaderboardTable();
             if (isExpanded()) {
-                for (SortableColumn<LeaderboardRowDTO, ?> column : getAllVisibleChildren()) {
+                for (AbstractSortableColumnWithMinMax<LeaderboardRowDTO, ?> column : getAllVisibleChildren()) {
                     getLeaderboardPanel().removeColumn(column); // removes only the children currently displayed
                 }
                 getLeaderboardPanel().getBusyIndicator().setBusy(false);
@@ -170,7 +171,7 @@ public abstract class ExpandableSortableColumn<C> extends SortableColumn<Leaderb
                         // while toggling the columns.
                         if (insertIndex != -1) {
                             insertIndex++;
-                            for (SortableColumn<LeaderboardRowDTO, ?> column : getAllVisibleChildren()) {
+                            for (AbstractSortableColumnWithMinMax<LeaderboardRowDTO, ?> column : getAllVisibleChildren()) {
                                 column.updateMinMax();
                                 getLeaderboardPanel().insertColumn(insertIndex++, column);
                             }

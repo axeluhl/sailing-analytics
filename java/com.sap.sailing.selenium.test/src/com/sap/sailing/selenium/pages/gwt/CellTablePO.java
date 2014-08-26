@@ -51,10 +51,7 @@ public abstract class CellTablePO<T extends DataEntryPO> extends PageArea {
     
     private static final String LOADING_ANIMATION_XPATH = "./td/div/div/div/img";
     
-    // It seems that the css class is not allways the same
-    //private static final String CELL_TABLE_CSS_CLASS = "GJTB2DRDFQ"; //$NON-NLS-1$
-    
-    protected static final String SELECTED_ROW_CSS_CLASS = "GJTB2DRDPP"; //$NON-NLS-1$
+    protected static final String SELECTED_ROW_CSS_CLASS = "GN5USXKCCQ"; //$NON-NLS-1$
     
     private static final String LOADING_ANIMATION_IMAGE = "data:image/gif;base64," +               //$NON-NLS-1$
             "R0lGODlhKwALAPEAAP///0tKSqampktKSiH/C05FVFNDQVBFMi4wAwEAAAAh/hpDcmVhdGVkIHdpdGggYWpheGx" +  //$NON-NLS-1$
@@ -235,13 +232,13 @@ public abstract class CellTablePO<T extends DataEntryPO> extends PageArea {
      */
     public void selectEntries(List<T> entries) {
         // First deselect all selected entries
-        for(T entry : getSelectedEntries()) {
+        for (T entry : getSelectedEntries()) {
             entry.deselect();
         }
-        
+
         // Select all specified entries
-        for(T entry : entries) {
-            if(this.getWebElement().equals(entry.table.getWebElement())) {
+        for (T entry : entries) {
+            if (this.getWebElement().equals(entry.table.getWebElement())) {
                 entry.appendToSelection();
             }
         }
@@ -256,14 +253,12 @@ public abstract class CellTablePO<T extends DataEntryPO> extends PageArea {
     public List<T> getSelectedEntries() {
         List<T> entries = getEntries();
         Iterator<T> iterator = entries.iterator();
-        
-        while(iterator.hasNext()) {
+        while (iterator.hasNext()) {
             T entry = iterator.next();
-            
-            if(!entry.isSelected())
+            if (!entry.isSelected()) {
                 iterator.remove();
+            }
         }
-        
         return entries;
     }
     

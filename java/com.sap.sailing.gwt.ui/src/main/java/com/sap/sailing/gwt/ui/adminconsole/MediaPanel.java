@@ -6,6 +6,7 @@ import java.util.Date;
 
 import com.google.gwt.cell.client.EditTextCell;
 import com.google.gwt.cell.client.FieldUpdater;
+import com.google.gwt.cell.client.TextCell;
 import com.google.gwt.core.client.GWT;
 import com.google.gwt.dom.client.Style.Unit;
 import com.google.gwt.event.dom.client.ClickEvent;
@@ -135,6 +136,22 @@ public class MediaPanel extends FlowPanel {
         // };
         // cellTable.addColumn(checkColumn, SafeHtmlUtils.fromSafeConstant("<br/>"));
         // cellTable.setColumnWidth(checkColumn, 40, Unit.PX);
+
+        // db id
+        Column<MediaTrack, String> dbIdColumn = new Column<MediaTrack, String>(new TextCell()) {
+            @Override
+            public String getValue(MediaTrack mediaTrack) {
+                return mediaTrack.dbId;
+            }
+        };
+        dbIdColumn.setSortable(true);
+        sortHandler.setComparator(dbIdColumn, new Comparator<MediaTrack>() {
+            public int compare(MediaTrack mediaTrack1, MediaTrack mediaTrack2) {
+                return mediaTrack1.dbId.compareTo(mediaTrack2.dbId);
+            }
+        });
+        mediaTracksTable.addColumn(dbIdColumn, stringMessages.id());
+        mediaTracksTable.setColumnWidth(dbIdColumn, 10, Unit.PCT);
 
         // media title
         Column<MediaTrack, String> titleColumn = new Column<MediaTrack, String>(new EditTextCell()) {

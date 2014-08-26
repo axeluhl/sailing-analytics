@@ -9,9 +9,11 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
+import com.sap.sailing.domain.common.LeaderboardNameConstants;
 import com.sap.sailing.domain.common.RaceIdentifier;
 import com.sap.sailing.domain.common.RegattaAndRaceIdentifier;
 import com.sap.sailing.domain.common.TimingConstants;
+import com.sap.sse.common.Util;
 
 public class RaceColumnDTO extends NamedDTO implements Serializable {
     private static final long serialVersionUID = -3228244237400937852L;
@@ -19,23 +21,15 @@ public class RaceColumnDTO extends NamedDTO implements Serializable {
     private List<FleetDTO> fleets;
     private Map<FleetDTO, RegattaAndRaceIdentifier> trackedRaceIdentifiersPerFleet;
     private Map<FleetDTO, RaceDTO> racesPerFleet;
-    private Boolean isValidInTotalScore;
     private Double explicitFactor;
     private double effectiveFactor;
 
     private Map<FleetDTO, RaceLogTrackingInfoDTO> raceLogTrackingInfos = new HashMap<FleetDTO, RaceLogTrackingInfoDTO>();
     
-    RaceColumnDTO() {} // for GWT serialization
-    
-    public RaceColumnDTO(Boolean isValidInTotalScore) {
-        this.isValidInTotalScore = isValidInTotalScore;
+    public RaceColumnDTO() {
         trackedRaceIdentifiersPerFleet = new HashMap<FleetDTO, RegattaAndRaceIdentifier>();
         racesPerFleet = new HashMap<FleetDTO, RaceDTO>();
         fleets = new ArrayList<FleetDTO>();
-    }
-    
-    public boolean isValidInTotalScore() {
-        return isValidInTotalScore;
     }
     
     public String getRaceColumnName() {
@@ -52,6 +46,17 @@ public class RaceColumnDTO extends NamedDTO implements Serializable {
 
     public boolean hasTrackedRace(RaceIdentifier raceIdentifier) {
         return trackedRaceIdentifiersPerFleet.values().contains(raceIdentifier);
+    }
+    
+    public FleetDTO getFleet(RaceIdentifier raceIdentifier) {
+        FleetDTO result = null;
+        for (FleetDTO identifier : trackedRaceIdentifiersPerFleet.keySet()) {
+            if (Util.equalsWithNull(trackedRaceIdentifiersPerFleet.get(identifier), raceIdentifier)) {
+                result = identifier;
+                break;
+            }
+        }
+        return result;
     }
     
     public boolean isMedalRace() {
@@ -227,7 +232,6 @@ public class RaceColumnDTO extends NamedDTO implements Serializable {
         result = prime * result + (int) (temp ^ (temp >>> 32));
         result = prime * result + ((explicitFactor == null) ? 0 : explicitFactor.hashCode());
         result = prime * result + ((fleets == null) ? 0 : fleets.hashCode());
-        result = prime * result + ((isValidInTotalScore == null) ? 0 : isValidInTotalScore.hashCode());
         result = prime * result + (medalRace ? 1231 : 1237);
         result = prime * result + ((racesPerFleet == null) ? 0 : racesPerFleet.hashCode());
         result = prime * result
@@ -255,11 +259,6 @@ public class RaceColumnDTO extends NamedDTO implements Serializable {
             if (other.fleets != null)
                 return false;
         } else if (!fleets.equals(other.fleets))
-            return false;
-        if (isValidInTotalScore == null) {
-            if (other.isValidInTotalScore != null)
-                return false;
-        } else if (!isValidInTotalScore.equals(other.isValidInTotalScore))
             return false;
         if (medalRace != other.medalRace)
             return false;
@@ -290,5 +289,9 @@ public class RaceColumnDTO extends NamedDTO implements Serializable {
     
     public void setRaceLogTrackingInfo(FleetDTO fleet, RaceLogTrackingInfoDTO info) {
         raceLogTrackingInfos.put(fleet, info);
+    }
+    
+    public String getSeriesName() {
+        return LeaderboardNameConstants.DEFAULT_SERIES_NAME;
     }
 }

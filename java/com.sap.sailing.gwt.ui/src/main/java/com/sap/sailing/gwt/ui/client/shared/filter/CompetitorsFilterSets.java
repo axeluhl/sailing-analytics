@@ -4,6 +4,7 @@ import java.util.ArrayList;
 import java.util.List;
 
 import com.sap.sailing.domain.common.dto.CompetitorDTO;
+import com.sap.sse.common.filter.Filter;
 import com.sap.sse.common.filter.FilterSet;
 
 public class CompetitorsFilterSets {
@@ -16,14 +17,25 @@ public class CompetitorsFilterSets {
         activeFilterSet = null;
     }
     
+    public FilterSet<CompetitorDTO, Filter<CompetitorDTO>> getActiveFilterSetWithGeneralizedType() {
+        FilterSet<CompetitorDTO, Filter<CompetitorDTO>> result = null;
+        if(activeFilterSet != null) {
+            result = new FilterSet<CompetitorDTO, Filter<CompetitorDTO>>(activeFilterSet.getName());
+            for (Filter<CompetitorDTO> filter : activeFilterSet.getFilters()) {
+                result.addFilter(filter);
+            }
+        }
+        return result;
+    }
+    
     public FilterSet<CompetitorDTO, FilterWithUI<CompetitorDTO>> getActiveFilterSet() {
         return activeFilterSet;
     }
 
     public FilterSet<CompetitorDTO, FilterWithUI<CompetitorDTO>> findFilterSetByName(String filterSetName) {
         FilterSet<CompetitorDTO, FilterWithUI<CompetitorDTO>> result = null;
-        for(FilterSet<CompetitorDTO, FilterWithUI<CompetitorDTO>> filterSet: filterSets) {
-            if(filterSet.getName().equals(filterSetName)) {
+        for (FilterSet<CompetitorDTO, FilterWithUI<CompetitorDTO>> filterSet : filterSets) {
+            if (filterSet.getName().equals(filterSetName)) {
                 result = filterSet;
                 break;
             }
@@ -32,8 +44,8 @@ public class CompetitorsFilterSets {
     }
     
     public void setActiveFilterSet(FilterSet<CompetitorDTO, FilterWithUI<CompetitorDTO>> newActiveFilterSet) {
-        if(newActiveFilterSet != null) {
-            if(filterSets.contains(newActiveFilterSet)) {
+        if (newActiveFilterSet != null) {
+            if (filterSets.contains(newActiveFilterSet)) {
                 this.activeFilterSet = newActiveFilterSet;
             }
         } else {

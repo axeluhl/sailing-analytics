@@ -128,11 +128,11 @@ public class LeaderboardDetailsPanelPO extends PageArea {
         CellTablePO<DataEntryPO> racesTable = getRacesTable();
         
         for(DataEntryPO entry : racesTable.getEntries()) {
-            String name = entry.getColumnContent(0);
-            String fleet = entry.getColumnContent(1);
-            //String medalRace = entry.getColumnContent(2);
-            //String linked = entry.getColumnContent(3);
-            //String factor = entry.getColumnContent(4);
+            String name = entry.getColumnContent("Race");
+            String fleet = entry.getColumnContent("Fleet");
+            //String medalRace = entry.getColumnContent("Medal Race");
+            //String linked = entry.getColumnContent("Is linked");
+            //String factor = entry.getColumnContent("Factor");
             
             result.add(new RaceDescriptor(name, fleet, false, false, 0.0));
         }
@@ -185,11 +185,11 @@ public class LeaderboardDetailsPanelPO extends PageArea {
         CellTablePO<DataEntryPO> racesTable = getRacesTable();
         
         for(DataEntryPO entry : racesTable.getEntries()) {
-            String name = entry.getColumnContent(0);
-            String fleet = entry.getColumnContent(1);
-            //String medalRace = entry.getColumnContent(2);
-            //String linked = entry.getColumnContent(3);
-            //String factor = entry.getColumnContent(4);
+            String name = entry.getColumnContent("Race");
+            String fleet = entry.getColumnContent("Fleet");
+            //String medalRace = entry.getColumnContent("Medal Race");
+            //String linked = entry.getColumnContent("Is linked");
+            //String factor = entry.getColumnContent("Factor");
             
             RaceDescriptor descriptor = new RaceDescriptor(name, fleet, false, false, 0.0);
             
@@ -204,9 +204,9 @@ public class LeaderboardDetailsPanelPO extends PageArea {
         CellTablePO<DataEntryPO> trackingTable = getTrackedRacesTable();
         
         for(DataEntryPO entry : trackingTable.getEntries()) {
-            String regatta = entry.getColumnContent(0);
-            String boatClass = entry.getColumnContent(1);
-            String raceName = entry.getColumnContent(2);
+            String regatta = entry.getColumnContent("Regatta");
+            String boatClass = entry.getColumnContent("Boat Class");
+            String raceName = entry.getColumnContent("Race");
             
             TrackedRaceDescriptor descriptor = new TrackedRaceDescriptor(regatta, boatClass, raceName);
             

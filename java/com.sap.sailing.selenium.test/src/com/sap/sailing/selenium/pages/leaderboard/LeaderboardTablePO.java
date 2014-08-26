@@ -17,9 +17,9 @@ import com.sap.sailing.selenium.pages.leaderboard.LeaderboardTablePO.Leaderboard
 
 public class LeaderboardTablePO extends CellTablePO<LeaderboardEntry> {
     public static class LeaderboardEntry extends DataEntryPO {
-        private static final int TOTAL_RANK_COLUMN = 0;
-        private static final int COMPETITOR_COLUMN = 1;
-        private static final int NAME_COLUMN = 2;
+        private static final String TOTAL_RANK_COLUMN = "Regatta Rank";
+        private static final String COMPETITOR_COLUMN = "Competitor";
+        private static final String NAME_COLUMN = "Name";
         
         private static final String TOTAL_POINTS_COLUMN = "Σ";
         

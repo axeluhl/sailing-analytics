@@ -33,6 +33,7 @@ import org.moxieapps.gwt.highcharts.client.plotOptions.ScatterPlotOptions;
 
 import com.google.gwt.i18n.client.NumberFormat;
 import com.google.gwt.user.client.rpc.AsyncCallback;
+import com.google.gwt.user.client.ui.Button;
 import com.google.gwt.user.client.ui.Label;
 import com.google.gwt.user.client.ui.RequiresResize;
 import com.google.gwt.user.client.ui.Widget;
@@ -52,6 +53,8 @@ import com.sap.sailing.gwt.ui.client.shared.components.Component;
 import com.sap.sailing.gwt.ui.shared.CompetitorRaceDataDTO;
 import com.sap.sailing.gwt.ui.shared.CompetitorsRaceDataDTO;
 import com.sap.sse.common.Util;
+import com.sap.sse.common.filter.Filter;
+import com.sap.sse.common.filter.FilterSet;
 import com.sap.sse.gwt.client.async.AsyncActionsExecutor;
 import com.sap.sse.gwt.client.player.TimeRangeWithZoomProvider;
 import com.sap.sse.gwt.client.player.Timer;
@@ -71,7 +74,7 @@ import com.sap.sse.gwt.client.player.Timer.PlayModes;
  */
 public abstract class AbstractCompetitorRaceChart<SettingsType extends ChartSettings> extends AbstractRaceChart implements
         CompetitorSelectionChangeListener, RequiresResize {
-    public static final String LODA_COMPETITOR_CHART_DATA_CATEGORY = "loadCompetitorChartData";
+    public static final String LOAD_COMPETITOR_CHART_DATA_CATEGORY = "loadCompetitorChartData";
     
     private static final int LINE_WIDTH = 1;
     
@@ -90,16 +93,16 @@ public abstract class AbstractCompetitorRaceChart<SettingsType extends ChartSett
     private Long timeOfEarliestRequestInMillis;
     private Long timeOfLatestRequestInMillis;
     
-    public AbstractCompetitorRaceChart(SailingServiceAsync sailingService, AsyncActionsExecutor asyncActionsExecutor,
+    protected AbstractCompetitorRaceChart(SailingServiceAsync sailingService, AsyncActionsExecutor asyncActionsExecutor,
             CompetitorSelectionProvider competitorSelectionProvider, RaceSelectionProvider raceSelectionProvider,
-            Timer timer, TimeRangeWithZoomProvider timeRangeWithZoomProvider, final StringMessages stringMessages,
-            ErrorReporter errorReporter, DetailType detailType, boolean compactChart, boolean allowTimeAdjust) {
+            Timer timer, TimeRangeWithZoomProvider timeRangeWithZoomProvider, Button settingsButton,
+            final StringMessages stringMessages, ErrorReporter errorReporter, DetailType detailType, boolean compactChart, boolean allowTimeAdjust) {
         this(sailingService, asyncActionsExecutor, competitorSelectionProvider, raceSelectionProvider, timer,
                 timeRangeWithZoomProvider, stringMessages, errorReporter, detailType, compactChart, allowTimeAdjust,
                 null, null);
     }
 
-    public AbstractCompetitorRaceChart(SailingServiceAsync sailingService, AsyncActionsExecutor asyncActionsExecutor,
+    AbstractCompetitorRaceChart(SailingServiceAsync sailingService, AsyncActionsExecutor asyncActionsExecutor,
             CompetitorSelectionProvider competitorSelectionProvider, RaceSelectionProvider raceSelectionProvider,
             Timer timer, TimeRangeWithZoomProvider timeRangeWithZoomProvider, final StringMessages stringMessages,
             ErrorReporter errorReporter, DetailType detailType, boolean compactChart, boolean allowTimeAdjust,
@@ -138,7 +141,8 @@ public abstract class AbstractCompetitorRaceChart<SettingsType extends ChartSett
                 .setMarginLeft(65)
                 .setMarginRight(65)
                 .setBorderColor(new Color("#CACACA"))
-                .setBackgroundColor(new Color("#EBEBEB"))
+                .setBackgroundColor(new Color("#FFFFFF"))
+                .setPlotBackgroundColor("#f8f8f8")
                 .setBorderWidth(0)
                 .setBorderRadius(0)
                 .setPlotBorderWidth(0)
@@ -151,6 +155,7 @@ public abstract class AbstractCompetitorRaceChart<SettingsType extends ChartSett
                                         new Marker().setEnabled(false).setHoverState(
                                                 new Marker().setEnabled(true).setRadius(4))).setShadow(false)
                                 .setHoverStateLineWidth(LINE_WIDTH));
+        chart.setStyleName(chartsCss.chartStyle());
         ChartUtil.useCheckboxesToShowAndHide(chart);
 
         if (allowTimeAdjust) {
@@ -198,54 +203,61 @@ public abstract class AbstractCompetitorRaceChart<SettingsType extends ChartSett
      * If no data needs to be {@link #needsDataLoading() loaded}, the "no competitors selected" label is displayed.
      */
     private void updateChart(Date from, Date to, boolean append) {
-        if (hasSelectedCompetitors()) {
-            setWidget(chart);
+        if (hasSelectedCompetitors() && isVisible()) {
+            remove(noCompetitorsSelectedLabel);
+            if (!getChildren().contains(chart)) {
+                add(chart);
+            }
             ArrayList<CompetitorDTO> competitorsToLoad = new ArrayList<CompetitorDTO>();
             for (CompetitorDTO competitorDTO : getSelectedCompetitors()) {
                 competitorsToLoad.add(competitorDTO);
             }
             loadData(from, to, competitorsToLoad, append);
         } else {
-            setWidget(noCompetitorsSelectedLabel);
+            remove(chart);
+            if (!getChildren().contains(noCompetitorsSelectedLabel)) {
+                add(noCompetitorsSelectedLabel);
+            }
         }
     }
 
     private void loadData(final Date from, final Date to, final List<CompetitorDTO> competitors, final boolean append) {
-        showLoading(stringMessages.loadingCompetitorData());
-        ArrayList<CompetitorDTO> competitorsToLoad = new ArrayList<CompetitorDTO>();
-        for (CompetitorDTO competitorDTO : competitors) {
-            competitorsToLoad.add(competitorDTO);
-        }
+        if (isVisible()) {
+            showLoading(stringMessages.loadingCompetitorData());
+            ArrayList<CompetitorDTO> competitorsToLoad = new ArrayList<CompetitorDTO>();
+            for (CompetitorDTO competitorDTO : competitors) {
+                competitorsToLoad.add(competitorDTO);
+            }
 
-        GetCompetitorsRaceDataAction getCompetitorsRaceDataAction = new GetCompetitorsRaceDataAction(sailingService,
-                selectedRaceIdentifier, competitorsToLoad, from, to, getStepSize(), getSelectedDetailType(),
-                leaderboardGroupName, leaderboardName);
-        asyncActionsExecutor.execute(getCompetitorsRaceDataAction, LODA_COMPETITOR_CHART_DATA_CATEGORY,
-                new AsyncCallback<CompetitorsRaceDataDTO>() {
-                    @Override
-                    public void onSuccess(final CompetitorsRaceDataDTO result) {
-                        hideLoading();
-                        if (result != null) {
-                            if (result.isEmpty() && chartContainsNoData()) {
-                                setWidget(noDataFoundLabel);
+            GetCompetitorsRaceDataAction getCompetitorsRaceDataAction = new GetCompetitorsRaceDataAction(sailingService,
+                    selectedRaceIdentifier, competitorsToLoad, from, to, getStepSize(), getSelectedDetailType(),
+                    leaderboardGroupName, leaderboardName);
+            asyncActionsExecutor.execute(getCompetitorsRaceDataAction, LOAD_COMPETITOR_CHART_DATA_CATEGORY,
+                    new AsyncCallback<CompetitorsRaceDataDTO>() {
+                        @Override
+                        public void onSuccess(final CompetitorsRaceDataDTO result) {
+                            hideLoading();
+                            if (result != null) {
+                                if (result.isEmpty() && chartContainsNoData()) {
+                                    setWidget(noDataFoundLabel);
+                                } else {
+                                    updateChartSeries(result, append);
+                                }
                             } else {
-                                updateChartSeries(result, append);
-                            }
-                        } else {
-                            if (!append) {
-                                clearChart();
+                                if (!append) {
+                                    clearChart();
+                                }
                             }
                         }
-                    }
-        
-                    @Override
-                    public void onFailure(Throwable caught) {
-                        hideLoading();
-                        errorReporter.reportError(stringMessages.errorFetchingChartData(caught.getMessage()),
-                                timer.getPlayMode() == PlayModes.Live);
-                    }
-                });
-
+            
+                        @Override
+                        public void onFailure(Throwable caught) {
+                            hideLoading();
+                            errorReporter.reportError(stringMessages.errorFetchingChartData(caught.getMessage()),
+                                    timer.getPlayMode() == PlayModes.Live);
+                        }
+                    });
+        }
     }
     
     private boolean chartContainsNoData() {
@@ -280,7 +292,7 @@ public abstract class AbstractCompetitorRaceChart<SettingsType extends ChartSett
         }
         
         if (isVisible()) {
-             if(hasSelectedCompetitors()) {
+             if (hasSelectedCompetitors()) {
                  chart.redraw();
              } else {
                  setWidget(noCompetitorsSelectedLabel);
@@ -406,11 +418,10 @@ public abstract class AbstractCompetitorRaceChart<SettingsType extends ChartSett
     @Override
     public void setVisible(boolean visible) {
         super.setVisible(visible);
-        if(visible) {
+        if (visible) {
             // Workaround for a highcharts bug: 
             // Set a chart title, overwrite the title, switch chart to invisible and visible again -> the old title appears  
-            chart.setTitle(new ChartTitle().setText(DetailTypeFormatter.format(selectedDetailType)),
-                    null);
+            chart.setTitle(new ChartTitle().setText(DetailTypeFormatter.format(selectedDetailType)), null);
         }
     }
 
@@ -654,5 +665,11 @@ public abstract class AbstractCompetitorRaceChart<SettingsType extends ChartSett
     @Override
     public void filteredCompetitorsListChanged(Iterable<CompetitorDTO> filteredCompetitors) {
         timeChanged(timer.getTime(), null);
+    }
+
+    @Override
+    public void filterChanged(FilterSet<CompetitorDTO, ? extends Filter<CompetitorDTO>> oldFilterSet,
+            FilterSet<CompetitorDTO, ? extends Filter<CompetitorDTO>> newFilterSet) {
+        // nothing to do; if it changes the filtered competitor list, a separate call to filteredCompetitorsListChanged will occur
     }
 }

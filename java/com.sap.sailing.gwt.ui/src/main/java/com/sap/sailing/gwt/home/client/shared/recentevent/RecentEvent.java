@@ -7,6 +7,7 @@ import com.google.gwt.dom.client.AnchorElement;
 import com.google.gwt.dom.client.DivElement;
 import com.google.gwt.dom.client.ImageElement;
 import com.google.gwt.dom.client.SpanElement;
+import com.google.gwt.dom.client.Style.Display;
 import com.google.gwt.safehtml.shared.SafeHtml;
 import com.google.gwt.uibinder.client.UiBinder;
 import com.google.gwt.uibinder.client.UiField;
@@ -26,7 +27,8 @@ public class RecentEvent extends UIObject {
     @UiField SpanElement eventStartDate;
     @UiField AnchorElement eventOverviewLink;
     @UiField ImageElement eventImage;
-
+    @UiField DivElement isLiveDiv;
+    
     private EventBaseDTO event;
 
     private final String defaultImageUrl = "http://static.sapsailing.com/ubilabsimages/default/default_event_photo.jpg";
@@ -52,7 +54,6 @@ public class RecentEvent extends UIObject {
                 }
             }
         });
-
     }
     
     public void setEvent(EventBaseDTO event) {
@@ -62,13 +63,17 @@ public class RecentEvent extends UIObject {
     
     private void updateUI() {
         SafeHtml safeHtmlEventName = LongNamesUtil.breakLongName(event.getName());
-        eventName.setInnerSafeHtml(safeHtmlEventName); 
-        
+        eventName.setInnerSafeHtml(safeHtmlEventName);
+
+        if (!event.isRunning()) {
+            isLiveDiv.getStyle().setDisplay(Display.NONE);
+        }
+
         venueName.setInnerText(event.venue.getName());
         eventStartDate.setInnerText(EventDatesFormatterUtil.formatDateRangeWithoutYear(event.startDate, event.endDate));
-        
+
         List<String> photoGalleryImageURLs = event.getPhotoGalleryImageURLs();
-        if(photoGalleryImageURLs.size() == 0) {
+        if (photoGalleryImageURLs.size() == 0) {
             eventImage.setSrc(defaultImageUrl);
         } else {
             eventImage.setSrc(photoGalleryImageURLs.get(0));
