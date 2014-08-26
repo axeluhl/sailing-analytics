@@ -180,6 +180,9 @@ public class AdminConsoleEntryPoint extends AbstractEntryPoint implements Regatt
 
         ResultImportUrlsManagementPanel resultImportUrlsManagementPanel = new ResultImportUrlsManagementPanel(sailingService, this, stringMessages);
         addToTabPanel(tabPanel, user, resultImportUrlsManagementPanel, stringMessages.resultImportUrls(), AdminConsoleFeatures.MANAGE_RESULT_IMPORT_URLS);
+        
+        StructureImportUrlsManagementPanel structureImportUrlsManagementPanel = new StructureImportUrlsManagementPanel(sailingService, this, stringMessages, this, eventManagementPanel);
+        addToTabPanel(tabPanel, user, structureImportUrlsManagementPanel, stringMessages.structureImportUrls(), AdminConsoleFeatures.MANAGE_STRUCTURE_IMPORT_URLS);
 
         RemoteSailingServerInstancesManagementPanel sailingServerInstancesManagementPanel = new RemoteSailingServerInstancesManagementPanel(sailingService, this, stringMessages);
         addToTabPanel(tabPanel, user, sailingServerInstancesManagementPanel, stringMessages.sailingServers(), AdminConsoleFeatures.MANAGE_SAILING_SERVER_INSTANCES);
@@ -208,6 +211,7 @@ public class AdminConsoleEntryPoint extends AbstractEntryPoint implements Regatt
             @Override
             public void onSelection(SelectionEvent<Integer> event) {
                 final Widget selectedPanel = ((ScrollPanel) tabPanel.getWidget(tabPanel.getSelectedIndex())).getWidget();
+          
                 if (selectedPanel == eventManagementPanel) {
                     eventManagementPanel.fillEvents();
                     fillLeaderboardGroups();

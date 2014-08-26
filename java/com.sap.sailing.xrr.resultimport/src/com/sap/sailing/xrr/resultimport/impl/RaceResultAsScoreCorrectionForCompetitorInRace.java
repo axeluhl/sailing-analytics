@@ -9,12 +9,13 @@ import java.util.Set;
 import com.sap.sailing.domain.common.MaxPointsReason;
 import com.sap.sailing.domain.common.RegattaScoreCorrections.ScoreCorrectionForCompetitorInRace;
 import com.sap.sailing.xrr.resultimport.Parser;
-import com.sap.sailing.xrr.resultimport.schema.Crew;
-import com.sap.sailing.xrr.resultimport.schema.CrewPosition;
-import com.sap.sailing.xrr.resultimport.schema.Division;
-import com.sap.sailing.xrr.resultimport.schema.IFBoatStatus;
-import com.sap.sailing.xrr.resultimport.schema.Person;
-import com.sap.sailing.xrr.resultimport.schema.RaceResult;
+import com.sap.sailing.xrr.schema.Crew;
+import com.sap.sailing.xrr.schema.CrewPosition;
+import com.sap.sailing.xrr.schema.Division;
+import com.sap.sailing.xrr.schema.IFBoatStatus;
+import com.sap.sailing.xrr.schema.Person;
+import com.sap.sailing.xrr.schema.RaceResult;
+
 
 public class RaceResultAsScoreCorrectionForCompetitorInRace implements ScoreCorrectionForCompetitorInRace {
     private final String sailID;

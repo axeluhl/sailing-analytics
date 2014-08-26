@@ -16,6 +16,7 @@ public enum AdminConsoleFeatures {
     MANAGE_LEADERBOARDS (UserRoles.eventmanager, UserRoles.administrator),
     MANAGE_LEADERBOARD_GROUPS (UserRoles.eventmanager, UserRoles.administrator),
     MANAGE_RESULT_IMPORT_URLS (UserRoles.eventmanager, UserRoles.administrator),
+    MANAGE_STRUCTURE_IMPORT_URLS (UserRoles.eventmanager, UserRoles.administrator),
     MANAGE_MEDIA (UserRoles.eventmanager, UserRoles.administrator),
     MANAGE_SAILING_SERVER_INSTANCES (UserRoles.administrator),
     MANAGE_REPLICATION (UserRoles.administrator),

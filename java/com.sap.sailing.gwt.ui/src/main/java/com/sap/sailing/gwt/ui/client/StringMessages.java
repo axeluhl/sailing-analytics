@@ -346,6 +346,8 @@ public interface StringMessages extends Messages {
     String regattaExistForSelectedBoatClass();
     String reload();
     String addRegatta();
+    String importRegatta();
+    String importAllRegattas();
     String exchangeName();
     String course();
     String courseLayout();
@@ -356,11 +358,14 @@ public interface StringMessages extends Messages {
     String showAllCompetitors();
     String boatTails();
     String resultImportUrls();
+    String structureImportUrls();
     String errorRefreshingResultImportUrlList(String message);
     String successfullyUpdatedResultImportUrls();
     String errorRemovingResultImportUrls(String message);
     String pleaseEnterNonEmptyUrl();
     String addResultImportUrl();
+    String addRegattaImportUrl();
+    String addAllRegattasImportUrl();
     String errorAddingResultImportUrl(String message);
     String sailingServers();
     String errorRefreshingSailingServers(String message);

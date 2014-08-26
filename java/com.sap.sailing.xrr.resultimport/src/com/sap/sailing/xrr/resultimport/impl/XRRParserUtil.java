@@ -5,7 +5,8 @@ import javax.xml.datatype.XMLGregorianCalendar;
 
 import com.sap.sailing.domain.common.TimePoint;
 import com.sap.sailing.domain.common.impl.MillisecondsTimePoint;
-import com.sap.sailing.xrr.resultimport.schema.RegattaResults;
+import com.sap.sailing.xrr.schema.RegattaResults;
+
 
 public class XRRParserUtil {
     public static TimePoint calculateTimePointForRegattaResults(RegattaResults regattaResult) {

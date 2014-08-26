@@ -23,10 +23,10 @@ import com.sap.sailing.resultimport.ResultUrlRegistry;
 import com.sap.sailing.xrr.resultimport.Parser;
 import com.sap.sailing.xrr.resultimport.ParserFactory;
 import com.sap.sailing.xrr.resultimport.impl.XRRRegattaResultsAsScoreCorrections;
-import com.sap.sailing.xrr.resultimport.schema.Division;
-import com.sap.sailing.xrr.resultimport.schema.Event;
-import com.sap.sailing.xrr.resultimport.schema.EventGender;
-import com.sap.sailing.xrr.resultimport.schema.RegattaResults;
+import com.sap.sailing.xrr.schema.Division;
+import com.sap.sailing.xrr.schema.Event;
+import com.sap.sailing.xrr.schema.EventGender;
+import com.sap.sailing.xrr.schema.RegattaResults;
 import com.sap.sse.common.Util;
 
 public class ScoreCorrectionProviderImpl implements ScoreCorrectionProvider, ResultUrlProvider {

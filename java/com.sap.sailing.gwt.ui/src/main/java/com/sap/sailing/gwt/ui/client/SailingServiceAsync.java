@@ -354,7 +354,7 @@ public interface SailingServiceAsync {
 
     void createEvent(String eventName, Date startDate, Date endDate, String description, boolean isPublic,
             List<String> courseAreaNames, Iterable<String> imageURLs, Iterable<String> videoURLs,
-            Iterable<String> sponsorImageURLs, String logoImageURL, String officialWebsiteURL, AsyncCallback<EventDTO> callback);
+            AsyncCallback<EventDTO> callback);
 
     void updateEvent(UUID eventId, String eventName, String eventDescription, Date startDate, Date endDate,
             VenueDTO venue, boolean isPublic, Iterable<UUID> leaderboardGroupIds, String officialWebsiteURL,
@@ -637,4 +637,7 @@ public interface SailingServiceAsync {
             AsyncCallback<Iterable<LeaderboardSearchResultDTO>> callback);
 
     void setStartTimeReceivedForRace(RaceIdentifier raceIdentifier, Date newStartTimeReceived, AsyncCallback<RaceDTO> callback);
+
+    void addEventImportUrl(String url, EventDTO newEvent, AsyncCallback<Void> asyncCallback); 
+
 }

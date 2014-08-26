@@ -13,4 +13,5 @@ Require-Bundle: com.sap.sailing.manage2sail,
  com.sap.sailing.domain.common,
  com.sap.sailing.resultimport,
  com.sap.sailing.xrr.resultimport,
- com.sap.sse.common
+ com.sap.sse.common,
+ com.sap.sailing.xrr.schema
