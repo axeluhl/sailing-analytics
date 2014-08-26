@@ -16,6 +16,7 @@ import javax.xml.bind.JAXBException;
 
 import buildstructure.BuildStructure;
 import buildstructure.Fleet;
+import buildstructure.SetRacenumber;
 import buildstructure.RaceType;
 import buildstructure.RegattaStructure;
 
@@ -56,9 +57,11 @@ public class StructureImportUrl {
     private ArrayList<Regattas> regattas;
     private LinkedHashMap<String, Boat> boatForPerson;
     private DomainFactory baseDomainFactory;
+    private SetRacenumber setRacenumber;
 
-    public StructureImportUrl(String url) {
- 
+    public StructureImportUrl(String url, SetRacenumber setRacenumber) {
+
+    	this.setRacenumber = setRacenumber;
         regattas = new EventImport().getRegattas(url);
 
         for (int i = 0; i < regattas.size(); i++) {
@@ -125,7 +128,7 @@ public class StructureImportUrl {
 
                 RaceType raceType = raceTypes.get(i);
 
-                ArrayList<Fleet> fleets = raceTypes.get(i).getFleets();
+                ArrayList<Fleet> fleets = raceType.getFleets();
                 ArrayList<FleetDTO> fleetsDTO = new ArrayList<FleetDTO>();
                 String fleetColor;
                 for (int j = 0; j < fleets.size(); j++) {
@@ -142,21 +145,10 @@ public class StructureImportUrl {
                 raceNames.clear();
                 
                 //set Racenumbers for each series
-                int index = 1; 
-                Race[] races = fleets.get(raceTypes.get(i).getMaxIndex()).getRaces();
+                Race[] races = fleets.get(raceType.getMaxIndex()).getRaces();
                 for (int j = 0; j < races.length; j++) {
                 	Race race = races[j];
-                    if (race != null) {
-                        char beginOfRaceType = raceType.getFirstChar();
-                        if (beginOfRaceType =='D' && race.getFirstChar()!='R') {
-                        	beginOfRaceType = 'R';
-                            raceNames.add("" + beginOfRaceType + index);
-                        } else {
-                            raceNames.add(race.getRaceName());
-                        }
-                        index++;
-                    }
-
+                    setRacenumber.setRacenumber(race, raceType, i, raceNames);
                 }
                 series.add(raceNames);
 
