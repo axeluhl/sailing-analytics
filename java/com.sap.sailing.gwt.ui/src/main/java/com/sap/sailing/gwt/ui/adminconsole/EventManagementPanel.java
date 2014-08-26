@@ -832,7 +832,7 @@ public class EventManagementPanel extends SimplePanel implements EventsRefresher
         for (CourseAreaDTO courseAreaDTO : newEvent.venue.getCourseAreas()) {
             courseAreaNames.add(courseAreaDTO.getName());
         }
-        sailingService.createEvent(newEvent.getName(), newEvent.startDate, newEvent.endDate, newEvent.getDescription(),
+        sailingService.createEvent(newEvent.getName(), newEvent.startDate, newEvent.endDate, newEvent.venue.getName(),
                 newEvent.isPublic, courseAreaNames, newEvent.getImageURLs(), newEvent.getVideoURLs(),
                 new AsyncCallback<EventDTO>() {
             @Override
