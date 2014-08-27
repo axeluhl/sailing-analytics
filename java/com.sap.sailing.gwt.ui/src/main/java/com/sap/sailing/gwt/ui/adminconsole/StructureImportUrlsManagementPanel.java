@@ -6,6 +6,7 @@ import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
 
+import com.google.gwt.dom.client.Style.Unit;
 import com.google.gwt.event.dom.client.ChangeEvent;
 import com.google.gwt.event.dom.client.ChangeHandler;
 import com.google.gwt.event.dom.client.ClickEvent;
@@ -14,22 +15,30 @@ import com.google.gwt.user.client.Window;
 import com.google.gwt.user.client.rpc.AsyncCallback;
 import com.google.gwt.user.client.ui.Button;
 import com.google.gwt.user.client.ui.FlowPanel;
+import com.google.gwt.user.client.ui.Grid;
 import com.google.gwt.user.client.ui.HasHorizontalAlignment;
+import com.google.gwt.user.client.ui.HasVerticalAlignment;
 import com.google.gwt.user.client.ui.HorizontalPanel;
 import com.google.gwt.user.client.ui.ListBox;
+import com.google.gwt.user.client.ui.SimplePanel;
 import com.google.gwt.user.client.ui.VerticalPanel;
 import com.sap.sailing.gwt.ui.client.ErrorReporter;
 import com.sap.sailing.gwt.ui.client.RegattaRefresher;
+import com.sap.sailing.gwt.ui.client.RegattaSelectionChangeListener;
+import com.sap.sailing.gwt.ui.client.RegattaSelectionModel;
+import com.sap.sailing.gwt.ui.client.RegattaSelectionProvider;
+import com.sap.sailing.gwt.ui.client.RegattasDisplayer;
 import com.sap.sailing.gwt.ui.client.SailingServiceAsync;
 import com.sap.sailing.gwt.ui.client.StringMessages;
 import com.sap.sailing.gwt.ui.client.TextfieldEntryDialog;
 import com.sap.sailing.gwt.ui.shared.CourseAreaDTO;
 import com.sap.sailing.gwt.ui.shared.EventDTO;
+import com.sap.sailing.gwt.ui.shared.RegattaDTO;
 import com.sap.sse.gwt.client.controls.busyindicator.SimpleBusyIndicator;
 import com.sap.sse.gwt.client.dialog.DataEntryDialog;
 import com.sap.sse.gwt.client.dialog.DataEntryDialog.DialogCallback;
 
-public class StructureImportUrlsManagementPanel extends FlowPanel {
+public class StructureImportUrlsManagementPanel extends FlowPanel implements RegattasDisplayer {
     private final ListBox urlProviderSelectionListBox;
     private final ListBox urlListBox;
 
@@ -39,6 +48,8 @@ public class StructureImportUrlsManagementPanel extends FlowPanel {
     private final RegattaRefresher regattaRefresher;
     private final SimpleBusyIndicator busyIndicator;
     private final EventManagementPanel eventManagementPanel;
+    private RegattaListComposite regattaListComposite;
+    private RegattaSelectionProvider regattaSelectionProvider;
 
     private final Button addButton;
     private final Button removeButton;
@@ -87,6 +98,19 @@ public class StructureImportUrlsManagementPanel extends FlowPanel {
             }
         });
         VerticalPanel vp = new VerticalPanel();
+        Grid grid = new Grid(1, 2);
+        vp.add(grid);
+
+        regattaSelectionProvider = new RegattaSelectionModel(true);
+        // regattaSelectionProvider.addRegattaSelectionChangeListener(this);
+
+        regattaListComposite = new RegattaListComposite(sailingService, regattaSelectionProvider, regattaRefresher,
+                errorReporter, stringMessages);
+        regattaListComposite.ensureDebugId("RegattaListComposite");
+        grid.setWidget(0, 0, regattaListComposite);
+        grid.getRowFormatter().setVerticalAlign(0, HasVerticalAlignment.ALIGN_TOP);
+        grid.getColumnFormatter().getElement(1).getStyle().setPaddingTop(2.0, Unit.EM);
+
         // HorizontalPanel providerSelectionPanel = new HorizontalPanel();
         // providerSelectionPanel.setVerticalAlignment(HasVerticalAlignment.ALIGN_MIDDLE);
         // vp.add(providerSelectionPanel);
@@ -223,9 +247,11 @@ public class StructureImportUrlsManagementPanel extends FlowPanel {
                                                 for (CourseAreaDTO courseAreaDTO : newEvent.venue.getCourseAreas()) {
                                                     courseAreaNames.add(courseAreaDTO.getName());
                                                 }
-                                                sailingService.createEvent(newEvent.getName(), newEvent.startDate, newEvent.endDate, newEvent.venue.getName(),
-                                                        newEvent.isPublic, courseAreaNames, newEvent.getImageURLs(), newEvent.getVideoURLs(),
-                                                        newEvent.getSponsorImageURLs(), newEvent.getLogoImageURL(), newEvent.getOfficialWebsiteURL(),
+                                                sailingService.createEvent(newEvent.getName(), newEvent.startDate,
+                                                        newEvent.endDate, newEvent.venue.getName(), newEvent.isPublic,
+                                                        courseAreaNames, newEvent.getImageURLs(),
+                                                        newEvent.getVideoURLs(), newEvent.getSponsorImageURLs(),
+                                                        newEvent.getLogoImageURL(), newEvent.getOfficialWebsiteURL(),
                                                         new AsyncCallback<EventDTO>() {
 
                                                             @Override
@@ -274,5 +300,11 @@ public class StructureImportUrlsManagementPanel extends FlowPanel {
                 });
         dialog.getEntryField().setVisibleLength(100);
         dialog.show();
+    }
+
+    @Override
+    public void fillRegattas(List<RegattaDTO> regattas) {
+        regattaListComposite.fillRegattas(regattas);
+
     }
 }
