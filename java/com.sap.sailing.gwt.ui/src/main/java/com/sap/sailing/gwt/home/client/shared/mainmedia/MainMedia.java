@@ -6,6 +6,8 @@ import java.util.List;
 import java.util.Random;
 
 import com.google.gwt.core.client.GWT;
+import com.google.gwt.core.client.Scheduler;
+import com.google.gwt.core.client.Scheduler.ScheduledCommand;
 import com.google.gwt.dom.client.DivElement;
 import com.google.gwt.event.dom.client.ClickEvent;
 import com.google.gwt.uibinder.client.UiBinder;
@@ -56,31 +58,35 @@ public class MainMedia extends Composite {
 
     public void setRecentEvents(List<EventBaseDTO> recentEvents) {
         List<String> photoGalleryUrls = new ArrayList<String>();
-        
-        for(EventBaseDTO event: recentEvents) {
+        for (EventBaseDTO event : recentEvents) {
             photoGalleryUrls.addAll(event.getPhotoGalleryImageURLs());
-
-            if(event.getVideoURLs().size() > 0 && videoCounter < 3) {
+            if (event.getVideoURLs().size() > 0 && videoCounter < 3) {
                 addVideoToVideoPanel(event);
             }
         }
-
         // shuffle the image url list (Remark: Collections.shuffle() is not implemented in GWT)
         int gallerySize = photoGalleryUrls.size();
-        Random random = new Random(gallerySize);  
-        for(int i = 0; i < gallerySize; i++) {  
-            Collections.swap(photoGalleryUrls, i, random.nextInt(gallerySize));  
+        Random random = new Random(gallerySize);
+        for (int i = 0; i < gallerySize; i++) {
+            Collections.swap(photoGalleryUrls, i, random.nextInt(gallerySize));
         }
-
-        for(String url : photoGalleryUrls) {
+        for (String url : photoGalleryUrls) {
             SimplePanel imageContainer = new SimplePanel();
             imageContainer.addStyleName(STYLES.media_swiperslide());
             String image = "url(" + url + ")";
             imageContainer.getElement().getStyle().setBackgroundImage(image);
             mediaSlides.add(imageContainer);
         }
-        
         this.swiper = Swiper.createWithLoopOption(STYLES.media_swipecontainer(), STYLES.media_swipewrapper(), STYLES.media_swiperslide());
+        // See bug 2232: the stage image sizes are scaled incorrectly. https://github.com/ubilabs/sap-sailing-analytics/issues/421 and
+        // http://bugzilla.sapsailing.com/bugzilla/show_bug.cgi?id=2232 have the details. A quick fix may be to send a resize event
+        // after everything has been rendered.
+        Scheduler.get().scheduleDeferred(new ScheduledCommand() {
+            @Override
+            public void execute() {
+                swiper.reInit();
+            }
+        });
     }
 
     private void addVideoToVideoPanel(EventBaseDTO event) {
@@ -97,17 +103,17 @@ public class MainMedia extends Composite {
     private String getRandomVideoURL(EventBaseDTO event) {
         String result = null;
         int videosCount = event.getVideoURLs().size();
-        if(videosCount > 0) {
-            if(videosCount == 1) {
+        if (videosCount > 0) {
+            if (videosCount == 1) {
                 result = event.getVideoURLs().get(0);
             } else {
                 List<String> videoUrls = new ArrayList<String>(event.getVideoURLs());
-                Random random = new Random(videosCount);  
-                for(int i = 0; i < videosCount; i++) {  
-                    Collections.swap(videoUrls, i, random.nextInt(videosCount));  
+                Random random = new Random(videosCount);
+                for (int i = 0; i < videosCount; i++) {
+                    Collections.swap(videoUrls, i, random.nextInt(videosCount));
                 }
                 result = videoUrls.get(0);
-            }                
+            }
         }
         return result;
     }
