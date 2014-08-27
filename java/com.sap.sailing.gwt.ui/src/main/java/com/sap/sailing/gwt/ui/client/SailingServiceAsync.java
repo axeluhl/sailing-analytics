@@ -352,7 +352,7 @@ public interface SailingServiceAsync {
 
     void removeEvents(Collection<UUID> eventIds, AsyncCallback<Void> asyncCallback);
 
-    void createEvent(String eventName, Date startDate, Date endDate, String description, boolean isPublic,
+    void createEvent(String eventName, String eventDescription, Date startDate, Date endDate, String venue, boolean isPublic,
             List<String> courseAreaNames, Iterable<String> imageURLs, Iterable<String> videoURLs,
             Iterable<String> sponsorImageURLs, String logoImageURL, String officialWebsiteURL, AsyncCallback<EventDTO> callback);
 

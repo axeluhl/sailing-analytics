@@ -285,9 +285,9 @@ public interface SailingService extends RemoteService {
             String logoImageURL, Iterable<String> imageURLs, Iterable<String> videoURLs,
             Iterable<String> sponsorImageURLs) throws Exception;
 
-    EventDTO createEvent(String eventName, Date startDate, Date endDate, String description, boolean isPublic,
-            List<String> courseAreaNames, Iterable<String> imageURLs, Iterable<String> videoURLs,
-            Iterable<String> sponsorImageURLs, String logoImageURL, String officialWebsiteURL) throws Exception;
+    EventDTO createEvent(String eventName, String eventDescription, Date startDate, Date endDate, String venue,
+            boolean isPublic, List<String> courseAreaNames, Iterable<String> imageURLs,
+            Iterable<String> videoURLs, Iterable<String> sponsorImageURLs, String logoImageURL, String officialWebsiteURL) throws Exception;
 
     void removeEvent(UUID eventId);
 

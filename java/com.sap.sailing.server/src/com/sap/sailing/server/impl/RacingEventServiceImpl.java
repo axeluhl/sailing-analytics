@@ -2294,14 +2294,14 @@ public class RacingEventServiceImpl implements RacingEventServiceWithTestSupport
 
     // Used for TESTING only
     @Override
-    public Event addEvent(String eventName, TimePoint startDate, TimePoint endDate, String venue, boolean isPublic, UUID id) {
-        Event result = createEventWithoutReplication(eventName, startDate, endDate, venue, isPublic, id,
-                /* imageURLs */ Collections.<URL>emptyList(), /* videoURLs */ Collections.<URL>emptyList(),
-                /* sponsorImageURLs */ Collections.<URL>emptyList(), /* logoImageURL */ null, /* officialWebsiteURL */ null);
-        replicate(new CreateEvent(eventName, startDate, endDate, venue, isPublic, id, /* imageURLs */
-                Collections.<URL> emptyList(), /* videoURLs */Collections.<URL> emptyList(),
-                /* sponsorImageURLs */ Collections.<URL> emptyList(), /* logoimageURL */ null,
-                /* officialWebsiteURLAsString */ null));
+    public Event addEvent(String eventName, String eventDescription, TimePoint startDate, TimePoint endDate, String venue, boolean isPublic, UUID id) {
+        Event result = createEventWithoutReplication(eventName, eventDescription, startDate, endDate, venue, isPublic,
+                id, /* imageURLs */ Collections.<URL>emptyList(),
+                /* videoURLs */ Collections.<URL>emptyList(), /* sponsorImageURLs */ Collections.<URL>emptyList(), /* logoImageURL */ null, /* officialWebsiteURL */ null);
+        replicate(new CreateEvent(eventName, eventDescription, startDate, endDate, venue, isPublic, /* imageURLs */
+                id, Collections.<URL> emptyList(),
+                /* videoURLs */Collections.<URL> emptyList(), /* sponsorImageURLs */ Collections.<URL> emptyList(),
+                /* logoimageURL */ null, /* officialWebsiteURLAsString */ null));
         return result;
     }
 
@@ -2311,11 +2311,12 @@ public class RacingEventServiceImpl implements RacingEventServiceWithTestSupport
     }
 
     @Override
-    public Event createEventWithoutReplication(String eventName, TimePoint startDate, TimePoint endDate, String venue,
-            boolean isPublic, UUID id, Iterable<URL> imageURLs, Iterable<URL> videoURLs,
-            Iterable<URL> sponsorImageURLs, URL logoImageURL, URL officialWebsiteURL) {
+    public Event createEventWithoutReplication(String eventName, String eventDescription, TimePoint startDate, TimePoint endDate,
+            String venue, boolean isPublic, UUID id, Iterable<URL> imageURLs,
+            Iterable<URL> videoURLs, Iterable<URL> sponsorImageURLs, URL logoImageURL, URL officialWebsiteURL) {
         Event result = new EventImpl(eventName, startDate, endDate, venue, isPublic, id);
         addEvent(result);
+        result.setDescription(eventDescription);
         result.setImageURLs(imageURLs);
         result.setVideoURLs(videoURLs);
         result.setSponsorImageURLs(sponsorImageURLs);
