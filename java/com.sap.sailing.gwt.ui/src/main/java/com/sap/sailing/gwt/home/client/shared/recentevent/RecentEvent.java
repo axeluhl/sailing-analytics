@@ -41,9 +41,7 @@ public class RecentEvent extends UIObject {
     public RecentEvent(final PlaceNavigator navigator, final EventBaseDTO event) {
         this.event = event;
         RecentEventResources.INSTANCE.css().ensureInjected();
-
         setElement(uiBinder.createAndBindUi(this));
-        
         Event.sinkEvents(eventOverviewLink, Event.ONCLICK);
         Event.setEventListener(eventOverviewLink, new EventListener() {
             @Override
@@ -61,14 +59,11 @@ public class RecentEvent extends UIObject {
     private void updateUI() {
         SafeHtml safeHtmlEventName = LongNamesUtil.breakLongName(event.getName());
         eventName.setInnerSafeHtml(safeHtmlEventName);
-
         if (!event.isRunning()) {
             isLiveDiv.getStyle().setDisplay(Display.NONE);
         }
-
         venueName.setInnerText(event.venue.getName());
         eventStartDate.setInnerText(EventDatesFormatterUtil.formatDateRangeWithoutYear(event.startDate, event.endDate));
-
         List<String> photoGalleryImageURLs = event.getPhotoGalleryImageURLs();
         if (photoGalleryImageURLs.size() == 0) {
             eventImage.setSrc(defaultImageUrl);

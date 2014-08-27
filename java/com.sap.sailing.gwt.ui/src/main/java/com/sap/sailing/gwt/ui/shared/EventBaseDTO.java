@@ -183,7 +183,7 @@ public class EventBaseDTO extends NamedDTO implements IsSerializable {
         String stageImageURL = getStageImageURL(); // if set, exclude stage image from photo gallery
         List<String> result = new ArrayList<String>();
         for (String imageUrl : imageURLs) {
-            if (!Util.equalsWithNull(imageUrl, stageImageURL)) {
+            if (imageURLs.size() == 1 || !Util.equalsWithNull(imageUrl, stageImageURL)) {
                 result.add(imageUrl);
             }
         }
