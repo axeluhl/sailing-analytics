@@ -36,18 +36,17 @@ public class EventsOverviewRecent extends Composite {
         initWidget(uiBinder.createAndBindUi(this));
     }
 
-    public void updateEvents(Map<Integer, List<EventBaseDTO>> recentEventsOrderedByYear) {
+    public void updateEvents(Map<Integer, List<EventBaseDTO>> recentEventsByYear) {
         // remove old widgets
         recentEventsPerYearPanel.clear();
         recentEventsComposites.clear();
-
         // recent events of this year
         Date now = new Date();
         int currentYear = DateUtil.getYear(now);
         boolean oneYearIsExpanded = false;
-        
-        if(recentEventsOrderedByYear.get(currentYear) != null) {
-            EventsOverviewRecentYear recentEventsOfOneYear = new EventsOverviewRecentYear(currentYear, recentEventsOrderedByYear.get(currentYear),  navigator);
+        if (recentEventsByYear.get(currentYear) != null) {
+            EventsOverviewRecentYear recentEventsOfOneYear = new EventsOverviewRecentYear(currentYear,
+                    recentEventsByYear.get(currentYear), navigator);
             recentEventsPerYearPanel.add(recentEventsOfOneYear);
             recentEventsComposites.put(currentYear, recentEventsOfOneYear);
             recentEventsOfOneYear.showContent();
@@ -55,17 +54,18 @@ public class EventsOverviewRecent extends Composite {
         }
         currentYear--;
         while (currentYear > 2010) {
-            if(recentEventsOrderedByYear.get(currentYear) != null) {
-                EventsOverviewRecentYear recentEventsOfOneYear = new EventsOverviewRecentYear(currentYear, recentEventsOrderedByYear.get(currentYear), navigator);
+            if (recentEventsByYear.get(currentYear) != null) {
+                EventsOverviewRecentYear recentEventsOfOneYear = new EventsOverviewRecentYear(currentYear,
+                        recentEventsByYear.get(currentYear), navigator);
                 recentEventsPerYearPanel.add(recentEventsOfOneYear);
                 recentEventsComposites.put(currentYear, recentEventsOfOneYear);
-                if(oneYearIsExpanded == true) {
+                if (oneYearIsExpanded == true) {
                     recentEventsOfOneYear.hideContent();
                 } else {
                     recentEventsOfOneYear.showContent();
                     oneYearIsExpanded = true;
                 }
-            }            
+            }
             currentYear--;
         }
     }

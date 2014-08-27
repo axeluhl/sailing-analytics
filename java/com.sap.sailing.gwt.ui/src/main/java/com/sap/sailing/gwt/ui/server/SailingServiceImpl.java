@@ -3089,7 +3089,7 @@ public class SailingServiceImpl extends ProxiedRemoteServiceServlet implements S
     public List<EventBaseDTO> getPublicEventsOfAllSailingServers() throws MalformedURLException {
         List<EventBaseDTO> result = new ArrayList<>();
         for (EventDTO localEvent : getEvents()) {
-            if(localEvent.isPublic) {
+            if (localEvent.isPublic) {
                 result.add(localEvent);
             }
         }
