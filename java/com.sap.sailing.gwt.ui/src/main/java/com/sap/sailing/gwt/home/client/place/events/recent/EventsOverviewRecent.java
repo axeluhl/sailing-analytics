@@ -1,9 +1,13 @@
 package com.sap.sailing.gwt.home.client.place.events.recent;
 
-import java.util.Date;
+import java.util.ArrayList;
+import java.util.Collections;
 import java.util.HashMap;
+import java.util.LinkedHashMap;
 import java.util.List;
+import java.util.ListIterator;
 import java.util.Map;
+import java.util.Map.Entry;
 
 import com.google.gwt.core.client.GWT;
 import com.google.gwt.uibinder.client.UiBinder;
@@ -11,7 +15,6 @@ import com.google.gwt.uibinder.client.UiField;
 import com.google.gwt.user.client.ui.Composite;
 import com.google.gwt.user.client.ui.HTMLPanel;
 import com.google.gwt.user.client.ui.Widget;
-import com.sap.sailing.gwt.home.client.DateUtil;
 import com.sap.sailing.gwt.home.client.app.PlaceNavigator;
 import com.sap.sailing.gwt.ui.shared.EventBaseDTO;
 
@@ -41,32 +44,33 @@ public class EventsOverviewRecent extends Composite {
         recentEventsPerYearPanel.clear();
         recentEventsComposites.clear();
         // recent events of this year
-        Date now = new Date();
-        int currentYear = DateUtil.getYear(now);
+        LinkedHashMap<Integer, List<EventBaseDTO>> recentEventsOrderedDescendingByYearOrderedDescendingByEndDate =
+                sortEventsDescendingByYear(recentEventsByYearOrderedByEndDate);
         boolean oneYearIsExpanded = false;
-        if (recentEventsByYearOrderedByEndDate.get(currentYear) != null) {
+        for (Entry<Integer, List<EventBaseDTO>> e : recentEventsOrderedDescendingByYearOrderedDescendingByEndDate.entrySet()) {
+            int currentYear = e.getKey();
             EventsOverviewRecentYear recentEventsOfOneYear = new EventsOverviewRecentYear(currentYear,
-                    recentEventsByYearOrderedByEndDate.get(currentYear), navigator);
+                    e.getValue(), navigator);
             recentEventsPerYearPanel.add(recentEventsOfOneYear);
             recentEventsComposites.put(currentYear, recentEventsOfOneYear);
-            recentEventsOfOneYear.showContent();
-            oneYearIsExpanded = true;
-        }
-        currentYear--;
-        while (currentYear > 2010) {
-            if (recentEventsByYearOrderedByEndDate.get(currentYear) != null) {
-                EventsOverviewRecentYear recentEventsOfOneYear = new EventsOverviewRecentYear(currentYear,
-                        recentEventsByYearOrderedByEndDate.get(currentYear), navigator);
-                recentEventsPerYearPanel.add(recentEventsOfOneYear);
-                recentEventsComposites.put(currentYear, recentEventsOfOneYear);
-                if (oneYearIsExpanded == true) {
-                    recentEventsOfOneYear.hideContent();
-                } else {
-                    recentEventsOfOneYear.showContent();
-                    oneYearIsExpanded = true;
-                }
+            if (oneYearIsExpanded == true) {
+                recentEventsOfOneYear.hideContent();
+            } else {
+                recentEventsOfOneYear.showContent();
+                oneYearIsExpanded = true;
             }
-            currentYear--;
         }
+    }
+
+    private LinkedHashMap<Integer, List<EventBaseDTO>> sortEventsDescendingByYear(
+            Map<Integer, List<EventBaseDTO>> recentEventsByYearOrderedByEndDate) {
+        LinkedHashMap<Integer, List<EventBaseDTO>> result = new LinkedHashMap<>();
+        List<Integer> yearKeysInDescendingOrder = new ArrayList<>(recentEventsByYearOrderedByEndDate.keySet());
+        Collections.sort(yearKeysInDescendingOrder);
+        for (ListIterator<Integer> i=yearKeysInDescendingOrder.listIterator(yearKeysInDescendingOrder.size()); i.hasPrevious(); ) {
+            Integer year = i.previous();
+            result.put(year, recentEventsByYearOrderedByEndDate.get(year));
+        }
+        return result;
     }
 }
