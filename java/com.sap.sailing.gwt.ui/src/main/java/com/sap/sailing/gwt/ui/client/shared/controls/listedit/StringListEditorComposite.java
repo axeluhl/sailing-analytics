@@ -18,17 +18,20 @@ import com.sap.sailing.gwt.ui.client.StringMessages;
 public class StringListEditorComposite extends ListEditorComposite<String> {
     public StringListEditorComposite(List<String> initialValues, StringMessages stringMessages,
             String popupDialogTitle, ImageResource removeImage, List<String> suggestValues) {
-        super(initialValues, new CollapsedUi(stringMessages, popupDialogTitle,
+        super(initialValues);
+        setActiveUi(new CollapsedUi(stringMessages, popupDialogTitle,
                 new ExpandedUi(stringMessages, removeImage, suggestValues)));
     }
 
     public StringListEditorComposite(List<String> initialValues, StringMessages stringMessages,
             ImageResource removeImage, List<String> suggestValues) {
-        super(initialValues, new ExpandedUi(stringMessages, removeImage, suggestValues));
+        super(initialValues);
+        setActiveUi(new ExpandedUi(stringMessages, removeImage, suggestValues));
     }
 
     public StringListEditorComposite(List<String> initialValues, ListEditorUiStrategy<String> activeUi) {
-        super(initialValues, activeUi);
+        super(initialValues);
+        setActiveUi(activeUi);
     }
 
     public static class CollapsedUi extends CollapsedListEditorUi<String> {

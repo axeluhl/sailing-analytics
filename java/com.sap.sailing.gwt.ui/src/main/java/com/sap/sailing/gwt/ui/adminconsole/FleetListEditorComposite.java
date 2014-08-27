@@ -24,7 +24,8 @@ import com.sap.sailing.gwt.ui.client.shared.controls.listedit.ListEditorComposit
 
 public class FleetListEditorComposite extends ListEditorComposite<FleetDTO> {
     public FleetListEditorComposite(List<FleetDTO> initialValues, StringMessages stringMessages, ImageResource removeImage) {
-        super(initialValues, new ExpandedUi(stringMessages, removeImage));
+        super(initialValues);
+        setActiveUi(new ExpandedUi(stringMessages, removeImage));
     }
 
     private static class ExpandedUi extends ExpandedListEditorUi<FleetDTO> {

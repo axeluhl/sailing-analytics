@@ -23,6 +23,7 @@ import buildstructure.RegattaStructure;
 import com.sap.sailing.domain.base.BoatClass;
 import com.sap.sailing.domain.base.DomainFactory;
 import com.sap.sailing.domain.base.Nationality;
+import com.sap.sailing.domain.base.Regatta;
 import com.sap.sailing.domain.base.impl.BoatImpl;
 import com.sap.sailing.domain.base.impl.DynamicBoat;
 import com.sap.sailing.domain.base.impl.DynamicPerson;
@@ -31,9 +32,11 @@ import com.sap.sailing.domain.base.impl.PersonImpl;
 import com.sap.sailing.domain.base.impl.RegattaImpl;
 import com.sap.sailing.domain.base.impl.TeamImpl;
 import com.sap.sailing.domain.common.Color;
+import com.sap.sailing.domain.common.ScoringSchemeType;
 import com.sap.sailing.domain.common.dto.FleetDTO;
 import com.sap.sailing.domain.common.dto.RegattaCreationParametersDTO;
 import com.sap.sailing.domain.common.dto.SeriesCreationParametersDTO;
+import com.sap.sailing.domain.leaderboard.ScoringScheme;
 import com.sap.sailing.domain.leaderboard.impl.LowPoint;
 import com.sap.sailing.server.operationaltransformation.AddSpecificRegatta;
 import com.sap.sailing.xrr.resultimport.ParserFactory;
@@ -81,7 +84,12 @@ public class StructureImportUrl {
         }
     }
 
-    public ArrayList<AddSpecificRegatta> getRegattas(Serializable courseAreaID) {
+    public ArrayList<AddSpecificRegatta> getRegattas(ScoringSchemeType scoringScheme, boolean isPersistent, UUID courseArea,
+    			boolean useStartTimeInference, DomainFactory baseDomainFactory, boolean firstColumnIsNonDiscardableCarryForward,
+    			boolean hasSplitFleetContiguousScoring, boolean startswithZeroScore, int[] discardingThresholds) {
+
+    	this.baseDomainFactory = baseDomainFactory;
+    	
         ArrayList<AddSpecificRegatta> regattas = new ArrayList<AddSpecificRegatta>();
         Event event = null;
 
@@ -99,13 +107,14 @@ public class StructureImportUrl {
 
             BuildStructure structure = new BuildStructure(races);
 
-            LinkedHashMap<String, SeriesCreationParametersDTO> seriesCreationParams = setSeriesCreationParametersDTO(structure);
+            LinkedHashMap<String, SeriesCreationParametersDTO> seriesCreationParams = setSeriesCreationParametersDTO(structure, 
+            		firstColumnIsNonDiscardableCarryForward, hasSplitFleetContiguousScoring, startswithZeroScore, discardingThresholds);
 
             regattas.add(new AddSpecificRegatta(RegattaImpl.getDefaultName(event.getTitle(), ((Division) event
                     .getRaceOrDivisionOrRegattaSeriesResult().get(0)).getTitle()), ((Division) event
                     .getRaceOrDivisionOrRegattaSeriesResult().get(0)).getTitle(), event.getEventID(),
-                    new RegattaCreationParametersDTO(seriesCreationParams), /* persistent */
-                    true, new LowPoint(), courseAreaID, /* useStartTimeInference */true));
+                    new RegattaCreationParametersDTO(seriesCreationParams),
+                    isPersistent, this.baseDomainFactory.createScoringScheme(scoringScheme), courseArea, useStartTimeInference));
 
         }
         eventName = event.getTitle();
@@ -116,7 +125,9 @@ public class StructureImportUrl {
         return eventName;
     }
 
-    private LinkedHashMap<String, SeriesCreationParametersDTO> setSeriesCreationParametersDTO(BuildStructure structure) {
+    private LinkedHashMap<String, SeriesCreationParametersDTO> setSeriesCreationParametersDTO(BuildStructure structure,
+    		boolean firstColumnIsNonDiscardableCarryForward, boolean hasSplitFleetContiguousScoring, boolean startswithZeroScore,
+    		int[] discardingThresholds) {
         LinkedHashMap<String, SeriesCreationParametersDTO> seriesCreationParams = new LinkedHashMap<String, SeriesCreationParametersDTO>();
 
         RegattaStructure regattaStructure = structure.getRegattaStructure();
@@ -151,10 +162,10 @@ public class StructureImportUrl {
                     setRacenumberStrategy.setRacenumber(race, raceType, i, raceNames);
                 }
                 series.add(raceNames);
-
+                
                 seriesCreationParams.put(raceType.getRaceType(), new SeriesCreationParametersDTO(fleetsDTO,
-                /* medal */raceTypes.get(i).isMedal(), /* startsWithZero */false, /* firstColumnIsNonDiscardableCarryForward */false,
-                /* discardingThresholds */null, /* hasSplitFleetContiguousScoring */false));
+                /* medal */raceTypes.get(i).isMedal(), startswithZeroScore, firstColumnIsNonDiscardableCarryForward,
+                discardingThresholds, hasSplitFleetContiguousScoring));
             }
 
         }
@@ -198,10 +209,8 @@ public class StructureImportUrl {
         return color;
     }
     
-    public void setCompetitors(DomainFactory baseDomainFactory){
-    	
-    	this.baseDomainFactory = baseDomainFactory;
-    	
+    public void setCompetitors(){
+    	    	
     	for(int i=0;i<results.size();i++){
     		BoatClass boatClass = null;
     		

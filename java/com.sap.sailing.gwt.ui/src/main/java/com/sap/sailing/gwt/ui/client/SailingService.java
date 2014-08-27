@@ -338,7 +338,7 @@ public interface SailingService extends RemoteService {
 
     void addResultImportUrl(String resultProviderName, String url) throws Exception;
 
-    void addEventImportUrl(String url, EventDTO newEvent);
+    void addEventImportUrl(String url, EventDTO newEvent, RegattaDTO defaultRegatta);
 
     void updateLeaderboardScoreCorrectionMetadata(String leaderboardName, Date timePointOfLastCorrectionValidity,
             String comment);

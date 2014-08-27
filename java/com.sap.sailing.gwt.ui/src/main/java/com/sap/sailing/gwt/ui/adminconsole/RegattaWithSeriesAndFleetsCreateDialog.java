@@ -17,9 +17,9 @@ import com.sap.sailing.gwt.ui.shared.SeriesDTO;
 
 public class RegattaWithSeriesAndFleetsCreateDialog extends RegattaWithSeriesAndFleetsDialog {
     
-    private static AdminConsoleResources resources = GWT.create(AdminConsoleResources.class);
+    protected static AdminConsoleResources resources = GWT.create(AdminConsoleResources.class);
     
-    private ListEditorComposite<SeriesDTO> seriesEditor;
+    protected ListEditorComposite<SeriesDTO> seriesEditor;
 
     protected static class RegattaParameterValidator implements Validator<RegattaDTO> {
 
@@ -98,8 +98,12 @@ public class RegattaWithSeriesAndFleetsCreateDialog extends RegattaWithSeriesAnd
             List<EventDTO> existingEvents, StringMessages stringConstants, DialogCallback<RegattaDTO> callback) {
         super(new RegattaDTO(), existingEvents, stringConstants.addRegatta(), stringConstants.ok(), stringConstants,
                 new RegattaParameterValidator(stringConstants, existingRegattas), callback);
-        this.seriesEditor = new SeriesWithFleetsListEditor(Collections.<SeriesDTO>emptyList(), stringMessages, resources.removeIcon(), /*enableFleetRemoval*/true);
+        setSeriesEditor();
     }
+
+	protected void setSeriesEditor() {
+		this.seriesEditor = new SeriesWithFleetsListEditor(Collections.<SeriesDTO>emptyList(), stringMessages, resources.removeIcon(), /*enableFleetRemoval*/true);
+	}
 
     @Override
     protected void setupAdditionalWidgetsOnPanel(final VerticalPanel panel) {

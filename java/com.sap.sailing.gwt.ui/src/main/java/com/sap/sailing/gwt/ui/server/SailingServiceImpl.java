@@ -63,6 +63,7 @@ import com.sap.sailing.domain.base.ControlPointWithTwoMarks;
 import com.sap.sailing.domain.base.Course;
 import com.sap.sailing.domain.base.CourseArea;
 import com.sap.sailing.domain.base.CourseBase;
+import com.sap.sailing.domain.base.DomainFactory;
 import com.sap.sailing.domain.base.Event;
 import com.sap.sailing.domain.base.EventBase;
 import com.sap.sailing.domain.base.Fleet;
@@ -3701,22 +3702,38 @@ public class SailingServiceImpl extends ProxiedRemoteServiceServlet implements S
         return convertToRegattaDTO(regatta);
     }
 
+    
     @Override
-    public void addEventImportUrl(String url, EventDTO newEvent) {
-
-        Regatta regatta = null;
+    public void addEventImportUrl(String url, EventDTO newEvent, RegattaDTO defaultRegatta) {
 
         StructureImportUrl structureImport = new StructureImportUrl(url, new SetRacenumberFromSeries());
-
+        
+        // set default settings for series
+        
+        boolean firstColumnIsNonDiscardableCarryForward = false;
+        boolean hasSplitFleetContiguousScoring = false;
+        boolean startswithZeroScore = false;
+        int[] discardingThresholds = null;
+        if(defaultRegatta.series.size()>0){
+        	SeriesDTO series = defaultRegatta.series.get(0);
+        	firstColumnIsNonDiscardableCarryForward = series.isFirstColumnIsNonDiscardableCarryForward();
+        	hasSplitFleetContiguousScoring = series.hasSplitFleetContiguousScoring();
+        	startswithZeroScore = series.isStartsWithZeroScore();
+        	discardingThresholds = series.getDiscardThresholds();
+        }
+        
+        
         // create Regattas
-        ArrayList<CourseAreaDTO> courseAreas = (ArrayList<CourseAreaDTO>) newEvent.venue.getCourseAreas();
-        ArrayList<AddSpecificRegatta> regattas = structureImport.getRegattas(courseAreas.get(0).id);
+        
+        ArrayList<AddSpecificRegatta> regattas = structureImport.getRegattas(defaultRegatta.scoringScheme, false, defaultRegatta.defaultCourseAreaUuid,
+        			defaultRegatta.useStartTimeInference, getBaseDomainFactory(), firstColumnIsNonDiscardableCarryForward, hasSplitFleetContiguousScoring, 
+        			startswithZeroScore, discardingThresholds);
 
         String eventName = structureImport.getEventName();
         ArrayList<String> leaderboardNames = new ArrayList<String>();
 
         for (int i = 0; i < regattas.size(); i++) {
-            regatta = getService().apply(regattas.get(i));
+        	Regatta regatta = getService().apply(regattas.get(i));
 
             // create Races
             List<List<List<String>>> series = structureImport.getRaceNames();
@@ -3748,7 +3765,7 @@ public class SailingServiceImpl extends ProxiedRemoteServiceServlet implements S
             // TODO Auto-generated catch block
             e.printStackTrace();
         }
-        structureImport.setCompetitors(getBaseDomainFactory());
+        structureImport.setCompetitors();
 
     }
 

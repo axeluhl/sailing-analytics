@@ -30,14 +30,14 @@ public class SeriesWithFleetsCreateDialog extends DataEntryDialog<SeriesDTO> {
     private StringMessages stringMessages;
     private SeriesDTO series;
 
-    private TextBox nameEntryField;
+    protected TextBox nameEntryField;
     private CheckBox isMedalSeriesCheckbox;
     private CheckBox startsWithZeroScoreCheckbox;
     private CheckBox hasSplitFleetContiguousScoringCheckbox;
     private CheckBox firstColumnIsNonDiscardableCarryForwardCheckbox;
     private CheckBox useSeriesResultDiscardingThresholdsCheckbox;
     private DiscardThresholdBoxes discardThresholdBoxes;
-    private ListEditorComposite<FleetDTO> fleetListComposite;
+    protected ListEditorComposite<FleetDTO> fleetListComposite;
 
     protected static class SeriesParameterValidator implements Validator<SeriesDTO> {
         private StringMessages stringMessages;
@@ -104,9 +104,7 @@ public class SeriesWithFleetsCreateDialog extends DataEntryDialog<SeriesDTO> {
         this.stringMessages = stringMessages;
         this.series = new SeriesDTO();
         
-        nameEntryField = createTextBox(null);
-        nameEntryField.ensureDebugId("NameTextBox");
-        nameEntryField.setVisibleLength(40);
+        setNameEntryField();
         
         isMedalSeriesCheckbox = createCheckbox(stringMessages.medalSeries());
         isMedalSeriesCheckbox.ensureDebugId("MedalSeriesCheckbox");
@@ -145,6 +143,12 @@ public class SeriesWithFleetsCreateDialog extends DataEntryDialog<SeriesDTO> {
         });
     }
 
+	protected void setNameEntryField() {
+		nameEntryField = createTextBox(null);
+        nameEntryField.ensureDebugId("NameTextBox");
+        nameEntryField.setVisibleLength(40);
+	}
+
     @Override
     protected SeriesDTO getResult() {
         series.setName(nameEntryField.getText());
@@ -152,7 +156,7 @@ public class SeriesWithFleetsCreateDialog extends DataEntryDialog<SeriesDTO> {
         series.setStartsWithZeroScore(startsWithZeroScoreCheckbox.getValue());
         series.setSplitFleetContiguousScoring(hasSplitFleetContiguousScoringCheckbox.getValue());
         series.setFirstColumnIsNonDiscardableCarryForward(firstColumnIsNonDiscardableCarryForwardCheckbox.getValue());
-        series.setFleets(fleetListComposite.getValue());
+    	series.setFleets(fleetListComposite.getValue());
         series.setDiscardThresholds(useSeriesResultDiscardingThresholdsCheckbox.getValue() ? discardThresholdBoxes.getDiscardThresholds() : null);
         return series;
     }
@@ -179,9 +183,14 @@ public class SeriesWithFleetsCreateDialog extends DataEntryDialog<SeriesDTO> {
         tabPanel.setWidth("100%");
         tabPanel.add(fleetListComposite, stringMessages.fleets());
         tabPanel.selectTab(0);
-        panel.add(tabPanel);
+        addFleetListComposite(panel, tabPanel);
         return panel;
     }
+
+	protected void addFleetListComposite(final VerticalPanel panel,
+			TabPanel tabPanel) {
+		panel.add(tabPanel);
+	}
     
     @Override
     public void show() {
