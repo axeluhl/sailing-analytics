@@ -49,8 +49,7 @@ public class EventsOverviewRecent extends Composite {
         boolean oneYearIsExpanded = false;
         for (Entry<Integer, List<EventBaseDTO>> e : recentEventsOrderedDescendingByYearOrderedDescendingByEndDate.entrySet()) {
             int currentYear = e.getKey();
-            EventsOverviewRecentYear recentEventsOfOneYear = new EventsOverviewRecentYear(currentYear,
-                    e.getValue(), navigator);
+            EventsOverviewRecentYear recentEventsOfOneYear = new EventsOverviewRecentYear(currentYear, e.getValue(), navigator);
             recentEventsPerYearPanel.add(recentEventsOfOneYear);
             recentEventsComposites.put(currentYear, recentEventsOfOneYear);
             if (oneYearIsExpanded == true) {

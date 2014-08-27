@@ -49,8 +49,7 @@ public class MainEvents extends Composite {
     }
 
     private void createRecentEvent(EventBaseDTO eventBase) {
-        RecentEvent event = new RecentEvent(navigator);
-        event.setEvent(eventBase);
+        RecentEvent event = new RecentEvent(navigator, eventBase);
         recentEventsDiv.appendChild(event.getElement());
     }
     

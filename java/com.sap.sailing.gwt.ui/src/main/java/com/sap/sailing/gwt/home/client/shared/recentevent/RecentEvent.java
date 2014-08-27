@@ -29,7 +29,7 @@ public class RecentEvent extends UIObject {
     @UiField ImageElement eventImage;
     @UiField DivElement isLiveDiv;
     
-    private EventBaseDTO event;
+    private final EventBaseDTO event;
 
     private final String defaultImageUrl = "http://static.sapsailing.com/ubilabsimages/default/default_event_photo.jpg";
 
@@ -38,7 +38,8 @@ public class RecentEvent extends UIObject {
     
     private static RecentEventUiBinder uiBinder = GWT.create(RecentEventUiBinder.class);
 
-    public RecentEvent(final PlaceNavigator navigator) {
+    public RecentEvent(final PlaceNavigator navigator, final EventBaseDTO event) {
+        this.event = event;
         RecentEventResources.INSTANCE.css().ensureInjected();
 
         setElement(uiBinder.createAndBindUi(this));
@@ -54,10 +55,6 @@ public class RecentEvent extends UIObject {
                 }
             }
         });
-    }
-    
-    public void setEvent(EventBaseDTO event) {
-        this.event = event;
         updateUI();
     }
     
