@@ -54,7 +54,7 @@ public class TabletAndDesktopEventsView extends AbstractEventsView {
     
     @Override 
     protected void updateEventsUI() {
-        recentEventsWidget.updateEvents(getRecentEventsByYear());
+        recentEventsWidget.updateEvents(getRecentEventsByYearOrderedByEndDate());
         upcomingEventsWidget.updateEvents(getUpcomingEvents());
     }
 }

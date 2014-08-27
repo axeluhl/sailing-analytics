@@ -36,7 +36,7 @@ public class EventsOverviewRecent extends Composite {
         initWidget(uiBinder.createAndBindUi(this));
     }
 
-    public void updateEvents(Map<Integer, List<EventBaseDTO>> recentEventsByYear) {
+    public void updateEvents(Map<Integer, List<EventBaseDTO>> recentEventsByYearOrderedByEndDate) {
         // remove old widgets
         recentEventsPerYearPanel.clear();
         recentEventsComposites.clear();
@@ -44,9 +44,9 @@ public class EventsOverviewRecent extends Composite {
         Date now = new Date();
         int currentYear = DateUtil.getYear(now);
         boolean oneYearIsExpanded = false;
-        if (recentEventsByYear.get(currentYear) != null) {
+        if (recentEventsByYearOrderedByEndDate.get(currentYear) != null) {
             EventsOverviewRecentYear recentEventsOfOneYear = new EventsOverviewRecentYear(currentYear,
-                    recentEventsByYear.get(currentYear), navigator);
+                    recentEventsByYearOrderedByEndDate.get(currentYear), navigator);
             recentEventsPerYearPanel.add(recentEventsOfOneYear);
             recentEventsComposites.put(currentYear, recentEventsOfOneYear);
             recentEventsOfOneYear.showContent();
@@ -54,9 +54,9 @@ public class EventsOverviewRecent extends Composite {
         }
         currentYear--;
         while (currentYear > 2010) {
-            if (recentEventsByYear.get(currentYear) != null) {
+            if (recentEventsByYearOrderedByEndDate.get(currentYear) != null) {
                 EventsOverviewRecentYear recentEventsOfOneYear = new EventsOverviewRecentYear(currentYear,
-                        recentEventsByYear.get(currentYear), navigator);
+                        recentEventsByYearOrderedByEndDate.get(currentYear), navigator);
                 recentEventsPerYearPanel.add(recentEventsOfOneYear);
                 recentEventsComposites.put(currentYear, recentEventsOfOneYear);
                 if (oneYearIsExpanded == true) {
