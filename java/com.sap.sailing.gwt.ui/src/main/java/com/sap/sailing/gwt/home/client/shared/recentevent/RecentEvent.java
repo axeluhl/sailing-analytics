@@ -65,7 +65,7 @@ public class RecentEvent extends UIObject {
         venueName.setInnerText(event.venue.getName());
         eventStartDate.setInnerText(EventDatesFormatterUtil.formatDateRangeWithoutYear(event.startDate, event.endDate));
         List<String> photoGalleryImageURLs = event.getPhotoGalleryImageURLs();
-        if (photoGalleryImageURLs.size() == 0) {
+        if (photoGalleryImageURLs.isEmpty()) {
             eventImage.setSrc(defaultImageUrl);
         } else {
             eventImage.setSrc(photoGalleryImageURLs.get(0));
