@@ -1257,7 +1257,7 @@ public class MasterDataImportTest {
         Iterable<URL> imageURLs = new HashSet<>();
         Iterable<URL> videoURLs = new HashSet<>();
         Iterable<URL> sponsorImageURLs = new HashSet<>();
-        Event event = sourceService.createEventWithoutReplication("Test Event", eventDescription,
+        Event event = sourceService.createEventWithoutReplication("Test Event", /* eventDescription */ null,
                 new MillisecondsTimePoint(0), new MillisecondsTimePoint(10), "testvenue", false, UUID.randomUUID(), imageURLs,
                 videoURLs, sponsorImageURLs, /* logoImageURL */ null, /* officialWebsiteURL */ null);
         CourseArea defaultCourseArea = sourceService.addCourseArea(event.getId(), "ECHO", UUID.randomUUID());
@@ -1324,7 +1324,7 @@ public class MasterDataImportTest {
         Iterable<URL> imageURLs = new HashSet<>();
         Iterable<URL> videoURLs = new HashSet<>();
         Iterable<URL> sponsorImageURLs = new HashSet<>();
-        Event event = sourceService.createEventWithoutReplication("Test Event", eventDescription,
+        Event event = sourceService.createEventWithoutReplication("Test Event", /* eventDescription */ null,
                 new MillisecondsTimePoint(0), new MillisecondsTimePoint(10), "testvenue", false, UUID.randomUUID(), imageURLs,
                 videoURLs, sponsorImageURLs, /* logoImageURL */ null, /* officialWebsiteURL */ null);
         CourseArea defaultCourseArea = sourceService.addCourseArea(event.getId(), "ECHO", UUID.randomUUID());

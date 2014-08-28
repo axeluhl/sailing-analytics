@@ -117,7 +117,7 @@ public class SearchServiceTest {
         final TimePoint pfingstbuschStartDate = new MillisecondsTimePoint(cal.getTime());
         cal.set(2014, 5, 8, 16, 00);
         final TimePoint pfingstbuschEndDate = new MillisecondsTimePoint(cal.getTime());
-        pfingstbusch = server.apply(new CreateEvent("Pfingsbusch", eventDescription, pfingstbuschStartDate, pfingstbuschEndDate, /* isPublic */
+        pfingstbusch = server.apply(new CreateEvent("Pfingsbusch", /* eventDescription */ null, pfingstbuschStartDate, pfingstbuschEndDate, /* isPublic */
                 "Kiel", true, UUID.randomUUID(), Collections.<URL>emptySet(),
                 Collections.<URL>emptySet(),
                 /* sponsorImageURLs */ Collections.<URL>emptySet(), /* logoImageURLAsString */ null, /* officialWebsiteURLAsString */ null));
@@ -150,7 +150,7 @@ public class SearchServiceTest {
         final TimePoint aalStartDate = new MillisecondsTimePoint(cal.getTime());
         cal.set(2014, 5, 8, 18, 00);
         final TimePoint aalEndDate = new MillisecondsTimePoint(cal.getTime());
-        aalEvent = server.apply(new CreateEvent("Aalregatta", eventDescription, aalStartDate, aalEndDate, /* isPublic */
+        aalEvent = server.apply(new CreateEvent("Aalregatta", /* eventDescription */ null, aalStartDate, aalEndDate, /* isPublic */
                 "Flensburg", true, UUID.randomUUID(), Collections.<URL>emptySet(),
                 Collections.<URL>emptySet(), /* sponsorImageURLs */ Collections.<URL>emptySet(),
                 /* logoimageURL */ null, /* officialWebsiteURLAsString */ null));
