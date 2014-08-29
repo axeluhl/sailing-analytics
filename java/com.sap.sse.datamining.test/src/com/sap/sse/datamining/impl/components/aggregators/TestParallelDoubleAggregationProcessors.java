@@ -31,7 +31,7 @@ public class TestParallelDoubleAggregationProcessors {
     public void testSumAggregationProcessor() throws InterruptedException {
         Processor<GroupedDataEntry<Double>> sumAggregationProcessor = new ParallelGroupedDoubleDataSumAggregationProcessor(ConcurrencyTestsUtil.getExecutor(), receivers);
         Collection<GroupedDataEntry<Double>> elements = createElements();
-        processElements(sumAggregationProcessor, elements);
+        ConcurrencyTestsUtil.processElements(sumAggregationProcessor, elements);
         
         sumAggregationProcessor.finish();
         Map<GroupKey, Double> expectedReceivedAggregations = computeExpectedSumAggregations(elements);
@@ -55,7 +55,7 @@ public class TestParallelDoubleAggregationProcessors {
     public void testAverageAggregationProcessor() throws InterruptedException {
         Processor<GroupedDataEntry<Double>> averageAggregationProcessor = new ParallelGroupedDoubleDataAverageAggregationProcessor(ConcurrencyTestsUtil.getExecutor(), receivers);
         Collection<GroupedDataEntry<Double>> elements = createElements();
-        processElements(averageAggregationProcessor, elements);
+        ConcurrencyTestsUtil.processElements(averageAggregationProcessor, elements);
         
         averageAggregationProcessor.finish();
         Map<GroupKey, Double> expectedReceivedAggregations = computeExpectedAverageAggregations(elements);
@@ -91,7 +91,7 @@ public class TestParallelDoubleAggregationProcessors {
     public void testMedianAggregationProcessor() throws InterruptedException {
         Processor<GroupedDataEntry<Double>> medianAggregationProcessor = new ParallelGroupedDoubleDataMedianAggregationProcessor(ConcurrencyTestsUtil.getExecutor(), receivers);
         Collection<GroupedDataEntry<Double>> elements = createElements();
-        processElements(medianAggregationProcessor, elements);
+        ConcurrencyTestsUtil.processElements(medianAggregationProcessor, elements);
         
         medianAggregationProcessor.finish();
         Map<GroupKey, Double> expectedReceivedAggregations = computeExpectedMedianAggregations(elements);
@@ -157,12 +157,6 @@ public class TestParallelDoubleAggregationProcessors {
         elements.add(new GroupedDataEntry<Double>(thirdGroupKey, 5.0));
         
         return elements;
-    }
-
-    private void processElements(Processor<GroupedDataEntry<Double>> processor, Collection<GroupedDataEntry<Double>> elements) {
-        for (GroupedDataEntry<Double> element : elements) {
-            processor.processElement(element);
-        }
     }
 
     private void verifyReceivedAggregations(Map<GroupKey, Double> expectedReceivedAggregations) {

@@ -59,7 +59,7 @@ public class TestFunctionDTOConstruction {
         boolean isDimension = true;
         int ordinal = 0;
         
-        return new FunctionDTOImpl(functionName, sourceTypeName, returnTypeName, parameterTypeNames, displayName, isDimension, ordinal);
+        return new FunctionDTOImpl(isDimension, functionName, sourceTypeName, returnTypeName, parameterTypeNames, displayName, ordinal);
     }
     
     @Test
@@ -81,7 +81,7 @@ public class TestFunctionDTOConstruction {
         boolean isDimension = false;
         int ordinal = 0;
         
-        return new FunctionDTOImpl(functionName, sourceTypeName, returnTypeName, parameterTypeNames, displayName, isDimension, ordinal);
+        return new FunctionDTOImpl(isDimension, functionName, sourceTypeName, returnTypeName, parameterTypeNames, displayName, ordinal);
     }
     
     @Test
@@ -103,7 +103,7 @@ public class TestFunctionDTOConstruction {
         boolean isDimension = false;
         int ordinal = 0;
         
-        return new FunctionDTOImpl(functionName, sourceTypeName, returnTypeName, parameterTypeNames, displayName, isDimension, ordinal);
+        return new FunctionDTOImpl(isDimension, functionName, sourceTypeName, returnTypeName, parameterTypeNames, displayName, ordinal);
     }
     
     @Test
@@ -126,7 +126,19 @@ public class TestFunctionDTOConstruction {
         boolean isDimension = false;
         int ordinal = 0;
         
-        return new FunctionDTOImpl(functionName, sourceTypeName, returnTypeName, parameterTypeNames, displayName, isDimension, ordinal);
+        return new FunctionDTOImpl(isDimension, functionName, sourceTypeName, returnTypeName, parameterTypeNames, displayName, ordinal);
+    }
+    
+    @Test
+    public void testThatLocalizedFunctionDTOAndUnlocalizedAreEqual() {
+        Function<?> dimension = FunctionFactory.createMethodWrappingFunction(dimensionMethod);
+        
+        FunctionDTO unlocalizedDimensionDTO = FunctionDTOFactory.createFunctionDTO(dimension);
+        FunctionDTO englishDimensionDTO = FunctionDTOFactory.createFunctionDTO(dimension, Locale.ENGLISH, TestsUtil.getTestStringMessages());
+        FunctionDTO germanDimensionDTO = FunctionDTOFactory.createFunctionDTO(dimension, Locale.GERMAN, TestsUtil.getTestStringMessages());
+        
+        assertThat(unlocalizedDimensionDTO, is(englishDimensionDTO));
+        assertThat(englishDimensionDTO, is(germanDimensionDTO));
     }
 
 }

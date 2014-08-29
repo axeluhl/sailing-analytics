@@ -14,6 +14,8 @@ public interface DataMiningService extends RemoteService {
     Collection<FunctionDTO> getAllStatistics(String localeInfoName);
     
     Collection<FunctionDTO> getDimensionsFor(FunctionDTO statisticToCalculate, String localeInfoName);
+
+    Object getDimensionValuesFor(Collection<FunctionDTO> dimensions);
     
     <ResultType extends Number> QueryResult<ResultType> runQuery(QueryDefinitionDeprecated queryDefinition) throws Exception;
 

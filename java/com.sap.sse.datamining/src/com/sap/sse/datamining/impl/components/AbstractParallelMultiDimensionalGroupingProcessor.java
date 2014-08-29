@@ -10,15 +10,15 @@ import com.sap.sse.datamining.components.Processor;
 import com.sap.sse.datamining.functions.Function;
 import com.sap.sse.datamining.shared.GroupKey;
 import com.sap.sse.datamining.shared.impl.CompoundGroupKey;
-import com.sap.sse.datamining.shared.impl.GenericGroupKey;
 
-public class ParallelMultiDimensionalGroupingProcessor<DataType>
-             extends AbstractSimpleParallelProcessor<DataType, GroupedDataEntry<DataType>> {
+public abstract class AbstractParallelMultiDimensionalGroupingProcessor<DataType>
+                      extends AbstractSimpleParallelProcessor<DataType, GroupedDataEntry<DataType>> {
 
     private Iterable<Function<?>> dimensions;
 
-    public ParallelMultiDimensionalGroupingProcessor(ExecutorService executor, Collection<Processor<GroupedDataEntry<DataType>>> resultReceivers,
-                                                     Iterable<Function<?>> dimensions) {
+    public AbstractParallelMultiDimensionalGroupingProcessor(ExecutorService executor,
+                                                             Collection<Processor<GroupedDataEntry<DataType>>> resultReceivers,
+                                                             Iterable<Function<?>> dimensions) {
         super(executor, resultReceivers);
         verifyThatDimensionsAreDimensions(dimensions);
         this.dimensions = dimensions;
@@ -61,10 +61,7 @@ public class ParallelMultiDimensionalGroupingProcessor<DataType>
         return key;
     }
 
-    private GroupKey createGroupKeyFor(DataType input, Function<?> mainDimension) {
-        Object keyValue = mainDimension.tryToInvoke(input);
-        return new GenericGroupKey<Object>(keyValue);
-    }
+    protected abstract GroupKey createGroupKeyFor(DataType input, Function<?> dimension);
 
     @Override
     protected void setAdditionalData(AdditionalResultDataBuilder additionalDataBuilder) {

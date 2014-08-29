@@ -87,6 +87,12 @@ public class DataMiningServiceImpl extends RemoteServiceServlet implements DataM
         }
         return functionDTOs;
     }
+    
+    @Override
+    public Object getDimensionValuesFor(Collection<FunctionDTO> dimensions) {
+        // TODO Auto-generated method stub
+        return null;
+    }
 
     @Override
     public <ResultType extends Number> QueryResult<ResultType> runQuery(QueryDefinitionDeprecated queryDefinition) throws Exception {

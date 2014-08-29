@@ -56,7 +56,7 @@ public class QueryDefinitionProviderWithControls extends AbstractQueryDefinition
 
         mainPanel.add(createFunctionsPanel());
 
-        selectionProvider = new RefreshingSelectionTablesPanel(stringMessages, sailingService, errorReporter);
+        selectionProvider = new RefreshingSelectionTablesPanel(stringMessages, dataMiningService, errorReporter, statisticProvider);
         selectionProvider.addSelectionChangedListener(new SelectionChangedListener() {
             @Override
             public void selectionChanged() {

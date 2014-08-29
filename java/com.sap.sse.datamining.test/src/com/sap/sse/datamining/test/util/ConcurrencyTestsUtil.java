@@ -2,6 +2,7 @@ package com.sap.sse.datamining.test.util;
 
 import static org.junit.Assert.fail;
 
+import java.util.Collection;
 import java.util.concurrent.LinkedBlockingQueue;
 import java.util.concurrent.ThreadPoolExecutor;
 import java.util.concurrent.TimeUnit;
@@ -29,6 +30,13 @@ public class ConcurrencyTestsUtil extends TestsUtil {
             Thread.sleep(milliseconds);
         } catch (InterruptedException e) {
             fail("The test was interrupted: " + e.getMessage());
+        }
+    }
+
+    public static <T> void processElements(Processor<T> processor,
+                                 Collection<T> elements) {
+        for (T element : elements) {
+            processor.processElement(element);
         }
     }
 

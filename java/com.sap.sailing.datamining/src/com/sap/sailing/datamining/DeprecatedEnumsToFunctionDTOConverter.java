@@ -24,12 +24,12 @@ public class DeprecatedEnumsToFunctionDTOConverter {
             FunctionDTO functionDTO = null;
             switch (statisticType) {
             case Distance:
-                functionDTO = new FunctionDTOImpl("getDistanceTraveled", HasTrackedLegOfCompetitorContext.class.getSimpleName(), "Double",
-                        new ArrayList<String>(), "Distance", false, 0);
+                functionDTO = new FunctionDTOImpl(false, "getDistanceTraveled", HasTrackedLegOfCompetitorContext.class.getSimpleName(),
+                        "Double", new ArrayList<String>(), "Distance", 0);
                 break;
             case Speed:
-                functionDTO = new FunctionDTOImpl("getGPSFix -> getSpeed -> getKnots", HasGPSFixContext.class.getSimpleName(),
-                        "double", new ArrayList<String>(), "Speed", false, 0);
+                functionDTO = new FunctionDTOImpl(false, "getGPSFix -> getSpeed -> getKnots",
+                        HasGPSFixContext.class.getSimpleName(), "double", new ArrayList<String>(), "Speed", 0);
                 break;
             }
             statisticTypeToFunctionDTOMap.put(statisticType, functionDTO);
@@ -39,48 +39,48 @@ public class DeprecatedEnumsToFunctionDTOConverter {
             FunctionDTO functionDTO = null;
             switch (dimensionIdentifier) {
             case BoatClassName:
-                functionDTO = new FunctionDTOImpl("getBoatClass -> getName", HasTrackedRaceContext.class.getSimpleName(),
-                        String.class.getSimpleName(), new ArrayList<String>(), "Boat Class Name", true, 0);
+                functionDTO = new FunctionDTOImpl(true, "getBoatClass -> getName",
+                        HasTrackedRaceContext.class.getSimpleName(), String.class.getSimpleName(), new ArrayList<String>(), "Boat Class Name", 0);
                 break;
             case CompetitorName:
-                functionDTO = new FunctionDTOImpl("getCompetitor -> getTeam -> getName", HasTrackedLegOfCompetitorContext.class.getSimpleName(),
-                        String.class.getSimpleName(), new ArrayList<String>(), "Competitor Name", true, 0);
+                functionDTO = new FunctionDTOImpl(true, "getCompetitor -> getTeam -> getName",
+                        HasTrackedLegOfCompetitorContext.class.getSimpleName(), String.class.getSimpleName(), new ArrayList<String>(), "Competitor Name", 0);
                 break;
             case CourseAreaName:
-                functionDTO = new FunctionDTOImpl("getCourseArea -> getName", HasTrackedRaceContext.class.getSimpleName(),
-                        String.class.getSimpleName(), new ArrayList<String>(), "Course Area Name", true, 0);
+                functionDTO = new FunctionDTOImpl(true, "getCourseArea -> getName",
+                        HasTrackedRaceContext.class.getSimpleName(), String.class.getSimpleName(), new ArrayList<String>(), "Course Area Name", 0);
                 break;
             case FleetName:
-                functionDTO = new FunctionDTOImpl("getFleet -> getName", HasTrackedRaceContext.class.getSimpleName(),
-                        String.class.getSimpleName(), new ArrayList<String>(), "Fleet Name", true, 0);
+                functionDTO = new FunctionDTOImpl(true, "getFleet -> getName",
+                        HasTrackedRaceContext.class.getSimpleName(), String.class.getSimpleName(), new ArrayList<String>(), "Fleet Name", 0);
                 break;
             case LegNumber:
-                functionDTO = new FunctionDTOImpl("getLegNumber", HasTrackedLegContext.class.getSimpleName(),
-                        "int", new ArrayList<String>(), "Leg Number", true, 0);
+                functionDTO = new FunctionDTOImpl(true, "getLegNumber",
+                        HasTrackedLegContext.class.getSimpleName(), "int", new ArrayList<String>(), "Leg Number", 0);
                 break;
             case LegType:
-                functionDTO = new FunctionDTOImpl("getLegType", HasTrackedLegContext.class.getSimpleName(),
-                        LegType.class.getSimpleName(), new ArrayList<String>(), "Leg Type", true, 0);
+                functionDTO = new FunctionDTOImpl(true, "getLegType",
+                        HasTrackedLegContext.class.getSimpleName(), LegType.class.getSimpleName(), new ArrayList<String>(), "Leg Type", 0);
                 break;
             case Nationality:
-                functionDTO = new FunctionDTOImpl("getCompetitor -> getTeam -> getNationality -> getThreeLetterIOCAcronym", HasTrackedLegOfCompetitorContext.class.getSimpleName(),
-                        String.class.getSimpleName(), new ArrayList<String>(), "Nationality", true, 0);
+                functionDTO = new FunctionDTOImpl(true, "getCompetitor -> getTeam -> getNationality -> getThreeLetterIOCAcronym",
+                        HasTrackedLegOfCompetitorContext.class.getSimpleName(), String.class.getSimpleName(), new ArrayList<String>(), "Nationality", 0);
                 break;
             case RaceName:
-                functionDTO = new FunctionDTOImpl("getRace -> getName", HasTrackedRaceContext.class.getSimpleName(),
-                        String.class.getSimpleName(), new ArrayList<String>(), "Race Name", true, 0);
+                functionDTO = new FunctionDTOImpl(true, "getRace -> getName",
+                        HasTrackedRaceContext.class.getSimpleName(), String.class.getSimpleName(), new ArrayList<String>(), "Race Name", 0);
                 break;
             case RegattaName:
-                functionDTO = new FunctionDTOImpl("getRegatta -> getName", HasTrackedRaceContext.class.getSimpleName(),
-                        String.class.getSimpleName(), new ArrayList<String>(), "Regattay Name", true, 0);
+                functionDTO = new FunctionDTOImpl(true, "getRegatta -> getName",
+                        HasTrackedRaceContext.class.getSimpleName(), String.class.getSimpleName(), new ArrayList<String>(), "Regattay Name", 0);
                 break;
             case SailID:
-                functionDTO = new FunctionDTOImpl("getCompetitor -> getBoat -> getSailID", HasTrackedLegOfCompetitorContext.class.getSimpleName(),
-                        String.class.getSimpleName(), new ArrayList<String>(), "Sail ID", true, 0);
+                functionDTO = new FunctionDTOImpl(true, "getCompetitor -> getBoat -> getSailID",
+                        HasTrackedLegOfCompetitorContext.class.getSimpleName(), String.class.getSimpleName(), new ArrayList<String>(), "Sail ID", 0);
                 break;
             case Year:
-                functionDTO = new FunctionDTOImpl("getYear", HasTrackedRaceContext.class.getSimpleName(),
-                        "Integer", new ArrayList<String>(), "Year", true, 0);
+                functionDTO = new FunctionDTOImpl(true, "getYear",
+                        HasTrackedRaceContext.class.getSimpleName(), "Integer", new ArrayList<String>(), "Year", 0);
                 break;
             }
             if (functionDTO != null) {

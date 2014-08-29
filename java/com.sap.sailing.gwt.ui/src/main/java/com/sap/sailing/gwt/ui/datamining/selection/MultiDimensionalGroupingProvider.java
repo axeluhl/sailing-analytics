@@ -71,17 +71,12 @@ public class MultiDimensionalGroupingProvider implements GroupingProvider, Stati
     }
 
     private void updateAvailableDimensionsFor() {
-        for (ValueListBox<FunctionDTO> dimensionToGroupByBox : dimensionToGroupByBoxes) {
-            mainPanel.remove(dimensionToGroupByBox);
-        }
-        dimensionToGroupByBoxes.clear();
-        availableDimensions.clear();
-        
         if (currentStatisticToCalculate != null) {
             dataMiningService.getDimensionsFor(currentStatisticToCalculate, LocaleInfo.getCurrentLocale()
                     .getLocaleName(), new AsyncCallback<Collection<FunctionDTO>>() {
                 @Override
                 public void onSuccess(Collection<FunctionDTO> dimensions) {
+                    clearAvailableDimensionsAndGroupByBoxes();
                     availableDimensions.addAll(dimensions);
                     Collections.sort(availableDimensions);
                     ValueListBox<FunctionDTO> firstDimensionToGroupByBox = createDimensionToGroupByBox();
@@ -97,9 +92,18 @@ public class MultiDimensionalGroupingProvider implements GroupingProvider, Stati
                 }
             });
         } else {
+            clearAvailableDimensionsAndGroupByBoxes();
             ValueListBox<FunctionDTO> firstDimensionToGroupByBox = createDimensionToGroupByBox();
             addDimensionToGroupByBoxAndUpdateAcceptableValues(firstDimensionToGroupByBox);
         }
+    }
+
+    private void clearAvailableDimensionsAndGroupByBoxes() {
+        for (ValueListBox<FunctionDTO> dimensionToGroupByBox : dimensionToGroupByBoxes) {
+            mainPanel.remove(dimensionToGroupByBox);
+        }
+        dimensionToGroupByBoxes.clear();
+        availableDimensions.clear();
     }
 
     private ValueListBox<FunctionDTO> createDimensionToGroupByBox() {

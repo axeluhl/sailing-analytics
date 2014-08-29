@@ -8,8 +8,8 @@ import com.sap.sse.datamining.AdditionalResultDataBuilder;
 import com.sap.sse.datamining.components.Processor;
 import com.sap.sse.datamining.functions.Function;
 
-public class ParallelGroupedElementsValueExtractionProcessor<ElementType, FunctionReturnType>
-             extends AbstractSimpleParallelProcessor<GroupedDataEntry<ElementType>, GroupedDataEntry<FunctionReturnType>> {
+public class ParallelGroupedElementsValueExtractionProcessor<DataType, FunctionReturnType>
+             extends AbstractSimpleParallelProcessor<GroupedDataEntry<DataType>, GroupedDataEntry<FunctionReturnType>> {
 
     private final Function<FunctionReturnType> extractionFunction;
     
@@ -21,7 +21,7 @@ public class ParallelGroupedElementsValueExtractionProcessor<ElementType, Functi
     }
 
     @Override
-    protected Callable<GroupedDataEntry<FunctionReturnType>> createInstruction(final GroupedDataEntry<ElementType> element) {
+    protected Callable<GroupedDataEntry<FunctionReturnType>> createInstruction(final GroupedDataEntry<DataType> element) {
         return new Callable<GroupedDataEntry<FunctionReturnType>>() {
             @Override
             public GroupedDataEntry<FunctionReturnType> call() throws Exception {

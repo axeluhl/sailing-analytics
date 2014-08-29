@@ -12,7 +12,7 @@ import com.sap.sse.datamining.impl.DataMiningActivator;
 import com.sap.sse.datamining.impl.ProcessorQuery;
 import com.sap.sse.datamining.impl.components.GroupedDataEntry;
 import com.sap.sse.datamining.impl.components.ParallelGroupedElementsValueExtractionProcessor;
-import com.sap.sse.datamining.impl.components.ParallelMultiDimensionalGroupingProcessor;
+import com.sap.sse.datamining.impl.components.ParallelMultiDimensionsValueNestingGroupingProcessor;
 import com.sap.sse.datamining.impl.components.aggregators.ParallelGroupedDoubleDataAverageAggregationProcessor;
 import com.sap.sse.datamining.impl.components.aggregators.ParallelGroupedDoubleDataMedianAggregationProcessor;
 import com.sap.sse.datamining.impl.components.aggregators.ParallelGroupedDoubleDataSumAggregationProcessor;
@@ -90,7 +90,7 @@ public class ProcessorFactory {
      * the executor).
      */
     public static <ElementType> Processor<ElementType> createGroupingProcessor(Collection<Processor<GroupedDataEntry<ElementType>>> resultReceivers, List<Function<?>> dimensionsToGroupBy) {
-        return new ParallelMultiDimensionalGroupingProcessor<>(DataMiningActivator.getExecutor(), resultReceivers, dimensionsToGroupBy);
+        return new ParallelMultiDimensionsValueNestingGroupingProcessor<>(DataMiningActivator.getExecutor(), resultReceivers, dimensionsToGroupBy);
     }
 
 }

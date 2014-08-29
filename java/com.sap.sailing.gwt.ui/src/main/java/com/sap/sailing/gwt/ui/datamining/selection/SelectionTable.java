@@ -13,12 +13,12 @@ import com.google.gwt.view.client.ListDataProvider;
 import com.google.gwt.view.client.MultiSelectionModel;
 import com.google.gwt.view.client.ProvidesKey;
 import com.google.gwt.view.client.SelectionChangeEvent;
-import com.sap.sailing.datamining.shared.DimensionIdentifier;
+import com.sap.sse.datamining.shared.dto.FunctionDTO;
 import com.sap.sse.gwt.client.panels.AbstractFilterablePanel;
 
-public abstract class SelectionTable<ContentType, ValueType extends Serializable> extends FlowPanel {
+public class SelectionTable<ContentType extends Serializable> extends FlowPanel {
     
-    private DimensionIdentifier dimension;
+    private FunctionDTO dimension;
     private Collection<ContentType> allData;
 
     private AbstractFilterablePanel<ContentType> filterPanel;
@@ -26,7 +26,7 @@ public abstract class SelectionTable<ContentType, ValueType extends Serializable
     private MultiSelectionModel<ContentType> selectionModel;
     private ListDataProvider<ContentType> dataProvider;
     
-    public SelectionTable(String title, DimensionIdentifier dimension) {
+    public SelectionTable(FunctionDTO dimension) {
         this.dimension = dimension;
         allData = new ArrayList<ContentType>();
         
@@ -37,16 +37,16 @@ public abstract class SelectionTable<ContentType, ValueType extends Serializable
         table.addColumn(new TextColumn<ContentType>() {
             @Override
             public String getValue(ContentType content) {
-                return SelectionTable.this.getValueAsString(content);
+                return SelectionTable.this.getElementAsString(content);
             }
-        }, title);
+        }, dimension.getDisplayName());
         selectionModel = new MultiSelectionModel<ContentType>();
         table.setSelectionModel(selectionModel);
         
         dataProvider = new ListDataProvider<ContentType>(new ProvidesKey<ContentType>() {
             @Override
             public Object getKey(ContentType item) {
-                return getValueAsString(item);
+                return getElementAsString(item);
             }
         });
         dataProvider.addDataDisplay(table);
@@ -55,7 +55,7 @@ public abstract class SelectionTable<ContentType, ValueType extends Serializable
             @Override
             public Iterable<String> getSearchableStrings(ContentType content) {
                 Collection<String> searchableStrings = new ArrayList<String>();
-                searchableStrings.add(getValueAsString(content));
+                searchableStrings.add(getElementAsString(content));
                 return searchableStrings;
             }
         };
@@ -66,7 +66,7 @@ public abstract class SelectionTable<ContentType, ValueType extends Serializable
         add(table);
     }
 
-    public DimensionIdentifier getDimension() {
+    public FunctionDTO getDimension() {
         return dimension;
     }
     
@@ -119,27 +119,23 @@ public abstract class SelectionTable<ContentType, ValueType extends Serializable
     }
 
     private Set<Object> getKeysFor(Collection<ContentType> content) {
-        Set<Object> newContentKeys = new HashSet<Object>();
+        Set<Object> contentKeys = new HashSet<Object>();
         for (ContentType element : content) {
-            newContentKeys.add(dataProvider.getKey(element));
+            contentKeys.add(dataProvider.getKey(element));
         }
-        return newContentKeys;
+        return contentKeys;
     }
 
-    public Collection<? extends Serializable> getSelectionAsValues() {
-        Collection<ValueType> selectionAsValues = new HashSet<ValueType>();
-        for (ContentType content : selectionModel.getSelectedSet()) {
-            selectionAsValues.add(getValue(content));
-        }
-        return selectionAsValues;
+    public Collection<ContentType> getSelectionAsValues() {
+        return selectionModel.getSelectedSet();
     }
 
     public void setSelection(Iterable<?> elements) {
         clearSelection();
         try {
             @SuppressWarnings("unchecked") //You can't use instanceof for generic type parameters
-            Iterable<ContentType> elementsMatchingContent = (Iterable<ContentType>) elements;
-            for (ContentType element : elementsMatchingContent) {
+            Iterable<ContentType> specificContent = (Iterable<ContentType>) elements;
+            for (ContentType element : specificContent) {
                 selectionModel.setSelected(element, true);
             }
         } catch (ClassCastException e) {/*Ignore the elements, because they don't match the ContentType*/}
@@ -148,11 +144,9 @@ public abstract class SelectionTable<ContentType, ValueType extends Serializable
     public void clearSelection() {
         selectionModel.clear();
     }
-
-    public abstract ValueType getValue(ContentType content);
     
-    public String getValueAsString(ContentType content) {
-        return getValue(content).toString();
+    public String getElementAsString(ContentType element) {
+        return element.toString();
     }
     
     public void addSelectionChangeHandler(SelectionChangeEvent.Handler handler) {

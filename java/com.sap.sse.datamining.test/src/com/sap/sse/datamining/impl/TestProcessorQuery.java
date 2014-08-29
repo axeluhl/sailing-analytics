@@ -30,7 +30,7 @@ import com.sap.sse.datamining.impl.components.AbstractSimpleFilteringRetrievalPr
 import com.sap.sse.datamining.impl.components.AbstractSimpleParallelProcessor;
 import com.sap.sse.datamining.impl.components.GroupedDataEntry;
 import com.sap.sse.datamining.impl.components.ParallelGroupedElementsValueExtractionProcessor;
-import com.sap.sse.datamining.impl.components.ParallelMultiDimensionalGroupingProcessor;
+import com.sap.sse.datamining.impl.components.ParallelMultiDimensionsValueNestingGroupingProcessor;
 import com.sap.sse.datamining.impl.components.aggregators.ParallelGroupedDoubleDataSumAggregationProcessor;
 import com.sap.sse.datamining.shared.GroupKey;
 import com.sap.sse.datamining.shared.QueryResult;
@@ -115,7 +115,7 @@ public class TestProcessorQuery {
                 Collection<Function<?>> dimensions = new ArrayList<>();
                 Function<Integer> getLengthFunction = FunctionFactory.createMethodWrappingFunction(FunctionTestsUtil.getMethodFromClass(Number.class, "getLength"));
                 dimensions.add(getLengthFunction);
-                Processor<Number> lengthGrouper = new ParallelMultiDimensionalGroupingProcessor<>(executor, Arrays.asList(crossSumExtractor), dimensions);
+                Processor<Number> lengthGrouper = new ParallelMultiDimensionsValueNestingGroupingProcessor<>(executor, Arrays.asList(crossSumExtractor), dimensions);
                 
                 FilterCriteria<Number> retrievalFilterCriteria = new FilterCriteria<Number>() {
                     @Override
