@@ -28,4 +28,4 @@ You can create new folders using the "Create Folder" button from the toolbar:
 
 ![WinSCP Create Folder](/wiki/images/winscp/winscp-create-folder.png)
 
-Files can be uploaded from your local disk by dragging and dropping them from a local Windows Explorer running on your desktop onto the content panel in the right part of the WinSCP window.![WinSCP Intall](/wiki/images/winscp-install-1.png).
+Files can be uploaded from your local disk by dragging and dropping them from a local Windows Explorer running on your desktop onto the content panel in the right part of the WinSCP window.
