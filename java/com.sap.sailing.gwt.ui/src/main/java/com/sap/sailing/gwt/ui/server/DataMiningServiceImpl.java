@@ -3,13 +3,13 @@ package com.sap.sailing.gwt.ui.server;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Locale;
+import java.util.Set;
 
 import org.osgi.framework.BundleContext;
 import org.osgi.util.tracker.ServiceTracker;
 
 import com.google.gwt.user.server.rpc.RemoteServiceServlet;
 import com.sap.sailing.datamining.factories.DataMiningFactory;
-import com.sap.sailing.datamining.shared.QueryDefinitionDeprecated;
 import com.sap.sailing.datamining.shared.SailingDataMiningSerializationDummy;
 import com.sap.sailing.gwt.ui.datamining.DataMiningService;
 import com.sap.sailing.server.RacingEventService;
@@ -18,6 +18,7 @@ import com.sap.sse.datamining.Query;
 import com.sap.sse.datamining.factories.FunctionDTOFactory;
 import com.sap.sse.datamining.functions.Function;
 import com.sap.sse.datamining.i18n.DataMiningStringMessages;
+import com.sap.sse.datamining.shared.QueryDefinition;
 import com.sap.sse.datamining.shared.QueryResult;
 import com.sap.sse.datamining.shared.SSEDataMiningSerializationDummy;
 import com.sap.sse.datamining.shared.dto.FunctionDTO;
@@ -89,13 +90,13 @@ public class DataMiningServiceImpl extends RemoteServiceServlet implements DataM
     }
     
     @Override
-    public Object getDimensionValuesFor(Collection<FunctionDTO> dimensions) {
+    public QueryResult<Set<Object>> getDimensionValuesFor(Collection<FunctionDTO> dimensions) {
         // TODO Auto-generated method stub
         return null;
     }
 
     @Override
-    public <ResultType extends Number> QueryResult<ResultType> runQuery(QueryDefinitionDeprecated queryDefinition) throws Exception {
+    public <ResultType extends Number> QueryResult<ResultType> runQuery(QueryDefinition queryDefinition) throws Exception {
         @SuppressWarnings("unchecked") // TODO Fix after the data mining has been cleaned
         Query<ResultType> query = (Query<ResultType>) DataMiningFactory.createQuery(getRacingEventService(), queryDefinition, getDataMiningServer().getFunctionProvider());
         return query.run();

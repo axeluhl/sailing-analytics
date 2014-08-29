@@ -12,9 +12,6 @@ import com.google.gwt.user.client.ui.FlowPanel;
 import com.google.gwt.user.client.ui.HorizontalPanel;
 import com.google.gwt.user.client.ui.RequiresResize;
 import com.google.gwt.user.client.ui.Widget;
-import com.sap.sailing.datamining.shared.DimensionIdentifier;
-import com.sap.sailing.datamining.shared.QueryDefinitionDeprecated;
-import com.sap.sailing.datamining.shared.impl.QueryDefinitionDeprecatedImpl;
 import com.sap.sailing.gwt.ui.client.ErrorReporter;
 import com.sap.sailing.gwt.ui.client.SailingServiceAsync;
 import com.sap.sailing.gwt.ui.client.StringMessages;
@@ -27,8 +24,10 @@ import com.sap.sailing.gwt.ui.datamining.SelectionChangedListener;
 import com.sap.sailing.gwt.ui.datamining.SelectionProvider;
 import com.sap.sailing.gwt.ui.datamining.StatisticChangedListener;
 import com.sap.sailing.gwt.ui.datamining.StatisticProvider;
+import com.sap.sse.datamining.shared.QueryDefinition;
 import com.sap.sse.datamining.shared.components.AggregatorType;
 import com.sap.sse.datamining.shared.dto.FunctionDTO;
+import com.sap.sse.datamining.shared.impl.QueryDefinitionImpl;
 
 public class QueryDefinitionProviderWithControls extends AbstractQueryDefinitionProvider implements DataMiningControls {
 
@@ -106,28 +105,23 @@ public class QueryDefinitionProviderWithControls extends AbstractQueryDefinition
     }
     
     @Override
-    public QueryDefinitionDeprecated getQueryDefinition() {
-        QueryDefinitionDeprecatedImpl queryDTO = new QueryDefinitionDeprecatedImpl(LocaleInfo.getCurrentLocale().getLocaleName(), groupBySelectionPanel.getGrouperType(),
-                                                                   statisticProvider.getStatisticToCalculate(), statisticProvider.getAggregatorType());
+    public QueryDefinition getQueryDefinition() {
+        QueryDefinitionImpl queryDTO = new QueryDefinitionImpl(LocaleInfo.getCurrentLocale().getLocaleName(), statisticProvider.getStatisticToCalculate(),
+                                                               statisticProvider.getAggregatorType());
         
-        switch (queryDTO.getGrouperType()) {
-        case Dimensions:
-        default:
-            for (FunctionDTO dimension : groupBySelectionPanel.getDimensionsToGroupBy()) {
-                queryDTO.appendDimensionToGroupBy(dimension);
-            }
-            break;
+        for (FunctionDTO dimension : groupBySelectionPanel.getDimensionsToGroupBy()) {
+            queryDTO.appendDimensionToGroupBy(dimension);
         }
         
-        for (Entry<DimensionIdentifier, Collection<? extends Serializable>> selectionEntry : selectionProvider.getSelection().entrySet()) {
-            queryDTO.setSelectionFor(selectionEntry.getKey(), selectionEntry.getValue());
+        for (Entry<FunctionDTO, Collection<? extends Serializable>> filterSelectionEntry : selectionProvider.getFilterSelection().entrySet()) {
+            queryDTO.setFilterSelectionFor(filterSelectionEntry.getKey(), filterSelectionEntry.getValue());
         }
         
         return queryDTO;
     }
 
     @Override
-    public void applyQueryDefinition(QueryDefinitionDeprecated queryDefinition) {
+    public void applyQueryDefinition(QueryDefinition queryDefinition) {
         setBlockChangeNotification(true);
         selectionProvider.applySelection(queryDefinition);
         groupBySelectionPanel.applyQueryDefinition(queryDefinition);

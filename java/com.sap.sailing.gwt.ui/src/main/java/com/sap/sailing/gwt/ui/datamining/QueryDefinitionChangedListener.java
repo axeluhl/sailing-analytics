@@ -1,9 +1,9 @@
 package com.sap.sailing.gwt.ui.datamining;
 
-import com.sap.sailing.datamining.shared.QueryDefinitionDeprecated;
+import com.sap.sse.datamining.shared.QueryDefinition;
 
 public interface QueryDefinitionChangedListener {
 
-    void queryDefinitionChanged(QueryDefinitionDeprecated newQueryDefinition);
+    void queryDefinitionChanged(QueryDefinition newQueryDefinition);
 
 }

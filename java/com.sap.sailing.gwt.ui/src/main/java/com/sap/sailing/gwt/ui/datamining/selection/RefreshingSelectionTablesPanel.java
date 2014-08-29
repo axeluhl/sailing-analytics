@@ -4,6 +4,7 @@ import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Collections;
+import java.util.Comparator;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
@@ -22,8 +23,6 @@ import com.google.gwt.user.client.ui.HorizontalPanel;
 import com.google.gwt.user.client.ui.Widget;
 import com.google.gwt.view.client.SelectionChangeEvent;
 import com.google.gwt.view.client.SelectionChangeEvent.Handler;
-import com.sap.sailing.datamining.shared.DimensionIdentifier;
-import com.sap.sailing.datamining.shared.QueryDefinitionDeprecated;
 import com.sap.sailing.gwt.ui.client.ErrorReporter;
 import com.sap.sailing.gwt.ui.client.StringMessages;
 import com.sap.sailing.gwt.ui.client.shared.components.SettingsDialogComponent;
@@ -34,6 +33,9 @@ import com.sap.sailing.gwt.ui.datamining.StatisticChangedListener;
 import com.sap.sailing.gwt.ui.datamining.StatisticProvider;
 import com.sap.sailing.gwt.ui.datamining.settings.RefreshingSelectionTablesSettings;
 import com.sap.sailing.gwt.ui.datamining.settings.RefreshingSelectionTablesSettingsDialogComponent;
+import com.sap.sse.datamining.shared.GroupKey;
+import com.sap.sse.datamining.shared.QueryDefinition;
+import com.sap.sse.datamining.shared.QueryResult;
 import com.sap.sse.datamining.shared.components.AggregatorType;
 import com.sap.sse.datamining.shared.dto.FunctionDTO;
 
@@ -153,31 +155,36 @@ public class RefreshingSelectionTablesPanel implements SelectionProvider<Refresh
     }
 
     private void updateTables() {
-//        boolean tableContentChanged = false;
-//        Map<DimensionIdentifier, Collection<?>> content = extractContent(regattas);
-//        for (Entry<DimensionIdentifier, Collection<?>> contentEntry : content.entrySet()) {
-//            boolean currentTableContentChanged = getTable(contentEntry.getKey()).updateContent(contentEntry.getValue());
-//            if (!tableContentChanged) {
-//                tableContentChanged = currentTableContentChanged;
-//            }
-//        }
-//
-//        if (settings.isRerunQueryAfterRefresh() && tableContentChanged) {
-//            notifySelectionChanged();
-//            // TODO query is executed, before the data is ready to be analyzed
-//        }
-//        if (settings.isRefreshAutomatically()) {
-//            timer.schedule(settings.getRefreshIntervalInMilliseconds());
-//        }
-        dataMiningService.getDimensionValuesFor(tablesMappedByDimension.keySet(), new AsyncCallback<Object>() {
+        dataMiningService.getDimensionValuesFor(tablesMappedByDimension.keySet(), new AsyncCallback<QueryResult<Set<Object>>>() {
             @Override
             public void onFailure(Throwable caught) {
                 errorReporter.reportError("Error fetching the dimension values from the server: " + caught.getMessage());
             }
             @Override
-            public void onSuccess(Object result) {
-                // TODO Auto-generated method stub
+            public void onSuccess(QueryResult<Set<Object>> result) {
+                boolean tableContentChanged = false;
+                for (Entry<GroupKey, Set<Object>> resultEntry : result.getResults().entrySet()) {
+                    List<?> sortedDimensionValues = new ArrayList<>(resultEntry.getValue());
+                    Collections.sort(sortedDimensionValues, new Comparator<Object>() {
+                        @Override
+                        public int compare(Object o1, Object o2) {
+                            return o1.toString().compareTo(o2.toString());
+                        }
+                    });
+                    boolean currentTableContentChanged = tablesMappedByDimension.get(resultEntry.getKey()).updateContent(sortedDimensionValues);
+                    if (!tableContentChanged) {
+                        tableContentChanged = currentTableContentChanged;
+                    }
+                }
                 
+                if (settings.isRerunQueryAfterRefresh() && tableContentChanged) {
+                    notifySelectionChanged();
+                    // TODO query is executed, before the data is ready to be analyzed
+                    // TODO does this error still appear with the new concept?
+                }
+                if (settings.isRefreshAutomatically()) {
+                    timer.schedule(settings.getRefreshIntervalInMilliseconds());
+                }
             }
         });
     }
@@ -202,20 +209,20 @@ public class RefreshingSelectionTablesPanel implements SelectionProvider<Refresh
     }
 
     @Override
-    public Map<DimensionIdentifier, Collection<? extends Serializable>> getSelection() {
-        Map<DimensionIdentifier, Collection<? extends Serializable>> selection = new HashMap<DimensionIdentifier, Collection<? extends Serializable>>();
+    public Map<FunctionDTO, Collection<? extends Serializable>> getFilterSelection() {
+        Map<FunctionDTO, Collection<? extends Serializable>> selection = new HashMap<>();
         for (SelectionTable<?> table : tablesMappedByDimension.values()) {
             Collection<? extends Serializable> specificSelection = table.getSelectionAsValues();
             if (!specificSelection.isEmpty()) {
-//                selection.put(table.getDimension(), specificSelection);
+                selection.put(table.getDimension(), specificSelection);
             }
         }
         return selection;
     }
 
     @Override
-    public void applySelection(QueryDefinitionDeprecated queryDefinition) {
-        for (Entry<DimensionIdentifier, Iterable<? extends Serializable>> selectionEntry : queryDefinition.getSelection().entrySet()) {
+    public void applySelection(QueryDefinition queryDefinition) {
+        for (Entry<FunctionDTO, Iterable<? extends Serializable>> selectionEntry : queryDefinition.getFilterSelection().entrySet()) {
             SelectionTable<?> selectionTable = tablesMappedByDimension.get(selectionEntry.getKey());
             selectionTable.setSelection((Iterable<?>) selectionEntry.getValue());
         }

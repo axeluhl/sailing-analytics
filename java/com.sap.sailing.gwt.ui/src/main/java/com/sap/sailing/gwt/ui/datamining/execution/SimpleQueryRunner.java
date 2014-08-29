@@ -5,7 +5,6 @@ import com.google.gwt.event.dom.client.ClickHandler;
 import com.google.gwt.user.client.rpc.AsyncCallback;
 import com.google.gwt.user.client.ui.Button;
 import com.google.gwt.user.client.ui.Widget;
-import com.sap.sailing.datamining.shared.QueryDefinitionDeprecated;
 import com.sap.sailing.gwt.ui.client.ErrorReporter;
 import com.sap.sailing.gwt.ui.client.StringMessages;
 import com.sap.sailing.gwt.ui.client.shared.components.SettingsDialogComponent;
@@ -15,6 +14,7 @@ import com.sap.sailing.gwt.ui.datamining.QueryRunner;
 import com.sap.sailing.gwt.ui.datamining.ResultsPresenter;
 import com.sap.sailing.gwt.ui.datamining.settings.QueryRunnerSettings;
 import com.sap.sailing.gwt.ui.datamining.settings.QueryRunnerSettingsDialogComponent;
+import com.sap.sse.datamining.shared.QueryDefinition;
 import com.sap.sse.datamining.shared.QueryResult;
 
 public class SimpleQueryRunner implements QueryRunner {
@@ -54,10 +54,9 @@ public class SimpleQueryRunner implements QueryRunner {
     }
 
     @Override
-    public void run(QueryDefinitionDeprecated queryDefinition) {
+    public void run(QueryDefinition queryDefinition) {
         Iterable<String> errorMessages = queryDefinitionProvider.validateQueryDefinition(queryDefinition);
         if (errorMessages == null || !errorMessages.iterator().hasNext()) {
-//            queryStatusLabel.setText(" | " + stringMessages.running());
             dataMiningService.runQuery(queryDefinition, new AsyncCallback<QueryResult<Number>>() {
                 @Override
                 public void onFailure(Throwable caught) {
@@ -67,7 +66,6 @@ public class SimpleQueryRunner implements QueryRunner {
             
                 @Override
                 public void onSuccess(QueryResult<Number> result) {
-//                    queryStatusLabel.setText(" | " + stringMessages.done());
                     resultsPresenter.showResult(result);
                 }
             });
@@ -89,7 +87,7 @@ public class SimpleQueryRunner implements QueryRunner {
     }
 
     @Override
-    public void queryDefinitionChanged(QueryDefinitionDeprecated newQueryDefinition) {
+    public void queryDefinitionChanged(QueryDefinition newQueryDefinition) {
         run(newQueryDefinition);
     }
 

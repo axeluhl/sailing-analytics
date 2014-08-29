@@ -5,14 +5,13 @@ import java.util.Collection;
 import java.util.HashSet;
 import java.util.Set;
 
-import com.sap.sailing.datamining.shared.QueryDefinitionDeprecated;
 import com.sap.sailing.gwt.ui.client.ErrorReporter;
 import com.sap.sailing.gwt.ui.client.SailingServiceAsync;
 import com.sap.sailing.gwt.ui.client.StringMessages;
 import com.sap.sailing.gwt.ui.datamining.DataMiningServiceAsync;
 import com.sap.sailing.gwt.ui.datamining.QueryDefinitionChangedListener;
 import com.sap.sailing.gwt.ui.datamining.QueryDefinitionProvider;
-import com.sap.sse.datamining.shared.components.GrouperType;
+import com.sap.sse.datamining.shared.QueryDefinition;
 import com.sap.sse.datamining.shared.dto.FunctionDTO;
 
 public abstract class AbstractQueryDefinitionProvider implements QueryDefinitionProvider {
@@ -37,7 +36,7 @@ public abstract class AbstractQueryDefinitionProvider implements QueryDefinition
     }
     
     @Override
-    public Iterable<String> validateQueryDefinition(QueryDefinitionDeprecated queryDefinition) {
+    public Iterable<String> validateQueryDefinition(QueryDefinition queryDefinition) {
         Collection<String> errorMessages = new ArrayList<String>();
         
         if (queryDefinition != null) {
@@ -54,28 +53,16 @@ public abstract class AbstractQueryDefinitionProvider implements QueryDefinition
         return errorMessages;
     }
 
-    private String validateGrouper(QueryDefinitionDeprecated queryDefinition) {
-        GrouperType grouper = queryDefinition.getGrouperType();
-        if (grouper == null) {
-            return stringMessages.noGrouperSelectedError();
-        }
-        
-        ValidateGrouper: switch (grouper) {
-        case Dimensions:
-            for (FunctionDTO dimension : queryDefinition.getDimensionsToGroupBy()) {
-                if (dimension != null) {
-                    break ValidateGrouper;
-                }
+    private String validateGrouper(QueryDefinition queryDefinition) {
+        for (FunctionDTO dimension : queryDefinition.getDimensionsToGroupBy()) {
+            if (dimension != null) {
+                return null;
             }
-            return stringMessages.noDimensionToGroupBySelectedError();
-        default:
-            return stringMessages.noGrouperSelectedError();
         }
-
-        return null;
+        return stringMessages.noDimensionToGroupBySelectedError();
     }
 
-    private String validateStatisticAndAggregator(QueryDefinitionDeprecated queryDefinition) {
+    private String validateStatisticAndAggregator(QueryDefinition queryDefinition) {
         return queryDefinition.getStatisticToCalculate() == null || queryDefinition.getAggregatorType() == null ? stringMessages.noStatisticSelectedError() : null;
     }
 
@@ -95,7 +82,7 @@ public abstract class AbstractQueryDefinitionProvider implements QueryDefinition
 
     protected void notifyQueryDefinitionChanged() {
         if (!blockChangeNotification) {
-            QueryDefinitionDeprecated queryDefinition = getQueryDefinition();
+            QueryDefinition queryDefinition = getQueryDefinition();
             for (QueryDefinitionChangedListener listener : listeners) {
                 listener.queryDefinitionChanged(queryDefinition);
             }

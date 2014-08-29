@@ -16,7 +16,6 @@ import com.google.gwt.user.client.ui.HorizontalPanel;
 import com.google.gwt.user.client.ui.Label;
 import com.google.gwt.user.client.ui.ValueListBox;
 import com.google.gwt.user.client.ui.Widget;
-import com.sap.sailing.datamining.shared.QueryDefinitionDeprecated;
 import com.sap.sailing.gwt.ui.client.ErrorReporter;
 import com.sap.sailing.gwt.ui.client.StringMessages;
 import com.sap.sailing.gwt.ui.client.shared.components.AbstractObjectRenderer;
@@ -25,6 +24,7 @@ import com.sap.sailing.gwt.ui.client.shared.components.SimpleObjectRenderer;
 import com.sap.sailing.gwt.ui.datamining.DataMiningServiceAsync;
 import com.sap.sailing.gwt.ui.datamining.StatisticChangedListener;
 import com.sap.sailing.gwt.ui.datamining.StatisticProvider;
+import com.sap.sse.datamining.shared.QueryDefinition;
 import com.sap.sse.datamining.shared.components.AggregatorType;
 import com.sap.sse.datamining.shared.dto.FunctionDTO;
 
@@ -135,7 +135,7 @@ public class SimpleStatisticProvider implements StatisticProvider {
     }
 
     @Override
-    public void applyQueryDefinition(QueryDefinitionDeprecated queryDefinition) {
+    public void applyQueryDefinition(QueryDefinition queryDefinition) {
         extractionFunctionListBox.setValue(queryDefinition.getStatisticToCalculate(), false);
         aggregatorListBox.setValue(queryDefinition.getAggregatorType(), false);
     }

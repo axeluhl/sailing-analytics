@@ -3,12 +3,10 @@ package com.sap.sailing.datamining.factories;
 import java.util.ArrayList;
 import java.util.List;
 
-import com.sap.sailing.datamining.QueryDefinitionConverter;
 import com.sap.sailing.datamining.data.HasGPSFixContext;
 import com.sap.sailing.datamining.data.HasTrackedLegContext;
 import com.sap.sailing.datamining.data.HasTrackedLegOfCompetitorContext;
 import com.sap.sailing.datamining.data.HasTrackedRaceContext;
-import com.sap.sailing.datamining.shared.QueryDefinitionDeprecated;
 import com.sap.sse.datamining.Query;
 import com.sap.sse.datamining.components.Processor;
 import com.sap.sse.datamining.factories.ProcessorFactory;
@@ -25,14 +23,8 @@ public final class DataMiningFactory {
     
     private DataMiningFactory() {
     }
-    
-    // TODO Delete, after the deprecated components have been removed
-    public static <DataSourceType, ElementType> Query<Double> createQuery(DataSourceType dataSource, QueryDefinitionDeprecated queryDefinition, FunctionProvider functionProvider) {
-        return createQuery(dataSource, QueryDefinitionConverter.convertDeprecatedQueryDefinition(queryDefinition), functionProvider);
-    }
 
-    // TODO Make public, after the deprecated components have been removed
-    private static <DataSourceType, ElementType> Query<Double> createQuery(DataSourceType dataSource, final QueryDefinition queryDefinition, final FunctionProvider functionProvider) {
+    public static <DataSourceType, ElementType> Query<Double> createQuery(DataSourceType dataSource, final QueryDefinition queryDefinition, final FunctionProvider functionProvider) {
         return new ProcessorQuery<Double, DataSourceType>(DataMiningActivator.getExecutor(), dataSource,
                 DataMiningActivator.getStringMessages(), DataMiningStringMessages.Util.getLocaleFor(queryDefinition.getLocaleInfoName())) {
             
