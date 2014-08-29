@@ -18,4 +18,11 @@ public interface Component<SettingsType> extends ComponentSettings<SettingsType>
     boolean isVisible();
     
     void setVisible(boolean visibility);
+    
+    /**
+     * If the component wants to add its specific styling rules, e.g., for the expand/collapse toggle buttons or
+     * the dragger handle, it should return a non-<code>null</code> value from this method which is then used as
+     * a dependent CSS class name for those components.
+     */
+    String getDependentCssClassName();
 }

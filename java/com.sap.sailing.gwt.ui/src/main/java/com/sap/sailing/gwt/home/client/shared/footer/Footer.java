@@ -5,6 +5,8 @@ import java.util.Map;
 import java.util.Map.Entry;
 
 import com.google.gwt.core.client.GWT;
+import com.google.gwt.dom.client.DivElement;
+import com.google.gwt.dom.client.Style.Display;
 import com.google.gwt.dom.client.StyleInjector;
 import com.google.gwt.event.dom.client.ClickEvent;
 import com.google.gwt.http.client.UrlBuilder;
@@ -22,6 +24,7 @@ public class Footer extends Composite {
     private static FooterPanelUiBinder uiBinder = GWT.create(FooterPanelUiBinder.class);
 
     @UiField Anchor changeLanguageLink; 
+    @UiField DivElement languageSelectionDiv;
     
     private final Map<String, String> localeAndLanguages; 
 
@@ -40,6 +43,7 @@ public class Footer extends Composite {
 
         initWidget(uiBinder.createAndBindUi(this));
         
+        languageSelectionDiv.getStyle().setDisplay(Display.NONE);
         updateUI();
     }
     

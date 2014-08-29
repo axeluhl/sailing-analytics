@@ -1,8 +1,11 @@
 package com.sap.sailing.gwt.home.client.i18n;
 
+import com.google.gwt.core.client.GWT;
 import com.google.gwt.i18n.client.Messages;
 
 public interface TextMessages extends Messages {
+    public static final TextMessages INSTANCE = GWT.create(TextMessages.class);
+
     String chooseALanguage();
     String home();
     String events();
@@ -10,10 +13,22 @@ public interface TextMessages extends Messages {
     String contact();
     String sponsoring();
     String solutions();
-    String search();
     String german();
     String english();
     String fullEventSchedule();
+    String officalEventWebsite();
+    String leg();
+    String races();
+    String moreInfo();
+    String viewAnalysis();
+    String overallLeaderboard();
+    String pleaseEnterASearchTerm();
+    String pleaseTryAgain();
+    String reloadPage();
+    String errorMessageLoadingData();
+    String errorMessageNoSuchLeaderboard();
+    String raceNotScheduled();
+    String regattaDetails();
     
     String countdownDays();
     String countdownHours();
@@ -27,7 +42,7 @@ public interface TextMessages extends Messages {
     String finished();
     String watchNow();
     String lastUpdate();
-    String leaderBoard();
+    String leaderboard();
     String boxNewsUpdateMoreLink();
     String boxNewsUpdateTitle();
     String boxUpcomingRacesCountdownStarted1();

@@ -387,7 +387,11 @@ public class EventManagementPanel extends SimplePanel implements EventsRefresher
         TextColumn<LeaderboardGroupDTO> leaderboardGroupDescriptionColumn = new TextColumn<LeaderboardGroupDTO>() {
             @Override
             public String getValue(LeaderboardGroupDTO event) {
-                return event.description;
+                String result = event.description;
+                if(event.description != null && event.description.length() > 40) {
+                    result = event.description.substring(0, 40) + "...";
+                }
+                return result;
             }
         };
         final SafeHtmlCell leaderboardsCell = new SafeHtmlCell();
@@ -468,7 +472,11 @@ public class EventManagementPanel extends SimplePanel implements EventsRefresher
         TextColumn<LeaderboardGroupDTO> leaderboardGroupDescriptionColumn = new TextColumn<LeaderboardGroupDTO>() {
             @Override
             public String getValue(LeaderboardGroupDTO event) {
-                return event.description;
+                String result = event.description;
+                if(event.description != null && event.description.length() > 40) {
+                    result = event.description.substring(0, 40) + "...";
+                }
+                return result;
             }
         };
         final SafeHtmlCell leaderboardsCell = new SafeHtmlCell();
@@ -824,8 +832,10 @@ public class EventManagementPanel extends SimplePanel implements EventsRefresher
         for (CourseAreaDTO courseAreaDTO : newEvent.venue.getCourseAreas()) {
             courseAreaNames.add(courseAreaDTO.getName());
         }
-        sailingService.createEvent(newEvent.getName(), newEvent.startDate, newEvent.endDate, newEvent.venue.getName(),
-                newEvent.isPublic, courseAreaNames, newEvent.getImageURLs(), newEvent.getVideoURLs(), new AsyncCallback<EventDTO>() {
+        sailingService.createEvent(newEvent.getName(), newEvent.getDescription(), newEvent.startDate, newEvent.endDate,
+                newEvent.venue.getName(), newEvent.isPublic, courseAreaNames, newEvent.getImageURLs(),
+                newEvent.getVideoURLs(), newEvent.getSponsorImageURLs(), newEvent.getLogoImageURL(),
+                newEvent.getOfficialWebsiteURL(), new AsyncCallback<EventDTO>() {
             @Override
             public void onFailure(Throwable t) {
                 errorReporter.reportError("Error trying to create new event " + newEvent.getName() + ": " + t.getMessage());

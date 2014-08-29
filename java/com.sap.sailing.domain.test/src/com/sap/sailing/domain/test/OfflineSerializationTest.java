@@ -92,9 +92,9 @@ public class OfflineSerializationTest extends AbstractSerializationTest {
         DomainFactory receiverDomainFactory = new DomainFactoryImpl();
         Event e = new EventImpl("Event Name", MillisecondsTimePoint.now(), MillisecondsTimePoint.now().plus(
                 Duration.ONE_DAY.times(10)), "At Home", /* is public */true, UUID.randomUUID());
-        LeaderboardGroup lg1 = new LeaderboardGroupImpl("LG1", "LG1 Description", /* displayGroupsInReverseOrder */ false, Collections.<Leaderboard> emptyList());
+        LeaderboardGroup lg1 = new LeaderboardGroupImpl("LG1", "LG1 Description", /* displayName */ null, /* displayGroupsInReverseOrder */ false, Collections.<Leaderboard> emptyList());
         e.addLeaderboardGroup(lg1);
-        LeaderboardGroup lg2 = new LeaderboardGroupImpl("LG2", "LG2 Description", /* displayGroupsInReverseOrder */ false, Collections.<Leaderboard> emptyList());
+        LeaderboardGroup lg2 = new LeaderboardGroupImpl("LG2", "LG2 Description", /* displayName */ null, /* displayGroupsInReverseOrder */ false, Collections.<Leaderboard> emptyList());
         e.addLeaderboardGroup(lg2);
         Event deserialized = cloneBySerialization(e, receiverDomainFactory);
         assertEquals(Util.size(e.getLeaderboardGroups()), Util.size(deserialized.getLeaderboardGroups()));
@@ -118,7 +118,7 @@ public class OfflineSerializationTest extends AbstractSerializationTest {
     @Test
     public void testSerializingOverallLeaderboardWithFactorOnColumn() throws ClassNotFoundException, IOException {
         Leaderboard leaderboard = new FlexibleLeaderboardImpl("Test Leaderboard", new ThresholdBasedResultDiscardingRuleImpl(new int[] { 3, 5 }), new HighPoint(), new CourseAreaImpl("Alpha", UUID.randomUUID()));
-        LeaderboardGroup leaderboardGroup = new LeaderboardGroupImpl("LeaderboardGroup", "Test Leaderboard Group", /* displayGroupsInReverseOrder */ false, Arrays.asList(new Leaderboard[] { leaderboard }));
+        LeaderboardGroup leaderboardGroup = new LeaderboardGroupImpl("LeaderboardGroup", "Test Leaderboard Group", /* displayName */ null, /* displayGroupsInReverseOrder */ false, Arrays.asList(new Leaderboard[] { leaderboard }));
         final LeaderboardGroupMetaLeaderboard overallLeaderboard = new LeaderboardGroupMetaLeaderboard(leaderboardGroup, new HighPoint(), new ThresholdBasedResultDiscardingRuleImpl(new int[0]));
         leaderboardGroup.setOverallLeaderboard(overallLeaderboard);
         final double FACTOR = 2.0;

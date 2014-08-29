@@ -220,7 +220,7 @@ public abstract class TrackedRaceImpl extends TrackedRaceWithWindEssentials impl
      * them.
      */
     private transient SmartFutureCache<Competitor, com.sap.sse.common.Util.Triple<TimePoint, TimePoint, List<Maneuver>>, EmptyUpdateInterval> maneuverCache;
-
+    
     private transient Map<TimePoint, Future<Wind>> directionFromStartToNextMarkCache;
 
     private final ConcurrentHashMap<Mark, GPSFixTrack<Mark, GPSFix>> markTracks;
@@ -234,7 +234,7 @@ public abstract class TrackedRaceImpl extends TrackedRaceWithWindEssentials impl
     private transient Timer cacheInvalidationTimer;
     private transient Object cacheInvalidationTimerLock;
 
-    protected transient HashMap<Serializable, RaceLog> attachedRaceLogs;
+    protected transient ConcurrentHashMap<Serializable, RaceLog> attachedRaceLogs;
 
     /**
      * The time delay to the current point in time in milliseconds.
@@ -289,7 +289,7 @@ public abstract class TrackedRaceImpl extends TrackedRaceWithWindEssentials impl
         super(race, trackedRegatta, windStore, millisecondsOverWhichToAverageWind);
         shortTimeWindCache = new ShortTimeWindCache(this, millisecondsOverWhichToAverageWind / 2);
         locksForMarkPassings = new IdentityHashMap<>();
-        attachedRaceLogs = new HashMap<>();
+        attachedRaceLogs = new ConcurrentHashMap<>();
         this.status = new TrackedRaceStatusImpl(TrackedRaceStatusEnum.PREPARED, 0.0);
         this.statusNotifier = new Object[0];
         this.loadingFromWindStoreLock = new NamedReentrantReadWriteLock("Loading from wind store lock for tracked race "
@@ -467,7 +467,7 @@ public abstract class TrackedRaceImpl extends TrackedRaceWithWindEssentials impl
      */
     private void readObject(ObjectInputStream ois) throws ClassNotFoundException, IOException {
         ois.defaultReadObject();
-        attachedRaceLogs = new HashMap<>();
+        attachedRaceLogs = new ConcurrentHashMap<>();
         markPassingsTimes = new ArrayList<com.sap.sse.common.Util.Pair<Waypoint, com.sap.sse.common.Util.Pair<TimePoint, TimePoint>>>();
         cacheInvalidationTimerLock = new Object();
         windStore = EmptyWindStore.INSTANCE;
@@ -491,7 +491,7 @@ public abstract class TrackedRaceImpl extends TrackedRaceWithWindEssentials impl
 
     @Override
     public synchronized void waitForLoadingFromGPSFixStoreToFinishRunning(RaceLog fromRaceLog) throws InterruptedException {
-        while (! attachedRaceLogs.containsKey(fromRaceLog.getId()) || loadingFromGPSFixStore) {
+        while (!attachedRaceLogs.containsKey(fromRaceLog.getId()) || loadingFromGPSFixStore) {
             wait();
         }
     }
@@ -506,7 +506,7 @@ public abstract class TrackedRaceImpl extends TrackedRaceWithWindEssentials impl
                     }
                 }, /* nameForLocks */"Maneuver cache for race " + getRace().getName());
     }
-
+    
     /**
      * Precondition: race has already been set, e.g., in constructor before this method is called
      */

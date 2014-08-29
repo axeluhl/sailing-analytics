@@ -10,13 +10,13 @@
 	position: relative;
     vertical-align: bottom;
 	background-color: #e5e5e5;
-	border-right: 1px solid #ffffff !important;
+	border-right: 1px solid #c9caca !important;
 	border-top: none !important;
 	border-bottom: 1px solid #c9caca !important;
 	padding: 3px 5px;
 	padding-bottom: 5px;
 	text-align: center;
-	font-family: 'OpenSansCondensedLight', 'OpenSansRegular', Arial, Verdana, sans-serif;
+	text-shadow: none !important;
 }
 
 .cellTableFirstColumnHeader {
@@ -24,7 +24,7 @@
     vertical-align: bottom;
 	background-color: #e5e5e5;
 	border-left: none !important;
-	border-right: 1px solid #ffffff !important;
+	border-right: 1px solid #c9caca !important;
 	border-top: none !important;
 	border-bottom: 1px solid #c9caca !important;
 	text-align: center;
@@ -55,9 +55,39 @@
 	border-left: none;
 	border-top: none !important;
 	border-bottom: 1px solid #c9caca !important;
-	padding: 5px 5px 5px !important;
+	padding: 7px 7px 7px;
 	white-space: nowrap;
-	font-family: 'OpenSansCondensedLight', 'OpenSansRegular', Arial, Verdana, sans-serif;
+	font-size: 12px !important;
+	line-height: 1.5 !important;
+}
+
+.cellTableCheckboxColumnCell {
+	padding: 1px 1px 1px !important;
+	vertical-align: middle !important;
+	text-align: center;
+}
+
+.cellTableCheckboxSelected {
+	margin-left: 0px; /* account for the selection border that pushes a selected checkbox to the side */
+	margin-top: 0px;
+	margin-bottom: 0px;
+	margin-right: 2px;
+	height: 18px;
+	width: 18px;
+	border: solid 1px #fcbb22;
+	background-color: #fcbb22;
+	vertical-align: middle;
+}
+
+.cellTableCheckboxDeselected {
+	margin-left: 2px; /* account for the selection border that pushes a selected checkbox to the side */
+	margin-top: 0px;
+	margin-bottom: 0px;
+	margin-right: 2px;
+	border: solid 1px #acacac;
+	height: 18px;
+	width: 18px;
+	vertical-align: middle;
 }
 
 .cellTableOddRow {
@@ -70,9 +100,10 @@
 	border-right: 1px solid #c9caca !important;
 	border-top: none !important;
 	border-bottom: 1px solid #c9caca !important;
-	padding: 5px 5px 5px !important;
+	padding: 7px 7px 7px;
 	white-space: nowrap;
-	font-family: 'OpenSansCondensedLight', 'OpenSansRegular', Arial, Verdana, sans-serif;
+	font-size: 12px !important;
+	line-height: 1.5 !important;
 }
 
 .cellTableHoveredRow {
@@ -104,7 +135,7 @@
 }
 
 .cellTableRaceColumnHeader {
-	background-color: #e0e0e0;
+	background-color: #e5e5e5;
 }
 
 .cellTableRaceColumnHeader span:first-child{

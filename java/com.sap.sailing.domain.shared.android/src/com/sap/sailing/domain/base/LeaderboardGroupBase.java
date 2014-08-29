@@ -10,4 +10,6 @@ public interface LeaderboardGroupBase extends Renamable, WithID {
     String getDescription();
     void setDescriptiom(String description);
     boolean hasOverallLeaderboard();
+    String getDisplayName();
+    void setDisplayName(String displayName);
 }

@@ -76,7 +76,7 @@ public class SpectatorEntryPoint extends AbstractEntryPoint implements RegattaRe
             String title = groupName != null ? groupName : stringMessages.overview();
             LogoAndTitlePanel logoAndTitlePanel = new LogoAndTitlePanel(title, stringMessages, this);
             logoAndTitlePanel.addStyleName("LogoAndTitlePanel");
-            FlowPanel globalNavigationPanel = new GlobalNavigationPanel(stringMessages, true, null, null);
+            FlowPanel globalNavigationPanel = new GlobalNavigationPanel(stringMessages, true, null, null, /* event */ null, null);
             logoAndTitlePanel.add(globalNavigationPanel);
 
             rootPanel.add(logoAndTitlePanel);

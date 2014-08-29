@@ -159,4 +159,9 @@ public class RestrictedGroupingProvider implements GroupingProvider {
     @Override
     public void updateSettings(Object newSettings) { }
 
+    @Override
+    public String getDependentCssClassName() {
+        return "restrictedGroupingProvider";
+    }
+
 }

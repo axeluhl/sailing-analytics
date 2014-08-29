@@ -3,9 +3,9 @@ package com.sap.sailing.gwt.ui.client.media.popup;
 import com.google.gwt.http.client.URL;
 import com.sap.sailing.domain.common.media.MediaTrack;
 
-public class YoutubeWindowPlayer extends PopupWindowPlayer {
+public class YoutubeWindowPlayer extends PopoutWindowPlayer {
     
-    public YoutubeWindowPlayer(MediaTrack mediaTrack, PopupCloseListener popupCloseListener) {
+    public YoutubeWindowPlayer(MediaTrack mediaTrack, PopoutCloseListener popupCloseListener) {
         super(mediaTrack, popupCloseListener);
     }
 

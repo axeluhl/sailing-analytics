@@ -18,6 +18,7 @@ import com.sap.sailing.domain.common.dto.LegEntryDTO;
 import com.sap.sailing.domain.common.impl.InvertibleComparatorAdapter;
 import com.sap.sailing.gwt.ui.client.DetailTypeFormatter;
 import com.sap.sailing.gwt.ui.client.StringMessages;
+import com.sap.sailing.gwt.ui.client.shared.controls.AbstractSortableColumnWithMinMax;
 import com.sap.sailing.gwt.ui.leaderboard.DetailTypeColumn.LegDetailField;
 
 public class TimeTraveledRaceColumn extends ExpandableSortableColumn<String> implements HasStringAndDoubleValue {
@@ -80,10 +81,10 @@ public class TimeTraveledRaceColumn extends ExpandableSortableColumn<String> imp
     }
     
     @Override
-    protected Map<DetailType, SortableColumn<LeaderboardRowDTO, ?>> getDetailColumnMap(
+    protected Map<DetailType, AbstractSortableColumnWithMinMax<LeaderboardRowDTO, ?>> getDetailColumnMap(
             LeaderboardPanel leaderboardPanel, StringMessages stringConstants, String detailHeaderStyle,
             String detailColumnStyle) {
-        Map<DetailType, SortableColumn<LeaderboardRowDTO, ?>> result = new HashMap<DetailType, SortableColumn<LeaderboardRowDTO, ?>>();
+        Map<DetailType, AbstractSortableColumnWithMinMax<LeaderboardRowDTO, ?>> result = new HashMap<>();
 
         result.put(DetailType.RACE_TIME_TRAVELED_UPWIND,
                 new FormattedDoubleDetailTypeColumn(DetailType.RACE_TIME_TRAVELED_UPWIND, new RaceTimeTraveledUpwindInSeconds(),
@@ -171,7 +172,7 @@ public class TimeTraveledRaceColumn extends ExpandableSortableColumn<String> imp
     }
 
     @Override
-    protected void updateMinMax() {
+    public void updateMinMax() {
         minmaxRenderer.updateMinMax(getDisplayedLeaderboardRowsProvider());
     }
 

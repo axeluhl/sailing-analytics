@@ -69,7 +69,7 @@ public class SimulatorField implements VectorField {
         this.bdB = new DegreePosition((this.rcStart.getLatDeg() - this.rcEnd.getLatDeg()) * bdPhi,
                 (this.rcStart.getLngDeg() - this.rcEnd.getLngDeg()) * bdPhi);
         this.xScale = windData.windData.xScale;
-		this.motionFactor = 0.07 * parameters.motionScale;
+		this.motionFactor = 0.0007 * parameters.motionScale;
 		this.lineBase = parameters.lineBase;
 		this.lineScale = parameters.lineScale;
         List<SimulatorWindDTO> gridData = windData.getMatrix();
@@ -137,6 +137,9 @@ public class SimulatorField implements VectorField {
 
     private Vector interpolate(Position p, Date at) {
         int step = (int) ((at.getTime() - startTime.getTime()) / timeStep.asMillis());
+        if (step >= this.data.length) {
+            step = this.data.length - 1;
+        }
         Neighbors idx = getNeighbors(p);
         if (swarmDebug
                 && ((idx.xTop >= (this.resX + 2 * this.borderX)) || (idx.yTop >= (this.resY + 2 * this.borderY)))) {

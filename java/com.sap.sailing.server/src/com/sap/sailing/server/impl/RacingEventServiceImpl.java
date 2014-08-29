@@ -1892,8 +1892,8 @@ public class RacingEventServiceImpl implements RacingEventServiceWithTestSupport
 
     @Override
     public LeaderboardGroup addLeaderboardGroup(UUID id, String groupName,
-            String description, boolean displayGroupsInReverseOrder,
-            List<String> leaderboardNames, int[] overallLeaderboardDiscardThresholds, ScoringSchemeType overallLeaderboardScoringSchemeType) {
+            String description, String displayName,
+            boolean displayGroupsInReverseOrder, List<String> leaderboardNames, int[] overallLeaderboardDiscardThresholds, ScoringSchemeType overallLeaderboardScoringSchemeType) {
         ArrayList<Leaderboard> leaderboards = new ArrayList<>();
         for (String leaderboardName : leaderboardNames) {
             Leaderboard leaderboard = leaderboardsByName.get(leaderboardName);
@@ -1903,8 +1903,8 @@ public class RacingEventServiceImpl implements RacingEventServiceWithTestSupport
                 leaderboards.add(leaderboard);
             }
         }
-        LeaderboardGroup result = new LeaderboardGroupImpl(id, groupName, description, displayGroupsInReverseOrder,
-                leaderboards);
+        LeaderboardGroup result = new LeaderboardGroupImpl(id, groupName, description, displayName,
+                displayGroupsInReverseOrder, leaderboards);
         if (overallLeaderboardScoringSchemeType != null) {
             // create overall leaderboard and its discards settings
             addOverallLeaderboardToLeaderboardGroup(result,
@@ -1984,14 +1984,17 @@ public class RacingEventServiceImpl implements RacingEventServiceWithTestSupport
 
     @Override
     public void updateLeaderboardGroup(String oldName, String newName, String description,
-            List<String> leaderboardNames, int[] overallLeaderboardDiscardThresholds,
-            ScoringSchemeType overallLeaderboardScoringSchemeType) {
+            String displayName, List<String> leaderboardNames,
+            int[] overallLeaderboardDiscardThresholds, ScoringSchemeType overallLeaderboardScoringSchemeType) {
         if (!oldName.equals(newName)) {
             renameLeaderboardGroup(oldName, newName);
         }
         LeaderboardGroup group = getLeaderboardGroupByName(newName);
         if (!description.equals(group.getDescription())) {
             group.setDescriptiom(description);
+        }
+        if (!Util.equalsWithNull(displayName, group.getDisplayName())) {
+            group.setDisplayName(displayName);
         }
         group.clearLeaderboards();
         for (String leaderboardName : leaderboardNames) {
@@ -2291,11 +2294,14 @@ public class RacingEventServiceImpl implements RacingEventServiceWithTestSupport
 
     // Used for TESTING only
     @Override
-    public Event addEvent(String eventName, TimePoint startDate, TimePoint endDate, String venue, boolean isPublic, UUID id) {
-        Event result = createEventWithoutReplication(eventName, startDate, endDate, venue, isPublic, id,
-                /* imageURLs */ Collections.<URL>emptyList(), /* videoURLs */ Collections.<URL>emptyList());
-        replicate(new CreateEvent(eventName, startDate, endDate, venue, isPublic, id, /* imageURLs */
-                Collections.<URL> emptyList(), /* videoURLs */Collections.<URL> emptyList()));
+    public Event addEvent(String eventName, String eventDescription, TimePoint startDate, TimePoint endDate, String venue, boolean isPublic, UUID id) {
+        Event result = createEventWithoutReplication(eventName, eventDescription, startDate, endDate, venue, isPublic,
+                id, /* imageURLs */ Collections.<URL>emptyList(),
+                /* videoURLs */ Collections.<URL>emptyList(), /* sponsorImageURLs */ Collections.<URL>emptyList(), /* logoImageURL */ null, /* officialWebsiteURL */ null);
+        replicate(new CreateEvent(eventName, eventDescription, startDate, endDate, venue, isPublic, /* imageURLs */
+                id, Collections.<URL> emptyList(),
+                /* videoURLs */Collections.<URL> emptyList(), /* sponsorImageURLs */ Collections.<URL> emptyList(),
+                /* logoimageURL */ null, /* officialWebsiteURLAsString */ null));
         return result;
     }
 
@@ -2305,12 +2311,17 @@ public class RacingEventServiceImpl implements RacingEventServiceWithTestSupport
     }
 
     @Override
-    public Event createEventWithoutReplication(String eventName, TimePoint startDate, TimePoint endDate, String venue,
-            boolean isPublic, UUID id, Iterable<URL> imageURLs, Iterable<URL> videoURLs) {
+    public Event createEventWithoutReplication(String eventName, String eventDescription, TimePoint startDate, TimePoint endDate,
+            String venue, boolean isPublic, UUID id, Iterable<URL> imageURLs,
+            Iterable<URL> videoURLs, Iterable<URL> sponsorImageURLs, URL logoImageURL, URL officialWebsiteURL) {
         Event result = new EventImpl(eventName, startDate, endDate, venue, isPublic, id);
         addEvent(result);
+        result.setDescription(eventDescription);
         result.setImageURLs(imageURLs);
         result.setVideoURLs(videoURLs);
+        result.setSponsorImageURLs(sponsorImageURLs);
+        result.setLogoImageURL(logoImageURL);
+        result.setOfficialWebsiteURL(officialWebsiteURL);
         return result;
     }
 

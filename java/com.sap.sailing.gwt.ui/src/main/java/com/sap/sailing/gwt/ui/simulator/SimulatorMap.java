@@ -216,7 +216,7 @@ public class SimulatorMap extends AbsolutePanel implements RequiresDataInitializ
                 timePanel.setMinMax(new Date(startTime), endDate, true);
                 timePanel.resetTimeSlider();
                 timePanel.timeChanged(windParams.getStartTime(), null);
-                if (windParams.isShowStreamlets2()) {
+                if (windParams.isShowStreamlets()) {
                 	windStreamletsCanvasOverlay.setEndDate(endDate);
                 }
             }
@@ -236,10 +236,10 @@ public class SimulatorMap extends AbsolutePanel implements RequiresDataInitializ
             if (windParams.isShowArrows()) {
                 windFieldCanvasOverlay.addToMap();
             }
-            if (windParams.isShowStreamlets()) {
+            if (windParams.isShowLineGuides()) {
                 windLineGuidesCanvasOverlay.addToMap();
             }
-            if (windParams.isShowStreamlets2()) {
+            if (windParams.isShowStreamlets()) {
                 windStreamletsCanvasOverlay.addToMap();
             }
 
@@ -250,10 +250,10 @@ public class SimulatorMap extends AbsolutePanel implements RequiresDataInitializ
             if (windParams.isShowArrows()) {
                 timeListeners.add(windFieldCanvasOverlay);
             }
-            if (windParams.isShowStreamlets()) {
+            if (windParams.isShowLineGuides()) {
                 timeListeners.add(windLineGuidesCanvasOverlay);
             }
-            if (windParams.isShowStreamlets2()) {
+            if (windParams.isShowStreamlets()) {
                 timeListeners.add(windStreamletsCanvasOverlay);
             }
             if (windParams.isShowGrid()) {
@@ -376,7 +376,7 @@ public class SimulatorMap extends AbsolutePanel implements RequiresDataInitializ
               
               MapTypeStyle[] mapTypeStyles;
               
-              if (windParams.isShowStreamlets2()) {
+              if (windParams.isShowStreamlets()) {
               
             	  mapTypeStyles = new MapTypeStyle[11];
 
@@ -469,7 +469,7 @@ public class SimulatorMap extends AbsolutePanel implements RequiresDataInitializ
               add(map, 0, 0);
               map.setSize("100%", "100%");
 
-              if (windParams.isShowStreamlets2()) {
+              if (windParams.isShowStreamlets()) {
             	  map.addBoundsChangeHandler(new BoundsChangeMapHandler() {
             		  @Override
             		  public void onEvent(BoundsChangeMapEvent event) {
@@ -477,7 +477,7 @@ public class SimulatorMap extends AbsolutePanel implements RequiresDataInitializ
             			  Scheduler.get().scheduleDeferred(new Scheduler.ScheduledCommand() {
             				  public void execute() {
             					  if (windStreamletsCanvasOverlay.getSwarm() != null) {
-            						  windStreamletsCanvasOverlay.getSwarm().onBoundsChanged();
+            						  windStreamletsCanvasOverlay.getSwarm().onBoundsChanged(true, 5);
             					  }
             				  }
             			  });
@@ -576,10 +576,10 @@ public class SimulatorMap extends AbsolutePanel implements RequiresDataInitializ
         if (windParams.isShowArrows()) {
             windFieldCanvasOverlay = new WindFieldCanvasOverlay(map, SimulatorMapOverlaysZIndexes.WINDFIELD_ZINDEX, timer, windParams);
         }
-        if (windParams.isShowStreamlets()) {
+        if (windParams.isShowLineGuides()) {
             windLineGuidesCanvasOverlay = new WindLineGuidesCanvasOverlay(map, SimulatorMapOverlaysZIndexes.WINDSTREAMLETS_ZINDEX, timer, xRes);
         }
-        if (windParams.isShowStreamlets2()) {
+        if (windParams.isShowStreamlets()) {
         	windStreamletsCanvasOverlay = new WindStreamletsCanvasOverlay(this, SimulatorMapOverlaysZIndexes.WINDFIELD_ZINDEX, timer, streamletPars, windParams);
         }
         if (windParams.isShowGrid()) {
@@ -668,10 +668,10 @@ public class SimulatorMap extends AbsolutePanel implements RequiresDataInitializ
                 if (windParams.isShowArrows()) {
                     windFieldCanvasOverlay.addToMap();
                 }
-                if (windParams.isShowStreamlets()) {
+                if (windParams.isShowLineGuides()) {
                     windLineGuidesCanvasOverlay.addToMap();
                 }
-                if (windParams.isShowStreamlets2()) {
+                if (windParams.isShowStreamlets()) {
                     windStreamletsCanvasOverlay.addToMap();
                 }
                 refreshWindFieldOverlay(wl);
@@ -679,10 +679,10 @@ public class SimulatorMap extends AbsolutePanel implements RequiresDataInitializ
                 if (windParams.isShowArrows()) {
                     timeListeners.add(windFieldCanvasOverlay);
                 }
-                if (windParams.isShowStreamlets()) {
+                if (windParams.isShowLineGuides()) {
                     timeListeners.add(windLineGuidesCanvasOverlay);
                 }
-                if (windParams.isShowStreamlets2()) {
+                if (windParams.isShowStreamlets()) {
                     timeListeners.add(windStreamletsCanvasOverlay);
                     windStreamletsCanvasOverlay.setVisible(true);
                 }
@@ -695,7 +695,7 @@ public class SimulatorMap extends AbsolutePanel implements RequiresDataInitializ
                 timePanel.setMinMax(windParams.getStartTime(), windParams.getEndTime(), true);
                 timePanel.resetTimeSlider();
                 timePanel.timeChanged(windParams.getStartTime(), null);
-                if (windParams.isShowStreamlets2()) {
+                if (windParams.isShowStreamlets()) {
                 	windStreamletsCanvasOverlay.setEndDate(windParams.getEndTime());
                 }
 
@@ -728,7 +728,7 @@ public class SimulatorMap extends AbsolutePanel implements RequiresDataInitializ
         if (this.windParams.isShowArrows()) {
             this.windFieldCanvasOverlay.draw();
         }
-        if (this.windParams.isShowStreamlets()) {
+        if (this.windParams.isShowLineGuides()) {
             this.windLineGuidesCanvasOverlay.draw();
         }
         if (this.windParams.isShowGrid()) {

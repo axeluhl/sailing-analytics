@@ -9,6 +9,7 @@ public class LeaderboardGroupBaseJsonSerializer implements JsonSerializer<Leader
     public static final String FIELD_ID = "id";
     public static final String FIELD_NAME = "name";
     public static final String FIELD_DESCRIPTION = "description";
+    public static final String FIELD_DISPLAY_NAME = "displayName";
     public static final String FIELD_HAS_OVERALL_LEADERBOARD = "hasOverallLeaderboard";
 
     public LeaderboardGroupBaseJsonSerializer() {
@@ -19,6 +20,7 @@ public class LeaderboardGroupBaseJsonSerializer implements JsonSerializer<Leader
         result.put(FIELD_ID, leaderboardGroup.getId().toString());
         result.put(FIELD_NAME, leaderboardGroup.getName());
         result.put(FIELD_DESCRIPTION, leaderboardGroup.getDescription());
+        result.put(FIELD_DISPLAY_NAME, leaderboardGroup.getDisplayName());
         result.put(FIELD_HAS_OVERALL_LEADERBOARD, leaderboardGroup.hasOverallLeaderboard());
         return result;
     }

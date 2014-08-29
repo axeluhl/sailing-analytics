@@ -21,7 +21,7 @@ public class FleetDeserializer implements JsonDeserializer<Fleet> {
         if (object.containsKey(FleetJsonSerializer.FIELD_COLOR)) {
             color = colorDeserializer.deserialize(Helpers.getNestedObjectSafe(object, FleetJsonSerializer.FIELD_COLOR));
         }
-        String name = object.get(FleetJsonSerializer.FIELD_NAME).toString();
+        String name = (String) object.get(FleetJsonSerializer.FIELD_NAME);
         Number ordering = (Number) object.get(FleetJsonSerializer.FIELD_ORDERING);
 
         return new FleetImpl(name, ordering.intValue(), color);

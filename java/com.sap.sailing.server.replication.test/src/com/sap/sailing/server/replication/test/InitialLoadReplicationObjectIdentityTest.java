@@ -86,7 +86,7 @@ public class InitialLoadReplicationObjectIdentityTest extends AbstractServerRepl
         final TimePoint eventStartDate = new MillisecondsTimePoint(new Date());
         final TimePoint eventEndDate = new MillisecondsTimePoint(new Date());
 
-        Event event = master.addEvent(eventName, eventStartDate, eventEndDate, venue, false, eventId);
+        Event event = master.addEvent(eventName, /* eventDescription */ null, eventStartDate, eventEndDate, venue, false, eventId);
         assertNotNull(master.getEvent(eventId));
         assertNull(replica.getEvent(eventId));
         
@@ -115,7 +115,8 @@ public class InitialLoadReplicationObjectIdentityTest extends AbstractServerRepl
         leaderboardNames.add(leaderboardName);
         int[] overallLeaderboardDiscardThresholds = new int[] {};
         ScoringSchemeType overallLeaderboardScoringSchemeType = ScoringSchemeType.HIGH_POINT;
-        LeaderboardGroup leaderboardGroup = master.addLeaderboardGroup(UUID.randomUUID(), leaderBoardGroupName, "Some descriptive Description", false, leaderboardNames, overallLeaderboardDiscardThresholds, overallLeaderboardScoringSchemeType);
+        LeaderboardGroup leaderboardGroup = master.addLeaderboardGroup(UUID.randomUUID(), leaderBoardGroupName, "Some descriptive Description",
+                "displayName", false, leaderboardNames, overallLeaderboardDiscardThresholds, overallLeaderboardScoringSchemeType);
         assertNotNull(master.getLeaderboardGroupByName(leaderBoardGroupName));
         assertNull(replica.getLeaderboardGroupByName(leaderBoardGroupName));
         

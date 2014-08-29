@@ -220,9 +220,13 @@ public class IgtimiWindReceiver implements BulkFixReceiver {
                 Speed sog = getSOG(timePoint, sogPair);
                 com.sap.sse.common.Util.Pair<COG, COG> cogPair = getSurroundingFixes(getCogTrack(deviceSerialNumber), timePoint);
                 Bearing cog = getCOG(timePoint, cogPair);
-                SpeedWithBearing sogCog = new KnotSpeedWithBearingImpl(sog.getKnots(), cog);
-                SpeedWithBearing trueWindSpeedAndDirection = apparentWindSpeedWithDirection.add(sogCog);
-                result = new WindImpl(pos, timePoint, trueWindSpeedAndDirection);
+                if (sog != null && cog != null) {
+                    SpeedWithBearing sogCog = new KnotSpeedWithBearingImpl(sog.getKnots(), cog);
+                    SpeedWithBearing trueWindSpeedAndDirection = apparentWindSpeedWithDirection.add(sogCog);
+                    result = new WindImpl(pos, timePoint, trueWindSpeedAndDirection);
+                } else {
+                    result = null;
+                }
             } else {
                 result = null;
             }
