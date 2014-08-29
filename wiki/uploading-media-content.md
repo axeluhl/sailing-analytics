@@ -12,20 +12,20 @@ For those in an open Internet environment (outside the SAP VPN or logged on to t
 
 After downloading WinSCP from the URL shown above, run the installer. When it asks you about your preferred user interface style you may want to choose "Explorer" which may be most familiar for Windows users.
 
-![WinSCP Install](/wiki/images/winscp-install-1.png)
+![WinSCP Install](/wiki/images/winscp/winscp-install-1.png)
 
 Then, launch WinSCP. It welcomes you with a login screen:
 
-![WinSCP Login](/wiki/images/winscp-login.png)
+![WinSCP Login](/wiki/images/winscp/winscp-login.png)
 
 Enter the hostname and port number as described above, depending on your network environment (within SAP network or outside of SAP network). Add your user name and password, then click the "Login" button. You should then see an Explorer-like window that shows the web server's file system hierarchy.
 
 Navigate to /var/www/static:
 
-![WinSCP /var/www/static](/wiki/images/winscp-var-www-static.png)
+![WinSCP /var/www/static](/wiki/images/winscp/winscp-var-www-static.png)
 
 You can create new folders using the "Create Folder" button from the toolbar:
 
-![WinSCP Create Folder](/wiki/images/winscp-create-folder.png)
+![WinSCP Create Folder](/wiki/images/winscp/winscp-create-folder.png)
 
-Files can be uploaded from your local disk by dragging and dropping them from a local Windows Explorer running on your desktop onto the content panel in the right part of the WinSCP window.![WinSCP Intall](/wiki/images/winscp-install-1.png).
+Files can be uploaded from your local disk by dragging and dropping them from a local Windows Explorer running on your desktop onto the content panel in the right part of the WinSCP window.
