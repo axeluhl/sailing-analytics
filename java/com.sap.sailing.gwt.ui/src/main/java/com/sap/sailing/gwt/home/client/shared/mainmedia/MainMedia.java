@@ -26,6 +26,8 @@ import com.sap.sse.common.Util.Pair;
 
 public class MainMedia extends Composite {
     
+    private static final int MAX_VIDEO_COUNT = 3;
+
     private static final MainMediaResources.LocalCss STYLES = MainMediaResources.INSTANCE.css(); 
 
     @UiField HTMLPanel videosPanel;
@@ -50,7 +52,7 @@ public class MainMedia extends Composite {
 
     public void setFeaturedEvents(List<Pair<StageEventType, EventBaseDTO>> featuredEvents) {
         for(Pair<StageEventType, EventBaseDTO> featuredEventTypeAndEvent: featuredEvents) {
-            if(featuredEventTypeAndEvent.getB().getVideoURLs().size() > 0 && videoCounter < 3) {
+            if(featuredEventTypeAndEvent.getB().getVideoURLs().size() > 0 && videoCounter < MAX_VIDEO_COUNT) {
                 addVideoToVideoPanel(featuredEventTypeAndEvent.getB());
             }
         }
@@ -60,7 +62,7 @@ public class MainMedia extends Composite {
         List<String> photoGalleryUrls = new ArrayList<String>();
         for (EventBaseDTO event : recentEvents) {
             photoGalleryUrls.addAll(event.getPhotoGalleryImageURLs());
-            if (event.getVideoURLs().size() > 0 && videoCounter < 3) {
+            if (!event.getVideoURLs().isEmpty() && videoCounter < MAX_VIDEO_COUNT) {
                 addVideoToVideoPanel(event);
             }
         }
@@ -101,19 +103,12 @@ public class MainMedia extends Composite {
     }
     
     private String getRandomVideoURL(EventBaseDTO event) {
-        String result = null;
-        int videosCount = event.getVideoURLs().size();
-        if (videosCount > 0) {
-            if (videosCount == 1) {
-                result = event.getVideoURLs().get(0);
-            } else {
-                List<String> videoUrls = new ArrayList<String>(event.getVideoURLs());
-                Random random = new Random(videosCount);
-                for (int i = 0; i < videosCount; i++) {
-                    Collections.swap(videoUrls, i, random.nextInt(videosCount));
-                }
-                result = videoUrls.get(0);
-            }
+        final String result;
+        List<String> videoURLs = event.getVideoURLs();
+        if (!videoURLs.isEmpty()) {
+            result = event.getVideoURLs().get(new Random(videoURLs.size()).nextInt(videoURLs.size()));
+        } else {
+            result = null;
         }
         return result;
     }
