@@ -10,17 +10,24 @@ import com.sap.sse.datamining.test.functions.registry.test_classes.Test_Regatta;
 public class Test_RegattaImpl extends Test_NamedImpl implements Test_Regatta {
 
     private Test_BoatClass boatClass;
+    private int year;
     private Collection<Test_Race> races;
 
-    public Test_RegattaImpl(String name, Test_BoatClass boatClass, Test_Race... races) {
+    public Test_RegattaImpl(String name, Test_BoatClass boatClass, int year, Test_Race... races) {
         super(name);
         this.boatClass = boatClass;
+        this.year = year;
         this.races = Arrays.asList(races);
     }
     
     @Override
     public Test_BoatClass getBoatClass() {
         return boatClass;
+    }
+    
+    @Override
+    public int getYear() {
+        return year;
     }
     
     @Override

@@ -1,15 +1,10 @@
 package com.sap.sse.datamining.impl.components.aggregators;
 
-import static org.hamcrest.Matchers.is;
-import static org.hamcrest.Matchers.notNullValue;
-import static org.junit.Assert.assertThat;
-
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Map;
-import java.util.Map.Entry;
 import java.util.Set;
 
 import org.junit.Before;
@@ -62,7 +57,7 @@ public class TestParallelGroupedDataCollectingAsSetProcessor {
         collectingProcessor.finish();
         
         Map<GroupKey, Set<Double>> expectedReceivedData = buildExpectedReceivedData(elements);
-        verifyReceivedData(expectedReceivedData);
+        ConcurrencyTestsUtil.verifyResultData(receivedData, expectedReceivedData);
     }
 
     private Collection<GroupedDataEntry<Double>> createElements() {
@@ -96,17 +91,6 @@ public class TestParallelGroupedDataCollectingAsSetProcessor {
             expectedReceivedData.get(element.getKey()).add(element.getDataEntry());
         }
         return expectedReceivedData;
-    }
-
-    private void verifyReceivedData(Map<GroupKey, Set<Double>> expectedReceivedData) {
-        assertThat("No aggregation has been received.", receivedData, notNullValue());
-        
-        for (Entry<GroupKey, Set<Double>> expectedReceivedAggregationEntry : expectedReceivedData.entrySet()) {
-            assertThat("The expected aggregation entry '" + expectedReceivedAggregationEntry + "' wasn't received.",
-                    receivedData.containsKey(expectedReceivedAggregationEntry.getKey()), is(true));
-            assertThat("The result for group '" + expectedReceivedAggregationEntry.getKey() + "' isn't correct.",
-                    receivedData.get(expectedReceivedAggregationEntry.getKey()), is(expectedReceivedAggregationEntry.getValue()));
-        }
     }
 
 }
