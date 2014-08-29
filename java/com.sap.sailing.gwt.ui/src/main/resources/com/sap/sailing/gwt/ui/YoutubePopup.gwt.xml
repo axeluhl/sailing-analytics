@@ -9,12 +9,14 @@
 	<inherits name="com.sap.sse.SSECommon" />
 
 	<inherits name="com.sap.sailing.domain.SailingDomain" />
-	
+	<!-- Fancy DateTimePicker (without the rest of Bootstrap!) -->
+	<!-- GWT-Bootstrap License: Apache License, Version 2.0 -->
+	<inherits name="com.github.gwtbootstrap.BootstrapNoResources" />
+	<inherits name='com.github.gwtbootstrap.datetimepicker.DatetimepickerNoResources' />
+		
 	<entry-point class="com.sap.sailing.gwt.ui.client.media.popup.YoutubePopupWindow" />
 
 <extend-property name="locale" values="de"/>
-	
-	<source path='client/media/popup' />
-	<source path='client/shared/media' />
-	<source path='client/media/shared' />
+	<source path='client'/>
+	<source path='shared'/>
 </module>
