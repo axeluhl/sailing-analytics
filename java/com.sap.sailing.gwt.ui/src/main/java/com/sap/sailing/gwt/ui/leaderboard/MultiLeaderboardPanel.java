@@ -199,7 +199,7 @@ public class MultiLeaderboardPanel extends AbstractLazyComponent<LeaderboardSett
             
             selectedLeaderboardFlowPanel = (FlowPanel) leaderboardsTabPanel.getWidget(newTabIndex);
             LeaderboardSettings newLeaderboardSettings = getOrCreateLeaderboardSettings(newSelectedLeaderboardName, leaderboardNamesAndSettings.get(selectedLeaderboardName));
-            selectedLeaderboardPanel = new LeaderboardPanel(sailingService, asyncActionsExecutor, newLeaderboardSettings,
+            selectedLeaderboardPanel = new LeaderboardPanel(sailingService, asyncActionsExecutor, newLeaderboardSettings, false,
                     /* preselectedRace*/ null, new CompetitorSelectionModel(true), timer,
                     null, newSelectedLeaderboardName, errorReporter, stringMessages, userAgent,
                     showRaceDetails, /* competitorSearchTextBox */ null, /* showSelectionCheckbox */ true,  /* raceTimesInfoProvider */null, 

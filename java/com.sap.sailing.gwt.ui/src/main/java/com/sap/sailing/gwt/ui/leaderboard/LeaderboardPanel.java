@@ -283,7 +283,7 @@ public class LeaderboardPanel extends SimplePanel implements TimeListener, PlayS
     private final DateTimeFormat dateFormatter = DateTimeFormat.getFormat(DateTimeFormat.PredefinedFormat.DATE_LONG);
     private final DateTimeFormat timeFormatter = DateTimeFormat.getFormat("HH:mm:ss zzz");
 
-    private boolean isEmbedded = false;
+    private boolean isEmbedded;
 
     private static LeaderboardResources resources = GWT.create(LeaderboardResources.class);
     private static LeaderboardTableResources tableResources = GWT.create(LeaderboardTableResources.class);
@@ -1582,16 +1582,16 @@ public class LeaderboardPanel extends SimplePanel implements TimeListener, PlayS
             LeaderboardSettings settings, CompetitorSelectionProvider competitorSelectionProvider,
             String leaderboardName, ErrorReporter errorReporter, final StringMessages stringMessages,
             final UserAgentDetails userAgent, boolean showRaceDetails) {
-        this(sailingService, asyncActionsExecutor, settings, /* preSelectedRace */null, competitorSelectionProvider,
+        this(sailingService, asyncActionsExecutor, settings, false, /* preSelectedRace */null, competitorSelectionProvider,
                 null, leaderboardName, errorReporter, stringMessages, userAgent, showRaceDetails);
     }
 
     public LeaderboardPanel(SailingServiceAsync sailingService, AsyncActionsExecutor asyncActionsExecutor,
-            LeaderboardSettings settings, RaceIdentifier preSelectedRace,
+            LeaderboardSettings settings, boolean isEmbedded, RaceIdentifier preSelectedRace,
             CompetitorSelectionProvider competitorSelectionProvider, String leaderboardGroupName,
             String leaderboardName, ErrorReporter errorReporter, final StringMessages stringMessages,
             final UserAgentDetails userAgent, boolean showRaceDetails) {
-        this(sailingService, asyncActionsExecutor, settings, preSelectedRace, competitorSelectionProvider, new Timer(
+        this(sailingService, asyncActionsExecutor, settings, isEmbedded, preSelectedRace, competitorSelectionProvider, new Timer(
                 // perform the first request as "live" but don't by default auto-play
                 PlayModes.Live, PlayStates.Paused, /* delayBetweenAutoAdvancesInMilliseconds */3000l), leaderboardGroupName,
                 leaderboardName, errorReporter, stringMessages, userAgent, showRaceDetails,
@@ -1600,7 +1600,7 @@ public class LeaderboardPanel extends SimplePanel implements TimeListener, PlayS
     }
 
     public LeaderboardPanel(SailingServiceAsync sailingService, AsyncActionsExecutor asyncActionsExecutor,
-            LeaderboardSettings settings, RaceIdentifier preSelectedRace,
+            LeaderboardSettings settings, boolean isEmbedded, RaceIdentifier preSelectedRace,
             CompetitorSelectionProvider competitorSelectionProvider, Timer timer, String leaderboardGroupName,
             String leaderboardName, ErrorReporter errorReporter, final StringMessages stringMessages,
             final UserAgentDetails userAgent, boolean showRaceDetails, CompetitorFilterPanel competitorSearchTextBox,
@@ -1611,6 +1611,7 @@ public class LeaderboardPanel extends SimplePanel implements TimeListener, PlayS
         this.showRaceDetails = showRaceDetails;
         this.sailingService = sailingService;
         this.asyncActionsExecutor = asyncActionsExecutor;
+        this.isEmbedded = isEmbedded;
         this.preSelectedRace = preSelectedRace;
         this.competitorSelectionProvider = competitorSelectionProvider;
         competitorSelectionProvider.addCompetitorSelectionChangeListener(this);
@@ -1708,11 +1709,6 @@ public class LeaderboardPanel extends SimplePanel implements TimeListener, PlayS
             loadCompleteLeaderboard(getLeaderboardDisplayDate());
         }
 
-        if (this.preSelectedRace == null) {
-            isEmbedded = false;
-        } else {
-            isEmbedded = true;
-        }
         contentPanel = new VerticalPanel();
         contentPanel.setStyleName(STYLE_LEADERBOARD_CONTENT);
         

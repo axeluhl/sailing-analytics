@@ -45,7 +45,7 @@ public class MetaLeaderboardViewer extends AbstractLeaderboardViewer {
             boolean showCharts, DetailType chartDetailType, boolean showSeriesLeaderboards) {
         super(competitorSelectionModel, asyncActionsExecutor,  timer, stringMessages, hideToolbar,
                 new LeaderboardPanel(sailingService, asyncActionsExecutor,
-                        leaderboardSettings, preselectedRace, competitorSelectionModel, timer,
+                        leaderboardSettings, preselectedRace != null, preselectedRace, competitorSelectionModel, timer,
                         leaderboardGroupName, metaLeaderboardName, errorReporter, stringMessages, userAgent,
                         showRaceDetails, /* competitorSearchTextBox */ null, /* showSelectionCheckbox */ true,  /* raceTimesInfoProvider */null, 
                         autoExpandLastRaceColumn, /* adjustTimerDelay */ true, /*autoApplyTopNFilter*/ false, false));

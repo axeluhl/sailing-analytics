@@ -40,7 +40,7 @@ public class MetaLeaderboardViewer extends AbstractLeaderboardViewer {
             String metaLeaderboardName, ErrorReporter errorReporter, StringMessages stringMessages,
             UserAgentDetails userAgent, boolean showRaceDetails, boolean autoExpandLastRaceColumn, boolean showSeriesLeaderboards) {
         super(competitorSelectionModel, asyncActionsExecutor,  timer, stringMessages, new LeaderboardPanel(sailingService, asyncActionsExecutor,
-                        leaderboardSettings, preselectedRace, competitorSelectionModel, timer,
+                        leaderboardSettings, true, preselectedRace, competitorSelectionModel, timer,
                         leaderboardGroupName, metaLeaderboardName, errorReporter, stringMessages, userAgent,
                         showRaceDetails, /* competitorSearchTextBox */ null, /* showSelectionCheckbox */ true, /* raceTimesInfoProvider */null, autoExpandLastRaceColumn, 
                         /* adjustTimerDelay */ true, /*autoApplyTopNFilter*/false, false));

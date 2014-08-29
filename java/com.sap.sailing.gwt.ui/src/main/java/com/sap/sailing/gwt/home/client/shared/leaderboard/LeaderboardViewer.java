@@ -41,7 +41,7 @@ public class LeaderboardViewer extends AbstractLeaderboardViewer {
             final StringMessages stringMessages, final UserAgentDetails userAgent, boolean showRaceDetails,
             boolean autoExpandLastRaceColumn, boolean showOverallLeaderboard) {
         super(competitorSelectionModel, asyncActionsExecutor, timer, stringMessages, new LeaderboardPanel(
-                sailingService, asyncActionsExecutor, leaderboardSettings, preselectedRace,
+                sailingService, asyncActionsExecutor, leaderboardSettings, true, preselectedRace,
                 competitorSelectionModel, timer, leaderboardGroupName, leaderboardName, errorReporter,
                 stringMessages, userAgent, showRaceDetails, /* competitorSearchTextBox */ null, /* showSelectionCheckbox */ true, /* raceTimesInfoProvider */null, autoExpandLastRaceColumn, /* adjustTimerDelay */
                 true, false, false));
@@ -59,7 +59,7 @@ public class LeaderboardViewer extends AbstractLeaderboardViewer {
                             if(result.size() == 1) {
                                 String overallLeaderboardName = result.get(0);
                                 overallLeaderboardPanel = new LeaderboardPanel(sailingService, asyncActionsExecutor,
-                                        leaderboardSettings, preselectedRace, competitorSelectionProvider, timer,
+                                        leaderboardSettings, true, preselectedRace, competitorSelectionProvider, timer,
                                         leaderboardGroupName, overallLeaderboardName, errorReporter, stringMessages, userAgent,
                                         false, /* competitorSearchTextBox */ null, /* showSelectionCheckbox */ true, /* raceTimesInfoProvider */null, false, 
                                         /* adjustTimerDelay */ true, /*autoApplyTopNFilter*/false, false);
