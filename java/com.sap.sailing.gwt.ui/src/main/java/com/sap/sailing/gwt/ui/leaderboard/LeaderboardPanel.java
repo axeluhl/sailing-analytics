@@ -241,7 +241,7 @@ public class LeaderboardPanel extends SimplePanel implements TimeListener, PlayS
      * This anchor's HTML holds the image tag for the play/pause button that needs to be updated when the {@link #timer}
      * changes its playing state
      */
-    private final Anchor playPause;
+    private Anchor playPause;
 
     private final CompetitorSelectionProvider competitorSelectionProvider;
     private final HorizontalPanel filterControlPanel;
@@ -273,12 +273,10 @@ public class LeaderboardPanel extends SimplePanel implements TimeListener, PlayS
 
     private final VerticalPanel contentPanel;
     
-    private final HorizontalPanel refreshAndSettingsPanel;
-
-    private final FlowPanel informationPanel;
-    private final Label scoreCorrectionLastUpdateTimeLabel;
-    private final Label scoreCorrectionCommentLabel;
-    private final Label liveRaceLabel; 
+    private HorizontalPanel refreshAndSettingsPanel;
+    private Label scoreCorrectionLastUpdateTimeLabel;
+    private Label scoreCorrectionCommentLabel;
+    private Label liveRaceLabel; 
     
     private final DateTimeFormat dateFormatter = DateTimeFormat.getFormat(DateTimeFormat.PredefinedFormat.DATE_LONG);
     private final DateTimeFormat timeFormatter = DateTimeFormat.getFormat("HH:mm:ss zzz");
@@ -288,8 +286,8 @@ public class LeaderboardPanel extends SimplePanel implements TimeListener, PlayS
     private static LeaderboardResources resources = GWT.create(LeaderboardResources.class);
     private static LeaderboardTableResources tableResources = GWT.create(LeaderboardTableResources.class);
 
-    private final ImageResource pauseIcon;
-    private final ImageResource playIcon;
+    private ImageResource pauseIcon;
+    private ImageResource playIcon;
 
     private final BusyIndicator busyIndicator;
 
@@ -1712,8 +1710,38 @@ public class LeaderboardPanel extends SimplePanel implements TimeListener, PlayS
         contentPanel = new VerticalPanel();
         contentPanel.setStyleName(STYLE_LEADERBOARD_CONTENT);
         
+        busyIndicator = new SimpleBusyIndicator(false, 0.8f);
+        busyIndicator.ensureDebugId("BusyIndicator");
         // the information panel
-        informationPanel = new FlowPanel();
+        if (!isEmbedded) {
+            Widget toolbarPanel = createToolbarPanel();
+            contentPanel.add(toolbarPanel);
+        }
+        if (competitorSearchTextBox != null) {
+            contentPanel.add(competitorSearchTextBox);
+            contentPanel.add(busyIndicator);
+            competitorSearchTextBox.getSettingsButton().addClickHandler(new ClickHandler() {
+                @Override
+                public void onClick(ClickEvent event) {
+                    new SettingsDialog<LeaderboardSettings>(LeaderboardPanel.this, stringMessages).show();
+                }
+            });
+            this.competitorFilterPanel = competitorSearchTextBox;
+        }
+        SortedCellTable<LeaderboardRowDTO> leaderboardTable = getLeaderboardTable();
+        leaderboardTable.getElement().getStyle().setMarginTop(5, Unit.PX);
+        filterControlPanel = new HorizontalPanel();
+        filterControlPanel.setStyleName("LeaderboardPanel-FilterControl-Panel");
+        contentPanel.add(leaderboardTable);
+        if (showCompetitorFilterStatus) {
+            contentPanel.add(createFilterDeselectionControl());
+        }
+        setWidget(contentPanel);
+        raceNameForDefaultSorting = settings.getNameOfRaceToSort();
+    }
+
+    private Widget createToolbarPanel() {
+        FlowPanel informationPanel = new FlowPanel();
         informationPanel.setStyleName(STYLE_LEADERBOARD_INFO);
         scoreCorrectionLastUpdateTimeLabel = new Label("");
         scoreCorrectionCommentLabel = new Label("");
@@ -1731,8 +1759,6 @@ public class LeaderboardPanel extends SimplePanel implements TimeListener, PlayS
         DockPanel toolbarPanel = new DockPanel();
         toolbarPanel.ensureDebugId("ToolbarPanel");
         toolbarPanel.setStyleName(STYLE_LEADERBOARD_TOOLBAR);
-        busyIndicator = new SimpleBusyIndicator(false, 0.8f);
-        busyIndicator.ensureDebugId("BusyIndicator");
         if (!isEmbedded) {
             toolbarPanel.add(informationPanel, DockPanel.WEST);
             toolbarPanel.add(busyIndicator, DockPanel.WEST);
@@ -1767,32 +1793,9 @@ public class LeaderboardPanel extends SimplePanel implements TimeListener, PlayS
 
         refreshAndSettingsPanel.add(refreshPanel);
         toolbarPanel.add(refreshAndSettingsPanel, DockPanel.EAST);
-        if (!isEmbedded) {
-            contentPanel.add(toolbarPanel);
-        }
-        if (competitorSearchTextBox != null) {
-            contentPanel.add(competitorSearchTextBox);
-            contentPanel.add(busyIndicator);
-            competitorSearchTextBox.getSettingsButton().addClickHandler(new ClickHandler() {
-                @Override
-                public void onClick(ClickEvent event) {
-                    new SettingsDialog<LeaderboardSettings>(LeaderboardPanel.this, stringMessages).show();
-                }
-            });
-            this.competitorFilterPanel = competitorSearchTextBox;
-        }
-        SortedCellTable<LeaderboardRowDTO> leaderboardTable = getLeaderboardTable();
-        leaderboardTable.getElement().getStyle().setMarginTop(5, Unit.PX);
-        filterControlPanel = new HorizontalPanel();
-        filterControlPanel.setStyleName("LeaderboardPanel-FilterControl-Panel");
-        contentPanel.add(leaderboardTable);
-        if (showCompetitorFilterStatus) {
-            contentPanel.add(createFilterDeselectionControl());
-        }
-        setWidget(contentPanel);
-        raceNameForDefaultSorting = settings.getNameOfRaceToSort();
+        return toolbarPanel;
     }
-    
+
     private Widget createFilterDeselectionControl() {
         filterStatusLabel = new Label();
         filterStatusLabel.setStyleName("LeaderboardPanel-FilterControl-StatusLabel");
@@ -2236,38 +2239,40 @@ public class LeaderboardPanel extends SimplePanel implements TimeListener, PlayS
                 leaderboardTable.sortColumn(columnToSortFor, columnToSortFor.getPreferredSortingOrder().isAscending());
             }
             
-            scoreCorrectionCommentLabel.setText(leaderboard.getComment() != null ? leaderboard.getComment() : "");
-            if (leaderboard.getTimePointOfLastCorrectionsValidity() != null) {
-                Date lastCorrectionDate = leaderboard.getTimePointOfLastCorrectionsValidity();
-                String lastUpdate = dateFormatter.format(lastCorrectionDate) + ", "
-                        + timeFormatter.format(lastCorrectionDate);
-                scoreCorrectionLastUpdateTimeLabel.setText(stringMessages.lastScoreUpdate() + ": " + lastUpdate);
-            } else {
-                scoreCorrectionLastUpdateTimeLabel.setText("");
+            if(!isEmbedded) {
+                scoreCorrectionCommentLabel.setText(leaderboard.getComment() != null ? leaderboard.getComment() : "");
+                if (leaderboard.getTimePointOfLastCorrectionsValidity() != null) {
+                    Date lastCorrectionDate = leaderboard.getTimePointOfLastCorrectionsValidity();
+                    String lastUpdate = dateFormatter.format(lastCorrectionDate) + ", "
+                            + timeFormatter.format(lastCorrectionDate);
+                    scoreCorrectionLastUpdateTimeLabel.setText(stringMessages.lastScoreUpdate() + ": " + lastUpdate);
+                } else {
+                    scoreCorrectionLastUpdateTimeLabel.setText("");
+                }
+                
+                List<com.sap.sse.common.Util.Pair<RaceColumnDTO, FleetDTO>> liveRaces = leaderboard.getLiveRaces(timer.getLiveTimePointInMillis());
+                boolean hasLiveRace = !liveRaces.isEmpty();
+                if (hasLiveRace) {
+                    String liveRaceText = "";
+                    if(liveRaces.size() == 1) {
+                        com.sap.sse.common.Util.Pair<RaceColumnDTO, FleetDTO> liveRace = liveRaces.get(0);
+                        liveRaceText = stringMessages.raceIsLive("'" + liveRace.getA().getRaceColumnName() + "'");
+                    } else {
+                        String raceNames = "";
+                        for (com.sap.sse.common.Util.Pair<RaceColumnDTO, FleetDTO> liveRace : liveRaces) {
+                            raceNames += "'" + liveRace.getA().getRaceColumnName() + "', ";
+                        }
+                        // remove last ", "
+                        raceNames = raceNames.substring(0, raceNames.length() - 2);
+                        liveRaceText = stringMessages.racesAreLive(raceNames);
+                    }
+                    liveRaceLabel.setText(liveRaceText);
+                } else {
+                    liveRaceLabel.setText("");
+                }
+                scoreCorrectionLastUpdateTimeLabel.setVisible(!hasLiveRace);
+                liveRaceLabel.setVisible(hasLiveRace);
             }
-            
-            List<com.sap.sse.common.Util.Pair<RaceColumnDTO, FleetDTO>> liveRaces = leaderboard.getLiveRaces(timer.getLiveTimePointInMillis());
-            boolean hasLiveRace = !liveRaces.isEmpty();
-            if (hasLiveRace) {
-            	String liveRaceText = "";
-            	if(liveRaces.size() == 1) {
-                	com.sap.sse.common.Util.Pair<RaceColumnDTO, FleetDTO> liveRace = liveRaces.get(0);
-                	liveRaceText = stringMessages.raceIsLive("'" + liveRace.getA().getRaceColumnName() + "'");
-            	} else {
-            		String raceNames = "";
-            		for(com.sap.sse.common.Util.Pair<RaceColumnDTO, FleetDTO> liveRace: liveRaces) {
-            			raceNames += "'" + liveRace.getA().getRaceColumnName() + "', ";
-            		}
-            		// remove last ", "
-            		raceNames = raceNames.substring(0, raceNames.length()-2);
-                	liveRaceText = stringMessages.racesAreLive(raceNames);
-            	}
-            	liveRaceLabel.setText(liveRaceText);
-            } else {
-            	liveRaceLabel.setText("");
-            }
-            scoreCorrectionLastUpdateTimeLabel.setVisible(!hasLiveRace);
-            liveRaceLabel.setVisible(hasLiveRace);
             informLeaderboardUpdateListenersAboutLeaderboardUpdated(leaderboard);
             getBusyIndicator().setBusy(false);
         }
