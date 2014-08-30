@@ -2900,9 +2900,11 @@ public class LeaderboardPanel extends SimplePanel implements TimeListener, PlayS
     @Override
     public void playStateChanged(PlayStates playState, PlayModes playMode) {
         currentlyHandlingPlayStateChange = true;
-        playPause.setHTML(getPlayPauseImgHtml(playState));
-        playPause.setTitle(playState == PlayStates.Playing ? stringMessages.pauseAutomaticRefresh() : stringMessages
-                .autoRefresh());
+        
+        if(!isEmbedded) {
+            playPause.setHTML(getPlayPauseImgHtml(playState));
+            playPause.setTitle(playState == PlayStates.Playing ? stringMessages.pauseAutomaticRefresh() : stringMessages.autoRefresh());
+        }
         if (!settingsUpdatedExplicitly && playMode != oldPlayMode) {
             // if settings weren't explicitly modified, auto-switch to live mode settings and sort for
             // any pre-selected race; we need to copy the previously selected race columns to the new RaceColumnSelection

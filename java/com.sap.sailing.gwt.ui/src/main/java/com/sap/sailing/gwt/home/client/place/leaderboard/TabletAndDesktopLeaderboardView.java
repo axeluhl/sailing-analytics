@@ -29,6 +29,8 @@ import com.sap.sailing.gwt.ui.leaderboard.LeaderboardSettings;
 import com.sap.sailing.gwt.ui.shared.EventDTO;
 import com.sap.sse.gwt.client.async.AsyncActionsExecutor;
 import com.sap.sse.gwt.client.player.Timer;
+import com.sap.sse.gwt.client.player.Timer.PlayModes;
+import com.sap.sse.gwt.client.player.Timer.PlayStates;
 import com.sap.sse.gwt.client.useragent.UserAgentDetails;
 
 public class TabletAndDesktopLeaderboardView extends Composite implements LeaderboardView {
@@ -43,9 +45,10 @@ public class TabletAndDesktopLeaderboardView extends Composite implements Leader
     // temp fields --> will be moved to a leaderboard partial later on
     @UiField HeadingElement title;
     @UiField Anchor settingsAnchor;
-    @UiField Anchor reloadAnchor;
+    @UiField Anchor autoRefreshAnchor;
     
     private AbstractLeaderboardViewer leaderboardViewer;
+    private Timer autoRefreshTimer;
     
     public TabletAndDesktopLeaderboardView(EventDTO event, String leaderboardName, Timer timerForClientServerOffset, PlaceNavigator placeNavigator) {
         eventHeader = new CompactEventHeader(event, leaderboardName, placeNavigator);
@@ -54,7 +57,6 @@ public class TabletAndDesktopLeaderboardView extends Composite implements Leader
         
         initWidget(uiBinder.createAndBindUi(this));
         
-        reloadAnchor.setVisible(false);
         title.setInnerText(TextMessages.INSTANCE.leaderboard() + ": " + leaderboardName);
     }
     
@@ -63,6 +65,7 @@ public class TabletAndDesktopLeaderboardView extends Composite implements Leader
             final String leaderboardGroupName, String leaderboardName, final ErrorReporter errorReporter,
             final StringMessages stringMessages, final UserAgentDetails userAgent, boolean showRaceDetails,  
             boolean autoExpandLastRaceColumn, boolean showOverallLeaderboard) {
+        this.autoRefreshTimer = timer;
         leaderboardViewer = new LeaderboardViewer(sailingService, new AsyncActionsExecutor(),
                 timer, leaderboardSettings, preselectedRace, leaderboardGroupName, leaderboardName, errorReporter, stringMessages,
                 userAgent, showRaceDetails, autoExpandLastRaceColumn, showOverallLeaderboard);
@@ -77,6 +80,7 @@ public class TabletAndDesktopLeaderboardView extends Composite implements Leader
             String leaderboardGroupName, String metaLeaderboardName, ErrorReporter errorReporter,
             StringMessages stringMessages, UserAgentDetails userAgent, boolean showRaceDetails,  
             boolean autoExpandLastRaceColumn, boolean showSeriesLeaderboards) {
+        this.autoRefreshTimer = timer;
         leaderboardViewer = new MetaLeaderboardViewer(sailingService, new AsyncActionsExecutor(),
                 timer, leaderboardSettings, null, preselectedRace, leaderboardGroupName, metaLeaderboardName, errorReporter, stringMessages,
                 userAgent, showRaceDetails, autoExpandLastRaceColumn, showSeriesLeaderboards);
@@ -86,8 +90,16 @@ public class TabletAndDesktopLeaderboardView extends Composite implements Leader
         leaderboardPanel.add(contentScrollPanel);
     }
 
-    @UiHandler("reloadAnchor")
-    void reloadClicked(ClickEvent event) {
+    @UiHandler("autoRefreshAnchor")
+    void toogleAutoRefreshClicked(ClickEvent event) {
+        if (autoRefreshTimer.getPlayState() == PlayStates.Playing) {
+            autoRefreshTimer.pause();
+            autoRefreshAnchor.getElement().getStyle().setBackgroundColor("#f0ab00");
+        } else {
+            // playing the standalone leaderboard means putting it into live mode
+            autoRefreshTimer.setPlayMode(PlayModes.Live);
+            autoRefreshAnchor.getElement().getStyle().setBackgroundColor("red");
+        }
     }
     
     @UiHandler("settingsAnchor")

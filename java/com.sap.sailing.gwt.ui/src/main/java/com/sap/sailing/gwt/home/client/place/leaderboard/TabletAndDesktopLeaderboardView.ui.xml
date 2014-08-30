@@ -10,6 +10,7 @@
         .leaderboardPanel {
         background-color:#f8f8f8;
 		padding: 0 10px 10px 10px;
+		width: 100%;
     }
 	</ui:style>
 	<g:HTMLPanel>
@@ -19,16 +20,14 @@
 		  <div class="{res.mediaCss.small9} {res.mediaCss.columns}">
 		    <h3 ui:field="title" class="{local_res.css.eventregattaleaderboard_meta_title}">
 		    </h3>
-		    <!-- 
 		    <div class="{local_res.css.eventregattaleaderboard_meta_update}"><ui:text from='{i18n.eventRegattaLeaderboardLastScoreUpdate}'/>: &nbsp; {leaderboard.lastScoringUpdate}</div>
-		     -->
 		  </div>
 		  <div class="{res.mediaCss.small3} {res.mediaCss.columns}">
- 			<g:Anchor ui:field="settingsAnchor" href="javascript:;" styleName="{res.mainCss.button} {local_res.css.eventregattaleaderboard_meta_settings}"></g:Anchor>
-			<g:Anchor ui:field="reloadAnchor" href="javascript:;" styleName="{res.mainCss.button} {local_res.css.eventregattaleaderboard_meta_reload}"></g:Anchor>
+			<g:Anchor ui:field="autoRefreshAnchor" href="javascript:;" styleName="{res.mainCss.button} {local_res.css.eventregattaleaderboard_meta_reload}"></g:Anchor>
+		    <g:Anchor ui:field="settingsAnchor" href="javascript:;" styleName="{res.mainCss.button} {local_res.css.eventregattaleaderboard_meta_settings}"></g:Anchor>
      	  </div>
-          <div class="{res.mediaCss.large12} {res.mediaCss.columns}">
-				<g:HTMLPanel ui:field="leaderboardPanel" styleName="{style.leaderboardPanel}">
+		  <div class="{res.mediaCss.large12} {res.mediaCss.columns}">
+              	<g:HTMLPanel ui:field="leaderboardPanel" styleName="{style.leaderboardPanel}">
         		</g:HTMLPanel>
 		   </div>
 		</div>
