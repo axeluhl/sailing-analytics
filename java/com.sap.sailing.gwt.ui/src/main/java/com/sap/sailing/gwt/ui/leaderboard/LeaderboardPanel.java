@@ -610,7 +610,7 @@ public class LeaderboardPanel extends SimplePanel implements TimeListener, PlayS
         public void render(Context context, LeaderboardRowDTO object, SafeHtmlBuilder sb) {
             String competitorColor = LeaderboardPanel.this.competitorSelectionProvider.getColor(object.competitor).getAsHtml();
             String competitorColorBarStyle;
-            if (LeaderboardPanel.this.isEmbedded) {
+            if (LeaderboardPanel.this.isEmbedded && preSelectedRace != null) {
                 competitorColorBarStyle = "style=\"border-bottom: 2px solid " + competitorColor + ";\"";
             } else {
                 competitorColorBarStyle = "style=\"border: none;\"";
