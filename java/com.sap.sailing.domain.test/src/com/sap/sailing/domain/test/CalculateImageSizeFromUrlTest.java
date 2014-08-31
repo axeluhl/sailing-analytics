@@ -3,7 +3,6 @@ package com.sap.sailing.domain.test;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertTrue;
 
-import java.awt.Dimension;
 import java.io.IOException;
 import java.net.MalformedURLException;
 import java.net.URL;
@@ -20,6 +19,8 @@ import org.junit.Test;
 
 import com.sap.sailing.domain.base.Event;
 import com.sap.sailing.domain.base.impl.EventImpl;
+import com.sap.sailing.domain.common.ImageSize;
+import com.sap.sailing.domain.common.impl.ImageSizeImpl;
 
 public class CalculateImageSizeFromUrlTest {
 
@@ -27,12 +28,12 @@ public class CalculateImageSizeFromUrlTest {
     public void calculateImageSizeFromUrl() throws IOException {
         int width = 350;
         int height = 150;
-        Dimension size = calculate("http://placehold.it/" + width + "x" + height);
+        ImageSize size = calculate("http://placehold.it/" + width + "x" + height);
         assertTrue(size.getWidth() == width);
         assertTrue(size.getHeight() == height);
     }
 
-    public Dimension calculate(String urlS) throws IOException {
+    public ImageSize calculate(String urlS) throws IOException {
         ImageInputStream in = null;
         try {
             URL url = new URL(urlS);
@@ -43,7 +44,7 @@ public class CalculateImageSizeFromUrlTest {
                 ImageReader reader = readers.next();
                 try {
                     reader.setInput(in);
-                    return new Dimension(reader.getWidth(0), reader.getHeight(0));
+                    return new ImageSizeImpl(reader.getWidth(0), reader.getHeight(0));
                 } finally {
                     reader.dispose();
                 }
@@ -63,7 +64,7 @@ public class CalculateImageSizeFromUrlTest {
         int height = Math.max(10, (int) (100. * Math.random()));
         URL imageURL = new URL("http://placehold.it/" + width + "x" + height);
         e.addImageURL(imageURL);
-        Dimension expectedSize = new Dimension(width, height);
+        ImageSize expectedSize = new ImageSizeImpl(width, height);
         assertEquals(expectedSize, e.getImageSize(imageURL));
     }
 }

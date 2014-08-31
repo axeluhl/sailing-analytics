@@ -87,6 +87,10 @@ public class Stage extends Composite {
             prevStageTeaserLink.setVisible(false);
         }
     }
+    
+    public void adjustSize() {
+        swiper.reInit();
+    }
 
     @UiHandler("nextStageTeaserLink")
     public void nextStageTeaserLinkClicked(ClickEvent e) {

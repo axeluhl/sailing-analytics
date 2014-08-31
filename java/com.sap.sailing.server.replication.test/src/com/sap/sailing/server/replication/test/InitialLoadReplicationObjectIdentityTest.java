@@ -86,7 +86,7 @@ public class InitialLoadReplicationObjectIdentityTest extends AbstractServerRepl
         final TimePoint eventStartDate = new MillisecondsTimePoint(new Date());
         final TimePoint eventEndDate = new MillisecondsTimePoint(new Date());
 
-        Event event = master.addEvent(eventName, eventStartDate, eventEndDate, venue, false, eventId);
+        Event event = master.addEvent(eventName, /* eventDescription */ null, eventStartDate, eventEndDate, venue, false, eventId);
         assertNotNull(master.getEvent(eventId));
         assertNull(replica.getEvent(eventId));
         

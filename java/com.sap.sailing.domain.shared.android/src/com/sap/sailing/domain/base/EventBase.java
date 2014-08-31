@@ -1,7 +1,9 @@
 package com.sap.sailing.domain.base;
 
 import java.net.URL;
+import java.util.concurrent.ExecutionException;
 
+import com.sap.sailing.domain.common.ImageSize;
 import com.sap.sailing.domain.common.Renamable;
 import com.sap.sailing.domain.common.TimePoint;
 import com.sap.sailing.domain.common.WithID;
@@ -61,6 +63,14 @@ public interface EventBase extends Named, WithDescription, Renamable, WithID {
     
     void removeSponsorImageURL(URL sponsorImageURL);
     
+    /**
+     * Replaces the {@link #getSponsorImageURLs() current contents of the sponsorship image URL sequence} by the image URLs in
+     * <code>sponsorImageURLs</code>.
+     * 
+     * @param sponsorImageURLs
+     *            if <code>null</code>, the internal sequence of sponsorship image URLs is cleared but remains valid (non-
+     *            <code>null</code>)
+     */
     void setSponsorImageURLs(Iterable<URL> sponsorImageURLs);
     
     /**
@@ -111,4 +121,10 @@ public interface EventBase extends Named, WithDescription, Renamable, WithID {
     void setOfficialWebsiteURL(URL officialWebsiteURL);
 
     Iterable<? extends LeaderboardGroupBase> getLeaderboardGroups();
+
+    /**
+     * For the images references by the image URLs in {@link #getImageURLs()}, {@link #getSponsorImageURLs()} and {@link #getLogoImageURL()}
+     * determines the image dimensions.
+     */
+    ImageSize getImageSize(URL imageURL) throws InterruptedException, ExecutionException;
 }

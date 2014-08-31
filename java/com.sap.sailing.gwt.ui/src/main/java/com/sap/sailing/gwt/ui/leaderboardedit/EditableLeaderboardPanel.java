@@ -820,49 +820,49 @@ public class EditableLeaderboardPanel extends LeaderboardPanel {
                 return getStringMessages().suppress();
             }
         });
-        result.add(new HasCell<LeaderboardRowDTO, String>() {
-            final class OptionalBoldRenderer implements SafeHtmlRenderer<String> {
-                private LeaderboardRowDTO currentRow;
+        final class OptionalBoldRenderer implements SafeHtmlRenderer<String> {
+            private LeaderboardRowDTO currentRow;
 
-                @Override
-                public SafeHtml render(String object) {
-                    SafeHtmlBuilder builder = new SafeHtmlBuilder();
-                    render(object, builder);
-                    return builder.toSafeHtml();
+            @Override
+            public SafeHtml render(String object) {
+                SafeHtmlBuilder builder = new SafeHtmlBuilder();
+                render(object, builder);
+                return builder.toSafeHtml();
+            }
+
+            private boolean isDisplayNameSet() {
+                return currentRow != null && getLeaderboard().isDisplayNameSet(currentRow.competitor);
+            }
+
+            @Override
+            public void render(String value, SafeHtmlBuilder builder) {
+                if (isDisplayNameSet()) {
+                    builder.appendHtmlConstant("<b>");
                 }
-
-                private boolean isDisplayNameSet() {
-                    return currentRow != null && getLeaderboard().isDisplayNameSet(currentRow.competitor);
-                }
-
-                @Override
-                public void render(String value, SafeHtmlBuilder builder) {
-                    if (isDisplayNameSet()) {
-                        builder.appendHtmlConstant("<b>");
-                    }
-                    builder.appendEscaped(value);
-                    if (isDisplayNameSet()) {
-                        builder.appendHtmlConstant("</b>");
-                    }
-                }
-
-                public void setCurrentRow(LeaderboardRowDTO currentRow) {
-                    this.currentRow = currentRow;
+                builder.appendEscaped(value);
+                if (isDisplayNameSet()) {
+                    builder.appendHtmlConstant("</b>");
                 }
             }
 
-            private final OptionalBoldRenderer renderer = new OptionalBoldRenderer();
+            public void setCurrentRow(LeaderboardRowDTO currentRow) {
+                this.currentRow = currentRow;
+            }
+        }
 
-            private final EditTextCell cell = new EditTextCell(renderer) {
-                @Override
-                public void render(Context context, String value, SafeHtmlBuilder sb) {
-                    renderer.setCurrentRow((LeaderboardRowDTO) context.getKey());
-                    super.render(context, value, sb);
-                }
-            };
+        final OptionalBoldRenderer renderer = new OptionalBoldRenderer();
+
+        final EditTextCell cellForCompetitorName = new EditTextCell(renderer) {
+            @Override
+            public void render(Context context, String value, SafeHtmlBuilder sb) {
+                renderer.setCurrentRow((LeaderboardRowDTO) context.getKey());
+                super.render(context, value, sb);
+            }
+        };
+        result.add(new HasCell<LeaderboardRowDTO, String>() {
             @Override
             public EditTextCell getCell() {
-                return cell;
+                return cellForCompetitorName;
             }
 
             @Override
@@ -873,6 +873,56 @@ public class EditableLeaderboardPanel extends LeaderboardPanel {
             @Override
             public String getValue(LeaderboardRowDTO row) {
                 return getLeaderboard().getDisplayName(row.competitor);
+            }
+        });
+        result.add(new HasCell<LeaderboardRowDTO, String>() {
+            private final ButtonCell cell = new ButtonCell();
+            @Override
+            public Cell<String> getCell() {
+                return cell;
+            }
+
+            @Override
+            public FieldUpdater<LeaderboardRowDTO, String> getFieldUpdater() {
+                return new FieldUpdater<LeaderboardRowDTO, String>() {
+                    @Override
+                    public void update(int index, final LeaderboardRowDTO row, String valueToUpdate) {
+                        new EditCompetitorNameDialog(getStringMessages(), row.competitor.getName(), new DialogCallback<String>() {
+                            @Override
+                            public void ok(final String value) {
+                                getSailingService().updateCompetitorDisplayNameInLeaderboard(getLeaderboardName(), row.competitor.getIdAsString(),
+                                        value == null || value.length() == 0 ? null : value.trim(),
+                                                new AsyncCallback<Void>() {
+                                    @Override
+                                    public void onFailure(Throwable t) {
+                                        EditableLeaderboardPanel.this.getErrorReporter().reportError("Error trying to update display name for competitor "+
+                                                row.competitor.getName()+" in leaderboard "+getLeaderboardName()+": "+t.getMessage()+
+                                                "\nYou may have to refresh your view.");
+                                    }
+
+                                    @Override
+                                    public void onSuccess(Void v) {
+                                        if (getLeaderboard().competitorDisplayNames == null) {
+                                            getLeaderboard().competitorDisplayNames = new HashMap<CompetitorDTO, String>();
+                                        }
+                                        getLeaderboard().competitorDisplayNames.put(row.competitor, value == null || value.trim().length() == 0 ? null : value.trim());
+                                        cellForCompetitorName.setViewData(row, null); // ensure that getValue() is called again
+                                        EditableLeaderboardPanel.this.getData().getList().set(
+                                                EditableLeaderboardPanel.this.getData().getList().indexOf(row), row);
+                                    }
+                                });
+                            }
+                            @Override
+                            public void cancel() {
+                            }
+                        }).show();
+                    }
+                };
+            }
+
+            @Override
+            public String getValue(LeaderboardRowDTO object) {
+                return getStringMessages().edit();
             }
         });
         return result;

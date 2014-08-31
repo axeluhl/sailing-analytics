@@ -39,25 +39,17 @@ public class MainEvents extends Composite {
     }
 
     public void setRecentEvents(List<EventBaseDTO> theRecentEvents) {
+        final int MAX_RECENT_EVENTS_ON_HOME_PAGE = 3;
         recentEventsDiv.removeAllChildren();
         recentEvents.clear();
         recentEvents.addAll(theRecentEvents);
-        
-        int size = recentEvents.size();
-        if(size > 0) {
-            createRecentEvent(recentEvents.get(0));
-        }
-        if(size > 1) {
-            createRecentEvent(recentEvents.get(1));
-        }
-        if(size > 2) {
-            createRecentEvent(recentEvents.get(2));
+        for (int i=0; i<recentEvents.size() && i<MAX_RECENT_EVENTS_ON_HOME_PAGE; i++) {
+            createRecentEvent(recentEvents.get(i));
         }
     }
 
     private void createRecentEvent(EventBaseDTO eventBase) {
-        RecentEvent event = new RecentEvent(navigator);
-        event.setEvent(eventBase);
+        RecentEvent event = new RecentEvent(navigator, eventBase);
         recentEventsDiv.appendChild(event.getElement());
     }
     

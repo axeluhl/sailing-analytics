@@ -9,6 +9,7 @@ import junit.framework.Assert;
 
 import org.junit.Test;
 
+import com.sap.sailing.domain.common.AbstractBearing;
 import com.sap.sailing.domain.common.Bearing;
 import com.sap.sailing.domain.common.Speed;
 import com.sap.sailing.domain.common.SpeedWithBearing;
@@ -168,7 +169,7 @@ public class PolarDiagramCSVTest {
 
     private static void testSpeedsAtBearingsOfPolarDiagrams(PolarDiagram expectedPD, PolarDiagram actualPD,
             String typeName) {
-        DegreeBearingImpl testBearing = null;
+        AbstractBearing testBearing = null;
         Speed actualSpeed = null;
         Speed expectedSpeed = null;
         SpeedWithBearing wind = null;

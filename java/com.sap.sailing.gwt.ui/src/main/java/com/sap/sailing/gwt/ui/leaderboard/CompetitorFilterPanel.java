@@ -31,6 +31,7 @@ import com.sap.sailing.gwt.ui.client.shared.filter.FilterUIFactory;
 import com.sap.sailing.gwt.ui.client.shared.filter.FilterWithUI;
 import com.sap.sailing.gwt.ui.client.shared.filter.LeaderboardFetcher;
 import com.sap.sailing.gwt.ui.client.shared.filter.LeaderboardFilterContext;
+import com.sap.sailing.gwt.ui.client.shared.filter.QuickRankProvider;
 import com.sap.sailing.gwt.ui.client.shared.filter.SelectedCompetitorsFilter;
 import com.sap.sailing.gwt.ui.client.shared.filter.SelectedRaceFilterContext;
 import com.sap.sailing.gwt.ui.client.shared.racemap.RaceMap;
@@ -366,6 +367,13 @@ public class CompetitorFilterPanel extends FlowPanel implements KeyUpHandler, Fi
      */
     public Button getSettingsButton() {
         return settingsButton;
+    }
+    
+    /**
+     * @return the {@link QuickRankProvider} if set or <code>null</code> if there is none
+     */
+    public QuickRankProvider getQuickRankProvider() {
+        return this.raceMap;
     }
 
     @Override

@@ -182,7 +182,8 @@ public class TabletAndDesktopEventView extends Composite implements EventView, E
         linkParams.put("eventId", event.id.toString());
         linkParams.put("leaderboardName", leaderboardName);
         linkParams.put("raceName", raceIdentifier.getRaceName());
-        linkParams.put(RaceBoardViewConfiguration.PARAM_CAN_REPLAY_DURING_LIVE_RACES, "true");
+        // TODO this must only be forwarded if there is a logged-on user
+//        linkParams.put(RaceBoardViewConfiguration.PARAM_CAN_REPLAY_DURING_LIVE_RACES, "true");
         linkParams.put(RaceBoardViewConfiguration.PARAM_VIEW_SHOW_MAPCONTROLS, "true");
         linkParams.put(RaceBoardViewConfiguration.PARAM_VIEW_SHOW_NAVIGATION_PANEL, "true");
         linkParams.put("regattaName", raceIdentifier.getRegattaName());
