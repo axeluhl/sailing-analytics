@@ -1,7 +1,11 @@
 package com.sap.sailing.gwt.home.client.place.leaderboard;
 
+import java.util.Date;
+import java.util.List;
+
 import com.google.gwt.core.client.GWT;
 import com.google.gwt.dom.client.HeadingElement;
+import com.google.gwt.dom.client.SpanElement;
 import com.google.gwt.event.dom.client.ClickEvent;
 import com.google.gwt.uibinder.client.UiBinder;
 import com.google.gwt.uibinder.client.UiField;
@@ -12,6 +16,9 @@ import com.google.gwt.user.client.ui.HTMLPanel;
 import com.google.gwt.user.client.ui.ScrollPanel;
 import com.google.gwt.user.client.ui.Widget;
 import com.sap.sailing.domain.common.RaceIdentifier;
+import com.sap.sailing.domain.common.dto.FleetDTO;
+import com.sap.sailing.domain.common.dto.LeaderboardDTO;
+import com.sap.sailing.domain.common.dto.RaceColumnDTO;
 import com.sap.sailing.gwt.home.client.app.PlaceNavigator;
 import com.sap.sailing.gwt.home.client.i18n.TextMessages;
 import com.sap.sailing.gwt.home.client.place.event.header.CompactEventHeader;
@@ -21,19 +28,22 @@ import com.sap.sailing.gwt.home.client.shared.leaderboard.LeaderboardViewer;
 import com.sap.sailing.gwt.home.client.shared.leaderboard.MetaLeaderboardViewer;
 import com.sap.sailing.gwt.ui.client.DebugIdHelper;
 import com.sap.sailing.gwt.ui.client.ErrorReporter;
+import com.sap.sailing.gwt.ui.client.LeaderboardUpdateListener;
 import com.sap.sailing.gwt.ui.client.SailingServiceAsync;
 import com.sap.sailing.gwt.ui.client.StringMessages;
 import com.sap.sailing.gwt.ui.client.shared.components.SettingsDialog;
+import com.sap.sailing.gwt.ui.common.client.DateAndTimeFormatterUtil;
 import com.sap.sailing.gwt.ui.leaderboard.LeaderboardPanel;
 import com.sap.sailing.gwt.ui.leaderboard.LeaderboardSettings;
 import com.sap.sailing.gwt.ui.shared.EventDTO;
+import com.sap.sse.common.Util.Pair;
 import com.sap.sse.gwt.client.async.AsyncActionsExecutor;
 import com.sap.sse.gwt.client.player.Timer;
 import com.sap.sse.gwt.client.player.Timer.PlayModes;
 import com.sap.sse.gwt.client.player.Timer.PlayStates;
 import com.sap.sse.gwt.client.useragent.UserAgentDetails;
 
-public class TabletAndDesktopLeaderboardView extends Composite implements LeaderboardView {
+public class TabletAndDesktopLeaderboardView extends Composite implements LeaderboardView, LeaderboardUpdateListener {
     private static LeaderboardPageViewUiBinder uiBinder = GWT.create(LeaderboardPageViewUiBinder.class);
 
     interface LeaderboardPageViewUiBinder extends UiBinder<Widget, TabletAndDesktopLeaderboardView> {
@@ -46,6 +56,9 @@ public class TabletAndDesktopLeaderboardView extends Composite implements Leader
     @UiField HeadingElement title;
     @UiField Anchor settingsAnchor;
     @UiField Anchor autoRefreshAnchor;
+    @UiField SpanElement lastScoringUpdateTimeDiv;
+    @UiField SpanElement lastScoringCommentDiv;
+    SpanElement liveRaceDiv;
     
     private AbstractLeaderboardViewer leaderboardViewer;
     private Timer autoRefreshTimer;
@@ -73,6 +86,7 @@ public class TabletAndDesktopLeaderboardView extends Composite implements Leader
         ScrollPanel contentScrollPanel = new ScrollPanel();
         contentScrollPanel.setWidget(leaderboardViewer);
         leaderboardPanel.add(contentScrollPanel);
+        leaderboardViewer.getLeaderboardPanel().addLeaderboardUpdateListener(this);
     }
 
     public void createMetaLeaderboardViewer(SailingServiceAsync sailingService, AsyncActionsExecutor asyncActionsExecutor, 
@@ -89,7 +103,7 @@ public class TabletAndDesktopLeaderboardView extends Composite implements Leader
         contentScrollPanel.setWidget(leaderboardViewer);
         leaderboardPanel.add(contentScrollPanel);
     }
-
+    
     @UiHandler("autoRefreshAnchor")
     void toogleAutoRefreshClicked(ClickEvent event) {
         if (autoRefreshTimer.getPlayState() == PlayStates.Playing) {
@@ -113,5 +127,49 @@ public class TabletAndDesktopLeaderboardView extends Composite implements Leader
                 StringMessages.INSTANCE);
         dialog.ensureDebugId(debugIdPrefix + "SettingsDialog");
         dialog.show();
+    }
+
+    @Override
+    public void updatedLeaderboard(LeaderboardDTO leaderboard) {
+        StringMessages stringMessages = StringMessages.INSTANCE;
+        
+        if(leaderboard != null) {
+            lastScoringCommentDiv.setInnerText(leaderboard.getComment() != null ? leaderboard.getComment() : "");
+            if (leaderboard.getTimePointOfLastCorrectionsValidity() != null) {
+                Date lastCorrectionDate = leaderboard.getTimePointOfLastCorrectionsValidity();
+                String lastUpdate = DateAndTimeFormatterUtil.longDateFormatter.render(lastCorrectionDate) + ", "
+                        + DateAndTimeFormatterUtil.longTimeFormatter.render(lastCorrectionDate);
+                lastScoringUpdateTimeDiv.setInnerText(TextMessages.INSTANCE.eventRegattaLeaderboardLastScoreUpdate() + ": " + lastUpdate);
+            } else {
+                lastScoringUpdateTimeDiv.setInnerText("");
+            }
+            
+            List<Pair<RaceColumnDTO, FleetDTO>> liveRaces = leaderboard.getLiveRaces(autoRefreshTimer.getLiveTimePointInMillis());
+            boolean hasLiveRace = !liveRaces.isEmpty();
+            if (hasLiveRace) {
+                String liveRaceText = "";
+                if(liveRaces.size() == 1) {
+                    Pair<RaceColumnDTO, FleetDTO> liveRace = liveRaces.get(0);
+                    liveRaceText = stringMessages.raceIsLive("'" + liveRace.getA().getRaceColumnName() + "'");
+                } else {
+                    String raceNames = "";
+                    for (Pair<RaceColumnDTO, FleetDTO> liveRace : liveRaces) {
+                        raceNames += "'" + liveRace.getA().getRaceColumnName() + "', ";
+                    }
+                    // remove last ", "
+                    raceNames = raceNames.substring(0, raceNames.length() - 2);
+                    liveRaceText = stringMessages.racesAreLive(raceNames);
+                }
+                liveRaceDiv.setInnerText(liveRaceText);
+            } else {
+                liveRaceDiv.setInnerText("");
+            }
+//            lastScoringUpdateTimeDiv.setVisible(!hasLiveRace);
+//            liveRaceDiv.setVisible(hasLiveRace);
+        }
+    }
+
+    @Override
+    public void currentRaceSelected(RaceIdentifier raceIdentifier, RaceColumnDTO raceColumn) {
     }
 }

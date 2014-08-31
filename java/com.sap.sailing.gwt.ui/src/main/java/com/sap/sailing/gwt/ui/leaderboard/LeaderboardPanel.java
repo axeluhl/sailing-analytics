@@ -28,7 +28,6 @@ import com.google.gwt.dom.client.Style.Unit;
 import com.google.gwt.event.dom.client.ClickEvent;
 import com.google.gwt.event.dom.client.ClickHandler;
 import com.google.gwt.event.shared.HandlerRegistration;
-import com.google.gwt.i18n.client.DateTimeFormat;
 import com.google.gwt.i18n.client.NumberFormat;
 import com.google.gwt.resources.client.ImageResource;
 import com.google.gwt.safehtml.client.SafeHtmlTemplates;
@@ -95,6 +94,7 @@ import com.sap.sailing.gwt.ui.client.shared.controls.SelectionCheckboxColumn;
 import com.sap.sailing.gwt.ui.client.shared.filter.CompetitorRaceRankFilter;
 import com.sap.sailing.gwt.ui.client.shared.filter.FilterWithUI;
 import com.sap.sailing.gwt.ui.client.shared.filter.LeaderboardFetcher;
+import com.sap.sailing.gwt.ui.common.client.DateAndTimeFormatterUtil;
 import com.sap.sailing.gwt.ui.leaderboard.DetailTypeColumn.LegDetailField;
 import com.sap.sailing.gwt.ui.leaderboard.LeaderboardSettings.RaceColumnSelectionStrategies;
 import com.sap.sailing.gwt.ui.shared.RaceTimesInfoDTO;
@@ -278,9 +278,6 @@ public class LeaderboardPanel extends SimplePanel implements TimeListener, PlayS
     private Label scoreCorrectionCommentLabel;
     private Label liveRaceLabel; 
     
-    private final DateTimeFormat dateFormatter = DateTimeFormat.getFormat(DateTimeFormat.PredefinedFormat.DATE_LONG);
-    private final DateTimeFormat timeFormatter = DateTimeFormat.getFormat("HH:mm:ss zzz");
-
     private boolean isEmbedded;
 
     private static LeaderboardResources resources = GWT.create(LeaderboardResources.class);
@@ -2243,8 +2240,8 @@ public class LeaderboardPanel extends SimplePanel implements TimeListener, PlayS
                 scoreCorrectionCommentLabel.setText(leaderboard.getComment() != null ? leaderboard.getComment() : "");
                 if (leaderboard.getTimePointOfLastCorrectionsValidity() != null) {
                     Date lastCorrectionDate = leaderboard.getTimePointOfLastCorrectionsValidity();
-                    String lastUpdate = dateFormatter.format(lastCorrectionDate) + ", "
-                            + timeFormatter.format(lastCorrectionDate);
+                    String lastUpdate = DateAndTimeFormatterUtil.longDateFormatter.render(lastCorrectionDate) + ", "
+                            + DateAndTimeFormatterUtil.longTimeFormatter.render(lastCorrectionDate);
                     scoreCorrectionLastUpdateTimeLabel.setText(stringMessages.lastScoreUpdate() + ": " + lastUpdate);
                 } else {
                     scoreCorrectionLastUpdateTimeLabel.setText("");
