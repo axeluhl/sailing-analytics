@@ -58,7 +58,7 @@ public class TabletAndDesktopLeaderboardView extends Composite implements Leader
     @UiField Anchor autoRefreshAnchor;
     @UiField SpanElement lastScoringUpdateTimeDiv;
     @UiField SpanElement lastScoringCommentDiv;
-    SpanElement liveRaceDiv;
+    @UiField SpanElement liveRaceDiv;
     
     private AbstractLeaderboardViewer leaderboardViewer;
     private Timer autoRefreshTimer;

@@ -24,6 +24,7 @@
 		  <div class="{res.mediaCss.small9} {res.mediaCss.columns}">
 		    <div class="{local_res.css.eventregattaleaderboard_meta_update}"><span ui:field="lastScoringCommentDiv" /></div>
 		    <div class="{local_res.css.eventregattaleaderboard_meta_update}"><span ui:field="lastScoringUpdateTimeDiv" /></div>
+		    <div class="{local_res.css.eventregattaleaderboard_meta_update}"><span ui:field="liveRaceDiv" /></div>
 		  </div>
 		  <div class="{res.mediaCss.small3} {res.mediaCss.columns}">
 			<g:Anchor ui:field="autoRefreshAnchor" href="javascript:;" styleName="{res.mainCss.button} {local_res.css.eventregattaleaderboard_meta_reload}"></g:Anchor>
