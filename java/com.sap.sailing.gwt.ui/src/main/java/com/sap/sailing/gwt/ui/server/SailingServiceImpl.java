@@ -3238,14 +3238,18 @@ public class SailingServiceImpl extends ProxiedRemoteServiceServlet implements S
     }
 
     @Override
-    public EventDTO createEvent(String eventName, Date startDate, Date endDate, String venue, boolean isPublic,
-            List<String> courseAreaNames, Iterable<String> imageURLs, Iterable<String> videoURLs) throws MalformedURLException {
+    public EventDTO createEvent(String eventName, String eventDescription, Date startDate, Date endDate, String venue,
+            boolean isPublic, List<String> courseAreaNames, Iterable<String> imageURLs,
+            Iterable<String> videoURLs, Iterable<String> sponsorImageURLs, String logoImageURLAsString, String officialWebsiteURLAsString)
+            throws MalformedURLException {
         UUID eventUuid = UUID.randomUUID();
         TimePoint startTimePoint = startDate != null ? new MillisecondsTimePoint(startDate) : null;
         TimePoint endTimePoint = endDate != null ? new MillisecondsTimePoint(endDate) : null;
         getService().apply(
-                new CreateEvent(eventName, startTimePoint, endTimePoint, venue, isPublic, eventUuid, createURLsFromStrings(imageURLs),
-                        createURLsFromStrings(videoURLs)));
+                new CreateEvent(eventName, eventDescription, startTimePoint, endTimePoint, venue, isPublic, eventUuid,
+                        createURLsFromStrings(imageURLs), createURLsFromStrings(videoURLs),
+                        createURLsFromStrings(sponsorImageURLs),
+                        logoImageURLAsString == null ? null : new URL(logoImageURLAsString), officialWebsiteURLAsString == null ? null : new URL(officialWebsiteURLAsString)));
         for (String courseAreaName : courseAreaNames) {
             createCourseArea(eventUuid, courseAreaName);
         }
@@ -3316,15 +3320,30 @@ public class SailingServiceImpl extends ProxiedRemoteServiceServlet implements S
         eventDTO.id = (UUID) event.getId();
         eventDTO.setDescription(event.getDescription());
         eventDTO.setOfficialWebsiteURL(event.getOfficialWebsiteURL() != null ? event.getOfficialWebsiteURL().toString() : null);
-        eventDTO.setLogoImageURL(event.getLogoImageURL() != null ? event.getLogoImageURL().toString() : null);
+        if (event.getLogoImageURL() == null) {
+            eventDTO.setLogoImageURL(null);
+        } else {
+            eventDTO.setLogoImageURL(event.getLogoImageURL().toString());
+            setImageSize(event, eventDTO, event.getLogoImageURL());
+        }
         for (URL url : event.getSponsorImageURLs()) {
             eventDTO.addSponsorImageURL(url.toString());
+            setImageSize(event, eventDTO, url);
         }
         for (URL url : event.getImageURLs()) {
             eventDTO.addImageURL(url.toString());
+            setImageSize(event, eventDTO, url);
         }
         for (URL url : event.getVideoURLs()) {
             eventDTO.addVideoURL(url.toString());
+        }
+    }
+
+    private void setImageSize(EventBase event, EventBaseDTO eventDTO, URL imageURL) {
+        try {
+            eventDTO.setImageSize(imageURL.toString(), event.getImageSize(imageURL));
+        } catch (InterruptedException | ExecutionException e) {
+            logger.log(Level.FINE, "Was unable to obtain image size for "+imageURL+" earlier.", e);
         }
     }
 

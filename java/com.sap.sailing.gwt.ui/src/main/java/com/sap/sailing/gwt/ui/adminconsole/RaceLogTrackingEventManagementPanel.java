@@ -30,6 +30,7 @@ import com.sap.sailing.gwt.ui.client.LeaderboardsRefresher;
 import com.sap.sailing.gwt.ui.client.RegattaRefresher;
 import com.sap.sailing.gwt.ui.client.SailingServiceAsync;
 import com.sap.sailing.gwt.ui.client.StringMessages;
+import com.sap.sailing.gwt.ui.client.shared.controls.SelectionCheckboxColumn;
 import com.sap.sailing.gwt.ui.shared.RaceLogSetStartTimeAndProcedureDTO;
 import com.sap.sailing.gwt.ui.shared.StrippedLeaderboardDTO;
 import com.sap.sse.common.Util;
@@ -62,24 +63,23 @@ public class RaceLogTrackingEventManagementPanel extends AbstractLeaderboardConf
     }
     
     @Override
-    protected void addColumnsToLeaderboardTable(CellTable<StrippedLeaderboardDTO> leaderboardTable) {
+    protected void addColumnsToLeaderboardTableAndSetSelectionModel(CellTable<StrippedLeaderboardDTO> leaderboardTable, AdminConsoleTableResources tableResources) {
         ListHandler<StrippedLeaderboardDTO> leaderboardColumnListHandler = new ListHandler<StrippedLeaderboardDTO>(
                 leaderboardList.getList());
-
+        SelectionCheckboxColumn<StrippedLeaderboardDTO> selectionCheckboxColumn = createSortableSelectionCheckboxColumn(
+                leaderboardTable, tableResources, leaderboardColumnListHandler);
         TextColumn<StrippedLeaderboardDTO> leaderboardNameColumn = new TextColumn<StrippedLeaderboardDTO>() {
             @Override
             public String getValue(StrippedLeaderboardDTO leaderboard) {
                 return leaderboard.name;
             }
         };
-
         TextColumn<StrippedLeaderboardDTO> leaderboardDisplayNameColumn = new TextColumn<StrippedLeaderboardDTO>() {
             @Override
             public String getValue(StrippedLeaderboardDTO leaderboard) {
                 return leaderboard.getDisplayName() != null ? leaderboard.getDisplayName() : "";
             }
         };
-
         ImagesBarColumn<StrippedLeaderboardDTO, RaceLogTrackingEventManagementImagesBarCell> leaderboardActionColumn =
                 new ImagesBarColumn<StrippedLeaderboardDTO, RaceLogTrackingEventManagementImagesBarCell>(
                 new RaceLogTrackingEventManagementImagesBarCell(stringMessages));
@@ -91,11 +91,13 @@ public class RaceLogTrackingEventManagementPanel extends AbstractLeaderboardConf
                 }
             }
         });
-
+        leaderboardTable.addColumn(selectionCheckboxColumn, selectionCheckboxColumn.getHeader());
         leaderboardTable.addColumn(leaderboardNameColumn, stringMessages.name());
         leaderboardTable.addColumn(leaderboardDisplayNameColumn, stringMessages.displayName());
         leaderboardTable.addColumn(leaderboardActionColumn, stringMessages.actions());
         leaderboardTable.addColumnSortHandler(leaderboardColumnListHandler);
+        leaderboardTable.setSelectionModel(new MultiSelectionModel<StrippedLeaderboardDTO>());
+        leaderboardTable.setSelectionModel(selectionCheckboxColumn.getSelectionModel(), selectionCheckboxColumn.getSelectionManager());
     }
     
     private RaceLogTrackingState getTrackingState(RaceColumnDTOAndFleetDTOWithNameBasedEquality race) {

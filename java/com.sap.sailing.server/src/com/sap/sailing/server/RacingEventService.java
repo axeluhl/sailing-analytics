@@ -340,6 +340,7 @@ public interface RacingEventService extends TrackedRegattaRegistry, RegattaFetch
      * 
      * @param eventName
      *            The name of the new event
+     * @param eventDescription TODO
      * @param startDate
      *            The start date of the event
      * @param endDate
@@ -352,7 +353,7 @@ public interface RacingEventService extends TrackedRegattaRegistry, RegattaFetch
      *            The name of the venue of the new event
      * @return The new event
      */
-    Event addEvent(String eventName, TimePoint startDate, TimePoint endDate, String venueName, boolean isPublic, UUID id);
+    Event addEvent(String eventName, String eventDescription, TimePoint startDate, TimePoint endDate, String venueName, boolean isPublic, UUID id);
 
     /**
      * Updates a sailing event with the name <code>eventName</code>, the venue<code>venue</code> and the regattas with
@@ -459,8 +460,8 @@ public interface RacingEventService extends TrackedRegattaRegistry, RegattaFetch
      */
     ConcurrentHashMap<String, Regatta> getPersistentRegattasForRaceIDs();
     
-    Event createEventWithoutReplication(String eventName, TimePoint startDate, TimePoint endDate, String venue, boolean isPublic,
-            UUID id, Iterable<URL> imageURLs, Iterable<URL> videoURLs);
+    Event createEventWithoutReplication(String eventName, String eventDescription, TimePoint startDate, TimePoint endDate, String venue,
+            boolean isPublic, UUID id, Iterable<URL> imageURLs, Iterable<URL> videoURLs, Iterable<URL> sponsorImageURLs, URL logoImageURL, URL officialWebsiteURL);
 
     void setRegattaForRace(Regatta regatta, String raceIdAsString);
 

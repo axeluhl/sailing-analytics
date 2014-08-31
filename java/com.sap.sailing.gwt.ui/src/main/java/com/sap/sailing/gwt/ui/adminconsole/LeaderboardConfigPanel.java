@@ -48,6 +48,7 @@ import com.sap.sailing.gwt.ui.client.RegattasDisplayer;
 import com.sap.sailing.gwt.ui.client.SailingServiceAsync;
 import com.sap.sailing.gwt.ui.client.StringMessages;
 import com.sap.sailing.gwt.ui.client.URLEncoder;
+import com.sap.sailing.gwt.ui.client.shared.controls.SelectionCheckboxColumn;
 import com.sap.sailing.gwt.ui.leaderboard.LeaderboardEntryPoint;
 import com.sap.sailing.gwt.ui.leaderboard.ScoringSchemeTypeFormatter;
 import com.sap.sailing.gwt.ui.shared.EventDTO;
@@ -113,10 +114,11 @@ TrackedRaceChangedListener, LeaderboardsDisplayer {
     }
     
     @Override
-    protected void addColumnsToLeaderboardTable(final CellTable<StrippedLeaderboardDTO> leaderboardTable) {
+    protected void addColumnsToLeaderboardTableAndSetSelectionModel(final CellTable<StrippedLeaderboardDTO> leaderboardTable, AdminConsoleTableResources tableResources) {
         ListHandler<StrippedLeaderboardDTO> leaderboardColumnListHandler = new ListHandler<StrippedLeaderboardDTO>(
                 leaderboardList.getList());
-        
+        SelectionCheckboxColumn<StrippedLeaderboardDTO> selectionCheckboxColumn = createSortableSelectionCheckboxColumn(
+                leaderboardTable, tableResources, leaderboardColumnListHandler);
         AnchorCell anchorCell = new AnchorCell();
         Column<StrippedLeaderboardDTO, SafeHtml> linkColumn = new Column<StrippedLeaderboardDTO, SafeHtml>(anchorCell) {
             @Override
@@ -262,6 +264,7 @@ TrackedRaceChangedListener, LeaderboardsDisplayer {
                 }
             }
         });
+        leaderboardTable.addColumn(selectionCheckboxColumn, selectionCheckboxColumn.getHeader());
         leaderboardTable.addColumn(linkColumn, stringMessages.name());
         leaderboardTable.addColumn(leaderboardDisplayNameColumn, stringMessages.displayName());
         leaderboardTable.addColumn(discardingOptionsColumn, stringMessages.discarding());
@@ -270,8 +273,9 @@ TrackedRaceChangedListener, LeaderboardsDisplayer {
         leaderboardTable.addColumn(courseAreaColumn, stringMessages.courseArea());
         leaderboardTable.addColumn(leaderboardActionColumn, stringMessages.actions());
         leaderboardTable.addColumnSortHandler(leaderboardColumnListHandler);
+        leaderboardTable.setSelectionModel(selectionCheckboxColumn.getSelectionModel(), selectionCheckboxColumn.getSelectionManager());
     }
-    
+
     protected void addLeaderboardCreateControls(Panel createPanel) {
         Button createFlexibleLeaderboardBtn = new Button(stringMessages.createFlexibleLeaderboard() + "...");
         createFlexibleLeaderboardBtn.ensureDebugId("CreateFlexibleLeaderboardButton");
