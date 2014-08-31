@@ -4,7 +4,6 @@ import java.util.Date;
 import java.util.List;
 
 import com.google.gwt.core.client.GWT;
-import com.google.gwt.dom.client.HeadingElement;
 import com.google.gwt.dom.client.SpanElement;
 import com.google.gwt.event.dom.client.ClickEvent;
 import com.google.gwt.uibinder.client.UiBinder;
@@ -53,7 +52,7 @@ public class TabletAndDesktopLeaderboardView extends Composite implements Leader
     @UiField(provided=true) CompactEventHeader eventHeader;
     
     // temp fields --> will be moved to a leaderboard partial later on
-    @UiField HeadingElement title;
+    @UiField SpanElement title;
     @UiField Anchor settingsAnchor;
     @UiField Anchor autoRefreshAnchor;
     @UiField SpanElement lastScoringUpdateTimeDiv;
@@ -70,7 +69,7 @@ public class TabletAndDesktopLeaderboardView extends Composite implements Leader
         
         initWidget(uiBinder.createAndBindUi(this));
         
-        title.setInnerText(TextMessages.INSTANCE.leaderboard() + ": " + leaderboardName);
+        title.setInnerText(leaderboardName);
     }
     
     public void createLeaderboardViewer(final SailingServiceAsync sailingService, final AsyncActionsExecutor asyncActionsExecutor,
