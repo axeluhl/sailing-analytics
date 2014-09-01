@@ -155,7 +155,9 @@ public class RefreshingSelectionTablesPanel implements SelectionProvider<Refresh
     }
 
     private void updateTables() {
-        dataMiningService.getDimensionValuesFor(tablesMappedByDimension.keySet(), new AsyncCallback<QueryResult<Set<Object>>>() {
+        //It's necessary to create a new Collection for the dimensions, since using the key set directly results in a serialization error
+        Collection<FunctionDTO> dimensions = new HashSet<>(tablesMappedByDimension.keySet());
+        dataMiningService.getDimensionValuesFor(dimensions, new AsyncCallback<QueryResult<Set<Object>>>() {
             @Override
             public void onFailure(Throwable caught) {
                 errorReporter.reportError("Error fetching the dimension values from the server: " + caught.getMessage());
