@@ -4,10 +4,8 @@ import java.io.IOException;
 import java.io.ObjectInputStream;
 import java.io.ObjectOutputStream;
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.Collection;
 import java.util.Collections;
-import java.util.Date;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Map;
@@ -16,42 +14,14 @@ import java.util.Set;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ConcurrentMap;
 
+import com.sap.sailing.domain.common.TimePoint;
+import com.sap.sailing.domain.common.TimeRange;
+import com.sap.sailing.domain.common.impl.TimeRangeImpl;
 import com.sap.sailing.domain.common.media.MediaTrack;
-import com.sap.sailing.domain.common.media.MediaUtil;
 import com.sap.sailing.util.impl.LockUtil;
 import com.sap.sailing.util.impl.NamedReentrantReadWriteLock;
 
 class MediaLibrary {
-
-    static class Interval {
-
-        public final Date begin;
-        public final Date end;
-
-        public Interval(Date begin, Date end) {
-            this.begin = begin;
-            this.end = end;
-        }
-
-        @Override
-        public boolean equals(Object obj) {
-            if (this == obj) {
-                return true;
-            } else if (obj instanceof Interval) {
-                Interval interval = (Interval) obj;
-                return MediaUtil.equalsDatesAllowingNull(this.begin, interval.begin)
-                        && MediaUtil.equalsDatesAllowingNull(this.end, interval.end);
-            } else {
-                return false;
-            }
-        }
-
-        @Override
-        public int hashCode() {
-            return Arrays.hashCode(new Date[] { begin, end });
-        }
-
-    }
 
     /**
      * The set of MediaTracks kept by this library. Due to complex write operations which require explicit write-locking
@@ -65,7 +35,7 @@ class MediaLibrary {
      * result in case a MediaTrack is being removed from the library or changes values such that it needs to be removed
      * from the cache.
      */
-    private final ConcurrentMap<Interval, Set<MediaTrack>> cacheByInterval = new ConcurrentHashMap<Interval, Set<MediaTrack>>();
+    private final ConcurrentMap<TimeRange, Set<MediaTrack>> cacheByInterval = new ConcurrentHashMap<TimeRange, Set<MediaTrack>>();
 
     private final NamedReentrantReadWriteLock lock = new NamedReentrantReadWriteLock(MediaLibrary.class.getName(), /* fair */ false);
 
@@ -104,11 +74,11 @@ class MediaLibrary {
      * @param endTime
      * @return
      */
-    Set<MediaTrack> findMediaTracksInTimeRange(Date startTime, Date endTime) {
+    Set<MediaTrack> findMediaTracksInTimeRange(TimePoint startTime, TimePoint endTime) {
 
         if (startTime != null) {
 
-            Interval interval = new Interval(startTime, endTime);
+            TimeRange interval = new TimeRangeImpl(startTime, endTime);
             LockUtil.lockForRead(lock);
             try {
                 Set<MediaTrack> cachedMediaTracks = cacheByInterval.get(interval);
@@ -136,6 +106,16 @@ class MediaLibrary {
         }
         // else
         return Collections.emptySet();
+    }
+
+    public Collection<MediaTrack> findLiveMediaTracksForRace(String regattaName, String raceName) {
+        Set<MediaTrack> result = new HashSet<MediaTrack>();
+        for (MediaTrack mediaTrack : mediaTracksByDbId.values()) {
+            if (mediaTrack.durationInMillis == 0) {
+                result.add(mediaTrack);
+            }
+        }
+        return result;
     }
 
     /**
@@ -236,9 +216,9 @@ class MediaLibrary {
      * To be called only under write lock!
      */
     private void updateCache_Add(MediaTrack mediaTrack) {
-        for (Entry<Interval, Set<MediaTrack>> cacheEntry : cacheByInterval.entrySet()) {
-            Interval interval = cacheEntry.getKey();
-            if (mediaTrack.overlapsWith(interval.begin, interval.end)) {
+        for (Entry<TimeRange, Set<MediaTrack>> cacheEntry : cacheByInterval.entrySet()) {
+            TimeRange interval = cacheEntry.getKey();
+            if (mediaTrack.overlapsWith(interval.from(), interval.to())) {
                 cacheEntry.getValue().add(mediaTrack);
             }
         }
@@ -248,10 +228,10 @@ class MediaLibrary {
      * To be called only under write lock!
      */
     private void updateCache_Change(MediaTrack mediaTrack) {
-        for (Entry<Interval, Set<MediaTrack>> cacheEntry : cacheByInterval.entrySet()) {
+        for (Entry<TimeRange, Set<MediaTrack>> cacheEntry : cacheByInterval.entrySet()) {
             cacheEntry.getValue().remove(mediaTrack);
-            Interval interval = cacheEntry.getKey();
-            if (mediaTrack.overlapsWith(interval.begin, interval.end)) {
+            TimeRange interval = cacheEntry.getKey();
+            if (mediaTrack.overlapsWith(interval.from(), interval.to())) {
                 cacheEntry.getValue().add(mediaTrack);
             }
         }
@@ -261,7 +241,7 @@ class MediaLibrary {
      * To be called only under write lock!
      */
     private void updateCache_Remove(MediaTrack mediaTrack) {
-        for (Entry<Interval, Set<MediaTrack>> cacheEntry : cacheByInterval.entrySet()) {
+        for (Entry<TimeRange, Set<MediaTrack>> cacheEntry : cacheByInterval.entrySet()) {
             cacheEntry.getValue().remove(mediaTrack);
         }
     }

@@ -3,7 +3,9 @@ package com.sap.sailing.server.impl;
 import static org.hamcrest.CoreMatchers.is;
 import static org.hamcrest.CoreMatchers.not;
 import static org.hamcrest.CoreMatchers.sameInstance;
+
 import static org.junit.Assert.assertThat;
+
 import static org.mockito.Matchers.any;
 import static org.mockito.Matchers.eq;
 import static org.mockito.Matchers.same;
@@ -23,6 +25,7 @@ import org.junit.Before;
 import org.junit.Test;
 import org.mockito.Mockito;
 
+import com.sap.sailing.domain.common.impl.MillisecondsTimePoint;
 import com.sap.sailing.domain.common.media.MediaTrack;
 import com.sap.sailing.domain.common.media.MediaTrack.MimeType;
 import com.sap.sailing.domain.persistence.DomainObjectFactory;
@@ -89,7 +92,7 @@ public class MasterDataImporterMediaTest {
         createRacingEventService();
         
         String dbId = new ObjectId().toStringMongod();
-        MediaTrack mediaTrackToImport = new MediaTrack(dbId, "title", "url", new Date(), 0, MimeType.mp3);
+        MediaTrack mediaTrackToImport = new MediaTrack(dbId, "title", "url", MillisecondsTimePoint.now(), 0, MimeType.mp3);
         mediaTracksToImport.add(mediaTrackToImport);
         racingEventService.mediaTracksImported(mediaTracksToImport, OVERRIDE);
         
@@ -115,7 +118,7 @@ public class MasterDataImporterMediaTest {
         createRacingEventService(existingMediaTrack);
         Collection<MediaTrack> allMediaTracksBeforeImport = racingEventService.getAllMediaTracks();
         
-        MediaTrack mediaTrackToImport = new MediaTrack(existingMediaTrack.dbId, existingMediaTrack.title, existingMediaTrack.url, existingMediaTrack.startTime, existingMediaTrack.durationInMillis, mimeType);
+        MediaTrack mediaTrackToImport = new MediaTrack(existingMediaTrack.dbId, existingMediaTrack.title, existingMediaTrack.url, existingMediaTrack.startTime(), existingMediaTrack.durationInMillis, mimeType);
         mediaTracksToImport.add(mediaTrackToImport);
         racingEventService.mediaTracksImported(mediaTracksToImport, OVERRIDE);
 
@@ -138,7 +141,7 @@ public class MasterDataImporterMediaTest {
         createRacingEventService(existingMediaTrack);
 
         String dbId2 = new ObjectId().toStringMongod();
-        MediaTrack mediaTrackToImport = new MediaTrack(dbId2, existingMediaTrack.title, existingMediaTrack.url, existingMediaTrack.startTime, existingMediaTrack.durationInMillis, mimeType);
+        MediaTrack mediaTrackToImport = new MediaTrack(dbId2, existingMediaTrack.title, existingMediaTrack.url, existingMediaTrack.startTime(), existingMediaTrack.durationInMillis, mimeType);
         mediaTracksToImport.add(mediaTrackToImport);
         racingEventService.mediaTracksImported(mediaTracksToImport, OVERRIDE);
         
@@ -161,7 +164,7 @@ public class MasterDataImporterMediaTest {
         DBMediaTrack existingMediaTrack = new DBMediaTrack(dbId, "title", "url", new Date(), 0, mimeType.name());
         createRacingEventService(existingMediaTrack);
 
-        MediaTrack mediaTrackToImport = new MediaTrack(existingMediaTrack.dbId, existingMediaTrack.title + "x", existingMediaTrack.url, existingMediaTrack.startTime, existingMediaTrack.durationInMillis, mimeType);
+        MediaTrack mediaTrackToImport = new MediaTrack(existingMediaTrack.dbId, existingMediaTrack.title + "x", existingMediaTrack.url, existingMediaTrack.startTime(), existingMediaTrack.durationInMillis, mimeType);
         assertThat(existingMediaTrack.title, is(not(mediaTrackToImport.title)));
 
         mediaTracksToImport.add(mediaTrackToImport);
@@ -188,7 +191,7 @@ public class MasterDataImporterMediaTest {
         DBMediaTrack existingMediaTrack = new DBMediaTrack(dbId, "title", "url", new Date(), 0, mimeType.name());
         createRacingEventService(existingMediaTrack);
 
-        MediaTrack mediaTrackToImport = new MediaTrack(existingMediaTrack.dbId, null, existingMediaTrack.url, existingMediaTrack.startTime, existingMediaTrack.durationInMillis, mimeType);
+        MediaTrack mediaTrackToImport = new MediaTrack(existingMediaTrack.dbId, null, existingMediaTrack.url, existingMediaTrack.startTime(), existingMediaTrack.durationInMillis, mimeType);
         assertThat(existingMediaTrack.title, is(not(mediaTrackToImport.title)));
 
         mediaTracksToImport.add(mediaTrackToImport);
@@ -214,7 +217,7 @@ public class MasterDataImporterMediaTest {
         DBMediaTrack existingMediaTrack = new DBMediaTrack(dbId, "title", "url", new Date(), 0, mimeType.name());
         createRacingEventService(existingMediaTrack);
 
-        MediaTrack mediaTrackToImport = new MediaTrack(existingMediaTrack.dbId, existingMediaTrack.title + "x", existingMediaTrack.url, existingMediaTrack.startTime, existingMediaTrack.durationInMillis, mimeType);
+        MediaTrack mediaTrackToImport = new MediaTrack(existingMediaTrack.dbId, existingMediaTrack.title + "x", existingMediaTrack.url, existingMediaTrack.startTime(), existingMediaTrack.durationInMillis, mimeType);
         assertThat(existingMediaTrack.title, is(not(mediaTrackToImport.title)));
 
         mediaTracksToImport.add(mediaTrackToImport);
@@ -240,7 +243,7 @@ public class MasterDataImporterMediaTest {
         DBMediaTrack existingMediaTrack = new DBMediaTrack(dbId, "title", "url", new Date(), 0, mimeType.name());
         createRacingEventService(existingMediaTrack);
 
-        MediaTrack mediaTrackToImport = new MediaTrack(existingMediaTrack.dbId, existingMediaTrack.title, existingMediaTrack.url + "x", existingMediaTrack.startTime, existingMediaTrack.durationInMillis, mimeType);
+        MediaTrack mediaTrackToImport = new MediaTrack(existingMediaTrack.dbId, existingMediaTrack.title, existingMediaTrack.url + "x", existingMediaTrack.startTime(), existingMediaTrack.durationInMillis, mimeType);
         assertThat(existingMediaTrack.url, is(not(mediaTrackToImport.url)));
 
         mediaTracksToImport.add(mediaTrackToImport);
@@ -266,8 +269,8 @@ public class MasterDataImporterMediaTest {
         DBMediaTrack existingMediaTrack = new DBMediaTrack(dbId, "title", "url", new Date(), 0, mimeType.name());
         createRacingEventService(existingMediaTrack);
 
-        MediaTrack mediaTrackToImport = new MediaTrack(existingMediaTrack.dbId, existingMediaTrack.title, existingMediaTrack.url, new Date(existingMediaTrack.startTime.getTime() + 1), existingMediaTrack.durationInMillis, mimeType);
-        assertThat(existingMediaTrack.startTime, is(not(mediaTrackToImport.startTime)));
+        MediaTrack mediaTrackToImport = new MediaTrack(existingMediaTrack.dbId, existingMediaTrack.title, existingMediaTrack.url, existingMediaTrack.startTime().plus(1), existingMediaTrack.durationInMillis, mimeType);
+        assertThat(existingMediaTrack.startTime(), is(not(mediaTrackToImport.startTime)));
 
         mediaTracksToImport.add(mediaTrackToImport);
         racingEventService.mediaTracksImported(mediaTracksToImport, OVERRIDE);
@@ -292,7 +295,7 @@ public class MasterDataImporterMediaTest {
         DBMediaTrack existingMediaTrack = new DBMediaTrack(dbId, "title", "url", new Date(), 0, mimeType.name());
         createRacingEventService(existingMediaTrack);
 
-        MediaTrack mediaTrackToImport = new MediaTrack(existingMediaTrack.dbId, existingMediaTrack.title, existingMediaTrack.url, existingMediaTrack.startTime, existingMediaTrack.durationInMillis + 1, mimeType);
+        MediaTrack mediaTrackToImport = new MediaTrack(existingMediaTrack.dbId, existingMediaTrack.title, existingMediaTrack.url, existingMediaTrack.startTime(), existingMediaTrack.durationInMillis + 1, mimeType);
         assertThat(existingMediaTrack.durationInMillis, is(not(mediaTrackToImport.durationInMillis)));
 
         mediaTracksToImport.add(mediaTrackToImport);

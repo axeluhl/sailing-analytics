@@ -2,7 +2,6 @@ package com.sap.sailing.gwt.ui.adminconsole;
 
 import java.util.Collection;
 import java.util.Comparator;
-import java.util.Date;
 
 import com.google.gwt.cell.client.EditTextCell;
 import com.google.gwt.cell.client.FieldUpdater;
@@ -23,6 +22,8 @@ import com.google.gwt.view.client.DefaultSelectionEventManager;
 import com.google.gwt.view.client.ListDataProvider;
 import com.google.gwt.view.client.SelectionModel;
 import com.google.gwt.view.client.SingleSelectionModel;
+import com.sap.sailing.domain.common.TimePoint;
+import com.sap.sailing.domain.common.impl.MillisecondsTimePoint;
 import com.sap.sailing.domain.common.media.MediaTrack;
 import com.sap.sailing.domain.common.media.MediaUtil;
 import com.sap.sailing.gwt.ui.client.ErrorReporter;
@@ -225,7 +226,7 @@ public class MediaPanel extends FlowPanel {
         Column<MediaTrack, String> startTimeColumn = new Column<MediaTrack, String>(new EditTextCell()) {
             @Override
             public String getValue(MediaTrack mediaTrack) {
-                return mediaTrack.startTime == null ? "" : TimeFormatUtil.DATETIME_FORMAT.format(mediaTrack.startTime);
+                return mediaTrack.startTime == null ? "" : TimeFormatUtil.DATETIME_FORMAT.format(mediaTrack.startTime.asDate());
             }
         };
         startTimeColumn.setSortable(true);
@@ -242,7 +243,7 @@ public class MediaPanel extends FlowPanel {
                     mediaTrack.startTime = null;
                 } else {
                     try {
-                        mediaTrack.startTime = TimeFormatUtil.DATETIME_FORMAT.parse(newStartTime);
+                        mediaTrack.startTime = new MillisecondsTimePoint(TimeFormatUtil.DATETIME_FORMAT.parse(newStartTime));
                     } catch (IllegalArgumentException e) {
                         errorReporter.reportError(stringMessages.mediaDateFormatError(TimeFormatUtil.DATETIME_FORMAT.toString()));
                     }
@@ -332,7 +333,7 @@ public class MediaPanel extends FlowPanel {
     }
 
     private void addUrlMediaTrack() {
-        Date defaultStartTime = new Date();
+        TimePoint defaultStartTime = MillisecondsTimePoint.now();
         NewMediaDialog dialog = new NewMediaDialog(defaultStartTime , stringMessages, new DialogCallback<MediaTrack>() {
 
             @Override

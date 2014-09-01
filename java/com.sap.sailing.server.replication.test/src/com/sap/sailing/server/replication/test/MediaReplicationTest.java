@@ -1,16 +1,15 @@
 package com.sap.sailing.server.replication.test;
 
-import static org.hamcrest.core.Is.is;
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertNotSame;
-import static org.junit.Assert.assertThat;
-
-import java.util.Date;
-
 import org.junit.Test;
 
+import com.sap.sailing.domain.common.TimePoint;
+import com.sap.sailing.domain.common.impl.MillisecondsTimePoint;
 import com.sap.sailing.domain.common.media.MediaTrack;
 import com.sap.sailing.domain.common.media.MediaTrack.MimeType;
+
+import static org.junit.Assert.*;
+
+import static org.hamcrest.core.Is.*;
 
 public class MediaReplicationTest extends AbstractServerReplicationTest {
       
@@ -22,7 +21,7 @@ public class MediaReplicationTest extends AbstractServerReplicationTest {
     private MediaTrack createMediaTrack() {
         String title = "title";
         String url = "url";
-        Date startTime = new Date();
+        TimePoint startTime = MillisecondsTimePoint.now();
         int durationInMillis = 1;
         MimeType mimeType = MimeType.mp4;
         MediaTrack mediaTrack = new MediaTrack(title, url, startTime, durationInMillis, mimeType);
@@ -81,7 +80,7 @@ public class MediaReplicationTest extends AbstractServerReplicationTest {
     public void testUpdateMediaTrackStartTimeReplication() throws InterruptedException {
         MediaTrack mediaTrack = createMediaTrack();
         master.mediaTrackAdded(mediaTrack);
-        mediaTrack.startTime = new Date(mediaTrack.startTime.getTime() + 1000);
+        mediaTrack.startTime = mediaTrack.startTime.plus(1000);
         master.mediaTrackStartTimeChanged(mediaTrack);
         waitSomeTime();
         assertThat(replica.getAllMediaTracks().size(), is(1));

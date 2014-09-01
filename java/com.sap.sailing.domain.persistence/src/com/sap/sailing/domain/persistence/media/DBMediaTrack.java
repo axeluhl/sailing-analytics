@@ -2,6 +2,9 @@ package com.sap.sailing.domain.persistence.media;
 
 import java.util.Date;
 
+import com.sap.sailing.domain.common.TimePoint;
+import com.sap.sailing.domain.common.impl.MillisecondsTimePoint;
+
 public class DBMediaTrack {
     
     public final String dbId;
@@ -20,4 +23,13 @@ public class DBMediaTrack {
         this.durationInMillis = duration;
         this.mimeType = mimeType;
     }
+    
+    public TimePoint startTime() {
+        if (this.startTime != null) {
+            return new MillisecondsTimePoint(this.startTime);
+        } else {
+            return null;
+        }
+    }
+    
 }

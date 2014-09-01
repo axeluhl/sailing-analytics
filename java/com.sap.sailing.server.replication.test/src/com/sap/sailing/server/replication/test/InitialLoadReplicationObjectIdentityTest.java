@@ -123,11 +123,11 @@ public class InitialLoadReplicationObjectIdentityTest extends AbstractServerRepl
         event.addLeaderboardGroup(leaderboardGroup);
         
         /* Media Library */
-        MediaTrack mediaTrack1 = new MediaTrack("title-1", "url", new Date(), 1, MimeType.mp4);
+        MediaTrack mediaTrack1 = new MediaTrack("title-1", "url", MillisecondsTimePoint.now(), 1, MimeType.mp4);
         master.mediaTrackAdded(mediaTrack1);
-        MediaTrack mediaTrack2 = new MediaTrack("title-2", "url", new Date(), 1, MimeType.ogv);
+        MediaTrack mediaTrack2 = new MediaTrack("title-2", "url", MillisecondsTimePoint.now(), 1, MimeType.ogv);
         master.mediaTrackAdded(mediaTrack2);
-        MediaTrack mediaTrack3 = new MediaTrack("title-3", "url", new Date(), 1, MimeType.mp4);
+        MediaTrack mediaTrack3 = new MediaTrack("title-3", "url", MillisecondsTimePoint.now(), 1, MimeType.mp4);
         master.mediaTrackAdded(mediaTrack3);
         
         /* fire up replication */

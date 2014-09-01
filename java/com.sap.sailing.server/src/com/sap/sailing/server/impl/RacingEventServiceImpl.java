@@ -14,7 +14,6 @@ import java.net.URLEncoder;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Collections;
-import java.util.Date;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Iterator;
@@ -82,6 +81,7 @@ import com.sap.sailing.domain.common.dto.FleetDTO;
 import com.sap.sailing.domain.common.dto.RegattaCreationParametersDTO;
 import com.sap.sailing.domain.common.dto.SeriesCreationParametersDTO;
 import com.sap.sailing.domain.common.impl.DataImportProgressImpl;
+import com.sap.sailing.domain.common.impl.MillisecondsTimePoint;
 import com.sap.sailing.domain.common.media.MediaTrack;
 import com.sap.sailing.domain.common.media.MediaTrack.MimeType;
 import com.sap.sailing.domain.common.racelog.RacingProcedureType;
@@ -2434,7 +2434,7 @@ public class RacingEventServiceImpl implements RacingEventServiceWithTestSupport
     public void mediaTrackAdded(MediaTrack mediaTrack) {
         String mimeType = mediaTrack.mimeType != null ? mediaTrack.mimeType.name() : null;
         if (mediaTrack.dbId == null) {
-            mediaTrack.dbId = mediaDB.insertMediaTrack(mediaTrack.title, mediaTrack.url, mediaTrack.startTime,
+            mediaTrack.dbId = mediaDB.insertMediaTrack(mediaTrack.title, mediaTrack.url, mediaTrack.startTime == null ? null : mediaTrack.startTime.asDate(),
                     mediaTrack.durationInMillis, mimeType);
         }
         mediaLibrary.addMediaTrack(mediaTrack);
@@ -2462,7 +2462,7 @@ public class RacingEventServiceImpl implements RacingEventServiceWithTestSupport
 
     @Override
     public void mediaTrackStartTimeChanged(MediaTrack mediaTrack) {
-        mediaDB.updateStartTime(mediaTrack.dbId, mediaTrack.startTime);
+        mediaDB.updateStartTime(mediaTrack.dbId, mediaTrack.startTime == null ? null : mediaTrack.startTime.asDate());
         mediaLibrary.startTimeChanged(mediaTrack);
         replicate(new UpdateMediaTrackStartTimeOperation(mediaTrack));
     }
@@ -2486,7 +2486,7 @@ public class RacingEventServiceImpl implements RacingEventServiceWithTestSupport
         for (MediaTrack trackToImport : mediaTracksToImport) {
             MediaTrack existingTrack = mediaLibrary.lookupMediaTrack(trackToImport);
             if (existingTrack == null) {
-                mediaDB.insertMediaTrackWithId(trackToImport.dbId, trackToImport.title, trackToImport.url, trackToImport.startTime, trackToImport.durationInMillis, trackToImport.mimeType.name());
+                mediaDB.insertMediaTrackWithId(trackToImport.dbId, trackToImport.title, trackToImport.url, trackToImport.startTime == null ? null : trackToImport.startTime.asDate(), trackToImport.durationInMillis, trackToImport.mimeType.name());
                 mediaTrackAdded(trackToImport);
             } else if (override) {
                     
@@ -2518,9 +2518,13 @@ public class RacingEventServiceImpl implements RacingEventServiceWithTestSupport
     public Collection<MediaTrack> getMediaTracksForRace(RegattaAndRaceIdentifier regattaAndRaceIdentifier) {
         TrackedRace trackedRace = getExistingTrackedRace(regattaAndRaceIdentifier);
         if (trackedRace != null) {
-            Date raceStart = trackedRace.getStartOfRace() == null ? null : trackedRace.getStartOfRace().asDate();
-            Date raceEnd = trackedRace.getEndOfRace() == null ? null : trackedRace.getEndOfRace().asDate();
-            return mediaLibrary.findMediaTracksInTimeRange(raceStart, raceEnd);
+            if (trackedRace.isLive(MillisecondsTimePoint.now())) {
+                return mediaLibrary.findLiveMediaTracksForRace(trackedRace.getRaceIdentifier().getRegattaName(), trackedRace.getRaceIdentifier().getRaceName());
+            } else {
+                TimePoint raceStart = trackedRace.getStartOfRace() == null ? null : trackedRace.getStartOfRace();
+                TimePoint raceEnd = trackedRace.getEndOfRace() == null ? null : trackedRace.getEndOfRace();
+                return mediaLibrary.findMediaTracksInTimeRange(raceStart, raceEnd);
+            }
         } else {
             return Collections.emptyList();
         }

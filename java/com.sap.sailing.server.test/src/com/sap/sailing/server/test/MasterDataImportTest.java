@@ -1604,7 +1604,7 @@ public class MasterDataImportTest {
             ClassNotFoundException {
         // Setup source service
         RacingEventService sourceService = new RacingEventServiceImpl();
-        MediaTrack trackOnSource = new MediaTrack("testTitle", "http://test/test.mp4", new Date(0), 2000,
+        MediaTrack trackOnSource = new MediaTrack("testTitle", "http://test/test.mp4", new MillisecondsTimePoint(0), 2000,
                 MediaTrack.MimeType.mp4);
         sourceService.mediaTrackAdded(trackOnSource);
 

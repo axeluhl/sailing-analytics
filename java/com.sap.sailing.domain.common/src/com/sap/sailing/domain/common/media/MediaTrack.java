@@ -3,6 +3,9 @@ package com.sap.sailing.domain.common.media;
 import java.io.Serializable;
 import java.util.Date;
 
+import com.sap.sailing.domain.common.TimePoint;
+import com.sap.sailing.domain.common.impl.MillisecondsTimePoint;
+
 /**
  * See http://my.opera.com/core/blog/2010/03/03/everything-you-need-to-know-about-html5-video-and-audio-2
  * @author D047974
@@ -69,7 +72,7 @@ public class MediaTrack implements Serializable {
     public String dbId;
     public String title;
     public String url;
-    public Date startTime;
+    public TimePoint startTime;
     public int durationInMillis;
     public MimeType mimeType;
     public Status status = Status.UNDEFINED;
@@ -77,7 +80,7 @@ public class MediaTrack implements Serializable {
     public MediaTrack() {
     }
     
-    public MediaTrack(String title, String url, Date startTime, int durationInMillis, MimeType mimeType) {
+    public MediaTrack(String title, String url, TimePoint startTime, int durationInMillis, MimeType mimeType) {
         this.title = title;
         this.url = url;
         this.startTime = startTime;
@@ -85,7 +88,11 @@ public class MediaTrack implements Serializable {
         this.mimeType = mimeType;
     }
     
-    public MediaTrack(String dbId, String title, String url, Date startTime, int durationInMillis, MimeType mimeType) {
+    public MediaTrack(String title, String url, Date startTime, int durationInMillis, MimeType mimeType) {
+        this(title, url, startTime == null ? null : new MillisecondsTimePoint(startTime), durationInMillis, mimeType);
+    }
+    
+    public MediaTrack(String dbId, String title, String url, TimePoint startTime, int durationInMillis, MimeType mimeType) {
         this.dbId = dbId;
         this.title = title;
         this.url = url;
@@ -94,13 +101,17 @@ public class MediaTrack implements Serializable {
         this.mimeType = mimeType;
     }
     
+    public MediaTrack(String dbId, String title, String url, Date startTime, int durationInMillis, MimeType mimeType) {
+        this(dbId, title, url, startTime == null ? null : new MillisecondsTimePoint(startTime), durationInMillis, mimeType);
+    }
+    
     public String toString() {
         return title + " - " + url + " [" + typeToString() + ']' + startTime + " [" + durationInMillis + status + ']';  
     }
     
-    public Date deriveEndTime() {
+    public TimePoint deriveEndTime() {
         if (startTime != null) {
-            return new Date(startTime.getTime() + durationInMillis);
+            return startTime.plus(durationInMillis);
         } else {
             return null;
         }
@@ -121,11 +132,11 @@ public class MediaTrack implements Serializable {
      * @param startTime Must not be null.
      * @param endTime May be null representing "open end".
      */
-    public boolean overlapsWith(Date startTime, Date endTime) {
+    public boolean overlapsWith(TimePoint startTime, TimePoint endTime) {
         if (this.startTime == null) {
             return false;
         } else {
-            return this.deriveEndTime().getTime() > startTime.getTime() && (endTime == null || this.startTime.getTime() < endTime.getTime());
+            return this.deriveEndTime().after(startTime) && (endTime == null || this.startTime.before(endTime));
         }
     }
     
