@@ -269,19 +269,19 @@ public class MediaPanel extends FlowPanel {
         Column<MediaTrack, String> durationColumn = new Column<MediaTrack, String>(new EditTextCell()) {
             @Override
             public String getValue(MediaTrack mediaTrack) {
-                return TimeFormatUtil.milliSecondsToHrsMinSec(mediaTrack.durationInMillis);
+                return TimeFormatUtil.durationToHrsMinSec(mediaTrack.duration);
             }
         };
         durationColumn.setSortable(true);
         sortHandler.setComparator(durationColumn, new Comparator<MediaTrack>() {
             public int compare(MediaTrack mediaTrack1, MediaTrack mediaTrack2) {
-                return Integer.valueOf(mediaTrack1.durationInMillis).compareTo(Integer.valueOf(mediaTrack2.durationInMillis));
+                return mediaTrack1.duration.compareTo(mediaTrack2.duration);
             }
         });
         durationColumn.setFieldUpdater(new FieldUpdater<MediaTrack, String>() {
             public void update(int index, MediaTrack mediaTrack, String newDuration) {
                 // Called when the user changes the value.
-                mediaTrack.durationInMillis = TimeFormatUtil.hrsMinSecToMilliSeconds(newDuration);
+                mediaTrack.duration = TimeFormatUtil.hrsMinSecToMilliSeconds(newDuration);
                 mediaService.updateDuration(mediaTrack, new AsyncCallback<Void>() {
 
                     @Override

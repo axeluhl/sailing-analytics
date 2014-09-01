@@ -2,6 +2,7 @@ package com.sap.sailing.domain.common;
 
 import org.junit.Test;
 
+import com.sap.sailing.domain.common.impl.MillisecondsDurationImpl;
 import com.sap.sailing.domain.common.impl.MillisecondsTimePoint;
 import com.sap.sailing.domain.common.media.MediaTrack;
 
@@ -9,11 +10,13 @@ import static org.junit.Assert.*;
 
 public class MediaTrackTest {
     
+    private static final Duration ONE_MILLISECOND = new MillisecondsDurationImpl(1);
+
     @Test
     public void testExactOverlap() throws Exception {
         MediaTrack mediaTrack = new MediaTrack();
         mediaTrack.startTime = MillisecondsTimePoint.now();
-        mediaTrack.durationInMillis = 1;
+        mediaTrack.duration = ONE_MILLISECOND;
         
         TimePoint startTime = mediaTrack.startTime;
         TimePoint endTime = mediaTrack.deriveEndTime();
@@ -25,7 +28,7 @@ public class MediaTrackTest {
     public void testNoOverlapLeft() throws Exception {
         MediaTrack mediaTrack = new MediaTrack();
         mediaTrack.startTime = MillisecondsTimePoint.now();
-        mediaTrack.durationInMillis = 1;
+        mediaTrack.duration = ONE_MILLISECOND;
         
         TimePoint startTime = mediaTrack.startTime.plus(2);
         TimePoint endTime = startTime.plus(1);
@@ -37,7 +40,7 @@ public class MediaTrackTest {
     public void testNoOverlapRight() throws Exception {
         MediaTrack mediaTrack = new MediaTrack();
         mediaTrack.startTime = MillisecondsTimePoint.now();
-        mediaTrack.durationInMillis = 1;
+        mediaTrack.duration = ONE_MILLISECOND;
         
         TimePoint startTime = mediaTrack.startTime.minus( 2);
         TimePoint endTime = startTime.plus(1);
@@ -49,7 +52,7 @@ public class MediaTrackTest {
     public void testPartialOverlapLeft() throws Exception {
         MediaTrack mediaTrack = new MediaTrack();
         mediaTrack.startTime = MillisecondsTimePoint.now();
-        mediaTrack.durationInMillis = 2;
+        mediaTrack.duration = ONE_MILLISECOND.times(2);
         
         TimePoint startTime = mediaTrack.startTime.minus( 1);
         TimePoint endTime = startTime.plus(2);
@@ -61,7 +64,7 @@ public class MediaTrackTest {
     public void testPartialOverlapRight() throws Exception {
         MediaTrack mediaTrack = new MediaTrack();
         mediaTrack.startTime = MillisecondsTimePoint.now();
-        mediaTrack.durationInMillis = 2;
+        mediaTrack.duration = ONE_MILLISECOND.times(2);
         
         TimePoint startTime = mediaTrack.startTime.plus(1);
         TimePoint endTime = startTime.plus(2);
@@ -73,7 +76,7 @@ public class MediaTrackTest {
     public void testMediaFullyIncluded() throws Exception {
         MediaTrack mediaTrack = new MediaTrack();
         mediaTrack.startTime = MillisecondsTimePoint.now();
-        mediaTrack.durationInMillis = 1;
+        mediaTrack.duration = ONE_MILLISECOND;
         
         TimePoint startTime = mediaTrack.startTime.minus( 1);
         TimePoint endTime = startTime.plus(3);
@@ -85,7 +88,7 @@ public class MediaTrackTest {
     public void testMediaFullyIncluding() throws Exception {
         MediaTrack mediaTrack = new MediaTrack();
         mediaTrack.startTime = MillisecondsTimePoint.now();
-        mediaTrack.durationInMillis = 3;
+        mediaTrack.duration = ONE_MILLISECOND.times(3);
         
         TimePoint startTime = mediaTrack.startTime.plus(1);
         TimePoint endTime = startTime.plus(1);
@@ -97,7 +100,7 @@ public class MediaTrackTest {
     public void testOverlapOpenEndStartingEarlier() throws Exception {
         MediaTrack mediaTrack = new MediaTrack();
         mediaTrack.startTime = MillisecondsTimePoint.now();
-        mediaTrack.durationInMillis = 1;
+        mediaTrack.duration = ONE_MILLISECOND;
         
         TimePoint startTime = mediaTrack.startTime.minus( 1);
         TimePoint endTime = null; //--> open end
@@ -109,7 +112,7 @@ public class MediaTrackTest {
     public void testOverlapOpenEndStartingLater() throws Exception {
         MediaTrack mediaTrack = new MediaTrack();
         mediaTrack.startTime = MillisecondsTimePoint.now();
-        mediaTrack.durationInMillis = 2;
+        mediaTrack.duration = ONE_MILLISECOND.times(2);
         
         TimePoint startTime = mediaTrack.startTime.plus(1);
         TimePoint endTime = null; //--> open end
@@ -121,7 +124,7 @@ public class MediaTrackTest {
     public void testOpenEndNoOverlap() throws Exception {
         MediaTrack mediaTrack = new MediaTrack();
         mediaTrack.startTime = MillisecondsTimePoint.now();
-        mediaTrack.durationInMillis = 1;
+        mediaTrack.duration = ONE_MILLISECOND;
         
         TimePoint startTime = mediaTrack.startTime.plus(2);
         TimePoint endTime = null; //--> open end

@@ -560,7 +560,7 @@ public class RacingEventServiceImpl implements RacingEventServiceWithTestSupport
         for (DBMediaTrack dbMediaTrack : allDBMediaTracks) {
             MimeType mimeType = dbMediaTrack.mimeType != null ? MimeType.byName(dbMediaTrack.mimeType) : null;
             MediaTrack mediaTrack = new MediaTrack(dbMediaTrack.dbId, dbMediaTrack.title, dbMediaTrack.url,
-                    dbMediaTrack.startTime, dbMediaTrack.durationInMillis, mimeType);
+                    dbMediaTrack.startTime, dbMediaTrack.duration, mimeType);
             mediaTrackAdded(mediaTrack);
         }
     }
@@ -2434,8 +2434,8 @@ public class RacingEventServiceImpl implements RacingEventServiceWithTestSupport
     public void mediaTrackAdded(MediaTrack mediaTrack) {
         String mimeType = mediaTrack.mimeType != null ? mediaTrack.mimeType.name() : null;
         if (mediaTrack.dbId == null) {
-            mediaTrack.dbId = mediaDB.insertMediaTrack(mediaTrack.title, mediaTrack.url, mediaTrack.startTime == null ? null : mediaTrack.startTime.asDate(),
-                    mediaTrack.durationInMillis, mimeType);
+            mediaTrack.dbId = mediaDB.insertMediaTrack(mediaTrack.title, mediaTrack.url, mediaTrack.startTime,
+                    mediaTrack.duration, mimeType);
         }
         mediaLibrary.addMediaTrack(mediaTrack);
         replicate(new AddMediaTrackOperation(mediaTrack));
@@ -2462,14 +2462,14 @@ public class RacingEventServiceImpl implements RacingEventServiceWithTestSupport
 
     @Override
     public void mediaTrackStartTimeChanged(MediaTrack mediaTrack) {
-        mediaDB.updateStartTime(mediaTrack.dbId, mediaTrack.startTime == null ? null : mediaTrack.startTime.asDate());
+        mediaDB.updateStartTime(mediaTrack.dbId, mediaTrack.startTime);
         mediaLibrary.startTimeChanged(mediaTrack);
         replicate(new UpdateMediaTrackStartTimeOperation(mediaTrack));
     }
 
     @Override
     public void mediaTrackDurationChanged(MediaTrack mediaTrack) {
-        mediaDB.updateDuration(mediaTrack.dbId, mediaTrack.durationInMillis);
+        mediaDB.updateDuration(mediaTrack.dbId, mediaTrack.duration);
         mediaLibrary.durationChanged(mediaTrack);
         replicate(new UpdateMediaTrackDurationOperation(mediaTrack));
     }
@@ -2486,7 +2486,7 @@ public class RacingEventServiceImpl implements RacingEventServiceWithTestSupport
         for (MediaTrack trackToImport : mediaTracksToImport) {
             MediaTrack existingTrack = mediaLibrary.lookupMediaTrack(trackToImport);
             if (existingTrack == null) {
-                mediaDB.insertMediaTrackWithId(trackToImport.dbId, trackToImport.title, trackToImport.url, trackToImport.startTime == null ? null : trackToImport.startTime.asDate(), trackToImport.durationInMillis, trackToImport.mimeType.name());
+                mediaDB.insertMediaTrackWithId(trackToImport.dbId, trackToImport.title, trackToImport.url, trackToImport.startTime, trackToImport.duration, trackToImport.mimeType.name());
                 mediaTrackAdded(trackToImport);
             } else if (override) {
                     
@@ -2506,8 +2506,8 @@ public class RacingEventServiceImpl implements RacingEventServiceWithTestSupport
                     existingTrack.startTime = trackToImport.startTime;
                     mediaTrackStartTimeChanged(existingTrack);
                 }
-                if (existingTrack.durationInMillis != trackToImport.durationInMillis) {
-                    existingTrack.durationInMillis = trackToImport.durationInMillis;
+                if (existingTrack.duration != trackToImport.duration) {
+                    existingTrack.duration = trackToImport.duration;
                     mediaTrackDurationChanged(existingTrack);
                 }
             }

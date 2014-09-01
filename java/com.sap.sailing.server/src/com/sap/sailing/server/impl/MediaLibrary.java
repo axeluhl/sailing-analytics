@@ -111,7 +111,7 @@ class MediaLibrary {
     public Collection<MediaTrack> findLiveMediaTracksForRace(String regattaName, String raceName) {
         Set<MediaTrack> result = new HashSet<MediaTrack>();
         for (MediaTrack mediaTrack : mediaTracksByDbId.values()) {
-            if (mediaTrack.durationInMillis == 0) {
+            if (mediaTrack.duration == null) {
                 result.add(mediaTrack);
             }
         }
@@ -204,7 +204,7 @@ class MediaLibrary {
         try {
             MediaTrack mediaTrack = mediaTracksByDbId.get(changedMediaTrack);
             if (mediaTrack != null) {
-                mediaTrack.durationInMillis = changedMediaTrack.durationInMillis;
+                mediaTrack.duration = changedMediaTrack.duration;
                 updateCache_Change(mediaTrack);
             }
         } finally {

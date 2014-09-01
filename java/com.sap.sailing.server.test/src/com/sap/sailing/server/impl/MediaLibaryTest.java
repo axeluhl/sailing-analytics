@@ -7,8 +7,10 @@ import java.util.Set;
 import org.junit.Before;
 import org.junit.Test;
 
+import com.sap.sailing.domain.common.Duration;
 import com.sap.sailing.domain.common.TimePoint;
 import com.sap.sailing.domain.common.TimeRange;
+import com.sap.sailing.domain.common.impl.MillisecondsDurationImpl;
 import com.sap.sailing.domain.common.impl.MillisecondsTimePoint;
 import com.sap.sailing.domain.common.impl.TimeRangeImpl;
 import com.sap.sailing.domain.common.media.MediaTrack;
@@ -16,14 +18,14 @@ import com.sap.sailing.domain.common.media.MediaTrack.MimeType;
 
 import static org.junit.Assert.*;
 
-import static org.hamcrest.core.Is.*;
+import static org.hamcrest.Matchers.*;
 
 
 public class MediaLibaryTest {
     
-    private static final int FIFTEEN_MINUTES_IN_MILLIS = 15 * 60 * 1000;
-    private static final int THIRTY_MINUTES_IN_MILLIS = 30 * 60 * 1000;
-    private static final int ONE_HOUR_IN_MILLIS = 60 * 60 * 1000;
+    private static final Duration FIFTEEN_MINUTES_IN_MILLIS = MillisecondsDurationImpl.ONE_MINUTE.times(15);
+    private static final Duration THIRTY_MINUTES_IN_MILLIS = MillisecondsDurationImpl.ONE_MINUTE.times(30);
+    private static final Duration ONE_HOUR_IN_MILLIS = MillisecondsDurationImpl.ONE_HOUR;
 
     private MediaLibrary mediaLibary;
 
@@ -37,9 +39,9 @@ public class MediaLibaryTest {
         String title = "title";
         String url = "url";
         TimePoint startTime = MillisecondsTimePoint.now();
-        int durationInMillis = 1;
+        Duration duration = MillisecondsDurationImpl.ONE_HOUR;
         MimeType mimeType = MimeType.mp4;
-        MediaTrack mediaTrack = new MediaTrack(dbId, title, url, startTime, durationInMillis, mimeType);
+        MediaTrack mediaTrack = new MediaTrack(dbId, title, url, startTime, duration, mimeType);
         return mediaTrack;
     }
     
@@ -61,7 +63,7 @@ public class MediaLibaryTest {
         assertThat(item.title, is(mediaTrack.title));
         assertThat(item.url, is(mediaTrack.url));
         assertThat(item.startTime, is(mediaTrack.startTime));
-        assertThat(item.durationInMillis, is(mediaTrack.durationInMillis));
+        assertThat(item.duration, is(mediaTrack.duration));
         assertThat(item.mimeType, is(mediaTrack.mimeType));
         
     }
@@ -79,7 +81,7 @@ public class MediaLibaryTest {
     @Test
     public void testQueryMediaTracksBetween_MatchingStartTimes_TrackLongerThanEndTime() {
         TimePoint startTime = MillisecondsTimePoint.now();
-        int duration = ONE_HOUR_IN_MILLIS;
+        Duration duration = ONE_HOUR_IN_MILLIS;
         TimePoint rangeStart = startTime;
         TimePoint rangeEnd = rangeStart.plus(THIRTY_MINUTES_IN_MILLIS);
 
@@ -89,7 +91,7 @@ public class MediaLibaryTest {
     @Test
     public void testQueryMediaTracksBetween_MatchingStartTimes_TrackShorterThanEndTime() {
         TimePoint startTime = MillisecondsTimePoint.now();
-        int duration = THIRTY_MINUTES_IN_MILLIS;
+        Duration duration = THIRTY_MINUTES_IN_MILLIS;
         TimePoint rangeStart = startTime;
         TimePoint rangeEnd = rangeStart.plus(ONE_HOUR_IN_MILLIS);
 
@@ -99,7 +101,7 @@ public class MediaLibaryTest {
     @Test
     public void testQueryMediaTracksBetween_StartsBeforeEndsAfterRange() {
         TimePoint startTime = MillisecondsTimePoint.now();
-        int duration = ONE_HOUR_IN_MILLIS;
+        Duration duration = ONE_HOUR_IN_MILLIS;
         TimePoint rangeStart = startTime.plus(FIFTEEN_MINUTES_IN_MILLIS);
         TimePoint rangeEnd = rangeStart.plus(FIFTEEN_MINUTES_IN_MILLIS);
 
@@ -111,7 +113,7 @@ public class MediaLibaryTest {
         TimePoint rangeStart = MillisecondsTimePoint.now();
         TimePoint rangeEnd = rangeStart.plus(ONE_HOUR_IN_MILLIS);
         TimePoint startTime = rangeStart.plus(FIFTEEN_MINUTES_IN_MILLIS);
-        int duration = FIFTEEN_MINUTES_IN_MILLIS;
+        Duration duration = FIFTEEN_MINUTES_IN_MILLIS;
 
         assertOverlap(startTime, duration, rangeStart, rangeEnd);
     }
@@ -121,7 +123,7 @@ public class MediaLibaryTest {
         TimePoint rangeStart = MillisecondsTimePoint.now();
         TimePoint rangeEnd = rangeStart.plus(THIRTY_MINUTES_IN_MILLIS);
         TimePoint startTime = rangeStart.plus(FIFTEEN_MINUTES_IN_MILLIS);
-        int duration = THIRTY_MINUTES_IN_MILLIS;
+        Duration duration = THIRTY_MINUTES_IN_MILLIS;
 
         assertOverlap(startTime, duration, rangeStart, rangeEnd);
     }
@@ -129,7 +131,7 @@ public class MediaLibaryTest {
     @Test
     public void testQueryMediaTracksBetween_StartsBeforeEndsBeforeRange() {
         TimePoint startTime = MillisecondsTimePoint.now();
-        int duration = THIRTY_MINUTES_IN_MILLIS;
+        Duration duration = THIRTY_MINUTES_IN_MILLIS;
         TimePoint rangeStart = startTime.plus(FIFTEEN_MINUTES_IN_MILLIS);
         TimePoint rangeEnd = rangeStart.plus(THIRTY_MINUTES_IN_MILLIS);
 
@@ -139,8 +141,8 @@ public class MediaLibaryTest {
     @Test
     public void testQueryMediaTracksBetween_TrackEndsBeforeRange() {
         TimePoint startTime = MillisecondsTimePoint.now();
-        int duration = THIRTY_MINUTES_IN_MILLIS;
-        TimePoint rangeStart = startTime.plus(duration + 1);
+        Duration duration = THIRTY_MINUTES_IN_MILLIS;
+        TimePoint rangeStart = startTime.plus(duration).plus(1);
         TimePoint rangeEnd = rangeStart.plus(ONE_HOUR_IN_MILLIS);
 
         assertNoOverlap(startTime, duration, rangeStart, rangeEnd);
@@ -151,7 +153,7 @@ public class MediaLibaryTest {
         TimePoint rangeStart = MillisecondsTimePoint.now();
         TimePoint rangeEnd = rangeStart.plus(THIRTY_MINUTES_IN_MILLIS);
         TimePoint startTime = rangeStart.plus(ONE_HOUR_IN_MILLIS);
-        int duration = THIRTY_MINUTES_IN_MILLIS;
+        Duration duration = THIRTY_MINUTES_IN_MILLIS;
 
         assertNoOverlap(startTime, duration, rangeStart, rangeEnd);
     }
@@ -161,10 +163,10 @@ public class MediaLibaryTest {
         MediaTrack originalMediaTrack = new MediaTrack();
         originalMediaTrack.dbId = "a";
         originalMediaTrack.startTime = MillisecondsTimePoint.now();
-        originalMediaTrack.durationInMillis = 100;
+        originalMediaTrack.duration = new MillisecondsDurationImpl(1);
         
-        TimePoint queryStartTime = originalMediaTrack.startTime.plus(1);
-        TimePoint queryEndTime = originalMediaTrack.deriveEndTime().minus(1);
+        TimePoint queryStartTime = originalMediaTrack.startTime.minus(1);
+        TimePoint queryEndTime = originalMediaTrack.deriveEndTime().plus(1);
 
         mediaLibary.addMediaTrack(originalMediaTrack);
         
@@ -174,7 +176,7 @@ public class MediaLibaryTest {
         MediaTrack changedMediaTrack = new MediaTrack();
         changedMediaTrack.dbId = "a";
         changedMediaTrack.startTime = originalMediaTrack.startTime.plus(101);
-        changedMediaTrack.durationInMillis = 100;
+        changedMediaTrack.duration = new MillisecondsDurationImpl(100);
         mediaLibary.startTimeChanged(changedMediaTrack);
         
         Set<MediaTrack> secondQueryResult = mediaLibary.findMediaTracksInTimeRange(queryStartTime, queryEndTime);
@@ -191,7 +193,7 @@ public class MediaLibaryTest {
         MediaTrack mediaTrack = new MediaTrack();
         mediaTrack.dbId = "a";
         mediaTrack.startTime = MillisecondsTimePoint.now();
-        mediaTrack.durationInMillis = 100;
+        mediaTrack.duration = MillisecondsDurationImpl.ONE_HOUR;
         
         TimePoint originalStartTime = mediaTrack.startTime;
         TimePoint originalEndTime = mediaTrack.deriveEndTime();
@@ -213,7 +215,7 @@ public class MediaLibaryTest {
         MediaTrack firstMediaTrack = new MediaTrack();
         firstMediaTrack.dbId = "a";
         firstMediaTrack.startTime = MillisecondsTimePoint.now();
-        firstMediaTrack.durationInMillis = 100;
+        firstMediaTrack.duration = MillisecondsDurationImpl.ONE_HOUR;
         mediaLibary.addMediaTrack(firstMediaTrack);
         
         TimePoint queryStartTime = firstMediaTrack.startTime.plus(1);
@@ -225,7 +227,7 @@ public class MediaLibaryTest {
         MediaTrack secondMediaTrack = new MediaTrack();
         secondMediaTrack.dbId = "b";
         secondMediaTrack.startTime = firstMediaTrack.startTime;
-        secondMediaTrack.durationInMillis = firstMediaTrack.durationInMillis;
+        secondMediaTrack.duration = firstMediaTrack.duration;
         mediaLibary.addMediaTrack(secondMediaTrack);
         
         Set<MediaTrack> secondQueryResult = mediaLibary.findMediaTracksInTimeRange(queryStartTime, queryEndTime);
@@ -238,13 +240,13 @@ public class MediaLibaryTest {
         assertThat(thirdQueryResult.size(), is(2));
 }
     
-    private void assertOverlap(TimePoint startTime, int durationInMillis, TimePoint rangeStart, TimePoint rangeEnd) {
+    private void assertOverlap(TimePoint startTime, Duration duration, TimePoint rangeStart, TimePoint rangeEnd) {
         //insert test object
         String dbId = "1234";
         String title = "title";
         String url = "url";
         MimeType mimeType = MimeType.mp4;
-        MediaTrack mediaTrack = new MediaTrack(dbId, title, url, startTime, durationInMillis, mimeType);
+        MediaTrack mediaTrack = new MediaTrack(dbId, title, url, startTime, duration, mimeType);
         mediaLibary.addMediaTrack(mediaTrack);
         
         Collection<MediaTrack> mediaTracks = mediaLibary.findMediaTracksInTimeRange(rangeStart, rangeEnd);
@@ -252,13 +254,13 @@ public class MediaLibaryTest {
         assertThat(mediaTracks.iterator().next().dbId, is(dbId));
     }
     
-    private void assertNoOverlap(TimePoint startTime, int durationInMillis, TimePoint rangeStart, TimePoint rangeEnd) {
+    private void assertNoOverlap(TimePoint startTime, Duration duration, TimePoint rangeStart, TimePoint rangeEnd) {
         //insert test object
         String dbId = "1234";
         String title = "title";
         String url = "url";
         MimeType mimeType = MimeType.mp4;
-        MediaTrack mediaTrack = new MediaTrack(dbId, title, url, startTime, durationInMillis, mimeType);
+        MediaTrack mediaTrack = new MediaTrack(dbId, title, url, startTime, duration, mimeType);
         mediaLibary.addMediaTrack(mediaTrack);
         
         Collection<MediaTrack> mediaTracks = mediaLibary.findMediaTracksInTimeRange(rangeStart, rangeEnd);
