@@ -88,7 +88,9 @@ public class MillisecondsDurationImpl implements Duration {
 
     @Override
     public boolean equals(Object obj) {
-        if (obj instanceof Duration) {
+        if (this == obj) {
+            return true;
+        } else if (obj instanceof Duration) {
             return compareTo((Duration) obj) == 0;
         } else {
             return false;
