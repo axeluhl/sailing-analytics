@@ -27,29 +27,29 @@ public class MetaLeaderboardViewer extends AbstractLeaderboardViewer {
     public MetaLeaderboardViewer(SailingServiceAsync sailingService, AsyncActionsExecutor asyncActionsExecutor, 
             Timer timer, LeaderboardSettings leaderboardSettings, String preselectedLeaderboardName, RaceIdentifier preselectedRace,
             String leaderboardGroupName, String metaLeaderboardName, ErrorReporter errorReporter,
-            StringMessages stringMessages, UserAgentDetails userAgent, boolean showRaceDetails, 
+            UserAgentDetails userAgent, boolean showRaceDetails, 
             boolean autoExpandLastRaceColumn, boolean showSeriesLeaderboards) {
         this(new CompetitorSelectionModel(/* hasMultiSelection */true), sailingService, asyncActionsExecutor,  timer,
                 leaderboardSettings, preselectedLeaderboardName, preselectedRace, leaderboardGroupName, metaLeaderboardName,
-                errorReporter, stringMessages, userAgent, showRaceDetails, autoExpandLastRaceColumn, showSeriesLeaderboards);
+                errorReporter, userAgent, showRaceDetails, autoExpandLastRaceColumn, showSeriesLeaderboards);
     }
     
     private MetaLeaderboardViewer(CompetitorSelectionModel competitorSelectionModel, SailingServiceAsync sailingService,
             AsyncActionsExecutor asyncActionsExecutor, Timer timer, LeaderboardSettings leaderboardSettings,
             String preselectedLeaderboardName, RaceIdentifier preselectedRace, String leaderboardGroupName,
-            String metaLeaderboardName, ErrorReporter errorReporter, StringMessages stringMessages,
+            String metaLeaderboardName, ErrorReporter errorReporter, 
             UserAgentDetails userAgent, boolean showRaceDetails, boolean autoExpandLastRaceColumn, boolean showSeriesLeaderboards) {
-        super(competitorSelectionModel, asyncActionsExecutor,  timer, stringMessages, new LeaderboardPanel(sailingService, asyncActionsExecutor,
+        super(competitorSelectionModel, asyncActionsExecutor,  timer, new LeaderboardPanel(sailingService, asyncActionsExecutor,
                         leaderboardSettings, true, preselectedRace, competitorSelectionModel, timer,
-                        leaderboardGroupName, metaLeaderboardName, errorReporter, stringMessages, userAgent,
+                        leaderboardGroupName, metaLeaderboardName, errorReporter, StringMessages.INSTANCE, userAgent,
                         showRaceDetails, /* competitorSearchTextBox */ null, /* showSelectionCheckbox */ true, /* raceTimesInfoProvider */null, autoExpandLastRaceColumn, 
                         /* adjustTimerDelay */ true, /*autoApplyTopNFilter*/false, false));
         final FlowPanel mainPanel = new FlowPanel();
         setWidget(mainPanel);
-        final Label overallStandingsLabel = new Label(stringMessages.overallStandings());
+        final Label overallStandingsLabel = new Label(StringMessages.INSTANCE.overallStandings());
         overallStandingsLabel.setStyleName("leaderboardHeading");
         multiLeaderboardPanel = new MultiLeaderboardPanel(sailingService, metaLeaderboardName, asyncActionsExecutor, timer,
-                preselectedLeaderboardName, preselectedRace, errorReporter, stringMessages,
+                preselectedLeaderboardName, preselectedRace, errorReporter, StringMessages.INSTANCE,
                 userAgent, showRaceDetails, autoExpandLastRaceColumn);
         multiLeaderboardPanel.setVisible(showSeriesLeaderboards);
         mainPanel.add(getLeaderboardPanel());

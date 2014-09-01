@@ -20,7 +20,6 @@ import com.sap.sse.gwt.client.player.Timer;
  * @author Frank Mittag (c163874)
  */
 public abstract class AbstractLeaderboardViewer extends SimplePanel {
-    protected final StringMessages stringMessages;
     private final LeaderboardPanel leaderboardPanel;
     protected final CompetitorSelectionModel competitorSelectionProvider;
     protected final AsyncActionsExecutor asyncActionsExecutor;
@@ -28,11 +27,10 @@ public abstract class AbstractLeaderboardViewer extends SimplePanel {
     protected final Timer timer;
 
     public AbstractLeaderboardViewer(CompetitorSelectionModel competitorSelectionProvider, AsyncActionsExecutor asyncActionsExecutor,
-            Timer timer, StringMessages stringMessages, LeaderboardPanel leaderboardPanel) {
+            Timer timer, LeaderboardPanel leaderboardPanel) {
         this.competitorSelectionProvider = competitorSelectionProvider;
         this.leaderboardPanel = leaderboardPanel;
         this.asyncActionsExecutor = asyncActionsExecutor;
-        this.stringMessages = stringMessages;
         this.timer = timer;
     }
     
@@ -51,7 +49,7 @@ public abstract class AbstractLeaderboardViewer extends SimplePanel {
                 @Override
                 public void onClick(ClickEvent event) {
                     SettingsDialog<SettingsType> dialog = new SettingsDialog<SettingsType>(component,
-                            stringMessages);
+                            StringMessages.INSTANCE);
                     dialog.ensureDebugId(debugIdPrefix + "SettingsDialog");
                     dialog.show();
                 }
@@ -60,7 +58,7 @@ public abstract class AbstractLeaderboardViewer extends SimplePanel {
         settingsButton.setEnabled(component.hasSettings() && hasSettingsWhenComponentIsInvisible);
 //        settingsButton.addStyleName(STYLE_VIEWER_TOOLBAR_SETTINGS_BUTTON);
         settingsButton.getElement().getStyle().setFloat(Style.Float.LEFT);
-        settingsButton.setTitle(stringMessages.settingsForComponent(componentName));
+        settingsButton.setTitle(StringMessages.INSTANCE.settingsForComponent(componentName));
     }
 }
 

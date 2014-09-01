@@ -18,7 +18,6 @@ import com.sap.sailing.domain.common.RegattaNameAndRaceName;
 import com.sap.sailing.gwt.home.client.i18n.TextMessages;
 import com.sap.sailing.gwt.home.client.shared.placeholder.Placeholder;
 import com.sap.sailing.gwt.ui.client.ErrorReporter;
-import com.sap.sailing.gwt.ui.client.StringMessages;
 import com.sap.sailing.gwt.ui.leaderboard.LeaderboardSettings;
 import com.sap.sailing.gwt.ui.leaderboard.LeaderboardSettings.RaceColumnSelectionStrategies;
 import com.sap.sailing.gwt.ui.leaderboard.LeaderboardSettingsFactory;
@@ -110,11 +109,11 @@ public class LeaderboardActivity extends AbstractActivity implements ErrorReport
         
         if (leaderboardType.isMetaLeaderboard()) {
             leaderboardView.createMetaLeaderboardViewer(clientFactory.getSailingService(), new AsyncActionsExecutor(),
-                    timer, leaderboardSettings, null, preselectedRace, "leaderboardGroupName", leaderboardName, this, StringMessages.INSTANCE,
+                    timer, leaderboardSettings, null, preselectedRace, "leaderboardGroupName", leaderboardName, this,
                     userAgent, showRaceDetails, autoExpandLastRaceColumn, showSeriesLeaderboards);
         } else {
             leaderboardView.createLeaderboardViewer(clientFactory.getSailingService(), new AsyncActionsExecutor(),
-                    timer, leaderboardSettings, preselectedRace, "leaderboardGroupName", leaderboardName, this, StringMessages.INSTANCE,
+                    timer, leaderboardSettings, preselectedRace, "leaderboardGroupName", leaderboardName, this,
                     userAgent, showRaceDetails, autoExpandLastRaceColumn, showOverallLeaderboard);
         }
 
