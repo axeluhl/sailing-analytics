@@ -63,7 +63,6 @@ import com.sap.sailing.domain.base.ControlPointWithTwoMarks;
 import com.sap.sailing.domain.base.Course;
 import com.sap.sailing.domain.base.CourseArea;
 import com.sap.sailing.domain.base.CourseBase;
-import com.sap.sailing.domain.base.DomainFactory;
 import com.sap.sailing.domain.base.Event;
 import com.sap.sailing.domain.base.EventBase;
 import com.sap.sailing.domain.base.Fleet;
@@ -188,7 +187,6 @@ import com.sap.sailing.domain.leaderboard.RegattaLeaderboard;
 import com.sap.sailing.domain.leaderboard.ThresholdBasedResultDiscardingRule;
 import com.sap.sailing.domain.leaderboard.caching.LeaderboardDTOCalculationReuseCache;
 import com.sap.sailing.domain.leaderboard.caching.LiveLeaderboardUpdater;
-import com.sap.sailing.domain.leaderboard.impl.LowPoint;
 import com.sap.sailing.domain.persistence.DomainObjectFactory;
 import com.sap.sailing.domain.persistence.MongoObjectFactory;
 import com.sap.sailing.domain.persistence.MongoRaceLogStoreFactory;
@@ -389,6 +387,7 @@ import com.sap.sailing.server.replication.ReplicationService;
 import com.sap.sailing.server.replication.impl.ReplicaDescriptor;
 import com.sap.sailing.util.BuildVersion;
 import com.sap.sailing.xrr.schema.RegattaResults;
+import com.sap.sailing.xrr.structureimport.SeriesParameters;
 import com.sap.sailing.xrr.structureimport.StructureImportUrl;
 import com.sap.sse.common.Util;
 import com.sap.sse.common.Util.Pair;
@@ -459,6 +458,8 @@ public class SailingServiceImpl extends ProxiedRemoteServiceServlet implements S
     private final SwissTimingReplayService swissTimingReplayService;
 
     private final QuickRanksLiveCache quickRanksLiveCache;
+    
+    private StructureImportUrl structureImport = null;
 
     public SailingServiceImpl() {
         BundleContext context = Activator.getDefault();
@@ -3703,34 +3704,74 @@ public class SailingServiceImpl extends ProxiedRemoteServiceServlet implements S
     }
 
     
-    @Override
-    public void addEventImportUrl(String url, EventDTO newEvent, RegattaDTO defaultRegatta) {
-
-        StructureImportUrl structureImport = new StructureImportUrl(url, new SetRacenumberFromSeries());
-        
-        // set default settings for series
-        
-        boolean firstColumnIsNonDiscardableCarryForward = false;
-        boolean hasSplitFleetContiguousScoring = false;
-        boolean startswithZeroScore = false;
-        int[] discardingThresholds = null;
+    private SeriesParameters getDefaultSeries(RegattaDTO defaultRegatta){
+    	SeriesParameters defaultSeries = new SeriesParameters(false, false, false, null);
         if(defaultRegatta.series.size()>0){
         	SeriesDTO series = defaultRegatta.series.get(0);
-        	firstColumnIsNonDiscardableCarryForward = series.isFirstColumnIsNonDiscardableCarryForward();
-        	hasSplitFleetContiguousScoring = series.hasSplitFleetContiguousScoring();
-        	startswithZeroScore = series.isStartsWithZeroScore();
-        	discardingThresholds = series.getDiscardThresholds();
+        	defaultSeries.setFirstColumnIsNonDiscardableCarryForward(series.isFirstColumnIsNonDiscardableCarryForward());
+        	defaultSeries.setHasSplitFleetContiguousScoring(series.hasSplitFleetContiguousScoring());
+        	defaultSeries.setStartswithZeroScore(series.isStartsWithZeroScore());
+        	defaultSeries.setDiscardingThresholds(series.getDiscardThresholds());
         }
-        
-        
-        // create Regattas
-        
-        ArrayList<AddSpecificRegatta> regattas = structureImport.getRegattas(defaultRegatta.scoringScheme, false, defaultRegatta.defaultCourseAreaUuid,
-        			defaultRegatta.useStartTimeInference, getBaseDomainFactory(), firstColumnIsNonDiscardableCarryForward, hasSplitFleetContiguousScoring, 
-        			startswithZeroScore, discardingThresholds);
+        return defaultSeries;
+    }
+    @Override
+    public void addEventImportUrl(final String url, final EventDTO newEvent, final RegattaDTO defaultRegatta) {
+    	
+    	structureImport = new StructureImportUrl(new SetRacenumberFromSeries());
+    	
+    	Runnable structureImportTask = new Runnable() {
 
-        String eventName = structureImport.getEventName();
-        ArrayList<String> leaderboardNames = new ArrayList<String>();
+            @Override
+            public void run() {
+            	structureImport.parseEvent(url);
+            	
+            	 // set default settings for series
+                SeriesParameters defaultSeries = getDefaultSeries(defaultRegatta);
+                
+                // get Regattas
+                ArrayList<AddSpecificRegatta> regattas = structureImport.getRegattas(defaultRegatta.scoringScheme, false, defaultRegatta.defaultCourseAreaUuid,
+                			defaultRegatta.useStartTimeInference, getBaseDomainFactory(), defaultSeries.isFirstColumnIsNonDiscardableCarryForward(), 
+                			defaultSeries.isHasSplitFleetContiguousScoring(), 
+                			defaultSeries.isStartswithZeroScore(), defaultSeries.getDiscardingThresholds());
+
+                String eventName = structureImport.getEventName();
+                ArrayList<String> leaderboardNames = createRegattasWithRaces(
+						regattas, eventName);
+                //create Leaderboard Group
+                createLeaderboardGroup(newEvent, eventName, leaderboardNames);
+                structureImport.setCompetitors();
+                structureImport.setFinished(true);
+                
+            }
+        };
+        executor.execute(structureImportTask);
+        
+    }
+    
+    private void createLeaderboardGroup(final EventDTO newEvent,
+			String eventName, ArrayList<String> leaderboardNames) {
+		CreateLeaderboardGroup createLeaderboardGroupOp = new CreateLeaderboardGroup(eventName, eventName, "", false,
+                leaderboardNames, null, null);
+        LeaderboardGroupDTO leaderboardGroupDTO = convertToLeaderboardGroupDTO(
+                getService().apply(createLeaderboardGroupOp), false, false);
+        List<UUID> uuids = new ArrayList<UUID>();
+        uuids.add(leaderboardGroupDTO.getId());
+        //add created Leaderboard Group to event
+        try {
+            updateEvent(newEvent.id, newEvent.getName(), newEvent.getDescription(), newEvent.startDate,
+                    newEvent.endDate, newEvent.venue, newEvent.isPublic, uuids, newEvent.getOfficialWebsiteURL(),
+                    newEvent.getLogoImageURL(), newEvent.getImageURLs(), newEvent.getVideoURLs(),
+                    newEvent.getSponsorImageURLs());
+        } catch (MalformedURLException e) {
+            // TODO Auto-generated catch block
+            e.printStackTrace();
+        }
+	}
+
+	private ArrayList<String> createRegattasWithRaces(
+			ArrayList<AddSpecificRegatta> regattas, String eventName) {
+		ArrayList<String> leaderboardNames = new ArrayList<String>();
 
         for (int i = 0; i < regattas.size(); i++) {
         	Regatta regatta = getService().apply(regattas.get(i));
@@ -3748,26 +3789,8 @@ public class SailingServiceImpl extends ProxiedRemoteServiceServlet implements S
                 createRegattaLeaderboard(regatta.getRegattaIdentifier(), eventName, new int[0]);
             }
         }
-        //create Leaderboard Group
-        CreateLeaderboardGroup createLeaderboardGroupOp = new CreateLeaderboardGroup(eventName, eventName, "", false,
-                leaderboardNames, null, null);
-        LeaderboardGroupDTO leaderboardGroupDTO = convertToLeaderboardGroupDTO(
-                getService().apply(createLeaderboardGroupOp), false, false);
-        List<UUID> uuids = new ArrayList<UUID>();
-        uuids.add(leaderboardGroupDTO.getId());
-        //add created Leaderboard Group to event
-        try {
-            updateEvent(newEvent.id, newEvent.getName(), newEvent.getDescription(), newEvent.startDate,
-                    newEvent.endDate, newEvent.venue, newEvent.isPublic, uuids, newEvent.getOfficialWebsiteURL(),
-                    newEvent.getLogoImageURL(), newEvent.getImageURLs(), newEvent.getVideoURLs(),
-                    newEvent.getSponsorImageURLs());
-        } catch (MalformedURLException e) {
-            // TODO Auto-generated catch block
-            e.printStackTrace();
-        }
-        structureImport.setCompetitors();
-
-    }
+		return leaderboardNames;
+	}
 
     @Override
     public RegattaScoreCorrectionDTO getScoreCorrections(String scoreCorrectionProviderName, String eventName,
@@ -4363,6 +4386,17 @@ public class SailingServiceImpl extends ProxiedRemoteServiceServlet implements S
 
     public DataImportProgress getImportOperationProgress(UUID id) {
         return getService().getDataImportLock().getProgress(id);
+    }
+    
+    public Integer getStructureImportOperationProgress(){
+    	int parsedDocuments = 0;
+    	if(structureImport != null){
+    		parsedDocuments = structureImport.getProgress();
+    		if(structureImport.isFinished()){
+    			parsedDocuments++;
+    		}
+    	}
+		return parsedDocuments;
     }
 
     private String createLeaderboardQuery(String[] groupNames, boolean compress, boolean exportWind)
