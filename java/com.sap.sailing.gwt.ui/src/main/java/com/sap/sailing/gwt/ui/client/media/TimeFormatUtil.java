@@ -3,6 +3,8 @@ package com.sap.sailing.gwt.ui.client.media;
 import com.google.gwt.i18n.client.DateTimeFormat;
 import com.google.gwt.i18n.client.DateTimeFormat.PredefinedFormat;
 import com.google.gwt.i18n.client.NumberFormat;
+import com.sap.sailing.domain.common.Duration;
+import com.sap.sailing.domain.common.impl.MillisecondsDurationImpl;
 import com.sap.sailing.gwt.ui.client.NumberFormatterFactory;
 
 public class TimeFormatUtil {
@@ -16,9 +18,9 @@ public class TimeFormatUtil {
     private static NumberFormat zeroPaddingNumberFormat_Min = NumberFormatterFactory.getDecimalFormat(2, 0);
     private static NumberFormat zeroPaddingNumberFormat_Sec = NumberFormatterFactory.getDecimalFormat(2, 3);
 
-    public static int hrsMinSecToMilliSeconds(String hrsMinSec) {
+    public static Duration hrsMinSecToMilliSeconds(String hrsMinSec) {
         String[] segements = hrsMinSec.split(":");
-        int milliseconds = 0;
+        long milliseconds = 0;
         boolean isNegative = false;
         switch (segements.length) {
         case 3:
@@ -38,34 +40,39 @@ public class TimeFormatUtil {
             milliseconds = milliseconds + Math.round(seconds * 1000);
         }
         if (isNegative) {
-            return -milliseconds;
+            return new MillisecondsDurationImpl(-milliseconds);
         } else {
-            return milliseconds;
+            return new MillisecondsDurationImpl(milliseconds);
         }
     }
 
-    public static String milliSecondsToHrsMinSec(long milliseconds) {
-        int signum  = Long.signum(milliseconds);
-        milliseconds = Math.abs(milliseconds);
-        
-        StringBuilder result = new StringBuilder();
-        
-        long hours = (milliseconds / MILLISECONDS_PER_HOUR);
-        if (hours > 0) {
-            result.append(String.valueOf(signum * hours) + ':');
-            signum = 1;
+    public static String durationToHrsMinSec(Duration duration) {
+        if (duration != null) {
+            long milliseconds = duration.asMillis();
+            int signum  = Long.signum(milliseconds);
+            milliseconds = Math.abs(milliseconds);
+            
+            StringBuilder result = new StringBuilder();
+            
+            long hours = (milliseconds / MILLISECONDS_PER_HOUR);
+            if (hours > 0) {
+                result.append(String.valueOf(signum * hours) + ':');
+                signum = 1;
+            }
+            milliseconds = Math.abs(milliseconds);
+            long rest = (milliseconds % MILLISECONDS_PER_HOUR);
+            long minutes = (rest / MILLISECONDS_PER_MINUTE);
+            if (minutes > 0 || result.length() > 0) {
+                result.append(zeroPaddingNumberFormat_Min.format(signum * minutes) + ':');
+                signum = 1;
+            }
+            rest = (rest % MILLISECONDS_PER_MINUTE);
+            double seconds = rest / 1000d;
+            result.append(zeroPaddingNumberFormat_Sec.format(signum * seconds));
+            return result.toString();
+        } else {
+            return "";
         }
-        milliseconds = Math.abs(milliseconds);
-        long rest = (milliseconds % MILLISECONDS_PER_HOUR);
-        long minutes = (rest / MILLISECONDS_PER_MINUTE);
-        if (minutes > 0 || result.length() > 0) {
-            result.append(zeroPaddingNumberFormat_Min.format(signum * minutes) + ':');
-            signum = 1;
-        }
-        rest = (rest % MILLISECONDS_PER_MINUTE);
-        double seconds = rest / 1000d;
-        result.append(zeroPaddingNumberFormat_Sec.format(signum * seconds));
-        return result.toString();
     }
 
 }
