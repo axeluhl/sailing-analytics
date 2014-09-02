@@ -56,7 +56,7 @@ public class StructureImportUrlsManagementPanel extends FlowPanel {
     private final Button removeButton;
     private final Button refreshButton;
     private final Button importDetailsButton;
-    
+
     private StructureImportProgressBar progressBar;
     private Label overallName;
     private int parsed;
@@ -111,7 +111,7 @@ public class StructureImportUrlsManagementPanel extends FlowPanel {
         removeButton.addClickHandler(new ClickHandler() {
             @Override
             public void onClick(ClickEvent event) {
-                List<RegattaDTO> regattaDTOs =  regattaListComposite.getAllRegattas();
+                List<RegattaDTO> regattaDTOs = regattaListComposite.getAllRegattas();
                 for (RegattaIdentifier selectedRegatta : regattaSelectionProvider.getSelectedRegattas()) {
                     for (RegattaDTO regattaDTO : regattaListComposite.getAllRegattas()) {
                         if (regattaDTO.getRegattaIdentifier().equals(selectedRegatta)) {
@@ -144,14 +144,14 @@ public class StructureImportUrlsManagementPanel extends FlowPanel {
         regattaSelectionProvider = new RegattaSelectionModel(true);
         // regattaSelectionProvider.addRegattaSelectionChangeListener(this);
 
-        regattaListComposite = new StructureImportListComposite(sailingService, regattaSelectionProvider, regattaRefresher,
-                errorReporter, stringMessages, "test");
+        regattaListComposite = new StructureImportListComposite(sailingService, regattaSelectionProvider,
+                regattaRefresher, errorReporter, stringMessages, "test");
         regattaListComposite.ensureDebugId("RegattaListComposite");
         grid.setWidget(0, 0, regattaListComposite);
         grid.getRowFormatter().setVerticalAlign(0, HasVerticalAlignment.ALIGN_TOP);
         grid.getColumnFormatter().getElement(0/** 1 */
         ).getStyle().setPaddingTop(2.0, Unit.EM);
-        
+
         add(progressPanel);
         add(vp);
         refreshUrlList();
@@ -211,8 +211,6 @@ public class StructureImportUrlsManagementPanel extends FlowPanel {
             }
         });
     }
-    
-
 
     private void createEventDetails(List<RegattaDTO> regattas) {
         List<String> regattaNamesTemp = new ArrayList<String>();
@@ -255,7 +253,7 @@ public class StructureImportUrlsManagementPanel extends FlowPanel {
                                             }
 
                                             @Override
-                                            public void onSuccess(EventDTO newEvent) { 
+                                            public void onSuccess(EventDTO newEvent) {
                                                 setDefaultRegatta(regattaNames, newEvent);
                                             }
                                         });
@@ -307,88 +305,83 @@ public class StructureImportUrlsManagementPanel extends FlowPanel {
         dialog.show();
     }
 
-
     public void fillRegattas(List<RegattaDTO> regattas) {
         regattaListComposite.fillRegattas(regattas);
     }
-    
-    private void createBarAndLabel(int amountOfRegattas){
+
+    private void createBarAndLabel(int amountOfRegattas) {
         overallName = new Label(stringMessages.overallProgress() + ":");
         progressPanel.add(overallName);
-        progressBar = new StructureImportProgressBar(
-                                amountOfRegattas+1, Style.ANIMATED);
+        progressBar = new StructureImportProgressBar(amountOfRegattas + 1, Style.ANIMATED);
         progressPanel.add(progressBar);
-        
+
     }
-    private void setProgressBar(final int amountOfRegattas){
+
+    private void setProgressBar(final int amountOfRegattas) {
         createBarAndLabel(amountOfRegattas);
-        
+
         final Timer timer = new Timer() {
             @Override
             public void run() {
-                sailingService.getStructureImportOperationProgress(new AsyncCallback<Integer>(){
-                         @Override
-                     public void onFailure(Throwable caught) {
-                         errorReporter.reportError(stringMessages
-                                 .errorAddingResultImportUrl(caught
-                                         .getMessage()));
-                     }
-                         @Override
-                     public void onSuccess(Integer result) {
-                                 parsed = result;
-                                 progressBar.setPercent(result);
-                         }
-                
+                sailingService.getStructureImportOperationProgress(new AsyncCallback<Integer>() {
+                    @Override
+                    public void onFailure(Throwable caught) {
+                        errorReporter.reportError(stringMessages.errorAddingResultImportUrl(caught.getMessage()));
+                    }
+
+                    @Override
+                    public void onSuccess(Integer result) {
+                        parsed = result;
+                        progressBar.setPercent(result);
+                    }
+
                 });
-                if(parsed >= amountOfRegattas){
+                if (parsed >= amountOfRegattas) {
                     regattaRefresher.fillRegattas();
                     fillRegattas(new ArrayList<RegattaDTO>());
                     progressBar.removeFromParent();
                     overallName.removeFromParent();
-                        this.cancel();
+                    this.cancel();
                 }
             }
         };
         timer.scheduleRepeating(2000);
     }
-    
-    private void setDefaultRegatta(final List<String> regattaNames, final EventDTO newEvent){
+
+    private void setDefaultRegatta(final List<String> regattaNames, final EventDTO newEvent) {
         Collection<RegattaDTO> existingRegattas = Collections.emptyList();
         List<EventDTO> existingEvents = new ArrayList<EventDTO>();
         existingEvents.add(newEvent);
-        
-        DefaultRegattaCreateDialog dialog = new DefaultRegattaCreateDialog(existingRegattas, existingEvents, stringMessages,
-                new DialogCallback<RegattaDTO>() {
-            @Override
-            public void cancel() {
-            }
 
-            @Override
-            public void ok(RegattaDTO newRegatta) {
-                createRegattas(regattaNames, newEvent, newRegatta);
-            }
-        });
-        dialog.ensureDebugId("DefaultRegattaCreateDialog");
-        dialog.show();
-                                
-    }
-    
-    private void createRegattas(final List<String> regattaNames, EventDTO newEvent, RegattaDTO defaultRegatta){
-        eventManagementPanel.fillEvents();
-        sailingService.addEventImportUrl(regattaNames, newEvent, defaultRegatta,
-                new AsyncCallback<Void>() {
+        DefaultRegattaCreateDialog dialog = new DefaultRegattaCreateDialog(existingRegattas, existingEvents,
+                stringMessages, new DialogCallback<RegattaDTO>() {
                     @Override
-                    public void onFailure(Throwable caught) {
-                        errorReporter.reportError(stringMessages
-                                .errorAddingResultImportUrl(caught
-                                        .getMessage()));
+                    public void cancel() {
                     }
 
                     @Override
-                    public void onSuccess(Void result) {
-                        setProgressBar(regattaNames.size());
+                    public void ok(RegattaDTO newRegatta) {
+                        createRegattas(regattaNames, newEvent, newRegatta);
                     }
                 });
+        dialog.ensureDebugId("DefaultRegattaCreateDialog");
+        dialog.show();
+
+    }
+
+    private void createRegattas(final List<String> regattaNames, EventDTO newEvent, RegattaDTO defaultRegatta) {
+        eventManagementPanel.fillEvents();
+        sailingService.addEventImportUrl(regattaNames, newEvent, defaultRegatta, new AsyncCallback<Void>() {
+            @Override
+            public void onFailure(Throwable caught) {
+                errorReporter.reportError(stringMessages.errorAddingResultImportUrl(caught.getMessage()));
+            }
+
+            @Override
+            public void onSuccess(Void result) {
+                setProgressBar(regattaNames.size());
+            }
+        });
     }
 
 }

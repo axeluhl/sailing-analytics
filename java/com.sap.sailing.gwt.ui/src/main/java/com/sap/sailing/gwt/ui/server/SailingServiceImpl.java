@@ -3807,17 +3807,31 @@ public class SailingServiceImpl extends ProxiedRemoteServiceServlet implements S
     private void createAndAddLeaderboardGroup(final EventDTO newEvent, String eventName,
             ArrayList<String> leaderboardNames) {
         LeaderboardGroupDTO leaderboardGroupDTO = null;
-        
         // create Leaderboard Group
-        if (getService().getLeaderboardGroupByName(eventName) == null) {
-            CreateLeaderboardGroup createLeaderboardGroupOp = new CreateLeaderboardGroup(eventName, eventName, "",
-                    false, leaderboardNames, null, null);
+        try { /* mit if abfangen */
+            CreateLeaderboardGroup createLeaderboardGroupOp = new CreateLeaderboardGroup(newEvent.getName(),
+                    newEvent.getDescription(), newEvent.getName(), false, leaderboardNames, null, null);
             leaderboardGroupDTO = convertToLeaderboardGroupDTO(getService().apply(createLeaderboardGroupOp), false,
                     false);
-        } else {
+        } catch (Exception e1) {
             leaderboardNames.addAll(getLeaderboardNames());
             updateLeaderboardGroup(eventName, eventName, "", eventName, leaderboardNames, null, null);
             leaderboardGroupDTO = getLeaderboardGroupByName(eventName, false);
+        }
+
+        List<UUID> eventLeaderboardGroupUUIDs = new ArrayList<>();
+        for (LeaderboardGroupDTO lg : newEvent.getLeaderboardGroups()) {
+            eventLeaderboardGroupUUIDs.add(lg.getId());
+        }
+        eventLeaderboardGroupUUIDs.add(leaderboardGroupDTO.getId());
+        try {
+            updateEvent(newEvent.id, newEvent.getName(), newEvent.getDescription(), newEvent.startDate,
+                    newEvent.endDate, newEvent.venue, newEvent.isPublic, eventLeaderboardGroupUUIDs,
+                    newEvent.getLogoImageURL(), newEvent.getOfficialWebsiteURL(), newEvent.getImageURLs(),
+                    newEvent.getVideoURLs(), newEvent.getSponsorImageURLs());
+        } catch (MalformedURLException e) {
+            // TODO Auto-generated catch block
+            e.printStackTrace();
         }
     }
 
@@ -5223,5 +5237,4 @@ public class SailingServiceImpl extends ProxiedRemoteServiceServlet implements S
         }
         return null;
     }
-
 }
