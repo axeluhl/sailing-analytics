@@ -14,43 +14,50 @@ import com.google.gwt.user.client.ui.Widget;
 import com.sap.sailing.gwt.ui.client.StringMessages;
 import com.sap.sailing.gwt.ui.client.shared.controls.listedit.ExpandedListEditorUi;
 import com.sap.sailing.gwt.ui.client.shared.controls.listedit.ListEditorComposite;
+import com.sap.sailing.gwt.ui.client.shared.controls.listedit.ListEditorUiStrategy;
 import com.sap.sailing.gwt.ui.shared.SeriesDTO;
 import com.sap.sse.gwt.client.dialog.DataEntryDialog.DialogCallback;
 
 public class SeriesWithFleetsListEditor extends ListEditorComposite<SeriesDTO> {
-    
-    public SeriesWithFleetsListEditor(List<SeriesDTO> initialValues, StringMessages stringMessages, ImageResource removeImage, boolean enableFleetRemoval) {
-        super(initialValues, new ExpandedUi(stringMessages, removeImage, enableFleetRemoval));
+	
+	public SeriesWithFleetsListEditor(List<SeriesDTO> initialValues, StringMessages stringMessages, ImageResource removeImage, boolean enableFleetRemoval) {
+        super(initialValues);
+        setActiveUi(createExpandedUi(stringMessages, removeImage, enableFleetRemoval));
     }
-    
-    private static class ExpandedUi extends ExpandedListEditorUi<SeriesDTO> {
+	
+	protected ListEditorUiStrategy<SeriesDTO> createExpandedUi(StringMessages stringMessages, ImageResource removeImage, boolean enableFleetRemoval){
+		return new ExpandedUi(stringMessages, removeImage, enableFleetRemoval);
+	}
+	
+    public static class ExpandedUi extends ExpandedListEditorUi<SeriesDTO> {
         public ExpandedUi(StringMessages stringMessages, ImageResource removeImage, boolean canRemoveItems) {
             super(stringMessages, removeImage, canRemoveItems);
         }
+        
 
         @Override
         protected Widget createAddWidget() {
-            Button addSeriesButton = new Button(stringMessages.addSeries());
-            addSeriesButton.ensureDebugId("AddSeriesButton");
-            addSeriesButton.addClickHandler(new ClickHandler() {
-                @Override
-                public void onClick(ClickEvent event) {
-                    SeriesWithFleetsCreateDialog dialog = new SeriesWithFleetsCreateDialog(Collections
-                            .unmodifiableCollection(context.getValue()), stringMessages, new DialogCallback<SeriesDTO>() {
-                        @Override
-                        public void cancel() {
-                        }
+        	Button addSeriesButton = new Button(stringMessages.addSeries());
+    		addSeriesButton.ensureDebugId("AddSeriesButton");
+    		addSeriesButton.addClickHandler(new ClickHandler() {
+    		    @Override
+    		    public void onClick(ClickEvent event) {
+    		        SeriesWithFleetsCreateDialog dialog = new SeriesWithFleetsCreateDialog(Collections
+    		                .unmodifiableCollection(context.getValue()), stringMessages, new DialogCallback<SeriesDTO>() {
+    		            @Override
+    		            public void cancel() {
+    		            }
 
-                        @Override
-                        public void ok(SeriesDTO newSeries) {
-                            addValue(newSeries);
-                        }
-                    });
-                    dialog.ensureDebugId("SeriesCreateDialog");
-                    dialog.show();
-                }
-            });
-            return addSeriesButton;
+    		            @Override
+    		            public void ok(SeriesDTO newSeries) {
+    		                addValue(newSeries);
+    		            }
+    		        });
+    		        dialog.ensureDebugId("SeriesCreateDialog");
+    		        dialog.show();
+    		    }
+    		});
+    		return addSeriesButton;
         }
 
         @Override

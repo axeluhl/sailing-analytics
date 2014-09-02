@@ -9,6 +9,7 @@ public interface StringMessages extends Messages {
     String helloWorld();
     String kielWeel2011();
     String stgAccount();
+    String setDefaultSeries();
     String tracTracEvents();
     String swissTimingEvents();
     String trackedBefore();

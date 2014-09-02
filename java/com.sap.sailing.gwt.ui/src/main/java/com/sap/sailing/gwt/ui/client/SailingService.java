@@ -338,9 +338,11 @@ public interface SailingService extends RemoteService {
 
     void addResultImportUrl(String resultProviderName, String url) throws Exception;
 
-    void addEventImportUrl(List<String> regattaNames, EventDTO newEvent);
     
     List<RegattaDTO> getRegattas(String url);
+
+    void addEventImportUrl(List<String> regattaNames,EventDTO newEvent, RegattaDTO defaultRegatta);
+
 
     void updateLeaderboardScoreCorrectionMetadata(String leaderboardName, Date timePointOfLastCorrectionValidity,
             String comment);
@@ -412,6 +414,8 @@ public interface SailingService extends RemoteService {
     UUID importMasterData(String host, String[] groupNames, boolean override, boolean compress, boolean exportWind);
 
     DataImportProgress getImportOperationProgress(UUID id);
+    
+    Integer getStructureImportOperationProgress();
 
     Iterable<CompetitorDTO> getCompetitors();
 

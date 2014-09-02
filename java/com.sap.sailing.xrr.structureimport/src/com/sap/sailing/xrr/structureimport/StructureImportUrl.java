@@ -31,6 +31,7 @@ import com.sap.sailing.domain.base.impl.PersonImpl;
 import com.sap.sailing.domain.base.impl.RegattaImpl;
 import com.sap.sailing.domain.base.impl.TeamImpl;
 import com.sap.sailing.domain.common.Color;
+import com.sap.sailing.domain.common.ScoringSchemeType;
 import com.sap.sailing.domain.common.dto.FleetDTO;
 import com.sap.sailing.domain.common.dto.RegattaCreationParametersDTO;
 import com.sap.sailing.domain.common.dto.SeriesCreationParametersDTO;
@@ -58,24 +59,25 @@ public class StructureImportUrl {
     private LinkedHashMap<String, Boat> boatForPerson;
     private DomainFactory baseDomainFactory;
     private SetRacenumberStrategy setRacenumberStrategy;
+    private int parsedDocuments = 0;
+    private boolean finished = false;
 
     public StructureImportUrl(String url, SetRacenumberStrategy setRacenumber) {
 
-    	this.setRacenumberStrategy = setRacenumber;
+        this.setRacenumberStrategy = setRacenumber;
         regattas = new EventImport().getRegattas(url);
 
-        
     }
-    
-    public ArrayList<Regattas> getRegattas(){
+
+    public ArrayList<Regattas> getRegattas() {
         return regattas;
     }
-    
-    public void updateRegattasToSelected(List<String> regattaNames){
+
+    public void updateRegattasToSelected(List<String> regattaNames) {
         ArrayList<Regattas> regattasTemp = new ArrayList<Regattas>();
-        for(Regattas regatta: regattas){
-            for(String s: regattaNames){
-                if(regatta.getName().equals(s)){
+        for (Regattas regatta : regattas) {
+            for (String s : regattaNames) {
+                if (regatta.getName().equals(s)) {
                     regattasTemp.add(regatta);
                 }
             }
@@ -83,26 +85,36 @@ public class StructureImportUrl {
         regattas = regattasTemp;
     }
 
-    public ArrayList<AddSpecificRegatta> getRegattas(Serializable courseAreaID) {
-        ArrayList<AddSpecificRegatta> regattas = new ArrayList<AddSpecificRegatta>();
-        Event event = null;
-        results.clear();
-        
-        for (int i = 0; i < this.regattas.size(); i++) {
+    public void parseEvent() {
+
+        for (int i = 0; i < regattas.size(); i++) {
             try {
-                parseRegattaXML(this.regattas.get(i).getXrrEntriesUrl());
+                parseRegattaXML(regattas.get(i).getXrrEntriesUrl());
             } catch (FileNotFoundException e) {
                 // TODO Auto-generated catch block
                 e.printStackTrace();
             } catch (JAXBException e) {
-                // TODO Auto-generated catch block
+                // TODO Auto-generated catch blocks
                 e.printStackTrace();
             } catch (IOException e) {
                 // TODO Auto-generated catch block
                 e.printStackTrace();
             }
-
+            parsedDocuments++;
         }
+
+    }
+
+    public ArrayList<AddSpecificRegatta> getRegattas(ScoringSchemeType scoringScheme, boolean isPersistent,
+            UUID courseArea, boolean useStartTimeInference, DomainFactory baseDomainFactory,
+            boolean firstColumnIsNonDiscardableCarryForward, boolean hasSplitFleetContiguousScoring,
+            boolean startswithZeroScore, int[] discardingThresholds) {
+
+        this.baseDomainFactory = baseDomainFactory;
+        ArrayList<AddSpecificRegatta> regattas = new ArrayList<AddSpecificRegatta>();
+        Event event = null;
+        results.clear();
+        parseEvent();
 
         for (int i = 0; i < results.size(); i++) {
 
@@ -110,7 +122,7 @@ public class StructureImportUrl {
 
             event = (Event) results.get(i).getPersonOrBoatOrTeam()
                     .get(results.get(i).getPersonOrBoatOrTeam().size() - 1);
-            
+
             List<Object> raceOrDevisionOrRegattaSeries = event.getRaceOrDivisionOrRegattaSeriesResult();
             for (int j = 1; j < raceOrDevisionOrRegattaSeries.size(); j++) {
                 races.add((Race) raceOrDevisionOrRegattaSeries.get(j));
@@ -118,26 +130,28 @@ public class StructureImportUrl {
 
             BuildStructure structure = new BuildStructure(races);
 
-            LinkedHashMap<String, SeriesCreationParametersDTO> seriesCreationParams = setSeriesCreationParametersDTO(structure);
+            LinkedHashMap<String, SeriesCreationParametersDTO> seriesCreationParams = setSeriesCreationParametersDTO(
+                    structure, firstColumnIsNonDiscardableCarryForward, hasSplitFleetContiguousScoring,
+                    startswithZeroScore, discardingThresholds);
 
             regattas.add(new AddSpecificRegatta(RegattaImpl.getDefaultName(event.getTitle(), ((Division) event
                     .getRaceOrDivisionOrRegattaSeriesResult().get(0)).getTitle()), ((Division) event
                     .getRaceOrDivisionOrRegattaSeriesResult().get(0)).getTitle(), event.getEventID(),
-                    new RegattaCreationParametersDTO(seriesCreationParams), /* persistent */
-                    true, new LowPoint(), courseAreaID, /* useStartTimeInference */true));
+                    new RegattaCreationParametersDTO(seriesCreationParams), isPersistent, this.baseDomainFactory
+                            .createScoringScheme(scoringScheme), courseArea, useStartTimeInference));
 
         }
         eventName = event.getTitle();
         return regattas;
     }
-    
-    public String getEventName(){
+
+    public String getEventName() {
         return eventName;
     }
-    
-    
 
-    private LinkedHashMap<String, SeriesCreationParametersDTO> setSeriesCreationParametersDTO(BuildStructure structure) {
+    private LinkedHashMap<String, SeriesCreationParametersDTO> setSeriesCreationParametersDTO(BuildStructure structure,
+            boolean firstColumnIsNonDiscardableCarryForward, boolean hasSplitFleetContiguousScoring,
+            boolean startswithZeroScore, int[] discardingThresholds) {
         LinkedHashMap<String, SeriesCreationParametersDTO> seriesCreationParams = new LinkedHashMap<String, SeriesCreationParametersDTO>();
 
         RegattaStructure regattaStructure = structure.getRegattaStructure();
@@ -164,18 +178,18 @@ public class StructureImportUrl {
                 }
                 List<String> raceNames = new ArrayList<String>();
                 raceNames.clear();
-                
-                //set Racenumbers for each series
+
+                // set Racenumbers for each series
                 Race[] races = fleets.get(raceType.getMaxIndex()).getRaces();
                 for (int j = 0; j < races.length; j++) {
-                	Race race = races[j];
+                    Race race = races[j];
                     setRacenumberStrategy.setRacenumber(race, raceType, i, raceNames);
                 }
                 series.add(raceNames);
 
                 seriesCreationParams.put(raceType.getRaceType(), new SeriesCreationParametersDTO(fleetsDTO,
-                /* medal */raceTypes.get(i).isMedal(), /* startsWithZero */false, /* firstColumnIsNonDiscardableCarryForward */false,
-                /* discardingThresholds */null, /* hasSplitFleetContiguousScoring */false));
+                /* medal */raceTypes.get(i).isMedal(), startswithZeroScore, firstColumnIsNonDiscardableCarryForward,
+                        discardingThresholds, hasSplitFleetContiguousScoring));
             }
 
         }
@@ -218,98 +232,96 @@ public class StructureImportUrl {
 
         return color;
     }
-    
-    public void setCompetitors(DomainFactory baseDomainFactory){
-    	
-    	this.baseDomainFactory = baseDomainFactory;
-    	
-    	for(int i=0;i<results.size();i++){
-    		BoatClass boatClass = null;
-    		
-    		if(regattas.get(i).getBoatClass() != null){
-    			boatClass = baseDomainFactory.getOrCreateBoatClass(regattas.get(i).getBoatClass());
-    		}else{
-    			boatClass = baseDomainFactory.getOrCreateBoatClass("default");
-    		}
-            
+
+    public void setCompetitors() {
+
+        for (int i = 0; i < results.size(); i++) {
+            BoatClass boatClass = null;
+
+            if (regattas.get(i).getBoatClass() != null) {
+                boatClass = baseDomainFactory.getOrCreateBoatClass(regattas.get(i).getBoatClass());
+            } else {
+                boatClass = baseDomainFactory.getOrCreateBoatClass("default");
+            }
+
             ArrayList<Object> personOrBoatOrTeam = (ArrayList<Object>) results.get(i).getPersonOrBoatOrTeam();
-            
-        	setBoatsAndTeamsForPerson(personOrBoatOrTeam);
-            
+
+            setBoatsAndTeamsForPerson(personOrBoatOrTeam);
+
             for (int j = 0; j < personOrBoatOrTeam.size(); j++) {
-                if(personOrBoatOrTeam.get(j) instanceof Person){
-                	Person person = (Person) personOrBoatOrTeam.get(j);
-                	String idAsString = person.getPersonID();
-                	
-                	String name = person.getGivenName() + " " + person.getFamilyName();
-                	Color color = null;
-                	Nationality nationality = (person.getNOC() == null) ? null : getNationality(
-                            person.getNOC().toString());
-            	
-                	BoatAndTeam boatAndTeam = getBoatAndTeam(idAsString, name, nationality, boatClass);
-                	
-                	baseDomainFactory.convertToCompetitorDTO(
-                            baseDomainFactory.getOrCreateCompetitor(UUID.fromString(idAsString), name,
-                                    color, boatAndTeam.getTeam(), boatAndTeam.getBoat()));                
-                }else{
-                	break;
+                if (personOrBoatOrTeam.get(j) instanceof Person) {
+                    Person person = (Person) personOrBoatOrTeam.get(j);
+                    String idAsString = person.getPersonID();
+
+                    String name = person.getGivenName() + " " + person.getFamilyName();
+                    Color color = null;
+                    Nationality nationality = (person.getNOC() == null) ? null : getNationality(person.getNOC()
+                            .toString());
+
+                    BoatAndTeam boatAndTeam = getBoatAndTeam(idAsString, name, nationality, boatClass);
+
+                    baseDomainFactory.convertToCompetitorDTO(baseDomainFactory.getOrCreateCompetitor(
+                            UUID.fromString(idAsString), name, color, boatAndTeam.getTeam(), boatAndTeam.getBoat()));
+                } else {
+                    break;
                 }
             }
         }
-        
-    }
-    
-    private Nationality getNationality(String country){
-    	return baseDomainFactory.getOrCreateNationality(country);
-    }
-    
-    private void setBoatsAndTeamsForPerson(ArrayList<Object >personOrBoatOrTeam){
-    	
-    	boatForPerson = new LinkedHashMap<String, Boat>();
-    	LinkedHashMap<String, Team> teamForBoat = new LinkedHashMap<String, Team>();
-    	
-    	for (int i=0; i < personOrBoatOrTeam.size(); i++) {
-    		if(personOrBoatOrTeam.get(i) instanceof Team){
-    			teamForBoat.put(((Team)personOrBoatOrTeam.get(i)).getBoatID(), (Team)personOrBoatOrTeam.get(i));
-    		}
-    	}
-    	
-    	for (int i = 0; i < personOrBoatOrTeam.size(); i++) {
-    		if(personOrBoatOrTeam.get(i) instanceof Boat){
-    			Team team = teamForBoat.get(((Boat)personOrBoatOrTeam.get(i)).getBoatID());
-    			
-    			ArrayList<Crew> crew = (ArrayList<Crew>) team.getCrew();
-    			for (int j = 0; j < crew.size(); j++) {
-					boatForPerson.put(crew.get(j).getPersonID(), (Boat)personOrBoatOrTeam.get(i));
-    			}
-    		}
-    	}
-    	
-    }
-    
-    private BoatAndTeam getBoatAndTeam(String idAsString, String name, Nationality nationality, BoatClass boatClass){
-    	
-    	DynamicBoat boat = createBoat(name, boatForPerson.get(idAsString), boatClass);
-    	if(nationality == null){
-    		String country = "";
-    		if(boat.getSailID().length()>=3){
-    			for (int i = 0; i < 3; i++) {
-					country += boat.getSailID().charAt(i);
-				}
 
-        		nationality = getNationality(country);
-    		}
-    	}
-    	DynamicTeam team = createTeam(name, nationality);
-    	return new BoatAndTeam(boat, team);
     }
-    
-    private DynamicBoat createBoat(String name, Boat boat, BoatClass boatClass){
-    	
-    	DynamicBoat boat1 = new BoatImpl(name + " boat", boatClass, boat.getSailNumber());
-    	return boat1;
+
+    private Nationality getNationality(String country) {
+        return baseDomainFactory.getOrCreateNationality(country);
     }
-    private DynamicTeam createTeam(String name, Nationality nationality){
+
+    private void setBoatsAndTeamsForPerson(ArrayList<Object> personOrBoatOrTeam) {
+
+        boatForPerson = new LinkedHashMap<String, Boat>();
+        LinkedHashMap<String, Team> teamForBoat = new LinkedHashMap<String, Team>();
+
+        for (int i = 0; i < personOrBoatOrTeam.size(); i++) {
+            if (personOrBoatOrTeam.get(i) instanceof Team) {
+                teamForBoat.put(((Team) personOrBoatOrTeam.get(i)).getBoatID(), (Team) personOrBoatOrTeam.get(i));
+            }
+        }
+
+        for (int i = 0; i < personOrBoatOrTeam.size(); i++) {
+            if (personOrBoatOrTeam.get(i) instanceof Boat) {
+                Team team = teamForBoat.get(((Boat) personOrBoatOrTeam.get(i)).getBoatID());
+
+                ArrayList<Crew> crew = (ArrayList<Crew>) team.getCrew();
+                for (int j = 0; j < crew.size(); j++) {
+                    boatForPerson.put(crew.get(j).getPersonID(), (Boat) personOrBoatOrTeam.get(i));
+                }
+            }
+        }
+
+    }
+
+    private BoatAndTeam getBoatAndTeam(String idAsString, String name, Nationality nationality, BoatClass boatClass) {
+
+        DynamicBoat boat = createBoat(name, boatForPerson.get(idAsString), boatClass);
+        if (nationality == null) {
+            String country = "";
+            if (boat.getSailID().length() >= 3) {
+                for (int i = 0; i < 3; i++) {
+                    country += boat.getSailID().charAt(i);
+                }
+
+                nationality = getNationality(country);
+            }
+        }
+        DynamicTeam team = createTeam(name, nationality);
+        return new BoatAndTeam(boat, team);
+    }
+
+    private DynamicBoat createBoat(String name, Boat boat, BoatClass boatClass) {
+
+        DynamicBoat boat1 = new BoatImpl(name + " boat", boatClass, boat.getSailNumber());
+        return boat1;
+    }
+
+    private DynamicTeam createTeam(String name, Nationality nationality) {
         DynamicPerson sailor = new PersonImpl(name, nationality, null, null);
         DynamicTeam team = new TeamImpl(name + " team", Collections.singleton(sailor), null);
         return team;
@@ -321,7 +333,7 @@ public class StructureImportUrl {
 
     private void parseRegattaXML(String url) throws FileNotFoundException, JAXBException, IOException {
         results.add(ParserFactory.INSTANCE.createParser(getInputStream(url), "").parse());
-    	
+
     }
 
     private InputStream getInputStream(String url) throws FileNotFoundException, IOException {
@@ -330,10 +342,21 @@ public class StructureImportUrl {
 
         return connection.getInputStream();
     }
-    
-    public void resetSeriesForRegattas(){
+
+    public void resetSeriesForRegattas() {
         seriesForRegattas.clear();
     }
-    
-    
+
+    public int getProgress() {
+        return parsedDocuments;
+    }
+
+    public boolean isFinished() {
+        return finished;
+    }
+
+    public void setFinished(boolean finished) {
+        this.finished = finished;
+    }
+
 }

@@ -387,6 +387,7 @@ import com.sap.sailing.server.replication.ReplicationService;
 import com.sap.sailing.server.replication.impl.ReplicaDescriptor;
 import com.sap.sailing.util.BuildVersion;
 import com.sap.sailing.xrr.schema.RegattaResults;
+import com.sap.sailing.xrr.structureimport.SeriesParameters;
 import com.sap.sailing.xrr.structureimport.StructureImportUrl;
 import com.sap.sse.common.Util;
 import com.sap.sse.common.Util.Pair;
@@ -449,7 +450,6 @@ public class SailingServiceImpl extends ProxiedRemoteServiceServlet implements S
 
     private int leaderboardDifferenceCacheByIdPairHits;
     private int leaderboardDifferenceCacheByIdPairMisses;
-    private StructureImportUrl structureImport;
     /**
      * Caches some results of the hard to compute difference between two {@link LeaderboardDTO}s. The objects contained
      * as values have been obtained by {@link IncrementalLeaderboardDTO#strip(LeaderboardDTO)}. The cache size is
@@ -460,6 +460,8 @@ public class SailingServiceImpl extends ProxiedRemoteServiceServlet implements S
     private final SwissTimingReplayService swissTimingReplayService;
 
     private final QuickRanksLiveCache quickRanksLiveCache;
+    
+    private StructureImportUrl structureImport = null;
 
     public SailingServiceImpl() {
         BundleContext context = Activator.getDefault();
@@ -3720,35 +3722,90 @@ public class SailingServiceImpl extends ProxiedRemoteServiceServlet implements S
         return convertToRegattaDTO(regatta);
     }
 
-    @Override
-    public void addEventImportUrl(List<String> regattaNames, EventDTO newEvent) {
-
-        Regatta regatta = null;
-        structureImport.updateRegattasToSelected(regattaNames);
-
-        // create Regattas
-        ArrayList<CourseAreaDTO> courseAreas = (ArrayList<CourseAreaDTO>) newEvent.venue.getCourseAreas();
-        ArrayList<AddSpecificRegatta> regattas = structureImport.getRegattas(courseAreas.get(0).id);
-        List<List<List<String>>> series = structureImport.getRaceNames();
-
-        String eventName = structureImport.getEventName();
-        ArrayList<String> leaderboardNames = new ArrayList<String>();
-
-        for (int i = 0; i < regattas.size(); i++) {
-            regatta = getService().apply(regattas.get(i));
-
-            // create Races
-            int j = 0;
-            for (Series s : regatta.getSeries()) {
-                addRaceColumnsToSeries(regatta.getRegattaIdentifier(), s.getName(), series.get(i).get(j));
-                j++;
-            }
-
-            if (getLeaderboard(regatta.getName()) == null) {
-                leaderboardNames.add(regatta.getName());
-                createRegattaLeaderboard(regatta.getRegattaIdentifier(), eventName, new int[0]);
-            }
+    
+    private SeriesParameters getDefaultSeries(RegattaDTO defaultRegatta){
+    	SeriesParameters defaultSeries = new SeriesParameters(false, false, false, null);
+        if(defaultRegatta.series.size()>0){
+        	SeriesDTO series = defaultRegatta.series.get(0);
+        	defaultSeries.setFirstColumnIsNonDiscardableCarryForward(series.isFirstColumnIsNonDiscardableCarryForward());
+        	defaultSeries.setHasSplitFleetContiguousScoring(series.hasSplitFleetContiguousScoring());
+        	defaultSeries.setStartswithZeroScore(series.isStartsWithZeroScore());
+        	defaultSeries.setDiscardingThresholds(series.getDiscardThresholds());
         }
+        return defaultSeries;
+    }
+    
+    public List<RegattaDTO> getRegattas(String url) {
+        structureImport = new StructureImportUrl(url, new SetRacenumberFromSeries());
+        RegattaDTO regattaDTO = null;
+        ArrayList<Regattas> regattas = structureImport.getRegattas();
+        List<RegattaDTO> regattasDTO = new ArrayList<RegattaDTO>();
+        for (int i = 0; i < regattas.size(); i++) {
+            regattaDTO = new RegattaDTO(regattas.get(i).getName(), null);
+            regattasDTO.add(regattaDTO);
+        }
+        return regattasDTO;
+        }
+
+        private ArrayList<String> createRegattasWithRaces(
+                        ArrayList<AddSpecificRegatta> regattas, String eventName) {
+
+                ArrayList<String> leaderboardNames = new ArrayList<String>();
+                List<List<List<String>>> series = structureImport.getRaceNames();
+
+                for (int i = 0; i < regattas.size(); i++) {
+                    Regatta regatta = getService().apply(regattas.get(i));
+
+                    // create Races
+                    int j = 0;
+                    for (Series s : regatta.getSeries()) {
+                        addRaceColumnsToSeries(regatta.getRegattaIdentifier(), s.getName(), series.get(i).get(j));
+                        j++;
+                    }
+
+                    if (getLeaderboard(regatta.getName()) == null) {
+                        leaderboardNames.add(regatta.getName());
+                        createRegattaLeaderboard(regatta.getRegattaIdentifier(), eventName, new int[0]);
+                    }
+                }
+                return leaderboardNames;
+        }
+    @Override
+    public void addEventImportUrl(final List<String> regattaNames, final EventDTO newEvent, final RegattaDTO defaultRegatta) {
+      
+        Runnable structureImportTask = new Runnable() {
+
+            @Override
+            public void run() {
+                
+                structureImport.updateRegattasToSelected(regattaNames);
+                
+                 // set default settings for series
+                SeriesParameters defaultSeries = getDefaultSeries(defaultRegatta);
+                
+                // get Regattas
+                ArrayList<AddSpecificRegatta> regattas = structureImport.getRegattas(defaultRegatta.scoringScheme, false, defaultRegatta.defaultCourseAreaUuid,
+                                        defaultRegatta.useStartTimeInference, getBaseDomainFactory(), defaultSeries.isFirstColumnIsNonDiscardableCarryForward(), 
+                                        defaultSeries.isHasSplitFleetContiguousScoring(), 
+                                        defaultSeries.isStartswithZeroScore(), defaultSeries.getDiscardingThresholds());
+
+                String eventName = structureImport.getEventName();
+                ArrayList<String> leaderboardNames = createRegattasWithRaces(
+                                                regattas, eventName);
+                //create Leaderboard Group
+                createAndAddLeaderboardGroup(newEvent, eventName, leaderboardNames);
+                structureImport.setCompetitors();
+                structureImport.resetSeriesForRegattas();
+                structureImport.setFinished(true);
+                
+            }
+        };
+        executor.execute(structureImportTask);
+    }
+
+    
+    private void createAndAddLeaderboardGroup(final EventDTO newEvent,
+            String eventName, ArrayList<String> leaderboardNames){
         LeaderboardGroupDTO leaderboardGroupDTO = null;
         // create Leaderboard Group
         try { /*mit if abfangen*/
@@ -3761,34 +3818,6 @@ public class SailingServiceImpl extends ProxiedRemoteServiceServlet implements S
             updateLeaderboardGroup(eventName, eventName, "", eventName, leaderboardNames, null, null);
             leaderboardGroupDTO = getLeaderboardGroupByName(eventName, false);
         }
-        List<UUID> uuids = new ArrayList<UUID>();
-        uuids.add(leaderboardGroupDTO.getId());
-        // add created Leaderboard Group to event
-        try {
-            updateEvent(newEvent.id, newEvent.getName(), newEvent.getDescription(), newEvent.startDate,
-                    newEvent.endDate, newEvent.venue, newEvent.isPublic, uuids, newEvent.getOfficialWebsiteURL(),
-                    newEvent.getLogoImageURL(), newEvent.getImageURLs(), newEvent.getVideoURLs(),
-                    newEvent.getSponsorImageURLs());
-        } catch (MalformedURLException e) {
-            // TODO Auto-generated catch block
-            e.printStackTrace();
-        }
-        structureImport.setCompetitors(getBaseDomainFactory());
-        structureImport.resetSeriesForRegattas();
-
-    }
-
-    public List<RegattaDTO> getRegattas(String url) {
-        structureImport = new StructureImportUrl(url, new SetRacenumberFromSeries());
-        RegattaDTO regattaDTO = null;
-        ArrayList<Regattas> regattas = structureImport.getRegattas();
-        List<RegattaDTO> regattasDTO = new ArrayList<RegattaDTO>();
-        for (int i = 0; i < regattas.size(); i++) {
-            regattaDTO = new RegattaDTO(regattas.get(i).getName(), null);
-            regattasDTO.add(regattaDTO);
-        }
-        return regattasDTO;
-
     }
 
     @Override
@@ -4385,6 +4414,17 @@ public class SailingServiceImpl extends ProxiedRemoteServiceServlet implements S
 
     public DataImportProgress getImportOperationProgress(UUID id) {
         return getService().getDataImportLock().getProgress(id);
+    }
+    
+    public Integer getStructureImportOperationProgress(){
+    	int parsedDocuments = 0;
+    	if(structureImport != null){
+    		parsedDocuments = structureImport.getProgress();
+    		if(structureImport.isFinished()){
+    			parsedDocuments++;
+    		}
+    	}
+		return parsedDocuments;
     }
 
     private String createLeaderboardQuery(String[] groupNames, boolean compress, boolean exportWind)

@@ -505,6 +505,8 @@ public interface SailingServiceAsync {
             AsyncCallback<UUID> asyncCallback);
 
     void getImportOperationProgress(UUID id, AsyncCallback<DataImportProgress> asyncCallback);
+    
+    void getStructureImportOperationProgress(AsyncCallback<Integer> asyncCallback);
 
     void getLeaderboardGroupNamesFromRemoteServer(String host, AsyncCallback<List<String>> leaderboardGroupNames);
 
@@ -637,8 +639,9 @@ public interface SailingServiceAsync {
             AsyncCallback<Iterable<LeaderboardSearchResultDTO>> callback);
 
     void setStartTimeReceivedForRace(RaceIdentifier raceIdentifier, Date newStartTimeReceived, AsyncCallback<RaceDTO> callback);
-
-    void addEventImportUrl(List<String> regattaNames, EventDTO newEvent, AsyncCallback<Void> asyncCallback); 
     
     void getRegattas(String url, AsyncCallback<List<RegattaDTO>> asyncCallback);
+
+    void addEventImportUrl(List<String> regattaNames, EventDTO newEvent,RegattaDTO defaultRegatta, AsyncCallback<Void> asyncCallback); 
+
 }

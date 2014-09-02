@@ -35,18 +35,21 @@ import com.google.gwt.user.client.ui.HasValue;
 public class ListEditorComposite<ValueType> extends Composite implements HasValue<List<ValueType>>,
         HasValueChangeHandlers<List<ValueType>> {
 
-    private final ListEditorUiStrategy<ValueType> activeUi;
+    private ListEditorUiStrategy<ValueType> activeUi = null;
 
     private List<ValueType> values;
 
-    public ListEditorComposite(List<ValueType> initialValues, ListEditorUiStrategy<ValueType> activeUi) {
+    public ListEditorComposite(List<ValueType> initialValues) {
         this.values = new ArrayList<ValueType>(initialValues);
-        this.activeUi = activeUi;
+    }
+
+	public void setActiveUi(ListEditorUiStrategy<ValueType> activeUi) {
+		this.activeUi = activeUi;
         this.activeUi.setContext(this);
 
         initWidget(activeUi.initWidget());
         activeUi.refresh();
-    }
+	}
 
     @Override
     public List<ValueType> getValue() {

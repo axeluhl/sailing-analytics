@@ -157,13 +157,17 @@ public abstract class RegattaWithSeriesAndFleetsDialog extends DataEntryDialog<R
     }
 
     private void onEventSelectionChanged() {
-        EventDTO selectedEvent = getSelectedEvent();
+        setCourseAreaSelection();
+    }
+
+	protected void setCourseAreaSelection() {
+		EventDTO selectedEvent = getSelectedEvent();
         courseAreaListBox.clear();
         courseAreaListBox.setEnabled(false);
         if (selectedEvent != null) {
             fillCourseAreaListBox(selectedEvent);
         }
-    }
+	}
 
     private void fillCourseAreaListBox(EventDTO selectedEvent) {
         courseAreaListBox.addItem(stringMessages.selectCourseArea());
