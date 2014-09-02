@@ -103,8 +103,8 @@ public class DurationTest {
 
     @Test
     public void compare() {
-        assertThat(MillisecondsDurationImpl.ONE_MINUTE.compareTo(MillisecondsDurationImpl.ONE_HOUR), lessThan(0));
-        assertThat(MillisecondsDurationImpl.ONE_HOUR.compareTo(MillisecondsDurationImpl.ONE_MINUTE), greaterThan(0));
+        assertTrue(MillisecondsDurationImpl.ONE_MINUTE.compareTo(MillisecondsDurationImpl.ONE_HOUR) < 0);
+        assertTrue(MillisecondsDurationImpl.ONE_HOUR.compareTo(MillisecondsDurationImpl.ONE_MINUTE) > 0);
     }
     
     @Test
