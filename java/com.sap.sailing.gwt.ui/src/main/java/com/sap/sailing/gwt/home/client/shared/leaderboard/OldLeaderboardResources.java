@@ -12,8 +12,6 @@ public interface OldLeaderboardResources extends ClientBundle {
 
     public interface LocalCss extends CssResource {
         String regattanavigation();
-        String regattanavigation_link();
-        String regattanavigation_linkactive();
         String oldLeaderboardPanel();
     }
 }

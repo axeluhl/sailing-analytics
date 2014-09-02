@@ -11,10 +11,10 @@
 		<s:header.CompactEventHeader ui:field='eventHeader'/>
 		<div class="{local_res2.css.regattanavigation}">
 		  <div class="{res.mainCss.grid}">
-    		<div class="{res.mediaCss.small12} {res.mediaCss.columns}">
-    		    <g:Anchor ui:field="leaderboardAnchor" href="javascript:;" styleName="{local_res2.css.regattanavigation_link}">Leaderboard</g:Anchor>
-    		    <g:Anchor ui:field="ranksChartAnchor" href="javascript:;" styleName="{local_res2.css.regattanavigation_link}">Rank Chart</g:Anchor>
-    		    <g:Anchor ui:field="pointsChartAnchor" href="javascript:;" styleName="{local_res2.css.regattanavigation_link}">Points Chart</g:Anchor>
+    		<div class="{res.mainCss.navbar}">
+    		    <g:Anchor ui:field="leaderboardAnchor" href="javascript:;" styleName="{res.mainCss.navbar_button}">Leaderboard</g:Anchor>
+    		    <g:Anchor ui:field="ranksChartAnchor" href="javascript:;" styleName="{res.mainCss.navbar_button}">Rank Chart</g:Anchor>
+    		    <g:Anchor ui:field="pointsChartAnchor" href="javascript:;" styleName="{res.mainCss.navbar_button}">Points Chart</g:Anchor>
     		</div>
           </div>
 		</div>
