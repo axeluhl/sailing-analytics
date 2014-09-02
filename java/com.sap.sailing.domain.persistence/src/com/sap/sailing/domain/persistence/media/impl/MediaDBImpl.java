@@ -13,6 +13,10 @@ import com.mongodb.DBCursor;
 import com.mongodb.DBObject;
 import com.mongodb.MongoException;
 import com.mongodb.WriteConcern;
+import com.sap.sailing.domain.common.Duration;
+import com.sap.sailing.domain.common.TimePoint;
+import com.sap.sailing.domain.common.impl.MillisecondsDurationImpl;
+import com.sap.sailing.domain.common.impl.MillisecondsTimePoint;
 import com.sap.sailing.domain.persistence.media.DBMediaTrack;
 import com.sap.sailing.domain.persistence.media.MediaDB;
 
@@ -39,12 +43,12 @@ public class MediaDBImpl implements MediaDB {
     }
 
     @Override
-    public String insertMediaTrack(String title, String url, Date startTime, int durationInMillis, String mimeType) {
+    public String insertMediaTrack(String title, String url, TimePoint startTime, Duration duration, String mimeType) {
         BasicDBObject dbMediaTrack = new BasicDBObject();
         dbMediaTrack.put(DbNames.Fields.MEDIA_TITLE.name(), title);
         dbMediaTrack.put(DbNames.Fields.MEDIA_URL.name(), url);
-        dbMediaTrack.put(DbNames.Fields.STARTTIME.name(), startTime);
-        dbMediaTrack.put(DbNames.Fields.DURATION_IN_MILLIS.name(), durationInMillis);
+        dbMediaTrack.put(DbNames.Fields.STARTTIME.name(), startTime == null ? null : startTime.asDate());
+        dbMediaTrack.put(DbNames.Fields.DURATION_IN_MILLIS.name(), duration == null ? null : duration.asMillis());
         dbMediaTrack.put(DbNames.Fields.MIME_TYPE.name(), mimeType);
         DBCollection dbVideos = getVideoCollection();
         dbVideos.insert(dbMediaTrack);
@@ -52,13 +56,13 @@ public class MediaDBImpl implements MediaDB {
     }
 
     @Override
-    public void insertMediaTrackWithId(String dbId, String title, String url, Date startTime, int durationInMillis, String mimeType) {
+    public void insertMediaTrackWithId(String dbId, String title, String url, TimePoint startTime, Duration duration, String mimeType) {
         BasicDBObject dbMediaTrack = new BasicDBObject();
         dbMediaTrack.put(DbNames.Fields._id.name(), new ObjectId(dbId));
         dbMediaTrack.put(DbNames.Fields.MEDIA_TITLE.name(), title);
         dbMediaTrack.put(DbNames.Fields.MEDIA_URL.name(), url);
-        dbMediaTrack.put(DbNames.Fields.STARTTIME.name(), startTime);
-        dbMediaTrack.put(DbNames.Fields.DURATION_IN_MILLIS.name(), durationInMillis);
+        dbMediaTrack.put(DbNames.Fields.STARTTIME.name(), startTime == null ? null : startTime.asDate());
+        dbMediaTrack.put(DbNames.Fields.DURATION_IN_MILLIS.name(), duration == null ? null : duration.asMillis());
         dbMediaTrack.put(DbNames.Fields.MIME_TYPE.name(), mimeType);
         DBCollection dbVideos = getVideoCollection();
         try {
@@ -85,9 +89,12 @@ public class MediaDBImpl implements MediaDB {
         String title = (String) dbObject.get(DbNames.Fields.MEDIA_TITLE.name());
         String url = (String) dbObject.get(DbNames.Fields.MEDIA_URL.name());
         Date startTime = (Date) dbObject.get(DbNames.Fields.STARTTIME.name());
-        Integer durationInMillis = (Integer) dbObject.get(DbNames.Fields.DURATION_IN_MILLIS.name());
+        Long duration = (Long) dbObject.get(DbNames.Fields.DURATION_IN_MILLIS.name());
         String mimeType = (String) dbObject.get(DbNames.Fields.MIME_TYPE.name());
-        DBMediaTrack dbMediaTrack = new DBMediaTrack(dbId, title, url, startTime, durationInMillis == null ? 0 : durationInMillis, mimeType);
+        DBMediaTrack dbMediaTrack = new DBMediaTrack(dbId, title, url, 
+                startTime == null ? null : new MillisecondsTimePoint(startTime), 
+                duration == null ? null : new MillisecondsDurationImpl(duration), 
+                mimeType);
         return dbMediaTrack;
     }
 
@@ -131,23 +138,23 @@ public class MediaDBImpl implements MediaDB {
     }
 
     @Override
-    public void updateStartTime(String dbId, Date startTime) {
+    public void updateStartTime(String dbId, TimePoint startTime) {
         BasicDBObject updateQuery = new BasicDBObject();
         updateQuery.append(DbNames.Fields._id.name(), new ObjectId(dbId));
 
         BasicDBObject updateCommand = new BasicDBObject();
-        updateCommand.append("$set", new BasicDBObject(DbNames.Fields.STARTTIME.name(), startTime));
+        updateCommand.append("$set", new BasicDBObject(DbNames.Fields.STARTTIME.name(), startTime == null ? null : startTime.asDate()));
 
         getVideoCollection().update(updateQuery, updateCommand);
     }
 
     @Override
-    public void updateDuration(String dbId, int durationInMillis) {
+    public void updateDuration(String dbId, Duration duration) {
         BasicDBObject updateQuery = new BasicDBObject();
         updateQuery.append(DbNames.Fields._id.name(), new ObjectId(dbId));
 
         BasicDBObject updateCommand = new BasicDBObject();
-        updateCommand.append("$set", new BasicDBObject(DbNames.Fields.DURATION_IN_MILLIS.name(), durationInMillis));
+        updateCommand.append("$set", new BasicDBObject(DbNames.Fields.DURATION_IN_MILLIS.name(), duration == null ? null : duration.asMillis()));
 
         getVideoCollection().update(updateQuery, updateCommand);
     }

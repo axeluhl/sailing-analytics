@@ -1,16 +1,17 @@
 package com.sap.sailing.server.replication.test;
 
-import static org.hamcrest.core.Is.is;
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertNotSame;
-import static org.junit.Assert.assertThat;
-
-import java.util.Date;
-
 import org.junit.Test;
 
+import com.sap.sailing.domain.common.Duration;
+import com.sap.sailing.domain.common.TimePoint;
+import com.sap.sailing.domain.common.impl.MillisecondsDurationImpl;
+import com.sap.sailing.domain.common.impl.MillisecondsTimePoint;
 import com.sap.sailing.domain.common.media.MediaTrack;
 import com.sap.sailing.domain.common.media.MediaTrack.MimeType;
+
+import static org.junit.Assert.*;
+
+import static org.hamcrest.core.Is.*;
 
 public class MediaReplicationTest extends AbstractServerReplicationTest {
       
@@ -22,10 +23,10 @@ public class MediaReplicationTest extends AbstractServerReplicationTest {
     private MediaTrack createMediaTrack() {
         String title = "title";
         String url = "url";
-        Date startTime = new Date();
-        int durationInMillis = 1;
+        TimePoint startTime = MillisecondsTimePoint.now();
+        Duration duration = MillisecondsDurationImpl.ONE_HOUR;
         MimeType mimeType = MimeType.mp4;
-        MediaTrack mediaTrack = new MediaTrack(title, url, startTime, durationInMillis, mimeType);
+        MediaTrack mediaTrack = new MediaTrack(title, url, startTime, duration, mimeType);
         return mediaTrack;
     }
     
@@ -81,7 +82,7 @@ public class MediaReplicationTest extends AbstractServerReplicationTest {
     public void testUpdateMediaTrackStartTimeReplication() throws InterruptedException {
         MediaTrack mediaTrack = createMediaTrack();
         master.mediaTrackAdded(mediaTrack);
-        mediaTrack.startTime = new Date(mediaTrack.startTime.getTime() + 1000);
+        mediaTrack.startTime = mediaTrack.startTime.plus(1000);
         master.mediaTrackStartTimeChanged(mediaTrack);
         waitSomeTime();
         assertThat(replica.getAllMediaTracks().size(), is(1));
@@ -92,11 +93,11 @@ public class MediaReplicationTest extends AbstractServerReplicationTest {
     public void testUpdateMediaTrackDurationReplication() throws InterruptedException {
         MediaTrack mediaTrack = createMediaTrack();
         master.mediaTrackAdded(mediaTrack);
-        mediaTrack.durationInMillis = mediaTrack.durationInMillis + 1000;
+        mediaTrack.duration = mediaTrack.duration.plus(1000);
         master.mediaTrackDurationChanged(mediaTrack);
         waitSomeTime();
         assertThat(replica.getAllMediaTracks().size(), is(1));
-        assertThat(replica.getAllMediaTracks().iterator().next().durationInMillis, is(mediaTrack.durationInMillis));
+        assertThat(replica.getAllMediaTracks().iterator().next().duration, is(mediaTrack.duration));
     }
 
 }
