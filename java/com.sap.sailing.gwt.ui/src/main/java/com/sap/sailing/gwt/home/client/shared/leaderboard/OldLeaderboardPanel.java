@@ -6,13 +6,13 @@ import java.util.List;
 import com.google.gwt.core.client.GWT;
 import com.google.gwt.dom.client.DivElement;
 import com.google.gwt.dom.client.SpanElement;
+import com.google.gwt.dom.client.Style.Visibility;
 import com.google.gwt.event.dom.client.ClickEvent;
 import com.google.gwt.uibinder.client.UiBinder;
 import com.google.gwt.uibinder.client.UiField;
 import com.google.gwt.uibinder.client.UiHandler;
 import com.google.gwt.user.client.ui.Anchor;
 import com.google.gwt.user.client.ui.Composite;
-import com.google.gwt.user.client.ui.HTML;
 import com.google.gwt.user.client.ui.HTMLPanel;
 import com.google.gwt.user.client.ui.ScrollPanel;
 import com.google.gwt.user.client.ui.Widget;
@@ -47,7 +47,7 @@ public class OldLeaderboardPanel extends Composite implements LeaderboardUpdateL
     interface OldLeaderboardPanelUiBinder extends UiBinder<Widget, OldLeaderboardPanel> {
     }
 
-    @UiField HTMLPanel leaderboardPanel;
+    @UiField HTMLPanel oldLeaderboardPanel;
     @UiField(provided=true) CompactEventHeader eventHeader;
     
     // temp fields --> will be moved to a leaderboard partial later on
@@ -57,6 +57,16 @@ public class OldLeaderboardPanel extends Composite implements LeaderboardUpdateL
     @UiField DivElement lastScoringUpdateTimeDiv;
     @UiField DivElement lastScoringCommentDiv;
     @UiField DivElement liveRaceDiv;
+
+    @UiField HTMLPanel leaderboardTabPanel;
+    @UiField HTMLPanel ranksChartTabPanel;
+    @UiField HTMLPanel pointsChartTabPanel;
+    private HTMLPanel activeTabPanel;
+    private Anchor activeAnchor;
+    
+    @UiField Anchor leaderboardAnchor;
+    @UiField Anchor ranksChartAnchor;
+    @UiField Anchor pointsChartAnchor;
     
     private AbstractLeaderboardViewer leaderboardViewer;
     private Timer autoRefreshTimer;
@@ -65,10 +75,18 @@ public class OldLeaderboardPanel extends Composite implements LeaderboardUpdateL
         eventHeader = new CompactEventHeader(event, leaderboardName, placeNavigator);
     
         EventRegattaLeaderboardResources.INSTANCE.css().ensureInjected();
+        OldLeaderboardResources.INSTANCE.css().ensureInjected();
         
         initWidget(uiBinder.createAndBindUi(this));
         
         title.setInnerText(leaderboardName);
+
+        activeAnchor = leaderboardAnchor;
+        activeTabPanel = leaderboardTabPanel;
+        activeAnchor.addStyleName(OldLeaderboardResources.INSTANCE.css().regattanavigation_linkactive());
+
+        ranksChartTabPanel.setVisible(false);
+        pointsChartTabPanel.setVisible(false);
     }
     
     public void createLeaderboardViewer(final SailingServiceAsync sailingService, final AsyncActionsExecutor asyncActionsExecutor,
@@ -83,7 +101,7 @@ public class OldLeaderboardPanel extends Composite implements LeaderboardUpdateL
 
         ScrollPanel contentScrollPanel = new ScrollPanel();
         contentScrollPanel.setWidget(leaderboardViewer);
-        leaderboardPanel.add(contentScrollPanel);
+        oldLeaderboardPanel.add(contentScrollPanel);
         leaderboardViewer.getLeaderboardPanel().addLeaderboardUpdateListener(this);
     }
 
@@ -99,7 +117,7 @@ public class OldLeaderboardPanel extends Composite implements LeaderboardUpdateL
        
         ScrollPanel contentScrollPanel = new ScrollPanel();
         contentScrollPanel.setWidget(leaderboardViewer);
-        leaderboardPanel.add(contentScrollPanel);
+        oldLeaderboardPanel.add(contentScrollPanel);
     }
     
     @UiHandler("autoRefreshAnchor")
@@ -129,45 +147,75 @@ public class OldLeaderboardPanel extends Composite implements LeaderboardUpdateL
 
     @Override
     public void updatedLeaderboard(LeaderboardDTO leaderboard) {
-        StringMessages stringMessages = StringMessages.INSTANCE;
-        
-        if(leaderboard != null) {
-            lastScoringCommentDiv.setInnerText(leaderboard.getComment() != null ? leaderboard.getComment() : "");
-            if (leaderboard.getTimePointOfLastCorrectionsValidity() != null) {
-                Date lastCorrectionDate = leaderboard.getTimePointOfLastCorrectionsValidity();
-                String lastUpdate = DateAndTimeFormatterUtil.longDateFormatter.render(lastCorrectionDate) + ", "
-                        + DateAndTimeFormatterUtil.longTimeFormatter.render(lastCorrectionDate);
-                lastScoringUpdateTimeDiv.setInnerText(TextMessages.INSTANCE.eventRegattaLeaderboardLastScoreUpdate() + ": " + lastUpdate);
-            } else {
-                lastScoringUpdateTimeDiv.setInnerText("");
-            }
+        if(activeTabPanel == leaderboardTabPanel) {
+            StringMessages stringMessages = StringMessages.INSTANCE;
             
-            List<Pair<RaceColumnDTO, FleetDTO>> liveRaces = leaderboard.getLiveRaces(autoRefreshTimer.getLiveTimePointInMillis());
-            boolean hasLiveRace = !liveRaces.isEmpty();
-            if (hasLiveRace) {
-                String liveRaceText = "";
-                if(liveRaces.size() == 1) {
-                    Pair<RaceColumnDTO, FleetDTO> liveRace = liveRaces.get(0);
-                    liveRaceText = stringMessages.raceIsLive("'" + liveRace.getA().getRaceColumnName() + "'");
+            if(leaderboard != null) {
+                lastScoringCommentDiv.setInnerText(leaderboard.getComment() != null ? leaderboard.getComment() : "");
+                if (leaderboard.getTimePointOfLastCorrectionsValidity() != null) {
+                    Date lastCorrectionDate = leaderboard.getTimePointOfLastCorrectionsValidity();
+                    String lastUpdate = DateAndTimeFormatterUtil.longDateFormatter.render(lastCorrectionDate) + ", "
+                            + DateAndTimeFormatterUtil.longTimeFormatter.render(lastCorrectionDate);
+                    lastScoringUpdateTimeDiv.setInnerText(TextMessages.INSTANCE.eventRegattaLeaderboardLastScoreUpdate() + ": " + lastUpdate);
                 } else {
-                    String raceNames = "";
-                    for (Pair<RaceColumnDTO, FleetDTO> liveRace : liveRaces) {
-                        raceNames += "'" + liveRace.getA().getRaceColumnName() + "', ";
-                    }
-                    // remove last ", "
-                    raceNames = raceNames.substring(0, raceNames.length() - 2);
-                    liveRaceText = stringMessages.racesAreLive(raceNames);
+                    lastScoringUpdateTimeDiv.setInnerText("");
                 }
-                liveRaceDiv.setInnerText(liveRaceText);
-            } else {
-                liveRaceDiv.setInnerText("");
+                
+                List<Pair<RaceColumnDTO, FleetDTO>> liveRaces = leaderboard.getLiveRaces(autoRefreshTimer.getLiveTimePointInMillis());
+                boolean hasLiveRace = !liveRaces.isEmpty();
+                if (hasLiveRace) {
+                    String liveRaceText = "";
+                    if(liveRaces.size() == 1) {
+                        Pair<RaceColumnDTO, FleetDTO> liveRace = liveRaces.get(0);
+                        liveRaceText = stringMessages.raceIsLive("'" + liveRace.getA().getRaceColumnName() + "'");
+                    } else {
+                        String raceNames = "";
+                        for (Pair<RaceColumnDTO, FleetDTO> liveRace : liveRaces) {
+                            raceNames += "'" + liveRace.getA().getRaceColumnName() + "', ";
+                        }
+                        // remove last ", "
+                        raceNames = raceNames.substring(0, raceNames.length() - 2);
+                        liveRaceText = stringMessages.racesAreLive(raceNames);
+                    }
+                    liveRaceDiv.setInnerText(liveRaceText);
+                } else {
+                    liveRaceDiv.setInnerText("");
+                }
+                lastScoringUpdateTimeDiv.getStyle().setVisibility(!hasLiveRace ? Visibility.VISIBLE : Visibility.HIDDEN);
+                liveRaceDiv.getStyle().setVisibility(hasLiveRace ? Visibility.VISIBLE : Visibility.HIDDEN);
             }
-            HTML.wrap(lastScoringUpdateTimeDiv).setVisible(!hasLiveRace);
-            HTML.wrap(liveRaceDiv).setVisible(hasLiveRace);
         }
     }
 
     @Override
     public void currentRaceSelected(RaceIdentifier raceIdentifier, RaceColumnDTO raceColumn) {
+    }
+    
+    @UiHandler("leaderboardAnchor")
+    void leaderboardTabClicked(ClickEvent event) {
+        setActiveTabPanel(leaderboardTabPanel, leaderboardAnchor);
+    }
+    
+    @UiHandler("ranksChartAnchor")
+    void ranksChartTabClicked(ClickEvent event) {
+        setActiveTabPanel(ranksChartTabPanel, ranksChartAnchor);
+        
+    }
+
+    @UiHandler("pointsChartAnchor")
+    void pointsChartTabClicked(ClickEvent event) {
+        setActiveTabPanel(pointsChartTabPanel, pointsChartAnchor);
+    }
+    
+    private void setActiveTabPanel(HTMLPanel newActivePanel, Anchor newActiveAnchor) {
+        if(activeTabPanel != null) {
+            activeTabPanel.setVisible(false);
+            activeAnchor.removeStyleName(OldLeaderboardResources.INSTANCE.css().regattanavigation_linkactive());
+        }
+        
+        activeTabPanel = newActivePanel;
+        activeAnchor = newActiveAnchor;
+        activeTabPanel.setVisible(true);
+        activeAnchor.addStyleName(OldLeaderboardResources.INSTANCE.css().regattanavigation_linkactive());
     }
 }

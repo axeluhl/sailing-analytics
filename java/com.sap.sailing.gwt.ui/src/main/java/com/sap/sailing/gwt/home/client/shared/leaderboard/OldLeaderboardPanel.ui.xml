@@ -6,36 +6,55 @@
     <ui:with field="i18n" type="com.sap.sailing.gwt.home.client.i18n.TextMessages"/>
 	<ui:with field="res" type="com.sap.sailing.gwt.home.client.HomeResources" />
     <ui:with field="local_res" type="com.sap.sailing.gwt.home.client.place.event.regattaleaderboard.EventRegattaLeaderboardResources" />
-    <ui:style>
-        .leaderboardPanel {
-        background-color:#f8f8f8;
-		padding: 0 10px 10px 10px;
-		width: 100%;
-    }
-	</ui:style>
+    <ui:with field="local_res2" type="com.sap.sailing.gwt.home.client.shared.leaderboard.OldLeaderboardResources" />
 	<g:HTMLPanel>
 		<s:header.CompactEventHeader ui:field='eventHeader'/>
-		<!-- The leaderboard of a regatta-->
-		<div class="{res.mainCss.grid} {local_res.css.eventregattaleaderboard_meta}">
-		   <div class="{res.mediaCss.large12} {res.mediaCss.columns}">
-		    <h3 class="{local_res.css.eventregattaleaderboard_meta_title}">
-		        <span style="color:darkgrey;"><ui:text from='{i18n.leaderboard}'/></span>
-		        <span ui:field="title"></span>
-		    </h3>
-		  </div>
-		  <div class="{res.mediaCss.small9} {res.mediaCss.columns}">
-		    <div ui:field="lastScoringCommentDiv" class="{local_res.css.eventregattaleaderboard_meta_update}"></div>
-		    <div ui:field="lastScoringUpdateTimeDiv" class="{local_res.css.eventregattaleaderboard_meta_update}"></div>
-		    <div ui:field="liveRaceDiv" style="color:red;" class="{local_res.css.eventregattaleaderboard_meta_update}"></div>
-		  </div>
-		  <div class="{res.mediaCss.small3} {res.mediaCss.columns}">
-			<g:Anchor ui:field="autoRefreshAnchor" href="javascript:;" styleName="{res.mainCss.button} {local_res.css.eventregattaleaderboard_meta_reload}"></g:Anchor>
-		    <g:Anchor ui:field="settingsAnchor" href="javascript:;" styleName="{res.mainCss.button} {local_res.css.eventregattaleaderboard_meta_settings}"></g:Anchor>
-     	  </div>
-		  <div class="{res.mediaCss.large12} {res.mediaCss.columns}">
-              	<g:HTMLPanel ui:field="leaderboardPanel" styleName="{style.leaderboardPanel}">
-        		</g:HTMLPanel>
-		   </div>
+		<div class="{local_res2.css.regattanavigation}">
+		  <div class="{res.mainCss.grid}">
+    		<div class="{res.mediaCss.small12} {res.mediaCss.columns}">
+    		    <g:Anchor ui:field="leaderboardAnchor" href="javascript:;" styleName="{local_res2.css.regattanavigation_link}">Leaderboard</g:Anchor>
+    		    <g:Anchor ui:field="ranksChartAnchor" href="javascript:;" styleName="{local_res2.css.regattanavigation_link}">Rank Chart</g:Anchor>
+    		    <g:Anchor ui:field="pointsChartAnchor" href="javascript:;" styleName="{local_res2.css.regattanavigation_link}">Points Chart</g:Anchor>
+    		</div>
+          </div>
 		</div>
+		<g:HTMLPanel ui:field="leaderboardTabPanel">
+			<!-- The leaderboard of a regatta-->
+			<div class="{res.mainCss.grid} {local_res.css.eventregattaleaderboard_meta}">
+			   <div class="{res.mediaCss.large12} {res.mediaCss.columns}">
+			    <h3 class="{local_res.css.eventregattaleaderboard_meta_title}">
+			        <span style="color:darkgrey;"><ui:text from='{i18n.leaderboard}'/></span>
+			        <span ui:field="title"></span>
+			    </h3>
+			  </div>
+			  <div class="{res.mediaCss.small9} {res.mediaCss.columns}">
+			    <div ui:field="lastScoringCommentDiv" class="{local_res.css.eventregattaleaderboard_meta_update}"></div>
+			    <div ui:field="lastScoringUpdateTimeDiv" class="{local_res.css.eventregattaleaderboard_meta_update}"></div>
+			    <div ui:field="liveRaceDiv" style="color:red;" class="{local_res.css.eventregattaleaderboard_meta_update}"></div>
+			  </div>
+			  <div class="{res.mediaCss.small3} {res.mediaCss.columns}">
+				<g:Anchor ui:field="autoRefreshAnchor" href="javascript:;" styleName="{res.mainCss.button} {local_res.css.eventregattaleaderboard_meta_reload}"></g:Anchor>
+			    <g:Anchor ui:field="settingsAnchor" href="javascript:;" styleName="{res.mainCss.button} {local_res.css.eventregattaleaderboard_meta_settings}"></g:Anchor>
+	     	  </div>
+			  <div class="{res.mediaCss.large12} {res.mediaCss.columns}">
+	              	<g:HTMLPanel ui:field="oldLeaderboardPanel" styleName="{local_res2.css.oldLeaderboardPanel}">
+	        		</g:HTMLPanel>
+			   </div>
+			</div>
+		</g:HTMLPanel>
+		<g:HTMLPanel ui:field="ranksChartTabPanel">
+			<div class="{res.mainCss.grid}">
+			   <div class="{res.mediaCss.large12} {res.mediaCss.columns}">
+			    <h3>Ranks Chart</h3>
+			  </div>
+			</div>		    		    
+		</g:HTMLPanel>
+		<g:HTMLPanel ui:field="pointsChartTabPanel">
+			<div class="{res.mainCss.grid}">
+			   <div class="{res.mediaCss.large12} {res.mediaCss.columns}">
+			    <h3>Total points Chart</h3>
+			  </div>
+			</div>		    		    
+		</g:HTMLPanel>
     </g:HTMLPanel>
 </ui:UiBinder>    
