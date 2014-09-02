@@ -123,6 +123,62 @@ public class RegattaListComposite extends Composite implements RegattasDisplayer
 
         initWidget(mainPanel);
     }
+    
+    public RegattaListComposite(final SailingServiceAsync sailingService,
+            final RegattaSelectionProvider regattaSelectionProvider, RegattaRefresher regattaRefresher,
+            final ErrorReporter errorReporter, final StringMessages stringMessages, String s) {
+        this.sailingService = sailingService; /*Zuweisung vllt raus?*/
+        this.regattaSelectionProvider = regattaSelectionProvider;
+        this.regattaRefresher = regattaRefresher;
+        this.errorReporter = errorReporter;
+        this.stringMessages = stringMessages;
+        mainPanel = new SimplePanel();
+        panel = new VerticalPanel();
+        mainPanel.setWidget(panel);
+        Label filterRegattasLabel = new Label(stringMessages.filterRegattasByName() + ":");
+        filterRegattasLabel.setWordWrap(false);
+        noRegattasLabel = new Label(stringMessages.noRegattasYet());
+        noRegattasLabel.ensureDebugId("NoRegattasLabel");
+        noRegattasLabel.setWordWrap(false);
+        panel.add(noRegattasLabel);
+        
+        regattaListDataProvider = new ListDataProvider<RegattaDTO>();
+        regattaTable = createRegattaImportTable(); 
+        regattaTable.ensureDebugId("RegattasCellTable");
+        regattaTable.setVisible(false);
+        filterablePanelRegattas = new LabeledAbstractFilterablePanel<RegattaDTO>(filterRegattasLabel, allRegattas,
+                regattaTable, regattaListDataProvider) {
+            @Override
+            public Iterable<String> getSearchableStrings(RegattaDTO t) {
+                List<String> string = new ArrayList<String>();
+                string.add(t.getName());
+                if (t.boatClass != null) {
+                    string.add(t.boatClass.getName());
+                }
+                return string;
+            }
+        };
+        filterablePanelRegattas.getTextBox().ensureDebugId("ReggatasFilterTextBox");
+        panel.add(filterablePanelRegattas);
+        
+        regattaSelectionModel = new MultiSelectionModel<RegattaDTO>();
+        regattaSelectionModel.addSelectionChangeHandler(new SelectionChangeEvent.Handler() {
+            @Override
+            public void onSelectionChange(SelectionChangeEvent event) {
+                List<RegattaDTO> selectedRegattas = getSelectedRegattas();
+                List<RegattaIdentifier> selectedRaceIdentifiers = new ArrayList<RegattaIdentifier>();
+                for (RegattaDTO selectedRegatta : selectedRegattas) {
+                    selectedRaceIdentifiers.add(selectedRegatta.getRegattaIdentifier());
+                }
+                RegattaListComposite.this.regattaSelectionProvider.setSelection(selectedRaceIdentifiers);
+            }
+        });
+        regattaTable.setSelectionModel(regattaSelectionModel);
+
+        panel.add(regattaTable);
+
+        initWidget(mainPanel);
+    }
 
     private CellTable<RegattaDTO> createRegattaTable() {
         CellTable<RegattaDTO> table = new CellTable<RegattaDTO>(/* pageSize */10000, tableRes);
@@ -300,4 +356,35 @@ public class RegattaListComposite extends Composite implements RegattasDisplayer
     public List<RegattaDTO> getAllRegattas() {
         return allRegattas;
     }
+    
+    //create Regatta Table in StructureImportURLManagementPanel
+    
+    private CellTable<RegattaDTO> createRegattaImportTable() {
+        CellTable<RegattaDTO> table = new CellTable<RegattaDTO>(/* pageSize */10000, tableRes);
+        regattaListDataProvider.addDataDisplay(table);
+        table.setWidth("100%");
+
+        ListHandler<RegattaDTO> columnSortHandler = new ListHandler<RegattaDTO>(regattaListDataProvider.getList());
+        table.addColumnSortHandler(columnSortHandler);
+
+        TextColumn<RegattaDTO> regattaNameColumn = new TextColumn<RegattaDTO>() {
+            @Override
+            public String getValue(RegattaDTO regatta) {
+                return regatta.getName();
+            }
+        };
+        regattaNameColumn.setSortable(true);
+        columnSortHandler.setComparator(regattaNameColumn, new Comparator<RegattaDTO>() {
+            @Override
+            public int compare(RegattaDTO r1, RegattaDTO r2) {
+                return new NaturalComparator().compare(r1.getName(), r2.getName());
+            }
+        });
+
+
+        table.addColumn(regattaNameColumn, stringMessages.regattaName());
+
+        return table;
+    }
+
 }

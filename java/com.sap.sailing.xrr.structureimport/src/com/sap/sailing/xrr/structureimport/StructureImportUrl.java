@@ -64,9 +64,33 @@ public class StructureImportUrl {
     	this.setRacenumberStrategy = setRacenumber;
         regattas = new EventImport().getRegattas(url);
 
-        for (int i = 0; i < regattas.size(); i++) {
+        
+    }
+    
+    public ArrayList<Regattas> getRegattas(){
+        return regattas;
+    }
+    
+    public void updateRegattasToSelected(List<String> regattaNames){
+        ArrayList<Regattas> regattasTemp = new ArrayList<Regattas>();
+        for(Regattas regatta: regattas){
+            for(String s: regattaNames){
+                if(regatta.getName().equals(s)){
+                    regattasTemp.add(regatta);
+                }
+            }
+        }
+        regattas = regattasTemp;
+    }
+
+    public ArrayList<AddSpecificRegatta> getRegattas(Serializable courseAreaID) {
+        ArrayList<AddSpecificRegatta> regattas = new ArrayList<AddSpecificRegatta>();
+        Event event = null;
+        results.clear();
+        
+        for (int i = 0; i < this.regattas.size(); i++) {
             try {
-                parseRegattaXML(regattas.get(i).getXrrEntriesUrl());
+                parseRegattaXML(this.regattas.get(i).getXrrEntriesUrl());
             } catch (FileNotFoundException e) {
                 // TODO Auto-generated catch block
                 e.printStackTrace();
@@ -79,11 +103,6 @@ public class StructureImportUrl {
             }
 
         }
-    }
-
-    public ArrayList<AddSpecificRegatta> getRegattas(Serializable courseAreaID) {
-        ArrayList<AddSpecificRegatta> regattas = new ArrayList<AddSpecificRegatta>();
-        Event event = null;
 
         for (int i = 0; i < results.size(); i++) {
 
@@ -115,6 +134,8 @@ public class StructureImportUrl {
     public String getEventName(){
         return eventName;
     }
+    
+    
 
     private LinkedHashMap<String, SeriesCreationParametersDTO> setSeriesCreationParametersDTO(BuildStructure structure) {
         LinkedHashMap<String, SeriesCreationParametersDTO> seriesCreationParams = new LinkedHashMap<String, SeriesCreationParametersDTO>();
@@ -308,6 +329,10 @@ public class StructureImportUrl {
         URLConnection connection = new URL(url).openConnection();
 
         return connection.getInputStream();
+    }
+    
+    public void resetSeriesForRegattas(){
+        seriesForRegattas.clear();
     }
     
     

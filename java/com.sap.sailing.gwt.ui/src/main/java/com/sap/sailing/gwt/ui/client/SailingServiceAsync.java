@@ -638,6 +638,7 @@ public interface SailingServiceAsync {
 
     void setStartTimeReceivedForRace(RaceIdentifier raceIdentifier, Date newStartTimeReceived, AsyncCallback<RaceDTO> callback);
 
-    void addEventImportUrl(String url, EventDTO newEvent, AsyncCallback<Void> asyncCallback); 
-
+    void addEventImportUrl(List<String> regattaNames, EventDTO newEvent, AsyncCallback<Void> asyncCallback); 
+    
+    void getRegattas(String url, AsyncCallback<List<RegattaDTO>> asyncCallback);
 }
