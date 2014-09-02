@@ -49,6 +49,8 @@ public class OldLeaderboardPanel extends Composite implements LeaderboardUpdateL
     }
 
     @UiField HTMLPanel oldLeaderboardPanel;
+    @UiField HTMLPanel ranksChartsPanel;
+    @UiField HTMLPanel pointsChartsPanel;
     @UiField(provided=true) CompactEventHeader eventHeader;
     
     // temp fields --> will be moved to a leaderboard partial later on

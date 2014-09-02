@@ -46,6 +46,8 @@
 			<div class="{res.mainCss.grid}">
 			   <div class="{res.mediaCss.large12} {res.mediaCss.columns}">
 			    <h3>Ranks Chart</h3>
+              	<g:HTMLPanel ui:field="ranksChartsPanel">
+        		</g:HTMLPanel>
 			  </div>
 			</div>		    		    
 		</g:HTMLPanel>
@@ -53,6 +55,8 @@
 			<div class="{res.mainCss.grid}">
 			   <div class="{res.mediaCss.large12} {res.mediaCss.columns}">
 			    <h3>Total points Chart</h3>
+              	<g:HTMLPanel ui:field="pointsChartsPanel">
+        		</g:HTMLPanel>
 			  </div>
 			</div>		    		    
 		</g:HTMLPanel>
