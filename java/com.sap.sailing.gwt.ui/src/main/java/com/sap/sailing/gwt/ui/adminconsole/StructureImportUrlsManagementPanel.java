@@ -24,6 +24,7 @@ import com.google.gwt.user.client.ui.HasVerticalAlignment;
 import com.google.gwt.user.client.ui.HorizontalPanel;
 import com.google.gwt.user.client.ui.Label;
 import com.google.gwt.user.client.ui.ListBox;
+import com.google.gwt.user.client.ui.Panel;
 import com.google.gwt.user.client.ui.VerticalPanel;
 import com.sap.sailing.domain.common.RegattaIdentifier;
 import com.sap.sailing.gwt.ui.client.ErrorReporter;
@@ -49,10 +50,10 @@ public class StructureImportUrlsManagementPanel extends FlowPanel implements Reg
     private final ErrorReporter errorReporter;
     private final StringMessages stringMessages;
     private final RegattaRefresher regattaRefresher;
-    private final SimpleBusyIndicator busyIndicator;
     private final EventManagementPanel eventManagementPanel;
     private RegattaListComposite regattaListComposite;
     private RegattaSelectionProvider regattaSelectionProvider;
+    private Panel progressPanel;
 
     private final Button addButton;
     private final Button removeButton;
@@ -70,6 +71,7 @@ public class StructureImportUrlsManagementPanel extends FlowPanel implements Reg
         this.errorReporter = errorReporter;
         this.stringMessages = stringMessages;
         this.regattaRefresher = regattaRefresher;
+        progressPanel = new FlowPanel();
         urlListBox = new ListBox(/* multiple select */true);
         urlProviderSelectionListBox = new ListBox(false);
         urlProviderSelectionListBox.addChangeHandler(new ChangeHandler() {
@@ -152,15 +154,11 @@ public class StructureImportUrlsManagementPanel extends FlowPanel implements Reg
         grid.getRowFormatter().setVerticalAlign(0, HasVerticalAlignment.ALIGN_TOP);
         grid.getColumnFormatter().getElement(0/** 1 */
         ).getStyle().setPaddingTop(2.0, Unit.EM);
+        
+        add(progressPanel);
         add(vp);
         refreshUrlList();
 
-        busyIndicator = new SimpleBusyIndicator();
-        HorizontalPanel hPanel = new HorizontalPanel();
-        hPanel.setWidth("100%");
-        hPanel.setHorizontalAlignment(HasHorizontalAlignment.ALIGN_CENTER);
-        hPanel.add(busyIndicator);
-        add(hPanel);
     }
 
     private String getSelectedProviderName() {
@@ -320,10 +318,11 @@ public class StructureImportUrlsManagementPanel extends FlowPanel implements Reg
     
     private void createBarAndLabel(int amountOfRegattas){
         overallName = new Label(stringMessages.overallProgress() + ":");
-        add(overallName);
+        progressPanel.add(overallName);
         progressBar = new StructureImportProgressBar(
                                 amountOfRegattas+1, Style.ANIMATED);
-        add(progressBar);
+        progressPanel.add(progressBar);
+        
     }
     private void setProgressBar(final int amountOfRegattas){
         createBarAndLabel(amountOfRegattas);
@@ -378,7 +377,7 @@ public class StructureImportUrlsManagementPanel extends FlowPanel implements Reg
                                 
     }
     
-    private void createRegattas(List<String> regattaNames, EventDTO newEvent, RegattaDTO defaultRegatta){
+    private void createRegattas(final List<String> regattaNames, EventDTO newEvent, RegattaDTO defaultRegatta){
         eventManagementPanel.fillEvents();
         sailingService.addEventImportUrl(regattaNames, newEvent, defaultRegatta,
                 new AsyncCallback<Void>() {
@@ -391,7 +390,7 @@ public class StructureImportUrlsManagementPanel extends FlowPanel implements Reg
 
                     @Override
                     public void onSuccess(Void result) {
-                        setProgressBar(43);
+                        setProgressBar(regattaNames.size());
                     }
                 });
     }
