@@ -3807,15 +3807,19 @@ public class SailingServiceImpl extends ProxiedRemoteServiceServlet implements S
     private void createAndAddLeaderboardGroup(final EventDTO newEvent, String eventName,
             ArrayList<String> leaderboardNames) {
         LeaderboardGroupDTO leaderboardGroupDTO = null;
+        String description = "";
+        if(newEvent.getDescription()!=null){
+            description = newEvent.getDescription();
+        }
         // create Leaderboard Group
-        try { /* mit if abfangen */
-            CreateLeaderboardGroup createLeaderboardGroupOp = new CreateLeaderboardGroup(newEvent.getName(),
-                    newEvent.getDescription(), newEvent.getName(), false, leaderboardNames, null, null);
+        if(getService().getLeaderboardGroupByName(newEvent.getName())==null){
+            CreateLeaderboardGroup createLeaderboardGroupOp = new CreateLeaderboardGroup(eventName,
+                    description, eventName, false, leaderboardNames, null, null);
             leaderboardGroupDTO = convertToLeaderboardGroupDTO(getService().apply(createLeaderboardGroupOp), false,
                     false);
-        } catch (Exception e1) {
+        } else {
             leaderboardNames.addAll(getLeaderboardNames());
-            updateLeaderboardGroup(eventName, eventName, "", eventName, leaderboardNames, null, null);
+            updateLeaderboardGroup(eventName, eventName, newEvent.getDescription(), eventName, leaderboardNames, null, null);
             leaderboardGroupDTO = getLeaderboardGroupByName(eventName, false);
         }
 
@@ -3825,7 +3829,7 @@ public class SailingServiceImpl extends ProxiedRemoteServiceServlet implements S
         }
         eventLeaderboardGroupUUIDs.add(leaderboardGroupDTO.getId());
         try {
-            updateEvent(newEvent.id, newEvent.getName(), newEvent.getDescription(), newEvent.startDate,
+            updateEvent(newEvent.id, newEvent.getName(), description, newEvent.startDate,
                     newEvent.endDate, newEvent.venue, newEvent.isPublic, eventLeaderboardGroupUUIDs,
                     newEvent.getLogoImageURL(), newEvent.getOfficialWebsiteURL(), newEvent.getImageURLs(),
                     newEvent.getVideoURLs(), newEvent.getSponsorImageURLs());
