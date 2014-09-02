@@ -19,7 +19,6 @@ import com.google.gwt.user.client.rpc.AsyncCallback;
 import com.google.gwt.user.client.ui.Button;
 import com.google.gwt.user.client.ui.FlowPanel;
 import com.google.gwt.user.client.ui.Grid;
-import com.google.gwt.user.client.ui.HasHorizontalAlignment;
 import com.google.gwt.user.client.ui.HasVerticalAlignment;
 import com.google.gwt.user.client.ui.HorizontalPanel;
 import com.google.gwt.user.client.ui.Label;
@@ -31,18 +30,16 @@ import com.sap.sailing.gwt.ui.client.ErrorReporter;
 import com.sap.sailing.gwt.ui.client.RegattaRefresher;
 import com.sap.sailing.gwt.ui.client.RegattaSelectionModel;
 import com.sap.sailing.gwt.ui.client.RegattaSelectionProvider;
-import com.sap.sailing.gwt.ui.client.RegattasDisplayer;
 import com.sap.sailing.gwt.ui.client.SailingServiceAsync;
 import com.sap.sailing.gwt.ui.client.StringMessages;
 import com.sap.sailing.gwt.ui.client.TextfieldEntryDialog;
 import com.sap.sailing.gwt.ui.shared.CourseAreaDTO;
 import com.sap.sailing.gwt.ui.shared.EventDTO;
 import com.sap.sailing.gwt.ui.shared.RegattaDTO;
-import com.sap.sse.gwt.client.controls.busyindicator.SimpleBusyIndicator;
 import com.sap.sse.gwt.client.dialog.DataEntryDialog;
 import com.sap.sse.gwt.client.dialog.DataEntryDialog.DialogCallback;
 
-public class StructureImportUrlsManagementPanel extends FlowPanel implements RegattasDisplayer {
+public class StructureImportUrlsManagementPanel extends FlowPanel {
     private final ListBox urlProviderSelectionListBox;
     private final ListBox urlListBox;
 
@@ -51,7 +48,7 @@ public class StructureImportUrlsManagementPanel extends FlowPanel implements Reg
     private final StringMessages stringMessages;
     private final RegattaRefresher regattaRefresher;
     private final EventManagementPanel eventManagementPanel;
-    private RegattaListComposite regattaListComposite;
+    private StructureImportListComposite regattaListComposite;
     private RegattaSelectionProvider regattaSelectionProvider;
     private Panel progressPanel;
 
@@ -147,7 +144,7 @@ public class StructureImportUrlsManagementPanel extends FlowPanel implements Reg
         regattaSelectionProvider = new RegattaSelectionModel(true);
         // regattaSelectionProvider.addRegattaSelectionChangeListener(this);
 
-        regattaListComposite = new RegattaListComposite(sailingService, regattaSelectionProvider, regattaRefresher,
+        regattaListComposite = new StructureImportListComposite(sailingService, regattaSelectionProvider, regattaRefresher,
                 errorReporter, stringMessages, "test");
         regattaListComposite.ensureDebugId("RegattaListComposite");
         grid.setWidget(0, 0, regattaListComposite);
@@ -310,10 +307,9 @@ public class StructureImportUrlsManagementPanel extends FlowPanel implements Reg
         dialog.show();
     }
 
-    @Override
+
     public void fillRegattas(List<RegattaDTO> regattas) {
         regattaListComposite.fillRegattas(regattas);
-
     }
     
     private void createBarAndLabel(int amountOfRegattas){
