@@ -365,6 +365,7 @@ public interface StringMessages extends Messages {
     String errorRemovingResultImportUrls(String message);
     String pleaseEnterNonEmptyUrl();
     String addResultImportUrl();
+    String addStructureImportUrl();
     String addRegattaImportUrl();
     String addAllRegattasImportUrl();
     String errorAddingResultImportUrl(String message);

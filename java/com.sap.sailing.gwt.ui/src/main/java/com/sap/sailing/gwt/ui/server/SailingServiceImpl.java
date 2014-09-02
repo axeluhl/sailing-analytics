@@ -4050,7 +4050,7 @@ public class SailingServiceImpl extends ProxiedRemoteServiceServlet implements
 
 	private URL getBaseURL(URL url) throws MalformedURLException {
 		return new URL(url.getProtocol(), url.getHost(), url.getPort(), /* file */
-				"");
+		"");
 	}
 
 	private RemoteSailingServerReferenceDTO createRemoteSailingServerReferenceDTO(
@@ -4684,8 +4684,8 @@ public class SailingServiceImpl extends ProxiedRemoteServiceServlet implements
 		// create Leaderboard Group
 		try { /* mit if abfangen */
 			CreateLeaderboardGroup createLeaderboardGroupOp = new CreateLeaderboardGroup(
-					newEvent.getName(), newEvent.getDescription(), newEvent.getName(), false, leaderboardNames, null,
-					null);
+					newEvent.getName(), newEvent.getDescription(),
+					newEvent.getName(), false, leaderboardNames, null, null);
 			leaderboardGroupDTO = convertToLeaderboardGroupDTO(getService()
 					.apply(createLeaderboardGroupOp), false, false);
 		} catch (Exception e1) {
@@ -4694,18 +4694,19 @@ public class SailingServiceImpl extends ProxiedRemoteServiceServlet implements
 					leaderboardNames, null, null);
 			leaderboardGroupDTO = getLeaderboardGroupByName(eventName, false);
 		}
-		
+
 		List<UUID> eventLeaderboardGroupUUIDs = new ArrayList<>();
-        for (LeaderboardGroupDTO lg : newEvent.getLeaderboardGroups()) {
-            eventLeaderboardGroupUUIDs.add(lg.getId());
-        }
-        eventLeaderboardGroupUUIDs.add(leaderboardGroupDTO.getId());
+		for (LeaderboardGroupDTO lg : newEvent.getLeaderboardGroups()) {
+			eventLeaderboardGroupUUIDs.add(lg.getId());
+		}
+		eventLeaderboardGroupUUIDs.add(leaderboardGroupDTO.getId());
 		try {
-			updateEvent(newEvent.id, newEvent.getName(), newEvent.getDescription(),
-							newEvent.startDate, newEvent.endDate, newEvent.venue,
-							newEvent.isPublic, eventLeaderboardGroupUUIDs, newEvent.getLogoImageURL(),
-							newEvent.getOfficialWebsiteURL(), newEvent.getImageURLs(), newEvent.getVideoURLs(),
-							newEvent.getSponsorImageURLs());
+			updateEvent(newEvent.id, newEvent.getName(),
+					newEvent.getDescription(), newEvent.startDate,
+					newEvent.endDate, newEvent.venue, newEvent.isPublic,
+					eventLeaderboardGroupUUIDs, newEvent.getLogoImageURL(),
+					newEvent.getOfficialWebsiteURL(), newEvent.getImageURLs(),
+					newEvent.getVideoURLs(), newEvent.getSponsorImageURLs());
 		} catch (MalformedURLException e) {
 			// TODO Auto-generated catch block
 			e.printStackTrace();
