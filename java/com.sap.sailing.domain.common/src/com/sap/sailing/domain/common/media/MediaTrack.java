@@ -137,6 +137,14 @@ public class MediaTrack implements Serializable {
         }
     }
     
+    public boolean isConnectedTo(RegattaAndRaceIdentifier race){
+        if(regattasAndRaces.contains(race)){
+            return true;
+        }else{
+            return false;
+        }
+    }
+    
     @Override
     public boolean equals(Object obj) {
         if (obj instanceof MediaTrack) {
