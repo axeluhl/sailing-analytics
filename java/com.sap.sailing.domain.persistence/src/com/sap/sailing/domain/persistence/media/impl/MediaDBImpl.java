@@ -14,6 +14,8 @@ import com.mongodb.DBObject;
 import com.mongodb.MongoException;
 import com.mongodb.WriteConcern;
 import com.sap.sailing.domain.common.Duration;
+import com.sap.sailing.domain.common.RegattaAndRaceIdentifier;
+import com.sap.sailing.domain.common.RegattaNameAndRaceName;
 import com.sap.sailing.domain.common.TimePoint;
 import com.sap.sailing.domain.common.impl.MillisecondsDurationImpl;
 import com.sap.sailing.domain.common.impl.MillisecondsTimePoint;
@@ -43,26 +45,30 @@ public class MediaDBImpl implements MediaDB {
     }
 
     @Override
-    public String insertMediaTrack(String title, String url, TimePoint startTime, Duration duration, String mimeType) {
+    public String insertMediaTrack(String title, String url, TimePoint startTime, Duration duration, String mimeType, RegattaAndRaceIdentifier regattaAndRace) {
         BasicDBObject dbMediaTrack = new BasicDBObject();
         dbMediaTrack.put(DbNames.Fields.MEDIA_TITLE.name(), title);
         dbMediaTrack.put(DbNames.Fields.MEDIA_URL.name(), url);
         dbMediaTrack.put(DbNames.Fields.STARTTIME.name(), startTime == null ? null : startTime.asDate());
         dbMediaTrack.put(DbNames.Fields.DURATION_IN_MILLIS.name(), duration == null ? null : duration.asMillis());
         dbMediaTrack.put(DbNames.Fields.MIME_TYPE.name(), mimeType);
+        dbMediaTrack.put(DbNames.Fields.REGATTA_NAME.name(), regattaAndRace == null ? null : regattaAndRace.getRegattaName());
+        dbMediaTrack.put(DbNames.Fields.RACE_NAME.name(), regattaAndRace == null ? null : regattaAndRace.getRaceName());
         DBCollection dbVideos = getVideoCollection();
         dbVideos.insert(dbMediaTrack);
         return ((ObjectId) dbMediaTrack.get(DbNames.Fields._id.name())).toStringMongod();
     }
 
     @Override
-    public void insertMediaTrackWithId(String dbId, String title, String url, TimePoint startTime, Duration duration, String mimeType) {
+    public void insertMediaTrackWithId(String dbId, String title, String url, TimePoint startTime, Duration duration, String mimeType, RegattaAndRaceIdentifier regattaAndRace) {
         BasicDBObject dbMediaTrack = new BasicDBObject();
         dbMediaTrack.put(DbNames.Fields._id.name(), new ObjectId(dbId));
         dbMediaTrack.put(DbNames.Fields.MEDIA_TITLE.name(), title);
         dbMediaTrack.put(DbNames.Fields.MEDIA_URL.name(), url);
         dbMediaTrack.put(DbNames.Fields.STARTTIME.name(), startTime == null ? null : startTime.asDate());
         dbMediaTrack.put(DbNames.Fields.DURATION_IN_MILLIS.name(), duration == null ? null : duration.asMillis());
+        dbMediaTrack.put(DbNames.Fields.REGATTA_NAME.name(), regattaAndRace == null ? null : regattaAndRace.getRegattaName());
+        dbMediaTrack.put(DbNames.Fields.RACE_NAME.name(), regattaAndRace == null ? null : regattaAndRace.getRaceName());
         dbMediaTrack.put(DbNames.Fields.MIME_TYPE.name(), mimeType);
         DBCollection dbVideos = getVideoCollection();
         try {
@@ -91,10 +97,13 @@ public class MediaDBImpl implements MediaDB {
         Date startTime = (Date) dbObject.get(DbNames.Fields.STARTTIME.name());
         Long duration = (Long) dbObject.get(DbNames.Fields.DURATION_IN_MILLIS.name());
         String mimeType = (String) dbObject.get(DbNames.Fields.MIME_TYPE.name());
+        String regattaName = (String) dbObject.get(DbNames.Fields.REGATTA_NAME.name());
+        String raceName = (String) dbObject.get(DbNames.Fields.RACE_NAME.name());
         DBMediaTrack dbMediaTrack = new DBMediaTrack(dbId, title, url, 
                 startTime == null ? null : new MillisecondsTimePoint(startTime), 
                 duration == null ? null : new MillisecondsDurationImpl(duration), 
-                mimeType);
+                mimeType,
+                (regattaName == null && raceName == null) ? null : new RegattaNameAndRaceName(regattaName, raceName));
         return dbMediaTrack;
     }
 
@@ -158,5 +167,17 @@ public class MediaDBImpl implements MediaDB {
 
         getVideoCollection().update(updateQuery, updateCommand);
     }
+
+	@Override
+	public void updateRace(String dbId, RegattaAndRaceIdentifier regattaAndRace) {
+		BasicDBObject updateQuery = new BasicDBObject();
+		updateQuery.append(DbNames.Fields._id.name(), new ObjectId(dbId));
+		
+		BasicDBObject updateCommand = new BasicDBObject();
+		updateCommand.append("$set", new BasicDBObject(DbNames.Fields.REGATTA_NAME.name(), regattaAndRace == null ? null : regattaAndRace.getRegattaName()));
+		updateCommand.append("$set", new BasicDBObject(DbNames.Fields.RACE_NAME.name(), regattaAndRace == null ? null : regattaAndRace.getRaceName()));
+
+        getVideoCollection().update(updateQuery, updateCommand);
+	}
 
 }
