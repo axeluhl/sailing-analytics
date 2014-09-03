@@ -1,20 +1,25 @@
 package com.sap.sailing.gwt.ui.adminconsole;
 
-import java.util.Collection;
-import java.util.Collections;
-import java.util.Comparator;
+import static com.google.gwt.dom.client.BrowserEvents.CLICK;
+import static com.google.gwt.dom.client.BrowserEvents.KEYUP;
 
-import java.util.List;
+import java.util.Collection;
+import java.util.Comparator;
 import java.util.HashSet;
 import java.util.Set;
 
 import com.google.gwt.cell.client.EditTextCell;
 import com.google.gwt.cell.client.FieldUpdater;
 import com.google.gwt.cell.client.TextCell;
+import com.google.gwt.cell.client.ValueUpdater;
+import com.google.gwt.cell.client.Cell.Context;
 import com.google.gwt.core.client.GWT;
+import com.google.gwt.dom.client.Element;
+import com.google.gwt.dom.client.NativeEvent;
 import com.google.gwt.dom.client.Style.Unit;
 import com.google.gwt.event.dom.client.ClickEvent;
 import com.google.gwt.event.dom.client.ClickHandler;
+import com.google.gwt.event.dom.client.KeyCodes;
 import com.google.gwt.user.cellview.client.CellTable;
 import com.google.gwt.user.cellview.client.Column;
 import com.google.gwt.user.cellview.client.ColumnSortEvent.ListHandler;
@@ -39,8 +44,6 @@ import com.sap.sailing.gwt.ui.client.SailingServiceAsync;
 import com.sap.sailing.gwt.ui.client.StringMessages;
 import com.sap.sailing.gwt.ui.client.media.NewMediaDialog;
 import com.sap.sailing.gwt.ui.client.media.TimeFormatUtil;
-import com.sap.sailing.gwt.ui.shared.EventDTO;
-import com.sap.sailing.gwt.ui.shared.RegattaDTO;
 import com.sap.sse.gwt.client.dialog.DataEntryDialog.DialogCallback;
 
 /**
@@ -50,7 +53,7 @@ import com.sap.sse.gwt.client.dialog.DataEntryDialog.DialogCallback;
  * 
  */
 public class MediaPanel extends FlowPanel {
-    
+
     private final SailingServiceAsync sailingService;
     private final MediaServiceAsync mediaService;
     private final ErrorReporter errorReporter;
@@ -59,7 +62,8 @@ public class MediaPanel extends FlowPanel {
     private CellTable<MediaTrack> mediaTracksTable;
     private ListDataProvider<MediaTrack> mediaTrackListDataProvider = new ListDataProvider<MediaTrack>();
 
-    public MediaPanel(SailingServiceAsync sailingService, MediaServiceAsync mediaService, ErrorReporter errorReporter, StringMessages stringMessages) {
+    public MediaPanel(SailingServiceAsync sailingService, MediaServiceAsync mediaService, ErrorReporter errorReporter,
+            StringMessages stringMessages) {
         this.sailingService = sailingService;
         this.mediaService = mediaService;
         this.stringMessages = stringMessages;
@@ -235,7 +239,20 @@ public class MediaPanel extends FlowPanel {
 
         // regattasAndRaces
 
-        Column<MediaTrack, String> regattaAndRaceColumn = new Column<MediaTrack, String>(new EditTextCell()) {
+        Column<MediaTrack, String> regattaAndRaceColumn = new Column<MediaTrack, String>(new EditTextCell(){
+            public void onBrowserEvent(Context context, Element parent, String value, NativeEvent event,
+                    ValueUpdater<String> valueUpdater) {
+                Object key = context.getKey();
+                String type = event.getType();
+                int keyCode = event.getKeyCode();
+                boolean enterPressed = KEYUP.equals(type) && keyCode == KeyCodes.KEY_ENTER;
+                if (CLICK.equals(type) || enterPressed) {
+                    
+                    //TODO: Open DialogBox
+
+                }
+            }
+        }) {
             @Override
             public String getValue(MediaTrack mediaTrack) {
                 if (mediaTrack.regattasAndRaces != null) {
@@ -245,13 +262,13 @@ public class MediaPanel extends FlowPanel {
             }
 
             
+
         };
-        
+
         regattaAndRaceColumn.setSortable(true);
         sortHandler.setComparator(regattaAndRaceColumn, new Comparator<MediaTrack>() {
             public int compare(MediaTrack mediaTrack1, MediaTrack mediaTrack2) {
-                return (listRegattasAndRaces(mediaTrack1))
-                        .compareTo(listRegattasAndRaces(mediaTrack2));
+                return (listRegattasAndRaces(mediaTrack1)).compareTo(listRegattasAndRaces(mediaTrack2));
             }
         });
         mediaTracksTable.addColumn(regattaAndRaceColumn, stringMessages.regattaAndRace());
@@ -433,6 +450,7 @@ public class MediaPanel extends FlowPanel {
         });
         dialog.show();
     }
+
     private String listRegattasAndRaces(MediaTrack mediaTrack) {
         String value = "";
         for (RegattaAndRaceIdentifier regattaAndRace : mediaTrack.regattasAndRaces) {
@@ -444,21 +462,22 @@ public class MediaPanel extends FlowPanel {
     public void onShow() {
         loadMediaTracks();
     }
-    
-//    private void openRegattasAndRacesDialog() {
-//        final Collection<RegattaDTO> existingRegattas = Collections.unmodifiableCollection(regattaListComposite.getAllRegattas());
-//
-//        sailingService.getEvents(new AsyncCallback<List<EventDTO>>() {
-//            @Override
-//            public void onFailure(Throwable caught) {
-//                openCreateRegattaDialog(existingRegattas, Collections.<EventDTO>emptyList());
-//            }
-//
-//            @Override
-//            public void onSuccess(List<EventDTO> result) {
-//                openCreateRegattaDialog(existingRegattas, Collections.unmodifiableList(result));
-//            }
-//        });
-//    }
+
+    // private void openRegattasAndRacesDialog() {
+    // final Collection<RegattaDTO> existingRegattas =
+    // Collections.unmodifiableCollection(regattaListComposite.getAllRegattas());
+    //
+    // sailingService.getEvents(new AsyncCallback<List<EventDTO>>() {
+    // @Override
+    // public void onFailure(Throwable caught) {
+    // openCreateRegattaDialog(existingRegattas, Collections.<EventDTO>emptyList());
+    // }
+    //
+    // @Override
+    // public void onSuccess(List<EventDTO> result) {
+    // openCreateRegattaDialog(existingRegattas, Collections.unmodifiableList(result));
+    // }
+    // });
+    // }
 
 }
