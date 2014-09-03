@@ -1,6 +1,7 @@
 package com.sap.sailing.domain.persistence.media;
 
 import com.sap.sailing.domain.common.Duration;
+import com.sap.sailing.domain.common.RegattaAndRaceIdentifier;
 import com.sap.sailing.domain.common.TimePoint;
 
 public class DBMediaTrack {
@@ -11,8 +12,9 @@ public class DBMediaTrack {
     public final TimePoint startTime;
     public final Duration duration;
     public final String mimeType;
+    public final RegattaAndRaceIdentifier regattaAndRace;
 
-    public DBMediaTrack(String dbId, String title, String url, TimePoint startTime, Duration duration, String mimeType) {
+    public DBMediaTrack(String dbId, String title, String url, TimePoint startTime, Duration duration, String mimeType, RegattaAndRaceIdentifier regattaAndRace) {
         super();
         this.dbId = dbId;
         this.title = title;
@@ -20,6 +22,7 @@ public class DBMediaTrack {
         this.startTime = startTime;
         this.duration = duration;
         this.mimeType = mimeType;
+        this.regattaAndRace = regattaAndRace;
     }
     
 }

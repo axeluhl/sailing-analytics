@@ -3,6 +3,7 @@ package com.sap.sailing.domain.common.media;
 import java.io.Serializable;
 
 import com.sap.sailing.domain.common.Duration;
+import com.sap.sailing.domain.common.RegattaAndRaceIdentifier;
 import com.sap.sailing.domain.common.TimePoint;
 
 /**
@@ -75,29 +76,32 @@ public class MediaTrack implements Serializable {
     public Duration duration;
     public MimeType mimeType;
     public Status status = Status.UNDEFINED;
+    public RegattaAndRaceIdentifier regattaAndRace;
 
     public MediaTrack() {
     }
     
-    public MediaTrack(String title, String url, TimePoint startTime, Duration duration, MimeType mimeType) {
+    public MediaTrack(String title, String url, TimePoint startTime, Duration duration, MimeType mimeType, RegattaAndRaceIdentifier regattaAndRace) {
         this.title = title;
         this.url = url;
         this.startTime = startTime;
         this.duration = duration;
         this.mimeType = mimeType;
+        this.regattaAndRace = regattaAndRace;
     }
     
-    public MediaTrack(String dbId, String title, String url, TimePoint startTime, Duration duration, MimeType mimeType) {
+    public MediaTrack(String dbId, String title, String url, TimePoint startTime, Duration duration, MimeType mimeType, RegattaAndRaceIdentifier regattaAndRace) {
         this.dbId = dbId;
         this.title = title;
         this.url = url;
         this.startTime = startTime;
         this.duration = duration;
         this.mimeType = mimeType;
+        this.regattaAndRace = regattaAndRace;
     }
     
     public String toString() {
-        return title + " - " + url + " [" + typeToString() + ']' + startTime + " [" + duration + status + ']';  
+        return title + " - " + url + " [" + typeToString() + ']' + startTime + " [" + duration + status + ']';  //TODO noch anpassen
     }
     
     public TimePoint deriveEndTime() {
