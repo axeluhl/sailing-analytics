@@ -211,6 +211,19 @@ class MediaLibrary {
             LockUtil.unlockAfterWrite(lock);
         }
     }
+    
+    void raceChanged(MediaTrack changedMediaTrack) {
+        LockUtil.lockForWrite(lock);
+        try {
+            MediaTrack mediaTrack = mediaTracksByDbId.get(changedMediaTrack);
+            if (mediaTrack != null) {
+                mediaTrack.regattaAndRace = changedMediaTrack.regattaAndRace;
+                updateCache_Change(mediaTrack);
+            }
+        } finally {
+            LockUtil.unlockAfterWrite(lock);
+        }
+    }
 
     /**
      * To be called only under write lock!

@@ -178,6 +178,7 @@ import com.sap.sailing.server.operationaltransformation.TrackRegatta;
 import com.sap.sailing.server.operationaltransformation.UpdateCompetitor;
 import com.sap.sailing.server.operationaltransformation.UpdateMarkPassings;
 import com.sap.sailing.server.operationaltransformation.UpdateMediaTrackDurationOperation;
+import com.sap.sailing.server.operationaltransformation.UpdateMediaTrackRaceOperation;
 import com.sap.sailing.server.operationaltransformation.UpdateMediaTrackStartTimeOperation;
 import com.sap.sailing.server.operationaltransformation.UpdateMediaTrackTitleOperation;
 import com.sap.sailing.server.operationaltransformation.UpdateMediaTrackUrlOperation;
@@ -2477,8 +2478,9 @@ public class RacingEventServiceImpl implements RacingEventServiceWithTestSupport
 
     @Override
     public void mediaTrackRaceChanged(MediaTrack mediaTrack) {
-        // TODO Auto-generated method stub
-        
+        mediaDB.updateRace(mediaTrack.dbId, mediaTrack.regattaAndRace);
+        mediaLibrary.raceChanged(mediaTrack);
+        replicate(new UpdateMediaTrackRaceOperation(mediaTrack));
     }
 
     @Override
