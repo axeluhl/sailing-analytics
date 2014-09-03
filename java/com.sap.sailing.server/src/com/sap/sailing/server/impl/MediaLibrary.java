@@ -14,6 +14,7 @@ import java.util.Set;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ConcurrentMap;
 
+import com.sap.sailing.domain.common.RegattaAndRaceIdentifier;
 import com.sap.sailing.domain.common.TimePoint;
 import com.sap.sailing.domain.common.TimeRange;
 import com.sap.sailing.domain.common.impl.TimeRangeImpl;
@@ -36,6 +37,8 @@ class MediaLibrary {
      * from the cache.
      */
     private final ConcurrentMap<TimeRange, Set<MediaTrack>> cacheByInterval = new ConcurrentHashMap<TimeRange, Set<MediaTrack>>();
+    
+    private final ConcurrentMap<RegattaAndRaceIdentifier, Set<MediaTrack>> cacheByRace = new ConcurrentHashMap<RegattaAndRaceIdentifier, Set<MediaTrack>>();
 
     private final NamedReentrantReadWriteLock lock = new NamedReentrantReadWriteLock(MediaLibrary.class.getName(), /* fair */ false);
 
@@ -72,39 +75,38 @@ class MediaLibrary {
      * 
      * @param startTime
      * @param endTime
+     * @param race TODO
      * @return
      */
-    Set<MediaTrack> findMediaTracksInTimeRange(TimePoint startTime, TimePoint endTime) {
+    Set<MediaTrack> findMediaTracksForRaceInTimeRange(TimePoint startTime, TimePoint endTime, RegattaAndRaceIdentifier race) {
 
-        if (startTime != null) {
-
-            TimeRange interval = new TimeRangeImpl(startTime, endTime);
+        if(race != null){
             LockUtil.lockForRead(lock);
-            try {
-                Set<MediaTrack> cachedMediaTracks = cacheByInterval.get(interval);
-                if (cachedMediaTracks == null) {
-
+            try{
+                Set<MediaTrack> cachedMediaTracks = cacheByRace.get(race);
+                if(cachedMediaTracks == null){
+                    
                     Set<MediaTrack> result = new HashSet<MediaTrack>();
                     for (MediaTrack mediaTrack : mediaTracksByDbId.values()) {
-                        if (mediaTrack.overlapsWith(startTime, endTime)) {
+                        if(mediaTrack.isConnectedTo(race) && mediaTrack.overlapsWith(startTime, endTime)){
                             result.add(mediaTrack);
                         }
                     }
-                    cachedMediaTracks = cacheByInterval.putIfAbsent(interval, result);
-                    if (cachedMediaTracks != null) {
+                    cachedMediaTracks = cacheByRace.putIfAbsent(race, result);
+                    if(cachedMediaTracks != null){
                         return cachedMediaTracks;
-                    } else {
+                    }else{
                         return result;
                     }
-                } else {
+                }else{
                     return cachedMediaTracks;
                 }
-
-            } finally {
+            }finally{
                 LockUtil.unlockAfterRead(lock);
-            }
+            }            
+            
         }
-        // else
+        //else
         return Collections.emptySet();
     }
 

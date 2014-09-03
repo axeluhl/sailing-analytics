@@ -1,6 +1,8 @@
 package com.sap.sailing.domain.common.media;
 
 import java.io.Serializable;
+import java.util.HashSet;
+import java.util.Set;
 
 import com.sap.sailing.domain.common.Duration;
 import com.sap.sailing.domain.common.RegattaAndRaceIdentifier;
@@ -132,6 +134,14 @@ public class MediaTrack implements Serializable {
             return false;
         } else {
             return this.deriveEndTime().after(startTime) && (endTime == null || this.startTime.before(endTime));
+        }
+    }
+    
+    public boolean isConnectedTo(RegattaAndRaceIdentifier race){
+        if(regattasAndRaces.contains(race)){
+            return true;
+        }else{
+            return false;
         }
     }
     

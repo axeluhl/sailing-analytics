@@ -172,7 +172,7 @@ public class MediaLibaryTest {
 
         mediaLibary.addMediaTrack(originalMediaTrack);
         
-        Set<MediaTrack> firstQueryResult = mediaLibary.findMediaTracksInTimeRange(queryStartTime, queryEndTime);
+        Set<MediaTrack> firstQueryResult = mediaLibary.findMediaTracksForRaceInTimeRange(queryStartTime, queryEndTime, null);
         assertThat(firstQueryResult.size(), is(1));
         
         MediaTrack changedMediaTrack = new MediaTrack();
@@ -181,10 +181,10 @@ public class MediaLibaryTest {
         changedMediaTrack.duration = new MillisecondsDurationImpl(100);
         mediaLibary.startTimeChanged(changedMediaTrack);
         
-        Set<MediaTrack> secondQueryResult = mediaLibary.findMediaTracksInTimeRange(queryStartTime, queryEndTime);
+        Set<MediaTrack> secondQueryResult = mediaLibary.findMediaTracksForRaceInTimeRange(queryStartTime, queryEndTime, null);
         assertThat(secondQueryResult.size(), is(0));
 
-        Set<MediaTrack> thirdQueryResult = mediaLibary.findMediaTracksInTimeRange(changedMediaTrack.startTime, changedMediaTrack.deriveEndTime());
+        Set<MediaTrack> thirdQueryResult = mediaLibary.findMediaTracksForRaceInTimeRange(changedMediaTrack.startTime, changedMediaTrack.deriveEndTime(), null);
         assertThat(thirdQueryResult.size(), is(1));
 
         
@@ -202,12 +202,12 @@ public class MediaLibaryTest {
 
         mediaLibary.addMediaTrack(mediaTrack);
         
-        Set<MediaTrack> firstQueryResult = mediaLibary.findMediaTracksInTimeRange(originalStartTime, originalEndTime);
+        Set<MediaTrack> firstQueryResult = mediaLibary.findMediaTracksForRaceInTimeRange(originalStartTime, originalEndTime, null);
         assertThat(firstQueryResult.size(), is(1));
         
         mediaLibary.deleteMediaTrack(mediaTrack);
         
-        Set<MediaTrack> secondQueryResult = mediaLibary.findMediaTracksInTimeRange(originalStartTime, originalEndTime);
+        Set<MediaTrack> secondQueryResult = mediaLibary.findMediaTracksForRaceInTimeRange(originalStartTime, originalEndTime, null);
         assertThat(secondQueryResult.size(), is(0));
 
     }
@@ -223,7 +223,7 @@ public class MediaLibaryTest {
         TimePoint queryStartTime = firstMediaTrack.startTime.plus(1);
         TimePoint queryEndTime = firstMediaTrack.deriveEndTime().minus(1);
         
-        Set<MediaTrack> firstQueryResult = mediaLibary.findMediaTracksInTimeRange(queryStartTime, queryEndTime);
+        Set<MediaTrack> firstQueryResult = mediaLibary.findMediaTracksForRaceInTimeRange(queryStartTime, queryEndTime, null);
         assertThat(firstQueryResult.size(), is(1));
         
         MediaTrack secondMediaTrack = new MediaTrack();
@@ -232,13 +232,13 @@ public class MediaLibaryTest {
         secondMediaTrack.duration = firstMediaTrack.duration;
         mediaLibary.addMediaTrack(secondMediaTrack);
         
-        Set<MediaTrack> secondQueryResult = mediaLibary.findMediaTracksInTimeRange(queryStartTime, queryEndTime);
+        Set<MediaTrack> secondQueryResult = mediaLibary.findMediaTracksForRaceInTimeRange(queryStartTime, queryEndTime, null);
         assertThat(secondQueryResult.size(), is(2));
 
         TimePoint uncachedStartTime = firstMediaTrack.startTime.plus(2);
         TimePoint uncachedEndTime = firstMediaTrack.deriveEndTime().minus(2);
 
-        Set<MediaTrack> thirdQueryResult = mediaLibary.findMediaTracksInTimeRange(uncachedStartTime, uncachedEndTime);
+        Set<MediaTrack> thirdQueryResult = mediaLibary.findMediaTracksForRaceInTimeRange(uncachedStartTime, uncachedEndTime, null);
         assertThat(thirdQueryResult.size(), is(2));
 }
     
@@ -252,7 +252,7 @@ public class MediaLibaryTest {
         MediaTrack mediaTrack = new MediaTrack(dbId, title, url, startTime, duration, mimeType, regattaAndRace);
         mediaLibary.addMediaTrack(mediaTrack);
         
-        Collection<MediaTrack> mediaTracks = mediaLibary.findMediaTracksInTimeRange(rangeStart, rangeEnd);
+        Collection<MediaTrack> mediaTracks = mediaLibary.findMediaTracksForRaceInTimeRange(rangeStart, rangeEnd, null);
         assertThat(mediaTracks.size(), is(1));
         assertThat(mediaTracks.iterator().next().dbId, is(dbId));
     }
@@ -267,7 +267,7 @@ public class MediaLibaryTest {
         MediaTrack mediaTrack = new MediaTrack(dbId, title, url, startTime, duration, mimeType, regattaAndRace);
         mediaLibary.addMediaTrack(mediaTrack);
         
-        Collection<MediaTrack> mediaTracks = mediaLibary.findMediaTracksInTimeRange(rangeStart, rangeEnd);
+        Collection<MediaTrack> mediaTracks = mediaLibary.findMediaTracksForRaceInTimeRange(rangeStart, rangeEnd, null);
         assertThat(mediaTracks.size(), is(0));
     }
     
