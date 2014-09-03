@@ -3,9 +3,7 @@ package com.sap.sailing.server.impl;
 import static org.hamcrest.CoreMatchers.is;
 import static org.hamcrest.CoreMatchers.not;
 import static org.hamcrest.CoreMatchers.sameInstance;
-
 import static org.junit.Assert.assertThat;
-
 import static org.mockito.Matchers.any;
 import static org.mockito.Matchers.eq;
 import static org.mockito.Matchers.same;
@@ -24,6 +22,7 @@ import org.junit.Before;
 import org.junit.Test;
 import org.mockito.Mockito;
 
+import com.sap.sailing.domain.common.RegattaNameAndRaceName;
 import com.sap.sailing.domain.common.impl.MillisecondsDurationImpl;
 import com.sap.sailing.domain.common.impl.MillisecondsTimePoint;
 import com.sap.sailing.domain.common.media.MediaTrack;
@@ -37,13 +36,13 @@ import com.sap.sailing.domain.tracking.WindStore;
 import com.sap.sailing.server.RacingEventService;
 
 public class MasterDataImporterMediaTest {
-    
+
     private static final boolean NO_OVERRIDE = false;
     private static final boolean OVERRIDE = true;
 
     private RacingEventService racingEventService;
     private Collection<MediaTrack> mediaTracksToImport;
-    
+
     @Before
     public void before() {
         mediaTracksToImport = new ArrayList<MediaTrack>();
@@ -54,13 +53,14 @@ public class MasterDataImporterMediaTest {
         MongoObjectFactory mongoObjectFactory = mock(MongoObjectFactory.class);
         WindStore windStore = mock(WindStore.class);
         GPSFixStore gpsFixStore = mock(GPSFixStore.class);
-        
+
         MediaDB mediaDb = mock(MediaDB.class);
         when(mediaDb.loadAllMediaTracks()).thenReturn(Arrays.asList(existingDbMediaTracks));
-        
-        racingEventService = spy(new RacingEventServiceImpl(domainObjectFactory, mongoObjectFactory, mediaDb, windStore, gpsFixStore));
+
+        racingEventService = spy(new RacingEventServiceImpl(domainObjectFactory, mongoObjectFactory, mediaDb,
+                windStore, gpsFixStore));
     }
-    
+
     @Test
     public void testEmptyImportList_NoOverride() throws Exception {
         createRacingEventService();
@@ -90,41 +90,44 @@ public class MasterDataImporterMediaTest {
     @Test
     public void testImportOneTrackToEmptyTarget_WithOverride() throws Exception {
         createRacingEventService();
-        
+
         String dbId = new ObjectId().toStringMongod();
-        MediaTrack mediaTrackToImport = new MediaTrack(dbId, "title", "url", MillisecondsTimePoint.now(), MillisecondsDurationImpl.ONE_HOUR, MimeType.mp3);
+        MediaTrack mediaTrackToImport = new MediaTrack(dbId, "title", "url", MillisecondsTimePoint.now(),
+                MillisecondsDurationImpl.ONE_HOUR, MimeType.mp3);
         mediaTracksToImport.add(mediaTrackToImport);
         racingEventService.mediaTracksImported(mediaTracksToImport, OVERRIDE);
-        
+
         Collection<MediaTrack> allMediaTracks = racingEventService.getAllMediaTracks();
         assertThat(allMediaTracks.size(), is(1));
         MediaTrack mediaTrack = allMediaTracks.iterator().next();
         assertThat(mediaTrack, sameInstance(mediaTrackToImport));
-        
+
         verify(racingEventService).mediaTrackAdded(same(mediaTrackToImport));
         verify(racingEventService, never()).mediaTrackDeleted(any(MediaTrack.class));
         verify(racingEventService, never()).mediaTrackTitleChanged(any(MediaTrack.class));
         verify(racingEventService, never()).mediaTrackUrlChanged(any(MediaTrack.class));
         verify(racingEventService, never()).mediaTrackStartTimeChanged(any(MediaTrack.class));
         verify(racingEventService, never()).mediaTrackDurationChanged(any(MediaTrack.class));
-        
+
     }
 
     @Test
     public void testImportOneTrackToSameTarget_WithOverride() throws Exception {
         String dbId = new ObjectId().toStringMongod();
         MimeType mimeType = MimeType.mp3;
-        DBMediaTrack existingMediaTrack = new DBMediaTrack(dbId, "title", "url", MillisecondsTimePoint.now(), MillisecondsDurationImpl.ONE_HOUR, mimeType.name());
+        DBMediaTrack existingMediaTrack = new DBMediaTrack(dbId, "title", "url", MillisecondsTimePoint.now(),
+                MillisecondsDurationImpl.ONE_HOUR, mimeType.name(), new RegattaNameAndRaceName("49er", "R1"));
         createRacingEventService(existingMediaTrack);
         Collection<MediaTrack> allMediaTracksBeforeImport = racingEventService.getAllMediaTracks();
-        
-        MediaTrack mediaTrackToImport = new MediaTrack(existingMediaTrack.dbId, existingMediaTrack.title, existingMediaTrack.url, existingMediaTrack.startTime, existingMediaTrack.duration, mimeType);
+
+        MediaTrack mediaTrackToImport = new MediaTrack(existingMediaTrack.dbId, existingMediaTrack.title,
+                existingMediaTrack.url, existingMediaTrack.startTime, existingMediaTrack.duration, mimeType);
         mediaTracksToImport.add(mediaTrackToImport);
         racingEventService.mediaTracksImported(mediaTracksToImport, OVERRIDE);
 
         Collection<MediaTrack> allMediaTracksAfterImport = racingEventService.getAllMediaTracks();
         assertThat(allMediaTracksAfterImport, is(allMediaTracksBeforeImport));
-        
+
         verify(racingEventService, never()).mediaTrackAdded(any(MediaTrack.class));
         verify(racingEventService, never()).mediaTrackDeleted(any(MediaTrack.class));
         verify(racingEventService, never()).mediaTrackTitleChanged(any(MediaTrack.class));
@@ -137,18 +140,19 @@ public class MasterDataImporterMediaTest {
     public void testImportOneTrackToExistingOtherTrack_WithOverride() throws Exception {
         String dbId = new ObjectId().toStringMongod();
         MimeType mimeType = MimeType.mp3;
-        DBMediaTrack existingMediaTrack = new DBMediaTrack(dbId, "title", "url", MillisecondsTimePoint.now(), MillisecondsDurationImpl.ONE_HOUR, mimeType.name());
+        DBMediaTrack existingMediaTrack = new DBMediaTrack(dbId, "title", "url", MillisecondsTimePoint.now(),
+                MillisecondsDurationImpl.ONE_HOUR, mimeType.name(), new RegattaNameAndRaceName("49er", "R1"));
         createRacingEventService(existingMediaTrack);
 
         String dbId2 = new ObjectId().toStringMongod();
-        MediaTrack mediaTrackToImport = new MediaTrack(dbId2, existingMediaTrack.title, existingMediaTrack.url, existingMediaTrack.startTime, existingMediaTrack.duration, mimeType);
+        MediaTrack mediaTrackToImport = new MediaTrack(dbId2, existingMediaTrack.title, existingMediaTrack.url,
+                existingMediaTrack.startTime, existingMediaTrack.duration, mimeType);
         mediaTracksToImport.add(mediaTrackToImport);
         racingEventService.mediaTracksImported(mediaTracksToImport, OVERRIDE);
-        
+
         Collection<MediaTrack> allMediaTracksAfterImport = racingEventService.getAllMediaTracks();
         assertThat(allMediaTracksAfterImport.size(), is(2));
 
-        
         verify(racingEventService).mediaTrackAdded(same(mediaTrackToImport));
         verify(racingEventService, never()).mediaTrackDeleted(any(MediaTrack.class));
         verify(racingEventService, never()).mediaTrackTitleChanged(any(MediaTrack.class));
@@ -161,20 +165,21 @@ public class MasterDataImporterMediaTest {
     public void testImportOneTrackToSameTargetWithChangedTitle_WithOverride() throws Exception {
         String dbId = new ObjectId().toStringMongod();
         MimeType mimeType = MimeType.mp3;
-        DBMediaTrack existingMediaTrack = new DBMediaTrack(dbId, "title", "url", MillisecondsTimePoint.now(), MillisecondsDurationImpl.ONE_HOUR, mimeType.name());
+        DBMediaTrack existingMediaTrack = new DBMediaTrack(dbId, "title", "url", MillisecondsTimePoint.now(),
+                MillisecondsDurationImpl.ONE_HOUR, mimeType.name(), new RegattaNameAndRaceName("49er", "R1"));
         createRacingEventService(existingMediaTrack);
 
-        MediaTrack mediaTrackToImport = new MediaTrack(existingMediaTrack.dbId, existingMediaTrack.title + "x", existingMediaTrack.url, existingMediaTrack.startTime, existingMediaTrack.duration, mimeType);
+        MediaTrack mediaTrackToImport = new MediaTrack(existingMediaTrack.dbId, existingMediaTrack.title + "x",
+                existingMediaTrack.url, existingMediaTrack.startTime, existingMediaTrack.duration, mimeType);
         assertThat(existingMediaTrack.title, is(not(mediaTrackToImport.title)));
 
         mediaTracksToImport.add(mediaTrackToImport);
         racingEventService.mediaTracksImported(mediaTracksToImport, OVERRIDE);
-        
+
         Collection<MediaTrack> allMediaTracksAfterImport = racingEventService.getAllMediaTracks();
         assertThat(allMediaTracksAfterImport.size(), is(1));
         MediaTrack mediaTrack = allMediaTracksAfterImport.iterator().next();
         assertThat(mediaTrack.title, is(mediaTrackToImport.title));
-
 
         verify(racingEventService, never()).mediaTrackAdded(any(MediaTrack.class));
         verify(racingEventService, never()).mediaTrackDeleted(any(MediaTrack.class));
@@ -188,15 +193,17 @@ public class MasterDataImporterMediaTest {
     public void testImportOneTrackWithNullTitleToSameTargetWithTitle_WithOverride() throws Exception {
         String dbId = new ObjectId().toStringMongod();
         MimeType mimeType = MimeType.mp3;
-        DBMediaTrack existingMediaTrack = new DBMediaTrack(dbId, "title", "url", MillisecondsTimePoint.now(), MillisecondsDurationImpl.ONE_HOUR, mimeType.name());
+        DBMediaTrack existingMediaTrack = new DBMediaTrack(dbId, "title", "url", MillisecondsTimePoint.now(),
+                MillisecondsDurationImpl.ONE_HOUR, mimeType.name(), new RegattaNameAndRaceName("49er", "R1"));
         createRacingEventService(existingMediaTrack);
 
-        MediaTrack mediaTrackToImport = new MediaTrack(existingMediaTrack.dbId, null, existingMediaTrack.url, existingMediaTrack.startTime, existingMediaTrack.duration, mimeType);
+        MediaTrack mediaTrackToImport = new MediaTrack(existingMediaTrack.dbId, null, existingMediaTrack.url,
+                existingMediaTrack.startTime, existingMediaTrack.duration, mimeType);
         assertThat(existingMediaTrack.title, is(not(mediaTrackToImport.title)));
 
         mediaTracksToImport.add(mediaTrackToImport);
         racingEventService.mediaTracksImported(mediaTracksToImport, OVERRIDE);
-        
+
         Collection<MediaTrack> allMediaTracksAfterImport = racingEventService.getAllMediaTracks();
         assertThat(allMediaTracksAfterImport.size(), is(1));
         MediaTrack mediaTrack = allMediaTracksAfterImport.iterator().next();
@@ -214,15 +221,17 @@ public class MasterDataImporterMediaTest {
     public void testImportOneTrackToSameTargetWithChangedTitle_NoOverride() throws Exception {
         String dbId = new ObjectId().toStringMongod();
         MimeType mimeType = MimeType.mp3;
-        DBMediaTrack existingMediaTrack = new DBMediaTrack(dbId, "title", "url", MillisecondsTimePoint.now(), MillisecondsDurationImpl.ONE_HOUR, mimeType.name());
+        DBMediaTrack existingMediaTrack = new DBMediaTrack(dbId, "title", "url", MillisecondsTimePoint.now(),
+                MillisecondsDurationImpl.ONE_HOUR, mimeType.name(), new RegattaNameAndRaceName("49er", "R1"));
         createRacingEventService(existingMediaTrack);
 
-        MediaTrack mediaTrackToImport = new MediaTrack(existingMediaTrack.dbId, existingMediaTrack.title + "x", existingMediaTrack.url, existingMediaTrack.startTime, existingMediaTrack.duration, mimeType);
+        MediaTrack mediaTrackToImport = new MediaTrack(existingMediaTrack.dbId, existingMediaTrack.title + "x",
+                existingMediaTrack.url, existingMediaTrack.startTime, existingMediaTrack.duration, mimeType);
         assertThat(existingMediaTrack.title, is(not(mediaTrackToImport.title)));
 
         mediaTracksToImport.add(mediaTrackToImport);
         racingEventService.mediaTracksImported(mediaTracksToImport, NO_OVERRIDE);
-        
+
         Collection<MediaTrack> allMediaTracksAfterImport = racingEventService.getAllMediaTracks();
         assertThat(allMediaTracksAfterImport.size(), is(1));
         MediaTrack mediaTrack = allMediaTracksAfterImport.iterator().next();
@@ -240,15 +249,17 @@ public class MasterDataImporterMediaTest {
     public void testImportOneTrackToSameTargetWithChangedUrl_WithOverride() throws Exception {
         String dbId = new ObjectId().toStringMongod();
         MimeType mimeType = MimeType.mp3;
-        DBMediaTrack existingMediaTrack = new DBMediaTrack(dbId, "title", "url", MillisecondsTimePoint.now(), MillisecondsDurationImpl.ONE_HOUR, mimeType.name());
+        DBMediaTrack existingMediaTrack = new DBMediaTrack(dbId, "title", "url", MillisecondsTimePoint.now(),
+                MillisecondsDurationImpl.ONE_HOUR, mimeType.name(), new RegattaNameAndRaceName("49er", "R1"));
         createRacingEventService(existingMediaTrack);
 
-        MediaTrack mediaTrackToImport = new MediaTrack(existingMediaTrack.dbId, existingMediaTrack.title, existingMediaTrack.url + "x", existingMediaTrack.startTime, existingMediaTrack.duration, mimeType);
+        MediaTrack mediaTrackToImport = new MediaTrack(existingMediaTrack.dbId, existingMediaTrack.title,
+                existingMediaTrack.url + "x", existingMediaTrack.startTime, existingMediaTrack.duration, mimeType);
         assertThat(existingMediaTrack.url, is(not(mediaTrackToImport.url)));
 
         mediaTracksToImport.add(mediaTrackToImport);
         racingEventService.mediaTracksImported(mediaTracksToImport, OVERRIDE);
-        
+
         Collection<MediaTrack> allMediaTracksAfterImport = racingEventService.getAllMediaTracks();
         assertThat(allMediaTracksAfterImport.size(), is(1));
         MediaTrack mediaTrack = allMediaTracksAfterImport.iterator().next();
@@ -266,15 +277,17 @@ public class MasterDataImporterMediaTest {
     public void testImportOneTrackToSameTargetWithChangedStarttime_WithOverride() throws Exception {
         String dbId = new ObjectId().toStringMongod();
         MimeType mimeType = MimeType.mp3;
-        DBMediaTrack existingMediaTrack = new DBMediaTrack(dbId, "title", "url", MillisecondsTimePoint.now(), MillisecondsDurationImpl.ONE_HOUR, mimeType.name());
+        DBMediaTrack existingMediaTrack = new DBMediaTrack(dbId, "title", "url", MillisecondsTimePoint.now(),
+                MillisecondsDurationImpl.ONE_HOUR, mimeType.name(), new RegattaNameAndRaceName("49er", "R1"));
         createRacingEventService(existingMediaTrack);
 
-        MediaTrack mediaTrackToImport = new MediaTrack(existingMediaTrack.dbId, existingMediaTrack.title, existingMediaTrack.url, existingMediaTrack.startTime.plus(1), existingMediaTrack.duration, mimeType);
+        MediaTrack mediaTrackToImport = new MediaTrack(existingMediaTrack.dbId, existingMediaTrack.title,
+                existingMediaTrack.url, existingMediaTrack.startTime.plus(1), existingMediaTrack.duration, mimeType);
         assertThat(existingMediaTrack.startTime, is(not(mediaTrackToImport.startTime)));
 
         mediaTracksToImport.add(mediaTrackToImport);
         racingEventService.mediaTracksImported(mediaTracksToImport, OVERRIDE);
-        
+
         Collection<MediaTrack> allMediaTracksAfterImport = racingEventService.getAllMediaTracks();
         assertThat(allMediaTracksAfterImport.size(), is(1));
         MediaTrack mediaTrack = allMediaTracksAfterImport.iterator().next();
@@ -292,15 +305,17 @@ public class MasterDataImporterMediaTest {
     public void testImportOneTrackToSameTargetWithChangedDuration_WithOverride() throws Exception {
         String dbId = new ObjectId().toStringMongod();
         MimeType mimeType = MimeType.mp3;
-        DBMediaTrack existingMediaTrack = new DBMediaTrack(dbId, "title", "url", MillisecondsTimePoint.now(), MillisecondsDurationImpl.ONE_HOUR, mimeType.name());
+        DBMediaTrack existingMediaTrack = new DBMediaTrack(dbId, "title", "url", MillisecondsTimePoint.now(),
+                MillisecondsDurationImpl.ONE_HOUR, mimeType.name(), new RegattaNameAndRaceName("49er", "R1"));
         createRacingEventService(existingMediaTrack);
 
-        MediaTrack mediaTrackToImport = new MediaTrack(existingMediaTrack.dbId, existingMediaTrack.title, existingMediaTrack.url, existingMediaTrack.startTime, existingMediaTrack.duration.plus(1), mimeType);
+        MediaTrack mediaTrackToImport = new MediaTrack(existingMediaTrack.dbId, existingMediaTrack.title,
+                existingMediaTrack.url, existingMediaTrack.startTime, existingMediaTrack.duration.plus(1), mimeType);
         assertThat(existingMediaTrack.duration, is(not(mediaTrackToImport.duration)));
 
         mediaTracksToImport.add(mediaTrackToImport);
         racingEventService.mediaTracksImported(mediaTracksToImport, OVERRIDE);
-        
+
         Collection<MediaTrack> allMediaTracksAfterImport = racingEventService.getAllMediaTracks();
         assertThat(allMediaTracksAfterImport.size(), is(1));
         MediaTrack mediaTrack = allMediaTracksAfterImport.iterator().next();
