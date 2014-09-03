@@ -9,7 +9,14 @@
     <ui:with field="local_res2" type="com.sap.sailing.gwt.home.client.shared.leaderboard.OldLeaderboardResources" />
 	<g:HTMLPanel>
 		<s:header.CompactEventHeader ui:field='eventHeader'/>
-		<div class="{local_res2.css.regattanavigation}">
+		<div class="{res.mainCss.grid}">
+    		<div class="{res.mainCss.navbar}">
+			    <h3 class="{local_res.css.eventregattaleaderboard_meta_title}">
+			        <span style="color:darkgrey;"><ui:text from='{i18n.regatta}'/></span>
+			        <span ui:field="title"></span>
+			    </h3>
+    		</div>
+		</div>
 		  <div class="{res.mainCss.grid}">
     		<div class="{res.mainCss.navbar}">
     		    <g:Anchor ui:field="leaderboardAnchor" href="javascript:;" styleName="{res.mainCss.navbar_button}">Leaderboard</g:Anchor>
@@ -17,16 +24,9 @@
     		    <g:Anchor ui:field="pointsChartAnchor" href="javascript:;" styleName="{res.mainCss.navbar_button}">Points Chart</g:Anchor>
     		</div>
           </div>
-		</div>
 		<g:HTMLPanel ui:field="leaderboardTabPanel">
 			<!-- The leaderboard of a regatta-->
 			<div class="{res.mainCss.grid} {local_res.css.eventregattaleaderboard_meta}">
-			   <div class="{res.mediaCss.large12} {res.mediaCss.columns}">
-			    <h3 class="{local_res.css.eventregattaleaderboard_meta_title}">
-			        <span style="color:darkgrey;"><ui:text from='{i18n.leaderboard}'/></span>
-			        <span ui:field="title"></span>
-			    </h3>
-			  </div>
 			  <div class="{res.mediaCss.small9} {res.mediaCss.columns}">
 			    <div ui:field="lastScoringCommentDiv" class="{local_res.css.eventregattaleaderboard_meta_update}"></div>
 			    <div ui:field="lastScoringUpdateTimeDiv" class="{local_res.css.eventregattaleaderboard_meta_update}"></div>
@@ -45,7 +45,7 @@
 		<g:HTMLPanel ui:field="ranksChartTabPanel">
 			<div class="{res.mainCss.grid}">
 			   <div class="{res.mediaCss.large12} {res.mediaCss.columns}">
-			    <h3>Ranks Chart</h3>
+			    <h3>Total Ranks Chart</h3>
               	<g:HTMLPanel ui:field="ranksChartsPanel">
         		</g:HTMLPanel>
 			  </div>
@@ -54,7 +54,7 @@
 		<g:HTMLPanel ui:field="pointsChartTabPanel">
 			<div class="{res.mainCss.grid}">
 			   <div class="{res.mediaCss.large12} {res.mediaCss.columns}">
-			    <h3>Total points Chart</h3>
+			    <h3>Total Points Chart</h3>
               	<g:HTMLPanel ui:field="pointsChartsPanel">
         		</g:HTMLPanel>
 			  </div>

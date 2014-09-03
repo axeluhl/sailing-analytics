@@ -1,64 +1,109 @@
 package com.sap.sailing.gwt.home.client.shared.leaderboard;
 
-import com.google.gwt.dom.client.Style;
-import com.google.gwt.event.dom.client.ClickEvent;
-import com.google.gwt.event.dom.client.ClickHandler;
-import com.google.gwt.user.client.ui.Button;
-import com.google.gwt.user.client.ui.SimplePanel;
+import com.sap.sailing.domain.common.DetailType;
+import com.sap.sailing.domain.common.RaceIdentifier;
 import com.sap.sailing.gwt.ui.client.CompetitorSelectionModel;
 import com.sap.sailing.gwt.ui.client.DebugIdHelper;
+import com.sap.sailing.gwt.ui.client.ErrorReporter;
+import com.sap.sailing.gwt.ui.client.SailingServiceAsync;
 import com.sap.sailing.gwt.ui.client.StringMessages;
+import com.sap.sailing.gwt.ui.client.shared.charts.MultiCompetitorLeaderboardChart;
+import com.sap.sailing.gwt.ui.client.shared.charts.MultiCompetitorLeaderboardChartSettings;
 import com.sap.sailing.gwt.ui.client.shared.components.Component;
 import com.sap.sailing.gwt.ui.client.shared.components.SettingsDialog;
 import com.sap.sailing.gwt.ui.leaderboard.LeaderboardPanel;
+import com.sap.sailing.gwt.ui.leaderboard.LeaderboardSettings;
 import com.sap.sse.gwt.client.async.AsyncActionsExecutor;
 import com.sap.sse.gwt.client.player.Timer;
+import com.sap.sse.gwt.client.useragent.UserAgentDetails;
 
 /**
- * A base class for a leaderboard viewer.
+ * A base class for a viewer managing data on the regatta level (like leaderboard, regatta rank, etc.)
  * 
  * @author Frank Mittag (c163874)
  */
-public abstract class AbstractLeaderboardViewer extends SimplePanel {
-    private final LeaderboardPanel leaderboardPanel;
+public abstract class AbstractLeaderboardViewer {
+    private LeaderboardPanel leaderboardPanel;
+    private MultiCompetitorLeaderboardChart multiCompetitorChart;
+
     protected final CompetitorSelectionModel competitorSelectionProvider;
     protected final AsyncActionsExecutor asyncActionsExecutor;
-
+    protected final ErrorReporter errorReporter;
+    protected final UserAgentDetails userAgent;
+    protected final SailingServiceAsync sailingService;
+    
     protected final Timer timer;
 
-    public AbstractLeaderboardViewer(CompetitorSelectionModel competitorSelectionProvider, AsyncActionsExecutor asyncActionsExecutor,
-            Timer timer, LeaderboardPanel leaderboardPanel) {
-        this.competitorSelectionProvider = competitorSelectionProvider;
-        this.leaderboardPanel = leaderboardPanel;
+    public AbstractLeaderboardViewer(final SailingServiceAsync sailingService, AsyncActionsExecutor asyncActionsExecutor, Timer timer, ErrorReporter errorReporter, UserAgentDetails userAgent) {
+        this.competitorSelectionProvider = new CompetitorSelectionModel(/* hasMultiSelection */true);
+        this.sailingService = sailingService;
         this.asyncActionsExecutor = asyncActionsExecutor;
         this.timer = timer;
+        this.errorReporter = errorReporter;
+        this.userAgent = userAgent;
+        this.leaderboardPanel = null;
+        this.multiCompetitorChart = null;
+    }
+
+    public LeaderboardPanel createLeaderboardPanel(final LeaderboardSettings leaderboardSettings, final RaceIdentifier preselectedRace,
+            final String leaderboardGroupName, String leaderboardName, boolean showRaceDetails, 
+            boolean autoExpandLastRaceColumn) {
+        if(leaderboardPanel == null) {
+            leaderboardPanel = new LeaderboardPanel(sailingService, asyncActionsExecutor, leaderboardSettings, true, preselectedRace,
+                    competitorSelectionProvider, timer, leaderboardGroupName, leaderboardName, errorReporter,
+                    StringMessages.INSTANCE, userAgent, showRaceDetails, /* competitorSearchTextBox */ null, /* showSelectionCheckbox */ true, /* raceTimesInfoProvider */null, autoExpandLastRaceColumn, /* adjustTimerDelay */
+                    true, false, false);
+        }
+        return leaderboardPanel;
+    }
+
+    public MultiCompetitorLeaderboardChart createMultiCompetitorChart(String leaderboardName, DetailType chartDetailType) {
+        if(multiCompetitorChart == null) {
+            multiCompetitorChart = new MultiCompetitorLeaderboardChart(sailingService, asyncActionsExecutor, leaderboardName, chartDetailType,
+                    competitorSelectionProvider, timer, StringMessages.INSTANCE, errorReporter);
+            multiCompetitorChart.setVisible(false); 
+        }
+        return multiCompetitorChart;
     }
     
     public LeaderboardPanel getLeaderboardPanel() {
         return leaderboardPanel;
     }
 
-    protected <SettingsType> void addComponentToNavigationMenu(final Component<SettingsType> component, boolean isCheckboxEnabled, 
-            String componentDisplayName, final boolean hasSettingsWhenComponentIsInvisible) {
-        final String componentName = componentDisplayName != null ? componentDisplayName : component.getLocalizedShortName();
-        final String debugIdPrefix = DebugIdHelper.createDebugId(componentName);
-        final Button settingsButton = new Button("");
-        settingsButton.ensureDebugId(debugIdPrefix + "SettingsButton");
-        if (component.hasSettings()) {
-            settingsButton.addClickHandler(new ClickHandler() {
-                @Override
-                public void onClick(ClickEvent event) {
-                    SettingsDialog<SettingsType> dialog = new SettingsDialog<SettingsType>(component,
-                            StringMessages.INSTANCE);
-                    dialog.ensureDebugId(debugIdPrefix + "SettingsDialog");
-                    dialog.show();
-                }
-            });
-        }
-        settingsButton.setEnabled(component.hasSettings() && hasSettingsWhenComponentIsInvisible);
-//        settingsButton.addStyleName(STYLE_VIEWER_TOOLBAR_SETTINGS_BUTTON);
-        settingsButton.getElement().getStyle().setFloat(Style.Float.LEFT);
-        settingsButton.setTitle(StringMessages.INSTANCE.settingsForComponent(componentName));
+    public MultiCompetitorLeaderboardChart getMultiCompetitorChart() {
+        return multiCompetitorChart;
     }
+
+    public void showCompetitorChart(DetailType chartDetailType) {
+        MultiCompetitorLeaderboardChart multiCompetitorChart = getMultiCompetitorChart();
+        MultiCompetitorLeaderboardChartSettings settings = new MultiCompetitorLeaderboardChartSettings(chartDetailType);
+        multiCompetitorChart.updateSettings(settings);
+        multiCompetitorChart.setVisible(true);
+        timer.addTimeListener(multiCompetitorChart);
+        multiCompetitorChart.timeChanged(timer.getTime(), null);
+    }
+
+    public void hideCompetitorChart() {
+        MultiCompetitorLeaderboardChart multiCompetitorChart = getMultiCompetitorChart();
+        multiCompetitorChart.setVisible(false);
+        timer.removeTimeListener(multiCompetitorChart);
+    }
+
+    public void showLeaderboardSettingsDialog() {
+        showComponentSettingsDialog(leaderboardPanel, null);
+    }
+    
+    public void showChartSettingsDialog() {
+        showComponentSettingsDialog(multiCompetitorChart, null);
+    }
+    
+    protected <SettingsType> void showComponentSettingsDialog(final Component<SettingsType> component, String componentDisplayName) {
+        String componentName = componentDisplayName != null ? componentDisplayName : component.getLocalizedShortName();
+        String debugIdPrefix = DebugIdHelper.createDebugId(componentName);
+        SettingsDialog<SettingsType> dialog = new SettingsDialog<SettingsType>(component, StringMessages.INSTANCE);
+        dialog.ensureDebugId(debugIdPrefix + "SettingsDialog");
+        dialog.show();
+    }
+
 }
 

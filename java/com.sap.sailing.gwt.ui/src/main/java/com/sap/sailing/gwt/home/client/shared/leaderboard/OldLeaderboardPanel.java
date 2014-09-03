@@ -16,6 +16,7 @@ import com.google.gwt.user.client.ui.Composite;
 import com.google.gwt.user.client.ui.HTMLPanel;
 import com.google.gwt.user.client.ui.ScrollPanel;
 import com.google.gwt.user.client.ui.Widget;
+import com.sap.sailing.domain.common.DetailType;
 import com.sap.sailing.domain.common.RaceIdentifier;
 import com.sap.sailing.domain.common.dto.FleetDTO;
 import com.sap.sailing.domain.common.dto.LeaderboardDTO;
@@ -98,14 +99,17 @@ public class OldLeaderboardPanel extends Composite implements LeaderboardUpdateL
             final UserAgentDetails userAgent, boolean showRaceDetails,  
             boolean autoExpandLastRaceColumn, boolean showOverallLeaderboard) {
         this.autoRefreshTimer = timer;
-        leaderboardViewer = new LeaderboardViewer(sailingService, new AsyncActionsExecutor(),
-                timer, leaderboardSettings, preselectedRace, leaderboardGroupName, leaderboardName, errorReporter, 
-                userAgent, showRaceDetails, autoExpandLastRaceColumn, showOverallLeaderboard);
+        leaderboardViewer = new LeaderboardViewer(sailingService, asyncActionsExecutor, timer, errorReporter, userAgent);
+        leaderboardViewer.createLeaderboardPanel(leaderboardSettings, preselectedRace, leaderboardGroupName, leaderboardName, showRaceDetails, autoExpandLastRaceColumn);
+        leaderboardViewer.createMultiCompetitorChart(leaderboardName, DetailType.REGATTA_RANK);
 
         ScrollPanel contentScrollPanel = new ScrollPanel();
-        contentScrollPanel.setWidget(leaderboardViewer);
+        contentScrollPanel.setWidget(leaderboardViewer.getLeaderboardPanel());
         oldLeaderboardPanel.add(contentScrollPanel);
         leaderboardViewer.getLeaderboardPanel().addLeaderboardUpdateListener(this);
+        
+        ranksChartsPanel.add(leaderboardViewer.getMultiCompetitorChart());
+        leaderboardViewer.hideCompetitorChart();
     }
 
     public void createMetaLeaderboardViewer(SailingServiceAsync sailingService, AsyncActionsExecutor asyncActionsExecutor, 
@@ -114,13 +118,14 @@ public class OldLeaderboardPanel extends Composite implements LeaderboardUpdateL
             UserAgentDetails userAgent, boolean showRaceDetails,  
             boolean autoExpandLastRaceColumn, boolean showSeriesLeaderboards) {
         this.autoRefreshTimer = timer;
-        leaderboardViewer = new MetaLeaderboardViewer(sailingService, new AsyncActionsExecutor(),
-                timer, leaderboardSettings, null, preselectedRace, leaderboardGroupName, metaLeaderboardName, errorReporter,
-                userAgent, showRaceDetails, autoExpandLastRaceColumn, showSeriesLeaderboards);
+        leaderboardViewer = new MetaLeaderboardViewer(sailingService, asyncActionsExecutor, timer, errorReporter, userAgent);
+        leaderboardViewer.createLeaderboardPanel(leaderboardSettings, preselectedRace, leaderboardGroupName, metaLeaderboardName, showRaceDetails, autoExpandLastRaceColumn);
        
         ScrollPanel contentScrollPanel = new ScrollPanel();
-        contentScrollPanel.setWidget(leaderboardViewer);
+        contentScrollPanel.setWidget(leaderboardViewer.getLeaderboardPanel());
         oldLeaderboardPanel.add(contentScrollPanel);
+
+        leaderboardViewer.hideCompetitorChart();
     }
     
     @UiHandler("autoRefreshAnchor")
@@ -197,17 +202,19 @@ public class OldLeaderboardPanel extends Composite implements LeaderboardUpdateL
     @UiHandler("leaderboardAnchor")
     void leaderboardTabClicked(ClickEvent event) {
         setActiveTabPanel(leaderboardTabPanel, leaderboardAnchor);
+        leaderboardViewer.hideCompetitorChart();
     }
     
     @UiHandler("ranksChartAnchor")
     void ranksChartTabClicked(ClickEvent event) {
         setActiveTabPanel(ranksChartTabPanel, ranksChartAnchor);
-        
+        leaderboardViewer.showCompetitorChart(DetailType.REGATTA_RANK);
     }
 
     @UiHandler("pointsChartAnchor")
     void pointsChartTabClicked(ClickEvent event) {
         setActiveTabPanel(pointsChartTabPanel, pointsChartAnchor);
+        leaderboardViewer.showCompetitorChart(DetailType.REGATTA_TOTAL_POINTS);
     }
     
     private void setActiveTabPanel(HTMLPanel newActivePanel, Anchor newActiveAnchor) {

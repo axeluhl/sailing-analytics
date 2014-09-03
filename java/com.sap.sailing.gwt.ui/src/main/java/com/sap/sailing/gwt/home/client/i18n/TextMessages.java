@@ -29,6 +29,7 @@ public interface TextMessages extends Messages {
     String errorMessageNoSuchLeaderboard();
     String raceNotScheduled();
     String regattaDetails();
+    String regatta();
     
     String countdownDays();
     String countdownHours();
