@@ -6,6 +6,8 @@ import java.util.List;
 import com.sap.sailing.domain.common.Duration;
 import com.sap.sailing.domain.common.RegattaAndRaceIdentifier;
 import com.sap.sailing.domain.common.TimePoint;
+import com.sap.sailing.domain.common.media.MediaTrack;
+import com.sap.sailing.domain.common.media.MediaTrack.MimeType;
 
 /**
  * Offers CRUD methods for mongo representation of media track objects.
@@ -19,7 +21,7 @@ public interface MediaDB {
 	 * Stores a new track to the database, returning the db-generated id.
 	 */
 	String insertMediaTrack(String title, String url, TimePoint startTime,
-			Duration duration, String mimeType,
+			Duration duration, MimeType mimeType,
 			RegattaAndRaceIdentifier regattaAndRace);
 
 	/**
@@ -34,10 +36,10 @@ public interface MediaDB {
 	 *             When track with specified dbId already exists.
 	 */
 	void insertMediaTrackWithId(String dbId, String videoTitle, String url,
-			TimePoint startTime, Duration duration, String mimeType,
+			TimePoint startTime, Duration duration, MimeType mimeType,
 			RegattaAndRaceIdentifier regattaAndRace);
 
-	List<DBMediaTrack> loadAllMediaTracks();
+	List<MediaTrack> loadAllMediaTracks();
 
 	void deleteMediaTrack(String dbId);
 
@@ -55,7 +57,7 @@ public interface MediaDB {
 
 		@Override
 		public String insertMediaTrack(String title, String url,
-				TimePoint startTime, Duration duration, String mimeType,
+				TimePoint startTime, Duration duration, MimeType mimeType,
 				RegattaAndRaceIdentifier regattaAndRace) {
 			return "0";
 		}
@@ -63,11 +65,11 @@ public interface MediaDB {
 		@Override
 		public void insertMediaTrackWithId(String dbId, String videoTitle,
 				String url, TimePoint startTime, Duration duration,
-				String mimeType, RegattaAndRaceIdentifier regattaAndRace) {
+				MimeType mimeType, RegattaAndRaceIdentifier regattaAndRace) {
 		};
 
 		@Override
-		public List<DBMediaTrack> loadAllMediaTracks() {
+		public List<MediaTrack> loadAllMediaTracks() {
 			return Collections.emptyList();
 		}
 

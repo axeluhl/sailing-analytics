@@ -130,22 +130,22 @@ public abstract class EventDialog extends DataEntryDialogWithBootstrap<EventDTO>
         };
         courseAreaNameList = new StringListInlineEditorComposite(Collections.<String> emptyList(),
                 new StringListInlineEditorComposite.ExpandedUi(stringMessages, resources.removeIcon(), /* suggestValues */
-                        SuggestedCourseAreaNames.suggestedCourseAreaNames));
+                        SuggestedCourseAreaNames.suggestedCourseAreaNames, 50));
         courseAreaNameList.addValueChangeHandler(valueChangeHandler);
         final List<String> imageSuggestionURLs = Arrays.asList(new String[] { "http://", "https://", "http://www.", "https://www" });
         imageURLList = new StringListInlineEditorComposite(Collections.<String> emptyList(),
                 new StringListInlineEditorComposite.ExpandedUi(stringMessages, resources.removeIcon(),
-                /* suggestValues */ imageSuggestionURLs));
+                /* suggestValues */ imageSuggestionURLs, 80));
         imageURLList.addValueChangeHandler(valueChangeHandler);
         List<String> videoURLSuggestions = new ArrayList<>(imageSuggestionURLs);
         videoURLSuggestions.add("http://www.youtube.com/watch?v=");
         videoURLList = new StringListInlineEditorComposite(Collections.<String> emptyList(),
                 new StringListInlineEditorComposite.ExpandedUi(stringMessages, resources.removeIcon(),
-                /* suggestValues */ videoURLSuggestions));
+                /* suggestValues */ videoURLSuggestions, 80));
         videoURLList.addValueChangeHandler(valueChangeHandler);
         sponsorImageURLList = new StringListInlineEditorComposite(Collections.<String> emptyList(),
                 new StringListInlineEditorComposite.ExpandedUi(stringMessages, resources.removeIcon(),
-                /* suggestValues */ imageSuggestionURLs));
+                /* suggestValues */ imageSuggestionURLs, 80));
         sponsorImageURLList.addValueChangeHandler(valueChangeHandler);
     }
 
