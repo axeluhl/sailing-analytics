@@ -188,7 +188,7 @@ public class AdminConsoleEntryPoint extends AbstractEntryPoint implements Regatt
         // replicationPanel.ensureDebugId("ReplicationManagement");
         addToTabPanel(tabPanel, user, replicationPanel, stringMessages.replication(), AdminConsoleFeatures.MANAGE_REPLICATION);
 
-        final MediaPanel mediaPanel = new MediaPanel(mediaService, this, stringMessages);
+        final MediaPanel mediaPanel = new MediaPanel(sailingService, mediaService, this, stringMessages);
         addToTabPanel(tabPanel, user, mediaPanel, stringMessages.mediaPanel(), AdminConsoleFeatures.MANAGE_MEDIA);
 
         final MasterDataImportPanel masterDataImportPanel = new MasterDataImportPanel(stringMessages, sailingService,

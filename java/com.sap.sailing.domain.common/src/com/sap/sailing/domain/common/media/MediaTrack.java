@@ -36,7 +36,11 @@ public class MediaTrack implements Serializable {
 
         public static MimeType byName(String mimeTypeName) {
             try {
-                return MimeType.valueOf(mimeTypeName);
+                if(mimeTypeName!=null){
+                    return MimeType.valueOf(mimeTypeName);
+                }else{
+                    return null;
+                }
             } catch (IllegalArgumentException ex) {
                 return null;
             }
