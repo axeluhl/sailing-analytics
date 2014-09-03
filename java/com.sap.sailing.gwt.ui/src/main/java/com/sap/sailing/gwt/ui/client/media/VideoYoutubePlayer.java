@@ -8,6 +8,7 @@ import com.google.gwt.event.logical.shared.AttachEvent.Handler;
 import com.google.gwt.user.client.ui.Panel;
 import com.google.gwt.user.client.ui.SimplePanel;
 import com.google.gwt.user.client.ui.Widget;
+import com.sap.sailing.domain.common.TimePoint;
 import com.sap.sailing.domain.common.impl.MillisecondsTimePoint;
 import com.sap.sailing.domain.common.media.MediaTrack;
 import com.sap.sailing.gwt.ui.client.media.shared.AbstractMediaPlayer;
@@ -25,7 +26,7 @@ public class VideoYoutubePlayer extends AbstractMediaPlayer implements VideoSync
     
     private static int videoCounter;
     
-    private final long raceStartTimeMillis;
+    private final TimePoint raceStartTime;
 
     private final Timer raceTimer;
     
@@ -44,10 +45,10 @@ public class VideoYoutubePlayer extends AbstractMediaPlayer implements VideoSync
     private final List<DeferredAction> deferredActions = new ArrayList<DeferredAction>();
 
 
-    public VideoYoutubePlayer(final MediaTrack videoTrack, long raceStartTimeMillis, final boolean showControls, Timer raceTimer) {
+    public VideoYoutubePlayer(final MediaTrack videoTrack, TimePoint raceStartTime, final boolean showControls, Timer raceTimer) {
         super(videoTrack);
         this.raceTimer = raceTimer;
-        this.raceStartTimeMillis = raceStartTimeMillis;
+        this.raceStartTime = raceStartTime;
 
         this.videoContainer = new SimplePanel();
         final String videoContainerId = "videoContainer-" + videoTrack.url + ++videoCounter;
@@ -85,7 +86,7 @@ public class VideoYoutubePlayer extends AbstractMediaPlayer implements VideoSync
 
     @Override
     public long getOffset() {
-        return getMediaTrack().startTime.asMillis() - raceStartTimeMillis;
+        return getMediaTrack().startTime.asMillis() - raceStartTime.asMillis();
     }
 
     @Override
