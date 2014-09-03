@@ -2,6 +2,7 @@ package com.sap.sailing.domain.persistence.media;
 
 import java.util.Collections;
 import java.util.List;
+import java.util.Set;
 
 import com.sap.sailing.domain.common.Duration;
 import com.sap.sailing.domain.common.RegattaAndRaceIdentifier;
@@ -22,7 +23,7 @@ public interface MediaDB {
 	 */
 	String insertMediaTrack(String title, String url, TimePoint startTime,
 			Duration duration, MimeType mimeType,
-			RegattaAndRaceIdentifier regattaAndRace);
+			Set<RegattaAndRaceIdentifier> regattasAndRaces);
 
 	/**
 	 * Stores a new track to the database, using the db id of the specified
@@ -37,7 +38,7 @@ public interface MediaDB {
 	 */
 	void insertMediaTrackWithId(String dbId, String videoTitle, String url,
 			TimePoint startTime, Duration duration, MimeType mimeType,
-			RegattaAndRaceIdentifier regattaAndRace);
+			Set<RegattaAndRaceIdentifier> regattaAndRace);
 
 	List<MediaTrack> loadAllMediaTracks();
 
@@ -51,21 +52,21 @@ public interface MediaDB {
 
 	void updateDuration(String dbId, Duration duration);
 
-	void updateRace(String dbId, RegattaAndRaceIdentifier race);
+	void updateRace(String dbId, Set<RegattaAndRaceIdentifier> race);
 
 	MediaDB TEST_STUB = new MediaDB() {
 
 		@Override
 		public String insertMediaTrack(String title, String url,
 				TimePoint startTime, Duration duration, MimeType mimeType,
-				RegattaAndRaceIdentifier regattaAndRace) {
+				Set<RegattaAndRaceIdentifier> regattasAndRaces) {
 			return "0";
 		}
 
 		@Override
 		public void insertMediaTrackWithId(String dbId, String videoTitle,
 				String url, TimePoint startTime, Duration duration,
-				MimeType mimeType, RegattaAndRaceIdentifier regattaAndRace) {
+				MimeType mimeType, Set<RegattaAndRaceIdentifier> regattaAndRace) {
 		};
 
 		@Override
@@ -94,7 +95,7 @@ public interface MediaDB {
 		}
 
 		@Override
-		public void updateRace(String dbId, RegattaAndRaceIdentifier race) {
+		public void updateRace(String dbId, Set<RegattaAndRaceIdentifier> race) {
 		}
 
 	};

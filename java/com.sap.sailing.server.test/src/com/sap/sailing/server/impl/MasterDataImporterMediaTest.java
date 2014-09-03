@@ -16,12 +16,15 @@ import static org.mockito.Mockito.when;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collection;
+import java.util.HashSet;
+import java.util.Set;
 
 import org.bson.types.ObjectId;
 import org.junit.Before;
 import org.junit.Test;
 import org.mockito.Mockito;
 
+import com.sap.sailing.domain.common.RegattaAndRaceIdentifier;
 import com.sap.sailing.domain.common.RegattaNameAndRaceName;
 import com.sap.sailing.domain.common.impl.MillisecondsDurationImpl;
 import com.sap.sailing.domain.common.impl.MillisecondsTimePoint;
@@ -91,8 +94,10 @@ public class MasterDataImporterMediaTest {
         createRacingEventService();
 
         String dbId = new ObjectId().toStringMongod();
+        Set<RegattaAndRaceIdentifier> regattasAndRaces = new HashSet<RegattaAndRaceIdentifier>();
+        regattasAndRaces.add(new RegattaNameAndRaceName("49er", "R1"));
         MediaTrack mediaTrackToImport = new MediaTrack(dbId, "title", "url", MillisecondsTimePoint.now(),
-                MillisecondsDurationImpl.ONE_HOUR, MimeType.mp3, new RegattaNameAndRaceName("49er", "R1"));
+                MillisecondsDurationImpl.ONE_HOUR, MimeType.mp3, regattasAndRaces);
         mediaTracksToImport.add(mediaTrackToImport);
         racingEventService.mediaTracksImported(mediaTracksToImport, OVERRIDE);
 
@@ -114,9 +119,10 @@ public class MasterDataImporterMediaTest {
     public void testImportOneTrackToSameTarget_WithOverride() throws Exception {
         String dbId = new ObjectId().toStringMongod();
         MimeType mimeType = MimeType.mp3;
-
+        Set<RegattaAndRaceIdentifier> regattasAndRaces = new HashSet<RegattaAndRaceIdentifier>();
+        regattasAndRaces.add(new RegattaNameAndRaceName("49er", "R1"));
         MediaTrack existingMediaTrack = new MediaTrack(dbId, "title", "url", MillisecondsTimePoint.now(),
-                MillisecondsDurationImpl.ONE_HOUR, mimeType, new RegattaNameAndRaceName("49er", "R1"));
+                MillisecondsDurationImpl.ONE_HOUR, mimeType, regattasAndRaces);
 
         createRacingEventService(existingMediaTrack);
         Collection<MediaTrack> allMediaTracksBeforeImport = racingEventService.getAllMediaTracks();
@@ -141,9 +147,10 @@ public class MasterDataImporterMediaTest {
     public void testImportOneTrackToExistingOtherTrack_WithOverride() throws Exception {
         String dbId = new ObjectId().toStringMongod();
         MimeType mimeType = MimeType.mp3;
-
+        Set<RegattaAndRaceIdentifier> regattasAndRaces = new HashSet<RegattaAndRaceIdentifier>();
+        regattasAndRaces.add(new RegattaNameAndRaceName("49er", "R1"));
         MediaTrack existingMediaTrack = new MediaTrack(dbId, "title", "url", MillisecondsTimePoint.now(),
-                MillisecondsDurationImpl.ONE_HOUR, mimeType, new RegattaNameAndRaceName("49er", "R1"));
+                MillisecondsDurationImpl.ONE_HOUR, mimeType, regattasAndRaces);
 
         createRacingEventService(existingMediaTrack);
 
@@ -168,9 +175,10 @@ public class MasterDataImporterMediaTest {
     public void testImportOneTrackToSameTargetWithChangedTitle_WithOverride() throws Exception {
         String dbId = new ObjectId().toStringMongod();
         MimeType mimeType = MimeType.mp3;
-
+        Set<RegattaAndRaceIdentifier> regattasAndRaces = new HashSet<RegattaAndRaceIdentifier>();
+        regattasAndRaces.add(new RegattaNameAndRaceName("49er", "R1"));
         MediaTrack existingMediaTrack = new MediaTrack(dbId, "title", "url", MillisecondsTimePoint.now(),
-                MillisecondsDurationImpl.ONE_HOUR, mimeType, new RegattaNameAndRaceName("49er", "R1"));
+                MillisecondsDurationImpl.ONE_HOUR, mimeType, regattasAndRaces);
 
         createRacingEventService(existingMediaTrack);
 
@@ -198,9 +206,10 @@ public class MasterDataImporterMediaTest {
     public void testImportOneTrackWithNullTitleToSameTargetWithTitle_WithOverride() throws Exception {
         String dbId = new ObjectId().toStringMongod();
         MimeType mimeType = MimeType.mp3;
-
+        Set<RegattaAndRaceIdentifier> regattasAndRaces = new HashSet<RegattaAndRaceIdentifier>();
+        regattasAndRaces.add(new RegattaNameAndRaceName("49er", "R1"));
         MediaTrack existingMediaTrack = new MediaTrack(dbId, "title", "url", MillisecondsTimePoint.now(),
-                MillisecondsDurationImpl.ONE_HOUR, mimeType, new RegattaNameAndRaceName("49er", "R1"));
+                MillisecondsDurationImpl.ONE_HOUR, mimeType, regattasAndRaces);
         
         createRacingEventService(existingMediaTrack);
 
@@ -228,9 +237,10 @@ public class MasterDataImporterMediaTest {
     public void testImportOneTrackToSameTargetWithChangedTitle_NoOverride() throws Exception {
         String dbId = new ObjectId().toStringMongod();
         MimeType mimeType = MimeType.mp3;
-
+        Set<RegattaAndRaceIdentifier> regattasAndRaces = new HashSet<RegattaAndRaceIdentifier>();
+        regattasAndRaces.add(new RegattaNameAndRaceName("49er", "R1"));
         MediaTrack existingMediaTrack = new MediaTrack(dbId, "title", "url", MillisecondsTimePoint.now(),
-                MillisecondsDurationImpl.ONE_HOUR, mimeType, new RegattaNameAndRaceName("49er", "R1"));
+                MillisecondsDurationImpl.ONE_HOUR, mimeType, regattasAndRaces);
 
         createRacingEventService(existingMediaTrack);
 
@@ -258,9 +268,10 @@ public class MasterDataImporterMediaTest {
     public void testImportOneTrackToSameTargetWithChangedUrl_WithOverride() throws Exception {
         String dbId = new ObjectId().toStringMongod();
         MimeType mimeType = MimeType.mp3;
-
+        Set<RegattaAndRaceIdentifier> regattasAndRaces = new HashSet<RegattaAndRaceIdentifier>();
+        regattasAndRaces.add(new RegattaNameAndRaceName("49er", "R1"));
         MediaTrack existingMediaTrack = new MediaTrack(dbId, "title", "url", MillisecondsTimePoint.now(),
-                MillisecondsDurationImpl.ONE_HOUR, mimeType, new RegattaNameAndRaceName("49er", "R1"));
+                MillisecondsDurationImpl.ONE_HOUR, mimeType, regattasAndRaces);
 
         createRacingEventService(existingMediaTrack);
 
@@ -288,9 +299,10 @@ public class MasterDataImporterMediaTest {
     public void testImportOneTrackToSameTargetWithChangedStarttime_WithOverride() throws Exception {
         String dbId = new ObjectId().toStringMongod();
         MimeType mimeType = MimeType.mp3;
-
+        Set<RegattaAndRaceIdentifier> regattasAndRaces = new HashSet<RegattaAndRaceIdentifier>();
+        regattasAndRaces.add(new RegattaNameAndRaceName("49er", "R1"));
         MediaTrack existingMediaTrack = new MediaTrack(dbId, "title", "url", MillisecondsTimePoint.now(),
-                MillisecondsDurationImpl.ONE_HOUR, mimeType, new RegattaNameAndRaceName("49er", "R1"));
+                MillisecondsDurationImpl.ONE_HOUR, mimeType, regattasAndRaces);
 
         createRacingEventService(existingMediaTrack);
 
@@ -318,8 +330,10 @@ public class MasterDataImporterMediaTest {
     public void testImportOneTrackToSameTargetWithChangedDuration_WithOverride() throws Exception {
         String dbId = new ObjectId().toStringMongod();
         MimeType mimeType = MimeType.mp3;
+        Set<RegattaAndRaceIdentifier> regattasAndRaces = new HashSet<RegattaAndRaceIdentifier>();
+        regattasAndRaces.add(new RegattaNameAndRaceName("49er", "R1"));
         MediaTrack existingMediaTrack = new MediaTrack(dbId, "title", "url", MillisecondsTimePoint.now(),
-                MillisecondsDurationImpl.ONE_HOUR, mimeType, new RegattaNameAndRaceName("49er", "R1"));
+                MillisecondsDurationImpl.ONE_HOUR, mimeType, regattasAndRaces);
         createRacingEventService(existingMediaTrack);
 
         MediaTrack mediaTrackToImport = new MediaTrack(existingMediaTrack.dbId, existingMediaTrack.title,

@@ -2,6 +2,8 @@ package com.sap.sailing.gwt.ui.adminconsole;
 
 import java.util.Collection;
 import java.util.Comparator;
+import java.util.HashSet;
+import java.util.Set;
 
 import com.google.gwt.cell.client.EditTextCell;
 import com.google.gwt.cell.client.FieldUpdater;
@@ -22,6 +24,7 @@ import com.google.gwt.view.client.DefaultSelectionEventManager;
 import com.google.gwt.view.client.ListDataProvider;
 import com.google.gwt.view.client.SelectionModel;
 import com.google.gwt.view.client.SingleSelectionModel;
+import com.sap.sailing.domain.common.RegattaAndRaceIdentifier;
 import com.sap.sailing.domain.common.RegattaNameAndRaceName;
 import com.sap.sailing.domain.common.TimePoint;
 import com.sap.sailing.domain.common.impl.MillisecondsTimePoint;
@@ -222,23 +225,25 @@ public class MediaPanel extends FlowPanel {
         });
         mediaTracksTable.setColumnWidth(urlColumn, 100, Unit.PCT);
 
-        // regattaAndRace
+        // regattasAndRaces
 
         Column<MediaTrack, String> regattaAndRaceColumn = new Column<MediaTrack, String>(new EditTextCell()) {
             @Override
             public String getValue(MediaTrack mediaTrack) {
                 if (mediaTrack.regattasAndRaces != null) {
-                    return mediaTrack.regattasAndRaces.getRegattaName() + " " + mediaTrack.regattasAndRaces.getRaceName();
+                    return listRegattasAndRaces(mediaTrack);
                 } else
                     return "";
             }
+
+            
         };
+        
         regattaAndRaceColumn.setSortable(true);
         sortHandler.setComparator(regattaAndRaceColumn, new Comparator<MediaTrack>() {
             public int compare(MediaTrack mediaTrack1, MediaTrack mediaTrack2) {
-                return (mediaTrack1.regattasAndRaces.getRegattaName() + " " + mediaTrack1.regattasAndRaces.getRaceName())
-                        .compareTo(mediaTrack2.regattasAndRaces.getRegattaName() + " "
-                                + mediaTrack2.regattasAndRaces.getRaceName());
+                return (listRegattasAndRaces(mediaTrack1))
+                        .compareTo(listRegattasAndRaces(mediaTrack2));
             }
         });
         mediaTracksTable.addColumn(regattaAndRaceColumn, stringMessages.regattaAndRace());
@@ -249,9 +254,11 @@ public class MediaPanel extends FlowPanel {
                     mediaTrack.regattasAndRaces = null;
                 } else {
                     String[] regattaAndRace = newRegattaAndRace.split(" ");
-                    mediaTrack.regattasAndRaces = new RegattaNameAndRaceName(regattaAndRace[0], regattaAndRace[1]); // TODO
-                                                                                                                  // sinnvolle
-                                                                                                                  // Eingabe
+                    Set<RegattaAndRaceIdentifier> regattasAndRaces = new HashSet<RegattaAndRaceIdentifier>();
+                    regattasAndRaces.add(new RegattaNameAndRaceName(regattaAndRace[0], regattaAndRace[1])); // TODO
+                                                                                                            // sinnvolle
+                                                                                                            // Eingabe)
+                    mediaTrack.regattasAndRaces = regattasAndRaces;
                 }
                 mediaService.updateRace(mediaTrack, new AsyncCallback<Void>() {
 
@@ -417,6 +424,13 @@ public class MediaPanel extends FlowPanel {
             }
         });
         dialog.show();
+    }
+    private String listRegattasAndRaces(MediaTrack mediaTrack) {
+        String value = "";
+        for (RegattaAndRaceIdentifier regattaAndRace : mediaTrack.regattasAndRaces) {
+            value += regattaAndRace.getRegattaName() + " " + regattaAndRace.getRaceName() + ", ";
+        }
+        return value;
     }
 
     public void onShow() {

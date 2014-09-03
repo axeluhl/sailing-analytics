@@ -1,5 +1,8 @@
 package com.sap.sailing.server.replication.test;
 
+import java.util.HashSet;
+import java.util.Set;
+
 import org.junit.Test;
 
 import com.sap.sailing.domain.common.Duration;
@@ -27,8 +30,9 @@ public class MediaReplicationTest extends AbstractServerReplicationTest {
         TimePoint startTime = MillisecondsTimePoint.now();
         Duration duration = MillisecondsDurationImpl.ONE_HOUR;
         MimeType mimeType = MimeType.mp4;
-        RegattaAndRaceIdentifier regattaAndRace = new RegattaNameAndRaceName("49er", "R1");
-        MediaTrack mediaTrack = new MediaTrack(title, url, startTime, duration, mimeType, regattaAndRace);
+        Set<RegattaAndRaceIdentifier> regattasAndRaces = new HashSet<RegattaAndRaceIdentifier>();
+        regattasAndRaces.add(new RegattaNameAndRaceName("49er", "R1"));
+        MediaTrack mediaTrack = new MediaTrack(title, url, startTime, duration, mimeType, regattasAndRaces);
         return mediaTrack;
     }
     
