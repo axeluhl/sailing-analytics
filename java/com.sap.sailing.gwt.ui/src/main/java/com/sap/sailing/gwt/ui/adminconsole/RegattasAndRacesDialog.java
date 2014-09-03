@@ -1,9 +1,12 @@
 package com.sap.sailing.gwt.ui.adminconsole;
 
+import java.util.Collection;
+import java.util.Collections;
 import java.util.List;
 
 import com.google.gwt.event.dom.client.ChangeEvent;
 import com.google.gwt.event.dom.client.ChangeHandler;
+import com.google.gwt.user.client.rpc.AsyncCallback;
 import com.google.gwt.user.client.ui.Grid;
 import com.google.gwt.user.client.ui.Label;
 import com.google.gwt.user.client.ui.ListBox;
@@ -206,6 +209,22 @@ public abstract class RegattasAndRacesDialog extends DataEntryDialog<RegattaDTO>
       }
       return result;
   }
+  
+//  private void openCreateRegattaDialog() {
+//      final Collection<RegattaDTO> existingRegattas = Collections.unmodifiableCollection(regattaListComposite.getAllRegattas());
+//
+//      sailingService.getEvents(new AsyncCallback<List<EventDTO>>() {
+//          @Override
+//          public void onFailure(Throwable caught) {
+//              openCreateRegattaDialog(existingRegattas, Collections.<EventDTO>emptyList());
+//          }
+//
+//          @Override
+//          public void onSuccess(List<EventDTO> result) {
+//              openCreateRegattaDialog(existingRegattas, Collections.unmodifiableList(result));
+//          }
+//      });
+//  }
   
 
 }

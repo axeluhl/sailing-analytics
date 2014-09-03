@@ -1,7 +1,9 @@
 package com.sap.sailing.gwt.ui.adminconsole;
 
 import java.util.Collection;
+import java.util.Collections;
 import java.util.Comparator;
+import java.util.List;
 
 import com.google.gwt.cell.client.EditTextCell;
 import com.google.gwt.cell.client.FieldUpdater;
@@ -29,9 +31,12 @@ import com.sap.sailing.domain.common.media.MediaTrack;
 import com.sap.sailing.domain.common.media.MediaUtil;
 import com.sap.sailing.gwt.ui.client.ErrorReporter;
 import com.sap.sailing.gwt.ui.client.MediaServiceAsync;
+import com.sap.sailing.gwt.ui.client.SailingServiceAsync;
 import com.sap.sailing.gwt.ui.client.StringMessages;
 import com.sap.sailing.gwt.ui.client.media.NewMediaDialog;
 import com.sap.sailing.gwt.ui.client.media.TimeFormatUtil;
+import com.sap.sailing.gwt.ui.shared.EventDTO;
+import com.sap.sailing.gwt.ui.shared.RegattaDTO;
 import com.sap.sse.gwt.client.dialog.DataEntryDialog.DialogCallback;
 
 /**
@@ -41,7 +46,8 @@ import com.sap.sse.gwt.client.dialog.DataEntryDialog.DialogCallback;
  * 
  */
 public class MediaPanel extends FlowPanel {
-
+    
+    private final SailingServiceAsync sailingService;
     private final MediaServiceAsync mediaService;
     private final ErrorReporter errorReporter;
     private final StringMessages stringMessages;
@@ -49,7 +55,8 @@ public class MediaPanel extends FlowPanel {
     private CellTable<MediaTrack> mediaTracksTable;
     private ListDataProvider<MediaTrack> mediaTrackListDataProvider = new ListDataProvider<MediaTrack>();
 
-    public MediaPanel(MediaServiceAsync mediaService, ErrorReporter errorReporter, StringMessages stringMessages) {
+    public MediaPanel(SailingServiceAsync sailingService, MediaServiceAsync mediaService, ErrorReporter errorReporter, StringMessages stringMessages) {
+        this.sailingService = sailingService;
         this.mediaService = mediaService;
         this.stringMessages = stringMessages;
         this.errorReporter = errorReporter;
@@ -421,6 +428,22 @@ public class MediaPanel extends FlowPanel {
 
     public void onShow() {
         loadMediaTracks();
+    }
+    
+    private void openRegattasAndRacesDialog() {
+        final Collection<RegattaDTO> existingRegattas = Collections.unmodifiableCollection(regattaListComposite.getAllRegattas());
+
+        sailingService.getEvents(new AsyncCallback<List<EventDTO>>() {
+            @Override
+            public void onFailure(Throwable caught) {
+                openCreateRegattaDialog(existingRegattas, Collections.<EventDTO>emptyList());
+            }
+
+            @Override
+            public void onSuccess(List<EventDTO> result) {
+                openCreateRegattaDialog(existingRegattas, Collections.unmodifiableList(result));
+            }
+        });
     }
 
 }
