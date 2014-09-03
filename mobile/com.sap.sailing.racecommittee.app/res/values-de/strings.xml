@@ -28,6 +28,9 @@
     <string name="abort_running_race">Abbruch</string>
     <string name="choose_xray_flag_up">Einzelrückruf</string>
     <string name="choose_first_substitute_flag">Gesamtrückruf</string>
+    <string name="confirm_general_recall">General Recall ausführen?</string>
+    <string name="confirm">Bestätigen</string>
+    <string name="abort">Abbruch</string>
     <string name="choose_blue_flag">Zieleinlauf beginnen</string>
     <string name="flag_ap">AP Flagge</string>
     <string name="flag_november">November</string>

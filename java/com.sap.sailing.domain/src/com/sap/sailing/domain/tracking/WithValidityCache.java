@@ -3,7 +3,10 @@ package com.sap.sailing.domain.tracking;
 public interface WithValidityCache {
     boolean isValidityCached();
     
-    boolean isValid();
+    /**
+     * Returns a valid result if {@link #isValidCached()} returns <code>true</code>
+     */
+    boolean isValidCached();
     
     void invalidateCache();
     

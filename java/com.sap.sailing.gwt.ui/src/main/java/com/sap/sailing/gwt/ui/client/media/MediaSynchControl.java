@@ -38,7 +38,7 @@ public class MediaSynchControl implements EditFlag {
         this.mediaSynchAdapter = mediaSynchAdapter;
         this.errorReporter = errorReporter;
         MediaTrack videoTrack = this.mediaSynchAdapter.getMediaTrack(); 
-        backupVideoTrack = new MediaTrack(null, videoTrack.title, videoTrack.url, videoTrack.startTime, videoTrack.durationInMillis, videoTrack.mimeType);
+        backupVideoTrack = new MediaTrack(null, videoTrack.title, videoTrack.url, videoTrack.startTime, videoTrack.duration, videoTrack.mimeType);
         mainPanel = new FlowPanel();
         fineTuningPanel = new FlowPanel();
         fineTuningPanel.addStyleName("finetuning-panel");
@@ -144,7 +144,7 @@ public class MediaSynchControl implements EditFlag {
 // For now, only start time can be changed.        
 //      getMediaTrack().title = backupVideoTrack.title;
 //      getMediaTrack().url = backupVideoTrack.url;
-//      getMediaTrack().durationInMillis = backupVideoTrack.durationInMillis;
+//      getMediaTrack().duration = backupVideoTrack.duration;
     }
 
     private void save() {

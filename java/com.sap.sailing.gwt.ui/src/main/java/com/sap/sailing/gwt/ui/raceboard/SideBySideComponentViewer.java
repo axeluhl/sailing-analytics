@@ -5,24 +5,17 @@ import java.util.List;
 
 import com.google.gwt.dom.client.Document;
 import com.google.gwt.dom.client.Style.Unit;
-import com.google.gwt.event.dom.client.ClickEvent;
-import com.google.gwt.event.dom.client.ClickHandler;
-import com.google.gwt.event.logical.shared.CloseEvent;
-import com.google.gwt.event.logical.shared.CloseHandler;
 import com.google.gwt.safehtml.shared.SafeHtml;
-import com.google.gwt.user.client.Window;
 import com.google.gwt.user.client.ui.AbsolutePanel;
 import com.google.gwt.user.client.ui.Button;
 import com.google.gwt.user.client.ui.DockLayoutPanel.Direction;
 import com.google.gwt.user.client.ui.LayoutPanel;
 import com.google.gwt.user.client.ui.Panel;
-import com.google.gwt.user.client.ui.PopupPanel;
 import com.google.gwt.user.client.ui.RequiresResize;
 import com.google.gwt.user.client.ui.ScrollPanel;
 import com.google.gwt.user.client.ui.Widget;
 import com.google.gwt.user.client.ui.WidgetCollection;
 import com.sap.sailing.gwt.ui.client.StringMessages;
-import com.sap.sailing.gwt.ui.client.media.MediaComponent;
 import com.sap.sailing.gwt.ui.client.media.MediaPlayerManagerComponent;
 import com.sap.sailing.gwt.ui.client.shared.components.Component;
 import com.sap.sailing.gwt.ui.client.shared.components.ComponentViewer;
@@ -30,7 +23,6 @@ import com.sap.sailing.gwt.ui.client.shared.components.SettingsDialog;
 import com.sap.sailing.gwt.ui.leaderboard.LeaderboardPanel;
 import com.sap.sailing.gwt.ui.shared.UserDTO;
 import com.sap.sse.common.Util.Pair;
-import com.sap.sse.gwt.client.dialog.WindowBox;
 
 /**
  *  Component Viewer that uses a {@link TouchSplitLayoutPanel}
@@ -63,8 +55,10 @@ public class SideBySideComponentViewer implements ComponentViewer {
     private final Component<?> rightComponent;
     private final List<Component<?>> components;
     private final ScrollPanel leftScrollPanel;
-    private final Button videoControlButton;
     private final StringMessages stringMessages;
+    private final MediaPlayerManagerComponent mediaPlayerManagerComponent;
+    private final Button videoToggleButton;
+    private final Button mediaManagementButton;
 
     private LayoutPanel mainPanel;
     
@@ -76,8 +70,10 @@ public class SideBySideComponentViewer implements ComponentViewer {
         this.stringMessages = stringMessages;
         this.leftComponent = leftComponentP;
         this.rightComponent = rightComponentP;
+        this.mediaPlayerManagerComponent = mediaPlayerManagerComponent;
         this.components = components;
-        this.videoControlButton = createVideoControlButton(mediaPlayerManagerComponent);
+        this.videoToggleButton = createVideoToggleButton(mediaPlayerManagerComponent);
+        this.mediaManagementButton = createMediaManagementButton(mediaPlayerManagerComponent);
         this.leftScrollPanel = new ScrollPanel();
         this.leftScrollPanel.add(leftComponentP.getEntryWidget());
         this.leftScrollPanel.setTitle(leftComponentP.getEntryWidget().getTitle());
@@ -102,9 +98,9 @@ public class SideBySideComponentViewer implements ComponentViewer {
         
         // add additional toggle buttons panel that currently only contains the video button
         List<Pair<Button, Component<?>>> additionalVerticalButtons = new ArrayList<Pair<Button,Component<?>>>();
-        additionalVerticalButtons.add(new Pair<Button, Component<?>>(videoControlButton, mediaComponent));
+        additionalVerticalButtons.add(new Pair<Button, Component<?>>(videoToggleButton, this.mediaPlayerManagerComponent));
         if (user != null) {
-            additionalVerticalButtons.add(new Pair<Button, Component<?>>(mediaComponent.getMediaSelectionButton(), mediaComponent));
+            additionalVerticalButtons.add(new Pair<Button, Component<?>>(mediaManagementButton, this.mediaPlayerManagerComponent));
         }
         
         // ensure that toggle buttons are positioned right
@@ -112,10 +108,10 @@ public class SideBySideComponentViewer implements ComponentViewer {
     }
     
     /**
-     * Create the video control button that shows or hides the video popup
+     * Create the video toggle button that shows or hides the video popup
      */
-    private Button createVideoControlButton(final MediaPlayerManagerComponent mediaPlayerManagerComponent) {
-        final Button videoControlButton = new Button(new SafeHtml() {
+    private Button createVideoToggleButton(final MediaPlayerManagerComponent mediaPlayerManagerComponent) {
+        final Button videoToggleButton = new Button(new SafeHtml() {
             private static final long serialVersionUID = 8679639887708833213L;
             @Override
             public String asString() {
@@ -126,46 +122,23 @@ public class SideBySideComponentViewer implements ComponentViewer {
                 }
             }
         });
-        videoControlButton.setTitle(stringMessages.showVideoPopup());
-        Button closeButton = new Button();
-        closeButton.setStyleName("VideoPopup-Close-Button");
-        final WindowBox dialog = new WindowBox(stringMessages.videoComponentShortName(), stringMessages.videoComponentShortName(), mediaComponent.getEntryWidget(), null);
-        dialog.addCloseHandler(new CloseHandler<PopupPanel>() {
-            @Override
-            public void onClose(CloseEvent<PopupPanel> event) {
-                mediaPlayerManagerComponent.setVisible(false);
-                    if (Document.get().getClientWidth() > 1024) {
-                        videoControlButton.setText(stringMessages.showVideoPopup());
-                    }
-            }
-        });
-        videoControlButton.addClickHandler(new ClickHandler() {
-            @Override
-            public void onClick(ClickEvent event) {
-                if (!dialog.isShowing()) {
-                    if (mediaComponent.isPotentiallyPlayable(mediaComponent.getDefaultVideo())) {
-                        mediaComponent.setVisible(true);
-                        dialog.setPopupPosition(47, Document.get().getClientHeight()-355);
-                        dialog.show();
-                        if (Document.get().getClientWidth() > 1024) {
-                            videoControlButton.setText(stringMessages.hideVideoPopup());
-                        }
-                    } else {
-                        Window.alert("This race has no default video associated.");
-                    }
-                } else {
-                    mediaComponent.setVisible(false);
-                    dialog.hide();
-                    if (Document.get().getClientWidth() > 1024) {
-                        videoControlButton.setText(stringMessages.showVideoPopup());
-                    }
-                }
-            }
-        });
+        videoToggleButton.setTitle(stringMessages.showVideoPopup());
         // hide button initially as we defer showing the button to the asynchroneous
         // task that gets launched by the media service to get video tracks
-        videoControlButton.setVisible(false);
-        return videoControlButton;
+        videoToggleButton.setVisible(false);
+        return videoToggleButton;
+    }
+    
+    /**
+     * Create the video control button that shows or hides the video popup
+     */
+    private Button createMediaManagementButton(final MediaPlayerManagerComponent mediaPlayerManagerComponent) {
+        final Button mediaManagementButton = new Button(stringMessages.mediaPanel());
+        mediaManagementButton.setTitle(stringMessages.showVideoPopup());
+        // hide button initially as we defer showing the button to the asynchroneous
+        // task that gets launched by the media service to get video tracks
+        mediaManagementButton.setVisible(false);
+        return mediaManagementButton;
     }
     
     private void initializeComponents() {
@@ -181,7 +154,7 @@ public class SideBySideComponentViewer implements ComponentViewer {
     }
     
     public Button getVideoControlButton() {
-        return videoControlButton;
+        return videoToggleButton;
     }
 
     /**

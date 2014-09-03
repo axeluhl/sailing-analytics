@@ -19,6 +19,7 @@ import com.sap.sailing.racecommittee.app.ui.fragments.dialogs.AbortTypeSelection
 import com.sap.sailing.racecommittee.app.ui.fragments.dialogs.RaceDialogFragment;
 import com.sap.sailing.racecommittee.app.ui.fragments.dialogs.RaceFinishingTimeDialog;
 import com.sap.sailing.racecommittee.app.ui.fragments.raceinfo.BaseRaceInfoRaceFragment;
+import com.sap.sailing.racecommittee.app.ui.fragments.raceinfo.running.ConfirmDialog.ConfirmRecallListener;
 import com.sap.sailing.racecommittee.app.ui.utils.FlagPoleStateRenderer;
 import com.sap.sailing.racecommittee.app.utils.TimeUtils;
 
@@ -83,10 +84,20 @@ public abstract class BaseRunningRaceFragment<ProcedureType extends RacingProced
         generalRecallButton.setOnClickListener(new OnClickListener() {
             @Override
             public void onClick(View v) {
-                TimePoint now = MillisecondsTimePoint.now();
-                getRaceState().setGeneralRecall(now);
-                // TODO see bug 1649: Explicit passing of pass identifier in RaceState interface
-                getRaceState().setAdvancePass(now);
+                ConfirmDialog confirmDialog = new ConfirmDialog();
+                confirmDialog.setTargetFragment(BaseRunningRaceFragment.this, 1);
+                confirmDialog.setCallback(new ConfirmRecallListener() {
+                    @Override
+                    public void returnAddedElementToPicker(boolean recall) {
+                        TimePoint now = MillisecondsTimePoint.now();
+                        getRaceState().setGeneralRecall(now);
+                        // TODO see bug 1649: Explicit passing of pass identifier in RaceState interface
+                        getRaceState().setAdvancePass(now);
+                    }
+                });
+                final String tag = "confirm_general_recall_fragment";
+                confirmDialog.show(getFragmentManager(), tag);
+                
             }
         });
         

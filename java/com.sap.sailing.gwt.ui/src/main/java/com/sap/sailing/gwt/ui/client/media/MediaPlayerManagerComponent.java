@@ -21,6 +21,8 @@ import com.google.gwt.user.client.rpc.AsyncCallback;
 import com.google.gwt.user.client.ui.SimplePanel;
 import com.google.gwt.user.client.ui.Widget;
 import com.sap.sailing.domain.common.RegattaAndRaceIdentifier;
+import com.sap.sailing.domain.common.TimePoint;
+import com.sap.sailing.domain.common.impl.MillisecondsTimePoint;
 import com.sap.sailing.domain.common.media.MediaTrack;
 import com.sap.sailing.domain.common.media.MediaTrack.MediaType;
 import com.sap.sailing.domain.common.media.MediaTrack.Status;
@@ -180,7 +182,8 @@ public class MediaPlayerManagerComponent implements Component<Void>, PlayStateLi
     @Override
     public void playStateChanged(PlayStates playState, PlayModes playMode) {
         this.currentPlayState = playState;
-        if (PlayModes.Replay.equals(playMode)) {
+        switch (playMode) {
+        case Replay:
             switch (this.currentPlayState) {
             case Playing:
                 startPlaying();
@@ -190,8 +193,13 @@ public class MediaPlayerManagerComponent implements Component<Void>, PlayStateLi
             default:
                 break;
             }
-        } else {
+            break;
+        case Live:
             // TODO: Live mode not supported, yet.
+            startPlaying();
+            break;
+        default:
+            break;
         }
     }
 
@@ -445,8 +453,8 @@ public class MediaPlayerManagerComponent implements Component<Void>, PlayStateLi
         notifyStateChange();
     }
 
-    private long getRaceStartTime() {
-        return raceTimesInfoProvider.getRaceTimesInfo(raceIdentifier).startOfRace.getTime();
+    private TimePoint getRaceStartTime() {
+        return new MillisecondsTimePoint(raceTimesInfoProvider.getRaceTimesInfo(raceIdentifier).startOfRace);
     }
 
     @Override
@@ -526,7 +534,7 @@ public class MediaPlayerManagerComponent implements Component<Void>, PlayStateLi
 
     @Override
     public void addMediaTrack() {
-        Date defaultStartTime = new Date(getRaceStartTime());
+        TimePoint defaultStartTime = getRaceStartTime();
         NewMediaDialog dialog = new NewMediaDialog(defaultStartTime, MediaPlayerManagerComponent.this.stringMessages, new DialogCallback<MediaTrack>() {
 
             @Override
