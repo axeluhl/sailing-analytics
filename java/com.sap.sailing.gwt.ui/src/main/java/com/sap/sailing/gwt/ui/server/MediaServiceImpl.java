@@ -79,4 +79,10 @@ public class MediaServiceImpl extends RemoteServiceServlet implements MediaServi
         racingEventService().mediaTrackDurationChanged(mediaTrack);
     }
 
+    @Override
+    public void updateRace(MediaTrack mediaTrack) {
+        racingEventService().mediaTrackRaceChanged(mediaTrack);
+        
+    }
+
 }

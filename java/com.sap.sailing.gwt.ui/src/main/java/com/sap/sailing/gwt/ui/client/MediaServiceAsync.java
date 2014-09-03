@@ -24,5 +24,7 @@ public interface MediaServiceAsync {
     void updateStartTime(MediaTrack mediaTrack, AsyncCallback<Void> asyncCallback);
 
     void updateDuration(MediaTrack mediaTrack, AsyncCallback<Void> asyncCallback);
+    
+    void updateRace(MediaTrack mediaTrack, AsyncCallback<Void> asyncCallback);
 
 }

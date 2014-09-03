@@ -2476,6 +2476,12 @@ public class RacingEventServiceImpl implements RacingEventServiceWithTestSupport
     }
 
     @Override
+    public void mediaTrackRaceChanged(MediaTrack mediaTrack) {
+        // TODO Auto-generated method stub
+        
+    }
+
+    @Override
     public void mediaTrackDeleted(MediaTrack mediaTrack) {
         mediaDB.deleteMediaTrack(mediaTrack.dbId);
         mediaLibrary.deleteMediaTrack(mediaTrack);
@@ -2782,5 +2788,6 @@ public class RacingEventServiceImpl implements RacingEventServiceWithTestSupport
         logger.fine("Remote search on "+remoteRef+" for "+query+" took "+(System.currentTimeMillis()-start)+"ms");
         return result;
     }
+
 
 }
