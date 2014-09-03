@@ -3,7 +3,6 @@ package com.sap.sailing.gwt.ui.client.media;
 import com.google.gwt.media.client.MediaBase;
 import com.google.gwt.media.client.Video;
 import com.google.gwt.user.client.ui.Widget;
-import com.sap.sailing.domain.common.TimePoint;
 import com.sap.sailing.domain.common.impl.MillisecondsTimePoint;
 import com.sap.sailing.domain.common.media.MediaTrack;
 import com.sap.sailing.gwt.ui.client.media.shared.VideoSynchPlayer;
@@ -12,14 +11,14 @@ import com.sap.sse.gwt.client.player.Timer;
 
 public class VideoHtmlPlayer extends AbstractHtmlMediaPlayer implements VideoSynchPlayer, MediaSynchAdapter, WithWidget {
 
-    private final TimePoint raceStartTime;
+    private final long raceStartTimeMillis;
     private final Timer raceTimer;
     private EditFlag editFlag;
     
-    public VideoHtmlPlayer(final MediaTrack videoTrack, TimePoint raceStartTime, boolean showSynchControls, Timer raceTimer) {
+    public VideoHtmlPlayer(final MediaTrack videoTrack, long raceStartTimeMillis, boolean showSynchControls, Timer raceTimer) {
         super(videoTrack);
         this.raceTimer = raceTimer;
-        this.raceStartTime = raceStartTime;
+        this.raceStartTimeMillis = raceStartTimeMillis;
     }
     
     @Override
@@ -29,7 +28,7 @@ public class VideoHtmlPlayer extends AbstractHtmlMediaPlayer implements VideoSyn
 
     @Override
     public long getOffset() {
-        return getMediaTrack().startTime.asMillis() - raceStartTime.asMillis();
+        return getMediaTrack().startTime.asMillis() - raceStartTimeMillis;
     }
 
     @Override

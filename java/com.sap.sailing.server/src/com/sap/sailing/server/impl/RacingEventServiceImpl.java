@@ -83,7 +83,6 @@ import com.sap.sailing.domain.common.dto.SeriesCreationParametersDTO;
 import com.sap.sailing.domain.common.impl.DataImportProgressImpl;
 import com.sap.sailing.domain.common.impl.MillisecondsTimePoint;
 import com.sap.sailing.domain.common.media.MediaTrack;
-import com.sap.sailing.domain.common.media.MediaTrack.MimeType;
 import com.sap.sailing.domain.common.racelog.RacingProcedureType;
 import com.sap.sailing.domain.common.racelog.tracking.TypeBasedServiceFinderFactory;
 import com.sap.sailing.domain.leaderboard.FlexibleLeaderboard;
@@ -104,7 +103,6 @@ import com.sap.sailing.domain.persistence.MongoRaceLogStoreFactory;
 import com.sap.sailing.domain.persistence.MongoWindStore;
 import com.sap.sailing.domain.persistence.MongoWindStoreFactory;
 import com.sap.sailing.domain.persistence.PersistenceFactory;
-import com.sap.sailing.domain.persistence.media.DBMediaTrack;
 import com.sap.sailing.domain.persistence.media.MediaDB;
 import com.sap.sailing.domain.persistence.media.MediaDBFactory;
 import com.sap.sailing.domain.persistence.racelog.tracking.MongoGPSFixStoreFactory;
@@ -556,11 +554,8 @@ public class RacingEventServiceImpl implements RacingEventServiceWithTestSupport
      * 
      */
     private void loadMediaLibary() {
-        Collection<DBMediaTrack> allDBMediaTracks = mediaDB.loadAllMediaTracks();
-        for (DBMediaTrack dbMediaTrack : allDBMediaTracks) {
-            MimeType mimeType = dbMediaTrack.mimeType != null ? MimeType.byName(dbMediaTrack.mimeType) : null;
-            MediaTrack mediaTrack = new MediaTrack(dbMediaTrack.dbId, dbMediaTrack.title, dbMediaTrack.url,
-                    dbMediaTrack.startTime, dbMediaTrack.duration, mimeType);
+        Collection<MediaTrack> allDbMediaTracks = mediaDB.loadAllMediaTracks();
+        for (MediaTrack mediaTrack : allDbMediaTracks) {
             mediaTrackAdded(mediaTrack);
         }
     }
@@ -2432,10 +2427,9 @@ public class RacingEventServiceImpl implements RacingEventServiceWithTestSupport
 
     @Override
     public void mediaTrackAdded(MediaTrack mediaTrack) {
-        String mimeType = mediaTrack.mimeType != null ? mediaTrack.mimeType.name() : null;
         if (mediaTrack.dbId == null) {
             mediaTrack.dbId = mediaDB.insertMediaTrack(mediaTrack.title, mediaTrack.url, mediaTrack.startTime,
-                    mediaTrack.duration, mimeType);
+                    mediaTrack.duration, mediaTrack.mimeType);
         }
         mediaLibrary.addMediaTrack(mediaTrack);
         replicate(new AddMediaTrackOperation(mediaTrack));
@@ -2486,7 +2480,7 @@ public class RacingEventServiceImpl implements RacingEventServiceWithTestSupport
         for (MediaTrack trackToImport : mediaTracksToImport) {
             MediaTrack existingTrack = mediaLibrary.lookupMediaTrack(trackToImport);
             if (existingTrack == null) {
-                mediaDB.insertMediaTrackWithId(trackToImport.dbId, trackToImport.title, trackToImport.url, trackToImport.startTime, trackToImport.duration, trackToImport.mimeType.name());
+                mediaDB.insertMediaTrackWithId(trackToImport.dbId, trackToImport.title, trackToImport.url, trackToImport.startTime, trackToImport.duration, trackToImport.mimeType);
                 mediaTrackAdded(trackToImport);
             } else if (override) {
                     
