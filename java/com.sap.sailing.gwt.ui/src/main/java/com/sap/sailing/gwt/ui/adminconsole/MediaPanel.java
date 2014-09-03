@@ -227,8 +227,8 @@ public class MediaPanel extends FlowPanel {
         Column<MediaTrack, String> regattaAndRaceColumn = new Column<MediaTrack, String>(new EditTextCell()) {
             @Override
             public String getValue(MediaTrack mediaTrack) {
-                if (mediaTrack.regattaAndRace != null) {
-                    return mediaTrack.regattaAndRace.getRegattaName() + " " + mediaTrack.regattaAndRace.getRaceName();
+                if (mediaTrack.regattasAndRaces != null) {
+                    return mediaTrack.regattasAndRaces.getRegattaName() + " " + mediaTrack.regattasAndRaces.getRaceName();
                 } else
                     return "";
             }
@@ -236,9 +236,9 @@ public class MediaPanel extends FlowPanel {
         regattaAndRaceColumn.setSortable(true);
         sortHandler.setComparator(regattaAndRaceColumn, new Comparator<MediaTrack>() {
             public int compare(MediaTrack mediaTrack1, MediaTrack mediaTrack2) {
-                return (mediaTrack1.regattaAndRace.getRegattaName() + " " + mediaTrack1.regattaAndRace.getRaceName())
-                        .compareTo(mediaTrack2.regattaAndRace.getRegattaName() + " "
-                                + mediaTrack2.regattaAndRace.getRaceName());
+                return (mediaTrack1.regattasAndRaces.getRegattaName() + " " + mediaTrack1.regattasAndRaces.getRaceName())
+                        .compareTo(mediaTrack2.regattasAndRaces.getRegattaName() + " "
+                                + mediaTrack2.regattasAndRaces.getRaceName());
             }
         });
         mediaTracksTable.addColumn(regattaAndRaceColumn, stringMessages.regattaAndRace());
@@ -246,10 +246,10 @@ public class MediaPanel extends FlowPanel {
             public void update(int index, MediaTrack mediaTrack, String newRegattaAndRace) {
                 // Called when the user changes the value.
                 if ("".equals(newRegattaAndRace) || !newRegattaAndRace.contains(" ")) {
-                    mediaTrack.regattaAndRace = null;
+                    mediaTrack.regattasAndRaces = null;
                 } else {
                     String[] regattaAndRace = newRegattaAndRace.split(" ");
-                    mediaTrack.regattaAndRace = new RegattaNameAndRaceName(regattaAndRace[0], regattaAndRace[1]); // TODO
+                    mediaTrack.regattasAndRaces = new RegattaNameAndRaceName(regattaAndRace[0], regattaAndRace[1]); // TODO
                                                                                                                   // sinnvolle
                                                                                                                   // Eingabe
                 }

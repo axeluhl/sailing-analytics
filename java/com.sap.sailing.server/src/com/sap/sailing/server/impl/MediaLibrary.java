@@ -219,7 +219,7 @@ class MediaLibrary {
         try {
             MediaTrack mediaTrack = mediaTracksByDbId.get(changedMediaTrack);
             if (mediaTrack != null) {
-                mediaTrack.regattaAndRace = changedMediaTrack.regattaAndRace;
+                mediaTrack.regattasAndRaces = changedMediaTrack.regattasAndRaces;
                 updateCache_Change(mediaTrack);
             }
         } finally {

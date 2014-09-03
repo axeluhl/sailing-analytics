@@ -306,7 +306,7 @@ public class MediaDBTest extends AbstractMongoDBTest {
         assertThat(videoTrack.title, is(videoTitle));
         assertThat(videoTrack.url, is(url));
         assertThat(videoTrack.mimeType, is(mimeType));
-        assertThat(videoTrack.regattaAndRace, is(regattaAndRace));
+        assertThat(videoTrack.regattasAndRaces, is(regattaAndRace));
     }
     
 }
