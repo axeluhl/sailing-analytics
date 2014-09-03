@@ -1,6 +1,8 @@
 package com.sap.sailing.domain.common.media;
 
 import java.io.Serializable;
+import java.util.HashSet;
+import java.util.Set;
 
 import com.sap.sailing.domain.common.Duration;
 import com.sap.sailing.domain.common.RegattaAndRaceIdentifier;
@@ -76,12 +78,12 @@ public class MediaTrack implements Serializable {
     public Duration duration;
     public MimeType mimeType;
     public Status status = Status.UNDEFINED;
-    public RegattaAndRaceIdentifier regattaAndRace;
+    public Set<RegattaAndRaceIdentifier> regattaAndRace = new HashSet<RegattaAndRaceIdentifier>();
 
     public MediaTrack() {
     }
     
-    public MediaTrack(String title, String url, TimePoint startTime, Duration duration, MimeType mimeType, RegattaAndRaceIdentifier regattaAndRace) {
+    public MediaTrack(String title, String url, TimePoint startTime, Duration duration, MimeType mimeType, Set<RegattaAndRaceIdentifier> regattasAndRaces) {
         this.title = title;
         this.url = url;
         this.startTime = startTime;
@@ -90,7 +92,7 @@ public class MediaTrack implements Serializable {
         this.regattaAndRace = regattaAndRace;
     }
     
-    public MediaTrack(String dbId, String title, String url, TimePoint startTime, Duration duration, MimeType mimeType, RegattaAndRaceIdentifier regattaAndRace) {
+    public MediaTrack(String dbId, String title, String url, TimePoint startTime, Duration duration, MimeType mimeType, Set<RegattaAndRaceIdentifier> regattasAndRaces) {
         this.dbId = dbId;
         this.title = title;
         this.url = url;

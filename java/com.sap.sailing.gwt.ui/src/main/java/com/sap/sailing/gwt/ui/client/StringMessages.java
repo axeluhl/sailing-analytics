@@ -78,6 +78,7 @@ public interface StringMessages extends Messages {
     String leaderboards();
     String leaderboardSettings();
     String settings();
+    String regattaAndRace();
     String selectAtLeastOneLegDetail();
     String currentSpeedOverGroundInKnots();
     String estimatedTimeToNextWaypointInSeconds();
