@@ -85,7 +85,7 @@ public class RegattaListComposite extends Composite implements RegattasDisplayer
         noRegattasLabel.ensureDebugId("NoRegattasLabel");
         noRegattasLabel.setWordWrap(false);
         panel.add(noRegattasLabel);
-        
+
         regattaListDataProvider = new ListDataProvider<RegattaDTO>();
         regattaTable = createRegattaTable();
         regattaTable.ensureDebugId("RegattasCellTable");
@@ -104,63 +104,7 @@ public class RegattaListComposite extends Composite implements RegattasDisplayer
         };
         filterablePanelRegattas.getTextBox().ensureDebugId("ReggatasFilterTextBox");
         panel.add(filterablePanelRegattas);
-        
-        regattaSelectionModel = new MultiSelectionModel<RegattaDTO>();
-        regattaSelectionModel.addSelectionChangeHandler(new SelectionChangeEvent.Handler() {
-            @Override
-            public void onSelectionChange(SelectionChangeEvent event) {
-                List<RegattaDTO> selectedRegattas = getSelectedRegattas();
-                List<RegattaIdentifier> selectedRaceIdentifiers = new ArrayList<RegattaIdentifier>();
-                for (RegattaDTO selectedRegatta : selectedRegattas) {
-                    selectedRaceIdentifiers.add(selectedRegatta.getRegattaIdentifier());
-                }
-                RegattaListComposite.this.regattaSelectionProvider.setSelection(selectedRaceIdentifiers);
-            }
-        });
-        regattaTable.setSelectionModel(regattaSelectionModel);
 
-        panel.add(regattaTable);
-
-        initWidget(mainPanel);
-    }
-    
-    public RegattaListComposite(final SailingServiceAsync sailingService,
-            final RegattaSelectionProvider regattaSelectionProvider, RegattaRefresher regattaRefresher,
-            final ErrorReporter errorReporter, final StringMessages stringMessages, String s) {
-        this.sailingService = sailingService; /*Zuweisung vllt raus?*/
-        this.regattaSelectionProvider = regattaSelectionProvider;
-        this.regattaRefresher = regattaRefresher;
-        this.errorReporter = errorReporter;
-        this.stringMessages = stringMessages;
-        mainPanel = new SimplePanel();
-        panel = new VerticalPanel();
-        mainPanel.setWidget(panel);
-        Label filterRegattasLabel = new Label(stringMessages.filterRegattasByName() + ":");
-        filterRegattasLabel.setWordWrap(false);
-        noRegattasLabel = new Label(stringMessages.noRegattasYet());
-        noRegattasLabel.ensureDebugId("NoRegattasLabel");
-        noRegattasLabel.setWordWrap(false);
-        panel.add(noRegattasLabel);
-        
-        regattaListDataProvider = new ListDataProvider<RegattaDTO>();
-        regattaTable = createRegattaImportTable(); 
-        regattaTable.ensureDebugId("RegattasCellTable");
-        regattaTable.setVisible(false);
-        filterablePanelRegattas = new LabeledAbstractFilterablePanel<RegattaDTO>(filterRegattasLabel, allRegattas,
-                regattaTable, regattaListDataProvider) {
-            @Override
-            public Iterable<String> getSearchableStrings(RegattaDTO t) {
-                List<String> string = new ArrayList<String>();
-                string.add(t.getName());
-                if (t.boatClass != null) {
-                    string.add(t.boatClass.getName());
-                }
-                return string;
-            }
-        };
-        filterablePanelRegattas.getTextBox().ensureDebugId("ReggatasFilterTextBox");
-        panel.add(filterablePanelRegattas);
-        
         regattaSelectionModel = new MultiSelectionModel<RegattaDTO>();
         regattaSelectionModel.addSelectionChangeHandler(new SelectionChangeEvent.Handler() {
             @Override
@@ -240,34 +184,33 @@ public class RegattaListComposite extends Composite implements RegattasDisplayer
 
     private void removeRegatta(final RegattaDTO regatta) {
         final RegattaIdentifier regattaIdentifier = new RegattaName(regatta.getName());
-        sailingService.removeRegatta(regattaIdentifier,new MarkedAsyncCallback<Void>(
-                new AsyncCallback<Void>() {
-                    @Override
-                    public void onFailure(Throwable caught) {
-                        errorReporter.reportError("Error trying to remove regatta " + regatta.getName() + ": " + caught.getMessage());
-                    }
-        
-                    @Override
-                    public void onSuccess(Void result) {
-                        regattaRefresher.fillRegattas();
-                    }
-                }));
+        sailingService.removeRegatta(regattaIdentifier, new MarkedAsyncCallback<Void>(new AsyncCallback<Void>() {
+            @Override
+            public void onFailure(Throwable caught) {
+                errorReporter.reportError("Error trying to remove regatta " + regatta.getName() + ": "
+                        + caught.getMessage());
+            }
+
+            @Override
+            public void onSuccess(Void result) {
+                regattaRefresher.fillRegattas();
+            }
+        }));
     }
 
     private void editRegatta(final RegattaDTO toBeEdited) {
         final Collection<RegattaDTO> existingRegattas = getAllRegattas();
-        sailingService.getEvents(new MarkedAsyncCallback<List<EventDTO>>(
-                new AsyncCallback<List<EventDTO>>() {
-                    @Override
-                    public void onFailure(Throwable caught) {
-                        openEditRegattaDialog(toBeEdited, existingRegattas, Collections.<EventDTO> emptyList());
-                    }
-        
-                    @Override
-                    public void onSuccess(List<EventDTO> events) {
-                        openEditRegattaDialog(toBeEdited, existingRegattas, Collections.unmodifiableList(events));
-                    }
-                }));
+        sailingService.getEvents(new MarkedAsyncCallback<List<EventDTO>>(new AsyncCallback<List<EventDTO>>() {
+            @Override
+            public void onFailure(Throwable caught) {
+                openEditRegattaDialog(toBeEdited, existingRegattas, Collections.<EventDTO> emptyList());
+            }
+
+            @Override
+            public void onSuccess(List<EventDTO> events) {
+                openEditRegattaDialog(toBeEdited, existingRegattas, Collections.unmodifiableList(events));
+            }
+        }));
     }
 
     private void openEditRegattaDialog(RegattaDTO regatta, Collection<RegattaDTO> existingRegattas,
@@ -275,7 +218,8 @@ public class RegattaListComposite extends Composite implements RegattasDisplayer
         RegattaWithSeriesAndFleetsDialog dialog = new RegattaWithSeriesAndFleetsEditDialog(regatta, existingRegattas,
                 existingEvents, stringMessages, new DialogCallback<RegattaDTO>() {
                     @Override
-                    public void cancel() { }
+                    public void cancel() {
+                    }
 
                     @Override
                     public void ok(RegattaDTO editedRegatta) {
@@ -287,38 +231,37 @@ public class RegattaListComposite extends Composite implements RegattasDisplayer
 
     private void commitEditedRegatta(final RegattaDTO editedRegatta) {
         final RegattaIdentifier regattaName = new RegattaName(editedRegatta.getName());
-        
-        sailingService.updateRegatta(regattaName, editedRegatta.defaultCourseAreaUuid,
-                editedRegatta.configuration, editedRegatta.useStartTimeInference, new MarkedAsyncCallback<Void>(
-                        new AsyncCallback<Void>() {
-                            @Override
-                            public void onFailure(Throwable caught) {
-                                errorReporter.reportError("Error trying to update regatta " + editedRegatta.getName() +
-                                        ": " + caught.getMessage());
-                            }
-                            
-                            @Override
-                            public void onSuccess(Void result) {
-                                regattaRefresher.fillRegattas();
-                            }
-                        }));
-        
+
+        sailingService.updateRegatta(regattaName, editedRegatta.defaultCourseAreaUuid, editedRegatta.configuration,
+                editedRegatta.useStartTimeInference, new MarkedAsyncCallback<Void>(new AsyncCallback<Void>() {
+                    @Override
+                    public void onFailure(Throwable caught) {
+                        errorReporter.reportError("Error trying to update regatta " + editedRegatta.getName() + ": "
+                                + caught.getMessage());
+                    }
+
+                    @Override
+                    public void onSuccess(Void result) {
+                        regattaRefresher.fillRegattas();
+                    }
+                }));
+
         for (SeriesDTO series : editedRegatta.series) {
-            sailingService.updateSeries(regattaName, series.getName(), series.getName(), series.isMedal(), 
-                    series.getDiscardThresholds(), series.isStartsWithZeroScore(), 
+            sailingService.updateSeries(regattaName, series.getName(), series.getName(), series.isMedal(),
+                    series.getDiscardThresholds(), series.isStartsWithZeroScore(),
                     series.isFirstColumnIsNonDiscardableCarryForward(), series.hasSplitFleetContiguousScoring(),
-                    series.getFleets(), new MarkedAsyncCallback<Void>(
-                            new AsyncCallback<Void>() {
-                                @Override
-                                public void onFailure(Throwable caught) {
-                                    errorReporter.reportError("Error trying to update regatta " + editedRegatta.getName() + ": " + caught.getMessage());
-                                }
-                                
-                                @Override
-                                public void onSuccess(Void result) {
-                                    regattaRefresher.fillRegattas();
-                                }
-                            }));
+                    series.getFleets(), new MarkedAsyncCallback<Void>(new AsyncCallback<Void>() {
+                        @Override
+                        public void onFailure(Throwable caught) {
+                            errorReporter.reportError("Error trying to update regatta " + editedRegatta.getName()
+                                    + ": " + caught.getMessage());
+                        }
+
+                        @Override
+                        public void onSuccess(Void result) {
+                            regattaRefresher.fillRegattas();
+                        }
+                    }));
         }
     }
 
@@ -355,36 +298,6 @@ public class RegattaListComposite extends Composite implements RegattasDisplayer
 
     public List<RegattaDTO> getAllRegattas() {
         return allRegattas;
-    }
-    
-    //create Regatta Table in StructureImportURLManagementPanel
-    
-    private CellTable<RegattaDTO> createRegattaImportTable() {
-        CellTable<RegattaDTO> table = new CellTable<RegattaDTO>(/* pageSize */10000, tableRes);
-        regattaListDataProvider.addDataDisplay(table);
-        table.setWidth("100%");
-
-        ListHandler<RegattaDTO> columnSortHandler = new ListHandler<RegattaDTO>(regattaListDataProvider.getList());
-        table.addColumnSortHandler(columnSortHandler);
-
-        TextColumn<RegattaDTO> regattaNameColumn = new TextColumn<RegattaDTO>() {
-            @Override
-            public String getValue(RegattaDTO regatta) {
-                return regatta.getName();
-            }
-        };
-        regattaNameColumn.setSortable(true);
-        columnSortHandler.setComparator(regattaNameColumn, new Comparator<RegattaDTO>() {
-            @Override
-            public int compare(RegattaDTO r1, RegattaDTO r2) {
-                return new NaturalComparator().compare(r1.getName(), r2.getName());
-            }
-        });
-
-
-        table.addColumn(regattaNameColumn, stringMessages.regattaName());
-
-        return table;
     }
 
 }
