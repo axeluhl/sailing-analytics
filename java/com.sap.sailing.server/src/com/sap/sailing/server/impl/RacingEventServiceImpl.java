@@ -561,7 +561,7 @@ public class RacingEventServiceImpl implements RacingEventServiceWithTestSupport
         for (DBMediaTrack dbMediaTrack : allDBMediaTracks) {
             MimeType mimeType = dbMediaTrack.mimeType != null ? MimeType.byName(dbMediaTrack.mimeType) : null;
             MediaTrack mediaTrack = new MediaTrack(dbMediaTrack.dbId, dbMediaTrack.title, dbMediaTrack.url,
-                    dbMediaTrack.startTime, dbMediaTrack.duration, mimeType);
+                    dbMediaTrack.startTime, dbMediaTrack.duration, mimeType, dbMediaTrack.regattaAndRace);
             mediaTrackAdded(mediaTrack);
         }
     }
@@ -2436,7 +2436,7 @@ public class RacingEventServiceImpl implements RacingEventServiceWithTestSupport
         String mimeType = mediaTrack.mimeType != null ? mediaTrack.mimeType.name() : null;
         if (mediaTrack.dbId == null) {
             mediaTrack.dbId = mediaDB.insertMediaTrack(mediaTrack.title, mediaTrack.url, mediaTrack.startTime,
-                    mediaTrack.duration, mimeType);
+                    mediaTrack.duration, mimeType, mediaTrack.regattaAndRace);
         }
         mediaLibrary.addMediaTrack(mediaTrack);
         replicate(new AddMediaTrackOperation(mediaTrack));
@@ -2487,7 +2487,7 @@ public class RacingEventServiceImpl implements RacingEventServiceWithTestSupport
         for (MediaTrack trackToImport : mediaTracksToImport) {
             MediaTrack existingTrack = mediaLibrary.lookupMediaTrack(trackToImport);
             if (existingTrack == null) {
-                mediaDB.insertMediaTrackWithId(trackToImport.dbId, trackToImport.title, trackToImport.url, trackToImport.startTime, trackToImport.duration, trackToImport.mimeType.name());
+                mediaDB.insertMediaTrackWithId(trackToImport.dbId, trackToImport.title, trackToImport.url, trackToImport.startTime, trackToImport.duration, trackToImport.mimeType.name(), trackToImport.regattaAndRace);
                 mediaTrackAdded(trackToImport);
             } else if (override) {
                     

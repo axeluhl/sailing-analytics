@@ -38,7 +38,7 @@ public class MediaSynchControl implements EditFlag {
         this.mediaSynchAdapter = mediaSynchAdapter;
         this.errorReporter = errorReporter;
         MediaTrack videoTrack = this.mediaSynchAdapter.getMediaTrack(); 
-        backupVideoTrack = new MediaTrack(null, videoTrack.title, videoTrack.url, videoTrack.startTime, videoTrack.duration, videoTrack.mimeType);
+        backupVideoTrack = new MediaTrack(null, videoTrack.title, videoTrack.url, videoTrack.startTime, videoTrack.duration, videoTrack.mimeType, videoTrack.regattaAndRace);
         mainPanel = new FlowPanel();
         fineTuningPanel = new FlowPanel();
         fineTuningPanel.addStyleName("finetuning-panel");

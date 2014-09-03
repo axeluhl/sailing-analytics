@@ -8,6 +8,8 @@ import org.junit.Before;
 import org.junit.Test;
 
 import com.sap.sailing.domain.common.Duration;
+import com.sap.sailing.domain.common.RegattaAndRaceIdentifier;
+import com.sap.sailing.domain.common.RegattaNameAndRaceName;
 import com.sap.sailing.domain.common.TimePoint;
 import com.sap.sailing.domain.common.TimeRange;
 import com.sap.sailing.domain.common.impl.MillisecondsDurationImpl;
@@ -17,7 +19,6 @@ import com.sap.sailing.domain.common.media.MediaTrack;
 import com.sap.sailing.domain.common.media.MediaTrack.MimeType;
 
 import static org.junit.Assert.*;
-
 import static org.hamcrest.Matchers.*;
 
 
@@ -41,7 +42,8 @@ public class MediaLibaryTest {
         TimePoint startTime = MillisecondsTimePoint.now();
         Duration duration = MillisecondsDurationImpl.ONE_HOUR;
         MimeType mimeType = MimeType.mp4;
-        MediaTrack mediaTrack = new MediaTrack(dbId, title, url, startTime, duration, mimeType);
+        RegattaAndRaceIdentifier regattaAndRace = new RegattaNameAndRaceName("49er", "R1");
+        MediaTrack mediaTrack = new MediaTrack(dbId, title, url, startTime, duration, mimeType, regattaAndRace);
         return mediaTrack;
     }
     
@@ -246,7 +248,8 @@ public class MediaLibaryTest {
         String title = "title";
         String url = "url";
         MimeType mimeType = MimeType.mp4;
-        MediaTrack mediaTrack = new MediaTrack(dbId, title, url, startTime, duration, mimeType);
+        RegattaAndRaceIdentifier regattaAndRace = new RegattaNameAndRaceName("49er", "R1");
+        MediaTrack mediaTrack = new MediaTrack(dbId, title, url, startTime, duration, mimeType, regattaAndRace);
         mediaLibary.addMediaTrack(mediaTrack);
         
         Collection<MediaTrack> mediaTracks = mediaLibary.findMediaTracksInTimeRange(rangeStart, rangeEnd);
@@ -260,7 +263,8 @@ public class MediaLibaryTest {
         String title = "title";
         String url = "url";
         MimeType mimeType = MimeType.mp4;
-        MediaTrack mediaTrack = new MediaTrack(dbId, title, url, startTime, duration, mimeType);
+        RegattaAndRaceIdentifier regattaAndRace = new RegattaNameAndRaceName("49er", "R1");
+        MediaTrack mediaTrack = new MediaTrack(dbId, title, url, startTime, duration, mimeType, regattaAndRace);
         mediaLibary.addMediaTrack(mediaTrack);
         
         Collection<MediaTrack> mediaTracks = mediaLibary.findMediaTracksInTimeRange(rangeStart, rangeEnd);
