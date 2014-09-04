@@ -245,15 +245,8 @@ public class MediaPanel extends FlowPanel {
             public void onEnterKeyDown(Context context, Element parent, String value, NativeEvent event,
                     ValueUpdater<String> valueUpdater) {
                 Object key = context.getKey();
-                String type = event.getType();
-                int keyCode = event.getKeyCode();
-                boolean enterPressed = KEYUP.equals(type) && keyCode == KeyCodes.KEY_ENTER;
-                if (CLICK.equals(type) || enterPressed) {
-                    
-                    //TODO: Open DialogBox
-                    
-
-                }
+                
+                //TODO: open DialogBox
             }
         }) {
             @Override
