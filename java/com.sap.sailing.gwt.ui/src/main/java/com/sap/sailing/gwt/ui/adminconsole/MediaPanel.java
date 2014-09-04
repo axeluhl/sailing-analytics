@@ -250,12 +250,10 @@ public class MediaPanel extends FlowPanel {
         Column<MediaTrack, String> regattaAndRaceColumn = new Column<MediaTrack, String>(new ClickableTextCell() {
             public void onEnterKeyDown(Context context, Element parent, String value, NativeEvent event,
                     ValueUpdater<String> valueUpdater) {
-                Object key = context.getKey();
                 String type = event.getType();
                 int keyCode = event.getKeyCode();
                 boolean enterPressed = KEYUP.equals(type) && keyCode == KeyCodes.KEY_ENTER;
                 if (CLICK.equals(type) || enterPressed) {
-
                     openRegattasAndRacesDialog(context, parent, valueUpdater);
                 }
             }
@@ -451,6 +449,7 @@ public class MediaPanel extends FlowPanel {
                     public void onSuccess(String dbId) {
                         mediaTrack.dbId = dbId;
                         loadMediaTracks();
+                        
                     }
                 });
 
@@ -475,9 +474,11 @@ public class MediaPanel extends FlowPanel {
         loadMediaTracks();
     }
 
-    public void openRegattasAndRacesDialog(final Context context, final Element parent,
-            final ValueUpdater<String> valueUpdater) {
-        final RegattasAndRacesDialog dialog = new RegattasAndRacesDialog(sailingService, errorReporter,
+
+
+
+    public void openRegattasAndRacesDialog(final Context context, final Element parent, final ValueUpdater<String> valueUpdater) {
+        final RegattasAndRacesDialog dialog = new RegattasAndRacesDialog(sailingService, (MediaTrack) context.getKey() , errorReporter,
                 regattaRefresher, stringMessages, null, new DialogCallback<Set<RegattaAndRaceIdentifier>>() {
 
                     @Override
