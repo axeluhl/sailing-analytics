@@ -39,7 +39,6 @@ public class Regatta extends Composite {
     private final EventDTO event;
     private final Timer timerForClientServerOffset;
     private final EventPageNavigator pageNavigator;
-    @SuppressWarnings("unused")
     private final PlaceNavigator placeNavigator;
     private StrippedLeaderboardDTO leaderboard;
     private RaceGroupDTO raceGroup;

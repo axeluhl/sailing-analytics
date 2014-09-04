@@ -6,6 +6,7 @@ import java.util.List;
 
 import com.google.gwt.core.client.GWT;
 import com.google.gwt.dom.client.DivElement;
+import com.google.gwt.dom.client.ParagraphElement;
 import com.google.gwt.dom.client.SpanElement;
 import com.google.gwt.dom.client.Style.Visibility;
 import com.google.gwt.event.dom.client.ChangeEvent;
@@ -26,7 +27,6 @@ import com.sap.sailing.domain.common.dto.LeaderboardDTO;
 import com.sap.sailing.domain.common.dto.RaceColumnDTO;
 import com.sap.sailing.gwt.home.client.HomeResources;
 import com.sap.sailing.gwt.home.client.app.PlaceNavigator;
-import com.sap.sailing.gwt.home.client.i18n.TextMessages;
 import com.sap.sailing.gwt.home.client.place.event.header.CompactEventHeader;
 import com.sap.sailing.gwt.home.client.place.event.regattaleaderboard.EventRegattaLeaderboardResources;
 import com.sap.sailing.gwt.ui.client.DebugIdHelper;
@@ -61,8 +61,9 @@ public class RegattaAnalytics extends Composite implements LeaderboardUpdateList
     @UiField SpanElement title;
     @UiField Anchor settingsAnchor;
     @UiField Anchor autoRefreshAnchor;
-    @UiField DivElement lastScoringUpdateTimeDiv;
-    @UiField DivElement lastScoringCommentDiv;
+    @UiField ParagraphElement lastScoringUpdateTimeDiv;
+    @UiField ParagraphElement lastScoringCommentDiv;
+    @UiField ParagraphElement scoringSchemeDiv;
     @UiField DivElement liveRaceDiv;
 
     @UiField HTMLPanel leaderboardTabPanel;
@@ -177,11 +178,12 @@ public class RegattaAnalytics extends Composite implements LeaderboardUpdateList
             
             if(leaderboard != null) {
                 lastScoringCommentDiv.setInnerText(leaderboard.getComment() != null ? leaderboard.getComment() : "");
+                scoringSchemeDiv.setInnerText(leaderboard.scoringScheme != null ? leaderboard.scoringScheme.name() : "");
                 if (leaderboard.getTimePointOfLastCorrectionsValidity() != null) {
                     Date lastCorrectionDate = leaderboard.getTimePointOfLastCorrectionsValidity();
                     String lastUpdate = DateAndTimeFormatterUtil.longDateFormatter.render(lastCorrectionDate) + ", "
                             + DateAndTimeFormatterUtil.longTimeFormatter.render(lastCorrectionDate);
-                    lastScoringUpdateTimeDiv.setInnerText(TextMessages.INSTANCE.eventRegattaLeaderboardLastScoreUpdate() + ": " + lastUpdate);
+                    lastScoringUpdateTimeDiv.setInnerText(lastUpdate);
                 } else {
                     lastScoringUpdateTimeDiv.setInnerText("");
                 }

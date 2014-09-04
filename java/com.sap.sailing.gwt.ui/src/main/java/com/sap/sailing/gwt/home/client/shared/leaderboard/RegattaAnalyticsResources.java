@@ -11,7 +11,6 @@ public interface RegattaAnalyticsResources extends ClientBundle {
     LocalCss css();
 
     public interface LocalCss extends CssResource {
-        String regattanavigation();
         String oldLeaderboardPanel();
     }
 }
