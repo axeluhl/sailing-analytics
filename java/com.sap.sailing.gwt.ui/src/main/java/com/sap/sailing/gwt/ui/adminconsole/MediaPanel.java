@@ -3,9 +3,8 @@ package com.sap.sailing.gwt.ui.adminconsole;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.Comparator;
-
-import java.util.List;
 import java.util.HashSet;
+import java.util.List;
 import java.util.Set;
 
 import com.google.gwt.cell.client.EditTextCell;
@@ -35,6 +34,8 @@ import com.sap.sailing.domain.common.media.MediaTrack;
 import com.sap.sailing.domain.common.media.MediaUtil;
 import com.sap.sailing.gwt.ui.client.ErrorReporter;
 import com.sap.sailing.gwt.ui.client.MediaServiceAsync;
+import com.sap.sailing.gwt.ui.client.RaceSelectionProvider;
+import com.sap.sailing.gwt.ui.client.RegattaRefresher;
 import com.sap.sailing.gwt.ui.client.SailingServiceAsync;
 import com.sap.sailing.gwt.ui.client.StringMessages;
 import com.sap.sailing.gwt.ui.client.media.NewMediaDialog;
@@ -52,6 +53,7 @@ import com.sap.sse.gwt.client.dialog.DataEntryDialog.DialogCallback;
 public class MediaPanel extends FlowPanel {
     
     private final SailingServiceAsync sailingService;
+    private final RegattaRefresher regattaRefresher;
     private final MediaServiceAsync mediaService;
     private final ErrorReporter errorReporter;
     private final StringMessages stringMessages;
@@ -59,8 +61,9 @@ public class MediaPanel extends FlowPanel {
     private CellTable<MediaTrack> mediaTracksTable;
     private ListDataProvider<MediaTrack> mediaTrackListDataProvider = new ListDataProvider<MediaTrack>();
 
-    public MediaPanel(SailingServiceAsync sailingService, MediaServiceAsync mediaService, ErrorReporter errorReporter, StringMessages stringMessages) {
+    public MediaPanel(SailingServiceAsync sailingService, RegattaRefresher regattaRefresher,MediaServiceAsync mediaService, ErrorReporter errorReporter, StringMessages stringMessages) {
         this.sailingService = sailingService;
+        this.regattaRefresher = regattaRefresher;
         this.mediaService = mediaService;
         this.stringMessages = stringMessages;
         this.errorReporter = errorReporter;
@@ -445,7 +448,23 @@ public class MediaPanel extends FlowPanel {
         loadMediaTracks();
     }
     
-//    private void openRegattasAndRacesDialog() {
+    public void openRegattasAndRacesDialog(){
+        RegattasAndRacesDialog dialog = new RegattasAndRacesDialog(sailingService, errorReporter, regattaRefresher,stringMessages,null,
+              new DialogCallback<RegattaDTO>() {
+          @Override
+          public void cancel() {
+          }
+
+          @Override
+          public void ok(RegattaDTO newRegatta) {
+//              createNewRegatta(newRegatta);
+          }
+      });
+      dialog.ensureDebugId("RegattasAndRacesDialog");
+      dialog.show();
+    }
+    
+//    private void openCreateRegattaDialog() {
 //        final Collection<RegattaDTO> existingRegattas = Collections.unmodifiableCollection(regattaListComposite.getAllRegattas());
 //
 //        sailingService.getEvents(new AsyncCallback<List<EventDTO>>() {
@@ -460,5 +479,22 @@ public class MediaPanel extends FlowPanel {
 //            }
 //        });
 //    }
-
+//
+//    private void openCreateRegattaDialog(Collection<RegattaDTO> existingRegattas, List<EventDTO> existingEvents) {
+//        RegattaWithSeriesAndFleetsCreateDialog dialog = new RegattaWithSeriesAndFleetsCreateDialog(existingRegattas, existingEvents, stringMessages,
+//                new DialogCallback<RegattaDTO>() {
+//            @Override
+//            public void cancel() {
+//            }
+//
+//            @Override
+//            public void ok(RegattaDTO newRegatta) {
+//                createNewRegatta(newRegatta);
+//            }
+//        });
+//        dialog.ensureDebugId("RegattaCreateDialog");
+//        dialog.show();
+//    }
+    
+    
 }
