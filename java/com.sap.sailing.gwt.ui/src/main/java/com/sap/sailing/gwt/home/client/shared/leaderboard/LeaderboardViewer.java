@@ -11,7 +11,7 @@ import com.sap.sse.gwt.client.useragent.UserAgentDetails;
  * @author Frank Mittag (c163874)
  *
  */
-public class LeaderboardViewer extends AbstractLeaderboardViewer {
+public class LeaderboardViewer extends AbstractRegattaAnalyticsManager {
 //    private LeaderboardPanel overallLeaderboardPanel;
     
     public LeaderboardViewer(final SailingServiceAsync sailingService, final AsyncActionsExecutor asyncActionsExecutor,

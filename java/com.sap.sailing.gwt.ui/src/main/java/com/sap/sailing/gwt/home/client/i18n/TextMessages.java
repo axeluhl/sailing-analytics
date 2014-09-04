@@ -30,6 +30,7 @@ public interface TextMessages extends Messages {
     String raceNotScheduled();
     String regattaDetails();
     String regatta();
+    String competitorsAnalytics();
     
     String countdownDays();
     String countdownHours();

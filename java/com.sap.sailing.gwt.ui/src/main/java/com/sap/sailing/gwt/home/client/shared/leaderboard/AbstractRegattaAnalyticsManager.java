@@ -18,11 +18,11 @@ import com.sap.sse.gwt.client.player.Timer;
 import com.sap.sse.gwt.client.useragent.UserAgentDetails;
 
 /**
- * A base class for a viewer managing data on the regatta level (like leaderboard, regatta rank, etc.)
+ * A base class managing analytical data on the regatta level (like leaderboard, regatta rank, etc.)
  * 
  * @author Frank Mittag (c163874)
  */
-public abstract class AbstractLeaderboardViewer {
+public abstract class AbstractRegattaAnalyticsManager {
     private LeaderboardPanel leaderboardPanel;
     private MultiCompetitorLeaderboardChart multiCompetitorChart;
 
@@ -34,7 +34,7 @@ public abstract class AbstractLeaderboardViewer {
     
     protected final Timer timer;
 
-    public AbstractLeaderboardViewer(final SailingServiceAsync sailingService, AsyncActionsExecutor asyncActionsExecutor, Timer timer, ErrorReporter errorReporter, UserAgentDetails userAgent) {
+    public AbstractRegattaAnalyticsManager(final SailingServiceAsync sailingService, AsyncActionsExecutor asyncActionsExecutor, Timer timer, ErrorReporter errorReporter, UserAgentDetails userAgent) {
         this.competitorSelectionProvider = new CompetitorSelectionModel(/* hasMultiSelection */true);
         this.sailingService = sailingService;
         this.asyncActionsExecutor = asyncActionsExecutor;

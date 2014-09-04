@@ -5,6 +5,6 @@
     <ui:with field="i18n" type="com.sap.sailing.gwt.home.client.i18n.TextMessages"/>
 	<ui:with field="res" type="com.sap.sailing.gwt.home.client.HomeResources" />
 	<g:HTMLPanel>
-		<s:leaderboard.OldLeaderboardPanel ui:field='oldLeaderboardPanel'/>
+		<s:leaderboard.RegattaAnalytics ui:field='regattaAnalytics'/>
     </g:HTMLPanel>
 </ui:UiBinder>    

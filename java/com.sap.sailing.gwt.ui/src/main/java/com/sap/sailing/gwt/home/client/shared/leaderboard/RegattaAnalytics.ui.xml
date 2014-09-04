@@ -6,7 +6,7 @@
     <ui:with field="i18n" type="com.sap.sailing.gwt.home.client.i18n.TextMessages"/>
 	<ui:with field="res" type="com.sap.sailing.gwt.home.client.HomeResources" />
     <ui:with field="local_res" type="com.sap.sailing.gwt.home.client.place.event.regattaleaderboard.EventRegattaLeaderboardResources" />
-    <ui:with field="local_res2" type="com.sap.sailing.gwt.home.client.shared.leaderboard.OldLeaderboardResources" />
+    <ui:with field="local_res2" type="com.sap.sailing.gwt.home.client.shared.leaderboard.RegattaAnalyticsResources" />
 	<g:HTMLPanel>
 		<s:header.CompactEventHeader ui:field='eventHeader'/>
 		<div class="{res.mainCss.grid}">
@@ -19,9 +19,8 @@
 		</div>
 		  <div class="{res.mainCss.grid}">
     		<div class="{res.mainCss.navbar}">
-    		    <g:Anchor ui:field="leaderboardAnchor" href="javascript:;" styleName="{res.mainCss.navbar_button}">Leaderboard</g:Anchor>
-    		    <g:Anchor ui:field="ranksChartAnchor" href="javascript:;" styleName="{res.mainCss.navbar_button}">Rank Chart</g:Anchor>
-    		    <g:Anchor ui:field="pointsChartAnchor" href="javascript:;" styleName="{res.mainCss.navbar_button}">Points Chart</g:Anchor>
+    		    <g:Anchor ui:field="leaderboardAnchor" href="javascript:;" styleName="{res.mainCss.navbar_button}"><ui:text from="{i18n.leaderboard}" /></g:Anchor>
+    		    <g:Anchor ui:field="competitorChartsAnchor" href="javascript:;" styleName="{res.mainCss.navbar_button}"><ui:text from="{i18n.competitorsAnalytics}" /></g:Anchor>
     		</div>
           </div>
 		<g:HTMLPanel ui:field="leaderboardTabPanel">
@@ -42,20 +41,12 @@
 			   </div>
 			</div>
 		</g:HTMLPanel>
-		<g:HTMLPanel ui:field="ranksChartTabPanel">
+		<g:HTMLPanel ui:field="competitorChartsTabPanel">
 			<div class="{res.mainCss.grid}">
 			   <div class="{res.mediaCss.large12} {res.mediaCss.columns}">
-			    <h3>Total Ranks Chart</h3>
-              	<g:HTMLPanel ui:field="ranksChartsPanel">
-        		</g:HTMLPanel>
-			  </div>
-			</div>		    		    
-		</g:HTMLPanel>
-		<g:HTMLPanel ui:field="pointsChartTabPanel">
-			<div class="{res.mainCss.grid}">
-			   <div class="{res.mediaCss.large12} {res.mediaCss.columns}">
-			    <h3>Total Points Chart</h3>
-              	<g:HTMLPanel ui:field="pointsChartsPanel">
+			    <h3><ui:text from="{i18n.competitorsAnalytics}" /></h3>
+			    <g:ListBox ui:field="chartTypeSelectionListBox" />
+              	<g:HTMLPanel ui:field="competitorChartsPanel">
         		</g:HTMLPanel>
 			  </div>
 			</div>		    		    

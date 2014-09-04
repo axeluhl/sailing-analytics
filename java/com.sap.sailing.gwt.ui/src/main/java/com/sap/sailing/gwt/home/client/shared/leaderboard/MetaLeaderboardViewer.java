@@ -18,7 +18,7 @@ import com.sap.sse.gwt.client.useragent.UserAgentDetails;
  * @author Frank Mittag (c163874)
  * @author Axel Uhl (d043530)
  */
-public class MetaLeaderboardViewer extends AbstractLeaderboardViewer {    
+public class MetaLeaderboardViewer extends AbstractRegattaAnalyticsManager {    
     private MultiLeaderboardPanel multiLeaderboardPanel;
     
     public MetaLeaderboardViewer(SailingServiceAsync sailingService,

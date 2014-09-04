@@ -7,7 +7,7 @@ import com.google.gwt.user.client.ui.Composite;
 import com.google.gwt.user.client.ui.Widget;
 import com.sap.sailing.domain.common.RaceIdentifier;
 import com.sap.sailing.gwt.home.client.app.PlaceNavigator;
-import com.sap.sailing.gwt.home.client.shared.leaderboard.OldLeaderboardPanel;
+import com.sap.sailing.gwt.home.client.shared.leaderboard.RegattaAnalytics;
 import com.sap.sailing.gwt.ui.client.ErrorReporter;
 import com.sap.sailing.gwt.ui.client.SailingServiceAsync;
 import com.sap.sailing.gwt.ui.leaderboard.LeaderboardSettings;
@@ -22,10 +22,10 @@ public class TabletAndDesktopLeaderboardView extends Composite implements Leader
     interface LeaderboardPageViewUiBinder extends UiBinder<Widget, TabletAndDesktopLeaderboardView> {
     }
 
-    @UiField(provided=true) OldLeaderboardPanel oldLeaderboardPanel;
+    @UiField(provided=true) RegattaAnalytics regattaAnalytics;
     
     public TabletAndDesktopLeaderboardView(EventDTO event, String leaderboardName, Timer timerForClientServerOffset, PlaceNavigator placeNavigator) {
-        oldLeaderboardPanel = new OldLeaderboardPanel(event, leaderboardName, timerForClientServerOffset, placeNavigator);
+        regattaAnalytics = new RegattaAnalytics(event, leaderboardName, timerForClientServerOffset, placeNavigator);
         
         initWidget(uiBinder.createAndBindUi(this));
     }
@@ -35,7 +35,7 @@ public class TabletAndDesktopLeaderboardView extends Composite implements Leader
             final String leaderboardGroupName, String leaderboardName, final ErrorReporter errorReporter,
             final UserAgentDetails userAgent, boolean showRaceDetails,  
             boolean autoExpandLastRaceColumn, boolean showOverallLeaderboard) {
-        oldLeaderboardPanel.createLeaderboardViewer(sailingService, asyncActionsExecutor, timer, leaderboardSettings, preselectedRace,
+        regattaAnalytics.createLeaderboardViewer(sailingService, asyncActionsExecutor, timer, leaderboardSettings, preselectedRace,
                 leaderboardGroupName, leaderboardName, errorReporter, userAgent, showRaceDetails, autoExpandLastRaceColumn, showOverallLeaderboard);
     }
 
@@ -43,7 +43,7 @@ public class TabletAndDesktopLeaderboardView extends Composite implements Leader
             Timer timer, LeaderboardSettings leaderboardSettings, String preselectedLeaderboardName, RaceIdentifier preselectedRace,
             String leaderboardGroupName, String metaLeaderboardName, ErrorReporter errorReporter,
             UserAgentDetails userAgent, boolean showRaceDetails, boolean autoExpandLastRaceColumn, boolean showSeriesLeaderboards) {
-        oldLeaderboardPanel.createMetaLeaderboardViewer(sailingService, asyncActionsExecutor, timer, leaderboardSettings, preselectedLeaderboardName,
+        regattaAnalytics.createMetaLeaderboardViewer(sailingService, asyncActionsExecutor, timer, leaderboardSettings, preselectedLeaderboardName,
                 preselectedRace, leaderboardGroupName, metaLeaderboardName, errorReporter, userAgent, showRaceDetails, autoExpandLastRaceColumn, showSeriesLeaderboards);
     }
 }
