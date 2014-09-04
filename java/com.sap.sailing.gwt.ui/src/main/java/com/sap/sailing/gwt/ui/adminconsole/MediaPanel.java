@@ -9,6 +9,8 @@ import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
 
+import com.google.gwt.cell.client.ActionCell;
+import com.google.gwt.cell.client.ClickableTextCell;
 import com.google.gwt.cell.client.EditTextCell;
 import com.google.gwt.cell.client.FieldUpdater;
 import com.google.gwt.cell.client.TextCell;
@@ -246,8 +248,8 @@ public class MediaPanel extends FlowPanel {
 
         // regattasAndRaces
 
-        Column<MediaTrack, String> regattaAndRaceColumn = new Column<MediaTrack, String>(new EditTextCell(){
-            public void onBrowserEvent(Context context, Element parent, String value, NativeEvent event,
+        Column<MediaTrack, String> regattaAndRaceColumn = new Column<MediaTrack, String>(new ClickableTextCell(){
+            public void onEnterKeyDown(Context context, Element parent, String value, NativeEvent event,
                     ValueUpdater<String> valueUpdater) {
                 Object key = context.getKey();
                 String type = event.getType();
