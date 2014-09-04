@@ -6,6 +6,7 @@ import com.google.gwt.user.client.ui.Grid;
 import com.google.gwt.user.client.ui.Label;
 import com.google.gwt.user.client.ui.VerticalPanel;
 import com.google.gwt.user.client.ui.Widget;
+import com.sap.sailing.domain.common.media.MediaTrack;
 import com.sap.sailing.gwt.ui.client.ErrorReporter;
 import com.sap.sailing.gwt.ui.client.RaceSelectionModel;
 import com.sap.sailing.gwt.ui.client.RaceSelectionProvider;
@@ -20,6 +21,7 @@ public class RegattasAndRacesDialog extends DataEntryDialog<RegattaDTO> {
 
     protected StringMessages stringMessages;
     protected final TrackedRacesListComposite trackedRacesListComposite;
+    protected MediaTrack mediaTrack; 
     // protected RegattaDTO regatta;
 
     // protected ListBox regattasListBox;
@@ -232,5 +234,39 @@ public class RegattasAndRacesDialog extends DataEntryDialog<RegattaDTO> {
     // }
     // });
     // }
-
+    
+    private boolean eventShouldBeListed(EventDTO event){
+        if(mediaTrackIsInTimerangeOf(event) || eventIsNotConnectedToAnyRaces(event)){
+            return true;
+        }
+        return false;
+    }
+    private boolean mediaTrackIsInTimerangeOf(EventDTO event){
+       if(mediaTrack.beginsAfter(event.endDate) || mediaTrack.endsBefore(event.startDate)){
+           return false;
+       }
+       return true;
+    }
+    
+    private boolean eventIsNotConnectedToAnyRaces(EventDTO event){
+        if(regattasAreNotConnectedToAnyRaces(event.regattas)){
+            return true;
+        }
+        return false;
+    }
+    
+    private boolean regattasAreNotConnectedToAnyRaces(List<RegattaDTO> regattas){
+        for (RegattaDTO regatta : regattas) {
+            if(regattaIsConnectedToAnyRaces(regatta)){
+                return false;
+            }
+        }
+        return true;
+    }
+    private boolean regattaIsConnectedToAnyRaces(RegattaDTO regatta){
+        if(regatta.races.size() > 0){
+            return true;
+        }
+        return false;
+    }
 }

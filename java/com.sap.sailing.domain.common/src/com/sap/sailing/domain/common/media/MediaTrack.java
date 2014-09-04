@@ -1,6 +1,7 @@
 package com.sap.sailing.domain.common.media;
 
 import java.io.Serializable;
+import java.util.Date;
 import java.util.HashSet;
 import java.util.Set;
 
@@ -162,6 +163,21 @@ public class MediaTrack implements Serializable {
     @Override
     public int hashCode() {
         return this.dbId == null ? 0 : this.dbId.hashCode();
+    }
+    
+    public boolean beginsAfter(Date eventEndDate){
+        if(startTime.asDate().after(eventEndDate)){
+            return true;
+        }else{
+            return false;
+        }
+    }
+    public boolean endsBefore(Date eventStartDate){
+        if(deriveEndTime().asDate().before(eventStartDate)){
+            return true;
+        }else{
+            return false;
+        }
     }
 
 }
