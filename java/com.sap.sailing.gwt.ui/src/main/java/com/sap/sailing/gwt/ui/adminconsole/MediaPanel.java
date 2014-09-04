@@ -255,9 +255,8 @@ public class MediaPanel extends FlowPanel {
                 int keyCode = event.getKeyCode();
                 boolean enterPressed = KEYUP.equals(type) && keyCode == KeyCodes.KEY_ENTER;
                 if (CLICK.equals(type) || enterPressed) {
-                    
-                    openRegattasAndRacesDialog(context, parent);
-                    
+
+                    openRegattasAndRacesDialog(context, parent, valueUpdater);
                 }
             }
         }) {
@@ -284,9 +283,14 @@ public class MediaPanel extends FlowPanel {
                 if ("".equals(newRegattaAndRace) || !newRegattaAndRace.contains(" ")) {
                     mediaTrack.regattasAndRaces = null;
                 } else {
-                    String[] regattaAndRace = newRegattaAndRace.split(" ");
+                    String[] regattasAndRacesArray = newRegattaAndRace.split(",");
                     Set<RegattaAndRaceIdentifier> regattasAndRaces = new HashSet<RegattaAndRaceIdentifier>();
-                    regattasAndRaces.add(new RegattaNameAndRaceName(regattaAndRace[0], regattaAndRace[1])); 
+                    for (String regattaNamesAndRaceNames : regattasAndRacesArray) {
+                        regattaNamesAndRaceNames = regattaNamesAndRaceNames.replace(",", "");
+                        String[] regattaAndRace = regattaNamesAndRaceNames.split("   ");
+                        regattasAndRaces.add(new RegattaNameAndRaceName(regattaAndRace[0], regattaAndRace[1]));
+                    }
+
                     mediaTrack.regattasAndRaces = regattasAndRaces;
                 }
                 mediaService.updateRace(mediaTrack, new AsyncCallback<Void>() {
@@ -460,14 +464,19 @@ public class MediaPanel extends FlowPanel {
         for (RegattaAndRaceIdentifier regattaAndRace : mediaTrack.regattasAndRaces) {
             value += regattaAndRace.getRegattaName() + " " + regattaAndRace.getRaceName() + ", ";
         }
-        return value;
+        if (value.length() > 1) {
+//            return value.substring(0, value.length()-2);
+            return String.valueOf(value.length());
+        } else
+            return value;
     }
 
     public void onShow() {
         loadMediaTracks();
     }
 
-    public void openRegattasAndRacesDialog(final Context context, final Element parent) {
+    public void openRegattasAndRacesDialog(final Context context, final Element parent,
+            final ValueUpdater<String> valueUpdater) {
         final RegattasAndRacesDialog dialog = new RegattasAndRacesDialog(sailingService, errorReporter,
                 regattaRefresher, stringMessages, null, new DialogCallback<Set<RegattaAndRaceIdentifier>>() {
 
@@ -479,22 +488,18 @@ public class MediaPanel extends FlowPanel {
                     public void ok(Set<RegattaAndRaceIdentifier> regattas) {
                         ClickableTextCell text = (ClickableTextCell) mediaTracksTable.getColumn(3).getCell();
 
-                        if (regattas.size() >=0) {
-//                            text.setValue(context, parent, regattas.iterator().next().getRegattaName()+ " "+regattas.iterator().next().getRaceName());
-//                            
-//                        }
-//                        else if(regattas.size()>=1){
-////                            text.setValue(context, parent, String.valueOf(regattas.size()));
+                        if (regattas.size() >= 0) {
                             String value = "";
-                            for(RegattaAndRaceIdentifier regattasAndRaces: regattas){
-                                value = value.concat(regattasAndRaces.getRegattaName()+ " "+regattasAndRaces.getRaceName());
+                            for (RegattaAndRaceIdentifier regattasAndRaces : regattas) {
+                                value = value.concat(regattasAndRaces.getRegattaName() + "    "
+                                        + regattasAndRaces.getRaceName() + ",");
                             }
-                            text.setValue(context, parent, value);
-                            
+                            valueUpdater.update(value);
                         }
 
                     }
                 });
+
         regattasDisplayers.add(dialog);
         dialog.ensureDebugId("RegattasAndRacesDialog");
         dialog.show();
