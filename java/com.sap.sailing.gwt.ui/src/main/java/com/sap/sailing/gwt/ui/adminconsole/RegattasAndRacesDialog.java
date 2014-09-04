@@ -1,22 +1,28 @@
 package com.sap.sailing.gwt.ui.adminconsole;
 
+import java.util.HashSet;
 import java.util.List;
+import java.util.Set;
 
 import com.google.gwt.user.client.ui.Grid;
 import com.google.gwt.user.client.ui.Label;
 import com.google.gwt.user.client.ui.VerticalPanel;
 import com.google.gwt.user.client.ui.Widget;
+import com.sap.sailing.domain.common.RegattaAndRaceIdentifier;
+import com.sap.sailing.domain.common.RegattaNameAndRaceName;
+import com.sap.sailing.domain.common.dto.RaceDTO;
 import com.sap.sailing.gwt.ui.client.ErrorReporter;
 import com.sap.sailing.gwt.ui.client.RaceSelectionModel;
 import com.sap.sailing.gwt.ui.client.RaceSelectionProvider;
 import com.sap.sailing.gwt.ui.client.RegattaRefresher;
+import com.sap.sailing.gwt.ui.client.RegattasDisplayer;
 import com.sap.sailing.gwt.ui.client.SailingServiceAsync;
 import com.sap.sailing.gwt.ui.client.StringMessages;
 import com.sap.sailing.gwt.ui.shared.EventDTO;
 import com.sap.sailing.gwt.ui.shared.RegattaDTO;
 import com.sap.sse.gwt.client.dialog.DataEntryDialog;
 
-public class RegattasAndRacesDialog extends DataEntryDialog<RegattaDTO> {
+public class RegattasAndRacesDialog extends DataEntryDialog<Set<RegattaAndRaceIdentifier>> implements RegattasDisplayer{
 
     protected StringMessages stringMessages;
     protected final TrackedRacesListComposite trackedRacesListComposite;
@@ -36,7 +42,7 @@ public class RegattasAndRacesDialog extends DataEntryDialog<RegattaDTO> {
     // DialogCallback<RegattaDTO> callback) {
     public RegattasAndRacesDialog(SailingServiceAsync sailingService, 
             ErrorReporter errorReporter, RegattaRefresher regattaRefresher, 
-            StringMessages stringMessages, Validator<RegattaDTO> validator, DialogCallback<RegattaDTO> callback) {
+            StringMessages stringMessages, Validator<Set<RegattaAndRaceIdentifier>> validator, DialogCallback<Set<RegattaAndRaceIdentifier>> callback) {
         super(stringMessages.addRegatta(), null, stringMessages.ok(), stringMessages.cancel(), validator, callback);
         this.stringMessages = stringMessages;
         // this.regatta = regatta;
@@ -44,6 +50,7 @@ public class RegattasAndRacesDialog extends DataEntryDialog<RegattaDTO> {
         trackedRacesListComposite = new TrackedRacesListComposite(sailingService, errorReporter, regattaRefresher,
                 new RaceSelectionModel(), stringMessages, /* multiselection */true);
         trackedRacesListComposite.ensureDebugId("TrackedRacesListComposite");
+        regattaRefresher.fillRegattas();
 
         // regattasListBox = createListBox(true);
         // regattasListBox.ensureDebugId("RegattasListBox");
@@ -91,14 +98,31 @@ public class RegattasAndRacesDialog extends DataEntryDialog<RegattaDTO> {
      }
 
     @Override
-    protected RegattaDTO getResult() {
+    protected Set<RegattaAndRaceIdentifier> getResult() {
 //        regatta.setName(nameEntryField.getText());
 //        regatta.boatClass = new BoatClassDTO(boatClassEntryField.getText(), 0.0);
 //        regatta.scoringScheme = getSelectedScoringSchemeType();
 //        regatta.useStartTimeInference = useStartTimeInferenceCheckBox.getValue();
 //        setCourseAreaInRegatta(regatta);
 //        return regatta;
-        return null;
+        return getSelectedRegattasAndRaces();
+    }
+
+
+    @Override
+    public void fillRegattas(List<RegattaDTO> result) {
+        // TODO Auto-generated method stub
+        this.trackedRacesListComposite.fillRegattas(result);
+    }
+    
+    public Set<RegattaAndRaceIdentifier> getSelectedRegattasAndRaces(){
+        List<RaceDTO> races = trackedRacesListComposite.getSelectedRaces();
+        Set<RegattaAndRaceIdentifier> regattasAndRaces = new HashSet<RegattaAndRaceIdentifier>();
+        for(RaceDTO race: races){
+            RegattaAndRaceIdentifier regattaNameAndRaceName = new RegattaNameAndRaceName(race.getRegattaName(), race.getName());
+            regattasAndRaces.add(regattaNameAndRaceName);
+        }
+        return regattasAndRaces;
     }
 
     // private void setCourseAreaInRegatta(RegattaDTO regatta) {

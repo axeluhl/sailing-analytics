@@ -6,16 +6,14 @@ import static com.google.gwt.dom.client.BrowserEvents.KEYUP;
 import java.util.Collection;
 import java.util.Comparator;
 import java.util.HashSet;
-import java.util.List;
 import java.util.Set;
 
-import com.google.gwt.cell.client.ActionCell;
+import com.google.gwt.cell.client.Cell.Context;
 import com.google.gwt.cell.client.ClickableTextCell;
 import com.google.gwt.cell.client.EditTextCell;
 import com.google.gwt.cell.client.FieldUpdater;
 import com.google.gwt.cell.client.TextCell;
 import com.google.gwt.cell.client.ValueUpdater;
-import com.google.gwt.cell.client.Cell.Context;
 import com.google.gwt.core.client.GWT;
 import com.google.gwt.dom.client.Element;
 import com.google.gwt.dom.client.NativeEvent;
@@ -43,13 +41,12 @@ import com.sap.sailing.domain.common.media.MediaTrack;
 import com.sap.sailing.domain.common.media.MediaUtil;
 import com.sap.sailing.gwt.ui.client.ErrorReporter;
 import com.sap.sailing.gwt.ui.client.MediaServiceAsync;
-import com.sap.sailing.gwt.ui.client.RaceSelectionProvider;
 import com.sap.sailing.gwt.ui.client.RegattaRefresher;
+import com.sap.sailing.gwt.ui.client.RegattasDisplayer;
 import com.sap.sailing.gwt.ui.client.SailingServiceAsync;
 import com.sap.sailing.gwt.ui.client.StringMessages;
 import com.sap.sailing.gwt.ui.client.media.NewMediaDialog;
 import com.sap.sailing.gwt.ui.client.media.TimeFormatUtil;
-import com.sap.sailing.gwt.ui.shared.RegattaDTO;
 import com.sap.sse.gwt.client.dialog.DataEntryDialog.DialogCallback;
 
 /**
@@ -66,12 +63,14 @@ public class MediaPanel extends FlowPanel {
     private final ErrorReporter errorReporter;
     private final StringMessages stringMessages;
     private final Grid mediaTracks;
+    private Set<RegattasDisplayer> regattasDisplayers;
     private CellTable<MediaTrack> mediaTracksTable;
     private ListDataProvider<MediaTrack> mediaTrackListDataProvider = new ListDataProvider<MediaTrack>();
 
-
-    public MediaPanel(SailingServiceAsync sailingService, RegattaRefresher regattaRefresher,MediaServiceAsync mediaService, ErrorReporter errorReporter, StringMessages stringMessages) {
-
+    public MediaPanel(Set<RegattasDisplayer> regattasDisplayers, SailingServiceAsync sailingService,
+            RegattaRefresher regattaRefresher, MediaServiceAsync mediaService, ErrorReporter errorReporter,
+            StringMessages stringMessages) {
+        this.regattasDisplayers = regattasDisplayers;
         this.sailingService = sailingService;
         this.regattaRefresher = regattaRefresher;
         this.mediaService = mediaService;
@@ -248,7 +247,7 @@ public class MediaPanel extends FlowPanel {
 
         // regattasAndRaces
 
-        Column<MediaTrack, String> regattaAndRaceColumn = new Column<MediaTrack, String>(new ClickableTextCell(){
+        Column<MediaTrack, String> regattaAndRaceColumn = new Column<MediaTrack, String>(new ClickableTextCell() {
             public void onEnterKeyDown(Context context, Element parent, String value, NativeEvent event,
                     ValueUpdater<String> valueUpdater) {
                 Object key = context.getKey();
@@ -257,8 +256,8 @@ public class MediaPanel extends FlowPanel {
                 boolean enterPressed = KEYUP.equals(type) && keyCode == KeyCodes.KEY_ENTER;
                 if (CLICK.equals(type) || enterPressed) {
                     
-                    openRegattasAndRacesDialog();
-
+                    openRegattasAndRacesDialog(context, parent);
+                    
                 }
             }
         }) {
@@ -269,8 +268,6 @@ public class MediaPanel extends FlowPanel {
                 } else
                     return "";
             }
-
-            
 
         };
 
@@ -289,9 +286,7 @@ public class MediaPanel extends FlowPanel {
                 } else {
                     String[] regattaAndRace = newRegattaAndRace.split(" ");
                     Set<RegattaAndRaceIdentifier> regattasAndRaces = new HashSet<RegattaAndRaceIdentifier>();
-                    regattasAndRaces.add(new RegattaNameAndRaceName(regattaAndRace[0], regattaAndRace[1])); // TODO
-                                                                                                            // sinnvolle
-                                                                                                            // Eingabe)
+                    regattasAndRaces.add(new RegattaNameAndRaceName(regattaAndRace[0], regattaAndRace[1])); 
                     mediaTrack.regattasAndRaces = regattasAndRaces;
                 }
                 mediaService.updateRace(mediaTrack, new AsyncCallback<Void>() {
@@ -472,22 +467,37 @@ public class MediaPanel extends FlowPanel {
         loadMediaTracks();
     }
 
-    
-    public void openRegattasAndRacesDialog(){
-        RegattasAndRacesDialog dialog = new RegattasAndRacesDialog(sailingService, errorReporter, regattaRefresher,stringMessages,null,
-              new DialogCallback<RegattaDTO>() {
-          @Override
-          public void cancel() {
-          }
+    public void openRegattasAndRacesDialog(final Context context, final Element parent) {
+        final RegattasAndRacesDialog dialog = new RegattasAndRacesDialog(sailingService, errorReporter,
+                regattaRefresher, stringMessages, null, new DialogCallback<Set<RegattaAndRaceIdentifier>>() {
 
-          @Override
-          public void ok(RegattaDTO newRegatta) {
-//              createNewRegatta(newRegatta);
-          }
-      });
-      dialog.ensureDebugId("RegattasAndRacesDialog");
-      dialog.show();
+                    @Override
+                    public void cancel() {
+                    }
+
+                    @Override
+                    public void ok(Set<RegattaAndRaceIdentifier> regattas) {
+                        ClickableTextCell text = (ClickableTextCell) mediaTracksTable.getColumn(3).getCell();
+
+                        if (regattas.size() >=0) {
+//                            text.setValue(context, parent, regattas.iterator().next().getRegattaName()+ " "+regattas.iterator().next().getRaceName());
+//                            
+//                        }
+//                        else if(regattas.size()>=1){
+////                            text.setValue(context, parent, String.valueOf(regattas.size()));
+                            String value = "";
+                            for(RegattaAndRaceIdentifier regattasAndRaces: regattas){
+                                value = value.concat(regattasAndRaces.getRegattaName()+ " "+regattasAndRaces.getRaceName());
+                            }
+                            text.setValue(context, parent, value);
+                            
+                        }
+
+                    }
+                });
+        regattasDisplayers.add(dialog);
+        dialog.ensureDebugId("RegattasAndRacesDialog");
+        dialog.show();
     }
-    
 
 }
