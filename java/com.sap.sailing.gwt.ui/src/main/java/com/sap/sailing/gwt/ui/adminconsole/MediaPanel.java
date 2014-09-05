@@ -279,7 +279,7 @@ public class MediaPanel extends FlowPanel {
             public void update(int index, MediaTrack mediaTrack, String newRegattaAndRace) {
                 // Called when the user changes the value.
                 if ("".equals(newRegattaAndRace) || !newRegattaAndRace.contains(" ")) {
-                    mediaTrack.regattasAndRaces = null;
+                    mediaTrack.regattasAndRaces = new HashSet<RegattaAndRaceIdentifier>();
                 } else {
                     String[] regattasAndRacesArray = newRegattaAndRace.split(",");
                     Set<RegattaAndRaceIdentifier> regattasAndRaces = new HashSet<RegattaAndRaceIdentifier>();
@@ -449,7 +449,7 @@ public class MediaPanel extends FlowPanel {
                     public void onSuccess(String dbId) {
                         mediaTrack.dbId = dbId;
                         loadMediaTracks();
-                        
+
                     }
                 });
 
@@ -459,27 +459,31 @@ public class MediaPanel extends FlowPanel {
     }
 
     private String listRegattasAndRaces(MediaTrack mediaTrack) {
-        String value = "";
-        for (RegattaAndRaceIdentifier regattaAndRace : mediaTrack.regattasAndRaces) {
-            value += regattaAndRace.getRegattaName() + " " + regattaAndRace.getRaceName() + ", ";
+
+        if (mediaTrack.regattasAndRaces.size() > 1) {
+            return String.valueOf(mediaTrack.regattasAndRaces.size());
+        } else {
+            String value = "";
+            for (RegattaAndRaceIdentifier regattaAndRace : mediaTrack.regattasAndRaces) {
+                value += regattaAndRace.getRegattaName() + " " + regattaAndRace.getRaceName() + ", ";
+            }
+            if (value.length() > 1) {
+                return value.substring(0, value.length() - 2);
+            } else
+                return value;
+
         }
-        if (value.length() > 1) {
-//            return value.substring(0, value.length()-2);
-            return String.valueOf(value.length());
-        } else
-            return value;
     }
 
     public void onShow() {
         loadMediaTracks();
     }
 
-
-
-
-    public void openRegattasAndRacesDialog(final Context context, final Element parent, final ValueUpdater<String> valueUpdater) {
-        final RegattasAndRacesDialog dialog = new RegattasAndRacesDialog(sailingService, (MediaTrack) context.getKey() , errorReporter,
-                regattaRefresher, stringMessages, null, new DialogCallback<Set<RegattaAndRaceIdentifier>>() {
+    public void openRegattasAndRacesDialog(final Context context, final Element parent,
+            final ValueUpdater<String> valueUpdater) {
+        final RegattasAndRacesDialog dialog = new RegattasAndRacesDialog(sailingService, (MediaTrack) context.getKey(),
+                errorReporter, regattaRefresher, stringMessages, null,
+                new DialogCallback<Set<RegattaAndRaceIdentifier>>() {
 
                     @Override
                     public void cancel() {
