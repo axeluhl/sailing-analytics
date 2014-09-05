@@ -1,6 +1,8 @@
 package com.sap.sailing.domain.common.test;
 
-import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.*;
+
+import static org.hamcrest.Matchers.*;
 
 import org.junit.Test;
 
@@ -98,4 +100,39 @@ public class DurationTest {
         assertEquals(3600*25, oneDay.asSeconds(), 0.1);
         assertEquals(3600*25*1000, oneDay.asMillis());
     }
+
+    @Test
+    public void compare() {
+        assertTrue(MillisecondsDurationImpl.ONE_MINUTE.compareTo(MillisecondsDurationImpl.ONE_HOUR) < 0);
+        assertTrue(MillisecondsDurationImpl.ONE_HOUR.compareTo(MillisecondsDurationImpl.ONE_MINUTE) > 0);
+    }
+    
+    @Test
+    public void compareEquals() {
+        assertThat(MillisecondsDurationImpl.ONE_HOUR.compareTo(MillisecondsDurationImpl.ONE_HOUR), is(0));
+    }
+    
+    @Test
+    public void testEqualForSame() {
+        assertThat(MillisecondsDurationImpl.ONE_HOUR, is(MillisecondsDurationImpl.ONE_HOUR));
+    }
+
+    @Test
+    public void testEqualForEuqal() {
+        Duration t1 = MillisecondsDurationImpl.ONE_HOUR;
+        Duration t2 = new MillisecondsDurationImpl(t1.asMillis());
+        assertThat(t1, is(t2));
+        assertThat(t2, is(t1));
+    }
+
+    @Test
+    public void testEqualForNull() {
+        assertFalse(MillisecondsDurationImpl.ONE_HOUR.equals(null));
+    }
+
+    @Test
+    public void testEqualForString() {
+        assertFalse(MillisecondsDurationImpl.ONE_HOUR.equals("s"));
+    }
+
 }

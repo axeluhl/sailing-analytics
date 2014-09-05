@@ -25,6 +25,8 @@ import com.google.gwt.user.client.ui.Button;
 import com.google.gwt.user.client.ui.CheckBox;
 import com.google.gwt.user.client.ui.Widget;
 import com.sap.sailing.domain.common.RegattaAndRaceIdentifier;
+import com.sap.sailing.domain.common.TimePoint;
+import com.sap.sailing.domain.common.impl.MillisecondsTimePoint;
 import com.sap.sailing.domain.common.media.MediaTrack;
 import com.sap.sailing.domain.common.media.MediaTrack.MediaType;
 import com.sap.sailing.domain.common.media.MediaTrack.Status;
@@ -538,7 +540,7 @@ public class MediaSelector implements PlayStateListener, TimeListener, MediaSele
     @Override
     public void addMediaTrack() {
         hideSelectionDialog();
-        Date defaultStartTime = new Date(getRaceStartTime());
+        TimePoint defaultStartTime = new MillisecondsTimePoint(getRaceStartTime());
         NewMediaDialog dialog = new NewMediaDialog(defaultStartTime, MediaSelector.this.stringMessages,
                 new DialogCallback<MediaTrack>() {
 

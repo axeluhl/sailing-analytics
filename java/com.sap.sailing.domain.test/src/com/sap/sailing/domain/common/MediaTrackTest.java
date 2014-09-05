@@ -1,24 +1,25 @@
 package com.sap.sailing.domain.common;
 
-import static org.junit.Assert.assertFalse;
-import static org.junit.Assert.assertTrue;
-
-import java.util.Date;
-
 import org.junit.Test;
 
+import com.sap.sailing.domain.common.impl.MillisecondsDurationImpl;
+import com.sap.sailing.domain.common.impl.MillisecondsTimePoint;
 import com.sap.sailing.domain.common.media.MediaTrack;
+
+import static org.junit.Assert.*;
 
 public class MediaTrackTest {
     
+    private static final Duration ONE_MILLISECOND = new MillisecondsDurationImpl(1);
+
     @Test
     public void testExactOverlap() throws Exception {
         MediaTrack mediaTrack = new MediaTrack();
-        mediaTrack.startTime = new Date();
-        mediaTrack.durationInMillis = 1;
+        mediaTrack.startTime = MillisecondsTimePoint.now();
+        mediaTrack.duration = ONE_MILLISECOND;
         
-        Date startTime = new Date(mediaTrack.startTime.getTime());
-        Date endTime = new Date(mediaTrack.deriveEndTime().getTime());
+        TimePoint startTime = mediaTrack.startTime;
+        TimePoint endTime = mediaTrack.deriveEndTime();
         assertTrue(mediaTrack.overlapsWith(startTime, endTime));
         
     }
@@ -26,11 +27,11 @@ public class MediaTrackTest {
     @Test
     public void testNoOverlapLeft() throws Exception {
         MediaTrack mediaTrack = new MediaTrack();
-        mediaTrack.startTime = new Date();
-        mediaTrack.durationInMillis = 1;
+        mediaTrack.startTime = MillisecondsTimePoint.now();
+        mediaTrack.duration = ONE_MILLISECOND;
         
-        Date startTime = new Date(mediaTrack.startTime.getTime() + 2);
-        Date endTime = new Date(startTime.getTime() + 1);
+        TimePoint startTime = mediaTrack.startTime.plus(2);
+        TimePoint endTime = startTime.plus(1);
         assertFalse(mediaTrack.overlapsWith(startTime, endTime));
         
     }
@@ -38,11 +39,11 @@ public class MediaTrackTest {
     @Test
     public void testNoOverlapRight() throws Exception {
         MediaTrack mediaTrack = new MediaTrack();
-        mediaTrack.startTime = new Date();
-        mediaTrack.durationInMillis = 1;
+        mediaTrack.startTime = MillisecondsTimePoint.now();
+        mediaTrack.duration = ONE_MILLISECOND;
         
-        Date startTime = new Date(mediaTrack.startTime.getTime() - 2);
-        Date endTime = new Date(startTime.getTime() + 1);
+        TimePoint startTime = mediaTrack.startTime.minus( 2);
+        TimePoint endTime = startTime.plus(1);
         assertFalse(mediaTrack.overlapsWith(startTime, endTime));
         
     }
@@ -50,11 +51,11 @@ public class MediaTrackTest {
     @Test
     public void testPartialOverlapLeft() throws Exception {
         MediaTrack mediaTrack = new MediaTrack();
-        mediaTrack.startTime = new Date();
-        mediaTrack.durationInMillis = 2;
+        mediaTrack.startTime = MillisecondsTimePoint.now();
+        mediaTrack.duration = ONE_MILLISECOND.times(2);
         
-        Date startTime = new Date(mediaTrack.startTime.getTime() - 1);
-        Date endTime = new Date(startTime.getTime() + 2);
+        TimePoint startTime = mediaTrack.startTime.minus( 1);
+        TimePoint endTime = startTime.plus(2);
         assertTrue(mediaTrack.overlapsWith(startTime, endTime));
         
     }
@@ -62,11 +63,11 @@ public class MediaTrackTest {
     @Test
     public void testPartialOverlapRight() throws Exception {
         MediaTrack mediaTrack = new MediaTrack();
-        mediaTrack.startTime = new Date();
-        mediaTrack.durationInMillis = 2;
+        mediaTrack.startTime = MillisecondsTimePoint.now();
+        mediaTrack.duration = ONE_MILLISECOND.times(2);
         
-        Date startTime = new Date(mediaTrack.startTime.getTime() + 1);
-        Date endTime = new Date(startTime.getTime() + 2);
+        TimePoint startTime = mediaTrack.startTime.plus(1);
+        TimePoint endTime = startTime.plus(2);
         assertTrue(mediaTrack.overlapsWith(startTime, endTime));
         
     }
@@ -74,11 +75,11 @@ public class MediaTrackTest {
     @Test
     public void testMediaFullyIncluded() throws Exception {
         MediaTrack mediaTrack = new MediaTrack();
-        mediaTrack.startTime = new Date();
-        mediaTrack.durationInMillis = 1;
+        mediaTrack.startTime = MillisecondsTimePoint.now();
+        mediaTrack.duration = ONE_MILLISECOND;
         
-        Date startTime = new Date(mediaTrack.startTime.getTime() - 1);
-        Date endTime = new Date(startTime.getTime() + 3);
+        TimePoint startTime = mediaTrack.startTime.minus( 1);
+        TimePoint endTime = startTime.plus(3);
         assertTrue(mediaTrack.overlapsWith(startTime, endTime));
         
     }
@@ -86,11 +87,11 @@ public class MediaTrackTest {
     @Test
     public void testMediaFullyIncluding() throws Exception {
         MediaTrack mediaTrack = new MediaTrack();
-        mediaTrack.startTime = new Date();
-        mediaTrack.durationInMillis = 3;
+        mediaTrack.startTime = MillisecondsTimePoint.now();
+        mediaTrack.duration = ONE_MILLISECOND.times(3);
         
-        Date startTime = new Date(mediaTrack.startTime.getTime() + 1);
-        Date endTime = new Date(startTime.getTime() + 1);
+        TimePoint startTime = mediaTrack.startTime.plus(1);
+        TimePoint endTime = startTime.plus(1);
         assertTrue(mediaTrack.overlapsWith(startTime, endTime));
         
     }
@@ -98,11 +99,11 @@ public class MediaTrackTest {
     @Test
     public void testOverlapOpenEndStartingEarlier() throws Exception {
         MediaTrack mediaTrack = new MediaTrack();
-        mediaTrack.startTime = new Date();
-        mediaTrack.durationInMillis = 1;
+        mediaTrack.startTime = MillisecondsTimePoint.now();
+        mediaTrack.duration = ONE_MILLISECOND;
         
-        Date startTime = new Date(mediaTrack.startTime.getTime() - 1);
-        Date endTime = null; //--> open end
+        TimePoint startTime = mediaTrack.startTime.minus( 1);
+        TimePoint endTime = null; //--> open end
         assertTrue(mediaTrack.overlapsWith(startTime, endTime));
         
     }
@@ -110,11 +111,11 @@ public class MediaTrackTest {
     @Test
     public void testOverlapOpenEndStartingLater() throws Exception {
         MediaTrack mediaTrack = new MediaTrack();
-        mediaTrack.startTime = new Date();
-        mediaTrack.durationInMillis = 2;
+        mediaTrack.startTime = MillisecondsTimePoint.now();
+        mediaTrack.duration = ONE_MILLISECOND.times(2);
         
-        Date startTime = new Date(mediaTrack.startTime.getTime() + 1);
-        Date endTime = null; //--> open end
+        TimePoint startTime = mediaTrack.startTime.plus(1);
+        TimePoint endTime = null; //--> open end
         assertTrue(mediaTrack.overlapsWith(startTime, endTime));
         
     }
@@ -122,11 +123,11 @@ public class MediaTrackTest {
     @Test
     public void testOpenEndNoOverlap() throws Exception {
         MediaTrack mediaTrack = new MediaTrack();
-        mediaTrack.startTime = new Date();
-        mediaTrack.durationInMillis = 1;
+        mediaTrack.startTime = MillisecondsTimePoint.now();
+        mediaTrack.duration = ONE_MILLISECOND;
         
-        Date startTime = new Date(mediaTrack.startTime.getTime() + 2);
-        Date endTime = null; //--> open end
+        TimePoint startTime = mediaTrack.startTime.plus(2);
+        TimePoint endTime = null; //--> open end
         assertFalse(mediaTrack.overlapsWith(startTime, endTime));
         
     }

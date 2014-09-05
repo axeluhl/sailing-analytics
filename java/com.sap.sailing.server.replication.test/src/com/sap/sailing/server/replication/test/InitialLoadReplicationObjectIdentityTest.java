@@ -1,6 +1,7 @@
 package com.sap.sailing.server.replication.test;
 
 import static org.hamcrest.core.Is.is;
+
 import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertNull;
 import static org.junit.Assert.assertSame;
@@ -30,6 +31,7 @@ import com.sap.sailing.domain.base.impl.RegattaImpl;
 import com.sap.sailing.domain.common.RegattaName;
 import com.sap.sailing.domain.common.ScoringSchemeType;
 import com.sap.sailing.domain.common.TimePoint;
+import com.sap.sailing.domain.common.impl.MillisecondsDurationImpl;
 import com.sap.sailing.domain.common.impl.MillisecondsTimePoint;
 import com.sap.sailing.domain.common.media.MediaTrack;
 import com.sap.sailing.domain.common.media.MediaTrack.MimeType;
@@ -123,11 +125,11 @@ public class InitialLoadReplicationObjectIdentityTest extends AbstractServerRepl
         event.addLeaderboardGroup(leaderboardGroup);
         
         /* Media Library */
-        MediaTrack mediaTrack1 = new MediaTrack("title-1", "url", new Date(), 1, MimeType.mp4);
+        MediaTrack mediaTrack1 = new MediaTrack("title-1", "url", MillisecondsTimePoint.now(), MillisecondsDurationImpl.ONE_HOUR, MimeType.mp4);
         master.mediaTrackAdded(mediaTrack1);
-        MediaTrack mediaTrack2 = new MediaTrack("title-2", "url", new Date(), 1, MimeType.ogv);
+        MediaTrack mediaTrack2 = new MediaTrack("title-2", "url", MillisecondsTimePoint.now(), MillisecondsDurationImpl.ONE_HOUR, MimeType.ogv);
         master.mediaTrackAdded(mediaTrack2);
-        MediaTrack mediaTrack3 = new MediaTrack("title-3", "url", new Date(), 1, MimeType.mp4);
+        MediaTrack mediaTrack3 = new MediaTrack("title-3", "url", MillisecondsTimePoint.now(), MillisecondsDurationImpl.ONE_HOUR, MimeType.mp4);
         master.mediaTrackAdded(mediaTrack3);
         
         /* fire up replication */
