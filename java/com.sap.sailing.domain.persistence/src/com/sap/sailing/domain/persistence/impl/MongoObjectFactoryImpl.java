@@ -1003,7 +1003,7 @@ public class MongoObjectFactoryImpl implements MongoObjectFactory {
     private Object storeRaceLogSuppressedMarkPassingsEvent(SuppressedMarkPassingsEvent event) {
         DBObject result = new BasicDBObject();
         storeRaceLogEventProperties(event, result);
-        result.put(FieldNames.INDEX_OF_FIRST_SUPPRESSED_WAYPOINT.name(), event.getIndexOfFirstSuppressedWaypoint());
+        result.put(FieldNames.INDEX_OF_FIRST_SUPPRESSED_WAYPOINT.name(), event.getZeroBasedIndexOfFirstSuppressedWaypoint());
         return result;
     }
 

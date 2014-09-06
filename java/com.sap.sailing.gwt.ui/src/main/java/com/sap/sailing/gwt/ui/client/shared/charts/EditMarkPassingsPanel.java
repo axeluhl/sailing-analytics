@@ -7,6 +7,7 @@ import java.util.HashMap;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
+import java.util.Map.Entry;
 import java.util.Set;
 import java.util.TreeSet;
 
@@ -29,9 +30,7 @@ import com.google.gwt.view.client.SelectionChangeEvent;
 import com.google.gwt.view.client.SelectionChangeEvent.Handler;
 import com.google.gwt.view.client.SingleSelectionModel;
 import com.sap.sailing.domain.common.RegattaAndRaceIdentifier;
-import com.sap.sailing.domain.common.TimePoint;
 import com.sap.sailing.domain.common.dto.CompetitorDTO;
-import com.sap.sailing.domain.common.dto.FleetDTO;
 import com.sap.sailing.domain.common.dto.LeaderboardDTO;
 import com.sap.sailing.domain.common.dto.RaceColumnDTO;
 import com.sap.sailing.gwt.ui.client.CompetitorSelectionChangeListener;
@@ -44,9 +43,9 @@ import com.sap.sailing.gwt.ui.shared.RaceCourseDTO;
 import com.sap.sailing.gwt.ui.shared.WaypointDTO;
 import com.sap.sse.common.Util;
 import com.sap.sse.common.Util.Pair;
-import com.sap.sse.common.Util.Triple;
 import com.sap.sse.common.filter.Filter;
 import com.sap.sse.common.filter.FilterSet;
+import com.sap.sse.gwt.client.async.AsyncAction;
 import com.sap.sse.gwt.client.async.AsyncActionsExecutor;
 import com.sap.sse.gwt.client.player.Timer;
 
@@ -64,12 +63,11 @@ public class EditMarkPassingsPanel extends FlexTable implements RaceSelectionCha
     private final AsyncActionsExecutor asyncExecutor;
     private final ErrorReporter errorReporter;
     private final CompetitorSelectionProvider competitorSelectionModel;
-    private final Timer timer;
     private LeaderboardDTO leaderboard;
+    private RaceColumnDTO column;
 
-    private Map<CompetitorDTO, List<Pair<WaypointDTO, TimePoint>>> currentEdits = new HashMap<>();
-    private Map<WaypointDTO, TimePoint> currentCompetitorEdits = new HashMap<>();
-    private WaypointDTO currentCompetitorSuppressedWaypoint;
+    private Map<Integer, Date> currentCompetitorEdits = new HashMap<>();
+    private Map<Integer, Date> currentCompetitorChanges = new HashMap<>();
 
     private final Button editMarkPassingsButton;
 
@@ -94,7 +92,6 @@ public class EditMarkPassingsPanel extends FlexTable implements RaceSelectionCha
         this.raceIdentifier = raceIdentifier;
         this.asyncExecutor = asyncActionsExecutor;
         this.errorReporter = errorReporter;
-        this.timer = timer;
 
         this.editMarkPassingsButton = editMarkPassingsButton;
         this.competitorSelectionModel = competitorSelectionModel;
@@ -112,7 +109,22 @@ public class EditMarkPassingsPanel extends FlexTable implements RaceSelectionCha
 
         removeSetMarkPassingsButton = new Button("Remove fixed mark passing");
         removeSetMarkPassingsButton.setEnabled(false);
+        removeSetMarkPassingsButton.addClickHandler(new ClickHandler() {
+            @Override
+            public void onClick(ClickEvent event) {
+                currentCompetitorChanges.put(currentWaypoints.indexOf(waypointSelectionModel.getSelectedObject().getA()), null);
+                wayPointSelectionTable.redraw();
+            }
+        });
         setTimeAsMarkPassingsButton = new Button("Set time as mark passing");
+        setTimeAsMarkPassingsButton.addClickHandler(new ClickHandler() {
+            @Override
+            public void onClick(ClickEvent event) {
+                Pair<WaypointDTO, Date> selectedObject = waypointSelectionModel.getSelectedObject();
+                currentCompetitorChanges.put(currentWaypoints.indexOf(selectedObject.getA()), timer.getTime());
+                wayPointSelectionTable.redraw();
+            }
+        });
         currentWaypoints = new ArrayList<>();
         waypointList = new ListDataProvider<>();
         waypointSelectionModel = new SingleSelectionModel<Util.Pair<WaypointDTO, Date>>();
@@ -145,13 +157,20 @@ public class EditMarkPassingsPanel extends FlexTable implements RaceSelectionCha
         wayPointSelectionTable.addColumn(new Column<Util.Pair<WaypointDTO, Date>, SafeHtml>(new AnchorCell()) {
             @Override
             public SafeHtml getValue(final Pair<WaypointDTO, Date> object) {
+                final Date date;
+                Date editedDate = currentCompetitorChanges.get(currentWaypoints.indexOf(object.getA()));
+                if (editedDate != null) {
+                    date = editedDate;
+                } else {
+                    date = object.getB();
+                }
                 return new SafeHtml() {
                     private static final long serialVersionUID = 1L;
 
                     @Override
                     public String asString() {
                         // TODO this is really unclean (Problem: no calendar)
-                        Date date = object.getB();
+                        // Oh and time zones are scary
                         String string = date.toString();
                         string = string.substring(10, 20);
                         return string;
@@ -179,6 +198,12 @@ public class EditMarkPassingsPanel extends FlexTable implements RaceSelectionCha
         });
 
         svButton = new Button(stringMessages.save());
+        svButton.addClickHandler(new ClickHandler() {
+            @Override
+            public void onClick(ClickEvent event) {
+                // TODO Pass info to server and reload new mark passings
+            }
+        });
         closeButton = new Button(stringMessages.close());
         closeButton.addClickHandler(new ClickHandler() {
             @Override
@@ -221,6 +246,9 @@ public class EditMarkPassingsPanel extends FlexTable implements RaceSelectionCha
     }
 
     private void disableEditing() {
+        // TODO clear all current info
+        currentCompetitorEdits.clear();
+        suppressMarkPassingsCheckBox.setValue(false);
         waypointList.setList(new ArrayList<Util.Pair<WaypointDTO, Date>>());
         editMarkPassingsButton.setEnabled(false);
     }
@@ -229,18 +257,43 @@ public class EditMarkPassingsPanel extends FlexTable implements RaceSelectionCha
         editMarkPassingsButton.setEnabled(true);
         removeSetMarkPassingsButton.setEnabled(false);
         final CompetitorDTO competitor = competitorSelectionModel.getSelectedCompetitors().iterator().next();
-        currentCompetitorEdits.clear();
-        List<Pair<WaypointDTO, TimePoint>> competitorEdits = currentEdits.get(competitor);
-        if (competitorEdits != null) {
-            for (Pair<WaypointDTO, TimePoint> edit : competitorEdits) {
-                if (edit.getB() == null) {
-                    setSuppressedWaypoint(edit.getA());
-                } else {
-                    currentCompetitorEdits.put(edit.getA(), edit.getB());
+        currentCompetitorEdits = new HashMap<>();
+
+        // Get current edits
+        asyncExecutor.execute(new AsyncAction<Map<Integer, Date>>() {
+            @Override
+            public void execute(AsyncCallback<Map<Integer, Date>> callback) {
+                sailingService.getCompetitorRaceLogMarkPassingData(leaderboard.name, column, column.getFleet(raceIdentifier), competitor,
+                        callback);
+
+            }
+        }, new AsyncCallback<Map<Integer, Date>>() {
+            @Override
+            public void onFailure(Throwable caught) {
+                errorReporter.reportError("Error retrieving race log mark passing data");
+            }
+
+            @Override
+            public void onSuccess(Map<Integer, Date> result) {
+                for (Entry<Integer, Date> data : result.entrySet()) {
+                    if (data.getValue() == null) {
+                        if (data.getValue() == null) {
+                            setSuppressedWaypoint(data.getKey());
+                        } else {
+                            currentCompetitorEdits.put(data.getKey(), data.getValue());
+                        }
+                    }
                 }
             }
-        }
-        AsyncCallback<Set<Util.Pair<String, Date>>> markPassingCallback = new AsyncCallback<Set<Util.Pair<String, Date>>>() {
+        });
+
+        // Get current mark passings
+        asyncExecutor.execute(new AsyncAction<Set<Pair<String, Date>>>() {
+            @Override
+            public void execute(AsyncCallback<Set<Pair<String, Date>>> callback) {
+                sailingService.getCompetitorMarkPassings(raceIdentifier, competitor, callback);
+            }
+        }, new AsyncCallback<Set<Util.Pair<String, Date>>>() {
             @Override
             public void onFailure(Throwable caught) {
                 errorReporter.reportError("Error obtaining mark passings", /* silent Mode */true);
@@ -271,16 +324,21 @@ public class EditMarkPassingsPanel extends FlexTable implements RaceSelectionCha
                 }
                 waypointList.setList(newMarkPassings);
             }
-        };
-        sailingService.getCompetitorMarkPassings(raceIdentifier, competitor, markPassingCallback);
+        });
     }
 
-    private void setSuppressedWaypoint(WaypointDTO a) {
-        // TODO Auto-generated method stub
+    private void setSuppressedWaypoint(Integer oneBasedIndex) {
+        suppressMarkPassingsCheckBox.setValue(true);
+        suppressMarkPassings.setValue(oneBasedIndex);
     }
 
     private void refreshWaypoints() {
-        AsyncCallback<RaceCourseDTO> courseCallback = new AsyncCallback<RaceCourseDTO>() {
+        asyncExecutor.execute(new AsyncAction<RaceCourseDTO>() {
+            @Override
+            public void execute(AsyncCallback<RaceCourseDTO> callback) {
+                sailingService.getRaceCourse(raceIdentifier, new Date(), callback);
+            }
+        }, new AsyncCallback<RaceCourseDTO>() {
             @Override
             public void onFailure(Throwable caught) {
                 errorReporter.reportError("Error obtaining course", true);
@@ -290,8 +348,7 @@ public class EditMarkPassingsPanel extends FlexTable implements RaceSelectionCha
             public void onSuccess(RaceCourseDTO result) {
                 currentWaypoints = result.waypoints;
             }
-        };
-        sailingService.getRaceCourse(raceIdentifier, new Date(), courseCallback);
+        });
     }
 
     @Override
@@ -315,29 +372,19 @@ public class EditMarkPassingsPanel extends FlexTable implements RaceSelectionCha
 
     public void setLeaderboard(LeaderboardDTO leaderboard) {
         this.leaderboard = leaderboard;
-        RaceColumnDTO column = leaderboard.getRaceList().iterator().next();
-        FleetDTO fleet = column.getFleet(raceIdentifier);
-
-        AsyncCallback<List<Triple<CompetitorDTO, Integer, TimePoint>>> asyncCallback = new AsyncCallback<List<Triple<CompetitorDTO, Integer, TimePoint>>>() {
-
-            @Override
-            public void onFailure(Throwable caught) {
-                errorReporter.reportError("Error retrieving edited mark passing data");
-            }
-
-            @Override
-            public void onSuccess(List<Triple<CompetitorDTO, Integer, TimePoint>> result) {
-                for (Triple<CompetitorDTO, Integer, TimePoint> triple : result) {
-                    CompetitorDTO competitor = triple.getA();
-                    List<Pair<WaypointDTO, TimePoint>> competitorEdits = currentEdits.get(competitor);
-                    if (competitorEdits == null) {
-                        competitorEdits = new ArrayList<>();
-                        currentEdits.put(competitor, competitorEdits);
-                    }
-                    competitorEdits.add(new Pair<WaypointDTO, TimePoint>(currentWaypoints.get(triple.getB()), triple.getC()));
-                }
-            }
-        };
-        sailingService.getRaceLogMarkPassingData(leaderboard.name, column, fleet, asyncCallback);
-    }
+        column = leaderboard.getRaceList().iterator().next();
+        /*
+         * FleetDTO fleet = column.getFleet(raceIdentifier); allEdits.clear(); AsyncCallback<List<Triple<CompetitorDTO,
+         * Integer, Date>>> asyncCallback = new AsyncCallback<List<Triple<CompetitorDTO, Integer, Date>>>() {
+         * 
+         * @Override public void onFailure(Throwable caught) {
+         * errorReporter.reportError("Error retrieving edited mark passing data"); }
+         * 
+         * @Override public void onSuccess(List<Triple<CompetitorDTO, Integer, Date>> result) { for
+         * (Triple<CompetitorDTO, Integer, Date> triple : result) { CompetitorDTO competitor = triple.getA();
+         * Map<Integer, Date> competitorEdits = allEdits.get(competitor); if (competitorEdits == null) {
+         * competitorEdits = new HashMap<>(); allEdits.put(competitor, competitorEdits); }
+         * competitorEdits.put(triple.getB() + 1, triple.getC()); } } };
+         * sailingService.getRaceLogMarkPassingData(leaderboard.name, column, fleet, asyncCallback);
+         */}
 }

@@ -8,11 +8,12 @@ import com.sap.sailing.domain.common.TimePoint;
 import com.sap.sailing.domain.racelog.RaceLog;
 import com.sap.sailing.domain.racelog.RaceLogEvent;
 import com.sap.sailing.domain.racelog.tracking.FixedMarkPassingEvent;
+import com.sap.sailing.domain.racelog.tracking.SuppressedMarkPassingsEvent;
 import com.sap.sse.common.Util.Triple;
 
-public class FixedMarkPassingsFinder extends RaceLogAnalyzer<Set<Triple<Competitor, Integer, TimePoint>>> {
+public class MarkPassingDataFinder extends RaceLogAnalyzer<Set<Triple<Competitor, Integer, TimePoint>>> {
 
-    public FixedMarkPassingsFinder(RaceLog raceLog) {
+    public MarkPassingDataFinder(RaceLog raceLog) {
         super(raceLog);
     }
 
@@ -24,6 +25,9 @@ public class FixedMarkPassingsFinder extends RaceLogAnalyzer<Set<Triple<Competit
                 FixedMarkPassingEvent castedEvent = (FixedMarkPassingEvent) event;
                 result.add(new Triple<Competitor, Integer, TimePoint>(castedEvent.getInvolvedBoats().get(0), castedEvent
                         .getZeroBasedIndexOfPassedWaypoint(), castedEvent.getTimePoint()));
+            } else if (event instanceof SuppressedMarkPassingsEvent){
+                SuppressedMarkPassingsEvent castedEvent = (SuppressedMarkPassingsEvent) event;
+                result.add(new Triple<Competitor, Integer, TimePoint>(castedEvent.getInvolvedBoats().get(0), castedEvent.getZeroBasedIndexOfFirstSuppressedWaypoint(), null));
             }
         }
         return result;

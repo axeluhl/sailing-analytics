@@ -5,6 +5,6 @@ import com.sap.sailing.domain.racelog.Revokable;
 
 public interface SuppressedMarkPassingsEvent extends RaceLogEvent, Revokable {
     
-    public Integer getIndexOfFirstSuppressedWaypoint();
+    public Integer getZeroBasedIndexOfFirstSuppressedWaypoint();
 
 }

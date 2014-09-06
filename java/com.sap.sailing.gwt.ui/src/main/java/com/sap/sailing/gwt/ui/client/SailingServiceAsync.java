@@ -77,7 +77,6 @@ import com.sap.sailing.gwt.ui.shared.WindDTO;
 import com.sap.sailing.gwt.ui.shared.WindInfoForRaceDTO;
 import com.sap.sse.common.Util;
 import com.sap.sse.common.Util.Pair;
-import com.sap.sse.common.Util.Triple;
 import com.sap.sse.common.search.KeywordQuery;
 
 /**
@@ -644,9 +643,10 @@ public interface SailingServiceAsync {
     void getCompetitorMarkPassings(RegattaAndRaceIdentifier race, CompetitorDTO competitorDTO,
             AsyncCallback<Set<Pair<String, Date>>> callback);
 
-    void updateRaceLogMarkPassingData(String leaderboardName, RaceColumnDTO raceColumnDTO, FleetDTO fleet,
-            List<Triple<CompetitorDTO, Integer, TimePoint>> update, AsyncCallback<Void> callback);
+    void getCompetitorRaceLogMarkPassingData(String leaderboardName, RaceColumnDTO raceColumnDTO, FleetDTO fleet, CompetitorDTO competitor,
+            AsyncCallback<Map<Integer, Date>> callback);
 
-    void getRaceLogMarkPassingData(String leaderboardName, RaceColumnDTO raceColumnDTO, FleetDTO fleet,
-            AsyncCallback<List<Triple<CompetitorDTO, Integer, TimePoint>>> callback);
+    void updateRaceLogMarkPassingData(String leaderboardName, RaceColumnDTO raceColumnDTO, FleetDTO fleet,
+            Map<Integer, TimePoint> newFixedPassings, Integer newZeroBasedIndexOfSuppressedMarkPassing, CompetitorDTO competitorDTO,
+            AsyncCallback<Void> callback);
 }

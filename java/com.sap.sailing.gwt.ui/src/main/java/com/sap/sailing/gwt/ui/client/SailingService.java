@@ -87,7 +87,6 @@ import com.sap.sailing.gwt.ui.shared.WindDTO;
 import com.sap.sailing.gwt.ui.shared.WindInfoForRaceDTO;
 import com.sap.sse.common.Util;
 import com.sap.sse.common.Util.Pair;
-import com.sap.sse.common.Util.Triple;
 import com.sap.sse.common.search.KeywordQuery;
 
 /**
@@ -529,9 +528,11 @@ public interface SailingService extends RemoteService {
 
     Set<Pair<String, Date>> getCompetitorMarkPassings(RegattaAndRaceIdentifier race, CompetitorDTO competitorDTO);
 
-    void updateRaceLogMarkPassingData(String leaderboardName, RaceColumnDTO raceColumnDTO, FleetDTO fleet,
-            List<Triple<CompetitorDTO, Integer, TimePoint>> update);
+    Map<Integer, Date> getCompetitorRaceLogMarkPassingData(String leaderboardName, RaceColumnDTO raceColumnDTO, FleetDTO 
+            fleet,
+            CompetitorDTO competitor);
 
-    List<Triple<CompetitorDTO, Integer, TimePoint>> getRaceLogMarkPassingData(String leaderboardName, RaceColumnDTO raceColumnDTO,
-            FleetDTO fleet);
+    void updateRaceLogMarkPassingData(String leaderboardName, RaceColumnDTO raceColumnDTO, FleetDTO fleet,
+            Map<Integer, TimePoint> newFixedPassings, Integer newZeroBasedIndexOfSuppressedMarkPassing, CompetitorDTO competitorDTO);
+
 }

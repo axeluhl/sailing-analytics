@@ -27,7 +27,7 @@ public class RaceLogSuppressedMarkPassingsEventSerializer extends BaseRaceLogEve
         SuppressedMarkPassingsEvent event = (SuppressedMarkPassingsEvent) object;
         
         JSONObject result = super.serialize(event);
-        result.put(FIELD_INDEX_OF_FIRST_SUPPRESSED_WAYPOINTS, event.getIndexOfFirstSuppressedWaypoint());
+        result.put(FIELD_INDEX_OF_FIRST_SUPPRESSED_WAYPOINTS, event.getZeroBasedIndexOfFirstSuppressedWaypoint());
         return result;
     }
 

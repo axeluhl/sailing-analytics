@@ -29,7 +29,7 @@ public class SuppressedMarkPassingsEventImpl extends RaceLogEventImpl implements
     }
 
     @Override
-    public Integer getIndexOfFirstSuppressedWaypoint() {
+    public Integer getZeroBasedIndexOfFirstSuppressedWaypoint() {
         return indexOfFirstSuppressedWaypoint;
     }
 

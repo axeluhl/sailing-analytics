@@ -21,17 +21,15 @@ import com.sap.sailing.domain.racelog.RaceLogStartTimeEvent;
 import com.sap.sailing.domain.racelog.RaceLogWindFixEvent;
 import com.sap.sailing.domain.racelog.RevokeEvent;
 import com.sap.sailing.domain.racelog.analyzing.impl.AbortingFlagFinder;
-import com.sap.sailing.domain.racelog.analyzing.impl.FixedMarkPassingsFinder;
 import com.sap.sailing.domain.racelog.analyzing.impl.LastPublishedCourseDesignFinder;
+import com.sap.sailing.domain.racelog.analyzing.impl.MarkPassingDataFinder;
 import com.sap.sailing.domain.racelog.analyzing.impl.StartTimeFinder;
-import com.sap.sailing.domain.racelog.analyzing.impl.SuppressedMarkPassingsFinder;
 import com.sap.sailing.domain.racelog.analyzing.impl.WindFixesFinder;
 import com.sap.sailing.domain.racelog.impl.BaseRaceLogEventVisitor;
 import com.sap.sailing.domain.racelog.tracking.FixedMarkPassingEvent;
 import com.sap.sailing.domain.racelog.tracking.SuppressedMarkPassingsEvent;
 import com.sap.sailing.domain.tracking.DynamicTrackedRace;
 import com.sap.sailing.domain.tracking.Wind;
-import com.sap.sse.common.Util.Pair;
 import com.sap.sse.common.Util.Triple;
 
 /**
@@ -52,8 +50,7 @@ public class DynamicTrackedRaceLogListener extends BaseRaceLogEventVisitor {
     private StartTimeFinder startTimeFinder;
     private AbortingFlagFinder abortingFlagFinder;
 
-    private FixedMarkPassingsFinder fixedPassingsFinder;
-    private SuppressedMarkPassingsFinder suppressedPassingsFinder;
+    private MarkPassingDataFinder markPassingDataFinder;
     private MarkPassingUpdateListener markPassingUpdateListener;
 
     public DynamicTrackedRaceLogListener(DynamicTrackedRace trackedRace) {
@@ -75,8 +72,7 @@ public class DynamicTrackedRaceLogListener extends BaseRaceLogEventVisitor {
             initializeWindTrack(raceLog);
             analyze();
             if (markPassingUpdateListener != null) {
-                suppressedPassingsFinder = new SuppressedMarkPassingsFinder(raceLog);
-                fixedPassingsFinder = new FixedMarkPassingsFinder(raceLog);
+                markPassingDataFinder = new MarkPassingDataFinder(raceLog);
                 analyzeMarkPassings();
             }
         }
@@ -89,7 +85,8 @@ public class DynamicTrackedRaceLogListener extends BaseRaceLogEventVisitor {
     /**
      * Retrieves all wind fixes available in the race log and adds them to the wind track for RACECOMMITTEEE
      * 
-     * @param raceLog The race log from which the available wind fixes shall be retrieved.
+     * @param raceLog
+     *            The race log from which the available wind fixes shall be retrieved.
      */
     private void initializeWindTrack(RaceLog raceLog) {
         WindFixesFinder windFixesFinder = new WindFixesFinder(raceLog);
@@ -110,8 +107,6 @@ public class DynamicTrackedRaceLogListener extends BaseRaceLogEventVisitor {
             removeAllWindFixesFromWindTrack(raceLog);
             raceLog.removeListener(this);
             raceLogs.remove(raceLog);
-            fixedPassingsFinder = new FixedMarkPassingsFinder(raceLog);
-            suppressedPassingsFinder = new SuppressedMarkPassingsFinder(raceLog);
             removeMarkPassingEvents();
         }
     }
@@ -130,11 +125,12 @@ public class DynamicTrackedRaceLogListener extends BaseRaceLogEventVisitor {
     }
 
     private void removeMarkPassingEvents() {
-        for (Pair<Competitor, Integer> pair : suppressedPassingsFinder.analyze()) {
-            markPassingUpdateListener.removeSuppressedPassing(pair.getA());
-        }
-        for (Triple<Competitor, Integer, TimePoint> triple : fixedPassingsFinder.analyze()) {
-            markPassingUpdateListener.removeFixedPassing(triple.getA(), triple.getB());
+        for (Triple<Competitor, Integer, TimePoint> triple : markPassingDataFinder.analyze()) {
+            if (triple.getC() == null) {
+                markPassingUpdateListener.removeSuppressedPassing(triple.getA());
+            } else {
+                markPassingUpdateListener.removeFixedPassing(triple.getA(), triple.getB());
+            }
         }
     }
 
@@ -178,11 +174,12 @@ public class DynamicTrackedRaceLogListener extends BaseRaceLogEventVisitor {
     }
 
     private void analyzeMarkPassings() {
-        for (Pair<Competitor, Integer> pair : suppressedPassingsFinder.analyze()) {
-            markPassingUpdateListener.addSuppressedPassing(pair.getA(), pair.getB());
-        }
-        for (Triple<Competitor, Integer, TimePoint> triple : fixedPassingsFinder.analyze()) {
-            markPassingUpdateListener.addFixedPassing(triple.getA(), triple.getB(), triple.getC());
+        for (Triple<Competitor, Integer, TimePoint> triple : markPassingDataFinder.analyze()) {
+            if (triple.getC() == null) {
+                markPassingUpdateListener.addSuppressedPassing(triple.getA(), triple.getB());
+            } else {
+                markPassingUpdateListener.addFixedPassing(triple.getA(), triple.getB(), triple.getC());
+            }
         }
     }
 
@@ -213,17 +210,20 @@ public class DynamicTrackedRaceLogListener extends BaseRaceLogEventVisitor {
         // add the wind fix to the race committee WindTrack
         trackedRace.recordWind(event.getWindFix(), raceCommitteeWindSource);
     }
+
     @Override
     public void visit(FixedMarkPassingEvent event) {
         if (markPassingUpdateListener != null) {
-            markPassingUpdateListener.addFixedPassing(event.getInvolvedBoats().get(0), event.getZeroBasedIndexOfPassedWaypoint(), event.getTimePointOfFixedPassing());
+            markPassingUpdateListener.addFixedPassing(event.getInvolvedBoats().get(0), event.getZeroBasedIndexOfPassedWaypoint(),
+                    event.getTimePointOfFixedPassing());
         }
     }
 
     @Override
     public void visit(SuppressedMarkPassingsEvent event) {
         if (markPassingUpdateListener != null) {
-            markPassingUpdateListener.addSuppressedPassing(event.getInvolvedBoats().get(0), event.getIndexOfFirstSuppressedWaypoint());
+            markPassingUpdateListener.addSuppressedPassing(event.getInvolvedBoats().get(0),
+                    event.getZeroBasedIndexOfFirstSuppressedWaypoint());
         }
     }
 
