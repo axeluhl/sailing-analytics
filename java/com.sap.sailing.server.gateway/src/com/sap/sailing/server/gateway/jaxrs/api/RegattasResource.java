@@ -701,15 +701,14 @@ public class RegattasResource extends AbstractSailingServerResource {
                         if(topN != null && topN > 0 && rank > topN) {
                             break;
                         }
+                        jsonCompetitorInLeg.put("id", competitor.getId() != null ? competitor.getId().toString() : null);
+                        jsonCompetitorInLeg.put("name", competitor.getName());
+                        jsonCompetitorInLeg.put("sailNumber", competitor.getBoat().getSailID());
+                        jsonCompetitorInLeg.put("color", competitor.getColor() != null ? competitor.getColor().getAsHtml() : null);
+                        jsonCompetitorInLeg.put("rank", rank++);
+
                         TrackedLegOfCompetitor currentLegOfCompetitor = trackedRace.getCurrentLeg(competitor, timePoint);
                         if (currentLegOfCompetitor != null) {
-                            jsonCompetitorInLeg.put("id", competitor.getId() != null ? competitor.getId().toString() : null);
-                            jsonCompetitorInLeg.put("name", competitor.getName());
-                            jsonCompetitorInLeg.put("sailNumber", competitor.getBoat().getSailID());
-                            jsonCompetitorInLeg.put("color", competitor.getColor() != null ? competitor.getColor().getAsHtml() : null);
-
-                            jsonCompetitorInLeg.put("rank", rank++);
-
                             int indexOfWaypoint = course.getIndexOfWaypoint(currentLegOfCompetitor.getLeg().getFrom());
                             jsonCompetitorInLeg.put("leg", indexOfWaypoint);
 
@@ -732,9 +731,12 @@ public class RegattasResource extends AbstractSailingServerResource {
                             if(windwardDistanceToOverallLeader != null) {
                                 jsonCompetitorInLeg.put("gapToLeader-m", roundDouble(windwardDistanceToOverallLeader.getMeters(), 2));
                             }
-
-                            jsonCompetitors.add(jsonCompetitorInLeg);
+                            jsonCompetitorInLeg.put("finished", false);
+                        } else {
+                            jsonCompetitorInLeg.put("finished", true);
                         }
+
+                        jsonCompetitors.add(jsonCompetitorInLeg);
                     }
                 } catch (NoWindException e1) {
                     // well, we don't know the wind direction... then no gap to leader will be shown...
