@@ -683,6 +683,8 @@ public class RegattasResource extends AbstractSailingServerResource {
             } else {     
                 TrackedRace trackedRace = findTrackedRace(regattaName, raceName);
                 Course course = trackedRace.getRace().getCourse();
+                Waypoint lastWaypoint = course.getLastWaypoint();
+
                 TimePoint timePoint = trackedRace.getTimePointOfNewestEvent() == null ? MillisecondsTimePoint.now()
                         : trackedRace.getTimePointOfNewestEvent();
                 // if(trackedRace.isLive(timePoint)) {
@@ -691,6 +693,18 @@ public class RegattasResource extends AbstractSailingServerResource {
                 jsonLiveData.put("name", trackedRace.getRace().getName());
                 jsonLiveData.put("regatta", regatta.getName());
 
+                if(trackedRace.getStartOfRace() != null) {
+                    TimePoint startOfRace = trackedRace.getStartOfRace();
+                    TimePoint now =  MillisecondsTimePoint.now();
+                    jsonLiveData.put("startTime", startOfRace.asMillis());
+                    jsonLiveData.put("liveTime", now.asMillis());
+                    if(startOfRace.before(now)) {
+                        jsonLiveData.put("timeSinceStart-s", (now.asMillis() - startOfRace.asMillis()) / 1000.0);
+                    } else {
+                        jsonLiveData.put("timeToStart-s", (startOfRace.asMillis() - now.asMillis()) / 1000.0);
+                    }
+                }
+                
                 JSONArray jsonCompetitors = new JSONArray();
                 try {
                     List<Competitor> competitorsFromBestToWorst = trackedRace.getCompetitorsFromBestToWorst(timePoint);
@@ -710,7 +724,7 @@ public class RegattasResource extends AbstractSailingServerResource {
                         TrackedLegOfCompetitor currentLegOfCompetitor = trackedRace.getCurrentLeg(competitor, timePoint);
                         if (currentLegOfCompetitor != null) {
                             int indexOfWaypoint = course.getIndexOfWaypoint(currentLegOfCompetitor.getLeg().getFrom());
-                            jsonCompetitorInLeg.put("leg", indexOfWaypoint);
+                            jsonCompetitorInLeg.put("leg", indexOfWaypoint+1);
 
                             Speed speedOverGround = currentLegOfCompetitor.getSpeedOverGround(timePoint);
                             if(speedOverGround != null) {
@@ -733,9 +747,13 @@ public class RegattasResource extends AbstractSailingServerResource {
                             }
                             jsonCompetitorInLeg.put("finished", false);
                         } else {
-                            jsonCompetitorInLeg.put("finished", true);
+                            // we need to distinguish between competitors which did not start and competitors which already finished
+                            if(trackedRace.getMarkPassing(competitor, lastWaypoint) != null) {
+                                jsonCompetitorInLeg.put("finished", true);
+                            } else {
+                                jsonCompetitorInLeg.put("finished", false);
+                            }
                         }
-
                         jsonCompetitors.add(jsonCompetitorInLeg);
                     }
                 } catch (NoWindException e1) {
