@@ -4959,7 +4959,7 @@ public class SailingServiceImpl extends ProxiedRemoteServiceServlet implements S
 
     @Override
     public void updateRaceLogMarkPassingData(String leaderboardName, RaceColumnDTO raceColumnDTO, FleetDTO fleet,
-            Map<Integer, TimePoint> newFixedPassings, Integer newZeroBasedIndexOfSuppressedMarkPassing, CompetitorDTO competitorDTO) {
+            Map<Integer, Date> newFixedPassings, Integer newZeroBasedIndexOfSuppressedMarkPassing, CompetitorDTO competitorDTO) {
         Map<Integer, FixedMarkPassingEvent> oldFixedPassings = new HashMap<>();
         SuppressedMarkPassingsEvent oldSuppressedMarkPassingEvent = null;
         RaceLog raceLog = getService().getRaceLog(leaderboardName, raceColumnDTO.getName(), fleet.getName());
@@ -5006,13 +5006,13 @@ public class SailingServiceImpl extends ProxiedRemoteServiceServlet implements S
         // Update Fixed
         List<FixedMarkPassingEvent> eventsToRevoke = new ArrayList<>();
         Map<Integer, TimePoint> eventsToCreate = new HashMap<>();
-        for (Entry<Integer, TimePoint> newFixed : newFixedPassings.entrySet()) {
+        for (Entry<Integer, Date> newFixed : newFixedPassings.entrySet()) {
             FixedMarkPassingEvent fixedMarkPassingEvent = oldFixedPassings.get(newFixed.getKey());
             if (fixedMarkPassingEvent != null) {
                 eventsToRevoke.add(fixedMarkPassingEvent);
             }
             if (newFixed.getValue() != null) {
-                eventsToCreate.put(newFixed.getKey(), newFixed.getValue());
+                eventsToCreate.put(newFixed.getKey(), new MillisecondsTimePoint(newFixed.getValue()));
             }
         }
         for (FixedMarkPassingEvent event : eventsToRevoke) {

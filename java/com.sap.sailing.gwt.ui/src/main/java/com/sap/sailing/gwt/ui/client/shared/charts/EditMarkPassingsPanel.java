@@ -84,9 +84,9 @@ public class EditMarkPassingsPanel extends FlexTable implements RaceSelectionCha
     private final Button svButton;
     private final Button closeButton;
 
-    public EditMarkPassingsPanel(SailingServiceAsync sailingService, AsyncActionsExecutor asyncActionsExecutor,
-            RegattaAndRaceIdentifier raceIdentifier, StringMessages stringMessages, final Button editMarkPassingsButton,
-            CompetitorSelectionProvider competitorSelectionModel, ErrorReporter errorReporter, final Timer timer) {
+    public EditMarkPassingsPanel(final SailingServiceAsync sailingService, AsyncActionsExecutor asyncActionsExecutor,
+            final RegattaAndRaceIdentifier raceIdentifier, StringMessages stringMessages, final Button editMarkPassingsButton,
+            final CompetitorSelectionProvider competitorSelectionModel, ErrorReporter errorReporter, final Timer timer) {
 
         this.sailingService = sailingService;
         this.raceIdentifier = raceIdentifier;
@@ -201,6 +201,29 @@ public class EditMarkPassingsPanel extends FlexTable implements RaceSelectionCha
         svButton.addClickHandler(new ClickHandler() {
             @Override
             public void onClick(ClickEvent event) {
+                asyncExecutor.execute(new AsyncAction<Void>() {
+                    @Override
+                    public void execute(AsyncCallback<Void> callback) {
+                        sailingService.updateRaceLogMarkPassingData(leaderboard.name, column, column.getFleet(raceIdentifier),
+                                currentCompetitorChanges, suppressMarkPassings.getValue(), competitorSelectionModel
+                                        .getSelectedCompetitors().iterator().next(), callback);
+                    }
+
+                }, new AsyncCallback<Void>() {
+
+                    @Override
+                    public void onFailure(Throwable caught) {
+                        // TODO Auto-generated method stub
+
+                    }
+
+                    @Override
+                    public void onSuccess(Void result) {
+                        // TODO Auto-generated method stub
+
+                    }
+
+                });
                 // TODO Pass info to server and reload new mark passings
             }
         });
@@ -373,18 +396,5 @@ public class EditMarkPassingsPanel extends FlexTable implements RaceSelectionCha
     public void setLeaderboard(LeaderboardDTO leaderboard) {
         this.leaderboard = leaderboard;
         column = leaderboard.getRaceList().iterator().next();
-        /*
-         * FleetDTO fleet = column.getFleet(raceIdentifier); allEdits.clear(); AsyncCallback<List<Triple<CompetitorDTO,
-         * Integer, Date>>> asyncCallback = new AsyncCallback<List<Triple<CompetitorDTO, Integer, Date>>>() {
-         * 
-         * @Override public void onFailure(Throwable caught) {
-         * errorReporter.reportError("Error retrieving edited mark passing data"); }
-         * 
-         * @Override public void onSuccess(List<Triple<CompetitorDTO, Integer, Date>> result) { for
-         * (Triple<CompetitorDTO, Integer, Date> triple : result) { CompetitorDTO competitor = triple.getA();
-         * Map<Integer, Date> competitorEdits = allEdits.get(competitor); if (competitorEdits == null) {
-         * competitorEdits = new HashMap<>(); allEdits.put(competitor, competitorEdits); }
-         * competitorEdits.put(triple.getB() + 1, triple.getC()); } } };
-         * sailingService.getRaceLogMarkPassingData(leaderboard.name, column, fleet, asyncCallback);
-         */}
+    }
 }

@@ -22,7 +22,6 @@ import com.sap.sailing.domain.common.RegattaAndRaceIdentifier;
 import com.sap.sailing.domain.common.RegattaIdentifier;
 import com.sap.sailing.domain.common.RegattaNameAndRaceName;
 import com.sap.sailing.domain.common.ScoringSchemeType;
-import com.sap.sailing.domain.common.TimePoint;
 import com.sap.sailing.domain.common.WindSource;
 import com.sap.sailing.domain.common.configuration.DeviceConfigurationMatcherType;
 import com.sap.sailing.domain.common.dto.CompetitorDTO;
@@ -647,6 +646,6 @@ public interface SailingServiceAsync {
             AsyncCallback<Map<Integer, Date>> callback);
 
     void updateRaceLogMarkPassingData(String leaderboardName, RaceColumnDTO raceColumnDTO, FleetDTO fleet,
-            Map<Integer, TimePoint> newFixedPassings, Integer newZeroBasedIndexOfSuppressedMarkPassing, CompetitorDTO competitorDTO,
+            Map<Integer, Date> newFixedPassings, Integer newZeroBasedIndexOfSuppressedMarkPassing, CompetitorDTO competitorDTO,
             AsyncCallback<Void> callback);
 }
