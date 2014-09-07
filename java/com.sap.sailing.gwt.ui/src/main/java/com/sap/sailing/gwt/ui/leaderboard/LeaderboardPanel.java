@@ -1723,8 +1723,8 @@ public class LeaderboardPanel extends SimplePanel implements TimeListener, PlayS
         // the mark passings panel
         Button editMarkPassingsButton = new Button("Edit MarkPassings");
         markPassingsPanel = new EditMarkPassingsPanel(sailingService, asyncActionsExecutor, preSelectedRace, stringMessages,
-      editMarkPassingsButton, competitorSelectionProvider, errorReporter, timer);
-        
+                editMarkPassingsButton, competitorSelectionProvider, errorReporter, timer);
+
         // the information panel
         informationPanel = new FlowPanel();
         informationPanel.setStyleName(STYLE_LEADERBOARD_INFO);

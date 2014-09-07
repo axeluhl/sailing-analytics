@@ -86,7 +86,7 @@ public class EditMarkPassingsPanel extends FlexTable implements RaceSelectionCha
 
     public EditMarkPassingsPanel(final SailingServiceAsync sailingService, AsyncActionsExecutor asyncActionsExecutor,
             final RegattaAndRaceIdentifier raceIdentifier, StringMessages stringMessages, final Button editMarkPassingsButton,
-            final CompetitorSelectionProvider competitorSelectionModel, ErrorReporter errorReporter, final Timer timer) {
+            final CompetitorSelectionProvider competitorSelectionModel, final ErrorReporter errorReporter, final Timer timer) {
 
         this.sailingService = sailingService;
         this.raceIdentifier = raceIdentifier;
@@ -213,18 +213,15 @@ public class EditMarkPassingsPanel extends FlexTable implements RaceSelectionCha
 
                     @Override
                     public void onFailure(Throwable caught) {
-                        // TODO Auto-generated method stub
-
+                        errorReporter.reportError("Error submitting new changes");
                     }
 
                     @Override
                     public void onSuccess(Void result) {
-                        // TODO Auto-generated method stub
-
+                        refillList();
                     }
 
                 });
-                // TODO Pass info to server and reload new mark passings
             }
         });
         closeButton = new Button(stringMessages.close());
@@ -281,6 +278,8 @@ public class EditMarkPassingsPanel extends FlexTable implements RaceSelectionCha
         removeSetMarkPassingsButton.setEnabled(false);
         final CompetitorDTO competitor = competitorSelectionModel.getSelectedCompetitors().iterator().next();
         currentCompetitorEdits = new HashMap<>();
+        suppressMarkPassingsCheckBox.setValue(false);
+        suppressMarkPassings.setText("");
 
         // Get current edits
         asyncExecutor.execute(new AsyncAction<Map<Integer, Date>>() {
@@ -395,6 +394,10 @@ public class EditMarkPassingsPanel extends FlexTable implements RaceSelectionCha
 
     public void setLeaderboard(LeaderboardDTO leaderboard) {
         this.leaderboard = leaderboard;
-        column = leaderboard.getRaceList().iterator().next();
+        for (RaceColumnDTO columnDTO : leaderboard.getRaceList()) {
+            if (columnDTO.containsRace(raceIdentifier)) {
+                column = columnDTO;
+            }
+        }
     }
 }
