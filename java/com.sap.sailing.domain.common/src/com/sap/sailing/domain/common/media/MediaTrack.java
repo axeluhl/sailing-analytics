@@ -87,9 +87,10 @@ public class MediaTrack implements Serializable {
     public Duration duration;
     public MimeType mimeType;
     public Status status = Status.UNDEFINED;
-    public Set<RegattaAndRaceIdentifier> regattasAndRaces = new HashSet<RegattaAndRaceIdentifier>();
+    public Set<RegattaAndRaceIdentifier> regattasAndRaces;
 
     public MediaTrack() {
+        regattasAndRaces = new HashSet<RegattaAndRaceIdentifier>();
     }
 
     public MediaTrack(String title, String url, TimePoint startTime, Duration duration, MimeType mimeType,
@@ -100,7 +101,9 @@ public class MediaTrack implements Serializable {
         this.duration = duration;
         this.mimeType = mimeType;
         if (regattasAndRaces != null) {
-            this.regattasAndRaces.addAll(regattasAndRaces);
+            this.regattasAndRaces = regattasAndRaces;
+        }else{
+            regattasAndRaces = new HashSet<RegattaAndRaceIdentifier>();
         }
     }
 
@@ -113,7 +116,7 @@ public class MediaTrack implements Serializable {
         this.duration = duration;
         this.mimeType = mimeType;
         if (regattasAndRaces != null) {
-            this.regattasAndRaces.addAll(regattasAndRaces);
+            this.regattasAndRaces = regattasAndRaces;
         }
     }
 
