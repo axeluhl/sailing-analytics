@@ -1,7 +1,9 @@
 package com.sap.sailing.domain.common.media;
 
 import java.io.Serializable;
-import java.util.Date;
+
+import com.sap.sailing.domain.common.Duration;
+import com.sap.sailing.domain.common.TimePoint;
 
 /**
  * See http://my.opera.com/core/blog/2010/03/03/everything-you-need-to-know-about-html5-video-and-audio-2
@@ -69,38 +71,38 @@ public class MediaTrack implements Serializable {
     public String dbId;
     public String title;
     public String url;
-    public Date startTime;
-    public int durationInMillis;
+    public TimePoint startTime;
+    public Duration duration;
     public MimeType mimeType;
     public Status status = Status.UNDEFINED;
 
     public MediaTrack() {
     }
     
-    public MediaTrack(String title, String url, Date startTime, int durationInMillis, MimeType mimeType) {
+    public MediaTrack(String title, String url, TimePoint startTime, Duration duration, MimeType mimeType) {
         this.title = title;
         this.url = url;
         this.startTime = startTime;
-        this.durationInMillis = durationInMillis;
+        this.duration = duration;
         this.mimeType = mimeType;
     }
     
-    public MediaTrack(String dbId, String title, String url, Date startTime, int durationInMillis, MimeType mimeType) {
+    public MediaTrack(String dbId, String title, String url, TimePoint startTime, Duration duration, MimeType mimeType) {
         this.dbId = dbId;
         this.title = title;
         this.url = url;
         this.startTime = startTime;
-        this.durationInMillis = durationInMillis;
+        this.duration = duration;
         this.mimeType = mimeType;
     }
     
     public String toString() {
-        return title + " - " + url + " [" + typeToString() + ']' + startTime + " [" + durationInMillis + status + ']';  
+        return title + " - " + url + " [" + typeToString() + ']' + startTime + " [" + duration + status + ']';  
     }
     
-    public Date deriveEndTime() {
+    public TimePoint deriveEndTime() {
         if (startTime != null) {
-            return new Date(startTime.getTime() + durationInMillis);
+            return startTime.plus(duration);
         } else {
             return null;
         }
@@ -121,11 +123,11 @@ public class MediaTrack implements Serializable {
      * @param startTime Must not be null.
      * @param endTime May be null representing "open end".
      */
-    public boolean overlapsWith(Date startTime, Date endTime) {
+    public boolean overlapsWith(TimePoint startTime, TimePoint endTime) {
         if (this.startTime == null) {
             return false;
         } else {
-            return this.deriveEndTime().getTime() > startTime.getTime() && (endTime == null || this.startTime.getTime() < endTime.getTime());
+            return this.deriveEndTime().after(startTime) && (endTime == null || this.startTime.before(endTime));
         }
     }
     

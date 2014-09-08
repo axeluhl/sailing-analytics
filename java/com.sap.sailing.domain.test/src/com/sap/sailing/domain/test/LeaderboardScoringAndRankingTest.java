@@ -209,10 +209,10 @@ public class LeaderboardScoringAndRankingTest extends AbstractLeaderboardTest {
         List<Competitor> rankedCompetitorsWithOneRaceMissingInQ2 = leaderboard.getCompetitorsFromBestToWorst(later);
         // scores: C1=1, C2=2, C3=3, C4=5, C5=7, C6=4, C7=6, C8=8, C9=4, C10=5
         // ordered by scores: C1, C2, C3, C6/C9, C4/C10, C7, C5, C8
-        // ordered primarily by number of races: C6, C4, C7, C5, C8, C1, C2, C3, C9, C10
-        assertEquals(Arrays.asList(new Competitor[] { competitors.get(5), competitors.get(3), competitors.get(6),
-                competitors.get(4), competitors.get(7), competitors.get(0), competitors.get(1), competitors.get(2),
-                competitors.get(8), competitors.get(9) }), rankedCompetitorsWithOneRaceMissingInQ2);
+        // incomplete fleets are ordered now also by scores 
+        assertEquals(Arrays.asList(new Competitor[] { competitors.get(0), competitors.get(1), competitors.get(2),
+                competitors.get(5), competitors.get(8), competitors.get(3), competitors.get(9), competitors.get(6),
+                competitors.get(4), competitors.get(7) }), rankedCompetitorsWithOneRaceMissingInQ2);
         double[] points = new double[] { 1, 2, 3, 5, 7, 4, 6, 8, 4, 5 };
         for (int i=0; i<9; i++) {
             assertEquals(points[i], leaderboard.getTotalPoints(competitors.get(i), later), 0.000000001);
@@ -280,10 +280,10 @@ public class LeaderboardScoringAndRankingTest extends AbstractLeaderboardTest {
         List<Competitor> rankedCompetitorsWithOneRaceMissingInQ2 = leaderboard.getCompetitorsFromBestToWorst(later);
         // scores: C1=1, C2=2, C3=3, C4=5, C5=7, C6=4, C7=6, C8=8, C9=4, C10=5
         // ordered by scores: C1, C2, C3, C6/C9, C4/C10, C7, C5, C8
-        // ordered primarily by number of races: C6, C4, C7, C5, C8, C1, C2, C3, C9, C10
-        assertEquals(Arrays.asList(new Competitor[] { competitors.get(5), competitors.get(3), competitors.get(6),
-                competitors.get(4), competitors.get(7), competitors.get(0), competitors.get(1), competitors.get(2),
-                competitors.get(8), competitors.get(9) }), rankedCompetitorsWithOneRaceMissingInQ2);
+        // incomplete fleets are ordered now also by scores 
+        assertEquals(Arrays.asList(new Competitor[] { competitors.get(0), competitors.get(1), competitors.get(2),
+                competitors.get(5), competitors.get(8), competitors.get(3), competitors.get(9), competitors.get(6),
+                competitors.get(4), competitors.get(7) }), rankedCompetitorsWithOneRaceMissingInQ2);
         double[] points = new double[] { 1, 2, 3, 5, 7, 4, 6, 8, 4, 5 };
         for (int i=0; i<9; i++) {
             assertEquals(points[i], leaderboard.getTotalPoints(competitors.get(i), later), 0.000000001);

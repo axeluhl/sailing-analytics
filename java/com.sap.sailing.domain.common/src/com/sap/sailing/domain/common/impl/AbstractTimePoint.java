@@ -89,7 +89,13 @@ public abstract class AbstractTimePoint implements TimePoint {
 
     @Override
     public boolean equals(Object obj) {
-        return compareTo((TimePoint) obj) == 0;
+        if (this == obj) {
+            return true;
+        } else if (obj instanceof TimePoint) {
+            return compareTo((TimePoint) obj) == 0;
+        } else {
+            return false;
+        }
     }
 
     @Override
