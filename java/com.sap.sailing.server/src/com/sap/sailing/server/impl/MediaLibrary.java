@@ -36,7 +36,7 @@ class MediaLibrary {
     private final ConcurrentMap<RegattaAndRaceIdentifier, Set<MediaTrack>> mediaTrackByRace = new ConcurrentHashMap<RegattaAndRaceIdentifier, Set<MediaTrack>>();
 
     private final NamedReentrantReadWriteLock lock = new NamedReentrantReadWriteLock(MediaLibrary.class.getName(), /* fair */
-            false);
+    false);
 
     // /**
     // * Sort in reverse order of start time! For equal start times compare dbId to distinguish different instances.
@@ -69,6 +69,7 @@ class MediaLibrary {
      * frequently than older ones. Thus, sorting the list of media tracks by start time and starting linear search from
      * the more recent end might reduce loop cycles during linear search. E.g. use a SortedMap with
      * COMPARATOR_BY_REVERSE_STARTTIME commented out above.
+     * 
      * @param race
      *            TODO
      * 
@@ -230,7 +231,7 @@ class MediaLibrary {
     private void updateCache_Add(MediaTrack mediaTrack) {
 
         mediaTracksByDbId.put(mediaTrack, mediaTrack);
-        
+
         for (RegattaAndRaceIdentifier regattasAndRaces : mediaTrack.regattasAndRaces) {
             if (mediaTrackByRace.containsKey(regattasAndRaces)) {
                 mediaTrackByRace.get(regattasAndRaces).add(mediaTrack);
@@ -254,14 +255,14 @@ class MediaLibrary {
      * To be called only under write lock!
      */
     private void updateCache_Remove(MediaTrack mediaTrack) {
-        
+
         mediaTracksByDbId.remove(mediaTrack);
-        
+
         for (RegattaAndRaceIdentifier regattaAndRace : mediaTrack.regattasAndRaces) {
             Set<MediaTrack> mediaTracks = mediaTrackByRace.get(regattaAndRace);
-            if(mediaTracks != null){
+            if (mediaTracks != null) {
                 mediaTracks.remove(mediaTrack);
-                if(mediaTracks.size()==0){
+                if (mediaTracks.size() == 0) {
                     mediaTrackByRace.remove(regattaAndRace);
                 }
             }

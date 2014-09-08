@@ -8,6 +8,7 @@ import java.util.Comparator;
 import java.util.HashSet;
 import java.util.Set;
 
+import com.github.gwtbootstrap.client.ui.Label;
 import com.google.gwt.cell.client.Cell.Context;
 import com.google.gwt.cell.client.ClickableTextCell;
 import com.google.gwt.cell.client.EditTextCell;
@@ -17,6 +18,7 @@ import com.google.gwt.cell.client.ValueUpdater;
 import com.google.gwt.core.client.GWT;
 import com.google.gwt.dom.client.Element;
 import com.google.gwt.dom.client.NativeEvent;
+import com.google.gwt.dom.client.Style.Cursor;
 import com.google.gwt.dom.client.Style.Unit;
 import com.google.gwt.event.dom.client.ClickEvent;
 import com.google.gwt.event.dom.client.ClickHandler;
@@ -265,9 +267,9 @@ public class MediaPanel extends FlowPanel {
                 } else
                     return "";
             }
+            
 
         };
-
         regattaAndRaceColumn.setSortable(true);
         sortHandler.setComparator(regattaAndRaceColumn, new Comparator<MediaTrack>() {
             public int compare(MediaTrack mediaTrack1, MediaTrack mediaTrack2) {
