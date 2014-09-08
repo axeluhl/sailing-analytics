@@ -496,7 +496,7 @@ public class MediaPanel extends FlowPanel {
 
         regattasDisplayers.add(dialog);
         dialog.ensureDebugId("RegattasAndRacesDialog");
-
+        dialog.show();
     }
 
 }
