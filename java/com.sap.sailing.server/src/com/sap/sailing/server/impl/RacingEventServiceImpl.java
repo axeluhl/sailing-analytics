@@ -2472,7 +2472,7 @@ public class RacingEventServiceImpl implements RacingEventServiceWithTestSupport
     @Override
     public void mediaTrackRaceChanged(MediaTrack mediaTrack) {
         mediaDB.updateRace(mediaTrack.dbId, mediaTrack.regattasAndRaces);
-        mediaLibrary.raceChanged(mediaTrack);
+        mediaLibrary.racesChanged(mediaTrack);
         replicate(new UpdateMediaTrackRaceOperation(mediaTrack));
     }
 

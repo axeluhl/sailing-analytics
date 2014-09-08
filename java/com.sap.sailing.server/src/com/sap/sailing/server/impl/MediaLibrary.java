@@ -213,7 +213,7 @@ class MediaLibrary {
         }
     }
     
-    void raceChanged(MediaTrack changedMediaTrack) {
+    void racesChanged(MediaTrack changedMediaTrack) {
         LockUtil.lockForWrite(lock);
         try {
             MediaTrack mediaTrack = mediaTracksByDbId.get(changedMediaTrack);
