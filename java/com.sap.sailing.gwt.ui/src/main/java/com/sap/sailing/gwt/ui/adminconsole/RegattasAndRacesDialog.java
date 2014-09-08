@@ -29,7 +29,7 @@ public class RegattasAndRacesDialog extends DataEntryDialog<Set<RegattaAndRaceId
     protected final MediaTrack mediaTrack;
     public boolean empty = true;
     public boolean started = false;
-    protected List<EventDTO> existingEvents;
+    private final VerticalPanel panel;
 
     public RegattasAndRacesDialog(SailingServiceAsync sailingService, final MediaTrack mediaTrack,
             ErrorReporter errorReporter, RegattaRefresher regattaRefresher, StringMessages stringMessages,
@@ -61,29 +61,20 @@ public class RegattasAndRacesDialog extends DataEntryDialog<Set<RegattaAndRaceId
         };
         trackedRacesListComposite.ensureDebugId("TrackedRacesListComposite");
         regattaRefresher.fillRegattas();
+        panel = new VerticalPanel();
+        Grid formGrid = new Grid(2, 2);
+        panel.add(formGrid);
+        Label message = new Label();
+        message.setText("Loading Regattas and Races");
+        formGrid.setWidget(0, 0, message);    
+        formGrid.setWidget(1, 1, trackedRacesListComposite);
+        formGrid.getWidget(1, 1).setVisible(false);
+        this.getCancelButton().setVisible(false);
 
     }
 
     @Override
     protected Widget getAdditionalWidget() {
-
-        final VerticalPanel panel = new VerticalPanel();
-        Widget additionalWidget = super.getAdditionalWidget();
-        if (additionalWidget != null) {
-
-            panel.add(additionalWidget);
-        }
-        Grid formGrid = new Grid(1, 1);
-        panel.add(formGrid);
-        if (this.empty) {
-            Label message = new Label();
-            message.setText("No Races available");
-            formGrid.setWidget(0, 0, message);
-            this.getCancelButton().setVisible(false);
-        } else {
-
-            formGrid.setWidget(0, 0, trackedRacesListComposite);
-        }
         return panel;
 
     }
@@ -96,11 +87,27 @@ public class RegattasAndRacesDialog extends DataEntryDialog<Set<RegattaAndRaceId
     @Override
     public void fillRegattas(List<RegattaDTO> result) {
         this.trackedRacesListComposite.fillRegattas(result);
-        if (!started) {
-            started = true;
-            this.show();
+        for (RegattaAndRaceIdentifier regattaAndRace : mediaTrack.regattasAndRaces) {
+            this.trackedRacesListComposite.selectRaceByIdentifier(regattaAndRace);
         }
+        updateUI();
 
+
+    }
+
+    public void updateUI() {
+        Grid grid = (Grid) panel.getWidget(0);
+        if (empty) {
+            Label label = (Label)grid.getWidget(0, 0);
+            label.setText("No Races available");
+            grid.getWidget(0, 0).setVisible(true);
+            grid.getWidget(1, 1).setVisible(false);
+            
+        } else {
+            grid.getWidget(0, 0).setVisible(false);
+            grid.getWidget(1, 1).setVisible(true);
+            this.getCancelButton().setVisible(true);
+        }
     }
 
     public Set<RegattaAndRaceIdentifier> getSelectedRegattasAndRaces() {

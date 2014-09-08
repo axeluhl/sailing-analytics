@@ -5,7 +5,6 @@ import static com.google.gwt.dom.client.BrowserEvents.KEYUP;
 
 import java.util.Collection;
 import java.util.Comparator;
-import java.util.HashSet;
 import java.util.Set;
 
 import com.google.gwt.cell.client.Cell.Context;
@@ -34,7 +33,6 @@ import com.google.gwt.view.client.ListDataProvider;
 import com.google.gwt.view.client.SelectionModel;
 import com.google.gwt.view.client.SingleSelectionModel;
 import com.sap.sailing.domain.common.RegattaAndRaceIdentifier;
-import com.sap.sailing.domain.common.RegattaNameAndRaceName;
 import com.sap.sailing.domain.common.TimePoint;
 import com.sap.sailing.domain.common.impl.MillisecondsTimePoint;
 import com.sap.sailing.domain.common.media.MediaTrack;
@@ -498,7 +496,7 @@ public class MediaPanel extends FlowPanel {
 
         regattasDisplayers.add(dialog);
         dialog.ensureDebugId("RegattasAndRacesDialog");
-
+        dialog.show();
     }
 
 }
