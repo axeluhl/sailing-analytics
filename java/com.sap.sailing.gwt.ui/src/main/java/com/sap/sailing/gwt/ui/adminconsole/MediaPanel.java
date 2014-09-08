@@ -284,7 +284,7 @@ public class MediaPanel extends FlowPanel {
                     String[] regattasAndRacesArray = newRegattaAndRace.split(",");
                     Set<RegattaAndRaceIdentifier> regattasAndRaces = new HashSet<RegattaAndRaceIdentifier>();
                     for (String regattaNamesAndRaceNames : regattasAndRacesArray) {
-                        regattaNamesAndRaceNames = regattaNamesAndRaceNames.replace(",", "");
+                        regattaNamesAndRaceNames = regattaNamesAndRaceNames.replace(", ", ""); //without string??
                         String[] regattaAndRace = regattaNamesAndRaceNames.split("   ");
                         regattasAndRaces.add(new RegattaNameAndRaceName(regattaAndRace[0], regattaAndRace[1]));
                     }
@@ -481,7 +481,8 @@ public class MediaPanel extends FlowPanel {
 
     public void openRegattasAndRacesDialog(final Context context, final Element parent,
             final ValueUpdater<String> valueUpdater) {
-        final RegattasAndRacesDialog dialog = new RegattasAndRacesDialog(sailingService, (MediaTrack) context.getKey(),
+        final MediaTrack mediaTrack = (MediaTrack) context.getKey();
+        final RegattasAndRacesDialog dialog = new RegattasAndRacesDialog(sailingService, mediaTrack,
                 errorReporter, regattaRefresher, stringMessages, null,
                 new DialogCallback<Set<RegattaAndRaceIdentifier>>() {
 
@@ -497,11 +498,13 @@ public class MediaPanel extends FlowPanel {
                                 value = value.concat(regattasAndRaces.getRegattaName() + "    "
                                         + regattasAndRaces.getRaceName() + ",");
                             }
+                            mediaTrack.regattasAndRaces = regattas;
                             valueUpdater.update(value);
                         }
 
                     }
                 });
+        
         regattasDisplayers.add(dialog);
         dialog.ensureDebugId("RegattasAndRacesDialog");
 

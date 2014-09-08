@@ -73,7 +73,6 @@ public class RegattasAndRacesDialog extends DataEntryDialog<Set<RegattaAndRaceId
 
             panel.add(additionalWidget);
         }
-        panel.clear();
         Grid formGrid = new Grid(1, 1);
         panel.add(formGrid);
         if (this.empty) {
