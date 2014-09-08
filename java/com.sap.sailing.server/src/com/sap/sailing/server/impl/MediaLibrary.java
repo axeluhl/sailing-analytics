@@ -17,7 +17,6 @@ import java.util.concurrent.ConcurrentMap;
 import com.sap.sailing.domain.common.RegattaAndRaceIdentifier;
 import com.sap.sailing.domain.common.TimePoint;
 import com.sap.sailing.domain.common.TimeRange;
-import com.sap.sailing.domain.common.impl.TimeRangeImpl;
 import com.sap.sailing.domain.common.media.MediaTrack;
 import com.sap.sailing.util.impl.LockUtil;
 import com.sap.sailing.util.impl.NamedReentrantReadWriteLock;
@@ -219,7 +218,8 @@ class MediaLibrary {
         try {
             MediaTrack mediaTrack = mediaTracksByDbId.get(changedMediaTrack);
             if (mediaTrack != null) {
-                mediaTrack.regattasAndRaces = changedMediaTrack.regattasAndRaces;
+                mediaTrack.regattasAndRaces.clear(); 
+                mediaTrack.regattasAndRaces.addAll(changedMediaTrack.regattasAndRaces);
                 updateCache_Change(mediaTrack);
             }
         } finally {

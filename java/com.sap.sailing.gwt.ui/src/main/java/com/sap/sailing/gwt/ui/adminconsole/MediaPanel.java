@@ -279,7 +279,7 @@ public class MediaPanel extends FlowPanel {
             public void update(int index, MediaTrack mediaTrack, String newRegattaAndRace) {
                 // Called when the user changes the value.
                 if ("".equals(newRegattaAndRace) || !newRegattaAndRace.contains(" ")) {
-                    mediaTrack.regattasAndRaces = new HashSet<RegattaAndRaceIdentifier>();
+                    mediaTrack.regattasAndRaces.clear();
                 } else {
                     String[] regattasAndRacesArray = newRegattaAndRace.split(",");
                     Set<RegattaAndRaceIdentifier> regattasAndRaces = new HashSet<RegattaAndRaceIdentifier>();
@@ -288,8 +288,8 @@ public class MediaPanel extends FlowPanel {
                         String[] regattaAndRace = regattaNamesAndRaceNames.split("   ");
                         regattasAndRaces.add(new RegattaNameAndRaceName(regattaAndRace[0], regattaAndRace[1]));
                     }
-
-                    mediaTrack.regattasAndRaces = regattasAndRaces;
+                    mediaTrack.regattasAndRaces.clear();
+                    mediaTrack.regattasAndRaces.addAll(regattasAndRaces);
                 }
                 mediaService.updateRace(mediaTrack, new AsyncCallback<Void>() {
 
@@ -491,8 +491,6 @@ public class MediaPanel extends FlowPanel {
 
                     @Override
                     public void ok(Set<RegattaAndRaceIdentifier> regattas) {
-                        ClickableTextCell text = (ClickableTextCell) mediaTracksTable.getColumn(3).getCell();
-
                         if (regattas.size() >= 0) {
                             String value = "";
                             for (RegattaAndRaceIdentifier regattasAndRaces : regattas) {
@@ -504,10 +502,9 @@ public class MediaPanel extends FlowPanel {
 
                     }
                 });
-
         regattasDisplayers.add(dialog);
         dialog.ensureDebugId("RegattasAndRacesDialog");
-        dialog.show();
+
     }
 
 }

@@ -6,6 +6,7 @@ import java.util.Set;
 
 import com.google.gwt.user.client.ui.Grid;
 import com.google.gwt.user.client.ui.HorizontalPanel;
+import com.google.gwt.user.client.ui.Label;
 import com.google.gwt.user.client.ui.VerticalPanel;
 import com.google.gwt.user.client.ui.Widget;
 import com.sap.sailing.domain.common.RegattaAndRaceIdentifier;
@@ -26,18 +27,24 @@ public class RegattasAndRacesDialog extends DataEntryDialog<Set<RegattaAndRaceId
     protected StringMessages stringMessages;
     protected final TrackedRacesListComposite trackedRacesListComposite;
     protected final MediaTrack mediaTrack;
-
+    public boolean empty = true;
+    public boolean started = false;
     protected List<EventDTO> existingEvents;
 
-    public RegattasAndRacesDialog(SailingServiceAsync sailingService, MediaTrack mediaTrack,
+    public RegattasAndRacesDialog(SailingServiceAsync sailingService, final MediaTrack mediaTrack,
             ErrorReporter errorReporter, RegattaRefresher regattaRefresher, StringMessages stringMessages,
             Validator<Set<RegattaAndRaceIdentifier>> validator, DialogCallback<Set<RegattaAndRaceIdentifier>> callback) {
-        super(stringMessages.addRegatta(), null, stringMessages.ok(), stringMessages.cancel(), validator, callback);
+        super(stringMessages.regattaAndRace(), null, stringMessages.ok(), stringMessages.cancel(), validator, callback);
         this.stringMessages = stringMessages;
+        this.mediaTrack = mediaTrack;
         trackedRacesListComposite = new TrackedRacesListComposite(sailingService, errorReporter, regattaRefresher,
                 new RaceSelectionModel(), stringMessages, /* multiselection */true) {
             protected boolean raceIsToBeAddedToList(RaceDTO race) {
-                if (mediaTrackIsInTimerangeOf(race)) {
+                if (mediaTrack.duration == null) {
+                    empty = isLife(race);
+                    return isLife(race);
+                } else if (mediaTrackIsInTimerangeOf(race)) {
+                    empty = false;
                     return true;
                 }
                 return false;
@@ -53,23 +60,33 @@ public class RegattasAndRacesDialog extends DataEntryDialog<Set<RegattaAndRaceId
             }
         };
         trackedRacesListComposite.ensureDebugId("TrackedRacesListComposite");
-        this.mediaTrack = mediaTrack;
         regattaRefresher.fillRegattas();
+
     }
 
     @Override
     protected Widget getAdditionalWidget() {
+
         final VerticalPanel panel = new VerticalPanel();
         Widget additionalWidget = super.getAdditionalWidget();
         if (additionalWidget != null) {
+
             panel.add(additionalWidget);
         }
+        panel.clear();
         Grid formGrid = new Grid(1, 1);
         panel.add(formGrid);
+        if (this.empty) {
+            Label message = new Label();
+            message.setText("No Races available");
+            formGrid.setWidget(0, 0, message);
+            this.getCancelButton().setVisible(false);
+        } else {
 
-        formGrid.setWidget(0, 0, trackedRacesListComposite);
-
+            formGrid.setWidget(0, 0, trackedRacesListComposite);
+        }
         return panel;
+
     }
 
     @Override
@@ -80,6 +97,11 @@ public class RegattasAndRacesDialog extends DataEntryDialog<Set<RegattaAndRaceId
     @Override
     public void fillRegattas(List<RegattaDTO> result) {
         this.trackedRacesListComposite.fillRegattas(result);
+        if (!started) {
+            started = true;
+            this.show();
+        }
+
     }
 
     public Set<RegattaAndRaceIdentifier> getSelectedRegattasAndRaces() {
@@ -92,13 +114,6 @@ public class RegattasAndRacesDialog extends DataEntryDialog<Set<RegattaAndRaceId
     }
 
     private boolean mediaTrackIsInTimerangeOf(RaceDTO race) {
-//        if (race.endOfRace != null && race.startOfRace != null) {
-//            if (mediaTrack.beginsAfter(race.endOfRace) || mediaTrack.endsBefore(race.startOfRace)) {
-//                return false;
-//            }
-//        }
-//        return true;
-
         if (race.endOfRace != null && mediaTrack.beginsAfter(race.endOfRace) || race.startOfRace != null
                 && mediaTrack.endsBefore(race.startOfRace)) {
             return false;
@@ -107,27 +122,35 @@ public class RegattasAndRacesDialog extends DataEntryDialog<Set<RegattaAndRaceId
 
     }
 
-    private boolean eventIsNotConnectedToAnyRaces(EventDTO event) {
-        if (regattasAreNotConnectedToAnyRaces(event.regattas)) {
-            return true;
-        }
-        return false;
-    }
+    // noch brauchbar??
+    // private boolean eventIsNotConnectedToAnyRaces(EventDTO event) {
+    // if (regattasAreNotConnectedToAnyRaces(event.regattas)) {
+    // return true;
+    // }
+    // return false;
+    // }
+    //
+    // private boolean regattasAreNotConnectedToAnyRaces(List<RegattaDTO> regattas) {
+    // for (RegattaDTO regatta : regattas) {
+    // if (regattaIsConnectedToAnyRaces(regatta)) {
+    // return false;
+    // }
+    // }
+    // return true;
+    // }
+    //
+    // private boolean regattaIsConnectedToAnyRaces(RegattaDTO regatta) {
+    // if (regatta.races.size() > 0) {
+    // return true;
+    // }
+    // return false;
+    // }
 
-    private boolean regattasAreNotConnectedToAnyRaces(List<RegattaDTO> regattas) {
-        for (RegattaDTO regatta : regattas) {
-            if (regattaIsConnectedToAnyRaces(regatta)) {
-                return false;
-            }
-        }
-        return true;
-    }
-
-    private boolean regattaIsConnectedToAnyRaces(RegattaDTO regatta) {
-        if (regatta.races.size() > 0) {
+    private boolean isLife(RaceDTO race) {
+        if (race.endOfRace == null)
             return true;
-        }
-        return false;
+        else
+            return false;
     }
 
 }

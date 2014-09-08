@@ -12,7 +12,7 @@ public class DBMediaTrack {
     public final TimePoint startTime;
     public final Duration duration;
     public final String mimeType;
-    public final RegattaAndRaceIdentifier regattaAndRace;
+    public RegattaAndRaceIdentifier regattaAndRace;
 
     public DBMediaTrack(String dbId, String title, String url, TimePoint startTime, Duration duration, String mimeType, RegattaAndRaceIdentifier regattaAndRace) {
         super();

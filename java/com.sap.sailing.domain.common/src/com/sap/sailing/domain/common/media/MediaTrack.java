@@ -11,25 +11,29 @@ import com.sap.sailing.domain.common.TimePoint;
 
 /**
  * See http://my.opera.com/core/blog/2010/03/03/everything-you-need-to-know-about-html5-video-and-audio-2
+ * 
  * @author D047974
- *
+ * 
  */
 public class MediaTrack implements Serializable {
-    
+
     private static final long serialVersionUID = 1L;
 
     public enum MimeType {
-        
-        mp4(MediaType.video, MediaSubType.mp4), ogv(MediaType.video, MediaSubType.ogg), qt(MediaType.video, MediaSubType.quicktime), mp3(MediaType.audio, MediaSubType.mpeg), ogg(MediaType.audio, MediaSubType.ogg), aac(MediaType.audio, MediaSubType.aac), webm(MediaType.video, MediaSubType.webm), youtube(MediaType.video, MediaSubType.youtube);
-        
+
+        mp4(MediaType.video, MediaSubType.mp4), ogv(MediaType.video, MediaSubType.ogg), qt(MediaType.video,
+                MediaSubType.quicktime), mp3(MediaType.audio, MediaSubType.mpeg), ogg(MediaType.audio, MediaSubType.ogg), aac(
+                MediaType.audio, MediaSubType.aac), webm(MediaType.video, MediaSubType.webm), youtube(MediaType.video,
+                MediaSubType.youtube);
+
         public final MediaType mediaType;
         public final MediaSubType mediaSubType;
-        
+
         MimeType(MediaType mediaType, MediaSubType mediaSubType) {
             this.mediaType = mediaType;
-            this.mediaSubType = mediaSubType;            
+            this.mediaSubType = mediaSubType;
         }
-        
+
         @Override
         public String toString() {
             return mediaType.name() + '/' + mediaSubType.toString();
@@ -37,42 +41,42 @@ public class MediaTrack implements Serializable {
 
         public static MimeType byName(String mimeTypeName) {
             try {
-                if(mimeTypeName!=null){
+                if (mimeTypeName != null) {
                     return MimeType.valueOf(mimeTypeName);
-                }else{
+                } else {
                     return null;
                 }
             } catch (IllegalArgumentException ex) {
                 return null;
             }
         }
-        
+
     }
-    
+
     public enum MediaType {
         audio, video;
     }
 
     public enum MediaSubType {
         ogg, mp4, mpeg, x_aiff, quicktime, aac, webm, youtube;
-        
+
         public String toString() {
             return name().replace('_', '-');
         };
-        
+
     }
-    
+
     public enum Status {
         UNDEFINED('?'), CANNOT_PLAY('-'), NOT_REACHABLE('#'), REACHABLE('+');
-        
+
         private final char symbol;
-        
+
         private Status(char symbol) {
             this.symbol = symbol;
         }
-        
+
         public String toString() {
-            return String.valueOf(this.symbol); 
+            return String.valueOf(this.symbol);
         }
     }
 
@@ -87,30 +91,38 @@ public class MediaTrack implements Serializable {
 
     public MediaTrack() {
     }
-    
-    public MediaTrack(String title, String url, TimePoint startTime, Duration duration, MimeType mimeType, Set<RegattaAndRaceIdentifier> regattasAndRaces) {
+
+    public MediaTrack(String title, String url, TimePoint startTime, Duration duration, MimeType mimeType,
+            Set<RegattaAndRaceIdentifier> regattasAndRaces) {
         this.title = title;
         this.url = url;
         this.startTime = startTime;
         this.duration = duration;
         this.mimeType = mimeType;
-        this.regattasAndRaces = regattasAndRaces;
+        if (regattasAndRaces != null) {
+            this.regattasAndRaces.addAll(regattasAndRaces);
+        }
     }
-    
-    public MediaTrack(String dbId, String title, String url, TimePoint startTime, Duration duration, MimeType mimeType, Set<RegattaAndRaceIdentifier> regattasAndRaces) {
+
+    public MediaTrack(String dbId, String title, String url, TimePoint startTime, Duration duration, MimeType mimeType,
+            Set<RegattaAndRaceIdentifier> regattasAndRaces) {
         this.dbId = dbId;
         this.title = title;
         this.url = url;
         this.startTime = startTime;
         this.duration = duration;
         this.mimeType = mimeType;
-        this.regattasAndRaces = regattasAndRaces;
+        if (regattasAndRaces != null) {
+            this.regattasAndRaces.addAll(regattasAndRaces);
+        }
     }
-    
+
     public String toString() {
-        return title + " - " + url + " [" + typeToString() + ']' + startTime + " [" + duration + status + ']';  //TODO noch anpassen
+        return title + " - " + url + " [" + typeToString() + ']' + startTime + " [" + duration + status + ']'; // TODO
+                                                                                                               // noch
+                                                                                                               // anpassen
     }
-    
+
     public TimePoint deriveEndTime() {
         if (startTime != null) {
             return startTime.plus(duration);
@@ -122,17 +134,20 @@ public class MediaTrack implements Serializable {
     public String typeToString() {
         return mimeType == null ? "undefined" : mimeType.toString();
     }
-    
+
     public boolean isYoutube() {
         return (mimeType != null) && MediaSubType.youtube.equals(mimeType.mediaSubType);
     }
-    
+
     /**
      * Checks for overlap of this start time and duration with the given startTime and endTime, excluding boundaries!
-     * Behaviour for given endTime being earlier than given startTime is not specified.
-     * endTime being null represents "open end". Open beginning is not allow, though!
-     * @param startTime Must not be null.
-     * @param endTime May be null representing "open end".
+     * Behaviour for given endTime being earlier than given startTime is not specified. endTime being null represents
+     * "open end". Open beginning is not allow, though!
+     * 
+     * @param startTime
+     *            Must not be null.
+     * @param endTime
+     *            May be null representing "open end".
      */
     public boolean overlapsWith(TimePoint startTime, TimePoint endTime) {
         if (this.startTime == null) {
@@ -141,41 +156,42 @@ public class MediaTrack implements Serializable {
             return this.deriveEndTime().after(startTime) && (endTime == null || this.startTime.before(endTime));
         }
     }
-    
-    public boolean isConnectedTo(RegattaAndRaceIdentifier race){
-        if(regattasAndRaces.contains(race)){
+
+    public boolean isConnectedTo(RegattaAndRaceIdentifier race) {
+        if (regattasAndRaces.contains(race)) {
             return true;
-        }else{
-            return false;
-        }
-    }
-    
-    @Override
-    public boolean equals(Object obj) {
-        if (obj instanceof MediaTrack) {
-            MediaTrack mediaTrack = (MediaTrack) obj;
-            return this.dbId == null? mediaTrack.dbId == null : this.dbId.equals(mediaTrack.dbId);
         } else {
             return false;
         }
     }
-    
+
+    @Override
+    public boolean equals(Object obj) {
+        if (obj instanceof MediaTrack) {
+            MediaTrack mediaTrack = (MediaTrack) obj;
+            return this.dbId == null ? mediaTrack.dbId == null : this.dbId.equals(mediaTrack.dbId);
+        } else {
+            return false;
+        }
+    }
+
     @Override
     public int hashCode() {
         return this.dbId == null ? 0 : this.dbId.hashCode();
     }
-    
-    public boolean beginsAfter(Date eventEndDate){
-        if(startTime.asDate().after(eventEndDate)){
+
+    public boolean beginsAfter(Date eventEndDate) {
+        if (startTime.asDate().after(eventEndDate)) {
             return true;
-        }else{
+        } else {
             return false;
         }
     }
-    public boolean endsBefore(Date eventStartDate){
-        if(deriveEndTime().asDate().before(eventStartDate)){
+
+    public boolean endsBefore(Date eventStartDate) {
+        if (deriveEndTime().asDate().before(eventStartDate)) {
             return true;
-        }else{
+        } else {
             return false;
         }
     }

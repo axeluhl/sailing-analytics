@@ -3,7 +3,6 @@ package com.sap.sailing.domain.persistence.media.impl;
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.HashSet;
-import java.util.Iterator;
 import java.util.List;
 import java.util.Set;
 
@@ -63,7 +62,7 @@ public class MediaDBImpl implements MediaDB {
         for (RegattaAndRaceIdentifier regattaAndRace : regattasAndRaces) {
             BasicDBObject object = new BasicDBObject();
             object.put(DbNames.Fields.REGATTA_NAME.name(), regattaAndRace.getRegattaName());
-            object.put(DbNames.Fields.RACE_NAME.name(), regattaAndRace.getRaceName());            
+            object.put(DbNames.Fields.RACE_NAME.name(), regattaAndRace.getRaceName());
             objectList.add(object);
         }
         dbMediaTrack.put(DbNames.Fields.REGATTAS_AND_RACES.name(), objectList);
@@ -84,11 +83,16 @@ public class MediaDBImpl implements MediaDB {
         dbMediaTrack.put(DbNames.Fields.DURATION_IN_MILLIS.name(), duration == null ? null : duration.asMillis());
         dbMediaTrack.put(DbNames.Fields.MIME_TYPE.name(), mimeType == null ? null : mimeType.name());
         BasicDBList objectList = new BasicDBList();
-        for (RegattaAndRaceIdentifier regattaAndRace : regattasAndRaces) {
-            BasicDBObject object = new BasicDBObject();
-            object.put(DbNames.Fields.REGATTA_NAME.name(), regattaAndRace.getRegattaName());
-            object.put(DbNames.Fields.RACE_NAME.name(), regattaAndRace.getRaceName());            
-            objectList.add(object);
+        if (regattasAndRaces != null) {
+            for (RegattaAndRaceIdentifier regattaAndRace : regattasAndRaces) {
+                BasicDBObject object = new BasicDBObject();
+                object.put(DbNames.Fields.REGATTA_NAME.name(), regattaAndRace.getRegattaName());
+                object.put(DbNames.Fields.RACE_NAME.name(), regattaAndRace.getRaceName());
+                objectList.add(object);
+            }
+        }
+        else{
+            System.currentTimeMillis();
         }
         dbMediaTrack.put(DbNames.Fields.REGATTAS_AND_RACES.name(), objectList);
         DBCollection dbVideos = getVideoCollection();
@@ -123,10 +127,10 @@ public class MediaDBImpl implements MediaDB {
         Set<RegattaAndRaceIdentifier> regattasAndRaces = new HashSet<RegattaAndRaceIdentifier>();
         BasicDBList list = (BasicDBList) dbObject.get(DbNames.Fields.REGATTAS_AND_RACES.name());
         for (Object regattaAndRace : list) {
-            BasicDBObject object = (BasicDBObject)regattaAndRace;
+            BasicDBObject object = (BasicDBObject) regattaAndRace;
             String regattaName = (String) object.get(DbNames.Fields.REGATTA_NAME.name());
             String raceName = (String) object.get(DbNames.Fields.RACE_NAME.name());
-            if(regattaName != null && raceName != null){
+            if (regattaName != null && raceName != null) {
                 regattasAndRaces.add(new RegattaNameAndRaceName(regattaName, raceName));
             }
         }
@@ -208,7 +212,7 @@ public class MediaDBImpl implements MediaDB {
         for (RegattaAndRaceIdentifier regattaAndRace : regattasAndRaces) {
             BasicDBObject object = new BasicDBObject();
             object.put(DbNames.Fields.REGATTA_NAME.name(), regattaAndRace.getRegattaName());
-            object.put(DbNames.Fields.RACE_NAME.name(), regattaAndRace.getRaceName());            
+            object.put(DbNames.Fields.RACE_NAME.name(), regattaAndRace.getRaceName());
             objectList.add(object);
         }
         BasicDBObject updateCommand = new BasicDBObject();
