@@ -175,7 +175,7 @@ import com.sap.sailing.server.operationaltransformation.TrackRegatta;
 import com.sap.sailing.server.operationaltransformation.UpdateCompetitor;
 import com.sap.sailing.server.operationaltransformation.UpdateMarkPassings;
 import com.sap.sailing.server.operationaltransformation.UpdateMediaTrackDurationOperation;
-import com.sap.sailing.server.operationaltransformation.UpdateMediaTrackRaceOperation;
+import com.sap.sailing.server.operationaltransformation.UpdateMediaTrackRacesOperation;
 import com.sap.sailing.server.operationaltransformation.UpdateMediaTrackStartTimeOperation;
 import com.sap.sailing.server.operationaltransformation.UpdateMediaTrackTitleOperation;
 import com.sap.sailing.server.operationaltransformation.UpdateMediaTrackUrlOperation;
@@ -2470,10 +2470,10 @@ public class RacingEventServiceImpl implements RacingEventServiceWithTestSupport
     }
 
     @Override
-    public void mediaTrackRaceChanged(MediaTrack mediaTrack) {
+    public void mediaTrackRacesChanged(MediaTrack mediaTrack) {
         mediaDB.updateRace(mediaTrack.dbId, mediaTrack.regattasAndRaces);
         mediaLibrary.racesChanged(mediaTrack);
-        replicate(new UpdateMediaTrackRaceOperation(mediaTrack));
+        replicate(new UpdateMediaTrackRacesOperation(mediaTrack));
     }
 
     @Override
@@ -2525,7 +2525,7 @@ public class RacingEventServiceImpl implements RacingEventServiceWithTestSupport
             } else {
                 TimePoint raceStart = trackedRace.getStartOfRace() == null ? null : trackedRace.getStartOfRace();
                 TimePoint raceEnd = trackedRace.getEndOfRace() == null ? null : trackedRace.getEndOfRace();
-                return mediaLibrary.findMediaTracksForRaceInTimeRange(raceStart, raceEnd, trackedRace.getRaceIdentifier());
+                return mediaLibrary.findMediaTracksForRace(trackedRace.getRaceIdentifier());
             }
         } else {
             return Collections.emptyList();

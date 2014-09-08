@@ -3,17 +3,17 @@ package com.sap.sailing.server.operationaltransformation;
 import com.sap.sailing.domain.common.media.MediaTrack;
 import com.sap.sailing.server.RacingEventService;
 
-public class UpdateMediaTrackRaceOperation extends AbstractMediaTrackOperation {
+public class UpdateMediaTrackRacesOperation extends AbstractMediaTrackOperation {
 
     private static final long serialVersionUID = 1L;
     
-    public UpdateMediaTrackRaceOperation(MediaTrack mediaTrack) {
+    public UpdateMediaTrackRacesOperation(MediaTrack mediaTrack) {
         super(mediaTrack);
     }
     
     @Override
     public Void internalApplyTo(RacingEventService toState) throws Exception {
-        toState.mediaTrackRaceChanged(this.mediaTrack);
+        toState.mediaTrackRacesChanged(this.mediaTrack);
         return null;
     }
 
