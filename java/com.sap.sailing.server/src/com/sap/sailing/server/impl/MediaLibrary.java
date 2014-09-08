@@ -14,6 +14,7 @@ import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ConcurrentMap;
 
 import com.sap.sailing.domain.common.RegattaAndRaceIdentifier;
+import com.sap.sailing.domain.common.TimePoint;
 import com.sap.sailing.domain.common.media.MediaTrack;
 import com.sap.sailing.util.impl.LockUtil;
 import com.sap.sailing.util.impl.NamedReentrantReadWriteLock;
@@ -72,10 +73,12 @@ class MediaLibrary {
      * 
      * @param race
      *            TODO
+     * @param startDate TODO
+     * @param endDate TODO
      * 
      * @return
      */
-    Set<MediaTrack> findMediaTracksForRace(RegattaAndRaceIdentifier race) {
+    Set<MediaTrack> findMediaTracksForRace(RegattaAndRaceIdentifier race, TimePoint startDate, TimePoint endDate) {
 
         if (race != null) {
             LockUtil.lockForRead(lock);

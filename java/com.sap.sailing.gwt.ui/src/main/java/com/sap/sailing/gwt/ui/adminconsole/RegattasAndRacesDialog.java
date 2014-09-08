@@ -11,6 +11,7 @@ import com.google.gwt.user.client.ui.VerticalPanel;
 import com.google.gwt.user.client.ui.Widget;
 import com.sap.sailing.domain.common.RegattaAndRaceIdentifier;
 import com.sap.sailing.domain.common.dto.RaceDTO;
+import com.sap.sailing.domain.common.dto.TrackedRaceDTO;
 import com.sap.sailing.domain.common.media.MediaTrack;
 import com.sap.sailing.gwt.ui.client.ErrorReporter;
 import com.sap.sailing.gwt.ui.client.RaceSelectionModel;
@@ -41,9 +42,9 @@ public class RegattasAndRacesDialog extends DataEntryDialog<Set<RegattaAndRaceId
                 new RaceSelectionModel(), stringMessages, /* multiselection */true) {
             protected boolean raceIsToBeAddedToList(RaceDTO race) {
                 if (mediaTrack.duration == null) {
-                    empty = isLife(race);
-                    return isLife(race);
-                } else if (mediaTrackIsInTimerangeOf(race)) {
+                    empty = isLife(race.trackedRace);
+                    return isLife(race.trackedRace);
+                } else if (mediaTrackIsInTimerangeOf(race.trackedRace)) {
                     empty = false;
                     return true;
                 }
@@ -112,9 +113,9 @@ public class RegattasAndRacesDialog extends DataEntryDialog<Set<RegattaAndRaceId
         return regattasAndRaces;
     }
 
-    private boolean mediaTrackIsInTimerangeOf(RaceDTO race) {
-        if (race.endOfRace != null && mediaTrack.beginsAfter(race.endOfRace) || race.startOfRace != null
-                && mediaTrack.endsBefore(race.startOfRace)) {
+    private boolean mediaTrackIsInTimerangeOf(TrackedRaceDTO race) {
+        if (race.endOfTracking != null && mediaTrack.beginsAfter(race.endOfTracking) || race.startOfTracking != null
+                && mediaTrack.endsBefore(race.startOfTracking)) {
             return false;
         } else
             return true;
@@ -145,8 +146,8 @@ public class RegattasAndRacesDialog extends DataEntryDialog<Set<RegattaAndRaceId
     // return false;
     // }
 
-    private boolean isLife(RaceDTO race) {
-        if (race.endOfRace == null)
+    private boolean isLife(TrackedRaceDTO race) {
+        if (race.endOfTracking == null)
             return true;
         else
             return false;

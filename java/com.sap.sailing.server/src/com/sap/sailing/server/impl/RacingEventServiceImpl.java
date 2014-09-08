@@ -2575,7 +2575,7 @@ public class RacingEventServiceImpl implements RacingEventServiceWithTestSupport
             } else {
                 TimePoint raceStart = trackedRace.getStartOfRace() == null ? null : trackedRace.getStartOfRace();
                 TimePoint raceEnd = trackedRace.getEndOfRace() == null ? null : trackedRace.getEndOfRace();
-                return mediaLibrary.findMediaTracksForRace(trackedRace.getRaceIdentifier());
+                return mediaLibrary.findMediaTracksForRace(trackedRace.getRaceIdentifier(), raceStart, raceEnd);
             }
         } else {
             return Collections.emptyList();
