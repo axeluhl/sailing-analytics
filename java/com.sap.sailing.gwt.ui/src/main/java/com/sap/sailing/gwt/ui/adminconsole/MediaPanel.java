@@ -281,15 +281,6 @@ public class MediaPanel extends FlowPanel {
                 if ("".equals(newRegattaAndRace) || !newRegattaAndRace.contains(" ")) {
                     mediaTrack.regattasAndRaces.clear();
                 } else {
-                    String[] regattasAndRacesArray = newRegattaAndRace.split(",");
-                    Set<RegattaAndRaceIdentifier> regattasAndRaces = new HashSet<RegattaAndRaceIdentifier>();
-                    for (String regattaNamesAndRaceNames : regattasAndRacesArray) {
-                        regattaNamesAndRaceNames = regattaNamesAndRaceNames.replace(", ", ""); //without string??
-                        String[] regattaAndRace = regattaNamesAndRaceNames.split("   ");
-                        regattasAndRaces.add(new RegattaNameAndRaceName(regattaAndRace[0], regattaAndRace[1]));
-                    }
-                    mediaTrack.regattasAndRaces.clear();
-                    mediaTrack.regattasAndRaces.addAll(regattasAndRaces);
                 }
                 mediaService.updateRace(mediaTrack, new AsyncCallback<Void>() {
 
@@ -482,9 +473,8 @@ public class MediaPanel extends FlowPanel {
     public void openRegattasAndRacesDialog(final Context context, final Element parent,
             final ValueUpdater<String> valueUpdater) {
         final MediaTrack mediaTrack = (MediaTrack) context.getKey();
-        final RegattasAndRacesDialog dialog = new RegattasAndRacesDialog(sailingService, mediaTrack,
-                errorReporter, regattaRefresher, stringMessages, null,
-                new DialogCallback<Set<RegattaAndRaceIdentifier>>() {
+        final RegattasAndRacesDialog dialog = new RegattasAndRacesDialog(sailingService, mediaTrack, errorReporter,
+                regattaRefresher, stringMessages, null, new DialogCallback<Set<RegattaAndRaceIdentifier>>() {
 
                     @Override
                     public void cancel() {
@@ -498,13 +488,14 @@ public class MediaPanel extends FlowPanel {
                                 value = value.concat(regattasAndRaces.getRegattaName() + "    "
                                         + regattasAndRaces.getRaceName() + ",");
                             }
-                            mediaTrack.regattasAndRaces = regattas;
+                            mediaTrack.regattasAndRaces.clear();
+                            mediaTrack.regattasAndRaces.addAll(regattas);
                             valueUpdater.update(value);
                         }
 
                     }
                 });
-        
+
         regattasDisplayers.add(dialog);
         dialog.ensureDebugId("RegattasAndRacesDialog");
 
