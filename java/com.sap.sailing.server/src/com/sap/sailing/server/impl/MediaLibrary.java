@@ -73,8 +73,10 @@ class MediaLibrary {
      * 
      * @param race
      *            TODO
-     * @param startDate TODO
-     * @param endDate TODO
+     * @param startDate
+     *            TODO
+     * @param endDate
+     *            TODO
      * 
      * @return
      */
@@ -232,16 +234,15 @@ class MediaLibrary {
      * To be called only under write lock!
      */
     private void updateCache_Add(MediaTrack mediaTrack) {
-
-        mediaTracksByDbId.put(mediaTrack, mediaTrack);
-
-        for (RegattaAndRaceIdentifier regattasAndRaces : mediaTrack.regattasAndRaces) {
-            if (mediaTrackByRace.containsKey(regattasAndRaces)) {
-                mediaTrackByRace.get(regattasAndRaces).add(mediaTrack);
-            } else {
-                Set<MediaTrack> mediaTracks = new HashSet<MediaTrack>();
-                mediaTracks.add(mediaTrack);
-                mediaTrackByRace.put(regattasAndRaces, mediaTracks);
+        if (mediaTrack != null) {
+            for (RegattaAndRaceIdentifier regattasAndRaces : mediaTrack.regattasAndRaces) {
+                if (mediaTrackByRace.containsKey(regattasAndRaces)) {
+                    mediaTrackByRace.get(regattasAndRaces).add(mediaTrack);
+                } else {
+                    Set<MediaTrack> mediaTracks = new HashSet<MediaTrack>();
+                    mediaTracks.add(mediaTrack);
+                    mediaTrackByRace.put(regattasAndRaces, mediaTracks);
+                }
             }
         }
     }
@@ -258,8 +259,6 @@ class MediaLibrary {
      * To be called only under write lock!
      */
     private void updateCache_Remove(MediaTrack mediaTrack) {
-
-        mediaTracksByDbId.remove(mediaTrack);
 
         for (RegattaAndRaceIdentifier regattaAndRace : mediaTrack.regattasAndRaces) {
             Set<MediaTrack> mediaTracks = mediaTrackByRace.get(regattaAndRace);
