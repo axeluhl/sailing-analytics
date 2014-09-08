@@ -234,7 +234,7 @@ class MediaLibrary {
      * To be called only under write lock!
      */
     private void updateCache_Add(MediaTrack mediaTrack) {
-        if (mediaTrack != null) {
+        if (mediaTrack.regattasAndRaces != null) {
             for (RegattaAndRaceIdentifier regattasAndRaces : mediaTrack.regattasAndRaces) {
                 if (mediaTrackByRace.containsKey(regattasAndRaces)) {
                     mediaTrackByRace.get(regattasAndRaces).add(mediaTrack);
@@ -243,6 +243,7 @@ class MediaLibrary {
                     mediaTracks.add(mediaTrack);
                     mediaTrackByRace.put(regattasAndRaces, mediaTracks);
                 }
+
             }
         }
     }
