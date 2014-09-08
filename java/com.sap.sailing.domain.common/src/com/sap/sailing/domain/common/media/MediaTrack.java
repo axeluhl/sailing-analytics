@@ -180,16 +180,16 @@ public class MediaTrack implements Serializable {
         return this.dbId == null ? 0 : this.dbId.hashCode();
     }
 
-    public boolean beginsAfter(Date eventEndDate) {
-        if (startTime.asDate().after(eventEndDate)) {
+    public boolean beginsAfter(Date date) {
+        if (startTime.asDate().after(date)) {
             return true;
         } else {
             return false;
         }
     }
 
-    public boolean endsBefore(Date eventStartDate) {
-        if (deriveEndTime().asDate().before(eventStartDate)) {
+    public boolean endsBefore(Date date) {
+        if (deriveEndTime().asDate().before(date)) {
             return true;
         } else {
             return false;
