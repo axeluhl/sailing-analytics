@@ -121,9 +121,11 @@ public class MediaTrack implements Serializable {
     }
 
     public String toString() {
-        return title + " - " + url + " [" + typeToString() + ']' + startTime + " [" + duration + status + ']'; // TODO
-                                                                                                               // noch
-                                                                                                               // anpassen
+        String regattasAndRaces = "";
+        for (RegattaAndRaceIdentifier regattaAndRace : this.regattasAndRaces) {
+            regattasAndRaces += ", " + regattaAndRace;
+        }
+        return title + " - " + url + " [" + typeToString() + ']' + " - " + regattasAndRaces + " - " + startTime + " [" + duration + status + ']'; 
     }
 
     public TimePoint deriveEndTime() {
