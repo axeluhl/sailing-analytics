@@ -182,7 +182,7 @@ public class RegattaAnalytics extends Composite implements LeaderboardUpdateList
                 scoringSchemeDiv.setInnerText(leaderboard.scoringScheme != null ? ScoringSchemeTypeFormatter.format(leaderboard.scoringScheme, StringMessages.INSTANCE) : "");
                 if (leaderboard.getTimePointOfLastCorrectionsValidity() != null) {
                     Date lastCorrectionDate = leaderboard.getTimePointOfLastCorrectionsValidity();
-                    String lastUpdate = DateAndTimeFormatterUtil.longDateFormatter.render(lastCorrectionDate) + ", "
+                    String lastUpdate = DateAndTimeFormatterUtil.defaultDateFormatter.render(lastCorrectionDate) + ", "
                             + DateAndTimeFormatterUtil.longTimeFormatter.render(lastCorrectionDate);
                     lastScoringUpdateTimeDiv.setInnerText(lastUpdate);
                 } else {
