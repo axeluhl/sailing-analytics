@@ -39,6 +39,7 @@ import com.sap.sailing.gwt.ui.client.shared.components.SettingsDialog;
 import com.sap.sailing.gwt.ui.common.client.DateAndTimeFormatterUtil;
 import com.sap.sailing.gwt.ui.leaderboard.LeaderboardPanel;
 import com.sap.sailing.gwt.ui.leaderboard.LeaderboardSettings;
+import com.sap.sailing.gwt.ui.leaderboard.ScoringSchemeTypeFormatter;
 import com.sap.sailing.gwt.ui.shared.EventDTO;
 import com.sap.sse.common.Util.Pair;
 import com.sap.sse.gwt.client.async.AsyncActionsExecutor;
@@ -178,7 +179,7 @@ public class RegattaAnalytics extends Composite implements LeaderboardUpdateList
             
             if(leaderboard != null) {
                 lastScoringCommentDiv.setInnerText(leaderboard.getComment() != null ? leaderboard.getComment() : "");
-                scoringSchemeDiv.setInnerText(leaderboard.scoringScheme != null ? leaderboard.scoringScheme.name() : "");
+                scoringSchemeDiv.setInnerText(leaderboard.scoringScheme != null ? ScoringSchemeTypeFormatter.format(leaderboard.scoringScheme, StringMessages.INSTANCE) : "");
                 if (leaderboard.getTimePointOfLastCorrectionsValidity() != null) {
                     Date lastCorrectionDate = leaderboard.getTimePointOfLastCorrectionsValidity();
                     String lastUpdate = DateAndTimeFormatterUtil.longDateFormatter.render(lastCorrectionDate) + ", "

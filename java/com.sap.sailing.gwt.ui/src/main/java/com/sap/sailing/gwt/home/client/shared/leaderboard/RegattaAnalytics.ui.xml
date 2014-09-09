@@ -38,9 +38,16 @@
 				<g:Anchor ui:field="autoRefreshAnchor" href="javascript:;" styleName="{res.mainCss.button} {local_res.css.regattaleaderboard_meta_reload}"></g:Anchor>
 				<g:Anchor ui:field="settingsAnchor" href="javascript:;" styleName="{res.mainCss.button} {local_res.css.regattaleaderboard_meta_settings_button}"></g:Anchor>
 			  </div>
+			  
 			  <div class="{res.mediaCss.small12} {res.mediaCss.columns}">
+			        <table class="{local_res.css.regattaleaderboard_table}">
+      				  <tr class="{local_res.css.regattaleaderboard_header}">
+      					<td>
 				<g:HTMLPanel ui:field="oldLeaderboardPanel" styleName="{local_res2.css.oldLeaderboardPanel}">
         		</g:HTMLPanel>
+      					</td>
+      				  </tr>
+      				</table>
 			  </div>
 		  </div>
 		</g:HTMLPanel>
