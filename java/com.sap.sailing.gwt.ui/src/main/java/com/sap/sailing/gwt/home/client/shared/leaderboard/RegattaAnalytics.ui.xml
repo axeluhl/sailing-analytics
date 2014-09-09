@@ -53,9 +53,14 @@
 		</g:HTMLPanel>
 		<g:HTMLPanel ui:field="competitorChartsTabPanel">
 			<div class="{res.mainCss.grid}">
-			   <div class="{res.mediaCss.small12} {res.mediaCss.columns}">
-			    <h3><ui:text from="{i18n.competitorsAnalytics}" /></h3>
-			    <g:ListBox ui:field="chartTypeSelectionListBox" />
+			  <div class="{res.mediaCss.small6} {res.mediaCss.column} {local_res.css.regattaleaderboard_meta_scoring}">
+			   		<h3><ui:text from="{i18n.competitorsAnalytics}" /></h3>
+			  </div>    
+			  <div class="{res.mediaCss.small6} {res.mediaCss.column} {local_res.css.regattaleaderboard_meta_settings}">
+			      	<ui:text from="{i18n.chooseChart}" />
+			  		<g:ListBox ui:field="chartTypeSelectionListBox" />
+			  </div>    
+			  <div class="{res.mediaCss.small12} {res.mediaCss.columns}">
               	<g:HTMLPanel ui:field="competitorChartsPanel">
         		</g:HTMLPanel>
 			  </div>
