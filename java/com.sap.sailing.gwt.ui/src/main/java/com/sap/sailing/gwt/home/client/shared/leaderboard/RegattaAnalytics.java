@@ -140,10 +140,11 @@ public class RegattaAnalytics extends Composite implements LeaderboardUpdateList
         regattaAnalyticsManager = new MetaLeaderboardViewer(sailingService, asyncActionsExecutor, timer, errorReporter, userAgent);
         regattaAnalyticsManager.createLeaderboardPanel(leaderboardSettings, preselectedRace, leaderboardGroupName, metaLeaderboardName, showRaceDetails, autoExpandLastRaceColumn);
        
-        ScrollPanel contentScrollPanel = new ScrollPanel();
-        contentScrollPanel.setWidget(regattaAnalyticsManager.getLeaderboardPanel());
-        oldLeaderboardPanel.add(contentScrollPanel);
-
+//        ScrollPanel contentScrollPanel = new ScrollPanel();
+//        contentScrollPanel.setWidget(regattaAnalyticsManager.getLeaderboardPanel());
+//        oldLeaderboardPanel.add(contentScrollPanel);
+        oldLeaderboardPanel.add(regattaAnalyticsManager.getLeaderboardPanel());
+        
         regattaAnalyticsManager.hideCompetitorChart();
     }
     
