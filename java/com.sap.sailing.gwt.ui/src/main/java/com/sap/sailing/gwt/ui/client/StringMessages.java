@@ -78,6 +78,7 @@ public interface StringMessages extends Messages {
     String leaderboards();
     String leaderboardSettings();
     String settings();
+    String regattaAndRace();
     String selectAtLeastOneLegDetail();
     String currentSpeedOverGroundInKnots();
     String estimatedTimeToNextWaypointInSeconds();
@@ -385,9 +386,7 @@ public interface StringMessages extends Messages {
     String scoringSchemeHighPointSystem();
     String scoringSchemeLowPointWinnerGetsZero();
     String scoringSchemeWinnerGetsFive();
-    String scoringSchemeWinnerGetsFiveIgnoringRaceCount();
     String scoringSchemeWinnerGetsSix();
-    String scoringSchemeWinnerGetsSixIgnoringRaceCount();
     String scoringSystem();
     String createFlexibleLeaderboard();
     String createRegattaLeaderboard();

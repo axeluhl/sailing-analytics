@@ -1,8 +1,13 @@
 package com.sap.sailing.server.replication.test;
 
+import java.util.HashSet;
+import java.util.Set;
+
 import org.junit.Test;
 
 import com.sap.sailing.domain.common.Duration;
+import com.sap.sailing.domain.common.RegattaAndRaceIdentifier;
+import com.sap.sailing.domain.common.RegattaNameAndRaceName;
 import com.sap.sailing.domain.common.TimePoint;
 import com.sap.sailing.domain.common.impl.MillisecondsDurationImpl;
 import com.sap.sailing.domain.common.impl.MillisecondsTimePoint;
@@ -10,7 +15,6 @@ import com.sap.sailing.domain.common.media.MediaTrack;
 import com.sap.sailing.domain.common.media.MediaTrack.MimeType;
 
 import static org.junit.Assert.*;
-
 import static org.hamcrest.core.Is.*;
 
 public class MediaReplicationTest extends AbstractServerReplicationTest {
@@ -26,7 +30,9 @@ public class MediaReplicationTest extends AbstractServerReplicationTest {
         TimePoint startTime = MillisecondsTimePoint.now();
         Duration duration = MillisecondsDurationImpl.ONE_HOUR;
         MimeType mimeType = MimeType.mp4;
-        MediaTrack mediaTrack = new MediaTrack(title, url, startTime, duration, mimeType);
+        Set<RegattaAndRaceIdentifier> regattasAndRaces = new HashSet<RegattaAndRaceIdentifier>();
+        regattasAndRaces.add(new RegattaNameAndRaceName("49er", "R1"));
+        MediaTrack mediaTrack = new MediaTrack(title, url, startTime, duration, mimeType, regattasAndRaces);
         return mediaTrack;
     }
     

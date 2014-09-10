@@ -1,15 +1,25 @@
 package com.sap.sailing.gwt.ui.adminconsole;
 
+import static com.google.gwt.dom.client.BrowserEvents.CLICK;
+import static com.google.gwt.dom.client.BrowserEvents.KEYUP;
+
 import java.util.Collection;
 import java.util.Comparator;
+import java.util.Set;
 
+import com.google.gwt.cell.client.Cell.Context;
+import com.google.gwt.cell.client.ClickableTextCell;
 import com.google.gwt.cell.client.EditTextCell;
 import com.google.gwt.cell.client.FieldUpdater;
 import com.google.gwt.cell.client.TextCell;
+import com.google.gwt.cell.client.ValueUpdater;
 import com.google.gwt.core.client.GWT;
+import com.google.gwt.dom.client.Element;
+import com.google.gwt.dom.client.NativeEvent;
 import com.google.gwt.dom.client.Style.Unit;
 import com.google.gwt.event.dom.client.ClickEvent;
 import com.google.gwt.event.dom.client.ClickHandler;
+import com.google.gwt.event.dom.client.KeyCodes;
 import com.google.gwt.user.cellview.client.CellTable;
 import com.google.gwt.user.cellview.client.Column;
 import com.google.gwt.user.cellview.client.ColumnSortEvent.ListHandler;
@@ -22,12 +32,16 @@ import com.google.gwt.view.client.DefaultSelectionEventManager;
 import com.google.gwt.view.client.ListDataProvider;
 import com.google.gwt.view.client.SelectionModel;
 import com.google.gwt.view.client.SingleSelectionModel;
+import com.sap.sailing.domain.common.RegattaAndRaceIdentifier;
 import com.sap.sailing.domain.common.TimePoint;
 import com.sap.sailing.domain.common.impl.MillisecondsTimePoint;
 import com.sap.sailing.domain.common.media.MediaTrack;
 import com.sap.sailing.domain.common.media.MediaUtil;
 import com.sap.sailing.gwt.ui.client.ErrorReporter;
 import com.sap.sailing.gwt.ui.client.MediaServiceAsync;
+import com.sap.sailing.gwt.ui.client.RegattaRefresher;
+import com.sap.sailing.gwt.ui.client.RegattasDisplayer;
+import com.sap.sailing.gwt.ui.client.SailingServiceAsync;
 import com.sap.sailing.gwt.ui.client.StringMessages;
 import com.sap.sailing.gwt.ui.client.media.NewMediaDialog;
 import com.sap.sailing.gwt.ui.client.media.TimeFormatUtil;
@@ -41,14 +55,22 @@ import com.sap.sse.gwt.client.dialog.DataEntryDialog.DialogCallback;
  */
 public class MediaPanel extends FlowPanel {
 
+    private final SailingServiceAsync sailingService;
+    private final RegattaRefresher regattaRefresher;
     private final MediaServiceAsync mediaService;
     private final ErrorReporter errorReporter;
     private final StringMessages stringMessages;
     private final Grid mediaTracks;
+    private Set<RegattasDisplayer> regattasDisplayers;
     private CellTable<MediaTrack> mediaTracksTable;
     private ListDataProvider<MediaTrack> mediaTrackListDataProvider = new ListDataProvider<MediaTrack>();
 
-    public MediaPanel(MediaServiceAsync mediaService, ErrorReporter errorReporter, StringMessages stringMessages) {
+    public MediaPanel(Set<RegattasDisplayer> regattasDisplayers, SailingServiceAsync sailingService,
+            RegattaRefresher regattaRefresher, MediaServiceAsync mediaService, ErrorReporter errorReporter,
+            StringMessages stringMessages) {
+        this.regattasDisplayers = regattasDisplayers;
+        this.sailingService = sailingService;
+        this.regattaRefresher = regattaRefresher;
         this.mediaService = mediaService;
         this.stringMessages = stringMessages;
         this.errorReporter = errorReporter;
@@ -122,8 +144,7 @@ public class MediaPanel extends FlowPanel {
     /**
      * Add the columns to the table.
      */
-    private void initTableColumns(final SelectionModel<MediaTrack> selectionModel,
-            ListHandler<MediaTrack> sortHandler) {
+    private void initTableColumns(final SelectionModel<MediaTrack> selectionModel, ListHandler<MediaTrack> sortHandler) {
         // // Checkbox column. This table will uses a checkbox column for selection.
         // // Alternatively, you can call cellTable.setSelectionEnabled(true) to enable
         // // mouse selection.
@@ -222,11 +243,72 @@ public class MediaPanel extends FlowPanel {
         });
         mediaTracksTable.setColumnWidth(urlColumn, 100, Unit.PCT);
 
+        // regattasAndRaces
+
+        Column<MediaTrack, String> regattaAndRaceColumn = new Column<MediaTrack, String>(new ClickableTextCell() {
+            public void onEnterKeyDown(Context context, Element parent, String value, NativeEvent event,
+                    ValueUpdater<String> valueUpdater) {
+                String type = event.getType();
+                int keyCode = event.getKeyCode();
+                boolean enterPressed = KEYUP.equals(type) && keyCode == KeyCodes.KEY_ENTER;
+                if (CLICK.equals(type) || enterPressed) {
+                    openRegattasAndRacesDialog(context, parent, valueUpdater);
+                }
+            }
+        }) {
+            @Override
+            public String getValue(MediaTrack mediaTrack) {
+                if (mediaTrack.regattasAndRaces != null) {
+                    return listRegattasAndRaces(mediaTrack);
+                } else
+                    return "";
+            }
+            
+
+        };
+        regattaAndRaceColumn.setSortable(true);
+        sortHandler.setComparator(regattaAndRaceColumn, new Comparator<MediaTrack>() {
+            public int compare(MediaTrack mediaTrack1, MediaTrack mediaTrack2) {
+                return (listRegattasAndRaces(mediaTrack1)).compareTo(listRegattasAndRaces(mediaTrack2));
+            }
+        });
+        mediaTracksTable.addColumn(regattaAndRaceColumn, stringMessages.regattaAndRace());
+        regattaAndRaceColumn.setFieldUpdater(new FieldUpdater<MediaTrack, String>() {
+            public void update(int index, MediaTrack mediaTrack, String newRegattaAndRace) {
+                // Called when the user changes the value.
+                if ("".equals(newRegattaAndRace) || !newRegattaAndRace.contains(" ")) {
+                    mediaTrack.regattasAndRaces.clear();
+                } else {
+                }
+                mediaService.updateRace(mediaTrack, new AsyncCallback<Void>() {
+
+                    @Override
+                    public void onFailure(Throwable t) {
+                        errorReporter.reportError(t.toString());
+                    }
+
+                    @Override
+                    public void onSuccess(Void allMediaTracks) {
+                        mediaTrackListDataProvider.refresh();
+                    }
+                });
+            }
+        });
+        mediaTracksTable.setColumnWidth(regattaAndRaceColumn, 100, Unit.PCT);
+
+        // regattaAndRaceColumn.addClickHandler(new ClickHandler() {
+        // @Override
+        // public void onClick(ClickEvent event) {
+        // addUrlMediaTrack();
+        // }
+        // });
+
         // start time
         Column<MediaTrack, String> startTimeColumn = new Column<MediaTrack, String>(new EditTextCell()) {
             @Override
             public String getValue(MediaTrack mediaTrack) {
-                return mediaTrack.startTime == null ? "" : TimeFormatUtil.DATETIME_FORMAT.format(mediaTrack.startTime.asDate());
+                return mediaTrack.startTime == null ? "" : TimeFormatUtil.DATETIME_FORMAT.format(mediaTrack.startTime
+                        .asDate());
             }
         };
         startTimeColumn.setSortable(true);
@@ -243,9 +325,11 @@ public class MediaPanel extends FlowPanel {
                     mediaTrack.startTime = null;
                 } else {
                     try {
-                        mediaTrack.startTime = new MillisecondsTimePoint(TimeFormatUtil.DATETIME_FORMAT.parse(newStartTime));
+                        mediaTrack.startTime = new MillisecondsTimePoint(TimeFormatUtil.DATETIME_FORMAT
+                                .parse(newStartTime));
                     } catch (IllegalArgumentException e) {
-                        errorReporter.reportError(stringMessages.mediaDateFormatError(TimeFormatUtil.DATETIME_FORMAT.toString()));
+                        errorReporter.reportError(stringMessages.mediaDateFormatError(TimeFormatUtil.DATETIME_FORMAT
+                                .toString()));
                     }
                 }
                 mediaService.updateStartTime(mediaTrack, new AsyncCallback<Void>() {
@@ -309,7 +393,7 @@ public class MediaPanel extends FlowPanel {
                     if (Window.confirm(stringMessages.reallyRemoveMediaTrack(mediaTrack.title))) {
                         removeMediaTrack(mediaTrack);
                     }
-                } 
+                }
             }
         });
         mediaTracksTable.addColumn(mediaActionColumn, stringMessages.delete());
@@ -334,7 +418,7 @@ public class MediaPanel extends FlowPanel {
 
     private void addUrlMediaTrack() {
         TimePoint defaultStartTime = MillisecondsTimePoint.now();
-        NewMediaDialog dialog = new NewMediaDialog(defaultStartTime , stringMessages, new DialogCallback<MediaTrack>() {
+        NewMediaDialog dialog = new NewMediaDialog(defaultStartTime, stringMessages, new DialogCallback<MediaTrack>() {
 
             @Override
             public void cancel() {
@@ -354,6 +438,7 @@ public class MediaPanel extends FlowPanel {
                     public void onSuccess(String dbId) {
                         mediaTrack.dbId = dbId;
                         loadMediaTracks();
+
                     }
                 });
 
@@ -361,9 +446,57 @@ public class MediaPanel extends FlowPanel {
         });
         dialog.show();
     }
-    
+
+    private String listRegattasAndRaces(MediaTrack mediaTrack) {
+
+        if (mediaTrack.regattasAndRaces.size() > 1) {
+            return String.valueOf(mediaTrack.regattasAndRaces.size());
+        } else {
+            String value = "";
+            for (RegattaAndRaceIdentifier regattaAndRace : mediaTrack.regattasAndRaces) {
+                value += regattaAndRace.getRegattaName() + " " + regattaAndRace.getRaceName() + ", ";
+            }
+            if (value.length() > 1) {
+                return value.substring(0, value.length() - 2);
+            } else
+                return value;
+
+        }
+    }
+
     public void onShow() {
         loadMediaTracks();
+    }
+
+    public void openRegattasAndRacesDialog(final Context context, final Element parent,
+            final ValueUpdater<String> valueUpdater) {
+        final MediaTrack mediaTrack = (MediaTrack) context.getKey();
+        final RegattasAndRacesDialog dialog = new RegattasAndRacesDialog(sailingService, mediaTrack, errorReporter,
+                regattaRefresher, stringMessages, null, new DialogCallback<Set<RegattaAndRaceIdentifier>>() {
+
+                    @Override
+                    public void cancel() {
+                    }
+
+                    @Override
+                    public void ok(Set<RegattaAndRaceIdentifier> regattas) {
+                        if (regattas.size() >= 0) {
+                            String value = "";
+                            for (RegattaAndRaceIdentifier regattasAndRaces : regattas) {
+                                value = value.concat(regattasAndRaces.getRegattaName() + "    "
+                                        + regattasAndRaces.getRaceName() + ",");
+                            }
+                            mediaTrack.regattasAndRaces.clear();
+                            mediaTrack.regattasAndRaces.addAll(regattas);
+                            valueUpdater.update(value);
+                        }
+
+                    }
+                });
+
+        regattasDisplayers.add(dialog);
+        dialog.ensureDebugId("RegattasAndRacesDialog");
+        dialog.show();
     }
 
 }

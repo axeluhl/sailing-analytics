@@ -22,12 +22,8 @@ public class ScoringSchemeTypeFormatter {
             return stringMessages.scoringSchemeLowPointWinnerGetsZero();
         case HIGH_POINT_WINNER_GETS_FIVE:
             return stringMessages.scoringSchemeWinnerGetsFive();
-        case HIGH_POINT_WINNER_GETS_FIVE_IGNORING_RACE_COUNT:
-            return stringMessages.scoringSchemeWinnerGetsFiveIgnoringRaceCount();
         case HIGH_POINT_WINNER_GETS_SIX:
             return stringMessages.scoringSchemeWinnerGetsSix();
-        case HIGH_POINT_WINNER_GETS_SIX_IGNORING_RACE_COUNT:
-            return stringMessages.scoringSchemeWinnerGetsSixIgnoringRaceCount();
         case HIGH_POINT_FIRST_GETS_TEN_OR_EIGHT:
             return stringMessages.scoringSchemeHighPointFirstGetsTenOrEight();
         }
