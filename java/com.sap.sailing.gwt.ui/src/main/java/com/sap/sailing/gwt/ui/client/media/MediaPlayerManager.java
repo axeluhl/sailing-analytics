@@ -5,10 +5,11 @@ import java.util.List;
 import java.util.Set;
 
 import com.sap.sailing.domain.common.media.MediaTrack;
+import com.sap.sse.gwt.client.useragent.UserAgentDetails;
 
-interface MediaPlayerManager {
+public interface MediaPlayerManager {
     
-    interface PlayerChangeListener {
+    public interface PlayerChangeListener {
 
         void notifyStateChange();
 
@@ -46,9 +47,14 @@ interface MediaPlayerManager {
 
     Collection<MediaTrack> getMediaTracks();
 
+    List<MediaTrack> getAudioTracks();
+    
     List<MediaTrack> getVideoTracks();
 
     MediaTrack getDockedVideoTrack();
+
+    UserAgentDetails getUserAgent();
+
     
 }
 

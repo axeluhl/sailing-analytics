@@ -31,9 +31,9 @@ import com.sap.sailing.gwt.ui.client.MediaServiceAsync;
 import com.sap.sailing.gwt.ui.client.RaceTimesInfoProvider;
 import com.sap.sailing.gwt.ui.client.StringMessages;
 import com.sap.sailing.gwt.ui.client.media.popup.PopoutWindowPlayer;
+import com.sap.sailing.gwt.ui.client.media.popup.PopoutWindowPlayer.PlayerCloseListener;
 import com.sap.sailing.gwt.ui.client.media.popup.VideoWindowPlayer;
 import com.sap.sailing.gwt.ui.client.media.popup.YoutubeWindowPlayer;
-import com.sap.sailing.gwt.ui.client.media.popup.PopoutWindowPlayer.PlayerCloseListener;
 import com.sap.sailing.gwt.ui.client.media.shared.MediaPlayer;
 import com.sap.sailing.gwt.ui.client.media.shared.VideoPlayer;
 import com.sap.sailing.gwt.ui.client.media.shared.VideoSynchPlayer;
@@ -671,6 +671,22 @@ public class MediaPlayerManagerComponent implements Component<Void>, PlayStateLi
     @Override
     public String getDependentCssClassName() {
         return "media";
+    }
+
+    @Override
+    public List<MediaTrack> getAudioTracks() {
+        List<MediaTrack> result = new ArrayList<MediaTrack>();
+        for (MediaTrack mediaTrack : mediaTracks) {
+            if (mediaTrack.mimeType.mediaType == MediaType.audio) {
+                result.add(mediaTrack);
+            }
+        }
+        return result;
+    }
+
+    @Override
+    public UserAgentDetails getUserAgent() {
+        return userAgent;
     }
 
 }

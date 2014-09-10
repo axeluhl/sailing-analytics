@@ -3,10 +3,10 @@ package com.sap.sailing.gwt.ui.client.media;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
-import com.google.gwt.dom.client.Style;
 import com.google.gwt.event.dom.client.ClickEvent;
 import com.google.gwt.event.dom.client.ClickHandler;
 import com.google.gwt.event.logical.shared.CloseEvent;
@@ -28,71 +28,23 @@ import com.google.gwt.user.client.ui.Widget;
 import com.sap.sailing.domain.common.media.MediaTrack;
 import com.sap.sse.gwt.client.useragent.UserAgentDetails.AgentTypes;
 
-public class MediaMultiSelectionControl extends AbstractMediaSelectionControl implements MediaPlayerManager.PlayerChangeListener, CloseHandler<PopupPanel> {
+public class MediaMultiSelectionControl extends AbstractMediaSelectionControl implements CloseHandler<PopupPanel> {
 
     private final DialogBox dialogControl;
     private final Map<MediaTrack, CheckBox> videoCheckBoxes = new HashMap<MediaTrack, CheckBox>();
-    
-    private final CheckBox toggleMediaButton;
-    private final Button selectMediaButton;
+    private final UIObject popupLocation;
 
-    public MediaMultiSelectionControl(MediaPlayerManager mediaPlayerManager, AgentTypes userAgent) {
-        super(mediaPlayerManager, userAgent);
+    public MediaMultiSelectionControl(MediaPlayerManager mediaPlayerManager,  UIObject popupLocation) {
+        super(mediaPlayerManager);
+        this.popupLocation = popupLocation;
 
         this.dialogControl = new DialogBox(true, false);
         this.dialogControl.setText("Select Playback Media");
         this.dialogControl.addCloseHandler(this);
-
-        this.selectMediaButton = new Button();
-        this.selectMediaButton.addClickHandler(new ClickHandler() {
-            @Override
-            public void onClick(ClickEvent event) {
-                if (isShowing()) {
-                    hide();
-                } else {
-                    showSelectionDialog();
-                }
-            }
-        });
-        selectMediaButton.addStyleName("raceBoardNavigation-settingsButton");
-        selectMediaButton.getElement().getStyle().setFloat(Style.Float.LEFT);
-        selectMediaButton.setTitle("Configure Media");
-
-        toggleMediaButton = new CheckBox("Audio & Video");
-        toggleMediaButton.addStyleName("raceBoardNavigation-innerElement");
-        toggleMediaButton.getElement().getStyle().setFloat(Style.Float.LEFT);
-        toggleMediaButton.addValueChangeHandler(new ValueChangeHandler<Boolean>() {
-
-            @Override
-            public void onValueChange(ValueChangeEvent<Boolean> event) {
-
-                if (toggleMediaButton.getValue()) {
-                    MediaMultiSelectionControl.this.mediaPlayerManager.playDefault();
-                } else {
-                    MediaMultiSelectionControl.this.mediaPlayerManager.stopAll();
-                }
-
-            }
-
-        });
-        setWidgetsVisible(false);
-
+      
     }
 
-    private void setWidgetsVisible(boolean isVisible) {
-        selectMediaButton.setVisible(isVisible);
-        toggleMediaButton.setVisible(isVisible);
-    }
-
-    protected void updateUi() {
-        setWidgetsVisible((mediaPlayerManager.getMediaTracks().size() > 0) || mediaPlayerManager.allowsEditing());
-        toggleMediaButton.setValue(mediaPlayerManager.isPlaying());
-    }
-
-    private void showSelectionDialog() {
-        MediaTrack playingAudioTrack = mediaPlayerManager.getPlayingAudioTrack();
-        Set<MediaTrack> playingVideoTracks = mediaPlayerManager.getPlayingVideoTracks();
-
+    public void show() {
         Collection<MediaTrack> reachableVideoTracks = new ArrayList<MediaTrack>();
         Collection<MediaTrack> reachableAudioTracks = new ArrayList<MediaTrack>();
         for (MediaTrack mediaTrack : mediaPlayerManager.getMediaTracks()) {
@@ -101,7 +53,7 @@ public class MediaMultiSelectionControl extends AbstractMediaSelectionControl im
                 case video:
                     reachableVideoTracks.add(mediaTrack);
                 case audio: // intentional fall through
-                    if(userAgent.equals(AgentTypes.FIREFOX)) {
+                    if(mediaPlayerManager.getUserAgent().getType().equals(AgentTypes.FIREFOX)) {
                         if(mediaTrack.isYoutube()) {
                             // only youtube audio tracks work with firefox
                             reachableAudioTracks.add(mediaTrack);
@@ -112,25 +64,20 @@ public class MediaMultiSelectionControl extends AbstractMediaSelectionControl im
                 }
             }
         }
-
-        boolean showAddButton = mediaPlayerManager.allowsEditing();
-        show(reachableVideoTracks, playingVideoTracks, reachableAudioTracks,
-                playingAudioTrack, showAddButton, toggleMediaButton);
-    }
-
-    public void show(Collection<MediaTrack> videoTracks, Set<MediaTrack> selectedVideos, Collection<MediaTrack> audioTracks, MediaTrack selectedAudioTrack, boolean showAddButton, UIObject popupLocation) {
         Panel grid = new VerticalPanel();
+        List<MediaTrack> audioTracks = mediaPlayerManager.getAudioTracks();
         if (!audioTracks.isEmpty()) {
             grid.add(createAudioHeader());
-            grid.add((RadioButton) createAudioButton(null, selectedAudioTrack));
+            grid.add((RadioButton) createAudioButton(null, mediaPlayerManager.getPlayingAudioTrack()));
             for (MediaTrack audioTrack : audioTracks) {
-                grid.add(createAudioButton(audioTrack, selectedAudioTrack));
+                grid.add(createAudioButton(audioTrack, mediaPlayerManager.getPlayingAudioTrack()));
             }
         }
+        List<MediaTrack> videoTracks = mediaPlayerManager.getVideoTracks();
         if (!videoTracks.isEmpty()) {
             grid.add(createVideoHeader());
             for (MediaTrack videoTrack : videoTracks) {
-                grid.add(createVideoCheckBox(videoTrack, selectedVideos));
+                grid.add(createVideoCheckBox(videoTrack, mediaPlayerManager.getPlayingVideoTracks()));
             }
         }
         if (mediaPlayerManager.allowsEditing()) {
@@ -245,8 +192,10 @@ public class MediaMultiSelectionControl extends AbstractMediaSelectionControl im
         dialogControl.hide(false);
     }
 
-    public Widget[] widgets() {
-        return new Widget[] {toggleMediaButton, selectMediaButton};
+    @Override
+    protected void updateUi() {
+        // TODO Auto-generated method stub
+        
     }
 
 }

@@ -19,7 +19,6 @@ import com.sap.sailing.gwt.ui.client.RegattaRefresher;
 import com.sap.sailing.gwt.ui.client.RegattasDisplayer;
 import com.sap.sailing.gwt.ui.client.SailingServiceAsync;
 import com.sap.sailing.gwt.ui.client.StringMessages;
-import com.sap.sailing.gwt.ui.shared.EventDTO;
 import com.sap.sailing.gwt.ui.shared.RegattaDTO;
 import com.sap.sse.gwt.client.dialog.DataEntryDialog;
 
@@ -70,7 +69,7 @@ public class RegattasAndRacesDialog extends DataEntryDialog<Set<RegattaAndRaceId
         formGrid.setWidget(0, 0, message);    
         formGrid.setWidget(1, 1, trackedRacesListComposite);
         formGrid.getWidget(1, 1).setVisible(false);
-        this.getCancelButton().setVisible(false);
+        this.getOkButton().setVisible(false);
 
     }
 

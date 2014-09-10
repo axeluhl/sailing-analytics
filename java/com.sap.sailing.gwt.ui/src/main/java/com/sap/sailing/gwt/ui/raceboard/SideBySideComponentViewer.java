@@ -5,6 +5,8 @@ import java.util.List;
 
 import com.google.gwt.dom.client.Document;
 import com.google.gwt.dom.client.Style.Unit;
+import com.google.gwt.event.dom.client.ClickEvent;
+import com.google.gwt.event.dom.client.ClickHandler;
 import com.google.gwt.safehtml.shared.SafeHtml;
 import com.google.gwt.user.client.ui.AbsolutePanel;
 import com.google.gwt.user.client.ui.Button;
@@ -16,6 +18,9 @@ import com.google.gwt.user.client.ui.ScrollPanel;
 import com.google.gwt.user.client.ui.Widget;
 import com.google.gwt.user.client.ui.WidgetCollection;
 import com.sap.sailing.gwt.ui.client.StringMessages;
+import com.sap.sailing.gwt.ui.client.media.MediaMultiSelectionControl;
+import com.sap.sailing.gwt.ui.client.media.MediaPlayerManager;
+import com.sap.sailing.gwt.ui.client.media.MediaPlayerManager.PlayerChangeListener;
 import com.sap.sailing.gwt.ui.client.media.MediaPlayerManagerComponent;
 import com.sap.sailing.gwt.ui.client.shared.components.Component;
 import com.sap.sailing.gwt.ui.client.shared.components.ComponentViewer;
@@ -74,6 +79,15 @@ public class SideBySideComponentViewer implements ComponentViewer {
         this.components = components;
         this.videoToggleButton = createVideoToggleButton(mediaPlayerManagerComponent);
         this.mediaManagementButton = createMediaManagementButton(mediaPlayerManagerComponent);
+
+        mediaPlayerManagerComponent.setPlayerChangeListener(new PlayerChangeListener(){
+
+            public void notifyStateChange(){
+                videoToggleButton.setVisible(mediaPlayerManagerComponent.getMediaTracks().size()>0);
+                mediaManagementButton.setVisible(mediaPlayerManagerComponent.allowsEditing());
+            }
+
+        });
         this.leftScrollPanel = new ScrollPanel();
         this.leftScrollPanel.add(leftComponentP.getEntryWidget());
         this.leftScrollPanel.setTitle(leftComponentP.getEntryWidget().getTitle());
@@ -131,10 +145,22 @@ public class SideBySideComponentViewer implements ComponentViewer {
     
     /**
      * Create the video control button that shows or hides the video popup
+     * @param userAgent 
      */
-    private Button createMediaManagementButton(final MediaPlayerManagerComponent mediaPlayerManagerComponent) {
+    private Button createMediaManagementButton(final MediaPlayerManager mediaPlayerManager) {
         final Button mediaManagementButton = new Button(stringMessages.mediaPanel());
         mediaManagementButton.setTitle(stringMessages.showVideoPopup());
+        //onClick
+        final MediaMultiSelectionControl multiSelectionControl = new MediaMultiSelectionControl(mediaPlayerManager, mediaManagementButton);
+        mediaManagementButton.addClickHandler(new ClickHandler() {
+            
+            @Override
+            public void onClick(ClickEvent event) {
+                // TODO Auto-generated method stub
+                multiSelectionControl.show();
+            }
+        });
+        
         // hide button initially as we defer showing the button to the asynchroneous
         // task that gets launched by the media service to get video tracks
         mediaManagementButton.setVisible(false);

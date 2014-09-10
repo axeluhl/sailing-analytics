@@ -7,15 +7,14 @@ import com.google.gwt.event.dom.client.ChangeHandler;
 import com.google.gwt.user.client.ui.ListBox;
 import com.google.gwt.user.client.ui.Widget;
 import com.sap.sailing.domain.common.media.MediaTrack;
-import com.sap.sse.gwt.client.useragent.UserAgentDetails.AgentTypes;
 
 public class MediaSingleSelectionControl extends AbstractMediaSelectionControl {
 
     private final ListBox selectMedia = new ListBox();
     private List<MediaTrack> videoTracks;
 
-    public MediaSingleSelectionControl(MediaPlayerManager mediaPlayerManager, AgentTypes userAgent) {
-        super(mediaPlayerManager, userAgent);
+    public MediaSingleSelectionControl(MediaPlayerManager mediaPlayerManager) {
+        super(mediaPlayerManager);
         updateUi();
         selectMedia.addChangeHandler(new ChangeHandler() {
             
