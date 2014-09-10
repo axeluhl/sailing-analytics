@@ -64,6 +64,7 @@ public class SideBySideComponentViewer implements ComponentViewer {
     private final MediaPlayerManagerComponent mediaPlayerManagerComponent;
     private final Button videoToggleButton;
     private final Button mediaManagementButton;
+    private boolean videoPlays = false;
 
     private LayoutPanel mainPanel;
     
@@ -124,7 +125,7 @@ public class SideBySideComponentViewer implements ComponentViewer {
     /**
      * Create the video toggle button that shows or hides the video popup
      */
-    private Button createVideoToggleButton(final MediaPlayerManagerComponent mediaPlayerManagerComponent) {
+    private Button createVideoToggleButton(final MediaPlayerManager mediaPlayerManager) {
         final Button videoToggleButton = new Button(new SafeHtml() {
             private static final long serialVersionUID = 8679639887708833213L;
             @Override
@@ -137,6 +138,19 @@ public class SideBySideComponentViewer implements ComponentViewer {
             }
         });
         videoToggleButton.setTitle(stringMessages.showVideoPopup());
+        videoToggleButton.addClickHandler(new ClickHandler() {
+            
+            @Override
+            public void onClick(ClickEvent event) {
+                if(videoPlays){
+                    videoPlays = false;
+                    mediaPlayerManager.stopAll();
+                }else{
+                    videoPlays = true;
+                    mediaPlayerManager.playDefault();
+                }
+            }
+        });
         // hide button initially as we defer showing the button to the asynchroneous
         // task that gets launched by the media service to get video tracks
         videoToggleButton.setVisible(false);
@@ -156,7 +170,6 @@ public class SideBySideComponentViewer implements ComponentViewer {
             
             @Override
             public void onClick(ClickEvent event) {
-                // TODO Auto-generated method stub
                 multiSelectionControl.show();
             }
         });

@@ -150,7 +150,7 @@ public class MediaPlayerManagerComponent implements Component<Void>, PlayStateLi
     public void playDefault() {
         MediaTrack defaultVideo = getDefaultVideo();
         if (defaultVideo != null) {
-            playDockedVideo(defaultVideo);
+            playFloatingVideo(defaultVideo);
             playAudio(defaultVideo);
         } else {
             MediaTrack defaultAudio = getDefaultAudio();
@@ -370,7 +370,7 @@ public class MediaPlayerManagerComponent implements Component<Void>, PlayStateLi
 
     @Override
     public void playFloatingVideo(final MediaTrack videoTrack) {
-        if (dockedVideoPlayer.getMediaTrack() == videoTrack) {
+        if (dockedVideoPlayer!=null && dockedVideoPlayer.getMediaTrack() == videoTrack) {
             closeDockedVideo();
         }
         VideoContainer activeVideoContainer = activeVideoContainers.get(videoTrack);
