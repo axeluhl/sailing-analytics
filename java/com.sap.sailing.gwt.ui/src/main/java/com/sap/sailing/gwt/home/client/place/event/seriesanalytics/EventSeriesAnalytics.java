@@ -1,4 +1,4 @@
-package com.sap.sailing.gwt.home.client.shared.leaderboard;
+package com.sap.sailing.gwt.home.client.place.event.seriesanalytics;
 
 import java.util.ArrayList;
 import java.util.Date;
@@ -18,15 +18,16 @@ import com.google.gwt.user.client.ui.Anchor;
 import com.google.gwt.user.client.ui.Composite;
 import com.google.gwt.user.client.ui.HTMLPanel;
 import com.google.gwt.user.client.ui.ListBox;
-import com.google.gwt.user.client.ui.ScrollPanel;
 import com.google.gwt.user.client.ui.Widget;
 import com.sap.sailing.domain.common.DetailType;
+import com.sap.sailing.domain.common.LeaderboardNameConstants;
 import com.sap.sailing.domain.common.RaceIdentifier;
 import com.sap.sailing.domain.common.dto.FleetDTO;
 import com.sap.sailing.domain.common.dto.LeaderboardDTO;
 import com.sap.sailing.domain.common.dto.RaceColumnDTO;
 import com.sap.sailing.gwt.home.client.HomeResources;
 import com.sap.sailing.gwt.home.client.app.PlaceNavigator;
+import com.sap.sailing.gwt.home.client.i18n.TextMessages;
 import com.sap.sailing.gwt.home.client.place.event.header.CompactEventHeader;
 import com.sap.sailing.gwt.home.client.place.event.regattaleaderboard.EventRegattaLeaderboardResources;
 import com.sap.sailing.gwt.ui.client.DebugIdHelper;
@@ -48,13 +49,14 @@ import com.sap.sse.gwt.client.player.Timer.PlayModes;
 import com.sap.sse.gwt.client.player.Timer.PlayStates;
 import com.sap.sse.gwt.client.useragent.UserAgentDetails;
 
-public class RegattaAnalytics extends Composite implements LeaderboardUpdateListener {
-    private static RegattaAnalyticsUiBinder uiBinder = GWT.create(RegattaAnalyticsUiBinder.class);
+public class EventSeriesAnalytics extends Composite implements LeaderboardUpdateListener {
+    private static EventSeriesAnalyticsUiBinder uiBinder = GWT.create(EventSeriesAnalyticsUiBinder.class);
 
-    interface RegattaAnalyticsUiBinder extends UiBinder<Widget, RegattaAnalytics> {
+    interface EventSeriesAnalyticsUiBinder extends UiBinder<Widget, EventSeriesAnalytics> {
     }
 
     @UiField HTMLPanel oldLeaderboardPanel;
+    @UiField HTMLPanel oldMultiLeaderboardPanel;
     @UiField HTMLPanel competitorChartsPanel;
     @UiField(provided=true) CompactEventHeader eventHeader;
     
@@ -63,32 +65,79 @@ public class RegattaAnalytics extends Composite implements LeaderboardUpdateList
     @UiField Anchor settingsAnchor;
     @UiField Anchor autoRefreshAnchor;
     @UiField ParagraphElement lastScoringUpdateTimeDiv;
+    @UiField ParagraphElement lastScoringUpdateTextDiv;
     @UiField ParagraphElement lastScoringCommentDiv;
     @UiField ParagraphElement scoringSchemeDiv;
     @UiField DivElement liveRaceDiv;
 
-    @UiField HTMLPanel leaderboardTabPanel;
+    @UiField HTMLPanel overallLeaderboardTabPanel;
+    @UiField HTMLPanel regattaLeaderboardsTabPanel;
     @UiField HTMLPanel competitorChartsTabPanel;
     private HTMLPanel activeTabPanel;
+    private Widget activeContentWidget;
     private Anchor activeAnchor;
-    
-    @UiField Anchor leaderboardAnchor;
+
+    @UiField Anchor overallLeaderboardAnchor;
+    @UiField Anchor regattaLeaderboardsAnchor;
     @UiField Anchor competitorChartsAnchor;
-    @UiField(provided=true) ListBox chartTypeSelectionListBox;
+    @UiField ListBox chartTypeSelectionListBox;
     
-    private AbstractRegattaAnalyticsManager regattaAnalyticsManager;
+    private EventSeriesAnalyticsDataManager eventSeriesAnalyticsManager;
     private Timer autoRefreshTimer;
     private final List<DetailType> availableDetailsTypes;
-    
-    public RegattaAnalytics(EventDTO event, String leaderboardName, Timer timerForClientServerOffset, PlaceNavigator placeNavigator) {
+        
+    public EventSeriesAnalytics(EventDTO event, String leaderboardName, Timer timerForClientServerOffset, PlaceNavigator placeNavigator) {
         eventHeader = new CompactEventHeader(event, leaderboardName, placeNavigator);
     
         availableDetailsTypes = new ArrayList<DetailType>();
-        availableDetailsTypes.add(DetailType.REGATTA_RANK);
-        availableDetailsTypes.add(DetailType.REGATTA_TOTAL_POINTS_SUM);
-        DetailType initialDetailType = DetailType.REGATTA_RANK;
+
+        EventRegattaLeaderboardResources.INSTANCE.css().ensureInjected();
+        EventSeriesAnalyticsResources.INSTANCE.css().ensureInjected();
         
-        chartTypeSelectionListBox = new ListBox(false);
+        initWidget(uiBinder.createAndBindUi(this));
+        
+        String seriesTitle = leaderboardName;
+        if(seriesTitle.endsWith(LeaderboardNameConstants.OVERALL)) {
+            seriesTitle = seriesTitle.substring(0, seriesTitle.length() - LeaderboardNameConstants.OVERALL.length());
+            seriesTitle = seriesTitle.trim();
+        }
+        title.setInnerText(seriesTitle);
+
+        activeAnchor = overallLeaderboardAnchor;
+        activeTabPanel = overallLeaderboardTabPanel;
+        activeContentWidget = null;
+        activeAnchor.addStyleName(HomeResources.INSTANCE.mainCss().navbar_buttonactive());
+
+        regattaLeaderboardsTabPanel.setVisible(false);
+        competitorChartsTabPanel.setVisible(false);
+    }
+    
+    public void createSeriesAnalyticsViewer(SailingServiceAsync sailingService, AsyncActionsExecutor asyncActionsExecutor, 
+            Timer timer, LeaderboardSettings leaderboardSettings, String preselectedLeaderboardName, RaceIdentifier preselectedRace,
+            String leaderboardGroupName, String metaLeaderboardName, ErrorReporter errorReporter,
+            UserAgentDetails userAgent, boolean showRaceDetails,  
+            boolean autoExpandLastRaceColumn, boolean showSeriesLeaderboards) {
+        this.autoRefreshTimer = timer;
+        eventSeriesAnalyticsManager = new EventSeriesAnalyticsDataManager(sailingService, asyncActionsExecutor, timer, errorReporter, userAgent);
+        eventSeriesAnalyticsManager.createOverallLeaderboardPanel(leaderboardSettings, preselectedRace, leaderboardGroupName, metaLeaderboardName, showRaceDetails, autoExpandLastRaceColumn);
+        eventSeriesAnalyticsManager.createMultiLeaderboardPanel(leaderboardSettings, null /*preSelectedLeaderboardName */, preselectedRace, leaderboardGroupName, metaLeaderboardName, showRaceDetails, autoExpandLastRaceColumn);
+
+        DetailType initialDetailType = DetailType.OVERALL_RANK;
+        availableDetailsTypes.add(DetailType.OVERALL_RANK);
+
+        fillChartTypeSelectionBox(initialDetailType);
+        eventSeriesAnalyticsManager.createMultiCompetitorChart(metaLeaderboardName, DetailType.OVERALL_RANK);
+       
+        oldLeaderboardPanel.add(eventSeriesAnalyticsManager.getLeaderboardPanel());
+        oldMultiLeaderboardPanel.add(eventSeriesAnalyticsManager.getMultiLeaderboardPanel());
+       
+        eventSeriesAnalyticsManager.getLeaderboardPanel().addLeaderboardUpdateListener(this);
+
+        activeContentWidget = eventSeriesAnalyticsManager.getLeaderboardPanel();
+    }
+
+    private void fillChartTypeSelectionBox(DetailType initialDetailType) {
+        chartTypeSelectionListBox.clear();
         int i = 0;
         for (DetailType detailType : availableDetailsTypes) {
             chartTypeSelectionListBox.addItem(DetailTypeFormatter.format(detailType), detailType.name());
@@ -97,55 +146,6 @@ public class RegattaAnalytics extends Composite implements LeaderboardUpdateList
             }
             i++;
         }
-        
-        EventRegattaLeaderboardResources.INSTANCE.css().ensureInjected();
-        RegattaAnalyticsResources.INSTANCE.css().ensureInjected();
-        
-        initWidget(uiBinder.createAndBindUi(this));
-        
-        title.setInnerText(leaderboardName);
-
-        activeAnchor = leaderboardAnchor;
-        activeTabPanel = leaderboardTabPanel;
-        activeAnchor.addStyleName(HomeResources.INSTANCE.mainCss().navbar_buttonactive());
-
-        competitorChartsTabPanel.setVisible(false);
-    }
-    
-    public void createLeaderboardViewer(final SailingServiceAsync sailingService, final AsyncActionsExecutor asyncActionsExecutor,
-            final Timer timer, final LeaderboardSettings leaderboardSettings, final RaceIdentifier preselectedRace,
-            final String leaderboardGroupName, String leaderboardName, final ErrorReporter errorReporter,
-            final UserAgentDetails userAgent, boolean showRaceDetails,  
-            boolean autoExpandLastRaceColumn, boolean showOverallLeaderboard) {
-        this.autoRefreshTimer = timer;
-        regattaAnalyticsManager = new LeaderboardViewer(sailingService, asyncActionsExecutor, timer, errorReporter, userAgent);
-        regattaAnalyticsManager.createLeaderboardPanel(leaderboardSettings, preselectedRace, leaderboardGroupName, leaderboardName, showRaceDetails, autoExpandLastRaceColumn);
-        regattaAnalyticsManager.createMultiCompetitorChart(leaderboardName, DetailType.REGATTA_RANK);
-
-        ScrollPanel contentScrollPanel = new ScrollPanel();
-        contentScrollPanel.setWidget(regattaAnalyticsManager.getLeaderboardPanel());
-        oldLeaderboardPanel.add(contentScrollPanel);
-        regattaAnalyticsManager.getLeaderboardPanel().addLeaderboardUpdateListener(this);
-        
-        competitorChartsPanel.add(regattaAnalyticsManager.getMultiCompetitorChart());
-        regattaAnalyticsManager.hideCompetitorChart();
-    }
-
-    public void createMetaLeaderboardViewer(SailingServiceAsync sailingService, AsyncActionsExecutor asyncActionsExecutor, 
-            Timer timer, LeaderboardSettings leaderboardSettings, String preselectedLeaderboardName, RaceIdentifier preselectedRace,
-            String leaderboardGroupName, String metaLeaderboardName, ErrorReporter errorReporter,
-            UserAgentDetails userAgent, boolean showRaceDetails,  
-            boolean autoExpandLastRaceColumn, boolean showSeriesLeaderboards) {
-        this.autoRefreshTimer = timer;
-        regattaAnalyticsManager = new MetaLeaderboardViewer(sailingService, asyncActionsExecutor, timer, errorReporter, userAgent);
-        regattaAnalyticsManager.createLeaderboardPanel(leaderboardSettings, preselectedRace, leaderboardGroupName, metaLeaderboardName, showRaceDetails, autoExpandLastRaceColumn);
-       
-//        ScrollPanel contentScrollPanel = new ScrollPanel();
-//        contentScrollPanel.setWidget(regattaAnalyticsManager.getLeaderboardPanel());
-//        oldLeaderboardPanel.add(contentScrollPanel);
-        oldLeaderboardPanel.add(regattaAnalyticsManager.getLeaderboardPanel());
-        
-        regattaAnalyticsManager.hideCompetitorChart();
     }
     
     @UiHandler("autoRefreshAnchor")
@@ -162,7 +162,7 @@ public class RegattaAnalytics extends Composite implements LeaderboardUpdateList
     
     @UiHandler("settingsAnchor")
     void settingsClicked(ClickEvent event) {
-        LeaderboardPanel leaderboardComponent = regattaAnalyticsManager.getLeaderboardPanel();
+        LeaderboardPanel leaderboardComponent = eventSeriesAnalyticsManager.getLeaderboardPanel();
         
         final String componentName = leaderboardComponent.getLocalizedShortName();
         final String debugIdPrefix = DebugIdHelper.createDebugId(componentName);
@@ -175,7 +175,7 @@ public class RegattaAnalytics extends Composite implements LeaderboardUpdateList
 
     @Override
     public void updatedLeaderboard(LeaderboardDTO leaderboard) {
-        if(activeTabPanel == leaderboardTabPanel) {
+        if(activeTabPanel == overallLeaderboardTabPanel) {
             StringMessages stringMessages = StringMessages.INSTANCE;
             
             if(leaderboard != null) {
@@ -186,8 +186,10 @@ public class RegattaAnalytics extends Composite implements LeaderboardUpdateList
                     String lastUpdate = DateAndTimeFormatterUtil.defaultDateFormatter.render(lastCorrectionDate) + ", "
                             + DateAndTimeFormatterUtil.longTimeFormatter.render(lastCorrectionDate);
                     lastScoringUpdateTimeDiv.setInnerText(lastUpdate);
+                    lastScoringUpdateTextDiv.setInnerText(TextMessages.INSTANCE.eventRegattaLeaderboardLastScoreUpdate());
                 } else {
                     lastScoringUpdateTimeDiv.setInnerText("");
+                    lastScoringUpdateTextDiv.setInnerText("");
                 }
                 
                 List<Pair<RaceColumnDTO, FleetDTO>> liveRaces = leaderboard.getLiveRaces(autoRefreshTimer.getLiveTimePointInMillis());
@@ -220,23 +222,25 @@ public class RegattaAnalytics extends Composite implements LeaderboardUpdateList
     public void currentRaceSelected(RaceIdentifier raceIdentifier, RaceColumnDTO raceColumn) {
     }
     
-    @UiHandler("leaderboardAnchor")
-    void leaderboardTabClicked(ClickEvent event) {
-        setActiveTabPanel(leaderboardTabPanel, leaderboardAnchor);
-        regattaAnalyticsManager.hideCompetitorChart();
+    @UiHandler("overallLeaderboardAnchor")
+    void overallLeaderboardTabClicked(ClickEvent event) {
+        setActiveTabPanel(overallLeaderboardTabPanel, eventSeriesAnalyticsManager.getLeaderboardPanel(), overallLeaderboardAnchor);
     }
-    
+
+    @UiHandler("regattaLeaderboardsAnchor")
+    void regattaLeaderboardsTabClicked(ClickEvent event) {
+        setActiveTabPanel(regattaLeaderboardsTabPanel, eventSeriesAnalyticsManager.getMultiLeaderboardPanel(), regattaLeaderboardsAnchor);
+    }
+
     @UiHandler("competitorChartsAnchor")
     void competitorChartsTabClicked(ClickEvent event) {
-        setActiveTabPanel(competitorChartsTabPanel, competitorChartsAnchor);
-        DetailType selectedChartDetailType = getSelectedChartDetailType();
-        regattaAnalyticsManager.showCompetitorChart(selectedChartDetailType);
+        setActiveTabPanel(competitorChartsTabPanel, eventSeriesAnalyticsManager.getMultiCompetitorChart(), competitorChartsAnchor);
     }
 
     @UiHandler("chartTypeSelectionListBox")
     void chartTypeSelectionChanged(ChangeEvent event) {
         DetailType selectedChartDetailType = getSelectedChartDetailType();
-        regattaAnalyticsManager.showCompetitorChart(selectedChartDetailType);
+        eventSeriesAnalyticsManager.showCompetitorChart(selectedChartDetailType);
     }
     
     private DetailType getSelectedChartDetailType() {
@@ -252,15 +256,23 @@ public class RegattaAnalytics extends Composite implements LeaderboardUpdateList
         return result;
     }
 
-    private void setActiveTabPanel(HTMLPanel newActivePanel, Anchor newActiveAnchor) {
+    private void setActiveTabPanel(HTMLPanel newActivePanel, Widget newActiveContentWidget, Anchor newActiveAnchor) {
         if(activeTabPanel != null) {
             activeTabPanel.setVisible(false);
             activeAnchor.removeStyleName(HomeResources.INSTANCE.mainCss().navbar_buttonactive());
         }
+        if(activeContentWidget != null) {
+            activeContentWidget.setVisible(false);
+        }
+        
+        DetailType selectedChartDetailType = getSelectedChartDetailType();
+        eventSeriesAnalyticsManager.showCompetitorChart(selectedChartDetailType);
         
         activeTabPanel = newActivePanel;
+        activeContentWidget = newActiveContentWidget;
         activeAnchor = newActiveAnchor;
         activeTabPanel.setVisible(true);
+        activeContentWidget.setVisible(true);
         activeAnchor.addStyleName(HomeResources.INSTANCE.mainCss().navbar_buttonactive());
     }
 }

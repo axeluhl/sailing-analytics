@@ -1,4 +1,4 @@
-package com.sap.sailing.gwt.home.client.shared.leaderboard;
+package com.sap.sailing.gwt.home.client.place.event.regattaanalytics;
 
 import com.sap.sailing.domain.common.DetailType;
 import com.sap.sailing.domain.common.RaceIdentifier;
@@ -18,23 +18,22 @@ import com.sap.sse.gwt.client.player.Timer;
 import com.sap.sse.gwt.client.useragent.UserAgentDetails;
 
 /**
- * A base class managing analytical data on the regatta level (like leaderboard, regatta rank, etc.)
+ * A class managing analytical data on the regatta level (like leaderboard, regatta rank, etc.)
  * 
  * @author Frank Mittag (c163874)
  */
-public abstract class AbstractRegattaAnalyticsManager {
+public class RegattaAnalyticsDataManager {
     private LeaderboardPanel leaderboardPanel;
     private MultiCompetitorLeaderboardChart multiCompetitorChart;
 
-    protected final CompetitorSelectionModel competitorSelectionProvider;
-    protected final AsyncActionsExecutor asyncActionsExecutor;
-    protected final ErrorReporter errorReporter;
-    protected final UserAgentDetails userAgent;
-    protected final SailingServiceAsync sailingService;
-    
-    protected final Timer timer;
+    private final CompetitorSelectionModel competitorSelectionProvider;
+    private final AsyncActionsExecutor asyncActionsExecutor;
+    private final ErrorReporter errorReporter;
+    private final UserAgentDetails userAgent;
+    private final SailingServiceAsync sailingService;
+    private final Timer timer;
 
-    public AbstractRegattaAnalyticsManager(final SailingServiceAsync sailingService, AsyncActionsExecutor asyncActionsExecutor, Timer timer, ErrorReporter errorReporter, UserAgentDetails userAgent) {
+    public RegattaAnalyticsDataManager(final SailingServiceAsync sailingService, AsyncActionsExecutor asyncActionsExecutor, Timer timer, ErrorReporter errorReporter, UserAgentDetails userAgent) {
         this.competitorSelectionProvider = new CompetitorSelectionModel(/* hasMultiSelection */true);
         this.sailingService = sailingService;
         this.asyncActionsExecutor = asyncActionsExecutor;
@@ -104,6 +103,4 @@ public abstract class AbstractRegattaAnalyticsManager {
         dialog.ensureDebugId(debugIdPrefix + "SettingsDialog");
         dialog.show();
     }
-
 }
-

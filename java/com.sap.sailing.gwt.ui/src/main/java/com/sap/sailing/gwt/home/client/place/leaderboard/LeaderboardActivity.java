@@ -64,7 +64,7 @@ public class LeaderboardActivity extends AbstractActivity implements ErrorReport
                                 @Override
                                 public void onSuccess(Util.Pair<String, LeaderboardType> leaderboardNameAndType) {
                                     if (leaderboardNameAndType != null && leaderboardName.equals(leaderboardNameAndType.getA())) {
-                                        createLeaderboardViewer(panel, event, leaderboardNameAndType.getA(), leaderboardNameAndType.getB(), showRaceDetails);
+                                        createAnalyticsViewer(panel, event, leaderboardNameAndType.getA(), leaderboardNameAndType.getB(), showRaceDetails);
                                     } else {
                                         createErrorView(TextMessages.INSTANCE.errorMessageNoSuchLeaderboard(), null, panel);
                                     }
@@ -87,7 +87,7 @@ public class LeaderboardActivity extends AbstractActivity implements ErrorReport
         }); 
     }
     
-    private void createLeaderboardViewer(AcceptsOneWidget panel, EventDTO event, String leaderboardName, LeaderboardType leaderboardType, boolean showRaceDetails) {
+    private void createAnalyticsViewer(AcceptsOneWidget panel, EventDTO event, String leaderboardName, LeaderboardType leaderboardType, boolean showRaceDetails) {
         String leaderboardDisplayName = Window.Location.getParameter("displayName");
         if (leaderboardDisplayName == null || leaderboardDisplayName.isEmpty()) {
             leaderboardDisplayName = leaderboardName;
@@ -105,19 +105,19 @@ public class LeaderboardActivity extends AbstractActivity implements ErrorReport
         boolean showOverallLeaderboard = GwtHttpRequestUtils.getBooleanParameter(LeaderboardUrlSettings.PARAM_SHOW_OVERALL_LEADERBOARD, false);
         boolean showSeriesLeaderboards = GwtHttpRequestUtils.getBooleanParameter(LeaderboardUrlSettings.PARAM_SHOW_SERIES_LEADERBOARDS, false);
         
-        LeaderboardView leaderboardView = clientFactory.createLeaderboardView(event, leaderboardName, timerForClientServerOffset);
+        AnalyticsView analyticsView = clientFactory.createLeaderboardView(event, leaderboardName, timerForClientServerOffset);
         
         if (leaderboardType.isMetaLeaderboard()) {
-            leaderboardView.createMetaLeaderboardViewer(clientFactory.getSailingService(), new AsyncActionsExecutor(),
+            analyticsView.createSeriesAnalyticsViewer(clientFactory.getSailingService(), new AsyncActionsExecutor(),
                     timer, leaderboardSettings, null, preselectedRace, "leaderboardGroupName", leaderboardName, this,
                     userAgent, showRaceDetails, autoExpandLastRaceColumn, showSeriesLeaderboards);
         } else {
-            leaderboardView.createLeaderboardViewer(clientFactory.getSailingService(), new AsyncActionsExecutor(),
+            analyticsView.createRegattaAnalyticsViewer(clientFactory.getSailingService(), new AsyncActionsExecutor(),
                     timer, leaderboardSettings, preselectedRace, "leaderboardGroupName", leaderboardName, this,
                     userAgent, showRaceDetails, autoExpandLastRaceColumn, showOverallLeaderboard);
         }
 
-        panel.setWidget(leaderboardView.asWidget());
+        panel.setWidget(analyticsView.asWidget());
     }
    
     /**

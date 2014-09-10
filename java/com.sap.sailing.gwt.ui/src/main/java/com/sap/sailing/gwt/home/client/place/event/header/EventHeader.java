@@ -12,6 +12,7 @@ import com.google.gwt.uibinder.client.UiField;
 import com.google.gwt.uibinder.client.UiHandler;
 import com.google.gwt.user.client.ui.Anchor;
 import com.google.gwt.user.client.ui.Widget;
+import com.sap.sailing.domain.common.LeaderboardNameConstants;
 import com.sap.sailing.gwt.home.client.app.PlaceNavigator;
 import com.sap.sailing.gwt.home.client.i18n.TextMessages;
 import com.sap.sailing.gwt.home.client.place.event.AbstractEventComposite;
@@ -62,16 +63,19 @@ public class EventHeader extends AbstractEventComposite {
     @UiField ImageElement eventLogo;
     @UiField ImageElement eventLogo2;
 //    @UiField ImageElement eventLogo3;
+
+//  private final List<Anchor> links1;
+//  private final List<Anchor> links2;
+//  private final List<Anchor> links3;
     
     private final String defaultLogoUrl = "http://static.sapsailing.com/ubilabsimages/default/default_event_logo.jpg";
-
-//    private final List<Anchor> links1;
-//    private final List<Anchor> links2;
-//    private final List<Anchor> links3;
-
-    public EventHeader(EventDTO event, EventPageNavigator pageNavigator) {
+    
+    private final PlaceNavigator placeNavigator;
+    
+    public EventHeader(EventDTO event, PlaceNavigator placeNavigator, EventPageNavigator pageNavigator) {
         super(event, pageNavigator);
         
+        this.placeNavigator = placeNavigator;
         initResources();
 
 //        links1 = Arrays.asList(new Anchor[] { overviewLink, regattasLink, scheduleLink, mediaLink });
@@ -96,19 +100,8 @@ public class EventHeader extends AbstractEventComposite {
 
     public EventHeader(EventDTO event) {
         super(event, null);
-        
-        initResources();
-        
-        isFinishedDiv.getStyle().setDisplay(Display.NONE);
-        isLiveDiv.getStyle().setDisplay(Display.NONE);
-        
-        setDataNavigationType("normal");
-        updateUI();
-    }
 
-    public EventHeader(EventDTO event, PlaceNavigator placeNavigator) {
-        super(event, null);
-        
+        this.placeNavigator = null;
         initResources();
         
         isFinishedDiv.getStyle().setDisplay(Display.NONE);
@@ -235,8 +228,12 @@ public class EventHeader extends AbstractEventComposite {
 
     @UiHandler("seriesLeaderboardAnchor")
     void seriesLeaderboardClicked(ClickEvent clickevent) {
-        if(getEvent().isFakeSeries()) {
-            getPageNavigator().openOverallLeaderboardViewer(getEvent().getLeaderboardGroups().get(0));
+        EventDTO event = getEvent();
+        if(event.isFakeSeries()) {
+            LeaderboardGroupDTO leaderboardGroupDTO = getEvent().getLeaderboardGroups().get(0);
+            String overallLeaderboardName = leaderboardGroupDTO.getName() + " " + LeaderboardNameConstants.OVERALL;
+            
+            placeNavigator.goToLeaderboard(event.id.toString(), overallLeaderboardName, event.getBaseURL(), event.isOnRemoteServer());
         }
     }
     

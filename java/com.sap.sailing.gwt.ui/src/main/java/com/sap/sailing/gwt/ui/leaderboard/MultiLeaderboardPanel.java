@@ -56,9 +56,10 @@ public class MultiLeaderboardPanel extends AbstractLazyComponent<LeaderboardSett
     private TabPanel leaderboardsTabPanel;
     private Label leaderboardsLabel;
     private final String metaLeaderboardName;
+    private final boolean isEmbedded;
     
-    public MultiLeaderboardPanel(SailingServiceAsync sailingService, String metaLeaderboardName, AsyncActionsExecutor asyncActionsExecutor, Timer timer,
-            String preselectedLeaderboardName, RaceIdentifier preselectedRace, 
+    public MultiLeaderboardPanel(SailingServiceAsync sailingService, String metaLeaderboardName, AsyncActionsExecutor asyncActionsExecutor,
+            Timer timer, boolean isEmbedded, String preselectedLeaderboardName, RaceIdentifier preselectedRace, 
             ErrorReporter errorReporter, StringMessages stringMessages,
             UserAgentDetails userAgent, boolean showRaceDetails, boolean autoExpandLastRaceColumn) {
         this.stringMessages = stringMessages;
@@ -69,6 +70,7 @@ public class MultiLeaderboardPanel extends AbstractLazyComponent<LeaderboardSett
         this.userAgent = userAgent;
         this.showRaceDetails = showRaceDetails;
         this.timer = timer;
+        this.isEmbedded = isEmbedded;
         this.selectedLeaderboardName = preselectedLeaderboardName;
         
         selectedLeaderboardFlowPanel = null;
@@ -94,11 +96,13 @@ public class MultiLeaderboardPanel extends AbstractLazyComponent<LeaderboardSett
     public Widget createWidget() {
         mainPanel = new VerticalPanel();
         
-        leaderboardsLabel = new Label(stringMessages.regattaLeaderboards());
-        leaderboardsLabel.setVisible(false);
-        leaderboardsLabel.getElement().getStyle().setFontWeight(FontWeight.BOLD);
-        leaderboardsLabel.getElement().getStyle().setMargin(5, Unit.PX);
-        mainPanel.add(leaderboardsLabel);
+        if(!isEmbedded) {
+            leaderboardsLabel = new Label(stringMessages.regattaLeaderboards());
+            leaderboardsLabel.setVisible(false);
+            leaderboardsLabel.getElement().getStyle().setFontWeight(FontWeight.BOLD);
+            leaderboardsLabel.getElement().getStyle().setMargin(5, Unit.PX);
+            mainPanel.add(leaderboardsLabel);
+        }
 
         leaderboardsTabPanel = new TabPanel();
         leaderboardsTabPanel.setVisible(false);
@@ -184,7 +188,9 @@ public class MultiLeaderboardPanel extends AbstractLazyComponent<LeaderboardSett
             }
             
             leaderboardsTabPanel.setVisible(leaderboardCount > 0);
-            leaderboardsLabel.setVisible(leaderboardCount > 0);
+            if(!isEmbedded) {
+                leaderboardsLabel.setVisible(leaderboardCount > 0);
+            }
         }
     }
 
@@ -199,7 +205,7 @@ public class MultiLeaderboardPanel extends AbstractLazyComponent<LeaderboardSett
             
             selectedLeaderboardFlowPanel = (FlowPanel) leaderboardsTabPanel.getWidget(newTabIndex);
             LeaderboardSettings newLeaderboardSettings = getOrCreateLeaderboardSettings(newSelectedLeaderboardName, leaderboardNamesAndSettings.get(selectedLeaderboardName));
-            selectedLeaderboardPanel = new LeaderboardPanel(sailingService, asyncActionsExecutor, newLeaderboardSettings, false,
+            selectedLeaderboardPanel = new LeaderboardPanel(sailingService, asyncActionsExecutor, newLeaderboardSettings, isEmbedded,
                     /* preselectedRace*/ null, new CompetitorSelectionModel(true), timer,
                     null, newSelectedLeaderboardName, errorReporter, stringMessages, userAgent,
                     showRaceDetails, /* competitorSearchTextBox */ null, /* showSelectionCheckbox */ true,  /* raceTimesInfoProvider */null, 

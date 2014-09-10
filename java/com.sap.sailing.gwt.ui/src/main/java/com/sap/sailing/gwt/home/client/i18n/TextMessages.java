@@ -32,6 +32,7 @@ public interface TextMessages extends Messages {
     String regatta();
     String competitorsAnalytics();
     String chooseChart();
+    String series();
     
     String countdownDays();
     String countdownHours();
