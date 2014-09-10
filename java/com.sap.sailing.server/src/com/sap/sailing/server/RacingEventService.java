@@ -426,6 +426,8 @@ public interface RacingEventService extends TrackedRegattaRegistry, RegattaFetch
 
     void mediaTrackDurationChanged(MediaTrack mediaTrack);
 
+    void mediaTrackRacesChanged(MediaTrack mediaTrack);
+    
     void mediaTrackDeleted(MediaTrack mediaTrack);
 
     /**
@@ -589,4 +591,5 @@ public interface RacingEventService extends TrackedRegattaRegistry, RegattaFetch
      * objects by the same name of that type will be replaced.
      */
     void addLeaderboardGroupWithoutReplication(LeaderboardGroup leaderboardGroup);
+
 }

@@ -1,6 +1,7 @@
 package com.sap.sailing.server.impl;
 
 import java.util.Collection;
+import java.util.HashSet;
 import java.util.Iterator;
 import java.util.Set;
 
@@ -8,6 +9,8 @@ import org.junit.Before;
 import org.junit.Test;
 
 import com.sap.sailing.domain.common.Duration;
+import com.sap.sailing.domain.common.RegattaAndRaceIdentifier;
+import com.sap.sailing.domain.common.RegattaNameAndRaceName;
 import com.sap.sailing.domain.common.TimePoint;
 import com.sap.sailing.domain.common.TimeRange;
 import com.sap.sailing.domain.common.impl.MillisecondsDurationImpl;
@@ -17,7 +20,6 @@ import com.sap.sailing.domain.common.media.MediaTrack;
 import com.sap.sailing.domain.common.media.MediaTrack.MimeType;
 
 import static org.junit.Assert.*;
-
 import static org.hamcrest.Matchers.*;
 
 
@@ -41,7 +43,9 @@ public class MediaLibaryTest {
         TimePoint startTime = MillisecondsTimePoint.now();
         Duration duration = MillisecondsDurationImpl.ONE_HOUR;
         MimeType mimeType = MimeType.mp4;
-        MediaTrack mediaTrack = new MediaTrack(dbId, title, url, startTime, duration, mimeType);
+        Set<RegattaAndRaceIdentifier> regattasAndRaces = new HashSet<RegattaAndRaceIdentifier>();
+        regattasAndRaces.add(new RegattaNameAndRaceName("49er", "R1"));
+        MediaTrack mediaTrack = new MediaTrack(dbId, title, url, startTime, duration, mimeType, regattasAndRaces);
         return mediaTrack;
     }
     
@@ -170,7 +174,7 @@ public class MediaLibaryTest {
 
         mediaLibary.addMediaTrack(originalMediaTrack);
         
-        Set<MediaTrack> firstQueryResult = mediaLibary.findMediaTracksInTimeRange(queryStartTime, queryEndTime);
+        Set<MediaTrack> firstQueryResult = mediaLibary.findMediaTracksForRace(null, null, null);
         assertThat(firstQueryResult.size(), is(1));
         
         MediaTrack changedMediaTrack = new MediaTrack();
@@ -179,10 +183,10 @@ public class MediaLibaryTest {
         changedMediaTrack.duration = new MillisecondsDurationImpl(100);
         mediaLibary.startTimeChanged(changedMediaTrack);
         
-        Set<MediaTrack> secondQueryResult = mediaLibary.findMediaTracksInTimeRange(queryStartTime, queryEndTime);
+        Set<MediaTrack> secondQueryResult = mediaLibary.findMediaTracksForRace(null, null, null);
         assertThat(secondQueryResult.size(), is(0));
 
-        Set<MediaTrack> thirdQueryResult = mediaLibary.findMediaTracksInTimeRange(changedMediaTrack.startTime, changedMediaTrack.deriveEndTime());
+        Set<MediaTrack> thirdQueryResult = mediaLibary.findMediaTracksForRace(null, null, null);
         assertThat(thirdQueryResult.size(), is(1));
 
         
@@ -200,12 +204,12 @@ public class MediaLibaryTest {
 
         mediaLibary.addMediaTrack(mediaTrack);
         
-        Set<MediaTrack> firstQueryResult = mediaLibary.findMediaTracksInTimeRange(originalStartTime, originalEndTime);
+        Set<MediaTrack> firstQueryResult = mediaLibary.findMediaTracksForRace(null, null, null);
         assertThat(firstQueryResult.size(), is(1));
         
         mediaLibary.deleteMediaTrack(mediaTrack);
         
-        Set<MediaTrack> secondQueryResult = mediaLibary.findMediaTracksInTimeRange(originalStartTime, originalEndTime);
+        Set<MediaTrack> secondQueryResult = mediaLibary.findMediaTracksForRace(null, null, null);
         assertThat(secondQueryResult.size(), is(0));
 
     }
@@ -221,7 +225,7 @@ public class MediaLibaryTest {
         TimePoint queryStartTime = firstMediaTrack.startTime.plus(1);
         TimePoint queryEndTime = firstMediaTrack.deriveEndTime().minus(1);
         
-        Set<MediaTrack> firstQueryResult = mediaLibary.findMediaTracksInTimeRange(queryStartTime, queryEndTime);
+        Set<MediaTrack> firstQueryResult = mediaLibary.findMediaTracksForRace(null, null, null);
         assertThat(firstQueryResult.size(), is(1));
         
         MediaTrack secondMediaTrack = new MediaTrack();
@@ -230,13 +234,13 @@ public class MediaLibaryTest {
         secondMediaTrack.duration = firstMediaTrack.duration;
         mediaLibary.addMediaTrack(secondMediaTrack);
         
-        Set<MediaTrack> secondQueryResult = mediaLibary.findMediaTracksInTimeRange(queryStartTime, queryEndTime);
+        Set<MediaTrack> secondQueryResult = mediaLibary.findMediaTracksForRace(null, null, null);
         assertThat(secondQueryResult.size(), is(2));
 
         TimePoint uncachedStartTime = firstMediaTrack.startTime.plus(2);
         TimePoint uncachedEndTime = firstMediaTrack.deriveEndTime().minus(2);
 
-        Set<MediaTrack> thirdQueryResult = mediaLibary.findMediaTracksInTimeRange(uncachedStartTime, uncachedEndTime);
+        Set<MediaTrack> thirdQueryResult = mediaLibary.findMediaTracksForRace(null, null, null);
         assertThat(thirdQueryResult.size(), is(2));
 }
     
@@ -246,10 +250,12 @@ public class MediaLibaryTest {
         String title = "title";
         String url = "url";
         MimeType mimeType = MimeType.mp4;
-        MediaTrack mediaTrack = new MediaTrack(dbId, title, url, startTime, duration, mimeType);
+        Set<RegattaAndRaceIdentifier> regattasAndRaces = new HashSet<RegattaAndRaceIdentifier>();
+        regattasAndRaces.add(new RegattaNameAndRaceName("49er", "R1"));        
+        MediaTrack mediaTrack = new MediaTrack(dbId, title, url, startTime, duration, mimeType, regattasAndRaces);
         mediaLibary.addMediaTrack(mediaTrack);
         
-        Collection<MediaTrack> mediaTracks = mediaLibary.findMediaTracksInTimeRange(rangeStart, rangeEnd);
+        Collection<MediaTrack> mediaTracks = mediaLibary.findMediaTracksForRace(null, null, null);
         assertThat(mediaTracks.size(), is(1));
         assertThat(mediaTracks.iterator().next().dbId, is(dbId));
     }
@@ -260,10 +266,12 @@ public class MediaLibaryTest {
         String title = "title";
         String url = "url";
         MimeType mimeType = MimeType.mp4;
-        MediaTrack mediaTrack = new MediaTrack(dbId, title, url, startTime, duration, mimeType);
+        Set<RegattaAndRaceIdentifier> regattasAndRaces = new HashSet<RegattaAndRaceIdentifier>();
+        regattasAndRaces.add(new RegattaNameAndRaceName("49er", "R1"));
+        MediaTrack mediaTrack = new MediaTrack(dbId, title, url, startTime, duration, mimeType, regattasAndRaces);
         mediaLibary.addMediaTrack(mediaTrack);
         
-        Collection<MediaTrack> mediaTracks = mediaLibary.findMediaTracksInTimeRange(rangeStart, rangeEnd);
+        Collection<MediaTrack> mediaTracks = mediaLibary.findMediaTracksForRace(null, null, null);
         assertThat(mediaTracks.size(), is(0));
     }
     

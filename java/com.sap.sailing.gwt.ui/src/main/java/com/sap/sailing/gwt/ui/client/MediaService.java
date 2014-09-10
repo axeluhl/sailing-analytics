@@ -23,5 +23,7 @@ public interface MediaService extends RemoteService {
     void updateStartTime(MediaTrack mediaTrack);
 
     void updateDuration(MediaTrack mediaTrack);
+    
+    void updateRace(MediaTrack mediaTrack);
 
 }
