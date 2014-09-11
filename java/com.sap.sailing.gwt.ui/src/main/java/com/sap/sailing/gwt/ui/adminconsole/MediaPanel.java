@@ -263,7 +263,6 @@ public class MediaPanel extends FlowPanel {
                 } else
                     return "";
             }
-            
 
         };
         regattaAndRaceColumn.setSortable(true);
@@ -418,32 +417,33 @@ public class MediaPanel extends FlowPanel {
 
     private void addUrlMediaTrack() {
         TimePoint defaultStartTime = MillisecondsTimePoint.now();
-        NewMediaDialog dialog = new NewMediaDialog(defaultStartTime, stringMessages, new DialogCallback<MediaTrack>() {
-
-            @Override
-            public void cancel() {
-                // no op
-            }
-
-            @Override
-            public void ok(final MediaTrack mediaTrack) {
-                mediaService.addMediaTrack(mediaTrack, new AsyncCallback<String>() {
+        NewMediaDialog dialog = new NewMediaDialog(defaultStartTime, stringMessages, sailingService, errorReporter,
+                regattaRefresher, regattasDisplayers, new DialogCallback<MediaTrack>() {
 
                     @Override
-                    public void onFailure(Throwable t) {
-                        errorReporter.reportError(t.toString());
+                    public void cancel() {
+                        // no op
                     }
 
                     @Override
-                    public void onSuccess(String dbId) {
-                        mediaTrack.dbId = dbId;
-                        loadMediaTracks();
+                    public void ok(final MediaTrack mediaTrack) {
+                        mediaService.addMediaTrack(mediaTrack, new AsyncCallback<String>() {
+
+                            @Override
+                            public void onFailure(Throwable t) {
+                                errorReporter.reportError(t.toString());
+                            }
+
+                            @Override
+                            public void onSuccess(String dbId) {
+                                mediaTrack.dbId = dbId;
+                                loadMediaTracks();
+
+                            }
+                        });
 
                     }
                 });
-
-            }
-        });
         dialog.show();
     }
 

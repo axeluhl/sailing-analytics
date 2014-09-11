@@ -74,10 +74,10 @@ public class RegattasAndRacesDialog extends DataEntryDialog<Set<RegattaAndRaceId
     }
 
     @Override
-    protected Widget getAdditionalWidget() {
+    public Widget getAdditionalWidget() {
         return panel;
-
     }
+    
 
     @Override
     protected Set<RegattaAndRaceIdentifier> getResult() {
@@ -91,7 +91,6 @@ public class RegattasAndRacesDialog extends DataEntryDialog<Set<RegattaAndRaceId
             this.trackedRacesListComposite.selectRaceByIdentifier(regattaAndRace);
         }
         updateUI();
-
 
     }
 
