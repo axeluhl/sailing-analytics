@@ -103,7 +103,7 @@ public class MediaTrack implements Serializable {
         if (regattasAndRaces != null) {
             this.regattasAndRaces = regattasAndRaces;
         }else{
-            regattasAndRaces = new HashSet<RegattaAndRaceIdentifier>();
+            this.regattasAndRaces = new HashSet<RegattaAndRaceIdentifier>();
         }
     }
 

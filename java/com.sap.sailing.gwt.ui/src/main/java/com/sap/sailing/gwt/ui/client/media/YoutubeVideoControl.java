@@ -158,7 +158,7 @@ public class YoutubeVideoControl  {
     
     private native boolean nativeIsPaused() /*-{
                 var player = this.@com.sap.sailing.gwt.ui.client.media.YoutubeVideoControl::youtubePlayer;
-                return player.getPlayerState() == $wnd.YT.PlayerState.PAUSED;
+                return player.getPlayerState() != $wnd.YT.PlayerState.PLAYING;
     }-*/;
 
     public double getDuration() {
