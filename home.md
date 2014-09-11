@@ -40,6 +40,7 @@ SAP is at the center of today’s technology revolution, developing innovations 
   * [[Layout repository|wiki/webdesign]]
   * [[Create boat graphics for the 2D race viewer|wiki/boatGraphicsSVG]]
   * [[Create clickable UI prototypes with Axure|wiki/ui-clickable-prototypes]]
+  * [[Uploading Media Content|wiki/uploading-media-content]]
 * General Information
   * [[Architecture and Infrastructure|wiki/architecture-and-infrastructure]]
   * [[Sailing Domain Algorithms|wiki/sailing-domain-algorithms]]

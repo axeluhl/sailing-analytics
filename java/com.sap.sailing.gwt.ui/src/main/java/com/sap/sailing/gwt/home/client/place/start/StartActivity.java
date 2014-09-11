@@ -10,9 +10,9 @@ import com.google.gwt.activity.shared.AbstractActivity;
 import com.google.gwt.core.client.Scheduler;
 import com.google.gwt.core.client.Scheduler.ScheduledCommand;
 import com.google.gwt.event.shared.EventBus;
-import com.google.gwt.i18n.client.DateTimeFormat;
 import com.google.gwt.user.client.rpc.AsyncCallback;
 import com.google.gwt.user.client.ui.AcceptsOneWidget;
+import com.sap.sailing.gwt.home.client.DateUtil;
 import com.sap.sailing.gwt.home.client.shared.placeholder.Placeholder;
 import com.sap.sailing.gwt.home.client.shared.stage.StageEventType;
 import com.sap.sailing.gwt.ui.shared.EventBaseDTO;
@@ -48,8 +48,7 @@ public class StartActivity extends AbstractActivity {
         List<EventBaseDTO> upcomingSoonEvents = new ArrayList<EventBaseDTO>();
         List<EventBaseDTO> popularEvents = new ArrayList<EventBaseDTO>();
         Date now = new Date();
-        DateTimeFormat yearFetcher = DateTimeFormat.getFormat("yyyy");
-        String currentYear = yearFetcher.format(now);
+        int currentYear = DateUtil.getYear(now);
         final int MAX_STAGE_EVENTS = 5;
         final long FOUR_WEEK_IN_MS = 4L * (1000 * 60 * 60 * 24 * 7);
         for (EventBaseDTO event : events) {
@@ -58,7 +57,7 @@ public class StartActivity extends AbstractActivity {
                     featuredEvents.add(new Pair<StageEventType, EventBaseDTO>(StageEventType.RUNNING, event));
                 } else if (event.startDate.after(now) && event.startDate.getTime() - now.getTime() < FOUR_WEEK_IN_MS) {
                     upcomingSoonEvents.add(event);
-                } else if (event.endDate.before(now) && yearFetcher.format(event.endDate).equals(currentYear)) {
+                } else if (event.endDate.before(now) && DateUtil.getYear(event.endDate) == currentYear) {
                     recentEventsOfSameYear.add(event);
                 }
             }

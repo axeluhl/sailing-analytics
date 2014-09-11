@@ -1252,7 +1252,7 @@ public class SailingServiceImpl extends ProxiedRemoteServiceServlet implements S
      * Fetches the {@link WindTrack#getAveragedWind(Position, TimePoint) average wind} from all wind tracks or those identified
      * by <code>windSourceTypeNames</code>
      */
-    //@Override
+    @Override
     public WindInfoForRaceDTO getAveragedWindInfo(RegattaAndRaceIdentifier raceIdentifier, Date from, long millisecondsStepWidth,
             int numberOfFixes, double latDeg, double lngDeg, Collection<String> windSourceTypeNames)
                     throws NoWindException {
@@ -3225,7 +3225,7 @@ public class SailingServiceImpl extends ProxiedRemoteServiceServlet implements S
     public List<EventBaseDTO> getPublicEventsOfAllSailingServers() throws MalformedURLException {
         List<EventBaseDTO> result = new ArrayList<>();
         for (EventDTO localEvent : getEvents()) {
-            if(localEvent.isPublic) {
+            if (localEvent.isPublic) {
                 result.add(localEvent);
             }
         }
@@ -3324,18 +3324,18 @@ public class SailingServiceImpl extends ProxiedRemoteServiceServlet implements S
     }
 
     @Override
-    public EventDTO createEvent(String eventName, Date startDate, Date endDate, String venue, boolean isPublic,
-            List<String> courseAreaNames, Iterable<String> imageURLs, Iterable<String> videoURLs,
-            Iterable<String> sponsorImageURLs, String logoImageURLAsString, String officialWebsiteURLAsString)
+    public EventDTO createEvent(String eventName, String eventDescription, Date startDate, Date endDate, String venue,
+            boolean isPublic, List<String> courseAreaNames, Iterable<String> imageURLs,
+            Iterable<String> videoURLs, Iterable<String> sponsorImageURLs, String logoImageURLAsString, String officialWebsiteURLAsString)
             throws MalformedURLException {
         UUID eventUuid = UUID.randomUUID();
         TimePoint startTimePoint = startDate != null ?  new MillisecondsTimePoint(startDate) : null;
         TimePoint endTimePoint = endDate != null ?  new MillisecondsTimePoint(endDate) : null;
         getService().apply(
-                new CreateEvent(eventName, startTimePoint, endTimePoint, venue, isPublic, eventUuid, createURLsFromStrings(imageURLs),
-                        createURLsFromStrings(videoURLs), createURLsFromStrings(sponsorImageURLs),
-                        logoImageURLAsString == null ? null : new URL(logoImageURLAsString),
-                        officialWebsiteURLAsString == null ? null : new URL(officialWebsiteURLAsString)));
+                new CreateEvent(eventName, eventDescription, startTimePoint, endTimePoint, venue, isPublic, eventUuid,
+                        createURLsFromStrings(imageURLs), createURLsFromStrings(videoURLs),
+                        createURLsFromStrings(sponsorImageURLs),
+                        logoImageURLAsString == null ? null : new URL(logoImageURLAsString), officialWebsiteURLAsString == null ? null : new URL(officialWebsiteURLAsString)));
         for (String courseAreaName : courseAreaNames) {
             createCourseArea(eventUuid, courseAreaName);
         }
