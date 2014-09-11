@@ -105,6 +105,7 @@ import com.sap.sailing.domain.common.CountryCode;
 import com.sap.sailing.domain.common.DataImportProgress;
 import com.sap.sailing.domain.common.DetailType;
 import com.sap.sailing.domain.common.Distance;
+import com.sap.sailing.domain.common.Duration;
 import com.sap.sailing.domain.common.LeaderboardNameConstants;
 import com.sap.sailing.domain.common.LeaderboardType;
 import com.sap.sailing.domain.common.LegType;
@@ -158,6 +159,7 @@ import com.sap.sailing.domain.common.impl.KilometersPerHourSpeedImpl;
 import com.sap.sailing.domain.common.impl.KnotSpeedImpl;
 import com.sap.sailing.domain.common.impl.KnotSpeedWithBearingImpl;
 import com.sap.sailing.domain.common.impl.MeterDistance;
+import com.sap.sailing.domain.common.impl.MillisecondsDurationImpl;
 import com.sap.sailing.domain.common.impl.MillisecondsTimePoint;
 import com.sap.sailing.domain.common.impl.PolarSheetGenerationResponseImpl;
 import com.sap.sailing.domain.common.impl.TimeRangeImpl;
@@ -283,6 +285,7 @@ import com.sap.sailing.gwt.ui.shared.ManeuverDTO;
 import com.sap.sailing.gwt.ui.shared.MarkDTO;
 import com.sap.sailing.gwt.ui.shared.MarkPassingTimesDTO;
 import com.sap.sailing.gwt.ui.shared.MarkpassingManeuverDTO;
+import com.sap.sailing.gwt.ui.shared.PathDTO;
 import com.sap.sailing.gwt.ui.shared.QuickRankDTO;
 import com.sap.sailing.gwt.ui.shared.RaceCourseDTO;
 import com.sap.sailing.gwt.ui.shared.RaceGroupDTO;
@@ -294,6 +297,7 @@ import com.sap.sailing.gwt.ui.shared.RaceInfoDTO.RaceInfoExtensionDTO;
 import com.sap.sailing.gwt.ui.shared.RaceLogDTO;
 import com.sap.sailing.gwt.ui.shared.RaceLogEventDTO;
 import com.sap.sailing.gwt.ui.shared.RaceLogSetStartTimeAndProcedureDTO;
+import com.sap.sailing.gwt.ui.shared.RaceMapDataDTO;
 import com.sap.sailing.gwt.ui.shared.RaceTimesInfoDTO;
 import com.sap.sailing.gwt.ui.shared.RaceWithCompetitorsDTO;
 import com.sap.sailing.gwt.ui.shared.RegattaDTO;
@@ -307,6 +311,8 @@ import com.sap.sailing.gwt.ui.shared.ReplicationStateDTO;
 import com.sap.sailing.gwt.ui.shared.ScoreCorrectionProviderDTO;
 import com.sap.sailing.gwt.ui.shared.SeriesDTO;
 import com.sap.sailing.gwt.ui.shared.SidelineDTO;
+import com.sap.sailing.gwt.ui.shared.SimulatorResultsDTO;
+import com.sap.sailing.gwt.ui.shared.SimulatorWindDTO;
 import com.sap.sailing.gwt.ui.shared.SpeedWithBearingDTO;
 import com.sap.sailing.gwt.ui.shared.StrippedLeaderboardDTO;
 import com.sap.sailing.gwt.ui.shared.SwissTimingArchiveConfigurationDTO;
@@ -383,6 +389,17 @@ import com.sap.sailing.server.replication.ReplicationFactory;
 import com.sap.sailing.server.replication.ReplicationMasterDescriptor;
 import com.sap.sailing.server.replication.ReplicationService;
 import com.sap.sailing.server.replication.impl.ReplicaDescriptor;
+import com.sap.sailing.simulator.Path;
+import com.sap.sailing.simulator.PolarDiagram;
+import com.sap.sailing.simulator.SailingSimulator;
+import com.sap.sailing.simulator.SimulationParameters;
+import com.sap.sailing.simulator.TimedPositionWithSpeed;
+import com.sap.sailing.simulator.impl.PolarDiagramCSV;
+import com.sap.sailing.simulator.impl.SailingSimulatorImpl;
+import com.sap.sailing.simulator.impl.SimulationParametersImpl;
+import com.sap.sailing.simulator.util.SailingSimulatorConstants;
+import com.sap.sailing.simulator.windfield.WindFieldGenerator;
+import com.sap.sailing.simulator.windfield.impl.WindFieldTrackedRaceImpl;
 import com.sap.sailing.util.BuildVersion;
 import com.sap.sailing.xrr.resultimport.schema.RegattaResults;
 import com.sap.sse.common.Util;
@@ -1436,6 +1453,125 @@ public class SailingServiceImpl extends ProxiedRemoteServiceServlet implements S
                         windSourceTypeNames, trackedRace, onlyUpToNewestEvent, /* includeCombinedWindForAllLegMiddles */ false);
             }
         }
+        return result;
+    }
+
+    @Override
+    public SimulatorResultsDTO getSimulatorResults(RegattaAndRaceIdentifier raceIdentifier, Date from) {
+        TrackedRace trackedRace = getExistingTrackedRace(raceIdentifier);
+        SimulatorResultsDTO result = null;
+        
+        if (trackedRace != null) {
+            TimePoint fromTimePoint = from == null ? new MillisecondsTimePoint(trackedRace.getStartOfRace().asMillis()) : new MillisecondsTimePoint(from);
+            
+            // get previous mark or start line as start-position
+            TrackedLeg trackedLeg = trackedRace.getCurrentLeg(fromTimePoint);
+            Waypoint fromWaypoint = trackedLeg.getLeg().getFrom();
+            Position startPosition = trackedRace.getApproximatePosition(fromWaypoint, fromTimePoint);
+            
+            // get next mark as end-position
+            Waypoint toWaypoint = trackedLeg.getLeg().getTo();
+            Position endPosition = trackedRace.getApproximatePosition(toWaypoint, fromTimePoint);
+
+            TimePoint startTimePoint = null;
+            Iterable<Util.Pair<Waypoint, Util.Pair<TimePoint, TimePoint>>> markPassings = trackedRace.getMarkPassingsTimes();
+            synchronized(markPassings) {
+                for(Pair<Waypoint, Pair<TimePoint, TimePoint>> markPassing : markPassings) {
+                    if (markPassing.getA().equals(fromWaypoint)) {
+                        startTimePoint = markPassing.getB().getA();
+                    }
+                }
+            }
+            
+            // determine legtype upwind/downwind/reaching
+            LegType legType = null;
+            try {
+                legType = trackedLeg.getLegType(fromTimePoint);
+            } catch (NoWindException e) {
+                // TODO Auto-generated catch block
+                e.printStackTrace();
+            }
+
+            // get windfield
+            WindFieldGenerator windField = new WindFieldTrackedRaceImpl(trackedRace);
+            Duration timeStep = new MillisecondsDurationImpl(15 * 1000);
+            windField.generate(startTimePoint, null, timeStep);
+            
+            // prepare simulation-parameters
+            List<Position> course = new ArrayList<Position>();
+            course.add(startPosition);
+            course.add(endPosition);
+            String csvFilePath = "PolarDiagram49STG.csv";
+            PolarDiagram polarDiagram = null;
+            try {
+                polarDiagram = new PolarDiagramCSV(csvFilePath);
+            } catch (IOException e) {
+                // TODO Auto-generated catch block
+                e.printStackTrace();
+            }
+            SimulationParameters simulationPars = new SimulationParametersImpl(course, polarDiagram, windField, SailingSimulatorConstants.ModeEvent, true, true);
+            
+            // for upwind/downwind, run simulation with start-time, start-position, end-position and windfield
+            SailingSimulator simulator = new SailingSimulatorImpl(simulationPars);
+            Map<String, Path> pathsAndNames = null;
+            if (legType != LegType.REACHING) {
+                pathsAndNames = simulator.getAllPathsEvenTimed(timeStep.asMillis(), null);
+            }
+
+            // prepare simulator-results-dto
+            if (pathsAndNames != null) {
+                int noOfPaths = pathsAndNames.size();
+                PathDTO[] pathDTOs = new PathDTO[noOfPaths];
+                int index = noOfPaths - 1;
+                for (Entry<String, Path> entry : pathsAndNames.entrySet()) {
+                    pathDTOs[index] = new PathDTO(entry.getKey());
+                    // fill pathDTO with path points where speed is true wind speed
+                    List<SimulatorWindDTO> wList = new ArrayList<SimulatorWindDTO>();
+                    for (TimedPositionWithSpeed p : entry.getValue().getPathPoints()) {
+                        wList.add(createSimulatorWindDTO(p));
+                    }
+                    pathDTOs[index].setPoints(wList);
+                    index--;
+                }
+                RaceMapDataDTO rcDTO;
+                rcDTO = new RaceMapDataDTO();
+                rcDTO.coursePositions = new CoursePositionsDTO();
+                rcDTO.coursePositions.waypointPositions = new ArrayList<PositionDTO>();
+                PositionDTO posDTO;
+                posDTO = SimulatorServiceUtils.toPositionDTO(startPosition);
+                rcDTO.coursePositions.waypointPositions.add(posDTO);
+                posDTO = SimulatorServiceUtils.toPositionDTO(endPosition);
+                rcDTO.coursePositions.waypointPositions.add(posDTO);
+                result = new SimulatorResultsDTO(rcDTO, pathDTOs, null, null);
+            }
+        }
+        
+        return result;
+    }
+    
+    private SimulatorWindDTO createSimulatorWindDTO(TimedPositionWithSpeed timedPositionWithSpeed) {
+
+        Position position = timedPositionWithSpeed.getPosition();
+        SpeedWithBearing speedWithBearing = timedPositionWithSpeed.getSpeed();
+        TimePoint timePoint = timedPositionWithSpeed.getTimePoint();
+
+        SimulatorWindDTO result = new SimulatorWindDTO();
+        if (speedWithBearing == null) {
+                result.trueWindBearingDeg = 0.0;
+                result.trueWindSpeedInKnots = 0.0;
+        } else {
+                result.trueWindBearingDeg = speedWithBearing.getBearing().getDegrees();
+                result.trueWindSpeedInKnots = speedWithBearing.getKnots();
+        }
+
+        if (position != null) {
+            result.position = SimulatorServiceUtils.toPositionDTO(position);
+        }
+
+        if (timePoint != null) {
+            result.timepoint = timePoint.asMillis();
+        }
+
         return result;
     }
 

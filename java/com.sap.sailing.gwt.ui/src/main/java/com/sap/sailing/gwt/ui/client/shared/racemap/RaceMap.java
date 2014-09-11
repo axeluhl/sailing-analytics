@@ -116,6 +116,7 @@ import com.sap.sailing.gwt.ui.shared.WindInfoForRaceDTO;
 import com.sap.sailing.gwt.ui.shared.WindTrackInfoDTO;
 import com.sap.sailing.gwt.ui.shared.racemap.GoogleMapAPIKey;
 import com.sap.sailing.gwt.ui.shared.racemap.GoogleMapStyleHelper;
+import com.sap.sailing.gwt.ui.shared.racemap.RaceSimulationOverlay;
 import com.sap.sailing.gwt.ui.shared.racemap.WindStreamletsRaceboardOverlay;
 import com.sap.sse.common.Util;
 import com.sap.sse.common.Util.Triple;
@@ -304,6 +305,7 @@ public class RaceMap extends AbsolutePanel implements TimeListener, CompetitorSe
     private int autoZoomLevel;           // zoom-level to which auto-zoom-in/-out is zooming
     LatLngBounds autoZoomLatLngBounds;   // bounds to which auto-zoom-in/-out is panning&zooming
     
+    private RaceSimulationOverlay simulationOverlay;
     private WindStreamletsRaceboardOverlay streamletOverlay;
     private final boolean showViewStreamlets;
     private final RegattaAndRaceIdentifier raceIdentifier;
@@ -459,6 +461,11 @@ public class RaceMap extends AbsolutePanel implements TimeListener, CompetitorSe
               if (showViewStreamlets) {
                   streamletOverlay.setVisible(true);
               }
+
+              // initialize simulation canvas
+              simulationOverlay = new RaceSimulationOverlay(getMap(), /* zIndex */ 0, raceIdentifier, sailingService, asyncActionsExecutor);
+              simulationOverlay.addToMap();
+
               createHeaderPanel(map);
               createSettingsButton(map);
 
@@ -1960,6 +1967,10 @@ public class RaceMap extends AbsolutePanel implements TimeListener, CompetitorSe
         if (newSettings.isShowWindStreamletOverlay() != settings.isShowWindStreamletOverlay()) {
             settings.setShowWindStreamletOverlay(newSettings.isShowWindStreamletOverlay());
             streamletOverlay.setVisible(newSettings.isShowWindStreamletOverlay());
+        }
+        if (newSettings.isShowSimulationOverlay() != settings.isShowSimulationOverlay()) {
+            settings.setShowSimulationOverlay(newSettings.isShowSimulationOverlay());
+            simulationOverlay.setVisible(newSettings.isShowSimulationOverlay());
         }
         if (requiredRedraw) {
             redraw();
