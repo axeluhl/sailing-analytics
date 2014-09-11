@@ -180,13 +180,13 @@ public class SimulatorServiceImpl extends RemoteServiceServlet implements Simula
     public WindFieldDTO getWindField(WindFieldGenParamsDTO params, WindPatternDisplay pattern)
             throws WindPatternNotFoundException {
         LOGGER.info("Entering getWindField");
-        Position nw = new DegreePosition(params.getRaceCourseStart().latDeg, params.getRaceCourseStart().lngDeg);
-        Position se = new DegreePosition(params.getRaceCourseEnd().latDeg, params.getRaceCourseEnd().lngDeg);
+        Position start = new DegreePosition(params.getRaceCourseStart().latDeg, params.getRaceCourseStart().lngDeg);
+        Position end = new DegreePosition(params.getRaceCourseEnd().latDeg, params.getRaceCourseEnd().lngDeg);
         List<Position> course = new ArrayList<Position>();
-        course.add(nw);
-        course.add(se);
+        course.add(start);
+        course.add(end);
 
-        Grid bd = new CurvedGrid(nw, se);
+        Grid bd = new CurvedGrid(start, end);
 
         controlParameters.resetBlastRandomStream = params.isKeepState();
         retreiveWindControlParameters(pattern);
