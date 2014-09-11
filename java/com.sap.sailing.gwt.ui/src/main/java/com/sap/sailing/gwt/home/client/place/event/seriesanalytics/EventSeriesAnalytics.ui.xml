@@ -20,81 +20,19 @@
 		      </div>
 		  </div>
 		  <div class="{res.mediaCss.small12} {res.mediaCss.columns} {local_res.css.regattaleaderboard_meta_navigation}">
-			<g:Anchor ui:field="overallLeaderboardAnchor" href="javascript:;" styleName="{res.mainCss.navbar_button}">overall leaderboard</g:Anchor>
-		    <g:Anchor ui:field="regattaLeaderboardsAnchor" href="javascript:;" styleName="{res.mainCss.navbar_button}">regatta leaderboards</g:Anchor>
+			<g:Anchor ui:field="overallLeaderboardAnchor" href="javascript:;" styleName="{res.mainCss.navbar_button}"><ui:text from="{i18n.overallLeaderboard}" /></g:Anchor>
+		    <g:Anchor ui:field="regattaLeaderboardsAnchor" href="javascript:;" styleName="{res.mainCss.navbar_button}"><ui:text from="{i18n.regattaLeaderboards}" /></g:Anchor>
 			<g:Anchor ui:field="competitorChartsAnchor" href="javascript:;" styleName="{res.mainCss.navbar_button}"><ui:text from="{i18n.competitorsAnalytics}" /></g:Anchor>
 		  </div>
 		</div>
 		<g:HTMLPanel ui:field="overallLeaderboardTabPanel">
-			<div class="{res.mainCss.grid}">
-			  <div class="{res.mediaCss.small6} {res.mediaCss.column} {local_res.css.regattaleaderboard_meta_scoring}">
-			    <p ui:field="lastScoringCommentDiv" class="{local_res.css.regattaleaderboard_meta_scoring_comment}"></p>
-			    <p ui:field="scoringSchemeDiv" class="{local_res.css.regattaleaderboard_meta_scoring_type}"></p>
-			  </div>
-			  <div class="{res.mediaCss.small6} {res.mediaCss.column} {local_res.css.regattaleaderboard_meta_settings}">
-			    <div class="{local_res.css.regattaleaderboard_meta_update}">
-			      <p ui:field="lastScoringUpdateTextDiv" class="{local_res.css.regattaleaderboard_meta_update_text}"></p>
-			      <p ui:field="lastScoringUpdateTimeDiv" class="{local_res.css.regattaleaderboard_meta_update_timestamp}"></p>
-			    </div>
-				<g:Anchor ui:field="autoRefreshAnchor" href="javascript:;" styleName="{res.mainCss.button} {local_res.css.regattaleaderboard_meta_reload}"></g:Anchor>
-				<g:Anchor ui:field="settingsAnchor" href="javascript:;" styleName="{res.mainCss.button} {local_res.css.regattaleaderboard_meta_settings_button}"></g:Anchor>
-			  </div>
-			  
-			  <div class="{res.mediaCss.small12} {res.mediaCss.columns}">
-			        <table class="{local_res.css.regattaleaderboard_table}">
-      				  <tr class="{local_res.css.regattaleaderboard_header}">
-      					<td>
-				<g:HTMLPanel ui:field="oldLeaderboardPanel" styleName="{local_res2.css.oldLeaderboardPanel}">
-        		</g:HTMLPanel>
-      					</td>
-      				  </tr>
-      				</table>
-			  </div>
-		  </div>
+			<s:oldleaderboard.OldLeaderboard ui:field='oldOverallLeaderboardComposite'/>
 		</g:HTMLPanel>
 		<g:HTMLPanel ui:field="regattaLeaderboardsTabPanel">
-			<div class="{res.mainCss.grid}">
-			    <!-- 
-			  <div class="{res.mediaCss.small6} {res.mediaCss.column} {local_res.css.regattaleaderboard_meta_scoring}">
-			    <p ui:field="lastScoringCommentDiv" class="{local_res.css.regattaleaderboard_meta_scoring_comment}"></p>
-			    <p ui:field="scoringSchemeDiv" class="{local_res.css.regattaleaderboard_meta_scoring_type}"></p>
-			  </div>
-			  <div class="{res.mediaCss.small6} {res.mediaCss.column} {local_res.css.regattaleaderboard_meta_settings}">
-			    <div class="{local_res.css.regattaleaderboard_meta_update}">
-			      <p class="{local_res.css.regattaleaderboard_meta_update_text}"><ui:text from='{i18n.eventRegattaLeaderboardLastScoreUpdate}'/></p>
-			      <p ui:field="lastScoringUpdateTimeDiv" class="{local_res.css.regattaleaderboard_meta_update_timestamp}"></p>
-			    </div>
-				<g:Anchor ui:field="autoRefreshAnchor" href="javascript:;" styleName="{res.mainCss.button} {local_res.css.regattaleaderboard_meta_reload}"></g:Anchor>
-				<g:Anchor ui:field="settingsAnchor" href="javascript:;" styleName="{res.mainCss.button} {local_res.css.regattaleaderboard_meta_settings_button}"></g:Anchor>
-			  </div>
-			     -->
-			  
-			  <div class="{res.mediaCss.small12} {res.mediaCss.columns}">
-			        <table class="{local_res.css.regattaleaderboard_table}">
-      				  <tr class="{local_res.css.regattaleaderboard_header}">
-      					<td>
-				<g:HTMLPanel ui:field="oldMultiLeaderboardPanel" styleName="{local_res2.css.oldMultiLeaderboardPanel}">
-        		</g:HTMLPanel>
-      					</td>
-      				  </tr>
-      				</table>
-			  </div>
-		  </div>
+			<s:oldmultileaderboard.OldMultiLeaderboard ui:field='oldRegattaLeaderboardsComposite'/>
 		</g:HTMLPanel>	
 		<g:HTMLPanel ui:field="competitorChartsTabPanel">
-			<div class="{res.mainCss.grid}">
-			  <div class="{res.mediaCss.small6} {res.mediaCss.column} {local_res.css.regattaleaderboard_meta_scoring}">
-			   		<h3><ui:text from="{i18n.competitorsAnalytics}" /></h3>
-			  </div>    
-			  <div class="{res.mediaCss.small6} {res.mediaCss.column} {local_res.css.regattaleaderboard_meta_settings}">
-			      	<ui:text from="{i18n.chooseChart}" />
-			  		<g:ListBox ui:field="chartTypeSelectionListBox" />
-			  </div>    
-			  <div class="{res.mediaCss.small12} {res.mediaCss.columns}">
-              	<g:HTMLPanel ui:field="competitorChartsPanel">
-        		</g:HTMLPanel>
-			  </div>
-			</div>		    		    
+			<s:oldcompetitorcharts.OldCompetitorCharts ui:field='oldCompetitorChartsComposite'/>
 		</g:HTMLPanel>
     </g:HTMLPanel>
 </ui:UiBinder>    

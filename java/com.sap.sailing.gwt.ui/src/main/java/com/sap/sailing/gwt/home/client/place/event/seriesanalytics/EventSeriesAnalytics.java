@@ -1,15 +1,12 @@
 package com.sap.sailing.gwt.home.client.place.event.seriesanalytics;
 
 import java.util.ArrayList;
-import java.util.Date;
 import java.util.List;
 
 import com.google.gwt.core.client.GWT;
 import com.google.gwt.dom.client.DivElement;
-import com.google.gwt.dom.client.ParagraphElement;
 import com.google.gwt.dom.client.SpanElement;
 import com.google.gwt.dom.client.Style.Visibility;
-import com.google.gwt.event.dom.client.ChangeEvent;
 import com.google.gwt.event.dom.client.ClickEvent;
 import com.google.gwt.uibinder.client.UiBinder;
 import com.google.gwt.uibinder.client.UiField;
@@ -17,7 +14,6 @@ import com.google.gwt.uibinder.client.UiHandler;
 import com.google.gwt.user.client.ui.Anchor;
 import com.google.gwt.user.client.ui.Composite;
 import com.google.gwt.user.client.ui.HTMLPanel;
-import com.google.gwt.user.client.ui.ListBox;
 import com.google.gwt.user.client.ui.Widget;
 import com.sap.sailing.domain.common.DetailType;
 import com.sap.sailing.domain.common.LeaderboardNameConstants;
@@ -27,26 +23,20 @@ import com.sap.sailing.domain.common.dto.LeaderboardDTO;
 import com.sap.sailing.domain.common.dto.RaceColumnDTO;
 import com.sap.sailing.gwt.home.client.HomeResources;
 import com.sap.sailing.gwt.home.client.app.PlaceNavigator;
-import com.sap.sailing.gwt.home.client.i18n.TextMessages;
 import com.sap.sailing.gwt.home.client.place.event.header.CompactEventHeader;
+import com.sap.sailing.gwt.home.client.place.event.oldcompetitorcharts.OldCompetitorCharts;
+import com.sap.sailing.gwt.home.client.place.event.oldleaderboard.OldLeaderboard;
+import com.sap.sailing.gwt.home.client.place.event.oldmultileaderboard.OldMultiLeaderboard;
 import com.sap.sailing.gwt.home.client.place.event.regattaleaderboard.EventRegattaLeaderboardResources;
-import com.sap.sailing.gwt.ui.client.DebugIdHelper;
-import com.sap.sailing.gwt.ui.client.DetailTypeFormatter;
 import com.sap.sailing.gwt.ui.client.ErrorReporter;
 import com.sap.sailing.gwt.ui.client.LeaderboardUpdateListener;
 import com.sap.sailing.gwt.ui.client.SailingServiceAsync;
 import com.sap.sailing.gwt.ui.client.StringMessages;
-import com.sap.sailing.gwt.ui.client.shared.components.SettingsDialog;
-import com.sap.sailing.gwt.ui.common.client.DateAndTimeFormatterUtil;
-import com.sap.sailing.gwt.ui.leaderboard.LeaderboardPanel;
 import com.sap.sailing.gwt.ui.leaderboard.LeaderboardSettings;
-import com.sap.sailing.gwt.ui.leaderboard.ScoringSchemeTypeFormatter;
 import com.sap.sailing.gwt.ui.shared.EventDTO;
 import com.sap.sse.common.Util.Pair;
 import com.sap.sse.gwt.client.async.AsyncActionsExecutor;
 import com.sap.sse.gwt.client.player.Timer;
-import com.sap.sse.gwt.client.player.Timer.PlayModes;
-import com.sap.sse.gwt.client.player.Timer.PlayStates;
 import com.sap.sse.gwt.client.useragent.UserAgentDetails;
 
 public class EventSeriesAnalytics extends Composite implements LeaderboardUpdateListener {
@@ -55,19 +45,12 @@ public class EventSeriesAnalytics extends Composite implements LeaderboardUpdate
     interface EventSeriesAnalyticsUiBinder extends UiBinder<Widget, EventSeriesAnalytics> {
     }
 
-    @UiField HTMLPanel oldLeaderboardPanel;
-    @UiField HTMLPanel oldMultiLeaderboardPanel;
-    @UiField HTMLPanel competitorChartsPanel;
+    @UiField OldLeaderboard oldOverallLeaderboardComposite;
+    @UiField OldCompetitorCharts oldCompetitorChartsComposite;
+    @UiField OldMultiLeaderboard oldRegattaLeaderboardsComposite;
     @UiField(provided=true) CompactEventHeader eventHeader;
     
-    // temp fields --> will be moved to a leaderboard partial later on
     @UiField SpanElement title;
-    @UiField Anchor settingsAnchor;
-    @UiField Anchor autoRefreshAnchor;
-    @UiField ParagraphElement lastScoringUpdateTimeDiv;
-    @UiField ParagraphElement lastScoringUpdateTextDiv;
-    @UiField ParagraphElement lastScoringCommentDiv;
-    @UiField ParagraphElement scoringSchemeDiv;
     @UiField DivElement liveRaceDiv;
 
     @UiField HTMLPanel overallLeaderboardTabPanel;
@@ -80,17 +63,13 @@ public class EventSeriesAnalytics extends Composite implements LeaderboardUpdate
     @UiField Anchor overallLeaderboardAnchor;
     @UiField Anchor regattaLeaderboardsAnchor;
     @UiField Anchor competitorChartsAnchor;
-    @UiField ListBox chartTypeSelectionListBox;
     
     private EventSeriesAnalyticsDataManager eventSeriesAnalyticsManager;
     private Timer autoRefreshTimer;
-    private final List<DetailType> availableDetailsTypes;
         
     public EventSeriesAnalytics(EventDTO event, String leaderboardName, Timer timerForClientServerOffset, PlaceNavigator placeNavigator) {
         eventHeader = new CompactEventHeader(event, leaderboardName, placeNavigator);
     
-        availableDetailsTypes = new ArrayList<DetailType>();
-
         EventRegattaLeaderboardResources.INSTANCE.css().ensureInjected();
         EventSeriesAnalyticsResources.INSTANCE.css().ensureInjected();
         
@@ -123,54 +102,21 @@ public class EventSeriesAnalytics extends Composite implements LeaderboardUpdate
         eventSeriesAnalyticsManager.createMultiLeaderboardPanel(leaderboardSettings, null /*preSelectedLeaderboardName */, preselectedRace, leaderboardGroupName, metaLeaderboardName, showRaceDetails, autoExpandLastRaceColumn);
 
         DetailType initialDetailType = DetailType.OVERALL_RANK;
+        List<DetailType> availableDetailsTypes = new ArrayList<DetailType>();
         availableDetailsTypes.add(DetailType.OVERALL_RANK);
+        availableDetailsTypes.add(DetailType.REGATTA_TOTAL_POINTS_SUM);
 
-        fillChartTypeSelectionBox(initialDetailType);
         eventSeriesAnalyticsManager.createMultiCompetitorChart(metaLeaderboardName, DetailType.OVERALL_RANK);
        
-        oldLeaderboardPanel.add(eventSeriesAnalyticsManager.getLeaderboardPanel());
-        oldMultiLeaderboardPanel.add(eventSeriesAnalyticsManager.getMultiLeaderboardPanel());
-       
+        oldOverallLeaderboardComposite.setLeaderboard(eventSeriesAnalyticsManager.getLeaderboardPanel(), timer);
+        oldRegattaLeaderboardsComposite.setMultiLeaderboard(eventSeriesAnalyticsManager.getMultiLeaderboardPanel(), timer);
+
+        oldCompetitorChartsComposite.setChart(eventSeriesAnalyticsManager.getMultiCompetitorChart(), availableDetailsTypes, initialDetailType);
+        eventSeriesAnalyticsManager.hideCompetitorChart();
+
         eventSeriesAnalyticsManager.getLeaderboardPanel().addLeaderboardUpdateListener(this);
 
         activeContentWidget = eventSeriesAnalyticsManager.getLeaderboardPanel();
-    }
-
-    private void fillChartTypeSelectionBox(DetailType initialDetailType) {
-        chartTypeSelectionListBox.clear();
-        int i = 0;
-        for (DetailType detailType : availableDetailsTypes) {
-            chartTypeSelectionListBox.addItem(DetailTypeFormatter.format(detailType), detailType.name());
-            if (detailType == initialDetailType) {
-                chartTypeSelectionListBox.setSelectedIndex(i);
-            }
-            i++;
-        }
-    }
-    
-    @UiHandler("autoRefreshAnchor")
-    void toogleAutoRefreshClicked(ClickEvent event) {
-        if (autoRefreshTimer.getPlayState() == PlayStates.Playing) {
-            autoRefreshTimer.pause();
-            autoRefreshAnchor.getElement().getStyle().setBackgroundColor("#f0ab00");
-        } else {
-            // playing the standalone leaderboard means putting it into live mode
-            autoRefreshTimer.setPlayMode(PlayModes.Live);
-            autoRefreshAnchor.getElement().getStyle().setBackgroundColor("red");
-        }
-    }
-    
-    @UiHandler("settingsAnchor")
-    void settingsClicked(ClickEvent event) {
-        LeaderboardPanel leaderboardComponent = eventSeriesAnalyticsManager.getLeaderboardPanel();
-        
-        final String componentName = leaderboardComponent.getLocalizedShortName();
-        final String debugIdPrefix = DebugIdHelper.createDebugId(componentName);
-
-        SettingsDialog<LeaderboardSettings> dialog = new SettingsDialog<LeaderboardSettings>(leaderboardComponent,
-                StringMessages.INSTANCE);
-        dialog.ensureDebugId(debugIdPrefix + "SettingsDialog");
-        dialog.show();
     }
 
     @Override
@@ -179,19 +125,6 @@ public class EventSeriesAnalytics extends Composite implements LeaderboardUpdate
             StringMessages stringMessages = StringMessages.INSTANCE;
             
             if(leaderboard != null) {
-                lastScoringCommentDiv.setInnerText(leaderboard.getComment() != null ? leaderboard.getComment() : "");
-                scoringSchemeDiv.setInnerText(leaderboard.scoringScheme != null ? ScoringSchemeTypeFormatter.format(leaderboard.scoringScheme, StringMessages.INSTANCE) : "");
-                if (leaderboard.getTimePointOfLastCorrectionsValidity() != null) {
-                    Date lastCorrectionDate = leaderboard.getTimePointOfLastCorrectionsValidity();
-                    String lastUpdate = DateAndTimeFormatterUtil.defaultDateFormatter.render(lastCorrectionDate) + ", "
-                            + DateAndTimeFormatterUtil.longTimeFormatter.render(lastCorrectionDate);
-                    lastScoringUpdateTimeDiv.setInnerText(lastUpdate);
-                    lastScoringUpdateTextDiv.setInnerText(TextMessages.INSTANCE.eventRegattaLeaderboardLastScoreUpdate());
-                } else {
-                    lastScoringUpdateTimeDiv.setInnerText("");
-                    lastScoringUpdateTextDiv.setInnerText("");
-                }
-                
                 List<Pair<RaceColumnDTO, FleetDTO>> liveRaces = leaderboard.getLiveRaces(autoRefreshTimer.getLiveTimePointInMillis());
                 boolean hasLiveRace = !liveRaces.isEmpty();
                 if (hasLiveRace) {
@@ -212,8 +145,9 @@ public class EventSeriesAnalytics extends Composite implements LeaderboardUpdate
                 } else {
                     liveRaceDiv.setInnerText("");
                 }
-                lastScoringUpdateTimeDiv.getStyle().setVisibility(!hasLiveRace ? Visibility.VISIBLE : Visibility.HIDDEN);
                 liveRaceDiv.getStyle().setVisibility(hasLiveRace ? Visibility.VISIBLE : Visibility.HIDDEN);
+                
+                oldOverallLeaderboardComposite.updatedLeaderboard(leaderboard, hasLiveRace);
             }
         }
     }
@@ -235,25 +169,8 @@ public class EventSeriesAnalytics extends Composite implements LeaderboardUpdate
     @UiHandler("competitorChartsAnchor")
     void competitorChartsTabClicked(ClickEvent event) {
         setActiveTabPanel(competitorChartsTabPanel, eventSeriesAnalyticsManager.getMultiCompetitorChart(), competitorChartsAnchor);
-    }
-
-    @UiHandler("chartTypeSelectionListBox")
-    void chartTypeSelectionChanged(ChangeEvent event) {
-        DetailType selectedChartDetailType = getSelectedChartDetailType();
+        DetailType selectedChartDetailType = oldCompetitorChartsComposite.getSelectedChartDetailType();
         eventSeriesAnalyticsManager.showCompetitorChart(selectedChartDetailType);
-    }
-    
-    private DetailType getSelectedChartDetailType() {
-        DetailType result = null;
-        int selectedIndex = chartTypeSelectionListBox.getSelectedIndex();
-        String selectedDetailType = chartTypeSelectionListBox.getValue(selectedIndex);
-        for (DetailType detailType : availableDetailsTypes) {
-            if (detailType.name().equals(selectedDetailType)) {
-                result = detailType;
-                break;
-            }
-        }
-        return result;
     }
 
     private void setActiveTabPanel(HTMLPanel newActivePanel, Widget newActiveContentWidget, Anchor newActiveAnchor) {
@@ -264,9 +181,6 @@ public class EventSeriesAnalytics extends Composite implements LeaderboardUpdate
         if(activeContentWidget != null) {
             activeContentWidget.setVisible(false);
         }
-        
-        DetailType selectedChartDetailType = getSelectedChartDetailType();
-        eventSeriesAnalyticsManager.showCompetitorChart(selectedChartDetailType);
         
         activeTabPanel = newActivePanel;
         activeContentWidget = newActiveContentWidget;

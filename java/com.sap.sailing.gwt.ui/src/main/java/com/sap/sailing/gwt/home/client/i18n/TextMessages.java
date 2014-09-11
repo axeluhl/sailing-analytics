@@ -33,6 +33,7 @@ public interface TextMessages extends Messages {
     String competitorsAnalytics();
     String chooseChart();
     String series();
+    String regattaLeaderboards();
     
     String countdownDays();
     String countdownHours();
