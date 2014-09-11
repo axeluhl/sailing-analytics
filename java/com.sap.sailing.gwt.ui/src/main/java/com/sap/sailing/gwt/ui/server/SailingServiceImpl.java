@@ -1462,7 +1462,7 @@ public class SailingServiceImpl extends ProxiedRemoteServiceServlet implements S
         SimulatorResultsDTO result = null;
         
         if (trackedRace != null) {
-            TimePoint fromTimePoint = from == null ? new MillisecondsTimePoint(trackedRace.getStartOfRace().asMillis()) : new MillisecondsTimePoint(from);
+            TimePoint fromTimePoint = from == null ? new MillisecondsTimePoint(trackedRace.getStartOfRace().asMillis() + 60000) : new MillisecondsTimePoint(from);
             
             // get previous mark or start line as start-position
             TrackedLeg trackedLeg = trackedRace.getCurrentLeg(fromTimePoint);
