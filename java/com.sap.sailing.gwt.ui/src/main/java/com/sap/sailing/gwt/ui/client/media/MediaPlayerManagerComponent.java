@@ -535,7 +535,7 @@ public class MediaPlayerManagerComponent implements Component<Void>, PlayStateLi
     @Override
     public void addMediaTrack() {
         TimePoint defaultStartTime = getRaceStartTime();
-        NewMediaDialog dialog = new NewMediaDialog(defaultStartTime, MediaPlayerManagerComponent.this.stringMessages, new DialogCallback<MediaTrack>() {
+        NewMediaDialog dialog = new NewMediaDialog(defaultStartTime, MediaPlayerManagerComponent.this.stringMessages, this.raceIdentifier, new DialogCallback<MediaTrack>() {
 
             @Override
             public void cancel() {
