@@ -349,6 +349,7 @@ import com.sap.sailing.server.operationaltransformation.MoveLeaderboardColumnDow
 import com.sap.sailing.server.operationaltransformation.MoveLeaderboardColumnUp;
 import com.sap.sailing.server.operationaltransformation.RemoveAndUntrackRace;
 import com.sap.sailing.server.operationaltransformation.RemoveColumnFromSeries;
+import com.sap.sailing.server.operationaltransformation.RemoveCourseArea;
 import com.sap.sailing.server.operationaltransformation.RemoveEvent;
 import com.sap.sailing.server.operationaltransformation.RemoveLeaderboard;
 import com.sap.sailing.server.operationaltransformation.RemoveLeaderboardColumn;
@@ -3207,9 +3208,13 @@ public class SailingServiceImpl extends ProxiedRemoteServiceServlet implements S
     }
 
     @Override
-    public CourseAreaDTO createCourseArea(UUID eventId, String courseAreaName) {
-        CourseArea courseArea = getService().apply(new AddCourseArea(eventId, courseAreaName, UUID.randomUUID()));
-        return convertToCourseAreaDTO(courseArea);
+    public void createCourseArea(UUID eventId, String courseAreaName) {
+        getService().apply(new AddCourseArea(eventId, courseAreaName, UUID.randomUUID()));
+    }
+
+    @Override
+    public void removeCourseArea(UUID eventId, UUID courseAreaId) {
+        getService().apply(new RemoveCourseArea(eventId, courseAreaId));
     }
 
     @Override

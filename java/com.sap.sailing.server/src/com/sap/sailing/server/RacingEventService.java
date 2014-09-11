@@ -467,6 +467,8 @@ public interface RacingEventService extends TrackedRegattaRegistry, RegattaFetch
 
     CourseArea addCourseAreaWithoutReplication(UUID eventId, UUID courseAreaId, String courseAreaName);
 
+    CourseArea removeCourseAreaWithoutReplication(UUID eventId, UUID courseAreaId);
+
     /**
      * Returns a mobile device's configuration.
      * @param identifier of the client (may include event)
