@@ -39,6 +39,11 @@ public class MediaServiceImpl extends RemoteServiceServlet implements MediaServi
     public Collection<MediaTrack> getMediaTracksForRace(RegattaAndRaceIdentifier regattaAndRaceIdentifier) {
         return racingEventService().getMediaTracksForRace(regattaAndRaceIdentifier);
     }
+    
+    @Override
+    public Collection<MediaTrack> getMediaTracksInTimeRange(RegattaAndRaceIdentifier regattaAndRaceIdentifier) {
+        return racingEventService().getMediaTracksInTimeRange(regattaAndRaceIdentifier);
+    }
 
     @Override
     public Collection<MediaTrack> getAllMediaTracks() {

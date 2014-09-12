@@ -90,8 +90,7 @@ public class MediaDBImpl implements MediaDB {
                 object.put(DbNames.Fields.RACE_NAME.name(), regattaAndRace.getRaceName());
                 objectList.add(object);
             }
-        }
-        else{
+        } else {
             System.currentTimeMillis();
         }
         dbMediaTrack.put(DbNames.Fields.REGATTAS_AND_RACES.name(), objectList);
@@ -121,21 +120,23 @@ public class MediaDBImpl implements MediaDB {
         String title = (String) dbObject.get(DbNames.Fields.MEDIA_TITLE.name());
         String url = (String) dbObject.get(DbNames.Fields.MEDIA_URL.name());
         Date startTime = (Date) dbObject.get(DbNames.Fields.STARTTIME.name());
-        Long duration = (Long) dbObject.get(DbNames.Fields.DURATION_IN_MILLIS.name());
+        Number duration = (Number)dbObject.get(DbNames.Fields.DURATION_IN_MILLIS.name());
         String mimeTypeText = (String) dbObject.get(DbNames.Fields.MIME_TYPE.name());
         MimeType mimeType = MimeType.byName(mimeTypeText);
         Set<RegattaAndRaceIdentifier> regattasAndRaces = new HashSet<RegattaAndRaceIdentifier>();
         BasicDBList list = (BasicDBList) dbObject.get(DbNames.Fields.REGATTAS_AND_RACES.name());
-        for (Object regattaAndRace : list) {
-            BasicDBObject object = (BasicDBObject) regattaAndRace;
-            String regattaName = (String) object.get(DbNames.Fields.REGATTA_NAME.name());
-            String raceName = (String) object.get(DbNames.Fields.RACE_NAME.name());
-            if (regattaName != null && raceName != null) {
-                regattasAndRaces.add(new RegattaNameAndRaceName(regattaName, raceName));
+        if (list != null) {
+            for (Object regattaAndRace : list) {
+                BasicDBObject object = (BasicDBObject) regattaAndRace;
+                String regattaName = (String) object.get(DbNames.Fields.REGATTA_NAME.name());
+                String raceName = (String) object.get(DbNames.Fields.RACE_NAME.name());
+                if (regattaName != null && raceName != null) {
+                    regattasAndRaces.add(new RegattaNameAndRaceName(regattaName, raceName));
+                }
             }
         }
         MediaTrack mediaTrack = new MediaTrack(dbId, title, url, startTime == null ? null : new MillisecondsTimePoint(
-                startTime), duration == null ? null : new MillisecondsDurationImpl(duration), mimeType,
+                startTime), duration == null ? null : new MillisecondsDurationImpl(duration.longValue()), mimeType,
                 regattasAndRaces);
         return mediaTrack;
     }

@@ -47,7 +47,52 @@ public class MediaMultiSelectionControl extends AbstractMediaSelectionControl im
     public void show() {
         Collection<MediaTrack> reachableVideoTracks = new ArrayList<MediaTrack>();
         Collection<MediaTrack> reachableAudioTracks = new ArrayList<MediaTrack>();
-        for (MediaTrack mediaTrack : mediaPlayerManager.getMediaTracks()) {
+        addAssignedMediaTracksTo(reachableVideoTracks, reachableAudioTracks);
+        addOverlappingMediaTracksTo(reachableVideoTracks, reachableAudioTracks);
+        Panel grid = new VerticalPanel();
+        addAudioTracksToGridPanel(reachableAudioTracks, grid);
+        addVideoTracksToGridPanel(reachableVideoTracks, grid);
+        addNewMediaButtonTo(grid);
+        dialogControl.add(grid);
+        dialogControl.showRelativeTo(popupLocation);
+    }
+
+    private void addNewMediaButtonTo(Panel grid) {
+        if (mediaPlayerManager.allowsEditing()) {
+            Button addButton = new Button("Add", new ClickHandler() {
+                
+                @Override
+                public void onClick(ClickEvent event) {
+                    hide();
+                    mediaPlayerManager.addMediaTrack();
+                }
+            });
+            grid.add(addButton);
+        }
+    }
+
+    private void addVideoTracksToGridPanel(Collection<MediaTrack> reachableVideoTracks, Panel grid) {
+        if (!reachableVideoTracks.isEmpty()) {
+            grid.add(createVideoHeader());
+            for (MediaTrack videoTrack : reachableVideoTracks) {
+                grid.add(createVideoOptions(videoTrack, mediaPlayerManager.getPlayingVideoTracks()));
+            }
+        }
+    }
+
+    private void addAudioTracksToGridPanel(Collection<MediaTrack> reachableAudioTracks, Panel grid) {
+        if (!reachableAudioTracks.isEmpty()) {
+            grid.add(createAudioHeader());
+            grid.add((RadioButton) createAudioButton(null, mediaPlayerManager.getPlayingAudioTrack()));
+            for (MediaTrack audioTrack : reachableAudioTracks) {
+                grid.add(createAudioButton(audioTrack, mediaPlayerManager.getPlayingAudioTrack()));
+            }
+        }
+    }
+
+    private void addOverlappingMediaTracksTo(Collection<MediaTrack> reachableVideoTracks,
+            Collection<MediaTrack> reachableAudioTracks) {
+        for (MediaTrack mediaTrack : mediaPlayerManager.getOverlappingMediaTracks()) {
             if (isPotentiallyPlayable(mediaTrack)) {
                 switch (mediaTrack.mimeType.mediaType) {
                 case video:
@@ -64,38 +109,90 @@ public class MediaMultiSelectionControl extends AbstractMediaSelectionControl im
                 }
             }
         }
-        Panel grid = new VerticalPanel();
-        List<MediaTrack> audioTracks = mediaPlayerManager.getAudioTracks();
-        if (!audioTracks.isEmpty()) {
-            grid.add(createAudioHeader());
-            grid.add((RadioButton) createAudioButton(null, mediaPlayerManager.getPlayingAudioTrack()));
-            for (MediaTrack audioTrack : audioTracks) {
-                grid.add(createAudioButton(audioTrack, mediaPlayerManager.getPlayingAudioTrack()));
-            }
-        }
-        List<MediaTrack> videoTracks = mediaPlayerManager.getVideoTracks();
-        if (!videoTracks.isEmpty()) {
-            grid.add(createVideoHeader());
-            for (MediaTrack videoTrack : videoTracks) {
-                grid.add(createVideoCheckBox(videoTrack, mediaPlayerManager.getPlayingVideoTracks()));
-            }
-        }
-        if (mediaPlayerManager.allowsEditing()) {
-            Button addButton = new Button("Add", new ClickHandler() {
-                
-                @Override
-                public void onClick(ClickEvent event) {
-                    hide();
-                    mediaPlayerManager.addMediaTrack();
-                }
-            });
-            grid.add(addButton);
-        }
-        dialogControl.add(grid);
-        dialogControl.showRelativeTo(popupLocation);
     }
 
-    private Widget createVideoCheckBox(final MediaTrack videoTrack, Set<MediaTrack> selectedVideos) {
+    private void addAssignedMediaTracksTo(Collection<MediaTrack> reachableVideoTracks,
+            Collection<MediaTrack> reachableAudioTracks) {
+        for (MediaTrack mediaTrack : mediaPlayerManager.getAssignedMediaTracks()) {
+            if (isPotentiallyPlayable(mediaTrack)) {
+                switch (mediaTrack.mimeType.mediaType) {
+                case video:
+                    reachableVideoTracks.add(mediaTrack);
+                case audio: // intentional fall through
+                    if(mediaPlayerManager.getUserAgent().getType().equals(AgentTypes.FIREFOX)) {
+                        if(mediaTrack.isYoutube()) {
+                            // only youtube audio tracks work with firefox
+                            reachableAudioTracks.add(mediaTrack);
+                        }
+                    } else {
+                        reachableAudioTracks.add(mediaTrack);
+                    }
+                }
+            }
+        }
+    }
+
+    private Widget createVideoOptions(final MediaTrack videoTrack, Set<MediaTrack> selectedVideos) {
+        CheckBox playCheckBox = createPlayCheckBox(videoTrack, selectedVideos);
+        
+        if (mediaPlayerManager.allowsEditing()) {
+            HorizontalPanel panel = new HorizontalPanel();
+            panel.setWidth("100%");
+            panel.add(playCheckBox);
+            
+            Button deleteButton = createDeleteButton(videoTrack, panel);
+            panel.setCellHorizontalAlignment(deleteButton, HasHorizontalAlignment.ALIGN_RIGHT);
+            panel.add(deleteButton);
+            CheckBox connectCheckBox = createConnectCheckBox(videoTrack);
+            panel.setCellHorizontalAlignment(deleteButton, HasHorizontalAlignment.ALIGN_RIGHT);
+            panel.add(connectCheckBox);
+            
+            return panel;
+        } else {
+            return playCheckBox;
+        }
+        
+    }
+
+    private CheckBox createConnectCheckBox(final MediaTrack videoTrack) {
+        CheckBox connectCheckBox = new CheckBox();
+        connectCheckBox.setValue(videoTrack.regattasAndRaces.contains(((MediaPlayerManagerComponent)mediaPlayerManager).getRaceIdentifier()));
+        connectCheckBox.addValueChangeHandler(new ValueChangeHandler<Boolean>() {
+            
+            @Override
+            public void onValueChange(ValueChangeEvent<Boolean> changeEvent) {
+                if (changeEvent.getValue()) {
+                    connectVideoWithRace(videoTrack);
+                } else {
+                    disconnectVideoWithRace(videoTrack);
+                }
+            }
+
+            private void disconnectVideoWithRace(final MediaTrack videoTrack) {
+                videoTrack.regattasAndRaces.remove(((MediaPlayerManagerComponent)mediaPlayerManager).getRaceIdentifier());
+            }
+
+            private void connectVideoWithRace(final MediaTrack videoTrack) {
+                videoTrack.regattasAndRaces.add(((MediaPlayerManagerComponent)mediaPlayerManager).getRaceIdentifier());
+            }
+        });
+        return connectCheckBox;
+    }
+
+    private Button createDeleteButton(final MediaTrack videoTrack, HorizontalPanel panel) {
+        Button deleteButton = new Button("X", new ClickHandler() {
+            
+            @Override
+            public void onClick(ClickEvent event) {
+                if (mediaPlayerManager.deleteMediaTrack(videoTrack)) {
+                    hide();
+                }
+            }
+        });
+        return deleteButton;
+    }
+
+    private CheckBox createPlayCheckBox(final MediaTrack videoTrack, Set<MediaTrack> selectedVideos) {
         CheckBox videoCheckBox = new CheckBox(videoTrack.title);
         videoCheckBoxes.put(videoTrack, videoCheckBox);
         videoCheckBox.setTitle(videoTrack.toString());
@@ -111,29 +208,7 @@ public class MediaMultiSelectionControl extends AbstractMediaSelectionControl im
                 }
             }
         });
-        
-        if (mediaPlayerManager.allowsEditing()) {
-            HorizontalPanel panel = new HorizontalPanel();
-            panel.setWidth("100%");
-            panel.add(videoCheckBox);
-            
-            Button deleteButton = new Button("X", new ClickHandler() {
-                
-                @Override
-                public void onClick(ClickEvent event) {
-                    if (mediaPlayerManager.deleteMediaTrack(videoTrack)) {
-                        hide();
-                    }
-                }
-            });
-            panel.setCellHorizontalAlignment(deleteButton, HasHorizontalAlignment.ALIGN_RIGHT);
-            panel.add(deleteButton);
-            
-            return panel;
-        } else {
-            return videoCheckBox;
-        }
-        
+        return videoCheckBox;
     }
     
     public void selectVideo(MediaTrack videoTrack) {
@@ -194,7 +269,9 @@ public class MediaMultiSelectionControl extends AbstractMediaSelectionControl im
 
     @Override
     protected void updateUi() {
-        // TODO Auto-generated method stub
+        if(mediaPlayerManager.hasLoadedAllMediaTracks()){
+            
+        }
         
     }
 

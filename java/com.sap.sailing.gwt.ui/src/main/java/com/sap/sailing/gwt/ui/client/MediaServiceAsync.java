@@ -10,6 +10,9 @@ public interface MediaServiceAsync {
 
     void getMediaTracksForRace(RegattaAndRaceIdentifier regattaAndRaceIdentifier,
             AsyncCallback<Collection<MediaTrack>> callback);
+    
+    void getMediaTracksInTimeRange(RegattaAndRaceIdentifier regattaAndRaceIdentifier,
+            AsyncCallback<Collection<MediaTrack>> callback);
 
     void getAllMediaTracks(AsyncCallback<Collection<MediaTrack>> asyncCallback);
 

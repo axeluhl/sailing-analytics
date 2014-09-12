@@ -45,7 +45,9 @@ public interface MediaPlayerManager {
 
     Set<MediaTrack> getPlayingVideoTracks();
 
-    Collection<MediaTrack> getMediaTracks();
+    Collection<MediaTrack> getAssignedMediaTracks();
+    
+    Collection<MediaTrack> getOverlappingMediaTracks();
 
     List<MediaTrack> getAudioTracks();
     
@@ -55,6 +57,7 @@ public interface MediaPlayerManager {
 
     UserAgentDetails getUserAgent();
 
-    
+    boolean hasLoadedAllMediaTracks();
+
 }
 

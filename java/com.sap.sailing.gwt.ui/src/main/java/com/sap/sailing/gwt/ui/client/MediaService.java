@@ -9,6 +9,8 @@ import com.sap.sailing.domain.common.media.MediaTrack;
 public interface MediaService extends RemoteService {
 
     Collection<MediaTrack> getMediaTracksForRace(RegattaAndRaceIdentifier regattaAndRaceIdentifier);
+    
+    Collection<MediaTrack> getMediaTracksInTimeRange(RegattaAndRaceIdentifier regattaAndRaceIdentifier);
 
     Collection<MediaTrack> getAllMediaTracks();
 

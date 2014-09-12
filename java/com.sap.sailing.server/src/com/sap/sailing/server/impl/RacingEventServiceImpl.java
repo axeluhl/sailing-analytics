@@ -2588,9 +2588,24 @@ public class RacingEventServiceImpl implements RacingEventServiceWithTestSupport
                 return mediaLibrary.findLiveMediaTracksForRace(trackedRace.getRaceIdentifier().getRegattaName(),
                         trackedRace.getRaceIdentifier().getRaceName());
             } else {
+                return mediaLibrary.findMediaTracksForRace(trackedRace.getRaceIdentifier());
+            }
+        } else {
+            return Collections.emptyList();
+        }
+    }
+    
+    @Override
+    public Collection<MediaTrack> getMediaTracksInTimeRange(RegattaAndRaceIdentifier regattaAndRaceIdentifier) {
+        TrackedRace trackedRace = getExistingTrackedRace(regattaAndRaceIdentifier);
+        if (trackedRace != null) {
+            if (trackedRace.isLive(MillisecondsTimePoint.now())) {
+                return mediaLibrary.findLiveMediaTracksForRace(trackedRace.getRaceIdentifier().getRegattaName(),
+                        trackedRace.getRaceIdentifier().getRaceName());
+            } else {
                 TimePoint raceStart = trackedRace.getStartOfRace() == null ? null : trackedRace.getStartOfRace();
                 TimePoint raceEnd = trackedRace.getEndOfRace() == null ? null : trackedRace.getEndOfRace();
-                return mediaLibrary.findMediaTracksForRace(trackedRace.getRaceIdentifier(), raceStart, raceEnd);
+                return mediaLibrary.findMediaTracksInTimeRange(raceStart, raceEnd);
             }
         } else {
             return Collections.emptyList();
