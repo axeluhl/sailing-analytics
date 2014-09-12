@@ -60,6 +60,7 @@ public class MediaMultiSelectionControl extends AbstractMediaSelectionControl im
 
     private void addNewMediaButtonsTo(Panel grid) {
         HorizontalPanel controlButtons = new HorizontalPanel();
+        controlButtons.setWidth("100%");
         if (mediaPlayerManager.allowsEditing()) {
             Button addButton = new Button("Add", new ClickHandler() {
 
@@ -69,7 +70,6 @@ public class MediaMultiSelectionControl extends AbstractMediaSelectionControl im
                     mediaPlayerManager.addMediaTrack();
                 }
             });
-//            controlButtons.setWidget(0, 0, addButton);
             controlButtons.add(addButton);
         }
 
@@ -80,12 +80,10 @@ public class MediaMultiSelectionControl extends AbstractMediaSelectionControl im
                 hide();
             }
         });
-//        controlButtons.setWidget(0, 1, closeButton);
-        controlButtons.setCellHorizontalAlignment(closeButton, HasHorizontalAlignment.ALIGN_RIGHT);
         controlButtons.add(closeButton);
+        controlButtons.setCellHorizontalAlignment(closeButton, HasHorizontalAlignment.ALIGN_RIGHT);
         
         grid.add(controlButtons);
-//        grid.set
     }
 
     private void addVideoTracksToGridPanel(Collection<MediaTrack> reachableVideoTracks, Panel grid) {
@@ -157,12 +155,13 @@ public class MediaMultiSelectionControl extends AbstractMediaSelectionControl im
             panel.setWidth("100%");
             panel.add(playCheckBox);
 
-            Button deleteButton = createDeleteButton(videoTrack, panel);
-            panel.setCellHorizontalAlignment(deleteButton, HasHorizontalAlignment.ALIGN_RIGHT);
+            Button deleteButton = createDeleteButton(videoTrack);
             panel.add(deleteButton);
             CheckBox connectCheckBox = createConnectCheckBox(videoTrack);
             panel.setCellHorizontalAlignment(deleteButton, HasHorizontalAlignment.ALIGN_RIGHT);
-            panel.add(connectCheckBox);      
+            panel.add(connectCheckBox);   
+            panel.setCellHorizontalAlignment(connectCheckBox, HasHorizontalAlignment.ALIGN_RIGHT);
+            panel.setCellWidth(connectCheckBox, "13");
             setEnableOfVideoTrack(connectCheckBox, connectCheckBox.getValue());
             return panel;
         } else {
@@ -229,7 +228,7 @@ public class MediaMultiSelectionControl extends AbstractMediaSelectionControl im
         });
     }
 
-    private Button createDeleteButton(final MediaTrack videoTrack, HorizontalPanel panel) {
+    private Button createDeleteButton(final MediaTrack videoTrack) {
         Button deleteButton = new Button("X", new ClickHandler() {
 
             @Override
