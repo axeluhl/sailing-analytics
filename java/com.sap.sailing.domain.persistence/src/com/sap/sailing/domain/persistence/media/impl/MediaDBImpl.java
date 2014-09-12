@@ -120,7 +120,7 @@ public class MediaDBImpl implements MediaDB {
         String title = (String) dbObject.get(DbNames.Fields.MEDIA_TITLE.name());
         String url = (String) dbObject.get(DbNames.Fields.MEDIA_URL.name());
         Date startTime = (Date) dbObject.get(DbNames.Fields.STARTTIME.name());
-        Number duration = (Number)dbObject.get(DbNames.Fields.DURATION_IN_MILLIS.name());
+        Number duration = (Number) dbObject.get(DbNames.Fields.DURATION_IN_MILLIS.name());
         String mimeTypeText = (String) dbObject.get(DbNames.Fields.MIME_TYPE.name());
         MimeType mimeType = MimeType.byName(mimeTypeText);
         Set<RegattaAndRaceIdentifier> regattasAndRaces = new HashSet<RegattaAndRaceIdentifier>();
