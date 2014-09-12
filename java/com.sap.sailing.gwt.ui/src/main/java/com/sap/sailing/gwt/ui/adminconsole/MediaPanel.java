@@ -5,6 +5,8 @@ import static com.google.gwt.dom.client.BrowserEvents.KEYUP;
 
 import java.util.Collection;
 import java.util.Comparator;
+import java.util.Date;
+import java.util.List;
 import java.util.Set;
 
 import com.google.gwt.cell.client.Cell.Context;
@@ -34,6 +36,8 @@ import com.google.gwt.view.client.SelectionModel;
 import com.google.gwt.view.client.SingleSelectionModel;
 import com.sap.sailing.domain.common.RegattaAndRaceIdentifier;
 import com.sap.sailing.domain.common.TimePoint;
+import com.sap.sailing.domain.common.dto.RaceDTO;
+import com.sap.sailing.domain.common.dto.TrackedRaceDTO;
 import com.sap.sailing.domain.common.impl.MillisecondsTimePoint;
 import com.sap.sailing.domain.common.media.MediaTrack;
 import com.sap.sailing.domain.common.media.MediaUtil;
@@ -43,9 +47,11 @@ import com.sap.sailing.gwt.ui.client.RegattaRefresher;
 import com.sap.sailing.gwt.ui.client.RegattasDisplayer;
 import com.sap.sailing.gwt.ui.client.SailingServiceAsync;
 import com.sap.sailing.gwt.ui.client.StringMessages;
-import com.sap.sailing.gwt.ui.client.media.NewMediaDialog;
 import com.sap.sailing.gwt.ui.client.media.NewMediaWithRaceSelectionDialog;
 import com.sap.sailing.gwt.ui.client.media.TimeFormatUtil;
+import com.sap.sailing.gwt.ui.shared.RaceWithCompetitorsDTO;
+import com.sap.sailing.gwt.ui.shared.RegattaDTO;
+import com.sap.sse.gwt.client.async.MarkedAsyncCallback;
 import com.sap.sse.gwt.client.dialog.DataEntryDialog.DialogCallback;
 
 /**
@@ -65,6 +71,7 @@ public class MediaPanel extends FlowPanel {
     private Set<RegattasDisplayer> regattasDisplayers;
     private CellTable<MediaTrack> mediaTracksTable;
     private ListDataProvider<MediaTrack> mediaTrackListDataProvider = new ListDataProvider<MediaTrack>();
+    private Date latestDate;
 
     public MediaPanel(Set<RegattasDisplayer> regattasDisplayers, SailingServiceAsync sailingService,
             RegattaRefresher regattaRefresher, MediaServiceAsync mediaService, ErrorReporter errorReporter,
@@ -417,9 +424,9 @@ public class MediaPanel extends FlowPanel {
     }
 
     private void addUrlMediaTrack() {
-        TimePoint defaultStartTime = MillisecondsTimePoint.now();
-        NewMediaWithRaceSelectionDialog dialog = new NewMediaWithRaceSelectionDialog(defaultStartTime, stringMessages, sailingService, errorReporter,
-                regattaRefresher, regattasDisplayers, new DialogCallback<MediaTrack>() {
+        NewMediaWithRaceSelectionDialog dialog = new NewMediaWithRaceSelectionDialog(getDefaultStartTime(),
+                stringMessages, sailingService, errorReporter, regattaRefresher, regattasDisplayers,
+                new DialogCallback<MediaTrack>() {
 
                     @Override
                     public void cancel() {
@@ -446,6 +453,44 @@ public class MediaPanel extends FlowPanel {
                     }
                 });
         dialog.show();
+    }
+
+    private TimePoint getDefaultStartTime() {
+        
+        if(getLatestDate()!=null){
+            return new MillisecondsTimePoint(latestDate); 
+        }else{
+            return MillisecondsTimePoint.now();
+        }
+
+    }
+
+    private Date getLatestDate() {
+        sailingService.getRegattas(new MarkedAsyncCallback<List<RegattaDTO>>(new AsyncCallback<List<RegattaDTO>>() {
+            @Override
+            public void onSuccess(List<RegattaDTO> result) {
+               latestDate = getDateFromLatestRegatta(result); 
+            }
+
+            private Date getDateFromLatestRegatta(List<RegattaDTO> result) {
+                RegattaDTO latestRegatta = null;
+                for (RegattaDTO regatta : result) {
+                    if(regatta.getStartDate()!=null){
+                        if(latestRegatta == null){
+                            latestRegatta = regatta;
+                        }else if(regatta.getStartDate().after(latestRegatta.getStartDate())) {
+                            latestRegatta = regatta;
+                        }
+                    }
+                }
+                return latestRegatta == null ? null : latestRegatta.getStartDate();
+            }
+
+            @Override
+            public void onFailure(Throwable caught) {
+            }
+        }));
+        return latestDate;
     }
 
     private String listRegattasAndRaces(MediaTrack mediaTrack) {
