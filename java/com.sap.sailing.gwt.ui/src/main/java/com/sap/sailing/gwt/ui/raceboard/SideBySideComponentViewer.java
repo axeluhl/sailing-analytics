@@ -30,15 +30,13 @@ import com.sap.sailing.gwt.ui.shared.UserDTO;
 import com.sap.sse.common.Util.Pair;
 
 /**
- *  Component Viewer that uses a {@link TouchSplitLayoutPanel}
- *  to display its components.
- *  
- *  TODO: Refactor to make sure it is really only performing operations
- *  that are related to view. Currently it is digging too deep into
- *  components and setting titles or even creating video buttons.
+ * Component Viewer that uses a {@link TouchSplitLayoutPanel} to display its components.
+ * 
+ * TODO: Refactor to make sure it is really only performing operations that are related to view. Currently it is digging
+ * too deep into components and setting titles or even creating video buttons.
  */
 public class SideBySideComponentViewer implements ComponentViewer {
-    
+
     private static final int DEFAULT_SOUTH_SPLIT_PANEL_HEIGHT = 200;
     private final int MIN_LEADERBOARD_WIDTH = 432; // works well for 505 and ESS
 
@@ -50,7 +48,7 @@ public class SideBySideComponentViewer implements ComponentViewer {
             WidgetCollection children = getChildren();
             for (Widget widget : children) {
                 if (widget instanceof RequiresResize) {
-                    ((RequiresResize)widget).onResize();
+                    ((RequiresResize) widget).onResize();
                 }
             }
         }
@@ -67,12 +65,14 @@ public class SideBySideComponentViewer implements ComponentViewer {
     private boolean videoPlays = false;
 
     private LayoutPanel mainPanel;
-    
-    private TouchSplitLayoutPanel splitLayoutPanel; 
+
+    private TouchSplitLayoutPanel splitLayoutPanel;
     private int savedSplitPosition = -1;
     private boolean layoutForLeftComponentForcedOnce = false;
-    
-    public SideBySideComponentViewer(final LeaderboardPanel leftComponentP, final Component<?> rightComponentP, final MediaPlayerManagerComponent mediaPlayerManagerComponent, List<Component<?>> components, final StringMessages stringMessages, UserDTO user) {
+
+    public SideBySideComponentViewer(final LeaderboardPanel leftComponentP, final Component<?> rightComponentP,
+            final MediaPlayerManagerComponent mediaPlayerManagerComponent, List<Component<?>> components,
+            final StringMessages stringMessages, UserDTO user) {
         this.stringMessages = stringMessages;
         this.leftComponent = leftComponentP;
         this.rightComponent = rightComponentP;
@@ -81,12 +81,12 @@ public class SideBySideComponentViewer implements ComponentViewer {
         this.videoToggleButton = createVideoToggleButton(mediaPlayerManagerComponent);
         this.mediaManagementButton = createMediaManagementButton(mediaPlayerManagerComponent);
 
-        mediaPlayerManagerComponent.setPlayerChangeListener(new PlayerChangeListener(){
+        mediaPlayerManagerComponent.setPlayerChangeListener(new PlayerChangeListener() {
 
-            public void notifyStateChange(){
-                videoToggleButton.setVisible(mediaPlayerManagerComponent.getMediaTracks().size()>0);
+            public void notifyStateChange() {
+                videoToggleButton.setVisible(mediaPlayerManagerComponent.getMediaTracks().size() > 0);
                 mediaManagementButton.setVisible(mediaPlayerManagerComponent.allowsEditing());
-                videoPlays = (mediaPlayerManagerComponent.getPlayingVideoTracks().size()>0);
+                videoPlays = (mediaPlayerManagerComponent.getPlayingVideoTracks().size() > 0);
             }
 
         });
@@ -97,38 +97,43 @@ public class SideBySideComponentViewer implements ComponentViewer {
         this.mainPanel.setSize("100%", "100%");
         this.mainPanel.getElement().getStyle().setMarginTop(-12, Unit.PX);
         this.mainPanel.setStyleName("SideBySideComponentViewer-MainPanel");
-        this.splitLayoutPanel = new TouchSplitLayoutPanel(/* horizontal splitter width */ 3, /*vertical splitter height*/ 25);
+        this.splitLayoutPanel = new TouchSplitLayoutPanel(/* horizontal splitter width */3, /* vertical splitter height */
+                25);
         this.mainPanel.add(splitLayoutPanel);
-        
+
         // initialize components - they need to be added before other widgets to get the right width
         initializeComponents();
 
         // initialize the leaderboard component
         savedSplitPosition = MIN_LEADERBOARD_WIDTH;
         splitLayoutPanel.insert(leftScrollPanel, leftComponent, Direction.WEST, savedSplitPosition);
-        
+
         // create a panel that will contain the horizontal toggle buttons
         ResizableAbsolutePanel panelForMapAndHorizontalToggleButtons = new ResizableAbsolutePanel();
         panelForMapAndHorizontalToggleButtons.add(rightComponent.getEntryWidget());
         splitLayoutPanel.insert(panelForMapAndHorizontalToggleButtons, rightComponent, Direction.CENTER, 0);
-        
+
         // add additional toggle buttons panel that currently only contains the video button
-        List<Pair<Button, Component<?>>> additionalVerticalButtons = new ArrayList<Pair<Button,Component<?>>>();
-        additionalVerticalButtons.add(new Pair<Button, Component<?>>(videoToggleButton, this.mediaPlayerManagerComponent));
+        List<Pair<Button, Component<?>>> additionalVerticalButtons = new ArrayList<Pair<Button, Component<?>>>();
+        additionalVerticalButtons.add(new Pair<Button, Component<?>>(videoToggleButton,
+                this.mediaPlayerManagerComponent));
         if (user != null) {
-            additionalVerticalButtons.add(new Pair<Button, Component<?>>(mediaManagementButton, this.mediaPlayerManagerComponent));
+            additionalVerticalButtons.add(new Pair<Button, Component<?>>(mediaManagementButton,
+                    this.mediaPlayerManagerComponent));
         }
-        
+
         // ensure that toggle buttons are positioned right
-        splitLayoutPanel.lastComponentHasBeenAdded(this, panelForMapAndHorizontalToggleButtons, additionalVerticalButtons);
+        splitLayoutPanel.lastComponentHasBeenAdded(this, panelForMapAndHorizontalToggleButtons,
+                additionalVerticalButtons);
     }
-    
+
     /**
      * Create the video toggle button that shows or hides the video popup
      */
     private Button createVideoToggleButton(final MediaPlayerManager mediaPlayerManager) {
         final Button videoToggleButton = new Button(new SafeHtml() {
             private static final long serialVersionUID = 8679639887708833213L;
+
             @Override
             public String asString() {
                 if (Document.get().getClientWidth() <= 1024) {
@@ -140,16 +145,18 @@ public class SideBySideComponentViewer implements ComponentViewer {
         });
         videoToggleButton.setTitle(stringMessages.showVideoPopup());
         videoToggleButton.addClickHandler(new ClickHandler() {
-            
+
             @Override
             public void onClick(ClickEvent event) {
-                if(videoPlays){
+                if (videoPlays) {
                     videoPlays = false;
+                    videoToggleButton.setText(stringMessages.showVideoPopup());
                     mediaPlayerManager.stopAll();
-                }else{
+                } else {
                     videoPlays = true;
+                    videoToggleButton.setText(stringMessages.hideVideoPopup());
                     mediaPlayerManager.playDefault();
-                    
+
                 }
             }
         });
@@ -158,51 +165,52 @@ public class SideBySideComponentViewer implements ComponentViewer {
         videoToggleButton.setVisible(false);
         return videoToggleButton;
     }
-    
+
     /**
      * Create the video control button that shows or hides the video popup
-     * @param userAgent 
+     * 
+     * @param userAgent
      */
     private Button createMediaManagementButton(final MediaPlayerManager mediaPlayerManager) {
         final Button mediaManagementButton = new Button(stringMessages.mediaPanel());
         mediaManagementButton.setTitle(stringMessages.showVideoPopup());
-        //onClick
-        final MediaMultiSelectionControl multiSelectionControl = new MediaMultiSelectionControl(mediaPlayerManager, mediaManagementButton);
+        // onClick
+        final MediaMultiSelectionControl multiSelectionControl = new MediaMultiSelectionControl(mediaPlayerManager,
+                mediaManagementButton);
         mediaManagementButton.addClickHandler(new ClickHandler() {
-            
+
             @Override
             public void onClick(ClickEvent event) {
-                multiSelectionControl.show();
+                    multiSelectionControl.show();
             }
         });
-        
+
         // hide button initially as we defer showing the button to the asynchroneous
         // task that gets launched by the media service to get video tracks
         mediaManagementButton.setVisible(false);
         return mediaManagementButton;
     }
-    
+
     private void initializeComponents() {
         for (final Component<?> component : components) {
             splitLayoutPanel.insert(component.getEntryWidget(), component, Direction.SOUTH, 200);
         }
     }
-    
+
     public <SettingsType> void showSettingsDialog(Component<SettingsType> component) {
         if (component.hasSettings()) {
             new SettingsDialog<SettingsType>(component, stringMessages).show();
         }
     }
-    
+
     public Button getVideoControlButton() {
         return videoToggleButton;
     }
 
     /**
-     * Called whenever the layout of {@link TouchSplitLayoutPanel} or other components
-     * change. Controls the visibility based on the {@link Component}s visibility.
-     * Each {@link Component} is in charge to not display any data or update itself
-     * when it is not visible.
+     * Called whenever the layout of {@link TouchSplitLayoutPanel} or other components change. Controls the visibility
+     * based on the {@link Component}s visibility. Each {@link Component} is in charge to not display any data or update
+     * itself when it is not visible.
      */
     public void forceLayout() {
         if (!leftComponent.isVisible() && rightComponent.isVisible()) {
@@ -211,17 +219,19 @@ public class SideBySideComponentViewer implements ComponentViewer {
                 if (leftScrollPanel.getOffsetWidth() > 0) {
                     savedSplitPosition = leftScrollPanel.getOffsetWidth();
                 }
-                splitLayoutPanel.setWidgetVisibility(leftScrollPanel, leftComponent, /*hidden*/true, savedSplitPosition);
+                splitLayoutPanel.setWidgetVisibility(leftScrollPanel, leftComponent, /* hidden */true,
+                        savedSplitPosition);
             }
         } else if (leftComponent.isVisible() && rightComponent.isVisible()) {
             // the leaderboard and the map are visible
-            splitLayoutPanel.setWidgetVisibility(leftScrollPanel, leftComponent, /*hidden*/false, savedSplitPosition);
+            splitLayoutPanel.setWidgetVisibility(leftScrollPanel, leftComponent, /* hidden */false, savedSplitPosition);
         } else if (!leftComponent.isVisible() && !rightComponent.isVisible()) {
         }
 
         for (Component<?> component : components) {
             final boolean isComponentVisible = component.isVisible();
-            splitLayoutPanel.setWidgetVisibility(component.getEntryWidget(), component, !isComponentVisible, DEFAULT_SOUTH_SPLIT_PANEL_HEIGHT);
+            splitLayoutPanel.setWidgetVisibility(component.getEntryWidget(), component, !isComponentVisible,
+                    DEFAULT_SOUTH_SPLIT_PANEL_HEIGHT);
         }
         splitLayoutPanel.forceLayout();
     }
@@ -242,7 +252,7 @@ public class SideBySideComponentViewer implements ComponentViewer {
     public String getViewerName() {
         return "";
     }
-    
+
     public void setLeftComponentWidth(int width) {
         // TODO: The information provided by width is wrong
         // need to find a way to get the correct information

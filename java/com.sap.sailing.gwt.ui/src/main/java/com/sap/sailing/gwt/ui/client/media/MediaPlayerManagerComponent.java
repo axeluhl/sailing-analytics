@@ -525,7 +525,7 @@ public class MediaPlayerManagerComponent implements Component<Void>, PlayStateLi
             }
             activeAudioPlayer = null;
         }
-        for (VideoContainer videoContainer : activeVideoContainers.values()) {
+        for (VideoContainer videoContainer : new ArrayList<VideoContainer>(activeVideoContainers.values())) { //using a copy to prevent a ConcurrentModificationException
             videoContainer.shutDown();
         }
         activeVideoContainers.clear();
