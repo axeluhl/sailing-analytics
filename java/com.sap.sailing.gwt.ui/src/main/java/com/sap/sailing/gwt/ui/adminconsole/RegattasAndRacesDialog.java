@@ -4,6 +4,7 @@ import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
 
+import com.google.gwt.user.client.ui.Button;
 import com.google.gwt.user.client.ui.Grid;
 import com.google.gwt.user.client.ui.HorizontalPanel;
 import com.google.gwt.user.client.ui.Label;
@@ -30,6 +31,7 @@ public class RegattasAndRacesDialog extends DataEntryDialog<Set<RegattaAndRaceId
     public boolean empty = true;
     public boolean started = false;
     private final VerticalPanel panel;
+    private Button btnRefresh;
 
     public RegattasAndRacesDialog(SailingServiceAsync sailingService, final MediaTrack mediaTrack,
             ErrorReporter errorReporter, RegattaRefresher regattaRefresher, StringMessages stringMessages,
@@ -41,8 +43,8 @@ public class RegattasAndRacesDialog extends DataEntryDialog<Set<RegattaAndRaceId
                 new RaceSelectionModel(), stringMessages, /* multiselection */true) {
             protected boolean raceIsToBeAddedToList(RaceDTO race) {
                 if (mediaTrack.duration == null) {
-                    empty = isLife(race.trackedRace);
-                    return isLife(race.trackedRace);
+                    empty = !isLive(race.trackedRace);
+                    return isLive(race.trackedRace);
                 } else if (mediaTrackIsInTimerangeOf(race.trackedRace)) {
                     empty = false;
                     return true;
@@ -51,6 +53,7 @@ public class RegattasAndRacesDialog extends DataEntryDialog<Set<RegattaAndRaceId
             }
 
             protected void addControlButtons(HorizontalPanel trackedRacesButtonPanel) {
+                btnRefresh = (Button)trackedRacesButtonPanel.getWidget(0);
             }
 
             protected void makeControlsReactToSelectionChange(List<RaceDTO> selectedRaces) {
@@ -86,12 +89,12 @@ public class RegattasAndRacesDialog extends DataEntryDialog<Set<RegattaAndRaceId
 
     @Override
     public void fillRegattas(List<RegattaDTO> result) {
+        empty = true;
         this.trackedRacesListComposite.fillRegattas(result);
         for (RegattaAndRaceIdentifier regattaAndRace : mediaTrack.regattasAndRaces) {
             this.trackedRacesListComposite.selectRaceByIdentifier(regattaAndRace);
         }
         updateUI();
-
     }
 
     public void updateUI() {
@@ -116,6 +119,10 @@ public class RegattasAndRacesDialog extends DataEntryDialog<Set<RegattaAndRaceId
             regattasAndRaces.add(race.getRaceIdentifier());
         }
         return regattasAndRaces;
+    }
+    
+    public void hideRefreshButton(){
+        btnRefresh.setVisible(false);
     }
 
     private boolean mediaTrackIsInTimerangeOf(TrackedRaceDTO race) {
@@ -151,7 +158,7 @@ public class RegattasAndRacesDialog extends DataEntryDialog<Set<RegattaAndRaceId
     // return false;
     // }
 
-    private boolean isLife(TrackedRaceDTO race) {
+    private boolean isLive(TrackedRaceDTO race) {
         if (race.endOfTracking == null)
             return true;
         else

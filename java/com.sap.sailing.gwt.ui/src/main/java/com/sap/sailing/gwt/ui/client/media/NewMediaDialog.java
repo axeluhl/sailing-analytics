@@ -20,11 +20,6 @@ import com.sap.sailing.domain.common.impl.MillisecondsDurationImpl;
 import com.sap.sailing.domain.common.impl.MillisecondsTimePoint;
 import com.sap.sailing.domain.common.media.MediaTrack;
 import com.sap.sailing.domain.common.media.MediaTrack.MimeType;
-import com.sap.sailing.gwt.ui.adminconsole.RegattasAndRacesDialog;
-import com.sap.sailing.gwt.ui.client.ErrorReporter;
-import com.sap.sailing.gwt.ui.client.RegattaRefresher;
-import com.sap.sailing.gwt.ui.client.RegattasDisplayer;
-import com.sap.sailing.gwt.ui.client.SailingServiceAsync;
 import com.sap.sailing.gwt.ui.client.StringMessages;
 import com.sap.sailing.gwt.ui.common.client.YoutubeApi;
 import com.sap.sse.gwt.client.dialog.DataEntryDialog;
@@ -42,15 +37,15 @@ public class NewMediaDialog extends DataEntryDialog<MediaTrack> {
 
     };
 
-    private final StringMessages stringMessages;
+    protected final StringMessages stringMessages;
 
-    private MediaTrack mediaTrack = new MediaTrack();
+    protected MediaTrack mediaTrack = new MediaTrack();
 
     private TextBox urlBox;
 
     private TextBox titleBox;
 
-    private TextBox startTimeBox;
+    protected TextBox startTimeBox;
 
     private Label infoLabel; // showing either mime type or youtube id
 
@@ -60,32 +55,7 @@ public class NewMediaDialog extends DataEntryDialog<MediaTrack> {
 
     private Label infoLabelLabel;
 
-    private SailingServiceAsync sailingService;
-
-    private ErrorReporter errorReporter;
-
-    private RegattaRefresher regattaRefresher;
-
-    private Set<RegattasDisplayer> regattasDisplayers;
-    
-    private Widget listOfRacesForMedia;
-
-    private RegattasAndRacesDialog racesForMediaDialog;
-    
-    private boolean searchForRaces = false;
-
-    private RegattaAndRaceIdentifier raceIdentifier;
-
-    public NewMediaDialog(TimePoint defaultStartTime, StringMessages stringMessages,
-            SailingServiceAsync sailingService, ErrorReporter errorReporter, RegattaRefresher regattaRefresher,
-            Set<RegattasDisplayer> regattasDisplayers, DialogCallback<MediaTrack> dialogCallback) {
-        this(defaultStartTime, stringMessages, null, dialogCallback);
-        this.searchForRaces = true;
-        this.sailingService = sailingService;
-        this.errorReporter = errorReporter;
-        this.regattaRefresher = regattaRefresher;
-        this.regattasDisplayers = regattasDisplayers;
-    }
+    final private RegattaAndRaceIdentifier raceIdentifier;
 
     public NewMediaDialog(TimePoint defaultStartTime, StringMessages stringMessages,
             RegattaAndRaceIdentifier raceIdentifier, DialogCallback<MediaTrack> dialogCallback) {
@@ -101,65 +71,27 @@ public class NewMediaDialog extends DataEntryDialog<MediaTrack> {
     protected MediaTrack getResult() {
         // mediaTrack.url = urlBox.getValue();
         mediaTrack.title = titleBox.getValue();
-        getStartTimeAndRefreshRacesForMedia();
+        getStartTime();
         String duration = durationBox.getValue();
         if (duration != null && !duration.equals("")) {
             mediaTrack.duration = TimeFormatUtil.hrsMinSecToMilliSeconds(duration);
         }
-
         connectMediaWithRace();
-        
+
         return mediaTrack;
     }
 
-    private void connectMediaWithRace() {
-        if(searchForRaces){
-            mediaTrack.regattasAndRaces = racesForMediaDialog.getSelectedRegattasAndRaces();
-        }else{
-            Set<RegattaAndRaceIdentifier> regattasAndRaces = new HashSet<RegattaAndRaceIdentifier>();
-            regattasAndRaces.add(this.raceIdentifier);
-            mediaTrack.regattasAndRaces = regattasAndRaces;
-        }
+    protected void connectMediaWithRace() {
+        Set<RegattaAndRaceIdentifier> regattasAndRaces = new HashSet<RegattaAndRaceIdentifier>();
+        regattasAndRaces.add(this.raceIdentifier);
+        mediaTrack.regattasAndRaces = regattasAndRaces;
     }
 
-    private void getStartTimeAndRefreshRacesForMedia() {
-        try {
-            String startTime = startTimeBox.getValue();
-            if (startTime != null && !startTime.equals("")) {
-                mediaTrack.startTime = new MillisecondsTimePoint(TimeFormatUtil.DATETIME_FORMAT.parse(startTime));
-                if(searchForRaces){
-                    regattaRefresher.fillRegattas();
-                    listOfRacesForMedia.setVisible(true);
-                }
-            }
-        } catch (Exception e) {
-            if(searchForRaces){
-                listOfRacesForMedia.setVisible(false);
-            }
+    protected void getStartTime() {
+        String startTime = startTimeBox.getValue();
+        if (startTime != null && !startTime.equals("")) {
+            mediaTrack.startTime = new MillisecondsTimePoint(TimeFormatUtil.DATETIME_FORMAT.parse(startTime));
         }
-    }
-    
-    private Widget racesForMedia(){
-        racesForMediaDialog = new RegattasAndRacesDialog(sailingService, mediaTrack,
-                errorReporter, regattaRefresher, stringMessages, null,
-                new DialogCallback<Set<RegattaAndRaceIdentifier>>() {
-
-                    @Override
-                    public void cancel() {
-                    }
-
-                    @Override
-                    public void ok(Set<RegattaAndRaceIdentifier> regattas) {
-                        if (regattas.size() >= 0) {
-                            mediaTrack.regattasAndRaces.clear();
-                            mediaTrack.regattasAndRaces.addAll(regattas);
-                        }
-                    }
-                });
-        racesForMediaDialog.ensureDebugId("RegattasAndRacesDialog");
-        regattasDisplayers.add(racesForMediaDialog);
-        
-        return listOfRacesForMedia = racesForMediaDialog.getAdditionalWidget();
     }
 
     private void loadMediaDuration() {
@@ -211,10 +143,6 @@ public class NewMediaDialog extends DataEntryDialog<MediaTrack> {
         formGrid.setWidget(4, 1, durationBox);
         mainPanel.add(formGrid);
         
-        if(searchForRaces){
-            mainPanel.add(racesForMedia());
-            listOfRacesForMedia.setVisible(false);
-        }
         return mainPanel;
     }
 
@@ -330,11 +258,11 @@ public class NewMediaDialog extends DataEntryDialog<MediaTrack> {
             infoLabelLabel.setText(stringMessages.mimeType() + ":");
             infoLabel.setText(mediaTrack.typeToString());
         }
-        String startTimeText = mediaTrack.startTime == null ? "undefined" : TimeFormatUtil.DATETIME_FORMAT
+        String startTimeText = mediaTrack.startTime == null ? "2014 Jan 01 12:12:59.000" : TimeFormatUtil.DATETIME_FORMAT
                 .format(mediaTrack.startTime.asDate());
-        
+
         startTimeBox.setText(startTimeText);
-        getStartTimeAndRefreshRacesForMedia();
+        getStartTime();
         durationBox.setText(TimeFormatUtil.durationToHrsMinSec(mediaTrack.duration));
     }
 

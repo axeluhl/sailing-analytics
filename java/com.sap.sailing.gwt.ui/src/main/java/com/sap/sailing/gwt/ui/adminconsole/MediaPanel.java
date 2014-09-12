@@ -44,6 +44,7 @@ import com.sap.sailing.gwt.ui.client.RegattasDisplayer;
 import com.sap.sailing.gwt.ui.client.SailingServiceAsync;
 import com.sap.sailing.gwt.ui.client.StringMessages;
 import com.sap.sailing.gwt.ui.client.media.NewMediaDialog;
+import com.sap.sailing.gwt.ui.client.media.NewMediaWithRaceSelectionDialog;
 import com.sap.sailing.gwt.ui.client.media.TimeFormatUtil;
 import com.sap.sse.gwt.client.dialog.DataEntryDialog.DialogCallback;
 
@@ -417,7 +418,7 @@ public class MediaPanel extends FlowPanel {
 
     private void addUrlMediaTrack() {
         TimePoint defaultStartTime = MillisecondsTimePoint.now();
-        NewMediaDialog dialog = new NewMediaDialog(defaultStartTime, stringMessages, sailingService, errorReporter,
+        NewMediaWithRaceSelectionDialog dialog = new NewMediaWithRaceSelectionDialog(defaultStartTime, stringMessages, sailingService, errorReporter,
                 regattaRefresher, regattasDisplayers, new DialogCallback<MediaTrack>() {
 
                     @Override
