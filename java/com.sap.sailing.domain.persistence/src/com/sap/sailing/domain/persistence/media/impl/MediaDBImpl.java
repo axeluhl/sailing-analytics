@@ -90,8 +90,7 @@ public class MediaDBImpl implements MediaDB {
                 object.put(DbNames.Fields.RACE_NAME.name(), regattaAndRace.getRaceName());
                 objectList.add(object);
             }
-        }
-        else{
+        } else {
             System.currentTimeMillis();
         }
         dbMediaTrack.put(DbNames.Fields.REGATTAS_AND_RACES.name(), objectList);

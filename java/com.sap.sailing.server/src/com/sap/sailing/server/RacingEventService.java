@@ -441,6 +441,8 @@ public interface RacingEventService extends TrackedRegattaRegistry, RegattaFetch
     void mediaTracksImported(Collection<MediaTrack> mediaTracksToImport, boolean override);
     
     Collection<MediaTrack> getMediaTracksForRace(RegattaAndRaceIdentifier regattaAndRaceIdentifier);
+    
+    Collection<MediaTrack> getMediaTracksInTimeRange(RegattaAndRaceIdentifier regattaAndRaceIdentifier);
 
     Collection<MediaTrack> getAllMediaTracks();
 

@@ -38,7 +38,6 @@ public class MediaSingleSelectionControl extends AbstractMediaSelectionControl {
         videoTracks = mediaPlayerManager.getVideoTracks();
         setWidgetsVisible(videoTracks.size() > 1);
         selectMedia.clear();
-        if (mediaPlayerManager.getVideoTracks().size() > 1) {
             int playingVideoIndex = -1;
             for (int i = 0; i < videoTracks.size(); i++) {
                 MediaTrack videoTrack = videoTracks.get(i);
@@ -47,8 +46,12 @@ public class MediaSingleSelectionControl extends AbstractMediaSelectionControl {
                     playingVideoIndex = i;
                 }
             }
+
+            if (mediaPlayerManager.getVideoTracks().size() > 1) {
+                //TODO consider special case, when there is only one video
+            }
             selectMedia.setSelectedIndex(playingVideoIndex);
-        }
+        
     }
 
     public Widget widget() {

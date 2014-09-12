@@ -83,8 +83,8 @@ public class SideBySideComponentViewer implements ComponentViewer {
 
         mediaPlayerManagerComponent.setPlayerChangeListener(new PlayerChangeListener() {
 
-            public void notifyStateChange() {
-                videoToggleButton.setVisible(mediaPlayerManagerComponent.getMediaTracks().size() > 0);
+            public void notifyStateChange(){
+                videoToggleButton.setVisible(mediaPlayerManagerComponent.getAssignedMediaTracks().size()>0);
                 mediaManagementButton.setVisible(mediaPlayerManagerComponent.allowsEditing());
                 videoPlays = (mediaPlayerManagerComponent.getPlayingVideoTracks().size() > 0);
             }
