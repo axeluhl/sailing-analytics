@@ -505,7 +505,7 @@ public class MediaPlayerManagerComponent implements Component<Void>, PlayStateLi
             // popupPlayer = new VideoWindowPlayer(videoTrack, popCloseListener);
             videoPlayer = new VideoHtmlPlayer(videoTrack, getRaceStartTime(), showSynchControls, raceTimer);
         }
-        return videoContainerFactory.createVideoContainer(videoPlayer, showSynchControls, mediaService, errorReporter,
+        return videoContainerFactory.createVideoContainer(videoPlayer, showSynchControls, getMediaService(), errorReporter,
                 playerCloseListener, popoutListener);
     }
 
@@ -624,7 +624,7 @@ public class MediaPlayerManagerComponent implements Component<Void>, PlayStateLi
 
                     @Override
                     public void ok(final MediaTrack mediaTrack) {
-                        MediaPlayerManagerComponent.this.mediaService.addMediaTrack(mediaTrack,
+                        MediaPlayerManagerComponent.this.getMediaService().addMediaTrack(mediaTrack,
                                 new AsyncCallback<String>() {
 
                                     @Override
@@ -648,7 +648,7 @@ public class MediaPlayerManagerComponent implements Component<Void>, PlayStateLi
     @Override
     public boolean deleteMediaTrack(final MediaTrack mediaTrack) {
         if (Window.confirm(stringMessages.reallyRemoveMediaTrack(mediaTrack.title))) {
-            mediaService.deleteMediaTrack(mediaTrack, new AsyncCallback<Void>() {
+            getMediaService().deleteMediaTrack(mediaTrack, new AsyncCallback<Void>() {
 
                 @Override
                 public void onFailure(Throwable t) {
@@ -787,6 +787,10 @@ public class MediaPlayerManagerComponent implements Component<Void>, PlayStateLi
 
     public RegattaAndRaceIdentifier getRaceIdentifier() {
         return raceIdentifier;
+    }
+
+    public MediaServiceAsync getMediaService() {
+        return mediaService;
     }
 
 }
