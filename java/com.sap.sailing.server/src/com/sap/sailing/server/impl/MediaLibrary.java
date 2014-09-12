@@ -242,9 +242,10 @@ class MediaLibrary {
         try {
             MediaTrack mediaTrack = mediaTracksByDbId.get(changedMediaTrack);
             if (mediaTrack != null) {
+                updateCache_Remove(mediaTrack); //Cannot use updateCache_Update method, because race is changed
                 mediaTrack.regattasAndRaces.clear();
                 mediaTrack.regattasAndRaces.addAll(changedMediaTrack.regattasAndRaces);
-                updateCache_Change(mediaTrack);
+                updateCache_Add(mediaTrack);
             }
         } finally {
             LockUtil.unlockAfterWrite(lock);

@@ -185,6 +185,7 @@ public class MediaMultiSelectionControl extends AbstractMediaSelectionControl im
                 } else {
                     disconnectVideoFromRace(videoTrack);
                     setEnableOfVideoTrack((CheckBox)changeEvent.getSource(), false);
+                    mediaPlayerManager.closeFloatingVideo(videoTrack);
                 }
             }
         });
@@ -196,6 +197,9 @@ public class MediaMultiSelectionControl extends AbstractMediaSelectionControl im
         for (Widget widget : videoTrack) {
             if(widget != checkBox && widget instanceof FocusWidget){
                 ((FocusWidget)widget).setEnabled(enable);
+                if(widget instanceof CheckBox){
+                    ((CheckBox)widget).setValue(false);
+                }
             }
         }
     }
