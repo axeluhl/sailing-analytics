@@ -3035,6 +3035,9 @@ public class LeaderboardPanel extends SimplePanel implements TimeListener, PlayS
         if (timer != null) {
             timer.removeTimeListener(this);
         }
+        if(leaderboardUpdateListener != null) {
+            leaderboardUpdateListener.clear();
+        }
     }
 
     protected Timer getTimer() {
@@ -3071,7 +3074,7 @@ public class LeaderboardPanel extends SimplePanel implements TimeListener, PlayS
     public void addLeaderboardUpdateListener(LeaderboardUpdateListener listener) {
         this.leaderboardUpdateListener.add(listener);
     }
-    
+
     protected void informLeaderboardUpdateListenersAboutLeaderboardUpdated(LeaderboardDTO leaderboard) {
         for (LeaderboardUpdateListener listener : this.leaderboardUpdateListener) {
             listener.updatedLeaderboard(leaderboard);

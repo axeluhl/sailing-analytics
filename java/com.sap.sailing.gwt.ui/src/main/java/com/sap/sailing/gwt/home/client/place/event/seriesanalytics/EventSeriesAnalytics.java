@@ -89,6 +89,7 @@ public class EventSeriesAnalytics extends Composite implements LeaderboardUpdate
 
         regattaLeaderboardsTabPanel.setVisible(false);
         competitorChartsTabPanel.setVisible(false);
+        liveRaceDiv.getStyle().setVisibility(Visibility.HIDDEN);
     }
     
     public void createSeriesAnalyticsViewer(SailingServiceAsync sailingService, AsyncActionsExecutor asyncActionsExecutor, 
@@ -115,7 +116,8 @@ public class EventSeriesAnalytics extends Composite implements LeaderboardUpdate
         eventSeriesAnalyticsManager.hideCompetitorChart();
 
         eventSeriesAnalyticsManager.getLeaderboardPanel().addLeaderboardUpdateListener(this);
-
+        eventSeriesAnalyticsManager.getMultiLeaderboardPanel().addLeaderboardUpdateListener(this);
+        
         activeContentWidget = eventSeriesAnalyticsManager.getLeaderboardPanel();
     }
 
@@ -149,6 +151,8 @@ public class EventSeriesAnalytics extends Composite implements LeaderboardUpdate
                 
                 oldOverallLeaderboardComposite.updatedLeaderboard(leaderboard, hasLiveRace);
             }
+        } else if(activeTabPanel == regattaLeaderboardsTabPanel) {
+            oldRegattaLeaderboardsComposite.updatedMultiLeaderboard(leaderboard, false);
         }
     }
 

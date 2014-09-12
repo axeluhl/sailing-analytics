@@ -76,6 +76,8 @@ public class RegattaAnalytics extends Composite implements LeaderboardUpdateList
         activeAnchor.addStyleName(HomeResources.INSTANCE.mainCss().navbar_buttonactive());
 
         competitorChartsTabPanel.setVisible(false);
+        liveRaceDiv.getStyle().setVisibility(Visibility.HIDDEN);
+
     }
     
     public void createRegattaAnalyticsViewer(final SailingServiceAsync sailingService, final AsyncActionsExecutor asyncActionsExecutor,

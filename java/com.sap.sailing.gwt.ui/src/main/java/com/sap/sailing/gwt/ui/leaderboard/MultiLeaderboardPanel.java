@@ -19,6 +19,7 @@ import com.google.gwt.user.client.ui.Widget;
 import com.sap.sailing.domain.common.RaceIdentifier;
 import com.sap.sailing.gwt.ui.client.CompetitorSelectionModel;
 import com.sap.sailing.gwt.ui.client.ErrorReporter;
+import com.sap.sailing.gwt.ui.client.LeaderboardUpdateListener;
 import com.sap.sailing.gwt.ui.client.SailingServiceAsync;
 import com.sap.sailing.gwt.ui.client.StringMessages;
 import com.sap.sailing.gwt.ui.client.shared.components.AbstractLazyComponent;
@@ -57,7 +58,9 @@ public class MultiLeaderboardPanel extends AbstractLazyComponent<LeaderboardSett
     private Label leaderboardsLabel;
     private final String metaLeaderboardName;
     private final boolean isEmbedded;
-    
+
+    private List<LeaderboardUpdateListener> leaderboardUpdateListener;
+
     public MultiLeaderboardPanel(SailingServiceAsync sailingService, String metaLeaderboardName, AsyncActionsExecutor asyncActionsExecutor,
             Timer timer, boolean isEmbedded, String preselectedLeaderboardName, RaceIdentifier preselectedRace, 
             ErrorReporter errorReporter, StringMessages stringMessages,
@@ -77,6 +80,7 @@ public class MultiLeaderboardPanel extends AbstractLazyComponent<LeaderboardSett
         selectedLeaderboardPanel = null;
         leaderboardNamesAndDisplayNames = new ArrayList<Util.Pair<String, String>>();
         leaderboardNamesAndSettings = new HashMap<String, LeaderboardSettings>();
+        leaderboardUpdateListener = new ArrayList<LeaderboardUpdateListener>();
     }
 
     private LeaderboardSettings getOrCreateLeaderboardSettings(String leaderboardName, LeaderboardSettings currentLeaderboardSettings) {
@@ -146,6 +150,10 @@ public class MultiLeaderboardPanel extends AbstractLazyComponent<LeaderboardSett
         selectedLeaderboardPanel.updateSettings(newSettings);
     }
 
+    public void addLeaderboardUpdateListener(LeaderboardUpdateListener listener) {
+        this.leaderboardUpdateListener.add(listener);
+    }
+
     public void setLeaderboardNames(List<Util.Pair<String, String>> newLeaderboardNamesAndDisplayNames) {
         leaderboardNamesAndDisplayNames.clear();
         leaderboardNamesAndDisplayNames.addAll(newLeaderboardNamesAndDisplayNames);
@@ -211,6 +219,10 @@ public class MultiLeaderboardPanel extends AbstractLazyComponent<LeaderboardSett
                     showRaceDetails, /* competitorSearchTextBox */ null, /* showSelectionCheckbox */ true,  /* raceTimesInfoProvider */null, 
                     false, /* adjustTimerDelay */ true, /*autoApplyTopNFilter*/ false, false);
             selectedLeaderboardFlowPanel.add(selectedLeaderboardPanel);
+            for(LeaderboardUpdateListener listener: leaderboardUpdateListener) {
+                selectedLeaderboardPanel.addLeaderboardUpdateListener(listener);
+            }
+            
         } else {
             if(selectedLeaderboardPanel != null && selectedLeaderboardFlowPanel != null) {
                 selectedLeaderboardPanel.removeAllListeners();
