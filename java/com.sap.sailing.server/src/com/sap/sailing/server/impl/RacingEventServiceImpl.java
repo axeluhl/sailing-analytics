@@ -2473,6 +2473,21 @@ public class RacingEventServiceImpl implements RacingEventServiceWithTestSupport
     }
 
     @Override
+    public CourseArea removeCourseAreaWithoutReplication(UUID eventId, UUID courseAreaId) {
+        final CourseArea courseArea = getBaseDomainFactory().getExistingCourseAreaById(courseAreaId);
+        if (courseArea == null) {
+            throw new IllegalArgumentException("No course area with ID "+courseAreaId+" found.");
+        }
+        final Event event = eventsById.get(eventId);
+        if (event == null) {
+            throw new IllegalArgumentException("No sailing event with ID " + eventId + " found.");
+        }
+        event.getVenue().removeCourseArea(courseArea);
+        mongoObjectFactory.storeEvent(event);
+        return courseArea;
+    }
+
+    @Override
     public void mediaTrackAdded(MediaTrack mediaTrack) {
         if (mediaTrack.dbId == null) {
             mediaTrack.dbId = mediaDB.insertMediaTrack(mediaTrack.title, mediaTrack.url, mediaTrack.startTime,

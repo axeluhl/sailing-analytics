@@ -104,11 +104,12 @@ public class RegattasAndRacesDialog extends DataEntryDialog<Set<RegattaAndRaceId
             label.setText("No Races available");
             grid.getWidget(0, 0).setVisible(true);
             grid.getWidget(1, 1).setVisible(false);
+            this.getOkButton().setVisible(false);
             
         } else {
             grid.getWidget(0, 0).setVisible(false);
             grid.getWidget(1, 1).setVisible(true);
-            this.getCancelButton().setVisible(true);
+            this.getOkButton().setVisible(true);
         }
     }
 

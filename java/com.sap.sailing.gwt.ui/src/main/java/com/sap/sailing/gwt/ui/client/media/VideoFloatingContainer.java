@@ -1,5 +1,6 @@
 package com.sap.sailing.gwt.ui.client.media;
 
+import com.google.gwt.dom.client.Document;
 import com.google.gwt.event.logical.shared.CloseEvent;
 import com.google.gwt.event.logical.shared.CloseHandler;
 import com.google.gwt.user.client.ui.FlowPanel;
@@ -55,6 +56,7 @@ public class VideoFloatingContainer extends AbstractVideoContainer implements Vi
 
     @Override
     void show() {
+        dialogBox.setPopupPosition(20, Document.get().getClientHeight()-dialogBox.getOffsetHeight()-500);
         dialogBox.show();
     }
 
