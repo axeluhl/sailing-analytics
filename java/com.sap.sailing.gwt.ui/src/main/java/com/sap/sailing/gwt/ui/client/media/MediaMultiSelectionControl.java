@@ -12,11 +12,11 @@ import com.google.gwt.event.logical.shared.CloseEvent;
 import com.google.gwt.event.logical.shared.CloseHandler;
 import com.google.gwt.event.logical.shared.ValueChangeEvent;
 import com.google.gwt.event.logical.shared.ValueChangeHandler;
+import com.google.gwt.user.client.rpc.AsyncCallback;
 import com.google.gwt.user.client.ui.Button;
 import com.google.gwt.user.client.ui.CheckBox;
 import com.google.gwt.user.client.ui.DialogBox;
-import com.google.gwt.user.client.ui.FlowPanel;
-import com.google.gwt.user.client.ui.Grid;
+import com.google.gwt.user.client.ui.FocusWidget;
 import com.google.gwt.user.client.ui.HasHorizontalAlignment;
 import com.google.gwt.user.client.ui.HorizontalPanel;
 import com.google.gwt.user.client.ui.Label;
@@ -81,12 +81,11 @@ public class MediaMultiSelectionControl extends AbstractMediaSelectionControl im
             }
         });
 //        controlButtons.setWidget(0, 1, closeButton);
-        controlButtons.add(closeButton);
         controlButtons.setCellHorizontalAlignment(closeButton, HasHorizontalAlignment.ALIGN_RIGHT);
+        controlButtons.add(closeButton);
+        
         grid.add(controlButtons);
 //        grid.set
-        dialogControl.add(grid);
-        dialogControl.showRelativeTo(popupLocation);
     }
 
     private void addVideoTracksToGridPanel(Collection<MediaTrack> reachableVideoTracks, Panel grid) {
@@ -163,8 +162,8 @@ public class MediaMultiSelectionControl extends AbstractMediaSelectionControl im
             panel.add(deleteButton);
             CheckBox connectCheckBox = createConnectCheckBox(videoTrack);
             panel.setCellHorizontalAlignment(deleteButton, HasHorizontalAlignment.ALIGN_RIGHT);
-            panel.add(connectCheckBox);
-
+            panel.add(connectCheckBox);      
+            setEnableOfVideoTrack(connectCheckBox, connectCheckBox.getValue());
             return panel;
         } else {
             return playCheckBox;
@@ -181,22 +180,53 @@ public class MediaMultiSelectionControl extends AbstractMediaSelectionControl im
             @Override
             public void onValueChange(ValueChangeEvent<Boolean> changeEvent) {
                 if (changeEvent.getValue()) {
-                    connectVideoWithRace(videoTrack);
+                    connectVideoToRace(videoTrack);
+                    setEnableOfVideoTrack((CheckBox)changeEvent.getSource(), true);
                 } else {
-                    disconnectVideoWithRace(videoTrack);
+                    disconnectVideoFromRace(videoTrack);
+                    setEnableOfVideoTrack((CheckBox)changeEvent.getSource(), false);
                 }
-            }
-
-            private void disconnectVideoWithRace(final MediaTrack videoTrack) {
-                videoTrack.regattasAndRaces.remove(((MediaPlayerManagerComponent) mediaPlayerManager)
-                        .getRaceIdentifier());
-            }
-
-            private void connectVideoWithRace(final MediaTrack videoTrack) {
-                videoTrack.regattasAndRaces.add(((MediaPlayerManagerComponent) mediaPlayerManager).getRaceIdentifier());
             }
         });
         return connectCheckBox;
+    }
+    
+    private void setEnableOfVideoTrack(CheckBox checkBox, boolean enable) {
+        Panel videoTrack = (HorizontalPanel)checkBox.getParent();
+        for (Widget widget : videoTrack) {
+            if(widget != checkBox && widget instanceof FocusWidget){
+                ((FocusWidget)widget).setEnabled(enable);
+            }
+        }
+    }
+    
+    private void disconnectVideoFromRace(final MediaTrack videoTrack) {
+        videoTrack.regattasAndRaces.remove(((MediaPlayerManagerComponent)mediaPlayerManager).getRaceIdentifier());
+        ((MediaPlayerManagerComponent)mediaPlayerManager).getMediaService().updateRace(videoTrack, new AsyncCallback<Void>() {
+
+            @Override
+            public void onFailure(Throwable t) {
+            }
+
+            @Override
+            public void onSuccess(Void allMediaTracks) {
+            }
+        });
+        
+    }
+
+    private void connectVideoToRace(final MediaTrack videoTrack) {
+        videoTrack.regattasAndRaces.add(((MediaPlayerManagerComponent)mediaPlayerManager).getRaceIdentifier());
+        ((MediaPlayerManagerComponent)mediaPlayerManager).getMediaService().updateRace(videoTrack, new AsyncCallback<Void>() {
+
+            @Override
+            public void onFailure(Throwable t) {
+            }
+
+            @Override
+            public void onSuccess(Void allMediaTracks) {
+            }
+        });
     }
 
     private Button createDeleteButton(final MediaTrack videoTrack, HorizontalPanel panel) {
