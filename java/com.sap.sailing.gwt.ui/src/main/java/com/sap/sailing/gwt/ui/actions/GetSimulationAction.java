@@ -10,26 +10,27 @@ import com.sap.sailing.gwt.ui.shared.SimulatorResultsDTO;
 import com.sap.sse.gwt.client.async.AsyncAction;
 
 /**
- * An asynchronous action to retrieve simulation results from the sailing analytics server that are to be shown on the
- * {@link RaceMap}
+ * An asynchronous action to retrieve simulation results from the sailing analytics server which are then shown on the
+ * {@link RaceSimulationOverlay} of {@link RaceMap}
  * 
  * @author Christopher Ronnewinkel (D036654)
  * 
  */
 public class GetSimulationAction implements AsyncAction<SimulatorResultsDTO> {
     private final SailingServiceAsync sailingService;
-    
     private final RegattaAndRaceIdentifier raceIdentifier;
     private final Date from;
+    private final Date prevStartTime;
     
-    public GetSimulationAction(SailingServiceAsync sailingService, RegattaAndRaceIdentifier raceIdentifier, Date from) {
+    public GetSimulationAction(SailingServiceAsync sailingService, RegattaAndRaceIdentifier raceIdentifier, Date from, Date prevStartTime) {
         this.sailingService = sailingService;
         this.raceIdentifier = raceIdentifier;
         this.from = from;
+        this.prevStartTime = prevStartTime;
     }
 
     @Override
     public void execute(AsyncCallback<SimulatorResultsDTO> callback) {
-        sailingService.getSimulatorResults(raceIdentifier, from, callback);
+        sailingService.getSimulatorResults(raceIdentifier, from, prevStartTime, callback);
     }
 }

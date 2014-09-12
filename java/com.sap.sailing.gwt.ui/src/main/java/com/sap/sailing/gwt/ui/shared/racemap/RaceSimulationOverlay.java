@@ -1,5 +1,6 @@
 package com.sap.sailing.gwt.ui.shared.racemap;
 
+import java.util.Date;
 import java.util.List;
 
 import com.google.gwt.canvas.dom.client.Context2d;
@@ -20,6 +21,8 @@ import com.sap.sailing.gwt.ui.simulator.util.ColorPalette;
 import com.sap.sailing.gwt.ui.simulator.util.ColorPaletteGenerator;
 import com.sap.sse.gwt.client.async.AsyncActionsExecutor;
 import com.sap.sse.gwt.client.async.MarkedAsyncCallback;
+import com.sap.sse.gwt.client.player.TimeListener;
+import com.sap.sse.gwt.client.player.Timer;
 
 /**
  * A Google Maps overlay based on an HTML5 canvas for drawing simulation results on the {@link RaceMap}.
@@ -27,43 +30,52 @@ import com.sap.sse.gwt.client.async.MarkedAsyncCallback;
  * @author Christopher Ronnewinkel (D036654)
  * 
  */
-public class RaceSimulationOverlay extends FullCanvasOverlay {
+public class RaceSimulationOverlay extends FullCanvasOverlay  implements TimeListener {
 
     public static final String GET_SIMULATION_CATEGORY = "getSimulation";
     
-    private boolean visible = false;
+    private final Timer timer;
+    private Date lastSimulationTime;
+    private final long deltaSimulationTime = 15000;
     private final RegattaAndRaceIdentifier raceIdentifier;
     private final SailingServiceAsync sailingService;
     private final AsyncActionsExecutor asyncActionsExecutor;
     private final ColorPalette colors;
+    private SimulatorResultsDTO simulationResult;
+    private Date prevStartTime;
     
-    public RaceSimulationOverlay(MapWidget map, int zIndex, RegattaAndRaceIdentifier raceIdentifier, SailingServiceAsync sailingService, AsyncActionsExecutor asyncActionsExecutor) {
+    public RaceSimulationOverlay(MapWidget map, int zIndex, final Timer timer, RegattaAndRaceIdentifier raceIdentifier, SailingServiceAsync sailingService, AsyncActionsExecutor asyncActionsExecutor) {
         super(map, zIndex);
+        this.timer = timer;
         this.raceIdentifier = raceIdentifier;
         this.sailingService = sailingService;
         this.asyncActionsExecutor = asyncActionsExecutor;
         this.colors = new ColorPaletteGenerator();
     }
-
+    
     @Override
-    public boolean isVisible() {
-        return this.visible;
+    public void timeChanged(final Date newTime, final Date oldTime) {
+        if (lastSimulationTime == null) {
+            lastSimulationTime = new Date(newTime.getTime() - deltaSimulationTime);
+        }
+        if (Math.abs(newTime.getTime() - lastSimulationTime.getTime()) >= deltaSimulationTime) {
+            lastSimulationTime = newTime;
+            this.simulate(newTime);
+        }
     }
-
+    
     @Override
-    public void setVisible(boolean isVisible) {
-        if (getCanvas() != null) {
-            if (isVisible) {
-                this.visible = isVisible;
-                this.simulate();
-            } else {
-                this.visible = isVisible;
-            }
+    public void addToMap() {
+        if (timer != null) {
+            timer.addTimeListener(this);
         }
     }
 
     @Override
     public void removeFromMap() {
+        if (timer != null) {
+            timer.removeTimeListener(this);
+        }
         this.setVisible(false);
     }
 
@@ -73,26 +85,36 @@ public class RaceSimulationOverlay extends FullCanvasOverlay {
 
     @Override
     protected void draw() {
-        // calibrate canvas
-        super.draw();
-        // do nothing
     }    
     
     public void onBoundsChanged(boolean zoomChanged) {
-        // calibrate projection
+        // calibrate canvas
+        super.draw();
+        // draw simulation paths
+        this.drawPaths();
     }
     
-    public void drawPaths(SimulatorResultsDTO results) {
+    public void clearCanvas() {
         double w = this.getCanvas().getOffsetWidth();
         double h = this.getCanvas().getOffsetHeight();
         Context2d g = this.getCanvas().getContext2d();
         g.clearRect(0, 0, w, h);
-
+    }
+    
+    public void drawPaths() {
+             
+        if (simulationResult == null) {
+            return;
+        }
+        if (simulationResult.getPaths() == null) {
+            return;
+        }
+        
         // calibrate canvas
         super.draw();
 
         Context2d ctxt = canvas.getContext2d();
-        PathDTO[] paths = results.getPaths();
+        PathDTO[] paths = simulationResult.getPaths();
         boolean first = true;
         int colorIdx = paths.length - 1;
         for(PathDTO path : paths) {
@@ -117,8 +139,8 @@ public class RaceSimulationOverlay extends FullCanvasOverlay {
         
     }
     
-    public void simulate() {
-        GetSimulationAction getSimulation = new GetSimulationAction(sailingService, raceIdentifier, null /* start-of-tracking */);
+    public void simulate(Date from) {
+        GetSimulationAction getSimulation = new GetSimulationAction(sailingService, raceIdentifier, from, prevStartTime);
         asyncActionsExecutor.execute(getSimulation, GET_SIMULATION_CATEGORY,
                 new MarkedAsyncCallback<>(new AsyncCallback<SimulatorResultsDTO>() {
                     @Override
@@ -130,12 +152,14 @@ public class RaceSimulationOverlay extends FullCanvasOverlay {
 
                     @Override
                     public void onSuccess(SimulatorResultsDTO result) {
-                        // draw results
-                        if (mapProjection != null) {
-                            //Context2d ctxt = canvas.getContext2d();
-                            //ctxt.setFillStyle("red");
-                            //ctxt.fillRect(10, 10, 50, 50);
-                            drawPaths(result);
+                        // store results
+                        if (result != null) {
+                            prevStartTime = result.getStartTime();
+                            if (result.getPaths() != null) {
+                                simulationResult = result;
+                                clearCanvas();
+                                drawPaths();
+                            }
                         }
                     }
                 }));

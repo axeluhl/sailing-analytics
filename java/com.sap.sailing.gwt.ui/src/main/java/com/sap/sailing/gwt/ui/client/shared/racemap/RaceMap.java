@@ -443,6 +443,9 @@ public class RaceMap extends AbsolutePanel implements TimeListener, CompetitorSe
                       if ((streamletOverlay != null) && !map.getBounds().equals(currentMapBounds)) {
                           streamletOverlay.onBoundsChanged(newZoomLevel != currentZoomLevel);
                       }
+                      if ((simulationOverlay != null) && !map.getBounds().equals(currentMapBounds)) {
+                          simulationOverlay.onBoundsChanged(newZoomLevel != currentZoomLevel);
+                      }
                       currentMapBounds = map.getBounds();
                       currentZoomLevel = newZoomLevel;
                       headerPanel.getElement().getStyle().setWidth(map.getOffsetWidth(), Unit.PX);
@@ -463,7 +466,7 @@ public class RaceMap extends AbsolutePanel implements TimeListener, CompetitorSe
               }
 
               // initialize simulation canvas
-              simulationOverlay = new RaceSimulationOverlay(getMap(), /* zIndex */ 0, raceIdentifier, sailingService, asyncActionsExecutor);
+              simulationOverlay = new RaceSimulationOverlay(getMap(), /* zIndex */ 0, timer, raceIdentifier, sailingService, asyncActionsExecutor);
               simulationOverlay.addToMap();
 
               createHeaderPanel(map);
@@ -1971,6 +1974,7 @@ public class RaceMap extends AbsolutePanel implements TimeListener, CompetitorSe
         if (newSettings.isShowSimulationOverlay() != settings.isShowSimulationOverlay()) {
             settings.setShowSimulationOverlay(newSettings.isShowSimulationOverlay());
             simulationOverlay.setVisible(newSettings.isShowSimulationOverlay());
+            simulationOverlay.timeChanged(timer.getTime(), null);
         }
         if (requiredRedraw) {
             redraw();

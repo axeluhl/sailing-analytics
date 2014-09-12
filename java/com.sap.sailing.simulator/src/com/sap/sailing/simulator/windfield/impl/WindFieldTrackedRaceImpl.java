@@ -7,7 +7,7 @@ import com.sap.sailing.simulator.windfield.WindFieldGenerator;
 
 /**
  * A windfield that can be used for race simulation and is based on the wind measurements & interpolation made available
- * as part of a {@link TrackedRace}. This is base data for visualizing race simulation on the {@link SimulationOverlay}
+ * as part of a {@link TrackedRace}. This is base data for visualizing race simulation on the {@link RaceSimulationOverlay}
  * of the {@link RaceMap}
  * 
  * @author Christopher Ronnewinkel (D036654)

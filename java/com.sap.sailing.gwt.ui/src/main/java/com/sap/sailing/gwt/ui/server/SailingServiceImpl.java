@@ -1457,12 +1457,12 @@ public class SailingServiceImpl extends ProxiedRemoteServiceServlet implements S
     }
 
     @Override
-    public SimulatorResultsDTO getSimulatorResults(RegattaAndRaceIdentifier raceIdentifier, Date from) {
+    public SimulatorResultsDTO getSimulatorResults(RegattaAndRaceIdentifier raceIdentifier, Date from, Date prevStartTime) {
         TrackedRace trackedRace = getExistingTrackedRace(raceIdentifier);
         SimulatorResultsDTO result = null;
         
         if (trackedRace != null) {
-            TimePoint fromTimePoint = from == null ? new MillisecondsTimePoint(trackedRace.getStartOfRace().asMillis() + 60000) : new MillisecondsTimePoint(from);
+            TimePoint fromTimePoint = from == null ? new MillisecondsTimePoint(trackedRace.getStartOfRace().asMillis() + 10000) : new MillisecondsTimePoint(from);
             
             // get previous mark or start line as start-position
             TrackedLeg trackedLeg = trackedRace.getCurrentLeg(fromTimePoint);
@@ -1481,6 +1481,10 @@ public class SailingServiceImpl extends ProxiedRemoteServiceServlet implements S
                         startTimePoint = markPassing.getB().getA();
                     }
                 }
+            }
+
+            if (startTimePoint.asDate().equals(prevStartTime)) {
+                return new SimulatorResultsDTO(startTimePoint.asDate(), null, null, null, null);
             }
             
             // determine legtype upwind/downwind/reaching
@@ -1542,7 +1546,7 @@ public class SailingServiceImpl extends ProxiedRemoteServiceServlet implements S
                 rcDTO.coursePositions.waypointPositions.add(posDTO);
                 posDTO = SimulatorServiceUtils.toPositionDTO(endPosition);
                 rcDTO.coursePositions.waypointPositions.add(posDTO);
-                result = new SimulatorResultsDTO(rcDTO, pathDTOs, null, null);
+                result = new SimulatorResultsDTO(startTimePoint.asDate(), rcDTO, pathDTOs, null, null);
             }
         }
         

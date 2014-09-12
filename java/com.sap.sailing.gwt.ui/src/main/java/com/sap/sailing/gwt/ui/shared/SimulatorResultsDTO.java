@@ -1,28 +1,42 @@
 package com.sap.sailing.gwt.ui.shared;
 
+import java.util.Date;
+
 import com.google.gwt.user.client.rpc.IsSerializable;
 
 public class SimulatorResultsDTO implements IsSerializable {
 
+    private Date startTime;
     private RaceMapDataDTO raceCourse;
     private WindFieldDTO windField;
     private PathDTO[] paths;
     private String notificationMessage;
 
     public SimulatorResultsDTO(){
+        this.startTime = null;
         this.raceCourse = null;
         this.windField = null;
         this.paths = null;
         this.notificationMessage = "";
     }
 
-    public SimulatorResultsDTO(final RaceMapDataDTO raceCourse, final PathDTO[] paths, final WindFieldDTO windField, final String notificationMessage) {
+    public SimulatorResultsDTO(final Date startTime, final RaceMapDataDTO raceCourse, final PathDTO[] paths, final WindFieldDTO windField, final String notificationMessage) {
+        this.startTime = startTime;
         this.raceCourse = raceCourse;
         this.paths = paths;
         this.windField = windField;
         this.notificationMessage = notificationMessage;
     }
+    
+    public Date getStartTime() {
+        return this.startTime;
+    }
 
+    public void setStartTime(Date startTime) {
+        this.startTime = startTime;
+    }
+
+    
     public RaceMapDataDTO getRaceCourse() {
         return this.raceCourse;
     }
