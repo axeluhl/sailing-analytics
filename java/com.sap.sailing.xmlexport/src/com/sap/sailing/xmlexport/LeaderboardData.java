@@ -229,11 +229,21 @@ public class LeaderboardData extends ExportAction {
         addNamedElementWithValue(raceElement, "end_of_tracking_time_as_millis", handleValue(race.getEndOfTracking()));
         
         LineDetails start = race.getStartLine(race.getStartOfTracking());
-        addNamedElementWithValue(raceElement, "start_line_length_in_meters", start.getLength().getMeters());
-        Distance advantage = start.getAdvantage();
-        addNamedElementWithValue(raceElement, "start_advantage_in_meters", advantage != null ? advantage.getMeters() : 0);
-        NauticalSide nauticalSideWhileApproaching = start.getAdvantageousSideWhileApproachingLine();
-        addNamedElementWithValue(raceElement, "advantageous_side_while_approaching_start_line", nauticalSideWhileApproaching != null ? nauticalSideWhileApproaching.name() : "UNKNOWN");
+        if (start != null) {
+            if (start.getLength() != null) {
+                addNamedElementWithValue(raceElement, "start_line_length_in_meters", start.getLength().getMeters());
+            } else {
+                addNamedElementWithValue(raceElement, "start_line_length_in_meters", 0);
+            }
+            Distance advantage = start.getAdvantage();
+            addNamedElementWithValue(raceElement, "start_advantage_in_meters", advantage != null ? advantage.getMeters() : 0);
+            NauticalSide nauticalSideWhileApproaching = start.getAdvantageousSideWhileApproachingLine();
+            addNamedElementWithValue(raceElement, "advantageous_side_while_approaching_start_line", nauticalSideWhileApproaching != null ? nauticalSideWhileApproaching.name() : "UNKNOWN");
+        } else {
+            addNamedElementWithValue(raceElement, "start_line_length_in_meters", 0);
+            addNamedElementWithValue(raceElement, "start_advantage_in_meters", 0);
+            addNamedElementWithValue(raceElement, "advantageous_side_while_approaching_start_line", "UNKNOWN");
+        }
 
         Distance raceCourseLength = race.getCourseLength();
         if (raceCourseLength == null) {
