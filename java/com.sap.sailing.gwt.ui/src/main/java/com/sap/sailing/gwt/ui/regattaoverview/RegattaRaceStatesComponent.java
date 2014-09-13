@@ -196,7 +196,7 @@ public class RegattaRaceStatesComponent extends SimplePanel implements Component
                         new AsyncCallback<List<RegattaOverviewEntryDTO>>() {
                             @Override
                             public void onFailure(Throwable cause) {
-                                errorReporter.reportError(cause.getMessage());
+                                // ignore errors as state can recover
                             }
                 
                             @Override
