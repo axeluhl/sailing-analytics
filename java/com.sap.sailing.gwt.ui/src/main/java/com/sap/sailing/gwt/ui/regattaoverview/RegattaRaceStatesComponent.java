@@ -90,7 +90,6 @@ public class RegattaRaceStatesComponent extends SimplePanel implements Component
 
     private final SailingServiceAsync sailingService;
     private final StringMessages stringMessages;
-    private final ErrorReporter errorReporter;
     private final UUID eventId;
 
     private EventDTO eventDTO;
@@ -131,7 +130,6 @@ public class RegattaRaceStatesComponent extends SimplePanel implements Component
             final StringMessages stringMessages, final UUID eventId, RegattaRaceStatesSettings settings, Timer timerToSynchronize) {
         this.sailingService = sailingService;
         this.stringMessages = stringMessages;
-        this.errorReporter = errorReporter;
         this.eventId = eventId;
         this.allEntries = new ArrayList<RegattaOverviewEntryDTO>();
         this.timerToSynchronize = timerToSynchronize;
