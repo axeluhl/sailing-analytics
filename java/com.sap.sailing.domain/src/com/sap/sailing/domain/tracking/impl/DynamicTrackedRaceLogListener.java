@@ -107,7 +107,9 @@ public class DynamicTrackedRaceLogListener extends BaseRaceLogEventVisitor {
             removeAllWindFixesFromWindTrack(raceLog);
             raceLog.removeListener(this);
             raceLogs.remove(raceLog);
-            removeMarkPassingEvents();
+            if (markPassingUpdateListener != null) {
+                removeMarkPassingEvents();
+            }
         }
     }
 
