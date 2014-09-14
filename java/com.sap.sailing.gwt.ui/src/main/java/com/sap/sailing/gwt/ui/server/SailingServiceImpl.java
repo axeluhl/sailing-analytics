@@ -349,6 +349,7 @@ import com.sap.sailing.server.operationaltransformation.MoveLeaderboardColumnDow
 import com.sap.sailing.server.operationaltransformation.MoveLeaderboardColumnUp;
 import com.sap.sailing.server.operationaltransformation.RemoveAndUntrackRace;
 import com.sap.sailing.server.operationaltransformation.RemoveColumnFromSeries;
+import com.sap.sailing.server.operationaltransformation.RemoveCourseArea;
 import com.sap.sailing.server.operationaltransformation.RemoveEvent;
 import com.sap.sailing.server.operationaltransformation.RemoveLeaderboard;
 import com.sap.sailing.server.operationaltransformation.RemoveLeaderboardColumn;
@@ -1235,7 +1236,7 @@ public class SailingServiceImpl extends ProxiedRemoteServiceServlet implements S
      * Fetches the {@link WindTrack#getAveragedWind(Position, TimePoint) average wind} from all wind tracks or those identified
      * by <code>windSourceTypeNames</code>
      */
-    //@Override
+    @Override
     public WindInfoForRaceDTO getAveragedWindInfo(RegattaAndRaceIdentifier raceIdentifier, Date from, long millisecondsStepWidth,
             int numberOfFixes, double latDeg, double lngDeg, Collection<String> windSourceTypeNames)
                     throws NoWindException {
@@ -3089,7 +3090,7 @@ public class SailingServiceImpl extends ProxiedRemoteServiceServlet implements S
     public List<EventBaseDTO> getPublicEventsOfAllSailingServers() throws MalformedURLException {
         List<EventBaseDTO> result = new ArrayList<>();
         for (EventDTO localEvent : getEvents()) {
-            if(localEvent.isPublic) {
+            if (localEvent.isPublic) {
                 result.add(localEvent);
             }
         }
@@ -3188,14 +3189,18 @@ public class SailingServiceImpl extends ProxiedRemoteServiceServlet implements S
     }
 
     @Override
-    public EventDTO createEvent(String eventName, Date startDate, Date endDate, String venue, boolean isPublic, List<String> courseAreaNames,
-            Iterable<String> imageURLs, Iterable<String> videoURLs) throws MalformedURLException {
+    public EventDTO createEvent(String eventName, String eventDescription, Date startDate, Date endDate, String venue,
+            boolean isPublic, List<String> courseAreaNames, Iterable<String> imageURLs,
+            Iterable<String> videoURLs, Iterable<String> sponsorImageURLs, String logoImageURLAsString, String officialWebsiteURLAsString)
+            throws MalformedURLException {
         UUID eventUuid = UUID.randomUUID();
         TimePoint startTimePoint = startDate != null ?  new MillisecondsTimePoint(startDate) : null;
         TimePoint endTimePoint = endDate != null ?  new MillisecondsTimePoint(endDate) : null;
         getService().apply(
-                new CreateEvent(eventName, startTimePoint, endTimePoint, venue, isPublic, eventUuid, createURLsFromStrings(imageURLs),
-                        createURLsFromStrings(videoURLs)));
+                new CreateEvent(eventName, eventDescription, startTimePoint, endTimePoint, venue, isPublic, eventUuid,
+                        createURLsFromStrings(imageURLs), createURLsFromStrings(videoURLs),
+                        createURLsFromStrings(sponsorImageURLs),
+                        logoImageURLAsString == null ? null : new URL(logoImageURLAsString), officialWebsiteURLAsString == null ? null : new URL(officialWebsiteURLAsString)));
         for (String courseAreaName : courseAreaNames) {
             createCourseArea(eventUuid, courseAreaName);
         }
@@ -3203,9 +3208,13 @@ public class SailingServiceImpl extends ProxiedRemoteServiceServlet implements S
     }
 
     @Override
-    public CourseAreaDTO createCourseArea(UUID eventId, String courseAreaName) {
-        CourseArea courseArea = getService().apply(new AddCourseArea(eventId, courseAreaName, UUID.randomUUID()));
-        return convertToCourseAreaDTO(courseArea);
+    public void createCourseArea(UUID eventId, String courseAreaName) {
+        getService().apply(new AddCourseArea(eventId, courseAreaName, UUID.randomUUID()));
+    }
+
+    @Override
+    public void removeCourseArea(UUID eventId, UUID courseAreaId) {
+        getService().apply(new RemoveCourseArea(eventId, courseAreaId));
     }
 
     @Override
@@ -3267,15 +3276,30 @@ public class SailingServiceImpl extends ProxiedRemoteServiceServlet implements S
         eventDTO.id = (UUID) event.getId();
         eventDTO.setDescription(event.getDescription());
         eventDTO.setOfficialWebsiteURL(event.getOfficialWebsiteURL() != null ? event.getOfficialWebsiteURL().toString() : null);
-        eventDTO.setLogoImageURL(event.getLogoImageURL() != null ? event.getLogoImageURL().toString() : null);
+        if (event.getLogoImageURL() == null) {
+            eventDTO.setLogoImageURL(null);
+        } else {
+            eventDTO.setLogoImageURL(event.getLogoImageURL().toString());
+            setImageSize(event, eventDTO, event.getLogoImageURL());
+        }
         for(URL url: event.getSponsorImageURLs()) {
             eventDTO.addSponsorImageURL(url.toString());
+            setImageSize(event, eventDTO, url);
         }
         for(URL url: event.getImageURLs()) {
             eventDTO.addImageURL(url.toString());
+            setImageSize(event, eventDTO, url);
         }
         for(URL url: event.getVideoURLs()) {
             eventDTO.addVideoURL(url.toString());
+        }
+    }
+
+    private void setImageSize(EventBase event, EventBaseDTO eventDTO, URL imageURL) {
+        try {
+            eventDTO.setImageSize(imageURL.toString(), event.getImageSize(imageURL));
+        } catch (InterruptedException | ExecutionException e) {
+            logger.log(Level.FINE, "Was unable to obtain image size for "+imageURL+" earlier.", e);
         }
     }
     

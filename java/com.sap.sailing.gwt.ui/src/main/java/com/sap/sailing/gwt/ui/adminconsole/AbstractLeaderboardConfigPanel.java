@@ -1,6 +1,7 @@
 package com.sap.sailing.gwt.ui.adminconsole;
 
 import java.util.ArrayList;
+import java.util.Comparator;
 import java.util.List;
 import java.util.Map;
 
@@ -8,6 +9,7 @@ import com.google.gwt.core.client.GWT;
 import com.google.gwt.event.dom.client.ClickEvent;
 import com.google.gwt.event.dom.client.ClickHandler;
 import com.google.gwt.user.cellview.client.CellTable;
+import com.google.gwt.user.cellview.client.ColumnSortEvent.ListHandler;
 import com.google.gwt.user.client.Window;
 import com.google.gwt.user.client.rpc.AsyncCallback;
 import com.google.gwt.user.client.ui.Button;
@@ -37,6 +39,7 @@ import com.sap.sailing.gwt.ui.client.RegattaRefresher;
 import com.sap.sailing.gwt.ui.client.RegattasDisplayer;
 import com.sap.sailing.gwt.ui.client.SailingServiceAsync;
 import com.sap.sailing.gwt.ui.client.StringMessages;
+import com.sap.sailing.gwt.ui.client.shared.controls.SelectionCheckboxColumn;
 import com.sap.sailing.gwt.ui.shared.RegattaDTO;
 import com.sap.sailing.gwt.ui.shared.StrippedLeaderboardDTO;
 import com.sap.sse.common.Util;
@@ -157,17 +160,14 @@ public abstract class AbstractLeaderboardConfigPanel extends FormPanel implement
             }
         };
         leaderboardConfigControlsPanel.add(filterLeaderboardPanel);
-        
         addLeaderboardConfigControls(leaderboardConfigControlsPanel);
-        
         leaderboardsPanel.add(leaderboardConfigControlsPanel);
         leaderboardTable.ensureDebugId("AvailableLeaderboardsTable");
-
-        addColumnsToLeaderboardTable(leaderboardTable);
-        
+        addColumnsToLeaderboardTableAndSetSelectionModel(leaderboardTable, tableRes);
+        @SuppressWarnings("unchecked")
+        MultiSelectionModel<StrippedLeaderboardDTO> multiSelectionModel = (MultiSelectionModel<StrippedLeaderboardDTO>) leaderboardTable.getSelectionModel();
+        leaderboardSelectionModel = multiSelectionModel;
         leaderboardTable.setWidth("100%");
-        leaderboardSelectionModel = new MultiSelectionModel<StrippedLeaderboardDTO>();
-        leaderboardTable.setSelectionModel(leaderboardSelectionModel);
         leaderboardSelectionModel.addSelectionChangeHandler(new SelectionChangeEvent.Handler() {
             public void onSelectionChange(SelectionChangeEvent event) {
                 leaderboardSelectionChanged();
@@ -179,10 +179,7 @@ public abstract class AbstractLeaderboardConfigPanel extends FormPanel implement
         HorizontalPanel leaderboardButtonPanel = new HorizontalPanel();
         leaderboardButtonPanel.setSpacing(5);
         leaderboardsPanel.add(leaderboardButtonPanel);
-        
         addLeaderboardCreateControls(leaderboardButtonPanel);
-        
-
         mainPanel.add(new Grid(1, 1));
 
         // caption panels for the selected leaderboard and tracked races
@@ -257,9 +254,33 @@ public abstract class AbstractLeaderboardConfigPanel extends FormPanel implement
     protected abstract void addLeaderboardConfigControls(Panel configPanel);
     protected abstract void addLeaderboardCreateControls(Panel createPanel);
     protected abstract void addSelectedLeaderboardRacesControls(Panel racesPanel);
-    protected abstract void addColumnsToLeaderboardTable(CellTable<StrippedLeaderboardDTO> leaderboardTable);
+    protected abstract void addColumnsToLeaderboardTableAndSetSelectionModel(CellTable<StrippedLeaderboardDTO> leaderboardTable, AdminConsoleTableResources tableRes);
     protected abstract void addColumnsToRacesTable(CellTable<RaceColumnDTOAndFleetDTOWithNameBasedEquality> racesTable);
 
+    protected SelectionCheckboxColumn<StrippedLeaderboardDTO> createSortableSelectionCheckboxColumn(
+            final CellTable<StrippedLeaderboardDTO> leaderboardTable, AdminConsoleTableResources tableResources,
+            ListHandler<StrippedLeaderboardDTO> leaderboardColumnListHandler) {
+        SelectionCheckboxColumn<StrippedLeaderboardDTO> selectionCheckboxColumn = new SelectionCheckboxColumn<StrippedLeaderboardDTO>(tableResources.cellTableStyle().cellTableCheckboxSelected(),
+                tableResources.cellTableStyle().cellTableCheckboxDeselected(), tableResources.cellTableStyle().cellTableCheckboxColumnCell()) {
+            @Override
+            protected ListDataProvider<StrippedLeaderboardDTO> getListDataProvider() {
+                return leaderboardList;
+            }
+
+            @Override
+            public Boolean getValue(StrippedLeaderboardDTO row) {
+                return leaderboardTable.getSelectionModel().isSelected(row);
+            }
+        };
+        selectionCheckboxColumn.setSortable(true);
+        leaderboardColumnListHandler.setComparator(selectionCheckboxColumn, new Comparator<StrippedLeaderboardDTO>() {
+            @Override
+            public int compare(StrippedLeaderboardDTO o1, StrippedLeaderboardDTO o2) {
+                return (leaderboardTable.getSelectionModel().isSelected(o1) ? 1 : 0) - (leaderboardTable.getSelectionModel().isSelected(o2) ? 1 : 0);
+            }
+        });
+        return selectionCheckboxColumn;
+    }
     
     @Override
     public void fillLeaderboards(Iterable<StrippedLeaderboardDTO> leaderboards) {

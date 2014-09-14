@@ -35,7 +35,7 @@ public class EventReplicationTest extends AbstractServerReplicationTest {
         List<String> regattas = new ArrayList<String>();
         regattas.add("Day1");
         regattas.add("Day2");
-        Event masterEvent = master.addEvent(eventName, eventStartDate, eventEndDate, venueName, isPublic, UUID.randomUUID());
+        Event masterEvent = master.addEvent(eventName, /* eventDescription */ null, eventStartDate, eventEndDate, venueName, isPublic, UUID.randomUUID());
 
         Thread.sleep(1000);
         Event replicatedEvent = replica.getEvent(masterEvent.getId());
@@ -54,7 +54,7 @@ public class EventReplicationTest extends AbstractServerReplicationTest {
         List<String> regattas = new ArrayList<String>();
         regattas.add("Day1");
         regattas.add("Day2");
-        final Event masterEvent = master.addEvent(eventName, null, null, venueName, isPublic, UUID.randomUUID());
+        final Event masterEvent = master.addEvent(eventName, /* eventDescription */ null, null, null, venueName, isPublic, UUID.randomUUID());
         final String leaderboardGroupName = "LGName";
         LeaderboardGroup lg = master.apply(new CreateLeaderboardGroup(leaderboardGroupName, "LGDescription", /* displayGroupsInReverseOrder */
                 "displayName", /* leaderboardNames */
@@ -78,7 +78,7 @@ public class EventReplicationTest extends AbstractServerReplicationTest {
         List<String> regattas = new ArrayList<String>();
         regattas.add("Day1");
         regattas.add("Day2");
-        Event masterEvent = master.addEvent(eventName, null, null, venueName, isPublic, UUID.randomUUID());
+        Event masterEvent = master.addEvent(eventName, /* eventDescription */ null, null, null, venueName, isPublic, UUID.randomUUID());
 
         Thread.sleep(1000);
         Event replicatedEvent = replica.getEvent(masterEvent.getId());
@@ -97,7 +97,7 @@ public class EventReplicationTest extends AbstractServerReplicationTest {
         final String courseArea = "Alpha";
         final TimePoint eventStartDate = new MillisecondsTimePoint(new Date());
         final TimePoint eventEndDate = new MillisecondsTimePoint(new Date());
-        Event masterEvent = master.addEvent(eventName, eventStartDate, eventEndDate, venueName, isPublic, UUID.randomUUID());
+        Event masterEvent = master.addEvent(eventName, /* eventDescription */ null, eventStartDate, eventEndDate, venueName, isPublic, UUID.randomUUID());
         CourseArea masterCourseArea = master.addCourseArea(masterEvent.getId(), courseArea, UUID.randomUUID());
 
         Thread.sleep(1000);

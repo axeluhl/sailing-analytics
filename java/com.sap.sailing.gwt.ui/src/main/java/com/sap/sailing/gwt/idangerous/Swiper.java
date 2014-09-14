@@ -31,7 +31,7 @@ public final class Swiper extends JavaScriptObject {
         var options = {
           loop: loop,
           wrapperClass: wrapperClass,
-          slideClass: slideClass
+          slideClass: slideClass,
         };
         if (pageChangeListener) {
             options.onSlideChangeEnd = function(swiper) {
@@ -41,6 +41,10 @@ public final class Swiper extends JavaScriptObject {
             };
         }
         return new $wnd.Swiper('.'+containerClass, options);
+    }-*/;
+    
+    public native void reInit() /*-{
+        this.reInit(true);
     }-*/;
     
     public native void swipeNext() /*-{

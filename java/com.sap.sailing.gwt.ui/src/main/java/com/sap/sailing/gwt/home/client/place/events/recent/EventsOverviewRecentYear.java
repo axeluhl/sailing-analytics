@@ -37,20 +37,16 @@ public class EventsOverviewRecentYear extends Composite {
     public EventsOverviewRecentYear(Integer year, List<EventBaseDTO> events, PlaceNavigator navigator) {
         EventsOverviewRecentResources.INSTANCE.css().ensureInjected();
         initWidget(uiBinder.createAndBindUi(this));
-        
         this.year.setInnerText(String.valueOf(year));
         this.eventsCount.setInnerText(String.valueOf(events.size()));
 //        this.countriesCount.setInnerText("tbd.");
 //        this.sailorsCount.setInnerText("tbd.");
 //        this.trackedRacesCount.setInnerText("tbd.");
-        
-        for(EventBaseDTO eventDTO: events) {
-            RecentEvent recentEvent = new RecentEvent(navigator);
-            recentEvent.setEvent(eventDTO);
+        for (EventBaseDTO eventDTO : events) {
+            RecentEvent recentEvent = new RecentEvent(navigator, eventDTO);
             recentEventsTeaserPanel.appendChild(recentEvent.getElement());
         }
         isContentVisible = true;
-     
         headerDiv.addDomHandler(new ClickHandler() {
             @Override
             public void onClick(ClickEvent event) {

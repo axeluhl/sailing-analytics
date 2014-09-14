@@ -3,6 +3,7 @@ package com.sap.sailing.server.test;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertSame;
+
 import static org.mockito.Mockito.doReturn;
 import static org.mockito.Mockito.spy;
 
@@ -71,6 +72,7 @@ import com.sap.sailing.domain.common.impl.DataImportProgressImpl;
 import com.sap.sailing.domain.common.impl.DegreeBearingImpl;
 import com.sap.sailing.domain.common.impl.DegreePosition;
 import com.sap.sailing.domain.common.impl.KnotSpeedWithBearingImpl;
+import com.sap.sailing.domain.common.impl.MillisecondsDurationImpl;
 import com.sap.sailing.domain.common.impl.MillisecondsTimePoint;
 import com.sap.sailing.domain.common.impl.WindSourceWithAdditionalID;
 import com.sap.sailing.domain.common.media.MediaTrack;
@@ -162,7 +164,7 @@ public class MasterDataImportTest {
             ClassNotFoundException {
         // Setup source service
         RacingEventService sourceService = new RacingEventServiceImpl();
-        Event event = sourceService.addEvent(TEST_EVENT_NAME, eventStartDate, eventEndDate, "testVenue", false, eventUUID);
+        Event event = sourceService.addEvent(TEST_EVENT_NAME, /* eventDescription */ null, eventStartDate, eventEndDate, "testVenue", false, eventUUID);
         UUID courseAreaUUID = UUID.randomUUID();
         CourseArea courseArea = new CourseAreaImpl("testArea", courseAreaUUID);
         event.getVenue().addCourseArea(courseArea);
@@ -378,7 +380,7 @@ public class MasterDataImportTest {
             InterruptedException, ClassNotFoundException {
         // Setup source service
         RacingEventService sourceService = new RacingEventServiceImpl();
-        Event event = sourceService.addEvent(TEST_EVENT_NAME, eventStartDate, eventEndDate, "testVenue", false, eventUUID);
+        Event event = sourceService.addEvent(TEST_EVENT_NAME, /* eventDescription */ null, eventStartDate, eventEndDate, "testVenue", false, eventUUID);
         UUID courseAreaUUID = UUID.randomUUID();
         CourseArea courseArea = new CourseAreaImpl("testArea", courseAreaUUID);
         event.getVenue().addCourseArea(courseArea);
@@ -534,7 +536,7 @@ public class MasterDataImportTest {
             ClassNotFoundException {
         // Setup source service
         RacingEventService sourceService = new RacingEventServiceImpl();
-        Event event = sourceService.addEvent(TEST_EVENT_NAME, eventStartDate, eventEndDate, "testVenue", false, eventUUID);
+        Event event = sourceService.addEvent(TEST_EVENT_NAME, /* eventDescription */ null, eventStartDate, eventEndDate, "testVenue", false, eventUUID);
         UUID courseAreaUUID = UUID.randomUUID();
         CourseArea courseArea = new CourseAreaImpl("testArea", courseAreaUUID);
         event.getVenue().addCourseArea(courseArea);
@@ -676,7 +678,7 @@ public class MasterDataImportTest {
                 PersistenceFactory.INSTANCE.getDomainObjectFactory(MongoDBService.INSTANCE, sourceDomainFactory),
                 PersistenceFactory.INSTANCE.getMongoObjectFactory(MongoDBService.INSTANCE),
                 MediaDBFactory.INSTANCE.getDefaultMediaDB(), EmptyWindStore.INSTANCE, EmptyGPSFixStore.INSTANCE);
-        Event event = sourceService.addEvent(TEST_EVENT_NAME, eventStartDate, eventEndDate, "testVenue", false, eventUUID);
+        Event event = sourceService.addEvent(TEST_EVENT_NAME, /* eventDescription */ null, eventStartDate, eventEndDate, "testVenue", false, eventUUID);
         UUID courseAreaUUID = UUID.randomUUID();
         CourseArea courseArea = new CourseAreaImpl("testArea", courseAreaUUID);
         event.getVenue().addCourseArea(courseArea);
@@ -831,7 +833,7 @@ public class MasterDataImportTest {
             InterruptedException, ClassNotFoundException {
         // Setup source service
         RacingEventService sourceService = new RacingEventServiceImpl();
-        Event event = sourceService.addEvent(TEST_EVENT_NAME, eventStartDate, eventEndDate, "testVenue", false, eventUUID);
+        Event event = sourceService.addEvent(TEST_EVENT_NAME, /* eventDescription */ null, eventStartDate, eventEndDate, "testVenue", false, eventUUID);
         UUID courseAreaUUID = UUID.randomUUID();
         CourseArea courseArea = new CourseAreaImpl("testArea", courseAreaUUID);
         event.getVenue().addCourseArea(courseArea);
@@ -945,8 +947,8 @@ public class MasterDataImportTest {
             domainFactory = destService.getBaseDomainFactory();
             // Create existing data on target
             venueNameNotToOverride = "doNotOverride";
-            Event eventNotToOverride = destService.addEvent(TEST_EVENT_NAME, eventStartDate, eventEndDate, venueNameNotToOverride, false,
-                    eventUUID);
+            Event eventNotToOverride = destService.addEvent(TEST_EVENT_NAME, /* eventDescription */ null, eventStartDate, eventEndDate, venueNameNotToOverride,
+                    false, eventUUID);
             courseAreaNotToOverride = new CourseAreaImpl("testAreaNotToOverride", courseAreaUUID);
             eventNotToOverride.getVenue().addCourseArea(courseAreaNotToOverride);
 
@@ -1029,7 +1031,7 @@ public class MasterDataImportTest {
             InterruptedException, ClassNotFoundException {
         // Setup source service
         RacingEventService sourceService = new RacingEventServiceImpl();
-        Event event = sourceService.addEvent(TEST_EVENT_NAME, eventStartDate, eventEndDate, "testVenue", false, eventUUID);
+        Event event = sourceService.addEvent(TEST_EVENT_NAME, /* eventDescription */ null, eventStartDate, eventEndDate, "testVenue", false, eventUUID);
         UUID courseAreaUUID = UUID.randomUUID();
         CourseArea courseArea = new CourseAreaImpl("testArea", courseAreaUUID);
         event.getVenue().addCourseArea(courseArea);
@@ -1139,7 +1141,7 @@ public class MasterDataImportTest {
             domainFactory = destService.getBaseDomainFactory();
             // Create existing data on target
             String venueNameToOverride = "Override";
-            Event eventToOverride = destService.addEvent(TEST_EVENT_NAME, eventStartDate, eventEndDate, venueNameToOverride, false, eventUUID);
+            Event eventToOverride = destService.addEvent(TEST_EVENT_NAME, /* eventDescription */ null, eventStartDate, eventEndDate, venueNameToOverride, false, eventUUID);
             CourseArea courseAreaToOverride = new CourseAreaImpl("testAreaToOverride", courseAreaUUID);
             eventToOverride.getVenue().addCourseArea(courseAreaToOverride);
 
@@ -1256,12 +1258,15 @@ public class MasterDataImportTest {
 
         Iterable<URL> imageURLs = new HashSet<>();
         Iterable<URL> videoURLs = new HashSet<>();
-        Event event = sourceService.createEventWithoutReplication("Test Event", new MillisecondsTimePoint(0),
-                new MillisecondsTimePoint(10), "testvenue", false, UUID.randomUUID(), imageURLs, videoURLs);
+        Iterable<URL> sponsorImageURLs = new HashSet<>();
+        Event event = sourceService.createEventWithoutReplication("Test Event", /* eventDescription */ null,
+                new MillisecondsTimePoint(0), new MillisecondsTimePoint(10), "testvenue", false, UUID.randomUUID(), imageURLs,
+                videoURLs, sponsorImageURLs, /* logoImageURL */ null, /* officialWebsiteURL */ null);
         CourseArea defaultCourseArea = sourceService.addCourseArea(event.getId(), "ECHO", UUID.randomUUID());
 
-        Regatta regatta = sourceService.createRegatta(RegattaImpl.getDefaultName(TEST_REGATTA_NAME, TEST_BOAT_CLASS_NAME), TEST_BOAT_CLASS_NAME, UUID.randomUUID(),
-                new ArrayList<Series>(), true, new LowPoint(), defaultCourseArea.getId(), /* useStartTimeInference */ true);
+        Regatta regatta = sourceService.createRegatta(
+                RegattaImpl.getDefaultName(TEST_REGATTA_NAME, TEST_BOAT_CLASS_NAME), TEST_BOAT_CLASS_NAME,
+                UUID.randomUUID(), new ArrayList<Series>(), true, new LowPoint(), defaultCourseArea.getId(), /* useStartTimeInference */ true);
         // Let's use the setters directly because we are not testing replication
         RegattaConfigurationImpl configuration = new RegattaConfigurationImpl();
         configuration.setDefaultCourseDesignerMode(CourseDesignerMode.BY_MAP);
@@ -1320,8 +1325,10 @@ public class MasterDataImportTest {
 
         Iterable<URL> imageURLs = new HashSet<>();
         Iterable<URL> videoURLs = new HashSet<>();
-        Event event = sourceService.createEventWithoutReplication("Test Event", new MillisecondsTimePoint(0),
-                new MillisecondsTimePoint(10), "testvenue", false, UUID.randomUUID(), imageURLs, videoURLs);
+        Iterable<URL> sponsorImageURLs = new HashSet<>();
+        Event event = sourceService.createEventWithoutReplication("Test Event", /* eventDescription */ null,
+                new MillisecondsTimePoint(0), new MillisecondsTimePoint(10), "testvenue", false, UUID.randomUUID(), imageURLs,
+                videoURLs, sponsorImageURLs, /* logoImageURL */ null, /* officialWebsiteURL */ null);
         CourseArea defaultCourseArea = sourceService.addCourseArea(event.getId(), "ECHO", UUID.randomUUID());
 
         List<String> raceColumnNames = new ArrayList<String>();
@@ -1450,7 +1457,7 @@ public class MasterDataImportTest {
             IOException, InterruptedException, ClassNotFoundException {
         // Setup source service
         RacingEventService sourceService = new RacingEventServiceImpl();
-        Event event = sourceService.addEvent(TEST_EVENT_NAME, eventStartDate, eventEndDate, "testVenue", false, eventUUID);
+        Event event = sourceService.addEvent(TEST_EVENT_NAME, /* eventDescription */ null, eventStartDate, eventEndDate, "testVenue", false, eventUUID);
         UUID courseAreaUUID = UUID.randomUUID();
         CourseArea courseArea = new CourseAreaImpl("testArea", courseAreaUUID);
         event.getVenue().addCourseArea(courseArea);
@@ -1599,7 +1606,7 @@ public class MasterDataImportTest {
             ClassNotFoundException {
         // Setup source service
         RacingEventService sourceService = new RacingEventServiceImpl();
-        MediaTrack trackOnSource = new MediaTrack("testTitle", "http://test/test.mp4", new Date(0), 2000,
+        MediaTrack trackOnSource = new MediaTrack("testTitle", "http://test/test.mp4", new MillisecondsTimePoint(0), MillisecondsDurationImpl.ONE_HOUR,
                 MediaTrack.MimeType.mp4);
         sourceService.mediaTrackAdded(trackOnSource);
 
@@ -1656,7 +1663,7 @@ public class MasterDataImportTest {
             InterruptedException, ClassNotFoundException {
         // Setup source service
         RacingEventService sourceService = new RacingEventServiceImpl();
-        Event event = sourceService.addEvent(TEST_EVENT_NAME, eventStartDate, eventEndDate, "testVenue", false, eventUUID);
+        Event event = sourceService.addEvent(TEST_EVENT_NAME, /* eventDescription */ null, eventStartDate, eventEndDate, "testVenue", false, eventUUID);
         UUID courseAreaUUID = UUID.randomUUID();
         CourseArea courseArea = new CourseAreaImpl("testArea", courseAreaUUID);
         event.getVenue().addCourseArea(courseArea);

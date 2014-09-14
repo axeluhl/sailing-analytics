@@ -66,7 +66,7 @@ public class RegattaReplicationTest extends AbstractServerReplicationTest {
         final TimePoint eventStartDate = new MillisecondsTimePoint(new Date());
         final TimePoint eventEndDate = new MillisecondsTimePoint(new Date());
 
-        Event event = master.addEvent("Event", eventStartDate, eventEndDate, "Venue", true, UUID.randomUUID());
+        Event event = master.addEvent("Event", /* eventDescription */ null, eventStartDate, eventEndDate, "Venue", true, UUID.randomUUID());
         master.addCourseArea(event.getId(), "Alpha", alphaCourseAreaId);
         master.addCourseArea(event.getId(), "TV", tvCourseAreaId);
         
@@ -112,7 +112,7 @@ public class RegattaReplicationTest extends AbstractServerReplicationTest {
         final UUID golfCourseAreaId = UUID.randomUUID();
         final TimePoint eventStartDate = new MillisecondsTimePoint(new Date());
         final TimePoint eventEndDate = new MillisecondsTimePoint(new Date());
-        Event event = master.addEvent("Event", eventStartDate, eventEndDate, "Venue", /*isPublic*/true, UUID.randomUUID());
+        Event event = master.addEvent("Event", /* eventDescription */ null, eventStartDate, eventEndDate, "Venue", /*isPublic*/true, UUID.randomUUID());
         master.addCourseArea(event.getId(), "TV", tvCourseAreaId);
         master.addCourseArea(event.getId(), "Golf", golfCourseAreaId);
         final String regattaName = RegattaImpl.getDefaultName("Kiel Week 2012", "49er");
@@ -137,7 +137,7 @@ public class RegattaReplicationTest extends AbstractServerReplicationTest {
         final TimePoint eventStartDate = new MillisecondsTimePoint(new Date());
         final TimePoint eventEndDate = new MillisecondsTimePoint(new Date());
         
-        Event event = master.addEvent("Event", eventStartDate, eventEndDate, "Venue", true, UUID.randomUUID());
+        Event event = master.addEvent("Event", /* eventDescription */ null, eventStartDate, eventEndDate, "Venue", true, UUID.randomUUID());
         master.addCourseArea(event.getId(), "Alpha", alphaCourseAreaId);
         
         UUID currentCourseAreaId = null;
@@ -295,7 +295,7 @@ public class RegattaReplicationTest extends AbstractServerReplicationTest {
         final String courseArea = "Alpha";
         final TimePoint eventStartDate = new MillisecondsTimePoint(new Date());
         final TimePoint eventEndDate = new MillisecondsTimePoint(new Date());
-        Event masterEvent = master.addEvent(eventName, eventStartDate, eventEndDate, venueName, isPublic, UUID.randomUUID());
+        Event masterEvent = master.addEvent(eventName, /* eventDescription */ null, eventStartDate, eventEndDate, venueName, isPublic, UUID.randomUUID());
         CourseArea masterCourseArea = master.addCourseArea(masterEvent.getId(), courseArea, UUID.randomUUID());
         
         Regatta masterRegatta = master.createRegatta(RegattaImpl.getDefaultName(eventName, boatClassName), boatClassName, UUID.randomUUID(), series,

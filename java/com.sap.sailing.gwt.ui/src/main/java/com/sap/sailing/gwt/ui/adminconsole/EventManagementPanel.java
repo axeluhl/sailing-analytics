@@ -48,6 +48,7 @@ import com.sap.sailing.gwt.ui.shared.LeaderboardGroupDTO;
 import com.sap.sailing.gwt.ui.shared.RegattaDTO;
 import com.sap.sailing.gwt.ui.shared.StrippedLeaderboardDTO;
 import com.sap.sse.common.Util;
+import com.sap.sse.common.Util.Pair;
 import com.sap.sse.gwt.client.dialog.DataEntryDialog.DialogCallback;
 import com.sap.sse.gwt.client.panels.LabeledAbstractFilterablePanel;
 
@@ -745,7 +746,9 @@ public class EventManagementPanel extends SimplePanel implements EventsRefresher
     }
 
     private void updateEvent(final EventDTO oldEvent, final EventDTO updatedEvent) {
-        List<CourseAreaDTO> courseAreasToAdd = getCourseAreasToAdd(oldEvent, updatedEvent);
+        Pair<List<CourseAreaDTO>, List<CourseAreaDTO>> courseAreasToAddAndRemove = getCourseAreasToAdd(oldEvent, updatedEvent);
+        List<CourseAreaDTO> courseAreasToAdd = courseAreasToAddAndRemove.getA();
+        List<CourseAreaDTO> courseAreasToRemove = courseAreasToAddAndRemove.getB();
         List<UUID> updatedEventLeaderboardGroupIds = new ArrayList<>();
         for (LeaderboardGroupDTO leaderboardGroup : updatedEvent.getLeaderboardGroups()) {
             updatedEventLeaderboardGroupIds.add(leaderboardGroup.getId());
@@ -779,52 +782,44 @@ public class EventManagementPanel extends SimplePanel implements EventsRefresher
                 }
             }
         });
+        for (CourseAreaDTO courseArea : courseAreasToAdd) {
+            sailingService.createCourseArea(oldEvent.id, courseArea.getName(), new AsyncCallback<Void>() {
 
-        if (courseAreasToAdd.size() > 0) {
-            for (CourseAreaDTO courseArea : courseAreasToAdd) {
-                sailingService.createCourseArea(oldEvent.id, courseArea.getName(), new AsyncCallback<CourseAreaDTO>() {
+                @Override
+                public void onFailure(Throwable t) {
+                    errorReporter.reportError("Error trying to add course area to sailing event " + oldEvent.getName()
+                            + ": " + t.getMessage());
+                }
 
-                    @Override
-                    public void onFailure(Throwable t) {
-                        errorReporter.reportError("Error trying to add course area to sailing event " + oldEvent.getName() + ": " + t.getMessage());
-                    }
+                @Override
+                public void onSuccess(Void result) {
+                    fillEvents();
+                }
 
-                    @Override
-                    public void onSuccess(CourseAreaDTO result) {
-                        fillEvents();
-                    }
+            });
+        }
+        for (CourseAreaDTO courseArea : courseAreasToRemove) {
+            sailingService.removeCourseArea(oldEvent.id, courseArea.id, new AsyncCallback<Void>() {
+                @Override
+                public void onFailure(Throwable t) {
+                    errorReporter.reportError("Error trying to remove course area from sailing event " + oldEvent.getName()
+                            + ": " + t.getMessage());
+                }
 
-                });
-            }
+                @Override
+                public void onSuccess(Void result) {
+                    fillEvents();
+                }
+            });
         }
     }
 
-    private List<CourseAreaDTO> getCourseAreasToAdd(final EventDTO oldEvent, final EventDTO updatedEvent) {
-        List<CourseAreaDTO> courseAreasToAdd = new ArrayList<CourseAreaDTO>();
-        List<String> courseAreaNamesToAdd = new ArrayList<String>();
-
-        List<String> newCourseAreaNames = new ArrayList<String>();
-        for (CourseAreaDTO courseArea : updatedEvent.venue.getCourseAreas()) {
-            newCourseAreaNames.add(courseArea.getName());
-        }
-
-        List<String> oldCourseAreaNames = new ArrayList<String>();
-        for (CourseAreaDTO courseArea : oldEvent.venue.getCourseAreas()) {
-            oldCourseAreaNames.add(courseArea.getName());
-        }
-
-        for (String newCourseAreaName : newCourseAreaNames) {
-            if (!oldCourseAreaNames.contains(newCourseAreaName))
-                courseAreaNamesToAdd.add(newCourseAreaName);
-        }
-
-        for (CourseAreaDTO courseArea : updatedEvent.venue.getCourseAreas()) {
-            if (courseAreaNamesToAdd.contains(courseArea.getName())) {
-                courseAreasToAdd.add(courseArea);
-            }
-        }
-
-        return courseAreasToAdd;
+    private Pair<List<CourseAreaDTO>, List<CourseAreaDTO>> getCourseAreasToAdd(final EventDTO oldEvent, final EventDTO updatedEvent) {
+        List<CourseAreaDTO> courseAreasToAdd = new ArrayList<CourseAreaDTO>(updatedEvent.venue.getCourseAreas());
+        courseAreasToAdd.removeAll(oldEvent.venue.getCourseAreas());
+        List<CourseAreaDTO> courseAreasToRemove = new ArrayList<CourseAreaDTO>(oldEvent.venue.getCourseAreas());
+        courseAreasToRemove.removeAll(updatedEvent.venue.getCourseAreas());
+        return new Pair<List<CourseAreaDTO>, List<CourseAreaDTO>>(courseAreasToAdd, courseAreasToRemove);
     }
 
     private void createNewEvent(final EventDTO newEvent) {
@@ -832,8 +827,10 @@ public class EventManagementPanel extends SimplePanel implements EventsRefresher
         for (CourseAreaDTO courseAreaDTO : newEvent.venue.getCourseAreas()) {
             courseAreaNames.add(courseAreaDTO.getName());
         }
-        sailingService.createEvent(newEvent.getName(), newEvent.startDate, newEvent.endDate, newEvent.venue.getName(),
-                newEvent.isPublic, courseAreaNames, newEvent.getImageURLs(), newEvent.getVideoURLs(), new AsyncCallback<EventDTO>() {
+        sailingService.createEvent(newEvent.getName(), newEvent.getDescription(), newEvent.startDate, newEvent.endDate,
+                newEvent.venue.getName(), newEvent.isPublic, courseAreaNames, newEvent.getImageURLs(),
+                newEvent.getVideoURLs(), newEvent.getSponsorImageURLs(), newEvent.getLogoImageURL(),
+                newEvent.getOfficialWebsiteURL(), new AsyncCallback<EventDTO>() {
             @Override
             public void onFailure(Throwable t) {
                 errorReporter.reportError("Error trying to create new event " + newEvent.getName() + ": " + t.getMessage());

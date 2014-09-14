@@ -1,10 +1,9 @@
 package com.sap.sailing.gwt.ui.client.media;
 
-import java.util.Date;
-
 import com.google.gwt.media.client.MediaBase;
 import com.google.gwt.media.client.Video;
 import com.google.gwt.user.client.ui.Widget;
+import com.sap.sailing.domain.common.impl.MillisecondsTimePoint;
 import com.sap.sailing.domain.common.media.MediaTrack;
 import com.sap.sailing.gwt.ui.client.media.shared.VideoSynchPlayer;
 import com.sap.sailing.gwt.ui.client.media.shared.WithWidget;
@@ -29,18 +28,18 @@ public class VideoHtmlPlayer extends AbstractHtmlMediaPlayer implements VideoSyn
 
     @Override
     public long getOffset() {
-        return getMediaTrack().startTime.getTime() - raceStartTimeMillis;
+        return getMediaTrack().startTime.asMillis() - raceStartTimeMillis;
     }
 
     @Override
     public void changeOffsetBy(long delta) {
-        getMediaTrack().startTime = new Date(getMediaTrack().startTime.getTime() + delta);
+        getMediaTrack().startTime = getMediaTrack().startTime.plus(delta);
         forceAlign();
     }
 
     @Override
     public void updateOffset() {
-        getMediaTrack().startTime = new Date(raceTimer.getTime().getTime() - getCurrentMediaTimeMillis());
+        getMediaTrack().startTime = new MillisecondsTimePoint(raceTimer.getTime().getTime() - getCurrentMediaTimeMillis());
     }
 
     @Override
