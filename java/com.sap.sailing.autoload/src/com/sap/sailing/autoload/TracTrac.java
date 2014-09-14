@@ -69,7 +69,7 @@ public class TracTrac {
                 
                 for (TracTracRaceRecordDTO raceRecord : racesThatCanBeTracked.getB()) {
                     RaceRecord record = getTracTracAdapter().getSingleTracTracRaceRecord(new URL(raceRecord.jsonURL), raceRecord.id, /*loadClientParams*/true);
-                    if (record.getRaceStatus().equals(TracTracConnectionConstants.REPLAY_STATUS)) {
+                    if (record.getRaceStatus().equals(TracTracConnectionConstants.REPLAY_STATUS) || record.getRaceVisibility().equals(TracTracConnectionConstants.REPLAY_VISIBILITY)) {
                         RegattaIdentifier regattaForRaceRecord = null;
                         if (raceRecord.hasRememberedRegatta()) {
                             Regatta regatta = getService().getRememberedRegattaForRace(raceRecord.id);
@@ -87,7 +87,7 @@ public class TracTrac {
                             /*tracTracUsername*/"", /*tracTracPassword*/"",
                             record.getRaceStatus(), record.getRaceVisibility());
                     } else {
-                        logger.info("Ignoring race " + record.getName() + " because it is in status " + record.getRaceStatus());
+                        logger.info("Ignoring race " + record.getName() + " because it is in status " + record.getRaceStatus() + " and visibility " + record.getRaceVisibility());
                     }
                 }
             }
