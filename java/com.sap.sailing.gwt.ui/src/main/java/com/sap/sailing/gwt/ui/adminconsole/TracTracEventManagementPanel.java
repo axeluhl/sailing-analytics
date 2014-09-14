@@ -371,6 +371,7 @@ public class TracTracEventManagementPanel extends AbstractEventManagementPanel {
         racesTable.addColumn(boatClassColumn, stringMessages.boatClass());
         racesTable.addColumn(raceStartTrackingColumn, stringMessages.startTime());
         racesTable.addColumn(raceStatusColumn, stringMessages.raceStatusColumn());
+        racesTable.addColumn(raceVisibilityColumn, stringMessages.raceVisibilityColumn());
         racesTable.addColumnSortHandler(getRaceTableColumnSortHandler(selectionCheckboxColumn, this.raceList.getList(),
                 raceNameColumn, boatClassColumn, raceStartTrackingColumn, raceStatusColumn));
         racesTable.setSelectionModel(selectionCheckboxColumn.getSelectionModel(), selectionCheckboxColumn.getSelectionManager());
