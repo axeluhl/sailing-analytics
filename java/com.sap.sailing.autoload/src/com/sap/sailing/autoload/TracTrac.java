@@ -107,7 +107,7 @@ public class TracTrac {
                     raceRecord.getTrackingStartTime().asDate(), 
                     raceRecord
                     .getTrackingEndTime().asDate(), raceRecord.getRaceStartTime().asDate(),
-                    raceRecord.getBoatClassNames(), raceRecord.getRaceStatus(), raceRecord.getJsonURL().toString(),
+                    raceRecord.getBoatClassNames(), raceRecord.getRaceStatus(), raceRecord.getRaceVisibility(), raceRecord.getJsonURL().toString(),
                     hasRememberedRegatta(raceRecord.getID())));
         }
         return new com.sap.sse.common.Util.Pair<String, List<TracTracRaceRecordDTO>>(raceRecords.getA(), result);
