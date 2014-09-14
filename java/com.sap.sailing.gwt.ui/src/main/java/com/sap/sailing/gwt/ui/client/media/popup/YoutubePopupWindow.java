@@ -99,7 +99,7 @@ public class YoutubePopupWindow extends AbstractPopupWindow {
 
     public native boolean isPaused() /*-{
 		var player = this.@com.sap.sailing.gwt.ui.client.media.popup.YoutubePopupWindow::youtubePlayer;
-		return player.getPlayerState() == $wnd.YT.PlayerState.PAUSED;
+		return player.getPlayerState() != $wnd.YT.PlayerState.PLAYING;
     }-*/;
 
     public native double getDuration() /*-{
