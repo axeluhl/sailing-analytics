@@ -29,6 +29,7 @@ import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
+import java.util.NavigableSet;
 import java.util.Set;
 import java.util.UUID;
 import java.util.concurrent.Callable;
@@ -218,6 +219,7 @@ import com.sap.sailing.domain.racelog.tracking.analyzing.impl.LastPingMappingEve
 import com.sap.sailing.domain.racelog.tracking.analyzing.impl.OpenEndedDeviceMappingCloser;
 import com.sap.sailing.domain.racelog.tracking.analyzing.impl.RaceLogTrackingStateAnalyzer;
 import com.sap.sailing.domain.racelog.tracking.analyzing.impl.RegisteredCompetitorsAnalyzer;
+import com.sap.sailing.domain.racelog.tracking.events.FixedMarkPassingEventImpl;
 import com.sap.sailing.domain.racelog.tracking.impl.DeviceMappingImpl;
 import com.sap.sailing.domain.racelogtracking.RaceLogTrackingAdapter;
 import com.sap.sailing.domain.racelogtracking.RaceLogTrackingAdapterFactory;
@@ -2683,15 +2685,16 @@ public class SailingServiceImpl extends ProxiedRemoteServiceServlet implements S
     }
 
     @Override
-    public Set<Pair<String, Date>> getCompetitorMarkPassings(RegattaAndRaceIdentifier race, CompetitorDTO competitorDTO) {
-        Set<Pair<String, Date>> result = new HashSet<>();
+    public Map<Integer, Date> getCompetitorMarkPassings(RegattaAndRaceIdentifier race, CompetitorDTO competitorDTO) {
+        Map<Integer, Date> result = new HashMap<>();
         final TrackedRace trackedRace = getExistingTrackedRace(race);
         if (trackedRace != null) {
             Competitor competitor = getCompetitorByIdAsString(trackedRace.getRace().getCompetitors(), competitorDTO.getIdAsString());
             Set<MarkPassing> competitorMarkPassings = trackedRace.getMarkPassings(competitor);
+            Iterable<Waypoint> waypoints = trackedRace.getRace().getCourse().getWaypoints();
             if (competitorMarkPassings != null) {
                 for (MarkPassing markPassing : competitorMarkPassings) {
-                    result.add(new Pair<String, Date>(markPassing.getWaypoint().getName(), markPassing.getTimePoint().asDate()));
+                    result.put(Util.indexOf(waypoints, markPassing.getWaypoint()), markPassing.getTimePoint().asDate());
                 }
             }
         }
@@ -4956,7 +4959,13 @@ public class SailingServiceImpl extends ProxiedRemoteServiceServlet implements S
         RaceLog raceLog = getService().getRaceLog(leaderboardName, raceColumnDTO.getName(), fleet.getName());
         for (Triple<Competitor, Integer, TimePoint> fixedEvent : new MarkPassingDataFinder(raceLog).analyze()) {
             if (fixedEvent.getA().getName().equals(competitor.getName())) {
-                result.put(fixedEvent.getB(), new Date(fixedEvent.getC().asMillis()));
+                final Date date;
+                if(fixedEvent.getC()!=null){
+                    date = new Date(fixedEvent.getC().asMillis());
+                } else {
+                    date = null;
+                }
+                result.put(fixedEvent.getB(), date);
             }
         }
         return result;
@@ -4969,10 +4978,11 @@ public class SailingServiceImpl extends ProxiedRemoteServiceServlet implements S
         SuppressedMarkPassingsEvent oldSuppressedMarkPassingEvent = null;
         RaceLog raceLog = getService().getRaceLog(leaderboardName, raceColumnDTO.getName(), fleet.getName());
         Competitor competitor = getCompetitor(competitorDTO);
-        for (RaceLogEvent event : raceLog.getUnrevokedEvents()) {
+        NavigableSet<RaceLogEvent> unrevokedEvents = raceLog.getUnrevokedEvents();
+        for (RaceLogEvent event : unrevokedEvents) {
             if (event instanceof SuppressedMarkPassingsEvent && event.getInvolvedBoats().contains(competitor)) {
                 oldSuppressedMarkPassingEvent = (SuppressedMarkPassingsEvent) event;
-            } else if (event instanceof FixedMarkPassingEvent && event.getInvolvedBoats().contains(competitor)) {
+            } else if (event instanceof FixedMarkPassingEventImpl && event.getInvolvedBoats().contains(competitor)) {
                 FixedMarkPassingEvent fixedEvent = (FixedMarkPassingEvent) event;
                 oldFixedPassings.put(fixedEvent.getZeroBasedIndexOfPassedWaypoint(), fixedEvent);
             }
@@ -4983,7 +4993,7 @@ public class SailingServiceImpl extends ProxiedRemoteServiceServlet implements S
         final boolean revoke;
         if (oldSuppressedMarkPassingEvent == null && newZeroBasedIndexOfSuppressedMarkPassing == null) {
             create = false;
-            revoke = true;
+            revoke = false;
         } else if (oldSuppressedMarkPassingEvent == null && newZeroBasedIndexOfSuppressedMarkPassing != null) {
             create = true;
             revoke = false;

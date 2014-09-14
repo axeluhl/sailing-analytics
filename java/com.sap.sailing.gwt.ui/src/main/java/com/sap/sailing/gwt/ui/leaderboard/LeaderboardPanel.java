@@ -1783,10 +1783,8 @@ public class LeaderboardPanel extends SimplePanel implements TimeListener, PlayS
         if (!isEmbedded) {
             contentPanel.add(toolbarPanel);
         }
-        contentPanel.add(markPassingsPanel);
         if (competitorSearchTextBox != null) {
             contentPanel.add(competitorSearchTextBox);
-        contentPanel.add(editMarkPassingsButton);
             contentPanel.add(busyIndicator);
             competitorSearchTextBox.getSettingsButton().addClickHandler(new ClickHandler() {
                 @Override
@@ -1796,6 +1794,8 @@ public class LeaderboardPanel extends SimplePanel implements TimeListener, PlayS
             });
             this.competitorFilterPanel = competitorSearchTextBox;
         }
+        contentPanel.add(markPassingsPanel);
+        contentPanel.add(editMarkPassingsButton);
         SortedCellTable<LeaderboardRowDTO> leaderboardTable = getLeaderboardTable();
         leaderboardTable.getElement().getStyle().setMarginTop(5, Unit.PX);
         filterControlPanel = new HorizontalPanel();

@@ -1,15 +1,11 @@
 package com.sap.sailing.gwt.ui.client.shared.charts;
 
 import java.util.ArrayList;
-import java.util.Comparator;
 import java.util.Date;
 import java.util.HashMap;
-import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
-import java.util.Set;
-import java.util.TreeSet;
 
 import com.google.gwt.cell.client.AbstractCell;
 import com.google.gwt.event.dom.client.ClickEvent;
@@ -114,6 +110,7 @@ public class EditMarkPassingsPanel extends FlexTable implements RaceSelectionCha
             public void onClick(ClickEvent event) {
                 currentCompetitorChanges.put(currentWaypoints.indexOf(waypointSelectionModel.getSelectedObject().getA()), null);
                 wayPointSelectionTable.redraw();
+                removeSetMarkPassingsButton.setEnabled(false);
             }
         });
         setTimeAsMarkPassingsButton = new Button("Set time as mark passing");
@@ -132,8 +129,9 @@ public class EditMarkPassingsPanel extends FlexTable implements RaceSelectionCha
             @Override
             public void onSelectionChange(SelectionChangeEvent event) {
                 Pair<WaypointDTO, Date> selectedObject = waypointSelectionModel.getSelectedObject();
-                WaypointDTO waypoint = selectedObject.getA();
-                removeSetMarkPassingsButton.setEnabled(currentCompetitorEdits.get(waypoint) != null);
+                Integer waypoint = currentWaypoints.indexOf(selectedObject.getA());
+                removeSetMarkPassingsButton.setEnabled(currentCompetitorEdits.get(waypoint) != null
+                        || currentCompetitorChanges.get(waypoint) != null);
                 Date timePoint = selectedObject.getB();
                 if (timePoint != null) {
                     timer.setTime(timePoint.getTime());
@@ -171,8 +169,11 @@ public class EditMarkPassingsPanel extends FlexTable implements RaceSelectionCha
                     public String asString() {
                         // TODO this is really unclean (Problem: no calendar)
                         // Oh and time zones are scary
-                        String string = date.toString();
-                        string = string.substring(10, 20);
+                        String string = "";
+                        if (date != null) {
+                            string = date.toString();
+                            string = string.substring(10, 20);
+                        }
                         return string;
                     }
                 };
@@ -204,8 +205,10 @@ public class EditMarkPassingsPanel extends FlexTable implements RaceSelectionCha
                 asyncExecutor.execute(new AsyncAction<Void>() {
                     @Override
                     public void execute(AsyncCallback<Void> callback) {
+                        Integer oneBasedIndexofsuppressed = suppressMarkPassings.getValue();
+                        Integer zeroBasedIndex = oneBasedIndexofsuppressed==null?null:oneBasedIndexofsuppressed-1;
                         sailingService.updateRaceLogMarkPassingData(leaderboard.name, column, column.getFleet(raceIdentifier),
-                                currentCompetitorChanges, suppressMarkPassings.getValue(), competitorSelectionModel
+                                currentCompetitorChanges, zeroBasedIndex, competitorSelectionModel
                                         .getSelectedCompetitors().iterator().next(), callback);
                     }
 
@@ -310,39 +313,24 @@ public class EditMarkPassingsPanel extends FlexTable implements RaceSelectionCha
         });
 
         // Get current mark passings
-        asyncExecutor.execute(new AsyncAction<Set<Pair<String, Date>>>() {
+        asyncExecutor.execute(new AsyncAction<Map<Integer, Date>>() {
             @Override
-            public void execute(AsyncCallback<Set<Pair<String, Date>>> callback) {
+            public void execute(AsyncCallback<Map<Integer, Date>> callback) {
                 sailingService.getCompetitorMarkPassings(raceIdentifier, competitor, callback);
             }
-        }, new AsyncCallback<Set<Util.Pair<String, Date>>>() {
+        }, new AsyncCallback<Map<Integer, Date>>() {
             @Override
             public void onFailure(Throwable caught) {
                 errorReporter.reportError("Error obtaining mark passings", /* silent Mode */true);
             }
 
             @Override
-            public void onSuccess(Set<Util.Pair<String, Date>> result) {
-                Set<Util.Pair<String, Date>> sortedPassings = new TreeSet<>(new Comparator<Util.Pair<String, Date>>() {
-                    @Override
-                    public int compare(Pair<String, Date> o1, Pair<String, Date> o2) {
-                        return o1.getB().compareTo(o2.getB());
-                    }
-                });
-                sortedPassings.addAll(result);
+            public void onSuccess(Map<Integer, Date> result) {
+
                 List<Util.Pair<WaypointDTO, Date>> newMarkPassings = new ArrayList<>();
                 for (WaypointDTO waypoint : currentWaypoints) {
-                    Util.Pair<String, Date> toAdd = null;
-                    for (Iterator<Util.Pair<String, Date>> it = sortedPassings.iterator(); it.hasNext() && toAdd == null;) {
-                        Util.Pair<String, Date> markPassing = it.next();
-                        if (markPassing.getA().equals(waypoint.getName())) {
-                            toAdd = markPassing;
-                        }
-                    }
-                    if (toAdd != null) {
-                        newMarkPassings.add(new Util.Pair<WaypointDTO, Date>(waypoint, toAdd.getB()));
-                        sortedPassings.remove(toAdd);
-                    }
+                    Date date = result.get(Util.indexOf(currentWaypoints, waypoint));
+                    newMarkPassings.add(new Util.Pair<WaypointDTO, Date>(waypoint, date));
                 }
                 waypointList.setList(newMarkPassings);
             }

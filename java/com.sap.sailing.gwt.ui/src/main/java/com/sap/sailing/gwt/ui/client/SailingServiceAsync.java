@@ -74,7 +74,6 @@ import com.sap.sailing.gwt.ui.shared.VenueDTO;
 import com.sap.sailing.gwt.ui.shared.WindDTO;
 import com.sap.sailing.gwt.ui.shared.WindInfoForRaceDTO;
 import com.sap.sse.common.Util;
-import com.sap.sse.common.Util.Pair;
 import com.sap.sse.common.search.KeywordQuery;
 
 /**
@@ -641,7 +640,7 @@ public interface SailingServiceAsync {
     void setStartTimeReceivedForRace(RaceIdentifier raceIdentifier, Date newStartTimeReceived, AsyncCallback<RaceDTO> callback);
 
     void getCompetitorMarkPassings(RegattaAndRaceIdentifier race, CompetitorDTO competitorDTO,
-            AsyncCallback<Set<Pair<String, Date>>> callback);
+            AsyncCallback<Map<Integer, Date>> callback);
 
     void getCompetitorRaceLogMarkPassingData(String leaderboardName, RaceColumnDTO raceColumnDTO, FleetDTO fleet, CompetitorDTO competitor,
             AsyncCallback<Map<Integer, Date>> callback);
