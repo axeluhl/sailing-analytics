@@ -1057,7 +1057,7 @@ public class SailingServiceImpl extends ProxiedRemoteServiceServlet implements S
                     MongoRaceLogStoreFactory.INSTANCE.getMongoRaceLogStore(mongoObjectFactory, domainObjectFactory),
                     RaceTracker.TIMEOUT_FOR_RECEIVING_RACE_DEFINITION_IN_MILLISECONDS, simulateWithStartTimeNow, 
                     tracTracUsername, tracTracPassword,
-                    record.getRaceStatus());
+                    record.getRaceStatus(), record.getRaceVisibility());
             if (trackWind) {
                 new Thread("Wind tracking starter for race " + record.getEventName() + "/" + record.getName()) {
                     public void run() {

@@ -85,7 +85,7 @@ public class TracTrac {
                             MongoRaceLogStoreFactory.INSTANCE.getMongoRaceLogStore(getService().getMongoObjectFactory(), getService().getDomainObjectFactory()),
                             RaceTracker.TIMEOUT_FOR_RECEIVING_RACE_DEFINITION_IN_MILLISECONDS, /*simulateWithStartTimeNow*/false, 
                             /*tracTracUsername*/"", /*tracTracPassword*/"",
-                            record.getRaceStatus());
+                            record.getRaceStatus(), record.getRaceVisibility());
                     } else {
                         logger.info("Ignoring race " + record.getName() + " because it is in status " + record.getRaceStatus());
                     }
