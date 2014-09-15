@@ -60,7 +60,7 @@ public class TabletAndDesktopEventView extends Composite implements EventView, E
         this.event = event;
         Map<String, Triple<RaceGroupDTO, StrippedLeaderboardDTO, LeaderboardGroupDTO>> regattaStructure = getRegattaStructure(event, raceGroups);
 
-        eventHeader = new EventHeader(event, this);
+        eventHeader = new EventHeader(event, navigator, this);
         eventRegattaList = new EventRegattaList(event, regattaStructure, timerForClientServerOffset, navigator, this);
         eventRegattaRaces = new EventRegattaRaces(event, timerForClientServerOffset, navigator, this);
         eventOverview = new EventOverview(event, this);
