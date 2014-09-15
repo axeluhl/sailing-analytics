@@ -1260,14 +1260,16 @@ public abstract class TrackedRaceImpl extends TrackedRaceWithWindEssentials impl
         boolean result = false;
         Course course = getRace().getCourse();
         Waypoint firstWaypoint = course.getFirstWaypoint();
-        TimePoint timepoint = startTime != null ? startTime : startOfTrackingReceived;
+        TimePoint timepoint = getStartOfRace();
+        if (timepoint == null) {
+            timepoint = getStartOfTracking();
+        }
         if (firstWaypoint != null && timepoint != null) {
             Position position = getApproximatePosition(firstWaypoint, timepoint);
-            if (position != null) {
-                Wind wind = getWind(position, timepoint);
-                if (wind != null) {
-                    result = true;
-                }
+            // position may be null; in that case, a "Global" wind value will be looked up
+            Wind wind = getWind(position, timepoint);
+            if (wind != null) {
+                result = true;
             }
         }
         return result;
