@@ -87,6 +87,12 @@ public class SideBySideComponentViewer implements ComponentViewer {
                 videoToggleButton.setVisible(mediaPlayerManagerComponent.getAssignedMediaTracks().size()>0);
                 mediaManagementButton.setVisible(mediaPlayerManagerComponent.allowsEditing());
                 videoPlays = (mediaPlayerManagerComponent.getPlayingVideoTracks().size() > 0);
+                if(videoPlays){
+                    videoToggleButton.setText(stringMessages.hideVideoPopup());
+                }
+                else{
+                    videoToggleButton.setText(stringMessages.showVideoPopup());
+                }
             }
 
         });
@@ -149,12 +155,8 @@ public class SideBySideComponentViewer implements ComponentViewer {
             @Override
             public void onClick(ClickEvent event) {
                 if (videoPlays) {
-                    videoPlays = false;
-                    videoToggleButton.setText(stringMessages.showVideoPopup());
                     mediaPlayerManager.stopAll();
                 } else {
-                    videoPlays = true;
-                    videoToggleButton.setText(stringMessages.hideVideoPopup());
                     mediaPlayerManager.playDefault();
 
                 }
