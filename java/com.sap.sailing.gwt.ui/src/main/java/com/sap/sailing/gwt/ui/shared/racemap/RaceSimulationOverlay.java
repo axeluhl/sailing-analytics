@@ -1,9 +1,13 @@
 package com.sap.sailing.gwt.ui.shared.racemap;
 
+import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
 
 import com.google.gwt.canvas.dom.client.Context2d;
+import com.google.gwt.canvas.dom.client.TextMetrics;
+import com.google.gwt.i18n.client.DateTimeFormat;
+import com.google.gwt.i18n.client.TimeZone;
 import com.google.gwt.maps.client.MapWidget;
 import com.google.gwt.maps.client.base.LatLng;
 import com.google.gwt.maps.client.base.Point;
@@ -33,6 +37,12 @@ import com.sap.sse.gwt.client.player.Timer;
 public class RaceSimulationOverlay extends FullCanvasOverlay  implements TimeListener {
 
     public static final String GET_SIMULATION_CATEGORY = "getSimulation";
+    private final String textColor = "Black";
+    private final String textFont = "10pt OpenSansRegular";
+    private int xOffset = 10;
+    private int yOffset = 150;
+    private double rectWidth = 20;
+    private double rectHeight = 20;
     
     private final Timer timer;
     private Date lastSimulationTime;
@@ -42,6 +52,7 @@ public class RaceSimulationOverlay extends FullCanvasOverlay  implements TimeLis
     private final AsyncActionsExecutor asyncActionsExecutor;
     private final ColorPalette colors;
     private SimulatorResultsDTO simulationResult;
+    private PathDTO racePath;
     private Date prevStartTime;
     
     public RaceSimulationOverlay(MapWidget map, int zIndex, final Timer timer, RegattaAndRaceIdentifier raceIdentifier, SailingServiceAsync sailingService, AsyncActionsExecutor asyncActionsExecutor) {
@@ -92,6 +103,7 @@ public class RaceSimulationOverlay extends FullCanvasOverlay  implements TimeLis
         super.draw();
         // draw simulation paths
         this.drawPaths();
+        this.drawLegend();
     }
     
     public void clearCanvas() {
@@ -139,6 +151,62 @@ public class RaceSimulationOverlay extends FullCanvasOverlay  implements TimeLis
         
     }
     
+    public void drawLegend() {
+        if (this.simulationResult == null) {
+            return;
+        }
+        int index = 0;
+        Context2d context2d = canvas.getContext2d();
+        context2d.setFont(textFont);
+        TextMetrics txtmet;
+        txtmet = context2d.measureText("00:00:00");
+        double timewidth = txtmet.getWidth();
+        double txtmaxwidth = 0.0;
+        txtmet = context2d.measureText(racePath.getName().split("#")[1]);
+        txtmaxwidth = Math.max(txtmaxwidth, txtmet.getWidth());
+        PathDTO[] paths = this.simulationResult.getPaths();
+        for (PathDTO path : paths) {
+            txtmet = context2d.measureText(path.getName());
+            txtmaxwidth = Math.max(txtmaxwidth, txtmet.getWidth());
+        }
+        drawRectangleWithText(xOffset, yOffset, "rgba(255,255,255,0.8);",
+                racePath.getName().split("#")[1], getFormattedTime(racePath.getPathTime()), txtmaxwidth, timewidth);
+        for (PathDTO path : paths) {
+            drawRectangleWithText(xOffset, yOffset + (paths.length-index) * rectHeight, this.colors.getColor(paths.length-1-index),
+                path.getName().split("#")[1], getFormattedTime(path.getPathTime()), txtmaxwidth, timewidth);
+            index++;
+        }
+    }
+    
+    protected void drawRectangle(double x, double y, String color) {
+        Context2d context2d = canvas.getContext2d();
+        context2d.setFillStyle(color);
+        context2d.setLineWidth(3);
+        context2d.fillRect(x, y, rectWidth, rectHeight);
+    }
+
+    protected void drawRectangleWithText(double x, double y, String color, String text, String time, double textmaxwidth, double timewidth) {
+        double offset = 3.0;
+        Context2d context2d = canvas.getContext2d();
+        context2d.setFont(textFont);
+        drawRectangle(x, y, color);
+        context2d.setGlobalAlpha(0.80);
+        context2d.setFillStyle("white");
+        context2d.fillRect(x + rectWidth, y, 15.0 + textmaxwidth + timewidth, rectHeight);
+        context2d.setGlobalAlpha(1.0);
+        context2d.setFillStyle(textColor);
+        context2d.fillText(text, x + rectWidth + 5.0, y + 12.0 + offset);
+        context2d.fillText(time, x + rectWidth + textmaxwidth + 10.0, y + 12.0 + offset);
+    }
+    
+    protected String getFormattedTime(long pathTime) {
+        TimeZone gmt = TimeZone.createTimeZone(0);
+        Date timeDiffDate = new Date(pathTime);
+        String pathTimeStr = DateTimeFormat.getFormat(DateTimeFormat.PredefinedFormat.HOUR24_MINUTE_SECOND).format(
+                timeDiffDate, gmt);
+        return pathTimeStr;
+    }
+    
     public void simulate(Date from) {
         GetSimulationAction getSimulation = new GetSimulationAction(sailingService, raceIdentifier, from, prevStartTime);
         asyncActionsExecutor.execute(getSimulation, GET_SIMULATION_CATEGORY,
@@ -157,8 +225,16 @@ public class RaceSimulationOverlay extends FullCanvasOverlay  implements TimeLis
                             prevStartTime = result.getStartTime();
                             if (result.getPaths() != null) {
                                 simulationResult = result;
+                                PathDTO[] paths = result.getPaths();
+                                racePath = new PathDTO();
+                                List<SimulatorWindDTO> racePathPoints = new ArrayList<SimulatorWindDTO>();
+                                racePathPoints.add(new SimulatorWindDTO(null, 0, 0, paths[0].getPoints().get(0).timepoint));
+                                racePathPoints.add(new SimulatorWindDTO(null, 0, 0, paths[0].getPoints().get(0).timepoint + result.getLegDuration()));
+                                racePath.setPoints(racePathPoints);
+                                racePath.setName("0#Race");
                                 clearCanvas();
                                 drawPaths();
+                                drawLegend();
                             }
                         }
                     }

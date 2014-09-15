@@ -1474,17 +1474,23 @@ public class SailingServiceImpl extends ProxiedRemoteServiceServlet implements S
             Position endPosition = trackedRace.getApproximatePosition(toWaypoint, fromTimePoint);
 
             TimePoint startTimePoint = null;
+            TimePoint endTimePoint = null;
             Iterable<Util.Pair<Waypoint, Util.Pair<TimePoint, TimePoint>>> markPassings = trackedRace.getMarkPassingsTimes();
+            long legDuration = 0;
             synchronized(markPassings) {
                 for(Pair<Waypoint, Pair<TimePoint, TimePoint>> markPassing : markPassings) {
                     if (markPassing.getA().equals(fromWaypoint)) {
                         startTimePoint = markPassing.getB().getA();
                     }
+                    if (markPassing.getA().equals(toWaypoint)) {
+                        endTimePoint = markPassing.getB().getA();
+                    }
                 }
             }
+            legDuration = endTimePoint.asMillis() - startTimePoint.asMillis();
 
             if (startTimePoint.asDate().equals(prevStartTime)) {
-                return new SimulatorResultsDTO(startTimePoint.asDate(), null, null, null, null);
+                return new SimulatorResultsDTO(startTimePoint.asDate(), 0, null, null, null, null);
             }
             
             // determine legtype upwind/downwind/reaching
@@ -1546,7 +1552,7 @@ public class SailingServiceImpl extends ProxiedRemoteServiceServlet implements S
                 rcDTO.coursePositions.waypointPositions.add(posDTO);
                 posDTO = SimulatorServiceUtils.toPositionDTO(endPosition);
                 rcDTO.coursePositions.waypointPositions.add(posDTO);
-                result = new SimulatorResultsDTO(startTimePoint.asDate(), rcDTO, pathDTOs, null, null);
+                result = new SimulatorResultsDTO(startTimePoint.asDate(), legDuration, rcDTO, pathDTOs, null, null);
             }
         }
         
