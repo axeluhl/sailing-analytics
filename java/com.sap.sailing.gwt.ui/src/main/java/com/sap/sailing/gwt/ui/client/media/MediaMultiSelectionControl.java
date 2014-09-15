@@ -23,6 +23,7 @@ import com.google.gwt.user.client.ui.Label;
 import com.google.gwt.user.client.ui.Panel;
 import com.google.gwt.user.client.ui.PopupPanel;
 import com.google.gwt.user.client.ui.RadioButton;
+import com.google.gwt.user.client.ui.ToggleButton;
 import com.google.gwt.user.client.ui.UIObject;
 import com.google.gwt.user.client.ui.VerticalPanel;
 import com.google.gwt.user.client.ui.Widget;
@@ -160,7 +161,7 @@ public class MediaMultiSelectionControl extends AbstractMediaSelectionControl im
             Button deleteButton = createDeleteButton(videoTrack, panel);
             panel.setCellHorizontalAlignment(deleteButton, HasHorizontalAlignment.ALIGN_RIGHT);
             panel.add(deleteButton);
-            CheckBox connectCheckBox = createConnectCheckBox(videoTrack);
+            ToggleButton connectCheckBox = createConnectCheckBox(videoTrack);
             panel.setCellHorizontalAlignment(deleteButton, HasHorizontalAlignment.ALIGN_RIGHT);
             panel.add(connectCheckBox);      
             setEnableOfVideoTrack(connectCheckBox, connectCheckBox.getValue());
@@ -171,20 +172,21 @@ public class MediaMultiSelectionControl extends AbstractMediaSelectionControl im
 
     }
 
-    private CheckBox createConnectCheckBox(final MediaTrack videoTrack) {
-        CheckBox connectCheckBox = new CheckBox();
+    private ToggleButton createConnectCheckBox(final MediaTrack videoTrack) {
+        final ToggleButton connectCheckBox = new ToggleButton();
         connectCheckBox.setValue(videoTrack.regattasAndRaces
                 .contains(((MediaPlayerManagerComponent) mediaPlayerManager).getRaceIdentifier()));
+        connectCheckBox.setTitle("Connect video to this race");
         connectCheckBox.addValueChangeHandler(new ValueChangeHandler<Boolean>() {
 
             @Override
             public void onValueChange(ValueChangeEvent<Boolean> changeEvent) {
-                if (changeEvent.getValue()) {
+                if (connectCheckBox.isDown()) {
                     connectVideoToRace(videoTrack);
-                    setEnableOfVideoTrack((CheckBox)changeEvent.getSource(), true);
+                    setEnableOfVideoTrack(connectCheckBox, true);
                 } else {
                     disconnectVideoFromRace(videoTrack);
-                    setEnableOfVideoTrack((CheckBox)changeEvent.getSource(), false);
+                    setEnableOfVideoTrack(connectCheckBox, false);
                     mediaPlayerManager.closeFloatingVideo(videoTrack);
                 }
             }
@@ -192,10 +194,10 @@ public class MediaMultiSelectionControl extends AbstractMediaSelectionControl im
         return connectCheckBox;
     }
     
-    private void setEnableOfVideoTrack(CheckBox checkBox, boolean enable) {
-        Panel videoTrack = (HorizontalPanel)checkBox.getParent();
+    private void setEnableOfVideoTrack(ToggleButton connectCheckBox, boolean enable) {
+        Panel videoTrack = (HorizontalPanel)connectCheckBox.getParent();
         for (Widget widget : videoTrack) {
-            if(widget != checkBox && widget instanceof FocusWidget){
+            if(widget != connectCheckBox && widget instanceof FocusWidget){
                 ((FocusWidget)widget).setEnabled(enable);
                 if(widget instanceof CheckBox){
                     ((CheckBox)widget).setValue(false);
