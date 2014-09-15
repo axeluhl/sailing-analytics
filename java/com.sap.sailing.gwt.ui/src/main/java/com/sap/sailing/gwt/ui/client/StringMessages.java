@@ -183,6 +183,7 @@ public interface StringMessages extends Messages {
     String otherManeuver();
     String douglasPeuckerPoints();
     String filterRacesByName();
+    String filterMediaByName();
     String actionEdit();
     String actionEditScores();
     String actionEditCompetitors();

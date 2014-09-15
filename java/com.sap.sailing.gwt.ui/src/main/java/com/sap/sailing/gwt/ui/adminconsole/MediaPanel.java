@@ -3,6 +3,7 @@ package com.sap.sailing.gwt.ui.adminconsole;
 import static com.google.gwt.dom.client.BrowserEvents.CLICK;
 import static com.google.gwt.dom.client.BrowserEvents.KEYUP;
 
+import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Comparator;
 import java.util.Date;
@@ -30,6 +31,9 @@ import com.google.gwt.user.client.rpc.AsyncCallback;
 import com.google.gwt.user.client.ui.Button;
 import com.google.gwt.user.client.ui.FlowPanel;
 import com.google.gwt.user.client.ui.Grid;
+import com.google.gwt.user.client.ui.HasVerticalAlignment;
+import com.google.gwt.user.client.ui.HorizontalPanel;
+import com.google.gwt.user.client.ui.Label;
 import com.google.gwt.view.client.DefaultSelectionEventManager;
 import com.google.gwt.view.client.ListDataProvider;
 import com.google.gwt.view.client.SelectionModel;
@@ -50,6 +54,7 @@ import com.sap.sailing.gwt.ui.client.media.TimeFormatUtil;
 import com.sap.sailing.gwt.ui.shared.RegattaDTO;
 import com.sap.sse.gwt.client.async.MarkedAsyncCallback;
 import com.sap.sse.gwt.client.dialog.DataEntryDialog.DialogCallback;
+import com.sap.sse.gwt.client.panels.LabeledAbstractFilterablePanel;
 
 /**
  * Table inspired by http://gwt.google.com/samples/Showcase/Showcase.html#!CwCellTable
@@ -60,6 +65,8 @@ import com.sap.sse.gwt.client.dialog.DataEntryDialog.DialogCallback;
 public class MediaPanel extends FlowPanel {
 
     private final SailingServiceAsync sailingService;
+    private final LabeledAbstractFilterablePanel<MediaTrack> filterableMediaTracks;
+    private List<MediaTrack> allMediaTracks;
     private final RegattaRefresher regattaRefresher;
     private final MediaServiceAsync mediaService;
     private final ErrorReporter errorReporter;
@@ -76,12 +83,14 @@ public class MediaPanel extends FlowPanel {
         this.regattasDisplayers = regattasDisplayers;
         this.sailingService = sailingService;
         this.regattaRefresher = regattaRefresher;
-        this.mediaService = mediaService;
+        this.mediaService = mediaService;  
         this.stringMessages = stringMessages;
         this.errorReporter = errorReporter;
         mediaTracks = new Grid();
         mediaTracks.resizeColumns(3);
         add(mediaTracks);
+        HorizontalPanel buttonAndFilterPanel = new HorizontalPanel();
+        allMediaTracks = new ArrayList<MediaTrack>();  
         Button refreshButton = new Button(stringMessages.refresh());
         refreshButton.addClickHandler(new ClickHandler() {
             @Override
@@ -90,7 +99,7 @@ public class MediaPanel extends FlowPanel {
             }
 
         });
-        add(refreshButton);
+        buttonAndFilterPanel.add(refreshButton);
         Button addUrlButton = new Button(stringMessages.addMediaTrack());
         addUrlButton.addClickHandler(new ClickHandler() {
             @Override
@@ -98,9 +107,25 @@ public class MediaPanel extends FlowPanel {
                 addUrlMediaTrack();
             }
         });
-        add(addUrlButton);
-
+        buttonAndFilterPanel.add(addUrlButton);
+        add(buttonAndFilterPanel);
         createMediaTracksTable();
+        Label lblFilterRaces = new Label(stringMessages.filterMediaByName() + ":");
+        lblFilterRaces.setWordWrap(false);
+        buttonAndFilterPanel.setSpacing(5);
+        buttonAndFilterPanel.add(lblFilterRaces);
+        buttonAndFilterPanel.setCellVerticalAlignment(lblFilterRaces, HasVerticalAlignment.ALIGN_MIDDLE);
+        this.filterableMediaTracks = new LabeledAbstractFilterablePanel<MediaTrack>(lblFilterRaces, allMediaTracks, mediaTracksTable, mediaTrackListDataProvider) {
+            @Override
+            public List<String> getSearchableStrings(MediaTrack t) {
+                List<String> strings = new ArrayList<String>();
+                strings.add(t.title);
+                strings.add(t.startTime.toString());
+                return strings;
+            }
+        };
+        filterableMediaTracks.getTextBox().ensureDebugId("MediaTracksFilterTextBox");
+        buttonAndFilterPanel.add(filterableMediaTracks);
     }
 
     protected void loadMediaTracks() {
@@ -114,9 +139,13 @@ public class MediaPanel extends FlowPanel {
             @Override
             public void onSuccess(Collection<MediaTrack> allMediaTracks) {
                 mediaTrackListDataProvider.getList().addAll(allMediaTracks);
+                allMediaTracks.clear();
+                allMediaTracks.addAll(mediaTrackListDataProvider.getList());
+                filterableMediaTracks.updateAll(allMediaTracks);
                 mediaTrackListDataProvider.refresh();
             }
         });
+        
 
     }
 
@@ -144,6 +173,8 @@ public class MediaPanel extends FlowPanel {
 
         mediaTrackListDataProvider.addDataDisplay(mediaTracksTable);
         add(mediaTracksTable);
+        allMediaTracks.clear();
+        allMediaTracks.addAll(mediaTrackListDataProvider.getList());
     }
 
     /**

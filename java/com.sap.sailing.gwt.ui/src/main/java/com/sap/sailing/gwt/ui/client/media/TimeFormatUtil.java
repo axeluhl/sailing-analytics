@@ -1,7 +1,6 @@
 package com.sap.sailing.gwt.ui.client.media;
 
 import com.google.gwt.i18n.client.DateTimeFormat;
-import com.google.gwt.i18n.client.DateTimeFormat.PredefinedFormat;
 import com.google.gwt.i18n.client.NumberFormat;
 import com.sap.sailing.domain.common.Duration;
 import com.sap.sailing.domain.common.impl.MillisecondsDurationImpl;

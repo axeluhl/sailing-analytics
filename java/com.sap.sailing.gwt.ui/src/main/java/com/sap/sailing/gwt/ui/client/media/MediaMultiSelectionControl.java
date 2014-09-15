@@ -234,7 +234,6 @@ public class MediaMultiSelectionControl extends AbstractMediaSelectionControl im
 
     private Button createDeleteButton(final MediaTrack videoTrack) {
         Button deleteButton = new Button("X", new ClickHandler() {
-
             @Override
             public void onClick(ClickEvent event) {
                 if (mediaPlayerManager.deleteMediaTrack(videoTrack)) {
