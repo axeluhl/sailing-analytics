@@ -642,6 +642,6 @@ public interface SailingServiceAsync {
     
     void getRegattas(String url, AsyncCallback<List<RegattaDTO>> asyncCallback);
 
-    void addEventImportUrl(List<String> regattaNames, EventDTO newEvent,RegattaDTO defaultRegatta, AsyncCallback<Void> asyncCallback); 
+    void createRegattaStructure(List<String> regattaNames, EventDTO newEvent,RegattaDTO defaultRegatta, AsyncCallback<Void> asyncCallback); 
 
 }

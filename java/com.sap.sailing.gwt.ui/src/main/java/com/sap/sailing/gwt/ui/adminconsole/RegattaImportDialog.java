@@ -4,7 +4,6 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.UUID;
 
-import com.google.gwt.core.client.GWT;
 import com.google.gwt.user.client.ui.CheckBox;
 import com.google.gwt.user.client.ui.Grid;
 import com.google.gwt.user.client.ui.Label;
@@ -22,7 +21,6 @@ import com.sap.sse.gwt.client.dialog.DataEntryDialog;
 
 
 public class RegattaImportDialog extends DataEntryDialog<String>{
-    private final AdminConsoleResources resources = GWT.create(AdminConsoleResources.class);
     protected StringMessages stringMessages;
     protected TextBox nameEntryField;
     protected TextArea descriptionEntryField;
@@ -45,37 +43,7 @@ public class RegattaImportDialog extends DataEntryDialog<String>{
             com.sap.sse.gwt.client.dialog.DataEntryDialog.DialogCallback<String> callback) {
         super("Regattas"/*title*/, null/*message*/, stringMessages.ok(), stringMessages.cancel(), validator, false/*animationEnables; raus?*/, callback);
         this.stringMessages = stringMessages;
-        // TODO Auto-generated constructor stub
     }
-
-
-//        this.stringMessages = stringMessages;
-//        final ValueChangeHandler<List<String>> valueChangeHandler = new ValueChangeHandler<List<String>>() {
-//            @Override
-//            public void onValueChange(ValueChangeEvent<List<String>> event) {
-//                validate();
-//            }
-//        };
-//        courseAreaNameList = new StringListInlineEditorComposite(Collections.<String> emptyList(),
-//                new StringListInlineEditorComposite.ExpandedUi(stringMessages, resources.removeIcon(), /* suggestValues */
-//                        SuggestedCourseAreaNames.suggestedCourseAreaNames));
-//        courseAreaNameList.addValueChangeHandler(valueChangeHandler);
-//        final List<String> imageSuggestionURLs = Arrays.asList(new String[] { "http://", "https://", "http://www.", "https://www" });
-//        imageURLList = new StringListInlineEditorComposite(Collections.<String> emptyList(),
-//                new StringListInlineEditorComposite.ExpandedUi(stringMessages, resources.removeIcon(),
-//                /* suggestValues */ imageSuggestionURLs));
-//        imageURLList.addValueChangeHandler(valueChangeHandler);
-//        List<String> videoURLSuggestions = new ArrayList<>(imageSuggestionURLs);
-//        videoURLSuggestions.add("http://www.youtube.com/watch?v=");
-//        videoURLList = new StringListInlineEditorComposite(Collections.<String> emptyList(),
-//                new StringListInlineEditorComposite.ExpandedUi(stringMessages, resources.removeIcon(),
-//                /* suggestValues */ videoURLSuggestions));
-//        videoURLList.addValueChangeHandler(valueChangeHandler);
-//        sponsorImageURLList = new StringListInlineEditorComposite(Collections.<String> emptyList(),
-//                new StringListInlineEditorComposite.ExpandedUi(stringMessages, resources.removeIcon(),
-//                /* suggestValues */ imageSuggestionURLs));
-//        sponsorImageURLList.addValueChangeHandler(valueChangeHandler);
-//    }
 
     @Override
     protected Widget getAdditionalWidget() {
@@ -118,9 +86,6 @@ public class RegattaImportDialog extends DataEntryDialog<String>{
     
     protected String getResult() {
         EventDTO result = new EventDTO();
-//        for (LeaderboardGroupDTO lg : leaderboardGroups) {
-//            result.addLeaderboardGroup(lg);
-//        }
         result.setName(nameEntryField.getText());
         result.setDescription(descriptionEntryField.getText());
         result.setOfficialWebsiteURL(officialWebsiteURLEntryField.getText().trim().isEmpty() ? null : officialWebsiteURLEntryField.getText().trim());

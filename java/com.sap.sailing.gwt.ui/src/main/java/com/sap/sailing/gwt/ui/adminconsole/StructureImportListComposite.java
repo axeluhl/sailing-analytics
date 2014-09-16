@@ -42,10 +42,7 @@ public class StructureImportListComposite extends Composite implements RegattasD
 
     private final Label noRegattasLabel;
 
-    private final SailingServiceAsync sailingService;
     private final RegattaSelectionProvider regattaSelectionProvider;
-    private final ErrorReporter errorReporter;
-    private final RegattaRefresher regattaRefresher;
     private final StringMessages stringMessages;
 
     private final LabeledAbstractFilterablePanel<RegattaDTO> filterablePanelRegattas;
@@ -62,10 +59,7 @@ public class StructureImportListComposite extends Composite implements RegattasD
     public StructureImportListComposite(final SailingServiceAsync sailingService,
             final RegattaSelectionProvider regattaSelectionProvider, RegattaRefresher regattaRefresher,
             final ErrorReporter errorReporter, final StringMessages stringMessages, String s) {
-        this.sailingService = sailingService; /* Zuweisung vllt raus? */
         this.regattaSelectionProvider = regattaSelectionProvider;
-        this.regattaRefresher = regattaRefresher;
-        this.errorReporter = errorReporter;
         this.stringMessages = stringMessages;
         AdminConsoleTableResources tableResources = GWT.create(AdminConsoleTableResources.class);
         this.selectionCheckboxColumn = new SelectionCheckboxColumn<RegattaDTO>(tableResources.cellTableStyle()
@@ -92,7 +86,7 @@ public class StructureImportListComposite extends Composite implements RegattasD
         panel.add(noRegattasLabel);
 
         regattaListDataProvider = new ListDataProvider<RegattaDTO>();
-        regattaTable = createRegattaImportTable();
+        regattaTable = createRegattaTable();
         regattaTable.ensureDebugId("RegattasCellTable");
         regattaTable.setVisible(false);
         filterablePanelRegattas = new LabeledAbstractFilterablePanel<RegattaDTO>(filterRegattasLabel, allRegattas,
@@ -161,9 +155,9 @@ public class StructureImportListComposite extends Composite implements RegattasD
         return allRegattas;
     }
 
-    // create Regatta Table in StructureImportURLManagementPanel
+    // create Regatta Table in StructureImportManagementPanel
 
-    private CellTable<RegattaDTO> createRegattaImportTable() {
+    private CellTable<RegattaDTO> createRegattaTable() {
         CellTable<RegattaDTO> table = new CellTable<RegattaDTO>(/* pageSize */10000, tableRes);
         regattaListDataProvider.addDataDisplay(table);
         table.setWidth("100%");

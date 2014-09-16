@@ -1,6 +1,6 @@
 package eventimport;
 
-public class Regattas {
+public class RegattaJSON {
     
     private String id = "";
     private String name = "";

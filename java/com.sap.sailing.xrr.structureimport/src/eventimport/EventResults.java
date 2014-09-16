@@ -4,21 +4,21 @@ import java.util.ArrayList;
 
 public class EventResults {
     
-    private ArrayList<Regattas> regattas = new ArrayList<Regattas>();
+    private ArrayList<RegattaJSON> regattas = new ArrayList<RegattaJSON>();
     private String id = "";
     private String name = "";
     private String xrrUrl = "";
 
 
-    public ArrayList<Regattas> getRegattas() {
+    public ArrayList<RegattaJSON> getRegattas() {
         return regattas;
     }
 
-    public void setRegattas(ArrayList<Regattas> regattas) {
+    public void setRegattas(ArrayList<RegattaJSON> regattas) {
         this.regattas = regattas;
     }
     
-    public void addRegatta(Regattas regatta){
+    public void addRegatta(RegattaJSON regatta){
         this.regattas.add(regatta);
     }
 

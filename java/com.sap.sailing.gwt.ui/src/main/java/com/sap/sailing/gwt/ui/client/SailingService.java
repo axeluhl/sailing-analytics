@@ -341,7 +341,7 @@ public interface SailingService extends RemoteService {
     
     List<RegattaDTO> getRegattas(String url);
 
-    void addEventImportUrl(List<String> regattaNames,EventDTO newEvent, RegattaDTO defaultRegatta);
+    void createRegattaStructure(List<String> regattaNames,EventDTO newEvent, RegattaDTO defaultRegatta);
 
 
     void updateLeaderboardScoreCorrectionMetadata(String leaderboardName, Date timePointOfLastCorrectionValidity,

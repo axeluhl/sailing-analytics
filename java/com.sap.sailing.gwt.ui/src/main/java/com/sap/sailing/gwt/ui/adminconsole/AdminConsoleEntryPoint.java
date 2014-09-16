@@ -181,7 +181,7 @@ public class AdminConsoleEntryPoint extends AbstractEntryPoint implements Regatt
         ResultImportUrlsManagementPanel resultImportUrlsManagementPanel = new ResultImportUrlsManagementPanel(sailingService, this, stringMessages);
         addToTabPanel(tabPanel, user, resultImportUrlsManagementPanel, stringMessages.resultImportUrls(), AdminConsoleFeatures.MANAGE_RESULT_IMPORT_URLS);
         
-        StructureImportUrlsManagementPanel structureImportUrlsManagementPanel = new StructureImportUrlsManagementPanel(sailingService, this, stringMessages, this, eventManagementPanel);
+        StructureImportManagementPanel structureImportUrlsManagementPanel = new StructureImportManagementPanel(sailingService, this, stringMessages, this, eventManagementPanel);
         addToTabPanel(tabPanel, user, structureImportUrlsManagementPanel, stringMessages.structureImportUrls(), AdminConsoleFeatures.MANAGE_STRUCTURE_IMPORT_URLS);
         
         RemoteSailingServerInstancesManagementPanel sailingServerInstancesManagementPanel = new RemoteSailingServerInstancesManagementPanel(sailingService, this, stringMessages);
