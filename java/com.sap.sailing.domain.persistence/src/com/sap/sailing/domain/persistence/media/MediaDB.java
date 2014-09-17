@@ -1,8 +1,12 @@
 package com.sap.sailing.domain.persistence.media;
 
 import java.util.Collections;
-import java.util.Date;
 import java.util.List;
+
+import com.sap.sailing.domain.common.Duration;
+import com.sap.sailing.domain.common.TimePoint;
+import com.sap.sailing.domain.common.media.MediaTrack;
+import com.sap.sailing.domain.common.media.MediaTrack.MimeType;
 
 /**
  * Offers CRUD methods for mongo representation of media track objects.
@@ -15,7 +19,7 @@ public interface MediaDB {
     /**
      * Stores a new track to the database, returning the db-generated id.
      */
-    String insertMediaTrack(String title, String url, Date startTime, int durationInMillis, String mimeType);
+    String insertMediaTrack(String title, String url, TimePoint startTime, Duration duration, MimeType mimeType);
 
     /**
      * Stores a new track to the database, using the db id of the specified trackToImport.
@@ -23,9 +27,9 @@ public interface MediaDB {
      * @throws NullpointerException When trackToImport.dbId is null.
      * @throws IllegalArgumentException When track with specified dbId already exists.
      */
-    void insertMediaTrackWithId(String dbId, String videoTitle, String url, Date startTime, int durationInMillis, String mimeType);
+    void insertMediaTrackWithId(String dbId, String videoTitle, String url, TimePoint startTime, Duration duration, MimeType mimeType);
 
-    List<DBMediaTrack> loadAllMediaTracks();
+    List<MediaTrack> loadAllMediaTracks();
 
     void deleteMediaTrack(String dbId);
 
@@ -33,22 +37,22 @@ public interface MediaDB {
 
     void updateUrl(String dbId, String url);
 
-    void updateStartTime(String dbId, Date startTime);
+    void updateStartTime(String dbId, TimePoint startTime);
 
-    void updateDuration(String dbId, int durationInMillis);
+    void updateDuration(String dbId, Duration duration);
 
     MediaDB TEST_STUB = new MediaDB() {
 
         @Override
-        public String insertMediaTrack(String title, String url, Date startTime, int durationInMillis, String mimeType) {
+        public String insertMediaTrack(String title, String url, TimePoint startTime, Duration duration, MimeType mimeType) {
             return "0";
         }
 
         @Override
-        public void insertMediaTrackWithId(String dbId, String videoTitle, String url, Date startTime, int durationInMillis, String mimeType) {};
+        public void insertMediaTrackWithId(String dbId, String videoTitle, String url, TimePoint startTime, Duration duration, MimeType mimeType) {};
         
         @Override
-        public List<DBMediaTrack> loadAllMediaTracks() {
+        public List<MediaTrack> loadAllMediaTracks() {
             return Collections.emptyList(); 
         }
 
@@ -62,10 +66,10 @@ public interface MediaDB {
         public void updateUrl(String dbId, String url) {}
 
         @Override
-        public void updateStartTime(String dbId, Date startTime) {}
+        public void updateStartTime(String dbId, TimePoint startTime) {}
 
         @Override
-        public void updateDuration(String dbId, int durationInMillis) {}
+        public void updateDuration(String dbId, Duration duration) {}
         
     };
 

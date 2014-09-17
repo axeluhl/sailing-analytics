@@ -135,12 +135,13 @@ figcaption {
   outline: none;
   text-decoration: none;
 }
-.navbar_buttonactive {
+.navbar_buttonactive,
+.navbar_buttonactive:focus {
   color: #fff;
-  background-color: #999;
+  background-color: #f0ab00;
 }
 .navbar_buttonactive:hover {
-  background-color: #8a8a8a;
+  background-color: #d89a00;
 }
 .button {
   font-size: 15px;

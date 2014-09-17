@@ -38,4 +38,5 @@
 	<source path='shared' />
 	<source path='common' />
 	<source path='actions' />
+	<source path='leaderboard' />
 </module>

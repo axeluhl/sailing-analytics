@@ -209,16 +209,23 @@ public class Util {
     }
 
     public static <T> boolean equals(Iterable<? extends T> a, Iterable<? extends T> b) {
-        Iterator<? extends T> aIter = a.iterator();
-        Iterator<? extends T> bIter = b.iterator();
-        while (aIter.hasNext() && bIter.hasNext()) {
-            T ao = aIter.next();
-            T bo = bIter.next();
-            if (!equalsWithNull(ao, bo)) {
-                return false;
+        if (a == null) {
+            return b == null;
+        } else if (b == null) {
+            return a == null;
+        } else {
+            // neither a nor b are null at this point:
+            Iterator<? extends T> aIter = a.iterator();
+            Iterator<? extends T> bIter = b.iterator();
+            while (aIter.hasNext() && bIter.hasNext()) {
+                T ao = aIter.next();
+                T bo = bIter.next();
+                if (!equalsWithNull(ao, bo)) {
+                    return false;
+                }
             }
+            return !aIter.hasNext() && !bIter.hasNext();
         }
-        return !aIter.hasNext() && !bIter.hasNext();
     }
 
     public static <T> T get(Iterable<T> iterable, int i) {

@@ -229,11 +229,21 @@ public class LeaderboardData extends ExportAction {
         addNamedElementWithValue(raceElement, "end_of_tracking_time_as_millis", handleValue(race.getEndOfTracking()));
         
         LineDetails start = race.getStartLine(race.getStartOfTracking());
-        addNamedElementWithValue(raceElement, "start_line_length_in_meters", start.getLength().getMeters());
-        Distance advantage = start.getAdvantage();
-        addNamedElementWithValue(raceElement, "start_advantage_in_meters", advantage != null ? advantage.getMeters() : 0);
-        NauticalSide nauticalSideWhileApproaching = start.getAdvantageousSideWhileApproachingLine();
-        addNamedElementWithValue(raceElement, "advantageous_side_while_approaching_start_line", nauticalSideWhileApproaching != null ? nauticalSideWhileApproaching.name() : "UNKNOWN");
+        if (start != null) {
+            if (start.getLength() != null) {
+                addNamedElementWithValue(raceElement, "start_line_length_in_meters", start.getLength().getMeters());
+            } else {
+                addNamedElementWithValue(raceElement, "start_line_length_in_meters", 0);
+            }
+            Distance advantage = start.getAdvantage();
+            addNamedElementWithValue(raceElement, "start_advantage_in_meters", advantage != null ? advantage.getMeters() : 0);
+            NauticalSide nauticalSideWhileApproaching = start.getAdvantageousSideWhileApproachingLine();
+            addNamedElementWithValue(raceElement, "advantageous_side_while_approaching_start_line", nauticalSideWhileApproaching != null ? nauticalSideWhileApproaching.name() : "UNKNOWN");
+        } else {
+            addNamedElementWithValue(raceElement, "start_line_length_in_meters", 0);
+            addNamedElementWithValue(raceElement, "start_advantage_in_meters", 0);
+            addNamedElementWithValue(raceElement, "advantageous_side_while_approaching_start_line", "UNKNOWN");
+        }
 
         Distance raceCourseLength = race.getCourseLength();
         if (raceCourseLength == null) {
@@ -421,8 +431,10 @@ public class LeaderboardData extends ExportAction {
             }
             Tack startTack = race.getTack(competitor, race.getStartOfRace());
             addNamedElementWithValue(competitorRaceDataElement, "start_tack", startTack != null ? startTack.name() : "UNKNOWN");
-            addNamedElementWithValue(competitorRaceDataElement, "starboard_mark_name", race.getStartLine(race.getStartOfRace()).getStarboardMarkWhileApproachingLine().getName());
-            addNamedElementWithValue(competitorRaceDataElement, "distance_to_start_line_on_race_start_in_meters", race.getDistanceToStartLine(competitor, race.getStartOfRace()).getMeters());
+            LineDetails startLine = race.getStartLine(race.getStartOfRace());
+            addNamedElementWithValue(competitorRaceDataElement, "starboard_mark_name", startLine != null ? startLine.getStarboardMarkWhileApproachingLine().getName() : "UNKNOWN");
+            Distance distanceToStartLine = race.getDistanceToStartLine(competitor, race.getStartOfRace());
+            addNamedElementWithValue(competitorRaceDataElement, "distance_to_start_line_on_race_start_in_meters", distanceToStartLine != null ? distanceToStartLine.getMeters() : 0);
             Speed estimatedSpeedAtStartSignal = race.getTrack(competitor).getEstimatedSpeed(race.getStartOfRace());
             if (estimatedSpeedAtStartSignal == null) {
                 raceConfidenceAndErrorMessages = updateConfidence("Competitor " + competitor.getName() + " has no valid speed at start for this race!", 0.1, raceConfidenceAndErrorMessages);

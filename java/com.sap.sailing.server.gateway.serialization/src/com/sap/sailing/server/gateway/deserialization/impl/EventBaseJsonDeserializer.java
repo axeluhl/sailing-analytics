@@ -12,8 +12,8 @@ import org.json.simple.JSONObject;
 import com.sap.sailing.domain.base.EventBase;
 import com.sap.sailing.domain.base.LeaderboardGroupBase;
 import com.sap.sailing.domain.base.Venue;
-import com.sap.sailing.domain.base.impl.EventBaseImpl;
 import com.sap.sailing.domain.base.impl.StrippedEventImpl;
+import com.sap.sailing.domain.common.impl.ImageSizeImpl;
 import com.sap.sailing.domain.common.impl.MillisecondsTimePoint;
 import com.sap.sailing.server.gateway.deserialization.JsonDeserializationException;
 import com.sap.sailing.server.gateway.deserialization.JsonDeserializer;
@@ -50,7 +50,7 @@ public class EventBaseJsonDeserializer implements JsonDeserializer<EventBase> {
                 leaderboardGroups.add(leaderboardGroupDeserializer.deserialize((JSONObject) lgJson));
             }
         }
-        EventBaseImpl result = new StrippedEventImpl(name, startDate == null ? null : new MillisecondsTimePoint(startDate.longValue()),
+        StrippedEventImpl result = new StrippedEventImpl(name, startDate == null ? null : new MillisecondsTimePoint(startDate.longValue()),
                 endDate == null ? null : new MillisecondsTimePoint(endDate.longValue()), venue, /* is public */ true, id, leaderboardGroups);
         result.setDescription(description);
         if (officialWebsiteURLAsString != null) {
@@ -86,6 +86,21 @@ public class EventBaseJsonDeserializer implements JsonDeserializer<EventBase> {
                 result.setSponsorImageURLs(getURLsFromStrings(Helpers.getNestedArraySafe(object, EventBaseJsonSerializer.FIELD_SPONSOR_IMAGE_URLS)));
             } catch (MalformedURLException e) {
                 throw new JsonDeserializationException("Error deserializing sponsor image URLs for event "+name, e);
+            }
+        }
+        JSONArray imageSizes = (JSONArray) object.get(EventBaseJsonSerializer.FIELD_IMAGE_SIZES);
+        if (imageSizes != null) {
+            for (Object imageURLAndSizeObject : imageSizes) {
+                JSONObject imageURLAndSizeJson = (JSONObject) imageURLAndSizeObject;
+                try {
+                    result.setImageSize(
+                            new URL((String) imageURLAndSizeJson.get(EventBaseJsonSerializer.FIELD_IMAGE_URL)),
+                            new ImageSizeImpl(
+                                    ((Number) imageURLAndSizeJson.get(EventBaseJsonSerializer.FIELD_IMAGE_WIDTH)).intValue(),
+                                    ((Number) imageURLAndSizeJson.get(EventBaseJsonSerializer.FIELD_IMAGE_HEIGHT)).intValue()));
+                } catch (MalformedURLException e) {
+                    throw new JsonDeserializationException(e);
+                }
             }
         }
         return result;

@@ -38,7 +38,6 @@ import com.sap.sailing.gwt.ui.shared.BulkScoreCorrectionDTO;
 import com.sap.sailing.gwt.ui.shared.CompactRaceMapDataDTO;
 import com.sap.sailing.gwt.ui.shared.CompetitorsRaceDataDTO;
 import com.sap.sailing.gwt.ui.shared.ControlPointDTO;
-import com.sap.sailing.gwt.ui.shared.CourseAreaDTO;
 import com.sap.sailing.gwt.ui.shared.CoursePositionsDTO;
 import com.sap.sailing.gwt.ui.shared.DeviceConfigurationDTO;
 import com.sap.sailing.gwt.ui.shared.DeviceConfigurationDTO.RegattaConfigurationDTO;
@@ -352,16 +351,18 @@ public interface SailingServiceAsync {
 
     void removeEvents(Collection<UUID> eventIds, AsyncCallback<Void> asyncCallback);
 
-    void createEvent(String eventName, Date startDate, Date endDate, String description, boolean isPublic,
+    void createEvent(String eventName, String eventDescription, Date startDate, Date endDate, String venue, boolean isPublic,
             List<String> courseAreaNames, Iterable<String> imageURLs, Iterable<String> videoURLs,
-            AsyncCallback<EventDTO> callback);
+            Iterable<String> sponsorImageURLs, String logoImageURL, String officialWebsiteURL, AsyncCallback<EventDTO> callback);
 
     void updateEvent(UUID eventId, String eventName, String eventDescription, Date startDate, Date endDate,
             VenueDTO venue, boolean isPublic, Iterable<UUID> leaderboardGroupIds, String officialWebsiteURL,
             String logoImageURL, Iterable<String> imageURLs, Iterable<String> videoURLs,
             Iterable<String> sponsorImageURLs, AsyncCallback<EventDTO> callback);
 
-    void createCourseArea(UUID eventId, String courseAreaName, AsyncCallback<CourseAreaDTO> callback);
+    void createCourseArea(UUID eventId, String courseAreaName, AsyncCallback<Void> callback);
+
+    void removeCourseArea(UUID eventId, UUID courseAreaId, AsyncCallback<Void> callback);
 
     void removeRegatta(RegattaIdentifier regattaIdentifier, AsyncCallback<Void> callback);
 

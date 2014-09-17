@@ -1,7 +1,6 @@
 package com.sap.sailing.gwt.ui.client.media;
 
 import java.util.ArrayList;
-import java.util.Date;
 import java.util.List;
 
 import com.google.gwt.event.logical.shared.AttachEvent;
@@ -9,6 +8,7 @@ import com.google.gwt.event.logical.shared.AttachEvent.Handler;
 import com.google.gwt.user.client.ui.Panel;
 import com.google.gwt.user.client.ui.SimplePanel;
 import com.google.gwt.user.client.ui.Widget;
+import com.sap.sailing.domain.common.impl.MillisecondsTimePoint;
 import com.sap.sailing.domain.common.media.MediaTrack;
 import com.sap.sailing.gwt.ui.client.media.shared.AbstractMediaPlayer;
 import com.sap.sailing.gwt.ui.client.media.shared.VideoSynchPlayer;
@@ -85,18 +85,18 @@ public class VideoYoutubePlayer extends AbstractMediaPlayer implements VideoSync
 
     @Override
     public long getOffset() {
-        return getMediaTrack().startTime.getTime() - raceStartTimeMillis;
+        return getMediaTrack().startTime.asMillis() - raceStartTimeMillis;
     }
 
     @Override
     public void changeOffsetBy(long delta) {
-        getMediaTrack().startTime = new Date(getMediaTrack().startTime.getTime() + delta);
+        getMediaTrack().startTime = getMediaTrack().startTime.plus(delta);
         forceAlign();
     }
 
     @Override
     public void updateOffset() {
-        getMediaTrack().startTime = new Date(raceTimer.getTime().getTime() - getCurrentMediaTimeMillis());
+        getMediaTrack().startTime = new MillisecondsTimePoint(raceTimer.getTime().getTime() - getCurrentMediaTimeMillis());
     }
 
     @Override

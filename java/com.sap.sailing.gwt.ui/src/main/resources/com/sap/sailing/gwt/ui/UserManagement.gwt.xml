@@ -38,4 +38,5 @@
 	<source path='simulator'/>
 	<source path='usermanagement'/>
 	<source path='shared'/>
+	<source path='leaderboard'/>
 </module>

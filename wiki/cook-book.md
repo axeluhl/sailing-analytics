@@ -2,6 +2,26 @@
 
 [[_TOC_]]
 
+### Switch from one Archive server to another
+
+When deploying a new version of the "Archive" server which hosts our sapsailing.com landing page and all historic events that don't have their own dedicated server instance, for availability reasons we always pull up a new server instance next to the currently running one, prepare and test it thoroughly and only then switch to it by updating the Apache configuration accordingly.
+
+Two files on our web server need to be edited, requiring `root` permissions: `/etc/httpd/conf.d/000-macros.conf` and `/etc/httpd/conf.d/001-events.conf`. In the `000-macros.conf` file you will find several lines reading something like
+
+   Use Rewrite 172.31.22.177 8888
+
+Those need to be updated to point to the internal IP address of the new "to-be" archive server. You can find this internal IP address in the Amazon EC2 administration console in the instances list by selecting your new archive server instance and checking the "Private IPs" field in the "Description" tab.
+
+In `001-events.conf` there his a single entry that needs updating. It looks like this:
+
+  Use Home www.sapsailing.com 172.31.22.177 8888
+
+and requires the same IP address update. When done, issue the command
+
+  service httpd reload
+
+which will reload the Apache configuration on the fly. Only then you may shut down the previous archive server, and only after convincing yourself that the switch was successful and that requests to sapsailing.com now are handled by your new archive server.
+
 ### Export from MongoDB
 
 To export data from MongoDB you simply have to use the monogexport command. It will export data to human readable JSON format. Make absolutely sure to use fields backed by an index in your query otherwise it can put MongoDB under heavy load and take ages.

@@ -48,7 +48,6 @@ import com.sap.sailing.gwt.ui.shared.BulkScoreCorrectionDTO;
 import com.sap.sailing.gwt.ui.shared.CompactRaceMapDataDTO;
 import com.sap.sailing.gwt.ui.shared.CompetitorsRaceDataDTO;
 import com.sap.sailing.gwt.ui.shared.ControlPointDTO;
-import com.sap.sailing.gwt.ui.shared.CourseAreaDTO;
 import com.sap.sailing.gwt.ui.shared.CoursePositionsDTO;
 import com.sap.sailing.gwt.ui.shared.DeviceConfigurationDTO;
 import com.sap.sailing.gwt.ui.shared.DeviceConfigurationDTO.RegattaConfigurationDTO;
@@ -285,8 +284,9 @@ public interface SailingService extends RemoteService {
             String logoImageURL, Iterable<String> imageURLs, Iterable<String> videoURLs,
             Iterable<String> sponsorImageURLs) throws Exception;
 
-    EventDTO createEvent(String eventName, Date startDate, Date endDate, String description, boolean isPublic,
-            List<String> courseAreaNames, Iterable<String> imageURLs, Iterable<String> videoURLs) throws Exception;
+    EventDTO createEvent(String eventName, String eventDescription, Date startDate, Date endDate, String venue,
+            boolean isPublic, List<String> courseAreaNames, Iterable<String> imageURLs,
+            Iterable<String> videoURLs, Iterable<String> sponsorImageURLs, String logoImageURL, String officialWebsiteURL) throws Exception;
 
     void removeEvent(UUID eventId);
 
@@ -350,8 +350,10 @@ public interface SailingService extends RemoteService {
     PolarSheetGenerationResponse generatePolarSheetForRaces(List<RegattaAndRaceIdentifier> selectedRaces,
             PolarSheetGenerationSettings settings, String name) throws Exception;
     
-    CourseAreaDTO createCourseArea(UUID eventId, String courseAreaName);
+    void createCourseArea(UUID eventId, String courseAreaName);
     
+    void removeCourseArea(UUID eventId, UUID courseAreaId);
+
     List<Util.Pair<String, String>> getLeaderboardsNamesOfMetaLeaderboard(String metaLeaderboardName);
 
     Util.Pair<String, LeaderboardType> checkLeaderboardName(String leaderboardName);

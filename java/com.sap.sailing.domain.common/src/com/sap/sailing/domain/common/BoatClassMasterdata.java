@@ -18,6 +18,7 @@ public enum BoatClassMasterdata {
     B_ONE ("B/ONE", true, 7.80, 2.49, BoatHullType.MONOHULL, "B-ONE"),
     DRAGON_INT ("Dragon Int.", true, 8.89, 1.96, BoatHullType.MONOHULL, "Drachen", "Dragon"),
     EXTREME_40 ("Extreme 40", false, 12.2, 6.60, BoatHullType.CATAMARAN, "Extreme-40", "Extreme40", "ESS40"),
+    D_35 ("D35", false, 10.81, 6.89, BoatHullType.CATAMARAN),
     EUROPE_INT ("Europe Int.", true, 3.35, 1.35, BoatHullType.MONOHULL, "Europe"),
     F_18 ("Formula 18", true, 6.85, 2.25, BoatHullType.CATAMARAN, "F18", "F-18"),
     FARR_30 ("Farr 30", true, 9.42, 3.08, BoatHullType.MONOHULL, "F30", "F-30", "Farr-30"),

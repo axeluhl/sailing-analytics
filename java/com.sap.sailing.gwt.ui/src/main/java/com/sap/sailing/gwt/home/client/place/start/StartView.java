@@ -13,4 +13,6 @@ public interface StartView {
     void setFeaturedEvents(List<Pair<StageEventType, EventBaseDTO>> featuredEvents);
 
     void setRecentEvents(List<EventBaseDTO> recentEvents);
+    
+    void adjustSizes();
 }
