@@ -37,7 +37,7 @@ public class TestAbstractParallelProcessorFinishing {
 
     @Test
     public void testProcessFinishing() {
-        processor.onElement(1);
+        processor.processElement(1);
         ConcurrencyTestsUtil.tryToFinishTheProcessorInAnotherThread(processor);
         ConcurrencyTestsUtil.sleepFor(100); //Wait till the processor tries to finish
         assertThat(receiverWasToldToFinish, is(false));
@@ -50,7 +50,9 @@ public class TestAbstractParallelProcessorFinishing {
     private Processor<Integer> createReceiver() {
         return new Processor<Integer>() {
             @Override
-            public void onElement(Integer element) { }
+            public void processElement(Integer element) { }
+            @Override
+            public void onFailure(Throwable failure) { }
             @Override
             public void finish() throws InterruptedException {
                 receiverWasToldToFinish = true;

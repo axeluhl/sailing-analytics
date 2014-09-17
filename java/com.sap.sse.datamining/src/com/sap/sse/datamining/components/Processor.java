@@ -4,16 +4,34 @@ import com.sap.sse.datamining.AdditionalResultDataBuilder;
 
 public interface Processor<InputType> {
 
-    public void onElement(InputType element);
+    /**
+     * Processes the given element and forwards the result.
+     * @param element The element to process.
+     */
+    public void processElement(InputType element);
 
     /**
-     * Tells this Processor, that there will be no incoming data.<br />
+     * This method handles the throwing of Throwables, so they don't get lost because of the 
+     * multi-threading.<br>
+     * The standard implementation is forwarding them to the last processor,
+     * that collects the failures, until the processing is finished. Than the failures will be
+     * handled.
+     * @param failure The thrown failure.
+     */
+    void onFailure(Throwable failure);
+
+    /**
+     * Tells this Processor, that there won't be data incoming anymore.<br />
      * The called Processor will finish his work and call <code>finish()</code> on all subsequent processors.
      * 
      * @throws InterruptedException
      */
     public void finish() throws InterruptedException;
 
+    /**
+     * Aborts the processing immediately. The result will be <code>null</code>, incomplete or undefined.<br />
+     * To shut down the process cleanly use {@link #finish()}.
+     */
     public void abort();
 
     /**

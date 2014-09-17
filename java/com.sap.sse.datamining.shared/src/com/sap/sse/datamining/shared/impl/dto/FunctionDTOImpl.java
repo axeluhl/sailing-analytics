@@ -7,14 +7,15 @@ import com.sap.sse.datamining.shared.dto.FunctionDTO;
 
 public class FunctionDTOImpl implements FunctionDTO {
     private static final long serialVersionUID = 4587389541910498505L;
-    
+
+    private boolean isDimension;
     private String functionName;
     private String sourceTypeName;
     private String returnTypeName;
     private List<String> parameterTypeNames;
 
     private String displayName;
-    private boolean isDimension;
+    private int ordinal;
 
     /**
      * Constructor for the GWT-Serialization. Don't use this!
@@ -23,14 +24,16 @@ public class FunctionDTOImpl implements FunctionDTO {
     FunctionDTOImpl() {
     }
     
-    public FunctionDTOImpl(String functionName, String sourceTypeName, String returnTypeName, List<String> parameterTypeNames, String displayName, boolean isDimension) {
+    public FunctionDTOImpl(boolean isDimension, String functionName, String sourceTypeName, String returnTypeName,
+                           List<String> parameterTypeNames, String displayName, int ordinal) {
+        this.isDimension = isDimension;
         this.functionName = functionName;
         this.sourceTypeName = sourceTypeName;
         this.returnTypeName = returnTypeName;
         this.parameterTypeNames = new ArrayList<String>(parameterTypeNames);
         
         this.displayName = displayName;
-        this.isDimension = isDimension;
+        this.ordinal = ordinal;
     }
 
     @Override
@@ -56,6 +59,16 @@ public class FunctionDTOImpl implements FunctionDTO {
     @Override
     public boolean isDimension() {
         return isDimension;
+    }
+    
+    @Override
+    public int getOrdinal() {
+        return ordinal;
+    }
+    
+    @Override
+    public int compareTo(FunctionDTO f) {
+        return Integer.compare(this.getOrdinal(), f.getOrdinal());
     }
     
     @Override

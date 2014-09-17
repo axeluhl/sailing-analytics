@@ -6,7 +6,6 @@ import java.util.Map;
 public interface QueryResult<AggregatedType> extends Serializable {
     
     int getRetrievedDataAmount();
-    public int getFilteredDataAmount();
     public double getCalculationTimeInSeconds();
 
     /**

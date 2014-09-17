@@ -6,13 +6,17 @@ import com.sap.sse.datamining.shared.dto.FunctionDTO;
 
 public interface FunctionProvider {
 
-    public Collection<Function<?>> getDimensionsFor(Class<?> dataType);
-
+    public Collection<Function<?>> getAllStatistics();
+    
     public Collection<Function<?>> getFunctionsFor(Class<?> sourceType);
+    
+    public Collection<Function<?>> getStatisticsFor(Class<?> sourceType);
+
+    public Collection<Function<?>> getDimensionsFor(Class<?> sourceType);
 
     /**
      * @return The first function, that matches the given DTO or <code>null</code>
      */
-    public Function<?> getFunctionFor(FunctionDTO functionDTO);
+    public Function<?> getFunctionForDTO(FunctionDTO functionDTO);
 
 }
