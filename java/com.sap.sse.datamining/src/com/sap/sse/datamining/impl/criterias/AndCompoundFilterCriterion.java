@@ -1,12 +1,12 @@
 package com.sap.sse.datamining.impl.criterias;
 
-import com.sap.sse.datamining.components.FilterCriteria;
+import com.sap.sse.datamining.components.FilterCriterion;
 
-public class AndCompoundFilterCriteria<DataType> extends CompoundFilterCriteria<DataType> {
+public class AndCompoundFilterCriterion<DataType> extends CompoundFilterCriterion<DataType> {
 
     @Override
     public boolean matches(DataType data) {
-        for (FilterCriteria<DataType> criteria : getCriterias()) {
+        for (FilterCriterion<DataType> criteria : getCriterias()) {
             if (!criteria.matches(data)) {
                 return false;
             }

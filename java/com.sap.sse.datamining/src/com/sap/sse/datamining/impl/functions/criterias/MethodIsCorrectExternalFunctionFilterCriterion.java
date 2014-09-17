@@ -2,9 +2,9 @@ package com.sap.sse.datamining.impl.functions.criterias;
 
 import java.lang.reflect.Method;
 
-import com.sap.sse.datamining.components.FilterCriteria;
+import com.sap.sse.datamining.components.FilterCriterion;
 
-public class MethodIsCorrectExternalFunctionFilterCriteria implements FilterCriteria<Method> {
+public class MethodIsCorrectExternalFunctionFilterCriterion implements FilterCriterion<Method> {
 
     @Override
     public boolean matches(Method method) {

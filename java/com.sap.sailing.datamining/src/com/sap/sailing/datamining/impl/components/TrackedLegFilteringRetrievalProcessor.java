@@ -9,7 +9,7 @@ import com.sap.sailing.datamining.data.HasTrackedLegContext;
 import com.sap.sailing.datamining.data.HasTrackedRaceContext;
 import com.sap.sailing.datamining.impl.data.TrackedLegWithContext;
 import com.sap.sailing.domain.tracking.TrackedLeg;
-import com.sap.sse.datamining.components.FilterCriteria;
+import com.sap.sse.datamining.components.FilterCriterion;
 import com.sap.sse.datamining.components.Processor;
 import com.sap.sse.datamining.impl.components.AbstractSimpleFilteringRetrievalProcessor;
 import com.sap.sse.datamining.shared.annotations.DataRetriever;
@@ -21,7 +21,7 @@ public class TrackedLegFilteringRetrievalProcessor extends
         AbstractSimpleFilteringRetrievalProcessor<HasTrackedRaceContext, HasTrackedLegContext> {
 
     public TrackedLegFilteringRetrievalProcessor(ExecutorService executor,
-            Collection<Processor<HasTrackedLegContext>> resultReceivers, FilterCriteria<HasTrackedLegContext> criteria) {
+            Collection<Processor<HasTrackedLegContext>> resultReceivers, FilterCriterion<HasTrackedLegContext> criteria) {
         super(executor, resultReceivers, criteria);
     }
 

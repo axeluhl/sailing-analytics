@@ -9,7 +9,7 @@ import com.sap.sailing.datamining.data.HasTrackedLegContext;
 import com.sap.sailing.datamining.data.HasTrackedLegOfCompetitorContext;
 import com.sap.sailing.datamining.impl.data.TrackedLegOfCompetitorWithContext;
 import com.sap.sailing.domain.base.Competitor;
-import com.sap.sse.datamining.components.FilterCriteria;
+import com.sap.sse.datamining.components.FilterCriterion;
 import com.sap.sse.datamining.components.Processor;
 import com.sap.sse.datamining.impl.components.AbstractSimpleFilteringRetrievalProcessor;
 import com.sap.sse.datamining.shared.annotations.DataRetriever;
@@ -22,7 +22,7 @@ public class TrackedLegOfCompetitorFilteringRetrievalProcessor extends
 
     public TrackedLegOfCompetitorFilteringRetrievalProcessor(ExecutorService executor,
             Collection<Processor<HasTrackedLegOfCompetitorContext>> resultReceivers,
-            FilterCriteria<HasTrackedLegOfCompetitorContext> criteria) {
+            FilterCriterion<HasTrackedLegOfCompetitorContext> criteria) {
         super(executor, resultReceivers, criteria);
     }
 

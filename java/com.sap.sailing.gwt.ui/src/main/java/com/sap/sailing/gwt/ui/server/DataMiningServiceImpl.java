@@ -9,7 +9,7 @@ import org.osgi.framework.BundleContext;
 import org.osgi.util.tracker.ServiceTracker;
 
 import com.google.gwt.user.server.rpc.RemoteServiceServlet;
-import com.sap.sailing.datamining.factories.DataMiningFactory;
+import com.sap.sailing.datamining.factories.SailingDataMiningFactory;
 import com.sap.sailing.datamining.shared.SailingDataMiningSerializationDummy;
 import com.sap.sailing.gwt.ui.datamining.DataMiningService;
 import com.sap.sailing.server.RacingEventService;
@@ -91,14 +91,14 @@ public class DataMiningServiceImpl extends RemoteServiceServlet implements DataM
     
     @Override
     public QueryResult<Set<Object>> getDimensionValuesFor(Collection<FunctionDTO> dimensions) throws Exception {
-        Query<Set<Object>> dimensionValuesQuery = DataMiningFactory.createDimensionValuesQuery(getRacingEventService(), dimensions, getDataMiningServer().getFunctionProvider());
+        Query<Set<Object>> dimensionValuesQuery = SailingDataMiningFactory.createDimensionValuesQuery(getRacingEventService(), dimensions, getDataMiningServer().getFunctionProvider());
         return dimensionValuesQuery.run();
     }
 
     @Override
     public <ResultType extends Number> QueryResult<ResultType> runQuery(QueryDefinition queryDefinition) throws Exception {
         @SuppressWarnings("unchecked") // TODO Fix after the data mining has been cleaned
-        Query<ResultType> query = (Query<ResultType>) DataMiningFactory.createQuery(getRacingEventService(), queryDefinition, getDataMiningServer().getFunctionProvider());
+        Query<ResultType> query = (Query<ResultType>) SailingDataMiningFactory.createQuery(getRacingEventService(), queryDefinition, getDataMiningServer().getFunctionProvider());
         return query.run();
     }
     

@@ -8,7 +8,7 @@ import com.sap.sailing.datamining.Activator;
 import com.sap.sailing.domain.leaderboard.Leaderboard;
 import com.sap.sailing.domain.leaderboard.LeaderboardGroup;
 import com.sap.sailing.domain.leaderboard.RegattaLeaderboard;
-import com.sap.sse.datamining.components.FilterCriteria;
+import com.sap.sse.datamining.components.FilterCriterion;
 import com.sap.sse.datamining.components.Processor;
 import com.sap.sse.datamining.impl.components.AbstractSimpleFilteringRetrievalProcessor;
 import com.sap.sse.datamining.shared.annotations.DataRetriever;
@@ -20,7 +20,7 @@ public class RegattaLeaderboardFilteringRetrievalProcessor extends
         AbstractSimpleFilteringRetrievalProcessor<LeaderboardGroup, RegattaLeaderboard> {
 
     public RegattaLeaderboardFilteringRetrievalProcessor(ExecutorService executor,
-            Collection<Processor<RegattaLeaderboard>> resultReceivers, FilterCriteria<RegattaLeaderboard> criteria) {
+            Collection<Processor<RegattaLeaderboard>> resultReceivers, FilterCriterion<RegattaLeaderboard> criteria) {
         super(executor, resultReceivers, criteria);
     }
 

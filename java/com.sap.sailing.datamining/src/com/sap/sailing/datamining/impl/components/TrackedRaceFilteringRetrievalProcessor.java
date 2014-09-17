@@ -11,7 +11,7 @@ import com.sap.sailing.domain.base.RaceColumn;
 import com.sap.sailing.domain.base.Regatta;
 import com.sap.sailing.domain.leaderboard.Leaderboard;
 import com.sap.sailing.domain.tracking.TrackedRace;
-import com.sap.sse.datamining.components.FilterCriteria;
+import com.sap.sse.datamining.components.FilterCriterion;
 import com.sap.sse.datamining.components.Processor;
 import com.sap.sse.datamining.impl.components.AbstractSimpleFilteringRetrievalProcessor;
 import com.sap.sse.datamining.shared.annotations.DataRetriever;
@@ -23,7 +23,7 @@ public class TrackedRaceFilteringRetrievalProcessor extends
         AbstractSimpleFilteringRetrievalProcessor<Leaderboard, HasTrackedRaceContext> {
 
     public TrackedRaceFilteringRetrievalProcessor(ExecutorService executor,
-            Collection<Processor<HasTrackedRaceContext>> resultReceivers, FilterCriteria<HasTrackedRaceContext> criteria) {
+            Collection<Processor<HasTrackedRaceContext>> resultReceivers, FilterCriterion<HasTrackedRaceContext> criteria) {
         super(executor, resultReceivers, criteria);
     }
 

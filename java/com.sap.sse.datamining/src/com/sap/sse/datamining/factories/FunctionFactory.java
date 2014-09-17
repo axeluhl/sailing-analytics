@@ -5,7 +5,7 @@ import java.util.ArrayList;
 import java.util.List;
 
 import com.sap.sse.datamining.functions.Function;
-import com.sap.sse.datamining.impl.functions.CompoundFunction;
+import com.sap.sse.datamining.impl.functions.ConcatenatingCompoundFunction;
 import com.sap.sse.datamining.impl.functions.MethodWrappingFunction;
 
 public class FunctionFactory {
@@ -28,14 +28,14 @@ public class FunctionFactory {
     }
 
     /**
-     * Creates a {@link CompoundFunction} for the given functions.<br>
+     * Creates a {@link ConcatenatingCompoundFunction} for the given functions.<br>
      * Throws a {@link ClassCastException}, if the return type of the last function doesn't match the generic <code>ReturnType</code> parameter.
      * 
      * @throws ClassCastException
      */
     @SuppressWarnings("unchecked")
     public static <ReturnType> Function<ReturnType> createCompoundFunction(String name, List<Function<?>> functions) throws ClassCastException {
-        return new CompoundFunction<ReturnType>(name, functions, (Class<ReturnType>) functions.get(functions.size() - 1).getReturnType());
+        return new ConcatenatingCompoundFunction<ReturnType>(name, functions, (Class<ReturnType>) functions.get(functions.size() - 1).getReturnType());
     }
 
     public static Function<?> createCompoundFunction(String name, List<Function<?>> previousFunctions,

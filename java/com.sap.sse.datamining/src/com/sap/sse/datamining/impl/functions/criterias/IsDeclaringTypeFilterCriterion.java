@@ -4,14 +4,14 @@ import java.util.Arrays;
 import java.util.Collection;
 import java.util.HashSet;
 
-import com.sap.sse.datamining.components.FilterCriteria;
+import com.sap.sse.datamining.components.FilterCriterion;
 import com.sap.sse.datamining.functions.Function;
 
-public class IsDeclaringTypeFilterCriteria implements FilterCriteria<Function<?>> {
+public class IsDeclaringTypeFilterCriterion implements FilterCriterion<Function<?>> {
 
     private final Collection<Class<?>> expectingTypes;
 
-    public IsDeclaringTypeFilterCriteria(Class<?> expectingType) {
+    public IsDeclaringTypeFilterCriterion(Class<?> expectingType) {
         this.expectingTypes = getSupertypesOf(expectingType);
         this.expectingTypes.add(expectingType);
     }

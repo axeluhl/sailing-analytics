@@ -9,7 +9,7 @@ import com.sap.sse.datamining.functions.Function;
 import com.sap.sse.datamining.i18n.DataMiningStringMessages;
 import com.sap.sse.datamining.shared.Unit;
 
-public class CompoundFunction<ReturnType> extends AbstractFunction<ReturnType> {
+public class ConcatenatingCompoundFunction<ReturnType> extends AbstractFunction<ReturnType> {
 
     private static final String SIMPLE_NAME_CHAIN_CONNECTOR = " -> ";
     private static final String LOCALIZED_NAME_CHAIN_CONNECTOR = " ";
@@ -18,7 +18,7 @@ public class CompoundFunction<ReturnType> extends AbstractFunction<ReturnType> {
     private final List<Function<?>> functions;
     private final int ordinal;
 
-    public CompoundFunction(String name, List<Function<?>> functions, Class<ReturnType> returnType) throws IllegalArgumentException {
+    public ConcatenatingCompoundFunction(String name, List<Function<?>> functions, Class<ReturnType> returnType) throws IllegalArgumentException {
         super(isLastFunctionADimension(functions));
         checkThatReturnTypesMatch(functions, returnType);
         
@@ -187,7 +187,7 @@ public class CompoundFunction<ReturnType> extends AbstractFunction<ReturnType> {
             return false;
         if (getClass() != obj.getClass())
             return false;
-        CompoundFunction<?> other = (CompoundFunction<?>) obj;
+        ConcatenatingCompoundFunction<?> other = (ConcatenatingCompoundFunction<?>) obj;
         if (functions == null) {
             if (other.functions != null)
                 return false;

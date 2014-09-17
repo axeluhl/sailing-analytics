@@ -26,9 +26,9 @@ import com.sap.sse.datamining.impl.components.GroupedDataEntry;
 import com.sap.sse.datamining.shared.QueryDefinition;
 import com.sap.sse.datamining.shared.dto.FunctionDTO;
 
-public final class DataMiningFactory {
+public final class SailingDataMiningFactory {
     
-    private DataMiningFactory() {
+    private SailingDataMiningFactory() {
     }
 
     public static <ElementType> Query<Double> createQuery(RacingEventService dataSource, final QueryDefinition queryDefinition, final FunctionProvider functionProvider) {

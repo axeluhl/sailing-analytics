@@ -4,15 +4,15 @@ import java.util.Collection;
 import java.util.HashSet;
 import java.util.Objects;
 
-import com.sap.sse.datamining.components.FilterCriteria;
+import com.sap.sse.datamining.components.FilterCriterion;
 import com.sap.sse.datamining.functions.Function;
 
-public class NullaryFunctionValuesFilterCriteria<DataType> implements FilterCriteria<DataType> {
+public class NullaryFunctionValuesFilterCriterion<DataType> implements FilterCriterion<DataType> {
 
     private Function<?> function;
     private Collection<?> valuesToMatch;
 
-    public NullaryFunctionValuesFilterCriteria(Function<?> function, Collection<?> valuesToMatch) {
+    public NullaryFunctionValuesFilterCriterion(Function<?> function, Collection<?> valuesToMatch) {
         this.function = function;
         this.valuesToMatch = new HashSet<>(valuesToMatch);
     }

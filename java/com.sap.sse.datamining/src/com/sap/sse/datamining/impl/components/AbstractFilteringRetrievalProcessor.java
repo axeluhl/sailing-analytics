@@ -4,16 +4,16 @@ import java.util.Collection;
 import java.util.concurrent.Callable;
 import java.util.concurrent.ExecutorService;
 
-import com.sap.sse.datamining.components.FilterCriteria;
+import com.sap.sse.datamining.components.FilterCriterion;
 import com.sap.sse.datamining.components.Processor;
 
 public abstract class AbstractFilteringRetrievalProcessor<InputType, WorkingType, ResultType> 
              extends AbstractRetrievalProcessor<InputType, WorkingType, ResultType> {
 
-    private final FilterCriteria<ResultType> criteria;
+    private final FilterCriterion<ResultType> criteria;
 
     public AbstractFilteringRetrievalProcessor(ExecutorService executor,
-            Collection<Processor<ResultType>> resultReceivers, FilterCriteria<ResultType> criteria) {
+            Collection<Processor<ResultType>> resultReceivers, FilterCriterion<ResultType> criteria) {
         super(executor, resultReceivers);
         this.criteria = criteria;
     }

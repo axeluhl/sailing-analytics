@@ -10,31 +10,31 @@ import java.util.Collection;
 
 import org.junit.Test;
 
-import com.sap.sse.datamining.components.FilterCriteria;
+import com.sap.sse.datamining.components.FilterCriterion;
 import com.sap.sse.datamining.factories.FunctionFactory;
 import com.sap.sse.datamining.functions.Function;
 import com.sap.sse.datamining.test.functions.test_classes.DataTypeWithContext;
 import com.sap.sse.datamining.test.functions.test_classes.DataTypeWithContextImpl;
 import com.sap.sse.datamining.test.util.FunctionTestsUtil;
-import com.sap.sse.datamining.test.util.StringRegexFilterCriteria;
+import com.sap.sse.datamining.test.util.StringRegexFilterCriterion;
 
 public class TestFilterCriterias {
 
     @Test
     public void testRegexFilterCriteria() {
-        FilterCriteria<String> regexFilterCriteria = new StringRegexFilterCriteria(".*");
+        FilterCriterion<String> regexFilterCriteria = new StringRegexFilterCriterion(".*");
         assertTrue(regexFilterCriteria.matches("some Random stuff"));
         assertFalse(regexFilterCriteria.matches(null));
         
         String[] stringsToMatch = new String[] {"Regatta", "Other Regatta", "Third Regatta"};
         
-        regexFilterCriteria = new StringRegexFilterCriteria(stringsToMatch[0] + "|" + stringsToMatch[1] + "|" + stringsToMatch[2]);
+        regexFilterCriteria = new StringRegexFilterCriterion(stringsToMatch[0] + "|" + stringsToMatch[1] + "|" + stringsToMatch[2]);
         for (String stringToMatch : stringsToMatch) {
             assertTrue("Failed to match " + stringToMatch, regexFilterCriteria.matches(stringToMatch));
         }
         assertFalse("'Fourth Regatta' shouldn't be matched", regexFilterCriteria.matches("Fourth Regatta"));
         
-        regexFilterCriteria = new StringRegexFilterCriteria(".*Regatta");
+        regexFilterCriteria = new StringRegexFilterCriterion(".*Regatta");
         for (String stringToMatch : stringsToMatch) {
             assertTrue("Failed to match " + stringToMatch, regexFilterCriteria.matches(stringToMatch));
         }
@@ -43,17 +43,17 @@ public class TestFilterCriterias {
     
     @Test
     public void testCompoundFilterCriterias() {
-        StringRegexFilterCriteria startsWithBar = new StringRegexFilterCriteria("Bar.*");
-        StringRegexFilterCriteria endWithFoo = new StringRegexFilterCriteria(".*Foo");
+        StringRegexFilterCriterion startsWithBar = new StringRegexFilterCriterion("Bar.*");
+        StringRegexFilterCriterion endWithFoo = new StringRegexFilterCriterion(".*Foo");
         
-        CompoundFilterCriteria<String> compoundCriteria = new AndCompoundFilterCriteria<String>();
+        CompoundFilterCriterion<String> compoundCriteria = new AndCompoundFilterCriterion<String>();
         compoundCriteria.addCriteria(startsWithBar);
         compoundCriteria.addCriteria(endWithFoo);
         
         assertTrue(compoundCriteria.matches("BarAndFoo"));
         assertFalse(compoundCriteria.matches("BarFo"));
         
-        compoundCriteria = new OrCompoundFilterCriteria<String>();
+        compoundCriteria = new OrCompoundFilterCriterion<String>();
         compoundCriteria.addCriteria(startsWithBar);
         compoundCriteria.addCriteria(endWithFoo);
 
@@ -66,7 +66,7 @@ public class TestFilterCriterias {
     public void testNullaryFunctionValuesFilterCriteria() {
         Function<String> getRegattaName = FunctionFactory.createMethodWrappingFunction(FunctionTestsUtil.getMethodFromClass(DataTypeWithContext.class, "getRegattaName"));
         Collection<String> valuesToMatch = Arrays.asList("Regatta", "Other Regatta");
-        FilterCriteria<DataTypeWithContext> nullaryFunctionFilterCriteria = new NullaryFunctionValuesFilterCriteria<>(getRegattaName, valuesToMatch);
+        FilterCriterion<DataTypeWithContext> nullaryFunctionFilterCriteria = new NullaryFunctionValuesFilterCriterion<>(getRegattaName, valuesToMatch);
         
         DataTypeWithContext regatta = new DataTypeWithContextImpl("Regatta", "Race Name", 7);
         assertThat(nullaryFunctionFilterCriteria.matches(regatta), is(true));

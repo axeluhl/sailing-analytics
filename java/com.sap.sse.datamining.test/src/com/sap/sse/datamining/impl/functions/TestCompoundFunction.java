@@ -41,7 +41,7 @@ public class TestCompoundFunction {
     public void testConstruction() {
         List<Function<?>> functions = new ArrayList<>();
         functions.add(getContainerElementFunction);
-        new CompoundFunction<String>("IllegalCompoundFunction", functions, String.class);
+        new ConcatenatingCompoundFunction<String>("IllegalCompoundFunction", functions, String.class);
     }
     
     @Test

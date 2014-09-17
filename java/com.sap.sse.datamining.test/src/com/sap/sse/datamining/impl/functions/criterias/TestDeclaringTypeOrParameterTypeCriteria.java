@@ -6,7 +6,7 @@ import static org.junit.Assert.assertThat;
 import org.junit.Before;
 import org.junit.Test;
 
-import com.sap.sse.datamining.components.FilterCriteria;
+import com.sap.sse.datamining.components.FilterCriterion;
 import com.sap.sse.datamining.factories.FunctionFactory;
 import com.sap.sse.datamining.functions.Function;
 import com.sap.sse.datamining.test.functions.test_classes.DataTypeInterface;
@@ -35,7 +35,7 @@ public class TestDeclaringTypeOrParameterTypeCriteria {
 
     @Test
     public void testMatchingTypeWithBigHierarchy() {
-        FilterCriteria<Function<?>> criteria = new IsDeclaringTypeFilterCriteria(DataTypeWithContextImpl.class);
+        FilterCriterion<Function<?>> criteria = new IsDeclaringTypeFilterCriterion(DataTypeWithContextImpl.class);
 
         assertThat(criteria.matches(getSpeedInKnotsValue), is(true));
         assertThat(criteria.matches(getRaceNameLengthValue), is(true));

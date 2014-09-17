@@ -21,7 +21,7 @@ import org.junit.Test;
 
 import com.sap.sse.datamining.AdditionalResultDataBuilder;
 import com.sap.sse.datamining.Query;
-import com.sap.sse.datamining.components.FilterCriteria;
+import com.sap.sse.datamining.components.FilterCriterion;
 import com.sap.sse.datamining.components.Processor;
 import com.sap.sse.datamining.factories.FunctionFactory;
 import com.sap.sse.datamining.functions.Function;
@@ -117,7 +117,7 @@ public class TestProcessorQuery {
                 dimensions.add(getLengthFunction);
                 Processor<Number> lengthGrouper = new ParallelMultiDimensionsValueNestingGroupingProcessor<>(executor, Arrays.asList(crossSumExtractor), dimensions);
                 
-                FilterCriteria<Number> retrievalFilterCriteria = new FilterCriteria<Number>() {
+                FilterCriterion<Number> retrievalFilterCriteria = new FilterCriterion<Number>() {
                     @Override
                     public boolean matches(Number element) {
                         return element.getValue() >= 10;

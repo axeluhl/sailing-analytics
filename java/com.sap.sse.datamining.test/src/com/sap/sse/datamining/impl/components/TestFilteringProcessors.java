@@ -13,7 +13,7 @@ import org.junit.Before;
 import org.junit.Test;
 
 import com.sap.sse.datamining.AdditionalResultDataBuilder;
-import com.sap.sse.datamining.components.FilterCriteria;
+import com.sap.sse.datamining.components.FilterCriterion;
 import com.sap.sse.datamining.components.Processor;
 import com.sap.sse.datamining.test.util.ConcurrencyTestsUtil;
 
@@ -27,7 +27,7 @@ public class TestFilteringProcessors {
 
     @Test
     public void testFilteringProcessor() {
-        FilterCriteria<Integer> elementIsEvenCriteria = new FilterCriteria<Integer>() {
+        FilterCriterion<Integer> elementIsEvenCriteria = new FilterCriterion<Integer>() {
             @Override
             public boolean matches(Integer element) {
                 return element % 2 == 0;

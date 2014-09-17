@@ -1,12 +1,12 @@
 package com.sap.sse.datamining.impl.criterias;
 
-import com.sap.sse.datamining.components.FilterCriteria;
+import com.sap.sse.datamining.components.FilterCriterion;
 
-public abstract class RegexFilterCriteria<DataType> implements FilterCriteria<DataType> {
+public abstract class RegexFilterCriterion<DataType> implements FilterCriterion<DataType> {
     
     private String regex;
 
-    public RegexFilterCriteria(String regex) {
+    public RegexFilterCriterion(String regex) {
         this.regex = regex;
     }
 

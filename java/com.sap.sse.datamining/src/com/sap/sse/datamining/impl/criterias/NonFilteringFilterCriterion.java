@@ -1,8 +1,8 @@
 package com.sap.sse.datamining.impl.criterias;
 
-import com.sap.sse.datamining.components.FilterCriteria;
+import com.sap.sse.datamining.components.FilterCriterion;
 
-public class NonFilteringFilterCriteria<T> implements FilterCriteria<T> {
+public class NonFilteringFilterCriterion<T> implements FilterCriterion<T> {
 
     @Override
     public boolean matches(T element) {
