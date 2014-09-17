@@ -165,7 +165,7 @@ public class LeaderboardActivity extends AbstractActivity implements ErrorReport
                                     raceColumnSelectionStrategy, showAddedScores, showOverallColumnWithNumberOfRacesSailedPerCompetitor);
 
         } else {
-            final List<DetailType> overallDetails = Collections.emptyList();
+            final List<DetailType> overallDetails = Collections.singletonList(DetailType.REGATTA_RANK);
             result = LeaderboardSettingsFactory.getInstance().createNewDefaultSettings(null, null,
                     /* overallDetails */ overallDetails, null,
                     /* autoExpandFirstRace */false, refreshIntervalMillis, numberOfLastRacesToShow,
