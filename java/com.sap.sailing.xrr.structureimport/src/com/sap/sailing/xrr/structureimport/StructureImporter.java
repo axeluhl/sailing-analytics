@@ -61,11 +61,14 @@ public class StructureImporter {
     private int parsedDocuments = 0;
     private boolean finished = false;
 
-    public StructureImporter(String url, SetRacenumberStrategy setRacenumber) {
+    public StructureImporter(SetRacenumberStrategy setRacenumber) {
 
         this.setRacenumberStrategy = setRacenumber;
-        regattas = new EventImport().getRegattas(url);
 
+    }
+
+    public void parseEvent(String url) {
+        regattas = new EventImport().getRegattas(url);
     }
 
     public List<String> getRegattaNames() {

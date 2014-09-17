@@ -3734,7 +3734,8 @@ public class SailingServiceImpl extends ProxiedRemoteServiceServlet implements S
     }
 
     public List<RegattaDTO> getRegattas(String url) {
-        structureImporter = new StructureImporter(url, new SetRacenumberFromSeries());
+        structureImporter = new StructureImporter(new SetRacenumberFromSeries());
+        structureImporter.parseEvent(url);
         List<RegattaDTO> dummyRegattaDTOs = new ArrayList<RegattaDTO>();
         List<String> regattaNames = structureImporter.getRegattaNames();
         for (String regattaName : regattaNames) {
