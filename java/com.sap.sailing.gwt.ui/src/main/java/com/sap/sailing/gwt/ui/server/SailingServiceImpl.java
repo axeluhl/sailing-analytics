@@ -3760,7 +3760,7 @@ public class SailingServiceImpl extends ProxiedRemoteServiceServlet implements S
 
             if (getLeaderboard(regatta.getName()) == null) {
                 leaderboardNames.add(regatta.getName());
-                createRegattaLeaderboard(regatta.getRegattaIdentifier(), eventName, new int[0]);
+                createRegattaLeaderboard(regatta.getRegattaIdentifier(), regatta.getBoatClass().toString(), new int[0]);
             }
         }
         return leaderboardNames;
