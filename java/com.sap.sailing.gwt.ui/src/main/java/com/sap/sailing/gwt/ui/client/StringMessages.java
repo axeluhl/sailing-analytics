@@ -815,7 +815,7 @@ public interface StringMessages extends Messages {
     String lastFinished();
     String run();
     String times();
-    String numberOfGPSFixes();
+    String dataAmount();
     String averageCleanedServerTime();
     String averageCleanedOverallTime();
     String dataMiningBenchmarkResults();

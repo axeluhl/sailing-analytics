@@ -3,13 +3,13 @@ package com.sap.sailing.gwt.ui.datamining.presentation;
 public class BenchmarkResult {
     
     private String identifier;
-    private int numberOfGPSFixes;
+    private int dataAmount;
     private double serverTime;
     private double overallTime;
     
-    public BenchmarkResult(String identifier, int numberOfGPSFixes, double serverTime, double overallTime) {
+    public BenchmarkResult(String identifier, int dataAmount, double serverTime, double overallTime) {
         this.identifier = identifier;
-        this.numberOfGPSFixes = numberOfGPSFixes;
+        this.dataAmount = dataAmount;
         this.serverTime = serverTime;
         this.overallTime = overallTime;
     }
@@ -18,8 +18,8 @@ public class BenchmarkResult {
         return identifier;
     }
 
-    public int getNumberOfGPSFixes() {
-        return numberOfGPSFixes;
+    public int getDataAmount() {
+        return dataAmount;
     }
     
     public double getServerTime() {

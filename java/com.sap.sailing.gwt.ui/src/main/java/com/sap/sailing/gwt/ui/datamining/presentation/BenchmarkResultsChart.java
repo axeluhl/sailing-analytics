@@ -72,7 +72,7 @@ public class BenchmarkResultsChart extends SimplePanel implements RequiresResize
         double averageOverallTime = getAverage(cleanedOverallTimePoints);
         
         //This method has to be called, before the points are added to the chart.
-        updateChartSubtitle(results.get(0).getNumberOfGPSFixes(), averageServerTime, averageOverallTime);
+        updateChartSubtitle(results.get(0).getDataAmount(), averageServerTime, averageOverallTime);
         serverTimeSeries.setPoints(serverTimePoints.toArray(new Point[serverTimePoints.size()]));
         cleanedServerTimeSeries.setPoints(cleanedServerTimePoints);
         cleanedServerTimeSeries.setName(stringMessages.cleanedServerTime() + "(" + (serverTimePoints.size() - cleanedServerTimePoints.length) + ")");
@@ -149,9 +149,9 @@ public class BenchmarkResultsChart extends SimplePanel implements RequiresResize
         }
     }
 
-    private void updateChartSubtitle(int numberOfGPSFixes, double averageServerTime, double averageOverallTime) {
+    private void updateChartSubtitle(int dataAmount, double averageServerTime, double averageOverallTime) {
         StringBuilder subtitelBuilder = new StringBuilder();
-        subtitelBuilder.append(stringMessages.numberOfGPSFixes() + ": " + numberOfGPSFixes);
+        subtitelBuilder.append(stringMessages.dataAmount() + ": " + dataAmount);
         subtitelBuilder.append(" - " + stringMessages.averageCleanedServerTime() + ": " + averageServerTime + "s");
         subtitelBuilder.append(" - " + stringMessages.averageCleanedOverallTime() + ": " + averageOverallTime + "s");
         

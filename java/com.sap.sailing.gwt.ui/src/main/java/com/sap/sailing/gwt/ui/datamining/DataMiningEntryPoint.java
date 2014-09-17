@@ -23,11 +23,13 @@ import com.sap.sailing.gwt.ui.client.SailingServiceAsync;
 import com.sap.sailing.gwt.ui.client.shared.components.Component;
 import com.sap.sailing.gwt.ui.client.shared.components.SettingsDialog;
 import com.sap.sailing.gwt.ui.datamining.execution.SimpleQueryRunner;
+import com.sap.sailing.gwt.ui.datamining.presentation.BenchmarkResultsPanel;
 import com.sap.sailing.gwt.ui.datamining.presentation.ResultsChart;
 import com.sap.sailing.gwt.ui.datamining.selection.QueryDefinitionProviderWithControls;
 import com.sap.sailing.gwt.ui.datamining.settings.QueryRunnerSettings;
 import com.sap.sailing.gwt.ui.datamining.settings.RefreshingSelectionTablesSettings;
 import com.sap.sse.gwt.client.EntryPointHelper;
+import com.sap.sse.gwt.shared.GwtHttpRequestUtils;
 
 public class DataMiningEntryPoint extends AbstractEntryPoint {
     private final SailingServiceAsync sailingService = GWT.create(SailingService.class);
@@ -54,20 +56,18 @@ public class DataMiningEntryPoint extends AbstractEntryPoint {
         dockPanel.add(queryDefinitionProviderWithControls.getEntryWidget());
         
         ResultsPresenter<Number> resultsPresenter = new ResultsChart(stringMessages);
-        splitPanel.addSouth(resultsPresenter.getWidget(), 400);
+        if (GwtHttpRequestUtils.getBooleanParameter("benchmark", true)) {
+            BenchmarkResultsPanel benchmarkResultsPanel = new BenchmarkResultsPanel(stringMessages, dataMiningService, this, queryDefinitionProviderWithControls);
+            splitPanel.addSouth(benchmarkResultsPanel, 500);
+        } else {
+            splitPanel.addSouth(resultsPresenter.getWidget(), 400);
+        }
         
         splitPanel.add(dockPanel);
         
         QueryRunner queryRunner = new SimpleQueryRunner(stringMessages, dataMiningService, this, queryDefinitionProviderWithControls, resultsPresenter);
         queryDefinitionProviderWithControls.addControl(queryRunner.getEntryWidget());
         queryDefinitionProviderWithControls.addControl(createSettingsControlWidget(queryRunner, queryDefinitionProviderWithControls));
-        
-        //TODO Is it possible to define a 'standard' query, when the available query definition parts are fetched from the server?
-        
-//        QueryDefinitionDeprecatedImpl queryDefinition = new QueryDefinitionDeprecatedImpl(LocaleInfo.getCurrentLocale().getLocaleName(), GrouperType.Dimensions, StatisticType.Speed, AggregatorType.Average, DataTypes.GPSFix);
-//        queryDefinition.appendDimensionToGroupBy(DimensionIdentifier.RegattaName);
-//        queryDefinitionProviderWithControls.applyQueryDefinition(queryDefinition);
-//        queryRunner.run(queryDefinitionProviderWithControls.getQueryDefinition());
     }
 
     private LogoAndTitlePanel createLogoAndTitlePanel() {

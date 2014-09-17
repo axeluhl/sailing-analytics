@@ -34,7 +34,7 @@ public class AdditionalResultDataImpl implements AdditionalResultData {
 
     @Override
     public double getCalculationTimeInSeconds() {
-        return calculationTimeInNanos;
+        return calculationTimeInNanos / 1000000000.0;
     }
 
     @Override
