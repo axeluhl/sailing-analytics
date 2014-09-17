@@ -8,6 +8,7 @@ import java.util.Map;
 import java.util.Timer;
 import java.util.TimerTask;
 import java.util.concurrent.Executor;
+import java.util.concurrent.ThreadPoolExecutor;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.TimeoutException;
 import java.util.concurrent.locks.ReentrantLock;
@@ -39,7 +40,18 @@ public abstract class ProcessorQuery<AggregatedType, DataSourceType> implements 
     private final Object monitorObject = new Object();
     private boolean workIsDone = false;
     private boolean processorTimedOut = false;
+    
+    /**
+     * Creates a query that returns a result without any additional data (like the calculation time or the retrieved data amount).<br>
+     * This is useful for non user specific queries, like retrieving the dimension values.
+     */
+    public ProcessorQuery(ThreadPoolExecutor executor, DataSourceType dataSource) {
+        this(executor, dataSource, null, null);
+    }
 
+    /**
+     * Creates a query that returns a result with additional data.
+     */
     public ProcessorQuery(Executor executor, DataSourceType dataSource, DataMiningStringMessages stringMessages, Locale locale) {
         this.executor = executor;
         this.dataSource = dataSource;
@@ -49,7 +61,7 @@ public abstract class ProcessorQuery<AggregatedType, DataSourceType> implements 
         resultReceiver = new ProcessResultReceiver();
         firstProcessor = createFirstProcessor();
     }
-    
+
     protected abstract Processor<DataSourceType> createFirstProcessor();
 
     @Override
@@ -102,7 +114,12 @@ public abstract class ProcessorQuery<AggregatedType, DataSourceType> implements 
         AdditionalResultDataBuilder additionalDataBuilder = new OverwritingResultDataBuilder();
         additionalDataBuilder = firstProcessor.getAdditionalResultData(additionalDataBuilder);
         Map<GroupKey, AggregatedType> results = resultReceiver.getResult();
-        return new QueryResultImpl<>(results, additionalDataBuilder.build(calculationTimeInNanos, stringMessages, locale));
+        
+        if (stringMessages != null && locale != null) {
+            return new QueryResultImpl<>(results, additionalDataBuilder.build(calculationTimeInNanos, stringMessages, locale));
+        } else {
+            return new QueryResultImpl<>(results);
+        }
     }
 
     private void logOccuredFailures() {

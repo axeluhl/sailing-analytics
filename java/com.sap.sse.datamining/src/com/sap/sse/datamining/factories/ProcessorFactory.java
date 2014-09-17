@@ -1,9 +1,11 @@
 package com.sap.sse.datamining.factories;
 
+import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collection;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
 import java.util.concurrent.ExecutorService;
 
 import com.sap.sse.datamining.components.Processor;
@@ -11,8 +13,10 @@ import com.sap.sse.datamining.functions.Function;
 import com.sap.sse.datamining.impl.DataMiningActivator;
 import com.sap.sse.datamining.impl.ProcessorQuery;
 import com.sap.sse.datamining.impl.components.GroupedDataEntry;
+import com.sap.sse.datamining.impl.components.ParallelByDimensionGroupingProcessor;
 import com.sap.sse.datamining.impl.components.ParallelGroupedElementsValueExtractionProcessor;
 import com.sap.sse.datamining.impl.components.ParallelMultiDimensionsValueNestingGroupingProcessor;
+import com.sap.sse.datamining.impl.components.aggregators.ParallelGroupedDataCollectingAsSetProcessor;
 import com.sap.sse.datamining.impl.components.aggregators.ParallelGroupedDoubleDataAverageAggregationProcessor;
 import com.sap.sse.datamining.impl.components.aggregators.ParallelGroupedDoubleDataMedianAggregationProcessor;
 import com.sap.sse.datamining.impl.components.aggregators.ParallelGroupedDoubleDataSumAggregationProcessor;
@@ -53,6 +57,16 @@ public class ProcessorFactory {
             throw new IllegalArgumentException("No aggregation processor implemented for the aggregation type '" + aggregatorType + "'");
         }
     }
+    
+    /**
+     * Creates a collecting processor with the given ProcessorQuery as result receiver, that stores all received grouped
+     * data in a Set.<br />
+     * The {@link DataMiningActivator} will be used to get the missing objects for the construction (like the executor).
+     */
+    public static Processor<GroupedDataEntry<Object>> createGroupedDataCollectingAsSetProcessor(ProcessorQuery<Set<Object>, ?> query) {
+        Collection<Processor<Map<GroupKey, Set<Object>>>> resultReceivers = Arrays.asList(query.getResultReceiver());
+        return new ParallelGroupedDataCollectingAsSetProcessor<>(DataMiningActivator.getExecutor(), resultReceivers);
+    }
 
     /**
      * Creates an extraction processor with the given aggregation processor as result receiver.<br />
@@ -91,6 +105,26 @@ public class ProcessorFactory {
      */
     public static <ElementType> Processor<ElementType> createGroupingProcessor(Collection<Processor<GroupedDataEntry<ElementType>>> resultReceivers, List<Function<?>> dimensionsToGroupBy) {
         return new ParallelMultiDimensionsValueNestingGroupingProcessor<>(DataMiningActivator.getExecutor(), resultReceivers, dimensionsToGroupBy);
+    }
+
+    /**
+     * Creates a dimension grouping processor followed by a function value extraction processor for each given dimension.<br>
+     * The {@link DataMiningActivator} will be used to get the missing objects for the construction (like
+     * the executor).
+     */
+    @SuppressWarnings("unchecked")
+    public static <DataType> Collection<Processor<?>> createGroupingExtractorsForDimensions(
+            Processor<GroupedDataEntry<Object>> valueCollector, Collection<Function<?>> dimensions) {
+        Collection<Processor<GroupedDataEntry<Object>>> extractionResultReceivers = new ArrayList<>();
+        extractionResultReceivers.add(valueCollector);
+
+        Collection<Processor<?>> groupingExtractors = new ArrayList<>();
+        for (Function<?> dimension : dimensions) {
+            Processor<GroupedDataEntry<DataType>> dimensionValueExtractor = new ParallelGroupedElementsValueExtractionProcessor<DataType, Object>(DataMiningActivator.getExecutor(), extractionResultReceivers, (Function<Object>) dimension);
+            Processor<DataType> byDimensionGrouper = new ParallelByDimensionGroupingProcessor<>(DataMiningActivator.getExecutor(), Arrays.asList(dimensionValueExtractor), dimension);
+            groupingExtractors.add(byDimensionGrouper);
+        }
+        return groupingExtractors;
     }
 
 }

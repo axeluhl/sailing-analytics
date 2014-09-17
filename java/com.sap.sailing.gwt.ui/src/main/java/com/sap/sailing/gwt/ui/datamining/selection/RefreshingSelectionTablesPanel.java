@@ -22,7 +22,6 @@ import com.google.gwt.user.client.rpc.AsyncCallback;
 import com.google.gwt.user.client.ui.HorizontalPanel;
 import com.google.gwt.user.client.ui.Widget;
 import com.google.gwt.view.client.SelectionChangeEvent;
-import com.google.gwt.view.client.SelectionChangeEvent.Handler;
 import com.sap.sailing.gwt.ui.client.ErrorReporter;
 import com.sap.sailing.gwt.ui.client.StringMessages;
 import com.sap.sailing.gwt.ui.client.shared.components.SettingsDialogComponent;
@@ -38,6 +37,7 @@ import com.sap.sse.datamining.shared.QueryDefinition;
 import com.sap.sse.datamining.shared.QueryResult;
 import com.sap.sse.datamining.shared.components.AggregatorType;
 import com.sap.sse.datamining.shared.dto.FunctionDTO;
+import com.sap.sse.datamining.shared.impl.GenericGroupKey;
 
 public class RefreshingSelectionTablesPanel implements SelectionProvider<RefreshingSelectionTablesSettings>,
                                                        StatisticChangedListener {
@@ -55,7 +55,7 @@ public class RefreshingSelectionTablesPanel implements SelectionProvider<Refresh
 
     private RefreshingSelectionTablesSettings settings;
     private Timer timer;
-    private Map<FunctionDTO, SelectionTable<?>> tablesMappedByDimension;
+    private Map<GenericGroupKey<FunctionDTO>, SelectionTable<?>> tablesMappedByDimensionAsKeys;
     private Set<SelectionChangedListener> listeners;
     
     private FunctionDTO currentStatisticToCalculate;
@@ -69,7 +69,7 @@ public class RefreshingSelectionTablesPanel implements SelectionProvider<Refresh
         listeners = new HashSet<SelectionChangedListener>();
         currentStatisticToCalculate = null;
 
-        tablesMappedByDimension = new HashMap<FunctionDTO, SelectionTable<?>>();
+        tablesMappedByDimensionAsKeys = new HashMap<GenericGroupKey<FunctionDTO>, SelectionTable<?>>();
         
         tablesPanel = new HorizontalPanel();
         
@@ -93,7 +93,6 @@ public class RefreshingSelectionTablesPanel implements SelectionProvider<Refresh
             }
         });
 
-        updateTables();
         doLayout(Window.getClientWidth(), Window.getClientHeight());
         statisticProvider.addStatisticChangedListener(this);
     }
@@ -114,24 +113,41 @@ public class RefreshingSelectionTablesPanel implements SelectionProvider<Refresh
             }
             @Override
             public void onSuccess(Collection<FunctionDTO> dimensions) {
-                Collection<FunctionDTO> dimensionsToBeRemoved = new HashSet<>(tablesMappedByDimension.keySet());
-                dimensionsToBeRemoved.removeAll(dimensions);
-                for (FunctionDTO dimensionToBeRemoved : dimensionsToBeRemoved) {
-                    tablesMappedByDimension.remove(dimensionToBeRemoved);
+                Collection<GenericGroupKey<FunctionDTO>> dimensionsAsKeys = new HashSet<>();
+                for (FunctionDTO dimension : dimensions) {
+                    dimensionsAsKeys.add(new GenericGroupKey<FunctionDTO>(dimension));
                 }
                 
-                for (FunctionDTO dimension : dimensions) {
-                    if (!tablesMappedByDimension.containsKey(dimension)) {
-                        SelectionTable<?> table = new SelectionTable<>(dimension);
-                        tablesMappedByDimension.put(table.getDimension(), table);
+                Collection<GenericGroupKey<FunctionDTO>> dimensionTablesToBeRemoved = new HashSet<>(tablesMappedByDimensionAsKeys.keySet());
+                dimensionTablesToBeRemoved.removeAll(dimensionsAsKeys);
+                for (GenericGroupKey<FunctionDTO> dimensionToBeRemoved : dimensionTablesToBeRemoved) {
+                    tablesMappedByDimensionAsKeys.remove(dimensionToBeRemoved);
+                }
+                
+                for (GenericGroupKey<FunctionDTO> dimensionAsKey : dimensionsAsKeys) {
+                    if (!tablesMappedByDimensionAsKeys.containsKey(dimensionAsKey)) {
+                        SelectionTable<?> table = new SelectionTable<>(dimensionAsKey.getValue());
+                        table.addSelectionChangeHandler(new SelectionChangeEvent.Handler() {
+                            @Override
+                            public void onSelectionChange(SelectionChangeEvent event) {
+                                notifySelectionChanged();
+                            }
+                        });
+                        
+                        tablesMappedByDimensionAsKeys.put(dimensionAsKey, table);
                     }
                 }
                 
-                List<FunctionDTO> sortedDimensions = new ArrayList<>(tablesMappedByDimension.keySet());
-                Collections.sort(sortedDimensions);
+                List<GenericGroupKey<FunctionDTO>> sortedDimensions = new ArrayList<>(tablesMappedByDimensionAsKeys.keySet());
+                Collections.sort(sortedDimensions, new Comparator<GenericGroupKey<FunctionDTO>>() {
+                    @Override
+                    public int compare(GenericGroupKey<FunctionDTO> k1, GenericGroupKey<FunctionDTO> k2) {
+                        return k1.getValue().compareTo(k2.getValue());
+                    }
+                });
                 tablesPanel.clear();
-                for (FunctionDTO dimension : sortedDimensions) {
-                    tablesPanel.add(tablesMappedByDimension.get(dimension));
+                for (GenericGroupKey<FunctionDTO> dimension : sortedDimensions) {
+                    tablesPanel.add(tablesMappedByDimensionAsKeys.get(dimension));
                 }
 
                 updateTables();
@@ -147,7 +163,7 @@ public class RefreshingSelectionTablesPanel implements SelectionProvider<Refresh
         tablesPanel.setWidth(absoluteWidth + "px");
         tablesPanel.setHeight(absoluteHeight + "px");
         
-        Collection<SelectionTable<?>> tables = tablesMappedByDimension.values();
+        Collection<SelectionTable<?>> tables = tablesMappedByDimensionAsKeys.values();
         for (SelectionTable<?> table : tables) {
             table.setWidth((absoluteWidth / tables.size()) + "px");
             table.setHeight(absoluteHeight + "px");
@@ -155,8 +171,11 @@ public class RefreshingSelectionTablesPanel implements SelectionProvider<Refresh
     }
 
     private void updateTables() {
-        //It's necessary to create a new Collection for the dimensions, since using the key set directly results in a serialization error
-        Collection<FunctionDTO> dimensions = new HashSet<>(tablesMappedByDimension.keySet());
+        Collection<FunctionDTO> dimensions = new HashSet<>();
+        for (GenericGroupKey<FunctionDTO> dimensionAsKey : tablesMappedByDimensionAsKeys.keySet()) {
+            dimensions.add(dimensionAsKey.getValue());
+        }
+        
         dataMiningService.getDimensionValuesFor(dimensions, new AsyncCallback<QueryResult<Set<Object>>>() {
             @Override
             public void onFailure(Throwable caught) {
@@ -173,7 +192,7 @@ public class RefreshingSelectionTablesPanel implements SelectionProvider<Refresh
                             return o1.toString().compareTo(o2.toString());
                         }
                     });
-                    boolean currentTableContentChanged = tablesMappedByDimension.get(resultEntry.getKey()).updateContent(sortedDimensionValues);
+                    boolean currentTableContentChanged = tablesMappedByDimensionAsKeys.get(resultEntry.getKey()).updateContent(sortedDimensionValues);
                     if (!tableContentChanged) {
                         tableContentChanged = currentTableContentChanged;
                     }
@@ -194,14 +213,6 @@ public class RefreshingSelectionTablesPanel implements SelectionProvider<Refresh
     @Override
     public void addSelectionChangedListener(SelectionChangedListener listener) {
         listeners.add(listener);
-        for (SelectionTable<?> table : tablesMappedByDimension.values()) {
-            table.addSelectionChangeHandler(new Handler() {
-                @Override
-                public void onSelectionChange(SelectionChangeEvent event) {
-                    notifySelectionChanged();
-                }
-            });
-        }
     }
 
     private void notifySelectionChanged() {
@@ -213,7 +224,7 @@ public class RefreshingSelectionTablesPanel implements SelectionProvider<Refresh
     @Override
     public Map<FunctionDTO, Collection<? extends Serializable>> getFilterSelection() {
         Map<FunctionDTO, Collection<? extends Serializable>> selection = new HashMap<>();
-        for (SelectionTable<?> table : tablesMappedByDimension.values()) {
+        for (SelectionTable<?> table : tablesMappedByDimensionAsKeys.values()) {
             Collection<? extends Serializable> specificSelection = table.getSelectionAsValues();
             if (!specificSelection.isEmpty()) {
                 selection.put(table.getDimension(), specificSelection);
@@ -225,14 +236,14 @@ public class RefreshingSelectionTablesPanel implements SelectionProvider<Refresh
     @Override
     public void applySelection(QueryDefinition queryDefinition) {
         for (Entry<FunctionDTO, Iterable<? extends Serializable>> selectionEntry : queryDefinition.getFilterSelection().entrySet()) {
-            SelectionTable<?> selectionTable = tablesMappedByDimension.get(selectionEntry.getKey());
+            SelectionTable<?> selectionTable = tablesMappedByDimensionAsKeys.get(selectionEntry.getKey());
             selectionTable.setSelection((Iterable<?>) selectionEntry.getValue());
         }
     }
 
     @Override
     public void clearSelection() {
-        for (SelectionTable<?> table : tablesMappedByDimension.values()) {
+        for (SelectionTable<?> table : tablesMappedByDimensionAsKeys.values()) {
             table.clearSelection();
         }
     }

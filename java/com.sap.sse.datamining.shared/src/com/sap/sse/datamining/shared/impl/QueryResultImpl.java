@@ -20,6 +20,10 @@ public class QueryResultImpl<AggregatedType> implements QueryResult<AggregatedTy
     @Deprecated
     QueryResultImpl() { }
     
+    public QueryResultImpl(Map<GroupKey, AggregatedType> results) {
+        this(results, new NullAdditionalResultData());
+    }
+    
     public QueryResultImpl(Map<GroupKey, AggregatedType> results, AdditionalResultData additionalData) {
         this.results = new HashMap<GroupKey, AggregatedType>(results);
         this.additionalData = additionalData;

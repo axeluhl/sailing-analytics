@@ -6,7 +6,6 @@ import java.util.Arrays;
 import java.util.Collection;
 import java.util.HashMap;
 import java.util.HashSet;
-import java.util.Locale;
 import java.util.Map;
 import java.util.Set;
 import java.util.concurrent.ExecutionException;
@@ -71,7 +70,7 @@ public class TestDimensionsValuesQuery {
     }
 
     private Query<Set<Object>> createDimensionsValuesQuery() {
-        return new ProcessorQuery<Set<Object>, Collection<Test_Regatta>>(ConcurrencyTestsUtil.getExecutor(), dataSource, ConcurrencyTestsUtil.getTestStringMessagesWithProductiveMessages(), Locale.ENGLISH) {
+        return new ProcessorQuery<Set<Object>, Collection<Test_Regatta>>(ConcurrencyTestsUtil.getExecutor(), dataSource) {
             @Override
             protected Processor<Collection<Test_Regatta>> createFirstProcessor() {
                 Collection<Processor<Map<GroupKey, Set<Object>>>> collectorResultReceivers = Arrays.asList(/*query*/ this.getResultReceiver());
@@ -128,13 +127,13 @@ public class TestDimensionsValuesQuery {
     @SuppressWarnings("unchecked")
     private <DataType> Collection<Processor<DataType>> createGroupingExtractorsForDimensions(
             Collection<Processor<GroupedDataEntry<Object>>> extractionResultReceivers, Collection<Function<?>> dimensions) {
-        Collection<Processor<DataType>> legGroupers = new ArrayList<>();
+        Collection<Processor<DataType>> groupingExtractors = new ArrayList<>();
         for (Function<?> dimension : dimensions) {
             Processor<GroupedDataEntry<DataType>> dimensionValueExtractor = new ParallelGroupedElementsValueExtractionProcessor<DataType, Object>(ConcurrencyTestsUtil.getExecutor(), extractionResultReceivers, (Function<Object>) dimension);
             Processor<DataType> byDimensionGrouper = new ParallelByDimensionGroupingProcessor<>(ConcurrencyTestsUtil.getExecutor(), Arrays.asList(dimensionValueExtractor), dimension);
-            legGroupers.add(byDimensionGrouper);
+            groupingExtractors.add(byDimensionGrouper);
         }
-        return legGroupers;
+        return groupingExtractors;
     }
     
     private Map<GroupKey, Set<Object>> buildExpectedResultData() {

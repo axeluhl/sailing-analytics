@@ -90,9 +90,9 @@ public class DataMiningServiceImpl extends RemoteServiceServlet implements DataM
     }
     
     @Override
-    public QueryResult<Set<Object>> getDimensionValuesFor(Collection<FunctionDTO> dimensions) {
-        // TODO Auto-generated method stub
-        return null;
+    public QueryResult<Set<Object>> getDimensionValuesFor(Collection<FunctionDTO> dimensions) throws Exception {
+        Query<Set<Object>> dimensionValuesQuery = DataMiningFactory.createDimensionValuesQuery(getRacingEventService(), dimensions, getDataMiningServer().getFunctionProvider());
+        return dimensionValuesQuery.run();
     }
 
     @Override
