@@ -32,7 +32,6 @@ import com.sap.sailing.gwt.ui.datamining.StatisticChangedListener;
 import com.sap.sailing.gwt.ui.datamining.StatisticProvider;
 import com.sap.sailing.gwt.ui.datamining.settings.RefreshingSelectionTablesSettings;
 import com.sap.sailing.gwt.ui.datamining.settings.RefreshingSelectionTablesSettingsDialogComponent;
-import com.sap.sse.datamining.shared.GroupKey;
 import com.sap.sse.datamining.shared.QueryDefinition;
 import com.sap.sse.datamining.shared.QueryResult;
 import com.sap.sse.datamining.shared.components.AggregatorType;
@@ -184,15 +183,19 @@ public class RefreshingSelectionTablesPanel implements SelectionProvider<Refresh
             @Override
             public void onSuccess(QueryResult<Set<Object>> result) {
                 boolean tableContentChanged = false;
-                for (Entry<GroupKey, Set<Object>> resultEntry : result.getResults().entrySet()) {
-                    List<?> sortedDimensionValues = new ArrayList<>(resultEntry.getValue());
-                    Collections.sort(sortedDimensionValues, new Comparator<Object>() {
-                        @Override
-                        public int compare(Object o1, Object o2) {
-                            return o1.toString().compareTo(o2.toString());
-                        }
-                    });
-                    boolean currentTableContentChanged = tablesMappedByDimensionAsKeys.get(resultEntry.getKey()).updateContent(sortedDimensionValues);
+                for (GenericGroupKey<FunctionDTO> dimensionAsKey : tablesMappedByDimensionAsKeys.keySet()) {
+                    List<?> sortedDimensionValues = new ArrayList<>();
+                    if (result.getResults().containsKey(dimensionAsKey)) {
+                        sortedDimensionValues = new ArrayList<>(result.getResults().get(dimensionAsKey));
+                        Collections.sort(sortedDimensionValues, new Comparator<Object>() {
+                            @Override
+                            public int compare(Object o1, Object o2) {
+                                return o1.toString().compareTo(o2.toString());
+                            }
+                        });
+                    }
+                    
+                    boolean currentTableContentChanged = tablesMappedByDimensionAsKeys.get(dimensionAsKey).updateContent(sortedDimensionValues);
                     if (!tableContentChanged) {
                         tableContentChanged = currentTableContentChanged;
                     }

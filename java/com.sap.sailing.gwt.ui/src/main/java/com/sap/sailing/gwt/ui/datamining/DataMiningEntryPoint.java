@@ -56,7 +56,7 @@ public class DataMiningEntryPoint extends AbstractEntryPoint {
         dockPanel.add(queryDefinitionProviderWithControls.getEntryWidget());
         
         ResultsPresenter<Number> resultsPresenter = new ResultsChart(stringMessages);
-        if (GwtHttpRequestUtils.getBooleanParameter("benchmark", true)) {
+        if (GwtHttpRequestUtils.getBooleanParameter("benchmark", false)) {
             BenchmarkResultsPanel benchmarkResultsPanel = new BenchmarkResultsPanel(stringMessages, dataMiningService, this, queryDefinitionProviderWithControls);
             splitPanel.addSouth(benchmarkResultsPanel, 500);
         } else {
