@@ -36,7 +36,7 @@ public class RegattasAndRacesDialog extends DataEntryDialog<Set<RegattaAndRaceId
     public RegattasAndRacesDialog(SailingServiceAsync sailingService, final MediaTrack mediaTrack,
             ErrorReporter errorReporter, RegattaRefresher regattaRefresher, StringMessages stringMessages,
             Validator<Set<RegattaAndRaceIdentifier>> validator, DialogCallback<Set<RegattaAndRaceIdentifier>> callback) {
-        super(stringMessages.regattaAndRace(), null, stringMessages.ok(), stringMessages.cancel(), validator, callback);
+        super(stringMessages.linkedRaces(), null, stringMessages.ok(), stringMessages.cancel(), validator, callback);
         this.stringMessages = stringMessages;
         this.mediaTrack = mediaTrack;
         trackedRacesListComposite = new TrackedRacesListComposite(sailingService, errorReporter, regattaRefresher,

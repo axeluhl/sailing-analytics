@@ -307,7 +307,7 @@ public class MediaPanel extends FlowPanel {
                 return (listRegattasAndRaces(mediaTrack1)).compareTo(listRegattasAndRaces(mediaTrack2));
             }
         });
-        mediaTracksTable.addColumn(regattaAndRaceColumn, stringMessages.regattaAndRace());
+        mediaTracksTable.addColumn(regattaAndRaceColumn, stringMessages.linkedRaces());
         regattaAndRaceColumn.setFieldUpdater(new FieldUpdater<MediaTrack, String>() {
             public void update(int index, MediaTrack mediaTrack, String newRegattaAndRace) {
                 // Called when the user changes the value.
