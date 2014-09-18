@@ -5,5 +5,5 @@ import com.sap.sailing.gwt.ui.shared.EventDTO;
 import com.sap.sse.gwt.client.player.Timer;
 
 public interface LeaderboardClientFactory extends SailingClientFactory {
-    LeaderboardView createLeaderboardView(EventDTO event, String leaderboardName, Timer timerForClientServerOffset);
+    AnalyticsView createLeaderboardView(EventDTO event, String leaderboardName, Timer timerForClientServerOffset);
 }

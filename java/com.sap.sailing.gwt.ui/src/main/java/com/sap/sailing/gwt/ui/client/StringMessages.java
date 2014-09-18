@@ -1085,4 +1085,5 @@ public interface StringMessages extends Messages {
     String manageMedia();
     String manageMediaTooltip();
     String showAll();
+    String raceVisibilityColumn();
 }

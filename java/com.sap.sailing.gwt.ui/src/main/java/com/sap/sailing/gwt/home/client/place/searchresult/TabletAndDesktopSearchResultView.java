@@ -23,6 +23,11 @@ public class TabletAndDesktopSearchResultView extends Composite implements Searc
     }
 
     @Override
+    public void initSearchResult(String searchText) {
+        searchResult.init(searchText);
+    }
+
+    @Override
     public void updateSearchResult(String searchText, Iterable<LeaderboardSearchResultDTO> searchResultItems) {
         searchResult.updateSearchResult(searchText, searchResultItems);
     }

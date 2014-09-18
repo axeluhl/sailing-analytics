@@ -38,17 +38,19 @@ public class RaceRecord {
     private final URI storedURI;
     private final List<String> boatClassNames;
     private final String raceStatus;
+    private final String raceVisibility;
     private final URL jsonUrl;
     
     public RaceRecord(URL jsonURL, String regattaName, String name, String replayURL, String paramURLAsString,
             String ID, String trackingstarttime, String trackingendtime, String racestarttime,
-            String commaSeparatedBoatClassNames, String status, boolean loadLiveAndStoredURI)
+            String commaSeparatedBoatClassNames, String status, String visibility, boolean loadLiveAndStoredURI)
             throws URISyntaxException, IOException {
         super();
         this.regattaName = regattaName;
         this.name = name;
         this.replayURL = replayURL;
         this.raceStatus = status;
+        this.raceVisibility = visibility;
         this.ID = ID;
         this.jsonUrl = jsonURL;
         this.boatClassNames = new ArrayList<String>();
@@ -186,6 +188,10 @@ public class RaceRecord {
     
     public String getRaceStatus() {
         return raceStatus;
+    }
+    
+    public String getRaceVisibility() {
+        return raceVisibility;
     }
     
     public URL getJsonURL() {
