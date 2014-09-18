@@ -27,8 +27,11 @@ public class TestAbstractStoringParallelAggregationProcessor {
     public void initializeReceivers() {
         Processor<Integer> receiver = new Processor<Integer>() {
             @Override
-            public void onElement(Integer element) {
+            public void processElement(Integer element) {
                 receivedElement = element;
+            }
+            @Override
+            public void onFailure(Throwable failure) {
             }
             @Override
             public void finish() throws InterruptedException {
@@ -74,7 +77,7 @@ public class TestAbstractStoringParallelAggregationProcessor {
     }
 
     private void processElementAndVerifyThatItWasStored(Processor<Integer> processor, int element) {
-        processor.onElement(element);
+        processor.processElement(element);
         ConcurrencyTestsUtil.sleepFor(100); //Giving the processor time to process the instructions
         assertThat("The element store doesn't contain the previously processed element '" + element + "'", elementStore.contains(element), is(true));
     }
@@ -99,9 +102,9 @@ public class TestAbstractStoringParallelAggregationProcessor {
             }
         };
 
-        processor.onElement(-1);
-        processor.onElement(42);
-        processor.onElement(7);
+        processor.processElement(-1);
+        processor.processElement(42);
+        processor.processElement(7);
         
         processor.finish();
         assertThat("The receiver wasn't told to finish", receiverWasToldToFinish, is(true));

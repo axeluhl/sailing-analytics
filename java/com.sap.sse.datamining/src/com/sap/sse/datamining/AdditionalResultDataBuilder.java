@@ -16,8 +16,6 @@ public interface AdditionalResultDataBuilder {
 
     public void setRetrievedDataAmount(int retrievedDataAmount);
 
-    public void setFilteredDataAmount(int filteredDataAmount);
-
     public void setExtractionFunction(Function<?> extractionFunction);
 
     public void setAggregationNameMessageKey(String aggregationNameMessageKey);

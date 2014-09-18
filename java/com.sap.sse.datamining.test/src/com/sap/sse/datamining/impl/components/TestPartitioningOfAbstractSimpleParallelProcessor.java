@@ -41,7 +41,7 @@ public class TestPartitioningOfAbstractSimpleParallelProcessor {
             }
         };
 
-        processor.onElement(1);
+        processor.processElement(1);
         ConcurrencyTestsUtil.sleepFor(200); //Giving the processor time to execute the instruction
         verifyPartitionedElements(1);
     }
