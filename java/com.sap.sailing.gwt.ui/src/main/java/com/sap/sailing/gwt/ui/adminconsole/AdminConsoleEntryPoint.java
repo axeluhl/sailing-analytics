@@ -208,17 +208,23 @@ public class AdminConsoleEntryPoint extends AbstractEntryPoint implements Regatt
                 if (selectedPanel == eventManagementPanel) {
                     eventManagementPanel.fillEvents();
                     fillLeaderboardGroups();
-                } else if (selectedPanel == leaderboardConfigPanel) {
+                } else if (selectedPanel == leaderboardTabPanel) {
                     fillLeaderboards();
-                } else if (selectedPanel == mediaPanel) {
-                    mediaPanel.onShow();
-                } else if (selectedPanel == competitorPanel) {
-                    competitorPanel.refreshCompetitorList();
-                } else if (selectedPanel == raceLogTrackingEventManagementPanel) {
-                    fillLeaderboards();
-                } else if (selectedPanel == leaderboardGroupConfigPanel) {
                     fillLeaderboardGroups();
+                } else if (selectedPanel == connectorsTabPanel) {
                     fillLeaderboards();
+                }
+            }
+        });
+        
+        racesTabPanel.addSelectionHandler(new SelectionHandler<Integer>() {
+            @Override
+            public void onSelection(SelectionEvent<Integer> event) {
+                // as panels are wrapped by scroll panel we need to use index here
+                if (event.getSelectedItem() == 1) {
+                    competitorPanel.refreshCompetitorList();
+                } else if (event.getSelectedItem() == 4) {
+                    mediaPanel.onShow();
                 }
             }
         });
