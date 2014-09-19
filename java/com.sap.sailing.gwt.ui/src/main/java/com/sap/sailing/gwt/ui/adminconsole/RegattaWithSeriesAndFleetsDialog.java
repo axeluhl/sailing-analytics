@@ -98,7 +98,7 @@ public abstract class RegattaWithSeriesAndFleetsDialog extends DataEntryDialog<R
         setupAdditionalWidgetsOnPanel(panel);
         return panel;
     }
-    
+
     @Override
     protected RegattaDTO getResult() {
         regatta.setName(nameEntryField.getText());
@@ -126,7 +126,7 @@ public abstract class RegattaWithSeriesAndFleetsDialog extends DataEntryDialog<R
         }
         return null;
     }
-    
+
     private boolean isCourseAreaInEvent(EventDTO event, UUID courseAreaId) {
         if (event.venue == null) {
             return false;
@@ -160,14 +160,14 @@ public abstract class RegattaWithSeriesAndFleetsDialog extends DataEntryDialog<R
         setCourseAreaSelection();
     }
 
-	protected void setCourseAreaSelection() {
-		EventDTO selectedEvent = getSelectedEvent();
+    protected void setCourseAreaSelection() {
+        EventDTO selectedEvent = getSelectedEvent();
         courseAreaListBox.clear();
         courseAreaListBox.setEnabled(false);
         if (selectedEvent != null) {
             fillCourseAreaListBox(selectedEvent);
         }
-	}
+    }
 
     private void fillCourseAreaListBox(EventDTO selectedEvent) {
         courseAreaListBox.addItem(stringMessages.selectCourseArea());

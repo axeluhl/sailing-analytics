@@ -106,6 +106,36 @@ public class StructureImporter {
             parsedDocuments++;
         }
     }
+    
+    public List<List<String>> getRegattaStructure(List<String> regattaNames){
+        //TODO anderen Rückgabeparameter verwenden. Evtl. eine eigene DTO Klasse. 
+        //Die Series aus diesem Paket kann ja nicht verwendet werden, weil es sonst wieder dependencies loops gibt  
+        
+        
+        ArrayList<String> allSeries = new ArrayList<String>(); 
+        
+        results.clear();
+        parseRegattas();
+
+        for (int i = 0; i < results.size(); i++) {
+            ArrayList<String> series = new ArrayList<String>();
+            ArrayList<Race> races = new ArrayList<Race>();
+
+            Event event = (Event) results.get(i).getPersonOrBoatOrTeam()
+                    .get(results.get(i).getPersonOrBoatOrTeam().size() - 1);
+
+            List<Object> raceOrDevisionOrRegattaSeries = event.getRaceOrDivisionOrRegattaSeriesResult();
+            for (int j = 1; j < raceOrDevisionOrRegattaSeries.size(); j++) {
+                races.add((Race) raceOrDevisionOrRegattaSeries.get(j));
+            }
+
+            BuildStructure structure = new BuildStructure(races);
+            //TODO am besten in der Buildstructure im RegattaStructure eine Methode getRegattaStructure(), 
+            //um die Struktur in dem gewünschten Format zu bekommen
+        }
+        
+        return null;
+    }
 
     public ArrayList<AddSpecificRegatta> getRegattas(ScoringSchemeType scoringScheme, boolean isPersistent,
             UUID courseArea, boolean useStartTimeInference, DomainFactory baseDomainFactory,
@@ -119,6 +149,9 @@ public class StructureImporter {
 
         for (int i = 0; i < results.size(); i++) {
 
+            //TODO hier die BuildStructure rausnehmen und das bestehende verwenden
+
+            
             ArrayList<Race> races = new ArrayList<Race>();
 
             Event event = (Event) results.get(i).getPersonOrBoatOrTeam()

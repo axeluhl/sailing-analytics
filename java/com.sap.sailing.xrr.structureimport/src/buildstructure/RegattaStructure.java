@@ -10,6 +10,7 @@ public class RegattaStructure {
     ArrayList<Series> series = new ArrayList<Series>();
     GuessSeriesStrategy guessSeriesStrategy;
     
+    
     public RegattaStructure(GuessSeriesStrategy guessSeries){
         this.guessSeriesStrategy = guessSeries;
     }
@@ -34,6 +35,7 @@ public class RegattaStructure {
         }
         
     }
+    
     public ArrayList<Series> getSeries(){
         return series;
     }

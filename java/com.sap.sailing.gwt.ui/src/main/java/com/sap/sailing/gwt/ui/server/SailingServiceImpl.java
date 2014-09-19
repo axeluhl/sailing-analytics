@@ -3766,6 +3766,12 @@ public class SailingServiceImpl extends ProxiedRemoteServiceServlet implements S
         }
         return leaderboardNames;
     }
+    
+    @Override
+    public void getRegattaStructure(final List<String> regattaNames){
+        //TODO hier die getRegattaStructure aus StructureImporter aufrufen
+        //TODO Rückgabetyp ändern
+    }
 
     @Override
     public void createRegattaStructure(final List<String> regattaNames, final EventDTO newEvent,
