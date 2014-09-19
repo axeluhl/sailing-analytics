@@ -6,14 +6,14 @@ import java.util.Collections;
 import com.sap.sailing.xrr.schema.Race;
 
 
-public class RaceType {
+public class Series {
 
     private String raceType = "";
     private int maxRaces = 0;
     private int maxRacesIndex = -1;
     private ArrayList<Fleet> fleets = new ArrayList<Fleet>();
 
-    public RaceType(String raceType) {
+    public Series(String raceType) {
         this.raceType = raceType;
     }
 
@@ -70,11 +70,11 @@ public class RaceType {
     	return raceType.charAt(0);
     }
 
-    public String getRaceType() {
+    public String getSeries() {
         return raceType;
     }
 
-    public void setRaceType(String raceType) {
+    public void setSeries(String raceType) {
         this.raceType = raceType;
     }
 

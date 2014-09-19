@@ -17,7 +17,7 @@ import javax.xml.bind.JAXBException;
 import buildstructure.BuildStructure;
 import buildstructure.Fleet;
 import buildstructure.SetRacenumberStrategy;
-import buildstructure.RaceType;
+import buildstructure.Series;
 import buildstructure.RegattaStructure;
 
 import com.sap.sailing.domain.base.BoatClass;
@@ -154,16 +154,16 @@ public class StructureImporter {
         List<List<String>> series = new ArrayList<List<String>>();
 
         if (regattaStructure != null) {
-            ArrayList<RaceType> raceTypes = regattaStructure.getRaceTypes();
+            ArrayList<Series> raceTypes = regattaStructure.getSeries();
             for (int i = 0; i < raceTypes.size(); i++) {
 
-                RaceType raceType = raceTypes.get(i);
+                Series raceType = raceTypes.get(i);
 
                 ArrayList<FleetDTO> fleets = getFleets(raceType.getFleets());
                 List<String> raceNames = getRaceNames(i, raceType, raceType.getFleets());
                 series.add(raceNames);
 
-                seriesCreationParams.put(raceType.getRaceType(), new SeriesCreationParametersDTO(fleets,
+                seriesCreationParams.put(raceType.getSeries(), new SeriesCreationParametersDTO(fleets,
                 /* medal */raceTypes.get(i).isMedal(), startswithZeroScore, firstColumnIsNonDiscardableCarryForward,
                         discardingThresholds, hasSplitFleetContiguousScoring));
             }
@@ -174,7 +174,7 @@ public class StructureImporter {
 
     }
 
-    private List<String> getRaceNames(int i, RaceType raceType, ArrayList<Fleet> fleets) {
+    private List<String> getRaceNames(int i, Series raceType, ArrayList<Fleet> fleets) {
         List<String> raceNames = new ArrayList<String>();
         raceNames.clear();
 

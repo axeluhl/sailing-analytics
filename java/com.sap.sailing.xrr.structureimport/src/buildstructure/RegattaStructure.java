@@ -7,7 +7,7 @@ import com.sap.sailing.xrr.schema.Race;
 
 public class RegattaStructure {
     
-    ArrayList<RaceType> raceTypes = new ArrayList<RaceType>();
+    ArrayList<Series> series = new ArrayList<Series>();
     GuessSeriesStrategy guessSeriesStrategy;
     
     public RegattaStructure(GuessSeriesStrategy guessSeries){
@@ -16,30 +16,30 @@ public class RegattaStructure {
     
     public void addRace(Race race, int[] numberOfRaces){
         
-        String raceType = guessSeriesStrategy.guessSeries(race.getRaceName());
+        String oneSeries = guessSeriesStrategy.guessSeries(race.getRaceName());
 
         boolean added = false;
         
-        for(int i=0;i<raceTypes.size();i++){
-            if(raceTypes.get(i).getRaceType().equals(raceType)){
-                raceTypes.get(i).addRace(race, numberOfRaces);
+        for(int i=0;i<series.size();i++){
+            if(series.get(i).getSeries().equals(oneSeries)){
+                series.get(i).addRace(race, numberOfRaces);
                 added = true;
             }
         }
         
         if(!added){
-            RaceType newRaceType = new RaceType(raceType);
-            newRaceType.addRace(race, numberOfRaces);
-            raceTypes.add(newRaceType);
+            Series newSeries = new Series(oneSeries);
+            newSeries.addRace(race, numberOfRaces);
+            series.add(newSeries);
         }
         
     }
-    public ArrayList<RaceType> getRaceTypes(){
-        return raceTypes;
+    public ArrayList<Series> getSeries(){
+        return series;
     }
-    public void checkRaceTypes(){
-        if(raceTypes.size()==1){
-            raceTypes.get(0).setRaceType("Default");
+    public void checkSeries(){
+        if(series.size()==1){
+            series.get(0).setSeries("Default");
         }
     }
 }
