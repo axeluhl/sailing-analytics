@@ -24,7 +24,7 @@
 			  
 			  <div class="{res.mediaCss.small12} {res.mediaCss.columns}">
 			        <table class="{local_res.css.regattaleaderboard_table}">
-      				  <tr class="{local_res.css.regattaleaderboard_header}">
+      				  <tr>
       					<td>
 				<g:HTMLPanel ui:field="oldMultiLeaderboardPanel" styleName="{local_res2.css.oldMultiLeaderboardPanel}">
         		</g:HTMLPanel>
