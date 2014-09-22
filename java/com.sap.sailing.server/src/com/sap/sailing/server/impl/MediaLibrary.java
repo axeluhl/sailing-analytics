@@ -75,9 +75,7 @@ class MediaLibrary {
      * @return
      */
     Set<MediaTrack> findMediaTracksInTimeRange(TimePoint startTime, TimePoint endTime) {
-
-        if (startTime != null) {
-
+        if (startTime != null && (endTime == null || startTime.before(endTime))) {
             TimeRange interval = new TimeRangeImpl(startTime, endTime);
             LockUtil.lockForRead(lock);
             try {

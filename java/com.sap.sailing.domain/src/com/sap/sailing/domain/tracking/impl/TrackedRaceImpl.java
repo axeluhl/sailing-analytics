@@ -1259,15 +1259,22 @@ public abstract class TrackedRaceImpl extends TrackedRaceWithWindEssentials impl
     public boolean hasWindData() {
         boolean result = false;
         Course course = getRace().getCourse();
-        Waypoint firstWaypoint = course.getFirstWaypoint();
-        TimePoint timepoint = startTime != null ? startTime : startOfTrackingReceived;
-        if (firstWaypoint != null && timepoint != null) {
-            Position position = getApproximatePosition(firstWaypoint, timepoint);
-            if (position != null) {
-                Wind wind = getWind(position, timepoint);
-                if (wind != null) {
-                    result = true;
+        TimePoint timepoint = getStartOfRace();
+        if (timepoint == null) {
+            timepoint = getStartOfTracking();
+        }
+        if (timepoint != null) {
+            Position position = null;
+            for (Waypoint waypoint : course.getWaypoints()) {
+                position = getApproximatePosition(waypoint, timepoint);
+                if (position != null) {
+                    break;
                 }
+            }
+            // position may be null if no waypoint's position is known; in that case, a "Global" wind value will be looked up
+            Wind wind = getWind(position, timepoint);
+            if (wind != null) {
+                result = true;
             }
         }
         return result;
@@ -1289,10 +1296,6 @@ public abstract class TrackedRaceImpl extends TrackedRaceWithWindEssentials impl
 
     @Override
     public Wind getWind(Position p, TimePoint at) {
-        return shortTimeWindCache.getWind(p, at);
-    }
-    
-    Wind getWindUncached(Position p, TimePoint at) {
         return getWind(p, at, getWindSourcesToExclude());
     }
 
@@ -1337,6 +1340,11 @@ public abstract class TrackedRaceImpl extends TrackedRaceWithWindEssentials impl
 
     @Override
     public WindWithConfidence<com.sap.sse.common.Util.Pair<Position, TimePoint>> getWindWithConfidence(Position p, TimePoint at,
+            Iterable<WindSource> windSourcesToExclude) {
+        return shortTimeWindCache.getWindWithConfidence(p, at, windSourcesToExclude);
+    }
+    
+    public WindWithConfidence<com.sap.sse.common.Util.Pair<Position, TimePoint>> getWindWithConfidenceUncached(Position p, TimePoint at,
             Iterable<WindSource> windSourcesToExclude) {
         boolean canUseSpeedOfAtLeastOneWindSource = false;
         Weigher<com.sap.sse.common.Util.Pair<Position, TimePoint>> weigher = new PositionAndTimePointWeigher(
@@ -3087,4 +3095,29 @@ public abstract class TrackedRaceImpl extends TrackedRaceWithWindEssentials impl
     public GPSFixStore getGPSFixStore() {
     	return gpsFixStore;
     }
+
+    @Override
+    public Position getCenterOfCourse(TimePoint at) {
+        int count = 0;
+        ScalablePosition sum = null;
+        for (Waypoint waypoint : getRace().getCourse().getWaypoints()) {
+            final Position waypointPosition = getApproximatePosition(waypoint, at);
+            if (waypointPosition != null) {
+                ScalablePosition p = new ScalablePosition(waypointPosition);
+                if (sum == null) {
+                    sum = p;
+                } else {
+                    sum = sum.add(p);
+                }
+            }
+        }
+        final Position result;
+        if (sum == null) {
+            result = null;
+        } else {
+            result = sum.divide(count);
+        }
+        return result;
+    }
+    
 }

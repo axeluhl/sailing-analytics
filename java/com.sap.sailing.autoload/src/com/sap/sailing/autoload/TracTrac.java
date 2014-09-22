@@ -69,7 +69,7 @@ public class TracTrac {
                 
                 for (TracTracRaceRecordDTO raceRecord : racesThatCanBeTracked.getB()) {
                     RaceRecord record = getTracTracAdapter().getSingleTracTracRaceRecord(new URL(raceRecord.jsonURL), raceRecord.id, /*loadClientParams*/true);
-                    if (record.getRaceStatus().equals(TracTracConnectionConstants.REPLAY_STATUS)) {
+                    if (record.getRaceStatus().equals(TracTracConnectionConstants.REPLAY_STATUS) || record.getRaceVisibility().equals(TracTracConnectionConstants.REPLAY_VISIBILITY)) {
                         RegattaIdentifier regattaForRaceRecord = null;
                         if (raceRecord.hasRememberedRegatta()) {
                             Regatta regatta = getService().getRememberedRegattaForRace(raceRecord.id);
@@ -84,10 +84,10 @@ public class TracTrac {
                             new MillisecondsTimePoint(record.getTrackingEndTime().asMillis()),
                             MongoRaceLogStoreFactory.INSTANCE.getMongoRaceLogStore(getService().getMongoObjectFactory(), getService().getDomainObjectFactory()),
                             RaceTracker.TIMEOUT_FOR_RECEIVING_RACE_DEFINITION_IN_MILLISECONDS, /*simulateWithStartTimeNow*/false, 
-                            /*tracTracUsername*/"", /*tracTracPassword*/"",
-                            record.getRaceStatus());
+                            /*ignoreTracTracMarkPassings*/ false, /*tracTracUsername*/"", /*tracTracPassword*/"",
+                            record.getRaceStatus(), record.getRaceVisibility());
                     } else {
-                        logger.info("Ignoring race " + record.getName() + " because it is in status " + record.getRaceStatus());
+                        logger.info("Ignoring race " + record.getName() + " because it is in status " + record.getRaceStatus() + " and visibility " + record.getRaceVisibility());
                     }
                 }
             }
@@ -107,7 +107,7 @@ public class TracTrac {
                     raceRecord.getTrackingStartTime().asDate(), 
                     raceRecord
                     .getTrackingEndTime().asDate(), raceRecord.getRaceStartTime().asDate(),
-                    raceRecord.getBoatClassNames(), raceRecord.getRaceStatus(), raceRecord.getJsonURL().toString(),
+                    raceRecord.getBoatClassNames(), raceRecord.getRaceStatus(), raceRecord.getRaceVisibility(), raceRecord.getJsonURL().toString(),
                     hasRememberedRegatta(raceRecord.getID())));
         }
         return new com.sap.sse.common.Util.Pair<String, List<TracTracRaceRecordDTO>>(raceRecords.getA(), result);

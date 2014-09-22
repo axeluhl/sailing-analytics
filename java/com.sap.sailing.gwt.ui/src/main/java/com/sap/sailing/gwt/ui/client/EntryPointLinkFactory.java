@@ -28,9 +28,9 @@ public class EntryPointLinkFactory {
         String[] documentAndFragment = baseLink.split("#", 2);
         StringBuilder link = new StringBuilder(documentAndFragment[0]);
         int i = 1;
-        for(Entry<String, String> entry: parameters.entrySet()) {
+        for (Entry<String, String> entry: parameters.entrySet()) {
             link.append(i == 1 ? "?" : "&");
-            link.append(entry.getKey() + "=" + entry.getValue());
+            link.append(entry.getKey() + "=" + replaceAmpersand(URLEncoder.encode(entry.getValue())));
             i++;
         }
         if (debugParam != null && !debugParam.isEmpty()) {
@@ -43,8 +43,12 @@ public class EntryPointLinkFactory {
         }
         if (documentAndFragment.length > 1) {
             link.append('#');
-            link.append(documentAndFragment[1]); // append the fragment following the "#" again
+            link.append(URLEncoder.encode(documentAndFragment[1])); // append the fragment following the "#" again
         }
-        return URLEncoder.encode(link.toString());
+        return link.toString();
+    }
+    
+    private static String replaceAmpersand(String param) {
+        return param.replaceAll("&", "%26");
     }
 }

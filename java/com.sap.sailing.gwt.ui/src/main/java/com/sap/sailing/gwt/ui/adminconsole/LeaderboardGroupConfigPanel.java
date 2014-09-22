@@ -611,6 +611,7 @@ public class LeaderboardGroupConfigPanel extends AbstractRegattaPanel implements
                             leaderboardsProvider.getList().addAll(availableLeaderboards);
                             leaderboardsProvider.getList().removeAll(selectedGroup.leaderboards);
                             leaderboardsFilterablePanel.getTextBox().setText("");
+                            leaderboardsFilterablePanel.updateAll(availableLeaderboards);
                             leaderboardsSelectionModel.clear();
                             for (StrippedLeaderboardDTO leaderboard : selectedLeaderboards) {
                                 leaderboardsSelectionModel.setSelected(leaderboard, true);

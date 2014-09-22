@@ -21,4 +21,5 @@ Export-Package: com.sap.sailing.domain.common,
  com.sap.sailing.domain.common.scalablevalue,
  com.sap.sailing.domain.common.scalablevalue.impl,
  com.sap.sailing.domain.common.trackfiles
-Require-Bundle: com.sap.sse.common
+Require-Bundle: com.sap.sse.datamining.shared,
+ com.sap.sse.common

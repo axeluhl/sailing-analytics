@@ -3,8 +3,8 @@ package com.sap.sailing.domain.racelog.impl;
 import java.lang.ref.Reference;
 import java.lang.ref.ReferenceQueue;
 import java.lang.ref.WeakReference;
-import java.util.HashMap;
 import java.util.Map;
+import java.util.concurrent.ConcurrentHashMap;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
@@ -22,7 +22,7 @@ import com.sap.sailing.domain.racelog.RaceLogEvent;
 public class WeakRaceLogChangedVisitor extends AbstractRaceLogChangedVisitor {
     private static final Logger logger = Logger.getLogger(WeakRaceLogChangedVisitor.class.getName());
     private static ReferenceQueue<? super RaceLogChangedListener> queue = new ReferenceQueue<RaceLogChangedListener>();
-    private static Map<Reference<?>, WeakRaceLogChangedVisitor> referenceToVisitor = new HashMap<Reference<?>, WeakRaceLogChangedVisitor>();
+    private static Map<Reference<?>, WeakRaceLogChangedVisitor> referenceToVisitor = new ConcurrentHashMap<Reference<?>, WeakRaceLogChangedVisitor>();
     static {
         new Thread(WeakRaceLogChangedVisitor.class.getSimpleName() + " weak reference cleaner") {
             @Override

@@ -81,7 +81,7 @@ public class EditMarkPassingsPanel extends FlexTable implements RaceSelectionCha
     private final Button closeButton;
 
     public EditMarkPassingsPanel(final SailingServiceAsync sailingService, AsyncActionsExecutor asyncActionsExecutor,
-            final RegattaAndRaceIdentifier raceIdentifier, StringMessages stringMessages, final Button editMarkPassingsButton,
+            final RegattaAndRaceIdentifier raceIdentifier, StringMessages stringMessages,
             final CompetitorSelectionProvider competitorSelectionModel, final ErrorReporter errorReporter, final Timer timer) {
 
         this.sailingService = sailingService;
@@ -89,7 +89,8 @@ public class EditMarkPassingsPanel extends FlexTable implements RaceSelectionCha
         this.asyncExecutor = asyncActionsExecutor;
         this.errorReporter = errorReporter;
 
-        this.editMarkPassingsButton = editMarkPassingsButton;
+        editMarkPassingsButton = new Button("Edit MarkPassings");
+
         this.competitorSelectionModel = competitorSelectionModel;
 
         editMarkPassingsButton.setEnabled(false);
@@ -387,5 +388,9 @@ public class EditMarkPassingsPanel extends FlexTable implements RaceSelectionCha
                 column = columnDTO;
             }
         }
+    }
+    
+    public Button getEditButton(){
+        return editMarkPassingsButton;
     }
 }

@@ -39,8 +39,8 @@ public class TabletAndDesktopEventsView extends AbstractEventsView {
         recentEventsWidget.setVisible(true);
         upcomingEventsWidget.setVisible(false);
         
-        recentEventsLink.getElement().removeClassName(homeRes.mainCss().buttoninactive());
-        upcomingEventsLink.getElement().addClassName(homeRes.mainCss().buttoninactive());
+        recentEventsLink.getElement().addClassName(homeRes.mainCss().navbar_buttonactive());
+        upcomingEventsLink.getElement().removeClassName(homeRes.mainCss().navbar_buttonactive());
     }
     
     @UiHandler("upcomingEventsLink")
@@ -48,8 +48,8 @@ public class TabletAndDesktopEventsView extends AbstractEventsView {
         recentEventsWidget.setVisible(false);
         upcomingEventsWidget.setVisible(true);
         
-        recentEventsLink.getElement().addClassName(homeRes.mainCss().buttoninactive());
-        upcomingEventsLink.getElement().removeClassName(homeRes.mainCss().buttoninactive());
+        upcomingEventsLink.getElement().addClassName(homeRes.mainCss().navbar_buttonactive());
+        recentEventsLink.getElement().removeClassName(homeRes.mainCss().navbar_buttonactive());
     }
     
     @Override 

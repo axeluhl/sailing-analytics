@@ -17,6 +17,27 @@ It contains also some files:
  - Manifest.txt -> manifest used to create the test.jar file
  
 ********************************************
+************* TracAPI 3.0.6 ****************
+********************************************
+This is a final version. It fixes bugs in the implementation and it adds a new feature. 
+This new feature adds methods to the API, but it keeps the backward compatibility. 
+This version provides a new JavaDoc version.
+
+Release date: 11/08/2014
+
+1) New features
+
+ - The IRaceCompetitor implements the IMetadataContainer interface (Requested by Frank Mittag, 16/07/2014)  
+
+2) Bugs
+
+ - The race name and the visibility are not updated in the IRacesListener.update() method.
+ (Reported by Jorge Piera, 06/08/2014)   
+ - The IRaceCompetitor doesn't contains the associated IRoute object (Reported by Jorge Piera, 08/08/2014)
+ - Changing the synchronization of the maps in the EventFactory (Reported by Axel Uhl, 09/08/2014)   
+ 
+ 
+********************************************
 ************* TracAPI 3.0.5 ****************
 ********************************************
 This is a final version. Only fixes bugs in the implementation
@@ -25,11 +46,10 @@ Release date: 05/08/2014
 
 1) Bugs
 
-- The previous version 3.0.4 added only changes in the synchronization. The lists were synchronized by hand
+ - The previous version 3.0.4 added only changes in the synchronization. The lists were synchronized by hand
  but the implementation continued using synchronized lists. The result was that we had a double
  synchronization for all the lists of the model: the synchronization by hand and the synchronization of
  the list. (Reported by Axel Uhl, 04/08/2014)   
- 
  - The new subscription library sends the static positions (from the parameters file) as positions events.
  The problem here is that the subscription library retrieves the positions from the model of control 
  points and  when some races are loaded in parallel these values can be invalid (values loaded by 
@@ -82,7 +102,7 @@ Release date: 24/07/2014
  - The events IRacesListener.abandonRace() and IRacesListener.startTracking() have been reviewed. Now they are always sent
  when the races are updated either using the event manager or using the external JSON service "update_race_status"
  - The controls are not updated when they are retrieved a second time from a parameters file. The library always returns 
- the first control thas was read the first time. (Reported by Axel Uhl, 24/07/2014)    
+ the first control that was read the first time. (Reported by Axel Uhl, 24/07/2014)    
  
 ********************************************
 ************* TracAPI 3.0.1 ****************
@@ -127,11 +147,11 @@ This is an SNAPSHOT version that means that is a version that has not been relea
  
 1) Bugs
 
-- The route name is lost when the ControlRouteChange event is thrown
-- Adding synchronized lists in some objects of the model that were not synchronized
-- Fixing an error using a local parameters file with a local MTB file
-- Fixing several errors marshaling the objects then an static property has been changed
-- Fixing a bug parsing a JSON with races that has races without params_url (for Orienteering events)
+ - The route name is lost when the ControlRouteChange event is thrown
+ - Adding synchronized lists in some objects of the model that were not synchronized
+ - Fixing an error using a local parameters file with a local MTB file
+ - Fixing several errors marshaling the objects then an static property has been changed
+ - Fixing a bug parsing a JSON with races that has races without params_url (for Orienteering events)
 
 
  
