@@ -14,6 +14,7 @@ public interface StringMessages extends Messages {
     String swissTimingEvents();
     String trackedBefore();
     String listRaces();
+    String listRegattas();
     String wind();
     String windPanelLabel();
     String refresh();

@@ -3744,13 +3744,13 @@ public class SailingServiceImpl extends ProxiedRemoteServiceServlet implements S
         return dummyRegattaDTOs;
     }
 
-    private ArrayList<String> createRegattasWithRaces(ArrayList<AddSpecificRegatta> regattas, String eventName) {
+    private List<String> createRegattasWithRaces(Iterable<AddSpecificRegatta> regattas, String eventName) {
 
-        ArrayList<String> leaderboardNames = new ArrayList<String>();
+        List<String> leaderboardNames = new ArrayList<String>();
         List<List<List<String>>> series = structureImporter.getRaceNames();
-
-        for (int i = 0; i < regattas.size(); i++) {
-            Regatta regatta = getService().apply(regattas.get(i));
+        int i = 0;
+        for (AddSpecificRegatta addSpecificRegatta: regattas) {
+            Regatta regatta = getService().apply(addSpecificRegatta);
 
             // create Races
             int j = 0;
@@ -3763,6 +3763,7 @@ public class SailingServiceImpl extends ProxiedRemoteServiceServlet implements S
                 leaderboardNames.add(regatta.getName());
                 createRegattaLeaderboard(regatta.getRegattaIdentifier(), regatta.getBoatClass().toString(), new int[0]);
             }
+            i++;
         }
         return leaderboardNames;
     }
@@ -3781,13 +3782,13 @@ public class SailingServiceImpl extends ProxiedRemoteServiceServlet implements S
                 SeriesParameters defaultSeries = getDefaultSeries(defaultRegatta);
 
                 // get Regattas
-                ArrayList<AddSpecificRegatta> regattas = structureImporter.getRegattas(defaultRegatta.scoringScheme,
+                Iterable<AddSpecificRegatta> regattas = structureImporter.getRegattas(defaultRegatta.scoringScheme,
                         false, defaultRegatta.defaultCourseAreaUuid, defaultRegatta.useStartTimeInference,
                         getBaseDomainFactory(), defaultSeries.isFirstColumnIsNonDiscardableCarryForward(),
                         defaultSeries.isHasSplitFleetContiguousScoring(), defaultSeries.isStartswithZeroScore(),
                         defaultSeries.getDiscardingThresholds());
 
-                ArrayList<String> leaderboardNames = createRegattasWithRaces(regattas, newEvent.getName());
+                List<String> leaderboardNames = createRegattasWithRaces(regattas, newEvent.getName());
                 createAndAddLeaderboardGroup(newEvent, leaderboardNames);
                 structureImporter.setCompetitors();
                 structureImporter.resetSeriesForRegattas();
@@ -3798,24 +3799,24 @@ public class SailingServiceImpl extends ProxiedRemoteServiceServlet implements S
         executor.execute(structureImportTask);
     }
 
-    private void createAndAddLeaderboardGroup(final EventDTO newEvent,
-            ArrayList<String> leaderboardNames) {
+    private void createAndAddLeaderboardGroup(final EventDTO newEvent, List<String> leaderboardNames) {
         LeaderboardGroupDTO leaderboardGroupDTO = null;
         String description = "";
-        if(newEvent.getDescription()!=null){
+        if (newEvent.getDescription() != null) {
             description = newEvent.getDescription();
         }
         String eventName = newEvent.getName();
-        
+
         // create Leaderboard Group
-        if(getService().getLeaderboardGroupByName(eventName)==null){
-            CreateLeaderboardGroup createLeaderboardGroupOp = new CreateLeaderboardGroup(eventName,
-                    description, eventName, false, leaderboardNames, null, null);
+        if (getService().getLeaderboardGroupByName(eventName) == null) {
+            CreateLeaderboardGroup createLeaderboardGroupOp = new CreateLeaderboardGroup(eventName, description,
+                    eventName, false, leaderboardNames, null, null);
             leaderboardGroupDTO = convertToLeaderboardGroupDTO(getService().apply(createLeaderboardGroupOp), false,
                     false);
         } else {
             leaderboardNames.addAll(getLeaderboardNames());
-            updateLeaderboardGroup(eventName, eventName, newEvent.getDescription(), eventName, leaderboardNames, null, null);
+            updateLeaderboardGroup(eventName, eventName, newEvent.getDescription(), eventName, leaderboardNames, null,
+                    null);
             leaderboardGroupDTO = getLeaderboardGroupByName(eventName, false);
         }
 
@@ -3825,10 +3826,10 @@ public class SailingServiceImpl extends ProxiedRemoteServiceServlet implements S
         }
         eventLeaderboardGroupUUIDs.add(leaderboardGroupDTO.getId());
         try {
-            updateEvent(newEvent.id, newEvent.getName(), description, newEvent.startDate,
-                    newEvent.endDate, newEvent.venue, newEvent.isPublic, eventLeaderboardGroupUUIDs,
-                    newEvent.getLogoImageURL(), newEvent.getOfficialWebsiteURL(), newEvent.getImageURLs(),
-                    newEvent.getVideoURLs(), newEvent.getSponsorImageURLs());
+            updateEvent(newEvent.id, newEvent.getName(), description, newEvent.startDate, newEvent.endDate,
+                    newEvent.venue, newEvent.isPublic, eventLeaderboardGroupUUIDs, newEvent.getLogoImageURL(),
+                    newEvent.getOfficialWebsiteURL(), newEvent.getImageURLs(), newEvent.getVideoURLs(),
+                    newEvent.getSponsorImageURLs());
         } catch (MalformedURLException e) {
             e.printStackTrace();
         }

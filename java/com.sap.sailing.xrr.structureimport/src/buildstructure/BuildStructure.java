@@ -1,8 +1,7 @@
 package buildstructure;
 
 
-import java.math.BigInteger;
-import java.util.ArrayList;
+import java.util.List;
 
 import com.sap.sailing.xrr.schema.Race;
 
@@ -11,7 +10,7 @@ public class BuildStructure {
     
     RegattaStructure structure = null;
     
-    public BuildStructure(ArrayList<Race> races){
+    public BuildStructure(List<Race> races){
         
         int[] numberOfRaces = new int[10];
         

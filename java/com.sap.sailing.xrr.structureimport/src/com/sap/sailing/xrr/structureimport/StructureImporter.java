@@ -107,19 +107,19 @@ public class StructureImporter {
         }
     }
 
-    public ArrayList<AddSpecificRegatta> getRegattas(ScoringSchemeType scoringScheme, boolean isPersistent,
+    public Iterable<AddSpecificRegatta> getRegattas(ScoringSchemeType scoringScheme, boolean isPersistent,
             UUID courseArea, boolean useStartTimeInference, DomainFactory baseDomainFactory,
             boolean firstColumnIsNonDiscardableCarryForward, boolean hasSplitFleetContiguousScoring,
             boolean startswithZeroScore, int[] discardingThresholds) {
 
         this.baseDomainFactory = baseDomainFactory;
-        ArrayList<AddSpecificRegatta> regattas = new ArrayList<AddSpecificRegatta>();
+        List<AddSpecificRegatta> regattas = new ArrayList<AddSpecificRegatta>();
         results.clear();
         parseRegattas();
 
         for (int i = 0; i < results.size(); i++) {
 
-            ArrayList<Race> races = new ArrayList<Race>();
+            List<Race> races = new ArrayList<Race>();
 
             Event event = (Event) results.get(i).getPersonOrBoatOrTeam()
                     .get(results.get(i).getPersonOrBoatOrTeam().size() - 1);
@@ -205,7 +205,7 @@ public class StructureImporter {
 
     private Color getColorFromString(String colorString) {
         Color color = null;
-        
+
         switch (colorString) {
         case "Blue":
             color = Color.BLUE;
@@ -290,13 +290,13 @@ public class StructureImporter {
         boatForPerson = new LinkedHashMap<String, Boat>();
         LinkedHashMap<String, Team> teamForBoat = new LinkedHashMap<String, Team>();
 
-        for (Object obj : personOrBoatOrTeam){
+        for (Object obj : personOrBoatOrTeam) {
             if (obj instanceof Team) {
                 teamForBoat.put(((Team) obj).getBoatID(), (Team) obj);
             }
         }
 
-        for (Object obj : personOrBoatOrTeam){
+        for (Object obj : personOrBoatOrTeam) {
             if (obj instanceof Boat) {
                 Team team = teamForBoat.get(((Boat) obj).getBoatID());
 

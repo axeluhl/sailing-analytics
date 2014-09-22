@@ -18,6 +18,7 @@ import com.google.gwt.user.client.ui.HasVerticalAlignment;
 import com.google.gwt.user.client.ui.HorizontalPanel;
 import com.google.gwt.user.client.ui.Label;
 import com.google.gwt.user.client.ui.Panel;
+import com.google.gwt.user.client.ui.TextBox;
 import com.google.gwt.user.client.ui.VerticalPanel;
 import com.sap.sailing.domain.common.RegattaIdentifier;
 import com.sap.sailing.gwt.ui.client.ErrorReporter;
@@ -26,11 +27,9 @@ import com.sap.sailing.gwt.ui.client.RegattaSelectionModel;
 import com.sap.sailing.gwt.ui.client.RegattaSelectionProvider;
 import com.sap.sailing.gwt.ui.client.SailingServiceAsync;
 import com.sap.sailing.gwt.ui.client.StringMessages;
-import com.sap.sailing.gwt.ui.client.TextfieldEntryDialog;
 import com.sap.sailing.gwt.ui.shared.CourseAreaDTO;
 import com.sap.sailing.gwt.ui.shared.EventDTO;
 import com.sap.sailing.gwt.ui.shared.RegattaDTO;
-import com.sap.sse.gwt.client.dialog.DataEntryDialog;
 import com.sap.sse.gwt.client.dialog.DataEntryDialog.DialogCallback;
 
 public class StructureImportManagementPanel extends FlowPanel {
@@ -43,9 +42,10 @@ public class StructureImportManagementPanel extends FlowPanel {
     private StructureImportListComposite regattaListComposite;
     private RegattaSelectionProvider regattaSelectionProvider;
     private Panel progressPanel;
+    private TextBox jsonURLTextBox;
+    private TextBox eventIDTextBox;
 
-    private Button addButton;
-    private Button removeButton;
+    private Button listRegattasButton;
     private Button importDetailsButton;
 
     private StructureImportProgressBar progressBar;
@@ -65,54 +65,49 @@ public class StructureImportManagementPanel extends FlowPanel {
 
     private void createUI() {
         progressPanel = new FlowPanel();
-
-        addButton = new Button(this.stringMessages.add());
-        removeButton = new Button(this.stringMessages.remove());
+        Grid URLgrid = new Grid(2, 2);
+        Label eventIDLabel = new Label(stringMessages.event() + ":");
+        Label jsonURLLabel = new Label(stringMessages.jsonUrl() + ":");
+        eventIDTextBox = new TextBox();
+        eventIDTextBox.ensureDebugId("eventIDTextBox");
+        eventIDTextBox.setVisibleLength(50);
+        jsonURLTextBox = new TextBox();
+        jsonURLTextBox.ensureDebugId("JsonURLTextBox");
+        jsonURLTextBox.setVisibleLength(100);
+        listRegattasButton = new Button(this.stringMessages.listRegattas());
         importDetailsButton = new Button(this.stringMessages.importRegatta());
         importDetailsButton.setEnabled(false);
         importDetailsButton.addClickHandler(new ClickHandler() {
             @Override
             public void onClick(ClickEvent event) {
-                List<RegattaDTO> regattas = getSelectedRegattas();
+                List<RegattaDTO> regattas = regattaListComposite.getSelectedRegattas();
                 createEventDetails(regattas);
             }
         });
-        addButton.addClickHandler(new ClickHandler() {
+        listRegattasButton.addClickHandler(new ClickHandler() {
             @Override
             public void onClick(ClickEvent event) {
                 addUrl();
             }
         });
-        removeButton.addClickHandler(new ClickHandler() {
-            @Override
-            public void onClick(ClickEvent event) {
-                List<RegattaDTO> regattas = regattaListComposite.getAllRegattas();
-                for (RegattaIdentifier selectedRegatta : regattaSelectionProvider.getSelectedRegattas()) {
-                    for (RegattaDTO regattaDTO : regattaListComposite.getAllRegattas()) {
-                        if (regattaDTO.getRegattaIdentifier().equals(selectedRegatta)) {
-                            regattas.remove(regattaDTO);
-                            break;
-                        }
-                    }
-                }
-                fillRegattas(regattas);
-                regattas.clear();
-            }
-        });
         VerticalPanel vp = new VerticalPanel();
 
         HorizontalPanel buttonPanel = new HorizontalPanel();
+        URLgrid.setWidget(0, 0, eventIDLabel);
+        URLgrid.setWidget(0, 1, eventIDTextBox);
+        URLgrid.setWidget(1, 0, jsonURLLabel);
+        URLgrid.setWidget(1, 1, jsonURLTextBox);
+        vp.add(URLgrid);
         vp.add(buttonPanel);
-        buttonPanel.add(addButton);
+        buttonPanel.add(listRegattasButton);
         buttonPanel.add(importDetailsButton);
-        buttonPanel.add(removeButton);
         Grid grid = new Grid(1, 1);
         vp.add(grid);
 
         regattaSelectionProvider = new RegattaSelectionModel(true);
 
-        regattaListComposite = new StructureImportListComposite(this.sailingService, regattaSelectionProvider,
-                this.regattaRefresher, this.errorReporter, this.stringMessages, "test");
+        regattaListComposite = new StructureImportListComposite(this.sailingService, this.regattaSelectionProvider,
+                this.regattaRefresher, this.errorReporter, this.stringMessages);
         regattaListComposite.ensureDebugId("RegattaListComposite");
         grid.setWidget(0, 0, regattaListComposite);
         grid.getRowFormatter().setVerticalAlign(0, HasVerticalAlignment.ALIGN_TOP);
@@ -125,7 +120,7 @@ public class StructureImportManagementPanel extends FlowPanel {
 
     private List<RegattaDTO> getSelectedRegattas() {
         List<RegattaDTO> regattas = new ArrayList<RegattaDTO>();
-        for (RegattaIdentifier selectedRegatta : regattaSelectionProvider.getSelectedRegattas()) {
+        for (RegattaIdentifier selectedRegatta : regattaListComposite.regattaSelectionProvider.getSelectedRegattas()) {
             for (RegattaDTO regattaDTO : regattaListComposite.getAllRegattas()) {
                 if (regattaDTO.getRegattaIdentifier().equals(selectedRegatta)) {
                     regattas.add(regattaDTO);
@@ -156,43 +151,32 @@ public class StructureImportManagementPanel extends FlowPanel {
     }
 
     private void addUrl() {
-        final TextfieldEntryDialog dialog = new TextfieldEntryDialog(stringMessages.addResultImportUrl(),
-                stringMessages.addResultImportUrl(), stringMessages.add(), stringMessages.cancel(), "http://",
-                new DataEntryDialog.Validator<String>() {
-                    @Override
-                    public String getErrorMessage(String valueToValidate) {
-                        String result = null;
-                        if (valueToValidate == null || valueToValidate.length() == 0) {
-                            result = stringMessages.pleaseEnterNonEmptyUrl();
-                        }
-                        return result;
-                    }
-                }, new DialogCallback<String>() {
-                    @Override
-                    public void cancel() {
-                        // user cancelled; just don't add
-                    }
+        String valueToValidate = "";
+        if(eventIDTextBox.getValue()==null||eventIDTextBox.getValue().length()==0){
+            valueToValidate = jsonURLTextBox.getValue();
+        }else{
+            valueToValidate = "http://manage2sail.com/api/public/links/event/"+eventIDTextBox.getValue()+"?accesstoken=bDAv8CwsTM94ujZ&mediaType=json";
+        }
+        
+        if (valueToValidate == null || valueToValidate.length() == 0) {
+            errorReporter.reportError(stringMessages.pleaseEnterNonEmptyUrl());
+        }
 
-                    @Override
-                    public void ok(final String url) {
-                        sailingService.getRegattas(url, new AsyncCallback<List<RegattaDTO>>() {
-                            @Override
-                            public void onFailure(Throwable caught) {
-                                errorReporter.reportError("Error trying to load regattas");
-                            }
+        else {
+            sailingService.getRegattas(valueToValidate, new AsyncCallback<List<RegattaDTO>>() {
+                @Override
+                public void onFailure(Throwable caught) {
+                    errorReporter.reportError("Error trying to load regattas");
+                }
 
-                            @Override
-                            public void onSuccess(List<RegattaDTO> regattas) {
-                                fillRegattas(regattas);
-                                importDetailsButton.setEnabled(true);
-                                removeButton.setEnabled(true);
-                            }
-                        });
+                @Override
+                public void onSuccess(List<RegattaDTO> regattas) {
+                    fillRegattas(regattas);
+                    importDetailsButton.setEnabled(true);
+                }
+            });
 
-                    }
-                });
-        dialog.getEntryField().setVisibleLength(100);
-        dialog.show();
+        }
     }
 
     public void fillRegattas(List<RegattaDTO> regattas) {
@@ -225,10 +209,8 @@ public class StructureImportManagementPanel extends FlowPanel {
                     }
 
                 });
-                if (parsed >= amountOfRegattas) {       /*finished*/
+                if (parsed >= amountOfRegattas) { /* finished */
                     regattaRefresher.fillRegattas();
-                    fillRegattas(new ArrayList<RegattaDTO>());
-                    importDetailsButton.setEnabled(false);
                     progressBar.removeFromParent();
                     overallName.removeFromParent();
                     this.cancel();

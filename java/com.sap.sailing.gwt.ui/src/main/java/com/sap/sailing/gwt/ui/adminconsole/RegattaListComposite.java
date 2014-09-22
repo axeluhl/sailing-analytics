@@ -42,9 +42,9 @@ import com.sap.sse.gwt.client.panels.LabeledAbstractFilterablePanel;
 
 public class RegattaListComposite extends Composite implements RegattasDisplayer {
 
-    private final SelectionModel<RegattaDTO> regattaSelectionModel;
-    private final CellTable<RegattaDTO> regattaTable;
-    private ListDataProvider<RegattaDTO> regattaListDataProvider;
+    protected /*final*/ SelectionModel<RegattaDTO> regattaSelectionModel;
+    protected final CellTable<RegattaDTO> regattaTable;
+    protected ListDataProvider<RegattaDTO> regattaListDataProvider;
     private List<RegattaDTO> allRegattas;
     private final SimplePanel mainPanel;
     private final VerticalPanel panel;
@@ -52,14 +52,14 @@ public class RegattaListComposite extends Composite implements RegattasDisplayer
     private final Label noRegattasLabel;
 
     private final SailingServiceAsync sailingService;
-    private final RegattaSelectionProvider regattaSelectionProvider;
+    protected final RegattaSelectionProvider regattaSelectionProvider;
     private final ErrorReporter errorReporter;
     private final RegattaRefresher regattaRefresher;
-    private final StringMessages stringMessages;
+    protected final StringMessages stringMessages;
 
     private final LabeledAbstractFilterablePanel<RegattaDTO> filterablePanelRegattas;
 
-    private static AdminConsoleTableResources tableRes = GWT.create(AdminConsoleTableResources.class);
+    protected static AdminConsoleTableResources tableRes = GWT.create(AdminConsoleTableResources.class);
 
     public static class AnchorCell extends AbstractCell<SafeHtml> {
         @Override
@@ -124,7 +124,7 @@ public class RegattaListComposite extends Composite implements RegattasDisplayer
         initWidget(mainPanel);
     }
 
-    private CellTable<RegattaDTO> createRegattaTable() {
+    protected CellTable<RegattaDTO> createRegattaTable() {
         CellTable<RegattaDTO> table = new CellTable<RegattaDTO>(/* pageSize */10000, tableRes);
         regattaListDataProvider.addDataDisplay(table);
         table.setWidth("100%");
@@ -265,7 +265,7 @@ public class RegattaListComposite extends Composite implements RegattasDisplayer
         }
     }
 
-    private List<RegattaDTO> getSelectedRegattas() {
+    protected List<RegattaDTO> getSelectedRegattas() {
         List<RegattaDTO> result = new ArrayList<RegattaDTO>();
         if (regattaListDataProvider != null) {
             for (RegattaDTO regatta : regattaListDataProvider.getList()) {
