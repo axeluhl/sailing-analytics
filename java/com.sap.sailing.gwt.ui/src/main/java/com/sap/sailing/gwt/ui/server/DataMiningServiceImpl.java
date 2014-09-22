@@ -2,23 +2,25 @@ package com.sap.sailing.gwt.ui.server;
 
 import java.util.ArrayList;
 import java.util.Collection;
+import java.util.Locale;
+import java.util.Set;
 
 import org.osgi.framework.BundleContext;
 import org.osgi.util.tracker.ServiceTracker;
 
 import com.google.gwt.user.server.rpc.RemoteServiceServlet;
-import com.sap.sailing.datamining.data.GPSFixWithContext;
-import com.sap.sailing.datamining.data.TrackedLegOfCompetitorWithContext;
-import com.sap.sailing.datamining.factories.DataMiningFactory;
-import com.sap.sailing.datamining.shared.DataTypes;
-import com.sap.sailing.datamining.shared.QueryDefinition;
-import com.sap.sailing.gwt.ui.datamining.client.DataMiningService;
+import com.sap.sailing.datamining.factories.SailingDataMiningFactory;
+import com.sap.sailing.datamining.shared.SailingDataMiningSerializationDummy;
+import com.sap.sailing.gwt.ui.datamining.DataMiningService;
 import com.sap.sailing.server.RacingEventService;
 import com.sap.sse.datamining.DataMiningServer;
 import com.sap.sse.datamining.Query;
+import com.sap.sse.datamining.factories.FunctionDTOFactory;
 import com.sap.sse.datamining.functions.Function;
-import com.sap.sse.datamining.shared.DataMiningSerializationDummy;
+import com.sap.sse.datamining.i18n.DataMiningStringMessages;
+import com.sap.sse.datamining.shared.QueryDefinition;
 import com.sap.sse.datamining.shared.QueryResult;
+import com.sap.sse.datamining.shared.SSEDataMiningSerializationDummy;
 import com.sap.sse.datamining.shared.dto.FunctionDTO;
 
 public class DataMiningServiceImpl extends RemoteServiceServlet implements DataMiningService {
@@ -37,14 +39,13 @@ public class DataMiningServiceImpl extends RemoteServiceServlet implements DataM
 
     private ServiceTracker<DataMiningServer, DataMiningServer> createAndOpenDataMiningServerTracker(
             BundleContext context) {
-        ServiceTracker<com.sap.sse.datamining.DataMiningServer, com.sap.sse.datamining.DataMiningServer> result = 
-                new ServiceTracker<com.sap.sse.datamining.DataMiningServer, com.sap.sse.datamining.DataMiningServer>(
-                context, com.sap.sse.datamining.DataMiningServer.class.getName(), null);
+        ServiceTracker<DataMiningServer, DataMiningServer> result = new ServiceTracker<DataMiningServer, DataMiningServer>(
+                context, DataMiningServer.class.getName(), null);
         result.open();
         return result;
     }
     
-    private com.sap.sse.datamining.DataMiningServer getDataMiningServer() {
+    private DataMiningServer getDataMiningServer() {
         return dataMiningServerTracker.getService();
     }
 
@@ -58,40 +59,56 @@ public class DataMiningServiceImpl extends RemoteServiceServlet implements DataM
     private RacingEventService getRacingEventService() {
         return racingEventServiceTracker.getService();
     }
+    
+    @Override
+    public Collection<FunctionDTO> getAllStatistics(String localeInfoName) {
+        Collection<Function<?>> statistics = getDataMiningServer().getFunctionProvider().getAllStatistics();
+        return functionsAsFunctionDTOs(statistics, localeInfoName);
+    }
 
     @Override
-    public Collection<FunctionDTO> getDimensionsFor(DataTypes dataType) {
-        Class<?> dataTypeBaseClass = getBaseClassFor(dataType);
+    public Collection<FunctionDTO> getDimensionsFor(FunctionDTO statisticToCalculate, String localeInfoName) {
+        Class<?> dataTypeBaseClass = getBaseClassFor(statisticToCalculate);
         Collection<Function<?>> dimensions = getDataMiningServer().getFunctionProvider().getDimensionsFor(dataTypeBaseClass);
-        return functionsAsFunctionDTOs(dimensions);
+        return functionsAsFunctionDTOs(dimensions, localeInfoName);
     }
     
-    private Class<?> getBaseClassFor(DataTypes dataType) {
-        switch (dataType) {
-        case GPSFix:
-            return GPSFixWithContext.class;
-        case TrackedLegOfCompetitor:
-            return TrackedLegOfCompetitorWithContext.class;
-        }
-        throw new IllegalArgumentException("No base class for data type " + dataType);
+    private Class<?> getBaseClassFor(FunctionDTO statisticToCalculate) {
+        Function<?> function = getDataMiningServer().getFunctionProvider().getFunctionForDTO(statisticToCalculate);
+        return function.getDeclaringType();
     }
 
-    private Collection<FunctionDTO> functionsAsFunctionDTOs(Collection<Function<?>> functions) {
+    private Collection<FunctionDTO> functionsAsFunctionDTOs(Collection<Function<?>> functions, String localeInfoName) {
+        Locale locale = DataMiningStringMessages.Util.getLocaleFor(localeInfoName);
+        DataMiningStringMessages dataMiningStringMessages = getDataMiningServer().getStringMessages();
+        
         Collection<FunctionDTO> functionDTOs = new ArrayList<FunctionDTO>();
         for (Function<?> function : functions) {
-            functionDTOs.add(function.asDTO());
+            functionDTOs.add(FunctionDTOFactory.createFunctionDTO(function, locale, dataMiningStringMessages));
         }
         return functionDTOs;
+    }
+    
+    @Override
+    public QueryResult<Set<Object>> getDimensionValuesFor(Collection<FunctionDTO> dimensions) throws Exception {
+        Query<Set<Object>> dimensionValuesQuery = SailingDataMiningFactory.createDimensionValuesQuery(getRacingEventService(), dimensions, getDataMiningServer().getFunctionProvider());
+        return dimensionValuesQuery.run();
     }
 
     @Override
     public <ResultType extends Number> QueryResult<ResultType> runQuery(QueryDefinition queryDefinition) throws Exception {
-        Query<ResultType> query = DataMiningFactory.createQuery(queryDefinition, getRacingEventService());
+        @SuppressWarnings("unchecked") // TODO Fix after the data mining has been cleaned
+        Query<ResultType> query = (Query<ResultType>) SailingDataMiningFactory.createQuery(getRacingEventService(), queryDefinition, getDataMiningServer().getFunctionProvider());
         return query.run();
     }
     
     @Override
-    public DataMiningSerializationDummy pseudoMethodSoThatSomeDataMiningClassesAreAddedToTheGWTSerializationPolicy() {
+    public SSEDataMiningSerializationDummy pseudoMethodSoThatSomeSSEDataMiningClassesAreAddedToTheGWTSerializationPolicy() {
+        return null;
+    }
+    
+    @Override
+    public SailingDataMiningSerializationDummy pseudoMethodSoThatSomeSailingDataMiningClassesAreAddedToTheGWTSerializationPolicy() {
         return null;
     }
 

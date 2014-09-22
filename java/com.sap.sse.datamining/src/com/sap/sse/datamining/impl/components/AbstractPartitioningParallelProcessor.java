@@ -32,7 +32,7 @@ public abstract class AbstractPartitioningParallelProcessor<InputType, WorkingTy
     }
 
     @Override
-    public void onElement(InputType element) {
+    public void processElement(InputType element) {
         for (WorkingType partialElement : partitionElement(element)) {
             final Callable<ResultType> instruction = createInstruction(partialElement);
             if (isInstructionValid(instruction)) {
@@ -46,7 +46,7 @@ public abstract class AbstractPartitioningParallelProcessor<InputType, WorkingTy
                             }
                         } catch (Exception e) {
                             if (!gotAborted || !(e instanceof InterruptedException)) {
-                                LOGGER.log(Level.FINEST, "An error occured during the processing of an instruction: ", e);
+                                onFailure(e);
                             }
                         } finally {
                             AbstractPartitioningParallelProcessor.this.unfinishedInstructionsCounter.decrement();
@@ -76,7 +76,7 @@ public abstract class AbstractPartitioningParallelProcessor<InputType, WorkingTy
     
     protected void forwardResultToReceivers(ResultType result) {
         for (Processor<ResultType> resultReceiver : resultReceivers) {
-            resultReceiver.onElement(result);
+            resultReceiver.processElement(result);
         }
     }
 
@@ -87,6 +87,13 @@ public abstract class AbstractPartitioningParallelProcessor<InputType, WorkingTy
     protected abstract Callable<ResultType> createInstruction(final WorkingType partialElement);
 
     protected abstract Iterable<WorkingType> partitionElement(InputType element);
+
+    @Override
+    public void onFailure(Throwable failure) {
+        for (Processor<ResultType> resultReceiver : resultReceivers) {
+            resultReceiver.onFailure(failure);
+        }
+    }
 
     @Override
     public void finish() throws InterruptedException {

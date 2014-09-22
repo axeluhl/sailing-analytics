@@ -1,7 +1,5 @@
 package com.sap.sailing.gwt.ui.client.media;
 
-import java.util.Date;
-
 import com.google.gwt.dom.client.MediaElement;
 import com.google.gwt.dom.client.Style;
 import com.google.gwt.event.dom.client.ChangeEvent;
@@ -13,6 +11,8 @@ import com.google.gwt.user.client.ui.Label;
 import com.google.gwt.user.client.ui.TextBox;
 import com.google.gwt.user.client.ui.VerticalPanel;
 import com.google.gwt.user.client.ui.Widget;
+import com.sap.sailing.domain.common.TimePoint;
+import com.sap.sailing.domain.common.impl.MillisecondsDurationImpl;
 import com.sap.sailing.domain.common.media.MediaTrack;
 import com.sap.sailing.domain.common.media.MediaTrack.MimeType;
 import com.sap.sailing.gwt.ui.client.StringMessages;
@@ -46,11 +46,11 @@ public class NewMediaDialog extends DataEntryDialog<MediaTrack> {
     
     private Label durationLabel;
 
-    private Date defaultStartTime;
+    private TimePoint defaultStartTime;
 
     private Label infoLabelLabel;
 
-    public NewMediaDialog(Date defaultStartTime, StringMessages stringMessages, DialogCallback<MediaTrack> dialogCallback) {
+    public NewMediaDialog(TimePoint defaultStartTime, StringMessages stringMessages, DialogCallback<MediaTrack> dialogCallback) {
         super(stringMessages.addMediaTrack(), "", stringMessages.ok(), stringMessages.cancel(), MEDIA_TRACK_VALIDATOR, dialogCallback);
         this.defaultStartTime = defaultStartTime;
         this.stringMessages = stringMessages;
@@ -84,7 +84,7 @@ public class NewMediaDialog extends DataEntryDialog<MediaTrack> {
     
     public void loadedmetadata(MediaElement mediaElement) {
         mediaTrack.startTime = this.defaultStartTime;
-        mediaTrack.durationInMillis = (int) Math.round(mediaElement.getDuration() * 1000);
+        mediaTrack.duration = new MillisecondsDurationImpl((long) Math.round(mediaElement.getDuration() * 1000));
         refreshUI();
     }
 
@@ -203,9 +203,9 @@ public class NewMediaDialog extends DataEntryDialog<MediaTrack> {
         setUiEnabled(true);
         mediaTrack.title = title;
         try {
-            mediaTrack.durationInMillis = (int) (1000 * Double.valueOf(durationInSeconds));
+            mediaTrack.duration = new MillisecondsDurationImpl((long) Math.round(1000 * Double.valueOf(durationInSeconds)));
         } catch (NumberFormatException ex) {
-            mediaTrack.durationInMillis = 0;
+            mediaTrack.duration = null;
         }
         mediaTrack.startTime = this.defaultStartTime;
         refreshUI();
@@ -220,9 +220,9 @@ public class NewMediaDialog extends DataEntryDialog<MediaTrack> {
             infoLabelLabel.setText(stringMessages.mimeType() + ":");
             infoLabel.setText(mediaTrack.typeToString());
         }
-        String startTimeText = mediaTrack.startTime == null ? "undefined" : TimeFormatUtil.DATETIME_FORMAT.format(mediaTrack.startTime);
+        String startTimeText = mediaTrack.startTime == null ? "undefined" : TimeFormatUtil.DATETIME_FORMAT.format(mediaTrack.startTime.asDate());
         startTimeLabel.setText(startTimeText);
-        durationLabel.setText(TimeFormatUtil.milliSecondsToHrsMinSec(mediaTrack.durationInMillis));        
+        durationLabel.setText(TimeFormatUtil.durationToHrsMinSec(mediaTrack.duration));        
     }
 
     @Override

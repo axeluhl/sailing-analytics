@@ -1,17 +1,21 @@
 package com.sap.sse.datamining.functions;
 
-import java.lang.reflect.Method;
 import java.util.Collection;
 
 public interface FunctionRegistry {
 
-    public void register(Method method);
-    public void register(Function<?> function);
-    public void registerFunctionsRetrievedBy(ParallelFunctionRetriever functionRetriever);
-    public void registerAll(Iterable<Function<?>> functions);
+    public void registerAllWithInternalFunctionPolicy(Collection<Class<?>> classesToScan);
+    public void registerAllWithExternalFunctionPolicy(Collection<Class<?>> externalClassesToScan);
 
-    public Collection<Function<?>> getAllRegisteredFunctions();
-    public Iterable<Function<?>> getRegisteredFunctionsOf(Class<?> declaringClass);
-    public Collection<Function<?>> getAllDimensions();
+    public void unregisterAllFunctionsOf(Collection<Class<?>> classesToUnregister);
+
+    public Collection<Function<?>> getAllFunctions();
+    public Collection<Function<?>> getAllFunctionsOf(Class<?> declaringType);
+    public Collection<Function<?>> getStatistics();
+    public Collection<Function<?>> getStatisticsOf(Class<?> declaringType);
+    public Collection<Function<?>> getDimensions();
+    public Collection<Function<?>> getDimensionsOf(Class<?> declaringType);
+    public Collection<Function<?>> getExternalFunctions();
+    public Collection<Function<?>> getExternalFunctionsOf(Class<?> declaringType);
 
 }

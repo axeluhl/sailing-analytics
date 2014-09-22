@@ -1235,8 +1235,9 @@ public abstract class AbstractSimpleLeaderboardImpl implements Leaderboard, Race
         long startOfRequestHandling = System.currentTimeMillis();
         final LeaderboardDTOCalculationReuseCache cache = new LeaderboardDTOCalculationReuseCache(timePoint);
         final LeaderboardDTO result = new LeaderboardDTO(this.getScoreCorrection().getTimePointOfLastCorrectionsValidity() == null ? null
-                : this.getScoreCorrection().getTimePointOfLastCorrectionsValidity().asDate(),
-                this.getScoreCorrection() == null ? null : this.getScoreCorrection().getComment(), this
+                : this.getScoreCorrection().getTimePointOfLastCorrectionsValidity().asDate(), 
+                this.getScoreCorrection() == null ? null : this.getScoreCorrection().getComment(),
+                this.getScoringScheme() == null ? null : this.getScoringScheme().getType(), this
                         .getScoringScheme().isHigherBetter(), new UUIDGenerator(), addOverallDetails);
         result.competitors = new ArrayList<CompetitorDTO>();
         result.name = this.getName();

@@ -46,6 +46,7 @@ public class EventRegattaList extends AbstractEventComposite {
     @UiField SpanElement allBoatClassesSelected;
     
     private final Map<String, List<Regatta>> regattaElementsByLeaderboardGroup;
+    private final List<AnchorElement> leaderboardGroupFilterAnchors;
     
     public EventRegattaList(EventDTO event, Map<String, Triple<RaceGroupDTO, StrippedLeaderboardDTO, LeaderboardGroupDTO>> regattaStructure, 
             Timer timerForClientServerOffset,  PlaceNavigator placeNavigator, EventPageNavigator pageNavigator) {
@@ -55,7 +56,7 @@ public class EventRegattaList extends AbstractEventComposite {
         initWidget(uiBinder.createAndBindUi(this));
 
         regattaElementsByLeaderboardGroup = new HashMap<>();
-
+        leaderboardGroupFilterAnchors = new ArrayList<AnchorElement>();
         boolean isSeries = event.isFakeSeries(); 
         boolean hasMultipleLeaderboardGroups = event.getLeaderboardGroups().size() > 1;
         
@@ -73,6 +74,7 @@ public class EventRegattaList extends AbstractEventComposite {
                     String leaderboardGroupName = LongNamesUtil.shortenLeaderboardGroupName(event.getName(), leaderboardGroup.getName());
                     filterLeaderboardGroupAnchor.setInnerText(leaderboardGroupName);
                     regattaGroupsNavigationPanel.appendChild(filterLeaderboardGroupAnchor);
+                    leaderboardGroupFilterAnchors.add(filterLeaderboardGroupAnchor);
                     
                     registerFilterLeaderboardGroupEvent(filterLeaderboardGroupAnchor, leaderboardGroup);
                 }
@@ -99,7 +101,7 @@ public class EventRegattaList extends AbstractEventComposite {
         }
     }
     
-    private void registerFilterLeaderboardGroupEvent(AnchorElement filterLeaderboardGroupAnchor, final LeaderboardGroupDTO leaderboardGroup) {
+    private void registerFilterLeaderboardGroupEvent(final AnchorElement filterLeaderboardGroupAnchor, final LeaderboardGroupDTO leaderboardGroup) {
         Event.sinkEvents(filterLeaderboardGroupAnchor, Event.ONCLICK);
         Event.setEventListener(filterLeaderboardGroupAnchor, new EventListener() {
             @Override
@@ -107,6 +109,11 @@ public class EventRegattaList extends AbstractEventComposite {
                 switch (DOM.eventGetType(event)) {
                     case Event.ONCLICK:
                          filterRegattaListByLeaderboardGroup(leaderboardGroup);
+                         
+                         for(AnchorElement anchor: leaderboardGroupFilterAnchors) {
+                             anchor.removeClassName(HomeResources.INSTANCE.mainCss().navbar_buttonactive());
+                         }
+                         filterLeaderboardGroupAnchor.addClassName(HomeResources.INSTANCE.mainCss().navbar_buttonactive());
                          break;
                 }
             }
@@ -116,6 +123,7 @@ public class EventRegattaList extends AbstractEventComposite {
     private void filterRegattaListByLeaderboardGroup(LeaderboardGroupDTO leaderboardGroup) {
         if (leaderboardGroup != null) {
             allBoatClassesSelected.getStyle().setDisplay(Display.NONE);
+            filterNoLeaderboardGroupsAnchor.removeClassName(HomeResources.INSTANCE.mainCss().navbar_buttonactive());
             // hide all regattas of the not selected leaderboardgroup
             for (LeaderboardGroupDTO lg : getEvent().getLeaderboardGroups()) {
                 boolean isVisible = leaderboardGroup.getName().equals(lg.getName());
@@ -127,6 +135,7 @@ public class EventRegattaList extends AbstractEventComposite {
         } else {
             // make all regattas visible
             allBoatClassesSelected.getStyle().setDisplay(Display.INLINE_BLOCK);
+            filterNoLeaderboardGroupsAnchor.addClassName(HomeResources.INSTANCE.mainCss().navbar_buttonactive());
             for (LeaderboardGroupDTO lg : getEvent().getLeaderboardGroups()) {
                 List<Regatta> regattaElements = regattaElementsByLeaderboardGroup.get(lg.getName());
                 for (Regatta regatta : regattaElements) {

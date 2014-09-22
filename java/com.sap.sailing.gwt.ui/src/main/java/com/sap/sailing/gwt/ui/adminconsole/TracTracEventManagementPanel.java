@@ -345,6 +345,13 @@ public class TracTracEventManagementPanel extends AbstractEventManagementPanel {
             }
         };
         raceStatusColumn.setSortable(true);
+        TextColumn<TracTracRaceRecordDTO> raceVisibilityColumn = new TextColumn<TracTracRaceRecordDTO>() {
+            @Override
+            public String getValue(TracTracRaceRecordDTO object) {
+                return object.raceVisibility;
+            }
+        };
+        raceVisibilityColumn.setSortable(true);
         
         SelectionCheckboxColumn<TracTracRaceRecordDTO> selectionCheckboxColumn = new SelectionCheckboxColumn<TracTracRaceRecordDTO>(tableResources.cellTableStyle().cellTableCheckboxSelected(),
                 tableResources.cellTableStyle().cellTableCheckboxDeselected(), tableResources.cellTableStyle().cellTableCheckboxColumnCell()) {
@@ -364,6 +371,7 @@ public class TracTracEventManagementPanel extends AbstractEventManagementPanel {
         racesTable.addColumn(boatClassColumn, stringMessages.boatClass());
         racesTable.addColumn(raceStartTrackingColumn, stringMessages.startTime());
         racesTable.addColumn(raceStatusColumn, stringMessages.raceStatusColumn());
+        racesTable.addColumn(raceVisibilityColumn, stringMessages.raceVisibilityColumn());
         racesTable.addColumnSortHandler(getRaceTableColumnSortHandler(selectionCheckboxColumn, this.raceList.getList(),
                 raceNameColumn, boatClassColumn, raceStartTrackingColumn, raceStatusColumn));
         racesTable.setSelectionModel(selectionCheckboxColumn.getSelectionModel(), selectionCheckboxColumn.getSelectionManager());
