@@ -562,4 +562,6 @@ public interface SailingService extends RemoteService {
      */
     RaceDTO setStartTimeReceivedForRace(RaceIdentifier raceIdentifier, Date newStartTimeReceived);
 
+    void getRegattaStructure(List<String> regattaNames);
+
 }

@@ -7,26 +7,26 @@ public class GuessSeriesFromRaceName implements GuessSeriesStrategy {
 	@Override
 	public String guessSeries(String race) {
 		String[] raceName = race.split(" ");
-        String raceType = raceName[0];
+        String series = raceName[0];
         
-        switch (raceType.charAt(0)){
+        switch (series.charAt(0)){
             case 'Q':
-                raceType = "Qualification";
+                series = "Qualification";
                 break;
             case 'R':
-                raceType = "Opening Series";
+                series = "Opening Series";
                 break;
             case 'F':
-                raceType = "Finals";
+                series = "Finals";
                 break;
             case 'M':
-                raceType = "Medal";
+                series = "Medal";
                 break;
             default:
-                raceType = "Default";
+                series = "Default";
                 break;
         }
-        return raceType;
+        return series;
 	}
 
 }

@@ -76,7 +76,7 @@ public class StructureImportManagementPanel extends FlowPanel {
         jsonURLTextBox.setVisibleLength(100);
         listRegattasButton = new Button(this.stringMessages.listRegattas());
         importDetailsButton = new Button(this.stringMessages.importRegatta());
-        importDetailsButton.setEnabled(false);
+        importDetailsButton.setEnabled(true);//TODO change to false
         importDetailsButton.addClickHandler(new ClickHandler() {
             @Override
             public void onClick(ClickEvent event) {
@@ -145,7 +145,7 @@ public class StructureImportManagementPanel extends FlowPanel {
 
             @Override
             public void onSuccess(List<EventDTO> events) {
-                openEventCreateDialog(regattaNames, events);
+                setDefaultRegatta(regattaNames, events);
             }
         });
     }
@@ -220,25 +220,34 @@ public class StructureImportManagementPanel extends FlowPanel {
         timer.scheduleRepeating(2000);
     }
 
-    private void setDefaultRegatta(final List<String> regattaNames, final EventDTO newEvent) {
-        Collection<RegattaDTO> existingRegattas = Collections.emptyList();
-        List<EventDTO> existingEvents = new ArrayList<EventDTO>();
-        existingEvents.add(newEvent);
+    private void setDefaultRegatta(final List<String> regattaNames, final List<EventDTO> newEvent) {
+        sailingService.getEvents(new AsyncCallback<List<EventDTO>>() {
+            @Override
+            public void onFailure(Throwable caught) {
+                errorReporter.reportError(stringMessages.errorAddingResultImportUrl(caught.getMessage()));
+            }
 
-        DefaultRegattaCreateDialog dialog = new DefaultRegattaCreateDialog(existingRegattas, existingEvents,
-                stringMessages, new DialogCallback<RegattaDTO>() {
-                    @Override
-                    public void cancel() {
-                    }
+            @Override
+            public void onSuccess(List<EventDTO> result) {
+                Collection<RegattaDTO> existingRegattas = Collections.emptyList();
+                DefaultRegattaCreateDialog dialog = new DefaultRegattaCreateDialog(existingRegattas, result, sailingService, errorReporter, 
+                        stringMessages, new DialogCallback<RegattaDTO>() {
+                            @Override
+                            public void cancel() {
+                            }
 
-                    @Override
-                    public void ok(RegattaDTO newRegatta) {
-                        createRegattas(regattaNames, newEvent, newRegatta);
-                    }
-                });
-        dialog.ensureDebugId("DefaultRegattaCreateDialog");
-        dialog.show();
+                            @Override
+                            public void ok(RegattaDTO newRegatta) {
+                                //TODO hier die getRegattaStructure aus sailingServiceImpl aufrufen und damit das UI aufbauen
+                            }
+                        });
+                dialog.ensureDebugId("DefaultRegattaCreateDialog");
+                dialog.show();
 
+            }
+        });
+
+        
     }
 
     private void createRegattas(final List<String> regattaNames, EventDTO newEvent, RegattaDTO defaultRegatta) {
@@ -254,44 +263,6 @@ public class StructureImportManagementPanel extends FlowPanel {
                 setProgressBar(regattaNames.size());
             }
         });
-    }
-
-    private void openEventCreateDialog(final List<String> regattaNames, List<EventDTO> events) {
-        EventCreateDialog dialog = new EventCreateDialog(Collections.unmodifiableCollection(events), stringMessages,
-                new DialogCallback<EventDTO>() {
-                    @Override
-                    public void cancel() {
-                    }
-
-                    @Override
-                    public void ok(final EventDTO newEvent) {
-                        createEventAndRegattaStructure(regattaNames, newEvent);
-                    }
-                });
-        dialog.show();
-    }
-
-    private void createEventAndRegattaStructure(final List<String> regattaNames, final EventDTO newEvent) {
-        List<String> courseAreaNames = new ArrayList<String>();
-        for (CourseAreaDTO courseAreaDTO : newEvent.venue.getCourseAreas()) {
-            courseAreaNames.add(courseAreaDTO.getName());
-        }
-        sailingService.createEvent(newEvent.getName(), newEvent.startDate, newEvent.endDate, newEvent.venue.getName(),
-                newEvent.isPublic, courseAreaNames, newEvent.getImageURLs(), newEvent.getVideoURLs(),
-                newEvent.getSponsorImageURLs(), newEvent.getLogoImageURL(), newEvent.getOfficialWebsiteURL(),
-                new AsyncCallback<EventDTO>() {
-
-                    @Override
-                    public void onFailure(Throwable t) {
-                        errorReporter.reportError("Error trying to create new event " + newEvent.getName() + ": "
-                                + t.getMessage());
-                    }
-
-                    @Override
-                    public void onSuccess(EventDTO newEvent) {
-                        setDefaultRegatta(regattaNames, newEvent);
-                    }
-                });
     }
 
 }

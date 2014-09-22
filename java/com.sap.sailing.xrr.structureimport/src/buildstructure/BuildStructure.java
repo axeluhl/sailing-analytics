@@ -38,7 +38,7 @@ public class BuildStructure {
             structure.addRace(races.get(i), numberOfRaces);
         }
         
-        structure.checkRaceTypes();
+        structure.checkSeries();
         
     }
     public RegattaStructure getRegattaStructure(){
