@@ -45,6 +45,17 @@ import com.sap.sse.common.Util;
 
 public class IgtimiConnectionImpl implements IgtimiConnection {
     private static final Logger logger = Logger.getLogger(IgtimiConnectionImpl.class.getName());
+
+    /**
+     * name of the JSON property indicating an error reason in a response document
+     */
+    private static final String REASON = "reason";
+
+    /**
+     * name of the JSON property indicating an error condition in a response document
+     */
+    private static final String ERROR = "error";
+
     private final Account account;
     private final IgtimiConnectionFactoryImpl connectionFactory;
     private final LiveDataConnectionFactory liveDataConnectionFactory;
@@ -149,6 +160,12 @@ public class IgtimiConnectionImpl implements IgtimiConnection {
         HttpClient client = connectionFactory.getHttpClient();
         HttpGet getResourceData = new HttpGet(connectionFactory.getResourceDataUrl(startTime, endTime, deviceSerialNumbers, typeAndCompression, account));
         JSONObject resourceDataJson = ConnectivityUtils.getJsonFromResponse(client.execute(getResourceData));
+        String error = (String) resourceDataJson.get(ERROR);
+        if (error != null) {
+            String reason = (String) resourceDataJson.get(REASON);
+            throw new ClientProtocolException("Error trying to obtain Igtimi resource data from "+startTime+" to "+endTime+
+                    " from devices "+deviceSerialNumbers+": "+error+(reason==null?"":". Reason: "+reason));
+        }
         return new FixFactory().createFixes(resourceDataJson);
     }
 
