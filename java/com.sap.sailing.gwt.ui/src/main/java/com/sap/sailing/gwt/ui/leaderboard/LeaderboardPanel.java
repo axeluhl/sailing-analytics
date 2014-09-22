@@ -15,8 +15,8 @@ import java.util.Set;
 
 import com.google.gwt.cell.client.Cell;
 import com.google.gwt.cell.client.Cell.Context;
+import com.google.gwt.cell.client.AbstractSafeHtmlCell;
 import com.google.gwt.cell.client.CompositeCell;
-import com.google.gwt.cell.client.EditTextCell;
 import com.google.gwt.cell.client.TextCell;
 import com.google.gwt.core.client.GWT;
 import com.google.gwt.core.client.Scheduler;
@@ -34,6 +34,7 @@ import com.google.gwt.safehtml.client.SafeHtmlTemplates;
 import com.google.gwt.safehtml.shared.SafeHtml;
 import com.google.gwt.safehtml.shared.SafeHtmlBuilder;
 import com.google.gwt.safehtml.shared.SafeHtmlUtils;
+import com.google.gwt.text.shared.AbstractSafeHtmlRenderer;
 import com.google.gwt.user.cellview.client.Column;
 import com.google.gwt.user.cellview.client.Header;
 import com.google.gwt.user.cellview.client.SafeHtmlHeader;
@@ -1437,20 +1438,30 @@ public class LeaderboardPanel extends SimplePanel implements TimeListener, PlayS
         }
     }
 
-    protected class CarryColumn extends LeaderboardSortableColumnWithMinMax<LeaderboardRowDTO, String> {
+    protected class CarryColumn extends LeaderboardSortableColumnWithMinMax<LeaderboardRowDTO, LeaderboardRowDTO> {
         public CarryColumn() {
-            super(new TextCell(), SortingOrder.ASCENDING, LeaderboardPanel.this);
+            super(new AbstractSafeHtmlCell<LeaderboardRowDTO>(new AbstractSafeHtmlRenderer<LeaderboardRowDTO>() {
+                @Override
+                public SafeHtml render(LeaderboardRowDTO object) {
+                    return new SafeHtmlBuilder().appendEscaped(object.carriedPoints == null ? "" : scoreFormat.format(object.carriedPoints)).toSafeHtml();
+                }
+            }) {
+                @Override
+                protected void render(com.google.gwt.cell.client.Cell.Context context, SafeHtml data, SafeHtmlBuilder sb) {
+                    sb.append(data);
+                }
+            }, SortingOrder.ASCENDING, LeaderboardPanel.this);
             setSortable(true);
         }
 
-        protected CarryColumn(EditTextCell editTextCell) {
-            super(editTextCell, SortingOrder.ASCENDING, LeaderboardPanel.this);
+        protected CarryColumn(Cell<LeaderboardRowDTO> cell) {
+            super(cell, SortingOrder.ASCENDING, LeaderboardPanel.this);
             setSortable(true);
         }
 
         @Override
-        public String getValue(LeaderboardRowDTO object) {
-            return object.carriedPoints == null ? "" : scoreFormat.format(object.carriedPoints);
+        public LeaderboardRowDTO getValue(LeaderboardRowDTO object) {
+            return object;
         }
 
         @Override
