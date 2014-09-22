@@ -10,7 +10,7 @@ public class BuildStructure {
     
     RegattaStructure structure = null;
     
-    public BuildStructure(List<Race> races){
+    public BuildStructure(List<Race> races, String name){
         
         int[] numberOfRaces = new int[10];
         
@@ -32,7 +32,7 @@ public class BuildStructure {
         }
         
         
-        structure = new RegattaStructure(new GuessSeriesFromRaceName());
+        structure = new RegattaStructure(new GuessSeriesFromRaceName(), name);
         
         for(int i=0;i<races.size();i++){
             structure.addRace(races.get(i), numberOfRaces);

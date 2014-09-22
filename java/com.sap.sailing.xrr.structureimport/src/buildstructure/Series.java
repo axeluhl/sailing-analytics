@@ -2,15 +2,16 @@ package buildstructure;
 
 import java.util.ArrayList;
 import java.util.Collections;
+import java.util.List;
 
 import com.sap.sailing.xrr.schema.Race;
-
 
 public class Series {
 
     private String raceType = "";
     private int maxRaces = 0;
     private int maxRacesIndex = -1;
+    private List<String> raceNames = new ArrayList<String>();
     private ArrayList<Fleet> fleets = new ArrayList<Fleet>();
 
     public Series(String raceType) {
@@ -36,7 +37,7 @@ public class Series {
             }
         }
 
-        if (numberOfRaces[raceNumber - 1] <=1  && !fleetEx) {
+        if (numberOfRaces[raceNumber - 1] <= 1 && !fleetEx) {
             fleetColor = "";
         }
 
@@ -65,9 +66,9 @@ public class Series {
         }
 
     }
-    
-    public char getFirstChar(){
-    	return raceType.charAt(0);
+
+    public char getFirstChar() {
+        return raceType.charAt(0);
     }
 
     public String getSeries() {
@@ -89,13 +90,21 @@ public class Series {
     public int getMaxIndex() {
         return maxRacesIndex;
     }
+
+    public boolean isMedal() {
+        if (this.raceType.equals("Medal")) {
+            return true;
+        } else {
+            return false;
+        }
+    }
+
+    public List<String> getRaceNames() {
+        return raceNames;
+    }
     
-    public boolean isMedal(){
-    	if(this.raceType.equals("Medal")){
-    		return true;
-    	}else{
-    		return false;
-    	}
+    public void setRaceNames(List<String> raceNames){
+        this.raceNames = raceNames;
     }
 
 }

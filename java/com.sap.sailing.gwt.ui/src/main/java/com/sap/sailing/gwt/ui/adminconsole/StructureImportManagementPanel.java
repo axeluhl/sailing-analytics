@@ -76,7 +76,7 @@ public class StructureImportManagementPanel extends FlowPanel {
         jsonURLTextBox.setVisibleLength(100);
         listRegattasButton = new Button(this.stringMessages.listRegattas());
         importDetailsButton = new Button(this.stringMessages.importRegatta());
-        importDetailsButton.setEnabled(true);//TODO change to false
+        importDetailsButton.setEnabled(true);// TODO change to false
         importDetailsButton.addClickHandler(new ClickHandler() {
             @Override
             public void onClick(ClickEvent event) {
@@ -118,18 +118,6 @@ public class StructureImportManagementPanel extends FlowPanel {
         add(vp);
     }
 
-    private List<RegattaDTO> getSelectedRegattas() {
-        List<RegattaDTO> regattas = new ArrayList<RegattaDTO>();
-        for (RegattaIdentifier selectedRegatta : regattaListComposite.regattaSelectionProvider.getSelectedRegattas()) {
-            for (RegattaDTO regattaDTO : regattaListComposite.getAllRegattas()) {
-                if (regattaDTO.getRegattaIdentifier().equals(selectedRegatta)) {
-                    regattas.add(regattaDTO);
-                }
-            }
-        }
-        return regattas;
-    }
-
     private void createEventDetails(List<RegattaDTO> regattas) {
         List<String> regattaNamesTemp = new ArrayList<String>();
         for (RegattaDTO regatta : regattas) {
@@ -152,12 +140,13 @@ public class StructureImportManagementPanel extends FlowPanel {
 
     private void addUrl() {
         String valueToValidate = "";
-        if(eventIDTextBox.getValue()==null||eventIDTextBox.getValue().length()==0){
+        if (eventIDTextBox.getValue() == null || eventIDTextBox.getValue().length() == 0) {
             valueToValidate = jsonURLTextBox.getValue();
-        }else{
-            valueToValidate = "http://manage2sail.com/api/public/links/event/"+eventIDTextBox.getValue()+"?accesstoken=bDAv8CwsTM94ujZ&mediaType=json";
+        } else {
+            valueToValidate = "http://manage2sail.com/api/public/links/event/" + eventIDTextBox.getValue()
+                    + "?accesstoken=bDAv8CwsTM94ujZ&mediaType=json";
         }
-        
+
         if (valueToValidate == null || valueToValidate.length() == 0) {
             errorReporter.reportError(stringMessages.pleaseEnterNonEmptyUrl());
         }
@@ -230,15 +219,28 @@ public class StructureImportManagementPanel extends FlowPanel {
             @Override
             public void onSuccess(List<EventDTO> result) {
                 Collection<RegattaDTO> existingRegattas = Collections.emptyList();
-                DefaultRegattaCreateDialog dialog = new DefaultRegattaCreateDialog(existingRegattas, result, sailingService, errorReporter, 
-                        stringMessages, new DialogCallback<RegattaDTO>() {
+                DefaultRegattaCreateDialog dialog = new DefaultRegattaCreateDialog(existingRegattas, result,
+                        sailingService, errorReporter, stringMessages, new DialogCallback<RegattaDTO>() {
                             @Override
                             public void cancel() {
                             }
 
                             @Override
                             public void ok(RegattaDTO newRegatta) {
-                                //TODO hier die getRegattaStructure aus sailingServiceImpl aufrufen und damit das UI aufbauen
+                                sailingService.getRegattaStructure(regattaNames, new AsyncCallback<Void>() {
+                                    @Override
+                                    public void onFailure(Throwable caught) {
+//                                        errorReporter.reportError(stringMessages.errorAddingResultImportUrl(caught
+//                                                .getMessage()));
+                                    }
+
+                                    @Override
+                                    public void onSuccess(Void result) {
+                                     // TODO hier die getRegattaStructure aus sailingServiceImpl aufrufen und damit das UI
+                                        // aufbauen
+                                    }
+                                });
+                                
                             }
                         });
                 dialog.ensureDebugId("DefaultRegattaCreateDialog");
@@ -247,7 +249,6 @@ public class StructureImportManagementPanel extends FlowPanel {
             }
         });
 
-        
     }
 
     private void createRegattas(final List<String> regattaNames, EventDTO newEvent, RegattaDTO defaultRegatta) {

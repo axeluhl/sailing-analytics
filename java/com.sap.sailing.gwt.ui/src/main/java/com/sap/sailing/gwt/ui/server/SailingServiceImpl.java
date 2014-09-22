@@ -54,6 +54,7 @@ import org.osgi.framework.InvalidSyntaxException;
 import org.osgi.framework.ServiceReference;
 import org.osgi.util.tracker.ServiceTracker;
 
+import buildstructure.BuildStructure;
 import buildstructure.SetRacenumberFromSeries;
 
 import com.sap.sailing.domain.base.BoatClass;
@@ -3747,13 +3748,17 @@ public class SailingServiceImpl extends ProxiedRemoteServiceServlet implements S
     private List<String> createRegattasWithRaces(Iterable<AddSpecificRegatta> regattas, String eventName) {
 
         List<String> leaderboardNames = new ArrayList<String>();
-        List<List<List<String>>> series = structureImporter.getRaceNames();
+//        List<List<List<String>>> series = structureImporter.getRaceNames();
+        List<BuildStructure> buildStructures = structureImporter.getBuildStructures();
         int i = 0;
         for (AddSpecificRegatta addSpecificRegatta: regattas) {
             Regatta regatta = getService().apply(addSpecificRegatta);
 
             // create Races
             int j = 0;
+            for(buildstructure.Series series: buildStructures.get(i).getRegattaStructure().getSeries()){
+            addRaceColumnsToSeries(regatta.getRegattaIdentifier(), buildStructure.get(i).getRegattaStructure()., );
+            }
             for (Series s : regatta.getSeries()) {
                 addRaceColumnsToSeries(regatta.getRegattaIdentifier(), s.getName(), series.get(i).get(j));
                 j++;
@@ -3767,11 +3772,13 @@ public class SailingServiceImpl extends ProxiedRemoteServiceServlet implements S
         }
         return leaderboardNames;
     }
-    
+
     @Override
-    public void getRegattaStructure(final List<String> regattaNames){
-        //TODO hier die getRegattaStructure aus StructureImporter aufrufen
-        //TODO Rückgabetyp ändern
+    public void getRegattaStructure(final List<String> regattaNames) {
+        structureImporter.getRegattaStructure(regattaNames);
+        // Series erstellen
+        // TODO hier die getRegattaStructure aus StructureImporter aufrufen
+        // TODO Rückgabetyp ändern
     }
 
     @Override

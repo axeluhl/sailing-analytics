@@ -55,6 +55,7 @@ public class StructureImporter {
     private ArrayList<RegattaResults> results = new ArrayList<RegattaResults>();
     private static List<List<List<String>>> seriesForRegattas = new ArrayList<List<List<String>>>();
     private ArrayList<RegattaJSON> regattas;
+    private List<BuildStructure> buildStructures = new ArrayList<BuildStructure>();
     private LinkedHashMap<String, Boat> boatForPerson;
     private DomainFactory baseDomainFactory;
     private SetRacenumberStrategy setRacenumberStrategy;
@@ -106,35 +107,38 @@ public class StructureImporter {
             parsedDocuments++;
         }
     }
-    
-    public List<List<String>> getRegattaStructure(List<String> regattaNames){
-        //TODO anderen Rückgabeparameter verwenden. Evtl. eine eigene DTO Klasse. 
-        //Die Series aus diesem Paket kann ja nicht verwendet werden, weil es sonst wieder dependencies loops gibt  
-        
-        
-        ArrayList<String> allSeries = new ArrayList<String>(); 
-        
+
+    public Iterable<BuildStructure> getRegattaStructure(List<String> regattaNames) {
+        // TODO anderen Rückgabeparameter verwenden. Evtl. eine eigene DTO Klasse.
+        // Die Series aus diesem Paket kann ja nicht verwendet werden, weil es sonst wieder dependencies loops gibt
+
+        List<String> allSeries = new ArrayList<String>();
+        buildStructures.clear();
+
         results.clear();
         parseRegattas();
+        int zaehler = 0;
 
-        for (int i = 0; i < results.size(); i++) {
-            ArrayList<String> series = new ArrayList<String>();
-            ArrayList<Race> races = new ArrayList<Race>();
+        for (RegattaResults result: results) {
+            List<String> series = new ArrayList<String>();
+            List<Race> races = new ArrayList<Race>();
 
-            Event event = (Event) results.get(i).getPersonOrBoatOrTeam()
-                    .get(results.get(i).getPersonOrBoatOrTeam().size() - 1);
+            Event event = (Event) result.getPersonOrBoatOrTeam()
+                    .get(result.getPersonOrBoatOrTeam().size() - 1);
 
             List<Object> raceOrDevisionOrRegattaSeries = event.getRaceOrDivisionOrRegattaSeriesResult();
             for (int j = 1; j < raceOrDevisionOrRegattaSeries.size(); j++) {
                 races.add((Race) raceOrDevisionOrRegattaSeries.get(j));
             }
 
-            BuildStructure structure = new BuildStructure(races);
-            //TODO am besten in der Buildstructure im RegattaStructure eine Methode getRegattaStructure(), 
-            //um die Struktur in dem gewünschten Format zu bekommen
+            BuildStructure structure = new BuildStructure(races, regattas.get(zaehler).getName());
+            // TODO am besten in der Buildstructure im RegattaStructure eine Methode getRegattaStructure(),
+            // um die Struktur in dem gewünschten Format zu bekommen
+            buildStructures.add(structure);
+            zaehler++;
         }
-        
-        return null;
+
+        return buildStructures;
     }
 
     public Iterable<AddSpecificRegatta> getRegattas(ScoringSchemeType scoringScheme, boolean isPersistent,
@@ -143,7 +147,7 @@ public class StructureImporter {
             boolean startswithZeroScore, int[] discardingThresholds) {
 
         this.baseDomainFactory = baseDomainFactory;
-        List<AddSpecificRegatta> regattas = new ArrayList<AddSpecificRegatta>();
+        List<AddSpecificRegatta> addSpecificRegattas = new ArrayList<AddSpecificRegatta>();
         results.clear();
         parseRegattas();
 
@@ -151,7 +155,7 @@ public class StructureImporter {
 
             List<Race> races = new ArrayList<Race>();
 
-            //TODO hier die BuildStructure rausnehmen und das bestehende verwenden
+            // TODO hier die BuildStructure rausnehmen und das bestehende verwenden
 
             Event event = (Event) results.get(i).getPersonOrBoatOrTeam()
                     .get(results.get(i).getPersonOrBoatOrTeam().size() - 1);
@@ -161,20 +165,20 @@ public class StructureImporter {
                 races.add((Race) raceOrDevisionOrRegattaSeries.get(j));
             }
 
-            BuildStructure structure = new BuildStructure(races);
+            BuildStructure structure = new BuildStructure(races, regattas.get(i).getName());
 
             LinkedHashMap<String, SeriesCreationParametersDTO> seriesCreationParams = setSeriesCreationParameters(
                     structure, firstColumnIsNonDiscardableCarryForward, hasSplitFleetContiguousScoring,
                     startswithZeroScore, discardingThresholds);
 
-            regattas.add(new AddSpecificRegatta(RegattaImpl.getDefaultName(event.getTitle(), ((Division) event
+            addSpecificRegattas.add(new AddSpecificRegatta(RegattaImpl.getDefaultName(event.getTitle(), ((Division) event
                     .getRaceOrDivisionOrRegattaSeriesResult().get(0)).getTitle()), ((Division) event
                     .getRaceOrDivisionOrRegattaSeriesResult().get(0)).getTitle(), event.getEventID(),
                     new RegattaCreationParametersDTO(seriesCreationParams), isPersistent, this.baseDomainFactory
                             .createScoringScheme(scoringScheme), courseArea, useStartTimeInference));
 
         }
-        return regattas;
+        return addSpecificRegattas;
     }
 
     private LinkedHashMap<String, SeriesCreationParametersDTO> setSeriesCreationParameters(BuildStructure structure,
@@ -193,7 +197,6 @@ public class StructureImporter {
 
                 ArrayList<FleetDTO> fleets = getFleets(raceType.getFleets());
                 List<String> raceNames = getRaceNames(i, raceType, raceType.getFleets());
-                series.add(raceNames);
 
                 seriesCreationParams.put(raceType.getSeries(), new SeriesCreationParametersDTO(fleets,
                 /* medal */raceTypes.get(i).isMedal(), startswithZeroScore, firstColumnIsNonDiscardableCarryForward,
@@ -201,14 +204,12 @@ public class StructureImporter {
             }
 
         }
-        seriesForRegattas.add(series);
         return seriesCreationParams;
 
     }
 
     private List<String> getRaceNames(int i, Series raceType, ArrayList<Fleet> fleets) {
         List<String> raceNames = new ArrayList<String>();
-        raceNames.clear();
 
         // set Racenumbers for each series
         Race[] races = fleets.get(raceType.getMaxIndex()).getRaces();
@@ -405,6 +406,10 @@ public class StructureImporter {
 
     public void setFinished(boolean finished) {
         this.finished = finished;
+    }
+    
+    public List<BuildStructure> getBuildStructures(){
+        return buildStructures;
     }
 
 }
