@@ -163,8 +163,8 @@ public class IgtimiConnectionImpl implements IgtimiConnection {
         // http://bugzilla.sapsailing.com/bugzilla/show_bug.cgi?id=2002 that talks about a one-month limitation
         // imposed by the Igtimi API
         TimePoint windowStartTime = startTime;
-        while (!startTime.after(endTime)) {
-            TimePoint windowEndTime = startTime.plus(Duration.ONE_WEEK);
+        while (!windowStartTime.after(endTime)) {
+            TimePoint windowEndTime = windowStartTime.plus(Duration.ONE_WEEK);
             if (windowEndTime.after(endTime)) {
                 windowEndTime = endTime;
             }
