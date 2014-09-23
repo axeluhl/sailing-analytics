@@ -142,7 +142,7 @@ public class CourseUpdateDuringNonAtomicSerializationTest implements Serializabl
     }
     
     @Test
-    public void testCourseUpdateHalfWayIntoSerialization() throws IOException, ClassNotFoundException {
+    public void testAddingOneWaypointHalfWayIntoSerialization() throws IOException, ClassNotFoundException {
         setUp(5);
         ByteArrayOutputStream bos = new ByteArrayOutputStream();
         ObjectOutputStream oos = new ObjectOutputStream(bos);
@@ -183,4 +183,71 @@ public class CourseUpdateDuringNonAtomicSerializationTest implements Serializabl
         assertEquals(Util.size(course.getWaypoints())-2, Util.size(deserializedCourse.getWaypoints()));
         assertEquals(Util.size(deserializedTrackedRace.getTrackedLegs())+1, Util.size(deserializedTrackedRace.getRace().getCourse().getWaypoints()));
     }
+
+    @Test
+    public void testRemovingOneWaypointHalfWayIntoSerialization() throws IOException, ClassNotFoundException {
+        setUp(5);
+        ByteArrayOutputStream bos = new ByteArrayOutputStream();
+        ObjectOutputStream oos = new ObjectOutputStream(bos);
+        oos.writeObject(course); // now the course has been written to the stream and won't be written a second time
+        // update the course:
+        course.removeWaypoint(2);
+        assertEquals(course.getLegs().size(), Util.size(trackedRace.getTrackedLegs()));
+        oos.writeObject(trackedRace);
+        oos.close();
+        ByteArrayInputStream bis = new ByteArrayInputStream(bos.toByteArray());
+        ObjectInputStream ois = new ObjectInputStream(bis);
+        Course deserializedCourse = (Course) ois.readObject();
+        TrackedRaceImpl deserializedTrackedRace = (TrackedRaceImpl) ois.readObject();
+        ois.close();
+        assertFalse(course.getWaypoints().equals(deserializedCourse.getWaypoints())); // the deserialized course is expected to have one more waypoint
+        assertEquals(Util.size(course.getWaypoints())+1, Util.size(deserializedCourse.getWaypoints()));
+        assertEquals(Util.size(deserializedTrackedRace.getTrackedLegs())+1, Util.size(deserializedTrackedRace.getRace().getCourse().getWaypoints()));
+    }
+
+    @Test
+    public void testRemovingTwoWaypointsHalfWayIntoSerialization() throws IOException, ClassNotFoundException {
+        setUp(5);
+        ByteArrayOutputStream bos = new ByteArrayOutputStream();
+        ObjectOutputStream oos = new ObjectOutputStream(bos);
+        oos.writeObject(course); // now the course has been written to the stream and won't be written a second time
+        // update the course:
+        course.removeWaypoint(2);
+        course.removeWaypoint(3);
+        assertEquals(course.getLegs().size(), Util.size(trackedRace.getTrackedLegs()));
+        oos.writeObject(trackedRace);
+        oos.close();
+        ByteArrayInputStream bis = new ByteArrayInputStream(bos.toByteArray());
+        ObjectInputStream ois = new ObjectInputStream(bis);
+        Course deserializedCourse = (Course) ois.readObject();
+        TrackedRaceImpl deserializedTrackedRace = (TrackedRaceImpl) ois.readObject();
+        ois.close();
+        assertFalse(course.getWaypoints().equals(deserializedCourse.getWaypoints())); // the deserialized course is expected to have one fewer waypoint
+        assertEquals(Util.size(course.getWaypoints())+2, Util.size(deserializedCourse.getWaypoints()));
+        assertEquals(Util.size(deserializedTrackedRace.getTrackedLegs())+1, Util.size(deserializedTrackedRace.getRace().getCourse().getWaypoints()));
+    }
+
+    @Test
+    public void testAddingTwoAndRemovingOneWaypointHalfWayIntoSerialization() throws IOException, ClassNotFoundException {
+        setUp(5);
+        ByteArrayOutputStream bos = new ByteArrayOutputStream();
+        ObjectOutputStream oos = new ObjectOutputStream(bos);
+        oos.writeObject(course); // now the course has been written to the stream and won't be written a second time
+        // update the course:
+        course.addWaypoint(2, new WaypointImpl(new MarkImpl("Mark 2.5")));
+        course.removeWaypoint(3);
+        course.addWaypoint(4, new WaypointImpl(new MarkImpl("Mark 4.5")));
+        assertEquals(course.getLegs().size(), Util.size(trackedRace.getTrackedLegs()));
+        oos.writeObject(trackedRace);
+        oos.close();
+        ByteArrayInputStream bis = new ByteArrayInputStream(bos.toByteArray());
+        ObjectInputStream ois = new ObjectInputStream(bis);
+        Course deserializedCourse = (Course) ois.readObject();
+        TrackedRaceImpl deserializedTrackedRace = (TrackedRaceImpl) ois.readObject();
+        ois.close();
+        assertFalse(course.getWaypoints().equals(deserializedCourse.getWaypoints())); // the deserialized course is expected to have one fewer waypoint
+        assertEquals(Util.size(course.getWaypoints())-1, Util.size(deserializedCourse.getWaypoints()));
+        assertEquals(Util.size(deserializedTrackedRace.getTrackedLegs())+1, Util.size(deserializedTrackedRace.getRace().getCourse().getWaypoints()));
+    }
+
 }
