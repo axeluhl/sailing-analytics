@@ -610,4 +610,10 @@ public class DummyTrackedRace extends TrackedRaceWithWindEssentials {
         
     }
 
+    @Override
+    public Position getCenterOfCourse(TimePoint at) {
+        // TODO Auto-generated method stub
+        return null;
+    }
+
 }

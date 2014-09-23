@@ -1296,10 +1296,6 @@ public abstract class TrackedRaceImpl extends TrackedRaceWithWindEssentials impl
 
     @Override
     public Wind getWind(Position p, TimePoint at) {
-        return shortTimeWindCache.getWind(p, at);
-    }
-    
-    Wind getWindUncached(Position p, TimePoint at) {
         return getWind(p, at, getWindSourcesToExclude());
     }
 
@@ -1344,6 +1340,11 @@ public abstract class TrackedRaceImpl extends TrackedRaceWithWindEssentials impl
 
     @Override
     public WindWithConfidence<com.sap.sse.common.Util.Pair<Position, TimePoint>> getWindWithConfidence(Position p, TimePoint at,
+            Iterable<WindSource> windSourcesToExclude) {
+        return shortTimeWindCache.getWindWithConfidence(p, at, windSourcesToExclude);
+    }
+    
+    public WindWithConfidence<com.sap.sse.common.Util.Pair<Position, TimePoint>> getWindWithConfidenceUncached(Position p, TimePoint at,
             Iterable<WindSource> windSourcesToExclude) {
         boolean canUseSpeedOfAtLeastOneWindSource = false;
         Weigher<com.sap.sse.common.Util.Pair<Position, TimePoint>> weigher = new PositionAndTimePointWeigher(
@@ -3094,4 +3095,29 @@ public abstract class TrackedRaceImpl extends TrackedRaceWithWindEssentials impl
     public GPSFixStore getGPSFixStore() {
     	return gpsFixStore;
     }
+
+    @Override
+    public Position getCenterOfCourse(TimePoint at) {
+        int count = 0;
+        ScalablePosition sum = null;
+        for (Waypoint waypoint : getRace().getCourse().getWaypoints()) {
+            final Position waypointPosition = getApproximatePosition(waypoint, at);
+            if (waypointPosition != null) {
+                ScalablePosition p = new ScalablePosition(waypointPosition);
+                if (sum == null) {
+                    sum = p;
+                } else {
+                    sum = sum.add(p);
+                }
+            }
+        }
+        final Position result;
+        if (sum == null) {
+            result = null;
+        } else {
+            result = sum.divide(count);
+        }
+        return result;
+    }
+    
 }

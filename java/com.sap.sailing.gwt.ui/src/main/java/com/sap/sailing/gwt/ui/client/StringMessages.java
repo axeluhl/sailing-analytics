@@ -1086,4 +1086,5 @@ public interface StringMessages extends Messages {
     String manageMediaTooltip();
     String showAll();
     String raceVisibilityColumn();
+    String enterCarryValueFor(String competitorName);
 }
