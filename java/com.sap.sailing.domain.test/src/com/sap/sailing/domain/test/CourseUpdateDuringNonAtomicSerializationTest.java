@@ -10,8 +10,10 @@ import static org.mockito.Mockito.withSettings;
 import java.io.ByteArrayInputStream;
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;
+import java.io.InputStream;
 import java.io.ObjectInputStream;
 import java.io.ObjectOutputStream;
+import java.io.ObjectStreamClass;
 import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.Collections;
@@ -141,6 +143,25 @@ public class CourseUpdateDuringNonAtomicSerializationTest implements Serializabl
         assertEquals(course.getLegs().size(), Util.size(trackedRace.getTrackedLegs()));
     }
     
+    private static class ObjectInputStreamWithLocalClassResolving extends ObjectInputStream {
+        public ObjectInputStreamWithLocalClassResolving(InputStream is) throws IOException {
+            super(is);
+        }
+        
+        @Override
+        protected Class<?> resolveClass(ObjectStreamClass classDesc) throws IOException, ClassNotFoundException {
+            String className = classDesc.getName();
+            // see http://bugs.sun.com/bugdatabase/view_bug.do?bug_id=6554519
+            // If using loadClass(...) on the class loader directly, an exception is thrown:
+            // StreamCorruptedException: invalid type code 00
+            try {
+                return Class.forName(className, /* initialize */ true, Thread.currentThread().getContextClassLoader());
+            } catch (ClassNotFoundException cnfe) {
+                return super.resolveClass(classDesc);
+            }
+        }
+    }
+    
     @Test
     public void testAddingOneWaypointHalfWayIntoSerialization() throws IOException, ClassNotFoundException {
         setUp(5);
@@ -153,7 +174,7 @@ public class CourseUpdateDuringNonAtomicSerializationTest implements Serializabl
         oos.writeObject(trackedRace);
         oos.close();
         ByteArrayInputStream bis = new ByteArrayInputStream(bos.toByteArray());
-        ObjectInputStream ois = new ObjectInputStream(bis);
+        ObjectInputStream ois = new ObjectInputStreamWithLocalClassResolving(bis);
         Course deserializedCourse = (Course) ois.readObject();
         TrackedRaceImpl deserializedTrackedRace = (TrackedRaceImpl) ois.readObject();
         ois.close();
@@ -175,7 +196,7 @@ public class CourseUpdateDuringNonAtomicSerializationTest implements Serializabl
         oos.writeObject(trackedRace);
         oos.close();
         ByteArrayInputStream bis = new ByteArrayInputStream(bos.toByteArray());
-        ObjectInputStream ois = new ObjectInputStream(bis);
+        ObjectInputStream ois = new ObjectInputStreamWithLocalClassResolving(bis);
         Course deserializedCourse = (Course) ois.readObject();
         TrackedRaceImpl deserializedTrackedRace = (TrackedRaceImpl) ois.readObject();
         ois.close();
@@ -196,7 +217,7 @@ public class CourseUpdateDuringNonAtomicSerializationTest implements Serializabl
         oos.writeObject(trackedRace);
         oos.close();
         ByteArrayInputStream bis = new ByteArrayInputStream(bos.toByteArray());
-        ObjectInputStream ois = new ObjectInputStream(bis);
+        ObjectInputStream ois = new ObjectInputStreamWithLocalClassResolving(bis);
         Course deserializedCourse = (Course) ois.readObject();
         TrackedRaceImpl deserializedTrackedRace = (TrackedRaceImpl) ois.readObject();
         ois.close();
@@ -218,7 +239,7 @@ public class CourseUpdateDuringNonAtomicSerializationTest implements Serializabl
         oos.writeObject(trackedRace);
         oos.close();
         ByteArrayInputStream bis = new ByteArrayInputStream(bos.toByteArray());
-        ObjectInputStream ois = new ObjectInputStream(bis);
+        ObjectInputStream ois = new ObjectInputStreamWithLocalClassResolving(bis);
         Course deserializedCourse = (Course) ois.readObject();
         TrackedRaceImpl deserializedTrackedRace = (TrackedRaceImpl) ois.readObject();
         ois.close();
@@ -241,7 +262,7 @@ public class CourseUpdateDuringNonAtomicSerializationTest implements Serializabl
         oos.writeObject(trackedRace);
         oos.close();
         ByteArrayInputStream bis = new ByteArrayInputStream(bos.toByteArray());
-        ObjectInputStream ois = new ObjectInputStream(bis);
+        ObjectInputStream ois = new ObjectInputStreamWithLocalClassResolving(bis);
         Course deserializedCourse = (Course) ois.readObject();
         TrackedRaceImpl deserializedTrackedRace = (TrackedRaceImpl) ois.readObject();
         ois.close();
