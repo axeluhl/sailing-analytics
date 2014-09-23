@@ -19,6 +19,7 @@ import org.json.simple.JSONObject;
 import org.json.simple.parser.ParseException;
 
 import com.sap.sailing.declination.DeclinationService;
+import com.sap.sailing.domain.common.Duration;
 import com.sap.sailing.domain.common.TimePoint;
 import com.sap.sailing.domain.common.impl.MillisecondsTimePoint;
 import com.sap.sailing.domain.igtimiadapter.Account;
@@ -154,19 +155,34 @@ public class IgtimiConnectionImpl implements IgtimiConnection {
     }
 
     @Override
-    public Iterable<Fix> getResourceData(TimePoint startTime, TimePoint endTime,
+    public Iterable<Fix> getResourceData(final TimePoint startTime, final TimePoint endTime,
             Iterable<String> deviceSerialNumbers, Map<Type, Double> typeAndCompression) throws IllegalStateException, ClientProtocolException, IOException, ParseException {
         logger.info("Obtaining resource data from "+startTime+" to "+endTime+" for devices "+deviceSerialNumbers+" for types "+typeAndCompression);
-        HttpClient client = connectionFactory.getHttpClient();
-        HttpGet getResourceData = new HttpGet(connectionFactory.getResourceDataUrl(startTime, endTime, deviceSerialNumbers, typeAndCompression, account));
-        JSONObject resourceDataJson = ConnectivityUtils.getJsonFromResponse(client.execute(getResourceData));
-        String error = (String) resourceDataJson.get(ERROR);
-        if (error != null) {
-            String reason = (String) resourceDataJson.get(REASON);
-            throw new ClientProtocolException("Error trying to obtain Igtimi resource data from "+startTime+" to "+endTime+
-                    " from devices "+deviceSerialNumbers+": "+error+(reason==null?"":". Reason: "+reason));
+        List<Fix> result = new ArrayList<>(); 
+        // Cut interval into slices that are at most one week long. See also the discussion at
+        // http://bugzilla.sapsailing.com/bugzilla/show_bug.cgi?id=2002 that talks about a one-month limitation
+        // imposed by the Igtimi API
+        TimePoint windowStartTime = startTime;
+        while (!startTime.after(endTime)) {
+            TimePoint windowEndTime = startTime.plus(Duration.ONE_WEEK);
+            if (windowEndTime.after(endTime)) {
+                windowEndTime = endTime;
+            }
+            HttpClient client = connectionFactory.getHttpClient();
+            HttpGet getResourceData = new HttpGet(connectionFactory.getResourceDataUrl(windowStartTime, windowEndTime,
+                    deviceSerialNumbers, typeAndCompression, account));
+            JSONObject resourceDataJson = ConnectivityUtils.getJsonFromResponse(client.execute(getResourceData));
+            String error = (String) resourceDataJson.get(ERROR);
+            if (error != null) {
+                String reason = (String) resourceDataJson.get(REASON);
+                throw new ClientProtocolException("Error trying to obtain Igtimi resource data from " + windowStartTime
+                        + " to " + windowEndTime + " from devices " + deviceSerialNumbers + ": " + error
+                        + (reason == null ? "" : ". Reason: " + reason));
+            }
+            Util.addAll(new FixFactory().createFixes(resourceDataJson), result);
+            windowStartTime = windowEndTime.plus(1);
         }
-        return new FixFactory().createFixes(resourceDataJson);
+        return result;
     }
 
     @Override
