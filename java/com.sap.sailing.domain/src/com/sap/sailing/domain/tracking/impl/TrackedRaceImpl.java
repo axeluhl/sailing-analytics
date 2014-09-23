@@ -501,8 +501,8 @@ public abstract class TrackedRaceImpl extends TrackedRaceWithWindEssentials impl
      */
     private void adjustStructureToCourse() throws PatchFailedException {
         final TrackedRaceAsWaypointList trackedRaceAsWaypointList = new TrackedRaceAsWaypointList(this);
-        Patch<Waypoint> diff = DiffUtils.diff(getRace().getCourse().getWaypoints(), trackedRaceAsWaypointList);
-        diff.applyTo(trackedRaceAsWaypointList);
+        Patch<Waypoint> diff = DiffUtils.diff(trackedRaceAsWaypointList, getRace().getCourse().getWaypoints());
+        diff.applyToInPlace(trackedRaceAsWaypointList);
     }
 
     @Override
@@ -3141,6 +3141,17 @@ public abstract class TrackedRaceImpl extends TrackedRaceWithWindEssentials impl
             result = sum.divide(count);
         }
         return result;
+    }
+
+    /**
+     * @return the waypoints known by this race, based on the key set of {@link #markPassingsForWaypoint}. This key set
+     *         is updated by {@link #waypointAdded(int, Waypoint)} and {@link #waypointRemoved(int, Waypoint)} and hence
+     *         is consistent with the {@link Course}'s waypoint list after the callback methods have returned. The
+     *         iteration order of the elements returned is undefined and in particular is <em>not</em> guaranteed to be
+     *         related to the {@link Course}'s waypoint order.
+     */
+    Iterable<Waypoint> getWaypoints() {
+        return markPassingsForWaypoint.keySet();
     }
     
 }
