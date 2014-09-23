@@ -3,42 +3,45 @@ package com.sap.sailing.domain.test;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertTrue;
-import static org.mockito.Mockito.mock;
-import static org.mockito.Mockito.when;
-import static org.mockito.Mockito.withSettings;
 
 import java.io.ByteArrayInputStream;
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;
-import java.io.InputStream;
 import java.io.ObjectInputStream;
 import java.io.ObjectOutputStream;
-import java.io.ObjectStreamClass;
 import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.UUID;
 
 import org.junit.Test;
 
-import com.sap.sailing.domain.base.BoatClass;
 import com.sap.sailing.domain.base.Competitor;
 import com.sap.sailing.domain.base.Course;
 import com.sap.sailing.domain.base.RaceDefinition;
 import com.sap.sailing.domain.base.Regatta;
 import com.sap.sailing.domain.base.Sideline;
 import com.sap.sailing.domain.base.Waypoint;
+import com.sap.sailing.domain.base.impl.BoatClassImpl;
+import com.sap.sailing.domain.base.impl.CourseAreaImpl;
 import com.sap.sailing.domain.base.impl.CourseImpl;
 import com.sap.sailing.domain.base.impl.MarkImpl;
+import com.sap.sailing.domain.base.impl.RaceDefinitionImpl;
+import com.sap.sailing.domain.base.impl.RegattaImpl;
 import com.sap.sailing.domain.base.impl.WaypointImpl;
+import com.sap.sailing.domain.common.BoatClassMasterdata;
+import com.sap.sailing.domain.leaderboard.impl.LowPoint;
+import com.sap.sailing.domain.racelog.impl.EmptyRaceLogStore;
 import com.sap.sailing.domain.racelog.tracking.EmptyGPSFixStore;
 import com.sap.sailing.domain.tracking.TrackedRegatta;
 import com.sap.sailing.domain.tracking.impl.DynamicTrackedRaceImpl;
 import com.sap.sailing.domain.tracking.impl.EmptyWindStore;
 import com.sap.sailing.domain.tracking.impl.TrackedRaceAsWaypointList;
 import com.sap.sailing.domain.tracking.impl.TrackedRaceImpl;
+import com.sap.sailing.domain.tracking.impl.TrackedRegattaImpl;
 import com.sap.sse.common.Util;
 
 import difflib.DiffUtils;
@@ -68,16 +71,11 @@ public class CourseUpdateDuringNonAtomicSerializationTest implements Serializabl
         addCalls = new HashMap<>();
         removeCalls = new HashMap<>();
         course = new CourseImpl("Test Course", waypoints);
-        TrackedRegatta trackedRegatta = mock(TrackedRegatta.class, withSettings().serializable());
-        Regatta regatta = mock(Regatta.class, withSettings().serializable());
-        when(trackedRegatta.getRegatta()).thenReturn(regatta);
-        when(regatta.getName()).thenReturn("Test Regatta");
-        RaceDefinition race = mock(RaceDefinition.class, withSettings().serializable());
-        BoatClass boatClass = mock(BoatClass.class, withSettings().serializable());
-        when(race.getBoatClass()).thenReturn(boatClass);
-        when(boatClass.typicallyStartsUpwind()).thenReturn(true);
-        when(race.getCourse()).thenReturn(course);
-        when(race.getCompetitors()).thenReturn(Collections.<Competitor>emptySet());
+        Regatta regatta = new RegattaImpl(EmptyRaceLogStore.INSTANCE, "Test Regatta",
+                new BoatClassImpl("505", BoatClassMasterdata._5O5), /* trackedRegattaRegistry */ null,
+                new LowPoint(), UUID.randomUUID(), new CourseAreaImpl("Alpha", UUID.randomUUID()));
+        TrackedRegatta trackedRegatta = new TrackedRegattaImpl(regatta);
+        RaceDefinition race = new RaceDefinitionImpl("Test Race", course, regatta.getBoatClass(), Collections.<Competitor>emptySet());
         trackedRace = new DynamicTrackedRaceImpl(trackedRegatta, race, Collections.<Sideline> emptySet(),
                 EmptyWindStore.INSTANCE, EmptyGPSFixStore.INSTANCE,
                 /* delayToLiveInMillis */10000, /* millisecondsOverWhichToAverageWind */30000, /* millisecondsOverWhichToAverageSpeed */
@@ -143,25 +141,6 @@ public class CourseUpdateDuringNonAtomicSerializationTest implements Serializabl
         assertEquals(course.getLegs().size(), Util.size(trackedRace.getTrackedLegs()));
     }
     
-    private static class ObjectInputStreamWithLocalClassResolving extends ObjectInputStream {
-        public ObjectInputStreamWithLocalClassResolving(InputStream is) throws IOException {
-            super(is);
-        }
-        
-        @Override
-        protected Class<?> resolveClass(ObjectStreamClass classDesc) throws IOException, ClassNotFoundException {
-            String className = classDesc.getName();
-            // see http://bugs.sun.com/bugdatabase/view_bug.do?bug_id=6554519
-            // If using loadClass(...) on the class loader directly, an exception is thrown:
-            // StreamCorruptedException: invalid type code 00
-            try {
-                return Class.forName(className, /* initialize */ true, Thread.currentThread().getContextClassLoader());
-            } catch (ClassNotFoundException cnfe) {
-                return super.resolveClass(classDesc);
-            }
-        }
-    }
-    
     @Test
     public void testAddingOneWaypointHalfWayIntoSerialization() throws IOException, ClassNotFoundException {
         setUp(5);
@@ -174,7 +153,7 @@ public class CourseUpdateDuringNonAtomicSerializationTest implements Serializabl
         oos.writeObject(trackedRace);
         oos.close();
         ByteArrayInputStream bis = new ByteArrayInputStream(bos.toByteArray());
-        ObjectInputStream ois = new ObjectInputStreamWithLocalClassResolving(bis);
+        ObjectInputStream ois = new ObjectInputStream(bis);
         Course deserializedCourse = (Course) ois.readObject();
         TrackedRaceImpl deserializedTrackedRace = (TrackedRaceImpl) ois.readObject();
         ois.close();
@@ -196,7 +175,7 @@ public class CourseUpdateDuringNonAtomicSerializationTest implements Serializabl
         oos.writeObject(trackedRace);
         oos.close();
         ByteArrayInputStream bis = new ByteArrayInputStream(bos.toByteArray());
-        ObjectInputStream ois = new ObjectInputStreamWithLocalClassResolving(bis);
+        ObjectInputStream ois = new ObjectInputStream(bis);
         Course deserializedCourse = (Course) ois.readObject();
         TrackedRaceImpl deserializedTrackedRace = (TrackedRaceImpl) ois.readObject();
         ois.close();
@@ -217,7 +196,7 @@ public class CourseUpdateDuringNonAtomicSerializationTest implements Serializabl
         oos.writeObject(trackedRace);
         oos.close();
         ByteArrayInputStream bis = new ByteArrayInputStream(bos.toByteArray());
-        ObjectInputStream ois = new ObjectInputStreamWithLocalClassResolving(bis);
+        ObjectInputStream ois = new ObjectInputStream(bis);
         Course deserializedCourse = (Course) ois.readObject();
         TrackedRaceImpl deserializedTrackedRace = (TrackedRaceImpl) ois.readObject();
         ois.close();
@@ -239,7 +218,7 @@ public class CourseUpdateDuringNonAtomicSerializationTest implements Serializabl
         oos.writeObject(trackedRace);
         oos.close();
         ByteArrayInputStream bis = new ByteArrayInputStream(bos.toByteArray());
-        ObjectInputStream ois = new ObjectInputStreamWithLocalClassResolving(bis);
+        ObjectInputStream ois = new ObjectInputStream(bis);
         Course deserializedCourse = (Course) ois.readObject();
         TrackedRaceImpl deserializedTrackedRace = (TrackedRaceImpl) ois.readObject();
         ois.close();
@@ -262,7 +241,7 @@ public class CourseUpdateDuringNonAtomicSerializationTest implements Serializabl
         oos.writeObject(trackedRace);
         oos.close();
         ByteArrayInputStream bis = new ByteArrayInputStream(bos.toByteArray());
-        ObjectInputStream ois = new ObjectInputStreamWithLocalClassResolving(bis);
+        ObjectInputStream ois = new ObjectInputStream(bis);
         Course deserializedCourse = (Course) ois.readObject();
         TrackedRaceImpl deserializedTrackedRace = (TrackedRaceImpl) ois.readObject();
         ois.close();
