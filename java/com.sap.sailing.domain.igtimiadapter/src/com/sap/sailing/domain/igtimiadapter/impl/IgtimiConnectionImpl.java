@@ -157,7 +157,7 @@ public class IgtimiConnectionImpl implements IgtimiConnection {
     @Override
     public Iterable<Fix> getResourceData(final TimePoint startTime, final TimePoint endTime,
             Iterable<String> deviceSerialNumbers, Map<Type, Double> typeAndCompression) throws IllegalStateException, ClientProtocolException, IOException, ParseException {
-        logger.info("Obtaining resource data from "+startTime+" to "+endTime+" for devices "+deviceSerialNumbers+" for types "+typeAndCompression);
+        logger.info("Requested resource data from "+startTime+" to "+endTime+" for devices "+deviceSerialNumbers+" for types "+typeAndCompression);
         List<Fix> result = new ArrayList<>(); 
         // Cut interval into slices that are at most one week long. See also the discussion at
         // http://bugzilla.sapsailing.com/bugzilla/show_bug.cgi?id=2002 that talks about a one-month limitation
@@ -168,6 +168,7 @@ public class IgtimiConnectionImpl implements IgtimiConnection {
             if (windowEndTime.after(endTime)) {
                 windowEndTime = endTime;
             }
+            logger.info("Obtaining resource data from "+windowStartTime+" to "+windowEndTime+" for devices "+deviceSerialNumbers+" for types "+typeAndCompression);
             HttpClient client = connectionFactory.getHttpClient();
             HttpGet getResourceData = new HttpGet(connectionFactory.getResourceDataUrl(windowStartTime, windowEndTime,
                     deviceSerialNumbers, typeAndCompression, account));
