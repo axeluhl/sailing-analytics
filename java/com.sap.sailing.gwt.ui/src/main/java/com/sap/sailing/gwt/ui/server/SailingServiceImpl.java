@@ -303,6 +303,7 @@ import com.sap.sailing.gwt.ui.shared.RegattaDTO;
 import com.sap.sailing.gwt.ui.shared.RegattaOverviewEntryDTO;
 import com.sap.sailing.gwt.ui.shared.RegattaScoreCorrectionDTO;
 import com.sap.sailing.gwt.ui.shared.RegattaScoreCorrectionDTO.ScoreCorrectionEntryDTO;
+import com.sap.sailing.gwt.ui.shared.RegattaStructureDTO;
 import com.sap.sailing.gwt.ui.shared.RemoteSailingServerReferenceDTO;
 import com.sap.sailing.gwt.ui.shared.ReplicaDTO;
 import com.sap.sailing.gwt.ui.shared.ReplicationMasterDTO;
@@ -388,6 +389,7 @@ import com.sap.sailing.server.replication.ReplicationService;
 import com.sap.sailing.server.replication.impl.ReplicaDescriptor;
 import com.sap.sailing.util.BuildVersion;
 import com.sap.sailing.xrr.schema.RegattaResults;
+import com.sap.sailing.xrr.structureimport.RegattaStructureKey;
 import com.sap.sailing.xrr.structureimport.SeriesParameters;
 import com.sap.sailing.xrr.structureimport.StructureImporter;
 import com.sap.sse.common.Util;
@@ -3723,7 +3725,7 @@ public class SailingServiceImpl extends ProxiedRemoteServiceServlet implements S
 
     private SeriesParameters getDefaultSeries(RegattaDTO defaultRegatta) {
         SeriesParameters defaultSeries = new SeriesParameters(false, false, false, null);
-        if (defaultRegatta.series.size() > 0) {
+        if (defaultRegatta.series.size() > 0) { //null abfangen
             SeriesDTO series = defaultRegatta.series.get(0);
             defaultSeries
                     .setFirstColumnIsNonDiscardableCarryForward(series.isFirstColumnIsNonDiscardableCarryForward());
@@ -3748,20 +3750,14 @@ public class SailingServiceImpl extends ProxiedRemoteServiceServlet implements S
     private List<String> createRegattasWithRaces(Iterable<AddSpecificRegatta> regattas, String eventName) {
 
         List<String> leaderboardNames = new ArrayList<String>();
-//        List<List<List<String>>> series = structureImporter.getRaceNames();
         List<BuildStructure> buildStructures = structureImporter.getBuildStructures();
         int i = 0;
-        for (AddSpecificRegatta addSpecificRegatta: regattas) {
+        for (AddSpecificRegatta addSpecificRegatta : regattas) {
             Regatta regatta = getService().apply(addSpecificRegatta);
 
-            // create Races
-            int j = 0;
-            for(buildstructure.Series series: buildStructures.get(i).getRegattaStructure().getSeries()){
-            addRaceColumnsToSeries(regatta.getRegattaIdentifier(), buildStructure.get(i).getRegattaStructure()., );
-            }
-            for (Series s : regatta.getSeries()) {
-                addRaceColumnsToSeries(regatta.getRegattaIdentifier(), s.getName(), series.get(i).get(j));
-                j++;
+            // create RaceColumns
+            for (buildstructure.Series series : buildStructures.get(i).getRegattaStructure().getSeries()) {
+                addRaceColumnsToSeries(regatta.getRegattaIdentifier(), series.getSeries(), series.getRaceNames());
             }
 
             if (getLeaderboard(regatta.getName()) == null) {
@@ -3774,11 +3770,16 @@ public class SailingServiceImpl extends ProxiedRemoteServiceServlet implements S
     }
 
     @Override
-    public void getRegattaStructure(final List<String> regattaNames) {
-        structureImporter.getRegattaStructure(regattaNames);
-        // Series erstellen
-        // TODO hier die getRegattaStructure aus StructureImporter aufrufen
-        // TODO Rückgabetyp ändern
+    public Set<RegattaStructureDTO> getRegattaStructure(final List<String> regattaNames) {
+        structureImporter.updateRegattasToSelected(regattaNames);
+        Map<RegattaStructureKey, Set<BuildStructure>> regattaStructures =  structureImporter.getRegattaStructures(regattaNames);
+        Set<RegattaStructureKey> regattaStructureKeys = regattaStructures.keySet();
+        Set<RegattaStructureDTO> regattaStructureDTOs = new HashSet<RegattaStructureDTO>();
+        for(RegattaStructureKey regattaStructureKey: regattaStructureKeys){
+            RegattaStructureDTO regattaStructureDTO = new RegattaStructureDTO(regattaStructureKey, regattaStructures.get(regattaStructureKey));
+            regattaStructureDTOs.add(regattaStructureDTO);
+        }
+        return regattaStructureDTOs;
     }
 
     @Override
@@ -3789,8 +3790,6 @@ public class SailingServiceImpl extends ProxiedRemoteServiceServlet implements S
 
             @Override
             public void run() {
-
-                structureImporter.updateRegattasToSelected(regattaNames);
 
                 SeriesParameters defaultSeries = getDefaultSeries(defaultRegatta);
 
@@ -3804,7 +3803,6 @@ public class SailingServiceImpl extends ProxiedRemoteServiceServlet implements S
                 List<String> leaderboardNames = createRegattasWithRaces(regattas, newEvent.getName());
                 createAndAddLeaderboardGroup(newEvent, leaderboardNames);
                 structureImporter.setCompetitors();
-                structureImporter.resetSeriesForRegattas();
                 structureImporter.setFinished(true);
 
             }
@@ -3819,6 +3817,7 @@ public class SailingServiceImpl extends ProxiedRemoteServiceServlet implements S
             description = newEvent.getDescription();
         }
         String eventName = newEvent.getName();
+        List<UUID> eventLeaderboardGroupUUIDs = new ArrayList<>();
 
         // create Leaderboard Group
         if (getService().getLeaderboardGroupByName(eventName) == null) {
@@ -3826,6 +3825,7 @@ public class SailingServiceImpl extends ProxiedRemoteServiceServlet implements S
                     eventName, false, leaderboardNames, null, null);
             leaderboardGroupDTO = convertToLeaderboardGroupDTO(getService().apply(createLeaderboardGroupOp), false,
                     false);
+            eventLeaderboardGroupUUIDs.add(leaderboardGroupDTO.getId());
         } else {
             leaderboardNames.addAll(getLeaderboardNames());
             updateLeaderboardGroup(eventName, eventName, newEvent.getDescription(), eventName, leaderboardNames, null,
@@ -3833,11 +3833,10 @@ public class SailingServiceImpl extends ProxiedRemoteServiceServlet implements S
             leaderboardGroupDTO = getLeaderboardGroupByName(eventName, false);
         }
 
-        List<UUID> eventLeaderboardGroupUUIDs = new ArrayList<>();
         for (LeaderboardGroupDTO lg : newEvent.getLeaderboardGroups()) {
             eventLeaderboardGroupUUIDs.add(lg.getId());
         }
-        eventLeaderboardGroupUUIDs.add(leaderboardGroupDTO.getId());
+
         try {
             updateEvent(newEvent.id, newEvent.getName(), description, newEvent.startDate, newEvent.endDate,
                     newEvent.venue, newEvent.isPublic, eventLeaderboardGroupUUIDs, newEvent.getLogoImageURL(),

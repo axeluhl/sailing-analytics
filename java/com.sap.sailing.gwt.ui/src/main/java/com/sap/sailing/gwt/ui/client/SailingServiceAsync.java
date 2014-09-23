@@ -59,6 +59,7 @@ import com.sap.sailing.gwt.ui.shared.RaceTimesInfoDTO;
 import com.sap.sailing.gwt.ui.shared.RegattaDTO;
 import com.sap.sailing.gwt.ui.shared.RegattaOverviewEntryDTO;
 import com.sap.sailing.gwt.ui.shared.RegattaScoreCorrectionDTO;
+import com.sap.sailing.gwt.ui.shared.RegattaStructureDTO;
 import com.sap.sailing.gwt.ui.shared.RemoteSailingServerReferenceDTO;
 import com.sap.sailing.gwt.ui.shared.ReplicationStateDTO;
 import com.sap.sailing.gwt.ui.shared.ScoreCorrectionProviderDTO;
@@ -644,6 +645,6 @@ public interface SailingServiceAsync {
 
     void createRegattaStructure(List<String> regattaNames, EventDTO newEvent,RegattaDTO defaultRegatta, AsyncCallback<Void> asyncCallback);
 
-    void getRegattaStructure(List<String> regattaNames, AsyncCallback<Void> callback); 
+    void getRegattaStructure(List<String> regattaNames, AsyncCallback<Set<RegattaStructureDTO>> asyncCallback); 
 
 }

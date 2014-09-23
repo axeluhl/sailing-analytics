@@ -4,6 +4,10 @@ import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.List;
+import java.util.Map;
+import java.util.Set;
+
+import buildstructure.BuildStructure;
 
 import com.github.gwtbootstrap.client.ui.base.ProgressBarBase.Style;
 import com.google.gwt.dom.client.Style.Unit;
@@ -20,16 +24,16 @@ import com.google.gwt.user.client.ui.Label;
 import com.google.gwt.user.client.ui.Panel;
 import com.google.gwt.user.client.ui.TextBox;
 import com.google.gwt.user.client.ui.VerticalPanel;
-import com.sap.sailing.domain.common.RegattaIdentifier;
 import com.sap.sailing.gwt.ui.client.ErrorReporter;
 import com.sap.sailing.gwt.ui.client.RegattaRefresher;
 import com.sap.sailing.gwt.ui.client.RegattaSelectionModel;
 import com.sap.sailing.gwt.ui.client.RegattaSelectionProvider;
 import com.sap.sailing.gwt.ui.client.SailingServiceAsync;
 import com.sap.sailing.gwt.ui.client.StringMessages;
-import com.sap.sailing.gwt.ui.shared.CourseAreaDTO;
 import com.sap.sailing.gwt.ui.shared.EventDTO;
 import com.sap.sailing.gwt.ui.shared.RegattaDTO;
+import com.sap.sailing.gwt.ui.shared.RegattaStructureDTO;
+import com.sap.sailing.xrr.structureimport.RegattaStructureKey;
 import com.sap.sse.gwt.client.dialog.DataEntryDialog.DialogCallback;
 
 public class StructureImportManagementPanel extends FlowPanel {
@@ -226,8 +230,8 @@ public class StructureImportManagementPanel extends FlowPanel {
                             }
 
                             @Override
-                            public void ok(RegattaDTO newRegatta) {
-                                sailingService.getRegattaStructure(regattaNames, new AsyncCallback<Void>() {
+                            public void ok(final RegattaDTO newRegatta) {
+                                sailingService.getRegattaStructure(regattaNames, new AsyncCallback<Set<RegattaStructureDTO>>() {
                                     @Override
                                     public void onFailure(Throwable caught) {
 //                                        errorReporter.reportError(stringMessages.errorAddingResultImportUrl(caught
@@ -235,9 +239,9 @@ public class StructureImportManagementPanel extends FlowPanel {
                                     }
 
                                     @Override
-                                    public void onSuccess(Void result) {
-                                     // TODO hier die getRegattaStructure aus sailingServiceImpl aufrufen und damit das UI
-                                        // aufbauen
+                                    public void onSuccess(Set<RegattaStructureDTO> result) {
+                                     // TODO UI aufbauen
+                                        createRegattas(regattaNames, new EventDTO("MyEvent"), newRegatta); //EventDTO??
                                     }
                                 });
                                 
