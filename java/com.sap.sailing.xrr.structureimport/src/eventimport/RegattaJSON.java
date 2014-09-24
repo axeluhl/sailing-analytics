@@ -1,12 +1,12 @@
 package eventimport;
 
 public class RegattaJSON {
-    
+
     private String id = "";
     private String name = "";
     private String gender = "";
     private String boatClass = "";
-	private String xrrEntriesUrl = "";
+    private String xrrEntriesUrl = "";
     private String xrrPreliminaryUrl = "";
     private String xrrFinalUrl = "";
     private String htmlUrl = "";
@@ -22,13 +22,14 @@ public class RegattaJSON {
     public String getName() {
         return name;
     }
-    public String getBoatClass() {
-		return boatClass;
-	}
 
-	public void setBoatClass(String boatClass) {
-		this.boatClass = boatClass;
-	}
+    public String getBoatClass() {
+        return boatClass;
+    }
+
+    public void setBoatClass(String boatClass) {
+        this.boatClass = boatClass;
+    }
 
     public void setName(String name) {
         this.name = name;

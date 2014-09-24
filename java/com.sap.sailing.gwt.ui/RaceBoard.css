@@ -628,7 +628,7 @@ img.openColumn {
 	border: none;
 }
 
-.gwt-Button, .gwt-Button:visited {
+.gwt-Button, .gwt-Button:visited, .test, .test:visited {
 	background-color: #fcbb22;
 	background-image: none !important;
     -moz-box-shadow: none;
@@ -641,4 +641,8 @@ img.openColumn {
 
 .gwt-Button:hover {
 	background-color: #fcbb22 !important;
+}
+
+.test:hover {
+	
 }

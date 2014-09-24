@@ -56,7 +56,6 @@ public class Fleet implements Comparable{
 
     @Override
     public int compareTo(Object o) {
-        // TODO Auto-generated method stub
         int a = getValueOfColor(this.color);
         int b = getValueOfColor(((Fleet) o).getColor());
         

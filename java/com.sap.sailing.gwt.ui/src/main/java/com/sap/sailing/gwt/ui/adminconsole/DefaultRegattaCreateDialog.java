@@ -24,8 +24,8 @@ public class DefaultRegattaCreateDialog extends RegattaWithSeriesAndFleetsCreate
     private SailingServiceAsync sailingService;
     private ErrorReporter errorReporter;
 
-    public DefaultRegattaCreateDialog(Collection<RegattaDTO> existingRegattas, List<EventDTO> existingEvents, SailingServiceAsync sailingService,
-            ErrorReporter errorReporter, StringMessages stringConstants,
+    public DefaultRegattaCreateDialog(Collection<RegattaDTO> existingRegattas, List<EventDTO> existingEvents,
+            SailingServiceAsync sailingService, ErrorReporter errorReporter, StringMessages stringConstants,
             com.sap.sse.gwt.client.dialog.DataEntryDialog.DialogCallback<RegattaDTO> callback) {
         super(existingRegattas, existingEvents, stringConstants, callback);
         this.sailingService = sailingService;
@@ -33,7 +33,7 @@ public class DefaultRegattaCreateDialog extends RegattaWithSeriesAndFleetsCreate
 
         nameEntryField.setText("Default");
         nameEntryField.setReadOnly(true);
-        boatClassEntryField.setText("DeOfault");
+        boatClassEntryField.setText("Default");
         boatClassEntryField.setReadOnly(true);
         setCourseAreaSelection();
 
@@ -101,6 +101,7 @@ public class DefaultRegattaCreateDialog extends RegattaWithSeriesAndFleetsCreate
 
                     @Override
                     public void onSuccess(EventDTO newEvent) {
+                        sailingEventsListBox.addItem(newEvent.getName());
                         sailingEventsListBox.setSelectedIndex(sailingEventsListBox.getItemCount() - 1);
                         for (CourseAreaDTO courseArea : newEvent.venue.getCourseAreas()) {
                             courseAreaListBox.addItem(courseArea.getName());

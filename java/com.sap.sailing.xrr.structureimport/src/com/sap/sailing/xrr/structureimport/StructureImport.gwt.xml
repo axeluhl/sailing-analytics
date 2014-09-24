@@ -3,5 +3,5 @@
 <module>
   <source path='buildstructure'/>
   <source path='eventimport'/>
-  <source path='importurl'/>
+  <source path='structureimport'/>
 </module>
