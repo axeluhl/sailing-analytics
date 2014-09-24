@@ -10,12 +10,13 @@ public class TracTracRaceRecordDTO extends AbstractRaceRecordDTO {
     public Date trackingEndTime;
     public Date raceStartTime;
     public String raceStatus;
+    public String raceVisibility;
     public Iterable<String> boatClassNames;
 
     public TracTracRaceRecordDTO() {}
     
     public TracTracRaceRecordDTO(String id, String regattaName, String name, Date trackingStartTime,
-            Date trackingEndTime, Date raceStartTime, Iterable<String> boatClassNames, String status, String jsonUrl, boolean hasRememberedRegatta) {
+            Date trackingEndTime, Date raceStartTime, Iterable<String> boatClassNames, String status, String visibility, String jsonUrl, boolean hasRememberedRegatta) {
         super(name, hasRememberedRegatta);
         this.regattaName = regattaName;
         this.id = id;
@@ -24,6 +25,7 @@ public class TracTracRaceRecordDTO extends AbstractRaceRecordDTO {
         this.raceStartTime = raceStartTime;
         this.boatClassNames = boatClassNames;
         this.raceStatus = status;
+        this.raceVisibility = visibility;
         this.jsonURL = jsonUrl;
     }
     

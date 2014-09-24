@@ -5,6 +5,8 @@ import com.sap.sailing.gwt.ui.shared.LeaderboardSearchResultDTO;
 
 public interface SearchResultView {
     Widget asWidget();
+
+    void initSearchResult(String searchText);
     
     void updateSearchResult(String searchText, Iterable<LeaderboardSearchResultDTO> searchResultItems);
 }

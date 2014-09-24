@@ -815,7 +815,7 @@ public interface StringMessages extends Messages {
     String lastFinished();
     String run();
     String times();
-    String numberOfGPSFixes();
+    String dataAmount();
     String averageCleanedServerTime();
     String averageCleanedOverallTime();
     String dataMiningBenchmarkResults();
@@ -840,7 +840,7 @@ public interface StringMessages extends Messages {
     String selectSheet();
     String groupBy();
     String statisticToCalculate();
-    String queryResultsChartSubtitle(int retrievedDataAmount, int filteredDataAmount, double calculationTime);
+    String queryResultsChartSubtitle(int retrievedDataAmount, double calculationTime);
     String noQuerySelected();
     String runAutomatically();
     String noStatisticSelectedError();
@@ -973,9 +973,8 @@ public interface StringMessages extends Messages {
     String rerunQueryAfterRefreshTooltip();
     String queryDefinitionProvider();
     String statisticProvider();
-    String toCalculateThe();
+    String calculateThe();
     String groupingProvider();
-    String use();
     String releaseNotes();
     String hasSplitFleetContiguousScoring();
     String eventOverview();
@@ -1044,6 +1043,7 @@ public interface StringMessages extends Messages {
     String imageURLs();
     String videoURLs();
     String sponsorImageURLs();
+    String invalidSelection();
     String advancePassId();
     String pleaseSelectAScoringResult();
     String eventOfficialWebsiteURL();
@@ -1069,6 +1069,7 @@ public interface StringMessages extends Messages {
     String totalNumberOfOperations();
     String currentOrAverageSpeedOverGroundInKnotsTooltip();
     String currentOrAverageSpeedOverGroundInKnots();
+    String connectors();
     String scoringSchemeHighPointFirstGetsTenOrEight();
     String videoComponentShortName();
     String competitorSearchFilter();
@@ -1086,4 +1087,6 @@ public interface StringMessages extends Messages {
     String manageMedia();
     String manageMediaTooltip();
     String showAll();
+    String raceVisibilityColumn();
+    String enterCarryValueFor(String competitorName);
 }

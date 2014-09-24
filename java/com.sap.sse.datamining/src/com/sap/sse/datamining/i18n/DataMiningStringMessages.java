@@ -8,15 +8,10 @@ import java.util.Map;
 
 import com.sap.sse.datamining.impl.i18n.CompoundDataMiningStringMessages;
 import com.sap.sse.datamining.impl.i18n.DataMiningStringMessagesImpl;
-import com.sap.sse.datamining.shared.Message;
 
 public interface DataMiningStringMessages {
 
     public String getResourceBaseName();
-
-    public String get(Locale locale, Message message);
-    public String get(Locale locale, Message message, String... parameters);
-    public String get(Locale locale, Message message, Message... parameters);
 
     public String get(Locale locale, String messageKey);
     public String get(Locale locale, String messageKey, String... parameters);
@@ -26,6 +21,7 @@ public interface DataMiningStringMessages {
 
         private static boolean supportedLocalesHaveBeenInitialized = false;
         private static final String DEFAULT_LOCALE_NAME = "default";
+        private static final Locale DEFAULT_LOCALE = Locale.ENGLISH;
         private static final Map<String, Locale> supportedLocalesMappedByLocaleInfo = new HashMap<>();
         
         private static final String DEFAULT_STRING_MESSAGES_BASE_NAME = "stringmessages/StringMessages";
@@ -61,19 +57,21 @@ public interface DataMiningStringMessages {
             return new CompoundDataMiningStringMessages(stringMessages);
         }
 
-        public static Locale getLocaleFrom(String localeInfoName) {
+        public static Locale getLocaleFor(String localeInfoName) {
             if (!supportedLocalesHaveBeenInitialized) {
                 initializeSupportedLocales();
             }
             
             Locale locale = Util.supportedLocalesMappedByLocaleInfo.get(localeInfoName);
-            return locale != null ? locale : Util.supportedLocalesMappedByLocaleInfo.get(DEFAULT_LOCALE_NAME);
+            return locale != null ? locale : DEFAULT_LOCALE;
         }
         
         private static void initializeSupportedLocales() {
-            supportedLocalesMappedByLocaleInfo.put(DEFAULT_LOCALE_NAME, Locale.ENGLISH);
+            supportedLocalesMappedByLocaleInfo.put(DEFAULT_LOCALE_NAME, DEFAULT_LOCALE);
             supportedLocalesMappedByLocaleInfo.put("en", Locale.ENGLISH);
             supportedLocalesMappedByLocaleInfo.put("de", Locale.GERMAN);
+            
+            supportedLocalesHaveBeenInitialized = true;
         }
         
         private Util () {

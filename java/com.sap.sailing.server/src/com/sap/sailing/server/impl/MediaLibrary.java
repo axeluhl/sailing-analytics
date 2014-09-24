@@ -114,7 +114,7 @@ class MediaLibrary {
 
     Set<MediaTrack> findMediaTracksInTimeRange(TimePoint startTime, TimePoint endTime) {
 
-        if (startTime != null && endTime != null) {
+        if (startTime != null && endTime != null && startTime.before(endTime)) {
             LockUtil.lockForRead(lock);
             try {
                 Set<MediaTrack> result = new HashSet<MediaTrack>();
@@ -134,13 +134,18 @@ class MediaLibrary {
     }
 
     public Collection<MediaTrack> findLiveMediaTracksForRace(String regattaName, String raceName) {
-        Set<MediaTrack> result = new HashSet<MediaTrack>();
-        for (MediaTrack mediaTrack : mediaTracksByDbId.values()) {
-            if (mediaTrack.duration == null) {
-                result.add(mediaTrack);
+        LockUtil.lockForRead(lock);
+        try {
+            Set<MediaTrack> result = new HashSet<MediaTrack>();
+            for (MediaTrack mediaTrack : mediaTracksByDbId.values()) {
+                if (mediaTrack.duration == null) {
+                    result.add(mediaTrack);
+                }
             }
+            return result;
+        } finally {
+            LockUtil.unlockAfterRead(lock);
         }
-        return result;
     }
 
     /**

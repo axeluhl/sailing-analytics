@@ -250,7 +250,7 @@ public class RegattaOverviewPanel extends SimplePanel {
                                 leaderboardsTabPanel.clear();
                                 for (StrippedLeaderboardDTO leaderboard : result) {
                                     LeaderboardPanel leaderboardPanel = new LeaderboardPanel(sailingService, 
-                                            new AsyncActionsExecutor(), leaderboardSettings, 
+                                            new AsyncActionsExecutor(), leaderboardSettings, false, 
                                             /*preSelectedRace*/null, 
                                             competitorSelectionProvider, 
                                             null, leaderboard.name, 

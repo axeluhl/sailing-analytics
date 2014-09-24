@@ -10,7 +10,6 @@ import com.sap.sailing.server.gateway.deserialization.JsonDeserializer;
 import com.sap.sailing.server.gateway.serialization.impl.FleetJsonSerializer;
 
 public class FleetDeserializer implements JsonDeserializer<Fleet> {
-
     private JsonDeserializer<Color> colorDeserializer;
 
     public FleetDeserializer(JsonDeserializer<Color> colorDeserializer) {

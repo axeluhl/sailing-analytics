@@ -60,7 +60,7 @@ public class CompetitorImpl implements DynamicCompetitor {
     public Serializable getId() {
         return id;
     }
-
+    
     @Override
     public DynamicTeam getTeam() {
         return team;

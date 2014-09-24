@@ -169,9 +169,6 @@ public class MediaLibaryTest {
         originalMediaTrack.startTime = MillisecondsTimePoint.now();
         originalMediaTrack.duration = new MillisecondsDurationImpl(1);
         
-        TimePoint queryStartTime = originalMediaTrack.startTime.minus(1);
-        TimePoint queryEndTime = originalMediaTrack.deriveEndTime().plus(1);
-
         mediaLibary.addMediaTrack(originalMediaTrack);
         
         Set<MediaTrack> firstQueryResult = mediaLibary.findMediaTracksForRace(null);
@@ -199,9 +196,6 @@ public class MediaLibaryTest {
         mediaTrack.startTime = MillisecondsTimePoint.now();
         mediaTrack.duration = MillisecondsDurationImpl.ONE_HOUR;
         
-        TimePoint originalStartTime = mediaTrack.startTime;
-        TimePoint originalEndTime = mediaTrack.deriveEndTime();
-
         mediaLibary.addMediaTrack(mediaTrack);
         
         Set<MediaTrack> firstQueryResult = mediaLibary.findMediaTracksForRace(null);
@@ -222,9 +216,6 @@ public class MediaLibaryTest {
         firstMediaTrack.duration = MillisecondsDurationImpl.ONE_HOUR;
         mediaLibary.addMediaTrack(firstMediaTrack);
         
-        TimePoint queryStartTime = firstMediaTrack.startTime.plus(1);
-        TimePoint queryEndTime = firstMediaTrack.deriveEndTime().minus(1);
-        
         Set<MediaTrack> firstQueryResult = mediaLibary.findMediaTracksForRace(null);
         assertThat(firstQueryResult.size(), is(1));
         
@@ -236,9 +227,6 @@ public class MediaLibaryTest {
         
         Set<MediaTrack> secondQueryResult = mediaLibary.findMediaTracksForRace(null);
         assertThat(secondQueryResult.size(), is(2));
-
-        TimePoint uncachedStartTime = firstMediaTrack.startTime.plus(2);
-        TimePoint uncachedEndTime = firstMediaTrack.deriveEndTime().minus(2);
 
         Set<MediaTrack> thirdQueryResult = mediaLibary.findMediaTracksForRace(null);
         assertThat(thirdQueryResult.size(), is(2));
