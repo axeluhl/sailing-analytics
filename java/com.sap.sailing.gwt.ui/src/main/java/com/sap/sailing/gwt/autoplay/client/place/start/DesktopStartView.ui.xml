@@ -1,0 +1,9 @@
+<!DOCTYPE ui:UiBinder SYSTEM "http://dl.google.com/gwt/DTD/xhtml.ent">
+<ui:UiBinder xmlns:ui="urn:ui:com.google.gwt.uibinder" 
+    xmlns:s="urn:import:com.sap.sailing.gwt.autoplay.client.place"
+	xmlns:g="urn:import:com.google.gwt.user.client.ui">
+	<ui:with field="res" type="com.sap.sailing.gwt.common.client.SharedResources" />
+   	<g:HTMLPanel>
+   	    <s:start.ModeSelector ui:field='modeSelector'/>
+	</g:HTMLPanel>
+</ui:UiBinder>    
