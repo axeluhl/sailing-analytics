@@ -1,6 +1,7 @@
 package com.sap.sailing.gwt.autoplay.client.app;
 
 import com.google.gwt.place.shared.PlaceController;
+import com.sap.sailing.gwt.autoplay.client.place.player.PlayerPlace;
 import com.sap.sailing.gwt.autoplay.client.place.start.StartPlace;
 
 public class PlaceNavigatorImpl implements PlaceNavigator {
@@ -15,4 +16,11 @@ public class PlaceNavigatorImpl implements PlaceNavigator {
     public void goToStart() {
         placeController.goTo(new StartPlace()); 
     }
+    
+    @Override
+    public void goToPlayer(String eventUuidAsString, String leaderboardIdAsNameString) {
+        PlayerPlace playerPlace = new PlayerPlace(eventUuidAsString, leaderboardIdAsNameString);
+        placeController.goTo(playerPlace); 
+    }
+
 }

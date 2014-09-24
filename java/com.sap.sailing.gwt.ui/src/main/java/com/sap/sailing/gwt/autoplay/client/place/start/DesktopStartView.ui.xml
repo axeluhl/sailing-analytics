@@ -3,7 +3,16 @@
     xmlns:s="urn:import:com.sap.sailing.gwt.autoplay.client.place"
 	xmlns:g="urn:import:com.google.gwt.user.client.ui">
 	<ui:with field="res" type="com.sap.sailing.gwt.common.client.SharedResources" />
-   	<g:HTMLPanel>
-   	    <s:start.ModeSelector ui:field='modeSelector'/>
-	</g:HTMLPanel>
+    <ui:style>
+        .mainPanel {
+			margin:10px;
+		}
+    </ui:style>
+    <g:HTMLPanel styleName="{style.mainPanel}">
+	    <g:HorizontalPanel spacing="5">
+	    	<g:Label text="Select an event:" />
+			<g:ListBox ui:field="eventSelectionBox" />
+		    <g:Button ui:field="startAutoPlayButton" text="Start autoplay"/>
+		</g:HorizontalPanel>
+     </g:HTMLPanel>
 </ui:UiBinder>    
