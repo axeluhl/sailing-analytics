@@ -4,10 +4,7 @@ import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.List;
-import java.util.Map;
 import java.util.Set;
-
-import buildstructure.BuildStructure;
 
 import com.github.gwtbootstrap.client.ui.base.ProgressBarBase.Style;
 import com.google.gwt.dom.client.Style.Unit;
@@ -33,7 +30,6 @@ import com.sap.sailing.gwt.ui.client.StringMessages;
 import com.sap.sailing.gwt.ui.shared.EventDTO;
 import com.sap.sailing.gwt.ui.shared.RegattaDTO;
 import com.sap.sailing.gwt.ui.shared.RegattaStructureDTO;
-import com.sap.sailing.xrr.structureimport.RegattaStructureKey;
 import com.sap.sse.gwt.client.dialog.DataEntryDialog.DialogCallback;
 
 public class StructureImportManagementPanel extends FlowPanel {
@@ -241,7 +237,8 @@ public class StructureImportManagementPanel extends FlowPanel {
                                     @Override
                                     public void onSuccess(Set<RegattaStructureDTO> result) {
                                      // TODO UI aufbauen
-                                        createRegattas(regattaNames, new EventDTO("MyEvent"), newRegatta); //EventDTO??
+                                        EventDTO eventDTO = new EventDTO("Test");
+                                        createRegattas(regattaNames, eventDTO, newRegatta); //EventDTO??
                                     }
                                 });
                                 
