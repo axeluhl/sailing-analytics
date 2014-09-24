@@ -1608,6 +1608,10 @@ public class MasterDataImportTest {
         RacingEventService sourceService = new RacingEventServiceImpl();
         Set<RegattaAndRaceIdentifier> regattasAndRaces = new HashSet<RegattaAndRaceIdentifier>();
         regattasAndRaces.add(new RegattaNameAndRaceName("49er", "R1"));
+        regattasAndRaces.add(new RegattaNameAndRaceName("49er", "R2"));
+        regattasAndRaces.add(new RegattaNameAndRaceName("48er", "F1"));
+        regattasAndRaces.add(new RegattaNameAndRaceName("48er", "F2"));
+        regattasAndRaces.add(new RegattaNameAndRaceName("48er", "F3"));
         MediaTrack trackOnSource = new MediaTrack("testTitle", "http://test/test.mp4", new MillisecondsTimePoint(0), MillisecondsDurationImpl.ONE_HOUR,
                 MediaTrack.MimeType.mp4, regattasAndRaces);
         sourceService.mediaTrackAdded(trackOnSource);
@@ -1657,6 +1661,8 @@ public class MasterDataImportTest {
         Assert.assertEquals(trackOnSource.dbId, trackOnTarget.dbId);
 
         Assert.assertEquals(trackOnSource.url, trackOnTarget.url);
+
+        Assert.assertEquals(trackOnSource.assignedRaces, trackOnTarget.assignedRaces);
 
     }
 
