@@ -5,7 +5,16 @@
     <ui:with field="i18n" type="com.sap.sailing.gwt.common.client.i18n.TextMessages"/>
 	<ui:with field="res" type="com.sap.sailing.gwt.common.client.SharedResources" />
     <ui:with field="local_res" type="com.sap.sailing.gwt.autoplay.client.place.start.ModeSelectorResources" />
-    <g:HTMLPanel>
-        <div>Hallo mode selector</div>
-	</g:HTMLPanel>
+    <ui:style>
+        .mainPanel {
+			margin:10px;
+		}
+    </ui:style>
+    <g:HTMLPanel styleName="{style.mainPanel}">
+	    <g:HorizontalPanel spacing="5">
+	    	<g:Label text="Select an event:" />
+			<g:ListBox ui:field="eventSelectionBox" />
+		    <g:Button ui:field="startAutoPlayButton" text="Start autoplay"/>
+		</g:HorizontalPanel>
+     </g:HTMLPanel>
 </ui:UiBinder>
