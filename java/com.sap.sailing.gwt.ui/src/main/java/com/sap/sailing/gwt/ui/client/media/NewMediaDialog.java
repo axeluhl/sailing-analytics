@@ -84,7 +84,7 @@ public class NewMediaDialog extends DataEntryDialog<MediaTrack> {
     protected void connectMediaWithRace() {
         Set<RegattaAndRaceIdentifier> regattasAndRaces = new HashSet<RegattaAndRaceIdentifier>();
         regattasAndRaces.add(this.raceIdentifier);
-        mediaTrack.regattasAndRaces = regattasAndRaces;
+        mediaTrack.assignedRaces = regattasAndRaces;
     }
 
     protected void getStartTime() {

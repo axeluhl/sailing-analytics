@@ -173,7 +173,7 @@ public class MediaMultiSelectionControl extends AbstractMediaSelectionControl im
 
     private ToggleButton createConnectButton(final MediaTrack videoTrack) {
         final ToggleButton connectButton = new ToggleButton();
-        connectButton.setValue(videoTrack.regattasAndRaces
+        connectButton.setValue(videoTrack.assignedRaces
                 .contains(((MediaPlayerManagerComponent) mediaPlayerManager).getRaceIdentifier()));
         connectButton.setTitle("Connect video to this race");
         connectButton.addValueChangeHandler(new ValueChangeHandler<Boolean>() {
@@ -206,7 +206,7 @@ public class MediaMultiSelectionControl extends AbstractMediaSelectionControl im
     }
     
     private void disconnectVideoFromRace(final MediaTrack videoTrack) {
-        videoTrack.regattasAndRaces.remove(((MediaPlayerManagerComponent)mediaPlayerManager).getRaceIdentifier());
+        videoTrack.assignedRaces.remove(((MediaPlayerManagerComponent)mediaPlayerManager).getRaceIdentifier());
         ((MediaPlayerManagerComponent)mediaPlayerManager).getMediaService().updateRace(videoTrack, new AsyncCallback<Void>() {
 
             @Override
@@ -221,7 +221,7 @@ public class MediaMultiSelectionControl extends AbstractMediaSelectionControl im
     }
 
     private void connectVideoToRace(final MediaTrack videoTrack) {
-        videoTrack.regattasAndRaces.add(((MediaPlayerManagerComponent)mediaPlayerManager).getRaceIdentifier());
+        videoTrack.assignedRaces.add(((MediaPlayerManagerComponent)mediaPlayerManager).getRaceIdentifier());
         ((MediaPlayerManagerComponent)mediaPlayerManager).getMediaService().updateRace(videoTrack, new AsyncCallback<Void>() {
 
             @Override

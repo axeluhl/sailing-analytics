@@ -91,7 +91,7 @@ public class RegattasAndRacesDialog extends DataEntryDialog<Set<RegattaAndRaceId
     public void fillRegattas(List<RegattaDTO> result) {
         empty = true;
         this.trackedRacesListComposite.fillRegattas(result);
-        for (RegattaAndRaceIdentifier regattaAndRace : mediaTrack.regattasAndRaces) {
+        for (RegattaAndRaceIdentifier regattaAndRace : mediaTrack.assignedRaces) {
             this.trackedRacesListComposite.selectRaceByIdentifier(regattaAndRace);
         }
         updateUI();

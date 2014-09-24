@@ -65,7 +65,7 @@ public class MediaDBImpl implements MediaDB {
             object.put(DbNames.Fields.RACE_NAME.name(), regattaAndRace.getRaceName());
             objectList.add(object);
         }
-        dbMediaTrack.put(DbNames.Fields.REGATTAS_AND_RACES.name(), objectList);
+        dbMediaTrack.put(DbNames.Fields.ASSIGNED_RACES.name(), objectList);
         DBCollection dbVideos = getVideoCollection();
         dbVideos.insert(dbMediaTrack);
         return ((ObjectId) dbMediaTrack.get(DbNames.Fields._id.name())).toStringMongod();
@@ -93,7 +93,7 @@ public class MediaDBImpl implements MediaDB {
         } else {
             System.currentTimeMillis();
         }
-        dbMediaTrack.put(DbNames.Fields.REGATTAS_AND_RACES.name(), objectList);
+        dbMediaTrack.put(DbNames.Fields.ASSIGNED_RACES.name(), objectList);
         DBCollection dbVideos = getVideoCollection();
         try {
             dbVideos.insert(dbMediaTrack);
@@ -124,10 +124,10 @@ public class MediaDBImpl implements MediaDB {
         String mimeTypeText = (String) dbObject.get(DbNames.Fields.MIME_TYPE.name());
         MimeType mimeType = MimeType.byName(mimeTypeText);
         Set<RegattaAndRaceIdentifier> regattasAndRaces = new HashSet<RegattaAndRaceIdentifier>();
-        BasicDBList list = (BasicDBList) dbObject.get(DbNames.Fields.REGATTAS_AND_RACES.name());
-        if (list != null) {
-            for (Object regattaAndRace : list) {
-                BasicDBObject object = (BasicDBObject) regattaAndRace;
+        BasicDBList assignedRaces = (BasicDBList) dbObject.get(DbNames.Fields.ASSIGNED_RACES.name());
+        if (assignedRaces != null) {
+            for (Object assignedRace : assignedRaces) {
+                BasicDBObject object = (BasicDBObject) assignedRace;
                 String regattaName = (String) object.get(DbNames.Fields.REGATTA_NAME.name());
                 String raceName = (String) object.get(DbNames.Fields.RACE_NAME.name());
                 if (regattaName != null && raceName != null) {
@@ -217,7 +217,7 @@ public class MediaDBImpl implements MediaDB {
             objectList.add(object);
         }
         BasicDBObject updateCommand = new BasicDBObject();
-        updateCommand.append("$set", new BasicDBObject(DbNames.Fields.REGATTAS_AND_RACES.name(), objectList));
+        updateCommand.append("$set", new BasicDBObject(DbNames.Fields.ASSIGNED_RACES.name(), objectList));
 
         getVideoCollection().update(updateQuery, updateCommand);
     }

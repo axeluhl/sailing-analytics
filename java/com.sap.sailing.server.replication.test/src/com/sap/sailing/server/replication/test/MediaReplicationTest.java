@@ -56,8 +56,8 @@ public class MediaReplicationTest extends AbstractServerReplicationTest {
         assertThat(replica.getAllMediaTracks().iterator().next().startTime, is(mediaTrack.startTime));
         assertThat(replica.getAllMediaTracks().iterator().next().duration, is(mediaTrack.duration));
         assertThat(replica.getAllMediaTracks().iterator().next().mimeType, is(mediaTrack.mimeType));
-        assertThat(replica.getAllMediaTracks().iterator().next().regattasAndRaces.size(), is(1));
-        assertThat(replica.getAllMediaTracks().iterator().next().regattasAndRaces, is(mediaTrack.regattasAndRaces));
+        assertThat(replica.getAllMediaTracks().iterator().next().assignedRaces.size(), is(1));
+        assertThat(replica.getAllMediaTracks().iterator().next().assignedRaces, is(mediaTrack.assignedRaces));
     }
 
     @Test
@@ -117,24 +117,24 @@ public class MediaReplicationTest extends AbstractServerReplicationTest {
     public void testUpdateMediaTrackAddRacesReplication() throws InterruptedException {
         MediaTrack mediaTrack = createMediaTrack();
         master.mediaTrackAdded(mediaTrack);
-        mediaTrack.regattasAndRaces.add(new RegattaNameAndRaceName("505", "R1"));
+        mediaTrack.assignedRaces.add(new RegattaNameAndRaceName("505", "R1"));
         master.mediaTrackRacesChanged(mediaTrack);
         waitSomeTime();
         assertThat(replica.getAllMediaTracks().size(), is(1));
-        assertThat(replica.getAllMediaTracks().iterator().next().regattasAndRaces.size(), is(2));
-        assertThat(replica.getAllMediaTracks().iterator().next().regattasAndRaces, is(mediaTrack.regattasAndRaces));
+        assertThat(replica.getAllMediaTracks().iterator().next().assignedRaces.size(), is(2));
+        assertThat(replica.getAllMediaTracks().iterator().next().assignedRaces, is(mediaTrack.assignedRaces));
     }
     
     @Test
     public void testUpdateMediaTrackDeleteRacesReplication() throws InterruptedException {
         MediaTrack mediaTrack = createMediaTrack();
         master.mediaTrackAdded(mediaTrack);
-        mediaTrack.regattasAndRaces.remove(new RegattaNameAndRaceName("49er", "R1"));
+        mediaTrack.assignedRaces.remove(new RegattaNameAndRaceName("49er", "R1"));
         master.mediaTrackRacesChanged(mediaTrack);
         waitSomeTime();
         assertThat(replica.getAllMediaTracks().size(), is(1));
-        assertThat(replica.getAllMediaTracks().iterator().next().regattasAndRaces.size(), is(0));
-        assertThat(replica.getAllMediaTracks().iterator().next().regattasAndRaces, is(mediaTrack.regattasAndRaces));
+        assertThat(replica.getAllMediaTracks().iterator().next().assignedRaces.size(), is(0));
+        assertThat(replica.getAllMediaTracks().iterator().next().assignedRaces, is(mediaTrack.assignedRaces));
     }
 
 }

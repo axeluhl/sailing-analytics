@@ -87,45 +87,34 @@ public class MediaTrack implements Serializable {
     public Duration duration;
     public MimeType mimeType;
     public Status status = Status.UNDEFINED;
-    public Set<RegattaAndRaceIdentifier> regattasAndRaces;
+    public Set<RegattaAndRaceIdentifier> assignedRaces;
 
     public MediaTrack() {
-        regattasAndRaces = new HashSet<RegattaAndRaceIdentifier>();
+        assignedRaces = new HashSet<RegattaAndRaceIdentifier>();
     }
 
     public MediaTrack(String title, String url, TimePoint startTime, Duration duration, MimeType mimeType,
-            Set<RegattaAndRaceIdentifier> regattasAndRaces) {
+            Set<RegattaAndRaceIdentifier> assignedRaces) {
         this.title = title;
         this.url = url;
         this.startTime = startTime;
         this.duration = duration;
         this.mimeType = mimeType;
-        if (regattasAndRaces != null) {
-            this.regattasAndRaces = regattasAndRaces;
-        }else{
-            this.regattasAndRaces = new HashSet<RegattaAndRaceIdentifier>();
+        this.assignedRaces = new HashSet<RegattaAndRaceIdentifier>();
+        if (assignedRaces != null) {
+            this.assignedRaces.addAll(assignedRaces);
         }
     }
 
     public MediaTrack(String dbId, String title, String url, TimePoint startTime, Duration duration, MimeType mimeType,
-            Set<RegattaAndRaceIdentifier> regattasAndRaces) {
+            Set<RegattaAndRaceIdentifier> assignedRaces) {
+        this(title, url, startTime, duration, mimeType, assignedRaces);
         this.dbId = dbId;
-        this.title = title;
-        this.url = url;
-        this.startTime = startTime;
-        this.duration = duration;
-        this.mimeType = mimeType;
-        if (regattasAndRaces != null) {
-            this.regattasAndRaces = regattasAndRaces;
-        }
+        
     }
 
     public String toString() {
-        String regattasAndRaces = "";
-        for (RegattaAndRaceIdentifier regattaAndRace : this.regattasAndRaces) {
-            regattasAndRaces += ", " + regattaAndRace;
-        }
-        return title + " - " + url + " [" + typeToString() + ']' + " - " + regattasAndRaces + " - " + startTime + " [" + duration + status + ']'; 
+        return title + " - " + url + " [" + typeToString() + ']' + " - " + assignedRaces + " - " + startTime + " [" + duration + status + ']'; 
     }
 
     public TimePoint deriveEndTime() {
@@ -163,7 +152,7 @@ public class MediaTrack implements Serializable {
     }
 
     public boolean isConnectedTo(RegattaAndRaceIdentifier race) {
-        if (regattasAndRaces.contains(race)) {
+        if (assignedRaces.contains(race)) {
             return true;
         } else {
             return false;

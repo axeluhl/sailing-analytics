@@ -54,7 +54,7 @@ public class NewMediaWithRaceSelectionDialog extends NewMediaDialog {
     }
 
     protected void connectMediaWithRace() {
-        mediaTrack.regattasAndRaces = racesForMediaDialog.getSelectedRegattasAndRaces();
+        mediaTrack.assignedRaces = racesForMediaDialog.getSelectedRegattasAndRaces();
     }
 
     private Widget racesForMedia() {
@@ -68,8 +68,8 @@ public class NewMediaWithRaceSelectionDialog extends NewMediaDialog {
                     @Override
                     public void ok(Set<RegattaAndRaceIdentifier> regattas) {
                         if (regattas.size() >= 0) {
-                            mediaTrack.regattasAndRaces.clear();
-                            mediaTrack.regattasAndRaces.addAll(regattas);
+                            mediaTrack.assignedRaces.clear();
+                            mediaTrack.assignedRaces.addAll(regattas);
                         }
                     }
                 });

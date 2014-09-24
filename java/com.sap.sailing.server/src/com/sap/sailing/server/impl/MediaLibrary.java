@@ -163,7 +163,7 @@ class MediaLibrary {
         try {
             for (MediaTrack mediaTrack : mediaTracks) {
                 this.mediaTracksByDbId.put(mediaTrack, mediaTrack);
-                updateCache_Add(mediaTrack);
+                updateStorage_Add(mediaTrack);
             }
         } finally {
             LockUtil.unlockAfterWrite(lock);
@@ -174,7 +174,7 @@ class MediaLibrary {
         LockUtil.lockForWrite(lock);
         try {
             MediaTrack deletedMediaTrack = mediaTracksByDbId.remove(mediaTrack);
-            updateCache_Remove(deletedMediaTrack);
+            updateStorage_Remove(deletedMediaTrack);
         } finally {
             LockUtil.unlockAfterWrite(lock);
         }
@@ -222,7 +222,6 @@ class MediaLibrary {
             MediaTrack mediaTrack = mediaTracksByDbId.get(changedMediaTrack);
             if (mediaTrack != null) {
                 mediaTrack.startTime = changedMediaTrack.startTime;
-                updateCache_Change(mediaTrack);
             }
         } finally {
             LockUtil.unlockAfterWrite(lock);
@@ -235,7 +234,6 @@ class MediaLibrary {
             MediaTrack mediaTrack = mediaTracksByDbId.get(changedMediaTrack);
             if (mediaTrack != null) {
                 mediaTrack.duration = changedMediaTrack.duration;
-                updateCache_Change(mediaTrack);
             }
         } finally {
             LockUtil.unlockAfterWrite(lock);
@@ -247,10 +245,10 @@ class MediaLibrary {
         try {
             MediaTrack mediaTrack = mediaTracksByDbId.get(changedMediaTrack);
             if (mediaTrack != null) {
-                updateCache_Remove(mediaTrack); //Cannot use updateCache_Update method, because race is changed
-                mediaTrack.regattasAndRaces.clear();
-                mediaTrack.regattasAndRaces.addAll(changedMediaTrack.regattasAndRaces);
-                updateCache_Add(mediaTrack);
+                updateStorage_Remove(mediaTrack); //Cannot use updateCache_Update method, because race is changed
+                mediaTrack.assignedRaces.clear();
+                mediaTrack.assignedRaces.addAll(changedMediaTrack.assignedRaces);
+                updateStorage_Add(mediaTrack);
             }
         } finally {
             LockUtil.unlockAfterWrite(lock);
@@ -260,15 +258,15 @@ class MediaLibrary {
     /**
      * To be called only under write lock!
      */
-    private void updateCache_Add(MediaTrack mediaTrack) {
-        if (mediaTrack.regattasAndRaces != null) {
-            for (RegattaAndRaceIdentifier regattasAndRaces : mediaTrack.regattasAndRaces) {
-                if (mediaTracksByRace.containsKey(regattasAndRaces)) {
-                    mediaTracksByRace.get(regattasAndRaces).add(mediaTrack);
+    private void updateStorage_Add(MediaTrack mediaTrack) {
+        if (mediaTrack.assignedRaces != null) {
+            for (RegattaAndRaceIdentifier assignedRace : mediaTrack.assignedRaces) {
+                if (mediaTracksByRace.containsKey(assignedRace)) {
+                    mediaTracksByRace.get(assignedRace).add(mediaTrack);
                 } else {
                     Set<MediaTrack> mediaTracks = new HashSet<MediaTrack>();
                     mediaTracks.add(mediaTrack);
-                    mediaTracksByRace.put(regattasAndRaces, mediaTracks);
+                    mediaTracksByRace.put(assignedRace, mediaTracks);
                 }
 
             }
@@ -278,22 +276,14 @@ class MediaLibrary {
     /**
      * To be called only under write lock!
      */
-    private void updateCache_Change(MediaTrack mediaTrack) {
-        updateCache_Remove(mediaTrack);
-        updateCache_Add(mediaTrack);
-    }
+    private void updateStorage_Remove(MediaTrack mediaTrack) {
 
-    /**
-     * To be called only under write lock!
-     */
-    private void updateCache_Remove(MediaTrack mediaTrack) {
-
-        for (RegattaAndRaceIdentifier regattaAndRace : mediaTrack.regattasAndRaces) {
-            Set<MediaTrack> mediaTracks = mediaTracksByRace.get(regattaAndRace);
+        for (RegattaAndRaceIdentifier assignedRace : mediaTrack.assignedRaces) {
+            Set<MediaTrack> mediaTracks = mediaTracksByRace.get(assignedRace);
             if (mediaTracks != null) {
                 mediaTracks.remove(mediaTrack);
                 if (mediaTracks.size() == 0) {
-                    mediaTracksByRace.remove(regattaAndRace);
+                    mediaTracksByRace.remove(assignedRace);
                 }
             }
         }

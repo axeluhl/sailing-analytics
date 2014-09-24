@@ -294,7 +294,7 @@ public class MediaPanel extends FlowPanel {
         }) {
             @Override
             public String getValue(MediaTrack mediaTrack) {
-                if (mediaTrack.regattasAndRaces != null) {
+                if (mediaTrack.assignedRaces != null) {
                     return listRegattasAndRaces(mediaTrack);
                 } else
                     return "";
@@ -312,7 +312,7 @@ public class MediaPanel extends FlowPanel {
             public void update(int index, MediaTrack mediaTrack, String newRegattaAndRace) {
                 // Called when the user changes the value.
                 if ("".equals(newRegattaAndRace) || !newRegattaAndRace.contains(" ")) {
-                    mediaTrack.regattasAndRaces.clear();
+                    mediaTrack.assignedRaces.clear();
                 } else {
                 }
                 mediaService.updateRace(mediaTrack, new AsyncCallback<Void>() {
@@ -523,11 +523,11 @@ public class MediaPanel extends FlowPanel {
 
     private String listRegattasAndRaces(MediaTrack mediaTrack) {
 
-        if (mediaTrack.regattasAndRaces.size() > 1) {
-            return String.valueOf(mediaTrack.regattasAndRaces.size());
+        if (mediaTrack.assignedRaces.size() > 1) {
+            return String.valueOf(mediaTrack.assignedRaces.size());
         } else {
             String value = "";
-            for (RegattaAndRaceIdentifier regattaAndRace : mediaTrack.regattasAndRaces) {
+            for (RegattaAndRaceIdentifier regattaAndRace : mediaTrack.assignedRaces) {
                 value += regattaAndRace.getRegattaName() + " " + regattaAndRace.getRaceName() + ", ";
             }
             if (value.length() > 1) {
@@ -560,8 +560,8 @@ public class MediaPanel extends FlowPanel {
                                 value = value.concat(regattasAndRaces.getRegattaName() + "    "
                                         + regattasAndRaces.getRaceName() + ",");
                             }
-                            mediaTrack.regattasAndRaces.clear();
-                            mediaTrack.regattasAndRaces.addAll(regattas);
+                            mediaTrack.assignedRaces.clear();
+                            mediaTrack.assignedRaces.addAll(regattas);
                             valueUpdater.update(value);
                         }
 

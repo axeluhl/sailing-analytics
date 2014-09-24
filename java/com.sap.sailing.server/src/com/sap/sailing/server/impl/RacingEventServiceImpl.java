@@ -2491,7 +2491,7 @@ public class RacingEventServiceImpl implements RacingEventServiceWithTestSupport
     public void mediaTrackAdded(MediaTrack mediaTrack) {
         if (mediaTrack.dbId == null) {
             mediaTrack.dbId = mediaDB.insertMediaTrack(mediaTrack.title, mediaTrack.url, mediaTrack.startTime,
-                    mediaTrack.duration, mediaTrack.mimeType, mediaTrack.regattasAndRaces);
+                    mediaTrack.duration, mediaTrack.mimeType, mediaTrack.assignedRaces);
         }
         mediaLibrary.addMediaTrack(mediaTrack);
         replicate(new AddMediaTrackOperation(mediaTrack));
@@ -2532,7 +2532,7 @@ public class RacingEventServiceImpl implements RacingEventServiceWithTestSupport
 
     @Override
     public void mediaTrackRacesChanged(MediaTrack mediaTrack) {
-        mediaDB.updateRace(mediaTrack.dbId, mediaTrack.regattasAndRaces);
+        mediaDB.updateRace(mediaTrack.dbId, mediaTrack.assignedRaces);
         mediaLibrary.racesChanged(mediaTrack);
         replicate(new UpdateMediaTrackRacesOperation(mediaTrack));
 
@@ -2552,7 +2552,7 @@ public class RacingEventServiceImpl implements RacingEventServiceWithTestSupport
             if (existingTrack == null) {
                 mediaDB.insertMediaTrackWithId(trackToImport.dbId, trackToImport.title, trackToImport.url,
                         trackToImport.startTime, trackToImport.duration, trackToImport.mimeType,
-                        trackToImport.regattasAndRaces);
+                        trackToImport.assignedRaces);
                 mediaTrackAdded(trackToImport);
             } else if (override) {
 
