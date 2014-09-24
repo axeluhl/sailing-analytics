@@ -82,5 +82,6 @@
 	<source path='ui/regattaoverview' />
 	<source path='ui/leaderboard'/>
 	<source path='home' />
+	<source path='common' />
 	<source path='idangerous' />
 </module>

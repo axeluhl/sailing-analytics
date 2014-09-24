@@ -20,7 +20,7 @@ import com.sap.sailing.domain.common.RaceIdentifier;
 import com.sap.sailing.domain.common.dto.FleetDTO;
 import com.sap.sailing.domain.common.dto.LeaderboardDTO;
 import com.sap.sailing.domain.common.dto.RaceColumnDTO;
-import com.sap.sailing.gwt.home.client.HomeResources;
+import com.sap.sailing.gwt.common.client.SharedResources;
 import com.sap.sailing.gwt.home.client.app.PlaceNavigator;
 import com.sap.sailing.gwt.home.client.place.event.header.CompactEventHeader;
 import com.sap.sailing.gwt.home.client.place.event.oldcompetitorcharts.OldCompetitorCharts;
@@ -73,7 +73,7 @@ public class RegattaAnalytics extends Composite implements LeaderboardUpdateList
 
         activeAnchor = leaderboardAnchor;
         activeTabPanel = leaderboardTabPanel;
-        activeAnchor.addStyleName(HomeResources.INSTANCE.mainCss().navbar_buttonactive());
+        activeAnchor.addStyleName(SharedResources.INSTANCE.mainCss().navbar_buttonactive());
 
         competitorChartsTabPanel.setVisible(false);
         liveRaceDiv.getStyle().setVisibility(Visibility.HIDDEN);
@@ -156,12 +156,12 @@ public class RegattaAnalytics extends Composite implements LeaderboardUpdateList
     private void setActiveTabPanel(HTMLPanel newActivePanel, Anchor newActiveAnchor) {
         if(activeTabPanel != null) {
             activeTabPanel.setVisible(false);
-            activeAnchor.removeStyleName(HomeResources.INSTANCE.mainCss().navbar_buttonactive());
+            activeAnchor.removeStyleName(SharedResources.INSTANCE.mainCss().navbar_buttonactive());
         }
         
         activeTabPanel = newActivePanel;
         activeAnchor = newActiveAnchor;
         activeTabPanel.setVisible(true);
-        activeAnchor.addStyleName(HomeResources.INSTANCE.mainCss().navbar_buttonactive());
+        activeAnchor.addStyleName(SharedResources.INSTANCE.mainCss().navbar_buttonactive());
     }
 }
