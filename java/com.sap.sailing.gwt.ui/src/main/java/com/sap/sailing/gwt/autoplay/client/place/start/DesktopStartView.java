@@ -15,6 +15,8 @@ import com.google.gwt.user.client.ui.ListBox;
 import com.google.gwt.user.client.ui.Widget;
 import com.sap.sailing.gwt.autoplay.client.app.PlaceNavigator;
 import com.sap.sailing.gwt.ui.shared.EventDTO;
+import com.sap.sailing.gwt.ui.shared.LeaderboardGroupDTO;
+import com.sap.sailing.gwt.ui.shared.StrippedLeaderboardDTO;
 
 public class DesktopStartView extends Composite implements StartView {
     private static StartPageViewUiBinder uiBinder = GWT.create(StartPageViewUiBinder.class);
@@ -23,6 +25,7 @@ public class DesktopStartView extends Composite implements StartView {
     }
 
     @UiField(provided=true) ListBox eventSelectionBox;
+    @UiField(provided=true) ListBox leaderboardSelectionBox;
     @UiField Button startAutoPlayButton;
     
     private final PlaceNavigator navigator;
@@ -34,8 +37,12 @@ public class DesktopStartView extends Composite implements StartView {
         this.events = new ArrayList<EventDTO>();
         
         eventSelectionBox = new ListBox(false);
+        leaderboardSelectionBox = new ListBox(false);
         
         initWidget(uiBinder.createAndBindUi(this));
+        
+        leaderboardSelectionBox.setVisible(false);
+        startAutoPlayButton.setEnabled(false);
     }
 
     @Override
@@ -43,27 +50,50 @@ public class DesktopStartView extends Composite implements StartView {
         this.events.clear();
         this.events.addAll(events);
         
+        eventSelectionBox.addItem("Please select an event");
         for(EventDTO event: events) {
             eventSelectionBox.addItem(event.getName());
         }
     }
     
     @UiHandler("eventSelectionBox")
-    void onLocaleSelectionChange(ChangeEvent event) {
+    void onEventSelectionChange(ChangeEvent event) {
+        EventDTO selectedEvent = getSelectedEvent();
+        if(selectedEvent != null) {
+            leaderboardSelectionBox.clear();
+            leaderboardSelectionBox.addItem("Please select a leaderboard");
+            for(LeaderboardGroupDTO leaderboardGroup: selectedEvent.getLeaderboardGroups()) {
+                for(StrippedLeaderboardDTO leaderboard: leaderboardGroup.getLeaderboards()) {
+                    leaderboardSelectionBox.addItem(leaderboard.name);
+                }
+            }
+        }
+        leaderboardSelectionBox.setVisible(selectedEvent != null);
+        startAutoPlayButton.setEnabled(selectedEvent != null);
     }
     
     @UiHandler("startAutoPlayButton")
     void startAutoPlayClicked(ClickEvent event) {
         EventDTO selectedEvent = getSelectedEvent();
-        if(selectedEvent != null) {
-            navigator.goToPlayer(selectedEvent.id.toString(), "");
+        String selectedLeaderboardName = getSelectedLeaderboardName();
+        if(selectedEvent != null && selectedLeaderboardName != null) {
+            navigator.goToPlayer(selectedEvent.id.toString(), selectedLeaderboardName);
         }
+    }
+
+    private String getSelectedLeaderboardName() {
+        String result = null;
+        int selectedIndex = leaderboardSelectionBox.getSelectedIndex();
+        if(selectedIndex > 0) {
+            result = leaderboardSelectionBox.getItemText(selectedIndex);
+        }
+        return result;
     }
 
     private EventDTO getSelectedEvent() {
         EventDTO result = null;
         int selectedIndex = eventSelectionBox.getSelectedIndex();
-        if(events != null && selectedIndex >= 0) {
+        if(events != null && selectedIndex > 0) {
             String selectedItemText = eventSelectionBox.getItemText(selectedIndex);
             for(EventDTO event: events) {
                 if(event.getName().equals(selectedItemText)) {

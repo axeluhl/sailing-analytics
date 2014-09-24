@@ -10,9 +10,13 @@
     </ui:style>
     <g:HTMLPanel styleName="{style.mainPanel}">
 	    <g:HorizontalPanel spacing="5">
-	    	<g:Label text="Select an event:" />
+	    	<g:Label text="Events:" />
 			<g:ListBox ui:field="eventSelectionBox" />
-		    <g:Button ui:field="startAutoPlayButton" text="Start autoplay"/>
 		</g:HorizontalPanel>
-     </g:HTMLPanel>
+	    <g:HorizontalPanel spacing="5">
+	    	<g:Label text="Leaderboards:" />
+			<g:ListBox ui:field="leaderboardSelectionBox" />
+		</g:HorizontalPanel>
+	    <g:Button ui:field="startAutoPlayButton" text="Start autoplay"/>
+	</g:HTMLPanel>
 </ui:UiBinder>    
