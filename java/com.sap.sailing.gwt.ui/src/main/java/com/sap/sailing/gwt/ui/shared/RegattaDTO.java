@@ -28,6 +28,7 @@ public class RegattaDTO extends NamedDTO {
     public String defaultCourseAreaName;
     public DeviceConfigurationDTO.RegattaConfigurationDTO configuration;
     public boolean useStartTimeInference = true;
+    public EventDTO event;
 
     public RegattaDTO() {}
 

@@ -8,14 +8,14 @@ import com.sap.sailing.xrr.schema.Race;
 
 public class Series {
 
-    private String raceType = "";
+    private String series = "";
     private int maxRaces = 0;
     private int maxRacesIndex = -1;
     private List<String> raceNames = new ArrayList<String>();
     private ArrayList<Fleet> fleets = new ArrayList<Fleet>();
 
     public Series(String raceType) {
-        this.raceType = raceType;
+        this.series = raceType;
     }
 
     @SuppressWarnings("unchecked")
@@ -68,15 +68,15 @@ public class Series {
     }
 
     public char getFirstChar() {
-        return raceType.charAt(0);
+        return series.charAt(0);
     }
 
     public String getSeries() {
-        return raceType;
+        return series;
     }
 
-    public void setSeries(String raceType) {
-        this.raceType = raceType;
+    public void setSeries(String series) {
+        this.series = series;
     }
 
     public ArrayList<Fleet> getFleets() {
@@ -92,7 +92,7 @@ public class Series {
     }
 
     public boolean isMedal() {
-        if (this.raceType.equals("Medal")) {
+        if (this.series.equals("Medal")) {
             return true;
         } else {
             return false;

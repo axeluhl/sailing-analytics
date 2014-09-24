@@ -6,6 +6,7 @@ import java.util.HashSet;
 import java.util.LinkedHashMap;
 import java.util.List;
 
+import com.github.gwtbootstrap.client.ui.Label;
 import com.google.gwt.dom.client.Style.Unit;
 import com.google.gwt.event.dom.client.ClickEvent;
 import com.google.gwt.event.dom.client.ClickHandler;
@@ -112,6 +113,29 @@ public class RegattaStructureManagementPanel extends SimplePanel implements Rega
         regattaDetailsComposite.setVisible(false);
         grid.setWidget(0, 1, regattaDetailsComposite);
     }
+    
+//    private void showRegattaStructure(RegattaStructure regattaStructure){
+//        Grid grid = new Grid();
+//        
+//        Button editBtn = new Button("Edit Series");
+//        editBtn.addClickHandler(new ClickHandler() {
+//            
+//            @Override
+//            public void onClick(ClickEvent event) {
+//                //TODO: open Dialog to edit default series
+//            }
+//        });
+//            
+//        Iterable<String> structure = regattaStructure.getStructure();
+//        int i = 0;
+//        for (String string : structure) {
+//            grid.setWidget(i, 0, new Label(string));
+//            grid.setWidget(i, 0, editBtn);
+//            i++;
+//        }
+//        
+//        
+//    }
 
     protected void removeRegattas(Collection<RegattaIdentifier> regattas) {
         if (!regattas.isEmpty()) {

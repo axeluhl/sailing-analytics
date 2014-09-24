@@ -98,16 +98,23 @@ public class StructureImporter {
     private void parseRegattas() {
 
         for (int i = 0; i < selectedRegattas.size(); i++) {
-            try {
-                parseRegattaXML(selectedRegattas.get(i).getXrrEntriesUrl());
-            } catch (FileNotFoundException e) {
-                e.printStackTrace();
-            } catch (JAXBException e) {
-                e.printStackTrace();
-            } catch (IOException e) {
-                e.printStackTrace();
-            }
-            parsedDocuments++;
+            final int index = i;
+            Runnable regattaParser = new Runnable() {
+
+                @Override
+                public void run() {
+
+                    try {
+                        parseRegattaXML(selectedRegattas.get(index).getXrrEntriesUrl());
+                    } catch (JAXBException | IOException e) {
+                        e.printStackTrace();
+                    }
+                    parsedDocuments++;
+
+                }
+
+            };
+            regattaParser.run();
         }
     }
 
@@ -128,7 +135,7 @@ public class StructureImporter {
                 races.add((Race) raceOrDevisionOrRegattaSeries.get(j));
             }
 
-            BuildStructure structure = new BuildStructure(races, selectedRegattas.get(zaehler).getName());
+            BuildStructure structure = new BuildStructure(races);
 //            analyseStructure(structure);
             buildStructures.add(structure);
             zaehler++;

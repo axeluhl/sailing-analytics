@@ -7,13 +7,11 @@ import com.sap.sailing.xrr.schema.Race;
 
 public class RegattaStructure {
     
-    String name;
     ArrayList<Series> series = new ArrayList<Series>();
     GuessSeriesStrategy guessSeriesStrategy;
     
     
-    public RegattaStructure(GuessSeriesStrategy guessSeries, String name){
-        this.name = name;
+    public RegattaStructure(GuessSeriesStrategy guessSeries){
         this.guessSeriesStrategy = guessSeries;
     }
     
