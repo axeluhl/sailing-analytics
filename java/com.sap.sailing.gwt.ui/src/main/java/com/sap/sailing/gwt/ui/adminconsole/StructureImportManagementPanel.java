@@ -27,6 +27,7 @@ import com.sap.sailing.gwt.ui.client.RegattaSelectionModel;
 import com.sap.sailing.gwt.ui.client.RegattaSelectionProvider;
 import com.sap.sailing.gwt.ui.client.SailingServiceAsync;
 import com.sap.sailing.gwt.ui.client.StringMessages;
+import com.sap.sailing.gwt.ui.shared.EventAndRegattaDTO;
 import com.sap.sailing.gwt.ui.shared.EventDTO;
 import com.sap.sailing.gwt.ui.shared.RegattaDTO;
 import com.sap.sailing.gwt.ui.shared.RegattaStructureDTO;
@@ -219,14 +220,14 @@ public class StructureImportManagementPanel extends FlowPanel {
             @Override
             public void onSuccess(List<EventDTO> result) {
                 Collection<RegattaDTO> existingRegattas = Collections.emptyList();
-                final DefaultRegattaCreateDialog dialog = new DefaultRegattaCreateDialog(existingRegattas, result,
-                        sailingService, errorReporter, stringMessages, new DialogCallback<RegattaDTO>() {
+                DefaultRegattaCreateDialog dialog = new DefaultRegattaCreateDialog(existingRegattas, result,
+                        sailingService, errorReporter, stringMessages, new DialogCallback<EventAndRegattaDTO>() {
                             @Override
                             public void cancel() {
                             }
 
                             @Override
-                            public void ok(final RegattaDTO newRegatta) {
+                            public void ok(final EventAndRegattaDTO newRegatta) {
                                 sailingService.getRegattaStructure(regattaNames, new AsyncCallback<Set<RegattaStructureDTO>>() {
                                     @Override
                                     public void onFailure(Throwable caught) {
@@ -237,9 +238,7 @@ public class StructureImportManagementPanel extends FlowPanel {
                                     @Override
                                     public void onSuccess(Set<RegattaStructureDTO> result) {
                                      // TODO UI aufbauen
-                                        EventDTO eventDTO = new EventDTO("Test");
-                                        newRegatta.
-                                        createRegattas(regattaNames, dialog.getSelectedEvent(), newRegatta); //EventDTO??
+                                        createRegattas(regattaNames, newRegatta.getEvent(), newRegatta.getRegatta()); 
                                     }
                                 });
                                 

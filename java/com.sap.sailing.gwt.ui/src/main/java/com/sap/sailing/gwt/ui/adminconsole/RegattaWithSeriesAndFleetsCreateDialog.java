@@ -16,9 +16,9 @@ import com.sap.sailing.gwt.ui.shared.RegattaDTO;
 import com.sap.sailing.gwt.ui.shared.SeriesDTO;
 
 public class RegattaWithSeriesAndFleetsCreateDialog extends RegattaWithSeriesAndFleetsDialog {
-    
+
     protected static AdminConsoleResources resources = GWT.create(AdminConsoleResources.class);
-    
+
     protected ListEditorComposite<SeriesDTO> seriesEditor;
 
     protected static class RegattaParameterValidator implements Validator<RegattaDTO> {
@@ -101,12 +101,14 @@ public class RegattaWithSeriesAndFleetsCreateDialog extends RegattaWithSeriesAnd
         setSeriesEditor();
     }
 
-	protected void setSeriesEditor() {
-		this.seriesEditor = new SeriesWithFleetsListEditor(Collections.<SeriesDTO>emptyList(), stringMessages, resources.removeIcon(), /*enableFleetRemoval*/true);
-	}
+    protected void setSeriesEditor() {
+        this.seriesEditor = new SeriesWithFleetsListEditor(Collections.<SeriesDTO> emptyList(), stringMessages,
+                resources.removeIcon(), /* enableFleetRemoval */true);
+    }
 
     @Override
     protected void setupAdditionalWidgetsOnPanel(final VerticalPanel panel) {
+        super.setupAdditionalWidgetsOnPanel(panel);
         TabPanel tabPanel = new TabPanel();
         tabPanel.setWidth("100%");
         tabPanel.add(seriesEditor, stringMessages.series());
@@ -119,7 +121,7 @@ public class RegattaWithSeriesAndFleetsCreateDialog extends RegattaWithSeriesAnd
         super.show();
         nameEntryField.setFocus(true);
     }
-    
+
     @Override
     protected RegattaDTO getResult() {
         RegattaDTO dto = super.getResult();

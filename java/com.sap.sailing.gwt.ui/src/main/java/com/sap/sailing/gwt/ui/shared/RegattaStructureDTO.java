@@ -1,11 +1,5 @@
 package com.sap.sailing.gwt.ui.shared;
 
-import java.util.Set;
-
-import buildstructure.BuildStructure;
-
-import com.sap.sailing.xrr.structureimport.RegattaStructureKey;
-import com.sap.sailing.xrr.structureimport.SeriesParameters;
 
 public class RegattaStructureDTO {
 //    private final RegattaStructureKey regattaStructure;

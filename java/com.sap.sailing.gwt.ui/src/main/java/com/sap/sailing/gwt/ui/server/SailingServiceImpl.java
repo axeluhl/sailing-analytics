@@ -389,7 +389,6 @@ import com.sap.sailing.server.replication.ReplicationService;
 import com.sap.sailing.server.replication.impl.ReplicaDescriptor;
 import com.sap.sailing.util.BuildVersion;
 import com.sap.sailing.xrr.schema.RegattaResults;
-import com.sap.sailing.xrr.structureimport.RegattaStructureKey;
 import com.sap.sailing.xrr.structureimport.SeriesParameters;
 import com.sap.sailing.xrr.structureimport.StructureImporter;
 import com.sap.sse.common.Util;
@@ -3725,7 +3724,7 @@ public class SailingServiceImpl extends ProxiedRemoteServiceServlet implements S
 
     private SeriesParameters getDefaultSeries(RegattaDTO defaultRegatta) {
         SeriesParameters defaultSeries = new SeriesParameters(false, false, false, null);
-        if (defaultRegatta.series.size() > 0) { //null abfangen
+        if (defaultRegatta.series!= null && defaultRegatta.series.size() > 0) { //null abfangen
             SeriesDTO series = defaultRegatta.series.get(0);
             defaultSeries
                     .setFirstColumnIsNonDiscardableCarryForward(series.isFirstColumnIsNonDiscardableCarryForward());

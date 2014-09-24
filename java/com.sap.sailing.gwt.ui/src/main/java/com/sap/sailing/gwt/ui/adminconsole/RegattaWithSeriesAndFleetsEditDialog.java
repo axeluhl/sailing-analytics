@@ -11,6 +11,7 @@ import com.google.gwt.event.logical.shared.ValueChangeHandler;
 import com.google.gwt.user.client.ui.Button;
 import com.google.gwt.user.client.ui.CheckBox;
 import com.google.gwt.user.client.ui.Grid;
+import com.google.gwt.user.client.ui.Label;
 import com.google.gwt.user.client.ui.TabPanel;
 import com.google.gwt.user.client.ui.VerticalPanel;
 import com.sap.sailing.gwt.ui.client.StringMessages;
@@ -27,26 +28,26 @@ public class RegattaWithSeriesAndFleetsEditDialog extends RegattaWithSeriesAndFl
 
     protected CheckBox regattaConfigurationCheckbox;
     protected Button regattaConfigurationButton;
-    
+
     private RegattaConfigurationDTO currentRegattaConfiguration;
     private ListEditorComposite<SeriesDTO> seriesEditor;
-    
+
     public RegattaWithSeriesAndFleetsEditDialog(RegattaDTO regatta, Collection<RegattaDTO> existingRegattas,
             List<EventDTO> existingEvents, final StringMessages stringMessages, DialogCallback<RegattaDTO> callback) {
-        super(regatta, existingEvents, stringMessages.editRegatta(), stringMessages.ok(), stringMessages,
-                null, callback);
+        super(regatta, existingEvents, stringMessages.editRegatta(), stringMessages.ok(), stringMessages, null,
+                callback);
         ensureDebugId("RegattaWithSeriesAndFleetsEditDialog");
         currentRegattaConfiguration = regatta.configuration;
-        
+
         nameEntryField.setEnabled(false);
         boatClassEntryField.setEnabled(false);
         scoringSchemeListBox.setEnabled(false);
         sailingEventsListBox.setEnabled(true);
         courseAreaListBox.setEnabled(true);
-        
+
         regattaConfigurationCheckbox = createCheckbox(stringMessages.setRacingProcedureConfiguration());
         regattaConfigurationCheckbox.ensureDebugId("RacingProcedureConfigurationCheckBox");
-        regattaConfigurationCheckbox.addValueChangeHandler(new ValueChangeHandler<Boolean>() { 
+        regattaConfigurationCheckbox.addValueChangeHandler(new ValueChangeHandler<Boolean>() {
             @Override
             public void onValueChange(ValueChangeEvent<Boolean> event) {
                 regattaConfigurationButton.setEnabled(event.getValue());
@@ -57,23 +58,25 @@ public class RegattaWithSeriesAndFleetsEditDialog extends RegattaWithSeriesAndFl
         regattaConfigurationButton.addClickHandler(new ClickHandler() {
             @Override
             public void onClick(ClickEvent event) {
-                new RegattaConfigurationDialog(currentRegattaConfiguration == null ? new RegattaConfigurationDTO() : currentRegattaConfiguration, 
-                        stringMessages, new DialogCallback<DeviceConfigurationDTO.RegattaConfigurationDTO>() {
-                    @Override
-                    public void ok(RegattaConfigurationDTO newConfiguration) {
-                        currentRegattaConfiguration = newConfiguration;
-                    }
+                new RegattaConfigurationDialog(currentRegattaConfiguration == null ? new RegattaConfigurationDTO()
+                        : currentRegattaConfiguration, stringMessages,
+                        new DialogCallback<DeviceConfigurationDTO.RegattaConfigurationDTO>() {
+                            @Override
+                            public void ok(RegattaConfigurationDTO newConfiguration) {
+                                currentRegattaConfiguration = newConfiguration;
+                            }
 
-                    @Override
-                    public void cancel() {
-                    }
-                }).show();
+                            @Override
+                            public void cancel() {
+                            }
+                        }).show();
             }
         });
         regattaConfigurationCheckbox.setValue(regatta.configuration != null);
         regattaConfigurationButton.setEnabled(regatta.configuration != null);
 
-        this.seriesEditor = new SeriesWithFleetsListEditor(regatta.series, stringMessages, resources.removeIcon(), /*enableFleetRemoval*/false);
+        this.seriesEditor = new SeriesWithFleetsListEditor(regatta.series, stringMessages, resources.removeIcon(), /* enableFleetRemoval */
+                false);
     }
 
     @Override
@@ -84,12 +87,13 @@ public class RegattaWithSeriesAndFleetsEditDialog extends RegattaWithSeriesAndFl
 
     @Override
     protected void setupAdditionalWidgetsOnPanel(VerticalPanel panel) {
+        super.setupAdditionalWidgetsOnPanel(panel);
         VerticalPanel content = new VerticalPanel();
-        
-        Grid proceduresGrid = new Grid(1,2);
+
+        Grid proceduresGrid = new Grid(1, 2);
         proceduresGrid.setWidget(0, 0, regattaConfigurationCheckbox);
         proceduresGrid.setWidget(0, 1, regattaConfigurationButton);
-        
+
         content.add(proceduresGrid);
         panel.add(content);
 
@@ -99,11 +103,11 @@ public class RegattaWithSeriesAndFleetsEditDialog extends RegattaWithSeriesAndFl
         tabPanel.selectTab(0);
         panel.add(tabPanel);
     }
-    
+
     @Override
     protected RegattaDTO getResult() {
         RegattaDTO regatta = super.getResult();
-        
+
         if (regattaConfigurationCheckbox.getValue()) {
             regatta.configuration = currentRegattaConfiguration;
         } else {
