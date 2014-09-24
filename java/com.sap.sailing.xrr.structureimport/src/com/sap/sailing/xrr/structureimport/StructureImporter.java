@@ -3,7 +3,6 @@ package com.sap.sailing.xrr.structureimport;
 import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.io.InputStream;
-import java.io.Serializable;
 import java.net.URL;
 import java.net.URLConnection;
 import java.util.ArrayList;
@@ -16,9 +15,9 @@ import javax.xml.bind.JAXBException;
 
 import buildstructure.BuildStructure;
 import buildstructure.Fleet;
-import buildstructure.SetRacenumberStrategy;
-import buildstructure.Series;
 import buildstructure.RegattaStructure;
+import buildstructure.Series;
+import buildstructure.SetRacenumberStrategy;
 
 import com.sap.sailing.domain.base.BoatClass;
 import com.sap.sailing.domain.base.DomainFactory;
@@ -35,7 +34,6 @@ import com.sap.sailing.domain.common.ScoringSchemeType;
 import com.sap.sailing.domain.common.dto.FleetDTO;
 import com.sap.sailing.domain.common.dto.RegattaCreationParametersDTO;
 import com.sap.sailing.domain.common.dto.SeriesCreationParametersDTO;
-import com.sap.sailing.domain.leaderboard.impl.LowPoint;
 import com.sap.sailing.server.operationaltransformation.AddSpecificRegatta;
 import com.sap.sailing.xrr.resultimport.ParserFactory;
 import com.sap.sailing.xrr.schema.Boat;
@@ -94,26 +92,32 @@ public class StructureImporter {
     private void parseRegattas() {
 
         for (int i = 0; i < regattas.size(); i++) {
-            try {
-                parseRegattaXML(regattas.get(i).getXrrEntriesUrl());
-            } catch (FileNotFoundException e) {
-                e.printStackTrace();
-            } catch (JAXBException e) {
-                e.printStackTrace();
-            } catch (IOException e) {
-                e.printStackTrace();
-            }
-            parsedDocuments++;
+            final int index = i;
+            Runnable regattaParser = new Runnable() {
+
+                @Override
+                public void run() {
+
+                    try {
+                        parseRegattaXML(regattas.get(index).getXrrEntriesUrl());
+                    } catch (JAXBException | IOException e) {
+                        e.printStackTrace();
+                    }
+                    parsedDocuments++;
+
+                }
+
+            };
+            regattaParser.run();
         }
     }
-    
-    public List<List<String>> getRegattaStructure(List<String> regattaNames){
-        //TODO anderen Rückgabeparameter verwenden. Evtl. eine eigene DTO Klasse. 
-        //Die Series aus diesem Paket kann ja nicht verwendet werden, weil es sonst wieder dependencies loops gibt  
-        
-        
-        ArrayList<String> allSeries = new ArrayList<String>(); 
-        
+
+    public List<List<String>> getRegattaStructure(List<String> regattaNames) {
+        // TODO anderen Rückgabeparameter verwenden. Evtl. eine eigene DTO Klasse.
+        // Die Series aus diesem Paket kann ja nicht verwendet werden, weil es sonst wieder dependencies loops gibt
+
+        ArrayList<String> allSeries = new ArrayList<String>();
+
         results.clear();
         parseRegattas();
 
@@ -130,10 +134,10 @@ public class StructureImporter {
             }
 
             BuildStructure structure = new BuildStructure(races);
-            //TODO am besten in der Buildstructure im RegattaStructure eine Methode getRegattaStructure(), 
-            //um die Struktur in dem gewünschten Format zu bekommen
+            // TODO am besten in der Buildstructure im RegattaStructure eine Methode getRegattaStructure(),
+            // um die Struktur in dem gewünschten Format zu bekommen
         }
-        
+
         return null;
     }
 
@@ -149,9 +153,8 @@ public class StructureImporter {
 
         for (int i = 0; i < results.size(); i++) {
 
-            //TODO hier die BuildStructure rausnehmen und das bestehende verwenden
+            // TODO hier die BuildStructure rausnehmen und das bestehende verwenden
 
-            
             ArrayList<Race> races = new ArrayList<Race>();
 
             Event event = (Event) results.get(i).getPersonOrBoatOrTeam()
@@ -238,7 +241,7 @@ public class StructureImporter {
 
     private Color getColorFromString(String colorString) {
         Color color = null;
-        
+
         switch (colorString) {
         case "Blue":
             color = Color.BLUE;
@@ -323,13 +326,13 @@ public class StructureImporter {
         boatForPerson = new LinkedHashMap<String, Boat>();
         LinkedHashMap<String, Team> teamForBoat = new LinkedHashMap<String, Team>();
 
-        for (Object obj : personOrBoatOrTeam){
+        for (Object obj : personOrBoatOrTeam) {
             if (obj instanceof Team) {
                 teamForBoat.put(((Team) obj).getBoatID(), (Team) obj);
             }
         }
 
-        for (Object obj : personOrBoatOrTeam){
+        for (Object obj : personOrBoatOrTeam) {
             if (obj instanceof Boat) {
                 Team team = teamForBoat.get(((Boat) obj).getBoatID());
 
