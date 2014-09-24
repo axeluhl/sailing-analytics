@@ -101,14 +101,27 @@ public class DefaultRegattaCreateDialog extends RegattaWithSeriesAndFleetsCreate
 
                     @Override
                     public void onSuccess(EventDTO newEvent) {
+                        existingEvents.add(newEvent);
                         sailingEventsListBox.addItem(newEvent.getName());
                         sailingEventsListBox.setSelectedIndex(sailingEventsListBox.getItemCount() - 1);
+                        courseAreaListBox.clear();
+                        courseAreaListBox.addItem(stringMessages.selectCourseArea());
                         for (CourseAreaDTO courseArea : newEvent.venue.getCourseAreas()) {
                             courseAreaListBox.addItem(courseArea.getName());
+                        }
+                        if(courseAreaListBox.getItemCount()>1){
+                            courseAreaListBox.setItemSelected(1, true);
                         }
                         courseAreaListBox.setEnabled(true);
                     }
                 });
+    }
+    
+    @Override
+    protected RegattaDTO getResult() {
+        RegattaDTO dto = super.getResult();
+        dto.event = getSelectedEvent();
+        return dto;
     }
 
 }

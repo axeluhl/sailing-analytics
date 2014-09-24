@@ -97,7 +97,7 @@ public class StructureImporter {
 
     private void parseRegattas() {
 
-        for (int i = 0; i < regattas.size(); i++) {
+        for (int i = 0; i < selectedRegattas.size(); i++) {
             final int index = i;
             Runnable regattaParser = new Runnable() {
 
@@ -105,7 +105,7 @@ public class StructureImporter {
                 public void run() {
 
                     try {
-                        parseRegattaXML(regattas.get(index).getXrrEntriesUrl());
+                        parseRegattaXML(selectedRegattas.get(index).getXrrEntriesUrl());
                     } catch (JAXBException | IOException e) {
                         e.printStackTrace();
                     }
@@ -135,7 +135,7 @@ public class StructureImporter {
                 races.add((Race) raceOrDevisionOrRegattaSeries.get(j));
             }
 
-            BuildStructure structure = new BuildStructure(races, selectedRegattas.get(zaehler).getName());
+            BuildStructure structure = new BuildStructure(races);
 //            analyseStructure(structure);
             buildStructures.add(structure);
             zaehler++;

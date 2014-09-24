@@ -219,7 +219,7 @@ public class StructureImportManagementPanel extends FlowPanel {
             @Override
             public void onSuccess(List<EventDTO> result) {
                 Collection<RegattaDTO> existingRegattas = Collections.emptyList();
-                DefaultRegattaCreateDialog dialog = new DefaultRegattaCreateDialog(existingRegattas, result,
+                final DefaultRegattaCreateDialog dialog = new DefaultRegattaCreateDialog(existingRegattas, result,
                         sailingService, errorReporter, stringMessages, new DialogCallback<RegattaDTO>() {
                             @Override
                             public void cancel() {
@@ -227,6 +227,7 @@ public class StructureImportManagementPanel extends FlowPanel {
 
                             @Override
                             public void ok(final RegattaDTO newRegatta) {
+                                
                                 sailingService.getRegattaStructure(regattaNames, new AsyncCallback<Set<RegattaStructureDTO>>() {
                                     @Override
                                     public void onFailure(Throwable caught) {
@@ -236,9 +237,7 @@ public class StructureImportManagementPanel extends FlowPanel {
 
                                     @Override
                                     public void onSuccess(Set<RegattaStructureDTO> result) {
-                                     // TODO UI aufbauen
-                                        EventDTO eventDTO = new EventDTO("Test");
-                                        createRegattas(regattaNames, eventDTO, newRegatta); //EventDTO??
+                                        createRegattas(regattaNames, newRegatta.event, newRegatta); //EventDTO??
                                     }
                                 });
                                 
