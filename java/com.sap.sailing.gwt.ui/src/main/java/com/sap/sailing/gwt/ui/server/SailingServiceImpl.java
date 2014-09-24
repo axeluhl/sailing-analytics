@@ -3771,14 +3771,14 @@ public class SailingServiceImpl extends ProxiedRemoteServiceServlet implements S
 
     @Override
     public Set<RegattaStructureDTO> getRegattaStructure(final List<String> regattaNames) {
-        structureImporter.updateRegattasToSelected(regattaNames);
-        Map<RegattaStructureKey, Set<BuildStructure>> regattaStructures =  structureImporter.getRegattaStructures(regattaNames);
-        Set<RegattaStructureKey> regattaStructureKeys = regattaStructures.keySet();
+//        structureImporter.updateRegattasToSelected(regattaNames);
+//        Map<RegattaStructureKey, Set<BuildStructure>> regattaStructures =  structureImporter.getRegattaStructures(regattaNames);
+//        Set<RegattaStructureKey> regattaStructureKeys = regattaStructures.keySet();
         Set<RegattaStructureDTO> regattaStructureDTOs = new HashSet<RegattaStructureDTO>();
-        for(RegattaStructureKey regattaStructureKey: regattaStructureKeys){
-            RegattaStructureDTO regattaStructureDTO = new RegattaStructureDTO(regattaStructureKey, regattaStructures.get(regattaStructureKey));
-            regattaStructureDTOs.add(regattaStructureDTO);
-        }
+//        for(RegattaStructureKey regattaStructureKey: regattaStructureKeys){
+//            RegattaStructureDTO regattaStructureDTO = new RegattaStructureDTO(regattaStructureKey, regattaStructures.get(regattaStructureKey));
+//            regattaStructureDTOs.add(regattaStructureDTO);
+//        }
         return regattaStructureDTOs;
     }
 
