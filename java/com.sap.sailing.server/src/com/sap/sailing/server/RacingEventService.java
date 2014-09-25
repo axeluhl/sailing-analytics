@@ -427,7 +427,7 @@ public interface RacingEventService extends TrackedRegattaRegistry, RegattaFetch
 
     void mediaTrackDurationChanged(MediaTrack mediaTrack);
 
-    void mediaTrackRacesChanged(MediaTrack mediaTrack);
+    void mediaTrackAssignedRacesChanged(MediaTrack mediaTrack);
     
     void mediaTrackDeleted(MediaTrack mediaTrack);
 

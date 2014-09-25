@@ -13,7 +13,7 @@ public class UpdateMediaTrackRacesOperation extends AbstractMediaTrackOperation 
     
     @Override
     public Void internalApplyTo(RacingEventService toState) throws Exception {
-        toState.mediaTrackRacesChanged(this.mediaTrack);
+        toState.mediaTrackAssignedRacesChanged(this.mediaTrack);
         return null;
     }
 

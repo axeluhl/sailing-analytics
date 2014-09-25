@@ -170,10 +170,11 @@ class MediaLibrary {
         }
     }
 
-    void deleteMediaTrack(MediaTrack mediaTrack) {
+    void deleteMediaTrack(MediaTrack mediaTrackToBeDeleted) {
         LockUtil.lockForWrite(lock);
         try {
-            MediaTrack deletedMediaTrack = mediaTracksByDbId.remove(mediaTrack);
+            MediaTrack deletedMediaTrack = getMediaTrackForClone(mediaTrackToBeDeleted);
+            mediaTracksByDbId.remove(deletedMediaTrack);
             updateStorage_Remove(deletedMediaTrack);
         } finally {
             LockUtil.unlockAfterWrite(lock);
@@ -183,7 +184,7 @@ class MediaLibrary {
     void titleChanged(MediaTrack changedMediaTrack) {
         LockUtil.lockForWrite(lock);
         try {
-            MediaTrack mediaTrack = mediaTracksByDbId.get(changedMediaTrack);
+            MediaTrack mediaTrack = getMediaTrackForClone(changedMediaTrack);
             if (mediaTrack != null) {
                 mediaTrack.title = changedMediaTrack.title;
             }
@@ -195,7 +196,7 @@ class MediaLibrary {
     void urlChanged(MediaTrack changedMediaTrack) {
         LockUtil.lockForWrite(lock);
         try {
-            MediaTrack mediaTrack = mediaTracksByDbId.get(changedMediaTrack);
+            MediaTrack mediaTrack = getMediaTrackForClone(changedMediaTrack);
             if (mediaTrack != null) {
                 mediaTrack.url = changedMediaTrack.url;
             }
@@ -207,7 +208,7 @@ class MediaLibrary {
     void mimeTypeChanged(MediaTrack changedMediaTrack) {
         LockUtil.lockForWrite(lock);
         try {
-            MediaTrack mediaTrack = mediaTracksByDbId.get(changedMediaTrack);
+            MediaTrack mediaTrack = getMediaTrackForClone(changedMediaTrack);
             if (mediaTrack != null) {
                 mediaTrack.mimeType = changedMediaTrack.mimeType;
             }
@@ -219,7 +220,7 @@ class MediaLibrary {
     void startTimeChanged(MediaTrack changedMediaTrack) {
         LockUtil.lockForWrite(lock);
         try {
-            MediaTrack mediaTrack = mediaTracksByDbId.get(changedMediaTrack);
+            MediaTrack mediaTrack = getMediaTrackForClone(changedMediaTrack);
             if (mediaTrack != null) {
                 mediaTrack.startTime = changedMediaTrack.startTime;
             }
@@ -231,7 +232,7 @@ class MediaLibrary {
     void durationChanged(MediaTrack changedMediaTrack) {
         LockUtil.lockForWrite(lock);
         try {
-            MediaTrack mediaTrack = mediaTracksByDbId.get(changedMediaTrack);
+            MediaTrack mediaTrack = getMediaTrackForClone(changedMediaTrack);
             if (mediaTrack != null) {
                 mediaTrack.duration = changedMediaTrack.duration;
             }
@@ -243,7 +244,7 @@ class MediaLibrary {
     void racesChanged(MediaTrack changedMediaTrack) {
         LockUtil.lockForWrite(lock);
         try {
-            MediaTrack mediaTrack = mediaTracksByDbId.get(changedMediaTrack);
+            MediaTrack mediaTrack = getMediaTrackForClone(changedMediaTrack);
             if (mediaTrack != null) {
                 updateStorage_Remove(mediaTrack); //Cannot use updateCache_Update method, because race is changed
                 mediaTrack.assignedRaces.clear();
@@ -253,6 +254,14 @@ class MediaLibrary {
         } finally {
             LockUtil.unlockAfterWrite(lock);
         }
+    }
+
+    private MediaTrack getMediaTrackForClone(MediaTrack mediaTrackClone) {
+        MediaTrack mediaTrack = mediaTracksByDbId.get(mediaTrackClone);
+        if (mediaTrack == mediaTrackClone) {
+            throw new IllegalArgumentException("Media track and clone must not be identical.");
+        }
+        return mediaTrack;
     }
 
     /**
@@ -326,7 +335,7 @@ class MediaLibrary {
     }
 
     public MediaTrack lookupMediaTrack(MediaTrack mediaTrack) {
-        return mediaTracksByDbId.get(mediaTrack);
+        return getMediaTrackForClone(mediaTrack);
     }
 
 }
