@@ -2,10 +2,14 @@ package com.sap.sailing.gwt.ui.client.media;
 
 import com.google.gwt.event.dom.client.ClickEvent;
 import com.google.gwt.event.dom.client.ClickHandler;
+import com.google.gwt.event.dom.client.KeyUpEvent;
+import com.google.gwt.event.dom.client.KeyUpHandler;
 import com.google.gwt.user.client.rpc.AsyncCallback;
 import com.google.gwt.user.client.ui.Button;
 import com.google.gwt.user.client.ui.FlowPanel;
 import com.google.gwt.user.client.ui.FocusWidget;
+import com.google.gwt.user.client.ui.TextBox;
+import com.google.gwt.user.client.ui.VerticalPanel;
 import com.google.gwt.user.client.ui.Widget;
 import com.sap.sailing.domain.common.media.MediaTrack;
 import com.sap.sailing.gwt.ui.client.ErrorReporter;
@@ -23,9 +27,11 @@ public class MediaSynchControl implements EditFlag {
     private final MediaTrack backupVideoTrack;
 
     private final FlowPanel mainPanel;
-    private final FlowPanel buttonPanel;
+    private final FlowPanel editPanel;
+    private final FlowPanel commitPanel;
     private final FlowPanel fineTuningPanel;
 
+    private final TextBox titleEdit;
     private final Button editButton;
     private final Button previewButton;
     private final Button saveButton;
@@ -38,12 +44,28 @@ public class MediaSynchControl implements EditFlag {
         this.mediaSynchAdapter = mediaSynchAdapter;
         this.errorReporter = errorReporter;
         MediaTrack videoTrack = this.mediaSynchAdapter.getMediaTrack(); 
-        backupVideoTrack = new MediaTrack(null, videoTrack.title, videoTrack.url, videoTrack.startTime, videoTrack.duration, videoTrack.mimeType, videoTrack.assignedRaces);
+        backupVideoTrack = new MediaTrack(videoTrack.title, videoTrack.url, videoTrack.startTime, videoTrack.duration, videoTrack.mimeType, videoTrack.assignedRaces);
         mainPanel = new FlowPanel();
+        mainPanel.addStyleName("main-panel");
+        editPanel = new FlowPanel();
         fineTuningPanel = new FlowPanel();
         fineTuningPanel.addStyleName("finetuning-panel");
-        buttonPanel = new FlowPanel();
-        buttonPanel.addStyleName("button-panel");
+        commitPanel = new FlowPanel();
+        commitPanel.addStyleName("button-panel");
+        
+        titleEdit = new TextBox();
+        titleEdit.setText(videoTrack.title);
+        titleEdit.addStyleName("title-edit");
+        titleEdit.addKeyUpHandler(new KeyUpHandler() {
+            
+            @Override
+            public void onKeyUp(KeyUpEvent event) {
+                String text = titleEdit.getText();
+                MediaSynchControl.this.mediaSynchAdapter.getMediaTrack().title = text;
+                updateUiState();
+            }
+        });
+        
         Button fastRewindButton = new Button("-1s &#171;", new ClickHandler() {
             @Override
             public void onClick(ClickEvent event) {
@@ -103,15 +125,17 @@ public class MediaSynchControl implements EditFlag {
         fineTuningPanel.add(slowForwardButton);
         fineTuningPanel.add(fastForwardButton);
         
-        mainPanel.add(editButton);
-        mainPanel.add(previewButton);
+        mainPanel.add(titleEdit);
+        editPanel.add(editButton);
+        editPanel.add(previewButton);
+        mainPanel.add(editPanel);
         mainPanel.add(fineTuningPanel);
         
-        buttonPanel.add(saveButton);
-        buttonPanel.add(discardButton);
+        commitPanel.add(saveButton);
+        commitPanel.add(discardButton);
         
         
-        mainPanel.add(buttonPanel);
+        mainPanel.add(commitPanel);
 
         updateUiState();
 
@@ -136,6 +160,8 @@ public class MediaSynchControl implements EditFlag {
     }
 
     private void discard() {
+        mediaSynchAdapter.getMediaTrack().title = backupVideoTrack.title;
+        titleEdit.setText(mediaSynchAdapter.getMediaTrack().title);
         mediaSynchAdapter.getMediaTrack().startTime = backupVideoTrack.startTime;
         isEditing = false;
         pausePlayback();
@@ -149,17 +175,35 @@ public class MediaSynchControl implements EditFlag {
 
     private void save() {
         
-        if (backupVideoTrack.startTime != mediaSynchAdapter.getMediaTrack().startTime) {
+        if (!backupVideoTrack.startTime.equals(mediaSynchAdapter.getMediaTrack().startTime)) {
             mediaService.updateStartTime(mediaSynchAdapter.getMediaTrack(), new AsyncCallback<Void>() {
 
                 @Override
                 public void onSuccess(Void result) {
-                    // nothing to do
+                    backupVideoTrack.startTime = mediaSynchAdapter.getMediaTrack().startTime;
+                    updateUiState();
                 }
 
                 @Override
                 public void onFailure(Throwable caught) {
                     errorReporter.reportError(caught.toString());
+                    updateUiState();
+                }
+            });
+        }
+        if (!backupVideoTrack.title.equals(mediaSynchAdapter.getMediaTrack().title)) {
+            mediaService.updateTitle(mediaSynchAdapter.getMediaTrack(), new AsyncCallback<Void>() {
+
+                @Override
+                public void onSuccess(Void result) {
+                    backupVideoTrack.title = mediaSynchAdapter.getMediaTrack().title;
+                    updateUiState();
+                }
+
+                @Override
+                public void onFailure(Throwable caught) {
+                    errorReporter.reportError(caught.toString());
+                    updateUiState();
                 }
             });
         }
@@ -177,12 +221,13 @@ public class MediaSynchControl implements EditFlag {
         editButton.setEnabled(!isEditing);
         previewButton.setEnabled(isEditing);
         
-        saveButton.setEnabled(!isEditing && isDirty());
-        discardButton.setEnabled(isEditing || isDirty());
+        boolean isDirty = isDirty();
+        saveButton.setEnabled(!isEditing && isDirty);
+        discardButton.setEnabled(isEditing || isDirty);
     }
 
     private boolean isDirty() {
-        return backupVideoTrack.startTime != mediaSynchAdapter.getMediaTrack().startTime;
+        return !backupVideoTrack.startTime.equals(mediaSynchAdapter.getMediaTrack().startTime) || !backupVideoTrack.title.equals(titleEdit.getText());
     }
 
     private void fastForward() {

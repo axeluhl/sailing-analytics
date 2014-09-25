@@ -81,3 +81,8 @@
 .gwt-extras-WindowBox .video-root-panel {
 	display: inline-block;
 }
+
+.gwt-extras-WindowBox .title-edit {
+    width: 100%;
+    margin-bottom: 10px;
+}
