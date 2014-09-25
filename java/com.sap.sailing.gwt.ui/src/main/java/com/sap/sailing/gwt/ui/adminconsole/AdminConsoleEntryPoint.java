@@ -79,9 +79,27 @@ public class AdminConsoleEntryPoint extends AbstractEntryPoint implements Regatt
     }
      
     private void createUI(UserDTO user) {
+        /* Generic selection handler that forwards selected tabs to a refresher that ensures
+         * that data gets reloaded. If you add a new tab then make sure to have a look at
+         * #refreshDataFor(Widget widget) to ensure that upon selection your tab gets the 
+         * data refreshed.
+         */
+        final SelectionHandler<Integer> tabSelectionHandler = new SelectionHandler<Integer>() {
+            @Override
+            public void onSelection(SelectionEvent<Integer> event) {
+                Object source = event.getSource();
+                if (source != null && source instanceof TabLayoutPanel) {
+                    TabLayoutPanel tabPanel = ((TabLayoutPanel)source);
+                    final Widget selectedPanel = tabPanel.getWidget(event.getSelectedItem());
+                    refreshDataFor(selectedPanel);
+                }
+            }
+        };
+    
         BetterDateTimeBox.initialize();
         
         final VerticalTabLayoutPanel tabPanel = new VerticalTabLayoutPanel(2.5, Unit.EM);
+        tabPanel.addSelectionHandler(tabSelectionHandler);
         tabPanel.ensureDebugId("AdministrationTabs");
         regattasDisplayers = new HashSet<>();
         leaderboardsDisplayers = new HashSet<>();
@@ -97,7 +115,10 @@ public class AdminConsoleEntryPoint extends AbstractEntryPoint implements Regatt
         addToTabPanel(tabPanel, user, regattaManagementPanel, stringMessages.regattas(), AdminConsoleFeatures.MANAGE_REGATTAS);
         regattasDisplayers.add(regattaManagementPanel);
         
+        /* LEADERBOARDS */
+        
         final TabLayoutPanel leaderboardTabPanel = new TabLayoutPanel(2.5, Unit.EM);
+        leaderboardTabPanel.addSelectionHandler(tabSelectionHandler);
         leaderboardTabPanel.ensureDebugId("LeaderboardPanel");
         tabPanel.add(leaderboardTabPanel, stringMessages.leaderboards());
         
@@ -116,7 +137,10 @@ public class AdminConsoleEntryPoint extends AbstractEntryPoint implements Regatt
         leaderboardGroupsDisplayers.add(leaderboardGroupConfigPanel);
         leaderboardsDisplayers.add(leaderboardGroupConfigPanel);
 
+        /* RACES */
+        
         final TabLayoutPanel racesTabPanel = new TabLayoutPanel(2.5, Unit.EM);
+        racesTabPanel.addSelectionHandler(tabSelectionHandler);
         racesTabPanel.ensureDebugId("RacesPanel");
         tabPanel.add(racesTabPanel, stringMessages.races());
         
@@ -130,25 +154,22 @@ public class AdminConsoleEntryPoint extends AbstractEntryPoint implements Regatt
         addToTabPanel(racesTabPanel, user, competitorPanel, stringMessages.competitors(), AdminConsoleFeatures.MANAGE_ALL_COMPETITORS);
 
         RaceCourseManagementPanel raceCourseManagementPanel = new RaceCourseManagementPanel(sailingService, this, this, stringMessages);
-        // raceCourseManagementPanel.ensureDebugId("RaceCourseManagement");
         addToTabPanel(racesTabPanel, user, raceCourseManagementPanel, stringMessages.courseLayout(), AdminConsoleFeatures.MANAGE_COURSE_LAYOUT);
         regattasDisplayers.add(raceCourseManagementPanel);
 
         final AsyncActionsExecutor asyncActionsExecutor = new AsyncActionsExecutor();
 
         WindPanel windPanel = new WindPanel(sailingService, asyncActionsExecutor, this, this, stringMessages);
-        // windPanel.ensureDebugId("WindManagement");
         regattasDisplayers.add(windPanel);
         addToTabPanel(racesTabPanel, user, windPanel, stringMessages.wind(), AdminConsoleFeatures.MANAGE_WIND);
 
         final MediaPanel mediaPanel = new MediaPanel(regattasDisplayers, sailingService, this, mediaService, this, stringMessages);
         addToTabPanel(racesTabPanel, user, mediaPanel, stringMessages.mediaPanel(), AdminConsoleFeatures.MANAGE_MEDIA);
 
-        /*final DeviceConfigurationPanel deviceConfigurationAdminPanel = new DeviceConfigurationPanel(sailingService,
-                stringMessages, this);
-        addScrollableTab(tabPanel, deviceConfigurationAdminPanel, stringMessages.deviceConfiguration() + " (admin)");*/
+        /* CONNECTORS */
         
         final TabLayoutPanel connectorsTabPanel = new TabLayoutPanel(2.5, Unit.EM);
+        connectorsTabPanel.addSelectionHandler(tabSelectionHandler);
         connectorsTabPanel.ensureDebugId("TrackingProviderPanel");
         tabPanel.add(connectorsTabPanel, stringMessages.connectors());
 
@@ -181,12 +202,14 @@ public class AdminConsoleEntryPoint extends AbstractEntryPoint implements Regatt
         ResultImportUrlsManagementPanel resultImportUrlsManagementPanel = new ResultImportUrlsManagementPanel(sailingService, this, stringMessages);
         addToTabPanel(connectorsTabPanel, user, resultImportUrlsManagementPanel, stringMessages.resultImportUrls(), AdminConsoleFeatures.MANAGE_RESULT_IMPORT_URLS);
 
+        /* ADVANCED */
+        
         final TabLayoutPanel advancedTabPanel = new TabLayoutPanel(2.5, Unit.EM);
+        advancedTabPanel.addSelectionHandler(tabSelectionHandler);
         advancedTabPanel.ensureDebugId("AdvancedPanel");
         tabPanel.add(advancedTabPanel, "Advanced");
 
         final ReplicationPanel replicationPanel = new ReplicationPanel(sailingService, this, stringMessages);
-        // replicationPanel.ensureDebugId("ReplicationManagement");
         addToTabPanel(advancedTabPanel, user, replicationPanel, stringMessages.replication(), AdminConsoleFeatures.MANAGE_REPLICATION);
 
         final MasterDataImportPanel masterDataImportPanel = new MasterDataImportPanel(stringMessages, sailingService,
@@ -201,33 +224,6 @@ public class AdminConsoleEntryPoint extends AbstractEntryPoint implements Regatt
         addToTabPanel(advancedTabPanel, user, deviceConfigurationUserPanel, stringMessages.deviceConfiguration(), AdminConsoleFeatures.MANAGE_DEVICE_CONFIGURATION);
 
         tabPanel.selectTab(0);
-        tabPanel.addSelectionHandler(new SelectionHandler<Integer>() {
-            @Override
-            public void onSelection(SelectionEvent<Integer> event) {
-                final Widget selectedPanel = tabPanel.getWidget(tabPanel.getSelectedIndex());
-                if (selectedPanel == eventManagementPanel) {
-                    eventManagementPanel.fillEvents();
-                    fillLeaderboardGroups();
-                } else if (selectedPanel == leaderboardTabPanel) {
-                    fillLeaderboards();
-                    fillLeaderboardGroups();
-                } else if (selectedPanel == connectorsTabPanel) {
-                    fillLeaderboards();
-                }
-            }
-        });
-        
-        racesTabPanel.addSelectionHandler(new SelectionHandler<Integer>() {
-            @Override
-            public void onSelection(SelectionEvent<Integer> event) {
-                // as panels are wrapped by scroll panel we need to use index here
-                if (event.getSelectedItem() == 1) {
-                    competitorPanel.refreshCompetitorList();
-                } else if (event.getSelectedItem() == 4) {
-                    mediaPanel.onShow();
-                }
-            }
-        });
         
         fillRegattas();
         fillLeaderboardGroups();
@@ -255,6 +251,32 @@ public class AdminConsoleEntryPoint extends AbstractEntryPoint implements Regatt
         dockPanel.addSouth(informationPanel, 2.5);
         dockPanel.add(tabPanel);
         rootPanel.add(dockPanel);
+    }
+    
+    private void refreshDataFor(Widget widget) {
+        Widget target = widget;
+        if (widget != null) {
+            if (widget instanceof ScrollPanel) {
+                target = ((ScrollPanel)widget).getWidget();
+            }
+            if (target instanceof EventManagementPanel) {
+                ((EventManagementPanel)target).fillEvents();
+                fillLeaderboardGroups();
+            } else if (target instanceof LeaderboardConfigPanel) {
+                fillLeaderboards();
+            } else if (target instanceof LeaderboardGroupConfigPanel) {
+                fillLeaderboardGroups();
+                fillLeaderboards();
+            } else if (target instanceof RegattaStructureManagementPanel) {
+                fillRegattas();
+            } else if (target instanceof CompetitorPanel) {
+                ((CompetitorPanel)target).refreshCompetitorList();
+            } else if (target instanceof RaceLogTrackingEventManagementPanel) {
+                fillLeaderboards();
+            } else if (target instanceof MediaPanel) {
+                ((MediaPanel)target).onShow();
+            }
+        }
     }
 
     private void addToTabPanel(VerticalTabLayoutPanel tabPanel, UserDTO user, Panel panelToAdd, String tabTitle, AdminConsoleFeatures feature) {
