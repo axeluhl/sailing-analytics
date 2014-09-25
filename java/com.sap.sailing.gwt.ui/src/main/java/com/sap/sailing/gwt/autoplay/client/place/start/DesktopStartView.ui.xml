@@ -3,20 +3,36 @@
     xmlns:s="urn:import:com.sap.sailing.gwt.autoplay.client.place"
 	xmlns:g="urn:import:com.google.gwt.user.client.ui">
 	<ui:with field="res" type="com.sap.sailing.gwt.common.client.SharedResources" />
-    <ui:style>
+    <ui:with field="i18n" type="com.sap.sailing.gwt.common.client.i18n.TextMessages"/>
+	<ui:style>
         .mainPanel {
 			margin:10px;
 		}
     </ui:style>
     <g:HTMLPanel styleName="{style.mainPanel}">
-	    <g:HorizontalPanel spacing="5">
-	    	<g:Label text="Events:" />
-			<g:ListBox ui:field="eventSelectionBox" />
-		</g:HorizontalPanel>
-	    <g:HorizontalPanel spacing="5">
-	    	<g:Label text="Leaderboards:" />
-			<g:ListBox ui:field="leaderboardSelectionBox" />
-		</g:HorizontalPanel>
-	    <g:Button ui:field="startAutoPlayButton" text="Start autoplay"/>
+		<div class="{res.mainCss.grid}">
+			<div class="{res.mediaCss.small2} {res.mediaCss.columns}">
+			    <ui:text from='{i18n.events}'/>
+	        </div>
+		    <div class="{res.mediaCss.small2} {res.mediaCss.columns}">
+				<g:ListBox ui:field="eventSelectionBox" />
+	        </div>
+		</div>
+		<div ui:field="leaderboardSelectionDiv" class="{res.mainCss.grid}">
+			<div class="{res.mediaCss.small2} {res.mediaCss.columns}">
+			    <ui:text from='{i18n.leaderboard}'/>
+	        </div>
+		    <div class="{res.mediaCss.small2} {res.mediaCss.columns}">
+				<g:ListBox ui:field="leaderboardSelectionBox" />
+	        </div>
+		</div>
+		<div class="{res.mainCss.grid}">
+			<div class="{res.mediaCss.small2} {res.mediaCss.columns}">
+			    &nbsp;
+	        </div>
+		    <div class="{res.mediaCss.small2} {res.mediaCss.columns}">
+	    		<g:Button ui:field="startAutoPlayButton" text="Start autoplay"/>
+		    </div>
+		</div>
 	</g:HTMLPanel>
 </ui:UiBinder>    

@@ -4,6 +4,8 @@ import java.util.ArrayList;
 import java.util.List;
 
 import com.google.gwt.core.client.GWT;
+import com.google.gwt.dom.client.DivElement;
+import com.google.gwt.dom.client.Style.Visibility;
 import com.google.gwt.event.dom.client.ChangeEvent;
 import com.google.gwt.event.dom.client.ClickEvent;
 import com.google.gwt.uibinder.client.UiBinder;
@@ -27,6 +29,7 @@ public class DesktopStartView extends Composite implements StartView {
     @UiField(provided=true) ListBox eventSelectionBox;
     @UiField(provided=true) ListBox leaderboardSelectionBox;
     @UiField Button startAutoPlayButton;
+    @UiField DivElement leaderboardSelectionDiv;
     
     private final PlaceNavigator navigator;
     private final List<EventDTO> events;
@@ -41,7 +44,7 @@ public class DesktopStartView extends Composite implements StartView {
         
         initWidget(uiBinder.createAndBindUi(this));
         
-        leaderboardSelectionBox.setVisible(false);
+        leaderboardSelectionDiv.getStyle().setVisibility(Visibility.HIDDEN);
         startAutoPlayButton.setEnabled(false);
     }
 
@@ -68,8 +71,14 @@ public class DesktopStartView extends Composite implements StartView {
                 }
             }
         }
-        leaderboardSelectionBox.setVisible(selectedEvent != null);
-        startAutoPlayButton.setEnabled(selectedEvent != null);
+        leaderboardSelectionDiv.getStyle().setVisibility(selectedEvent != null ? Visibility.VISIBLE : Visibility.HIDDEN);
+        startAutoPlayButton.setEnabled(false);
+    }
+
+    @UiHandler("leaderboardSelectionBox")
+    void onLeaderboardSelectionChange(ChangeEvent event) {
+        String selectedLeaderboardName = getSelectedLeaderboardName();
+        startAutoPlayButton.setEnabled(selectedLeaderboardName != null);
     }
     
     @UiHandler("startAutoPlayButton")
