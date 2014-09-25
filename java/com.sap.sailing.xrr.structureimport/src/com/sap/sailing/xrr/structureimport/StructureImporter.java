@@ -26,6 +26,7 @@ import buildstructure.SetRacenumberStrategy;
 import com.sap.sailing.domain.base.BoatClass;
 import com.sap.sailing.domain.base.DomainFactory;
 import com.sap.sailing.domain.base.Nationality;
+import com.sap.sailing.domain.base.Regatta;
 import com.sap.sailing.domain.base.impl.BoatImpl;
 import com.sap.sailing.domain.base.impl.DynamicBoat;
 import com.sap.sailing.domain.base.impl.DynamicPerson;
@@ -34,6 +35,7 @@ import com.sap.sailing.domain.base.impl.PersonImpl;
 import com.sap.sailing.domain.base.impl.RegattaImpl;
 import com.sap.sailing.domain.base.impl.TeamImpl;
 import com.sap.sailing.domain.common.Color;
+import com.sap.sailing.domain.common.FleetColors;
 import com.sap.sailing.domain.common.ScoringSchemeType;
 import com.sap.sailing.domain.common.dto.FleetDTO;
 import com.sap.sailing.domain.common.dto.RegattaCreationParametersDTO;
@@ -54,75 +56,89 @@ import eventimport.RegattaJSON;
 
 public class StructureImporter {
 
-    private ArrayList<RegattaResults> results = new ArrayList<RegattaResults>();
-    private ArrayList<RegattaJSON> regattas;
-    private ArrayList<RegattaJSON> selectedRegattas = new ArrayList<RegattaJSON>();;
+    private final Set<RegattaResults> results = Collections.synchronizedSet(new HashSet<RegattaResults>());
     private Map<RegattaStructureKey, Set<BuildStructure>> seriesStructuresWithFrequency = new HashMap<RegattaStructureKey, Set<BuildStructure>>(); // TODO
                                                                                                                                                          // rename
     private List<BuildStructure> buildStructures = new ArrayList<BuildStructure>();
     private LinkedHashMap<String, Boat> boatForPerson;
     private DomainFactory baseDomainFactory;
-    private SetRacenumberStrategy setRacenumberStrategy;
+    private final SetRacenumberStrategy setRacenumberStrategy;
     private int parsedDocuments = 0;
     private boolean finished = false;
 
     public StructureImporter(SetRacenumberStrategy setRacenumber) {
-
         this.setRacenumberStrategy = setRacenumber;
-
+    }
+    
+    public StructureImporter() {
+        this(null);
     }
 
-    public void parseEvent(String url) {
-        regattas = new EventImport().getRegattas(url);
+    public Iterable<RegattaJSON> parseEvent(String url) {
+        return new EventImport().getRegattas(url);
     }
 
-    public List<String> getRegattaNames() {
-        List<String> regattaNames = new ArrayList<String>();
-        for (RegattaJSON regatta : regattas) {
-            regattaNames.add(regatta.getName());
-        }
-        return regattaNames;
-    }
-
-    public void updateRegattasToSelected(List<String> regattaNames) {
-        selectedRegattas.clear();
-        for (RegattaJSON regatta : regattas) {
-            for (String s : regattaNames) {
-                if (regatta.getName().equals(s)) {
-                    selectedRegattas.add(regatta);
-                }
+    public Iterable<String> getRegattaNames(Iterable <RegattaJSON> regattas, DomainFactory baseDomainFactory) {
+        parseRegattas(regattas);
+        for (RegattaResults result : results) {
+            List<Race> races = new ArrayList<Race>();
+            Event event = (Event) result.getPersonOrBoatOrTeam().get(result.getPersonOrBoatOrTeam().size() - 1);
+            Iterable<Object> raceOrDevisionOrRegattaSeriesResults = event.getRaceOrDivisionOrRegattaSeriesResult();
+            
+            LinkedHashMap<String, SeriesCreationParametersDTO> seriesCreationParams = setSeriesCreationParameters(
+                    buildStructures.get(i), false, false,
+                    false, null);
+            this.baseDomainFactory = baseDomainFactory;
+            Set<Regatta> addSpecificRegattas = new HashSet<Regatta>();
+            addSpecificRegattas.add((Regatta)new AddSpecificRegatta(RegattaImpl.getDefaultName(event.getTitle(),
+                    ((Division) event.getRaceOrDivisionOrRegattaSeriesResult().get(0)).getTitle()), ((Division) event
+                    .getRaceOrDivisionOrRegattaSeriesResult().get(0)).getTitle(), event.getEventID(),
+                    new RegattaCreationParametersDTO(seriesCreationParams), false, this.baseDomainFactory
+                            .createScoringScheme(ScoringSchemeType.LOW_POINT), null /*courseAreaUUID*/, true));
+            
+            for (Object raceOrDevisionOrRegattaSeriesResult: raceOrDevisionOrRegattaSeriesResults) {
+                races.add((Race) raceOrDevisionOrRegattaSeriesResult);
             }
+
+            BuildStructure structure = new BuildStructure(races);
+//            analyseStructure(structure);
+            buildStructures.add(structure);
         }
+        return seriesStructuresWithFrequency;
+    }
+    
+    public Iterable<Regatta> getRegattas(DomainFactory baseDomainFactory) {
+
+        this.baseDomainFactory = baseDomainFactory;
+        Set<Regatta> addSpecificRegattas = new HashSet<Regatta>();
+
+        for (int i = 0; i < results.size(); i++) {
+
+
+        }
+        return addSpecificRegattas;
     }
 
-    private void parseRegattas() {
-
-        for (int i = 0; i < selectedRegattas.size(); i++) {
-            final int index = i;
-            Runnable regattaParser = new Runnable() {
-
+    private Iterable<RegattaResults> parseRegattas(final Iterable<RegattaJSON> selectedRegattas) {
+        for (final RegattaJSON selectedRegatta : selectedRegattas) {
+            new Thread("XRR Importer "+selectedRegatta.getName()) {
                 @Override
                 public void run() {
-
                     try {
-                        parseRegattaXML(selectedRegattas.get(index).getXrrEntriesUrl());
+                        parseRegattaXML(selectedRegatta.getXrrEntriesUrl());
                     } catch (JAXBException | IOException e) {
-                        e.printStackTrace();
+                        e.printStackTrace(); //TODO 
                     }
                     parsedDocuments++;
-
                 }
-
-            };
-            regattaParser.run();
+            }.start();
         }
+        return results;
     }
 
     public Map<RegattaStructureKey, Set<BuildStructure>> getRegattaStructures(List<String> regattaNames) {
-        // dependencies loops
         buildStructures.clear();
         results.clear();
-        parseRegattas();
         int zaehler = 0;
 
         for (RegattaResults result : results) {
@@ -165,34 +181,6 @@ public class StructureImporter {
 //        }
 //
 //    }
-
-    public Iterable<AddSpecificRegatta> getRegattas(ScoringSchemeType scoringScheme, boolean isPersistent,
-            UUID courseArea, boolean useStartTimeInference, DomainFactory baseDomainFactory,
-            boolean firstColumnIsNonDiscardableCarryForward, boolean hasSplitFleetContiguousScoring,
-            boolean startswithZeroScore, int[] discardingThresholds) {
-
-        this.baseDomainFactory = baseDomainFactory;
-        List<AddSpecificRegatta> addSpecificRegattas = new ArrayList<AddSpecificRegatta>();
-
-        for (int i = 0; i < results.size(); i++) {
-            LinkedHashMap<String, SeriesCreationParametersDTO> seriesCreationParams = setSeriesCreationParameters(
-                    buildStructures.get(i), firstColumnIsNonDiscardableCarryForward, hasSplitFleetContiguousScoring,
-                    startswithZeroScore, discardingThresholds);
-
-            Event event = (Event) results.get(i).getPersonOrBoatOrTeam()
-                    .get(results.get(i).getPersonOrBoatOrTeam().size() - 1);
-
-            String titel = event.getTitle();
-
-            addSpecificRegattas.add(new AddSpecificRegatta(RegattaImpl.getDefaultName(event.getTitle(),
-                    ((Division) event.getRaceOrDivisionOrRegattaSeriesResult().get(0)).getTitle()), ((Division) event
-                    .getRaceOrDivisionOrRegattaSeriesResult().get(0)).getTitle(), event.getEventID(),
-                    new RegattaCreationParametersDTO(seriesCreationParams), isPersistent, this.baseDomainFactory
-                            .createScoringScheme(scoringScheme), courseArea, useStartTimeInference));
-
-        }
-        return addSpecificRegattas;
-    }
 
     private LinkedHashMap<String, SeriesCreationParametersDTO> setSeriesCreationParameters(BuildStructure structure,
             boolean firstColumnIsNonDiscardableCarryForward, boolean hasSplitFleetContiguousScoring,
@@ -247,39 +235,18 @@ public class StructureImporter {
         return fleetsDTO;
     }
 
-    private Color getColorFromString(String colorString) {
-        Color color = null;
-
-        switch (colorString) {
-        case "Blue":
-            color = Color.BLUE;
-            break;
-        case "Red":
-            color = Color.RED;
-            break;
-        case "Yellow":
-            color = Color.YELLOW;
-            break;
-        case "Green":
-            color = Color.GREEN;
-            break;
-        case "Gold":
-            color = Color.ORANGE;
-            break;
-        case "Silver":
-            color = Color.LIGHT_GRAY;
-            break;
-        case "Bronze":
-            color = Color.ORANGE;
-            break;
-        case "Emerald":
-            color = Color.CYAN;
-            break;
-        default:
-            color = Color.BLACK;
+    private Color getColorFromString(final String colorString) {
+        Color result = null;
+        for (FleetColors fleetColor : FleetColors.values()) {
+            if (fleetColor.name().equalsIgnoreCase(colorString)) {
+                result = fleetColor.getColor();
+                break;
+            }
         }
-
-        return color;
+        if (result == null) {
+            result = Color.BLACK;
+        }
+        return result;
     }
 
     public void setCompetitors() {
@@ -389,13 +356,10 @@ public class StructureImporter {
 
     private void parseRegattaXML(String url) throws FileNotFoundException, JAXBException, IOException {
         results.add(ParserFactory.INSTANCE.createParser(getInputStream(url), "").parse());
-
     }
 
     private InputStream getInputStream(String url) throws FileNotFoundException, IOException {
-
         URLConnection connection = new URL(url).openConnection();
-
         return connection.getInputStream();
     }
 

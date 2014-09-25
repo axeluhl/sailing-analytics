@@ -1,6 +1,5 @@
-package com.sap.sailing.gwt.ui.adminconsole;
+package com.sap.sailing.domain.common;
 
-import com.sap.sailing.domain.common.Color;
 import com.sap.sailing.domain.common.impl.RGBColor;
 
 public enum FleetColors {

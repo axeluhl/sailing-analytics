@@ -398,6 +398,8 @@ import com.sap.sse.common.Util.Triple;
 import com.sap.sse.common.search.KeywordQuery;
 import com.sap.sse.common.search.Result;
 
+import eventimport.RegattaJSON;
+
 /**
  * The server side implementation of the RPC service.
  */
@@ -461,8 +463,6 @@ public class SailingServiceImpl extends ProxiedRemoteServiceServlet implements S
     private final SwissTimingReplayService swissTimingReplayService;
 
     private final QuickRanksLiveCache quickRanksLiveCache;
-
-    private StructureImporter structureImporter = null;
 
     public SailingServiceImpl() {
         BundleContext context = Activator.getDefault();
@@ -3725,7 +3725,7 @@ public class SailingServiceImpl extends ProxiedRemoteServiceServlet implements S
 
     private SeriesParameters getDefaultSeries(RegattaDTO defaultRegatta) {
         SeriesParameters defaultSeries = new SeriesParameters(false, false, false, null);
-        if (defaultRegatta.series!= null && defaultRegatta.series.size() > 0) { //null abfangen
+        if (defaultRegatta.series != null && defaultRegatta.series.size() > 0) { // null abfangen
             SeriesDTO series = defaultRegatta.series.get(0);
             defaultSeries
                     .setFirstColumnIsNonDiscardableCarryForward(series.isFirstColumnIsNonDiscardableCarryForward());
@@ -3736,21 +3736,19 @@ public class SailingServiceImpl extends ProxiedRemoteServiceServlet implements S
         return defaultSeries;
     }
 
-    public List<RegattaDTO> getRegattas(String url) {
-        structureImporter = new StructureImporter(new SetRacenumberFromSeries());
-        structureImporter.parseEvent(url);
-        List<RegattaDTO> dummyRegattaDTOs = new ArrayList<RegattaDTO>();
-        List<String> regattaNames = structureImporter.getRegattaNames();
-        for (String regattaName : regattaNames) {
-            dummyRegattaDTOs.add(new RegattaDTO(regattaName, null));
-        }
-        return dummyRegattaDTOs;
+    public Iterable<Regatta> getRegattas(String url) { // parse directly
+        StructureImporter structureImporter = new StructureImporter();
+        Iterable<RegattaJSON> parsedEvent = structureImporter.parseEvent(url);
+
+        // get Regattas
+        Iterable<Regatta> regattas = structureImporter.getRegattas(getBaseDomainFactory());
+        return regattas;
     }
 
-    private List<String> createRegattasWithRaces(Iterable<AddSpecificRegatta> regattas, String eventName) {
-
-        List<String> leaderboardNames = new ArrayList<String>();
-        List<BuildStructure> buildStructures = structureImporter.getBuildStructures();
+    private Iterable<String> createRegattasWithRaces(Iterable<AddSpecificRegatta> regattas, String eventName) {
+        StructureImporter structureImporter = new StructureImporter(new SetRacenumberFromSeries());
+        Set<String> leaderboardNames = new HashSet<String>();
+        Set<BuildStructure> buildStructures = structureImporter.getBuildStructures();
         int i = 0;
         for (AddSpecificRegatta addSpecificRegatta : regattas) {
             Regatta regatta = getService().apply(addSpecificRegatta);
@@ -3771,14 +3769,16 @@ public class SailingServiceImpl extends ProxiedRemoteServiceServlet implements S
 
     @Override
     public Set<RegattaStructureDTO> getRegattaStructure(final List<String> regattaNames) {
-        structureImporter.updateRegattasToSelected(regattaNames);
-        Map<RegattaStructureKey, Set<BuildStructure>> regattaStructures =  structureImporter.getRegattaStructures(regattaNames);
-//        Set<RegattaStructureKey> regattaStructureKeys = regattaStructures.keySet();
+        StructureImporter structureImporter = new StructureImporter(new SetRacenumberFromSeries());
+        Map<RegattaStructureKey, Set<BuildStructure>> regattaStructures = structureImporter
+                .getRegattaStructures(regattaNames);
+        // Set<RegattaStructureKey> regattaStructureKeys = regattaStructures.keySet();
         Set<RegattaStructureDTO> regattaStructureDTOs = new HashSet<RegattaStructureDTO>();
-//        for(RegattaStructureKey regattaStructureKey: regattaStructureKeys){
-//            RegattaStructureDTO regattaStructureDTO = new RegattaStructureDTO(regattaStructureKey, regattaStructures.get(regattaStructureKey));
-//            regattaStructureDTOs.add(regattaStructureDTO);
-//        }
+        // for(RegattaStructureKey regattaStructureKey: regattaStructureKeys){
+        // RegattaStructureDTO regattaStructureDTO = new RegattaStructureDTO(regattaStructureKey,
+        // regattaStructures.get(regattaStructureKey));
+        // regattaStructureDTOs.add(regattaStructureDTO);
+        // }
         return regattaStructureDTOs;
     }
 
@@ -3790,16 +3790,6 @@ public class SailingServiceImpl extends ProxiedRemoteServiceServlet implements S
 
             @Override
             public void run() {
-
-                SeriesParameters defaultSeries = getDefaultSeries(defaultRegatta);
-
-                // get Regattas
-                Iterable<AddSpecificRegatta> regattas = structureImporter.getRegattas(defaultRegatta.scoringScheme,
-                        false, defaultRegatta.defaultCourseAreaUuid, defaultRegatta.useStartTimeInference,
-                        getBaseDomainFactory(), defaultSeries.isFirstColumnIsNonDiscardableCarryForward(),
-                        defaultSeries.isHasSplitFleetContiguousScoring(), defaultSeries.isStartswithZeroScore(),
-                        defaultSeries.getDiscardingThresholds());
-
                 List<String> leaderboardNames = createRegattasWithRaces(regattas, newEvent.getName());
                 createAndAddLeaderboardGroup(newEvent, leaderboardNames);
                 structureImporter.setCompetitors();

@@ -111,13 +111,6 @@ public class DefaultRegattaCreateDialog extends AbstractRegattaWithSeriesAndFlee
                     }
                 });
     }
-    
-    @Override
-    protected RegattaDTO getResult() {
-        RegattaDTO dto = super.getResult();
-        dto.event = getSelectedEvent();
-        return dto;
-    }
 
     @Override
     protected EventAndRegattaDTO getResult() {

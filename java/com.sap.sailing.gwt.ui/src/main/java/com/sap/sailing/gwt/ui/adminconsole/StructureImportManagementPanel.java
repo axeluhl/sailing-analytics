@@ -220,24 +220,14 @@ public class StructureImportManagementPanel extends FlowPanel {
             @Override
             public void onSuccess(List<EventDTO> result) {
                 Collection<RegattaDTO> existingRegattas = Collections.emptyList();
-<<<<<<< HEAD
                 DefaultRegattaCreateDialog dialog = new DefaultRegattaCreateDialog(existingRegattas, result,
                         sailingService, errorReporter, stringMessages, new DialogCallback<EventAndRegattaDTO>() {
-=======
-                final DefaultRegattaCreateDialog dialog = new DefaultRegattaCreateDialog(existingRegattas, result,
-                        sailingService, errorReporter, stringMessages, new DialogCallback<RegattaDTO>() {
->>>>>>> c4e4ab63f4bad228672c2408fb854a49f04b8983
                             @Override
                             public void cancel() {
                             }
 
                             @Override
-<<<<<<< HEAD
                             public void ok(final EventAndRegattaDTO newRegatta) {
-=======
-                            public void ok(final RegattaDTO newRegatta) {
-                                
->>>>>>> c4e4ab63f4bad228672c2408fb854a49f04b8983
                                 sailingService.getRegattaStructure(regattaNames, new AsyncCallback<Set<RegattaStructureDTO>>() {
                                     @Override
                                     public void onFailure(Throwable caught) {
@@ -247,12 +237,8 @@ public class StructureImportManagementPanel extends FlowPanel {
 
                                     @Override
                                     public void onSuccess(Set<RegattaStructureDTO> result) {
-<<<<<<< HEAD
                                      // TODO UI aufbauen
                                         createRegattas(regattaNames, newRegatta.getEvent(), newRegatta.getRegatta()); 
-=======
-                                        createRegattas(regattaNames, newRegatta.event, newRegatta); //EventDTO??
->>>>>>> c4e4ab63f4bad228672c2408fb854a49f04b8983
                                     }
                                 });
                                 

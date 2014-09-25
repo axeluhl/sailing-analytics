@@ -10,6 +10,7 @@ import java.util.UUID;
 
 import com.google.gwt.user.client.rpc.RemoteService;
 import com.sap.sailing.domain.base.RaceDefinition;
+import com.sap.sailing.domain.base.Regatta;
 import com.sap.sailing.domain.base.RemoteSailingServerReference;
 import com.sap.sailing.domain.common.DataImportProgress;
 import com.sap.sailing.domain.common.DetailType;
@@ -340,7 +341,7 @@ public interface SailingService extends RemoteService {
     void addResultImportUrl(String resultProviderName, String url) throws Exception;
 
     
-    List<RegattaDTO> getRegattas(String url);
+    Iterable<Regatta> getRegattas(String url);
 
     void createRegattaStructure(List<String> regattaNames,EventDTO newEvent, RegattaDTO defaultRegatta);
 
