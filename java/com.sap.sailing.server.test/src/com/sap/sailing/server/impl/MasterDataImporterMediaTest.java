@@ -356,4 +356,39 @@ public class MasterDataImporterMediaTest {
         verify(racingEventService).mediaTrackDurationChanged(eq(mediaTrackToImport));
     }
 
+    @Test
+    public void testImportOneTrackToSameTargetWithChangedAssignedRaces_WithOverride() throws Exception {
+        String dbId = new ObjectId().toStringMongod();
+        MimeType mimeType = MimeType.mp3;
+        Set<RegattaAndRaceIdentifier> regattasAndRaces = new HashSet<RegattaAndRaceIdentifier>();
+        regattasAndRaces.add(new RegattaNameAndRaceName("49er", "R1"));
+        MediaTrack existingMediaTrack = new MediaTrack(dbId, "title", "url", MillisecondsTimePoint.now(),
+                MillisecondsDurationImpl.ONE_HOUR, mimeType, regattasAndRaces);
+        createRacingEventService(existingMediaTrack);
+
+        MediaTrack mediaTrackToImport = new MediaTrack(existingMediaTrack.dbId, existingMediaTrack.title,
+                existingMediaTrack.url, existingMediaTrack.startTime, existingMediaTrack.duration, mimeType, existingMediaTrack.assignedRaces);
+        mediaTrackToImport.assignedRaces.add(new RegattaNameAndRaceName("49er", "R2"));
+        assertThat(existingMediaTrack.assignedRaces, is(not(mediaTrackToImport.assignedRaces)));
+        assertThat(existingMediaTrack.assignedRaces.size(), is(1));
+        assertThat(mediaTrackToImport.assignedRaces.size(), is(2));
+
+        mediaTracksToImport.add(mediaTrackToImport);
+        racingEventService.mediaTracksImported(mediaTracksToImport, OVERRIDE);
+
+        Collection<MediaTrack> allMediaTracksAfterImport = racingEventService.getAllMediaTracks();
+        assertThat(allMediaTracksAfterImport.size(), is(1));
+        MediaTrack mediaTrack = allMediaTracksAfterImport.iterator().next();
+        assertThat(existingMediaTrack.assignedRaces, is(mediaTrackToImport.assignedRaces));
+        assertThat(existingMediaTrack.assignedRaces.size(), is(2));
+
+        verify(racingEventService, never()).mediaTrackAdded(any(MediaTrack.class));
+        verify(racingEventService, never()).mediaTrackDeleted(any(MediaTrack.class));
+        verify(racingEventService, never()).mediaTrackTitleChanged(any(MediaTrack.class));
+        verify(racingEventService, never()).mediaTrackUrlChanged(any(MediaTrack.class));
+        verify(racingEventService, never()).mediaTrackStartTimeChanged(any(MediaTrack.class));
+        verify(racingEventService, never()).mediaTrackDurationChanged(any(MediaTrack.class));
+        verify(racingEventService).mediaTrackAssignedRacesChanged(eq(mediaTrackToImport));
+    }
+
 }

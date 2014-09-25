@@ -2561,20 +2561,19 @@ public class RacingEventServiceImpl implements RacingEventServiceWithTestSupport
                 // and don't justify the introduction of a new set
                 // of methods (including replication).
                 if (!Util.equalsWithNull(existingTrack.title, trackToImport.title)) {
-                    existingTrack.title = trackToImport.title;
-                    mediaTrackTitleChanged(existingTrack);
+                    mediaTrackTitleChanged(trackToImport);
                 }
                 if (!Util.equalsWithNull(existingTrack.url, trackToImport.url)) {
-                    existingTrack.url = trackToImport.url;
-                    mediaTrackUrlChanged(existingTrack);
+                    mediaTrackUrlChanged(trackToImport);
                 }
                 if (!Util.equalsWithNull(existingTrack.startTime, trackToImport.startTime)) {
-                    existingTrack.startTime = trackToImport.startTime;
-                    mediaTrackStartTimeChanged(existingTrack);
+                    mediaTrackStartTimeChanged(trackToImport);
                 }
-                if (existingTrack.duration != trackToImport.duration) {
-                    existingTrack.duration = trackToImport.duration;
-                    mediaTrackDurationChanged(existingTrack);
+                if (!Util.equalsWithNull(existingTrack.duration, trackToImport.duration)) {
+                    mediaTrackDurationChanged(trackToImport);
+                }
+                if (!Util.equalsWithNull(existingTrack.assignedRaces, trackToImport.assignedRaces)) {
+                    mediaTrackAssignedRacesChanged(trackToImport);
                 }
             }
         }
