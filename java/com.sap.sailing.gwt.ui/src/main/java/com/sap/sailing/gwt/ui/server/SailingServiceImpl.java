@@ -54,9 +54,6 @@ import org.osgi.framework.InvalidSyntaxException;
 import org.osgi.framework.ServiceReference;
 import org.osgi.util.tracker.ServiceTracker;
 
-import buildstructure.BuildStructure;
-import buildstructure.SetRacenumberFromSeries;
-
 import com.sap.sailing.domain.base.BoatClass;
 import com.sap.sailing.domain.base.Competitor;
 import com.sap.sailing.domain.base.ControlPoint;
@@ -389,7 +386,6 @@ import com.sap.sailing.server.replication.ReplicationService;
 import com.sap.sailing.server.replication.impl.ReplicaDescriptor;
 import com.sap.sailing.util.BuildVersion;
 import com.sap.sailing.xrr.schema.RegattaResults;
-import com.sap.sailing.xrr.structureimport.RegattaStructureKey;
 import com.sap.sailing.xrr.structureimport.SeriesParameters;
 import com.sap.sailing.xrr.structureimport.StructureImporter;
 import com.sap.sse.common.Util;
@@ -3725,7 +3721,7 @@ public class SailingServiceImpl extends ProxiedRemoteServiceServlet implements S
 
     private SeriesParameters getDefaultSeries(RegattaDTO defaultRegatta) {
         SeriesParameters defaultSeries = new SeriesParameters(false, false, false, null);
-        if (defaultRegatta.series != null && defaultRegatta.series.size() > 0) { // null abfangen
+        if (defaultRegatta.series != null && !defaultRegatta.series.isEmpty()) { 
             SeriesDTO series = defaultRegatta.series.get(0);
             defaultSeries
                     .setFirstColumnIsNonDiscardableCarryForward(series.isFirstColumnIsNonDiscardableCarryForward());
@@ -3736,45 +3732,36 @@ public class SailingServiceImpl extends ProxiedRemoteServiceServlet implements S
         return defaultSeries;
     }
 
-    public List<RegattaDTO> getRegattas(String url) { 
-        StructureImporter structureImporter = new StructureImporter();
+    public Iterable<AddSpecificRegatta> getRegattas(String url) { 
+        StructureImporter structureImporter = new StructureImporter(baseDomainFactory);
         Iterable<RegattaJSON> parsedEvent = structureImporter.parseEvent(url);
-        // get Regattas
-        Iterable<Regatta> regattas = structureImporter.getRegattas(parsedEvent);
-        List<RegattaDTO> regattaDTOs = new ArrayList<RegattaDTO>();
-        for(Regatta regatta: regattas){
-            regattaDTOs.add(convertToRegattaDTO(regatta));
-        }
-        return regattaDTOs;
+        return structureImporter.getRegattas(parsedEvent);
     }
 
-    private Iterable<String> createRegattasWithRaces(Iterable<AddSpecificRegatta> regattas, String eventName) {
-        StructureImporter structureImporter = new StructureImporter(new SetRacenumberFromSeries());
-        Set<String> leaderboardNames = new HashSet<String>();
-        Set<BuildStructure> buildStructures = structureImporter.getBuildStructures();
-        int i = 0;
+    private List<String> createRegattasWithRaces(Iterable<AddSpecificRegatta> regattas, String eventName) {
+        List<String> leaderboardNames = new ArrayList<String>();
         for (AddSpecificRegatta addSpecificRegatta : regattas) {
             Regatta regatta = getService().apply(addSpecificRegatta);
 
             // create RaceColumns
-            for (buildstructure.Series series : buildStructures.get(i).getRegattaStructure().getSeries()) {
-                addRaceColumnsToSeries(regatta.getRegattaIdentifier(), series.getSeries(), series.getRaceNames());
-            }
+            for (Series series : regatta.getSeries()) {
+            	List<String> raceNames = new ArrayList<String>();
+            	for (RaceColumnInSeries raceColumnInSeries : series.getRaceColumns()) {
+					raceNames.add(raceColumnInSeries.getName());
+				}
+                addRaceColumnsToSeries(regatta.getRegattaIdentifier(), series.getName(), raceNames);
+			}
 
             if (getLeaderboard(regatta.getName()) == null) {
                 leaderboardNames.add(regatta.getName());
                 createRegattaLeaderboard(regatta.getRegattaIdentifier(), regatta.getBoatClass().toString(), new int[0]);
             }
-            i++;
         }
         return leaderboardNames;
     }
 
     @Override
     public Set<RegattaStructureDTO> getRegattaStructure(final List<String> regattaNames) {
-        StructureImporter structureImporter = new StructureImporter(new SetRacenumberFromSeries());
-        Map<RegattaStructureKey, Set<BuildStructure>> regattaStructures = structureImporter
-                .getRegattaStructures(regattaNames);
         // Set<RegattaStructureKey> regattaStructureKeys = regattaStructures.keySet();
         Set<RegattaStructureDTO> regattaStructureDTOs = new HashSet<RegattaStructureDTO>();
         // for(RegattaStructureKey regattaStructureKey: regattaStructureKeys){
@@ -3786,16 +3773,17 @@ public class SailingServiceImpl extends ProxiedRemoteServiceServlet implements S
     }
 
     @Override
-    public void createRegattaStructure(final List<String> regattaNames, final EventDTO newEvent,
+    public void createRegattaStructure(final Iterable<AddSpecificRegatta> regattas, final EventDTO newEvent,
             final RegattaDTO defaultRegatta) {
 
         Runnable structureImportTask = new Runnable() {
 
             @Override
             public void run() {
-                List<String> leaderboardNames = createRegattasWithRaces(regattas, newEvent.getName());
+            	final StructureImporter structureImporter = new StructureImporter();
+                final List<String> leaderboardNames = createRegattasWithRaces(regattas, newEvent.getName());
                 createAndAddLeaderboardGroup(newEvent, leaderboardNames);
-                structureImporter.setCompetitors();
+//                structureImporter.setCompetitors(regattas, "");
                 structureImporter.setFinished(true);
 
             }
@@ -4437,14 +4425,14 @@ public class SailingServiceImpl extends ProxiedRemoteServiceServlet implements S
     }
 
     public Integer getStructureImportOperationProgress() {
-        int parsedDocuments = 0;
-        if (structureImporter != null) {
-            parsedDocuments = structureImporter.getProgress();
-            if (structureImporter.isFinished()) {
-                parsedDocuments++;
-            }
-        }
-        return parsedDocuments;
+//        int parsedDocuments = 0;
+//        if (structureImporter != null) {
+//            parsedDocuments = structureImporter.getProgress();
+//            if (structureImporter.isFinished()) {
+//                parsedDocuments++;
+//            }
+//        }
+        return 0;
     }
 
     private String createLeaderboardQuery(String[] groupNames, boolean compress, boolean exportWind)

@@ -3,6 +3,7 @@ package com.sap.sailing.gwt.ui.adminconsole;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Collections;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
 
@@ -31,7 +32,7 @@ import com.sap.sailing.gwt.ui.client.StringMessages;
 import com.sap.sailing.gwt.ui.shared.EventAndRegattaDTO;
 import com.sap.sailing.gwt.ui.shared.EventDTO;
 import com.sap.sailing.gwt.ui.shared.RegattaDTO;
-import com.sap.sailing.gwt.ui.shared.RegattaStructureDTO;
+import com.sap.sailing.server.operationaltransformation.AddSpecificRegatta;
 import com.sap.sse.gwt.client.dialog.DataEntryDialog.DialogCallback;
 
 public class StructureImportManagementPanel extends FlowPanel {
@@ -45,6 +46,7 @@ public class StructureImportManagementPanel extends FlowPanel {
     private Panel progressPanel;
     private TextBox jsonURLTextBox;
     private TextBox eventIDTextBox;
+    private Iterable<AddSpecificRegatta> addSpecificRegattas;
 
     private Button listRegattasButton;
     private Button importDetailsButton;
@@ -85,7 +87,15 @@ public class StructureImportManagementPanel extends FlowPanel {
             @Override
             public void onClick(ClickEvent event) {
                 List<RegattaDTO> regattas = regattaListComposite.getSelectedRegattas();
-                createEventDetails(regattas);
+                Set<AddSpecificRegatta> selectedRegattas = new HashSet<AddSpecificRegatta>();
+                for(RegattaDTO regatta: regattas){
+                    for(AddSpecificRegatta addSpecificRegatta: addSpecificRegattas){
+                        if(regatta.getName().equals(((Regatta)addSpecificRegatta).getName())){
+                            selectedRegattas.add(addSpecificRegatta);
+                        }
+                    }
+                }
+                createEventDetails(selectedRegattas);
             }
         });
         listRegattasButton.addClickHandler(new ClickHandler() {
@@ -119,22 +129,15 @@ public class StructureImportManagementPanel extends FlowPanel {
         add(vp);
     }
 
-    private void createEventDetails(List<RegattaDTO> regattas) {
-        List<String> regattaNamesTemp = new ArrayList<String>();
-        for (RegattaDTO regatta : regattas) {
-            regattaNamesTemp.add(regatta.getName());
-        }
-
-        final List<String> regattaNames = regattaNamesTemp;
+    private void createEventDetails(final Iterable<AddSpecificRegatta> regattas) {
         sailingService.getEvents(new AsyncCallback<List<EventDTO>>() {
             @Override
             public void onFailure(Throwable caught) {
                 errorReporter.reportError("Error trying to get events");
             }
-
             @Override
             public void onSuccess(List<EventDTO> events) {
-                setDefaultRegatta(regattaNames, events);
+                setDefaultRegatta(regattas, events);
             }
         });
     }
@@ -153,23 +156,27 @@ public class StructureImportManagementPanel extends FlowPanel {
         }
 
         else {
-            sailingService.getRegattas(valueToValidate, new AsyncCallback<List<RegattaDTO>>() {
+            sailingService.getRegattas(valueToValidate, new AsyncCallback<Iterable<AddSpecificRegatta>>() {
                 @Override
                 public void onFailure(Throwable caught) {
                     errorReporter.reportError("Error trying to load regattas");
                 }
                 @Override
-                public void onSuccess(List<RegattaDTO> regattas) {
+                public void onSuccess(Iterable<AddSpecificRegatta> regattas) {
+                    addSpecificRegattas = regattas;
                     fillRegattas(regattas);
                     importDetailsButton.setEnabled(true);
                 }
             });
-
         }
     }
 
-    public void fillRegattas(List<RegattaDTO> regattas) {
-        regattaListComposite.fillRegattas(regattas);
+    private void fillRegattas(Iterable<AddSpecificRegatta> regattas) {
+        List<RegattaDTO> regattaDTOs = new ArrayList<RegattaDTO>();
+        for(AddSpecificRegatta regatta: regattas){
+            regattaDTOs.add(new RegattaDTO(((Regatta)regatta).getName(), null));
+        }
+        regattaListComposite.fillRegattas(regattaDTOs);
     }
 
     private void createProgressBarAndLabel(int amountOfRegattas) {
@@ -209,7 +216,7 @@ public class StructureImportManagementPanel extends FlowPanel {
         timer.scheduleRepeating(2000);
     }
 
-    private void setDefaultRegatta(final List<String> regattaNames, final List<EventDTO> newEvent) {
+    private void setDefaultRegatta(final Iterable<AddSpecificRegatta> selectedRegattas, final List<EventDTO> newEvent) {
         sailingService.getEvents(new AsyncCallback<List<EventDTO>>() {
             @Override
             public void onFailure(Throwable caught) {
@@ -224,24 +231,23 @@ public class StructureImportManagementPanel extends FlowPanel {
                             @Override
                             public void cancel() {
                             }
-
                             @Override
                             public void ok(final EventAndRegattaDTO newRegatta) {
-                                sailingService.getRegattaStructure(regattaNames,
-                                        new AsyncCallback<Set<RegattaStructureDTO>>() {
-                                            @Override
-                                            public void onFailure(Throwable caught) {
-                                                // errorReporter.reportError(stringMessages.errorAddingResultImportUrl(caught
-                                                // .getMessage()));
-                                            }
-
-                                            @Override
-                                            public void onSuccess(Set<RegattaStructureDTO> result) {
-                                                // TODO UI aufbauen
-                                                createRegattas(regattaNames, newRegatta.getEvent(),
+//                                sailingService.getRegattaStructure(selectedRegattas,
+//                                        new AsyncCallback<Set<RegattaStructureDTO>>() {
+//                                            @Override
+//                                            public void onFailure(Throwable caught) {
+//                                                // errorReporter.reportError(stringMessages.errorAddingResultImportUrl(caught
+//                                                // .getMessage()));
+//                                            }
+//
+//                                            @Override
+//                                            public void onSuccess(Set<RegattaStructureDTO> result) {
+//                                                // TODO UI aufbauen
+                                                createRegattas(selectedRegattas, newRegatta.getEvent(),
                                                         newRegatta.getRegatta());
-                                            }
-                                        });
+//                                            }
+//                                        });
 
                             }
                         });
@@ -253,7 +259,7 @@ public class StructureImportManagementPanel extends FlowPanel {
 
     }
 
-    private void createRegattas(final List<String> regattaNames, EventDTO newEvent, RegattaDTO defaultRegatta) {
+    private void createRegattas(final Iterable<AddSpecificRegatta> regattaNames, EventDTO newEvent, RegattaDTO defaultRegatta) {
         eventManagementPanel.fillEvents();
         sailingService.createRegattaStructure(regattaNames, newEvent, defaultRegatta, new AsyncCallback<Void>() {
             @Override
@@ -263,7 +269,7 @@ public class StructureImportManagementPanel extends FlowPanel {
 
             @Override
             public void onSuccess(Void result) {
-                setProgressBar(regattaNames.size());
+//                setProgressBar(regattaNames.size());
             }
         });
     }

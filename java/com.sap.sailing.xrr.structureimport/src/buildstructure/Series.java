@@ -103,7 +103,7 @@ public class Series {
         }
     }
 
-    public Iterable<String> getRaceNames() {
+    public List<String> getRaceNames() {
         return raceNames;
     }
     

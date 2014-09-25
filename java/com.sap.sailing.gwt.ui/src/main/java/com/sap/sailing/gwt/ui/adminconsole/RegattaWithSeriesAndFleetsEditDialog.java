@@ -11,7 +11,6 @@ import com.google.gwt.event.logical.shared.ValueChangeHandler;
 import com.google.gwt.user.client.ui.Button;
 import com.google.gwt.user.client.ui.CheckBox;
 import com.google.gwt.user.client.ui.Grid;
-import com.google.gwt.user.client.ui.Label;
 import com.google.gwt.user.client.ui.TabPanel;
 import com.google.gwt.user.client.ui.VerticalPanel;
 import com.sap.sailing.gwt.ui.client.StringMessages;
@@ -25,7 +24,6 @@ import com.sap.sailing.gwt.ui.shared.SeriesDTO;
 public class RegattaWithSeriesAndFleetsEditDialog extends RegattaWithSeriesAndFleetsDialog {
 
     private static AdminConsoleResources resources = GWT.create(AdminConsoleResources.class);
-
     protected CheckBox regattaConfigurationCheckbox;
     protected Button regattaConfigurationButton;
 

@@ -75,6 +75,7 @@ import com.sap.sailing.gwt.ui.shared.TrackFileImportDeviceIdentifierDTO;
 import com.sap.sailing.gwt.ui.shared.VenueDTO;
 import com.sap.sailing.gwt.ui.shared.WindDTO;
 import com.sap.sailing.gwt.ui.shared.WindInfoForRaceDTO;
+import com.sap.sailing.server.operationaltransformation.AddSpecificRegatta;
 import com.sap.sse.common.Util;
 import com.sap.sse.common.search.KeywordQuery;
 
@@ -641,9 +642,11 @@ public interface SailingServiceAsync {
 
     void setStartTimeReceivedForRace(RaceIdentifier raceIdentifier, Date newStartTimeReceived, AsyncCallback<RaceDTO> callback);
     
-    void getRegattas(String url, AsyncCallback<List<RegattaDTO>> asyncCallback);
+    void getRegattas(String url, AsyncCallback<Iterable<AddSpecificRegatta>> asyncCallback);
 
-    void createRegattaStructure(List<String> regattaNames, EventDTO newEvent,RegattaDTO defaultRegatta, AsyncCallback<Void> asyncCallback);
+    void createRegattaStructure(Iterable<AddSpecificRegatta> regattaNames,
+			EventDTO newEvent, RegattaDTO defaultRegatta,
+			AsyncCallback<Void> asyncCallback);
 
     void getRegattaStructure(List<String> regattaNames, AsyncCallback<Set<RegattaStructureDTO>> asyncCallback); 
 

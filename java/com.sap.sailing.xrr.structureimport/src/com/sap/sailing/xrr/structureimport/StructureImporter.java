@@ -43,7 +43,6 @@ import com.sap.sailing.domain.common.dto.RegattaCreationParametersDTO;
 import com.sap.sailing.domain.common.dto.SeriesCreationParametersDTO;
 import com.sap.sailing.server.operationaltransformation.AddSpecificRegatta;
 import com.sap.sailing.xrr.resultimport.ParserFactory;
-import com.sap.sailing.xrr.resultimport.impl.ScoreCorrectionProviderImpl;
 import com.sap.sailing.xrr.schema.Boat;
 import com.sap.sailing.xrr.schema.Crew;
 import com.sap.sailing.xrr.schema.Division;
@@ -59,7 +58,6 @@ import eventimport.RegattaJSON;
 public class StructureImporter {
 
     private static final Logger logger = Logger.getLogger(StructureImporter.class.getName());
-    private final Set<RegattaResults> results = Collections.synchronizedSet(new HashSet<RegattaResults>());
     private Map<RegattaStructureKey, Set<BuildStructure>> seriesStructuresWithFrequency = new HashMap<RegattaStructureKey, Set<BuildStructure>>(); // TODO
                                                                                                                                                    // rename
     private LinkedHashMap<String, Boat> boatForPerson;
@@ -85,23 +83,22 @@ public class StructureImporter {
         return new EventImport().getRegattas(url);
     }
 
-    public Iterable<Regatta> getRegattas(Iterable<RegattaJSON> regattas) {
-        parseRegattas(regattas);
-        Set<Regatta> addSpecificRegattas = new HashSet<Regatta>();
-        BuildStructure buildStructure = new BuildStructure(null);
-        for (RegattaResults result : results) {
+    public Iterable<AddSpecificRegatta> getRegattas(Iterable<RegattaJSON> regattas) {
+        Iterable<RegattaResults> parsedRegattas = parseRegattas(regattas);
+        Set<AddSpecificRegatta> addSpecificRegattas = new HashSet<AddSpecificRegatta>();
+        for (RegattaResults result : parsedRegattas) {
             Set<Race> races = new HashSet<Race>();
             //assuming that the last element in getPersonOrBoatOrTeam is an event
             Event event = (Event) result.getPersonOrBoatOrTeam().get(result.getPersonOrBoatOrTeam().size() - 1); 
-            Iterable<Object> raceOrDevisionOrRegattaSeriesResults = event.getRaceOrDivisionOrRegattaSeriesResult();
-            for (Object raceOrDevisionOrRegattaSeriesResult : raceOrDevisionOrRegattaSeriesResults) {
-                races.add((Race) raceOrDevisionOrRegattaSeriesResult);
+            Iterable<Object> raceOrDivisionOrRegattaSeriesResults = event.getRaceOrDivisionOrRegattaSeriesResult();
+            for (Object raceOrDivisionOrRegattaSeriesResult : raceOrDivisionOrRegattaSeriesResults) {
+                races.add((Race) raceOrDivisionOrRegattaSeriesResult);
             }
-            buildStructure = new BuildStructure(races);
+            BuildStructure buildStructure = new BuildStructure(races);
             // analyseStructure(structure);
             LinkedHashMap<String, SeriesCreationParametersDTO> seriesCreationParams = setSeriesCreationParameters(
                     buildStructure, false, false, false, null);
-            addSpecificRegattas.add((Regatta) new AddSpecificRegatta(RegattaImpl.getDefaultName(event.getTitle(),
+            addSpecificRegattas.add( new AddSpecificRegatta(RegattaImpl.getDefaultName(event.getTitle(),
                     ((Division) event.getRaceOrDivisionOrRegattaSeriesResult().get(0)).getTitle()), ((Division) event
                     .getRaceOrDivisionOrRegattaSeriesResult().get(0)).getTitle(), event.getEventID(),
                     new RegattaCreationParametersDTO(seriesCreationParams), false, this.baseDomainFactory
@@ -111,7 +108,7 @@ public class StructureImporter {
     }
 
     private Iterable<RegattaResults> parseRegattas(final Iterable<RegattaJSON> selectedRegattas) {
-        final Set<RegattaResults> result = new HashSet<RegattaResults>();
+    	final Set<RegattaResults> result = Collections.synchronizedSet(new HashSet<RegattaResults>());
         Set<Thread> threads = new HashSet<Thread>();
         for (final RegattaJSON selectedRegatta : selectedRegattas) {
             Thread thread = new Thread("XRR Importer " + selectedRegatta.getName()) {
@@ -225,10 +222,10 @@ public class StructureImporter {
         return result;
     }
 
-    public void setCompetitors(Set<RegattaResults> results, RegattaJSON event) {
+    public void setCompetitors(Set<RegattaResults> results, String boatClassName) {
         for (RegattaResults result : results) {
             BoatClass boatClass = null;
-            boatClass = getBoatClass(event);
+            boatClass = getBoatClass(boatClassName);
             Iterable<Object> personOrBoatOrTeam = result.getPersonOrBoatOrTeam();
             setBoatsAndTeamsForPerson(personOrBoatOrTeam);
             for (Object obj : personOrBoatOrTeam) {
@@ -240,7 +237,7 @@ public class StructureImporter {
                     Nationality nationality = (person.getNOC() == null) ? null : getNationality(person.getNOC()
                             .toString());
                     BoatAndTeam boatAndTeam = getBoatAndTeam(idAsString, name, nationality, boatClass);
-                    baseDomainFactory.convertToCompetitorDTO(baseDomainFactory.getOrCreateCompetitor(
+                    this.baseDomainFactory.convertToCompetitorDTO(this.baseDomainFactory.getOrCreateCompetitor(
                             UUID.fromString(idAsString), name, color, boatAndTeam.getTeam(), boatAndTeam.getBoat()));
                 } else {
                     break;
@@ -249,10 +246,10 @@ public class StructureImporter {
         }
     }
 
-    private BoatClass getBoatClass(RegattaJSON regatta) {
+    private BoatClass getBoatClass(String boatClassName) {
         BoatClass boatClass;
-        if (regatta.getBoatClass() != null) {
-            boatClass = baseDomainFactory.getOrCreateBoatClass(regatta.getBoatClass());
+        if (boatClassName != null && !boatClassName.equals("")) {
+            boatClass = baseDomainFactory.getOrCreateBoatClass(boatClassName);
         } else {
             boatClass = baseDomainFactory.getOrCreateBoatClass("default");
         }
@@ -264,10 +261,8 @@ public class StructureImporter {
     }
 
     private void setBoatsAndTeamsForPerson(Iterable<Object> personOrBoatOrTeam) {
-
         boatForPerson = new LinkedHashMap<String, Boat>();
         LinkedHashMap<String, Team> teamForBoat = new LinkedHashMap<String, Team>();
-
         for (Object obj : personOrBoatOrTeam) {
             if (obj instanceof Team) {
                 teamForBoat.put(((Team) obj).getBoatID(), (Team) obj);
@@ -276,7 +271,7 @@ public class StructureImporter {
         for (Object obj : personOrBoatOrTeam) {
             if (obj instanceof Boat) {
                 Team team = teamForBoat.get(((Boat) obj).getBoatID());
-                ArrayList<Crew> crew = (ArrayList<Crew>) team.getCrew();
+                Iterable<Crew> crew = team.getCrew();
                 for (Crew person : crew) {
                     boatForPerson.put(person.getPersonID(), (Boat) obj);
                 }
