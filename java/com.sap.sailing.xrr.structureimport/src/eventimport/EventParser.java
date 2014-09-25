@@ -25,10 +25,10 @@ public class EventParser {
             InputStreamReader streamReader = getStreamReader(url);
             
             jsonRoot = (JSONObject) new JSONParser().parse(streamReader);
-            eventResults = new EventResults();
-            eventResults.setId((String) jsonRoot.get("Id"));
-            eventResults.setName((String) jsonRoot.get("Name"));
-            eventResults.setXrrUrl((String) jsonRoot.get("XrrUrl"));
+            String id = (String) jsonRoot.get("Id");
+            String name = (String) jsonRoot.get("Name");
+            String xrrUrl = (String) jsonRoot.get("XrrUrl");
+            eventResults = new EventResults(id, name, xrrUrl);
             
             JSONArray jsonRegattas = (JSONArray) jsonRoot.get("Regattas");
             for (Object regattaObject: jsonRegattas) {

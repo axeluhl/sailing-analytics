@@ -9,7 +9,12 @@ public class EventResults {
     private String id = "";
     private String name = "";
     private String xrrUrl = "";
-
+    
+    public EventResults(String id, String name, String xrrUrl){
+    	this.id = id;
+    	this.name = name;
+    	this.xrrUrl = xrrUrl;
+    }
 
     public Iterable<RegattaJSON> getRegattas() {
         return regattas;
