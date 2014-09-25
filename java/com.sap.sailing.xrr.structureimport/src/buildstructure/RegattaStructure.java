@@ -2,12 +2,13 @@ package buildstructure;
 
 
 import java.util.ArrayList;
+import java.util.List;
 
 import com.sap.sailing.xrr.schema.Race;
 
 public class RegattaStructure {
     
-    ArrayList<Series> series = new ArrayList<Series>();
+    List<Series> series = new ArrayList<Series>();
     GuessSeriesStrategy guessSeriesStrategy;
     
     
@@ -21,9 +22,9 @@ public class RegattaStructure {
 
         boolean added = false;
         
-        for(int i=0;i<series.size();i++){
-            if(series.get(i).getSeries().equals(oneSeries)){
-                series.get(i).addRace(race, numberOfRaces);
+        for(Series singleSeries: series){
+            if(singleSeries.getSeries().equals(oneSeries)){
+                singleSeries.addRace(race, numberOfRaces);
                 added = true;
             }
         }
@@ -36,12 +37,12 @@ public class RegattaStructure {
         
     }
     
-    public ArrayList<Series> getSeries(){
+    public Iterable<Series> getSeries(){
         return series;
     }
     public void checkSeries(){
         if(series.size()==1){
-            series.get(0).setSeries("Default");
+            series.iterator().next().setSeries("Default");
         }
     }
 }

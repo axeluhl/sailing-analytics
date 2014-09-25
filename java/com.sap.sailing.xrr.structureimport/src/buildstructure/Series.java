@@ -2,7 +2,9 @@ package buildstructure;
 
 import java.util.ArrayList;
 import java.util.Collections;
+import java.util.HashSet;
 import java.util.List;
+import java.util.Set;
 
 import com.sap.sailing.xrr.schema.Race;
 
@@ -12,8 +14,8 @@ public class Series {
     private int maxRaces = 0;
     private int maxRacesIndex = -1;
     private List<String> raceNames = new ArrayList<String>();
-    private ArrayList<Fleet> fleets = new ArrayList<Fleet>();
-
+    private List<Fleet> fleets = new ArrayList<Fleet>();
+    
     public Series(String raceType) {
         this.series = raceType;
     }
@@ -30,8 +32,8 @@ public class Series {
 
         if (raceName.length > 1) {
             fleetColor = raceName[raceName.length - 1];
-            for (int i = 0; i < fleets.size(); i++) {
-                if (fleetColor.equals(fleets.get(i).getColor())) {
+            for (Fleet fleet: fleets) {
+                if (fleetColor.equals(fleet.getColor())) {
                     fleetEx = true;
                 }
             }
@@ -43,15 +45,17 @@ public class Series {
 
         boolean added = false;
 
-        for (int i = 0; i < fleets.size(); i++) {
-            if (fleets.get(i).getColor().equals(fleetColor)) {
-                fleets.get(i).addRace(race);
+        int counter = 0;
+        for (Fleet fleet: fleets) {
+            if (fleet.getColor().equals(fleetColor)) {
+                fleet.addRace(race);
                 added = true;
             }
-            if (fleets.get(i).getNumRaces() > maxRaces) {
-                maxRaces = fleets.get(i).getNumRaces();
-                maxRacesIndex = i;
+            if (fleet.getNumRaces() > maxRaces) {
+                maxRaces = fleet.getNumRaces();
+                maxRacesIndex = counter;
             }
+            counter++;
         }
 
         if (!added) {
@@ -79,7 +83,7 @@ public class Series {
         this.series = series;
     }
 
-    public ArrayList<Fleet> getFleets() {
+    public List<Fleet> getFleets() {
         return fleets;
     }
 
@@ -99,7 +103,7 @@ public class Series {
         }
     }
 
-    public List<String> getRaceNames() {
+    public Iterable<String> getRaceNames() {
         return raceNames;
     }
     

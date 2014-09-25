@@ -1,28 +1,22 @@
 package buildstructure;
 
-
-
-
 import java.awt.Color;
 
 import com.sap.sailing.xrr.schema.Race;
 
-
-public class Fleet implements Comparable{
+public class Fleet implements Comparable {
     private final int NUMBEROFRACES = 10;
-    
+
     private String color = "";
     private Race[] races = new Race[NUMBEROFRACES];
     private int numRaces = 0;
-    
-    
-    
-    public Fleet(String color){
+
+    public Fleet(String color) {
         this.color = color;
     }
-    
-    public void addRace(Race race){
-    	String raceName = race.getRaceName();
+
+    public void addRace(Race race) {
+        String raceName = race.getRaceName();
         if (raceName.split(" ").length > 1) {
             raceName = raceName.split(" ")[0];
         }
@@ -30,27 +24,28 @@ public class Fleet implements Comparable{
             raceName = "CF";
         }
         race.setRaceName(raceName);
-    	
+
         int raceNumber = Integer.parseInt(race.getRaceNumber() + "");
-        if(races.length > raceNumber){
+        if (races.length > raceNumber) {
             races[raceNumber - 1] = race;
             numRaces++;
-        }else{
+        } else {
             Race[] temp = races;
             races = new Race[temp.length + NUMBEROFRACES];
-            for(int i=0;i<temp.length;i++){
+            for (int i = 0; i < temp.length; i++) {
                 races[i] = temp[i];
             }
             races[raceNumber - 1] = race;
             numRaces++;
         }
-        
-        		
+
     }
-    public Race[] getRaces(){
+
+    public Race[] getRaces() {
         return races;
     }
-    public String getColor(){
+
+    public String getColor() {
         return color;
     }
 
@@ -58,22 +53,20 @@ public class Fleet implements Comparable{
     public int compareTo(Object o) {
         int a = getValueOfColor(this.color);
         int b = getValueOfColor(((Fleet) o).getColor());
-        
+
         int result = 0;
-        if(a<b){
+        if (a < b) {
             result = -1;
-        }else if(a>b){
+        } else if (a > b) {
             result = 1;
         }
-            
         return result;
-       
-       
     }
-    private int getValueOfColor(String color){
+
+    private int getValueOfColor(String color) {
         int value = 0;
-        
-        switch(color){
+
+        switch (color) {
         case "Gold":
             value = 0;
             break;
@@ -102,11 +95,11 @@ public class Fleet implements Comparable{
             value = 10;
             break;
         }
-        
+
         return value;
     }
-    
-    public int getNumRaces(){
+
+    public int getNumRaces() {
         return numRaces;
     }
 
