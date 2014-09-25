@@ -380,7 +380,7 @@ public class MasterDataImporterMediaTest {
         assertThat(allMediaTracksAfterImport.size(), is(1));
         MediaTrack mediaTrack = allMediaTracksAfterImport.iterator().next();
         assertThat(existingMediaTrack.assignedRaces, is(mediaTrackToImport.assignedRaces));
-        assertThat(existingMediaTrack.assignedRaces.size(), is(2));
+        assertThat(mediaTrack.assignedRaces.size(), is(2));
 
         verify(racingEventService, never()).mediaTrackAdded(any(MediaTrack.class));
         verify(racingEventService, never()).mediaTrackDeleted(any(MediaTrack.class));
