@@ -1,5 +1,6 @@
 package buildstructure;
 
+import java.util.ArrayList;
 import java.util.List;
 
 import com.sap.sailing.xrr.schema.Race;
@@ -7,7 +8,8 @@ import com.sap.sailing.xrr.schema.Race;
 public class SetRacenumberFromSeries implements SetRacenumberStrategy {
 
     @Override
-    public void setRacenumber(Race race, Series series, int i, List<String> raceNames) {
+    public void setRacenumber(Race race, Series series, int i) {
+    	List<String> raceNames = new ArrayList<String>();
         if (race != null) {
             char beginOfSeries = series.getFirstChar();
             if (beginOfSeries == 'D' && race.getFirstChar() != 'R') {
@@ -19,5 +21,4 @@ public class SetRacenumberFromSeries implements SetRacenumberStrategy {
         }
         series.setRaceNames(raceNames);
     }
-
 }

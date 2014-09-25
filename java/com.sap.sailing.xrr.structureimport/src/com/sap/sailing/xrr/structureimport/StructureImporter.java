@@ -64,17 +64,22 @@ public class StructureImporter {
                                                                                                                                                          // rename
     private List<BuildStructure> buildStructures = new ArrayList<BuildStructure>();
     private LinkedHashMap<String, Boat> boatForPerson;
-    private DomainFactory baseDomainFactory;
+    private final DomainFactory baseDomainFactory;
     private final SetRacenumberStrategy setRacenumberStrategy;
     private int parsedDocuments = 0;
     private boolean finished = false;
 
-    public StructureImporter(SetRacenumberStrategy setRacenumber) {
+    public StructureImporter(SetRacenumberStrategy setRacenumber, DomainFactory baseDomainFactory) {
         this.setRacenumberStrategy = setRacenumber;
+    	this.baseDomainFactory = baseDomainFactory;
+    }
+    
+    public StructureImporter(DomainFactory baseDomainFactory){
+    	this(null, baseDomainFactory);
     }
     
     public StructureImporter() {
-        this(null);
+        this(null, null);
     }
 
     public Iterable<RegattaJSON> parseEvent(String url) {
@@ -110,9 +115,8 @@ public class StructureImporter {
         return seriesStructuresWithFrequency;
     }
     
-    public Iterable<Regatta> getRegattas(DomainFactory baseDomainFactory) {
+    public Iterable<Regatta> getRegattas() {
 
-        this.baseDomainFactory = baseDomainFactory;
         Set<Regatta> addSpecificRegattas = new HashSet<Regatta>();
 
         for (int i = 0; i < results.size(); i++) {
@@ -123,13 +127,14 @@ public class StructureImporter {
     }
 
     private Iterable<RegattaResults> parseRegattas(final Iterable<RegattaJSON> selectedRegattas) {
+    	final Set<RegattaResults> result = new HashSet<RegattaResults>();
     	Set<Thread> threads = new HashSet<Thread>();
         for (final RegattaJSON selectedRegatta : selectedRegattas) {
         	Thread thread = new Thread("XRR Importer "+selectedRegatta.getName()) {
                 @Override
                 public void run() {
                     try {
-                        parseRegattaXML(selectedRegatta.getXrrEntriesUrl());
+                        result.add(parseRegattaXML(selectedRegatta.getXrrEntriesUrl()));
                     } catch (JAXBException | IOException e) {
                     	logger.info("Parse error during XRR import. Ignoring document "+selectedRegatta.getName());
                     }
@@ -150,7 +155,7 @@ public class StructureImporter {
             	//not all Regattas have been parsed
             }
         }
-        return results;
+        return result;
     }
 
     public Map<RegattaStructureKey, Set<BuildStructure>> getRegattaStructures(List<String> regattaNames) {
@@ -224,16 +229,12 @@ public class StructureImporter {
 
     }
 
-    private List<String> setRaceNames(int i, Series raceType, ArrayList<Fleet> fleets) {
-        List<String> raceNames = new ArrayList<String>();
-
+    private void setRaceNames(int i, Series raceType, ArrayList<Fleet> fleets) {
         // set Racenumbers for each series
         Race[] races = fleets.get(raceType.getMaxIndex()).getRaces();
-        for (int j = 0; j < races.length; j++) {
-            Race race = races[j];
-            setRacenumberStrategy.setRacenumber(race, raceType, i, raceNames);
+        for(Race race : races){
+            setRacenumberStrategy.setRacenumber(race, raceType, i);
         }
-        return raceNames;
     }
 
     private List<FleetDTO> getFleets(ArrayList<Fleet> fleets) {
@@ -266,14 +267,14 @@ public class StructureImporter {
         return result;
     }
 
-    public void setCompetitors() {
+    public void setCompetitors(Set<RegattaResults> results, RegattaJSON event) {
 
-        for (int i = 0; i < results.size(); i++) {
+    	for(RegattaResults result : results){
             BoatClass boatClass = null;
 
-            boatClass = getBoatClass(selectedRegattas.get(i));
+            boatClass = getBoatClass(event);
 
-            ArrayList<Object> personOrBoatOrTeam = (ArrayList<Object>) results.get(i).getPersonOrBoatOrTeam();
+            Iterable<Object> personOrBoatOrTeam = result.getPersonOrBoatOrTeam();
 
             setBoatsAndTeamsForPerson(personOrBoatOrTeam);
 
@@ -313,7 +314,7 @@ public class StructureImporter {
         return baseDomainFactory.getOrCreateNationality(country);
     }
 
-    private void setBoatsAndTeamsForPerson(ArrayList<Object> personOrBoatOrTeam) {
+    private void setBoatsAndTeamsForPerson(Iterable<Object> personOrBoatOrTeam) {
 
         boatForPerson = new LinkedHashMap<String, Boat>();
         LinkedHashMap<String, Team> teamForBoat = new LinkedHashMap<String, Team>();
@@ -371,8 +372,8 @@ public class StructureImporter {
         return team;
     }
 
-    private void parseRegattaXML(String url) throws FileNotFoundException, JAXBException, IOException {
-        results.add(ParserFactory.INSTANCE.createParser(getInputStream(url), "").parse());
+    private RegattaResults parseRegattaXML(String url) throws FileNotFoundException, JAXBException, IOException {
+        return ParserFactory.INSTANCE.createParser(getInputStream(url), "").parse();
     }
 
     private InputStream getInputStream(String url) throws FileNotFoundException, IOException {
