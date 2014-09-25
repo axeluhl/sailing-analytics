@@ -151,6 +151,7 @@ import com.sap.sailing.domain.common.dto.RaceColumnInSeriesDTO;
 import com.sap.sailing.domain.common.dto.RaceDTO;
 import com.sap.sailing.domain.common.dto.RaceLogTrackingInfoDTO;
 import com.sap.sailing.domain.common.dto.RegattaCreationParametersDTO;
+import com.sap.sailing.domain.common.dto.SeriesCreationParametersDTO;
 import com.sap.sailing.domain.common.dto.TrackedRaceDTO;
 import com.sap.sailing.domain.common.impl.DegreeBearingImpl;
 import com.sap.sailing.domain.common.impl.DegreePosition;
@@ -3717,6 +3718,10 @@ public class SailingServiceImpl extends ProxiedRemoteServiceServlet implements S
                         seriesNamesWithFleetNamesAndFleetOrderingAndMedal, persistent, baseDomainFactory
                                 .createScoringScheme(scoringSchemeType), defaultCourseAreaId, useStartTimeInference));
         return convertToRegattaDTO(regatta);
+    }
+    
+    private void createRegattaFromRegattaDTO(RegattaDTO regatta){
+    	this.createRegatta(regatta.getName(), regatta.boatClass.getName(), null, false, regatta.scoringScheme, regatta.defaultCourseAreaUuid, regatta.useStartTimeInference);
     }
 
     private SeriesParameters getDefaultSeries(RegattaDTO defaultRegatta) {
