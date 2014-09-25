@@ -28,20 +28,19 @@ import com.sap.sailing.domain.base.BoatClass;
 import com.sap.sailing.domain.base.DomainFactory;
 import com.sap.sailing.domain.base.Nationality;
 import com.sap.sailing.domain.base.Regatta;
+import com.sap.sailing.domain.base.impl.BoatClassImpl;
 import com.sap.sailing.domain.base.impl.BoatImpl;
 import com.sap.sailing.domain.base.impl.DynamicBoat;
 import com.sap.sailing.domain.base.impl.DynamicPerson;
 import com.sap.sailing.domain.base.impl.DynamicTeam;
+import com.sap.sailing.domain.base.impl.FleetImpl;
 import com.sap.sailing.domain.base.impl.PersonImpl;
 import com.sap.sailing.domain.base.impl.RegattaImpl;
+import com.sap.sailing.domain.base.impl.SeriesImpl;
 import com.sap.sailing.domain.base.impl.TeamImpl;
 import com.sap.sailing.domain.common.Color;
 import com.sap.sailing.domain.common.FleetColors;
 import com.sap.sailing.domain.common.ScoringSchemeType;
-import com.sap.sailing.domain.common.dto.FleetDTO;
-import com.sap.sailing.domain.common.dto.RegattaCreationParametersDTO;
-import com.sap.sailing.domain.common.dto.SeriesCreationParametersDTO;
-import com.sap.sailing.server.operationaltransformation.AddSpecificRegatta;
 import com.sap.sailing.xrr.resultimport.ParserFactory;
 import com.sap.sailing.xrr.schema.Boat;
 import com.sap.sailing.xrr.schema.Crew;
@@ -88,27 +87,26 @@ public class StructureImporter {
         Set<Regatta> addSpecificRegattas = new HashSet<Regatta>();
         for (RegattaResults result : parsedRegattas) {
             Set<Race> races = new HashSet<Race>();
-            //assuming that the last element in getPersonOrBoatOrTeam is an event
-            Event event = (Event) result.getPersonOrBoatOrTeam().get(result.getPersonOrBoatOrTeam().size() - 1); 
+            // assuming that the last element in getPersonOrBoatOrTeam is an event
+            Event event = (Event) result.getPersonOrBoatOrTeam().get(result.getPersonOrBoatOrTeam().size() - 1);
             Iterable<Object> raceOrDivisionOrRegattaSeriesResults = event.getRaceOrDivisionOrRegattaSeriesResult();
             for (Object raceOrDivisionOrRegattaSeriesResult : raceOrDivisionOrRegattaSeriesResults) {
-                races.add((Race) raceOrDivisionOrRegattaSeriesResult);
+                if (raceOrDivisionOrRegattaSeriesResult instanceof Race) {
+                    races.add((Race) raceOrDivisionOrRegattaSeriesResult);
+                }
             }
             BuildStructure buildStructure = new BuildStructure(races);
             // analyseStructure(structure);
-            LinkedHashMap<String, SeriesCreationParametersDTO> seriesCreationParams = setSeriesCreationParameters(
-                    buildStructure, false, false, false, null);
-            addSpecificRegattas.add((Regatta)new AddSpecificRegatta(RegattaImpl.getDefaultName(event.getTitle(),
-                    ((Division) event.getRaceOrDivisionOrRegattaSeriesResult().get(0)).getTitle()), ((Division) event
-                    .getRaceOrDivisionOrRegattaSeriesResult().get(0)).getTitle(), event.getEventID(),
-                    new RegattaCreationParametersDTO(seriesCreationParams), false, this.baseDomainFactory
-                            .createScoringScheme(ScoringSchemeType.LOW_POINT), null /* courseAreaUUID */, true));
+            addSpecificRegattas.add(new RegattaImpl(RegattaImpl.getDefaultName(event.getTitle(),
+                    ((Division) event.getRaceOrDivisionOrRegattaSeriesResult().get(0)).getTitle()), new BoatClassImpl(((Division) event
+                    .getRaceOrDivisionOrRegattaSeriesResult().get(0)).getTitle(),true), setSeries(buildStructure), false, this.baseDomainFactory
+                            .createScoringScheme(ScoringSchemeType.LOW_POINT), event.getEventID(), null));
         }
         return addSpecificRegattas;
     }
 
     private Iterable<RegattaResults> parseRegattas(final Iterable<RegattaJSON> selectedRegattas) {
-    	final Set<RegattaResults> result = Collections.synchronizedSet(new HashSet<RegattaResults>());
+        final Set<RegattaResults> result = Collections.synchronizedSet(new HashSet<RegattaResults>());
         Set<Thread> threads = new HashSet<Thread>();
         for (final RegattaJSON selectedRegatta : selectedRegattas) {
             Thread thread = new Thread("XRR Importer " + selectedRegatta.getName()) {
@@ -164,23 +162,37 @@ public class StructureImporter {
     //
     // }
 
-    private LinkedHashMap<String, SeriesCreationParametersDTO> setSeriesCreationParameters(BuildStructure structure,
-            boolean firstColumnIsNonDiscardableCarryForward, boolean hasSplitFleetContiguousScoring,
-            boolean startswithZeroScore, int[] discardingThresholds) {
-        LinkedHashMap<String, SeriesCreationParametersDTO> seriesCreationParams = new LinkedHashMap<String, SeriesCreationParametersDTO>();
+//    private LinkedHashMap<String, SeriesCreationParametersDTO> setSeriesCreationParameters(BuildStructure structure,
+//            boolean firstColumnIsNonDiscardableCarryForward, boolean hasSplitFleetContiguousScoring,
+//            boolean startswithZeroScore, int[] discardingThresholds) {
+//        LinkedHashMap<String, SeriesCreationParametersDTO> seriesCreationParams = new LinkedHashMap<String, SeriesCreationParametersDTO>();
+//        RegattaStructure regattaStructure = structure.getRegattaStructure();
+//        if (regattaStructure != null) {
+//            int index = 0;
+//            for (Series raceType : regattaStructure.getSeries()) {
+//                List<FleetDTO> fleets = getFleets(raceType.getFleets());
+//                setRaceNames(index, raceType, raceType.getFleets());
+//                seriesCreationParams.put(raceType.getSeries(), new SeriesCreationParametersDTO(fleets,
+//                /* medal */raceType.isMedal(), startswithZeroScore, firstColumnIsNonDiscardableCarryForward,
+//                        discardingThresholds, hasSplitFleetContiguousScoring));
+//                index++;
+//            }
+//        }
+//        return seriesCreationParams;
+//    }
+    
+    private Iterable<SeriesImpl> setSeries(BuildStructure structure) {
+        Set<SeriesImpl> series = new HashSet<SeriesImpl>(); 
         RegattaStructure regattaStructure = structure.getRegattaStructure();
         if (regattaStructure != null) {
             int index = 0;
             for (Series raceType : regattaStructure.getSeries()) {
-                List<FleetDTO> fleets = getFleets(raceType.getFleets());
+                List<FleetImpl> fleets = getFleets(raceType.getFleets());
                 setRaceNames(index, raceType, raceType.getFleets());
-                seriesCreationParams.put(raceType.getSeries(), new SeriesCreationParametersDTO(fleets,
-                /* medal */raceType.isMedal(), startswithZeroScore, firstColumnIsNonDiscardableCarryForward,
-                        discardingThresholds, hasSplitFleetContiguousScoring));
-                index++;
+                series.add(new SeriesImpl(raceType.getSeries(), raceType.isMedal(), fleets, raceType.getRaceNames(), null));
             }
         }
-        return seriesCreationParams;
+        return series;
     }
 
     private void setRaceNames(int i, Series raceType, List<Fleet> fleets) {
@@ -191,21 +203,40 @@ public class StructureImporter {
         }
     }
 
-    private List<FleetDTO> getFleets(List<Fleet> fleets) {
-        List<FleetDTO> fleetsDTO = new ArrayList<FleetDTO>();
+//    private List<FleetDTO> getFleets(List<Fleet> fleets) {
+//        List<FleetDTO> fleetsDTO = new ArrayList<FleetDTO>();
+//        String fleetColor = "";
+//        if (fleets.size() <= 1) {
+//            fleetColor = "Default";
+//        } else {
+//            int index = 0;
+//            for (Fleet fleet : fleets) {
+//                fleetColor = fleet.getColor();
+//                FleetDTO fleetDTO = new FleetDTO(fleetColor, index, getColorFromString(fleetColor));
+//                fleetsDTO.add(fleetDTO);
+//                index++;
+//            }
+//        }
+//        return fleetsDTO;
+//    }
+    
+    private List<FleetImpl> getFleets(List<Fleet> fleets) {
+        List<FleetImpl> fleetsImpl = new ArrayList<FleetImpl>();
         String fleetColor = "";
         if (fleets.size() <= 1) {
             fleetColor = "Default";
+            FleetImpl fleetImpl = new FleetImpl(fleetColor, 0, getColorFromString(fleetColor));
+            fleetsImpl.add(fleetImpl);
         } else {
             int index = 0;
             for (Fleet fleet : fleets) {
                 fleetColor = fleet.getColor();
-                FleetDTO fleetDTO = new FleetDTO(fleetColor, index, getColorFromString(fleetColor));
-                fleetsDTO.add(fleetDTO);
+                FleetImpl fleetImpl = new FleetImpl(fleetColor, index, getColorFromString(fleetColor));
+                fleetsImpl.add(fleetImpl);
                 index++;
             }
         }
-        return fleetsDTO;
+        return fleetsImpl;
     }
 
     private Color getColorFromString(final String colorString) {

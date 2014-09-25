@@ -54,6 +54,8 @@ import org.osgi.framework.InvalidSyntaxException;
 import org.osgi.framework.ServiceReference;
 import org.osgi.util.tracker.ServiceTracker;
 
+import buildstructure.SetRacenumberFromSeries;
+
 import com.sap.sailing.domain.base.BoatClass;
 import com.sap.sailing.domain.base.Competitor;
 import com.sap.sailing.domain.base.ControlPoint;
@@ -3721,7 +3723,7 @@ public class SailingServiceImpl extends ProxiedRemoteServiceServlet implements S
     }
     
     private void createRegattaFromRegattaDTO(RegattaDTO regatta){
-    	this.createRegatta(regatta.getName(), regatta.boatClass.getName(), null, false, regatta.scoringScheme, regatta.defaultCourseAreaUuid, regatta.useStartTimeInference);
+    	this.createRegatta(regatta.getName(), regatta.boatClass.getName(),null, false, regatta.scoringScheme, regatta.defaultCourseAreaUuid, regatta.useStartTimeInference);
     }
 
     private SeriesParameters getDefaultSeries(RegattaDTO defaultRegatta) {
@@ -3738,9 +3740,9 @@ public class SailingServiceImpl extends ProxiedRemoteServiceServlet implements S
     }
 
     public Iterable<RegattaDTO> getRegattas(String url) { 
-        StructureImporter structureImporter = new StructureImporter(baseDomainFactory);
+        StructureImporter structureImporter = new StructureImporter(new SetRacenumberFromSeries(), baseDomainFactory);
         Iterable<RegattaJSON> parsedEvent = structureImporter.parseEvent(url);
-        Set<RegattaDTO> regattaDTOs = new HashSet<RegattaDTO>();
+        List<RegattaDTO> regattaDTOs = new ArrayList<RegattaDTO>();
         Iterable<Regatta> regattas = structureImporter.getRegattas(parsedEvent);
         for(Regatta regatta: regattas){
             regattaDTOs.add(convertToRegattaDTO(regatta));
@@ -3786,8 +3788,8 @@ public class SailingServiceImpl extends ProxiedRemoteServiceServlet implements S
     public void createRegattaStructure(final Iterable<RegattaDTO> regattas, final EventDTO newEvent,
             final RegattaDTO defaultRegatta) {
         final Set<AddSpecificRegatta> addSpecificRegattas = new HashSet<AddSpecificRegatta>();
-        for(Regatta regatta: regattas){
-            addSpecificRegattas.add((AddSpecificRegatta)regatta);
+        for(RegattaDTO regatta: regattas){
+            createRegattaFromRegattaDTO(regatta);
         }
         Runnable structureImportTask = new Runnable() {
             @Override

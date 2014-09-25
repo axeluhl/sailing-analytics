@@ -1,11 +1,8 @@
 package com.sap.sailing.gwt.ui.adminconsole;
 
-import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Collections;
-import java.util.HashSet;
 import java.util.List;
-import java.util.Set;
 
 import com.github.gwtbootstrap.client.ui.base.ProgressBarBase.Style;
 import com.google.gwt.dom.client.Style.Unit;
@@ -22,7 +19,6 @@ import com.google.gwt.user.client.ui.Label;
 import com.google.gwt.user.client.ui.Panel;
 import com.google.gwt.user.client.ui.TextBox;
 import com.google.gwt.user.client.ui.VerticalPanel;
-import com.sap.sailing.domain.base.Regatta;
 import com.sap.sailing.gwt.ui.client.ErrorReporter;
 import com.sap.sailing.gwt.ui.client.RegattaRefresher;
 import com.sap.sailing.gwt.ui.client.RegattaSelectionModel;
@@ -62,7 +58,7 @@ public class StructureImportManagementPanel extends FlowPanel {
         this.stringMessages = stringMessages;
         this.regattaRefresher = regattaRefresher;
         this.regattaListComposite = new StructureImportListComposite(this.sailingService,
-                this.regattaSelectionProvider, this.regattaRefresher, this.errorReporter, this.stringMessages);
+                new RegattaSelectionModel(true), this.regattaRefresher, this.errorReporter, this.stringMessages);
         regattaListComposite.ensureDebugId("RegattaListComposite");
         createUI();
 
