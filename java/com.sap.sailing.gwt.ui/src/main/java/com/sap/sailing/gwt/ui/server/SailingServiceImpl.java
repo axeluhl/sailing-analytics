@@ -3745,7 +3745,7 @@ public class SailingServiceImpl extends ProxiedRemoteServiceServlet implements S
     }
 
     private Iterable<String> createRegattasWithRaces(Iterable<AddSpecificRegatta> regattas, String eventName) {
-        StructureImporter structureImporter = new StructureImporter(new SetRacenumberFromSeries());
+        StructureImporter structureImporter = new StructureImporter(new SetRacenumberFromSeries(), null/*eventually it has to be baseDomainFactory*");
         Set<String> leaderboardNames = new HashSet<String>();
         Set<BuildStructure> buildStructures = structureImporter.getBuildStructures();
         int i = 0;
@@ -3768,7 +3768,7 @@ public class SailingServiceImpl extends ProxiedRemoteServiceServlet implements S
 
     @Override
     public Set<RegattaStructureDTO> getRegattaStructure(final List<String> regattaNames) {
-        StructureImporter structureImporter = new StructureImporter(new SetRacenumberFromSeries());
+        StructureImporter structureImporter = new StructureImporter(new SetRacenumberFromSeries(), null);
         Map<RegattaStructureKey, Set<BuildStructure>> regattaStructures = structureImporter
                 .getRegattaStructures(regattaNames);
         // Set<RegattaStructureKey> regattaStructureKeys = regattaStructures.keySet();
