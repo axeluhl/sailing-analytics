@@ -31,7 +31,7 @@
 			    &nbsp;
 	        </div>
 		    <div class="{res.mediaCss.small2} {res.mediaCss.columns}">
-	    		<g:Button ui:field="startAutoPlayButton" text="Start autoplay"/>
+	    		<g:Button ui:field="startAutoPlayButton" text="Start autoplay" styleName="{res.mainCss.button}" />
 		    </div>
 		</div>
 	</g:HTMLPanel>

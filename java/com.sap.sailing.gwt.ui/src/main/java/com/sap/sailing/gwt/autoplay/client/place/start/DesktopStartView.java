@@ -16,6 +16,7 @@ import com.google.gwt.user.client.ui.Composite;
 import com.google.gwt.user.client.ui.ListBox;
 import com.google.gwt.user.client.ui.Widget;
 import com.sap.sailing.gwt.autoplay.client.app.PlaceNavigator;
+import com.sap.sailing.gwt.common.client.SharedResources;
 import com.sap.sailing.gwt.ui.shared.EventDTO;
 import com.sap.sailing.gwt.ui.shared.LeaderboardGroupDTO;
 import com.sap.sailing.gwt.ui.shared.StrippedLeaderboardDTO;
@@ -46,6 +47,7 @@ public class DesktopStartView extends Composite implements StartView {
         
         leaderboardSelectionDiv.getStyle().setVisibility(Visibility.HIDDEN);
         startAutoPlayButton.setEnabled(false);
+        startAutoPlayButton.addStyleName(SharedResources.INSTANCE.mainCss().buttoninactive());
     }
 
     @Override
@@ -72,13 +74,18 @@ public class DesktopStartView extends Composite implements StartView {
             }
         }
         leaderboardSelectionDiv.getStyle().setVisibility(selectedEvent != null ? Visibility.VISIBLE : Visibility.HIDDEN);
-        startAutoPlayButton.setEnabled(false);
     }
 
     @UiHandler("leaderboardSelectionBox")
     void onLeaderboardSelectionChange(ChangeEvent event) {
         String selectedLeaderboardName = getSelectedLeaderboardName();
-        startAutoPlayButton.setEnabled(selectedLeaderboardName != null);
+        if(selectedLeaderboardName != null) {
+            startAutoPlayButton.setEnabled(true);
+            startAutoPlayButton.removeStyleName(SharedResources.INSTANCE.mainCss().buttoninactive());
+        } else {
+            startAutoPlayButton.setEnabled(false);
+            startAutoPlayButton.addStyleName(SharedResources.INSTANCE.mainCss().buttoninactive());
+        }
     }
     
     @UiHandler("startAutoPlayButton")
