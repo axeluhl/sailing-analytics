@@ -3732,10 +3732,15 @@ public class SailingServiceImpl extends ProxiedRemoteServiceServlet implements S
         return defaultSeries;
     }
 
-    public Iterable<AddSpecificRegatta> getRegattas(String url) { 
+    public Iterable<RegattaDTO> getRegattas(String url) { 
         StructureImporter structureImporter = new StructureImporter(baseDomainFactory);
         Iterable<RegattaJSON> parsedEvent = structureImporter.parseEvent(url);
-        return structureImporter.getRegattas(parsedEvent);
+        Set<RegattaDTO> regattaDTOs = new HashSet<RegattaDTO>();
+        Iterable<Regatta> regattas = structureImporter.getRegattas(parsedEvent);
+        for(Regatta regatta: regattas){
+            regattaDTOs.add(convertToRegattaDTO(regatta));
+        }
+        return regattaDTOs;
     }
 
     private List<String> createRegattasWithRaces(Iterable<AddSpecificRegatta> regattas, String eventName) {
@@ -3773,15 +3778,17 @@ public class SailingServiceImpl extends ProxiedRemoteServiceServlet implements S
     }
 
     @Override
-    public void createRegattaStructure(final Iterable<AddSpecificRegatta> regattas, final EventDTO newEvent,
+    public void createRegattaStructure(final Iterable<RegattaDTO> regattas, final EventDTO newEvent,
             final RegattaDTO defaultRegatta) {
-
+        final Set<AddSpecificRegatta> addSpecificRegattas = new HashSet<AddSpecificRegatta>();
+        for(Regatta regatta: regattas){
+            addSpecificRegattas.add((AddSpecificRegatta)regatta);
+        }
         Runnable structureImportTask = new Runnable() {
-
             @Override
             public void run() {
             	final StructureImporter structureImporter = new StructureImporter();
-                final List<String> leaderboardNames = createRegattasWithRaces(regattas, newEvent.getName());
+                final List<String> leaderboardNames = createRegattasWithRaces(addSpecificRegattas, newEvent.getName());
                 createAndAddLeaderboardGroup(newEvent, leaderboardNames);
 //                structureImporter.setCompetitors(regattas, "");
                 structureImporter.setFinished(true);

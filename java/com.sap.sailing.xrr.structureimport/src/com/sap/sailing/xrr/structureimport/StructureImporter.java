@@ -83,9 +83,9 @@ public class StructureImporter {
         return new EventImport().getRegattas(url);
     }
 
-    public Iterable<AddSpecificRegatta> getRegattas(Iterable<RegattaJSON> regattas) {
+    public Iterable<Regatta> getRegattas(Iterable<RegattaJSON> regattas) {
         Iterable<RegattaResults> parsedRegattas = parseRegattas(regattas);
-        Set<AddSpecificRegatta> addSpecificRegattas = new HashSet<AddSpecificRegatta>();
+        Set<Regatta> addSpecificRegattas = new HashSet<Regatta>();
         for (RegattaResults result : parsedRegattas) {
             Set<Race> races = new HashSet<Race>();
             //assuming that the last element in getPersonOrBoatOrTeam is an event
@@ -98,7 +98,7 @@ public class StructureImporter {
             // analyseStructure(structure);
             LinkedHashMap<String, SeriesCreationParametersDTO> seriesCreationParams = setSeriesCreationParameters(
                     buildStructure, false, false, false, null);
-            addSpecificRegattas.add( new AddSpecificRegatta(RegattaImpl.getDefaultName(event.getTitle(),
+            addSpecificRegattas.add((Regatta)new AddSpecificRegatta(RegattaImpl.getDefaultName(event.getTitle(),
                     ((Division) event.getRaceOrDivisionOrRegattaSeriesResult().get(0)).getTitle()), ((Division) event
                     .getRaceOrDivisionOrRegattaSeriesResult().get(0)).getTitle(), event.getEventID(),
                     new RegattaCreationParametersDTO(seriesCreationParams), false, this.baseDomainFactory

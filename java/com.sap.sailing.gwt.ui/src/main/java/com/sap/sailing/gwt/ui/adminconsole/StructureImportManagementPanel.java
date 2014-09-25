@@ -32,7 +32,6 @@ import com.sap.sailing.gwt.ui.client.StringMessages;
 import com.sap.sailing.gwt.ui.shared.EventAndRegattaDTO;
 import com.sap.sailing.gwt.ui.shared.EventDTO;
 import com.sap.sailing.gwt.ui.shared.RegattaDTO;
-import com.sap.sailing.server.operationaltransformation.AddSpecificRegatta;
 import com.sap.sse.gwt.client.dialog.DataEntryDialog.DialogCallback;
 
 public class StructureImportManagementPanel extends FlowPanel {
@@ -46,7 +45,7 @@ public class StructureImportManagementPanel extends FlowPanel {
     private Panel progressPanel;
     private TextBox jsonURLTextBox;
     private TextBox eventIDTextBox;
-    private Iterable<AddSpecificRegatta> addSpecificRegattas;
+    private Iterable<RegattaDTO> addSpecificRegattas;
 
     private Button listRegattasButton;
     private Button importDetailsButton;
@@ -86,15 +85,7 @@ public class StructureImportManagementPanel extends FlowPanel {
         importDetailsButton.addClickHandler(new ClickHandler() {
             @Override
             public void onClick(ClickEvent event) {
-                List<RegattaDTO> regattas = regattaListComposite.getSelectedRegattas();
-                Set<AddSpecificRegatta> selectedRegattas = new HashSet<AddSpecificRegatta>();
-                for(RegattaDTO regatta: regattas){
-                    for(AddSpecificRegatta addSpecificRegatta: addSpecificRegattas){
-                        if(regatta.getName().equals(((Regatta)addSpecificRegatta).getName())){
-                            selectedRegattas.add(addSpecificRegatta);
-                        }
-                    }
-                }
+                List<RegattaDTO> selectedRegattas = regattaListComposite.getSelectedRegattas();
                 createEventDetails(selectedRegattas);
             }
         });
@@ -129,7 +120,7 @@ public class StructureImportManagementPanel extends FlowPanel {
         add(vp);
     }
 
-    private void createEventDetails(final Iterable<AddSpecificRegatta> regattas) {
+    private void createEventDetails(final Iterable<RegattaDTO> regattas) {
         sailingService.getEvents(new AsyncCallback<List<EventDTO>>() {
             @Override
             public void onFailure(Throwable caught) {
@@ -156,13 +147,13 @@ public class StructureImportManagementPanel extends FlowPanel {
         }
 
         else {
-            sailingService.getRegattas(valueToValidate, new AsyncCallback<Iterable<AddSpecificRegatta>>() {
+            sailingService.getRegattas(valueToValidate, new AsyncCallback<Iterable<RegattaDTO>>() {
                 @Override
                 public void onFailure(Throwable caught) {
                     errorReporter.reportError("Error trying to load regattas");
                 }
                 @Override
-                public void onSuccess(Iterable<AddSpecificRegatta> regattas) {
+                public void onSuccess(Iterable<RegattaDTO> regattas) {
                     addSpecificRegattas = regattas;
                     fillRegattas(regattas);
                     importDetailsButton.setEnabled(true);
@@ -171,12 +162,8 @@ public class StructureImportManagementPanel extends FlowPanel {
         }
     }
 
-    private void fillRegattas(Iterable<AddSpecificRegatta> regattas) {
-        List<RegattaDTO> regattaDTOs = new ArrayList<RegattaDTO>();
-        for(AddSpecificRegatta regatta: regattas){
-            regattaDTOs.add(new RegattaDTO(((Regatta)regatta).getName(), null));
-        }
-        regattaListComposite.fillRegattas(regattaDTOs);
+    private void fillRegattas(Iterable<RegattaDTO> regattas) {
+        regattaListComposite.fillRegattas((List<RegattaDTO>)regattas);
     }
 
     private void createProgressBarAndLabel(int amountOfRegattas) {
@@ -216,7 +203,7 @@ public class StructureImportManagementPanel extends FlowPanel {
         timer.scheduleRepeating(2000);
     }
 
-    private void setDefaultRegatta(final Iterable<AddSpecificRegatta> selectedRegattas, final List<EventDTO> newEvent) {
+    private void setDefaultRegatta(final Iterable<RegattaDTO> selectedRegattas, final List<EventDTO> newEvent) {
         sailingService.getEvents(new AsyncCallback<List<EventDTO>>() {
             @Override
             public void onFailure(Throwable caught) {
@@ -259,7 +246,7 @@ public class StructureImportManagementPanel extends FlowPanel {
 
     }
 
-    private void createRegattas(final Iterable<AddSpecificRegatta> regattaNames, EventDTO newEvent, RegattaDTO defaultRegatta) {
+    private void createRegattas(final Iterable<RegattaDTO> regattaNames, EventDTO newEvent, RegattaDTO defaultRegatta) {
         eventManagementPanel.fillEvents();
         sailingService.createRegattaStructure(regattaNames, newEvent, defaultRegatta, new AsyncCallback<Void>() {
             @Override

@@ -10,6 +10,7 @@ import java.util.UUID;
 
 import com.google.gwt.user.client.rpc.RemoteService;
 import com.sap.sailing.domain.base.RaceDefinition;
+import com.sap.sailing.domain.base.Regatta;
 import com.sap.sailing.domain.base.RemoteSailingServerReference;
 import com.sap.sailing.domain.common.DataImportProgress;
 import com.sap.sailing.domain.common.DetailType;
@@ -341,7 +342,7 @@ public interface SailingService extends RemoteService {
     void addResultImportUrl(String resultProviderName, String url) throws Exception;
 
     
-    Iterable<AddSpecificRegatta> getRegattas(String url);
+    Iterable<RegattaDTO> getRegattas(String url);
 
     void updateLeaderboardScoreCorrectionMetadata(String leaderboardName, Date timePointOfLastCorrectionValidity,
             String comment);
@@ -563,7 +564,7 @@ public interface SailingService extends RemoteService {
 
     Set<RegattaStructureDTO> getRegattaStructure(List<String> regattaNames);
 
-	void createRegattaStructure(Iterable<AddSpecificRegatta> regattas,
+	void createRegattaStructure(Iterable<RegattaDTO> regattas,
 			EventDTO newEvent, RegattaDTO defaultRegatta);
 
 }

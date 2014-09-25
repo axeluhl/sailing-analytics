@@ -9,6 +9,7 @@ import java.util.Set;
 import java.util.UUID;
 
 import com.google.gwt.user.client.rpc.AsyncCallback;
+import com.sap.sailing.domain.base.Regatta;
 import com.sap.sailing.domain.base.RemoteSailingServerReference;
 import com.sap.sailing.domain.common.DataImportProgress;
 import com.sap.sailing.domain.common.DetailType;
@@ -642,9 +643,9 @@ public interface SailingServiceAsync {
 
     void setStartTimeReceivedForRace(RaceIdentifier raceIdentifier, Date newStartTimeReceived, AsyncCallback<RaceDTO> callback);
     
-    void getRegattas(String url, AsyncCallback<Iterable<AddSpecificRegatta>> asyncCallback);
+    void getRegattas(String url, AsyncCallback<Iterable<RegattaDTO>> asyncCallback);
 
-    void createRegattaStructure(Iterable<AddSpecificRegatta> regattaNames,
+    void createRegattaStructure(Iterable<RegattaDTO> regattaNames,
 			EventDTO newEvent, RegattaDTO defaultRegatta,
 			AsyncCallback<Void> asyncCallback);
 
