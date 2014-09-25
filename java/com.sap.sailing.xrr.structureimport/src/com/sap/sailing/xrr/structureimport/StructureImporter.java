@@ -14,6 +14,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 import java.util.UUID;
+import java.util.logging.Logger;
 
 import javax.xml.bind.JAXBException;
 
@@ -42,6 +43,7 @@ import com.sap.sailing.domain.common.dto.RegattaCreationParametersDTO;
 import com.sap.sailing.domain.common.dto.SeriesCreationParametersDTO;
 import com.sap.sailing.server.operationaltransformation.AddSpecificRegatta;
 import com.sap.sailing.xrr.resultimport.ParserFactory;
+import com.sap.sailing.xrr.resultimport.impl.ScoreCorrectionProviderImpl;
 import com.sap.sailing.xrr.schema.Boat;
 import com.sap.sailing.xrr.schema.Crew;
 import com.sap.sailing.xrr.schema.Division;
@@ -55,7 +57,8 @@ import eventimport.EventImport;
 import eventimport.RegattaJSON;
 
 public class StructureImporter {
-
+	
+	private static final Logger logger = Logger.getLogger(StructureImporter.class.getName());
     private final Set<RegattaResults> results = Collections.synchronizedSet(new HashSet<RegattaResults>());
     private Map<RegattaStructureKey, Set<BuildStructure>> seriesStructuresWithFrequency = new HashMap<RegattaStructureKey, Set<BuildStructure>>(); // TODO
                                                                                                                                                          // rename
@@ -120,18 +123,32 @@ public class StructureImporter {
     }
 
     private Iterable<RegattaResults> parseRegattas(final Iterable<RegattaJSON> selectedRegattas) {
+    	Set<Thread> threads = new HashSet<Thread>();
         for (final RegattaJSON selectedRegatta : selectedRegattas) {
-            new Thread("XRR Importer "+selectedRegatta.getName()) {
+        	Thread thread = new Thread("XRR Importer "+selectedRegatta.getName()) {
                 @Override
                 public void run() {
                     try {
                         parseRegattaXML(selectedRegatta.getXrrEntriesUrl());
                     } catch (JAXBException | IOException e) {
-                        e.printStackTrace(); //TODO 
+                    	logger.info("Parse error during XRR import. Ignoring document "+selectedRegatta.getName());
                     }
                     parsedDocuments++;
                 }
-            }.start();
+            };
+            thread.start();
+            threads.add(thread);
+        }
+        while (true) {
+            try {
+                for (Thread thread : threads) {
+					thread.join();
+				}
+                break;
+            }
+            catch (InterruptedException e) {
+            	//not all Regattas have been parsed
+            }
         }
         return results;
     }

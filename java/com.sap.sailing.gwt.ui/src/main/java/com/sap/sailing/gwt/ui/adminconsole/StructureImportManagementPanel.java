@@ -40,7 +40,7 @@ public class StructureImportManagementPanel extends FlowPanel {
     private final StringMessages stringMessages;
     private final RegattaRefresher regattaRefresher;
     private final EventManagementPanel eventManagementPanel;
-    private StructureImportListComposite regattaListComposite;
+    private final StructureImportListComposite regattaListComposite;
     private RegattaSelectionProvider regattaSelectionProvider;
     private Panel progressPanel;
     private TextBox jsonURLTextBox;
@@ -60,6 +60,9 @@ public class StructureImportManagementPanel extends FlowPanel {
         this.errorReporter = errorReporter;
         this.stringMessages = stringMessages;
         this.regattaRefresher = regattaRefresher;
+        this.regattaListComposite = new StructureImportListComposite(this.sailingService, this.regattaSelectionProvider,
+                this.regattaRefresher, this.errorReporter, this.stringMessages);
+        regattaListComposite.ensureDebugId("RegattaListComposite");
         createUI();
 
     }
@@ -77,7 +80,7 @@ public class StructureImportManagementPanel extends FlowPanel {
         jsonURLTextBox.setVisibleLength(100);
         listRegattasButton = new Button(this.stringMessages.listRegattas());
         importDetailsButton = new Button(this.stringMessages.importRegatta());
-        importDetailsButton.setEnabled(true);// TODO change to false
+        importDetailsButton.setEnabled(false);
         importDetailsButton.addClickHandler(new ClickHandler() {
             @Override
             public void onClick(ClickEvent event) {
@@ -107,9 +110,6 @@ public class StructureImportManagementPanel extends FlowPanel {
 
         regattaSelectionProvider = new RegattaSelectionModel(true);
 
-        regattaListComposite = new StructureImportListComposite(this.sailingService, this.regattaSelectionProvider,
-                this.regattaRefresher, this.errorReporter, this.stringMessages);
-        regattaListComposite.ensureDebugId("RegattaListComposite");
         grid.setWidget(0, 0, regattaListComposite);
         grid.getRowFormatter().setVerticalAlign(0, HasVerticalAlignment.ALIGN_TOP);
         grid.getColumnFormatter().getElement(0/** 1 */
