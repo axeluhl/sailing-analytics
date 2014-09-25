@@ -222,10 +222,10 @@ public class StructureImporter {
         return result;
     }
 
-    public void setCompetitors(Set<RegattaResults> results, RegattaJSON event) {
+    public void setCompetitors(Set<RegattaResults> results, String boatClassName) {
         for (RegattaResults result : results) {
             BoatClass boatClass = null;
-            boatClass = getBoatClass(event);
+            boatClass = getBoatClass(boatClassName);
             Iterable<Object> personOrBoatOrTeam = result.getPersonOrBoatOrTeam();
             setBoatsAndTeamsForPerson(personOrBoatOrTeam);
             for (Object obj : personOrBoatOrTeam) {
@@ -246,10 +246,10 @@ public class StructureImporter {
         }
     }
 
-    private BoatClass getBoatClass(RegattaJSON regatta) {
+    private BoatClass getBoatClass(String boatClassName) {
         BoatClass boatClass;
-        if (regatta.getBoatClass() != null) {
-            boatClass = baseDomainFactory.getOrCreateBoatClass(regatta.getBoatClass());
+        if (boatClassName != null && !boatClassName.equals("")) {
+            boatClass = baseDomainFactory.getOrCreateBoatClass(boatClassName);
         } else {
             boatClass = baseDomainFactory.getOrCreateBoatClass("default");
         }

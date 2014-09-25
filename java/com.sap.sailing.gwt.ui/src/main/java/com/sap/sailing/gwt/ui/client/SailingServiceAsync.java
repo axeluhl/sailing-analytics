@@ -644,7 +644,9 @@ public interface SailingServiceAsync {
     
     void getRegattas(String url, AsyncCallback<Iterable<Regatta>> asyncCallback);
 
-    void createRegattaStructure(List<String> regattaNames, EventDTO newEvent,RegattaDTO defaultRegatta, AsyncCallback<Void> asyncCallback);
+    void createRegattaStructure(Iterable<Regatta> regattaNames,
+			EventDTO newEvent, RegattaDTO defaultRegatta,
+			AsyncCallback<Void> asyncCallback);
 
     void getRegattaStructure(List<String> regattaNames, AsyncCallback<Set<RegattaStructureDTO>> asyncCallback); 
 

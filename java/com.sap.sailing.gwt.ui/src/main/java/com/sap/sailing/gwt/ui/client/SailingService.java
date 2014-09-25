@@ -86,6 +86,7 @@ import com.sap.sailing.gwt.ui.shared.TrackFileImportDeviceIdentifierDTO;
 import com.sap.sailing.gwt.ui.shared.VenueDTO;
 import com.sap.sailing.gwt.ui.shared.WindDTO;
 import com.sap.sailing.gwt.ui.shared.WindInfoForRaceDTO;
+import com.sap.sailing.server.operationaltransformation.AddSpecificRegatta;
 import com.sap.sse.common.Util;
 import com.sap.sse.common.Util.Pair;
 import com.sap.sse.common.search.KeywordQuery;
@@ -343,9 +344,6 @@ public interface SailingService extends RemoteService {
     
     Iterable<Regatta> getRegattas(String url);
 
-    void createRegattaStructure(List<String> regattaNames,EventDTO newEvent, RegattaDTO defaultRegatta);
-
-
     void updateLeaderboardScoreCorrectionMetadata(String leaderboardName, Date timePointOfLastCorrectionValidity,
             String comment);
 
@@ -565,5 +563,8 @@ public interface SailingService extends RemoteService {
     RaceDTO setStartTimeReceivedForRace(RaceIdentifier raceIdentifier, Date newStartTimeReceived);
 
     Set<RegattaStructureDTO> getRegattaStructure(List<String> regattaNames);
+
+	void createRegattaStructure(Iterable<AddSpecificRegatta> regattas,
+			EventDTO newEvent, RegattaDTO defaultRegatta);
 
 }
