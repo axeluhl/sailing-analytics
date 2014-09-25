@@ -3736,12 +3736,16 @@ public class SailingServiceImpl extends ProxiedRemoteServiceServlet implements S
         return defaultSeries;
     }
 
-    public Iterable<Regatta> getRegattas(String url) { 
+    public List<RegattaDTO> getRegattas(String url) { 
         StructureImporter structureImporter = new StructureImporter();
         Iterable<RegattaJSON> parsedEvent = structureImporter.parseEvent(url);
         // get Regattas
-        Iterable<Regatta> regattas = structureImporter.getRegattas(parsedEvent, getBaseDomainFactory());
-        return regattas;
+        Iterable<Regatta> regattas = structureImporter.getRegattas(parsedEvent);
+        List<RegattaDTO> regattaDTOs = new ArrayList<RegattaDTO>();
+        for(Regatta regatta: regattas){
+            regattaDTOs.add(convertToRegattaDTO(regatta));
+        }
+        return regattaDTOs;
     }
 
     private Iterable<String> createRegattasWithRaces(Iterable<AddSpecificRegatta> regattas, String eventName) {

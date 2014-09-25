@@ -21,6 +21,7 @@ import com.google.gwt.user.client.ui.Label;
 import com.google.gwt.user.client.ui.Panel;
 import com.google.gwt.user.client.ui.TextBox;
 import com.google.gwt.user.client.ui.VerticalPanel;
+import com.sap.sailing.domain.base.Regatta;
 import com.sap.sailing.gwt.ui.client.ErrorReporter;
 import com.sap.sailing.gwt.ui.client.RegattaRefresher;
 import com.sap.sailing.gwt.ui.client.RegattaSelectionModel;
@@ -34,7 +35,6 @@ import com.sap.sailing.gwt.ui.shared.RegattaStructureDTO;
 import com.sap.sse.gwt.client.dialog.DataEntryDialog.DialogCallback;
 
 public class StructureImportManagementPanel extends FlowPanel {
-
     private final SailingServiceAsync sailingService;
     private final ErrorReporter errorReporter;
     private final StringMessages stringMessages;
@@ -60,8 +60,8 @@ public class StructureImportManagementPanel extends FlowPanel {
         this.errorReporter = errorReporter;
         this.stringMessages = stringMessages;
         this.regattaRefresher = regattaRefresher;
-        this.regattaListComposite = new StructureImportListComposite(this.sailingService, this.regattaSelectionProvider,
-                this.regattaRefresher, this.errorReporter, this.stringMessages);
+        this.regattaListComposite = new StructureImportListComposite(this.sailingService,
+                this.regattaSelectionProvider, this.regattaRefresher, this.errorReporter, this.stringMessages);
         regattaListComposite.ensureDebugId("RegattaListComposite");
         createUI();
 
@@ -158,7 +158,6 @@ public class StructureImportManagementPanel extends FlowPanel {
                 public void onFailure(Throwable caught) {
                     errorReporter.reportError("Error trying to load regattas");
                 }
-
                 @Override
                 public void onSuccess(List<RegattaDTO> regattas) {
                     fillRegattas(regattas);
@@ -228,20 +227,22 @@ public class StructureImportManagementPanel extends FlowPanel {
 
                             @Override
                             public void ok(final EventAndRegattaDTO newRegatta) {
-                                sailingService.getRegattaStructure(regattaNames, new AsyncCallback<Set<RegattaStructureDTO>>() {
-                                    @Override
-                                    public void onFailure(Throwable caught) {
-//                                        errorReporter.reportError(stringMessages.errorAddingResultImportUrl(caught
-//                                                .getMessage()));
-                                    }
+                                sailingService.getRegattaStructure(regattaNames,
+                                        new AsyncCallback<Set<RegattaStructureDTO>>() {
+                                            @Override
+                                            public void onFailure(Throwable caught) {
+                                                // errorReporter.reportError(stringMessages.errorAddingResultImportUrl(caught
+                                                // .getMessage()));
+                                            }
 
-                                    @Override
-                                    public void onSuccess(Set<RegattaStructureDTO> result) {
-                                     // TODO UI aufbauen
-                                        createRegattas(regattaNames, newRegatta.getEvent(), newRegatta.getRegatta()); 
-                                    }
-                                });
-                                
+                                            @Override
+                                            public void onSuccess(Set<RegattaStructureDTO> result) {
+                                                // TODO UI aufbauen
+                                                createRegattas(regattaNames, newRegatta.getEvent(),
+                                                        newRegatta.getRegatta());
+                                            }
+                                        });
+
                             }
                         });
                 dialog.ensureDebugId("DefaultRegattaCreateDialog");
