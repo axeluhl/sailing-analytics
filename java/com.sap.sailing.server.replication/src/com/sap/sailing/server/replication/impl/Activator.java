@@ -44,7 +44,10 @@ import com.sap.sailing.server.replication.ReplicationService;
  * <li><code>replicate.master.queue.port</code>: the port for connecting to the RabbitMQ server; use 0 to connect to
  * Rabbit's default port</li>
  * <li><code>replicate.master.exchange.name</code>: name of the fan-out exchange that the remote master has created on
- * the RabbitMQ messaging system to which this replica connects</li>
+ * the RabbitMQ messaging system to which this replica connects. If missing, defaults to what this instance uses as its
+ * own master exchange name, as described above, based on the <code>replication.exchangeName</code> property, the
+ * <code>REPLICATION_CHANNEL</code> environment variable and the ultimate default name
+ * <code>"sapsailinganalytics"</code>.</li>
  * </ul>
  * Note that there are no default values for the properties that control automatic replication. If you provide the
  * <code>replicate.on.start</code> property with <code>true</code> as the value, all other
@@ -111,16 +114,20 @@ public class Activator implements BundleActivator {
         ReplicationService serverReplicationMasterService = new ReplicationServiceImpl(exchangeName, exchangeHost, exchangePort, replicationInstancesManager);
         bundleContext.registerService(ReplicationService.class, serverReplicationMasterService, null);
         logger.info("Registered replication service "+serverReplicationMasterService+" using exchange name "+exchangeName+" on host "+exchangeHost);
-        checkIfAutomaticReplicationShouldStart(serverReplicationMasterService);
+        checkIfAutomaticReplicationShouldStart(serverReplicationMasterService, exchangeName);
     }
     
-    private void checkIfAutomaticReplicationShouldStart(ReplicationService serverReplicationMasterService) {
+    private void checkIfAutomaticReplicationShouldStart(ReplicationService serverReplicationMasterService, String masterExchangeName) {
         String replicateOnStart = System.getProperty(PROPERTY_NAME_REPLICATE_ON_START);
         if (Boolean.valueOf(replicateOnStart)) {
             logger.info("Configuration requested automatic replication. Starting it up...");
+            String replicateFromExchangeName = System.getProperty(PROPERTY_NAME_REPLICATE_MASTER_EXCHANGE_NAME);
+            if (replicateFromExchangeName == null) {
+                replicateFromExchangeName = masterExchangeName;
+            }
             ReplicationMasterDescriptorImpl master = new ReplicationMasterDescriptorImpl(
                     System.getProperty(PROPERTY_NAME_REPLICATE_MASTER_QUEUE_HOST),
-                    System.getProperty(PROPERTY_NAME_REPLICATE_MASTER_EXCHANGE_NAME),
+                    replicateFromExchangeName,
                     Integer.valueOf(System.getProperty(PROPERTY_NAME_REPLICATE_MASTER_QUEUE_PORT).trim()), 
                     serverReplicationMasterService.getServerIdentifier().toString(), 
                     System.getProperty(PROPERTY_NAME_REPLICATE_MASTER_SERVLET_HOST), 
