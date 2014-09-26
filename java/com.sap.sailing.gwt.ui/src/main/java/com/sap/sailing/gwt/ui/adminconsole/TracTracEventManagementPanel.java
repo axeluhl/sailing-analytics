@@ -32,7 +32,6 @@ import com.google.gwt.user.client.ui.TextBox;
 import com.google.gwt.user.client.ui.VerticalPanel;
 import com.google.gwt.user.client.ui.Widget;
 import com.google.gwt.view.client.ListDataProvider;
-import com.google.gwt.view.client.MultiSelectionModel;
 import com.google.gwt.view.client.SelectionModel;
 import com.sap.sailing.domain.common.RegattaIdentifier;
 import com.sap.sailing.domain.common.RegattaName;
@@ -42,6 +41,7 @@ import com.sap.sailing.gwt.ui.client.RaceSelectionModel;
 import com.sap.sailing.gwt.ui.client.RegattaRefresher;
 import com.sap.sailing.gwt.ui.client.SailingServiceAsync;
 import com.sap.sailing.gwt.ui.client.StringMessages;
+import com.sap.sailing.gwt.ui.client.shared.controls.SelectionCheckboxColumn;
 import com.sap.sailing.gwt.ui.shared.RegattaDTO;
 import com.sap.sailing.gwt.ui.shared.TracTracConfigurationDTO;
 import com.sap.sailing.gwt.ui.shared.TracTracRaceRecordDTO;
@@ -345,15 +345,36 @@ public class TracTracEventManagementPanel extends AbstractEventManagementPanel {
             }
         };
         raceStatusColumn.setSortable(true);
+        TextColumn<TracTracRaceRecordDTO> raceVisibilityColumn = new TextColumn<TracTracRaceRecordDTO>() {
+            @Override
+            public String getValue(TracTracRaceRecordDTO object) {
+                return object.raceVisibility;
+            }
+        };
+        raceVisibilityColumn.setSortable(true);
         
+        SelectionCheckboxColumn<TracTracRaceRecordDTO> selectionCheckboxColumn = new SelectionCheckboxColumn<TracTracRaceRecordDTO>(tableResources.cellTableStyle().cellTableCheckboxSelected(),
+                tableResources.cellTableStyle().cellTableCheckboxDeselected(), tableResources.cellTableStyle().cellTableCheckboxColumnCell()) {
+                    @Override
+                    public Boolean getValue(TracTracRaceRecordDTO row) {
+                        return racesTable.getSelectionModel().isSelected(row);
+                    }
+
+                    @Override
+                    protected ListDataProvider<TracTracRaceRecordDTO> getListDataProvider() {
+                        return raceList;
+                    }
+        };
+        racesTable.addColumn(selectionCheckboxColumn, selectionCheckboxColumn.getHeader());
         racesTable.addColumn(regattaNameColumn, stringMessages.event());
         racesTable.addColumn(raceNameColumn, stringMessages.race());
         racesTable.addColumn(boatClassColumn, stringMessages.boatClass());
         racesTable.addColumn(raceStartTrackingColumn, stringMessages.startTime());
         racesTable.addColumn(raceStatusColumn, stringMessages.raceStatusColumn());
-        racesTable.addColumnSortHandler(getRaceTableColumnSortHandler(this.raceList.getList(), raceNameColumn,
-                boatClassColumn, raceStartTrackingColumn, raceStatusColumn));
-        racesTable.setSelectionModel(new MultiSelectionModel<TracTracRaceRecordDTO>());
+        racesTable.addColumn(raceVisibilityColumn, stringMessages.raceVisibilityColumn());
+        racesTable.addColumnSortHandler(getRaceTableColumnSortHandler(selectionCheckboxColumn, this.raceList.getList(),
+                raceNameColumn, boatClassColumn, raceStartTrackingColumn, raceStatusColumn));
+        racesTable.setSelectionModel(selectionCheckboxColumn.getSelectionModel(), selectionCheckboxColumn.getSelectionManager());
         racesTable.setWidth("100%");
 
         raceList.addDataDisplay(racesTable);
@@ -392,10 +413,11 @@ public class TracTracEventManagementPanel extends AbstractEventManagementPanel {
         this.errorReporter.reportError(message);
     }
     
-    private ListHandler<TracTracRaceRecordDTO> getRaceTableColumnSortHandler(List<TracTracRaceRecordDTO> raceRecords,
-            Column<TracTracRaceRecordDTO, ?> nameColumn, Column<TracTracRaceRecordDTO, ?> boatClassColumn,
-            Column<TracTracRaceRecordDTO, ?> trackingStartColumn, Column<TracTracRaceRecordDTO, ?> raceStatusColumn) {
+    private ListHandler<TracTracRaceRecordDTO> getRaceTableColumnSortHandler(SelectionCheckboxColumn<TracTracRaceRecordDTO> selectionCheckboxColumn,
+            List<TracTracRaceRecordDTO> raceRecords, Column<TracTracRaceRecordDTO, ?> nameColumn,
+            Column<TracTracRaceRecordDTO, ?> boatClassColumn, Column<TracTracRaceRecordDTO, ?> trackingStartColumn, Column<TracTracRaceRecordDTO, ?> raceStatusColumn) {
         ListHandler<TracTracRaceRecordDTO> result = new ListHandler<TracTracRaceRecordDTO>(raceRecords);
+        result.setComparator(selectionCheckboxColumn, selectionCheckboxColumn.getComparator());
         result.setComparator(nameColumn, new Comparator<TracTracRaceRecordDTO>() {
             @Override
             public int compare(TracTracRaceRecordDTO o1, TracTracRaceRecordDTO o2) {

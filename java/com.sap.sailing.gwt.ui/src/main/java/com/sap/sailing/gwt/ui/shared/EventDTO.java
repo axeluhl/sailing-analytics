@@ -33,6 +33,18 @@ public class EventDTO extends EventBaseDTO {
         regattas = new ArrayList<RegattaDTO>();
     }
     
+    public boolean isFakeSeries() {
+        return leaderboardGroups.size() == 1 && leaderboardGroups.get(0).hasOverallLeaderboard();
+    }
+    
+    public boolean isRunning() {
+        return getCurrentServerTime().after(startDate) && getCurrentServerTime().before(endDate);
+    }
+
+    public boolean isFinished() {
+        return getCurrentServerTime().after(endDate);
+    }
+
     private void initCurrentServerTime() {
         currentServerTime = new Date();
     }

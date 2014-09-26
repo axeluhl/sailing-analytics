@@ -18,7 +18,9 @@ package difflib;
 import java.util.*;
 
 /**
- * Describes the delta between original and revised texts.
+ * Describes the delta between original and revised object lists. Applying the patch only uses {@link List#add(int, Object)}
+ * and {@link List#remove(int)} as modifying operations. In particular, no call to {@link List#set(int, Object)} needs to be
+ * expected.
  * 
  * @author <a href="dm.naumenko@gmail.com">Dmitry Naumenko</a>
  */

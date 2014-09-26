@@ -48,6 +48,7 @@ public class WindInfoForRaceVectorField implements VectorField, AverageLatitudeP
     private final Weigher<Pair<PositionDTO, Date>> weigher;
     private double averageLatitudeDeg;
     private double averageLatitudeCosine;
+    private double knotsInDegreePerFrame;
     
     private final Comparator<WindDTO> windByMeasureTimePointComparator = new Comparator<WindDTO>() {
         @Override
@@ -57,8 +58,9 @@ public class WindInfoForRaceVectorField implements VectorField, AverageLatitudeP
     };
     private final WindInfoForRaceDTO windInfoForRace;
     
-    public WindInfoForRaceVectorField(WindInfoForRaceDTO windInfoForRace) {
+    public WindInfoForRaceVectorField(WindInfoForRaceDTO windInfoForRace, double framesPerSecond) {
         this.windInfoForRace = windInfoForRace;
+        this.knotsInDegreePerFrame = 1.0 / (60*3600) / framesPerSecond; // 1kn = 1/60 deg/h = 1/(60*3600) deg/s
         weigher = new PositionDTOAndDateWeigher(/* half confidence after milliseconds */3000,
                 /* halfConfidenceDistance */new MeterDistance(100), this);
     }
@@ -156,7 +158,7 @@ public class WindInfoForRaceVectorField implements VectorField, AverageLatitudeP
     public double getMotionScale(int zoomLevel) {
         // This implementation is copied from SimulatorField, hoping it does something useful in combination with
         // the Swarm implementation.
-        return 0.07 * Math.pow(1.6, Math.min(1.0, 6.0 - zoomLevel));
+        return 2.0 * knotsInDegreePerFrame * Math.pow(1.8, Math.min(15.0, 20.0 - zoomLevel)); 
     }
     
     @Override
@@ -170,7 +172,7 @@ public class WindInfoForRaceVectorField implements VectorField, AverageLatitudeP
      */
     @Override
     public double getLineWidth(double speed) {
-        return 3.*speed/MAX_WIND_SPEED_IN_KNOTS;
+        return 1.2;
     }
 
     @Override
@@ -180,7 +182,7 @@ public class WindInfoForRaceVectorField implements VectorField, AverageLatitudeP
 
     @Override
     public double getParticleFactor() {
-        return 1.0;
+        return 0.5;
     }
 
     /**
@@ -188,7 +190,7 @@ public class WindInfoForRaceVectorField implements VectorField, AverageLatitudeP
      */
     @Override
     public String getColor(double speed) {
-        return "rgba(255,255,255,"+Math.min(255, Math.round(255.*speed/MAX_WIND_SPEED_IN_KNOTS))+")";
+        return "rgba(255,255,255,"+Math.min(1.0, 0.5+0.6*speed/MAX_WIND_SPEED_IN_KNOTS)+")";
     }
 
 }

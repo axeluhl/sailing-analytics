@@ -17,25 +17,38 @@ public class EntryPointLinkFactory {
     public static String createLeaderboardGroupLink(Map<String, String> parameters) {
         return createEntryPointLink("/gwt/Spectator.html", parameters);
     }
+    
+    public static String createEventLink(Map<String, String> parameters, String eventId) {
+        return createEntryPointLink("/gwt/Home.html#EventPlace:eventId="+eventId, parameters);
+    }
 
     private static String createEntryPointLink(String baseLink, Map<String, String> parameters) {
         String debugParam = Window.Location.getParameter("gwt.codesvr");
         String localeParam = Window.Location.getParameter("locale");
-        String link = baseLink;
+        String[] documentAndFragment = baseLink.split("#", 2);
+        StringBuilder link = new StringBuilder(documentAndFragment[0]);
         int i = 1;
-        for(Entry<String, String> entry: parameters.entrySet()) {
-            link += i == 1 ? "?" : "&";
-            link += entry.getKey() + "=" + entry.getValue();
+        for (Entry<String, String> entry: parameters.entrySet()) {
+            link.append(i == 1 ? "?" : "&");
+            link.append(entry.getKey() + "=" + replaceAmpersand(URLEncoder.encode(entry.getValue())));
             i++;
         }
         if (debugParam != null && !debugParam.isEmpty()) {
-            link += i == 1 ? "?" : "&";
-            link += "gwt.codesvr=" + debugParam;
+            link.append(i == 1 ? "?" : "&");
+            link.append("gwt.codesvr=" + debugParam);
         }
         if (localeParam != null && !localeParam.isEmpty()) {
-            link += i == 1 ? "?" : "&";
-            link += "locale=" + localeParam;
+            link.append(i == 1 ? "?" : "&");
+            link.append("locale=" + localeParam);
         }
-        return URLEncoder.encode(link);
+        if (documentAndFragment.length > 1) {
+            link.append('#');
+            link.append(URLEncoder.encode(documentAndFragment[1])); // append the fragment following the "#" again
+        }
+        return link.toString();
+    }
+    
+    private static String replaceAmpersand(String param) {
+        return param.replaceAll("&", "%26");
     }
 }

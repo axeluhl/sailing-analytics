@@ -28,6 +28,7 @@ public class RaceDTO extends NamedDTO {
     public PlacemarkOrderDTO places;
 
     public TrackedRaceDTO trackedRace;
+    public TrackedRaceStatisticsDTO trackedRaceStatistics;
 
     private String regattaName;
     public String boatClass;

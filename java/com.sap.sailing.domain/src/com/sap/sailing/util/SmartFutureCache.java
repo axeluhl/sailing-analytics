@@ -507,7 +507,7 @@ public class SmartFutureCache<K, V, U extends UpdateInterval<U>> {
      * from the cache straight away (<code>waitForLatest==false</code>) or, if a re-calculation for the <code>key</code> is still
      * ongoing, the result of that ongoing re-calculation is returned.
      */
-    public V get(K key, boolean waitForLatest) {
+    public V get(final K key, boolean waitForLatest) {
         V value = null;
         if (waitForLatest) {
             FutureTaskWithCancelBlocking future;
@@ -545,11 +545,12 @@ public class SmartFutureCache<K, V, U extends UpdateInterval<U>> {
                 }
             } // else no calculation currently going on; value has been fetched from latest cache entry
         } else {
-            LockUtil.lockForRead(getOrCreateLockForKey(key));
+            final NamedReentrantReadWriteLock lock = getOrCreateLockForKey(key);
+            LockUtil.lockForRead(lock);
             try {
                 value = cache.get(key);
             } finally {
-                LockUtil.unlockAfterRead(getOrCreateLockForKey(key));
+                LockUtil.unlockAfterRead(lock);
             }
         }
         return value;
@@ -574,6 +575,13 @@ public class SmartFutureCache<K, V, U extends UpdateInterval<U>> {
      */
     public int getSmartFutureCacheTaskReuseCounter() {
         return smartFutureCacheTaskReuseCounter;
+    }
+
+    /**
+     * Removes the key from the cache. If any updates are still running, they may again insert the key into hte cache.
+     */
+    public void remove(K key) {
+        cache(key, null);
     }
 
 }

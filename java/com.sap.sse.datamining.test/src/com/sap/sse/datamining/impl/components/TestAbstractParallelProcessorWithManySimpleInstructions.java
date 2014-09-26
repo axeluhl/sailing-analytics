@@ -25,8 +25,11 @@ public class TestAbstractParallelProcessorWithManySimpleInstructions {
     public void initializeProcessor() {
         Processor<Integer> receiver = new Processor<Integer>() {
             @Override
-            public void onElement(Integer element) {
+            public void processElement(Integer element) {
                 incrementSum(element);
+            }
+            @Override
+            public void onFailure(Throwable failure) {
             }
             @Override
             public void finish() throws InterruptedException {
@@ -80,7 +83,7 @@ public class TestAbstractParallelProcessorWithManySimpleInstructions {
         int expectedSum = 0;
         for (int instructionNumber = 0; instructionNumber < elementAmount ; instructionNumber++) {
             Integer value = (int) (Math.random() * valueExclusiveUpperBound);
-            processor.onElement(value);
+            processor.processElement(value);
             expectedSum += value;
         }
         return expectedSum;

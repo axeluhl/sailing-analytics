@@ -3,6 +3,7 @@ package com.sap.sailing.gwt.home.client.place.events.recent;
 import java.util.List;
 
 import com.google.gwt.core.client.GWT;
+import com.google.gwt.dom.client.DivElement;
 import com.google.gwt.dom.client.SpanElement;
 import com.google.gwt.event.dom.client.ClickEvent;
 import com.google.gwt.event.dom.client.ClickHandler;
@@ -27,7 +28,7 @@ public class EventsOverviewRecentYear extends Composite {
 //    @UiField SpanElement countriesCount;
 //    @UiField SpanElement sailorsCount;
 //    @UiField SpanElement trackedRacesCount;
-    @UiField HTMLPanel recentEventsTeaserPanel;
+    @UiField DivElement recentEventsTeaserPanel;
     @UiField HTMLPanel contentDiv;
     @UiField HTMLPanel headerDiv;
     
@@ -36,20 +37,16 @@ public class EventsOverviewRecentYear extends Composite {
     public EventsOverviewRecentYear(Integer year, List<EventBaseDTO> events, PlaceNavigator navigator) {
         EventsOverviewRecentResources.INSTANCE.css().ensureInjected();
         initWidget(uiBinder.createAndBindUi(this));
-        
         this.year.setInnerText(String.valueOf(year));
         this.eventsCount.setInnerText(String.valueOf(events.size()));
 //        this.countriesCount.setInnerText("tbd.");
 //        this.sailorsCount.setInnerText("tbd.");
 //        this.trackedRacesCount.setInnerText("tbd.");
-        
-        for(EventBaseDTO eventDTO: events) {
-            RecentEvent recentEvent = new RecentEvent(navigator);
-            recentEvent.setEvent(eventDTO);
-            recentEventsTeaserPanel.add(recentEvent);
+        for (EventBaseDTO eventDTO : events) {
+            RecentEvent recentEvent = new RecentEvent(navigator, eventDTO);
+            recentEventsTeaserPanel.appendChild(recentEvent.getElement());
         }
         isContentVisible = true;
-     
         headerDiv.addDomHandler(new ClickHandler() {
             @Override
             public void onClick(ClickEvent event) {

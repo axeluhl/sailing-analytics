@@ -257,7 +257,7 @@ public class TrackedLegImpl implements TrackedLeg, RaceChangeListener {
     @Override
     public void waypointAdded(int zeroBasedIndex, Waypoint waypointThatGotAdded) {
         clearCaches(); // necessary because the competitor tracks ordered by rank may change for legs adjacent to the waypoint added
-    }
+    }                  // and because the leg's from/to waypoints may have changed
 
     @Override
     public void waypointRemoved(int zeroBasedIndex, Waypoint waypointThatGotRemoved) {

@@ -18,9 +18,7 @@ import com.google.gwt.user.client.ui.Composite;
 import com.google.gwt.user.client.ui.HTMLPanel;
 import com.google.gwt.user.client.ui.TextBox;
 import com.google.gwt.user.client.ui.Widget;
-import com.google.web.bindery.event.shared.EventBus;
 import com.sap.sailing.gwt.home.client.app.PlaceNavigator;
-import com.sap.sailing.gwt.home.client.place.searchresult.SearchEvent;
 import com.sap.sailing.gwt.ui.shared.LeaderboardSearchResultDTO;
 
 public class SearchResult extends Composite {
@@ -40,11 +38,11 @@ public class SearchResult extends Composite {
 
     private final List<SearchResultItem> searchResultItemComposites;
     private final PlaceNavigator navigator;
-    private final EventBus eventBus;
 
-    public SearchResult(PlaceNavigator navigator, EventBus eventBus) {
+    private int resultCounter;
+
+    public SearchResult(PlaceNavigator navigator) {
         this.navigator = navigator;
-        this.eventBus = eventBus;
         this.searchResultItemComposites = new ArrayList<SearchResultItem>();
         
         SearchResultResources.INSTANCE.css().ensureInjected();
@@ -84,22 +82,14 @@ public class SearchResult extends Composite {
         if(searchText.isEmpty()) {
             Window.alert("Please enter a search term.");
         } else {
-            eventBus.fireEvent(new SearchEvent(searchText));
+            navigator.goToSearchResult(searchText);
         }
     }
 
     public void updateSearchResult(String searchText, Iterable<LeaderboardSearchResultDTO> searchResultItems) {
-        searchResultItemPanel.clear();
-        searchResultItemComposites.clear();
-        
-        searchResultFor.setInnerText(searchText);
-        searchText1.setText(searchText);
-        searchText2.setText(searchText);
-        
-        int resultCounter = 0;
-        for(LeaderboardSearchResultDTO singleSearchResult: searchResultItems) {
+        for (LeaderboardSearchResultDTO singleSearchResult : searchResultItems) {
             // for now filter all results where we no event is defined
-            if(singleSearchResult.getEvent() != null) {
+            if (singleSearchResult.getEvent() != null) {
                 SearchResultItem searchResultItem = new SearchResultItem(navigator, singleSearchResult);
                 searchResultItemPanel.add(searchResultItem);
                 searchResultItemComposites.add(searchResultItem);
@@ -107,5 +97,16 @@ public class SearchResult extends Composite {
             }
         }
         searchResultCount.setInnerText(String.valueOf(resultCounter));
+    }
+
+    public void init(String searchText) {
+        searchResultItemPanel.clear();
+        searchResultItemComposites.clear();
+        
+        searchResultFor.setInnerText(searchText);
+        searchText1.setText(searchText);
+        searchText2.setText(searchText);
+        
+        resultCounter = 0;
     }
 }

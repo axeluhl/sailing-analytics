@@ -136,6 +136,8 @@ import com.sap.sailing.domain.racelog.RevokeEvent;
 import com.sap.sailing.domain.racelog.impl.CompetitorResultsImpl;
 import com.sap.sailing.domain.racelog.impl.RaceLogEventAuthorImpl;
 import com.sap.sailing.domain.racelog.impl.RaceLogImpl;
+import com.sap.sailing.domain.racelog.scoring.AdditionalScoringInformationType;
+import com.sap.sailing.domain.racelog.scoring.impl.AdditionalScoringInformationEventImpl;
 import com.sap.sailing.domain.racelog.tracking.CloseOpenEndedDeviceMappingEvent;
 import com.sap.sailing.domain.racelog.tracking.DefineMarkEvent;
 import com.sap.sailing.domain.racelog.tracking.DenoteForTrackingEvent;
@@ -711,6 +713,7 @@ public class DomainObjectFactoryImpl implements DomainObjectFactory {
             // migration: leaderboard groups that don't yet have a UUID receive a random one
         }
         String description = (String) o.get(FieldNames.LEADERBOARD_GROUP_DESCRIPTION.name());
+        String displayName = (String) o.get(FieldNames.LEADERBOARD_GROUP_DISPLAY_NAME.name());
         boolean displayGroupsInReverseOrder = false; // default value 
         Object displayGroupsInReverseOrderObj = o.get(FieldNames.LEADERBOARD_GROUP_DISPLAY_IN_REVERSE_ORDER.name());
         if (displayGroupsInReverseOrderObj != null) {
@@ -732,7 +735,7 @@ public class DomainObjectFactoryImpl implements DomainObjectFactory {
             }
         }
         logger.info("loaded leaderboard group "+name);
-        LeaderboardGroupImpl result = new LeaderboardGroupImpl(uuid, name, description, displayGroupsInReverseOrder, leaderboards);
+        LeaderboardGroupImpl result = new LeaderboardGroupImpl(uuid, name, description, displayName, displayGroupsInReverseOrder, leaderboards);
         Object overallLeaderboardIdOrName = o.get(FieldNames.LEADERBOARD_GROUP_OVERALL_LEADERBOARD.name());
         if (overallLeaderboardIdOrName != null) {
             final DBObject dbOverallLeaderboard;
@@ -1116,7 +1119,14 @@ public class DomainObjectFactoryImpl implements DomainObjectFactory {
         if (scoringSchemeTypeName == null) {
             scoringSchemeType = ScoringSchemeType.LOW_POINT; // the default
         } else {
-            scoringSchemeType = ScoringSchemeType.valueOf(scoringSchemeTypeName);
+            try {
+                scoringSchemeType = ScoringSchemeType.valueOf(scoringSchemeTypeName);
+            } catch (IllegalArgumentException ila) {
+                // can happen that the database contains a scoring scheme that
+                // has not yet been implemented - fall back with a warning
+                scoringSchemeType = ScoringSchemeType.LOW_POINT;
+                logger.warning("Could not find scoring scheme " + scoringSchemeTypeName + "! Most probably this has not yet been implemented or even been removed.");
+            }
         }
         return scoringSchemeType;
     }
@@ -1334,6 +1344,8 @@ public class DomainObjectFactoryImpl implements DomainObjectFactory {
             return loadRaceLogDefineMarkEvent(createdAt, author, logicalTimePoint, id, passId, competitors, dbObject);
         } else if (eventClass.equals(CloseOpenEndedDeviceMappingEvent.class.getSimpleName())) {
             return loadRaceLogCloseOpenEndedDeviceMappingEvent(createdAt, author, logicalTimePoint, id, passId, competitors, dbObject);
+        } else if (eventClass.equals(AdditionalScoringInformationEventImpl.class.getSimpleName())) {
+            return loadRaceLogAdditionalScoringInformationEvent(createdAt, author, logicalTimePoint, id, passId, competitors, dbObject);
         }
 
         throw new IllegalStateException(String.format("Unknown RaceLogEvent type %s", eventClass));
@@ -1417,6 +1429,18 @@ public class DomainObjectFactoryImpl implements DomainObjectFactory {
         TimePoint closingTimePoint = loadTimePoint(dbObject, FieldNames.RACE_LOG_CLOSING_TIMEPOINT);
         return raceLogEventFactory.createCloseOpenEndedDeviceMappingEvent(createdAt, author, logicalTimePoint, id, passId,
                 deviceMappingEventId, closingTimePoint);
+    }
+
+    private RaceLogEvent loadRaceLogAdditionalScoringInformationEvent(TimePoint createdAt, RaceLogEventAuthor author, TimePoint logicalTimePoint,
+            Serializable id, Integer passId, List<Competitor> competitors, DBObject dbObject) {
+        Object additionalScoringInformationTypeInfo = dbObject.get(FieldNames.RACE_LOG_ADDITIONAL_SCORING_INFORMATION_TYPE.name());
+        AdditionalScoringInformationType informationType = AdditionalScoringInformationType.UNKNOWN;
+        if (additionalScoringInformationTypeInfo != null) {
+            informationType = AdditionalScoringInformationType.valueOf(additionalScoringInformationTypeInfo.toString());
+        } else {
+            logger.warning("Could not find additional scoring information attached to db log for " + dbObject.toString());
+        }
+        return raceLogEventFactory.createAdditionalScoringInformationEvent(createdAt, author, logicalTimePoint, id, competitors, passId, informationType);
     }
 
     private RaceLogEvent loadRaceLogRaceLogProtestStartTimeEvent(TimePoint createdAt, RaceLogEventAuthor author,

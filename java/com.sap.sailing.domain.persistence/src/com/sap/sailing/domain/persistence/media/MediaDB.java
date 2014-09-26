@@ -1,8 +1,14 @@
 package com.sap.sailing.domain.persistence.media;
 
 import java.util.Collections;
-import java.util.Date;
 import java.util.List;
+import java.util.Set;
+
+import com.sap.sailing.domain.common.Duration;
+import com.sap.sailing.domain.common.RegattaAndRaceIdentifier;
+import com.sap.sailing.domain.common.TimePoint;
+import com.sap.sailing.domain.common.media.MediaTrack;
+import com.sap.sailing.domain.common.media.MediaTrack.MimeType;
 
 /**
  * Offers CRUD methods for mongo representation of media track objects.
@@ -12,61 +18,86 @@ import java.util.List;
  */
 public interface MediaDB {
 
-    /**
-     * Stores a new track to the database, returning the db-generated id.
-     */
-    String insertMediaTrack(String title, String url, Date startTime, int durationInMillis, String mimeType);
+	/**
+	 * Stores a new track to the database, returning the db-generated id.
+	 */
+	String insertMediaTrack(String title, String url, TimePoint startTime,
+			Duration duration, MimeType mimeType,
+			Set<RegattaAndRaceIdentifier> regattasAndRaces);
 
-    /**
-     * Stores a new track to the database, using the db id of the specified trackToImport.
-     * @return true if a new track has been added to db, e.g. the specified dbId didn't exist.
-     * @throws NullpointerException When trackToImport.dbId is null.
-     * @throws IllegalArgumentException When track with specified dbId already exists.
-     */
-    void insertMediaTrackWithId(String dbId, String videoTitle, String url, Date startTime, int durationInMillis, String mimeType);
+	/**
+	 * Stores a new track to the database, using the db id of the specified
+	 * trackToImport.
+	 * 
+	 * @return true if a new track has been added to db, e.g. the specified dbId
+	 *         didn't exist.
+	 * @throws NullpointerException
+	 *             When trackToImport.dbId is null.
+	 * @throws IllegalArgumentException
+	 *             When track with specified dbId already exists.
+	 */
+	void insertMediaTrackWithId(String dbId, String videoTitle, String url,
+			TimePoint startTime, Duration duration, MimeType mimeType,
+			Set<RegattaAndRaceIdentifier> regattaAndRace);
 
-    List<DBMediaTrack> loadAllMediaTracks();
+	List<MediaTrack> loadAllMediaTracks();
 
-    void deleteMediaTrack(String dbId);
+	void deleteMediaTrack(String dbId);
 
-    void updateTitle(String dbId, String title);
+	void updateTitle(String dbId, String title);
 
-    void updateUrl(String dbId, String url);
+	void updateUrl(String dbId, String url);
 
-    void updateStartTime(String dbId, Date startTime);
+	void updateStartTime(String dbId, TimePoint startTime);
 
-    void updateDuration(String dbId, int durationInMillis);
+	void updateDuration(String dbId, Duration duration);
 
-    MediaDB TEST_STUB = new MediaDB() {
+	void updateRace(String dbId, Set<RegattaAndRaceIdentifier> race);
 
-        @Override
-        public String insertMediaTrack(String title, String url, Date startTime, int durationInMillis, String mimeType) {
-            return "0";
-        }
+	MediaDB TEST_STUB = new MediaDB() {
 
-        @Override
-        public void insertMediaTrackWithId(String dbId, String videoTitle, String url, Date startTime, int durationInMillis, String mimeType) {};
-        
-        @Override
-        public List<DBMediaTrack> loadAllMediaTracks() {
-            return Collections.emptyList(); 
-        }
+		@Override
+		public String insertMediaTrack(String title, String url,
+				TimePoint startTime, Duration duration, MimeType mimeType,
+				Set<RegattaAndRaceIdentifier> regattasAndRaces) {
+			return "0";
+		}
 
-        @Override
-        public void deleteMediaTrack(String dbId) {}
+		@Override
+		public void insertMediaTrackWithId(String dbId, String videoTitle,
+				String url, TimePoint startTime, Duration duration,
+				MimeType mimeType, Set<RegattaAndRaceIdentifier> regattaAndRace) {
+		};
 
-        @Override
-        public void updateTitle(String dbId, String title) {}
+		@Override
+		public List<MediaTrack> loadAllMediaTracks() {
+			return Collections.emptyList();
+		}
 
-        @Override
-        public void updateUrl(String dbId, String url) {}
+		@Override
+		public void deleteMediaTrack(String dbId) {
+		}
 
-        @Override
-        public void updateStartTime(String dbId, Date startTime) {}
+		@Override
+		public void updateTitle(String dbId, String title) {
+		}
 
-        @Override
-        public void updateDuration(String dbId, int durationInMillis) {}
-        
-    };
+		@Override
+		public void updateUrl(String dbId, String url) {
+		}
+
+		@Override
+		public void updateStartTime(String dbId, TimePoint startTime) {
+		}
+
+		@Override
+		public void updateDuration(String dbId, Duration duration) {
+		}
+
+		@Override
+		public void updateRace(String dbId, Set<RegattaAndRaceIdentifier> race) {
+		}
+
+	};
 
 }

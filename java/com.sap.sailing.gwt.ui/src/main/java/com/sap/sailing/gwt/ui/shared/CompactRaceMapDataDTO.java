@@ -2,6 +2,7 @@ package com.sap.sailing.gwt.ui.shared;
 
 import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
 
@@ -33,9 +34,12 @@ public class CompactRaceMapDataDTO implements IsSerializable {
         for (Map.Entry<CompetitorDTO, List<GPSFixDTO>> e : boatPositions.entrySet()) {
             this.boatPositionsByCompetitorIdAsString.put(e.getKey().getIdAsString(), e.getValue());
         }
-        this.quickRanks = new ArrayList<CompactQuickRankDTO>(quickRanks.size());
-        for (QuickRankDTO quickRank : quickRanks) {
-            this.quickRanks.add(new CompactQuickRankDTO(quickRank.competitor.getIdAsString(), quickRank.rank, quickRank.legNumberOneBased));
+        this.quickRanks = new ArrayList<CompactQuickRankDTO>(quickRanks == null ? 0 : quickRanks.size());
+        if (quickRanks != null) {
+            for (QuickRankDTO quickRank : quickRanks) {
+                this.quickRanks.add(new CompactQuickRankDTO(quickRank.competitor.getIdAsString(), quickRank.rank,
+                        quickRank.legNumberOneBased));
+            }
         }
         this.courseSidelines = courseSidelines;
         this.coursePositions = coursePositions;
@@ -47,11 +51,11 @@ public class CompactRaceMapDataDTO implements IsSerializable {
             competitorsByIdAsString.put(competitor.getIdAsString(), competitor);
         }
         RaceMapDataDTO result = new RaceMapDataDTO();
-        result.quickRanks = new ArrayList<QuickRankDTO>(this.quickRanks.size());
+        result.quickRanks = new LinkedHashMap<CompetitorDTO, QuickRankDTO>(this.quickRanks.size());
         for (CompactQuickRankDTO compactQuickRank : this.quickRanks) {
             final CompetitorDTO competitorDTO = competitorsByIdAsString.get(compactQuickRank.getCompetitorIdAsString());
             if (competitorDTO != null) {
-                result.quickRanks.add(new QuickRankDTO(competitorDTO, compactQuickRank.getRank(), compactQuickRank.getLegNumber()));
+                result.quickRanks.put(competitorDTO, new QuickRankDTO(competitorDTO, compactQuickRank.getRank(), compactQuickRank.getLegNumber()));
             }
         }
         result.courseSidelines = courseSidelines;

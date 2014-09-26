@@ -30,7 +30,7 @@ iframe {display: block; width: 100%; height: 100%; border: none; overflow-y: aut
 }
 
 body {
-	background: #ebebeb;
+	background: white;
 	font-family: 'OpenSansRegular', Arial, Verdana, sans-serif;
 	line-height: 1;
 	font-size: 14px;
@@ -68,13 +68,18 @@ table {
 .CombinedWindPanel {
 	-moz-border-radius: 4px;
 	-webkit-border-radius: 4px;
+	-o-border-radius: 4px;
+	-ms-border-radius: 4px;
 	border-radius: 4px;
 	background-color: rgba(255, 255, 255, 0.75);
 	border: 1px solid #C9CACA;
 }
 
-.RaceBoardHeaderPanel {
-	margin: 0 12px 14px 12px;
+.RaceMap-HeaderPanel {
+	height: 60px;
+	width: 100%;
+	background-color: #333;
+	opacity: .5;
 }
 
 .leaderboardLabel {
@@ -193,6 +198,9 @@ img.openColumn {
 	height: 23px;
     margin: 0 12px 0 1px;
 	-webkit-border-radius: 0px 3px 3px 0px;
+	-moz-border-radius: 0px 3px 3px 0px;
+	-o-border-radius: 0px 3px 3px 0px;
+	-ms-border-radius: 0px 3px 3px 0px;
 	border-radius: 0px 3px 3px 0px;
 }
 
@@ -201,17 +209,6 @@ img.openColumn {
 	background-position: center, center -30px;
 	background-repeat: no-repeat, repeat-x;
     cursor: pointer;
-}
-
-.raceBoardNavigation-filterButton {
-	background: url(images/filter_white.png), url(images/btn-cta-orangeleft.png);
-	background-position: center, center 0;
-	background-repeat: no-repeat, repeat-x;
-	width: 27px;
-	height: 23px;
-    margin: 0 12px 0 1px;
-	-webkit-border-radius: 0px 3px 3px 0px;
-	border-radius: 0px 3px 3px 0px;
 }
 
 .raceBoardNavigation-filterButton:hover {
@@ -236,9 +233,13 @@ img.openColumn {
     text-decoration: none;
     -moz-border-radius: 5px 0 0 5px;
     -webkit-border-radius: 5px 0 0 5px;
+    -o-border-radius: 5px 0 0 5px;
+    -ms-border-radius: 5px 0 0 5px;
     border-radius: 5px 0 0 5px;
     -moz-box-shadow: 0 1px 3px rgba(0, 0, 0, 0.3);
     -webkit-box-shadow: 0 1px 3px rgba(0, 0, 0, 0.3);
+    -o-box-shadow: 0 1px 3px rgba(0, 0, 0, 0.3);
+    -ms-box-shadow: 0 1px 3px rgba(0, 0, 0, 0.3);
     box-shadow: 0 1px 3px rgba(0, 0, 0, 0.3);
     text-shadow: 0 -1px 1px rgba(0, 0, 0, 0.25);
     border-bottom: 1px solid rgba(0, 0, 0, 0.25);
@@ -271,12 +272,16 @@ img.openColumn {
     text-decoration: none;
     -moz-box-shadow: 0 1px 3px rgba(0, 0, 0, 0.3);
     -webkit-box-shadow: 0 1px 3px rgba(0, 0, 0, 0.3);
+    -o-box-shadow: 0 1px 3px rgba(0, 0, 0, 0.3);
+    -ms-box-shadow: 0 1px 3px rgba(0, 0, 0, 0.3);
     box-shadow: 0 1px 3px rgba(0, 0, 0, 0.3);
     text-shadow: 0 -1px 1px rgba(0, 0, 0, 0.25);
     border-bottom: 1px solid rgba(0, 0, 0, 0.25);
 	border-radius: 5px 5px 5px 5px;
     -moz-border-radius: 5px 0 0 5px;
     -webkit-border-radius: 5px 5px 5px 5px;
+    -o-border-radius: 5px 5px 5px 5px;
+    -ms-border-radius: 5px 5px 5px 5px;
 }
 
 .raceBoardNavigation-standaloneElement:active {
@@ -298,41 +303,79 @@ img.openColumn {
 	margin: 0 0 0 5px;
 }
 
+.timePanelButton-SlowDown {
+	background-color: red !important;
+}
+
+.timePanelButton-SpeedUp {
+	background-color: green !important;
+}
+
 .playPauseButton {
 	padding: 0;
 	float: left;
-	width: 28px;
-	height: 25px;
-	background: url(images/timeslider-play-active-icon.png) 0 0 no-repeat;
+	width: 32px;
+	height: 28px;
+	background: url(images/viewicons/@1x/img/SAP_RV_Play_INACTIVE.png) center no-repeat;
     cursor: pointer;
+    border: 1px solid #cecece;
+    border-radius: 4px;
+    outline: 0;
 }
 
 .playPauseButton:hover{
-  background: url(images/playbutton-hover.png) 0 0 no-repeat !important;
   cursor: pointer;
+  background-color: #cecece;
 }
 
 .playPauseButtonPause {
-	background: url(images/timeslider-pause-icon.png) 0 0 no-repeat;
+	background: url(images/viewicons/@2x/img/SAP_RV_Pause_INACTIVE.png) 2px 0 no-repeat;
+	outline: 0;
+	background-size: contain;
 }
 
 .playPauseButtonPause:hover {
-  background: url(images/playbuttonPause-hover.png) 0 0 no-repeat !important;
   cursor: pointer;
 }
 
 .backToLivePlayButton {
-	background: url(images/btn-cta-greenleft.png) center top repeat-x;
-    margin: 0 0 0 5px;
+    position: absolute;
+    right: 15px;
+    top: 8px;
+    width: 42px;
+    height: 38px;
+	font-size: 8px;
+	white-space: normal;
+    -moz-border-radius: 5px;
+    -webkit-border-radius: 5px;
+    -o-border-radius: 5px;
+    -ms-border-radius: 5px;
+    border-radius: 5px;
+    border: none;
+    cursor: pointer;
+}
+
+.backToLivePlayButton-Inactive {
+	color: #6dc021;
+	background-color: white;
+	font-weight: bold;
+}
+
+.backToLivePlayButton-Active {
+	background-color: #6dc021;
+	color: white;
+	font-weight: normal;
 }
 
 .backToLivePlayButton:hover {
-    background: url(images/btn-cta-greenleft.png) center -30px repeat-x;
-    margin: 0 0 0 5px;
+	border: 2px solid gray;
+}
+
+.backToLivePlayButton:focus {
+	outline: 0 !important;
 }
 
 .dockLayoutPanel div[style="position: absolute; overflow: hidden; left: 0px; right: 0px; bottom: 0px; height: 90px;"] {
-	box-shadow: 0 0 8px #424242;
 	z-index: 10;
 }
 
@@ -346,15 +389,23 @@ img.openColumn {
   height: 8px;
   -moz-border-radius-topleft: 50%;
   -webkit-border-top-left-radius: 50%;
+  -o-border-top-left-radius: 50%;
+  -ms-border-top-left-radius: 50%;
   border-top-left-radius: 50%;
   -moz-border-radius-topright: 50%;
   -webkit-border-top-right-radius: 50%;
+  -o-border-top-right-radius: 50%;
+  -ms-border-top-right-radius: 50%;
   border-top-right-radius: 50%;
   -moz-border-radius-bottomleft: 50%;
   -webkit-border-bottom-left-radius: 50%;
+  -o-border-bottom-left-radius: 50%;
+  -ms-border-bottom-left-radius: 50%;
   border-bottom-left-radius: 50%;
   -moz-border-radius-bottomright: 50%;
   -webkit-border-bottom-right-radius: 50%;
+  -o-border-bottom-right-radius: 50%;
+  -ms-border-bottom-right-radius: 50%;
   border-bottom-right-radius: 50%;
   float: left;
 }
@@ -372,8 +423,236 @@ img.openColumn {
 }
 
 .busyIndicator-Simple {
-	margin-top: 7px;	
+	position: absolute;
+	top: 0.7em;
+	right: 7.4em;
 }
 
 .busyIndicator-Circle {
+}
+
+.raceBoard-TitlePanel {
+	position: relative;
+	top: 10px;
+	z-index: 10;
+	color: #fff;
+	margin-left: auto;
+	margin-right: auto;
+}
+
+.raceBoard-TitlePanel-RaceNameLabel {
+	font-size: 32px;
+	font-weight: bold;
+	padding: 7px;
+}
+
+.raceBoard-Logo {
+	position: absolute;
+	top: 6px;
+	left: 10px;
+	z-index: 10;
+	cursor: pointer;
+}
+
+.SideBySideComponentViewer-MainPanel {
+	top: 12px;
+}
+
+.TimePanel-ShowExtended-Button {
+	width: 29px;
+	height: 28px;
+	float: left;
+	cursor: pointer;
+  	border-top-left-radius: 5px;
+  	border-top-right-radius: 5px;
+  	border-bottom-left-radius: 5px;
+  	border-bottom-right-radius: 5px;
+  	border: 1px solid #ececec;
+}
+
+.TimePanel-ShowExtended-Button-Open {
+	background: white url(images/arrows_top_black.png) center no-repeat;
+}
+
+.TimePanel-ShowExtended-Button-Closed {
+	background: white url(images/arrows_bottom_black.png) center no-repeat;
+}
+
+.TimePanel-ShowExtended-Button:hover {
+	background-color: #cecece;
+}
+
+.TimePanel-ShowExtended-Button:focus {
+	outline: 0 !important;
+}
+
+.RaceBoard-globalNavigation-Link {
+	display: inline;
+	margin-right: 3px;
+}
+
+.RaceBoard-globalNavigation-Link a {
+	color: #fff;
+	cursor: pointer;
+}
+
+.RaceBoard-globalNavigation-Link+.RaceBoard-globalNavigation-Link:before {
+	content: ' \00bb\00a0';
+}
+
+.TimePanel-settingsButtonStyle {
+	position: absolute;
+	right: 0px;
+	z-index: 1;
+	border: none;
+}
+
+.TimePanel-settingsButtonStyle:focus {
+	outline: 0 !important;
+}
+
+.TimePanel-settingsButtonStyle:hover {
+	border: 1px solid gray;
+}
+
+.gwt-SplitLayoutPanel-NorthSouthToggleButton-Closed-multiCompetitorRaceChart {
+	background-color: white;
+	background-image: url(images/viewicons/@1x/img/SAP_RV_CompetitorCharts_INACTIVE.png), url(images/arrows_top_black_small.png);
+	background-repeat: no-repeat, no-repeat;
+	background-position: 5% 50%, 95% 50%
+}
+
+.gwt-SplitLayoutPanel-NorthSouthToggleButton-Open-multiCompetitorRaceChart {
+	background-color: white;
+	background-image: url(images/viewicons/@1x/img/SAP_RV_CompetitorCharts_GHOSTED.png), url(images/arrows_bottom_black_small.png);
+	background-repeat: no-repeat, no-repeat;
+	background-position: 5% 50%, 95% 50%
+}
+
+.gwt-SplitLayoutPanel-NorthSouthToggleButton-Closed-windChart {
+	background-color: white;
+	background-image: url(images/viewicons/@1x/img/SAP_RV_CompetitorCharts_INACTIVE.png), url(images/arrows_top_black_small.png);
+	background-repeat: no-repeat, no-repeat;
+	background-position: 5% 50%, 95% 50%
+}
+
+.gwt-SplitLayoutPanel-NorthSouthToggleButton-Open-windChart {
+	background-color: white;
+	background-image: url(images/viewicons/@1x/img/SAP_RV_CompetitorCharts_GHOSTED.png), url(images/arrows_bottom_black_small.png);
+	background-repeat: no-repeat, no-repeat;
+	background-position: 5% 50%, 95% 50%
+}
+
+.gwt-SplitLayoutPanel-EastToggleButton-Open-leaderboard {
+	background-color: white;
+	background-image: url(images/viewicons/@1x/img/SAP_RV_Leaderboard_GHOSTED.png), url(images/arrows_top_black_small.png);
+	background-repeat: no-repeat, no-repeat;
+	background-position: 4% 50%, 96% 50%
+}
+
+.gwt-SplitLayoutPanel-EastToggleButton-Closed-leaderboard {
+	background-color: white;
+	background-image: url(images/viewicons/@1x/img/SAP_RV_Leaderboard_INACTIVE.png), url(images/arrows_bottom_black_small.png);
+	background-repeat: no-repeat, no-repeat;
+	background-position: 4% 50%, 96% 50%
+}
+
+.gwt-SplitLayoutPanel-NorthSouthToggleButton-Closed-media {
+	background-color: white;
+	background-image: url(images/viewicons/@1x/img/SAP_RV_AudioVideo_INACTIVE.png);
+	background-repeat: no-repeat, no-repeat;
+	background-position: 4% 50%, 96% 50%
+}
+
+.gwt-SplitLayoutPanel-NorthSouthToggleButton-Open-media {
+	background-color: white;
+	background-image: url(images/viewicons/@1x/img/SAP_RV_AudioVideo_INACTIVE.png);
+	background-repeat: no-repeat, no-repeat;
+	background-position: 4% 50%, 96% 50%
+}
+
+.gwt-SplitLayoutPanel-NorthSouthToggleButton-Small-media {
+	background-position: 50% 50%, 100% 50% !important;
+    margin-left: 0px !important;
+    padding: 2px 20px !important;
+}
+
+@external gwt-ToggleButton-up, gwt-ToggleButton-down, gwt-ToggleButton-up-hovering, gwt-ToggleButton-down-hovering;
+.gwt-ToggleButton-up, .gwt-ToggleButton-up-hovering {
+   background: url(images/unlock.png) center no-repeat;
+   margin-left: 5px;
+} 
+.gwt-ToggleButton-down, .gwt-ToggleButton-down-hovering {
+   background: url(images/lock.png) center no-repeat;
+   margin-left: 5px;
+}
+
+.RegattaRaceInformation-Header {
+	position: relative;
+    left: 140px;
+    top: 11px;
+}
+
+.RegattaRaceInformation-Header .RaceName-Label {
+	display: inline;
+    color: white;
+    margin-right: 10px;
+    font-size: 36px;
+}
+
+.RegattaRaceInformation-Header .RaceSeriesAndFleet-Label {
+	display: inline;
+    color: white;
+    font-size: 15px;
+}
+
+.RegattaAndRaceTime-Header {
+	position: absolute;
+    right: 10px;
+    top: 13px;
+    text-align: right;
+    color: white;
+}
+
+.RegattaAndRaceTime-Header .RegattaName-Anchor {
+	font-size: 15px;
+	color: white;
+	text-decoration: none;
+	padding-left: 25px;
+    background-image: url(images/home.png);
+    background-repeat: no-repeat;
+    background-size: 17px;
+    background-position: 4px 1px;
+}
+
+.RegattaAndRaceTime-Header .RegattaName-Anchor:hover {
+	text-decoration: underline;
+}
+	
+.RegattaAndRaceTime-Header .RaceTime-Label {
+	font-size: 15px;
+	margin-top: 5px;
+}
+
+.VideoPopup-Close-Button {
+	border: none;
+}
+
+.gwt-Button, .gwt-Button:visited, .test, .test:visited {
+	background-color: #fcbb22;
+	background-image: none !important;
+    -moz-box-shadow: none;
+	-webkit-box-shadow: none;
+	-o-box-shadow: none;
+	-ms-box-shadow: none;
+	box-shadow: none;
+	text-shadow: none;
+}
+
+.gwt-Button:hover {
+	background-color: #fcbb22 !important;
+}
+
+.test:hover {
+	
 }

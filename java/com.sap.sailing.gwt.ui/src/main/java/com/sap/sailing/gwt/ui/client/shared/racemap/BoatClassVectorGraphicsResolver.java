@@ -24,7 +24,7 @@ public class BoatClassVectorGraphicsResolver {
     	
     	BoatClassVectorGraphics laser = new LaserVectorGraphics("470", "470er");
     	BoatClassVectorGraphics _49er = new _49erVectorGraphics("49erFX", "49FX", "29er");
-    	BoatClassVectorGraphics extreme40 = new Extreme40VectorGraphics("Extreme");
+    	BoatClassVectorGraphics extreme40 = new Extreme40VectorGraphics("Extreme", "D35");
         BoatClassVectorGraphics smallMultihull = new SmallMultihullVectorGraphics("Nacra 17", "Formula 16", "Formula 18", 
                 "Hobie Wild Cat", "Hobie Tiger", "A-Catamaran", "Tornado");
     	

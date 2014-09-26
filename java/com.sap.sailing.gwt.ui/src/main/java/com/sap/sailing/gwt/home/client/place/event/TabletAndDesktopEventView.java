@@ -6,13 +6,19 @@ import java.util.List;
 import java.util.Map;
 
 import com.google.gwt.core.client.GWT;
+import com.google.gwt.place.shared.Place;
+import com.google.gwt.place.shared.PlaceTokenizer;
 import com.google.gwt.uibinder.client.UiBinder;
 import com.google.gwt.uibinder.client.UiField;
+import com.google.gwt.user.client.History;
 import com.google.gwt.user.client.Window;
 import com.google.gwt.user.client.ui.Composite;
 import com.google.gwt.user.client.ui.Widget;
+import com.sap.sailing.domain.common.LeaderboardNameConstants;
 import com.sap.sailing.domain.common.RegattaAndRaceIdentifier;
 import com.sap.sailing.domain.common.dto.RaceDTO;
+import com.sap.sailing.gwt.home.client.place.event.EventPlace.NavigationTabs;
+import com.sap.sailing.gwt.home.client.app.PlaceNavigator;
 import com.sap.sailing.gwt.home.client.place.event.header.EventHeader;
 import com.sap.sailing.gwt.home.client.place.event.media.EventMedia;
 import com.sap.sailing.gwt.home.client.place.event.overview.EventOverview;
@@ -28,7 +34,7 @@ import com.sap.sailing.gwt.ui.shared.LeaderboardGroupDTO;
 import com.sap.sailing.gwt.ui.shared.RaceGroupDTO;
 import com.sap.sailing.gwt.ui.shared.RegattaOverviewEntryDTO;
 import com.sap.sailing.gwt.ui.shared.StrippedLeaderboardDTO;
-import com.sap.sse.common.Util.Pair;
+import com.sap.sse.common.Util.Triple;
 import com.sap.sse.gwt.client.player.Timer;
 
 public class TabletAndDesktopEventView extends Composite implements EventView, EventPageNavigator {
@@ -47,62 +53,45 @@ public class TabletAndDesktopEventView extends Composite implements EventView, E
     @UiField EventSponsors eventSponsors;
 
     private final List<Widget> pageElements;
-    private final Map<String, Pair<StrippedLeaderboardDTO, LeaderboardGroupDTO>> leaderboardsWithLeaderboardGroup;
+    private final EventDTO event;
     
     public TabletAndDesktopEventView(SailingServiceAsync sailingService, EventDTO event, List<RaceGroupDTO> raceGroups, String leaderboardName,   
-            Timer timerForClientServerOffset) {
-        leaderboardsWithLeaderboardGroup = new HashMap<String, Pair<StrippedLeaderboardDTO, LeaderboardGroupDTO>>();
-        for(LeaderboardGroupDTO leaderboardGroup: event.getLeaderboardGroups()) {
-            for(StrippedLeaderboardDTO leaderboard: leaderboardGroup.getLeaderboards()) {
-                leaderboardsWithLeaderboardGroup.put(leaderboard.name, new Pair<StrippedLeaderboardDTO, LeaderboardGroupDTO>(leaderboard, leaderboardGroup));
-            }
-        }
-        
-        eventHeader = new EventHeader(event, this);
-        eventRegattaList = new EventRegattaList(event, raceGroups, leaderboardsWithLeaderboardGroup, timerForClientServerOffset, this);
-        eventRegattaRaces = new EventRegattaRaces(event, timerForClientServerOffset, this);
-        eventOverview = new EventOverview(event);
-        eventSchedule = new EventSchedule(event);
-        eventMedia = new EventMedia(event);
+            Timer timerForClientServerOffset, PlaceNavigator navigator) {
+        this.event = event;
+        Map<String, Triple<RaceGroupDTO, StrippedLeaderboardDTO, LeaderboardGroupDTO>> regattaStructure = getRegattaStructure(event, raceGroups);
+
+        eventHeader = new EventHeader(event, navigator, this);
+        eventRegattaList = new EventRegattaList(event, regattaStructure, timerForClientServerOffset, navigator, this);
+        eventRegattaRaces = new EventRegattaRaces(event, timerForClientServerOffset, navigator, this);
+        eventOverview = new EventOverview(event, this);
+        eventSchedule = new EventSchedule(event, this);
+        eventMedia = new EventMedia(event, this);
         
         initWidget(uiBinder.createAndBindUi(this));
         
         pageElements = Arrays.asList(new Widget[] { eventOverview, eventRegattaList, eventRegattaRaces, eventMedia, eventSchedule });
 
-        int leaderboardsCount = raceGroups.size();
-        if(leaderboardsCount == 0) {
-            Window.alert("There is no data available for this event.");
+        Triple<RaceGroupDTO, StrippedLeaderboardDTO, LeaderboardGroupDTO> selectedRegatta = null;
+        if(leaderboardName != null) {
+            selectedRegatta = regattaStructure.get(leaderboardName);
+        }
+        
+        // in case we only have one regatta/leaderboard we go directly to the 'races' page
+        if(selectedRegatta == null && regattaStructure.size() == 1) {
+            selectedRegatta = regattaStructure.get(0);
+        }
+
+        if(selectedRegatta != null && !event.isFakeSeries()) {
+            goToRegattaRaces(selectedRegatta.getC(), selectedRegatta.getB(), selectedRegatta.getA());
         } else {
-            RaceGroupDTO selectedRaceGroup = null;
-
-            // find the preselected leaderboard (if one exist)
-            if (leaderboardName != null) {
-                for (RaceGroupDTO raceGroup : raceGroups) {
-                    if(raceGroup.getName().equals(leaderboardName)) {
-                        selectedRaceGroup = raceGroup;
-                        break;
-                    }
-                }
-            }
-
-            // in case we only have one regatta/leaderboard we go directly to the 'races' page
-            if(selectedRaceGroup == null && leaderboardsCount == 1) {
-                selectedRaceGroup = raceGroups.get(0);
-            }
-
-            if(selectedRaceGroup != null) {
-                goToRegattaRaces(selectedRaceGroup, leaderboardsWithLeaderboardGroup.get(selectedRaceGroup.getName()).getA());
-            } else {
-                goToRegattas();
-            }
-            if(event.getSponsorImageURLs() != null && event.getSponsorImageURLs().size() > 0) {
-                eventSponsors.setVisible(false);
-                eventSponsors.setEventSponsors(event.getSponsorImageURLs());
-            } else {
-                eventSponsors.setVisible(false);
-                eventSponsors.setEventSponsors(null);
-            }
-            
+            goToRegattas();
+        }
+        if(event.getSponsorImageURLs() != null && event.getSponsorImageURLs().size() > 0) {
+            eventSponsors.setVisible(false);
+            eventSponsors.setEventSponsors(event.getSponsorImageURLs());
+        } else {
+            eventSponsors.setVisible(false);
+            eventSponsors.setEventSponsors(null);
         }
     }
 
@@ -115,31 +104,46 @@ public class TabletAndDesktopEventView extends Composite implements EventView, E
     public void goToOverview() {
         setVisibleEventElement(eventOverview);
         eventHeader.setDataNavigationType("normal");
+        
+        EventPlace place = new EventPlace(event.id.toString(), NavigationTabs.Overview, null);
+        pushPlaceToHistoryStack(place, new EventPlace.Tokenizer());
     }
 
     @Override
     public void goToRegattas() {
         setVisibleEventElement(eventRegattaList);
         eventHeader.setDataNavigationType("normal");
+        
+        EventPlace place = new EventPlace(event.id.toString(), NavigationTabs.Regattas, null);
+        pushPlaceToHistoryStack(place, new EventPlace.Tokenizer());
     }
 
     @Override
-    public void goToRegattaRaces(RaceGroupDTO raceGroup, StrippedLeaderboardDTO leaderboard) {
-        eventRegattaRaces.setRacesFromRaceGroup(raceGroup, leaderboard);
+    public void goToRegattaRaces(LeaderboardGroupDTO leaderboardGroup, StrippedLeaderboardDTO leaderboard, RaceGroupDTO raceGroup) {
+        eventRegattaRaces.setRaces(leaderboardGroup, false, leaderboard, raceGroup);
         eventHeader.setDataNavigationType("compact");
         setVisibleEventElement(eventRegattaRaces);
+        
+        EventPlace place = new EventPlace(event.id.toString(), NavigationTabs.Regatta, leaderboard.name);
+        pushPlaceToHistoryStack(place, new EventPlace.Tokenizer());
     }
 
     @Override
     public void goToSchedule() {
         setVisibleEventElement(eventSchedule);
         eventHeader.setDataNavigationType("normal");
+        
+        EventPlace place = new EventPlace(event.id.toString(), NavigationTabs.Schedule, null);
+        pushPlaceToHistoryStack(place, new EventPlace.Tokenizer());
     }
 
     @Override
     public void goToMedia() {
         setVisibleEventElement(eventMedia);
         eventHeader.setDataNavigationType("normal");
+        
+        EventPlace place = new EventPlace(event.id.toString(), NavigationTabs.Media, null);
+        pushPlaceToHistoryStack(place, new EventPlace.Tokenizer());
     }
 
     @Override
@@ -155,11 +159,31 @@ public class TabletAndDesktopEventView extends Composite implements EventView, E
         Window.open(link, "_blank", "");
     }
 
+    @Override
+    public void openOverallLeaderboardViewer(LeaderboardGroupDTO leaderboardGroup) {
+        String link = EntryPointLinkFactory.createLeaderboardLink(createOverallLeaderboardLinkParameters(leaderboardGroup));
+        Window.open(link, "_blank", "");
+    }
+
+    private Map<String, String> createOverallLeaderboardLinkParameters(LeaderboardGroupDTO leaderboardGroup) {
+        Map<String, String> linkParams = new HashMap<String, String>();
+        linkParams.put("eventId", event.id.toString());
+        linkParams.put("name", leaderboardGroup.getName() + " " + LeaderboardNameConstants.OVERALL);
+        linkParams.put("showRaceDetails", "true");
+        if(leaderboardGroup.getDisplayName() != null) {
+            linkParams.put("displayName", leaderboardGroup.getDisplayName());
+        }
+        linkParams.put("leaderboardGroupName", leaderboardGroup.getName());
+        return linkParams;
+    }
+
     private Map<String, String> createRaceBoardLinkParameters(String leaderboardName, RegattaAndRaceIdentifier raceIdentifier) {
         Map<String, String> linkParams = new HashMap<String, String>();
+        linkParams.put("eventId", event.id.toString());
         linkParams.put("leaderboardName", leaderboardName);
         linkParams.put("raceName", raceIdentifier.getRaceName());
-        linkParams.put(RaceBoardViewConfiguration.PARAM_CAN_REPLAY_DURING_LIVE_RACES, "true");
+        // TODO this must only be forwarded if there is a logged-on user
+//        linkParams.put(RaceBoardViewConfiguration.PARAM_CAN_REPLAY_DURING_LIVE_RACES, "true");
         linkParams.put(RaceBoardViewConfiguration.PARAM_VIEW_SHOW_MAPCONTROLS, "true");
         linkParams.put(RaceBoardViewConfiguration.PARAM_VIEW_SHOW_NAVIGATION_PANEL, "true");
         linkParams.put("regattaName", raceIdentifier.getRegattaName());
@@ -168,9 +192,9 @@ public class TabletAndDesktopEventView extends Composite implements EventView, E
 
     private Map<String, String> createLeaderboardLinkParameters(LeaderboardGroupDTO leaderboardGroup, StrippedLeaderboardDTO leaderboard) {
         Map<String, String> linkParams = new HashMap<String, String>();
+        linkParams.put("eventId", event.id.toString());
         linkParams.put("name", leaderboard.name);
         linkParams.put("showRaceDetails", "true");
-        linkParams.put("embedded", "true");                   
         if (leaderboard.displayName != null) {
             linkParams.put("displayName", leaderboard.displayName);
         }
@@ -184,6 +208,28 @@ public class TabletAndDesktopEventView extends Composite implements EventView, E
         for (Widget element : pageElements) {
             element.setVisible(element == visibleWidget);
         }
+    }
+
+    private Map<String, Triple<RaceGroupDTO, StrippedLeaderboardDTO, LeaderboardGroupDTO>> getRegattaStructure(EventDTO event, List<RaceGroupDTO> raceGroups) {
+        Map<String, Triple<RaceGroupDTO, StrippedLeaderboardDTO, LeaderboardGroupDTO>> result = new HashMap<>();
+        Map<String, RaceGroupDTO> raceGroupsMap = new HashMap<>();
+        for (RaceGroupDTO raceGroup: raceGroups) {
+            raceGroupsMap.put(raceGroup.getName(), raceGroup);
+        }            
+        
+        for (LeaderboardGroupDTO leaderboardGroup : event.getLeaderboardGroups()) {
+            for(StrippedLeaderboardDTO leaderboard: leaderboardGroup.getLeaderboards()) {
+                String leaderboardName = leaderboard.name;
+                result.put(leaderboardName, new Triple<RaceGroupDTO, StrippedLeaderboardDTO, LeaderboardGroupDTO>(raceGroupsMap.get(leaderboardName),
+                        leaderboard, leaderboardGroup));
+            }
+        }
+        return result;
+    }
+    
+    private  <T extends Place> void pushPlaceToHistoryStack(T destinationPlace, PlaceTokenizer<T> tokenizer) {
+        String placeHistoryToken = destinationPlace.getClass().getSimpleName() + ":" + tokenizer.getToken(destinationPlace);
+        History.newItem(placeHistoryToken, false);
     }
 
 }

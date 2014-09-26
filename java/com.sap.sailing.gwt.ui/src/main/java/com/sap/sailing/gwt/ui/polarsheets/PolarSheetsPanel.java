@@ -279,4 +279,9 @@ public class PolarSheetsPanel extends SplitLayoutPanel implements RaceSelectionC
     public Widget getEntryWidget() {
         return this;
     }
+
+    @Override
+    public String getDependentCssClassName() {
+        return "polarSheet";
+    }
 }

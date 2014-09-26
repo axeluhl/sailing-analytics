@@ -117,6 +117,10 @@ import com.sap.sailing.util.impl.NamedReentrantReadWriteLock;
 import com.sap.sse.common.Util;
 import com.sap.sse.common.Util.Pair;
 
+import difflib.DiffUtils;
+import difflib.Patch;
+import difflib.PatchFailedException;
+
 public abstract class TrackedRaceImpl extends TrackedRaceWithWindEssentials implements CourseListener {
     private static final long serialVersionUID = -4825546964220003507L;
 
@@ -220,7 +224,7 @@ public abstract class TrackedRaceImpl extends TrackedRaceWithWindEssentials impl
      * them.
      */
     private transient SmartFutureCache<Competitor, com.sap.sse.common.Util.Triple<TimePoint, TimePoint, List<Maneuver>>, EmptyUpdateInterval> maneuverCache;
-
+    
     private transient Map<TimePoint, Future<Wind>> directionFromStartToNextMarkCache;
 
     private final ConcurrentHashMap<Mark, GPSFixTrack<Mark, GPSFix>> markTracks;
@@ -234,7 +238,7 @@ public abstract class TrackedRaceImpl extends TrackedRaceWithWindEssentials impl
     private transient Timer cacheInvalidationTimer;
     private transient Object cacheInvalidationTimerLock;
 
-    protected transient HashMap<Serializable, RaceLog> attachedRaceLogs;
+    protected transient ConcurrentHashMap<Serializable, RaceLog> attachedRaceLogs;
 
     /**
      * The time delay to the current point in time in milliseconds.
@@ -289,7 +293,7 @@ public abstract class TrackedRaceImpl extends TrackedRaceWithWindEssentials impl
         super(race, trackedRegatta, windStore, millisecondsOverWhichToAverageWind);
         shortTimeWindCache = new ShortTimeWindCache(this, millisecondsOverWhichToAverageWind / 2);
         locksForMarkPassings = new IdentityHashMap<>();
-        attachedRaceLogs = new HashMap<>();
+        attachedRaceLogs = new ConcurrentHashMap<>();
         this.status = new TrackedRaceStatusImpl(TrackedRaceStatusEnum.PREPARED, 0.0);
         this.statusNotifier = new Object[0];
         this.loadingFromWindStoreLock = new NamedReentrantReadWriteLock("Loading from wind store lock for tracked race "
@@ -465,9 +469,9 @@ public abstract class TrackedRaceImpl extends TrackedRaceWithWindEssentials impl
      * When de-serializing, a possibly remote {@link #windStore} is ignored because it is transient. Instead, an
      * {@link EmptyWindStore} is used for the de-serialized instance.
      */
-    private void readObject(ObjectInputStream ois) throws ClassNotFoundException, IOException {
+    private void readObject(ObjectInputStream ois) throws ClassNotFoundException, IOException, PatchFailedException {
         ois.defaultReadObject();
-        attachedRaceLogs = new HashMap<>();
+        attachedRaceLogs = new ConcurrentHashMap<>();
         markPassingsTimes = new ArrayList<com.sap.sse.common.Util.Pair<Waypoint, com.sap.sse.common.Util.Pair<TimePoint, TimePoint>>>();
         cacheInvalidationTimerLock = new Object();
         windStore = EmptyWindStore.INSTANCE;
@@ -475,9 +479,30 @@ public abstract class TrackedRaceImpl extends TrackedRaceWithWindEssentials impl
         competitorRankingsLocks = createCompetitorRankingsLockMap();
         directionFromStartToNextMarkCache = new HashMap<TimePoint, Future<Wind>>();
         crossTrackErrorCache = new CrossTrackErrorCache(this);
+        crossTrackErrorCache.invalidate();
         maneuverCache = createManeuverCache();
+        triggerManeuverCacheRecalculationForAllCompetitors();
         logger.info("Deserialized race " + getRace().getName());
         shortTimeWindCache = new ShortTimeWindCache(this, millisecondsOverWhichToAverageWind / 2);
+        // considering the unlikely possibility that the course and this tracked race's internal structures
+        // may be inconsistent, e.g., due to non-atomic serialization of course and tracked race; see bug 2223
+        adjustStructureToCourse();
+    }
+
+    /**
+     * When the {@link TrackedRace} object and the {@link RaceDefinition} and in particular its {@link CourseImpl} objects are not
+     * atomically serialized, inconsistencies may occur during de-serialization. In particular, the tracked race's leg-oriented
+     * structures may not consistently reflect the course's leg sequence because a course update could have happened between
+     * course serialization and tracked race serialization.<p>
+     * 
+     * To fix this, the list of waypoints as found in this tracked race's leg-oriented structures, compared to the course's
+     * waypoint list, produces a patch that can be applied to this tracked race, resulting in the necessary
+     * {@link #waypointAdded(int, Waypoint)} and {@link #waypointRemoved(int, Waypoint)} calls.
+     */
+    private void adjustStructureToCourse() throws PatchFailedException {
+        final TrackedRaceAsWaypointList trackedRaceAsWaypointList = new TrackedRaceAsWaypointList(this);
+        Patch<Waypoint> diff = DiffUtils.diff(trackedRaceAsWaypointList, getRace().getCourse().getWaypoints());
+        diff.applyToInPlace(trackedRaceAsWaypointList);
     }
 
     @Override
@@ -489,7 +514,7 @@ public abstract class TrackedRaceImpl extends TrackedRaceWithWindEssentials impl
 
     @Override
     public synchronized void waitForLoadingFromGPSFixStoreToFinishRunning(RaceLog fromRaceLog) throws InterruptedException {
-        while (! attachedRaceLogs.containsKey(fromRaceLog.getId()) || loadingFromGPSFixStore) {
+        while (!attachedRaceLogs.containsKey(fromRaceLog.getId()) || loadingFromGPSFixStore) {
             wait();
         }
     }
@@ -504,7 +529,7 @@ public abstract class TrackedRaceImpl extends TrackedRaceWithWindEssentials impl
                     }
                 }, /* nameForLocks */"Maneuver cache for race " + getRace().getName());
     }
-
+    
     /**
      * Precondition: race has already been set, e.g., in constructor before this method is called
      */
@@ -1257,15 +1282,22 @@ public abstract class TrackedRaceImpl extends TrackedRaceWithWindEssentials impl
     public boolean hasWindData() {
         boolean result = false;
         Course course = getRace().getCourse();
-        Waypoint firstWaypoint = course.getFirstWaypoint();
-        TimePoint timepoint = startTime != null ? startTime : startOfTrackingReceived;
-        if (firstWaypoint != null && timepoint != null) {
-            Position position = getApproximatePosition(firstWaypoint, timepoint);
-            if (position != null) {
-                Wind wind = getWind(position, timepoint);
-                if (wind != null) {
-                    result = true;
+        TimePoint timepoint = getStartOfRace();
+        if (timepoint == null) {
+            timepoint = getStartOfTracking();
+        }
+        if (timepoint != null) {
+            Position position = null;
+            for (Waypoint waypoint : course.getWaypoints()) {
+                position = getApproximatePosition(waypoint, timepoint);
+                if (position != null) {
+                    break;
                 }
+            }
+            // position may be null if no waypoint's position is known; in that case, a "Global" wind value will be looked up
+            Wind wind = getWind(position, timepoint);
+            if (wind != null) {
+                result = true;
             }
         }
         return result;
@@ -1287,10 +1319,6 @@ public abstract class TrackedRaceImpl extends TrackedRaceWithWindEssentials impl
 
     @Override
     public Wind getWind(Position p, TimePoint at) {
-        return shortTimeWindCache.getWind(p, at);
-    }
-    
-    Wind getWindUncached(Position p, TimePoint at) {
         return getWind(p, at, getWindSourcesToExclude());
     }
 
@@ -1336,6 +1364,11 @@ public abstract class TrackedRaceImpl extends TrackedRaceWithWindEssentials impl
     @Override
     public WindWithConfidence<com.sap.sse.common.Util.Pair<Position, TimePoint>> getWindWithConfidence(Position p, TimePoint at,
             Iterable<WindSource> windSourcesToExclude) {
+        return shortTimeWindCache.getWindWithConfidence(p, at, windSourcesToExclude);
+    }
+    
+    public WindWithConfidence<com.sap.sse.common.Util.Pair<Position, TimePoint>> getWindWithConfidenceUncached(Position p, TimePoint at,
+            Iterable<WindSource> windSourcesToExclude) {
         boolean canUseSpeedOfAtLeastOneWindSource = false;
         Weigher<com.sap.sse.common.Util.Pair<Position, TimePoint>> weigher = new PositionAndTimePointWeigher(
         /* halfConfidenceAfterMilliseconds */WindTrack.WIND_HALF_CONFIDENCE_TIME_MILLIS, WindTrack.WIND_HALF_CONFIDENCE_DISTANCE);
@@ -1378,7 +1411,7 @@ public abstract class TrackedRaceImpl extends TrackedRaceWithWindEssentials impl
                             Position firstLegEnd = getApproximatePosition(firstLeg.getTo(), at);
                             Position firstLegStart = getApproximatePosition(firstLeg.getFrom(), at);
                             if (firstLegStart != null && firstLegEnd != null) {
-                                result = new WindImpl(firstLegStart, at, new KnotSpeedWithBearingImpl(1.0,
+                                result = new WindImpl(firstLegStart, at, new KnotSpeedWithBearingImpl(0.0,
                                         firstLegEnd.getBearingGreatCircle(firstLegStart)));
                             } else {
                                 result = null;
@@ -3085,4 +3118,40 @@ public abstract class TrackedRaceImpl extends TrackedRaceWithWindEssentials impl
     public GPSFixStore getGPSFixStore() {
     	return gpsFixStore;
     }
+
+    @Override
+    public Position getCenterOfCourse(TimePoint at) {
+        int count = 0;
+        ScalablePosition sum = null;
+        for (Waypoint waypoint : getRace().getCourse().getWaypoints()) {
+            final Position waypointPosition = getApproximatePosition(waypoint, at);
+            if (waypointPosition != null) {
+                ScalablePosition p = new ScalablePosition(waypointPosition);
+                if (sum == null) {
+                    sum = p;
+                } else {
+                    sum = sum.add(p);
+                }
+            }
+        }
+        final Position result;
+        if (sum == null) {
+            result = null;
+        } else {
+            result = sum.divide(count);
+        }
+        return result;
+    }
+
+    /**
+     * @return the waypoints known by this race, based on the key set of {@link #markPassingsForWaypoint}. This key set
+     *         is updated by {@link #waypointAdded(int, Waypoint)} and {@link #waypointRemoved(int, Waypoint)} and hence
+     *         is consistent with the {@link Course}'s waypoint list after the callback methods have returned. The
+     *         iteration order of the elements returned is undefined and in particular is <em>not</em> guaranteed to be
+     *         related to the {@link Course}'s waypoint order.
+     */
+    Iterable<Waypoint> getWaypoints() {
+        return markPassingsForWaypoint.keySet();
+    }
+    
 }

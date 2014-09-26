@@ -178,5 +178,10 @@ public class TrackedRacesListComposite extends AbstractTrackedRacesListComposite
         }
     }
 
+    @Override
+    public String getDependentCssClassName() {
+        return "trackedRacesListComposite";
+    }
+
     
 }

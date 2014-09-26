@@ -45,9 +45,10 @@ public class MetaLeaderboardViewer extends AbstractLeaderboardViewer {
             boolean showCharts, DetailType chartDetailType, boolean showSeriesLeaderboards) {
         super(competitorSelectionModel, asyncActionsExecutor,  timer, stringMessages, hideToolbar,
                 new LeaderboardPanel(sailingService, asyncActionsExecutor,
-                        leaderboardSettings, preselectedRace, competitorSelectionModel, timer,
+                        leaderboardSettings, preselectedRace != null, preselectedRace, competitorSelectionModel, timer,
                         leaderboardGroupName, metaLeaderboardName, errorReporter, stringMessages, userAgent,
-                        showRaceDetails, /* raceTimesInfoProvider */null, autoExpandLastRaceColumn,  /* adjustTimerDelay */ true));
+                        showRaceDetails, /* competitorSearchTextBox */ null, /* showSelectionCheckbox */ true,  /* raceTimesInfoProvider */null, 
+                        autoExpandLastRaceColumn, /* adjustTimerDelay */ true, /*autoApplyTopNFilter*/ false, false));
         FlowPanel mainPanel = createViewerPanel();
         setWidget(mainPanel);
         final Label overallStandingsLabel = new Label(stringMessages.overallStandings());
@@ -57,7 +58,7 @@ public class MetaLeaderboardViewer extends AbstractLeaderboardViewer {
         multiCompetitorChart.setVisible(showCharts); 
         multiCompetitorChart.getElement().getStyle().setMarginTop(10, Unit.PX);
         multiCompetitorChart.getElement().getStyle().setMarginBottom(10, Unit.PX);
-        multiLeaderboardPanel = new MultiLeaderboardPanel(sailingService, metaLeaderboardName, asyncActionsExecutor, timer,
+        multiLeaderboardPanel = new MultiLeaderboardPanel(sailingService, metaLeaderboardName, asyncActionsExecutor, timer, false /*isEmbedded*/,
                 preselectedLeaderboardName, preselectedRace, errorReporter, stringMessages,
                 userAgent, showRaceDetails, autoExpandLastRaceColumn);
         multiLeaderboardPanel.setVisible(showSeriesLeaderboards);

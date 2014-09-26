@@ -397,7 +397,7 @@ public interface TrackedRace extends Serializable {
 
     /**
      * Computes a default wind direction based on the direction of the first leg at time <code>at</code>, with a default
-     * speed of one knot. Note that this wind direction can only be used if {@link #raceIsKnownToStartUpwind()} returns
+     * speed of zero knots. Note that this wind direction can only be used if {@link #raceIsKnownToStartUpwind()} returns
      * <code>true</code>.
      * 
      * @param at
@@ -702,5 +702,10 @@ public interface TrackedRace extends Serializable {
     SpeedWithConfidence<TimePoint> getAverageWindSpeedWithConfidence(long resolutionInMillis);
     
     GPSFixStore getGPSFixStore();
+
+    /**
+     * Computes the center point of the course's marks at the given time point.
+     */
+    Position getCenterOfCourse(TimePoint at);
 
 }

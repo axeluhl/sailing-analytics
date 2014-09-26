@@ -36,6 +36,7 @@ import com.sap.sailing.domain.base.Fleet;
 import com.sap.sailing.domain.base.Leg;
 import com.sap.sailing.domain.base.Mark;
 import com.sap.sailing.domain.base.RaceColumn;
+import com.sap.sailing.domain.base.RaceColumnInSeries;
 import com.sap.sailing.domain.base.RaceColumnListener;
 import com.sap.sailing.domain.base.Waypoint;
 import com.sap.sailing.domain.common.Distance;
@@ -68,6 +69,7 @@ import com.sap.sailing.domain.leaderboard.ThresholdBasedResultDiscardingRule;
 import com.sap.sailing.domain.leaderboard.caching.LeaderboardDTOCache;
 import com.sap.sailing.domain.leaderboard.caching.LeaderboardDTOCalculationReuseCache;
 import com.sap.sailing.domain.leaderboard.caching.LiveLeaderboardUpdater;
+import com.sap.sailing.domain.racelog.InvalidatesLeaderboardCache;
 import com.sap.sailing.domain.racelog.RaceLogEvent;
 import com.sap.sailing.domain.racelog.RaceLogIdentifier;
 import com.sap.sailing.domain.tracking.GPSFix;
@@ -83,8 +85,8 @@ import com.sap.sailing.domain.tracking.TrackedRace;
 import com.sap.sailing.domain.tracking.TrackedRaceStatus;
 import com.sap.sailing.domain.tracking.TrackedRegattaRegistry;
 import com.sap.sailing.domain.tracking.Wind;
-import com.sap.sailing.domain.tracking.WindPositionMode;
 import com.sap.sailing.domain.tracking.WindLegTypeAndLegBearingCache;
+import com.sap.sailing.domain.tracking.WindPositionMode;
 import com.sap.sailing.util.impl.LockUtil;
 import com.sap.sailing.util.impl.NamedReentrantReadWriteLock;
 import com.sap.sailing.util.impl.RaceColumnListeners;
@@ -1215,6 +1217,13 @@ public abstract class AbstractSimpleLeaderboardImpl implements Leaderboard, Race
     @Override
     public void raceLogEventAdded(RaceColumn raceColumn, RaceLogIdentifier raceLogIdentifier, RaceLogEvent event) {
         getRaceColumnListeners().notifyListenersAboutRaceLogEventAdded(raceColumn, raceLogIdentifier, event);
+        if (event instanceof InvalidatesLeaderboardCache) {
+            // make sure to invalidate the cache as this event indicates that
+            // it changes values the cache could still hold
+            if (leaderboardDTOCache != null) {
+                leaderboardDTOCache.invalidate(this);
+            }
+        }
     }
 
     @Override
@@ -1226,8 +1235,9 @@ public abstract class AbstractSimpleLeaderboardImpl implements Leaderboard, Race
         long startOfRequestHandling = System.currentTimeMillis();
         final LeaderboardDTOCalculationReuseCache cache = new LeaderboardDTOCalculationReuseCache(timePoint);
         final LeaderboardDTO result = new LeaderboardDTO(this.getScoreCorrection().getTimePointOfLastCorrectionsValidity() == null ? null
-                : this.getScoreCorrection().getTimePointOfLastCorrectionsValidity().asDate(),
-                this.getScoreCorrection() == null ? null : this.getScoreCorrection().getComment(), this
+                : this.getScoreCorrection().getTimePointOfLastCorrectionsValidity().asDate(), 
+                this.getScoreCorrection() == null ? null : this.getScoreCorrection().getComment(),
+                this.getScoringScheme() == null ? null : this.getScoringScheme().getType(), this
                         .getScoringScheme().isHigherBetter(), new UUIDGenerator(), addOverallDetails);
         result.competitors = new ArrayList<CompetitorDTO>();
         result.name = this.getName();
@@ -1240,7 +1250,8 @@ public abstract class AbstractSimpleLeaderboardImpl implements Leaderboard, Race
         Map<RaceColumn, FutureTask<List<CompetitorDTO>>> competitorsFromBestToWorstTasks = new HashMap<>();
         for (final RaceColumn raceColumn : this.getRaceColumns()) {
             result.createEmptyRaceColumn(raceColumn.getName(), raceColumn.isMedalRace(),
-                    this.getScoringScheme().isValidInTotalScore(this, raceColumn, timePoint));
+                    raceColumn instanceof RaceColumnInSeries ? ((RaceColumnInSeries) raceColumn).getRegatta().getName() : null,
+                            raceColumn instanceof RaceColumnInSeries ? ((RaceColumnInSeries) raceColumn).getSeries().getName() : null);
             for (Fleet fleet : raceColumn.getFleets()) {
                 RegattaAndRaceIdentifier raceIdentifier = null;
                 RaceDTO race = null;
@@ -1253,8 +1264,10 @@ public abstract class AbstractSimpleLeaderboardImpl implements Leaderboard, Race
                 }
                 // Note: the RaceColumnDTO won't be created by the following addRace call because it has been created
                 // above by the result.createEmptyRaceColumn call
-                result.addRace(raceColumn.getName(), raceColumn.getExplicitFactor(), raceColumn.getFactor(), fleetDTO,
-                        raceColumn.isMedalRace(), raceIdentifier, race);
+                result.addRace(raceColumn.getName(), raceColumn.getExplicitFactor(), raceColumn.getFactor(),
+                        raceColumn instanceof RaceColumnInSeries ? ((RaceColumnInSeries) raceColumn).getRegatta().getName() : null,
+                        raceColumn instanceof RaceColumnInSeries ? ((RaceColumnInSeries) raceColumn).getSeries().getName() : null,
+                        fleetDTO, raceColumn.isMedalRace(), raceIdentifier, race);
             }
             FutureTask<List<CompetitorDTO>> task = new FutureTask<List<CompetitorDTO>>(new Callable<List<CompetitorDTO>>() {
                 @Override
@@ -1647,7 +1660,8 @@ public abstract class AbstractSimpleLeaderboardImpl implements Leaderboard, Race
             boolean waitForLatestAnalyses, Map<Leg, LinkedHashMap<Competitor, Integer>> legRanksCache,
             LeaderboardDTOCalculationReuseCache cache) throws NoWindException {
         LegEntryDTO result;
-        if (trackedLeg == null || trackedLeg.getTime(timePoint) == null) {
+        final Duration time = trackedLeg.getTime(timePoint);
+        if (trackedLeg == null || time == null) {
             result = null;
         } else {
             result = new LegEntryDTO();
@@ -1669,7 +1683,7 @@ public abstract class AbstractSimpleLeaderboardImpl implements Leaderboard, Race
             Distance distanceTraveled = trackedLeg.getDistanceTraveled(timePoint);
             result.distanceTraveledInMeters = distanceTraveled == null ? null : distanceTraveled.getMeters();
             result.estimatedTimeToNextWaypointInSeconds = trackedLeg.getEstimatedTimeToNextMarkInSeconds(timePoint, WindPositionMode.EXACT, cache);
-            result.timeInMilliseconds = trackedLeg.getTime(timePoint).asMillis();
+            result.timeInMilliseconds = time.asMillis();
             result.finished = trackedLeg.hasFinishedLeg(timePoint);
             result.gapToLeaderInSeconds = trackedLeg.getGapToLeaderInSeconds(timePoint,
                     legRanksCache.get(trackedLeg.getLeg()).entrySet().iterator().next().getKey(), WindPositionMode.LEG_MIDDLE);

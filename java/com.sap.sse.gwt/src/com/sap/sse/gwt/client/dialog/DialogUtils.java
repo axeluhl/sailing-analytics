@@ -32,6 +32,14 @@ public abstract class DialogUtils {
                     }
                 }
             });
+            widget.addKeyUpHandler(new KeyUpHandler() {
+                @Override
+                public void onKeyUp(KeyUpEvent event) {
+                    if (event.getNativeEvent().getKeyCode() == KeyCodes.KEY_ESCAPE) {
+                        button.click();
+                    }
+                }
+            });
         }
     }
 

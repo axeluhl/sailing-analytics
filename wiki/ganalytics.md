@@ -2,7 +2,7 @@
 
 GAnalytics Homepage: http://www.google.com/intl/en/analytics/ <br/>
 GAnalytics Account: gmsponsorship@gmail.com <br/> 
-GAnalytics PW: <br/>
+GAnalytics PW: sailing123<br/>
 <br/>
 GAnalytics Tracking ID: **UA-52789785-1** (to make tracking possible for the webpage the tracking code has to be embeedded in the html code)<br/> 
 <br/> 

@@ -4,24 +4,30 @@ import com.google.gwt.core.client.GWT;
 import com.google.gwt.dom.client.DivElement;
 import com.google.gwt.dom.client.ImageElement;
 import com.google.gwt.dom.client.SpanElement;
+import com.google.gwt.dom.client.Style.Display;
+import com.google.gwt.dom.client.StyleInjector;
 import com.google.gwt.event.dom.client.ClickEvent;
 import com.google.gwt.uibinder.client.UiBinder;
 import com.google.gwt.uibinder.client.UiField;
 import com.google.gwt.uibinder.client.UiHandler;
 import com.google.gwt.user.client.ui.Anchor;
-import com.google.gwt.user.client.ui.Composite;
 import com.google.gwt.user.client.ui.Widget;
+import com.sap.sailing.domain.common.LeaderboardNameConstants;
+import com.sap.sailing.gwt.home.client.app.PlaceNavigator;
+import com.sap.sailing.gwt.home.client.i18n.TextMessages;
+import com.sap.sailing.gwt.home.client.place.event.AbstractEventComposite;
 import com.sap.sailing.gwt.home.client.place.event.EventPageNavigator;
 import com.sap.sailing.gwt.home.client.shared.EventDatesFormatterUtil;
+import com.sap.sailing.gwt.ui.shared.CourseAreaDTO;
 import com.sap.sailing.gwt.ui.shared.EventDTO;
+import com.sap.sailing.gwt.ui.shared.LeaderboardGroupDTO;
+import com.sap.sailing.gwt.ui.shared.StrippedLeaderboardDTO;
 
-public class EventHeader extends Composite {
+public class EventHeader extends AbstractEventComposite {
     private static EventHeaderUiBinder uiBinder = GWT.create(EventHeaderUiBinder.class);
 
     interface EventHeaderUiBinder extends UiBinder<Widget, EventHeader> {
     }
-
-    private final EventDTO event;
 
 //    @UiField Anchor overviewLink;
       @UiField Anchor regattasLink;
@@ -37,34 +43,40 @@ public class EventHeader extends Composite {
 //    @UiField Anchor regattasLink3;
 //    @UiField Anchor scheduleLink3;
 //    @UiField Anchor mediaLink3;
-
+      @UiField Anchor officalWebsiteAnchor;
+      @UiField Anchor twitterAnchor;
+      @UiField Anchor facebookAnchor;
+      @UiField DivElement seriesLeaderboardDiv;
+      @UiField Anchor seriesLeaderboardAnchor;
+      
     @UiField DivElement eventHeaderWrapperDiv;
-    @UiField SpanElement eventName;
-    @UiField SpanElement eventName2;
+    @UiField DivElement regattaNameInSeriesDiv;
+    @UiField SpanElement eventNameSpan;
+    @UiField SpanElement eventName2Span;
 //    @UiField SpanElement eventName3;
-    @UiField SpanElement eventDate;
-    @UiField SpanElement eventDescription;
-    @UiField SpanElement venueName;
-    @UiField SpanElement eventWebsite;
+    @UiField DivElement eventDateDiv;
+    @UiField DivElement eventDescriptionDiv;
+    @UiField SpanElement venueNameSpan;
+    @UiField DivElement isLiveDiv;
+    @UiField DivElement isFinishedDiv;
     
     @UiField ImageElement eventLogo;
     @UiField ImageElement eventLogo2;
 //    @UiField ImageElement eventLogo3;
-    
-    private final String defaultLogoUrl = "http://static.sapsailing.com/newhome/default_event_logo.png";
 
-//    private final List<Anchor> links1;
-//    private final List<Anchor> links2;
-//    private final List<Anchor> links3;
+//  private final List<Anchor> links1;
+//  private final List<Anchor> links2;
+//  private final List<Anchor> links3;
     
-    private final EventPageNavigator pageNavigator;
-
-    public EventHeader(EventDTO event, EventPageNavigator pageNavigator) {
-        this.event = event;
-        this.pageNavigator = pageNavigator;
+    private final String defaultLogoUrl = "http://static.sapsailing.com/ubilabsimages/default/default_event_logo.jpg";
+    
+    private final PlaceNavigator placeNavigator;
+    
+    public EventHeader(EventDTO event, PlaceNavigator placeNavigator, EventPageNavigator pageNavigator) {
+        super(event, pageNavigator);
         
-        EventHeaderResources.INSTANCE.css().ensureInjected();
-        initWidget(uiBinder.createAndBindUi(this));
+        this.placeNavigator = placeNavigator;
+        initResources();
 
 //        links1 = Arrays.asList(new Anchor[] { overviewLink, regattasLink, scheduleLink, mediaLink });
 //        links2 = Arrays.asList(new Anchor[] { overviewLink2, regattasLink2, scheduleLink2, mediaLink2 });
@@ -73,26 +85,107 @@ public class EventHeader extends Composite {
 //        setActiveLink(links2, overviewLink2);
 //        setActiveLink(links3, overviewLink3);
 
+        if(event.isRunning()) {
+            isFinishedDiv.getStyle().setDisplay(Display.NONE);
+        } else if (event.isFinished()) {
+            isLiveDiv.getStyle().setDisplay(Display.NONE);
+        } else {
+            isFinishedDiv.getStyle().setDisplay(Display.NONE);
+            isLiveDiv.getStyle().setDisplay(Display.NONE);
+        }
+        
         setDataNavigationType("normal");
         updateUI();
+    }
+
+    public EventHeader(EventDTO event) {
+        super(event, null);
+
+        this.placeNavigator = null;
+        initResources();
+        
+        isFinishedDiv.getStyle().setDisplay(Display.NONE);
+        isLiveDiv.getStyle().setDisplay(Display.NONE);
+        
+        setDataNavigationType("normal");
+        updateUI();
+    }
+
+    private void initResources() {
+        EventHeaderResources.INSTANCE.css().ensureInjected();
+        StyleInjector.injectAtEnd("@media (min-width: 50em) { "+EventHeaderResources.INSTANCE.largeCss().getText()+"}");
+        
+        initWidget(uiBinder.createAndBindUi(this));
     }
     
     public void setDataNavigationType(String dataNavigationType) {
         eventHeaderWrapperDiv.setAttribute("data-navigationtype", dataNavigationType);
     }
+
+    private StrippedLeaderboardDTO findLeaderboardWithSameCourseArea(EventDTO event) {
+        for(LeaderboardGroupDTO leaderboardGroup: event.getLeaderboardGroups()) {
+            for(StrippedLeaderboardDTO leaderboard: leaderboardGroup.getLeaderboards()) {
+                for(CourseAreaDTO courseArea: event.venue.getCourseAreas()) {
+                    if(leaderboard.defaultCourseAreaId != null && leaderboard.defaultCourseAreaId.equals(courseArea.id)) {
+                        return leaderboard;
+                    }
+                }
+            }
+        }
+        return null;
+    }
     
     private void updateUI() {
-        eventName.setInnerHTML(event.getName());
-        eventName2.setInnerHTML(event.getName());
+        EventDTO event = getEvent();
+        boolean isSeries = event.isFakeSeries(); 
+
+        String eventName = event.getName();
+        if(isSeries) {
+            LeaderboardGroupDTO leaderboardGroupDTO = event.getLeaderboardGroups().get(0);
+            eventName = leaderboardGroupDTO.getDisplayName() != null ? leaderboardGroupDTO.getDisplayName() : leaderboardGroupDTO.getName();
+            
+            StrippedLeaderboardDTO leaderboardFittingToEvent = findLeaderboardWithSameCourseArea(event);
+            if(leaderboardFittingToEvent != null) {
+                regattaNameInSeriesDiv.setInnerText(leaderboardFittingToEvent.displayName);
+            } else {
+                regattaNameInSeriesDiv.getStyle().setDisplay(Display.NONE);
+            }
+        } else {
+            seriesLeaderboardDiv.getStyle().setDisplay(Display.NONE);
+            regattaNameInSeriesDiv.getStyle().setDisplay(Display.NONE);
+        }
+        
+        eventNameSpan.setInnerHTML(eventName);
+        eventName2Span.setInnerHTML(eventName);
 //        eventName3.setInnerHTML(event.getName());
-        venueName.setInnerHTML(event.venue.getName());
-        eventDate.setInnerHTML(EventDatesFormatterUtil.formatDateRangeWithYear(event.startDate, event.endDate));
+        venueNameSpan.setInnerHTML(event.venue.getName());
+        eventDateDiv.setInnerHTML(EventDatesFormatterUtil.formatDateRangeWithYear(event.startDate, event.endDate));
         
         if(event.getDescription() != null) {
-            eventDescription.setInnerHTML(event.getDescription());
+            eventDescriptionDiv.setInnerHTML(event.getDescription());
         }
         if(event.getOfficialWebsiteURL() != null) {
-            eventWebsite.setInnerHTML(event.getOfficialWebsiteURL());
+            String title = event.getOfficialWebsiteURL();
+            if(title.startsWith("http://")) {
+                title = title.substring("http://".length(), title.length());
+            }
+            if(title.length() > 35) {
+                title = TextMessages.INSTANCE.officalEventWebsite();
+            }
+            officalWebsiteAnchor.setText(title);
+            officalWebsiteAnchor.setHref(event.getOfficialWebsiteURL());
+        } else {
+            officalWebsiteAnchor.setVisible(false);
+        }
+        if(event.getTwitterURL() != null) {
+            twitterAnchor.setHref(event.getTwitterURL());
+        } else {
+            twitterAnchor.setVisible(false);
+        }
+        if(event.getFacebookURL() != null) {
+            facebookAnchor.setHref(event.getFacebookURL());
+        } else {
+            facebookAnchor.setVisible(false);
         }
         
         String logoUrl = event.getLogoImageURL() != null ? event.getLogoImageURL() : defaultLogoUrl;
@@ -133,13 +226,24 @@ public class EventHeader extends Composite {
         showRegattas();        
     }
 
+    @UiHandler("seriesLeaderboardAnchor")
+    void seriesLeaderboardClicked(ClickEvent clickevent) {
+        EventDTO event = getEvent();
+        if(event.isFakeSeries()) {
+            LeaderboardGroupDTO leaderboardGroupDTO = getEvent().getLeaderboardGroups().get(0);
+            String overallLeaderboardName = leaderboardGroupDTO.getName() + " " + LeaderboardNameConstants.OVERALL;
+            
+            placeNavigator.goToLeaderboard(event.id.toString(), overallLeaderboardName, event.getBaseURL(), event.isOnRemoteServer());
+        }
+    }
+    
 //    @UiHandler("regattasLink3")
 //    void regattas3Clicked(ClickEvent event) {
 //        showRegattas();        
 //    }
 //
     private void showRegattas() {
-        pageNavigator.goToRegattas();
+        getPageNavigator().goToRegattas();
 //        setActiveLink(links1, regattasLink);
 //        setActiveLink(links2, regattasLink2);
 //        setActiveLink(links3, regattasLink3);

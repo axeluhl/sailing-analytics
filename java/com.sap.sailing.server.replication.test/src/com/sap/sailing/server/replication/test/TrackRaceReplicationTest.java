@@ -83,7 +83,7 @@ public class TrackRaceReplicationTest extends AbstractServerReplicationTest {
         });
         trackingParams = com.sap.sailing.domain.tractracadapter.DomainFactory.INSTANCE.createTrackingConnectivityParameters(paramURL,
                 liveURI, storedURI, courseDesignUpdateURI, startOfTracking, endOfTracking, /* delayToLiveInMillis */
-                        0l, /* simulateWithStartTimeNow */false, EmptyRaceLogStore.INSTANCE, tracTracUsername, tracTracPassword, "");
+                        0l, /* simulateWithStartTimeNow */false, EmptyRaceLogStore.INSTANCE, tracTracUsername, tracTracPassword, "", "");
     }
 
     private void startTracking() throws Exception, InterruptedException {
@@ -159,7 +159,7 @@ public class TrackRaceReplicationTest extends AbstractServerReplicationTest {
             receivedStartAndEndOfTracking = master.getTrackedRace(raceIdentifier).getStartOfTracking() != null &&
                     master.getTrackedRace(raceIdentifier).getEndOfTracking() != null;
         }
-        Thread.sleep(2000); // kept failing several times for a 1000ms timeout
+        Thread.sleep(3000); // kept failing several times for a 1000ms timeout
         TrackedRace replicaTrackedRace = replica.getTrackedRace(raceIdentifier);
         assertEquals(masterTrackedRace.getStartOfTracking(), replicaTrackedRace.getStartOfTracking());
         assertEquals(masterTrackedRace.getEndOfTracking(), replicaTrackedRace.getEndOfTracking());

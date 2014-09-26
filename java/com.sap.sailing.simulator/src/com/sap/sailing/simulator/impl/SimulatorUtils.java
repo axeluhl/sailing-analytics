@@ -82,7 +82,8 @@ public class SimulatorUtils {
         String tractracPassword = "";
         RaceHandle raceHandle = tracTracAdapterFactory.getOrCreateTracTracAdapter(service.getBaseDomainFactory())
                 .addTracTracRace(service, paramURL, liveURI, storedURI, null, raceLogStore,
-                        timeoutInMilliseconds, tractracUsername, tractracPassword, TracTracConnectionConstants.ONLINE_STATUS);
+                        timeoutInMilliseconds, tractracUsername, tractracPassword, TracTracConnectionConstants.ONLINE_STATUS,
+                        TracTracConnectionConstants.ONLINE_VISIBILITY);
         return raceHandle;
     }
 
@@ -373,7 +374,7 @@ public class SimulatorUtils {
         Map<String, Path> paths = new HashMap<String, Path>();
 
         // get instance of heuristic searcher
-        PathGeneratorTreeGrowWind3 genTreeGrow = new PathGeneratorTreeGrowWind3(parameters);
+        PathGeneratorTreeGrowWind genTreeGrow = new PathGeneratorTreeGrowWind(parameters);
 
         // search best left-starting 1-turner
         genTreeGrow.setEvaluationParameters("L", 1, null);

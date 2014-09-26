@@ -12,25 +12,25 @@ import com.sap.sailing.gwt.home.client.DateUtil;
 import com.sap.sailing.gwt.ui.shared.EventBaseDTO;
 
 public abstract class AbstractEventsView extends Composite implements EventsView {
-    private final Map<Integer, List<EventBaseDTO>> recentEventsOrderedByYear;
+    private final Map<Integer, List<EventBaseDTO>> recentEventsByYearOrderedByEndDate;
     private final List<EventBaseDTO> upcomingEvents;
 
     public AbstractEventsView() {
-        recentEventsOrderedByYear = new HashMap<Integer, List<EventBaseDTO>>();
+        recentEventsByYearOrderedByEndDate = new HashMap<Integer, List<EventBaseDTO>>();
         upcomingEvents = new ArrayList<EventBaseDTO>();
     }
     
     @Override
     public void setEvents(List<EventBaseDTO> events) {
-        for(EventBaseDTO event: events) {
-            if(event.startDate != null) {
-                if(DateUtil.isDayInPast(event.startDate)) { 
-                    // recent event
+        for (EventBaseDTO event : events) {
+            if (event.startDate != null && event.endDate != null) {
+                if (DateUtil.isDayInPast(event.startDate) || event.isRunning()) {
+                    // recent event or live event
                     int year = DateUtil.getYear(event.startDate);
-                    List<EventBaseDTO> eventsOfYear = recentEventsOrderedByYear.get(year);
-                    if(eventsOfYear == null) {
+                    List<EventBaseDTO> eventsOfYear = recentEventsByYearOrderedByEndDate.get(year);
+                    if (eventsOfYear == null) {
                         eventsOfYear = new ArrayList<EventBaseDTO>();
-                        recentEventsOrderedByYear.put(year, eventsOfYear);
+                        recentEventsByYearOrderedByEndDate.put(year, eventsOfYear);
                     }
                     eventsOfYear.add(event);
                 } else {
@@ -39,8 +39,7 @@ public abstract class AbstractEventsView extends Composite implements EventsView
                 }
             }
         }
-     
-        for(List<EventBaseDTO> eventsPerYear: recentEventsOrderedByYear.values()) {
+        for (List<EventBaseDTO> eventsPerYear : recentEventsByYearOrderedByEndDate.values()) {
             Collections.sort(eventsPerYear, EVENTS_BY_DESCENDING_DATE_COMPARATOR);
         }
         Collections.sort(upcomingEvents, EVENTS_BY_ASCENDING_DATE_COMPARATOR);
@@ -49,8 +48,13 @@ public abstract class AbstractEventsView extends Composite implements EventsView
 
     protected abstract void updateEventsUI();
 
-    public Map<Integer, List<EventBaseDTO>> getRecentEventsOrderedByYear() {
-        return recentEventsOrderedByYear;
+    /**
+     * Returns a map whose keys denote years and whose values are event lists ordered by descending
+     * {@link EventBaseDTO#endDate end date}. Note that the iteration order for the map entries is undefined
+     * and in particular is not enumerating the years in any well-defined order.
+     */
+    public Map<Integer, List<EventBaseDTO>> getRecentEventsByYearOrderedByEndDate() {
+        return recentEventsByYearOrderedByEndDate;
     }
 
     public List<EventBaseDTO> getUpcomingEvents() {

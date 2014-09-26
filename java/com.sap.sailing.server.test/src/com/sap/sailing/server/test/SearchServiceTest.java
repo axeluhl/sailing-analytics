@@ -117,8 +117,10 @@ public class SearchServiceTest {
         final TimePoint pfingstbuschStartDate = new MillisecondsTimePoint(cal.getTime());
         cal.set(2014, 5, 8, 16, 00);
         final TimePoint pfingstbuschEndDate = new MillisecondsTimePoint(cal.getTime());
-        pfingstbusch = server.apply(new CreateEvent("Pfingsbusch", pfingstbuschStartDate, pfingstbuschEndDate, "Kiel", /* isPublic */
-                true, UUID.randomUUID(), Collections.<URL>emptySet(), Collections.<URL>emptySet()));
+        pfingstbusch = server.apply(new CreateEvent("Pfingsbusch", /* eventDescription */ null, pfingstbuschStartDate, pfingstbuschEndDate, /* isPublic */
+                "Kiel", true, UUID.randomUUID(), Collections.<URL>emptySet(),
+                Collections.<URL>emptySet(),
+                /* sponsorImageURLs */ Collections.<URL>emptySet(), /* logoImageURLAsString */ null, /* officialWebsiteURLAsString */ null));
         kiel = pfingstbusch.getVenue();
         final CourseAreaImpl kielAlpha = new CourseAreaImpl("Alpha", UUID.randomUUID());
         kiel.addCourseArea(kielAlpha);
@@ -148,8 +150,10 @@ public class SearchServiceTest {
         final TimePoint aalStartDate = new MillisecondsTimePoint(cal.getTime());
         cal.set(2014, 5, 8, 18, 00);
         final TimePoint aalEndDate = new MillisecondsTimePoint(cal.getTime());
-        aalEvent = server.apply(new CreateEvent("Aalregatta", aalStartDate, aalEndDate, "Flensburg", /* isPublic */
-                true, UUID.randomUUID(), Collections.<URL>emptySet(), Collections.<URL>emptySet()));
+        aalEvent = server.apply(new CreateEvent("Aalregatta", /* eventDescription */ null, aalStartDate, aalEndDate, /* isPublic */
+                "Flensburg", true, UUID.randomUUID(), Collections.<URL>emptySet(),
+                Collections.<URL>emptySet(), /* sponsorImageURLs */ Collections.<URL>emptySet(),
+                /* logoimageURL */ null, /* officialWebsiteURLAsString */ null));
         flensburg = aalEvent.getVenue();
         final CourseAreaImpl flensburgStandard = new CourseAreaImpl("Standard", UUID.randomUUID());
         flensburg.addCourseArea(flensburgStandard);

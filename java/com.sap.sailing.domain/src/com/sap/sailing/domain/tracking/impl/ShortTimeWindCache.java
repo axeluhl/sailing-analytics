@@ -9,8 +9,10 @@ import java.util.logging.Logger;
 
 import com.sap.sailing.domain.common.Position;
 import com.sap.sailing.domain.common.TimePoint;
-import com.sap.sailing.domain.tracking.Wind;
+import com.sap.sailing.domain.common.WindSource;
+import com.sap.sailing.domain.tracking.WindWithConfidence;
 import com.sap.sse.common.Util.Pair;
+import com.sap.sse.common.Util.Triple;
 
 /**
  * Caches wind information across a short duration of a few seconds, based on position and time point. A separate timer
@@ -22,12 +24,13 @@ import com.sap.sse.common.Util.Pair;
  */
 public class ShortTimeWindCache {
     private static final Logger logger = Logger.getLogger(ShortTimeWindCache.class.getName());
-    private final ConcurrentHashMap<Pair<Position, TimePoint>, Wind> cache;
-    
+    private final ConcurrentHashMap<Triple<Position, TimePoint, Iterable<WindSource>>,
+                                    WindWithConfidence<com.sap.sse.common.Util.Pair<Position, TimePoint>>> cache;
+
     /**
      * The keys of {@link #cache} in the order in which to invalidate them, keyed by the time they were entered into the cache.
      */
-    private final ConcurrentLinkedDeque<Pair<Long, Pair<Position, TimePoint>>> order;
+    private final ConcurrentLinkedDeque<Pair<Long, Triple<Position, TimePoint, Iterable<WindSource>>>> order;
     
     /**
      * Creation and removal / cancellation of the timer is synchronized using {@link #order}.
@@ -44,7 +47,7 @@ public class ShortTimeWindCache {
         @Override
         public void run() {
             long oldestToKeep = System.currentTimeMillis() - preserveHowManyMilliseconds;
-            Pair<Long, Pair<Position, TimePoint>> next;
+            Pair<Long, Triple<Position, TimePoint, Iterable<WindSource>>> next;
             while ((next = order.pollFirst()) != null && next.getA() < oldestToKeep) {
                 cache.remove(next.getB());
             }
@@ -65,37 +68,37 @@ public class ShortTimeWindCache {
         order = new ConcurrentLinkedDeque<>();
     }
     
-    public void add(Position position, TimePoint timePoint, Wind wind) {
-        final Pair<Position, TimePoint> key = new Pair<Position, TimePoint>(position, timePoint);
+    public void add(Triple<Position, TimePoint, Iterable<WindSource>> key, WindWithConfidence<com.sap.sse.common.Util.Pair<Position, TimePoint>> wind) {
         cache.put(key, wind);
         boolean orderEmpty = order.isEmpty();
         synchronized (order) {
-            order.add(new Pair<Long, Pair<Position, TimePoint>>(System.currentTimeMillis(), key));
+            order.add(new Pair<Long, Triple<Position, TimePoint, Iterable<WindSource>>>(System.currentTimeMillis(), key));
             if (orderEmpty) {
                 ensureTimerIsRunning();
             }
         }
     }
     
-    public Wind getWind(Position position, TimePoint timePoint) {
-        Wind wind;
-        final Pair<Position, TimePoint> key = new Pair<>(position, timePoint);
+    WindWithConfidence<com.sap.sse.common.Util.Pair<Position, TimePoint>> getWindWithConfidence(Position p,
+            TimePoint at, Iterable<WindSource> windSourcesToExclude) {
+        WindWithConfidence<com.sap.sse.common.Util.Pair<Position, TimePoint>> wind;
+        final Triple<Position, TimePoint, Iterable<WindSource>> key = new Triple<>(p, at, windSourcesToExclude);
         wind = cache.get(key);
         if (wind == null) {
             misses++;
             if (misses % 100000l == 0 && logger.isLoggable(Level.FINE)) {
                 logger.fine("hits: " + hits + ", misses: " + misses);
             }
-            wind = trackedRace.getWindUncached(position, timePoint);
+            wind = trackedRace.getWindWithConfidenceUncached(p, at, windSourcesToExclude);
             if (wind != null) {
-                add(position, timePoint, wind);
+                add(key, wind);
             }
         } else {
             hits++;
         }
         return wind;
     }
-
+    
     /**
      * Must be called under write lock
      */

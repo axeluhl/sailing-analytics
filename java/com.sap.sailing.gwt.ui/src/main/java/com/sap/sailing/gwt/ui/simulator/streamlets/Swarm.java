@@ -24,6 +24,9 @@ public class Swarm implements TimeListener {
     private Mercator projection;
     private final VectorField field;
     
+    private boolean zoomChanged = false;
+    private Vector diffPx;
+    
     /**
      * The number of particles to show. After {@link #updateBounds()} has been run, this also reflects the size of the
      * {@link #particles} array. Note that since elements in {@link #particles} can be <code>null</code>, this number
@@ -59,21 +62,21 @@ public class Swarm implements TimeListener {
         this.parameters = streamletPars;
         timePoint = timer.getTime();
         cosineOfAverageLatitude = 1.0; // default to equator
+        diffPx = new Vector(0, 0);
     }
 
     public void start(int animationIntervalMillis) {
+        fullcanvas.setCanvasSettings();
         projection = new Mercator(fullcanvas, map);
         projection.calibrate();
-        this.updateBounds();
-        Context2d ctxt = canvas.getContext2d();
-        ctxt.setFillStyle("red");
+        updateBounds();
         particles = this.createParticles();
-        this.swarmContinue = true;
+        swarmContinue = true;
         startLoop(animationIntervalMillis);
     }
 
     public void stop() {
-        this.swarmContinue = false;
+        swarmContinue = false;
     }
 
     private Particle createParticle() {
@@ -125,9 +128,12 @@ public class Swarm implements TimeListener {
         return newParticles;
     }
 
-    public void onBoundsChanged() {
-        projection.clearCanvas();
-        swarmPause = 5;
+    public void onBoundsChanged(boolean zoomChanged, int swarmPause) {
+        this.zoomChanged |= zoomChanged;
+        if (this.zoomChanged) {
+            projection.clearCanvas();
+        }
+        this.swarmPause = swarmPause;
     }
 
     private void updateBounds() {
@@ -141,11 +147,14 @@ public class Swarm implements TimeListener {
         Vector boundsNEpx = this.projection.latlng2pixel(visibleBoundsOfField.getNorthEast());
         double boundsWidthpx = Math.abs(boundsNEpx.x - boundsSWpx.x);
         double boundsHeightpx = Math.abs(boundsSWpx.y - boundsNEpx.y);
-        this.nParticles = (int) Math.round(Math.sqrt(boundsWidthpx * boundsHeightpx) * this.field.getParticleFactor()
-                * this.parameters.swarmScale);
+        this.nParticles = (int)Math.round(Math.sqrt(boundsWidthpx * boundsHeightpx) * this.field.getParticleFactor() * this.parameters.swarmScale);
         cosineOfAverageLatitude = Math.cos((visibleBoundsOfField.getSouthWest().getLatRad()+visibleBoundsOfField.getNorthEast().getLatRad())/2);
     };
 
+    //native void log(String message) /*-{
+    //    console.log( message );
+    //}-*/;
+    
     private void startLoop(final int animationIntervalMillis) {
         // Create animation-loop based on timer timeout
         loopTimer = new com.google.gwt.user.client.Timer() {
@@ -157,16 +166,25 @@ public class Swarm implements TimeListener {
                     fullcanvas.setCanvasSettings();
                     projection.calibrate();
                     updateBounds();
-                    particles = createParticles();
+                    if (zoomChanged) {
+                        diffPx = new Vector(0,0);
+                        particles = createParticles();
+                        zoomChanged = false;
+                    } else {
+                        diffPx = fullcanvas.getDiffPx();
+                    }
                     swarmPause = 0;
                 }
                 if ((!swarmOffScreen) && (swarmPause == 0)) {
-                    execute();
+                    execute(diffPx);
+                    diffPx = new Vector(0, 0);
                 }
                 Date time1 = new Date();
                 if (swarmContinue) {
                     // wait at least 10ms for the next iteration; try to get one iteration done every animationIntervalMillis if possible
-                    loopTimer.schedule((int) Math.max(10, animationIntervalMillis - (time1.getTime() - time0.getTime())));
+                    long timeDelta = time1.getTime() - time0.getTime();
+                    //log("fps: "+(1000.0/timeDelta));
+                    loopTimer.schedule((int) Math.max(10, animationIntervalMillis - timeDelta));
                 } else {
                     projection.clearCanvas();
                 }
@@ -203,8 +221,8 @@ public class Swarm implements TimeListener {
      * Moves each particle by its vector {@link Particle#v} multiplied by the speed which is 0.01 times the
      * {@link VectorField#getMotionScale(int)} at the map's current zoom level.
      */
-    private boolean execute() {
-        double speed = 0.01 * field.getMotionScale(map.getZoom());
+    private boolean execute(Vector diffPx) {
+        double speed = field.getMotionScale(map.getZoom());
         for (int idx = 0; idx < particles.length; idx++) {
             Particle particle = particles[idx];
             if (particle != null && particle.stepsToLive > 0 && particle.v != null) {
@@ -212,6 +230,12 @@ public class Swarm implements TimeListener {
                 // update its currentPosition, currentPixelCoordinate and previousPixelCoordinate fields;
                 // also, its particle.v field is updated based on its new position from the vector field
                 particle.previousPixelCoordinate = particle.currentPixelCoordinate;
+                if (diffPx.x != 0) {
+                    particle.previousPixelCoordinate.x += diffPx.x;
+                }
+                if (diffPx.y != 0) {
+                    particle.previousPixelCoordinate.y += diffPx.y;
+                }
                 double latDeg = particle.currentPosition.getLatDeg() + speed * particle.v.y;
                 double lngDeg = particle.currentPosition.getLngDeg() + speed * particle.v.x / cosineOfAverageLatitude;
                 particle.currentPosition = new DegreePosition(latDeg, lngDeg);

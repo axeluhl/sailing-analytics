@@ -104,8 +104,8 @@ public class RegattaListCompositePO extends PageArea {
         CellTablePO<DataEntryPO> table = getRegattasTable();
         
         for(DataEntryPO entry : table.getEntries()) {
-            String name = entry.getColumnContent(0);
-            String boatClass = entry.getColumnContent(1);
+            String name = entry.getColumnContent("Regatta name");
+            String boatClass = entry.getColumnContent("Boat Class");
             
             descriptors.add(new RegattaDescriptor(name, boatClass));
         }
@@ -150,7 +150,7 @@ public class RegattaListCompositePO extends PageArea {
         CellTablePO<DataEntryPO> table = getRegattasTable();
         
         for(DataEntryPO entry : table.getEntries()) {
-            String name = entry.getColumnContent(0);
+            String name = entry.getColumnContent("Regatta name");
 //            String boatClass = columns.getColumnContent(1);
 //            
 //            if(regatta.equals(new RegattaDescriptor(name, boatClass)))

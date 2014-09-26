@@ -24,7 +24,7 @@ public abstract class AbstractMediaPlayer implements MediaPlayer {
     }
 
     public void forceAlign() {
-        forceAlign(mediaTrack.startTime.getTime());
+        forceAlign(mediaTrack.startTime.asMillis());
     }
 
     public void raceTimeChanged(Date raceTime) {
@@ -39,15 +39,15 @@ public abstract class AbstractMediaPlayer implements MediaPlayer {
     
     @Override
 	public boolean isCoveringCurrentRaceTime() {
-        double mediaTime = (raceTimeInMillis - mediaTrack.startTime.getTime()) / 1000d;
+        double mediaTime = (raceTimeInMillis - mediaTrack.startTime.asMillis()) / 1000d;
         return (mediaTime >= 0) && (mediaTime <= getDuration());
 	}
 
     protected void alignTime() {
-        long mediaStartTimeInMillis = mediaTrack.startTime.getTime();
+        long mediaStartTimeInMillis = mediaTrack.startTime.asMillis();
         long mediaTimeInMillis = mediaStartTimeInMillis + getCurrentMediaTimeMillis();
-        long mediaLaggingBehindRaceInMillis = raceTimeInMillis - mediaTimeInMillis;
-        if (Math.abs(mediaLaggingBehindRaceInMillis) > TOLERATED_LAG_IN_MILLISECONDS) {
+        long mediaTimeOffFromRaceInMillis = raceTimeInMillis - mediaTimeInMillis;
+        if (Math.abs(mediaTimeOffFromRaceInMillis) > TOLERATED_LAG_IN_MILLISECONDS) {
             forceAlign(mediaStartTimeInMillis);
         }
     }

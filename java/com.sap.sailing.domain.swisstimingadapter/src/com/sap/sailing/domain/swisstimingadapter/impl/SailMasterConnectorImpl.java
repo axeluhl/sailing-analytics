@@ -27,6 +27,7 @@ import java.util.logging.Level;
 import java.util.logging.Logger;
 
 import com.sap.sailing.domain.base.BoatClass;
+import com.sap.sailing.domain.common.AbstractBearing;
 import com.sap.sailing.domain.common.Distance;
 import com.sap.sailing.domain.common.Position;
 import com.sap.sailing.domain.common.Speed;
@@ -388,7 +389,7 @@ public class SailMasterConnectorImpl extends SailMasterTransceiverImpl implement
                 final Speed velocityMadeGood = fixSections[vmgIndex].trim().length() == 0 ? null : new KnotSpeedImpl(
                         Double.valueOf(fixSections[vmgIndex]));
                 fixDetailIndex += 2;
-                final DegreeBearingImpl cog = new DegreeBearingImpl(
+                final AbstractBearing cog = new DegreeBearingImpl(
                         Double.valueOf(fixSections[fixDetailIndex++]));
                 final SpeedWithBearing speed = new KnotSpeedWithBearingImpl(speedOverGroundInKnots, cog);
                 final Integer nextMarkIndex = fixSections.length <= fixDetailIndex

@@ -3,13 +3,21 @@ package com.sap.sailing.gwt.home.client.place.event.regattaraces;
 import com.google.gwt.core.client.GWT;
 import com.google.gwt.resources.client.ClientBundle;
 import com.google.gwt.resources.client.CssResource;
+import com.google.gwt.resources.client.CssResource.Shared;
 
 public interface EventRegattaRacesResources extends ClientBundle {
     public static final EventRegattaRacesResources INSTANCE = GWT.create(EventRegattaRacesResources.class);
 
+    public interface MinWidth25emCss extends LocalCss {
+    }
+
+    @Source("com/sap/sailing/gwt/home/client/place/event/regattaraces/EventRegattaRacesMedium.css")
+    MinWidth25emCss mediumCss();
+
     @Source("com/sap/sailing/gwt/home/client/place/event/regattaraces/EventRegattaRaces.css")
     LocalCss css();
 
+    @Shared
     public interface LocalCss extends CssResource {
         String eventregattaraces();
         String eventregattaraces_phase();

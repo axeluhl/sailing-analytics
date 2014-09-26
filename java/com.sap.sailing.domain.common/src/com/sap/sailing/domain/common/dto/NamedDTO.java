@@ -4,6 +4,12 @@ import java.io.Serializable;
 
 import com.sap.sse.common.Named;
 
+/**
+ * Equality and hash code are based on the {@link #name} field's value.
+ * 
+ * @author Axel Uhl (D043530)
+ *
+ */
 public class NamedDTO implements Named, Serializable {
     private static final long serialVersionUID = -6620231501480297257L;
     private String name;

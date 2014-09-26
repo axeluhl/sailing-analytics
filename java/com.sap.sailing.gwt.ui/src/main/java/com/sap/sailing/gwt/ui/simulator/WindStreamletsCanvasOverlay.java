@@ -30,7 +30,7 @@ public class WindStreamletsCanvasOverlay extends FullCanvasOverlay implements Ti
     private final Timer timer;
     private Date endDate;
 
-    private int nParticles;
+    private boolean macroWeather;
     private Swarm swarm;
 
     public WindStreamletsCanvasOverlay(SimulatorMap simulatorMap, int zIndex, final Timer timer, final StreamletParameters streamletPars,
@@ -40,7 +40,7 @@ public class WindStreamletsCanvasOverlay extends FullCanvasOverlay implements Ti
         this.timer = timer;
         this.windParams = windParams;
         this.streamletPars = streamletPars;
-        this.nParticles = this.simulatorMap.getMainPanel().particles;
+        this.macroWeather = this.simulatorMap.getMainPanel().macroWeather;
         windFieldDTO = null;
         getCanvas().getElement().setId("swarm-display");
     }
@@ -122,7 +122,8 @@ public class WindStreamletsCanvasOverlay extends FullCanvasOverlay implements Ti
     protected void draw() {
         super.draw();
         if (mapProjection != null) {
-            if ((nParticles > 0) && (swarm == null)) {
+            if ((macroWeather) && (swarm == null)) {
+                macroWeather = false;
                 SimulatorJSBundle bundle = GWT.create(SimulatorJSBundle.class);
                 String jsonStr = bundle.windStreamletsDataJS().getText();
                 RectField f = RectField.read(jsonStr.substring(19, jsonStr.length() - 1), false, streamletPars);

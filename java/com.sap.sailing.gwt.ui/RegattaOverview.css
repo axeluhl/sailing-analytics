@@ -80,6 +80,8 @@ table {
   box-shadow: 0 0 20px #858585;
   -moz-box-shadow: 0 0 20px #858585;
   -webkit-box-shadow: 0 0 20px #858585;
+  -o-box-shadow: 0 0 20px #858585;
+  -ms-box-shadow: 0 0 20px #858585;
 }
 
 .LogoAndTitlePanel:after {
@@ -136,15 +138,23 @@ table {
   background: url(images/functionBar_bg.png) 0 0 repeat-x;
   -moz-border-radius-topleft: 5px;
   -webkit-border-top-left-radius: 5px;
+  -o-border-top-left-radius: 5px;
+  -ms-border-top-left-radius: 5px;
   border-top-left-radius: 5px;
   -moz-border-radius-topright: 5px;
   -webkit-border-top-right-radius: 5px;
+  -o-border-top-right-radius: 5px;
+  -ms-border-top-right-radius: 5px;
   border-top-right-radius: 5px;
   -moz-border-radius-bottomleft: 5px;
   -webkit-border-bottom-left-radius: 5px;
+  -o-border-bottom-left-radius: 5px;
+  -ms-border-bottom-left-radius: 5px;
   border-bottom-left-radius: 5px;
   -moz-border-radius-bottomright: 5px;
   -webkit-border-bottom-right-radius: 5px;
+  -o-border-bottom-right-radius: 5px;
+  -ms-border-bottom-right-radius: 5px;
   border-bottom-right-radius: 5px;
   margin: 0 0 15px 0;
 }
@@ -162,15 +172,23 @@ table {
   height: 10px;
   -moz-border-radius-topleft: 50%;
   -webkit-border-top-left-radius: 50%;
+  -o-border-top-left-radius: 50%;
+  -ms-border-top-left-radius: 50%;
   border-top-left-radius: 50%;
   -moz-border-radius-topright: 50%;
   -webkit-border-top-right-radius: 50%;
+  -o-border-top-right-radius: 50%;
+  -ms-border-top-right-radius: 50%;
   border-top-right-radius: 50%;
   -moz-border-radius-bottomleft: 50%;
   -webkit-border-bottom-left-radius: 50%;
+  -o-border-bottom-left-radius: 50%;
+  -ms-border-bottom-left-radius: 50%;
   border-bottom-left-radius: 50%;
   -moz-border-radius-bottomright: 50%;
   -webkit-border-bottom-right-radius: 50%;
+  -o-border-bottom-right-radius: 50%;
+  -ms-border-bottom-right-radius: 50%;
   border-bottom-right-radius: 50%;
   float: left;
   margin: 2px 6px 0 0;
@@ -226,9 +244,13 @@ table {
     text-decoration: none;
     -moz-border-radius: 5px 0 0 5px;
     -webkit-border-radius: 5px 0 0 5px;
+    -o-border-radius: 5px 0 0 5px;
+    -ms-border-radius: 5px 0 0 5px;
     border-radius: 5px 0 0 5px;
     -moz-box-shadow: 0 1px 3px rgba(0, 0, 0, 0.3);
     -webkit-box-shadow: 0 1px 3px rgba(0, 0, 0, 0.3);
+    -o-box-shadow: 0 1px 3px rgba(0, 0, 0, 0.3);
+    -ms-box-shadow: 0 1px 3px rgba(0, 0, 0, 0.3);
     box-shadow: 0 1px 3px rgba(0, 0, 0, 0.3);
     text-shadow: 0 -1px 1px rgba(0, 0, 0, 0.25);
     border-bottom: 1px solid rgba(0, 0, 0, 0.25);
