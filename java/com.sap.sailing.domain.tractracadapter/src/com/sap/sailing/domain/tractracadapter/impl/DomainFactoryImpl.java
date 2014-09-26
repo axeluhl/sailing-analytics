@@ -666,7 +666,6 @@ public class DomainFactoryImpl implements DomainFactory {
     public RaceTrackingConnectivityParameters createTrackingConnectivityParameters(URL paramURL, URI liveURI,
             URI storedURI, URI courseDesignUpdateURI, TimePoint startOfTracking, TimePoint endOfTracking, long delayToLiveInMillis,
             boolean simulateWithStartTimeNow, boolean ignoreTracTracMarkPassings, RaceLogStore raceLogStore, String tracTracUsername, String tracTracPassword, String raceStatus, String raceVisibility) {
-            String tracTracPassword, String raceStatus, String raceVisibility) {
         return new RaceTrackingConnectivityParametersImpl(paramURL, liveURI, storedURI, courseDesignUpdateURI, startOfTracking, endOfTracking,
                 delayToLiveInMillis, simulateWithStartTimeNow, ignoreTracTracMarkPassings, raceLogStore, this, tracTracUsername, tracTracPassword, raceStatus, raceVisibility);
     }

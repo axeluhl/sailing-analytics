@@ -18,6 +18,7 @@ import com.google.gwt.user.client.ui.Widget;
 import com.sap.sailing.domain.common.DetailType;
 import com.sap.sailing.domain.common.LeaderboardNameConstants;
 import com.sap.sailing.domain.common.RaceIdentifier;
+import com.sap.sailing.domain.common.RegattaAndRaceIdentifier;
 import com.sap.sailing.domain.common.dto.FleetDTO;
 import com.sap.sailing.domain.common.dto.LeaderboardDTO;
 import com.sap.sailing.domain.common.dto.RaceColumnDTO;
@@ -93,7 +94,7 @@ public class EventSeriesAnalytics extends Composite implements LeaderboardUpdate
     }
     
     public void createSeriesAnalyticsViewer(SailingServiceAsync sailingService, AsyncActionsExecutor asyncActionsExecutor, 
-            Timer timer, LeaderboardSettings leaderboardSettings, String preselectedLeaderboardName, RaceIdentifier preselectedRace,
+            Timer timer, LeaderboardSettings leaderboardSettings, String preselectedLeaderboardName, RegattaAndRaceIdentifier preselectedRace,
             String leaderboardGroupName, String metaLeaderboardName, ErrorReporter errorReporter,
             UserAgentDetails userAgent, boolean showRaceDetails,  
             boolean autoExpandLastRaceColumn, boolean showSeriesLeaderboards) {

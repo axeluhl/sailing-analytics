@@ -68,7 +68,7 @@ public interface TracTracAdapter {
     RaceHandle addTracTracRace(TrackerManager trackerManager, RegattaIdentifier regattaToAddTo, URL paramURL, URI liveURI,
             URI storedURI, URI courseDesignUpdateURI, TimePoint trackingStartTime,
             TimePoint trackingEndTime, RaceLogStore raceLogStore,
-            long timeoutForReceivingRaceDefinitionInMilliseconds, boolean simulateWithStartTimeNow, boolean ignoreTracTracMarkPassings, String tracTracUsername, String tracTracPassword, String raceStatus, String raceVisibility)
+            long timeoutForReceivingRaceDefinitionInMilliseconds, boolean simulateWithStartTimeNow, boolean ignoreTracTracMarkPassings,
             String tracTracUsername, String tracTracPassword, 
             String raceStatus, String raceVisibility)
             throws MalformedURLException, FileNotFoundException, URISyntaxException, Exception;

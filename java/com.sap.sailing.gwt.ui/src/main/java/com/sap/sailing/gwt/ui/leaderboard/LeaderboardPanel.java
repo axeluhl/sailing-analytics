@@ -1813,8 +1813,6 @@ public class LeaderboardPanel extends SimplePanel implements TimeListener, PlayS
         refreshAndSettingsPanel.add(refreshPanel);
         toolbarPanel.add(refreshAndSettingsPanel, DockPanel.EAST);
         return toolbarPanel;
-        contentPanel.add(markPassingsPanel);
-        contentPanel.add(editMarkPassingsButton);
     }
 
     private Widget createFilterDeselectionControl() {

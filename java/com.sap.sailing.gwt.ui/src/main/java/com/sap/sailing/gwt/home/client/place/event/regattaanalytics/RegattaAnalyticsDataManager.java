@@ -1,7 +1,7 @@
 package com.sap.sailing.gwt.home.client.place.event.regattaanalytics;
 
 import com.sap.sailing.domain.common.DetailType;
-import com.sap.sailing.domain.common.RaceIdentifier;
+import com.sap.sailing.domain.common.RegattaAndRaceIdentifier;
 import com.sap.sailing.gwt.ui.client.CompetitorSelectionModel;
 import com.sap.sailing.gwt.ui.client.DebugIdHelper;
 import com.sap.sailing.gwt.ui.client.ErrorReporter;
@@ -44,7 +44,7 @@ public class RegattaAnalyticsDataManager {
         this.multiCompetitorChart = null;
     }
 
-    public LeaderboardPanel createLeaderboardPanel(final LeaderboardSettings leaderboardSettings, final RaceIdentifier preselectedRace,
+    public LeaderboardPanel createLeaderboardPanel(final LeaderboardSettings leaderboardSettings, final RegattaAndRaceIdentifier preselectedRace,
             final String leaderboardGroupName, String leaderboardName, boolean showRaceDetails, 
             boolean autoExpandLastRaceColumn) {
         if(leaderboardPanel == null) {

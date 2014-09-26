@@ -17,8 +17,6 @@ import java.util.logging.Logger;
 
 import org.junit.After;
 import org.junit.Before;
-import org.junit.Rule;
-import org.junit.rules.Timeout;
 
 import com.sap.sailing.domain.common.PassingInstruction;
 import com.sap.sailing.domain.tractracadapter.Receiver;
