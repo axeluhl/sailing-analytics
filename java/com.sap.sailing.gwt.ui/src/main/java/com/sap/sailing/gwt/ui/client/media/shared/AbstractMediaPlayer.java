@@ -46,8 +46,8 @@ public abstract class AbstractMediaPlayer implements MediaPlayer {
     protected void alignTime() {
         long mediaStartTimeInMillis = mediaTrack.startTime.asMillis();
         long mediaTimeInMillis = mediaStartTimeInMillis + getCurrentMediaTimeMillis();
-        long mediaLaggingBehindRaceInMillis = raceTimeInMillis - mediaTimeInMillis;
-        if (Math.abs(mediaLaggingBehindRaceInMillis) > TOLERATED_LAG_IN_MILLISECONDS) {
+        long mediaTimeOffFromRaceInMillis = raceTimeInMillis - mediaTimeInMillis;
+        if (Math.abs(mediaTimeOffFromRaceInMillis) > TOLERATED_LAG_IN_MILLISECONDS) {
             forceAlign(mediaStartTimeInMillis);
         }
     }

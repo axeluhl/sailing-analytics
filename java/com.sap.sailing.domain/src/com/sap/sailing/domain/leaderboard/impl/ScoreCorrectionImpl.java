@@ -8,6 +8,8 @@ import java.util.Map;
 import java.util.NavigableSet;
 import java.util.Set;
 import java.util.concurrent.Callable;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 
 import com.sap.sailing.domain.base.Competitor;
 import com.sap.sailing.domain.base.RaceColumn;
@@ -33,6 +35,7 @@ import com.sap.sse.common.Util;
  */
 public class ScoreCorrectionImpl implements SettableScoreCorrection {
     private static final long serialVersionUID = -7088305215528928135L;
+    private static final Logger logger = Logger.getLogger(ScoreCorrectionImpl.class.getName());
 
     /**
      * If no max point reason is provided for a competitor/race, {@link MaxPointsReason#NONE} should be the default.
@@ -439,6 +442,7 @@ public class ScoreCorrectionImpl implements SettableScoreCorrection {
                             }
                         }, numberOfCompetitorsInLeaderboardFetcher);
             } catch (Exception e) {
+                logger.log(Level.SEVERE, "Exception while computing corrected non maxed score", e);
                 throw new RuntimeException(e);
             }
         } else {

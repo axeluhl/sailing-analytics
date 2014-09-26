@@ -12,6 +12,11 @@ public class DateAndTimeFormatterUtil {
     public static DateTimeFormatRenderer defaultTimeFormatter = new DateTimeFormatRenderer(
             DateTimeFormat.getFormat(PredefinedFormat.TIME_LONG));
 
+    public static DateTimeFormatRenderer longDateFormatter = new DateTimeFormatRenderer(
+            DateTimeFormat.getFormat(DateTimeFormat.PredefinedFormat.DATE_LONG));
+    public static DateTimeFormatRenderer longTimeFormatter = new DateTimeFormatRenderer(
+            DateTimeFormat.getFormat("HH:mm:ss zzz"));
+
     private static DateTimeFormatRenderer secondsTimeFormatter = new DateTimeFormatRenderer(
             DateTimeFormat.getFormat("m:ss"));
     private static DateTimeFormatRenderer minutesAndSecondsTimeFormatter = new DateTimeFormatRenderer(

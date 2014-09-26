@@ -71,6 +71,7 @@ import com.sap.sse.common.Util;
 import com.sap.sse.common.Util.Triple;
 import com.sap.sse.common.search.KeywordQuery;
 import com.sap.sse.common.search.Result;
+import com.sap.sse.common.search.Searchable;
 
 /**
  * An OSGi service that can be used to track boat races using a TracTrac connector that pushes
@@ -91,7 +92,7 @@ import com.sap.sse.common.search.Result;
  *
  */
 public interface RacingEventService extends TrackedRegattaRegistry, RegattaFetcher, RegattaRegistry, RaceFetcher,
-        LeaderboardRegistry, EventResolver, LeaderboardGroupResolver, TrackerManager {
+        LeaderboardRegistry, EventResolver, LeaderboardGroupResolver, TrackerManager, Searchable<LeaderboardSearchResult, KeywordQuery> {
     @Override
     Regatta getRegatta(RegattaName regattaName);
 
@@ -426,6 +427,8 @@ public interface RacingEventService extends TrackedRegattaRegistry, RegattaFetch
 
     void mediaTrackDurationChanged(MediaTrack mediaTrack);
 
+    void mediaTrackAssignedRacesChanged(MediaTrack mediaTrack);
+    
     void mediaTrackDeleted(MediaTrack mediaTrack);
 
     /**
@@ -439,6 +442,8 @@ public interface RacingEventService extends TrackedRegattaRegistry, RegattaFetch
     void mediaTracksImported(Collection<MediaTrack> mediaTracksToImport, boolean override);
     
     Collection<MediaTrack> getMediaTracksForRace(RegattaAndRaceIdentifier regattaAndRaceIdentifier);
+    
+    Collection<MediaTrack> getMediaTracksInTimeRange(RegattaAndRaceIdentifier regattaAndRaceIdentifier);
 
     Collection<MediaTrack> getAllMediaTracks();
 
@@ -562,6 +567,7 @@ public interface RacingEventService extends TrackedRegattaRegistry, RegattaFetch
     /**
      * Searches the content of this server, not that of any remote servers referenced by any {@link RemoteSailingServerReference}s.
      */
+    @Override
     Result<LeaderboardSearchResult> search(KeywordQuery query);
 
     /**
@@ -591,4 +597,5 @@ public interface RacingEventService extends TrackedRegattaRegistry, RegattaFetch
      * objects by the same name of that type will be replaced.
      */
     void addLeaderboardGroupWithoutReplication(LeaderboardGroup leaderboardGroup);
+
 }

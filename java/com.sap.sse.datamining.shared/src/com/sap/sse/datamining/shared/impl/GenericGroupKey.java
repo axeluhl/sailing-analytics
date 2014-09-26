@@ -17,6 +17,10 @@ public class GenericGroupKey<T> extends AbstractGroupKey {
     public GenericGroupKey(T value) {
         this.value = value;
     }
+    
+    public T getValue() {
+        return value;
+    }
 
     @Override
     public boolean hasSubKey() {

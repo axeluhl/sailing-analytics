@@ -1,9 +1,5 @@
 package com.sap.sse.datamining.impl.components.aggregators;
 
-import static org.hamcrest.Matchers.is;
-import static org.hamcrest.Matchers.notNullValue;
-import static org.junit.Assert.assertThat;
-
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Collections;
@@ -31,11 +27,11 @@ public class TestParallelDoubleAggregationProcessors {
     public void testSumAggregationProcessor() throws InterruptedException {
         Processor<GroupedDataEntry<Double>> sumAggregationProcessor = new ParallelGroupedDoubleDataSumAggregationProcessor(ConcurrencyTestsUtil.getExecutor(), receivers);
         Collection<GroupedDataEntry<Double>> elements = createElements();
-        processElements(sumAggregationProcessor, elements);
+        ConcurrencyTestsUtil.processElements(sumAggregationProcessor, elements);
         
         sumAggregationProcessor.finish();
         Map<GroupKey, Double> expectedReceivedAggregations = computeExpectedSumAggregations(elements);
-        verifyReceivedAggregations(expectedReceivedAggregations);
+        ConcurrencyTestsUtil.verifyResultData(receivedAggregations, expectedReceivedAggregations);
     }
 
     private Map<GroupKey, Double> computeExpectedSumAggregations(Collection<GroupedDataEntry<Double>> elements) {
@@ -55,11 +51,11 @@ public class TestParallelDoubleAggregationProcessors {
     public void testAverageAggregationProcessor() throws InterruptedException {
         Processor<GroupedDataEntry<Double>> averageAggregationProcessor = new ParallelGroupedDoubleDataAverageAggregationProcessor(ConcurrencyTestsUtil.getExecutor(), receivers);
         Collection<GroupedDataEntry<Double>> elements = createElements();
-        processElements(averageAggregationProcessor, elements);
+        ConcurrencyTestsUtil.processElements(averageAggregationProcessor, elements);
         
         averageAggregationProcessor.finish();
         Map<GroupKey, Double> expectedReceivedAggregations = computeExpectedAverageAggregations(elements);
-        verifyReceivedAggregations(expectedReceivedAggregations);
+        ConcurrencyTestsUtil.verifyResultData(receivedAggregations, expectedReceivedAggregations);
     }
 
     private Map<GroupKey, Double> computeExpectedAverageAggregations(Collection<GroupedDataEntry<Double>> elements) {
@@ -91,11 +87,11 @@ public class TestParallelDoubleAggregationProcessors {
     public void testMedianAggregationProcessor() throws InterruptedException {
         Processor<GroupedDataEntry<Double>> medianAggregationProcessor = new ParallelGroupedDoubleDataMedianAggregationProcessor(ConcurrencyTestsUtil.getExecutor(), receivers);
         Collection<GroupedDataEntry<Double>> elements = createElements();
-        processElements(medianAggregationProcessor, elements);
+        ConcurrencyTestsUtil.processElements(medianAggregationProcessor, elements);
         
         medianAggregationProcessor.finish();
         Map<GroupKey, Double> expectedReceivedAggregations = computeExpectedMedianAggregations(elements);
-        verifyReceivedAggregations(expectedReceivedAggregations);
+        ConcurrencyTestsUtil.verifyResultData(receivedAggregations, expectedReceivedAggregations);
     }
 
     private Map<GroupKey, Double> computeExpectedMedianAggregations(Collection<GroupedDataEntry<Double>> elements) {
@@ -158,30 +154,16 @@ public class TestParallelDoubleAggregationProcessors {
         
         return elements;
     }
-
-    private void processElements(Processor<GroupedDataEntry<Double>> processor, Collection<GroupedDataEntry<Double>> elements) {
-        for (GroupedDataEntry<Double> element : elements) {
-            processor.onElement(element);
-        }
-    }
-
-    private void verifyReceivedAggregations(Map<GroupKey, Double> expectedReceivedAggregations) {
-        assertThat("No aggregation has been received.", receivedAggregations, notNullValue());
-        
-        for (Entry<GroupKey, Double> expectedReceivedAggregationEntry : expectedReceivedAggregations.entrySet()) {
-            assertThat("The expected aggregation entry '" + expectedReceivedAggregationEntry + "' wasn't received.",
-                       receivedAggregations.containsKey(expectedReceivedAggregationEntry.getKey()), is(true));
-            assertThat("The result for group '" + expectedReceivedAggregationEntry.getKey() + "' isn't correct.",
-                       receivedAggregations.get(expectedReceivedAggregationEntry.getKey()), is(expectedReceivedAggregationEntry.getValue()));
-        }
-    }
     
     @Before
     public void initializeResultReceivers() {
         Processor<Map<GroupKey, Double>> receiver = new Processor<Map<GroupKey,Double>>() {
             @Override
-            public void onElement(Map<GroupKey, Double> element) {
+            public void processElement(Map<GroupKey, Double> element) {
                 receivedAggregations = element;
+            }
+            @Override
+            public void onFailure(Throwable failure) {
             }
             @Override
             public void finish() throws InterruptedException {

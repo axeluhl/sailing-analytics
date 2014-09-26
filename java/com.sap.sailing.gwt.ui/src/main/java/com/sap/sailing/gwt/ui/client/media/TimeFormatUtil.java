@@ -1,7 +1,6 @@
 package com.sap.sailing.gwt.ui.client.media;
 
 import com.google.gwt.i18n.client.DateTimeFormat;
-import com.google.gwt.i18n.client.DateTimeFormat.PredefinedFormat;
 import com.google.gwt.i18n.client.NumberFormat;
 import com.sap.sailing.domain.common.Duration;
 import com.sap.sailing.domain.common.impl.MillisecondsDurationImpl;
@@ -13,7 +12,7 @@ public class TimeFormatUtil {
 
     static final int MILLISECONDS_PER_HOUR = 60 * MILLISECONDS_PER_MINUTE;
 
-    public static final DateTimeFormat DATETIME_FORMAT = DateTimeFormat.getFormat(PredefinedFormat.DATE_TIME_MEDIUM);
+    public static final DateTimeFormat DATETIME_FORMAT = DateTimeFormat.getFormat("yyyy MMM dd HH:mm:ss.SSS");
     
     private static NumberFormat zeroPaddingNumberFormat_Min = NumberFormatterFactory.getDecimalFormat(2, 0);
     private static NumberFormat zeroPaddingNumberFormat_Sec = NumberFormatterFactory.getDecimalFormat(2, 3);

@@ -21,7 +21,10 @@ public class TestAbstractProcessor {
     public void initializeReceivers() {
         Processor<Integer> receiver = new Processor<Integer>() {
             @Override
-            public void onElement(Integer element) {
+            public void processElement(Integer element) {
+            }
+            @Override
+            public void onFailure(Throwable failure) {
             }
             @Override
             public void finish() throws InterruptedException {
@@ -44,7 +47,7 @@ public class TestAbstractProcessor {
     public void testFinishing() throws InterruptedException {
         Processor<Integer> processor = new AbstractProcessor<Integer, Integer>(receivers) {
             @Override
-            protected Integer processElement(Integer element) {
+            protected Integer handleElement(Integer element) {
                 return null;
             }
             @Override

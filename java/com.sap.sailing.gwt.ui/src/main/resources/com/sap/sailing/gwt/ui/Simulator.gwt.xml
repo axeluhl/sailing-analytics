@@ -45,6 +45,7 @@
 	<source path='client'/>
 	<source path='actions'/>
 	<source path='simulator'/>
+	<source path='leaderboard'/>
 	
 	<inherits name='com.google.gwt.logging.Logging'/>
   	<set-property name="gwt.logging.enabled" value="FALSE"/>

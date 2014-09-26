@@ -33,9 +33,11 @@ public class TestParallelMultiDimensionalGroupingProcessor {
     public void intializeProcessor() throws IllegalArgumentException, NoSuchMethodException, SecurityException {
         Processor<GroupedDataEntry<Number>> receiver = new Processor<GroupedDataEntry<Number>>() {
             @Override
-            public void onElement(GroupedDataEntry<Number> element) {
+            public void processElement(GroupedDataEntry<Number> element) {
                 groupedElement = element;
             }
+            @Override
+            public void onFailure(Throwable failure) { }
             @Override
             public void finish() throws InterruptedException { }
             @Override
@@ -53,18 +55,18 @@ public class TestParallelMultiDimensionalGroupingProcessor {
         dimensions.add(new MethodWrappingFunction<>(Number.class.getMethod("getLength", new Class<?>[0]), int.class));
         dimensions.add(new MethodWrappingFunction<>(Number.class.getMethod("getCrossSum", new Class<?>[0]), int.class));
         
-        processor = new ParallelMultiDimensionalGroupingProcessor<Number>(ConcurrencyTestsUtil.getExecutor(), receivers, dimensions);
+        processor = new ParallelMultiDimensionsValueNestingGroupingProcessor<Number>(ConcurrencyTestsUtil.getExecutor(), receivers, dimensions);
     }
     
     @Test(expected=IllegalArgumentException.class)
     public void testConstructionWithNullDimensions() {
-        new ParallelMultiDimensionalGroupingProcessor<>(ConcurrencyTestsUtil.getExecutor(), receivers, null);
+        new ParallelMultiDimensionsValueNestingGroupingProcessor<>(ConcurrencyTestsUtil.getExecutor(), receivers, null);
     }
     
     @Test(expected=IllegalArgumentException.class)
     public void testConstructionWithEmptyDimensions() {
         Iterable<Function<?>> dimensions = new ArrayList<>();
-        new ParallelMultiDimensionalGroupingProcessor<>(ConcurrencyTestsUtil.getExecutor(), receivers, dimensions);
+        new ParallelMultiDimensionsValueNestingGroupingProcessor<>(ConcurrencyTestsUtil.getExecutor(), receivers, dimensions);
     }
     
     @Test(expected=IllegalArgumentException.class)
@@ -72,13 +74,13 @@ public class TestParallelMultiDimensionalGroupingProcessor {
         Collection<Function<?>> functions = new ArrayList<>();
         Method method = FunctionTestsUtil.getMethodFromSimpleClassWithMarkedMethod("sideEffectFreeValue");
         functions.add(FunctionFactory.createMethodWrappingFunction(method));
-        new ParallelMultiDimensionalGroupingProcessor<>(ConcurrencyTestsUtil.getExecutor(), receivers, functions);
+        new ParallelMultiDimensionsValueNestingGroupingProcessor<>(ConcurrencyTestsUtil.getExecutor(), receivers, functions);
     }
 
     @Test
     public void testGroupKeyGeneration() {
         Number number = new Number(1111);
-        processor.onElement(number);
+        processor.processElement(number);
         ConcurrencyTestsUtil.sleepFor(200); //Giving the processor time to finish the instruction
         verifyGroupedElement(number);
     }

@@ -998,6 +998,11 @@ public class MockedTrackedRace implements DynamicTrackedRace {
     @Override
     public void setMarkPassingRaceLogListener(MarkPassingUpdateListener listener) {
         // TODO Auto-generated method stub
-        
+   }
+    @Override
+    public Position getCenterOfCourse(TimePoint at) {
+        // TODO Auto-generated method stub
+        return null;
     }
+
 }

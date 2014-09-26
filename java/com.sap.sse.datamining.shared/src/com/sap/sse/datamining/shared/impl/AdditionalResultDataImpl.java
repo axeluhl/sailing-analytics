@@ -7,7 +7,6 @@ public class AdditionalResultDataImpl implements AdditionalResultData {
     private static final long serialVersionUID = -9054872418326676943L;
     
     private int retrievedDataAmount;
-    private int filteredDataAmount;
     private String resultSignifier;
     private Unit unit;
     private int valueDecimals;
@@ -19,10 +18,9 @@ public class AdditionalResultDataImpl implements AdditionalResultData {
     @Deprecated
     AdditionalResultDataImpl() { }
 
-    public AdditionalResultDataImpl(int retrievedDataAmount, int filteredDataAmount, String resultSignifier, Unit unit, int valueDecimals,
+    public AdditionalResultDataImpl(int retrievedDataAmount, String resultSignifier, Unit unit, int valueDecimals,
             long calculationTimeInNanos) {
                 this.retrievedDataAmount = retrievedDataAmount;
-                this.filteredDataAmount = filteredDataAmount;
                 this.resultSignifier = resultSignifier;
                 this.unit = unit;
                 this.valueDecimals = valueDecimals;
@@ -35,13 +33,8 @@ public class AdditionalResultDataImpl implements AdditionalResultData {
     }
 
     @Override
-    public int getFilteredDataAmount() {
-        return filteredDataAmount;
-    }
-
-    @Override
     public double getCalculationTimeInSeconds() {
-        return calculationTimeInNanos;
+        return calculationTimeInNanos / 1000000000.0;
     }
 
     @Override

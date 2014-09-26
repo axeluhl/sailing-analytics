@@ -34,7 +34,6 @@ public class SystemInformationPanel extends FlowPanel {
 
     private void addFloatingWidget(Widget w) { 
         w.getElement().getStyle().setFloat(Style.Float.LEFT);
-        w.getElement().getStyle().setPadding(3, Style.Unit.PX);
         add(w);
     }
     
