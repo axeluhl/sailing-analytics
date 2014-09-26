@@ -2,13 +2,16 @@ package com.sap.sailing.gwt.ui.adminconsole;
 
 import java.util.ArrayList;
 import java.util.Collection;
+import java.util.Collections;
 import java.util.List;
 
+import com.google.gwt.core.client.GWT;
 import com.google.gwt.event.dom.client.ClickEvent;
 import com.google.gwt.event.dom.client.ClickHandler;
 import com.google.gwt.user.client.rpc.AsyncCallback;
 import com.google.gwt.user.client.ui.Button;
 import com.google.gwt.user.client.ui.Grid;
+import com.google.gwt.user.client.ui.TabPanel;
 import com.google.gwt.user.client.ui.VerticalPanel;
 import com.sap.sailing.gwt.ui.client.ErrorReporter;
 import com.sap.sailing.gwt.ui.client.SailingServiceAsync;
@@ -17,9 +20,12 @@ import com.sap.sailing.gwt.ui.shared.CourseAreaDTO;
 import com.sap.sailing.gwt.ui.shared.EventAndRegattaDTO;
 import com.sap.sailing.gwt.ui.shared.EventDTO;
 import com.sap.sailing.gwt.ui.shared.RegattaDTO;
+import com.sap.sailing.gwt.ui.shared.SeriesDTO;
 
 public class DefaultRegattaCreateDialog extends
 		AbstractRegattaWithSeriesAndFleetsDialog<EventAndRegattaDTO> {
+	
+	 private static AdminConsoleResources resources = GWT.create(AdminConsoleResources.class);
 
 	private SailingServiceAsync sailingService;
 	private ErrorReporter errorReporter;
@@ -31,21 +37,21 @@ public class DefaultRegattaCreateDialog extends
 			ErrorReporter errorReporter,
 			StringMessages stringConstants,
 			com.sap.sse.gwt.client.dialog.DataEntryDialog.DialogCallback<EventAndRegattaDTO> callback) {
-		super(new RegattaDTO(), existingEvents, stringConstants.addRegatta(),
-				stringConstants.ok(), stringConstants,
+		super(new RegattaDTO(), existingEvents,
+				"Create default settings for all regattas...", stringConstants
+						.ok(), stringConstants,
 				null /* RegattaParameterValidator */, callback);
 		this.sailingService = sailingService;
 		this.errorReporter = errorReporter;
 		setCourseAreaSelection();
-
+		setSeriesEditor();
 	}
 
-	// protected void setSeriesEditor() {
-	// this.seriesEditor = new
-	// SeriesWithFleetsDefaultListEditor(Collections.<SeriesDTO> emptyList(),
-	// stringMessages,
-	// resources.removeIcon(), /* enableFleetRemoval */true);
-	// }
+	protected void setSeriesEditor() {
+		seriesEditor = new SeriesWithFleetsDefaultListEditor(
+				Collections.<SeriesDTO> emptyList(), stringMessages,
+				resources.removeIcon(), /* enableFleetRemoval */true);
+	}
 
 	protected void setupAdditionalWidgetsOnPanel(final VerticalPanel panel) {
 		Button newEventBtn = new Button("Create New Event");
@@ -68,6 +74,12 @@ public class DefaultRegattaCreateDialog extends
 		newGrid.setWidget(3, 2, newEventBtn);
 		panel.remove(0);
 		panel.add(newGrid);
+		
+		TabPanel tabPanel = new TabPanel();
+        tabPanel.setWidth("100%");
+        tabPanel.add(seriesEditor, stringMessages.series());
+        tabPanel.selectTab(0);
+        panel.add(tabPanel);
 	}
 
 	private void openEventCreateDialog() {

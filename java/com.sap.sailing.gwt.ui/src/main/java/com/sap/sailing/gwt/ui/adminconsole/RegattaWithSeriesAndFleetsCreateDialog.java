@@ -10,7 +10,6 @@ import com.google.gwt.core.shared.GWT;
 import com.google.gwt.user.client.ui.TabPanel;
 import com.google.gwt.user.client.ui.VerticalPanel;
 import com.sap.sailing.gwt.ui.client.StringMessages;
-import com.sap.sailing.gwt.ui.client.shared.controls.listedit.ListEditorComposite;
 import com.sap.sailing.gwt.ui.shared.EventDTO;
 import com.sap.sailing.gwt.ui.shared.RegattaDTO;
 import com.sap.sailing.gwt.ui.shared.SeriesDTO;
@@ -18,8 +17,6 @@ import com.sap.sailing.gwt.ui.shared.SeriesDTO;
 public class RegattaWithSeriesAndFleetsCreateDialog extends RegattaWithSeriesAndFleetsDialog {
 
     protected static AdminConsoleResources resources = GWT.create(AdminConsoleResources.class);
-
-    protected ListEditorComposite<SeriesDTO> seriesEditor;
 
     protected static class RegattaParameterValidator implements Validator<RegattaDTO> {
 
@@ -101,6 +98,7 @@ public class RegattaWithSeriesAndFleetsCreateDialog extends RegattaWithSeriesAnd
         setSeriesEditor();
     }
 
+    @Override
     protected void setSeriesEditor() {
         this.seriesEditor = new SeriesWithFleetsListEditor(Collections.<SeriesDTO> emptyList(), stringMessages,
                 resources.removeIcon(), /* enableFleetRemoval */true);

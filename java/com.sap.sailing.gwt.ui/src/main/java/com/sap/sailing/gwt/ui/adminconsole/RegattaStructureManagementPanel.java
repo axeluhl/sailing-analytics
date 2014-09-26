@@ -111,29 +111,6 @@ public class RegattaStructureManagementPanel extends SimplePanel implements Rega
         regattaDetailsComposite.setVisible(false);
         grid.setWidget(0, 1, regattaDetailsComposite);
     }
-    
-//    private void showRegattaStructure(RegattaStructure regattaStructure){
-//        Grid grid = new Grid();
-//        
-//        Button editBtn = new Button("Edit Series");
-//        editBtn.addClickHandler(new ClickHandler() {
-//            
-//            @Override
-//            public void onClick(ClickEvent event) {
-//                //TODO: open Dialog to edit default series
-//            }
-//        });
-//            
-//        Iterable<String> structure = regattaStructure.getStructure();
-//        int i = 0;
-//        for (String string : structure) {
-//            grid.setWidget(i, 0, new Label(string));
-//            grid.setWidget(i, 0, editBtn);
-//            i++;
-//        }
-//        
-//        
-//    }
 
     protected void removeRegattas(Collection<RegattaIdentifier> regattas) {
         if (!regattas.isEmpty()) {

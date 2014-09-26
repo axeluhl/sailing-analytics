@@ -1,5 +1,7 @@
 package com.sap.sailing.gwt.ui.shared;
 
+import com.sap.sailing.xrr.structureimport.SeriesParameters;
+
 
 public class RegattaStructureDTO {
 //    private final RegattaStructureKey regattaStructure;
@@ -20,10 +22,10 @@ public class RegattaStructureDTO {
 //        }
 //        return regattaStructureString.substring(1);
 //    }
-
+//
 //    public void setDefaultSeries(RegattaDTO defaultRegatta) {
 //        SeriesParameters defaultSeries = new SeriesParameters(false, false, false, null);
-//        if (defaultRegatta.series.size() > 0) { // null abfangen
+//        if (!defaultRegatta.series.isEmpty()) {
 //            SeriesDTO series = defaultRegatta.series.get(0);
 //            defaultSeries
 //                    .setFirstColumnIsNonDiscardableCarryForward(series.isFirstColumnIsNonDiscardableCarryForward());

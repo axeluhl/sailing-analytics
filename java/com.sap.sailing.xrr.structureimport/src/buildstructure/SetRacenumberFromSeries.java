@@ -9,7 +9,11 @@ public class SetRacenumberFromSeries implements SetRacenumberStrategy {
 
     @Override
     public void setRacenumber(Race race, Series series, int i) {
-    	List<String> raceNames = new ArrayList<String>();
+    	List<String> raceNames = series.getRaceNames();
+    	if(raceNames == null){
+    		raceNames = new ArrayList<String>();
+    		series.setRaceNames(raceNames);
+    	}
         if (race != null) {
             char beginOfSeries = series.getFirstChar();
             if (beginOfSeries == 'D' && race.getFirstChar() != 'R') {
@@ -19,6 +23,5 @@ public class SetRacenumberFromSeries implements SetRacenumberStrategy {
                 raceNames.add(race.getRaceName());
             }
         }
-        series.setRaceNames(raceNames);
     }
 }

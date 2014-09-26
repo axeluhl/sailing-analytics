@@ -31,7 +31,7 @@ public class SeriesWithFleetsCreateDialog extends DataEntryDialog<SeriesDTO> {
     private SeriesDTO series;
 
     protected TextBox nameEntryField;
-    private CheckBox isMedalSeriesCheckbox;
+    protected CheckBox isMedalSeriesCheckbox;
     private CheckBox startsWithZeroScoreCheckbox;
     private CheckBox hasSplitFleetContiguousScoringCheckbox;
     private CheckBox firstColumnIsNonDiscardableCarryForwardCheckbox;

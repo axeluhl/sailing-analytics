@@ -5,10 +5,10 @@
 // Generated on: 2013.03.15 at 04:56:46 PM CET 
 //
 
-
 package com.sap.sailing.xrr.schema;
 
 import java.math.BigInteger;
+
 import javax.xml.bind.annotation.XmlAccessType;
 import javax.xml.bind.annotation.XmlAccessorType;
 import javax.xml.bind.annotation.XmlAttribute;
@@ -16,15 +16,17 @@ import javax.xml.bind.annotation.XmlSchemaType;
 import javax.xml.bind.annotation.XmlType;
 import javax.xml.datatype.XMLGregorianCalendar;
 
-
 /**
  * 
- * 				very preliminary, info about a single race within a regatta
- * 			
+ * very preliminary, info about a single race within a regatta
  * 
- * <p>Java class for Race complex type.
  * 
- * <p>The following schema fragment specifies the expected content contained within this class.
+ * <p>
+ * Java class for Race complex type.
+ * 
+ * <p>
+ * The following schema fragment specifies the expected content contained within
+ * this class.
  * 
  * <pre>
  * &lt;complexType name="Race">
@@ -48,247 +50,234 @@ import javax.xml.datatype.XMLGregorianCalendar;
  */
 @XmlAccessorType(XmlAccessType.FIELD)
 @XmlType(name = "Race")
-public class Race {
+public class Race implements Comparable<Race> {
 
-    @XmlAttribute(name = "RaceID", required = true)
-    protected String raceID;
-    @XmlAttribute(name = "RaceNumber", required = true)
-    protected BigInteger raceNumber;
-    @XmlAttribute(name = "RaceName")
-    protected String raceName;
-    @XmlAttribute(name = "RaceStartDate")
-    @XmlSchemaType(name = "date")
-    protected XMLGregorianCalendar raceStartDate;
-    @XmlAttribute(name = "RaceStartTime")
-    @XmlSchemaType(name = "time")
-    protected XMLGregorianCalendar raceStartTime;
-    @XmlAttribute(name = "RaceStatus")
-    protected IFRaceStatus raceStatus;
-    @XmlAttribute(name = "Stage")
-    protected String stage;
-    @XmlAttribute(name = "Flight")
-    protected String flight;
-    @XmlAttribute(name = "Match")
-    protected String match;
+	@XmlAttribute(name = "RaceID", required = true)
+	protected String raceID;
+	@XmlAttribute(name = "RaceNumber", required = true)
+	protected BigInteger raceNumber;
+	@XmlAttribute(name = "RaceName")
+	protected String raceName;
+	@XmlAttribute(name = "RaceStartDate")
+	@XmlSchemaType(name = "date")
+	protected XMLGregorianCalendar raceStartDate;
+	@XmlAttribute(name = "RaceStartTime")
+	@XmlSchemaType(name = "time")
+	protected XMLGregorianCalendar raceStartTime;
+	@XmlAttribute(name = "RaceStatus")
+	protected IFRaceStatus raceStatus;
+	@XmlAttribute(name = "Stage")
+	protected String stage;
+	@XmlAttribute(name = "Flight")
+	protected String flight;
+	@XmlAttribute(name = "Match")
+	protected String match;
 
-    /**
-     * Gets the value of the raceID property.
-     * 
-     * @return
-     *     possible object is
-     *     {@link String }
-     *     
-     */
-    public String getRaceID() {
-        return raceID;
-    }
+	/**
+	 * Gets the value of the raceID property.
+	 * 
+	 * @return possible object is {@link String }
+	 * 
+	 */
+	public String getRaceID() {
+		return raceID;
+	}
 
-    /**
-     * Sets the value of the raceID property.
-     * 
-     * @param value
-     *     allowed object is
-     *     {@link String }
-     *     
-     */
-    public void setRaceID(String value) {
-        this.raceID = value;
-    }
+	/**
+	 * Sets the value of the raceID property.
+	 * 
+	 * @param value
+	 *            allowed object is {@link String }
+	 * 
+	 */
+	public void setRaceID(String value) {
+		this.raceID = value;
+	}
 
-    /**
-     * Gets the value of the raceNumber property.
-     * 
-     * @return
-     *     possible object is
-     *     {@link BigInteger }
-     *     
-     */
-    public BigInteger getRaceNumber() {
-        return raceNumber;
-    }
+	/**
+	 * Gets the value of the raceNumber property.
+	 * 
+	 * @return possible object is {@link BigInteger }
+	 * 
+	 */
+	public BigInteger getRaceNumber() {
+		return raceNumber;
+	}
 
-    /**
-     * Sets the value of the raceNumber property.
-     * 
-     * @param value
-     *     allowed object is
-     *     {@link BigInteger }
-     *     
-     */
-    public void setRaceNumber(BigInteger value) {
-        this.raceNumber = value;
-    }
+	/**
+	 * Sets the value of the raceNumber property.
+	 * 
+	 * @param value
+	 *            allowed object is {@link BigInteger }
+	 * 
+	 */
+	public void setRaceNumber(BigInteger value) {
+		this.raceNumber = value;
+	}
 
-    /**
-     * Gets the value of the raceName property.
-     * 
-     * @return
-     *     possible object is
-     *     {@link String }
-     *     
-     */
-    public String getRaceName() {
-        return raceName;
-    }
+	/**
+	 * Gets the value of the raceName property.
+	 * 
+	 * @return possible object is {@link String }
+	 * 
+	 */
+	public String getRaceName() {
+		return raceName;
+	}
 
-    /**
-     * Sets the value of the raceName property.
-     * 
-     * @param value
-     *     allowed object is
-     *     {@link String }
-     *     
-     */
-    public void setRaceName(String value) {
-        this.raceName = value;
-    }
+	/**
+	 * Sets the value of the raceName property.
+	 * 
+	 * @param value
+	 *            allowed object is {@link String }
+	 * 
+	 */
+	public void setRaceName(String value) {
+		this.raceName = value;
+	}
 
-    /**
-     * Gets the value of the raceStartDate property.
-     * 
-     * @return
-     *     possible object is
-     *     {@link XMLGregorianCalendar }
-     *     
-     */
-    public XMLGregorianCalendar getRaceStartDate() {
-        return raceStartDate;
-    }
+	/**
+	 * Gets the value of the raceStartDate property.
+	 * 
+	 * @return possible object is {@link XMLGregorianCalendar }
+	 * 
+	 */
+	public XMLGregorianCalendar getRaceStartDate() {
+		return raceStartDate;
+	}
 
-    /**
-     * Sets the value of the raceStartDate property.
-     * 
-     * @param value
-     *     allowed object is
-     *     {@link XMLGregorianCalendar }
-     *     
-     */
-    public void setRaceStartDate(XMLGregorianCalendar value) {
-        this.raceStartDate = value;
-    }
+	/**
+	 * Sets the value of the raceStartDate property.
+	 * 
+	 * @param value
+	 *            allowed object is {@link XMLGregorianCalendar }
+	 * 
+	 */
+	public void setRaceStartDate(XMLGregorianCalendar value) {
+		this.raceStartDate = value;
+	}
 
-    /**
-     * Gets the value of the raceStartTime property.
-     * 
-     * @return
-     *     possible object is
-     *     {@link XMLGregorianCalendar }
-     *     
-     */
-    public XMLGregorianCalendar getRaceStartTime() {
-        return raceStartTime;
-    }
+	/**
+	 * Gets the value of the raceStartTime property.
+	 * 
+	 * @return possible object is {@link XMLGregorianCalendar }
+	 * 
+	 */
+	public XMLGregorianCalendar getRaceStartTime() {
+		return raceStartTime;
+	}
 
-    /**
-     * Sets the value of the raceStartTime property.
-     * 
-     * @param value
-     *     allowed object is
-     *     {@link XMLGregorianCalendar }
-     *     
-     */
-    public void setRaceStartTime(XMLGregorianCalendar value) {
-        this.raceStartTime = value;
-    }
+	/**
+	 * Sets the value of the raceStartTime property.
+	 * 
+	 * @param value
+	 *            allowed object is {@link XMLGregorianCalendar }
+	 * 
+	 */
+	public void setRaceStartTime(XMLGregorianCalendar value) {
+		this.raceStartTime = value;
+	}
 
-    /**
-     * Gets the value of the raceStatus property.
-     * 
-     * @return
-     *     possible object is
-     *     {@link IFRaceStatus }
-     *     
-     */
-    public IFRaceStatus getRaceStatus() {
-        return raceStatus;
-    }
+	/**
+	 * Gets the value of the raceStatus property.
+	 * 
+	 * @return possible object is {@link IFRaceStatus }
+	 * 
+	 */
+	public IFRaceStatus getRaceStatus() {
+		return raceStatus;
+	}
 
-    /**
-     * Sets the value of the raceStatus property.
-     * 
-     * @param value
-     *     allowed object is
-     *     {@link IFRaceStatus }
-     *     
-     */
-    public void setRaceStatus(IFRaceStatus value) {
-        this.raceStatus = value;
-    }
+	/**
+	 * Sets the value of the raceStatus property.
+	 * 
+	 * @param value
+	 *            allowed object is {@link IFRaceStatus }
+	 * 
+	 */
+	public void setRaceStatus(IFRaceStatus value) {
+		this.raceStatus = value;
+	}
 
-    /**
-     * Gets the value of the stage property.
-     * 
-     * @return
-     *     possible object is
-     *     {@link String }
-     *     
-     */
-    public String getStage() {
-        return stage;
-    }
+	/**
+	 * Gets the value of the stage property.
+	 * 
+	 * @return possible object is {@link String }
+	 * 
+	 */
+	public String getStage() {
+		return stage;
+	}
 
-    /**
-     * Sets the value of the stage property.
-     * 
-     * @param value
-     *     allowed object is
-     *     {@link String }
-     *     
-     */
-    public void setStage(String value) {
-        this.stage = value;
-    }
+	/**
+	 * Sets the value of the stage property.
+	 * 
+	 * @param value
+	 *            allowed object is {@link String }
+	 * 
+	 */
+	public void setStage(String value) {
+		this.stage = value;
+	}
 
-    /**
-     * Gets the value of the flight property.
-     * 
-     * @return
-     *     possible object is
-     *     {@link String }
-     *     
-     */
-    public String getFlight() {
-        return flight;
-    }
+	/**
+	 * Gets the value of the flight property.
+	 * 
+	 * @return possible object is {@link String }
+	 * 
+	 */
+	public String getFlight() {
+		return flight;
+	}
 
-    /**
-     * Sets the value of the flight property.
-     * 
-     * @param value
-     *     allowed object is
-     *     {@link String }
-     *     
-     */
-    public void setFlight(String value) {
-        this.flight = value;
-    }
+	/**
+	 * Sets the value of the flight property.
+	 * 
+	 * @param value
+	 *            allowed object is {@link String }
+	 * 
+	 */
+	public void setFlight(String value) {
+		this.flight = value;
+	}
 
-    /**
-     * Gets the value of the match property.
-     * 
-     * @return
-     *     possible object is
-     *     {@link String }
-     *     
-     */
-    public String getMatch() {
-        return match;
-    }
+	/**
+	 * Gets the value of the match property.
+	 * 
+	 * @return possible object is {@link String }
+	 * 
+	 */
+	public String getMatch() {
+		return match;
+	}
 
-    /**
-     * Sets the value of the match property.
-     * 
-     * @param value
-     *     allowed object is
-     *     {@link String }
-     *     
-     */
-    public void setMatch(String value) {
-        this.match = value;
-    }
+	/**
+	 * Sets the value of the match property.
+	 * 
+	 * @param value
+	 *            allowed object is {@link String }
+	 * 
+	 */
+	public void setMatch(String value) {
+		this.match = value;
+	}
 
 	public char getFirstChar() {
 		return raceName.charAt(0);
+	}
+
+	@Override
+	public int compareTo(Race arg0) {
+		int a = Integer.parseInt(this.getRaceNumber() + "");
+		int b = Integer.parseInt(arg0.getRaceNumber() + "");
+
+		int result = 0;
+		if (a < b) {
+			result = -1;
+		} else if (a > b) {
+			result = 1;
+		}
+		return result;
 	}
 
 }

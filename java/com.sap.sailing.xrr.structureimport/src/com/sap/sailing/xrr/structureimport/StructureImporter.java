@@ -41,6 +41,8 @@ import com.sap.sailing.domain.base.impl.TeamImpl;
 import com.sap.sailing.domain.common.Color;
 import com.sap.sailing.domain.common.FleetColors;
 import com.sap.sailing.domain.common.ScoringSchemeType;
+import com.sap.sailing.domain.common.dto.FleetDTO;
+import com.sap.sailing.domain.common.dto.SeriesCreationParametersDTO;
 import com.sap.sailing.xrr.resultimport.ParserFactory;
 import com.sap.sailing.xrr.schema.Boat;
 import com.sap.sailing.xrr.schema.Crew;
@@ -57,13 +59,9 @@ import eventimport.RegattaJSON;
 public class StructureImporter {
 
     private static final Logger logger = Logger.getLogger(StructureImporter.class.getName());
-    private Map<RegattaStructureKey, Set<BuildStructure>> seriesStructuresWithFrequency = new HashMap<RegattaStructureKey, Set<BuildStructure>>(); // TODO
-                                                                                                                                                   // rename
     private LinkedHashMap<String, Boat> boatForPerson;
     private final DomainFactory baseDomainFactory;
     private final SetRacenumberStrategy setRacenumberStrategy;
-    private int parsedDocuments = 0;
-    private boolean finished = false;
 
     public StructureImporter(SetRacenumberStrategy setRacenumber, DomainFactory baseDomainFactory) {
         this.setRacenumberStrategy = setRacenumber;
@@ -96,11 +94,11 @@ public class StructureImporter {
                 }
             }
             BuildStructure buildStructure = new BuildStructure(races);
-            // analyseStructure(structure);
-            addSpecificRegattas.add(new RegattaImpl(RegattaImpl.getDefaultName(event.getTitle(),
+            RegattaImpl regatta = new RegattaImpl(RegattaImpl.getDefaultName(event.getTitle(),
                     ((Division) event.getRaceOrDivisionOrRegattaSeriesResult().get(0)).getTitle()), new BoatClassImpl(((Division) event
                     .getRaceOrDivisionOrRegattaSeriesResult().get(0)).getTitle(),true), setSeries(buildStructure), false, this.baseDomainFactory
-                            .createScoringScheme(ScoringSchemeType.LOW_POINT), event.getEventID(), null));
+                            .createScoringScheme(ScoringSchemeType.LOW_POINT), event.getEventID(), null);
+            addSpecificRegattas.add(regatta);
         }
         return addSpecificRegattas;
     }
@@ -117,7 +115,6 @@ public class StructureImporter {
                     } catch (JAXBException | IOException e) {
                         logger.info("Parse error during XRR import. Ignoring document " + selectedRegatta.getName());
                     }
-                    parsedDocuments++;
                 }
             };
             thread.start();
@@ -130,56 +127,11 @@ public class StructureImporter {
                 }
                 break;
             } catch (InterruptedException e) {
-                // not all Regattas have been parsed
+                // waiting for the other threads
             }
         }
         return result;
     }
-
-    public Map<RegattaStructureKey, Set<BuildStructure>> getRegattaStructures(List<String> regattaNames) {
-        return seriesStructuresWithFrequency;
-    }
-
-    // public void analyseStructure(BuildStructure structure) {
-    // Map<String,String> seriesAndFleets = new HashMap<String,String>();
-    // for (Series series : structure.getRegattaStructure().getSeries()) {
-    // seriesAndFleets.add(series.getSeries());
-    // for (Fleet fleet : series.getFleets()) {
-    // seriesAndFleets.add(fleet.getColor());
-    // }
-    // }
-    // RegattaStructureKey regattaStructureKey = new RegattaStructureKey(seriesAndFleets);
-    //
-    // if (!seriesAndFleets.isEmpty()) {
-    // if (seriesStructuresWithFrequency.containsKey(regattaStructureKey)) {
-    // seriesStructuresWithFrequency.get(regattaStructureKey).add(structure);
-    // } else {
-    // Set<BuildStructure> buildStructures = new HashSet<BuildStructure>();
-    // buildStructures.add(structure);
-    // seriesStructuresWithFrequency.put(regattaStructureKey, buildStructures);
-    // }
-    // }
-    //
-    // }
-
-//    private LinkedHashMap<String, SeriesCreationParametersDTO> setSeriesCreationParameters(BuildStructure structure,
-//            boolean firstColumnIsNonDiscardableCarryForward, boolean hasSplitFleetContiguousScoring,
-//            boolean startswithZeroScore, int[] discardingThresholds) {
-//        LinkedHashMap<String, SeriesCreationParametersDTO> seriesCreationParams = new LinkedHashMap<String, SeriesCreationParametersDTO>();
-//        RegattaStructure regattaStructure = structure.getRegattaStructure();
-//        if (regattaStructure != null) {
-//            int index = 0;
-//            for (Series raceType : regattaStructure.getSeries()) {
-//                List<FleetDTO> fleets = getFleets(raceType.getFleets());
-//                setRaceNames(index, raceType, raceType.getFleets());
-//                seriesCreationParams.put(raceType.getSeries(), new SeriesCreationParametersDTO(fleets,
-//                /* medal */raceType.isMedal(), startswithZeroScore, firstColumnIsNonDiscardableCarryForward,
-//                        discardingThresholds, hasSplitFleetContiguousScoring));
-//                index++;
-//            }
-//        }
-//        return seriesCreationParams;
-//    }
     
     private Iterable<SeriesImpl> setSeries(BuildStructure structure) {
         Set<SeriesImpl> series = new HashSet<SeriesImpl>(); 
@@ -187,7 +139,7 @@ public class StructureImporter {
         if (regattaStructure != null) {
             int index = 0;
             for (Series raceType : regattaStructure.getSeries()) {
-                List<FleetImpl> fleets = getFleets(raceType.getFleets());
+                List<com.sap.sailing.domain.base.Fleet> fleets = getFleets(raceType.getFleets());
                 setRaceNames(index, raceType, raceType.getFleets());
                 series.add(new SeriesImpl(raceType.getSeries(), raceType.isMedal(), fleets, raceType.getRaceNames(), null));
             }
@@ -196,32 +148,14 @@ public class StructureImporter {
     }
 
     private void setRaceNames(int i, Series raceType, List<Fleet> fleets) {
-        // set Racenumbers for each series
-        Race[] races = fleets.get(raceType.getMaxIndex()).getRaces();
+        Iterable<Race> races = fleets.get(raceType.getMaxIndex()).getRaces();
         for (Race race : races) {
             setRacenumberStrategy.setRacenumber(race, raceType, i);
         }
     }
-
-//    private List<FleetDTO> getFleets(List<Fleet> fleets) {
-//        List<FleetDTO> fleetsDTO = new ArrayList<FleetDTO>();
-//        String fleetColor = "";
-//        if (fleets.size() <= 1) {
-//            fleetColor = "Default";
-//        } else {
-//            int index = 0;
-//            for (Fleet fleet : fleets) {
-//                fleetColor = fleet.getColor();
-//                FleetDTO fleetDTO = new FleetDTO(fleetColor, index, getColorFromString(fleetColor));
-//                fleetsDTO.add(fleetDTO);
-//                index++;
-//            }
-//        }
-//        return fleetsDTO;
-//    }
     
-    private List<FleetImpl> getFleets(List<Fleet> fleets) {
-        List<FleetImpl> fleetsImpl = new ArrayList<FleetImpl>();
+    private List<com.sap.sailing.domain.base.Fleet> getFleets(List<Fleet> fleets) {
+        List<com.sap.sailing.domain.base.Fleet> fleetsImpl = new ArrayList<com.sap.sailing.domain.base.Fleet>();
         String fleetColor = "";
         if (fleets.size() <= 1) {
             fleetColor = "Default";
@@ -348,17 +282,5 @@ public class StructureImporter {
     private InputStream getInputStream(String url) throws FileNotFoundException, IOException {
         URLConnection connection = new URL(url).openConnection();
         return connection.getInputStream();
-    }
-
-    public int getProgress() {
-        return parsedDocuments;
-    }
-
-    public boolean isFinished() {
-        return finished;
-    }
-
-    public void setFinished(boolean finished) {
-        this.finished = finished;
     }
 }

@@ -10,7 +10,6 @@ import java.util.UUID;
 
 import com.google.gwt.user.client.rpc.RemoteService;
 import com.sap.sailing.domain.base.RaceDefinition;
-import com.sap.sailing.domain.base.Regatta;
 import com.sap.sailing.domain.base.RemoteSailingServerReference;
 import com.sap.sailing.domain.common.DataImportProgress;
 import com.sap.sailing.domain.common.DetailType;
@@ -70,7 +69,6 @@ import com.sap.sailing.gwt.ui.shared.RaceTimesInfoDTO;
 import com.sap.sailing.gwt.ui.shared.RegattaDTO;
 import com.sap.sailing.gwt.ui.shared.RegattaOverviewEntryDTO;
 import com.sap.sailing.gwt.ui.shared.RegattaScoreCorrectionDTO;
-import com.sap.sailing.gwt.ui.shared.RegattaStructureDTO;
 import com.sap.sailing.gwt.ui.shared.RemoteSailingServerReferenceDTO;
 import com.sap.sailing.gwt.ui.shared.ReplicationStateDTO;
 import com.sap.sailing.gwt.ui.shared.ScoreCorrectionProviderDTO;
@@ -86,7 +84,6 @@ import com.sap.sailing.gwt.ui.shared.TrackFileImportDeviceIdentifierDTO;
 import com.sap.sailing.gwt.ui.shared.VenueDTO;
 import com.sap.sailing.gwt.ui.shared.WindDTO;
 import com.sap.sailing.gwt.ui.shared.WindInfoForRaceDTO;
-import com.sap.sailing.server.operationaltransformation.AddSpecificRegatta;
 import com.sap.sse.common.Util;
 import com.sap.sse.common.Util.Pair;
 import com.sap.sse.common.search.KeywordQuery;
@@ -561,8 +558,6 @@ public interface SailingService extends RemoteService {
      * @return The RaceDTO of the modified race or <code>null</code>, if the given newStartTimeReceived was null.
      */
     RaceDTO setStartTimeReceivedForRace(RaceIdentifier raceIdentifier, Date newStartTimeReceived);
-
-    Set<RegattaStructureDTO> getRegattaStructure(List<String> regattaNames);
 
 	void createRegattaStructure(Iterable<RegattaDTO> regattas,
 			EventDTO newEvent, RegattaDTO defaultRegatta);

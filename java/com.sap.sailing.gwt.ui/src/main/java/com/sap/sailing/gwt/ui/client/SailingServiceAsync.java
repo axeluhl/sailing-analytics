@@ -9,7 +9,6 @@ import java.util.Set;
 import java.util.UUID;
 
 import com.google.gwt.user.client.rpc.AsyncCallback;
-import com.sap.sailing.domain.base.Regatta;
 import com.sap.sailing.domain.base.RemoteSailingServerReference;
 import com.sap.sailing.domain.common.DataImportProgress;
 import com.sap.sailing.domain.common.DetailType;
@@ -60,7 +59,6 @@ import com.sap.sailing.gwt.ui.shared.RaceTimesInfoDTO;
 import com.sap.sailing.gwt.ui.shared.RegattaDTO;
 import com.sap.sailing.gwt.ui.shared.RegattaOverviewEntryDTO;
 import com.sap.sailing.gwt.ui.shared.RegattaScoreCorrectionDTO;
-import com.sap.sailing.gwt.ui.shared.RegattaStructureDTO;
 import com.sap.sailing.gwt.ui.shared.RemoteSailingServerReferenceDTO;
 import com.sap.sailing.gwt.ui.shared.ReplicationStateDTO;
 import com.sap.sailing.gwt.ui.shared.ScoreCorrectionProviderDTO;
@@ -76,7 +74,6 @@ import com.sap.sailing.gwt.ui.shared.TrackFileImportDeviceIdentifierDTO;
 import com.sap.sailing.gwt.ui.shared.VenueDTO;
 import com.sap.sailing.gwt.ui.shared.WindDTO;
 import com.sap.sailing.gwt.ui.shared.WindInfoForRaceDTO;
-import com.sap.sailing.server.operationaltransformation.AddSpecificRegatta;
 import com.sap.sse.common.Util;
 import com.sap.sse.common.search.KeywordQuery;
 
@@ -647,8 +644,6 @@ public interface SailingServiceAsync {
 
     void createRegattaStructure(Iterable<RegattaDTO> regattaNames,
 			EventDTO newEvent, RegattaDTO defaultRegatta,
-			AsyncCallback<Void> asyncCallback);
-
-    void getRegattaStructure(List<String> regattaNames, AsyncCallback<Set<RegattaStructureDTO>> asyncCallback); 
+			AsyncCallback<Void> asyncCallback); 
 
 }

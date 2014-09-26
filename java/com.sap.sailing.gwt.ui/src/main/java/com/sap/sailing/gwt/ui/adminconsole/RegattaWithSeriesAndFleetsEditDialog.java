@@ -14,12 +14,10 @@ import com.google.gwt.user.client.ui.Grid;
 import com.google.gwt.user.client.ui.TabPanel;
 import com.google.gwt.user.client.ui.VerticalPanel;
 import com.sap.sailing.gwt.ui.client.StringMessages;
-import com.sap.sailing.gwt.ui.client.shared.controls.listedit.ListEditorComposite;
 import com.sap.sailing.gwt.ui.shared.DeviceConfigurationDTO;
 import com.sap.sailing.gwt.ui.shared.DeviceConfigurationDTO.RegattaConfigurationDTO;
 import com.sap.sailing.gwt.ui.shared.EventDTO;
 import com.sap.sailing.gwt.ui.shared.RegattaDTO;
-import com.sap.sailing.gwt.ui.shared.SeriesDTO;
 
 public class RegattaWithSeriesAndFleetsEditDialog extends RegattaWithSeriesAndFleetsDialog {
 
@@ -28,7 +26,6 @@ public class RegattaWithSeriesAndFleetsEditDialog extends RegattaWithSeriesAndFl
     protected Button regattaConfigurationButton;
 
     private RegattaConfigurationDTO currentRegattaConfiguration;
-    private ListEditorComposite<SeriesDTO> seriesEditor;
 
     public RegattaWithSeriesAndFleetsEditDialog(RegattaDTO regatta, Collection<RegattaDTO> existingRegattas,
             List<EventDTO> existingEvents, final StringMessages stringMessages, DialogCallback<RegattaDTO> callback) {
@@ -72,10 +69,14 @@ public class RegattaWithSeriesAndFleetsEditDialog extends RegattaWithSeriesAndFl
         });
         regattaConfigurationCheckbox.setValue(regatta.configuration != null);
         regattaConfigurationButton.setEnabled(regatta.configuration != null);
-
-        this.seriesEditor = new SeriesWithFleetsListEditor(regatta.series, stringMessages, resources.removeIcon(), /* enableFleetRemoval */
-                false);
     }
+    
+
+	@Override
+	protected void setSeriesEditor() {
+		seriesEditor = new SeriesWithFleetsListEditor(regatta.series, stringMessages, resources.removeIcon(), /* enableFleetRemoval */
+                false);
+	}
 
     @Override
     public void show() {

@@ -14,10 +14,12 @@ import com.google.gwt.user.client.ui.Widget;
 import com.sap.sailing.domain.common.ScoringSchemeType;
 import com.sap.sailing.domain.common.dto.BoatClassDTO;
 import com.sap.sailing.gwt.ui.client.StringMessages;
+import com.sap.sailing.gwt.ui.client.shared.controls.listedit.ListEditorComposite;
 import com.sap.sailing.gwt.ui.leaderboard.ScoringSchemeTypeFormatter;
 import com.sap.sailing.gwt.ui.shared.CourseAreaDTO;
 import com.sap.sailing.gwt.ui.shared.EventDTO;
 import com.sap.sailing.gwt.ui.shared.RegattaDTO;
+import com.sap.sailing.gwt.ui.shared.SeriesDTO;
 import com.sap.sse.gwt.client.dialog.DataEntryDialog;
 
 public abstract class AbstractRegattaWithSeriesAndFleetsDialog<T> extends DataEntryDialog<T> {
@@ -29,6 +31,7 @@ public abstract class AbstractRegattaWithSeriesAndFleetsDialog<T> extends DataEn
     protected ListBox courseAreaListBox;
     protected ListBox sailingEventsListBox;
     protected CheckBox useStartTimeInferenceCheckBox;
+    protected ListEditorComposite<SeriesDTO> seriesEditor;
 
     protected List<EventDTO> existingEvents;
 
@@ -110,6 +113,8 @@ public abstract class AbstractRegattaWithSeriesAndFleetsDialog<T> extends DataEn
         }
         return false;
     }
+    
+    protected abstract void setSeriesEditor();
 
     private void setupEventAndCourseAreaListBoxes(StringMessages stringMessages) {
         sailingEventsListBox.addItem(stringMessages.selectSailingEvent());
@@ -189,6 +194,7 @@ public abstract class AbstractRegattaWithSeriesAndFleetsDialog<T> extends DataEn
         regatta.scoringScheme = getSelectedScoringSchemeType();
         regatta.useStartTimeInference = useStartTimeInferenceCheckBox.getValue();
         setCourseAreaInRegatta(regatta);
+        regatta.series = seriesEditor.getValue();
         return regatta;
     }
 

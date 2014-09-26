@@ -1,6 +1,8 @@
 package buildstructure;
 
 import java.awt.Color;
+import java.util.Set;
+import java.util.TreeSet;
 
 import com.sap.sailing.xrr.schema.Race;
 
@@ -8,7 +10,8 @@ public class Fleet implements Comparable {
     private final int NUMBEROFRACES = 10;
 
     private String color = "";
-    private Race[] races = new Race[NUMBEROFRACES];
+    private Race[] racesOld = new Race[NUMBEROFRACES];
+    private Set<Race> races = new TreeSet<Race>();
     private int numRaces = 0;
 
     public Fleet(String color) {
@@ -26,22 +29,23 @@ public class Fleet implements Comparable {
         race.setRaceName(raceName);
 
         int raceNumber = Integer.parseInt(race.getRaceNumber() + "");
-        if (races.length > raceNumber) {
-            races[raceNumber - 1] = race;
+        if (racesOld.length > raceNumber) {
+            racesOld[raceNumber - 1] = race;
             numRaces++;
         } else {
-            Race[] temp = races;
-            races = new Race[temp.length + NUMBEROFRACES];
+            Race[] temp = racesOld;
+            racesOld = new Race[temp.length + NUMBEROFRACES];
             for (int i = 0; i < temp.length; i++) {
-                races[i] = temp[i];
+                racesOld[i] = temp[i];
             }
-            races[raceNumber - 1] = race;
+            racesOld[raceNumber - 1] = race;
             numRaces++;
         }
+        races.add(race);
 
     }
 
-    public Race[] getRaces() {
+    public Iterable<Race> getRaces() {
         return races;
     }
 
