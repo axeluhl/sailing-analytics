@@ -91,8 +91,8 @@ public abstract class AbstractServerReplicationTest {
             boolean dropDB, RacingEventServiceImpl master, RacingEventServiceImpl replica) throws IOException, InterruptedException {
         String exchangeName = "test-sapsailinganalytics-exchange";
         String exchangeHost = "localhost";
-        if (System.getenv(Activator.REPLICATION_HOST) != null) {
-            exchangeHost = System.getenv(Activator.REPLICATION_HOST);
+        if (System.getenv(Activator.ENV_VAR_NAME_REPLICATION_HOST) != null) {
+            exchangeHost = System.getenv(Activator.ENV_VAR_NAME_REPLICATION_HOST);
         }
         final UUID serverUuid = UUID.randomUUID();
         final MongoDBService mongoDBService = MongoDBService.INSTANCE;

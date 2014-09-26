@@ -62,7 +62,7 @@ public class ConnectionResetAndReconnectTest extends AbstractServerReplicationTe
         @Override
         public QueueingConsumer getConsumer() throws IOException {
             ConnectionFactory connectionFactory = new ConnectionFactory();
-            connectionFactory.setHost(getHostname());
+            connectionFactory.setHost(getMessagingHostname());
             int port = getMessagingPort();
             if (port != 0) {
                 connectionFactory.setPort(port);

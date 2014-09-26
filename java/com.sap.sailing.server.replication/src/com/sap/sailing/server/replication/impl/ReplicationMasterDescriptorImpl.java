@@ -27,7 +27,17 @@ public class ReplicationMasterDescriptorImpl implements ReplicationMasterDescrip
     private QueueingConsumer consumer;
     
     /**
-     * @param messagingPort 0 means use default port
+     * @param messagingHostname
+     *            name of the host on which the exchange is hosted to which this replica connects with a queue whose
+     *            name is provided in the <code>queueName</code> parameter
+     * @param exchangeName
+     *            the name of the fan-out exchange used by the remote master to write its replication operations to
+     * @param messagingPort
+     *            0 means use default port
+     * @param queueName
+     *            the name for the queue that this replication client uses to connect to the remote exchange; it is
+     *            helpful if this queue name uniquely identifies the replica because the queue name will appear in tools
+     *            for monitoring the messaging infrastructure
      */
     public ReplicationMasterDescriptorImpl(String messagingHostname, String masterServletHostname, String exchangeName, int servletPort, int messagingPort, String queueName) {
         this.masterServletHostname = masterServletHostname;
@@ -167,7 +177,7 @@ public class ReplicationMasterDescriptorImpl implements ReplicationMasterDescrip
     }
     
     public String toString() {
-        return getHostname() + ":" + getServletPort() + "/" + getMessagingPort();
+        return getHostname() + ":" + getServletPort() + " / " + getMessagingHostname()+":"+getMessagingPort();
     }
     
 }

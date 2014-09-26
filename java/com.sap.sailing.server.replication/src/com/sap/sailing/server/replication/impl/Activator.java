@@ -14,14 +14,14 @@ public class Activator implements BundleActivator {
     private static final String PROPERTY_NAME_EXCHANGE_NAME = "replication.exchangeName";
     private static final String PROPERTY_NAME_EXCHANGE_HOST = "replication.exchangeHost";
     
-    public static final String REPLICATION_CHANNEL = "REPLICATION_CHANNEL";
-    public static final String REPLICATION_HOST = "REPLICATION_HOST";
+    public static final String ENV_VAR_NAME_REPLICATION_CHANNEL = "REPLICATION_CHANNEL";
+    public static final String ENV_VAR_NAME_REPLICATION_HOST = "REPLICATION_HOST";
     
-    public static final String REPLICATE_ON_START = "replicate.on.start";
-    public static final String REPLICATE_MASTER_SERVLET_HOST = "replicate.master.servlet.host";
-    public static final String REPLICATE_MASTER_SERVLET_PORT = "replicate.master.servlet.port";
-    public static final String REPLICATE_MASTER_QUEUE_HOST = "replicate.master.queue.host";
-    public static final String REPLICATE_MASTER_QUEUE_PORT = "replicate.master.queue.port";
+    public static final String PROPERTY_NAME_REPLICATE_ON_START = "replicate.on.start";
+    public static final String PROPERTY_NAME_REPLICATE_MASTER_SERVLET_HOST = "replicate.master.servlet.host";
+    public static final String PROPERTY_NAME_REPLICATE_MASTER_SERVLET_PORT = "replicate.master.servlet.port";
+    public static final String PROPERTY_NAME_REPLICATE_MASTER_QUEUE_HOST = "replicate.master.queue.host";
+    public static final String PROPERTY_NAME_REPLICATE_MASTER_QUEUE_PORT = "replicate.master.queue.port";
 
     private ReplicationInstancesManager replicationInstancesManager;
     
@@ -32,17 +32,17 @@ public class Activator implements BundleActivator {
         String exchangeName = bundleContext.getProperty(PROPERTY_NAME_EXCHANGE_NAME);
         String exchangeHost = bundleContext.getProperty(PROPERTY_NAME_EXCHANGE_HOST);
         if (exchangeName == null) {
-            if (System.getenv(REPLICATION_CHANNEL) == null) {
+            if (System.getenv(ENV_VAR_NAME_REPLICATION_CHANNEL) == null) {
                 exchangeName = "sapsailinganalytics";
             } else {
-                exchangeName = System.getenv(REPLICATION_CHANNEL);
+                exchangeName = System.getenv(ENV_VAR_NAME_REPLICATION_CHANNEL);
             }
         }
         if (exchangeHost == null) {
-            if (System.getenv(REPLICATION_HOST) == null) {
+            if (System.getenv(ENV_VAR_NAME_REPLICATION_HOST) == null) {
                 exchangeHost = "localhost";
             } else {
-                exchangeHost = System.getenv(REPLICATION_HOST);
+                exchangeHost = System.getenv(ENV_VAR_NAME_REPLICATION_HOST);
             }
         }
         replicationInstancesManager = new ReplicationInstancesManager();
@@ -53,15 +53,15 @@ public class Activator implements BundleActivator {
     }
     
     private void checkIfAutomaticReplicationShouldStart(ReplicationService serverReplicationMasterService, String exchangeName) {
-        String replicateOnStart = System.getProperty(REPLICATE_ON_START);
-        if (replicateOnStart != null && replicateOnStart.equals("True")) {
-            logger.info("Configuration requested automatic replication. Starting up...");
+        String replicateOnStart = System.getProperty(PROPERTY_NAME_REPLICATE_ON_START);
+        if (Boolean.valueOf(replicateOnStart)) {
+            logger.info("Configuration requested automatic replication. Starting it up...");
             ReplicationMasterDescriptorImpl master = new ReplicationMasterDescriptorImpl(
-                    System.getProperty(REPLICATE_MASTER_QUEUE_HOST),
-                    System.getProperty(REPLICATE_MASTER_SERVLET_HOST), 
+                    System.getProperty(PROPERTY_NAME_REPLICATE_MASTER_QUEUE_HOST),
+                    System.getProperty(PROPERTY_NAME_REPLICATE_MASTER_SERVLET_HOST), 
                     exchangeName, 
-                    Integer.valueOf(System.getProperty(REPLICATE_MASTER_SERVLET_PORT).trim()), 
-                    Integer.valueOf(System.getProperty(REPLICATE_MASTER_QUEUE_PORT).trim()), 
+                    Integer.valueOf(System.getProperty(PROPERTY_NAME_REPLICATE_MASTER_SERVLET_PORT).trim()), 
+                    Integer.valueOf(System.getProperty(PROPERTY_NAME_REPLICATE_MASTER_QUEUE_PORT).trim()), 
                     serverReplicationMasterService.getServerIdentifier().toString());
             try {
                 serverReplicationMasterService.startToReplicateFrom(master);

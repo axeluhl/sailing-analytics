@@ -409,7 +409,7 @@ public class ReplicationServiceImpl implements ReplicationService, OperationExec
         logger.info("Initial load URL is "+initialLoadURL);
         replicator = new Replicator(master, this, /* startSuspended */ true, consumer, getRacingEventService().getBaseDomainFactory());
         // start receiving messages already now, but start in suspended mode
-        replicatorThread = new Thread(replicator, "Replicator receiving from "+master.getHostname()+"/"+master.getExchangeName());
+        replicatorThread = new Thread(replicator, "Replicator receiving from "+master.getMessagingHostname()+"/"+master.getExchangeName());
         replicatorThread.start();
         logger.info("Started replicator thread");
         InputStream is = initialLoadURL.openStream();
