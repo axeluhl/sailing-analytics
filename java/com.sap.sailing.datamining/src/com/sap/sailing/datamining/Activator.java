@@ -8,6 +8,9 @@ import org.osgi.framework.BundleContext;
 import org.osgi.framework.ServiceReference;
 
 import com.sap.sailing.datamining.data.HasGPSFixContext;
+import com.sap.sailing.datamining.data.HasTrackedLegContext;
+import com.sap.sailing.datamining.data.HasTrackedLegOfCompetitorContext;
+import com.sap.sailing.datamining.data.HasTrackedRaceContext;
 import com.sap.sse.datamining.ClassesWithFunctionsRegistrationService;
 
 public class Activator implements BundleActivator {
@@ -34,13 +37,9 @@ public class Activator implements BundleActivator {
 
     public static Set<Class<?>> getInternalClassesWithMarkedMethods() {
         Set<Class<?>> internalClasses = new HashSet<>();
-        /*
-         * This also contains the marked methods of
-         * HasTrackedRaceContext,
-         * HasTrackedLegContext and
-         * HasTrackedLegOfCompetitorContext,
-         * because these are the super types of HasGPSFixContext.
-         */
+        internalClasses.add(HasTrackedRaceContext.class);
+        internalClasses.add(HasTrackedLegContext.class);
+        internalClasses.add(HasTrackedLegOfCompetitorContext.class);
         internalClasses.add(HasGPSFixContext.class);
         return internalClasses;
     }

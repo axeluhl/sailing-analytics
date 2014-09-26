@@ -38,6 +38,7 @@ public class SimpleStatisticProvider implements StatisticProvider {
     private final HorizontalPanel mainPanel;
     private final ValueListBox<FunctionDTO> extractionFunctionListBox;
     private final ValueListBox<AggregatorType> aggregatorListBox;
+    private final Label baseDataTypeLabel;
 
     public SimpleStatisticProvider(StringMessages stringMessages, DataMiningServiceAsync dataMiningService, ErrorReporter errorReporter) {
         this.stringMessages = stringMessages;
@@ -55,6 +56,10 @@ public class SimpleStatisticProvider implements StatisticProvider {
         aggregatorListBox = createAggregatorListBox();
         HorizontalPanel aggregatorPanel = surroundAggregatorListBoxWithBraces(aggregatorListBox);
         mainPanel.add(aggregatorPanel);
+        
+        mainPanel.add(new Label(this.stringMessages.basedOn()));
+        baseDataTypeLabel = new Label();
+        mainPanel.add(baseDataTypeLabel);
 
         updateExtractionFunctions();
     }
@@ -73,7 +78,8 @@ public class SimpleStatisticProvider implements StatisticProvider {
                                                                                                          : acceptableValues.iterator().next();
                     extractionFunctionListBox.setValue(valueToBeSelected);
                     extractionFunctionListBox.setAcceptableValues(acceptableValues);
-                    
+
+                    baseDataTypeLabel.setText(valueToBeSelected.getSourceTypeName());
                     if (!valueToBeSelected.equals(currentExtractionFunction)) {
                         notifyListeners();
                     }
@@ -101,6 +107,7 @@ public class SimpleStatisticProvider implements StatisticProvider {
         extractionFunctionListBox.addValueChangeHandler(new ValueChangeHandler<FunctionDTO>() {
             @Override
             public void onValueChange(ValueChangeEvent<FunctionDTO> event) {
+                baseDataTypeLabel.setText(event.getValue().getSourceTypeName());
                 notifyListeners();
             }
         });

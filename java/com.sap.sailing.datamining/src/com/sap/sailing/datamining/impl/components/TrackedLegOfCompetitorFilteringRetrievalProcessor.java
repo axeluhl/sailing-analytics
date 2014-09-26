@@ -29,7 +29,7 @@ public class TrackedLegOfCompetitorFilteringRetrievalProcessor extends
     @Override
     protected Iterable<HasTrackedLegOfCompetitorContext> retrieveData(HasTrackedLegContext element) {
         Collection<HasTrackedLegOfCompetitorContext> trackedLegOfCompetitorsWithContext = new ArrayList<>();
-        for (Competitor competitor : element.getRace().getCompetitors()) {
+        for (Competitor competitor : element.getTrackedRaceContext().getTrackedRace().getRace().getCompetitors()) {
             HasTrackedLegOfCompetitorContext trackedLegOfCompetitorWithContext = new TrackedLegOfCompetitorWithContext(element, element.getTrackedLeg().getTrackedLeg(competitor));
             trackedLegOfCompetitorsWithContext.add(trackedLegOfCompetitorWithContext);
         }

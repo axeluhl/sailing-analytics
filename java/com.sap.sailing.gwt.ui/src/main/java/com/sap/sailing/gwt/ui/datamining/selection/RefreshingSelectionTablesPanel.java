@@ -175,42 +175,47 @@ public class RefreshingSelectionTablesPanel implements SelectionProvider<Refresh
             dimensions.add(dimensionAsKey.getValue());
         }
         
-        dataMiningService.getDimensionValuesFor(dimensions, new AsyncCallback<QueryResult<Set<Object>>>() {
-            @Override
-            public void onFailure(Throwable caught) {
-                errorReporter.reportError("Error fetching the dimension values from the server: " + caught.getMessage());
-            }
-            @Override
-            public void onSuccess(QueryResult<Set<Object>> result) {
-                boolean tableContentChanged = false;
-                for (GenericGroupKey<FunctionDTO> dimensionAsKey : tablesMappedByDimensionAsKeys.keySet()) {
-                    List<?> sortedDimensionValues = new ArrayList<>();
-                    if (result.getResults().containsKey(dimensionAsKey)) {
-                        sortedDimensionValues = new ArrayList<>(result.getResults().get(dimensionAsKey));
-                        Collections.sort(sortedDimensionValues, new Comparator<Object>() {
-                            @Override
-                            public int compare(Object o1, Object o2) {
-                                return o1.toString().compareTo(o2.toString());
-                            }
-                        });
+        if (!dimensions.isEmpty()) {
+            dataMiningService.getDimensionValuesFor(dimensions, new AsyncCallback<QueryResult<Set<Object>>>() {
+                @Override
+                public void onFailure(Throwable caught) {
+                    errorReporter.reportError("Error fetching the dimension values from the server: "
+                            + caught.getMessage());
+                }
+
+                @Override
+                public void onSuccess(QueryResult<Set<Object>> result) {
+                    boolean tableContentChanged = false;
+                    for (GenericGroupKey<FunctionDTO> dimensionAsKey : tablesMappedByDimensionAsKeys.keySet()) {
+                        List<?> sortedDimensionValues = new ArrayList<>();
+                        if (result.getResults().containsKey(dimensionAsKey)) {
+                            sortedDimensionValues = new ArrayList<>(result.getResults().get(dimensionAsKey));
+                            Collections.sort(sortedDimensionValues, new Comparator<Object>() {
+                                @Override
+                                public int compare(Object o1, Object o2) {
+                                    return o1.toString().compareTo(o2.toString());
+                                }
+                            });
+                        }
+
+                        boolean currentTableContentChanged = tablesMappedByDimensionAsKeys.get(dimensionAsKey)
+                                .updateContent(sortedDimensionValues);
+                        if (!tableContentChanged) {
+                            tableContentChanged = currentTableContentChanged;
+                        }
                     }
-                    
-                    boolean currentTableContentChanged = tablesMappedByDimensionAsKeys.get(dimensionAsKey).updateContent(sortedDimensionValues);
-                    if (!tableContentChanged) {
-                        tableContentChanged = currentTableContentChanged;
+
+                    if (settings.isRerunQueryAfterRefresh() && tableContentChanged) {
+                        notifySelectionChanged();
+                        // TODO query is executed, before the data is ready to be analyzed
+                        // TODO does this error still appear with the new concept?
+                    }
+                    if (settings.isRefreshAutomatically()) {
+                        timer.schedule(settings.getRefreshIntervalInMilliseconds());
                     }
                 }
-                
-                if (settings.isRerunQueryAfterRefresh() && tableContentChanged) {
-                    notifySelectionChanged();
-                    // TODO query is executed, before the data is ready to be analyzed
-                    // TODO does this error still appear with the new concept?
-                }
-                if (settings.isRefreshAutomatically()) {
-                    timer.schedule(settings.getRefreshIntervalInMilliseconds());
-                }
-            }
-        });
+            });
+        }
     }
 
     @Override

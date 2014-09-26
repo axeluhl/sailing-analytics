@@ -28,7 +28,7 @@ public class GPSFixRetrievalProcessor extends AbstractSimpleRetrievalProcessor<H
     @Override
     protected Iterable<HasGPSFixContext> retrieveData(HasTrackedLegOfCompetitorContext element) {
         Collection<HasGPSFixContext> gpsFixesWithContext = new ArrayList<>();
-        GPSFixTrack<Competitor, GPSFixMoving> competitorTrack = element.getTrackedRace().getTrack(element.getCompetitor());
+        GPSFixTrack<Competitor, GPSFixMoving> competitorTrack = element.getTrackedLegContext().getTrackedRaceContext().getTrackedRace().getTrack(element.getCompetitor());
         competitorTrack.lockForRead();
         try {
             TrackedLegOfCompetitor trackedLegOfCompetitor = element.getTrackedLegOfCompetitor();
