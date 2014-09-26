@@ -8,6 +8,7 @@ import java.util.UUID;
 
 import com.rabbitmq.client.Channel;
 import com.rabbitmq.client.QueueingConsumer;
+import com.sap.sailing.server.replication.impl.RabbitInputStreamProvider;
 
 /**
  * Identifies a master server instance from which a replica can obtain an initial load and continuous updates.
@@ -21,6 +22,10 @@ public interface ReplicationMasterDescriptor {
     
     URL getReplicationDeRegistrationRequestURL(UUID uuid) throws MalformedURLException;
 
+    /**
+     * The content produced by the URL returned is the name of the queue from which the client can read the
+     * initial load using a {@link RabbitInputStreamProvider}.
+     */
     URL getInitialLoadURL() throws MalformedURLException;
 
     int getMessagingPort();
