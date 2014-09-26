@@ -16,7 +16,6 @@ public class BoatClassImageResolver {
         boatClassIconsMap.put(BoatClassMasterdata._12M.getDisplayName(), imageResources._12mRIcon());
         boatClassIconsMap.put(BoatClassMasterdata._2_4M.getDisplayName(), imageResources._2_4mIcon());
         boatClassIconsMap.put(BoatClassMasterdata._29ER.getDisplayName(), imageResources._29erIcon());
-        boatClassIconsMap.put(BoatClassMasterdata._29ERXX.getDisplayName(), imageResources._29erIcon());
         boatClassIconsMap.put(BoatClassMasterdata._420.getDisplayName(), imageResources._420Icon());
         boatClassIconsMap.put(BoatClassMasterdata._470.getDisplayName(), imageResources._470Icon());
         boatClassIconsMap.put(BoatClassMasterdata._49ERFX.getDisplayName(), imageResources._49erFXIcon());

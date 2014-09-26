@@ -577,6 +577,16 @@ img.openColumn {
     padding: 2px 20px !important;
 }
 
+@external gwt-ToggleButton-up, gwt-ToggleButton-down, gwt-ToggleButton-up-hovering, gwt-ToggleButton-down-hovering;
+.gwt-ToggleButton-up, .gwt-ToggleButton-up-hovering {
+   background: url(images/unlock.png) center no-repeat;
+   margin-left: 5px;
+} 
+.gwt-ToggleButton-down, .gwt-ToggleButton-down-hovering {
+   background: url(images/lock.png) center no-repeat;
+   margin-left: 5px;
+}
+
 .RegattaRaceInformation-Header {
 	position: relative;
     left: 140px;
@@ -628,7 +638,7 @@ img.openColumn {
 	border: none;
 }
 
-.gwt-Button, .gwt-Button:visited {
+.gwt-Button, .gwt-Button:visited, .test, .test:visited {
 	background-color: #fcbb22;
 	background-image: none !important;
     -moz-box-shadow: none;
@@ -641,4 +651,8 @@ img.openColumn {
 
 .gwt-Button:hover {
 	background-color: #fcbb22 !important;
+}
+
+.test:hover {
+	
 }

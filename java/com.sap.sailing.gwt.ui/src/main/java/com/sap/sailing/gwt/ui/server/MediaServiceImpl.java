@@ -39,6 +39,11 @@ public class MediaServiceImpl extends RemoteServiceServlet implements MediaServi
     public Collection<MediaTrack> getMediaTracksForRace(RegattaAndRaceIdentifier regattaAndRaceIdentifier) {
         return racingEventService().getMediaTracksForRace(regattaAndRaceIdentifier);
     }
+    
+    @Override
+    public Collection<MediaTrack> getMediaTracksInTimeRange(RegattaAndRaceIdentifier regattaAndRaceIdentifier) {
+        return racingEventService().getMediaTracksInTimeRange(regattaAndRaceIdentifier);
+    }
 
     @Override
     public Collection<MediaTrack> getAllMediaTracks() {
@@ -77,6 +82,12 @@ public class MediaServiceImpl extends RemoteServiceServlet implements MediaServi
     @Override
     public void updateDuration(MediaTrack mediaTrack) {
         racingEventService().mediaTrackDurationChanged(mediaTrack);
+    }
+
+    @Override
+    public void updateRace(MediaTrack mediaTrack) {
+        racingEventService().mediaTrackAssignedRacesChanged(mediaTrack);
+        
     }
 
 }

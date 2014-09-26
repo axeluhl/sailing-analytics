@@ -78,6 +78,7 @@ public interface StringMessages extends Messages {
     String leaderboards();
     String leaderboardSettings();
     String settings();
+    String linkedRaces();
     String selectAtLeastOneLegDetail();
     String currentSpeedOverGroundInKnots();
     String estimatedTimeToNextWaypointInSeconds();
@@ -183,6 +184,7 @@ public interface StringMessages extends Messages {
     String otherManeuver();
     String douglasPeuckerPoints();
     String filterRacesByName();
+    String filterMediaByName();
     String actionEdit();
     String actionEditScores();
     String actionEditCompetitors();

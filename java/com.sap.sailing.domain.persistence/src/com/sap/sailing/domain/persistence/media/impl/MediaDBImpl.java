@@ -2,10 +2,13 @@ package com.sap.sailing.domain.persistence.media.impl;
 
 import java.util.ArrayList;
 import java.util.Date;
+import java.util.HashSet;
 import java.util.List;
+import java.util.Set;
 
 import org.bson.types.ObjectId;
 
+import com.mongodb.BasicDBList;
 import com.mongodb.BasicDBObject;
 import com.mongodb.DB;
 import com.mongodb.DBCollection;
@@ -14,6 +17,8 @@ import com.mongodb.DBObject;
 import com.mongodb.MongoException;
 import com.mongodb.WriteConcern;
 import com.sap.sailing.domain.common.Duration;
+import com.sap.sailing.domain.common.RegattaAndRaceIdentifier;
+import com.sap.sailing.domain.common.RegattaNameAndRaceName;
 import com.sap.sailing.domain.common.TimePoint;
 import com.sap.sailing.domain.common.impl.MillisecondsDurationImpl;
 import com.sap.sailing.domain.common.impl.MillisecondsTimePoint;
@@ -44,20 +49,32 @@ public class MediaDBImpl implements MediaDB {
     }
 
     @Override
-    public String insertMediaTrack(String title, String url, TimePoint startTime, Duration duration, MimeType mimeType) {
+    public String insertMediaTrack(String title, String url, TimePoint startTime, Duration duration, MimeType mimeType,
+            Set<RegattaAndRaceIdentifier> regattasAndRaces) {
+
         BasicDBObject dbMediaTrack = new BasicDBObject();
         dbMediaTrack.put(DbNames.Fields.MEDIA_TITLE.name(), title);
         dbMediaTrack.put(DbNames.Fields.MEDIA_URL.name(), url);
         dbMediaTrack.put(DbNames.Fields.STARTTIME.name(), startTime == null ? null : startTime.asDate());
         dbMediaTrack.put(DbNames.Fields.DURATION_IN_MILLIS.name(), duration == null ? null : duration.asMillis());
         dbMediaTrack.put(DbNames.Fields.MIME_TYPE.name(), mimeType == null ? null : mimeType.name());
+        BasicDBList objectList = new BasicDBList();
+        for (RegattaAndRaceIdentifier regattaAndRace : regattasAndRaces) {
+            BasicDBObject object = new BasicDBObject();
+            object.put(DbNames.Fields.REGATTA_NAME.name(), regattaAndRace.getRegattaName());
+            object.put(DbNames.Fields.RACE_NAME.name(), regattaAndRace.getRaceName());
+            objectList.add(object);
+        }
+        dbMediaTrack.put(DbNames.Fields.ASSIGNED_RACES.name(), objectList);
         DBCollection dbVideos = getVideoCollection();
         dbVideos.insert(dbMediaTrack);
         return ((ObjectId) dbMediaTrack.get(DbNames.Fields._id.name())).toStringMongod();
     }
 
     @Override
-    public void insertMediaTrackWithId(String dbId, String title, String url, TimePoint startTime, Duration duration, MimeType mimeType) {
+    public void insertMediaTrackWithId(String dbId, String title, String url, TimePoint startTime, Duration duration,
+            MimeType mimeType, Set<RegattaAndRaceIdentifier> regattasAndRaces) {
+
         BasicDBObject dbMediaTrack = new BasicDBObject();
         dbMediaTrack.put(DbNames.Fields._id.name(), new ObjectId(dbId));
         dbMediaTrack.put(DbNames.Fields.MEDIA_TITLE.name(), title);
@@ -65,11 +82,24 @@ public class MediaDBImpl implements MediaDB {
         dbMediaTrack.put(DbNames.Fields.STARTTIME.name(), startTime == null ? null : startTime.asDate());
         dbMediaTrack.put(DbNames.Fields.DURATION_IN_MILLIS.name(), duration == null ? null : duration.asMillis());
         dbMediaTrack.put(DbNames.Fields.MIME_TYPE.name(), mimeType == null ? null : mimeType.name());
+        BasicDBList objectList = new BasicDBList();
+        if (regattasAndRaces != null) {
+            for (RegattaAndRaceIdentifier regattaAndRace : regattasAndRaces) {
+                BasicDBObject object = new BasicDBObject();
+                object.put(DbNames.Fields.REGATTA_NAME.name(), regattaAndRace.getRegattaName());
+                object.put(DbNames.Fields.RACE_NAME.name(), regattaAndRace.getRaceName());
+                objectList.add(object);
+            }
+        } else {
+            System.currentTimeMillis();
+        }
+        dbMediaTrack.put(DbNames.Fields.ASSIGNED_RACES.name(), objectList);
         DBCollection dbVideos = getVideoCollection();
         try {
             dbVideos.insert(dbMediaTrack);
         } catch (MongoException.DuplicateKey e) {
-            throw new IllegalArgumentException("Duplicate key '" + dbId + "' caused an error when importing media (title: '" + title + "')", e);
+            throw new IllegalArgumentException("Duplicate key '" + dbId
+                    + "' caused an error when importing media (title: '" + title + "')", e);
         }
     }
 
@@ -93,10 +123,21 @@ public class MediaDBImpl implements MediaDB {
         Number duration = (Number) dbObject.get(DbNames.Fields.DURATION_IN_MILLIS.name());
         String mimeTypeText = (String) dbObject.get(DbNames.Fields.MIME_TYPE.name());
         MimeType mimeType = MimeType.byName(mimeTypeText);
-        MediaTrack mediaTrack = new MediaTrack(dbId, title, url, 
-                startTime == null ? null : new MillisecondsTimePoint(startTime), 
-                duration == null ? null : new MillisecondsDurationImpl(duration.longValue()), 
-                mimeType);
+        Set<RegattaAndRaceIdentifier> regattasAndRaces = new HashSet<RegattaAndRaceIdentifier>();
+        BasicDBList assignedRaces = (BasicDBList) dbObject.get(DbNames.Fields.ASSIGNED_RACES.name());
+        if (assignedRaces != null) {
+            for (Object assignedRace : assignedRaces) {
+                BasicDBObject object = (BasicDBObject) assignedRace;
+                String regattaName = (String) object.get(DbNames.Fields.REGATTA_NAME.name());
+                String raceName = (String) object.get(DbNames.Fields.RACE_NAME.name());
+                if (regattaName != null && raceName != null) {
+                    regattasAndRaces.add(new RegattaNameAndRaceName(regattaName, raceName));
+                }
+            }
+        }
+        MediaTrack mediaTrack = new MediaTrack(dbId, title, url, startTime == null ? null : new MillisecondsTimePoint(
+                startTime), duration == null ? null : new MillisecondsDurationImpl(duration.longValue()), mimeType,
+                regattasAndRaces);
         return mediaTrack;
     }
 
@@ -145,7 +186,8 @@ public class MediaDBImpl implements MediaDB {
         updateQuery.append(DbNames.Fields._id.name(), new ObjectId(dbId));
 
         BasicDBObject updateCommand = new BasicDBObject();
-        updateCommand.append("$set", new BasicDBObject(DbNames.Fields.STARTTIME.name(), startTime == null ? null : startTime.asDate()));
+        updateCommand.append("$set", new BasicDBObject(DbNames.Fields.STARTTIME.name(), startTime == null ? null
+                : startTime.asDate()));
 
         getVideoCollection().update(updateQuery, updateCommand);
     }
@@ -156,7 +198,26 @@ public class MediaDBImpl implements MediaDB {
         updateQuery.append(DbNames.Fields._id.name(), new ObjectId(dbId));
 
         BasicDBObject updateCommand = new BasicDBObject();
-        updateCommand.append("$set", new BasicDBObject(DbNames.Fields.DURATION_IN_MILLIS.name(), duration == null ? null : duration.asMillis()));
+        updateCommand.append("$set", new BasicDBObject(DbNames.Fields.DURATION_IN_MILLIS.name(),
+                duration == null ? null : duration.asMillis()));
+
+        getVideoCollection().update(updateQuery, updateCommand);
+    }
+
+    @Override
+    public void updateRace(String dbId, Set<RegattaAndRaceIdentifier> regattasAndRaces) {
+        BasicDBObject updateQuery = new BasicDBObject();
+        updateQuery.append(DbNames.Fields._id.name(), new ObjectId(dbId));
+
+        BasicDBList objectList = new BasicDBList();
+        for (RegattaAndRaceIdentifier regattaAndRace : regattasAndRaces) {
+            BasicDBObject object = new BasicDBObject();
+            object.put(DbNames.Fields.REGATTA_NAME.name(), regattaAndRace.getRegattaName());
+            object.put(DbNames.Fields.RACE_NAME.name(), regattaAndRace.getRaceName());
+            objectList.add(object);
+        }
+        BasicDBObject updateCommand = new BasicDBObject();
+        updateCommand.append("$set", new BasicDBObject(DbNames.Fields.ASSIGNED_RACES.name(), objectList));
 
         getVideoCollection().update(updateQuery, updateCommand);
     }
