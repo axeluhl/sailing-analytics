@@ -83,7 +83,7 @@ public class TracTrac {
                             new MillisecondsTimePoint(record.getTrackingStartTime().asMillis()),
                             new MillisecondsTimePoint(record.getTrackingEndTime().asMillis()),
                             MongoRaceLogStoreFactory.INSTANCE.getMongoRaceLogStore(getService().getMongoObjectFactory(), getService().getDomainObjectFactory()),
-                            RaceTracker.TIMEOUT_FOR_RECEIVING_RACE_DEFINITION_IN_MILLISECONDS, /*simulateWithStartTimeNow*/false, 
+                            RaceTracker.TIMEOUT_FOR_RECEIVING_RACE_DEFINITION_IN_MILLISECONDS, /*simulateWithStartTimeNow*/false,
                             /*ignoreTracTracMarkPassings*/ false, /*tracTracUsername*/"", /*tracTracPassword*/"",
                             record.getRaceStatus(), record.getRaceVisibility());
                     } else {

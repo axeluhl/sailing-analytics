@@ -1745,6 +1745,8 @@ public class LeaderboardPanel extends SimplePanel implements TimeListener, PlayS
             });
             this.competitorFilterPanel = competitorSearchTextBox;
         }
+        contentPanel.add(markPassingsPanel);
+        contentPanel.add(markPassingsPanel.getEditButton());
         SortedCellTable<LeaderboardRowDTO> leaderboardTable = getLeaderboardTable();
         leaderboardTable.getElement().getStyle().setMarginTop(5, Unit.PX);
         filterControlPanel = new HorizontalPanel();
@@ -1810,7 +1812,6 @@ public class LeaderboardPanel extends SimplePanel implements TimeListener, PlayS
 
         refreshAndSettingsPanel.add(refreshPanel);
         toolbarPanel.add(refreshAndSettingsPanel, DockPanel.EAST);
-        contentPanel.add(markPassingsPanel);
         contentPanel.add(markPassingsPanel.getEditButton());
         return toolbarPanel;
     }
