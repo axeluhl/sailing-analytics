@@ -1,38 +1,52 @@
 package com.sap.sailing.datamining;
 
+import java.util.HashSet;
+import java.util.Set;
+
 import org.osgi.framework.BundleActivator;
 import org.osgi.framework.BundleContext;
-import org.osgi.framework.ServiceRegistration;
+import org.osgi.framework.ServiceReference;
 
-import com.sap.sailing.datamining.impl.data.SailingDataMiningClassesWithFunctionsService;
-import com.sap.sse.datamining.ClassesWithFunctionsService;
+import com.sap.sailing.datamining.data.HasGPSFixContext;
+import com.sap.sse.datamining.ClassesWithFunctionsRegistrationService;
 
 public class Activator implements BundleActivator {
     
     public static final String dataRetrieverGroupName = "Sailing";
 
     private static BundleContext context;
-
-    private ServiceRegistration<ClassesWithFunctionsService> classesWithFunctionsServiceRegistration;
+    private ServiceReference<ClassesWithFunctionsRegistrationService> classesWithFunctionsRegistrationServiceReference;
 
     @Override
     public void start(BundleContext context) throws Exception {
         Activator.context = context;
-        registerClassesWithFunctionsService();
+        
+        classesWithFunctionsRegistrationServiceReference = Activator.context.getServiceReference(ClassesWithFunctionsRegistrationService.class);
+        Activator.context.getService(classesWithFunctionsRegistrationServiceReference).registerInternalClassesWithMarkedMethods(getInternalClassesWithMarkedMethods());
+        Activator.context.getService(classesWithFunctionsRegistrationServiceReference).registerExternalLibraryClasses(getExternalLibraryClasses());
     }
 
     @Override
     public void stop(BundleContext context) throws Exception {
-        unregisterClassesWithFunctionsService();
+        Activator.context.getService(classesWithFunctionsRegistrationServiceReference).unregisterAllFunctionsOf(getInternalClassesWithMarkedMethods());
+        Activator.context.getService(classesWithFunctionsRegistrationServiceReference).unregisterAllFunctionsOf(getExternalLibraryClasses());
     }
 
-    private void unregisterClassesWithFunctionsService() {
-        context.ungetService(classesWithFunctionsServiceRegistration.getReference());
+    public static Set<Class<?>> getInternalClassesWithMarkedMethods() {
+        Set<Class<?>> internalClasses = new HashSet<>();
+        /*
+         * This also contains the marked methods of
+         * HasTrackedRaceContext,
+         * HasTrackedLegContext and
+         * HasTrackedLegOfCompetitorContext,
+         * because these are the super types of HasGPSFixContext.
+         */
+        internalClasses.add(HasGPSFixContext.class);
+        return internalClasses;
     }
 
-    private void registerClassesWithFunctionsService() {
-        classesWithFunctionsServiceRegistration = context.registerService(ClassesWithFunctionsService.class,
-                new SailingDataMiningClassesWithFunctionsService(), null);
+    public static Set<Class<?>> getExternalLibraryClasses() {
+        return new HashSet<>();
     }
 
 }

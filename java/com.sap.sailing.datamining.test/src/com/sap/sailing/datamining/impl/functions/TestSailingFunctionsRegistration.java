@@ -11,10 +11,10 @@ import java.util.HashSet;
 import org.junit.BeforeClass;
 import org.junit.Test;
 
+import com.sap.sailing.datamining.Activator;
 import com.sap.sailing.datamining.data.HasGPSFixContext;
 import com.sap.sailing.datamining.data.HasTrackedLegOfCompetitorContext;
 import com.sap.sailing.datamining.data.HasTrackedRaceContext;
-import com.sap.sailing.datamining.impl.data.SailingDataMiningClassesWithFunctionsService;
 import com.sap.sailing.domain.base.Competitor;
 import com.sap.sailing.domain.base.Moving;
 import com.sap.sailing.domain.base.Nationality;
@@ -32,10 +32,8 @@ public class TestSailingFunctionsRegistration {
     
     @BeforeClass
     public static void setUpFunctionRegistryAndProvider() {
-        SailingDataMiningClassesWithFunctionsService classesWithFunctionsService = new SailingDataMiningClassesWithFunctionsService();
-        
         functionRegistry = new SimpleFunctionRegistry();
-        functionRegistry.registerAllWithInternalFunctionPolicy(classesWithFunctionsService.getInternalClassesWithMarkedMethods());
+        functionRegistry.registerAllWithInternalFunctionPolicy(Activator.getInternalClassesWithMarkedMethods());
     }
     
     @Test
