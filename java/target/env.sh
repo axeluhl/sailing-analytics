@@ -11,9 +11,13 @@ SERVER_NAME=MASTER
 
 MEMORY="1024m"
 
-# Queue Host and Name of the queue where to
+# Message Queue hostname where to
 # send messages for replicas (this server is master)
 REPLICATION_HOST=localhost
+# For the port, use 0 for the RabbitMQ default or a specific port that your RabbitMQ server is listening on
+REPLICATION_PORT=0
+# The name of the message queuing fan-out exchange that this server will use in its role as replication master.
+# Make sure this is unique so that no other master is writing to this exchange at any time.
 REPLICATION_CHANNEL=sapsailinganalytics-master
 
 TELNET_PORT=14888
@@ -23,10 +27,9 @@ MONGODB_PORT=27017
 MONGODB_NAME=winddb
 EXPEDITION_PORT=2010
 
-# Start replication upon startup?
-# If you activate this make sure to
-# set the REPLICATION_CHANNEL to the
-# same channel the master is using
+# Start replication upon startup? If you activate this make sure to
+# set the REPLICATE_MASTER_EXCHANGE_NAME variable to the
+# same channel the master is using in its REPLICATION_CHANNEL variable
 REPLICATE_ON_START=False
 
 # Host where the master Java instance is running
@@ -38,6 +41,11 @@ REPLICATE_MASTER_SERVLET_PORT=
 # (port is normally something like 5672)
 REPLICATE_MASTER_QUEUE_HOST=
 REPLICATE_MASTER_QUEUE_PORT=
+
+# Exchange name that the master from which to auto-replicate is using as
+# its REPLICATION_CHANNEL variable, mapping to the master's replication.exchangeName
+# system property.
+REPLICATE_MASTER_EXCHANGE_NAME=
 
 # Automatic build and test configuration
 DEPLOY_TO=server

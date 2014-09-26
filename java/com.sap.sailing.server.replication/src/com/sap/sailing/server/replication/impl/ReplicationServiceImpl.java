@@ -80,7 +80,16 @@ public class ReplicationServiceImpl implements ReplicationService, OperationExec
      * serialized form. Clients need to know this name to be able to bind their queues to the exchange.
      */
     private final String exchangeName;
+    
+    /**
+     * The host on which the RabbitMQ server runs
+     */
     private final String exchangeHost;
+    
+    /**
+     * The port on which to reach the RabbitMQ server, or 0 for the RabbitMQ default port
+     */
+    private final int exchangePort;
     
     /**
      * UUID that identifies this server
@@ -157,13 +166,18 @@ public class ReplicationServiceImpl implements ReplicationService, OperationExec
      */
     private long messageCount;
     
-    public ReplicationServiceImpl(String exchangeName, String exchangeHost, final ReplicationInstancesManager replicationInstancesManager) throws IOException {
-        this(exchangeName, exchangeHost, replicationInstancesManager, /* localService */ null, /* create RacingEventServiceTracker */ true);
+    /**
+     * @param exchangeName name of the fan-out exchange to which replication operations will be sent
+     * @param exchangeHost name of the host under which the RabbitMQ server can be reached 
+     * @param exchangePort port of the RabbitMQ server, or 0 for default port
+     */
+    public ReplicationServiceImpl(String exchangeName, String exchangeHost, int exchangePort, final ReplicationInstancesManager replicationInstancesManager) throws IOException {
+        this(exchangeName, exchangeHost, exchangePort, replicationInstancesManager, /* localService */ null, /* create RacingEventServiceTracker */ true);
     }
     
     private ReplicationServiceImpl(String exchangeName, String exchangeHost,
-            final ReplicationInstancesManager replicationInstancesManager, RacingEventService localService,
-            boolean createRacingEventServiceTracker) throws IOException {
+            int exchangePort, final ReplicationInstancesManager replicationInstancesManager,
+            RacingEventService localService, boolean createRacingEventServiceTracker) throws IOException {
         timer = new Timer("ReplicationServiceImpl timer for delayed task sending");
         this.replicationInstancesManager = replicationInstancesManager;
         replicaUUIDs = new HashMap<ReplicationMasterDescriptor, String>();
@@ -176,6 +190,7 @@ public class ReplicationServiceImpl implements ReplicationService, OperationExec
         this.localService = localService;
         this.exchangeName = exchangeName;
         this.exchangeHost = exchangeHost;
+        this.exchangePort = exchangePort;
         replicator = null;
         serverUUID = UUID.randomUUID();
         logger.info("Setting " + serverUUID.toString() + " as unique replication identifier.");
@@ -191,7 +206,7 @@ public class ReplicationServiceImpl implements ReplicationService, OperationExec
      */
     public ReplicationServiceImpl(String exchangeName, String exchangeHost,
             final ReplicationInstancesManager replicationInstancesManager, RacingEventService localService) throws IOException {
-        this(exchangeName, exchangeHost, replicationInstancesManager, localService, /* create RacingEventServiceTracker */ false);
+        this(exchangeName, exchangeHost, 0, replicationInstancesManager, localService, /* create RacingEventServiceTracker */ false);
     }
     
     protected ServiceTracker<RacingEventService, RacingEventService> getRacingEventServiceTracker() {
@@ -209,7 +224,10 @@ public class ReplicationServiceImpl implements ReplicationService, OperationExec
     @Override
     public Channel createMasterChannel() throws IOException, ConnectException {
         final ConnectionFactory connectionFactory = new ConnectionFactory();
-        connectionFactory.setHost(exchangeHost); // ...and use default port
+        connectionFactory.setHost(exchangeHost);
+        if (exchangePort != 0) {
+            connectionFactory.setPort(exchangePort);
+        }
         Channel result = null;
         try {
             result = connectionFactory.newConnection().createChannel();
