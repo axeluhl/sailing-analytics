@@ -37,10 +37,10 @@ REPLICATE_ON_START=False
 REPLICATE_MASTER_SERVLET_HOST=
 REPLICATE_MASTER_SERVLET_PORT=
 
-# Host and port where RabbitMQ is running 
-# (port is normally something like 5672)
+# Host where RabbitMQ is running 
 REPLICATE_MASTER_QUEUE_HOST=
-REPLICATE_MASTER_QUEUE_PORT=
+# Port that RabbitMQ is listening on (normally something like 5672); use 0 to connect to RabbitMQ's default port
+REPLICATE_MASTER_QUEUE_PORT=0
 
 # Exchange name that the master from which to auto-replicate is using as
 # its REPLICATION_CHANNEL variable, mapping to the master's replication.exchangeName

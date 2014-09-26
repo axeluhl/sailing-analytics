@@ -41,7 +41,8 @@ import com.sap.sailing.server.replication.ReplicationService;
  * <li><code>replicate.master.servlet.port</code>: the port for the HTTP connection described above</li>
  * <li><code>replicate.master.queue.host</code>: the name of the host running the RabbitMQ server; this replica will
  * connect to a fan-out exchange running on that server to receive the replication messages from the master</li>
- * <li><code>replicate.master.queue.port</code>: the port for connecting to the RabbitMQ server</li>
+ * <li><code>replicate.master.queue.port</code>: the port for connecting to the RabbitMQ server; use 0 to connect to
+ * Rabbit's default port</li>
  * <li><code>replicate.master.exchange.name</code>: name of the fan-out exchange that the remote master has created on
  * the RabbitMQ messaging system to which this replica connects</li>
  * </ul>
