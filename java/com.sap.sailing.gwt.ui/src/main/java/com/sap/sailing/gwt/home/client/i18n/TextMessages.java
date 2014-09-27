@@ -152,6 +152,7 @@ public interface TextMessages extends Messages {
     String regattasResultsTitle();
     String searchResultHeaderButton();
     String searchResultHeaderLabel();
+    String searchResultsFound();
     String searchResultHeaderPlaceholder();
     String searchResultMore();
     String searchResultSearch();
