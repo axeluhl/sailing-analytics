@@ -10,17 +10,13 @@ import java.util.Map.Entry;
 import com.google.gwt.cell.client.AbstractCell;
 import com.google.gwt.event.dom.client.ClickEvent;
 import com.google.gwt.event.dom.client.ClickHandler;
-import com.google.gwt.event.logical.shared.ValueChangeEvent;
-import com.google.gwt.event.logical.shared.ValueChangeHandler;
 import com.google.gwt.safehtml.shared.SafeHtml;
 import com.google.gwt.safehtml.shared.SafeHtmlBuilder;
 import com.google.gwt.user.cellview.client.CellTable;
 import com.google.gwt.user.cellview.client.Column;
 import com.google.gwt.user.client.rpc.AsyncCallback;
 import com.google.gwt.user.client.ui.Button;
-import com.google.gwt.user.client.ui.CheckBox;
 import com.google.gwt.user.client.ui.FlexTable;
-import com.google.gwt.user.client.ui.IntegerBox;
 import com.google.gwt.view.client.ListDataProvider;
 import com.google.gwt.view.client.SelectionChangeEvent;
 import com.google.gwt.view.client.SelectionChangeEvent.Handler;
@@ -74,9 +70,10 @@ public class EditMarkPassingsPanel extends FlexTable implements RaceSelectionCha
     private final SingleSelectionModel<Util.Pair<WaypointDTO, Date>> waypointSelectionModel;
     private List<WaypointDTO> currentWaypoints;
 
-    private final IntegerBox suppressMarkPassings;
-    private final CheckBox suppressMarkPassingsCheckBox;
-
+    private final Button suppressPassingsButton;
+    private final Button removeSuppressedPassingButton;
+    private Integer zeroBasedIndexOfFirstSuppressedWaypoint;
+    
     private final Button svButton;
     private final Button closeButton;
 
@@ -115,6 +112,7 @@ public class EditMarkPassingsPanel extends FlexTable implements RaceSelectionCha
             }
         });
         setTimeAsMarkPassingsButton = new Button("Set time as mark passing");
+        setTimeAsMarkPassingsButton.setEnabled(false);
         setTimeAsMarkPassingsButton.addClickHandler(new ClickHandler() {
             @Override
             public void onClick(ClickEvent event) {
@@ -137,6 +135,8 @@ public class EditMarkPassingsPanel extends FlexTable implements RaceSelectionCha
                 if (timePoint != null) {
                     timer.setTime(timePoint.getTime());
                 }
+                suppressPassingsButton.setEnabled(true);
+                setTimeAsMarkPassingsButton.setEnabled(true);
             }
         });
         wayPointSelectionTable = new CellTable<Util.Pair<WaypointDTO, Date>>();
@@ -183,21 +183,26 @@ public class EditMarkPassingsPanel extends FlexTable implements RaceSelectionCha
 
         waypointList.addDataDisplay(wayPointSelectionTable);
         wayPointSelectionTable.setSelectionModel(waypointSelectionModel);
-
-        suppressMarkPassings = new IntegerBox();
-        suppressMarkPassings.setWidth("1cm");
-        suppressMarkPassings.setEnabled(false);
-        suppressMarkPassingsCheckBox = new CheckBox("Suppress mark passings starting at Waypoint:");
-        suppressMarkPassingsCheckBox.addValueChangeHandler(new ValueChangeHandler<Boolean>() {
+        
+        suppressPassingsButton = new Button("Suppress after selected");
+        suppressPassingsButton.setEnabled(false);
+        suppressPassingsButton.addClickHandler(new ClickHandler() {
             @Override
-            public void onValueChange(ValueChangeEvent<Boolean> event) {
-                Boolean value = event.getValue();
-                suppressMarkPassings.setEnabled(value);
-                if (value == false) {
-                    suppressMarkPassings.setText("");
-                }
+            public void onClick(ClickEvent event) {
+                zeroBasedIndexOfFirstSuppressedWaypoint = Util.indexOf(currentWaypoints, waypointSelectionModel.getSelectedObject().getA());
+                removeSuppressedPassingButton.setEnabled(true);
             }
         });
+        
+        removeSuppressedPassingButton = new Button("Remove suppressed passing");
+        removeSuppressedPassingButton.setEnabled(false);
+        removeSuppressedPassingButton.addClickHandler(new ClickHandler() {
+            @Override
+            public void onClick(ClickEvent event) {
+                zeroBasedIndexOfFirstSuppressedWaypoint = null;
+            }
+        });
+        
 
         svButton = new Button(stringMessages.save());
         svButton.addClickHandler(new ClickHandler() {
@@ -206,10 +211,8 @@ public class EditMarkPassingsPanel extends FlexTable implements RaceSelectionCha
                 asyncExecutor.execute(new AsyncAction<Void>() {
                     @Override
                     public void execute(AsyncCallback<Void> callback) {
-                        Integer oneBasedIndexofsuppressed = suppressMarkPassings.getValue();
-                        Integer zeroBasedIndex = oneBasedIndexofsuppressed==null?null:oneBasedIndexofsuppressed-1;
                         sailingService.updateRaceLogMarkPassingData(leaderboard.name, column, column.getFleet(raceIdentifier),
-                                currentCompetitorChanges, zeroBasedIndex, competitorSelectionModel
+                                currentCompetitorChanges, zeroBasedIndexOfFirstSuppressedWaypoint, competitorSelectionModel
                                         .getSelectedCompetitors().iterator().next(), callback);
                     }
 
@@ -237,13 +240,13 @@ public class EditMarkPassingsPanel extends FlexTable implements RaceSelectionCha
             }
         });
         refreshWaypoints();
+        
+        setWidget(1, 0, wayPointSelectionTable);
+        setWidget(2, 0, setTimeAsMarkPassingsButton);
+        setWidget(2, 1, removeSetMarkPassingsButton);
 
-        setWidget(1, 0, setTimeAsMarkPassingsButton);
-        setWidget(2, 0, wayPointSelectionTable);
-        setWidget(3, 0, removeSetMarkPassingsButton);
-
-        setWidget(4, 0, suppressMarkPassingsCheckBox);
-        setWidget(4, 1, suppressMarkPassings);
+        setWidget(3, 0, suppressPassingsButton);
+        setWidget(3, 1, removeSuppressedPassingButton);
 
         setWidget(6, 1, svButton);
         setWidget(6, 2, closeButton);
@@ -272,7 +275,7 @@ public class EditMarkPassingsPanel extends FlexTable implements RaceSelectionCha
     private void disableEditing() {
         // TODO clear all current info
         currentCompetitorEdits.clear();
-        suppressMarkPassingsCheckBox.setValue(false);
+        suppressPassingsButton.setEnabled(false);
         waypointList.setList(new ArrayList<Util.Pair<WaypointDTO, Date>>());
         editMarkPassingsButton.setEnabled(false);
     }
@@ -282,8 +285,7 @@ public class EditMarkPassingsPanel extends FlexTable implements RaceSelectionCha
         removeSetMarkPassingsButton.setEnabled(false);
         final CompetitorDTO competitor = competitorSelectionModel.getSelectedCompetitors().iterator().next();
         currentCompetitorEdits = new HashMap<>();
-        suppressMarkPassingsCheckBox.setValue(false);
-        suppressMarkPassings.setText("");
+        suppressPassingsButton.setEnabled(false);
 
         // Get current edits
         asyncExecutor.execute(new AsyncAction<Map<Integer, Date>>() {
@@ -304,7 +306,8 @@ public class EditMarkPassingsPanel extends FlexTable implements RaceSelectionCha
                 for (Entry<Integer, Date> data : result.entrySet()) {
                     if (data.getValue() == null) {
                         if (data.getValue() == null) {
-                            setSuppressedWaypoint(data.getKey());
+                            zeroBasedIndexOfFirstSuppressedWaypoint = data.getKey();
+                            removeSuppressedPassingButton.setEnabled(true);
                         } else {
                             currentCompetitorEdits.put(data.getKey(), data.getValue());
                         }
@@ -336,11 +339,6 @@ public class EditMarkPassingsPanel extends FlexTable implements RaceSelectionCha
                 waypointList.setList(newMarkPassings);
             }
         });
-    }
-
-    private void setSuppressedWaypoint(Integer oneBasedIndex) {
-        suppressMarkPassingsCheckBox.setValue(true);
-        suppressMarkPassings.setValue(oneBasedIndex);
     }
 
     private void refreshWaypoints() {
