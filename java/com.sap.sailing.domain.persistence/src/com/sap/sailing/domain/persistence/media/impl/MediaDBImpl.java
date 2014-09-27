@@ -205,16 +205,18 @@ public class MediaDBImpl implements MediaDB {
     }
 
     @Override
-    public void updateRace(String dbId, Set<RegattaAndRaceIdentifier> regattasAndRaces) {
+    public void updateRace(String dbId, Set<RegattaAndRaceIdentifier> assignedRaces) {
         BasicDBObject updateQuery = new BasicDBObject();
         updateQuery.append(DbNames.Fields._id.name(), new ObjectId(dbId));
 
         BasicDBList objectList = new BasicDBList();
-        for (RegattaAndRaceIdentifier regattaAndRace : regattasAndRaces) {
-            BasicDBObject object = new BasicDBObject();
-            object.put(DbNames.Fields.REGATTA_NAME.name(), regattaAndRace.getRegattaName());
-            object.put(DbNames.Fields.RACE_NAME.name(), regattaAndRace.getRaceName());
-            objectList.add(object);
+        if (assignedRaces != null) {
+            for (RegattaAndRaceIdentifier assignedRace : assignedRaces) {
+                BasicDBObject object = new BasicDBObject();
+                object.put(DbNames.Fields.REGATTA_NAME.name(), assignedRace.getRegattaName());
+                object.put(DbNames.Fields.RACE_NAME.name(), assignedRace.getRaceName());
+                objectList.add(object);
+            }
         }
         BasicDBObject updateCommand = new BasicDBObject();
         updateCommand.append("$set", new BasicDBObject(DbNames.Fields.ASSIGNED_RACES.name(), objectList));

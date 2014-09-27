@@ -91,8 +91,8 @@ public class MediaPlayerManagerComponent implements Component<Void>, PlayStateLi
         this.raceTimer.addPlayStateListener(this);
         this.raceTimer.addTimeListener(this);
         this.mediaService = mediaService;
-        mediaService.getMediaTracksForRace(this.getRaceIdentifier(), getAssignedMediaCallback());
-        mediaService.getMediaTracksInTimeRange(this.getRaceIdentifier(), getOverlappingMediaCallback());
+        mediaService.getMediaTracksForRace(this.getCurrentRace(), getAssignedMediaCallback());
+        mediaService.getMediaTracksInTimeRange(this.getCurrentRace(), getOverlappingMediaCallback());
         this.stringMessages = stringMessages;
         this.errorReporter = errorReporter;
         this.userAgent = userAgent;
@@ -510,7 +510,7 @@ public class MediaPlayerManagerComponent implements Component<Void>, PlayStateLi
     }
 
     private TimePoint getRaceStartTime() {
-        Date startOfRace = raceTimesInfoProvider.getRaceTimesInfo(getRaceIdentifier()).startOfRace;
+        Date startOfRace = raceTimesInfoProvider.getRaceTimesInfo(getCurrentRace()).startOfRace;
         if (startOfRace != null) {
             return new MillisecondsTimePoint(startOfRace);
         } else {
@@ -609,7 +609,7 @@ public class MediaPlayerManagerComponent implements Component<Void>, PlayStateLi
         TimePoint raceStartTime = getRaceStartTime();
         TimePoint defaultStartTime = raceStartTime;
         NewMediaDialog dialog = new NewMediaDialog(defaultStartTime, MediaPlayerManagerComponent.this.stringMessages,
-                this.getRaceIdentifier(), new DialogCallback<MediaTrack>() {
+                this.getCurrentRace(), new DialogCallback<MediaTrack>() {
 
                     @Override
                     public void cancel() {
@@ -779,12 +779,19 @@ public class MediaPlayerManagerComponent implements Component<Void>, PlayStateLi
         return userAgent;
     }
 
-    public RegattaAndRaceIdentifier getRaceIdentifier() {
+    @Override
+    public RegattaAndRaceIdentifier getCurrentRace() {
         return raceIdentifier;
     }
 
+    @Override
     public MediaServiceAsync getMediaService() {
         return mediaService;
+    }
+
+    @Override
+    public ErrorReporter getErrorReporter() {
+        return errorReporter;
     }
 
 }

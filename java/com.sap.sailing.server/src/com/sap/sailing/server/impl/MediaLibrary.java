@@ -225,7 +225,9 @@ class MediaLibrary {
             if (mediaTrack != null) {
                 updateMapByRace_Remove(mediaTrack); //Cannot use updateCache_Update method, because race is changed
                 mediaTrack.assignedRaces.clear();
-                mediaTrack.assignedRaces.addAll(changedMediaTrack.assignedRaces);
+                if (changedMediaTrack.assignedRaces != null) { //safety check for imports from legacy installations which have no assignedRaces field 
+                    mediaTrack.assignedRaces.addAll(changedMediaTrack.assignedRaces);
+                }
                 updateMapByRace_Add(mediaTrack);
             }
         } finally {

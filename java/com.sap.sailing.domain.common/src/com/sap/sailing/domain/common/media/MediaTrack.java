@@ -95,12 +95,12 @@ public class MediaTrack implements Serializable {
 
     public MediaTrack(String title, String url, TimePoint startTime, Duration duration, MimeType mimeType,
             Set<RegattaAndRaceIdentifier> assignedRaces) {
+        this();
         this.title = title;
         this.url = url;
         this.startTime = startTime;
         this.duration = duration;
         this.mimeType = mimeType;
-        this.assignedRaces = new HashSet<RegattaAndRaceIdentifier>();
         if (assignedRaces != null) {
             this.assignedRaces.addAll(assignedRaces);
         }
