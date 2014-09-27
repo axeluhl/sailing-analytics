@@ -281,7 +281,7 @@ public class MediaPanel extends FlowPanel {
 
         // regattasAndRaces
 
-        Column<MediaTrack, String> regattaAndRaceColumn = new Column<MediaTrack, String>(new ClickableTextCell() {
+        Column<MediaTrack, String> assignedRacesColumn = new Column<MediaTrack, String>(new ClickableTextCell() {
             public void onEnterKeyDown(Context context, Element parent, String value, NativeEvent event,
                     ValueUpdater<String> valueUpdater) {
                 String type = event.getType();
@@ -295,25 +295,26 @@ public class MediaPanel extends FlowPanel {
             @Override
             public String getValue(MediaTrack mediaTrack) {
                 if (mediaTrack.assignedRaces != null) {
-                    return listRegattasAndRaces(mediaTrack);
+                    return listAssignedRaces(mediaTrack);
                 } else
                     return "";
             }
 
         };
-        regattaAndRaceColumn.setSortable(true);
-        sortHandler.setComparator(regattaAndRaceColumn, new Comparator<MediaTrack>() {
+        assignedRacesColumn.setSortable(true);
+        sortHandler.setComparator(assignedRacesColumn, new Comparator<MediaTrack>() {
             public int compare(MediaTrack mediaTrack1, MediaTrack mediaTrack2) {
-                return (listRegattasAndRaces(mediaTrack1)).compareTo(listRegattasAndRaces(mediaTrack2));
+                return (listAssignedRaces(mediaTrack1)).compareTo(listAssignedRaces(mediaTrack2));
             }
         });
-        mediaTracksTable.addColumn(regattaAndRaceColumn, stringMessages.linkedRaces());
-        regattaAndRaceColumn.setFieldUpdater(new FieldUpdater<MediaTrack, String>() {
-            public void update(int index, MediaTrack mediaTrack, String newRegattaAndRace) {
+        mediaTracksTable.addColumn(assignedRacesColumn, stringMessages.linkedRaces());
+        assignedRacesColumn.setFieldUpdater(new FieldUpdater<MediaTrack, String>() {
+            public void update(int index, MediaTrack mediaTrack, String newAssignedRace) {
                 // Called when the user changes the value.
-                if ("".equals(newRegattaAndRace) || !newRegattaAndRace.contains(" ")) {
+                if (newAssignedRace.trim().isEmpty()) {
                     mediaTrack.assignedRaces.clear();
                 } else {
+                    //no op
                 }
                 mediaService.updateRace(mediaTrack, new AsyncCallback<Void>() {
 
@@ -329,14 +330,7 @@ public class MediaPanel extends FlowPanel {
                 });
             }
         });
-        mediaTracksTable.setColumnWidth(regattaAndRaceColumn, 100, Unit.PCT);
-
-        // regattaAndRaceColumn.addClickHandler(new ClickHandler() {
-        // @Override
-        // public void onClick(ClickEvent event) {
-        // addUrlMediaTrack();
-        // }
-        // });
+        mediaTracksTable.setColumnWidth(assignedRacesColumn, 100, Unit.PCT);
 
         // start time
         Column<MediaTrack, String> startTimeColumn = new Column<MediaTrack, String>(new EditTextCell()) {
@@ -521,14 +515,14 @@ public class MediaPanel extends FlowPanel {
         return latestDate;
     }
 
-    private String listRegattasAndRaces(MediaTrack mediaTrack) {
+    private String listAssignedRaces(MediaTrack mediaTrack) {
 
         if (mediaTrack.assignedRaces.size() > 1) {
             return String.valueOf(mediaTrack.assignedRaces.size());
         } else {
             String value = "";
-            for (RegattaAndRaceIdentifier regattaAndRace : mediaTrack.assignedRaces) {
-                value += regattaAndRace.getRegattaName() + " " + regattaAndRace.getRaceName() + ", ";
+            for (RegattaAndRaceIdentifier assignedRace : mediaTrack.assignedRaces) {
+                value += assignedRace.getRegattaName() + " " + assignedRace.getRaceName() + ", ";
             }
             if (value.length() > 1) {
                 return value.substring(0, value.length() - 2);
@@ -545,7 +539,7 @@ public class MediaPanel extends FlowPanel {
     public void openRegattasAndRacesDialog(final Context context, final Element parent,
             final ValueUpdater<String> valueUpdater) {
         final MediaTrack mediaTrack = (MediaTrack) context.getKey();
-        final RegattasAndRacesDialog dialog = new RegattasAndRacesDialog(sailingService, mediaTrack, errorReporter,
+        final AssignRacesToMediaDialog dialog = new AssignRacesToMediaDialog(sailingService, mediaTrack, errorReporter,
                 regattaRefresher, stringMessages, null, new DialogCallback<Set<RegattaAndRaceIdentifier>>() {
 
                     @Override

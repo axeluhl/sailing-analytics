@@ -28,8 +28,10 @@ public abstract class AbstractMediaPlayer implements MediaPlayer {
     }
 
     public void raceTimeChanged(Date raceTime) {
-        raceTimeInMillis = raceTime.getTime();
-        alignTime();
+        if (raceTime != null) {
+            raceTimeInMillis = raceTime.getTime();
+            alignTime();
+        }
     }
     
     @Override
@@ -47,19 +49,26 @@ public abstract class AbstractMediaPlayer implements MediaPlayer {
         long mediaStartTimeInMillis = mediaTrack.startTime.asMillis();
         long mediaTimeInMillis = mediaStartTimeInMillis + getCurrentMediaTimeMillis();
         long mediaTimeOffFromRaceInMillis = raceTimeInMillis - mediaTimeInMillis;
-        if (Math.abs(mediaTimeOffFromRaceInMillis) > TOLERATED_LAG_IN_MILLISECONDS) {
+        if (isOffsetTolerable(mediaTimeOffFromRaceInMillis)) {
             forceAlign(mediaStartTimeInMillis);
         }
+    }
+
+    private boolean isOffsetTolerable(long mediaTimeOffFromRaceInMillis) {
+        return Math.abs(mediaTimeOffFromRaceInMillis) > TOLERATED_LAG_IN_MILLISECONDS;
     }
 
     private void forceAlign(long mediaStartTimeInMillis) {
         double mediaTime = (raceTimeInMillis - mediaStartTimeInMillis) / 1000d;
         if (mediaTime < 0) {
             pauseMedia();
-        } else if (mediaTime > getDuration()) {
-            pauseMedia();
         } else {
-            setCurrentMediaTime(mediaTime);
+            double duration = getDuration();
+            if (mediaTime > duration) {
+                pauseMedia();
+            } else {
+                setCurrentMediaTime(mediaTime);
+            }
         }
     }
 

@@ -57,7 +57,5 @@ public interface MediaPlayerManager {
 
     UserAgentDetails getUserAgent();
 
-    boolean hasLoadedAllMediaTracks();
-
 }
 

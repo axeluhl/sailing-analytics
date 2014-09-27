@@ -132,4 +132,52 @@ public class MediaTrackTest {
         
     }
 
+    @Test
+    public void testNoDurationWithOverlap() throws Exception {
+        MediaTrack mediaTrack = new MediaTrack();
+        mediaTrack.startTime = MillisecondsTimePoint.now();
+        mediaTrack.duration = null; // --> open end
+        
+        TimePoint startTime = mediaTrack.startTime.plus(2);
+        TimePoint endTime = startTime.plus(2); 
+        assertTrue(mediaTrack.overlapsWith(startTime, endTime));
+        
+    }
+
+    @Test
+    public void testNoDurationWithoutOverlap() throws Exception {
+        MediaTrack mediaTrack = new MediaTrack();
+        mediaTrack.startTime = MillisecondsTimePoint.now();
+        mediaTrack.duration = null; // --> open end
+        
+        TimePoint startTime = mediaTrack.startTime.minus(10);
+        TimePoint endTime = startTime.plus(2); 
+        assertFalse(mediaTrack.overlapsWith(startTime, endTime));
+        
+    }
+
+    @Test
+    public void testNoDurationOpenEnd() throws Exception {
+        MediaTrack mediaTrack = new MediaTrack();
+        mediaTrack.startTime = MillisecondsTimePoint.now();
+        mediaTrack.duration = null; // --> open end
+        
+        TimePoint startTime = mediaTrack.startTime.minus(10);
+        TimePoint endTime = null; 
+        assertTrue(mediaTrack.overlapsWith(startTime, endTime));
+        
+    }
+
+    @Test
+    public void testNoDurationOpenEnd2() throws Exception {
+        MediaTrack mediaTrack = new MediaTrack();
+        mediaTrack.startTime = MillisecondsTimePoint.now();
+        mediaTrack.duration = null; // --> open end
+        
+        TimePoint startTime = mediaTrack.startTime.plus(10);
+        TimePoint endTime = null; 
+        assertTrue(mediaTrack.overlapsWith(startTime, endTime));
+        
+    }
+
 }

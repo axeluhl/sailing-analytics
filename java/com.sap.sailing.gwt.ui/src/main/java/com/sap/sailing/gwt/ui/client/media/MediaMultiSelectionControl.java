@@ -323,9 +323,6 @@ public class MediaMultiSelectionControl extends AbstractMediaSelectionControl im
 
     @Override
     protected void updateUi() {
-        if (mediaPlayerManager.hasLoadedAllMediaTracks()) {
-
-        }
     }
 
 }
