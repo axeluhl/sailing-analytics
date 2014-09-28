@@ -71,6 +71,7 @@
 	<source path='ui/simulator' />
 	<source path='ui/regattaoverview' />
 	<source path='ui/leaderboard'/>
+	<source path='ui/raceboard'/>
 	<source path='autoplay' />
 	<source path='common' />
 	<source path='idangerous' />

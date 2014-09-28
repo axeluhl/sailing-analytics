@@ -7,7 +7,6 @@ import com.sap.sailing.gwt.autoplay.client.place.player.DesktopPlayerView;
 import com.sap.sailing.gwt.autoplay.client.place.player.PlayerView;
 import com.sap.sailing.gwt.autoplay.client.place.start.DesktopStartView;
 import com.sap.sailing.gwt.autoplay.client.place.start.StartView;
-import com.sap.sailing.gwt.ui.shared.EventDTO;
 import com.sap.sse.gwt.client.mvp.ErrorView;
 
 
@@ -30,8 +29,8 @@ public class DesktopApplicationClientFactory extends AbstractApplicationClientFa
     }
 
     @Override
-    public PlayerView createPlayerView(EventDTO event, String leaderboardName) {
-        return new DesktopPlayerView(event, leaderboardName, getPlaceNavigator());
+    public PlayerView createPlayerView() {
+        return new DesktopPlayerView(getPlaceNavigator());
     }
 
     @Override

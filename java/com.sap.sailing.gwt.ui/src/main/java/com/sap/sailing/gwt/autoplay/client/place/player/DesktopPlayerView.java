@@ -2,10 +2,11 @@ package com.sap.sailing.gwt.autoplay.client.place.player;
 
 import com.google.gwt.core.client.GWT;
 import com.google.gwt.uibinder.client.UiBinder;
+import com.google.gwt.uibinder.client.UiField;
 import com.google.gwt.user.client.ui.Composite;
+import com.google.gwt.user.client.ui.DockLayoutPanel;
 import com.google.gwt.user.client.ui.Widget;
 import com.sap.sailing.gwt.autoplay.client.app.PlaceNavigator;
-import com.sap.sailing.gwt.ui.shared.EventDTO;
 
 public class DesktopPlayerView extends Composite implements PlayerView {
     private static PlayerViewUiBinder uiBinder = GWT.create(PlayerViewUiBinder.class);
@@ -13,17 +14,24 @@ public class DesktopPlayerView extends Composite implements PlayerView {
     interface PlayerViewUiBinder extends UiBinder<Widget, DesktopPlayerView> {
     }
 
-    private final EventDTO event;
-    private final String leaderboardName;
+    @UiField DockLayoutPanel dockPanel;
     
-    public DesktopPlayerView(EventDTO event, String leaderboardName, PlaceNavigator navigator) {
-        this.event = event;
-        this.leaderboardName = leaderboardName;
-        
+    public DesktopPlayerView(PlaceNavigator navigator) {
         initWidget(uiBinder.createAndBindUi(this));
     }
-    
-    private void updateUI() {
-        
+
+    @Override
+    public void clearDockPanel() {
+        int childWidgetCount = dockPanel.getWidgetCount();
+        for(int i = childWidgetCount-1; i >=0; i--) {
+            Widget widget = dockPanel.getWidget(i);
+            dockPanel.remove(widget);
+        }
     }
+    
+    @Override
+    public DockLayoutPanel getDockPanel() {
+        return dockPanel;
+    }
+
 }

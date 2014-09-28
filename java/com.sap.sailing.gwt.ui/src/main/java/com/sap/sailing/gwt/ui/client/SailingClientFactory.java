@@ -11,6 +11,8 @@ import com.sap.sse.gwt.client.mvp.ErrorView;
  */
 public interface SailingClientFactory extends ClientFactory {
     SailingServiceAsync getSailingService();
+
+    MediaServiceAsync getMediaService();
     
     ErrorView createErrorView(String errorMessage, Throwable errorReason);
 }

@@ -7,10 +7,11 @@
 	<ui:style>
         .mainPanel {
 			margin:10px;
+			padding-top: 1em;
 		}
     </ui:style>
     <g:HTMLPanel styleName="{style.mainPanel}">
-		<div class="{res.mainCss.grid}">
+		<div class="{res.mainCss.grid}" style="padding-bottom:1em;">
 			<div class="{res.mediaCss.small2} {res.mediaCss.columns}">
 			    <ui:text from='{i18n.events}'/>
 	        </div>
@@ -18,7 +19,7 @@
 				<g:ListBox ui:field="eventSelectionBox" />
 	        </div>
 		</div>
-		<div ui:field="leaderboardSelectionDiv" class="{res.mainCss.grid}">
+		<div ui:field="leaderboardSelectionDiv" class="{res.mainCss.grid}" style="padding-bottom:1em;">
 			<div class="{res.mediaCss.small2} {res.mediaCss.columns}">
 			    <ui:text from='{i18n.leaderboard}'/>
 	        </div>
