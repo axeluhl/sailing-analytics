@@ -32,7 +32,7 @@ import com.sap.sailing.domain.common.WindSource;
 import com.sap.sailing.domain.common.WindSourceType;
 import com.sap.sailing.domain.common.racelog.Flags;
 import com.sap.sailing.domain.leaderboard.ScoringScheme;
-import com.sap.sailing.domain.markpassingcalculation.MarkPassingUpdateListener;
+import com.sap.sailing.domain.markpassingcalculation.MarkPassingCalculator;
 import com.sap.sailing.domain.racelog.RaceLog;
 import com.sap.sailing.domain.racelog.tracking.GPSFixStore;
 import com.sap.sailing.domain.tracking.CourseDesignChangedListener;
@@ -1000,10 +1000,10 @@ public class MockedTrackedRace implements DynamicTrackedRace {
         // TODO Auto-generated method stub
         return null;
     }
-    
-    @Override
-    public void setMarkPassingRaceLogListener(MarkPassingUpdateListener listener) {
-        // TODO Auto-generated method stub  
-    } 
 
+    @Override
+    public void setMarkPassingCalculator(MarkPassingCalculator calculator) {
+        // TODO Auto-generated method stub
+        
+    }
 }

@@ -25,6 +25,7 @@ import com.sap.sailing.domain.common.SpeedWithBearing;
 import com.sap.sailing.domain.common.Tack;
 import com.sap.sailing.domain.common.TimePoint;
 import com.sap.sailing.domain.common.WindSource;
+import com.sap.sailing.domain.markpassingcalculation.MarkPassingCalculator;
 import com.sap.sailing.domain.racelog.RaceLog;
 import com.sap.sailing.domain.racelog.tracking.GPSFixStore;
 import com.sap.sailing.domain.tracking.CourseDesignChangedListener;
@@ -614,6 +615,12 @@ public class DummyTrackedRace extends TrackedRaceWithWindEssentials {
     public Position getCenterOfCourse(TimePoint at) {
         // TODO Auto-generated method stub
         return null;
+    }
+
+    @Override
+    public void setMarkPassingCalculator(MarkPassingCalculator calculator) {
+        // TODO Auto-generated method stub
+        
     }
 
 }
