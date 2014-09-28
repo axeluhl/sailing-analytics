@@ -28,8 +28,8 @@ import com.sap.sailing.domain.common.WindSource;
 import com.sap.sailing.domain.common.WindSourceType;
 import com.sap.sailing.domain.common.impl.MillisecondsTimePoint;
 import com.sap.sailing.domain.common.impl.WindSourceImpl;
-import com.sap.sailing.domain.markpassingcalculation.MarkPassingUpdateListener;
 import com.sap.sailing.domain.common.racelog.Flags;
+import com.sap.sailing.domain.markpassingcalculation.MarkPassingCalculator;
 import com.sap.sailing.domain.racelog.RaceLog;
 import com.sap.sailing.domain.racelog.tracking.GPSFixStore;
 import com.sap.sailing.domain.tracking.CourseDesignChangedListener;
@@ -71,7 +71,7 @@ DynamicTrackedRace, GPSTrackListener<Competitor, GPSFixMoving> {
     private transient Set<CourseDesignChangedListener> courseDesignChangedListeners;
     private transient Set<StartTimeChangedListener> startTimeChangedListeners;
     private transient Set<RaceAbortedListener> raceAbortedListeners;
-
+    
     public DynamicTrackedRaceImpl(TrackedRegatta trackedRegatta, RaceDefinition race, Iterable<Sideline> sidelines,
             WindStore windStore, GPSFixStore gpsFixStore, long delayToLiveInMillis, long millisecondsOverWhichToAverageWind, long millisecondsOverWhichToAverageSpeed,
             long delayForCacheInvalidationOfWindEstimation) {
@@ -929,7 +929,8 @@ DynamicTrackedRace, GPSTrackListener<Competitor, GPSFixMoving> {
     }
     
     @Override
-    public void setMarkPassingRaceLogListener(MarkPassingUpdateListener listener) {
-        logListener.setMarkPassingUpdateListener(listener);
+    public void setMarkPassingCalculator(MarkPassingCalculator calculator) {
+        super.setMarkPassingCalculator(calculator);
+        logListener.setMarkPassingUpdateListener(calculator.getListener());
     }
 }

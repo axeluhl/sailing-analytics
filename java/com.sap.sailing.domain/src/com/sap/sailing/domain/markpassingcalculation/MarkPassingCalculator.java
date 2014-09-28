@@ -72,7 +72,7 @@ public class MarkPassingCalculator {
             chooser.calculateMarkPassDeltas(c, allCandidates.getA(), allCandidates.getB());
         }
         if (listen) {
-            new Thread(new Listen(), "MarkPassingCalculator listener for race " + race.getRace().getName()).start();
+            new Thread(new Listen(), "MarkPassingCalculator for race " + race.getRace().getName()).start();
         }
     }
 
@@ -251,5 +251,9 @@ public class MarkPassingCalculator {
             Util.Pair<Iterable<Candidate>, Iterable<Candidate>> allCandidates = finder.getAllCandidates(c);
             chooser.calculateMarkPassDeltas(c, allCandidates.getA(), allCandidates.getB());
         }
+    }
+
+    public MarkPassingUpdateListener getListener() {
+        return listener;
     }
 }

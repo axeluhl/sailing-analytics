@@ -5,7 +5,6 @@ import com.sap.sailing.domain.base.CourseBase;
 import com.sap.sailing.domain.base.Mark;
 import com.sap.sailing.domain.common.TimePoint;
 import com.sap.sailing.domain.common.WindSource;
-import com.sap.sailing.domain.markpassingcalculation.MarkPassingUpdateListener;
 import com.sap.sailing.domain.common.racelog.Flags;
 
 public interface DynamicTrackedRace extends TrackedRace {
@@ -101,6 +100,4 @@ public interface DynamicTrackedRace extends TrackedRace {
     void invalidateStartTime();
     
     void invalidateEndTime();
-
-    void setMarkPassingRaceLogListener(MarkPassingUpdateListener listener);
 }

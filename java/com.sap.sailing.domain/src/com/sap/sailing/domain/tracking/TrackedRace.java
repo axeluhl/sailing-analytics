@@ -28,6 +28,7 @@ import com.sap.sailing.domain.common.TrackedRaceStatusEnum;
 import com.sap.sailing.domain.common.WindSource;
 import com.sap.sailing.domain.common.WindSourceType;
 import com.sap.sailing.domain.common.dto.TrackedRaceDTO;
+import com.sap.sailing.domain.markpassingcalculation.MarkPassingCalculator;
 import com.sap.sailing.domain.racelog.RaceLog;
 import com.sap.sailing.domain.racelog.tracking.DeviceMappingEvent;
 import com.sap.sailing.domain.racelog.tracking.GPSFixStore;
@@ -707,5 +708,7 @@ public interface TrackedRace extends Serializable {
      * Computes the center point of the course's marks at the given time point.
      */
     Position getCenterOfCourse(TimePoint at);
+
+    void setMarkPassingCalculator(MarkPassingCalculator calculator);
 
 }

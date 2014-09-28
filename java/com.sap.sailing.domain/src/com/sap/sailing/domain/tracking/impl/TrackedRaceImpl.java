@@ -43,6 +43,7 @@ import com.sap.sailing.domain.base.SpeedWithBearingWithConfidence;
 import com.sap.sailing.domain.base.SpeedWithConfidence;
 import com.sap.sailing.domain.base.Timed;
 import com.sap.sailing.domain.base.Waypoint;
+import com.sap.sailing.domain.base.impl.CourseImpl;
 import com.sap.sailing.domain.base.impl.DouglasPeucker;
 import com.sap.sailing.domain.base.impl.SpeedWithConfidenceImpl;
 import com.sap.sailing.domain.common.Bearing;
@@ -84,6 +85,7 @@ import com.sap.sailing.domain.common.racelog.tracking.TransformationException;
 import com.sap.sailing.domain.common.scalablevalue.impl.ScalablePosition;
 import com.sap.sailing.domain.confidence.ConfidenceBasedWindAverager;
 import com.sap.sailing.domain.confidence.ConfidenceFactory;
+import com.sap.sailing.domain.markpassingcalculation.MarkPassingCalculator;
 import com.sap.sailing.domain.racelog.RaceLog;
 import com.sap.sailing.domain.racelog.analyzing.impl.StartTimeFinder;
 import com.sap.sailing.domain.racelog.tracking.DeviceMapping;
@@ -99,12 +101,13 @@ import com.sap.sailing.domain.tracking.MarkPassing;
 import com.sap.sailing.domain.tracking.Track;
 import com.sap.sailing.domain.tracking.TrackedLeg;
 import com.sap.sailing.domain.tracking.TrackedLegOfCompetitor;
+import com.sap.sailing.domain.tracking.TrackedRace;
 import com.sap.sailing.domain.tracking.TrackedRaceStatus;
 import com.sap.sailing.domain.tracking.TrackedRaceWithWindEssentials;
 import com.sap.sailing.domain.tracking.TrackedRegatta;
 import com.sap.sailing.domain.tracking.Wind;
-import com.sap.sailing.domain.tracking.WindPositionMode;
 import com.sap.sailing.domain.tracking.WindLegTypeAndLegBearingCache;
+import com.sap.sailing.domain.tracking.WindPositionMode;
 import com.sap.sailing.domain.tracking.WindStore;
 import com.sap.sailing.domain.tracking.WindTrack;
 import com.sap.sailing.domain.tracking.WindWithConfidence;
@@ -227,6 +230,8 @@ public abstract class TrackedRaceImpl extends TrackedRaceWithWindEssentials impl
     
     private transient Map<TimePoint, Future<Wind>> directionFromStartToNextMarkCache;
 
+    protected MarkPassingCalculator markPassingCalculator;
+    
     private final ConcurrentHashMap<Mark, GPSFixTrack<Mark, GPSFix>> markTracks;
     
     private final Map<String, Sideline> courseSidelines;
@@ -2605,11 +2610,13 @@ public abstract class TrackedRaceImpl extends TrackedRaceWithWindEssentials impl
     }
 
     private void suspendAllCachesNotUpdatingWhileLoading() {
+        markPassingCalculator.suspend();
         crossTrackErrorCache.suspend();
         maneuverCache.suspend();
     }
 
     private void resumeAllCachesNotUpdatingWhileLoading() {
+        markPassingCalculator.resume();
         crossTrackErrorCache.resume();
         maneuverCache.resume();
     }
@@ -3117,6 +3124,11 @@ public abstract class TrackedRaceImpl extends TrackedRaceWithWindEssentials impl
     @Override
     public GPSFixStore getGPSFixStore() {
     	return gpsFixStore;
+    }
+    
+    @Override
+    public void setMarkPassingCalculator(MarkPassingCalculator calculator) {
+        markPassingCalculator = calculator;
     }
 
     @Override
