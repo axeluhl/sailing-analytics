@@ -234,10 +234,16 @@ public class DynamicTrackedRaceLogListener extends BaseRaceLogEventVisitor {
         if (markPassingUpdateListener != null) {
             RaceLogEvent revokedEvent = null;
             for (RaceLog log : raceLogs) {
-                revokedEvent = log.getEventById(event.getRevokedEventId());
-                if (revokedEvent != null) {
-                    break;
+                try {
+                    log.lockForRead();
+                    revokedEvent = log.getEventById(event.getRevokedEventId());
+                    if (revokedEvent != null) {
+                        break;
+                    }
+                } finally {
+                    log.unlockAfterRead();
                 }
+
             }
             if (revokedEvent instanceof SuppressedMarkPassingsEvent) {
                 markPassingUpdateListener.removeSuppressedPassing(revokedEvent.getInvolvedBoats().get(0));

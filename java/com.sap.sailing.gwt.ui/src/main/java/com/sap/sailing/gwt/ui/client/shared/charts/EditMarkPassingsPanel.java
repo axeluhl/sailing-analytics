@@ -200,6 +200,7 @@ public class EditMarkPassingsPanel extends FlexTable implements RaceSelectionCha
             @Override
             public void onClick(ClickEvent event) {
                 zeroBasedIndexOfFirstSuppressedWaypoint = null;
+                removeSuppressedPassingButton.setEnabled(false);
             }
         });
         
@@ -248,8 +249,8 @@ public class EditMarkPassingsPanel extends FlexTable implements RaceSelectionCha
         setWidget(3, 0, suppressPassingsButton);
         setWidget(3, 1, removeSuppressedPassingButton);
 
-        setWidget(6, 1, svButton);
-        setWidget(6, 2, closeButton);
+        setWidget(6, 0, svButton);
+        setWidget(6, 1, closeButton);
         setVisible(false);
 
     }
@@ -286,6 +287,7 @@ public class EditMarkPassingsPanel extends FlexTable implements RaceSelectionCha
         final CompetitorDTO competitor = competitorSelectionModel.getSelectedCompetitors().iterator().next();
         currentCompetitorEdits = new HashMap<>();
         suppressPassingsButton.setEnabled(false);
+        removeSuppressedPassingButton.setEnabled(false);
 
         // Get current edits
         asyncExecutor.execute(new AsyncAction<Map<Integer, Date>>() {
