@@ -59,22 +59,21 @@ public class EditMarkPassingsPanel extends FlexTable implements RaceSelectionCha
     private RaceColumnDTO column;
 
     private Map<Integer, Date> currentCompetitorEdits = new HashMap<>();
-    private Map<Integer, Date> currentCompetitorChanges = new HashMap<>();
 
     private final Button editMarkPassingsButton;
 
-    private final Button setTimeAsMarkPassingsButton;
-    private final Button removeSetMarkPassingsButton;
-    private final CellTable<Util.Pair<WaypointDTO, Date>> wayPointSelectionTable;
-    private final ListDataProvider<Util.Pair<WaypointDTO, Date>> waypointList;
-    private final SingleSelectionModel<Util.Pair<WaypointDTO, Date>> waypointSelectionModel;
+    private final CellTable<Util.Pair<Integer, Date>> wayPointSelectionTable;
+    private final ListDataProvider<Util.Pair<Integer, Date>> waypointList;
+    private final SingleSelectionModel<Util.Pair<Integer, Date>> waypointSelectionModel;
     private List<WaypointDTO> currentWaypoints;
+    private CompetitorDTO competitor;
 
+    private final Button setTimeAsMarkPassingsButton;
+    private final Button removeFixedMarkPassingsButton;
     private final Button suppressPassingsButton;
     private final Button removeSuppressedPassingButton;
     private Integer zeroBasedIndexOfFirstSuppressedWaypoint;
-    
-    private final Button svButton;
+
     private final Button closeButton;
 
     public EditMarkPassingsPanel(final SailingServiceAsync sailingService, AsyncActionsExecutor asyncActionsExecutor,
@@ -91,7 +90,6 @@ public class EditMarkPassingsPanel extends FlexTable implements RaceSelectionCha
         this.competitorSelectionModel = competitorSelectionModel;
 
         editMarkPassingsButton.setEnabled(false);
-
         competitorSelectionModel.addCompetitorSelectionChangeListener(this);
         editMarkPassingsButton.addClickHandler(new ClickHandler() {
             @Override
@@ -101,36 +99,16 @@ public class EditMarkPassingsPanel extends FlexTable implements RaceSelectionCha
             }
         });
 
-        removeSetMarkPassingsButton = new Button("Remove fixed mark passing");
-        removeSetMarkPassingsButton.setEnabled(false);
-        removeSetMarkPassingsButton.addClickHandler(new ClickHandler() {
-            @Override
-            public void onClick(ClickEvent event) {
-                currentCompetitorChanges.put(currentWaypoints.indexOf(waypointSelectionModel.getSelectedObject().getA()), null);
-                wayPointSelectionTable.redraw();
-                removeSetMarkPassingsButton.setEnabled(false);
-            }
-        });
-        setTimeAsMarkPassingsButton = new Button("Set time as mark passing");
-        setTimeAsMarkPassingsButton.setEnabled(false);
-        setTimeAsMarkPassingsButton.addClickHandler(new ClickHandler() {
-            @Override
-            public void onClick(ClickEvent event) {
-                Pair<WaypointDTO, Date> selectedObject = waypointSelectionModel.getSelectedObject();
-                currentCompetitorChanges.put(currentWaypoints.indexOf(selectedObject.getA()), timer.getTime());
-                wayPointSelectionTable.redraw();
-            }
-        });
+        // Waypoint list
         currentWaypoints = new ArrayList<>();
         waypointList = new ListDataProvider<>();
-        waypointSelectionModel = new SingleSelectionModel<Util.Pair<WaypointDTO, Date>>();
+        waypointSelectionModel = new SingleSelectionModel<Util.Pair<Integer, Date>>();
         waypointSelectionModel.addSelectionChangeHandler(new Handler() {
             @Override
             public void onSelectionChange(SelectionChangeEvent event) {
-                Pair<WaypointDTO, Date> selectedObject = waypointSelectionModel.getSelectedObject();
-                Integer waypoint = currentWaypoints.indexOf(selectedObject.getA());
-                removeSetMarkPassingsButton.setEnabled(currentCompetitorEdits.get(waypoint) != null
-                        || currentCompetitorChanges.get(waypoint) != null);
+                Pair<Integer, Date> selectedObject = waypointSelectionModel.getSelectedObject();
+                Integer waypoint = selectedObject.getA();
+                removeFixedMarkPassingsButton.setEnabled(currentCompetitorEdits.get(waypoint) != null);
                 Date timePoint = selectedObject.getB();
                 if (timePoint != null) {
                     timer.setTime(timePoint.getTime());
@@ -139,37 +117,32 @@ public class EditMarkPassingsPanel extends FlexTable implements RaceSelectionCha
                 setTimeAsMarkPassingsButton.setEnabled(true);
             }
         });
-        wayPointSelectionTable = new CellTable<Util.Pair<WaypointDTO, Date>>();
-        wayPointSelectionTable.addColumn(new Column<Util.Pair<WaypointDTO, Date>, SafeHtml>(new AnchorCell()) {
+        wayPointSelectionTable = new CellTable<Util.Pair<Integer, Date>>();
+        wayPointSelectionTable.addColumn(new Column<Util.Pair<Integer, Date>, SafeHtml>(new AnchorCell()) {
             @Override
-            public SafeHtml getValue(final Util.Pair<WaypointDTO, Date> object) {
+            public SafeHtml getValue(final Util.Pair<Integer, Date> object) {
                 return new SafeHtml() {
                     private static final long serialVersionUID = 1L;
 
                     @Override
                     public String asString() {
-                        return object.getA().getName();
+                        return currentWaypoints.get(object.getA()).getName();
                     }
                 };
             }
         }, "Waypoint");
-        wayPointSelectionTable.addColumn(new Column<Util.Pair<WaypointDTO, Date>, SafeHtml>(new AnchorCell()) {
+        wayPointSelectionTable.addColumn(new Column<Util.Pair<Integer, Date>, SafeHtml>(new AnchorCell()) {
             @Override
-            public SafeHtml getValue(final Pair<WaypointDTO, Date> object) {
+            public SafeHtml getValue(final Pair<Integer, Date> object) {
                 final Date date;
-                Date editedDate = currentCompetitorChanges.get(currentWaypoints.indexOf(object.getA()));
-                if (editedDate != null) {
-                    date = editedDate;
-                } else {
-                    date = object.getB();
-                }
+                date = object.getB();
                 return new SafeHtml() {
                     private static final long serialVersionUID = 1L;
 
                     @Override
                     public String asString() {
                         // TODO this is really unclean (Problem: no calendar)
-                        // Oh and time zones are scary
+                        // Oh and time zones could be problem
                         String string = "";
                         if (date != null) {
                             string = date.toString();
@@ -183,55 +156,108 @@ public class EditMarkPassingsPanel extends FlexTable implements RaceSelectionCha
 
         waypointList.addDataDisplay(wayPointSelectionTable);
         wayPointSelectionTable.setSelectionModel(waypointSelectionModel);
-        
-        suppressPassingsButton = new Button("Suppress after selected");
-        suppressPassingsButton.setEnabled(false);
-        suppressPassingsButton.addClickHandler(new ClickHandler() {
-            @Override
-            public void onClick(ClickEvent event) {
-                zeroBasedIndexOfFirstSuppressedWaypoint = Util.indexOf(currentWaypoints, waypointSelectionModel.getSelectedObject().getA());
-                removeSuppressedPassingButton.setEnabled(true);
-            }
-        });
-        
-        removeSuppressedPassingButton = new Button("Remove suppressed passing");
-        removeSuppressedPassingButton.setEnabled(false);
-        removeSuppressedPassingButton.addClickHandler(new ClickHandler() {
-            @Override
-            public void onClick(ClickEvent event) {
-                zeroBasedIndexOfFirstSuppressedWaypoint = null;
-                removeSuppressedPassingButton.setEnabled(false);
-            }
-        });
-        
 
-        svButton = new Button(stringMessages.save());
-        svButton.addClickHandler(new ClickHandler() {
+        // Buttons for fixing
+        removeFixedMarkPassingsButton = new Button("Remove fixed mark passing");
+        removeFixedMarkPassingsButton.setEnabled(false);
+        removeFixedMarkPassingsButton.addClickHandler(new ClickHandler() {
             @Override
             public void onClick(ClickEvent event) {
                 asyncExecutor.execute(new AsyncAction<Void>() {
                     @Override
                     public void execute(AsyncCallback<Void> callback) {
-                        sailingService.updateRaceLogMarkPassingData(leaderboard.name, column, column.getFleet(raceIdentifier),
-                                currentCompetitorChanges, zeroBasedIndexOfFirstSuppressedWaypoint, competitorSelectionModel
-                                        .getSelectedCompetitors().iterator().next(), callback);
+                        sailingService.updateFixedMarkPassing(leaderboard.name, column, column.getFleet(raceIdentifier),
+                                waypointSelectionModel.getSelectedObject().getA(), null, competitor, callback);
                     }
-
                 }, new AsyncCallback<Void>() {
-
                     @Override
                     public void onFailure(Throwable caught) {
-                        errorReporter.reportError("Error submitting new changes");
+                        errorReporter.reportError("Error removing fixed mark passing");
                     }
 
                     @Override
                     public void onSuccess(Void result) {
                         refillList();
                     }
-
                 });
             }
         });
+        setTimeAsMarkPassingsButton = new Button("Set time as mark passing");
+        setTimeAsMarkPassingsButton.setEnabled(false);
+        setTimeAsMarkPassingsButton.addClickHandler(new ClickHandler() {
+            @Override
+            public void onClick(ClickEvent event) {
+                asyncExecutor.execute(new AsyncAction<Void>() {
+                    @Override
+                    public void execute(AsyncCallback<Void> callback) {
+                        sailingService.updateFixedMarkPassing(leaderboard.name, column, column.getFleet(raceIdentifier),
+                                waypointSelectionModel.getSelectedObject().getA(), timer.getTime(), competitor, callback);
+                    }
+                }, new AsyncCallback<Void>() {
+                    @Override
+                    public void onFailure(Throwable caught) {
+                        errorReporter.reportError("Error setting fixed mark passing");
+                    }
+
+                    @Override
+                    public void onSuccess(Void result) {
+                        refillList();
+                    }
+                });
+            }
+        });
+
+        // Button for suppressing
+        suppressPassingsButton = new Button("Suppress after selected");
+        suppressPassingsButton.setEnabled(false);
+        suppressPassingsButton.addClickHandler(new ClickHandler() {
+            @Override
+            public void onClick(ClickEvent event) {
+                asyncExecutor.execute(new AsyncAction<Void>() {
+                    @Override
+                    public void execute(AsyncCallback<Void> callback) {
+                        sailingService.updateSuppressedMarkPassings(leaderboard.name, column, column.getFleet(raceIdentifier),
+                                waypointSelectionModel.getSelectedObject().getA(), competitor, callback);
+                    }
+                }, new AsyncCallback<Void>() {
+                    @Override
+                    public void onFailure(Throwable caught) {
+                        errorReporter.reportError("Error suppressing mark passings");
+                    }
+
+                    @Override
+                    public void onSuccess(Void result) {
+                        refillList();
+                    }
+                });
+            }
+        });
+
+        removeSuppressedPassingButton = new Button("Remove suppressed passing");
+        removeSuppressedPassingButton.setEnabled(false);
+        removeSuppressedPassingButton.addClickHandler(new ClickHandler() {
+            @Override
+            public void onClick(ClickEvent event) {
+                asyncExecutor.execute(new AsyncAction<Void>() {
+                    @Override
+                    public void execute(AsyncCallback<Void> callback) {
+                        sailingService.updateSuppressedMarkPassings(leaderboard.name, column, column.getFleet(raceIdentifier), null,
+                                competitor, callback);
+                    }
+                }, new AsyncCallback<Void>() {
+                    @Override
+                    public void onFailure(Throwable caught) {
+                        errorReporter.reportError("Error suppressing mark passings");
+                    }
+
+                    @Override
+                    public void onSuccess(Void result) {
+                        refillList();
+                    }
+                });
+            }
+        });
+
         closeButton = new Button(stringMessages.close());
         closeButton.addClickHandler(new ClickHandler() {
             @Override
@@ -241,18 +267,13 @@ public class EditMarkPassingsPanel extends FlexTable implements RaceSelectionCha
             }
         });
         refreshWaypoints();
-        
         setWidget(1, 0, wayPointSelectionTable);
         setWidget(2, 0, setTimeAsMarkPassingsButton);
-        setWidget(2, 1, removeSetMarkPassingsButton);
-
+        setWidget(2, 1, removeFixedMarkPassingsButton);
         setWidget(3, 0, suppressPassingsButton);
         setWidget(3, 1, removeSuppressedPassingButton);
-
-        setWidget(6, 0, svButton);
-        setWidget(6, 1, closeButton);
+        setWidget(4, 0, closeButton);
         setVisible(false);
-
     }
 
     @Override
@@ -275,21 +296,16 @@ public class EditMarkPassingsPanel extends FlexTable implements RaceSelectionCha
 
     private void disableEditing() {
         // TODO clear all current info
-        currentCompetitorEdits.clear();
-        suppressPassingsButton.setEnabled(false);
-        waypointList.setList(new ArrayList<Util.Pair<WaypointDTO, Date>>());
-        editMarkPassingsButton.setEnabled(false);
+        waypointList.setList(new ArrayList<Util.Pair<Integer, Date>>());
+        disableButtons();
     }
 
     private void refillList() {
         editMarkPassingsButton.setEnabled(true);
-        removeSetMarkPassingsButton.setEnabled(false);
-        final CompetitorDTO competitor = competitorSelectionModel.getSelectedCompetitors().iterator().next();
-        currentCompetitorEdits = new HashMap<>();
-        suppressPassingsButton.setEnabled(false);
-        removeSuppressedPassingButton.setEnabled(false);
+        disableButtons();
 
         // Get current edits
+        competitor = competitorSelectionModel.getSelectedCompetitors().iterator().next();
         asyncExecutor.execute(new AsyncAction<Map<Integer, Date>>() {
             @Override
             public void execute(AsyncCallback<Map<Integer, Date>> callback) {
@@ -307,12 +323,10 @@ public class EditMarkPassingsPanel extends FlexTable implements RaceSelectionCha
             public void onSuccess(Map<Integer, Date> result) {
                 for (Entry<Integer, Date> data : result.entrySet()) {
                     if (data.getValue() == null) {
-                        if (data.getValue() == null) {
-                            zeroBasedIndexOfFirstSuppressedWaypoint = data.getKey();
-                            removeSuppressedPassingButton.setEnabled(true);
-                        } else {
-                            currentCompetitorEdits.put(data.getKey(), data.getValue());
-                        }
+                        zeroBasedIndexOfFirstSuppressedWaypoint = data.getKey();
+                        removeSuppressedPassingButton.setEnabled(true);
+                    } else {
+                        currentCompetitorEdits.put(data.getKey(), data.getValue());
                     }
                 }
             }
@@ -332,15 +346,22 @@ public class EditMarkPassingsPanel extends FlexTable implements RaceSelectionCha
 
             @Override
             public void onSuccess(Map<Integer, Date> result) {
-
-                List<Util.Pair<WaypointDTO, Date>> newMarkPassings = new ArrayList<>();
+                List<Util.Pair<Integer, Date>> newMarkPassings = new ArrayList<>();
                 for (WaypointDTO waypoint : currentWaypoints) {
-                    Date date = result.get(Util.indexOf(currentWaypoints, waypoint));
-                    newMarkPassings.add(new Util.Pair<WaypointDTO, Date>(waypoint, date));
+                    int index = currentWaypoints.indexOf(waypoint);
+                    newMarkPassings.add(new Util.Pair<Integer, Date>(index, result.get(index)));
                 }
                 waypointList.setList(newMarkPassings);
             }
         });
+    }
+
+    private void disableButtons() {
+        currentCompetitorEdits.clear();
+        setTimeAsMarkPassingsButton.setEnabled(false);
+        removeFixedMarkPassingsButton.setEnabled(false);
+        suppressPassingsButton.setEnabled(false);
+        removeSuppressedPassingButton.setEnabled(false);
     }
 
     private void refreshWaypoints() {
@@ -389,8 +410,8 @@ public class EditMarkPassingsPanel extends FlexTable implements RaceSelectionCha
             }
         }
     }
-    
-    public Button getEditButton(){
+
+    public Button getEditButton() {
         return editMarkPassingsButton;
     }
 }

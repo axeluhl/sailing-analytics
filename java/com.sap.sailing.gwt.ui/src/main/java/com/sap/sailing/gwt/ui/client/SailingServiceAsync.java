@@ -645,7 +645,9 @@ public interface SailingServiceAsync {
     void getCompetitorRaceLogMarkPassingData(String leaderboardName, RaceColumnDTO raceColumnDTO, FleetDTO fleet, CompetitorDTO competitor,
             AsyncCallback<Map<Integer, Date>> callback);
 
-    void updateRaceLogMarkPassingData(String leaderboardName, RaceColumnDTO raceColumnDTO, FleetDTO fleet,
-            Map<Integer, Date> newFixedPassings, Integer newZeroBasedIndexOfSuppressedMarkPassing, CompetitorDTO competitorDTO,
-            AsyncCallback<Void> callback);
+    void updateSuppressedMarkPassings(String leaderboardName, RaceColumnDTO raceColumnDTO, FleetDTO fleet,
+            Integer newZeroBasedIndexOfSuppressedMarkPassing, CompetitorDTO competitorDTO, AsyncCallback<Void> callback);
+
+    void updateFixedMarkPassing(String leaderboardName, RaceColumnDTO raceColumnDTO, FleetDTO fleet, Integer indexOfWaypoint,
+            Date dateOfMarkPassing, CompetitorDTO competitorDTO, AsyncCallback<Void> callback);
 }

@@ -532,7 +532,10 @@ public interface SailingService extends RemoteService {
             fleet,
             CompetitorDTO competitor);
 
-    void updateRaceLogMarkPassingData(String leaderboardName, RaceColumnDTO raceColumnDTO, FleetDTO fleet,
-            Map<Integer, Date> newFixedPassings, Integer newZeroBasedIndexOfSuppressedMarkPassing, CompetitorDTO competitorDTO);
+    void updateSuppressedMarkPassings(String leaderboardName, RaceColumnDTO raceColumnDTO, FleetDTO fleet,
+            Integer newZeroBasedIndexOfSuppressedMarkPassing, CompetitorDTO competitorDTO);
+
+    void updateFixedMarkPassing(String leaderboardName, RaceColumnDTO raceColumnDTO, FleetDTO fleet, Integer indexOfWaypoint,
+            Date dateOfMarkPassing, CompetitorDTO competitorDTO);
 
 }

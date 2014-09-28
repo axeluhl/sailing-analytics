@@ -4955,9 +4955,36 @@ public class SailingServiceImpl extends ProxiedRemoteServiceServlet implements S
     }
 
     @Override
-    public void updateRaceLogMarkPassingData(String leaderboardName, RaceColumnDTO raceColumnDTO, FleetDTO fleet,
-            Map<Integer, Date> newFixedPassings, Integer newZeroBasedIndexOfSuppressedMarkPassing, CompetitorDTO competitorDTO) {
-        Map<Integer, FixedMarkPassingEvent> oldFixedPassings = new HashMap<>();
+    public void updateFixedMarkPassing(String leaderboardName, RaceColumnDTO raceColumnDTO, FleetDTO fleet, Integer indexOfWaypoint,
+            Date dateOfMarkPassing, CompetitorDTO competitorDTO) {
+        RaceLog raceLog = getService().getRaceLog(leaderboardName, raceColumnDTO.getName(), fleet.getName());
+        Competitor competitor = getCompetitor(competitorDTO);
+        FixedMarkPassingEvent oldFixedMarkPassingEvent = null;
+        for (RaceLogEvent event : raceLog.getUnrevokedEvents()) {
+            if (event instanceof FixedMarkPassingEventImpl && event.getInvolvedBoats().contains(competitor)) {
+                FixedMarkPassingEvent fixedEvent = (FixedMarkPassingEvent) event;
+                if (fixedEvent.getZeroBasedIndexOfPassedWaypoint() == indexOfWaypoint) {
+                    oldFixedMarkPassingEvent = fixedEvent;
+                }
+            }
+        }
+        if (oldFixedMarkPassingEvent != null) {
+            try {
+                raceLog.revokeEvent(getService().getServerAuthor(), oldFixedMarkPassingEvent);
+            } catch (NotRevokableException e) {
+                e.printStackTrace();
+            }
+        }
+        if (dateOfMarkPassing != null) {
+            raceLog.add(RaceLogEventFactory.INSTANCE.createFixedMarkPassingEvent(MillisecondsTimePoint.now(), getService()
+                    .getServerAuthor(), UUID.randomUUID(), Arrays.asList(competitor), raceLog.getCurrentPassId(),
+                    new MillisecondsTimePoint(dateOfMarkPassing), indexOfWaypoint));
+        }
+    }
+    
+    @Override
+    public void updateSuppressedMarkPassings(String leaderboardName, RaceColumnDTO raceColumnDTO, FleetDTO fleet,
+            Integer newZeroBasedIndexOfSuppressedMarkPassing, CompetitorDTO competitorDTO) {
         SuppressedMarkPassingsEvent oldSuppressedMarkPassingEvent = null;
         RaceLog raceLog = getService().getRaceLog(leaderboardName, raceColumnDTO.getName(), fleet.getName());
         Competitor competitor = getCompetitor(competitorDTO);
@@ -4965,13 +4992,10 @@ public class SailingServiceImpl extends ProxiedRemoteServiceServlet implements S
         for (RaceLogEvent event : unrevokedEvents) {
             if (event instanceof SuppressedMarkPassingsEvent && event.getInvolvedBoats().contains(competitor)) {
                 oldSuppressedMarkPassingEvent = (SuppressedMarkPassingsEvent) event;
-            } else if (event instanceof FixedMarkPassingEventImpl && event.getInvolvedBoats().contains(competitor)) {
-                FixedMarkPassingEvent fixedEvent = (FixedMarkPassingEvent) event;
-                oldFixedPassings.put(fixedEvent.getZeroBasedIndexOfPassedWaypoint(), fixedEvent);
+                break;
             }
         }
 
-        // Update Suppressed
         final boolean create;
         final boolean revoke;
         if (oldSuppressedMarkPassingEvent == null) {
@@ -5003,33 +5027,6 @@ public class SailingServiceImpl extends ProxiedRemoteServiceServlet implements S
             raceLog.add(RaceLogEventFactory.INSTANCE.createSuppressedMarkPassingsEvent(MillisecondsTimePoint.now(), getService()
                     .getServerAuthor(), UUID.randomUUID(), Arrays.asList(competitor), raceLog.getCurrentPassId(),
                     newZeroBasedIndexOfSuppressedMarkPassing));
-        }
-
-        // Update Fixed
-        List<FixedMarkPassingEvent> eventsToRevoke = new ArrayList<>();
-        Map<Integer, TimePoint> eventsToCreate = new HashMap<>();
-        for (Entry<Integer, Date> newFixed : newFixedPassings.entrySet()) {
-            FixedMarkPassingEvent fixedMarkPassingEvent = oldFixedPassings.get(newFixed.getKey());
-            if (fixedMarkPassingEvent != null) {
-                eventsToRevoke.add(fixedMarkPassingEvent);
-            }
-            if (newFixed.getValue() != null) {
-                eventsToCreate.put(newFixed.getKey(), new MillisecondsTimePoint(newFixed.getValue()));
-            }
-        }
-        for (FixedMarkPassingEvent event : eventsToRevoke) {
-            try {
-                raceLog.revokeEvent(getService().getServerAuthor(), event);
-            } catch (NotRevokableException e) {
-                e.printStackTrace();
-            }
-        }
-        for (Entry<Integer, TimePoint> newEvent : eventsToCreate.entrySet()) {
-            TimePoint now = MillisecondsTimePoint.now();
-            RaceLogEvent event = null;
-            event = RaceLogEventFactory.INSTANCE.createFixedMarkPassingEvent(now, getService().getServerAuthor(), UUID.randomUUID(),
-                    Arrays.asList(competitor), raceLog.getCurrentPassId(), newEvent.getValue(), newEvent.getKey());
-            raceLog.add(event);
         }
     }
 
