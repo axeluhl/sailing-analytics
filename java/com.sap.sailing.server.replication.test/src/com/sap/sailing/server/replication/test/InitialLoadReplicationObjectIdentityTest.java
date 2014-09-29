@@ -128,13 +128,13 @@ public class InitialLoadReplicationObjectIdentityTest extends AbstractServerRepl
         event.addLeaderboardGroup(leaderboardGroup);
         
         /* Media Library */
-        Set<RegattaAndRaceIdentifier> regattasAndRaces = new HashSet<RegattaAndRaceIdentifier>();
-        regattasAndRaces.add(new RegattaNameAndRaceName("49er", "R1"));
-        MediaTrack mediaTrack1 = new MediaTrack("title-1", "url", MillisecondsTimePoint.now(), MillisecondsDurationImpl.ONE_HOUR, MimeType.mp4, regattasAndRaces);
+        Set<RegattaAndRaceIdentifier> assignedRaces = new HashSet<RegattaAndRaceIdentifier>();
+        assignedRaces.add(new RegattaNameAndRaceName("49er", "R1"));
+        MediaTrack mediaTrack1 = new MediaTrack("title-1", "url", MillisecondsTimePoint.now(), MillisecondsDurationImpl.ONE_HOUR, MimeType.mp4, assignedRaces);
         master.mediaTrackAdded(mediaTrack1);
-        MediaTrack mediaTrack2 = new MediaTrack("title-2", "url", MillisecondsTimePoint.now(), MillisecondsDurationImpl.ONE_HOUR, MimeType.ogv, regattasAndRaces);
+        MediaTrack mediaTrack2 = new MediaTrack("title-2", "url", MillisecondsTimePoint.now(), MillisecondsDurationImpl.ONE_HOUR, MimeType.ogv, assignedRaces);
         master.mediaTrackAdded(mediaTrack2);
-        MediaTrack mediaTrack3 = new MediaTrack("title-3", "url", MillisecondsTimePoint.now(), MillisecondsDurationImpl.ONE_HOUR, MimeType.mp4, regattasAndRaces);
+        MediaTrack mediaTrack3 = new MediaTrack("title-3", "url", MillisecondsTimePoint.now(), MillisecondsDurationImpl.ONE_HOUR, MimeType.mp4, assignedRaces);
         master.mediaTrackAdded(mediaTrack3);
         
         /* fire up replication */

@@ -279,7 +279,7 @@ public class MediaPanel extends FlowPanel {
         });
         mediaTracksTable.setColumnWidth(urlColumn, 100, Unit.PCT);
 
-        // regattasAndRaces
+        // assingedRaces
 
         Column<MediaTrack, String> assignedRacesColumn = new Column<MediaTrack, String>(new ClickableTextCell() {
             public void onEnterKeyDown(Context context, Element parent, String value, NativeEvent event,
@@ -288,7 +288,7 @@ public class MediaPanel extends FlowPanel {
                 int keyCode = event.getKeyCode();
                 boolean enterPressed = KEYUP.equals(type) && keyCode == KeyCodes.KEY_ENTER;
                 if (CLICK.equals(type) || enterPressed) {
-                    openRegattasAndRacesDialog(context, parent, valueUpdater);
+                    openAssignedRacesDialog(context, parent, valueUpdater);
                 }
             }
         }) {
@@ -536,7 +536,7 @@ public class MediaPanel extends FlowPanel {
         loadMediaTracks();
     }
 
-    public void openRegattasAndRacesDialog(final Context context, final Element parent,
+    public void openAssignedRacesDialog(final Context context, final Element parent,
             final ValueUpdater<String> valueUpdater) {
         final MediaTrack mediaTrack = (MediaTrack) context.getKey();
         final AssignRacesToMediaDialog dialog = new AssignRacesToMediaDialog(sailingService, mediaTrack, errorReporter,
@@ -547,15 +547,15 @@ public class MediaPanel extends FlowPanel {
                     }
 
                     @Override
-                    public void ok(Set<RegattaAndRaceIdentifier> regattas) {
-                        if (regattas.size() >= 0) {
+                    public void ok(Set<RegattaAndRaceIdentifier> assignedRaces) {
+                        if (assignedRaces.size() >= 0) {
                             String value = "";
-                            for (RegattaAndRaceIdentifier regattasAndRaces : regattas) {
-                                value = value.concat(regattasAndRaces.getRegattaName() + "    "
-                                        + regattasAndRaces.getRaceName() + ",");
+                            for (RegattaAndRaceIdentifier assignedRace : assignedRaces) {
+                                value = value.concat(assignedRace.getRegattaName() + "    "
+                                        + assignedRace.getRaceName() + ",");
                             }
                             mediaTrack.assignedRaces.clear();
-                            mediaTrack.assignedRaces.addAll(regattas);
+                            mediaTrack.assignedRaces.addAll(assignedRaces);
                             valueUpdater.update(value);
                         }
 
@@ -563,7 +563,7 @@ public class MediaPanel extends FlowPanel {
                 });
 
         regattasDisplayers.add(dialog);
-        dialog.ensureDebugId("RegattasAndRacesDialog");
+        dialog.ensureDebugId("AssignedRacesDialog");
         dialog.show();
     }
 

@@ -73,7 +73,7 @@ public class NewMediaWithRaceSelectionDialog extends NewMediaDialog {
                         }
                     }
                 });
-        racesForMediaDialog.ensureDebugId("RegattasAndRacesDialog");
+        racesForMediaDialog.ensureDebugId("AssignedRacesDialog");
         racesForMediaDialog.hideRefreshButton();
         regattasDisplayers.add(racesForMediaDialog);
 

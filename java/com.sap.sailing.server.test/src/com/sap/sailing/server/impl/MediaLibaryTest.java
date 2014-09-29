@@ -50,9 +50,9 @@ public class MediaLibaryTest {
         TimePoint startTime = MillisecondsTimePoint.now();
         Duration duration = MillisecondsDurationImpl.ONE_HOUR;
         MimeType mimeType = MimeType.mp4;
-        Set<RegattaAndRaceIdentifier> regattasAndRaces = new HashSet<RegattaAndRaceIdentifier>();
-        regattasAndRaces.add(RACE_1);
-        MediaTrack mediaTrack = new MediaTrack(dbId, title, url, startTime, duration, mimeType, regattasAndRaces);
+        Set<RegattaAndRaceIdentifier> assignedRaces = new HashSet<RegattaAndRaceIdentifier>();
+        assignedRaces.add(RACE_1);
+        MediaTrack mediaTrack = new MediaTrack(dbId, title, url, startTime, duration, mimeType, assignedRaces);
         return mediaTrack;
     }
     
