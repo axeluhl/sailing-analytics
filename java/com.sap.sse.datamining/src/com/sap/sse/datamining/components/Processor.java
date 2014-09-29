@@ -33,6 +33,8 @@ public interface Processor<InputType> {
      * To shut down the process cleanly use {@link #finish()}.
      */
     public void abort();
+    
+    public Class<InputType> getInputType();
 
     /**
      * Takes a result builder and fills it with its additional data and the data of its result receivers.

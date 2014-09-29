@@ -13,6 +13,7 @@ import org.junit.Test;
 import com.sap.sse.datamining.AdditionalResultDataBuilder;
 import com.sap.sse.datamining.components.Processor;
 import com.sap.sse.datamining.test.util.ConcurrencyTestsUtil;
+import com.sap.sse.datamining.test.util.components.NullProcessor;
 
 public class TestAbstractParallelProcessorWithManySimpleInstructions {
     
@@ -23,30 +24,20 @@ public class TestAbstractParallelProcessorWithManySimpleInstructions {
     
     @Before
     public void initializeProcessor() {
-        Processor<Integer> receiver = new Processor<Integer>() {
+        Processor<Integer> receiver = new NullProcessor<Integer>(Integer.class) {
             @Override
             public void processElement(Integer element) {
                 incrementSum(element);
             }
             @Override
-            public void onFailure(Throwable failure) {
-            }
-            @Override
             public void finish() throws InterruptedException {
                 receiverWasToldToFinish = true;
-            }
-            @Override
-            public void abort() {
-            }
-            @Override
-            public AdditionalResultDataBuilder getAdditionalResultData(AdditionalResultDataBuilder additionalDataBuilder) {
-                return additionalDataBuilder;
             }
         };
         
         Collection<Processor<Integer>> receivers = new ArrayList<>();
         receivers.add(receiver);
-        processor = new AbstractSimpleParallelProcessor<Integer, Integer>(ConcurrencyTestsUtil.getExecutor(), receivers) {
+        processor = new AbstractSimpleParallelProcessor<Integer, Integer>(Integer.class, ConcurrencyTestsUtil.getExecutor(), receivers) {
             @Override
             protected Callable<Integer> createInstruction(final Integer element) {
                 return new Callable<Integer>() {

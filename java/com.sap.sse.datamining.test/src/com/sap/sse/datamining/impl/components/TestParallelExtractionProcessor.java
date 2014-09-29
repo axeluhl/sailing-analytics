@@ -13,15 +13,15 @@ import java.util.Map;
 import org.junit.Before;
 import org.junit.Test;
 
-import com.sap.sse.datamining.AdditionalResultDataBuilder;
 import com.sap.sse.datamining.components.Processor;
 import com.sap.sse.datamining.factories.FunctionFactory;
 import com.sap.sse.datamining.functions.Function;
 import com.sap.sse.datamining.shared.GroupKey;
 import com.sap.sse.datamining.shared.impl.GenericGroupKey;
-import com.sap.sse.datamining.test.components.util.Number;
 import com.sap.sse.datamining.test.util.ConcurrencyTestsUtil;
 import com.sap.sse.datamining.test.util.FunctionTestsUtil;
+import com.sap.sse.datamining.test.util.components.NullProcessor;
+import com.sap.sse.datamining.test.util.components.Number;
 
 public class TestParallelExtractionProcessor {
     
@@ -39,23 +39,11 @@ public class TestParallelExtractionProcessor {
     public void initializeReceivers() {
         receivedValues = new HashMap<>();
         
-        Processor<GroupedDataEntry<Integer>> receiver = new Processor<GroupedDataEntry<Integer>>() {
+        @SuppressWarnings("unchecked")
+        Processor<GroupedDataEntry<Integer>> receiver = new NullProcessor<GroupedDataEntry<Integer>>((Class<GroupedDataEntry<Integer>>)(Class<?>) GroupedDataEntry.class) {
             @Override
             public void processElement(GroupedDataEntry<Integer> element) {
                 receivedValues.put(element.getKey(), element.getDataEntry());
-            }
-            @Override
-            public void onFailure(Throwable failure) {
-            }
-            @Override
-            public void finish() throws InterruptedException {
-            }
-            @Override
-            public void abort() {
-            }
-            @Override
-            public AdditionalResultDataBuilder getAdditionalResultData(AdditionalResultDataBuilder additionalDataBuilder) {
-                return additionalDataBuilder;
             }
         };
         

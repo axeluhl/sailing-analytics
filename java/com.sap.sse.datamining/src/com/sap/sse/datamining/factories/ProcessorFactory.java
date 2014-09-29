@@ -94,8 +94,8 @@ public class ProcessorFactory {
      * The {@link DataMiningActivator} will be used to get the missing objects for the construction (like
      * the executor).
      */
-    public static <ElementType> Processor<ElementType> createGroupingProcessor(Processor<GroupedDataEntry<ElementType>> extractionProcessor, List<Function<?>> dimensionsToGroupBy) {
-        return createGroupingProcessor(Arrays.asList(extractionProcessor), dimensionsToGroupBy);
+    public static <DataType> Processor<DataType> createGroupingProcessor(Class<DataType> dataType, Processor<GroupedDataEntry<DataType>> extractionProcessor,  List<Function<?>> dimensionsToGroupBy) {
+        return createGroupingProcessor(dataType, Arrays.asList(extractionProcessor), dimensionsToGroupBy);
     }
 
     /**
@@ -103,8 +103,8 @@ public class ProcessorFactory {
      * The {@link DataMiningActivator} will be used to get the missing objects for the construction (like
      * the executor).
      */
-    public static <ElementType> Processor<ElementType> createGroupingProcessor(Collection<Processor<GroupedDataEntry<ElementType>>> resultReceivers, List<Function<?>> dimensionsToGroupBy) {
-        return new ParallelMultiDimensionsValueNestingGroupingProcessor<>(DataMiningActivator.getExecutor(), resultReceivers, dimensionsToGroupBy);
+    public static <DataType> Processor<DataType> createGroupingProcessor(Class<DataType> dataType, Collection<Processor<GroupedDataEntry<DataType>>> resultReceivers, List<Function<?>> dimensionsToGroupBy) {
+        return new ParallelMultiDimensionsValueNestingGroupingProcessor<>(dataType, DataMiningActivator.getExecutor(), resultReceivers, dimensionsToGroupBy);
     }
 
     /**
@@ -113,7 +113,7 @@ public class ProcessorFactory {
      * the executor).
      */
     @SuppressWarnings("unchecked")
-    public static <DataType> Collection<Processor<?>> createGroupingExtractorsForDimensions(
+    public static <DataType> Collection<Processor<?>> createGroupingExtractorsForDimensions(Class<DataType> dataType,
             Processor<GroupedDataEntry<Object>> valueCollector, Collection<Function<?>> dimensions) {
         Collection<Processor<GroupedDataEntry<Object>>> extractionResultReceivers = new ArrayList<>();
         extractionResultReceivers.add(valueCollector);
@@ -121,7 +121,7 @@ public class ProcessorFactory {
         Collection<Processor<?>> groupingExtractors = new ArrayList<>();
         for (Function<?> dimension : dimensions) {
             Processor<GroupedDataEntry<DataType>> dimensionValueExtractor = new ParallelGroupedElementsValueExtractionProcessor<DataType, Object>(DataMiningActivator.getExecutor(), extractionResultReceivers, (Function<Object>) dimension);
-            Processor<DataType> byDimensionGrouper = new ParallelByDimensionGroupingProcessor<>(DataMiningActivator.getExecutor(), Arrays.asList(dimensionValueExtractor), dimension);
+            Processor<DataType> byDimensionGrouper = new ParallelByDimensionGroupingProcessor<>(dataType, DataMiningActivator.getExecutor(), Arrays.asList(dimensionValueExtractor), dimension);
             groupingExtractors.add(byDimensionGrouper);
         }
         return groupingExtractors;

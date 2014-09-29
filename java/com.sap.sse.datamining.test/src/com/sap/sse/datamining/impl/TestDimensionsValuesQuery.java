@@ -18,34 +18,26 @@ import com.sap.sse.datamining.components.Processor;
 import com.sap.sse.datamining.factories.FunctionDTOFactory;
 import com.sap.sse.datamining.factories.FunctionFactory;
 import com.sap.sse.datamining.functions.Function;
-import com.sap.sse.datamining.impl.components.AbstractSimpleRetrievalProcessor;
 import com.sap.sse.datamining.impl.components.GroupedDataEntry;
 import com.sap.sse.datamining.impl.components.ParallelByDimensionGroupingProcessor;
 import com.sap.sse.datamining.impl.components.ParallelGroupedElementsValueExtractionProcessor;
 import com.sap.sse.datamining.impl.components.aggregators.ParallelGroupedDataCollectingAsSetProcessor;
+import com.sap.sse.datamining.impl.criterias.NonFilteringFilterCriterion;
 import com.sap.sse.datamining.shared.GroupKey;
 import com.sap.sse.datamining.shared.dto.FunctionDTO;
 import com.sap.sse.datamining.shared.impl.GenericGroupKey;
 import com.sap.sse.datamining.test.functions.registry.test_classes.Test_Boat;
-import com.sap.sse.datamining.test.functions.registry.test_classes.Test_BoatClass;
 import com.sap.sse.datamining.test.functions.registry.test_classes.Test_Competitor;
-import com.sap.sse.datamining.test.functions.registry.test_classes.Test_Leg;
 import com.sap.sse.datamining.test.functions.registry.test_classes.Test_Named;
 import com.sap.sse.datamining.test.functions.registry.test_classes.Test_Race;
 import com.sap.sse.datamining.test.functions.registry.test_classes.Test_Regatta;
-import com.sap.sse.datamining.test.functions.registry.test_classes.Test_Team;
-import com.sap.sse.datamining.test.functions.registry.test_classes.impl.Test_BoatClassImpl;
-import com.sap.sse.datamining.test.functions.registry.test_classes.impl.Test_BoatImpl;
-import com.sap.sse.datamining.test.functions.registry.test_classes.impl.Test_CompetitorImpl;
-import com.sap.sse.datamining.test.functions.registry.test_classes.impl.Test_LegImpl;
-import com.sap.sse.datamining.test.functions.registry.test_classes.impl.Test_RaceImpl;
-import com.sap.sse.datamining.test.functions.registry.test_classes.impl.Test_RegattaImpl;
-import com.sap.sse.datamining.test.functions.registry.test_classes.impl.Test_TeamImpl;
-import com.sap.sse.datamining.test.functions.registry.test_contexts.Test_HasLegContext;
-import com.sap.sse.datamining.test.functions.registry.test_contexts.Test_HasLegContextImpl;
+import com.sap.sse.datamining.test.functions.registry.test_contexts.Test_HasLegOfCompetitorContext;
 import com.sap.sse.datamining.test.functions.registry.test_contexts.Test_HasRaceContext;
-import com.sap.sse.datamining.test.functions.registry.test_contexts.Test_HasRaceContextImpl;
+import com.sap.sse.datamining.test.util.ComponentsAndQueriesTestsUtil;
 import com.sap.sse.datamining.test.util.ConcurrencyTestsUtil;
+import com.sap.sse.datamining.test.util.components.TestLegOfCompetitorWithContextFilteringRetrievalProcessor;
+import com.sap.sse.datamining.test.util.components.TestRaceWithContextFilteringRetrievalProcessor;
+import com.sap.sse.datamining.test.util.components.TestRegattaRetrievalProcessor;
 
 public class TestDimensionsValuesQuery {
     
@@ -83,22 +75,8 @@ public class TestDimensionsValuesQuery {
                 legDimensions.add(dimensionLegNumber);
                 legDimensions.add(dimensionCompetitorName);
                 legDimensions.add(dimensionCompetitorSailID);
-                Collection<Processor<Test_HasLegContext>> legRetrieverResultReceivers = createGroupingExtractorsForDimensions(extractionResultReceivers, legDimensions);
-                Processor<Test_HasRaceContext> legRetriever = new AbstractSimpleRetrievalProcessor<Test_HasRaceContext, Test_HasLegContext>(ConcurrencyTestsUtil.getExecutor(), legRetrieverResultReceivers) {
-                    @Override
-                    protected Iterable<Test_HasLegContext> retrieveData(Test_HasRaceContext raceWithContext) {
-                        Collection<Test_HasLegContext> legsWithContext = new ArrayList<>();
-                        int legNumber = 0;
-                        for (Test_Leg leg : raceWithContext.getRace().getLegs()) {
-                            legNumber++;
-                            for (Test_Competitor competitor : raceWithContext.getRace().getCompetitors()) {
-                                legsWithContext.add(new Test_HasLegContextImpl(raceWithContext.getRegatta(), raceWithContext.getRace(), raceWithContext.getBoatClass(),
-                                                                               raceWithContext.getYear(), leg, legNumber, competitor));
-                            }
-                        }
-                        return legsWithContext;
-                    }
-                };
+                Collection<Processor<Test_HasLegOfCompetitorContext>> legRetrieverResultReceivers = createGroupingExtractorsForDimensions(Test_HasLegOfCompetitorContext.class, extractionResultReceivers, legDimensions);
+                Processor<Test_HasRaceContext> legWithContextRetriever = new TestLegOfCompetitorWithContextFilteringRetrievalProcessor(ConcurrencyTestsUtil.getExecutor(), legRetrieverResultReceivers, new NonFilteringFilterCriterion<>(Test_HasLegOfCompetitorContext.class));
 
                 
                 Collection<Function<?>> raceDimensions = new ArrayList<>();
@@ -106,31 +84,22 @@ public class TestDimensionsValuesQuery {
                 raceDimensions.add(dimensionRaceName);
                 raceDimensions.add(dimensionBoatClassName);
                 raceDimensions.add(dimensionYear);
-                Collection<Processor<Test_HasRaceContext>> raceRetrieverResultReceivers = createGroupingExtractorsForDimensions(extractionResultReceivers, raceDimensions);
-                raceRetrieverResultReceivers.add(legRetriever);
-                return new AbstractSimpleRetrievalProcessor<Collection<Test_Regatta>, Test_HasRaceContext>(ConcurrencyTestsUtil.getExecutor(), raceRetrieverResultReceivers) {
-                    @Override
-                    protected Iterable<Test_HasRaceContext> retrieveData(Collection<Test_Regatta> regattas) {
-                        Collection<Test_HasRaceContext> racesWithContext = new ArrayList<>();
-                        for (Test_Regatta regatta : regattas) {
-                            for (Test_Race race : regatta.getRaces()) {
-                                racesWithContext.add(new Test_HasRaceContextImpl(regatta, race, regatta.getBoatClass(), regatta.getYear()));
-                            }
-                        }
-                        return racesWithContext;
-                    }
-                };
+                Collection<Processor<Test_HasRaceContext>> raceRetrieverResultReceivers = createGroupingExtractorsForDimensions(Test_HasRaceContext.class, extractionResultReceivers, raceDimensions);
+                raceRetrieverResultReceivers.add(legWithContextRetriever);
+                Processor<Test_Regatta> raceWithContextRetriever = new TestRaceWithContextFilteringRetrievalProcessor(ConcurrencyTestsUtil.getExecutor(), raceRetrieverResultReceivers, new NonFilteringFilterCriterion<>(Test_HasRaceContext.class));
+
+                return new TestRegattaRetrievalProcessor(ConcurrencyTestsUtil.getExecutor(), Arrays.asList(raceWithContextRetriever));
             }
         };
     }
 
     @SuppressWarnings("unchecked")
-    private <DataType> Collection<Processor<DataType>> createGroupingExtractorsForDimensions(
+    private <DataType> Collection<Processor<DataType>> createGroupingExtractorsForDimensions(Class<DataType> dataType,
             Collection<Processor<GroupedDataEntry<Object>>> extractionResultReceivers, Collection<Function<?>> dimensions) {
         Collection<Processor<DataType>> groupingExtractors = new ArrayList<>();
         for (Function<?> dimension : dimensions) {
             Processor<GroupedDataEntry<DataType>> dimensionValueExtractor = new ParallelGroupedElementsValueExtractionProcessor<DataType, Object>(ConcurrencyTestsUtil.getExecutor(), extractionResultReceivers, (Function<Object>) dimension);
-            Processor<DataType> byDimensionGrouper = new ParallelByDimensionGroupingProcessor<>(ConcurrencyTestsUtil.getExecutor(), Arrays.asList(dimensionValueExtractor), dimension);
+            Processor<DataType> byDimensionGrouper = new ParallelByDimensionGroupingProcessor<>(dataType, ConcurrencyTestsUtil.getExecutor(), Arrays.asList(dimensionValueExtractor), dimension);
             groupingExtractors.add(byDimensionGrouper);
         }
         return groupingExtractors;
@@ -198,10 +167,10 @@ public class TestDimensionsValuesQuery {
         Method getYearMethod = Test_HasRaceContext.class.getMethod("getYear", new Class<?>[0]);
         dimensionYear = FunctionFactory.createMethodWrappingFunction(getYearMethod);
         
-        Method getLegNumberMethod = Test_HasLegContext.class.getMethod("getLegNumber", new Class<?>[0]);
+        Method getLegNumberMethod = Test_HasLegOfCompetitorContext.class.getMethod("getLegNumber", new Class<?>[0]);
         dimensionLegNumber = FunctionFactory.createMethodWrappingFunction(getLegNumberMethod);
         
-        Method getCompetitorMethod = Test_HasLegContext.class.getMethod("getCompetitor", new Class<?>[0]);
+        Method getCompetitorMethod = Test_HasLegOfCompetitorContext.class.getMethod("getCompetitor", new Class<?>[0]);
         Function<?> getCompetitor = FunctionFactory.createMethodWrappingFunction(getCompetitorMethod);
         
         Method getTeamMethod = Test_Competitor.class.getMethod("getTeam", new Class<?>[0]);
@@ -217,61 +186,7 @@ public class TestDimensionsValuesQuery {
     
     @Before
     public void initializeDataSource() {
-        //Initialize 49er competitors
-        Test_Team team1_49er = new Test_TeamImpl("49er Team 1");
-        Test_Boat boatGER1 = new Test_BoatImpl("GER1");
-        Test_Competitor competitor1_49er = new Test_CompetitorImpl(team1_49er, boatGER1);
-        
-        Test_Team team2_49er = new Test_TeamImpl("49er Team 2");
-        Test_Boat boatGER2 = new Test_BoatImpl("GER2");
-        Test_Competitor competitor2_49er = new Test_CompetitorImpl(team2_49er, boatGER2);
-        
-        Test_Team team3_49er = new Test_TeamImpl("49er Team 3");
-        Test_Boat boatGER3 = new Test_BoatImpl("GER3");
-        Test_Competitor competitor3_49er = new Test_CompetitorImpl(team3_49er, boatGER3);
-        
-        Test_Team team4_49er = new Test_TeamImpl("49er Team 4");
-        Test_Boat boatGER4 = new Test_BoatImpl("GER4");
-        Test_Competitor competitor4_49er = new Test_CompetitorImpl(team4_49er, boatGER4);
-        
-        Collection<Test_Competitor> competitors49er = Arrays.asList(competitor1_49er, competitor2_49er, competitor3_49er, competitor4_49er);
-
-        //Initialize 505 competitors
-        Test_Team team1_505 = new Test_TeamImpl("505 Team 1");
-        Test_Boat boatENG1 = new Test_BoatImpl("ENG1");
-        Test_Competitor competitor1_505 = new Test_CompetitorImpl(team1_505, boatENG1);
-        
-        Test_Team team2_505 = new Test_TeamImpl("505 Team 2");
-        Test_Boat boatENG2 = new Test_BoatImpl("ENG2");
-        Test_Competitor competitor2_505 = new Test_CompetitorImpl(team2_505, boatENG2);
-        
-        Test_Team team3_505 = new Test_TeamImpl("505 Team 3");
-        Test_Boat boatENG3 = new Test_BoatImpl("ENG3");
-        Test_Competitor competitor3_505 = new Test_CompetitorImpl(team3_505, boatENG3);
-        
-        Collection<Test_Competitor> competitors505 = Arrays.asList(competitor1_505, competitor2_505, competitor3_505);
-        
-        // Test_Leg has only the statistic distance traveled
-        // This test requires only the dimensions, so only one leg is necessary
-        Test_Leg leg = new Test_LegImpl(0.0);
-        Collection<Test_Leg> legs = Arrays.asList(leg, leg, leg, leg, leg);
-        
-        //Initialize races, boat classes and regattas
-        Test_Race race1_49er = new Test_RaceImpl("Race 1", competitors49er, legs);
-        Test_Race race2_49er = new Test_RaceImpl("Race 2", competitors49er, legs);
-        Test_Race race3_49er = new Test_RaceImpl("Race 3", competitors49er, legs);
-        Test_Race race1_505 = new Test_RaceImpl("Race 1", competitors505, legs);
-        Test_Race race2_505 = new Test_RaceImpl("Race 2", competitors505, legs);
-
-        Test_BoatClass boatClass49er = new Test_BoatClassImpl("49er");
-        Test_BoatClass boatClass505 = new Test_BoatClassImpl("505");
-        
-        Test_Regatta regatta49er = new Test_RegattaImpl("KW 2014 49er", boatClass49er, 2014, race1_49er, race2_49er, race3_49er);
-        Test_Regatta regatta505 = new Test_RegattaImpl("KW 2014 505", boatClass505, 2014, race1_505, race2_505);
-        
-        dataSource = new ArrayList<>();
-        dataSource.add(regatta49er);
-        dataSource.add(regatta505);
+        dataSource = ComponentsAndQueriesTestsUtil.createExampleDataSource();
     }
 
 }

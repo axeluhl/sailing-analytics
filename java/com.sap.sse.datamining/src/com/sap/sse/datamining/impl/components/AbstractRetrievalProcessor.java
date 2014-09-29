@@ -15,8 +15,8 @@ public abstract class AbstractRetrievalProcessor<InputType, WorkingType, ResultT
     private final Lock retrievedDataAmountLock;
     private int retrievedDataAmount;
 
-    public AbstractRetrievalProcessor(ExecutorService executor, Collection<Processor<ResultType>> resultReceivers) {
-        super(executor, resultReceivers);
+    public AbstractRetrievalProcessor(Class<InputType> InputType, ExecutorService executor, Collection<Processor<ResultType>> resultReceivers) {
+        super(InputType, executor, resultReceivers);
         retrievedDataAmountLock = new ReentrantLock(); 
     }
 

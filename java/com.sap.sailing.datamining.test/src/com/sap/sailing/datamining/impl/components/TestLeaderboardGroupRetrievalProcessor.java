@@ -17,11 +17,11 @@ import org.junit.Ignore;
 import org.junit.Test;
 
 import com.sap.sailing.datamining.test.util.ConcurrencyTestsUtil;
+import com.sap.sailing.datamining.test.util.NullProcessor;
 import com.sap.sailing.domain.leaderboard.Leaderboard;
 import com.sap.sailing.domain.leaderboard.LeaderboardGroup;
 import com.sap.sailing.domain.leaderboard.impl.LeaderboardGroupImpl;
 import com.sap.sailing.server.RacingEventService;
-import com.sap.sse.datamining.AdditionalResultDataBuilder;
 import com.sap.sse.datamining.components.Processor;
 
 public class TestLeaderboardGroupRetrievalProcessor {
@@ -37,23 +37,10 @@ public class TestLeaderboardGroupRetrievalProcessor {
         stub(service.getLeaderboardGroups()).toReturn(getGroupsInService());
 
         retrievedGroups = new HashSet<>();
-        Processor<LeaderboardGroup> receiver = new Processor<LeaderboardGroup>() {
+        Processor<LeaderboardGroup> receiver = new NullProcessor<LeaderboardGroup>(LeaderboardGroup.class) {
             @Override
             public void processElement(LeaderboardGroup element) {
                 retrievedGroups.add(element);
-            }
-            @Override
-            public void onFailure(Throwable failure) {
-            }
-            @Override
-            public void finish() throws InterruptedException {
-            }
-            @Override
-            public void abort() {
-            }
-            @Override
-            public AdditionalResultDataBuilder getAdditionalResultData(AdditionalResultDataBuilder additionalDataBuilder) {
-                return null;
             }
         };
         

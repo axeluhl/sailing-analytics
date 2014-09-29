@@ -14,7 +14,7 @@ import com.sap.sse.datamining.AdditionalResultDataBuilder;
 import com.sap.sse.datamining.components.Processor;
 
 public abstract class AbstractPartitioningParallelProcessor<InputType, WorkingType, ResultType>
-                      implements Processor<InputType> {
+                      extends AbstractProcessor<InputType> {
 
     private static final Logger LOGGER = Logger.getLogger(AbstractPartitioningParallelProcessor.class.getName());
     private static final int SLEEP_TIME_DURING_FINISHING = 100;
@@ -25,7 +25,8 @@ public abstract class AbstractPartitioningParallelProcessor<InputType, WorkingTy
     
     private boolean gotAborted = false;
 
-    public AbstractPartitioningParallelProcessor(ExecutorService executor, Collection<Processor<ResultType>> resultReceivers) {
+    public AbstractPartitioningParallelProcessor(Class<InputType> inputType, ExecutorService executor, Collection<Processor<ResultType>> resultReceivers) {
+        super(inputType);
         this.executor = executor;
         this.resultReceivers = new HashSet<Processor<ResultType>>(resultReceivers);
         unfinishedInstructionsCounter = new UnfinishedInstructionsCounter();

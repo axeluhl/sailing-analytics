@@ -44,7 +44,8 @@ public final class SailingDataMiningFactory {
                 Processor<GroupedDataEntry<ElementType>> extractionProcessor = ProcessorFactory.createExtractionProcessor(aggregationProcessor, extractionFunction);
                 
                 List<Function<?>> dimensionsToGroupBy = convertDTOsToFunctions(queryDefinition.getDimensionsToGroupBy(), functionProvider);
-                Processor<ElementType> groupingProcessor = ProcessorFactory.createGroupingProcessor(extractionProcessor, dimensionsToGroupBy);
+                @SuppressWarnings("unchecked")
+                Processor<ElementType> groupingProcessor = ProcessorFactory.createGroupingProcessor((Class<ElementType>) extractionFunction.getDeclaringType(), extractionProcessor, dimensionsToGroupBy);
                 
                 SailingDataRetrievalLevels dataRetrievalLevel = calculateDataRetrievalLevel(extractionFunction);
                 Processor<RacingEventService> firstRetrievalProcessor = SailingDataRetrieverFactory.createRetrievalProcessorChain(dataRetrievalLevel, groupingProcessor, queryDefinition.getFilterSelection(), functionProvider);
@@ -69,8 +70,9 @@ public final class SailingDataMiningFactory {
                 for (int i = deepestRetrievalLevel.ordinal(); i >= 0; i--) {
                     SailingDataRetrievalLevels retrievalLevel = SailingDataRetrievalLevels.values()[i];
                     
+                    Class<?> dataType = retrievalLevel.getDataType();
                     Collection<Function<?>> dimensionsForRetrievalLevel = dimensionsMappedByRetrievalLevel.containsKey(retrievalLevel) ? dimensionsMappedByRetrievalLevel.get(retrievalLevel) : new ArrayList<Function<?>>();
-                    Collection<Processor<?>> retrievalResultReceivers = ProcessorFactory.createGroupingExtractorsForDimensions(valueCollector, dimensionsForRetrievalLevel);
+                    Collection<Processor<?>> retrievalResultReceivers = ProcessorFactory.createGroupingExtractorsForDimensions(dataType, valueCollector, dimensionsForRetrievalLevel);
                     if (retrievalProcessor != null) {
                         retrievalResultReceivers.add(retrievalProcessor);
                     }

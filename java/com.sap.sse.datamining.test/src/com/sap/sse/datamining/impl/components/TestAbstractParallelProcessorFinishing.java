@@ -14,6 +14,7 @@ import org.junit.Test;
 import com.sap.sse.datamining.AdditionalResultDataBuilder;
 import com.sap.sse.datamining.components.Processor;
 import com.sap.sse.datamining.test.util.ConcurrencyTestsUtil;
+import com.sap.sse.datamining.test.util.components.NullProcessor;
 
 public class TestAbstractParallelProcessorFinishing {
     
@@ -48,17 +49,11 @@ public class TestAbstractParallelProcessorFinishing {
     }
 
     private Processor<Integer> createReceiver() {
-        return new Processor<Integer>() {
-            @Override
-            public void processElement(Integer element) { }
-            @Override
-            public void onFailure(Throwable failure) { }
+        return new NullProcessor<Integer>(Integer.class) {
             @Override
             public void finish() throws InterruptedException {
                 receiverWasToldToFinish = true;
             }
-            @Override
-            public void abort() { }
             @Override
             public AdditionalResultDataBuilder getAdditionalResultData(AdditionalResultDataBuilder additionalDataBuilder) {
                 return additionalDataBuilder;
@@ -67,7 +62,7 @@ public class TestAbstractParallelProcessorFinishing {
     }
 
     private AbstractSimpleParallelProcessor<Integer, Integer> createProcessor(Collection<Processor<Integer>> receivers) {
-        return new AbstractSimpleParallelProcessor<Integer, Integer>(ConcurrencyTestsUtil.getExecutor(), receivers) {
+        return new AbstractSimpleParallelProcessor<Integer, Integer>(Integer.class, ConcurrencyTestsUtil.getExecutor(), receivers) {
             @Override
             protected Callable<Integer> createInstruction(Integer partialElement) {
                 return new Callable<Integer>() {

@@ -16,10 +16,11 @@ public abstract class AbstractParallelMultiDimensionalGroupingProcessor<DataType
 
     private Iterable<Function<?>> dimensions;
 
-    public AbstractParallelMultiDimensionalGroupingProcessor(ExecutorService executor,
+    public AbstractParallelMultiDimensionalGroupingProcessor(Class<DataType> dataType,
+                                                             ExecutorService executor,
                                                              Collection<Processor<GroupedDataEntry<DataType>>> resultReceivers,
                                                              Iterable<Function<?>> dimensions) {
-        super(executor, resultReceivers);
+        super(dataType, executor, resultReceivers);
         verifyThatDimensionsAreDimensions(dimensions);
         this.dimensions = dimensions;
     }

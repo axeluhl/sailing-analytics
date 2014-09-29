@@ -32,17 +32,19 @@ import com.sap.sse.datamining.impl.components.GroupedDataEntry;
 import com.sap.sse.datamining.impl.components.ParallelGroupedElementsValueExtractionProcessor;
 import com.sap.sse.datamining.impl.components.ParallelMultiDimensionsValueNestingGroupingProcessor;
 import com.sap.sse.datamining.impl.components.aggregators.ParallelGroupedDoubleDataSumAggregationProcessor;
+import com.sap.sse.datamining.impl.criterias.AbstractFilterCriterion;
 import com.sap.sse.datamining.shared.GroupKey;
 import com.sap.sse.datamining.shared.QueryResult;
 import com.sap.sse.datamining.shared.Unit;
 import com.sap.sse.datamining.shared.impl.AdditionalResultDataImpl;
 import com.sap.sse.datamining.shared.impl.GenericGroupKey;
 import com.sap.sse.datamining.shared.impl.QueryResultImpl;
-import com.sap.sse.datamining.test.components.util.BlockingProcessor;
-import com.sap.sse.datamining.test.components.util.Number;
 import com.sap.sse.datamining.test.util.ConcurrencyTestsUtil;
 import com.sap.sse.datamining.test.util.FunctionTestsUtil;
 import com.sap.sse.datamining.test.util.TestsUtil;
+import com.sap.sse.datamining.test.util.components.BlockingProcessor;
+import com.sap.sse.datamining.test.util.components.NullProcessor;
+import com.sap.sse.datamining.test.util.components.Number;
 
 public class TestProcessorQuery {
     
@@ -115,15 +117,16 @@ public class TestProcessorQuery {
                 Collection<Function<?>> dimensions = new ArrayList<>();
                 Function<Integer> getLengthFunction = FunctionFactory.createMethodWrappingFunction(FunctionTestsUtil.getMethodFromClass(Number.class, "getLength"));
                 dimensions.add(getLengthFunction);
-                Processor<Number> lengthGrouper = new ParallelMultiDimensionsValueNestingGroupingProcessor<>(executor, Arrays.asList(crossSumExtractor), dimensions);
+                Processor<Number> lengthGrouper = new ParallelMultiDimensionsValueNestingGroupingProcessor<>(Number.class, executor, Arrays.asList(crossSumExtractor), dimensions);
                 
-                FilterCriterion<Number> retrievalFilterCriteria = new FilterCriterion<Number>() {
+                FilterCriterion<Number> retrievalFilterCriteria = new AbstractFilterCriterion<Number>(Number.class) {
                     @Override
                     public boolean matches(Number element) {
                         return element.getValue() >= 10;
                     }
                 };
-                Processor<Iterable<Number>> filteringRetrievalProcessor = new AbstractSimpleFilteringRetrievalProcessor<Iterable<Number>, Number>(ConcurrencyTestsUtil.getExecutor(), Arrays.asList(lengthGrouper), retrievalFilterCriteria) {
+                @SuppressWarnings("unchecked")
+                Processor<Iterable<Number>> filteringRetrievalProcessor = new AbstractSimpleFilteringRetrievalProcessor<Iterable<Number>, Number>((Class<Iterable<Number>>)(Class<?>) Iterable.class, ConcurrencyTestsUtil.getExecutor(), Arrays.asList(lengthGrouper), retrievalFilterCriteria) {
                     @Override
                     protected Iterable<Number> retrieveData(Iterable<Number> element) {
                         return element;
@@ -158,15 +161,13 @@ public class TestProcessorQuery {
     public void testQueryTimeouting() throws TimeoutException {
         ProcessorQuery<Double, Iterable<Number>> query = new ProcessorQuery<Double, Iterable<Number>>(
                 ConcurrencyTestsUtil.getExecutor(), createDataSource(), stringMessages, Locale.ENGLISH) {
+            @SuppressWarnings("unchecked")
             @Override
             protected Processor<Iterable<Number>> createFirstProcessor() {
-                Processor<Double> resultReceiver = new Processor<Double>() {
+                Processor<Double> resultReceiver = new NullProcessor<Double>(Double.class) {
                     @Override
                     public void processElement(Double element) {
                         receivedElementOrFinished = true;
-                    }
-                    @Override
-                    public void onFailure(Throwable failure) {
                     }
                     @Override
                     public void finish() throws InterruptedException {
@@ -176,12 +177,8 @@ public class TestProcessorQuery {
                     public void abort() {
                         receivedAbort = true;
                     }
-                    @Override
-                    public AdditionalResultDataBuilder getAdditionalResultData(AdditionalResultDataBuilder additionalDataBuilder) {
-                        return additionalDataBuilder;
-                    }
                 };
-                return new BlockingProcessor<Iterable<Number>, Double>(ConcurrencyTestsUtil.getExecutor(), Arrays.asList(resultReceiver), (long) 1000);
+                return new BlockingProcessor<Iterable<Number>, Double>((Class<Iterable<Number>>)(Class<?>) Iterable.class, ConcurrencyTestsUtil.getExecutor(), Arrays.asList(resultReceiver), (long) 1000);
             }
         };
         
@@ -213,9 +210,11 @@ public class TestProcessorQuery {
         assertThat(query.run(500, TimeUnit.MILLISECONDS).getResults(), is(expectedResult));
     }
 
+    @SuppressWarnings("unchecked")
     private AbstractSimpleParallelProcessor<Iterable<Number>, Map<GroupKey, Double>> createSumBuildingProcessor(
             ProcessorQuery<Double, Iterable<Number>> query, final String keyValue) {
-        return new AbstractSimpleParallelProcessor<Iterable<Number>, Map<GroupKey, Double>>(ConcurrencyTestsUtil.getExecutor(),
+        return new AbstractSimpleParallelProcessor<Iterable<Number>, Map<GroupKey, Double>>((Class<Iterable<Number>>)(Class<?>) Iterable.class, 
+                                                                                            ConcurrencyTestsUtil.getExecutor(),
                                                                                             Arrays.asList(query.getResultReceiver())) {
             @Override
             protected Callable<Map<GroupKey, Double>> createInstruction(final Iterable<Number> element) {

@@ -12,8 +12,8 @@ public class ParallelFilteringProcessor<InputType> extends AbstractSimpleParalle
 
     private final FilterCriterion<InputType> filterCriteria;
 
-    public ParallelFilteringProcessor(ExecutorService executor, Collection<Processor<InputType>> resultReceivers, FilterCriterion<InputType> filterCriteria) {
-        super(executor, resultReceivers);
+    public ParallelFilteringProcessor(Class<InputType> inputType, ExecutorService executor, Collection<Processor<InputType>> resultReceivers, FilterCriterion<InputType> filterCriteria) {
+        super(inputType, executor, resultReceivers);
         this.filterCriteria = filterCriteria;
     }
 

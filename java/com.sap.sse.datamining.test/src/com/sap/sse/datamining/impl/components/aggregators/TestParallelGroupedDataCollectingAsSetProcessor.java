@@ -10,12 +10,12 @@ import java.util.Set;
 import org.junit.Before;
 import org.junit.Test;
 
-import com.sap.sse.datamining.AdditionalResultDataBuilder;
 import com.sap.sse.datamining.components.Processor;
 import com.sap.sse.datamining.impl.components.GroupedDataEntry;
 import com.sap.sse.datamining.shared.GroupKey;
 import com.sap.sse.datamining.shared.impl.GenericGroupKey;
 import com.sap.sse.datamining.test.util.ConcurrencyTestsUtil;
+import com.sap.sse.datamining.test.util.components.NullProcessor;
 
 public class TestParallelGroupedDataCollectingAsSetProcessor {
 
@@ -24,23 +24,11 @@ public class TestParallelGroupedDataCollectingAsSetProcessor {
     
     @Before
     public void initializeReceivers() {
-        Processor<Map<GroupKey, Set<Double>>> receiver = new Processor<Map<GroupKey, Set<Double>>>() {
+        @SuppressWarnings("unchecked")
+        Processor<Map<GroupKey, Set<Double>>> receiver = new NullProcessor<Map<GroupKey, Set<Double>>>((Class<Map<GroupKey, Set<Double>>>)(Class<?>) Map.class) {
             @Override
             public void processElement(Map<GroupKey, Set<Double>> element) {
                 receivedData = element;
-            }
-            @Override
-            public void onFailure(Throwable failure) {
-            }
-            @Override
-            public void finish() throws InterruptedException {
-            }
-            @Override
-            public void abort() {
-            }
-            @Override
-            public AdditionalResultDataBuilder getAdditionalResultData(AdditionalResultDataBuilder additionalDataBuilder) {
-                return additionalDataBuilder;
             }
         };
         

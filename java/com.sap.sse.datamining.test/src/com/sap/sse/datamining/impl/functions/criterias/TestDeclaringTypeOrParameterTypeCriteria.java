@@ -43,5 +43,11 @@ public class TestDeclaringTypeOrParameterTypeCriteria {
 
         assertThat(criteria.matches(libraryFunction), is(false));
     }
+    
+    @Test
+    public void testGetElementType() {
+        FilterCriterion<Function<?>> criteria = new IsDeclaringTypeFilterCriterion(DataTypeWithContextImpl.class);
+        assertThat(criteria.getElementType().equals(Function.class), is(true));
+    }
 
 }

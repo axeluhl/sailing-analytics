@@ -13,10 +13,11 @@ import java.util.Set;
 import org.junit.Before;
 import org.junit.Test;
 
-import com.sap.sse.datamining.AdditionalResultDataBuilder;
 import com.sap.sse.datamining.components.FilterCriterion;
 import com.sap.sse.datamining.components.Processor;
+import com.sap.sse.datamining.impl.criterias.AbstractFilterCriterion;
 import com.sap.sse.datamining.test.util.ConcurrencyTestsUtil;
+import com.sap.sse.datamining.test.util.components.NullProcessor;
 
 public class TestAbstractFilteringRetrievalProcessor {
     
@@ -67,7 +68,8 @@ public class TestAbstractFilteringRetrievalProcessor {
         layeredDataSource.add(dataSource);
         layeredDataSource.add(dataSource);
         
-        Processor<Iterable<Iterable<Integer>>> layeredRetrievalProcessor = new AbstractSimpleRetrievalProcessor<Iterable<Iterable<Integer>>, Iterable<Integer>>(ConcurrencyTestsUtil.getExecutor(), Arrays.asList(filteringRetrievalProcessor)) {
+        @SuppressWarnings("unchecked")
+        Processor<Iterable<Iterable<Integer>>> layeredRetrievalProcessor = new AbstractSimpleRetrievalProcessor<Iterable<Iterable<Integer>>, Iterable<Integer>>((Class<Iterable<Iterable<Integer>>>)(Class<?>) Iterable.class, ConcurrencyTestsUtil.getExecutor(), Arrays.asList(filteringRetrievalProcessor)) {
             @Override
             protected Iterable<Iterable<Integer>> retrieveData(Iterable<Iterable<Integer>> element) {
                 return element;
@@ -85,37 +87,25 @@ public class TestAbstractFilteringRetrievalProcessor {
         assertThat(resultDataBuilder.getRetrievedDataAmount(), is(expectedRetrievedDataAmount));
     }
     
+    @SuppressWarnings("unchecked")
     @Before
     public void setUpResultReceiverAndProcessor() {
-        Processor<Integer> resultReceiver = new Processor<Integer>() {
+        Processor<Integer> resultReceiver = new NullProcessor<Integer>(Integer.class) {
             @Override
             public void processElement(Integer element) {
                 synchronized (receivedResults) {
                     receivedResults.add(element);
                 }
             }
-            @Override
-            public void onFailure(Throwable failure) {
-            }
-            @Override
-            public void finish() throws InterruptedException {
-            }
-            @Override
-            public void abort() {
-            }
-            @Override
-            public AdditionalResultDataBuilder getAdditionalResultData(AdditionalResultDataBuilder additionalDataBuilder) {
-                return additionalDataBuilder;
-            }
         };
         
-        FilterCriterion<Integer> elementGreaterZeroFilterCriteria = new FilterCriterion<Integer>() {
+        FilterCriterion<Integer> elementGreaterZeroFilterCriteria = new AbstractFilterCriterion<Integer>(Integer.class) {
             @Override
             public boolean matches(Integer element) {
                 return element >= 0;
             }
         };
-        filteringRetrievalProcessor = new AbstractSimpleFilteringRetrievalProcessor<Iterable<Integer>, Integer>(ConcurrencyTestsUtil.getExecutor(), Arrays.asList(resultReceiver), elementGreaterZeroFilterCriteria) {
+        filteringRetrievalProcessor = new AbstractSimpleFilteringRetrievalProcessor<Iterable<Integer>, Integer>((Class<Iterable<Integer>>)(Class<?>) Iterable.class, ConcurrencyTestsUtil.getExecutor(), Arrays.asList(resultReceiver), elementGreaterZeroFilterCriteria) {
             @Override
             protected Iterable<Integer> retrieveData(Iterable<Integer> element) {
                 return element;

@@ -9,9 +9,9 @@ import com.sap.sse.datamining.components.Processor;
 public abstract class AbstractSimpleFilteringRetrievalProcessor<InputType, ResultType> extends
         AbstractFilteringRetrievalProcessor<InputType, ResultType, ResultType> {
 
-    public AbstractSimpleFilteringRetrievalProcessor(ExecutorService executor,
-            Collection<Processor<ResultType>> resultReceivers, FilterCriterion<ResultType> criteria) {
-        super(executor, resultReceivers, criteria);
+    public AbstractSimpleFilteringRetrievalProcessor(Class<InputType> inputType,
+            ExecutorService executor, Collection<Processor<ResultType>> resultReceivers, FilterCriterion<ResultType> criteria) {
+        super(inputType, executor, resultReceivers, criteria);
     }
 
     @Override

@@ -21,7 +21,7 @@ public class RegattaLeaderboardFilteringRetrievalProcessor extends
 
     public RegattaLeaderboardFilteringRetrievalProcessor(ExecutorService executor,
             Collection<Processor<RegattaLeaderboard>> resultReceivers, FilterCriterion<RegattaLeaderboard> criteria) {
-        super(executor, resultReceivers, criteria);
+        super(LeaderboardGroup.class, executor, resultReceivers, criteria);
     }
 
     @Override

@@ -11,12 +11,12 @@ import java.util.Map.Entry;
 import org.junit.Before;
 import org.junit.Test;
 
-import com.sap.sse.datamining.AdditionalResultDataBuilder;
 import com.sap.sse.datamining.components.Processor;
 import com.sap.sse.datamining.impl.components.GroupedDataEntry;
 import com.sap.sse.datamining.shared.GroupKey;
 import com.sap.sse.datamining.shared.impl.GenericGroupKey;
 import com.sap.sse.datamining.test.util.ConcurrencyTestsUtil;
+import com.sap.sse.datamining.test.util.components.NullProcessor;
 
 public class TestParallelDoubleAggregationProcessors {
     
@@ -157,23 +157,11 @@ public class TestParallelDoubleAggregationProcessors {
     
     @Before
     public void initializeResultReceivers() {
-        Processor<Map<GroupKey, Double>> receiver = new Processor<Map<GroupKey,Double>>() {
+        @SuppressWarnings("unchecked")
+        Processor<Map<GroupKey, Double>> receiver = new NullProcessor<Map<GroupKey, Double>>((Class<Map<GroupKey, Double>>)(Class<?>) Map.class) {
             @Override
             public void processElement(Map<GroupKey, Double> element) {
                 receivedAggregations = element;
-            }
-            @Override
-            public void onFailure(Throwable failure) {
-            }
-            @Override
-            public void finish() throws InterruptedException {
-            }
-            @Override
-            public void abort() {
-            }
-            @Override
-            public AdditionalResultDataBuilder getAdditionalResultData(AdditionalResultDataBuilder additionalDataBuilder) {
-                return additionalDataBuilder;
             }
         };
         

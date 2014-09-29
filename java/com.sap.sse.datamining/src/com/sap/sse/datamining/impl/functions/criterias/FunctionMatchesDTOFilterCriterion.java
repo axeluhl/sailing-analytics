@@ -1,11 +1,10 @@
 package com.sap.sse.datamining.impl.functions.criterias;
 
-import com.sap.sse.datamining.components.FilterCriterion;
 import com.sap.sse.datamining.factories.FunctionDTOFactory;
 import com.sap.sse.datamining.functions.Function;
 import com.sap.sse.datamining.shared.dto.FunctionDTO;
 
-public class FunctionMatchesDTOFilterCriterion implements FilterCriterion<Function<?>> {
+public class FunctionMatchesDTOFilterCriterion extends AbstractFunctionFilterCriterion {
 
     private FunctionDTO functionDTOToMatch;
 

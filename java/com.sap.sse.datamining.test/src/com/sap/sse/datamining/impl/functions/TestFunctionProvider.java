@@ -21,8 +21,8 @@ import com.sap.sse.datamining.functions.FunctionRegistry;
 import com.sap.sse.datamining.i18n.DataMiningStringMessages;
 import com.sap.sse.datamining.shared.dto.FunctionDTO;
 import com.sap.sse.datamining.test.functions.registry.test_classes.Test_Named;
-import com.sap.sse.datamining.test.functions.registry.test_contexts.Test_HasLegContext;
-import com.sap.sse.datamining.test.functions.registry.test_contexts.Test_HasLegContextImpl;
+import com.sap.sse.datamining.test.functions.registry.test_contexts.Test_HasLegOfCompetitorContext;
+import com.sap.sse.datamining.test.functions.registry.test_contexts.Test_HasLegOfCompetitorContextImpl;
 import com.sap.sse.datamining.test.functions.registry.test_contexts.Test_HasRaceContext;
 import com.sap.sse.datamining.test.functions.registry.test_contexts.Test_HasRaceContextImpl;
 import com.sap.sse.datamining.test.functions.test_classes.SimpleClassWithMarkedMethods;
@@ -44,7 +44,7 @@ public class TestFunctionProvider {
         functionRegistry = new SimpleFunctionRegistry();
         
         Collection<Class<?>> internalClassesToScan = new HashSet<>();
-        internalClassesToScan.add(Test_HasLegContext.class);
+        internalClassesToScan.add(Test_HasLegOfCompetitorContext.class);
         internalClassesToScan.add(Test_HasRaceContext.class);
         functionRegistry.registerAllWithInternalFunctionPolicy(internalClassesToScan);
         
@@ -68,17 +68,17 @@ public class TestFunctionProvider {
         assertThat(functionProvider.getDimensionsFor(Test_HasRaceContext.class), is(expectedDimensions));
         assertThat(functionProvider.getDimensionsFor(Test_HasRaceContextImpl.class), is(expectedDimensions));
 
-        expectedDimensions.addAll(functionRegistryUtil.getExpectedDimensionsFor(Test_HasLegContext.class));
-        assertThat(functionProvider.getDimensionsFor(Test_HasLegContext.class), is(expectedDimensions));
-        assertThat(functionProvider.getDimensionsFor(Test_HasLegContextImpl.class), is(expectedDimensions));
+        expectedDimensions.addAll(functionRegistryUtil.getExpectedDimensionsFor(Test_HasLegOfCompetitorContext.class));
+        assertThat(functionProvider.getDimensionsFor(Test_HasLegOfCompetitorContext.class), is(expectedDimensions));
+        assertThat(functionProvider.getDimensionsFor(Test_HasLegOfCompetitorContextImpl.class), is(expectedDimensions));
     }
     
     @Test
     public void testGetStatisticsForType() {
         FunctionProvider functionProvider = new RegistryFunctionProvider(functionRegistry);
-        Collection<Function<?>> expectedFunctions = functionRegistryUtil.getExpectedStatisticsFor(Test_HasLegContext.class);
-        assertThat(functionProvider.getStatisticsFor(Test_HasLegContext.class), is(expectedFunctions));
-        assertThat(functionProvider.getStatisticsFor(Test_HasLegContextImpl.class), is(expectedFunctions));
+        Collection<Function<?>> expectedFunctions = functionRegistryUtil.getExpectedStatisticsFor(Test_HasLegOfCompetitorContext.class);
+        assertThat(functionProvider.getStatisticsFor(Test_HasLegOfCompetitorContext.class), is(expectedFunctions));
+        assertThat(functionProvider.getStatisticsFor(Test_HasLegOfCompetitorContextImpl.class), is(expectedFunctions));
     }
     
     @Test

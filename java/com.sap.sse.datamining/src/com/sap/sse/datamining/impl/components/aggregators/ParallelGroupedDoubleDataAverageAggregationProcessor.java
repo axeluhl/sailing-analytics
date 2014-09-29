@@ -17,9 +17,10 @@ public class ParallelGroupedDoubleDataAverageAggregationProcessor extends
     private final AbstractParallelStoringAggregationProcessor<GroupedDataEntry<Double>, Map<GroupKey, Double>> sumAggregationProcessor;
     private final Map<GroupKey, Integer> elementAmountPerKey;
 
+    @SuppressWarnings("unchecked")
     public ParallelGroupedDoubleDataAverageAggregationProcessor(ExecutorService executor,
             Collection<Processor<Map<GroupKey, Double>>> resultReceivers) {
-        super(executor, resultReceivers, Message.Average.toString());
+        super((Class<GroupedDataEntry<Double>>)(Class<?>) GroupedDataEntry.class, executor, resultReceivers, Message.Average.toString());
         elementAmountPerKey = new HashMap<>();
         sumAggregationProcessor = new ParallelGroupedDoubleDataSumAggregationProcessor(executor, resultReceivers);
     }

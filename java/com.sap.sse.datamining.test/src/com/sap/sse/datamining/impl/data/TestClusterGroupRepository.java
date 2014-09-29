@@ -16,7 +16,7 @@ import com.sap.sse.datamining.data.Cluster;
 import com.sap.sse.datamining.data.ClusterBoundary;
 import com.sap.sse.datamining.data.ClusterGroup;
 import com.sap.sse.datamining.data.ClusterGroupRepository;
-import com.sap.sse.datamining.test.components.util.Number;
+import com.sap.sse.datamining.test.util.components.Number;
 
 public class TestClusterGroupRepository {
     

@@ -46,14 +46,14 @@ public class TestFilterCriterias {
         StringRegexFilterCriterion startsWithBar = new StringRegexFilterCriterion("Bar.*");
         StringRegexFilterCriterion endWithFoo = new StringRegexFilterCriterion(".*Foo");
         
-        CompoundFilterCriterion<String> compoundCriteria = new AndCompoundFilterCriterion<String>();
+        CompoundFilterCriterion<String> compoundCriteria = new AndCompoundFilterCriterion<String>(String.class);
         compoundCriteria.addCriteria(startsWithBar);
         compoundCriteria.addCriteria(endWithFoo);
         
         assertTrue(compoundCriteria.matches("BarAndFoo"));
         assertFalse(compoundCriteria.matches("BarFo"));
         
-        compoundCriteria = new OrCompoundFilterCriterion<String>();
+        compoundCriteria = new OrCompoundFilterCriterion<String>(String.class);
         compoundCriteria.addCriteria(startsWithBar);
         compoundCriteria.addCriteria(endWithFoo);
 
@@ -66,7 +66,7 @@ public class TestFilterCriterias {
     public void testNullaryFunctionValuesFilterCriteria() {
         Function<String> getRegattaName = FunctionFactory.createMethodWrappingFunction(FunctionTestsUtil.getMethodFromClass(DataTypeWithContext.class, "getRegattaName"));
         Collection<String> valuesToMatch = Arrays.asList("Regatta", "Other Regatta");
-        FilterCriterion<DataTypeWithContext> nullaryFunctionFilterCriteria = new NullaryFunctionValuesFilterCriterion<>(getRegattaName, valuesToMatch);
+        FilterCriterion<DataTypeWithContext> nullaryFunctionFilterCriteria = new NullaryFunctionValuesFilterCriterion<>(DataTypeWithContext.class, getRegattaName, valuesToMatch);
         
         DataTypeWithContext regatta = new DataTypeWithContextImpl("Regatta", "Race Name", 7);
         assertThat(nullaryFunctionFilterCriteria.matches(regatta), is(true));

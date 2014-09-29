@@ -214,6 +214,12 @@ public abstract class ProcessorQuery<AggregatedType, DataSourceType> implements 
         public AdditionalResultDataBuilder getAdditionalResultData(AdditionalResultDataBuilder additionalDataBuilder) {
             return additionalDataBuilder;
         }
+
+        @SuppressWarnings("unchecked")
+        @Override
+        public Class<Map<GroupKey, AggregatedType>> getInputType() {
+            return (Class<Map<GroupKey, AggregatedType>>)(Class<?>) Map.class;
+        }
         
     }
 

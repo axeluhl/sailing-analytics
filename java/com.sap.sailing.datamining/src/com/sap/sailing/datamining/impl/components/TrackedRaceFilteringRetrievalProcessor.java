@@ -24,7 +24,7 @@ public class TrackedRaceFilteringRetrievalProcessor extends
 
     public TrackedRaceFilteringRetrievalProcessor(ExecutorService executor,
             Collection<Processor<HasTrackedRaceContext>> resultReceivers, FilterCriterion<HasTrackedRaceContext> criteria) {
-        super(executor, resultReceivers, criteria);
+        super(Leaderboard.class, executor, resultReceivers, criteria);
     }
 
     @Override

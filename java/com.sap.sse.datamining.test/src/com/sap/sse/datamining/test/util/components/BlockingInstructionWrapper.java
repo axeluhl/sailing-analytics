@@ -1,4 +1,4 @@
-package com.sap.sse.datamining.test.components.util;
+package com.sap.sse.datamining.test.util.components;
 
 import com.sap.sse.datamining.test.util.ConcurrencyTestsUtil;
 
