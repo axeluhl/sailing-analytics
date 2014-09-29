@@ -2610,13 +2610,17 @@ public abstract class TrackedRaceImpl extends TrackedRaceWithWindEssentials impl
     }
 
     private void suspendAllCachesNotUpdatingWhileLoading() {
-        markPassingCalculator.suspend();
+        if (markPassingCalculator != null) {
+            markPassingCalculator.suspend();
+        }
         crossTrackErrorCache.suspend();
         maneuverCache.suspend();
     }
 
     private void resumeAllCachesNotUpdatingWhileLoading() {
-        markPassingCalculator.resume();
+        if (markPassingCalculator != null) {
+            markPassingCalculator.resume();
+        }
         crossTrackErrorCache.resume();
         maneuverCache.resume();
     }
