@@ -349,13 +349,12 @@ public class MediaPanel extends FlowPanel {
         startTimeColumn.setFieldUpdater(new FieldUpdater<MediaTrack, String>() {
             public void update(int index, MediaTrack mediaTrack, String newStartTime) {
                 // Called when the user changes the value.
-                newStartTime = newStartTime.trim();
-                if ("".equals(newStartTime)) {
+                if (newStartTime == null || newStartTime.trim().isEmpty()) {
                     mediaTrack.startTime = null;
                 } else {
                     try {
                         mediaTrack.startTime = new MillisecondsTimePoint(TimeFormatUtil.DATETIME_FORMAT
-                                .parse(newStartTime));
+                                .parse(newStartTime.trim()));
                     } catch (IllegalArgumentException e) {
                         errorReporter.reportError(stringMessages.mediaDateFormatError(TimeFormatUtil.DATETIME_FORMAT
                                 .toString()));
@@ -394,7 +393,15 @@ public class MediaPanel extends FlowPanel {
         durationColumn.setFieldUpdater(new FieldUpdater<MediaTrack, String>() {
             public void update(int index, MediaTrack mediaTrack, String newDuration) {
                 // Called when the user changes the value.
-                mediaTrack.duration = TimeFormatUtil.hrsMinSecToMilliSeconds(newDuration);
+                if (newDuration == null || newDuration.trim().isEmpty()) {
+                    mediaTrack.duration = null;
+                } else {
+                    try {
+                        mediaTrack.duration = TimeFormatUtil.hrsMinSecToMilliSeconds(newDuration);
+                    } catch (Exception e) {
+                        errorReporter.reportError(stringMessages.mediaDateFormatError("Duration hh:mm:ss.xxx"));
+                    }
+                }
                 mediaService.updateDuration(mediaTrack, new AsyncCallback<Void>() {
 
                     @Override

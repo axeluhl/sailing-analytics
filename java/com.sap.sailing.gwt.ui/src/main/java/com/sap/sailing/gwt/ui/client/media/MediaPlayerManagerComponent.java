@@ -261,7 +261,7 @@ public class MediaPlayerManagerComponent implements Component<Void>, PlayStateLi
     @Override
     public void timeChanged(Date newRaceTime, Date oldRaceTime) {
         this.currentRaceTime = newRaceTime;
-        if (activeAudioPlayer != null) {
+        if (isStandaloneAudio()) { // only if audio player isn't one of the video players anyway
             activeAudioPlayer.raceTimeChanged(this.currentRaceTime);
             ensurePlayState(activeAudioPlayer);
         }

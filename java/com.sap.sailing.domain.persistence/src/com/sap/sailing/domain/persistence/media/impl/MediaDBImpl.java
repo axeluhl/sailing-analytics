@@ -127,7 +127,7 @@ public class MediaDBImpl implements MediaDB {
         MimeType mimeType = MimeType.byName(mimeTypeText);
         Set<RegattaAndRaceIdentifier> assignedRaces = new HashSet<RegattaAndRaceIdentifier>();
         BasicDBList assignedRacesDb = (BasicDBList) dbObject.get(DbNames.Fields.ASSIGNED_RACES.name());
-        if (assignedRacesDb != null) { //safety check to support deserialized instances imported from legacy servers
+        if (assignedRacesDb != null) { //safety check to support legacy instances
             for (Object assignedRace : assignedRacesDb) {
                 BasicDBObject object = (BasicDBObject) assignedRace;
                 String regattaName = (String) object.get(DbNames.Fields.REGATTA_NAME.name());
