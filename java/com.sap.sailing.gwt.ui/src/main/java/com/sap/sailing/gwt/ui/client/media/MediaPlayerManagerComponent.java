@@ -63,8 +63,8 @@ public class MediaPlayerManagerComponent implements Component<Void>, PlayStateLi
     private MediaPlayer activeAudioPlayer;
     private VideoPlayer dockedVideoPlayer;
     private final Map<MediaTrack, VideoContainer> activeVideoContainers = new HashMap<MediaTrack, VideoContainer>();
-    private Collection<MediaTrack> assignedMediaTracks = null;
-    private Collection<MediaTrack> overlappingMediaTracks = null;
+    private Collection<MediaTrack> assignedMediaTracks = new ArrayList<>();
+    private Collection<MediaTrack> overlappingMediaTracks = new ArrayList<>();
 
     private final RegattaAndRaceIdentifier raceIdentifier;
     private final RaceTimesInfoProvider raceTimesInfoProvider;
@@ -91,8 +91,8 @@ public class MediaPlayerManagerComponent implements Component<Void>, PlayStateLi
         this.raceTimer.addPlayStateListener(this);
         this.raceTimer.addTimeListener(this);
         this.mediaService = mediaService;
-        mediaService.getMediaTracksForRace(this.getRaceIdentifier(), getAssignedMediaCallback());
-        mediaService.getMediaTracksInTimeRange(this.getRaceIdentifier(), getOverlappingMediaCallback());
+        mediaService.getMediaTracksForRace(this.getCurrentRace(), getAssignedMediaCallback());
+        mediaService.getMediaTracksInTimeRange(this.getCurrentRace(), getOverlappingMediaCallback());
         this.stringMessages = stringMessages;
         this.errorReporter = errorReporter;
         this.userAgent = userAgent;
@@ -261,14 +261,14 @@ public class MediaPlayerManagerComponent implements Component<Void>, PlayStateLi
     @Override
     public void timeChanged(Date newRaceTime, Date oldRaceTime) {
         this.currentRaceTime = newRaceTime;
-        if (activeAudioPlayer != null) {
-            activeAudioPlayer.raceTimeChanged(this.currentRaceTime);
+        if (isStandaloneAudio()) { // only if audio player isn't one of the video players anyway
             ensurePlayState(activeAudioPlayer);
+            activeAudioPlayer.raceTimeChanged(this.currentRaceTime);
         }
         for (VideoContainer videoContainer : activeVideoContainers.values()) {
             VideoPlayer videoPlayer = videoContainer.getVideoPlayer();
-            videoPlayer.raceTimeChanged(this.currentRaceTime);
             ensurePlayState(videoPlayer);
+            videoPlayer.raceTimeChanged(this.currentRaceTime);
         }
     }
 
@@ -291,14 +291,10 @@ public class MediaPlayerManagerComponent implements Component<Void>, PlayStateLi
 
             @Override
             public void onSuccess(Collection<MediaTrack> mediaTracks) {
-                if (MediaPlayerManagerComponent.this.assignedMediaTracks != null) {
-                    MediaPlayerManagerComponent.this.assignedMediaTracks.clear();
-                    MediaPlayerManagerComponent.this.assignedMediaTracks.addAll(mediaTracks);
-                    for (MediaTrack mediaTrack : MediaPlayerManagerComponent.this.assignedMediaTracks) {
-                        setStatus(mediaTrack);
-                    }
-                } else {
-                    MediaPlayerManagerComponent.this.assignedMediaTracks = mediaTracks;
+                MediaPlayerManagerComponent.this.assignedMediaTracks.clear();
+                MediaPlayerManagerComponent.this.assignedMediaTracks.addAll(mediaTracks);
+                for (MediaTrack mediaTrack : MediaPlayerManagerComponent.this.assignedMediaTracks) {
+                    setStatus(mediaTrack);
                 }
 
                 if (autoSelectMedia) {
@@ -329,29 +325,16 @@ public class MediaPlayerManagerComponent implements Component<Void>, PlayStateLi
 
             @Override
             public void onSuccess(Collection<MediaTrack> mediaTracks) {
-                if (MediaPlayerManagerComponent.this.overlappingMediaTracks != null) {
-                    MediaPlayerManagerComponent.this.overlappingMediaTracks.clear();
-                    MediaPlayerManagerComponent.this.overlappingMediaTracks.addAll(mediaTracks);
-                    for (MediaTrack mediaTrack : MediaPlayerManagerComponent.this.overlappingMediaTracks) {
-                        setStatus(mediaTrack);
-                    }
-                } else {
-                    MediaPlayerManagerComponent.this.overlappingMediaTracks = mediaTracks;
+                MediaPlayerManagerComponent.this.overlappingMediaTracks.clear();
+                MediaPlayerManagerComponent.this.overlappingMediaTracks.addAll(mediaTracks);
+                for (MediaTrack mediaTrack : MediaPlayerManagerComponent.this.overlappingMediaTracks) {
+                    setStatus(mediaTrack);
                 }
 
                 notifyStateChange();
             }
 
         };
-    }
-
-    public boolean hasLoadedAllMediaTracks() {
-        if (this.allowsEditing()) {
-            return (assignedMediaTracks != null && overlappingMediaTracks != null);
-        } else {
-            return assignedMediaTracks != null;
-        }
-
     }
 
     private void notifyStateChange() {
@@ -527,7 +510,12 @@ public class MediaPlayerManagerComponent implements Component<Void>, PlayStateLi
     }
 
     private TimePoint getRaceStartTime() {
-        return new MillisecondsTimePoint(raceTimesInfoProvider.getRaceTimesInfo(getRaceIdentifier()).startOfRace);
+        Date startOfRace = raceTimesInfoProvider.getRaceTimesInfo(getCurrentRace()).startOfRace;
+        if (startOfRace != null) {
+            return new MillisecondsTimePoint(startOfRace);
+        } else {
+            return null;
+        }
     }
 
     @Override
@@ -563,10 +551,14 @@ public class MediaPlayerManagerComponent implements Component<Void>, PlayStateLi
         }
     }
 
+    private boolean isLive() {
+        return raceTimer.getPlayMode() == Timer.PlayModes.Live;
+    }
+
     private void synchPlayState(final MediaPlayer mediaPlayer) {
         mediaPlayer.setPlaybackSpeed(currentPlaybackSpeed);
-        mediaPlayer.raceTimeChanged(this.currentRaceTime);
         ensurePlayState(mediaPlayer);
+        mediaPlayer.raceTimeChanged(this.currentRaceTime);
     }
 
     private void ensurePlayState(final MediaPlayer mediaPlayer) {
@@ -614,9 +606,10 @@ public class MediaPlayerManagerComponent implements Component<Void>, PlayStateLi
 
     @Override
     public void addMediaTrack() {
-        TimePoint defaultStartTime = getRaceStartTime();
+        TimePoint raceStartTime = getRaceStartTime();
+        TimePoint defaultStartTime = raceStartTime;
         NewMediaDialog dialog = new NewMediaDialog(defaultStartTime, MediaPlayerManagerComponent.this.stringMessages,
-                this.getRaceIdentifier(), new DialogCallback<MediaTrack>() {
+                this.getCurrentRace(), new DialogCallback<MediaTrack>() {
 
                     @Override
                     public void cancel() {
@@ -786,12 +779,19 @@ public class MediaPlayerManagerComponent implements Component<Void>, PlayStateLi
         return userAgent;
     }
 
-    public RegattaAndRaceIdentifier getRaceIdentifier() {
+    @Override
+    public RegattaAndRaceIdentifier getCurrentRace() {
         return raceIdentifier;
     }
 
+    @Override
     public MediaServiceAsync getMediaService() {
         return mediaService;
+    }
+
+    @Override
+    public ErrorReporter getErrorReporter() {
+        return errorReporter;
     }
 
 }

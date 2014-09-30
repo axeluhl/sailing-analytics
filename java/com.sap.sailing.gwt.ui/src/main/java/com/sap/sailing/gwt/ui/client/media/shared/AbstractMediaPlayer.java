@@ -28,8 +28,10 @@ public abstract class AbstractMediaPlayer implements MediaPlayer {
     }
 
     public void raceTimeChanged(Date raceTime) {
-        raceTimeInMillis = raceTime.getTime();
-        alignTime();
+        if (raceTime != null) {
+            raceTimeInMillis = raceTime.getTime();
+            alignTime();
+        }
     }
     
     @Override
@@ -40,26 +42,35 @@ public abstract class AbstractMediaPlayer implements MediaPlayer {
     @Override
 	public boolean isCoveringCurrentRaceTime() {
         double mediaTime = (raceTimeInMillis - mediaTrack.startTime.asMillis()) / 1000d;
-        return (mediaTime >= 0) && (mediaTime <= getDuration());
+        double duration = getDuration();
+        return (mediaTime >= 0) && ((duration == 0) || (mediaTime <= duration)); // for unknown reasons, Youtube player sometimes returns duration = 0 for live stream
 	}
 
     protected void alignTime() {
         long mediaStartTimeInMillis = mediaTrack.startTime.asMillis();
         long mediaTimeInMillis = mediaStartTimeInMillis + getCurrentMediaTimeMillis();
         long mediaTimeOffFromRaceInMillis = raceTimeInMillis - mediaTimeInMillis;
-        if (Math.abs(mediaTimeOffFromRaceInMillis) > TOLERATED_LAG_IN_MILLISECONDS) {
+        if (isOutOfTolerance(mediaTimeOffFromRaceInMillis)) {
             forceAlign(mediaStartTimeInMillis);
         }
+    }
+
+    private boolean isOutOfTolerance(long mediaTimeOffFromRaceInMillis) {
+        return Math.abs(mediaTimeOffFromRaceInMillis) > TOLERATED_LAG_IN_MILLISECONDS;
     }
 
     private void forceAlign(long mediaStartTimeInMillis) {
         double mediaTime = (raceTimeInMillis - mediaStartTimeInMillis) / 1000d;
         if (mediaTime < 0) {
             pauseMedia();
-        } else if (mediaTime > getDuration()) {
-            pauseMedia();
         } else {
-            setCurrentMediaTime(mediaTime);
+            double duration = getDuration();
+            double diff = mediaTime - duration;
+            if (duration == 0 || diff <= 0) {
+                setCurrentMediaTime(mediaTime);
+            } else {
+                pauseMedia();
+            }
         }
     }
 

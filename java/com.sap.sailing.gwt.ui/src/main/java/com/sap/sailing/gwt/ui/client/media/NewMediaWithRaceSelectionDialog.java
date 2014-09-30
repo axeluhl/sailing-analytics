@@ -8,7 +8,7 @@ import com.sap.sailing.domain.common.RegattaAndRaceIdentifier;
 import com.sap.sailing.domain.common.TimePoint;
 import com.sap.sailing.domain.common.impl.MillisecondsTimePoint;
 import com.sap.sailing.domain.common.media.MediaTrack;
-import com.sap.sailing.gwt.ui.adminconsole.RegattasAndRacesDialog;
+import com.sap.sailing.gwt.ui.adminconsole.AssignRacesToMediaDialog;
 import com.sap.sailing.gwt.ui.client.ErrorReporter;
 import com.sap.sailing.gwt.ui.client.RegattaRefresher;
 import com.sap.sailing.gwt.ui.client.RegattasDisplayer;
@@ -27,7 +27,7 @@ public class NewMediaWithRaceSelectionDialog extends NewMediaDialog {
 
     private Widget listOfRacesForMedia;
 
-    private RegattasAndRacesDialog racesForMediaDialog;
+    private AssignRacesToMediaDialog racesForMediaDialog;
 
     public NewMediaWithRaceSelectionDialog(TimePoint defaultStartTime, StringMessages stringMessages,
             SailingServiceAsync sailingService, ErrorReporter errorReporter, RegattaRefresher regattaRefresher,
@@ -40,7 +40,7 @@ public class NewMediaWithRaceSelectionDialog extends NewMediaDialog {
         this.regattasDisplayers = regattasDisplayers;
     }
 
-    protected void getStartTime() {
+    protected void updateStartTimeFromUi() {
         try {
             String startTime = startTimeBox.getValue();
             if (startTime != null && !startTime.equals("")) {
@@ -54,11 +54,11 @@ public class NewMediaWithRaceSelectionDialog extends NewMediaDialog {
     }
 
     protected void connectMediaWithRace() {
-        mediaTrack.assignedRaces = racesForMediaDialog.getSelectedRegattasAndRaces();
+        mediaTrack.assignedRaces = racesForMediaDialog.getAssignedRaces();
     }
 
     private Widget racesForMedia() {
-        racesForMediaDialog = new RegattasAndRacesDialog(sailingService, mediaTrack, errorReporter, regattaRefresher,
+        racesForMediaDialog = new AssignRacesToMediaDialog(sailingService, mediaTrack, errorReporter, regattaRefresher,
                 stringMessages, null, new DialogCallback<Set<RegattaAndRaceIdentifier>>() {
 
                     @Override
@@ -73,7 +73,7 @@ public class NewMediaWithRaceSelectionDialog extends NewMediaDialog {
                         }
                     }
                 });
-        racesForMediaDialog.ensureDebugId("RegattasAndRacesDialog");
+        racesForMediaDialog.ensureDebugId("AssignedRacesDialog");
         racesForMediaDialog.hideRefreshButton();
         regattasDisplayers.add(racesForMediaDialog);
 
