@@ -40,8 +40,30 @@ public class PolarDiagramBase implements PolarDiagram, Serializable {
     protected NavigableMap<Speed, Bearing> gybeAngles;
     protected NavigableMap<Speed, Speed> beatSOG;
     protected NavigableMap<Speed, Speed> gybeSOG;
+    
+    protected double scaleBearing = 1.0;
+    protected double scaleSpeed = 1.0;
 
+    @Override
+    public void setSpeedScale(double scaleSpeed) {
+        this.scaleSpeed = scaleSpeed;
+    }
+    
+    @Override
+    public double getSpeedScale() {
+        return this.scaleSpeed;
+    }
+    
+    @Override
+    public void setBearingScale(double scaleBearing) {
+        this.scaleBearing = scaleBearing;
+    }
 
+    @Override
+    public double getBearingScale() {
+        return this.scaleBearing;
+    }
+    
     @Override
     public NavigableMap<Speed, NavigableMap<Bearing, Speed>> getSpeedTable() {
         return this.speedTable;
@@ -376,7 +398,7 @@ public class PolarDiagramBase implements PolarDiagram, Serializable {
 
             double boatSpeed = this.interpolate(values, 0, extTable);
 
-            return new KnotSpeedWithBearingImpl(boatSpeed, bearing);
+            return new KnotSpeedWithBearingImpl(boatSpeed*this.scaleSpeed, bearing);
 
         }
     }
@@ -452,7 +474,7 @@ public class PolarDiagramBase implements PolarDiagram, Serializable {
                     / (ceilingWind.getKnots() - floorWind.getKnots());
         }
 
-        return new KnotSpeedWithBearingImpl(speed, bearing);
+        return new KnotSpeedWithBearingImpl(speed*this.scaleSpeed, bearing);
     }
 
     @Override
@@ -500,8 +522,9 @@ public class PolarDiagramBase implements PolarDiagram, Serializable {
             }
 
             // get bearing to north based on beatAngle and windBearing
-            estBeatAngleLeft = windBearing.add(new RadianBearingImpl(-beatAngle));
-            estBeatAngleRight = windBearing.add(new RadianBearingImpl(+beatAngle));
+            double scaledBeatAngle = beatAngle*this.scaleBearing;
+            estBeatAngleLeft = windBearing.add(new RadianBearingImpl(-scaledBeatAngle));
+            estBeatAngleRight = windBearing.add(new RadianBearingImpl(+scaledBeatAngle));
 
             return new Bearing[] { estBeatAngleLeft, estBeatAngleRight };
 
@@ -680,8 +703,9 @@ public class PolarDiagramBase implements PolarDiagram, Serializable {
             }
             // Bearing estGybeAngle = new RadianBearingImpl(gybeAngle);
 
-            estGybeAngleRight = windBearing.add(new RadianBearingImpl(+gybeAngle));
-            estGybeAngleLeft = windBearing.add(new RadianBearingImpl(-gybeAngle));
+            double scaledGybeAngle = Math.PI-(Math.PI-gybeAngle)*this.scaleBearing;
+            estGybeAngleRight = windBearing.add(new RadianBearingImpl(+scaledGybeAngle));
+            estGybeAngleLeft = windBearing.add(new RadianBearingImpl(-scaledGybeAngle));
 
             return new Bearing[] { estGybeAngleRight, estGybeAngleLeft };
 
@@ -754,10 +778,10 @@ public class PolarDiagramBase implements PolarDiagram, Serializable {
             windSide = WindSide.RIGHT;
         }
         if (bearing.equals(wind.getBearing())) {
-            windSide = WindSide.OPPOSING;
+            windSide = WindSide.DOWNWIND;
         }
         if (bearing.equals(wind.getBearing().reverse())) {
-            windSide = WindSide.FACING;
+            windSide = WindSide.UPWIND;
         }
 
         return windSide;
