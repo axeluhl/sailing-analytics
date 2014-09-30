@@ -3,11 +3,11 @@
 Integrating smartphones into the _Sailing Analytics_ has long been talked about, and some effort has been invested on the server side to implement this idea. So far, the smartphone side of things has received substantially less attention, even though it is probably the most essential part when it comes to making the solution desirable for sailors. The missing parts on both sides and a high-level specification for the app are presented here.
 
 ## Table of Contents
-<!--[[_TOC_]]-->
+[[_TOC_]]
 
 <!-- Gollumn and python-markdown have a different syntax for the TOC :( -->
 
-[TOC]
+<!--[TOC]-->
 
 ## A lengthier Introduction
 The _SAP Sailing Analytics_ use tracking data to allow users to analyze sailing regattas in their browser - both on a regatta level, covering multiple races in tables called _Leaderboards_, and on a per-race level through map-centric interactive views called _RaceBoards_. The Sailing Analytics are currently targeted at large sailing events. Dedicated tracking providers collect and send the positional data of the sailing boats along with competitor metadata, and trained personnel that knows the Sailing Analytics inside out operates them on-site, for example by maintaining the regatta data (regattas, races, fleets, result corrections etc.).
