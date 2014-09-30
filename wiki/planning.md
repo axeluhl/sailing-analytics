@@ -54,12 +54,8 @@ The links above lead to short write-ups of the respective business case behind t
 
 [[AirMAX vs. MikroTik|/wiki/planning/AirMAXvsMikroTik]]
 
-[[Scaling by Server Replication|wiki/planning/scalebyreplication]]
-
 [[ISAF-Internal Projects|wiki/planning/ISAFInternalProjects]]
 
 [[Microcopter Integration|wiki/planning/Microcopter]]
 
 [[Race Rendering Technology|wiki/planning/RaceRenderingTechnology]]
-
-[[Satellite Internet Connection|wiki/planning/SatelliteInternetConnection]]
