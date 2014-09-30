@@ -74,9 +74,9 @@ DynamicTrackedRace, GPSTrackListener<Competitor, GPSFixMoving> {
     
     public DynamicTrackedRaceImpl(TrackedRegatta trackedRegatta, RaceDefinition race, Iterable<Sideline> sidelines,
             WindStore windStore, GPSFixStore gpsFixStore, long delayToLiveInMillis, long millisecondsOverWhichToAverageWind, long millisecondsOverWhichToAverageSpeed,
-            long delayForCacheInvalidationOfWindEstimation) {
+            long delayForCacheInvalidationOfWindEstimation, boolean useMarkPassingCalculator) {
         super(trackedRegatta, race, sidelines, windStore, gpsFixStore, delayToLiveInMillis, millisecondsOverWhichToAverageWind, millisecondsOverWhichToAverageSpeed,
-                delayForCacheInvalidationOfWindEstimation);
+                delayForCacheInvalidationOfWindEstimation, useMarkPassingCalculator);
         this.logListener = new DynamicTrackedRaceLogListener(this);
         this.courseDesignChangedListeners = new HashSet<>();
         this.startTimeChangedListeners = new HashSet<>();
@@ -123,9 +123,9 @@ DynamicTrackedRace, GPSTrackListener<Competitor, GPSFixMoving> {
      */
     public DynamicTrackedRaceImpl(TrackedRegatta trackedRegatta, RaceDefinition race, Iterable<Sideline> sidelines,
             WindStore windStore, GPSFixStore gpsFixStore, long delayToLiveInMillis,
-            long millisecondsOverWhichToAverageWind, long millisecondsOverWhichToAverageSpeed) {
+            long millisecondsOverWhichToAverageWind, long millisecondsOverWhichToAverageSpeed, boolean useMarkPassingCalculator) {
         this(trackedRegatta, race, sidelines, windStore, gpsFixStore, delayToLiveInMillis, millisecondsOverWhichToAverageWind, millisecondsOverWhichToAverageSpeed,
-                millisecondsOverWhichToAverageWind/2);
+                millisecondsOverWhichToAverageWind/2, useMarkPassingCalculator);
     }
 
     @Override
@@ -929,8 +929,7 @@ DynamicTrackedRace, GPSTrackListener<Competitor, GPSFixMoving> {
     }
     
     @Override
-    public void setMarkPassingCalculator(MarkPassingCalculator calculator) {
-        super.setMarkPassingCalculator(calculator);
-        logListener.setMarkPassingUpdateListener(calculator.getListener());
+    protected MarkPassingCalculator getMarkPassingCalculator() {
+        return new MarkPassingCalculator(this, true); 
     }
 }

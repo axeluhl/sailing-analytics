@@ -49,7 +49,6 @@ import com.sap.sailing.domain.common.TimePoint;
 import com.sap.sailing.domain.common.impl.DegreeBearingImpl;
 import com.sap.sailing.domain.common.impl.DegreePosition;
 import com.sap.sailing.domain.common.impl.MillisecondsTimePoint;
-import com.sap.sailing.domain.markpassingcalculation.MarkPassingCalculator;
 import com.sap.sailing.domain.racelog.RaceLogStore;
 import com.sap.sailing.domain.racelog.tracking.EmptyGPSFixStore;
 import com.sap.sailing.domain.racelog.tracking.GPSFixStore;
@@ -75,9 +74,9 @@ import com.sap.sailing.domain.tractracadapter.TracTracConfiguration;
 import com.sap.sailing.domain.tractracadapter.TracTracControlPoint;
 import com.sap.sailing.domain.tractracadapter.TracTracRaceTracker;
 import com.sap.sailing.util.WeakIdentityHashMap;
-import com.tractrac.model.lib.api.data.IPosition;
 import com.sap.sse.common.Util;
 import com.sap.sse.common.Util.Pair;
+import com.tractrac.model.lib.api.data.IPosition;
 import com.tractrac.model.lib.api.event.CreateModelException;
 import com.tractrac.model.lib.api.event.ICompetitor;
 import com.tractrac.model.lib.api.event.ICompetitorClass;
@@ -517,7 +516,7 @@ public class DomainFactoryImpl implements DomainFactory {
                 if (raceDefinition.getBoatClass() == trackedRegatta.getRegatta().getBoatClass()) {
                     trackedRegatta.getRegatta().addRace(raceDefinition);
                     trackedRace = createTrackedRace(trackedRegatta, raceDefinition, sidelines, windStore, EmptyGPSFixStore.INSTANCE,
-                            delayToLiveInMillis, millisecondsOverWhichToAverageWind, raceDefinitionSetToUpdate);
+                            delayToLiveInMillis, millisecondsOverWhichToAverageWind, raceDefinitionSetToUpdate, ignoreTracTracMarkPassings);
                     logger.info("Added race " + raceDefinition + " to regatta " + trackedRegatta.getRegatta());
                     addTracTracUpdateHandlers(tracTracUpdateURI, tracTracEventUuid, tracTracUsername, tracTracPassword,
                             raceDefinition, trackedRace);
@@ -530,9 +529,6 @@ public class DomainFactoryImpl implements DomainFactory {
                 }
             } else {
                 logger.info("Found existing tracked race for race "+raceName+" with ID "+raceId);
-            }
-            if (ignoreTracTracMarkPassings) {
-                new MarkPassingCalculator(trackedRace, true);
             }
             return trackedRace;
         }
@@ -556,11 +552,11 @@ public class DomainFactoryImpl implements DomainFactory {
     }
 
     private DynamicTrackedRace createTrackedRace(TrackedRegatta trackedRegatta, RaceDefinition race, Iterable<Sideline> sidelines, WindStore windStore, GPSFixStore gpsFixStore,
-            long delayToLiveInMillis, long millisecondsOverWhichToAverageWind, DynamicRaceDefinitionSet raceDefinitionSetToUpdate) {
+            long delayToLiveInMillis, long millisecondsOverWhichToAverageWind, DynamicRaceDefinitionSet raceDefinitionSetToUpdate, boolean useMarkPassingCalculator) {
         return trackedRegatta.createTrackedRace(race, sidelines,
                 windStore, gpsFixStore, delayToLiveInMillis, millisecondsOverWhichToAverageWind,
                 /* time over which to average speed: */ race.getBoatClass().getApproximateManeuverDurationInMilliseconds(),
-                raceDefinitionSetToUpdate);
+                raceDefinitionSetToUpdate, useMarkPassingCalculator);
     }
     
     @Override

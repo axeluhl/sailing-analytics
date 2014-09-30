@@ -93,7 +93,7 @@ public class TrackedRaceContentsReplicationTest extends AbstractServerReplicatio
         trackedRace = (DynamicTrackedRace) master.apply(new CreateTrackedRace(raceIdentifier,
                 MongoWindStoreFactory.INSTANCE.getMongoWindStore(PersistenceFactory.INSTANCE.getDefaultMongoObjectFactory(),
                         PersistenceFactory.INSTANCE.getDefaultDomainObjectFactory()), EmptyGPSFixStore.INSTANCE, /* delayToLiveInMillis */ 5000,
-                /* millisecondsOverWhichToAverageWind */ 10000, /* millisecondsOverWhichToAverageSpeed */10000));
+                /* millisecondsOverWhichToAverageWind */ 10000, /* millisecondsOverWhichToAverageSpeed */10000, /*useMarkPassingCalculator*/ false));
         trackedRace.waitUntilLoadingFromWindStoreComplete();
     }
     

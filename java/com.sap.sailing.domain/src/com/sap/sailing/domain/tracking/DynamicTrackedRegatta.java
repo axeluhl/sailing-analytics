@@ -24,6 +24,6 @@ public interface DynamicTrackedRegatta extends TrackedRegatta {
      */
     DynamicTrackedRace createTrackedRace(RaceDefinition raceDefinition, Iterable<Sideline> sidelines, WindStore windStore,
     		GPSFixStore gpsFixStore, long delayToLiveInMillis, long millisecondsOverWhichToAverageWind, long millisecondsOverWhichToAverageSpeed,
-            DynamicRaceDefinitionSet raceDefinitionSetToUpdate);
+            DynamicRaceDefinitionSet raceDefinitionSetToUpdate, boolean useMarkPassingCalculator);
 
 }

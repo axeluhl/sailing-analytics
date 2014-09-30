@@ -230,7 +230,7 @@ public abstract class TrackedRaceImpl extends TrackedRaceWithWindEssentials impl
     
     private transient Map<TimePoint, Future<Wind>> directionFromStartToNextMarkCache;
 
-    protected MarkPassingCalculator markPassingCalculator;
+    protected final MarkPassingCalculator markPassingCalculator;
     
     private final ConcurrentHashMap<Mark, GPSFixTrack<Mark, GPSFix>> markTracks;
     
@@ -294,7 +294,7 @@ public abstract class TrackedRaceImpl extends TrackedRaceWithWindEssentials impl
 
     public TrackedRaceImpl(final TrackedRegatta trackedRegatta, RaceDefinition race, final Iterable<Sideline> sidelines, final WindStore windStore, final GPSFixStore gpsFixStore,
             long delayToLiveInMillis, final long millisecondsOverWhichToAverageWind,
-            long millisecondsOverWhichToAverageSpeed, long delayForWindEstimationCacheInvalidation) {
+            long millisecondsOverWhichToAverageSpeed, long delayForWindEstimationCacheInvalidation, boolean useMarkPassingCalculator) {
         super(race, trackedRegatta, windStore, millisecondsOverWhichToAverageWind);
         shortTimeWindCache = new ShortTimeWindCache(this, millisecondsOverWhichToAverageWind / 2);
         locksForMarkPassings = new IdentityHashMap<>();
@@ -403,6 +403,11 @@ public abstract class TrackedRaceImpl extends TrackedRaceWithWindEssentials impl
                 getOrCreateWindTrack(trackBasedWindSource, delayForWindEstimationCacheInvalidation));
         competitorRankings = createCompetitorRankingsCache();
         competitorRankingsLocks = createCompetitorRankingsLockMap();
+        if(useMarkPassingCalculator){
+        markPassingCalculator = getMarkPassingCalculator();
+        } else {
+            markPassingCalculator = null;
+        }
         // now wait until wind loading has at least started; then we know that the serialization lock is safely held by the loader
         try {
             waitUntilLoadingFromWindStoreComplete();
@@ -3130,9 +3135,13 @@ public abstract class TrackedRaceImpl extends TrackedRaceWithWindEssentials impl
     	return gpsFixStore;
     }
     
+    protected MarkPassingCalculator getMarkPassingCalculator() {
+        return null;
+    }
+    
     @Override
-    public void setMarkPassingCalculator(MarkPassingCalculator calculator) {
-        markPassingCalculator = calculator;
+    public Boolean isUsingMarkPassingCalculator() {
+        return markPassingCalculator!=null;
     }
 
     @Override
