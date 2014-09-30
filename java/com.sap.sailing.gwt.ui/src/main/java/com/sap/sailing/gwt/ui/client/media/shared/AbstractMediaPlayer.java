@@ -42,19 +42,20 @@ public abstract class AbstractMediaPlayer implements MediaPlayer {
     @Override
 	public boolean isCoveringCurrentRaceTime() {
         double mediaTime = (raceTimeInMillis - mediaTrack.startTime.asMillis()) / 1000d;
-        return (mediaTime >= 0) && (mediaTime <= getDuration());
+        double duration = getDuration();
+        return (mediaTime >= 0) && ((duration == 0) || (mediaTime <= duration)); // for unknown reasons, Youtube player sometimes returns duration = 0 for live stream
 	}
 
     protected void alignTime() {
         long mediaStartTimeInMillis = mediaTrack.startTime.asMillis();
         long mediaTimeInMillis = mediaStartTimeInMillis + getCurrentMediaTimeMillis();
         long mediaTimeOffFromRaceInMillis = raceTimeInMillis - mediaTimeInMillis;
-        if (isOffsetTolerable(mediaTimeOffFromRaceInMillis)) {
+        if (isOutOfTolerance(mediaTimeOffFromRaceInMillis)) {
             forceAlign(mediaStartTimeInMillis);
         }
     }
 
-    private boolean isOffsetTolerable(long mediaTimeOffFromRaceInMillis) {
+    private boolean isOutOfTolerance(long mediaTimeOffFromRaceInMillis) {
         return Math.abs(mediaTimeOffFromRaceInMillis) > TOLERATED_LAG_IN_MILLISECONDS;
     }
 
@@ -64,10 +65,11 @@ public abstract class AbstractMediaPlayer implements MediaPlayer {
             pauseMedia();
         } else {
             double duration = getDuration();
-            if (mediaTime > duration) {
-                pauseMedia();
-            } else {
+            double diff = mediaTime - duration;
+            if (duration == 0 || diff <= 0) {
                 setCurrentMediaTime(mediaTime);
+            } else {
+                pauseMedia();
             }
         }
     }

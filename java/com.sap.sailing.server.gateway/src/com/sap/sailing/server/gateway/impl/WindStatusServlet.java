@@ -43,6 +43,7 @@ public class WindStatusServlet extends SailingServerHttpServlet implements Igtim
     
     private static List<ExpeditionMessageInfo> lastExpeditionMessages;
     
+    private static Object lock = new Object();
     private static int igtimiRawMessageCount;
     private static List<IgtimiMessageInfo> lastIgtimiMessages;
     private static IgtimiWindReceiver igtimiWindReceiver;
@@ -58,15 +59,18 @@ public class WindStatusServlet extends SailingServerHttpServlet implements Igtim
     }
     
     private void initializeWindReceiver() {
-        if(!isExpeditionListenerRegistered) {
-            isExpeditionListenerRegistered = registerExpeditionListener();
-            lastExpeditionMessages = new ArrayList<WindStatusServlet.ExpeditionMessageInfo>();
+        synchronized (lock) {
+            if (!isExpeditionListenerRegistered) {
+                isExpeditionListenerRegistered = registerExpeditionListener();
+                lastExpeditionMessages = new ArrayList<WindStatusServlet.ExpeditionMessageInfo>();
+            }
         }
-        
-        if (!isIgtimiListenerRegistered) {
-            isIgtimiListenerRegistered = registerIgtimiListener();
-            lastIgtimiMessages = new ArrayList<WindStatusServlet.IgtimiMessageInfo>();
-            igtimiRawMessageCount = 0;
+        synchronized (lock) {
+            if (!isIgtimiListenerRegistered) {
+                isIgtimiListenerRegistered = registerIgtimiListener();
+                lastIgtimiMessages = new ArrayList<WindStatusServlet.IgtimiMessageInfo>();
+                igtimiRawMessageCount = 0;
+            }
         }
     }
 
@@ -135,13 +139,13 @@ public class WindStatusServlet extends SailingServerHttpServlet implements Igtim
         ServiceTracker<IgtimiConnectionFactory, IgtimiConnectionFactory> igtimiServiceTracker = new ServiceTracker<IgtimiConnectionFactory, IgtimiConnectionFactory>(getContext(), IgtimiConnectionFactory.class, null);
         igtimiServiceTracker.open();
         IgtimiConnectionFactory igtimiConnectionFactory = igtimiServiceTracker.getService();
+        igtimiWindReceiver = new IgtimiWindReceiver(DeclinationService.INSTANCE);
+        igtimiWindReceiver.addListener(this);
         for (Account account : igtimiConnectionFactory.getAllAccounts()) {
             if (account.getUser() != null) {
                 IgtimiConnection igtimiConnection = igtimiConnectionFactory.connect(account);
                 try {
                     liveDataConnection = igtimiConnection.getOrCreateLiveConnection(igtimiConnection.getWindDevices());
-                    igtimiWindReceiver = new IgtimiWindReceiver(igtimiConnection.getWindDevices(), DeclinationService.INSTANCE);
-                    igtimiWindReceiver.addListener(this);
                     liveDataConnection.addListener(igtimiWindReceiver);
                     liveDataConnection.addListener(this);
                     result = true;

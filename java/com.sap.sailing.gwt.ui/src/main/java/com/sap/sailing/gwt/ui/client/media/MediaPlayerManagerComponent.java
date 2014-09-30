@@ -262,13 +262,13 @@ public class MediaPlayerManagerComponent implements Component<Void>, PlayStateLi
     public void timeChanged(Date newRaceTime, Date oldRaceTime) {
         this.currentRaceTime = newRaceTime;
         if (isStandaloneAudio()) { // only if audio player isn't one of the video players anyway
-            activeAudioPlayer.raceTimeChanged(this.currentRaceTime);
             ensurePlayState(activeAudioPlayer);
+            activeAudioPlayer.raceTimeChanged(this.currentRaceTime);
         }
         for (VideoContainer videoContainer : activeVideoContainers.values()) {
             VideoPlayer videoPlayer = videoContainer.getVideoPlayer();
-            videoPlayer.raceTimeChanged(this.currentRaceTime);
             ensurePlayState(videoPlayer);
+            videoPlayer.raceTimeChanged(this.currentRaceTime);
         }
     }
 
@@ -557,8 +557,8 @@ public class MediaPlayerManagerComponent implements Component<Void>, PlayStateLi
 
     private void synchPlayState(final MediaPlayer mediaPlayer) {
         mediaPlayer.setPlaybackSpeed(currentPlaybackSpeed);
-        mediaPlayer.raceTimeChanged(this.currentRaceTime);
         ensurePlayState(mediaPlayer);
+        mediaPlayer.raceTimeChanged(this.currentRaceTime);
     }
 
     private void ensurePlayState(final MediaPlayer mediaPlayer) {

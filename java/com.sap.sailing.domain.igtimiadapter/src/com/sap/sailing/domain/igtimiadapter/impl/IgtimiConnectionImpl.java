@@ -304,8 +304,7 @@ public class IgtimiConnectionImpl implements IgtimiConnection {
         }
         final Map<TrackedRace, Integer> result;
         if (!deviceSerialNumbers.isEmpty()) {
-            IgtimiWindReceiver windReceiver = new IgtimiWindReceiver(deviceSerialNumbers,
-                    correctByDeclination ? DeclinationService.INSTANCE : null);
+            IgtimiWindReceiver windReceiver = new IgtimiWindReceiver(correctByDeclination ? DeclinationService.INSTANCE : null);
             final WindListenerSendingToTrackedRace windListener = new WindListenerSendingToTrackedRace(
                     trackedRaces, Activator.getInstance().getWindTrackerFactory());
             windReceiver.addListener(windListener);
