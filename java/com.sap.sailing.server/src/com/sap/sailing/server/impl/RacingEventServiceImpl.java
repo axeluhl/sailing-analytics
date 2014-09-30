@@ -576,9 +576,7 @@ public class RacingEventServiceImpl implements RacingEventServiceWithTestSupport
      */
     private void loadMediaLibary() {
         Collection<MediaTrack> allDbMediaTracks = mediaDB.loadAllMediaTracks();
-        for (MediaTrack mediaTrack : allDbMediaTracks) {
-            mediaTrackAdded(mediaTrack);
-        }
+        mediaTracksAdded(allDbMediaTracks);
     }
 
     private void loadStoredDeviceConfigurations() {
@@ -2533,7 +2531,7 @@ public class RacingEventServiceImpl implements RacingEventServiceWithTestSupport
     @Override
     public void mediaTrackAssignedRacesChanged(MediaTrack mediaTrack) {
         mediaDB.updateRace(mediaTrack.dbId, mediaTrack.assignedRaces);
-        mediaLibrary.racesChanged(mediaTrack);
+        mediaLibrary.assignedRacesChanged(mediaTrack);
         replicate(new UpdateMediaTrackRacesOperation(mediaTrack));
 
     }
@@ -2581,17 +2579,7 @@ public class RacingEventServiceImpl implements RacingEventServiceWithTestSupport
 
     @Override
     public Collection<MediaTrack> getMediaTracksForRace(RegattaAndRaceIdentifier regattaAndRaceIdentifier) {
-        TrackedRace trackedRace = getExistingTrackedRace(regattaAndRaceIdentifier);
-        if (trackedRace != null) {
-            if (trackedRace.isLive(MillisecondsTimePoint.now())) {
-                return mediaLibrary.findLiveMediaTracksForRace(trackedRace.getRaceIdentifier().getRegattaName(),
-                        trackedRace.getRaceIdentifier().getRaceName());
-            } else {
-                return mediaLibrary.findMediaTracksForRace(trackedRace.getRaceIdentifier());
-            }
-        } else {
-            return Collections.emptyList();
-        }
+        return mediaLibrary.findMediaTracksForRace(regattaAndRaceIdentifier);
     }
     
     @Override
@@ -2599,11 +2587,10 @@ public class RacingEventServiceImpl implements RacingEventServiceWithTestSupport
         TrackedRace trackedRace = getExistingTrackedRace(regattaAndRaceIdentifier);
         if (trackedRace != null) {
             if (trackedRace.isLive(MillisecondsTimePoint.now())) {
-                return mediaLibrary.findLiveMediaTracksForRace(trackedRace.getRaceIdentifier().getRegattaName(),
-                        trackedRace.getRaceIdentifier().getRaceName());
+                return mediaLibrary.findLiveMediaTracks();
             } else {
-                TimePoint raceStart = trackedRace.getStartOfRace() == null ? null : trackedRace.getStartOfRace();
-                TimePoint raceEnd = trackedRace.getEndOfRace() == null ? null : trackedRace.getEndOfRace();
+                TimePoint raceStart = trackedRace.getStartOfRace() == null ? trackedRace.getStartOfTracking() : trackedRace.getStartOfRace();
+                TimePoint raceEnd = trackedRace.getEndOfRace() == null ? trackedRace.getEndOfTracking() : trackedRace.getEndOfRace();
                 return mediaLibrary.findMediaTracksInTimeRange(raceStart, raceEnd);
             }
         } else {

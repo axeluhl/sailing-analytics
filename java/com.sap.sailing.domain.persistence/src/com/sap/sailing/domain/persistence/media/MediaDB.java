@@ -23,7 +23,7 @@ public interface MediaDB {
 	 */
 	String insertMediaTrack(String title, String url, TimePoint startTime,
 			Duration duration, MimeType mimeType,
-			Set<RegattaAndRaceIdentifier> regattasAndRaces);
+			Set<RegattaAndRaceIdentifier> assignedRaces);
 
 	/**
 	 * Stores a new track to the database, using the db id of the specified
@@ -59,14 +59,14 @@ public interface MediaDB {
 		@Override
 		public String insertMediaTrack(String title, String url,
 				TimePoint startTime, Duration duration, MimeType mimeType,
-				Set<RegattaAndRaceIdentifier> regattasAndRaces) {
+				Set<RegattaAndRaceIdentifier> assignedRaces) {
 			return "0";
 		}
 
 		@Override
 		public void insertMediaTrackWithId(String dbId, String videoTitle,
 				String url, TimePoint startTime, Duration duration,
-				MimeType mimeType, Set<RegattaAndRaceIdentifier> regattaAndRace) {
+				MimeType mimeType, Set<RegattaAndRaceIdentifier> assingedRace) {
 		};
 
 		@Override

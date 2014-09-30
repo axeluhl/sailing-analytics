@@ -1,5 +1,6 @@
 package com.sap.sailing.gwt.ui.client.media;
 
+import java.util.Date;
 import java.util.HashSet;
 import java.util.Set;
 
@@ -61,7 +62,7 @@ public class NewMediaDialog extends DataEntryDialog<MediaTrack> {
             RegattaAndRaceIdentifier raceIdentifier, DialogCallback<MediaTrack> dialogCallback) {
         super(stringMessages.addMediaTrack(), "", stringMessages.ok(), stringMessages.cancel(), MEDIA_TRACK_VALIDATOR,
                 dialogCallback);
-        this.defaultStartTime = defaultStartTime;
+        this.defaultStartTime = defaultStartTime != null ? defaultStartTime : MillisecondsTimePoint.now();
         this.stringMessages = stringMessages;
         this.raceIdentifier = raceIdentifier;
         registerNativeMethods();
@@ -71,26 +72,37 @@ public class NewMediaDialog extends DataEntryDialog<MediaTrack> {
     protected MediaTrack getResult() {
         // mediaTrack.url = urlBox.getValue();
         mediaTrack.title = titleBox.getValue();
-        getStartTime();
-        String duration = durationBox.getValue();
-        if (duration != null && !duration.equals("")) {
-            mediaTrack.duration = TimeFormatUtil.hrsMinSecToMilliSeconds(duration);
-        }
+        updateStartTimeFromUi();
+        updateDurationFromUi();
         connectMediaWithRace();
 
         return mediaTrack;
     }
 
-    protected void connectMediaWithRace() {
-        Set<RegattaAndRaceIdentifier> regattasAndRaces = new HashSet<RegattaAndRaceIdentifier>();
-        regattasAndRaces.add(this.raceIdentifier);
-        mediaTrack.assignedRaces = regattasAndRaces;
+    private void updateDurationFromUi() {
+        String duration = durationBox.getValue();
+        if (duration != null && !duration.trim().isEmpty()) {
+            mediaTrack.duration = TimeFormatUtil.hrsMinSecToMilliSeconds(duration);
+        } else { 
+            mediaTrack.duration = null;
+        }
     }
 
-    protected void getStartTime() {
-        String startTime = startTimeBox.getValue();
-        if (startTime != null && !startTime.equals("")) {
-            mediaTrack.startTime = new MillisecondsTimePoint(TimeFormatUtil.DATETIME_FORMAT.parse(startTime));
+    protected void connectMediaWithRace() {
+        Set<RegattaAndRaceIdentifier> assignedRaces = new HashSet<RegattaAndRaceIdentifier>();
+        assignedRaces.add(this.raceIdentifier);
+        mediaTrack.assignedRaces = assignedRaces;
+    }
+
+    protected void updateStartTimeFromUi() {
+        String startTimeText = startTimeBox.getValue();
+        if (startTimeText != null && !startTimeText.equals("")) {
+            try {
+                Date startTime = TimeFormatUtil.DATETIME_FORMAT.parse(startTimeText);
+                mediaTrack.startTime = new MillisecondsTimePoint(startTime);
+            } catch (IllegalArgumentException ex) {
+                //TODO: highlight format error in UI
+            }
         }
     }
 
@@ -116,7 +128,12 @@ public class NewMediaDialog extends DataEntryDialog<MediaTrack> {
 
     public void loadedmetadata(MediaElement mediaElement) {
         mediaTrack.startTime = this.defaultStartTime;
-        mediaTrack.duration = new MillisecondsDurationImpl((long) Math.round(mediaElement.getDuration() * 1000));
+        double duration = mediaElement.getDuration();
+        if (duration > 0) {
+            mediaTrack.duration = new MillisecondsDurationImpl((long) Math.round(duration * 1000));
+        } else {
+            mediaTrack.duration = null;
+        }
         refreshUI();
     }
 
@@ -240,8 +257,13 @@ public class NewMediaDialog extends DataEntryDialog<MediaTrack> {
         setUiEnabled(true);
         mediaTrack.title = title;
         try {
-            mediaTrack.duration = new MillisecondsDurationImpl((long) Math.round(1000 * Double
-                    .valueOf(durationInSeconds)));
+            long duration = (long) Math.round(1000 * Double
+                    .valueOf(durationInSeconds));
+            if (duration > 0) {
+                mediaTrack.duration = new MillisecondsDurationImpl(duration);
+            } else {
+                mediaTrack.duration = null;
+            }
         } catch (NumberFormatException ex) {
             mediaTrack.duration = null;
         }
@@ -258,12 +280,16 @@ public class NewMediaDialog extends DataEntryDialog<MediaTrack> {
             infoLabelLabel.setText(stringMessages.mimeType() + ":");
             infoLabel.setText(mediaTrack.typeToString());
         }
-        String startTimeText = mediaTrack.startTime == null ? "2014 Jan 01 12:12:59.000" : TimeFormatUtil.DATETIME_FORMAT
-                .format(mediaTrack.startTime.asDate());
+        TimePoint startTime = mediaTrack.startTime != null ? mediaTrack.startTime : defaultStartTime; 
+        String startTimeText = TimeFormatUtil.DATETIME_FORMAT.format(startTime.asDate());
 
         startTimeBox.setText(startTimeText);
-        getStartTime();
-        durationBox.setText(TimeFormatUtil.durationToHrsMinSec(mediaTrack.duration));
+        updateStartTimeFromUi();
+        if (mediaTrack.duration != null) {
+            durationBox.setText(TimeFormatUtil.durationToHrsMinSec(mediaTrack.duration));
+        } else {
+            durationBox.setText("");
+        }
     }
 
     @Override

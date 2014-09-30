@@ -48,7 +48,7 @@ abstract public class AbstractHtmlMediaPlayer extends AbstractMediaPlayer {
     
     private void initPlayState() {
         if (!isReady && (mediaElement != null)) {
-            mediaElement.setCurrentTime(deferredMediaTime);
+            mediaElement.setCurrentTime(Math.min(deferredMediaTime, mediaElement.getDuration()));
             mediaElement.setMuted(deferredIsMuted);
             mediaElement.setPlaybackRate(deferredPlaybackSpeed);
             if (deferredIsPlaying) {
@@ -123,7 +123,7 @@ abstract public class AbstractHtmlMediaPlayer extends AbstractMediaPlayer {
     public void setCurrentMediaTime(double mediaTime) {
         this.deferredMediaTime = mediaTime;
         if (isReady && mediaElement != null) {
-            mediaElement.setCurrentTime(mediaTime);
+            mediaElement.setCurrentTime(Math.min(mediaTime, mediaElement.getDuration()));
         }
     }
 

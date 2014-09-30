@@ -95,12 +95,12 @@ public class MediaTrack implements Serializable {
 
     public MediaTrack(String title, String url, TimePoint startTime, Duration duration, MimeType mimeType,
             Set<RegattaAndRaceIdentifier> assignedRaces) {
+        this();
         this.title = title;
         this.url = url;
         this.startTime = startTime;
         this.duration = duration;
         this.mimeType = mimeType;
-        this.assignedRaces = new HashSet<RegattaAndRaceIdentifier>();
         if (assignedRaces != null) {
             this.assignedRaces.addAll(assignedRaces);
         }
@@ -147,7 +147,7 @@ public class MediaTrack implements Serializable {
         if (this.startTime == null) {
             return false;
         } else {
-            return this.deriveEndTime().after(startTime) && (endTime == null || this.startTime.before(endTime));
+            return !this.endsBefore(startTime != null ? startTime.asDate() : null) && !this.beginsAfter(endTime != null ? endTime.asDate() : null);
         }
     }
 
@@ -175,7 +175,9 @@ public class MediaTrack implements Serializable {
     }
 
     public boolean beginsAfter(Date date) {
-        if (startTime.asDate().after(date)) {
+        if (date == null) {
+            return false;
+        } else if (startTime.asDate().after(date)) {
             return true;
         } else {
             return false;
@@ -183,7 +185,11 @@ public class MediaTrack implements Serializable {
     }
 
     public boolean endsBefore(Date date) {
-        if (deriveEndTime().asDate().before(date)) {
+        if (date == null) {
+            return false;
+        } else if (duration == null) {
+            return false; //null-duration implies open-ended!
+        } else if (deriveEndTime().asDate().before(date)) {
             return true;
         } else {
             return false;

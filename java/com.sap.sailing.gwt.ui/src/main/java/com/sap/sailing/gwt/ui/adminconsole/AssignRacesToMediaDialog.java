@@ -23,17 +23,17 @@ import com.sap.sailing.gwt.ui.client.StringMessages;
 import com.sap.sailing.gwt.ui.shared.RegattaDTO;
 import com.sap.sse.gwt.client.dialog.DataEntryDialog;
 
-public class RegattasAndRacesDialog extends DataEntryDialog<Set<RegattaAndRaceIdentifier>> implements RegattasDisplayer {
+public class AssignRacesToMediaDialog extends DataEntryDialog<Set<RegattaAndRaceIdentifier>> implements RegattasDisplayer {
 
     protected StringMessages stringMessages;
     protected final TrackedRacesListComposite trackedRacesListComposite;
     protected final MediaTrack mediaTrack;
-    public boolean empty = true;
+    public boolean hasRaceCandidates = false;
     public boolean started = false;
     private final VerticalPanel panel;
     private Button btnRefresh;
 
-    public RegattasAndRacesDialog(SailingServiceAsync sailingService, final MediaTrack mediaTrack,
+    public AssignRacesToMediaDialog(SailingServiceAsync sailingService, final MediaTrack mediaTrack,
             ErrorReporter errorReporter, RegattaRefresher regattaRefresher, StringMessages stringMessages,
             Validator<Set<RegattaAndRaceIdentifier>> validator, DialogCallback<Set<RegattaAndRaceIdentifier>> callback) {
         super(stringMessages.linkedRaces(), null, stringMessages.ok(), stringMessages.cancel(), validator, callback);
@@ -42,11 +42,8 @@ public class RegattasAndRacesDialog extends DataEntryDialog<Set<RegattaAndRaceId
         trackedRacesListComposite = new TrackedRacesListComposite(sailingService, errorReporter, regattaRefresher,
                 new RaceSelectionModel(), stringMessages, /* multiselection */true) {
             protected boolean raceIsToBeAddedToList(RaceDTO race) {
-                if (mediaTrack.duration == null) {
-                    empty = !isLive(race.trackedRace);
-                    return isLive(race.trackedRace);
-                } else if (mediaTrackIsInTimerangeOf(race.trackedRace)) {
-                    empty = false;
+                if (mediaTrackIsInTimerangeOf(race.trackedRace)) {
+                    hasRaceCandidates = true;
                     return true;
                 }
                 return false;
@@ -84,42 +81,41 @@ public class RegattasAndRacesDialog extends DataEntryDialog<Set<RegattaAndRaceId
 
     @Override
     protected Set<RegattaAndRaceIdentifier> getResult() {
-        return getSelectedRegattasAndRaces();
+        return getAssignedRaces();
     }
 
     @Override
     public void fillRegattas(List<RegattaDTO> result) {
-        empty = true;
+        hasRaceCandidates = false;
         this.trackedRacesListComposite.fillRegattas(result);
-        for (RegattaAndRaceIdentifier regattaAndRace : mediaTrack.assignedRaces) {
-            this.trackedRacesListComposite.selectRaceByIdentifier(regattaAndRace);
+        for (RegattaAndRaceIdentifier assignedRace : mediaTrack.assignedRaces) {
+            this.trackedRacesListComposite.selectRaceByIdentifier(assignedRace);
         }
         updateUI();
     }
 
     public void updateUI() {
         Grid grid = (Grid) panel.getWidget(0);
-        if (empty) {
+        if (hasRaceCandidates) {
+            grid.getWidget(0, 0).setVisible(false);
+            grid.getWidget(1, 1).setVisible(true);
+            this.getOkButton().setVisible(true);
+        } else {
             Label label = (Label)grid.getWidget(0, 0);
             label.setText("No Races available");
             grid.getWidget(0, 0).setVisible(true);
             grid.getWidget(1, 1).setVisible(false);
             this.getOkButton().setVisible(false);
-            
-        } else {
-            grid.getWidget(0, 0).setVisible(false);
-            grid.getWidget(1, 1).setVisible(true);
-            this.getOkButton().setVisible(true);
         }
     }
 
-    public Set<RegattaAndRaceIdentifier> getSelectedRegattasAndRaces() {
+    public Set<RegattaAndRaceIdentifier> getAssignedRaces() {
         List<RaceDTO> races = trackedRacesListComposite.getSelectedRaces();
-        Set<RegattaAndRaceIdentifier> regattasAndRaces = new HashSet<RegattaAndRaceIdentifier>();
+        Set<RegattaAndRaceIdentifier> assignedRaces = new HashSet<RegattaAndRaceIdentifier>();
         for (RaceDTO race : races) {
-            regattasAndRaces.add(race.getRaceIdentifier());
+            assignedRaces.add(race.getRaceIdentifier());
         }
-        return regattasAndRaces;
+        return assignedRaces;
     }
     
     public void hideRefreshButton(){
@@ -127,43 +123,12 @@ public class RegattasAndRacesDialog extends DataEntryDialog<Set<RegattaAndRaceId
     }
 
     private boolean mediaTrackIsInTimerangeOf(TrackedRaceDTO race) {
-        if (race.endOfTracking != null && mediaTrack.beginsAfter(race.endOfTracking) || race.startOfTracking != null
-                && mediaTrack.endsBefore(race.startOfTracking)) {
+        if ((race.endOfTracking != null && mediaTrack.beginsAfter(race.endOfTracking)) || (race.startOfTracking != null
+                && mediaTrack.endsBefore(race.startOfTracking))) {
             return false;
         } else
             return true;
 
-    }
-
-    // noch brauchbar??
-    // private boolean eventIsNotConnectedToAnyRaces(EventDTO event) {
-    // if (regattasAreNotConnectedToAnyRaces(event.regattas)) {
-    // return true;
-    // }
-    // return false;
-    // }
-    //
-    // private boolean regattasAreNotConnectedToAnyRaces(List<RegattaDTO> regattas) {
-    // for (RegattaDTO regatta : regattas) {
-    // if (regattaIsConnectedToAnyRaces(regatta)) {
-    // return false;
-    // }
-    // }
-    // return true;
-    // }
-    //
-    // private boolean regattaIsConnectedToAnyRaces(RegattaDTO regatta) {
-    // if (regatta.races.size() > 0) {
-    // return true;
-    // }
-    // return false;
-    // }
-
-    private boolean isLive(TrackedRaceDTO race) {
-        if (race.endOfTracking == null)
-            return true;
-        else
-            return false;
     }
 
 }

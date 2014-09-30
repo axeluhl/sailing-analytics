@@ -8,6 +8,7 @@ import java.util.Collection;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.HashSet;
+import java.util.List;
 import java.util.Map;
 import java.util.Set;
 import java.util.concurrent.ConcurrentHashMap;
@@ -71,37 +72,17 @@ class MediaLibrary {
      * the more recent end might reduce loop cycles during linear search. E.g. use a SortedMap with
      * COMPARATOR_BY_REVERSE_STARTTIME commented out above.
      * 
-     * @param race
-     *            TODO
-     * @param startDate
-     *            TODO
-     * @param endDate
-     *            TODO
-     * 
-     * @return
      */
-    Set<MediaTrack> findMediaTracksForRace(RegattaAndRaceIdentifier race) {
+    Collection<MediaTrack> findMediaTracksForRace(RegattaAndRaceIdentifier race) {
 
         if (race != null) {
             LockUtil.lockForRead(lock);
             try {
-                Set<MediaTrack> cachedMediaTracks = mediaTracksByRace.get(race);
-                if (cachedMediaTracks == null) {
-
-                    Set<MediaTrack> result = new HashSet<MediaTrack>();
-                    for (MediaTrack mediaTrack : mediaTracksByDbId.values()) {
-                        if (mediaTrack.isConnectedTo(race)) {
-                            result.add(mediaTrack);
-                        }
-                    }
-                    cachedMediaTracks = mediaTracksByRace.putIfAbsent(race, result);
-                    if (cachedMediaTracks != null) {
-                        return cachedMediaTracks;
-                    } else {
-                        return result;
-                    }
+                Set<MediaTrack> mediaTracksForRace = mediaTracksByRace.get(race);
+                if (mediaTracksForRace == null) {
+                    return Collections.emptyList();
                 } else {
-                    return cachedMediaTracks;
+                    return new ArrayList<>(mediaTracksForRace);
                 }
             } finally {
                 LockUtil.unlockAfterRead(lock);
@@ -112,31 +93,27 @@ class MediaLibrary {
         return Collections.emptySet();
     }
 
-    Set<MediaTrack> findMediaTracksInTimeRange(TimePoint startTime, TimePoint endTime) {
+    Collection<MediaTrack> findMediaTracksInTimeRange(TimePoint startTime, TimePoint endTime) {
 
-        if (startTime != null && endTime != null && startTime.before(endTime)) {
-            LockUtil.lockForRead(lock);
-            try {
-                Set<MediaTrack> result = new HashSet<MediaTrack>();
-                for (MediaTrack mediaTrack : mediaTracksByDbId.values()) {
-                    if (mediaTrack.overlapsWith(startTime, endTime)) {
-                        result.add(mediaTrack);
-                    }
-                }
-                return result;
-            } finally {
-                LockUtil.unlockAfterRead(lock);
-            }
-
-        }
-        // else
-        return Collections.emptySet();
-    }
-
-    public Collection<MediaTrack> findLiveMediaTracksForRace(String regattaName, String raceName) {
         LockUtil.lockForRead(lock);
         try {
-            Set<MediaTrack> result = new HashSet<MediaTrack>();
+            List<MediaTrack> result = new ArrayList<MediaTrack>();
+            for (MediaTrack mediaTrack : mediaTracksByDbId.values()) {
+                if (mediaTrack.overlapsWith(startTime, endTime)) {
+                    result.add(mediaTrack);
+                }
+            }
+            return result;
+        } finally {
+            LockUtil.unlockAfterRead(lock);
+        }
+
+    }
+
+    public Collection<MediaTrack> findLiveMediaTracks() {
+        LockUtil.lockForRead(lock);
+        try {
+            List<MediaTrack> result = new ArrayList<MediaTrack>();
             for (MediaTrack mediaTrack : mediaTracksByDbId.values()) {
                 if (mediaTrack.duration == null) {
                     result.add(mediaTrack);
@@ -163,7 +140,7 @@ class MediaLibrary {
         try {
             for (MediaTrack mediaTrack : mediaTracks) {
                 this.mediaTracksByDbId.put(mediaTrack, mediaTrack);
-                updateStorage_Add(mediaTrack);
+                updateMapByRace_Add(mediaTrack);
             }
         } finally {
             LockUtil.unlockAfterWrite(lock);
@@ -175,7 +152,7 @@ class MediaLibrary {
         try {
             MediaTrack deletedMediaTrack = getMediaTrackForClone(mediaTrackToBeDeleted);
             mediaTracksByDbId.remove(deletedMediaTrack);
-            updateStorage_Remove(deletedMediaTrack);
+            updateMapByRace_Remove(deletedMediaTrack);
         } finally {
             LockUtil.unlockAfterWrite(lock);
         }
@@ -241,15 +218,17 @@ class MediaLibrary {
         }
     }
 
-    void racesChanged(MediaTrack changedMediaTrack) {
+    void assignedRacesChanged(MediaTrack changedMediaTrack) {
         LockUtil.lockForWrite(lock);
         try {
             MediaTrack mediaTrack = getMediaTrackForClone(changedMediaTrack);
             if (mediaTrack != null) {
-                updateStorage_Remove(mediaTrack); //Cannot use updateCache_Update method, because race is changed
+                updateMapByRace_Remove(mediaTrack); //Cannot use updateCache_Update method, because race is changed
                 mediaTrack.assignedRaces.clear();
-                mediaTrack.assignedRaces.addAll(changedMediaTrack.assignedRaces);
-                updateStorage_Add(mediaTrack);
+                if (changedMediaTrack.assignedRaces != null) { //safety check for imports from legacy installations which have no assignedRaces field 
+                    mediaTrack.assignedRaces.addAll(changedMediaTrack.assignedRaces);
+                }
+                updateMapByRace_Add(mediaTrack);
             }
         } finally {
             LockUtil.unlockAfterWrite(lock);
@@ -267,7 +246,7 @@ class MediaLibrary {
     /**
      * To be called only under write lock!
      */
-    private void updateStorage_Add(MediaTrack mediaTrack) {
+    private void updateMapByRace_Add(MediaTrack mediaTrack) {
         if (mediaTrack.assignedRaces != null) {
             for (RegattaAndRaceIdentifier assignedRace : mediaTrack.assignedRaces) {
                 if (mediaTracksByRace.containsKey(assignedRace)) {
@@ -285,7 +264,7 @@ class MediaLibrary {
     /**
      * To be called only under write lock!
      */
-    private void updateStorage_Remove(MediaTrack mediaTrack) {
+    private void updateMapByRace_Remove(MediaTrack mediaTrack) {
 
         for (RegattaAndRaceIdentifier assignedRace : mediaTrack.assignedRaces) {
             Set<MediaTrack> mediaTracks = mediaTracksByRace.get(assignedRace);
@@ -304,7 +283,7 @@ class MediaLibrary {
     Collection<MediaTrack> allTracks() {
         LockUtil.lockForRead(lock);
         try {
-            return new ArrayList<MediaTrack>(mediaTracksByDbId.values());
+            return new ArrayList<>(mediaTracksByDbId.values());
         } finally {
             LockUtil.unlockAfterRead(lock);
         }

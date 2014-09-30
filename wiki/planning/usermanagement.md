@@ -1,4 +1,4 @@
-## User Management
+# User Management
 
 User and role management is required mainly for two reasons:
 

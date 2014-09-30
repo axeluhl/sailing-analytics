@@ -18,6 +18,8 @@ For tennis we already know that major parts of the architecture of the SAP Saili
 
 * Concurrency support in the form of various locking and caching components
 
+* Replication architecture, allowing for long-distance and scale-out type of set-ups
+
 * Growing Amazon EC2 support, enabling elastic scaling of a solution
 
 Similarly, for supporting equestrian sports the same architecture can be used in case sensor data is to be processed, analyzed and visualized in a way similar to what we do for sailing.
