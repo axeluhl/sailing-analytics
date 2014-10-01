@@ -6,7 +6,9 @@ Backlog:
 - make simulation available as overlay on sailing analytics referring to the currently selected leg
   - integrate simulator with measured spatial wind (first version done)
   - race simulation overlay executing simulation and visualizing simulation results (first version done)
-  - integration with polar sheets required, in order to have beat/jibe angles & speed available
+  - integration with polar sheets required
+    - optimal beat/jibe angles & speed; interpolated in dependence on wind speed
+    - overall form of polar diagram 
   - user interface of race simulation to be clarified: user options, UI elements, etc.
 - visualize ladder rungs, i.e. advantage line plus intermediate isochrones in distance-steps or time-steps
   - for average wind based on convex hull of polar diagram (generalization of advantage line to 360-degree-view)
