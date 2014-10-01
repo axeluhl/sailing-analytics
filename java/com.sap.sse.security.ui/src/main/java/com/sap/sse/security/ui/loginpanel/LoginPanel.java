@@ -15,10 +15,10 @@ import com.google.gwt.user.client.rpc.AsyncCallback;
 import com.google.gwt.user.client.rpc.ServiceDefTarget;
 import com.google.gwt.user.client.ui.Anchor;
 import com.google.gwt.user.client.ui.FlowPanel;
+import com.google.gwt.user.client.ui.FocusPanel;
 import com.google.gwt.user.client.ui.FormPanel;
 import com.google.gwt.user.client.ui.FormPanel.SubmitEvent;
 import com.google.gwt.user.client.ui.FormPanel.SubmitHandler;
-import com.google.gwt.user.client.ui.FocusPanel;
 import com.google.gwt.user.client.ui.HTML;
 import com.google.gwt.user.client.ui.ImageResourceRenderer;
 import com.google.gwt.user.client.ui.Label;
@@ -26,6 +26,7 @@ import com.google.gwt.user.client.ui.PasswordTextBox;
 import com.google.gwt.user.client.ui.SimplePanel;
 import com.google.gwt.user.client.ui.SubmitButton;
 import com.google.gwt.user.client.ui.TextBox;
+import com.sap.sse.gwt.client.EntryPointHelper;
 import com.sap.sse.security.ui.client.UserManagementImageResources;
 import com.sap.sse.security.ui.client.UserStatusEventHandler;
 import com.sap.sse.security.ui.oauth.client.component.OAuthLoginPanel;
@@ -41,7 +42,7 @@ public class LoginPanel extends FlowPanel implements UserStatusEventHandler {
     private static final UserManagementServiceAsync userManagementService = GWT.create(UserManagementService.class);
 
     static {
-        registerASyncService((ServiceDefTarget) userManagementService, "service/usermanagement");
+        EntryPointHelper.registerASyncService((ServiceDefTarget) userManagementService, "service/usermanagement");
     }
 
     private static final List<UserStatusEventHandler> handlers = new ArrayList<>();
@@ -247,12 +248,6 @@ public class LoginPanel extends FlowPanel implements UserStatusEventHandler {
             wrapperPanel.addStyleName(StylesheetResources.INSTANCE.css().loginPanelExpanded());
             wrapperPanel.removeStyleName(StylesheetResources.INSTANCE.css().loginPanelCollapsed());
         }
-    }
-
-    protected static void registerASyncService(ServiceDefTarget serviceToRegister, String servicePath) {
-        String moduleBaseURL = GWT.getModuleBaseURL();
-        String baseURL = moduleBaseURL.substring(0, moduleBaseURL.indexOf('/', moduleBaseURL.indexOf(':') + 3) + 1);
-        serviceToRegister.setServiceEntryPoint(baseURL + "security/ui/" + servicePath);
     }
 
     public static UserDTO getCurrentUser() {
