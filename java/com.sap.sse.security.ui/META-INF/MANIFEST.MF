@@ -18,4 +18,5 @@ Require-Bundle: javax.servlet;bundle-version="2.5.0",
  org.json.simple
 Web-ContextPath: /security/ui
 Export-Package: com.sap.sse.security.ui.loginpanel,
- com.sap.sse.security.ui.server
+ com.sap.sse.security.ui.server,
+ com.sap.sse.security.ui.shared

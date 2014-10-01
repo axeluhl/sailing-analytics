@@ -18,11 +18,9 @@ public class UserStatusPanel extends FlowPanel {
         userNameLabel = new Label("User:");
         userNameText = new Label("");
         userRolesText = new Label("");
-//            @Override
         addFloatingWidget(userNameLabel);
         addFloatingWidget(userNameText);
         addFloatingWidget(userRolesText);
-
         updateUser();
     }
 
@@ -41,5 +39,5 @@ public class UserStatusPanel extends FlowPanel {
 //            userRolesText.setText("Unknown");
 //        }
 //    }
-}
+    }
 }

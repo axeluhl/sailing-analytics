@@ -477,7 +477,7 @@ public class MediaPlayerManagerComponent implements Component<Void>, PlayStateLi
         };
 
         final VideoSynchPlayer videoPlayer;
-        boolean showSynchControls = this.user != null;
+        boolean showSynchControls = /* TODO was something like this: this.user != null; */ true;
 
         if (videoTrack.isYoutube()) {
             // popupPlayer = new YoutubeWindowPlayer(videoTrack, popCloseListener);
@@ -660,7 +660,7 @@ public class MediaPlayerManagerComponent implements Component<Void>, PlayStateLi
 
     @Override
     public boolean allowsEditing() {
-        return this.user != null;
+        return /* TODO was something like this: this.user != null; */ true;
     }
 
     @Override

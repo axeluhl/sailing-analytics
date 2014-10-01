@@ -122,7 +122,7 @@ public class SideBySideComponentViewer implements ComponentViewer {
         List<Pair<Button, Component<?>>> additionalVerticalButtons = new ArrayList<Pair<Button, Component<?>>>();
         additionalVerticalButtons.add(new Pair<Button, Component<?>>(videoToggleButton,
                 this.mediaPlayerManagerComponent));
-        if (user != null) {
+        if (/* TODO check for correct role; was: user != null */ true) {
             additionalVerticalButtons.add(new Pair<Button, Component<?>>(mediaManagementButton,
                     this.mediaPlayerManagerComponent));
         }
