@@ -56,7 +56,7 @@ public class LoginPanel extends FlowPanel implements UserStatusEventHandler {
     private boolean expanded = false;
     private static UserDTO currentUser = null;
 
-    private Label loginTitle1;
+    private Label loginTitle;
     private Anchor loginLink;
 
     private TextBox name;
@@ -78,12 +78,12 @@ public class LoginPanel extends FlowPanel implements UserStatusEventHandler {
         FlowPanel titlePanel = new FlowPanel();
         titleFocus.setWidget(titlePanel);
         titlePanel.addStyleName(StylesheetResources.INSTANCE.css().loginPanelTitlePanel());
-        loginTitle1 = new Label("");
+        loginTitle = new Label("");
         loginLink = new Anchor("Login");
         final ImageResource userImageResource = UserManagementImageResources.INSTANCE.userIcon();
         ImageResourceRenderer renderer = new ImageResourceRenderer();
         titlePanel.add(new HTML(renderer.render(userImageResource)));
-        titlePanel.add(loginTitle1);
+        titlePanel.add(loginTitle);
         titlePanel.add(loginLink);
         wrapperPanel.add(titleFocus);
         titleFocus.addClickHandler(new ClickHandler() {
@@ -187,7 +187,6 @@ public class LoginPanel extends FlowPanel implements UserStatusEventHandler {
 
     private static void updateUser() {
         userManagementService.getCurrentUser(new AsyncCallback<UserDTO>() {
-
             @Override
             public void onSuccess(UserDTO result) {
                 if (result != null && currentUser != null && result.getName().equals(currentUser.getName())) {
@@ -196,9 +195,9 @@ public class LoginPanel extends FlowPanel implements UserStatusEventHandler {
                 currentUser = result;
                 System.out.println("User changed to " + (result == null ? "No User" : result.getName()) + "handlers: "
                         + handlers.size());
-                for (int i = 0; i < handlers.size(); i++) {
-                    System.out.print(handlers.get(i) + ", ");
-                    handlers.get(i).onUserStatusChange(currentUser);
+                for (UserStatusEventHandler handler : handlers) {
+                    System.out.print(handler + ", ");
+                    handler.onUserStatusChange(currentUser);
                 }
                 System.out.println();
             }
@@ -214,23 +213,23 @@ public class LoginPanel extends FlowPanel implements UserStatusEventHandler {
         if (currentUser != null) {
             String name = currentUser.getName();
             if (name == null) {
-                loginTitle1.setText("Inavalid username!");
+                loginTitle.setText("Inavalid username!");
             } else {
                 if (name.contains("*")) {
                     name = name.split("\\*")[1];
                 }
-                loginTitle1.setTitle(name);
+                loginTitle.setTitle(name);
                 if (name.length() > 15) {
                     name = name.substring(0, 12) + "...";
                 }
-                loginTitle1.setText("Welcome, " + name + "! ");
+                loginTitle.setText("Welcome, " + name + "! ");
             }
             infoPanel.setWidget(userPanel);
             loginLink.setText("");
             updateUserContent();
         } else {
             infoPanel.setWidget(loginPanel);
-            loginTitle1.setText("");
+            loginTitle.setText("");
             loginLink.setText("Login");
         }
         expanded = false;

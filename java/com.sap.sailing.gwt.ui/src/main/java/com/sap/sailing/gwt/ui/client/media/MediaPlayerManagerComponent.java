@@ -48,6 +48,7 @@ import com.sap.sse.gwt.client.player.Timer.PlayModes;
 import com.sap.sse.gwt.client.player.Timer.PlayStates;
 import com.sap.sse.gwt.client.useragent.UserAgentDetails;
 import com.sap.sse.gwt.client.useragent.UserAgentDetails.AgentTypes;
+import com.sap.sse.security.ui.loginpanel.LoginPanel;
 
 public class MediaPlayerManagerComponent implements Component<Void>, PlayStateListener, TimeListener,
         MediaPlayerManager, CloseHandler<Window>, ClosingHandler {
@@ -477,7 +478,7 @@ public class MediaPlayerManagerComponent implements Component<Void>, PlayStateLi
         };
 
         final VideoSynchPlayer videoPlayer;
-        boolean showSynchControls = /* TODO was something like this: this.user != null; */ true;
+        boolean showSynchControls = LoginPanel.getCurrentUser() != null;
 
         if (videoTrack.isYoutube()) {
             // popupPlayer = new YoutubeWindowPlayer(videoTrack, popCloseListener);
@@ -660,7 +661,7 @@ public class MediaPlayerManagerComponent implements Component<Void>, PlayStateLi
 
     @Override
     public boolean allowsEditing() {
-        return /* TODO was something like this: this.user != null; */ true;
+        return LoginPanel.getCurrentUser() != null;
     }
 
     @Override

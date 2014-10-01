@@ -1,2 +1,0 @@
-serviceClass: com.sap.sse.security.ui.shared.UserManagementService
-path: 15951CA4E2AABDC6EA2B74FBE8BCC2CA.gwt.rpc

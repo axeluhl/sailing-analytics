@@ -45,6 +45,7 @@ import com.sap.sse.gwt.client.async.AsyncActionsExecutor;
 import com.sap.sse.gwt.client.async.MarkedAsyncCallback;
 import com.sap.sse.gwt.client.panels.VerticalTabLayoutPanel;
 import com.sap.sse.security.ui.loginpanel.LoginPanel;
+import com.sap.sse.security.ui.shared.UserDTO;
 
 public class AdminConsoleEntryPoint extends AbstractEntryPoint implements RegattaRefresher, LeaderboardsRefresher, LeaderboardGroupsRefresher {
     private Set<RegattasDisplayer> regattasDisplayers;
@@ -277,7 +278,8 @@ public class AdminConsoleEntryPoint extends AbstractEntryPoint implements Regatt
     }
 
     private void addToTabPanel(VerticalTabLayoutPanel tabPanel, Panel panelToAdd, String tabTitle, AdminConsoleFeatures feature) {
-        if(/*TODO [S056866] user != null &&*/ isUserInRole(feature.getEnabledRoles())) {
+        UserDTO user = LoginPanel.getCurrentUser();
+        if (user != null && isUserInRole(feature.getEnabledRoles())) {
             ScrollPanel scrollPanel = new ScrollPanel();
             scrollPanel.add(panelToAdd);
             panelToAdd.setSize("90%", "90%");
@@ -286,7 +288,8 @@ public class AdminConsoleEntryPoint extends AbstractEntryPoint implements Regatt
     }
     
     private void addToTabPanel(TabLayoutPanel tabPanel, Panel panelToAdd, String tabTitle, AdminConsoleFeatures feature) {
-        if(/*TODO [S056866] user != null &&*/ isUserInRole(feature.getEnabledRoles())) {
+        UserDTO user = LoginPanel.getCurrentUser();
+        if (user != null && isUserInRole(feature.getEnabledRoles())) {
             ScrollPanel scrollPanel = new ScrollPanel();
             scrollPanel.add(panelToAdd);
             panelToAdd.setSize("90%", "90%");
@@ -294,14 +297,15 @@ public class AdminConsoleEntryPoint extends AbstractEntryPoint implements Regatt
         }
     }
     
-    private boolean isUserInRole(/*TODO [S056866] UserDTO user,*/ UserRoles[] roles) {
+    private boolean isUserInRole(UserRoles[] roles) {
         boolean result = true;
-//        for(UserRoles enabledRole: roles) {
-//            if (user.roles.contains(enabledRole.name())) {
-//                result = true;
-//                break;
-//            }
-//        }
+        UserDTO user = LoginPanel.getCurrentUser();
+        for (UserRoles enabledRole : roles) {
+            if (user.getRoles().contains(enabledRole.name())) {
+                result = true;
+                break;
+            }
+        }
         return result;
     }
     

@@ -21,7 +21,11 @@
   <inherits name="com.google.gwt.logging.Logging"/>
   
   <inherits name="com.sap.sse.security.ui.LoginPanel"/>
-  
+
+  <!-- Other module inherits                                      -->
+  <inherits name="com.sap.sse.gwt.EmulatedJRE" /> -->
+  <inherits name="com.sap.sse.gwt.SSESharedGWT" />
+  <inherits name="com.sap.sse.SSECommon" />
   
   <super-source path="jre" />
 

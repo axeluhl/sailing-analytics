@@ -7,16 +7,12 @@ import java.util.List;
 import com.google.gwt.user.client.rpc.IsSerializable;
 
 public class UserDTO implements IsSerializable {
-
-    
     private String name;
     private String email;
-    private List<AccountDTO> accounts = new ArrayList<AccountDTO>();
-    
+    private List<AccountDTO> accounts;
     private List<String> roles = new ArrayList<>();
 
-    public UserDTO() {
-    }
+    UserDTO() {} // for serialization only
 
     public UserDTO(String name, String email, List<AccountDTO> accounts) {
         this.name = name;

@@ -6,8 +6,7 @@ public abstract class AccountDTO implements IsSerializable {
 
     private String accountType;
 
-    public AccountDTO() {
-    }
+    AccountDTO() {} // for serialization only
     
     public AccountDTO(String accountType) {
         super();
