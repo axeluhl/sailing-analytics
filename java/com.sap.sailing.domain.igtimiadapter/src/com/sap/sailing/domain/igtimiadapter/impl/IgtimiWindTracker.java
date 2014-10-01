@@ -9,6 +9,7 @@ import java.util.Map;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
+import com.sap.sailing.declination.DeclinationService;
 import com.sap.sailing.domain.common.TimePoint;
 import com.sap.sailing.domain.common.impl.MillisecondsTimePoint;
 import com.sap.sailing.domain.igtimiadapter.Account;
@@ -30,7 +31,7 @@ public class IgtimiWindTracker extends AbstractWindTracker implements WindTracke
     private boolean stopping;
 
     protected IgtimiWindTracker(final DynamicTrackedRace trackedRace, final IgtimiConnectionFactory connectionFactory,
-            final IgtimiWindTrackerFactory windTrackerFactory) throws Exception {
+            final IgtimiWindTrackerFactory windTrackerFactory, final boolean correctByDeclination) throws Exception {
         super(trackedRace);
         this.windTrackerFactory = windTrackerFactory;
         liveConnectionsAndDeviceSerialNumber = new HashMap<>();
@@ -47,7 +48,7 @@ public class IgtimiWindTracker extends AbstractWindTracker implements WindTracke
                                 Iterable<String> devicesWeShouldListenTo = connection.getWindDevices();
                                 if (!stopping) {
                                     LiveDataConnection liveConnection = connection.getOrCreateLiveConnection(devicesWeShouldListenTo);
-                                    IgtimiWindReceiver windReceiver = new IgtimiWindReceiver(devicesWeShouldListenTo);
+                                    IgtimiWindReceiver windReceiver = new IgtimiWindReceiver(correctByDeclination ? DeclinationService.INSTANCE : null);
                                     liveConnection.addListener(windReceiver);
                                     windReceiver.addListener(new WindListenerSendingToTrackedRace(Collections.singleton(getTrackedRace()), windTrackerFactory));
                                     liveConnectionsAndDeviceSerialNumber.put(liveConnection, new Util.Pair<Iterable<String>, Account>(devicesWeShouldListenTo, account));

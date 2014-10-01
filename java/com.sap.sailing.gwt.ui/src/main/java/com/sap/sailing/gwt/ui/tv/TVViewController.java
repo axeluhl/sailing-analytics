@@ -45,6 +45,7 @@ public class TVViewController implements RaceTimesInfoProviderListener {
     private final UserAgentDetails userAgent;
     private final LogoAndTitlePanel logoAndTitlePanel;
     private final DockLayoutPanel dockPanel;
+    private final AsyncActionsExecutor asyncActionsExecutor;
     
     /**
      * We use two timers: one for the leaderboard, one for the race board. This way, we can stop one while the other continues.
@@ -66,7 +67,6 @@ public class TVViewController implements RaceTimesInfoProviderListener {
     private boolean showRaceDetails;
     private boolean showWindChart;
     private final RaceBoardViewConfiguration raceboardViewConfig;
-    private final boolean showNavigationPanel;
     
     /**
      * @param logoAndTitlePanel
@@ -79,8 +79,7 @@ public class TVViewController implements RaceTimesInfoProviderListener {
             StringMessages stringMessages, ErrorReporter errorReporter, String leaderboardGroupName,
             String leaderboardName, UserAgentDetails userAgent, LogoAndTitlePanel logoAndTitlePanel,
             DockLayoutPanel dockPanel, long delayToLiveInMillis, boolean showRaceDetails,
-            boolean showNavigationPanel, RaceBoardViewConfiguration raceboardViewConfig) {
-        this.showNavigationPanel = showNavigationPanel;
+            RaceBoardViewConfiguration raceboardViewConfig) {
         this.raceboardViewConfig = raceboardViewConfig;
         this.sailingService = sailingService;
         this.mediaService = mediaService;
@@ -93,9 +92,10 @@ public class TVViewController implements RaceTimesInfoProviderListener {
         this.dockPanel = dockPanel;
         this.showRaceDetails = showRaceDetails;
         
+        asyncActionsExecutor = new AsyncActionsExecutor();
         showWindChart = false;
         leaderboard = null;
-        leaderboardSettings = LeaderboardSettingsFactory.getInstance().createNewDefaultSettings(null, null, null, /* autoExpandFirstRace */ false); 
+        leaderboardSettings = LeaderboardSettingsFactory.getInstance().createNewDefaultSettings(null, null, null, /* autoExpandFirstRace */ false, /* showRegattaRank */ true); 
         
         leaderboardTimer = new Timer(PlayModes.Live, /* delayBetweenAutoAdvancesInMilliseconds */1000l);
         leaderboardTimer.setLivePlayDelayInMillis(delayToLiveInMillis);
@@ -106,19 +106,22 @@ public class TVViewController implements RaceTimesInfoProviderListener {
         raceboardTimer.setRefreshInterval(REFRESH_INTERVAL_IN_MILLIS_RACEBOARD);
         raceboardTimer.play();
 
-        raceTimesInfoProvider = new RaceTimesInfoProvider(sailingService, errorReporter, new ArrayList<RegattaAndRaceIdentifier>(), 3000l);
+        raceTimesInfoProvider = new RaceTimesInfoProvider(sailingService, asyncActionsExecutor, errorReporter, new ArrayList<RegattaAndRaceIdentifier>(), 3000l);
         raceTimesInfoProvider.addRaceTimesInfoProviderListener(this);
     }
     
     private LeaderboardPanel createLeaderboardPanel(String leaderboardGroupName, String leaderboardName, boolean showRaceDetails) {
         CompetitorSelectionModel selectionModel = new CompetitorSelectionModel(/* hasMultiSelection */ true);
-        LeaderboardPanel leaderboardPanel = new LeaderboardPanel(sailingService, new AsyncActionsExecutor(), leaderboardSettings,
-        /* preSelectedRace */null, selectionModel, leaderboardTimer, leaderboardGroupName, leaderboardName, errorReporter, stringMessages,
-                userAgent, showRaceDetails, /* raceTimesInfoProvider */ null, /* autoExpandLastRaceColumn */ false, /* adjustTimerDelay */ true) {
+        LeaderboardPanel leaderboardPanel = new LeaderboardPanel(sailingService, asyncActionsExecutor,
+                leaderboardSettings, false,
+                /* preSelectedRace */null, selectionModel, leaderboardTimer, leaderboardGroupName, leaderboardName,
+                errorReporter, stringMessages, userAgent, showRaceDetails, /* competitorSearchTextBox */ null, /* showRegattaRank */
+                /* showSelectionCheckbox */false, /* raceTimesInfoProvider */null, false, /* autoExpandLastRaceColumn */
+                /* adjustTimerDelay */true, /*autoApplyTopNFilter*/ false, false) {
             @Override
             protected void setLeaderboard(LeaderboardDTO leaderboard) {
                 super.setLeaderboard(leaderboard);
-                TVViewController.this.leaderboard = leaderboard;                
+                TVViewController.this.leaderboard = leaderboard;
                 updateRaceTimesInfoProvider();
             }
         };
@@ -146,8 +149,9 @@ public class TVViewController implements RaceTimesInfoProviderListener {
         RaceSelectionModel raceSelectionModel = new RaceSelectionModel();
         List<RegattaAndRaceIdentifier> singletonList = Collections.singletonList(raceToShow);
         raceSelectionModel.setSelection(singletonList);
-        RaceBoardPanel raceBoardPanel = new RaceBoardPanel(sailingService, mediaService, raceboardTimer, raceSelectionModel, leaderboardName,
-                null, raceboardViewConfig, errorReporter, stringMessages, userAgent, raceTimesInfoProvider, /* showMapControls */ false);
+        RaceBoardPanel raceBoardPanel = new RaceBoardPanel(sailingService, mediaService, asyncActionsExecutor, null,
+                raceboardTimer, raceSelectionModel, leaderboardName, null, /* event */null, raceboardViewConfig,
+                errorReporter, stringMessages, userAgent, raceTimesInfoProvider, /* showMapControls */false);
         return raceBoardPanel;
     }
     
@@ -186,11 +190,6 @@ public class TVViewController implements RaceTimesInfoProviderListener {
             raceBoardPanel.setSize("100%", "100%");
             if (showWindChart) {
                 raceBoardPanel.setWindChartVisible(true);
-            }
-            if (showNavigationPanel) {
-                FlowPanel toolbarPanel = new FlowPanel();
-                toolbarPanel.add(raceBoardPanel.getComponentControlsPanel());
-                dockPanel.addNorth(toolbarPanel, 40);
             }
             FlowPanel timePanel = createTimePanel(raceBoardPanel);
             dockPanel.addSouth(timePanel, 90);                     

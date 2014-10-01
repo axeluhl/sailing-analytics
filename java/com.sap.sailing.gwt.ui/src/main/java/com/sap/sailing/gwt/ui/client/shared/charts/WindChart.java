@@ -37,6 +37,7 @@ import com.google.gwt.i18n.client.DateTimeFormat;
 import com.google.gwt.i18n.client.NumberFormat;
 import com.google.gwt.text.client.DateTimeFormatRenderer;
 import com.google.gwt.user.client.rpc.AsyncCallback;
+import com.google.gwt.user.client.ui.Button;
 import com.google.gwt.user.client.ui.RequiresResize;
 import com.google.gwt.user.client.ui.Widget;
 import com.sap.sailing.domain.common.RegattaAndRaceIdentifier;
@@ -49,6 +50,7 @@ import com.sap.sailing.gwt.ui.client.SailingServiceAsync;
 import com.sap.sailing.gwt.ui.client.StringMessages;
 import com.sap.sailing.gwt.ui.client.WindSourceTypeFormatter;
 import com.sap.sailing.gwt.ui.client.shared.components.Component;
+import com.sap.sailing.gwt.ui.client.shared.components.SettingsDialog;
 import com.sap.sailing.gwt.ui.client.shared.components.SettingsDialogComponent;
 import com.sap.sailing.gwt.ui.shared.WindDTO;
 import com.sap.sailing.gwt.ui.shared.WindInfoForRaceDTO;
@@ -79,7 +81,6 @@ public class WindChart extends AbstractRaceChart implements Component<WindChartS
 
     private final ColorMapImpl<WindSource> colorMap;
 
-
     /**
      * @param raceSelectionProvider
      *            if <code>null</code>, this chart won't update its contents automatically upon race selection change;
@@ -106,7 +107,8 @@ public class WindChart extends AbstractRaceChart implements Component<WindChartS
                 .setBorderColor(new Color("#CACACA"))
                 .setBorderWidth(0)
                 .setBorderRadius(0)
-                .setBackgroundColor(new Color("#EBEBEB"))
+                .setBackgroundColor(new Color("#FFFFFF"))
+                .setPlotBackgroundColor("#f8f8f8")
                 .setPlotBorderWidth(0)
                 .setCredits(new Credits().setEnabled(false))
                 .setChartTitle(new ChartTitle().setText(stringMessages.wind()))
@@ -115,6 +117,7 @@ public class WindChart extends AbstractRaceChart implements Component<WindChartS
                         new Marker().setEnabled(false).setHoverState(
                                 new Marker().setEnabled(true).setRadius(4))).setShadow(false)
                                     .setHoverStateLineWidth(LINE_WIDTH));
+        chart.setStyleName(chartsCss.chartStyle());
         ChartUtil.useCheckboxesToShowAndHide(chart);
         final NumberFormat numberFormat = NumberFormat.getFormat("0");
         chart.setToolTip(new ToolTip().setEnabled(true).setFormatter(new ToolTipFormatter() {
@@ -184,6 +187,12 @@ public class WindChart extends AbstractRaceChart implements Component<WindChartS
         setSize("100%", "100%");
         raceSelectionProvider.addRaceSelectionChangeListener(this);
     }
+    
+    @Override
+    protected Button createSettingsButton() {
+        Button settingsButton = SettingsDialog.createSettingsButton(this, stringMessages);
+        return settingsButton;
+    }
 
     @Override
     public String getLocalizedShortName() {
@@ -244,7 +253,7 @@ public class WindChart extends AbstractRaceChart implements Component<WindChartS
                 }
             }
         }
-        chart.redraw();
+        onResize();
     }
 
     /**
@@ -432,38 +441,38 @@ public class WindChart extends AbstractRaceChart implements Component<WindChartS
      *            of overwriting the existing series.
      */
     private void loadData(final Date from, final Date to, final boolean append) {
-        if (selectedRaceIdentifier == null) {
-            clearChart();
-        } else if (needsDataLoading() && from != null && to != null) {
-            setWidget(chart);
-            showLoading("Loading wind data...");
-            GetWindInfoAction getWindInfoAction = new GetWindInfoAction(sailingService, selectedRaceIdentifier,
-                    // TODO Time interval should be determined by a selection in the chart but be at most 60s. See bug #121.
-                    // Consider incremental updates for new data only.
-                    from, to, settings.getResolutionInMilliseconds(), null, /* onlyUpToNewestEvent==true because we don't want
-                    to overshoot the evidence so far */ true);
-            asyncActionsExecutor.execute(getWindInfoAction, LODA_WIND_CHART_DATA_CATEGORY,
-                    new AsyncCallback<WindInfoForRaceDTO>() {
-                        @Override
-                        public void onSuccess(WindInfoForRaceDTO result) {
-                            if (result != null) {
-                                updateChartSeries(result, append);
-                                updateVisibleSeries();
-                            } else {
-                                if (!append) {
-                                    clearChart(); // no wind known for untracked race
+        if (isVisible()) {
+            if (selectedRaceIdentifier == null) {
+                clearChart();
+            } else if (needsDataLoading() && from != null && to != null) {
+                setWidget(chart);
+                showLoading("Loading wind data...");
+                GetWindInfoAction getWindInfoAction = new GetWindInfoAction(sailingService, selectedRaceIdentifier,
+                        from, to, settings.getResolutionInMilliseconds(), null, /* onlyUpToNewestEvent==true because we don't want
+                        to overshoot the evidence so far */ true);
+                asyncActionsExecutor.execute(getWindInfoAction, LODA_WIND_CHART_DATA_CATEGORY,
+                        new AsyncCallback<WindInfoForRaceDTO>() {
+                            @Override
+                            public void onSuccess(WindInfoForRaceDTO result) {
+                                if (result != null) {
+                                    updateChartSeries(result, append);
+                                    updateVisibleSeries();
+                                } else {
+                                    if (!append) {
+                                        clearChart(); // no wind known for untracked race
+                                    }
                                 }
+                                hideLoading();
                             }
-                            hideLoading();
-                        }
-        
-                        @Override
-                        public void onFailure(Throwable caught) {
-                            errorReporter.reportError(stringMessages.errorFetchingWindInformationForRace() + " "
-                                    + selectedRaceIdentifier + ": " + caught.getMessage(), timer.getPlayMode() == PlayModes.Live);
-                            hideLoading();
-                        }
-                    });
+            
+                            @Override
+                            public void onFailure(Throwable caught) {
+                                errorReporter.reportError(stringMessages.errorFetchingWindInformationForRace() + " "
+                                        + selectedRaceIdentifier + ": " + caught.getMessage(), timer.getPlayMode() == PlayModes.Live);
+                                hideLoading();
+                            }
+                        });
+            }
         }
     }
     
@@ -611,5 +620,11 @@ public class WindChart extends AbstractRaceChart implements Component<WindChartS
         }
         buffer.append("\n");
         return buffer.toString();
-    }    
+    }
+
+    @Override
+    public String getDependentCssClassName() {
+        return "windChart";
+    }
+    
 }

@@ -54,7 +54,7 @@ import com.sap.sailing.domain.tracking.DynamicTrackedRegatta;
 import com.sap.sailing.domain.tracking.GPSFixMoving;
 import com.sap.sailing.domain.tracking.MarkPassing;
 import com.sap.sailing.domain.tracking.RaceTracker;
-import com.sap.sailing.domain.tracking.RacesHandle;
+import com.sap.sailing.domain.tracking.RaceHandle;
 import com.sap.sailing.domain.tracking.TrackedRace;
 import com.sap.sailing.domain.tracking.TrackedRaceStatus;
 import com.sap.sailing.domain.tracking.TrackedRegattaRegistry;
@@ -162,15 +162,15 @@ public class SwissTimingRaceTrackerImpl extends AbstractRaceTrackerImpl implemen
     }
 
     @Override
-    public RacesHandle getRacesHandle() {
-        return new RacesHandle() {
+    public RaceHandle getRacesHandle() {
+        return new RaceHandle() {
             @Override
             public Regatta getRegatta() {
                 return SwissTimingRaceTrackerImpl.this.getRegatta();
             }
 
             @Override
-            public Set<RaceDefinition> getRaces() {
+            public RaceDefinition getRace() {
                 synchronized (this) {
                     while (race == null) {
                         try {
@@ -180,11 +180,11 @@ public class SwissTimingRaceTrackerImpl extends AbstractRaceTrackerImpl implemen
                         }
                     }
                 }
-                return Collections.singleton(race);
+                return race;
             }
 
             @Override
-            public Set<RaceDefinition> getRaces(long timeoutInMilliseconds) {
+            public RaceDefinition getRace(long timeoutInMilliseconds) {
                 long start = System.currentTimeMillis();
                 synchronized (this) {
                     RaceDefinition preResult = race;
@@ -200,11 +200,11 @@ public class SwissTimingRaceTrackerImpl extends AbstractRaceTrackerImpl implemen
                             interrupted = true;
                         }
                     }
-                    final Set<RaceDefinition> result;
+                    final RaceDefinition result;
                     if (preResult == null) {
-                        result = Collections.emptySet();
+                        result = null;
                     } else {
-                        result = Collections.singleton(preResult);
+                        result = preResult;
                     }
                     return result;
                 }

@@ -43,6 +43,13 @@ public interface TrackedLeg extends Serializable {
      */
     LinkedHashMap<Competitor, Integer> getRanks(TimePoint timePoint);
 
+    /**
+     * Same as {@link #getRanks(TimePoint)}, only that a cache for wind and leg type
+     * and bearing data can be passed to avoid redundant calculations during a single
+     * round trip.
+     */
+    LinkedHashMap<Competitor, Integer> getRanks(TimePoint timePoint, WindLegTypeAndLegBearingCache cache);
+
     Bearing getLegBearing(TimePoint at);
 
     /**
@@ -75,16 +82,30 @@ public interface TrackedLeg extends Serializable {
      * wind's bearing, and the distance from the projection to <code>pos2</code> is returned. Otherwise, it is assumed
      * that the leg is neither an upwind nor a downwind leg, and hence the along-track distance to <code>mark</code> is
      * returned. The distance returned from this method is always positive. See also {@link #getWindwardDistance}.
-     * 
      * @param at
      *            the wind estimation is performed for this point in time
      */
-    Distance getAbsoluteWindwardDistance(Position pos1, Position pos2, TimePoint at) throws NoWindException;
-    
+    Distance getAbsoluteWindwardDistance(Position pos1, Position pos2, TimePoint at, WindPositionMode windPositionMode) throws NoWindException;
+
     /**
-     * Same as {@link #getAbsoluteWindwardDistance(Position, Position, TimePoint)}, but this method considers the leg's
+     * Same as {@link #getAbsoluteWindwardDistance(Position, Position, TimePoint, WindPositionMode)}, only that a cache
+     * for leg types, wind data and leg bearings can be passed to save the effort of redundant calculations of these
+     * values.
+     */
+    Distance getAbsoluteWindwardDistance(Position pos1, Position pos2, TimePoint at, WindPositionMode windPositionMode,
+            WindLegTypeAndLegBearingCache cache) throws NoWindException;
+
+    /**
+     * Same as {@link #getAbsoluteWindwardDistance(Position, Position, TimePoint, WindPositionMode)}, but this method considers the leg's
      * direction and will return a negative distance if <code>pos1</code> is already "ahead" of <code>pos2</code> in the
      * leg's direction, or a positive distance otherwise.
      */
-    Distance getWindwardDistance(Position pos1, Position pos2, TimePoint at) throws NoWindException;
+    Distance getWindwardDistance(Position pos1, Position pos2, TimePoint at, WindPositionMode windPositionMode) throws NoWindException;
+
+    /**
+     * The middle (traveling half the length) of the course middle line, connecting the center of gravity of the leg's start
+     * waypoint's position at time point <code>at</code> and the position of the leg's end waypoint at time point <code>at</code>.
+     */
+    Position getMiddleOfLeg(TimePoint at);
+
 }

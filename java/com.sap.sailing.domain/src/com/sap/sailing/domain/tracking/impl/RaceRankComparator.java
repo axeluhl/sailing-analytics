@@ -11,15 +11,19 @@ import com.sap.sailing.domain.base.Competitor;
 import com.sap.sailing.domain.common.Distance;
 import com.sap.sailing.domain.common.NoWindException;
 import com.sap.sailing.domain.common.TimePoint;
+import com.sap.sailing.domain.leaderboard.caching.LeaderboardDTOCalculationReuseCache;
 import com.sap.sailing.domain.tracking.MarkPassing;
 import com.sap.sailing.domain.tracking.TrackedLegOfCompetitor;
 import com.sap.sailing.domain.tracking.TrackedRace;
+import com.sap.sailing.domain.tracking.WindPositionMode;
 
 /**
  * Compares two competitors by their ranking in the overall race for a given time point. Competitors who haven't started
  * the first leg are all equally ranked last. Competitors in different legs are ranked by inverse leg index: the higher
  * the number of the leg the lesser (better) the rank. Competitors in the same leg are ranked by their windward distance
- * to go in that leg, requiring wind data or estimates to be available for the given time point.
+ * to go in that leg, requiring wind data or estimates to be available for the given time point. The wind is estimated at
+ * the middle of the leg for consistent ordering, so the same wind data will be used for comparing all competitors in the
+ * same leg at a given point in time.
  * <p>
  * 
  * Two different competitors may end up being ranked equal by this comparator. So take care and don't use this
@@ -41,10 +45,12 @@ public class RaceRankComparator implements Comparator<Competitor> {
         this.timePoint = timePoint;
         this.markPassingWithTimePoint = new DummyMarkPassingWithTimePointOnly(timePoint);
         this.windwardDistanceToGoInLegCache = new HashMap<Competitor, Distance>();
+        LeaderboardDTOCalculationReuseCache cache = new LeaderboardDTOCalculationReuseCache(timePoint);
         for (Competitor competitor : trackedRace.getRace().getCompetitors()) {
             final TrackedLegOfCompetitor trackedLegOfCompetitor = trackedRace.getTrackedLeg(competitor, timePoint);
             if (trackedLegOfCompetitor != null) {
-                windwardDistanceToGoInLegCache.put(competitor, trackedLegOfCompetitor.getWindwardDistanceToGo(timePoint));
+                windwardDistanceToGoInLegCache.put(competitor, trackedLegOfCompetitor.getWindwardDistanceToGo(timePoint,
+                        WindPositionMode.LEG_MIDDLE, cache));
             }
         }
     }

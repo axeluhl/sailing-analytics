@@ -6,8 +6,8 @@ public class StrippedLeaderboardGroupImpl extends LeaderboardGroupBaseImpl {
     private static final long serialVersionUID = 7263952130620919924L;
     private final boolean hasOverallLeaderboard;
 
-    public StrippedLeaderboardGroupImpl(UUID id, String name, String description, boolean hasOverallLeaderboard) {
-        super(id, name, description);
+    public StrippedLeaderboardGroupImpl(UUID id, String name, String description, String displayName, boolean hasOverallLeaderboard) {
+        super(id, name, description, displayName);
         this.hasOverallLeaderboard = hasOverallLeaderboard;
     }
 

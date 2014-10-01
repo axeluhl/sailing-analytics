@@ -9,7 +9,6 @@ import java.net.URL;
 import java.util.ArrayList;
 import java.util.Iterator;
 import java.util.List;
-import java.util.Set;
 
 import com.sap.sailing.domain.base.Competitor;
 import com.sap.sailing.domain.base.RaceDefinition;
@@ -17,7 +16,7 @@ import com.sap.sailing.domain.common.RegattaAndRaceIdentifier;
 import com.sap.sailing.domain.common.RegattaNameAndRaceName;
 import com.sap.sailing.domain.tracking.GPSFixMoving;
 import com.sap.sailing.domain.tracking.GPSFixTrack;
-import com.sap.sailing.domain.tracking.RacesHandle;
+import com.sap.sailing.domain.tracking.RaceHandle;
 import com.sap.sailing.domain.tracking.TrackedRace;
 import com.sap.sailing.domain.tractracadapter.TracTracAdapterFactory;
 import com.sap.sailing.domain.tractracadapter.impl.TracTracAdapterFactoryImpl;
@@ -29,7 +28,7 @@ public class RacingEventPersistence {
 
     static RacingEventServiceImpl service;
     static TracTracAdapterFactory tracTracAdapterFactory;
-    static RacesHandle raceHandle;
+    static RaceHandle raceHandle;
     static String paramURLStr = "http://germanmaster.traclive.dk/events/event_20110929_Internatio/clientparams.php?event=event_20110929_Internatio&race=d1f521fa-ec52-11e0-a523-406186cbf87c";
     // proxy
     static String liveURIStr = "tcp://10.18.22.156:1520";
@@ -59,17 +58,12 @@ public class RacingEventPersistence {
         System.out.println("Done loading race.");
 
         String regatta = raceHandle.getRegatta().getName();
-        Set<RaceDefinition> races = raceHandle.getRaces();
-
+        RaceDefinition race = raceHandle.getRace();
         List<TrackedRace> racesList = new ArrayList<TrackedRace>();
-
-        for (RaceDefinition r : races) {
-            RegattaAndRaceIdentifier raceIdentifier = new RegattaNameAndRaceName(regatta, r.getName());
-            TrackedRace tr = service.getExistingTrackedRace(raceIdentifier);
-            tr.waitUntilNotLoading();
-
-            racesList.add(tr);
-        }
+        RegattaAndRaceIdentifier raceIdentifier = new RegattaNameAndRaceName(regatta, race.getName());
+        TrackedRace tr = service.getExistingTrackedRace(raceIdentifier);
+        tr.waitUntilNotLoading();
+        racesList.add(tr);
 
         FileOutputStream f_os = new FileOutputStream(regatta + ".data");
         ObjectOutputStream os = new ObjectOutputStream(f_os);

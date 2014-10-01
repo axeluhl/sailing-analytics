@@ -14,7 +14,7 @@ import com.sap.sailing.domain.common.Speed;
 import com.sap.sailing.domain.common.SpeedWithBearing;
 import com.sap.sailing.domain.common.TimePoint;
 import com.sap.sailing.domain.common.impl.MillisecondsTimePoint;
-import com.sap.sailing.simulator.Boundary;
+import com.sap.sailing.simulator.Grid;
 import com.sap.sailing.simulator.Path;
 import com.sap.sailing.simulator.PolarDiagram;
 import com.sap.sailing.simulator.SimulationParameters;
@@ -34,7 +34,7 @@ public class PathGeneratorDijkstra extends PathGeneratorBase {
     public Path getPath() {
 
         // retrieve simulation parameters
-        Boundary boundary = new RectangularBoundary(this.parameters.getCourse().get(0), this.parameters
+        Grid boundary = new RectangularGrid(this.parameters.getCourse().get(0), this.parameters
                 .getCourse().get(1));// simulationParameters.getBoundaries();
         WindFieldGenerator windField = this.parameters.getWindField();
         PolarDiagram polarDiagram = this.parameters.getBoatPolarDiagram();
@@ -49,7 +49,7 @@ public class PathGeneratorDijkstra extends PathGeneratorBase {
         int gridv = this.parameters.getProperty("Djikstra.gridv[int]").intValue(); // number of vertical grid steps
         int gridh = this.parameters.getProperty("Djikstra.gridh[int]").intValue(); // number of horizontal grid
         // steps
-        Position[][] sailGrid = boundary.extractGrid(gridh, gridv, 0, 0);
+        Position[][] sailGrid = boundary.generatePositions(gridh, gridv, 0, 0);
 
         // create adjacency graph including start and end
         Map<Position, List<Position>> graph = new HashMap<Position, List<Position>>();

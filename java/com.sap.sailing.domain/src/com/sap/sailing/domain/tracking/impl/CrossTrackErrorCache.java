@@ -85,6 +85,15 @@ public class CrossTrackErrorCache extends AbstractRaceChangeListener {
 
         private static final long serialVersionUID = 4884868659665863604L;
         
+        public void deleteAll() {
+            lockForWrite();
+            try {
+                getInternalRawFixes().clear();
+            } finally {
+                unlockAfterWrite();
+            }
+        }
+        
         public void deleteAllLaterThan(TimePoint from) {
             // TODO use a specialized ArrayList in a specialized ArrayListNavigableSet and then make removeRange public
             lockForWrite();
@@ -171,7 +180,11 @@ public class CrossTrackErrorCache extends AbstractRaceChangeListener {
                             FromTimePointToEndUpdateInterval updateInterval) {
                         CrossTrackErrorSumAndNumberOfFixesTrack result;
                         if (oldValue != null) {
-                            oldValue.deleteAllLaterThan(updateInterval.getFrom());
+                            if (updateInterval == null) {
+                                oldValue.deleteAll();
+                            } else {
+                                oldValue.deleteAllLaterThan(updateInterval.getFrom());
+                            }
                             computedCacheUpdate.lockForRead();
                             try {
                                 for (CrossTrackErrorSumAndNumberOfFixes entry : computedCacheUpdate.getRawFixes()) {
@@ -384,7 +397,7 @@ public class CrossTrackErrorCache extends AbstractRaceChangeListener {
     }
 
     @Override
-    public void markPositionChanged(GPSFix fix, Mark mark) {
+    public void markPositionChanged(GPSFix fix, Mark mark, boolean firstInTrack) {
         TimePoint from = owner.getOrCreateTrack(mark).getEstimatedPositionTimePeriodAffectedBy(fix).getA();
         final List<Competitor> shuffledCompetitors = new ArrayList<>(cachePerCompetitor.keySet());
         Collections.shuffle(shuffledCompetitors);
@@ -434,6 +447,27 @@ public class CrossTrackErrorCache extends AbstractRaceChangeListener {
         }
     }
     
+    @Override
+    public void waypointAdded(int zeroBasedIndex, Waypoint waypointThatGotAdded) {
+        invalidate();
+    }
+
+    /**
+     * Invalidates all cache contents for all competitors from the beginning of time
+     */
+    public void invalidate() {
+        final List<Competitor> shuffledCompetitors = new ArrayList<>(cachePerCompetitor.keySet());
+        Collections.shuffle(shuffledCompetitors);
+        for (Competitor competitor : shuffledCompetitors) {
+            cachePerCompetitor.triggerUpdate(competitor, null /* meaning: from the beginning of time */);
+        }
+    }
+
+    @Override
+    public void waypointRemoved(int zeroBasedIndex, Waypoint waypointThatGotRemoved) {
+        invalidate();
+    }
+
     @Override
     public String toString() {
         return "CrossTrackErrorCache for competitors "+cachePerCompetitor.keySet();

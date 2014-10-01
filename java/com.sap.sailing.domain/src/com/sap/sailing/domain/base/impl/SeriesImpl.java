@@ -76,7 +76,8 @@ public class SeriesImpl extends RenamableImpl implements Series, RaceColumnListe
         for (Fleet fleet : fleets) {
             this.fleetsByName.put(fleet.getName(), fleet);
         }
-        fleetsInAscendingOrder = new ArrayList<Fleet>(fleetsByName.values());
+        fleetsInAscendingOrder = new ArrayList<Fleet>();
+        Util.addAll(fleets, fleetsInAscendingOrder);
         Collections.sort(fleetsInAscendingOrder);
         List<RaceColumnInSeries> myRaceColumns = new ArrayList<RaceColumnInSeries>();
         this.raceColumns = myRaceColumns;

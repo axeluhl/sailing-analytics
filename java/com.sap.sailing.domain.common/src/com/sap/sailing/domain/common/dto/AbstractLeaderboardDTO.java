@@ -11,6 +11,7 @@ import java.util.Set;
 import java.util.UUID;
 
 import com.sap.sailing.domain.common.LeaderboardType;
+import com.sap.sailing.domain.common.RaceIdentifier;
 import com.sap.sailing.domain.common.RegattaAndRaceIdentifier;
 import com.sap.sailing.domain.common.ScoringSchemeType;
 import com.sap.sse.common.Util;
@@ -40,8 +41,10 @@ public abstract class AbstractLeaderboardDTO implements Serializable {
     
     public Set<BoatClassDTO> getBoatClasses() {
         Set<BoatClassDTO> result = new HashSet<BoatClassDTO>();
-        for (CompetitorDTO competitor : rows.keySet()) {
-            result.add(competitor.getBoatClass());
+        if(rows != null) {
+            for (CompetitorDTO competitor : rows.keySet()) {
+                result.add(competitor.getBoatClass());
+            }
         }
         return result;
     }
@@ -59,21 +62,23 @@ public abstract class AbstractLeaderboardDTO implements Serializable {
     }
 
     /**
-     * If the race whose name is specified in <code>raceName</code> has at least one competitor who has valid
-     * {@link LeaderboardEntryDTO#legDetails} for that race, the maximum number of entries of all such competitors in
-     * the leg details is returned, telling the number of legs that the race column shall display. Otherwise, -1 is
-     * returned.
+     * If the race column whose name is specified in <code>raceColumnName</code> has at least one competitor who has valid
+     * {@link LeaderboardEntryDTO#legDetails} for that race column, the maximum number of entries of all such competitors in
+     * the leg details is returned, telling the number of legs that the race column shall display. Otherwise, -1 is returned.
+     * If you specify an non null <code>preselectedRace</code> the leg count is calculated only for that race.
      */
-    public int getLegCount(String raceColumnName) {
+    public int getLegCount(String raceColumnName, RaceIdentifier preselectedRace) {
         int result = -1;
         for (LeaderboardRowDTO row : rows.values()) {
-            if (row.fieldsByRaceColumnName.get(raceColumnName) != null && row.fieldsByRaceColumnName.get(raceColumnName).legDetails != null) {
-                result = Math.max(result, row.fieldsByRaceColumnName.get(raceColumnName).legDetails.size());
+            LeaderboardEntryDTO leaderboardEntryDTO = row.fieldsByRaceColumnName.get(raceColumnName);
+            if (leaderboardEntryDTO != null && leaderboardEntryDTO.legDetails != null
+                    && (preselectedRace == null || (preselectedRace != null && preselectedRace.equals(leaderboardEntryDTO.race)))) {
+                result = Math.max(result, leaderboardEntryDTO.legDetails.size());
             }
         }
         return result;
     }
-
+ 
     /**
      * Tells if the <code>competitor</code> scored (and therefore presumably participated) in a medal race represented
      * in this leaderboard.
@@ -118,16 +123,6 @@ public abstract class AbstractLeaderboardDTO implements Serializable {
         return getRaceColumnByName(raceColumnName).isMedalRace();
     }
 
-    private RaceColumnDTO getOrCreateRaceColumn(String raceColumnName) {
-        RaceColumnDTO result = getRaceColumnByName(raceColumnName);
-        if (result == null) {
-            result = new RaceColumnDTO(/* isValidInTotalScore */ true);
-            result.setName(raceColumnName);
-            races.add(result);
-        }
-        return result;
-    }
-
     /**
      * If the {@link RaceColumnDTO} by the name <code>raceColumnName</code> doesn't exist yet within this leaderboard
      * DTO, it is created, setting is {@link RaceColumnDTO#isValidInTotalScore()} to <code>true</code>. This method
@@ -141,15 +136,26 @@ public abstract class AbstractLeaderboardDTO implements Serializable {
      * @param effectiveFactor
      *            is what you get when you call {@link RaceColumn#getFactor()} on the race column that the resulting
      *            {@link RaceColumnDTO} represents
+     * @param regattaName
+     *            must not be <code>null</code> if <code>seriesName</code> is not <code>null</code>; specified
+     *            separately from <code>trackedRaceIdentifier</code> because a column may belong to regatta/series
+     *            despite not having a tracked race associated
+     * @param seriesName
+     *            if <code>null</code>, this method will produce a {@link RaceColumnDTO}, otherwise a
+     *            {@link RaceColumnInSeriesDTO}
      * @param fleetDTO
      *            must not be null
      */
     public RaceColumnDTO addRace(String raceColumnName, Double explicitFactor, double effectiveFactor,
-            FleetDTO fleetDTO, boolean medalRace, RegattaAndRaceIdentifier trackedRaceIdentifier, RaceDTO race) {
+            String regattaName, String seriesName, FleetDTO fleetDTO, boolean medalRace, RegattaAndRaceIdentifier trackedRaceIdentifier, RaceDTO race) {
         assert fleetDTO != null;
-        RaceColumnDTO raceColumnDTO = getOrCreateRaceColumn(raceColumnName);
+        RaceColumnDTO raceColumnDTO = getRaceColumnByName(raceColumnName);
+        if (raceColumnDTO == null) {
+            raceColumnDTO = RaceColumnDTOFactory.INSTANCE.createRaceColumnDTO(raceColumnName, medalRace,
+                explicitFactor, regattaName, seriesName);
+            races.add(raceColumnDTO);
+        }
         raceColumnDTO.setEffectiveFactor(effectiveFactor);
-        raceColumnDTO.setExplicitFactor(explicitFactor);
         boolean contains = false;
         for (FleetDTO fleet : raceColumnDTO.getFleets()) {
             if (fleet.getName().equals(fleetDTO.getName())) {
@@ -160,16 +166,14 @@ public abstract class AbstractLeaderboardDTO implements Serializable {
         if (!contains) {
             raceColumnDTO.addFleet(fleetDTO);
         }
-        raceColumnDTO.setMedalRace(medalRace);
         raceColumnDTO.setRaceIdentifier(fleetDTO, trackedRaceIdentifier);
         raceColumnDTO.setRace(fleetDTO, race);
         return raceColumnDTO;
     }
 
-    public RaceColumnDTO createEmptyRaceColumn(String raceColumnName, boolean medalRace, boolean isValidInTotalScore) {
-        RaceColumnDTO raceColumn = new RaceColumnDTO(isValidInTotalScore);
-        raceColumn.setName(raceColumnName);
-        raceColumn.setMedalRace(medalRace);
+    public RaceColumnDTO createEmptyRaceColumn(String raceColumnName, boolean medalRace, String regattaName, String seriesName) {
+        final RaceColumnDTO raceColumn = RaceColumnDTOFactory.INSTANCE.createRaceColumnDTO(raceColumnName,
+                medalRace, /* explicit factor */ null, regattaName, seriesName);
         races.add(raceColumn);
         return raceColumn;
     }
@@ -183,6 +187,31 @@ public abstract class AbstractLeaderboardDTO implements Serializable {
         return null;
     }
 
+    public int getRaceColumnsCount() {
+        return races.size();
+    }
+
+    public int getRacesCount() {
+        int result = 0;
+        for (RaceColumnDTO race : getRaceList()) {
+            result += race.getFleets().size();
+        }
+        return result;
+    }
+
+    public int getTrackedRacesCount() {
+        int result = 0;
+        for (RaceColumnDTO raceColumn : getRaceList()) {
+            for (FleetDTO fleet : raceColumn.getFleets()) {
+                RaceDTO race = raceColumn.getRace(fleet);
+                if(race != null && race.trackedRace != null && race.trackedRace.hasGPSData && race.trackedRace.hasWindData) {
+                    result++;
+                }
+            }
+        }
+        return result;
+    }
+    
     public List<RaceColumnDTO> getRaceList() {
         return races;
     }

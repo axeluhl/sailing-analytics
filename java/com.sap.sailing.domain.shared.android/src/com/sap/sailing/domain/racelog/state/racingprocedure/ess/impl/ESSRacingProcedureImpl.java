@@ -91,37 +91,52 @@ public class ESSRacingProcedureImpl extends BaseRacingProcedure implements ESSRa
     public FlagPoleState getActiveFlags(TimePoint startTime, TimePoint now) {
         if (now.before(startTime.minus(startPhaseAPDownInterval))) {
             return new FlagPoleState(
-                    Arrays.asList(new FlagPole(Flags.AP, true), new FlagPole(Flags.ESSTHREE, false)), 
+                    Arrays.asList(new FlagPole(Flags.AP, true), new FlagPole(Flags.ESSTHREE, false)), null,
                     Arrays.asList(new FlagPole(Flags.AP, false), new FlagPole(Flags.ESSTHREE, false)), 
                     startTime.minus(startPhaseAPDownInterval));
         } else if (now.before(startTime.minus(startPhaseESSThreeUpInterval))) {
             return new FlagPoleState(
-                    Arrays.asList(new FlagPole(Flags.AP, false), new FlagPole(Flags.ESSTHREE, false)), 
+                    Arrays.asList(new FlagPole(Flags.AP, false), new FlagPole(Flags.ESSTHREE, false)),
+                    startTime.minus(startPhaseAPDownInterval),
                     Arrays.asList(new FlagPole(Flags.ESSTHREE, true), new FlagPole(Flags.ESSTWO, false)), 
                     startTime.minus(startPhaseESSThreeUpInterval));
         } else if (now.before(startTime.minus(startPhaseESSTwoUpInterval))) {
             return new FlagPoleState(
-                    Arrays.asList(new FlagPole(Flags.ESSTHREE, true), new FlagPole(Flags.ESSTWO, false)), 
+                    Arrays.asList(new FlagPole(Flags.ESSTHREE, true), new FlagPole(Flags.ESSTWO, false)),
+                    startTime.minus(startPhaseESSThreeUpInterval),
                     Arrays.asList(new FlagPole(Flags.ESSTWO, true), new FlagPole(Flags.ESSONE, false)), 
                     startTime.minus(startPhaseESSTwoUpInterval));
         } else if (now.before(startTime.minus(startPhaseESSOneUpInterval))) {
             return new FlagPoleState(
-                    Arrays.asList(new FlagPole(Flags.ESSTWO, true), new FlagPole(Flags.ESSONE, false)), 
+                    Arrays.asList(new FlagPole(Flags.ESSTWO, true), new FlagPole(Flags.ESSONE, false)),
+                    startTime.minus(startPhaseESSTwoUpInterval),
                     Arrays.asList(new FlagPole(Flags.ESSONE, true)), 
                     startTime.minus(startPhaseESSOneUpInterval));
         } if (now.before(startTime)) {
             return new FlagPoleState(
-                    Arrays.asList(new FlagPole(Flags.ESSONE, true)), 
+                    Arrays.asList(new FlagPole(Flags.ESSONE, true)),
+                    startTime.minus(startPhaseESSOneUpInterval),
                     Arrays.asList(new FlagPole(Flags.ESSONE, false)), 
                     startTime);
         } else {
-            if (isIndividualRecallDisplayed()) {
+            if (isIndividualRecallDisplayed(now)) {
                 return new FlagPoleState(
                         Arrays.asList(new FlagPole(Flags.XRAY, true)),
+                        getIndividualRecallDisplayedTime(),
                         Arrays.asList(new FlagPole(Flags.XRAY, false)),
                         getIndividualRecallRemovalTime());
+            } else if (isFinished(now)) {
+                return new FlagPoleState(
+                        Arrays.asList(new FlagPole(Flags.BLUE, false)), getFinishedTime());
+            } else if (isInFinishingPhase(now)) {
+                return new FlagPoleState(
+                        Arrays.asList(new FlagPole(Flags.BLUE, true)),
+                        getFinishingTime(),
+                        Arrays.asList(new FlagPole(Flags.BLUE, false)),
+                        null);
             } else {
-                return new FlagPoleState(Collections.<FlagPole>emptyList());
+                TimePoint recallRemoved = getIndividualRecallRemovalTime();
+                return new FlagPoleState(Collections.<FlagPole>emptyList(), recallRemoved == null ? startTime : recallRemoved);
             }
         }
     }

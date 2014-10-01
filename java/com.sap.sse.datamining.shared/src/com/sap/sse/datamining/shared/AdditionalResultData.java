@@ -6,8 +6,6 @@ public interface AdditionalResultData extends Serializable {
 
     public int getRetrievedDataAmount();
 
-    public int getFilteredDataAmount();
-
     public double getCalculationTimeInSeconds();
 
     public String getResultSignifier();

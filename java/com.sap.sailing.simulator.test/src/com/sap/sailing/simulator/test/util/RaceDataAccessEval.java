@@ -5,7 +5,6 @@ import java.net.URI;
 import java.net.URISyntaxException;
 import java.net.URL;
 import java.util.Iterator;
-import java.util.Set;
 import java.util.logging.Logger;
 
 import com.sap.sailing.domain.base.Competitor;
@@ -14,7 +13,7 @@ import com.sap.sailing.domain.common.RegattaAndRaceIdentifier;
 import com.sap.sailing.domain.common.RegattaNameAndRaceName;
 import com.sap.sailing.domain.tracking.GPSFixMoving;
 import com.sap.sailing.domain.tracking.GPSFixTrack;
-import com.sap.sailing.domain.tracking.RacesHandle;
+import com.sap.sailing.domain.tracking.RaceHandle;
 import com.sap.sailing.domain.tracking.TrackedRace;
 import com.sap.sailing.domain.tractracadapter.TracTracAdapterFactory;
 import com.sap.sailing.domain.tractracadapter.impl.TracTracAdapterFactoryImpl;
@@ -32,7 +31,7 @@ public class RaceDataAccessEval {
     private static URI storedUri;
     private static RacingEventServiceImpl service;
     private static TracTracAdapterFactory tracTracAdapterFactory;
-    private static RacesHandle raceHandle;
+    private static RaceHandle raceHandle;
     public boolean storedend = false;
 
     public static void main(String[] args) throws Exception, InterruptedException, MalformedURLException,
@@ -103,45 +102,31 @@ public class RaceDataAccessEval {
         service = new RacingEventServiceImpl();
         tracTracAdapterFactory = new TracTracAdapterFactoryImpl();
         logger.info("Calling service.addTracTracRace");
-        raceHandle = SimulatorUtils.loadRace(service, tracTracAdapterFactory, paramUrl, liveUri, storedUri, null,
-                60000);
+        raceHandle = SimulatorUtils.loadRace(service, tracTracAdapterFactory, paramUrl, liveUri, storedUri, null, 60000);
         logger.info("Calling raceHandle.getRaces(): " + raceHandle);
-
-        Set<RaceDefinition> races = raceHandle.getRaces(); // wait for RaceDefinition to be completely wired in Regatta
-        logger.info("Obtained races: " + races.size());
-
+        RaceDefinition race = raceHandle.getRace(); // wait for RaceDefinition to be completely wired in Regatta
+        logger.info("Obtained race: " + race);
         String regatta = raceHandle.getRegatta().getName();
-
-        Iterator<RaceDefinition> racIter = races.iterator();
-        while (racIter.hasNext()) {
-            RaceDefinition race = racIter.next();
-            System.out.println("Race: \"" + race.getName() + "\", \"" + regatta + "\"");
-
-            RegattaAndRaceIdentifier raceIdentifier = new RegattaNameAndRaceName(regatta, race.getName());
-            TrackedRace tr = service.getExistingTrackedRace(raceIdentifier);
-            tr.waitUntilNotLoading();
-
-            System.out.println("Competitors:");
-            Iterable<Competitor> competitors = tr.getRace().getCompetitors();
-            System.out.println("" + competitors);
-            Iterator<Competitor> comIter = competitors.iterator();
-            while (comIter.hasNext()) {
-                Competitor com = comIter.next();
-                GPSFixTrack<Competitor, GPSFixMoving> track = null;
-                Iterable<GPSFixMoving> fixes = null;
-                track = tr.getTrack(com);
-
-                track.lockForRead();
-                fixes = track.getFixes();
-                GPSFixMoving fix = fixes.iterator().next();
-                System.out.println("" + com.getName() + ", First GPS-Fix: " + fix.getPosition().getLatDeg() + ", "
-                        + fix.getPosition().getLngDeg());
-                track.unlockAfterRead();
-
-            }
-
+        System.out.println("Race: \"" + race.getName() + "\", \"" + regatta + "\"");
+        RegattaAndRaceIdentifier raceIdentifier = new RegattaNameAndRaceName(regatta, race.getName());
+        TrackedRace tr = service.getExistingTrackedRace(raceIdentifier);
+        tr.waitUntilNotLoading();
+        System.out.println("Competitors:");
+        Iterable<Competitor> competitors = tr.getRace().getCompetitors();
+        System.out.println("" + competitors);
+        Iterator<Competitor> comIter = competitors.iterator();
+        while (comIter.hasNext()) {
+            Competitor com = comIter.next();
+            GPSFixTrack<Competitor, GPSFixMoving> track = null;
+            Iterable<GPSFixMoving> fixes = null;
+            track = tr.getTrack(com);
+            track.lockForRead();
+            fixes = track.getFixes();
+            GPSFixMoving fix = fixes.iterator().next();
+            System.out.println("" + com.getName() + ", First GPS-Fix: " + fix.getPosition().getLatDeg() + ", "
+                    + fix.getPosition().getLngDeg());
+            track.unlockAfterRead();
         }
-
     }
 
 }

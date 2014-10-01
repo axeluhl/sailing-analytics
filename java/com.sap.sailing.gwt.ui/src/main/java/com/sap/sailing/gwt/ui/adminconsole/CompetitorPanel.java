@@ -51,7 +51,7 @@ public class CompetitorPanel extends SimplePanel {
         this.errorReporter = errorReporter;
         this.leaderboardName = leaderboardName;
         this.competitorTable = new CompetitorTableWrapper<>(sailingService, stringMessages, errorReporter,
-                new MultiSelectionModel<CompetitorDTO>());
+                new MultiSelectionModel<CompetitorDTO>(), false);
         this.competitorSelectionModel = competitorTable.getSelectionModel();
         VerticalPanel mainPanel = new VerticalPanel();
         this.setWidget(mainPanel);

@@ -1,0 +1,797 @@
+package com.sap.sailing.gwt.ui.client.media;
+
+import java.util.ArrayList;
+import java.util.Collection;
+import java.util.Collections;
+import java.util.Date;
+import java.util.HashMap;
+import java.util.HashSet;
+import java.util.List;
+import java.util.Map;
+import java.util.Set;
+
+import com.google.gwt.dom.client.AudioElement;
+import com.google.gwt.dom.client.MediaElement;
+import com.google.gwt.event.logical.shared.CloseEvent;
+import com.google.gwt.event.logical.shared.CloseHandler;
+import com.google.gwt.media.client.Audio;
+import com.google.gwt.user.client.Window;
+import com.google.gwt.user.client.Window.ClosingEvent;
+import com.google.gwt.user.client.Window.ClosingHandler;
+import com.google.gwt.user.client.rpc.AsyncCallback;
+import com.google.gwt.user.client.ui.SimplePanel;
+import com.google.gwt.user.client.ui.Widget;
+import com.sap.sailing.domain.common.RegattaAndRaceIdentifier;
+import com.sap.sailing.domain.common.TimePoint;
+import com.sap.sailing.domain.common.impl.MillisecondsTimePoint;
+import com.sap.sailing.domain.common.media.MediaTrack;
+import com.sap.sailing.domain.common.media.MediaTrack.MediaType;
+import com.sap.sailing.domain.common.media.MediaTrack.Status;
+import com.sap.sailing.gwt.ui.client.ErrorReporter;
+import com.sap.sailing.gwt.ui.client.MediaServiceAsync;
+import com.sap.sailing.gwt.ui.client.RaceTimesInfoProvider;
+import com.sap.sailing.gwt.ui.client.StringMessages;
+import com.sap.sailing.gwt.ui.client.media.popup.PopoutWindowPlayer;
+import com.sap.sailing.gwt.ui.client.media.popup.PopoutWindowPlayer.PlayerCloseListener;
+import com.sap.sailing.gwt.ui.client.media.popup.VideoWindowPlayer;
+import com.sap.sailing.gwt.ui.client.media.popup.YoutubeWindowPlayer;
+import com.sap.sailing.gwt.ui.client.media.shared.MediaPlayer;
+import com.sap.sailing.gwt.ui.client.media.shared.VideoPlayer;
+import com.sap.sailing.gwt.ui.client.media.shared.VideoSynchPlayer;
+import com.sap.sailing.gwt.ui.client.shared.components.Component;
+import com.sap.sailing.gwt.ui.client.shared.components.SettingsDialogComponent;
+import com.sap.sailing.gwt.ui.shared.UserDTO;
+import com.sap.sse.gwt.client.dialog.DataEntryDialog.DialogCallback;
+import com.sap.sse.gwt.client.player.PlayStateListener;
+import com.sap.sse.gwt.client.player.TimeListener;
+import com.sap.sse.gwt.client.player.Timer;
+import com.sap.sse.gwt.client.player.Timer.PlayModes;
+import com.sap.sse.gwt.client.player.Timer.PlayStates;
+import com.sap.sse.gwt.client.useragent.UserAgentDetails;
+import com.sap.sse.gwt.client.useragent.UserAgentDetails.AgentTypes;
+
+public class MediaPlayerManagerComponent implements Component<Void>, PlayStateListener, TimeListener,
+        MediaPlayerManager, CloseHandler<Window>, ClosingHandler {
+
+    static interface VideoContainerFactory<T> {
+        T createVideoContainer(VideoSynchPlayer videoPlayer, boolean showSynchControls, MediaServiceAsync mediaService,
+                ErrorReporter errorReporter, PlayerCloseListener playerCloseListener, PopoutListener popoutListener);
+    }
+
+    private final SimplePanel rootPanel = new SimplePanel();
+
+    private MediaPlayer activeAudioPlayer;
+    private VideoPlayer dockedVideoPlayer;
+    private final Map<MediaTrack, VideoContainer> activeVideoContainers = new HashMap<MediaTrack, VideoContainer>();
+    private Collection<MediaTrack> assignedMediaTracks = new ArrayList<>();
+    private Collection<MediaTrack> overlappingMediaTracks = new ArrayList<>();
+
+    private final RegattaAndRaceIdentifier raceIdentifier;
+    private final RaceTimesInfoProvider raceTimesInfoProvider;
+    private final Timer raceTimer;
+    private final MediaServiceAsync mediaService;
+    private final StringMessages stringMessages;
+    private final ErrorReporter errorReporter;
+    private final UserAgentDetails userAgent;
+    private final UserDTO user;
+    private boolean autoSelectMedia;
+
+    private Date currentRaceTime;
+    private double currentPlaybackSpeed = 1.0d;
+    private PlayStates currentPlayState = PlayStates.Paused;
+    private PlayerChangeListener playerChangeListener;
+
+    public MediaPlayerManagerComponent(RegattaAndRaceIdentifier selectedRaceIdentifier,
+            RaceTimesInfoProvider raceTimesInfoProvider, Timer raceTimer, MediaServiceAsync mediaService,
+            StringMessages stringMessages, ErrorReporter errorReporter, UserAgentDetails userAgent, UserDTO user,
+            boolean autoSelectMedia) {
+        this.raceIdentifier = selectedRaceIdentifier;
+        this.raceTimesInfoProvider = raceTimesInfoProvider;
+        this.raceTimer = raceTimer;
+        this.raceTimer.addPlayStateListener(this);
+        this.raceTimer.addTimeListener(this);
+        this.mediaService = mediaService;
+        mediaService.getMediaTracksForRace(this.getCurrentRace(), getAssignedMediaCallback());
+        mediaService.getMediaTracksInTimeRange(this.getCurrentRace(), getOverlappingMediaCallback());
+        this.stringMessages = stringMessages;
+        this.errorReporter = errorReporter;
+        this.userAgent = userAgent;
+        this.user = user;
+        this.autoSelectMedia = autoSelectMedia;
+
+        Window.addCloseHandler(this);
+        Window.addWindowClosingHandler(this);
+
+    }
+
+    private static boolean isPotentiallyPlayable(MediaTrack mediaTrack) {
+        return MediaTrack.Status.REACHABLE.equals(mediaTrack.status)
+                || MediaTrack.Status.UNDEFINED.equals(mediaTrack.status);
+    }
+
+    private void setStatus(final MediaTrack mediaTrack) {
+        if (!mediaTrack.isYoutube()) {
+            // firefox crashes in the current version when trying to read the metadata from mp4 files
+            if (!userAgent.getType().equals(AgentTypes.FIREFOX)) {
+                Audio audio = Audio.createIfSupported();
+                if (audio != null) {
+                    AudioElement mediaReachableTester = audio.getAudioElement();
+                    addLoadMetadataHandler(mediaReachableTester, mediaTrack);
+                    mediaReachableTester.setPreload(MediaElement.PRELOAD_METADATA);
+                    mediaReachableTester.setSrc(mediaTrack.url);
+                    mediaReachableTester.load();
+                } else {
+                    mediaTrack.status = Status.CANNOT_PLAY;
+                }
+            } else {
+                mediaTrack.status = Status.REACHABLE;
+            }
+        } else {
+            mediaTrack.status = Status.REACHABLE;
+        }
+    }
+
+    native void addLoadMetadataHandler(MediaElement mediaElement, MediaTrack mediaTrack) /*-{
+		var that = this;
+		mediaElement
+				.addEventListener(
+						'loadedmetadata',
+						function() {
+							that.@com.sap.sailing.gwt.ui.client.media.MediaPlayerManagerComponent::loadedmetadata(Lcom/sap/sailing/domain/common/media/MediaTrack;)(mediaTrack);
+						});
+		mediaElement
+				.addEventListener(
+						'error',
+						function() {
+							that.@com.sap.sailing.gwt.ui.client.media.MediaPlayerManagerComponent::mediaError(Lcom/sap/sailing/domain/common/media/MediaTrack;)(mediaTrack);
+						});
+    }-*/;
+
+    public void loadedmetadata(MediaTrack mediaTrack) {
+        mediaTrack.status = Status.REACHABLE;
+    }
+
+    public void mediaError(MediaTrack mediaTrack) {
+        mediaTrack.status = Status.NOT_REACHABLE;
+    }
+
+    @Override
+    public void playDefault() {
+        MediaTrack defaultVideo = getDefaultVideo();
+        if (defaultVideo != null) {
+            playFloatingVideo(defaultVideo);
+            playAudio(defaultVideo);
+        } else {
+            MediaTrack defaultAudio = getDefaultAudio();
+            if (defaultAudio != null) {
+                playAudio(defaultAudio);
+            }
+        }
+    }
+
+    private MediaTrack getDefaultAudio() {
+        // TODO: implement a better heuristic than just taking the first to come
+        for (MediaTrack mediaTrack : assignedMediaTracks) {
+            if (MediaType.audio.equals(mediaTrack.mimeType.mediaType) && isPotentiallyPlayable(mediaTrack)) {
+                return mediaTrack;
+            }
+        }
+        return null;
+    }
+
+    private MediaTrack getDefaultVideo() {
+        for (MediaTrack mediaTrack : assignedMediaTracks) {
+            if (MediaType.video.equals(mediaTrack.mimeType.mediaType) && isPotentiallyPlayable(mediaTrack)) {
+                return mediaTrack;
+            }
+        }
+        return null;
+    }
+
+    @Override
+    public void playStateChanged(PlayStates playState, PlayModes playMode) {
+        this.currentPlayState = playState;
+        switch (playMode) {
+        case Replay:
+            switch (this.currentPlayState) {
+            case Playing:
+                startPlaying();
+                break;
+            case Paused:
+                pausePlaying();
+            default:
+                break;
+            }
+            break;
+        case Live:
+            // TODO: Live mode not supported, yet.
+            startPlaying();
+            break;
+        default:
+            break;
+        }
+    }
+
+    @Override
+    public void playSpeedFactorChanged(double newPlaySpeedFactor) {
+        this.currentPlaybackSpeed = newPlaySpeedFactor;
+        if (isStandaloneAudio()) {// only if audio player isn't one of the video players anyway
+            activeAudioPlayer.setPlaybackSpeed(this.currentPlaybackSpeed);
+        }
+        for (VideoContainer videoContainer : activeVideoContainers.values()) {
+            VideoPlayer videoPlayer = videoContainer.getVideoPlayer();
+            videoPlayer.setPlaybackSpeed(this.currentPlaybackSpeed);
+        }
+    }
+
+    /**
+     * Checks if audio player isn't one of the video players
+     * 
+     * @return
+     */
+    private boolean isStandaloneAudio() {
+        return activeAudioPlayer != null && !activeVideoContainers.containsKey(activeAudioPlayer.getMediaTrack());
+    }
+
+    private void pausePlaying() {
+        if (isStandaloneAudio()) { // only if audio player isn't one of the video players anyway
+            activeAudioPlayer.pauseMedia();
+        }
+
+        for (VideoContainer videoContainer : activeVideoContainers.values()) {
+            VideoPlayer videoPlayer = videoContainer.getVideoPlayer();
+            if (!videoPlayer.isMediaPaused()) {
+                videoPlayer.pauseMedia();
+            }
+        }
+    }
+
+    private void startPlaying() {
+        if (isStandaloneAudio() && activeAudioPlayer.isCoveringCurrentRaceTime()) {
+            activeAudioPlayer.playMedia();
+        }
+        for (VideoContainer videoContainer : activeVideoContainers.values()) {
+            VideoPlayer videoPlayer = videoContainer.getVideoPlayer();
+            if (videoPlayer.isMediaPaused() && videoPlayer.isCoveringCurrentRaceTime()) {
+                videoPlayer.playMedia();
+            }
+        }
+    }
+
+    @Override
+    public void timeChanged(Date newRaceTime, Date oldRaceTime) {
+        this.currentRaceTime = newRaceTime;
+        if (isStandaloneAudio()) { // only if audio player isn't one of the video players anyway
+            ensurePlayState(activeAudioPlayer);
+            activeAudioPlayer.raceTimeChanged(this.currentRaceTime);
+        }
+        for (VideoContainer videoContainer : activeVideoContainers.values()) {
+            VideoPlayer videoPlayer = videoContainer.getVideoPlayer();
+            ensurePlayState(videoPlayer);
+            videoPlayer.raceTimeChanged(this.currentRaceTime);
+        }
+    }
+
+    /**
+     * Wraps the callback handling functions in an object to better document their purpose. onSuccess and onError are
+     * simply too generic to tell about their concrete use.
+     * 
+     * @return
+     */
+    private AsyncCallback<Collection<MediaTrack>> getAssignedMediaCallback() {
+
+        return new AsyncCallback<Collection<MediaTrack>>() {
+
+            @Override
+            public void onFailure(Throwable caught) {
+                notifyStateChange();
+                errorReporter.reportError("Remote Procedure Call getMediaTracksForRace(...) - Failure: "
+                        + caught.getMessage());
+            }
+
+            @Override
+            public void onSuccess(Collection<MediaTrack> mediaTracks) {
+                MediaPlayerManagerComponent.this.assignedMediaTracks.clear();
+                MediaPlayerManagerComponent.this.assignedMediaTracks.addAll(mediaTracks);
+                for (MediaTrack mediaTrack : MediaPlayerManagerComponent.this.assignedMediaTracks) {
+                    setStatus(mediaTrack);
+                }
+
+                if (autoSelectMedia) {
+                    playDefault();
+                }
+                notifyStateChange();
+            }
+
+        };
+    }
+
+    /**
+     * Wraps the callback handling functions in an object to better document their purpose. onSuccess and onError are
+     * simply too generic to tell about their concrete use.
+     * 
+     * @return
+     */
+    private AsyncCallback<Collection<MediaTrack>> getOverlappingMediaCallback() {
+
+        return new AsyncCallback<Collection<MediaTrack>>() {
+
+            @Override
+            public void onFailure(Throwable caught) {
+                notifyStateChange();
+                errorReporter.reportError("Remote Procedure Call getMediaTracksForRace(...) - Failure: "
+                        + caught.getMessage());
+            }
+
+            @Override
+            public void onSuccess(Collection<MediaTrack> mediaTracks) {
+                MediaPlayerManagerComponent.this.overlappingMediaTracks.clear();
+                MediaPlayerManagerComponent.this.overlappingMediaTracks.addAll(mediaTracks);
+                for (MediaTrack mediaTrack : MediaPlayerManagerComponent.this.overlappingMediaTracks) {
+                    setStatus(mediaTrack);
+                }
+
+                notifyStateChange();
+            }
+
+        };
+    }
+
+    private void notifyStateChange() {
+        if (playerChangeListener != null) {
+            playerChangeListener.notifyStateChange();
+        }
+    }
+
+    @Override
+    public void playDockedVideo(MediaTrack videoTrack) {
+        if ((dockedVideoPlayer == null) || (dockedVideoPlayer.getMediaTrack() != videoTrack)) {
+            closeDockedVideo();
+            closeFloatingVideo(videoTrack);
+            VideoContainer videoDockedContainer = createAndWrapVideoPlayer(videoTrack,
+                    new VideoContainerFactory<VideoDockedContainer>() {
+                        @Override
+                        public VideoDockedContainer createVideoContainer(VideoSynchPlayer videoPlayer,
+                                boolean showSynchControls, MediaServiceAsync mediaService, ErrorReporter errorReporter,
+                                PlayerCloseListener playerCloseListener, PopoutListener popoutListener) {
+                            VideoDockedContainer videoDockedContainer = new VideoDockedContainer(rootPanel,
+                                    videoPlayer, playerCloseListener, popoutListener);
+                            return videoDockedContainer;
+                        }
+                    });
+            registerVideoContainer(videoTrack, videoDockedContainer);
+            notifyStateChange();
+        } else {
+            // nothing changed
+        }
+    }
+
+    @Override
+    public void closeDockedVideo() {
+        if (dockedVideoPlayer != null) {
+            dockedVideoPlayer.shutDown();
+            dockedVideoPlayer = null;
+            notifyStateChange();
+        } else {
+            // nothing changed
+        }
+    }
+
+    @Override
+    public void playAudio(MediaTrack audioTrack) {
+        if ((activeAudioPlayer == null) || (activeAudioPlayer.getMediaTrack() != audioTrack)) {
+            muteAudio();
+            if ((audioTrack != null) && audioTrack.isYoutube()) { // --> Youtube videos can't be played for audio-only.
+                                                                  // So add a video player first.
+                playFloatingVideo(audioTrack);
+            }
+            VideoContainer playingVideoContainer = activeVideoContainers.get(audioTrack);
+            if (playingVideoContainer != null) {
+                VideoPlayer playingVideoPlayer = playingVideoContainer.getVideoPlayer();
+                activeAudioPlayer = playingVideoPlayer;
+                activeAudioPlayer.setMuted(false);
+            } else {
+                assignNewAudioPlayer(audioTrack);
+            }
+            notifyStateChange();
+        } else {
+            // nothing changed
+        }
+    }
+
+    @Override
+    public void muteAudio() {
+        if (activeAudioPlayer != null) { // --> then reset active audio player
+
+            if (activeVideoContainers.containsKey(activeAudioPlayer.getMediaTrack())) { // pre-change audioPlayer is one
+                                                                                        // of the
+                // videoPlayers
+                activeAudioPlayer.setMuted(true);
+            } else { // pre-change audioPlayer is a dedicated audio-only player
+                activeAudioPlayer.shutDown();
+            }
+            activeAudioPlayer = null;
+            notifyStateChange();
+        } else {
+            // nothing changed
+        }
+    }
+
+    @Override
+    public void playFloatingVideo(final MediaTrack videoTrack) {
+        if (dockedVideoPlayer != null && dockedVideoPlayer.getMediaTrack() == videoTrack) {
+            closeDockedVideo();
+        }
+        VideoContainer activeVideoContainer = activeVideoContainers.get(videoTrack);
+        if (activeVideoContainer == null) {
+            VideoFloatingContainer videoFloatingContainer = createAndWrapVideoPlayer(videoTrack,
+                    new VideoContainerFactory<VideoFloatingContainer>() {
+                        @Override
+                        public VideoFloatingContainer createVideoContainer(VideoSynchPlayer videoPlayer,
+                                boolean showSynchControls, MediaServiceAsync mediaService, ErrorReporter errorReporter,
+                                PlayerCloseListener playerCloseListener, PopoutListener popoutListener) {
+                            VideoFloatingContainer videoFloatingContainer = new VideoFloatingContainer(videoPlayer,
+                                    showSynchControls, mediaService, errorReporter, playerCloseListener, popoutListener);
+                            return videoFloatingContainer;
+                        }
+                    });
+
+            registerVideoContainer(videoTrack, videoFloatingContainer);
+            notifyStateChange();
+        } else {
+            // nothing changed
+        }
+
+    }
+
+    private <T> T createAndWrapVideoPlayer(final MediaTrack videoTrack, VideoContainerFactory<T> videoContainerFactory) {
+        final PopoutWindowPlayer.PlayerCloseListener playerCloseListener = new PopoutWindowPlayer.PlayerCloseListener() {
+
+            private VideoContainer videoContainer;
+
+            @Override
+            public void playerClosed() {
+                if (videoContainer == null) {
+                    closeFloatingVideo(videoTrack);
+                } else {
+                    registerVideoContainer(videoTrack, videoContainer);
+                    videoContainer = null;
+                }
+            }
+
+            @Override
+            public void setVideoContainer(VideoContainer videoContainer) {
+                this.videoContainer = videoContainer;
+            }
+        };
+        PopoutListener popoutListener = new PopoutListener() {
+
+            @Override
+            public void popoutVideo(MediaTrack videoTrack) {
+                VideoContainer videoContainer;
+                if (videoTrack.isYoutube()) {
+                    videoContainer = new YoutubeWindowPlayer(videoTrack, playerCloseListener);
+                } else {
+                    videoContainer = new VideoWindowPlayer(videoTrack, playerCloseListener);
+                }
+                playerCloseListener.setVideoContainer(videoContainer);
+                closeFloatingVideo(videoTrack);
+            }
+        };
+
+        final VideoSynchPlayer videoPlayer;
+        boolean showSynchControls = this.user != null;
+
+        if (videoTrack.isYoutube()) {
+            // popupPlayer = new YoutubeWindowPlayer(videoTrack, popCloseListener);
+            videoPlayer = new VideoYoutubePlayer(videoTrack, getRaceStartTime(), showSynchControls, raceTimer);
+        } else {
+            // popupPlayer = new VideoWindowPlayer(videoTrack, popCloseListener);
+            videoPlayer = new VideoHtmlPlayer(videoTrack, getRaceStartTime(), showSynchControls, raceTimer);
+        }
+        return videoContainerFactory.createVideoContainer(videoPlayer, showSynchControls, getMediaService(), errorReporter,
+                playerCloseListener, popoutListener);
+    }
+
+    private void registerVideoContainer(final MediaTrack videoTrack, final VideoContainer videoContainer) {
+        VideoPlayer videoPlayer = videoContainer.getVideoPlayer();
+        activeVideoContainers.put(videoTrack, videoContainer);
+        if ((activeAudioPlayer != null) && (activeAudioPlayer.getMediaTrack() == videoTrack)) { // selected video track
+                                                                                                // has been playing as
+                                                                                                // audio-only
+            activeAudioPlayer.pauseMedia();
+            activeAudioPlayer = videoContainer.getVideoPlayer();
+            videoPlayer.setMuted(false);
+        } else {
+            videoPlayer.setMuted(true);
+        }
+        synchPlayState(videoPlayer);
+        notifyStateChange();
+    }
+
+    private TimePoint getRaceStartTime() {
+        Date startOfRace = raceTimesInfoProvider.getRaceTimesInfo(getCurrentRace()).startOfRace;
+        if (startOfRace != null) {
+            return new MillisecondsTimePoint(startOfRace);
+        } else {
+            return null;
+        }
+    }
+
+    @Override
+    public void closeFloatingVideo(MediaTrack videoTrack) {
+        VideoContainer removedVideoContainer = activeVideoContainers.remove(videoTrack);
+        if (removedVideoContainer != null) {
+            removedVideoContainer.shutDown();
+            if (activeAudioPlayer != null && activeAudioPlayer.getMediaTrack() == videoTrack) { // in case this video
+                                                                                                // has been the sound
+                                                                                                // source, replace the
+                                                                                                // video player with a
+                                                                                                // dedicated audio
+                                                                                                // player
+                if (videoTrack.isYoutube()) {
+                    assignNewAudioPlayer(null);
+                } else {
+                    assignNewAudioPlayer(videoTrack);
+                }
+            }
+            notifyStateChange();
+        } else {
+            // nothing changed
+        }
+    }
+
+    private void assignNewAudioPlayer(MediaTrack audioTrack) {
+        if (audioTrack != null) {
+            activeAudioPlayer = new AudioHtmlPlayer(audioTrack);
+
+            synchPlayState(activeAudioPlayer);
+        } else {
+            activeAudioPlayer = null;
+        }
+    }
+
+    private boolean isLive() {
+        return raceTimer.getPlayMode() == Timer.PlayModes.Live;
+    }
+
+    private void synchPlayState(final MediaPlayer mediaPlayer) {
+        mediaPlayer.setPlaybackSpeed(currentPlaybackSpeed);
+        ensurePlayState(mediaPlayer);
+        mediaPlayer.raceTimeChanged(this.currentRaceTime);
+    }
+
+    private void ensurePlayState(final MediaPlayer mediaPlayer) {
+        switch (this.currentPlayState) {
+        case Playing:
+            if (mediaPlayer.isMediaPaused() && mediaPlayer.isCoveringCurrentRaceTime()) {
+                mediaPlayer.playMedia();
+            }
+            break;
+        case Paused:
+            if (!mediaPlayer.isMediaPaused()) {
+                mediaPlayer.pauseMedia();
+            }
+        default:
+            break;
+        }
+    }
+
+    @Override
+    public void onClose(CloseEvent<Window> arg0) {
+        stopAll();
+    }
+
+    @Override
+    public void onWindowClosing(ClosingEvent arg0) {
+        stopAll();
+    }
+
+    @Override
+    public void stopAll() {
+        if (activeAudioPlayer != null) {
+            if (!activeVideoContainers.containsKey(activeAudioPlayer.getMediaTrack())) { // only if audio player isn't
+                                                                                         // one of the video players
+                                                                                         // anyway.
+                activeAudioPlayer.shutDown();
+            }
+            activeAudioPlayer = null;
+        }
+        for (VideoContainer videoContainer : new ArrayList<VideoContainer>(activeVideoContainers.values())) { //using a copy to prevent a ConcurrentModificationException
+            videoContainer.shutDown();
+        }
+        activeVideoContainers.clear();
+        notifyStateChange();
+    }
+
+    @Override
+    public void addMediaTrack() {
+        TimePoint raceStartTime = getRaceStartTime();
+        TimePoint defaultStartTime = raceStartTime;
+        NewMediaDialog dialog = new NewMediaDialog(defaultStartTime, MediaPlayerManagerComponent.this.stringMessages,
+                this.getCurrentRace(), new DialogCallback<MediaTrack>() {
+
+                    @Override
+                    public void cancel() {
+                        // no op
+                    }
+
+                    @Override
+                    public void ok(final MediaTrack mediaTrack) {
+                        MediaPlayerManagerComponent.this.getMediaService().addMediaTrack(mediaTrack,
+                                new AsyncCallback<String>() {
+
+                                    @Override
+                                    public void onFailure(Throwable t) {
+                                        errorReporter.reportError(t.toString());
+                                    }
+
+                                    @Override
+                                    public void onSuccess(String dbId) {
+                                        mediaTrack.dbId = dbId;
+                                        assignedMediaTracks.add(mediaTrack);
+                                        playFloatingVideo(mediaTrack);
+                                    }
+                                });
+
+                    }
+                });
+        dialog.show();
+    }
+
+    @Override
+    public boolean deleteMediaTrack(final MediaTrack mediaTrack) {
+        if (Window.confirm(stringMessages.reallyRemoveMediaTrack(mediaTrack.title))) {
+            getMediaService().deleteMediaTrack(mediaTrack, new AsyncCallback<Void>() {
+
+                @Override
+                public void onFailure(Throwable t) {
+                    errorReporter.reportError(t.toString());
+                }
+
+                @Override
+                public void onSuccess(Void _void) {
+                    MediaPlayerManagerComponent.this.closeFloatingVideo(mediaTrack);
+                    assignedMediaTracks.remove(mediaTrack);
+                }
+            });
+            return true;
+        } else {
+            return false;
+        }
+    }
+
+    @Override
+    public boolean allowsEditing() {
+        return this.user != null;
+    }
+
+    @Override
+    public Boolean isPlaying() {
+        return (activeAudioPlayer != null) || (!activeVideoContainers.isEmpty());
+    }
+
+    @Override
+    public void setPlayerChangeListener(PlayerChangeListener playerChangeListener) {
+        this.playerChangeListener = playerChangeListener;
+
+    }
+
+    @Override
+    public MediaTrack getPlayingAudioTrack() {
+        return activeAudioPlayer != null ? activeAudioPlayer.getMediaTrack() : null;
+    }
+
+    @Override
+    public MediaTrack getDockedVideoTrack() {
+        return dockedVideoPlayer != null ? dockedVideoPlayer.getMediaTrack() : null;
+    }
+
+    @Override
+    public Set<MediaTrack> getPlayingVideoTracks() {
+        return activeVideoContainers.keySet();
+    }
+
+    @Override
+    public Collection<MediaTrack> getAssignedMediaTracks() {
+        return Collections.unmodifiableCollection(assignedMediaTracks);
+    }
+    
+    @Override
+    public Collection<MediaTrack> getOverlappingMediaTracks() {
+        removeMediaTracksWhichAreInAssignedMediaTracks();
+        return Collections.unmodifiableCollection(overlappingMediaTracks);
+    }
+
+    private void removeMediaTracksWhichAreInAssignedMediaTracks() {
+        Collection<MediaTrack> temp = new HashSet<MediaTrack>(overlappingMediaTracks);
+        for (MediaTrack mediaTrack : temp) {
+            if(assignedMediaTracks.contains(mediaTrack)){
+                overlappingMediaTracks.remove(mediaTrack);
+            }
+        }
+    }
+
+    @Override
+    public List<MediaTrack> getVideoTracks() {
+        List<MediaTrack> result = new ArrayList<MediaTrack>();
+        for (MediaTrack mediaTrack : assignedMediaTracks) {
+            if (mediaTrack.mimeType.mediaType == MediaType.video) {
+                result.add(mediaTrack);
+            }
+        }
+        return result;
+    }
+
+    @Override
+    public String getLocalizedShortName() {
+        return stringMessages.videoComponentShortName();
+    }
+
+    @Override
+    public boolean hasSettings() {
+        return false;
+    }
+
+    @Override
+    public SettingsDialogComponent<Void> getSettingsDialogComponent() {
+        throw new UnsupportedOperationException();
+    }
+
+    @Override
+    public void updateSettings(Void newSettings) {
+        throw new UnsupportedOperationException();
+    }
+
+    @Override
+    public Widget getEntryWidget() {
+        return rootPanel;
+    }
+
+    @Override
+    public boolean isVisible() {
+        return rootPanel.isVisible();
+    }
+
+    @Override
+    public void setVisible(boolean visibility) {
+        rootPanel.setVisible(visibility);
+    }
+
+    @Override
+    public String getDependentCssClassName() {
+        return "media";
+    }
+
+    @Override
+    public List<MediaTrack> getAudioTracks() {
+        List<MediaTrack> result = new ArrayList<MediaTrack>();
+        for (MediaTrack mediaTrack : assignedMediaTracks) {
+            if (mediaTrack.mimeType.mediaType == MediaType.audio) {
+                result.add(mediaTrack);
+            }
+        }
+        return result;
+    }
+
+    @Override
+    public UserAgentDetails getUserAgent() {
+        return userAgent;
+    }
+
+    @Override
+    public RegattaAndRaceIdentifier getCurrentRace() {
+        return raceIdentifier;
+    }
+
+    @Override
+    public MediaServiceAsync getMediaService() {
+        return mediaService;
+    }
+
+    @Override
+    public ErrorReporter getErrorReporter() {
+        return errorReporter;
+    }
+
+}

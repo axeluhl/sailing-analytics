@@ -30,7 +30,7 @@
         </parameters.proxy>
         <!-- Change the configuration file to the one you like to use for the tests. -->
         <parameters.integration-tests>
-          -Dselenium.test.environment.configuration=ci-test-environment.xml -Dmongo.dbName=winddbTest
+          -Dselenium.test.environment.configuration=ci-test-environment.xml
         </parameters.integration-tests>
       </properties>
     </profile>

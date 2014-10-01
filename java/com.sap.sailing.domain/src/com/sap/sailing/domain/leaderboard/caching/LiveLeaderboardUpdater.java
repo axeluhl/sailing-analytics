@@ -188,7 +188,8 @@ public class LiveLeaderboardUpdater implements Runnable {
                 }
             }
         }
-        logger.info(""+LiveLeaderboardUpdater.class.getSimpleName()+" cache hits/misses: "+cacheHitCount+"/"+cacheMissCount);
+        logger.info(""+LiveLeaderboardUpdater.class.getSimpleName()+" for "+getLeaderboard().getName()+
+                " cache hits/misses: "+cacheHitCount+"/"+cacheMissCount);
         return result;
     }
 
@@ -217,7 +218,7 @@ public class LiveLeaderboardUpdater implements Runnable {
      * <code>result</code> has the details.
      * 
      * @param addOverallDetails tells whether overall details are requested for the resulting leaderboard; see also
-     * {@link Leaderboard#computeDTO(TimePoint, Collection, boolean, boolean, TrackedRegattaRegistry, DomainFactory)}.
+     * {@link Leaderboard#computeDTO(TimePoint, Collection, boolean, boolean, TrackedRegattaRegistry, DomainFactory, boolean)}.
      */
     private synchronized void updateRequestTimes(Collection<String> namesOfRaceColumnsForWhichToLoadLegDetails, boolean addOverallDetails) {
         lastRequest = getLeaderboard().getNowMinusDelay();
@@ -275,7 +276,7 @@ public class LiveLeaderboardUpdater implements Runnable {
                     final boolean addOverallDetails = getOverallDetails(timePoint);
                     LeaderboardDTO newCacheValue = leaderboard.computeDTO(timePoint,
                             namesOfRaceColumnsForWhichToLoadLegDetails, addOverallDetails,
-                            /* waitForLatestAnalyses */false, trackedRegattaRegistry, baseDomainFactory);
+                            /* waitForLatestAnalyses */false, trackedRegattaRegistry, baseDomainFactory, /* fillNetPointsUncorrected */ false);
                     updateCacheContents(namesOfRaceColumnsForWhichToLoadLegDetails, addOverallDetails, newCacheValue);
                 } catch (NoWindException e) {
                     logger.info("Unable to update cached leaderboard results for leaderboard " + leaderboard.getName() + ": "

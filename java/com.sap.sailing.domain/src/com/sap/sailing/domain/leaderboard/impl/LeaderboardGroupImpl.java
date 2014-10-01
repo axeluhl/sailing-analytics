@@ -1,5 +1,7 @@
 package com.sap.sailing.domain.leaderboard.impl;
 
+import java.io.IOException;
+import java.io.ObjectOutputStream;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.HashSet;
@@ -29,15 +31,21 @@ public class LeaderboardGroupImpl extends LeaderboardGroupBaseImpl implements Le
     /**
      * Creates a new leaderboard group with a new UUID as its ID.
      */
-    public LeaderboardGroupImpl(String name, String description, boolean displayGroupsInReverseOrder, List<? extends Leaderboard> leaderboards) {
-        this(UUID.randomUUID(), name, description, displayGroupsInReverseOrder, leaderboards);
+    public LeaderboardGroupImpl(String name, String description, String displayName,
+            boolean displayGroupsInReverseOrder, List<? extends Leaderboard> leaderboards) {
+        this(UUID.randomUUID(), name, description, displayName, displayGroupsInReverseOrder, leaderboards);
+    }
+    
+    private synchronized void writeObject(ObjectOutputStream oos) throws IOException {
+        oos.defaultWriteObject();
     }
 
     /**
      * Use this constructor when loading or deserializing a leaderboard group and the ID is known and is provided to the constructor.
      */
-    public LeaderboardGroupImpl(UUID id, String name, String description, boolean displayGroupsInReverseOrder, List<? extends Leaderboard> leaderboards) {
-        super(id, name, description);
+    public LeaderboardGroupImpl(UUID id, String name, String description, String displayName,
+            boolean displayGroupsInReverseOrder, List<? extends Leaderboard> leaderboards) {
+        super(id, name, description, displayName);
         this.displayGroupsInReverseOrder = displayGroupsInReverseOrder;
         this.leaderboards = new ArrayList<Leaderboard>(leaderboards);
         this.listeners = new HashSet<LeaderboardGroupListener>();

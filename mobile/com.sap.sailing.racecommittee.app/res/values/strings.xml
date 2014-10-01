@@ -30,6 +30,9 @@
     <string name="choose_xray_flag_up">Display Individual Recall</string>
     <string name="choose_xray_flag_down">Remove Individual Recall</string>
     <string name="choose_first_substitute_flag">General Recall</string>
+    <string name="confirm_general_recall">Execute General Recall?</string>
+    <string name="confirm">Confirm</string>
+    <string name="abort">Cancel</string>
     <string name="choose_blue_flag">Begin finish phase</string>
     <string name="flag_ap">AP Flag</string>
     <string name="flag_november">November</string>
@@ -247,9 +250,14 @@
 	<string name="preference_there_are_no_regattas">There are no regattas loaded.</string>
 	<string name="configure_regatta">Configure regatta %1$s</string>
 
+	<string name="race_start_in_5_minutes">5 Minutes</string>
 	<string name="race_start_in_4_minutes">4 Minutes</string>
 	<string name="race_start_in_2_minutes">2 Minutes</string>
+	<string name="race_start_in_1_minute">1 Minute</string>
 	<string name="race_reset_course">Reset course</string>
 	
 	<string name="no_course_active">No course active</string>
+	<string name="toggle_group_race_mode">Group Race?</string>
+	<string name="toggle_group_race_mode_off">No Group Racing</string>
+	<string name="toggle_group_race_mode_on">Group Racing</string>
 </resources>

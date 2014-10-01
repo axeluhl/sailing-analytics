@@ -1,5 +1,7 @@
 package com.sap.sailing.server.replication.test;
 
+import static org.junit.Assert.assertFalse;
+
 import java.io.BufferedReader;
 import java.io.IOException;
 import java.io.InputStreamReader;
@@ -23,6 +25,7 @@ import org.junit.Before;
 import org.junit.Rule;
 import org.junit.rules.Timeout;
 
+import com.rabbitmq.client.Channel;
 import com.rabbitmq.client.QueueingConsumer;
 import com.sap.sailing.domain.base.DomainFactory;
 import com.sap.sailing.domain.base.impl.DomainFactoryImpl;
@@ -37,6 +40,7 @@ import com.sap.sailing.server.impl.RacingEventServiceImpl;
 import com.sap.sailing.server.replication.ReplicationMasterDescriptor;
 import com.sap.sailing.server.replication.ReplicationService;
 import com.sap.sailing.server.replication.impl.Activator;
+import com.sap.sailing.server.replication.impl.RabbitOutputStream;
 import com.sap.sailing.server.replication.impl.ReplicaDescriptor;
 import com.sap.sailing.server.replication.impl.ReplicationInstancesManager;
 import com.sap.sailing.server.replication.impl.ReplicationMasterDescriptorImpl;
@@ -55,6 +59,7 @@ public abstract class AbstractServerReplicationTest {
     private ReplicationMasterDescriptor  masterDescriptor;
     
     @Rule public Timeout AbstractTracTracLiveTestTimeout = new Timeout(5 * 60 * 1000); // timeout after 5 minutes
+    private Thread initialLoadTestServerThread;
 
     /**
      * Drops the test DB. Sets up master and replica, starts the JMS message broker and registers the replica with the master.
@@ -86,8 +91,8 @@ public abstract class AbstractServerReplicationTest {
             boolean dropDB, RacingEventServiceImpl master, RacingEventServiceImpl replica) throws IOException, InterruptedException {
         String exchangeName = "test-sapsailinganalytics-exchange";
         String exchangeHost = "localhost";
-        if (System.getenv(Activator.REPLICATION_HOST) != null) {
-            exchangeHost = System.getenv(Activator.REPLICATION_HOST);
+        if (System.getenv(Activator.ENV_VAR_NAME_REPLICATION_HOST) != null) {
+            exchangeHost = System.getenv(Activator.ENV_VAR_NAME_REPLICATION_HOST);
         }
         final UUID serverUuid = UUID.randomUUID();
         final MongoDBService mongoDBService = MongoDBService.INSTANCE;
@@ -115,11 +120,11 @@ public abstract class AbstractServerReplicationTest {
         masterReplicator.registerReplica(replicaDescriptor);
         // connect to exchange host and local server running as master
         // master server and exchange host can be two different hosts
-        masterDescriptor = new ReplicationMasterDescriptorImpl(exchangeHost, "localhost", exchangeName, SERVLET_PORT, 0, UUID.randomUUID().toString());
+        masterDescriptor = new ReplicationMasterDescriptorImpl(exchangeHost, exchangeName, 0, UUID.randomUUID().toString(), "localhost", SERVLET_PORT);
         ReplicationServiceTestImpl replicaReplicator = new ReplicationServiceTestImpl(exchangeName, exchangeHost, resolveAgainst, rim,
                 replicaDescriptor, this.replica, this.master, masterReplicator, masterDescriptor);
         Util.Pair<ReplicationServiceTestImpl, ReplicationMasterDescriptor> result = new Util.Pair<>(replicaReplicator, masterDescriptor);
-        replicaReplicator.startInitialLoadTransmissionServlet();
+        initialLoadTestServerThread = replicaReplicator.startInitialLoadTransmissionServlet();
         this.replicaReplicator = replicaReplicator; 
         return result;
     }
@@ -136,11 +141,19 @@ public abstract class AbstractServerReplicationTest {
         final MongoDBService mongoDBService = MongoDBService.INSTANCE;
         final MongoObjectFactory mongoObjectFactory = PersistenceFactory.INSTANCE.getMongoObjectFactory(mongoDBService);
         mongoObjectFactory.getDatabase().requestDone();
-        masterReplicator.unregisterReplica(replicaDescriptor);
-        masterDescriptor.stopConnection();
+        if (masterReplicator != null) {
+            masterReplicator.unregisterReplica(replicaDescriptor);
+        }
+        if (masterDescriptor != null) {
+            masterDescriptor.stopConnection();
+        }
         try {
-            URLConnection urlConnection = new URL("http://localhost:"+SERVLET_PORT+"/STOP").openConnection(); // stop the initial load test server thread
-            urlConnection.getInputStream().close();
+            if (initialLoadTestServerThread != null) {
+                URLConnection urlConnection = new URL("http://localhost:"+SERVLET_PORT+"/STOP").openConnection(); // stop the initial load test server thread
+                urlConnection.getInputStream().close();
+                initialLoadTestServerThread.join(10000 /* wait 10s */);
+                assertFalse("Expected initial load test server thread to die", initialLoadTestServerThread.isAlive());
+            }
         } catch (ConnectException ex) {
             /* do not make tests fail because of a server that has been shut down
              * or when an exception occured (see setUp()) - let the
@@ -154,6 +167,7 @@ public abstract class AbstractServerReplicationTest {
     }
     
     static class ReplicationServiceTestImpl extends ReplicationServiceImpl {
+        protected static final int INITIAL_LOAD_PACKAGE_SIZE = 1024*1024;
         private final DomainFactory resolveAgainst;
         private final RacingEventService master;
         private final ReplicaDescriptor replicaDescriptor;
@@ -173,9 +187,9 @@ public abstract class AbstractServerReplicationTest {
             this.masterDescriptor = masterDescriptor;
         }
         
-        private void startInitialLoadTransmissionServlet() throws InterruptedException {
+        private Thread startInitialLoadTransmissionServlet() throws InterruptedException {
             final boolean[] listening = new boolean[] { false };
-            new Thread("Replication initial load test server") {
+            Thread initialLoadTestServerThread = new Thread("Replication initial load test server") {
                 public void run() {
                     ServerSocket ss;
                     try {
@@ -203,10 +217,15 @@ public abstract class AbstractServerReplicationTest {
                                 registerReplicaUuidForMaster(uuid, masterDescriptor);
                                 pw.print(uuid.getBytes());
                             } else if (request.contains("INITIAL_LOAD")) {
-                                final GZIPOutputStream gzipOutputStream = new GZIPOutputStream(s.getOutputStream());
+                                Channel channel = masterReplicationService.createMasterChannel();
+                                RabbitOutputStream ros = new RabbitOutputStream(INITIAL_LOAD_PACKAGE_SIZE, channel,
+                                        /* queueName */ "initial-load-for-TestClient-"+UUID.randomUUID(), /* syncAfterTimeout */ false);
+                                pw.println(ros.getQueueName());
+                                final GZIPOutputStream gzipOutputStream = new GZIPOutputStream(ros);
                                 final ObjectOutputStream oos = new ObjectOutputStream(gzipOutputStream);
                                 master.serializeForInitialReplication(oos);
                                 gzipOutputStream.finish();
+                                ros.close();
                             } else if (request.contains("STOP")) {
                                 stop = true;
                             }
@@ -218,12 +237,14 @@ public abstract class AbstractServerReplicationTest {
                         throw new RuntimeException(e);
                     }
                 }
-            }.start();
+            };
+            initialLoadTestServerThread.start();
             synchronized (listening) {
                 while (!listening[0]) {
                     listening.wait();
                 }
             }
+            return initialLoadTestServerThread;
         }
 
         /**

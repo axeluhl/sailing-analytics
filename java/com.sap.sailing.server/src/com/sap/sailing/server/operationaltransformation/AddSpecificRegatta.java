@@ -26,21 +26,23 @@ public class AddSpecificRegatta extends AbstractAddRegattaOperation {
     private final boolean persistent;
     private final ScoringScheme scoringScheme;
     private final Serializable defaultCourseAreaId;
+    private final boolean useStartTimeInference;
     
     public AddSpecificRegatta(String regattaName, String boatClassName, Serializable id,
             RegattaCreationParametersDTO seriesNamesWithFleetNamesAndFleetOrderingAndMedalAndDiscardingThresholds,
-            boolean persistent, ScoringScheme scoringScheme, Serializable defaultCourseAreaId) {
+            boolean persistent, ScoringScheme scoringScheme, Serializable defaultCourseAreaId, boolean useStartTimeInference) {
         super(regattaName, boatClassName, id);
         this.seriesNamesWithFleetNamesAndFleetOrderingAndMedalAndStartsWithZeroScoreAndDiscardingThresholds = seriesNamesWithFleetNamesAndFleetOrderingAndMedalAndDiscardingThresholds;
         this.persistent = persistent;
         this.scoringScheme = scoringScheme;
         this.defaultCourseAreaId = defaultCourseAreaId;
+        this.useStartTimeInference = useStartTimeInference;
     }
 
     @Override
     public Regatta internalApplyTo(RacingEventService toState) throws Exception {
-        Regatta regatta = toState.createRegatta(getBaseRegattaName(), getBoatClassName(), getId(), createSeries(toState),
-                persistent, scoringScheme, defaultCourseAreaId);
+        Regatta regatta = toState.createRegatta(getRegattaName(), getBoatClassName(), getId(), createSeries(toState),
+                persistent, scoringScheme, defaultCourseAreaId, useStartTimeInference);
         return regatta;
     }
 

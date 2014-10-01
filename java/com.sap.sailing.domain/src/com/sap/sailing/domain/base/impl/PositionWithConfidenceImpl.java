@@ -2,6 +2,7 @@ package com.sap.sailing.domain.base.impl;
 
 import com.sap.sailing.domain.base.PositionWithConfidence;
 import com.sap.sailing.domain.common.Position;
+import com.sap.sailing.domain.common.confidence.impl.HasConfidenceImpl;
 import com.sap.sailing.domain.common.scalablevalue.IsScalable;
 import com.sap.sailing.domain.common.scalablevalue.impl.ScalablePosition;
 

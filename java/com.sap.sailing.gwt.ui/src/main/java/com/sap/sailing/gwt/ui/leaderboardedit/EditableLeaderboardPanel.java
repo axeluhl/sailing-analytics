@@ -17,6 +17,8 @@ import com.google.gwt.cell.client.TextCell;
 import com.google.gwt.core.client.GWT;
 import com.google.gwt.event.dom.client.ClickEvent;
 import com.google.gwt.event.dom.client.ClickHandler;
+import com.google.gwt.event.logical.shared.ValueChangeEvent;
+import com.google.gwt.event.logical.shared.ValueChangeHandler;
 import com.google.gwt.resources.client.ImageResource;
 import com.google.gwt.safehtml.shared.SafeHtml;
 import com.google.gwt.safehtml.shared.SafeHtmlBuilder;
@@ -34,6 +36,7 @@ import com.google.gwt.user.client.rpc.AsyncCallback;
 import com.google.gwt.user.client.ui.AbstractImagePrototype;
 import com.google.gwt.user.client.ui.Anchor;
 import com.google.gwt.user.client.ui.Button;
+import com.google.gwt.user.client.ui.CheckBox;
 import com.google.gwt.user.client.ui.Grid;
 import com.google.gwt.user.client.ui.ImageResourceRenderer;
 import com.google.gwt.user.client.ui.Label;
@@ -62,7 +65,7 @@ import com.sap.sailing.gwt.ui.leaderboard.CompetitorFetcher;
 import com.sap.sailing.gwt.ui.leaderboard.LeaderboardPanel;
 import com.sap.sailing.gwt.ui.leaderboard.LeaderboardSettings;
 import com.sap.sailing.gwt.ui.leaderboard.LeaderboardSettingsFactory;
-import com.sap.sailing.gwt.ui.leaderboard.SortableColumn;
+import com.sap.sailing.gwt.ui.leaderboard.LeaderboardSortableColumnWithMinMax;
 import com.sap.sse.common.Util;
 import com.sap.sse.gwt.client.async.AsyncActionsExecutor;
 import com.sap.sse.gwt.client.dialog.DataEntryDialog.DialogCallback;
@@ -83,6 +86,8 @@ public class EditableLeaderboardPanel extends LeaderboardPanel {
 
     final private CellTable<CompetitorDTO> suppressedCompetitorsTable;
     final private ListDataProvider<CompetitorDTO> suppressedCompetitorsShown;
+
+    private CheckBox showUncorrectedNetPointsCheckbox;
     
     private class SettingsClickHandler implements ClickHandler {
         private final StringMessages stringMessages;
@@ -99,28 +104,7 @@ public class EditableLeaderboardPanel extends LeaderboardPanel {
 
     private class EditableCarryColumn extends CarryColumn {
         public EditableCarryColumn() {
-            super(new EditTextCell());
-            setFieldUpdater(new FieldUpdater<LeaderboardRowDTO, String>() {
-                @Override
-                public void update(final int rowIndex, final LeaderboardRowDTO row, final String value) {
-                    getSailingService().updateLeaderboardCarryValue(getLeaderboardName(), row.competitor.getIdAsString(),
-                            value == null || value.length() == 0 ? null : Double.valueOf(value.trim()),
-                                    new AsyncCallback<Void>() {
-                        @Override
-                        public void onFailure(Throwable t) {
-                            EditableLeaderboardPanel.this.getErrorReporter().reportError("Error trying to update carry value for competitor "+
-                                    row.competitor.getName()+" in leaderboard "+getLeaderboardName()+": "+t.getMessage()+
-                                    "\nYou may have to refresh your view.");
-                        }
-
-                        @Override
-                        public void onSuccess(Void v) {
-                            row.carriedPoints = value==null||value.length()==0 ? null : Double.valueOf(value.trim());
-                            EditableLeaderboardPanel.this.getData().getList().set(rowIndex, row);
-                        }
-                    });
-                }
-            });
+            super(new CompositeCell<LeaderboardRowDTO>(getCellListForEditableCarryColumn()));
         }
     }
 
@@ -141,7 +125,7 @@ public class EditableLeaderboardPanel extends LeaderboardPanel {
      * @author Axel Uhl (d043530)
      * 
      */
-    private class SuppressedSailIDColumn extends SortableColumn<CompetitorDTO, String> {
+    private class SuppressedSailIDColumn extends LeaderboardSortableColumnWithMinMax<CompetitorDTO, String> {
         protected SuppressedSailIDColumn() {
             super(new TextCell(), SortingOrder.ASCENDING, EditableLeaderboardPanel.this);
         }
@@ -184,7 +168,7 @@ public class EditableLeaderboardPanel extends LeaderboardPanel {
         }
     }
 
-    protected class SuppressedCompetitorColumn extends SortableColumn<CompetitorDTO, CompetitorDTO> {
+    protected class SuppressedCompetitorColumn extends LeaderboardSortableColumnWithMinMax<CompetitorDTO, CompetitorDTO> {
         private final CompetitorColumnBase<CompetitorDTO> base;
 
         protected SuppressedCompetitorColumn(CompetitorColumnBase<CompetitorDTO> base) {
@@ -600,7 +584,7 @@ public class EditableLeaderboardPanel extends LeaderboardPanel {
             String leaderboardName, String leaderboardGroupName, final ErrorReporter errorReporter,
             final StringMessages stringMessages, UserAgentDetails userAgent) {
         super(sailingService, asyncActionsExecutor, LeaderboardSettingsFactory.getInstance().createNewDefaultSettings(
-                /* racesToShow */ null, /* namesOfRacesToShow */ null, null, /* autoExpandFirstRace */ false),
+                /* racesToShow */ null, /* namesOfRacesToShow */ null, null, /* autoExpandFirstRace */ false, /* showRegattaRank */ true),
                 new CompetitorSelectionModel(/* hasMultiSelection */true),
                 leaderboardName, errorReporter, stringMessages, userAgent, /* showRaceDetails */ true);
         suppressedCompetitorsShown = new ListDataProvider<CompetitorDTO>(new ArrayList<CompetitorDTO>());
@@ -630,13 +614,13 @@ public class EditableLeaderboardPanel extends LeaderboardPanel {
         
         
 
-        Grid scoreCorrectionInfoGrid = new Grid(3,3);
+        Grid scoreCorrectionInfoGrid = new Grid(3,4);
         scoreCorrectionInfoGrid.setCellPadding(3);
-        scoreCorrectionInfoGrid.setWidget(0,  0, new Label("Last score correction time:"));
+        scoreCorrectionInfoGrid.setWidget(0,  0, new Label(stringMessages.lastScoreCorrectionsTime() + ":"));
         lastScoreCorrectionTimeBox = new DateBox();
         scoreCorrectionInfoGrid.setWidget(0,  1, lastScoreCorrectionTimeBox);
 
-        scoreCorrectionInfoGrid.setWidget(1,  0, new Label("Last score correction comment:"));
+        scoreCorrectionInfoGrid.setWidget(1,  0, new Label(stringMessages.lastScoreCorrectionsComment() + ":"));
         lastScoreCorrectionCommentBox = new TextBox();
         scoreCorrectionInfoGrid.setWidget(1,  1, lastScoreCorrectionCommentBox);
 
@@ -664,9 +648,17 @@ public class EditableLeaderboardPanel extends LeaderboardPanel {
             }
         });
 
-        final Button setScoreCorrectionDefaultTimeBtn = new Button("Set time to 'now'");
+        final Button setScoreCorrectionDefaultTimeBtn = new Button(stringMessages.setTimeToNow()); // FIXME i18n
         setScoreCorrectionDefaultTimeBtn.addStyleName("inlineButton");
-        scoreCorrectionInfoGrid.setWidget(0,  2, setScoreCorrectionDefaultTimeBtn);
+        scoreCorrectionInfoGrid.setWidget(0, 2, setScoreCorrectionDefaultTimeBtn);
+        showUncorrectedNetPointsCheckbox = new CheckBox(stringMessages.showUncorrectedNetPoints());
+        showUncorrectedNetPointsCheckbox.addValueChangeHandler(new ValueChangeHandler<Boolean>() {
+            @Override
+            public void onValueChange(ValueChangeEvent<Boolean> event) {
+                timeChanged(getTimer().getTime(), getTimer().getTime());
+            }
+        });
+        scoreCorrectionInfoGrid.setWidget(0, 3, showUncorrectedNetPointsCheckbox);
 
         setScoreCorrectionDefaultTimeBtn.addClickHandler(new ClickHandler() {
             @Override
@@ -748,9 +740,9 @@ public class EditableLeaderboardPanel extends LeaderboardPanel {
      * the column must always be shown.
      */
     @Override
-    protected boolean updateCarryColumn(LeaderboardDTO leaderboard) {
-        ensureCarryColumn();
-        return true;
+    protected int updateCarryColumn(LeaderboardDTO leaderboard, int zeroBasedIndexOfCarryColumn) {
+        ensureCarryColumn(zeroBasedIndexOfCarryColumn);
+        return zeroBasedIndexOfCarryColumn+1;
     }
 
     @Override
@@ -807,49 +799,49 @@ public class EditableLeaderboardPanel extends LeaderboardPanel {
                 return getStringMessages().suppress();
             }
         });
-        result.add(new HasCell<LeaderboardRowDTO, String>() {
-            final class OptionalBoldRenderer implements SafeHtmlRenderer<String> {
-                private LeaderboardRowDTO currentRow;
+        final class OptionalBoldRenderer implements SafeHtmlRenderer<String> {
+            private LeaderboardRowDTO currentRow;
 
-                @Override
-                public SafeHtml render(String object) {
-                    SafeHtmlBuilder builder = new SafeHtmlBuilder();
-                    render(object, builder);
-                    return builder.toSafeHtml();
+            @Override
+            public SafeHtml render(String object) {
+                SafeHtmlBuilder builder = new SafeHtmlBuilder();
+                render(object, builder);
+                return builder.toSafeHtml();
+            }
+
+            private boolean isDisplayNameSet() {
+                return currentRow != null && getLeaderboard().isDisplayNameSet(currentRow.competitor);
+            }
+
+            @Override
+            public void render(String value, SafeHtmlBuilder builder) {
+                if (isDisplayNameSet()) {
+                    builder.appendHtmlConstant("<b>");
                 }
-
-                private boolean isDisplayNameSet() {
-                    return currentRow != null && getLeaderboard().isDisplayNameSet(currentRow.competitor);
-                }
-
-                @Override
-                public void render(String value, SafeHtmlBuilder builder) {
-                    if (isDisplayNameSet()) {
-                        builder.appendHtmlConstant("<b>");
-                    }
-                    builder.appendEscaped(value);
-                    if (isDisplayNameSet()) {
-                        builder.appendHtmlConstant("</b>");
-                    }
-                }
-
-                public void setCurrentRow(LeaderboardRowDTO currentRow) {
-                    this.currentRow = currentRow;
+                builder.appendEscaped(value);
+                if (isDisplayNameSet()) {
+                    builder.appendHtmlConstant("</b>");
                 }
             }
 
-            private final OptionalBoldRenderer renderer = new OptionalBoldRenderer();
+            public void setCurrentRow(LeaderboardRowDTO currentRow) {
+                this.currentRow = currentRow;
+            }
+        }
 
-            private final EditTextCell cell = new EditTextCell(renderer) {
-                @Override
-                public void render(Context context, String value, SafeHtmlBuilder sb) {
-                    renderer.setCurrentRow((LeaderboardRowDTO) context.getKey());
-                    super.render(context, value, sb);
-                }
-            };
+        final OptionalBoldRenderer renderer = new OptionalBoldRenderer();
+
+        final EditTextCell cellForCompetitorName = new EditTextCell(renderer) {
+            @Override
+            public void render(Context context, String value, SafeHtmlBuilder sb) {
+                renderer.setCurrentRow((LeaderboardRowDTO) context.getKey());
+                super.render(context, value, sb);
+            }
+        };
+        result.add(new HasCell<LeaderboardRowDTO, String>() {
             @Override
             public EditTextCell getCell() {
-                return cell;
+                return cellForCompetitorName;
             }
 
             @Override
@@ -862,7 +854,133 @@ public class EditableLeaderboardPanel extends LeaderboardPanel {
                 return getLeaderboard().getDisplayName(row.competitor);
             }
         });
+        result.add(new HasCell<LeaderboardRowDTO, String>() {
+            private final ButtonCell cell = new ButtonCell();
+            @Override
+            public Cell<String> getCell() {
+                return cell;
+            }
+
+            @Override
+            public FieldUpdater<LeaderboardRowDTO, String> getFieldUpdater() {
+                return new FieldUpdater<LeaderboardRowDTO, String>() {
+                    @Override
+                    public void update(int index, final LeaderboardRowDTO row, String valueToUpdate) {
+                        new EditCompetitorNameDialog(getStringMessages(), row.competitor.getName(), new DialogCallback<String>() {
+                            @Override
+                            public void ok(final String value) {
+                                getSailingService().updateCompetitorDisplayNameInLeaderboard(getLeaderboardName(), row.competitor.getIdAsString(),
+                                        value == null || value.length() == 0 ? null : value.trim(),
+                                                new AsyncCallback<Void>() {
+                                    @Override
+                                    public void onFailure(Throwable t) {
+                                        EditableLeaderboardPanel.this.getErrorReporter().reportError("Error trying to update display name for competitor "+
+                                                row.competitor.getName()+" in leaderboard "+getLeaderboardName()+": "+t.getMessage()+
+                                                "\nYou may have to refresh your view.");
+                                    }
+
+                                    @Override
+                                    public void onSuccess(Void v) {
+                                        if (getLeaderboard().competitorDisplayNames == null) {
+                                            getLeaderboard().competitorDisplayNames = new HashMap<CompetitorDTO, String>();
+                                        }
+                                        getLeaderboard().competitorDisplayNames.put(row.competitor, value == null || value.trim().length() == 0 ? null : value.trim());
+                                        cellForCompetitorName.setViewData(row, null); // ensure that getValue() is called again
+                                        EditableLeaderboardPanel.this.getData().getList().set(
+                                                EditableLeaderboardPanel.this.getData().getList().indexOf(row), row);
+                                    }
+                                });
+                            }
+                            @Override
+                            public void cancel() {
+                            }
+                        }).show();
+                    }
+                };
+            }
+
+            @Override
+            public String getValue(LeaderboardRowDTO object) {
+                return getStringMessages().edit();
+            }
+        });
         return result;
+    }
+    
+    private List<HasCell<LeaderboardRowDTO, ?>> getCellListForEditableCarryColumn() {
+        List<HasCell<LeaderboardRowDTO, ?>> result = new ArrayList<HasCell<LeaderboardRowDTO, ?>>();
+        result.add(new HasCell<LeaderboardRowDTO, String>() {
+            private final ButtonCell cell = new ButtonCell();
+            @Override
+            public Cell<String> getCell() {
+                return cell;
+            }
+
+            @Override
+            public FieldUpdater<LeaderboardRowDTO, String> getFieldUpdater() {
+                return new FieldUpdater<LeaderboardRowDTO, String>() {
+                    @Override
+                    public void update(int index, final LeaderboardRowDTO row, String value) {
+                        new EditCarryValueDialog(getStringMessages(), row.competitor.getName(), row.carriedPoints, new DialogCallback<Double>() {
+                            @Override
+                            public void ok(final Double value) {
+                                updateCarriedPoints(EditableLeaderboardPanel.this.getData().getList().indexOf(row), row, value);
+                            }
+                            @Override
+                            public void cancel() {
+                            }
+                        }).show();
+                    }
+                };
+            }
+
+            @Override
+            public String getValue(LeaderboardRowDTO object) {
+                return getStringMessages().edit();
+            }
+        });
+        final EditTextCell carryTextCell = new EditTextCell();
+        final FieldUpdater<LeaderboardRowDTO, String> fieldUpdater = new FieldUpdater<LeaderboardRowDTO, String>() {
+            @Override
+            public void update(final int rowIndex, final LeaderboardRowDTO row, final String value) {
+                updateCarriedPoints(rowIndex, row, value==null||value.length()==0 ? null : Double.valueOf(value.trim()));
+            }
+        };
+        result.add(new HasCell<LeaderboardRowDTO, String>() {
+            @Override
+            public Cell<String> getCell() {
+                return carryTextCell;
+            }
+
+            @Override
+            public FieldUpdater<LeaderboardRowDTO, String> getFieldUpdater() {
+                return fieldUpdater;
+            }
+
+            @Override
+            public String getValue(LeaderboardRowDTO object) {
+                return object.carriedPoints == null ? "" : scoreFormat.format(object.carriedPoints);
+            }
+        });
+        return result;
+    }
+    
+    private void updateCarriedPoints(final int rowIndex, final LeaderboardRowDTO row, final Double value) {
+        getSailingService().updateLeaderboardCarryValue(getLeaderboardName(), row.competitor.getIdAsString(), value,
+                new AsyncCallback<Void>() {
+            @Override
+            public void onFailure(Throwable t) {
+                EditableLeaderboardPanel.this.getErrorReporter().reportError("Error trying to update carry value for competitor "+
+                        row.competitor.getName()+" in leaderboard "+getLeaderboardName()+": "+t.getMessage()+
+                        "\nYou may have to refresh your view.");
+            }
+
+            @Override
+            public void onSuccess(Void v) {
+                row.carriedPoints = value;
+                EditableLeaderboardPanel.this.getData().getList().set(rowIndex, row);
+            }
+        });
     }
 
     @Override
@@ -883,6 +1001,14 @@ public class EditableLeaderboardPanel extends LeaderboardPanel {
                 maxPointsDropDownCellProvider, netPointsEditCellProvider));
         return list;
     }
+    
+    /**
+     * Computing the uncorrected scores can be expensive for large leaderboards; disable by default but allow user to enable
+     */
+    @Override
+    protected boolean isFillNetPointsUncorrected() {
+        return showUncorrectedNetPointsCheckbox==null?false:showUncorrectedNetPointsCheckbox.getValue();
+    }
 
     @Override
     protected void updateLeaderboard(LeaderboardDTO leaderboard) {
@@ -897,5 +1023,15 @@ public class EditableLeaderboardPanel extends LeaderboardPanel {
                 suppressedCompetitorsShown.getList().add(suppressedCompetitor);
             }
         }
+    }
+
+    /**
+     * When editing, scrolling is not really an issue because usually the editable version is not used in live mode. But when
+     * clicking the "Edit" button in a previously de-selected row, we still want the score to get the selection and the focus.
+     * So turn off any focus/blur magic for this subclass.
+     */
+    @Override
+    protected void blurFocusedElementAfterSelectionChange() {
     }   
+
 }

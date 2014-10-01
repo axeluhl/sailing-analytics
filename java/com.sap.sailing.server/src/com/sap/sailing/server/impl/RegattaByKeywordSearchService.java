@@ -1,15 +1,19 @@
 package com.sap.sailing.server.impl;
 
 import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.HashSet;
 import java.util.LinkedHashSet;
 import java.util.List;
+import java.util.Map;
 import java.util.Set;
 
 import com.sap.sailing.domain.base.Competitor;
 import com.sap.sailing.domain.base.Event;
+import com.sap.sailing.domain.base.LeaderboardSearchResult;
+import com.sap.sailing.domain.base.impl.LeaderboardSearchResultImpl;
 import com.sap.sailing.domain.leaderboard.Leaderboard;
 import com.sap.sailing.domain.leaderboard.LeaderboardGroup;
-import com.sap.sailing.server.LeaderboardSearchResult;
 import com.sap.sailing.server.RacingEventService;
 import com.sap.sse.common.Util;
 import com.sap.sse.common.filter.AbstractListFilter;
@@ -29,10 +33,13 @@ import com.sap.sse.common.search.ResultImpl;
  */
 public class RegattaByKeywordSearchService {
     Result<LeaderboardSearchResult> search(final RacingEventService racingEventService, KeywordQuery query) {
-        ResultImpl<LeaderboardSearchResult> result = new ResultImpl<>(query, new RegattaSearchResultRanker(racingEventService));
+        ResultImpl<LeaderboardSearchResult> result = new ResultImpl<>(query, new LeaderboardSearchResultRanker(racingEventService));
+        final Map<Leaderboard, Event> eventForLeaderboard = new HashMap<>();
+        final Map<Leaderboard, Set<LeaderboardGroup>> leaderboardGroupsForLeaderboard = new HashMap<>();
         AbstractListFilter<Leaderboard> leaderboardFilter = new AbstractListFilter<Leaderboard>() {
             @Override
             public Iterable<String> getStrings(Leaderboard leaderboard) {
+                // TODO allow recording which part of the leaderboard was matched by the keywords by returning "annotated strings" that the matcher can understand
                 List<String> leaderboardStrings = new ArrayList<>();
                 leaderboardStrings.add(leaderboard.getName());
                 leaderboardStrings.add(leaderboard.getDisplayName());
@@ -49,16 +56,23 @@ public class RegattaByKeywordSearchService {
                 for (LeaderboardGroup leaderboardGroup : leaderboardGroupsHostingLeaderboard) {
                     leaderboardStrings.add(leaderboardGroup.getName());
                     leaderboardStrings.add(leaderboardGroup.getDescription());
+                    Set<LeaderboardGroup> leaderboardGroups = leaderboardGroupsForLeaderboard.get(leaderboard);
+                    if (leaderboardGroups == null) {
+                        leaderboardGroups = new HashSet<>();
+                        leaderboardGroupsForLeaderboard.put(leaderboard, leaderboardGroups);
+                    }
+                    leaderboardGroups.add(leaderboardGroup);
                 }
                 for (Event event : getEventsHostingLeaderboard(leaderboard, racingEventService, leaderboardGroupsHostingLeaderboard)) {
                     leaderboardStrings.add(event.getName());
                     leaderboardStrings.add(event.getVenue().getName());
+                    eventForLeaderboard.put(leaderboard, event);
                 }
                 return leaderboardStrings;
             }
         };
         for (Leaderboard matchingLeaderboard : leaderboardFilter.applyFilter(query.getKeywords(), racingEventService.getLeaderboards().values())) {
-            result.addHit(new LeaderboardSearchResultImpl(matchingLeaderboard));
+            result.addHit(new LeaderboardSearchResultImpl(matchingLeaderboard, eventForLeaderboard.get(matchingLeaderboard), leaderboardGroupsForLeaderboard.get(matchingLeaderboard)));
         }
         return result;
     }

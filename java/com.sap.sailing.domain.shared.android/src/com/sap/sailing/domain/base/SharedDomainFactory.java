@@ -45,6 +45,11 @@ public interface SharedDomainFactory extends CompetitorFactory {
      * and <code>shape</code> as its {@link Mark#getShape()}.
      */
     Mark getOrCreateMark(Serializable id, String name, MarkType type, String color, String shape, String pattern);
+    
+    /**
+     * @see #getOrCreateMark(String, String)
+     */
+    Mark getOrCreateMark(String toStringRepresentationOfID, String name, MarkType type, String color, String shape, String pattern);
 
     /**
      * @param name also uses the name as the gate's ID; if you have a real ID, use {@link #createGate(Serializable, Mark, Mark, String)} instead
@@ -99,4 +104,8 @@ public interface SharedDomainFactory extends CompetitorFactory {
     Mark getExistingMarkByIdAsString(String toStringRepresentationOfID);
     
     Mark getExistingMarkById(Serializable id);
+    
+    ControlPointWithTwoMarks getOrCreateControlPointWithTwoMarks(Serializable id, String name, Mark left, Mark right);
+    
+    ControlPointWithTwoMarks getOrCreateControlPointWithTwoMarks(String id, String name, Mark left, Mark right);
 }

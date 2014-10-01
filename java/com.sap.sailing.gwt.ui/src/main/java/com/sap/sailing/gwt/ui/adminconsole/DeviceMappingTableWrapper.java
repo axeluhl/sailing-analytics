@@ -1,11 +1,16 @@
 package com.sap.sailing.gwt.ui.adminconsole;
 
+import java.util.ArrayList;
 import java.util.Comparator;
 import java.util.List;
 
 import com.google.gwt.dom.client.Style.Unit;
+import com.google.gwt.event.logical.shared.ValueChangeEvent;
+import com.google.gwt.event.logical.shared.ValueChangeHandler;
 import com.google.gwt.user.cellview.client.ColumnSortEvent.ListHandler;
 import com.google.gwt.user.cellview.client.TextColumn;
+import com.google.gwt.user.client.ui.CheckBox;
+import com.google.gwt.user.client.ui.Widget;
 import com.google.gwt.view.client.SingleSelectionModel;
 import com.sap.sailing.domain.common.dto.CompetitorDTO;
 import com.sap.sailing.gwt.ui.client.ErrorReporter;
@@ -15,10 +20,26 @@ import com.sap.sailing.gwt.ui.common.client.DateAndTimeFormatterUtil;
 import com.sap.sailing.gwt.ui.shared.DeviceMappingDTO;
 
 public class DeviceMappingTableWrapper extends TableWrapper<DeviceMappingDTO, SingleSelectionModel<DeviceMappingDTO>> {
+    static interface FilterChangedHandler {
+        void onFilterChanged(List<DeviceMappingDTO> filteredList);
+    }
+    private List<DeviceMappingDTO> allMappings = new ArrayList<>();
+    private final CheckBox showPingMappingsCb;
+    
+    private final List<FilterChangedHandler> filterHandlers = new ArrayList<>();
 
     public DeviceMappingTableWrapper(SailingServiceAsync sailingService, final StringMessages stringMessages,
             ErrorReporter errorReporter) {
-        super(sailingService, stringMessages, errorReporter, new SingleSelectionModel<DeviceMappingDTO>());
+        super(sailingService, stringMessages, errorReporter, new SingleSelectionModel<DeviceMappingDTO>(), true);
+        
+        showPingMappingsCb = new CheckBox(stringMessages.showPingMarkMappings());
+        showPingMappingsCb.addValueChangeHandler(new ValueChangeHandler<Boolean>() {
+            @Override
+            public void onValueChange(ValueChangeEvent<Boolean> event) {
+                filterPingMappings();
+            }
+        });
+        mainPanel.insert(showPingMappingsCb, 0);
         
         table.setWidth("1000px", true);
         table.addStyleName("wrap-cols");
@@ -118,11 +139,36 @@ public class DeviceMappingTableWrapper extends TableWrapper<DeviceMappingDTO, Si
         table.addColumn(toCol, stringMessages.to());
 
         table.addColumnSortHandler(listHandler);
-        mainPanel.add(table);
+    }
+    
+    private void notifyFilterHandlers() {
+        for (FilterChangedHandler handler : filterHandlers) {
+            handler.onFilterChanged(getDataProvider().getList());
+        }
+    }
+    
+    private void filterPingMappings() {
+        boolean show = showPingMappingsCb.getValue();
+        getDataProvider().getList().clear();
+        for (DeviceMappingDTO mapping : allMappings) {
+            if (show || ! "PING".equals(mapping.deviceIdentifier.deviceType)) {
+                getDataProvider().getList().add(mapping);
+            }
+        }
+        notifyFilterHandlers();
     }
     
     public void refresh(List<DeviceMappingDTO> mappings) {
-        dataProvider.getList().clear();
-        dataProvider.getList().addAll(mappings);
+        allMappings = mappings;
+        filterPingMappings();
+    }
+    
+    @Override
+    public Widget asWidget() {
+        return  mainPanel;
+    }
+    
+    public void addFilterChangedHandler(FilterChangedHandler handler) {
+        filterHandlers.add(handler);
     }
 }

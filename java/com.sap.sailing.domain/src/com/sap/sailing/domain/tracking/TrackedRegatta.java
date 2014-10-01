@@ -29,7 +29,7 @@ import com.sap.sailing.domain.racelog.tracking.GPSFixStore;
 public interface TrackedRegatta extends Serializable {
     Regatta getRegatta();
 
-    Iterable<TrackedRace> getTrackedRaces();
+    Iterable<? extends TrackedRace> getTrackedRaces();
 
     Iterable<TrackedRace> getTrackedRaces(BoatClass boatClass);
 
@@ -72,5 +72,5 @@ public interface TrackedRegatta extends Serializable {
     int getNetPoints(Competitor competitor, TimePoint timePoint) throws NoWindException;
 
     void removeTrackedRace(RaceDefinition raceDefinition);
-
+    
 }

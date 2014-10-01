@@ -7,5 +7,5 @@
 	
 	<super-source path="jre" />
 	
-	<extend-property name="locale" values="de"/>
+<extend-property name="locale" values="de"/>
 </module>

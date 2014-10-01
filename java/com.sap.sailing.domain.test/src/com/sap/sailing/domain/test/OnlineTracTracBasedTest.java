@@ -39,7 +39,12 @@ import com.sap.sailing.domain.tractracadapter.Receiver;
 import com.sap.sailing.domain.tractracadapter.ReceiverType;
 import com.sap.sailing.domain.tractracadapter.TracTracConnectionConstants;
 import com.sap.sailing.domain.tractracadapter.impl.DomainFactoryImpl;
-import com.tractrac.clientmodule.Race;
+import com.tractrac.model.lib.api.event.CreateModelException;
+import com.tractrac.model.lib.api.event.IRace;
+import com.tractrac.subscription.lib.api.SubscriberInitializationException;
+import com.tractrac.subscription.lib.api.event.IConnectionStatusListener;
+import com.tractrac.subscription.lib.api.event.ILiveDataEvent;
+import com.tractrac.subscription.lib.api.event.IStoredDataEvent;
 
 /**
  * Connects to TracTrac data. Subclasses should implement a @Before method which calls
@@ -74,14 +79,14 @@ public abstract class OnlineTracTracBasedTest extends AbstractTracTracLiveTest {
     
     
     @Before
-    public void setUp() throws MalformedURLException, IOException, InterruptedException, URISyntaxException, ParseException {
+    public void setUp() throws MalformedURLException, IOException, InterruptedException, URISyntaxException, ParseException, SubscriberInitializationException, CreateModelException {
         domainFactory = new DomainFactoryImpl(new com.sap.sailing.domain.base.impl.DomainFactoryImpl());
         // keep superclass implementation from automatically setting up for a Weymouth event and force subclasses
         // to select a race
     }
 
     protected void setUp(String regattaName, String raceId, ReceiverType... receiverTypes) throws MalformedURLException,
-            IOException, InterruptedException, URISyntaxException {
+            IOException, InterruptedException, URISyntaxException, SubscriberInitializationException, CreateModelException {
         setUpWithoutLaunchingController(regattaName, raceId);
         finishSetUp(receiverTypes);
     }
@@ -93,7 +98,7 @@ public abstract class OnlineTracTracBasedTest extends AbstractTracTracLiveTest {
     }
 
     protected void setUp(URL paramUrl, URI liveUri, URI storedUri, ReceiverType... receiverTypes)
-            throws MalformedURLException, IOException, InterruptedException, URISyntaxException {
+            throws MalformedURLException, IOException, InterruptedException, URISyntaxException, SubscriberInitializationException, CreateModelException {
         setUpWithoutLaunchingController(paramUrl, liveUri, storedUri);
         finishSetUp(receiverTypes);
     }
@@ -102,17 +107,36 @@ public abstract class OnlineTracTracBasedTest extends AbstractTracTracLiveTest {
             throws InterruptedException {
         setStoredDataLoaded(false);
         ArrayList<Receiver> receivers = new ArrayList<Receiver>();
-        for (Receiver r : domainFactory.getUpdateReceivers(trackedRegatta, getTracTracEvent(), EmptyWindStore.INSTANCE,
-        /* startOfTracking */null, /* endOfTracking */null, /* delayToLiveInMillis */0l, /* simulator */ null,
-                new DynamicRaceDefinitionSet() {
-                    @Override
-                    public void addRaceDefinition(RaceDefinition race, DynamicTrackedRace trackedRace) {
-                    }
-                }, /* trackedRegattaRegistry */ null, /*courseDesignUpdateURI*/ null, /*tracTracUsername*/ null, /*tracTracPassword*/ null, receiverTypes)) {
+        for (Receiver r : domainFactory.getUpdateReceivers(trackedRegatta, getTracTracRace(), EmptyWindStore.INSTANCE, /* delayToLiveInMillis */0l, /* simulator */null, new DynamicRaceDefinitionSet() {
+            @Override
+            public void addRaceDefinition(RaceDefinition race, DynamicTrackedRace trackedRace) {
+            }
+        },
+                /* trackedRegattaRegistry */null,
+                /* courseDesignUpdateURI */null, /* tracTracUsername */null, null, /* tracTracPassword */
+                getEventSubscriber(), getRaceSubscriber(), receiverTypes)) {
             receivers.add(r);
         }
+        getRaceSubscriber().subscribeConnectionStatus(new IConnectionStatusListener() {
+            @Override
+            public void stopped(Object o) {}
+            
+            @Override
+            public void gotStoredDataEvent(IStoredDataEvent storedDataEvent) {
+                if (storedDataEvent.getProgress() == 1.0) {
+                    synchronized (semaphor) {
+                        storedDataLoaded = true;
+                        semaphor.notifyAll();
+                    }
+                }
+            }
+            
+            @Override
+            public void gotLiveDataEvent(ILiveDataEvent liveDataEvent) {}
+
+        });
         addListenersForStoredDataAndStartController(receivers);
-        Race tractracRace = getTracTracEvent().getRaceList().iterator().next();
+        IRace tractracRace = getTracTracRace();
         // we used to expect here that there is no RaceDefinition for the TracTrac race yet; however,
         // loading the race from an .mtb file stored locally, things work so fast that the race arrives through
         // a background thread (actually the RaceCourseReceiver) that it's initialized before we can check it here.
@@ -138,14 +162,13 @@ public abstract class OnlineTracTracBasedTest extends AbstractTracTracLiveTest {
         trackedRace = getTrackedRegatta().getTrackedRace(race);
     }
 
-
     private void setStoredDataLoaded(boolean storedDataLoaded) {
         this.storedDataLoaded = storedDataLoaded;
     }
 
 
     protected void setUpWithoutLaunchingController(String regattaName, String raceId) throws FileNotFoundException, MalformedURLException,
-            URISyntaxException {
+            URISyntaxException, SubscriberInitializationException, CreateModelException {
         final URL paramUrl = new URL("http://" + TracTracConnectionConstants.HOST_NAME + "/events/"+regattaName+"/clientparams.php?event="+regattaName+"&race="+raceId);
         final URI liveUri = tractracTunnel ? new URI("tcp://"+tractracTunnelHost+":"+TracTracConnectionConstants.PORT_TUNNEL_LIVE) : new URI("tcp://" + TracTracConnectionConstants.HOST_NAME + ":" + TracTracConnectionConstants.PORT_LIVE);
         final URI storedUri = tractracTunnel ? new URI("tcp://"+tractracTunnelHost+":"+TracTracConnectionConstants.PORT_TUNNEL_STORED) : new URI("tcp://" + TracTracConnectionConstants.HOST_NAME + ":" + TracTracConnectionConstants.PORT_STORED);
@@ -154,12 +177,12 @@ public abstract class OnlineTracTracBasedTest extends AbstractTracTracLiveTest {
 
 
     protected void setUpWithoutLaunchingController(final URL paramUrl, final URI liveUri, final URI storedUri)
-            throws FileNotFoundException, MalformedURLException {
+            throws FileNotFoundException, MalformedURLException, URISyntaxException, SubscriberInitializationException, CreateModelException {
         super.setUp(paramUrl, liveUri, storedUri);
         if (domainFactory == null) {
             domainFactory = new DomainFactoryImpl(new com.sap.sailing.domain.base.impl.DomainFactoryImpl());
         }
-        domainEvent = domainFactory.getOrCreateDefaultRegatta(EmptyRaceLogStore.INSTANCE, getTracTracEvent(), /* trackedRegattaRegistry */ null);
+        domainEvent = domainFactory.getOrCreateDefaultRegatta(EmptyRaceLogStore.INSTANCE, getTracTracRace(), /* trackedRegattaRegistry */ null);
         trackedRegatta = new DynamicTrackedRegattaImpl(domainEvent);
     }
     
@@ -215,18 +238,6 @@ public abstract class OnlineTracTracBasedTest extends AbstractTracTracLiveTest {
     
     protected void setTrackedRace(DynamicTrackedRace race) {
         this.trackedRace = race;
-    }
-
-    /**
-     * When all stored data has been transmitted, notify the semaphor for tests to start processing
-     */
-    @Override
-    public void storedDataEnd() {
-        super.storedDataEnd();
-        synchronized (semaphor) {
-            storedDataLoaded = true;
-            semaphor.notifyAll();
-        }
     }
 
     protected String getExpectedEventName() {

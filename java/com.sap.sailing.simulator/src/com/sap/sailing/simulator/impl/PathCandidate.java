@@ -5,8 +5,9 @@ import com.sap.sailing.simulator.TimedPosition;
 
 public class PathCandidate implements Comparable<PathCandidate> {
 
-    public PathCandidate(TimedPosition pos, double vrt, double hrz, int trn, String path, char sid, Wind wind) {
+    public PathCandidate(TimedPosition pos, boolean reached, double vrt, double hrz, int trn, String path, char sid, Wind wind) {
         this.pos = pos;   // time and position
+        this.reached = reached;
         this.vrt = vrt;   // height of target projected onto wind
         this.hrz = hrz;   // distance from middle line
         this.trn = trn;   // number of turns
@@ -15,6 +16,7 @@ public class PathCandidate implements Comparable<PathCandidate> {
     }
 
     TimedPosition pos;
+    boolean reached;
     double vrt;
     double hrz;
     int trn;
@@ -22,20 +24,20 @@ public class PathCandidate implements Comparable<PathCandidate> {
     char sid;
 
     @Override
-    // sort descending by length, width, height
+    // sort descending by time, -#turns, width
     public int compareTo(PathCandidate other) {
-        if (this.path.length() == other.path.length()) {
-            if (this.vrt == other.vrt) {
+        if (Math.abs(this.pos.getTimePoint().asMillis() - other.pos.getTimePoint().asMillis()) <= 1000) {
+            if (this.trn == other.trn) {
                 if (Math.abs(this.hrz) == Math.abs(other.hrz)) {
                     return 0;
                 } else {
                     return (Math.abs(this.hrz) < Math.abs(other.hrz) ? -1 : +1);
                 }
             } else {
-                return (this.vrt > other.vrt ? -1 : +1);
+                return (this.trn < other.trn ? -1 : +1);
             }
         } else {
-            return (this.path.length() < other.path.length() ? -1 : +1);            
+            return (this.pos.getTimePoint().asMillis() < other.pos.getTimePoint().asMillis() ? -1 : +1);            
         }
     }
 

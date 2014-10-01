@@ -29,17 +29,23 @@ public class LeaderboardSettingsFactory {
      *            unchanged during {@link LeaderboardPanel#updateSettings(LeaderboardSettings)}; otherwise, the settings
      *            will show the single race column identified by this argument
      * @param nameOfRaceToShow
-     *            alternatively to <code>nameOfRaceColumnToShow</code>, this argument may be used in case the race name is known,
-     *            but its column name is not. If <code>null</code>, and <code>nameOfRaceColumnToShow</code> is also <code>null</code>,
-     *            no change to the selected race columns will happen while updating the leaderboard settings. It is an error
-     *            to pass non-<code>null</code> values for both, <code>nameOfRaceColumnToShow</code> <em>and</em>
-     *            <code>nameOfRaceToShow</code>, and an {@link IllegalArgumentException} will be thrown in this case.
-     * @param raceColumnSelection 
-     *            the settings will be constructed such that the new settings will have the same race columns selected as those selected by
-     *            this argument
+     *            alternatively to <code>nameOfRaceColumnToShow</code>, this argument may be used in case the race name
+     *            is known, but its column name is not. If <code>null</code>, and <code>nameOfRaceColumnToShow</code> is
+     *            also <code>null</code>, no change to the selected race columns will happen while updating the
+     *            leaderboard settings. It is an error to pass non-<code>null</code> values for both,
+     *            <code>nameOfRaceColumnToShow</code> <em>and</em> <code>nameOfRaceToShow</code>, and an
+     *            {@link IllegalArgumentException} will be thrown in this case.
+     * @param raceColumnSelection
+     *            the settings will be constructed such that the new settings will have the same race columns selected
+     *            as those selected by this argument
+     * @param showRegattaRank
+     *            if <code>null</code>, the overall detail settings that are responsible for deciding whether or not to
+     *            show the regatta rank are left unchanged; otherwise, a non-<code>null</code> overall details
+     *            collection will be put to the settings and the {@link DetailType#REGATTA_RANK} will be added to the
+     *            overall details if and only if this parameter is <code>true</code>
      */
     public LeaderboardSettings createNewSettingsForPlayMode(PlayModes playMode, String nameOfRaceToSort, String nameOfRaceColumnToShow,
-            String nameOfRaceToShow, RaceColumnSelection raceColumnSelection) {
+            String nameOfRaceToShow, RaceColumnSelection raceColumnSelection, Boolean showRegattaRank) {
         if (nameOfRaceColumnToShow != null && nameOfRaceToShow != null) {
             throw new IllegalArgumentException("Can identify only one race to show, either by race name or by its column name, but not both");
         }
@@ -63,21 +69,41 @@ public class LeaderboardSettingsFactory {
                 raceDetails.add(DetailType.RACE_DISTANCE_TO_LEADER_IN_METERS);
                 raceDetails.add(DetailType.NUMBER_OF_MANEUVERS);
                 raceDetails.add(DetailType.DISPLAY_LEGS);
-                List<DetailType> overallDetails = null; // lead overall details unchanged
+                final List<DetailType> overallDetails = createOverallDetailsForShowRegattaRank(showRegattaRank);
                 settings = new LeaderboardSettings(maneuverDetails, legDetails, raceDetails, overallDetails,
                         namesOfRaceColumnsToShow,
                         namesOfRacesToShow, raceColumnSelection.getNumberOfLastRaceColumnsToShow(),
                         /* set autoExpandPreSelectedRace to true if we look at a single race */ nameOfRaceColumnToShow != null || nameOfRaceToShow != null,
                         /* refresh interval */ null, /* name of race to sort */ nameOfRaceToSort,
                         /* ascending */ true, /* updateUponPlayStateChange */ true, raceColumnSelection.getType(),
-                        /*showAddedScores*/ false);
+                        /*showAddedScores*/ false, /*showOverallRacesCompleted*/ false);
                 break;
             case Replay:
             settings = createNewDefaultSettings(namesOfRaceColumnsToShow, namesOfRacesToShow, nameOfRaceToSort, /* autoExpandFirstRace */
-                    nameOfRaceColumnToShow != null);
+                    nameOfRaceColumnToShow != null, showRegattaRank);
             break;
         }
         return settings;
+    }
+
+    /**
+     * @param showRegattaRank
+     *            if <code>null</code>, the overall detail settings that are responsible for deciding whether or not to
+     *            show the regatta rank are left unchanged; otherwise, a non-<code>null</code> overall details
+     *            collection will be put to the settings and the {@link DetailType#REGATTA_RANK} will be added to the
+     *            overall details if and only if this parameter is <code>true</code>
+     */
+    private List<DetailType> createOverallDetailsForShowRegattaRank(Boolean showRegattaRank) {
+        final List<DetailType> overallDetails;
+        if (showRegattaRank != null) {
+            overallDetails = new ArrayList<>();
+            if (showRegattaRank) {
+                overallDetails.add(DetailType.REGATTA_RANK);
+            }
+        } else {
+            overallDetails = null; // leave overall details unchanged
+        }
+        return overallDetails;
     }
 
     /**
@@ -89,13 +115,19 @@ public class LeaderboardSettingsFactory {
      * @param namesOfRacesToShow
      *            alternatively, races to show can also be specified by their race names; if not <code>null</code>,
      *            <code>namesOfRaceColumnsToShow</code> must be <code>null</code>
+     * @param showRegattaRank
+     *            if <code>null</code>, the overall detail settings that are responsible for deciding whether or not to
+     *            show the regatta rank are left unchanged; otherwise, a non-<code>null</code> overall details
+     *            collection will be put to the settings and the {@link DetailType#REGATTA_RANK} will be added to the
+     *            overall details if and only if this parameter is <code>true</code>
      * @param showOverallLeaderboardsOnSamePage
      *            tells whether a meta leaderboard should be shown beneath the actual leaderboard on the same page, if
      *            such a meta leaderboard exists; if multiple such meta leaderboards exist, they are all shown
      */
     public LeaderboardSettings createNewDefaultSettings(List<String> namesOfRaceColumnsToShow,
-            List<String> namesOfRacesToShow, String nameOfRaceToSort, boolean autoExpandPreSelectedRace) {
-        return createNewDefaultSettings(namesOfRaceColumnsToShow, namesOfRacesToShow, /* leave overallDetailsToShow unchanged */ null,
+            List<String> namesOfRacesToShow, String nameOfRaceToSort, boolean autoExpandPreSelectedRace, Boolean showRegattaRank) {
+        final List<DetailType> overallDetails = createOverallDetailsForShowRegattaRank(showRegattaRank);
+        return createNewDefaultSettings(namesOfRaceColumnsToShow, namesOfRacesToShow, overallDetails,
                 nameOfRaceToSort, autoExpandPreSelectedRace, /* refreshIntervalMillis */ null);
     }
     
@@ -133,7 +165,7 @@ public class LeaderboardSettingsFactory {
                 namesOfRacesToShow, numberOfLastRacesToShow,
                 autoExpandPreSelectedRace, refreshIntervalMillis, /* sort by column */ nameOfRaceToSort,
                 /* ascending */ true, /* updateUponPlayStateChange */ true, raceColumnSelectionStrategy,
-                /*showAddedScores*/ false);
+                /*showAddedScores*/ false, /*showOverallRacesCompleted*/ false);
     }
     
     public LeaderboardSettings mergeLeaderboardSettings(LeaderboardSettings settingsWithRaceSelection, LeaderboardSettings settingsWithDetails) {
@@ -154,7 +186,8 @@ public class LeaderboardSettingsFactory {
 
         return new LeaderboardSettings(maneuverDetails, legDetails, raceDetails, overallDetailsToShow,
                 namesOfRaceColumnsToShow, namesOfRacesToShow, numberOfLastRacesToShow, autoExpandPreSelectedRace, refreshIntervalInMs,
-                nameOfRaceToSort, sortAscending, updateUponPlayStateChange, strategy, /*showAddedScores*/ false);
+                nameOfRaceToSort, sortAscending, updateUponPlayStateChange, strategy, /*showAddedScores*/ false,
+                /*showOverallRacesCompleted*/ false);
     }
     
     private List<DetailType> copyDetailTypes(List<DetailType> detailTypes) {

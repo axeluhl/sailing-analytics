@@ -1,28 +1,27 @@
 package com.sap.sailing.server.operationaltransformation;
 
-import com.sap.sailing.domain.base.Mark;
 import com.sap.sailing.domain.common.RegattaAndRaceIdentifier;
 import com.sap.sailing.domain.tracking.DynamicTrackedRace;
 import com.sap.sailing.domain.tracking.GPSFix;
 import com.sap.sailing.server.RacingEventService;
 import com.sap.sailing.server.RacingEventServiceOperation;
 
-public class RecordMarkGPSFix extends AbstractRaceOperation<Void> {
+public abstract class RecordMarkGPSFix extends AbstractRaceOperation<Void> {
     private static final long serialVersionUID = -2149936580623244814L;
-    private final Mark mark;
     private final GPSFix fix;
     
-    public RecordMarkGPSFix(RegattaAndRaceIdentifier raceIdentifier, Mark mark, GPSFix fix) {
+    public RecordMarkGPSFix(RegattaAndRaceIdentifier raceIdentifier, GPSFix fix) {
         super(raceIdentifier);
-        this.mark = mark;
         this.fix = fix;
     }
 
-    @Override
-    public Void internalApplyTo(RacingEventService toState) throws Exception {
+    protected GPSFix getFix() {
+        return fix;
+    }
+
+    protected DynamicTrackedRace getTrackedRace(RacingEventService toState) {
         DynamicTrackedRace trackedRace = (DynamicTrackedRace) toState.getTrackedRace(getRaceIdentifier());
-        trackedRace.recordFix(mark, fix);
-        return null;
+        return trackedRace;
     }
 
     @Override

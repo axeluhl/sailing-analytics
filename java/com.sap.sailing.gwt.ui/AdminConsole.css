@@ -110,6 +110,7 @@ fieldset legend {
 
 .dialogMessageLabel {
 	font-weight: bold;
+	width: 300px;
 }
 
 .gwt-DialogBox {
@@ -150,6 +151,7 @@ fieldset legend {
 
 .gwt-Button {
 	margin: 3px 2px 3px 5px;
+	outline: 0;
 }
 
 .gwt-Button:hover {

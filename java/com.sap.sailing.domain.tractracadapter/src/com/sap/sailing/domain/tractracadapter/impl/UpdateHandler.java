@@ -14,6 +14,7 @@ import java.net.URI;
 import java.net.URL;
 import java.net.URLEncoder;
 import java.util.HashMap;
+import java.util.Map;
 import java.util.Map.Entry;
 import java.util.logging.Logger;
 
@@ -56,13 +57,14 @@ public class UpdateHandler {
         this.raceId = raceId;
         this.updateDeserializer = new UpdateResponseDeserializer();
         if (updateURI != null && !updateURI.toString().equals("")) {
+            logger.info("Activating TracTrac update handler "+this+" for race with ID "+raceId);
             this.active = true;
         } else {
             this.active = false;
         }
     }
 
-    protected URL buildUpdateURL(HashMap<String, String> additionalParameters) throws MalformedURLException, UnsupportedEncodingException {
+    protected URL buildUpdateURL(Map<String, String> additionalParameters) throws MalformedURLException, UnsupportedEncodingException {
         String serverUpdateURI = this.updateURI.toString();
         // make sure that the update URI always ends with a slash
         if (!serverUpdateURI.endsWith("/")) {
@@ -90,6 +92,7 @@ public class UpdateHandler {
     }
     
     protected void checkAndLogUpdateResponse(HttpURLConnection connection) throws IOException, ParseException {
+        connection.setConnectTimeout(10000/*milliseconds*/);
         connection.connect();
         BufferedReader reader = getResponseOnUpdateFromTracTrac(connection);
         Object responseBody = JSONValue.parseWithException(reader);

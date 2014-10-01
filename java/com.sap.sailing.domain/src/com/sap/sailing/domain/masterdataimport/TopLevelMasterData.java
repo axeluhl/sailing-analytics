@@ -73,14 +73,11 @@ public class TopLevelMasterData implements Serializable {
             HashSet<Event> eventSet = new HashSet<Event>();
             eventsForLeaderboardGroup.put(leaderboardGroup, eventSet);
             for (Leaderboard leaderboard : leaderboardGroup.getLeaderboards()) {
-                if (leaderboard instanceof RegattaLeaderboard) {
-                    RegattaLeaderboard regattaLeaderboard = (RegattaLeaderboard) leaderboard;
-                    CourseArea courseArea = regattaLeaderboard.getRegatta().getDefaultCourseArea();
-                    if (courseArea != null) {
-                        Event event = eventForCourseArea.get(courseArea);
-                        if (event != null) {
-                            eventSet.add(event);
-                        }
+                CourseArea courseArea = leaderboard.getDefaultCourseArea();
+                if (courseArea != null) {
+                    Event event = eventForCourseArea.get(courseArea);
+                    if (event != null) {
+                        eventSet.add(event);
                     }
                 }
             }
@@ -175,5 +172,18 @@ public class TopLevelMasterData implements Serializable {
             }
         }
         return allEventsInMasterData.values();
+    }
+
+    public Iterable<Regatta> getAllRegattas() {
+        Set<Regatta> regattas = new HashSet<>();
+        for (LeaderboardGroup leaderboardGroup : leaderboardGroups) {
+            for (Leaderboard leaderboard : leaderboardGroup.getLeaderboards()) {
+                if (leaderboard instanceof RegattaLeaderboard) {
+                    RegattaLeaderboard regattaLeaderboard = (RegattaLeaderboard) leaderboard;
+                    regattas.add(regattaLeaderboard.getRegatta());
+                }
+            }
+        }
+        return regattas;
     }
 }

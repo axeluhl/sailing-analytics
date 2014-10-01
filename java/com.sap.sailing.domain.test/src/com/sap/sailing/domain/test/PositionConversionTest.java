@@ -9,13 +9,12 @@ import java.util.Collections;
 
 import org.junit.Test;
 
-import com.maptrack.client.io.TypeController;
 import com.sap.sailing.domain.common.Position;
 import com.sap.sailing.domain.tractracadapter.DomainFactory;
 import com.sap.sailing.domain.tractracadapter.Receiver;
-import com.tractrac.clientmodule.ControlPoint;
-import com.tractrac.clientmodule.data.ControlPointPositionData;
-import com.tractrac.clientmodule.data.ICallbackData;
+import com.tractrac.model.lib.api.data.IPosition;
+import com.tractrac.model.lib.api.route.IControl;
+import com.tractrac.subscription.lib.api.control.IControlPointPositionListener;
 
 public class PositionConversionTest extends AbstractTracTracLiveTest {
 
@@ -31,34 +30,13 @@ public class PositionConversionTest extends AbstractTracTracLiveTest {
 
     @Test
     public void testReceiptOfControlPointPosition() {
-        final ControlPoint[] firstTracked = new ControlPoint[1];
-        final ControlPointPositionData[] firstData = new ControlPointPositionData[1];
+        final IControl[] firstTracked = new IControl[1];
+        final IPosition[] firstData = new IPosition[1];
         final Object semaphor = new Object();
         
         Receiver receiver = new Receiver() {
             @Override
             public void stopPreemptively() {
-            }
-
-            @Override
-            public Iterable<TypeController> getTypeControllersAndStart() {
-                TypeController listener = ControlPointPositionData.subscribe(getTracTracEvent(),
-                        new ICallbackData<ControlPoint, ControlPointPositionData>() {
-                            private boolean first = true;
-
-                            public void gotData(ControlPoint tracked, ControlPointPositionData record,
-                                    boolean isLiveData) {
-                                if (first) {
-                                    synchronized (semaphor) {
-                                        firstTracked[0] = tracked;
-                                        firstData[0] = record;
-                                        semaphor.notifyAll();
-                                    }
-                                    first = false;
-                                }
-                            }
-                        }, /* fromTime */0 /* means ALL */, /* toTime */Long.MAX_VALUE);
-                return Collections.singleton(listener);
             }
 
             @Override
@@ -75,6 +53,25 @@ public class PositionConversionTest extends AbstractTracTracLiveTest {
 
             @Override
             public void stopAfterNotReceivingEventsForSomeTime(long timeoutInMilliseconds) {
+            }
+
+            @Override
+            public void subscribe() {
+                getRaceSubscriber().subscribeControlPositions(new IControlPointPositionListener() {
+                    private boolean first = true;
+                    
+                    @Override
+                    public void gotControlPointPosition(IControl control, IPosition position, int controlPointNumber) {
+                        if (first) {
+                            synchronized (semaphor) {
+                                firstTracked[0] = control;
+                                firstData[0] = position;
+                                semaphor.notifyAll();
+                            }
+                            first = false;
+                        }
+                    }
+                });
             }
         };
         addListenersForStoredDataAndStartController(Collections.singleton(receiver));

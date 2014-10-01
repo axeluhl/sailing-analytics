@@ -1,5 +1,6 @@
 package com.sap.sailing.domain.base;
 
+import com.sap.sailing.domain.common.BoatHullType;
 import com.sap.sailing.domain.common.Distance;
 import com.sap.sailing.domain.common.TimePoint;
 import com.sap.sse.common.Named;
@@ -37,9 +38,15 @@ public interface BoatClass extends Named, IsManagedBySharedDomainFactory {
      * start with a non-upwind leg even though this method returns <code>true</code>.
      */
     boolean typicallyStartsUpwind();
-    
-    Distance getHullLength();
 
+    String getDisplayName();
+
+    Distance getHullLength();
+    
+    Distance getHullBeam();
+
+    BoatHullType getHullType();
+    
     /**
      * Downwind leg-based wind estimations are inherently less confident than upwind leg-based estimations because
      * jibing angles vary more greatly from boat to boat than tacking angles.

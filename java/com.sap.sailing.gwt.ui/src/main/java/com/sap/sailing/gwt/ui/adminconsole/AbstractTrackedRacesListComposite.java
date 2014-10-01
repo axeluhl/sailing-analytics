@@ -25,7 +25,6 @@ import com.google.gwt.user.client.ui.SimplePanel;
 import com.google.gwt.user.client.ui.VerticalPanel;
 import com.google.gwt.user.client.ui.Widget;
 import com.google.gwt.view.client.ListDataProvider;
-import com.google.gwt.view.client.MultiSelectionModel;
 import com.google.gwt.view.client.SelectionChangeEvent;
 import com.google.gwt.view.client.SelectionChangeEvent.Handler;
 import com.google.gwt.view.client.SelectionModel;
@@ -44,6 +43,7 @@ import com.sap.sailing.gwt.ui.client.SailingServiceAsync;
 import com.sap.sailing.gwt.ui.client.StringMessages;
 import com.sap.sailing.gwt.ui.client.shared.components.Component;
 import com.sap.sailing.gwt.ui.client.shared.components.SettingsDialogComponent;
+import com.sap.sailing.gwt.ui.client.shared.controls.SelectionCheckboxColumn;
 import com.sap.sailing.gwt.ui.common.client.DateAndTimeFormatterUtil;
 import com.sap.sailing.gwt.ui.shared.RegattaDTO;
 import com.sap.sse.gwt.client.async.MarkedAsyncCallback;
@@ -59,6 +59,8 @@ public abstract class AbstractTrackedRacesListComposite extends SimplePanel impl
     private boolean dontFireNextSelectionChangeEvent;
 
     private final SelectionModel<RaceDTO> selectionModel;
+    
+    private final SelectionCheckboxColumn<RaceDTO> selectionCheckboxColumn;
 
     private final CellTable<RaceDTO> raceTable;
 
@@ -98,9 +100,21 @@ public abstract class AbstractTrackedRacesListComposite extends SimplePanel impl
         this.multiSelection = hasMultiSelection;
         this.raceSelectionProvider = raceSelectionProvider;
         this.stringMessages = stringMessages;
+        AdminConsoleTableResources tableResources = GWT.create(AdminConsoleTableResources.class);
+        this.selectionCheckboxColumn = new SelectionCheckboxColumn<RaceDTO>(tableResources.cellTableStyle().cellTableCheckboxSelected(),
+                tableResources.cellTableStyle().cellTableCheckboxDeselected(), tableResources.cellTableStyle().cellTableCheckboxColumnCell()) {
+            @Override
+            protected ListDataProvider<RaceDTO> getListDataProvider() {
+                return raceList;
+            }
+
+            @Override
+            public Boolean getValue(RaceDTO row) {
+                return raceTable.getSelectionModel().isSelected(row);
+            }
+        };
 
         raceList = new ListDataProvider<RaceDTO>();
-        selectionModel = multiSelection ? new MultiSelectionModel<RaceDTO>() : new SingleSelectionModel<RaceDTO>();
         settings = new TrackedRacesSettings();
         settings.setDelayToLiveInSeconds(DEFAULT_LIVE_DELAY_IN_MILLISECONDS / 1000l);
 
@@ -123,7 +137,13 @@ public abstract class AbstractTrackedRacesListComposite extends SimplePanel impl
         raceTable.ensureDebugId("TrackedRacesCellTable");
         ListHandler<RaceDTO> columnSortHandler = setupTableColumns(stringMessages);
         raceTable.setWidth("300px");
-        raceTable.setSelectionModel(selectionModel);
+        if (multiSelection) {
+            selectionModel = this.selectionCheckboxColumn.getSelectionModel();
+            raceTable.setSelectionModel(selectionModel, this.selectionCheckboxColumn.getSelectionManager());
+        } else {
+            selectionModel = new SingleSelectionModel<RaceDTO>();
+            raceTable.setSelectionModel(selectionModel);
+        }
         raceTable.setVisible(false);
         panel.add(raceTable);
         raceList.addDataDisplay(raceTable);
@@ -341,7 +361,10 @@ public abstract class AbstractTrackedRacesListComposite extends SimplePanel impl
                 return race.isTracked && race.trackedRace != null ? race.trackedRace.delayToLiveInMs : null;
             }
         });
-
+        if (multiSelection) {
+            columnSortHandler.setComparator(selectionCheckboxColumn, selectionCheckboxColumn.getComparator());
+            raceTable.addColumn(selectionCheckboxColumn, selectionCheckboxColumn.getHeader());
+        }
         raceTable.addColumn(regattaNameColumn, stringMessages.regatta());
         raceTable.addColumn(boatClassNameColumn, stringMessages.boatClass());
         raceTable.addColumn(raceNameColumn, stringMessages.race());

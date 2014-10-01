@@ -3,6 +3,7 @@ package com.sap.sailing.server.test;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertSame;
+import static org.junit.Assert.assertTrue;
 
 import java.net.URL;
 import java.util.ArrayList;
@@ -21,13 +22,18 @@ import org.junit.Before;
 import org.junit.Test;
 
 import com.sap.sailing.domain.base.Competitor;
+import com.sap.sailing.domain.base.DomainFactory;
 import com.sap.sailing.domain.base.Event;
+import com.sap.sailing.domain.base.LeaderboardGroupBase;
+import com.sap.sailing.domain.base.LeaderboardSearchResult;
+import com.sap.sailing.domain.base.LeaderboardSearchResultBase;
 import com.sap.sailing.domain.base.Regatta;
 import com.sap.sailing.domain.base.Venue;
 import com.sap.sailing.domain.base.Waypoint;
 import com.sap.sailing.domain.base.impl.CourseAreaImpl;
 import com.sap.sailing.domain.base.impl.CourseImpl;
 import com.sap.sailing.domain.base.impl.RaceDefinitionImpl;
+import com.sap.sailing.domain.base.impl.RegattaImpl;
 import com.sap.sailing.domain.common.Color;
 import com.sap.sailing.domain.common.RegattaName;
 import com.sap.sailing.domain.common.TimePoint;
@@ -36,14 +42,25 @@ import com.sap.sailing.domain.common.dto.RegattaCreationParametersDTO;
 import com.sap.sailing.domain.common.dto.SeriesCreationParametersDTO;
 import com.sap.sailing.domain.common.impl.MillisecondsTimePoint;
 import com.sap.sailing.domain.leaderboard.Leaderboard;
+import com.sap.sailing.domain.leaderboard.LeaderboardGroup;
 import com.sap.sailing.domain.leaderboard.RegattaLeaderboard;
 import com.sap.sailing.domain.leaderboard.impl.LowPoint;
 import com.sap.sailing.domain.racelog.tracking.EmptyGPSFixStore;
 import com.sap.sailing.domain.test.AbstractTracTracLiveTest;
 import com.sap.sailing.domain.tracking.DynamicTrackedRace;
 import com.sap.sailing.domain.tracking.impl.EmptyWindStore;
-import com.sap.sailing.server.LeaderboardSearchResult;
 import com.sap.sailing.server.RacingEventService;
+import com.sap.sailing.server.gateway.deserialization.JsonDeserializationException;
+import com.sap.sailing.server.gateway.deserialization.impl.CourseAreaJsonDeserializer;
+import com.sap.sailing.server.gateway.deserialization.impl.EventBaseJsonDeserializer;
+import com.sap.sailing.server.gateway.deserialization.impl.LeaderboardGroupBaseJsonDeserializer;
+import com.sap.sailing.server.gateway.deserialization.impl.LeaderboardSearchResultBaseJsonDeserializer;
+import com.sap.sailing.server.gateway.deserialization.impl.VenueJsonDeserializer;
+import com.sap.sailing.server.gateway.serialization.impl.CourseAreaJsonSerializer;
+import com.sap.sailing.server.gateway.serialization.impl.EventBaseJsonSerializer;
+import com.sap.sailing.server.gateway.serialization.impl.LeaderboardGroupBaseJsonSerializer;
+import com.sap.sailing.server.gateway.serialization.impl.LeaderboardSearchResultJsonSerializer;
+import com.sap.sailing.server.gateway.serialization.impl.VenueJsonSerializer;
 import com.sap.sailing.server.impl.RacingEventServiceImpl;
 import com.sap.sailing.server.operationaltransformation.AddColumnToSeries;
 import com.sap.sailing.server.operationaltransformation.AddRaceDefinition;
@@ -100,8 +117,10 @@ public class SearchServiceTest {
         final TimePoint pfingstbuschStartDate = new MillisecondsTimePoint(cal.getTime());
         cal.set(2014, 5, 8, 16, 00);
         final TimePoint pfingstbuschEndDate = new MillisecondsTimePoint(cal.getTime());
-        pfingstbusch = server.apply(new CreateEvent("Pfingsbusch", pfingstbuschStartDate, pfingstbuschEndDate, "Kiel", /* isPublic */
-                true, UUID.randomUUID(), Collections.<URL>emptySet(), Collections.<URL>emptySet()));
+        pfingstbusch = server.apply(new CreateEvent("Pfingsbusch", /* eventDescription */ null, pfingstbuschStartDate, pfingstbuschEndDate, /* isPublic */
+                "Kiel", true, UUID.randomUUID(), Collections.<URL>emptySet(),
+                Collections.<URL>emptySet(),
+                /* sponsorImageURLs */ Collections.<URL>emptySet(), /* logoImageURLAsString */ null, /* officialWebsiteURLAsString */ null));
         kiel = pfingstbusch.getVenue();
         final CourseAreaImpl kielAlpha = new CourseAreaImpl("Alpha", UUID.randomUUID());
         kiel.addCourseArea(kielAlpha);
@@ -112,17 +131,16 @@ public class SearchServiceTest {
                 new SeriesCreationParametersDTO(Collections.singletonList(new FleetDTO("Default", /* order */-1, Color.RED)),
                 /* medal */false, /* startsWithZero */false, /* firstColumnIsNonDiscardableCarryForward */false,
                 /* discardingThresholds */null, /* hasSplitFleetContiguousScoring */false));
-        pfingstbusch29er = server.apply(new AddSpecificRegatta("Pfingstbusch", "29er", UUID.randomUUID(),
+        pfingstbusch29er = server.apply(new AddSpecificRegatta(RegattaImpl.getDefaultName("Pfingstbusch", "29er"), "29er", UUID.randomUUID(),
                 new RegattaCreationParametersDTO(seriesCreationParams), /* persistent */
-                true, new LowPoint(), kielAlpha.getId()));
+                true, new LowPoint(), kielAlpha.getId(), /* useStartTimeInference */ true));
         server.apply(new AddColumnToSeries(pfingstbusch29er.getRegattaIdentifier(), "Default", "R1"));
         server.apply(new AddColumnToSeries(pfingstbusch29er.getRegattaIdentifier(), "Default", "R2"));
         server.apply(new AddColumnToSeries(pfingstbusch29er.getRegattaIdentifier(), "Default", "R3"));
         RegattaLeaderboard pfingstbusch29erLeaderboard = server.apply(new CreateRegattaLeaderboard(pfingstbusch29er.getRegattaIdentifier(),
                 /* leaderboardDisplayName */ null, /* discardThresholds */ new int[0]));
-        pfingstbusch470 = server.apply(new AddSpecificRegatta("Pfingstbusch", "470", UUID.randomUUID(),
-                new RegattaCreationParametersDTO(seriesCreationParams), /* persistent */
-                true, new LowPoint(), kielBravo.getId()));
+        pfingstbusch470 = server.apply(new AddSpecificRegatta(RegattaImpl.getDefaultName("Pfingstbusch", "470"), "470", UUID.randomUUID(), new RegattaCreationParametersDTO(seriesCreationParams), /* persistent */
+                true, new LowPoint(), kielBravo.getId(), /* useStartTimeInference */ true));
         server.apply(new AddColumnToSeries(pfingstbusch470.getRegattaIdentifier(), "Default", "R1"));
         server.apply(new AddColumnToSeries(pfingstbusch470.getRegattaIdentifier(), "Default", "R2"));
         server.apply(new AddColumnToSeries(pfingstbusch470.getRegattaIdentifier(), "Default", "R3"));
@@ -132,14 +150,16 @@ public class SearchServiceTest {
         final TimePoint aalStartDate = new MillisecondsTimePoint(cal.getTime());
         cal.set(2014, 5, 8, 18, 00);
         final TimePoint aalEndDate = new MillisecondsTimePoint(cal.getTime());
-        aalEvent = server.apply(new CreateEvent("Aalregatta", aalStartDate, aalEndDate, "Flensburg", /* isPublic */
-                true, UUID.randomUUID(), Collections.<URL>emptySet(), Collections.<URL>emptySet()));
+        aalEvent = server.apply(new CreateEvent("Aalregatta", /* eventDescription */ null, aalStartDate, aalEndDate, /* isPublic */
+                "Flensburg", true, UUID.randomUUID(), Collections.<URL>emptySet(),
+                Collections.<URL>emptySet(), /* sponsorImageURLs */ Collections.<URL>emptySet(),
+                /* logoimageURL */ null, /* officialWebsiteURLAsString */ null));
         flensburg = aalEvent.getVenue();
         final CourseAreaImpl flensburgStandard = new CourseAreaImpl("Standard", UUID.randomUUID());
         flensburg.addCourseArea(flensburgStandard);
-        aalRegatta = server.apply(new AddSpecificRegatta("Aalregatta", "ORC", UUID.randomUUID(),
+        aalRegatta = server.apply(new AddSpecificRegatta(RegattaImpl.getDefaultName("Aalregatta", "ORC"), "ORC", UUID.randomUUID(),
                 new RegattaCreationParametersDTO(seriesCreationParams), /* persistent */
-                true, new LowPoint(), flensburgStandard.getId()));
+                true, new LowPoint(), flensburgStandard.getId(), /* useStartTimeInference */ true));
         server.apply(new AddColumnToSeries(aalRegatta.getRegattaIdentifier(), "Default", "R1"));
         server.apply(new AddColumnToSeries(aalRegatta.getRegattaIdentifier(), "Default", "R2"));
         RegattaLeaderboard aalRegattaLeaderboard = server.apply(new CreateRegattaLeaderboard(aalRegatta.getRegattaIdentifier(),
@@ -241,10 +261,14 @@ public class SearchServiceTest {
         Result<LeaderboardSearchResult> searchResults = server.search(new KeywordQuery(Arrays.asList(new String[] { "Kiel" })));
         assertEquals(2, Util.size(searchResults.getHits()));
         final Iterator<LeaderboardSearchResult> iterator = searchResults.getHits().iterator();
-        Regatta firstFoundRegatta = iterator.next().getRegatta();
+        final LeaderboardSearchResult firstMatch = iterator.next();
+        Regatta firstFoundRegatta = firstMatch.getRegatta();
         assertSame(pfingstbusch29er, firstFoundRegatta);
-        Regatta secondFoundRegatta = iterator.next().getRegatta();
+        assertSame(pfingstbusch, firstMatch.getEvent());
+        final LeaderboardSearchResult secondMatch = iterator.next();
+        Regatta secondFoundRegatta = secondMatch.getRegatta();
         assertSame(pfingstbusch470, secondFoundRegatta);
+        assertSame(pfingstbusch, secondMatch.getEvent());
     }
 
     @Test
@@ -252,9 +276,44 @@ public class SearchServiceTest {
         Result<LeaderboardSearchResult> searchResults = server.search(new KeywordQuery(Arrays.asList(new String[] { "Buhl" })));
         assertEquals(2, Util.size(searchResults.getHits()));
         final Iterator<LeaderboardSearchResult> iter = searchResults.getHits().iterator();
-        Regatta earlierStartRegatta = iter.next().getRegatta();
+        final LeaderboardSearchResult firstMatch = iter.next();
+        Regatta earlierStartRegatta = firstMatch.getRegatta();
         assertSame(pfingstbusch470, earlierStartRegatta);
-        Regatta laterStartRegatta = iter.next().getRegatta();
+        assertSame(pfingstbusch, firstMatch.getEvent());
+        final LeaderboardSearchResult secondMatch = iter.next();
+        Regatta laterStartRegatta = secondMatch.getRegatta();
         assertSame(aalRegatta, laterStartRegatta);
+        assertSame(aalEvent, secondMatch.getEvent());
+    }
+
+    @Test
+    public void testSerializeAndDeserializeSearchResult() throws JsonDeserializationException {
+        Result<LeaderboardSearchResult> searchResults = server.search(new KeywordQuery(Arrays.asList(new String[] { "Buhl" })));
+        LeaderboardGroupBaseJsonSerializer leaderboardGroupBaseJsonSerializer = new LeaderboardGroupBaseJsonSerializer();
+        LeaderboardSearchResultJsonSerializer serializer = new LeaderboardSearchResultJsonSerializer(new EventBaseJsonSerializer(new VenueJsonSerializer(new CourseAreaJsonSerializer()),
+                leaderboardGroupBaseJsonSerializer),
+                leaderboardGroupBaseJsonSerializer);
+        LeaderboardGroupBaseJsonDeserializer leaderboardGroupBaseJsonDeserializer = new LeaderboardGroupBaseJsonDeserializer();
+        LeaderboardSearchResultBaseJsonDeserializer deserializer = new LeaderboardSearchResultBaseJsonDeserializer(
+                new EventBaseJsonDeserializer(new VenueJsonDeserializer(new CourseAreaJsonDeserializer(DomainFactory.INSTANCE)),
+                        leaderboardGroupBaseJsonDeserializer), leaderboardGroupBaseJsonDeserializer);
+        final LeaderboardSearchResult expected = searchResults.getHits().iterator().next();
+        LeaderboardSearchResultBase deserialized = deserializer.deserialize(serializer.serialize(expected));
+        assertEquals("Pfingstbusch (470)", deserialized.getRegattaName());
+        assertEquals(expected.getEvent().getName(), deserialized.getEvent().getName());
+        assertEquals(expected.getEvent().getId(), deserialized.getEvent().getId());
+        assertEquals(expected.getEvent().getStartDate(), deserialized.getEvent().getStartDate());
+        assertEquals(expected.getEvent().getEndDate(), deserialized.getEvent().getEndDate());
+        assertEquals(expected.getEvent().getVenue().getName(), deserialized.getEvent().getVenue().getName());
+        Iterator<LeaderboardGroup> expectedLGs = expected.getLeaderboardGroups().iterator();
+        Iterator<? extends LeaderboardGroupBase> deserializedLGs = deserialized.getLeaderboardGroups().iterator();
+        while (expectedLGs.hasNext()) {
+            assertTrue(deserializedLGs.hasNext());
+            LeaderboardGroup expectedLG = expectedLGs.next();
+            LeaderboardGroupBase deserializedLG = deserializedLGs.next();
+            assertEquals(expectedLG.getId(), deserializedLG.getId());
+            assertEquals(expectedLG.getName(), deserializedLG.getName());
+            assertEquals(expectedLG.getDescription(), deserializedLG.getDescription());
+        }
     }
 }

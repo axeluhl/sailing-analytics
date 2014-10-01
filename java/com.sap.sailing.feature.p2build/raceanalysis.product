@@ -31,6 +31,7 @@
    </features>
 
    <configurations>
+      <plugin id="com.sap.sailing.autoload" autoStart="true" startLevel="6" />
       <plugin id="com.sap.sailing.barbados.resultimport" autoStart="true" startLevel="3" />
       <plugin id="com.sap.sailing.domain.deckmanadapter" autoStart="true" startLevel="4" />
       <plugin id="com.sap.sailing.domain.igtimiadapter" autoStart="true" startLevel="3" />

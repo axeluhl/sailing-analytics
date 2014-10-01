@@ -8,6 +8,8 @@ import java.util.Map;
 import java.util.NavigableSet;
 import java.util.Set;
 import java.util.concurrent.Callable;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 
 import com.sap.sailing.domain.base.Competitor;
 import com.sap.sailing.domain.base.RaceColumn;
@@ -33,6 +35,7 @@ import com.sap.sse.common.Util;
  */
 public class ScoreCorrectionImpl implements SettableScoreCorrection {
     private static final long serialVersionUID = -7088305215528928135L;
+    private static final Logger logger = Logger.getLogger(ScoreCorrectionImpl.class.getName());
 
     /**
      * If no max point reason is provided for a competitor/race, {@link MaxPointsReason#NONE} should be the default.
@@ -296,6 +299,7 @@ public class ScoreCorrectionImpl implements SettableScoreCorrection {
         case DNS:
         case DNC:
         case OCS:
+        case BFD:
             result = true;
             break;
         default:
@@ -337,9 +341,10 @@ public class ScoreCorrectionImpl implements SettableScoreCorrection {
      * <p>
      */
     @Override
-    public Result getCorrectedScore(Callable<Integer> trackedRankProvider, final Competitor competitor,
-            final RaceColumn raceColumn, final TimePoint timePoint, final NumberOfCompetitorsInLeaderboardFetcher numberOfCompetitorsInLeaderboardFetcher,
-            ScoringScheme scoringScheme) {
+    public Result getCorrectedScore(final Callable<Integer> trackedRankProvider, final Competitor competitor,
+            final RaceColumn raceColumn, final TimePoint timePoint,
+            final NumberOfCompetitorsInLeaderboardFetcher numberOfCompetitorsInLeaderboardFetcher,
+            final ScoringScheme scoringScheme) {
         Double result;
         final MaxPointsReason maxPointsReason = getMaxPointsReason(competitor, raceColumn, timePoint);
         if (maxPointsReason == MaxPointsReason.NONE) {
@@ -356,19 +361,6 @@ public class ScoreCorrectionImpl implements SettableScoreCorrection {
                 result = correctedNonMaxedScore;
             }
         }
-        // also compute uncorrected score
-        Double resultUncorrected = 0.0;
-        try {
-            resultUncorrected = scoringScheme.getScoreForRank(raceColumn, competitor, trackedRankProvider.call(), new Callable<Integer>() {
-                                        @Override
-                                        public Integer call() {
-                                            return getNumberOfCompetitorsInRace(raceColumn, competitor, numberOfCompetitorsInLeaderboardFetcher);
-                                        }
-                            }, numberOfCompetitorsInLeaderboardFetcher);
-        } catch (Exception e) {
-            throw new RuntimeException(e);
-        }
-        final Double uncorrectedScore = resultUncorrected;
         final Double correctedScore = result;
         return new Result() {
             @Override
@@ -393,7 +385,19 @@ public class ScoreCorrectionImpl implements SettableScoreCorrection {
 
             @Override
             public Double getUncorrectedScore() {
-                return uncorrectedScore;
+                Double resultUncorrected = 0.0;
+                try {
+                    resultUncorrected = scoringScheme.getScoreForRank(raceColumn, competitor,
+                            trackedRankProvider.call(), new Callable<Integer>() {
+                                @Override
+                                public Integer call() {
+                                    return getNumberOfCompetitorsInRace(raceColumn, competitor, numberOfCompetitorsInLeaderboardFetcher);
+                                }
+                            }, numberOfCompetitorsInLeaderboardFetcher);
+                } catch (Exception e) {
+                    throw new RuntimeException(e);
+                }
+                return resultUncorrected;
             }
         };
     }
@@ -438,6 +442,7 @@ public class ScoreCorrectionImpl implements SettableScoreCorrection {
                             }
                         }, numberOfCompetitorsInLeaderboardFetcher);
             } catch (Exception e) {
+                logger.log(Level.SEVERE, "Exception while computing corrected non maxed score", e);
                 throw new RuntimeException(e);
             }
         } else {

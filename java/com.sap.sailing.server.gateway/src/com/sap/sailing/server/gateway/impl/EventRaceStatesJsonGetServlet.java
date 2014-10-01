@@ -114,8 +114,10 @@ public class EventRaceStatesJsonGetServlet extends AbstractJsonHttpServlet {
         if (raceLog != null && !raceLog.isEmpty()) {
             TimePoint startTime = new StartTimeFinder(raceLog).analyze();
             TimePoint finishedTime = new FinishedTimeFinder(raceLog).analyze();
+            RaceLogFlagEvent abortingFlagEvent = new AbortingFlagFinder(raceLog).analyze();
+            TimePoint abortingTime = abortingFlagEvent != null ? abortingFlagEvent.getLogicalTimePoint() : null;
             
-            result = RaceStateOfSameDayHelper.isRaceStateOfSameDay(startTime, finishedTime, now);
+            result = RaceStateOfSameDayHelper.isRaceStateOfSameDay(startTime, finishedTime, abortingTime, now);
         }
         return result;
     }
@@ -125,27 +127,24 @@ public class EventRaceStatesJsonGetServlet extends AbstractJsonHttpServlet {
         result.put("raceName", raceColumn.getName());
         result.put("fleetName", fleet.getName());
         RaceIdentifier raceIdentifier = raceColumn.getRaceIdentifier(fleet);
+        result.put("trackedRaceName", raceIdentifier != null ? raceIdentifier.getRaceName() : null);
         result.put("trackedRaceId", raceIdentifier != null ? raceIdentifier.toString() : null);
         RaceLog raceLog = raceColumn.getRaceLog(fleet);
         if (raceLog != null && !raceLog.isEmpty()) {
-            
             ReadonlyRaceState state = ReadonlyRaceStateImpl.create(raceLog);
             RaceLogRaceStatus status = state.getStatus();
             TimePoint startTime = state.getStartTime();
             TimePoint finishedTime = state.getFinishedTime();
-            
             JSONObject raceLogStateJson = new JSONObject();
             result.put("raceState", raceLogStateJson);
             raceLogStateJson.put("startTime", startTime != null ? startTime.toString() : null);
             raceLogStateJson.put("endTime", finishedTime != null ? finishedTime.toString() : null);
             raceLogStateJson.put("lastStatus", status.name());
-            
             ReadonlyGateStartRacingProcedure procedure = state.getTypedReadonlyRacingProcedure(ReadonlyGateStartRacingProcedure.class);
             if (procedure != null) {
                 raceLogStateJson.put("pathfinderId", procedure.getPathfinder());
                 raceLogStateJson.put("gateLineOpeningTime", procedure.getGateLaunchStopTime());
             }
-            
             AbortingFlagFinder abortingFlagFinder = new AbortingFlagFinder(raceLog);
             RaceLogFlagEvent abortingFlagEvent = abortingFlagFinder.analyze();
             LastFlagsFinder lastFlagFinder = new LastFlagsFinder(raceLog);

@@ -5,6 +5,7 @@ import java.util.HashSet;
 import java.util.NavigableSet;
 import java.util.UUID;
 
+import com.sap.sailing.domain.common.TimePoint;
 import com.sap.sailing.domain.common.WithID;
 import com.sap.sailing.domain.common.racelog.tracking.NotRevokableException;
 import com.sap.sailing.domain.racelog.impl.RaceLogEventComparator;
@@ -109,7 +110,8 @@ public interface RaceLog extends Track<RaceLogEvent>, WithID {
     RaceLogEvent getEventById(Serializable id);
     
     /**
-     * Get a {@link NavigableSet} of unrevoked events regardless of the {@code pass}.
+     * Get a {@link NavigableSet} of unrevoked events regardless of the {@code pass}. Events are sorted by
+     * their {@link TimePoint} and the oldest is returned first.
      * @return
      */
     NavigableSet<RaceLogEvent> getUnrevokedEvents();

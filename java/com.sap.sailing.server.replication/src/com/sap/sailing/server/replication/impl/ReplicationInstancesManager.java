@@ -3,11 +3,13 @@ package com.sap.sailing.server.replication.impl;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.HashSet;
+import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
 import com.sap.sailing.server.RacingEventServiceOperation;
 import com.sap.sailing.server.replication.ReplicationMasterDescriptor;
+import com.sap.sse.common.Util;
 
 public class ReplicationInstancesManager {
 
@@ -20,6 +22,25 @@ public class ReplicationInstancesManager {
     private Map<ReplicaDescriptor, Map<Class<? extends RacingEventServiceOperation<?>>, Integer>> replicationCounts;
     
     /**
+     * Used to calculate the average number of operations per message sent/received for each replica.
+     * 
+     * @see #totalMessageCount
+     */
+    private final Map<ReplicaDescriptor, Long> totalNumberOfOperations;
+
+    /**
+     * Used to calculate the average number of operations per message sent/received for each replica.
+     * 
+     * @see #totalNumberOfOperations
+     */
+    private final Map<ReplicaDescriptor, Long> totalMessageCount;
+    
+    /**
+     * Contains the size of all messages sent over
+     */
+    private final Map<ReplicaDescriptor, Long> totalQueueMessagesRawSizeInBytes;
+    
+    /**
      * The descriptor of the replication master
      */
     private ReplicationMasterDescriptor replicationMasterDescriptor;
@@ -27,6 +48,9 @@ public class ReplicationInstancesManager {
     public ReplicationInstancesManager() {
         replicaDescriptors = new HashSet<ReplicaDescriptor>();
         replicationCounts = new HashMap<ReplicaDescriptor, Map<Class<? extends RacingEventServiceOperation<?>>,Integer>>();
+        totalMessageCount = new HashMap<>();
+        totalNumberOfOperations = new HashMap<>();
+        totalQueueMessagesRawSizeInBytes = new HashMap<ReplicaDescriptor, Long>();
     }
     
     /**
@@ -63,27 +87,98 @@ public class ReplicationInstancesManager {
      * 
      * @see #getStatistics
      */
-    public <T> void log(RacingEventServiceOperation<T> replicatedOperation) {
+    public void log(List<Class<?>> classes, long sizeOfQueueMessageInBytes) {
         for (ReplicaDescriptor replica : getReplicaDescriptors()) {
             Map<Class<? extends RacingEventServiceOperation<?>>, Integer> counts = replicationCounts.get(replica);
             if (counts == null) {
                 counts = new HashMap<Class<? extends RacingEventServiceOperation<?>>, Integer>();
                 replicationCounts.put(replica, counts);
             }
-            @SuppressWarnings("unchecked") // safe because replicatedOperation is declared of type RacingEventserviceOperation<T>
-            Class<? extends RacingEventServiceOperation<T>> operationClass = (Class<? extends RacingEventServiceOperation<T>>) replicatedOperation
-                    .getClass();
-            Integer count = counts.get(operationClass);
-            if (count == null) {
-                count = 0;
+            for (Class<?> replicatedOperationClass : classes) {
+                // safe because replicatedOperation is declared of type RacingEventserviceOperation<T>
+                @SuppressWarnings("unchecked")
+                Class<? extends RacingEventServiceOperation<?>> operationClass = (Class<? extends RacingEventServiceOperation<?>>) replicatedOperationClass;
+                Integer count = counts.get(operationClass);
+                if (count == null) {
+                    count = 0;
+                }
+                counts.put(operationClass, ++count);
             }
-            count++;
-            counts.put(operationClass, count);
+            Long totalOps = totalNumberOfOperations.get(replica);
+            if (totalOps == null) {
+                totalOps = 0l;
+            }
+            totalOps += Util.size(classes);
+            totalNumberOfOperations.put(replica, totalOps);
+            Long totalMessages = totalMessageCount.get(replica);
+            if (totalMessages == null) {
+                totalMessages = 0l;
+            }
+            totalMessageCount.put(replica, ++totalMessages);
+            Long totalQueueMessagesSizeInBytes = totalQueueMessagesRawSizeInBytes.get(replica);
+            if (totalQueueMessagesSizeInBytes == null) {
+                totalQueueMessagesSizeInBytes = 0l;
+            }
+            totalQueueMessagesRawSizeInBytes.put(replica, totalQueueMessagesSizeInBytes+sizeOfQueueMessageInBytes);
         }
     }
     
     public Map<Class<? extends RacingEventServiceOperation<?>>, Integer> getStatistics(ReplicaDescriptor replica) {
         return replicationCounts.get(replica);
+    }
+    
+    public long getNumberOfBytesSent(ReplicaDescriptor replica) {
+        final long result;
+        Long totalQueueMessageSize = totalQueueMessagesRawSizeInBytes.get(replica);
+        if (totalQueueMessageSize == null) {
+            result = 0l;
+        } else {
+            result = totalQueueMessageSize.longValue();
+        }
+        return result;
+    }
+    
+    public double getAverageNumberOfOperationsPerMessage(ReplicaDescriptor replica) {
+        final double result;
+        Long messageCount = totalMessageCount.get(replica);
+        if (messageCount != null) {
+            Long operationsCount = totalNumberOfOperations.get(replica);
+            if (operationsCount == null) {
+                result = 0;
+            } else {
+                result = ((double) operationsCount)/(double) messageCount;
+            }
+        } else {
+            result = 0;
+        }
+        return result;
+    }
+    
+    public double getAverageNumberOfBytesPerMessage(ReplicaDescriptor replica) {
+        final double result;
+        Long messageCount = totalMessageCount.get(replica);
+        if (messageCount != null) {
+            Long messageSizeInTotal = totalQueueMessagesRawSizeInBytes.get(replica);
+            if (messageSizeInTotal == null) {
+                result = 0;
+            } else {
+                result = ((double) messageSizeInTotal)/(double) messageCount;
+            }
+        } else {
+            result = 0;
+        }
+        return result;
+    }
+    
+    public long getNumberOfMessagesSent(ReplicaDescriptor replica) {
+        final long result;
+        Long messageCount = totalMessageCount.get(replica);
+        if (messageCount != null) {
+            result = messageCount.longValue();
+        } else {
+            result = 0l;
+        }
+        return result;
     }
 
     public void removeAll() {

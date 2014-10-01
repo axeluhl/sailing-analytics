@@ -1,10 +1,12 @@
 # Welcome to the SAP Sailing Wiki
 
-This is the <img src="http://www.sapsailing.com/images/sap-logo.png"/> Sailing Analytics Wiki where useful information regarding this project can be found.
+This is the <img src="http://www.sapsailing.com/images/sap-logo_grey.png"/> Wiki where useful information regarding this project can be found.
 
 ### The Pitch
 
 Like businesses, sailors need the latest information to make strategic decisions - but they need it even faster. One wrong tack, a false estimation of the current, or the slightest wind shift can cost the skipper the entire race. As premium sponsor of the Kieler Woche 2011, and co-sponsor of Sailing Team Germany (STG), SAP is showing how innovative IT solutions providing real time data analysis can give teams the competitive edge.
+
+SAP is at the center of today’s technology revolution, developing innovations that not only help businesses run like never before, but also improve the lives of people everywhere. As market leader in enterprise application software, SAP SE (NYSE: SAP) helps companies of all sizes and industries run better. From back office to boardroom, warehouse to storefront, desktop to mobile device – SAP empowers people and organizations to work together more efficiently and use business insight more effectively to stay ahead of the competition. SAP applications and services enable more than 258,000 customers to operate profitably, adapt continuously, and grow sustainably.
 
 ### Table of Contents
 
@@ -13,14 +15,20 @@ Like businesses, sailors need the latest information to make strategic decisions
 * Production Environment
   * [[Amazon EC2|wiki/amazon-ec2]]
   * [[EC2 Backup Strategy|wiki/amazon-ec2-backup-strategy]]
-  * [[TracTrac Lifecycle for Event Managers|wiki/tractrac-lifecycle]]
+  * [[TracTrac|wiki/tractrac-lifecycle]]
+  * [[Analytics on a stick|wiki/analytics-on-a-stick]]
+  * [[Operating Igtimi WindBots/windbot-operations]]
+  * [[Monitoring Apache and RabbitMQ|wiki/monitoring-apache-and-rabbitmq]]
+  * [[JMX Support|wiki/jmx]]
 * Information for Developers
-  * [[Cook Book|wiki/cook-book]]
   * [[OnBoarding Information|wiki/onboarding]]
+  * [[Cook Book|wiki/cook-book]]
   * [[Building and Deploying|wiki/building-and-deploying]]
   * [[Continuous Integration with Hudson/Jenkins|wiki/ci]]
   * [[UI Tests with Selenium|wiki/selenium-ui-tests]]
+  * [[Profiling|wiki/profiling]]
   * [[Typical Development Scenarios|wiki/typical-development-scenarios]]
+  * [[Load Tests|wiki/server-load-tests]]
   * [[Server Replication|wiki/server-replication]]
   * [[Configure Races on Server|wiki/typical-development-scenarios]]
   * [[Development Environment|wiki/development-environment]]
@@ -28,10 +36,12 @@ Like businesses, sailors need the latest information to make strategic decisions
   * [[Working with GWT Locally|wiki/local-gwt]]
   * [[Mobile Development|wiki/mobile-development]]
   * [[Security|wiki/security]]
+  * [[Java De(Serialization) and Circular Dependencies|wiki/java-de-serialization-and-circular-dependencies]]
 * Information for Webdesigners
   * [[Layout repository|wiki/webdesign]]
   * [[Create boat graphics for the 2D race viewer|wiki/boatGraphicsSVG]]
   * [[Create clickable UI prototypes with Axure|wiki/ui-clickable-prototypes]]
+  * [[Uploading Media Content|wiki/uploading-media-content]]
 * General Information
   * [[Architecture and Infrastructure|wiki/architecture-and-infrastructure]]
   * [[Sailing Domain Algorithms|wiki/sailing-domain-algorithms]]
@@ -40,10 +50,13 @@ Like businesses, sailors need the latest information to make strategic decisions
   * [[Racecommittee App|wiki/racecommittee-app]]
   * [[Web Services API|wiki/sailing-webservices]]
   * [[Theses (Bachelor, Master, ...)|wiki/theses]]
+  * [[Google Analytics (Web Page Tracking)|wiki/ganalytics]]
 * Planning and Event Information
   * [[Project Planning (bigger development)|wiki/planning]]
   * [[General Event Planning|wiki/general-event-planning]]
   * [[Information about Extreme Sailing Series|wiki/extreme-sailing-series]]
+  * [[Travem&uuml;nder Woche 2014 event page|wiki/tw2014]]
+  * [[505 worlds Kiel 2014 event page|wiki/505-worlds-kiel-2014]]
 
 ### Internal services (not related to wiki but useful)
 

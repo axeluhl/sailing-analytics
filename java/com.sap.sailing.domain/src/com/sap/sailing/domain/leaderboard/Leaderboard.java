@@ -3,12 +3,14 @@ package com.sap.sailing.domain.leaderboard;
 import java.util.Collection;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
 import java.util.concurrent.ExecutionException;
 
 import com.sap.sailing.domain.base.Competitor;
 import com.sap.sailing.domain.base.CourseArea;
 import com.sap.sailing.domain.base.DomainFactory;
 import com.sap.sailing.domain.base.Fleet;
+import com.sap.sailing.domain.base.LeaderboardBase;
 import com.sap.sailing.domain.base.RaceColumn;
 import com.sap.sailing.domain.base.RaceColumnListener;
 import com.sap.sailing.domain.base.Series;
@@ -25,7 +27,6 @@ import com.sap.sailing.domain.leaderboard.caching.LiveLeaderboardUpdater;
 import com.sap.sailing.domain.tracking.GPSFixMoving;
 import com.sap.sailing.domain.tracking.TrackedRace;
 import com.sap.sailing.domain.tracking.TrackedRegattaRegistry;
-import com.sap.sse.common.Named;
 import com.sap.sse.common.Util;
 
 /**
@@ -43,7 +44,7 @@ import com.sap.sse.common.Util;
  * @author Axel Uhl (d043530)
  * 
  */
-public interface Leaderboard extends Named {
+public interface Leaderboard extends LeaderboardBase {
     /**
      * If the leaderboard is a "matrix" with the cells being defined by a competitor / race "coordinate,"
      * then this interface defines the structure of the "cells."
@@ -73,7 +74,7 @@ public interface Leaderboard extends Named {
     LeaderboardDTO computeDTO(final TimePoint timePoint,
             final Collection<String> namesOfRaceColumnsForWhichToLoadLegDetails, boolean addOverallDetails,
             final boolean waitForLatestAnalyses, TrackedRegattaRegistry trackedRegattaRegistry,
-            DomainFactory baseDomainFactory) throws NoWindException;
+            DomainFactory baseDomainFactory, boolean fillNetPointsUncorrected) throws NoWindException;
 
     /**
      * Obtains the unique set of {@link Competitor} objects from all {@link TrackedRace}s currently linked to this
@@ -113,7 +114,18 @@ public interface Leaderboard extends Named {
     Fleet getFleet(String fleetName);
     
     Entry getEntry(Competitor competitor, RaceColumn race, TimePoint timePoint) throws NoWindException;
-    
+
+    /**
+     * Same as {@link #getEntry}, but the discards for the competitor across the leaderboard can be provided for better performance
+     * in case the entries for several columns shall be computed by multiple calls to this method.
+     * 
+     * @param discardedRaceColumns
+     *            expected to be the result of what we would get if we called {@link #getResultDiscardingRule()}.
+     *            {@link ResultDiscardingRule#getDiscardedRaceColumns(Competitor, Leaderboard, Iterable, TimePoint)
+     *            getDiscardedRaceColumns(competitor, this, raceColumnsToConsider, timePoint)}.
+     */
+    Entry getEntry(Competitor competitor, RaceColumn race, TimePoint timePoint, Set<RaceColumn> discardedRaceColumns) throws NoWindException;
+
     /**
      * Computes the competitor's ranks as they were or would have been after each race column (from left to right)
      * was completed.<p>
@@ -122,7 +134,7 @@ public interface Leaderboard extends Named {
      * For split fleets things can vary slightly. There, one fleet may complete a few races before the another fleet
      * starts with those races. In this case there isn't even any point in time at which all fleets have finished
      * exactly <i>n</i> races. Still, this method pretends such a time point would have existed, actually ignoring
-     * the <i>times</i> at which a race took place but only looking at the resulting scores and discard.<p>
+     * the <i>times</i> at which a race took place but only looking at the resulting scores and discards.<p>
      * 
      * When computing the ranks after all columns up to and including the race column that is the key of the resulting
      * map, the method applies the discarding and tie breaking rules as they would have had to be applied had the races
@@ -132,6 +144,25 @@ public interface Leaderboard extends Named {
      * as {@link #getRaceColumns()}.
      */
     Map<RaceColumn, List<Competitor>> getRankedCompetitorsFromBestToWorstAfterEachRaceColumn(TimePoint timePoint) throws NoWindException;
+    
+    /**
+     * Computes the competitor's total points sum as they were or would have been after each race column (from left to right)
+     * was completed.<p>
+     * 
+     * A leaderboard fills up over time, usually "from left to right" with one race after another finishing.
+     * For split fleets things can vary slightly. There, one fleet may complete a few races before the another fleet
+     * starts with those races. In this case there isn't even any point in time at which all fleets have finished
+     * exactly <i>n</i> races. Still, this method pretends such a time point would have existed, actually ignoring
+     * the <i>times</i> at which a race took place but only looking at the resulting scores and discards.<p>
+     * 
+     * When computing the total points sum after all columns up to and including the race column that is the key of the resulting
+     * map, the method applies the discarding and tie breaking rules as they would have had to be applied had the races
+     * in the respective column just completed.
+     * 
+     * @return The resulting map is guaranteed to have the same iteration order regarding the race columns
+     * as {@link #getRaceColumns()}.
+     */
+    Map<RaceColumn, Map<Competitor, Double>> getTotalPointsSumAfterRaceColumn(TimePoint timePoint) throws NoWindException;
     
     /**
      * Tells the number of points carried over from previous races not tracked by this leaderboard for
@@ -217,6 +248,14 @@ public interface Leaderboard extends Named {
     Double getTotalPoints(Competitor competitor, TimePoint timePoint) throws NoWindException;
     
     /**
+     * Sums up the {@link #getTotalPoints(Competitor, RaceColumn, TimePoint) total points} of <code>competitor</code>
+     * across all race columns listed in <code>raceColumnsToconsider</code>, respecting the
+     * {@link RaceColumn#isStartsWithZeroScore()} property.
+     */
+    Double getTotalPoints(Competitor competitor, Iterable<RaceColumn> raceColumnsToConsider, TimePoint timePoint)
+            throws NoWindException;
+
+    /**
      * Sorts the competitors according to their ranking in the race column specified. Only competitors who have a score
      * are added to the result list. This excludes competitors whose fleet hasn't raced for the <code>raceColumn</code>
      * yet, and those where no tracked rank is known and no manual score correction was performed.
@@ -241,10 +280,6 @@ public interface Leaderboard extends Named {
     
     /**
      * Returns the total rank of the given competitor.
-     * @param competitor
-     * @param timePoint
-     * @return
-     * @throws NoWindException
      */
     int getTotalRankOfCompetitor(Competitor competitor, TimePoint timePoint) throws NoWindException;
 
@@ -300,12 +335,6 @@ public interface Leaderboard extends Named {
     
     void setDisplayName(Competitor competitor, String displayName);
 
-    /**
-     * If a display name for the leaderboard has been defined,
-     * this method returns it; otherwise, <code>null</code> is returned.
-     */
-    String getDisplayName();
-
     void setDisplayName(String displayName);
 
     /**
@@ -318,10 +347,11 @@ public interface Leaderboard extends Named {
      * Tells if the column represented by <code>raceColumn</code> shall be considered when counting the number of "races
      * so far" for discarding. Although medal races are never discarded themselves, they still count in determining the
      * number of "races so far" which is then the basis for deciding how many races may be discarded. If a leaderboard
-     * has corrections for a column for the <code>competitor</code> then that column shall be considered for discarding
-     * and counts for determining the number of races so far. Also, if a tracked race is connected to the column and has
-     * started already, the column is to be considered for discarding unless the column has several unordered fleets and
-     * not all fleets have started their race yet (see
+     * has corrections for a column for the <code>competitor</code> that are already to be applied at
+     * <code>timePoint</code> (e.g., because the race can be proven to have finished at <code>timePoint</code>), then
+     * that column shall be considered for discarding and counts for determining the number of races so far. Also, if a
+     * tracked race is connected to the column and has started already, the column is to be considered for discarding
+     * unless the column has several unordered fleets and not all fleets have started their race yet (see
      * {@link ScoringScheme#isValidInTotalScore(Leaderboard, RaceColumn, TimePoint)}).
      */
     boolean countRaceForComparisonWithDiscardingThresholds(Competitor competitor, RaceColumn raceColumn, TimePoint timePoint);
@@ -416,6 +446,20 @@ public interface Leaderboard extends Named {
     Double getTotalPoints(Competitor competitor, RaceColumn raceColumn, Iterable<RaceColumn> raceColumnsToConsider,
             TimePoint timePoint) throws NoWindException;
 
+    /**
+     * Same as {@link #getTotalPoints(Competitor, RaceColumn, Iterable, TimePoint)}, only that the set of discarded race columns can
+     * be specified which is useful when total points are to be computed for more than one column for the same
+     * competitor because then the calculation of discards (which requires looking at all columns) only needs to be done
+     * once and not again for each column (which would lead to quadratic effort).
+     * 
+     * @param discardedRaceColumns
+     *            expected to be the result of what we would get if we called {@link #getResultDiscardingRule()}.
+     *            {@link ResultDiscardingRule#getDiscardedRaceColumns(Competitor, Leaderboard, Iterable, TimePoint)
+     *            getDiscardedRaceColumns(competitor, this, raceColumnsToConsider, timePoint)}.
+     */
+    Double getTotalPoints(Competitor competitor, RaceColumn raceColumn, TimePoint timePoint,
+            Set<RaceColumn> discardedRaceColumns) throws NoWindException;
+
     TimePoint getNowMinusDelay();
     
     /**
@@ -453,7 +497,6 @@ public interface Leaderboard extends Named {
      *            point at which to evaluate the leaderboard status
      * @param namesOfRaceColumnsForWhichToLoadLegDetails
      *            the names of the race columns of which to expand the details in the result
-     * @param addOverallDetails TODO
      * @param trackedRegattaRegistry
      *            used to determine which of the races are still being tracked and which ones are not
      * @param baseDomainFactory
@@ -461,8 +504,9 @@ public interface Leaderboard extends Named {
      */
     LeaderboardDTO getLeaderboardDTO(TimePoint timePoint,
             Collection<String> namesOfRaceColumnsForWhichToLoadLegDetails,
-            boolean addOverallDetails, TrackedRegattaRegistry trackedRegattaRegistry, DomainFactory baseDomainFactory) throws NoWindException,
+            boolean addOverallDetails, TrackedRegattaRegistry trackedRegattaRegistry, DomainFactory baseDomainFactory, boolean fillNetPointsUncorrected) throws NoWindException,
             InterruptedException, ExecutionException;
 
     NumberOfCompetitorsInLeaderboardFetcher getNumberOfCompetitorsInLeaderboardFetcher();
+
 }

@@ -11,7 +11,6 @@ import java.text.ParseException;
 import java.util.List;
 import java.util.UUID;
 
-import com.maptrack.client.io.TypeController;
 import com.sap.sailing.domain.base.BoatClass;
 import com.sap.sailing.domain.base.Course;
 import com.sap.sailing.domain.base.Mark;
@@ -41,13 +40,15 @@ import com.sap.sailing.domain.tracking.impl.EmptyWindStore;
 import com.sap.sailing.domain.tractracadapter.impl.DomainFactoryImpl;
 import com.sap.sailing.domain.tractracadapter.impl.RaceCourseReceiver;
 import com.sap.sailing.domain.tractracadapter.impl.Simulator;
+import com.tractrac.model.lib.api.data.IPosition;
 import com.sap.sse.common.Util;
-import com.tractrac.clientmodule.Competitor;
-import com.tractrac.clientmodule.Event;
-import com.tractrac.clientmodule.Race;
-import com.tractrac.clientmodule.data.ControlPointPositionData;
-import com.tractrac.clientmodule.data.DataController;
-import com.tractrac.clientmodule.data.Position;
+import com.tractrac.model.lib.api.event.CreateModelException;
+import com.tractrac.model.lib.api.event.ICompetitor;
+import com.tractrac.model.lib.api.event.IEvent;
+import com.tractrac.model.lib.api.event.IRace;
+import com.tractrac.subscription.lib.api.IEventSubscriber;
+import com.tractrac.subscription.lib.api.IRaceSubscriber;
+import com.tractrac.subscription.lib.api.SubscriberInitializationException;
 
 import difflib.PatchFailedException;
 
@@ -61,7 +62,7 @@ public interface DomainFactory {
     
     com.sap.sailing.domain.base.DomainFactory getBaseDomainFactory();
 
-    com.sap.sailing.domain.common.Position createPosition(Position position);
+    com.sap.sailing.domain.common.Position createPosition(IPosition position);
 
     com.sap.sailing.domain.common.TimePoint createTimePoint(long timestamp);
 
@@ -69,7 +70,7 @@ public interface DomainFactory {
 
     Sideline createSideline(String name, Iterable<TracTracControlPoint> controlPoints);
 
-    com.sap.sailing.domain.base.Competitor getOrCreateCompetitor(Competitor competitor);
+    com.sap.sailing.domain.base.Competitor getOrCreateCompetitor(ICompetitor competitor);
 
     com.sap.sailing.domain.base.Competitor getOrCreateCompetitor(UUID competitorId, String competitorClassName,
             String nationalityAsString, String name, String shortName);
@@ -80,7 +81,7 @@ public interface DomainFactory {
      */
     Nationality getOrCreateNationality(String threeLetterIOCCode);
 
-    GPSFixMoving createGPSFixMoving(Position position);
+    GPSFixMoving createGPSFixMoving(IPosition position);
 
     Person getOrCreatePerson(String name, Nationality nationality, UUID id);
 
@@ -100,7 +101,7 @@ public interface DomainFactory {
      * boat class exists yet.
      * @param trackedRegattaRegistry TODO
      */
-    com.sap.sailing.domain.base.Regatta getOrCreateDefaultRegatta(RaceLogStore raceLogStore, Event event, TrackedRegattaRegistry trackedRegattaRegistry);
+    com.sap.sailing.domain.base.Regatta getOrCreateDefaultRegatta(RaceLogStore raceLogStore, IRace race, TrackedRegattaRegistry trackedRegattaRegistry);
     
     /**
      * Creates a race tracked for the specified URL/URIs and starts receiving all available existing and future push
@@ -115,8 +116,8 @@ public interface DomainFactory {
      * 
      * The link to the {@link RaceDefinition} is created in the {@link DomainFactory} when the
      * {@link RaceCourseReceiver} creates the {@link TrackedRace} object. Starting then, the {@link DomainFactory} will
-     * respond with the {@link RaceDefinition} when its {@link DomainFactory#getRaces(Event)} is called with the
-     * TracTrac {@link Event} as argument that is used for its tracking.
+     * respond with the {@link RaceDefinition} when its {@link DomainFactory#getRaceID(IRace)} is called with the
+     * TracTrac {@link IEvent} as argument that is used for its tracking.
      * <p>
      * @param startOfTracking
      *            if <code>null</code>, all stored data from the "beginning of time" will be loaded that the event has
@@ -133,48 +134,40 @@ public interface DomainFactory {
      */
     TracTracRaceTracker createRaceTracker(URL paramURL, URI liveURI, URI storedURI, URI courseDesignUpdateURI, TimePoint startOfTracking,
             TimePoint endOfTracking, long delayToLiveInMillis, boolean simulateWithStartTimeNow, RaceLogStore raceLogStore, 
-            WindStore windStore, GPSFixStore gpsFixStore, String tracTracUsername, String tracTracPassword, String raceStatus, TrackedRegattaRegistry trackedRegattaRegistry) throws MalformedURLException, FileNotFoundException,
-            URISyntaxException;
+            WindStore windStore, GPSFixStore gpsFixStore, String tracTracUsername, String tracTracPassword, 
+            String raceStatus, String raceVisibility, TrackedRegattaRegistry trackedRegattaRegistry) throws MalformedURLException, FileNotFoundException,
+            URISyntaxException, CreateModelException, SubscriberInitializationException;
 
     /**
      * Same as {@link #createRaceTracker(URL, URI, URI, URI, TimePoint, TimePoint, WindStore, TrackedRegattaRegistry)}, only that
      * a predefined {@link Regatta} is used to hold the resulting races.
-     * @param raceStatus 
      */
     RaceTracker createRaceTracker(Regatta regatta, URL paramURL, URI liveURI, URI storedURI, URI courseDesignUpdateURI, TimePoint startOfTracking,
             TimePoint endOfTracking, long delayToLiveInMillis, boolean simulateWithStartTimeNow, RaceLogStore raceLogStore, 
-            WindStore windStore, GPSFixStore gpsFixStore, String tracTracUsername, String tracTracPassword, String raceStatus, TrackedRegattaRegistry trackedRegattaRegistry) throws MalformedURLException, FileNotFoundException,
-            URISyntaxException;
+            WindStore windStore, GPSFixStore gpsFixStore, String tracTracUsername, String tracTracPassword, String raceStatus, String raceVisibility, TrackedRegattaRegistry trackedRegattaRegistry) throws MalformedURLException, FileNotFoundException,
+            URISyntaxException, CreateModelException, SubscriberInitializationException;
 
     BoatClass getOrCreateBoatClass(String competitorClassName);
 
     /**
-     * For each race listed by the <code>tractracEvent</code>, produces {@link TypeController listeners} that, when
-     * {@link DataController#add(TypeController) registered} with the controller, create a {@link RaceDefinition} with
-     * the {@link Course} defined in proper order, and {@link com.sap.sailing.domain.base.Regatta#addRace(RaceDefinition)
-     * add} it to the <code>event</code>. Other listeners of those returned will listen for raw position and aggregated
-     * position data and update the {@link TrackedRegatta}'s content accordingly.
+     * For <code>tractracRace</code>, produces listeners that, when subscribed with either the <code>eventSubscriber</code>
+     * or the <code>raceSubscriber</code>, create a {@link RaceDefinition} with the {@link Course} defined in proper order,
+     * and {@link com.sap.sailing.domain.base.Regatta#addRace(RaceDefinition) add} it to the <code>event</code>. Other
+     * listeners of those returned will listen for raw position and aggregated position data and update the
+     * {@link TrackedRegatta}'s content accordingly.
      * 
      * @param trackedRegatta
      *            must have been created before through
-     *            {@link #getOrCreateTrackedRegatta(com.sap.sailing.domain.base.Regatta)} because otherwise the link to the
-     *            {@link Event} can't be established
-     * @param startOfTracking
-     *            if <code>null</code>, all stored data from the "beginning of time" will be loaded that the event has
-     *            to provide, particularly for the mark positions which are stored per event, not per race; otherwise,
-     *            particularly the mark position loading will be constrained to this start time.
-     * @param endOfTracking
-     *            if <code>null</code>, all stored data until the "end of time" will be loaded that the event has to
-     *            provide, particularly for the mark positions which are stored per event, not per race; otherwise,
-     *            particularly the mark position loading will be constrained to this end time.
+     *            {@link #getOrCreateTrackedRegatta(com.sap.sailing.domain.base.Regatta)} because otherwise the link to
+     *            the {@link IEvent} can't be established
      * @param tokenToRetrieveAssociatedRace
-     *            used to update the set of{@link RaceDefinition}s received by the
-     *            {@link RaceCourseReceiver} created by this call
+     *            used to update the set of{@link RaceDefinition}s received by the {@link RaceCourseReceiver} created by
+     *            this call
      */
-    Iterable<Receiver> getUpdateReceivers(DynamicTrackedRegatta trackedRegatta, Event tractracEvent,
-            TimePoint startOfTracking, TimePoint endOfTracking, long delayToLiveInMillis, Simulator simulator,
-            WindStore windStore, DynamicRaceDefinitionSet raceDefinitionSetToUpdate,
-            TrackedRegattaRegistry trackedRegattaRegistry, URI courseDesignUpdateURI, String tracTracUsername, String tracTracPassword);
+    Iterable<Receiver> getUpdateReceivers(DynamicTrackedRegatta trackedRegatta, long delayToLiveInMillis,
+            Simulator simulator, WindStore windStore, DynamicRaceDefinitionSet raceDefinitionSetToUpdate, TrackedRegattaRegistry trackedRegattaRegistry,
+            IRace tractracRace, URI courseDesignUpdateURI,
+            String tracTracUsername, String tracTracPassword, IEventSubscriber eventSubscriber, IRaceSubscriber raceSubscriber);
 
     /**
      * Creates a {@link RaceDefinition} from a TracTrac {@link Race} and a domain {@link Course} definition. The
@@ -214,10 +207,10 @@ public interface DomainFactory {
     /**
      * If the vm argument tractrac.usemarkpassings=false, the RecieverType MARKPASSINGS will not return anything
      */
-    Iterable<Receiver> getUpdateReceivers(DynamicTrackedRegatta trackedRegatta, Event tractracEvent, WindStore windStore,
-            TimePoint startOfTracking, TimePoint endOfTracking, long delayToLiveInMillis, Simulator simulator, 
-            DynamicRaceDefinitionSet raceDefinitionSetToUpdate, TrackedRegattaRegistry trackedRegattaRegistry, 
-            URI courseDesignUpdateURI, String tracTracUsername, String tracTracPassword, ReceiverType... types);
+    Iterable<Receiver> getUpdateReceivers(DynamicTrackedRegatta trackedRegatta, IRace tractracRace, WindStore windStore,
+            long delayToLiveInMillis, Simulator simulator, DynamicRaceDefinitionSet raceDefinitionSetToUpdate, TrackedRegattaRegistry trackedRegattaRegistry, 
+            URI courseDesignUpdateURI, String tracTracUsername, 
+            String tracTracPassword, IEventSubscriber eventSubscriber, IRaceSubscriber raceSubscriber, ReceiverType... types);
 
     JSONService parseJSONURLWithRaceRecords(URL jsonURL, boolean loadClientParams) throws IOException, ParseException, org.json.simple.parser.ParseException, URISyntaxException;
 
@@ -249,26 +242,26 @@ public interface DomainFactory {
      */
     RaceDefinition getAndWaitForRaceDefinition(UUID raceId, long timeoutInMilliseconds);
 
-    Util.Pair<Iterable<com.sap.sailing.domain.base.Competitor>, BoatClass> getCompetitorsAndDominantBoatClass(Race race);
+    Util.Pair<Iterable<com.sap.sailing.domain.base.Competitor>, BoatClass> getCompetitorsAndDominantBoatClass(IRace race);
     
     RaceTrackingConnectivityParameters createTrackingConnectivityParameters(URL paramURL, URI liveURI, URI storedURI, URI courseDesignUpdateURI,
             TimePoint startOfTracking, TimePoint endOfTracking, long delayToLiveInMillis, boolean simulateWithStartTimeNow, RaceLogStore raceLogStore,
-            String tracTracUsername, String tracTracPassword, String raceStatus);
+            String tracTracUsername, String tracTracPassword, String raceStatus, String raceVisibility);
     /**
      * Removes all knowledge about <code>tractracRace</code> which includes removing it from the race cache, from the
      * {@link com.sap.sailing.domain.base.Regatta} and, if a {@link TrackedRace} for the corresponding
      * {@link RaceDefinition} exists, from the {@link TrackedRegatta}. If removing the race from the event, the event is
-     * removed from the event cache such that {@link #getOrCreateDefaultRegatta(Event, TrackedRegattaRegistry)} will have to create a new one. Similarly,
+     * removed from the event cache such that {@link #getOrCreateDefaultRegatta(IEvent, TrackedRegattaRegistry)} will have to create a new one. Similarly,
      * if the {@link TrackedRace} that was removed from the {@link TrackedRegatta} was the last one, the
      * {@link TrackedRegatta} is removed such that {@link #getOrCreateTrackedRegatta(com.sap.sailing.domain.base.Regatta)}
      * will have to create a new one.
      */
-    void removeRace(Event tractracEvent, Race tractracRace, TrackedRegattaRegistry trackedRegattaRegistry);
+    void removeRace(IEvent tractracEvent, IRace tractracRace, TrackedRegattaRegistry trackedRegattaRegistry);
 
     /**
      * Computes an ID to use for a {@link RaceDefinition} based on the TracTrac race.
      */
-    Serializable getRaceID(Race tractracRace);
+    Serializable getRaceID(IRace tractracRace);
 
     JSONService parseJSONURLForOneRaceRecord(URL jsonURL, String raceId, boolean loadClientParams) throws IOException, ParseException, org.json.simple.parser.ParseException, URISyntaxException;
 
@@ -277,5 +270,13 @@ public interface DomainFactory {
     BoatClass getDominantBoatClass(List<String> competitorClassNames);
 
     List<Sideline> createSidelines(String raceMetadataString, Iterable<? extends TracTracControlPoint> allEventControlPoints);
+
+    /**
+     * When a tracked race has been created for tracking with the TracTrac adapter, change listeners have to be subscribed to
+     * the {@link TrackedRace} which will notify certain changes to the race's state to TracTrac. This includes the course layout,
+     * the start time and whether a race was aborted.
+     */
+    void addTracTracUpdateHandlers(URI tracTracUpdateURI, UUID tracTracEventUuid, String tracTracUsername,
+            String tracTracPassword, RaceDefinition raceDefinition, DynamicTrackedRace trackedRace);
 
 }

@@ -11,29 +11,31 @@ import java.net.URL;
 import java.text.ParseException;
 import java.util.ArrayList;
 import java.util.Collection;
-import java.util.Collections;
 import java.util.HashSet;
 import java.util.List;
 import java.util.logging.Logger;
 
 import org.junit.After;
-import org.junit.Assert;
 import org.junit.Before;
 import org.junit.Rule;
 import org.junit.rules.Timeout;
 
-import com.maptrack.client.io.TypeController;
 import com.sap.sailing.domain.common.PassingInstruction;
 import com.sap.sailing.domain.tractracadapter.Receiver;
 import com.sap.sailing.domain.tractracadapter.TracTracConnectionConstants;
 import com.sap.sailing.domain.tractracadapter.TracTracControlPoint;
 import com.sap.sailing.domain.tractracadapter.impl.ControlPointAdapter;
-import com.sap.sse.common.Util;
-import com.tractrac.clientmodule.ControlPoint;
-import com.tractrac.clientmodule.Event;
-import com.tractrac.clientmodule.data.DataController;
-import com.tractrac.clientmodule.data.DataController.Listener;
-import com.tractrac.clientmodule.setup.KeyValue;
+import com.sap.sse.common.Util.Pair;
+import com.tractrac.model.lib.api.ModelLocator;
+import com.tractrac.model.lib.api.event.CreateModelException;
+import com.tractrac.model.lib.api.event.IEvent;
+import com.tractrac.model.lib.api.event.IRace;
+import com.tractrac.model.lib.api.route.IControl;
+import com.tractrac.subscription.lib.api.IEventSubscriber;
+import com.tractrac.subscription.lib.api.IRaceSubscriber;
+import com.tractrac.subscription.lib.api.ISubscriberFactory;
+import com.tractrac.subscription.lib.api.SubscriberInitializationException;
+import com.tractrac.subscription.lib.api.SubscriptionLocator;
 
 /**
  * Subclassing tests have to call {@link #addListenersForStoredDataAndStartController(Iterable)} to kick off
@@ -44,17 +46,16 @@ import com.tractrac.clientmodule.setup.KeyValue;
  * @author Axel Uhl (D043530)
  *
  */
-public abstract class AbstractTracTracLiveTest extends StoredTrackBasedTest implements Listener {
+public abstract class AbstractTracTracLiveTest extends StoredTrackBasedTest {
     private static final Logger logger = Logger.getLogger(AbstractTracTracLiveTest.class.getName());
     protected static final boolean tractracTunnel = Boolean.valueOf(System.getProperty("tractrac.tunnel", "false"));
     protected static final String tractracTunnelHost = System.getProperty("tractrac.tunnel.host", "localhost");
-    private Event event;
+    private IRace race;
+    private IEventSubscriber eventSubscriber;
+    private IRaceSubscriber raceSubscriber;
     private final Collection<Receiver> receivers;
     
-    private Thread ioThread;
-    private DataController controller;
-    
-    @Rule public Timeout AbstractTracTracLiveTestTimeout = new Timeout(2 * 60 * 1000);
+    @Rule public Timeout AbstractTracTracLiveTestTimeout = new Timeout(3 * 60 * 1000);
 
     protected AbstractTracTracLiveTest() throws URISyntaxException, MalformedURLException {
         receivers = new HashSet<Receiver>();
@@ -62,9 +63,11 @@ public abstract class AbstractTracTracLiveTest extends StoredTrackBasedTest impl
 
     /**
      * Default set-up for an STG training session in Weymouth, 2011
+     * @throws SubscriberInitializationException 
+     * @throws CreateModelException 
      */
     @Before
-    public void setUp() throws MalformedURLException, IOException, InterruptedException, URISyntaxException, ParseException {
+    public void setUp() throws MalformedURLException, IOException, InterruptedException, URISyntaxException, SubscriberInitializationException, ParseException, CreateModelException {
         final String eventID = "event_20110505_SailingTea";
         final String raceID = "bd8c778e-7c65-11e0-8236-406186cbf87c";
         setUp(getParamURL(eventID, raceID), getLiveURI(), getStoredURI());
@@ -83,10 +86,22 @@ public abstract class AbstractTracTracLiveTest extends StoredTrackBasedTest impl
                 "&race="+raceID);
     }
     
-    protected void setUp(URL paramUrl, URI liveUri, URI storedUri) throws FileNotFoundException, MalformedURLException {
+    protected IEventSubscriber getEventSubscriber() {
+        return eventSubscriber;
+    }
+
+    protected IRaceSubscriber getRaceSubscriber() {
+        return raceSubscriber;
+    }
+
+    protected void setUp(URL paramUrl, URI liveUri, URI storedUri) throws FileNotFoundException, MalformedURLException, URISyntaxException, SubscriberInitializationException, CreateModelException {
         // Read event data from configuration file
-        event = KeyValue.setup(paramUrl);
-        assertNotNull(event);
+        final IRace race = ModelLocator.getEventFactory().createRace(new URI(paramUrl.toString()));
+        this.race = race;
+        ISubscriberFactory subscriberFactory = SubscriptionLocator.getSusbcriberFactory();
+        eventSubscriber = subscriberFactory.createEventSubscriber(race.getEvent(), liveUri, storedUri);
+        raceSubscriber = subscriberFactory.createRaceSubscriber(race, liveUri, storedUri);
+        assertNotNull(race);
         // Initialize data controller using live and stored data sources
         if (storedUri.toString().startsWith("file:")) {
             try {
@@ -97,9 +112,7 @@ public abstract class AbstractTracTracLiveTest extends StoredTrackBasedTest impl
                 e.printStackTrace();
             }
         }
-        controller = new DataController(liveUri, storedUri, this);
-        // Start live and stored data streams
-        ioThread = new Thread(controller, "I/O for event "+event.getName()+", paramURL "+paramUrl);
+        // TODO Start live and stored data subscribers
         // test cases need to start the thread calling startController
         // after adding their listeners
     }
@@ -110,112 +123,43 @@ public abstract class AbstractTracTracLiveTest extends StoredTrackBasedTest impl
     
     protected void addListenersForStoredDataAndStartController(Iterable<Receiver> receivers) {
         for (Receiver receiver : receivers) {
-            this.receivers.add(receiver);
-            for (TypeController typeController : receiver.getTypeControllersAndStart()) {
-                getController().add(typeController);
-            }
+            receiver.subscribe();
         }
-        startController();
-    }
-    
-    /**
-     * Called when the {@link #storedDataEnd()} event was received. Adds the listeners
-     * returned to the {@link #getController() controller}, presumably for live data.
-     * This default implementation returns an empty iterable. Subclasses may override
-     * to return more.
-     */
-    protected Iterable<TypeController> getListenersForLiveData() {
-        return Collections.emptySet();
-    }
-
-    protected void startController() {
-        ioThread.start();
+        getEventSubscriber().start();
+        getRaceSubscriber().start();
     }
     
     @After
     public void tearDown() throws MalformedURLException, IOException, InterruptedException {
         logger.info("entering "+getClass().getName()+".tearDown()");
-        Thread.sleep(500); // wait a bit before stopping the controller; in earlier versions we did a web request to stop the
-        // simulator here; then, the ioThread joined flawlessly; aggressively stopping the controller doesn't let the ioThread join
-        if (getController() != null) // the controller (and the ioThread see below) are null if the data is being read from a local file.
-            controller.stop(/* abortStored */ true);
-    logger.info("successfully stopped controller");
-        try {
-            if (ioThread != null) {
-                ioThread.join(3000); // just wait a little bit, then give up
-            }
-        } catch (InterruptedException ex) {
-            Assert.fail(ex.getMessage());
-        }
-        logger.info("successfully joined ioThread");
         for (Receiver receiver : receivers) {
             receiver.stopPreemptively();
             logger.info("successfully stopped receiver "+receiver);
         }
+        getEventSubscriber().stop();
+        getRaceSubscriber().stop();
         logger.info("leaving "+getClass().getName()+".tearDown()");
     }
-
     
-    protected Event getTracTracEvent() {
-        return event;
+    protected IEvent getTracTracEvent() {
+        return race.getEvent();
+    }
+    
+    protected IRace getTracTracRace() {
+        return race;
     }
 
-    protected DataController getController() {
-        return controller;
-    }
-
-    @Override
-    public void liveDataConnected() {
-        System.out.println("Live data connected");
-    }
-
-    @Override
-    public void liveDataDisconnected() {
-        System.out.println("Live data disconnected");
-    }
-
-    @Override
-    public void stopped() {
-        System.out.println("stopped");
-    }
-
-    @Override
-    public void storedDataBegin() {
-        System.out.println("Stored data begin");
-    }
-
-    @Override
-    public void storedDataEnd() {
-        System.out.println("Stored data end");
-    }
-
-    @Override
-    public void storedDataProgress(float progress) {
-        System.out.println("Stored data progress: "+progress);
-        
-    }
-
-    @Override
-    public void storedDataError(String arg0) {
-        System.err.println("Error with stored data "+arg0);
-    }
-
-    @Override
-    public void liveDataConnectError(String arg0) {
-        System.err.println("Error with live data "+arg0);
-    }
-
-    public static Iterable<Util.Pair<TracTracControlPoint, PassingInstruction>> getTracTracControlPointsWithPassingInstructions(Iterable<ControlPoint> controlPoints) {
-        List<Util.Pair<TracTracControlPoint, PassingInstruction>> ttControlPoints = new ArrayList<Util.Pair<TracTracControlPoint, PassingInstruction>>();
-        for (com.tractrac.clientmodule.ControlPoint cp : controlPoints) {
-            ttControlPoints.add(new Util.Pair<TracTracControlPoint, PassingInstruction>(new ControlPointAdapter(cp), null));
+    public static Iterable<Pair<TracTracControlPoint, PassingInstruction>> getTracTracControlPointsWithPassingInstructions(Iterable<IControl> controlPoints) {
+        List<Pair<TracTracControlPoint, PassingInstruction>> ttControlPoints = new ArrayList<Pair<TracTracControlPoint, PassingInstruction>>();
+        for (IControl cp : controlPoints) {
+            ttControlPoints.add(new Pair<TracTracControlPoint, PassingInstruction>(new ControlPointAdapter(cp), null));
         }
         return ttControlPoints;
     }
     
-    public static Iterable<TracTracControlPoint> getTracTracControlPoints(Iterable<ControlPoint> controlPoints) {
+    public static Iterable<TracTracControlPoint> getTracTracControlPoints(Iterable<IControl> controlPoints) {
         List<TracTracControlPoint> ttControlPoints = new ArrayList<>();
-        for (com.tractrac.clientmodule.ControlPoint cp : controlPoints) {
+        for (IControl cp : controlPoints) {
             ttControlPoints.add(new ControlPointAdapter(cp));
         }
         return ttControlPoints;

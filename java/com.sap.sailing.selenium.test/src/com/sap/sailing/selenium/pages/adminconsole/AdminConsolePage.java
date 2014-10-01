@@ -1,14 +1,11 @@
 package com.sap.sailing.selenium.pages.adminconsole;
 
 import java.text.MessageFormat;
-import java.util.List;
 
 import org.openqa.selenium.By;
-import org.openqa.selenium.By.ByXPath;
 import org.openqa.selenium.WebDriver;
 import org.openqa.selenium.WebElement;
 import org.openqa.selenium.interactions.Actions;
-import org.openqa.selenium.support.CacheLookup;
 import org.openqa.selenium.support.ui.FluentWait;
 
 import com.sap.sailing.selenium.core.BySeleniumId;
@@ -29,41 +26,36 @@ import com.sap.sailing.selenium.pages.adminconsole.tractrac.TracTracEventManagem
  *   D049941
  */
 public class AdminConsolePage extends HostPage {
-    private enum ScrollDirection {
-        Left {
-            @Override
-            public By getBy() {
-                return By.className("gwt-ScrolledTabLayoutPanel-scrollLeft");
-            }
-        },
-        Rigth {
-            @Override
-            public By getBy() {
-                return By.className("gwt-ScrolledTabLayoutPanel-scrollRight");
-            }
-        };
-        
-        public abstract By getBy();
-    }
-    
     private static final String PAGE_TITLE = "SAP Sailing Analytics Administration Console"; //$NON-NLS-1$
     
     private static final MessageFormat TAB_EXPRESSION = new MessageFormat(
             ".//div[contains(@class, \"gwt-TabLayoutPanelTabInner\")]/div[text()=\"{0}\"]/../..");
     
+    private static final MessageFormat VERTICAL_TAB_EXPRESSION = new MessageFormat(
+            ".//div[contains(@class, \"gwt-VerticalTabLayoutPanelTabInner\")]/div[text()=\"{0}\"]/../..");
+    
     private static final String REGATTA_STRUCTURE_TAB_LABEL = "Regattas"; //$NON-NLS-1$
     private static final String REGATTA_STRUCTURE_TAB_IDENTIFIER = "RegattaStructureManagement"; //$NON-NLS-1$
+    
+    private static final String TRACTRAC_EVENTS_TAB_PARENT_LABEL = "Connectors";
+    private static final String TRACTRAC_EVENTS_TAB_PARENT_IDENTIFIER = "TrackingProviderPanel";
     
     private static final String TRACTRAC_EVENTS_TAB_LABEL = "TracTrac Events"; //$NON-NLS-1$
     private static final String TRACTRAC_EVENTS_TAB_IDENTIFIER = "TracTracEventManagement"; //$NON-NLS-1$
     
+    private static final String TRACKED_RACES_TAB_PARENT_LABEL = "Races"; //$NON-NLS-1$
+    private static final String TRACKED_RACES_TAB_PARENT_IDENTIFIER = "RacesPanel"; //$NON-NLS-1$
+    
     private static final String TRACKED_RACES_TAB_LABEL = "Tracked races"; //$NON-NLS-1$
     private static final String TRACKED_RACES_TAB_IDENTIFIER = "TrackedRacesManagement"; //$NON-NLS-1$
+    
+    private static final String LEADERBOARD_CONFIGURATION_TAB_PARENT_LABEL = "Leaderboards"; //$NON-NLS-1$
+    private static final String LEADERBOARD_CONFIGURATION_TAB_PARENT_IDENTIFIER = "LeaderboardPanel"; //$NON-NLS-1$
     
     private static final String LEADERBOARD_CONFIGURATION_TAB_LABEL = "Leaderboard Configuration"; //$NON-NLS-1$
     private static final String LEADERBOARD_CONFIGURATION_TAB_IDENTIFIER = "LeaderboardConfiguration"; //$NON-NLS-1$
     
-    private static final String LEADERBOARD_GROUP_CONFIGURATION_TAB_LABEL = "Leaderboard Group Configuration"; //$NON-NLS-1$
+    private static final String LEADERBOARD_GROUP_CONFIGURATION_TAB_LABEL = "Leaderboard groups"; //$NON-NLS-1$
     private static final String LEADERBOARD_GROUP_CONFIGURATION_TAB_IDENTIFIER = "LeaderboardGroupConfiguration"; //$NON-NLS-1$
     
     /**
@@ -95,15 +87,7 @@ public class AdminConsolePage extends HostPage {
     }
     
     @FindBy(how = BySeleniumId.class, using = "AdministrationTabs")
-    private WebElement tabPanel;
-    
-    @CacheLookup
-    @FindBy(how = ByXPath.class, using = ".//div[contains(@class, \"gwt-TabLayoutPanelTabs\")]")
-    private WebElement tabsContainer;
-    
-    @CacheLookup
-    @FindBy(how = ByXPath.class, using = ".//div[contains(@class, \"gwt-TabLayoutPanelTabInner\")]")
-    private List<WebElement> tabs;
+    private WebElement administrationTabPanel;
     
     private AdminConsolePage(WebDriver driver) {
         super(driver);
@@ -111,7 +95,7 @@ public class AdminConsolePage extends HostPage {
     
     public RegattaStructureManagementPanelPO goToRegattaStructure() {
         return new RegattaStructureManagementPanelPO(this.driver, goToTab(REGATTA_STRUCTURE_TAB_LABEL,
-                REGATTA_STRUCTURE_TAB_IDENTIFIER));
+                REGATTA_STRUCTURE_TAB_IDENTIFIER, true));
     }
     
     /**
@@ -122,23 +106,27 @@ public class AdminConsolePage extends HostPage {
      *   The page object for the TracTracEvents tab.
      */
     public TracTracEventManagementPanelPO goToTracTracEvents() {
+        goToTab(TRACTRAC_EVENTS_TAB_PARENT_LABEL, TRACTRAC_EVENTS_TAB_PARENT_IDENTIFIER, true);
         return new TracTracEventManagementPanelPO(this.driver, goToTab(TRACTRAC_EVENTS_TAB_LABEL,
-                TRACTRAC_EVENTS_TAB_IDENTIFIER));
+                TRACTRAC_EVENTS_TAB_IDENTIFIER, false));
     }
     
     public TrackedRacesManagementPanelPO goToTrackedRaces() {
+        goToTab(TRACKED_RACES_TAB_PARENT_LABEL, TRACKED_RACES_TAB_PARENT_IDENTIFIER, true);
         return new TrackedRacesManagementPanelPO(this.driver, goToTab(TRACKED_RACES_TAB_LABEL,
-                TRACKED_RACES_TAB_IDENTIFIER));
+                TRACKED_RACES_TAB_IDENTIFIER, false));
     }
     
     public LeaderboardConfigurationPanelPO goToLeaderboardConfiguration() {
+        goToTab(LEADERBOARD_CONFIGURATION_TAB_PARENT_LABEL, LEADERBOARD_CONFIGURATION_TAB_PARENT_IDENTIFIER, true);
         return new LeaderboardConfigurationPanelPO(this.driver, goToTab(LEADERBOARD_CONFIGURATION_TAB_LABEL,
-                LEADERBOARD_CONFIGURATION_TAB_IDENTIFIER));
+                LEADERBOARD_CONFIGURATION_TAB_IDENTIFIER, false));
     }
     
     public LeaderboardGroupConfigurationPanelPO goToLeaderboardGroupConfiguration() {
+        goToTab(LEADERBOARD_CONFIGURATION_TAB_PARENT_LABEL, LEADERBOARD_CONFIGURATION_TAB_PARENT_IDENTIFIER, true);
         return new LeaderboardGroupConfigurationPanelPO(this.driver, goToTab(LEADERBOARD_GROUP_CONFIGURATION_TAB_LABEL,
-                LEADERBOARD_GROUP_CONFIGURATION_TAB_IDENTIFIER));
+                LEADERBOARD_GROUP_CONFIGURATION_TAB_IDENTIFIER, false));
     }
     
     /**
@@ -151,103 +139,26 @@ public class AdminConsolePage extends HostPage {
         }
     }
     
-    private WebElement goToTab(String label, final String id) {
+    private WebElement goToTab(String label, final String id, boolean isVertical) {
         String expression = TAB_EXPRESSION.format(new Object[] {label});
-        WebElement tab = this.tabPanel.findElement(By.xpath(expression));
-        
-        ScrollDirection direction = getScrollDirection(tab);
-        
-        if(direction != null) {
-            WebElement scroller = this.tabPanel.findElement(direction.getBy());
-            
-            while(!tab.isDisplayed() && scroller.isDisplayed()) {
-                scrollAndWait(scroller);
-            }
-            
-            
-            
-            // Workaround for "Offset within element cannot be scrolled into view: (-1, 5)".
-            // We try to scroll one more time to make the tab completely visible
-            //
-            // TODO: Create a bug report for this!
-            int tabIndex = (direction == ScrollDirection.Left ? getFirstVisibleTabIndex() : getLastVisibleTabIndex());
-            
-            if(scroller.isDisplayed() && getTabIndex(tab) == tabIndex) {
-                scrollAndWait(scroller);
-            }
-                
+        if (isVertical) {
+            expression = VERTICAL_TAB_EXPRESSION.format(new Object[] {label});
         }
-        
+        WebElement tab = this.administrationTabPanel.findElement(By.xpath(expression));
         // We have to determine the location where we have to click at the tab for the case its not completely visible.
         // NOTE: We assume that the browser window is big enough to display at least 2 tabs!
         Actions actions = new Actions(this.driver);
         actions.moveToElement(tab, determineOffsetForClick(tab), 5);
         actions.click();
         actions.perform();
-        
         // Wait for the tab to become visible due to the used animations.
-        FluentWait<WebElement> wait = createFluentWait(this.tabPanel);
+        FluentWait<WebElement> wait = createFluentWait(this.administrationTabPanel);
         WebElement content = wait.until(ElementSearchConditions.visibilityOfElementLocated(new BySeleniumId(id)));
-        
+        waitForAjaxRequests(); // switching tabs can trigger asynchronous updates, replacing UI elements
         return content;
     }
     
-    private ScrollDirection getScrollDirection(WebElement tab) {
-        int tabIndex = getTabIndex(tab);
-        
-        if(tabIndex < getFirstVisibleTabIndex())
-            return ScrollDirection.Left;
-        
-        if(tabIndex > getLastVisibleTabIndex())
-            return ScrollDirection.Rigth;
-        
-        return null;
-    }
-    
-    private void scrollAndWait(WebElement scroller) {
-        WebElement arrow = scroller.findElement(By.tagName("img"));
-        arrow.click();
-        
-        // TODO: Find a better solution with ImplicitWait
-        try {
-            Thread.sleep(500L);
-        } catch (InterruptedException exception) {
-        }
-    }
-    
-    private int getTabIndex(WebElement tab) {
-        return tab.findElements(By.xpath("./preceding-sibling::div")).size();
-    }
-    
-    private int getFirstVisibleTabIndex() {
-        for(int i = 0; i <= this.tabs.size() - 1; i++) {
-            if(this.tabs.get(i).isDisplayed()) {
-                return i;
-            }
-        }
-        
-        return -1;
-    }
-    
-    private int getLastVisibleTabIndex() {
-        for(int i = this.tabs.size() - 1; i >= 0; i--) {
-            if(this.tabs.get(i).isDisplayed()) {
-                return i;
-            }
-        }
-        
-        return -1;
-    }
-    
     private int determineOffsetForClick(WebElement tab) {
-        int tabIndex = getTabIndex(tab);
-        
-        if(tabIndex == getFirstVisibleTabIndex())
-            return -1;
-        
-        if(tabIndex == getLastVisibleTabIndex())
-            return +1;
-        
         return tab.getSize().width / 2;
     }
 }

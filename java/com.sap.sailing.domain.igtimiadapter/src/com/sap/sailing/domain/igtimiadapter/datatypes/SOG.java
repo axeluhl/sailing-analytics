@@ -4,13 +4,14 @@ import java.util.Map;
 
 import com.sap.sailing.domain.common.Speed;
 import com.sap.sailing.domain.common.TimePoint;
-import com.sap.sailing.domain.common.impl.KnotSpeedImpl;
+import com.sap.sailing.domain.common.impl.KilometersPerHourSpeedImpl;
 import com.sap.sailing.domain.igtimiadapter.IgtimiFixReceiver;
 import com.sap.sailing.domain.igtimiadapter.Sensor;
 
 /**
- * Speed over ground
+ * Speed over ground expressed in kilometers per hour
  * 
+ * @see AWS
  * @author Axel Uhl (d043530)
  *
  */
@@ -20,7 +21,7 @@ public class SOG extends Fix {
     
     public SOG(TimePoint timePoint, Sensor sensor, Map<Integer, Object> valuesPerSubindex) {
         super(sensor, timePoint);
-        speedOverGround = new KnotSpeedImpl(((Number) valuesPerSubindex.get(1)).doubleValue());
+        speedOverGround = new KilometersPerHourSpeedImpl(((Number) valuesPerSubindex.get(1)).doubleValue());
     }
 
     public Speed getSpeedOverGround() {

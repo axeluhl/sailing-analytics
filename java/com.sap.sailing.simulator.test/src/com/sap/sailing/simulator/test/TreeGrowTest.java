@@ -8,19 +8,21 @@ import junit.framework.Assert;
 
 import org.junit.Test;
 
+import com.sap.sailing.domain.common.Duration;
 import com.sap.sailing.domain.common.Position;
 import com.sap.sailing.domain.common.SpeedWithBearing;
 import com.sap.sailing.domain.common.TimePoint;
 import com.sap.sailing.domain.common.impl.DegreeBearingImpl;
 import com.sap.sailing.domain.common.impl.DegreePosition;
 import com.sap.sailing.domain.common.impl.KnotSpeedWithBearingImpl;
+import com.sap.sailing.domain.common.impl.MillisecondsDurationImpl;
 import com.sap.sailing.domain.common.impl.MillisecondsTimePoint;
 import com.sap.sailing.simulator.Path;
 import com.sap.sailing.simulator.PolarDiagram;
 import com.sap.sailing.simulator.SimulationParameters;
-import com.sap.sailing.simulator.impl.PathGeneratorTreeGrowWind3;
+import com.sap.sailing.simulator.impl.PathGeneratorTreeGrowWind;
 import com.sap.sailing.simulator.impl.PolarDiagram49STG;
-import com.sap.sailing.simulator.impl.RectangularBoundary;
+import com.sap.sailing.simulator.impl.RectangularGrid;
 import com.sap.sailing.simulator.impl.SimulationParametersImpl;
 import com.sap.sailing.simulator.util.SailingSimulatorConstants;
 import com.sap.sailing.simulator.windfield.WindControlParameters;
@@ -42,8 +44,8 @@ public class TreeGrowTest {
         course.add(start);
         course.add(end);
         PolarDiagram pd = new PolarDiagram49STG();//PolarDiagram49.CreateStandard49();
-        RectangularBoundary bd = new RectangularBoundary(start, end, 0.1);
-        Position[][] positions = bd.extractGrid(10, 10, 0, 0);
+        RectangularGrid bd = new RectangularGrid(start, end);
+        Position[][] positions = bd.generatePositions(10, 10, 0, 0);
         //RectangularBoundary new_bd = new RectangularBoundary(start, end, 0.1);
         //Speed knotSpeed = new KnotSpeedImpl(8);
         WindControlParameters windParameters = new WindControlParameters(12, start.getBearingGreatCircle(end).reverse().getDegrees());
@@ -51,7 +53,7 @@ public class TreeGrowTest {
         wf.setPositionGrid(positions);
         Date startDate = new Date(0);
         TimePoint startTime = new MillisecondsTimePoint(startDate.getTime());
-        TimePoint timeStep = new MillisecondsTimePoint(20000);
+        Duration timeStep = new MillisecondsDurationImpl(20000);
         wf.generate(startTime, null, timeStep);
         SimulationParameters param = new SimulationParametersImpl(course, pd, wf, SailingSimulatorConstants.ModeFreestyle, true, true);
 
@@ -60,7 +62,7 @@ public class TreeGrowTest {
         param.setProperty("Djikstra.gridv[int]", 10.0);
         param.setProperty("Djikstra.gridh[int]", 100.0);*/
 
-        PathGeneratorTreeGrowWind3 treeGrow = new PathGeneratorTreeGrowWind3(param);
+        PathGeneratorTreeGrowWind treeGrow = new PathGeneratorTreeGrowWind(param);
 
         Path path = treeGrow.getPath();
 

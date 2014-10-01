@@ -30,6 +30,8 @@ body ::-webkit-scrollbar-track {
   background: #b6b6b6;
   -webkit-border-radius: 5px;
   -moz-border-radius: 5px;
+  -o-border-radius: 5px;
+  -ms-border-radius: 5px;
   border-radius: 5px;
   overflow: hidden;
   border: 1px solid #aaaaaa;
@@ -41,6 +43,8 @@ body ::-webkit-scrollbar-track {
   margin: 12px;
   -webkit-border-radius: 5px;
   -moz-border-radius: 5px;
+  -o-border-radius: 5px;
+  -ms-border-radius: 5px;
   border-radius: 5px;
   width: auto !important;
   border: 1px solid #aaaaaa;
@@ -54,9 +58,13 @@ body ::-webkit-scrollbar-track {
   position: relative;
   -webkit-border-top-left-radius: 4px;
   -moz-border-top-left-radius: 4px;
+  -o-border-top-left-radius: 4px;
+  -ms-border-top-left-radius: 4px;
   border-top-left-radius: 4px;
   -webkit-border-top-right-radius: 4px;
   -moz-border-top-right-radius: 4px;
+  -o-border-top-right-radius: 4px;
+  -ms-border-top-right-radius: 4px;
   border-top-right-radius: 4px;
 }
 
@@ -136,10 +144,6 @@ body ::-webkit-scrollbar-track {
   color:#A1A1A1;
   }
 
-.gwt-SplitLayoutPanel-HDragger {
-  width: 20px;
-}
-
 .gwt-ToggleButton {
   background: url(images/btn-cta-orangeleft.png) center top repeat-x;
   padding: 8px;
@@ -152,18 +156,179 @@ body ::-webkit-scrollbar-track {
   color: #fff;
 }
 
-.gwt-SplitLayoutPanel-HDragger {
-  width: 12px;
+.gwt-SplitLayoutPanel-NorthSouthToggleButton-Panel {
+	position: absolute;
+	right: 10px;
+	top: 3px;
+}
+
+.gwt-SplitLayoutPanel-EastToggleButton-Panel {
+	position: absolute;
+	bottom: 77px;
+	margin-left: -35px;
+}
+
+.gwt-SplitLayoutPanel-EastToggleButton {
+	height: 40px;
+    background-color: white;
+    border: none;
+    -webkit-transform: rotate(-90deg);
+    -moz-transform: rotate(-90deg);
+    -o-transform: rotate(-90deg);
+    -ms-transform: rotate(-90deg);
+	padding-right: 25px;
+	padding-left: 30px;
+	margin-left: -15px;
+	border-bottom: 1px solid #cecece;
+	border-right: 1px solid #cecece;
+	border-left: 1px solid #cecece;
+	border-bottom-right-radius: 10px;
+    border-bottom-left-radius: 10px;
+}
+
+.gwt-SplitLayoutPanel-EastToggleButton-Open {
+	background: white url(images/arrows_top_black_small.png) 96% 50% no-repeat;
+}
+
+.gwt-SplitLayoutPanel-EastToggleButton-Closed {
+	background: white url(images/arrows_bottom_black_small.png) 96% 50% no-repeat;
+}
+
+.gwt-SplitLayoutPanel-EastToggleButton:hover {
+	background-color: #ececec;
+}
+
+.gwt-SplitLayoutPanel-EastToggleButton:focus {
+	outline:0 !important;
+}
+
+.gwt-SplitLayoutPanel-NorthSouthToggleButton {
+    height: 33px;
+    background-color: #fff;
+    border: 1px solid #cecece;
+    margin-left: 5px;
+	padding: 2px 40px;
+	border-radius: 7px;
+	margin-top: 0px;
+}
+
+.gwt-SplitLayoutPanel-NorthSouthToggleButton-Closed {
+	background: white url(images/arrows_top_black_small.png) 95% 50% no-repeat;
+	font-weight: normal;
+}
+	
+.gwt-SplitLayoutPanel-NorthSouthToggleButton-Open {
+	background: white url(images/arrows_bottom_black_small.png) 95% 50% no-repeat;
+	font-weight: bold;
+	border-width: 3px;
+}
+	
+.gwt-SplitLayoutPanel-NorthSouthToggleButton:focus {
+	outline:0 !important;
+}
+
+.gwt-SplitLayoutPanel-NorthSouthToggleButton:hover {
+	background-color: #ececec;
 }
 
 .gwt-SplitLayoutPanel-HDragger {
-  background: #cbcaca url(images/thumb_vertical.png) center center no-repeat;
-  cursor: col-resize;
+	position: absolute;
+	height: 60px !important;
+	width: 25px !important;
+	margin-left: 3px;
+	top: 40% !important;
+	background: #ffffff url(images/thumb_vertical.png) 70% 50% no-repeat;
+	border: 2px solid #cecece;
+	border-left: 0px;
+	cursor: col-resize;
+	border-top-right-radius: 25px;
+	border-bottom-right-radius: 25px;
+	z-index: 1;
+}
+
+.SplitLayoutPanel-Divider-Horizontal {
+	background: #ffffff;
+}
+
+.SplitLayoutPanel-Divider-Vertical {
+	background: #ffffff;
+	border-top: 1px solid #cecece;
 }
 
 .gwt-SplitLayoutPanel-VDragger {
-  background: #cbcaca url(images/thumb_horz.png) center center no-repeat;
-  cursor: row-resize;
+	position: absolute;
+	width: 60px !important;
+	height: 21px !important;
+	left: 48% !important;
+	top: 2px !important;
+	background: #ffffff url(images/thumb_horz.png) 50% 30% no-repeat;
+	cursor: row-resize;
+	border: 2px solid #cecece;
+	border-bottom: 0px;
+	border-top-left-radius: 25px;
+	border-top-right-radius: 25px;
+	opacity: .7;
+	z-index: 1;
+}
+
+.gwt-SplitLayoutPanel-CloseAndSettingsButton-Panel {
+	position: absolute;
+	right: 2px;
+	top: 2px;
+	z-index: 1;
+}
+
+.gwt-SplitLayoutPanel-CloseButton {
+	margin-left: 10px;
+	border-top-left-radius: 25px;
+	border-top-right-radius: 25px;
+	border-bottom-left-radius: 25px;
+	border-bottom-right-radius: 25px;
+	background: white url(images/close_black.png) center no-repeat;
+	z-index: 1;
+	width: 28px;
+	height: 28px;
+	cursor: pointer;
+}
+
+.gwt-SplitLayoutPanel-CloseButton:focus {
+	outline:0 !important;
+}
+
+.gwt-SplitLayoutPanel-CloseButton:hover {
+	background-color: #ececec;
+}
+
+.gwt-SettingsButton {
+	border: none;
+	background: grey url(images/SAP_RV_Settings.png) center no-repeat;
+	z-index: 1;
+	width: 28px;
+	height: 28px;
+	cursor: pointer;
+}
+
+.gwt-SettingsButton:hover {
+	background-color: #cecece;
+}
+
+.gwt-SettingsButton:focus {
+	outline: 0 !important;
+}
+
+.gwt-MapSettingsButton {
+	margin-right: 30px;
+	margin-top: 5px;
+	border-top-left-radius: 25px;
+	border-top-right-radius: 25px;
+	border-bottom-left-radius: 25px;
+	border-bottom-right-radius: 25px;
+	border: none;
+	background: white url(images/SAP_RV_SettingsBlack.png) center no-repeat;
+	z-index: 1;
+	width: 28px;
+	height: 28px;
+	cursor: pointer;
 }
 
 .gwt-ToggleButton-up-hovering, .gwt-ToggleButton-down-hovering {
@@ -310,15 +475,13 @@ body ::-webkit-scrollbar-track {
 }
 
 .timeLinePanel {
-  color: #fff;
+  color: black;
   width: 100%;
   position: fixed;
   bottom: 0;
   z-index: 9;
-  background: #7c7b7c;
-  box-shadow: 0 0 20px #858585;
-  -webkit-box-shadow: 0 0 20px #858585;
-  -moz-box-shadow: 0 0 20px #858585;
+  background: #f6f6f6;
+  border-top: 2px solid #cecece;
 }
 
 .timeLineInnerBgPanel {
@@ -337,8 +500,6 @@ body ::-webkit-scrollbar-track {
 .timePanel-controls {
     margin: 0;
     padding: 7px 12px 0 12px;
-    -webkit-box-shadow: 0px -7px 8px 0px rgba(84, 84, 84, 1);
-    box-shadow: 0px -7px 8px 0px rgba(84, 84, 84, 1);
     height: 29px;
 }
 
@@ -348,6 +509,13 @@ body ::-webkit-scrollbar-track {
     border-right: 1px solid #fcbb22;
     height: 24px;
     margin: 0 14px 0 0;
+}
+
+.timePanel-timeslider-play {
+    float:left;
+    padding: 10px 4px;
+    height: 24px;
+    margin: 5px 14px 5px 0;
 }
 
 .timePanel-controls-playSpeed {
@@ -388,7 +556,7 @@ body ::-webkit-scrollbar-track {
 
 .timePanel-controls-timeDelay {
   float: right;
-  margin: 0 10px 0 0;
+  margin: 0 50px 0 0;
 }
 
 .timePanel-controls-playmode{
@@ -414,8 +582,6 @@ body ::-webkit-scrollbar-track {
 }
 
 .timePanelInnerWrapper {
-    -webkit-box-shadow: inset 0px -7px 13px 0px rgba(84, 84, 84, 1);
-    box-shadow: inset 0px -7px 13px 0px rgba(84, 84, 84, 1);
 }
 
 
@@ -431,6 +597,8 @@ body ::-webkit-scrollbar-track {
     box-shadow: 0 0 20px #858585;
     -moz-box-shadow: 0 0 20px #858585;
     -webkit-box-shadow: 0 0 20px #858585;
+    -o-box-shadow: 0 0 20px #858585;
+    -ms-box-shadow: 0 0 20px #858585;
     z-index: 1;
 }
 
@@ -449,7 +617,7 @@ body ::-webkit-scrollbar-track {
     right:0;
 }
 
-.globalNavigationLink, .globalNavigationLink:visited {
+.globalNavigation-Link, .globalNavigation-Link:visited {
   font-family: OpenSansSemiBold, Verdana, Arial, sans-serif;
     border: none;
     display: inline-block;
@@ -469,13 +637,13 @@ body ::-webkit-scrollbar-track {
     white-space: nowrap;
 }
 
-.globalNavigationLink:active {
+.globalNavigation-Link:active {
     top: 1px;
     position: relative;
     border: none;
 }
 
-.globalNavigationLink:hover {
+.globalNavigation-Link:hover {
   background: url(images/btn-cta-orangeleft.png) center -30px repeat-x;
     cursor: pointer;
 }
@@ -530,12 +698,17 @@ body ::-webkit-scrollbar-track {
 
 .gwt-DialogBox .Caption {
     font-size: 14px;
-    padding: 14px 10px;
-    background: url(images/dialogBox-bg.png) 0 0 repeat-x;
+    padding: 8px 10px;
+    background-color: #cecece;
+    border: 1px solid #cecece;
     -webkit-border-top-left-radius: 5px;
   -webkit-border-top-right-radius: 5px;
   -moz-border-radius-topleft: 5px;
   -moz-border-radius-topright: 5px;
+  -o-border-radius-topleft: 5px;
+  -o-border-radius-topright: 5px;
+  -ms-border-radius-topleft: 5px;
+  -ms-border-radius-topright: 5px;
   border-top-left-radius: 5px;
   border-top-right-radius: 5px;
   font-family: OpenSansSemiBold, Verdana, Arial, sans-serif;
@@ -544,9 +717,13 @@ body ::-webkit-scrollbar-track {
 .gwt-DialogBox .dialogContent {
     background: #ffffff;
     padding: 10px;
-    border: 10px solid #a6a6a6;
+    border: 1px solid #cecece;
   -webkit-border-bottom-right-radius: 5px;
   -webkit-border-bottom-left-radius: 5px;
+  -o-border-bottom-right-radius: 5px;
+  -o-border-bottom-left-radius: 5px;
+  -ms-border-bottom-right-radius: 5px;
+  -ms-border-bottom-left-radius: 5px;
   -moz-border-radius-bottomright: 5px;
   -moz-border-radius-bottomleft: 5px;
   border-bottom-right-radius: 5px;
@@ -556,23 +733,26 @@ body ::-webkit-scrollbar-track {
 .gwt-Button, .gwt-Button:visited {
   font-family: OpenSansSemiBold, Verdana, Arial, sans-serif;
   border: none;
-
-    background: url(images/btn-cta-orangeleft.png) center top repeat-x;
+  background: url(images/btn-cta-orangeleft.png) center top repeat-x;
     display: inline-block;
     padding: 2px 10px 4px;
     color: #fff;
     text-decoration: none;
     -moz-border-radius: 5px;
     -webkit-border-radius: 5px;
+    -o-border-radius: 5px;
+    -ms-border-radius: 5px;
     border-radius: 5px;
-    -moz-box-shadow: 0 1px 3px rgba(0, 0, 0, 0.3);
-    -webkit-box-shadow: 0 1px 3px rgba(0, 0, 0, 0.3);
-    box-shadow: 0 1px 3px rgba(0, 0, 0, 0.3);
-    text-shadow: 0 -1px 1px rgba(0, 0, 0, 0.25);
     border-bottom: 1px solid rgba(0, 0, 0, 0.25);
     cursor: pointer;
     height: 24px;
     white-space: nowrap;
+    -moz-box-shadow: 0 1px 3px rgba(0, 0, 0, 0.3);
+	-webkit-box-shadow: 0 1px 3px rgba(0, 0, 0, 0.3);
+	-o-box-shadow: 0 1px 3px rgba(0, 0, 0, 0.3);
+	-ms-box-shadow: 0 1px 3px rgba(0, 0, 0, 0.3);
+	box-shadow: 0 1px 3px rgba(0, 0, 0, 0.3);
+	text-shadow: 0 -1px 1px rgba(0, 0, 0, 0.25);
 }
 
 .gwt-Button:active {
@@ -593,6 +773,8 @@ body ::-webkit-scrollbar-track {
   border: 1px solid #919090;
   -moz-box-shadow: none;
   -webkit-box-shadow: none;
+  -o-box-shadow: none;
+  -ms-box-shadow: none;
   box-shadow: none;
   border: none;
   text-shadow: none;
@@ -652,7 +834,6 @@ body ::-webkit-scrollbar-track {
 }
 
 .SettingsDialogComponent .dialogInnerHeadline {
-    background: url(images/settingsDialog_bg.png) repeat-x 0 0 #E5E5E5;
     border: 1px solid #CCCCCC;
     font-family: OpenSansSemiBold,Arial,Verdana,sans-serif;
     height: 21px;
@@ -660,6 +841,8 @@ body ::-webkit-scrollbar-track {
     border-radius: 3px;
     -moz-border-radius: 3px;
     -webkit-border-radius: 3px;
+    -o-border-radius: 3px;
+    -ms-border-radius: 3px;
     margin: 0 0 10px 0;
 }
 
@@ -736,4 +919,49 @@ video {
 .pointeredLink {
   cursor: pointer;
   cursor: hand;
+}
+
+.betterCheckboxCellSelected {
+	margin: 0px;
+	height: 18px;
+	width: 18px;
+	border: 1px;
+	background-color: #acacac;
+	vertical-align: middle;
+}
+
+.betterCheckboxCellDeselected {
+	margin-left: 2px; /* account for the selection border that pushes a selected checkbox to the side */
+	margin-top: 0px;
+	margin-bottom: 0px;
+	margin-right: 0px;
+	border: 1px;
+	height: 18px;
+	width: 18px;
+	vertical-align: middle;
+}
+
+.LeaderboardPanel-FilterControl-Panel {
+	width: 380px;
+	border-top: 1px solid #ececec;
+    margin-top: 3px;
+}
+
+.LeaderboardPanel-FilterClear-Button {
+    margin-top: 2px;
+    font-size: 10px;
+    outline: 0;
+    height: 23px;
+	background-color: #fff;
+    border: 1px solid #cecece;
+    border-radius: 7px;
+}
+
+.LeaderboardPanel-FilterClear-Button:hover {
+	background-color: #ececec;
+}
+
+.LeaderboardPanel-FilterControl-StatusLabel {
+	padding: 8px 2px;
+	font-size: 10px;
 }

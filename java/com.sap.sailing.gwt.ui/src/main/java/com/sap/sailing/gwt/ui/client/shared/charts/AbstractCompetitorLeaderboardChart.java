@@ -42,6 +42,8 @@ import com.sap.sailing.gwt.ui.client.StringMessages;
 import com.sap.sailing.gwt.ui.client.shared.components.AbstractLazyComponent;
 import com.sap.sailing.gwt.ui.client.shared.components.Component;
 import com.sap.sse.common.Util;
+import com.sap.sse.common.filter.Filter;
+import com.sap.sse.common.filter.FilterSet;
 import com.sap.sse.gwt.client.async.AsyncActionsExecutor;
 import com.sap.sse.gwt.client.player.TimeListener;
 import com.sap.sse.gwt.client.player.Timer;
@@ -150,7 +152,7 @@ public abstract class AbstractCompetitorLeaderboardChart<SettingsType> extends A
                 chart.getYAxis().setReversed(true);
                 chart.getYAxis().setTickInterval(1.0);
                 break;
-            case REGATTA_TOTAL_POINTS:
+            case REGATTA_TOTAL_POINTS_SUM:
                 chart.getYAxis().setTickInterval(5.0);
                 chart.getYAxis().setReversed(false);
                 break;
@@ -231,12 +233,12 @@ public abstract class AbstractCompetitorLeaderboardChart<SettingsType> extends A
                         setWidget(chart);
                         raceColumnNames.clear();
                         
-                        switch(selectedDetailType) {
+                        switch (selectedDetailType) {
                         case OVERALL_RANK:
                         case REGATTA_RANK:
                             fillTotalRanksSeries(result, chartSeries);
                             break;
-                        case REGATTA_TOTAL_POINTS:
+                        case REGATTA_TOTAL_POINTS_SUM:
                             fillTotalPointsSeries(result, chartSeries);
                             break;
                         default:
@@ -298,7 +300,9 @@ public abstract class AbstractCompetitorLeaderboardChart<SettingsType> extends A
         chart.setHeight(maxCompetitorCount * 30 + 100 + "px");
     }
 
-    private void fillTotalPointsSeries(List<com.sap.sse.common.Util.Triple<String, List<CompetitorDTO>, List<Double>>> result, List<Series> chartSeries) {
+    private void fillTotalPointsSeries(
+            List<com.sap.sse.common.Util.Triple<String, List<CompetitorDTO>, List<Double>>> result,
+            List<Series> chartSeries) {
         Double maxTotalPoints = 0.0;
         Set<Series> unusedSeries = new HashSet<Series>(competitorSeries.values());
         for (Series series : competitorSeries.values()) {
@@ -308,11 +312,10 @@ public abstract class AbstractCompetitorLeaderboardChart<SettingsType> extends A
         }
         int raceColumnNumber = 0;
         int maxCompetitorCount = 0;
-        Map<CompetitorDTO, Double> sumTotalPointsMap = new HashMap<CompetitorDTO, Double>();
         for (com.sap.sse.common.Util.Triple<String, List<CompetitorDTO>, List<Double>> entry : result) {
             List<Double> dataValues = entry.getC();
             raceColumnNames.add(entry.getA());
-            if(hasValidValues(dataValues)) {
+            if (hasValidValues(dataValues)) {
                 raceColumnNamesWithData.add(entry.getA());
                 int index = 0;
                 maxCompetitorCount = Math.max(maxCompetitorCount, entry.getB().size());
@@ -320,18 +323,13 @@ public abstract class AbstractCompetitorLeaderboardChart<SettingsType> extends A
                     if (isCompetitorVisible(competitor)) {
                         Series series = getOrCreateSeries(competitor);
                         Double dataValue = dataValues.get(index);
-                        if(dataValue != null) {
+                        if (dataValue != null) {
                             Double sumTotalPoints = dataValue;
-                            if(sumTotalPointsMap.containsKey(competitor)) {
-                                sumTotalPoints += sumTotalPointsMap.get(competitor);
-                            } 
-                            sumTotalPointsMap.put(competitor, sumTotalPoints);
                             series.addPoint(raceColumnNumber, sumTotalPoints, /* redraw */ false, /* shift */ false, /* animation */ false);
-                            if(sumTotalPoints > maxTotalPoints) {
+                            if (sumTotalPoints > maxTotalPoints) {
                                 maxTotalPoints = sumTotalPoints;
                             }
                         }
-                        
                         unusedSeries.remove(series);
                         if (!chartSeries.contains(series)) {
                             chart.addSeries(series);
@@ -384,5 +382,10 @@ public abstract class AbstractCompetitorLeaderboardChart<SettingsType> extends A
 
     @Override
     public void filteredCompetitorsListChanged(Iterable<CompetitorDTO> filteredCompetitors) {
+    }
+
+    @Override
+    public void filterChanged(FilterSet<CompetitorDTO, ? extends Filter<CompetitorDTO>> oldFilterSet,
+            FilterSet<CompetitorDTO, ? extends Filter<CompetitorDTO>> newFilterSet) {
     }
 }

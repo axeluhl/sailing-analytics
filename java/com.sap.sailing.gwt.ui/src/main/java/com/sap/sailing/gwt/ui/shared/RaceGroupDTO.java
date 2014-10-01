@@ -11,6 +11,8 @@ public class RaceGroupDTO extends NamedDTO implements IsSerializable {
     private static final long serialVersionUID = 8432572954520767329L;
     public String courseAreaIdAsString;
     public String displayName;
+    public String leaderboardGroupName;
+    public String boatClass;
     private List<RaceGroupSeriesDTO> series = new ArrayList<RaceGroupSeriesDTO>();
     
     public RaceGroupDTO() {}

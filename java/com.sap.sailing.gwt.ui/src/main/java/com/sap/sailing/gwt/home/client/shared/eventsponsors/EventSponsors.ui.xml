@@ -1,0 +1,28 @@
+<!DOCTYPE ui:UiBinder SYSTEM "http://dl.google.com/gwt/DTD/xhtml.ent">
+<ui:UiBinder xmlns:ui="urn:ui:com.google.gwt.uibinder"
+  xmlns:g="urn:import:com.google.gwt.user.client.ui"
+    xmlns:s="urn:import:com.sap.sailing.gwt.home.client.shared">
+    <ui:with field="i18n" type="com.sap.sailing.gwt.home.client.i18n.TextMessages"/>
+    <ui:with field="res" type="com.sap.sailing.gwt.home.client.HomeResources" />
+    <ui:with field="local_res" type="com.sap.sailing.gwt.home.client.shared.eventsponsors.EventSponsorsResources" />
+    <g:HTMLPanel>
+
+<!-- Sponsors of an event-->
+<div class="{local_res.css.eventsponsors}">
+  <div class="{res.mainCss.grid}">
+    <div class="{res.mediaCss.small12} {res.mediaCss.columns}">
+      <h3 class="{local_res.css.eventsponsors_title}">Event Sponsors</h3>
+    </div>
+    <div class="{res.mediaCss.small12} {res.mediaCss.columns}">
+      <hr></hr>
+    </div>
+    <g:HTMLPanel ui:field="sponsorsPlaceholder">
+		<!-- the sponsor widgets will be inserted here -->
+	</g:HTMLPanel>
+    <div class="{res.mediaCss.small12} {res.mediaCss.columns}">
+      <hr></hr>
+    </div>
+  </div>
+</div>
+    </g:HTMLPanel>
+</ui:UiBinder>

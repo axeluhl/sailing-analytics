@@ -109,9 +109,9 @@ public class IgtimiWindReceiver implements BulkFixReceiver {
         }
     }
 
-    public IgtimiWindReceiver(Iterable<String> deviceSerialNumbers) {
+    public IgtimiWindReceiver(DeclinationService declinationService) {
         receiver = new FixReceiver();
-        declinationService = DeclinationService.INSTANCE;
+        this.declinationService = declinationService;
         listeners = new ConcurrentHashMap<>();
         awaTrack = new HashMap<>();
         awsTrack = new HashMap<>();
@@ -185,42 +185,51 @@ public class IgtimiWindReceiver implements BulkFixReceiver {
         Speed aws = getAWS(timePoint, awsPair);
         com.sap.sse.common.Util.Pair<GpsLatLong, GpsLatLong> gpsPair = getSurroundingFixes(getGpsTrack(deviceSerialNumber), timePoint);
         Position pos = getPosition(timePoint, gpsPair);
-        com.sap.sse.common.Util.Pair<HDG, HDG> hdgPair = getSurroundingFixes(getHdgTrack(deviceSerialNumber), timePoint);
-        com.sap.sse.common.Util.Pair<HDGM, HDGM> hdgmPair = getSurroundingFixes(getHdgmTrack(deviceSerialNumber), timePoint);
-        Bearing heading = getHeading(timePoint, hdgPair, hdgmPair, pos);
-        if (awa != null && aws != null && pos != null && heading != null) {
-            Bearing apparentWindDirection = heading.add(awa);
-            SpeedWithBearing apparentWindSpeedWithDirection = new KnotSpeedWithBearingImpl(aws.getKnots(), apparentWindDirection);
-            /*
-             * Hint from Brent Russell from Igtimi, at 2013-12-05 on the question whether to use GpsLatLong to improve
-             * precision of boat speed / coarse over SOG/COG measurements:
-             * 
-             * "Personally I would use COG/SOG exclusively, and if unhappy with the result add a small amount of
-             * smoothing and consider dropping samples as outliers if they cause a SOG discontinuity. The latter might
-             * happen as a satellite is dropped/acquired - and I'd expect to see a time correlated position jump as
-             * well. Probably not though a direction/speed correlation :)
-             * 
-             * All our GPS systems are using Doppler to calculate COG/SOG and this should be the most accurate measure.
-             * I don't believe that delta position really adds any more "truth" to the measurement of physical reality,
-             * if that makes sense. I'd trust d-p even less at low speeds, where you'll see the most disagreement. Also
-             * there is a significant quantisation noise error in the d-p calculations from the GPS resolution too, so
-             * you'd have to smooth it before averaging - possibly in a speed dependent way.
-             * 
-             * Remember that Doppler COG/SOG is using the same raw satellite measurements that are being used to
-             * calculate position, just the algorithm is different. I suspect that merging the two might be, in
-             * practice, just a slightly indirect way of averaging. If you like the central limit theorem in action over
-             * the set of algorithms!
-             * 
-             * So again, my personal preference would be to work with the data that should be the most accurate
-             * (COG/SOG) and consider algorithms that handle smoothing of that data best."
-             */
-            com.sap.sse.common.Util.Pair<SOG, SOG> sogPair = getSurroundingFixes(getSogTrack(deviceSerialNumber), timePoint);
-            Speed sog = getSOG(timePoint, sogPair);
-            com.sap.sse.common.Util.Pair<COG, COG> cogPair = getSurroundingFixes(getCogTrack(deviceSerialNumber), timePoint);
-            Bearing cog = getCOG(timePoint, cogPair);
-            SpeedWithBearing sogCog = new KnotSpeedWithBearingImpl(sog.getKnots(), cog);
-            SpeedWithBearing trueWindSpeedAndDirection = apparentWindSpeedWithDirection.add(sogCog);
-            result = new WindImpl(pos, timePoint, trueWindSpeedAndDirection);
+        if (pos != null) {
+            com.sap.sse.common.Util.Pair<HDG, HDG> hdgPair = getSurroundingFixes(getHdgTrack(deviceSerialNumber), timePoint);
+            com.sap.sse.common.Util.Pair<HDGM, HDGM> hdgmPair = getSurroundingFixes(getHdgmTrack(deviceSerialNumber), timePoint);
+            Bearing heading = getHeading(timePoint, hdgPair, hdgmPair, pos);
+            if (awa != null && aws != null && heading != null) {
+                Bearing apparentWindDirection = heading.add(awa);
+                SpeedWithBearing apparentWindSpeedWithDirection = new KnotSpeedWithBearingImpl(aws.getKnots(), apparentWindDirection);
+                /*
+                 * Hint from Brent Russell from Igtimi, at 2013-12-05 on the question whether to use GpsLatLong to
+                 * improve precision of boat speed / coarse over SOG/COG measurements:
+                 * 
+                 * "Personally I would use COG/SOG exclusively, and if unhappy with the result add a small amount of
+                 * smoothing and consider dropping samples as outliers if they cause a SOG discontinuity. The latter
+                 * might happen as a satellite is dropped/acquired - and I'd expect to see a time correlated position
+                 * jump as well. Probably not though a direction/speed correlation :)
+                 * 
+                 * All our GPS systems are using Doppler to calculate COG/SOG and this should be the most accurate
+                 * measure. I don't believe that delta position really adds any more "truth" to the measurement of
+                 * physical reality, if that makes sense. I'd trust d-p even less at low speeds, where you'll see the
+                 * most disagreement. Also there is a significant quantisation noise error in the d-p calculations from
+                 * the GPS resolution too, so you'd have to smooth it before averaging - possibly in a speed dependent
+                 * way.
+                 * 
+                 * Remember that Doppler COG/SOG is using the same raw satellite measurements that are being used to
+                 * calculate position, just the algorithm is different. I suspect that merging the two might be, in
+                 * practice, just a slightly indirect way of averaging. If you like the central limit theorem in action
+                 * over the set of algorithms!
+                 * 
+                 * So again, my personal preference would be to work with the data that should be the most accurate
+                 * (COG/SOG) and consider algorithms that handle smoothing of that data best."
+                 */
+                com.sap.sse.common.Util.Pair<SOG, SOG> sogPair = getSurroundingFixes(getSogTrack(deviceSerialNumber), timePoint);
+                Speed sog = getSOG(timePoint, sogPair);
+                com.sap.sse.common.Util.Pair<COG, COG> cogPair = getSurroundingFixes(getCogTrack(deviceSerialNumber), timePoint);
+                Bearing cog = getCOG(timePoint, cogPair);
+                if (sog != null && cog != null) {
+                    SpeedWithBearing sogCog = new KnotSpeedWithBearingImpl(sog.getKnots(), cog);
+                    SpeedWithBearing trueWindSpeedAndDirection = apparentWindSpeedWithDirection.add(sogCog);
+                    result = new WindImpl(pos, timePoint, trueWindSpeedAndDirection);
+                } else {
+                    result = null;
+                }
+            } else {
+                result = null;
+            }
         } else {
             result = null;
         }
@@ -375,8 +384,18 @@ public class IgtimiWindReceiver implements BulkFixReceiver {
         } else {
             Bearing hdgm = getHDGM(timePoint, hdgmPair);
             if (hdgm != null) {
-                Declination declination = declinationService.getDeclination(timePoint, position, /* timeoutForOnlineFetchInMilliseconds 5s */ 5000);
-                trueHeading = hdgm.add(declination.getBearingCorrectedTo(timePoint));
+                if (declinationService == null) {
+                    trueHeading = hdgm;
+                } else {
+                    try {
+                        Declination declination = declinationService.getDeclination(timePoint, position, /* timeoutForOnlineFetchInMilliseconds 5s */ 5000);
+                        trueHeading = hdgm.add(declination.getBearingCorrectedTo(timePoint));
+                    } catch (Exception e) {
+                        logger.log(Level.SEVERE, "Correction of declination was requested but unsuccessful. Can't correct heading "+
+                                hdgm+"@"+timePoint+" by declination. Forwarding exception.");
+                        throw e;
+                    }
+                }
             } else {
                 trueHeading = null;
             }

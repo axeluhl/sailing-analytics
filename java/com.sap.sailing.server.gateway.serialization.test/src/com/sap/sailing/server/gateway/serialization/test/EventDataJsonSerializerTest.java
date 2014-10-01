@@ -5,6 +5,7 @@ import static org.mockito.Mockito.doReturn;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
 
+import java.net.MalformedURLException;
 import java.net.URL;
 import java.util.Collections;
 import java.util.Date;
@@ -35,16 +36,24 @@ import com.sap.sailing.server.gateway.serialization.impl.VenueJsonSerializer;
 public class EventDataJsonSerializerTest {
     protected final UUID expectedId = UUID.randomUUID();
     protected final String expectedName = "ab";
+    protected final String expectedDescription = "cd";
     protected final TimePoint expectedStartDate = new MillisecondsTimePoint(new Date());
     protected final TimePoint expectedEndDate = new MillisecondsTimePoint(new Date());
     protected final Venue expectedVenue = new VenueImpl("Expected Venue");
-    protected final LeaderboardGroup expectedLeaderbaordGroup = mock(LeaderboardGroup.class);
+    protected final URL expectedOfficialWebsiteURL;
+    protected final URL expectedLogoImageURL;
+    protected final LeaderboardGroup expectedLeaderboardGroup = mock(LeaderboardGroup.class);
     
     protected JsonSerializer<Venue> venueSerializer;
     protected EventBaseJsonSerializer serializer;
     protected EventBaseJsonDeserializer deserializer;
     protected EventBase event;
 
+    public EventDataJsonSerializerTest() throws MalformedURLException {
+        expectedOfficialWebsiteURL = new URL("http://official.website.com");
+        expectedLogoImageURL = new URL("http://official.logo.com/logo.png");
+    }
+    
     // see https://groups.google.com/forum/?fromgroups=#!topic/mockito/iMumB0_bpdo
     @Before
     public void setUp() {
@@ -52,24 +61,29 @@ public class EventDataJsonSerializerTest {
         event = mock(EventBase.class);
         when(event.getId()).thenReturn(expectedId);
         when(event.getName()).thenReturn(expectedName);
+        when(event.getDescription()).thenReturn(expectedDescription);
+        when(event.getOfficialWebsiteURL()).thenReturn(expectedOfficialWebsiteURL);
+        when(event.getLogoImageURL()).thenReturn(expectedLogoImageURL);
         when(event.getStartDate()).thenReturn(expectedStartDate);
         when(event.getEndDate()).thenReturn(expectedEndDate);
         when(event.getVenue()).thenReturn(expectedVenue);
         when(event.getImageURLs()).thenReturn(Collections.<URL>emptySet());
         when(event.getVideoURLs()).thenReturn(Collections.<URL>emptySet());
+        when(event.getSponsorImageURLs()).thenReturn(Collections.<URL>emptySet());
         // ... and the serializer itself.		
         serializer = new EventBaseJsonSerializer(new VenueJsonSerializer(new CourseAreaJsonSerializer()), new LeaderboardGroupBaseJsonSerializer());
         deserializer = new EventBaseJsonDeserializer(new VenueJsonDeserializer(new CourseAreaJsonDeserializer(DomainFactory.INSTANCE)), new LeaderboardGroupBaseJsonDeserializer());
         
-        when(expectedLeaderbaordGroup.getId()).thenReturn(UUID.randomUUID());
-        when(expectedLeaderbaordGroup.getName()).thenReturn("LG");
-        when(expectedLeaderbaordGroup.getDescription()).thenReturn("LG Description");
-        when(expectedLeaderbaordGroup.hasOverallLeaderboard()).thenReturn(false);
-        doReturn(Collections.<LeaderboardGroup>singleton(expectedLeaderbaordGroup)).when(event).getLeaderboardGroups();
+        when(expectedLeaderboardGroup.getId()).thenReturn(UUID.randomUUID());
+        when(expectedLeaderboardGroup.getName()).thenReturn("LG");
+        when(expectedLeaderboardGroup.getDescription()).thenReturn("LG Description");
+        when(expectedLeaderboardGroup.getDisplayName()).thenReturn("LG Display Name");
+        when(expectedLeaderboardGroup.hasOverallLeaderboard()).thenReturn(false);
+        doReturn(Collections.<LeaderboardGroup>singleton(expectedLeaderboardGroup)).when(event).getLeaderboardGroups();
     }
 
     @Test
-    public void testBasicAttributes() {
+    public void testBasicAttributes() throws MalformedURLException {
         JSONObject result = serializer.serialize(event);
         assertEquals(
                 expectedId,
@@ -77,6 +91,18 @@ public class EventDataJsonSerializerTest {
         assertEquals(
                 expectedName,
                 result.get(EventBaseJsonSerializer.FIELD_NAME));
+        assertEquals(
+                expectedDescription,
+                result.get(EventBaseJsonSerializer.FIELD_DESCRIPTION));
+        assertEquals(
+                expectedOfficialWebsiteURL,
+                new URL((String) result.get(EventBaseJsonSerializer.FIELD_OFFICIAL_WEBSITE_URL)));
+        assertEquals(
+                expectedLogoImageURL,
+                new URL((String) result.get(EventBaseJsonSerializer.FIELD_LOGO_IMAGE_URL)));
+        assertEquals(
+                expectedDescription,
+                result.get(EventBaseJsonSerializer.FIELD_DESCRIPTION));
         assertEquals(
                 expectedStartDate,
                 new MillisecondsTimePoint(((Number) result.get(EventBaseJsonSerializer.FIELD_START_DATE)).longValue()));
@@ -93,10 +119,11 @@ public class EventDataJsonSerializerTest {
         assertEquals(expectedName, deserializedEvent.getName());
         assertEquals(expectedStartDate, deserializedEvent.getStartDate());
         assertEquals(expectedEndDate, deserializedEvent.getEndDate());
-        assertEquals(expectedLeaderbaordGroup.getName(), deserializedEvent.getLeaderboardGroups().iterator().next().getName());
-        assertEquals(expectedLeaderbaordGroup.getDescription(), deserializedEvent.getLeaderboardGroups().iterator().next().getDescription());
-        assertEquals(expectedLeaderbaordGroup.getId(), deserializedEvent.getLeaderboardGroups().iterator().next().getId());
-        assertEquals(expectedLeaderbaordGroup.hasOverallLeaderboard(), deserializedEvent.getLeaderboardGroups().iterator().next().hasOverallLeaderboard());
+        assertEquals(expectedLeaderboardGroup.getName(), deserializedEvent.getLeaderboardGroups().iterator().next().getName());
+        assertEquals(expectedLeaderboardGroup.getDescription(), deserializedEvent.getLeaderboardGroups().iterator().next().getDescription());
+        assertEquals(expectedLeaderboardGroup.getDisplayName(), deserializedEvent.getLeaderboardGroups().iterator().next().getDisplayName());
+        assertEquals(expectedLeaderboardGroup.getId(), deserializedEvent.getLeaderboardGroups().iterator().next().getId());
+        assertEquals(expectedLeaderboardGroup.hasOverallLeaderboard(), deserializedEvent.getLeaderboardGroups().iterator().next().hasOverallLeaderboard());
     }
 
     @Test

@@ -26,12 +26,9 @@ public class TestRaceFilterForTracTracEvents extends AbstractSeleniumTest {
     @SuppressWarnings("boxing")
     public void testNoFilter() {
         AdminConsolePage adminConsole = AdminConsolePage.goToPage(getWebDriver(), getContextRoot());
-        
         TracTracEventManagementPanelPO tracTracEvents = adminConsole.goToTracTracEvents();
         tracTracEvents.listTrackableRaces(BMW_CUP_JSON_URL);
-        
         assertThat(tracTracEvents.getTrackableRaces().size(), is(12));
-        
     }
     
     /**
@@ -41,11 +38,9 @@ public class TestRaceFilterForTracTracEvents extends AbstractSeleniumTest {
     @SuppressWarnings("boxing")
     public void testPartialFilter() {
         AdminConsolePage adminConsole = AdminConsolePage.goToPage(getWebDriver(), getContextRoot());
-        
         TracTracEventManagementPanelPO tracTracEvents = adminConsole.goToTracTracEvents();
         tracTracEvents.listTrackableRaces(BMW_CUP_JSON_URL);
         tracTracEvents.setFilterForTrackableRaces("BMW Cup Race 1"); //$NON-NLS-1$
-        
         assertThat(tracTracEvents.getTrackableRaces().size(), is(5));
     }
     
@@ -56,11 +51,9 @@ public class TestRaceFilterForTracTracEvents extends AbstractSeleniumTest {
     @SuppressWarnings("boxing")
     public void testExactFilter() {
         AdminConsolePage adminConsole = AdminConsolePage.goToPage(getWebDriver(), getContextRoot());
-        
         TracTracEventManagementPanelPO tracTracEvents = adminConsole.goToTracTracEvents();
         tracTracEvents.listTrackableRaces(BMW_CUP_JSON_URL);
         tracTracEvents.setFilterForTrackableRaces("BMW Cup Race 12"); //$NON-NLS-1$
-        
         assertThat(tracTracEvents.getTrackableRaces().size(), is(1));
     }
     
@@ -71,11 +64,9 @@ public class TestRaceFilterForTracTracEvents extends AbstractSeleniumTest {
     @SuppressWarnings("boxing")
     public void testNoneMatchingFilter() {
         AdminConsolePage adminConsole = AdminConsolePage.goToPage(getWebDriver(), getContextRoot());
-        
         TracTracEventManagementPanelPO tracTracEvents = adminConsole.goToTracTracEvents();
         tracTracEvents.listTrackableRaces(BMW_CUP_JSON_URL);
         tracTracEvents.setFilterForTrackableRaces("BMW Cup Race 18"); //$NON-NLS-1$
-        
         assertThat(tracTracEvents.getTrackableRaces().size(), is(0));
     }
 }

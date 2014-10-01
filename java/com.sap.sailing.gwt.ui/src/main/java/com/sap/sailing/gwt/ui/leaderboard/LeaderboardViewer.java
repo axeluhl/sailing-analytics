@@ -23,8 +23,6 @@ import com.sap.sse.gwt.client.useragent.UserAgentDetails;
  *
  */
 public class LeaderboardViewer extends AbstractLeaderboardViewer {
-
-    private final LeaderboardPanel leaderboardPanel;
     private final MultiCompetitorLeaderboardChart multiCompetitorChart;
     private LeaderboardPanel overallLeaderboardPanel;
     
@@ -33,27 +31,36 @@ public class LeaderboardViewer extends AbstractLeaderboardViewer {
             final String leaderboardGroupName, String leaderboardName, final ErrorReporter errorReporter,
             final StringMessages stringMessages, final UserAgentDetails userAgent, boolean showRaceDetails, boolean hideToolbar, 
             boolean autoExpandLastRaceColumn, boolean showCharts, DetailType chartDetailType, boolean showOverallLeaderboard) {
-        super(new CompetitorSelectionModel(/* hasMultiSelection */true), asyncActionsExecutor, 
-                timer, stringMessages, hideToolbar);
+        this(new CompetitorSelectionModel(/* hasMultiSelection */true), sailingService, asyncActionsExecutor, timer,
+                leaderboardSettings, preselectedRace, leaderboardGroupName, leaderboardName, errorReporter,
+                stringMessages, userAgent, showRaceDetails, hideToolbar, autoExpandLastRaceColumn, showCharts,
+                chartDetailType, showOverallLeaderboard);
+    }
 
+    private LeaderboardViewer(CompetitorSelectionModel competitorSelectionModel,
+            final SailingServiceAsync sailingService, final AsyncActionsExecutor asyncActionsExecutor,
+            final Timer timer, final LeaderboardSettings leaderboardSettings, final RaceIdentifier preselectedRace,
+            final String leaderboardGroupName, String leaderboardName, final ErrorReporter errorReporter,
+            final StringMessages stringMessages, final UserAgentDetails userAgent, boolean showRaceDetails,
+            boolean hideToolbar, boolean autoExpandLastRaceColumn, boolean showCharts, DetailType chartDetailType,
+            boolean showOverallLeaderboard) {
+        super(competitorSelectionModel, asyncActionsExecutor, timer, stringMessages, hideToolbar, new LeaderboardPanel(
+                sailingService, asyncActionsExecutor, leaderboardSettings, preselectedRace != null, preselectedRace,
+                competitorSelectionModel, timer, leaderboardGroupName, leaderboardName, errorReporter,
+                stringMessages, userAgent, showRaceDetails, /* competitorSearchTextBox */ null, /* showSelectionCheckbox */ true, /* adjustTimerDelay */
+                /* raceTimesInfoProvider */null, autoExpandLastRaceColumn, true, /*autoApplyTopNFilter*/ false, false));
         final FlowPanel mainPanel = createViewerPanel();
         setWidget(mainPanel);
-
-        leaderboardPanel = new LeaderboardPanel(sailingService, asyncActionsExecutor,
-                leaderboardSettings, preselectedRace, competitorSelectionProvider, timer,
-                leaderboardGroupName, leaderboardName, errorReporter, stringMessages, userAgent,
-                showRaceDetails, /* raceTimesInfoProvider */null, autoExpandLastRaceColumn,  /* adjustTimerDelay */ true);
-
         multiCompetitorChart = new MultiCompetitorLeaderboardChart(sailingService, asyncActionsExecutor, leaderboardName, chartDetailType,
                 competitorSelectionProvider, timer, stringMessages, errorReporter);
         multiCompetitorChart.setVisible(showCharts); 
         multiCompetitorChart.getElement().getStyle().setMarginTop(10, Unit.PX);
         multiCompetitorChart.getElement().getStyle().setMarginBottom(10, Unit.PX);
 
-        mainPanel.add(leaderboardPanel);
+        mainPanel.add(getLeaderboardPanel());
         mainPanel.add(multiCompetitorChart);
 
-        addComponentToNavigationMenu(leaderboardPanel, false, null, /* hasSettingsWhenComponentIsInvisible*/ true);
+        addComponentToNavigationMenu(getLeaderboardPanel(), false, null, /* hasSettingsWhenComponentIsInvisible*/ true);
         addComponentToNavigationMenu(multiCompetitorChart, true, null,  /* hasSettingsWhenComponentIsInvisible*/ true);
         // Remark: For now we only add the overallLeaderboardPanel to the navigation menu in case it's visible from the beginning
         
@@ -69,9 +76,10 @@ public class LeaderboardViewer extends AbstractLeaderboardViewer {
                             if(result.size() == 1) {
                                 String overallLeaderboardName = result.get(0);
                                 overallLeaderboardPanel = new LeaderboardPanel(sailingService, asyncActionsExecutor,
-                                        leaderboardSettings, preselectedRace, competitorSelectionProvider, timer,
+                                        leaderboardSettings, preselectedRace != null, preselectedRace, competitorSelectionProvider, timer,
                                         leaderboardGroupName, overallLeaderboardName, errorReporter, stringMessages, userAgent,
-                                        false, /* raceTimesInfoProvider */null, false,  /* adjustTimerDelay */ true);
+                                        false, /* competitorSearchTextBox */ null, /* showSelectionCheckbox */ true,  /* raceTimesInfoProvider */null,
+                                        false, /* adjustTimerDelay */ true, /*autoApplyTopNFilter*/ false, false);
                                 mainPanel.add(overallLeaderboardPanel);
                                 addComponentToNavigationMenu(overallLeaderboardPanel, true, stringMessages.seriesLeaderboard(),
                                         /* hasSettingsWhenComponentIsInvisible*/ true);

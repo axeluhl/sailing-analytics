@@ -104,11 +104,13 @@ public class LeaderboardGroupPanel extends SimplePanel implements HasWelcomeWidg
     private final boolean showRaceDetails;
     private final boolean canReplayDuringLiveRaces;
     private final boolean showMapControls;
+    private final boolean showNavigationPanel;
     private final Timer timerForClientServerOffset;
     
     public LeaderboardGroupPanel(SailingServiceAsync sailingService, StringMessages stringConstants,
             ErrorReporter errorReporter, final String groupName, String root, String viewMode, boolean embedded,
-            boolean showRaceDetails, boolean canReplayDuringLiveRaces, boolean showMapControls) {
+            boolean showRaceDetails, boolean canReplayDuringLiveRaces, boolean showMapControls,
+            boolean showNavigationPanel) {
         super();
         this.isEmbedded = embedded;
         this.showRaceDetails = showRaceDetails;
@@ -117,6 +119,7 @@ public class LeaderboardGroupPanel extends SimplePanel implements HasWelcomeWidg
         this.sailingService = sailingService;
         this.stringMessages = stringConstants;
         this.errorReporter = errorReporter;
+        this.showNavigationPanel = showNavigationPanel;
         this.root = (root == null || root.length() == 0) ? "leaderboardGroupPanel" : root;
         this.viewMode = viewMode;
         setWidth("95%");
@@ -324,7 +327,7 @@ public class LeaderboardGroupPanel extends SimplePanel implements HasWelcomeWidg
                 int seriesRow = 0;
                 for (SeriesDTO series : regatta.series) {
                     // render the series name
-                    if (! "Default".equals(series.getName())) {
+                    if (!LeaderboardNameConstants.DEFAULT_SERIES_NAME.equals(series.getName())) {
                         seriesGrid.setHTML(seriesRow, 0, TEXTTEMPLATE.textWithClass(series.getName(), 50, STYLE_TABLE_TEXT));
                     }
                     seriesGridFormatter.setVerticalAlignment(seriesRow, 0, HasVerticalAlignment.ALIGN_MIDDLE);
@@ -352,7 +355,7 @@ public class LeaderboardGroupPanel extends SimplePanel implements HasWelcomeWidg
                         FleetDTO fleet = series.getFleets().get(0);
                         List<RaceColumnDTO> raceColumnsOfSeries = getRacesOfFleet(leaderboard, series, fleet);
                         String displayName = fleet.getName();
-                        if (! "Default".equals(fleet.getName())) {
+                        if (!LeaderboardNameConstants.DEFAULT_FLEET_NAME.equals(fleet.getName())) {
                             Grid fleetsGrid = new Grid(1, 2);
                             CellFormatter fleetGridsFormatter = fleetsGrid.getCellFormatter();
                             fleetsGrid.setHTML(0, 0, TEXTTEMPLATE.textWithClass(displayName, 50, STYLE_TABLE_TEXT));
@@ -424,6 +427,8 @@ public class LeaderboardGroupPanel extends SimplePanel implements HasWelcomeWidg
             linkParams.put(RaceBoardViewConfiguration.PARAM_CAN_REPLAY_DURING_LIVE_RACES, "true");
         }
         linkParams.put(RaceBoardViewConfiguration.PARAM_VIEW_SHOW_MAPCONTROLS, Boolean.toString(showMapControls));
+        linkParams.put(RaceBoardViewConfiguration.PARAM_VIEW_SHOW_NAVIGATION_PANEL,
+                Boolean.toString(showNavigationPanel));
         linkParams.put("regattaName", raceIdentifier.getRegattaName());
         linkParams.put("leaderboardGroupName", leaderboardGroup.getName());
         if (viewMode != null && !viewMode.isEmpty()) {

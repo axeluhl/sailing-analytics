@@ -29,6 +29,7 @@ import com.google.gwt.user.client.ui.Button;
 import com.google.gwt.user.client.ui.HorizontalPanel;
 import com.google.gwt.user.client.ui.Panel;
 import com.google.gwt.view.client.CellPreviewEvent;
+import com.sap.sailing.gwt.ui.adminconsole.DeviceMappingTableWrapper.FilterChangedHandler;
 import com.sap.sailing.gwt.ui.client.ErrorReporter;
 import com.sap.sailing.gwt.ui.client.SailingServiceAsync;
 import com.sap.sailing.gwt.ui.client.StringMessages;
@@ -43,7 +44,7 @@ public class RaceLogTrackingDeviceMappingsDialog extends RaceLogTrackingDialog {
     public static final int CHART_WIDTH = 500;
     public static final String SERIES_COLOR = "#fcb913";
     
-    private List<DeviceMappingDTO> allMappings = new ArrayList<DeviceMappingDTO>();
+    private List<DeviceMappingDTO> mappings = new ArrayList<DeviceMappingDTO>();
     
     private DeviceMappingTableWrapper deviceMappingTable;
     
@@ -60,10 +61,18 @@ public class RaceLogTrackingDeviceMappingsDialog extends RaceLogTrackingDialog {
         super(sailingService, stringMessages, errorReporter, leaderboardName, raceColumnName, fleetName, false);
         
         deviceMappingTable = new DeviceMappingTableWrapper(sailingService, stringMessages, errorReporter);
+        
+        deviceMappingTable.addFilterChangedHandler(new FilterChangedHandler() {
+            @Override
+            public void onFilterChanged(List<DeviceMappingDTO> filteredList) {
+                mappings = filteredList;
+                updateChart();
+            }
+        });
         deviceMappingTable.getTable().addCellPreviewHandler(new CellPreviewEvent.Handler<DeviceMappingDTO>() {
             @Override
             public void onCellPreview(CellPreviewEvent<DeviceMappingDTO> event) {
-                int i = allMappings.indexOf(event.getValue());
+                int i = mappings.indexOf(event.getValue());
                 chart.getSeries()[0].getPoints()[i].select(true, false);
             }
         });
@@ -126,7 +135,7 @@ public class RaceLogTrackingDeviceMappingsDialog extends RaceLogTrackingDialog {
             @Override
             public boolean onMouseOver(PointMouseOverEvent pointMouseOverEvent) {
                 int i = (int) pointMouseOverEvent.getXAsLong();
-                deviceMappingTable.getSelectionModel().setSelected(allMappings.get(i), true);
+                deviceMappingTable.getSelectionModel().setSelected(mappings.get(i), true);
                 chart.getSeries()[0].getPoints()[i].select(true, false);
                 return true;
             }
@@ -155,7 +164,7 @@ public class RaceLogTrackingDeviceMappingsDialog extends RaceLogTrackingDialog {
             @Override
             public String format(ToolTipData toolTipData) {
                 int index = (int) toolTipData.getXAsLong();
-                DeviceMappingDTO mapping = allMappings.get(index);
+                DeviceMappingDTO mapping = mappings.get(index);
                 String itemType = mapping.mappedTo instanceof MarkDTO ? stringMessages.mark() : stringMessages.competitor();
                 
                 return "<b>" + stringMessages.device() + ":</b> " + mapping.deviceIdentifier.deviceType + " - " + mapping.deviceIdentifier.deviceId + "<br/>" +
@@ -203,7 +212,13 @@ public class RaceLogTrackingDeviceMappingsDialog extends RaceLogTrackingDialog {
     }
     
     private void updateChart() {
-        data = new Point[allMappings.size()];
+        earliest = new Date(Long.MAX_VALUE);
+        latest = new Date(Long.MIN_VALUE);
+        for (DeviceMappingDTO mapping : mappings) {
+            updateExtremes(mapping);
+        }
+        
+        data = new Point[mappings.size()];
         long earliestMillis = earliest.getTime();
         long latestMillis = latest.getTime();
         long range = latestMillis - earliestMillis;
@@ -212,7 +227,7 @@ public class RaceLogTrackingDeviceMappingsDialog extends RaceLogTrackingDialog {
         long yMax = latestMillis + extension;
         
         int i = 0;
-        for (DeviceMappingDTO mapping : allMappings) {
+        for (DeviceMappingDTO mapping : mappings) {
             JSONObject userData = new JSONObject();
             userData.put(FIELD_INDEX, userData);
             
@@ -241,19 +256,13 @@ public class RaceLogTrackingDeviceMappingsDialog extends RaceLogTrackingDialog {
     }
     
     private void refresh() {
-        earliest = new Date(Long.MAX_VALUE);
-        latest = new Date(Long.MIN_VALUE);
-        
         sailingService.getDeviceMappingsFromRaceLog(leaderboardName, raceColumnName, fleetName, new AsyncCallback<List<DeviceMappingDTO>>() {
             @Override
             public void onSuccess(List<DeviceMappingDTO> result) {
-                for (DeviceMappingDTO mapping : result) {
-                    updateExtremes(mapping);
-                }
-                allMappings = result;
+                mappings = result;
                 
                 updateChart();
-                deviceMappingTable.refresh(allMappings);
+                deviceMappingTable.refresh(mappings);
             }
             
             @Override

@@ -12,6 +12,7 @@ import com.google.gwt.maps.client.MapWidget;
 import com.google.gwt.maps.client.base.LatLng;
 import com.google.gwt.maps.client.base.Point;
 import com.google.gwt.maps.client.geometrylib.SphericalUtils;
+import com.sap.sailing.domain.common.AbstractBearing;
 import com.sap.sailing.domain.common.Mile;
 import com.sap.sailing.domain.common.dto.PositionDTO;
 import com.sap.sailing.domain.common.impl.DegreeBearingImpl;
@@ -164,7 +165,7 @@ public class PathCanvasOverlay extends WindFieldCanvasOverlay implements Named {
                 //if ((displayWindAlongPath) && ((index % arrowInterleave) == 0)) {
                 if (displayWindAlongPath) {
                     if (checkPointsAreFarEnough(windDTO,prevWindDTO)) {
-                        DegreeBearingImpl dbi = new DegreeBearingImpl(windDTO.trueWindBearingDeg);
+                        AbstractBearing dbi = new DegreeBearingImpl(windDTO.trueWindBearingDeg);
                         // System.out.print("index: "+index+"\n");
 
                         drawScaledArrow(windDTO, dbi.getRadians(), index, true);
@@ -173,7 +174,7 @@ public class PathCanvasOverlay extends WindFieldCanvasOverlay implements Named {
                 }
                 index++;
 
-                long timeStep = windParams.getTimeStep().getTime();
+                long timeStep = windParams.getTimeStep().asMillis();
                 if ((windDTO.timepoint - startTime) % (timeStep) == 0) {
                     drawPoint(windDTO);
                 }

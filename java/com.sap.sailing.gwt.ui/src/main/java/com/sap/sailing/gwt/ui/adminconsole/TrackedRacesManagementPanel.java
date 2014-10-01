@@ -2,15 +2,22 @@ package com.sap.sailing.gwt.ui.adminconsole;
 
 import java.util.Date;
 
+import com.google.gwt.event.dom.client.ClickEvent;
+import com.google.gwt.event.dom.client.ClickHandler;
 import com.google.gwt.i18n.client.DateTimeFormat;
 import com.google.gwt.i18n.client.DateTimeFormat.PredefinedFormat;
 import com.google.gwt.i18n.client.TimeZone;
 import com.google.gwt.text.client.DateTimeFormatRenderer;
+import com.google.gwt.user.client.rpc.AsyncCallback;
+import com.google.gwt.user.client.ui.Button;
 import com.google.gwt.user.client.ui.Grid;
+import com.google.gwt.user.client.ui.HorizontalPanel;
+import com.sap.sailing.domain.common.dto.RaceDTO;
 import com.sap.sailing.gwt.ui.client.ErrorReporter;
 import com.sap.sailing.gwt.ui.client.RegattaRefresher;
 import com.sap.sailing.gwt.ui.client.SailingServiceAsync;
 import com.sap.sailing.gwt.ui.client.StringMessages;
+import com.sap.sse.gwt.client.dialog.DataEntryDialog.DialogCallback;
 
 public class TrackedRacesManagementPanel extends AbstractRaceManagementPanel {
     private final DateTimeFormatRenderer dateFormatter = new DateTimeFormatRenderer(
@@ -25,6 +32,37 @@ public class TrackedRacesManagementPanel extends AbstractRaceManagementPanel {
     public TrackedRacesManagementPanel(final SailingServiceAsync sailingService, ErrorReporter errorReporter,
             RegattaRefresher regattaRefresher, StringMessages stringConstants) {
         super(sailingService, errorReporter, regattaRefresher, stringConstants);
+        
+        HorizontalPanel controlsPanel = new HorizontalPanel();
+        Button setStartTimeButton = new Button(stringMessages.setStartTimeReceived(), new ClickHandler() {
+            @Override
+            public void onClick(ClickEvent event) {
+                new SetStartTimeReceivedDialog(stringMessages, new DialogCallback<Date>() {
+                    @Override
+                    public void ok(Date newStartTimeReceived) {
+                        sailingService.setStartTimeReceivedForRace(selectedRaceDTO.getRaceIdentifier(), newStartTimeReceived, new AsyncCallback<RaceDTO>() {
+                            @Override
+                            public void onFailure(Throwable caught) {
+                                TrackedRacesManagementPanel.this.errorReporter.reportError("Error setting the received start time: " + caught.getMessage());
+                            }
+                            @Override
+                            public void onSuccess(RaceDTO result) {
+                                if (result != null) {
+                                    selectedRaceDTO = result;
+                                    refreshSelectedRaceData();
+                                    
+                                    TrackedRacesManagementPanel.this.regattaRefresher.fillRegattas();
+                                }
+                            }
+                        });
+                    }
+                    @Override
+                    public void cancel() { }
+                }).show();
+            }
+        });
+        controlsPanel.add(setStartTimeButton);
+        selectedRaceContentPanel.add(controlsPanel);
 
         raceDataGrid = new Grid(6,2);
         this.selectedRaceContentPanel.add(raceDataGrid);
@@ -58,19 +96,21 @@ public class TrackedRacesManagementPanel extends AbstractRaceManagementPanel {
             } else {
                 raceDataGrid.setText(2, 1, "");
             }
-            if(selectedRaceDTO.trackedRace.startOfTracking != null) {
+            if (selectedRaceDTO.trackedRace != null && selectedRaceDTO.trackedRace.startOfTracking != null) {
                 raceDataGrid.setText(3, 1, dateFormatter.render(selectedRaceDTO.trackedRace.startOfTracking) + " "
                         + timeFormatter.render(selectedRaceDTO.trackedRace.startOfTracking));
             } else {
                 raceDataGrid.setText(3, 1, "");
             }
-            if(selectedRaceDTO.trackedRace.endOfTracking != null) {
+            if (selectedRaceDTO.trackedRace != null && selectedRaceDTO.trackedRace.endOfTracking != null) {
                 raceDataGrid.setText(4, 1, dateFormatter.render(selectedRaceDTO.trackedRace.endOfTracking) + " "
                         + timeFormatter.render(selectedRaceDTO.trackedRace.endOfTracking));
             } else {
                 raceDataGrid.setText(4, 1, "");
             }
-            raceDataGrid.setText(5, 1, "" + selectedRaceDTO.trackedRace.delayToLiveInMs);
+            if (selectedRaceDTO.trackedRace != null) {
+                raceDataGrid.setText(5, 1, "" + selectedRaceDTO.trackedRace.delayToLiveInMs);
+            }
         }
     }
 }

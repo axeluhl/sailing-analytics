@@ -2,26 +2,21 @@ package com.sap.sse.datamining.impl.functions;
 
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
-import java.util.ArrayList;
 import java.util.Arrays;
-import java.util.List;
 import java.util.Locale;
 import java.util.logging.Level;
 
 import com.sap.sse.datamining.i18n.DataMiningStringMessages;
 import com.sap.sse.datamining.shared.Unit;
+import com.sap.sse.datamining.shared.annotations.Connector;
 import com.sap.sse.datamining.shared.annotations.Dimension;
-import com.sap.sse.datamining.shared.annotations.SideEffectFreeValue;
-import com.sap.sse.datamining.shared.dto.FunctionDTO;
-import com.sap.sse.datamining.shared.impl.dto.FunctionDTOImpl;
+import com.sap.sse.datamining.shared.annotations.Statistic;
 
 public class MethodWrappingFunction<ReturnType> extends AbstractFunction<ReturnType> {
 
-    private Method method;
-    
-    private String messageKey;
-    private int resultDecimals;
-    private Unit resultUnit;
+    private final Method method;
+    private Class<ReturnType> returnType;
+    private AdditionalMethodWrappingFunctionData additionalData;
     
     /**
      * Throws an {@link IllegalArgumentException}, if the return type of the method and the given <code>returnType</code>
@@ -32,6 +27,7 @@ public class MethodWrappingFunction<ReturnType> extends AbstractFunction<ReturnT
         checkThatReturnTypesMatch(method, returnType);
         
         this.method = method;
+        this.returnType = returnType;
         initializeAdditionalData();
     }
 
@@ -47,26 +43,37 @@ public class MethodWrappingFunction<ReturnType> extends AbstractFunction<ReturnT
     }
 
     private void initializeAdditionalData() {
+        additionalData = new AdditionalMethodWrappingFunctionData("", Unit.None, 0, Integer.MAX_VALUE);
+        
         if (method.getAnnotation(Dimension.class) != null) {
-            messageKey = method.getAnnotation(Dimension.class).messageKey();
-            resultUnit = method.getAnnotation(Dimension.class).resultUnit();
-            resultDecimals = method.getAnnotation(Dimension.class).resultDecimals();
+            Dimension dimensionData = method.getAnnotation(Dimension.class);
+            additionalData = new AdditionalMethodWrappingFunctionData(dimensionData.messageKey(), Unit.None, 0, dimensionData.ordinal());
         }
-        if (method.getAnnotation(SideEffectFreeValue.class) != null) {
-            messageKey = method.getAnnotation(SideEffectFreeValue.class).messageKey();
-            resultUnit = method.getAnnotation(SideEffectFreeValue.class).resultUnit();
-            resultDecimals = method.getAnnotation(SideEffectFreeValue.class).resultDecimals();
+        
+        if (method.getAnnotation(Statistic.class) != null) {
+            Statistic statisticData = method.getAnnotation(Statistic.class);
+            additionalData = new AdditionalMethodWrappingFunctionData(statisticData.messageKey(), statisticData.resultUnit(), statisticData.resultDecimals(), statisticData.ordinal());
+        }
+        
+        if (method.getAnnotation(Connector.class) != null) {
+            Connector connectorData = method.getAnnotation(Connector.class);
+            additionalData = new AdditionalMethodWrappingFunctionData(connectorData.messageKey(), Unit.None, 0, connectorData.ordinal());
         }
     }
 
     @Override
-    public Class<?> getDeclaringClass() {
+    public Class<?> getDeclaringType() {
         return method.getDeclaringClass();
     }
     
     @Override
     public Iterable<Class<?>> getParameters() {
         return Arrays.asList(method.getParameterTypes());
+    }
+    
+    @Override
+    public Class<ReturnType> getReturnType() {
+        return returnType;
     }
     
     @Override
@@ -77,65 +84,52 @@ public class MethodWrappingFunction<ReturnType> extends AbstractFunction<ReturnT
     @SuppressWarnings("unchecked") // The cast has to work, because the constructor checks, that the return types match
     @Override
     public ReturnType tryToInvoke(Object instance, Object... parameters) {
-        try {
-            return (ReturnType) method.invoke(instance, parameters);
-        } catch (IllegalAccessException | IllegalArgumentException | InvocationTargetException e) {
-            getLogger().log(Level.FINER, "Error invoking the Function " + getMethodName(), e);
+        if (instance != null) {
+            try {
+                return (ReturnType) method.invoke(instance, parameters);
+            } catch (IllegalAccessException | IllegalArgumentException | InvocationTargetException e) {
+                getLogger().log(Level.FINER, "Error invoking the Function " + method.getName(), e);
+            }
         }
         return null;
     }
 
     @Override
     public Unit getResultUnit() {
-        return resultUnit;
+        return additionalData.getResultUnit();
     }
 
     @Override
     public int getResultDecimals() {
-        return resultDecimals;
+        return additionalData.getResultDecimals();
+    }
+    
+    @Override
+    public int getOrdinal() {
+        return additionalData.getOrdinal();
     }
 
     @Override
-    public String getLocalizedName(Locale locale, DataMiningStringMessages stringMessages) {
-        if (messageKey == null || messageKey.isEmpty()) {
-            return getMethodName();
-        }
-        return stringMessages.get(locale, messageKey);
-    }
-    
-    private String getMethodName() {
+    public String getSimpleName() {
         return method.getName();
     }
     
     @Override
-    public FunctionDTO asDTO() {
-        return createDTO(getMethodName());
+    public String getLocalizedName(Locale locale, DataMiningStringMessages stringMessages) {
+        if (!isLocatable()) {
+            return getSimpleName();
+        }
+        return stringMessages.get(locale, additionalData.getMessageKey());
     }
 
     @Override
-    public FunctionDTO asDTO(Locale locale, DataMiningStringMessages stringMessages) {
-        return createDTO(getLocalizedName(locale, stringMessages));
+    public boolean isLocatable() {
+        return additionalData != null && !additionalData.getMessageKey().isEmpty();
     }
     
-    private FunctionDTO createDTO(String displayName) {
-        String functionName = getMethodName();
-        String sourceTypeName = getDeclaringClass().getSimpleName();
-        String returnTypeName = method.getReturnType().getSimpleName();
-        List<String> parameterTypeNames = getParameterTypeNames();
-        return new FunctionDTOImpl(functionName, sourceTypeName, returnTypeName, parameterTypeNames, displayName, isDimension());
-    }
-
-    private List<String> getParameterTypeNames() {
-        List<String> parameterTypeNames = new ArrayList<>();
-        for (Class<?> parameterType : method.getParameterTypes()) {
-            parameterTypeNames.add(parameterType.getSimpleName());
-        }
-        return parameterTypeNames;
-    }
-
     @Override
     public String toString() {
-        return getDeclaringClass().getSimpleName() + "." + getMethodName() + "(" + parametersAsString() + ") : " + method.getReturnType().getSimpleName();
+        return getDeclaringType().getSimpleName() + "." + method.getName() + "(" + parametersAsString() + ") : " + method.getReturnType().getSimpleName();
     }
 
     private String parametersAsString() {

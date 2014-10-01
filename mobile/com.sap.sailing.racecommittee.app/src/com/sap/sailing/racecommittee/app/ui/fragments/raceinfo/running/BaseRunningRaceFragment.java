@@ -6,6 +6,7 @@ import android.view.View;
 import android.view.View.OnClickListener;
 import android.view.ViewGroup;
 import android.view.ViewStub;
+import android.widget.Button;
 import android.widget.ImageButton;
 import android.widget.LinearLayout;
 import android.widget.TextView;
@@ -18,6 +19,7 @@ import com.sap.sailing.racecommittee.app.ui.fragments.dialogs.AbortTypeSelection
 import com.sap.sailing.racecommittee.app.ui.fragments.dialogs.RaceDialogFragment;
 import com.sap.sailing.racecommittee.app.ui.fragments.dialogs.RaceFinishingTimeDialog;
 import com.sap.sailing.racecommittee.app.ui.fragments.raceinfo.BaseRaceInfoRaceFragment;
+import com.sap.sailing.racecommittee.app.ui.fragments.raceinfo.running.ConfirmDialog.ConfirmRecallListener;
 import com.sap.sailing.racecommittee.app.ui.utils.FlagPoleStateRenderer;
 import com.sap.sailing.racecommittee.app.utils.TimeUtils;
 
@@ -28,6 +30,7 @@ public abstract class BaseRunningRaceFragment<ProcedureType extends RacingProced
     private ImageButton generalRecallButton;
     private TextView startCountUpTextView;
     private TextView nextCountdownTextView;
+    private Button resetCourseButton;
 
     protected ImageButton individualRecallButton;
     protected TextView individualRecallLabel;
@@ -57,6 +60,7 @@ public abstract class BaseRunningRaceFragment<ProcedureType extends RacingProced
         generalRecallButton = (ImageButton) getView().findViewById(R.id.race_running_base_general_recall);
         individualRecallButton = (ImageButton) getView().findViewById(R.id.race_running_base_individual_recall);
         individualRecallLabel = (TextView) getView().findViewById(R.id.race_running_base_individual_recall_label);
+        resetCourseButton = (Button) getView().findViewById(R.id.race_running_base_reset_course);
         
         if (getRacingProcedure().hasIndividualRecall()) {
             individualRecallButton.setOnClickListener(new OnClickListener() {
@@ -80,10 +84,20 @@ public abstract class BaseRunningRaceFragment<ProcedureType extends RacingProced
         generalRecallButton.setOnClickListener(new OnClickListener() {
             @Override
             public void onClick(View v) {
-                TimePoint now = MillisecondsTimePoint.now();
-                getRaceState().setGeneralRecall(now);
-                // TODO see bug 1649: Explicit passing of pass identifier in RaceState interface
-                getRaceState().setAdvancePass(now);
+                ConfirmDialog confirmDialog = new ConfirmDialog();
+                confirmDialog.setTargetFragment(BaseRunningRaceFragment.this, 1);
+                confirmDialog.setCallback(new ConfirmRecallListener() {
+                    @Override
+                    public void returnAddedElementToPicker(boolean recall) {
+                        TimePoint now = MillisecondsTimePoint.now();
+                        getRaceState().setGeneralRecall(now);
+                        // TODO see bug 1649: Explicit passing of pass identifier in RaceState interface
+                        getRaceState().setAdvancePass(now);
+                    }
+                });
+                final String tag = "confirm_general_recall_fragment";
+                confirmDialog.show(getFragmentManager(), tag);
+                
             }
         });
         
@@ -100,6 +114,13 @@ public abstract class BaseRunningRaceFragment<ProcedureType extends RacingProced
                 RaceDialogFragment fragment = new AbortTypeSelectionDialog();
                 fragment.setArguments(getRecentArguments());
                 fragment.show(getFragmentManager(), "dialogAPNovemberMode");
+            }
+        });
+        
+        resetCourseButton.setOnClickListener(new OnClickListener() {
+            @Override
+            public void onClick(View paramView) {
+                showCourseDesignDialog();
             }
         });
         

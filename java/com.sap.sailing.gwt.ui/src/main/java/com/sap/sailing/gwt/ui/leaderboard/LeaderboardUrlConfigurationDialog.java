@@ -1,7 +1,6 @@
 package com.sap.sailing.gwt.ui.leaderboard;
 
 import java.util.ArrayList;
-import java.util.Collections;
 import java.util.List;
 
 import com.google.gwt.user.client.ui.Anchor;
@@ -18,7 +17,7 @@ import com.sap.sailing.gwt.ui.client.StringMessages;
 import com.sap.sailing.gwt.ui.client.shared.components.Component;
 import com.sap.sailing.gwt.ui.client.shared.components.SettingsDialog;
 import com.sap.sailing.gwt.ui.client.shared.components.SettingsDialogComponent;
-import com.sap.sailing.gwt.ui.leaderboard.LeaderboardEntryPoint.LeaderboardUrlSettings;
+import com.sap.sailing.gwt.ui.leaderboard.LeaderboardUrlSettings;
 import com.sap.sse.gwt.client.dialog.DataEntryDialog;
 
 public class LeaderboardUrlConfigurationDialog extends SettingsDialog<LeaderboardUrlSettings> {
@@ -71,6 +70,11 @@ public class LeaderboardUrlConfigurationDialog extends SettingsDialog<Leaderboar
         public void setVisible(boolean visibility) {
             // no-op
         }
+
+        @Override
+        public String getDependentCssClassName() {
+            return "leaderboardUrlConfigurationDialog";
+        }
     }
     
     private static class LeaderboardUrlConfigurationDialogComponent implements SettingsDialogComponent<LeaderboardUrlSettings> {
@@ -103,17 +107,16 @@ public class LeaderboardUrlConfigurationDialog extends SettingsDialog<Leaderboar
             }
             LeaderboardSettings settings = LeaderboardSettingsFactory.getInstance().createNewDefaultSettings(
                     namesOfRaceColumnsToShow, /* namesOfRacesToShow */null, /* nameOfRaceToSort */null, /* autoExpandPreSelectedRace */
-                    false);
-            List<DetailType> overallDetailsToShow = Collections.emptyList();
+                    false, /* showRegattaRank */ true);
             leaderboardSettingsDialogComponent = new LeaderboardSettingsDialogComponent(settings.getManeuverDetailsToShow(),
-                settings.getLegDetailsToShow(), settings.getRaceDetailsToShow(), overallDetailsToShow, raceList, 
+                settings.getLegDetailsToShow(), settings.getRaceDetailsToShow(), settings.getOverallDetailsToShow(), raceList, 
                 /* select all races by default */ raceList, new ExplicitRaceColumnSelection(),
                 /* autoExpandPreSelectedRace */ false, settings.isShowAddedScores(),
-                /* delayBetweenAutoAdvancesInMilliseconds */ 3000l, stringMessages);
+                /* delayBetweenAutoAdvancesInMilliseconds */ 3000l, settings.isShowOverallColumnWithNumberOfRacesCompletedPerCompetitor(), stringMessages);
         }
 
         private void updateURL(LeaderboardUrlSettings settings, String leaderboardName, String leaderboardDisplayName) {
-            resultingUrl.setHref(LeaderboardEntryPoint.getUrl(leaderboardName, leaderboardDisplayName, settings));
+            resultingUrl.setHref(LeaderboardUrlSettings.getUrl(leaderboardName, leaderboardDisplayName, settings));
         }
 
         /**
@@ -172,12 +175,12 @@ public class LeaderboardUrlConfigurationDialog extends SettingsDialog<Leaderboar
 
             chartDetailListBox = dialog.createListBox(false);
             urlSettingsContent.add(chartDetailListBox);
-            if(leaderboardType.isMetaLeaderboard()) {
+            if (leaderboardType.isMetaLeaderboard()) {
                 chartDetailListBox.addItem(DetailType.OVERALL_RANK.name());
-                chartDetailListBox.addItem(DetailType.REGATTA_TOTAL_POINTS.name());
+                chartDetailListBox.addItem(DetailType.REGATTA_TOTAL_POINTS_SUM.name());
             } else {
                 chartDetailListBox.addItem(DetailType.REGATTA_RANK.name());
-                chartDetailListBox.addItem(DetailType.REGATTA_TOTAL_POINTS.name());
+                chartDetailListBox.addItem(DetailType.REGATTA_TOTAL_POINTS_SUM.name());
             }
             chartDetailListBox.setSelectedIndex(0);
             

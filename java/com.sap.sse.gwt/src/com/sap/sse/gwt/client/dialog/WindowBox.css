@@ -2,6 +2,10 @@
 	clip: rect(auto auto auto auto);
 }
 
+.gwt-extras-WindowBox .Caption {
+    padding: 4px 10px;
+}
+
 .gwt-extras-WindowBox .dialogMiddleCenter {
   padding: 0px !important;
 }
@@ -12,8 +16,8 @@
 
 .gwt-extras-WindowBox .gwt-extras-dialog-controls {
   position: absolute;
-  top: 12px;
-  right: 19px;
+  top: 3px;
+  right: 12px;
 }
 
 .gwt-extras-WindowBox .gwt-extras-dialog-controls a {
@@ -24,7 +28,7 @@
 }
 
 .gwt-extras-WindowBox .dialogMiddleCenterInner {
-	overflow: auto;
+	padding: 2px;
 }
 
 .gwt-extras-WindowBox .gwt-extras-dialog-controls a.gwt-extras-dialog-close {
@@ -76,4 +80,9 @@
 
 .gwt-extras-WindowBox .video-root-panel {
 	display: inline-block;
+}
+
+.gwt-extras-WindowBox .title-edit {
+    width: 100%;
+    margin-bottom: 10px;
 }

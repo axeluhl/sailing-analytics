@@ -14,11 +14,3 @@ Also, we need to improve the accuracy of the current estimator. See
 also bug
 [240](http://bugzilla.sapsailing.com/bugzilla/show_bug.cgi?id=125).
 
-If we get measurements from more than one wind sensor, we usually also
-receive the sensor's position. We currently don't use this information
-in answerin queries for wind data at a time point and a position. We
-should come to a pragmatic interpolation algorithm that at least
-roughly understands the air flow across the race course area. To a
-degree this is also touched by bug
-[1201](http://bugzilla.sapsailing.com/bugzilla/show_bug.cgi?id=1201).
-

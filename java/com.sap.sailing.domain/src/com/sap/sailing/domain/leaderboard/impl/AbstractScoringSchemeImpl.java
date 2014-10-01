@@ -128,7 +128,6 @@ public abstract class AbstractScoringSchemeImpl implements ScoringScheme {
      */
     @Override
     public int compareByBetterScore(List<com.sap.sse.common.Util.Pair<RaceColumn, Double>> o1Scores, List<com.sap.sse.common.Util.Pair<RaceColumn, Double>> o2Scores, boolean nullScoresAreBetter) {
-        assert o1Scores.size() == o2Scores.size();
         final Comparator<Double> pureScoreComparator = getScoreComparator(nullScoresAreBetter);
         // needs to compare net points; therefore, divide the total points by the column factor for comparison:
         List<Double> o1NetScores = new ArrayList<>();
@@ -148,16 +147,20 @@ public abstract class AbstractScoringSchemeImpl implements ScoringScheme {
         while (result == 0 && o1Iter.hasNext() && o2Iter.hasNext()) {
             result = pureScoreComparator.compare(o1Iter.next(), o2Iter.next());
         }
+        if (o1Iter.hasNext() != o2Iter.hasNext()) {
+            // if, as may be allowed by some scoring scheme variants, competitors with different numbers of scored races are compared
+            // and are equal for all races of the competitor who scored fewer races, the competitor who scored more races is preferred
+            result = o1Iter.hasNext() ? -1 : 1;
+        }
         return result;
     }
 
     /**
-     * By default, this scoring scheme implementation directly compares the numbers of races scored. A competitor who
-     * scored fewer races is ranked worse ("greater") than a competitor with more races scored.
+     * By default, this scoring scheme implementation does not compare the numbers of races scored.
      */
     @Override
     public int compareByNumberOfRacesScored(int competitor1NumberOfRacesScored, int competitor2NumberOfRacesScored) {
-        return competitor2NumberOfRacesScored - competitor1NumberOfRacesScored;
+        return 0;
     }
 
     @Override

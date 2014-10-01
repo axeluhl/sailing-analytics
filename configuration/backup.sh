@@ -1,4 +1,4 @@
-#!/bin/sh
+#!/bin/bash
 
 # This is a template for creating backup of data and persist them
 # to a central backup server. Make sure to adapt this script to your needs.

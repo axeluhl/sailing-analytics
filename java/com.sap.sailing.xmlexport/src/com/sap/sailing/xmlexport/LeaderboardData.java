@@ -30,6 +30,7 @@ import com.sap.sailing.domain.common.Bearing;
 import com.sap.sailing.domain.common.Distance;
 import com.sap.sailing.domain.common.Duration;
 import com.sap.sailing.domain.common.MaxPointsReason;
+import com.sap.sailing.domain.common.NauticalSide;
 import com.sap.sailing.domain.common.NoWindException;
 import com.sap.sailing.domain.common.Position;
 import com.sap.sailing.domain.common.Speed;
@@ -37,6 +38,7 @@ import com.sap.sailing.domain.common.Tack;
 import com.sap.sailing.domain.common.TimePoint;
 import com.sap.sailing.domain.common.impl.KnotSpeedImpl;
 import com.sap.sailing.domain.common.impl.MeterDistance;
+import com.sap.sailing.domain.common.impl.MillisecondsDurationImpl;
 import com.sap.sailing.domain.common.impl.MillisecondsTimePoint;
 import com.sap.sailing.domain.leaderboard.Leaderboard;
 import com.sap.sailing.domain.tracking.GPSFixMoving;
@@ -46,37 +48,13 @@ import com.sap.sailing.domain.tracking.Maneuver;
 import com.sap.sailing.domain.tracking.TrackedLeg;
 import com.sap.sailing.domain.tracking.TrackedLegOfCompetitor;
 import com.sap.sailing.domain.tracking.TrackedRace;
+import com.sap.sailing.domain.tracking.WindPositionMode;
 import com.sap.sailing.server.RacingEventService;
 import com.sap.sse.common.Util;
+import com.sap.sse.common.Util.Pair;
 
 /**
- * Exports all data from a leaderboard into XML format. Format is as follows:
- * 
- * <pre>
- * <leaderboard>
- *      <name>XY</name>
- *      <competitor>
- *              <uuid>1234</uuid>
- *              <sail_id></sail_id>
- *      </competitor>
- *      
- *      <race>
- *              <name>R1</name>
- *              <competitor>
- *                      <uuid>1234</uuid>
- *                      <race_final_rank>1</race_final_rank>
- *                      <race_final_score>10</race_final_score>
- *              </competitor>
- *              <leg>
- *                      <count>1</count>
- *                      <competitor>
- *                              <uuid>1234</uuid>
- *                              <number_of_jibes>123</number_of_jibes>
- *                      </competitor>
- *              </leg>
- *      </race>
- * </leaderboard>
- * </pre>
+ * Exports all data from a leaderboard into XML format.
  * 
  * @author Simon Marcel Pamies
  */
@@ -97,6 +75,23 @@ public class LeaderboardData extends ExportAction {
         super(req, res, service);
     }
 
+    /**
+     *  Creates XML for a leaderboard. Expects a list of generated competitors and races XML elements that are associated with the leaderboard.
+     *  <pre>
+     *  <leaderboard>
+     *     <name>ESS 2014 Qingdao (Extreme40)</name>
+     *     <display_name>Qingdao</display_name>
+     *     <delay_to_live_in_millis>8000</delay_to_live_in_millis>
+     *     <scoring_scheme>HIGH_POINT_FIRST_GETS_TEN</scoring_scheme>
+     *     <boat_class>Extreme40</boat_class>
+     *       <confidence>
+     *       <simple_confidence_value>1.0</simple_confidence_value>
+     *       <messages></messages>
+     *     </confidence>
+     *     <competitor>
+     *     </competitor>
+     *  </pre>
+     */
     private Element createLeaderboardXML(Leaderboard leaderboard, List<Element> competitors, List<Element> races, Util.Pair<Double, Vector<String>> leaderboardConfidenceAndErrorMessages) {
         Element leaderboardElement = new Element("leaderboard");
         addNamedElementWithValue(leaderboardElement, "name", leaderboard.getName());
@@ -111,6 +106,20 @@ public class LeaderboardData extends ExportAction {
         return leaderboardElement;
     }
     
+    /**
+     * For the given {@link TimePoint} creates elements with several representations
+     * of that {@link TimePoint}.
+     * <pre>
+     *   <last_modification_year>2014</last_modification_year>
+     *   <last_modification_month>4</last_modification_month>
+     *   <last_modification_day>4</last_modification_day>
+     *   <last_modification_hour>9</last_modification_hour>
+     *   <last_modification_minute>3</last_modification_minute>
+     *   <last_modification_second>45</last_modification_second>
+     *   <last_modification_formatted>04.05.2014 09:03:45</last_modification_formatted>
+     *   <last_modification_millis_since_epoch>1399194225000</last_modification_millis_since_epoch>
+     * </pre>
+     */
     private List<Element> createTimedXML(String prefix, TimePoint timepoint) {
         List<Element> timedElements = new ArrayList<Element>();
         Calendar timedDate = Calendar.getInstance();
@@ -140,6 +149,17 @@ public class LeaderboardData extends ExportAction {
         return timedElements;
     }
     
+    /**
+     * Creates elements related to the given speed fix. Implies that this is related to wind.
+     * <pre>
+     *       <wind_speed_in_knots>10.985139054212647</wind_speed_in_knots>
+     *       <wind_speed_in_meters_per_second>5.652159186143912</wind_speed_in_meters_per_second>
+     *       <wind_speed_in_beaufort>4.0</wind_speed_in_beaufort>
+     *       <wind_confidence>0.24242981000649663</wind_confidence>
+     *       <wind_human_readable>Medium</wind_human_readable>
+     *       <wind_knots_interval>8-12kn</wind_knots_interval>
+     * </pre>
+     */
     public List<Element> createWindXML(String prefix, SpeedWithConfidence<TimePoint> speedWithConfidence) {
         List<Element> windElements = new ArrayList<Element>();
         if (speedWithConfidence == null) {
@@ -177,6 +197,9 @@ public class LeaderboardData extends ExportAction {
         return windElements;
     }
     
+    /**
+     * Creates elements containing information about a race
+     */
     private Element createRaceXML(final TrackedRace race, final Fleet fleet, final List<Element> legs, final RaceColumn column, final Leaderboard leaderboard, int sameDayGroupIndex, int raceCounter, Util.Pair<Double, Vector<String>> raceConfidenceAndErrorMessages) throws NoWindException, IOException, ServletException {
         Element raceElement = new Element("race");
         addNamedElementWithValue(raceElement, "name", cleanRaceName(race.getRace().getName()));
@@ -206,11 +229,27 @@ public class LeaderboardData extends ExportAction {
         addNamedElementWithValue(raceElement, "end_of_tracking_time_as_millis", handleValue(race.getEndOfTracking()));
         
         LineDetails start = race.getStartLine(race.getStartOfTracking());
-        addNamedElementWithValue(raceElement, "start_line_length_in_meters", start.getLength().getMeters());
-        addNamedElementWithValue(raceElement, "start_advantage_in_meters", start.getAdvantage().getMeters());
-        addNamedElementWithValue(raceElement, "advantageous_side_while_approaching_start_line", start.getAdvantageousSideWhileApproachingLine().name());
+        if (start != null) {
+            if (start.getLength() != null) {
+                addNamedElementWithValue(raceElement, "start_line_length_in_meters", start.getLength().getMeters());
+            } else {
+                addNamedElementWithValue(raceElement, "start_line_length_in_meters", 0);
+            }
+            Distance advantage = start.getAdvantage();
+            addNamedElementWithValue(raceElement, "start_advantage_in_meters", advantage != null ? advantage.getMeters() : 0);
+            NauticalSide nauticalSideWhileApproaching = start.getAdvantageousSideWhileApproachingLine();
+            addNamedElementWithValue(raceElement, "advantageous_side_while_approaching_start_line", nauticalSideWhileApproaching != null ? nauticalSideWhileApproaching.name() : "UNKNOWN");
+        } else {
+            addNamedElementWithValue(raceElement, "start_line_length_in_meters", 0);
+            addNamedElementWithValue(raceElement, "start_advantage_in_meters", 0);
+            addNamedElementWithValue(raceElement, "advantageous_side_while_approaching_start_line", "UNKNOWN");
+        }
 
-        addNamedElementWithValue(raceElement, "course_length_in_meters", race.getCourseLength().getMeters());
+        Distance raceCourseLength = race.getCourseLength();
+        if (raceCourseLength == null) {
+            raceConfidenceAndErrorMessages = updateConfidence("Race " + race.getRace().getName() + " has no course length.", 0.1, raceConfidenceAndErrorMessages);
+        }
+        addNamedElementWithValue(raceElement, "course_length_in_meters", raceCourseLength != null ? raceCourseLength.getMeters() : 0);
         raceElement.addContent(createWindXML("wind_", race.getAverageWindSpeedWithConfidence(/*resolutionInMillis*/ 5*60*1000)));
         
         final List<Competitor> allCompetitors = race.getCompetitorsFromBestToWorst(/*timePoint*/ race.getEndOfRace());
@@ -270,7 +309,7 @@ public class LeaderboardData extends ExportAction {
                     addNamedElementWithValue(competitorRaceDataElement, "final_race_score", finalRaceScore);
                     competitorElement.addContent(competitorRaceDataElement);
                     raceElement.addContent(competitorElement);
-                    raceConfidenceAndErrorMessages.getB().add("Competitor " + competitorInLeaderboard.getName() + " has no valid data for this race!");
+                    raceConfidenceAndErrorMessages = updateConfidence("Competitor " + competitorInLeaderboard.getName() + " has no valid data for this race!", 0.2, raceConfidenceAndErrorMessages);
                     additionalCompetitorCount++;
                 }
             }
@@ -291,7 +330,7 @@ public class LeaderboardData extends ExportAction {
                 // we do not want to include competitors that did not start the race
                 competitorElement.addContent(competitorRaceDataElement);
                 raceElement.addContent(competitorElement);
-                raceConfidenceAndErrorMessages.getB().add("Competitor " + competitor.getName() + " has no valid data for this race!");
+                raceConfidenceAndErrorMessages = updateConfidence("Competitor " + competitor.getName() + " has no valid data for this race!", 0.1, raceConfidenceAndErrorMessages);
                 continue;
             }
 
@@ -311,69 +350,140 @@ public class LeaderboardData extends ExportAction {
                 if (averageIntervallRaw != null) {
                     addNamedElementWithValue(competitorRaceDataElement, "average_interval_between_fixes_raw_as_millis", averageIntervallRaw.asMillis());
                 }
+            } else {
+                addNamedElementWithValue(competitorRaceDataElement, "average_interval_between_fixes_outliers_removed_as_millis", 0);
+                addNamedElementWithValue(competitorRaceDataElement, "average_interval_between_fixes_raw_as_millis", 0);
+                raceConfidenceAndErrorMessages = updateConfidence("Competitor " + competitor.getName() + " has no valid gps track for this race!", 0.5, raceConfidenceAndErrorMessages);
             }
                 
             int[] timePointsInSecondsBeforeStart = new int[]{0, 5, 10, 20, 30};
             for (int i : timePointsInSecondsBeforeStart) {
                 TimePoint beforeRaceStartTime = race.getStartOfRace().minus(i*1000);
-                addNamedElementWithValue(competitorRaceDataElement, "distance_to_start_line_"+i+"seconds_before_start_in_meters", race.getDistanceToStartLine(competitor, beforeRaceStartTime).getMeters());
-                addNamedElementWithValue(competitorRaceDataElement, "speed_"+i+"seconds_before_start_of_race_in_knots", race.getTrack(competitor).getEstimatedSpeed(beforeRaceStartTime).getKnots());
-                addNamedElementWithValue(competitorRaceDataElement, "distance_from_starboard_side_of_start_line_"+i+"seconds_before_start_in_meters", race.getDistanceFromStarboardSideOfStartLine(competitor, beforeRaceStartTime).getMeters());
+                Distance distanceToStartLineBeforeStart = race.getDistanceToStartLine(competitor, beforeRaceStartTime);
+                if (distanceToStartLineBeforeStart == null) {
+                    raceConfidenceAndErrorMessages = updateConfidence("Competitor " + competitor.getName() + " has no valid distance to startline " + i + " seconds before start for this race!", 0.1, raceConfidenceAndErrorMessages);
+                }
+                addNamedElementWithValue(competitorRaceDataElement, "distance_to_start_line_"+i+"seconds_before_start_in_meters", distanceToStartLineBeforeStart != null ? distanceToStartLineBeforeStart.getMeters() : 0);
+                Speed estimatedSpeedBeforeStarttime = race.getTrack(competitor).getEstimatedSpeed(beforeRaceStartTime);
+                if (estimatedSpeedBeforeStarttime == null) {
+                    raceConfidenceAndErrorMessages = updateConfidence("Competitor " + competitor.getName() + " has no valid speed " + i + " seconds before start for this race!", 0.1, raceConfidenceAndErrorMessages);
+                }
+                addNamedElementWithValue(competitorRaceDataElement, "speed_"+i+"seconds_before_start_of_race_in_knots", estimatedSpeedBeforeStarttime != null ? estimatedSpeedBeforeStarttime.getKnots() : 0);
                 
-                Iterator<Mark> marksForStartLine = race.getStartLine(beforeRaceStartTime).getWaypoint().getControlPoint().getMarks().iterator();
-                Mark first = marksForStartLine.next();
-                Mark second = null;
-                if (marksForStartLine.hasNext()) {
-                    second = marksForStartLine.next();
-                    Position firstMarkPosition = race.getOrCreateTrack(first).getEstimatedPosition(beforeRaceStartTime, /*extrapolate*/ false);
-                    Position secondMarkPosition = race.getOrCreateTrack(second).getEstimatedPosition(beforeRaceStartTime, /*extrapolate*/ false);
-                    Position competitorPosition = race.getTrack(competitor).getEstimatedPosition(beforeRaceStartTime, /*extrapolate*/ false);
-                    if (firstMarkPosition != null && secondMarkPosition != null) {
-                        Position projectedCompetitorPositionOntoStartLine = getOrthogonalProjectionOntoLine(
-                            competitorPosition,
-                            firstMarkPosition,
-                            secondMarkPosition
-                            );
-                        // now compute the distance from starboard mark
-                        Mark starboardMark = race.getStartLine(beforeRaceStartTime).getStarboardMarkWhileApproachingLine();
-                        Mark portMark = null;
-                        if (starboardMark.equals(first)) {
-                            portMark = second;
-                        } else {
-                            portMark = first;
+                Distance distanceToStarboardSide = race.getDistanceFromStarboardSideOfStartLine(competitor, beforeRaceStartTime);
+                if (distanceToStarboardSide == null) {
+                    raceConfidenceAndErrorMessages = updateConfidence("Competitor " + competitor.getName() + " has no valid distance to starboard side " + i + " seconds before start for this race!", 0.1, raceConfidenceAndErrorMessages);
+                }
+                addNamedElementWithValue(competitorRaceDataElement, "distance_from_starboard_side_of_start_line_"+i+"seconds_before_start_in_meters", distanceToStarboardSide != null ? distanceToStarboardSide.getMeters() : 0);
+                
+                LineDetails raceStartLine = race.getStartLine(beforeRaceStartTime);
+                if (raceStartLine == null) {
+                    addNamedElementWithValue(competitorRaceDataElement, "bearing_fom_port_mark_to_starboard_mark"+i+"seconds_before_start_in_degrees", 0);
+                    addNamedElementWithValue(competitorRaceDataElement, "bearing_fom_projected_position_to_starboard_mark"+i+"seconds_before_start_in_degrees", 0);
+                    addNamedElementWithValue(competitorRaceDataElement, "bearing_to_starboard_mark_"+i+"seconds_before_start_in_degrees", 0);
+                    addNamedElementWithValue(competitorRaceDataElement, "competitor_in_startline_box_"+i+"seconds_before_start", "false");
+                    addNamedElementWithValue(competitorRaceDataElement, "projected_starboard_mark_distance_"+i+"seconds_before_start_in_meters", 0);
+                    addNamedElementWithValue(competitorRaceDataElement, "projected_position_onto_startline_"+i+"seconds_before_start", 0);
+                    raceConfidenceAndErrorMessages = updateConfidence("Race " + race.getRace().getName() + " has no valid startline! Data related to startline will be wrong.", 0.2, raceConfidenceAndErrorMessages);
+                } else {
+                    Iterator<Mark> marksForStartLine = race.getStartLine(beforeRaceStartTime).getWaypoint().getControlPoint().getMarks().iterator();
+                    Mark first = marksForStartLine.next();
+                    Mark second = null;
+                    if (marksForStartLine.hasNext()) {
+                        second = marksForStartLine.next();
+                        Position firstMarkPosition = race.getOrCreateTrack(first).getEstimatedPosition(beforeRaceStartTime, /*extrapolate*/ false);
+                        Position secondMarkPosition = race.getOrCreateTrack(second).getEstimatedPosition(beforeRaceStartTime, /*extrapolate*/ false);
+                        Position competitorPosition = race.getTrack(competitor).getEstimatedPosition(beforeRaceStartTime, /*extrapolate*/ false);
+                        if (firstMarkPosition != null && secondMarkPosition != null) {
+                            Position projectedCompetitorPositionOntoStartLine = getOrthogonalProjectionOntoLine(
+                                competitorPosition,
+                                firstMarkPosition,
+                                secondMarkPosition
+                                );
+                            // now compute the distance from starboard mark
+                            Mark starboardMark = race.getStartLine(beforeRaceStartTime).getStarboardMarkWhileApproachingLine();
+                            Mark portMark = null;
+                            if (starboardMark.equals(first)) {
+                                portMark = second;
+                            } else {
+                                portMark = first;
+                            }
+                            Position portMarkPosition = race.getOrCreateTrack(portMark).getEstimatedPosition(beforeRaceStartTime, /*extrapolate*/ false);
+                            Position starboardMarkPosition = race.getOrCreateTrack(starboardMark).getEstimatedPosition(beforeRaceStartTime, /*extrapolate*/ false);
+                            Distance projectedDistance = projectedCompetitorPositionOntoStartLine.getDistance(starboardMarkPosition);
+                            Bearing bearingToStarboardMarkFromCompetitorPosition = competitorPosition.getBearingGreatCircle(starboardMarkPosition);
+                            Bearing bearingFromPortToStarboardMark = portMarkPosition.getBearingGreatCircle(starboardMarkPosition);
+                            Bearing bearingFromProjectedCompetitorPositionToStarboardMark = projectedCompetitorPositionOntoStartLine.getBearingGreatCircle(starboardMarkPosition);
+                            addNamedElementWithValue(competitorRaceDataElement, "bearing_fom_port_mark_to_starboard_mark"+i+"seconds_before_start_in_degrees", bearingFromPortToStarboardMark.getDegrees());
+                            addNamedElementWithValue(competitorRaceDataElement, "bearing_fom_projected_position_to_starboard_mark"+i+"seconds_before_start_in_degrees", bearingFromProjectedCompetitorPositionToStarboardMark.getDegrees());
+                            addNamedElementWithValue(competitorRaceDataElement, "bearing_to_starboard_mark_"+i+"seconds_before_start_in_degrees", bearingToStarboardMarkFromCompetitorPosition.getDegrees());
+                            if (Math.rint(bearingFromPortToStarboardMark.getDegrees()) == Math.rint(bearingFromProjectedCompetitorPositionToStarboardMark.getDegrees())) {
+                                addNamedElementWithValue(competitorRaceDataElement, "competitor_in_startline_box_"+i+"seconds_before_start", "true");
+                                addNamedElementWithValue(competitorRaceDataElement, "projected_starboard_mark_distance_"+i+"seconds_before_start_in_meters", projectedDistance.getMeters());
+                            } else {
+                                addNamedElementWithValue(competitorRaceDataElement, "competitor_in_startline_box_"+i+"seconds_before_start", "false");
+                                addNamedElementWithValue(competitorRaceDataElement, "projected_starboard_mark_distance_"+i+"seconds_before_start_in_meters", 0-projectedDistance.getMeters());
+                            }
+                            addNamedElementWithValue(competitorRaceDataElement, "projected_position_onto_startline_"+i+"seconds_before_start", projectedCompetitorPositionOntoStartLine.toString());
                         }
-                        Position portMarkPosition = race.getOrCreateTrack(portMark).getEstimatedPosition(beforeRaceStartTime, /*extrapolate*/ false);
-                        Position starboardMarkPosition = race.getOrCreateTrack(starboardMark).getEstimatedPosition(beforeRaceStartTime, /*extrapolate*/ false);
-                        Distance projectedDistance = projectedCompetitorPositionOntoStartLine.getDistance(starboardMarkPosition);
-                        Bearing bearingToStarboardMarkFromCompetitorPosition = competitorPosition.getBearingGreatCircle(starboardMarkPosition);
-                        Bearing bearingFromPortToStarboardMark = portMarkPosition.getBearingGreatCircle(starboardMarkPosition);
-                        Bearing bearingFromProjectedCompetitorPositionToStarboardMark = projectedCompetitorPositionOntoStartLine.getBearingGreatCircle(starboardMarkPosition);
-                        addNamedElementWithValue(competitorRaceDataElement, "bearing_fom_port_mark_to_starboard_mark"+i+"seconds_before_start_in_degrees", bearingFromPortToStarboardMark.getDegrees());
-                        addNamedElementWithValue(competitorRaceDataElement, "bearing_fom_projected_position_to_starboard_mark"+i+"seconds_before_start_in_degrees", bearingFromProjectedCompetitorPositionToStarboardMark.getDegrees());
-                        addNamedElementWithValue(competitorRaceDataElement, "bearing_to_starboard_mark_"+i+"seconds_before_start_in_degrees", bearingToStarboardMarkFromCompetitorPosition.getDegrees());
-                        if (Math.rint(bearingFromPortToStarboardMark.getDegrees()) == Math.rint(bearingFromProjectedCompetitorPositionToStarboardMark.getDegrees())) {
-                            addNamedElementWithValue(competitorRaceDataElement, "competitor_in_startline_box_"+i+"seconds_before_start", "true");
-                            addNamedElementWithValue(competitorRaceDataElement, "projected_starboard_mark_distance_"+i+"seconds_before_start_in_meters", projectedDistance.getMeters());
-                        } else {
-                            addNamedElementWithValue(competitorRaceDataElement, "competitor_in_startline_box_"+i+"seconds_before_start", "false");
-                            addNamedElementWithValue(competitorRaceDataElement, "projected_starboard_mark_distance_"+i+"seconds_before_start_in_meters", 0-projectedDistance.getMeters());
-                        }
-                        addNamedElementWithValue(competitorRaceDataElement, "projected_position_onto_startline_"+i+"seconds_before_start", projectedCompetitorPositionOntoStartLine.toString());
                     }
                 }
             }
             Tack startTack = race.getTack(competitor, race.getStartOfRace());
             addNamedElementWithValue(competitorRaceDataElement, "start_tack", startTack != null ? startTack.name() : "UNKNOWN");
-            addNamedElementWithValue(competitorRaceDataElement, "starboard_mark_name", race.getStartLine(race.getStartOfRace()).getStarboardMarkWhileApproachingLine().getName());
-            addNamedElementWithValue(competitorRaceDataElement, "distance_to_start_line_on_race_start_in_meters", race.getDistanceToStartLine(competitor, race.getStartOfRace()).getMeters());
-            addNamedElementWithValue(competitorRaceDataElement, "speed_on_start_signal_of_race_in_knots", race.getTrack(competitor).getEstimatedSpeed(race.getStartOfRace()).getKnots());
-            addNamedElementWithValue(competitorRaceDataElement, "distance_from_starboard_side_of_start_line_when_passing_start_in_meters", race.getDistanceFromStarboardSideOfStartLineWhenPassingStart(competitor).getMeters());
+            LineDetails startLine = race.getStartLine(race.getStartOfRace());
+            addNamedElementWithValue(competitorRaceDataElement, "starboard_mark_name", startLine != null ? startLine.getStarboardMarkWhileApproachingLine().getName() : "UNKNOWN");
+            Distance distanceToStartLine = race.getDistanceToStartLine(competitor, race.getStartOfRace());
+            addNamedElementWithValue(competitorRaceDataElement, "distance_to_start_line_on_race_start_in_meters", distanceToStartLine != null ? distanceToStartLine.getMeters() : 0);
+            Speed estimatedSpeedAtStartSignal = race.getTrack(competitor).getEstimatedSpeed(race.getStartOfRace());
+            if (estimatedSpeedAtStartSignal == null) {
+                raceConfidenceAndErrorMessages = updateConfidence("Competitor " + competitor.getName() + " has no valid speed at start for this race!", 0.1, raceConfidenceAndErrorMessages);
+            }
+            addNamedElementWithValue(competitorRaceDataElement, "speed_on_start_signal_of_race_in_knots", estimatedSpeedAtStartSignal != null ? estimatedSpeedAtStartSignal.getKnots() : 0);
+            Distance distanceFromStarboardSideWhenPassingStart = race.getDistanceFromStarboardSideOfStartLineWhenPassingStart(competitor);
+            if (distanceFromStarboardSideWhenPassingStart == null) {
+                raceConfidenceAndErrorMessages = updateConfidence("Competitor " + competitor.getName() + " has no valid distance from line at start for this race!", 0.1, raceConfidenceAndErrorMessages);
+            }
+            addNamedElementWithValue(competitorRaceDataElement, "distance_from_starboard_side_of_start_line_when_passing_start_in_meters", distanceFromStarboardSideWhenPassingStart != null ? distanceFromStarboardSideWhenPassingStart.getMeters() : 0);
             addNamedElementWithValue(competitorRaceDataElement, "rank_based_on_distance_from_starboard_side_of_start_line", competitorToDistanceRank.get(competitor));
-            addNamedElementWithValue(competitorRaceDataElement, "speed_when_crossing_start_line_in_knots", race.getSpeedWhenCrossingStartLine(competitor).getKnots());
-            addNamedElementWithValue(competitorRaceDataElement, "maximum_race_speed_over_ground_in_knots", getMaximumSpeedOverGround(competitor, race).getKnots());
+            Speed speedWhenCrossingStartline = race.getSpeedWhenCrossingStartLine(competitor);
+            if (speedWhenCrossingStartline == null) {
+                raceConfidenceAndErrorMessages = updateConfidence("Competitor " + competitor.getName() + " has no valid speed when passing startline for this race!", 0.2, raceConfidenceAndErrorMessages);
+            }
+            addNamedElementWithValue(competitorRaceDataElement, "speed_when_crossing_start_line_in_knots", speedWhenCrossingStartline != null ? speedWhenCrossingStartline.getKnots() : 0);
+            com.sap.sse.common.Util.Triple<GPSFixMoving, Speed, TrackedLegOfCompetitor> gpsFixWithSpeedAndLegInformation = getMaximumSpeedOverGround(competitor, race);
+            if (gpsFixWithSpeedAndLegInformation != null && gpsFixWithSpeedAndLegInformation.getB() != null) {
+                addNamedElementWithValue(competitorRaceDataElement, "maximum_race_speed_over_ground_in_knots", gpsFixWithSpeedAndLegInformation.getB().getKnots());
+                competitorRaceDataElement.addContent(createTimedXML("maximum_race_speed_measured_at_", gpsFixWithSpeedAndLegInformation.getA().getTimePoint()));
+                if (gpsFixWithSpeedAndLegInformation.getC() != null) {
+                    // check which leg number it is
+                    int legCounterForMaxSpeed = 0;
+                    for (Leg leg : race.getRace().getCourse().getLegs()) {
+                        legCounterForMaxSpeed++;
+                        if (leg.equals(gpsFixWithSpeedAndLegInformation.getC().getLeg())) {
+                            break;
+                        }
+                    }
+                    addNamedElementWithValue(competitorRaceDataElement, "maximum_race_speed_over_ground_reached_in_leg", legCounterForMaxSpeed);
+                    TrackedLeg trackedLegWithTypeInformation = gpsFixWithSpeedAndLegInformation.getC().getTrackedLeg();
+                    if (trackedLegWithTypeInformation != null) {
+                        addNamedElementWithValue(competitorRaceDataElement, "maximum_race_speed_over_ground_reached_in_leg_with_type", trackedLegWithTypeInformation.getLegType(gpsFixWithSpeedAndLegInformation.getA().getTimePoint()).name());
+                    } else {
+                        addNamedElementWithValue(competitorRaceDataElement, "maximum_race_speed_over_ground_reached_in_leg_with_type", "UNKNOWN");
+                    }
+                } else {
+                    addNamedElementWithValue(competitorRaceDataElement, "maximum_race_speed_over_ground_reached_in_leg", 0);
+                }
+            } else {
+                addNamedElementWithValue(competitorRaceDataElement, "maximum_race_speed_over_ground_in_knots", 0.0);
+                competitorRaceDataElement.addContent(createTimedXML("maximum_race_speed_measured_at_", race.getStartOfRace()));
+                addNamedElementWithValue(competitorRaceDataElement, "maximum_race_speed_over_ground_reached_in_leg_with_type", "UNKNOWN");
+                addNamedElementWithValue(competitorRaceDataElement, "maximum_race_speed_over_ground_reached_in_leg", 0);
+                raceConfidenceAndErrorMessages = updateConfidence("Competitor " + competitor.getName() + " has no valid maximum speed for this race!", 0.5, raceConfidenceAndErrorMessages);
+            }
             Distance distanceTraveledInThisRace = race.getDistanceTraveled(competitor, race.getEndOfRace());
             if (distanceTraveledInThisRace == null) {
-                raceConfidenceAndErrorMessages.getB().add("Competitor " + competitor.getName() + " has no valid distance traveled for this race!");
+                raceConfidenceAndErrorMessages = updateConfidence("Competitor " + competitor.getName() + " has no valid distance traveled for this race! Check distance traveled including non finished legs.", 0.3, raceConfidenceAndErrorMessages);
             }
             addNamedElementWithValue(competitorRaceDataElement, "distance_traveled_in_meters", distanceTraveledInThisRace == null ? 0.0 : distanceTraveledInThisRace.getMeters());
             addNamedElementWithValue(competitorRaceDataElement, "distance_traveled_including_non_finished_legs_in_meters", getDistanceTraveled(race, competitor, race.getEndOfRace(), /*alsoReturnDistanceIfCompetitorHasNotFinishedRace*/ true).getMeters());
@@ -384,8 +494,8 @@ public class LeaderboardData extends ExportAction {
             if (trackedLegOfCompetitor != null && trackedLegOfCompetitor.getFinishTime() != null) {
                 addNamedElementWithValue(competitorRaceDataElement, "rank_at_end_of_first_leg", trackedLegOfCompetitor.getRank(trackedLegOfCompetitor.getFinishTime()));
             } else {
-                raceConfidenceAndErrorMessages.getB().add("It seems that competitor " + competitor.getName() + " has not finished first leg!");
                 addNamedElementWithValue(competitorRaceDataElement, "rank_at_end_of_first_leg", 0);
+                raceConfidenceAndErrorMessages = updateConfidence("It seems that competitor " + competitor.getName() + " has not finished first leg!", 0.1, raceConfidenceAndErrorMessages);
             }
             Distance averageCrossTrackError = race.getAverageAbsoluteCrossTrackError(competitor, race.getStartOfRace(), race.getEndOfRace(), /*upwindOnly*/ false, /*waitForLatestAnalysis*/ false);
             addNamedElementWithValue(competitorRaceDataElement, "average_cross_track_error_in_meters", averageCrossTrackError != null ? averageCrossTrackError.getMeters() : -1.0);
@@ -400,6 +510,10 @@ public class LeaderboardData extends ExportAction {
         return raceElement;
     }
     
+    /**
+     * Creates xml elements related to a competitor.
+     * @param shortVersion when set to <code>true</code> then only the name and UUID is returned
+     */
     private Element createCompetitorXML(Competitor competitor, Leaderboard leaderboard, boolean shortVersion, Util.Pair<Double, Vector<String>> competitorConfidenceAndErrorMessages) throws NoWindException, IOException, ServletException {
         TimePoint timeSpent = MillisecondsTimePoint.now();
         Element competitorElement = new Element("competitor");
@@ -427,56 +541,68 @@ public class LeaderboardData extends ExportAction {
             addNamedElementWithValue(competitorElement, "nationality_ioc", "");
         }
         
-        if (leaderboard.getTimePointOfLatestModification() != null) {
-            TimePoint timePointOfLatestModification = leaderboard.getTimePointOfLatestModification();
-            Duration totalTimeSailed = leaderboard.getTotalTimeSailed(competitor, timePointOfLatestModification);
-            addNamedElementWithValue(competitorElement, "total_time_sailed_in_milliseconds", totalTimeSailed.asMillis());
-            addNamedElementWithValue(competitorElement, "total_time_sailed_including_non_finished_races_in_milliseconds", getTotalTimeSailedInMilliseconds(competitor, timePointOfLatestModification, true));
-            Distance totalDistanceSailed = leaderboard.getTotalDistanceTraveled(competitor, timePointOfLatestModification);
-            addNamedElementWithValue(competitorElement, "total_distance_sailed_in_meters", totalDistanceSailed != null ? totalDistanceSailed.getMeters() : 0);
-            addNamedElementWithValue(competitorElement, "total_distance_sailed_including_non_finished_races_in_meters", getTotalDistanceTraveled(leaderboard, competitor, timePointOfLatestModification).getMeters());
-            if (totalDistanceSailed == null) {
-                competitorConfidenceAndErrorMessages.getB().add("Competitor has not finished all races in this leaderboard! His distance sailed is not comparable to others!");
+        // determine the last race and take the timepoint from there
+        TimePoint timePointOfLatestModification = null;
+        RaceColumn lastRaceColumnWithTrackedRace = null;
+        for (RaceColumn column : leaderboard.getRaceColumns()) {
+            if (column.hasTrackedRaces()) {
+                lastRaceColumnWithTrackedRace = column;
             }
-            addNamedElementWithValue(competitorElement, "maximum_speed_over_ground_in_knots", leaderboard.getMaximumSpeedOverGround(competitor, timePointOfLatestModification).getB().getKnots());
-            Speed averageSpeed = leaderboard.getAverageSpeedOverGround(competitor, timePointOfLatestModification);
-            addNamedElementWithValue(competitorElement, "average_speed_over_ground_from_start_mark_passing_in_knots", averageSpeed != null ? averageSpeed.getKnots() : 0);
-            if (averageSpeed == null) {
-                competitorConfidenceAndErrorMessages.getB().add("Competitor has not finished all races in this leaderboard! His average speed over ground is not comparable to others!");
-            }
-            Speed averageSpeedOverGroundIncludingNonCompletedRaces = getAverageSpeedOverGround(leaderboard, competitor, timePointOfLatestModification, true);
-            addNamedElementWithValue(competitorElement, "average_speed_over_ground_including_non_finished_races_in_knots", averageSpeedOverGroundIncludingNonCompletedRaces == null ? 0 : averageSpeedOverGroundIncludingNonCompletedRaces.getKnots());
-            
-            addNamedElementWithValue(competitorElement, "overall_rank", leaderboard.getTotalRankOfCompetitor(competitor, timePointOfLatestModification));
-            addNamedElementWithValue(competitorElement, "overall_score", leaderboard.getTotalPoints(competitor, timePointOfLatestModification));
-        } else {
-            TimePoint now = MillisecondsTimePoint.now();
-            addNamedElementWithValue(competitorElement, "total_time_sailed_in_milliseconds", leaderboard.getTotalTimeSailed(competitor, now).asMillis());
-            addNamedElementWithValue(competitorElement, "total_time_sailed_including_non_finished_races_in_milliseconds", getTotalTimeSailedInMilliseconds(competitor, now, true));
-            Distance totalDistanceSailed = leaderboard.getTotalDistanceTraveled(competitor, now);
-            addNamedElementWithValue(competitorElement, "total_distance_sailed_in_meters", totalDistanceSailed != null ? totalDistanceSailed.getMeters() : 0);
-            if (totalDistanceSailed == null) {
-                competitorConfidenceAndErrorMessages.getB().add("Competitor has not finished all races in this leaderboard! His distance sailed is not comparable to others!");
-            }
-            addNamedElementWithValue(competitorElement, "total_distance_sailed_including_non_finished_races_in_meters", getTotalDistanceTraveled(leaderboard, competitor, now).getMeters());
-            addNamedElementWithValue(competitorElement, "maximum_speed_over_ground_in_knots", leaderboard.getMaximumSpeedOverGround(competitor, now).getB().getKnots());
-            Speed averageSpeed = leaderboard.getAverageSpeedOverGround(competitor, now);
-            addNamedElementWithValue(competitorElement, "average_speed_over_ground_from_start_mark_passing_in_knots", averageSpeed != null ? averageSpeed.getKnots() : 0);
-            if (averageSpeed == null) {
-                competitorConfidenceAndErrorMessages.getB().add("Competitor has not finished all races in this leaderboard! His average speed over ground is not comparable to others!");
-            }
-            Speed averageSpeedOverGroundIncludingNonCompletedRaces = getAverageSpeedOverGround(leaderboard, competitor, now, true);
-            addNamedElementWithValue(competitorElement, "average_speed_over_ground_including_non_finished_races_in_knots", averageSpeedOverGroundIncludingNonCompletedRaces == null ? 0 : averageSpeedOverGroundIncludingNonCompletedRaces.getKnots());
-            
-            addNamedElementWithValue(competitorElement, "overall_rank", leaderboard.getTotalRankOfCompetitor(competitor, now));
-            addNamedElementWithValue(competitorElement, "overall_score", leaderboard.getTotalPoints(competitor, now));
         }
+        TimePoint endOfRaceForLastTrackedRaceInLeaderboard = null;
+        if (lastRaceColumnWithTrackedRace != null) {
+            TrackedRace lastTrackedRace = lastRaceColumnWithTrackedRace.getTrackedRace(competitor);
+            if (lastTrackedRace != null) {
+                endOfRaceForLastTrackedRaceInLeaderboard = lastTrackedRace.getEndOfRace();
+            } else {
+                // can happen that for this competitor there is no tracked race
+                // leave time null so that leaderboard latest modification time
+                // will kick in
+            }
+        }
+        if (endOfRaceForLastTrackedRaceInLeaderboard != null) {
+            timePointOfLatestModification = endOfRaceForLastTrackedRaceInLeaderboard;
+        } else {
+            if (leaderboard.getTimePointOfLatestModification() != null) {
+                timePointOfLatestModification = leaderboard.getTimePointOfLatestModification();
+            } else {
+                timePointOfLatestModification = MillisecondsTimePoint.now();
+            }
+        }
+        Duration totalTimeSailed = leaderboard.getTotalTimeSailed(competitor, timePointOfLatestModification);
+        if (totalTimeSailed != null) {
+            addNamedElementWithValue(competitorElement, "total_time_sailed_in_milliseconds", totalTimeSailed.asMillis());
+        } else {
+            addNamedElementWithValue(competitorElement, "total_time_sailed_in_milliseconds", 0);
+        }
+        addNamedElementWithValue(competitorElement, "total_time_sailed_including_non_finished_races_in_milliseconds", getTotalTimeSailedInMilliseconds(competitor, timePointOfLatestModification, true));
+        Distance totalDistanceSailed = leaderboard.getTotalDistanceTraveled(competitor, timePointOfLatestModification);
+        if (totalDistanceSailed == null) {
+            competitorConfidenceAndErrorMessages = updateConfidence("Competitor has not finished all races in this leaderboard! His distance sailed is not comparable to others!", 0.1, competitorConfidenceAndErrorMessages);
+        }
+        addNamedElementWithValue(competitorElement, "total_distance_sailed_in_meters", totalDistanceSailed != null ? totalDistanceSailed.getMeters() : 0);
+        Distance totalDistanceSailedIncludingNonFinishedRaces = getTotalDistanceTraveled(leaderboard, competitor, timePointOfLatestModification);
+        addNamedElementWithValue(competitorElement, "total_distance_sailed_including_non_finished_races_in_meters", totalDistanceSailedIncludingNonFinishedRaces != null ? totalDistanceSailedIncludingNonFinishedRaces.getMeters() : 0);
+        Pair<GPSFixMoving, Speed> maximumLeaderboardSpeedOverGround = leaderboard.getMaximumSpeedOverGround(competitor, timePointOfLatestModification);
+        addNamedElementWithValue(competitorElement, "maximum_speed_over_ground_in_knots", maximumLeaderboardSpeedOverGround != null ? maximumLeaderboardSpeedOverGround.getB().getKnots() : 0);
+        Speed averageSpeed = leaderboard.getAverageSpeedOverGround(competitor, timePointOfLatestModification);
+        if (averageSpeed == null) {
+            competitorConfidenceAndErrorMessages = updateConfidence("Competitor has not finished all races in this leaderboard! His average speed over ground is not comparable to others!", 0.1, competitorConfidenceAndErrorMessages);
+        }
+        addNamedElementWithValue(competitorElement, "average_speed_over_ground_from_start_mark_passing_in_knots", averageSpeed != null ? averageSpeed.getKnots() : 0);
+        Speed averageSpeedOverGroundIncludingNonCompletedRaces = getAverageSpeedOverGround(leaderboard, competitor, timePointOfLatestModification, true);
+        addNamedElementWithValue(competitorElement, "average_speed_over_ground_including_non_finished_races_in_knots", averageSpeedOverGroundIncludingNonCompletedRaces == null ? 0 : averageSpeedOverGroundIncludingNonCompletedRaces.getKnots());
+        addNamedElementWithValue(competitorElement, "overall_rank", leaderboard.getTotalRankOfCompetitor(competitor, timePointOfLatestModification));
+        addNamedElementWithValue(competitorElement, "overall_score", leaderboard.getTotalPoints(competitor, timePointOfLatestModification));
         competitorElement.addContent(createDataConfidenceXML(competitorConfidenceAndErrorMessages));
         TimePoint elapsedTime = MillisecondsTimePoint.now().minus(timeSpent.asMillis());
         addNamedElementWithValue(competitorElement, "generation_time_in_milliseconds", elapsedTime.asMillis());
         return competitorElement;
     }
     
+    /**
+     * Create xml elements related to a leg.
+     */
     private Element createLegXML(TrackedLeg trackedLeg, Leaderboard leaderboard, int legCounter, Util.Pair<Double, Vector<String>> raceConfidenceAndErrorMessages, Util.Pair<Double, Vector<String>> legConfidenceAndErrorMessages) throws NoWindException, IOException, ServletException {
         TimePoint timeSpent = MillisecondsTimePoint.now();
         Leg leg = trackedLeg.getLeg();
@@ -509,15 +635,19 @@ public class LeaderboardData extends ExportAction {
             Util.Pair<GPSFixMoving, Speed> maximumSpeed = competitorLeg.getMaximumSpeedOverGround(legFinishTime);
             addNamedElementWithValue(competitorLegDataElement, "maximum_speed_over_ground_in_knots", maximumSpeed != null ? maximumSpeed.getB().getKnots() : -1);
             if (maximumSpeed == null) {
-                legConfidenceAndErrorMessages.getB().add("Competitor "+ competitor.getName() +" has not finished this leg! His maximum speed for this leg is not comparable to others!");
+                legConfidenceAndErrorMessages = updateConfidence("Competitor "+ competitor.getName() +" has not finished this leg! His maximum speed for this leg is not comparable to others!", 0.1, legConfidenceAndErrorMessages);
             }
             Speed averageVelocityMadeGood = competitorLeg.getAverageVelocityMadeGood(legFinishTime);
             addNamedElementWithValue(competitorLegDataElement, "average_velocity_made_good_in_knots", averageVelocityMadeGood != null ? averageVelocityMadeGood.getKnots() : 0);
             addNamedElementWithValue(competitorLegDataElement, "leg_finished_time_as_millis", handleValue(legFinishTime));
             addNamedElementWithValue(competitorLegDataElement, "total_race_time_elapsed_as_millis", handleValue(legFinishTime)-handleValue(trackedLeg.getTrackedRace().getStartOfRace()));
-            addNamedElementWithValue(competitorLegDataElement, "time_spend_in_this_leg_as_millis", competitorLeg.getTime(legFinishTime).asMillis());
-            addNamedElementWithValue(competitorLegDataElement, "gap_to_leader_at_finish_in_seconds", competitorLeg.getGapToLeaderInSeconds(legFinishTime));
-            Distance windwardDistanceToOverallLeader = competitorLeg.getWindwardDistanceToOverallLeader(legFinishTime);
+            Duration timeSpentInThisLeg = competitorLeg.getTime(legFinishTime);
+            if (timeSpentInThisLeg == null) {
+                legConfidenceAndErrorMessages = updateConfidence("Competitor " + competitor.getName() + " seems to not have finished this leg before end of tracking time.", 0.1, legConfidenceAndErrorMessages);
+            }
+            addNamedElementWithValue(competitorLegDataElement, "time_spend_in_this_leg_as_millis", timeSpentInThisLeg != null ? timeSpentInThisLeg.asMillis() : new MillisecondsDurationImpl(0).asMillis());
+            addNamedElementWithValue(competitorLegDataElement, "gap_to_leader_at_finish_in_seconds", competitorLeg.getGapToLeaderInSeconds(legFinishTime, WindPositionMode.LEG_MIDDLE));
+            Distance windwardDistanceToOverallLeader = competitorLeg.getWindwardDistanceToOverallLeader(legFinishTime, WindPositionMode.LEG_MIDDLE);
             addNamedElementWithValue(competitorLegDataElement, "windward_distance_to_overall_leader_that_has_finished_this_leg_in_meters", windwardDistanceToOverallLeader != null ? windwardDistanceToOverallLeader.getMeters() : 0);
             addNamedElementWithValue(competitorLegDataElement, "distance_traveled_in_meters", competitorLeg.getDistanceTraveled(legFinishTime).getMeters());
             addNamedElementWithValue(competitorLegDataElement, "average_speed_over_ground_in_knots", competitorLeg.getAverageSpeedOverGround(legFinishTime).getKnots());
@@ -566,6 +696,9 @@ public class LeaderboardData extends ExportAction {
         return legElement;
     }
     
+    /**
+     * Creates xml elements that indicate confidence.
+     */
     private Element createDataConfidenceXML(Util.Pair<Double, Vector<String>> confidenceAndMessages) {
         Element confidenceDataElement = new Element("confidence");
         addNamedElementWithValue(confidenceDataElement, "simple_confidence_value", confidenceAndMessages.getA().doubleValue());
@@ -575,6 +708,17 @@ public class LeaderboardData extends ExportAction {
         }
         confidenceDataElement.addContent(messagesElement);
         return confidenceDataElement;
+    }
+    
+    /**
+     * Update confidence 
+     * @param message The message that contains information why confidence is decreased
+     * @param decreaseConfidenceBy Value telling how much the confidence should be decreased
+     */
+    private Util.Pair<Double, Vector<String>> updateConfidence(String message, double decreaseConfidenceBy, Util.Pair<Double, Vector<String>> confidencePair) {
+        Vector<String> messages = confidencePair.getB();
+        messages.add(message);
+        return new Util.Pair<Double, Vector<String>>(confidencePair.getA().doubleValue()-decreaseConfidenceBy, messages);
     }
     
     private Util.Pair<Double, Vector<String>> checkData(TrackedLeg leg) throws Exception {
@@ -701,6 +845,9 @@ public class LeaderboardData extends ExportAction {
         return new Util.Pair<Double, Vector<String>>(simpleConfidence, messages);
     }
     
+    /**
+     * Groups races together that have been on the same day
+     */
     private int getSameDayGroupIndex(TrackedRace currentRace, TrackedRace raceBefore) {
         if (raceBefore != null && !raceBefore.equals(currentRace)) {
             if (currentRace != null && currentRace.getStartOfRace() != null && raceBefore.getStartOfRace() != null) {
@@ -759,10 +906,7 @@ public class LeaderboardData extends ExportAction {
                 }
             }
         }
-        
         log.info("Finished XML export of leaderboard " + leaderboard.getName() + " in " + MillisecondsTimePoint.now().minus(timeSpent.asMillis()).asMillis() + " milliseconds");
         sendDocument(createLeaderboardXML(leaderboard, competitorElements, racesElements, leaderboardConfidenceAndErrorMessages), leaderboard.getName() + ".xml");
     }
-    
-
 }

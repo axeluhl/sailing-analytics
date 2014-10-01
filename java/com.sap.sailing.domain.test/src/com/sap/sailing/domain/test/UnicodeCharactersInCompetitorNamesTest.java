@@ -11,7 +11,9 @@ import java.net.URL;
 import java.nio.charset.Charset;
 
 import org.junit.Before;
+import org.junit.Rule;
 import org.junit.Test;
+import org.junit.rules.Timeout;
 
 import com.sap.sailing.domain.base.Competitor;
 import com.sap.sailing.domain.racelog.impl.EmptyRaceLogStore;
@@ -21,18 +23,22 @@ import com.sap.sailing.domain.tractracadapter.DomainFactory;
 import com.sap.sailing.domain.tractracadapter.TracTracConnectionConstants;
 import com.sap.sailing.domain.tractracadapter.TracTracRaceTracker;
 import com.sap.sailing.domain.tractracadapter.impl.DomainFactoryImpl;
+import com.tractrac.model.lib.api.event.CreateModelException;
+import com.tractrac.subscription.lib.api.SubscriberInitializationException;
 
 public class UnicodeCharactersInCompetitorNamesTest {
     protected static final boolean tractracTunnel = Boolean.valueOf(System.getProperty("tractrac.tunnel", "false"));
     protected static final String tractracTunnelHost = System.getProperty("tractrac.tunnel.host", "localhost");
     private DomainFactory domainFactory;
     
+    @Rule public Timeout AbstractTracTracLiveTestTimeout = new Timeout(2 * 60 * 1000);
+
     @Before
     public void setUp() {
         domainFactory = new DomainFactoryImpl(new com.sap.sailing.domain.base.impl.DomainFactoryImpl());
     }
     
-    public static void main(String[] args) throws URISyntaxException, IOException, InterruptedException {
+    public static void main(String[] args) throws URISyntaxException, IOException, InterruptedException, CreateModelException, SubscriberInitializationException {
         UnicodeCharactersInCompetitorNamesTest t = new UnicodeCharactersInCompetitorNamesTest();
         t.setUp();
         t.readJSONURLAndCheckCompetitorNames();
@@ -40,7 +46,7 @@ public class UnicodeCharactersInCompetitorNamesTest {
     }
     
     @Test
-    public void testFindUnicodeCharactersInCompetitorNames() throws MalformedURLException, FileNotFoundException, URISyntaxException, IOException, InterruptedException {
+    public void testFindUnicodeCharactersInCompetitorNames() throws MalformedURLException, FileNotFoundException, URISyntaxException, IOException, InterruptedException, CreateModelException, SubscriberInitializationException {
         TracTracRaceTracker fourtyninerYellow_2 = domainFactory
                 .createRaceTracker(
                         new URL(
@@ -56,11 +62,10 @@ public class UnicodeCharactersInCompetitorNamesTest {
                                         + TracTracConnectionConstants.PORT_STORED),
                         new URI("http://tracms.traclive.dk/update_course"),
                         /* startOfTracking */null, /* endOfTracking */null, /* delayToLiveInMillis */0l,
-                        /* simulateWithStartTimeNow */ false, EmptyRaceLogStore.INSTANCE, EmptyWindStore.INSTANCE, EmptyGPSFixStore.INSTANCE, "tracTest", "tracTest", "",
+                        /* simulateWithStartTimeNow */ false, EmptyRaceLogStore.INSTANCE, EmptyWindStore.INSTANCE, EmptyGPSFixStore.INSTANCE, "tracTest", "tracTest", "", "",
                         new DummyTrackedRegattaRegistry());
 
-        Iterable<Competitor> competitors = fourtyninerYellow_2.getRacesHandle().getRaces().iterator().next()
-                .getCompetitors();
+        Iterable<Competitor> competitors = fourtyninerYellow_2.getRacesHandle().getRace().getCompetitors();
         for (Competitor competitor : competitors) {
             System.out.println(competitor.getName());
         }

@@ -5,7 +5,18 @@
 	xsi:schemaLocation="http://java.sun.com/xml/ns/javaee
 	http://java.sun.com/xml/ns/javaee/web-app_2_5.xsd" version="2.5">
 
+	<!-- Disable directory listing: -->
 	<servlet>
+		<servlet-name>default</servlet-name>
+		<servlet-class>org.eclipse.jetty.servlet.DefaultServlet
+		</servlet-class>
+		<init-param>
+			<param-name>dirAllowed</param-name>
+			<param-value>false</param-value>
+		</init-param>
+	</servlet>
+
+   	<servlet>
 		<servlet-name>AdminApp</servlet-name>
 		<servlet-class>com.sap.sailing.server.gateway.impl.AdminApp</servlet-class>
 	</servlet>
@@ -239,7 +250,7 @@
    		</init-param>
 		<init-param>
    			<param-name>com.sun.jersey.spi.container.ContainerResponseFilters</param-name>
-   			<param-value>com.sap.sailing.server.gateway.jaxrs.AccessControlResponseFilter</param-value>
+   			<param-value>com.sap.sailing.server.gateway.jaxrs.AccessControlAndEncodingResponseFilter</param-value>
 		</init-param>   
 		<load-on-startup>1</load-on-startup>
   	</servlet>
@@ -256,7 +267,7 @@
    		</init-param>
 		<init-param>
    			<param-name>com.sun.jersey.spi.container.ContainerResponseFilters</param-name>
-   			<param-value>com.sap.sailing.server.gateway.jaxrs.AccessControlResponseFilter</param-value>
+   			<param-value>com.sap.sailing.server.gateway.jaxrs.AccessControlAndEncodingResponseFilter</param-value>
 		</init-param>   
 		<load-on-startup>1</load-on-startup>
   	</servlet>

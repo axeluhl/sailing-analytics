@@ -17,6 +17,7 @@ import com.sap.sailing.domain.common.dto.LeaderboardRowDTO;
 import com.sap.sailing.domain.common.dto.LegEntryDTO;
 import com.sap.sailing.domain.common.impl.InvertibleComparatorAdapter;
 import com.sap.sailing.gwt.ui.client.StringMessages;
+import com.sap.sailing.gwt.ui.client.shared.controls.AbstractSortableColumnWithMinMax;
 import com.sap.sailing.gwt.ui.leaderboard.DetailTypeColumn.LegDetailField;
 
 /**
@@ -27,7 +28,7 @@ import com.sap.sailing.gwt.ui.leaderboard.DetailTypeColumn.LegDetailField;
  * 
  */
 public class LegColumn extends ExpandableSortableColumn<String> {
-    private final String raceName;
+    private final String raceColumnName;
     private final int legIndex;
     private final StringMessages stringMessages;
     private final String headerStyle;
@@ -218,13 +219,13 @@ public class LegColumn extends ExpandableSortableColumn<String> {
         }
     }
         
-    public LegColumn(LeaderboardPanel leaderboardPanel, String raceName, int legIndex, SortingOrder preferredSortingOrder, StringMessages stringMessages,
+    public LegColumn(LeaderboardPanel leaderboardPanel, String raceColumnName, int legIndex, SortingOrder preferredSortingOrder, StringMessages stringMessages,
             List<DetailType> legDetailSelection, String headerStyle, String columnStyle,
             String detailHeaderStyle, String detailColumnStyle) {
         super(leaderboardPanel, /* expandable */true /* all legs have details */, new TextCell(), preferredSortingOrder,
                 stringMessages, detailHeaderStyle, detailColumnStyle, legDetailSelection, leaderboardPanel);
         setHorizontalAlignment(ALIGN_CENTER);
-        this.raceName = raceName;
+        this.raceColumnName = raceColumnName;
         this.legIndex = legIndex;
         this.stringMessages = stringMessages;
         this.headerStyle = headerStyle;
@@ -242,10 +243,10 @@ public class LegColumn extends ExpandableSortableColumn<String> {
     }
 
     @Override
-    protected Map<DetailType, SortableColumn<LeaderboardRowDTO, ?>> getDetailColumnMap(
+    protected Map<DetailType, AbstractSortableColumnWithMinMax<LeaderboardRowDTO, ?>> getDetailColumnMap(
             LeaderboardPanel leaderboardPanel, StringMessages stringMessages, String detailHeaderStyle,
             String detailColumnStyle) {
-        Map<DetailType, SortableColumn<LeaderboardRowDTO, ?>> result = new HashMap<DetailType, SortableColumn<LeaderboardRowDTO, ?>>();
+        Map<DetailType, AbstractSortableColumnWithMinMax<LeaderboardRowDTO, ?>> result = new HashMap<>();
         
         result.put(DetailType.DISTANCE_TRAVELED,
                 new FormattedDoubleDetailTypeColumn(DetailType.DISTANCE_TRAVELED, new DistanceTraveledInMeters(), detailHeaderStyle, detailColumnStyle, leaderboardPanel));
@@ -308,7 +309,7 @@ public class LegColumn extends ExpandableSortableColumn<String> {
     }
 
     private String getRaceName() {
-        return raceName;
+        return raceColumnName;
     }
 
     private LegEntryDTO getLegEntry(LeaderboardRowDTO row) {
@@ -347,9 +348,12 @@ public class LegColumn extends ExpandableSortableColumn<String> {
     
     @Override
     public String getValue(LeaderboardRowDTO row) {
+        LeaderboardEntryDTO leaderboardEntryDTO = row.fieldsByRaceColumnName.get(raceColumnName);
         LegEntryDTO legEntry = getLegEntry(row);
         if (legEntry != null && legEntry.rank != 0) {
             return ""+legEntry.rank;
+        }  else if (leaderboardEntryDTO.legDetails != null && legIndex+1 > leaderboardEntryDTO.legDetails.size()) {
+            return "n/a";
         } else {
             return "";
         }

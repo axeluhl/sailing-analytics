@@ -1,0 +1,49 @@
+@external gwt-VerticalTabLayoutPanel;
+.gwt-VerticalTabLayoutPanel {
+	margin-left: 5px;
+}
+.gwt-VerticalTabLayoutPanel>div {
+    position: static !important;
+}
+@external gwt-VerticalTabLayoutPanelTabs;
+.gwt-VerticalTabLayoutPanel .gwt-VerticalTabLayoutPanelTabs {
+  padding-top: 6px;
+  padding-left: 5px;
+  top: 0;
+  width: 140px;
+}
+@external gwt-VerticalTabLayoutPanelContentContainer;
+.gwt-VerticalTabLayoutPanel .gwt-VerticalTabLayoutPanelContentContainer {
+  border-color: #ccc;
+  border-style: solid;
+  border-width: 0px 1px 1px;
+  left: 150px !important;
+  top: 0 !important;
+}
+@external gwt-VerticalTabLayoutPanelContent;
+.gwt-VerticalTabLayoutPanel .gwt-VerticalTabLayoutPanelContent {
+  overflow: hidden;
+  padding: 6px;
+}
+@external gwt-VerticalTabLayoutPanelTab;
+.gwt-VerticalTabLayoutPanel .gwt-VerticalTabLayoutPanelTab {
+  margin-left: 4px;
+  cursor: pointer;
+  cursor: hand;
+  color: white;
+  font-weight: normal;
+  text-align: center;
+  background: #8E8E8E;
+  -moz-border-radius: 3px 3px 0px 0px;
+  border-radius: 3px 3px 0px 0px;
+  display: block;
+  margin-top: 2px;
+  padding: 8px 6px;
+}
+@external gwt-VerticalTabLayoutPanelTab-selected;
+.gwt-VerticalTabLayoutPanel .gwt-VerticalTabLayoutPanelTab-selected {
+  cursor: default;
+  background-color: #ececec;
+  color: #333;
+  font-weight: bold;
+}

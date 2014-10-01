@@ -3,6 +3,7 @@ package com.sap.sailing.gwt.ui.client.shared.charts;
 import java.util.ArrayList;
 import java.util.List;
 
+import com.google.gwt.user.client.ui.FocusWidget;
 import com.google.gwt.user.client.ui.Label;
 import com.google.gwt.user.client.ui.ListBox;
 import com.google.gwt.user.client.ui.VerticalPanel;
@@ -28,7 +29,7 @@ public class MultiCompetitorRaceChartSettingsComponent extends AbstractChartSett
         availableDetailsTypes.add(DetailType.DISTANCE_TRAVELED);
         availableDetailsTypes.add(DetailType.VELOCITY_MADE_GOOD_IN_KNOTS);
         availableDetailsTypes.add(DetailType.GAP_TO_LEADER_IN_SECONDS);
-        availableDetailsTypes.add(DetailType.CURRENT_SPEED_OVER_GROUND_IN_KNOTS);
+        availableDetailsTypes.add(DetailType.RACE_CURRENT_SPEED_OVER_GROUND_IN_KNOTS);
         availableDetailsTypes.add(DetailType.RACE_RANK);
         availableDetailsTypes.add(DetailType.REGATTA_RANK);
         availableDetailsTypes.add(DetailType.DISTANCE_TO_START_LINE);
@@ -76,6 +77,11 @@ public class MultiCompetitorRaceChartSettingsComponent extends AbstractChartSett
             }
         }
         return new MultiCompetitorRaceChartSettings(getAbstractResult(), newDetailType);
+    }
+
+    @Override
+    public FocusWidget getFocusWidget() {
+        return chartTypeSelectionListBox;
     }
 
 }
