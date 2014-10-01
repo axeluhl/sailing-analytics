@@ -6,15 +6,16 @@
     <ui:with field="local_res" type="com.sap.sailing.gwt.autoplay.client.shared.header.SAPHeaderResources" />
 	<g:HTMLPanel>
 		<header class="{local_res.css.siteheader}">
-		  <div class="{res.mainCss.grid}">
-		    <div class="{res.mediaCss.small2} {res.mediaCss.large3} {res.mediaCss.columns}">
+		    <div class="{local_res.css.siteheaderLeft}">
 				<g:Image resource="{local_res.logo}" pixelSize="80, 40" altText="SAP Sailing Analytics" styleName="{local_res.css.logo}"/>
 				<p class="{local_res.css.logotitle}">Sailing Analytics</p>
+			</div>
+		    <div class="{local_res.css.siteheaderCentered}">
+		    	<div ui:field="pageTitleDiv" class="{local_res.css.pagetitle}"></div>
 		    </div>
-		    <div class="{res.mediaCss.small9} {res.mediaCss.medium7} {res.mediaCss.large6} {res.mediaCss.columns}">
-		        <p ui:field="pageTitleParagraph" class="{local_res.css.pagetitle}"></p>
-		    </div>
-		  </div>
+		    <div class="{local_res.css.siteheaderRight}">
+		        &nbsp;
+			</div>		        
 		</header>
 		    <!-- 
 			<div class="{res.mainCss.grid}">

@@ -8,7 +8,6 @@ import java.util.Map;
 
 import com.google.gwt.dom.client.Style.FontWeight;
 import com.google.gwt.dom.client.Style.TextAlign;
-import com.google.gwt.dom.client.Style.Unit;
 import com.google.gwt.user.client.ui.FlowPanel;
 import com.google.gwt.user.client.ui.ScrollPanel;
 import com.sap.sailing.domain.common.RegattaAndRaceIdentifier;

@@ -7,21 +7,37 @@
   line-height: 4em;
   width: 100%;
   overflow: hidden;
+  text-align:center;
 }
+
+.siteheaderLeft {
+    float:left;
+	width: 25%;
+	text-align: left;
+}
+
+.siteheaderCentered {
+	width: 50%;
+    display: inline-block;
+    margin:0 auto;
+}
+
+.siteheaderRight {
+    float:right;
+	width: 25%;
+	text-align: right;
+}
+
 .logo {
-  margin: 0.8em 0;
+  margin: 0.8em 10px;
   float: left;
 }
 .logotitle {
   display: inline;
-  height: 4.33em;
-  line-height: 4.33em;
   color: #f6f9fc;
 }
 .pagetitle {
-  display: inline;
-  height: 4.33em;
-  line-height: 4.33em;
   color: #ffffff;
+  font-size: 1.5rem;
   font-weight: bold;
 }
