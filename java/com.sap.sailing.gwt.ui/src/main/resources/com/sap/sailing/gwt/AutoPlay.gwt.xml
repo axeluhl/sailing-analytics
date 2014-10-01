@@ -50,9 +50,7 @@
 	<extend-property name="locale" values="de" />
 
 	<!-- Uncomment this to get clear-text CSS style/class names in generated output -->
-	<!-- 
 	<set-configuration-property name="CssResource.style" value="pretty" />
-	-->
 	
 	<set-property name="gwt.logging.enabled" value="TRUE"/> 
 	<set-property name="gwt.logging.logLevel" value="FINE"/>

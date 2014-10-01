@@ -6,6 +6,8 @@ import java.util.Date;
 import java.util.List;
 import java.util.Map;
 
+import com.google.gwt.dom.client.Style.FontWeight;
+import com.google.gwt.dom.client.Style.TextAlign;
 import com.google.gwt.dom.client.Style.Unit;
 import com.google.gwt.user.client.ui.FlowPanel;
 import com.google.gwt.user.client.ui.ScrollPanel;
@@ -13,6 +15,8 @@ import com.sap.sailing.domain.common.RegattaAndRaceIdentifier;
 import com.sap.sailing.domain.common.dto.FleetDTO;
 import com.sap.sailing.domain.common.dto.LeaderboardDTO;
 import com.sap.sailing.domain.common.dto.RaceColumnDTO;
+import com.sap.sailing.gwt.autoplay.client.shared.header.SAPHeader;
+import com.sap.sailing.gwt.common.client.i18n.TextMessages;
 import com.sap.sailing.gwt.ui.client.CompetitorSelectionModel;
 import com.sap.sailing.gwt.ui.client.ErrorReporter;
 import com.sap.sailing.gwt.ui.client.MediaServiceAsync;
@@ -97,7 +101,7 @@ public class AutoPlayController implements RaceTimesInfoProviderListener {
     private LeaderboardPanel createLeaderboardPanel(String leaderboardGroupName, String leaderboardName, boolean showRaceDetails) {
         CompetitorSelectionModel selectionModel = new CompetitorSelectionModel(/* hasMultiSelection */ true);
         LeaderboardPanel leaderboardPanel = new LeaderboardPanel(sailingService, asyncActionsExecutor,
-                leaderboardSettings, false,
+                leaderboardSettings, true,
                 /* preSelectedRace */null, selectionModel, leaderboardTimer, leaderboardGroupName, leaderboardName,
                 errorReporter, StringMessages.INSTANCE, userAgent, showRaceDetails, /* competitorSearchTextBox */ null, /* showRegattaRank */
                 /* showSelectionCheckbox */false, /* raceTimesInfoProvider */null, false, /* autoExpandLastRaceColumn */
@@ -109,7 +113,8 @@ public class AutoPlayController implements RaceTimesInfoProviderListener {
                 updateRaceTimesInfoProvider();
             }
         };
-        leaderboardPanel.getElement().getStyle().setMargin(5, Unit.PX);
+        leaderboardPanel.getContentWidget().getElement().getStyle().setProperty("margin", "0 auto");
+        leaderboardPanel.getContentWidget().getElement().getStyle().setFontWeight(FontWeight.BOLD);
         return leaderboardPanel;
     }
     
@@ -142,8 +147,13 @@ public class AutoPlayController implements RaceTimesInfoProviderListener {
     private void showLeaderboard() {
         if (activeTvView != AutoPlayModes.Leaderboard) {
             playerView.clearDockPanel();
-            LeaderboardPanel leaderboardPanel = createLeaderboardPanel(leaderboardGroupName, leaderboardName, showRaceDetails);
+            
+            SAPHeader sapHeader = new SAPHeader(TextMessages.INSTANCE.leaderboard() +  ": " + leaderboardName);
+            playerView.getDockPanel().addNorth(sapHeader, 80);
+            
+            LeaderboardPanel leaderboardPanel = createLeaderboardPanel(leaderboardGroupName, leaderboardName, showRaceDetails);          
             ScrollPanel leaderboardContentPanel = new ScrollPanel();
+            leaderboardContentPanel.getElement().getStyle().setTextAlign(TextAlign.CENTER);
             leaderboardContentPanel.add(leaderboardPanel);
             playerView.getDockPanel().add(leaderboardContentPanel);
             currentLiveRace = null;
