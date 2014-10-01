@@ -3,10 +3,10 @@ package com.sap.sse.datamining.test.util.components;
 import com.sap.sse.datamining.AdditionalResultDataBuilder;
 import com.sap.sse.datamining.impl.components.AbstractProcessor;
 
-public class NullProcessor<InputType> extends AbstractProcessor<InputType> {
+public class NullProcessor<InputType, ResultType> extends AbstractProcessor<InputType, ResultType> {
 
-    public NullProcessor(Class<InputType> inputType) {
-        super(inputType);
+    public NullProcessor(Class<InputType> inputType, Class<ResultType> resultType) {
+        super(inputType, resultType);
     }
 
     @Override

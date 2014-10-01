@@ -12,9 +12,9 @@ public abstract class AbstractFilteringRetrievalProcessor<InputType, WorkingType
 
     private final FilterCriterion<ResultType> criteria;
 
-    public AbstractFilteringRetrievalProcessor(Class<InputType> inputType,
-            ExecutorService executor, Collection<Processor<ResultType>> resultReceivers, FilterCriterion<ResultType> criteria) {
-        super(inputType, executor, resultReceivers);
+    public AbstractFilteringRetrievalProcessor(Class<InputType> inputType, Class<ResultType> resultType,
+            ExecutorService executor, Collection<Processor<ResultType, ?>> resultReceivers, FilterCriterion<ResultType> criteria) {
+        super(inputType, resultType, executor, resultReceivers);
         this.criteria = criteria;
     }
     

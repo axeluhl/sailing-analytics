@@ -18,8 +18,10 @@ public class ParallelGroupedDoubleDataSumAggregationProcessor
 
     @SuppressWarnings("unchecked")
     public ParallelGroupedDoubleDataSumAggregationProcessor(ExecutorService executor,
-            Collection<Processor<Map<GroupKey, Double>>> resultReceivers) {
-        super((Class<GroupedDataEntry<Double>>)(Class<?>) GroupedDataEntry.class, executor, resultReceivers, Message.Sum.toString());
+            Collection<Processor<Map<GroupKey, Double>, ?>> resultReceivers) {
+        super((Class<GroupedDataEntry<Double>>)(Class<?>) GroupedDataEntry.class,
+              (Class<Map<GroupKey, Double>>)(Class<?>) Map.class,
+              executor, resultReceivers, Message.Sum.toString());
         elementAmountMap = new HashMap<>();
     }
 

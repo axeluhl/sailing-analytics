@@ -24,15 +24,15 @@ import com.sap.sse.datamining.test.util.components.Number;
 
 public class TestParallelMultiDimensionalGroupingProcessor {
     
-    private Processor<Number> processor;
-    private Collection<Processor<GroupedDataEntry<Number>>> receivers;
+    private Processor<Number, GroupedDataEntry<Number>> processor;
+    private Collection<Processor<GroupedDataEntry<Number>, ?>> receivers;
 
     private GroupedDataEntry<Number> groupedElement;
 
     @Before
     public void intializeProcessor() throws IllegalArgumentException, NoSuchMethodException, SecurityException {
         @SuppressWarnings("unchecked")
-        Processor<GroupedDataEntry<Number>> receiver = new NullProcessor<GroupedDataEntry<Number>>((Class<GroupedDataEntry<Number>>)(Class<?>) GroupedDataEntry.class) {
+        Processor<GroupedDataEntry<Number>, Void> receiver = new NullProcessor<GroupedDataEntry<Number>, Void>((Class<GroupedDataEntry<Number>>)(Class<?>) GroupedDataEntry.class, Void.class) {
             @Override
             public void processElement(GroupedDataEntry<Number> element) {
                 groupedElement = element;

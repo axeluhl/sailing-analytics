@@ -50,7 +50,7 @@ public abstract class AbstractDataRetrieverChainBuilder<DataSourceType> implemen
 
     @SuppressWarnings("unchecked") // Checking type safety with comparison of the classes
     @Override
-    public <T> DataRetrieverChainBuilder<DataSourceType> addResultReceiver(Processor<T> resultReceiver) {
+    public <T> DataRetrieverChainBuilder<DataSourceType> addResultReceiver(Processor<T, ?> resultReceiver) {
         Class<?> currentRetrievedDataType = getCurrentRetrievedDataType();
         if (!resultReceiver.getInputType().isAssignableFrom(currentRetrievedDataType)) {
             throw new IllegalArgumentException("The given result receiver (with input type '" + resultReceiver.getInputType().getSimpleName()
@@ -68,15 +68,15 @@ public abstract class AbstractDataRetrieverChainBuilder<DataSourceType> implemen
     }
 
     @Override
-    public Processor<DataSourceType> build() {
-        Processor<?> previousRetriever = null;
+    public Processor<DataSourceType, ?> build() {
+        Processor<?, ?> previousRetriever = null;
         for (int retrievedDataTypeIndex = currentRetrievedDataTypeIndex; retrievedDataTypeIndex >= 0; retrievedDataTypeIndex--) {
             Class<?> retrievedDataType = retrievableDataTypes.get(retrievedDataTypeIndex);
             FilterCriterion<?> filter = filters.getCriterion(retrievedDataType);
             filter = filter != null ? filter : new NonFilteringFilterCriterion<>(retrievedDataType);
             
             Collection<?> storedResultReceivers = receivers.getResultReceivers(retrievedDataType);
-            Collection<Processor<?>> resultReceivers = storedResultReceivers != null ? new ArrayList<Processor<?>>((Collection<Processor<?>>) storedResultReceivers) : new ArrayList<Processor<?>>();
+            Collection<Processor<?, ?>> resultReceivers = storedResultReceivers != null ? new ArrayList<Processor<?, ?>>((Collection<Processor<?, ?>>) storedResultReceivers) : new ArrayList<Processor<?, ?>>();
             if (previousRetriever != null) {
                 resultReceivers.add(previousRetriever);
             }
@@ -84,10 +84,10 @@ public abstract class AbstractDataRetrieverChainBuilder<DataSourceType> implemen
             previousRetriever = createRetrieverFor(retrievedDataType, filter, resultReceivers);
         }
         
-        return (Processor<DataSourceType>) previousRetriever;
+        return (Processor<DataSourceType, ?>) previousRetriever;
     }
 
-    protected abstract Processor<?> createRetrieverFor(Class<?> retrievedDataType, FilterCriterion<?> filter,
-            Collection<Processor<?>> resultReceivers);
+    protected abstract Processor<?, ?> createRetrieverFor(Class<?> retrievedDataType, FilterCriterion<?> filter,
+            Collection<Processor<?, ?>> resultReceivers);
 
 }

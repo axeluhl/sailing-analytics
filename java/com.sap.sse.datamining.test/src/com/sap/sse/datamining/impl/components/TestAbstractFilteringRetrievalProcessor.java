@@ -21,7 +21,7 @@ import com.sap.sse.datamining.test.util.components.NullProcessor;
 
 public class TestAbstractFilteringRetrievalProcessor {
     
-    private Processor<Iterable<Integer>> filteringRetrievalProcessor;
+    private Processor<Iterable<Integer>, Integer> filteringRetrievalProcessor;
     private Collection<Integer> dataSource;
     
     private Collection<Integer> receivedResults = new ArrayList<>();
@@ -68,8 +68,11 @@ public class TestAbstractFilteringRetrievalProcessor {
         layeredDataSource.add(dataSource);
         layeredDataSource.add(dataSource);
         
+        Collection<Processor<Iterable<Integer>, ?>> resultReceivers = new ArrayList<>();
+        resultReceivers.add(filteringRetrievalProcessor);
         @SuppressWarnings("unchecked")
-        Processor<Iterable<Iterable<Integer>>> layeredRetrievalProcessor = new AbstractSimpleRetrievalProcessor<Iterable<Iterable<Integer>>, Iterable<Integer>>((Class<Iterable<Iterable<Integer>>>)(Class<?>) Iterable.class, ConcurrencyTestsUtil.getExecutor(), Arrays.asList(filteringRetrievalProcessor)) {
+        Processor<Iterable<Iterable<Integer>>, Iterable<Integer>> layeredRetrievalProcessor = new AbstractSimpleRetrievalProcessor<Iterable<Iterable<Integer>>, Iterable<Integer>>((Class<Iterable<Iterable<Integer>>>)(Class<?>) Iterable.class, (Class<Iterable<Integer>>)(Class<?>) Iterable.class,
+                                                                                                                                                                                    ConcurrencyTestsUtil.getExecutor(), resultReceivers) {
             @Override
             protected Iterable<Iterable<Integer>> retrieveData(Iterable<Iterable<Integer>> element) {
                 return element;
@@ -90,7 +93,7 @@ public class TestAbstractFilteringRetrievalProcessor {
     @SuppressWarnings("unchecked")
     @Before
     public void setUpResultReceiverAndProcessor() {
-        Processor<Integer> resultReceiver = new NullProcessor<Integer>(Integer.class) {
+        Processor<Integer, Void> resultReceiver = new NullProcessor<Integer, Void>(Integer.class, Void.class) {
             @Override
             public void processElement(Integer element) {
                 synchronized (receivedResults) {
@@ -98,6 +101,8 @@ public class TestAbstractFilteringRetrievalProcessor {
                 }
             }
         };
+        Collection<Processor<Integer, ?>> resultReceivers = new ArrayList<>();
+        resultReceivers.add(resultReceiver);
         
         FilterCriterion<Integer> elementGreaterZeroFilterCriteria = new AbstractFilterCriterion<Integer>(Integer.class) {
             @Override
@@ -105,7 +110,7 @@ public class TestAbstractFilteringRetrievalProcessor {
                 return element >= 0;
             }
         };
-        filteringRetrievalProcessor = new AbstractSimpleFilteringRetrievalProcessor<Iterable<Integer>, Integer>((Class<Iterable<Integer>>)(Class<?>) Iterable.class, ConcurrencyTestsUtil.getExecutor(), Arrays.asList(resultReceiver), elementGreaterZeroFilterCriteria) {
+        filteringRetrievalProcessor = new AbstractSimpleFilteringRetrievalProcessor<Iterable<Integer>, Integer>((Class<Iterable<Integer>>)(Class<?>) Iterable.class, Integer.class, ConcurrencyTestsUtil.getExecutor(), resultReceivers, elementGreaterZeroFilterCriteria) {
             @Override
             protected Iterable<Integer> retrieveData(Iterable<Integer> element) {
                 return element;

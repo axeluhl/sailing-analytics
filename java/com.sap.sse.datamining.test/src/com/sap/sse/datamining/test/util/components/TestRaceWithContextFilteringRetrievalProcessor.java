@@ -16,8 +16,8 @@ public class TestRaceWithContextFilteringRetrievalProcessor extends
         AbstractSimpleFilteringRetrievalProcessor<Test_Regatta, Test_HasRaceContext> {
 
     public TestRaceWithContextFilteringRetrievalProcessor(ExecutorService executor,
-            Collection<Processor<Test_HasRaceContext>> resultReceivers, FilterCriterion<Test_HasRaceContext> criteria) {
-        super(Test_Regatta.class, executor, resultReceivers, criteria);
+            Collection<Processor<Test_HasRaceContext, ?>> resultReceivers, FilterCriterion<Test_HasRaceContext> criteria) {
+        super(Test_Regatta.class, Test_HasRaceContext.class, executor, resultReceivers, criteria);
     }
 
     @Override

@@ -23,6 +23,7 @@ import com.sap.sse.datamining.i18n.DataMiningStringMessages;
 import com.sap.sse.datamining.impl.DataMiningActivator;
 import com.sap.sse.datamining.impl.ProcessorQuery;
 import com.sap.sse.datamining.impl.components.GroupedDataEntry;
+import com.sap.sse.datamining.shared.GroupKey;
 import com.sap.sse.datamining.shared.QueryDefinition;
 import com.sap.sse.datamining.shared.dto.FunctionDTO;
 
@@ -34,21 +35,20 @@ public final class SailingDataMiningFactory {
     public static <ElementType> Query<Double> createQuery(RacingEventService dataSource, final QueryDefinition queryDefinition, final FunctionProvider functionProvider) {
         return new ProcessorQuery<Double, RacingEventService>(DataMiningActivator.getExecutor(), dataSource,
                 DataMiningActivator.getStringMessages(), DataMiningStringMessages.Util.getLocaleFor(queryDefinition.getLocaleInfoName())) {
-            
             @Override
-            protected Processor<RacingEventService> createFirstProcessor() {
-                Processor<GroupedDataEntry<Double>> aggregationProcessor = ProcessorFactory.createAggregationProcessor(/*query*/ this, queryDefinition.getAggregatorType());
+            protected Processor<RacingEventService, ?> createFirstProcessor() {
+                Processor<GroupedDataEntry<Double>, Map<GroupKey, Double>> aggregationProcessor = ProcessorFactory.createAggregationProcessor(/*query*/ this, queryDefinition.getAggregatorType());
                 
                 @SuppressWarnings("unchecked") // TODO Clean, after the deprecated components have been removed
                 Function<Double> extractionFunction = (Function<Double>) functionProvider.getFunctionForDTO(queryDefinition.getStatisticToCalculate());
-                Processor<GroupedDataEntry<ElementType>> extractionProcessor = ProcessorFactory.createExtractionProcessor(aggregationProcessor, extractionFunction);
+                Processor<GroupedDataEntry<ElementType>, GroupedDataEntry<Double>> extractionProcessor = ProcessorFactory.createExtractionProcessor(aggregationProcessor, extractionFunction);
                 
                 List<Function<?>> dimensionsToGroupBy = convertDTOsToFunctions(queryDefinition.getDimensionsToGroupBy(), functionProvider);
                 @SuppressWarnings("unchecked")
-                Processor<ElementType> groupingProcessor = ProcessorFactory.createGroupingProcessor((Class<ElementType>) extractionFunction.getDeclaringType(), extractionProcessor, dimensionsToGroupBy);
+                Processor<ElementType, GroupedDataEntry<ElementType>> groupingProcessor = ProcessorFactory.createGroupingProcessor((Class<ElementType>) extractionFunction.getDeclaringType(), extractionProcessor, dimensionsToGroupBy);
                 
                 SailingDataRetrievalLevels dataRetrievalLevel = calculateDataRetrievalLevel(extractionFunction);
-                Processor<RacingEventService> firstRetrievalProcessor = SailingDataRetrieverFactory.createRetrievalProcessorChain(dataRetrievalLevel, groupingProcessor, queryDefinition.getFilterSelection(), functionProvider);
+                Processor<RacingEventService, ?> firstRetrievalProcessor = SailingDataRetrieverFactory.createRetrievalProcessorChain(dataRetrievalLevel, groupingProcessor, queryDefinition.getFilterSelection(), functionProvider);
                 return firstRetrievalProcessor;
             }
             
@@ -59,20 +59,20 @@ public final class SailingDataMiningFactory {
     public static Query<Set<Object>> createDimensionValuesQuery(RacingEventService dataSource, final Collection<FunctionDTO> dimensionDTOs, final FunctionProvider functionProvider) {
         return new ProcessorQuery<Set<Object>, RacingEventService>(DataMiningActivator.getExecutor(), dataSource) {
             @Override
-            protected Processor<RacingEventService> createFirstProcessor() {
-                Processor<GroupedDataEntry<Object>> valueCollector = ProcessorFactory.createGroupedDataCollectingAsSetProcessor(/*query*/ this);
+            protected Processor<RacingEventService, ?> createFirstProcessor() {
+                Processor<GroupedDataEntry<Object>, Map<GroupKey, Set<Object>>> valueCollector = ProcessorFactory.createGroupedDataCollectingAsSetProcessor(/*query*/ this);
                 
                 Collection<Function<?>> dimensions = convertDTOsToFunctions(dimensionDTOs, functionProvider);
                 Map<SailingDataRetrievalLevels, Collection<Function<?>>> dimensionsMappedByRetrievalLevel = mapFunctionsByRetrievalLevel(dimensions);
                 SailingDataRetrievalLevels deepestRetrievalLevel = getDeepestRetrievalLevel(dimensionsMappedByRetrievalLevel.keySet());
 
-                Processor<?> retrievalProcessor = null;
+                Processor<?, ?> retrievalProcessor = null;
                 for (int i = deepestRetrievalLevel.ordinal(); i >= 0; i--) {
                     SailingDataRetrievalLevels retrievalLevel = SailingDataRetrievalLevels.values()[i];
                     
                     Class<?> dataType = retrievalLevel.getDataType();
                     Collection<Function<?>> dimensionsForRetrievalLevel = dimensionsMappedByRetrievalLevel.containsKey(retrievalLevel) ? dimensionsMappedByRetrievalLevel.get(retrievalLevel) : new ArrayList<Function<?>>();
-                    Collection<Processor<?>> retrievalResultReceivers = ProcessorFactory.createGroupingExtractorsForDimensions(dataType, valueCollector, dimensionsForRetrievalLevel);
+                    Collection<Processor<?, ?>> retrievalResultReceivers = ProcessorFactory.createGroupingExtractorsForDimensions(dataType, valueCollector, dimensionsForRetrievalLevel);
                     if (retrievalProcessor != null) {
                         retrievalResultReceivers.add(retrievalProcessor);
                     }
@@ -81,7 +81,7 @@ public final class SailingDataMiningFactory {
                 }
                 
                 // A retrieval processor created this way results always in a Processor<RacingEventService>
-                return (Processor<RacingEventService>) retrievalProcessor;
+                return (Processor<RacingEventService, ?>) retrievalProcessor;
             }
         };
     }

@@ -17,7 +17,7 @@ import com.sap.sse.datamining.test.util.components.NullProcessor;
 
 public class TestAbstractStoringParallelAggregationProcessor {
 
-    private Collection<Processor<Integer>> receivers;
+    private Collection<Processor<Integer, ?>> receivers;
     private boolean receiverWasToldToFinish = false;
     private Integer receivedElement = null;
     
@@ -25,7 +25,7 @@ public class TestAbstractStoringParallelAggregationProcessor {
     
     @Before
     public void initializeReceivers() {
-        Processor<Integer> receiver = new NullProcessor<Integer>(Integer.class) {
+        Processor<Integer, Void> receiver = new NullProcessor<Integer, Void>(Integer.class, Void.class) {
             @Override
             public void processElement(Integer element) {
                 receivedElement = element;
@@ -42,7 +42,7 @@ public class TestAbstractStoringParallelAggregationProcessor {
 
     @Test
     public void testAbstractAggregationHandling() throws InterruptedException {
-        Processor<Integer> processor = new AbstractParallelStoringAggregationProcessor<Integer, Integer>(Integer.class, ConcurrencyTestsUtil.getExecutor(), receivers, Message.Sum.toString()) {
+        Processor<Integer, Integer> processor = new AbstractParallelStoringAggregationProcessor<Integer, Integer>(Integer.class, Integer.class, ConcurrencyTestsUtil.getExecutor(), receivers, Message.Sum.toString()) {
             @Override
             protected void storeElement(Integer element) {
                 elementStore.add(element);
@@ -66,7 +66,7 @@ public class TestAbstractStoringParallelAggregationProcessor {
         assertThat(receivedElement, is(expectedReceivedElement));
     }
 
-    private void processElementAndVerifyThatItWasStored(Processor<Integer> processor, int element) {
+    private void processElementAndVerifyThatItWasStored(Processor<Integer, Integer> processor, int element) {
         processor.processElement(element);
         ConcurrencyTestsUtil.sleepFor(100); //Giving the processor time to process the instructions
         assertThat("The element store doesn't contain the previously processed element '" + element + "'", elementStore.contains(element), is(true));
@@ -74,7 +74,7 @@ public class TestAbstractStoringParallelAggregationProcessor {
     
     @Test(timeout=5000)
     public void testThatTheLockIsReleasedAfterStoringFailed() throws InterruptedException {
-        Processor<Integer> processor = new AbstractParallelStoringAggregationProcessor<Integer, Integer>(Integer.class, ConcurrencyTestsUtil.getExecutor(), receivers, Message.Sum.toString()) {
+        Processor<Integer, Integer> processor = new AbstractParallelStoringAggregationProcessor<Integer, Integer>(Integer.class, Integer.class, ConcurrencyTestsUtil.getExecutor(), receivers, Message.Sum.toString()) {
             @Override
             protected void storeElement(Integer element) {
                 if (element < 0) {

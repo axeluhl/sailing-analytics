@@ -13,11 +13,11 @@ public interface DataRetrieverChainBuilder<DataSourceType> {
     public Class<?> getCurrentRetrievedDataType();
 
     public <T> DataRetrieverChainBuilder<DataSourceType> setFilter(FilterCriterion<T> filter);
-    public <T> DataRetrieverChainBuilder<DataSourceType> addResultReceiver(Processor<T> resultReceiver);
+    public <T> DataRetrieverChainBuilder<DataSourceType> addResultReceiver(Processor<T, ?> resultReceiver);
 
     public DataRetrieverChainBuilder<DataSourceType> stepDeeper();
 
-    public Processor<DataSourceType> build();
+    public Processor<DataSourceType, ?> build();
     
     public class TypeSafeFilterCriterionCollection {
         
@@ -40,23 +40,23 @@ public interface DataRetrieverChainBuilder<DataSourceType> {
     
     public class TypeSafeResultReceiverCollection {
         
-        private final Map<Class<?>, Collection<Processor<?>>> receiversMappedByInputType;
+        private final Map<Class<?>, Collection<Processor<?, ?>>> receiversMappedByInputType;
         
         public TypeSafeResultReceiverCollection() {
             receiversMappedByInputType = new HashMap<>();
         }
         
-        public <T> void addResultReceiver(Class<T> inputType, Processor<T> resultReceiver) {
+        public <T> void addResultReceiver(Class<T> inputType, Processor<T, ?> resultReceiver) {
             if (!receiversMappedByInputType.containsKey(inputType)) {
-                receiversMappedByInputType.put(inputType, new ArrayList<Processor<?>>());
+                receiversMappedByInputType.put(inputType, new ArrayList<Processor<?, ?>>());
             }
             
             receiversMappedByInputType.get(inputType).add(resultReceiver);
         }
 
         @SuppressWarnings("unchecked") // The way the processors were added, the cast has to work
-        public <T> Collection<Processor<T>> getResultReceivers(Class<T> inputType) {
-            return (Collection<Processor<T>>)(Collection<?>) receiversMappedByInputType.get(inputType);
+        public <T> Collection<Processor<T, ?>> getResultReceivers(Class<T> inputType) {
+            return (Collection<Processor<T, ?>>)(Collection<?>) receiversMappedByInputType.get(inputType);
         }
         
     }

@@ -6,7 +6,6 @@ import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.stub;
 
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.Collection;
 import java.util.HashMap;
 import java.util.HashSet;
@@ -27,7 +26,7 @@ import com.sap.sse.datamining.components.Processor;
 public class TestLeaderboardGroupRetrievalProcessor {
     
     private RacingEventService service;
-    private Processor<RacingEventService> retriever;
+    private Processor<RacingEventService, LeaderboardGroup> retriever;
     
     private Collection<LeaderboardGroup> retrievedGroups;
     
@@ -37,14 +36,16 @@ public class TestLeaderboardGroupRetrievalProcessor {
         stub(service.getLeaderboardGroups()).toReturn(getGroupsInService());
 
         retrievedGroups = new HashSet<>();
-        Processor<LeaderboardGroup> receiver = new NullProcessor<LeaderboardGroup>(LeaderboardGroup.class) {
+        Processor<LeaderboardGroup, Void> receiver = new NullProcessor<LeaderboardGroup, Void>(LeaderboardGroup.class, Void.class) {
             @Override
             public void processElement(LeaderboardGroup element) {
                 retrievedGroups.add(element);
             }
         };
         
-        retriever = new LeaderboardGroupRetrievalProcessor(ConcurrencyTestsUtil.getExecutor(), Arrays.asList(receiver));
+        Collection<Processor<LeaderboardGroup, ?>> resultReceivers = new ArrayList<>();
+        resultReceivers.add(receiver);
+        retriever = new LeaderboardGroupRetrievalProcessor(ConcurrencyTestsUtil.getExecutor(), resultReceivers);
     }
 
     private Map<String, LeaderboardGroup> getGroupsInService() {

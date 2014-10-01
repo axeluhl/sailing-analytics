@@ -10,8 +10,8 @@ import com.sap.sse.datamining.components.Processor;
 public abstract class AbstractSimpleParallelProcessor<InputType, ResultType>
                       extends AbstractPartitioningParallelProcessor<InputType, InputType, ResultType> {
 
-    public AbstractSimpleParallelProcessor(Class<InputType> inputType, ExecutorService executor, Collection<Processor<ResultType>> resultReceivers) {
-        super(inputType, executor, resultReceivers);
+    public AbstractSimpleParallelProcessor(Class<InputType> inputType, Class<ResultType> resultType, ExecutorService executor, Collection<Processor<ResultType, ?>> resultReceivers) {
+        super(inputType, resultType, executor, resultReceivers);
     }
 
     @Override

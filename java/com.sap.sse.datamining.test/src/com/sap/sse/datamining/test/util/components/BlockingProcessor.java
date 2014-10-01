@@ -11,8 +11,10 @@ import com.sap.sse.datamining.impl.components.AbstractSimpleParallelProcessor;
 public class BlockingProcessor<InputType, ResultType> extends AbstractSimpleParallelProcessor<InputType, ResultType> {
     private final long timeToBlockInMillis;
 
-    public BlockingProcessor(Class<InputType> inputType, ExecutorService executor, Collection<Processor<ResultType>> resultReceivers, long timeToBlockInMillis) {
-        super(inputType, executor, resultReceivers);
+    public BlockingProcessor(Class<InputType> inputType, Class<ResultType> resultType,
+                             ExecutorService executor, Collection<Processor<ResultType, ?>> resultReceivers,
+                             long timeToBlockInMillis) {
+        super(inputType, resultType, executor, resultReceivers);
         this.timeToBlockInMillis = timeToBlockInMillis;
     }
 

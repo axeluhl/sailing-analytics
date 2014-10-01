@@ -21,8 +21,8 @@ public class TrackedLegFilteringRetrievalProcessor extends
         AbstractSimpleFilteringRetrievalProcessor<HasTrackedRaceContext, HasTrackedLegContext> {
 
     public TrackedLegFilteringRetrievalProcessor(ExecutorService executor,
-            Collection<Processor<HasTrackedLegContext>> resultReceivers, FilterCriterion<HasTrackedLegContext> criteria) {
-        super(HasTrackedRaceContext.class, executor, resultReceivers, criteria);
+            Collection<Processor<HasTrackedLegContext, ?>> resultReceivers, FilterCriterion<HasTrackedLegContext> criteria) {
+        super(HasTrackedRaceContext.class, HasTrackedLegContext.class, executor, resultReceivers, criteria);
     }
 
     @Override

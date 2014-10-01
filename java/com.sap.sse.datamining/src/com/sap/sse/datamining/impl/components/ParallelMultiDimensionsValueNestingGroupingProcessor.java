@@ -22,7 +22,7 @@ public class ParallelMultiDimensionsValueNestingGroupingProcessor<DataType>
 
     public ParallelMultiDimensionsValueNestingGroupingProcessor(Class<DataType> dataType,
                                                                 ExecutorService executor,
-                                                                Collection<Processor<GroupedDataEntry<DataType>>> resultReceivers,
+                                                                Collection<Processor<GroupedDataEntry<DataType>, ?>> resultReceivers,
                                                                 Iterable<Function<?>> dimensions) {
         super(dataType, executor, resultReceivers, dimensions);
     }

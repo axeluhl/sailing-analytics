@@ -8,8 +8,8 @@ import com.sap.sse.datamining.components.Processor;
 public abstract class AbstractSimpleRetrievalProcessor<InputType, ResultType> extends
         AbstractRetrievalProcessor<InputType, ResultType, ResultType> {
 
-    public AbstractSimpleRetrievalProcessor(Class<InputType> inputType, ExecutorService executor, Collection<Processor<ResultType>> resultReceivers) {
-        super(inputType, executor, resultReceivers);
+    public AbstractSimpleRetrievalProcessor(Class<InputType> inputType, Class<ResultType> resultType, ExecutorService executor, Collection<Processor<ResultType, ?>> resultReceivers) {
+        super(inputType, resultType, executor, resultReceivers);
     }
 
     @Override

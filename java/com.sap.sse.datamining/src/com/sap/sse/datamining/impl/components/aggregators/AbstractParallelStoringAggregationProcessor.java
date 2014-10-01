@@ -17,10 +17,11 @@ public abstract class AbstractParallelStoringAggregationProcessor<InputType, Agg
     private final String aggregationNameMessageKey;
 
     public AbstractParallelStoringAggregationProcessor(Class<InputType> inputType,
+                                                       Class<AggregatedType> resultType,
                                                        ExecutorService executor,
-                                                       Collection<Processor<AggregatedType>> resultReceivers,
+                                                       Collection<Processor<AggregatedType, ?>> resultReceivers,
                                                        String aggregationNameMessageKey) {
-        super(inputType, executor, resultReceivers);
+        super(inputType, resultType, executor, resultReceivers);
         storeLock = new ReentrantLock();
         this.aggregationNameMessageKey = aggregationNameMessageKey;
     }

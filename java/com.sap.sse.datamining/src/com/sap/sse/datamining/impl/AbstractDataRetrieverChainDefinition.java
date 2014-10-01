@@ -39,14 +39,14 @@ public abstract class AbstractDataRetrieverChainDefinition<DataSourceType> imple
     public DataRetrieverChainBuilder<DataSourceType> startBuilding() {
         return new AbstractDataRetrieverChainBuilder<DataSourceType>(retrievableDataTypes) {
             @Override
-            protected Processor<?> createRetrieverFor(Class<?> retrievedDataType, FilterCriterion<?> filter,
-                    Collection<Processor<?>> resultReceivers) {
+            protected Processor<?, ?> createRetrieverFor(Class<?> retrievedDataType, FilterCriterion<?> filter,
+                    Collection<Processor<?, ?>> resultReceivers) {
                 return AbstractDataRetrieverChainDefinition.this.createRetrieverFor(retrievedDataType, filter, resultReceivers);
             }
         };
     }
 
-    protected abstract Processor<?> createRetrieverFor(Class<?> retrievedDataType, FilterCriterion<?> filter,
-            Collection<Processor<?>> resultReceivers);
+    protected abstract Processor<?, ?> createRetrieverFor(Class<?> retrievedDataType, FilterCriterion<?> filter,
+            Collection<Processor<?, ?>> resultReceivers);
 
 }

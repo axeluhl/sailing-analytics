@@ -15,9 +15,9 @@ public class ParallelGroupedElementsValueExtractionProcessor<DataType, FunctionR
     
     @SuppressWarnings("unchecked")
     public ParallelGroupedElementsValueExtractionProcessor(ThreadPoolExecutor executor,
-                                                           Collection<Processor<GroupedDataEntry<FunctionReturnType>>> resultReceivers,
+                                                           Collection<Processor<GroupedDataEntry<FunctionReturnType>, ?>> resultReceivers,
                                                            Function<FunctionReturnType> extractionFunction) {
-        super((Class<GroupedDataEntry<DataType>>)(Class<?>) GroupedDataEntry.class, executor, resultReceivers);
+        super((Class<GroupedDataEntry<DataType>>)(Class<?>) GroupedDataEntry.class, (Class<GroupedDataEntry<FunctionReturnType>>)(Class<?>) GroupedDataEntry.class, executor, resultReceivers);
         this.extractionFunction = extractionFunction;
     }
 

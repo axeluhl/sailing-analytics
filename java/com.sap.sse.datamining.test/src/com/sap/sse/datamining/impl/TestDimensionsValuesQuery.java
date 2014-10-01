@@ -64,19 +64,20 @@ public class TestDimensionsValuesQuery {
     private Query<Set<Object>> createDimensionsValuesQuery() {
         return new ProcessorQuery<Set<Object>, Collection<Test_Regatta>>(ConcurrencyTestsUtil.getExecutor(), dataSource) {
             @Override
-            protected Processor<Collection<Test_Regatta>> createFirstProcessor() {
-                Collection<Processor<Map<GroupKey, Set<Object>>>> collectorResultReceivers = Arrays.asList(/*query*/ this.getResultReceiver());
+            protected Processor<Collection<Test_Regatta>, ?> createFirstProcessor() {
+                Collection<Processor<Map<GroupKey, Set<Object>>, ?>> collectorResultReceivers = new ArrayList<>();
+                collectorResultReceivers.add(/*query*/ this.getResultReceiver());
                 
-                Processor<GroupedDataEntry<Object>> resultCollector = new ParallelGroupedDataCollectingAsSetProcessor<Object>(ConcurrencyTestsUtil.getExecutor(), collectorResultReceivers);
-                Collection<Processor<GroupedDataEntry<Object>>> extractionResultReceivers = new ArrayList<>();
+                Processor<GroupedDataEntry<Object>, Map<GroupKey, Set<Object>>> resultCollector = new ParallelGroupedDataCollectingAsSetProcessor<Object>(ConcurrencyTestsUtil.getExecutor(), collectorResultReceivers);
+                Collection<Processor<GroupedDataEntry<Object>, ?>> extractionResultReceivers = new ArrayList<>();
                 extractionResultReceivers.add(resultCollector);
                 
                 Collection<Function<?>> legDimensions = new ArrayList<>();
                 legDimensions.add(dimensionLegNumber);
                 legDimensions.add(dimensionCompetitorName);
                 legDimensions.add(dimensionCompetitorSailID);
-                Collection<Processor<Test_HasLegOfCompetitorContext>> legRetrieverResultReceivers = createGroupingExtractorsForDimensions(Test_HasLegOfCompetitorContext.class, extractionResultReceivers, legDimensions);
-                Processor<Test_HasRaceContext> legWithContextRetriever = new TestLegOfCompetitorWithContextFilteringRetrievalProcessor(ConcurrencyTestsUtil.getExecutor(), legRetrieverResultReceivers, new NonFilteringFilterCriterion<>(Test_HasLegOfCompetitorContext.class));
+                Collection<Processor<Test_HasLegOfCompetitorContext, ?>> legRetrieverResultReceivers = createGroupingExtractorsForDimensions(Test_HasLegOfCompetitorContext.class, extractionResultReceivers, legDimensions);
+                Processor<Test_HasRaceContext, Test_HasLegOfCompetitorContext> legWithContextRetriever = new TestLegOfCompetitorWithContextFilteringRetrievalProcessor(ConcurrencyTestsUtil.getExecutor(), legRetrieverResultReceivers, new NonFilteringFilterCriterion<>(Test_HasLegOfCompetitorContext.class));
 
                 
                 Collection<Function<?>> raceDimensions = new ArrayList<>();
@@ -84,22 +85,27 @@ public class TestDimensionsValuesQuery {
                 raceDimensions.add(dimensionRaceName);
                 raceDimensions.add(dimensionBoatClassName);
                 raceDimensions.add(dimensionYear);
-                Collection<Processor<Test_HasRaceContext>> raceRetrieverResultReceivers = createGroupingExtractorsForDimensions(Test_HasRaceContext.class, extractionResultReceivers, raceDimensions);
+                Collection<Processor<Test_HasRaceContext, ?>> raceRetrieverResultReceivers = createGroupingExtractorsForDimensions(Test_HasRaceContext.class, extractionResultReceivers, raceDimensions);
                 raceRetrieverResultReceivers.add(legWithContextRetriever);
-                Processor<Test_Regatta> raceWithContextRetriever = new TestRaceWithContextFilteringRetrievalProcessor(ConcurrencyTestsUtil.getExecutor(), raceRetrieverResultReceivers, new NonFilteringFilterCriterion<>(Test_HasRaceContext.class));
-
-                return new TestRegattaRetrievalProcessor(ConcurrencyTestsUtil.getExecutor(), Arrays.asList(raceWithContextRetriever));
+                Processor<Test_Regatta, Test_HasRaceContext> raceWithContextRetriever = new TestRaceWithContextFilteringRetrievalProcessor(ConcurrencyTestsUtil.getExecutor(), raceRetrieverResultReceivers, new NonFilteringFilterCriterion<>(Test_HasRaceContext.class));
+                Collection<Processor<Test_Regatta, ?>> regattaRetrieverResultReceivers = new ArrayList<>();
+                regattaRetrieverResultReceivers.add(raceWithContextRetriever);
+                
+                return new TestRegattaRetrievalProcessor(ConcurrencyTestsUtil.getExecutor(), regattaRetrieverResultReceivers);
             }
         };
     }
 
     @SuppressWarnings("unchecked")
-    private <DataType> Collection<Processor<DataType>> createGroupingExtractorsForDimensions(Class<DataType> dataType,
-            Collection<Processor<GroupedDataEntry<Object>>> extractionResultReceivers, Collection<Function<?>> dimensions) {
-        Collection<Processor<DataType>> groupingExtractors = new ArrayList<>();
+    private <DataType> Collection<Processor<DataType, ?>> createGroupingExtractorsForDimensions(Class<DataType> dataType,
+            Collection<Processor<GroupedDataEntry<Object>, ?>> extractionResultReceivers, Collection<Function<?>> dimensions) {
+        Collection<Processor<DataType, ?>> groupingExtractors = new ArrayList<>();
         for (Function<?> dimension : dimensions) {
-            Processor<GroupedDataEntry<DataType>> dimensionValueExtractor = new ParallelGroupedElementsValueExtractionProcessor<DataType, Object>(ConcurrencyTestsUtil.getExecutor(), extractionResultReceivers, (Function<Object>) dimension);
-            Processor<DataType> byDimensionGrouper = new ParallelByDimensionGroupingProcessor<>(dataType, ConcurrencyTestsUtil.getExecutor(), Arrays.asList(dimensionValueExtractor), dimension);
+            Processor<GroupedDataEntry<DataType>, GroupedDataEntry<Object>> dimensionValueExtractor = new ParallelGroupedElementsValueExtractionProcessor<DataType, Object>(ConcurrencyTestsUtil.getExecutor(), extractionResultReceivers, (Function<Object>) dimension);
+            Collection<Processor<GroupedDataEntry<DataType>, ?>> groupingResultReceivers = new ArrayList<>();
+            groupingResultReceivers.add(dimensionValueExtractor);
+            
+            Processor<DataType, GroupedDataEntry<DataType>> byDimensionGrouper = new ParallelByDimensionGroupingProcessor<>(dataType, ConcurrencyTestsUtil.getExecutor(), groupingResultReceivers, dimension);
             groupingExtractors.add(byDimensionGrouper);
         }
         return groupingExtractors;

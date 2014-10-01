@@ -16,9 +16,9 @@ import com.sap.sse.datamining.test.functions.registry.test_contexts.Test_HasRace
 public class TestLegOfCompetitorWithContextFilteringRetrievalProcessor extends
         AbstractSimpleFilteringRetrievalProcessor<Test_HasRaceContext, Test_HasLegOfCompetitorContext>{
 
-    public TestLegOfCompetitorWithContextFilteringRetrievalProcessor(ExecutorService executor,
-            Collection<Processor<Test_HasLegOfCompetitorContext>> resultReceivers, FilterCriterion<Test_HasLegOfCompetitorContext> criteria) {
-        super(Test_HasRaceContext.class, executor, resultReceivers, criteria);
+    public TestLegOfCompetitorWithContextFilteringRetrievalProcessor(ExecutorService executor, Collection<Processor<Test_HasLegOfCompetitorContext, ?>> resultReceivers,
+                                                                     FilterCriterion<Test_HasLegOfCompetitorContext> criteria) {
+        super(Test_HasRaceContext.class, Test_HasLegOfCompetitorContext.class, executor, resultReceivers, criteria);
     }
 
     @Override

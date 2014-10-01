@@ -21,8 +21,8 @@ import com.sap.sse.datamining.shared.annotations.DataRetriever;
                level=5)
 public class GPSFixRetrievalProcessor extends AbstractSimpleRetrievalProcessor<HasTrackedLegOfCompetitorContext, HasGPSFixContext> {
 
-    public GPSFixRetrievalProcessor(ExecutorService executor, Collection<Processor<HasGPSFixContext>> resultReceivers) {
-        super(HasTrackedLegOfCompetitorContext.class, executor, resultReceivers);
+    public GPSFixRetrievalProcessor(ExecutorService executor, Collection<Processor<HasGPSFixContext, ?>> resultReceivers) {
+        super(HasTrackedLegOfCompetitorContext.class, HasGPSFixContext.class, executor, resultReceivers);
     }
 
     @Override

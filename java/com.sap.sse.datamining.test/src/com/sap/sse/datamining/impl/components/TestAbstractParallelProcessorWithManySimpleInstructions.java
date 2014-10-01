@@ -17,14 +17,14 @@ import com.sap.sse.datamining.test.util.components.NullProcessor;
 
 public class TestAbstractParallelProcessorWithManySimpleInstructions {
     
-    private Processor<Integer> processor;
+    private Processor<Integer, Integer> processor;
     
     private int sum = 0;
     private boolean receiverWasToldToFinish = false;
     
     @Before
     public void initializeProcessor() {
-        Processor<Integer> receiver = new NullProcessor<Integer>(Integer.class) {
+        Processor<Integer, Void> receiver = new NullProcessor<Integer, Void>(Integer.class, Void.class) {
             @Override
             public void processElement(Integer element) {
                 incrementSum(element);
@@ -35,9 +35,9 @@ public class TestAbstractParallelProcessorWithManySimpleInstructions {
             }
         };
         
-        Collection<Processor<Integer>> receivers = new ArrayList<>();
+        Collection<Processor<Integer, ?>> receivers = new ArrayList<>();
         receivers.add(receiver);
-        processor = new AbstractSimpleParallelProcessor<Integer, Integer>(Integer.class, ConcurrencyTestsUtil.getExecutor(), receivers) {
+        processor = new AbstractSimpleParallelProcessor<Integer, Integer>(Integer.class, Integer.class, ConcurrencyTestsUtil.getExecutor(), receivers) {
             @Override
             protected Callable<Integer> createInstruction(final Integer element) {
                 return new Callable<Integer>() {

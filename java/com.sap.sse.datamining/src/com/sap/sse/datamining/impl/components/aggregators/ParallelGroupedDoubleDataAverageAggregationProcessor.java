@@ -19,8 +19,10 @@ public class ParallelGroupedDoubleDataAverageAggregationProcessor extends
 
     @SuppressWarnings("unchecked")
     public ParallelGroupedDoubleDataAverageAggregationProcessor(ExecutorService executor,
-            Collection<Processor<Map<GroupKey, Double>>> resultReceivers) {
-        super((Class<GroupedDataEntry<Double>>)(Class<?>) GroupedDataEntry.class, executor, resultReceivers, Message.Average.toString());
+            Collection<Processor<Map<GroupKey, Double>, ?>> resultReceivers) {
+        super((Class<GroupedDataEntry<Double>>)(Class<?>) GroupedDataEntry.class,
+              (Class<Map<GroupKey, Double>>)(Class<?>) Map.class,
+              executor, resultReceivers, Message.Average.toString());
         elementAmountPerKey = new HashMap<>();
         sumAggregationProcessor = new ParallelGroupedDoubleDataSumAggregationProcessor(executor, resultReceivers);
     }

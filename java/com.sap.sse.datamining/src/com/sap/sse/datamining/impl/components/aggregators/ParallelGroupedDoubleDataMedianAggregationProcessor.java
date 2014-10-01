@@ -21,8 +21,10 @@ public class ParallelGroupedDoubleDataMedianAggregationProcessor
 
     @SuppressWarnings("unchecked")
     public ParallelGroupedDoubleDataMedianAggregationProcessor(ExecutorService executor,
-            Collection<Processor<Map<GroupKey, Double>>> resultReceivers) {
-        super((Class<GroupedDataEntry<Double>>)(Class<?>) GroupedDataEntry.class, executor, resultReceivers, Message.Median.toString());
+            Collection<Processor<Map<GroupKey, Double>, ?>> resultReceivers) {
+        super((Class<GroupedDataEntry<Double>>)(Class<?>) GroupedDataEntry.class,
+              (Class<Map<GroupKey, Double>>)(Class<?>) Map.class,
+              executor, resultReceivers, Message.Median.toString());
         groupedValues = new HashMap<>();
     }
 

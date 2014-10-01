@@ -37,7 +37,7 @@ public class TestDataRetrieverChainCreation {
     private FilterCriterion<Test_HasLegOfCompetitorContext> legOfCompetitorFilter;
     
     private int receivedLegOfCompetitorAmount = 0;
-    private Processor<Test_HasLegOfCompetitorContext> legReceiver = new NullProcessor<Test_HasLegOfCompetitorContext>(Test_HasLegOfCompetitorContext.class) {
+    private Processor<Test_HasLegOfCompetitorContext, Void> legReceiver = new NullProcessor<Test_HasLegOfCompetitorContext, Void>(Test_HasLegOfCompetitorContext.class, Void.class) {
         @Override
         public void processElement(Test_HasLegOfCompetitorContext element) {
             receivedLegOfCompetitorAmount++;
@@ -53,21 +53,21 @@ public class TestDataRetrieverChainCreation {
         
         dataRetrieverChainDefinition = new AbstractDataRetrieverChainDefinition<Collection<Test_Regatta>>(Collection.class, retrievableDataTypes) {
             @Override
-            protected Processor<?> createRetrieverFor(Class<?> retrievedDataType, FilterCriterion<?> filter,
-                    Collection<Processor<?>> resultReceivers) {
+            protected Processor<?, ?> createRetrieverFor(Class<?> retrievedDataType, FilterCriterion<?> filter,
+                    Collection<Processor<?, ?>> resultReceivers) {
                 ThreadPoolExecutor executor = ConcurrencyTestsUtil.getExecutor();
                 
                 if (retrievedDataType.equals(Test_Regatta.class)) {
-                    Collection<Processor<Test_Regatta>> specificResultReceivers = (Collection<Processor<Test_Regatta>>)(Collection<?>) resultReceivers;
+                    Collection<Processor<Test_Regatta, ?>> specificResultReceivers = (Collection<Processor<Test_Regatta, ?>>)(Collection<?>) resultReceivers;
                     return new TestRegattaRetrievalProcessor(executor, specificResultReceivers);
                 }
                 if (retrievedDataType.equals(Test_HasRaceContext.class)) {
-                    Collection<Processor<Test_HasRaceContext>> specificResultReceivers = (Collection<Processor<Test_HasRaceContext>>)(Collection<?>) resultReceivers;
+                    Collection<Processor<Test_HasRaceContext, ?>> specificResultReceivers = (Collection<Processor<Test_HasRaceContext, ?>>)(Collection<?>) resultReceivers;
                     FilterCriterion<Test_HasRaceContext> specificFilter = (FilterCriterion<Test_HasRaceContext>) filter;
                     return new TestRaceWithContextFilteringRetrievalProcessor(executor, specificResultReceivers, specificFilter);
                 }
                 if (retrievedDataType.equals(Test_HasLegOfCompetitorContext.class)) {
-                    Collection<Processor<Test_HasLegOfCompetitorContext>> specificResultReceivers = (Collection<Processor<Test_HasLegOfCompetitorContext>>)(Collection<?>) resultReceivers;
+                    Collection<Processor<Test_HasLegOfCompetitorContext, ?>> specificResultReceivers = (Collection<Processor<Test_HasLegOfCompetitorContext, ?>>)(Collection<?>) resultReceivers;
                     FilterCriterion<Test_HasLegOfCompetitorContext> specificFilter = (FilterCriterion<Test_HasLegOfCompetitorContext>) filter;
                     return new TestLegOfCompetitorWithContextFilteringRetrievalProcessor(executor, specificResultReceivers, specificFilter);
                 }
@@ -106,7 +106,7 @@ public class TestDataRetrieverChainCreation {
         chainBuilder.stepDeeper().setFilter(legOfCompetitorFilter).addResultReceiver(legReceiver);
         assertThat(chainBuilder.getCurrentRetrievedDataType().equals(Test_HasLegOfCompetitorContext.class), is(true));
         
-        Processor<Collection<Test_Regatta>> firstRetrieverInChain = chainBuilder.build();
+        Processor<Collection<Test_Regatta>, ?> firstRetrieverInChain = chainBuilder.build();
         firstRetrieverInChain.processElement(ComponentsAndQueriesTestsUtil.createExampleDataSource());
         firstRetrieverInChain.finish();
         ConcurrencyTestsUtil.sleepFor(500);

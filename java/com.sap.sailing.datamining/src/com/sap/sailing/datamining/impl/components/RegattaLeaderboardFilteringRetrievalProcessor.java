@@ -20,8 +20,8 @@ public class RegattaLeaderboardFilteringRetrievalProcessor extends
         AbstractSimpleFilteringRetrievalProcessor<LeaderboardGroup, RegattaLeaderboard> {
 
     public RegattaLeaderboardFilteringRetrievalProcessor(ExecutorService executor,
-            Collection<Processor<RegattaLeaderboard>> resultReceivers, FilterCriterion<RegattaLeaderboard> criteria) {
-        super(LeaderboardGroup.class, executor, resultReceivers, criteria);
+            Collection<Processor<RegattaLeaderboard, ?>> resultReceivers, FilterCriterion<RegattaLeaderboard> criteria) {
+        super(LeaderboardGroup.class, RegattaLeaderboard.class, executor, resultReceivers, criteria);
     }
 
     @Override

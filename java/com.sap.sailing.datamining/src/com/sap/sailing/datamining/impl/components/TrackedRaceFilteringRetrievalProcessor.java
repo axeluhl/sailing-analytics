@@ -23,8 +23,8 @@ public class TrackedRaceFilteringRetrievalProcessor extends
         AbstractSimpleFilteringRetrievalProcessor<Leaderboard, HasTrackedRaceContext> {
 
     public TrackedRaceFilteringRetrievalProcessor(ExecutorService executor,
-            Collection<Processor<HasTrackedRaceContext>> resultReceivers, FilterCriterion<HasTrackedRaceContext> criteria) {
-        super(Leaderboard.class, executor, resultReceivers, criteria);
+            Collection<Processor<HasTrackedRaceContext, ?>> resultReceivers, FilterCriterion<HasTrackedRaceContext> criteria) {
+        super(Leaderboard.class, HasTrackedRaceContext.class, executor, resultReceivers, criteria);
     }
 
     @Override

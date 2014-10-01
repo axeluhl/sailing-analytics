@@ -19,13 +19,13 @@ import com.sap.sse.datamining.test.util.components.NullProcessor;
 
 public class TestParallelGroupedDataCollectingAsSetProcessor {
 
-    private Collection<Processor<Map<GroupKey, Set<Double>>>> receivers;
+    private Collection<Processor<Map<GroupKey, Set<Double>>, ?>> receivers;
     private Map<GroupKey, Set<Double>> receivedData = null;
     
     @Before
     public void initializeReceivers() {
         @SuppressWarnings("unchecked")
-        Processor<Map<GroupKey, Set<Double>>> receiver = new NullProcessor<Map<GroupKey, Set<Double>>>((Class<Map<GroupKey, Set<Double>>>)(Class<?>) Map.class) {
+        Processor<Map<GroupKey, Set<Double>>, Void> receiver = new NullProcessor<Map<GroupKey, Set<Double>>, Void>((Class<Map<GroupKey, Set<Double>>>)(Class<?>) Map.class, Void.class) {
             @Override
             public void processElement(Map<GroupKey, Set<Double>> element) {
                 receivedData = element;
@@ -38,7 +38,7 @@ public class TestParallelGroupedDataCollectingAsSetProcessor {
 
     @Test
     public void testDataCollecting() throws InterruptedException {
-        Processor<GroupedDataEntry<Double>> collectingProcessor = new ParallelGroupedDataCollectingAsSetProcessor<Double>(ConcurrencyTestsUtil.getExecutor(), receivers);
+        Processor<GroupedDataEntry<Double>, Map<GroupKey, Set<Double>>> collectingProcessor = new ParallelGroupedDataCollectingAsSetProcessor<Double>(ConcurrencyTestsUtil.getExecutor(), receivers);
         Collection<GroupedDataEntry<Double>> elements = createElements();
         
         ConcurrencyTestsUtil.processElements(collectingProcessor, elements);

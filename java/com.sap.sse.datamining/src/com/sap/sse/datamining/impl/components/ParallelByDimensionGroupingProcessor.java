@@ -21,7 +21,7 @@ public class ParallelByDimensionGroupingProcessor<DataType> extends
 
     public ParallelByDimensionGroupingProcessor(Class<DataType> dataType,
                                                 ExecutorService executor,
-                                                Collection<Processor<GroupedDataEntry<DataType>>> resultReceivers,
+                                                Collection<Processor<GroupedDataEntry<DataType>, ?>> resultReceivers,
                                                 Function<?> dimension) {
         super(dataType, executor, resultReceivers, asIterable(dimension));
     }
