@@ -15,7 +15,10 @@ public class AutoPlayEntryPoint extends AbstractEntryPoint {
 
     public void onModuleLoad() {
         AutoPlayAppClientFactory clientFactory = GWT.create(AutoPlayAppClientFactory.class);
+
         EntryPointHelper.registerASyncService((ServiceDefTarget) clientFactory.getSailingService(), RemoteServiceMappingConstants.sailingServiceRemotePath);
+        EntryPointHelper.registerASyncService((ServiceDefTarget) clientFactory.getMediaService(), RemoteServiceMappingConstants.mediaServiceRemotePath);
+        
         AutoPlayAppHistoryMapper applicationHistoryMapper = GWT.create(AutoPlayAppHistoryMapper.class);
         onModuleLoad(clientFactory, applicationHistoryMapper, new AutoPlayAppActivityMapper(clientFactory));
 
