@@ -60,17 +60,6 @@
                                     See also https://bugs.eclipse.org/bugs/show_bug.cgi?id=386988
                             -->
                             <dependencies>
-                                <dependency>
-                                    <type>eclipse-feature</type>
-                                    <artifactId>com.sap.sailing.feature</artifactId>
-                                    <version>0.0.0</version>
-                                </dependency>
-                                <dependency>
-                                    <type>eclipse-feature</type>
-                                    <artifactId>com.sap.sailing.feature.runtime</artifactId>
-                                    <version>0.0.0</version>
-                                </dependency>
-                                
                                 <!-- This bundle should only be deployed in a test environment! -->
                                 <dependency>
                                     <type>eclipse-plugin</type>
