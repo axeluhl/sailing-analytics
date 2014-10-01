@@ -13,4 +13,4 @@ Backlog:
   - for spatially resolved wind based on simulation
 - use multiple wind sources to derive a spatially resolved wind field and use it in calculation of ladder rungs and simulation of courses
   - solved with Igtimi equipment
-  - current measurements are required to improve accuracy of polar sheets and race simulation
+  - water current measurements are required to improve accuracy of polar sheets and race simulation
