@@ -26,7 +26,6 @@ import com.sap.sailing.gwt.ui.client.shared.components.Component;
 import com.sap.sailing.gwt.ui.client.shared.components.ComponentViewer;
 import com.sap.sailing.gwt.ui.client.shared.components.SettingsDialog;
 import com.sap.sailing.gwt.ui.leaderboard.LeaderboardPanel;
-import com.sap.sailing.gwt.ui.shared.UserDTO;
 import com.sap.sse.common.Util.Pair;
 
 /**
@@ -72,7 +71,7 @@ public class SideBySideComponentViewer implements ComponentViewer {
 
     public SideBySideComponentViewer(final LeaderboardPanel leftComponentP, final Component<?> rightComponentP,
             final MediaPlayerManagerComponent mediaPlayerManagerComponent, List<Component<?>> components,
-            final StringMessages stringMessages, UserDTO user) {
+            final StringMessages stringMessages) {
         this.stringMessages = stringMessages;
         this.leftComponent = leftComponentP;
         this.rightComponent = rightComponentP;

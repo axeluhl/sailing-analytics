@@ -110,7 +110,6 @@ public class RaceBoardEntryPoint extends AbstractEntryPoint {
         List<ParallelExecutionCallback<?>> callbacks = new ArrayList<>();
         callbacks.add(getLeaderboardNamesCallback);
         callbacks.add(getRegattasCallback);
-        callbacks.add(getUserCallback);
         if (leaderboardGroupName != null) {
             callbacks.add(getLeaderboardGroupByNameCallback);
         }

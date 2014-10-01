@@ -40,7 +40,6 @@ import com.sap.sailing.gwt.ui.client.media.shared.VideoPlayer;
 import com.sap.sailing.gwt.ui.client.media.shared.VideoSynchPlayer;
 import com.sap.sailing.gwt.ui.client.shared.components.Component;
 import com.sap.sailing.gwt.ui.client.shared.components.SettingsDialogComponent;
-import com.sap.sailing.gwt.ui.shared.UserDTO;
 import com.sap.sse.gwt.client.dialog.DataEntryDialog.DialogCallback;
 import com.sap.sse.gwt.client.player.PlayStateListener;
 import com.sap.sse.gwt.client.player.TimeListener;
@@ -73,7 +72,6 @@ public class MediaPlayerManagerComponent implements Component<Void>, PlayStateLi
     private final StringMessages stringMessages;
     private final ErrorReporter errorReporter;
     private final UserAgentDetails userAgent;
-    private final UserDTO user;
     private boolean autoSelectMedia;
 
     private Date currentRaceTime;
@@ -83,7 +81,7 @@ public class MediaPlayerManagerComponent implements Component<Void>, PlayStateLi
 
     public MediaPlayerManagerComponent(RegattaAndRaceIdentifier selectedRaceIdentifier,
             RaceTimesInfoProvider raceTimesInfoProvider, Timer raceTimer, MediaServiceAsync mediaService,
-            StringMessages stringMessages, ErrorReporter errorReporter, UserAgentDetails userAgent, UserDTO user,
+            StringMessages stringMessages, ErrorReporter errorReporter, UserAgentDetails userAgent,
             boolean autoSelectMedia) {
         this.raceIdentifier = selectedRaceIdentifier;
         this.raceTimesInfoProvider = raceTimesInfoProvider;
@@ -96,7 +94,6 @@ public class MediaPlayerManagerComponent implements Component<Void>, PlayStateLi
         this.stringMessages = stringMessages;
         this.errorReporter = errorReporter;
         this.userAgent = userAgent;
-        this.user = user;
         this.autoSelectMedia = autoSelectMedia;
 
         Window.addCloseHandler(this);
