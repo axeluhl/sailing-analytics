@@ -30,18 +30,18 @@ import com.google.gwt.user.client.ui.Widget;
 import com.sap.sailing.domain.common.media.MediaTrack;
 import com.sap.sse.gwt.client.useragent.UserAgentDetails.AgentTypes;
 
-public class MediaMultiSelectionControl extends AbstractMediaSelectionControl implements CloseHandler<PopupPanel> {
+public class MediaManagementControl extends AbstractMediaSelectionControl implements CloseHandler<PopupPanel> {
 
     private final DialogBox dialogControl;
     private final Map<MediaTrack, CheckBox> videoCheckBoxes = new HashMap<MediaTrack, CheckBox>();
     private final UIObject popupLocation;
 
-    public MediaMultiSelectionControl(MediaPlayerManager mediaPlayerManager, UIObject popupLocation) {
+    public MediaManagementControl(MediaPlayerManager mediaPlayerManager, UIObject popupLocation) {
         super(mediaPlayerManager);
         this.popupLocation = popupLocation;
 
         this.dialogControl = new DialogBox(true, false);
-        this.dialogControl.setText("Select Playback Media");
+        this.dialogControl.setText("Manage Playback Media");
         this.dialogControl.addCloseHandler(this);
 
     }

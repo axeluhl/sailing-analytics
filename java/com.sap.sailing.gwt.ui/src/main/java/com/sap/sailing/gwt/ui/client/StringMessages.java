@@ -1082,9 +1082,13 @@ public interface StringMessages extends Messages {
     String raceIsInLiveTimePanelMode();
     String backToLiveTimePanelMode();
     String windChart();
-    String showVideoPopup();
-    String hideVideoPopup();
-    String manageMedia();
+    String showVideoCaption();
+    String showVideoTooltip();
+    String hideVideoCaption();
+    String hideVideoTooltip();
+    String selectVideoCaption(int mediaCount);
+    String selectVideoTooltip();
+    String manageMediaCaption();
     String manageMediaTooltip();
     String showAll();
     String raceVisibilityColumn();

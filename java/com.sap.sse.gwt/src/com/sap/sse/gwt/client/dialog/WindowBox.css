@@ -3,7 +3,7 @@
 }
 
 .gwt-extras-WindowBox .Caption {
-    padding: 4px 10px;
+    padding: 4px 45px 0px 5px;
 }
 
 .gwt-extras-WindowBox .dialogMiddleCenter {
@@ -40,9 +40,6 @@
 }
 
 .gwt-extras-WindowBox .gwt-extras-dialog-controls a.gwt-extras-dialog-minimize {
-  /*display: block;
-  height: 12px;
-  width: 12px;*/
   background: transparent url(images/min-4panel.png) left top no-repeat;
 }
 
@@ -79,7 +76,8 @@
 }
 
 .gwt-extras-WindowBox .video-root-panel {
-	display: inline-block;
+	min-width: 400px;
+    min-height: 225px;
 }
 
 .gwt-extras-WindowBox .title-edit {

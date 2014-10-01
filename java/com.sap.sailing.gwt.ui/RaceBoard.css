@@ -653,6 +653,43 @@ img.openColumn {
 	background-color: #fcbb22 !important;
 }
 
-.test:hover {
-	
+.Media-Select-Button {
+  font-size: 15px;
+  font-size: 1rem;
+  display: inline-block;
+  font-weight: 400;
+  color: #111;
+  border: none;
+  padding: 0.666666666666667em 1.133333333333333em;
+  background-color: #fff;
+  -webkit-transition: background-color 0.2s;
+  -moz-transition: background-color 0.2s;
+  -o-transition: background-color 0.2s;
+  -ms-transition: background-color 0.2s;
+  transition: background-color 0.2s;
+  width: 100%;
+  text-align: left;
 }
+.Media-Select-Button:hover,
+.Media-Select-Button:focus {
+  background-color: #f0ab00;
+}
+
+.Media-Select-Button-playing {
+  color: #999;
+}
+.Media-Select-Button-playing:hover,
+.Media-Select-Button-playing:focus {
+ color: #fff;
+ background-color: #ccc;
+}
+
+
+.Media-Select-Popup .dialogMiddleCenterInner {
+    padding: 0;
+}
+
+.Media-Select-Popup .Caption {
+    padding: 4px 10px;
+}
+

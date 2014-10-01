@@ -483,10 +483,8 @@ public class MediaPlayerManagerComponent implements Component<Void>, PlayStateLi
         boolean showSynchControls = this.user != null;
 
         if (videoTrack.isYoutube()) {
-            // popupPlayer = new YoutubeWindowPlayer(videoTrack, popCloseListener);
             videoPlayer = new VideoYoutubePlayer(videoTrack, getRaceStartTime(), showSynchControls, raceTimer);
         } else {
-            // popupPlayer = new VideoWindowPlayer(videoTrack, popCloseListener);
             videoPlayer = new VideoHtmlPlayer(videoTrack, getRaceStartTime(), showSynchControls, raceTimer);
         }
         return videoContainerFactory.createVideoContainer(videoPlayer, showSynchControls, getMediaService(), errorReporter,
@@ -619,20 +617,21 @@ public class MediaPlayerManagerComponent implements Component<Void>, PlayStateLi
                     @Override
                     public void ok(final MediaTrack mediaTrack) {
                         MediaPlayerManagerComponent.this.getMediaService().addMediaTrack(mediaTrack,
-                                new AsyncCallback<String>() {
+                            new AsyncCallback<String>() {
 
-                                    @Override
-                                    public void onFailure(Throwable t) {
-                                        errorReporter.reportError(t.toString());
-                                    }
+                                @Override
+                                public void onFailure(Throwable t) {
+                                    errorReporter.reportError(t.toString());
+                                }
 
-                                    @Override
-                                    public void onSuccess(String dbId) {
-                                        mediaTrack.dbId = dbId;
-                                        assignedMediaTracks.add(mediaTrack);
-                                        playFloatingVideo(mediaTrack);
-                                    }
-                                });
+                                @Override
+                                public void onSuccess(String dbId) {
+                                    mediaTrack.dbId = dbId;
+                                    assignedMediaTracks.add(mediaTrack);
+                                    playFloatingVideo(mediaTrack);
+                                    notifyStateChange();
+                                }
+                        });
 
                     }
                 });
@@ -653,6 +652,7 @@ public class MediaPlayerManagerComponent implements Component<Void>, PlayStateLi
                 public void onSuccess(Void _void) {
                     MediaPlayerManagerComponent.this.closeFloatingVideo(mediaTrack);
                     assignedMediaTracks.remove(mediaTrack);
+                    notifyStateChange();
                 }
             });
             return true;
