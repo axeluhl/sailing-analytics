@@ -7,7 +7,7 @@ Backlog:
   - integrate simulator with measured spatial wind (first version done)
   - race simulation overlay executing simulation and visualizing simulation results (first version done)
   - integration with polar sheets required
-    - optimal beat/jibe angles & speed; interpolated in dependence on wind speed
+    + optimal beat/jibe angles & speed; interpolated in dependence on wind speed
     - overall form of polar diagram 
   - user interface of race simulation to be clarified: user options, UI elements, etc.
 - visualize ladder rungs, i.e. advantage line plus intermediate isochrones in distance-steps or time-steps
