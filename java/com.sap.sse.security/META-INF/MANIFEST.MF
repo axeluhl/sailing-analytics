@@ -22,7 +22,7 @@ Bundle-ClassPath: lib/shiro-core-1.2.2.jar,
  lib/shiro-ehcache-1.2.3.jar,
  lib/ehcache-core-2.4.7.jar
 Require-Bundle: javax.servlet;bundle-version="2.5.0",
- com.sap.sse.security.userstore;bundle-version="1.0.0",
+ com.sap.sse.security.userstore,
  com.google.gwt.osgi,
  slf4j.api;bundle-version="1.6.4",
  org.json.simple,
