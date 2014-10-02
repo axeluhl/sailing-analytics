@@ -77,27 +77,20 @@ public class SecurityServiceImpl  extends RemoteServiceServlet implements Securi
     }
     
     public SecurityServiceImpl() {
-        
         BundleContext context = Activator.getContext();
         ServiceReference<?> serviceReference = context.
                 getServiceReference(UserStore.class.getName());
         store = (UserStore) context.
                 getService(serviceReference);
-        
-        //Create default users if no users exist yet.
+        // Create default users if no users exist yet.
         if (store.getUserCollection().isEmpty()){
             try {
-                logger.info("No users found, creating default users!");
-                createSimpleUser("Ben", "Ben@sapsailing.com", "ben123");
-                addRoleForUser("Ben", "admin");
-                addRoleForUser("Ben", "moderator");
-                createSimpleUser("Peter", "Peter@sapsailing.com", "peter123");
-                addRoleForUser("Peter", "moderator");
-                createSimpleUser("Hans", "Hans@sapsailing.com", "hans123");
-                createSimpleUser("Hubert", "Hubert@sapsailing.com", "hubert123");
-                createSimpleUser("Franz", "Franz@sapsailing.com", "franz123");
+                logger.info("No users found, creating default user \"admin\" with password \"admin\"");
+                createSimpleUser("admin", "nobody@sapsailing.com", "admin");
+                addRoleForUser("admin", "admin");
+                addRoleForUser("admin", "moderator");
             } catch (UserManagementException e) {
-                e.printStackTrace();
+                logger.log(Level.SEVERE, "Exception while creating default admin user", e);
             }
         }
         
