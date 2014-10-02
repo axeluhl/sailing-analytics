@@ -2,7 +2,6 @@ package com.sap.sailing.gwt.ui.adminconsole;
 
 import java.util.ArrayList;
 import java.util.Collection;
-import java.util.Collections;
 import java.util.List;
 
 import com.google.gwt.core.client.GWT;
@@ -24,62 +23,68 @@ import com.sap.sailing.gwt.ui.shared.SeriesDTO;
 
 public class DefaultRegattaCreateDialog extends
 		AbstractRegattaWithSeriesAndFleetsDialog<EventAndRegattaDTO> {
-	
-	 private static AdminConsoleResources resources = GWT.create(AdminConsoleResources.class);
 
-	private SailingServiceAsync sailingService;
-	private ErrorReporter errorReporter;
+	private static AdminConsoleResources resources = GWT
+			.create(AdminConsoleResources.class);
+
+	private final SailingServiceAsync sailingService;
+	private final ErrorReporter errorReporter;
+	private final Iterable<RegattaDTO> defaultRegattas;
 
 	public DefaultRegattaCreateDialog(
-			Collection<RegattaDTO> existingRegattas,
-			List<EventDTO> existingEvents,
+			Iterable<RegattaDTO> selectedRegattas,
 			SailingServiceAsync sailingService,
 			ErrorReporter errorReporter,
 			StringMessages stringConstants,
 			com.sap.sse.gwt.client.dialog.DataEntryDialog.DialogCallback<EventAndRegattaDTO> callback) {
-		super(new RegattaDTO(), existingEvents,
+		super(new RegattaDTO(), new ArrayList<EventDTO>(),
 				"Create default settings for all regattas...", stringConstants
 						.ok(), stringConstants,
 				null /* RegattaParameterValidator */, callback);
 		this.sailingService = sailingService;
 		this.errorReporter = errorReporter;
+		this.defaultRegattas = selectedRegattas;
 		setCourseAreaSelection();
 		setSeriesEditor();
 	}
 
 	protected void setSeriesEditor() {
+		List<SeriesDTO> series = new ArrayList<SeriesDTO>();
+		for (RegattaDTO regattaDTO : defaultRegattas) {
+			series.addAll(regattaDTO.series);
+		}
 		seriesEditor = new SeriesWithFleetsDefaultListEditor(
-				Collections.<SeriesDTO> emptyList(), stringMessages,
-				resources.removeIcon(), /* enableFleetRemoval */true);
+				series, stringMessages, resources.removeIcon(), /* enableFleetRemoval */
+				true);
 	}
 
 	protected void setupAdditionalWidgetsOnPanel(final VerticalPanel panel) {
-		Button newEventBtn = new Button("Create New Event");
-		newEventBtn.addClickHandler(new ClickHandler() {
+//		Button newEventBtn = new Button("Create New Event");
+//		newEventBtn.addClickHandler(new ClickHandler() {
+//
+//			@Override
+//			public void onClick(ClickEvent event) {
+//				openEventCreateDialog();
+//			}
+//		});
+//
+//		Grid grid = (Grid) panel.getWidget(0);
+//		Grid newGrid = new Grid(6, 3);
+//		for (int i = 0; i < grid.getColumnCount(); i++) {
+//			for (int j = 0; j < grid.getRowCount(); j++) {
+//				newGrid.setWidget(j, i, grid.getWidget(j, i));
+//			}
+//		}
+//
+//		newGrid.setWidget(3, 2, newEventBtn);
+//		panel.remove(0);
+//		panel.add(newGrid);
 
-			@Override
-			public void onClick(ClickEvent event) {
-				openEventCreateDialog();
-			}
-		});
-
-		Grid grid = (Grid) panel.getWidget(0);
-		Grid newGrid = new Grid(6, 3);
-		for (int i = 0; i < grid.getColumnCount(); i++) {
-			for (int j = 0; j < grid.getRowCount(); j++) {
-				newGrid.setWidget(j, i, grid.getWidget(j, i));
-			}
-		}
-
-		newGrid.setWidget(3, 2, newEventBtn);
-		panel.remove(0);
-		panel.add(newGrid);
-		
 		TabPanel tabPanel = new TabPanel();
-        tabPanel.setWidth("100%");
-        tabPanel.add(seriesEditor, stringMessages.series());
-        tabPanel.selectTab(0);
-        panel.add(tabPanel);
+		tabPanel.setWidth("100%");
+		tabPanel.add(seriesEditor, stringMessages.series());
+		tabPanel.selectTab(0);
+		panel.add(tabPanel);
 	}
 
 	private void openEventCreateDialog() {

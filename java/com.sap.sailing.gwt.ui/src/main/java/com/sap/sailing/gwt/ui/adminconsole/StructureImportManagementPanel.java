@@ -1,7 +1,5 @@
 package com.sap.sailing.gwt.ui.adminconsole;
 
-import java.util.Collection;
-import java.util.Collections;
 import java.util.HashSet;
 import java.util.LinkedHashMap;
 import java.util.List;
@@ -126,7 +124,7 @@ public class StructureImportManagementPanel extends FlowPanel {
 
 			@Override
 			public void onSuccess(List<EventDTO> events) {
-				setDefaultRegatta(regattas, events);
+				setDefaultRegatta(regattas);
 			}
 		});
 	}
@@ -234,6 +232,8 @@ public class StructureImportManagementPanel extends FlowPanel {
 					// series with a dropdown and return
 					// those. I suggest using a LinkedHashMap<String, SeriesDTO>
 
+					setDefaultRegatta(structure.get(struct));
+
 					/*
 					 * only for testing. parameters will be received from the
 					 * dialog
@@ -280,40 +280,23 @@ public class StructureImportManagementPanel extends FlowPanel {
 		editSeriesPanel.add(grid);
 	}
 
-	private void setDefaultRegatta(final Iterable<RegattaDTO> selectedRegattas,
-			final List<EventDTO> newEvent) {
-		sailingService.getEvents(new AsyncCallback<List<EventDTO>>() {
-			@Override
-			public void onFailure(Throwable caught) {
-				errorReporter.reportError(stringMessages
-						.errorAddingResultImportUrl(caught.getMessage()));
-			}
+	private void setDefaultRegatta(final Iterable<RegattaDTO> selectedRegattas) {
+		DefaultRegattaCreateDialog dialog = new DefaultRegattaCreateDialog(
+				selectedRegattas, sailingService, errorReporter,
+				stringMessages, new DialogCallback<EventAndRegattaDTO>() {
+					@Override
+					public void cancel() {
+					}
 
-			@Override
-			public void onSuccess(List<EventDTO> result) {
-				Collection<RegattaDTO> existingRegattas = Collections
-						.emptyList();
-				DefaultRegattaCreateDialog dialog = new DefaultRegattaCreateDialog(
-						existingRegattas, result, sailingService,
-						errorReporter, stringMessages,
-						new DialogCallback<EventAndRegattaDTO>() {
-							@Override
-							public void cancel() {
-							}
-
-							@Override
-							public void ok(final EventAndRegattaDTO newRegatta) {
-								createRegattas(selectedRegattas,
-										newRegatta.getEvent(),
-										newRegatta.getRegatta());
-							}
-						});
-				dialog.ensureDebugId("DefaultRegattaCreateDialog");
-				dialog.show();
-
-			}
-		});
-
+					@Override
+					public void ok(final EventAndRegattaDTO newRegatta) {
+						// createRegattas(selectedRegattas,
+						// newRegatta.getEvent(),
+						// newRegatta.getRegatta());
+					}
+				});
+		dialog.ensureDebugId("DefaultRegattaCreateDialog");
+		dialog.show();
 	}
 
 	private void createRegattas(final Iterable<RegattaDTO> regattaNames,
