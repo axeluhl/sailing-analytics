@@ -18,7 +18,7 @@ public class Swarm implements TimeListener {
     private final FullCanvasOverlay fullcanvas;
     private final Canvas canvas;
     private final MapWidget map;
-	private StreamletParameters parameters; 
+    private StreamletParameters parameters; 
 
     private Timer loopTimer;
     private Mercator projection;
