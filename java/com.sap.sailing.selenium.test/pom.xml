@@ -76,7 +76,6 @@
                                     <artifactId>com.sap.sailing.server.gateway.test.support</artifactId>
                                     <version>0.0.0</version>
                                 </dependency>
-                                -->
                             </dependencies>
                             
                             <bundleStartLevel>
