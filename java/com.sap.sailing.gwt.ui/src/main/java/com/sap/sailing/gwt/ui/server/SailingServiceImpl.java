@@ -1466,6 +1466,10 @@ public class SailingServiceImpl extends ProxiedRemoteServiceServlet implements S
             
             // get previous mark or start line as start-position
             TrackedLeg trackedLeg = trackedRace.getCurrentLeg(fromTimePoint);
+            if (trackedLeg == null) {
+                return result;
+            }
+            
             Waypoint fromWaypoint = trackedLeg.getLeg().getFrom();
             Position startPosition = trackedRace.getApproximatePosition(fromWaypoint, fromTimePoint);
             
