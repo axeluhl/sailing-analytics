@@ -1,4 +1,4 @@
-package com.sap.sailing.gwt.ui.client;
+package com.sap.sse.security.ui.client;
 
 
 /**
@@ -6,7 +6,7 @@ package com.sap.sailing.gwt.ui.client;
  * <code>@RemoteServiceRelativePath</code> annotation can't be used to automatically resolve the right path because it
  * uses <code>GWT.getModuleBaseURL()</code> to calculate the path which is different for each EntryPoint.
  * 
- * @author Frank
+ * @author Axel Uhl (D043530)
  *
  */
 public interface RemoteServiceMappingConstants {
@@ -14,13 +14,7 @@ public interface RemoteServiceMappingConstants {
      * The hosting bundle's web context path from the OSGi manifest. This is the URL prefix under which all services are
      * registered based on their relative path specification in the <code>web.xml</code> descriptor.
      */
-    public static final String WEB_CONTEXT_PATH = "gwt";
-
-    public static final String mediaServiceRemotePath = "service/media";
-
-    public static final String sailingServiceRemotePath = "service/sailing";
-
-    public static final String simulatorServiceRemotePath = "service/simulator";
-
-    public static final String dataMiningServiceRemotePath = "service/datamining";
+    public static final String WEB_CONTEXT_PATH = "security/ui";
+    
+    public static final String userManagementServiceRemotePath = "service/usermanagement";
 }

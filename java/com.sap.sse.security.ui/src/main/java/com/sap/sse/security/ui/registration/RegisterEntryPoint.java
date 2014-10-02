@@ -22,8 +22,6 @@ import com.sap.sse.security.ui.shared.UserManagementService;
 import com.sap.sse.security.ui.shared.UserManagementServiceAsync;
 
 public class RegisterEntryPoint implements EntryPoint {
-
-    
     private final UserManagementServiceAsync userManagementService = GWT.create(UserManagementService.class);
 
     @Override
@@ -56,7 +54,6 @@ public class RegisterEntryPoint implements EntryPoint {
             @Override
             public void onSubmit(SubmitEvent event) {
                 userManagementService.login(nameText.getText(), pwText.getText(), new AsyncCallback<SuccessInfo>() {
-
                     @Override
                     public void onFailure(Throwable caught) {
                         GWT.log(caught.getMessage());

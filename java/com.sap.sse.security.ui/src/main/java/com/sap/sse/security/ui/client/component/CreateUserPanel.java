@@ -21,7 +21,6 @@ public class CreateUserPanel extends FlowPanel {
     
     private List<UserCreationEventHandler> handlers = new ArrayList<>();
 
-    
     public CreateUserPanel(final UserManagementServiceAsync userManagementService) {
         Label title = new Label("Create a new user");
         title.getElement().getStyle().setFontSize(25, Unit.PX);

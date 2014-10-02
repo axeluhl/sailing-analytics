@@ -27,6 +27,7 @@ import com.google.gwt.user.client.ui.SimplePanel;
 import com.google.gwt.user.client.ui.SubmitButton;
 import com.google.gwt.user.client.ui.TextBox;
 import com.sap.sse.gwt.client.EntryPointHelper;
+import com.sap.sse.security.ui.client.RemoteServiceMappingConstants;
 import com.sap.sse.security.ui.client.UserManagementImageResources;
 import com.sap.sse.security.ui.client.UserStatusEventHandler;
 import com.sap.sse.security.ui.oauth.client.component.OAuthLoginPanel;
@@ -42,7 +43,9 @@ public class LoginPanel extends FlowPanel implements UserStatusEventHandler {
     private static final UserManagementServiceAsync userManagementService = GWT.create(UserManagementService.class);
 
     static {
-        EntryPointHelper.registerASyncService((ServiceDefTarget) userManagementService, "security/ui", "service/usermanagement");
+        EntryPointHelper.registerASyncService((ServiceDefTarget) userManagementService,
+                RemoteServiceMappingConstants.WEB_CONTEXT_PATH,
+                RemoteServiceMappingConstants.userManagementServiceRemotePath);
     }
 
     private static final List<UserStatusEventHandler> handlers = new ArrayList<>();

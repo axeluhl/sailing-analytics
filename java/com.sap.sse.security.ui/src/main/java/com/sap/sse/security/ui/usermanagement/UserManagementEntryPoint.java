@@ -27,6 +27,8 @@ import com.google.gwt.view.client.ProvidesKey;
 import com.google.gwt.view.client.SelectionChangeEvent;
 import com.google.gwt.view.client.SelectionChangeEvent.Handler;
 import com.google.gwt.view.client.SingleSelectionModel;
+import com.sap.sse.gwt.client.EntryPointHelper;
+import com.sap.sse.security.ui.client.RemoteServiceMappingConstants;
 import com.sap.sse.security.ui.client.UserChangeEventHandler;
 import com.sap.sse.security.ui.client.UserStatusEventHandler;
 import com.sap.sse.security.ui.client.component.CreateUserPanel;
@@ -50,7 +52,7 @@ public class UserManagementEntryPoint implements EntryPoint {
     
     private TextBox filterBox = new TextBox();
     
-    ProvidesKey<UserDTO> keyProvider = new ProvidesKey<UserDTO>() {
+    private ProvidesKey<UserDTO> keyProvider = new ProvidesKey<UserDTO>() {
         public Object getKey(UserDTO item) {
             // Always do a null check.
             return (item == null) ? null : item.getName();
@@ -59,18 +61,17 @@ public class UserManagementEntryPoint implements EntryPoint {
     
     private UserListDataProvider userListDataProvider = new UserListDataProvider(userManagementService, filterBox, keyProvider);
     
-    SingleSelectionModel<UserDTO>  singleSelectionModel = new SingleSelectionModel<>(keyProvider);
+    private SingleSelectionModel<UserDTO> singleSelectionModel = new SingleSelectionModel<>(keyProvider);
     
     @Override
     public void onModuleLoad() {
-        registerASyncService((ServiceDefTarget) userManagementService, "service/usermanagement");
-        
+        EntryPointHelper.registerASyncService((ServiceDefTarget) userManagementService,
+                RemoteServiceMappingConstants.WEB_CONTEXT_PATH,
+                RemoteServiceMappingConstants.userManagementServiceRemotePath);
         center = new SimpleLayoutPanel();
-        
         RootLayoutPanel rootPanel = RootLayoutPanel.get();
         DockLayoutPanel dockPanel = new DockLayoutPanel(Unit.PX);
         rootPanel.add(dockPanel);
-        
         HorizontalPanel hp = new HorizontalPanel();
         LoginPanel.addUserStatusEventHandler(new UserStatusEventHandler() {
             
@@ -92,7 +93,6 @@ public class UserManagementEntryPoint implements EntryPoint {
             }
         });
         Button createButton = new Button("Create User", new ClickHandler() {
-            
             @Override
             public void onClick(ClickEvent event) {
                 CreateUserPanel createUserPanel = new CreateUserPanel(userManagementService);

@@ -35,8 +35,7 @@
 	<servlet>
 		<display-name>User Management Service</display-name>
 		<servlet-name>UserManagementService</servlet-name>
-		<servlet-class>com.sap.sse.security.ui.server.UserManagementServiceImpl
-		</servlet-class>
+		<servlet-class>com.sap.sse.security.ui.server.UserManagementServiceImpl</servlet-class>
 	</servlet>
 	<servlet-mapping>
 		<servlet-name>UserManagementService</servlet-name>
@@ -46,8 +45,7 @@
 	<servlet>
 		<display-name>Redirect Servlet</display-name>
 		<servlet-name>RedirectServlet</servlet-name>
-		<servlet-class>com.sap.sse.security.ui.servlet.RedirectServlet
-		</servlet-class>
+		<servlet-class>com.sap.sse.security.ui.servlet.RedirectServlet</servlet-class>
 	</servlet>
 	<servlet-mapping>
 		<servlet-name>RedirectServlet</servlet-name>
@@ -57,12 +55,10 @@
 	<!-- remote logging -->
 	<servlet>
 		<servlet-name>remoteLogging</servlet-name>
-		<servlet-class>com.google.gwt.logging.server.RemoteLoggingServiceImpl
-		</servlet-class>
+		<servlet-class>com.google.gwt.logging.server.RemoteLoggingServiceImpl</servlet-class>
 	</servlet>
 	<servlet-mapping>
 		<servlet-name>remoteLogging</servlet-name>
-		<url-pattern>/com.sap.sse.security.ui.OAuthLogin/remote_logging
-		</url-pattern>
+		<url-pattern>/com.sap.sse.security.ui.OAuthLogin/remote_logging</url-pattern>
 	</servlet-mapping>
 </web-app>

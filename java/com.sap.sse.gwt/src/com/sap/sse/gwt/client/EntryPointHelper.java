@@ -39,9 +39,8 @@ public class EntryPointHelper {
      */
     public static void registerASyncService(ServiceDefTarget serviceToRegister, String webContextPath, String servicePath) {
         String moduleBaseURL = GWT.getModuleBaseURL();
-        String baseURL = moduleBaseURL.substring(0, moduleBaseURL.lastIndexOf('/', moduleBaseURL.length()-2)+1);
-        String baseBaseURL = baseURL.substring(0, baseURL.lastIndexOf('/', baseURL.length()-2)+1);
-        serviceToRegister.setServiceEntryPoint(baseBaseURL + webContextPath + "/" + servicePath);
+        String baseURL = moduleBaseURL.substring(0, moduleBaseURL.indexOf('/', moduleBaseURL.indexOf('/', moduleBaseURL.indexOf('/')+1)+1)+1);
+        serviceToRegister.setServiceEntryPoint(baseURL + webContextPath + "/" + servicePath);
     }
     
 }
