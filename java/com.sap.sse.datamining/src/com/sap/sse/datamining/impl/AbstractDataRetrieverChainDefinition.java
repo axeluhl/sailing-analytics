@@ -11,7 +11,7 @@ import com.sap.sse.datamining.components.Processor;
 
 public abstract class AbstractDataRetrieverChainDefinition<DataSourceType> implements DataRetrieverChainDefinition<DataSourceType> {
 
-    private final Class<? super DataSourceType> dataSourceType;
+    private final Class<DataSourceType> dataSourceType;
     private final List<Class<?>> retrievableDataTypes;
 
     /**
@@ -20,13 +20,13 @@ public abstract class AbstractDataRetrieverChainDefinition<DataSourceType> imple
      *                             This means, that the most generic data type (e.g. Regatta) is first and the most
      *                             specific data type (e.g. GPSFix) is last.
      */
-    public AbstractDataRetrieverChainDefinition(Class<? super DataSourceType> dataSourceType, List<Class<?>> retrievableDataTypes) {
+    public AbstractDataRetrieverChainDefinition(Class<DataSourceType> dataSourceType, List<Class<?>> retrievableDataTypes) {
         this.dataSourceType = dataSourceType;
         this.retrievableDataTypes = new ArrayList<>(retrievableDataTypes);
     }
 
     @Override
-    public Class<? super DataSourceType> getDataSourceType() {
+    public Class<DataSourceType> getDataSourceType() {
         return dataSourceType;
     }
 
