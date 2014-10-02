@@ -47,6 +47,9 @@
 							<modules>
 								<module>com.sap.sse.security.ui.UserManagement</module>
 								<module>com.sap.sse.security.ui.Login</module>
+								<module>com.sap.sse.security.ui.OAuthLogin</module>
+								<module>com.sap.sse.security.ui.LoginPanel</module>
+								<module>com.sap.sse.security.ui.Register</module>
 							</modules>
 							<gen>${basedir}/.generated</gen>
 							<localWorkers>3</localWorkers>
