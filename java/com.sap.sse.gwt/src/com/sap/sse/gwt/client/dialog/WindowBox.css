@@ -63,7 +63,6 @@
 .gwt-extras-WindowBox .media-synch-control {
 	background: #efefef;
 	padding: 10px;
-	margin: 10px 0 10px 0;
 }
 
 .gwt-extras-WindowBox .media-synch-control:after {
@@ -87,7 +86,9 @@
 }
 
 .gwt-extras-WindowBox .video-root-panel {
-    display: table-cell;
+    display: inline-block;
+    width: 100%;
+    height: 100%;
 	min-width: 400px;
     min-height: 225px;
 }
