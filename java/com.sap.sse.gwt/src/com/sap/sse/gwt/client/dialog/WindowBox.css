@@ -2,8 +2,19 @@
 	clip: rect(auto auto auto auto);
 }
 
+.gwt-extras-WindowBox .dialogTopCenterInner {
+  background-color: #bbb;
+}
+
 .gwt-extras-WindowBox .Caption {
+   background: transparent;
+   border: none;
     padding: 4px 45px 0px 5px;
+    width: auto;
+    max-width: 25em;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
 }
 
 .gwt-extras-WindowBox .dialogMiddleCenter {
@@ -16,7 +27,7 @@
 
 .gwt-extras-WindowBox .gwt-extras-dialog-controls {
   position: absolute;
-  top: 3px;
+  top: -1px;
   right: 12px;
 }
 
@@ -76,11 +87,19 @@
 }
 
 .gwt-extras-WindowBox .video-root-panel {
+    display: table-cell;
 	min-width: 400px;
     min-height: 225px;
 }
 
-.gwt-extras-WindowBox .title-edit {
+.Youtube-Video-Panel {
+    display: block;
+    border: none;
+    min-height: 225px;
+ }
+ 
+ .gwt-extras-WindowBox .title-edit {
     width: 100%;
     margin-bottom: 10px;
 }
+

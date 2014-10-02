@@ -64,8 +64,8 @@ public class YoutubeVideoControl  {
 
         var player = new $wnd.YT.Player(videoContainerId, {
                 videoId : videoUrl,
-                height: '480', //see https://developers.google.com/youtube/iframe_api_reference?hl=en#Playback_quality
-                width: '853',
+                //height: '480', //see https://developers.google.com/youtube/iframe_api_reference?hl=en#Playback_quality
+                //width: '853',
                 events: { //https://developers.google.com/youtube/iframe_api_reference?hl=en#Events
                     'onReady': function(event) {
                                     that.@com.sap.sailing.gwt.ui.client.media.YoutubeVideoControl::initPlayState(Lcom/google/gwt/core/client/JavaScriptObject;)(player);

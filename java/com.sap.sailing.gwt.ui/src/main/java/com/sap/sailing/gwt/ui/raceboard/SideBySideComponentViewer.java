@@ -87,18 +87,18 @@ public class SideBySideComponentViewer implements ComponentViewer {
                 case 1:
                     mediaSelectionButton.setVisible(true);
                     if(mediaPlayerManagerComponent.isPlaying()){
-                        mediaSelectionButton.setText(stringMessages.hideVideoCaption());
-                        mediaSelectionButton.setTitle(stringMessages.hideVideoTooltip());
+                        mediaSelectionButton.setText(stringMessages.mediaHideVideoCaption());
+                        mediaSelectionButton.setTitle(stringMessages.mediaHideVideoTooltip());
                     }
                     else{
-                        mediaSelectionButton.setText(stringMessages.showVideoCaption());
-                        mediaSelectionButton.setTitle(stringMessages.showVideoTooltip());
+                        mediaSelectionButton.setText(stringMessages.mediaShowVideoCaption());
+                        mediaSelectionButton.setTitle(stringMessages.mediaShowVideoTooltip(mediaPlayerManagerComponent.getAssignedMediaTracks().iterator().next().title));
                     }
                     break;
                 default:
                     mediaSelectionButton.setVisible(true);
-                    mediaSelectionButton.setText(stringMessages.selectVideoCaption(mediaPlayerManagerComponent.getAssignedMediaTracks().size()));
-                    mediaSelectionButton.setTitle(stringMessages.selectVideoTooltip());
+                    mediaSelectionButton.setText(stringMessages.mediaSelectVideoCaption(mediaPlayerManagerComponent.getAssignedMediaTracks().size()));
+                    mediaSelectionButton.setTitle(stringMessages.mediaSelectVideoTooltip());
                     break;
                 }
                 mediaManagementButton.setVisible(mediaPlayerManagerComponent.allowsEditing());
@@ -150,7 +150,7 @@ public class SideBySideComponentViewer implements ComponentViewer {
     private Button createMediaSelectionButton(final MediaPlayerManager mediaPlayerManager) {
         final Button result = new Button();
         final MediaSingleSelectionControl multiSelectionControl = new MediaSingleSelectionControl(mediaPlayerManager,
-                result);
+                result, stringMessages);
         result.addClickHandler(new ClickHandler() {
 
             @Override
@@ -180,11 +180,11 @@ public class SideBySideComponentViewer implements ComponentViewer {
      * @param userAgent
      */
     private Button createMediaManagementButton(final MediaPlayerManager mediaPlayerManager) {
-        final Button result = new Button(stringMessages.manageMediaCaption());
-        result.setTitle(stringMessages.manageMediaTooltip());
+        final Button result = new Button(stringMessages.mediaManageMediaCaption());
+        result.setTitle(stringMessages.mediaManageMediaTooltip());
         // onClick
         final MediaManagementControl multiSelectionControl = new MediaManagementControl(mediaPlayerManager,
-                result);
+                result, stringMessages);
         result.addClickHandler(new ClickHandler() {
 
             @Override

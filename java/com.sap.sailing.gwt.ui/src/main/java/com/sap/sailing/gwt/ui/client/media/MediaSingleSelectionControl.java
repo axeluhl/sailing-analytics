@@ -14,14 +14,15 @@ import com.google.gwt.user.client.ui.PopupPanel;
 import com.google.gwt.user.client.ui.UIObject;
 import com.google.gwt.user.client.ui.VerticalPanel;
 import com.sap.sailing.domain.common.media.MediaTrack;
+import com.sap.sailing.gwt.ui.client.StringMessages;
 
 public class MediaSingleSelectionControl extends AbstractMediaSelectionControl implements CloseHandler<PopupPanel> {
 
     private final DialogBox dialogControl;
     private final UIObject popupLocation;
 
-    public MediaSingleSelectionControl(MediaPlayerManager mediaPlayerManager, UIObject popupLocation) {
-        super(mediaPlayerManager);
+    public MediaSingleSelectionControl(MediaPlayerManager mediaPlayerManager, UIObject popupLocation, StringMessages stringMessages) {
+        super(mediaPlayerManager, stringMessages);
         this.popupLocation = popupLocation;
 
         this.dialogControl = new DialogBox(true, false);
@@ -58,14 +59,28 @@ public class MediaSingleSelectionControl extends AbstractMediaSelectionControl i
         Button mediaSelectButton = new Button(mediaTrack.title);
         mediaSelectButton.setStyleName("Media-Select-Button");
         if (mediaPlayerManager.getPlayingVideoTracks().contains(mediaTrack)) {
+            mediaSelectButton.setTitle(stringMessages.mediaHideVideoTooltip());
             mediaSelectButton.addStyleName("Media-Select-Button-playing");
-            mediaSelectButton.setEnabled(false);
-        } else {
             mediaSelectButton.addClickHandler(new ClickHandler() {
                 
                 @Override
                 public void onClick(ClickEvent event) {
-                    if (mediaPlayerManager.getPlayingAudioTrack() != mediaTrack) {
+                    if (mediaPlayerManager.getPlayingAudioTrack() == mediaTrack) {
+                        mediaPlayerManager.muteAudio();
+                    }
+                    mediaPlayerManager.closeFloatingVideo(mediaTrack);
+                    hide();
+                };
+            });
+        } else {
+            mediaSelectButton.setTitle(stringMessages.mediaShowVideoTooltip(mediaTrack.title));
+            mediaSelectButton.addClickHandler(new ClickHandler() {
+                
+                @Override
+                public void onClick(ClickEvent event) {
+                    if (event.isControlKeyDown() && mediaTrack.mimeType.mediaType == MediaTrack.MediaType.video) {
+                        mediaPlayerManager.playFloatingVideo(mediaTrack);
+                    } else if (mediaPlayerManager.getPlayingAudioTrack() != mediaTrack) {
                         mediaPlayerManager.stopAll();
                         if (mediaTrack.mimeType.mediaType == MediaTrack.MediaType.video) {
                             mediaPlayerManager.playFloatingVideo(mediaTrack);
