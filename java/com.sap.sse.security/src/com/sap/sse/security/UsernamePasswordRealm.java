@@ -24,15 +24,13 @@ import com.sap.sse.security.userstore.shared.UsernamePasswordAccount;
 
 public class UsernamePasswordRealm extends AuthorizingRealm {
     
-    private UserStore store;
+    private final UserStore store;
     
     public UsernamePasswordRealm() {
         super();
         BundleContext context = Activator.getContext();
-        ServiceReference<?> serviceReference = context.
-                getServiceReference(UserStore.class.getName());
-        store = (UserStore) context.
-                getService(serviceReference);
+        ServiceReference<?> serviceReference = context.getServiceReference(UserStore.class.getName());
+        store = (UserStore) context.getService(serviceReference);
     }
     
     @Override
