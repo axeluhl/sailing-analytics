@@ -85,7 +85,10 @@ public class AdminConsoleEntryPoint extends AbstractEntryPoint implements Regatt
                         Widget widgetAssociatedToVerticalTab = verticalTabLayoutPanel.getWidget(verticalTabLayoutPanel.getSelectedIndex());
                         if (widgetAssociatedToVerticalTab instanceof TabLayoutPanel) {
                             TabLayoutPanel selectedTabLayoutPanel = (TabLayoutPanel)widgetAssociatedToVerticalTab;
-                            widgetAssociatedToVerticalTab = selectedTabLayoutPanel.getWidget(selectedTabLayoutPanel.getSelectedIndex());
+                            final int selectedIndex = selectedTabLayoutPanel.getSelectedIndex();
+                            if (selectedIndex >= 0) {
+                                widgetAssociatedToVerticalTab = selectedTabLayoutPanel.getWidget(selectedIndex);
+                            }
                         }
                         refreshDataFor(widgetAssociatedToVerticalTab);
                     }
