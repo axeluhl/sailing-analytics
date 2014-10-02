@@ -16,6 +16,10 @@
   <!-- <inherits name='com.google.gwt.user.theme.dark.Dark'/>     -->
   <stylesheet src="../UserManagement.css" />
   
+  <!-- Other module inherits                                      -->
+  <inherits name="com.sap.sse.gwt.EmulatedJRE" /> -->
+  <inherits name="com.sap.sse.gwt.SSESharedGWT" />
+  <inherits name="com.sap.sse.SSECommon" />
   
   <inherits name="com.google.gwt.resources.Resources" />
   <inherits name="com.google.gwt.logging.Logging"/>
