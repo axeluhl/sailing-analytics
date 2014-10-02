@@ -4,6 +4,6 @@ Bundle-Name: Test
 Bundle-SymbolicName: com.sap.sse.security.test
 Bundle-Version: 1.0.0.qualifier
 Bundle-Vendor: SAP
-Fragment-Host: com.sap.sse.security;bundle-version="1.0.0.qualifier"
+Fragment-Host: com.sap.sse.security
 Bundle-RequiredExecutionEnvironment: JavaSE-1.7
 Require-Bundle: org.junit4;bundle-version="4.8.2"
