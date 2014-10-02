@@ -29,12 +29,8 @@ public class PolarDiagramBase implements PolarDiagram, Serializable {
     protected SpeedWithBearing current = null; //new KnotSpeedWithBearingImpl(0, new DegreeBearingImpl(180));
 
     // private static Logger logger = Logger.getLogger("com.sap.sailing");
-    // the preferred direction of movement
-    // is used by optimalDirectionsUpwind() and optimialDirectionsDownwind()
-    protected Bearing targetDirection = new DegreeBearingImpl(0);
-
+    protected Bearing targetDirection = new DegreeBearingImpl(0); // bearing of target may deviate from 0 degrees, if target is not exactly windward
     protected NavigableMap<Speed, NavigableMap<Bearing, Speed>> speedTable;
-    //protected NavigableMap<Speed, NavigableMap<Speed, NavigableMap<Bearing, NavigableMap<Bearing, Speed>>>> extTable;
     protected NavigableMap<Double,Object> extTable = null;
     protected NavigableMap<Speed, Bearing> beatAngles;
     protected NavigableMap<Speed, Bearing> gybeAngles;
@@ -134,40 +130,16 @@ public class PolarDiagramBase implements PolarDiagram, Serializable {
             if ((current == null)||(current.getKnots() == 0.0)) {
                 wind = newWind;
                 trueWind = newWind;
-                //polarChart = null;
-                //polarChartOG = null;
             } else {
                 wind = getApparentWindFromCurrent(newWind);
                 trueWind = newWind;
-                //transformPD();
             }
         }
     }
 
-    /*    public void transformPD() {
-
-        if (current != null) {
-
-            polarChart = new TreeMap<Bearing, SpeedWithBearing>(bearingComparator);
-            polarChartOG = new TreeMap<Bearing, SpeedWithBearing>(bearingComparator);
-            for (Double bearAngle = 0.0; bearAngle < 360.0; bearAngle += 5.0) {
-
-                SpeedWithBearing rotSpeed = new KnotSpeedWithBearingImpl(this.getSpeedAtBearingRaw(new DegreeBearingImpl(bearAngle)).getKnots(), new DegreeBearingImpl(bearAngle));
-                SpeedWithBearing transSpeed = getSOGfromSMF(rotSpeed);
-
-                polarChart.put(new DegreeBearingImpl(bearAngle), transSpeed);
-                polarChartOG.put(transSpeed.getBearing(), transSpeed);
-                //System.out.println(""+bearAngle+","+((transSpeed.getBearing().getDegrees())%360.0)+","+transSpeed.getKnots());
-
-            }
-
-        }
-    }*/
-
     // initialize polar diagram with supporting points to represent mapping:
     //     trueWindSpeed -> { currentSpeed -> { currentBearingTW -> { boatBearingTW -> boatSpeed } } }
     // where currentBearingTW and boatBearingTW are bearings relative to true wind
-    //
     public NavigableMap<Double,Object> extendSpeedMap() {
 
         NavigableMap<Double,Object> extMap = new TreeMap<Double,Object>();
@@ -372,11 +344,6 @@ public class PolarDiagramBase implements PolarDiagram, Serializable {
 
     @Override
     public SpeedWithBearing getSpeedAtBearingOverGround(Bearing bearing) {
-
-        // TODO: check this new initialization, maybe keep previous current and reset current at end
-        /*if (extTable == null) {
-            extTable = this.extendSpeedMap();
-        }*/
 
         if ((current == null)||(current.getKnots() == 0.0)) {
 
