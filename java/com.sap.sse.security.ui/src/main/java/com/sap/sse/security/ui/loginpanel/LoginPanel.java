@@ -42,7 +42,7 @@ public class LoginPanel extends FlowPanel implements UserStatusEventHandler {
     private static final UserManagementServiceAsync userManagementService = GWT.create(UserManagementService.class);
 
     static {
-        EntryPointHelper.registerASyncService((ServiceDefTarget) userManagementService, "service/usermanagement");
+        EntryPointHelper.registerASyncService((ServiceDefTarget) userManagementService, "security/ui", "service/usermanagement");
     }
 
     private static final List<UserStatusEventHandler> handlers = new ArrayList<>();

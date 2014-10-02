@@ -52,7 +52,7 @@
 	</filter-mapping>
 
 	<servlet>
-		<display-name>Sailing Service</display-name>
+	    <display-name>Sailing Service</display-name>
 	    <servlet-name>SailingService</servlet-name>
     	<servlet-class>com.sap.sailing.gwt.ui.server.SailingServiceImpl</servlet-class>
 	</servlet>
