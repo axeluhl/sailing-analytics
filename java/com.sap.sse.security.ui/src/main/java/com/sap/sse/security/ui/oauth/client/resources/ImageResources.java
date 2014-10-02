@@ -8,45 +8,45 @@ public interface ImageResources extends ClientBundle {
     
     public static final ImageResources INSTANCE = GWT.create(ImageResources.class);
 
-    @Source("../../images/facebook.png")
+    @Source("com/sap/sse/security/ui/oauth/images/facebook.png")
     public DataResource facebookIconImageData();
 
-    @Source("../../images/flickr.png")
+    @Source("com/sap/sse/security/ui/oauth/images/flickr.png")
     public DataResource flickrIconImageData();
 
-    @Source("../../images/github.png")
+    @Source("com/sap/sse/security/ui/oauth/images/github.png")
     public DataResource githubIconImageData();
 
-    @Source("../../images/google.png")
+    @Source("com/sap/sse/security/ui/oauth/images/google.png")
     public DataResource googleIconImageData();
 
-    @Source("../../images/linkedin.png")
+    @Source("com/sap/sse/security/ui/oauth/images/linkedin.png")
     public DataResource linkedinIconImageData();
 
-    @Source("../../images/twitter.png")
+    @Source("com/sap/sse/security/ui/oauth/images/twitter.png")
     public DataResource twitterIconImageData();
 
-    @Source("../../images/vimeo.png")
+    @Source("com/sap/sse/security/ui/oauth/images/vimeo.png")
     public DataResource vimeoIconImageData();
 
-    @Source("../../images/wordpress.png")
+    @Source("com/sap/sse/security/ui/oauth/images/wordpress.png")
     public DataResource wordpressIconImageData();
 
-    @Source("../../images/yahoo.png")
+    @Source("com/sap/sse/security/ui/oauth/images/yahoo.png")
     public DataResource yahooIconImageData();
     
-    @Source("../../images/instagram.png")
+    @Source("com/sap/sse/security/ui/oauth/images/instagram.png")
     public DataResource instagramIconImageData();
     
-    @Source("../../images/imgur.png")
+    @Source("com/sap/sse/security/ui/oauth/images/imgur.png")
     public DataResource imgurIconImageData();
     
-    @Source("../../images/live32.png")
+    @Source("com/sap/sse/security/ui/oauth/images/live32.png")
     public DataResource liveIconImageData();
     
-    @Source("../../images/tumblr.png")
+    @Source("com/sap/sse/security/ui/oauth/images/tumblr.png")
     public DataResource tumblrIconImageData();
     
-    @Source("../../images/foursquare.png")
+    @Source("com/sap/sse/security/ui/oauth/images/foursquare.png")
     public DataResource foursquareIconImageData();
 }
