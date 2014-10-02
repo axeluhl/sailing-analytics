@@ -18,19 +18,27 @@ The links above lead to short write-ups of the respective business case behind t
 
 ## Project Candidates
 
-[[Trim Database|wiki/planning/TrimDatabase]]
-
 [[Smartphone Tracking|wiki/smartphone-tracking]]
+
+[[User Management|wiki/planning/usermanagement]]
+
+[[User Preferences, Bookmarkability and History State Management|wiki/planning/page-state]]
+
+[[Support Specific Analysis Scenarios|wiki/planning/AnalysisScenarios]]
+
+[[Simulator Integration|wiki/planning/SimulatorIntegration]]
 
 [[GPS Import|wiki/planning/gps-import]]
 
-[[Sailing Community|wiki/planning/sailing-community]]
-
 [[Monitoring and Improving Data Quality|wiki/data-quality]]
 
-[[ORC|wiki/planning/ORC]]
+[[Usability of the Administration Interface|wiki/planning/usability-of-the-administration-interface]]
 
-[[Support Specific Analysis Scenarios|wiki/planning/AnalysisScenarios]]
+[[Trim Database|wiki/planning/TrimDatabase]]
+
+[[Sailing Community|wiki/planning/sailing-community]]
+
+[[ORC|wiki/planning/ORC]]
 
 [[Improve Landing Page|wiki/planning/LandingPage]]
 
@@ -40,15 +48,9 @@ The links above lead to short write-ups of the respective business case behind t
 
 [[Mobile Version SAP Sailing Analytics|wiki/planning/MobileSailingAnalytics]]
 
-[[User Management|wiki/planning/usermanagement]]
-
 [[Extracting an "SAP Sports Server" Basis|wiki/planning/sap-sports-server]]
 
-[[Usability of the Administration Interface|wiki/planning/usability-of-the-administration-interface]]
-
 [[Advanced Wind Field Analysis|wiki/planning/AdvancedWindFieldAnalysis]]
-
-[[Simulator Integration|wiki/planning/SimulatorIntegration]]
 
 [[ISAF SWC Engagement|wiki/planning/ISAFSWCEngagement]]
 
