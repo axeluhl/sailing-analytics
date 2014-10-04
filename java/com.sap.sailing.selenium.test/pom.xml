@@ -92,7 +92,7 @@
                                 </bundle>
                                 <bundle>
                                     <id>com.sap.sse.security.ui</id>
-                                    <level>3</level>
+                                    <level>5</level>
                                     <autoStart>true</autoStart>
                                 </bundle>
                                 <bundle>
