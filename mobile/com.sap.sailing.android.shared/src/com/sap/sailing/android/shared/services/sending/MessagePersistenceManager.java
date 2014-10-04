@@ -17,7 +17,7 @@ import com.sap.sailing.android.shared.logging.ExLog;
 import com.sap.sailing.android.shared.util.FileHandlerUtils;
 import com.sap.sailing.android.shared.util.SharedAppConstants;
 
-public abstract class MessagePersistenceManager {
+public class MessagePersistenceManager {
     
     private final static String TAG = MessagePersistenceManager.class.getName();
 
@@ -25,10 +25,13 @@ public abstract class MessagePersistenceManager {
 
     protected Context context;
     protected List<String> persistedMessages;
+    
+    private final MessageRestorer messageRestorer;
 
-    public MessagePersistenceManager(Context context) {
+    public MessagePersistenceManager(Context context, MessageRestorer messageRestorer) {
         this.context = context;
         persistedMessages = new ArrayList<String>();
+        this.messageRestorer = messageRestorer;
         initializeFileAndPersistedMessages();
     }
 
@@ -106,7 +109,9 @@ public abstract class MessagePersistenceManager {
         return persistedMessages;
     }
     
-    protected abstract void restoreMessage(Intent messageIntent);
+    public static interface MessageRestorer {
+        void restoreMessage(Context context, Intent messageIntent);
+    }
 
     public List<Intent> restoreMessages() {
         List<Intent> delayedIntents = new ArrayList<Intent>();
@@ -134,7 +139,7 @@ public abstract class MessagePersistenceManager {
             Intent messageIntent = MessageSendingService.createMessageIntent(context, url, callbackPayload,
                     null, payload, callbackClass);
             
-            restoreMessage(messageIntent);
+            messageRestorer.restoreMessage(context, messageIntent);
             
             if (messageIntent != null) {
                 delayedIntents.add(messageIntent);

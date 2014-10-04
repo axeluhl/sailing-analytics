@@ -16,6 +16,7 @@ import android.content.Intent;
 import android.content.ServiceConnection;
 import android.os.IBinder;
 
+import com.sap.sailing.android.shared.logging.ExLog;
 import com.sap.sailing.android.shared.services.sending.MessageSendingService;
 import com.sap.sailing.android.shared.services.sending.MessageSendingService.MessageSendingBinder;
 import com.sap.sailing.android.shared.services.sending.ServerReplyCallback;
@@ -24,8 +25,6 @@ import com.sap.sailing.domain.racelog.RaceLog;
 import com.sap.sailing.domain.racelog.RaceLogEvent;
 import com.sap.sailing.racecommittee.app.data.DataManager;
 import com.sap.sailing.racecommittee.app.data.ReadonlyDataManager;
-import com.sap.sailing.android.shared.logging.ExLog;
-import com.sap.sailing.racecommittee.app.services.sending.EventSendingService;
 import com.sap.sailing.server.gateway.deserialization.JsonDeserializationException;
 import com.sap.sailing.server.gateway.deserialization.racelog.impl.RaceLogEventDeserializer;
 
@@ -97,7 +96,7 @@ public class RaceLogEventsCallback implements ServerReplyCallback {
         }
         
         EventSendingConnection connection = new EventSendingConnection(context, eventsToAdd, raceLog);
-        if (context.bindService(new Intent(context, EventSendingService.class), connection,
+        if (context.bindService(new Intent(context, MessageSendingService.class), connection,
                 Context.BIND_AUTO_CREATE)) {
             // execution deferred until service is bound
             ExLog.i(TAG, "Waiting for sending service to be bound.");

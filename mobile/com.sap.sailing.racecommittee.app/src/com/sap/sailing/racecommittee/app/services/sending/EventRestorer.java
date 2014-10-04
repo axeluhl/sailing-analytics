@@ -7,29 +7,25 @@ import org.json.simple.parser.ParseException;
 import android.content.Context;
 import android.content.Intent;
 
-import com.sap.sailing.android.shared.services.sending.MessagePersistenceManager;
+import com.sap.sailing.android.shared.logging.ExLog;
+import com.sap.sailing.android.shared.services.sending.MessagePersistenceManager.MessageRestorer;
 import com.sap.sailing.android.shared.util.SharedAppConstants;
 import com.sap.sailing.domain.racelog.RaceLogEvent;
 import com.sap.sailing.racecommittee.app.data.DataManager;
 import com.sap.sailing.racecommittee.app.data.DataStore;
-import com.sap.sailing.android.shared.logging.ExLog;
 import com.sap.sailing.server.gateway.deserialization.JsonDeserializationException;
 import com.sap.sailing.server.gateway.deserialization.racelog.impl.RaceLogEventDeserializer;
 
-public class EventPersistenceManager extends MessagePersistenceManager {
-    public EventPersistenceManager(Context context) {
-        super(context);
-    }
-
-    private final static String TAG = EventPersistenceManager.class.getName();
+public class EventRestorer implements MessageRestorer {
+    private final static String TAG = EventRestorer.class.getName();
 
     @Override
-    protected void restoreMessage(Intent messageIntent) {
+    public void restoreMessage(Context context, Intent messageIntent) {
         String raceId = messageIntent.getExtras().getString(SharedAppConstants.CALLBACK_PAYLOAD);
         String serializedEventAsJson = messageIntent.getExtras().getString(SharedAppConstants.PAYLOAD);
         
         ExLog.i(TAG, String.format("Trying to re-add event to race log of race %s.", raceId));
-        DataStore store = DataManager.create(this.context).getDataStore();
+        DataStore store = DataManager.create(context).getDataStore();
         if (!store.hasRace(raceId)) {
             ExLog.w(TAG, String.format("There is no race %s.", raceId));
             return;

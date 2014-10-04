@@ -13,6 +13,7 @@ import android.view.MenuInflater;
 import android.view.MenuItem;
 import android.widget.Toast;
 
+import com.sap.sailing.android.shared.logging.ExLog;
 import com.sap.sailing.android.shared.services.sending.MessageSendingService;
 import com.sap.sailing.android.shared.services.sending.MessageSendingService.MessageSendingBinder;
 import com.sap.sailing.android.shared.services.sending.MessageSendingService.MessageSendingServiceLogger;
@@ -20,8 +21,6 @@ import com.sap.sailing.racecommittee.app.AppPreferences;
 import com.sap.sailing.racecommittee.app.R;
 import com.sap.sailing.racecommittee.app.RaceApplication;
 import com.sap.sailing.racecommittee.app.data.InMemoryDataStore;
-import com.sap.sailing.android.shared.logging.ExLog;
-import com.sap.sailing.racecommittee.app.services.sending.EventSendingService;
 
 /**
  * Base activity for all race committee cockpit activities enabling basic menu functionality.
@@ -136,7 +135,7 @@ public abstract class BaseActivity extends LoggableActivity {
     public void onStart() {
         super.onStart();
         
-        Intent intent = new Intent(this, EventSendingService.class);
+        Intent intent = new Intent(this, MessageSendingService.class);
         bindService(intent, sendingServiceConnection, Context.BIND_AUTO_CREATE);
     }
     

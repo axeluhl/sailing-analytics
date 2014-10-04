@@ -9,30 +9,54 @@ import java.util.List;
 import java.util.Set;
 
 import android.app.Service;
+import android.content.ComponentName;
 import android.content.Context;
 import android.content.Intent;
+import android.content.pm.PackageManager;
 import android.net.ConnectivityManager;
 import android.net.NetworkInfo;
 import android.os.Binder;
+import android.os.Bundle;
 import android.os.Handler;
 import android.os.IBinder;
 
 import com.sap.sailing.android.shared.logging.ExLog;
+import com.sap.sailing.android.shared.services.sending.MessagePersistenceManager.MessageRestorer;
 import com.sap.sailing.android.shared.services.sending.MessageSenderTask.MessageSendingListener;
 import com.sap.sailing.android.shared.util.SharedAppConstants;
 import com.sap.sailing.android.shared.util.SharedAppPreferences;
 
-/*
- * Sending a message to the webservice
+/**
+ * Service that handles sending messages to a webservice. Deals with an offline setting
+ * by buffering the messages in a file, so that they can be sent when the connection is
+ * re-established.<br>
  * 
- * Usage:
+ * <b>Use in the following way:</b> Add the service declaration to your {@code AndroidManifest.xml},
+ * and also specify your class implementing the {@link MessagePersistenceManager.MessageRestorer}
+ * as a meta-data tag with the key {@code com.sap.sailing.android.shared.services.sending.messageRestorer}.
+ * For example:
+ * <pre>{@code
+ * <service
+ *   android:name="com.sap.sailing.android.shared.services.sending.MessageSendingService"
+ *   android:exported="false" >
+ *   <intent-filter>
+ *     <action android:name="com.sap.sailing.android.shared.action.sendSavedIntents" />
+ *     <action android:name="com.sap.sailing.android.shared.action.sendMessage" />
+ *   </intent-filter>
+ *   <meta-data android:name="com.sap.sailing.android.shared.services.sending.messageRestorer"
+ *     android:value="com.sap.sailing.racecommittee.app.services.sending.EventRestorer" />
+ * </service>
+ * }</pre>
  * 
+ * Sending a message example:
+ * <pre>{@code
  * Intent i = new Intent(SharedAppConstants.SEND_MESSAGE_ACTION);
  * i.putExtra(SharedAppConstants.PAYLOAD, JsonUtils.getObjectAsString('someEventObject'));
  * i.putExtra(SharedAppConstants.CALLBACK_PAYLOAD, 'raceuuid');
  * context.startService(i);
+ * }</pre>
  */
-public abstract class MessageSendingService extends Service implements MessageSendingListener {
+public class MessageSendingService extends Service implements MessageSendingListener {
 
     protected final static String TAG = MessageSendingService.class.getName();
 
@@ -119,7 +143,25 @@ public abstract class MessageSendingService extends Service implements MessageSe
         return null;
     }
     
-    protected abstract MessagePersistenceManager getPersistenceManager();
+    private MessagePersistenceManager getPersistenceManager() {
+        ComponentName thisService = new ComponentName(this, this.getClass());
+        try {
+            Bundle data = getPackageManager().getServiceInfo(thisService, PackageManager.GET_META_DATA).metaData;
+            String className = data.getString("com.sap.sailing.android.shared.services.sending.messageRestorer");
+            Class<?> clazz = Class.forName(className);
+            if (! MessageRestorer.class.isAssignableFrom(clazz)) {
+                throw new Exception("Class does not conform to expected type.");
+            }
+            @SuppressWarnings("unchecked") //checked above
+            Class<MessageRestorer> castedClass = (Class<MessageRestorer>) clazz;
+            MessageRestorer restorer = castedClass.getConstructor().newInstance();
+            return new MessagePersistenceManager(this, restorer);
+        } catch (Exception e) {
+            ExLog.e(TAG, "Could not find message persistence manager. See documentation of MessageSendingService"
+                    + "on how to register the persistence manager through the manifest. Error Message: " + e.getMessage());
+            return null;
+        }
+    }
 
     /*
      * (non-Javadoc)
