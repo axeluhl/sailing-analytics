@@ -118,7 +118,7 @@
 	</modules>
 	
 	<properties>
-		<tycho-version>0.18.1</tycho-version>
+		<tycho-version>0.20.0</tycho-version>
         
 		<!--
           QUESTION: Which properties or settings are system dependent and differ across
