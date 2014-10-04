@@ -105,12 +105,12 @@ public class OnlineDataManager extends DataManager {
                         new VenueJsonDeserializer(new CourseAreaJsonDeserializer(domainFactory)), new LeaderboardGroupBaseJsonDeserializer()));
                 DataHandler<Collection<EventBase>> handler = new EventsDataHandler(OnlineDataManager.this);
 
-                ExLog.i(TAG, "getEventsLoader created new loader...");
+                ExLog.i(context, TAG, "getEventsLoader created new loader...");
 
                 return new OnlineDataLoader<Collection<EventBase>>(context, 
                         new URL(preferences.getServerBaseURL() + "/sailingserver/events"), parser, handler);
             }
-        });
+        }, getContext());
     }
 
     @Override
@@ -147,7 +147,7 @@ public class OnlineDataManager extends DataManager {
                     RaceLogServletConstants.PARAM_COURSE_AREA_FILTER + "=" + courseAreaId.toString()+"&"+
                     RaceLogServletConstants.PARAMS_CLIENT_UUID + "=" + EventSendingServiceUtil.uuid), parser, handler);
             }
-        });
+        }, getContext());
     }
 
     @Override
@@ -171,7 +171,7 @@ public class OnlineDataManager extends DataManager {
                         "&"+RaceLogServletConstants.PARAMS_RACE_COLUMN_NAME+"=" + raceColumnName + 
                         "&"+RaceLogServletConstants.PARAMS_RACE_FLEET_NAME+"=" + fleetName), parser, handler);
             }
-        });
+        }, getContext());
     }
 
     @Override
@@ -197,7 +197,7 @@ public class OnlineDataManager extends DataManager {
                     + raceGroupName + "&" + RaceLogServletConstants.PARAMS_RACE_COLUMN_NAME + "=" + raceColumnName
                     + "&"+RaceLogServletConstants.PARAMS_RACE_FLEET_NAME+"=" + fleetName), parser, handler);
             }
-        });
+        }, getContext());
     }
 
     @Override
@@ -206,7 +206,7 @@ public class OnlineDataManager extends DataManager {
         return new DataLoaderCallbacks<Collection<Competitor>>(callback, new LoaderCreator<Collection<Competitor>>() {
             @Override
             public Loader<DataLoaderResult<Collection<Competitor>>> create(int id, Bundle args) throws Exception {
-                ExLog.i(TAG, String.format("Creating Competitor-OnlineDataLoader %d", id));
+                ExLog.i(context, TAG, String.format("Creating Competitor-OnlineDataLoader %d", id));
                 JsonDeserializer<Competitor> competitorDeserializer = new CompetitorJsonDeserializer(domainFactory.getCompetitorStore(),
                         new TeamJsonDeserializer(new PersonJsonDeserializer(new NationalityJsonDeserializer(domainFactory))), 
                         new BoatJsonDeserializer(new BoatClassJsonDeserializer(domainFactory)));
@@ -226,7 +226,7 @@ public class OnlineDataManager extends DataManager {
                                 + RaceLogServletConstants.PARAMS_RACE_COLUMN_NAME + "=" + raceColumnName + "&"
                                 + RaceLogServletConstants.PARAMS_RACE_FLEET_NAME + "=" + fleetName), parser, handler);
             }
-        });
+        }, getContext());
     }
 
     @Override
@@ -235,7 +235,7 @@ public class OnlineDataManager extends DataManager {
         return new DataLoaderCallbacks<DeviceConfiguration>(callback, new LoaderCreator<DeviceConfiguration>() {
             @Override
             public Loader<DataLoaderResult<DeviceConfiguration>> create(int id, Bundle args) throws Exception {
-                ExLog.i(TAG, String.format("Creating Configuration-OnlineDataLoader %d", id));
+                ExLog.i(context, TAG, String.format("Creating Configuration-OnlineDataLoader %d", id));
                 
                 DataHandler<DeviceConfiguration> handler = new NullDataHandler<DeviceConfiguration>();
                 DataParser<DeviceConfiguration> parser = new DeviceConfigurationParser(DeviceConfigurationJsonDeserializer.create());
@@ -248,6 +248,6 @@ public class OnlineDataManager extends DataManager {
                         new URL(preferences.getServerBaseURL() + "/sailingserver/rc/configuration?client="+ encodedIdentifier), 
                         parser, handler);
             }
-        });
+        }, getContext());
     }
 }

@@ -16,7 +16,7 @@ public class SendDelayedMessagesCaller implements Runnable {
     }
 
     public void run() {
-        ExLog.i(TAG, "The Message Sending Service is called to send possibly delayed intents");
+        ExLog.i(context, TAG, "The Message Sending Service is called to send possibly delayed intents");
         Intent sendSavedIntent = new Intent(SharedAppConstants.INTENT_ACTION_SEND_SAVED_INTENTS);
         context.startService(sendSavedIntent);
     }

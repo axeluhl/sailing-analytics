@@ -147,7 +147,7 @@ public class PositioningFragment extends RaceDialogFragment {
 
             public void onItemClick(AdapterView<?> arg0, View view, int position, long arg3) {
                 Competitor competitor = (Competitor) competitorsAdapter.getItem(position);
-                ExLog.i("RaceFinishingFragment", "Grid is clicked at position " + position + " for competitor "
+                ExLog.i(getActivity(), "RaceFinishingFragment", "Grid is clicked at position " + position + " for competitor "
                         + competitor.getName());
                 onCompetitorClickedOnGrid(competitor);
             }

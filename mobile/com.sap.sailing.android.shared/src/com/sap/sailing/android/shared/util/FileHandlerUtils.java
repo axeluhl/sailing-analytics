@@ -5,13 +5,15 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
 
+import android.content.Context;
+
 import com.sap.sailing.android.shared.logging.ExLog;
 
 public class FileHandlerUtils {
 
     private final static String TAG = FileHandlerUtils.class.getName();
 
-    public static String convertStreamToString(InputStream inputStream) {
+    public static String convertStreamToString(InputStream inputStream, Context context) {
         /*
          * To convert the InputStream to String we use the BufferedReader.readLine() method. We iterate until the
          * BufferedReader return null which means there's no more data to read. Each line will appended to a
@@ -26,12 +28,12 @@ public class FileHandlerUtils {
                 stringBuilder.append(line + "\n");
             }
         } catch (IOException e) {
-            ExLog.e(TAG, "In Method convertStreamToString while converting stream to string: " + e.getMessage());
+            ExLog.e(context, TAG, "In Method convertStreamToString while converting stream to string: " + e.getMessage());
         } finally {
             try {
                 inputStream.close();
             } catch (IOException e) {
-                ExLog.e(TAG, "In Method convertStreamToString while closing the input stream: " + e.getMessage());
+                ExLog.e(context, TAG, "In Method convertStreamToString while closing the input stream: " + e.getMessage());
             }
         }
         return stringBuilder.toString();

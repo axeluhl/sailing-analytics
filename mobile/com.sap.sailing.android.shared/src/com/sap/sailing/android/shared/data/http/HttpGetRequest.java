@@ -6,14 +6,16 @@ import java.io.InputStream;
 import java.net.HttpURLConnection;
 import java.net.URL;
 
+import android.content.Context;
+
 public class HttpGetRequest extends HttpRequest {
 
-    public HttpGetRequest(URL requestUrl) {
-        super(requestUrl);
+    public HttpGetRequest(URL requestUrl, Context context) {
+        super(requestUrl, context);
     }
 
-    public HttpGetRequest(URL url, HttpRequestProgressListener listener) {
-        super(url, listener);
+    public HttpGetRequest(URL url, HttpRequestProgressListener listener, Context context) {
+        super(url, listener, context);
     }
 
 

@@ -108,7 +108,7 @@ public class WindActivity extends SessionActivity implements CompassDirectionLis
                     finish();
                 } catch (NumberFormatException nfe) {
                     Toast.makeText(WindActivity.this, R.string.wind_speed_direction_not_a_valid_number, Toast.LENGTH_LONG).show();
-                    ExLog.i(this.getClass().getCanonicalName(), nfe.getMessage());
+                    ExLog.i(WindActivity.this, this.getClass().getCanonicalName(), nfe.getMessage());
                 }
             }
 

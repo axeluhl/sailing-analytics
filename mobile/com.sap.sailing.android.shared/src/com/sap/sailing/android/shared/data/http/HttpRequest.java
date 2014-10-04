@@ -12,6 +12,8 @@ import java.net.URL;
 
 import org.apache.http.HttpStatus;
 
+import android.content.Context;
+
 import com.sap.sailing.android.shared.logging.ExLog;
 
 public abstract class HttpRequest {
@@ -38,16 +40,18 @@ public abstract class HttpRequest {
 
     private final HttpRequestProgressListener listener;
     private final URL url;
+    private final Context context;
     private boolean isCancelled;
 
-    public HttpRequest(URL url) {
-        this(url, null);
+    public HttpRequest(URL url, Context context) {
+        this(url, null, context);
     }
 
-    public HttpRequest(URL url, HttpRequestProgressListener listener) {
+    public HttpRequest(URL url, HttpRequestProgressListener listener, Context context) {
         this.url = url;
         this.listener = listener;
         this.isCancelled = false;
+        this.context = context;
     }
 
     public boolean isCancelled() {
@@ -63,7 +67,7 @@ public abstract class HttpRequest {
      * You must close this stream when done.
      */
     public InputStream execute() throws IOException {
-        ExLog.i(TAG, String.format("(Request %d) Executing HTTP request on %s.", this.hashCode(), url));
+        ExLog.i(context, TAG, String.format("(Request %d) Executing HTTP request on %s.", this.hashCode(), url));
 
         HttpURLConnection connection = (HttpURLConnection) url.openConnection();
 
@@ -87,15 +91,15 @@ public abstract class HttpRequest {
             InputStream copiedResponseInputStream = readAndCopyResponse(connection, responseInputStream);
             
             if (copiedResponseInputStream != null) {
-                ExLog.i(TAG, String.format("(Request %d) HTTP request executed.", this.hashCode()));
+                ExLog.i(context, TAG, String.format("(Request %d) HTTP request executed.", this.hashCode()));
             } else {
-                ExLog.i(TAG, String.format("(Request %d) HTTP request aborted.", this.hashCode()));
+                ExLog.i(context, TAG, String.format("(Request %d) HTTP request aborted.", this.hashCode()));
             }
             
             connection.disconnect();
             return copiedResponseInputStream;
         } catch (IOException e) {
-            ExLog.i(TAG, String.format("(Request %d) HTTP request failed.", this.hashCode()));
+            ExLog.i(context, TAG, String.format("(Request %d) HTTP request failed.", this.hashCode()));
             throw e;
         } finally {
             if (responseInputStream != null) {

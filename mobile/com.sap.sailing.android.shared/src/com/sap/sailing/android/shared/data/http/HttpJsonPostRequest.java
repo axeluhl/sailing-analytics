@@ -8,17 +8,19 @@ import java.net.HttpURLConnection;
 import java.net.URL;
 import java.nio.charset.Charset;
 
+import android.content.Context;
+
 public class HttpJsonPostRequest extends HttpRequest {
     public final static String ContentType = "application/json;charset=UTF-8";
 
     private String requestBody;
 
-    public HttpJsonPostRequest(URL requestUrl) {
-        this(requestUrl, null);
+    public HttpJsonPostRequest(URL requestUrl, Context context) {
+        this(requestUrl, null, context);
     }
     
-    public HttpJsonPostRequest(URL requestUrl, String body) {
-        super(requestUrl);
+    public HttpJsonPostRequest(URL requestUrl, String body, Context context) {
+        super(requestUrl, context);
         this.requestBody = body;
     }
 

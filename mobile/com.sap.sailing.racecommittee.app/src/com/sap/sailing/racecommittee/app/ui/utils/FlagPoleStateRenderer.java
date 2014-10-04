@@ -40,7 +40,7 @@ public class FlagPoleStateRenderer {
         if (previousState != null && FlagPoleState.describesSameState(previousState, state)) {
             return;
         }
-        ExLog.i(FlagPoleStateRenderer.class.getSimpleName(), "Re-Rendering flags.");
+        ExLog.i(context, FlagPoleStateRenderer.class.getSimpleName(), "Re-Rendering flags.");
         previousState = state;
         
         displayedFlagsViewGroup.removeAllViews();

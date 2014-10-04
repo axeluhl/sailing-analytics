@@ -9,12 +9,14 @@ import java.io.InputStream;
 import java.net.HttpURLConnection;
 import java.net.URL;
 
+import android.content.Context;
+
 public class FileBasedHttpGetRequest extends HttpGetRequest {
 
     private final File outputFile;
 
-    public FileBasedHttpGetRequest(URL url, HttpRequestProgressListener listener, File outputFile) {
-        super(url, listener);
+    public FileBasedHttpGetRequest(URL url, HttpRequestProgressListener listener, File outputFile, Context context) {
+        super(url, listener, context);
         this.outputFile = outputFile;
     }
     

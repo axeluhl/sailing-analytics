@@ -50,9 +50,9 @@ public class MessagePersistenceManager {
 
     private void persistMessage(String url, String callbackPayload, String payload, String callbackClass) {
         String messageLine = getSerializedIntentForPersistence(url, callbackPayload, payload, callbackClass);
-        ExLog.i(TAG, String.format("Persisting message \"%s\".", messageLine));
+        ExLog.i(context, TAG, String.format("Persisting message \"%s\".", messageLine));
         if (persistedMessages.contains(messageLine)) {
-            ExLog.i(TAG, "The message already exists. Ignoring.");
+            ExLog.i(context, TAG, "The message already exists. Ignoring.");
             return;
         }
         saveMessage(messageLine);
@@ -79,7 +79,7 @@ public class MessagePersistenceManager {
 
     private void removeMessage(String url, String callbackPayload, String payload, String callbackClass) {
         if (!persistedMessages.isEmpty()) {
-            ExLog.i(TAG, String.format("Removing message \"%s\".", payload));
+            ExLog.i(context, TAG, String.format("Removing message \"%s\".", payload));
             String messageLine = getSerializedIntentForPersistence(url, callbackPayload, payload, callbackClass);
             removePersistedMessage(messageLine);
         }
@@ -97,7 +97,7 @@ public class MessagePersistenceManager {
         if (persistedMessages.contains(messageLine)) {
             persistedMessages.remove(messageLine);
             writePersistedMessagesToFile();
-            ExLog.i(TAG, "Message removed.");
+            ExLog.i(context, TAG, "Message removed.");
         }
     }
 
@@ -130,7 +130,7 @@ public class MessagePersistenceManager {
                     (Class<? extends ServerReplyCallback>) Class.forName(callbackClassString);
                     callbackClass = tmp;
                 } catch (ClassNotFoundException e) {
-                    ExLog.e(TAG, "Could not find class for callback name: " + callbackClassString);
+                    ExLog.e(context, TAG, "Could not find class for callback name: " + callbackClassString);
                 }
             }
             
@@ -145,7 +145,7 @@ public class MessagePersistenceManager {
                 delayedIntents.add(messageIntent);
             }
         }
-        ExLog.i(TAG, "Restored " + delayedIntents.size() + " messages");
+        ExLog.i(context, TAG, "Restored " + delayedIntents.size() + " messages");
         return delayedIntents;
     }
 
@@ -159,10 +159,10 @@ public class MessagePersistenceManager {
         try {
             inputStream = context.openFileInput(delayedMessagesFileName);
 
-            fileContent = FileHandlerUtils.convertStreamToString(inputStream);
+            fileContent = FileHandlerUtils.convertStreamToString(inputStream, context);
             inputStream.close();
         } catch (IOException e) {
-            ExLog.w(TAG, "In Method getFileContent(): " + e.getMessage() + " fileContent is empty");
+            ExLog.w(context, TAG, "In Method getFileContent(): " + e.getMessage() + " fileContent is empty");
         }
         return fileContent;
     }
@@ -170,7 +170,7 @@ public class MessagePersistenceManager {
     private void saveMessage(String messageLine) {
         persistedMessages.add(messageLine);
         writePersistedMessagesToFile();
-        ExLog.i(TAG, "Wrote message to file: " + messageLine);
+        ExLog.i(context, TAG, "Wrote message to file: " + messageLine);
     }
 
     private void writePersistedMessagesToFile() {
@@ -180,7 +180,7 @@ public class MessagePersistenceManager {
             newFileContent.append('\n');
         }
         writeToFile(newFileContent.toString(), Context.MODE_PRIVATE);
-        ExLog.i(TAG, "Wrote file content to file: " + newFileContent);
+        ExLog.i(context, TAG, "Wrote file content to file: " + newFileContent);
     }
 
     private void initializeFileAndPersistedMessages() {
@@ -193,10 +193,10 @@ public class MessagePersistenceManager {
                 }
             }
         } catch (FileNotFoundException e) {
-            ExLog.w(TAG, "persistence file not found in internal storage. The file will be created.");
+            ExLog.w(context, TAG, "persistence file not found in internal storage. The file will be created.");
             clearPersistedMessages();
         }
-        ExLog.i(TAG, "Initialized file");
+        ExLog.i(context, TAG, "Initialized file");
     }
 
     private void clearPersistedMessages() {
@@ -210,7 +210,7 @@ public class MessagePersistenceManager {
             outputStream.write(content.getBytes());
             outputStream.close();
         } catch (IOException e) {
-            ExLog.e(TAG, "In Method writeToFile: " + e.getMessage() + " with content " + content + " and mode " + mode);
+            ExLog.e(context, TAG, "In Method writeToFile: " + e.getMessage() + " with content " + content + " and mode " + mode);
         }
     }
 

@@ -26,6 +26,9 @@ import com.sap.sailing.racecommittee.app.domain.coursedesign.WindWardLeeWardCour
  * Wrapper for {@link SharedPreferences} for all hidden and non-hidden preferences and state variables.
  */
 public class AppPreferences extends SharedAppPreferences {
+    public Context getContext() {
+        return context;
+    }
 
     public static AppPreferences on(Context context) {
         return new AppPreferences(context);

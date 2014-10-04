@@ -24,10 +24,10 @@ public class EventRestorer implements MessageRestorer {
         String raceId = messageIntent.getExtras().getString(SharedAppConstants.CALLBACK_PAYLOAD);
         String serializedEventAsJson = messageIntent.getExtras().getString(SharedAppConstants.PAYLOAD);
         
-        ExLog.i(TAG, String.format("Trying to re-add event to race log of race %s.", raceId));
+        ExLog.i(context, TAG, String.format("Trying to re-add event to race log of race %s.", raceId));
         DataStore store = DataManager.create(context).getDataStore();
         if (!store.hasRace(raceId)) {
-            ExLog.w(TAG, String.format("There is no race %s.", raceId));
+            ExLog.w(context, TAG, String.format("There is no race %s.", raceId));
             return;
         }
         try {
@@ -35,14 +35,14 @@ public class EventRestorer implements MessageRestorer {
             RaceLogEvent event = deserializer.deserialize((JSONObject) new JSONParser().parse(serializedEventAsJson));
             boolean added = store.getRace(raceId).getRaceLog().add(event);
             if (added) {
-                ExLog.i(TAG, String.format("Event readded: %s", serializedEventAsJson));
+                ExLog.i(context, TAG, String.format("Event readded: %s", serializedEventAsJson));
             } else {
-                ExLog.i(TAG, "Event didn't need to be readded. Same event already in the log");
+                ExLog.i(context, TAG, "Event didn't need to be readded. Same event already in the log");
             }
         } catch (JsonDeserializationException e) {
-            ExLog.w(TAG, String.format("Error while readding event to race log: %s", e.toString()));
+            ExLog.w(context, TAG, String.format("Error while readding event to race log: %s", e.toString()));
         } catch (ParseException e) {
-            ExLog.w(TAG, String.format("Error while readding event to race log: %s", e.toString()));
+            ExLog.w(context, TAG, String.format("Error while readding event to race log: %s", e.toString()));
         }
     }
 

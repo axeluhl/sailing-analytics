@@ -43,7 +43,7 @@ public abstract class PrerequisiteRaceDialog<PrerequisiteType extends RacingProc
 
         if (isInPrerequisiteMode()) {
             if (prerequisite == null) {
-                ExLog.w(TAG, "Fragment not initialized correctly. Restored?");
+                ExLog.w(getActivity(), TAG, "Fragment not initialized correctly. Restored?");
                 this.dismissAllowingStateLoss();
             }
             setCancelable(false);

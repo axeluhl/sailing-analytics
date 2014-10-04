@@ -113,7 +113,7 @@ public class EditSetPreference extends DialogPreference {
     protected void onDialogClosed(boolean positiveResult) {
         if (positiveResult) {
             if (callChangeListener(new HashSet<String>(currentValue))) {
-                ExLog.i(TAG, "Storing result...");
+                ExLog.i(getContext(), TAG, "Storing result...");
                 persistStringSet(currentValue);
             }
         }

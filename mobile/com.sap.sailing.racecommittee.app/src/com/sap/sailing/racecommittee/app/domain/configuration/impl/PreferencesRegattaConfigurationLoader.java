@@ -74,7 +74,7 @@ public class PreferencesRegattaConfigurationLoader implements ConfigurationLoade
 
     @Override
     public void store() {
-        ExLog.i(TAG, "Storing new racing procedure configuration.");
+        ExLog.i(preferences.getContext(), TAG, "Storing new racing procedure configuration.");
         
         if (configuration.getDefaultRacingProcedureType() != null) {
             preferences.setDefaultRacingProcedureType(configuration.getDefaultRacingProcedureType());

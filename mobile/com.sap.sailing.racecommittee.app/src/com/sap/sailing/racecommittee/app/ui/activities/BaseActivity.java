@@ -87,23 +87,23 @@ public abstract class BaseActivity extends LoggableActivity {
     public boolean onOptionsItemSelected(MenuItem item) {
         switch (item.getItemId()) {
         case R.id.options_menu_settings:
-            ExLog.i(TAG, "Clicked SETTINGS.");
+            ExLog.i(this, TAG, "Clicked SETTINGS.");
             fadeActivity(SettingsActivity.class, false);
             return true;
         case R.id.options_menu_reload:
-            ExLog.i(TAG, "Clicked RESET.");
+            ExLog.i(this, TAG, "Clicked RESET.");
             InMemoryDataStore.INSTANCE.reset();
             return onReset();
         case R.id.options_menu_live:
-            ExLog.i(TAG, "Clicked LIVE.");
+            ExLog.i(this, TAG, "Clicked LIVE.");
             Toast.makeText(this, getLiveIconText(), Toast.LENGTH_LONG).show();
             return true;
         case R.id.options_menu_info:
-            ExLog.i(TAG, "Clicked INFO.");
+            ExLog.i(this, TAG, "Clicked INFO.");
             fadeActivity(SystemInformationActivity.class, false);
             return true;
         case android.R.id.home:
-            ExLog.i(TAG, "Clicked HOME.");
+            ExLog.i(this, TAG, "Clicked HOME.");
             return onHomeClicked();
         default:
             return super.onOptionsItemSelected(item);
@@ -119,7 +119,7 @@ public abstract class BaseActivity extends LoggableActivity {
     @Override
     public void onBackPressed() {
         super.onBackPressed();
-        ExLog.i(TAG, String.format("Back pressed on activity %s", this.getClass().getSimpleName()));
+        ExLog.i(this, TAG, String.format("Back pressed on activity %s", this.getClass().getSimpleName()));
     }
 
     protected boolean onHomeClicked() {

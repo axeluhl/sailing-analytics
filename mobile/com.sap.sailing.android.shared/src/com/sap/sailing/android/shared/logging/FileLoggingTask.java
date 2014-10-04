@@ -11,6 +11,7 @@ import java.util.Date;
 import java.util.Locale;
 import java.util.concurrent.BlockingQueue;
 
+import android.content.Context;
 import android.util.Log;
 
 import com.sap.sailing.android.shared.util.SharedAppConstants;
@@ -27,13 +28,16 @@ public class FileLoggingTask implements Runnable {
     private String logFileName;
     private File logFile;
     private BufferedWriter logWriter;
+    
+    private final Context context;
 
-    public FileLoggingTask(BlockingQueue<String> queue) {
+    public FileLoggingTask(BlockingQueue<String> queue, Context context) {
         this.queue = queue;
+        this.context = context.getApplicationContext();
     }
 
-    public FileLoggingTask() {
-        this.queue = null;
+    public FileLoggingTask(Context context) {
+        this(null, context);
     }
 
     public boolean tryStartFileLogging() {
@@ -45,7 +49,7 @@ public class FileLoggingTask implements Runnable {
             Format format = new SimpleDateFormat(logFileDateFormat, Locale.US);
             logFileName = String.format(template, format.format(new Date()));
 
-            File loggingDirectory = SharedAppConstants.getExternalApplicationFolder();
+            File loggingDirectory = SharedAppConstants.getExternalApplicationFolder(context);
             logFile = new File(loggingDirectory, logFileName);
 
             if (prepareFile(logFile)) {

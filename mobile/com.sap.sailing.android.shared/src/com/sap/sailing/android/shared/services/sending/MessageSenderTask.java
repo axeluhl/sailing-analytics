@@ -4,6 +4,7 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.net.URL;
 
+import android.content.Context;
 import android.content.Intent;
 import android.os.AsyncTask;
 import android.os.Bundle;
@@ -23,9 +24,11 @@ public class MessageSenderTask extends AsyncTask<Intent, Void, Util.Triple<Inten
     }
 
     private MessageSendingListener listener;
+    private Context context;
 
-    public MessageSenderTask(MessageSendingListener listener) {
+    public MessageSenderTask(MessageSendingListener listener, Context context) {
         this.listener = listener;
+        this.context = context;
     }
 
     @SuppressWarnings("unused")
@@ -44,10 +47,10 @@ public class MessageSenderTask extends AsyncTask<Intent, Void, Util.Triple<Inten
         }
         InputStream responseStream = null;
         try {
-            ExLog.i(TAG, "Posting message: " + payload);
-            HttpRequest post = new HttpJsonPostRequest(new URL(url), payload);
+            ExLog.i(context, TAG, "Posting message: " + payload);
+            HttpRequest post = new HttpJsonPostRequest(new URL(url), payload, context);
             responseStream = post.execute();
-            ExLog.i(TAG, "Post successful for the following message: " + payload);
+            ExLog.i(context, TAG, "Post successful for the following message: " + payload);
             result = new Util.Triple<Intent, Boolean, InputStream>(intent, true, responseStream);
         } catch (IOException e) {
             if (responseStream != null) {
@@ -55,7 +58,7 @@ public class MessageSenderTask extends AsyncTask<Intent, Void, Util.Triple<Inten
                     responseStream.close();
                 } catch (IOException ie) { }
             }
-            ExLog.e(TAG, String.format("Post not successful, exception occured: %s", e.toString()));
+            ExLog.e(context, TAG, String.format("Post not successful, exception occured: %s", e.toString()));
             result = new Util.Triple<Intent, Boolean, InputStream>(intent, false, null);
         }
         return result;

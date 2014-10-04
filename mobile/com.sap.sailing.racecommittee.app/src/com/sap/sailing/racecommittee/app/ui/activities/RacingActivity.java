@@ -87,7 +87,7 @@ public class RacingActivity extends SessionActivity implements RaceInfoListener 
 
             // Let's do the setup stuff only when the data is changed (or its the first time)
             if (lastSeenRaces != null && CollectionUtils.isEqualCollection(data, lastSeenRaces)) {
-                ExLog.i(TAG, "Same races are already loaded...");
+                ExLog.i(RacingActivity.this, TAG, "Same races are already loaded...");
             } else {
                 lastSeenRaces = data;
 
@@ -111,7 +111,7 @@ public class RacingActivity extends SessionActivity implements RaceInfoListener 
                         public void onClick(DialogInterface dialog, int id) {
                             setProgressBarIndeterminateVisibility(true);
 
-                            ExLog.i(TAG, "Issuing a reload of managed races");
+                            ExLog.i(RacingActivity.this, TAG, "Issuing a reload of managed races");
                             getLoaderManager().restartLoader(RacesLoaderId, null,
                                     dataManager.createRacesLoader(courseArea.getId(), RaceLoadClient.this));
                             dialog.cancel();
@@ -219,7 +219,7 @@ public class RacingActivity extends SessionActivity implements RaceInfoListener 
     private void loadRaces(final CourseArea courseArea) {
         setProgressBarIndeterminateVisibility(true);
 
-        ExLog.i(TAG, "Issuing loading of managed races from data manager");
+        ExLog.i(this, TAG, "Issuing loading of managed races from data manager");
         getLoaderManager().initLoader(RacesLoaderId, null,
                 dataManager.createRacesLoader(courseArea.getId(), new RaceLoadClient(courseArea)));
     }

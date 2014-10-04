@@ -29,7 +29,7 @@ public class FlagsBitmapCache {
         Pair<Flags, Flags> query = new Pair<Flags, Flags>(upperFlag, lowerFlag);
         Bitmap flagBitmap = bitmapCache.get(query);
         if (flagBitmap == null) {
-            ExLog.i(FlagsBitmapCache.class.getSimpleName(), 
+            ExLog.i(context, FlagsBitmapCache.class.getSimpleName(), 
                     String.format("Creating Bitmap for %s|%s flag.", upperFlag, lowerFlag));
             flagBitmap = createFlagBitmap(upperFlag, lowerFlag);
             bitmapCache.put(query, flagBitmap);

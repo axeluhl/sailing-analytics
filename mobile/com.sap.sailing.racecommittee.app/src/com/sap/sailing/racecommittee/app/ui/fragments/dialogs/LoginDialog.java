@@ -5,10 +5,11 @@ import android.content.DialogInterface;
 import android.content.DialogInterface.OnClickListener;
 import android.os.Bundle;
 
+import com.sap.sailing.android.shared.logging.ExLog;
 import com.sap.sailing.domain.racelog.RaceLogEventAuthor;
 import com.sap.sailing.domain.racelog.impl.RaceLogEventAuthorImpl;
 import com.sap.sailing.racecommittee.app.R;
-import com.sap.sailing.android.shared.logging.ExLog;
+import com.sap.sailing.racecommittee.app.logging.LogEvent;
 
 public class LoginDialog extends ActivityAttachedDialogFragment {
 
@@ -86,13 +87,13 @@ public class LoginDialog extends ActivityAttachedDialogFragment {
     @Override
     protected void onNegativeButton() {
         selectedLoginType = DefaultLoginType;
-        ExLog.i(ExLog.LOGIN_BUTTON_NEGATIVE, String.valueOf(selectedLoginType), getActivity());
+        ExLog.i(getActivity(), LogEvent.LOGIN_BUTTON_NEGATIVE, String.valueOf(selectedLoginType));
         super.onNegativeButton();
     }
 
     @Override
     protected void onPositiveButton() {
-        ExLog.i(ExLog.LOGIN_BUTTON_POSITIVE, String.valueOf(selectedLoginType), getActivity());
+        ExLog.i(getActivity(), LogEvent.LOGIN_BUTTON_POSITIVE, String.valueOf(selectedLoginType));
         super.onPositiveButton();
     }
 

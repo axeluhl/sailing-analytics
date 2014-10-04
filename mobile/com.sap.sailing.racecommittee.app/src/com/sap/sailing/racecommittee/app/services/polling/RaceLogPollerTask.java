@@ -5,6 +5,7 @@ import java.io.InputStream;
 import java.io.Serializable;
 import java.net.URL;
 
+import android.content.Context;
 import android.os.AsyncTask;
 
 import com.sap.sailing.android.shared.data.http.HttpJsonPostRequest;
@@ -19,9 +20,11 @@ public class RaceLogPollerTask extends AsyncTask<Util.Pair<Serializable, URL>, P
     }
     
     private final PollingResultListener listener;
+    private final Context context;
 
-    public RaceLogPollerTask(PollingResultListener listener) {
+    public RaceLogPollerTask(PollingResultListener listener, Context context) {
         this.listener = listener;
+        this.context = context;
     }
 
     @Override
@@ -31,7 +34,7 @@ public class RaceLogPollerTask extends AsyncTask<Util.Pair<Serializable, URL>, P
                 return null;
             }
             
-            HttpRequest request = new HttpJsonPostRequest(query.getB());
+            HttpRequest request = new HttpJsonPostRequest(query.getB(), context);
             InputStream responseStream = null;
             try {
                 responseStream = request.execute();

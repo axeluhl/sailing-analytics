@@ -31,10 +31,10 @@ public class RaceApplication extends Application {
     @Override
     public void onCreate() {
         super.onCreate();
-        ExLog.i(TAG, "Application is starting.");
+        ExLog.i(this, TAG, "Application is starting.");
         
         Thread.setDefaultUncaughtExceptionHandler(new LoggingExceptionHandler(Thread
-                .getDefaultUncaughtExceptionHandler()));
+                .getDefaultUncaughtExceptionHandler(), this));
         
         LifecycleLogger.enableLifecycleLogging(AppConstants.ENABLE_LIFECYCLE_LOGGING);
         stringContext = new StringContext(new WeakReference<Context>(getApplicationContext()));

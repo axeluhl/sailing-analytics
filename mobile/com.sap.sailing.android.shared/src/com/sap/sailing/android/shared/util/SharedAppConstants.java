@@ -3,16 +3,15 @@ package com.sap.sailing.android.shared.util;
 
 import java.io.File;
 
+import android.content.Context;
 import android.os.Environment;
 
-public class SharedAppConstants {
+import com.sap.sailing.android.shared.R;
 
-    public static final boolean IS_DATA_OFFLINE = false;
-    public static final boolean ENABLE_LIFECYCLE_LOGGING = false;
-    private final static String ApplicationFolder = "/racecommittee";
-    
-    public static File getExternalApplicationFolder() {
-        File dir = new File(Environment.getExternalStorageDirectory() + ApplicationFolder);
+public class SharedAppConstants {    
+    public static File getExternalApplicationFolder(Context context) {
+        String appFolder = context.getResources().getString(R.string.app_folder);
+        File dir = new File(Environment.getExternalStorageDirectory() + File.separator + appFolder);
         dir.mkdirs();
         return dir;
     }

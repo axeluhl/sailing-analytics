@@ -38,7 +38,7 @@ public abstract class AttachedDialogFragment extends LoggableDialogFragment {
         if (getHost() != null) {
             getHost().getListener().onDialogNegativeButton(this);
         } else {
-            ExLog.w(TAG, "Dialog host was null.");
+            ExLog.w(getActivity(), TAG, "Dialog host was null.");
         }
     }
 
@@ -46,7 +46,7 @@ public abstract class AttachedDialogFragment extends LoggableDialogFragment {
         if (getHost() != null) {
             getHost().getListener().onDialogPositiveButton(this);
         } else {
-            ExLog.w(TAG, "Dialog host was null.");
+            ExLog.w(getActivity(), TAG, "Dialog host was null.");
         }
     }
 

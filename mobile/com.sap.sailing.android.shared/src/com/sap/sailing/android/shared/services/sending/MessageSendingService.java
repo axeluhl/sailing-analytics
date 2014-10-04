@@ -139,7 +139,7 @@ public class MessageSendingService extends Service implements MessageSendingList
         if (id != null) {
             return id;
         }
-        ExLog.w(TAG, "Unable to extract message identifier from message intent.");
+        ExLog.w(this, TAG, "Unable to extract message identifier from message intent.");
         return null;
     }
     
@@ -157,7 +157,7 @@ public class MessageSendingService extends Service implements MessageSendingList
             MessageRestorer restorer = castedClass.getConstructor().newInstance();
             return new MessagePersistenceManager(this, restorer);
         } catch (Exception e) {
-            ExLog.e(TAG, "Could not find message persistence manager. See documentation of MessageSendingService"
+            ExLog.e(this, TAG, "Could not find message persistence manager. See documentation of MessageSendingService"
                     + "on how to register the persistence manager through the manifest. Error Message: " + e.getMessage());
             return null;
         }
@@ -182,10 +182,10 @@ public class MessageSendingService extends Service implements MessageSendingList
     @Override
     public int onStartCommand(Intent intent, int flags, int startId) {
         if (intent == null) {
-            ExLog.i(TAG, "Service is restarted.");
+            ExLog.i(this, TAG, "Service is restarted.");
             return START_STICKY;
         }
-        ExLog.i(TAG, "Service is called by following intent: " + intent.getAction());
+        ExLog.i(this, TAG, "Service is called by following intent: " + intent.getAction());
         handleCommand(intent, startId);
         // We want this service to continue running until it is explicitly
         // stopped, so return sticky.
@@ -202,9 +202,9 @@ public class MessageSendingService extends Service implements MessageSendingList
     }
 
     private void handleSendMessages(Intent intent) {
-        ExLog.i(TAG, String.format("Trying to send a message..."));
+        ExLog.i(this, TAG, String.format("Trying to send a message..."));
         if (!isConnected()) {
-            ExLog.i(TAG, String.format("Send aborted because there is no connection."));
+            ExLog.i(this, TAG, String.format("Send aborted because there is no connection."));
             persistenceManager.persistIntent(intent);
             ConnectivityChangedReceiver.enable(this);
             serviceLogger.onMessageSentFailed();
@@ -214,10 +214,10 @@ public class MessageSendingService extends Service implements MessageSendingList
     }
 
     private void handleDelayedMessages() {
-        ExLog.i(TAG, String.format("Trying to resend stored messages..."));
+        ExLog.i(this, TAG, String.format("Trying to resend stored messages..."));
         isHandlerSet = false;
         if (!isConnected()) {
-            ExLog.i(TAG, String.format("Resend aborted because there is no connection."));
+            ExLog.i(this, TAG, String.format("Resend aborted because there is no connection."));
             ConnectivityChangedReceiver.enable(this);
             serviceLogger.onMessageSentFailed();
         } else {
@@ -227,7 +227,7 @@ public class MessageSendingService extends Service implements MessageSendingList
 
     private void sendDelayedMessages() {
         List<Intent> delayedIntents = persistenceManager.restoreMessages();
-        ExLog.i(TAG, String.format("Resending %d messages...", delayedIntents.size()));
+        ExLog.i(this, TAG, String.format("Resending %d messages...", delayedIntents.size()));
         for (Intent intent : delayedIntents) {
             sendMessage(intent);
         }
@@ -235,14 +235,14 @@ public class MessageSendingService extends Service implements MessageSendingList
 
     private void sendMessage(Intent intent) {
         if (!SharedAppPreferences.on(this).isSendingActive()) {
-            ExLog.i(TAG, "Sending deactivated. Message will not be sent to server.");
+            ExLog.i(this, TAG, "Sending deactivated. Message will not be sent to server.");
         } else {
             Serializable messageId = getMessageId(intent);
             if (messageId != null && suppressedMessageIds.contains(messageId)) {
                 suppressedMessageIds.remove(messageId);
-                ExLog.i(TAG, String.format("Message %s is suppressed, won't be sent.", messageId));
+                ExLog.i(this, TAG, String.format("Message %s is suppressed, won't be sent.", messageId));
             } else {
-                MessageSenderTask task = new MessageSenderTask(this);
+                MessageSenderTask task = new MessageSenderTask(this, this);
                 task.execute(intent);
             }
         }
@@ -251,7 +251,7 @@ public class MessageSendingService extends Service implements MessageSendingList
     @Override
     public void onMessageSent(Intent intent, boolean success, InputStream inputStream) {
         if (!success) {
-            ExLog.w(TAG, "Error while posting intent to server. Will persist intent...");
+            ExLog.w(this, TAG, "Error while posting intent to server. Will persist intent...");
             persistenceManager.persistIntent(intent);
             if (!isHandlerSet) {
                 SendDelayedMessagesCaller delayedCaller = new SendDelayedMessagesCaller(this);
@@ -260,7 +260,7 @@ public class MessageSendingService extends Service implements MessageSendingList
             }
             serviceLogger.onMessageSentFailed();
         } else {
-            ExLog.i(TAG, "Message successfully sent.");
+            ExLog.i(this, TAG, "Message successfully sent.");
             if (persistenceManager.areIntentsDelayed()) {
                 persistenceManager.removeIntent(intent);
             }
@@ -273,7 +273,7 @@ public class MessageSendingService extends Service implements MessageSendingList
                 try {
                     callback = (ServerReplyCallback) Class.forName(callbackClassString).newInstance();
                 } catch (Exception e) {
-                    ExLog.e(TAG, "Error while passing server response to callback");
+                    ExLog.e(this, TAG, "Error while passing server response to callback");
                     e.printStackTrace();
                 }
             }

@@ -40,7 +40,7 @@ public class ConnectivityChangedReceiver extends BroadcastReceiver {
         ComponentName receiver = new ComponentName(context, ConnectivityChangedReceiver.class);
         PackageManager packageManager = context.getPackageManager();
         packageManager.setComponentEnabledSetting(receiver, PackageManager.COMPONENT_ENABLED_STATE_DISABLED, PackageManager.DONT_KILL_APP);
-        ExLog.w(TAG, "Regained connectivity. ConnectivityChangedReceiver disabled");
+        ExLog.w(context, TAG, "Regained connectivity. ConnectivityChangedReceiver disabled");
     }
 
     /**
@@ -51,7 +51,7 @@ public class ConnectivityChangedReceiver extends BroadcastReceiver {
         ComponentName receiver = new ComponentName(context, ConnectivityChangedReceiver.class);
         PackageManager packageManager = context.getPackageManager();
         packageManager.setComponentEnabledSetting(receiver, PackageManager.COMPONENT_ENABLED_STATE_ENABLED, PackageManager.DONT_KILL_APP);
-        ExLog.w(TAG, "Connectivity lost. ConnectivityChangedReceiver enabled");
+        ExLog.w(context, TAG, "Connectivity lost. ConnectivityChangedReceiver enabled");
     }
 
 }

@@ -49,11 +49,11 @@ public class RaceLogEventsCallback implements ServerReplyCallback {
     @Override
     public void processResponse(Context context, InputStream responseStream, String raceId) {
         ReadonlyDataManager dataManager = DataManager.create(context);
-        List<RaceLogEvent> eventsToAdd = parseResponse(dataManager, responseStream);
+        List<RaceLogEvent> eventsToAdd = parseResponse(context, dataManager, responseStream);
         addEvents(context, raceId, dataManager, eventsToAdd);
     }
 
-    protected List<RaceLogEvent> parseResponse(ReadonlyDataManager dataManager, InputStream responseStream) {
+    protected List<RaceLogEvent> parseResponse(Context context, ReadonlyDataManager dataManager, InputStream responseStream) {
         List<RaceLogEvent> eventsToAdd = new ArrayList<RaceLogEvent>();
         
         JSONParser parser = new JSONParser();
@@ -66,11 +66,11 @@ public class RaceLogEventsCallback implements ServerReplyCallback {
                     RaceLogEvent eventToAdd = deserializer.deserialize((JSONObject) o);
                     eventsToAdd.add(eventToAdd);
                 } catch (JsonDeserializationException e) {
-                    ExLog.e(TAG, "Error deserializing Race Log event:\n" + o);
+                    ExLog.e(context, TAG, "Error deserializing Race Log event:\n" + o);
                 }
             }
         } catch (Exception e) {
-            ExLog.e(TAG, "Error parsing server response");
+            ExLog.e(context, TAG, "Error parsing server response");
         }
 
         return eventsToAdd;
@@ -79,19 +79,19 @@ public class RaceLogEventsCallback implements ServerReplyCallback {
     private void addEvents(Context context, Serializable raceId, ReadonlyDataManager dataManager,
             List<RaceLogEvent> eventsToAdd) {
         if (eventsToAdd.isEmpty()) {
-            ExLog.i(TAG, "No server-side events to add for race " + raceId);
+            ExLog.i(context, TAG, "No server-side events to add for race " + raceId);
             return;
         }
         
-        ExLog.i(TAG, String.format("Server sent %d events to be added for race %s.", eventsToAdd.size(), raceId));
+        ExLog.i(context, TAG, String.format("Server sent %d events to be added for race %s.", eventsToAdd.size(), raceId));
 
         if (!dataManager.getDataStore().hasRace(raceId)) {
-            ExLog.w(TAG, "I have no race " + raceId);
+            ExLog.w(context, TAG, "I have no race " + raceId);
             return;
         }
         RaceLog raceLog = dataManager.getDataStore().getRace(raceId).getRaceLog();
         if (raceLog == null) {
-            ExLog.w(TAG, "Unable to retrieve race log for race " + raceId);
+            ExLog.w(context, TAG, "Unable to retrieve race log for race " + raceId);
             return;
         }
         
@@ -99,20 +99,20 @@ public class RaceLogEventsCallback implements ServerReplyCallback {
         if (context.bindService(new Intent(context, MessageSendingService.class), connection,
                 Context.BIND_AUTO_CREATE)) {
             // execution deferred until service is bound
-            ExLog.i(TAG, "Waiting for sending service to be bound.");
+            ExLog.i(context, TAG, "Waiting for sending service to be bound.");
         } else {
-            ExLog.e(TAG,"Unable to bind to sending service. Processing server response without suppressing received events...");
-            addEvents(eventsToAdd, raceLog, null);
+            ExLog.e(context, TAG,"Unable to bind to sending service. Processing server response without suppressing received events...");
+            addEvents(context, eventsToAdd, raceLog, null);
         }
     }
 
-    protected void addEvents(List<RaceLogEvent> eventsToAdd, RaceLog raceLog, MessageSendingService sendingService) {
+    protected void addEvents(Context context, List<RaceLogEvent> eventsToAdd, RaceLog raceLog, MessageSendingService sendingService) {
         for (RaceLogEvent eventToAddToRaceLog : eventsToAdd) {
             if (sendingService != null) {
                 sendingService.registerMessageForSuppression(eventToAddToRaceLog.getId());
             }
             raceLog.add(eventToAddToRaceLog);
-            ExLog.i(TAG, "Added event " + eventToAddToRaceLog.toString() + " to client's race log");
+            ExLog.i(context, TAG, "Added event " + eventToAddToRaceLog.toString() + " to client's race log");
         }
     }
 
@@ -136,8 +136,8 @@ public class RaceLogEventsCallback implements ServerReplyCallback {
         public void onServiceConnected(ComponentName className, IBinder service) {
             MessageSendingBinder binder = (MessageSendingBinder) service;
             sendingService = binder.getService();
-            ExLog.i(TAG, "Sending service is bound. Continue to process server response...");
-            addEvents(eventsToAdd, raceLog, sendingService);
+            ExLog.i(context, TAG, "Sending service is bound. Continue to process server response...");
+            addEvents(context, eventsToAdd, raceLog, sendingService);
             context.unbindService(this);
         }
 

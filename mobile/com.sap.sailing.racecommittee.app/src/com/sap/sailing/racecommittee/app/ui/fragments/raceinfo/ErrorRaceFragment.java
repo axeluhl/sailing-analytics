@@ -11,7 +11,7 @@ public class ErrorRaceFragment extends RaceFragment {
     @Override
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        ExLog.e(TAG, "Somehow the error race fragment got selected...");
+        ExLog.e(getActivity(), TAG, "Somehow the error race fragment got selected...");
     }
 
 }
