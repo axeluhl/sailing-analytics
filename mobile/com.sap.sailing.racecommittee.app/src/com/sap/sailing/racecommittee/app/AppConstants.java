@@ -1,10 +1,9 @@
 package com.sap.sailing.racecommittee.app;
 
 
-import com.sap.sailing.android.shared.util.SharedAppConstants;
 import com.sap.sailing.racecommittee.app.ui.fragments.raceinfo.SetStartTimeRaceFragment;
 
-public class AppConstants extends SharedAppConstants {
+public class AppConstants {
     public static final boolean IS_DATA_OFFLINE = false;
     public static final boolean ENABLE_LIFECYCLE_LOGGING = false;
 

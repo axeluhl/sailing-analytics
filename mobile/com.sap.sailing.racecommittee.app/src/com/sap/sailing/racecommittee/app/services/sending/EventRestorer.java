@@ -9,7 +9,7 @@ import android.content.Intent;
 
 import com.sap.sailing.android.shared.logging.ExLog;
 import com.sap.sailing.android.shared.services.sending.MessagePersistenceManager.MessageRestorer;
-import com.sap.sailing.android.shared.util.SharedAppConstants;
+import com.sap.sailing.android.shared.services.sending.MessageSendingService;
 import com.sap.sailing.domain.racelog.RaceLogEvent;
 import com.sap.sailing.racecommittee.app.data.DataManager;
 import com.sap.sailing.racecommittee.app.data.DataStore;
@@ -21,8 +21,8 @@ public class EventRestorer implements MessageRestorer {
 
     @Override
     public void restoreMessage(Context context, Intent messageIntent) {
-        String raceId = messageIntent.getExtras().getString(SharedAppConstants.CALLBACK_PAYLOAD);
-        String serializedEventAsJson = messageIntent.getExtras().getString(SharedAppConstants.PAYLOAD);
+        String raceId = messageIntent.getExtras().getString(MessageSendingService.CALLBACK_PAYLOAD);
+        String serializedEventAsJson = messageIntent.getExtras().getString(MessageSendingService.PAYLOAD);
         
         ExLog.i(context, TAG, String.format("Trying to re-add event to race log of race %s.", raceId));
         DataStore store = DataManager.create(context).getDataStore();

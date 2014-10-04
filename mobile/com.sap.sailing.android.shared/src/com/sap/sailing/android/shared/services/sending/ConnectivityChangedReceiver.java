@@ -12,7 +12,6 @@ import android.net.ConnectivityManager;
 import android.net.NetworkInfo;
 
 import com.sap.sailing.android.shared.logging.ExLog;
-import com.sap.sailing.android.shared.util.SharedAppConstants;
 
 public class ConnectivityChangedReceiver extends BroadcastReceiver {
     
@@ -26,7 +25,7 @@ public class ConnectivityChangedReceiver extends BroadcastReceiver {
         NetworkInfo networkInfo = (NetworkInfo)intent.getParcelableExtra(ConnectivityManager.EXTRA_NETWORK_INFO);
         if (!networkInfo.isConnected())
             return;
-        Intent sendSavedIntent = new Intent(SharedAppConstants.INTENT_ACTION_SEND_SAVED_INTENTS);
+        Intent sendSavedIntent = new Intent(MessageSendingService.INTENT_ACTION_SEND_SAVED_INTENTS);
         context.startService(sendSavedIntent);
 
         disable(context);

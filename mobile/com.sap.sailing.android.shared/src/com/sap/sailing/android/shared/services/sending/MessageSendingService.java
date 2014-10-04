@@ -19,12 +19,12 @@ import android.os.Binder;
 import android.os.Bundle;
 import android.os.Handler;
 import android.os.IBinder;
+import android.preference.PreferenceManager;
 
+import com.sap.sailing.android.shared.R;
 import com.sap.sailing.android.shared.logging.ExLog;
 import com.sap.sailing.android.shared.services.sending.MessagePersistenceManager.MessageRestorer;
 import com.sap.sailing.android.shared.services.sending.MessageSenderTask.MessageSendingListener;
-import com.sap.sailing.android.shared.util.SharedAppConstants;
-import com.sap.sailing.android.shared.util.SharedAppPreferences;
 
 /**
  * Service that handles sending messages to a webservice. Deals with an offline setting
@@ -50,13 +50,20 @@ import com.sap.sailing.android.shared.util.SharedAppPreferences;
  * 
  * Sending a message example:
  * <pre>{@code
- * Intent i = new Intent(SharedAppConstants.SEND_MESSAGE_ACTION);
- * i.putExtra(SharedAppConstants.PAYLOAD, JsonUtils.getObjectAsString('someEventObject'));
- * i.putExtra(SharedAppConstants.CALLBACK_PAYLOAD, 'raceuuid');
+ * Intent i = new Intent(SEND_MESSAGE_ACTION);
+ * i.putExtra(PAYLOAD, JsonUtils.getObjectAsString('someEventObject'));
+ * i.putExtra(CALLBACK_PAYLOAD, 'raceuuid');
  * context.startService(i);
  * }</pre>
  */
 public class MessageSendingService extends Service implements MessageSendingListener {
+    public final static String URL = "url";
+    public final static String PAYLOAD = "payload";
+    public final static String CALLBACK_CLASS = "callback";
+    public final static String CALLBACK_PAYLOAD = "callbackPayload"; // passed back to callback
+    public final static String MESSAGE_ID = "messageId";
+    public final static String INTENT_ACTION_SEND_SAVED_INTENTS = "com.sap.sailing.android.shared.action.sendSavedIntents";
+    public final static String INTENT_ACTION_SEND_MESSAGE = "com.sap.sailing.android.shared.action.sendMessage";
 
     protected final static String TAG = MessageSendingService.class.getName();
 
@@ -125,17 +132,17 @@ public class MessageSendingService extends Service implements MessageSendingList
 
     public static Intent createMessageIntent(Context context, String url, Serializable callbackPayload, Serializable messageId, String payload,
             Class<? extends ServerReplyCallback> callbackClass) {
-        Intent messageIntent = new Intent(SharedAppConstants.INTENT_ACTION_SEND_MESSAGE);
-        messageIntent.putExtra(SharedAppConstants.CALLBACK_PAYLOAD, callbackPayload);
-        messageIntent.putExtra(SharedAppConstants.MESSAGE_ID, messageId);
-        messageIntent.putExtra(SharedAppConstants.PAYLOAD, payload);
-        messageIntent.putExtra(SharedAppConstants.URL, url);
-        messageIntent.putExtra(SharedAppConstants.CALLBACK_CLASS, callbackClass == null ? null : callbackClass.getName());
+        Intent messageIntent = new Intent(INTENT_ACTION_SEND_MESSAGE);
+        messageIntent.putExtra(CALLBACK_PAYLOAD, callbackPayload);
+        messageIntent.putExtra(MESSAGE_ID, messageId);
+        messageIntent.putExtra(PAYLOAD, payload);
+        messageIntent.putExtra(URL, url);
+        messageIntent.putExtra(CALLBACK_CLASS, callbackClass == null ? null : callbackClass.getName());
         return messageIntent;
     }
 
     private Serializable getMessageId(Intent intent) {
-        Serializable id = intent.getSerializableExtra(SharedAppConstants.MESSAGE_ID);
+        Serializable id = intent.getSerializableExtra(MESSAGE_ID);
         if (id != null) {
             return id;
         }
@@ -194,9 +201,9 @@ public class MessageSendingService extends Service implements MessageSendingList
 
     private void handleCommand(Intent intent, int startId) {
         String action = intent.getAction();
-        if (action.equals(SharedAppConstants.INTENT_ACTION_SEND_SAVED_INTENTS)) {
+        if (action.equals(INTENT_ACTION_SEND_SAVED_INTENTS)) {
             handleDelayedMessages();
-        } else if (action.equals(SharedAppConstants.INTENT_ACTION_SEND_MESSAGE)) {
+        } else if (action.equals(INTENT_ACTION_SEND_MESSAGE)) {
             handleSendMessages(intent);
         }
     }
@@ -234,7 +241,9 @@ public class MessageSendingService extends Service implements MessageSendingList
     }
 
     private void sendMessage(Intent intent) {
-        if (!SharedAppPreferences.on(this).isSendingActive()) {
+        boolean sendingActive = PreferenceManager.getDefaultSharedPreferences(this).getBoolean(getString(R.string.preference_isSendingActive_key),
+                getResources().getBoolean(R.bool.preference_isSendingActive_default));
+        if (! sendingActive) {
             ExLog.i(this, TAG, "Sending deactivated. Message will not be sent to server.");
         } else {
             Serializable messageId = getMessageId(intent);
@@ -250,12 +259,14 @@ public class MessageSendingService extends Service implements MessageSendingList
 
     @Override
     public void onMessageSent(Intent intent, boolean success, InputStream inputStream) {
+        int resendMillis = PreferenceManager.getDefaultSharedPreferences(this).getInt(getString(R.string.preference_messageResendIntervalMillis_key),
+                getResources().getInteger(R.integer.preference_messageResendIntervalMillis_default));
         if (!success) {
             ExLog.w(this, TAG, "Error while posting intent to server. Will persist intent...");
             persistenceManager.persistIntent(intent);
             if (!isHandlerSet) {
                 SendDelayedMessagesCaller delayedCaller = new SendDelayedMessagesCaller(this);
-                handler.postDelayed(delayedCaller, SharedAppConstants.MESSAGE_RESEND_INTERVAL); // after 30 sec, try the sending again
+                handler.postDelayed(delayedCaller, resendMillis); // after 30 sec, try the sending again
                 isHandlerSet = true;
             }
             serviceLogger.onMessageSentFailed();
@@ -267,7 +278,7 @@ public class MessageSendingService extends Service implements MessageSendingList
             lastSuccessfulSend = Calendar.getInstance().getTime();
             serviceLogger.onMessageSentSuccessful();
             
-            String callbackClassString = intent.getStringExtra(SharedAppConstants.CALLBACK_CLASS);
+            String callbackClassString = intent.getStringExtra(CALLBACK_CLASS);
             ServerReplyCallback callback = null;
             if (callbackClassString != null) {
                 try {
@@ -278,7 +289,7 @@ public class MessageSendingService extends Service implements MessageSendingList
                 }
             }
             if (callback != null) {
-                String raceId = intent.getStringExtra(SharedAppConstants.CALLBACK_PAYLOAD);
+                String raceId = intent.getStringExtra(CALLBACK_PAYLOAD);
                 callback.processResponse(this, inputStream, raceId);
             }
         }

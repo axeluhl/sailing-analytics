@@ -4,7 +4,6 @@ import android.content.Context;
 import android.content.Intent;
 
 import com.sap.sailing.android.shared.logging.ExLog;
-import com.sap.sailing.android.shared.util.SharedAppConstants;
 
 public class SendDelayedMessagesCaller implements Runnable {
 
@@ -17,7 +16,7 @@ public class SendDelayedMessagesCaller implements Runnable {
 
     public void run() {
         ExLog.i(context, TAG, "The Message Sending Service is called to send possibly delayed intents");
-        Intent sendSavedIntent = new Intent(SharedAppConstants.INTENT_ACTION_SEND_SAVED_INTENTS);
+        Intent sendSavedIntent = new Intent(MessageSendingService.INTENT_ACTION_SEND_SAVED_INTENTS);
         context.startService(sendSavedIntent);
     }
 }

@@ -15,7 +15,6 @@ import android.os.Bundle;
 
 import com.sap.sailing.android.shared.logging.ExLog;
 import com.sap.sailing.android.shared.util.FileHandlerUtils;
-import com.sap.sailing.android.shared.util.SharedAppConstants;
 
 public class MessagePersistenceManager {
     
@@ -41,10 +40,10 @@ public class MessagePersistenceManager {
 
     public void persistIntent(Intent intent) {
         Bundle extras = intent.getExtras();
-        String callbackPayload = extras.getString(SharedAppConstants.CALLBACK_PAYLOAD);
-        String url = extras.getString(SharedAppConstants.URL);
-        String payload = extras.getString(SharedAppConstants.PAYLOAD);
-        String callbackClass = extras.getString(SharedAppConstants.CALLBACK_CLASS);
+        String callbackPayload = extras.getString(MessageSendingService.CALLBACK_PAYLOAD);
+        String url = extras.getString(MessageSendingService.URL);
+        String payload = extras.getString(MessageSendingService.PAYLOAD);
+        String callbackClass = extras.getString(MessageSendingService.CALLBACK_CLASS);
         persistMessage(url, callbackPayload, payload, callbackClass);
     }
 
@@ -70,10 +69,10 @@ public class MessagePersistenceManager {
 
     public void removeIntent(Intent intent) {
         Bundle extras = intent.getExtras();
-        String url = extras.getString(SharedAppConstants.URL);
-        String callbackPayload = extras.getString(SharedAppConstants.CALLBACK_PAYLOAD);
-        String payload = extras.getString(SharedAppConstants.PAYLOAD);
-        String callbackClass = extras.getString(SharedAppConstants.CALLBACK_CLASS);
+        String url = extras.getString(MessageSendingService.URL);
+        String callbackPayload = extras.getString(MessageSendingService.CALLBACK_PAYLOAD);
+        String payload = extras.getString(MessageSendingService.PAYLOAD);
+        String callbackClass = extras.getString(MessageSendingService.CALLBACK_CLASS);
         removeMessage(url, callbackPayload, payload, callbackClass);
     }
 

@@ -8,9 +8,9 @@ import java.util.Set;
 import android.content.Context;
 import android.content.SharedPreferences;
 import android.content.SharedPreferences.OnSharedPreferenceChangeListener;
+import android.preference.PreferenceManager;
 import android.provider.Settings.Secure;
 
-import com.sap.sailing.android.shared.util.SharedAppPreferences;
 import com.sap.sailing.domain.common.CourseDesignerMode;
 import com.sap.sailing.domain.common.racelog.Flags;
 import com.sap.sailing.domain.common.racelog.RacingProcedureType;
@@ -25,17 +25,34 @@ import com.sap.sailing.racecommittee.app.domain.coursedesign.WindWardLeeWardCour
 /**
  * Wrapper for {@link SharedPreferences} for all hidden and non-hidden preferences and state variables.
  */
-public class AppPreferences extends SharedAppPreferences {
+public class AppPreferences {
     public Context getContext() {
         return context;
     }
-
+    
     public static AppPreferences on(Context context) {
         return new AppPreferences(context);
     }
-    
+
     public static AppPreferences on(Context context, String preferenceName) {
         return new AppPreferences(context, preferenceName);
+    }
+
+    protected final SharedPreferences preferences;
+    protected final Context context;
+
+    protected AppPreferences(Context context) {
+        this.context = context;
+        this.preferences = PreferenceManager.getDefaultSharedPreferences(context);
+    }
+    
+    public AppPreferences(Context context, String preferenceName) {
+        this.context = context;
+        this.preferences = context.getSharedPreferences(preferenceName, Context.MODE_PRIVATE);
+    }
+
+    protected String key(int keyId) {
+        return context.getString(keyId);
     }
     
     public interface PollingActiveChangedListener {
@@ -51,14 +68,6 @@ public class AppPreferences extends SharedAppPreferences {
     private final static String HIDDEN_PREFERENCE_BOAT_CLASS = "boatClassPref";
     private final static String HIDDEN_PREFERENCE_COURSE_LAYOUT = "courseLayoutPref";
     private final static String HIDDEN_PREFERENCE_NUMBER_OF_ROUNDS = "numberOfRoundsPref";
-
-    private AppPreferences(Context context) {
-        super(context);
-    }
-    
-    public AppPreferences(Context context, String preferenceName) {
-        super(context, preferenceName);
-    }
 
     public String getDeviceIdentifier() {
         String identifier = preferences.getString(key(R.string.preference_identifier_key), "");
@@ -322,5 +331,15 @@ public class AppPreferences extends SharedAppPreferences {
         if (pollingActiveChangedListeners.isEmpty()) {
             preferences.unregisterOnSharedPreferenceChangeListener(pollingActiveChangedListener);
         }
+    }
+    
+    public boolean isSendingActive() {
+        return preferences.getBoolean(context.getResources().getString(R.string.preference_isSendingActive_key),
+                context.getResources().getBoolean(R.bool.preference_isSendingActive_default));
+    }
+    
+    public void setSendingActive(boolean activate) {
+        preferences.edit().putBoolean(context.getResources().getString(R.string.preference_isSendingActive_key),
+                activate).commit();
     }
 }

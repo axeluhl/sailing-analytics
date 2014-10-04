@@ -12,7 +12,6 @@ import android.os.Bundle;
 import com.sap.sailing.android.shared.data.http.HttpJsonPostRequest;
 import com.sap.sailing.android.shared.data.http.HttpRequest;
 import com.sap.sailing.android.shared.logging.ExLog;
-import com.sap.sailing.android.shared.util.SharedAppConstants;
 import com.sap.sse.common.Util;
 
 public class MessageSenderTask extends AsyncTask<Intent, Void, Util.Triple<Intent, Boolean, InputStream>> {
@@ -40,8 +39,8 @@ public class MessageSenderTask extends AsyncTask<Intent, Void, Util.Triple<Inten
             return new Util.Triple<Intent, Boolean, InputStream>(intent, false, null);
         }
         Bundle extras = intent.getExtras();
-        String payload = extras.getString(SharedAppConstants.PAYLOAD);
-        String url = extras.getString(SharedAppConstants.URL);
+        String payload = extras.getString(MessageSendingService.PAYLOAD);
+        String url = extras.getString(MessageSendingService.URL);
         if (payload == null || url == null) {
             return new Util.Triple<Intent, Boolean, InputStream>(intent, false, null);
         }

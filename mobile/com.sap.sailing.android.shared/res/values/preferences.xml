@@ -1,0 +1,8 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources xmlns:tools="http://schemas.android.com/tools">
+    <string name="preference_messageResendIntervalMillis_key">messageResendIntervalMillis</string>
+    <integer name="preference_messageResendIntervalMillis_default">30000</integer>
+    
+    <string name="preference_isSendingActive_key">isSendingActive</string>
+    <bool name="preference_isSendingActive_default">false</bool>
+</resources>
