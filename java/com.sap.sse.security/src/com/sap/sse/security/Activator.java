@@ -70,7 +70,7 @@ public class Activator implements BundleActivator {
                 try {
                     logger.info("Waiting for UserStore service...");
                     UserStore userStore = tracker.waitForService(0);
-                    logger.info("Obtained UserStore service");
+                    logger.info("Obtained UserStore service "+userStore);
                     createAndRegisterSecurityService(userStore);
                 } catch (InterruptedException e) {
                     logger.log(Level.SEVERE, "Interrupted while waiting for UserStore service", e);

@@ -75,6 +75,7 @@ public class SecurityServiceImpl  extends RemoteServiceServlet implements Securi
     }
     
     public SecurityServiceImpl(UserStore store) {
+        logger.info("Initializing Security Service with user store "+store);
         this.store = store;
         // Create default users if no users exist yet.
         if (store.getUserCollection().isEmpty()){
