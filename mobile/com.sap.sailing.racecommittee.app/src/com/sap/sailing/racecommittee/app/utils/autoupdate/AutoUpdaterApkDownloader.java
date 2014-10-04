@@ -4,10 +4,10 @@ import java.io.File;
 import java.io.InputStream;
 import java.net.URL;
 
-import com.sap.sailing.racecommittee.app.data.http.FileBasedHttpGetRequest;
-import com.sap.sailing.racecommittee.app.data.http.HttpRequest;
-import com.sap.sailing.racecommittee.app.data.http.HttpRequest.HttpRequestProgressListener;
-import com.sap.sailing.racecommittee.app.logging.ExLog;
+import com.sap.sailing.android.shared.data.http.FileBasedHttpGetRequest;
+import com.sap.sailing.android.shared.data.http.HttpRequest;
+import com.sap.sailing.android.shared.data.http.HttpRequest.HttpRequestProgressListener;
+import com.sap.sailing.android.shared.logging.ExLog;
 import com.sap.sailing.racecommittee.app.utils.autoupdate.AutoUpdaterChecker.AutoUpdaterState;
 
 public class AutoUpdaterApkDownloader extends AutoUpdaterDownloader<File> implements HttpRequestProgressListener {

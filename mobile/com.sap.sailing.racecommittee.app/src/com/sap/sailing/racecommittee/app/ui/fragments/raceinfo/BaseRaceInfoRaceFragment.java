@@ -14,7 +14,7 @@ import com.sap.sailing.domain.racelog.state.racingprocedure.RacingProcedure;
 import com.sap.sailing.domain.racelog.state.racingprocedure.ReadonlyRacingProcedure;
 import com.sap.sailing.domain.racelog.state.racingprocedure.impl.BaseRacingProcedureChangedListener;
 import com.sap.sailing.racecommittee.app.R;
-import com.sap.sailing.racecommittee.app.logging.ExLog;
+import com.sap.sailing.android.shared.logging.ExLog;
 import com.sap.sailing.racecommittee.app.ui.fragments.RaceFragment;
 import com.sap.sailing.racecommittee.app.ui.fragments.dialogs.RaceDialogFragment;
 import com.sap.sailing.racecommittee.app.ui.utils.CourseDesignerChooser;

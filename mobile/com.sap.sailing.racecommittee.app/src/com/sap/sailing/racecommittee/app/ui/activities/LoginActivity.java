@@ -24,7 +24,7 @@ import com.sap.sailing.racecommittee.app.data.OnlineDataManager;
 import com.sap.sailing.racecommittee.app.data.ReadonlyDataManager;
 import com.sap.sailing.racecommittee.app.data.clients.LoadClient;
 import com.sap.sailing.racecommittee.app.domain.configuration.impl.PreferencesDeviceConfigurationLoader;
-import com.sap.sailing.racecommittee.app.logging.ExLog;
+import com.sap.sailing.android.shared.logging.ExLog;
 import com.sap.sailing.racecommittee.app.ui.fragments.dialogs.AttachedDialogFragment;
 import com.sap.sailing.racecommittee.app.ui.fragments.dialogs.DialogListenerHost;
 import com.sap.sailing.racecommittee.app.ui.fragments.dialogs.LoginDialog;

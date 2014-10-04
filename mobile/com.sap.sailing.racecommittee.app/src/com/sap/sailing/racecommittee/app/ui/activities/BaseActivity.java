@@ -13,27 +13,28 @@ import android.view.MenuInflater;
 import android.view.MenuItem;
 import android.widget.Toast;
 
+import com.sap.sailing.android.shared.services.sending.MessageSendingService;
+import com.sap.sailing.android.shared.services.sending.MessageSendingService.MessageSendingBinder;
+import com.sap.sailing.android.shared.services.sending.MessageSendingService.MessageSendingServiceLogger;
 import com.sap.sailing.racecommittee.app.AppPreferences;
 import com.sap.sailing.racecommittee.app.R;
 import com.sap.sailing.racecommittee.app.RaceApplication;
 import com.sap.sailing.racecommittee.app.data.InMemoryDataStore;
-import com.sap.sailing.racecommittee.app.logging.ExLog;
+import com.sap.sailing.android.shared.logging.ExLog;
 import com.sap.sailing.racecommittee.app.services.sending.EventSendingService;
-import com.sap.sailing.racecommittee.app.services.sending.EventSendingService.EventSendingBinder;
-import com.sap.sailing.racecommittee.app.services.sending.EventSendingService.EventSendingServiceLogger;
 
 /**
  * Base activity for all race committee cockpit activities enabling basic menu functionality.
  */
 public abstract class BaseActivity extends LoggableActivity {
     
-    private class EventSendingServiceConnection implements ServiceConnection, EventSendingServiceLogger {
+    private class EventSendingServiceConnection implements ServiceConnection, MessageSendingServiceLogger {
         @Override
         public void onServiceConnected(ComponentName className, IBinder service) {
-            EventSendingBinder binder = (EventSendingBinder) service;
+            MessageSendingBinder binder = (MessageSendingBinder) service;
             sendingService = binder.getService();
             boundSendingService = true;
-            sendingService.setEventSendingServiceLogger(this);
+            sendingService.setMessageSendingServiceLogger(this);
             updateSendingServiceInformation();
         }
 
@@ -43,12 +44,12 @@ public abstract class BaseActivity extends LoggableActivity {
         }
 
         @Override
-        public void onEventSentSuccessful() {
+        public void onMessageSentSuccessful() {
             updateSendingServiceInformation();
         }
 
         @Override
-        public void onEventSentFailed() {
+        public void onMessageSentFailed() {
             updateSendingServiceInformation();
         }
     }
@@ -60,7 +61,7 @@ public abstract class BaseActivity extends LoggableActivity {
     protected MenuItem menuItemLive;
 
     protected boolean boundSendingService = false;
-    protected EventSendingService sendingService;
+    protected MessageSendingService sendingService;
     private EventSendingServiceConnection sendingServiceConnection;
     
     private String sendingServiceStatus = "";

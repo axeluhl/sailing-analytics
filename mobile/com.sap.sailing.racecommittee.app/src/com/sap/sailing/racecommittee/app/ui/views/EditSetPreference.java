@@ -21,7 +21,7 @@ import android.widget.Button;
 import android.widget.ListView;
 
 import com.sap.sailing.racecommittee.app.R;
-import com.sap.sailing.racecommittee.app.logging.ExLog;
+import com.sap.sailing.android.shared.logging.ExLog;
 import com.sap.sailing.racecommittee.app.ui.adapters.ArrayRemoveAdapter;
 
 public class EditSetPreference extends DialogPreference {

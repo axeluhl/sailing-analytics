@@ -7,7 +7,7 @@ import android.content.DialogInterface;
 import android.content.DialogInterface.OnClickListener;
 import android.os.Bundle;
 
-import com.sap.sailing.racecommittee.app.logging.ExLog;
+import com.sap.sailing.android.shared.logging.ExLog;
 
 public abstract class AttachedDialogFragment extends LoggableDialogFragment {
     private final static String TAG = AttachedDialogFragment.class.getName();

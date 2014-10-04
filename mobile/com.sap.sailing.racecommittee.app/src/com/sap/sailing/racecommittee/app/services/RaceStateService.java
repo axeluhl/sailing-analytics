@@ -32,7 +32,7 @@ import com.sap.sailing.racecommittee.app.R;
 import com.sap.sailing.racecommittee.app.data.DataManager;
 import com.sap.sailing.racecommittee.app.data.ReadonlyDataManager;
 import com.sap.sailing.racecommittee.app.domain.ManagedRace;
-import com.sap.sailing.racecommittee.app.logging.ExLog;
+import com.sap.sailing.android.shared.logging.ExLog;
 import com.sap.sailing.racecommittee.app.services.polling.RaceLogPoller;
 import com.sap.sailing.racecommittee.app.services.sending.RaceEventSender;
 import com.sap.sailing.racecommittee.app.ui.activities.LoginActivity;

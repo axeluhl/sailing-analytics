@@ -45,8 +45,8 @@ import com.sap.sailing.racecommittee.app.data.parsers.MarksDataParser;
 import com.sap.sailing.racecommittee.app.domain.ManagedRace;
 import com.sap.sailing.racecommittee.app.domain.ManagedRaceIdentifier;
 import com.sap.sailing.racecommittee.app.domain.configuration.impl.PreferencesRegattaConfigurationLoader;
-import com.sap.sailing.racecommittee.app.logging.ExLog;
-import com.sap.sailing.racecommittee.app.services.sending.EventSendingService;
+import com.sap.sailing.android.shared.logging.ExLog;
+import com.sap.sailing.racecommittee.app.services.sending.EventSendingServiceUtil;
 import com.sap.sailing.server.gateway.deserialization.JsonDeserializer;
 import com.sap.sailing.server.gateway.deserialization.coursedata.impl.ControlPointDeserializer;
 import com.sap.sailing.server.gateway.deserialization.coursedata.impl.CourseBaseDeserializer;
@@ -145,7 +145,7 @@ public class OnlineDataManager extends DataManager {
                 return new OnlineDataLoader<Collection<ManagedRace>>(context, new URL(preferences.getServerBaseURL()
                     + "/sailingserver/rc/racegroups?"+
                     RaceLogServletConstants.PARAM_COURSE_AREA_FILTER + "=" + courseAreaId.toString()+"&"+
-                    RaceLogServletConstants.PARAMS_CLIENT_UUID + "=" + EventSendingService.uuid), parser, handler);
+                    RaceLogServletConstants.PARAMS_CLIENT_UUID + "=" + EventSendingServiceUtil.uuid), parser, handler);
             }
         });
     }

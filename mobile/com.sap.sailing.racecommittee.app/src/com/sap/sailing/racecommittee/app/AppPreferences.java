@@ -8,9 +8,9 @@ import java.util.Set;
 import android.content.Context;
 import android.content.SharedPreferences;
 import android.content.SharedPreferences.OnSharedPreferenceChangeListener;
-import android.preference.PreferenceManager;
 import android.provider.Settings.Secure;
 
+import com.sap.sailing.android.shared.util.SharedAppPreferences;
 import com.sap.sailing.domain.common.CourseDesignerMode;
 import com.sap.sailing.domain.common.racelog.Flags;
 import com.sap.sailing.domain.common.racelog.RacingProcedureType;
@@ -25,7 +25,7 @@ import com.sap.sailing.racecommittee.app.domain.coursedesign.WindWardLeeWardCour
 /**
  * Wrapper for {@link SharedPreferences} for all hidden and non-hidden preferences and state variables.
  */
-public class AppPreferences {
+public class AppPreferences extends SharedAppPreferences {
 
     public static AppPreferences on(Context context) {
         return new AppPreferences(context);
@@ -39,8 +39,6 @@ public class AppPreferences {
         void onPollingActiveChanged(boolean isActive);
     }
 
-    private final static String HIDDEN_PREFERENCE_SENDING_ACTIVE = "sendingActivePref";
-
     private final static String HIDDEN_PREFERENCE_AUTHOR_NAME = "authorName";
     private final static String HIDDEN_PREFERENCE_AUTHOR_PRIORITY = "authorPriority";
 
@@ -51,34 +49,17 @@ public class AppPreferences {
     private final static String HIDDEN_PREFERENCE_COURSE_LAYOUT = "courseLayoutPref";
     private final static String HIDDEN_PREFERENCE_NUMBER_OF_ROUNDS = "numberOfRoundsPref";
 
-    private final SharedPreferences preferences;
-    private final Context context;
-
     private AppPreferences(Context context) {
-        this.context = context;
-        this.preferences = PreferenceManager.getDefaultSharedPreferences(context);
+        super(context);
     }
     
     public AppPreferences(Context context, String preferenceName) {
-        this.context = context;
-        this.preferences = context.getSharedPreferences(preferenceName, Context.MODE_PRIVATE);
-    }
-
-    private String key(int keyId) {
-        return context.getString(keyId);
+        super(context, preferenceName);
     }
 
     public String getDeviceIdentifier() {
         String identifier = preferences.getString(key(R.string.preference_identifier_key), "");
         return identifier.isEmpty() ? Secure.getString(context.getContentResolver(), Secure.ANDROID_ID) : identifier;
-    }
-
-    public boolean isSendingActive() {
-        return preferences.getBoolean(HIDDEN_PREFERENCE_SENDING_ACTIVE, false);
-    }
-    
-    public void setSendingActive(boolean activate) {
-        preferences.edit().putBoolean(HIDDEN_PREFERENCE_SENDING_ACTIVE, activate).commit();
     }
 
     public void setAuthor(RaceLogEventAuthor author) {

@@ -8,8 +8,8 @@ import android.content.Intent;
 import android.content.pm.PackageInfo;
 import android.content.pm.PackageManager.NameNotFoundException;
 
-import com.sap.sailing.racecommittee.app.logging.ExLog;
-import com.sap.sailing.racecommittee.app.logging.LifecycleLogger;
+import com.sap.sailing.android.shared.logging.ExLog;
+import com.sap.sailing.android.shared.logging.LifecycleLogger;
 import com.sap.sailing.racecommittee.app.utils.LoggingExceptionHandler;
 import com.sap.sailing.racecommittee.app.utils.PreferenceHelper;
 

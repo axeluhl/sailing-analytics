@@ -87,8 +87,8 @@
             android:name=".services.sending.EventSendingService"
             android:exported="false" >
             <intent-filter>
-                <action android:name="com.sap.sailing.racecommittee.app.action.sendSavedIntents" />
-                <action android:name="com.sap.sailing.racecommittee.app.action.sendEvent" />
+                <action android:name="com.sap.sailing.android.shared.action.sendSavedIntents" />
+                <action android:name="com.sap.sailing.android.shared.action.sendMessage" />
             </intent-filter>
         </service>
 

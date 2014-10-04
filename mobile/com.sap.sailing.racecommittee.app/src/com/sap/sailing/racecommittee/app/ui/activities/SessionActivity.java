@@ -9,7 +9,7 @@ import android.os.Bundle;
 
 import com.sap.sailing.racecommittee.app.AppConstants;
 import com.sap.sailing.racecommittee.app.R;
-import com.sap.sailing.racecommittee.app.logging.ExLog;
+import com.sap.sailing.android.shared.logging.ExLog;
 
 public abstract class SessionActivity extends BaseActivity {
 

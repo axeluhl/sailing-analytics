@@ -11,7 +11,7 @@ import android.widget.ImageButton;
 import com.sap.sailing.domain.common.racelog.Flags;
 import com.sap.sailing.racecommittee.app.AppConstants;
 import com.sap.sailing.racecommittee.app.R;
-import com.sap.sailing.racecommittee.app.logging.ExLog;
+import com.sap.sailing.android.shared.logging.ExLog;
 
 public class AbortTypeSelectionDialog extends RaceDialogFragment {
     private ImageButton apFlag;

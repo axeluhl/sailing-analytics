@@ -16,7 +16,7 @@ import android.net.Uri;
 import com.sap.sailing.racecommittee.app.AppConstants;
 import com.sap.sailing.racecommittee.app.AppPreferences;
 import com.sap.sailing.racecommittee.app.R;
-import com.sap.sailing.racecommittee.app.logging.ExLog;
+import com.sap.sailing.android.shared.logging.ExLog;
 import com.sap.sailing.racecommittee.app.ui.activities.SettingsActivity;
 import com.sap.sailing.racecommittee.app.ui.fragments.preference.GeneralPreferenceFragment;
 

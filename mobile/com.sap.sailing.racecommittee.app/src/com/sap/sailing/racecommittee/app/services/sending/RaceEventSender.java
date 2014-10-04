@@ -26,7 +26,7 @@ public class RaceEventSender implements RaceLogChangedListener {
     public void eventAdded(RaceLogEvent event) {
         JSONObject serializedEvent = serializer.serialize(event);
         service.startService(
-                EventSendingService.createEventIntent(service, race, event.getId(), serializedEvent.toJSONString(),
+                EventSendingServiceUtil.createEventIntent(service, race, event.getId(), serializedEvent.toJSONString(),
                         RaceLogEventsCallback.class));
     }
 

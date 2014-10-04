@@ -18,6 +18,8 @@ import android.view.Window;
 import android.widget.ArrayAdapter;
 import android.widget.Toast;
 
+import com.sap.sailing.android.shared.logging.ExLog;
+import com.sap.sailing.android.shared.util.CollectionUtils;
 import com.sap.sailing.domain.base.CourseArea;
 import com.sap.sailing.domain.racelog.RaceLogEventAuthor;
 import com.sap.sailing.racecommittee.app.AppConstants;
@@ -26,13 +28,11 @@ import com.sap.sailing.racecommittee.app.data.DataManager;
 import com.sap.sailing.racecommittee.app.data.ReadonlyDataManager;
 import com.sap.sailing.racecommittee.app.data.clients.LoadClient;
 import com.sap.sailing.racecommittee.app.domain.ManagedRace;
-import com.sap.sailing.racecommittee.app.logging.ExLog;
 import com.sap.sailing.racecommittee.app.ui.fragments.RaceFragment;
 import com.sap.sailing.racecommittee.app.ui.fragments.RaceInfoFragment;
 import com.sap.sailing.racecommittee.app.ui.fragments.lists.ManagedRaceListFragment;
 import com.sap.sailing.racecommittee.app.ui.fragments.lists.ManagedRaceListFragment.FilterMode;
 import com.sap.sailing.racecommittee.app.ui.fragments.raceinfo.RaceInfoListener;
-import com.sap.sailing.racecommittee.app.utils.CollectionUtils;
 
 public class RacingActivity extends SessionActivity implements RaceInfoListener {
     // private final static String TAG = RacingActivity.class.getName();

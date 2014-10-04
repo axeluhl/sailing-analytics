@@ -5,7 +5,7 @@ import android.content.Loader;
 import android.os.Bundle;
 
 import com.sap.sailing.racecommittee.app.data.clients.LoadClient;
-import com.sap.sailing.racecommittee.app.logging.ExLog;
+import com.sap.sailing.android.shared.logging.ExLog;
 
 /**
  * <p>

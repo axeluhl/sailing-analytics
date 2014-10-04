@@ -32,7 +32,7 @@ import com.sap.sailing.domain.racelog.state.racingprocedure.rrs26.impl.Startmode
 import com.sap.sailing.racecommittee.app.AppConstants;
 import com.sap.sailing.racecommittee.app.R;
 import com.sap.sailing.racecommittee.app.domain.ManagedRace;
-import com.sap.sailing.racecommittee.app.logging.ExLog;
+import com.sap.sailing.android.shared.logging.ExLog;
 import com.sap.sailing.racecommittee.app.ui.fragments.RaceFragment;
 import com.sap.sailing.racecommittee.app.ui.fragments.dialogs.AbortModeSelectionDialog;
 import com.sap.sailing.racecommittee.app.ui.fragments.dialogs.DatePickerFragment;

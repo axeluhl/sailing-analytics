@@ -15,7 +15,7 @@ import android.widget.Toast;
 
 import com.sap.sailing.racecommittee.app.R;
 import com.sap.sailing.racecommittee.app.RaceApplication;
-import com.sap.sailing.racecommittee.app.logging.ExLog;
+import com.sap.sailing.android.shared.logging.ExLog;
 
 public class AutoUpdaterChecker {
 

@@ -12,7 +12,7 @@ import android.net.ConnectivityManager;
 import android.net.NetworkInfo;
 
 import com.sap.sailing.racecommittee.app.AppConstants;
-import com.sap.sailing.racecommittee.app.logging.ExLog;
+import com.sap.sailing.android.shared.logging.ExLog;
 
 public class ConnectivityChangedReceiver extends BroadcastReceiver {
     

@@ -5,7 +5,7 @@ import java.util.Date;
 
 import android.util.Log;
 
-import com.sap.sailing.racecommittee.app.logging.FileLoggingTask;
+import com.sap.sailing.android.shared.logging.FileLoggingTask;
 
 public class LoggingExceptionHandler implements UncaughtExceptionHandler {
     

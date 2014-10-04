@@ -13,7 +13,7 @@ import com.sap.sailing.domain.common.racelog.Flags;
 import com.sap.sailing.domain.racelog.state.RaceState;
 import com.sap.sailing.racecommittee.app.AppConstants;
 import com.sap.sailing.racecommittee.app.R;
-import com.sap.sailing.racecommittee.app.logging.ExLog;
+import com.sap.sailing.android.shared.logging.ExLog;
 
 public class AbortModeSelectionDialog extends RaceDialogFragment {
     Flags abortFlag;

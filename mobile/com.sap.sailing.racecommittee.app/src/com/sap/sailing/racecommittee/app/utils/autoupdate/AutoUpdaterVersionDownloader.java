@@ -6,7 +6,7 @@ import java.io.InputStream;
 import java.net.URL;
 import java.nio.charset.Charset;
 
-import com.sap.sailing.racecommittee.app.data.http.HttpGetRequest;
+import com.sap.sailing.android.shared.data.http.HttpGetRequest;
 import com.sap.sailing.racecommittee.app.utils.autoupdate.AutoUpdaterChecker.AutoUpdaterState;
 import com.sap.sse.common.Util;
 
