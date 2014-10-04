@@ -6,6 +6,7 @@ import org.apache.shiro.SecurityUtils;
 import org.junit.BeforeClass;
 import org.junit.Test;
 
+import com.sap.sse.security.Activator;
 import com.sap.sse.security.SecurityServiceImpl;
 import com.sap.sse.security.UsernamePasswordRealm;
 import com.sap.sse.security.userstore.mongodb.UserStoreImpl;
@@ -17,6 +18,7 @@ public class LoginTest {
     public static void setUp(){
         UserStore store = new UserStoreImpl();
         UsernamePasswordRealm.setTestUserStore(store);
+        Activator.setTestUserStore(store);
         new SecurityServiceImpl(store);
     }
 

@@ -15,6 +15,20 @@ public class Activator implements BundleActivator {
     private static SecurityService securityService;
     private ServiceRegistration<?> registration;
 
+    /**
+     * In a non-OSGi test environment, having Shiro instantiate this class with a
+     * default constructor makes it difficult to get access to the user store
+     * implementation which may live in a bundle that this bundle has no direct
+     * access to. Therefore, test cases must set the UserStore implementation
+     * by invoking {@link #setTestUserStore} before the default constructor is
+     * invoked.
+     */
+    private static UserStore testUserStore;
+    
+    public static void setTestUserStore(UserStore theTestUserStore) {
+        testUserStore = theTestUserStore;
+    }
+    
     static BundleContext getContext() {
         return context;
     }
@@ -29,10 +43,15 @@ public class Activator implements BundleActivator {
      * @see org.osgi.framework.BundleActivator#start(org.osgi.framework.BundleContext)
      */
     public void start(BundleContext bundleContext) throws Exception {
-        BundleContext context = Activator.getContext();
+        context = bundleContext;
         ServiceReference<?> serviceReference = context.
                 getServiceReference(UserStore.class.getName());
-        UserStore store = (UserStore) context.getService(serviceReference);
+        final UserStore store;
+        if (serviceReference == null) {
+            store = testUserStore;
+        } else {
+            store = (UserStore) context.getService(serviceReference);
+        }
         securityService = new SecurityServiceImpl(store);
         registration = context.registerService(SecurityService.class.getName(),
                 securityService, null);
