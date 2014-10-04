@@ -9,4 +9,26 @@
   </parent>
   <artifactId>com.sap.sse.security.test</artifactId>
   <packaging>eclipse-test-plugin</packaging>
+
+<build>
+<plugins>
+<plugin>
+  <groupId>org.eclipse.tycho</groupId>
+  <artifactId>tycho-surefire-plugin</artifactId>
+  <configuration>
+    <dependencies>
+      <dependency>
+        <type>p2-installable-unit</type>
+        <artifactId>com.sap.sse.security.userstore.mongodb</artifactId>
+      </dependency>
+      <dependency>
+        <type>p2-installable-unit</type>
+        <artifactId>com.sap.sse.security</artifactId>
+      </dependency>
+    </dependencies>
+  </configuration>
+</plugin>
+</plugins>
+</build>
+
 </project>

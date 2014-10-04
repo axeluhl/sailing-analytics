@@ -1,16 +1,18 @@
 package com.sap.sse.security;
 
+import java.util.logging.Level;
 import java.util.logging.Logger;
 
 import org.osgi.framework.BundleActivator;
 import org.osgi.framework.BundleContext;
-import org.osgi.framework.ServiceReference;
 import org.osgi.framework.ServiceRegistration;
+import org.osgi.util.tracker.ServiceTracker;
 
 import com.sap.sse.security.userstore.shared.UserStore;
 
 public class Activator implements BundleActivator {
-
+    private static final Logger logger = Logger.getLogger(Activator.class.getName());
+    
     private static BundleContext context;
     private static SecurityService securityService;
     private ServiceRegistration<?> registration;
@@ -27,6 +29,7 @@ public class Activator implements BundleActivator {
     
     public static void setTestUserStore(UserStore theTestUserStore) {
         testUserStore = theTestUserStore;
+        UsernamePasswordRealm.setTestUserStore(theTestUserStore);
     }
     
     static BundleContext getContext() {
@@ -37,25 +40,43 @@ public class Activator implements BundleActivator {
         return securityService;
     }
 
-    /*
-     * (non-Javadoc)
-     * 
-     * @see org.osgi.framework.BundleActivator#start(org.osgi.framework.BundleContext)
+    /**
+     * If no {@link #testUserStore} is available, start looking for a {@link UserStore} service in a background thread.
+     * As soon as a service reference for a {@link UserStore} implementation becomes available in the service registry.
+     * If a {@link UserStore} has been found, one way or another, the {@link SecurityService} is created and
+     * registered as an OSGi service.
      */
     public void start(BundleContext bundleContext) throws Exception {
-        context = bundleContext;
-        ServiceReference<?> serviceReference = context.
-                getServiceReference(UserStore.class.getName());
-        final UserStore store;
-        if (serviceReference == null) {
-            store = testUserStore;
+        if (testUserStore != null) {
+            createAndRegisterSecurityService(testUserStore);
         } else {
-            store = (UserStore) context.getService(serviceReference);
+            waitForUserStoreService(bundleContext);
         }
+    }
+
+    private void createAndRegisterSecurityService(UserStore store) {
         securityService = new SecurityServiceImpl(store);
         registration = context.registerService(SecurityService.class.getName(),
                 securityService, null);
         Logger.getLogger(Activator.class.getName()).info("Security Service registered.");
+    }
+
+    private void waitForUserStoreService(BundleContext bundleContext) {
+        context = bundleContext;
+        final ServiceTracker<UserStore, UserStore> tracker = new ServiceTracker<>(bundleContext, UserStore.class, /* customizer */ null);
+        new Thread("ServiceTracker waiting for UserStore service") {
+            @Override
+            public void run() {
+                try {
+                    logger.info("Waiting for UserStore service...");
+                    UserStore userStore = tracker.waitForService(0);
+                    logger.info("Obtained UserStore service");
+                    createAndRegisterSecurityService(userStore);
+                } catch (InterruptedException e) {
+                    logger.log(Level.SEVERE, "Interrupted while waiting for UserStore service", e);
+                }
+            }
+        }.start();
     }
 
     /*

@@ -24,7 +24,6 @@ public class Activator implements BundleActivator {
      */
     public void start(BundleContext bundleContext) throws Exception {
         Activator.context = bundleContext;
-        
         registration = context.registerService(UserStore.class.getName(),
                 new UserStoreImpl(), null);
         Logger.getLogger(Activator.class.getName()).info("User store registered.");
