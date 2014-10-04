@@ -60,9 +60,9 @@ public abstract class MessagePersistenceManager {
      */
     private String getSerializedIntentForPersistence(String url, String callbackPayload, 
             String payload, String callbackClass) {
-        String eventLine = String.format("%s;%s;%s;%s", callbackPayload, URLEncoder.encode(payload), 
+        String messageLine = String.format("%s;%s;%s;%s", callbackPayload, URLEncoder.encode(payload), 
                 url, callbackClass);
-        return eventLine;
+        return messageLine;
     }
 
     public void removeIntent(Intent intent) {
@@ -83,19 +83,16 @@ public abstract class MessagePersistenceManager {
     }
     
     /**
-     * Removes all pending events and clears the persistence file.
+     * Removes all pending messages and clears the persistence file.
      */
     public synchronized void removeAllMessages() {
         persistedMessages.clear();
         writePersistedMessagesToFile();
     }
 
-    /**
-     * @param eventLine
-     */
-    private void removePersistedMessage(String eventLine) {
-        if (persistedMessages.contains(eventLine)) {
-            persistedMessages.remove(eventLine);
+    private void removePersistedMessage(String messageLine) {
+        if (persistedMessages.contains(messageLine)) {
+            persistedMessages.remove(messageLine);
             writePersistedMessagesToFile();
             ExLog.i(TAG, "Message removed.");
         }
@@ -132,8 +129,8 @@ public abstract class MessagePersistenceManager {
                 }
             }
             
-            // We are passing no event id, because we know it used to suppress event sending and
-            // we want this event to be sent.
+            // We are passing no message id, because we know it used to suppress message sending and
+            // we want this message to be sent.
             Intent messageIntent = MessageSendingService.createMessageIntent(context, url, callbackPayload,
                     null, payload, callbackClass);
             
@@ -165,16 +162,16 @@ public abstract class MessagePersistenceManager {
         return fileContent;
     }
 
-    private void saveMessage(String eventLine) {
-        persistedMessages.add(eventLine);
+    private void saveMessage(String messageLine) {
+        persistedMessages.add(messageLine);
         writePersistedMessagesToFile();
-        ExLog.i(TAG, "Wrote event to file: " + eventLine);
+        ExLog.i(TAG, "Wrote message to file: " + messageLine);
     }
 
     private void writePersistedMessagesToFile() {
         StringBuilder newFileContent = new StringBuilder();
-        for (String persistedEvent : persistedMessages) {
-            newFileContent.append(persistedEvent);
+        for (String persistedMessage : persistedMessages) {
+            newFileContent.append(persistedMessage);
             newFileContent.append('\n');
         }
         writeToFile(newFileContent.toString(), Context.MODE_PRIVATE);
@@ -184,20 +181,20 @@ public abstract class MessagePersistenceManager {
     private void initializeFileAndPersistedMessages() {
         try {
             String fileContent = getFileContent();
-            String[] eventLines = fileContent.split("\n");
-            for (String eventLine : eventLines) {
-                if (!eventLine.isEmpty()) {
-                    persistedMessages.add(eventLine);
+            String[] messageLines = fileContent.split("\n");
+            for (String messageLine : messageLines) {
+                if (!messageLine.isEmpty()) {
+                    persistedMessages.add(messageLine);
                 }
             }
         } catch (FileNotFoundException e) {
             ExLog.w(TAG, "persistence file not found in internal storage. The file will be created.");
-            clearPersistedEvents();
+            clearPersistedMessages();
         }
         ExLog.i(TAG, "Initialized file");
     }
 
-    private void clearPersistedEvents() {
+    private void clearPersistedMessages() {
         persistedMessages.clear();
         writePersistedMessagesToFile();
     }

@@ -23,7 +23,7 @@ import com.sap.sailing.android.shared.util.SharedAppConstants;
 import com.sap.sailing.android.shared.util.SharedAppPreferences;
 
 /*
- * Sending an event to the webservice
+ * Sending a message to the webservice
  * 
  * Usage:
  * 
@@ -110,7 +110,7 @@ public abstract class MessageSendingService extends Service implements MessageSe
         return messageIntent;
     }
 
-    private Serializable getEventId(Intent intent) {
+    private Serializable getMessageId(Intent intent) {
         Serializable id = intent.getSerializableExtra(SharedAppConstants.MESSAGE_ID);
         if (id != null) {
             return id;
@@ -193,12 +193,12 @@ public abstract class MessageSendingService extends Service implements MessageSe
 
     private void sendMessage(Intent intent) {
         if (!SharedAppPreferences.on(this).isSendingActive()) {
-            ExLog.i(TAG, "Sending deactivated. Event will not be sent to server.");
+            ExLog.i(TAG, "Sending deactivated. Message will not be sent to server.");
         } else {
-            Serializable eventId = getEventId(intent);
-            if (eventId != null && suppressedMessageIds.contains(eventId)) {
-                suppressedMessageIds.remove(eventId);
-                ExLog.i(TAG, String.format("Event %s is suppressed, won't be sent.", eventId));
+            Serializable messageId = getMessageId(intent);
+            if (messageId != null && suppressedMessageIds.contains(messageId)) {
+                suppressedMessageIds.remove(messageId);
+                ExLog.i(TAG, String.format("Message %s is suppressed, won't be sent.", messageId));
             } else {
                 MessageSenderTask task = new MessageSenderTask(this);
                 task.execute(intent);
@@ -207,7 +207,7 @@ public abstract class MessageSendingService extends Service implements MessageSe
     }
 
     @Override
-    public void onEventSent(Intent intent, boolean success, InputStream inputStream) {
+    public void onMessageSent(Intent intent, boolean success, InputStream inputStream) {
         if (!success) {
             ExLog.w(TAG, "Error while posting intent to server. Will persist intent...");
             persistenceManager.persistIntent(intent);
@@ -218,7 +218,7 @@ public abstract class MessageSendingService extends Service implements MessageSe
             }
             serviceLogger.onMessageSentFailed();
         } else {
-            ExLog.i(TAG, "Event successfully sent.");
+            ExLog.i(TAG, "Message successfully sent.");
             if (persistenceManager.areIntentsDelayed()) {
                 persistenceManager.removeIntent(intent);
             }

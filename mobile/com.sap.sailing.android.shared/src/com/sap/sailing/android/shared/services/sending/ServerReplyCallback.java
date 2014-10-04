@@ -6,7 +6,7 @@ import android.content.Context;
 import android.content.Intent;
 
 /**
- * This callback is used to attach an operation to the sending of a {@link RaceLogEvent}, so
+ * This callback is used to attach an operation to the sending of a message, so
  * that the server reply to the performed POST request can be evaluated.
  * 
  * Important: As the callback needs to be passed around in an {@link Intent} and also written

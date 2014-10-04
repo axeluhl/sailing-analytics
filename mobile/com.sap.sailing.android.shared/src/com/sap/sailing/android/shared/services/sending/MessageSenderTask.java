@@ -19,7 +19,7 @@ public class MessageSenderTask extends AsyncTask<Intent, Void, Util.Triple<Inten
     private static String TAG = MessageSenderTask.class.getName();
 
     public interface MessageSendingListener {
-        public void onEventSent(Intent intent, boolean success, InputStream inputStream);
+        public void onMessageSent(Intent intent, boolean success, InputStream inputStream);
     }
 
     private MessageSendingListener listener;
@@ -37,17 +37,17 @@ public class MessageSenderTask extends AsyncTask<Intent, Void, Util.Triple<Inten
             return new Util.Triple<Intent, Boolean, InputStream>(intent, false, null);
         }
         Bundle extras = intent.getExtras();
-        String serializedEventAsJson = extras.getString(SharedAppConstants.PAYLOAD);
+        String payload = extras.getString(SharedAppConstants.PAYLOAD);
         String url = extras.getString(SharedAppConstants.URL);
-        if (serializedEventAsJson == null || url == null) {
+        if (payload == null || url == null) {
             return new Util.Triple<Intent, Boolean, InputStream>(intent, false, null);
         }
         InputStream responseStream = null;
         try {
-            ExLog.i(TAG, "Posting event: " + serializedEventAsJson);
-            HttpRequest post = new HttpJsonPostRequest(new URL(url), serializedEventAsJson);
+            ExLog.i(TAG, "Posting message: " + payload);
+            HttpRequest post = new HttpJsonPostRequest(new URL(url), payload);
             responseStream = post.execute();
-            ExLog.i(TAG, "Post successful for the following event: " + serializedEventAsJson);
+            ExLog.i(TAG, "Post successful for the following message: " + payload);
             result = new Util.Triple<Intent, Boolean, InputStream>(intent, true, responseStream);
         } catch (IOException e) {
             if (responseStream != null) {
@@ -64,7 +64,7 @@ public class MessageSenderTask extends AsyncTask<Intent, Void, Util.Triple<Inten
     @Override
     protected void onPostExecute(Util.Triple<Intent, Boolean, InputStream> resultTriple) {
         super.onPostExecute(resultTriple);
-        listener.onEventSent(resultTriple.getA(), resultTriple.getB(), resultTriple.getC());
+        listener.onMessageSent(resultTriple.getA(), resultTriple.getB(), resultTriple.getC());
     }
 
 }
