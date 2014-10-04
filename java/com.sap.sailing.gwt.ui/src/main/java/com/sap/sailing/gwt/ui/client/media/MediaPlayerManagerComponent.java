@@ -90,6 +90,9 @@ public class MediaPlayerManagerComponent implements Component<Void>, PlayStateLi
         this.raceTimer = raceTimer;
         this.raceTimer.addPlayStateListener(this);
         this.raceTimer.addTimeListener(this);
+        this.playSpeedFactorChanged(raceTimer.getPlaySpeedFactor());
+        this.timeChanged(raceTimer.getTime(), this.currentRaceTime);
+        this.playStateChanged(raceTimer.getPlayState(), raceTimer.getPlayMode());
         this.mediaService = mediaService;
         mediaService.getMediaTracksForRace(this.getCurrentRace(), getAssignedMediaCallback());
         mediaService.getMediaTracksInTimeRange(this.getCurrentRace(), getOverlappingMediaCallback());
