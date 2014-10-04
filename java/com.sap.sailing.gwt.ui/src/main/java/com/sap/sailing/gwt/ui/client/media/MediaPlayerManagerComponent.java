@@ -76,9 +76,6 @@ public class MediaPlayerManagerComponent implements Component<Void>, PlayStateLi
     private final UserDTO user;
     private boolean autoSelectMedia;
 
-    private Date currentRaceTime;
-    private double currentPlaybackSpeed = 1.0d;
-    private PlayStates currentPlayState = PlayStates.Paused;
     private PlayerChangeListener playerChangeListener;
 
     public MediaPlayerManagerComponent(RegattaAndRaceIdentifier selectedRaceIdentifier,
@@ -91,7 +88,7 @@ public class MediaPlayerManagerComponent implements Component<Void>, PlayStateLi
         this.raceTimer.addPlayStateListener(this);
         this.raceTimer.addTimeListener(this);
         this.playSpeedFactorChanged(raceTimer.getPlaySpeedFactor());
-        this.timeChanged(raceTimer.getTime(), this.currentRaceTime);
+        this.timeChanged(raceTimer.getTime(), null);
         this.playStateChanged(raceTimer.getPlayState(), raceTimer.getPlayMode());
         this.mediaService = mediaService;
         mediaService.getMediaTracksForRace(this.getCurrentRace(), getAssignedMediaCallback());
@@ -193,10 +190,9 @@ public class MediaPlayerManagerComponent implements Component<Void>, PlayStateLi
 
     @Override
     public void playStateChanged(PlayStates playState, PlayModes playMode) {
-        this.currentPlayState = playState;
         switch (playMode) {
         case Replay:
-            switch (this.currentPlayState) {
+            switch (this.raceTimer.getPlayState()) {
             case Playing:
                 startPlaying();
                 break;
@@ -217,13 +213,12 @@ public class MediaPlayerManagerComponent implements Component<Void>, PlayStateLi
 
     @Override
     public void playSpeedFactorChanged(double newPlaySpeedFactor) {
-        this.currentPlaybackSpeed = newPlaySpeedFactor;
         if (isStandaloneAudio()) {// only if audio player isn't one of the video players anyway
-            activeAudioPlayer.setPlaybackSpeed(this.currentPlaybackSpeed);
+            activeAudioPlayer.setPlaybackSpeed(newPlaySpeedFactor);
         }
         for (VideoContainer videoContainer : activeVideoContainers.values()) {
             VideoPlayer videoPlayer = videoContainer.getVideoPlayer();
-            videoPlayer.setPlaybackSpeed(this.currentPlaybackSpeed);
+            videoPlayer.setPlaybackSpeed(newPlaySpeedFactor);
         }
     }
 
@@ -263,15 +258,14 @@ public class MediaPlayerManagerComponent implements Component<Void>, PlayStateLi
 
     @Override
     public void timeChanged(Date newRaceTime, Date oldRaceTime) {
-        this.currentRaceTime = newRaceTime;
         if (isStandaloneAudio()) { // only if audio player isn't one of the video players anyway
             ensurePlayState(activeAudioPlayer);
-            activeAudioPlayer.raceTimeChanged(this.currentRaceTime);
+            activeAudioPlayer.raceTimeChanged(newRaceTime);
         }
         for (VideoContainer videoContainer : activeVideoContainers.values()) {
             VideoPlayer videoPlayer = videoContainer.getVideoPlayer();
             ensurePlayState(videoPlayer);
-            videoPlayer.raceTimeChanged(this.currentRaceTime);
+            videoPlayer.raceTimeChanged(newRaceTime);
         }
     }
 
@@ -557,13 +551,13 @@ public class MediaPlayerManagerComponent implements Component<Void>, PlayStateLi
     }
 
     private void synchPlayState(final MediaPlayer mediaPlayer) {
-        mediaPlayer.setPlaybackSpeed(currentPlaybackSpeed);
+        mediaPlayer.setPlaybackSpeed(this.raceTimer.getPlaySpeedFactor());
         ensurePlayState(mediaPlayer);
-        mediaPlayer.raceTimeChanged(this.currentRaceTime);
+        mediaPlayer.raceTimeChanged(this.raceTimer.getTime());
     }
 
     private void ensurePlayState(final MediaPlayer mediaPlayer) {
-        switch (this.currentPlayState) {
+        switch (this.raceTimer.getPlayState()) {
         case Playing:
             if (mediaPlayer.isMediaPaused() && mediaPlayer.isCoveringCurrentRaceTime()) {
                 mediaPlayer.playMedia();
