@@ -14,7 +14,7 @@ import android.content.SharedPreferences;
 import android.net.Uri;
 
 import com.sap.sailing.android.shared.logging.ExLog;
-import com.sap.sailing.racecommittee.app.AppConstants;
+import com.sap.sailing.android.shared.util.FileHandlerUtils;
 import com.sap.sailing.racecommittee.app.AppPreferences;
 import com.sap.sailing.racecommittee.app.R;
 import com.sap.sailing.racecommittee.app.ui.activities.SettingsActivity;
@@ -100,7 +100,7 @@ public class AutoUpdater {
     }
 
     private void clearUpdateCache() {
-        for (File file : AppConstants.getExternalApplicationFolder(context).listFiles()) {
+        for (File file : FileHandlerUtils.getExternalApplicationFolder(context).listFiles()) {
             if (file.getName().startsWith("auto-update-") &&
                     file.getName().endsWith(".apk")) {
                 boolean result = file.delete();
@@ -112,7 +112,7 @@ public class AutoUpdater {
     }
 
     public File createApkTargetFile() throws IOException {
-        return File.createTempFile("auto-update-", ".apk", AppConstants.getExternalApplicationFolder(context));
+        return File.createTempFile("auto-update-", ".apk", FileHandlerUtils.getExternalApplicationFolder(context));
     }
 
 }

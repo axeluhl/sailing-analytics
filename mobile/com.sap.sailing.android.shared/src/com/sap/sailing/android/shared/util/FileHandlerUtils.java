@@ -1,12 +1,15 @@
 package com.sap.sailing.android.shared.util;
 
 import java.io.BufferedReader;
+import java.io.File;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
 
 import android.content.Context;
+import android.os.Environment;
 
+import com.sap.sailing.android.shared.R;
 import com.sap.sailing.android.shared.logging.ExLog;
 
 public class FileHandlerUtils {
@@ -37,5 +40,12 @@ public class FileHandlerUtils {
             }
         }
         return stringBuilder.toString();
+    }
+    
+    public static File getExternalApplicationFolder(Context context) {
+        String appFolder = context.getResources().getString(R.string.app_folder);
+        File dir = new File(Environment.getExternalStorageDirectory() + File.separator + appFolder);
+        dir.mkdirs();
+        return dir;
     }
 }
