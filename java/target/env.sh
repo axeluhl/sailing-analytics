@@ -75,7 +75,7 @@ USE_ENVIRONMENT=
 INSTANCE_ID="$SERVER_NAME:$SERVER_PORT"
 ADDITIONAL_JAVA_ARGS="-Dpersistentcompetitors.clear=false -XX:+UseMembar -XX:+UseG1GC -verbose:gc -XX:+PrintGCTimeStamps -XX:+PrintGCDetails -Xloggc:logs/gc.log -XX:+UseGCLogFileRotation -XX:NumberOfGCLogFiles=10 -XX:GCLogFileSize=100M"
 
-JAVA_HOME=/opt/jdk1.7.0_60
+JAVA_HOME=/opt/jdk1.8.0_20
 if [[ ! -d $JAVA_HOME ]] && [[ -f "/usr/libexec/java_home" ]]; then
     JAVA_HOME=`/usr/libexec/java_home`
 fi
