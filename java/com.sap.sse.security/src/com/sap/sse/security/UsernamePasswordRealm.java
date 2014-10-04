@@ -26,20 +26,43 @@ public class UsernamePasswordRealm extends AuthorizingRealm {
     
     private final UserStore store;
     
+    /**
+     * In a non-OSGi test environment, having Shiro instantiate this class with a
+     * default constructor makes it difficult to get access to the user store
+     * implementation which may live in a bundle that this bundle has no direct
+     * access to. Therefore, test cases must set the UserStore implementation
+     * by invoking {@link #setTestUserStore} before the default constructor is
+     * invoked.
+     */
+    private static UserStore testUserStore;
+    
+    public static void setTestUserStore(UserStore theTestUserStore) {
+        testUserStore = theTestUserStore;
+    }
+    
     public UsernamePasswordRealm() {
         super();
         BundleContext context = Activator.getContext();
-        ServiceReference<?> serviceReference = context.getServiceReference(UserStore.class.getName());
-        store = (UserStore) context.getService(serviceReference);
+        if (context == null) {
+            // non-OSGi case, such as during JUnit test execution?
+            store = testUserStore;
+        } else {
+            ServiceReference<?> serviceReference = context.getServiceReference(UserStore.class.getName());
+            store = (UserStore) context.getService(serviceReference);
+        }
     }
     
     @Override
     public boolean supports(AuthenticationToken token) {
-        if (token == null)
-            return false;
-        if (! (token instanceof UsernamePasswordToken))
-            return false;
-        return true;
+        final boolean result;
+        if (token == null) {
+            result = false;
+        } else if (! (token instanceof UsernamePasswordToken)) {
+            result = false;
+        } else {
+            result = true;
+        }
+        return result;
     }
 
     @Override

@@ -7,12 +7,17 @@ import org.junit.BeforeClass;
 import org.junit.Test;
 
 import com.sap.sse.security.SecurityServiceImpl;
+import com.sap.sse.security.UsernamePasswordRealm;
+import com.sap.sse.security.userstore.mongodb.UserStoreImpl;
+import com.sap.sse.security.userstore.shared.UserStore;
 
 public class LoginTest {
     
     @BeforeClass
     public static void setUp(){
-        new SecurityServiceImpl();
+        UserStore store = new UserStoreImpl();
+        UsernamePasswordRealm.setTestUserStore(store);
+        new SecurityServiceImpl(store);
     }
 
     @Test

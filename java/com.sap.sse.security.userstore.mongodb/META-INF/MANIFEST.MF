@@ -13,3 +13,4 @@ Require-Bundle: com.sap.sse.security.userstore;bundle-version="1.0.0",
  com.sap.sse.security;bundle-version="1.0.0",
  com.mongodb.driver;bundle-version="2.6.2",
  com.sap.sailing.mongodb
+Export-Package: com.sap.sse.security.userstore.mongodb

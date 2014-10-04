@@ -35,8 +35,6 @@ import org.apache.shiro.web.filter.mgt.FilterChainResolver;
 import org.apache.shiro.web.filter.mgt.PathMatchingFilterChainResolver;
 import org.apache.shiro.web.util.SavedRequest;
 import org.apache.shiro.web.util.WebUtils;
-import org.osgi.framework.BundleContext;
-import org.osgi.framework.ServiceReference;
 import org.scribe.builder.ServiceBuilder;
 import org.scribe.builder.api.FacebookApi;
 import org.scribe.builder.api.FlickrApi;
@@ -76,12 +74,8 @@ public class SecurityServiceImpl  extends RemoteServiceServlet implements Securi
         shiroConfiguration.loadFromPath("classpath:shiro.ini");
     }
     
-    public SecurityServiceImpl() {
-        BundleContext context = Activator.getContext();
-        ServiceReference<?> serviceReference = context.
-                getServiceReference(UserStore.class.getName());
-        store = (UserStore) context.
-                getService(serviceReference);
+    public SecurityServiceImpl(UserStore store) {
+        this.store = store;
         // Create default users if no users exist yet.
         if (store.getUserCollection().isEmpty()){
             try {
