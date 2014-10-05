@@ -41,7 +41,7 @@ public class OperationalTransformationTest {
         MongoDBService.INSTANCE.getDB().dropDatabase();
         racingEventServiceServer = new RacingEventServiceImpl();
         racingEventServiceReplica = new RacingEventServiceImpl();
-        OperationalTransformer<RacingEventService, RacingEventServiceOperation<?>> transformer = new OperationalTransformer<>();
+        OperationalTransformer<RacingEventService, RacingEventServiceOperation<?>> transformer = new OperationalTransformer<RacingEventService, RacingEventServiceOperation<?>>();
         server = new PeerImpl<>(transformer, racingEventServiceServer, Role.SERVER);
         replica = new PeerImpl<>(transformer, racingEventServiceReplica, Role.CLIENT);
         // wire the peers:

@@ -45,7 +45,7 @@ public class RaceLogOperationalTransformationTest {
         raceLogClient1 = new RaceLogImpl("Test Race Log Client1");
         raceLogClient2 = new RaceLogImpl("Test Race Log Client2");
         raceLogServer = new RaceLogImpl("Test Race Log Server");
-        transformer = new OperationalTransformer<>();
+        transformer = new OperationalTransformer<RaceLog, RaceLogEventWithTransformationSupport<?>>();
         client1Latch = new CountDownLatch(1);
         client1 = new PeerImpl<RaceLogEventWithTransformationSupport<?>, RaceLog>(transformer, raceLogClient1, Role.CLIENT) {
             @Override

@@ -17,6 +17,8 @@ package com.sap.sse.gwt.client.panels;
 
 import java.util.ArrayList;
 import java.util.Iterator;
+import java.util.Spliterator;
+import java.util.function.Consumer;
 
 import com.google.gwt.core.client.GWT;
 import com.google.gwt.dom.client.Document;
@@ -721,4 +723,14 @@ public class VerticalTabLayoutPanel extends ResizeComposite implements HasWidget
       selectedIndex++;
     }
   }
+
+    @Override
+    public void forEach(Consumer<? super Widget> action) {
+
+    }
+
+    @Override
+    public Spliterator<Widget> spliterator() {
+        return null;
+    }
 }

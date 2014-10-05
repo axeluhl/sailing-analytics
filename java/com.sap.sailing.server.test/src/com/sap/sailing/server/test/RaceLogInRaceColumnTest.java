@@ -42,7 +42,7 @@ public class RaceLogInRaceColumnTest {
     public void setUp() {
         MongoDBService.INSTANCE.getDB().dropDatabase();
         racingEventServiceServer = new RacingEventServiceImpl();
-        OperationalTransformer<RacingEventService, RacingEventServiceOperation<?>> transformer = new OperationalTransformer<>();
+        OperationalTransformer<RacingEventService, RacingEventServiceOperation<?>> transformer = new OperationalTransformer<RacingEventService, RacingEventServiceOperation<?>>();
         server = new PeerImpl<>(transformer, racingEventServiceServer, Role.SERVER);
     }
 
