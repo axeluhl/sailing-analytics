@@ -17,6 +17,7 @@ import com.google.gwt.user.client.ui.RootLayoutPanel;
 import com.google.gwt.user.client.ui.SubmitButton;
 import com.google.gwt.user.client.ui.TextBox;
 import com.sap.sse.gwt.client.EntryPointHelper;
+import com.sap.sse.security.ui.client.RemoteServiceMappingConstants;
 import com.sap.sse.security.ui.shared.SuccessInfo;
 import com.sap.sse.security.ui.shared.UserManagementService;
 import com.sap.sse.security.ui.shared.UserManagementServiceAsync;
@@ -26,7 +27,9 @@ public class RegisterEntryPoint implements EntryPoint {
 
     @Override
     public void onModuleLoad() {
-        EntryPointHelper.registerASyncService((ServiceDefTarget) userManagementService, "service/usermanagement");
+        EntryPointHelper.registerASyncService((ServiceDefTarget) userManagementService,
+                RemoteServiceMappingConstants.WEB_CONTEXT_PATH,
+                RemoteServiceMappingConstants.userManagementServiceRemotePath);
         RootLayoutPanel rootPanel = RootLayoutPanel.get();
         DockLayoutPanel dockPanel = new DockLayoutPanel(Unit.PX);
         rootPanel.add(dockPanel);
