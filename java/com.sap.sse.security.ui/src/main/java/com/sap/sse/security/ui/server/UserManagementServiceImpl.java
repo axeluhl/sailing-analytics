@@ -8,6 +8,9 @@ import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
 import java.util.TreeMap;
+import java.util.concurrent.Callable;
+import java.util.concurrent.ExecutionException;
+import java.util.concurrent.FutureTask;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
@@ -48,24 +51,31 @@ public class UserManagementServiceImpl extends RemoteServiceServlet implements U
     private static final Logger logger = Logger.getLogger(UserManagementServiceImpl.class.getName());
 
     private final BundleContext context;
-    private SecurityService securityService;
+    private FutureTask<SecurityService> securityService;
 
     public UserManagementServiceImpl() {
         context = Activator.getContext();
         final ServiceTracker<SecurityService, SecurityService> tracker = new ServiceTracker<>(context, SecurityService.class, /* customizer */ null);
         tracker.open();
-        new Thread("ServiceTracker in bundle com.sap.sse.security.ui waiting for SecurityService") {
+        setSecurityService(new FutureTask<SecurityService>(new Callable<SecurityService>() {
             @Override
-            public void run() {
+            public SecurityService call() {
+                SecurityService result = null;
                 try {
                     logger.info("Waiting for SecurityService...");
-                    securityService = tracker.waitForService(0);
-                    logger.info("Obtained SecurityService "+securityService+
-                            ". Setting it as SecurityUtils\' security manager.");
-                    SecurityUtils.setSecurityManager(securityService.getSecurityManager());
+                    result = tracker.waitForService(0);
+                    logger.info("Obtained SecurityService "+getSecurityService());
+                    return result;
                 } catch (InterruptedException e) {
                     logger.log(Level.SEVERE, "Interrupted while waiting for UserStore service", e);
                 }
+                return result;
+            }
+        }));
+        new Thread("ServiceTracker in bundle com.sap.sse.security.ui waiting for SecurityService") {
+            @Override
+            public void run() {
+                SecurityUtils.setSecurityManager(getSecurityService().getSecurityManager());
             }
         }.start();
     }
@@ -78,7 +88,7 @@ public class UserManagementServiceImpl extends RemoteServiceServlet implements U
     @Override
     public Collection<UserDTO> getUserList() {
         List<UserDTO> users = new ArrayList<>();
-        for (User u : securityService.getUserList()) {
+        for (User u : getSecurityService().getUserList()) {
             UserDTO userDTO = createUserDTOFromUser(u);
             users.add(userDTO);
         }
@@ -90,7 +100,7 @@ public class UserManagementServiceImpl extends RemoteServiceServlet implements U
     @Override
     public UserDTO getCurrentUser() {
         logger.info("Request: " + getThreadLocalRequest().getRequestURL());
-        User user = securityService.getCurrentUser();
+        User user = getSecurityService().getCurrentUser();
         if (user == null){
             return null;
         }
@@ -100,7 +110,7 @@ public class UserManagementServiceImpl extends RemoteServiceServlet implements U
     @Override
     public SuccessInfo login(String username, String password) {
         try {
-            String success = securityService.login(username, password);
+            String success = getSecurityService().login(username, password);
             return new SuccessInfo(true, success);
         } catch (UserManagementException e) {
             return new SuccessInfo(false, "Failed to login.");
@@ -110,7 +120,7 @@ public class UserManagementServiceImpl extends RemoteServiceServlet implements U
     @Override
     public SuccessInfo logout() {
         logger.info("Logging out user: " + SessionUtils.loadUsername());
-        securityService.logout();
+        getSecurityService().logout();
         getHttpSession().invalidate();
         logger.info("Invalidated HTTP session");
         return new SuccessInfo(true, "Logged out.");
@@ -120,7 +130,7 @@ public class UserManagementServiceImpl extends RemoteServiceServlet implements U
     public UserDTO createSimpleUser(String name, String email, String password) {
         User u = null;
         try {
-            u = securityService.createSimpleUser(name, email, password);
+            u = getSecurityService().createSimpleUser(name, email, password);
         } catch (UserManagementException e) {
             e.printStackTrace();
         }
@@ -133,7 +143,7 @@ public class UserManagementServiceImpl extends RemoteServiceServlet implements U
     @Override
     public Collection<UserDTO> getFilteredSortedUserList(String filter) {
         List<UserDTO> users = new ArrayList<>();
-        for (User u : securityService.getUserList()) {
+        for (User u : getSecurityService().getUserList()) {
             if (filter != null && !"".equals(filter)) {
                 if (u.getName().contains(filter)) {
                     users.add(createUserDTOFromUser(u));
@@ -158,12 +168,12 @@ public class UserManagementServiceImpl extends RemoteServiceServlet implements U
         Subject currentUser = SecurityUtils.getSubject();
 
         if (currentUser.hasRole(UserStore.DefaultRoles.ADMIN.getName())) {
-            User u = securityService.getUserByName(username);
+            User u = getSecurityService().getUserByName(username);
             if (u == null) {
                 return new SuccessInfo(false, "User does not exist.");
             }
             try {
-                securityService.addRoleForUser(username, role);
+                getSecurityService().addRoleForUser(username, role);
                 return new SuccessInfo(true, "Added role: " + role + ".");
             } catch (UserManagementException e) {
                 return new SuccessInfo(false, e.getMessage());
@@ -176,7 +186,7 @@ public class UserManagementServiceImpl extends RemoteServiceServlet implements U
     @Override
     public SuccessInfo deleteUser(String username) {
         try {
-            securityService.deleteUser(username);
+            getSecurityService().deleteUser(username);
             return new SuccessInfo(true, "Deleted user: " + username + ".");
         } catch (UserManagementException e) {
             return new SuccessInfo(false, "Could not delete user.");
@@ -207,7 +217,7 @@ public class UserManagementServiceImpl extends RemoteServiceServlet implements U
     @Override
     public Map<String, String> getSettings() {
         Map<String, String> settings = new TreeMap<String, String>();
-        for (Entry<String, Object> e : securityService.getAllSettings().entrySet()){
+        for (Entry<String, Object> e : getSecurityService().getAllSettings().entrySet()){
             settings.put(e.getKey(), e.getValue().toString());
         }
         return settings;
@@ -216,21 +226,21 @@ public class UserManagementServiceImpl extends RemoteServiceServlet implements U
     @Override
     public void setSetting(String key, String clazz, String setting) {
         if (clazz.equals(Boolean.class.getName())){
-            securityService.setSetting(key, Boolean.parseBoolean(setting));
+            getSecurityService().setSetting(key, Boolean.parseBoolean(setting));
         }
         else if (clazz.equals(Integer.class.getName())){
-            securityService.setSetting(key, Integer.parseInt(setting));
+            getSecurityService().setSetting(key, Integer.parseInt(setting));
         }
         else {
-            securityService.setSetting(key, setting);
+            getSecurityService().setSetting(key, setting);
         }
-        securityService.refreshSecurityConfig(getServletContext());
+        getSecurityService().refreshSecurityConfig(getServletContext());
     }
 
     @Override
     public Map<String, String> getSettingTypes() {
         Map<String, String> settingTypes = new TreeMap<String, String>();
-        for (Entry<String, Class<?>> e : securityService.getAllSettingTypes().entrySet()){
+        for (Entry<String, Class<?>> e : getSecurityService().getAllSettingTypes().entrySet()){
             settingTypes.put(e.getKey(), e.getValue().getName());
         }
         return settingTypes;
@@ -250,7 +260,7 @@ public class UserManagementServiceImpl extends RemoteServiceServlet implements U
         String authorizationUrl = null;
         
         try {
-            authorizationUrl = securityService.getAuthenticationUrl(createCredentialFromDTO(credential));
+            authorizationUrl = getSecurityService().getAuthenticationUrl(createCredentialFromDTO(credential));
         } catch (UserManagementException e) {
             throw new OAuthException(e.getMessage());
         }
@@ -263,7 +273,7 @@ public class UserManagementServiceImpl extends RemoteServiceServlet implements U
         
         User user = null;
         try {
-            user = securityService.verifySocialUser(createCredentialFromDTO(credentialDTO));
+            user = getSecurityService().verifySocialUser(createCredentialFromDTO(credentialDTO));
         } catch (UserManagementException e) {
             e.printStackTrace();
         }
@@ -301,21 +311,33 @@ public class UserManagementServiceImpl extends RemoteServiceServlet implements U
     @Override
     public void addSetting(String key, String clazz, String setting) {
         try {
-            securityService.addSetting(key, Class.forName(clazz));
+            getSecurityService().addSetting(key, Class.forName(clazz));
         } catch (ClassNotFoundException e) {
             e.printStackTrace();
         } catch (UserManagementException e) {
             e.printStackTrace();
         }
         if (clazz.equals(Boolean.class.getName())){
-            securityService.setSetting(key, Boolean.parseBoolean(setting));
+            getSecurityService().setSetting(key, Boolean.parseBoolean(setting));
         }
         else if (clazz.equals(Integer.class.getName())){
-            securityService.setSetting(key, Integer.parseInt(setting));
+            getSecurityService().setSetting(key, Integer.parseInt(setting));
         }
         else {
-            securityService.setSetting(key, setting);
+            getSecurityService().setSetting(key, setting);
         }
-        securityService.refreshSecurityConfig(getServletContext());
+        getSecurityService().refreshSecurityConfig(getServletContext());
+    }
+
+    private SecurityService getSecurityService() {
+        try {
+            return securityService.get();
+        } catch (InterruptedException | ExecutionException e) {
+            throw new RuntimeException(e);
+        }
+    }
+
+    private void setSecurityService(FutureTask<SecurityService> securityService) {
+        this.securityService = securityService;
     }
 }
