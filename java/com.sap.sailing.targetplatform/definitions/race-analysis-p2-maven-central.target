@@ -14,17 +14,17 @@
 <repository location="http://p2.sapsailing.com/p2/sailing/"/>
 </location>
 <location includeAllPlatforms="false" includeMode="slicer" includeSource="true" type="InstallableUnit">
-<unit id="org.eclipse.osgi" version="3.9.0.v20130529-1710" />
-<unit id="org.eclipse.osgi.services" version="3.3.100.v20130513-1956" />
-<unit id="org.eclipse.equinox.common" version="3.6.200.v20130402-1505" />
-<unit id="org.eclipse.equinox.util" version="1.0.500.v20130404-1337" />
-<unit id="org.eclipse.equinox.simpleconfigurator" version="1.0.400.v20130327-2119" />
-<unit id="org.eclipse.equinox.console" version="1.0.100.v20130429-0953" />
-<unit id="org.eclipse.equinox.launcher" version="1.3.0.v20130327-1440" />
-<unit id="org.apache.felix.gogo.command" version="0.10.0.v201209301215" />
-<unit id="org.apache.felix.gogo.runtime" version="0.10.0.v201209301036" />
-<unit id="org.apache.felix.gogo.shell" version="0.10.0.v201212101605" />
-<repository location="http://download.eclipse.org/releases/kepler"/>
+<unit id="org.eclipse.osgi" version="3.10.1.v20140909-1633"/>
+<unit id="org.eclipse.osgi.services" version="3.4.0.v20140312-2051"/>
+<unit id="org.eclipse.equinox.common" version="3.6.200.v20130402-1505"/>
+<unit id="org.eclipse.equinox.util" version="1.0.500.v20130404-1337"/>
+<unit id="org.eclipse.equinox.simpleconfigurator" version="1.1.0.v20131217-1203"/>
+<unit id="org.eclipse.equinox.console" version="1.1.0.v20140131-1639"/>
+<unit id="org.eclipse.equinox.launcher" version="1.3.0.v20140415-2008"/>
+<unit id="org.apache.felix.gogo.command" version="0.10.0.v201209301215"/>
+<unit id="org.apache.felix.gogo.runtime" version="0.10.0.v201209301036"/>
+<unit id="org.apache.felix.gogo.shell" version="0.10.0.v201212101605"/>
+<repository location="http://download.eclipse.org/releases/luna"/>
 </location>
 <location includeAllPlatforms="false" includeConfigurePhase="false" includeMode="slicer" includeSource="true" type="InstallableUnit">
 <unit id="org.apache.commons.fileupload" version="1.2.2.v20111214-1400"/>
