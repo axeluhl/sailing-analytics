@@ -109,20 +109,24 @@ public class SetStartTimeRaceFragment extends RaceFragment {
             }
         });
         
-        btSetCourse.setOnClickListener(new OnClickListener() {
-            @Override
-            public void onClick(View paramView) {
-                showCourseDesignDialog();
-            }
-        });
+        if (btSetCourse != null) {
+            btSetCourse.setOnClickListener(new OnClickListener() {
+                @Override
+                public void onClick(View paramView) {
+                    showCourseDesignDialog();
+                }
+            });
+        }
 
-        btPostpone.setOnClickListener(new OnClickListener() {
-            @Override
-            public void onClick(View arg0) {
-                ExLog.i(getActivity(), LogEvent.RACE_SET_TIME_BUTTON_AP, getRace().getId().toString());
-                showAPModeDialog();
-            }
-        });
+        if (btSetCourse != null) {
+            btPostpone.setOnClickListener(new OnClickListener() {
+                @Override
+                public void onClick(View arg0) {
+                    ExLog.i(getActivity(), LogEvent.RACE_SET_TIME_BUTTON_AP, getRace().getId().toString());
+                    showAPModeDialog();
+                }
+            });
+        }
 
         textInfoText = (TextView) getView().findViewById(R.id.race_reset_time_text_infotext);
         
