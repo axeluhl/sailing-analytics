@@ -75,6 +75,7 @@ public class UserManagementServiceImpl extends RemoteServiceServlet implements U
         new Thread("ServiceTracker in bundle com.sap.sse.security.ui waiting for SecurityService") {
             @Override
             public void run() {
+                securityService.run();
                 SecurityUtils.setSecurityManager(getSecurityService().getSecurityManager());
             }
         }.start();
