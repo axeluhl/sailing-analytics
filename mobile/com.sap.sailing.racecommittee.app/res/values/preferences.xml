@@ -76,4 +76,6 @@
     <bool name="preference_racing_procedure_basic_hasxray_default">false</bool>
     
     <string name="preference_regatta_specific_save_key">basicIndividualRecall</string>
+    
+    <string name="app_folder">racecommittee</string>
 </resources>

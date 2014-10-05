@@ -245,4 +245,7 @@
 	<string name="race_start_in_1_minute">1 Minute</string>
 	<string name="race_reset_course">Kurs ändern</string>
 	<string name="no_course_active">Kein Kurs gesetzt</string>
+	<string name="toggle_group_race_mode">Gruppenrennen?</string>
+	<string name="toggle_group_race_mode_off">Kein Gruppenrennen</string>
+	<string name="toggle_group_race_mode_on">Gruppenrennen</string>
 </resources>
