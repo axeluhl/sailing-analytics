@@ -8,6 +8,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
 import java.util.TreeMap;
+import java.util.logging.Level;
 import java.util.logging.Logger;
 
 import javax.servlet.http.HttpSession;
@@ -16,7 +17,7 @@ import org.apache.shiro.SecurityUtils;
 import org.apache.shiro.subject.Subject;
 import org.apache.shiro.util.ByteSource;
 import org.osgi.framework.BundleContext;
-import org.osgi.framework.ServiceReference;
+import org.osgi.util.tracker.ServiceTracker;
 
 import com.google.gwt.user.server.rpc.RemoteServiceServlet;
 import com.sap.sse.security.Credential;
@@ -51,9 +52,21 @@ public class UserManagementServiceImpl extends RemoteServiceServlet implements U
 
     public UserManagementServiceImpl() {
         context = Activator.getContext();
-        ServiceReference<?> serviceReference = context.getServiceReference(SecurityService.class.getName());
-        securityService = (SecurityService) context.getService(serviceReference);
-        SecurityUtils.setSecurityManager(securityService.getSecurityManager());
+        final ServiceTracker<SecurityService, SecurityService> tracker = new ServiceTracker<>(context, SecurityService.class, /* customizer */ null);
+        new Thread("ServiceTracker in bundle com.sap.sse.security.ui waiting for SecurityService") {
+            @Override
+            public void run() {
+                try {
+                    logger.info("Waiting for SecurityService...");
+                    securityService = tracker.waitForService(0);
+                    logger.info("Obtained SecurityService "+securityService+
+                            ". Setting it as SecurityUtils\' security manager.");
+                    SecurityUtils.setSecurityManager(securityService.getSecurityManager());
+                } catch (InterruptedException e) {
+                    logger.log(Level.SEVERE, "Interrupted while waiting for UserStore service", e);
+                }
+            }
+        }.start();
     }
 
     @Override
