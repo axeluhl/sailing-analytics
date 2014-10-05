@@ -13,6 +13,19 @@ import android.net.NetworkInfo;
 
 import com.sap.sailing.android.shared.logging.ExLog;
 
+/**
+ * Informs {@link MessageSendingService} whenever connectivity is restored, so that it can start sending
+ * messages again.
+ * 
+ * Register in manifest:
+ * <pre>{@code
+ * <receiver android:name="com.sap.sailing.android.shared.services.sending.ConnectivityChangedReceiver" >
+ *   <intent-filter>
+ *     <action android:name="android.net.conn.CONNECTIVITY_CHANGE" />
+ *   </intent-filter>
+ * </receiver>
+ * }</pre>
+ */
 public class ConnectivityChangedReceiver extends BroadcastReceiver {
     
     private final static String TAG = ConnectivityChangedReceiver.class.getName();

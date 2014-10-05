@@ -34,6 +34,7 @@ import com.sap.sailing.android.shared.services.sending.MessageSenderTask.Message
  * <b>Use in the following way:</b> Add the service declaration to your {@code AndroidManifest.xml},
  * and also specify your class implementing the {@link MessagePersistenceManager.MessageRestorer}
  * as a meta-data tag with the key {@code com.sap.sailing.android.shared.services.sending.messageRestorer}.
+ * Also refer to {@link ConnectivityChangedReceiver}, which has to be registered as well.
  * For example:
  * <pre>{@code
  * <service
