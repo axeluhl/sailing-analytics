@@ -24,6 +24,7 @@ public class Activator implements BundleActivator {
     public void start(BundleContext context) throws Exception {
         Activator.context = context;
         final ServiceTracker<SecurityService, SecurityService> tracker = new ServiceTracker<>(context, SecurityService.class, /* customizer */ null);
+        tracker.open();
         new Thread("ServiceTracker in bundle com.sap.sailing.gwt.ui waiting for SecurityService") {
             @Override
             public void run() {

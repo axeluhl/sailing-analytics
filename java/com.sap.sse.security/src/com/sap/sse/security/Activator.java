@@ -64,6 +64,7 @@ public class Activator implements BundleActivator {
     private void waitForUserStoreService(BundleContext bundleContext) {
         context = bundleContext;
         final ServiceTracker<UserStore, UserStore> tracker = new ServiceTracker<>(bundleContext, UserStore.class, /* customizer */ null);
+        tracker.open();
         new Thread("ServiceTracker waiting for UserStore service") {
             @Override
             public void run() {
