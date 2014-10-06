@@ -49,12 +49,10 @@ import com.sap.sailing.android.shared.services.sending.MessageSenderTask.Message
  * </service>
  * }</pre>
  * 
- * Sending a message example:
+ * Message sending example: 
  * <pre>{@code
- * Intent i = new Intent(SEND_MESSAGE_ACTION);
- * i.putExtra(PAYLOAD, JsonUtils.getObjectAsString('someEventObject'));
- * i.putExtra(CALLBACK_PAYLOAD, 'raceuuid');
- * context.startService(i);
+ * context.startService(MessageSendingService.createMessageIntent(
+ *      context, url, race.getId(), eventId, serializedEventAsJson, callbackClass));
  * }</pre>
  */
 public class MessageSendingService extends Service implements MessageSendingListener {
