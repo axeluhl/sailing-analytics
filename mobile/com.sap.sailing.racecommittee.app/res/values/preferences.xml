@@ -79,8 +79,7 @@
     
     <!-- override android.shared default value -->
     <string name="app_folder">racecommittee</string>
-    
-    <!-- override android.shared default values -->
+    <bool name="preference_isSendingActive_default">false</bool>
     <string name="intent_send_saved_intents">com.sap.sailing.racecommittee.app.action.sendSavedIntents</string>
     <string name="intent_send_message">com.sap.sailing.racecommittee.app.action.sendMessage</string>
 </resources>
