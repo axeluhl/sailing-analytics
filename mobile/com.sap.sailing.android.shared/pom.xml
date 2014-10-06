@@ -64,16 +64,10 @@
 		<sourceDirectory>src</sourceDirectory>
 		<finalName>${project.artifactId}</finalName>
 		<plugins>
-			<plugin>
-				<groupId>com.jayway.maven.plugins.android.generation2</groupId>
-				<artifactId>android-maven-plugin</artifactId>
-				<configuration>
-					<sdk>
-						<!-- platform as api level (api level 16 = platform 4.1) -->
-						<platform>13</platform>
-					</sdk>
-				</configuration>
-			</plugin>
+            <plugin>
+                <groupId>com.jayway.maven.plugins.android.generation2</groupId>
+                <artifactId>android-maven-plugin</artifactId>
+            </plugin>
 		</plugins>
 	</build>
 </project>
