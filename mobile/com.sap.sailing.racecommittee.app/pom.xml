@@ -86,36 +86,6 @@
             <plugin>
                 <groupId>com.jayway.maven.plugins.android.generation2</groupId>
                 <artifactId>android-maven-plugin</artifactId>
-                <configuration>
-                    <sdk>
-                        <platform>13</platform>
-                    </sdk>
-                    <release>true</release>
-                    <proguard>
-                        <!-- Someone needs to look into this - quite hard to find a configuration that doesnt break everything -->
-                        <skip>true</skip>
-                        <config>proguard-project.txt</config>
-                        <configs>
-                            <config>${env.ANDROID_HOME}/tools/proguard/proguard-android.txt</config>
-                        </configs>
-                    </proguard>
-                    <zipalign>
-                        <skip>false</skip>
-                    </zipalign>
-                </configuration>
-                <executions>
-                  <execution>
-                    <goals>
-                      <goal>apk</goal>
-                    </goals>
-                    <configuration>
-                      <excludeJarResources>
-                        <!-- Prevents *-sources.jar to be distributed with the APK -->
-                        <excludeJarResource>com.sap.sailing.*\.jar$</excludeJarResource>
-                      </excludeJarResources>
-                    </configuration>
-                  </execution>
-                </executions>
             </plugin>
             <plugin>
                 <groupId>org.apache.maven.plugins</groupId>
