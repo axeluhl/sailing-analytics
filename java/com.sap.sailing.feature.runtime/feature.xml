@@ -18,12 +18,12 @@
    </license>
 
    <requires>
-      <import plugin="javax.servlet" version="2.6.0" match="greaterOrEqual"/>
-      <import plugin="org.eclipse.jetty.deploy" version="9.0.4" match="greaterOrEqual"/>
-      <import plugin="org.eclipse.jetty.server" version="9.0.4" match="greaterOrEqual"/>
-      <import plugin="org.eclipse.jetty.util" version="9.0.4" match="greaterOrEqual"/>
-      <import plugin="org.eclipse.jetty.webapp" version="9.0.4" match="greaterOrEqual"/>
-      <import plugin="org.eclipse.jetty.xml" version="9.0.4" match="greaterOrEqual"/>
+      <import plugin="javax.servlet" version="3.1.0" match="greaterOrEqual"/>
+      <import plugin="org.eclipse.jetty.deploy" version="9.2.2" match="greaterOrEqual"/>
+      <import plugin="org.eclipse.jetty.server" version="9.2.2" match="greaterOrEqual"/>
+      <import plugin="org.eclipse.jetty.util" version="9.2.2" match="greaterOrEqual"/>
+      <import plugin="org.eclipse.jetty.webapp" version="9.2.2" match="greaterOrEqual"/>
+      <import plugin="org.eclipse.jetty.xml" version="9.2.2" match="greaterOrEqual"/>
       <import plugin="org.eclipse.osgi"/>
       <import plugin="org.eclipse.osgi.services"/>
       <import plugin="slf4j.api"/>
@@ -43,7 +43,7 @@
          id="org.eclipse.jetty.osgi.boot"
          download-size="0"
          install-size="0"
-         version="9.0.4.v20130625"
+         version="9.2.2.v20140723"
          unpack="false"/>
 
    <plugin

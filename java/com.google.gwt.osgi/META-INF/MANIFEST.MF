@@ -4,7 +4,7 @@ Bundle-Name: Osgi
 Bundle-SymbolicName: com.google.gwt.osgi
 Bundle-Version: 2.6.1.qualifier
 Bundle-Vendor: GOOGLE
-Bundle-RequiredExecutionEnvironment: JavaSE-1.7
+Bundle-RequiredExecutionEnvironment: JavaSE-1.8
 Bundle-ClassPath: lib/gwt-user.jar,
  .
 Export-Package: com.google.gwt.activity.shared,
