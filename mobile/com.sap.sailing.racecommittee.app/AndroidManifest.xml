@@ -87,8 +87,8 @@
             android:name="com.sap.sailing.android.shared.services.sending.MessageSendingService"
             android:exported="false" >
             <intent-filter>
-                <action android:name="com.sap.sailing.android.shared.action.sendSavedIntents" />
-                <action android:name="com.sap.sailing.android.shared.action.sendMessage" />
+                <action android:name="com.sap.sailing.racecommittee.app.action.sendSavedIntents" />
+                <action android:name="com.sap.sailing.racecommittee.app.action.sendMessage" />
             </intent-filter>
             <meta-data android:name="com.sap.sailing.android.shared.services.sending.messageRestorer"
                 android:value="com.sap.sailing.racecommittee.app.services.sending.EventRestorer" />

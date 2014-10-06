@@ -1,3 +1,0 @@
-<resources>
-    <string name="app_folder">com.sap.sailing</string><!-- Can be overridden by application (through a string with the same name) -->
-</resources>

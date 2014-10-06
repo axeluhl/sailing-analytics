@@ -138,7 +138,9 @@ public class MessagePersistenceManager {
             Intent messageIntent = MessageSendingService.createMessageIntent(context, url, callbackPayload,
                     null, payload, callbackClass);
             
-            messageRestorer.restoreMessage(context, messageIntent);
+            if (messageRestorer != null) {
+                messageRestorer.restoreMessage(context, messageIntent);
+            }
             
             if (messageIntent != null) {
                 delayedIntents.add(messageIntent);

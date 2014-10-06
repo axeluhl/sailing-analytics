@@ -77,5 +77,10 @@
     
     <string name="preference_regatta_specific_save_key">basicIndividualRecall</string>
     
+    <!-- override android.shared default value -->
     <string name="app_folder">racecommittee</string>
+    
+    <!-- override android.shared default values -->
+    <string name="intent_send_saved_intents">com.sap.sailing.racecommittee.app.action.sendSavedIntents</string>
+    <string name="intent_send_message">com.sap.sailing.racecommittee.app.action.sendMessage</string>
 </resources>

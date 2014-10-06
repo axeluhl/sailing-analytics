@@ -49,6 +49,11 @@ import com.sap.sailing.android.shared.services.sending.MessageSenderTask.Message
  * </service>
  * }</pre>
  * 
+ * To enable side-by-side use of multiple apps (e.g. RaceCommittee and Tracking) using this same shared library,
+ * where one sending service should not influence the other, exchange the names in the intent filter, and
+ * override the strings "intent_send_saved_intents" and "intent_send_message" (e.g. in the
+ * preferences.xml of your app).
+ * 
  * Message sending example: 
  * <pre>{@code
  * context.startService(MessageSendingService.createMessageIntent(
@@ -61,8 +66,6 @@ public class MessageSendingService extends Service implements MessageSendingList
     public final static String CALLBACK_CLASS = "callback";
     public final static String CALLBACK_PAYLOAD = "callbackPayload"; // passed back to callback
     public final static String MESSAGE_ID = "messageId";
-    public final static String INTENT_ACTION_SEND_SAVED_INTENTS = "com.sap.sailing.android.shared.action.sendSavedIntents";
-    public final static String INTENT_ACTION_SEND_MESSAGE = "com.sap.sailing.android.shared.action.sendMessage";
 
     protected final static String TAG = MessageSendingService.class.getName();
 
@@ -131,7 +134,7 @@ public class MessageSendingService extends Service implements MessageSendingList
 
     public static Intent createMessageIntent(Context context, String url, Serializable callbackPayload, Serializable messageId, String payload,
             Class<? extends ServerReplyCallback> callbackClass) {
-        Intent messageIntent = new Intent(INTENT_ACTION_SEND_MESSAGE);
+        Intent messageIntent = new Intent(context.getString(R.string.intent_send_message));
         messageIntent.putExtra(CALLBACK_PAYLOAD, callbackPayload);
         messageIntent.putExtra(MESSAGE_ID, messageId);
         messageIntent.putExtra(PAYLOAD, payload);
@@ -151,6 +154,7 @@ public class MessageSendingService extends Service implements MessageSendingList
     
     private MessagePersistenceManager getPersistenceManager() {
         ComponentName thisService = new ComponentName(this, this.getClass());
+        MessageRestorer restorer = null;
         try {
             Bundle data = getPackageManager().getServiceInfo(thisService, PackageManager.GET_META_DATA).metaData;
             String className = data.getString("com.sap.sailing.android.shared.services.sending.messageRestorer");
@@ -160,13 +164,12 @@ public class MessageSendingService extends Service implements MessageSendingList
             }
             @SuppressWarnings("unchecked") //checked above
             Class<MessageRestorer> castedClass = (Class<MessageRestorer>) clazz;
-            MessageRestorer restorer = castedClass.getConstructor().newInstance();
-            return new MessagePersistenceManager(this, restorer);
+            restorer = castedClass.getConstructor().newInstance();
         } catch (Exception e) {
-            ExLog.e(this, TAG, "Could not find message persistence manager. See documentation of MessageSendingService"
-                    + "on how to register the persistence manager through the manifest. Error Message: " + e.getMessage());
-            return null;
+            ExLog.e(this, TAG, "Could not find MessageRestorer. See documentation of MessageSendingService"
+                    + "on how to register the restorer through the manifest. Error Message: " + e.getMessage());
         }
+        return new MessagePersistenceManager(this, restorer);
     }
 
     /*
@@ -200,9 +203,9 @@ public class MessageSendingService extends Service implements MessageSendingList
 
     private void handleCommand(Intent intent, int startId) {
         String action = intent.getAction();
-        if (action.equals(INTENT_ACTION_SEND_SAVED_INTENTS)) {
+        if (action.equals(getString(R.string.intent_send_saved_intents))) {
             handleDelayedMessages();
-        } else if (action.equals(INTENT_ACTION_SEND_MESSAGE)) {
+        } else if (action.equals(getString(R.string.intent_send_message))) {
             handleSendMessages(intent);
         }
     }
