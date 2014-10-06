@@ -28,11 +28,16 @@ public class DataMiningServiceImpl extends RemoteServiceServlet implements DataM
 
     private final BundleContext context;
 
+    private final SailingDataMiningFactory sailingDataMiningFactory;
+
     private final ServiceTracker<DataMiningServer, DataMiningServer> dataMiningServerTracker;
     private final ServiceTracker<RacingEventService, RacingEventService> racingEventServiceTracker;
     
     public DataMiningServiceImpl() {
         context = Activator.getDefault();
+        
+        sailingDataMiningFactory = new SailingDataMiningFactory();
+        
         dataMiningServerTracker = createAndOpenDataMiningServerTracker(context);
         racingEventServiceTracker = createAndOpenRacingEventServiceTracker(context);
     }
@@ -91,14 +96,14 @@ public class DataMiningServiceImpl extends RemoteServiceServlet implements DataM
     
     @Override
     public QueryResult<Set<Object>> getDimensionValuesFor(Collection<FunctionDTO> dimensions) throws Exception {
-        Query<Set<Object>> dimensionValuesQuery = SailingDataMiningFactory.createDimensionValuesQuery(getRacingEventService(), dimensions, getDataMiningServer().getFunctionProvider());
+        Query<Set<Object>> dimensionValuesQuery = sailingDataMiningFactory.createDimensionValuesQuery(getRacingEventService(), dimensions, getDataMiningServer().getFunctionProvider());
         return dimensionValuesQuery.run();
     }
 
     @Override
     public <ResultType extends Number> QueryResult<ResultType> runQuery(QueryDefinition queryDefinition) throws Exception {
         @SuppressWarnings("unchecked") // TODO Fix after the data mining has been cleaned
-        Query<ResultType> query = (Query<ResultType>) SailingDataMiningFactory.createQuery(getRacingEventService(), queryDefinition, getDataMiningServer().getFunctionProvider());
+        Query<ResultType> query = (Query<ResultType>) sailingDataMiningFactory.createQuery(getRacingEventService(), queryDefinition, getDataMiningServer().getFunctionProvider());
         return query.run();
     }
     

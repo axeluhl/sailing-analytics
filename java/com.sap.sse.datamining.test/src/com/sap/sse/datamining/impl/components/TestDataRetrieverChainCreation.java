@@ -43,7 +43,7 @@ public class TestDataRetrieverChainCreation {
 
     @SuppressWarnings("unchecked")
     @Before
-    public void initializeRetrieverChain() throws InstantiationException, IllegalAccessException {
+    public void initializeRetrieverChain() {
         dataRetrieverChainDefinition = new SimpleDataRetrieverChainDefinition<>((Class<Collection<Test_Regatta>>)(Class<?>) Collection.class);
         Class<Processor<Collection<Test_Regatta>, Test_Regatta>> regattaRetrieverClass = (Class<Processor<Collection<Test_Regatta>, Test_Regatta>>)(Class<?>) TestRegattaRetrievalProcessor.class;
         dataRetrieverChainDefinition.startWith(regattaRetrieverClass, Test_Regatta.class);

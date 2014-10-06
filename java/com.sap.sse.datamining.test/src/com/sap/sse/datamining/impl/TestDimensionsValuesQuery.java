@@ -13,6 +13,8 @@ import java.util.concurrent.ExecutionException;
 import org.junit.Before;
 import org.junit.Test;
 
+import com.sap.sse.datamining.DataRetrieverChainBuilder;
+import com.sap.sse.datamining.DataRetrieverChainDefinition;
 import com.sap.sse.datamining.Query;
 import com.sap.sse.datamining.components.Processor;
 import com.sap.sse.datamining.factories.FunctionDTOFactory;
@@ -22,7 +24,6 @@ import com.sap.sse.datamining.impl.components.GroupedDataEntry;
 import com.sap.sse.datamining.impl.components.ParallelByDimensionGroupingProcessor;
 import com.sap.sse.datamining.impl.components.ParallelGroupedElementsValueExtractionProcessor;
 import com.sap.sse.datamining.impl.components.aggregators.ParallelGroupedDataCollectingAsSetProcessor;
-import com.sap.sse.datamining.impl.criterias.NonFilteringFilterCriterion;
 import com.sap.sse.datamining.shared.GroupKey;
 import com.sap.sse.datamining.shared.dto.FunctionDTO;
 import com.sap.sse.datamining.shared.impl.GenericGroupKey;
@@ -52,6 +53,7 @@ public class TestDimensionsValuesQuery {
     private Function<String> dimensionCompetitorName;
     private Function<String> dimensionCompetitorSailID;
     
+    private DataRetrieverChainDefinition<Collection<Test_Regatta>> dataRetrieverChainDefinition;
     private Collection<Test_Regatta> dataSource;
 
     @Test
@@ -76,22 +78,18 @@ public class TestDimensionsValuesQuery {
                 legDimensions.add(dimensionLegNumber);
                 legDimensions.add(dimensionCompetitorName);
                 legDimensions.add(dimensionCompetitorSailID);
-                Collection<Processor<Test_HasLegOfCompetitorContext, ?>> legRetrieverResultReceivers = createGroupingExtractorsForDimensions(Test_HasLegOfCompetitorContext.class, extractionResultReceivers, legDimensions);
-                Processor<Test_HasRaceContext, Test_HasLegOfCompetitorContext> legWithContextRetriever = new TestLegOfCompetitorWithContextFilteringRetrievalProcessor(ConcurrencyTestsUtil.getExecutor(), legRetrieverResultReceivers, new NonFilteringFilterCriterion<>(Test_HasLegOfCompetitorContext.class));
-
                 
                 Collection<Function<?>> raceDimensions = new ArrayList<>();
                 raceDimensions.add(dimensionRegattaName);
                 raceDimensions.add(dimensionRaceName);
                 raceDimensions.add(dimensionBoatClassName);
                 raceDimensions.add(dimensionYear);
-                Collection<Processor<Test_HasRaceContext, ?>> raceRetrieverResultReceivers = createGroupingExtractorsForDimensions(Test_HasRaceContext.class, extractionResultReceivers, raceDimensions);
-                raceRetrieverResultReceivers.add(legWithContextRetriever);
-                Processor<Test_Regatta, Test_HasRaceContext> raceWithContextRetriever = new TestRaceWithContextFilteringRetrievalProcessor(ConcurrencyTestsUtil.getExecutor(), raceRetrieverResultReceivers, new NonFilteringFilterCriterion<>(Test_HasRaceContext.class));
-                Collection<Processor<Test_Regatta, ?>> regattaRetrieverResultReceivers = new ArrayList<>();
-                regattaRetrieverResultReceivers.add(raceWithContextRetriever);
                 
-                return new TestRegattaRetrievalProcessor(ConcurrencyTestsUtil.getExecutor(), regattaRetrieverResultReceivers);
+                DataRetrieverChainBuilder<Collection<Test_Regatta>> chainBuilder = dataRetrieverChainDefinition.startBuilding(ConcurrencyTestsUtil.getExecutor());
+                chainBuilder.stepDeeper().addAllResultReceivers(createGroupingExtractorsForDimensions(Test_HasRaceContext.class, extractionResultReceivers, raceDimensions))
+                            .stepDeeper().addAllResultReceivers(createGroupingExtractorsForDimensions(Test_HasLegOfCompetitorContext.class, extractionResultReceivers, legDimensions));
+                
+                return chainBuilder.build();
             }
         };
     }
@@ -151,6 +149,26 @@ public class TestDimensionsValuesQuery {
             }
         }
         return expectedResultData;
+    }
+    
+    @SuppressWarnings("unchecked")
+    @Before
+    public void initializeDataRetrieverChain() {
+        dataRetrieverChainDefinition = new SimpleDataRetrieverChainDefinition<>((Class<Collection<Test_Regatta>>)(Class<?>) Collection.class);
+        Class<Processor<Collection<Test_Regatta>, Test_Regatta>> regattaRetrieverClass = (Class<Processor<Collection<Test_Regatta>, Test_Regatta>>)(Class<?>) TestRegattaRetrievalProcessor.class;
+        dataRetrieverChainDefinition.startWith(regattaRetrieverClass, Test_Regatta.class);
+        
+        Class<Processor<Test_Regatta, Test_HasRaceContext>> raceRetrieverClass = 
+                (Class<Processor<Test_Regatta, Test_HasRaceContext>>)(Class<?>) TestRaceWithContextFilteringRetrievalProcessor.class;
+        dataRetrieverChainDefinition.addAsLast(regattaRetrieverClass,
+                                               raceRetrieverClass,
+                                               Test_HasRaceContext.class);
+        
+        Class<Processor<Test_HasRaceContext, Test_HasLegOfCompetitorContext>> legRetrieverClass = 
+                (Class<Processor<Test_HasRaceContext, Test_HasLegOfCompetitorContext>>)(Class<?>) TestLegOfCompetitorWithContextFilteringRetrievalProcessor.class;
+        dataRetrieverChainDefinition.addAsLast(raceRetrieverClass,
+                                               legRetrieverClass,
+                                               Test_HasLegOfCompetitorContext.class);
     }
 
     @Before

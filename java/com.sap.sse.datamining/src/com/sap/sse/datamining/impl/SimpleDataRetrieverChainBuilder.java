@@ -61,6 +61,14 @@ public class SimpleDataRetrieverChainBuilder<DataSourceType> implements DataRetr
         filters.setCriterion((Class<T>) currentRetrievedDataType, filter);
         return this;
     }
+    
+    @Override
+    public <T> DataRetrieverChainBuilder<DataSourceType> addAllResultReceivers(Collection<Processor<T, ?>> resultReceivers) {
+        for (Processor<T, ?> resultReceiver : resultReceivers) {
+            addResultReceiver(resultReceiver);
+        }
+        return this;
+    }
 
     @SuppressWarnings("unchecked") // Checking type safety with comparison of the classes
     @Override

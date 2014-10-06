@@ -25,9 +25,10 @@ import com.sap.sse.datamining.components.Processor;
 import com.sap.sse.datamining.factories.FunctionFactory;
 import com.sap.sse.datamining.functions.Function;
 import com.sap.sse.datamining.i18n.DataMiningStringMessages;
-import com.sap.sse.datamining.impl.components.AbstractSimpleFilteringRetrievalProcessor;
 import com.sap.sse.datamining.impl.components.AbstractSimpleParallelProcessor;
+import com.sap.sse.datamining.impl.components.AbstractSimpleRetrievalProcessor;
 import com.sap.sse.datamining.impl.components.GroupedDataEntry;
+import com.sap.sse.datamining.impl.components.ParallelFilteringProcessor;
 import com.sap.sse.datamining.impl.components.ParallelGroupedElementsValueExtractionProcessor;
 import com.sap.sse.datamining.impl.components.ParallelMultiDimensionsValueNestingGroupingProcessor;
 import com.sap.sse.datamining.impl.components.aggregators.ParallelGroupedDoubleDataSumAggregationProcessor;
@@ -122,25 +123,29 @@ public class TestProcessorQuery {
                 Function<Integer> getLengthFunction = FunctionFactory.createMethodWrappingFunction(FunctionTestsUtil.getMethodFromClass(Number.class, "getLength"));
                 dimensions.add(getLengthFunction);
                 Processor<Number, GroupedDataEntry<Number>> lengthGrouper = new ParallelMultiDimensionsValueNestingGroupingProcessor<>(Number.class, executor, groupingResultReceivers, dimensions);
-                Collection<Processor<Number, ?>> retrievalResultReceivers = new ArrayList<>();
-                retrievalResultReceivers.add(lengthGrouper);
+                Collection<Processor<Number, ?>> filtrationResultReceivers = new ArrayList<>();
+                filtrationResultReceivers.add(lengthGrouper);
                 
-                FilterCriterion<Number> retrievalFilterCriteria = new AbstractFilterCriterion<Number>(Number.class) {
+                FilterCriterion<Number> filterCriterion = new AbstractFilterCriterion<Number>(Number.class) {
                     @Override
                     public boolean matches(Number element) {
                         return element.getValue() >= 10;
                     }
                 };
+                Processor<Number, Number> filtrationProcessor = new ParallelFilteringProcessor<>(Number.class, executor, filtrationResultReceivers, filterCriterion);
+                Collection<Processor<Number, ?>> retrievalResultReceivers = new ArrayList<>();
+                retrievalResultReceivers.add(filtrationProcessor);
+                
                 @SuppressWarnings("unchecked")
-                Processor<Iterable<Number>, Number> filteringRetrievalProcessor = new AbstractSimpleFilteringRetrievalProcessor<Iterable<Number>, Number>((Class<Iterable<Number>>)(Class<?>) Iterable.class, Number.class,
-                                                                                                                                                          ConcurrencyTestsUtil.getExecutor(), retrievalResultReceivers, retrievalFilterCriteria) {
+                Processor<Iterable<Number>, Number> retrievalProcessor = new AbstractSimpleRetrievalProcessor<Iterable<Number>, Number>((Class<Iterable<Number>>)(Class<?>) Iterable.class, Number.class,
+                                                                                                                                                          ConcurrencyTestsUtil.getExecutor(), retrievalResultReceivers) {
                     @Override
                     protected Iterable<Number> retrieveData(Iterable<Number> element) {
                         return element;
                     }
                 };
                 
-                return filteringRetrievalProcessor;
+                return retrievalProcessor;
             }
         };
         return query;

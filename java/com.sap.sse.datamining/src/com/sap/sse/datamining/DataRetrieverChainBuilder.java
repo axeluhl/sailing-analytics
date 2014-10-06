@@ -14,6 +14,7 @@ public interface DataRetrieverChainBuilder<DataSourceType> {
 
     public <T> DataRetrieverChainBuilder<DataSourceType> setFilter(FilterCriterion<T> filter);
     public <T> DataRetrieverChainBuilder<DataSourceType> addResultReceiver(Processor<T, ?> resultReceiver);
+    public <T> DataRetrieverChainBuilder<DataSourceType> addAllResultReceivers(Collection<Processor<T, ?>> resultReceivers);
 
     public boolean canStepDeeper();
     public DataRetrieverChainBuilder<DataSourceType> stepDeeper();

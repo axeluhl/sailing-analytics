@@ -56,6 +56,11 @@ public class OverwritingResultDataBuilder implements AdditionalResultDataBuilder
     }
 
     @Override
+    public int getRetrievedDataAmount() {
+        return retrievedDataAmount;
+    }
+
+    @Override
     public void setExtractionFunction(Function<?> extractionFunction) {
         this.extractionFunction = extractionFunction;
         unit = extractionFunction.getResultUnit();
@@ -65,10 +70,6 @@ public class OverwritingResultDataBuilder implements AdditionalResultDataBuilder
     @Override
     public void setAggregationNameMessageKey(String aggregationNameMessageKey) {
         this.aggregationNameMessageKey = aggregationNameMessageKey;
-    }
-
-    protected int getRetrievedDataAmount() {
-        return retrievedDataAmount;
     }
 
     protected Function<?> getExtractionFunction() {

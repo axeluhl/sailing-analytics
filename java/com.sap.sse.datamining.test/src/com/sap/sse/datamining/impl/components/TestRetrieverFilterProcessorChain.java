@@ -19,9 +19,9 @@ import com.sap.sse.datamining.impl.criterias.AbstractFilterCriterion;
 import com.sap.sse.datamining.test.util.ConcurrencyTestsUtil;
 import com.sap.sse.datamining.test.util.components.NullProcessor;
 
-public class TestAbstractFilteringRetrievalProcessor {
+public class TestRetrieverFilterProcessorChain {
     
-    private Processor<Iterable<Integer>, Integer> filteringRetrievalProcessor;
+    private Processor<Iterable<Integer>, Integer> retrievalProcessor;
     private Collection<Integer> dataSource;
     
     private Collection<Integer> receivedResults = new ArrayList<>();
@@ -33,8 +33,8 @@ public class TestAbstractFilteringRetrievalProcessor {
 
     @Test
     public void testFiltration() throws InterruptedException {
-        filteringRetrievalProcessor.processElement(dataSource);
-        filteringRetrievalProcessor.finish();
+        retrievalProcessor.processElement(dataSource);
+        retrievalProcessor.finish();
         ConcurrencyTestsUtil.sleepFor(500); //Giving the processor time to finish
 
         Collection<Integer> expectedResults = Arrays.asList(0, 1, 2);
@@ -50,14 +50,14 @@ public class TestAbstractFilteringRetrievalProcessor {
 
     @Test
     public void testProvidedAdditionalData() throws InterruptedException {
-        filteringRetrievalProcessor.processElement(dataSource);
-        filteringRetrievalProcessor.finish();
+        retrievalProcessor.processElement(dataSource);
+        retrievalProcessor.finish();
         ConcurrencyTestsUtil.sleepFor(500); //Giving the processor time to finish
         
         int expectedRetrievedDataAmount = receivedResults.size();
         
         OverwritingResultDataBuilder resultDataBuilder = new OverwritingResultDataBuilder();
-        filteringRetrievalProcessor.getAdditionalResultData(resultDataBuilder);
+        retrievalProcessor.getAdditionalResultData(resultDataBuilder);
         assertThat(resultDataBuilder.getRetrievedDataAmount(), is(expectedRetrievedDataAmount));
     }
     
@@ -69,7 +69,7 @@ public class TestAbstractFilteringRetrievalProcessor {
         layeredDataSource.add(dataSource);
         
         Collection<Processor<Iterable<Integer>, ?>> resultReceivers = new ArrayList<>();
-        resultReceivers.add(filteringRetrievalProcessor);
+        resultReceivers.add(retrievalProcessor);
         @SuppressWarnings("unchecked")
         Processor<Iterable<Iterable<Integer>>, Iterable<Integer>> layeredRetrievalProcessor = new AbstractSimpleRetrievalProcessor<Iterable<Iterable<Integer>>, Iterable<Integer>>((Class<Iterable<Iterable<Integer>>>)(Class<?>) Iterable.class, (Class<Iterable<Integer>>)(Class<?>) Iterable.class,
                                                                                                                                                                                     ConcurrencyTestsUtil.getExecutor(), resultReceivers) {
@@ -92,7 +92,7 @@ public class TestAbstractFilteringRetrievalProcessor {
     
     @SuppressWarnings("unchecked")
     @Before
-    public void setUpResultReceiverAndProcessor() {
+    public void setUpResultReceiverAndProcessors() {
         Processor<Integer, Void> resultReceiver = new NullProcessor<Integer, Void>(Integer.class, Void.class) {
             @Override
             public void processElement(Integer element) {
@@ -101,8 +101,8 @@ public class TestAbstractFilteringRetrievalProcessor {
                 }
             }
         };
-        Collection<Processor<Integer, ?>> resultReceivers = new ArrayList<>();
-        resultReceivers.add(resultReceiver);
+        Collection<Processor<Integer, ?>> filtrationResultReceivers = new ArrayList<>();
+        filtrationResultReceivers.add(resultReceiver);
         
         FilterCriterion<Integer> elementGreaterZeroFilterCriteria = new AbstractFilterCriterion<Integer>(Integer.class) {
             @Override
@@ -110,7 +110,11 @@ public class TestAbstractFilteringRetrievalProcessor {
                 return element >= 0;
             }
         };
-        filteringRetrievalProcessor = new AbstractSimpleFilteringRetrievalProcessor<Iterable<Integer>, Integer>((Class<Iterable<Integer>>)(Class<?>) Iterable.class, Integer.class, ConcurrencyTestsUtil.getExecutor(), resultReceivers, elementGreaterZeroFilterCriteria) {
+        Processor<Integer, Integer> filtrationProcessor = new ParallelFilteringProcessor<>(Integer.class, ConcurrencyTestsUtil.getExecutor(), filtrationResultReceivers, elementGreaterZeroFilterCriteria);
+        
+        Collection<Processor<Integer, ?>> retrievalResultReceivers = new ArrayList<>();
+        retrievalResultReceivers.add(filtrationProcessor);
+        retrievalProcessor = new AbstractSimpleRetrievalProcessor<Iterable<Integer>, Integer>((Class<Iterable<Integer>>)(Class<?>) Iterable.class, Integer.class, ConcurrencyTestsUtil.getExecutor(), retrievalResultReceivers) {
             @Override
             protected Iterable<Integer> retrieveData(Iterable<Integer> element) {
                 return element;
