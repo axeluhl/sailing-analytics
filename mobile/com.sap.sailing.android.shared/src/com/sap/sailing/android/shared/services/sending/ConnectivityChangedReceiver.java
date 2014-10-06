@@ -11,7 +11,6 @@ import android.content.pm.PackageManager;
 import android.net.ConnectivityManager;
 import android.net.NetworkInfo;
 
-import com.sap.sailing.android.shared.R;
 import com.sap.sailing.android.shared.logging.ExLog;
 
 /**
@@ -39,8 +38,7 @@ public class ConnectivityChangedReceiver extends BroadcastReceiver {
         NetworkInfo networkInfo = (NetworkInfo)intent.getParcelableExtra(ConnectivityManager.EXTRA_NETWORK_INFO);
         if (!networkInfo.isConnected())
             return;
-        Intent sendSavedIntent = new Intent(context.getString(R.string.intent_send_saved_intents));
-        context.startService(sendSavedIntent);
+        context.startService(MessageSendingService.createSendDelayedIntent(context));
 
         disable(context);
     }

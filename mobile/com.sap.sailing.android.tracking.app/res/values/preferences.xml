@@ -2,6 +2,4 @@
 <resources xmlns:tools="http://schemas.android.com/tools" tools:ignore="MissingTranslation">
     <!-- override default values of android.shared -->
     <string name="app_folder">tracking</string>
-    <string name="intent_send_saved_intents">com.sap.sailing.android.tracking.app.action.sendSavedIntents</string>
-    <string name="intent_send_message">com.sap.sailing.android.tracking.app.action.sendMessage</string>
 </resources>

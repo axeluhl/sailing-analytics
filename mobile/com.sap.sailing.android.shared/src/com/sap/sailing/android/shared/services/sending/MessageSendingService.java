@@ -40,19 +40,11 @@ import com.sap.sailing.android.shared.services.sending.MessageSenderTask.Message
  * <service
  *   android:name="com.sap.sailing.android.shared.services.sending.MessageSendingService"
  *   android:exported="false" >
- *   <intent-filter>
- *     <action android:name="com.sap.sailing.android.shared.action.sendSavedIntents" />
- *     <action android:name="com.sap.sailing.android.shared.action.sendMessage" />
- *   </intent-filter>
  *   <meta-data android:name="com.sap.sailing.android.shared.services.sending.messageRestorer"
  *     android:value="com.sap.sailing.racecommittee.app.services.sending.EventRestorer" />
  * </service>
  * }</pre>
  * 
- * To enable side-by-side use of multiple apps (e.g. RaceCommittee and Tracking) using this same shared library,
- * where one sending service should not influence the other, exchange the names in the intent filter, and
- * override the strings "intent_send_saved_intents" and "intent_send_message" (e.g. in the
- * preferences.xml of your app).
  * 
  * Message sending example: 
  * <pre>{@code
@@ -134,13 +126,20 @@ public class MessageSendingService extends Service implements MessageSendingList
 
     public static Intent createMessageIntent(Context context, String url, Serializable callbackPayload, Serializable messageId, String payload,
             Class<? extends ServerReplyCallback> callbackClass) {
-        Intent messageIntent = new Intent(context.getString(R.string.intent_send_message));
+        Intent messageIntent = new Intent(context, MessageSendingService.class);
+        messageIntent.setAction(context.getString(R.string.intent_send_message));
         messageIntent.putExtra(CALLBACK_PAYLOAD, callbackPayload);
         messageIntent.putExtra(MESSAGE_ID, messageId);
         messageIntent.putExtra(PAYLOAD, payload);
         messageIntent.putExtra(URL, url);
         messageIntent.putExtra(CALLBACK_CLASS, callbackClass == null ? null : callbackClass.getName());
         return messageIntent;
+    }
+    
+    public static Intent createSendDelayedIntent(Context context) {
+        Intent intent = new Intent(context, MessageSendingService.class);
+        intent.setAction(context.getString(R.string.intent_send_saved_intents));
+        return intent;
     }
 
     private Serializable getMessageId(Intent intent) {
