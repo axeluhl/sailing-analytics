@@ -1,11 +1,13 @@
-package com.sap.sailing.racecommittee.app.ui.activities;
+package com.sap.sailing.android.shared.ui.activities;
 
 import android.app.Activity;
 import android.os.Bundle;
 
+import com.sap.sailing.android.shared.logging.ExLog;
 import com.sap.sailing.android.shared.logging.LifecycleLogger;
 
 public abstract class LoggableActivity extends Activity {
+    private static final String TAG = LoggableActivity.class.getName();
 
     private LifecycleLogger lifeLogger;
 
@@ -14,38 +16,44 @@ public abstract class LoggableActivity extends Activity {
     }
 
     @Override
-    public void onCreate(Bundle savedInstanceState) {
+    protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         lifeLogger.onCreate(this);
     }
 
     @Override
-    public void onStart() {
+    protected void onStart() {
         super.onStart();
         lifeLogger.onStart(this);
     }
 
     @Override
-    public void onResume() {
+    protected void onResume() {
         super.onResume();
         lifeLogger.onResume(this);
     }
 
     @Override
-    public void onPause() {
+    protected void onPause() {
         super.onPause();
         lifeLogger.onPause(this);
     }
 
     @Override
-    public void onStop() {
+    protected void onStop() {
         super.onStop();
         lifeLogger.onStop(this);
     }
 
     @Override
-    public void onDestroy() {
+    protected void onDestroy() {
         super.onDestroy();
         lifeLogger.onDestroy(this);
+    }
+    
+    @Override
+    public void onBackPressed() {
+        super.onBackPressed();
+        ExLog.i(this, TAG, String.format("Back pressed on activity %s", this.getClass().getSimpleName()));
     }
 }
