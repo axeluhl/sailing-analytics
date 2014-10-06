@@ -394,7 +394,10 @@ public class RaceMap extends AbsolutePanel implements TimeListener, CompetitorSe
               RaceMap.this.add(map, 0, 0);
               Image sapLogo = createSAPLogo();
               RaceMap.this.add(sapLogo);
-              RaceMap.this.add(combinedWindPanel, 10, 10+sapLogo.getHeight()+/*spacing*/15);
+              map.setControls(ControlPosition.LEFT_TOP, combinedWindPanel);
+              combinedWindPanel.getParent().getElement().getStyle().setProperty("paddingLeft", "10px");
+              combinedWindPanel.getParent().getElement().getStyle().setProperty("paddingTop", "34px");
+
               RaceMap.this.raceMapImageManager.loadMapIcons(map);
               map.setSize("100%", "100%");
               map.addZoomChangeHandler(new ZoomChangeMapHandler() {

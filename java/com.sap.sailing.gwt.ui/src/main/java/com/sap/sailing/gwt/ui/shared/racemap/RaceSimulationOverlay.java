@@ -42,7 +42,7 @@ public class RaceSimulationOverlay extends FullCanvasOverlay  implements TimeLis
     public static final String GET_SIMULATION_CATEGORY = "getSimulation";
     private final String textColor = "Black";
     private final String textFont = "10pt OpenSansRegular";
-    private int xOffset = 10;
+    private int xOffset = 0;
     private int yOffset = 0; //150;
     private double rectWidth = 20;
     private double rectHeight = 20;
@@ -114,6 +114,8 @@ public class RaceSimulationOverlay extends FullCanvasOverlay  implements TimeLis
             }
         });*/
         map.setControls(ControlPosition.LEFT_TOP, simulationLegend);
+        simulationLegend.getParent().getElement().getStyle().setProperty("paddingLeft", "10px");
+        simulationLegend.getParent().getElement().getStyle().setProperty("paddingTop", "10px");
     }
     
     public void onBoundsChanged(boolean zoomChanged) {
