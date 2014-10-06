@@ -4,6 +4,7 @@ import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
 
+import com.google.gwt.canvas.client.Canvas;
 import com.google.gwt.canvas.dom.client.Context2d;
 import com.google.gwt.canvas.dom.client.TextMetrics;
 import com.google.gwt.i18n.client.DateTimeFormat;
@@ -11,11 +12,13 @@ import com.google.gwt.i18n.client.TimeZone;
 import com.google.gwt.maps.client.MapWidget;
 import com.google.gwt.maps.client.base.LatLng;
 import com.google.gwt.maps.client.base.Point;
+import com.google.gwt.maps.client.controls.ControlPosition;
 import com.google.gwt.user.client.Window;
 import com.google.gwt.user.client.rpc.AsyncCallback;
 import com.sap.sailing.domain.common.RegattaAndRaceIdentifier;
 import com.sap.sailing.gwt.ui.actions.GetSimulationAction;
 import com.sap.sailing.gwt.ui.client.SailingServiceAsync;
+import com.sap.sailing.gwt.ui.client.StringMessages;
 import com.sap.sailing.gwt.ui.client.shared.racemap.RaceMap;
 import com.sap.sailing.gwt.ui.shared.PathDTO;
 import com.sap.sailing.gwt.ui.shared.SimulatorResultsDTO;
@@ -40,10 +43,10 @@ public class RaceSimulationOverlay extends FullCanvasOverlay  implements TimeLis
     private final String textColor = "Black";
     private final String textFont = "10pt OpenSansRegular";
     private int xOffset = 10;
-    private int yOffset = 150;
+    private int yOffset = 0; //150;
     private double rectWidth = 20;
     private double rectHeight = 20;
-    
+    private final StringMessages stringMessages;
     private final Timer timer;
     private Date lastSimulationTime;
     private final long deltaSimulationTime = 15000;
@@ -54,12 +57,14 @@ public class RaceSimulationOverlay extends FullCanvasOverlay  implements TimeLis
     private SimulatorResultsDTO simulationResult;
     private PathDTO racePath;
     private Date prevStartTime;
+    private Canvas simulationLegend;
     
-    public RaceSimulationOverlay(MapWidget map, int zIndex, final Timer timer, RegattaAndRaceIdentifier raceIdentifier, SailingServiceAsync sailingService, AsyncActionsExecutor asyncActionsExecutor) {
+    public RaceSimulationOverlay(MapWidget map, int zIndex, final Timer timer, RegattaAndRaceIdentifier raceIdentifier, SailingServiceAsync sailingService, StringMessages stringMessages, AsyncActionsExecutor asyncActionsExecutor) {
         super(map, zIndex);
         this.timer = timer;
         this.raceIdentifier = raceIdentifier;
         this.sailingService = sailingService;
+        this.stringMessages = stringMessages;
         this.asyncActionsExecutor = asyncActionsExecutor;
         this.colors = new ColorPaletteGenerator();
     }
@@ -98,33 +103,59 @@ public class RaceSimulationOverlay extends FullCanvasOverlay  implements TimeLis
     protected void draw() {
     }    
     
+    private void createSimulationLegend(MapWidget map) {
+        simulationLegend = Canvas.createIfSupported();
+        simulationLegend.setStyleName("gwt-MapSimulationLegend");
+        simulationLegend.setTitle(stringMessages.simulationLegendTooltip());
+        /*simulationLegend.addClickHandler(new ClickHandler() {
+            @Override
+            public void onClick(ClickEvent event) {
+                new SettingsDialog<RaceMapSettings>(component, stringMessages).show();
+            }
+        });*/
+        map.setControls(ControlPosition.LEFT_TOP, simulationLegend);
+    }
+    
     public void onBoundsChanged(boolean zoomChanged) {
         // calibrate canvas
         super.draw();
         // draw simulation paths
         this.drawPaths();
-        this.drawLegend();
     }
     
     public void clearCanvas() {
+        // clear paths
         double w = this.getCanvas().getOffsetWidth();
         double h = this.getCanvas().getOffsetHeight();
         Context2d g = this.getCanvas().getContext2d();
         g.clearRect(0, 0, w, h);
+        
+        // clear legend
+        if (simulationLegend != null) {
+            w = simulationLegend.getOffsetWidth();
+            h = simulationLegend.getOffsetHeight();
+            g = simulationLegend.getContext2d();
+            g.clearRect(0, 0, w, h);            
+        }
     }
     
     public void drawPaths() {
-             
+        // check availability of simulation results
         if (simulationResult == null) {
             return;
         }
         if (simulationResult.getPaths() == null) {
             return;
         }
+        // draw legend
+        if (simulationLegend == null) {
+            createSimulationLegend(map);
+        }
+        drawLegend(simulationLegend);
         
         // calibrate canvas
         super.draw();
-
+        // draw paths
         Context2d ctxt = canvas.getContext2d();
         PathDTO[] paths = simulationResult.getPaths();
         boolean first = true;
@@ -151,7 +182,7 @@ public class RaceSimulationOverlay extends FullCanvasOverlay  implements TimeLis
         
     }
     
-    public void drawLegend() {
+    public void drawLegend(Canvas canvas) {
         if (this.simulationResult == null) {
             return;
         }
@@ -169,27 +200,36 @@ public class RaceSimulationOverlay extends FullCanvasOverlay  implements TimeLis
             txtmet = context2d.measureText(path.getName());
             txtmaxwidth = Math.max(txtmaxwidth, txtmet.getWidth());
         }
-        drawRectangleWithText(xOffset, yOffset, "rgba(255,255,255,0.8);",
+        //canvas.setSize(xOffset + rectWidth + txtmaxwidth + timewidth + 10.0+"px", rectHeight*(paths.length+1)+"px");
+        int canvasWidth = (int)Math.ceil(xOffset + rectWidth + txtmaxwidth + timewidth + 10.0 + 5.0);
+        int canvasHeight = (int)Math.ceil(yOffset + rectHeight*(paths.length+1));
+        setCanvasSize(canvas, canvasWidth, canvasHeight);
+        drawRectangleWithText(context2d, xOffset, yOffset, "rgba(255,255,255,0.8);",
                 racePath.getName().split("#")[1], getFormattedTime(racePath.getPathTime()), txtmaxwidth, timewidth);
         for (PathDTO path : paths) {
-            drawRectangleWithText(xOffset, yOffset + (paths.length-index) * rectHeight, this.colors.getColor(paths.length-1-index),
+            drawRectangleWithText(context2d, xOffset, yOffset + (paths.length-index) * rectHeight, this.colors.getColor(paths.length-1-index),
                 path.getName().split("#")[1], getFormattedTime(path.getPathTime()), txtmaxwidth, timewidth);
             index++;
         }
     }
+
+    protected void setCanvasSize(Canvas canvas, int canvasWidth, int canvasHeight) {
+        canvas.setWidth(String.valueOf(canvasWidth));
+        canvas.setHeight(String.valueOf(canvasHeight));
+        canvas.setCoordinateSpaceWidth(canvasWidth);
+        canvas.setCoordinateSpaceHeight(canvasHeight);
+    }
     
-    protected void drawRectangle(double x, double y, String color) {
-        Context2d context2d = canvas.getContext2d();
+    protected void drawRectangle(Context2d context2d, double x, double y, String color) {
         context2d.setFillStyle(color);
         context2d.setLineWidth(3);
         context2d.fillRect(x, y, rectWidth, rectHeight);
     }
 
-    protected void drawRectangleWithText(double x, double y, String color, String text, String time, double textmaxwidth, double timewidth) {
+    protected void drawRectangleWithText(Context2d context2d, double x, double y, String color, String text, String time, double textmaxwidth, double timewidth) {
         double offset = 3.0;
-        Context2d context2d = canvas.getContext2d();
         context2d.setFont(textFont);
-        drawRectangle(x, y, color);
+        drawRectangle(context2d, x, y, color);
         context2d.setGlobalAlpha(0.80);
         context2d.setFillStyle("white");
         context2d.fillRect(x + rectWidth, y, 15.0 + textmaxwidth + timewidth, rectHeight);
@@ -234,7 +274,6 @@ public class RaceSimulationOverlay extends FullCanvasOverlay  implements TimeLis
                                 racePath.setName("0#Race");
                                 clearCanvas();
                                 drawPaths();
-                                drawLegend();
                             }
                         }
                     }

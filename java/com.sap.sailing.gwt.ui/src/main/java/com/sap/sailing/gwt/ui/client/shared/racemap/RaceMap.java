@@ -466,7 +466,7 @@ public class RaceMap extends AbsolutePanel implements TimeListener, CompetitorSe
               }
 
               // initialize simulation canvas
-              simulationOverlay = new RaceSimulationOverlay(getMap(), /* zIndex */ 0, timer, raceIdentifier, sailingService, asyncActionsExecutor);
+              simulationOverlay = new RaceSimulationOverlay(getMap(), /* zIndex */ 0, timer, raceIdentifier, sailingService, stringMessages, asyncActionsExecutor);
               simulationOverlay.addToMap();
 
               createHeaderPanel(map);

@@ -1052,6 +1052,7 @@ public interface StringMessages extends Messages {
     String errorFetchingWindStreamletData(String message);
     String showWindStreamletOverlay();
     String showSimulationOverlay();
+    String simulationLegendTooltip();
     String regattaNameMustNotContainSlashes();
     String showNumberOfRacesScored();
     String racesScored();
