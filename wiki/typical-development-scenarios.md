@@ -16,6 +16,18 @@ Add a New Library which can not be found in any SAP Repository
 •	The admin of the central p2 repository (currently at sapsailing.com) must now replace the content of the central server /home/trac/p2-repositories/sailing with the content of the new local base p2 repository (com.sap.sailing.targetplatform/base/gen/p2)
 *	Reload the target platform in the IDE
 
+## Adding or Upgrading Bundles from a p2 Repository
+
+The Eclipse p2 handling is sometimes mysterious. Listing the plugins in a repository doesn't seem to be supported by the Eclipse UI. However, not always do we want to add entire features; sometimes, just a list of bundles would do. The following command, executed on the command line, executed from your Eclipse installation directory, can help you find the right bundles and their versions to add textually to the *.target definition file:
+
+  `java -jar plugins/org.eclipse.equinox.launcher_1.3.0.v20140415-2008.jar -debug -consolelog -application org.eclipse.equinox.p2.director -repository http://download.eclipse.org/releases/luna/ -list`
+
+Note that you may have to adjust the exact file name and version number of the equinox launcher JAR file according to your installed Eclipse version.
+
+From the list shown, pick the bundle you need and add it to the `*.target` file, as in
+
+  `<unit id="org.apache.felix.gogo.runtime" version="0.10.0.v201209301036"/>`
+
 ## Adding an Existing Remote p2 Repository as New Source of Libraries
 *	Add the URL of the remote p2 repository to all target definition files in com.sap.sailing.targetplatform/defintions
 *	Select the features of the p2 repository you want to use in the project
