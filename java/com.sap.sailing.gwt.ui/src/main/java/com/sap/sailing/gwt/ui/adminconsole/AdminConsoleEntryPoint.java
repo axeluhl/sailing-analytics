@@ -207,7 +207,7 @@ public class AdminConsoleEntryPoint extends AbstractEntryPoint implements Regatt
         final TabLayoutPanel advancedTabPanel = new TabLayoutPanel(2.5, Unit.EM);
         advancedTabPanel.addSelectionHandler(tabSelectionHandler);
         advancedTabPanel.ensureDebugId("AdvancedPanel");
-        tabPanel.add(advancedTabPanel, "Advanced");
+        tabPanel.add(advancedTabPanel, stringMessages.advanced());
 
         final ReplicationPanel replicationPanel = new ReplicationPanel(sailingService, this, stringMessages);
         addToTabPanel(advancedTabPanel, replicationPanel, stringMessages.replication(), AdminConsoleFeatures.MANAGE_REPLICATION);
