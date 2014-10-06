@@ -44,7 +44,6 @@ public class LoginPanel extends FlowPanel implements UserStatusEventHandler {
 
     static {
         EntryPointHelper.registerASyncService((ServiceDefTarget) userManagementService,
-                RemoteServiceMappingConstants.WEB_CONTEXT_PATH,
                 RemoteServiceMappingConstants.userManagementServiceRemotePath);
     }
 
@@ -103,7 +102,6 @@ public class LoginPanel extends FlowPanel implements UserStatusEventHandler {
         infoPanel.setWidget(loginPanel);
         wrapperPanel.add(infoPanel);
         add(wrapperPanel);
-
         addUserStatusEventHandler(this);
         registerStorageListener();
         updateUser();
@@ -112,11 +110,9 @@ public class LoginPanel extends FlowPanel implements UserStatusEventHandler {
     private void initLoginContent() {
         loginPanel = new FormPanel();
         loginPanel.addSubmitHandler(new SubmitHandler() {
-
             @Override
             public void onSubmit(SubmitEvent event) {
                 userManagementService.login(name.getText(), password.getText(), new AsyncCallback<SuccessInfo>() {
-
                     @Override
                     public void onFailure(Throwable caught) {
                         Window.alert(caught.getMessage());
@@ -134,9 +130,7 @@ public class LoginPanel extends FlowPanel implements UserStatusEventHandler {
                 });
             }
         });
-
         FlowPanel formContent = new FlowPanel();
-
         Label nameLabel = new Label("Name: ");
         formContent.add(nameLabel);
         name = new TextBox();

@@ -31,7 +31,6 @@
 		<dispatcher>ERROR</dispatcher>
 	</filter-mapping>
 
-
 	<servlet>
 		<display-name>User Management Service</display-name>
 		<servlet-name>UserManagementService</servlet-name>

@@ -1,5 +1,8 @@
 package com.sap.sse.security.ui.server;
 
+import java.lang.reflect.InvocationHandler;
+import java.lang.reflect.Method;
+import java.lang.reflect.Proxy;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Collections;
@@ -14,6 +17,7 @@ import java.util.concurrent.FutureTask;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
+import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpSession;
 
 import org.apache.shiro.SecurityUtils;
@@ -23,6 +27,7 @@ import org.osgi.framework.BundleContext;
 import org.osgi.util.tracker.ServiceTracker;
 
 import com.google.gwt.user.server.rpc.RemoteServiceServlet;
+import com.google.gwt.user.server.rpc.SerializationPolicy;
 import com.sap.sse.security.Credential;
 import com.sap.sse.security.SecurityService;
 import com.sap.sse.security.SessionUtils;
@@ -84,6 +89,32 @@ public class UserManagementServiceImpl extends RemoteServiceServlet implements U
     @Override
     public String sayHello() {
         return "Hello";
+    }
+
+    @Override
+    protected SerializationPolicy doGetSerializationPolicy(HttpServletRequest request, String moduleBaseURL,
+            String strongName) {
+        final String emulatedContextPath = "/"+(moduleBaseURL.split("/")[3]);
+        try {
+            final Method getContextPath = HttpServletRequest.class.getDeclaredMethod("getContextPath");
+            HttpServletRequest proxyRequestAnsweringWithEmulatedContextPath = (HttpServletRequest) Proxy
+                    .newProxyInstance(request.getClass().getClassLoader(), new Class[] { HttpServletRequest.class },
+                            new InvocationHandler() {
+                                @Override
+                                public Object invoke(Object proxy, Method method, Object[] args) throws Throwable {
+                                    if (method.equals(getContextPath)) {
+                                        return emulatedContextPath;
+                                    } else {
+                                        return method.invoke(proxy, args);
+                                    }
+                                }
+                            });
+            return super.doGetSerializationPolicy(proxyRequestAnsweringWithEmulatedContextPath, moduleBaseURL, strongName);
+        } catch (NoSuchMethodException | SecurityException e) {
+            logger.log(Level.SEVERE, "Error obtaining serialization policy for " + request + " with moduleBaseURL "
+                    + moduleBaseURL, e);
+            throw new RuntimeException(e);
+        }
     }
 
     @Override
