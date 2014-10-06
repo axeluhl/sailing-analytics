@@ -15,15 +15,16 @@ public interface DataRetrieverChainBuilder<DataSourceType> {
     public <T> DataRetrieverChainBuilder<DataSourceType> setFilter(FilterCriterion<T> filter);
     public <T> DataRetrieverChainBuilder<DataSourceType> addResultReceiver(Processor<T, ?> resultReceiver);
 
+    public boolean canStepDeeper();
     public DataRetrieverChainBuilder<DataSourceType> stepDeeper();
 
     public Processor<DataSourceType, ?> build();
     
-    public class TypeSafeFilterCriterionCollection {
+    public class TypeSafeFilterCriteriaCollection {
         
         private final Map<Class<?>, FilterCriterion<?>> criteriaMappedByElementType;
         
-        public TypeSafeFilterCriterionCollection() {
+        public TypeSafeFilterCriteriaCollection() {
             criteriaMappedByElementType = new HashMap<>();
         }
         
@@ -31,7 +32,7 @@ public interface DataRetrieverChainBuilder<DataSourceType> {
             criteriaMappedByElementType.put(elementType, criterion);
         }
         
-        @SuppressWarnings("unchecked") // The way the criteria are set, the cast has to work
+        @SuppressWarnings("unchecked") // The cast has to work, due to the way the criteria were set
         public <T> FilterCriterion<T> getCriterion(Class<T> elementType) {
             return (FilterCriterion<T>) criteriaMappedByElementType.get(elementType);
         }
@@ -54,7 +55,7 @@ public interface DataRetrieverChainBuilder<DataSourceType> {
             receiversMappedByInputType.get(inputType).add(resultReceiver);
         }
 
-        @SuppressWarnings("unchecked") // The way the processors were added, the cast has to work
+        @SuppressWarnings("unchecked") // The cast has to work, due to the way the processors were added
         public <T> Collection<Processor<T, ?>> getResultReceivers(Class<T> inputType) {
             return (Collection<Processor<T, ?>>)(Collection<?>) receiversMappedByInputType.get(inputType);
         }

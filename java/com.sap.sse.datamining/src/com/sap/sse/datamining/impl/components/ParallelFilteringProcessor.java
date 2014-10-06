@@ -10,11 +10,11 @@ import com.sap.sse.datamining.components.Processor;
 
 public class ParallelFilteringProcessor<InputType> extends AbstractSimpleParallelProcessor<InputType, InputType> {
 
-    private final FilterCriterion<InputType> filterCriteria;
+    private final FilterCriterion<InputType> filterCriterion;
 
-    public ParallelFilteringProcessor(Class<InputType> inputType, ExecutorService executor, Collection<Processor<InputType, ?>> resultReceivers, FilterCriterion<InputType> filterCriteria) {
+    public ParallelFilteringProcessor(Class<InputType> inputType, ExecutorService executor, Collection<Processor<InputType, ?>> resultReceivers, FilterCriterion<InputType> filterCriterion) {
         super(inputType, inputType, executor, resultReceivers);
-        this.filterCriteria = filterCriteria;
+        this.filterCriterion = filterCriterion;
     }
 
     @Override
@@ -22,7 +22,7 @@ public class ParallelFilteringProcessor<InputType> extends AbstractSimpleParalle
         return new Callable<InputType>() {
             @Override
             public InputType call() throws Exception {
-                if (filterCriteria.matches(element)) {
+                if (filterCriterion.matches(element)) {
                     return element;
                 } else {
                     return ParallelFilteringProcessor.super.createInvalidResult();
