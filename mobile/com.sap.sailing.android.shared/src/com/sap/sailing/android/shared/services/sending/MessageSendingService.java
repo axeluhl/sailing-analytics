@@ -19,12 +19,12 @@ import android.os.Binder;
 import android.os.Bundle;
 import android.os.Handler;
 import android.os.IBinder;
-import android.preference.PreferenceManager;
 
 import com.sap.sailing.android.shared.R;
 import com.sap.sailing.android.shared.logging.ExLog;
 import com.sap.sailing.android.shared.services.sending.MessagePersistenceManager.MessageRestorer;
 import com.sap.sailing.android.shared.services.sending.MessageSenderTask.MessageSendingListener;
+import com.sap.sailing.android.shared.util.PrefUtils;
 
 /**
  * Service that handles sending messages to a webservice. Deals with an offline setting
@@ -242,8 +242,8 @@ public class MessageSendingService extends Service implements MessageSendingList
     }
 
     private void sendMessage(Intent intent) {
-        boolean sendingActive = PreferenceManager.getDefaultSharedPreferences(this).getBoolean(getString(R.string.preference_isSendingActive_key),
-                getResources().getBoolean(R.bool.preference_isSendingActive_default));
+        boolean sendingActive = PrefUtils.getBoolean(this, R.string.preference_isSendingActive_key,
+                R.bool.preference_isSendingActive_default);
         if (! sendingActive) {
             ExLog.i(this, TAG, "Sending deactivated. Message will not be sent to server.");
         } else {
@@ -260,8 +260,8 @@ public class MessageSendingService extends Service implements MessageSendingList
 
     @Override
     public void onMessageSent(Intent intent, boolean success, InputStream inputStream) {
-        int resendMillis = PreferenceManager.getDefaultSharedPreferences(this).getInt(getString(R.string.preference_messageResendIntervalMillis_key),
-                getResources().getInteger(R.integer.preference_messageResendIntervalMillis_default));
+        int resendMillis = PrefUtils.getInt(this, R.string.preference_messageResendIntervalMillis_key,
+                R.integer.preference_messageResendIntervalMillis_default);
         if (!success) {
             ExLog.w(this, TAG, "Error while posting intent to server. Will persist intent...");
             persistenceManager.persistIntent(intent);
