@@ -64,7 +64,7 @@ public class UserManagementServiceImpl extends RemoteServiceServlet implements U
                 try {
                     logger.info("Waiting for SecurityService...");
                     result = tracker.waitForService(0);
-                    logger.info("Obtained SecurityService "+getSecurityService());
+                    logger.info("Obtained SecurityService "+result);
                     return result;
                 } catch (InterruptedException e) {
                     logger.log(Level.SEVERE, "Interrupted while waiting for UserStore service", e);
