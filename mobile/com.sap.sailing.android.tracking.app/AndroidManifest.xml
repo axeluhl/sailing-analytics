@@ -1,0 +1,45 @@
+<?xml version="1.0" encoding="utf-8"?>
+<manifest xmlns:android="http://schemas.android.com/apk/res/android"
+    package="com.sap.sailing.android.tracking.app"
+    android:versionCode="1" >
+
+    <uses-sdk
+        android:minSdkVersion="13"
+        android:targetSdkVersion="19" />
+
+    <uses-permission android:name="android.permission.INTERNET" />
+    <uses-permission android:name="android.permission.ACCESS_NETWORK_STATE" />
+    <uses-permission android:name="android.permission.ACCESS_FINE_LOCATION" />
+    <uses-permission android:name="android.permission.WRITE_EXTERNAL_STORAGE" />
+
+    <application
+        android:name="TrackingApplication"
+        android:allowBackup="true"
+        android:hardwareAccelerated="true"
+        android:icon="@drawable/sap_sailing_app_icon"
+        android:label="@string/app_name"
+        android:theme="@style/Theme.Welter" >
+
+	<meta-data
+        android:name="com.google.android.gms.version"
+        android:value="@integer/google_play_services_version" />
+
+        <!--service
+            android:name="com.sap.sailing.android.shared.services.sending.MessageSendingService"
+            android:exported="false" >
+            <intent-filter>
+                <action android:name="com.sap.sailing.android.shared.action.sendSavedIntents" />
+                <action android:name="com.sap.sailing.android.shared.action.sendMessage" />
+            </intent-filter>
+            <meta-data android:name="com.sap.sailing.android.shared.services.sending.messageRestorer"
+                android:value="com.sap.sailing.racecommittee.app.services.sending.EventRestorer" />
+        </service>
+
+        <receiver android:name="com.sap.sailing.android.shared.services.sending.ConnectivityChangedReceiver" >
+            <intent-filter>
+                <action android:name="android.net.conn.CONNECTIVITY_CHANGE" />
+            </intent-filter>
+        </receiver-->
+    </application>
+
+</manifest>
