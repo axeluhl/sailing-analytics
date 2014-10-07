@@ -12,7 +12,6 @@ import com.sap.sse.datamining.DataRetrieverChainDefinition;
 import com.sap.sse.datamining.components.FilterCriterion;
 import com.sap.sse.datamining.components.Processor;
 import com.sap.sse.datamining.impl.components.ParallelFilteringProcessor;
-import com.sap.sse.datamining.impl.criterias.NonFilteringFilterCriterion;
 
 public class SimpleDataRetrieverChainBuilder<DataSourceType> implements DataRetrieverChainBuilder<DataSourceType> {
     
@@ -133,14 +132,8 @@ public class SimpleDataRetrieverChainBuilder<DataSourceType> implements DataRetr
         try {
             retrieverConstructor = retrieverType.getConstructor(ExecutorService.class, Collection.class);
         } catch (NoSuchMethodException | SecurityException e) {
-            // TODO Remove the inner try-catch, after all filtering retriever have been split up to a retriever
-            //      followed by a filter
-            try {
-                retrieverConstructor = retrieverType.getConstructor(ExecutorService.class, Collection.class, FilterCriterion.class);
-            } catch (NoSuchMethodException | SecurityException e1) {
-                throw new IllegalArgumentException("Couldn't get an usable constructor from the given retrieverType '"
-                        + retrieverType.getSimpleName() + "'", e);
-            }
+            throw new IllegalArgumentException("Couldn't get an usable constructor from the given retrieverType '"
+                    + retrieverType.getSimpleName() + "'", e);
         }
         
         return constructRetriever(retrieverConstructor, retrievedDataType, resultReceivers, filter);
@@ -149,32 +142,20 @@ public class SimpleDataRetrieverChainBuilder<DataSourceType> implements DataRetr
     private <ResultType> Processor<?, ResultType> constructRetriever(Constructor<Processor<?, ResultType>> retrieverConstructor, Class<ResultType> retrievedDataType,
             Collection<Processor<ResultType, ?>> resultReceivers, FilterCriterion<ResultType> filter) {
         try {
-            if (retrieverConstructor.getParameterTypes().length == 2) {
-                Collection<Processor<ResultType, ?>> retrievalResultReceivers = resultReceivers;
-                if (filter != null) {
-                    Processor<ResultType, ?> filteringProcessor = new ParallelFilteringProcessor<ResultType>(retrievedDataType, executor, resultReceivers, filter);
-                    retrievalResultReceivers = new ArrayList<>();
-                    retrievalResultReceivers.add(filteringProcessor);
-                }
-                
-                return retrieverConstructor.newInstance(executor, retrievalResultReceivers);
+            Collection<Processor<ResultType, ?>> retrievalResultReceivers = resultReceivers;
+            if (filter != null) {
+                Processor<ResultType, ?> filteringProcessor = new ParallelFilteringProcessor<ResultType>(
+                        retrievedDataType, executor, resultReceivers, filter);
+                retrievalResultReceivers = new ArrayList<>();
+                retrievalResultReceivers.add(filteringProcessor);
             }
-            // TODO Remove the second if, after all filtering retriever have been split up to a retriever
-            //      followed by a filter
-            if (retrieverConstructor.getParameterTypes().length == 3) {
-                if (filter == null) {
-                    filter = new NonFilteringFilterCriterion<>(retrievedDataType);
-                }
-                return retrieverConstructor.newInstance(executor, resultReceivers, filter);
-            }
+
+            return retrieverConstructor.newInstance(executor, retrievalResultReceivers);
         } catch (InstantiationException | IllegalAccessException |
                  IllegalArgumentException | InvocationTargetException e) {
             throw new UnsupportedOperationException("Couldn't create a data retriever instance with the constructor "
                                                     + retrieverConstructor.toString(), e);
         }
-        
-        throw new UnsupportedOperationException("Couldn't create a data retriever instance with the constructor "
-                                                + retrieverConstructor.toString());
     }
 
 }

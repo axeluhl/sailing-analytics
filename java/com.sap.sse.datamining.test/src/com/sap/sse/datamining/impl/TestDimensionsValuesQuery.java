@@ -36,8 +36,8 @@ import com.sap.sse.datamining.test.functions.registry.test_contexts.Test_HasLegO
 import com.sap.sse.datamining.test.functions.registry.test_contexts.Test_HasRaceContext;
 import com.sap.sse.datamining.test.util.ComponentsAndQueriesTestsUtil;
 import com.sap.sse.datamining.test.util.ConcurrencyTestsUtil;
-import com.sap.sse.datamining.test.util.components.TestLegOfCompetitorWithContextFilteringRetrievalProcessor;
-import com.sap.sse.datamining.test.util.components.TestRaceWithContextFilteringRetrievalProcessor;
+import com.sap.sse.datamining.test.util.components.TestLegOfCompetitorWithContextRetrievalProcessor;
+import com.sap.sse.datamining.test.util.components.TestRaceWithContextRetrievalProcessor;
 import com.sap.sse.datamining.test.util.components.TestRegattaRetrievalProcessor;
 
 public class TestDimensionsValuesQuery {
@@ -159,13 +159,13 @@ public class TestDimensionsValuesQuery {
         dataRetrieverChainDefinition.startWith(regattaRetrieverClass, Test_Regatta.class);
         
         Class<Processor<Test_Regatta, Test_HasRaceContext>> raceRetrieverClass = 
-                (Class<Processor<Test_Regatta, Test_HasRaceContext>>)(Class<?>) TestRaceWithContextFilteringRetrievalProcessor.class;
+                (Class<Processor<Test_Regatta, Test_HasRaceContext>>)(Class<?>) TestRaceWithContextRetrievalProcessor.class;
         dataRetrieverChainDefinition.addAsLast(regattaRetrieverClass,
                                                raceRetrieverClass,
                                                Test_HasRaceContext.class);
         
         Class<Processor<Test_HasRaceContext, Test_HasLegOfCompetitorContext>> legRetrieverClass = 
-                (Class<Processor<Test_HasRaceContext, Test_HasLegOfCompetitorContext>>)(Class<?>) TestLegOfCompetitorWithContextFilteringRetrievalProcessor.class;
+                (Class<Processor<Test_HasRaceContext, Test_HasLegOfCompetitorContext>>)(Class<?>) TestLegOfCompetitorWithContextRetrievalProcessor.class;
         dataRetrieverChainDefinition.addAsLast(raceRetrieverClass,
                                                legRetrieverClass,
                                                Test_HasLegOfCompetitorContext.class);

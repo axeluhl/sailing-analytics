@@ -9,21 +9,19 @@ import com.sap.sailing.datamining.data.HasTrackedLegContext;
 import com.sap.sailing.datamining.data.HasTrackedLegOfCompetitorContext;
 import com.sap.sailing.datamining.impl.data.TrackedLegOfCompetitorWithContext;
 import com.sap.sailing.domain.base.Competitor;
-import com.sap.sse.datamining.components.FilterCriterion;
 import com.sap.sse.datamining.components.Processor;
-import com.sap.sse.datamining.impl.components.AbstractSimpleFilteringRetrievalProcessor;
+import com.sap.sse.datamining.impl.components.AbstractSimpleRetrievalProcessor;
 import com.sap.sse.datamining.shared.annotations.DataRetriever;
 
 @DataRetriever(dataType=HasTrackedLegOfCompetitorContext.class,
                groupName=Activator.dataRetrieverGroupName,
                level=4)
 public class TrackedLegOfCompetitorFilteringRetrievalProcessor extends
-        AbstractSimpleFilteringRetrievalProcessor<HasTrackedLegContext, HasTrackedLegOfCompetitorContext> {
+        AbstractSimpleRetrievalProcessor<HasTrackedLegContext, HasTrackedLegOfCompetitorContext> {
 
     public TrackedLegOfCompetitorFilteringRetrievalProcessor(ExecutorService executor,
-            Collection<Processor<HasTrackedLegOfCompetitorContext, ?>> resultReceivers,
-            FilterCriterion<HasTrackedLegOfCompetitorContext> criteria) {
-        super(HasTrackedLegContext.class, HasTrackedLegOfCompetitorContext.class, executor, resultReceivers, criteria);
+            Collection<Processor<HasTrackedLegOfCompetitorContext, ?>> resultReceivers) {
+        super(HasTrackedLegContext.class, HasTrackedLegOfCompetitorContext.class, executor, resultReceivers);
     }
 
     @Override

@@ -7,7 +7,6 @@ import java.util.concurrent.ExecutorService;
 
 import com.sap.sse.datamining.DataRetrieverChainBuilder;
 import com.sap.sse.datamining.DataRetrieverChainDefinition;
-import com.sap.sse.datamining.components.FilterCriterion;
 import com.sap.sse.datamining.components.Processor;
 
 public class SimpleDataRetrieverChainDefinition<DataSourceType> implements
@@ -70,14 +69,8 @@ public class SimpleDataRetrieverChainDefinition<DataSourceType> implements
         try {
             retrieverType.getConstructor(ExecutorService.class, Collection.class);
         } catch (NoSuchMethodException | SecurityException e) {
-            // TODO Remove the inner try-catch, after all filtering retriever have been split up to a retriever
-            //      followed by a filter
-            try {
-                retrieverType.getConstructor(ExecutorService.class, Collection.class, FilterCriterion.class);
-            } catch (NoSuchMethodException | SecurityException e1) {
-                throw new IllegalArgumentException("Couldn't get an usable constructor from the given nextRetrieverType '"
-                        + retrieverType.getSimpleName() + "'", e);
-            }
+            throw new IllegalArgumentException("Couldn't get an usable constructor from the given nextRetrieverType '"
+                    + retrieverType.getSimpleName() + "'", e);
         }
     }
 
