@@ -1,5 +1,12 @@
 package com.sap.sse.security.userstore.shared;
 
+/**
+ * Provides entries for Shiro's [urls] ini section. The enumeration literals are parsed by
+ * the <code><SecurityServiceImpl</code> constructor. The naming convention for the literals is
+ * 
+ * @author Benjamin Ebling
+ *
+ */
 public enum DefaultSettings {
 
     URLS_LOGIN("/Login.html"),

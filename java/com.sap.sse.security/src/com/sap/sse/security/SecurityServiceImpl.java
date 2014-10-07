@@ -59,12 +59,12 @@ import com.sap.sse.security.userstore.shared.UserManagementException;
 import com.sap.sse.security.userstore.shared.UserStore;
 import com.sap.sse.security.userstore.shared.UsernamePasswordAccount;
 
-public class SecurityServiceImpl  extends RemoteServiceServlet implements SecurityService {
-    
+public class SecurityServiceImpl extends RemoteServiceServlet implements SecurityService {
+
     private static final long serialVersionUID = -3490163216601311858L;
-    
+
     private static final Logger logger = Logger.getLogger(SecurityServiceImpl.class.getName());
-    
+
     private SecurityManager securityManager;
     private CacheManager cacheManager = new EhCacheManager();
     private UserStore store;
@@ -73,12 +73,12 @@ public class SecurityServiceImpl  extends RemoteServiceServlet implements Securi
         shiroConfiguration = new Ini();
         shiroConfiguration.loadFromPath("classpath:shiro.ini");
     }
-    
+
     public SecurityServiceImpl(UserStore store) {
-        logger.info("Initializing Security Service with user store "+store);
+        logger.info("Initializing Security Service with user store " + store);
         this.store = store;
         // Create default users if no users exist yet.
-        if (store.getUserCollection().isEmpty()){
+        if (store.getUserCollection().isEmpty()) {
             try {
                 logger.info("No users found, creating default user \"admin\" with password \"admin\"");
                 createSimpleUser("admin", "nobody@sapsailing.com", "admin");
@@ -88,33 +88,37 @@ public class SecurityServiceImpl  extends RemoteServiceServlet implements Securi
                 logger.log(Level.SEVERE, "Exception while creating default admin user", e);
             }
         }
-        
+
         Map<String, Class<?>> allSettingTypes = store.getAllSettingTypes();
-        for (Entry<String, Class<?>> e : allSettingTypes.entrySet()){
+        for (Entry<String, Class<?>> e : allSettingTypes.entrySet()) {
             String[] classifier = e.getKey().split("_");
-            if (classifier[0].equals("URLS") && !classifier[1].equals("AUTH")){
+            if (classifier[0].equals("URLS") && !classifier[1].equals("AUTH")) {
                 String key = store.getSetting(e.getKey(), String.class);
                 String n = classifier[0] + "_AUTH";
-                for (int i = 1; i < classifier.length; i++){
+                for (int i = 1; i < classifier.length; i++) {
                     n += "_" + classifier[i];
                 }
                 String value = store.getSetting(n, String.class);
-//                if (shiroConfiguration.getSection("urls") == null){
-//                    shiroConfiguration.addSection("urls");
-//                }
+                // if (shiroConfiguration.getSection("urls") == null){
+                // shiroConfiguration.addSection("urls");
+                // }
                 shiroConfiguration.getSection("urls").put(key, value);
             }
         }
-//        shiroConfiguration.getSection("urls").put("/**", "anon");
-        for (Entry<String, String> e : shiroConfiguration.getSection("urls").entrySet()){
-            System.out.println(e.getKey() + ": " + e.getValue());
-        }
-//        ini.getSection("urls").put("", "");
+        // shiroConfiguration.getSection("urls").put("/**", "anon");
+        // ini.getSection("urls").put("", "");
         Factory<SecurityManager> factory = new WebIniSecurityManagerFactory(shiroConfiguration);
-//        LifecycleUtils.init(ini);
-        
-        
+        // LifecycleUtils.init(ini);
+
         logger.info("Loaded shiro.ini file from: classpath:shiro.ini");
+        StringBuilder logMessage = new StringBuilder("[urls] section from Shiro configuration:");
+        for (Entry<String, String> e : shiroConfiguration.getSection("urls").entrySet()) {
+            logMessage.append("\n");
+            logMessage.append(e.getKey());
+            logMessage.append(": ");
+            logMessage.append(e.getValue());
+        }
+        logger.info(logMessage.toString());
         System.setProperty("java.net.useSystemProxies", "true");
         SecurityManager securityManager = factory.getInstance();
         logger.info("Created: " + securityManager);
@@ -142,10 +146,9 @@ public class SecurityServiceImpl  extends RemoteServiceServlet implements Securi
         SessionUtils.saveUsername(username);
         HttpServletRequest httpRequest = WebUtils.getHttpRequest(subject);
         SavedRequest savedRequest = WebUtils.getSavedRequest(httpRequest);
-        if (savedRequest != null){
+        if (savedRequest != null) {
             redirectUrl = savedRequest.getRequestUrl();
-        }
-        else {
+        } else {
             redirectUrl = "";
         }
         System.out.println("Redirecturl: " + redirectUrl);
@@ -166,10 +169,10 @@ public class SecurityServiceImpl  extends RemoteServiceServlet implements Securi
 
     @Override
     public User createSimpleUser(String name, String email, String password) throws UserManagementException {
-        if (store.getUserByName(name) != null){
+        if (store.getUserByName(name) != null) {
             throw new UserManagementException(UserManagementException.USER_ALREADY_EXISTS);
         }
-        if (name == null || password == null || name.length() < 3 || password.length() < 5){
+        if (name == null || password == null || name.length() < 3 || password.length() < 5) {
             throw new UserManagementException(UserManagementException.INVALID_CREDENTIALS);
         }
         RandomNumberGenerator rng = new SecureRandomNumberGenerator();
@@ -203,7 +206,7 @@ public class SecurityServiceImpl  extends RemoteServiceServlet implements Securi
     public void setSetting(String key, Object setting) {
         String[] split = key.split("_");
         if (split[0].equals("URLS"))
-        store.setSetting(key, setting);
+            store.setSetting(key, setting);
     }
 
     @Override
@@ -223,7 +226,7 @@ public class SecurityServiceImpl  extends RemoteServiceServlet implements Securi
 
     @Override
     public User createSocialUser(String name, SocialUserAccount socialUserAccount) throws UserManagementException {
-        if (store.getUserByName(name) != null){
+        if (store.getUserByName(name) != null) {
             throw new UserManagementException(UserManagementException.USER_ALREADY_EXISTS);
         }
         return store.createUser(name, socialUserAccount.getProperty(Social.EMAIL.name()), socialUserAccount);
@@ -248,17 +251,18 @@ public class SecurityServiceImpl  extends RemoteServiceServlet implements Securi
                         + "Please contact your administrator to unlock it.");
                 throw new UserManagementException("Invalid credentials!");
             } catch (AuthenticationException ae) {
-                logger.log(Level.SEVERE,ae.getLocalizedMessage());
+                logger.log(Level.SEVERE, ae.getLocalizedMessage());
                 throw new UserManagementException("An error occured while authenticating the user!");
             }
         }
         String username = SessionUtils.loadUsername();
-        if (username == null){
-            logger.info("Something went wrong while authneticating, check doGetAuthenticationInfo() in " + OAuthRealm.class.getName() + ".");
+        if (username == null) {
+            logger.info("Something went wrong while authneticating, check doGetAuthenticationInfo() in "
+                    + OAuthRealm.class.getName() + ".");
             throw new UserManagementException("An error occured while authenticating the user!");
         }
         User user = store.getUserByName(username);
-        if (user == null){
+        if (user == null) {
             logger.info("Could not find user " + username);
             throw new UserManagementException("An error occured while authenticating the user!");
         }
@@ -272,7 +276,7 @@ public class SecurityServiceImpl  extends RemoteServiceServlet implements Securi
             return null;
         }
         String username = SessionUtils.loadUsername();
-        if (username == null || username.length() <= 0){
+        if (username == null || username.length() <= 0) {
             return null;
         }
         return store.getUserByName(username);
@@ -303,7 +307,8 @@ public class SecurityServiceImpl  extends RemoteServiceServlet implements Securi
                 // get the access token
                 SessionUtils.saveRequestTokenToSession(requestToken);
             } catch (Exception e) {
-                throw new UserManagementException("Could not get request token for " + authProvider + " " + e.getMessage());
+                throw new UserManagementException("Could not get request token for " + authProvider + " "
+                        + e.getMessage());
             }
 
         }
@@ -322,14 +327,14 @@ public class SecurityServiceImpl  extends RemoteServiceServlet implements Securi
             }
         } catch (Exception e) {
             e.printStackTrace();
-            throw new  UserManagementException("Could not get Authorization url: ");
+            throw new UserManagementException("Could not get Authorization url: ");
         }
 
         if (authProvider == ClientUtils.FLICKR) {
             authorizationUrl += "&perms=read";
         }
-        
-        if (authProvider == ClientUtils.FACEBOOK){
+
+        if (authProvider == ClientUtils.FACEBOOK) {
             authorizationUrl += "&scope=email";
         }
 
@@ -341,84 +346,109 @@ public class SecurityServiceImpl  extends RemoteServiceServlet implements Securi
         OAuthService service = null;
         switch (authProvider) {
         case ClientUtils.FACEBOOK: {
-            service = new ServiceBuilder().provider(FacebookApi.class).apiKey(store.getSetting(SocialSettingsKeys.OAUTH_FACEBOOK_APP_ID.name(), String.class))
-                    .apiSecret(store.getSetting(SocialSettingsKeys.OAUTH_FACEBOOK_APP_SECRET.name(), String.class)).callback(ClientUtils.getCallbackUrl()).build();
+            service = new ServiceBuilder().provider(FacebookApi.class)
+                    .apiKey(store.getSetting(SocialSettingsKeys.OAUTH_FACEBOOK_APP_ID.name(), String.class))
+                    .apiSecret(store.getSetting(SocialSettingsKeys.OAUTH_FACEBOOK_APP_SECRET.name(), String.class))
+                    .callback(ClientUtils.getCallbackUrl()).build();
             break;
         }
 
         case ClientUtils.GOOGLE: {
-            service = new ServiceBuilder().provider(GoogleApi.class).apiKey(store.getSetting(SocialSettingsKeys.OAUTH_GOOGLE_APP_ID.name(), String.class))
-                    .apiSecret(store.getSetting(SocialSettingsKeys.OAUTH_GOOGLE_APP_SECRET.name(), String.class)).scope(store.getSetting(SocialSettingsKeys.OAUTH_GOOGLE_SCOPE.name(), String.class))
+            service = new ServiceBuilder().provider(GoogleApi.class)
+                    .apiKey(store.getSetting(SocialSettingsKeys.OAUTH_GOOGLE_APP_ID.name(), String.class))
+                    .apiSecret(store.getSetting(SocialSettingsKeys.OAUTH_GOOGLE_APP_SECRET.name(), String.class))
+                    .scope(store.getSetting(SocialSettingsKeys.OAUTH_GOOGLE_SCOPE.name(), String.class))
                     .callback(ClientUtils.getCallbackUrl()).build();
 
             break;
         }
 
         case ClientUtils.TWITTER: {
-            service = new ServiceBuilder().provider(TwitterApi.class).apiKey(store.getSetting(SocialSettingsKeys.OAUTH_TWITTER_APP_ID.name(), String.class))
-                    .apiSecret(store.getSetting(SocialSettingsKeys.OAUTH_TWITTER_APP_SECRET.name(), String.class)).callback(ClientUtils.getCallbackUrl()).build();
+            service = new ServiceBuilder().provider(TwitterApi.class)
+                    .apiKey(store.getSetting(SocialSettingsKeys.OAUTH_TWITTER_APP_ID.name(), String.class))
+                    .apiSecret(store.getSetting(SocialSettingsKeys.OAUTH_TWITTER_APP_SECRET.name(), String.class))
+                    .callback(ClientUtils.getCallbackUrl()).build();
             break;
         }
         case ClientUtils.YAHOO: {
-            service = new ServiceBuilder().provider(YahooApi.class).apiKey(store.getSetting(SocialSettingsKeys.OAUTH_YAHOO_APP_ID.name(), String.class))
-                    .apiSecret(store.getSetting(SocialSettingsKeys.OAUTH_YAHOO_APP_SECRET.name(), String.class)).callback(ClientUtils.getCallbackUrl()).build();
+            service = new ServiceBuilder().provider(YahooApi.class)
+                    .apiKey(store.getSetting(SocialSettingsKeys.OAUTH_YAHOO_APP_ID.name(), String.class))
+                    .apiSecret(store.getSetting(SocialSettingsKeys.OAUTH_YAHOO_APP_SECRET.name(), String.class))
+                    .callback(ClientUtils.getCallbackUrl()).build();
             break;
         }
 
         case ClientUtils.LINKEDIN: {
-            service = new ServiceBuilder().provider(LinkedInApi.class).apiKey(store.getSetting(SocialSettingsKeys.OAUTH_LINKEDIN_APP_ID.name(), String.class))
-                    .apiSecret(store.getSetting(SocialSettingsKeys.OAUTH_LINKEDIN_APP_SECRET.name(), String.class)).callback(ClientUtils.getCallbackUrl()).build();
+            service = new ServiceBuilder().provider(LinkedInApi.class)
+                    .apiKey(store.getSetting(SocialSettingsKeys.OAUTH_LINKEDIN_APP_ID.name(), String.class))
+                    .apiSecret(store.getSetting(SocialSettingsKeys.OAUTH_LINKEDIN_APP_SECRET.name(), String.class))
+                    .callback(ClientUtils.getCallbackUrl()).build();
             break;
         }
 
         case ClientUtils.INSTAGRAM: {
-            service = new ServiceBuilder().provider(InstagramApi.class).apiKey(store.getSetting(SocialSettingsKeys.OAUTH_INSTAGRAM_APP_ID.name(), String.class))
-                    .apiSecret(store.getSetting(SocialSettingsKeys.OAUTH_INSTAGRAM_APP_SECRET.name(), String.class)).callback(ClientUtils.getCallbackUrl()).build();
+            service = new ServiceBuilder().provider(InstagramApi.class)
+                    .apiKey(store.getSetting(SocialSettingsKeys.OAUTH_INSTAGRAM_APP_ID.name(), String.class))
+                    .apiSecret(store.getSetting(SocialSettingsKeys.OAUTH_INSTAGRAM_APP_SECRET.name(), String.class))
+                    .callback(ClientUtils.getCallbackUrl()).build();
             break;
         }
 
         case ClientUtils.GITHUB: {
-            service = new ServiceBuilder().provider(GithubApi.class).apiKey(store.getSetting(SocialSettingsKeys.OAUTH_GITHUB_APP_ID.name(), String.class))
-                    .apiSecret(store.getSetting(SocialSettingsKeys.OAUTH_GITHUB_APP_SECRET.name(), String.class)).callback(ClientUtils.getCallbackUrl()).build();
+            service = new ServiceBuilder().provider(GithubApi.class)
+                    .apiKey(store.getSetting(SocialSettingsKeys.OAUTH_GITHUB_APP_ID.name(), String.class))
+                    .apiSecret(store.getSetting(SocialSettingsKeys.OAUTH_GITHUB_APP_SECRET.name(), String.class))
+                    .callback(ClientUtils.getCallbackUrl()).build();
             break;
 
         }
 
         case ClientUtils.IMGUR: {
-            service = new ServiceBuilder().provider(ImgUrApi.class).apiKey(store.getSetting(SocialSettingsKeys.OAUTH_IMGUR_APP_ID.name(), String.class))
-                    .apiSecret(store.getSetting(SocialSettingsKeys.OAUTH_IMGUR_APP_SECRET.name(), String.class)).callback(ClientUtils.getCallbackUrl()).build();
+            service = new ServiceBuilder().provider(ImgUrApi.class)
+                    .apiKey(store.getSetting(SocialSettingsKeys.OAUTH_IMGUR_APP_ID.name(), String.class))
+                    .apiSecret(store.getSetting(SocialSettingsKeys.OAUTH_IMGUR_APP_SECRET.name(), String.class))
+                    .callback(ClientUtils.getCallbackUrl()).build();
             break;
         }
 
         case ClientUtils.FLICKR: {
-            service = new ServiceBuilder().provider(FlickrApi.class).apiKey(store.getSetting(SocialSettingsKeys.OAUTH_FLICKR_APP_ID.name(), String.class))
-                    .apiSecret(store.getSetting(SocialSettingsKeys.OAUTH_FLICKR_APP_SECRET.name(), String.class)).callback(ClientUtils.getCallbackUrl()).build();
+            service = new ServiceBuilder().provider(FlickrApi.class)
+                    .apiKey(store.getSetting(SocialSettingsKeys.OAUTH_FLICKR_APP_ID.name(), String.class))
+                    .apiSecret(store.getSetting(SocialSettingsKeys.OAUTH_FLICKR_APP_SECRET.name(), String.class))
+                    .callback(ClientUtils.getCallbackUrl()).build();
             break;
         }
 
         case ClientUtils.VIMEO: {
-            service = new ServiceBuilder().provider(VimeoApi.class).apiKey(store.getSetting(SocialSettingsKeys.OAUTH_VIMEO_APP_ID.name(), String.class))
-                    .apiSecret(store.getSetting(SocialSettingsKeys.OAUTH_VIMEO_APP_SECRET.name(), String.class)).callback(ClientUtils.getCallbackUrl()).build();
+            service = new ServiceBuilder().provider(VimeoApi.class)
+                    .apiKey(store.getSetting(SocialSettingsKeys.OAUTH_VIMEO_APP_ID.name(), String.class))
+                    .apiSecret(store.getSetting(SocialSettingsKeys.OAUTH_VIMEO_APP_SECRET.name(), String.class))
+                    .callback(ClientUtils.getCallbackUrl()).build();
             break;
         }
 
         case ClientUtils.WINDOWS_LIVE: {
             // a Scope must be specified
-            service = new ServiceBuilder().provider(LiveApi.class).apiKey(store.getSetting(SocialSettingsKeys.OAUTH_WINDOWS_LIVE_APP_ID.name(), String.class))
-                    .apiSecret(store.getSetting(SocialSettingsKeys.OAUTH_WINDOWS_LIVE_APP_SECRET.name(), String.class)).callback(ClientUtils.getCallbackUrl())
-                    .scope("wl.basic").build();
+            service = new ServiceBuilder().provider(LiveApi.class)
+                    .apiKey(store.getSetting(SocialSettingsKeys.OAUTH_WINDOWS_LIVE_APP_ID.name(), String.class))
+                    .apiSecret(store.getSetting(SocialSettingsKeys.OAUTH_WINDOWS_LIVE_APP_SECRET.name(), String.class))
+                    .callback(ClientUtils.getCallbackUrl()).scope("wl.basic").build();
             break;
         }
 
         case ClientUtils.TUMBLR: {
-            service = new ServiceBuilder().provider(TumblrApi.class).apiKey(store.getSetting(SocialSettingsKeys.OAUTH_TUMBLR_LIVE_APP_ID.name(), String.class))
-                    .apiSecret(store.getSetting(SocialSettingsKeys.OAUTH_TUMBLR_LIVE_APP_SECRET.name(), String.class)).callback(ClientUtils.getCallbackUrl()).build();
+            service = new ServiceBuilder().provider(TumblrApi.class)
+                    .apiKey(store.getSetting(SocialSettingsKeys.OAUTH_TUMBLR_LIVE_APP_ID.name(), String.class))
+                    .apiSecret(store.getSetting(SocialSettingsKeys.OAUTH_TUMBLR_LIVE_APP_SECRET.name(), String.class))
+                    .callback(ClientUtils.getCallbackUrl()).build();
             break;
         }
 
         case ClientUtils.FOURSQUARE: {
-            service = new ServiceBuilder().provider(Foursquare2Api.class).apiKey(store.getSetting(SocialSettingsKeys.OAUTH_FOURSQUARE_APP_ID.name(), String.class))
-                    .apiSecret(store.getSetting(SocialSettingsKeys.OAUTH_FOURSQUARE_APP_SECRET.name(), String.class)).callback(ClientUtils.getCallbackUrl()).build();
+            service = new ServiceBuilder().provider(Foursquare2Api.class)
+                    .apiKey(store.getSetting(SocialSettingsKeys.OAUTH_FOURSQUARE_APP_ID.name(), String.class))
+                    .apiSecret(store.getSetting(SocialSettingsKeys.OAUTH_FOURSQUARE_APP_SECRET.name(), String.class))
+                    .callback(ClientUtils.getCallbackUrl()).build();
             break;
         }
 
@@ -432,16 +462,16 @@ public class SecurityServiceImpl  extends RemoteServiceServlet implements Securi
 
     @Override
     public void addSetting(String key, Class<?> clazz) throws UserManagementException {
-        if (!isValidSettingsKey(key)){
+        if (!isValidSettingsKey(key)) {
             throw new UserManagementException("Invalid key!");
         }
         store.addSetting(key, clazz);
     }
-    
-    public static boolean isValidSettingsKey(String key){
+
+    public static boolean isValidSettingsKey(String key) {
         char[] characters = key.toCharArray();
-        for (char c : characters){
-            if (!Character.isLetter(c) && c != '_'){
+        for (char c : characters) {
+            if (!Character.isLetter(c) && c != '_') {
                 return false;
             }
         }
@@ -455,42 +485,40 @@ public class SecurityServiceImpl  extends RemoteServiceServlet implements Securi
         System.out.println("Env: " + env);
         FilterChainResolver resolver = env.getFilterChainResolver();
         System.out.println("Resolver: " + resolver);
-        if (resolver instanceof PathMatchingFilterChainResolver){
+        if (resolver instanceof PathMatchingFilterChainResolver) {
             PathMatchingFilterChainResolver pmfcr = (PathMatchingFilterChainResolver) resolver;
             FilterChainManager filterChainManager = pmfcr.getFilterChainManager();
             System.out.println(filterChainManager);
-            
-            
-            
+
             Set<String> chainNames = filterChainManager.getChainNames();
-            
+
             System.out.println("Chains:");
-            for (String s: chainNames){
+            for (String s : chainNames) {
                 System.out.println(s + ": " + Arrays.toString(filterChainManager.getChain(s).toArray(new Filter[0])));
             }
 
-//            Map<String, Class<?>> allSettingTypes = store.getAllSettingTypes();
-//            for (Entry<String, Class<?>> e : allSettingTypes.entrySet()){
-//                String[] classifier = e.getKey().split("_");
-//                if (classifier[0].equals("URLS") && !classifier[1].equals("AUTH")){
-//                    String url = store.getSetting(e.getKey(), String.class);
-//                    String n = classifier[0] + "_AUTH";
-//                    for (int i = 1; i < classifier.length; i++){
-//                        n += "_" + classifier[i];
-//                    }
-//                    String filter = store.getSetting(n, String.class);
-//                    if (url != null && filter != null){
-//                        if (!chainNames.contains(url)){
-//                            filterChainManager.createChain(url, filter);
-//                            logger.info("Created filter " + filter + " for " + url);
-//                        }
-//                        else {
-//                            filterChainManager.addToChain(url, filter);
-//                            logger.info("Updated filter " + filter + " for " + url);
-//                        }
-//                    }
-//                }
-//            }
+            // Map<String, Class<?>> allSettingTypes = store.getAllSettingTypes();
+            // for (Entry<String, Class<?>> e : allSettingTypes.entrySet()){
+            // String[] classifier = e.getKey().split("_");
+            // if (classifier[0].equals("URLS") && !classifier[1].equals("AUTH")){
+            // String url = store.getSetting(e.getKey(), String.class);
+            // String n = classifier[0] + "_AUTH";
+            // for (int i = 1; i < classifier.length; i++){
+            // n += "_" + classifier[i];
+            // }
+            // String filter = store.getSetting(n, String.class);
+            // if (url != null && filter != null){
+            // if (!chainNames.contains(url)){
+            // filterChainManager.createChain(url, filter);
+            // logger.info("Created filter " + filter + " for " + url);
+            // }
+            // else {
+            // filterChainManager.addToChain(url, filter);
+            // logger.info("Updated filter " + filter + " for " + url);
+            // }
+            // }
+            // }
+            // }
         }
     }
 

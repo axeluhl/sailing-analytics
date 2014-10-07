@@ -17,11 +17,9 @@
 		<filter-name>ShiroFilter</filter-name>
 		<filter-class>org.apache.shiro.web.servlet.ShiroFilter</filter-class>
 	</filter>
-	<!-- Make sure any request you want accessible to Shiro is filtered. /* 
-		catches all -->
-	<!-- requests. Usually this filter mapping is defined first (before all 
-		others) to -->
-	<!-- ensure that Shiro works in subsequent filters in the filter chain: -->
+	<!-- Make sure any request you want accessible to Shiro is filtered. "/*" 
+		catches all requests. Usually this filter mapping is defined first (before all 
+		others) to ensure that Shiro works in subsequent filters in the filter chain: -->
 	<filter-mapping>
 		<filter-name>ShiroFilter</filter-name>
 		<url-pattern>/*</url-pattern>

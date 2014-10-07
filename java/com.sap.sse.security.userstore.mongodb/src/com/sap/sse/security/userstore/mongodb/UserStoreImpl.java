@@ -15,12 +15,11 @@ import com.sap.sse.security.userstore.shared.User;
 import com.sap.sse.security.userstore.shared.UserManagementException;
 import com.sap.sse.security.userstore.shared.UserStore;
 
-
 public class UserStoreImpl implements UserStore {
     private static final Logger logger = Logger.getLogger(UserStoreImpl.class.getName());
-    
+
     private String name = "MongoDB user store";
-    
+
     private ConcurrentHashMap<String, User> users;
     private ConcurrentHashMap<String, Object> settings;
     private ConcurrentHashMap<String, Class<?>> settingTypes;
@@ -29,28 +28,28 @@ public class UserStoreImpl implements UserStore {
         users = new ConcurrentHashMap<>();
         settings = new ConcurrentHashMap<>();
         settingTypes = new ConcurrentHashMap<String, Class<?>>();
-        for (Entry<String, Class<?>> e : PersistenceFactory.INSTANCE.getDefaultDomainObjectFactory().loadSettingTypes().entrySet()){
+        for (Entry<String, Class<?>> e : PersistenceFactory.INSTANCE.getDefaultDomainObjectFactory().loadSettingTypes().entrySet()) {
             settingTypes.put(e.getKey(), e.getValue());
         }
-        for (Entry<String, Object> e : PersistenceFactory.INSTANCE.getDefaultDomainObjectFactory().loadSettings().entrySet()){
+        for (Entry<String, Object> e : PersistenceFactory.INSTANCE.getDefaultDomainObjectFactory().loadSettings().entrySet()) {
             settings.put(e.getKey(), e.getValue());
         }
         boolean changed = false;
-        changed = changed | initDefaultSettingsIfEmpty();
-        changed = changed | initSocialSettingsIfEmpty();
-        if (changed){
+        changed = changed || initDefaultSettingsIfEmpty();
+        changed = changed || initSocialSettingsIfEmpty();
+        if (changed) {
             PersistenceFactory.INSTANCE.getDefaultMongoObjectFactory().storeSettingTypes(settingTypes);
             PersistenceFactory.INSTANCE.getDefaultMongoObjectFactory().storeSettings(settings);
         }
-        for (User u : PersistenceFactory.INSTANCE.getDefaultDomainObjectFactory().loadAllUsers()){
+        for (User u : PersistenceFactory.INSTANCE.getDefaultDomainObjectFactory().loadAllUsers()) {
             users.put(u.getName(), u);
         }
     }
-    
+
     private boolean initSocialSettingsIfEmpty() {
         boolean changed = false;
-        for (SocialSettingsKeys ssk : SocialSettingsKeys.values()){
-            if (settingTypes.get(ssk.name()) == null || settings.get(ssk.name()) == null){
+        for (SocialSettingsKeys ssk : SocialSettingsKeys.values()) {
+            if (settingTypes.get(ssk.name()) == null || settings.get(ssk.name()) == null) {
                 addSetting(ssk.name(), String.class);
                 setSetting(ssk.name(), ssk.getValue());
                 changed = true;
@@ -58,11 +57,11 @@ public class UserStoreImpl implements UserStore {
         }
         return changed;
     }
-    
-    private boolean initDefaultSettingsIfEmpty(){
+
+    private boolean initDefaultSettingsIfEmpty() {
         boolean changed = false;
-        for (DefaultSettings ds : DefaultSettings.values()){
-            if (settingTypes.get(ds.name()) == null || settings.get(ds.name()) == null){
+        for (DefaultSettings ds : DefaultSettings.values()) {
+            if (settingTypes.get(ds.name()) == null || settings.get(ds.name()) == null) {
                 addSetting(ds.name(), String.class);
                 setSetting(ds.name(), ds.getValue());
                 changed = true;
@@ -92,7 +91,7 @@ public class UserStoreImpl implements UserStore {
 
     @Override
     public User getUserByName(String name) {
-        if (name == null){
+        if (name == null) {
             return null;
         }
         return users.get(name);
@@ -100,7 +99,7 @@ public class UserStoreImpl implements UserStore {
 
     @Override
     public Set<String> getRolesFromUser(String name) throws UserManagementException {
-        if (users.get(name) == null){
+        if (users.get(name) == null) {
             throw new UserManagementException(UserManagementException.USER_DOES_NOT_EXIST);
         }
         return users.get(name).getRoles();
@@ -108,7 +107,7 @@ public class UserStoreImpl implements UserStore {
 
     @Override
     public void addRoleForUser(String name, String role) throws UserManagementException {
-        if (users.get(name) == null){
+        if (users.get(name) == null) {
             throw new UserManagementException(UserManagementException.USER_DOES_NOT_EXIST);
         }
         users.get(name).addRole(role);
@@ -117,7 +116,7 @@ public class UserStoreImpl implements UserStore {
 
     @Override
     public void removeRoleFromUser(String name, String role) throws UserManagementException {
-        if (users.get(name) == null){
+        if (users.get(name) == null) {
             throw new UserManagementException(UserManagementException.USER_DOES_NOT_EXIST);
         }
         users.get(name).removeRole(role);
@@ -126,7 +125,7 @@ public class UserStoreImpl implements UserStore {
 
     @Override
     public void deleteUser(String name) throws UserManagementException {
-        if (users.get(name) == null){
+        if (users.get(name) == null) {
             throw new UserManagementException(UserManagementException.USER_DOES_NOT_EXIST);
         }
         logger.info("Deleting user: " + users.get(name).toString());
@@ -137,10 +136,10 @@ public class UserStoreImpl implements UserStore {
     @Override
     public <T> T getSetting(String key, Class<T> clazz) {
         Class<?> settingClazz = settingTypes.get(key);
-        if (settingClazz == null){
+        if (settingClazz == null) {
             return null;
         }
-        if (!settingClazz.equals(clazz)){
+        if (!settingClazz.equals(clazz)) {
             throw new IllegalArgumentException("Value for \"" + key + "\" is not of type \"" + clazz.getName() + "\"!");
         }
         return clazz.cast(settings.get(key));
@@ -155,7 +154,7 @@ public class UserStoreImpl implements UserStore {
     @Override
     public void setSetting(String key, Object setting) {
         Class<?> clazz = settingTypes.get(key);
-        if (clazz == null || !clazz.isInstance(setting)){
+        if (clazz == null || !clazz.isInstance(setting)) {
             return;
         }
         settings.put(key, setting);
