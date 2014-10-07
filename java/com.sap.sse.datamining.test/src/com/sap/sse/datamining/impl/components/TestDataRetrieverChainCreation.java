@@ -78,6 +78,29 @@ public class TestDataRetrieverChainCreation {
         };
     }
 
+    @SuppressWarnings("unchecked")
+    @Test
+    public void testGetRetrievedDataType() {
+        DataRetrieverChainDefinition<Collection<Test_Regatta>> dataRetrieverChainDefinition = new SimpleDataRetrieverChainDefinition<>((Class<Collection<Test_Regatta>>)(Class<?>) Collection.class);
+        Class<Processor<Collection<Test_Regatta>, Test_Regatta>> regattaRetrieverClass = (Class<Processor<Collection<Test_Regatta>, Test_Regatta>>)(Class<?>) TestRegattaRetrievalProcessor.class;
+        dataRetrieverChainDefinition.startWith(regattaRetrieverClass, Test_Regatta.class);
+        assertThat(dataRetrieverChainDefinition.getRetrievedDataType().equals(Test_Regatta.class), is(true));
+        
+        Class<Processor<Test_Regatta, Test_HasRaceContext>> raceRetrieverClass = 
+                (Class<Processor<Test_Regatta, Test_HasRaceContext>>)(Class<?>) TestRaceWithContextRetrievalProcessor.class;
+        dataRetrieverChainDefinition.addAsLast(regattaRetrieverClass,
+                                               raceRetrieverClass,
+                                               Test_HasRaceContext.class);
+        assertThat(dataRetrieverChainDefinition.getRetrievedDataType().equals(Test_HasRaceContext.class), is(true));
+        
+        Class<Processor<Test_HasRaceContext, Test_HasLegOfCompetitorContext>> legRetrieverClass = 
+                (Class<Processor<Test_HasRaceContext, Test_HasLegOfCompetitorContext>>)(Class<?>) TestLegOfCompetitorWithContextRetrievalProcessor.class;
+        dataRetrieverChainDefinition.addAsLast(raceRetrieverClass,
+                                               legRetrieverClass,
+                                               Test_HasLegOfCompetitorContext.class);
+        assertThat(dataRetrieverChainDefinition.getRetrievedDataType().equals(Test_HasLegOfCompetitorContext.class), is(true));
+    }
+
     @Test
     public void testStepByStepDataRetrieverChainCreation() throws InterruptedException {
         DataRetrieverChainBuilder<Collection<Test_Regatta>> chainBuilder = dataRetrieverChainDefinition.startBuilding(ConcurrencyTestsUtil.getExecutor());

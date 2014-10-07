@@ -24,6 +24,11 @@ public class SimpleDataRetrieverChainDefinition<DataSourceType> implements
     public Class<DataSourceType> getDataSourceType() {
         return dataSourceType;
     }
+    
+    @Override
+    public Class<?> getRetrievedDataType() {
+        return dataRetrieverTypesWithInformation.get(dataRetrieverTypesWithInformation.size() - 1).getRetrievedDataType();
+    }
 
     @Override
     public <ResultType> void startWith(Class<Processor<DataSourceType, ResultType>> retrieverType,

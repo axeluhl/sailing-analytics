@@ -7,6 +7,14 @@ import com.sap.sse.datamining.components.Processor;
 public interface DataRetrieverChainDefinition<DataSourceType> {
     
     public Class<DataSourceType> getDataSourceType();
+    
+    /**
+     * Returns the retrieved data type of the complete chain of this definition,
+     * that is the retrieved data type of the last added retriever type.
+     * 
+     * @return the retrieved data type of the complete chain of this definition
+     */
+    public Class<?> getRetrievedDataType();
 
     public <ResultType> void startWith(Class<Processor<DataSourceType, ResultType>> retrieverType, Class<ResultType> retrievedDataType);
 
