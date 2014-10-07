@@ -75,6 +75,16 @@ table {
 	border: 1px solid #C9CACA;
 }
 
+.CombinedWindPanelParentDiv {
+	padding-top: 34px;
+	padding-left: 10px;
+}
+
+.MapSimulationLegendParentDiv {
+	padding-top: 10px;
+	padding-left: 10px;
+}
+
 .RaceMap-HeaderPanel {
 	height: 60px;
 	width: 100%;

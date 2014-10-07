@@ -105,7 +105,7 @@ public class RaceSimulationOverlay extends FullCanvasOverlay  implements TimeLis
     
     private void createSimulationLegend(MapWidget map) {
         simulationLegend = Canvas.createIfSupported();
-        simulationLegend.setStyleName("gwt-MapSimulationLegend");
+        simulationLegend.addStyleName("MapSimulationLegend");
         simulationLegend.setTitle(stringMessages.simulationLegendTooltip());
         /*simulationLegend.addClickHandler(new ClickHandler() {
             @Override
@@ -114,8 +114,7 @@ public class RaceSimulationOverlay extends FullCanvasOverlay  implements TimeLis
             }
         });*/
         map.setControls(ControlPosition.LEFT_TOP, simulationLegend);
-        simulationLegend.getParent().getElement().getStyle().setProperty("paddingLeft", "10px");
-        simulationLegend.getParent().getElement().getStyle().setProperty("paddingTop", "10px");
+        simulationLegend.getParent().addStyleName("MapSimulationLegendParentDiv");
     }
     
     public void onBoundsChanged(boolean zoomChanged) {
