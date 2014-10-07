@@ -56,7 +56,7 @@ public class VideoFloatingContainer extends AbstractVideoContainer implements Vi
 
     @Override
     void show() {
-        dialogBox.setPopupPosition(20, Document.get().getClientHeight()-dialogBox.getOffsetHeight()-500);
+        dialogBox.setPopupPosition(5, Document.get().getClientHeight()-dialogBox.getOffsetHeight()-500);
         dialogBox.show();
     }
 

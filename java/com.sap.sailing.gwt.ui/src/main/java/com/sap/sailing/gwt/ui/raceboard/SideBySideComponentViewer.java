@@ -3,11 +3,9 @@ package com.sap.sailing.gwt.ui.raceboard;
 import java.util.ArrayList;
 import java.util.List;
 
-import com.google.gwt.dom.client.Document;
 import com.google.gwt.dom.client.Style.Unit;
 import com.google.gwt.event.dom.client.ClickEvent;
 import com.google.gwt.event.dom.client.ClickHandler;
-import com.google.gwt.safehtml.shared.SafeHtml;
 import com.google.gwt.user.client.ui.AbsolutePanel;
 import com.google.gwt.user.client.ui.Button;
 import com.google.gwt.user.client.ui.DockLayoutPanel.Direction;
@@ -18,10 +16,11 @@ import com.google.gwt.user.client.ui.ScrollPanel;
 import com.google.gwt.user.client.ui.Widget;
 import com.google.gwt.user.client.ui.WidgetCollection;
 import com.sap.sailing.gwt.ui.client.StringMessages;
-import com.sap.sailing.gwt.ui.client.media.MediaMultiSelectionControl;
+import com.sap.sailing.gwt.ui.client.media.MediaManagementControl;
 import com.sap.sailing.gwt.ui.client.media.MediaPlayerManager;
 import com.sap.sailing.gwt.ui.client.media.MediaPlayerManager.PlayerChangeListener;
 import com.sap.sailing.gwt.ui.client.media.MediaPlayerManagerComponent;
+import com.sap.sailing.gwt.ui.client.media.MediaSingleSelectionControl;
 import com.sap.sailing.gwt.ui.client.shared.components.Component;
 import com.sap.sailing.gwt.ui.client.shared.components.ComponentViewer;
 import com.sap.sailing.gwt.ui.client.shared.components.SettingsDialog;
@@ -58,10 +57,8 @@ public class SideBySideComponentViewer implements ComponentViewer {
     private final List<Component<?>> components;
     private final ScrollPanel leftScrollPanel;
     private final StringMessages stringMessages;
-    private final MediaPlayerManagerComponent mediaPlayerManagerComponent;
-    private final Button videoToggleButton;
+    private final Button mediaSelectionButton;
     private final Button mediaManagementButton;
-    private boolean videoPlays = false;
 
     private LayoutPanel mainPanel;
 
@@ -75,23 +72,35 @@ public class SideBySideComponentViewer implements ComponentViewer {
         this.stringMessages = stringMessages;
         this.leftComponent = leftComponentP;
         this.rightComponent = rightComponentP;
-        this.mediaPlayerManagerComponent = mediaPlayerManagerComponent;
         this.components = components;
-        this.videoToggleButton = createVideoToggleButton(mediaPlayerManagerComponent);
+        this.mediaSelectionButton = createMediaSelectionButton(mediaPlayerManagerComponent);
         this.mediaManagementButton = createMediaManagementButton(mediaPlayerManagerComponent);
 
         mediaPlayerManagerComponent.setPlayerChangeListener(new PlayerChangeListener() {
 
             public void notifyStateChange(){
-                videoToggleButton.setVisible(mediaPlayerManagerComponent.getAssignedMediaTracks().size()>0);
+                switch (mediaPlayerManagerComponent.getAssignedMediaTracks().size()) {
+                case 0:
+                    mediaSelectionButton.setVisible(false);
+                    break;
+                case 1:
+                    mediaSelectionButton.setVisible(true);
+                    if(mediaPlayerManagerComponent.isPlaying()){
+                        mediaSelectionButton.setText(stringMessages.mediaHideVideoCaption());
+                        mediaSelectionButton.setTitle(stringMessages.mediaHideVideoTooltip());
+                    }
+                    else{
+                        mediaSelectionButton.setText(stringMessages.mediaShowVideoCaption());
+                        mediaSelectionButton.setTitle(stringMessages.mediaShowVideoTooltip(mediaPlayerManagerComponent.getAssignedMediaTracks().iterator().next().title));
+                    }
+                    break;
+                default:
+                    mediaSelectionButton.setVisible(true);
+                    mediaSelectionButton.setText(stringMessages.mediaSelectVideoCaption(mediaPlayerManagerComponent.getAssignedMediaTracks().size()));
+                    mediaSelectionButton.setTitle(stringMessages.mediaSelectVideoTooltip());
+                    break;
+                }
                 mediaManagementButton.setVisible(mediaPlayerManagerComponent.allowsEditing());
-                videoPlays = (mediaPlayerManagerComponent.getPlayingVideoTracks().size() > 0);
-                if(videoPlays){
-                    videoToggleButton.setText(stringMessages.hideVideoPopup());
-                }
-                else{
-                    videoToggleButton.setText(stringMessages.showVideoPopup());
-                }
             }
 
         });
@@ -120,11 +129,11 @@ public class SideBySideComponentViewer implements ComponentViewer {
 
         // add additional toggle buttons panel that currently only contains the video button
         List<Pair<Button, Component<?>>> additionalVerticalButtons = new ArrayList<Pair<Button, Component<?>>>();
-        additionalVerticalButtons.add(new Pair<Button, Component<?>>(videoToggleButton,
-                this.mediaPlayerManagerComponent));
+        additionalVerticalButtons.add(new Pair<Button, Component<?>>(mediaSelectionButton,
+                mediaPlayerManagerComponent));
         if (/* TODO check for correct role; was: user != null */ true) {
             additionalVerticalButtons.add(new Pair<Button, Component<?>>(mediaManagementButton,
-                    this.mediaPlayerManagerComponent));
+                    mediaPlayerManagerComponent));
         }
 
         // ensure that toggle buttons are positioned right
@@ -133,38 +142,35 @@ public class SideBySideComponentViewer implements ComponentViewer {
     }
 
     /**
-     * Create the video toggle button that shows or hides the video popup
+     * Create the video control button that shows or hides the video popup
+     * 
+     * @param userAgent
      */
-    private Button createVideoToggleButton(final MediaPlayerManager mediaPlayerManager) {
-        final Button videoToggleButton = new Button(new SafeHtml() {
-            private static final long serialVersionUID = 8679639887708833213L;
-
-            @Override
-            public String asString() {
-                if (Document.get().getClientWidth() <= 1024) {
-                    return "&nbsp;";
-                } else {
-                    return stringMessages.showVideoPopup();
-                }
-            }
-        });
-        videoToggleButton.setTitle(stringMessages.showVideoPopup());
-        videoToggleButton.addClickHandler(new ClickHandler() {
+    private Button createMediaSelectionButton(final MediaPlayerManager mediaPlayerManager) {
+        final Button result = new Button();
+        final MediaSingleSelectionControl multiSelectionControl = new MediaSingleSelectionControl(mediaPlayerManager,
+                result, stringMessages);
+        result.addClickHandler(new ClickHandler() {
 
             @Override
             public void onClick(ClickEvent event) {
-                if (videoPlays) {
-                    mediaPlayerManager.stopAll();
+                if (mediaPlayerManager.getAssignedMediaTracks().size() == 1) {
+                    if (mediaPlayerManager.isPlaying()) {
+                        mediaPlayerManager.stopAll();
+                    } else {
+                        mediaPlayerManager.playDefault();
+    
+                    }
                 } else {
-                    mediaPlayerManager.playDefault();
-
+                    multiSelectionControl.show();
                 }
             }
         });
+
         // hide button initially as we defer showing the button to the asynchroneous
         // task that gets launched by the media service to get video tracks
-        videoToggleButton.setVisible(false);
-        return videoToggleButton;
+        result.setVisible(false);
+        return result;
     }
 
     /**
@@ -173,12 +179,12 @@ public class SideBySideComponentViewer implements ComponentViewer {
      * @param userAgent
      */
     private Button createMediaManagementButton(final MediaPlayerManager mediaPlayerManager) {
-        final Button mediaManagementButton = new Button(stringMessages.mediaPanel());
-        mediaManagementButton.setTitle(stringMessages.showVideoPopup());
+        final Button result = new Button(stringMessages.mediaManageMediaCaption());
+        result.setTitle(stringMessages.mediaManageMediaTooltip());
         // onClick
-        final MediaMultiSelectionControl multiSelectionControl = new MediaMultiSelectionControl(mediaPlayerManager,
-                mediaManagementButton);
-        mediaManagementButton.addClickHandler(new ClickHandler() {
+        final MediaManagementControl multiSelectionControl = new MediaManagementControl(mediaPlayerManager,
+                result, stringMessages);
+        result.addClickHandler(new ClickHandler() {
 
             @Override
             public void onClick(ClickEvent event) {
@@ -188,8 +194,8 @@ public class SideBySideComponentViewer implements ComponentViewer {
 
         // hide button initially as we defer showing the button to the asynchroneous
         // task that gets launched by the media service to get video tracks
-        mediaManagementButton.setVisible(false);
-        return mediaManagementButton;
+        result.setVisible(false);
+        return result;
     }
 
     private void initializeComponents() {
@@ -202,10 +208,6 @@ public class SideBySideComponentViewer implements ComponentViewer {
         if (component.hasSettings()) {
             new SettingsDialog<SettingsType>(component, stringMessages).show();
         }
-    }
-
-    public Button getVideoControlButton() {
-        return videoToggleButton;
     }
 
     /**
