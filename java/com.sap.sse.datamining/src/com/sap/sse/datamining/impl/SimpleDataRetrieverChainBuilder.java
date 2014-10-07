@@ -4,7 +4,10 @@ import java.lang.reflect.Constructor;
 import java.lang.reflect.InvocationTargetException;
 import java.util.ArrayList;
 import java.util.Collection;
+import java.util.HashMap;
+import java.util.HashSet;
 import java.util.List;
+import java.util.Map;
 import java.util.concurrent.ExecutorService;
 
 import com.sap.sse.datamining.DataRetrieverChainBuilder;
@@ -18,8 +21,8 @@ public class SimpleDataRetrieverChainBuilder<DataSourceType> implements DataRetr
     private final ExecutorService executor;
     private final List<DataRetrieverTypeWithInformation<?, ?>> dataRetrieverTypesWithInformation;
 
-    private final TypeSafeFilterCriteriaCollection filters;
-    private final TypeSafeResultReceiverCollection receivers;
+    private final Map<Integer, FilterCriterion<?>> filters;
+    private final Map<Integer, Collection<Processor<?, ?>>> receivers;
     private int currentRetrieverTypeIndex;
 
     /**
@@ -43,42 +46,35 @@ public class SimpleDataRetrieverChainBuilder<DataSourceType> implements DataRetr
         this.executor = executor;
         this.dataRetrieverTypesWithInformation = new ArrayList<>(dataRetrieverTypesWithInformation);
         
-        filters = new TypeSafeFilterCriteriaCollection();
-        receivers = new TypeSafeResultReceiverCollection();
+        filters = new HashMap<>();
+        receivers = new HashMap<>();
         currentRetrieverTypeIndex = 0;
     }
 
-    @SuppressWarnings("unchecked") // Checking type safety with comparison of the classes
     @Override
-    public <T> DataRetrieverChainBuilder<DataSourceType> setFilter(FilterCriterion<T> filter) {
+    public DataRetrieverChainBuilder<DataSourceType> setFilter(FilterCriterion<?> filter) {
         Class<?> currentRetrievedDataType = getCurrentRetrievedDataType();
         if (!filter.getElementType().isAssignableFrom(currentRetrievedDataType)) {
             throw new IllegalArgumentException("The given filter (with element type '" + filter.getElementType().getSimpleName()
                                                + "') isn't able to match the current retrieved data type '" + currentRetrievedDataType.getSimpleName() + "'");
         }
 
-        filters.setCriterion((Class<T>) currentRetrievedDataType, filter);
-        return this;
-    }
-    
-    @Override
-    public <T> DataRetrieverChainBuilder<DataSourceType> addAllResultReceivers(Collection<Processor<T, ?>> resultReceivers) {
-        for (Processor<T, ?> resultReceiver : resultReceivers) {
-            addResultReceiver(resultReceiver);
-        }
+        filters.put(currentRetrieverTypeIndex, filter);
         return this;
     }
 
-    @SuppressWarnings("unchecked") // Checking type safety with comparison of the classes
     @Override
-    public <T> DataRetrieverChainBuilder<DataSourceType> addResultReceiver(Processor<T, ?> resultReceiver) {
+    public DataRetrieverChainBuilder<DataSourceType> addResultReceiver(Processor<?, ?> resultReceiver) {
         Class<?> currentRetrievedDataType = getCurrentRetrievedDataType();
         if (!resultReceiver.getInputType().isAssignableFrom(currentRetrievedDataType)) {
             throw new IllegalArgumentException("The given result receiver (with input type '" + resultReceiver.getInputType().getSimpleName()
                     + "') isn't able to process the current retrieved data type '" + currentRetrievedDataType.getSimpleName() + "'");
         }
-        
-        receivers.addResultReceiver((Class<T>) getCurrentRetrievedDataType(), resultReceiver);
+
+        if (!receivers.containsKey(currentRetrieverTypeIndex)) {
+            receivers.put(currentRetrieverTypeIndex, new HashSet<Processor<?, ?>>());
+        }
+        receivers.get(currentRetrieverTypeIndex).add(resultReceiver);
         return this;
     }
     
@@ -102,25 +98,25 @@ public class SimpleDataRetrieverChainBuilder<DataSourceType> implements DataRetr
     @Override
     public Processor<DataSourceType, ?> build() {
         Processor<?, ?> firstRetriever = null;
-        for (int retrievedDataTypeIndex = currentRetrieverTypeIndex; retrievedDataTypeIndex >= 0; retrievedDataTypeIndex--) {
-            DataRetrieverTypeWithInformation<?, ?> dataRetrieverTypeWithInformation = dataRetrieverTypesWithInformation.get(retrievedDataTypeIndex);
-            firstRetriever = createRetriever(dataRetrieverTypeWithInformation, firstRetriever);
+        for (int retrieverTypeIndex = currentRetrieverTypeIndex; retrieverTypeIndex >= 0; retrieverTypeIndex--) {
+            DataRetrieverTypeWithInformation<?, ?> dataRetrieverTypeWithInformation = dataRetrieverTypesWithInformation.get(retrieverTypeIndex);
+            firstRetriever = createRetriever(dataRetrieverTypeWithInformation, firstRetriever, retrieverTypeIndex);
         }
         
         return (Processor<DataSourceType, ?>) firstRetriever;
     }
     
     @SuppressWarnings("unchecked")
-    private <ResultType> Processor<?, ResultType> createRetriever(DataRetrieverTypeWithInformation<?, ?> dataRetrieverTypeWithInformation, Processor<?, ?> previousRetriever) {
+    private <ResultType> Processor<?, ResultType> createRetriever(DataRetrieverTypeWithInformation<?, ?> dataRetrieverTypeWithInformation, Processor<?, ?> previousRetriever, int retrieverTypeIndex) {
         Class<ResultType> retrievedDataType = (Class<ResultType>) dataRetrieverTypeWithInformation.getRetrievedDataType();
         
-        Collection<?> storedResultReceivers = receivers.getResultReceivers(retrievedDataType);
+        Collection<?> storedResultReceivers = receivers.get(retrieverTypeIndex);
         Collection<Processor<ResultType, ?>> resultReceivers = storedResultReceivers != null ? new ArrayList<Processor<ResultType, ?>>((Collection<Processor<ResultType, ?>>) storedResultReceivers) : new ArrayList<Processor<ResultType, ?>>();
         if (previousRetriever != null) {
             resultReceivers.add((Processor<ResultType, ?>) previousRetriever);
         }
         
-        FilterCriterion<ResultType> filter = filters.getCriterion(retrievedDataType);
+        FilterCriterion<ResultType> filter = (FilterCriterion<ResultType>) filters.get(retrieverTypeIndex);
         
         Class<Processor<?, ResultType>> retrieverType = (Class<Processor<?, ResultType>>)(Class<?>) dataRetrieverTypeWithInformation.getRetrieverType();
         return createRetriever(retrieverType, retrievedDataType, resultReceivers, filter);
