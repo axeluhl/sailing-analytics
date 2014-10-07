@@ -18,8 +18,8 @@ public class PlaceNavigatorImpl implements PlaceNavigator {
     }
     
     @Override
-    public void goToPlayer(String eventUuidAsString, String leaderboardIdAsNameString) {
-        PlayerPlace playerPlace = new PlayerPlace(eventUuidAsString, leaderboardIdAsNameString);
+    public void goToPlayer(String eventUuidAsString, String leaderboardIdAsNameString, String leaderboardZoom) {
+        PlayerPlace playerPlace = new PlayerPlace(eventUuidAsString, leaderboardIdAsNameString, String.valueOf(leaderboardZoom));
         placeController.goTo(playerPlace); 
     }
 

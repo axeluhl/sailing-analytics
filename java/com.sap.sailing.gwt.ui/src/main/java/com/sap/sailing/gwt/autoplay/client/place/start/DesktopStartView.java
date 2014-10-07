@@ -8,12 +8,15 @@ import com.google.gwt.dom.client.DivElement;
 import com.google.gwt.dom.client.Style.Visibility;
 import com.google.gwt.event.dom.client.ChangeEvent;
 import com.google.gwt.event.dom.client.ClickEvent;
+import com.google.gwt.event.logical.shared.ValueChangeEvent;
 import com.google.gwt.uibinder.client.UiBinder;
 import com.google.gwt.uibinder.client.UiField;
 import com.google.gwt.uibinder.client.UiHandler;
 import com.google.gwt.user.client.ui.Button;
+import com.google.gwt.user.client.ui.CheckBox;
 import com.google.gwt.user.client.ui.Composite;
 import com.google.gwt.user.client.ui.ListBox;
+import com.google.gwt.user.client.ui.TextBox;
 import com.google.gwt.user.client.ui.Widget;
 import com.sap.sailing.gwt.autoplay.client.app.PlaceNavigator;
 import com.sap.sailing.gwt.common.client.SharedResources;
@@ -29,8 +32,12 @@ public class DesktopStartView extends Composite implements StartView {
 
     @UiField(provided=true) ListBox eventSelectionBox;
     @UiField(provided=true) ListBox leaderboardSelectionBox;
+    @UiField CheckBox leaderboardAutoZoomBox;
+    @UiField TextBox leaderboardZoomBox;
     @UiField Button startAutoPlayButton;
     @UiField DivElement leaderboardSelectionDiv;
+    @UiField DivElement leaderboardZoomDiv;
+    @UiField DivElement leaderboardAutoZoomDiv;
     
     private final PlaceNavigator navigator;
     private final List<EventDTO> events;
@@ -44,7 +51,10 @@ public class DesktopStartView extends Composite implements StartView {
         leaderboardSelectionBox = new ListBox(false);
         
         initWidget(uiBinder.createAndBindUi(this));
-        
+
+        leaderboardAutoZoomBox.setValue(true);
+        leaderboardZoomBox.setEnabled(false);
+
         leaderboardSelectionDiv.getStyle().setVisibility(Visibility.HIDDEN);
         startAutoPlayButton.setEnabled(false);
         startAutoPlayButton.addStyleName(SharedResources.INSTANCE.mainCss().buttoninactive());
@@ -92,9 +102,19 @@ public class DesktopStartView extends Composite implements StartView {
     void startAutoPlayClicked(ClickEvent event) {
         EventDTO selectedEvent = getSelectedEvent();
         String selectedLeaderboardName = getSelectedLeaderboardName();
+        String leaderboardZoom = getLeaderboardZoom();
         if(selectedEvent != null && selectedLeaderboardName != null) {
-            navigator.goToPlayer(selectedEvent.id.toString(), selectedLeaderboardName);
+            navigator.goToPlayer(selectedEvent.id.toString(), selectedLeaderboardName, leaderboardZoom);
         }
+    }
+
+    @UiHandler("leaderboardAutoZoomBox")
+    public void onLeaderboardAutoZoomClicked(ValueChangeEvent<Boolean> ev) {
+        leaderboardZoomBox.setEnabled(!leaderboardAutoZoomBox.getValue());
+    }
+    
+    private String getLeaderboardZoom() {
+        return leaderboardAutoZoomBox.getValue() == true ? "auto" : String.valueOf(leaderboardZoomBox.getValue());
     }
 
     private String getSelectedLeaderboardName() {

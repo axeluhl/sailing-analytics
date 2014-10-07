@@ -27,6 +27,22 @@
 				<g:ListBox ui:field="leaderboardSelectionBox" />
 	        </div>
 		</div>
+		<div ui:field="leaderboardAutoZoomDiv" class="{res.mainCss.grid}" style="padding-bottom:1em;">
+			<div class="{res.mediaCss.small2} {res.mediaCss.columns}">
+			    <span>Leaderboard Auto-Zoom:</span>
+	        </div>
+		    <div class="{res.mediaCss.small2} {res.mediaCss.columns}">
+				<g:CheckBox ui:field="leaderboardAutoZoomBox" />
+	        </div>
+		</div>
+		<div ui:field="leaderboardZoomDiv" class="{res.mainCss.grid}" style="padding-bottom:1em;">
+			<div class="{res.mediaCss.small2} {res.mediaCss.columns}">
+			    <span>Leaderboard Zoom-Factor:</span>
+	        </div>
+		    <div class="{res.mediaCss.small2} {res.mediaCss.columns}">
+				<g:TextBox ui:field="leaderboardZoomBox" />
+	        </div>
+		</div>
 		<div class="{res.mainCss.grid}">
 			<div class="{res.mediaCss.small2} {res.mediaCss.columns}">
 			    &nbsp;

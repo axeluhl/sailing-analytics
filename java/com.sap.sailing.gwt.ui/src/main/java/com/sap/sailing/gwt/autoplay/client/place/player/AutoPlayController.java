@@ -6,15 +6,23 @@ import java.util.Date;
 import java.util.List;
 import java.util.Map;
 
+import com.google.gwt.core.client.Scheduler;
+import com.google.gwt.core.client.Scheduler.RepeatingCommand;
 import com.google.gwt.dom.client.Style.FontWeight;
+import com.google.gwt.dom.client.Style.Position;
 import com.google.gwt.dom.client.Style.TextAlign;
+import com.google.gwt.event.logical.shared.ResizeEvent;
+import com.google.gwt.event.logical.shared.ResizeHandler;
+import com.google.gwt.user.client.Window;
 import com.google.gwt.user.client.ui.FlowPanel;
 import com.google.gwt.user.client.ui.ScrollPanel;
+import com.google.gwt.user.client.ui.Widget;
 import com.sap.sailing.domain.common.RegattaAndRaceIdentifier;
 import com.sap.sailing.domain.common.dto.FleetDTO;
 import com.sap.sailing.domain.common.dto.LeaderboardDTO;
 import com.sap.sailing.domain.common.dto.RaceColumnDTO;
 import com.sap.sailing.gwt.autoplay.client.shared.header.SAPHeader;
+import com.sap.sailing.gwt.common.client.CSS3Util;
 import com.sap.sailing.gwt.common.client.i18n.TextMessages;
 import com.sap.sailing.gwt.ui.client.CompetitorSelectionModel;
 import com.sap.sailing.gwt.ui.client.ErrorReporter;
@@ -57,6 +65,7 @@ public class AutoPlayController implements RaceTimesInfoProviderListener {
     private LeaderboardDTO leaderboard;
     private final String leaderboardName;
     private final String leaderboardGroupName;
+    private final String leaderboardZoom;
     private LeaderboardSettings leaderboardSettings; 
    
     // raceboard related attributes
@@ -65,15 +74,18 @@ public class AutoPlayController implements RaceTimesInfoProviderListener {
     private boolean showWindChart;
     private final RaceBoardViewConfiguration raceboardViewConfig;
     private final PlayerView playerView;
+    private final int SAP_HEADER_HEIGHT = 80;
+    private Widget currentContentWidget;
     
     public AutoPlayController(SailingServiceAsync sailingService, MediaServiceAsync mediaService, 
-            ErrorReporter errorReporter, String leaderboardGroupName, String leaderboardName, UserAgentDetails userAgent,
+            ErrorReporter errorReporter, String leaderboardGroupName, String leaderboardName, final String leaderboardZoom, UserAgentDetails userAgent,
             long delayToLiveInMillis, boolean showRaceDetails, RaceBoardViewConfiguration raceboardViewConfig, PlayerView playerView) {
         this.raceboardViewConfig = raceboardViewConfig;
         this.sailingService = sailingService;
         this.mediaService = mediaService;
         this.errorReporter = errorReporter;
         this.leaderboardName = leaderboardName;
+        this.leaderboardZoom = leaderboardZoom;
         this.leaderboardGroupName = leaderboardGroupName;
         this.userAgent = userAgent;
         this.showRaceDetails = showRaceDetails;
@@ -95,6 +107,15 @@ public class AutoPlayController implements RaceTimesInfoProviderListener {
 
         raceTimesInfoProvider = new RaceTimesInfoProvider(sailingService, asyncActionsExecutor, errorReporter, new ArrayList<RegattaAndRaceIdentifier>(), 3000l);
         raceTimesInfoProvider.addRaceTimesInfoProviderListener(this);
+        
+        Window.addResizeHandler(new ResizeHandler() {
+            @Override
+            public void onResize(ResizeEvent event) {
+                if(leaderboardZoom != null && leaderboardZoom.equalsIgnoreCase("auto")) {
+                    autoZoomContentWidget();
+                }
+            }
+        });
     }
     
     private LeaderboardPanel createLeaderboardPanel(String leaderboardGroupName, String leaderboardName, boolean showRaceDetails) {
@@ -112,7 +133,8 @@ public class AutoPlayController implements RaceTimesInfoProviderListener {
                 updateRaceTimesInfoProvider();
             }
         };
-        leaderboardPanel.getContentWidget().getElement().getStyle().setProperty("margin", "0 auto");
+//        leaderboardPanel.getContentWidget().getElement().getStyle().setProperty("margin", "0 auto");
+        leaderboardPanel.getContentWidget().getElement().getStyle().setPosition(Position.ABSOLUTE);
         leaderboardPanel.getContentWidget().getElement().getStyle().setFontWeight(FontWeight.BOLD);
         return leaderboardPanel;
     }
@@ -148,10 +170,26 @@ public class AutoPlayController implements RaceTimesInfoProviderListener {
             playerView.clearDockPanel();
             
             SAPHeader sapHeader = new SAPHeader(TextMessages.INSTANCE.leaderboard() +  ": " + leaderboardName);
-            playerView.getDockPanel().addNorth(sapHeader, 80);
+            playerView.getDockPanel().addNorth(sapHeader, SAP_HEADER_HEIGHT);
             
             LeaderboardPanel leaderboardPanel = createLeaderboardPanel(leaderboardGroupName, leaderboardName, showRaceDetails);          
             ScrollPanel leaderboardContentPanel = new ScrollPanel();
+
+            currentContentWidget = leaderboardPanel.getContentWidget();
+            
+            if(leaderboardZoom != null) {
+                if(leaderboardZoom.equalsIgnoreCase("auto")) {
+                    autoZoomContentWidget();
+                } else {
+                    try {
+                        Double zoom = Double.valueOf(leaderboardZoom);
+                        scaleContentWidget(SAP_HEADER_HEIGHT, currentContentWidget, zoom);
+                    } catch (NumberFormatException e) {
+                        // do nothing
+                    }
+                }
+            }
+            
             leaderboardContentPanel.getElement().getStyle().setTextAlign(TextAlign.CENTER);
             leaderboardContentPanel.add(leaderboardPanel);
             playerView.getDockPanel().add(leaderboardContentPanel);
@@ -161,7 +199,55 @@ public class AutoPlayController implements RaceTimesInfoProviderListener {
             leaderboardTimer.setPlayMode(PlayModes.Live);
         }
     }
+
+    private void autoZoomContentWidget() {
+        if(currentContentWidget != null) {
+            Scheduler.get().scheduleFixedPeriod(new RepeatingCommand() {
+                public boolean execute () {
+                    boolean invokeAgain = true;
+                    if(currentContentWidget.getOffsetHeight() > 10) {
+                        scaleContentWidget(SAP_HEADER_HEIGHT, currentContentWidget);
+                        invokeAgain = false;
+                    }
+                    return invokeAgain;
+                }
+              }, 1000);
+        }
+    }
+
+    private void scaleContentWidget(int headerHeight, Widget contentWidget, double scaleFactor, double diffX) {
+        if(scaleFactor > 0.0) {
+            CSS3Util.setProperty(contentWidget.getElement().getStyle(),
+                    "transform", "translateX(" + diffX / 2.0 + "px) scale(" + scaleFactor + ")");
+            CSS3Util.setProperty(contentWidget.getElement().getStyle(), "transformOrigin", "0 0");
+        }
+    }
+
+    private void scaleContentWidget(int headerHeight, Widget contentWidget, double scaleFactor) {
+        int clientWidth = Window.getClientWidth();
+        int contentWidth = contentWidget.getOffsetWidth();
+
+        double diffX = clientWidth - contentWidth * scaleFactor;
+        
+        scaleContentWidget(headerHeight, contentWidget, scaleFactor, diffX);
+    }
     
+    private void scaleContentWidget(int headerHeight, Widget contentWidget) {
+        int clientWidth = Window.getClientWidth();
+        int clientHeight = Window.getClientHeight() - headerHeight;
+
+        int contentWidth = contentWidget.getOffsetWidth();
+        int contentHeight = contentWidget.getOffsetHeight();
+        
+        double scaleFactorX = clientWidth / (double) contentWidth;
+        double scaleFactorY = clientHeight / (double) contentHeight;
+        
+        Double scaleFactor = scaleFactorX > scaleFactorY ? scaleFactorY : scaleFactorX;
+        double diffX = clientWidth - contentWidth * scaleFactor;
+
+        scaleContentWidget(headerHeight, contentWidget, scaleFactor, diffX);
+    }
+     
     private void showRaceBoard() {
         if (activeTvView != AutoPlayModes.Raceboard) {
             playerView.clearDockPanel();

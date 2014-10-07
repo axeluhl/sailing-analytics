@@ -45,8 +45,8 @@ public class PlayerActivity extends AbstractActivity implements ErrorReporter {
                 panel.setWidget(view.asWidget());
 
                 autoPlayController = new AutoPlayController(clientFactory.getSailingService(), clientFactory.getMediaService(),
-                        PlayerActivity.this, /*leaderboardGroupName*/ "" , playerPlace.getLeaderboardIdAsNameString(), userAgent, delayToLiveMillis,
-                        showRaceDetails, readRaceboardConfiguration, view);
+                        PlayerActivity.this, /*leaderboardGroupName*/ "" , playerPlace.getLeaderboardIdAsNameString(), playerPlace.getLeaderboardZoomAsString(),
+                        userAgent, delayToLiveMillis, showRaceDetails, readRaceboardConfiguration, view);
                 autoPlayController.updatePlayMode(AutoPlayModes.Leaderboard);
             }
 
