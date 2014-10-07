@@ -29,7 +29,7 @@ public class SeriesWithFleetsListEditor extends ListEditorComposite<SeriesDTO> {
 		return new ExpandedUi(stringMessages, removeImage, enableFleetRemoval);
 	}
 	
-    public static class ExpandedUi extends ExpandedListEditorUi<SeriesDTO> {
+    protected static class ExpandedUi extends ExpandedListEditorUi<SeriesDTO> {
         public ExpandedUi(StringMessages stringMessages, ImageResource removeImage, boolean canRemoveItems) {
             super(stringMessages, removeImage, canRemoveItems);
         }

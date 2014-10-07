@@ -1,12 +1,9 @@
 package com.sap.sailing.gwt.ui.adminconsole;
 
 import java.util.ArrayList;
-import java.util.Collections;
 import java.util.HashMap;
-import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
-import java.util.Set;
 
 import com.google.gwt.dom.client.Style.FontWeight;
 import com.google.gwt.event.dom.client.ClickEvent;
@@ -24,20 +21,20 @@ import com.sap.sse.gwt.client.dialog.DataEntryDialog.DialogCallback;
 
 public class SeriesWithFleetsDefaultListEditor extends
 		SeriesWithFleetsListEditor {
-	private final Map<String, Map<String, Set<SeriesDTO>>> seriesStructure;
+	private final static Map<String, Map<String, List<SeriesDTO>>> seriesStructure = new HashMap<String, Map<String, List<SeriesDTO>>>();
 
 	public SeriesWithFleetsDefaultListEditor(List<SeriesDTO> series,
 			StringMessages stringMessages, ImageResource removeImage,
 			boolean enableFleetRemoval) {
-		super(series, stringMessages, removeImage, enableFleetRemoval);
+		super(new ArrayList<SeriesDTO>(), stringMessages, removeImage, enableFleetRemoval);
 
-		seriesStructure = new HashMap<String, Map<String, Set<SeriesDTO>>>();
-
+		seriesStructure.clear();
 		analyzeSeriesStructure(series);
 		List<SeriesDTO> seriesCompact = new ArrayList<SeriesDTO>();
 		for (String string : seriesStructure.keySet()) {
 			for (String seriesName : seriesStructure.get(string).keySet()) {
-				for (SeriesDTO seriesDTO : seriesStructure.get(string).get(seriesName)) {
+				for (SeriesDTO seriesDTO : seriesStructure.get(string).get(
+						seriesName)) {
 					seriesCompact.add(seriesDTO);
 					break;
 				}
@@ -50,7 +47,7 @@ public class SeriesWithFleetsDefaultListEditor extends
 		for (SeriesDTO seriesDTO : series) {
 			if (seriesStructure.get(seriesDTO.getName()) == null) {
 				seriesStructure.put(seriesDTO.getName(),
-						new HashMap<String, Set<SeriesDTO>>());
+						new HashMap<String, List<SeriesDTO>>());
 			}
 			String temp = "";
 			for (FleetDTO fleet : seriesDTO.getFleets()) {
@@ -58,7 +55,7 @@ public class SeriesWithFleetsDefaultListEditor extends
 			}
 			if (!seriesStructure.get(seriesDTO.getName()).containsKey(temp)) {
 				seriesStructure.get(seriesDTO.getName()).put(temp,
-						new HashSet<SeriesDTO>());
+						new ArrayList<SeriesDTO>());
 			}
 			seriesStructure.get(seriesDTO.getName()).get(temp).add(seriesDTO);
 		}
@@ -77,28 +74,60 @@ public class SeriesWithFleetsDefaultListEditor extends
 				ImageResource removeImage, boolean canRemoveItems) {
 			super(stringMessages, removeImage, canRemoveItems);
 		}
-
+		
 		protected Widget createAddWidget() {
-			Button addSeriesButton = new Button(
-					stringMessages.setDefaultSeries());
+			return new HorizontalPanel();
+		}
+		private Widget listSeriesWithFleets(final SeriesDTO seriesDTO){
+			final Button addSeriesButton = new Button("Edit Series");
 			addSeriesButton.ensureDebugId("SetDefaultSeriesButton");
 			addSeriesButton.addClickHandler(new ClickHandler() {
 				@Override
-				public void onClick(ClickEvent event) {
+				public void onClick(final ClickEvent event) {
+					final Map<String, List<SeriesDTO>> seriesNames = seriesStructure
+							.remove(seriesDTO.getName());
+					String temp = "";
+					for (FleetDTO fleet : seriesDTO.getFleets()) {
+						temp += fleet.getName();
+					}
+					final List<SeriesDTO> oldSeries = seriesNames.remove(temp);
 					SeriesWithFleetsDefaultCreateDialog dialog = new SeriesWithFleetsDefaultCreateDialog(
-							Collections.unmodifiableCollection(context
-									.getValue()), stringMessages,
+							seriesDTO, stringMessages,
 							new DialogCallback<SeriesDTO>() {
 								@Override
 								public void cancel() {
 								}
 
 								@Override
-								public void ok(SeriesDTO newSeries) {
-									addValue(newSeries);
+								public void ok(SeriesDTO defaultSeries) {
+									for (SeriesDTO series : oldSeries) {
+										series.setDiscardThresholds(defaultSeries
+												.getDiscardThresholds());
+										series.setFirstColumnIsNonDiscardableCarryForward(defaultSeries
+												.isFirstColumnIsNonDiscardableCarryForward());
+										series.setFleets(defaultSeries
+												.getFleets());
+										series.setSplitFleetContiguousScoring(defaultSeries
+												.hasSplitFleetContiguousScoring());
+										series.setStartsWithZeroScore(defaultSeries
+												.isStartsWithZeroScore());
+									}
+									String temp = "";
+									for (FleetDTO fleet : defaultSeries
+											.getFleets()) {
+										temp += fleet.getName();
+									}
+									seriesNames.put(temp, oldSeries);
+									seriesStructure.put(
+											defaultSeries.getName(),
+											seriesNames);
+									HorizontalPanel panel = (HorizontalPanel) addSeriesButton
+											.getParent();
+									((Label) panel.getWidget(1))
+											.setText(getFleetText(defaultSeries));
 								}
 							});
-					dialog.ensureDebugId("DefaultSeriesCreateDialog");
+					dialog.ensureDebugId("SeriesEditDialog");
 					dialog.show();
 				}
 			});
@@ -114,9 +143,14 @@ public class SeriesWithFleetsDefaultListEditor extends
 			seriesLabel.setWordWrap(false);
 			seriesLabel.getElement().getStyle().setFontWeight(FontWeight.BOLD);
 			hPanel.add(seriesLabel);
+			hPanel.add(new Label(getFleetText(seriesDTO)));
+			hPanel.add(listSeriesWithFleets(seriesDTO));
 
-			String fleetText = seriesDTO.getFleets().size() + " ";
+			return hPanel;
+		}
 
+		protected String getFleetText(SeriesDTO seriesDTO) {
+			String fleetText = "";
 			if (seriesDTO.getFleets() != null
 					&& seriesDTO.getFleets().size() > 0) {
 				if (seriesDTO.getFleets().size() == 1) {
@@ -129,11 +163,7 @@ public class SeriesWithFleetsDefaultListEditor extends
 			} else {
 				fleetText = "No fleets defined.";
 			}
-			hPanel.add(new Label(fleetText));
-
-			return hPanel;
+			return fleetText;
 		}
-
 	}
-
 }

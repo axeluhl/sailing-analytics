@@ -25,18 +25,18 @@ import com.sap.sse.gwt.client.dialog.DataEntryDialog;
 
 public class SeriesWithFleetsCreateDialog extends DataEntryDialog<SeriesDTO> {
     
-    private static AdminConsoleResources resources = GWT.create(AdminConsoleResources.class);
+    protected static AdminConsoleResources resources = GWT.create(AdminConsoleResources.class);
 
     private StringMessages stringMessages;
     private SeriesDTO series;
 
     protected TextBox nameEntryField;
     protected CheckBox isMedalSeriesCheckbox;
-    private CheckBox startsWithZeroScoreCheckbox;
-    private CheckBox hasSplitFleetContiguousScoringCheckbox;
-    private CheckBox firstColumnIsNonDiscardableCarryForwardCheckbox;
-    private CheckBox useSeriesResultDiscardingThresholdsCheckbox;
-    private DiscardThresholdBoxes discardThresholdBoxes;
+    protected CheckBox startsWithZeroScoreCheckbox;
+    protected CheckBox hasSplitFleetContiguousScoringCheckbox;
+    protected CheckBox firstColumnIsNonDiscardableCarryForwardCheckbox;
+    protected CheckBox useSeriesResultDiscardingThresholdsCheckbox;
+    protected DiscardThresholdBoxes discardThresholdBoxes;
     protected ListEditorComposite<FleetDTO> fleetListComposite;
 
     protected static class SeriesParameterValidator implements Validator<SeriesDTO> {
@@ -132,7 +132,11 @@ public class SeriesWithFleetsCreateDialog extends DataEntryDialog<SeriesDTO> {
         widget.ensureDebugId("DiscardThresholdBoxes");
         widget.setVisible(false);
         
-        fleetListComposite = new FleetListEditorComposite(Arrays.asList(new FleetDTO(LeaderboardNameConstants.DEFAULT_FLEET_NAME, 0, null)), stringMessages, resources.removeIcon());
+        initializeFleetListComposite(stringMessages);
+    }
+
+	protected void initializeFleetListComposite(StringMessages stringMessages) {
+		fleetListComposite = new FleetListEditorComposite(Arrays.asList(new FleetDTO(LeaderboardNameConstants.DEFAULT_FLEET_NAME, 0, null)), stringMessages, resources.removeIcon());
         fleetListComposite.ensureDebugId("FleetListEditorComposite");
         fleetListComposite.addValueChangeHandler(new ValueChangeHandler<List<FleetDTO>>() {
             
@@ -141,7 +145,7 @@ public class SeriesWithFleetsCreateDialog extends DataEntryDialog<SeriesDTO> {
                 validate();
             }
         });
-    }
+	}
 
 	protected void setNameEntryField() {
 		nameEntryField = createTextBox(null);
@@ -183,14 +187,9 @@ public class SeriesWithFleetsCreateDialog extends DataEntryDialog<SeriesDTO> {
         tabPanel.setWidth("100%");
         tabPanel.add(fleetListComposite, stringMessages.fleets());
         tabPanel.selectTab(0);
-        addFleetListComposite(panel, tabPanel);
+        panel.add(tabPanel);
         return panel;
     }
-
-	protected void addFleetListComposite(final VerticalPanel panel,
-			TabPanel tabPanel) {
-		panel.add(tabPanel);
-	}
     
     @Override
     public void show() {

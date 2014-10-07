@@ -1,5 +1,6 @@
 package com.sap.sailing.gwt.ui.adminconsole;
 
+import java.util.ArrayList;
 import java.util.HashSet;
 import java.util.LinkedHashMap;
 import java.util.List;
@@ -15,6 +16,7 @@ import com.google.gwt.user.client.ui.Grid;
 import com.google.gwt.user.client.ui.HasVerticalAlignment;
 import com.google.gwt.user.client.ui.HorizontalPanel;
 import com.google.gwt.user.client.ui.Label;
+import com.google.gwt.user.client.ui.ListBox;
 import com.google.gwt.user.client.ui.Panel;
 import com.google.gwt.user.client.ui.TextBox;
 import com.google.gwt.user.client.ui.VerticalPanel;
@@ -23,6 +25,7 @@ import com.sap.sailing.gwt.ui.client.RegattaRefresher;
 import com.sap.sailing.gwt.ui.client.RegattaSelectionModel;
 import com.sap.sailing.gwt.ui.client.SailingServiceAsync;
 import com.sap.sailing.gwt.ui.client.StringMessages;
+import com.sap.sailing.gwt.ui.shared.CourseAreaDTO;
 import com.sap.sailing.gwt.ui.shared.EventAndRegattaDTO;
 import com.sap.sailing.gwt.ui.shared.EventDTO;
 import com.sap.sailing.gwt.ui.shared.RegattaDTO;
@@ -43,6 +46,8 @@ public class StructureImportManagementPanel extends FlowPanel {
 	private Button listRegattasButton;
 	private Button importDetailsButton;
 	private VerticalPanel editSeriesPanel;
+	private List<EventDTO> existingEvents;
+	private ListBox sailingEventsListBox;
 
 	public StructureImportManagementPanel(SailingServiceAsync sailingService,
 			ErrorReporter errorReporter, StringMessages stringMessages,
@@ -79,7 +84,8 @@ public class StructureImportManagementPanel extends FlowPanel {
 			public void onClick(ClickEvent event) {
 				List<RegattaDTO> selectedRegattas = regattaListComposite
 						.getSelectedRegattas();
-				createEventDetails(selectedRegattas);
+				//TODO createRegattas. perhaps sailingServiceImpl has to be changed
+				// createRegattas(selectedRegattas, getSelectedEvent());
 			}
 		});
 		listRegattasButton.addClickHandler(new ClickHandler() {
@@ -115,7 +121,20 @@ public class StructureImportManagementPanel extends FlowPanel {
 		add(editSeriesPanel);
 	}
 
-	private void createEventDetails(final Iterable<RegattaDTO> regattas) {
+	private void createEventDetails() {
+		Grid grid = new Grid(1, 2);
+		sailingEventsListBox = new ListBox(false);
+		sailingEventsListBox.ensureDebugId("EventListBox");
+		grid.setWidget(0, 0, sailingEventsListBox);
+		Button newEventBtn = new Button("Create New Event");
+		newEventBtn.addClickHandler(new ClickHandler() {
+			@Override
+			public void onClick(ClickEvent event) {
+				openEventCreateDialog();
+			}
+		});
+		grid.setWidget(0, 1, newEventBtn);
+		editSeriesPanel.add(grid);
 		sailingService.getEvents(new AsyncCallback<List<EventDTO>>() {
 			@Override
 			public void onFailure(Throwable caught) {
@@ -124,9 +143,61 @@ public class StructureImportManagementPanel extends FlowPanel {
 
 			@Override
 			public void onSuccess(List<EventDTO> events) {
-				setDefaultRegatta(regattas);
+				existingEvents = events;
+				sailingEventsListBox.addItem(stringMessages
+						.selectSailingEvent());
+				for (EventDTO event : existingEvents) {
+					sailingEventsListBox.addItem(event.getName());
+				}
 			}
 		});
+
+	}
+
+	private void openEventCreateDialog() {
+		EventCreateDialog dialog = new EventCreateDialog(existingEvents,
+				stringMessages, new DialogCallback<EventDTO>() {
+					@Override
+					public void cancel() {
+					}
+
+					@Override
+					public void ok(final EventDTO newEvent) {
+						createEvent(newEvent);
+					}
+				});
+		dialog.show();
+	}
+
+	private void createEvent(final EventDTO newEvent) {
+		List<String> courseAreaNames = new ArrayList<String>();
+		for (CourseAreaDTO courseAreaDTO : newEvent.venue.getCourseAreas()) {
+			courseAreaNames.add(courseAreaDTO.getName());
+		}
+		sailingService.createEvent(newEvent.getName(), newEvent.startDate,
+				newEvent.endDate, newEvent.venue.getName(), newEvent.isPublic,
+				courseAreaNames, newEvent.getImageURLs(),
+				newEvent.getVideoURLs(), newEvent.getSponsorImageURLs(),
+				newEvent.getLogoImageURL(), newEvent.getOfficialWebsiteURL(),
+				new AsyncCallback<EventDTO>() {
+					@Override
+					public void onFailure(Throwable t) {
+						errorReporter
+								.reportError("Error trying to create new event "
+										+ newEvent.getName()
+										+ ": "
+										+ t.getMessage());
+					}
+
+					@Override
+					public void onSuccess(EventDTO newEvent) {
+						existingEvents.add(newEvent);
+						sailingEventsListBox.addItem(newEvent.getName());
+						sailingEventsListBox
+								.setSelectedIndex(sailingEventsListBox
+										.getItemCount() - 1);
+					}
+				});
 	}
 
 	private void addUrl() {
@@ -155,9 +226,11 @@ public class StructureImportManagementPanel extends FlowPanel {
 
 						@Override
 						public void onSuccess(Iterable<RegattaDTO> regattas) {
+							editSeriesPanel.clear();
 							fillRegattas(regattas);
 							importDetailsButton.setEnabled(true);
 							LinkedHashMap<Set<String>, Set<RegattaDTO>> structure = getRegattaStructure(regattas);
+							createEventDetails();
 							showRegattaStructure(structure);
 						}
 					});
@@ -219,8 +292,8 @@ public class StructureImportManagementPanel extends FlowPanel {
 
 	private void showRegattaStructure(
 			final LinkedHashMap<Set<String>, Set<RegattaDTO>> structure) {
-		Grid grid = new Grid(structure.size(), 2);
 
+		Grid grid = new Grid(structure.size(), 2);
 		int i = 0;
 		for (final Set<String> struct : structure.keySet()) {
 			Button editBtn = new Button("Edit Series");
@@ -228,42 +301,7 @@ public class StructureImportManagementPanel extends FlowPanel {
 
 				@Override
 				public void onClick(ClickEvent event) {
-					// TODO open dialog to edit series parameters for each
-					// series with a dropdown and return
-					// those. I suggest using a LinkedHashMap<String, SeriesDTO>
-
 					setDefaultRegatta(structure.get(struct));
-
-					/*
-					 * only for testing. parameters will be received from the
-					 * dialog
-					 */
-					LinkedHashMap<String, SeriesDTO> parameters = new LinkedHashMap<String, SeriesDTO>();
-					Set<RegattaDTO> regattasTest = structure.get(struct);
-					for (RegattaDTO regatta : regattasTest) {
-						for (SeriesDTO series : regatta.series) {
-							parameters.put(series.getName(), new SeriesDTO("",
-									null, null, false, null, false, false,
-									false));
-						}
-					}
-					/* only for testing */
-
-					Set<RegattaDTO> regattas = structure.get(struct);
-					for (RegattaDTO regatta : regattas) {
-						for (SeriesDTO series : regatta.series) {
-							SeriesDTO seriesParameters = parameters.get(series
-									.getName());
-							series.setDiscardThresholds(seriesParameters
-									.getDiscardThresholds());
-							series.setSplitFleetContiguousScoring(seriesParameters
-									.hasSplitFleetContiguousScoring());
-							series.setStartsWithZeroScore(seriesParameters
-									.isStartsWithZeroScore());
-							series.setFirstColumnIsNonDiscardableCarryForward(seriesParameters
-									.isFirstColumnIsNonDiscardableCarryForward());
-						}
-					}
 				}
 			});
 
@@ -276,27 +314,45 @@ public class StructureImportManagementPanel extends FlowPanel {
 			grid.setWidget(i, 1, editBtn);
 			i++;
 		}
-		editSeriesPanel.clear();
 		editSeriesPanel.add(grid);
 	}
 
 	private void setDefaultRegatta(final Iterable<RegattaDTO> selectedRegattas) {
+		List<EventDTO> existingEvents = new ArrayList<EventDTO>();
+		EventDTO selectedEvent = getSelectedEvent();
+		if (selectedEvent != null) {
+			existingEvents.add(getSelectedEvent());
+		}
 		DefaultRegattaCreateDialog dialog = new DefaultRegattaCreateDialog(
-				selectedRegattas, sailingService, errorReporter,
-				stringMessages, new DialogCallback<EventAndRegattaDTO>() {
+				existingEvents, selectedRegattas, sailingService,
+				errorReporter, stringMessages,
+				new DialogCallback<EventAndRegattaDTO>() {
 					@Override
 					public void cancel() {
 					}
 
 					@Override
 					public void ok(final EventAndRegattaDTO newRegatta) {
-						// createRegattas(selectedRegattas,
-						// newRegatta.getEvent(),
-						// newRegatta.getRegatta());
+
 					}
 				});
 		dialog.ensureDebugId("DefaultRegattaCreateDialog");
 		dialog.show();
+	}
+
+	private EventDTO getSelectedEvent() {
+		EventDTO result = null;
+		int selIndex = sailingEventsListBox.getSelectedIndex();
+		if (selIndex > 0) { // the zero index represents the 'no selection' text
+			String itemText = sailingEventsListBox.getItemText(selIndex);
+			for (EventDTO eventDTO : existingEvents) {
+				if (eventDTO.getName().equals(itemText)) {
+					result = eventDTO;
+					break;
+				}
+			}
+		}
+		return result;
 	}
 
 	private void createRegattas(final Iterable<RegattaDTO> regattaNames,

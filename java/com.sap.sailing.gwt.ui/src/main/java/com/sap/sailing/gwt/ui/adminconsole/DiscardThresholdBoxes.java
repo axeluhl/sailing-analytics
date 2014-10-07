@@ -59,6 +59,14 @@ public class DiscardThresholdBoxes {
     public Widget getWidget() {
         return widget;
     }
+    
+    public void setDiscardThresholds(int[] discardThresholds){
+    	if(discardThresholds!=null){
+    		for (int i = 0; i < discardThresholds.length; i++) {
+				discardThresholdBoxes[i].setText(discardThresholds[i] + "");
+			}
+    	}
+    }
 
     public int[] getDiscardThresholds() {
         List<Integer> discardThresholds = new ArrayList<Integer>();
