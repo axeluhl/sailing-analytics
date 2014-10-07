@@ -109,7 +109,7 @@ public class IgtimiWindReceiver implements BulkFixReceiver {
         }
     }
 
-    public IgtimiWindReceiver(Iterable<String> deviceSerialNumbers, DeclinationService declinationService) {
+    public IgtimiWindReceiver(DeclinationService declinationService) {
         receiver = new FixReceiver();
         this.declinationService = declinationService;
         listeners = new ConcurrentHashMap<>();

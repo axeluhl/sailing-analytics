@@ -1,7 +1,9 @@
 package com.sap.sailing.media.persistence.test;
 
 import java.net.UnknownHostException;
+import java.util.HashSet;
 import java.util.List;
+import java.util.Set;
 
 import org.bson.types.ObjectId;
 import org.hamcrest.core.Is;
@@ -9,6 +11,8 @@ import org.junit.Test;
 
 import com.mongodb.MongoException;
 import com.sap.sailing.domain.common.Duration;
+import com.sap.sailing.domain.common.RegattaAndRaceIdentifier;
+import com.sap.sailing.domain.common.RegattaNameAndRaceName;
 import com.sap.sailing.domain.common.TimePoint;
 import com.sap.sailing.domain.common.impl.MillisecondsDurationImpl;
 import com.sap.sailing.domain.common.impl.MillisecondsTimePoint;
@@ -18,7 +22,6 @@ import com.sap.sailing.domain.persistence.media.MediaDB;
 import com.sap.sailing.domain.persistence.media.MediaDBFactory;
 
 import static org.junit.Assert.*;
-
 import static org.hamcrest.Matchers.*;
 
 public class MediaDBTest extends AbstractMongoDBTest {
@@ -35,7 +38,10 @@ public class MediaDBTest extends AbstractMongoDBTest {
         TimePoint startTime = MillisecondsTimePoint.now();
         Duration duration = MillisecondsDurationImpl.ONE_HOUR;
         MimeType mimeType = MimeType.ogv;
-        String dbId = mongoDB.insertMediaTrack(videoTitle, url, startTime, duration, mimeType);
+        Set<RegattaAndRaceIdentifier> assignedRaces = new HashSet<RegattaAndRaceIdentifier>();
+        assignedRaces.add(new RegattaNameAndRaceName("49er", "R1"));
+        String dbId = mongoDB.insertMediaTrack(videoTitle, url, startTime, duration, mimeType, assignedRaces);
+        
         assertNotNull(dbId);
         MediaTrack videoTrack = mongoDB.loadAllMediaTracks().iterator().next();
         assertNotNull(videoTrack);
@@ -52,8 +58,11 @@ public class MediaDBTest extends AbstractMongoDBTest {
         TimePoint startTime = MillisecondsTimePoint.now();
         Duration duration = MillisecondsDurationImpl.ONE_HOUR;
         MimeType mimeType = MimeType.ogv;
-        mongoDB.insertMediaTrackWithId(dbId, videoTitle, url, startTime, duration, mimeType);
+        Set<RegattaAndRaceIdentifier> assignedRaces = new HashSet<RegattaAndRaceIdentifier>();
+        assignedRaces.add(new RegattaNameAndRaceName("49er", "R1"));
+        mongoDB.insertMediaTrackWithId(dbId, videoTitle, url, startTime, duration, mimeType, assignedRaces);
         MediaTrack videoTrack = mongoDB.loadAllMediaTracks().iterator().next();
+
         assertNotNull(videoTrack);
         assertThat(videoTrack.dbId, Is.is(dbId));
         assertThat(videoTrack.title, Is.is(videoTitle));
@@ -68,7 +77,10 @@ public class MediaDBTest extends AbstractMongoDBTest {
         TimePoint startTime = MillisecondsTimePoint.now();
         Duration duration = MillisecondsDurationImpl.ONE_HOUR;
         MimeType mimeType = MimeType.ogv;
-        mongoDB.insertMediaTrackWithId(dbId, videoTitle, url, startTime, duration, mimeType);
+        Set<RegattaAndRaceIdentifier> assignedRaces = new HashSet<RegattaAndRaceIdentifier>();
+        assignedRaces.add(new RegattaNameAndRaceName("49er", "R1"));
+        mongoDB.insertMediaTrackWithId(dbId, videoTitle, url, startTime, duration, mimeType, assignedRaces);
+
     }
     
     @Test(expected=IllegalArgumentException.class)
@@ -79,8 +91,11 @@ public class MediaDBTest extends AbstractMongoDBTest {
         TimePoint startTime = MillisecondsTimePoint.now();
         Duration duration = MillisecondsDurationImpl.ONE_HOUR;
         MimeType mimeType = MimeType.ogv;
-        String dbId = mongoDB.insertMediaTrack(videoTitle, url, startTime, duration, mimeType);
-        mongoDB.insertMediaTrackWithId(dbId, videoTitle, url, startTime, duration, mimeType);
+        Set<RegattaAndRaceIdentifier> assignedRaces = new HashSet<RegattaAndRaceIdentifier>();
+        assignedRaces.add(new RegattaNameAndRaceName("49er", "R1"));
+        String dbId = mongoDB.insertMediaTrack(videoTitle, url, startTime, duration, mimeType, assignedRaces);
+        mongoDB.insertMediaTrackWithId(dbId, videoTitle, url, startTime, duration, mimeType, assignedRaces);
+
     }
     
 //    @Test
@@ -246,9 +261,12 @@ public class MediaDBTest extends AbstractMongoDBTest {
         TimePoint startTime = MillisecondsTimePoint.now();
         Duration duration = MillisecondsDurationImpl.ONE_HOUR;
         MimeType mimeType = MimeType.ogv;
+        Set<RegattaAndRaceIdentifier> assignedRaces = new HashSet<RegattaAndRaceIdentifier>();
+        assignedRaces.add(new RegattaNameAndRaceName("49er", "R1"));
+
 
         for (int i = 0; i < count; i++) {
-            mongoDB.insertMediaTrack(videoTitleTemplate + i, url, startTime, duration, mimeType);
+            mongoDB.insertMediaTrack(videoTitleTemplate + i, url, startTime, duration, mimeType, assignedRaces);
         }
     }
 
@@ -261,7 +279,9 @@ public class MediaDBTest extends AbstractMongoDBTest {
         TimePoint startTime = MillisecondsTimePoint.now();
         Duration duration = MillisecondsDurationImpl.ONE_HOUR;
         MimeType mimeType = MimeType.ogv;
-        String dbId = mongoDB.insertMediaTrack(videoTitle, url, startTime, duration, mimeType);
+        Set<RegattaAndRaceIdentifier> assignedRaces = new HashSet<RegattaAndRaceIdentifier>();
+        assignedRaces.add(new RegattaNameAndRaceName("49er", "R1"));
+        String dbId = mongoDB.insertMediaTrack(videoTitle, url, startTime, duration, mimeType, assignedRaces);
         
         //delete
         mongoDB.deleteMediaTrack(dbId);
@@ -279,7 +299,10 @@ public class MediaDBTest extends AbstractMongoDBTest {
         TimePoint originalDate = MillisecondsTimePoint.now();
         Duration duration = MillisecondsDurationImpl.ONE_HOUR;
         MimeType mimeType = MimeType.ogv;
-        String dbId = mongoDB.insertMediaTrack(videoTitle, url, originalDate, duration, mimeType);
+        Set<RegattaAndRaceIdentifier> assignedRaces = new HashSet<RegattaAndRaceIdentifier>();
+        assignedRaces.add(new RegattaNameAndRaceName("49er", "R1"));
+        String dbId = mongoDB.insertMediaTrack(videoTitle, url, originalDate, duration, mimeType, assignedRaces);
+
         
         //update with new date
         TimePoint newDate = originalDate.plus(1000);
@@ -292,6 +315,7 @@ public class MediaDBTest extends AbstractMongoDBTest {
         assertThat(videoTrack.title, is(videoTitle));
         assertThat(videoTrack.url, is(url));
         assertThat(videoTrack.mimeType, is(mimeType));
+        assertThat(videoTrack.assignedRaces, is(assignedRaces));
     }
     
 }

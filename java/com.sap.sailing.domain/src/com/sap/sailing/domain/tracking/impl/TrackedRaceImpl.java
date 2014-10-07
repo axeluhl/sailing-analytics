@@ -117,6 +117,10 @@ import com.sap.sailing.util.impl.NamedReentrantReadWriteLock;
 import com.sap.sse.common.Util;
 import com.sap.sse.common.Util.Pair;
 
+import difflib.DiffUtils;
+import difflib.Patch;
+import difflib.PatchFailedException;
+
 public abstract class TrackedRaceImpl extends TrackedRaceWithWindEssentials implements CourseListener {
     private static final long serialVersionUID = -4825546964220003507L;
 
@@ -465,7 +469,7 @@ public abstract class TrackedRaceImpl extends TrackedRaceWithWindEssentials impl
      * When de-serializing, a possibly remote {@link #windStore} is ignored because it is transient. Instead, an
      * {@link EmptyWindStore} is used for the de-serialized instance.
      */
-    private void readObject(ObjectInputStream ois) throws ClassNotFoundException, IOException {
+    private void readObject(ObjectInputStream ois) throws ClassNotFoundException, IOException, PatchFailedException {
         ois.defaultReadObject();
         attachedRaceLogs = new ConcurrentHashMap<>();
         markPassingsTimes = new ArrayList<com.sap.sse.common.Util.Pair<Waypoint, com.sap.sse.common.Util.Pair<TimePoint, TimePoint>>>();
@@ -480,6 +484,25 @@ public abstract class TrackedRaceImpl extends TrackedRaceWithWindEssentials impl
         triggerManeuverCacheRecalculationForAllCompetitors();
         logger.info("Deserialized race " + getRace().getName());
         shortTimeWindCache = new ShortTimeWindCache(this, millisecondsOverWhichToAverageWind / 2);
+        // considering the unlikely possibility that the course and this tracked race's internal structures
+        // may be inconsistent, e.g., due to non-atomic serialization of course and tracked race; see bug 2223
+        adjustStructureToCourse();
+    }
+
+    /**
+     * When the {@link TrackedRace} object and the {@link RaceDefinition} and in particular its {@link CourseImpl} objects are not
+     * atomically serialized, inconsistencies may occur during de-serialization. In particular, the tracked race's leg-oriented
+     * structures may not consistently reflect the course's leg sequence because a course update could have happened between
+     * course serialization and tracked race serialization.<p>
+     * 
+     * To fix this, the list of waypoints as found in this tracked race's leg-oriented structures, compared to the course's
+     * waypoint list, produces a patch that can be applied to this tracked race, resulting in the necessary
+     * {@link #waypointAdded(int, Waypoint)} and {@link #waypointRemoved(int, Waypoint)} calls.
+     */
+    private void adjustStructureToCourse() throws PatchFailedException {
+        final TrackedRaceAsWaypointList trackedRaceAsWaypointList = new TrackedRaceAsWaypointList(this);
+        Patch<Waypoint> diff = DiffUtils.diff(trackedRaceAsWaypointList, getRace().getCourse().getWaypoints());
+        diff.applyToInPlace(trackedRaceAsWaypointList);
     }
 
     @Override
@@ -3118,6 +3141,17 @@ public abstract class TrackedRaceImpl extends TrackedRaceWithWindEssentials impl
             result = sum.divide(count);
         }
         return result;
+    }
+
+    /**
+     * @return the waypoints known by this race, based on the key set of {@link #markPassingsForWaypoint}. This key set
+     *         is updated by {@link #waypointAdded(int, Waypoint)} and {@link #waypointRemoved(int, Waypoint)} and hence
+     *         is consistent with the {@link Course}'s waypoint list after the callback methods have returned. The
+     *         iteration order of the elements returned is undefined and in particular is <em>not</em> guaranteed to be
+     *         related to the {@link Course}'s waypoint order.
+     */
+    Iterable<Waypoint> getWaypoints() {
+        return markPassingsForWaypoint.keySet();
     }
     
 }

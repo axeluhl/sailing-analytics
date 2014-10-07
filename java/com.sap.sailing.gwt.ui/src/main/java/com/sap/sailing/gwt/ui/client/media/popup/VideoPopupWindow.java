@@ -79,7 +79,7 @@ public class VideoPopupWindow extends AbstractPopupWindow implements ContextMenu
 
     @Override
     public void setTime(double time) {
-        video.setCurrentTime(time);
+        video.setCurrentTime(Math.min(time, video.getDuration()));
     }
 
     @Override

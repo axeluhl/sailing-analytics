@@ -5,7 +5,7 @@ import com.sap.sailing.domain.common.media.MediaTrack;
 
 public class VideoWindowPlayer extends PopoutWindowPlayer {
     
-    public VideoWindowPlayer(MediaTrack mediaTrack, PopoutCloseListener popupCloseListener) {
+    public VideoWindowPlayer(MediaTrack mediaTrack, PlayerCloseListener popupCloseListener) {
         super(mediaTrack, popupCloseListener);
     }
 

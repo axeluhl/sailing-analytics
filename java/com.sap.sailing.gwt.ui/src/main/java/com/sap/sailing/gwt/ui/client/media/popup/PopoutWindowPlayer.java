@@ -9,16 +9,16 @@ import com.sap.sailing.gwt.ui.client.media.shared.VideoPlayer;
 
 public abstract class PopoutWindowPlayer extends AbstractMediaPlayer implements VideoPlayer, VideoContainer {
 
-    public interface PopoutCloseListener {
-        void popoutClosed();
+    public interface PlayerCloseListener {
+        void playerClosed();
 
         void setVideoContainer(VideoContainer videoContainer);
     }
 
     private final JavaScriptObject playerWindow;
-    private final PopoutCloseListener popupCloseHandler;
+    private final PlayerCloseListener popupCloseHandler;
 
-    protected PopoutWindowPlayer(MediaTrack mediaTrack, PopoutCloseListener popupCloseListener) {
+    protected PopoutWindowPlayer(MediaTrack mediaTrack, PlayerCloseListener popupCloseListener) {
         super(mediaTrack);
         this.popupCloseHandler = popupCloseListener;
         
@@ -63,7 +63,7 @@ public abstract class PopoutWindowPlayer extends AbstractMediaPlayer implements 
 
     private void onClosingPopup() {
         pauseMedia();
-        popupCloseHandler.popoutClosed();
+        popupCloseHandler.playerClosed();
     }
 
     @Override

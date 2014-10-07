@@ -1,7 +1,6 @@
 package com.sap.sailing.gwt.ui.raceboard;
 
 import java.util.ArrayList;
-import java.util.Collection;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
@@ -11,7 +10,6 @@ import com.google.gwt.dom.client.Document;
 import com.google.gwt.dom.client.Style.Unit;
 import com.google.gwt.i18n.client.DateTimeFormat;
 import com.google.gwt.user.client.Command;
-import com.google.gwt.user.client.rpc.AsyncCallback;
 import com.google.gwt.user.client.ui.Anchor;
 import com.google.gwt.user.client.ui.FlowPanel;
 import com.google.gwt.user.client.ui.Label;
@@ -25,7 +23,6 @@ import com.sap.sailing.domain.common.dto.FleetDTO;
 import com.sap.sailing.domain.common.dto.LeaderboardDTO;
 import com.sap.sailing.domain.common.dto.RaceColumnDTO;
 import com.sap.sailing.domain.common.dto.RaceDTO;
-import com.sap.sailing.domain.common.media.MediaTrack;
 import com.sap.sailing.gwt.ui.client.CompetitorSelectionModel;
 import com.sap.sailing.gwt.ui.client.ErrorReporter;
 import com.sap.sailing.gwt.ui.client.GlobalNavigationPanel;
@@ -38,7 +35,7 @@ import com.sap.sailing.gwt.ui.client.RaceTimesInfoProvider;
 import com.sap.sailing.gwt.ui.client.RegattasDisplayer;
 import com.sap.sailing.gwt.ui.client.SailingServiceAsync;
 import com.sap.sailing.gwt.ui.client.StringMessages;
-import com.sap.sailing.gwt.ui.client.media.MediaComponent;
+import com.sap.sailing.gwt.ui.client.media.MediaPlayerManagerComponent;
 import com.sap.sailing.gwt.ui.client.shared.charts.MultiCompetitorRaceChart;
 import com.sap.sailing.gwt.ui.client.shared.charts.WindChart;
 import com.sap.sailing.gwt.ui.client.shared.charts.WindChartSettings;
@@ -213,8 +210,9 @@ public class RaceBoardPanel extends SimplePanel implements RegattasDisplayer, Ra
         windChart.onRaceSelectionChange(raceSelectionProvider.getSelectedRaces());
         windChart.getEntryWidget().setTitle(stringMessages.windChart());
         components.add(windChart);
-        MediaComponent mediaComponent = createMediaComponent();
-        leaderboardAndMapViewer = new SideBySideComponentViewer(leaderboardPanel, raceMap, mediaComponent, components, stringMessages, this.user);
+        boolean autoSelectMedia = getConfiguration().isAutoSelectMedia();
+        MediaPlayerManagerComponent mediaPlayerManagerComponent = new MediaPlayerManagerComponent(selectedRaceIdentifier, raceTimesInfoProvider, timer, mediaService, stringMessages, errorReporter, userAgent, user, autoSelectMedia);
+        leaderboardAndMapViewer = new SideBySideComponentViewer(leaderboardPanel, raceMap, mediaPlayerManagerComponent, components, stringMessages, this.user);
         componentViewers.add(leaderboardAndMapViewer);
         for (ComponentViewer componentViewer : componentViewers) {
             mainPanel.add(componentViewer.getViewerWidget());
@@ -231,32 +229,6 @@ public class RaceBoardPanel extends SimplePanel implements RegattasDisplayer, Ra
             leaderboardPanel.setVisible(true);
             leaderboardPanel.setVisible(false);
         }
-    }
-    
-    private MediaComponent createMediaComponent() {
-        boolean autoSelectMedia = getConfiguration().isAutoSelectMedia();
-        String defaultMedia = getConfiguration().getDefaultMedia();
-        final MediaComponent mediaComponent = new MediaComponent(selectedRaceIdentifier, raceTimesInfoProvider, timer, mediaService, stringMessages, errorReporter, userAgent, this.user, autoSelectMedia, defaultMedia);
-        timer.addPlayStateListener(mediaComponent);
-        timer.addTimeListener(mediaComponent);
-        mediaComponent.setVisible(false);
-        mediaService.getMediaTracksForRace(selectedRaceIdentifier, new AsyncCallback<Collection<MediaTrack>>() {
-            @Override
-            public void onSuccess(Collection<MediaTrack> result) {
-                mediaComponent.getMediaLibraryCallback().onSuccess(result);
-                if (mediaComponent.isPotentiallyPlayable(mediaComponent.getDefaultVideo())) {
-                    if (leaderboardAndMapViewer != null) {
-                        leaderboardAndMapViewer.getVideoControlButton().setVisible(true);
-                    }
-                }
-            }
-            
-            @Override
-            public void onFailure(Throwable caught) {
-                mediaComponent.getMediaLibraryCallback().onFailure(caught);
-            }
-        }); // load media tracks
-        return mediaComponent;
     }
     
     @SuppressWarnings("unused")

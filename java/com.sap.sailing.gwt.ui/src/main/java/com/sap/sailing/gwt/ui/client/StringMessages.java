@@ -78,6 +78,7 @@ public interface StringMessages extends Messages {
     String leaderboards();
     String leaderboardSettings();
     String settings();
+    String linkedRaces();
     String selectAtLeastOneLegDetail();
     String currentSpeedOverGroundInKnots();
     String estimatedTimeToNextWaypointInSeconds();
@@ -182,6 +183,7 @@ public interface StringMessages extends Messages {
     String otherManeuver();
     String douglasPeuckerPoints();
     String filterRacesByName();
+    String filterMediaByName();
     String actionEdit();
     String actionEditScores();
     String actionEditCompetitors();
@@ -1080,10 +1082,14 @@ public interface StringMessages extends Messages {
     String raceIsInLiveTimePanelMode();
     String backToLiveTimePanelMode();
     String windChart();
-    String showVideoPopup();
-    String hideVideoPopup();
-    String manageMedia();
-    String manageMediaTooltip();
+    String mediaShowVideoCaption();
+    String mediaShowVideoTooltip(String title);
+    String mediaHideVideoCaption();
+    String mediaHideVideoTooltip();
+    String mediaSelectVideoCaption(int mediaCount);
+    String mediaSelectVideoTooltip();
+    String mediaManageMediaCaption();
+    String mediaManageMediaTooltip();
     String showAll();
     String raceVisibilityColumn();
     String enterCarryValueFor(String competitorName);

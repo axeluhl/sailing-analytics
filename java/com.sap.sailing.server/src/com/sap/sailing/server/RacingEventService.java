@@ -427,6 +427,8 @@ public interface RacingEventService extends TrackedRegattaRegistry, RegattaFetch
 
     void mediaTrackDurationChanged(MediaTrack mediaTrack);
 
+    void mediaTrackAssignedRacesChanged(MediaTrack mediaTrack);
+    
     void mediaTrackDeleted(MediaTrack mediaTrack);
 
     /**
@@ -440,6 +442,8 @@ public interface RacingEventService extends TrackedRegattaRegistry, RegattaFetch
     void mediaTracksImported(Collection<MediaTrack> mediaTracksToImport, boolean override);
     
     Collection<MediaTrack> getMediaTracksForRace(RegattaAndRaceIdentifier regattaAndRaceIdentifier);
+    
+    Collection<MediaTrack> getMediaTracksInTimeRange(RegattaAndRaceIdentifier regattaAndRaceIdentifier);
 
     Collection<MediaTrack> getAllMediaTracks();
 
@@ -593,4 +597,5 @@ public interface RacingEventService extends TrackedRegattaRegistry, RegattaFetch
      * objects by the same name of that type will be replaced.
      */
     void addLeaderboardGroupWithoutReplication(LeaderboardGroup leaderboardGroup);
+
 }
