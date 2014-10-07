@@ -1,12 +1,10 @@
-package com.sap.sailing.racecommittee.app.utils;
+package com.sap.sailing.android.shared.logging;
 
 import java.lang.Thread.UncaughtExceptionHandler;
 import java.util.Date;
 
 import android.content.Context;
 import android.util.Log;
-
-import com.sap.sailing.android.shared.logging.FileLoggingTask;
 
 public class LoggingExceptionHandler implements UncaughtExceptionHandler {
     

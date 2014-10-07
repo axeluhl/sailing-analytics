@@ -1,4 +1,4 @@
-package com.sap.sailing.racecommittee.app.ui.utils;
+package com.sap.sailing.android.shared.ui.utils;
 
 import java.util.HashSet;
 import java.util.Set;

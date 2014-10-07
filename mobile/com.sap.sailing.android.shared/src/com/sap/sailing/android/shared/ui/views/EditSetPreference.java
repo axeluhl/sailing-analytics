@@ -1,4 +1,4 @@
-package com.sap.sailing.racecommittee.app.ui.views;
+package com.sap.sailing.android.shared.ui.views;
 
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -20,9 +20,9 @@ import android.widget.AutoCompleteTextView;
 import android.widget.Button;
 import android.widget.ListView;
 
-import com.sap.sailing.racecommittee.app.R;
+import com.sap.sailing.android.shared.R;
 import com.sap.sailing.android.shared.logging.ExLog;
-import com.sap.sailing.racecommittee.app.ui.adapters.ArrayRemoveAdapter;
+import com.sap.sailing.android.shared.ui.adapters.ArrayRemoveAdapter;
 
 public class EditSetPreference extends DialogPreference {
 

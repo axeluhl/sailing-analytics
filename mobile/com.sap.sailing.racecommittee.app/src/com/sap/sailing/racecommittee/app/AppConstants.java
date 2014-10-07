@@ -5,7 +5,6 @@ import com.sap.sailing.racecommittee.app.ui.fragments.raceinfo.SetStartTimeRaceF
 
 public class AppConstants {
     public static final boolean IS_DATA_OFFLINE = false;
-    public static final boolean ENABLE_LIFECYCLE_LOGGING = false;
 
     // Intent extra fields
     public final static String COURSE_AREA_UUID_KEY = "courseUuid";

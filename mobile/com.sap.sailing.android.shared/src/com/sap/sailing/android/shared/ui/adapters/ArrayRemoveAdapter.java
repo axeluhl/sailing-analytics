@@ -1,4 +1,4 @@
-package com.sap.sailing.racecommittee.app.ui.adapters;
+package com.sap.sailing.android.shared.ui.adapters;
 
 import java.util.List;
 
@@ -11,7 +11,7 @@ import android.widget.ArrayAdapter;
 import android.widget.ImageButton;
 import android.widget.TextView;
 
-import com.sap.sailing.racecommittee.app.R;
+import com.sap.sailing.android.shared.R;
 
 public class ArrayRemoveAdapter<T> extends ArrayAdapter<T> {
     

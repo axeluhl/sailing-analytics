@@ -1,4 +1,4 @@
-package com.sap.sailing.racecommittee.app.ui.fragments.preference;
+package com.sap.sailing.android.shared.ui.fragments.preference;
 
 import java.util.ArrayList;
 import java.util.Collections;
@@ -14,8 +14,8 @@ import android.preference.Preference.OnPreferenceChangeListener;
 import android.preference.PreferenceFragment;
 import android.preference.PreferenceManager;
 
-import com.sap.sailing.racecommittee.app.ui.utils.MultiplePreferenceChangeListener;
-import com.sap.sailing.racecommittee.app.ui.views.EditSetPreference;
+import com.sap.sailing.android.shared.ui.utils.MultiplePreferenceChangeListener;
+import com.sap.sailing.android.shared.ui.views.EditSetPreference;
 
 /**
  * Created by I074137 on 18.09.13.

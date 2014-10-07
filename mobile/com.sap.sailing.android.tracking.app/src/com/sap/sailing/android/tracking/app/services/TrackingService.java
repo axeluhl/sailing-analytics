@@ -17,6 +17,8 @@ import com.google.android.gms.location.LocationListener;
 import com.google.android.gms.location.LocationRequest;
 import com.sap.sailing.android.shared.logging.ExLog;
 import com.sap.sailing.android.shared.services.sending.MessageSendingService;
+import com.sap.sailing.android.shared.util.PrefUtils;
+import com.sap.sailing.android.tracking.app.R;
 import com.sap.sailing.android.tracking.app.nmea.NmeaGprmcBuilder;
 
 public class TrackingService extends Service implements ConnectionCallbacks, OnConnectionFailedListener,
@@ -29,8 +31,6 @@ LocationListener {
     
     public static final int FIX_INTERVAL_MS = 500;
     public static final int FASTEST_FIX_INTERVAL_MS = 100;
-    
-    public static final String URL = "http://192.168.1.79";
 
     @Override
     public void onCreate() {
@@ -94,12 +94,17 @@ LocationListener {
     public void onDisconnected() {
         ExLog.i(this, TAG, "LocationClient was disconnected");
     }
+    
+    private String getServerURL() {
+        return PrefUtils.getString(this, R.string.preference_server_url_key,
+                R.string.preference_server_url_default);
+    }
 
     @Override
     public void onLocationChanged(Location location) {
         String nmea = NmeaGprmcBuilder.buildNmeaStringFrom(location);
         startService(MessageSendingService.createMessageIntent(
-                this, URL, null, UUID.randomUUID(), nmea, null));
+                this, getServerURL(), null, UUID.randomUUID(), nmea, null));
         ExLog.i(this, TAG, "Sent NMEA to server:" + nmea);
         //TODO also store to SD card
     }

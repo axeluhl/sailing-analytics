@@ -1,0 +1,17 @@
+<?xml version="1.0" encoding="utf-8"?>
+<PreferenceScreen xmlns:android="http://schemas.android.com/apk/res/android" >
+
+    <PreferenceCategory android:title="@string/settings_category_connection" >
+        <EditTextPreference
+            android:defaultValue="@string/preference_device_identifier_default"
+            android:key="@string/preference_device_identifier_key"
+            android:summary="@string/empty"
+            android:title="@string/device_identifier" />
+        <EditTextPreference
+            android:defaultValue="@string/preference_server_url_default"
+            android:key="@string/preference_server_url_key"
+            android:summary="@string/empty"
+            android:title="@string/server_url" />
+    </PreferenceCategory>
+
+</PreferenceScreen>

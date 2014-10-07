@@ -19,7 +19,7 @@ import com.sap.sailing.android.shared.services.sending.MessageSendingService.Mes
 import com.sap.sailing.android.shared.services.sending.MessageSendingService.MessageSendingServiceLogger;
 import com.sap.sailing.android.shared.util.PrefUtils;
 
-public abstract class SendingServiceAwareActivity extends LoggableActivity {
+public abstract class SendingServiceAwareActivity extends ResilientActivity {
     
     private class MessageSendingServiceConnection implements ServiceConnection, MessageSendingServiceLogger {
         @Override

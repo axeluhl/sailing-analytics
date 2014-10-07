@@ -14,6 +14,7 @@
     <uses-permission android:name="android.permission.WRITE_EXTERNAL_STORAGE" />
 
     <application
+        android:name="com.sap.sailing.android.shared.application.LoggableApplication"
         android:allowBackup="true"
         android:hardwareAccelerated="true"
         android:icon="@drawable/sap_sailing_app_icon"
@@ -32,6 +33,14 @@
                 <action android:name="android.intent.action.MAIN" />
                 <category android:name="android.intent.category.LAUNCHER" />
             </intent-filter>
+        </activity>
+        
+        <activity
+            android:name="com.sap.sailing.android.tracking.app.ui.activities.SystemInformationActivity">
+        </activity>
+        
+        <activity
+            android:name="com.sap.sailing.android.tracking.app.ui.activities.SettingsActivity">
         </activity>
 
         <service

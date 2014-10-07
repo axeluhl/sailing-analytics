@@ -8,12 +8,11 @@ import android.os.Bundle;
 import android.os.IBinder;
 import android.widget.TextView;
 
-import com.sap.sailing.android.shared.ui.activities.SendingServiceAwareActivity;
 import com.sap.sailing.android.tracking.app.R;
 import com.sap.sailing.android.tracking.app.services.TrackingService;
 import com.sap.sailing.android.tracking.app.services.TrackingService.TrackingServiceBinder;
 
-public class LaunchActivity extends SendingServiceAwareActivity {
+public class LaunchActivity extends BaseActivity {
     // private static final String TAG = LaunchActivity.class.getName();
 
     private final TrackingServiceConnection trackingServiceConnection = new TrackingServiceConnection();
@@ -59,10 +58,5 @@ public class LaunchActivity extends SendingServiceAwareActivity {
             status.setText(R.string.not_tracking);
             unbindService(trackingServiceConnection);
         }
-    }
-
-    @Override
-    protected int getOptionsMenuResId() {
-        return 0;
     }
 }

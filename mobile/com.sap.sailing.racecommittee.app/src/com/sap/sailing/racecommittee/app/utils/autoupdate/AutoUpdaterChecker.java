@@ -13,9 +13,9 @@ import android.content.DialogInterface.OnCancelListener;
 import android.content.DialogInterface.OnClickListener;
 import android.widget.Toast;
 
-import com.sap.sailing.racecommittee.app.R;
-import com.sap.sailing.racecommittee.app.RaceApplication;
 import com.sap.sailing.android.shared.logging.ExLog;
+import com.sap.sailing.android.shared.util.AppUtils;
+import com.sap.sailing.racecommittee.app.R;
 
 public class AutoUpdaterChecker {
 
@@ -93,7 +93,7 @@ public class AutoUpdaterChecker {
 
         @Override
         public void updateToVersion(int serverVersion, final String apkFileName) {
-            int currentVersion = RaceApplication.getPackageInfo(context).versionCode;
+            int currentVersion = AppUtils.getPackageInfo(context).versionCode;
             boolean needsUpdate = currentVersion != serverVersion;
             ExLog.i(context, TAG, String.format("Server version is %d. Local version is %d.", serverVersion, currentVersion));
             

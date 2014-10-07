@@ -1,4 +1,4 @@
-package com.sap.sailing.racecommittee.app;
+package com.sap.sailing.android.shared.application;
 
 import java.lang.ref.WeakReference;
 

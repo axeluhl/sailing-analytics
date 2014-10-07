@@ -51,7 +51,7 @@
 	        android:title="@string/settings_general_language_header"
 	        android:summary="@string/settings_general_language_description" />
         
-	    <com.sap.sailing.racecommittee.app.ui.views.EditSetPreference
+	    <com.sap.sailing.android.shared.ui.views.EditSetPreference
 	        android:key="@string/preference_course_areas_key"
 	        android:defaultValue="@array/preference_course_areas_default"
 	        android:title="@string/settings_general_manageareas_header"

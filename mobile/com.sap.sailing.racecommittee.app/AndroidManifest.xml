@@ -30,7 +30,7 @@
     <uses-feature android:name="android.hardware.camera.autofocus" />
 
     <application
-        android:name="RaceApplication"
+        android:name=".RaceApplication"
         android:allowBackup="true"
         android:hardwareAccelerated="true"
         android:icon="@drawable/sap_sailing_app_icon"
@@ -68,7 +68,7 @@
              >
         </activity>
         <activity
-            android:name=".ui.activities.SystemInformationActivity"
+            android:name="com.sap.sailing.racecommittee.app.ui.activities.SystemInformationActivity"
             android:screenOrientation="sensorLandscape" >
         </activity>
 
