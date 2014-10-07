@@ -11,7 +11,6 @@ import org.junit.Before;
 import org.junit.Test;
 
 import com.sap.sse.datamining.components.Processor;
-import com.sap.sse.datamining.shared.Message;
 import com.sap.sse.datamining.test.util.ConcurrencyTestsUtil;
 import com.sap.sse.datamining.test.util.components.NullProcessor;
 
@@ -42,7 +41,7 @@ public class TestAbstractStoringParallelAggregationProcessor {
 
     @Test
     public void testAbstractAggregationHandling() throws InterruptedException {
-        Processor<Integer, Integer> processor = new AbstractParallelStoringAggregationProcessor<Integer, Integer>(Integer.class, Integer.class, ConcurrencyTestsUtil.getExecutor(), receivers, Message.Sum.toString()) {
+        Processor<Integer, Integer> processor = new AbstractParallelStoringAggregationProcessor<Integer, Integer>(Integer.class, Integer.class, ConcurrencyTestsUtil.getExecutor(), receivers, "Sum") {
             @Override
             protected void storeElement(Integer element) {
                 elementStore.add(element);
@@ -74,7 +73,7 @@ public class TestAbstractStoringParallelAggregationProcessor {
     
     @Test(timeout=5000)
     public void testThatTheLockIsReleasedAfterStoringFailed() throws InterruptedException {
-        Processor<Integer, Integer> processor = new AbstractParallelStoringAggregationProcessor<Integer, Integer>(Integer.class, Integer.class, ConcurrencyTestsUtil.getExecutor(), receivers, Message.Sum.toString()) {
+        Processor<Integer, Integer> processor = new AbstractParallelStoringAggregationProcessor<Integer, Integer>(Integer.class, Integer.class, ConcurrencyTestsUtil.getExecutor(), receivers, "Sum") {
             @Override
             protected void storeElement(Integer element) {
                 if (element < 0) {

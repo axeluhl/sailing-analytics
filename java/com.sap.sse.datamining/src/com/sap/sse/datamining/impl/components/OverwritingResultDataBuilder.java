@@ -6,7 +6,6 @@ import com.sap.sse.datamining.AdditionalResultDataBuilder;
 import com.sap.sse.datamining.functions.Function;
 import com.sap.sse.datamining.i18n.DataMiningStringMessages;
 import com.sap.sse.datamining.shared.AdditionalResultData;
-import com.sap.sse.datamining.shared.Message;
 import com.sap.sse.datamining.shared.Unit;
 import com.sap.sse.datamining.shared.impl.AdditionalResultDataImpl;
 
@@ -47,7 +46,7 @@ public class OverwritingResultDataBuilder implements AdditionalResultDataBuilder
         
         String extractedStatisticName = extractionFunction.getLocalizedName(locale, stringMessages);
         String aggregationName = stringMessages.get(locale, aggregationNameMessageKey);
-        return stringMessages.get(locale, Message.ResultSignifier.toString(), extractedStatisticName, aggregationName);
+        return stringMessages.get(locale, "ResultSignifier", extractedStatisticName, aggregationName);
     }
 
     @Override

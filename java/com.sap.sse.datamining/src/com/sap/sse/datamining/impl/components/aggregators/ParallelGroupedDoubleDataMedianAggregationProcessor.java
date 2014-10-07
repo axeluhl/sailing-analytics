@@ -12,7 +12,6 @@ import java.util.concurrent.ExecutorService;
 import com.sap.sse.datamining.components.Processor;
 import com.sap.sse.datamining.impl.components.GroupedDataEntry;
 import com.sap.sse.datamining.shared.GroupKey;
-import com.sap.sse.datamining.shared.Message;
 
 public class ParallelGroupedDoubleDataMedianAggregationProcessor
              extends AbstractParallelStoringAggregationProcessor<GroupedDataEntry<Double>, Map<GroupKey, Double>> {
@@ -24,7 +23,7 @@ public class ParallelGroupedDoubleDataMedianAggregationProcessor
             Collection<Processor<Map<GroupKey, Double>, ?>> resultReceivers) {
         super((Class<GroupedDataEntry<Double>>)(Class<?>) GroupedDataEntry.class,
               (Class<Map<GroupKey, Double>>)(Class<?>) Map.class,
-              executor, resultReceivers, Message.Median.toString());
+              executor, resultReceivers, "Median");
         groupedValues = new HashMap<>();
     }
 
