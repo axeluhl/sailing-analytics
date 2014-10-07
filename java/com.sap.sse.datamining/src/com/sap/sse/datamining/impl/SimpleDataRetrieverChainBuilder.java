@@ -53,10 +53,9 @@ public class SimpleDataRetrieverChainBuilder<DataSourceType> implements DataRetr
 
     @Override
     public DataRetrieverChainBuilder<DataSourceType> setFilter(FilterCriterion<?> filter) {
-        Class<?> currentRetrievedDataType = getCurrentRetrievedDataType();
-        if (!filter.getElementType().isAssignableFrom(currentRetrievedDataType)) {
+        if (!filter.getElementType().isAssignableFrom(getCurrentRetrievedDataType())) {
             throw new IllegalArgumentException("The given filter (with element type '" + filter.getElementType().getSimpleName()
-                                               + "') isn't able to match the current retrieved data type '" + currentRetrievedDataType.getSimpleName() + "'");
+                                               + "') isn't able to match the current retrieved data type '" + getCurrentRetrievedDataType().getSimpleName() + "'");
         }
 
         filters.put(currentRetrieverTypeIndex, filter);
@@ -65,10 +64,9 @@ public class SimpleDataRetrieverChainBuilder<DataSourceType> implements DataRetr
 
     @Override
     public DataRetrieverChainBuilder<DataSourceType> addResultReceiver(Processor<?, ?> resultReceiver) {
-        Class<?> currentRetrievedDataType = getCurrentRetrievedDataType();
-        if (!resultReceiver.getInputType().isAssignableFrom(currentRetrievedDataType)) {
+        if (!resultReceiver.getInputType().isAssignableFrom(getCurrentRetrievedDataType())) {
             throw new IllegalArgumentException("The given result receiver (with input type '" + resultReceiver.getInputType().getSimpleName()
-                    + "') isn't able to process the current retrieved data type '" + currentRetrievedDataType.getSimpleName() + "'");
+                    + "') isn't able to process the current retrieved data type '" + getCurrentRetrievedDataType().getSimpleName() + "'");
         }
 
         if (!receivers.containsKey(currentRetrieverTypeIndex)) {

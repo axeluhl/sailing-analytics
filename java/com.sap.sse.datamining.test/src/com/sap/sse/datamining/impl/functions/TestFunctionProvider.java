@@ -76,9 +76,20 @@ public class TestFunctionProvider {
     @Test
     public void testGetStatisticsForType() {
         FunctionProvider functionProvider = new RegistryFunctionProvider(functionRegistry);
-        Collection<Function<?>> expectedFunctions = functionRegistryUtil.getExpectedStatisticsFor(Test_HasLegOfCompetitorContext.class);
-        assertThat(functionProvider.getStatisticsFor(Test_HasLegOfCompetitorContext.class), is(expectedFunctions));
-        assertThat(functionProvider.getStatisticsFor(Test_HasLegOfCompetitorContextImpl.class), is(expectedFunctions));
+        Collection<Function<?>> expectedStatistics = functionRegistryUtil.getExpectedStatisticsFor(Test_HasLegOfCompetitorContext.class);
+        assertThat(functionProvider.getStatisticsFor(Test_HasLegOfCompetitorContext.class), is(expectedStatistics));
+        assertThat(functionProvider.getStatisticsFor(Test_HasLegOfCompetitorContextImpl.class), is(expectedStatistics));
+    }
+    
+    @Test
+    public void testGetAllFunctionsForType() {
+        FunctionProvider functionProvider = new RegistryFunctionProvider(functionRegistry);
+        
+        Collection<Function<?>> expectedFunctions = functionRegistryUtil.getExpectedDimensionsFor(Test_HasRaceContext.class);
+        expectedFunctions.addAll(functionRegistryUtil.getExpectedDimensionsFor(Test_HasLegOfCompetitorContext.class));
+        expectedFunctions.addAll(functionRegistryUtil.getExpectedStatisticsFor(Test_HasLegOfCompetitorContext.class));
+        assertThat(functionProvider.getFunctionsFor(Test_HasLegOfCompetitorContext.class), is(expectedFunctions));
+        assertThat(functionProvider.getFunctionsFor(Test_HasLegOfCompetitorContextImpl.class), is(expectedFunctions));
     }
     
     @Test

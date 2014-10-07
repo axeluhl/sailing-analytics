@@ -63,11 +63,11 @@ public class TestClusterGroupRepository {
 
         ClusterBoundary<Number> lengthGreaterEqualsOne = new ComparatorClusterBoundary<Number>(lengthComparator, new Number(0), ComparisonStrategy.GREATER_EQUALS_THAN);
         ClusterBoundary<Number> lengthLowerSix = new ComparatorClusterBoundary<Number>(lengthComparator, new Number(100000), ComparisonStrategy.LOWER_THAN);
-        Cluster<Number> lengthBetweenOneAndFiveCluster = new ClusterWithBoundaries<>("Short", lengthGreaterEqualsOne, lengthLowerSix);
+        Cluster<Number> lengthBetweenOneAndFiveCluster = new ClusterWithLowerAndUpperBoundaries<>("Short", lengthGreaterEqualsOne, lengthLowerSix);
 
         ClusterBoundary<Number> lengthGreaterEqualsSix = new ComparatorClusterBoundary<Number>(lengthComparator, new Number(100000), ComparisonStrategy.GREATER_EQUALS_THAN);
         ClusterBoundary<Number> lengthLowerEqualsTen = new ComparatorClusterBoundary<Number>(lengthComparator, new Number(1000000000), ComparisonStrategy.LOWER_EQUALS_THAN);
-        Cluster<Number> lengthBetweenSixAndTen = new ClusterWithBoundaries<>("Long", lengthGreaterEqualsSix, lengthLowerEqualsTen);
+        Cluster<Number> lengthBetweenSixAndTen = new ClusterWithLowerAndUpperBoundaries<>("Long", lengthGreaterEqualsSix, lengthLowerEqualsTen);
         
         return new FixClusterGroup<>("Number Length", Arrays.asList(lengthBetweenOneAndFiveCluster, lengthBetweenSixAndTen));
     }
@@ -82,11 +82,11 @@ public class TestClusterGroupRepository {
 
         ClusterBoundary<Number> crossSumGreaterEqualsZero = new ComparatorClusterBoundary<Number>(crossSumComparator, new Number(0), ComparisonStrategy.GREATER_EQUALS_THAN);
         ClusterBoundary<Number> crossSumLowerTwentySix = new ComparatorClusterBoundary<Number>(crossSumComparator, new Number(998), ComparisonStrategy.LOWER_THAN);
-        Cluster<Number> crossSumBetweenZeroAndTwentyFiveCluster = new ClusterWithBoundaries<>("Low", crossSumGreaterEqualsZero, crossSumLowerTwentySix);
+        Cluster<Number> crossSumBetweenZeroAndTwentyFiveCluster = new ClusterWithLowerAndUpperBoundaries<>("Low", crossSumGreaterEqualsZero, crossSumLowerTwentySix);
 
         ClusterBoundary<Number> crossSumGreaterEqualsTwentySix = new ComparatorClusterBoundary<Number>(crossSumComparator, new Number(998), ComparisonStrategy.GREATER_EQUALS_THAN);
         ClusterBoundary<Number> crossSumLowerEqualsFifty = new ComparatorClusterBoundary<Number>(crossSumComparator, new Number(999995), ComparisonStrategy.LOWER_EQUALS_THAN);
-        Cluster<Number> lengthBetweenSixAndTen = new ClusterWithBoundaries<>("High", crossSumGreaterEqualsTwentySix, crossSumLowerEqualsFifty);
+        Cluster<Number> lengthBetweenSixAndTen = new ClusterWithLowerAndUpperBoundaries<>("High", crossSumGreaterEqualsTwentySix, crossSumLowerEqualsFifty);
         
         return new FixClusterGroup<>("Number Cross-Sum", Arrays.asList(crossSumBetweenZeroAndTwentyFiveCluster, lengthBetweenSixAndTen));
     }

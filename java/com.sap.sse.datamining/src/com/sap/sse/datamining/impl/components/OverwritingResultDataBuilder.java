@@ -71,20 +71,4 @@ public class OverwritingResultDataBuilder implements AdditionalResultDataBuilder
         this.aggregationNameMessageKey = aggregationNameMessageKey;
     }
 
-    protected Function<?> getExtractionFunction() {
-        return extractionFunction;
-    }
-
-    protected String getAggregationNameMessageKey() {
-        return aggregationNameMessageKey;
-    }
-
-    protected Unit getUnit() {
-        return unit;
-    }
-
-    protected int getResultDecimals() {
-        return resultDecimals;
-    }
-
 }

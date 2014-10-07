@@ -21,8 +21,8 @@ import com.sap.sse.datamining.impl.functions.SimpleFunctionRegistry;
 
 public class DataMiningActivator implements BundleActivator, ClassesWithFunctionsRegistrationService {
 
-//    private static final Logger LOGGER = Logger.getLogger(DataMiningActivator.class.getName());
     private static final int THREAD_POOL_SIZE = Math.max(Runtime.getRuntime().availableProcessors(), 3);
+    private static final String STRING_MESSAGES_BASE_NAME = "stringmessages/StringMessages";
 
     private static BundleContext context;
     
@@ -35,7 +35,7 @@ public class DataMiningActivator implements BundleActivator, ClassesWithFunction
     @Override
     public void start(BundleContext context) throws Exception {
         DataMiningActivator.context = context;
-        stringMessages = DataMiningStringMessages.Util.getDefaultStringMessages();
+        stringMessages = DataMiningStringMessages.Util.getInstanceFor(STRING_MESSAGES_BASE_NAME);
         executor = new ThreadPoolExecutor(THREAD_POOL_SIZE, THREAD_POOL_SIZE, 60, TimeUnit.SECONDS,
                                           new LinkedBlockingQueue<Runnable>());
 

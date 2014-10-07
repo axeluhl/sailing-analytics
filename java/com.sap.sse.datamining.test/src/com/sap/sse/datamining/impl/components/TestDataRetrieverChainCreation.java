@@ -80,8 +80,10 @@ public class TestDataRetrieverChainCreation {
 
     @SuppressWarnings("unchecked")
     @Test
-    public void testGetRetrievedDataType() {
+    public void testGetRetrievedDataTypeAndGetDataSourceType() {
         DataRetrieverChainDefinition<Collection<Test_Regatta>> dataRetrieverChainDefinition = new SimpleDataRetrieverChainDefinition<>((Class<Collection<Test_Regatta>>)(Class<?>) Collection.class);
+        assertThat(dataRetrieverChainDefinition.getDataSourceType().equals(Collection.class), is(true));
+        
         Class<Processor<Collection<Test_Regatta>, Test_Regatta>> regattaRetrieverClass = (Class<Processor<Collection<Test_Regatta>, Test_Regatta>>)(Class<?>) TestRegattaRetrievalProcessor.class;
         dataRetrieverChainDefinition.startWith(regattaRetrieverClass, Test_Regatta.class);
         assertThat(dataRetrieverChainDefinition.getRetrievedDataType().equals(Test_Regatta.class), is(true));

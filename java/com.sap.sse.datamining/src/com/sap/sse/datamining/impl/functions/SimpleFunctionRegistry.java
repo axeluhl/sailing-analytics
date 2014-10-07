@@ -165,7 +165,10 @@ public class SimpleFunctionRegistry implements FunctionRegistry {
     public Collection<Function<?>> getAllFunctionsOf(Class<?> declaringType) {
         Collection<Function<?>> allFunctions = new HashSet<>();
         for (Map<Class<?>, Set<Function<?>>> functionMap : functionMaps) {
-            allFunctions.addAll(functionMap.get(declaringType));
+            Collection<Function<?>> functions = functionMap.get(declaringType);
+            if (functions != null) {
+                allFunctions.addAll(functions);
+            }
         }
         return allFunctions;
     }

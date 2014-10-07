@@ -4,6 +4,7 @@ import static org.hamcrest.Matchers.is;
 import static org.junit.Assert.assertThat;
 
 import java.util.Locale;
+import java.util.MissingResourceException;
 
 import org.junit.Before;
 import org.junit.Test;
@@ -16,23 +17,23 @@ public class TestI18N {
     private static final String SIMPLE_TEST_MESSAGE_KEY = "SimpleTestMessage";
     private static final String TEST_MESSAGE_WITH_PARAMETERS = "TestMessageWithParameters";
     
-    private DataMiningStringMessages bundleManager;
+    private DataMiningStringMessages testStringMessages;
     
     @Before
     public void initializeBundleManager() {
-        bundleManager = TestsUtil.getTestStringMessages();
+        testStringMessages = TestsUtil.getTestStringMessages();
     }
 
     @Test
     public void testGettingASimpleMessage() {
-        assertThat(bundleManager.get(Locale.ENGLISH, SIMPLE_TEST_MESSAGE_KEY), is("English"));
-        assertThat(bundleManager.get(Locale.GERMAN, SIMPLE_TEST_MESSAGE_KEY), is("Deutsch"));
+        assertThat(testStringMessages.get(Locale.ENGLISH, SIMPLE_TEST_MESSAGE_KEY), is("English"));
+        assertThat(testStringMessages.get(Locale.GERMAN, SIMPLE_TEST_MESSAGE_KEY), is("Deutsch"));
     }
     
     @Test
     public void testGettingAMessageWithParameters() {
-        assertThat(bundleManager.get(Locale.ENGLISH, TEST_MESSAGE_WITH_PARAMETERS, "Param0", "Param1"), is("English Param0 - Param1"));
-        assertThat(bundleManager.get(Locale.GERMAN, TEST_MESSAGE_WITH_PARAMETERS, "Param0", "Param1"), is("Deutsch Param0 - Param1"));
+        assertThat(testStringMessages.get(Locale.ENGLISH, TEST_MESSAGE_WITH_PARAMETERS, "Param0", "Param1"), is("English Param0 - Param1"));
+        assertThat(testStringMessages.get(Locale.GERMAN, TEST_MESSAGE_WITH_PARAMETERS, "Param0", "Param1"), is("Deutsch Param0 - Param1"));
     }
     
     @Test
@@ -42,6 +43,16 @@ public class TestI18N {
         assertThat(DataMiningStringMessages.Util.getLocaleFor("de"), is(Locale.GERMAN));
 
         assertThat(DataMiningStringMessages.Util.getLocaleFor("Unsupported locale info name"), is(Locale.ENGLISH));
+    }
+    
+    @Test(expected=MissingResourceException.class)
+    public void testGettingAMessageForAMissingKeyFromSimpleStringMessages() {
+        testStringMessages.get(Locale.ENGLISH, "$%&MissingKey/()");
+    }
+    
+    @Test(expected=MissingResourceException.class)
+    public void testGettingAMessageForAMissingKeyFromCompoundStringMessages() {
+        TestsUtil.getTestStringMessagesWithProductiveMessages().get(Locale.ENGLISH, "$%&MissingKey/()");
     }
 
 }
