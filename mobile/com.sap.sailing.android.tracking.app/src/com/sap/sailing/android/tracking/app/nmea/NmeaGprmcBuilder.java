@@ -6,10 +6,8 @@ import java.util.Date;
 import java.util.List;
 import java.util.TimeZone;
 
-import android.annotation.SuppressLint;
 import android.location.Location;
 
-@SuppressLint("SimpleDateFormat")
 public class NmeaGprmcBuilder {
     /**
      * Sentence begin character
