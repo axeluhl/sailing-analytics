@@ -31,6 +31,7 @@ public abstract class RegattaWithSeriesAndFleetsDialog extends AbstractRegattaWi
         if (regatta.boatClass != null) {
             boatClassEntryField.setText(regatta.boatClass.getName());
         }
+		setSeriesEditor();
     }
 
     @Override

@@ -41,7 +41,6 @@ public class DefaultRegattaCreateDialog extends
 		sailingEventsListBox.setSelectedIndex(1);
 		sailingEventsListBox.setEnabled(false);
 		setCourseAreaSelection();
-		setSeriesEditor();
 	}
 
 	protected void setSeriesEditor() {

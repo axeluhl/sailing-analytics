@@ -643,7 +643,6 @@ public interface SailingServiceAsync {
     void getRegattas(String url, AsyncCallback<Iterable<RegattaDTO>> asyncCallback);
 
     void createRegattaStructure(Iterable<RegattaDTO> regattaNames,
-			EventDTO newEvent, RegattaDTO defaultRegatta,
-			AsyncCallback<Void> asyncCallback); 
+			EventDTO newEvent, AsyncCallback<Void> asyncCallback); 
 
 }

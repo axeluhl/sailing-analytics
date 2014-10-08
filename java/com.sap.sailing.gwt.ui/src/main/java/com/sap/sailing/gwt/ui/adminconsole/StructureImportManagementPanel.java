@@ -82,10 +82,17 @@ public class StructureImportManagementPanel extends FlowPanel {
 		importDetailsButton.addClickHandler(new ClickHandler() {
 			@Override
 			public void onClick(ClickEvent event) {
-				List<RegattaDTO> selectedRegattas = regattaListComposite
-						.getSelectedRegattas();
-				//TODO createRegattas. perhaps sailingServiceImpl has to be changed
-				// createRegattas(selectedRegattas, getSelectedEvent());
+				if (getSelectedEvent() != null) {
+					List<RegattaDTO> selectedRegattas = regattaListComposite
+							.getSelectedRegattas();
+					if(!selectedRegattas.isEmpty()){
+					createRegattas(selectedRegattas, getSelectedEvent());
+					}else{
+						errorReporter.reportError("Please select at least one regatta");
+					}
+				}else{
+					errorReporter.reportError("Please select an event");
+				}
 			}
 		});
 		listRegattasButton.addClickHandler(new ClickHandler() {
@@ -355,11 +362,11 @@ public class StructureImportManagementPanel extends FlowPanel {
 		return result;
 	}
 
-	private void createRegattas(final Iterable<RegattaDTO> regattaNames,
-			EventDTO newEvent, RegattaDTO defaultRegatta) {
+	private void createRegattas(final Iterable<RegattaDTO> selectedRegattas,
+			EventDTO newEvent) {
 		eventManagementPanel.fillEvents();
-		sailingService.createRegattaStructure(regattaNames, newEvent,
-				defaultRegatta, new AsyncCallback<Void>() {
+		sailingService.createRegattaStructure(selectedRegattas, newEvent,
+				new AsyncCallback<Void>() {
 					@Override
 					public void onFailure(Throwable caught) {
 						errorReporter.reportError(stringMessages

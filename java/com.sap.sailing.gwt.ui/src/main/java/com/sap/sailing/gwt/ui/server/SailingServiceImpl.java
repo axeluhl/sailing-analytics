@@ -3778,28 +3778,9 @@ public class SailingServiceImpl extends ProxiedRemoteServiceServlet implements S
     }
 
     @Override
-    public void createRegattaStructure(final Iterable<RegattaDTO> regattas, final EventDTO newEvent,
-            final RegattaDTO defaultRegatta) {
+    public void createRegattaStructure(final Iterable<RegattaDTO> regattas, final EventDTO newEvent) {
     	final List<String> leaderboardNames = new ArrayList<String>();
         for(RegattaDTO regatta: regattas){
-        	regatta.defaultCourseAreaUuid = defaultRegatta.defaultCourseAreaUuid;
-        	regatta.defaultCourseAreaName = defaultRegatta.defaultCourseAreaName;
-        	regatta.scoringScheme = defaultRegatta.scoringScheme;
-        	regatta.useStartTimeInference = defaultRegatta.useStartTimeInference;
-        	for (SeriesDTO series : regatta.series) {
-        		if(!defaultRegatta.series.isEmpty()){
-        			SeriesDTO defaultSeries = defaultRegatta.series.get(0);
-        			series.setDiscardThresholds(defaultSeries.getDiscardThresholds());
-        			series.setSplitFleetContiguousScoring(defaultSeries.hasSplitFleetContiguousScoring());
-        			series.setStartsWithZeroScore(defaultSeries.isStartsWithZeroScore());
-        			series.setFirstColumnIsNonDiscardableCarryForward(defaultSeries.isFirstColumnIsNonDiscardableCarryForward());
-        		}else{
-        			series.setDiscardThresholds(null);
-        			series.setSplitFleetContiguousScoring(false);
-        			series.setStartsWithZeroScore(false);
-        			series.setFirstColumnIsNonDiscardableCarryForward(false);
-        		}
-        	}
             createRegattaFromRegattaDTO(regatta);
             leaderboardNames.addAll(createRegattasWithRaces(regatta, newEvent.getName()));
         }

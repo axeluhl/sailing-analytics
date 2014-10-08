@@ -560,6 +560,6 @@ public interface SailingService extends RemoteService {
     RaceDTO setStartTimeReceivedForRace(RaceIdentifier raceIdentifier, Date newStartTimeReceived);
 
 	void createRegattaStructure(Iterable<RegattaDTO> regattas,
-			EventDTO newEvent, RegattaDTO defaultRegatta);
+			EventDTO newEvent);
 
 }
