@@ -1,12 +1,19 @@
 package com.sap.sse.datamining.test.util;
 
+import static org.hamcrest.Matchers.is;
+import static org.hamcrest.Matchers.notNullValue;
+import static org.junit.Assert.assertThat;
 import static org.junit.Assert.fail;
 
+import java.util.Collection;
+import java.util.Map;
+import java.util.Map.Entry;
 import java.util.concurrent.LinkedBlockingQueue;
 import java.util.concurrent.ThreadPoolExecutor;
 import java.util.concurrent.TimeUnit;
 
 import com.sap.sse.datamining.components.Processor;
+import com.sap.sse.datamining.shared.GroupKey;
 
 public class ConcurrencyTestsUtil extends TestsUtil {
 
@@ -29,6 +36,23 @@ public class ConcurrencyTestsUtil extends TestsUtil {
             Thread.sleep(milliseconds);
         } catch (InterruptedException e) {
             fail("The test was interrupted: " + e.getMessage());
+        }
+    }
+
+    public static <T> void processElements(Processor<T> processor, Collection<T> elements) {
+        for (T element : elements) {
+            processor.processElement(element);
+        }
+    }
+
+    public static <ResultDataType> void verifyResultData(Map<GroupKey, ResultDataType> resultData, Map<GroupKey, ResultDataType> expectedResultData) {
+        assertThat("No aggregation has been received.", resultData, notNullValue());
+        
+        for (Entry<GroupKey, ResultDataType> expectedReceivedAggregationEntry : expectedResultData.entrySet()) {
+            assertThat("The expected aggregation entry '" + expectedReceivedAggregationEntry + "' wasn't received.",
+                    resultData.containsKey(expectedReceivedAggregationEntry.getKey()), is(true));
+            assertThat("The result for group '" + expectedReceivedAggregationEntry.getKey() + "' isn't correct.",
+                    resultData.get(expectedReceivedAggregationEntry.getKey()), is(expectedReceivedAggregationEntry.getValue()));
         }
     }
 

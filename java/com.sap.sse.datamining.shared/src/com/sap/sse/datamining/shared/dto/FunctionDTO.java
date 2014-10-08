@@ -3,7 +3,7 @@ package com.sap.sse.datamining.shared.dto;
 import java.io.Serializable;
 import java.util.List;
 
-public interface FunctionDTO extends Serializable {
+public interface FunctionDTO extends Serializable, Comparable<FunctionDTO> {
 
     public boolean isDimension();
 
@@ -14,5 +14,7 @@ public interface FunctionDTO extends Serializable {
     public String getReturnTypeName();
 
     public String getSourceTypeName();
+    
+    public int getOrdinal();
 
 }

@@ -2,6 +2,7 @@ package com.sap.sailing.gwt.home.client.place.searchresult;
 
 import com.google.gwt.activity.shared.AbstractActivity;
 import com.google.gwt.event.shared.EventBus;
+import com.google.gwt.user.client.Window;
 import com.google.gwt.user.client.rpc.AsyncCallback;
 import com.google.gwt.user.client.ui.AcceptsOneWidget;
 import com.sap.sailing.gwt.home.client.shared.placeholder.Placeholder;
@@ -45,8 +46,26 @@ public class SearchResultActivity extends AbstractActivity {
     }
 
     protected void doSearch(final String searchText) {
-        KeywordQuery searchQuery = new KeywordQuery(searchText);
-        clientFactory.getSailingService().search(null, searchQuery, new AsyncCallback<Iterable<LeaderboardSearchResultDTO>>() {
+        final KeywordQuery searchQuery = new KeywordQuery(searchText.split("[ \t]+"));
+        clientFactory.getSailingService().getSearchServerNames(new AsyncCallback<Iterable<String>>() {
+            @Override
+            public void onSuccess(Iterable<String> serverNames) {
+                view.initSearchResult(searchText);
+                searchSingleServer(searchText, searchQuery, /* null meaning the "local" server */ null);
+                for (String serverName : serverNames) {
+                    searchSingleServer(searchText, searchQuery, serverName);
+                }
+            }
+
+            @Override
+            public void onFailure(Throwable caught) {
+                Window.alert("Error: "+caught.getMessage());
+            }
+        });
+    }
+
+    private void searchSingleServer(final String searchText, KeywordQuery searchQuery, String serverName) {
+        clientFactory.getSailingService().search(serverName, searchQuery, new AsyncCallback<Iterable<LeaderboardSearchResultDTO>>() {
             @Override
             public void onSuccess(Iterable<LeaderboardSearchResultDTO> searchResults) {
                 view.updateSearchResult(searchText, searchResults);

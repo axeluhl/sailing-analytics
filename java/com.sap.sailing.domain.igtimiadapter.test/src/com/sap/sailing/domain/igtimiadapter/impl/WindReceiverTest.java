@@ -5,7 +5,6 @@ import static org.junit.Assert.assertFalse;
 
 import java.util.ArrayList;
 import java.util.Arrays;
-import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -37,7 +36,7 @@ public class WindReceiverTest {
     public void simpleWindReceiverTest() {
         final List<Wind> windReceived = new ArrayList<>();
         final String deviceSerialNumber = "Non-Existing Test Device";
-        IgtimiWindReceiver receiver = new IgtimiWindReceiver(Collections.singleton(deviceSerialNumber), DeclinationService.INSTANCE);
+        IgtimiWindReceiver receiver = new IgtimiWindReceiver(DeclinationService.INSTANCE);
         receiver.addListener(new IgtimiWindListener() {
             @Override
             public void windDataReceived(Wind wind, String deviceSerialNumber) {
@@ -75,7 +74,7 @@ public class WindReceiverTest {
     public void trueWindCalculationTest() {
         final List<Wind> windReceived = new ArrayList<>();
         final String deviceSerialNumber = "Non-Existing Test Device";
-        IgtimiWindReceiver receiver = new IgtimiWindReceiver(Collections.singleton(deviceSerialNumber), DeclinationService.INSTANCE);
+        IgtimiWindReceiver receiver = new IgtimiWindReceiver(DeclinationService.INSTANCE);
         receiver.addListener(new IgtimiWindListener() {
             @Override
             public void windDataReceived(Wind wind, String deviceSerialNumber) {
@@ -117,7 +116,7 @@ public class WindReceiverTest {
         final Map<String, Wind> windReceived = new HashMap<>();
         final String deviceSerialNumber1 = "Non-Existing Test Device #1";
         final String deviceSerialNumber2 = "Non-Existing Test Device #2";
-        IgtimiWindReceiver receiver = new IgtimiWindReceiver(Arrays.asList(new String[] { deviceSerialNumber1, deviceSerialNumber2 }), DeclinationService.INSTANCE);
+        IgtimiWindReceiver receiver = new IgtimiWindReceiver(DeclinationService.INSTANCE);
         receiver.addListener(new IgtimiWindListener() {
             @Override
             public void windDataReceived(Wind wind, String deviceSerialNumber) {

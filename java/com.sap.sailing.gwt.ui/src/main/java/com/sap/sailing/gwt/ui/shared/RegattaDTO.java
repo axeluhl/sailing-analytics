@@ -56,7 +56,10 @@ public class RegattaDTO extends NamedDTO {
      * @return The start date of the first {@link #races Race}, or <code>null</code> if the start date isn't set
      */
     public Date getStartDate() {
-        return races.get(0).startOfRace;
+        if(races.size()>0){
+            return races.get(0).startOfRace;
+        }
+        return null;
     }
     
     /**

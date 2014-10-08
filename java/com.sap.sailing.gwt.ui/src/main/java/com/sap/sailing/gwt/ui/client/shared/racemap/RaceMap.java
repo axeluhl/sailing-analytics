@@ -515,6 +515,7 @@ public class RaceMap extends AbsolutePanel implements TimeListener, CompetitorSe
         // controls at RIGHT would not get the correct top setting
         map.setControls(ControlPosition.TOP_RIGHT, headerPanel);
     }
+    
     private void createSettingsButton(MapWidget map) {
         final Component<RaceMapSettings> component = this;
         Button settingsButton = new Button();

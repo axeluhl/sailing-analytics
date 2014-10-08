@@ -108,11 +108,12 @@
 		<module>com.sap.sailing.simulator.test</module>
 		<module>com.sap.sailing.server.trackfiles.test</module>
 		<module>com.sap.sailing.selenium.test</module>
+		<module>com.sap.sailing.autoload</module>
 		<module>com.sap.sailing.feature.p2build</module>
 	</modules>
 	
 	<properties>
-		<tycho-version>0.18.1</tycho-version>
+		<tycho-version>0.20.0</tycho-version>
         
 		<!--
           QUESTION: Which properties or settings are system dependent and differ across

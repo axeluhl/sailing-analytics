@@ -1,6 +1,9 @@
 package com.sap.sailing.selenium.test.adminconsole;
 
-import static org.junit.Assert.*;
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertFalse;
+import static org.junit.Assert.assertNotNull;
+import static org.junit.Assert.assertTrue;
 
 import java.util.List;
 
@@ -31,7 +34,9 @@ public class TestLeaderboardFilterInLeaderboardGroupConfig extends AbstractSelen
         assertEquals("Test", selectedEntries.get(0).getColumnContent("Name"));
         
         LeaderboardConfigurationPanelPO leaderboardConfiguration = adminConsole.goToLeaderboardConfiguration();
+        assertFalse(leaderboardConfiguration.getAvailableLeaderboards().contains("Test"));
         leaderboardConfiguration.createFlexibleLeaderboard("Test");
+        assertTrue(leaderboardConfiguration.getAvailableLeaderboards().contains("Test"));
 
         leaderboardGroupConfiguration = adminConsole.goToLeaderboardGroupConfiguration();
         LeaderboardGroupDetailsPanelPO leaderboardGroupDetails = leaderboardGroupConfiguration.getLeaderboardGroupDetails("Test");

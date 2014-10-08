@@ -63,6 +63,7 @@ import com.sap.sailing.domain.common.MasterDataImportObjectCreationCount;
 import com.sap.sailing.domain.common.MaxPointsReason;
 import com.sap.sailing.domain.common.Position;
 import com.sap.sailing.domain.common.RegattaAndRaceIdentifier;
+import com.sap.sailing.domain.common.RegattaNameAndRaceName;
 import com.sap.sailing.domain.common.SpeedWithBearing;
 import com.sap.sailing.domain.common.TimePoint;
 import com.sap.sailing.domain.common.WindSource;
@@ -71,6 +72,7 @@ import com.sap.sailing.domain.common.impl.DataImportProgressImpl;
 import com.sap.sailing.domain.common.impl.DegreeBearingImpl;
 import com.sap.sailing.domain.common.impl.DegreePosition;
 import com.sap.sailing.domain.common.impl.KnotSpeedWithBearingImpl;
+import com.sap.sailing.domain.common.impl.MillisecondsDurationImpl;
 import com.sap.sailing.domain.common.impl.MillisecondsTimePoint;
 import com.sap.sailing.domain.common.impl.WindSourceWithAdditionalID;
 import com.sap.sailing.domain.common.media.MediaTrack;
@@ -1604,8 +1606,14 @@ public class MasterDataImportTest {
             ClassNotFoundException {
         // Setup source service
         RacingEventService sourceService = new RacingEventServiceImpl();
-        MediaTrack trackOnSource = new MediaTrack("testTitle", "http://test/test.mp4", new Date(0), 2000,
-                MediaTrack.MimeType.mp4);
+        Set<RegattaAndRaceIdentifier> assignedRaces = new HashSet<RegattaAndRaceIdentifier>();
+        assignedRaces.add(new RegattaNameAndRaceName("49er", "R1"));
+        assignedRaces.add(new RegattaNameAndRaceName("49er", "R2"));
+        assignedRaces.add(new RegattaNameAndRaceName("48er", "F1"));
+        assignedRaces.add(new RegattaNameAndRaceName("48er", "F2"));
+        assignedRaces.add(new RegattaNameAndRaceName("48er", "F3"));
+        MediaTrack trackOnSource = new MediaTrack("testTitle", "http://test/test.mp4", new MillisecondsTimePoint(0), MillisecondsDurationImpl.ONE_HOUR,
+                MediaTrack.MimeType.mp4, assignedRaces);
         sourceService.mediaTrackAdded(trackOnSource);
 
         // Serialize
@@ -1653,6 +1661,8 @@ public class MasterDataImportTest {
         Assert.assertEquals(trackOnSource.dbId, trackOnTarget.dbId);
 
         Assert.assertEquals(trackOnSource.url, trackOnTarget.url);
+
+        Assert.assertEquals(trackOnSource.assignedRaces, trackOnTarget.assignedRaces);
 
     }
 

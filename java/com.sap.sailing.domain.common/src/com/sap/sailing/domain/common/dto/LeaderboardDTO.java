@@ -7,6 +7,8 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
+import com.sap.sailing.domain.common.ScoringSchemeType;
+
 /**
  * Captures the serializable properties of a leaderboard which in particular has the competitors, any optional display
  * name mappings for the competitors, races and their net / total points as well as possible reasons for maximum points
@@ -62,10 +64,11 @@ public class LeaderboardDTO extends AbstractLeaderboardDTO implements Serializab
      * from it by the {@link #clone()} operation.
      * @param hasOverallDetails TODO
      */
-    public LeaderboardDTO(Date timePointOfLastCorrectionsValidity, String comment, boolean higherScoreIsBetter, UUIDGenerator uuidGenerator, boolean hasOverallDetails) {
+    public LeaderboardDTO(Date timePointOfLastCorrectionsValidity, String comment, ScoringSchemeType scoringScheme, boolean higherScoreIsBetter, UUIDGenerator uuidGenerator, boolean hasOverallDetails) {
         initCollections();
         id = uuidGenerator.generateRandomUUID();
         this.timePointOfLastCorrectionsValidity = timePointOfLastCorrectionsValidity;
+        this.scoringScheme = scoringScheme;
         this.comment = comment;
         this.higherScoresIsBetter = higherScoreIsBetter;
         this.hasOverallDetails = hasOverallDetails;

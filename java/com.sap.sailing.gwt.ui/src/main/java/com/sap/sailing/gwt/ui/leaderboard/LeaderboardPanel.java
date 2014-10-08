@@ -15,8 +15,8 @@ import java.util.Set;
 
 import com.google.gwt.cell.client.Cell;
 import com.google.gwt.cell.client.Cell.Context;
+import com.google.gwt.cell.client.AbstractSafeHtmlCell;
 import com.google.gwt.cell.client.CompositeCell;
-import com.google.gwt.cell.client.EditTextCell;
 import com.google.gwt.cell.client.TextCell;
 import com.google.gwt.core.client.GWT;
 import com.google.gwt.core.client.Scheduler;
@@ -28,13 +28,13 @@ import com.google.gwt.dom.client.Style.Unit;
 import com.google.gwt.event.dom.client.ClickEvent;
 import com.google.gwt.event.dom.client.ClickHandler;
 import com.google.gwt.event.shared.HandlerRegistration;
-import com.google.gwt.i18n.client.DateTimeFormat;
 import com.google.gwt.i18n.client.NumberFormat;
 import com.google.gwt.resources.client.ImageResource;
 import com.google.gwt.safehtml.client.SafeHtmlTemplates;
 import com.google.gwt.safehtml.shared.SafeHtml;
 import com.google.gwt.safehtml.shared.SafeHtmlBuilder;
 import com.google.gwt.safehtml.shared.SafeHtmlUtils;
+import com.google.gwt.text.shared.AbstractSafeHtmlRenderer;
 import com.google.gwt.user.cellview.client.Column;
 import com.google.gwt.user.cellview.client.Header;
 import com.google.gwt.user.cellview.client.SafeHtmlHeader;
@@ -95,6 +95,7 @@ import com.sap.sailing.gwt.ui.client.shared.controls.SelectionCheckboxColumn;
 import com.sap.sailing.gwt.ui.client.shared.filter.CompetitorRaceRankFilter;
 import com.sap.sailing.gwt.ui.client.shared.filter.FilterWithUI;
 import com.sap.sailing.gwt.ui.client.shared.filter.LeaderboardFetcher;
+import com.sap.sailing.gwt.ui.common.client.DateAndTimeFormatterUtil;
 import com.sap.sailing.gwt.ui.leaderboard.DetailTypeColumn.LegDetailField;
 import com.sap.sailing.gwt.ui.leaderboard.LeaderboardSettings.RaceColumnSelectionStrategies;
 import com.sap.sailing.gwt.ui.shared.RaceTimesInfoDTO;
@@ -241,7 +242,7 @@ public class LeaderboardPanel extends SimplePanel implements TimeListener, PlayS
      * This anchor's HTML holds the image tag for the play/pause button that needs to be updated when the {@link #timer}
      * changes its playing state
      */
-    private final Anchor playPause;
+    private Anchor playPause;
 
     private final CompetitorSelectionProvider competitorSelectionProvider;
     private final HorizontalPanel filterControlPanel;
@@ -273,23 +274,18 @@ public class LeaderboardPanel extends SimplePanel implements TimeListener, PlayS
 
     private final VerticalPanel contentPanel;
     
-    private final HorizontalPanel refreshAndSettingsPanel;
-
-    private final FlowPanel informationPanel;
-    private final Label scoreCorrectionLastUpdateTimeLabel;
-    private final Label scoreCorrectionCommentLabel;
-    private final Label liveRaceLabel; 
+    private HorizontalPanel refreshAndSettingsPanel;
+    private Label scoreCorrectionLastUpdateTimeLabel;
+    private Label scoreCorrectionCommentLabel;
+    private Label liveRaceLabel; 
     
-    private final DateTimeFormat dateFormatter = DateTimeFormat.getFormat(DateTimeFormat.PredefinedFormat.DATE_LONG);
-    private final DateTimeFormat timeFormatter = DateTimeFormat.getFormat("HH:mm:ss zzz");
-
-    private boolean isEmbedded = false;
+    private boolean isEmbedded;
 
     private static LeaderboardResources resources = GWT.create(LeaderboardResources.class);
     private static LeaderboardTableResources tableResources = GWT.create(LeaderboardTableResources.class);
 
-    private final ImageResource pauseIcon;
-    private final ImageResource playIcon;
+    private ImageResource pauseIcon;
+    private ImageResource playIcon;
 
     private final BusyIndicator busyIndicator;
 
@@ -615,7 +611,7 @@ public class LeaderboardPanel extends SimplePanel implements TimeListener, PlayS
         public void render(Context context, LeaderboardRowDTO object, SafeHtmlBuilder sb) {
             String competitorColor = LeaderboardPanel.this.competitorSelectionProvider.getColor(object.competitor).getAsHtml();
             String competitorColorBarStyle;
-            if (LeaderboardPanel.this.isEmbedded) {
+            if (LeaderboardPanel.this.isEmbedded && preSelectedRace != null) {
                 competitorColorBarStyle = "style=\"border-bottom: 2px solid " + competitorColor + ";\"";
             } else {
                 competitorColorBarStyle = "style=\"border: none;\"";
@@ -1442,20 +1438,30 @@ public class LeaderboardPanel extends SimplePanel implements TimeListener, PlayS
         }
     }
 
-    protected class CarryColumn extends LeaderboardSortableColumnWithMinMax<LeaderboardRowDTO, String> {
+    protected class CarryColumn extends LeaderboardSortableColumnWithMinMax<LeaderboardRowDTO, LeaderboardRowDTO> {
         public CarryColumn() {
-            super(new TextCell(), SortingOrder.ASCENDING, LeaderboardPanel.this);
+            super(new AbstractSafeHtmlCell<LeaderboardRowDTO>(new AbstractSafeHtmlRenderer<LeaderboardRowDTO>() {
+                @Override
+                public SafeHtml render(LeaderboardRowDTO object) {
+                    return new SafeHtmlBuilder().appendEscaped(object.carriedPoints == null ? "" : scoreFormat.format(object.carriedPoints)).toSafeHtml();
+                }
+            }) {
+                @Override
+                protected void render(com.google.gwt.cell.client.Cell.Context context, SafeHtml data, SafeHtmlBuilder sb) {
+                    sb.append(data);
+                }
+            }, SortingOrder.ASCENDING, LeaderboardPanel.this);
             setSortable(true);
         }
 
-        protected CarryColumn(EditTextCell editTextCell) {
-            super(editTextCell, SortingOrder.ASCENDING, LeaderboardPanel.this);
+        protected CarryColumn(Cell<LeaderboardRowDTO> cell) {
+            super(cell, SortingOrder.ASCENDING, LeaderboardPanel.this);
             setSortable(true);
         }
 
         @Override
-        public String getValue(LeaderboardRowDTO object) {
-            return object.carriedPoints == null ? "" : scoreFormat.format(object.carriedPoints);
+        public LeaderboardRowDTO getValue(LeaderboardRowDTO object) {
+            return object;
         }
 
         @Override
@@ -1582,16 +1588,16 @@ public class LeaderboardPanel extends SimplePanel implements TimeListener, PlayS
             LeaderboardSettings settings, CompetitorSelectionProvider competitorSelectionProvider,
             String leaderboardName, ErrorReporter errorReporter, final StringMessages stringMessages,
             final UserAgentDetails userAgent, boolean showRaceDetails) {
-        this(sailingService, asyncActionsExecutor, settings, /* preSelectedRace */null, competitorSelectionProvider,
+        this(sailingService, asyncActionsExecutor, settings, false, /* preSelectedRace */null, competitorSelectionProvider,
                 null, leaderboardName, errorReporter, stringMessages, userAgent, showRaceDetails);
     }
 
     public LeaderboardPanel(SailingServiceAsync sailingService, AsyncActionsExecutor asyncActionsExecutor,
-            LeaderboardSettings settings, RaceIdentifier preSelectedRace,
+            LeaderboardSettings settings, boolean isEmbedded, RaceIdentifier preSelectedRace,
             CompetitorSelectionProvider competitorSelectionProvider, String leaderboardGroupName,
             String leaderboardName, ErrorReporter errorReporter, final StringMessages stringMessages,
             final UserAgentDetails userAgent, boolean showRaceDetails) {
-        this(sailingService, asyncActionsExecutor, settings, preSelectedRace, competitorSelectionProvider, new Timer(
+        this(sailingService, asyncActionsExecutor, settings, isEmbedded, preSelectedRace, competitorSelectionProvider, new Timer(
                 // perform the first request as "live" but don't by default auto-play
                 PlayModes.Live, PlayStates.Paused, /* delayBetweenAutoAdvancesInMilliseconds */3000l), leaderboardGroupName,
                 leaderboardName, errorReporter, stringMessages, userAgent, showRaceDetails,
@@ -1600,7 +1606,7 @@ public class LeaderboardPanel extends SimplePanel implements TimeListener, PlayS
     }
 
     public LeaderboardPanel(SailingServiceAsync sailingService, AsyncActionsExecutor asyncActionsExecutor,
-            LeaderboardSettings settings, RaceIdentifier preSelectedRace,
+            LeaderboardSettings settings, boolean isEmbedded, RaceIdentifier preSelectedRace,
             CompetitorSelectionProvider competitorSelectionProvider, Timer timer, String leaderboardGroupName,
             String leaderboardName, ErrorReporter errorReporter, final StringMessages stringMessages,
             final UserAgentDetails userAgent, boolean showRaceDetails, CompetitorFilterPanel competitorSearchTextBox,
@@ -1611,6 +1617,7 @@ public class LeaderboardPanel extends SimplePanel implements TimeListener, PlayS
         this.showRaceDetails = showRaceDetails;
         this.sailingService = sailingService;
         this.asyncActionsExecutor = asyncActionsExecutor;
+        this.isEmbedded = isEmbedded;
         this.preSelectedRace = preSelectedRace;
         this.competitorSelectionProvider = competitorSelectionProvider;
         competitorSelectionProvider.addCompetitorSelectionChangeListener(this);
@@ -1708,16 +1715,41 @@ public class LeaderboardPanel extends SimplePanel implements TimeListener, PlayS
             loadCompleteLeaderboard(getLeaderboardDisplayDate());
         }
 
-        if (this.preSelectedRace == null) {
-            isEmbedded = false;
-        } else {
-            isEmbedded = true;
-        }
         contentPanel = new VerticalPanel();
         contentPanel.setStyleName(STYLE_LEADERBOARD_CONTENT);
         
+        busyIndicator = new SimpleBusyIndicator(false, 0.8f);
+        busyIndicator.ensureDebugId("BusyIndicator");
         // the information panel
-        informationPanel = new FlowPanel();
+        if (!isEmbedded) {
+            Widget toolbarPanel = createToolbarPanel();
+            contentPanel.add(toolbarPanel);
+        }
+        if (competitorSearchTextBox != null) {
+            contentPanel.add(competitorSearchTextBox);
+            contentPanel.add(busyIndicator);
+            competitorSearchTextBox.getSettingsButton().addClickHandler(new ClickHandler() {
+                @Override
+                public void onClick(ClickEvent event) {
+                    new SettingsDialog<LeaderboardSettings>(LeaderboardPanel.this, stringMessages).show();
+                }
+            });
+            this.competitorFilterPanel = competitorSearchTextBox;
+        }
+        SortedCellTable<LeaderboardRowDTO> leaderboardTable = getLeaderboardTable();
+        leaderboardTable.getElement().getStyle().setMarginTop(5, Unit.PX);
+        filterControlPanel = new HorizontalPanel();
+        filterControlPanel.setStyleName("LeaderboardPanel-FilterControl-Panel");
+        contentPanel.add(leaderboardTable);
+        if (showCompetitorFilterStatus) {
+            contentPanel.add(createFilterDeselectionControl());
+        }
+        setWidget(contentPanel);
+        raceNameForDefaultSorting = settings.getNameOfRaceToSort();
+    }
+
+    private Widget createToolbarPanel() {
+        FlowPanel informationPanel = new FlowPanel();
         informationPanel.setStyleName(STYLE_LEADERBOARD_INFO);
         scoreCorrectionLastUpdateTimeLabel = new Label("");
         scoreCorrectionCommentLabel = new Label("");
@@ -1735,8 +1767,6 @@ public class LeaderboardPanel extends SimplePanel implements TimeListener, PlayS
         DockPanel toolbarPanel = new DockPanel();
         toolbarPanel.ensureDebugId("ToolbarPanel");
         toolbarPanel.setStyleName(STYLE_LEADERBOARD_TOOLBAR);
-        busyIndicator = new SimpleBusyIndicator(false, 0.8f);
-        busyIndicator.ensureDebugId("BusyIndicator");
         if (!isEmbedded) {
             toolbarPanel.add(informationPanel, DockPanel.WEST);
             toolbarPanel.add(busyIndicator, DockPanel.WEST);
@@ -1771,32 +1801,9 @@ public class LeaderboardPanel extends SimplePanel implements TimeListener, PlayS
 
         refreshAndSettingsPanel.add(refreshPanel);
         toolbarPanel.add(refreshAndSettingsPanel, DockPanel.EAST);
-        if (!isEmbedded) {
-            contentPanel.add(toolbarPanel);
-        }
-        if (competitorSearchTextBox != null) {
-            contentPanel.add(competitorSearchTextBox);
-            contentPanel.add(busyIndicator);
-            competitorSearchTextBox.getSettingsButton().addClickHandler(new ClickHandler() {
-                @Override
-                public void onClick(ClickEvent event) {
-                    new SettingsDialog<LeaderboardSettings>(LeaderboardPanel.this, stringMessages).show();
-                }
-            });
-            this.competitorFilterPanel = competitorSearchTextBox;
-        }
-        SortedCellTable<LeaderboardRowDTO> leaderboardTable = getLeaderboardTable();
-        leaderboardTable.getElement().getStyle().setMarginTop(5, Unit.PX);
-        filterControlPanel = new HorizontalPanel();
-        filterControlPanel.setStyleName("LeaderboardPanel-FilterControl-Panel");
-        contentPanel.add(leaderboardTable);
-        if (showCompetitorFilterStatus) {
-            contentPanel.add(createFilterDeselectionControl());
-        }
-        setWidget(contentPanel);
-        raceNameForDefaultSorting = settings.getNameOfRaceToSort();
+        return toolbarPanel;
     }
-    
+
     private Widget createFilterDeselectionControl() {
         filterStatusLabel = new Label();
         filterStatusLabel.setStyleName("LeaderboardPanel-FilterControl-StatusLabel");
@@ -2240,38 +2247,40 @@ public class LeaderboardPanel extends SimplePanel implements TimeListener, PlayS
                 leaderboardTable.sortColumn(columnToSortFor, columnToSortFor.getPreferredSortingOrder().isAscending());
             }
             
-            scoreCorrectionCommentLabel.setText(leaderboard.getComment() != null ? leaderboard.getComment() : "");
-            if (leaderboard.getTimePointOfLastCorrectionsValidity() != null) {
-                Date lastCorrectionDate = leaderboard.getTimePointOfLastCorrectionsValidity();
-                String lastUpdate = dateFormatter.format(lastCorrectionDate) + ", "
-                        + timeFormatter.format(lastCorrectionDate);
-                scoreCorrectionLastUpdateTimeLabel.setText(stringMessages.lastScoreUpdate() + ": " + lastUpdate);
-            } else {
-                scoreCorrectionLastUpdateTimeLabel.setText("");
+            if(!isEmbedded) {
+                scoreCorrectionCommentLabel.setText(leaderboard.getComment() != null ? leaderboard.getComment() : "");
+                if (leaderboard.getTimePointOfLastCorrectionsValidity() != null) {
+                    Date lastCorrectionDate = leaderboard.getTimePointOfLastCorrectionsValidity();
+                    String lastUpdate = DateAndTimeFormatterUtil.longDateFormatter.render(lastCorrectionDate) + ", "
+                            + DateAndTimeFormatterUtil.longTimeFormatter.render(lastCorrectionDate);
+                    scoreCorrectionLastUpdateTimeLabel.setText(stringMessages.lastScoreUpdate() + ": " + lastUpdate);
+                } else {
+                    scoreCorrectionLastUpdateTimeLabel.setText("");
+                }
+                
+                List<com.sap.sse.common.Util.Pair<RaceColumnDTO, FleetDTO>> liveRaces = leaderboard.getLiveRaces(timer.getLiveTimePointInMillis());
+                boolean hasLiveRace = !liveRaces.isEmpty();
+                if (hasLiveRace) {
+                    String liveRaceText = "";
+                    if(liveRaces.size() == 1) {
+                        com.sap.sse.common.Util.Pair<RaceColumnDTO, FleetDTO> liveRace = liveRaces.get(0);
+                        liveRaceText = stringMessages.raceIsLive("'" + liveRace.getA().getRaceColumnName() + "'");
+                    } else {
+                        String raceNames = "";
+                        for (com.sap.sse.common.Util.Pair<RaceColumnDTO, FleetDTO> liveRace : liveRaces) {
+                            raceNames += "'" + liveRace.getA().getRaceColumnName() + "', ";
+                        }
+                        // remove last ", "
+                        raceNames = raceNames.substring(0, raceNames.length() - 2);
+                        liveRaceText = stringMessages.racesAreLive(raceNames);
+                    }
+                    liveRaceLabel.setText(liveRaceText);
+                } else {
+                    liveRaceLabel.setText("");
+                }
+                scoreCorrectionLastUpdateTimeLabel.setVisible(!hasLiveRace);
+                liveRaceLabel.setVisible(hasLiveRace);
             }
-            
-            List<com.sap.sse.common.Util.Pair<RaceColumnDTO, FleetDTO>> liveRaces = leaderboard.getLiveRaces(timer.getLiveTimePointInMillis());
-            boolean hasLiveRace = !liveRaces.isEmpty();
-            if (hasLiveRace) {
-            	String liveRaceText = "";
-            	if(liveRaces.size() == 1) {
-                	com.sap.sse.common.Util.Pair<RaceColumnDTO, FleetDTO> liveRace = liveRaces.get(0);
-                	liveRaceText = stringMessages.raceIsLive("'" + liveRace.getA().getRaceColumnName() + "'");
-            	} else {
-            		String raceNames = "";
-            		for(com.sap.sse.common.Util.Pair<RaceColumnDTO, FleetDTO> liveRace: liveRaces) {
-            			raceNames += "'" + liveRace.getA().getRaceColumnName() + "', ";
-            		}
-            		// remove last ", "
-            		raceNames = raceNames.substring(0, raceNames.length()-2);
-                	liveRaceText = stringMessages.racesAreLive(raceNames);
-            	}
-            	liveRaceLabel.setText(liveRaceText);
-            } else {
-            	liveRaceLabel.setText("");
-            }
-            scoreCorrectionLastUpdateTimeLabel.setVisible(!hasLiveRace);
-            liveRaceLabel.setVisible(hasLiveRace);
             informLeaderboardUpdateListenersAboutLeaderboardUpdated(leaderboard);
             getBusyIndicator().setBusy(false);
         }
@@ -2899,9 +2908,11 @@ public class LeaderboardPanel extends SimplePanel implements TimeListener, PlayS
     @Override
     public void playStateChanged(PlayStates playState, PlayModes playMode) {
         currentlyHandlingPlayStateChange = true;
-        playPause.setHTML(getPlayPauseImgHtml(playState));
-        playPause.setTitle(playState == PlayStates.Playing ? stringMessages.pauseAutomaticRefresh() : stringMessages
-                .autoRefresh());
+        
+        if(!isEmbedded) {
+            playPause.setHTML(getPlayPauseImgHtml(playState));
+            playPause.setTitle(playState == PlayStates.Playing ? stringMessages.pauseAutomaticRefresh() : stringMessages.autoRefresh());
+        }
         if (!settingsUpdatedExplicitly && playMode != oldPlayMode) {
             // if settings weren't explicitly modified, auto-switch to live mode settings and sort for
             // any pre-selected race; we need to copy the previously selected race columns to the new RaceColumnSelection
@@ -3035,6 +3046,9 @@ public class LeaderboardPanel extends SimplePanel implements TimeListener, PlayS
         if (timer != null) {
             timer.removeTimeListener(this);
         }
+        if(leaderboardUpdateListener != null) {
+            leaderboardUpdateListener.clear();
+        }
     }
 
     protected Timer getTimer() {
@@ -3071,7 +3085,7 @@ public class LeaderboardPanel extends SimplePanel implements TimeListener, PlayS
     public void addLeaderboardUpdateListener(LeaderboardUpdateListener listener) {
         this.leaderboardUpdateListener.add(listener);
     }
-    
+
     protected void informLeaderboardUpdateListenersAboutLeaderboardUpdated(LeaderboardDTO leaderboard) {
         for (LeaderboardUpdateListener listener : this.leaderboardUpdateListener) {
             listener.updatedLeaderboard(leaderboard);

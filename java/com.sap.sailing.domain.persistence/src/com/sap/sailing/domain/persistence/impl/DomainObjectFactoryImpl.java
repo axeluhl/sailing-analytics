@@ -1119,7 +1119,14 @@ public class DomainObjectFactoryImpl implements DomainObjectFactory {
         if (scoringSchemeTypeName == null) {
             scoringSchemeType = ScoringSchemeType.LOW_POINT; // the default
         } else {
-            scoringSchemeType = ScoringSchemeType.valueOf(scoringSchemeTypeName);
+            try {
+                scoringSchemeType = ScoringSchemeType.valueOf(scoringSchemeTypeName);
+            } catch (IllegalArgumentException ila) {
+                // can happen that the database contains a scoring scheme that
+                // has not yet been implemented - fall back with a warning
+                scoringSchemeType = ScoringSchemeType.LOW_POINT;
+                logger.warning("Could not find scoring scheme " + scoringSchemeTypeName + "! Most probably this has not yet been implemented or even been removed.");
+            }
         }
         return scoringSchemeType;
     }

@@ -156,12 +156,11 @@ public abstract class AbstractScoringSchemeImpl implements ScoringScheme {
     }
 
     /**
-     * By default, this scoring scheme implementation directly compares the numbers of races scored. A competitor who
-     * scored fewer races is ranked worse ("greater") than a competitor with more races scored.
+     * By default, this scoring scheme implementation does not compare the numbers of races scored.
      */
     @Override
     public int compareByNumberOfRacesScored(int competitor1NumberOfRacesScored, int competitor2NumberOfRacesScored) {
-        return competitor2NumberOfRacesScored - competitor1NumberOfRacesScored;
+        return 0;
     }
 
     @Override

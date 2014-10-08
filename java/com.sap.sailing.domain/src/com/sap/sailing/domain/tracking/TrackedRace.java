@@ -703,4 +703,9 @@ public interface TrackedRace extends Serializable {
     
     GPSFixStore getGPSFixStore();
 
+    /**
+     * Computes the center point of the course's marks at the given time point.
+     */
+    Position getCenterOfCourse(TimePoint at);
+
 }
