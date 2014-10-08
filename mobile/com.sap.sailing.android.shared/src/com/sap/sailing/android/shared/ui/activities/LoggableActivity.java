@@ -1,12 +1,12 @@
 package com.sap.sailing.android.shared.ui.activities;
 
-import android.app.Activity;
 import android.os.Bundle;
+import android.support.v4.app.FragmentActivity;
 
 import com.sap.sailing.android.shared.logging.ExLog;
 import com.sap.sailing.android.shared.logging.LifecycleLogger;
 
-public abstract class LoggableActivity extends Activity {
+public abstract class LoggableActivity extends FragmentActivity {
     private static final String TAG = LoggableActivity.class.getName();
 
     private LifecycleLogger lifeLogger;

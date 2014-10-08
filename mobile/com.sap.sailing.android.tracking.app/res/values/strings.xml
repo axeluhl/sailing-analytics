@@ -11,4 +11,6 @@
     <string name="settings_category_connection">Connection</string>
     <string name="server_url">Server</string>
     <string name="device_identifier">Device Identifier</string>
+    
+    <string name="play_services_available">Google Play services is available</string>
 </resources>
