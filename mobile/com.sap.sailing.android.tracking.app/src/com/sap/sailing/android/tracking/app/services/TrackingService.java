@@ -5,7 +5,6 @@ import java.util.UUID;
 import android.app.Service;
 import android.content.Intent;
 import android.location.Location;
-import android.os.Binder;
 import android.os.Bundle;
 import android.os.IBinder;
 
@@ -23,6 +22,7 @@ import com.sap.sailing.android.tracking.app.nmea.NmeaGprmcBuilder;
 
 public class TrackingService extends Service implements ConnectionCallbacks, OnConnectionFailedListener,
 LocationListener {
+
     private LocationClient locationClient;
     private LocationRequest locationRequest;
     private boolean locationUpdateRequested = false;
@@ -44,22 +44,11 @@ LocationListener {
         
         locationClient = new LocationClient(this, this, this);
     }
-
-    /**
-     * Class for clients to access. Because we know this service always runs in the same process as its clients, we
-     * don't need to deal with IPC.
-     */
-    public class TrackingServiceBinder extends Binder {
-        public TrackingService getService() {
-            return TrackingService.this;
-        }
-    }
-
-    private final TrackingServiceBinder binder = new TrackingServiceBinder();
-
+    
     @Override
-    public IBinder onBind(Intent intent) {
-        return binder;
+    public int onStartCommand(Intent intent, int flags, int startId) {
+        startTracking();
+        return Service.START_STICKY;
     }
 
     public void startTracking() {
@@ -107,5 +96,10 @@ LocationListener {
                 this, getServerURL(), null, UUID.randomUUID(), nmea, null));
         ExLog.i(this, TAG, "Sent NMEA to server:" + nmea);
         //TODO also store to SD card
+    }
+
+    @Override
+    public IBinder onBind(Intent intent) {
+        return null;
     }
 }
