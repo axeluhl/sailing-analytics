@@ -98,11 +98,11 @@ public class UserStoreImpl implements UserStore {
     }
 
     @Override
-    public Set<String> getRolesFromUser(String name) throws UserManagementException {
-        if (users.get(name) == null) {
+    public Set<String> getRolesFromUser(String username) throws UserManagementException {
+        if (users.get(username) == null) {
             throw new UserManagementException(UserManagementException.USER_DOES_NOT_EXIST);
         }
-        return users.get(name).getRoles();
+        return users.get(username).getRoles();
     }
 
     @Override

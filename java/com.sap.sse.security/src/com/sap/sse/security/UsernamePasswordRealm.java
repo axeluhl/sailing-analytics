@@ -67,12 +67,12 @@ public class UsernamePasswordRealm extends AuthorizingRealm {
 
     @Override
     protected AuthorizationInfo doGetAuthorizationInfo(PrincipalCollection principals) {
-        SimpleAuthorizationInfo ai = new SimpleAuthorizationInfo();
-        List<String> roles = new ArrayList<>();
+        final SimpleAuthorizationInfo ai = new SimpleAuthorizationInfo();
+        final List<String> roles = new ArrayList<>();
         for (Object r : principals.asList()){
-            String name = r.toString();
+            String username = r.toString();
             try {
-                roles.addAll(store.getRolesFromUser(name));
+                roles.addAll(store.getRolesFromUser(username));
             } catch (UserManagementException e) {
                throw new AuthenticationException(e.getMessage());
             }

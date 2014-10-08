@@ -15,7 +15,7 @@ public interface UserStore {
     
     User createUser(String name, String email, Account... accounts);
     
-    Set<String> getRolesFromUser(String name) throws UserManagementException;
+    Set<String> getRolesFromUser(String username) throws UserManagementException;
     
     void addRoleForUser(String name, String role) throws UserManagementException;
     void removeRoleFromUser(String name, String role) throws UserManagementException;
