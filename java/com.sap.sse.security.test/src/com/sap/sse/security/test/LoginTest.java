@@ -13,9 +13,8 @@ import com.sap.sse.security.userstore.mongodb.UserStoreImpl;
 import com.sap.sse.security.userstore.shared.UserStore;
 
 public class LoginTest {
-    
     @BeforeClass
-    public static void setUp(){
+    public static void setUp() {
         UserStore store = new UserStoreImpl();
         UsernamePasswordRealm.setTestUserStore(store);
         Activator.setTestUserStore(store);
@@ -24,6 +23,6 @@ public class LoginTest {
 
     @Test
     public void testGetUser() {
-        assertNotNull("Subject should not be null: ",SecurityUtils.getSubject());
+        assertNotNull("Subject should not be null: ", SecurityUtils.getSubject());
     }
 }

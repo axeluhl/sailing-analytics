@@ -247,12 +247,6 @@ public class UserManagementServiceImpl extends RemoteServiceServlet implements U
         return settingTypes;
     }
     
-    
-    
-    
-    
-    
-    
     //--------------------------------------------------------- OAuth Implementations -------------------------------------------------------------------------
 
     @Override

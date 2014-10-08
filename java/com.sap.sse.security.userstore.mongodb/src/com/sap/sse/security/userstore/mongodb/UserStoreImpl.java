@@ -76,7 +76,10 @@ public class UserStoreImpl implements UserStore {
     }
 
     @Override
-    public User createUser(String name, String email, Account... accounts) {
+    public User createUser(String name, String email, Account... accounts) throws UserManagementException {
+        if (getUserByName(name) != null) {
+            throw new UserManagementException(UserManagementException.USER_ALREADY_EXISTS);
+        }
         User user = new User(name, email, accounts);
         logger.info("Creating user: " + user.toString());
         PersistenceFactory.INSTANCE.getDefaultMongoObjectFactory().storeUser(user);

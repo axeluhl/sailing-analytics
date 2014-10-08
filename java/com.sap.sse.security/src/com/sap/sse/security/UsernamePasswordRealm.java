@@ -10,46 +10,18 @@ import org.apache.shiro.authc.SaltedAuthenticationInfo;
 import org.apache.shiro.authc.UsernamePasswordToken;
 import org.apache.shiro.authz.AuthorizationInfo;
 import org.apache.shiro.authz.SimpleAuthorizationInfo;
-import org.apache.shiro.realm.AuthorizingRealm;
 import org.apache.shiro.subject.PrincipalCollection;
 import org.apache.shiro.util.ByteSource;
-import org.osgi.framework.BundleContext;
-import org.osgi.framework.ServiceReference;
 
 import com.sap.sse.security.userstore.shared.Account.AccountType;
 import com.sap.sse.security.userstore.shared.User;
 import com.sap.sse.security.userstore.shared.UserManagementException;
-import com.sap.sse.security.userstore.shared.UserStore;
 import com.sap.sse.security.userstore.shared.UsernamePasswordAccount;
 
-public class UsernamePasswordRealm extends AuthorizingRealm {
-    
-    private final UserStore store;
-    
-    /**
-     * In a non-OSGi test environment, having Shiro instantiate this class with a
-     * default constructor makes it difficult to get access to the user store
-     * implementation which may live in a bundle that this bundle has no direct
-     * access to. Therefore, test cases must set the UserStore implementation
-     * by invoking {@link #setTestUserStore} before the default constructor is
-     * invoked.
-     */
-    private static UserStore testUserStore;
-    
-    public static void setTestUserStore(UserStore theTestUserStore) {
-        testUserStore = theTestUserStore;
-    }
+public class UsernamePasswordRealm extends AbstractUserStoreBasedRealm {
     
     public UsernamePasswordRealm() {
         super();
-        BundleContext context = Activator.getContext();
-        if (context == null) {
-            // non-OSGi case, such as during JUnit test execution?
-            store = testUserStore;
-        } else {
-            ServiceReference<?> serviceReference = context.getServiceReference(UserStore.class.getName());
-            store = (UserStore) context.getService(serviceReference);
-        }
     }
     
     @Override
@@ -72,7 +44,7 @@ public class UsernamePasswordRealm extends AuthorizingRealm {
         for (Object r : principals.asList()){
             String username = r.toString();
             try {
-                roles.addAll(store.getRolesFromUser(username));
+                roles.addAll(getUserStore().getRolesFromUser(username));
             } catch (UserManagementException e) {
                throw new AuthenticationException(e.getMessage());
             }
@@ -93,7 +65,7 @@ public class UsernamePasswordRealm extends AuthorizingRealm {
         // read password hash and salt from db
         String saltedPassword = null;
         ByteSource salt = null;
-        User user = store.getUserByName(username);
+        User user = getUserStore().getUserByName(username);
         if (user == null){
             return null;
         }
