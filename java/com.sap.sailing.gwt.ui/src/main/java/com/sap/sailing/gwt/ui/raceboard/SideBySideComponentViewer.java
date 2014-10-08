@@ -3,6 +3,7 @@ package com.sap.sailing.gwt.ui.raceboard;
 import java.util.ArrayList;
 import java.util.List;
 
+import com.google.gwt.dom.client.Document;
 import com.google.gwt.dom.client.Style.Unit;
 import com.google.gwt.event.dom.client.ClickEvent;
 import com.google.gwt.event.dom.client.ClickHandler;
@@ -79,27 +80,37 @@ public class SideBySideComponentViewer implements ComponentViewer {
         mediaPlayerManagerComponent.setPlayerChangeListener(new PlayerChangeListener() {
 
             public void notifyStateChange(){
+                String caption;
+                String tooltip;
                 switch (mediaPlayerManagerComponent.getAssignedMediaTracks().size()) {
                 case 0:
+                    caption = "No Videos";
+                    tooltip = caption;
                     mediaSelectionButton.setVisible(false);
                     break;
                 case 1:
                     mediaSelectionButton.setVisible(true);
                     if(mediaPlayerManagerComponent.isPlaying()){
-                        mediaSelectionButton.setText(stringMessages.mediaHideVideoCaption());
-                        mediaSelectionButton.setTitle(stringMessages.mediaHideVideoTooltip());
+                        caption = stringMessages.mediaHideVideoCaption();
+                        tooltip = stringMessages.mediaHideVideoTooltip();
                     }
                     else{
-                        mediaSelectionButton.setText(stringMessages.mediaShowVideoCaption());
-                        mediaSelectionButton.setTitle(stringMessages.mediaShowVideoTooltip(mediaPlayerManagerComponent.getAssignedMediaTracks().iterator().next().title));
+                        caption = stringMessages.mediaShowVideoCaption();
+                        tooltip = stringMessages.mediaShowVideoTooltip(mediaPlayerManagerComponent.getAssignedMediaTracks().iterator().next().title);
                     }
                     break;
                 default:
                     mediaSelectionButton.setVisible(true);
-                    mediaSelectionButton.setText(stringMessages.mediaSelectVideoCaption(mediaPlayerManagerComponent.getAssignedMediaTracks().size()));
-                    mediaSelectionButton.setTitle(stringMessages.mediaSelectVideoTooltip());
+                    caption = stringMessages.mediaSelectVideoCaption(mediaPlayerManagerComponent.getAssignedMediaTracks().size());
+                    tooltip = stringMessages.mediaSelectVideoTooltip();
                     break;
                 }
+                if (Document.get().getClientWidth() <= 1024) {
+                    mediaSelectionButton.setHTML("&nbsp;");
+                } else {
+                    mediaSelectionButton.setText(caption);
+                }
+                mediaSelectionButton.setTitle(tooltip);
                 mediaManagementButton.setVisible(mediaPlayerManagerComponent.allowsEditing());
             }
 
