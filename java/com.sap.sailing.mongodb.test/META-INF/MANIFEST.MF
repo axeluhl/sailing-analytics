@@ -4,7 +4,7 @@ Bundle-Name: Test
 Bundle-SymbolicName: com.sap.sailing.mongodb.test
 Bundle-Version: 1.0.0.qualifier
 Bundle-Vendor: SAP
-Bundle-RequiredExecutionEnvironment: JavaSE-1.7
+Bundle-RequiredExecutionEnvironment: JavaSE-1.8
 Fragment-Host: com.sap.sailing.mongodb
 Require-Bundle: com.sap.sailing.domain,
  com.sap.sailing.domain.shared.android,
@@ -24,5 +24,6 @@ Require-Bundle: com.sap.sailing.domain,
  com.sap.sailing.server.gateway;bundle-version="1.0.0",
  com.sap.sse.common
 Import-Package: com.sap.sailing.domain.common.impl,
- com.sap.sailing.domain.common.racelog.tracking
+ com.sap.sailing.domain.common.racelog.tracking,
+ org.junit;version="4.11.0"
 

@@ -4,7 +4,7 @@ Bundle-Name: Smartphone Adapter Test
 Bundle-SymbolicName: com.sap.sailing.domain.racelogtrackingadapter.test
 Bundle-Version: 1.0.0.qualifier
 Bundle-Vendor: SAP
-Bundle-RequiredExecutionEnvironment: JavaSE-1.7
+Bundle-RequiredExecutionEnvironment: JavaSE-1.8
 Fragment-Host: com.sap.sailing.domain.racelogtrackingadapter
 Require-Bundle: org.junit4;bundle-version="4.8.2",
  com.sap.sailing.domain.racelogtrackingadapter.testsupport,
@@ -17,4 +17,5 @@ Import-Package: com.sap.sailing.domain.persistence.impl,
  com.sap.sailing.domain.persistence.racelog.tracking.impl,
  com.sap.sailing.domain.tractracadapter,
  com.sap.sailing.server.impl,
- javax.servlet.http;version="2.5.0"
+ javax.servlet.http;version="2.5.0",
+ org.junit;version="4.11.0"

@@ -136,7 +136,7 @@ public class WindEstimationLockingUnderLoadTest {
             @Override
             public void run() {
                 TimePoint now = MillisecondsTimePoint.now();
-                for (int i = 0; i < 100000; i++) {
+                for (int i = 0; i < 10000; i++) {
                     final WindImpl wind = new WindImpl(new DegreePosition(49, 8), now, new KnotSpeedWithBearingImpl(
                             /* speedInKnots */12., new DegreeBearingImpl(47)));
                     addMeasuredWindFix(wind);
@@ -149,7 +149,7 @@ public class WindEstimationLockingUnderLoadTest {
             @Override
             public void run() {
                 TimePoint now = MillisecondsTimePoint.now();
-                for (int i=0; i<100000; i++) {
+                for (int i=0; i<10000; i++) {
                     estimationTrack.getAveragedWind(/* position */ null, now);
                     now = now.plus(10);   // the cache quantizes to a full second; so not all time points will automatically fetch uncached values
                 }

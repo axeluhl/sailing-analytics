@@ -38,7 +38,7 @@ public class ReplicationStopTest extends AbstractServerReplicationTest {
         List<String> regattas = new ArrayList<String>();
         regattas.add("Day1");
         regattas.add("Day2");
-        return master.addEvent(eventName, eventStartDate, eventEndDate, venueName, isPublic, UUID.randomUUID());
+        return master.addEvent(eventName, /* eventDescription */ null, eventStartDate, eventEndDate, venueName, isPublic, UUID.randomUUID());
     }
     
     

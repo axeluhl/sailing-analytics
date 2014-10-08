@@ -127,7 +127,7 @@ public class EventRegattaRacesRace extends UIObject {
     private SimpleRaceStates getSimpleRaceState() {
         SimpleRaceStates simpleRaceState = SimpleRaceStates.NOT_TRACKED;
         
-        if(race != null && race.trackedRace != null) {
+        if(race != null && race.trackedRace != null && race.trackedRace.hasGPSData && race.trackedRace.hasWindData) {
             simpleRaceState = SimpleRaceStates.TRACKED;
             if(isLive()) {
                 simpleRaceState = SimpleRaceStates.TRACKED_AND_LIVE;

@@ -104,28 +104,7 @@ public class EditableLeaderboardPanel extends LeaderboardPanel {
 
     private class EditableCarryColumn extends CarryColumn {
         public EditableCarryColumn() {
-            super(new EditTextCell());
-            setFieldUpdater(new FieldUpdater<LeaderboardRowDTO, String>() {
-                @Override
-                public void update(final int rowIndex, final LeaderboardRowDTO row, final String value) {
-                    getSailingService().updateLeaderboardCarryValue(getLeaderboardName(), row.competitor.getIdAsString(),
-                            value == null || value.length() == 0 ? null : Double.valueOf(value.trim()),
-                                    new AsyncCallback<Void>() {
-                        @Override
-                        public void onFailure(Throwable t) {
-                            EditableLeaderboardPanel.this.getErrorReporter().reportError("Error trying to update carry value for competitor "+
-                                    row.competitor.getName()+" in leaderboard "+getLeaderboardName()+": "+t.getMessage()+
-                                    "\nYou may have to refresh your view.");
-                        }
-
-                        @Override
-                        public void onSuccess(Void v) {
-                            row.carriedPoints = value==null||value.length()==0 ? null : Double.valueOf(value.trim());
-                            EditableLeaderboardPanel.this.getData().getList().set(rowIndex, row);
-                        }
-                    });
-                }
-            });
+            super(new CompositeCell<LeaderboardRowDTO>(getCellListForEditableCarryColumn()));
         }
     }
 
@@ -926,6 +905,82 @@ public class EditableLeaderboardPanel extends LeaderboardPanel {
             }
         });
         return result;
+    }
+    
+    private List<HasCell<LeaderboardRowDTO, ?>> getCellListForEditableCarryColumn() {
+        List<HasCell<LeaderboardRowDTO, ?>> result = new ArrayList<HasCell<LeaderboardRowDTO, ?>>();
+        result.add(new HasCell<LeaderboardRowDTO, String>() {
+            private final ButtonCell cell = new ButtonCell();
+            @Override
+            public Cell<String> getCell() {
+                return cell;
+            }
+
+            @Override
+            public FieldUpdater<LeaderboardRowDTO, String> getFieldUpdater() {
+                return new FieldUpdater<LeaderboardRowDTO, String>() {
+                    @Override
+                    public void update(int index, final LeaderboardRowDTO row, String value) {
+                        new EditCarryValueDialog(getStringMessages(), row.competitor.getName(), row.carriedPoints, new DialogCallback<Double>() {
+                            @Override
+                            public void ok(final Double value) {
+                                updateCarriedPoints(EditableLeaderboardPanel.this.getData().getList().indexOf(row), row, value);
+                            }
+                            @Override
+                            public void cancel() {
+                            }
+                        }).show();
+                    }
+                };
+            }
+
+            @Override
+            public String getValue(LeaderboardRowDTO object) {
+                return getStringMessages().edit();
+            }
+        });
+        final EditTextCell carryTextCell = new EditTextCell();
+        final FieldUpdater<LeaderboardRowDTO, String> fieldUpdater = new FieldUpdater<LeaderboardRowDTO, String>() {
+            @Override
+            public void update(final int rowIndex, final LeaderboardRowDTO row, final String value) {
+                updateCarriedPoints(rowIndex, row, value==null||value.length()==0 ? null : Double.valueOf(value.trim()));
+            }
+        };
+        result.add(new HasCell<LeaderboardRowDTO, String>() {
+            @Override
+            public Cell<String> getCell() {
+                return carryTextCell;
+            }
+
+            @Override
+            public FieldUpdater<LeaderboardRowDTO, String> getFieldUpdater() {
+                return fieldUpdater;
+            }
+
+            @Override
+            public String getValue(LeaderboardRowDTO object) {
+                return object.carriedPoints == null ? "" : scoreFormat.format(object.carriedPoints);
+            }
+        });
+        return result;
+    }
+    
+    private void updateCarriedPoints(final int rowIndex, final LeaderboardRowDTO row, final Double value) {
+        getSailingService().updateLeaderboardCarryValue(getLeaderboardName(), row.competitor.getIdAsString(), value,
+                new AsyncCallback<Void>() {
+            @Override
+            public void onFailure(Throwable t) {
+                EditableLeaderboardPanel.this.getErrorReporter().reportError("Error trying to update carry value for competitor "+
+                        row.competitor.getName()+" in leaderboard "+getLeaderboardName()+": "+t.getMessage()+
+                        "\nYou may have to refresh your view.");
+            }
+
+            @Override
+            public void onSuccess(Void v) {
+                row.carriedPoints = value;
+                EditableLeaderboardPanel.this.getData().getList().set(rowIndex, row);
+            }
+        });
     }
 
     @Override

@@ -63,7 +63,7 @@ public class SailingServiceImplMock extends SailingServiceImpl {
         @SuppressWarnings("unchecked")
         ServiceTracker<ReplicationService, ReplicationService> result = mock(ServiceTracker.class);
         try {
-            final ReplicationServiceImpl replicationService = new ReplicationServiceImpl("test exchange", "localhost", new ReplicationInstancesManager()) {
+            final ReplicationServiceImpl replicationService = new ReplicationServiceImpl("test exchange", "localhost", 0, new ReplicationInstancesManager()) {
                 @Override
                 protected ServiceTracker<RacingEventService, RacingEventService> getRacingEventServiceTracker() {
                     @SuppressWarnings("unchecked")

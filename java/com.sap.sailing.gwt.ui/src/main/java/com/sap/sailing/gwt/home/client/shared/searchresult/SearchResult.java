@@ -39,6 +39,8 @@ public class SearchResult extends Composite {
     private final List<SearchResultItem> searchResultItemComposites;
     private final PlaceNavigator navigator;
 
+    private int resultCounter;
+
     public SearchResult(PlaceNavigator navigator) {
         this.navigator = navigator;
         this.searchResultItemComposites = new ArrayList<SearchResultItem>();
@@ -85,17 +87,9 @@ public class SearchResult extends Composite {
     }
 
     public void updateSearchResult(String searchText, Iterable<LeaderboardSearchResultDTO> searchResultItems) {
-        searchResultItemPanel.clear();
-        searchResultItemComposites.clear();
-        
-        searchResultFor.setInnerText(searchText);
-        searchText1.setText(searchText);
-        searchText2.setText(searchText);
-        
-        int resultCounter = 0;
-        for(LeaderboardSearchResultDTO singleSearchResult: searchResultItems) {
+        for (LeaderboardSearchResultDTO singleSearchResult : searchResultItems) {
             // for now filter all results where we no event is defined
-            if(singleSearchResult.getEvent() != null) {
+            if (singleSearchResult.getEvent() != null) {
                 SearchResultItem searchResultItem = new SearchResultItem(navigator, singleSearchResult);
                 searchResultItemPanel.add(searchResultItem);
                 searchResultItemComposites.add(searchResultItem);
@@ -103,5 +97,16 @@ public class SearchResult extends Composite {
             }
         }
         searchResultCount.setInnerText(String.valueOf(resultCounter));
+    }
+
+    public void init(String searchText) {
+        searchResultItemPanel.clear();
+        searchResultItemComposites.clear();
+        
+        searchResultFor.setInnerText(searchText);
+        searchText1.setText(searchText);
+        searchText2.setText(searchText);
+        
+        resultCounter = 0;
     }
 }

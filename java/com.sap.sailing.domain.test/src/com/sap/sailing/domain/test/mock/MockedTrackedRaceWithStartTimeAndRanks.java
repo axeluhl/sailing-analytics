@@ -657,4 +657,10 @@ public class MockedTrackedRaceWithStartTimeAndRanks implements TrackedRace {
         
     }
 
+    @Override
+    public Position getCenterOfCourse(TimePoint at) {
+        // TODO Auto-generated method stub
+        return null;
+    }
+
 }

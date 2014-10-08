@@ -199,7 +199,7 @@ public class CourseTest {
     @Test
     public void testWaypointDeleteWithSubsequentInsertInOnePatch() throws PatchFailedException {
         List<Waypoint> waypoints = new ArrayList<Waypoint>();
-        final WaypointImpl rcBlackConical = new WaypointImpl(new ControlPointWithTwoMarksImpl(new MarkImpl("RC"), new MarkImpl("Black Conical"), "Start"));
+        final WaypointImpl rcBlackConical = new WaypointImpl(new ControlPointWithTwoMarksImpl(new MarkImpl("RC"), new MarkImpl("Black Conical"), "RC-Black Conical"));
         waypoints.add(rcBlackConical);
         final WaypointImpl orange = new WaypointImpl(new MarkImpl("Orange"));
         waypoints.add(orange);
@@ -209,9 +209,9 @@ public class CourseTest {
         waypoints.add(red);
         final WaypointImpl yellow = new WaypointImpl(new MarkImpl("Yellow"));
         waypoints.add(yellow);
-        final WaypointImpl finishPoleCylinder = new WaypointImpl(new ControlPointWithTwoMarksImpl(new MarkImpl("Finish Pole"), new MarkImpl("Cylinder"), "Finish"));
+        final WaypointImpl finishPoleCylinder = new WaypointImpl(new ControlPointWithTwoMarksImpl(new MarkImpl("Finish Pole"), new MarkImpl("Cylinder"), "Finish Pole-Cylinder"));
         waypoints.add(finishPoleCylinder);
-        Course course = new CourseImpl("Race 26", waypoints);
+        Course course = new CourseImpl("Race 24", waypoints);
         assertWaypointIndexes(course);
         List<com.sap.sse.common.Util.Pair<ControlPoint, PassingInstruction>> courseToUpdate = new ArrayList<com.sap.sse.common.Util.Pair<ControlPoint, PassingInstruction>>();
         courseToUpdate.add(new Pair<>(rcBlackConical.getControlPoint(), rcBlackConical.getPassingInstructions()));

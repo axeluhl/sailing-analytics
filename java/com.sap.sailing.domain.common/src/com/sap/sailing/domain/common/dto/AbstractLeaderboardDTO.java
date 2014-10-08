@@ -201,9 +201,10 @@ public abstract class AbstractLeaderboardDTO implements Serializable {
 
     public int getTrackedRacesCount() {
         int result = 0;
-        for (RaceColumnDTO race : getRaceList()) {
-            for (FleetDTO fleet : race.getFleets()) {
-                if (race.isTrackedRace(fleet)) {
+        for (RaceColumnDTO raceColumn : getRaceList()) {
+            for (FleetDTO fleet : raceColumn.getFleets()) {
+                RaceDTO race = raceColumn.getRace(fleet);
+                if(race != null && race.trackedRace != null && race.trackedRace.hasGPSData && race.trackedRace.hasWindData) {
                     result++;
                 }
             }

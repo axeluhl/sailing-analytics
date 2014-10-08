@@ -1,7 +1,7 @@
 package com.sap.sse.datamining.impl.components;
 
+import java.util.Arrays;
 import java.util.Collection;
-import java.util.Collections;
 import java.util.concurrent.Callable;
 import java.util.concurrent.ExecutorService;
 
@@ -16,7 +16,7 @@ public abstract class AbstractSimpleParallelProcessor<InputType, ResultType>
 
     @Override
     protected Iterable<InputType> partitionElement(InputType element) {
-        return Collections.singleton(element);
+        return Arrays.asList(element);
     }
     
     //Redefinition of the method to set the parameter name to element instead of partial element.

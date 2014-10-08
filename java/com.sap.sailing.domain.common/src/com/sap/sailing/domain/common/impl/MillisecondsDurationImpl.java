@@ -80,4 +80,21 @@ public class MillisecondsDurationImpl implements Duration {
         long diff = asMillis() - o.asMillis();
         return diff > 0l ? 1 : diff < 0l ? -1 : 0;
     }
+
+    @Override
+    public int hashCode() {
+        return (int) (asMillis() & Integer.MAX_VALUE);
+    }
+
+    @Override
+    public boolean equals(Object obj) {
+        if (this == obj) {
+            return true;
+        } else if (obj instanceof Duration) {
+            return compareTo((Duration) obj) == 0;
+        } else {
+            return false;
+        }
+    }
+
 }

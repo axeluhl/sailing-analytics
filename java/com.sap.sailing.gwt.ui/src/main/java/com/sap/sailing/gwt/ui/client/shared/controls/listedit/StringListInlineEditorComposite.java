@@ -2,6 +2,7 @@ package com.sap.sailing.gwt.ui.client.shared.controls.listedit;
 
 import java.util.List;
 
+import com.google.gwt.dom.client.InputElement;
 import com.google.gwt.event.dom.client.ClickEvent;
 import com.google.gwt.event.dom.client.ClickHandler;
 import com.google.gwt.event.dom.client.KeyUpEvent;
@@ -19,14 +20,14 @@ import com.sap.sailing.gwt.ui.client.StringMessages;
 
 public class StringListInlineEditorComposite extends StringListEditorComposite {
     public StringListInlineEditorComposite(List<String> initialValues, StringMessages stringMessages,
-            String popupDialogTitle, ImageResource removeImage, List<String> suggestValues) {
+            String popupDialogTitle, ImageResource removeImage, List<String> suggestValues, int textBoxSize) {
         super(initialValues, new CollapsedUi(stringMessages, popupDialogTitle,
-                new ExpandedUi(stringMessages, removeImage, suggestValues)));
+                new ExpandedUi(stringMessages, removeImage, suggestValues, textBoxSize)));
     }
 
     public StringListInlineEditorComposite(List<String> initialValues, StringMessages stringMessages,
-            ImageResource removeImage, List<String> suggestValues) {
-        super(initialValues, new ExpandedUi(stringMessages, removeImage, suggestValues));
+            ImageResource removeImage, List<String> suggestValues, int textBoxSize) {
+        super(initialValues, new ExpandedUi(stringMessages, removeImage, suggestValues, textBoxSize));
     }
 
     public StringListInlineEditorComposite(List<String> initialValues, ListEditorUiStrategy<String> activeUi) {
@@ -61,10 +62,12 @@ public class StringListInlineEditorComposite extends StringListEditorComposite {
     public static class ExpandedUi extends ExpandedListEditorUi<String> {
 
         protected final MultiWordSuggestOracle inputOracle;
+        protected int textBoxSize;
 
-        public ExpandedUi(StringMessages stringMessages, ImageResource removeImage, List<String> suggestValues) {
+        public ExpandedUi(StringMessages stringMessages, ImageResource removeImage, List<String> suggestValues, int textBoxSize) {
             super(stringMessages, removeImage, /*canRemoveItems*/true);
             this.inputOracle = new MultiWordSuggestOracle();
+            this.textBoxSize = textBoxSize;
 
             inputOracle.addAll(suggestValues);
         }
@@ -78,6 +81,10 @@ public class StringListInlineEditorComposite extends StringListEditorComposite {
         @Override
         protected Widget createAddWidget() {
             final SuggestBox inputBox = new SuggestBox(inputOracle);
+            
+            InputElement inputElement = inputBox.getElement().cast();
+            inputElement.setSize(textBoxSize);
+
             final Button addButton = new Button(stringMessages.add());
             addButton.setEnabled(false);
             addButton.addClickHandler(new ClickHandler() {
@@ -105,6 +112,7 @@ public class StringListInlineEditorComposite extends StringListEditorComposite {
         @Override
         protected Widget createValueWidget(final int rowIndex, String newValue) {
             final TextBox textBox = new TextBox();
+            textBox.setVisibleLength(textBoxSize);
             textBox.ensureDebugId("ValueTextBox");
             textBox.setValue(newValue);
 

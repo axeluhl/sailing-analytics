@@ -352,6 +352,7 @@ import com.sap.sailing.server.operationaltransformation.MoveLeaderboardColumnDow
 import com.sap.sailing.server.operationaltransformation.MoveLeaderboardColumnUp;
 import com.sap.sailing.server.operationaltransformation.RemoveAndUntrackRace;
 import com.sap.sailing.server.operationaltransformation.RemoveColumnFromSeries;
+import com.sap.sailing.server.operationaltransformation.RemoveCourseArea;
 import com.sap.sailing.server.operationaltransformation.RemoveEvent;
 import com.sap.sailing.server.operationaltransformation.RemoveLeaderboard;
 import com.sap.sailing.server.operationaltransformation.RemoveLeaderboardColumn;
@@ -1047,9 +1048,11 @@ public class SailingServiceImpl extends ProxiedRemoteServiceServlet implements S
             }
 
             result.add(new TracTracRaceRecordDTO(raceRecord.getID(), raceRecord.getEventName(), raceRecord.getName(),
-                    raceRecord.getTrackingStartTime().asDate(), raceRecord.getTrackingEndTime().asDate(), raceRecord
-                            .getRaceStartTime().asDate(), raceRecord.getBoatClassNames(), raceRecord.getRaceStatus(),
-                    raceRecord.getJsonURL().toString(), hasRememberedRegatta(raceRecord.getID())));
+                    raceRecord.getTrackingStartTime().asDate(), 
+                    raceRecord
+                    .getTrackingEndTime().asDate(), raceRecord.getRaceStartTime().asDate(),
+                    raceRecord.getBoatClassNames(), raceRecord.getRaceStatus(), raceRecord.getRaceVisibility(), raceRecord.getJsonURL().toString(),
+                    hasRememberedRegatta(raceRecord.getID())));
         }
         return new com.sap.sse.common.Util.Pair<String, List<TracTracRaceRecordDTO>>(raceRecords.getA(), result);
     }
@@ -1095,8 +1098,9 @@ public class SailingServiceImpl extends ProxiedRemoteServiceServlet implements S
                     new MillisecondsTimePoint(record.getTrackingStartTime().asMillis()),
                     new MillisecondsTimePoint(record.getTrackingEndTime().asMillis()),
                     MongoRaceLogStoreFactory.INSTANCE.getMongoRaceLogStore(mongoObjectFactory, domainObjectFactory),
-                    RaceTracker.TIMEOUT_FOR_RECEIVING_RACE_DEFINITION_IN_MILLISECONDS, simulateWithStartTimeNow,
-                    tracTracUsername, tracTracPassword, record.getRaceStatus());
+                    RaceTracker.TIMEOUT_FOR_RECEIVING_RACE_DEFINITION_IN_MILLISECONDS, simulateWithStartTimeNow, 
+                    tracTracUsername, tracTracPassword,
+                    record.getRaceStatus(), record.getRaceVisibility());
             if (trackWind) {
                 new Thread("Wind tracking starter for race " + record.getEventName() + "/" + record.getName()) {
                     public void run() {
@@ -1277,10 +1281,10 @@ public class SailingServiceImpl extends ProxiedRemoteServiceServlet implements S
      * Fetches the {@link WindTrack#getAveragedWind(Position, TimePoint) average wind} from all wind tracks or those
      * identified by <code>windSourceTypeNames</code>
      */
-    // @Override
-    public WindInfoForRaceDTO getAveragedWindInfo(RegattaAndRaceIdentifier raceIdentifier, Date from,
-            long millisecondsStepWidth, int numberOfFixes, double latDeg, double lngDeg,
-            Collection<String> windSourceTypeNames) throws NoWindException {
+    @Override
+    public WindInfoForRaceDTO getAveragedWindInfo(RegattaAndRaceIdentifier raceIdentifier, Date from, long millisecondsStepWidth,
+            int numberOfFixes, double latDeg, double lngDeg, Collection<String> windSourceTypeNames)
+                    throws NoWindException {
         Position position = new DegreePosition(latDeg, lngDeg);
         WindInfoForRaceDTO result = null;
         TrackedRace trackedRace = getExistingTrackedRace(raceIdentifier);
@@ -1369,7 +1373,7 @@ public class SailingServiceImpl extends ProxiedRemoteServiceServlet implements S
      *            {@link WindInfoForRaceDTO#getCombinedWindOnLegMiddle(int)}.
      */
     private WindInfoForRaceDTO getAveragedWindInfo(TimePoint from, long millisecondsStepWidth, int numberOfFixes,
-            Collection<String> windSourceTypeNames, TrackedRace trackedRace, boolean onlyUpToNewestEvent,
+            Collection<String> windSourceTypeNames, final TrackedRace trackedRace, boolean onlyUpToNewestEvent,
             boolean includeCombinedWindForAllLegMiddles) {
         WindInfoForRaceDTO result = null;
         if (trackedRace != null) {
@@ -1387,17 +1391,23 @@ public class SailingServiceImpl extends ProxiedRemoteServiceServlet implements S
             Util.addAll(trackedRace.getWindSources(), windSourcesToDeliver);
             final WindSource combinedWindSource = new WindSourceImpl(WindSourceType.COMBINED);
             windSourcesToDeliver.add(combinedWindSource);
-            for (WindSource windSource : windSourcesToDeliver) {
+            for (final WindSource windSource : windSourcesToDeliver) {
                 // TODO consider parallelizing
                 if (windSourceTypeNames == null || windSourceTypeNames.contains(windSource.getType().name())) {
                     WindTrackInfoDTO windTrackInfoDTO = createWindTrackInfoDTO(from, millisecondsStepWidth,
                             numberOfFixes, trackedRace, onlyUpToNewestEvent, newestEvent, windSource,
+<<<<<<< HEAD
                             new PositionAtTimeProvider() {
                                 @Override
                                 public Position getPosition(TimePoint at) {
                                     return null;
                                 }
                             });
+=======
+                            new PositionAtTimeProvider() { @Override public Position getPosition(TimePoint at) {
+                                return windSource == combinedWindSource ? trackedRace.getCenterOfCourse(at) : null;
+                            }});
+>>>>>>> bd3cae080532f5e4232975e9d0752cb41f47486d
                     windTrackInfoDTOs.put(windSource, windTrackInfoDTO);
                 }
             }
@@ -3356,19 +3366,26 @@ public class SailingServiceImpl extends ProxiedRemoteServiceServlet implements S
     }
 
     @Override
-    public EventDTO createEvent(String eventName, Date startDate, Date endDate, String venue, boolean isPublic,
-            List<String> courseAreaNames, Iterable<String> imageURLs, Iterable<String> videoURLs,
-            Iterable<String> sponsorImageURLs, String logoImageURLAsString, String officialWebsiteURLAsString)
+    public EventDTO createEvent(String eventName, String eventDescription, Date startDate, Date endDate, String venue,
+            boolean isPublic, List<String> courseAreaNames, Iterable<String> imageURLs,
+            Iterable<String> videoURLs, Iterable<String> sponsorImageURLs, String logoImageURLAsString, String officialWebsiteURLAsString)
             throws MalformedURLException {
         UUID eventUuid = UUID.randomUUID();
         TimePoint startTimePoint = startDate != null ? new MillisecondsTimePoint(startDate) : null;
         TimePoint endTimePoint = endDate != null ? new MillisecondsTimePoint(endDate) : null;
         getService().apply(
+<<<<<<< HEAD
                 new CreateEvent(eventName, startTimePoint, endTimePoint, venue, isPublic, eventUuid,
                         createURLsFromStrings(imageURLs), createURLsFromStrings(videoURLs),
                         createURLsFromStrings(sponsorImageURLs), logoImageURLAsString == null ? null : new URL(
                                 logoImageURLAsString), officialWebsiteURLAsString == null ? null : new URL(
                                 officialWebsiteURLAsString)));
+=======
+                new CreateEvent(eventName, eventDescription, startTimePoint, endTimePoint, venue, isPublic, eventUuid,
+                        createURLsFromStrings(imageURLs), createURLsFromStrings(videoURLs),
+                        createURLsFromStrings(sponsorImageURLs),
+                        logoImageURLAsString == null ? null : new URL(logoImageURLAsString), officialWebsiteURLAsString == null ? null : new URL(officialWebsiteURLAsString)));
+>>>>>>> bd3cae080532f5e4232975e9d0752cb41f47486d
         for (String courseAreaName : courseAreaNames) {
             createCourseArea(eventUuid, courseAreaName);
         }
@@ -3376,9 +3393,13 @@ public class SailingServiceImpl extends ProxiedRemoteServiceServlet implements S
     }
 
     @Override
-    public CourseAreaDTO createCourseArea(UUID eventId, String courseAreaName) {
-        CourseArea courseArea = getService().apply(new AddCourseArea(eventId, courseAreaName, UUID.randomUUID()));
-        return convertToCourseAreaDTO(courseArea);
+    public void createCourseArea(UUID eventId, String courseAreaName) {
+        getService().apply(new AddCourseArea(eventId, courseAreaName, UUID.randomUUID()));
+    }
+
+    @Override
+    public void removeCourseArea(UUID eventId, UUID courseAreaId) {
+        getService().apply(new RemoveCourseArea(eventId, courseAreaId));
     }
 
     @Override

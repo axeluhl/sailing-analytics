@@ -3,11 +3,11 @@
 Integrating smartphones into the _Sailing Analytics_ has long been talked about, and some effort has been invested on the server side to implement this idea. So far, the smartphone side of things has received substantially less attention, even though it is probably the most essential part when it comes to making the solution desirable for sailors. The missing parts on both sides and a high-level specification for the app are presented here.
 
 ## Table of Contents
-<!--[[_TOC_]]-->
+[[_TOC_]]
 
 <!-- Gollumn and python-markdown have a different syntax for the TOC :( -->
 
-[TOC]
+<!--[TOC]-->
 
 ## A lengthier Introduction
 The _SAP Sailing Analytics_ use tracking data to allow users to analyze sailing regattas in their browser - both on a regatta level, covering multiple races in tables called _Leaderboards_, and on a per-race level through map-centric interactive views called _RaceBoards_. The Sailing Analytics are currently targeted at large sailing events. Dedicated tracking providers collect and send the positional data of the sailing boats along with competitor metadata, and trained personnel that knows the Sailing Analytics inside out operates them on-site, for example by maintaining the regatta data (regattas, races, fleets, result corrections etc.).
@@ -50,12 +50,14 @@ First the use cases for the tracking app are presented, which should give a good
 The proposed smartphone app should enable casual users to apply the Sailing Analytics to their own tracking data. The following paragraphs describe the most important use cases in this context from the viewpoint of the users, leaving the technical details for a later section. The use cases are ordered by their importance - the ones that should be supported first are presented first.
 
 ### Individual Training
-This can be considered as being the simplest use-case. After downloading the app, the sailor creates a user account. Alternatively, he may log in to an existing account. As is common for apps this login should persist across app and phone restarts, until the users explicitly logs out. The user data could also serve as the basis for the competitor data (for which additional information about the country, sail-number and boatclass is required), but this discussed later on in the technical addendum.
+<div class="image"><img src="login.png" width="400px"/></div>
+
+This can be considered as being the simplest use-case. After downloading the app, the sailor creates a user account. Alternatively, he may log in to an existing account. As is common for apps this login should persist across app and phone restarts, until the users explicitly logs out. The user data could also serve as the basis for the competitor data (for which additional information about the country, sail-number and boatclass is required).
 
 !!! server
     Clarify how user and competitor management play together. Are they entirely separate, and a user can create different competitors for his account, and switch between them, or is a user the same thing as a competitor? What happens, e.g., if a user switches to a different boat - changing the boat class and sail-number in his user preferences would cause wrong information for old races. Instead of having to login with a different user, instead the user might select from the list of competitors he has created from that account, or choose to add a new one.
 
-<div class="image"><img src="training.svg"/></div>
+<div class="image"><img src="training.png" width="700px"/></div>
 
 On the following start screen there is a dominant button for starting the tracking - this functionality has to be readily available at all times, as missing out on tracking data is the potentially worst thing that can happen - everything else can be done later on. During tracking, the following information should be shown:
 
@@ -186,6 +188,25 @@ The Leaderboard is a pretty complex table. It includes several levels of hierarc
 An important part of the app surely also lies in managing the existing tracks and races generated from these tracks. On the one hand, the user may simply wish to see what tracks are on his phone (and what their synchronization status to the server is), and browser through his races. The list of races then serves as an entrypoint for analysis or sharing.
 
 
+### Start Line Analysis
+This app is targeted at sailors as users - enabling them to track and analyze their own training sessions and races. To improve, a sailor needs to know which part of his performance can be optimized.  Apart from the RaceBoard, a detailed start line analysis can be helpful. Interesting figures include:
+
+* distance to start line at time of start
+* start on left or right side of line
+* on which tack was the boat at time of start
+* speed on crossing the start line
+* speed at time of start
+* rank for the first few 10s-intervals (rank at 10s/20s/... into the race)
+
+In addition to the figures for the own boat, these figures could be compared to those of other competitors when analyzing a race. By doing so, a sailor can learn what others are doing better or worse than him.
+
+
+### Social Media Integration
+Enabling social interaction within the app can increase the visibility of both the app and the Sailing Analytics. Part of this is allowing users to invite others to participate in a race. Social interaction within the app is one part of this: users can invite other users to participate in their race, and communicate directly e.g. by setting the start time.
+
+Connecting to existing social networks and communication channels is another simple yet effective measure to this end. A race or regatta (represented by a URL) can be easily shared through these. 
+The URL should be handled by the app if available. Otherwise a mobile representation of the requested site should be rendered, ideally with an additional recommendation on installing the app.
+
 
 ## Technical Addendum
 This addendum addresses more technical issues that seem obvious from the point in time of writing this documentation. More technical issues will surely arise during implementation, but the following sections try to cover the larger areas that can already be foreseen.
@@ -215,6 +236,37 @@ The question arises, which other steps should also be made accessible through a 
 * managing one's list of tracked races including sharing options (who may see what), and the ability to share races using the desktop computer
 
 Basically, this means duplicating functionality (maybe even for the third time: complex regatta management in the AdminConsole, simple wizard on the smartphone, intermediate one in the Smartphone-Tracking web interface) to allow user to perform difficult or more complex tasks at their computer. This does not have to be implemented immediately, at least we can wait to see for which steps users would like to see this possibility most.
+
+
+### Necessary APIs
+The various components of the app that have been described have to interact with the existing Sailing Analytics backend. Some of these interactions are entirely new, others already exist - but only for the web interface (through the _GWT-RPC_ channel). Other interactions again are already available in the form of _RESTful JSON APIs_ which are used by the RaceCommittee App. The following list gives an overview of the data and interactions which span both mobile device and backend.
+
+* Account Management
+    * Creating an account
+    * Logging in
+    * Searching user list
+* Competitor Management
+    * Creating a new competitor
+    * Editing an existing competitor
+* Submitting GPS Fixes
+* Submitting further sensor data and multimedia
+* Track Management
+    * Retrieving list
+    * Defining visibility
+* Race Management
+    * Retrieving list
+    * Creating a race
+    * Course definition
+    * Setting start time
+    * Inviting users
+    * Defining visibility
+* Regatta Management
+    * Retrieving list
+    * Creating a regatta
+    * Adding a race
+    * Defining visibility
+* RaceBoard
+    * Variety of measurements and calculated figures
 
 
 ### Backend Implementation Details

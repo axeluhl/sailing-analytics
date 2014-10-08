@@ -71,6 +71,7 @@ import com.sap.sse.common.Util;
 import com.sap.sse.common.Util.Triple;
 import com.sap.sse.common.search.KeywordQuery;
 import com.sap.sse.common.search.Result;
+import com.sap.sse.common.search.Searchable;
 
 /**
  * An OSGi service that can be used to track boat races using a TracTrac connector that pushes
@@ -91,7 +92,7 @@ import com.sap.sse.common.search.Result;
  *
  */
 public interface RacingEventService extends TrackedRegattaRegistry, RegattaFetcher, RegattaRegistry, RaceFetcher,
-        LeaderboardRegistry, EventResolver, LeaderboardGroupResolver, TrackerManager {
+        LeaderboardRegistry, EventResolver, LeaderboardGroupResolver, TrackerManager, Searchable<LeaderboardSearchResult, KeywordQuery> {
     @Override
     Regatta getRegatta(RegattaName regattaName);
 
@@ -340,6 +341,7 @@ public interface RacingEventService extends TrackedRegattaRegistry, RegattaFetch
      * 
      * @param eventName
      *            The name of the new event
+     * @param eventDescription TODO
      * @param startDate
      *            The start date of the event
      * @param endDate
@@ -352,7 +354,7 @@ public interface RacingEventService extends TrackedRegattaRegistry, RegattaFetch
      *            The name of the venue of the new event
      * @return The new event
      */
-    Event addEvent(String eventName, TimePoint startDate, TimePoint endDate, String venueName, boolean isPublic, UUID id);
+    Event addEvent(String eventName, String eventDescription, TimePoint startDate, TimePoint endDate, String venueName, boolean isPublic, UUID id);
 
     /**
      * Updates a sailing event with the name <code>eventName</code>, the venue<code>venue</code> and the regattas with
@@ -425,6 +427,8 @@ public interface RacingEventService extends TrackedRegattaRegistry, RegattaFetch
 
     void mediaTrackDurationChanged(MediaTrack mediaTrack);
 
+    void mediaTrackAssignedRacesChanged(MediaTrack mediaTrack);
+    
     void mediaTrackDeleted(MediaTrack mediaTrack);
 
     /**
@@ -438,6 +442,8 @@ public interface RacingEventService extends TrackedRegattaRegistry, RegattaFetch
     void mediaTracksImported(Collection<MediaTrack> mediaTracksToImport, boolean override);
     
     Collection<MediaTrack> getMediaTracksForRace(RegattaAndRaceIdentifier regattaAndRaceIdentifier);
+    
+    Collection<MediaTrack> getMediaTracksInTimeRange(RegattaAndRaceIdentifier regattaAndRaceIdentifier);
 
     Collection<MediaTrack> getAllMediaTracks();
 
@@ -459,12 +465,14 @@ public interface RacingEventService extends TrackedRegattaRegistry, RegattaFetch
      */
     ConcurrentHashMap<String, Regatta> getPersistentRegattasForRaceIDs();
     
-    Event createEventWithoutReplication(String eventName, TimePoint startDate, TimePoint endDate, String venue, boolean isPublic,
-            UUID id, Iterable<URL> imageURLs, Iterable<URL> videoURLs, Iterable<URL> sponsorImageURLs, URL logoImageURL, URL officialWebsiteURL);
+    Event createEventWithoutReplication(String eventName, String eventDescription, TimePoint startDate, TimePoint endDate, String venue,
+            boolean isPublic, UUID id, Iterable<URL> imageURLs, Iterable<URL> videoURLs, Iterable<URL> sponsorImageURLs, URL logoImageURL, URL officialWebsiteURL);
 
     void setRegattaForRace(Regatta regatta, String raceIdAsString);
 
     CourseArea addCourseAreaWithoutReplication(UUID eventId, UUID courseAreaId, String courseAreaName);
+
+    CourseArea removeCourseAreaWithoutReplication(UUID eventId, UUID courseAreaId);
 
     /**
      * Returns a mobile device's configuration.
@@ -559,6 +567,7 @@ public interface RacingEventService extends TrackedRegattaRegistry, RegattaFetch
     /**
      * Searches the content of this server, not that of any remote servers referenced by any {@link RemoteSailingServerReference}s.
      */
+    @Override
     Result<LeaderboardSearchResult> search(KeywordQuery query);
 
     /**
@@ -588,4 +597,5 @@ public interface RacingEventService extends TrackedRegattaRegistry, RegattaFetch
      * objects by the same name of that type will be replaced.
      */
     void addLeaderboardGroupWithoutReplication(LeaderboardGroup leaderboardGroup);
+
 }

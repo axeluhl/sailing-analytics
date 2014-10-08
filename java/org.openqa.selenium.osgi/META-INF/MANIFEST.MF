@@ -42,7 +42,7 @@ Bundle-ClassPath: lib/apache-mime4j-0.6.jar,
  selenium-java-2.40.0.jar,
  lib/guava-15.0.jar
 Bundle-Vendor: openqa
-Bundle-RequiredExecutionEnvironment: JavaSE-1.7
+Bundle-RequiredExecutionEnvironment: JavaSE-1.8
 Export-Package: com.google.common.annotations,
  com.google.common.base,
  com.google.common.base.internal,

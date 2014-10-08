@@ -28,7 +28,6 @@ public class EventsOverviewUpcoming extends Composite {
     public EventsOverviewUpcoming(PlaceNavigator navigator) {
         this.navigator = navigator;
         upcomingEventComposites = new ArrayList<UpcomingEvent>();
-
         EventsOverviewUpcomingResources.INSTANCE.css().ensureInjected();
         initWidget(uiBinder.createAndBindUi(this));
     }
@@ -36,10 +35,8 @@ public class EventsOverviewUpcoming extends Composite {
     public void updateEvents(List<EventBaseDTO> events) {
         eventsPlaceholder.clear();
         upcomingEventComposites.clear();
-
-        for(EventBaseDTO event: events) {
+        for (EventBaseDTO event : events) {
             UpcomingEvent upcomingEvent = new UpcomingEvent(event, navigator);
-            
             upcomingEventComposites.add(upcomingEvent);
             eventsPlaceholder.getElement().appendChild(upcomingEvent.getElement());
         }

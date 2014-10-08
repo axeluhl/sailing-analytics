@@ -64,8 +64,8 @@ public class YoutubeVideoControl  {
 
         var player = new $wnd.YT.Player(videoContainerId, {
                 videoId : videoUrl,
-                height: '480', //see https://developers.google.com/youtube/iframe_api_reference?hl=en#Playback_quality
-                width: '853',
+                //height: '480', //see https://developers.google.com/youtube/iframe_api_reference?hl=en#Playback_quality
+                //width: '853',
                 events: { //https://developers.google.com/youtube/iframe_api_reference?hl=en#Events
                     'onReady': function(event) {
                                     that.@com.sap.sailing.gwt.ui.client.media.YoutubeVideoControl::initPlayState(Lcom/google/gwt/core/client/JavaScriptObject;)(player);
@@ -129,9 +129,10 @@ public class YoutubeVideoControl  {
     }
     
     private native void nativeSetCurrentTime(double time) /*-{
-                var player = this.@com.sap.sailing.gwt.ui.client.media.YoutubeVideoControl::youtubePlayer;
-                var allowSeekAhead = true; 
-                player.seekTo(time, allowSeekAhead);
+        var player = this.@com.sap.sailing.gwt.ui.client.media.YoutubeVideoControl::youtubePlayer;
+        var allowSeekAhead = true; 
+        var duration = player.getDuration();
+        player.seekTo(Math.min(time, duration), allowSeekAhead);
     }-*/;
 
     public void setMuted(boolean muted) {
@@ -158,7 +159,7 @@ public class YoutubeVideoControl  {
     
     private native boolean nativeIsPaused() /*-{
                 var player = this.@com.sap.sailing.gwt.ui.client.media.YoutubeVideoControl::youtubePlayer;
-                return player.getPlayerState() == $wnd.YT.PlayerState.PAUSED;
+                return player.getPlayerState() != $wnd.YT.PlayerState.PLAYING;
     }-*/;
 
     public double getDuration() {

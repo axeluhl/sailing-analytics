@@ -40,6 +40,7 @@ SAP is at the center of today’s technology revolution, developing innovations 
   * [[Layout repository|wiki/webdesign]]
   * [[Create boat graphics for the 2D race viewer|wiki/boatGraphicsSVG]]
   * [[Create clickable UI prototypes with Axure|wiki/ui-clickable-prototypes]]
+  * [[Uploading Media Content|wiki/uploading-media-content]]
 * General Information
   * [[Architecture and Infrastructure|wiki/architecture-and-infrastructure]]
   * [[Sailing Domain Algorithms|wiki/sailing-domain-algorithms]]
@@ -55,6 +56,8 @@ SAP is at the center of today’s technology revolution, developing innovations 
   * [[Information about Extreme Sailing Series|wiki/extreme-sailing-series]]
   * [[Travem&uuml;nder Woche 2014 event page|wiki/tw2014]]
   * [[505 worlds Kiel 2014 event page|wiki/505-worlds-kiel-2014]]
+* Event Content Management
+  * [[Link Race Videos|wiki/linking-race-videos]]
 
 ### Internal services (not related to wiki but useful)
 

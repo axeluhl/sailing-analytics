@@ -47,4 +47,9 @@ public class TabletAndDesktopStartView extends Composite implements StartView {
         mainMedia.setRecentEvents(recentEvents);
     }
 
+    @Override
+    public void adjustSizes() {
+        stage.adjustSize();
+    }
+
 }

@@ -80,6 +80,7 @@ public interface StringMessages extends Messages {
     String leaderboards();
     String leaderboardSettings();
     String settings();
+    String linkedRaces();
     String selectAtLeastOneLegDetail();
     String currentSpeedOverGroundInKnots();
     String estimatedTimeToNextWaypointInSeconds();
@@ -184,6 +185,7 @@ public interface StringMessages extends Messages {
     String otherManeuver();
     String douglasPeuckerPoints();
     String filterRacesByName();
+    String filterMediaByName();
     String actionEdit();
     String actionEditScores();
     String actionEditCompetitors();
@@ -393,9 +395,7 @@ public interface StringMessages extends Messages {
     String scoringSchemeHighPointSystem();
     String scoringSchemeLowPointWinnerGetsZero();
     String scoringSchemeWinnerGetsFive();
-    String scoringSchemeWinnerGetsFiveIgnoringRaceCount();
     String scoringSchemeWinnerGetsSix();
-    String scoringSchemeWinnerGetsSixIgnoringRaceCount();
     String scoringSystem();
     String createFlexibleLeaderboard();
     String createRegattaLeaderboard();
@@ -823,7 +823,7 @@ public interface StringMessages extends Messages {
     String lastFinished();
     String run();
     String times();
-    String numberOfGPSFixes();
+    String dataAmount();
     String averageCleanedServerTime();
     String averageCleanedOverallTime();
     String dataMiningBenchmarkResults();
@@ -848,7 +848,7 @@ public interface StringMessages extends Messages {
     String selectSheet();
     String groupBy();
     String statisticToCalculate();
-    String queryResultsChartSubtitle(int retrievedDataAmount, int filteredDataAmount, double calculationTime);
+    String queryResultsChartSubtitle(int retrievedDataAmount, double calculationTime);
     String noQuerySelected();
     String runAutomatically();
     String noStatisticSelectedError();
@@ -981,9 +981,8 @@ public interface StringMessages extends Messages {
     String rerunQueryAfterRefreshTooltip();
     String queryDefinitionProvider();
     String statisticProvider();
-    String toCalculateThe();
+    String calculateThe();
     String groupingProvider();
-    String use();
     String releaseNotes();
     String hasSplitFleetContiguousScoring();
     String eventOverview();
@@ -1052,6 +1051,7 @@ public interface StringMessages extends Messages {
     String imageURLs();
     String videoURLs();
     String sponsorImageURLs();
+    String invalidSelection();
     String advancePassId();
     String pleaseSelectAScoringResult();
     String eventOfficialWebsiteURL();
@@ -1077,6 +1077,7 @@ public interface StringMessages extends Messages {
     String totalNumberOfOperations();
     String currentOrAverageSpeedOverGroundInKnotsTooltip();
     String currentOrAverageSpeedOverGroundInKnots();
+    String connectors();
     String scoringSchemeHighPointFirstGetsTenOrEight();
     String videoComponentShortName();
     String competitorSearchFilter();
@@ -1089,9 +1090,15 @@ public interface StringMessages extends Messages {
     String raceIsInLiveTimePanelMode();
     String backToLiveTimePanelMode();
     String windChart();
-    String showVideoPopup();
-    String hideVideoPopup();
-    String manageMedia();
-    String manageMediaTooltip();
+    String mediaShowVideoCaption();
+    String mediaShowVideoTooltip(String title);
+    String mediaHideVideoCaption();
+    String mediaHideVideoTooltip();
+    String mediaSelectVideoCaption(int mediaCount);
+    String mediaSelectVideoTooltip();
+    String mediaManageMediaCaption();
+    String mediaManageMediaTooltip();
     String showAll();
+    String raceVisibilityColumn();
+    String enterCarryValueFor(String competitorName);
 }

@@ -29,6 +29,11 @@ public interface TextMessages extends Messages {
     String errorMessageNoSuchLeaderboard();
     String raceNotScheduled();
     String regattaDetails();
+    String regatta();
+    String competitorsAnalytics();
+    String chooseChart();
+    String series();
+    String regattaLeaderboards();
     
     String countdownDays();
     String countdownHours();
@@ -147,6 +152,7 @@ public interface TextMessages extends Messages {
     String regattasResultsTitle();
     String searchResultHeaderButton();
     String searchResultHeaderLabel();
+    String searchResultsFound();
     String searchResultHeaderPlaceholder();
     String searchResultMore();
     String searchResultSearch();
