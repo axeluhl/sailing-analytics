@@ -9,19 +9,17 @@ import java.util.Map;
 import com.google.gwt.core.client.Scheduler;
 import com.google.gwt.core.client.Scheduler.RepeatingCommand;
 import com.google.gwt.dom.client.Style.FontWeight;
-import com.google.gwt.dom.client.Style.Position;
-import com.google.gwt.dom.client.Style.TextAlign;
 import com.google.gwt.event.logical.shared.ResizeEvent;
 import com.google.gwt.event.logical.shared.ResizeHandler;
 import com.google.gwt.user.client.Window;
 import com.google.gwt.user.client.ui.FlowPanel;
-import com.google.gwt.user.client.ui.ScrollPanel;
 import com.google.gwt.user.client.ui.Widget;
 import com.sap.sailing.domain.common.RegattaAndRaceIdentifier;
 import com.sap.sailing.domain.common.dto.FleetDTO;
 import com.sap.sailing.domain.common.dto.LeaderboardDTO;
 import com.sap.sailing.domain.common.dto.RaceColumnDTO;
 import com.sap.sailing.gwt.autoplay.client.shared.header.SAPHeader;
+import com.sap.sailing.gwt.autoplay.client.shared.oldleaderboard.OldLeaderboard;
 import com.sap.sailing.gwt.common.client.CSS3Util;
 import com.sap.sailing.gwt.common.client.i18n.TextMessages;
 import com.sap.sailing.gwt.ui.client.CompetitorSelectionModel;
@@ -112,7 +110,7 @@ public class AutoPlayController implements RaceTimesInfoProviderListener {
             @Override
             public void onResize(ResizeEvent event) {
                 if(leaderboardZoom != null && leaderboardZoom.equalsIgnoreCase("auto")) {
-                    autoZoomContentWidget();
+                    autoZoomContentWidget(SAP_HEADER_HEIGHT, currentContentWidget);
                 }
             }
         });
@@ -134,7 +132,7 @@ public class AutoPlayController implements RaceTimesInfoProviderListener {
             }
         };
 //        leaderboardPanel.getContentWidget().getElement().getStyle().setProperty("margin", "0 auto");
-        leaderboardPanel.getContentWidget().getElement().getStyle().setPosition(Position.ABSOLUTE);
+//        leaderboardPanel.getContentWidget().getElement().getStyle().setPosition(Position.ABSOLUTE);
         leaderboardPanel.getContentWidget().getElement().getStyle().setFontWeight(FontWeight.BOLD);
         return leaderboardPanel;
     }
@@ -171,15 +169,15 @@ public class AutoPlayController implements RaceTimesInfoProviderListener {
             
             SAPHeader sapHeader = new SAPHeader(TextMessages.INSTANCE.leaderboard() +  ": " + leaderboardName);
             playerView.getDockPanel().addNorth(sapHeader, SAP_HEADER_HEIGHT);
-            
-            LeaderboardPanel leaderboardPanel = createLeaderboardPanel(leaderboardGroupName, leaderboardName, showRaceDetails);          
-            ScrollPanel leaderboardContentPanel = new ScrollPanel();
 
-            currentContentWidget = leaderboardPanel.getContentWidget();
+            LeaderboardPanel leaderboardPanel = createLeaderboardPanel(leaderboardGroupName, leaderboardName, showRaceDetails);
+            OldLeaderboard oldLeaderboard = new OldLeaderboard(leaderboardPanel);
+            
+            currentContentWidget = oldLeaderboard.getContentWidget();
             
             if(leaderboardZoom != null) {
                 if(leaderboardZoom.equalsIgnoreCase("auto")) {
-                    autoZoomContentWidget();
+                    autoZoomContentWidget(SAP_HEADER_HEIGHT, currentContentWidget);
                 } else {
                     try {
                         Double zoom = Double.valueOf(leaderboardZoom);
@@ -189,10 +187,8 @@ public class AutoPlayController implements RaceTimesInfoProviderListener {
                     }
                 }
             }
-            
-            leaderboardContentPanel.getElement().getStyle().setTextAlign(TextAlign.CENTER);
-            leaderboardContentPanel.add(leaderboardPanel);
-            playerView.getDockPanel().add(leaderboardContentPanel);
+
+            playerView.getDockPanel().add(oldLeaderboard);
             currentLiveRace = null;
             activeTvView = AutoPlayModes.Leaderboard;
             raceboardTimer.pause();
@@ -200,13 +196,13 @@ public class AutoPlayController implements RaceTimesInfoProviderListener {
         }
     }
 
-    private void autoZoomContentWidget() {
-        if(currentContentWidget != null) {
+    private void autoZoomContentWidget(int headerHeight, final Widget contentWidget) {
+        if(contentWidget != null) {
             Scheduler.get().scheduleFixedPeriod(new RepeatingCommand() {
                 public boolean execute () {
                     boolean invokeAgain = true;
-                    if(currentContentWidget.getOffsetHeight() > 10) {
-                        scaleContentWidget(SAP_HEADER_HEIGHT, currentContentWidget);
+                    if(currentContentWidget.getOffsetHeight() > 100) {
+                        scaleContentWidget(SAP_HEADER_HEIGHT, contentWidget);
                         invokeAgain = false;
                     }
                     return invokeAgain;

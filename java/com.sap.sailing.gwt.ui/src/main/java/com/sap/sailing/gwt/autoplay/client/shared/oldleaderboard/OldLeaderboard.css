@@ -1,0 +1,10 @@
+.oldLeaderboardPanel {
+  background-color:#f8f8f8;
+  padding: 10px 10px 10px 10px;
+  width: 100%;
+  font-weight: bold;
+}
+
+.leaderboardAndTitlePanel {
+	display: inline-block;
+}
