@@ -1,4 +1,4 @@
-package com.sap.sse.datamining.impl.components;
+package com.sap.sse.datamining.impl;
 
 import static org.hamcrest.Matchers.greaterThan;
 import static org.hamcrest.Matchers.is;
@@ -76,6 +76,12 @@ public class TestDataRetrieverChainCreation {
                 return element.getLegNumber() <= 3;
             }
         };
+    }
+    
+    @Test
+    public void testCreationWithExistingChainDefinition() {
+        DataRetrieverChainDefinition<Collection<Test_Regatta>> chainClone = new SimpleDataRetrieverChainDefinition<>(dataRetrieverChainDefinition);
+        assertThat(chainClone, is(dataRetrieverChainDefinition));
     }
 
     @SuppressWarnings("unchecked")

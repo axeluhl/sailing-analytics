@@ -1,8 +1,10 @@
 package com.sap.sse.datamining;
 
+import java.util.Collection;
 import java.util.concurrent.ExecutorService;
 
 import com.sap.sse.datamining.components.Processor;
+import com.sap.sse.datamining.impl.DataRetrieverTypeWithInformation;
 
 public interface DataRetrieverChainDefinition<DataSourceType> {
     
@@ -23,6 +25,8 @@ public interface DataRetrieverChainDefinition<DataSourceType> {
                      Class<Processor<NextInputType, NextResultType>> nextRetrieverType,
                      Class<NextResultType> retrievedDataType);
     
+    public Collection<? extends DataRetrieverTypeWithInformation<?, ?>> getDataRetrieverTypesWithInformation();
+
     public DataRetrieverChainBuilder<DataSourceType> startBuilding(ExecutorService executor);
 
 }

@@ -20,6 +20,11 @@ public class SimpleDataRetrieverChainDefinition<DataSourceType> implements
         dataRetrieverTypesWithInformation = new ArrayList<>();
     }
 
+    public SimpleDataRetrieverChainDefinition(DataRetrieverChainDefinition<DataSourceType> dataRetrieverChainDefinition) {
+        this(dataRetrieverChainDefinition.getDataSourceType());
+        dataRetrieverTypesWithInformation.addAll(dataRetrieverChainDefinition.getDataRetrieverTypesWithInformation());
+    }
+
     @Override
     public Class<DataSourceType> getDataSourceType() {
         return dataSourceType;
@@ -78,10 +83,47 @@ public class SimpleDataRetrieverChainDefinition<DataSourceType> implements
                     + retrieverType.getSimpleName() + "'", e);
         }
     }
+    
+    @Override
+    public Collection<? extends DataRetrieverTypeWithInformation<?, ?>> getDataRetrieverTypesWithInformation() {
+        return dataRetrieverTypesWithInformation;
+    }
 
     @Override
     public DataRetrieverChainBuilder<DataSourceType> startBuilding(ExecutorService executor) {
         return new SimpleDataRetrieverChainBuilder<>(executor, dataRetrieverTypesWithInformation);
+    }
+
+    @Override
+    public int hashCode() {
+        final int prime = 31;
+        int result = 1;
+        result = prime * result
+                + ((dataRetrieverTypesWithInformation == null) ? 0 : dataRetrieverTypesWithInformation.hashCode());
+        result = prime * result + ((dataSourceType == null) ? 0 : dataSourceType.hashCode());
+        return result;
+    }
+
+    @Override
+    public boolean equals(Object obj) {
+        if (this == obj)
+            return true;
+        if (obj == null)
+            return false;
+        if (getClass() != obj.getClass())
+            return false;
+        SimpleDataRetrieverChainDefinition<?> other = (SimpleDataRetrieverChainDefinition<?>) obj;
+        if (dataRetrieverTypesWithInformation == null) {
+            if (other.dataRetrieverTypesWithInformation != null)
+                return false;
+        } else if (!dataRetrieverTypesWithInformation.equals(other.dataRetrieverTypesWithInformation))
+            return false;
+        if (dataSourceType == null) {
+            if (other.dataSourceType != null)
+                return false;
+        } else if (!dataSourceType.equals(other.dataSourceType))
+            return false;
+        return true;
     }
 
 }
