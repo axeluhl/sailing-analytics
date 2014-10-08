@@ -7,6 +7,8 @@ import java.util.List;
 import java.util.Set;
 
 import com.google.gwt.dom.client.Style.Unit;
+import com.google.gwt.event.dom.client.ChangeEvent;
+import com.google.gwt.event.dom.client.ChangeHandler;
 import com.google.gwt.event.dom.client.ClickEvent;
 import com.google.gwt.event.dom.client.ClickHandler;
 import com.google.gwt.user.client.rpc.AsyncCallback;
@@ -71,11 +73,25 @@ public class StructureImportManagementPanel extends FlowPanel {
 		Label eventIDLabel = new Label(stringMessages.event() + ":");
 		Label jsonURLLabel = new Label(stringMessages.jsonUrl() + ":");
 		eventIDTextBox = new TextBox();
+		eventIDTextBox.addChangeHandler(new ChangeHandler() {
+			@Override
+			public void onChange(ChangeEvent event) {
+				jsonURLTextBox
+						.setText("http://manage2sail.com/api/public/links/event/"
+								+ eventIDTextBox.getValue()
+								+ "?accesstoken=bDAv8CwsTM94ujZ&mediaType=json");
+			}
+		});
 		eventIDTextBox.ensureDebugId("eventIDTextBox");
 		eventIDTextBox.setVisibleLength(50);
 		jsonURLTextBox = new TextBox();
 		jsonURLTextBox.ensureDebugId("JsonURLTextBox");
 		jsonURLTextBox.setVisibleLength(100);
+		jsonURLTextBox
+				.getElement()
+				.setPropertyString(
+						"placeholder",
+						"http://manage2sail.com/api/public/links/event/d30883d3-2876-4d7e-af49-891af6cbae1b?accesstoken=bDAv8CwsTM94ujZ&mediaType=json");
 		listRegattasButton = new Button(this.stringMessages.listRegattas());
 		importDetailsButton = new Button(this.stringMessages.importRegatta());
 		importDetailsButton.setEnabled(false);
@@ -85,12 +101,13 @@ public class StructureImportManagementPanel extends FlowPanel {
 				if (getSelectedEvent() != null) {
 					List<RegattaDTO> selectedRegattas = regattaListComposite
 							.getSelectedRegattas();
-					if(!selectedRegattas.isEmpty()){
-					createRegattas(selectedRegattas, getSelectedEvent());
-					}else{
-						errorReporter.reportError("Please select at least one regatta");
+					if (!selectedRegattas.isEmpty()) {
+						createRegattas(selectedRegattas, getSelectedEvent());
+					} else {
+						errorReporter
+								.reportError("Please select at least one regatta");
 					}
-				}else{
+				} else {
 					errorReporter.reportError("Please select an event");
 				}
 			}
@@ -181,7 +198,8 @@ public class StructureImportManagementPanel extends FlowPanel {
 		for (CourseAreaDTO courseAreaDTO : newEvent.venue.getCourseAreas()) {
 			courseAreaNames.add(courseAreaDTO.getName());
 		}
-		sailingService.createEvent(newEvent.getName(), newEvent.startDate,
+		sailingService.createEvent(newEvent.getName(),
+				newEvent.getDescription(), newEvent.startDate,
 				newEvent.endDate, newEvent.venue.getName(), newEvent.isPublic,
 				courseAreaNames, newEvent.getImageURLs(),
 				newEvent.getVideoURLs(), newEvent.getSponsorImageURLs(),
@@ -248,7 +266,6 @@ public class StructureImportManagementPanel extends FlowPanel {
 			Iterable<RegattaDTO> regattas) {
 		final LinkedHashMap<Set<String>, Set<RegattaDTO>> structure = new LinkedHashMap<Set<String>, Set<RegattaDTO>>();
 
-		// TODO change to enum
 		Set<Set<String>> staticStructures = new HashSet<Set<String>>();
 		Set<String> OPENINGMEDAL = new HashSet<String>();
 		OPENINGMEDAL.add("Opening Series");
