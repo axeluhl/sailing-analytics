@@ -40,13 +40,15 @@ public class RaceMapSettingsDialogComponent implements SettingsDialogComponent<R
     private CheckBox showSelectedCompetitorsInfoCheckBox;
     private LongBox tailLengthBox;
     private DoubleBox buoyZoneRadiusBox;
+    private boolean showViewSimulation;
     
     private final StringMessages stringMessages;
     private final RaceMapSettings initialSettings;
 
     private ArrayList<CheckBox> disableOnlySelectedWhenAreFalse;
     
-    public RaceMapSettingsDialogComponent(RaceMapSettings settings, StringMessages stringMessages) {
+    public RaceMapSettingsDialogComponent(RaceMapSettings settings, StringMessages stringMessages, boolean showViewSimulation) {
+        this.showViewSimulation = showViewSimulation;
         this.stringMessages = stringMessages;
         initialSettings = settings;
     }
@@ -69,10 +71,12 @@ public class RaceMapSettingsDialogComponent implements SettingsDialogComponent<R
         showWindStreamletOverlayCheckbox = dialog.createCheckbox(stringMessages.showWindStreamletOverlay());
         showWindStreamletOverlayCheckbox.setValue(initialSettings.isShowWindStreamletOverlay());
         vp.add(showWindStreamletOverlayCheckbox);
-                
-        showSimulationOverlayCheckbox = dialog.createCheckbox(stringMessages.showSimulationOverlay());
-        showSimulationOverlayCheckbox.setValue(initialSettings.isShowSimulationOverlay());
-        vp.add(showSimulationOverlayCheckbox);
+        
+        if (showViewSimulation) {
+            showSimulationOverlayCheckbox = dialog.createCheckbox(stringMessages.showSimulationOverlay());
+            showSimulationOverlayCheckbox.setValue(initialSettings.isShowSimulationOverlay());
+            vp.add(showSimulationOverlayCheckbox);
+        }
         
         Label zoomLabel = dialog.createHeadlineLabel(stringMessages.zoom());
         vp.add(zoomLabel);
@@ -211,7 +215,11 @@ public class RaceMapSettingsDialogComponent implements SettingsDialogComponent<R
         result.setShowDouglasPeuckerPoints(showDouglasPeuckerPointsCheckBox.getValue());
         result.setShowOnlySelectedCompetitors(showOnlySelectedCompetitorsCheckBox.getValue());
         result.setShowWindStreamletOverlay(showWindStreamletOverlayCheckbox.getValue());
-        result.setShowSimulationOverlay(showSimulationOverlayCheckbox.getValue());
+        if (showViewSimulation) {
+            result.setShowSimulationOverlay(showSimulationOverlayCheckbox.getValue());
+        } else {
+            result.setShowSimulationOverlay(false);            
+        }
         result.setShowSelectedCompetitorsInfo(showSelectedCompetitorsInfoCheckBox.getValue());
         if (helpLinesSettings.isVisible(HelpLineTypes.BOATTAILS)) {
             result.setTailLengthInMilliseconds(tailLengthBox.getValue() == null ? -1 : tailLengthBox.getValue() * 1000l);

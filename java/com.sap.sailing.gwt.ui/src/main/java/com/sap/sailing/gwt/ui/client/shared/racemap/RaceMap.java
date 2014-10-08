@@ -308,11 +308,12 @@ public class RaceMap extends AbsolutePanel implements TimeListener, CompetitorSe
     private RaceSimulationOverlay simulationOverlay;
     private WindStreamletsRaceboardOverlay streamletOverlay;
     private final boolean showViewStreamlets;
+    private final boolean showViewSimulation;
     private final RegattaAndRaceIdentifier raceIdentifier;
 
     public RaceMap(SailingServiceAsync sailingService, AsyncActionsExecutor asyncActionsExecutor,
             ErrorReporter errorReporter, Timer timer, CompetitorSelectionProvider competitorSelection,
-            StringMessages stringMessages, boolean showMapControls, boolean showViewStreamlets,
+            StringMessages stringMessages, boolean showMapControls, boolean showViewStreamlets, boolean showViewSimulation,
             RegattaAndRaceIdentifier raceIdentifier) {
         this.setSize("100%", "100%");
         this.stringMessages = stringMessages;
@@ -336,6 +337,7 @@ public class RaceMap extends AbsolutePanel implements TimeListener, CompetitorSe
         lastTimeChangeBeforeInitialization = null;
         isMapInitialized = false;
         this.showViewStreamlets = showViewStreamlets;
+        this.showViewSimulation = showViewSimulation;
         headerPanel = new FlowPanel();
         headerPanel.setStyleName("RaceMap-HeaderPanel");
         panelForLeftHeaderLabels = new AbsolutePanel();
@@ -467,10 +469,12 @@ public class RaceMap extends AbsolutePanel implements TimeListener, CompetitorSe
                   streamletOverlay.setVisible(true);
               }
 
-              // initialize simulation canvas
-              simulationOverlay = new RaceSimulationOverlay(getMap(), /* zIndex */ 0, timer, raceIdentifier, sailingService, stringMessages, asyncActionsExecutor);
-              simulationOverlay.addToMap();
-
+              if (showViewSimulation) {
+                  // initialize simulation canvas
+                  simulationOverlay = new RaceSimulationOverlay(getMap(), /* zIndex */ 0, timer, raceIdentifier, sailingService, stringMessages, asyncActionsExecutor);
+                  simulationOverlay.addToMap();
+              }
+              
               createHeaderPanel(map);
               createSettingsButton(map);
 
@@ -1913,7 +1917,7 @@ public class RaceMap extends AbsolutePanel implements TimeListener, CompetitorSe
 
     @Override
     public SettingsDialogComponent<RaceMapSettings> getSettingsDialogComponent() {
-        return new RaceMapSettingsDialogComponent(settings, stringMessages);
+        return new RaceMapSettingsDialogComponent(settings, stringMessages, this.showViewSimulation);
     }
 
     @Override
