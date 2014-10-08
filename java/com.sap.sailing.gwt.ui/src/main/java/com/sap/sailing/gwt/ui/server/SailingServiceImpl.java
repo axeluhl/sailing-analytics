@@ -1396,18 +1396,9 @@ public class SailingServiceImpl extends ProxiedRemoteServiceServlet implements S
                 if (windSourceTypeNames == null || windSourceTypeNames.contains(windSource.getType().name())) {
                     WindTrackInfoDTO windTrackInfoDTO = createWindTrackInfoDTO(from, millisecondsStepWidth,
                             numberOfFixes, trackedRace, onlyUpToNewestEvent, newestEvent, windSource,
-<<<<<<< HEAD
-                            new PositionAtTimeProvider() {
-                                @Override
-                                public Position getPosition(TimePoint at) {
-                                    return null;
-                                }
-                            });
-=======
                             new PositionAtTimeProvider() { @Override public Position getPosition(TimePoint at) {
                                 return windSource == combinedWindSource ? trackedRace.getCenterOfCourse(at) : null;
                             }});
->>>>>>> bd3cae080532f5e4232975e9d0752cb41f47486d
                     windTrackInfoDTOs.put(windSource, windTrackInfoDTO);
                 }
             }
@@ -3374,18 +3365,10 @@ public class SailingServiceImpl extends ProxiedRemoteServiceServlet implements S
         TimePoint startTimePoint = startDate != null ? new MillisecondsTimePoint(startDate) : null;
         TimePoint endTimePoint = endDate != null ? new MillisecondsTimePoint(endDate) : null;
         getService().apply(
-<<<<<<< HEAD
-                new CreateEvent(eventName, startTimePoint, endTimePoint, venue, isPublic, eventUuid,
-                        createURLsFromStrings(imageURLs), createURLsFromStrings(videoURLs),
-                        createURLsFromStrings(sponsorImageURLs), logoImageURLAsString == null ? null : new URL(
-                                logoImageURLAsString), officialWebsiteURLAsString == null ? null : new URL(
-                                officialWebsiteURLAsString)));
-=======
                 new CreateEvent(eventName, eventDescription, startTimePoint, endTimePoint, venue, isPublic, eventUuid,
                         createURLsFromStrings(imageURLs), createURLsFromStrings(videoURLs),
                         createURLsFromStrings(sponsorImageURLs),
                         logoImageURLAsString == null ? null : new URL(logoImageURLAsString), officialWebsiteURLAsString == null ? null : new URL(officialWebsiteURLAsString)));
->>>>>>> bd3cae080532f5e4232975e9d0752cb41f47486d
         for (String courseAreaName : courseAreaNames) {
             createCourseArea(eventUuid, courseAreaName);
         }

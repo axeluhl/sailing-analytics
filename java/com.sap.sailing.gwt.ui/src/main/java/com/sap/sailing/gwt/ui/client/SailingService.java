@@ -371,15 +371,10 @@ public interface SailingService extends RemoteService {
 
     PolarSheetGenerationResponse generatePolarSheetForRaces(List<RegattaAndRaceIdentifier> selectedRaces,
             PolarSheetGenerationSettings settings, String name) throws Exception;
-<<<<<<< HEAD
-
-    CourseAreaDTO createCourseArea(UUID eventId, String courseAreaName);
-=======
     
     void createCourseArea(UUID eventId, String courseAreaName);
     
     void removeCourseArea(UUID eventId, UUID courseAreaId);
->>>>>>> bd3cae080532f5e4232975e9d0752cb41f47486d
 
     List<Util.Pair<String, String>> getLeaderboardsNamesOfMetaLeaderboard(String metaLeaderboardName);
 

@@ -213,15 +213,6 @@ public class AdminConsoleEntryPoint extends AbstractEntryPoint implements Regatt
         addToTabPanel(connectorsTabPanel, user, igtimiAccountsPanel, stringMessages.igtimiAccounts(), AdminConsoleFeatures.MANAGE_IGTIMI_ACCOUNTS);
         
         ResultImportUrlsManagementPanel resultImportUrlsManagementPanel = new ResultImportUrlsManagementPanel(sailingService, this, stringMessages);
-<<<<<<< HEAD
-        addToTabPanel(tabPanel, user, resultImportUrlsManagementPanel, stringMessages.resultImportUrls(), AdminConsoleFeatures.MANAGE_RESULT_IMPORT_URLS);
-        
-        StructureImportManagementPanel structureImportUrlsManagementPanel = new StructureImportManagementPanel(sailingService, this, stringMessages, this, eventManagementPanel);
-        addToTabPanel(tabPanel, user, structureImportUrlsManagementPanel, stringMessages.structureImportUrls(), AdminConsoleFeatures.MANAGE_STRUCTURE_IMPORT_URLS);
-        
-        RemoteSailingServerInstancesManagementPanel sailingServerInstancesManagementPanel = new RemoteSailingServerInstancesManagementPanel(sailingService, this, stringMessages);
-        addToTabPanel(tabPanel, user, sailingServerInstancesManagementPanel, stringMessages.sailingServers(), AdminConsoleFeatures.MANAGE_SAILING_SERVER_INSTANCES);
-=======
         addToTabPanel(connectorsTabPanel, user, resultImportUrlsManagementPanel, stringMessages.resultImportUrls(), AdminConsoleFeatures.MANAGE_RESULT_IMPORT_URLS);
 
         /* ADVANCED */
@@ -230,7 +221,6 @@ public class AdminConsoleEntryPoint extends AbstractEntryPoint implements Regatt
         advancedTabPanel.addSelectionHandler(tabSelectionHandler);
         advancedTabPanel.ensureDebugId("AdvancedPanel");
         tabPanel.add(advancedTabPanel, "Advanced");
->>>>>>> bd3cae080532f5e4232975e9d0752cb41f47486d
 
         final ReplicationPanel replicationPanel = new ReplicationPanel(sailingService, this, stringMessages);
         addToTabPanel(advancedTabPanel, user, replicationPanel, stringMessages.replication(), AdminConsoleFeatures.MANAGE_REPLICATION);
@@ -247,32 +237,6 @@ public class AdminConsoleEntryPoint extends AbstractEntryPoint implements Regatt
         addToTabPanel(advancedTabPanel, user, deviceConfigurationUserPanel, stringMessages.deviceConfiguration(), AdminConsoleFeatures.MANAGE_DEVICE_CONFIGURATION);
 
         tabPanel.selectTab(0);
-<<<<<<< HEAD
-        tabPanel.addSelectionHandler(new SelectionHandler<Integer>() {
-            @Override
-            public void onSelection(SelectionEvent<Integer> event) {
-                final Widget selectedPanel = ((ScrollPanel) tabPanel.getWidget(tabPanel.getSelectedIndex())).getWidget();
-          
-                if (selectedPanel == eventManagementPanel) {
-                    eventManagementPanel.fillEvents();
-                    fillLeaderboardGroups();
-                } else if (selectedPanel == leaderboardConfigPanel) {
-                    fillLeaderboards();
-                } else if (selectedPanel == mediaPanel) {
-                    mediaPanel.onShow();
-                } else if (selectedPanel == competitorPanel) {
-                    competitorPanel.refreshCompetitorList();
-                } else if (selectedPanel == raceLogTrackingEventManagementPanel) {
-                    fillLeaderboards();
-                } else if (selectedPanel == leaderboardGroupConfigPanel) {
-                    fillLeaderboardGroups();
-                    fillLeaderboards();
-                }
-            }
-        });
-=======
-        
->>>>>>> bd3cae080532f5e4232975e9d0752cb41f47486d
         fillRegattas();
         fillLeaderboardGroups();
         fillLeaderboards();
