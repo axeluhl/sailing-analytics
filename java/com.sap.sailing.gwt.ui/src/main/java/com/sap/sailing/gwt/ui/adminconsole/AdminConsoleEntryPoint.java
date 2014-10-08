@@ -88,10 +88,23 @@ public class AdminConsoleEntryPoint extends AbstractEntryPoint implements Regatt
             @Override
             public void onSelection(SelectionEvent<Integer> event) {
                 Object source = event.getSource();
-                if (source != null && source instanceof TabLayoutPanel) {
-                    TabLayoutPanel tabPanel = ((TabLayoutPanel)source);
-                    final Widget selectedPanel = tabPanel.getWidget(event.getSelectedItem());
-                    refreshDataFor(selectedPanel);
+                if (source != null) {
+                    if (source instanceof TabLayoutPanel) {
+                        final TabLayoutPanel tabPanel = ((TabLayoutPanel)source);
+                        final Widget selectedPanel = tabPanel.getWidget(event.getSelectedItem());
+                        refreshDataFor(selectedPanel);
+                    } else if (source instanceof VerticalTabLayoutPanel) {
+                        final VerticalTabLayoutPanel verticalTabLayoutPanel = (VerticalTabLayoutPanel)source;
+                        Widget widgetAssociatedToVerticalTab = verticalTabLayoutPanel.getWidget(verticalTabLayoutPanel.getSelectedIndex());
+                        if (widgetAssociatedToVerticalTab instanceof TabLayoutPanel) {
+                            TabLayoutPanel selectedTabLayoutPanel = (TabLayoutPanel)widgetAssociatedToVerticalTab;
+                            final int selectedIndex = selectedTabLayoutPanel.getSelectedIndex();
+                            if (selectedIndex >= 0) {
+                                widgetAssociatedToVerticalTab = selectedTabLayoutPanel.getWidget(selectedIndex);
+                            }
+                        }
+                        refreshDataFor(widgetAssociatedToVerticalTab);
+                    }
                 }
             }
         };

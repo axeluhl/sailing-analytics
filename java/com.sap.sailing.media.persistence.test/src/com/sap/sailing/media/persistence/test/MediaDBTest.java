@@ -38,9 +38,9 @@ public class MediaDBTest extends AbstractMongoDBTest {
         TimePoint startTime = MillisecondsTimePoint.now();
         Duration duration = MillisecondsDurationImpl.ONE_HOUR;
         MimeType mimeType = MimeType.ogv;
-        Set<RegattaAndRaceIdentifier> regattasAndRaces = new HashSet<RegattaAndRaceIdentifier>();
-        regattasAndRaces.add(new RegattaNameAndRaceName("49er", "R1"));
-        String dbId = mongoDB.insertMediaTrack(videoTitle, url, startTime, duration, mimeType, regattasAndRaces);
+        Set<RegattaAndRaceIdentifier> assignedRaces = new HashSet<RegattaAndRaceIdentifier>();
+        assignedRaces.add(new RegattaNameAndRaceName("49er", "R1"));
+        String dbId = mongoDB.insertMediaTrack(videoTitle, url, startTime, duration, mimeType, assignedRaces);
         
         assertNotNull(dbId);
         MediaTrack videoTrack = mongoDB.loadAllMediaTracks().iterator().next();
@@ -58,9 +58,9 @@ public class MediaDBTest extends AbstractMongoDBTest {
         TimePoint startTime = MillisecondsTimePoint.now();
         Duration duration = MillisecondsDurationImpl.ONE_HOUR;
         MimeType mimeType = MimeType.ogv;
-        Set<RegattaAndRaceIdentifier> regattasAndRaces = new HashSet<RegattaAndRaceIdentifier>();
-        regattasAndRaces.add(new RegattaNameAndRaceName("49er", "R1"));
-        mongoDB.insertMediaTrackWithId(dbId, videoTitle, url, startTime, duration, mimeType, regattasAndRaces);
+        Set<RegattaAndRaceIdentifier> assignedRaces = new HashSet<RegattaAndRaceIdentifier>();
+        assignedRaces.add(new RegattaNameAndRaceName("49er", "R1"));
+        mongoDB.insertMediaTrackWithId(dbId, videoTitle, url, startTime, duration, mimeType, assignedRaces);
         MediaTrack videoTrack = mongoDB.loadAllMediaTracks().iterator().next();
 
         assertNotNull(videoTrack);
@@ -77,9 +77,9 @@ public class MediaDBTest extends AbstractMongoDBTest {
         TimePoint startTime = MillisecondsTimePoint.now();
         Duration duration = MillisecondsDurationImpl.ONE_HOUR;
         MimeType mimeType = MimeType.ogv;
-        Set<RegattaAndRaceIdentifier> regattasAndRaces = new HashSet<RegattaAndRaceIdentifier>();
-        regattasAndRaces.add(new RegattaNameAndRaceName("49er", "R1"));
-        mongoDB.insertMediaTrackWithId(dbId, videoTitle, url, startTime, duration, mimeType, regattasAndRaces);
+        Set<RegattaAndRaceIdentifier> assignedRaces = new HashSet<RegattaAndRaceIdentifier>();
+        assignedRaces.add(new RegattaNameAndRaceName("49er", "R1"));
+        mongoDB.insertMediaTrackWithId(dbId, videoTitle, url, startTime, duration, mimeType, assignedRaces);
 
     }
     
@@ -91,10 +91,10 @@ public class MediaDBTest extends AbstractMongoDBTest {
         TimePoint startTime = MillisecondsTimePoint.now();
         Duration duration = MillisecondsDurationImpl.ONE_HOUR;
         MimeType mimeType = MimeType.ogv;
-        Set<RegattaAndRaceIdentifier> regattasAndRaces = new HashSet<RegattaAndRaceIdentifier>();
-        regattasAndRaces.add(new RegattaNameAndRaceName("49er", "R1"));
-        String dbId = mongoDB.insertMediaTrack(videoTitle, url, startTime, duration, mimeType, regattasAndRaces);
-        mongoDB.insertMediaTrackWithId(dbId, videoTitle, url, startTime, duration, mimeType, regattasAndRaces);
+        Set<RegattaAndRaceIdentifier> assignedRaces = new HashSet<RegattaAndRaceIdentifier>();
+        assignedRaces.add(new RegattaNameAndRaceName("49er", "R1"));
+        String dbId = mongoDB.insertMediaTrack(videoTitle, url, startTime, duration, mimeType, assignedRaces);
+        mongoDB.insertMediaTrackWithId(dbId, videoTitle, url, startTime, duration, mimeType, assignedRaces);
 
     }
     
@@ -261,12 +261,12 @@ public class MediaDBTest extends AbstractMongoDBTest {
         TimePoint startTime = MillisecondsTimePoint.now();
         Duration duration = MillisecondsDurationImpl.ONE_HOUR;
         MimeType mimeType = MimeType.ogv;
-        Set<RegattaAndRaceIdentifier> regattasAndRaces = new HashSet<RegattaAndRaceIdentifier>();
-        regattasAndRaces.add(new RegattaNameAndRaceName("49er", "R1"));
+        Set<RegattaAndRaceIdentifier> assignedRaces = new HashSet<RegattaAndRaceIdentifier>();
+        assignedRaces.add(new RegattaNameAndRaceName("49er", "R1"));
 
 
         for (int i = 0; i < count; i++) {
-            mongoDB.insertMediaTrack(videoTitleTemplate + i, url, startTime, duration, mimeType, regattasAndRaces);
+            mongoDB.insertMediaTrack(videoTitleTemplate + i, url, startTime, duration, mimeType, assignedRaces);
         }
     }
 
@@ -279,9 +279,9 @@ public class MediaDBTest extends AbstractMongoDBTest {
         TimePoint startTime = MillisecondsTimePoint.now();
         Duration duration = MillisecondsDurationImpl.ONE_HOUR;
         MimeType mimeType = MimeType.ogv;
-        Set<RegattaAndRaceIdentifier> regattasAndRaces = new HashSet<RegattaAndRaceIdentifier>();
-        regattasAndRaces.add(new RegattaNameAndRaceName("49er", "R1"));
-        String dbId = mongoDB.insertMediaTrack(videoTitle, url, startTime, duration, mimeType, regattasAndRaces);
+        Set<RegattaAndRaceIdentifier> assignedRaces = new HashSet<RegattaAndRaceIdentifier>();
+        assignedRaces.add(new RegattaNameAndRaceName("49er", "R1"));
+        String dbId = mongoDB.insertMediaTrack(videoTitle, url, startTime, duration, mimeType, assignedRaces);
         
         //delete
         mongoDB.deleteMediaTrack(dbId);
@@ -299,9 +299,9 @@ public class MediaDBTest extends AbstractMongoDBTest {
         TimePoint originalDate = MillisecondsTimePoint.now();
         Duration duration = MillisecondsDurationImpl.ONE_HOUR;
         MimeType mimeType = MimeType.ogv;
-        Set<RegattaAndRaceIdentifier> regattasAndRaces = new HashSet<RegattaAndRaceIdentifier>();
-        regattasAndRaces.add(new RegattaNameAndRaceName("49er", "R1"));
-        String dbId = mongoDB.insertMediaTrack(videoTitle, url, originalDate, duration, mimeType, regattasAndRaces);
+        Set<RegattaAndRaceIdentifier> assignedRaces = new HashSet<RegattaAndRaceIdentifier>();
+        assignedRaces.add(new RegattaNameAndRaceName("49er", "R1"));
+        String dbId = mongoDB.insertMediaTrack(videoTitle, url, originalDate, duration, mimeType, assignedRaces);
 
         
         //update with new date
@@ -315,7 +315,7 @@ public class MediaDBTest extends AbstractMongoDBTest {
         assertThat(videoTrack.title, is(videoTitle));
         assertThat(videoTrack.url, is(url));
         assertThat(videoTrack.mimeType, is(mimeType));
-        assertThat(videoTrack.assignedRaces, is(regattasAndRaces));
+        assertThat(videoTrack.assignedRaces, is(assignedRaces));
     }
     
 }

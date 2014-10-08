@@ -1606,14 +1606,14 @@ public class MasterDataImportTest {
             ClassNotFoundException {
         // Setup source service
         RacingEventService sourceService = new RacingEventServiceImpl();
-        Set<RegattaAndRaceIdentifier> regattasAndRaces = new HashSet<RegattaAndRaceIdentifier>();
-        regattasAndRaces.add(new RegattaNameAndRaceName("49er", "R1"));
-        regattasAndRaces.add(new RegattaNameAndRaceName("49er", "R2"));
-        regattasAndRaces.add(new RegattaNameAndRaceName("48er", "F1"));
-        regattasAndRaces.add(new RegattaNameAndRaceName("48er", "F2"));
-        regattasAndRaces.add(new RegattaNameAndRaceName("48er", "F3"));
+        Set<RegattaAndRaceIdentifier> assignedRaces = new HashSet<RegattaAndRaceIdentifier>();
+        assignedRaces.add(new RegattaNameAndRaceName("49er", "R1"));
+        assignedRaces.add(new RegattaNameAndRaceName("49er", "R2"));
+        assignedRaces.add(new RegattaNameAndRaceName("48er", "F1"));
+        assignedRaces.add(new RegattaNameAndRaceName("48er", "F2"));
+        assignedRaces.add(new RegattaNameAndRaceName("48er", "F3"));
         MediaTrack trackOnSource = new MediaTrack("testTitle", "http://test/test.mp4", new MillisecondsTimePoint(0), MillisecondsDurationImpl.ONE_HOUR,
-                MediaTrack.MimeType.mp4, regattasAndRaces);
+                MediaTrack.MimeType.mp4, assignedRaces);
         sourceService.mediaTrackAdded(trackOnSource);
 
         // Serialize

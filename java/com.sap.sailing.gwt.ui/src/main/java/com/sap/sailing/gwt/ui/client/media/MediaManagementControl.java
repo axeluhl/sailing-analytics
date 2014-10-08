@@ -28,20 +28,21 @@ import com.google.gwt.user.client.ui.UIObject;
 import com.google.gwt.user.client.ui.VerticalPanel;
 import com.google.gwt.user.client.ui.Widget;
 import com.sap.sailing.domain.common.media.MediaTrack;
+import com.sap.sailing.gwt.ui.client.StringMessages;
 import com.sap.sse.gwt.client.useragent.UserAgentDetails.AgentTypes;
 
-public class MediaMultiSelectionControl extends AbstractMediaSelectionControl implements CloseHandler<PopupPanel> {
+public class MediaManagementControl extends AbstractMediaSelectionControl implements CloseHandler<PopupPanel> {
 
     private final DialogBox dialogControl;
     private final Map<MediaTrack, CheckBox> videoCheckBoxes = new HashMap<MediaTrack, CheckBox>();
     private final UIObject popupLocation;
 
-    public MediaMultiSelectionControl(MediaPlayerManager mediaPlayerManager, UIObject popupLocation) {
-        super(mediaPlayerManager);
+    public MediaManagementControl(MediaPlayerManager mediaPlayerManager, UIObject popupLocation, StringMessages stringMessages) {
+        super(mediaPlayerManager, stringMessages);
         this.popupLocation = popupLocation;
 
         this.dialogControl = new DialogBox(true, false);
-        this.dialogControl.setText("Select Playback Media");
+        this.dialogControl.setText("Manage Playback Media");
         this.dialogControl.addCloseHandler(this);
 
     }
@@ -174,19 +175,16 @@ public class MediaMultiSelectionControl extends AbstractMediaSelectionControl im
     private ToggleButton createConnectButton(final MediaTrack videoTrack) {
         final ToggleButton connectButton = new ToggleButton();
         connectButton.setValue(videoTrack.assignedRaces
-                .contains(((MediaPlayerManagerComponent) mediaPlayerManager).getRaceIdentifier()));
+                .contains(mediaPlayerManager.getCurrentRace()));
         connectButton.setTitle("Connect video to this race");
         connectButton.addValueChangeHandler(new ValueChangeHandler<Boolean>() {
 
             @Override
             public void onValueChange(ValueChangeEvent<Boolean> changeEvent) {
                 if (connectButton.isDown()) {
-                    connectVideoToRace(videoTrack);
-                    setEnableOfVideoTrack(connectButton, true);
+                    connectVideoToRace(videoTrack, connectButton);
                 } else {
-                    disconnectVideoFromRace(videoTrack);
-                    setEnableOfVideoTrack(connectButton, false);
-                    mediaPlayerManager.closeFloatingVideo(videoTrack);
+                    disconnectVideoFromRace(videoTrack, connectButton);
                 }
             }
         });
@@ -205,31 +203,36 @@ public class MediaMultiSelectionControl extends AbstractMediaSelectionControl im
         }
     }
     
-    private void disconnectVideoFromRace(final MediaTrack videoTrack) {
-        videoTrack.assignedRaces.remove(((MediaPlayerManagerComponent)mediaPlayerManager).getRaceIdentifier());
-        ((MediaPlayerManagerComponent)mediaPlayerManager).getMediaService().updateRace(videoTrack, new AsyncCallback<Void>() {
+    private void disconnectVideoFromRace(final MediaTrack videoTrack, final ToggleButton connectButton) {
+        videoTrack.assignedRaces.remove(mediaPlayerManager.getCurrentRace());
+        mediaPlayerManager.getMediaService().updateRace(videoTrack, new AsyncCallback<Void>() {
 
             @Override
             public void onFailure(Throwable t) {
+                mediaPlayerManager.getErrorReporter().reportError(t.toString());
             }
 
             @Override
             public void onSuccess(Void allMediaTracks) {
+                setEnableOfVideoTrack(connectButton, false);
+                mediaPlayerManager.closeFloatingVideo(videoTrack);
             }
         });
         
     }
 
-    private void connectVideoToRace(final MediaTrack videoTrack) {
-        videoTrack.assignedRaces.add(((MediaPlayerManagerComponent)mediaPlayerManager).getRaceIdentifier());
-        ((MediaPlayerManagerComponent)mediaPlayerManager).getMediaService().updateRace(videoTrack, new AsyncCallback<Void>() {
+    private void connectVideoToRace(final MediaTrack videoTrack, final ToggleButton connectButton) {
+        videoTrack.assignedRaces.add(mediaPlayerManager.getCurrentRace());
+        mediaPlayerManager.getMediaService().updateRace(videoTrack, new AsyncCallback<Void>() {
 
             @Override
             public void onFailure(Throwable t) {
+                mediaPlayerManager.getErrorReporter().reportError(t.toString());
             }
 
             @Override
             public void onSuccess(Void allMediaTracks) {
+                setEnableOfVideoTrack(connectButton, true);
             }
         });
     }
@@ -323,9 +326,6 @@ public class MediaMultiSelectionControl extends AbstractMediaSelectionControl im
 
     @Override
     protected void updateUi() {
-        if (mediaPlayerManager.hasLoadedAllMediaTracks()) {
-
-        }
     }
 
 }
