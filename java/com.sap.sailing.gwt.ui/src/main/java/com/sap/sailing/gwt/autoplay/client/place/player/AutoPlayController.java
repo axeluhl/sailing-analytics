@@ -181,7 +181,7 @@ public class AutoPlayController implements RaceTimesInfoProviderListener {
                 } else {
                     try {
                         Double zoom = Double.valueOf(leaderboardZoom);
-                        scaleContentWidget(SAP_HEADER_HEIGHT, currentContentWidget, zoom);
+                        zoomContentWidget(SAP_HEADER_HEIGHT, currentContentWidget, zoom);
                     } catch (NumberFormatException e) {
                         // do nothing
                     }
@@ -196,13 +196,13 @@ public class AutoPlayController implements RaceTimesInfoProviderListener {
         }
     }
 
-    private void autoZoomContentWidget(int headerHeight, final Widget contentWidget) {
+    private void zoomContentWidget(final int headerHeight, final Widget contentWidget, final double scaleFactor) {
         if(contentWidget != null) {
             Scheduler.get().scheduleFixedPeriod(new RepeatingCommand() {
                 public boolean execute () {
                     boolean invokeAgain = true;
-                    if(currentContentWidget.getOffsetHeight() > 100) {
-                        scaleContentWidget(SAP_HEADER_HEIGHT, contentWidget);
+                    if(currentContentWidget.getOffsetHeight() > 50) {
+                        scaleContentWidget(headerHeight, contentWidget, scaleFactor);
                         invokeAgain = false;
                     }
                     return invokeAgain;
@@ -211,10 +211,18 @@ public class AutoPlayController implements RaceTimesInfoProviderListener {
         }
     }
 
-    private void scaleContentWidget(int headerHeight, Widget contentWidget, double scaleFactor, double diffX) {
-        if(scaleFactor > 0.0) {
-            CSS3Util.setProperty(contentWidget.getElement().getStyle(), "transform", "translateX(" + diffX / 2.0 + "px) scale(" + scaleFactor + ")");
-            CSS3Util.setProperty(contentWidget.getElement().getStyle(), "transformOrigin", "0 0");
+    private void autoZoomContentWidget(final int headerHeight, final Widget contentWidget) {
+        if(contentWidget != null) {
+            Scheduler.get().scheduleFixedPeriod(new RepeatingCommand() {
+                public boolean execute () {
+                    boolean invokeAgain = true;
+                    if(currentContentWidget.getOffsetHeight() > 50) {
+                        scaleContentWidget(headerHeight, contentWidget);
+                        invokeAgain = false;
+                    }
+                    return invokeAgain;
+                }
+              }, 1000);
         }
     }
 
@@ -245,7 +253,14 @@ public class AutoPlayController implements RaceTimesInfoProviderListener {
 
         scaleContentWidget(headerHeight, contentWidget, scaleFactor, diffX);
     }
-     
+
+    private void scaleContentWidget(int headerHeight, Widget contentWidget, double scaleFactor, double diffX) {
+        if(scaleFactor > 0.0) {
+            CSS3Util.setProperty(contentWidget.getElement().getStyle(), "transform", "translateX(" + diffX / 2.0 + "px) scale(" + scaleFactor + ")");
+            CSS3Util.setProperty(contentWidget.getElement().getStyle(), "transformOrigin", "0 0");
+        }
+    }
+
     private void showRaceBoard() {
         if (activeTvView != AutoPlayModes.Raceboard) {
             playerView.clearDockPanel();

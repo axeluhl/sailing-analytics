@@ -19,6 +19,7 @@ import com.google.gwt.user.client.ui.ListBox;
 import com.google.gwt.user.client.ui.TextBox;
 import com.google.gwt.user.client.ui.Widget;
 import com.sap.sailing.gwt.autoplay.client.app.PlaceNavigator;
+import com.sap.sailing.gwt.autoplay.client.shared.header.SAPHeader;
 import com.sap.sailing.gwt.common.client.SharedResources;
 import com.sap.sailing.gwt.ui.shared.EventDTO;
 import com.sap.sailing.gwt.ui.shared.LeaderboardGroupDTO;
@@ -30,6 +31,7 @@ public class DesktopStartView extends Composite implements StartView {
     interface StartPageViewUiBinder extends UiBinder<Widget, DesktopStartView> {
     }
 
+    @UiField(provided=true) SAPHeader sapHeader;
     @UiField(provided=true) ListBox eventSelectionBox;
     @UiField(provided=true) ListBox leaderboardSelectionBox;
     @UiField CheckBox leaderboardAutoZoomBox;
@@ -47,6 +49,7 @@ public class DesktopStartView extends Composite implements StartView {
         this.navigator = navigator;
         this.events = new ArrayList<EventDTO>();
         
+        sapHeader = new SAPHeader("Auto player configuration");
         eventSelectionBox = new ListBox(false);
         leaderboardSelectionBox = new ListBox(false);
         
@@ -56,6 +59,9 @@ public class DesktopStartView extends Composite implements StartView {
         leaderboardZoomBox.setEnabled(false);
 
         leaderboardSelectionDiv.getStyle().setVisibility(Visibility.HIDDEN);
+        leaderboardZoomDiv.getStyle().setVisibility(Visibility.HIDDEN);
+        leaderboardAutoZoomDiv.getStyle().setVisibility(Visibility.HIDDEN);
+        
         startAutoPlayButton.setEnabled(false);
         startAutoPlayButton.addStyleName(SharedResources.INSTANCE.mainCss().buttoninactive());
     }
@@ -96,6 +102,8 @@ public class DesktopStartView extends Composite implements StartView {
             startAutoPlayButton.setEnabled(false);
             startAutoPlayButton.addStyleName(SharedResources.INSTANCE.mainCss().buttoninactive());
         }
+        leaderboardZoomDiv.getStyle().setVisibility(selectedLeaderboardName != null ? Visibility.VISIBLE : Visibility.HIDDEN);
+        leaderboardAutoZoomDiv.getStyle().setVisibility(selectedLeaderboardName != null ? Visibility.VISIBLE : Visibility.HIDDEN);
     }
     
     @UiHandler("startAutoPlayButton")
