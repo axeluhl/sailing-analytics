@@ -66,8 +66,8 @@ public class SecurityServiceImpl extends RemoteServiceServlet implements Securit
     private static final Logger logger = Logger.getLogger(SecurityServiceImpl.class.getName());
 
     private SecurityManager securityManager;
-    private CacheManager cacheManager = new EhCacheManager();
-    private UserStore store;
+    private final CacheManager cacheManager = new EhCacheManager();
+    private final UserStore store;
     private static Ini shiroConfiguration;
     static {
         shiroConfiguration = new Ini();

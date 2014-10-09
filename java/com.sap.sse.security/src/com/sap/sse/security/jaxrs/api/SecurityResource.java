@@ -1,5 +1,7 @@
 package com.sap.sse.security.jaxrs.api;
 
+import java.util.logging.Logger;
+
 import javax.ws.rs.FormParam;
 import javax.ws.rs.GET;
 import javax.ws.rs.POST;
@@ -14,25 +16,12 @@ import com.sap.sse.security.userstore.shared.UserManagementException;
 
 @Path("/restsecurity")
 public class SecurityResource extends AbstractSecurityResource {
-
+    private static final Logger logger = Logger.getLogger(SecurityResource.class.getName());
+    
     private Response getSecurityErrorResponse(String msg) {
         return  Response.status(Status.BAD_REQUEST).entity(msg).type(MediaType.TEXT_PLAIN).build();
     }
 
-//    @GET
-//    @Produces("application/json;charset=UTF-8")
-//    public Response getEvents() {
-//        JsonSerializer<EventBase> eventSerializer = new EventBaseJsonSerializer(new VenueJsonSerializer(new CourseAreaJsonSerializer()), new LeaderboardGroupBaseJsonSerializer());
-//        JSONArray result = new JSONArray();
-//        for (EventBase event : getService().getAllEvents()) {
-//            if (event.isPublic()) {
-//                result.add(eventSerializer.serialize(event));
-//            }
-//        }
-//        String json = result.toJSONString();
-//        return Response.ok(json, MediaType.APPLICATION_JSON).build();
-//    }
-    
     @GET
     @Produces("application/json;charset=UTF-8")
     public Response sayHello(){
@@ -43,10 +32,11 @@ public class SecurityResource extends AbstractSecurityResource {
     @Path("/login")
     @Produces("application/json;charset=UTF-8")
     public Response login(@FormParam("username") String username, @FormParam("password") String password){
-        System.out.println("Logging in " + username + " with pw: " + password);
         try {
             getService().login(username, password);
+            logger.info("Successfully logged in " + username + " with password");
         } catch (UserManagementException e) {
+            logger.info("Logging in " + username + " with password failed: "+e.getMessage());
             return getSecurityErrorResponse(e.getMessage());
         }
         return Response.ok("Logged in!", MediaType.TEXT_PLAIN).build();

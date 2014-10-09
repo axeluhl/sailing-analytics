@@ -5,12 +5,10 @@ import java.util.Set;
 
 import javax.ws.rs.core.Application;
 
-
 public class RestApiApplication extends Application {
     public Set<Class<?>> getClasses() {
         HashSet<Class<?>> classes = new HashSet<>();
-         classes.add(SecurityResource.class);
-        
+        classes.add(SecurityResource.class);
         return classes;
     }
 }

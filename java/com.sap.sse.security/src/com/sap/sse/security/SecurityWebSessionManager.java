@@ -23,8 +23,6 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 public class SecurityWebSessionManager extends DefaultWebSessionManager {
-
-    
     private static final Logger log = LoggerFactory.getLogger(SecurityWebSessionManager.class);
 
     private Cookie sessionIdCookie;
