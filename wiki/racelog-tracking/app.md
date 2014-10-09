@@ -1,7 +1,9 @@
 # RaceLog Tracking App Architecture
 
 # Development Info
-Development is currently underway on 
+Development is currently underway on the following branches:
+* ``ftes-rltracking-app``
+* ``jbross-rltracking-app``
 
 # Project and Build structure
 ## Projects
