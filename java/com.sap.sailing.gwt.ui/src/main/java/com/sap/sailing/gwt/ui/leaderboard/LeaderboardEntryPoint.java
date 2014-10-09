@@ -32,6 +32,7 @@ import com.sap.sailing.gwt.ui.client.SailingServiceAsync;
 import com.sap.sailing.gwt.ui.client.StringMessages;
 import com.sap.sailing.gwt.ui.leaderboard.LeaderboardSettings.RaceColumnSelectionStrategies;
 import com.sap.sailing.gwt.ui.shared.EventDTO;
+import com.sap.sailing.gwt.ui.shared.SecurityStylesheetResources;
 import com.sap.sse.common.Util;
 import com.sap.sse.gwt.client.EntryPointHelper;
 import com.sap.sse.gwt.client.async.AsyncActionsExecutor;
@@ -87,7 +88,7 @@ public class LeaderboardEntryPoint extends AbstractEntryPoint {
                                             } else {
                                                 RootPanel.get().add(new Label(stringMessages.noSuchLeaderboard()));
                                             }
-                            RootPanel.get().add(new LoginPanel());
+                                            RootPanel.get().add(new LoginPanel(SecurityStylesheetResources.INSTANCE.css()));
                                         }
 
                                         @Override

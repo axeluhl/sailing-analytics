@@ -69,17 +69,16 @@ public class LoginPanel extends FlowPanel implements UserStatusEventHandler {
 
     private final int id;
 
-    public LoginPanel() {
+    public LoginPanel(final Css css) {
         id = counter++;
-        StylesheetResources.INSTANCE.css().ensureInjected();
-
+        css.ensureInjected();
         wrapperPanel = new FlowPanel();
-        wrapperPanel.addStyleName(StylesheetResources.INSTANCE.css().loginPanel());
-        wrapperPanel.addStyleName(StylesheetResources.INSTANCE.css().loginPanelCollapsed());
+        wrapperPanel.addStyleName(css.loginPanel());
+        wrapperPanel.addStyleName(css.loginPanelCollapsed());
         FocusPanel titleFocus = new FocusPanel();
         FlowPanel titlePanel = new FlowPanel();
         titleFocus.setWidget(titlePanel);
-        titlePanel.addStyleName(StylesheetResources.INSTANCE.css().loginPanelTitlePanel());
+        titlePanel.addStyleName(css.loginPanelTitlePanel());
         loginTitle = new Label("");
         loginLink = new Anchor("Login");
         final ImageResource userImageResource = UserManagementImageResources.INSTANCE.userIcon();
@@ -89,14 +88,13 @@ public class LoginPanel extends FlowPanel implements UserStatusEventHandler {
         titlePanel.add(loginLink);
         wrapperPanel.add(titleFocus);
         titleFocus.addClickHandler(new ClickHandler() {
-
             @Override
             public void onClick(ClickEvent event) {
                 toggleLoginPanel();
             }
         });
         infoPanel = new SimplePanel();
-        infoPanel.addStyleName(StylesheetResources.INSTANCE.css().loginPanelInfoPanel());
+        infoPanel.addStyleName(css.loginPanelInfoPanel());
         initLoginContent();
         initUserContent();
         infoPanel.setWidget(loginPanel);
@@ -266,7 +264,6 @@ public class LoginPanel extends FlowPanel implements UserStatusEventHandler {
     public static void registerStorageListener() {
         if (localStorage != null) {
             Storage.addStorageEventHandler(new StorageEvent.Handler() {
-
                 @Override
                 public void onStorageChange(StorageEvent event) {
                     if ("update".equals(event.getKey()) && "true".equals(event.getNewValue())) {

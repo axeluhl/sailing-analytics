@@ -33,11 +33,11 @@ import com.sap.sailing.gwt.ui.client.RemoteServiceMappingConstants;
 import com.sap.sailing.gwt.ui.client.SailingService;
 import com.sap.sailing.gwt.ui.client.SailingServiceAsync;
 import com.sap.sailing.gwt.ui.client.shared.panels.SystemInformationPanel;
-import com.sap.sailing.gwt.ui.client.shared.panels.UserStatusPanel;
 import com.sap.sailing.gwt.ui.masterdataimport.MasterDataImportPanel;
 import com.sap.sailing.gwt.ui.shared.BetterDateTimeBox;
 import com.sap.sailing.gwt.ui.shared.LeaderboardGroupDTO;
 import com.sap.sailing.gwt.ui.shared.RegattaDTO;
+import com.sap.sailing.gwt.ui.shared.SecurityStylesheetResources;
 import com.sap.sailing.gwt.ui.shared.StrippedLeaderboardDTO;
 import com.sap.sailing.gwt.ui.usermanagement.UserRoles;
 import com.sap.sse.gwt.client.EntryPointHelper;
@@ -58,10 +58,8 @@ public class AdminConsoleEntryPoint extends AbstractEntryPoint implements Regatt
     @Override
     protected void doOnModuleLoad() {
         super.doOnModuleLoad();
-        
         EntryPointHelper.registerASyncService((ServiceDefTarget) sailingService, RemoteServiceMappingConstants.sailingServiceRemotePath);
         EntryPointHelper.registerASyncService((ServiceDefTarget) mediaService, RemoteServiceMappingConstants.mediaServiceRemotePath);
-
         createUI();
     }
      
@@ -232,9 +230,7 @@ public class AdminConsoleEntryPoint extends AbstractEntryPoint implements Regatt
         DockPanel informationPanel = new DockPanel();
         informationPanel.setSize("100%", "95%");
         informationPanel.setSpacing(10);
-        UserStatusPanel userStatusPanel = new UserStatusPanel();
-        userStatusPanel.ensureDebugId("UserStatus");
-        informationPanel.add(userStatusPanel, DockPanel.WEST);
+        informationPanel.add(new LoginPanel(SecurityStylesheetResources.INSTANCE.css()), DockPanel.WEST);
         informationPanel.add(persistentAlertLabel, DockPanel.CENTER);
 
         SystemInformationPanel sysinfoPanel = new SystemInformationPanel(sailingService, this);
@@ -251,7 +247,6 @@ public class AdminConsoleEntryPoint extends AbstractEntryPoint implements Regatt
         dockPanel.addSouth(informationPanel, 2.5);
         dockPanel.add(tabPanel);
         rootPanel.add(dockPanel);
-        rootPanel.add(new LoginPanel());
     }
     
     private void refreshDataFor(Widget widget) {

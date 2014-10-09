@@ -39,6 +39,7 @@ import com.sap.sse.security.ui.client.component.UserList;
 import com.sap.sse.security.ui.client.component.UserListDataProvider;
 import com.sap.sse.security.ui.loginpanel.EntryPointLinkFactory;
 import com.sap.sse.security.ui.loginpanel.LoginPanel;
+import com.sap.sse.security.ui.loginpanel.StylesheetResources;
 import com.sap.sse.security.ui.shared.SuccessInfo;
 import com.sap.sse.security.ui.shared.UserDTO;
 import com.sap.sse.security.ui.shared.UserManagementService;
@@ -171,7 +172,7 @@ public class UserManagementEntryPoint implements EntryPoint {
             }
         });
         center.setWidget(createUserPanel);
-        RootPanel.get().add(new LoginPanel());
+        RootPanel.get().add(new LoginPanel(StylesheetResources.INSTANCE.css()));
     }
     
     protected void registerASyncService(ServiceDefTarget serviceToRegister, String servicePath) {
