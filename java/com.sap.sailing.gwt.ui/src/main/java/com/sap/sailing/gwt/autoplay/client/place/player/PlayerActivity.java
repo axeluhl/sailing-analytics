@@ -64,6 +64,8 @@ public class PlayerActivity extends AbstractActivity implements ErrorReporter {
                 RaceBoardViewConfiguration.PARAM_VIEW_SHOW_WINDCHART, false /* default */);
         final boolean showViewStreamlets = GwtHttpRequestUtils.getBooleanParameter(
                 RaceBoardViewConfiguration.PARAM_VIEW_SHOW_STREAMLETS, false /* default */);
+        final boolean showViewSimulation = GwtHttpRequestUtils.getBooleanParameter(
+                RaceBoardViewConfiguration.PARAM_VIEW_SHOW_SIMULATION, false /* default */);
         final boolean showCompetitorsChart = GwtHttpRequestUtils.getBooleanParameter(
                 RaceBoardViewConfiguration.PARAM_VIEW_SHOW_COMPETITORSCHART, false /* default */);
         String activeCompetitorsFilterSetName = GwtHttpRequestUtils.getStringParameter(RaceBoardViewConfiguration.PARAM_VIEW_COMPETITOR_FILTER, null /* default*/);
@@ -71,7 +73,7 @@ public class PlayerActivity extends AbstractActivity implements ErrorReporter {
         final boolean autoSelectMedia = GwtHttpRequestUtils.getBooleanParameter(RaceBoardViewConfiguration.PARAM_AUTOSELECT_MEDIA, false);
         
         return new RaceBoardViewConfiguration(activeCompetitorsFilterSetName, showLeaderboard,
-                showWindChart, showCompetitorsChart, showViewStreamlets, /* canReplayWhileLiveIsPossible */false, autoSelectMedia, defaultMedia);
+                showWindChart, showCompetitorsChart, showViewStreamlets, showViewSimulation, /* canReplayWhileLiveIsPossible */false, autoSelectMedia, defaultMedia);
     }
 
     private void createErrorView(String errorMessage, Throwable errorReason, AcceptsOneWidget panel) {
