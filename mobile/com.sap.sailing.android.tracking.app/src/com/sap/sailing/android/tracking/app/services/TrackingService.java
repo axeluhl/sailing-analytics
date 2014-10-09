@@ -23,7 +23,7 @@ import com.sap.sailing.android.shared.services.sending.MessageSendingService;
 import com.sap.sailing.android.shared.util.PrefUtils;
 import com.sap.sailing.android.tracking.app.R;
 import com.sap.sailing.android.tracking.app.nmea.NmeaGprmcBuilder;
-import com.sap.sailing.android.tracking.app.ui.activities.LaunchActivity;
+import com.sap.sailing.android.tracking.app.ui.activities.StopTrackingActivity;
 
 public class TrackingService extends Service implements ConnectionCallbacks, OnConnectionFailedListener,
         LocationListener {
@@ -123,7 +123,7 @@ public class TrackingService extends Service implements ConnectionCallbacks, OnC
     private void showNotification() {
         CharSequence text = getText(R.string.tracker_started);
         Notification notification = new Notification(R.drawable.icon, text, System.currentTimeMillis());
-        Intent i = new Intent(this, LaunchActivity.class);
+        Intent i = new Intent(this, StopTrackingActivity.class);
         i.setFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP | Intent.FLAG_ACTIVITY_SINGLE_TOP);
         PendingIntent pi = PendingIntent.getActivity(this, 0, i, 0);
         notification.setLatestEventInfo(this, getText(R.string.app_name), text, pi);

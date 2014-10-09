@@ -30,9 +30,17 @@
             android:launchMode="standard" >
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />
-
                 <category android:name="android.intent.category.LAUNCHER" />
             </intent-filter>
+        </activity>
+        
+        <activity android:name="com.sap.sailing.android.tracking.app.ui.activities.StartTrackingActivity" >
+            <intent-filter>
+    			<action android:name="android.intent.action.VIEW"/>
+    			<category android:name="android.intent.category.DEFAULT"/>
+    			<category android:name="android.intent.category.BROWSABLE"/>
+    			<data android:scheme="http" android:host="sapsailing.com" android:path="/apps/com.sap.sailing.tracking.app.apk"/>
+  			</intent-filter>
         </activity>
         <activity android:name="com.sap.sailing.android.tracking.app.ui.activities.SystemInformationActivity" >
         </activity>

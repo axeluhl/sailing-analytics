@@ -1,94 +1,75 @@
 package com.sap.sailing.android.tracking.app.ui.activities;
 
-import android.app.Dialog;
+import java.net.URL;
+
+import android.app.Activity;
 import android.content.Intent;
+import android.net.Uri;
 import android.os.Bundle;
-import android.support.v4.app.DialogFragment;
 import android.view.View;
 import android.view.View.OnClickListener;
 import android.widget.Button;
+import android.widget.Toast;
 
-import com.google.android.gms.common.ConnectionResult;
-import com.google.android.gms.common.GooglePlayServicesUtil;
-import com.sap.sailing.android.shared.logging.ExLog;
 import com.sap.sailing.android.tracking.app.R;
-import com.sap.sailing.android.tracking.app.services.TrackingService;
 
 public class LaunchActivity extends BaseActivity {
-    private static final String TAG = LaunchActivity.class.getName();
-    private Button startTracking;
-    private Button nextActivity;
-
+    
+    private static int requestCodeQRCode = 42471;
+    
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.launch_activity);
 
-        startTracking = (Button) findViewById(R.id.btnStartTracking);
-        startTracking.setOnClickListener(new OnClickListener() {
+        Button scanBarcode = (Button) findViewById(R.id.btnScanBarcode);
+        scanBarcode.setOnClickListener(new OnClickListener() {
             @Override
             public void onClick(View v) {
-                if (!googlePLayServicesAvailable()) {
-                    return;
-                }
-                
-                Intent startTracking = new Intent(LaunchActivity.this, TrackingService.class);
-                getBaseContext().startService(startTracking);
-            }
-        });
-
-        nextActivity = (Button) findViewById(R.id.btnNextActivity);
-        nextActivity.setOnClickListener(new OnClickListener() {
-            @Override
-            public void onClick(View v) {
-                Intent intent = new Intent(LaunchActivity.this, StopTrackingActivity.class);
-                fadeActivity(intent);
+                requestQRCodeScan();
             }
         });
     }
-
-    private boolean googlePLayServicesAvailable() {
-        int resultCode = GooglePlayServicesUtil.isGooglePlayServicesAvailable(this);
-
-        if (ConnectionResult.SUCCESS == resultCode) {
-            ExLog.i(this, TAG, getString(R.string.play_services_available));
+    
+    protected boolean requestQRCodeScan() {
+        try {
+            Intent intent = new Intent("com.google.zxing.client.android.SCAN");
+            intent.putExtra("SCAN_MODE", "QR_CODE_MODE");
+            startActivityForResult(intent, requestCodeQRCode);
             return true;
-        } else {
-            // Display an error dialog
-            Dialog dialog = GooglePlayServicesUtil.getErrorDialog(resultCode, this, 0);
-            if (dialog != null) {
-                ErrorDialogFragment errorFragment = new ErrorDialogFragment();
-                errorFragment.setDialog(dialog);
-                errorFragment.show(getSupportFragmentManager(), TAG);
+        } catch (Exception e) {    
+            Uri marketUri = Uri.parse("market://details?id=com.google.zxing.client.android");
+            Intent marketIntent = new Intent(Intent.ACTION_VIEW,marketUri);
+            startActivity(marketIntent);
+        }
+        return false;
+    }
+    
+    @Override
+    public void onActivityResult(int requestCode, int resultCode, Intent data) {
+        if (requestCode != requestCodeQRCode) {
+            super.onActivityResult(requestCode, resultCode, data);
+            return;
+        }
+        
+        if (resultCode == Activity.RESULT_OK) {
+            String content = data.getStringExtra("SCAN_RESULT");
+            try {
+                //Just Toast URL for now, TODO: parse URL parameters (race, regatta, ...)
+                Toast.makeText(this, content, Toast.LENGTH_LONG).show();
+            } catch (IllegalArgumentException e) {
+                Toast.makeText(this, "Error scanning QRCode (" + e.getMessage() + ")", Toast.LENGTH_LONG).show();
             }
-            return false;
+        } else {
+            Toast.makeText(this, "Error scanning QRCode (" + resultCode + ")", Toast.LENGTH_LONG).show();
         }
     }
-
-    public static class ErrorDialogFragment extends DialogFragment {
-        private Dialog dialog;
-
-        public ErrorDialogFragment() {
-            super();
-            dialog = null;
-        }
-
-        /**
-         * Set the dialog to display
-         *
-         * @param dialog
-         *            An error dialog
-         */
-        public void setDialog(Dialog dialog) {
-            this.dialog = dialog;
-        }
-
-        /*
-         * This method must return a Dialog to the DialogFragment.
-         */
-        @Override
-        public Dialog onCreateDialog(Bundle savedInstanceState) {
-            return dialog;
-        }
+    
+    //FIXME: currently duplicate code with racecommitte app (GeneralPreferenceFragment), refactor once maven build is available and thus update mechanism can be created for tracking app see bugs 2398 2399
+    protected String getServerUrl(URL apkUrl) {
+        String protocol = apkUrl.getProtocol();
+        String host = apkUrl.getHost();
+        String port = apkUrl.getPort() == -1 ? "" : ":" + apkUrl.getPort();
+        return protocol + "://" + host + port;
     }
 }
