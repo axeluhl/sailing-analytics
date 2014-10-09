@@ -1051,6 +1051,8 @@ public interface StringMessages extends Messages {
     String showPingMarkMappings();
     String errorFetchingWindStreamletData(String message);
     String showWindStreamletOverlay();
+    String showSimulationOverlay();
+    String simulationLegendTooltip();
     String regattaNameMustNotContainSlashes();
     String showNumberOfRacesScored();
     String racesScored();
@@ -1082,10 +1084,14 @@ public interface StringMessages extends Messages {
     String raceIsInLiveTimePanelMode();
     String backToLiveTimePanelMode();
     String windChart();
-    String showVideoPopup();
-    String hideVideoPopup();
-    String manageMedia();
-    String manageMediaTooltip();
+    String mediaShowVideoCaption();
+    String mediaShowVideoTooltip(String title);
+    String mediaHideVideoCaption();
+    String mediaHideVideoTooltip();
+    String mediaSelectVideoCaption(int mediaCount);
+    String mediaSelectVideoTooltip();
+    String mediaManageMediaCaption();
+    String mediaManageMediaTooltip();
     String showAll();
     String raceVisibilityColumn();
     String enterCarryValueFor(String competitorName);
