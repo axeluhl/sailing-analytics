@@ -3,7 +3,7 @@
   font-size: 1rem;
   background: #333;
   border-bottom: 5px solid #f0ab00;
-  min-height: 4.33em;
+  height: 70px;
   line-height: 4em;
   width: 100%;
   overflow: hidden;
@@ -35,6 +35,7 @@
 .logotitle {
   display: inline;
   color: #f6f9fc;
+  font-weight: bold;
 }
 .pagetitle {
   color: #ffffff;

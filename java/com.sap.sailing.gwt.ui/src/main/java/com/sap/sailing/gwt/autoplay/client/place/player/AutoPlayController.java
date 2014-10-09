@@ -72,8 +72,10 @@ public class AutoPlayController implements RaceTimesInfoProviderListener {
     private boolean showWindChart;
     private final RaceBoardViewConfiguration raceboardViewConfig;
     private final PlayerView playerView;
-    private final int SAP_HEADER_HEIGHT = 80;
     private Widget currentContentWidget;
+
+    private static int SAP_HEADER_HEIGHT = 70;
+    private static double MIN_SCALE_FACTOR = 0.8;
     
     public AutoPlayController(SailingServiceAsync sailingService, MediaServiceAsync mediaService, 
             ErrorReporter errorReporter, String leaderboardGroupName, String leaderboardName, final String leaderboardZoom, UserAgentDetails userAgent,
@@ -131,8 +133,6 @@ public class AutoPlayController implements RaceTimesInfoProviderListener {
                 updateRaceTimesInfoProvider();
             }
         };
-//        leaderboardPanel.getContentWidget().getElement().getStyle().setProperty("margin", "0 auto");
-//        leaderboardPanel.getContentWidget().getElement().getStyle().setPosition(Position.ABSOLUTE);
         leaderboardPanel.getContentWidget().getElement().getStyle().setFontWeight(FontWeight.BOLD);
         return leaderboardPanel;
     }
@@ -172,6 +172,7 @@ public class AutoPlayController implements RaceTimesInfoProviderListener {
 
             LeaderboardPanel leaderboardPanel = createLeaderboardPanel(leaderboardGroupName, leaderboardName, showRaceDetails);
             OldLeaderboard oldLeaderboard = new OldLeaderboard(leaderboardPanel);
+            leaderboardPanel.addLeaderboardUpdateListener(oldLeaderboard);
             
             currentContentWidget = oldLeaderboard.getContentWidget();
             
@@ -213,8 +214,7 @@ public class AutoPlayController implements RaceTimesInfoProviderListener {
 
     private void scaleContentWidget(int headerHeight, Widget contentWidget, double scaleFactor, double diffX) {
         if(scaleFactor > 0.0) {
-            CSS3Util.setProperty(contentWidget.getElement().getStyle(),
-                    "transform", "translateX(" + diffX / 2.0 + "px) scale(" + scaleFactor + ")");
+            CSS3Util.setProperty(contentWidget.getElement().getStyle(), "transform", "translateX(" + diffX / 2.0 + "px) scale(" + scaleFactor + ")");
             CSS3Util.setProperty(contentWidget.getElement().getStyle(), "transformOrigin", "0 0");
         }
     }
@@ -239,6 +239,9 @@ public class AutoPlayController implements RaceTimesInfoProviderListener {
         double scaleFactorY = clientHeight / (double) contentHeight;
         
         Double scaleFactor = scaleFactorX > scaleFactorY ? scaleFactorY : scaleFactorX;
+        if(scaleFactor < MIN_SCALE_FACTOR) {
+            scaleFactor = MIN_SCALE_FACTOR;
+        }
         double diffX = clientWidth - contentWidth * scaleFactor;
 
         scaleContentWidget(headerHeight, contentWidget, scaleFactor, diffX);

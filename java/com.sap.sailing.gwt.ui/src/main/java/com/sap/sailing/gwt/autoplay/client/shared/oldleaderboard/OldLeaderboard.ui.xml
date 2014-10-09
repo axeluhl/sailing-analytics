@@ -3,26 +3,22 @@
 	xmlns:g="urn:import:com.google.gwt.user.client.ui">
     <ui:with field="i18n" type="com.sap.sailing.gwt.common.client.i18n.TextMessages"/>
 	<ui:with field="res" type="com.sap.sailing.gwt.common.client.SharedResources" />
-    <ui:with field="local_res" type="com.sap.sailing.gwt.home.client.place.event.regattaleaderboard.EventRegattaLeaderboardResources" />
-    <ui:with field="local_res2" type="com.sap.sailing.gwt.autoplay.client.shared.oldleaderboard.OldLeaderboardResources" />
+    <ui:with field="local_res" type="com.sap.sailing.gwt.autoplay.client.shared.oldleaderboard.OldLeaderboardResources" />
 		<g:HTMLPanel>
-		    <g:HTMLPanel ui:field="contentPanel" styleName="{local_res2.css.leaderboardAndTitlePanel}">
-		        <table>
+		    <g:HTMLPanel ui:field="contentPanel" styleName="{local_res.css.leaderboardAndTitlePanel}">
+		        <table class="{local_res.css.leaderboardAndTitleTable}">
 		            <tr>
 		                <td width="50%">
 							<div class="{local_res.css.regattaleaderboard_meta_scoring}">
-								<p ui:field="lastScoringCommentDiv"
-									class="{local_res.css.regattaleaderboard_meta_scoring_comment}"></p>
+								<p ui:field="lastScoringCommentDiv" class="{local_res.css.regattaleaderboard_meta_scoring_comment}"></p>
 								<p ui:field="scoringSchemeDiv" class="{local_res.css.regattaleaderboard_meta_scoring_type}"></p>
 							</div>
 		                </td>
 						<td width="50%">
-							<div class="{local_res.css.regattaleaderboard_meta_settings}">
 								<div class="{local_res.css.regattaleaderboard_meta_update}">
 									<p ui:field="lastScoringUpdateTextDiv" class="{local_res.css.regattaleaderboard_meta_update_text}"></p>
 									<p ui:field="lastScoringUpdateTimeDiv" class="{local_res.css.regattaleaderboard_meta_update_timestamp}"></p>
 								</div>
-							</div>
 						</td>
 					</tr>
 					<tr>

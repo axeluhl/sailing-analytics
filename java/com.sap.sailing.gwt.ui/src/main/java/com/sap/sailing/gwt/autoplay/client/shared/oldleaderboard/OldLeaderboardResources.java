@@ -13,5 +13,13 @@ public interface OldLeaderboardResources extends ClientBundle {
     public interface LocalCss extends CssResource {
         String oldLeaderboardPanel();
         String leaderboardAndTitlePanel();
+        String leaderboardAndTitleTable();
+        String regattaleaderboard_meta_scoring();
+        String regattaleaderboard_meta_scoring_comment();
+        String regattaleaderboard_meta_scoring_type();
+        String regattaleaderboard_meta_update();
+        String regattaleaderboard_meta_update_text();
+        String regattaleaderboard_meta_update_timestamp();
+        
     }
 }

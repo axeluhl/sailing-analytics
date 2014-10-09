@@ -1,10 +1,28 @@
 .oldLeaderboardPanel {
   background-color:#f8f8f8;
-  padding: 10px 10px 10px 10px;
   width: 100%;
   font-weight: bold;
 }
 
 .leaderboardAndTitlePanel {
 	display: inline-block;
+}
+
+.leaderboardAndTitleTable {
+	margin-bottom: 0.75em;
+}
+
+.regattaleaderboard_meta_scoring,
+.regattaleaderboard_meta_update {
+  font-weight: bold;
+  margin-top: 0.5em;
+}
+.regattaleaderboard_meta_scoring_comment,
+.regattaleaderboard_meta_scoring_type,
+.regattaleaderboard_meta_update_timestamp,
+.regattaleaderboard_meta_update_text {
+  margin: 0;
+}
+.regattaleaderboard_meta_update {
+  text-align: right;
 }
