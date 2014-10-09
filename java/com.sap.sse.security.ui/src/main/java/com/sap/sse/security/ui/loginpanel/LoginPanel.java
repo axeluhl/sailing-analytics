@@ -69,7 +69,10 @@ public class LoginPanel extends FlowPanel implements UserStatusEventHandler {
 
     private final int id;
 
+    private final Css css;
+
     public LoginPanel(final Css css) {
+        this.css = css;
         id = counter++;
         css.ensureInjected();
         wrapperPanel = new FlowPanel();
@@ -228,19 +231,19 @@ public class LoginPanel extends FlowPanel implements UserStatusEventHandler {
             loginLink.setText("Login");
         }
         expanded = false;
-        wrapperPanel.addStyleName(StylesheetResources.INSTANCE.css().loginPanelCollapsed());
-        wrapperPanel.removeStyleName(StylesheetResources.INSTANCE.css().loginPanelExpanded());
+        wrapperPanel.addStyleName(css.loginPanelCollapsed());
+        wrapperPanel.removeStyleName(css.loginPanelExpanded());
     }
 
     private void toggleLoginPanel() {
         if (expanded) {
             expanded = false;
-            wrapperPanel.addStyleName(StylesheetResources.INSTANCE.css().loginPanelCollapsed());
-            wrapperPanel.removeStyleName(StylesheetResources.INSTANCE.css().loginPanelExpanded());
+            wrapperPanel.addStyleName(css.loginPanelCollapsed());
+            wrapperPanel.removeStyleName(css.loginPanelExpanded());
         } else {
             expanded = true;
-            wrapperPanel.addStyleName(StylesheetResources.INSTANCE.css().loginPanelExpanded());
-            wrapperPanel.removeStyleName(StylesheetResources.INSTANCE.css().loginPanelCollapsed());
+            wrapperPanel.addStyleName(css.loginPanelExpanded());
+            wrapperPanel.removeStyleName(css.loginPanelCollapsed());
         }
     }
 

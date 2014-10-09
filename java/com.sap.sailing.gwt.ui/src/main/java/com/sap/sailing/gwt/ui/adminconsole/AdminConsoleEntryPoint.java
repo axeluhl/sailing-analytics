@@ -5,7 +5,10 @@ import java.util.List;
 import java.util.Set;
 
 import com.google.gwt.core.client.GWT;
+import com.google.gwt.dom.client.Style.Overflow;
 import com.google.gwt.dom.client.Style.Unit;
+import com.google.gwt.event.logical.shared.AttachEvent;
+import com.google.gwt.event.logical.shared.AttachEvent.Handler;
 import com.google.gwt.event.logical.shared.SelectionEvent;
 import com.google.gwt.event.logical.shared.SelectionHandler;
 import com.google.gwt.safehtml.shared.SafeHtmlBuilder;
@@ -227,7 +230,15 @@ public class AdminConsoleEntryPoint extends AbstractEntryPoint implements Regatt
         fillLeaderboardGroups();
         fillLeaderboards();
 
-        DockPanel informationPanel = new DockPanel();
+        final DockPanel informationPanel = new DockPanel();
+        informationPanel.addAttachHandler(new Handler() {
+            @Override
+            public void onAttachOrDetach(AttachEvent event) {
+                if (event.isAttached()) {
+                    informationPanel.getElement().getParentElement().getStyle().setOverflow(Overflow.VISIBLE);
+                }
+            }
+        });
         informationPanel.setSize("100%", "95%");
         informationPanel.setSpacing(10);
         informationPanel.add(new LoginPanel(SecurityStylesheetResources.INSTANCE.css()), DockPanel.WEST);

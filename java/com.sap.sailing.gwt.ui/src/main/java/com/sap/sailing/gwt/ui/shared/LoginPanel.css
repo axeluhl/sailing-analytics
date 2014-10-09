@@ -1,4 +1,11 @@
 .loginPanel {
+	width: 250px;
+	position: absolute;
+	left: 0;
+	bottom: 0;
+	padding: 5px;
+	padding-left: 10px;
+	border-top-right-radius: 10px;
 	background: #cccccc; /* Old browsers */
 	background: -moz-linear-gradient(top, #cccccc 0%, #999999 100%);
 	/* FF3.6+ */
