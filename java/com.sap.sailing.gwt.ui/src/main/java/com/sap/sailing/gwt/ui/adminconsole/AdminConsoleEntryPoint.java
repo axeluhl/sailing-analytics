@@ -291,7 +291,7 @@ public class AdminConsoleEntryPoint extends AbstractEntryPoint implements Regatt
         if (user != null && isUserInRole(feature.getEnabledRoles())) {
             ScrollPanel scrollPanel = new ScrollPanel();
             scrollPanel.add(panelToAdd);
-            panelToAdd.setSize("90%", "90%");
+            panelToAdd.setSize("100%", "100%");
             tabPanel.add(scrollPanel, tabTitle, false);
         }
     }
@@ -301,7 +301,7 @@ public class AdminConsoleEntryPoint extends AbstractEntryPoint implements Regatt
         if (user != null && isUserInRole(feature.getEnabledRoles())) {
             ScrollPanel scrollPanel = new ScrollPanel();
             scrollPanel.add(panelToAdd);
-            panelToAdd.setSize("90%", "90%");
+            panelToAdd.setSize("100%", "100%");
             tabPanel.add(scrollPanel, tabTitle, false);
         }
     }
