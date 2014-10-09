@@ -40,6 +40,7 @@ public class RecordFixesFlatJsonPostServlet extends AbstractJsonPostServlet<Pair
 
         try {
             getService().getGPSFixStore().storeFix(device, fix);
+            logger.log(Level.INFO, "Added fix for device " + device.toString()  + " to store");
         } catch (TransformationException | NoCorrespondingServiceRegisteredException e) {
             logger.log(Level.WARNING, "Could not load store fix from device " + device);
         }
