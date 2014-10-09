@@ -5,6 +5,12 @@ The term itself should be revised at some point, and currently refers to the tec
 
 This is the second iteration of implementing this idea. For previous documentation, see [[smartphone tracking|wiki/smartphone-tracking]].
 
+## Server Architecture
+[[Server Architecture|wiki/racelog-tracking/server]]
+
+## App Architecture
+[[Server Architecture|wiki/racelog-tracking/app]]
+
 [[_TOC_]]
 
 # Development Infos
