@@ -21,8 +21,8 @@ import com.google.gwt.user.client.ui.HorizontalPanel;
 import com.google.gwt.user.client.ui.ImageResourceRenderer;
 import com.google.gwt.user.client.ui.Label;
 import com.google.gwt.user.client.ui.VerticalPanel;
+import com.sap.sse.security.ui.client.Resources;
 import com.sap.sse.security.ui.client.UserChangeEventHandler;
-import com.sap.sse.security.ui.client.UserManagementImageResources;
 import com.sap.sse.security.ui.oauth.client.SocialUserDTO;
 import com.sap.sse.security.ui.shared.AccountDTO;
 import com.sap.sse.security.ui.shared.SuccessInfo;
@@ -54,7 +54,7 @@ public class UserDetailsView extends FlowPanel {
         FlowPanel fp = new FlowPanel();
         fp.setWidth("100%");
         ImageResourceRenderer renderer = new ImageResourceRenderer();
-        final ImageResource userImageResource = UserManagementImageResources.INSTANCE.userSmall();
+        final ImageResource userImageResource = Resources.INSTANCE.userSmall();
         fp.add(new HTML(renderer.render(userImageResource)));
         Label name = new Label("Name: " + user.getName());
         fp.add(name);

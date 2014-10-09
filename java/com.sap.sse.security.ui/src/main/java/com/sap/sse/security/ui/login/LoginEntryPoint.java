@@ -17,8 +17,8 @@ import com.google.gwt.user.client.ui.RootLayoutPanel;
 import com.google.gwt.user.client.ui.RootPanel;
 import com.google.gwt.user.client.ui.SubmitButton;
 import com.google.gwt.user.client.ui.TextBox;
+import com.sap.sse.security.ui.client.Resources;
 import com.sap.sse.security.ui.loginpanel.LoginPanel;
-import com.sap.sse.security.ui.loginpanel.StylesheetResources;
 import com.sap.sse.security.ui.shared.SuccessInfo;
 import com.sap.sse.security.ui.shared.UserManagementService;
 import com.sap.sse.security.ui.shared.UserManagementServiceAsync;
@@ -37,7 +37,7 @@ public class LoginEntryPoint implements EntryPoint {
         
         FlowPanel fp = new FlowPanel();
         
-        RootPanel.get().add(new LoginPanel(StylesheetResources.INSTANCE.css()));
+        RootPanel.get().add(new LoginPanel(Resources.INSTANCE.css()));
         
         Label nameLabel = new Label("Name: ");
         fp.add(nameLabel);

@@ -28,7 +28,7 @@ import com.google.gwt.user.client.ui.SubmitButton;
 import com.google.gwt.user.client.ui.TextBox;
 import com.sap.sse.gwt.client.EntryPointHelper;
 import com.sap.sse.security.ui.client.RemoteServiceMappingConstants;
-import com.sap.sse.security.ui.client.UserManagementImageResources;
+import com.sap.sse.security.ui.client.Resources;
 import com.sap.sse.security.ui.client.UserStatusEventHandler;
 import com.sap.sse.security.ui.oauth.client.component.OAuthLoginPanel;
 import com.sap.sse.security.ui.shared.SuccessInfo;
@@ -84,7 +84,7 @@ public class LoginPanel extends FlowPanel implements UserStatusEventHandler {
         titlePanel.addStyleName(css.loginPanelTitlePanel());
         loginTitle = new Label("");
         loginLink = new Anchor("Login");
-        final ImageResource userImageResource = UserManagementImageResources.INSTANCE.userIcon();
+        final ImageResource userImageResource = Resources.INSTANCE.userIcon();
         ImageResourceRenderer renderer = new ImageResourceRenderer();
         titlePanel.add(new HTML(renderer.render(userImageResource)));
         titlePanel.add(loginTitle);

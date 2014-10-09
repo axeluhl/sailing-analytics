@@ -29,6 +29,7 @@ import com.google.gwt.view.client.SelectionChangeEvent.Handler;
 import com.google.gwt.view.client.SingleSelectionModel;
 import com.sap.sse.gwt.client.EntryPointHelper;
 import com.sap.sse.security.ui.client.RemoteServiceMappingConstants;
+import com.sap.sse.security.ui.client.Resources;
 import com.sap.sse.security.ui.client.UserChangeEventHandler;
 import com.sap.sse.security.ui.client.UserStatusEventHandler;
 import com.sap.sse.security.ui.client.component.CreateUserPanel;
@@ -39,7 +40,6 @@ import com.sap.sse.security.ui.client.component.UserList;
 import com.sap.sse.security.ui.client.component.UserListDataProvider;
 import com.sap.sse.security.ui.loginpanel.EntryPointLinkFactory;
 import com.sap.sse.security.ui.loginpanel.LoginPanel;
-import com.sap.sse.security.ui.loginpanel.StylesheetResources;
 import com.sap.sse.security.ui.shared.SuccessInfo;
 import com.sap.sse.security.ui.shared.UserDTO;
 import com.sap.sse.security.ui.shared.UserManagementService;
@@ -172,7 +172,7 @@ public class UserManagementEntryPoint implements EntryPoint {
             }
         });
         center.setWidget(createUserPanel);
-        RootPanel.get().add(new LoginPanel(StylesheetResources.INSTANCE.css()));
+        RootPanel.get().add(new LoginPanel(Resources.INSTANCE.css()));
     }
     
     protected void registerASyncService(ServiceDefTarget serviceToRegister, String servicePath) {
