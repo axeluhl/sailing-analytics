@@ -21,4 +21,6 @@
     <string name="start_tracking">Start Tracking</string>
     
     <string name="next_activity">Next Activity</string>
+    <string name="tracker_started">SAP Sailing Tracker started</string>
+    <string name="tracker_stopped">SAP Sailing Tracker stopped</string>
 </resources>
