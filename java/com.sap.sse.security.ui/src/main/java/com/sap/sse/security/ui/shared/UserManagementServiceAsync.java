@@ -7,9 +7,6 @@ import com.google.gwt.user.client.rpc.AsyncCallback;
 import com.sap.sse.security.ui.oauth.client.CredentialDTO;
 
 public interface UserManagementServiceAsync {
-
-    void sayHello(AsyncCallback<String> callback);
-
     void getUserList(AsyncCallback<Collection<UserDTO>> callback);
 
     void getCurrentUser(AsyncCallback<UserDTO> callback);

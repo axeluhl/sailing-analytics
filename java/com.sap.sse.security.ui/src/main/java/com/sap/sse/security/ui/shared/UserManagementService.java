@@ -8,9 +8,6 @@ import com.sap.sse.security.ui.oauth.client.CredentialDTO;
 import com.sap.sse.security.ui.oauth.shared.OAuthException;
 
 public interface UserManagementService extends RemoteService {
-
-    String sayHello();
-    
     Collection<UserDTO> getUserList();
     
     Collection<UserDTO> getFilteredSortedUserList(String filter);

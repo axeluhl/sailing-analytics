@@ -115,14 +115,11 @@ public class OAuthRealm extends AbstractUserStoreBasedRealm {
             logger.info("Verifying state: " + credential.getState());
             // verifyState(credential.getState());
         }
-
         /* if there is any request token in session, get it */
         requestToken = SessionUtils.getRequestTokenFromSession();
-
         OAuthService service = null;
         Verifier verifier = null;
         Token accessToken = null;
-
         /* Get Access Token */
         if (authProvider != ClientUtils.DEFAULT) {
             service = getOAuthService(authProvider);
@@ -143,7 +140,6 @@ public class OAuthRealm extends AbstractUserStoreBasedRealm {
             logger.info(" Secret: " + accessToken.getSecret());
             logger.info(" Raw: " + accessToken.getRawResponse());
         }
-
         // if (authProvider == ClientUtils.INSTAGRAM)
         // {
         // try
@@ -171,7 +167,6 @@ public class OAuthRealm extends AbstractUserStoreBasedRealm {
         if (authProvider == ClientUtils.GITHUB || authProvider == ClientUtils.FOURSQUARE) {
             protectedResourceUrl = String.format(protectedResourceUrl, accessToken.getToken());
         }
-
         if (authProvider == ClientUtils.YAHOO) {
             // throw new OurException("Not implemented for yahoo yet!)");
             /* we need to replace <GUID> */
@@ -187,24 +182,17 @@ public class OAuthRealm extends AbstractUserStoreBasedRealm {
             logger.info("Yahoo protected resource url: " + protectedResourceUrl);
 
         }
-
         // make session id
         String sessionId = makeRandomString();
-
         // must save session id to session
         SessionUtils.saveSessionIdToSession(sessionId);
-
         // must save authProvider to session
         SessionUtils.saveAuthProviderToSession(authProvider);
-
         SocialUserAccount socialUser = null;
-        
         // must save acess token to session
         SessionUtils.saveAccessTokenToSession(accessToken);
-
         // must save the protected resource url to session
         SessionUtils.saveProtectedResourceUrlToSession(protectedResourceUrl);
-
         // now request protected resource
         logger.info("Getting protected resource");
         logger.info("Protected resource url: " + protectedResourceUrl);
@@ -233,7 +221,7 @@ public class OAuthRealm extends AbstractUserStoreBasedRealm {
         String socialname = authProviderName + "*" + socialUser.getProperty(Social.NAME.name());
 
         User user = getUserStore().getUserByName(socialname);
-        if (user == null){
+        if (user == null) {
             try {
                 user = getUserStore().createUser(socialname, socialUser.getProperty(Social.EMAIL.name()), socialUser);
             } catch (UserManagementException e) {

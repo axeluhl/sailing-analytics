@@ -82,11 +82,6 @@ public class UserManagementServiceImpl extends RemoteServiceServlet implements U
     }
 
     @Override
-    public String sayHello() {
-        return "Hello";
-    }
-
-    @Override
     public Collection<UserDTO> getUserList() {
         List<UserDTO> users = new ArrayList<>();
         for (User u : getSecurityService().getUserList()) {
