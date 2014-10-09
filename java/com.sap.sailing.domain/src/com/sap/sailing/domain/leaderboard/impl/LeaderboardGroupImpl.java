@@ -104,43 +104,47 @@ public class LeaderboardGroupImpl extends LeaderboardGroupBaseImpl implements Le
     }
 
     @Override
-    public int getIndexOf(Leaderboard leaderboard) {
+    public synchronized int getIndexOf(Leaderboard leaderboard) {
         return leaderboards.indexOf(leaderboard);
     }
 
     @Override
-    public synchronized void addLeaderboard(Leaderboard leaderboard) {
+    public void addLeaderboard(Leaderboard leaderboard) {
         addLeaderboardAt(leaderboard, leaderboards.size());
     }
     
     @Override
-    public synchronized void addLeaderboardAt(Leaderboard leaderboard, int index) {
-        leaderboards.add(index, leaderboard);
+    public void addLeaderboardAt(Leaderboard leaderboard, int index) {
+        synchronized (this) {
+            leaderboards.add(index, leaderboard);
+        }
         notifyLeaderboardGroupListenersAboutLeaderboardAdded(leaderboard);
     }
 
     @Override
-    public synchronized void addAllLeaderboards(Collection<Leaderboard> leaderboards) {
+    public void addAllLeaderboards(Collection<Leaderboard> leaderboards) {
         for (Leaderboard leaderboard : leaderboards) {
             addLeaderboard(leaderboard);
         }
     }
 
     @Override
-    public synchronized void removeLeaderboard(Leaderboard leaderboard) {
-        leaderboards.remove(leaderboard);
+    public void removeLeaderboard(Leaderboard leaderboard) {
+        synchronized (this) {
+            leaderboards.remove(leaderboard);
+        }
         notifyLeaderboardGroupListenersAboutLeaderboardRemoved(leaderboard);
     }
 
     @Override
-    public synchronized void removeAllLeaderboards(Collection<Leaderboard> leaderboards) {
+    public void removeAllLeaderboards(Collection<Leaderboard> leaderboards) {
         for (Leaderboard leaderboard : leaderboards) {
             removeLeaderboard(leaderboard);
         }
     }
 
     @Override
-    public synchronized void clearLeaderboards() {
+    public void clearLeaderboards() {
         for (Leaderboard leaderboard : getLeaderboards()) {
             removeLeaderboard(leaderboard);
         }
