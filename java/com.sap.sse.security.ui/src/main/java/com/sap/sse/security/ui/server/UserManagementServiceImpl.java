@@ -106,10 +106,10 @@ public class UserManagementServiceImpl extends RemoteServiceServlet implements U
     @Override
     public SuccessInfo login(String username, String password) {
         try {
-            String success = getSecurityService().login(username, password);
-            return new SuccessInfo(true, success);
+            String redirectURL = getSecurityService().login(username, password);
+            return new SuccessInfo(true, "Success. Redirecting to "+redirectURL, redirectURL, createUserDTOFromUser(getSecurityService().getUserByName(username)));
         } catch (UserManagementException e) {
-            return new SuccessInfo(false, "Failed to login.");
+            return new SuccessInfo(false, "Failed to login.", /* redirectURL */ null, null);
         }
     }
 
@@ -119,7 +119,7 @@ public class UserManagementServiceImpl extends RemoteServiceServlet implements U
         getSecurityService().logout();
         getHttpSession().invalidate();
         logger.info("Invalidated HTTP session");
-        return new SuccessInfo(true, "Logged out.");
+        return new SuccessInfo(true, "Logged out.", /* redirectURL */ null, null);
     }
 
     @Override
@@ -162,21 +162,20 @@ public class UserManagementServiceImpl extends RemoteServiceServlet implements U
 
     @Override
     public SuccessInfo addRoleForUser(String username, String role) {
-        Subject currentUser = SecurityUtils.getSubject();
-
-        if (currentUser.hasRole(UserStore.DefaultRoles.ADMIN.getName())) {
+        Subject currentSubject = SecurityUtils.getSubject();
+        if (currentSubject.hasRole(UserStore.DefaultRoles.ADMIN.getName())) {
             User u = getSecurityService().getUserByName(username);
             if (u == null) {
-                return new SuccessInfo(false, "User does not exist.");
+                return new SuccessInfo(false, "User does not exist.", /* redirectURL */ null, null);
             }
             try {
                 getSecurityService().addRoleForUser(username, role);
-                return new SuccessInfo(true, "Added role: " + role + ".");
+                return new SuccessInfo(true, "Added role: " + role + ".", /* redirectURL */ null, createUserDTOFromUser(u));
             } catch (UserManagementException e) {
-                return new SuccessInfo(false, e.getMessage());
+                return new SuccessInfo(false, e.getMessage(), /* redirectURL */ null, null);
             }
         } else {
-            return new SuccessInfo(false, "You don't have the required permissions to add a role.");
+            return new SuccessInfo(false, "You don't have the required permissions to add a role.", /* redirectURL */ null, null);
         }
     }
 
@@ -184,9 +183,9 @@ public class UserManagementServiceImpl extends RemoteServiceServlet implements U
     public SuccessInfo deleteUser(String username) {
         try {
             getSecurityService().deleteUser(username);
-            return new SuccessInfo(true, "Deleted user: " + username + ".");
+            return new SuccessInfo(true, "Deleted user: " + username + ".", /* redirectURL */ null, null);
         } catch (UserManagementException e) {
-            return new SuccessInfo(false, "Could not delete user.");
+            return new SuccessInfo(false, "Could not delete user.", /* redirectURL */ null, null);
         }
     }
 

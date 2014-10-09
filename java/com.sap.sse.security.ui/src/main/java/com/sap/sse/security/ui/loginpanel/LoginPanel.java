@@ -3,6 +3,7 @@ package com.sap.sse.security.ui.loginpanel;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
+import java.util.logging.Logger;
 
 import com.google.gwt.core.client.GWT;
 import com.google.gwt.event.dom.client.ClickEvent;
@@ -29,6 +30,7 @@ import com.google.gwt.user.client.ui.TextBox;
 import com.sap.sse.gwt.client.EntryPointHelper;
 import com.sap.sse.security.ui.client.RemoteServiceMappingConstants;
 import com.sap.sse.security.ui.client.Resources;
+import com.sap.sse.security.ui.client.StringMessages;
 import com.sap.sse.security.ui.client.UserStatusEventHandler;
 import com.sap.sse.security.ui.oauth.client.component.OAuthLoginPanel;
 import com.sap.sse.security.ui.shared.SuccessInfo;
@@ -37,10 +39,13 @@ import com.sap.sse.security.ui.shared.UserManagementService;
 import com.sap.sse.security.ui.shared.UserManagementServiceAsync;
 
 public class LoginPanel extends FlowPanel implements UserStatusEventHandler {
+    private static final Logger logger = Logger.getLogger(LoginPanel.class.getName());
 
     private static Storage localStorage = Storage.getLocalStorageIfSupported();
 
     private static final UserManagementServiceAsync userManagementService = GWT.create(UserManagementService.class);
+    
+    private static final StringMessages stringMessages = GWT.create(StringMessages.class);
 
     static {
         EntryPointHelper.registerASyncService((ServiceDefTarget) userManagementService,
@@ -83,7 +88,7 @@ public class LoginPanel extends FlowPanel implements UserStatusEventHandler {
         titleFocus.setWidget(titlePanel);
         titlePanel.addStyleName(css.loginPanelTitlePanel());
         loginTitle = new Label("");
-        loginLink = new Anchor("Login");
+        loginLink = new Anchor(stringMessages.signIn());
         final ImageResource userImageResource = Resources.INSTANCE.userIcon();
         ImageResourceRenderer renderer = new ImageResourceRenderer();
         titlePanel.add(new HTML(renderer.render(userImageResource)));
@@ -132,17 +137,17 @@ public class LoginPanel extends FlowPanel implements UserStatusEventHandler {
             }
         });
         FlowPanel formContent = new FlowPanel();
-        Label nameLabel = new Label("Name: ");
+        Label nameLabel = new Label(stringMessages.name()+": ");
         formContent.add(nameLabel);
         name = new TextBox();
         formContent.add(name);
-        Label passwordLabel = new Label("Password: ");
+        Label passwordLabel = new Label(stringMessages.password()+": ");
         formContent.add(passwordLabel);
         password = new PasswordTextBox();
         formContent.add(password);
-        SubmitButton submit = new SubmitButton("Login");
+        SubmitButton submit = new SubmitButton(stringMessages.signIn());
         formContent.add(submit);
-        Anchor register = new Anchor("Register",
+        Anchor register = new Anchor(stringMessages.signUp(),
                 EntryPointLinkFactory.createRegistrationLink(new HashMap<String, String>()));
         formContent.add(register);
 
@@ -158,7 +163,7 @@ public class LoginPanel extends FlowPanel implements UserStatusEventHandler {
     private void updateUserContent() {
         if (currentUser != null) {
             userPanel.clear();
-            Anchor logout = new Anchor("Logout");
+            Anchor logout = new Anchor(stringMessages.signOut());
             userPanel.add(logout);
             logout.addClickHandler(new ClickHandler() {
 
@@ -191,13 +196,12 @@ public class LoginPanel extends FlowPanel implements UserStatusEventHandler {
                     return;
                 }
                 currentUser = result;
-                System.out.println("User changed to " + (result == null ? "No User" : result.getName()) + "handlers: "
+                logger.info("User changed to " + (result == null ? "No User" : result.getName()) + "handlers: "
                         + handlers.size());
                 for (UserStatusEventHandler handler : handlers) {
-                    System.out.print(handler + ", ");
+                    logger.info(handler + ", ");
                     handler.onUserStatusChange(currentUser);
                 }
-                System.out.println();
             }
 
             @Override
@@ -211,7 +215,7 @@ public class LoginPanel extends FlowPanel implements UserStatusEventHandler {
         if (currentUser != null) {
             String name = currentUser.getName();
             if (name == null) {
-                loginTitle.setText("Inavalid username!");
+                loginTitle.setText(stringMessages.invalidUsername());
             } else {
                 if (name.contains("*")) {
                     name = name.split("\\*")[1];

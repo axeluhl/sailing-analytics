@@ -13,4 +13,18 @@ public interface StringMessages extends Messages {
     String loggedIn();
 
     String signIn();
+
+    String invalidUsername();
+
+    String signUp();
+
+    String signOut();
+
+    String couldNotSignOut(String message);
+
+    String createUser();
+
+    String settings();
+
+    String filterUsers();
 }

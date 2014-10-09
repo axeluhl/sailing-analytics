@@ -30,6 +30,7 @@ import com.google.gwt.view.client.SingleSelectionModel;
 import com.sap.sse.gwt.client.EntryPointHelper;
 import com.sap.sse.security.ui.client.RemoteServiceMappingConstants;
 import com.sap.sse.security.ui.client.Resources;
+import com.sap.sse.security.ui.client.StringMessages;
 import com.sap.sse.security.ui.client.UserChangeEventHandler;
 import com.sap.sse.security.ui.client.UserStatusEventHandler;
 import com.sap.sse.security.ui.client.component.CreateUserPanel;
@@ -48,6 +49,8 @@ import com.sap.sse.security.ui.shared.UserManagementServiceAsync;
 public class UserManagementEntryPoint implements EntryPoint {
 
     private final UserManagementServiceAsync userManagementService = GWT.create(UserManagementService.class);
+    
+    private final StringMessages stringMessages = GWT.create(StringMessages.class);
     
     private SimpleLayoutPanel center;
     
@@ -74,12 +77,10 @@ public class UserManagementEntryPoint implements EntryPoint {
         rootPanel.add(dockPanel);
         HorizontalPanel hp = new HorizontalPanel();
         LoginPanel.addUserStatusEventHandler(new UserStatusEventHandler() {
-            
             @Override
             public void onUserStatusChange(UserDTO user) {
                 if (user == null){
                     userManagementService.logout(new AsyncCallback<SuccessInfo>() {
-
                         @Override
                         public void onFailure(Throwable caught) {
                         }
@@ -92,7 +93,7 @@ public class UserManagementEntryPoint implements EntryPoint {
                 }
             }
         });
-        Button createButton = new Button("Create User", new ClickHandler() {
+        Button createButton = new Button(stringMessages.createUser(), new ClickHandler() {
             @Override
             public void onClick(ClickEvent event) {
                 CreateUserPanel createUserPanel = new CreateUserPanel(userManagementService);
@@ -110,22 +111,17 @@ public class UserManagementEntryPoint implements EntryPoint {
             }
         });
         hp.add(createButton);
-        
-        Button settingsButton = new Button("Settings", new ClickHandler() {
-            
+        Button settingsButton = new Button(stringMessages.settings(), new ClickHandler() {
             @Override
             public void onClick(ClickEvent event) {
                 center.setWidget(new SettingsPanel(userManagementService));
             }
         });
         hp.add(settingsButton);
-        
         dockPanel.addNorth(hp, 50);
-        
         final UserList userList = new UserList(keyProvider);
         userList.setSelectionModel(singleSelectionModel);
         singleSelectionModel.addSelectionChangeHandler(new Handler() {
-            
             @Override
             public void onSelectionChange(SelectionChangeEvent event) {
                 final UserDetailsView userDetailsView = new UserDetailsView(userManagementService, singleSelectionModel.getSelectedObject());
@@ -152,16 +148,14 @@ public class UserManagementEntryPoint implements EntryPoint {
                 userListDataProvider.updateDisplays();
             }
         });
-        filterBox.getElement().setPropertyString("placeholder", "Filter users...");
+        filterBox.getElement().setPropertyString("placeholder", stringMessages.filterUsers());
         vp.add(filterBox);
         vp.add(pager);
         vp.add(scrollPanel);
         dockPanel.addWest(vp, 350);
-        
         dockPanel.add(center);
         CreateUserPanel createUserPanel = new CreateUserPanel(userManagementService);
         createUserPanel.addUserCreationEventHandler(new UserCreationEventHandler() {
-            
             @Override
             public void onUserCreation(UserDTO user) {
                 userListDataProvider.updateDisplays();
@@ -172,12 +166,5 @@ public class UserManagementEntryPoint implements EntryPoint {
         });
         center.setWidget(createUserPanel);
         RootPanel.get().add(new LoginPanel(Resources.INSTANCE.css()));
-    }
-    
-    protected void registerASyncService(ServiceDefTarget serviceToRegister, String servicePath) {
-        String moduleBaseURL = GWT.getModuleBaseURL();
-        String baseURL = moduleBaseURL.substring(0, moduleBaseURL.lastIndexOf('/', moduleBaseURL.length()-2)+1);
-        
-        serviceToRegister.setServiceEntryPoint(baseURL + servicePath);
     }
 }

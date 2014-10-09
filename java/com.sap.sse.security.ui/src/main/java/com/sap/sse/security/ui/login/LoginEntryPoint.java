@@ -66,8 +66,8 @@ public class LoginEntryPoint implements EntryPoint {
 
                     @Override
                     public void onSuccess(SuccessInfo result) {
-                        if (result.isSuccessful() && !result.getMessage().equals("")){
-                            Window.Location.replace(result.getMessage());
+                        if (result.isSuccessful() && !result.getRedirectURL().equals("")){
+                            Window.Location.replace(result.getRedirectURL());
                         }
                         else if (result.isSuccessful()) {
                             Window.alert(stringMessages.loggedIn());

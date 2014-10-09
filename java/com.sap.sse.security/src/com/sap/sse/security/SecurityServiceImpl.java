@@ -151,7 +151,7 @@ public class SecurityServiceImpl extends RemoteServiceServlet implements Securit
         } else {
             redirectUrl = "";
         }
-        System.out.println("Redirecturl: " + redirectUrl);
+        logger.info("Redirecturl: " + redirectUrl);
         return redirectUrl;
     }
 

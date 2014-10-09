@@ -8,13 +8,17 @@ public class SuccessInfo implements IsSerializable {
     
     private boolean successful;
     private String message;
+    private UserDTO userDTO;
+    private String redirectURL;
     
     SuccessInfo() {} // for serializtion only
     
-    public SuccessInfo(boolean successful, String message) {
+    public SuccessInfo(boolean successful, String message, String redirectURL, UserDTO userDTO) {
         super();
         this.successful = successful;
         this.message = message;
+        this.redirectURL = redirectURL;
+        this.userDTO = userDTO;
     }
 
     public boolean isSuccessful() {
@@ -24,6 +28,13 @@ public class SuccessInfo implements IsSerializable {
     public String getMessage() {
         return message;
     }
-    
+
+    public UserDTO getUserDTO() {
+        return userDTO;
+    }
+
+    public String getRedirectURL() {
+        return redirectURL;
+    }
     
 }

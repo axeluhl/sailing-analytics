@@ -23,8 +23,10 @@ public interface SecurityService {
     
     User getCurrentUser();
     
+    /**
+     * Returns the redirect URL
+     */
     String login(String username, String password)  throws UserManagementException;
-    
     
     String getAuthenticationUrl(Credential credential) throws UserManagementException;
     
