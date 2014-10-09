@@ -188,7 +188,6 @@ public abstract class AbstractLeaderboardConfigPanel extends FormPanel implement
         mainPanel.add(splitPanel);
 
         selectedLeaderBoardPanel = new CaptionPanel(stringMessages.leaderboard());
-//        selectedLeaderBoardPanel.setWidth("50%");
         splitPanel.add(selectedLeaderBoardPanel);
         splitPanel.setCellWidth(selectedLeaderBoardPanel, "50%");
         
@@ -197,7 +196,6 @@ public abstract class AbstractLeaderboardConfigPanel extends FormPanel implement
         selectedLeaderBoardPanel.setContentWidget(vPanel);
 
         trackedRacesCaptionPanel = new CaptionPanel(stringMessages.trackedRaces());
-//        trackedRacesCaptionPanel.setWidth("50%");
         splitPanel.add(trackedRacesCaptionPanel);
         splitPanel.setCellWidth(trackedRacesCaptionPanel, "50%");
 
