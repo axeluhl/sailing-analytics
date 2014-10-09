@@ -9,7 +9,8 @@
 	<inherits name='com.google.gwt.user.User' />
 
 	<stylesheet src="../LeaderboardNewHome.css" />
-
+	<stylesheet src="../RaceBoard.css" />
+		
 	<inherits name="com.sap.sse.gwt.EmulatedJRE" />
 	<inherits name='com.sap.sailing.gwt.FormFactor'/>
 	
@@ -70,6 +71,9 @@
 	<source path='ui/regattaoverview' />
 	<source path='ui/leaderboard'/>
 	<source path='ui/raceboard'/>
+	<source path='ui/adminconsole'/>
+	<source path='ui/usermanagement'/>
+	<source path='ui/masterdataimport'/>
 	<source path='autoplay' />
 	<source path='home' />
 	<source path='common' />
