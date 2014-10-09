@@ -637,8 +637,8 @@ public class SimulatorMap extends AbsolutePanel implements RequiresDataInitializ
         PositionDTO endPointDTO = new PositionDTO(raceCourseCanvasOverlay.getEndPoint().getLatitude(),
                 raceCourseCanvasOverlay.getEndPoint().getLongitude());
         LOGGER.info("StartPoint:" + startPointDTO);
-        windParams.setNorthWest(startPointDTO);
-        windParams.setSouthEast(endPointDTO);
+        windParams.setRaceCourseStart(startPointDTO);
+        windParams.setRaceCourseEnd(endPointDTO);
         windParams.setxRes(xRes);
         windParams.setyRes(yRes);
         windParams.setBorder(border);
@@ -754,11 +754,11 @@ public class SimulatorMap extends AbsolutePanel implements RequiresDataInitializ
         if (mode != SailingSimulatorConstants.ModeMeasured) {
             PositionDTO startPointDTO = new PositionDTO(raceCourseCanvasOverlay.getStartPoint().getLatitude(), 
                     raceCourseCanvasOverlay.getStartPoint().getLongitude());
-            windParams.setNorthWest(startPointDTO);
+            windParams.setRaceCourseStart(startPointDTO);
 
             PositionDTO endPointDTO = new PositionDTO(raceCourseCanvasOverlay.getEndPoint().getLatitude(), 
                     raceCourseCanvasOverlay.getEndPoint().getLongitude());
-            windParams.setSouthEast(endPointDTO);
+            windParams.setRaceCourseEnd(endPointDTO);
         }
 
         windParams.setxRes(xRes);

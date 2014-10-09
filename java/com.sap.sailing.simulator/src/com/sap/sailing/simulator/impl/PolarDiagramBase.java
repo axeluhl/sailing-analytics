@@ -29,19 +29,37 @@ public class PolarDiagramBase implements PolarDiagram, Serializable {
     protected SpeedWithBearing current = null; //new KnotSpeedWithBearingImpl(0, new DegreeBearingImpl(180));
 
     // private static Logger logger = Logger.getLogger("com.sap.sailing");
-    // the preferred direction of movement
-    // is used by optimalDirectionsUpwind() and optimialDirectionsDownwind()
-    protected Bearing targetDirection = new DegreeBearingImpl(0);
-
+    protected Bearing targetDirection = new DegreeBearingImpl(0); // bearing of target may deviate from 0 degrees, if target is not exactly windward
     protected NavigableMap<Speed, NavigableMap<Bearing, Speed>> speedTable;
-    //protected NavigableMap<Speed, NavigableMap<Speed, NavigableMap<Bearing, NavigableMap<Bearing, Speed>>>> extTable;
     protected NavigableMap<Double,Object> extTable = null;
     protected NavigableMap<Speed, Bearing> beatAngles;
     protected NavigableMap<Speed, Bearing> gybeAngles;
     protected NavigableMap<Speed, Speed> beatSOG;
     protected NavigableMap<Speed, Speed> gybeSOG;
+    
+    protected double scaleBearing = 1.0;
+    protected double scaleSpeed = 1.0;
 
+    @Override
+    public void setSpeedScale(double scaleSpeed) {
+        this.scaleSpeed = scaleSpeed;
+    }
+    
+    @Override
+    public double getSpeedScale() {
+        return this.scaleSpeed;
+    }
+    
+    @Override
+    public void setBearingScale(double scaleBearing) {
+        this.scaleBearing = scaleBearing;
+    }
 
+    @Override
+    public double getBearingScale() {
+        return this.scaleBearing;
+    }
+    
     @Override
     public NavigableMap<Speed, NavigableMap<Bearing, Speed>> getSpeedTable() {
         return this.speedTable;
@@ -112,40 +130,16 @@ public class PolarDiagramBase implements PolarDiagram, Serializable {
             if ((current == null)||(current.getKnots() == 0.0)) {
                 wind = newWind;
                 trueWind = newWind;
-                //polarChart = null;
-                //polarChartOG = null;
             } else {
                 wind = getApparentWindFromCurrent(newWind);
                 trueWind = newWind;
-                //transformPD();
             }
         }
     }
 
-    /*    public void transformPD() {
-
-        if (current != null) {
-
-            polarChart = new TreeMap<Bearing, SpeedWithBearing>(bearingComparator);
-            polarChartOG = new TreeMap<Bearing, SpeedWithBearing>(bearingComparator);
-            for (Double bearAngle = 0.0; bearAngle < 360.0; bearAngle += 5.0) {
-
-                SpeedWithBearing rotSpeed = new KnotSpeedWithBearingImpl(this.getSpeedAtBearingRaw(new DegreeBearingImpl(bearAngle)).getKnots(), new DegreeBearingImpl(bearAngle));
-                SpeedWithBearing transSpeed = getSOGfromSMF(rotSpeed);
-
-                polarChart.put(new DegreeBearingImpl(bearAngle), transSpeed);
-                polarChartOG.put(transSpeed.getBearing(), transSpeed);
-                //System.out.println(""+bearAngle+","+((transSpeed.getBearing().getDegrees())%360.0)+","+transSpeed.getKnots());
-
-            }
-
-        }
-    }*/
-
     // initialize polar diagram with supporting points to represent mapping:
     //     trueWindSpeed -> { currentSpeed -> { currentBearingTW -> { boatBearingTW -> boatSpeed } } }
     // where currentBearingTW and boatBearingTW are bearings relative to true wind
-    //
     public NavigableMap<Double,Object> extendSpeedMap() {
 
         NavigableMap<Double,Object> extMap = new TreeMap<Double,Object>();
@@ -351,11 +345,6 @@ public class PolarDiagramBase implements PolarDiagram, Serializable {
     @Override
     public SpeedWithBearing getSpeedAtBearingOverGround(Bearing bearing) {
 
-        // TODO: check this new initialization, maybe keep previous current and reset current at end
-        /*if (extTable == null) {
-            extTable = this.extendSpeedMap();
-        }*/
-
         if ((current == null)||(current.getKnots() == 0.0)) {
 
             return getSpeedAtBearingRaw(bearing);
@@ -376,7 +365,7 @@ public class PolarDiagramBase implements PolarDiagram, Serializable {
 
             double boatSpeed = this.interpolate(values, 0, extTable);
 
-            return new KnotSpeedWithBearingImpl(boatSpeed, bearing);
+            return new KnotSpeedWithBearingImpl(boatSpeed*this.scaleSpeed, bearing);
 
         }
     }
@@ -452,7 +441,7 @@ public class PolarDiagramBase implements PolarDiagram, Serializable {
                     / (ceilingWind.getKnots() - floorWind.getKnots());
         }
 
-        return new KnotSpeedWithBearingImpl(speed, bearing);
+        return new KnotSpeedWithBearingImpl(speed*this.scaleSpeed, bearing);
     }
 
     @Override
@@ -500,8 +489,9 @@ public class PolarDiagramBase implements PolarDiagram, Serializable {
             }
 
             // get bearing to north based on beatAngle and windBearing
-            estBeatAngleLeft = windBearing.add(new RadianBearingImpl(-beatAngle));
-            estBeatAngleRight = windBearing.add(new RadianBearingImpl(+beatAngle));
+            double scaledBeatAngle = beatAngle*this.scaleBearing;
+            estBeatAngleLeft = windBearing.add(new RadianBearingImpl(-scaledBeatAngle));
+            estBeatAngleRight = windBearing.add(new RadianBearingImpl(+scaledBeatAngle));
 
             return new Bearing[] { estBeatAngleLeft, estBeatAngleRight };
 
@@ -680,8 +670,9 @@ public class PolarDiagramBase implements PolarDiagram, Serializable {
             }
             // Bearing estGybeAngle = new RadianBearingImpl(gybeAngle);
 
-            estGybeAngleRight = windBearing.add(new RadianBearingImpl(+gybeAngle));
-            estGybeAngleLeft = windBearing.add(new RadianBearingImpl(-gybeAngle));
+            double scaledGybeAngle = Math.PI-(Math.PI-gybeAngle)*this.scaleBearing;
+            estGybeAngleRight = windBearing.add(new RadianBearingImpl(+scaledGybeAngle));
+            estGybeAngleLeft = windBearing.add(new RadianBearingImpl(-scaledGybeAngle));
 
             return new Bearing[] { estGybeAngleRight, estGybeAngleLeft };
 
@@ -754,10 +745,10 @@ public class PolarDiagramBase implements PolarDiagram, Serializable {
             windSide = WindSide.RIGHT;
         }
         if (bearing.equals(wind.getBearing())) {
-            windSide = WindSide.OPPOSING;
+            windSide = WindSide.DOWNWIND;
         }
         if (bearing.equals(wind.getBearing().reverse())) {
-            windSide = WindSide.FACING;
+            windSide = WindSide.UPWIND;
         }
 
         return windSide;
