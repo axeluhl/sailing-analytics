@@ -110,11 +110,12 @@ public class UserStoreImpl implements UserStore {
 
     @Override
     public void addRoleForUser(String name, String role) throws UserManagementException {
-        if (users.get(name) == null) {
+        final User user = users.get(name);
+        if (user == null) {
             throw new UserManagementException(UserManagementException.USER_DOES_NOT_EXIST);
         }
-        users.get(name).addRole(role);
-        PersistenceFactory.INSTANCE.getDefaultMongoObjectFactory().storeUser(users.get(name));
+        user.addRole(role);
+        PersistenceFactory.INSTANCE.getDefaultMongoObjectFactory().storeUser(user);
     }
 
     @Override

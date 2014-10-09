@@ -4,7 +4,7 @@ import com.sap.sailing.mongodb.MongoDBService;
 import com.sap.sse.security.userstore.mongodb.impl.PersistenceFactoryImpl;
 
 public interface PersistenceFactory {
-PersistenceFactory INSTANCE = new PersistenceFactoryImpl();
+    PersistenceFactory INSTANCE = new PersistenceFactoryImpl();
     
     DomainObjectFactory getDefaultDomainObjectFactory();
     DomainObjectFactory getDomainObjectFactory(MongoDBService mongoDBService);
