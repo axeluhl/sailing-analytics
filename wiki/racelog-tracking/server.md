@@ -8,9 +8,9 @@ RaceLog tracking has been merged into the master branch with commit 4b4b61b6c518
 * ``ftes-rltracking-equestrian``: Serves as a reference implementation of a tracking adapter built for RaceLog-tracking.
 
 # Architectural Overview
-The basic architecture of Racelog-tracking is presented in this diagram (download as [[PDF|racelog-tracking/architecture.pdf]]):
+The basic architecture of Racelog-tracking is presented in this diagram (download as [[PDF|wiki/racelog-tracking/architecture.pdf]]):
 
-[[racelog-tracking/architecture.svg]]
+[[wiki/racelog-tracking/architecture.svg]]
 
 Following the numbers in the diagram, this is a possible race log tracking scenario:
 
