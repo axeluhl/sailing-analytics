@@ -75,7 +75,6 @@ public class AutoPlayController implements RaceTimesInfoProviderListener {
     private Widget currentContentWidget;
 
     private static int SAP_HEADER_HEIGHT = 70;
-    private static double MIN_SCALE_FACTOR = 0.8;
     
     public AutoPlayController(SailingServiceAsync sailingService, MediaServiceAsync mediaService, 
             ErrorReporter errorReporter, String leaderboardGroupName, String leaderboardName, final String leaderboardZoom, UserAgentDetails userAgent,
@@ -239,8 +238,8 @@ public class AutoPlayController implements RaceTimesInfoProviderListener {
         double scaleFactorY = clientHeight / (double) contentHeight;
         
         Double scaleFactor = scaleFactorX > scaleFactorY ? scaleFactorY : scaleFactorX;
-        if(scaleFactor < MIN_SCALE_FACTOR) {
-            scaleFactor = MIN_SCALE_FACTOR;
+        if(scaleFactor < 1.0) {
+            scaleFactor = 1.0;
         }
         double diffX = clientWidth - contentWidth * scaleFactor;
 
