@@ -1,15 +1,19 @@
 package com.sap.sailing.android.tracking.app.utils;
 
 import android.content.Context;
+import android.content.SharedPreferences;
+import android.preference.PreferenceManager;
 
 import com.sap.sailing.android.shared.util.PrefUtils;
 import com.sap.sailing.android.tracking.app.R;
 
 public class AppPreferences {
     protected final Context context;
+    protected final SharedPreferences preferences;
 
     public AppPreferences(Context context) {
         this.context = context;
+        this.preferences = PreferenceManager.getDefaultSharedPreferences(context);
     }
     
     public String getDeviceIdentifier() {
@@ -20,5 +24,9 @@ public class AppPreferences {
     public String getServerURL() {
         return PrefUtils.getString(context, R.string.preference_server_url_key,
                 R.string.preference_server_url_default);
+    }
+    
+    public void setServerURL(String serverUrl) {
+        preferences.edit().putString(context.getString(R.string.preference_server_url_key), serverUrl);
     }
 }
