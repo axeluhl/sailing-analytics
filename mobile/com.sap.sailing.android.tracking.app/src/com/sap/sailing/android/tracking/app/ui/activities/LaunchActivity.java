@@ -1,62 +1,94 @@
 package com.sap.sailing.android.tracking.app.ui.activities;
 
-import android.content.ComponentName;
-import android.content.Context;
+import android.app.Dialog;
 import android.content.Intent;
-import android.content.ServiceConnection;
 import android.os.Bundle;
-import android.os.IBinder;
-import android.widget.TextView;
+import android.support.v4.app.DialogFragment;
+import android.view.View;
+import android.view.View.OnClickListener;
+import android.widget.Button;
 
+import com.google.android.gms.common.ConnectionResult;
+import com.google.android.gms.common.GooglePlayServicesUtil;
+import com.sap.sailing.android.shared.logging.ExLog;
 import com.sap.sailing.android.tracking.app.R;
 import com.sap.sailing.android.tracking.app.services.TrackingService;
-import com.sap.sailing.android.tracking.app.services.TrackingService.TrackingServiceBinder;
 
 public class LaunchActivity extends BaseActivity {
-    // private static final String TAG = LaunchActivity.class.getName();
-
-    private final TrackingServiceConnection trackingServiceConnection = new TrackingServiceConnection();
-    private TrackingService trackingService;
-    private boolean boundTrackingService = false;
-    private TextView status;
-
-    private class TrackingServiceConnection implements ServiceConnection {
-        @Override
-        public void onServiceConnected(ComponentName className, IBinder service) {
-            TrackingServiceBinder binder = (TrackingServiceBinder) service;
-            trackingService = binder.getService();
-            trackingService.startTracking();
-            boundTrackingService = true;
-            status.setText(R.string.tracking);
-        }
-
-        @Override
-        public void onServiceDisconnected(ComponentName arg) {
-            boundTrackingService = false;
-        }
-    }
+    private static final String TAG = LaunchActivity.class.getName();
+    private Button startTracking;
+    private Button nextActivity;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.launch_activity);
-        status = (TextView) findViewById(R.id.status);
+
+        startTracking = (Button) findViewById(R.id.btnStartTracking);
+        startTracking.setOnClickListener(new OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                if (!googlePLayServicesAvailable()) {
+                    return;
+                }
+                
+                Intent startTracking = new Intent(LaunchActivity.this, TrackingService.class);
+                getBaseContext().startService(startTracking);
+            }
+        });
+
+        nextActivity = (Button) findViewById(R.id.btnNextActivity);
+        nextActivity.setOnClickListener(new OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                Intent intent = new Intent(LaunchActivity.this, StopTrackingActivity.class);
+                fadeActivity(intent);
+            }
+        });
     }
 
-    @Override
-    protected void onResume() {
-        super.onResume();
-        bindService(new Intent(getApplicationContext(), TrackingService.class), trackingServiceConnection,
-                Context.BIND_AUTO_CREATE);
+    private boolean googlePLayServicesAvailable() {
+        int resultCode = GooglePlayServicesUtil.isGooglePlayServicesAvailable(this);
+
+        if (ConnectionResult.SUCCESS == resultCode) {
+            ExLog.i(this, TAG, getString(R.string.play_services_available));
+            return true;
+        } else {
+            // Display an error dialog
+            Dialog dialog = GooglePlayServicesUtil.getErrorDialog(resultCode, this, 0);
+            if (dialog != null) {
+                ErrorDialogFragment errorFragment = new ErrorDialogFragment();
+                errorFragment.setDialog(dialog);
+                errorFragment.show(getSupportFragmentManager(), TAG);
+            }
+            return false;
+        }
     }
 
-    @Override
-    protected void onPause() {
-        super.onPause();
-        if (boundTrackingService) {
-            trackingService.stopTracking();
-            status.setText(R.string.not_tracking);
-            unbindService(trackingServiceConnection);
+    public static class ErrorDialogFragment extends DialogFragment {
+        private Dialog dialog;
+
+        public ErrorDialogFragment() {
+            super();
+            dialog = null;
+        }
+
+        /**
+         * Set the dialog to display
+         *
+         * @param dialog
+         *            An error dialog
+         */
+        public void setDialog(Dialog dialog) {
+            this.dialog = dialog;
+        }
+
+        /*
+         * This method must return a Dialog to the DialogFragment.
+         */
+        @Override
+        public Dialog onCreateDialog(Bundle savedInstanceState) {
+            return dialog;
         }
     }
 }
