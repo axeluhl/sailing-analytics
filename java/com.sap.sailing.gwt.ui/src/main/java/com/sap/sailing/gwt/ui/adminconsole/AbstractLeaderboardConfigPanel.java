@@ -137,7 +137,6 @@ public abstract class AbstractLeaderboardConfigPanel extends FormPanel implement
         //Create leaderboards list and functionality
         CaptionPanel leaderboardsCaptionPanel = new CaptionPanel(stringMessages.leaderboards());
         leaderboardsCaptionPanel.setStyleName("bold");
-        leaderboardsCaptionPanel.setWidth("75%");
         mainPanel.add(leaderboardsCaptionPanel);
 
         VerticalPanel leaderboardsPanel = new VerticalPanel();
@@ -184,20 +183,23 @@ public abstract class AbstractLeaderboardConfigPanel extends FormPanel implement
 
         // caption panels for the selected leaderboard and tracked races
         HorizontalPanel splitPanel = new HorizontalPanel();
+        splitPanel.setWidth("100%");
         splitPanel.ensureDebugId("LeaderboardDetailsPanel");
         mainPanel.add(splitPanel);
 
         selectedLeaderBoardPanel = new CaptionPanel(stringMessages.leaderboard());
-        selectedLeaderBoardPanel.setWidth("50%");
+//        selectedLeaderBoardPanel.setWidth("50%");
         splitPanel.add(selectedLeaderBoardPanel);
-
+        splitPanel.setCellWidth(selectedLeaderBoardPanel, "50%");
+        
         VerticalPanel vPanel = new VerticalPanel();
         vPanel.setWidth("100%");
         selectedLeaderBoardPanel.setContentWidget(vPanel);
 
         trackedRacesCaptionPanel = new CaptionPanel(stringMessages.trackedRaces());
-        trackedRacesCaptionPanel.setWidth("50%");
+//        trackedRacesCaptionPanel.setWidth("50%");
         splitPanel.add(trackedRacesCaptionPanel);
+        splitPanel.setCellWidth(trackedRacesCaptionPanel, "50%");
 
         VerticalPanel trackedRacesPanel = new VerticalPanel();
         trackedRacesPanel.setWidth("100%");
@@ -234,7 +236,7 @@ public abstract class AbstractLeaderboardConfigPanel extends FormPanel implement
         
         raceColumnTable = new RaceTableWrapper<SetSelectionModel<RaceColumnDTOAndFleetDTOWithNameBasedEquality>>(
                 sailingService, stringMessages, errorReporter, raceColumnTableSelectionModel);
-        raceColumnTable.getTable().setWidth("500px");
+        raceColumnTable.getTable().setWidth("100%");
         addColumnsToRacesTable(raceColumnTable.getTable());
         this.raceColumnTableSelectionModel = raceColumnTableSelectionModel;
         raceColumnTableSelectionModel.addSelectionChangeHandler(new SelectionChangeEvent.Handler() {
