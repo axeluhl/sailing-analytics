@@ -52,7 +52,7 @@ public class LoginEntryPoint implements EntryPoint {
         fp.add(pwLabel);
         final PasswordTextBox pwText = new PasswordTextBox();
         fp.add(pwText);
-        SubmitButton submit = new SubmitButton();
+        SubmitButton submit = new SubmitButton(stringMessages.signIn());
         fp.add(submit);
         FormPanel formPanel = new FormPanel();
         formPanel.addSubmitHandler(new SubmitHandler() {

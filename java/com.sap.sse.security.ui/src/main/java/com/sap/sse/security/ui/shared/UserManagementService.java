@@ -19,7 +19,7 @@ public interface UserManagementService extends RemoteService {
     
     SuccessInfo login(String username, String password);
     
-    UserDTO createSimpleUser(String name, String email, String password);
+    UserDTO createSimpleUser(String name, String email, String password) throws Exception;
     
     SuccessInfo deleteUser(String username);
     

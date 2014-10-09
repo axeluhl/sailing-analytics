@@ -11,4 +11,6 @@ public interface StringMessages extends Messages {
     String password();
 
     String loggedIn();
+
+    String signIn();
 }

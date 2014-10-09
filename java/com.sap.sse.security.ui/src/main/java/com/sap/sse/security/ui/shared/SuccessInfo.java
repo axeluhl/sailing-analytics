@@ -9,8 +9,7 @@ public class SuccessInfo implements IsSerializable {
     private boolean successful;
     private String message;
     
-    public SuccessInfo() {
-    }
+    SuccessInfo() {} // for serializtion only
     
     public SuccessInfo(boolean successful, String message) {
         super();

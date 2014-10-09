@@ -273,15 +273,19 @@ public class SecurityServiceImpl extends RemoteServiceServlet implements Securit
 
     @Override
     public User getCurrentUser() {
+        final User result;
         Subject subject = SecurityUtils.getSubject();
         if (subject == null) {
-            return null;
+            result = null;
+        } else {
+            String username = SessionUtils.loadUsername();
+            if (username == null || username.length() <= 0) {
+                result = null;
+            } else {
+                result = store.getUserByName(username);
+            }
         }
-        String username = SessionUtils.loadUsername();
-        if (username == null || username.length() <= 0) {
-            return null;
-        }
-        return store.getUserByName(username);
+        return result;
     }
 
     @Override
