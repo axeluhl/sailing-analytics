@@ -1,6 +1,6 @@
 # RaceLog Tracking App Architecture
 
-[[TOC]]
+[[_TOC_]]
 
 # Development Info
 Development is currently underway on the following branches:
