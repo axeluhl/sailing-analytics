@@ -20,28 +20,32 @@ public class UserStoreImpl implements UserStore {
 
     private String name = "MongoDB user store";
 
-    private ConcurrentHashMap<String, User> users;
-    private ConcurrentHashMap<String, Object> settings;
-    private ConcurrentHashMap<String, Class<?>> settingTypes;
+    private final ConcurrentHashMap<String, User> users;
+    private final ConcurrentHashMap<String, Object> settings;
+    private final ConcurrentHashMap<String, Class<?>> settingTypes;
+    private final DomainObjectFactory domainObjectFactory;
+    private final MongoObjectFactory mongoObjectFactory;
 
     public UserStoreImpl() {
         users = new ConcurrentHashMap<>();
         settings = new ConcurrentHashMap<>();
         settingTypes = new ConcurrentHashMap<String, Class<?>>();
-        for (Entry<String, Class<?>> e : PersistenceFactory.INSTANCE.getDefaultDomainObjectFactory().loadSettingTypes().entrySet()) {
+        domainObjectFactory = PersistenceFactory.INSTANCE.getDefaultDomainObjectFactory();
+        mongoObjectFactory = PersistenceFactory.INSTANCE.getDefaultMongoObjectFactory();
+        for (Entry<String, Class<?>> e : domainObjectFactory.loadSettingTypes().entrySet()) {
             settingTypes.put(e.getKey(), e.getValue());
         }
-        for (Entry<String, Object> e : PersistenceFactory.INSTANCE.getDefaultDomainObjectFactory().loadSettings().entrySet()) {
+        for (Entry<String, Object> e : domainObjectFactory.loadSettings().entrySet()) {
             settings.put(e.getKey(), e.getValue());
         }
         boolean changed = false;
         changed = changed || initDefaultSettingsIfEmpty();
         changed = changed || initSocialSettingsIfEmpty();
         if (changed) {
-            PersistenceFactory.INSTANCE.getDefaultMongoObjectFactory().storeSettingTypes(settingTypes);
-            PersistenceFactory.INSTANCE.getDefaultMongoObjectFactory().storeSettings(settings);
+            mongoObjectFactory.storeSettingTypes(settingTypes);
+            mongoObjectFactory.storeSettings(settings);
         }
-        for (User u : PersistenceFactory.INSTANCE.getDefaultDomainObjectFactory().loadAllUsers()) {
+        for (User u : domainObjectFactory.loadAllUsers()) {
             users.put(u.getName(), u);
         }
     }
@@ -82,7 +86,7 @@ public class UserStoreImpl implements UserStore {
         }
         User user = new User(name, email, accounts);
         logger.info("Creating user: " + user.toString());
-        PersistenceFactory.INSTANCE.getDefaultMongoObjectFactory().storeUser(user);
+        mongoObjectFactory.storeUser(user);
         users.put(name, user);
         return user;
     }
@@ -115,7 +119,7 @@ public class UserStoreImpl implements UserStore {
             throw new UserManagementException(UserManagementException.USER_DOES_NOT_EXIST);
         }
         user.addRole(role);
-        PersistenceFactory.INSTANCE.getDefaultMongoObjectFactory().storeUser(user);
+        mongoObjectFactory.storeUser(user);
     }
 
     @Override
@@ -124,7 +128,7 @@ public class UserStoreImpl implements UserStore {
             throw new UserManagementException(UserManagementException.USER_DOES_NOT_EXIST);
         }
         users.get(name).removeRole(role);
-        PersistenceFactory.INSTANCE.getDefaultMongoObjectFactory().storeUser(users.get(name));
+        mongoObjectFactory.storeUser(users.get(name));
     }
 
     @Override
@@ -133,7 +137,7 @@ public class UserStoreImpl implements UserStore {
             throw new UserManagementException(UserManagementException.USER_DOES_NOT_EXIST);
         }
         logger.info("Deleting user: " + users.get(name).toString());
-        PersistenceFactory.INSTANCE.getDefaultMongoObjectFactory().deleteUser(users.get(name));
+        mongoObjectFactory.deleteUser(users.get(name));
         users.remove(name);
     }
 
@@ -152,7 +156,7 @@ public class UserStoreImpl implements UserStore {
     @Override
     public void addSetting(String key, Class<?> type) {
         settingTypes.put(key, type);
-        PersistenceFactory.INSTANCE.getDefaultMongoObjectFactory().storeSettingTypes(settingTypes);
+        mongoObjectFactory.storeSettingTypes(settingTypes);
     }
 
     @Override
@@ -162,7 +166,7 @@ public class UserStoreImpl implements UserStore {
             return;
         }
         settings.put(key, setting);
-        PersistenceFactory.INSTANCE.getDefaultMongoObjectFactory().storeSettings(settings);
+        mongoObjectFactory.storeSettings(settings);
     }
 
     @Override
