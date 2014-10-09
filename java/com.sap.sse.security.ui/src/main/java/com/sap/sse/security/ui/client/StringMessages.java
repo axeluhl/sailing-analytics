@@ -27,4 +27,6 @@ public interface StringMessages extends Messages {
     String settings();
 
     String filterUsers();
+
+    String welcome(String name);
 }

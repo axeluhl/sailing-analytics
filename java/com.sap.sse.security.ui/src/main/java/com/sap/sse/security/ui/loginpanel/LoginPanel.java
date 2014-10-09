@@ -150,9 +150,7 @@ public class LoginPanel extends FlowPanel implements UserStatusEventHandler {
         Anchor register = new Anchor(stringMessages.signUp(),
                 EntryPointLinkFactory.createRegistrationLink(new HashMap<String, String>()));
         formContent.add(register);
-
         formContent.add(new OAuthLoginPanel(userManagementService));
-
         loginPanel.setWidget(formContent);
     }
 
@@ -166,14 +164,12 @@ public class LoginPanel extends FlowPanel implements UserStatusEventHandler {
             Anchor logout = new Anchor(stringMessages.signOut());
             userPanel.add(logout);
             logout.addClickHandler(new ClickHandler() {
-
                 @Override
                 public void onClick(ClickEvent event) {
                     userManagementService.logout(new AsyncCallback<SuccessInfo>() {
-
                         @Override
                         public void onFailure(Throwable caught) {
-                            Window.alert("Could not log out:" + caught.getMessage());
+                            Window.alert(stringMessages.couldNotSignOut(caught.getMessage()));
                         }
 
                         @Override
@@ -224,7 +220,7 @@ public class LoginPanel extends FlowPanel implements UserStatusEventHandler {
                 if (name.length() > 15) {
                     name = name.substring(0, 12) + "...";
                 }
-                loginTitle.setText("Welcome, " + name + "! ");
+                loginTitle.setText(stringMessages.welcome(name));
             }
             infoPanel.setWidget(userPanel);
             loginLink.setText("");
@@ -232,7 +228,7 @@ public class LoginPanel extends FlowPanel implements UserStatusEventHandler {
         } else {
             infoPanel.setWidget(loginPanel);
             loginTitle.setText("");
-            loginLink.setText("Login");
+            loginLink.setText(stringMessages.signIn());
         }
         expanded = false;
         wrapperPanel.addStyleName(css.loginPanelCollapsed());
