@@ -13,14 +13,9 @@ import org.apache.shiro.cache.CacheManager;
  *
  */
 public class SessionCacheManager implements CacheManager {
-    private final SecurityService securityService;
-    
-    public SessionCacheManager() {
-        securityService = Activator.getSecurityService();
-    }
-
     @Override
     public <K, V> Cache<K, V> getCache(String name) throws CacheException {
+        final SecurityService securityService = Activator.getSecurityService();
         if (securityService == null){
             return null;
         }
