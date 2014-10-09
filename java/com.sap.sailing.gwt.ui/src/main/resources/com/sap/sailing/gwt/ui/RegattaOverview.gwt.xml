@@ -52,6 +52,9 @@
 	<source path='common'/> 
 	<source path='client'/>
 	<source path='controls'/>
+	<source path='adminconsole'/>
+	<source path='usermanagement'/>
+	<source path='masterdataimport'/>
 	<source path='components'/>
 	<source path='leaderboard'/>
 	<source path='regattaoverview'/>
