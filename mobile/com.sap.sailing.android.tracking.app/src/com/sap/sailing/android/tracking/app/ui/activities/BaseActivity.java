@@ -5,9 +5,11 @@ import android.view.MenuItem;
 import com.sap.sailing.android.shared.logging.ExLog;
 import com.sap.sailing.android.shared.ui.activities.SendingServiceAwareActivity;
 import com.sap.sailing.android.tracking.app.R;
+import com.sap.sailing.android.tracking.app.utils.AppPreferences;
 
 public class BaseActivity extends SendingServiceAwareActivity {
     private static final String TAG = SendingServiceAwareActivity.class.getName();
+    protected final AppPreferences prefs = new AppPreferences(this);
 
     @Override
     protected int getOptionsMenuResId() {

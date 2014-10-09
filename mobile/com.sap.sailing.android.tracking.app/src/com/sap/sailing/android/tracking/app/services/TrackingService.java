@@ -2,6 +2,9 @@ package com.sap.sailing.android.tracking.app.services;
 
 import java.util.UUID;
 
+import org.json.JSONException;
+import org.json.JSONObject;
+
 import android.app.Notification;
 import android.app.NotificationManager;
 import android.app.PendingIntent;
@@ -20,10 +23,10 @@ import com.google.android.gms.location.LocationListener;
 import com.google.android.gms.location.LocationRequest;
 import com.sap.sailing.android.shared.logging.ExLog;
 import com.sap.sailing.android.shared.services.sending.MessageSendingService;
-import com.sap.sailing.android.shared.util.PrefUtils;
 import com.sap.sailing.android.tracking.app.R;
-import com.sap.sailing.android.tracking.app.nmea.NmeaGprmcBuilder;
 import com.sap.sailing.android.tracking.app.ui.activities.LaunchActivity;
+import com.sap.sailing.android.tracking.app.utils.AppPreferences;
+import com.sap.sailing.server.gateway.deserialization.impl.FlatSmartphoneUuidAndGPSFixMovingJsonDeserializer;
 
 public class TrackingService extends Service implements ConnectionCallbacks, OnConnectionFailedListener,
         LocationListener {
@@ -32,9 +35,11 @@ public class TrackingService extends Service implements ConnectionCallbacks, OnC
     private LocationRequest locationRequest;
     private NotificationManager notificationManager;
     private boolean locationUpdateRequested = false;
+    private final AppPreferences prefs = new AppPreferences(this);
 
     private static final String TAG = TrackingService.class.getName();
 
+    public static final String WEB_SERVICE_PATH = "/tracking/recordFixesFlatJson";
     public static final int FIX_INTERVAL_MS = 500;
     public static final int FASTEST_FIX_INTERVAL_MS = 100;
     // Unique Identification Number for the Notification.
@@ -95,16 +100,29 @@ public class TrackingService extends Service implements ConnectionCallbacks, OnC
         ExLog.i(this, TAG, "LocationClient was disconnected");
     }
 
-    private String getServerURL() {
-        return PrefUtils.getString(this, R.string.preference_server_url_key, R.string.preference_server_url_default);
+    private String getWebServiceURL() {
+        return prefs.getServerURL() + WEB_SERVICE_PATH;
     }
 
     @Override
     public void onLocationChanged(Location location) {
-        String nmea = NmeaGprmcBuilder.buildNmeaStringFrom(location);
-        startService(MessageSendingService.createMessageIntent(this, getServerURL(), null, UUID.randomUUID(), nmea,
-                null));
-        ExLog.i(this, TAG, "Sent NMEA to server:" + nmea);
+        JSONObject json = new JSONObject();
+        try {
+            json.put(FlatSmartphoneUuidAndGPSFixMovingJsonDeserializer.DEVICE_UUID,
+                    prefs.getDeviceIdentifier());
+            json.put(FlatSmartphoneUuidAndGPSFixMovingJsonDeserializer.LAT_DEG, location.getLatitude());
+            json.put(FlatSmartphoneUuidAndGPSFixMovingJsonDeserializer.LON_DEG, location.getLongitude());
+            json.put(FlatSmartphoneUuidAndGPSFixMovingJsonDeserializer.TIME_MILLIS, location.getTime());
+            json.put(FlatSmartphoneUuidAndGPSFixMovingJsonDeserializer.SPEED_M_PER_S, location.getSpeed());
+            json.put(FlatSmartphoneUuidAndGPSFixMovingJsonDeserializer.BEARING_DEG, location.getBearing());
+        } catch (JSONException e) {
+            ExLog.e(this, TAG, "Error serializing fix: " + e.getMessage());
+        }
+        String jsonString = json.toString();
+        
+        startService(MessageSendingService.createMessageIntent(this, getWebServiceURL(),
+                null, UUID.randomUUID(), jsonString, null));
+        
         // TODO also store to SD card
     }
 
