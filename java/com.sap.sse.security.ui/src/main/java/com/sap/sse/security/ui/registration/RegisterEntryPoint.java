@@ -18,12 +18,14 @@ import com.google.gwt.user.client.ui.SubmitButton;
 import com.google.gwt.user.client.ui.TextBox;
 import com.sap.sse.gwt.client.EntryPointHelper;
 import com.sap.sse.security.ui.client.RemoteServiceMappingConstants;
+import com.sap.sse.security.ui.client.StringMessages;
 import com.sap.sse.security.ui.shared.SuccessInfo;
 import com.sap.sse.security.ui.shared.UserManagementService;
 import com.sap.sse.security.ui.shared.UserManagementServiceAsync;
 
 public class RegisterEntryPoint implements EntryPoint {
     private final UserManagementServiceAsync userManagementService = GWT.create(UserManagementService.class);
+    private final StringMessages stringMessages = GWT.create(StringMessages.class);
 
     @Override
     public void onModuleLoad() {
@@ -36,24 +38,18 @@ public class RegisterEntryPoint implements EntryPoint {
         
         FlowPanel fp = new FlowPanel();
         
-        Label nameLabel = new Label("Name: ");
+        Label nameLabel = new Label(stringMessages.name()+": ");
         fp.add(nameLabel);
         final TextBox nameText = new TextBox();
-        nameText.setName("username");
         fp.add(nameText);
-        
-        Label pwLabel = new Label("Password: ");
+        Label pwLabel = new Label(stringMessages.password()+": ");
         fp.add(pwLabel);
         final PasswordTextBox pwText = new PasswordTextBox();
-        pwText.setName("password");
         fp.add(pwText);
-        
-        SubmitButton submit = new SubmitButton("login");
+        SubmitButton submit = new SubmitButton();
         fp.add(submit);
-        
         FormPanel formPanel = new FormPanel();
         formPanel.addSubmitHandler(new SubmitHandler() {
-            
             @Override
             public void onSubmit(SubmitEvent event) {
                 userManagementService.login(nameText.getText(), pwText.getText(), new AsyncCallback<SuccessInfo>() {
@@ -68,7 +64,7 @@ public class RegisterEntryPoint implements EntryPoint {
                             Window.Location.replace(result.getMessage());
                         }
                         else if (result.isSuccessful()) {
-                            Window.alert("Logged in!");
+                            Window.alert(stringMessages.loggedIn());
                         }
                         else {
                             Window.alert(result.getMessage());

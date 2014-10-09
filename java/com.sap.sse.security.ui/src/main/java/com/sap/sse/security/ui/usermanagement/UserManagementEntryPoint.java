@@ -67,7 +67,6 @@ public class UserManagementEntryPoint implements EntryPoint {
     @Override
     public void onModuleLoad() {
         EntryPointHelper.registerASyncService((ServiceDefTarget) userManagementService,
-                RemoteServiceMappingConstants.WEB_CONTEXT_PATH,
                 RemoteServiceMappingConstants.userManagementServiceRemotePath);
         center = new SimpleLayoutPanel();
         RootLayoutPanel rootPanel = RootLayoutPanel.get();
