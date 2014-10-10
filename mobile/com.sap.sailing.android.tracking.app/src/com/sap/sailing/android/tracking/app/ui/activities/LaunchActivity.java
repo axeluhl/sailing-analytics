@@ -11,11 +11,15 @@ import android.view.View.OnClickListener;
 import android.widget.Button;
 import android.widget.Toast;
 
+import com.sap.sailing.android.shared.logging.ExLog;
 import com.sap.sailing.android.tracking.app.R;
+import com.sap.sailing.android.tracking.app.utils.AppPreferences;
 
 public class LaunchActivity extends BaseActivity {
     
     private static int requestCodeQRCode = 42471;
+    private static final String TAG = LaunchActivity.class.getName();
+    private final AppPreferences prefs = new AppPreferences(this);
     
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -54,12 +58,15 @@ public class LaunchActivity extends BaseActivity {
         
         if (resultCode == Activity.RESULT_OK) {
             String content = data.getStringExtra("SCAN_RESULT");
-            try {
-                //Just Toast URL for now, TODO: parse URL parameters (race, regatta, ...)
-                Toast.makeText(this, content, Toast.LENGTH_LONG).show();
-            } catch (IllegalArgumentException e) {
-                Toast.makeText(this, "Error scanning QRCode (" + e.getMessage() + ")", Toast.LENGTH_LONG).show();
-            }
+            ExLog.i(this, TAG, "Parsing URI: "+content);
+            Uri uri = Uri.parse(content);
+            String host = uri.getHost();
+            prefs.setServerURL(host);
+            String leaderboard = uri.getQueryParameter("leaderboard");
+            String raceColumn = uri.getQueryParameter("raceColumn");
+            String fleet = uri.getQueryParameter("fleet");
+            String competitor = uri.getQueryParameter("competitor");
+            //TODO: write RacelogDeviceCompetitorMappingEvent
         } else {
             Toast.makeText(this, "Error scanning QRCode (" + resultCode + ")", Toast.LENGTH_LONG).show();
         }
