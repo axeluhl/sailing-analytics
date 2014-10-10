@@ -14,7 +14,7 @@ public class SmartphoneUUIDSerializationHandler {
     }
 
     public Util.Pair<String, String> serialize(DeviceIdentifier deviceIdentifier) throws TransformationException {
-        return new Util.Pair<String, String>(castIdentifier(deviceIdentifier).getUUID().toString(), SmartphoneUUIDIdentifier.TYPE);
+        return new Util.Pair<String, String>(SmartphoneUUIDIdentifier.TYPE, castIdentifier(deviceIdentifier).getUUID().toString());
     }
 
     public DeviceIdentifier deserialize(String input, String type, String stringRep) throws TransformationException {
