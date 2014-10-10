@@ -77,8 +77,8 @@ public class AutoPlayController implements RaceTimesInfoProviderListener {
     private static int SAP_HEADER_HEIGHT = 70;
     
     public AutoPlayController(SailingServiceAsync sailingService, MediaServiceAsync mediaService, 
-            ErrorReporter errorReporter, String leaderboardGroupName, String leaderboardName, final String leaderboardZoom, UserAgentDetails userAgent,
-            long delayToLiveInMillis, boolean showRaceDetails, RaceBoardViewConfiguration raceboardViewConfig, PlayerView playerView) {
+            ErrorReporter errorReporter, String leaderboardGroupName, String leaderboardName, final String leaderboardZoom, 
+            UserAgentDetails userAgent, long delayToLiveInMillis, boolean showRaceDetails, RaceBoardViewConfiguration raceboardViewConfig, PlayerView playerView) {
         this.raceboardViewConfig = raceboardViewConfig;
         this.sailingService = sailingService;
         this.mediaService = mediaService;

@@ -35,6 +35,7 @@ public class DesktopStartView extends Composite implements StartView {
     @UiField(provided=true) ListBox eventSelectionBox;
     @UiField(provided=true) ListBox leaderboardSelectionBox;
     @UiField CheckBox leaderboardAutoZoomBox;
+    @UiField CheckBox startInFullscreenModeBox;
     @UiField TextBox leaderboardZoomBox;
     @UiField Button startAutoPlayButton;
     @UiField DivElement leaderboardSelectionDiv;
@@ -57,6 +58,7 @@ public class DesktopStartView extends Composite implements StartView {
 
         leaderboardAutoZoomBox.setValue(true);
         leaderboardZoomBox.setEnabled(false);
+        startInFullscreenModeBox.setValue(true);
 
         leaderboardSelectionDiv.getStyle().setVisibility(Visibility.HIDDEN);
         leaderboardZoomDiv.getStyle().setVisibility(Visibility.HIDDEN);
@@ -111,8 +113,9 @@ public class DesktopStartView extends Composite implements StartView {
         EventDTO selectedEvent = getSelectedEvent();
         String selectedLeaderboardName = getSelectedLeaderboardName();
         String leaderboardZoom = getLeaderboardZoom();
+        
         if(selectedEvent != null && selectedLeaderboardName != null) {
-            navigator.goToPlayer(selectedEvent.id.toString(), selectedLeaderboardName, leaderboardZoom);
+            navigator.goToPlayer(selectedEvent.id.toString(), selectedLeaderboardName, leaderboardZoom, startInFullscreenModeBox.getValue());
         }
     }
 
