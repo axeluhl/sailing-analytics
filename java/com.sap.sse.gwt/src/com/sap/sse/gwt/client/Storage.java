@@ -19,6 +19,10 @@ public class Storage extends JavaScriptObject {
         registerAsStorageEventHandler();
     }
     
+    protected Storage() {
+        super();
+    }
+    
     private static void registerAsStorageEventHandler() {
         if (isSupported()) {
             registerAsStorageEventHandlerImpl();
@@ -100,27 +104,27 @@ public class Storage extends JavaScriptObject {
         return result;
     }
     
-    public native void setItem(String key, String value) /*-{
+    public final native void setItem(String key, String value) /*-{
         this.setItem(key, value);
     }-*/;
 
-    public native String getItem(String key) /*-{
+    public final native String getItem(String key) /*-{
         return this.getItem(key);
     }-*/;
 
-    public native void removeItem(String key) /*-{
+    public final native void removeItem(String key) /*-{
         return this.removeItem(key);
     }-*/;
 
-    public native void clear() /*-{
+    public final native void clear() /*-{
         this.clear();
     }-*/;
 
-    public native String getKey(int index) /*-{
+    public final native String getKey(int index) /*-{
         return this.key(index);
     }-*/;
 
-    public native int getLength() /*-{
+    public final native int getLength() /*-{
         return this.length;
     }-*/;
 }
