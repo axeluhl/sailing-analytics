@@ -35,7 +35,7 @@ public class TrackingService extends Service implements ConnectionCallbacks, OnC
     private LocationRequest locationRequest;
     private NotificationManager notificationManager;
     private boolean locationUpdateRequested = false;
-    private final AppPreferences prefs = new AppPreferences(this);
+    private AppPreferences prefs;
 
     private static final String TAG = TrackingService.class.getName();
 
@@ -49,6 +49,7 @@ public class TrackingService extends Service implements ConnectionCallbacks, OnC
     @Override
     public void onCreate() {
         super.onCreate();
+        prefs = new AppPreferences(this);
 
         // http://developer.android.com/training/location/receive-location-updates.html
         locationRequest = LocationRequest.create();
