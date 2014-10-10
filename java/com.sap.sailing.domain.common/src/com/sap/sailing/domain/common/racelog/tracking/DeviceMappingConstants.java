@@ -28,5 +28,5 @@ public interface DeviceMappingConstants {
    static final String COMPETITOR_ID_AS_STRING = "competitor";
    static final String MARK_ID_AS_STRING = "mark";
    static final String FROM_MILLIS = "from";
-   static final String TO_MILLIS = "from";
+   static final String TO_MILLIS = "to";
 }

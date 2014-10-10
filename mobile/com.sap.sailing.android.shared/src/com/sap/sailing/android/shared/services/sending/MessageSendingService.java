@@ -2,11 +2,13 @@ package com.sap.sailing.android.shared.services.sending;
 
 import java.io.InputStream;
 import java.io.Serializable;
+import java.net.URLEncoder;
 import java.util.Calendar;
 import java.util.Date;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
+import java.util.UUID;
 
 import android.app.Service;
 import android.content.ComponentName;
@@ -25,6 +27,7 @@ import com.sap.sailing.android.shared.logging.ExLog;
 import com.sap.sailing.android.shared.services.sending.MessagePersistenceManager.MessageRestorer;
 import com.sap.sailing.android.shared.services.sending.MessageSenderTask.MessageSendingListener;
 import com.sap.sailing.android.shared.util.PrefUtils;
+import com.sap.sailing.domain.common.racelog.RaceLogServletConstants;
 
 /**
  * Service that handles sending messages to a webservice. Deals with an offline setting
@@ -307,5 +310,23 @@ public class MessageSendingService extends Service implements MessageSendingList
             return false;
         }
         return activeNetwork.isConnected();
+    }
+    
+    /**
+     * a UUID that identifies this client session; can be used, e.g., to let the server identify subsequent requests coming from the same client
+     */
+    public final static UUID uuid = UUID.randomUUID();
+    
+    public static String getRaceLogEventSendAndReceiveUrl(Context context, final String raceGroupName,
+            final String raceName, final String fleetName) {
+        String url = String.format("%s/sailingserver/rc/racelog?"+
+                RaceLogServletConstants.PARAMS_LEADERBOARD_NAME+"=%s&"+
+                RaceLogServletConstants.PARAMS_RACE_COLUMN_NAME+"=%s&"+
+                RaceLogServletConstants.PARAMS_RACE_FLEET_NAME+"=%s&"+
+                RaceLogServletConstants.PARAMS_CLIENT_UUID+"=%s",
+                PrefUtils.getString(context, R.string.preference_server_url_key, R.string.preference_server_url_default),
+                URLEncoder.encode(raceGroupName),
+                URLEncoder.encode(raceName), URLEncoder.encode(fleetName), uuid);
+        return url;
     }
 }

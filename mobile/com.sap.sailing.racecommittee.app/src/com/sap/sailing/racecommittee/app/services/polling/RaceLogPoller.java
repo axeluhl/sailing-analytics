@@ -15,12 +15,12 @@ import android.os.Handler;
 import android.os.Looper;
 
 import com.sap.sailing.android.shared.logging.ExLog;
+import com.sap.sailing.android.shared.services.sending.MessageSendingService;
 import com.sap.sailing.racecommittee.app.AppPreferences;
 import com.sap.sailing.racecommittee.app.AppPreferences.PollingActiveChangedListener;
 import com.sap.sailing.racecommittee.app.domain.ManagedRace;
 import com.sap.sailing.racecommittee.app.domain.racelog.impl.RaceLogEventsCallback;
 import com.sap.sailing.racecommittee.app.services.polling.RaceLogPollerTask.PollingResultListener;
-import com.sap.sailing.racecommittee.app.services.sending.EventSendingServiceUtil;
 import com.sap.sse.common.Util;
 
 /**
@@ -70,7 +70,7 @@ public class RaceLogPoller implements PollingActiveChangedListener {
     }
 
     private URL createURL(ManagedRace race) throws MalformedURLException {
-        return new URL(EventSendingServiceUtil.getRaceLogEventSendAndReceiveUrl(context, race.getRaceGroup().getName(),
+        return new URL(MessageSendingService.getRaceLogEventSendAndReceiveUrl(context, race.getRaceGroup().getName(),
                 race.getName(), race.getFleet().getName()));
     }
 
