@@ -2,12 +2,11 @@ package com.sap.sse.security.ui.client;
 
 import java.util.HashSet;
 import java.util.Set;
-import java.util.UUID;
 import java.util.logging.Logger;
 
 import com.google.gwt.core.client.GWT;
-import com.google.gwt.storage.client.Storage;
-import com.google.gwt.storage.client.StorageEvent;
+import com.google.gwt.core.client.JavaScriptObject;
+import com.google.gwt.user.client.Random;
 import com.google.gwt.user.client.Window;
 import com.google.gwt.user.client.rpc.AsyncCallback;
 import com.sap.sse.gwt.client.async.MarkedAsyncCallback;
@@ -46,52 +45,58 @@ public class UserService {
 
     private final UserManagementServiceAsync userManagementService;
 
-    private final Storage localStorage;
-
     private final Set<UserStatusEventHandler> handlers;
 
     private UserDTO currentUser;
 
-    private final UUID id;
+    private final String id;
 
     public UserService(UserManagementServiceAsync userManagementService) {
-        this.id = UUID.randomUUID();
+        this.id = ""+(System.currentTimeMillis() * Random.nextInt()); // something pretty random
         this.userManagementService = userManagementService;
-        localStorage = Storage.getLocalStorageIfSupported();
         handlers = new HashSet<>();
-        registerStorageListener();
+        registerThisAsStorageEventHandler();
         updateUser(/* notifyOtherInstances */ false);
     }
+    
+    private native void registerThisAsStorageEventHandler() /*-{
+        var that = this;
+        $wnd.addEventListener("storage", function(event) {
+            var key = event.key;
+            var newValue = event.newValue;
+            var oldValue = event.oldValue;
+            var url = event.url;
+            var storageArea = event.storageArea;
+            that.@com.sap.sse.security.ui.client.UserService::storageEventReceived(Ljava/lang/String;Ljava/lang/String;Ljava/lang/String;Ljava/lang/String;Lcom/google/gwt/core/client/JavaScriptObject;)(
+                key, newValue, oldValue, url, storageArea);
+        });
+    }-*/;
+
+    /**
+     * Lets this user service get notified if other tabs or browser windows update the logged-in user
+     */
+    public void storageEventReceived(String key, String newValue, String oldValue, String url, JavaScriptObject storageArea) {
+        logger.info("Received storage event { key: "+key+", newValue: "+newValue+", oldValue: "+oldValue+", url: "+url+", storageArea: "+storageArea);
+        // ignore update events coming from this object itself
+        if (LOCAL_STORAGE_UPDATE_KEY.equals(key) && newValue != null
+                && !newValue.isEmpty() && !newValue.equals(id.toString())) {
+            updateUser(/* Don't play endless ping-ping between instances! */ false);
+        }
+    }
+    
+    private native void setItem(String key, String value) /*-{
+        localStorage.setItem(key, value);
+    }-*/;
     
     /**
      * Used to synchronize changes in the user status between all {@link UserService} instances across all browser
      * tabs/windows.
      */
     public void fireUserUpdateEvent() {
-        if (localStorage != null) {
-            localStorage.setItem(LOCAL_STORAGE_UPDATE_KEY, id.toString());
-            localStorage.setItem(LOCAL_STORAGE_UPDATE_KEY, "");
-        }
+        setItem(LOCAL_STORAGE_UPDATE_KEY, ""); // force a change
+        setItem(LOCAL_STORAGE_UPDATE_KEY, id);
     }
 
-    /**
-     * Lets this user service get notified if other tabs or browser windows update the logged-in user
-     */
-    private void registerStorageListener() {
-        if (localStorage != null) {
-            Storage.addStorageEventHandler(new StorageEvent.Handler() {
-                @Override
-                public void onStorageChange(StorageEvent event) {
-                    // ignore update events coming from this object itself
-                    if (LOCAL_STORAGE_UPDATE_KEY.equals(event.getKey()) && event.getNewValue() != null
-                            && !event.getNewValue().isEmpty() && !event.getNewValue().equals(id.toString())) {
-                        updateUser(/* Don't play endless ping-ping between instances! */ false);
-                    }
-                }
-            });
-        }
-    };
-    
     /**
      * Fetches the {@link UserDTO} for the currently signed-in user, identified by the current session, from the server.
      * Receiving a result or an error condition will {@link #fireUserUpdateEvent() fire an update event} to all other
@@ -210,4 +215,5 @@ public class UserService {
     public UserManagementServiceAsync getUserManagementService() {
         return userManagementService;
     }
+    
 }
