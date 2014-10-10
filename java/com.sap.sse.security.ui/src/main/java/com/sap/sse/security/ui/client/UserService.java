@@ -76,10 +76,6 @@ public class UserService {
         });
     }
     
-    private native void setItem(String key, String value) /*-{
-        localStorage.setItem(key, value);
-    }-*/;
-    
     /**
      * Used to synchronize changes in the user status between all {@link UserService} instances across all browser
      * tabs/windows.
