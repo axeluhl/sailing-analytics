@@ -12,31 +12,35 @@ import com.google.gwt.core.client.JavaScriptObject;
  *
  */
 public class StorageEvent extends JavaScriptObject {
+    protected StorageEvent() {
+        super();
+    }
+    
     public static interface Handler {
         void onStorageChange(StorageEvent event);
     }
 
-    public native String getKey() /*-{
+    public final native String getKey() /*-{
         return this.key;
     }-*/;
 
-    public native String getNewValue() /*-{
+    public final native String getNewValue() /*-{
 	return this.newValue;
     }-*/;
 
-    public native String getOldValue() /*-{
+    public final native String getOldValue() /*-{
 	return this.oldValue;
     }-*/;
 
-    public Storage getStorageArea() {
+    public final Storage getStorageArea() {
         return getStorageAreaImpl().cast();
     }
 
-    private native JavaScriptObject getStorageAreaImpl() /*-{
+    private final native JavaScriptObject getStorageAreaImpl() /*-{
         return this.storageArea;
     }-*/;
 
-    public native String getUrl() /*-{
+    public final native String getUrl() /*-{
         return this.url;
     }-*/;
 }
