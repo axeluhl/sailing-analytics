@@ -1095,4 +1095,7 @@ public interface StringMessages extends Messages {
     String showAll();
     String raceVisibilityColumn();
     String enterCarryValueFor(String competitorName);
+    String mappingDetails();
+    String deviceMappingQrCodeExplanation();
+    String qrCode();
 }
