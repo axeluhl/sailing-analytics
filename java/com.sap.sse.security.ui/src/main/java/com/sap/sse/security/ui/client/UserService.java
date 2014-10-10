@@ -2,6 +2,7 @@ package com.sap.sse.security.ui.client;
 
 import java.util.HashSet;
 import java.util.Set;
+import java.util.UUID;
 import java.util.logging.Logger;
 
 import com.google.gwt.core.client.GWT;
@@ -9,11 +10,10 @@ import com.google.gwt.storage.client.Storage;
 import com.google.gwt.storage.client.StorageEvent;
 import com.google.gwt.user.client.Window;
 import com.google.gwt.user.client.rpc.AsyncCallback;
-import com.sap.sse.security.ui.loginpanel.LoginPanel;
+import com.sap.sse.gwt.client.async.MarkedAsyncCallback;
 import com.sap.sse.security.ui.oauth.client.util.ClientUtils;
 import com.sap.sse.security.ui.shared.SuccessInfo;
 import com.sap.sse.security.ui.shared.UserDTO;
-import com.sap.sse.security.ui.shared.UserManagementService;
 import com.sap.sse.security.ui.shared.UserManagementServiceAsync;
 
 /**
@@ -44,7 +44,7 @@ public class UserService {
      */
     private static final String LOCAL_STORAGE_UPDATE_KEY = "current-user-has-changed";
 
-    private static final UserManagementServiceAsync userManagementService = GWT.create(UserManagementService.class);
+    private final UserManagementServiceAsync userManagementService;
 
     private final Storage localStorage;
 
@@ -52,13 +52,28 @@ public class UserService {
 
     private UserDTO currentUser;
 
-    public UserService() {
+    private final UUID id;
+
+    public UserService(UserManagementServiceAsync userManagementService) {
+        this.id = UUID.randomUUID();
+        this.userManagementService = userManagementService;
         localStorage = Storage.getLocalStorageIfSupported();
         handlers = new HashSet<>();
         registerStorageListener();
         updateUser(/* notifyOtherInstances */ false);
     }
     
+    /**
+     * Used to synchronize changes in the user status between all {@link UserService} instances across all browser
+     * tabs/windows.
+     */
+    public void fireUserUpdateEvent() {
+        if (localStorage != null) {
+            localStorage.setItem(LOCAL_STORAGE_UPDATE_KEY, id.toString());
+            localStorage.setItem(LOCAL_STORAGE_UPDATE_KEY, "");
+        }
+    }
+
     /**
      * Lets this user service get notified if other tabs or browser windows update the logged-in user
      */
@@ -67,7 +82,9 @@ public class UserService {
             Storage.addStorageEventHandler(new StorageEvent.Handler() {
                 @Override
                 public void onStorageChange(StorageEvent event) {
-                    if (LOCAL_STORAGE_UPDATE_KEY.equals(event.getKey()) && Boolean.TRUE.toString().equals(event.getNewValue())) {
+                    // ignore update events coming from this object itself
+                    if (LOCAL_STORAGE_UPDATE_KEY.equals(event.getKey()) && event.getNewValue() != null
+                            && !event.getNewValue().isEmpty() && !event.getNewValue().equals(id.toString())) {
                         updateUser(/* Don't play endless ping-ping between instances! */ false);
                     }
                 }
@@ -86,7 +103,8 @@ public class UserService {
      *            if <code>true</code>, other instances of this class will be notified about the result of the call
      */
     private void updateUser(final boolean notifyOtherInstances) {
-        userManagementService.getCurrentUser(new AsyncCallback<UserDTO>() {
+        userManagementService.getCurrentUser(new MarkedAsyncCallback<UserDTO>(
+                new AsyncCallback<UserDTO>() {
             @Override
             public void onSuccess(UserDTO result) {
                 setCurrentUser(result, notifyOtherInstances);
@@ -96,7 +114,7 @@ public class UserService {
             public void onFailure(Throwable caught) {
                 Window.alert(caught.getMessage());
             }
-        });
+        }));
     }
     
     /**
@@ -105,7 +123,8 @@ public class UserService {
      * signed-in user will remain to be signed in.
      */
     public void login(String username, String password, final AsyncCallback<SuccessInfo> callback) {
-        userManagementService.login(username, password, new AsyncCallback<SuccessInfo>() {
+        userManagementService.login(username, password,
+                new MarkedAsyncCallback<SuccessInfo>(new AsyncCallback<SuccessInfo>() {
             @Override
             public void onFailure(Throwable caught) {
                 callback.onFailure(caught);
@@ -118,13 +137,14 @@ public class UserService {
                 }
                 callback.onSuccess(result);
             }
-        });
+        }));
     }
     
     public void verifySocialUser(final AsyncCallback<UserDTO> callback) throws Exception {
         final String authProviderName = ClientUtils.getAuthProviderNameFromCookie();
         logger.info("Verifying " + authProviderName + " user ...");
-        userManagementService.verifySocialUser(ClientUtils.getCredential(), new AsyncCallback<UserDTO>() {
+        userManagementService.verifySocialUser(ClientUtils.getCredential(),
+                new MarkedAsyncCallback<UserDTO>(new AsyncCallback<UserDTO>() {
             @Override
             public void onFailure(Throwable caught) {
                 callback.onFailure(caught);
@@ -136,11 +156,11 @@ public class UserService {
                 logger.info(authProviderName + " user '" + result.getName() + "' is verified!\n");
                 callback.onSuccess(result);
             }
-        });
+        }));
     }
 
     public void logout() {
-        LoginPanel.userManagementService.logout(new AsyncCallback<SuccessInfo>() {
+        userManagementService.logout(new AsyncCallback<SuccessInfo>() {
             @Override
             public void onFailure(Throwable caught) {
                 Window.alert(stringMessages.couldNotSignOut(caught.getMessage()));
@@ -165,8 +185,8 @@ public class UserService {
     
     private void setCurrentUser(UserDTO result, final boolean notifyOtherInstances) {
         currentUser = result;
-        logger.info("User changed to " + (result == null ? "No User" : result.getName()) + "roles: "
-                + result.getRoles());
+        logger.info("User changed to " + (result == null ? "No User" : (result.getName() + " roles: "
+                + result.getRoles())));
         notifyUserStatusEventHandlers();
         if (notifyOtherInstances) {
             fireUserUpdateEvent();
@@ -187,15 +207,7 @@ public class UserService {
         }
     }
     
-    /**
-     * Used to synchronize changes in the user status between all {@link UserService} instances across all browser
-     * tabs/windows.
-     */
-    public void fireUserUpdateEvent() {
-        if (localStorage != null) {
-            localStorage.setItem(LOCAL_STORAGE_UPDATE_KEY, Boolean.TRUE.toString());
-            localStorage.setItem(LOCAL_STORAGE_UPDATE_KEY, Boolean.FALSE.toString());
-        }
+    public UserManagementServiceAsync getUserManagementService() {
+        return userManagementService;
     }
-
 }

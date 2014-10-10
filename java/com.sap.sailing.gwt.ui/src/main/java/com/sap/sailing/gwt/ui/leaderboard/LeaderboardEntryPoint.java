@@ -32,7 +32,6 @@ import com.sap.sailing.gwt.ui.client.SailingServiceAsync;
 import com.sap.sailing.gwt.ui.client.StringMessages;
 import com.sap.sailing.gwt.ui.leaderboard.LeaderboardSettings.RaceColumnSelectionStrategies;
 import com.sap.sailing.gwt.ui.shared.EventDTO;
-import com.sap.sailing.gwt.ui.shared.SecurityStylesheetResources;
 import com.sap.sse.common.Util;
 import com.sap.sse.gwt.client.EntryPointHelper;
 import com.sap.sse.gwt.client.async.AsyncActionsExecutor;
@@ -42,7 +41,6 @@ import com.sap.sse.gwt.client.player.Timer;
 import com.sap.sse.gwt.client.player.Timer.PlayModes;
 import com.sap.sse.gwt.client.player.Timer.PlayStates;
 import com.sap.sse.gwt.shared.GwtHttpRequestUtils;
-import com.sap.sse.security.ui.loginpanel.LoginPanel;
 
 
 public class LeaderboardEntryPoint extends AbstractEntryPoint {
@@ -59,9 +57,7 @@ public class LeaderboardEntryPoint extends AbstractEntryPoint {
     @Override
     protected void doOnModuleLoad() {
         super.doOnModuleLoad();
-        
         EntryPointHelper.registerASyncService((ServiceDefTarget) sailingService, RemoteServiceMappingConstants.sailingServiceRemotePath);
-
         final boolean showRaceDetails = GwtHttpRequestUtils.getBooleanParameter(LeaderboardUrlSettings.PARAM_SHOW_RACE_DETAILS, false /* default*/);
         final boolean embedded = GwtHttpRequestUtils.getBooleanParameter(LeaderboardUrlSettings.PARAM_EMBEDDED, false /* default*/); 
         final boolean hideToolbar = GwtHttpRequestUtils.getBooleanParameter(LeaderboardUrlSettings.PARAM_HIDE_TOOLBAR, false /* default*/); 
@@ -88,7 +84,6 @@ public class LeaderboardEntryPoint extends AbstractEntryPoint {
                                             } else {
                                                 RootPanel.get().add(new Label(stringMessages.noSuchLeaderboard()));
                                             }
-                                            RootPanel.get().add(new LoginPanel(SecurityStylesheetResources.INSTANCE.css()));
                                         }
 
                                         @Override
@@ -121,7 +116,12 @@ public class LeaderboardEntryPoint extends AbstractEntryPoint {
         }
         final String zoomTo = Window.Location.getParameter(LeaderboardUrlSettings.PARAM_ZOOM_TO);
         if (zoomTo != null) {
-            RootPanel.getBodyElement().setAttribute("style", "zoom: "+zoomTo+";-moz-transform: scale("+zoomTo+");-moz-transform-origin: 0 0;-o-transform: scale("+zoomTo+");-o-transform-origin: 0 0;-webkit-transform: scale("+zoomTo+");-webkit-transform-origin: 0 0;");
+            RootPanel.getBodyElement().setAttribute(
+                    "style",
+                    "zoom: " + zoomTo + ";-moz-transform: scale(" + zoomTo
+                            + ");-moz-transform-origin: 0 0;-o-transform: scale(" + zoomTo
+                            + ");-o-transform-origin: 0 0;-webkit-transform: scale(" + zoomTo
+                            + ");-webkit-transform-origin: 0 0;");
         }
     }
     
@@ -136,7 +136,7 @@ public class LeaderboardEntryPoint extends AbstractEntryPoint {
                 leaderboardDisplayName = leaderboardName;
             }
             globalNavigationPanel = new GlobalNavigationPanel(stringMessages, true, null, leaderboardGroupName, event, null);
-            logoAndTitlePanel = new LogoAndTitlePanel(leaderboardGroupName, leaderboardDisplayName, stringMessages, this) {
+            logoAndTitlePanel = new LogoAndTitlePanel(leaderboardGroupName, leaderboardDisplayName, stringMessages, this, getUserService()) {
                 @Override
                 public void onResize() {
                     super.onResize();
@@ -167,7 +167,7 @@ public class LeaderboardEntryPoint extends AbstractEntryPoint {
         boolean showOverallLeaderboard = GwtHttpRequestUtils.getBooleanParameter(LeaderboardUrlSettings.PARAM_SHOW_OVERALL_LEADERBOARD, false);
         boolean showSeriesLeaderboards = GwtHttpRequestUtils.getBooleanParameter(LeaderboardUrlSettings.PARAM_SHOW_SERIES_LEADERBOARDS, false);
         String chartDetailParam = GwtHttpRequestUtils.getStringParameter(LeaderboardUrlSettings.PARAM_CHART_DETAIL, null);
-        DetailType chartDetailType;
+        final DetailType chartDetailType;
         if (chartDetailParam != null && (DetailType.REGATTA_RANK.name().equals(chartDetailParam) || DetailType.OVERALL_RANK.name().equals(chartDetailParam) || 
                 DetailType.REGATTA_TOTAL_POINTS_SUM.name().equals(chartDetailParam))) {
             chartDetailType = DetailType.valueOf(chartDetailParam);

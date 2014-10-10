@@ -32,6 +32,7 @@ import com.sap.sse.security.ui.client.RemoteServiceMappingConstants;
 import com.sap.sse.security.ui.client.Resources;
 import com.sap.sse.security.ui.client.StringMessages;
 import com.sap.sse.security.ui.client.UserChangeEventHandler;
+import com.sap.sse.security.ui.client.UserService;
 import com.sap.sse.security.ui.client.UserStatusEventHandler;
 import com.sap.sse.security.ui.client.component.CreateUserPanel;
 import com.sap.sse.security.ui.client.component.CreateUserPanel.UserCreationEventHandler;
@@ -71,12 +72,13 @@ public class UserManagementEntryPoint implements EntryPoint {
     public void onModuleLoad() {
         EntryPointHelper.registerASyncService((ServiceDefTarget) userManagementService,
                 RemoteServiceMappingConstants.userManagementServiceRemotePath);
+        UserService userService = new UserService(userManagementService);
         center = new SimpleLayoutPanel();
         RootLayoutPanel rootPanel = RootLayoutPanel.get();
         DockLayoutPanel dockPanel = new DockLayoutPanel(Unit.PX);
         rootPanel.add(dockPanel);
         HorizontalPanel hp = new HorizontalPanel();
-        LoginPanel.addUserStatusEventHandler(new UserStatusEventHandler() {
+        userService.addUserStatusEventHandler(new UserStatusEventHandler() {
             @Override
             public void onUserStatusChange(UserDTO user) {
                 if (user == null){
@@ -98,11 +100,10 @@ public class UserManagementEntryPoint implements EntryPoint {
             public void onClick(ClickEvent event) {
                 CreateUserPanel createUserPanel = new CreateUserPanel(userManagementService);
                 createUserPanel.addUserCreationEventHandler(new UserCreationEventHandler() {
-                    
                     @Override
                     public void onUserCreation(UserDTO user) {
                         userListDataProvider.updateDisplays();
-                        if (user != null){
+                        if (user != null) {
                             singleSelectionModel.setSelected(user, true);
                         }
                     }
@@ -165,6 +166,6 @@ public class UserManagementEntryPoint implements EntryPoint {
             }
         });
         center.setWidget(createUserPanel);
-        RootPanel.get().add(new LoginPanel(Resources.INSTANCE.css()));
+        RootPanel.get().add(new LoginPanel(Resources.INSTANCE.css(), userService));
     }
 }

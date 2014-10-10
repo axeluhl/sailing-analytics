@@ -57,7 +57,7 @@ public class AdminConsoleEntryPoint extends AbstractEntryPoint implements Regatt
 
     private final SailingServiceAsync sailingService = GWT.create(SailingService.class);
     private final MediaServiceAsync mediaService = GWT.create(MediaService.class);
-    
+
     @Override
     protected void doOnModuleLoad() {
         super.doOnModuleLoad();
@@ -241,7 +241,7 @@ public class AdminConsoleEntryPoint extends AbstractEntryPoint implements Regatt
         });
         informationPanel.setSize("100%", "95%");
         informationPanel.setSpacing(10);
-        informationPanel.add(new LoginPanel(SecurityStylesheetResources.INSTANCE.css()), DockPanel.WEST);
+        informationPanel.add(new LoginPanel(SecurityStylesheetResources.INSTANCE.css(), getUserService()), DockPanel.WEST);
         informationPanel.add(persistentAlertLabel, DockPanel.CENTER);
 
         SystemInformationPanel sysinfoPanel = new SystemInformationPanel(sailingService, this);
@@ -287,7 +287,7 @@ public class AdminConsoleEntryPoint extends AbstractEntryPoint implements Regatt
     }
 
     private void addToTabPanel(VerticalTabLayoutPanel tabPanel, Panel panelToAdd, String tabTitle, AdminConsoleFeatures feature) {
-        UserDTO user = LoginPanel.getCurrentUser();
+        UserDTO user = getUserService().getCurrentUser();
         if (user != null && isUserInRole(feature.getEnabledRoles())) {
             ScrollPanel scrollPanel = new ScrollPanel();
             scrollPanel.add(panelToAdd);
@@ -297,7 +297,7 @@ public class AdminConsoleEntryPoint extends AbstractEntryPoint implements Regatt
     }
     
     private void addToTabPanel(TabLayoutPanel tabPanel, Panel panelToAdd, String tabTitle, AdminConsoleFeatures feature) {
-        UserDTO user = LoginPanel.getCurrentUser();
+        UserDTO user = getUserService().getCurrentUser();
         if (user != null && isUserInRole(feature.getEnabledRoles())) {
             ScrollPanel scrollPanel = new ScrollPanel();
             scrollPanel.add(panelToAdd);
@@ -308,7 +308,7 @@ public class AdminConsoleEntryPoint extends AbstractEntryPoint implements Regatt
     
     private boolean isUserInRole(UserRoles[] roles) {
         boolean result = true;
-        UserDTO user = LoginPanel.getCurrentUser();
+        UserDTO user = getUserService().getCurrentUser();
         for (UserRoles enabledRole : roles) {
             if (user.getRoles().contains(enabledRole.name())) {
                 result = true;

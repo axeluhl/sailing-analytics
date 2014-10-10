@@ -28,24 +28,22 @@ import com.sap.sse.security.ui.shared.UserManagementService;
 import com.sap.sse.security.ui.shared.UserManagementServiceAsync;
 
 public class LoginEntryPoint implements EntryPoint {
-
-    private final UserManagementServiceAsync userManagementService = GWT.create(UserManagementService.class);
-    
     private final StringMessages stringMessages = GWT.create(StringMessages.class);
-    
-    private final UserService userService = new UserService();
+    private UserManagementServiceAsync userManagementService;
+    private UserService userService;
 
     @Override
     public void onModuleLoad() {
+        userManagementService = GWT.create(UserManagementService.class);
         EntryPointHelper.registerASyncService((ServiceDefTarget) userManagementService,
                 RemoteServiceMappingConstants.userManagementServiceRemotePath);
-        
+        userService = new UserService(userManagementService);
         RootLayoutPanel rootPanel = RootLayoutPanel.get();
         DockLayoutPanel dockPanel = new DockLayoutPanel(Unit.PX);
         rootPanel.add(dockPanel);
         
         FlowPanel fp = new FlowPanel();
-        RootPanel.get().add(new LoginPanel(Resources.INSTANCE.css()));
+        RootPanel.get().add(new LoginPanel(Resources.INSTANCE.css(), userService));
         
         Label nameLabel = new Label(stringMessages.name()+": ");
         fp.add(nameLabel);

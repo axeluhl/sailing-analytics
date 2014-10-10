@@ -5,6 +5,9 @@ import com.google.gwt.user.client.ui.Anchor;
 import com.google.gwt.user.client.ui.FlowPanel;
 import com.google.gwt.user.client.ui.Label;
 import com.google.gwt.user.client.ui.RequiresResize;
+import com.sap.sailing.gwt.ui.shared.SecurityStylesheetResources;
+import com.sap.sse.security.ui.client.UserService;
+import com.sap.sse.security.ui.loginpanel.LoginPanel;
 
 public class LogoAndTitlePanel extends FlowPanel implements RequiresResize {
     private final String title;
@@ -15,16 +18,18 @@ public class LogoAndTitlePanel extends FlowPanel implements RequiresResize {
     private boolean lastIsSmallWidth;
     private final WindowSizeDetector windowSizeDetector;
     private final StringMessages stringMessages;
+    private final UserService userService;
 
-    public LogoAndTitlePanel(StringMessages stringConstants, WindowSizeDetector windowSizeDetector) {
-        this(null, null, stringConstants, windowSizeDetector);
+    public LogoAndTitlePanel(StringMessages stringConstants, WindowSizeDetector windowSizeDetector, UserService userService) {
+        this(null, null, stringConstants, windowSizeDetector, userService);
     }
 
-    public LogoAndTitlePanel(String title, StringMessages stringConstants, WindowSizeDetector windowSizeDetector) {
-        this(title, null, stringConstants, windowSizeDetector);
+    public LogoAndTitlePanel(String title, StringMessages stringConstants, WindowSizeDetector windowSizeDetector, UserService userService) {
+        this(title, null, stringConstants, windowSizeDetector, userService);
     }
 
-    public LogoAndTitlePanel(String title, String subtitle, StringMessages stringMessages, WindowSizeDetector windowSizeDetector) {
+    public LogoAndTitlePanel(String title, String subtitle, StringMessages stringMessages, WindowSizeDetector windowSizeDetector, UserService userService) {
+        this.userService = userService;
         this.title = title;
         this.subtitle = subtitle;
         this.stringMessages = stringMessages;
@@ -73,6 +78,7 @@ public class LogoAndTitlePanel extends FlowPanel implements RequiresResize {
             subTitleLabelWrapper.add(subTitleLabel);
             this.add(subTitleLabelWrapper);
         }
+        this.add(new LoginPanel(SecurityStylesheetResources.INSTANCE.css(), userService));
     }
 
     public String getTitle() {

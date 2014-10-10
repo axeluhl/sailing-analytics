@@ -26,7 +26,7 @@ import com.sap.sse.security.ui.shared.UserManagementServiceAsync;
 public class OAuthLoginEntryPoint implements EntryPoint, UserChangeEventHandler {
     private final UserManagementServiceAsync userManagementService = GWT.create(UserManagementService.class);
     private final StringMessages stringMessages = GWT.create(StringMessages.class);
-    private final UserService userService = new UserService();
+    private final UserService userService = new UserService(userManagementService);
 
     private OAuthLoginPanel loginScreen = new OAuthLoginPanel(userManagementService);
     private FlowPanel content = new FlowPanel();

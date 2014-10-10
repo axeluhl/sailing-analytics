@@ -7,7 +7,8 @@
 	<inherits name="com.sap.sailing.gwt.ui.EmulatedJRE" />
 	<inherits name="com.sap.sse.gwt.SSESharedGWT" />
 	<inherits name="com.sap.sse.SSECommon" />
-
+	<inherits name="com.sap.sse.security.ui.LoginPanel" />
+	
 	<inherits name="com.sap.sailing.domain.SailingDomain" />
 	<!-- Highcharts API -->
 	<inherits name="org.moxieapps.gwt.highcharts.Highcharts" />
@@ -23,7 +24,7 @@
 				
 	<entry-point class="com.sap.sailing.gwt.ui.client.media.popup.YoutubePopupWindow" />
 
-<extend-property name="locale" values="de"/>
+	<extend-property name="locale" values="de"/>
 	<source path='client'/>
 	<source path='shared'/>
 	<source path='actions'/>

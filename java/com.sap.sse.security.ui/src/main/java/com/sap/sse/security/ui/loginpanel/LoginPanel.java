@@ -8,7 +8,6 @@ import com.google.gwt.event.dom.client.ClickHandler;
 import com.google.gwt.resources.client.ImageResource;
 import com.google.gwt.user.client.Window;
 import com.google.gwt.user.client.rpc.AsyncCallback;
-import com.google.gwt.user.client.rpc.ServiceDefTarget;
 import com.google.gwt.user.client.ui.Anchor;
 import com.google.gwt.user.client.ui.FlowPanel;
 import com.google.gwt.user.client.ui.FocusPanel;
@@ -22,8 +21,6 @@ import com.google.gwt.user.client.ui.PasswordTextBox;
 import com.google.gwt.user.client.ui.SimplePanel;
 import com.google.gwt.user.client.ui.SubmitButton;
 import com.google.gwt.user.client.ui.TextBox;
-import com.sap.sse.gwt.client.EntryPointHelper;
-import com.sap.sse.security.ui.client.RemoteServiceMappingConstants;
 import com.sap.sse.security.ui.client.Resources;
 import com.sap.sse.security.ui.client.StringMessages;
 import com.sap.sse.security.ui.client.UserService;
@@ -31,18 +28,12 @@ import com.sap.sse.security.ui.client.UserStatusEventHandler;
 import com.sap.sse.security.ui.oauth.client.component.OAuthLoginPanel;
 import com.sap.sse.security.ui.shared.SuccessInfo;
 import com.sap.sse.security.ui.shared.UserDTO;
-import com.sap.sse.security.ui.shared.UserManagementService;
 import com.sap.sse.security.ui.shared.UserManagementServiceAsync;
 
 public class LoginPanel extends FlowPanel implements UserStatusEventHandler {
-    public static final UserManagementServiceAsync userManagementService = GWT.create(UserManagementService.class);
+    public final UserManagementServiceAsync userManagementService;
     
     public static final StringMessages stringMessages = GWT.create(StringMessages.class);
-
-    static {
-        EntryPointHelper.registerASyncService((ServiceDefTarget) userManagementService,
-                RemoteServiceMappingConstants.userManagementServiceRemotePath);
-    }
 
     private FormPanel loginPanel;
     private FlowPanel userPanel;
@@ -51,7 +42,7 @@ public class LoginPanel extends FlowPanel implements UserStatusEventHandler {
     private static int counter = 0;
 
     private boolean expanded = false;
-    private static UserService userService = new UserService();
+    private UserService userService;
 
     private Label loginTitle;
     private Anchor loginLink;
@@ -66,7 +57,9 @@ public class LoginPanel extends FlowPanel implements UserStatusEventHandler {
 
     private final Css css;
 
-    public LoginPanel(final Css css) {
+    public LoginPanel(final Css css, UserService userService) {
+        this.userManagementService = userService.getUserManagementService();
+        this.userService = userService;
         this.css = css;
         id = counter++;
         css.ensureInjected();
@@ -106,7 +99,8 @@ public class LoginPanel extends FlowPanel implements UserStatusEventHandler {
         loginPanel.addSubmitHandler(new SubmitHandler() {
             @Override
             public void onSubmit(SubmitEvent event) {
-                userService.login(name.getText(), password.getText(), new AsyncCallback<SuccessInfo>() {
+                userService.login(name.getText(), password.getText(),
+                        new AsyncCallback<SuccessInfo>() {
                     @Override
                     public void onFailure(Throwable caught) {
                         Window.alert(caught.getMessage());
@@ -118,7 +112,6 @@ public class LoginPanel extends FlowPanel implements UserStatusEventHandler {
                             Window.alert(result.getMessage());
                         }
                     }
-                    
                 });
             }
         });
@@ -198,15 +191,15 @@ public class LoginPanel extends FlowPanel implements UserStatusEventHandler {
         }
     }
 
-    public static UserDTO getCurrentUser() {
+    public UserDTO getCurrentUser() {
         return userService.getCurrentUser();
     }
 
-    public static void addUserStatusEventHandler(UserStatusEventHandler handler) {
+    public void addUserStatusEventHandler(UserStatusEventHandler handler) {
         userService.addUserStatusEventHandler(handler);
     }
 
-    public static void removeUserStatusEventHandler(UserStatusEventHandler handler) {
+    public void removeUserStatusEventHandler(UserStatusEventHandler handler) {
         userService.removeUserStatusEventHandler(handler);
     }
 

@@ -48,7 +48,7 @@ import com.sap.sse.gwt.client.player.Timer.PlayModes;
 import com.sap.sse.gwt.client.player.Timer.PlayStates;
 import com.sap.sse.gwt.client.useragent.UserAgentDetails;
 import com.sap.sse.gwt.client.useragent.UserAgentDetails.AgentTypes;
-import com.sap.sse.security.ui.loginpanel.LoginPanel;
+import com.sap.sse.security.ui.client.UserService;
 
 public class MediaPlayerManagerComponent implements Component<Void>, PlayStateListener, TimeListener,
         MediaPlayerManager, CloseHandler<Window>, ClosingHandler {
@@ -59,6 +59,7 @@ public class MediaPlayerManagerComponent implements Component<Void>, PlayStateLi
     }
 
     private final SimplePanel rootPanel = new SimplePanel();
+    private final UserService userService;
 
     private MediaPlayer activeAudioPlayer;
     private VideoPlayer dockedVideoPlayer;
@@ -79,8 +80,9 @@ public class MediaPlayerManagerComponent implements Component<Void>, PlayStateLi
 
     public MediaPlayerManagerComponent(RegattaAndRaceIdentifier selectedRaceIdentifier,
             RaceTimesInfoProvider raceTimesInfoProvider, Timer raceTimer, MediaServiceAsync mediaService,
-            StringMessages stringMessages, ErrorReporter errorReporter, UserAgentDetails userAgent,
-            boolean autoSelectMedia) {
+            UserService userService, StringMessages stringMessages, ErrorReporter errorReporter,
+            UserAgentDetails userAgent, boolean autoSelectMedia) {
+        this.userService = userService;
         this.raceIdentifier = selectedRaceIdentifier;
         this.raceTimesInfoProvider = raceTimesInfoProvider;
         this.raceTimer = raceTimer;
@@ -475,7 +477,7 @@ public class MediaPlayerManagerComponent implements Component<Void>, PlayStateLi
         };
 
         final VideoSynchPlayer videoPlayer;
-        boolean showSynchControls = LoginPanel.getCurrentUser() != null;
+        boolean showSynchControls = userService.getCurrentUser() != null;
 
         if (videoTrack.isYoutube()) {
             videoPlayer = new VideoYoutubePlayer(videoTrack, getRaceStartTime(), showSynchControls, raceTimer);
@@ -658,7 +660,7 @@ public class MediaPlayerManagerComponent implements Component<Void>, PlayStateLi
 
     @Override
     public boolean allowsEditing() {
-        return LoginPanel.getCurrentUser() != null;
+        return userService.getCurrentUser() != null;
     }
 
     @Override

@@ -17,12 +17,14 @@ import com.google.gwt.user.client.ui.Image;
 import com.google.gwt.user.client.ui.Label;
 import com.google.gwt.user.client.ui.PopupPanel;
 import com.google.gwt.user.client.ui.VerticalPanel;
+import com.sap.sse.security.ui.client.StringMessages;
 import com.sap.sse.security.ui.oauth.client.CredentialDTO;
 import com.sap.sse.security.ui.oauth.client.resources.ImageResources;
 import com.sap.sse.security.ui.oauth.client.util.ClientUtils;
 import com.sap.sse.security.ui.shared.UserManagementServiceAsync;
 
 public class OAuthLoginPanel extends Composite {
+    private static final StringMessages stringMessages = GWT.create(StringMessages.class);
     private static final String SAP_SAILING_OAUTH_WINDOW = "sap_sailing_oauth_verification_window";
     private VerticalPanel verticalPanel;
     private FlexTable flexTableLeft;
@@ -64,7 +66,7 @@ public class OAuthLoginPanel extends Composite {
         dp.add(flexTableLeft);
         verticalPanel.add(dp);
 
-        Label loginWithLabel = new Label("Login With");
+        Label loginWithLabel = new Label("Login With"); // TODO i18n
         loginWithLabel.setWordWrap(false);
         // loginWithLabel.setStyleName(labelStyle);
         flexTableLeft.setWidget(0, 0, loginWithLabel);
@@ -77,7 +79,7 @@ public class OAuthLoginPanel extends Composite {
         facebookImage = new Image(images.facebookIconImageData().getSafeUri());
         image = facebookImage;
         // image.setStyleName(imageStyle);
-        image.setTitle("Login with Facebook");
+        image.setTitle("Login with Facebook"); // TODO i18n
         flexTableLeft.setWidget(r, c, image);
 
         r = 1;
@@ -85,7 +87,7 @@ public class OAuthLoginPanel extends Composite {
         googleImage = new Image(images.googleIconImageData().getSafeUri());
         image = googleImage;
         // image.setStyleName(imageStyle);
-        image.setTitle("Login with Google");
+        image.setTitle("Login with Google"); // TODO i18n
 //        flexTableLeft.setWidget(r, c, image);
         flexTableLeft.getCellFormatter().setHorizontalAlignment(r, c, har);
 
@@ -94,7 +96,7 @@ public class OAuthLoginPanel extends Composite {
         twitterImage = new Image(images.twitterIconImageData().getSafeUri());
         image = twitterImage;
         // image.setStyleName(imageStyle);
-        image.setTitle("Login with Twitter");
+        image.setTitle("Login with Twitter"); // TODO i18n
 //        flexTableLeft.setWidget(r, c, image);
         flexTableLeft.getCellFormatter().setHorizontalAlignment(r, c, har);
 
@@ -103,7 +105,7 @@ public class OAuthLoginPanel extends Composite {
         yahooImage = new Image(images.yahooIconImageData().getSafeUri());
         image = yahooImage;
         // image.setStyleName(imageStyle);
-        image.setTitle("Login with Yahoo!");
+        image.setTitle("Login with Yahoo!"); // TODO i18n
 //        flexTableLeft.setWidget(r, c, image);
         flexTableLeft.getCellFormatter().setHorizontalAlignment(r, c, har);
 
@@ -113,7 +115,7 @@ public class OAuthLoginPanel extends Composite {
         linkedinImage = new Image(images.linkedinIconImageData().getSafeUri());
         image = linkedinImage;
         // image.setStyleName(imageStyle);
-        image.setTitle("Login with LinkedIn");
+        image.setTitle("Login with LinkedIn"); // TODO i18n
 //        flexTableLeft.setWidget(r, c, image);
         flexTableLeft.getCellFormatter().setHorizontalAlignment(r, c, har);
 
@@ -122,7 +124,7 @@ public class OAuthLoginPanel extends Composite {
         instagramImage = new Image(images.instagramIconImageData().getSafeUri());
         image = instagramImage;
         // image.setStyleName(imageStyle);
-        image.setTitle("Login with Instagram");
+        image.setTitle("Login with Instagram"); // TODO i18n
 //        flexTableLeft.setWidget(r, c, image);
         flexTableLeft.getCellFormatter().setHorizontalAlignment(r, c, har);
 
@@ -131,7 +133,7 @@ public class OAuthLoginPanel extends Composite {
         vimeoImage = new Image(images.vimeoIconImageData().getSafeUri());
         image = vimeoImage;
         // image.setStyleName(imageStyle);
-        image.setTitle("Login with Vimeo");
+        image.setTitle("Login with Vimeo"); // TODO i18n
 //        flexTableLeft.setWidget(r, c, image);
         flexTableLeft.getCellFormatter().setHorizontalAlignment(r, c, har);
 
@@ -140,7 +142,7 @@ public class OAuthLoginPanel extends Composite {
         githubImage = new Image(images.githubIconImageData().getSafeUri());
         image = githubImage;
         // image.setStyleName(imageStyle);
-        image.setTitle("Login with github");
+        image.setTitle("Login with github"); // TODO i18n
 //        flexTableLeft.setWidget(r, c, image);
         flexTableLeft.getCellFormatter().setHorizontalAlignment(r, c, har);
 
@@ -150,7 +152,7 @@ public class OAuthLoginPanel extends Composite {
         flickrImage = new Image(images.flickrIconImageData().getSafeUri());
         image = flickrImage;
         // image.setStyleName(imageStyle);
-        image.setTitle("Login with flickr");
+        image.setTitle("Login with flickr"); // TODO i18n
 //        flexTableLeft.setWidget(r, c, image);
         flexTableLeft.getCellFormatter().setHorizontalAlignment(r, c, har);
 
@@ -159,7 +161,7 @@ public class OAuthLoginPanel extends Composite {
         liveImage = new Image(images.liveIconImageData().getSafeUri());
         image = liveImage;
         // image.setStyleName(imageStyle);
-        image.setTitle("Login with Microsoft Live Connect");
+        image.setTitle("Login with Microsoft Live Connect"); // TODO i18n
 //        flexTableLeft.setWidget(r, c, image);
         flexTableLeft.getCellFormatter().setHorizontalAlignment(r, c, har);
         flexTableLeft.getCellFormatter().setHorizontalAlignment(1, 0, HasHorizontalAlignment.ALIGN_RIGHT);
@@ -171,7 +173,7 @@ public class OAuthLoginPanel extends Composite {
         tumblrImage = new Image(images.tumblrIconImageData().getSafeUri());
         image = tumblrImage;
         // image.setStyleName(imageStyle);
-        image.setTitle("Login with tumblr.");
+        image.setTitle("Login with tumblr."); // TODO i18n
 //        flexTableLeft.setWidget(r, c, image);
         flexTableLeft.getCellFormatter().setHorizontalAlignment(r, c, har);
         flexTableLeft.getCellFormatter().setHorizontalAlignment(1, 0, HasHorizontalAlignment.ALIGN_RIGHT);
@@ -183,7 +185,7 @@ public class OAuthLoginPanel extends Composite {
         foursquareImage = new Image(images.foursquareIconImageData().getSafeUri());
         image = foursquareImage;
         // image.setStyleName(imageStyle);
-        image.setTitle("Login with foursquare");
+        image.setTitle("Login with foursquare"); // TODO i18n
 //        flexTableLeft.setWidget(r, c, image);
         flexTableLeft.getCellFormatter().setHorizontalAlignment(r, c, har);
         flexTableLeft.getCellFormatter().setHorizontalAlignment(1, 0, HasHorizontalAlignment.ALIGN_RIGHT);
@@ -198,8 +200,7 @@ public class OAuthLoginPanel extends Composite {
         popupFrame.setHeight("300px");
         popupFrame.getElement().getStyle().setBorderWidth(0, Unit.PX);
         popupContent.add(popupFrame);
-        Button close = new Button("Close", new ClickHandler() {
-            
+        Button close = new Button(stringMessages.close(), new ClickHandler() {
             @Override
             public void onClick(ClickEvent event) {
                 popupPanel.hide();
@@ -214,13 +215,10 @@ public class OAuthLoginPanel extends Composite {
         // String authProviderName = ClientUtils.getAuthProviderName(authProvider);
         final String callbackUrl = ClientUtils.getCallbackUrl();
         GWT.log("Getting authorization url");
-
         final CredentialDTO credential = new CredentialDTO();
         credential.setRedirectUrl(callbackUrl);
         credential.setAuthProvider(authProvider);
-
         userManagementService.getAuthorizationUrl(credential, new AsyncCallback<String>() {
-
             @Override
             public void onFailure(Throwable caught) {
                 ClientUtils.handleException(caught);
@@ -256,7 +254,6 @@ public class OAuthLoginPanel extends Composite {
     }-*/;
 
     private void setupLoginScreenHandlers() {
-
         facebookImage.addClickHandler(new ClickHandler() {
             @Override
             public void onClick(ClickEvent event) {
