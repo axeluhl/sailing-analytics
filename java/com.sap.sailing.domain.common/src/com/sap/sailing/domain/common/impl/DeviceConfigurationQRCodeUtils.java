@@ -8,7 +8,7 @@ import com.sap.sse.common.Util;
  * This class is used by our backend, in GWT-client code and by the Android app. Therefore we cannot use classes like
  * {@link URLEncoder} to help us with the encoding.
  */
-public class QRCodeUtils {
+public class DeviceConfigurationQRCodeUtils {
 
     private static final String fragmentKey = "identifier";
 
