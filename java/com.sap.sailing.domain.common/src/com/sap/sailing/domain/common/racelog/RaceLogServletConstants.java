@@ -1,7 +1,7 @@
-package com.sap.sailing.domain.racelog;
+package com.sap.sailing.domain.common.racelog;
 
 /**
- * Constants shared across race committee app and servlet implementation
+ * Constants shared across race committee app, servlet implementation and GWT.
  * 
  * @author Axel Uhl (d043530)
  *

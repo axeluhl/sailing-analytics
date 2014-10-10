@@ -9,7 +9,7 @@ import android.content.Intent;
 
 import com.sap.sailing.android.shared.services.sending.MessageSendingService;
 import com.sap.sailing.android.shared.services.sending.ServerReplyCallback;
-import com.sap.sailing.domain.racelog.RaceLogServletConstants;
+import com.sap.sailing.domain.common.racelog.RaceLogServletConstants;
 import com.sap.sailing.racecommittee.app.AppPreferences;
 import com.sap.sailing.racecommittee.app.domain.ManagedRace;
 
