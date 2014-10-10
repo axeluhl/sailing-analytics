@@ -14,17 +14,26 @@
 	margin-bottom: 0.75em;
 }
 
-.regattaleaderboard_meta_scoring,
-.regattaleaderboard_meta_update {
-  font-weight: bold;
-  margin-top: 0.5em;
+.regattaleaderboard_meta_scoring_comment {
+	margin: 0;
+	font-weight: bold;
+	padding-top: 0.25em;
+	padding-bottom: 0.25em;
 }
-.regattaleaderboard_meta_scoring_comment,
-.regattaleaderboard_meta_scoring_type,
-.regattaleaderboard_meta_update_timestamp,
+.regattaleaderboard_meta_scoring_type {
+	margin: 0;
+	font-weight: bold;
+}
+
+.regattaleaderboard_meta_update_timestamp {
+	margin: 0;
+	font-weight: bold;
+	text-align: right;
+}
 .regattaleaderboard_meta_update_text {
-  margin: 0;
-}
-.regattaleaderboard_meta_update {
-  text-align: right;
+	margin: 0;
+	font-weight: bold;
+	text-align: right;
+	padding-bottom: 0.25em;
+	padding-top: 0.25em;
 }

@@ -3,7 +3,7 @@ package com.sap.sailing.gwt.autoplay.client.shared.oldleaderboard;
 import java.util.Date;
 
 import com.google.gwt.core.client.GWT;
-import com.google.gwt.dom.client.ParagraphElement;
+import com.google.gwt.dom.client.DivElement;
 import com.google.gwt.uibinder.client.UiBinder;
 import com.google.gwt.uibinder.client.UiField;
 import com.google.gwt.user.client.ui.Composite;
@@ -28,10 +28,10 @@ public class OldLeaderboard extends Composite implements LeaderboardUpdateListen
     @UiField HTMLPanel oldLeaderboardPanel;
     @UiField HTMLPanel contentPanel;
 
-    @UiField ParagraphElement lastScoringUpdateTimeDiv;
-    @UiField ParagraphElement lastScoringUpdateTextDiv;
-    @UiField ParagraphElement lastScoringCommentDiv;
-    @UiField ParagraphElement scoringSchemeDiv;
+    @UiField DivElement lastScoringUpdateTimeDiv;
+    @UiField DivElement lastScoringUpdateTextDiv;
+    @UiField DivElement lastScoringCommentDiv;
+    @UiField DivElement scoringSchemeDiv;
 
     private LeaderboardPanel leaderboardPanel;
 

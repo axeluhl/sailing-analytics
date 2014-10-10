@@ -8,18 +8,12 @@
 		    <g:HTMLPanel ui:field="contentPanel" styleName="{local_res.css.leaderboardAndTitlePanel}">
 		        <table class="{local_res.css.leaderboardAndTitleTable}">
 		            <tr>
-		                <td width="50%">
-							<div class="{local_res.css.regattaleaderboard_meta_scoring}">
-								<p ui:field="lastScoringCommentDiv" class="{local_res.css.regattaleaderboard_meta_scoring_comment}"></p>
-								<p ui:field="scoringSchemeDiv" class="{local_res.css.regattaleaderboard_meta_scoring_type}"></p>
-							</div>
-		                </td>
-						<td width="50%">
-								<div class="{local_res.css.regattaleaderboard_meta_update}">
-									<p ui:field="lastScoringUpdateTextDiv" class="{local_res.css.regattaleaderboard_meta_update_text}"></p>
-									<p ui:field="lastScoringUpdateTimeDiv" class="{local_res.css.regattaleaderboard_meta_update_timestamp}"></p>
-								</div>
-						</td>
+		                <td width="50%"><div ui:field="lastScoringCommentDiv" class="{local_res.css.regattaleaderboard_meta_scoring_comment}"></div></td>
+						<td width="50%"><div ui:field="lastScoringUpdateTextDiv" class="{local_res.css.regattaleaderboard_meta_update_text}"></div></td>
+		             </tr>
+					<tr>
+					    <td><div ui:field="scoringSchemeDiv" class="{local_res.css.regattaleaderboard_meta_scoring_type}"></div></td>
+						<td><div ui:field="lastScoringUpdateTimeDiv" class="{local_res.css.regattaleaderboard_meta_update_timestamp}"></div></td>
 					</tr>
 					<tr>
 						<td colspan="2">
