@@ -1,16 +1,11 @@
 package com.sap.sse.security.ui.loginpanel;
 
-import java.util.ArrayList;
 import java.util.HashMap;
-import java.util.List;
-import java.util.logging.Logger;
 
 import com.google.gwt.core.client.GWT;
 import com.google.gwt.event.dom.client.ClickEvent;
 import com.google.gwt.event.dom.client.ClickHandler;
 import com.google.gwt.resources.client.ImageResource;
-import com.google.gwt.storage.client.Storage;
-import com.google.gwt.storage.client.StorageEvent;
 import com.google.gwt.user.client.Window;
 import com.google.gwt.user.client.rpc.AsyncCallback;
 import com.google.gwt.user.client.rpc.ServiceDefTarget;
@@ -31,6 +26,7 @@ import com.sap.sse.gwt.client.EntryPointHelper;
 import com.sap.sse.security.ui.client.RemoteServiceMappingConstants;
 import com.sap.sse.security.ui.client.Resources;
 import com.sap.sse.security.ui.client.StringMessages;
+import com.sap.sse.security.ui.client.UserService;
 import com.sap.sse.security.ui.client.UserStatusEventHandler;
 import com.sap.sse.security.ui.oauth.client.component.OAuthLoginPanel;
 import com.sap.sse.security.ui.shared.SuccessInfo;
@@ -39,20 +35,14 @@ import com.sap.sse.security.ui.shared.UserManagementService;
 import com.sap.sse.security.ui.shared.UserManagementServiceAsync;
 
 public class LoginPanel extends FlowPanel implements UserStatusEventHandler {
-    private static final Logger logger = Logger.getLogger(LoginPanel.class.getName());
-
-    private static Storage localStorage = Storage.getLocalStorageIfSupported();
-
-    private static final UserManagementServiceAsync userManagementService = GWT.create(UserManagementService.class);
+    public static final UserManagementServiceAsync userManagementService = GWT.create(UserManagementService.class);
     
-    private static final StringMessages stringMessages = GWT.create(StringMessages.class);
+    public static final StringMessages stringMessages = GWT.create(StringMessages.class);
 
     static {
         EntryPointHelper.registerASyncService((ServiceDefTarget) userManagementService,
                 RemoteServiceMappingConstants.userManagementServiceRemotePath);
     }
-
-    private static final List<UserStatusEventHandler> handlers = new ArrayList<>();
 
     private FormPanel loginPanel;
     private FlowPanel userPanel;
@@ -61,7 +51,7 @@ public class LoginPanel extends FlowPanel implements UserStatusEventHandler {
     private static int counter = 0;
 
     private boolean expanded = false;
-    private static UserDTO currentUser = null;
+    private static UserService userService = new UserService();
 
     private Label loginTitle;
     private Anchor loginLink;
@@ -109,8 +99,6 @@ public class LoginPanel extends FlowPanel implements UserStatusEventHandler {
         wrapperPanel.add(infoPanel);
         add(wrapperPanel);
         addUserStatusEventHandler(this);
-        registerStorageListener();
-        updateUser();
     }
 
     private void initLoginContent() {
@@ -118,7 +106,7 @@ public class LoginPanel extends FlowPanel implements UserStatusEventHandler {
         loginPanel.addSubmitHandler(new SubmitHandler() {
             @Override
             public void onSubmit(SubmitEvent event) {
-                userManagementService.login(name.getText(), password.getText(), new AsyncCallback<SuccessInfo>() {
+                userService.login(name.getText(), password.getText(), new AsyncCallback<SuccessInfo>() {
                     @Override
                     public void onFailure(Throwable caught) {
                         Window.alert(caught.getMessage());
@@ -126,13 +114,11 @@ public class LoginPanel extends FlowPanel implements UserStatusEventHandler {
 
                     @Override
                     public void onSuccess(SuccessInfo result) {
-                        if (result.isSuccessful()) {
-                            fireUserUpdateEvent();
-                            updateUser();
-                        } else {
+                        if (!result.isSuccessful()) {
                             Window.alert(result.getMessage());
                         }
                     }
+                    
                 });
             }
         });
@@ -159,57 +145,22 @@ public class LoginPanel extends FlowPanel implements UserStatusEventHandler {
     }
 
     private void updateUserContent() {
-        if (currentUser != null) {
+        if (getCurrentUser() != null) {
             userPanel.clear();
             Anchor logout = new Anchor(stringMessages.signOut());
             userPanel.add(logout);
             logout.addClickHandler(new ClickHandler() {
                 @Override
                 public void onClick(ClickEvent event) {
-                    userManagementService.logout(new AsyncCallback<SuccessInfo>() {
-                        @Override
-                        public void onFailure(Throwable caught) {
-                            Window.alert(stringMessages.couldNotSignOut(caught.getMessage()));
-                        }
-
-                        @Override
-                        public void onSuccess(SuccessInfo result) {
-                            currentUser = null;
-                            updateStatus();
-                            fireUserUpdateEvent();
-                        }
-                    });
+                    userService.logout();
                 }
             });
         }
     }
 
-    private static void updateUser() {
-        userManagementService.getCurrentUser(new AsyncCallback<UserDTO>() {
-            @Override
-            public void onSuccess(UserDTO result) {
-                if (result != null && currentUser != null && result.getName().equals(currentUser.getName())) {
-                    return;
-                }
-                currentUser = result;
-                logger.info("User changed to " + (result == null ? "No User" : result.getName()) + "handlers: "
-                        + handlers.size());
-                for (UserStatusEventHandler handler : handlers) {
-                    logger.info(handler + ", ");
-                    handler.onUserStatusChange(currentUser);
-                }
-            }
-
-            @Override
-            public void onFailure(Throwable caught) {
-                Window.alert(caught.getMessage());
-            }
-        });
-    }
-
-    private void updateStatus() {
-        if (currentUser != null) {
-            String name = currentUser.getName();
+    public void updateStatus() {
+        if (getCurrentUser() != null) {
+            String name = getCurrentUser().getName();
             if (name == null) {
                 loginTitle.setText(stringMessages.invalidUsername());
             } else {
@@ -248,52 +199,21 @@ public class LoginPanel extends FlowPanel implements UserStatusEventHandler {
     }
 
     public static UserDTO getCurrentUser() {
-        return currentUser;
+        return userService.getCurrentUser();
     }
 
     public static void addUserStatusEventHandler(UserStatusEventHandler handler) {
-        handlers.add(handler);
+        userService.addUserStatusEventHandler(handler);
     }
 
     public static void removeUserStatusEventHandler(UserStatusEventHandler handler) {
-        handlers.remove(handler);
+        userService.removeUserStatusEventHandler(handler);
     }
 
     @Override
     public void onUserStatusChange(UserDTO user) {
         updateStatus();
     }
-
-    public static void registerStorageListener() {
-        if (localStorage != null) {
-            Storage.addStorageEventHandler(new StorageEvent.Handler() {
-                @Override
-                public void onStorageChange(StorageEvent event) {
-                    if ("update".equals(event.getKey()) && "true".equals(event.getNewValue())) {
-                        updateUser();
-                    }
-                }
-            });
-        }
-    };
-
-    /**
-     * Used to synchronize changes in the user status between all browser tabs/windows.
-     * 
-     */
-    public static void fireUserUpdateEvent() {
-        if (localStorage != null) {
-            localStorage.setItem("update", "true");
-            localStorage.setItem("update", "false");
-        }
-    };
-
-    public static String getUpdateProperty() {
-        if (localStorage != null) {
-            return localStorage.getItem("update");
-        }
-        return null;
-    };
 
     @Override
     public int hashCode() {

@@ -21,6 +21,7 @@ import com.sap.sse.gwt.client.EntryPointHelper;
 import com.sap.sse.security.ui.client.RemoteServiceMappingConstants;
 import com.sap.sse.security.ui.client.Resources;
 import com.sap.sse.security.ui.client.StringMessages;
+import com.sap.sse.security.ui.client.UserService;
 import com.sap.sse.security.ui.loginpanel.LoginPanel;
 import com.sap.sse.security.ui.shared.SuccessInfo;
 import com.sap.sse.security.ui.shared.UserManagementService;
@@ -31,6 +32,8 @@ public class LoginEntryPoint implements EntryPoint {
     private final UserManagementServiceAsync userManagementService = GWT.create(UserManagementService.class);
     
     private final StringMessages stringMessages = GWT.create(StringMessages.class);
+    
+    private final UserService userService = new UserService();
 
     @Override
     public void onModuleLoad() {
@@ -58,7 +61,7 @@ public class LoginEntryPoint implements EntryPoint {
         formPanel.addSubmitHandler(new SubmitHandler() {
             @Override
             public void onSubmit(SubmitEvent event) {
-                userManagementService.login(nameText.getText(), pwText.getText(), new AsyncCallback<SuccessInfo>() {
+                userService.login(nameText.getText(), pwText.getText(), new AsyncCallback<SuccessInfo>() {
                     @Override
                     public void onFailure(Throwable caught) {
                         GWT.log(caught.getMessage());
@@ -67,7 +70,6 @@ public class LoginEntryPoint implements EntryPoint {
                     @Override
                     public void onSuccess(SuccessInfo result) {
                         if (result.isSuccessful()) {
-                            LoginPanel.fireUserUpdateEvent();
                             if (!result.getRedirectURL().equals("")) {
                                 Window.Location.replace(result.getRedirectURL());
                             } else  {

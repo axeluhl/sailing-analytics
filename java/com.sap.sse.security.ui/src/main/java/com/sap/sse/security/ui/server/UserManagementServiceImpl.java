@@ -26,7 +26,6 @@ import com.google.gwt.user.server.rpc.RemoteServiceServlet;
 import com.sap.sse.security.Credential;
 import com.sap.sse.security.SecurityService;
 import com.sap.sse.security.SessionUtils;
-import com.sap.sse.security.ui.Activator;
 import com.sap.sse.security.ui.oauth.client.CredentialDTO;
 import com.sap.sse.security.ui.oauth.client.SocialUserDTO;
 import com.sap.sse.security.ui.oauth.shared.OAuthException;
@@ -45,7 +44,6 @@ import com.sap.sse.security.userstore.shared.UserStore;
 import com.sap.sse.security.userstore.shared.UsernamePasswordAccount;
 
 public class UserManagementServiceImpl extends RemoteServiceServlet implements UserManagementService {
-
     private static final long serialVersionUID = 4458564336368629101L;
     
     private static final Logger logger = Logger.getLogger(UserManagementServiceImpl.class.getName());
@@ -90,14 +88,12 @@ public class UserManagementServiceImpl extends RemoteServiceServlet implements U
         }
         return users;
     }
-    
-    
 
     @Override
     public UserDTO getCurrentUser() {
         logger.info("Request: " + getThreadLocalRequest().getRequestURL());
         User user = getSecurityService().getCurrentUser();
-        if (user == null){
+        if (user == null) {
             return null;
         }
         return createUserDTOFromUser(user);
@@ -260,7 +256,6 @@ public class UserManagementServiceImpl extends RemoteServiceServlet implements U
 
     @Override
     public UserDTO verifySocialUser(CredentialDTO credentialDTO) {
-        
         User user = null;
         try {
             user = getSecurityService().verifySocialUser(createCredentialFromDTO(credentialDTO));

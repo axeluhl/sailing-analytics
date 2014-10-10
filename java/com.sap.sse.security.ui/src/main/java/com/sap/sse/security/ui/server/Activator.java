@@ -1,4 +1,4 @@
-package com.sap.sse.security.ui;
+package com.sap.sse.security.ui.server;
 
 import org.osgi.framework.BundleActivator;
 import org.osgi.framework.BundleContext;

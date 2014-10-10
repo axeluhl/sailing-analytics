@@ -29,4 +29,14 @@ public interface StringMessages extends Messages {
     String filterUsers();
 
     String welcome(String name);
+
+    String tryingToVerifyUser();
+
+    String fetchingUserInformation();
+
+    String signedInAs(String name);
+
+    String close();
+
+    String loading();
 }
