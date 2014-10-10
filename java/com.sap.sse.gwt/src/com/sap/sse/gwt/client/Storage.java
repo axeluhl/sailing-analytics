@@ -31,6 +31,20 @@ public class Storage extends JavaScriptObject {
         });
     }-*/;
 
+    public static HandlerRegistration addStorageEventHandler(final StorageEvent.Handler handler) {
+        storageEventHandlers.add(handler);
+        return new HandlerRegistration() {
+            @Override
+            public void removeHandler() {
+                storageEventHandlers.remove(handler);
+            }
+        };
+    }
+
+    public static void removeStorageEventHandler(StorageEvent.Handler handler) {
+        storageEventHandlers.remove(handler);
+    }
+
     private static void onStorageEvent(JavaScriptObject event) {
         StorageEvent storageEvent = event.cast();
         for (StorageEvent.Handler handler : storageEventHandlers) {
@@ -62,16 +76,6 @@ public class Storage extends JavaScriptObject {
         }
     }-*/;
     
-    public static HandlerRegistration addStorageEventHandler(final StorageEvent.Handler handler) {
-        storageEventHandlers.add(handler);
-        return new HandlerRegistration() {
-            @Override
-            public void removeHandler() {
-                storageEventHandlers.remove(handler);
-            }
-        };
-    }
-
     public static boolean isSupported() {
         return isLocalStorageSupported() && isSessionStorageSupported();
     }
@@ -95,4 +99,28 @@ public class Storage extends JavaScriptObject {
         }
         return result;
     }
+    
+    public native void setItem(String key, String value) /*-{
+        this.setItem(key, value);
+    }-*/;
+
+    public native String getItem(String key) /*-{
+        return this.getItem(key);
+    }-*/;
+
+    public native void removeItem(String key) /*-{
+        return this.removeItem(key);
+    }-*/;
+
+    public native void clear() /*-{
+        this.clear();
+    }-*/;
+
+    public native String getKey(int index) /*-{
+        return this.key(index);
+    }-*/;
+
+    public native int getLength() /*-{
+        return this.length;
+    }-*/;
 }
