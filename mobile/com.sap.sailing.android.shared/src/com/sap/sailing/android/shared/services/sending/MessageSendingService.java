@@ -168,7 +168,7 @@ public class MessageSendingService extends Service implements MessageSendingList
             Class<MessageRestorer> castedClass = (Class<MessageRestorer>) clazz;
             restorer = castedClass.getConstructor().newInstance();
         } catch (Exception e) {
-            ExLog.e(this, TAG, "Could not find MessageRestorer. See documentation of MessageSendingService"
+            ExLog.w(this, TAG, "Could not find MessageRestorer. See documentation of MessageSendingService"
                     + "on how to register the restorer through the manifest. Error Message: " + e.getMessage());
         }
         return new MessagePersistenceManager(this, restorer);
