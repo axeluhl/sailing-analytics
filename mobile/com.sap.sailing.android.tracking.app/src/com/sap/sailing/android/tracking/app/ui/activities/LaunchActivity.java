@@ -132,6 +132,8 @@ public class LaunchActivity extends BaseActivity {
                 ExLog.i(this, TAG, "Created mapping event");
                 Toast.makeText(this, "Successfully created mapping between device and " + itemType,
                         Toast.LENGTH_LONG).show();
+                
+                startActivity(new Intent(this, StartTrackingActivity.class));
             }
         } else {
             Toast.makeText(this, "Error scanning QRCode (" + resultCode + ")", Toast.LENGTH_LONG).show();
