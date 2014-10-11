@@ -12,6 +12,7 @@ import com.google.gwt.dom.client.Style.FontWeight;
 import com.google.gwt.event.logical.shared.ResizeEvent;
 import com.google.gwt.event.logical.shared.ResizeHandler;
 import com.google.gwt.user.client.Window;
+import com.google.gwt.user.client.ui.Button;
 import com.google.gwt.user.client.ui.FlowPanel;
 import com.google.gwt.user.client.ui.Widget;
 import com.sap.sailing.domain.common.RegattaAndRaceIdentifier;
@@ -270,7 +271,10 @@ public class AutoPlayController implements RaceTimesInfoProviderListener {
                 raceBoardPanel.setWindChartVisible(true);
             }
             FlowPanel timePanel = createTimePanel(raceBoardPanel);
-            playerView.getDockPanel().addSouth(timePanel, 90);                     
+            
+            final Button toggleButton = raceBoardPanel.getTimePanel().getAdvancedToggleButton();
+            toggleButton.setVisible(false);
+            playerView.getDockPanel().addSouth(timePanel, 67);                     
             playerView.getDockPanel().add(raceBoardPanel);
             activeTvView = AutoPlayModes.Raceboard;
             leaderboardTimer.pause();
