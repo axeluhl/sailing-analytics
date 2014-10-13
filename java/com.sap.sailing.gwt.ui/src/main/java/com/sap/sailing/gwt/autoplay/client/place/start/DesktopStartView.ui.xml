@@ -9,6 +9,14 @@
         <div style="height:1em;" />
 		<div class="{res.mainCss.grid}" style="padding-bottom:1em;">
 			<div class="{res.mediaCss.small2} {res.mediaCss.columns}">
+			    <span>Sprache:</span>
+	        </div>
+		    <div class="{res.mediaCss.small2} {res.mediaCss.columns}">
+				<g:ListBox ui:field="localeSelectionBox" />
+	        </div>
+		</div>
+        <div class="{res.mainCss.grid}" style="padding-bottom:1em;">
+			<div class="{res.mediaCss.small2} {res.mediaCss.columns}">
 			    <ui:text from='{i18n.events}'/>
 	        </div>
 		    <div class="{res.mediaCss.small2} {res.mediaCss.columns}">

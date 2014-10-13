@@ -8,11 +8,13 @@ public class PlayerPlace extends AbstractBasePlace {
     private final String leaderboardIdAsNameString;
     private final String leaderboardZoomAsString;
     private final String fullscreenAsString;
+    private final String locale;
     
     private final static String PARAM_EVENTID = "eventId"; 
     private final static String PARAM_LEADEROARD_NAME = "leaderboardName"; 
     private final static String PARAM_LEADEROARD_ZOOM = "leaderboardZoom"; 
     private final static String PARAM_FULLSCREEN = "fullscreen"; 
+    private final static String PARAM_LOCALE = "locale"; 
     
     public PlayerPlace(String url) {
         super(url);
@@ -20,15 +22,17 @@ public class PlayerPlace extends AbstractBasePlace {
         leaderboardIdAsNameString = getParameter(PARAM_LEADEROARD_NAME);
         leaderboardZoomAsString = getParameter(PARAM_LEADEROARD_ZOOM);
         fullscreenAsString = getParameter(PARAM_FULLSCREEN);
+        locale = getParameter(PARAM_LOCALE);
     }
 
-    public PlayerPlace(String eventUuidAsString, String leaderboardIdAsNameString, String leaderboardZoomAsString, boolean fullscreen) {
+    public PlayerPlace(String eventUuidAsString, String leaderboardIdAsNameString, String leaderboardZoomAsString, boolean fullscreen, String locale) {
         super(PARAM_EVENTID, eventUuidAsString, PARAM_LEADEROARD_NAME, leaderboardIdAsNameString, 
                 PARAM_LEADEROARD_ZOOM, leaderboardZoomAsString, PARAM_FULLSCREEN, String.valueOf(fullscreen));
         this.eventUuidAsString = eventUuidAsString;
         this.leaderboardIdAsNameString = leaderboardIdAsNameString;
         this.leaderboardZoomAsString = leaderboardZoomAsString;
         this.fullscreenAsString = String.valueOf(fullscreen);
+        this.locale = locale;
     }
 
     public String getEventUuidAsString() {
@@ -47,6 +51,10 @@ public class PlayerPlace extends AbstractBasePlace {
         return fullscreenAsString;
     }
 
+    public String getLocale() {
+        return locale;
+    }
+    
     public static class Tokenizer implements PlaceTokenizer<PlayerPlace> {
         @Override
         public String getToken(PlayerPlace place) {

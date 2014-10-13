@@ -32,6 +32,7 @@ public class DesktopStartView extends Composite implements StartView {
     }
 
     @UiField(provided=true) SAPHeader sapHeader;
+    @UiField(provided=true) ListBox localeSelectionBox;
     @UiField(provided=true) ListBox eventSelectionBox;
     @UiField(provided=true) ListBox leaderboardSelectionBox;
     @UiField CheckBox leaderboardAutoZoomBox;
@@ -53,6 +54,10 @@ public class DesktopStartView extends Composite implements StartView {
         sapHeader = new SAPHeader("Auto player configuration");
         eventSelectionBox = new ListBox(false);
         leaderboardSelectionBox = new ListBox(false);
+        localeSelectionBox = new ListBox(false);
+        localeSelectionBox.addItem("Deutsch", "de");
+        localeSelectionBox.addItem("English", "en");
+
         
         initWidget(uiBinder.createAndBindUi(this));
 
@@ -115,7 +120,8 @@ public class DesktopStartView extends Composite implements StartView {
         String leaderboardZoom = getLeaderboardZoom();
         
         if(selectedEvent != null && selectedLeaderboardName != null) {
-            navigator.goToPlayer(selectedEvent.id.toString(), selectedLeaderboardName, leaderboardZoom, startInFullscreenModeBox.getValue());
+            navigator.goToPlayer(selectedEvent.id.toString(), selectedLeaderboardName, leaderboardZoom, 
+                    startInFullscreenModeBox.getValue(), getSelectedLocale());
         }
     }
 
@@ -126,6 +132,15 @@ public class DesktopStartView extends Composite implements StartView {
     
     private String getLeaderboardZoom() {
         return leaderboardAutoZoomBox.getValue() == true ? "auto" : String.valueOf(leaderboardZoomBox.getValue());
+    }
+
+    private String getSelectedLocale() {
+        String result = null;
+        int selectedIndex = localeSelectionBox.getSelectedIndex();
+        if(selectedIndex > 0) {
+            result = localeSelectionBox.getItemText(selectedIndex);
+        }
+        return result;
     }
 
     private String getSelectedLeaderboardName() {
