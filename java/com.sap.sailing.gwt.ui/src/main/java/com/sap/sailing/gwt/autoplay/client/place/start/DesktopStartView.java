@@ -1,7 +1,9 @@
 package com.sap.sailing.gwt.autoplay.client.place.start;
 
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
 import com.google.gwt.core.client.GWT;
 import com.google.gwt.dom.client.DivElement;
@@ -9,6 +11,7 @@ import com.google.gwt.dom.client.Style.Visibility;
 import com.google.gwt.event.dom.client.ChangeEvent;
 import com.google.gwt.event.dom.client.ClickEvent;
 import com.google.gwt.event.logical.shared.ValueChangeEvent;
+import com.google.gwt.i18n.client.LocaleInfo;
 import com.google.gwt.uibinder.client.UiBinder;
 import com.google.gwt.uibinder.client.UiField;
 import com.google.gwt.uibinder.client.UiHandler;
@@ -19,6 +22,7 @@ import com.google.gwt.user.client.ui.ListBox;
 import com.google.gwt.user.client.ui.TextBox;
 import com.google.gwt.user.client.ui.Widget;
 import com.sap.sailing.gwt.autoplay.client.app.PlaceNavigator;
+import com.sap.sailing.gwt.autoplay.client.place.player.PlayerPlace;
 import com.sap.sailing.gwt.autoplay.client.shared.header.SAPHeader;
 import com.sap.sailing.gwt.common.client.SharedResources;
 import com.sap.sailing.gwt.ui.shared.EventDTO;
@@ -37,6 +41,7 @@ public class DesktopStartView extends Composite implements StartView {
     @UiField(provided=true) ListBox leaderboardSelectionBox;
     @UiField CheckBox leaderboardAutoZoomBox;
     @UiField CheckBox startInFullscreenModeBox;
+    @UiField CheckBox autoSelectMediaBox;
     @UiField TextBox leaderboardZoomBox;
     @UiField Button startAutoPlayButton;
     @UiField DivElement leaderboardSelectionDiv;
@@ -46,18 +51,26 @@ public class DesktopStartView extends Composite implements StartView {
     private final PlaceNavigator navigator;
     private final List<EventDTO> events;
     
+    private Map<String, String> raceboardParameters;
+    private Map<String, String> leaderboardParameters;
+    
     public DesktopStartView(PlaceNavigator navigator) {
         super();
         this.navigator = navigator;
         this.events = new ArrayList<EventDTO>();
+        this.raceboardParameters = new HashMap<String, String>();
+        this.leaderboardParameters = new HashMap<String, String>();
         
         sapHeader = new SAPHeader("Auto player configuration");
         eventSelectionBox = new ListBox(false);
         leaderboardSelectionBox = new ListBox(false);
         localeSelectionBox = new ListBox(false);
-        localeSelectionBox.addItem("Deutsch", "de");
-        localeSelectionBox.addItem("English", "en");
-
+        for (String localeName : LocaleInfo.getAvailableLocaleNames()) {
+            if(!localeName.equals("default")) {
+                String displayName = LocaleInfo.getLocaleNativeDisplayName(localeName);
+                localeSelectionBox.addItem(displayName);
+            }
+         }
         
         initWidget(uiBinder.createAndBindUi(this));
 
@@ -118,10 +131,15 @@ public class DesktopStartView extends Composite implements StartView {
         EventDTO selectedEvent = getSelectedEvent();
         String selectedLeaderboardName = getSelectedLeaderboardName();
         String leaderboardZoom = getLeaderboardZoom();
+        Boolean isAutoSelectMedia = autoSelectMediaBox.getValue();
         
         if(selectedEvent != null && selectedLeaderboardName != null) {
-            navigator.goToPlayer(selectedEvent.id.toString(), selectedLeaderboardName, leaderboardZoom, 
-                    startInFullscreenModeBox.getValue(), getSelectedLocale());
+            leaderboardParameters.put(PlayerPlace.PARAM_LEADEROARD_ZOOM, leaderboardZoom);
+            leaderboardParameters.put(PlayerPlace.PARAM_LEADEROARD_NAME, selectedLeaderboardName);
+            raceboardParameters.put(PlayerPlace.PARAM_RACEBOARD_AUTOSELECT_MEDIA, String.valueOf(isAutoSelectMedia));
+            
+            navigator.goToPlayer(selectedEvent.id.toString(), getSelectedLocale(), startInFullscreenModeBox.getValue(), 
+                    leaderboardParameters, raceboardParameters);
         }
     }
 
@@ -138,7 +156,17 @@ public class DesktopStartView extends Composite implements StartView {
         String result = null;
         int selectedIndex = localeSelectionBox.getSelectedIndex();
         if(selectedIndex > 0) {
-            result = localeSelectionBox.getItemText(selectedIndex);
+            String selectedLocale = localeSelectionBox.getItemText(selectedIndex);
+            for (String localeName : LocaleInfo.getAvailableLocaleNames()) {
+                if(!localeName.equals("default")) {
+                    String displayName = LocaleInfo.getLocaleNativeDisplayName(localeName);
+                    if(displayName.equals(selectedLocale)) {
+                        result = localeName;
+                        break;
+                    }
+                }
+             }
+
         }
         return result;
     }

@@ -4,35 +4,50 @@ import com.google.gwt.place.shared.PlaceTokenizer;
 import com.sap.sailing.gwt.common.client.AbstractBasePlace;
 
 public class PlayerPlace extends AbstractBasePlace {
+    // general parameters
     private final String eventUuidAsString;
-    private final String leaderboardIdAsNameString;
-    private final String leaderboardZoomAsString;
-    private final String fullscreenAsString;
     private final String locale;
+    private final boolean fullscreen;
     
-    private final static String PARAM_EVENTID = "eventId"; 
-    private final static String PARAM_LEADEROARD_NAME = "leaderboardName"; 
-    private final static String PARAM_LEADEROARD_ZOOM = "leaderboardZoom"; 
-    private final static String PARAM_FULLSCREEN = "fullscreen"; 
-    private final static String PARAM_LOCALE = "locale"; 
+    public final static String PARAM_EVENTID = "eventId"; 
+    public final static String PARAM_LOCALE = "locale";
+    public final static String PARAM_FULLSCREEN = "fullscreen";
+    
+    // leaderboard parameters
+    private final String leaderboardIdAsNameString;
+    private final String leaderboardZoom;
+    
+    public final static String PARAM_LEADEROARD_NAME = "leaderboardName"; 
+    public final static String PARAM_LEADEROARD_ZOOM = "leaderboardZoom"; 
+
+    // raceboard parameters
+    private String raceboardAutoSelectMedia;  
+
+    public final static String PARAM_RACEBOARD_AUTOSELECT_MEDIA = "autoSelectMedia"; 
     
     public PlayerPlace(String url) {
         super(url);
         eventUuidAsString = getParameter(PARAM_EVENTID);
-        leaderboardIdAsNameString = getParameter(PARAM_LEADEROARD_NAME);
-        leaderboardZoomAsString = getParameter(PARAM_LEADEROARD_ZOOM);
-        fullscreenAsString = getParameter(PARAM_FULLSCREEN);
         locale = getParameter(PARAM_LOCALE);
+        fullscreen = Boolean.valueOf(getParameter(PARAM_FULLSCREEN));
+
+        leaderboardIdAsNameString = getParameter(PARAM_LEADEROARD_NAME);
+        leaderboardZoom = getParameter(PARAM_LEADEROARD_ZOOM);
+        
+        raceboardAutoSelectMedia = getParameter(PARAM_RACEBOARD_AUTOSELECT_MEDIA);
     }
 
-    public PlayerPlace(String eventUuidAsString, String leaderboardIdAsNameString, String leaderboardZoomAsString, boolean fullscreen, String locale) {
-        super(PARAM_EVENTID, eventUuidAsString, PARAM_LEADEROARD_NAME, leaderboardIdAsNameString, 
-                PARAM_LEADEROARD_ZOOM, leaderboardZoomAsString, PARAM_FULLSCREEN, String.valueOf(fullscreen));
+    public PlayerPlace(String eventUuidAsString, String locale, boolean fullscreen,
+            String leaderboardIdAsNameString, String leaderboardZoomAsString, String raceboardAutoSelectMedia) {
+        super(PARAM_EVENTID, eventUuidAsString, PARAM_LOCALE, locale, PARAM_FULLSCREEN, String.valueOf(fullscreen), 
+                PARAM_LEADEROARD_NAME, leaderboardIdAsNameString, PARAM_LEADEROARD_ZOOM, leaderboardZoomAsString,
+                PARAM_RACEBOARD_AUTOSELECT_MEDIA, raceboardAutoSelectMedia);
         this.eventUuidAsString = eventUuidAsString;
-        this.leaderboardIdAsNameString = leaderboardIdAsNameString;
-        this.leaderboardZoomAsString = leaderboardZoomAsString;
-        this.fullscreenAsString = String.valueOf(fullscreen);
         this.locale = locale;
+        this.fullscreen = fullscreen;
+        this.leaderboardIdAsNameString = leaderboardIdAsNameString;
+        this.leaderboardZoom = leaderboardZoomAsString;
+        this.raceboardAutoSelectMedia = raceboardAutoSelectMedia; 
     }
 
     public String getEventUuidAsString() {
@@ -43,12 +58,16 @@ public class PlayerPlace extends AbstractBasePlace {
         return leaderboardIdAsNameString;
     }
 
-    public String getLeaderboardZoomAsString() {
-        return leaderboardZoomAsString;
+    public String getLeaderboardZoom() {
+        return leaderboardZoom;
+    }
+    
+    public String getRaceboardAutoSelectMedia() {
+        return raceboardAutoSelectMedia;
     }
 
-    public String getFullscreenAsString() {
-        return fullscreenAsString;
+    public boolean isFullscreen() {
+        return fullscreen;
     }
 
     public String getLocale() {

@@ -45,14 +45,13 @@ public class PlayerActivity extends AbstractActivity implements ErrorReporter {
                 PlayerView view = clientFactory.createPlayerView();
                 panel.setWidget(view.asWidget());
 
-                Boolean startInFullScreenMode = Boolean.valueOf(playerPlace.getFullscreenAsString());
-                if(startInFullScreenMode) {
+                if(playerPlace.isFullscreen()) {
                     FullscreenUtil.requestFullscreen();
                 }
 
                 autoPlayController = new AutoPlayController(clientFactory.getSailingService(), clientFactory.getMediaService(),
                         PlayerActivity.this, /*leaderboardGroupName*/ "" , playerPlace.getLeaderboardIdAsNameString(), 
-                        playerPlace.getLeaderboardZoomAsString(), userAgent, delayToLiveMillis, showRaceDetails, readRaceboardConfiguration, view);
+                        playerPlace.getLeaderboardZoom(), userAgent, delayToLiveMillis, showRaceDetails, readRaceboardConfiguration, view);
                 autoPlayController.updatePlayMode(AutoPlayModes.Leaderboard);
             }
 
@@ -64,6 +63,8 @@ public class PlayerActivity extends AbstractActivity implements ErrorReporter {
     }
     
     private RaceBoardViewConfiguration readRaceboardConfiguration() {
+        Boolean autoSelectMedia = Boolean.valueOf(playerPlace.getRaceboardAutoSelectMedia());
+
         final boolean showLeaderboard = GwtHttpRequestUtils.getBooleanParameter(
                 RaceBoardViewConfiguration.PARAM_VIEW_SHOW_LEADERBOARD, true /* default */);
         final boolean showWindChart = GwtHttpRequestUtils.getBooleanParameter(
@@ -76,7 +77,6 @@ public class PlayerActivity extends AbstractActivity implements ErrorReporter {
                 RaceBoardViewConfiguration.PARAM_VIEW_SHOW_COMPETITORSCHART, false /* default */);
         String activeCompetitorsFilterSetName = GwtHttpRequestUtils.getStringParameter(RaceBoardViewConfiguration.PARAM_VIEW_COMPETITOR_FILTER, null /* default*/);
         final String defaultMedia = GwtHttpRequestUtils.getStringParameter(RaceBoardViewConfiguration.PARAM_DEFAULT_MEDIA, null /* default */);
-        final boolean autoSelectMedia = GwtHttpRequestUtils.getBooleanParameter(RaceBoardViewConfiguration.PARAM_AUTOSELECT_MEDIA, false);
         
         return new RaceBoardViewConfiguration(activeCompetitorsFilterSetName, showLeaderboard,
                 showWindChart, showCompetitorsChart, showViewStreamlets, showViewSimulation, /* canReplayWhileLiveIsPossible */false, autoSelectMedia, defaultMedia);

@@ -9,15 +9,23 @@
         <div style="height:1em;" />
 		<div class="{res.mainCss.grid}" style="padding-bottom:1em;">
 			<div class="{res.mediaCss.small2} {res.mediaCss.columns}">
-			    <span>Sprache:</span>
+			    <span>Display language:</span>
 	        </div>
 		    <div class="{res.mediaCss.small2} {res.mediaCss.columns}">
 				<g:ListBox ui:field="localeSelectionBox" />
 	        </div>
 		</div>
+		<div class="{res.mainCss.grid}" style="padding-bottom:1em;">
+			<div class="{res.mediaCss.small2} {res.mediaCss.columns}">
+			    <span>Start browser in full screen mode:</span>
+	        </div>
+		    <div class="{res.mediaCss.small2} {res.mediaCss.columns}">
+				<g:CheckBox ui:field="startInFullscreenModeBox" />
+	        </div>
+		</div>
         <div class="{res.mainCss.grid}" style="padding-bottom:1em;">
 			<div class="{res.mediaCss.small2} {res.mediaCss.columns}">
-			    <ui:text from='{i18n.events}'/>
+			    <span>Event:</span>
 	        </div>
 		    <div class="{res.mediaCss.small2} {res.mediaCss.columns}">
 				<g:ListBox ui:field="eventSelectionBox" />
@@ -25,7 +33,7 @@
 		</div>
 		<div ui:field="leaderboardSelectionDiv" class="{res.mainCss.grid}" style="padding-bottom:1em;">
 			<div class="{res.mediaCss.small2} {res.mediaCss.columns}">
-			    <ui:text from='{i18n.leaderboard}'/>
+			    <span>Leaderboard:</span>
 	        </div>
 		    <div class="{res.mediaCss.small2} {res.mediaCss.columns}">
 				<g:ListBox ui:field="leaderboardSelectionBox" />
@@ -49,10 +57,10 @@
 		</div>
 		<div class="{res.mainCss.grid}" style="padding-bottom:1em;">
 			<div class="{res.mediaCss.small2} {res.mediaCss.columns}">
-			    <span>Start in full screen mode:</span>
+			    <span>Auto-Play video:</span>
 	        </div>
 		    <div class="{res.mediaCss.small2} {res.mediaCss.columns}">
-				<g:CheckBox ui:field="startInFullscreenModeBox" />
+				<g:CheckBox ui:field="autoSelectMediaBox" />
 	        </div>
 		</div>
 		<div class="{res.mainCss.grid}">
