@@ -79,6 +79,9 @@
 	<source path='ui/shared' />
 	<source path='ui/actions' />
 	<source path='ui/simulator' />
+	<source path='ui/adminconsole' />
+	<source path='ui/usermanagement' />
+	<source path='ui/masterdataimport' />
 	<source path='ui/regattaoverview' />
 	<source path='ui/leaderboard'/>
 	<source path='home' />
