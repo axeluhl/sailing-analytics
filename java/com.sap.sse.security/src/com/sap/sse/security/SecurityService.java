@@ -4,6 +4,8 @@ import java.util.Collection;
 import java.util.Map;
 import java.util.Set;
 
+import javax.mail.MessagingException;
+import javax.mail.internet.AddressException;
 import javax.servlet.ServletContext;
 
 import org.apache.shiro.cache.CacheManager;
@@ -59,4 +61,6 @@ public interface SecurityService {
     void refreshSecurityConfig(ServletContext context);
 
     CacheManager getCacheManager();
+    
+    void sendMail(String username, String subject, String body) throws AddressException, MessagingException;
 }

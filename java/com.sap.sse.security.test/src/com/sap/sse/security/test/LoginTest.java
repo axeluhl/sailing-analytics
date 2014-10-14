@@ -2,6 +2,8 @@ package com.sap.sse.security.test;
 
 import static org.junit.Assert.assertNotNull;
 
+import java.util.Properties;
+
 import org.apache.shiro.SecurityUtils;
 import org.junit.BeforeClass;
 import org.junit.Test;
@@ -18,7 +20,7 @@ public class LoginTest {
         UserStore store = new UserStoreImpl();
         UsernamePasswordRealm.setTestUserStore(store);
         Activator.setTestUserStore(store);
-        new SecurityServiceImpl(store);
+        new SecurityServiceImpl(store, /* mailProperties */ new Properties());
     }
 
     @Test

@@ -4,11 +4,20 @@ import java.util.Arrays;
 import java.util.Collection;
 import java.util.Map;
 import java.util.Map.Entry;
+import java.util.Properties;
 import java.util.Set;
 import java.util.UUID;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
+import javax.mail.Message.RecipientType;
+import javax.mail.MessagingException;
+import javax.mail.PasswordAuthentication;
+import javax.mail.Session;
+import javax.mail.Transport;
+import javax.mail.internet.AddressException;
+import javax.mail.internet.InternetAddress;
+import javax.mail.internet.MimeMessage;
 import javax.servlet.Filter;
 import javax.servlet.ServletContext;
 import javax.servlet.http.HttpServletRequest;
@@ -68,15 +77,22 @@ public class SecurityServiceImpl extends RemoteServiceServlet implements Securit
     private SecurityManager securityManager;
     private final CacheManager cacheManager = new EhCacheManager();
     private final UserStore store;
+    private final Properties mailProperties;
+    
     private static Ini shiroConfiguration;
     static {
         shiroConfiguration = new Ini();
         shiroConfiguration.loadFromPath("classpath:shiro.ini");
     }
 
-    public SecurityServiceImpl(UserStore store) {
-        logger.info("Initializing Security Service with user store " + store);
+    /**
+     * @param mailProperties must not be <code>null</code>
+     */
+    public SecurityServiceImpl(UserStore store, Properties mailProperties) {
+        assert mailProperties != null;
+        logger.info("Initializing Security Service with user store " + store+" and mail properties "+mailProperties);
         this.store = store;
+        this.mailProperties = mailProperties;
         // Create default users if no users exist yet.
         if (store.getUserCollection().isEmpty()) {
             try {
@@ -103,6 +119,34 @@ public class SecurityServiceImpl extends RemoteServiceServlet implements Securit
         logger.info("Created: " + securityManager);
         SecurityUtils.setSecurityManager(securityManager);
         this.securityManager = securityManager;
+    }
+
+    private class SMTPAuthenticator extends javax.mail.Authenticator {
+        public PasswordAuthentication getPasswordAuthentication() {
+           String username = mailProperties.getProperty("mail.smtp.user");
+           String password = mailProperties.getProperty("mail.smtp.password");
+           return new PasswordAuthentication(username, password);
+        }
+    }
+
+    @Override
+    public void sendMail(String username, String subject, String body) throws AddressException, MessagingException {
+        final User user = getUserByName(username);
+        if (user != null) {
+            final String toAddress = user.getEmail();
+            if (toAddress != null) {
+                Session session = Session.getInstance(this.mailProperties, new SMTPAuthenticator());
+                MimeMessage msg = new MimeMessage(session);
+                msg.setFrom(new InternetAddress("root@sapsailing.com"));
+                msg.setSubject(subject);
+                msg.setContent(body, "text/plain");
+                msg.addRecipient(RecipientType.TO, new InternetAddress(toAddress.trim()));
+                Transport ts = session.getTransport();
+                ts.connect();
+                ts.sendMessage(msg, msg.getRecipients(RecipientType.TO));
+                ts.close();
+            }
+        }
     }
 
     @Override

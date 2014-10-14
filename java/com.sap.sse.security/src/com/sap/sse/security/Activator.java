@@ -30,8 +30,6 @@ public class Activator implements BundleActivator {
      */
     private static UserStore testUserStore;
     
-    private Properties mailProperties;
-    
     public static void setTestUserStore(UserStore theTestUserStore) {
         testUserStore = theTestUserStore;
         UsernamePasswordRealm.setTestUserStore(theTestUserStore);
@@ -41,7 +39,7 @@ public class Activator implements BundleActivator {
         return context;
     }
     
-    static SecurityService getSecurityService(){
+    static SecurityService getSecurityService() {
         return securityService;
     }
 
@@ -55,23 +53,23 @@ public class Activator implements BundleActivator {
         // Load mail properties
         File propertiesfile = new File(new File(System.getProperty("jetty.home")).getParent()
                 + "/security.properties");
-        mailProperties = new Properties();
+        Properties mailProperties = new Properties();
         mailProperties.load(new FileReader(propertiesfile));
         if (testUserStore != null) {
-            createAndRegisterSecurityService(testUserStore);
+            createAndRegisterSecurityService(testUserStore, mailProperties);
         } else {
-            waitForUserStoreService(bundleContext);
+            waitForUserStoreService(bundleContext, mailProperties);
         }
     }
 
-    private void createAndRegisterSecurityService(UserStore store) {
-        securityService = new SecurityServiceImpl(store);
+    private void createAndRegisterSecurityService(UserStore store, Properties mailProperties) {
+        securityService = new SecurityServiceImpl(store, mailProperties);
         registration = context.registerService(SecurityService.class.getName(),
                 securityService, null);
         Logger.getLogger(Activator.class.getName()).info("Security Service registered.");
     }
 
-    private void waitForUserStoreService(BundleContext bundleContext) {
+    private void waitForUserStoreService(BundleContext bundleContext, final Properties mailProperties) {
         context = bundleContext;
         final ServiceTracker<UserStore, UserStore> tracker = new ServiceTracker<>(bundleContext, UserStore.class, /* customizer */ null);
         tracker.open();
@@ -82,7 +80,7 @@ public class Activator implements BundleActivator {
                     logger.info("Waiting for UserStore service...");
                     UserStore userStore = tracker.waitForService(0);
                     logger.info("Obtained UserStore service "+userStore);
-                    createAndRegisterSecurityService(userStore);
+                    createAndRegisterSecurityService(userStore, mailProperties);
                 } catch (InterruptedException e) {
                     logger.log(Level.SEVERE, "Interrupted while waiting for UserStore service", e);
                 }
