@@ -65,10 +65,16 @@ public class DesktopStartView extends Composite implements StartView {
         eventSelectionBox = new ListBox(false);
         leaderboardSelectionBox = new ListBox(false);
         localeSelectionBox = new ListBox(false);
+        LocaleInfo currentLocale = LocaleInfo.getCurrentLocale();
+        int i = 0;
         for (String localeName : LocaleInfo.getAvailableLocaleNames()) {
             if(!localeName.equals("default")) {
                 String displayName = LocaleInfo.getLocaleNativeDisplayName(localeName);
                 localeSelectionBox.addItem(displayName);
+                if(currentLocale.getLocaleName().equals(localeName)) {
+                    localeSelectionBox.setSelectedIndex(i);
+                }
+                i++;
             }
          }
         
@@ -155,7 +161,7 @@ public class DesktopStartView extends Composite implements StartView {
     private String getSelectedLocale() {
         String result = null;
         int selectedIndex = localeSelectionBox.getSelectedIndex();
-        if(selectedIndex > 0) {
+        if(selectedIndex >= 0) {
             String selectedLocale = localeSelectionBox.getItemText(selectedIndex);
             for (String localeName : LocaleInfo.getAvailableLocaleNames()) {
                 if(!localeName.equals("default")) {
