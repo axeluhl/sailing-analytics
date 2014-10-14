@@ -5,4 +5,9 @@
     
     <!-- override default values of android.shared -->
     <string name="app_folder">tracking</string>
+    
+    <string name="preference_gps_fix_interval_key">gpsFixInterval</string>
+    <string name="preference_gps_fix_interval_ms_default">500</string>
+    <string name="preference_gps_fix_fastest_interval_key">gpsFixFastestInterval</string>
+    <string name="preference_gps_fastest_fix_interval_ms_default">100</string>
 </resources>

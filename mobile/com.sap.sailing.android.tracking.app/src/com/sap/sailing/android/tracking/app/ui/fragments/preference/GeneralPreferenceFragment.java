@@ -2,6 +2,7 @@ package com.sap.sailing.android.tracking.app.ui.fragments.preference;
 
 
 import android.os.Bundle;
+import android.preference.Preference;
 
 import com.sap.sailing.android.shared.ui.fragments.preference.BasePreferenceFragment;
 import com.sap.sailing.android.tracking.app.R;
@@ -14,5 +15,7 @@ public class GeneralPreferenceFragment extends BasePreferenceFragment {
         addPreferencesFromResource(R.xml.preference_general);
         bindPreferenceSummaryToValue(findPreference(R.string.preference_device_identifier_key));
         bindPreferenceSummaryToValue(findPreference(R.string.preference_server_url_key));
+        Preference findPreference = findPreference(R.string.preference_gps_fix_interval_key);
+        bindPreferenceSummaryToValue(findPreference);
     }
 }

@@ -40,8 +40,6 @@ public class TrackingService extends Service implements ConnectionCallbacks, OnC
     private static final String TAG = TrackingService.class.getName();
 
     public static final String WEB_SERVICE_PATH = "/tracking/recordFixesFlatJson";
-    public static final int FIX_INTERVAL_MS = 500;
-    public static final int FASTEST_FIX_INTERVAL_MS = 100;
     // Unique Identification Number for the Notification.
     // We use it on Notification start, and to cancel it.
     private int NOTIFICATION_ID = R.string.tracker_started;
@@ -54,8 +52,8 @@ public class TrackingService extends Service implements ConnectionCallbacks, OnC
         // http://developer.android.com/training/location/receive-location-updates.html
         locationRequest = LocationRequest.create();
         locationRequest.setPriority(LocationRequest.PRIORITY_HIGH_ACCURACY);
-        locationRequest.setInterval(FIX_INTERVAL_MS);
-        locationRequest.setFastestInterval(FASTEST_FIX_INTERVAL_MS);
+        locationRequest.setInterval(prefs.getGPSFixInterval());
+        locationRequest.setFastestInterval(prefs.getGPSFixFastestInterval());
 
         locationClient = new LocationClient(this, this, this);
         notificationManager = (NotificationManager) getSystemService(NOTIFICATION_SERVICE);
