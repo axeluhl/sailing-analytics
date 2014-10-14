@@ -281,19 +281,6 @@ public class AdminConsoleEntryPoint extends AbstractEntryPoint implements Regatt
         rootPanel.add(dockPanel);
     }
 
-    /**
-     * Sets the sizie of the tab panel when the tab panel is attached to the DOM
-     */
-    private void setTabPanelSize(final TabLayoutPanel advancedTabPanel, final String width, final String height) {
-        advancedTabPanel.addAttachHandler(new Handler() {
-            @Override
-            public void onAttachOrDetach(AttachEvent event) {
-                advancedTabPanel.getElement().getParentElement().getStyle().setProperty("width", width);
-                advancedTabPanel.getElement().getParentElement().getStyle().setProperty("height", height);
-            }
-        });
-    }
-    
     private void refreshDataFor(Widget widget) {
         Widget target = widget;
         if (widget != null) {

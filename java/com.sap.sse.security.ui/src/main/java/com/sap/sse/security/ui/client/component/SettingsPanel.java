@@ -17,36 +17,38 @@ import com.google.gwt.user.client.rpc.AsyncCallback;
 import com.google.gwt.user.client.ui.Button;
 import com.google.gwt.user.client.ui.CheckBox;
 import com.google.gwt.user.client.ui.FlexTable;
-import com.google.gwt.user.client.ui.FlowPanel;
 import com.google.gwt.user.client.ui.HTML;
 import com.google.gwt.user.client.ui.ImageResourceRenderer;
 import com.google.gwt.user.client.ui.IntegerBox;
 import com.google.gwt.user.client.ui.Label;
+import com.google.gwt.user.client.ui.LayoutPanel;
 import com.google.gwt.user.client.ui.ScrollPanel;
 import com.google.gwt.user.client.ui.TabLayoutPanel;
 import com.google.gwt.user.client.ui.TextBox;
+import com.sap.sse.security.ui.client.StringMessages;
 import com.sap.sse.security.ui.client.resources.IconResources;
 import com.sap.sse.security.ui.shared.UserManagementServiceAsync;
+import com.sap.sse.security.ui.usermanagement.UserManagementEntryPoint;
 
-public class SettingsPanel extends FlowPanel {
+public class SettingsPanel extends LayoutPanel {
 
     private UserManagementServiceAsync userManagementService;
     private Map<String, String> settings = null;
     private Map<String, String> settingTypes = null;
     private Map<String, FlexTable> savedTabs = new HashMap<>();
+    private final StringMessages stringMessages;
 
-    public SettingsPanel(UserManagementServiceAsync userManagementService) {
+    public SettingsPanel(UserManagementServiceAsync userManagementService, StringMessages stringMessages) {
         super();
+        setHeight("600px");
+        this.stringMessages = stringMessages;
         this.userManagementService = userManagementService;
         initComponents();
     }
 
     private void initComponents() {
         clear();
-        Label settingsTitle = new Label("Settings");
-        add(settingsTitle);
         userManagementService.getSettingTypes(new AsyncCallback<Map<String, String>>() {
-
             @Override
             public void onFailure(Throwable caught) {
             }
@@ -77,6 +79,7 @@ public class SettingsPanel extends FlowPanel {
         }
         TabLayoutPanel tabPanel = new TabLayoutPanel(30, Unit.PX);
         tabPanel.setHeight("95%");
+        UserManagementEntryPoint.setTabPanelSize(tabPanel, "100%", "95%");
 
         Map<String, Integer> numberOfSettings = new HashMap<>();
         for (Entry<String, String> e : settingTypes.entrySet()) {
@@ -116,7 +119,7 @@ public class SettingsPanel extends FlowPanel {
             table.setWidget(newline, 1, url);
             table.setWidget(newline, 2, filter);
             
-            Button add = new Button("Add url filter", new ClickHandler() {
+            Button add = new Button(stringMessages.addURLFilter(), new ClickHandler() {
                 
                 @Override
                 public void onClick(ClickEvent event) {
@@ -133,7 +136,6 @@ public class SettingsPanel extends FlowPanel {
                         }
                     });
                     userManagementService.addSetting("URLS_AUTH_" + key.getText(), String.class.getName(), filter.getText(), new AsyncCallback<Void>() {
-
                         @Override
                         public void onFailure(Throwable caught) {
                             Window.alert(caught.getMessage());
@@ -148,7 +150,7 @@ public class SettingsPanel extends FlowPanel {
             });
             table.setWidget(newline+1, 0, add);
         }
-
+        clear();
         add(tabPanel);
     }
 

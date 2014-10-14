@@ -4,11 +4,11 @@ import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;
 
+import com.google.gwt.user.client.Window;
 import com.google.gwt.user.client.rpc.AsyncCallback;
 import com.google.gwt.user.client.ui.TextBox;
 import com.google.gwt.view.client.AbstractDataProvider;
 import com.google.gwt.view.client.HasData;
-import com.google.gwt.view.client.ProvidesKey;
 import com.google.gwt.view.client.Range;
 import com.sap.sse.security.ui.shared.UserDTO;
 import com.sap.sse.security.ui.shared.UserManagementServiceAsync;
@@ -18,8 +18,7 @@ public class UserListDataProvider extends AbstractDataProvider<UserDTO> {
     private UserManagementServiceAsync userManagementService;
     private TextBox filterBox;
     
-    public UserListDataProvider(UserManagementServiceAsync userManagementService, TextBox filterBox, ProvidesKey<UserDTO> keyProvider) {
-        super(keyProvider);
+    public UserListDataProvider(UserManagementServiceAsync userManagementService, TextBox filterBox) {
        this.userManagementService = userManagementService;
        this.filterBox = filterBox;
     }
@@ -28,10 +27,9 @@ public class UserListDataProvider extends AbstractDataProvider<UserDTO> {
     protected void onRangeChanged(HasData<UserDTO> display) {
         final Range range = display.getVisibleRange();
         userManagementService.getFilteredSortedUserList(filterBox.getText(), new AsyncCallback<Collection<UserDTO>>() {
-
             @Override
             public void onFailure(Throwable caught) {
-                
+                Window.alert(caught.getMessage());
             }
 
             @Override

@@ -5,6 +5,8 @@ import com.google.gwt.core.client.GWT;
 import com.google.gwt.debug.client.DebugInfo;
 import com.google.gwt.event.dom.client.ClickEvent;
 import com.google.gwt.event.dom.client.ClickHandler;
+import com.google.gwt.event.logical.shared.AttachEvent;
+import com.google.gwt.event.logical.shared.AttachEvent.Handler;
 import com.google.gwt.resources.client.TextResource;
 import com.google.gwt.user.client.Window;
 import com.google.gwt.user.client.rpc.ServiceDefTarget;
@@ -13,6 +15,7 @@ import com.google.gwt.user.client.ui.DialogBox;
 import com.google.gwt.user.client.ui.HTML;
 import com.google.gwt.user.client.ui.Label;
 import com.google.gwt.user.client.ui.RootPanel;
+import com.google.gwt.user.client.ui.TabLayoutPanel;
 import com.google.gwt.user.client.ui.VerticalPanel;
 import com.sap.sse.gwt.client.EntryPointHelper;
 import com.sap.sse.gwt.client.async.MarkedAsyncCallback;
@@ -135,5 +138,18 @@ public abstract class AbstractEntryPoint implements EntryPoint, ErrorReporter, W
             }
         });
         return myErrorDialogBox;
+    }
+
+    /**
+     * Sets the size of the tab panel when the tab panel is attached to the DOM
+     */
+    protected void setTabPanelSize(final TabLayoutPanel advancedTabPanel, final String width, final String height) {
+        advancedTabPanel.addAttachHandler(new Handler() {
+            @Override
+            public void onAttachOrDetach(AttachEvent event) {
+                advancedTabPanel.getElement().getParentElement().getStyle().setProperty("width", width);
+                advancedTabPanel.getElement().getParentElement().getStyle().setProperty("height", height);
+            }
+        });
     }
 }

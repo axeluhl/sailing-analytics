@@ -10,6 +10,8 @@ public interface StringMessages extends Messages {
 
     String password();
 
+    String passwordRepeat();
+
     String loggedIn();
 
     String signIn();
@@ -39,4 +41,25 @@ public interface StringMessages extends Messages {
     String close();
 
     String loading();
+
+    String users();
+
+    String addURLFilter();
+
+    String ok();
+
+    String cancel();
+
+    String username();
+
+    String email();
+
+    String usernameMustHaveAtLeastNCharacters(int minimumUsernameLength);
+
+    String passwordMustHaveAtLeastNCharacters(int minimumPasswordLength);
+
+    String passwordsDontMatch();
+
+    String couldNotCreateUser(String message);
+
 }

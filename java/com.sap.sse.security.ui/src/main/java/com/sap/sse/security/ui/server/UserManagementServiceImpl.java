@@ -23,6 +23,7 @@ import org.osgi.framework.BundleContext;
 import org.osgi.util.tracker.ServiceTracker;
 
 import com.google.gwt.user.server.rpc.RemoteServiceServlet;
+import com.sap.sailing.domain.common.impl.NaturalComparator;
 import com.sap.sse.security.Credential;
 import com.sap.sse.security.DefaultRoles;
 import com.sap.sse.security.SecurityService;
@@ -145,12 +146,11 @@ public class UserManagementServiceImpl extends RemoteServiceServlet implements U
                 users.add(createUserDTOFromUser(u));
             }
         }
-
         Collections.sort(users, new Comparator<UserDTO>() {
-
+            private final NaturalComparator naturalComparator = new NaturalComparator(/* caseSensitive */ false);
             @Override
             public int compare(UserDTO u1, UserDTO u2) {
-                return u1.getName().compareTo(u2.getName());
+                return naturalComparator.compare(u1.getName(), u2.getName());
             }
         });
         return users;
