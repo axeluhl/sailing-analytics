@@ -46,4 +46,3 @@ We agree that better information about access to our web site would be very help
 We therefore will need to log at a more fine-grained level on the server and probably also capture and collect some user statistics on the client, particularly for those interactions that don't immediately result in a server round-trip. This logging data will then be made amenable to advanced analysis.
 
 We agreed that extending a Bachelor Thesis position or a DHBW internship to work on the topic will be best suited to move this topic ahead.
-   

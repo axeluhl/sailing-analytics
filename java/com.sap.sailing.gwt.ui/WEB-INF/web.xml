@@ -18,7 +18,7 @@
 	<!-- Apache Shiro -->
 	<context-param>
 		<param-name>shiroEnvironmentClass</param-name>
-		<param-value>com.sap.sse.security.CustomWebEnvironment</param-value>
+		<param-value>org.apache.shiro.web.env.IniWebEnvironment</param-value>
 	</context-param>
 	<listener>
 		<listener-class>org.apache.shiro.web.env.EnvironmentLoaderListener</listener-class>
