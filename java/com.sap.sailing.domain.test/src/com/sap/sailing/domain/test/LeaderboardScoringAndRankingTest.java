@@ -979,6 +979,11 @@ public class LeaderboardScoringAndRankingTest extends AbstractLeaderboardTest {
         assertEquals(28 /* one win, two second */, leaderboardGroup.getOverallLeaderboard().getTotalPoints(c[0], later), 0.000000001);
         assertEquals(29 /* two wins, one second */, leaderboardGroup.getOverallLeaderboard().getTotalPoints(c[3], later), 0.000000001);
     }
+
+    @Test 
+    public void testHighPointScoringWithInterpolationWhenFleetNotComplete() {
+        // TODO: write some tests
+    }
     
     @Test
     public void testOverallLeaderboardWithESSHighPointScoringAndTieBreakInLastRegattaOfLeaderboardGroup() throws NoWindException {
