@@ -9,7 +9,6 @@ import java.util.concurrent.ConcurrentHashMap;
 import java.util.logging.Logger;
 
 import com.sap.sse.security.userstore.shared.Account;
-import com.sap.sse.security.userstore.shared.DefaultSettings;
 import com.sap.sse.security.userstore.shared.SocialSettingsKeys;
 import com.sap.sse.security.userstore.shared.User;
 import com.sap.sse.security.userstore.shared.UserManagementException;
@@ -39,7 +38,6 @@ public class UserStoreImpl implements UserStore {
             settings.put(e.getKey(), e.getValue());
         }
         boolean changed = false;
-        changed = changed || initDefaultSettingsIfEmpty();
         changed = changed || initSocialSettingsIfEmpty();
         if (changed) {
             mongoObjectFactory.storeSettingTypes(settingTypes);
@@ -56,18 +54,6 @@ public class UserStoreImpl implements UserStore {
             if (settingTypes.get(ssk.name()) == null || settings.get(ssk.name()) == null) {
                 addSetting(ssk.name(), String.class);
                 setSetting(ssk.name(), ssk.getValue());
-                changed = true;
-            }
-        }
-        return changed;
-    }
-
-    private boolean initDefaultSettingsIfEmpty() {
-        boolean changed = false;
-        for (DefaultSettings ds : DefaultSettings.values()) {
-            if (settingTypes.get(ds.name()) == null || settings.get(ds.name()) == null) {
-                addSetting(ds.name(), String.class);
-                setSetting(ds.name(), ds.getValue());
                 changed = true;
             }
         }

@@ -26,6 +26,7 @@ import com.google.gwt.user.server.rpc.RemoteServiceServlet;
 import com.sap.sse.security.Credential;
 import com.sap.sse.security.SecurityService;
 import com.sap.sse.security.SessionUtils;
+import com.sap.sse.security.ui.client.DefaultRoles;
 import com.sap.sse.security.ui.oauth.client.CredentialDTO;
 import com.sap.sse.security.ui.oauth.client.SocialUserDTO;
 import com.sap.sse.security.ui.oauth.shared.OAuthException;
@@ -40,7 +41,6 @@ import com.sap.sse.security.userstore.shared.FieldNames.Social;
 import com.sap.sse.security.userstore.shared.SocialUserAccount;
 import com.sap.sse.security.userstore.shared.User;
 import com.sap.sse.security.userstore.shared.UserManagementException;
-import com.sap.sse.security.userstore.shared.UserStore;
 import com.sap.sse.security.userstore.shared.UsernamePasswordAccount;
 
 public class UserManagementServiceImpl extends RemoteServiceServlet implements UserManagementService {
@@ -159,7 +159,7 @@ public class UserManagementServiceImpl extends RemoteServiceServlet implements U
     @Override
     public SuccessInfo addRoleForUser(String username, String role) {
         Subject currentSubject = SecurityUtils.getSubject();
-        if (currentSubject.hasRole(UserStore.DefaultRoles.ADMIN.getName())) {
+        if (currentSubject.hasRole(DefaultRoles.ADMIN.getRolename())) {
             User u = getSecurityService().getUserByName(username);
             if (u == null) {
                 return new SuccessInfo(false, "User does not exist.", /* redirectURL */ null, null);
@@ -232,7 +232,7 @@ public class UserManagementServiceImpl extends RemoteServiceServlet implements U
     @Override
     public Map<String, String> getSettingTypes() {
         Map<String, String> settingTypes = new TreeMap<String, String>();
-        for (Entry<String, Class<?>> e : getSecurityService().getAllSettingTypes().entrySet()){
+        for (Entry<String, Class<?>> e : getSecurityService().getAllSettingTypes().entrySet()) {
             settingTypes.put(e.getKey(), e.getValue().getName());
         }
         return settingTypes;

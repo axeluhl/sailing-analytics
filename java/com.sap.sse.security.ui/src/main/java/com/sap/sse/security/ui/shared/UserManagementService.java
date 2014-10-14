@@ -9,32 +9,32 @@ import com.sap.sse.security.ui.oauth.shared.OAuthException;
 
 public interface UserManagementService extends RemoteService {
     Collection<UserDTO> getUserList();
-    
+
     Collection<UserDTO> getFilteredSortedUserList(String filter);
-    
+
     UserDTO getCurrentUser();
-    
+
     SuccessInfo login(String username, String password);
-    
+
     UserDTO createSimpleUser(String name, String email, String password) throws Exception;
-    
+
     SuccessInfo deleteUser(String username);
-    
+
     SuccessInfo logout();
-    
+
     SuccessInfo addRoleForUser(String username, String role);
-    
+
     Map<String, String> getSettings();
-    
+
     Map<String, String> getSettingTypes();
-    
+
     void setSetting(String key, String clazz, String setting);
+
     void addSetting(String key, String clazz, String setting);
-    
-    
-    //------------------------------------------------ OAuth Interface ----------------------------------------------------------------------
-    
-    public String     getAuthorizationUrl(CredentialDTO credential) throws OAuthException;
-    
+
+    // ------------------------------------------------ OAuth Interface --------------------------------------------------------------
+
+    public String getAuthorizationUrl(CredentialDTO credential) throws OAuthException;
+
     public UserDTO verifySocialUser(CredentialDTO credential) throws OAuthException;
 }
