@@ -1,7 +1,9 @@
 package com.sap.sailing.gwt.ui.adminconsole;
 
 import java.util.HashSet;
+import java.util.LinkedHashMap;
 import java.util.List;
+import java.util.Map;
 import java.util.Set;
 
 import com.google.gwt.core.client.GWT;
@@ -43,10 +45,12 @@ import com.sap.sailing.gwt.ui.shared.RegattaDTO;
 import com.sap.sailing.gwt.ui.shared.SecurityStylesheetResources;
 import com.sap.sailing.gwt.ui.shared.StrippedLeaderboardDTO;
 import com.sap.sailing.gwt.ui.usermanagement.UserRoles;
+import com.sap.sse.common.Util.Triple;
 import com.sap.sse.gwt.client.EntryPointHelper;
 import com.sap.sse.gwt.client.async.AsyncActionsExecutor;
 import com.sap.sse.gwt.client.async.MarkedAsyncCallback;
 import com.sap.sse.gwt.client.panels.VerticalTabLayoutPanel;
+import com.sap.sse.security.ui.client.UserStatusEventHandler;
 import com.sap.sse.security.ui.loginpanel.LoginPanel;
 import com.sap.sse.security.ui.shared.UserDTO;
 
@@ -57,10 +61,23 @@ public class AdminConsoleEntryPoint extends AbstractEntryPoint implements Regatt
 
     private final SailingServiceAsync sailingService = GWT.create(SailingService.class);
     private final MediaServiceAsync mediaService = GWT.create(MediaService.class);
+    
+    /**
+     * The administration console's UI depends on the user's roles. When the roles change then so shall the display of tabs.
+     * {@link AdminConsoleFeatures} list the roles to which they are made available. This map keeps track of the dependencies
+     * and allows the UI to adjust to role changes.
+     */
+    private final LinkedHashMap<Triple<VerticalOrHorizontalTabLayoutPanel, Widget, String>, AdminConsoleFeatures> roleSpecificTabs = new LinkedHashMap<>();
 
     @Override
     protected void doOnModuleLoad() {
         super.doOnModuleLoad();
+        getUserService().addUserStatusEventHandler(new UserStatusEventHandler() {
+            @Override
+            public void onUserStatusChange(UserDTO user) {
+                updateTabDisplayForCurrentUser(user);
+            }
+        });
         EntryPointHelper.registerASyncService((ServiceDefTarget) sailingService, RemoteServiceMappingConstants.sailingServiceRemotePath);
         EntryPointHelper.registerASyncService((ServiceDefTarget) mediaService, RemoteServiceMappingConstants.mediaServiceRemotePath);
         createUI();
@@ -223,9 +240,10 @@ public class AdminConsoleEntryPoint extends AbstractEntryPoint implements Regatt
         final DeviceConfigurationPanel deviceConfigurationUserPanel = new DeviceConfigurationUserPanel(sailingService,
                 stringMessages, this);
         addToTabPanel(advancedTabPanel, deviceConfigurationUserPanel, stringMessages.deviceConfiguration(), AdminConsoleFeatures.MANAGE_DEVICE_CONFIGURATION);
-
-        tabPanel.selectTab(0);
-        
+        updateTabDisplayForCurrentUser(getUserService().getCurrentUser());
+        if (tabPanel.getWidgetCount() > 0) {
+            tabPanel.selectTab(0);
+        }
         fillRegattas();
         fillLeaderboardGroups();
         fillLeaderboards();
@@ -285,24 +303,64 @@ public class AdminConsoleEntryPoint extends AbstractEntryPoint implements Regatt
             }
         }
     }
+    
+    private static interface VerticalOrHorizontalTabLayoutPanel {
+        void add(Widget child, String text, boolean asHtml);
 
-    private void addToTabPanel(VerticalTabLayoutPanel tabPanel, Panel panelToAdd, String tabTitle, AdminConsoleFeatures feature) {
-        UserDTO user = getUserService().getCurrentUser();
-        if (user != null && isUserInRole(feature.getEnabledRoles())) {
-            ScrollPanel scrollPanel = new ScrollPanel();
-            scrollPanel.add(panelToAdd);
-            panelToAdd.setSize("100%", "100%");
-            tabPanel.add(scrollPanel, tabTitle, false);
-        }
+        void remove(Widget child);
+    }
+
+    private void addToTabPanel(final VerticalTabLayoutPanel tabPanel, Panel panelToAdd, String tabTitle, AdminConsoleFeatures feature) {
+        VerticalOrHorizontalTabLayoutPanel wrapper = new VerticalOrHorizontalTabLayoutPanel() {
+            @Override
+            public void add(Widget child, String text, boolean asHtml) {
+                tabPanel.add(child, text, asHtml);
+            }
+            @Override
+            public void remove(Widget child) {
+                tabPanel.remove(child);
+            }
+        };
+        addToTabPanel(wrapper, panelToAdd, tabTitle, feature);
+    }
+
+    private ScrollPanel wrapInScrollPanel(Panel panelToAdd) {
+        ScrollPanel scrollPanel = new ScrollPanel();
+        scrollPanel.add(panelToAdd);
+        panelToAdd.setSize("100%", "100%");
+        return scrollPanel;
     }
     
-    private void addToTabPanel(TabLayoutPanel tabPanel, Panel panelToAdd, String tabTitle, AdminConsoleFeatures feature) {
-        UserDTO user = getUserService().getCurrentUser();
-        if (user != null && isUserInRole(feature.getEnabledRoles())) {
-            ScrollPanel scrollPanel = new ScrollPanel();
-            scrollPanel.add(panelToAdd);
-            panelToAdd.setSize("100%", "100%");
-            tabPanel.add(scrollPanel, tabTitle, false);
+    private void addToTabPanel(final TabLayoutPanel tabPanel, Panel panelToAdd, String tabTitle, AdminConsoleFeatures feature) {
+        VerticalOrHorizontalTabLayoutPanel wrapper = new VerticalOrHorizontalTabLayoutPanel() {
+            @Override
+            public void add(Widget child, String text, boolean asHtml) {
+                tabPanel.add(child, text, asHtml);
+            }
+            @Override
+            public void remove(Widget child) {
+                tabPanel.remove(child);
+            }
+        };
+        addToTabPanel(wrapper, panelToAdd, tabTitle, feature);
+    }
+
+    private void addToTabPanel(VerticalOrHorizontalTabLayoutPanel tabPanel, Panel panelToAdd, String tabTitle,
+            AdminConsoleFeatures feature) {
+        roleSpecificTabs.put(new Triple<VerticalOrHorizontalTabLayoutPanel, Widget, String>(tabPanel, wrapInScrollPanel(panelToAdd), tabTitle), feature);
+    }
+    
+    /**
+     * After initialization or whenever the user changes, the tab display is adjusted based on which roles are required
+     * to see which tabs. See {@link #roleSpecificTabs}.
+     */
+    private void updateTabDisplayForCurrentUser(UserDTO user) {
+        for (Map.Entry<Triple<VerticalOrHorizontalTabLayoutPanel, Widget, String>, AdminConsoleFeatures> e : roleSpecificTabs.entrySet()) {
+            if (user != null && isUserInRole(e.getValue().getEnabledRoles())) {
+                e.getKey().getA().add(e.getKey().getB(), e.getKey().getC(), /* asHtml */ false);
+            } else {
+                e.getKey().getA().remove(e.getKey().getB());
+            }
         }
     }
     
