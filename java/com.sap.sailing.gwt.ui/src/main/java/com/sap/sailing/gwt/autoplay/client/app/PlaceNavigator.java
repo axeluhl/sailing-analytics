@@ -4,6 +4,6 @@ import java.util.Map;
 
 public interface PlaceNavigator {
     void goToStart();
-    void goToPlayer(String eventUuidAsString, String locale, boolean fullscreen, 
+    void goToPlayer(String eventUuidAsString, boolean fullscreen, 
             Map<String, String> leaderboardParameters, Map<String, String> raceboardParameters); 
 }

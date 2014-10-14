@@ -21,6 +21,7 @@ import com.google.gwt.user.client.ui.Composite;
 import com.google.gwt.user.client.ui.ListBox;
 import com.google.gwt.user.client.ui.TextBox;
 import com.google.gwt.user.client.ui.Widget;
+import com.google.web.bindery.event.shared.EventBus;
 import com.sap.sailing.gwt.autoplay.client.app.PlaceNavigator;
 import com.sap.sailing.gwt.autoplay.client.place.player.PlayerPlace;
 import com.sap.sailing.gwt.autoplay.client.shared.header.SAPHeader;
@@ -28,6 +29,7 @@ import com.sap.sailing.gwt.common.client.SharedResources;
 import com.sap.sailing.gwt.ui.shared.EventDTO;
 import com.sap.sailing.gwt.ui.shared.LeaderboardGroupDTO;
 import com.sap.sailing.gwt.ui.shared.StrippedLeaderboardDTO;
+import com.sap.sse.gwt.client.event.LocaleChangeEvent;
 
 public class DesktopStartView extends Composite implements StartView {
     private static StartPageViewUiBinder uiBinder = GWT.create(StartPageViewUiBinder.class);
@@ -49,14 +51,16 @@ public class DesktopStartView extends Composite implements StartView {
     @UiField DivElement leaderboardAutoZoomDiv;
     
     private final PlaceNavigator navigator;
+    private final EventBus eventBus;
     private final List<EventDTO> events;
     
     private Map<String, String> raceboardParameters;
     private Map<String, String> leaderboardParameters;
     
-    public DesktopStartView(PlaceNavigator navigator) {
+    public DesktopStartView(PlaceNavigator navigator, EventBus eventBus) {
         super();
         this.navigator = navigator;
+        this.eventBus = eventBus;
         this.events = new ArrayList<EventDTO>();
         this.raceboardParameters = new HashMap<String, String>();
         this.leaderboardParameters = new HashMap<String, String>();
@@ -132,6 +136,13 @@ public class DesktopStartView extends Composite implements StartView {
         leaderboardAutoZoomDiv.getStyle().setVisibility(selectedLeaderboardName != null ? Visibility.VISIBLE : Visibility.HIDDEN);
     }
     
+    @UiHandler("localeSelectionBox") 
+    void onLocaleSelectionChange(ChangeEvent event) {
+        String selectedLocale = getSelectedLocale();
+        LocaleChangeEvent localeChangeEvent = new LocaleChangeEvent(selectedLocale);
+        eventBus.fireEvent(localeChangeEvent);
+    }
+    
     @UiHandler("startAutoPlayButton")
     void startAutoPlayClicked(ClickEvent event) {
         EventDTO selectedEvent = getSelectedEvent();
@@ -144,7 +155,7 @@ public class DesktopStartView extends Composite implements StartView {
             leaderboardParameters.put(PlayerPlace.PARAM_LEADEROARD_NAME, selectedLeaderboardName);
             raceboardParameters.put(PlayerPlace.PARAM_RACEBOARD_AUTOSELECT_MEDIA, String.valueOf(isAutoSelectMedia));
             
-            navigator.goToPlayer(selectedEvent.id.toString(), getSelectedLocale(), startInFullscreenModeBox.getValue(), 
+            navigator.goToPlayer(selectedEvent.id.toString(), startInFullscreenModeBox.getValue(), 
                     leaderboardParameters, raceboardParameters);
         }
     }

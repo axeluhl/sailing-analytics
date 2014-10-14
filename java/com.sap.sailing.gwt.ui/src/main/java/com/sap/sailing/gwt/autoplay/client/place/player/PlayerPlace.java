@@ -6,11 +6,9 @@ import com.sap.sailing.gwt.common.client.AbstractBasePlace;
 public class PlayerPlace extends AbstractBasePlace {
     // general parameters
     private final String eventUuidAsString;
-    private final String locale;
     private final boolean fullscreen;
     
     public final static String PARAM_EVENTID = "eventId"; 
-    public final static String PARAM_LOCALE = "locale";
     public final static String PARAM_FULLSCREEN = "fullscreen";
     
     // leaderboard parameters
@@ -28,7 +26,6 @@ public class PlayerPlace extends AbstractBasePlace {
     public PlayerPlace(String url) {
         super(url);
         eventUuidAsString = getParameter(PARAM_EVENTID);
-        locale = getParameter(PARAM_LOCALE);
         fullscreen = Boolean.valueOf(getParameter(PARAM_FULLSCREEN));
 
         leaderboardIdAsNameString = getParameter(PARAM_LEADEROARD_NAME);
@@ -37,13 +34,12 @@ public class PlayerPlace extends AbstractBasePlace {
         raceboardAutoSelectMedia = getParameter(PARAM_RACEBOARD_AUTOSELECT_MEDIA);
     }
 
-    public PlayerPlace(String eventUuidAsString, String locale, boolean fullscreen,
+    public PlayerPlace(String eventUuidAsString, boolean fullscreen,
             String leaderboardIdAsNameString, String leaderboardZoomAsString, String raceboardAutoSelectMedia) {
-        super(PARAM_EVENTID, eventUuidAsString, PARAM_LOCALE, locale, PARAM_FULLSCREEN, String.valueOf(fullscreen), 
+        super(PARAM_EVENTID, eventUuidAsString, PARAM_FULLSCREEN, String.valueOf(fullscreen), 
                 PARAM_LEADEROARD_NAME, leaderboardIdAsNameString, PARAM_LEADEROARD_ZOOM, leaderboardZoomAsString,
                 PARAM_RACEBOARD_AUTOSELECT_MEDIA, raceboardAutoSelectMedia);
         this.eventUuidAsString = eventUuidAsString;
-        this.locale = locale;
         this.fullscreen = fullscreen;
         this.leaderboardIdAsNameString = leaderboardIdAsNameString;
         this.leaderboardZoom = leaderboardZoomAsString;
@@ -70,10 +66,6 @@ public class PlayerPlace extends AbstractBasePlace {
         return fullscreen;
     }
 
-    public String getLocale() {
-        return locale;
-    }
-    
     public static class Tokenizer implements PlaceTokenizer<PlayerPlace> {
         @Override
         public String getToken(PlayerPlace place) {

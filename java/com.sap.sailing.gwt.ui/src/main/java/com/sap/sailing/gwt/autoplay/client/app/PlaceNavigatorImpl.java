@@ -20,9 +20,9 @@ public class PlaceNavigatorImpl implements PlaceNavigator {
     }
     
     @Override
-    public void goToPlayer(String eventUuidAsString, String locale, boolean fullscreen, 
+    public void goToPlayer(String eventUuidAsString, boolean fullscreen, 
             Map<String, String> leaderboardParameters, Map<String, String> raceboardParameters) {
-        PlayerPlace playerPlace = new PlayerPlace(eventUuidAsString, locale, fullscreen, 
+        PlayerPlace playerPlace = new PlayerPlace(eventUuidAsString, fullscreen, 
                 leaderboardParameters.get(PlayerPlace.PARAM_LEADEROARD_NAME), 
                 leaderboardParameters.get(PlayerPlace.PARAM_LEADEROARD_ZOOM),
                 raceboardParameters.get(PlayerPlace.PARAM_RACEBOARD_AUTOSELECT_MEDIA));

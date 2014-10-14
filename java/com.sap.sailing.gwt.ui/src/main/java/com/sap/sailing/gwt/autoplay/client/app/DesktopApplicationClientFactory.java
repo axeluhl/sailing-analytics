@@ -25,7 +25,7 @@ public class DesktopApplicationClientFactory extends AbstractApplicationClientFa
 
     @Override
     public StartView createStartView() {
-        return new DesktopStartView(getPlaceNavigator());
+        return new DesktopStartView(getPlaceNavigator(), getEventBus());
     }
 
     @Override
