@@ -61,14 +61,12 @@ public class OAuthRealm extends AbstractUserStoreBasedRealm {
 
             @Override
             public Collection<String> getStringPermissions() {
-                // TODO Auto-generated method stub
                 return new ArrayList<String>();
             }
 
             @Override
             public Collection<String> getRoles() {
                 ArrayList<String> roles = new ArrayList<>();
-                roles.add("admin");
                 return roles;
             }
 
@@ -76,7 +74,6 @@ public class OAuthRealm extends AbstractUserStoreBasedRealm {
             public Collection<Permission> getObjectPermissions() {
                 ArrayList<Permission> permissions = new ArrayList<>();
                 permissions.add(new Permission() {
-
                     @Override
                     public boolean implies(Permission arg0) {
                         return false;

@@ -1,7 +1,5 @@
 package com.sap.sse.security.ui.usermanagement;
 
-import java.util.HashMap;
-
 import com.google.gwt.core.client.EntryPoint;
 import com.google.gwt.core.client.GWT;
 import com.google.gwt.dom.client.Style.Unit;
@@ -12,7 +10,6 @@ import com.google.gwt.event.dom.client.ClickHandler;
 import com.google.gwt.user.cellview.client.SimplePager;
 import com.google.gwt.user.cellview.client.SimplePager.TextLocation;
 import com.google.gwt.user.client.Window;
-import com.google.gwt.user.client.rpc.AsyncCallback;
 import com.google.gwt.user.client.rpc.ServiceDefTarget;
 import com.google.gwt.user.client.ui.Button;
 import com.google.gwt.user.client.ui.DockLayoutPanel;
@@ -40,9 +37,7 @@ import com.sap.sse.security.ui.client.component.SettingsPanel;
 import com.sap.sse.security.ui.client.component.UserDetailsView;
 import com.sap.sse.security.ui.client.component.UserList;
 import com.sap.sse.security.ui.client.component.UserListDataProvider;
-import com.sap.sse.security.ui.loginpanel.EntryPointLinkFactory;
 import com.sap.sse.security.ui.loginpanel.LoginPanel;
-import com.sap.sse.security.ui.shared.SuccessInfo;
 import com.sap.sse.security.ui.shared.UserDTO;
 import com.sap.sse.security.ui.shared.UserManagementService;
 import com.sap.sse.security.ui.shared.UserManagementServiceAsync;
@@ -56,6 +51,8 @@ public class UserManagementEntryPoint implements EntryPoint {
     private SimpleLayoutPanel center;
     
     private TextBox filterBox = new TextBox();
+    
+    private UserDTO user;
     
     private ProvidesKey<UserDTO> keyProvider = new ProvidesKey<UserDTO>() {
         public Object getKey(UserDTO item) {
@@ -81,18 +78,10 @@ public class UserManagementEntryPoint implements EntryPoint {
         userService.addUserStatusEventHandler(new UserStatusEventHandler() {
             @Override
             public void onUserStatusChange(UserDTO user) {
-                if (user == null){
-                    userManagementService.logout(new AsyncCallback<SuccessInfo>() {
-                        @Override
-                        public void onFailure(Throwable caught) {
-                        }
-
-                        @Override
-                        public void onSuccess(SuccessInfo result) {
-                        }
-                    });
-                    Window.Location.replace(EntryPointLinkFactory.createLoginLink(new HashMap<String, String>()));
+                if (user == null && UserManagementEntryPoint.this.user != null) {
+                    Window.Location.reload();
                 }
+                UserManagementEntryPoint.this.user = user;
             }
         });
         Button createButton = new Button(stringMessages.createUser(), new ClickHandler() {
@@ -143,7 +132,6 @@ public class UserManagementEntryPoint implements EntryPoint {
         ScrollPanel scrollPanel = new ScrollPanel(userList);
         VerticalPanel vp = new VerticalPanel();
         filterBox.addChangeHandler(new ChangeHandler() {
-            
             @Override
             public void onChange(ChangeEvent event) {
                 userListDataProvider.updateDisplays();

@@ -31,6 +31,7 @@ import org.apache.shiro.authc.UsernamePasswordToken;
 import org.apache.shiro.cache.CacheManager;
 import org.apache.shiro.cache.ehcache.EhCacheManager;
 import org.apache.shiro.config.Ini;
+import org.apache.shiro.config.Ini.Section;
 import org.apache.shiro.crypto.RandomNumberGenerator;
 import org.apache.shiro.crypto.SecureRandomNumberGenerator;
 import org.apache.shiro.crypto.hash.Sha256Hash;
@@ -107,11 +108,14 @@ public class SecurityServiceImpl extends RemoteServiceServlet implements Securit
         Factory<SecurityManager> factory = new WebIniSecurityManagerFactory(shiroConfiguration);
         logger.info("Loaded shiro.ini file from: classpath:shiro.ini");
         StringBuilder logMessage = new StringBuilder("[urls] section from Shiro configuration:");
-        for (Entry<String, String> e : shiroConfiguration.getSection("urls").entrySet()) {
-            logMessage.append("\n");
-            logMessage.append(e.getKey());
-            logMessage.append(": ");
-            logMessage.append(e.getValue());
+        final Section urlsSection = shiroConfiguration.getSection("urls");
+        if (urlsSection != null) {
+            for (Entry<String, String> e : urlsSection.entrySet()) {
+                logMessage.append("\n");
+                logMessage.append(e.getKey());
+                logMessage.append(": ");
+                logMessage.append(e.getValue());
+            }
         }
         logger.info(logMessage.toString());
         System.setProperty("java.net.useSystemProxies", "true");
