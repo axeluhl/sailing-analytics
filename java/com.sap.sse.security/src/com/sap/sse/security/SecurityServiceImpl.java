@@ -88,28 +88,7 @@ public class SecurityServiceImpl extends RemoteServiceServlet implements Securit
                 logger.log(Level.SEVERE, "Exception while creating default admin user", e);
             }
         }
-
-        Map<String, Class<?>> allSettingTypes = store.getAllSettingTypes();
-        for (Entry<String, Class<?>> e : allSettingTypes.entrySet()) {
-            String[] classifier = e.getKey().split("_");
-            if (classifier[0].equals("URLS") && !classifier[1].equals("AUTH")) {
-                String key = store.getSetting(e.getKey(), String.class);
-                String n = classifier[0] + "_AUTH";
-                for (int i = 1; i < classifier.length; i++) {
-                    n += "_" + classifier[i];
-                }
-                String value = store.getSetting(n, String.class);
-                // if (shiroConfiguration.getSection("urls") == null){
-                // shiroConfiguration.addSection("urls");
-                // }
-                shiroConfiguration.getSection("urls").put(key, value);
-            }
-        }
-        // shiroConfiguration.getSection("urls").put("/**", "anon");
-        // ini.getSection("urls").put("", "");
         Factory<SecurityManager> factory = new WebIniSecurityManagerFactory(shiroConfiguration);
-        // LifecycleUtils.init(ini);
-
         logger.info("Loaded shiro.ini file from: classpath:shiro.ini");
         StringBuilder logMessage = new StringBuilder("[urls] section from Shiro configuration:");
         for (Entry<String, String> e : shiroConfiguration.getSection("urls").entrySet()) {
