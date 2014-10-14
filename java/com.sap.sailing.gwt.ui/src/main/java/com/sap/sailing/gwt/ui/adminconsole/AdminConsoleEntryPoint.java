@@ -20,7 +20,6 @@ import com.google.gwt.user.client.ui.Anchor;
 import com.google.gwt.user.client.ui.DockLayoutPanel;
 import com.google.gwt.user.client.ui.DockPanel;
 import com.google.gwt.user.client.ui.HasHorizontalAlignment;
-import com.google.gwt.user.client.ui.Panel;
 import com.google.gwt.user.client.ui.RootLayoutPanel;
 import com.google.gwt.user.client.ui.ScrollPanel;
 import com.google.gwt.user.client.ui.TabLayoutPanel;
@@ -136,9 +135,10 @@ public class AdminConsoleEntryPoint extends AbstractEntryPoint implements Regatt
         /* LEADERBOARDS */
         
         final TabLayoutPanel leaderboardTabPanel = new TabLayoutPanel(2.5, Unit.EM);
+        setTabPanelSize(leaderboardTabPanel, "100%", "100%");
         leaderboardTabPanel.addSelectionHandler(tabSelectionHandler);
         leaderboardTabPanel.ensureDebugId("LeaderboardPanel");
-        tabPanel.add(leaderboardTabPanel, stringMessages.leaderboards());
+        addToTabPanel(tabPanel, leaderboardTabPanel, stringMessages.leaderboards(), AdminConsoleFeatures.MANAGE_LEADERBOARDS);
         
         final LeaderboardConfigPanel leaderboardConfigPanel = new LeaderboardConfigPanel(sailingService, this, this,
                 stringMessages, /* showRaceDetails */true, this);
@@ -158,9 +158,10 @@ public class AdminConsoleEntryPoint extends AbstractEntryPoint implements Regatt
         /* RACES */
         
         final TabLayoutPanel racesTabPanel = new TabLayoutPanel(2.5, Unit.EM);
+        setTabPanelSize(racesTabPanel, "100%", "100%");
         racesTabPanel.addSelectionHandler(tabSelectionHandler);
         racesTabPanel.ensureDebugId("RacesPanel");
-        tabPanel.add(racesTabPanel, stringMessages.races());
+        addToTabPanel(tabPanel, racesTabPanel, stringMessages.races(), AdminConsoleFeatures.MANAGE_TRACKED_RACES);
         
         TrackedRacesManagementPanel trackedRacesManagementPanel = new TrackedRacesManagementPanel(sailingService, this,
                 this, stringMessages);
@@ -187,9 +188,10 @@ public class AdminConsoleEntryPoint extends AbstractEntryPoint implements Regatt
         /* CONNECTORS */
         
         final TabLayoutPanel connectorsTabPanel = new TabLayoutPanel(2.5, Unit.EM);
+        setTabPanelSize(connectorsTabPanel, "100%", "100%");
         connectorsTabPanel.addSelectionHandler(tabSelectionHandler);
         connectorsTabPanel.ensureDebugId("TrackingProviderPanel");
-        tabPanel.add(connectorsTabPanel, stringMessages.connectors());
+        addToTabPanel(tabPanel, connectorsTabPanel, stringMessages.connectors(), AdminConsoleFeatures.MANAGE_TRACKED_RACES);
 
         AbstractEventManagementPanel tractracEventManagementPanel = new TracTracEventManagementPanel(sailingService,
                 this, this, stringMessages);
@@ -223,9 +225,10 @@ public class AdminConsoleEntryPoint extends AbstractEntryPoint implements Regatt
         /* ADVANCED */
         
         final TabLayoutPanel advancedTabPanel = new TabLayoutPanel(2.5, Unit.EM);
+        setTabPanelSize(advancedTabPanel, "100%", "100%");
         advancedTabPanel.addSelectionHandler(tabSelectionHandler);
         advancedTabPanel.ensureDebugId("AdvancedPanel");
-        tabPanel.add(advancedTabPanel, stringMessages.advanced());
+        addToTabPanel(tabPanel, advancedTabPanel, stringMessages.advanced(), AdminConsoleFeatures.MANAGE_REPLICATION);
 
         final ReplicationPanel replicationPanel = new ReplicationPanel(sailingService, this, stringMessages);
         addToTabPanel(advancedTabPanel, replicationPanel, stringMessages.replication(), AdminConsoleFeatures.MANAGE_REPLICATION);
@@ -277,6 +280,19 @@ public class AdminConsoleEntryPoint extends AbstractEntryPoint implements Regatt
         dockPanel.add(tabPanel);
         rootPanel.add(dockPanel);
     }
+
+    /**
+     * Sets the sizie of the tab panel when the tab panel is attached to the DOM
+     */
+    private void setTabPanelSize(final TabLayoutPanel advancedTabPanel, final String width, final String height) {
+        advancedTabPanel.addAttachHandler(new Handler() {
+            @Override
+            public void onAttachOrDetach(AttachEvent event) {
+                advancedTabPanel.getElement().getParentElement().getStyle().setProperty("width", width);
+                advancedTabPanel.getElement().getParentElement().getStyle().setProperty("height", height);
+            }
+        });
+    }
     
     private void refreshDataFor(Widget widget) {
         Widget target = widget;
@@ -306,15 +322,15 @@ public class AdminConsoleEntryPoint extends AbstractEntryPoint implements Regatt
     
     private static interface VerticalOrHorizontalTabLayoutPanel {
         void add(Widget child, String text, boolean asHtml);
-
         void remove(Widget child);
     }
 
-    private void addToTabPanel(final VerticalTabLayoutPanel tabPanel, Panel panelToAdd, String tabTitle, AdminConsoleFeatures feature) {
+    private void addToTabPanel(final VerticalTabLayoutPanel tabPanel, Widget panelToAdd, String tabTitle, AdminConsoleFeatures feature) {
         VerticalOrHorizontalTabLayoutPanel wrapper = new VerticalOrHorizontalTabLayoutPanel() {
             @Override
             public void add(Widget child, String text, boolean asHtml) {
                 tabPanel.add(child, text, asHtml);
+                tabPanel.forceLayout();
             }
             @Override
             public void remove(Widget child) {
@@ -324,18 +340,19 @@ public class AdminConsoleEntryPoint extends AbstractEntryPoint implements Regatt
         addToTabPanel(wrapper, panelToAdd, tabTitle, feature);
     }
 
-    private ScrollPanel wrapInScrollPanel(Panel panelToAdd) {
+    private ScrollPanel wrapInScrollPanel(Widget panelToAdd) {
         ScrollPanel scrollPanel = new ScrollPanel();
         scrollPanel.add(panelToAdd);
         panelToAdd.setSize("100%", "100%");
         return scrollPanel;
     }
     
-    private void addToTabPanel(final TabLayoutPanel tabPanel, Panel panelToAdd, String tabTitle, AdminConsoleFeatures feature) {
+    private void addToTabPanel(final TabLayoutPanel tabPanel, Widget panelToAdd, String tabTitle, AdminConsoleFeatures feature) {
         VerticalOrHorizontalTabLayoutPanel wrapper = new VerticalOrHorizontalTabLayoutPanel() {
             @Override
             public void add(Widget child, String text, boolean asHtml) {
                 tabPanel.add(child, text, asHtml);
+                tabPanel.forceLayout();
             }
             @Override
             public void remove(Widget child) {
@@ -345,7 +362,7 @@ public class AdminConsoleEntryPoint extends AbstractEntryPoint implements Regatt
         addToTabPanel(wrapper, panelToAdd, tabTitle, feature);
     }
 
-    private void addToTabPanel(VerticalOrHorizontalTabLayoutPanel tabPanel, Panel panelToAdd, String tabTitle,
+    private void addToTabPanel(VerticalOrHorizontalTabLayoutPanel tabPanel, Widget panelToAdd, String tabTitle,
             AdminConsoleFeatures feature) {
         roleSpecificTabs.put(new Triple<VerticalOrHorizontalTabLayoutPanel, Widget, String>(tabPanel, wrapInScrollPanel(panelToAdd), tabTitle), feature);
     }
@@ -356,10 +373,11 @@ public class AdminConsoleEntryPoint extends AbstractEntryPoint implements Regatt
      */
     private void updateTabDisplayForCurrentUser(UserDTO user) {
         for (Map.Entry<Triple<VerticalOrHorizontalTabLayoutPanel, Widget, String>, AdminConsoleFeatures> e : roleSpecificTabs.entrySet()) {
+            final Widget panelToAdd = e.getKey().getB();
             if (user != null && isUserInRole(e.getValue().getEnabledRoles())) {
-                e.getKey().getA().add(e.getKey().getB(), e.getKey().getC(), /* asHtml */ false);
+                e.getKey().getA().add(panelToAdd, e.getKey().getC(), /* asHtml */ false);
             } else {
-                e.getKey().getA().remove(e.getKey().getB());
+                e.getKey().getA().remove(panelToAdd);
             }
         }
     }
