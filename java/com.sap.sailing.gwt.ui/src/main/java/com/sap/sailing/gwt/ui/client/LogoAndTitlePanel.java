@@ -5,9 +5,7 @@ import com.google.gwt.user.client.ui.Anchor;
 import com.google.gwt.user.client.ui.FlowPanel;
 import com.google.gwt.user.client.ui.Label;
 import com.google.gwt.user.client.ui.RequiresResize;
-import com.sap.sailing.gwt.ui.shared.SecurityStylesheetResources;
 import com.sap.sse.security.ui.client.UserService;
-import com.sap.sse.security.ui.loginpanel.LoginPanel;
 
 public class LogoAndTitlePanel extends FlowPanel implements RequiresResize {
     private final String title;
@@ -18,6 +16,8 @@ public class LogoAndTitlePanel extends FlowPanel implements RequiresResize {
     private boolean lastIsSmallWidth;
     private final WindowSizeDetector windowSizeDetector;
     private final StringMessages stringMessages;
+    
+    @SuppressWarnings("unused") // preparing this panel for user management support; need proper styling for the panel, see also renderUI()
     private final UserService userService;
 
     public LogoAndTitlePanel(StringMessages stringConstants, WindowSizeDetector windowSizeDetector, UserService userService) {
@@ -78,7 +78,8 @@ public class LogoAndTitlePanel extends FlowPanel implements RequiresResize {
             subTitleLabelWrapper.add(subTitleLabel);
             this.add(subTitleLabelWrapper);
         }
-        this.add(new LoginPanel(SecurityStylesheetResources.INSTANCE.css(), userService));
+        // When we want to add a login panel to the logo and title panel, it may look like this:
+        //        this.add(new LoginPanel(SecurityStylesheetResources.INSTANCE.css(), userService));
     }
 
     public String getTitle() {
