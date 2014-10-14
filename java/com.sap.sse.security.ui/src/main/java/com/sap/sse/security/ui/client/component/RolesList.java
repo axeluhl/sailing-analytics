@@ -83,7 +83,10 @@ public class RolesList extends DecoratorPanel {
         hp.add(addRole);
         fp.add(hp);
         
-        rolesDataProvider = new ListDataProvider<>(userDTO.getRoles(), keyProvider);
+        rolesDataProvider = new ListDataProvider<String>();
+        for (String role : userDTO.getRoles()) {
+            rolesDataProvider.getList().add(role);
+        }
         roleList = new CellList<>(new TextCell(), keyProvider);
         rolesDataProvider.addDataDisplay(roleList);
         

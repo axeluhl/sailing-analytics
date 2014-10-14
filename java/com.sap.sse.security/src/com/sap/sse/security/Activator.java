@@ -1,5 +1,8 @@
 package com.sap.sse.security;
 
+import java.io.File;
+import java.io.FileReader;
+import java.util.Properties;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
@@ -27,6 +30,8 @@ public class Activator implements BundleActivator {
      */
     private static UserStore testUserStore;
     
+    private Properties mailProperties;
+    
     public static void setTestUserStore(UserStore theTestUserStore) {
         testUserStore = theTestUserStore;
         UsernamePasswordRealm.setTestUserStore(theTestUserStore);
@@ -47,6 +52,11 @@ public class Activator implements BundleActivator {
      * registered as an OSGi service.
      */
     public void start(BundleContext bundleContext) throws Exception {
+        // Load mail properties
+        File propertiesfile = new File(new File(System.getProperty("jetty.home")).getParent()
+                + "/security.properties");
+        mailProperties = new Properties();
+        mailProperties.load(new FileReader(propertiesfile));
         if (testUserStore != null) {
             createAndRegisterSecurityService(testUserStore);
         } else {

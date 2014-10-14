@@ -386,7 +386,7 @@ public class AdminConsoleEntryPoint extends AbstractEntryPoint implements Regatt
         boolean result = true;
         UserDTO user = getUserService().getCurrentUser();
         for (UserRoles enabledRole : roles) {
-            if (user.getRoles().contains(enabledRole.name())) {
+            if (user.hasRole(enabledRole.name())) {
                 result = true;
                 break;
             }

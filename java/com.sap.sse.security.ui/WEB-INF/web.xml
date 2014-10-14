@@ -58,5 +58,6 @@
 		<servlet-name>remoteLogging</servlet-name>
 		<url-pattern>/com.sap.sse.security.ui.OAuthLogin/remote_logging</url-pattern>
 		<url-pattern>/com.sap.sse.security.ui.Login/remote_logging</url-pattern>
+		<url-pattern>/com.sap.sse.security.ui.UserManagement/remote_logging</url-pattern>
 	</servlet-mapping>
 </web-app>

@@ -80,7 +80,9 @@ public class DomainObjectFactoryImpl implements DomainObjectFactory {
         DBObject accountsMap = (DBObject) userDBObject.get(FieldNames.User.ACCOUNTS.name());
         Map<AccountType, Account> accounts = createAccountMapFromdDBObject(accountsMap);
         User result = new User(name, email, accounts.values());
-        result.setRoles(roles);
+        for (String role : roles) {
+            result.addRole(role);
+        }
         return result;
     }
 

@@ -10,26 +10,24 @@ import java.util.concurrent.ConcurrentHashMap;
 import com.sap.sse.security.userstore.shared.Account.AccountType;
 
 public class User {
-    
+
     private String name;
-    
+
     private String email;
-    
-    private Set<String> roles = new HashSet<>();
-    private Map<AccountType, Account> accounts = new ConcurrentHashMap<>();
+
+    private final Set<String> roles;
+    private final Map<AccountType, Account> accounts;
 
     public User(String name, String email, Account... accounts) {
-        super();
-        this.name = name;
-        for (Account a : accounts){
-            this.accounts.put(a.getAccountType(), a);
-        }
+        this(name, email, Arrays.asList(accounts));
     }
-    
+
     public User(String name, String email, Collection<Account> accounts) {
         super();
+        this.roles = new HashSet<>();
+        this.accounts = new ConcurrentHashMap<>();
         this.name = name;
-        for (Account a : accounts){
+        for (Account a : accounts) {
             this.accounts.put(a.getAccountType(), a);
         }
     }
@@ -41,37 +39,33 @@ public class User {
     public void setName(String name) {
         this.name = name;
     }
-    
+
     public Set<String> getRoles() {
         return roles;
     }
-    
-    public void addRole(String role){
+
+    public void addRole(String role) {
         roles.add(role);
     }
+
+    public boolean hasRole(String role) {
+        return roles.contains(role);
+    }
     
-    public void removeRole(String role){
+    public void removeRole(String role) {
         roles.remove(role);
     }
-    
-    public Account getAccount(AccountType type){
+
+    public Account getAccount(AccountType type) {
         return accounts.get(type);
     }
-    
-    public void setAccount(AccountType type, Account account){
-        accounts.put(type, account);
-    }
-    
-    public void removeAccount(AccountType type){
+
+    public void removeAccount(AccountType type) {
         accounts.remove(type);
     }
 
-    public Map<AccountType, Account> getAllAccounts(){
+    public Map<AccountType, Account> getAllAccounts() {
         return accounts;
-    }
-
-    public void setRoles(Set<String> roles) {
-        this.roles = roles;
     }
 
     public String getEmail() {
@@ -84,8 +78,9 @@ public class User {
 
     @Override
     public String toString() {
-        return "User [name=" + name + ", email=" + email + ", roles=" + Arrays.toString(roles.toArray(new String[roles.size()])) + ", accounts=" + Arrays.toString(accounts.keySet().toArray(new AccountType[accounts.size()])) + "]";
+        return "User [name=" + name + ", email=" + email + ", roles="
+                + Arrays.toString(roles.toArray(new String[roles.size()])) + ", accounts="
+                + Arrays.toString(accounts.keySet().toArray(new AccountType[accounts.size()])) + "]";
     }
-    
-    
+
 }
