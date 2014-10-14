@@ -190,7 +190,6 @@ public class RaceBoardPanel extends SimplePanel implements RegattasDisplayer, Ra
     /**
      * @param event an optional event; may be <code>null</code> or else can be used to show some context information in
      * the {@link GlobalNavigationPanel}.
-     * @param userService TODO
      */
     private void createOneScreenView(String leaderboardName, String leaderboardGroupName, EventDTO event, FlowPanel mainPanel,
             boolean showMapControls, RaceMap raceMap, UserService userService) {

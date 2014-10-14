@@ -438,12 +438,10 @@ public class MediaPlayerManagerComponent implements Component<Void>, PlayStateLi
         } else {
             // nothing changed
         }
-
     }
 
     private <T> T createAndWrapVideoPlayer(final MediaTrack videoTrack, VideoContainerFactory<T> videoContainerFactory) {
         final PopoutWindowPlayer.PlayerCloseListener playerCloseListener = new PopoutWindowPlayer.PlayerCloseListener() {
-
             private VideoContainer videoContainer;
 
             @Override
@@ -462,7 +460,6 @@ public class MediaPlayerManagerComponent implements Component<Void>, PlayStateLi
             }
         };
         PopoutListener popoutListener = new PopoutListener() {
-
             @Override
             public void popoutVideo(MediaTrack videoTrack) {
                 VideoContainer videoContainer;
@@ -475,10 +472,8 @@ public class MediaPlayerManagerComponent implements Component<Void>, PlayStateLi
                 closeFloatingVideo(videoTrack);
             }
         };
-
         final VideoSynchPlayer videoPlayer;
         boolean showSynchControls = userService.getCurrentUser() != null;
-
         if (videoTrack.isYoutube()) {
             videoPlayer = new VideoYoutubePlayer(videoTrack, getRaceStartTime(), showSynchControls, raceTimer);
         } else {
