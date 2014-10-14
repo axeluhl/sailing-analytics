@@ -81,6 +81,7 @@ import com.sap.sailing.domain.common.impl.BoundsImpl;
 import com.sap.sailing.domain.common.impl.DegreeBearingImpl;
 import com.sap.sailing.domain.common.impl.RGBColor;
 import com.sap.sailing.domain.common.scalablevalue.impl.ScalableBearing;
+import com.sap.sailing.gwt.ui.actions.GetPolarAction;
 import com.sap.sailing.gwt.ui.actions.GetRaceMapDataAction;
 import com.sap.sailing.gwt.ui.actions.GetWindInfoAction;
 import com.sap.sailing.gwt.ui.client.ClientResources;
@@ -123,6 +124,7 @@ import com.sap.sse.common.filter.Filter;
 import com.sap.sse.common.filter.FilterSet;
 import com.sap.sse.gwt.client.ErrorReporter;
 import com.sap.sse.gwt.client.async.AsyncActionsExecutor;
+import com.sap.sse.gwt.client.async.MarkedAsyncCallback;
 import com.sap.sse.gwt.client.player.TimeListener;
 import com.sap.sse.gwt.client.player.Timer;
 import com.sap.sse.gwt.client.player.Timer.PlayModes;
@@ -309,6 +311,8 @@ public class RaceMap extends AbsolutePanel implements TimeListener, CompetitorSe
     private WindStreamletsRaceboardOverlay streamletOverlay;
     private final boolean showViewStreamlets;
     private final boolean showViewSimulation;
+    public static final String GET_POLAR_CATEGORY = "getPolar";
+    private boolean hasPolar;
     private final RegattaAndRaceIdentifier raceIdentifier;
 
     public RaceMap(SailingServiceAsync sailingService, AsyncActionsExecutor asyncActionsExecutor,
@@ -338,6 +342,7 @@ public class RaceMap extends AbsolutePanel implements TimeListener, CompetitorSe
         isMapInitialized = false;
         this.showViewStreamlets = showViewStreamlets;
         this.showViewSimulation = showViewSimulation;
+        this.hasPolar = false;
         headerPanel = new FlowPanel();
         headerPanel.setStyleName("RaceMap-HeaderPanel");
         panelForLeftHeaderLabels = new AbsolutePanel();
@@ -470,6 +475,8 @@ public class RaceMap extends AbsolutePanel implements TimeListener, CompetitorSe
               }
 
               if (showViewSimulation) {
+            	  // determine availability of polar diagram
+            	  hasPolar();
                   // initialize simulation canvas
                   simulationOverlay = new RaceSimulationOverlay(getMap(), /* zIndex */ 0, timer, raceIdentifier, sailingService, stringMessages, asyncActionsExecutor);
                   simulationOverlay.addToMap();
@@ -485,6 +492,26 @@ public class RaceMap extends AbsolutePanel implements TimeListener, CompetitorSe
         };
 
         LoadApi.go(onLoad, loadLibraries, sensor, "key="+GoogleMapAPIKey.V3_APIKey); 
+    }
+    
+    public void hasPolar() {
+        GetPolarAction getPolar = new GetPolarAction(sailingService, raceIdentifier);
+        asyncActionsExecutor.execute(getPolar, GET_POLAR_CATEGORY,
+                new MarkedAsyncCallback<>(new AsyncCallback<Boolean>() {
+                    @Override
+                    public void onFailure(Throwable caught) {
+                        // TODO: add corresponding message to string-messages
+                        // Window.setStatus(stringMessages.errorFetchingWindStreamletData(caught.getMessage()));
+                        Window.setStatus(GET_POLAR_CATEGORY);
+                    }
+
+                    @Override
+                    public void onSuccess(Boolean result) {
+                        // store results
+                    	hasPolar = result.booleanValue();
+                    }
+                }));
+
     }
 
     /**
@@ -1918,7 +1945,7 @@ public class RaceMap extends AbsolutePanel implements TimeListener, CompetitorSe
 
     @Override
     public SettingsDialogComponent<RaceMapSettings> getSettingsDialogComponent() {
-        return new RaceMapSettingsDialogComponent(settings, stringMessages, this.showViewSimulation);
+        return new RaceMapSettingsDialogComponent(settings, stringMessages, this.showViewSimulation && this.hasPolar);
     }
 
     @Override

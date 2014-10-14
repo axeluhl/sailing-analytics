@@ -1482,6 +1482,14 @@ public class SailingServiceImpl extends ProxiedRemoteServiceServlet implements S
     }
 
     @Override
+    public Boolean getPolarResults(RegattaAndRaceIdentifier raceIdentifier) {
+        TrackedRace trackedRace = getExistingTrackedRace(raceIdentifier);
+        BoatClass boatClass = trackedRace.getRace().getBoatClass();
+        PolarDiagram polarDiagram = polarDiagramService.getService().getPolarDiagram(boatClass);
+        return new Boolean(polarDiagram != null);
+    };
+
+    @Override
     public SimulatorResultsDTO getSimulatorResults(RegattaAndRaceIdentifier raceIdentifier, Date from, Date prevStartTime) {
         TrackedRace trackedRace = getExistingTrackedRace(raceIdentifier);
         SimulatorResultsDTO result = null;
