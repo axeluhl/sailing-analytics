@@ -82,7 +82,7 @@ public class SecurityServiceImpl extends RemoteServiceServlet implements Securit
             try {
                 logger.info("No users found, creating default user \"admin\" with password \"admin\"");
                 createSimpleUser("admin", "nobody@sapsailing.com", "admin");
-                addRoleForUser("admin", "admin");
+                addRoleForUser("admin", DefaultRoles.ADMIN.getRolename());
                 addRoleForUser("admin", "moderator");
             } catch (UserManagementException e) {
                 logger.log(Level.SEVERE, "Exception while creating default admin user", e);
@@ -188,13 +188,13 @@ public class SecurityServiceImpl extends RemoteServiceServlet implements Securit
     }
 
     @Override
-    public void addRoleForUser(String name, String role) throws UserManagementException {
-        store.addRoleForUser(name, role);
+    public void addRoleForUser(String username, String role) throws UserManagementException {
+        store.addRoleForUser(username, role);
     }
 
     @Override
-    public void removeRoleFromUser(String name, String role) throws UserManagementException {
-        store.removeRoleFromUser(name, role);
+    public void removeRoleFromUser(String username, String role) throws UserManagementException {
+        store.removeRoleFromUser(username, role);
     }
 
     @Override

@@ -19,7 +19,7 @@ public interface SecurityService {
 
     Collection<User> getUserList();
 
-    User getUserByName(String name);
+    User getUserByName(String username);
 
     User getCurrentUser();
 
@@ -34,17 +34,17 @@ public interface SecurityService {
 
     void logout();
 
-    User createSimpleUser(String name, String email, String password) throws UserManagementException;
+    User createSimpleUser(String username, String email, String password) throws UserManagementException;
 
-    User createSocialUser(String name, SocialUserAccount socialUserAccount) throws UserManagementException;
+    User createSocialUser(String username, SocialUserAccount socialUserAccount) throws UserManagementException;
 
     void deleteUser(String username) throws UserManagementException;
 
-    Set<String> getRolesFromUser(String name) throws UserManagementException;
+    Set<String> getRolesFromUser(String username) throws UserManagementException;
 
-    void addRoleForUser(String name, String role) throws UserManagementException;
+    void addRoleForUser(String username, String role) throws UserManagementException;
 
-    void removeRoleFromUser(String name, String role) throws UserManagementException;
+    void removeRoleFromUser(String username, String role) throws UserManagementException;
 
     void addSetting(String key, Class<?> clazz) throws UserManagementException;
 
