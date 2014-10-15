@@ -385,6 +385,7 @@ public interface StringMessages extends com.sap.sse.gwt.client.StringMessages {
     String scoringSchemeWinnerGetsFive();
     String scoringSchemeWinnerGetsSix();
     String scoringSchemeWinnerGetsEight();
+    String scoringSchemeWinnerGetsEightAndInterpolation();
     String scoringSystem();
     String createFlexibleLeaderboard();
     String createRegattaLeaderboard();
