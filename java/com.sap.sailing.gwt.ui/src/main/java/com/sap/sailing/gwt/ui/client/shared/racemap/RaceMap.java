@@ -478,8 +478,9 @@ public class RaceMap extends AbsolutePanel implements TimeListener, CompetitorSe
             	  // determine availability of polar diagram
             	  hasPolar();
                   // initialize simulation canvas
-                  simulationOverlay = new RaceSimulationOverlay(getMap(), /* zIndex */ 0, timer, raceIdentifier, sailingService, stringMessages, asyncActionsExecutor);
+                  simulationOverlay = new RaceSimulationOverlay(getMap(), /* zIndex */ 0, raceIdentifier, sailingService, stringMessages, asyncActionsExecutor);
                   simulationOverlay.addToMap();
+                  simulationOverlay.setVisible(false);
               }
               
               createHeaderPanel(map);
@@ -737,6 +738,9 @@ public class RaceMap extends AbsolutePanel implements TimeListener, CompetitorSe
             public void onSuccess(RaceMapDataDTO raceMapDataDTO) {
                 if (map != null && raceMapDataDTO != null) {
                     quickRanks = raceMapDataDTO.quickRanks;
+                    if (showViewSimulation) {
+                    	simulationOverlay.updateLeg(getCurrentLeg(), newTime, false);
+                    }
                     // process response only if not received out of order
                     if (startedProcessingRequestID < requestID) {
                         startedProcessingRequestID = requestID;
@@ -2008,7 +2012,7 @@ public class RaceMap extends AbsolutePanel implements TimeListener, CompetitorSe
         if (newSettings.isShowSimulationOverlay() != settings.isShowSimulationOverlay()) {
             settings.setShowSimulationOverlay(newSettings.isShowSimulationOverlay());
             simulationOverlay.setVisible(newSettings.isShowSimulationOverlay());
-            simulationOverlay.timeChanged(timer.getTime(), null);
+        	simulationOverlay.updateLeg(getCurrentLeg(), timer.getTime(), true);
         }
         if (requiredRedraw) {
             redraw();
@@ -2212,6 +2216,10 @@ public class RaceMap extends AbsolutePanel implements TimeListener, CompetitorSe
             result = null;
         }
         return result;
+    }
+    
+    public int getCurrentLeg() {
+    	return this.getLeadingVisibleCompetitorWithOneBasedLegNumber(getCompetitorsToShow()).getA();
     }
 
     private Image createSAPLogo() {
