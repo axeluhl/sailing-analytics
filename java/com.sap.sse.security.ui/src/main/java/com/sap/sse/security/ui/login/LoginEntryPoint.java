@@ -1,6 +1,5 @@
 package com.sap.sse.security.ui.login;
 
-import com.google.gwt.core.client.EntryPoint;
 import com.google.gwt.core.client.GWT;
 import com.google.gwt.dom.client.Style.Unit;
 import com.google.gwt.user.client.Window;
@@ -17,6 +16,7 @@ import com.google.gwt.user.client.ui.RootLayoutPanel;
 import com.google.gwt.user.client.ui.RootPanel;
 import com.google.gwt.user.client.ui.SubmitButton;
 import com.google.gwt.user.client.ui.TextBox;
+import com.sap.sse.gwt.client.AbstractEntryPoint;
 import com.sap.sse.gwt.client.EntryPointHelper;
 import com.sap.sse.security.ui.client.RemoteServiceMappingConstants;
 import com.sap.sse.security.ui.client.Resources;
@@ -27,13 +27,13 @@ import com.sap.sse.security.ui.shared.SuccessInfo;
 import com.sap.sse.security.ui.shared.UserManagementService;
 import com.sap.sse.security.ui.shared.UserManagementServiceAsync;
 
-public class LoginEntryPoint implements EntryPoint {
+public class LoginEntryPoint extends AbstractEntryPoint {
     private final StringMessages stringMessages = GWT.create(StringMessages.class);
     private UserManagementServiceAsync userManagementService;
     private UserService userService;
 
     @Override
-    public void onModuleLoad() {
+    public void doOnModuleLoad() {
         userManagementService = GWT.create(UserManagementService.class);
         EntryPointHelper.registerASyncService((ServiceDefTarget) userManagementService,
                 RemoteServiceMappingConstants.userManagementServiceRemotePath);
@@ -48,12 +48,15 @@ public class LoginEntryPoint implements EntryPoint {
         Label nameLabel = new Label(stringMessages.name()+": ");
         fp.add(nameLabel);
         final TextBox nameText = new TextBox();
+        nameText.ensureDebugId("username");
         fp.add(nameText);
         Label pwLabel = new Label(stringMessages.password()+": ");
+        pwLabel.ensureDebugId("password");
         fp.add(pwLabel);
         final PasswordTextBox pwText = new PasswordTextBox();
         fp.add(pwText);
         SubmitButton submit = new SubmitButton(stringMessages.signIn());
+        submit.ensureDebugId("login");
         fp.add(submit);
         FormPanel formPanel = new FormPanel();
         formPanel.addSubmitHandler(new SubmitHandler() {
