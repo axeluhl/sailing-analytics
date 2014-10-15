@@ -1097,4 +1097,9 @@ public interface StringMessages extends com.sap.sse.gwt.client.StringMessages {
     String mappingDetails();
     String deviceMappingQrCodeExplanation();
     String qrCode();
+    String enterCourseAreaName();
+    String enterImageURL();
+    String enterVideoURL();
+    String enterSponsorImageURL();
+    String enterRaceName();
 }

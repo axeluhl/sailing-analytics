@@ -130,22 +130,22 @@ public abstract class EventDialog extends DataEntryDialogWithBootstrap<EventDTO>
         };
         courseAreaNameList = new StringListInlineEditorComposite(Collections.<String> emptyList(),
                 new StringListInlineEditorComposite.ExpandedUi(stringMessages, resources.removeIcon(), /* suggestValues */
-                        SuggestedCourseAreaNames.suggestedCourseAreaNames, 50));
+                        SuggestedCourseAreaNames.suggestedCourseAreaNames, stringMessages.enterCourseAreaName(), 50));
         courseAreaNameList.addValueChangeHandler(valueChangeHandler);
         final List<String> imageSuggestionURLs = Arrays.asList(new String[] { "http://", "https://", "http://www.", "https://www" });
         imageURLList = new StringListInlineEditorComposite(Collections.<String> emptyList(),
                 new StringListInlineEditorComposite.ExpandedUi(stringMessages, resources.removeIcon(),
-                /* suggestValues */ imageSuggestionURLs, 80));
+                /* suggestValues */ imageSuggestionURLs, stringMessages.enterImageURL(), 80));
         imageURLList.addValueChangeHandler(valueChangeHandler);
         List<String> videoURLSuggestions = new ArrayList<>(imageSuggestionURLs);
         videoURLSuggestions.add("http://www.youtube.com/watch?v=");
         videoURLList = new StringListInlineEditorComposite(Collections.<String> emptyList(),
                 new StringListInlineEditorComposite.ExpandedUi(stringMessages, resources.removeIcon(),
-                /* suggestValues */ videoURLSuggestions, 80));
+                /* suggestValues */ videoURLSuggestions, stringMessages.enterVideoURL(), 80));
         videoURLList.addValueChangeHandler(valueChangeHandler);
         sponsorImageURLList = new StringListInlineEditorComposite(Collections.<String> emptyList(),
                 new StringListInlineEditorComposite.ExpandedUi(stringMessages, resources.removeIcon(),
-                /* suggestValues */ imageSuggestionURLs, 80));
+                /* suggestValues */ imageSuggestionURLs, stringMessages.enterSponsorImageURL(), 80));
         sponsorImageURLList.addValueChangeHandler(valueChangeHandler);
     }
 
