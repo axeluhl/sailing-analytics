@@ -74,6 +74,7 @@ public class MediaPlayerManagerComponent implements Component<Void>, PlayStateLi
     private final ErrorReporter errorReporter;
     private final UserAgentDetails userAgent;
     private final UserDTO user;
+    private final PopupPositionProvider popupPositionProvider;
     private boolean autoSelectMedia;
 
     private PlayerChangeListener playerChangeListener;
@@ -81,7 +82,7 @@ public class MediaPlayerManagerComponent implements Component<Void>, PlayStateLi
     public MediaPlayerManagerComponent(RegattaAndRaceIdentifier selectedRaceIdentifier,
             RaceTimesInfoProvider raceTimesInfoProvider, Timer raceTimer, MediaServiceAsync mediaService,
             StringMessages stringMessages, ErrorReporter errorReporter, UserAgentDetails userAgent, UserDTO user,
-            boolean autoSelectMedia) {
+            PopupPositionProvider popupPositionProvider, boolean autoSelectMedia) {
         this.raceIdentifier = selectedRaceIdentifier;
         this.raceTimesInfoProvider = raceTimesInfoProvider;
         this.raceTimer = raceTimer;
@@ -97,6 +98,7 @@ public class MediaPlayerManagerComponent implements Component<Void>, PlayStateLi
         this.errorReporter = errorReporter;
         this.userAgent = userAgent;
         this.user = user;
+        this.popupPositionProvider = popupPositionProvider;
         this.autoSelectMedia = autoSelectMedia;
 
         Window.addCloseHandler(this);
@@ -427,7 +429,7 @@ public class MediaPlayerManagerComponent implements Component<Void>, PlayStateLi
                         public VideoFloatingContainer createVideoContainer(VideoSynchPlayer videoPlayer,
                                 boolean showSynchControls, MediaServiceAsync mediaService, ErrorReporter errorReporter,
                                 PlayerCloseListener playerCloseListener, PopoutListener popoutListener) {
-                            VideoFloatingContainer videoFloatingContainer = new VideoFloatingContainer(videoPlayer,
+                            VideoFloatingContainer videoFloatingContainer = new VideoFloatingContainer(videoPlayer, popupPositionProvider,
                                     showSynchControls, mediaService, errorReporter, playerCloseListener, popoutListener);
                             return videoFloatingContainer;
                         }
