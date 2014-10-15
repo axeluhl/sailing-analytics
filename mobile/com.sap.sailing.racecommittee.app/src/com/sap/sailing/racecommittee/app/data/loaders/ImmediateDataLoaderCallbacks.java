@@ -20,6 +20,6 @@ public class ImmediateDataLoaderCallbacks<T> extends DataLoaderCallbacks<T> {
             public Loader<DataLoaderResult<T>> create(int id, Bundle args) throws Exception {
                 return new ImmediateDataLoader<T>(context, loadingFunc);
             }
-        });
+        }, context);
     }
 }

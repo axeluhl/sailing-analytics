@@ -36,7 +36,7 @@ import com.sap.sailing.racecommittee.app.data.DataManager;
 import com.sap.sailing.racecommittee.app.data.OnlineDataManager;
 import com.sap.sailing.racecommittee.app.data.ReadonlyDataManager;
 import com.sap.sailing.racecommittee.app.data.clients.LoadClient;
-import com.sap.sailing.racecommittee.app.logging.ExLog;
+import com.sap.sailing.android.shared.logging.ExLog;
 import com.sap.sailing.racecommittee.app.ui.adapters.finishing.CompetitorPositioningListAdapter;
 import com.sap.sailing.racecommittee.app.ui.adapters.finishing.CompetitorsAdapter;
 import com.sap.sailing.racecommittee.app.ui.comparators.NaturalNamedComparator;
@@ -147,7 +147,7 @@ public class PositioningFragment extends RaceDialogFragment {
 
             public void onItemClick(AdapterView<?> arg0, View view, int position, long arg3) {
                 Competitor competitor = (Competitor) competitorsAdapter.getItem(position);
-                ExLog.i("RaceFinishingFragment", "Grid is clicked at position " + position + " for competitor "
+                ExLog.i(getActivity(), "RaceFinishingFragment", "Grid is clicked at position " + position + " for competitor "
                         + competitor.getName());
                 onCompetitorClickedOnGrid(competitor);
             }
