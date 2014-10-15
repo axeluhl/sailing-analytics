@@ -1,11 +1,12 @@
 package com.sap.sailing.racecommittee.app.data.loaders;
 
 import android.app.LoaderManager.LoaderCallbacks;
+import android.content.Context;
 import android.content.Loader;
 import android.os.Bundle;
 
+import com.sap.sailing.android.shared.logging.ExLog;
 import com.sap.sailing.racecommittee.app.data.clients.LoadClient;
-import com.sap.sailing.racecommittee.app.logging.ExLog;
 
 /**
  * <p>
@@ -34,10 +35,12 @@ public class DataLoaderCallbacks<T> implements LoaderCallbacks<DataLoaderResult<
 
     private LoadClient<T> clientCallback;
     private LoaderCreator<T> loaderCreator;
+    private final Context context;
 
-    public DataLoaderCallbacks(LoadClient<T> clientCallback, LoaderCreator<T> loaderCreator) {
+    public DataLoaderCallbacks(LoadClient<T> clientCallback, LoaderCreator<T> loaderCreator, Context context) {
         this.clientCallback = clientCallback;
         this.loaderCreator = loaderCreator;
+        this.context = context;
     }
 
     @Override
@@ -45,7 +48,7 @@ public class DataLoaderCallbacks<T> implements LoaderCallbacks<DataLoaderResult<
         try {
             return loaderCreator.create(id, args);
         } catch (Exception e) {
-            ExLog.ex(TAG, e);
+            ExLog.ex(context, TAG, e);
         }
         throw new IllegalStateException("Exception while creating a loader.");
     }

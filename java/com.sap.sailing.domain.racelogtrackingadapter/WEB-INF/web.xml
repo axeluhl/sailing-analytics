@@ -25,4 +25,13 @@
     	<url-pattern>/recordFixes</url-pattern>
   	</servlet-mapping>
   	
+  		<servlet>
+    	<servlet-name>RecordFixesFlatJsonPostServlet</servlet-name>
+		<servlet-class>com.sap.sailing.domain.racelogtracking.servlet.RecordFixesFlatJsonPostServlet</servlet-class>
+  	</servlet>
+  	<servlet-mapping>
+    	<servlet-name>RecordFixesFlatJsonPostServlet</servlet-name>
+    	<url-pattern>/recordFixesFlatJson</url-pattern>
+  	</servlet-mapping>
+  	
  </web-app>

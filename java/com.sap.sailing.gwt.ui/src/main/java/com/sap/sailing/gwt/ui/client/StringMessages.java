@@ -389,6 +389,7 @@ public interface StringMessages extends Messages {
     String scoringSchemeWinnerGetsFive();
     String scoringSchemeWinnerGetsSix();
     String scoringSchemeWinnerGetsEight();
+    String scoringSchemeWinnerGetsEightAndInterpolation();
     String scoringSystem();
     String createFlexibleLeaderboard();
     String createRegattaLeaderboard();
@@ -1096,4 +1097,7 @@ public interface StringMessages extends Messages {
     String showAll();
     String raceVisibilityColumn();
     String enterCarryValueFor(String competitorName);
+    String mappingDetails();
+    String deviceMappingQrCodeExplanation();
+    String qrCode();
 }

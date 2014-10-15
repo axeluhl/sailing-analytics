@@ -45,6 +45,7 @@ import com.sap.sailing.domain.leaderboard.impl.HighPointFirstGets10Or8AndLastBre
 import com.sap.sailing.domain.leaderboard.impl.HighPointFirstGets1LastBreaksTie;
 import com.sap.sailing.domain.leaderboard.impl.HighPointLastBreaksTie;
 import com.sap.sailing.domain.leaderboard.impl.HighPointWinnerGetsEight;
+import com.sap.sailing.domain.leaderboard.impl.HighPointWinnerGetsEightAndInterpolation;
 import com.sap.sailing.domain.leaderboard.impl.HighPointWinnerGetsFive;
 import com.sap.sailing.domain.leaderboard.impl.HighPointWinnerGetsSix;
 import com.sap.sailing.domain.leaderboard.impl.LowPoint;
@@ -108,6 +109,8 @@ public class DomainFactoryImpl extends SharedDomainFactoryImpl implements Domain
             return new HighPointWinnerGetsSix();
         case HIGH_POINT_WINNER_GETS_EIGHT:
             return new HighPointWinnerGetsEight();
+        case HIGH_POINT_WINNER_GETS_EIGHT_AND_INTERPOLATION:
+            return new HighPointWinnerGetsEightAndInterpolation();
         case HIGH_POINT_FIRST_GETS_TEN_OR_EIGHT:
             return new HighPointFirstGets10Or8AndLastBreaksTie();
         }
