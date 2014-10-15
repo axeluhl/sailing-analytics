@@ -28,8 +28,6 @@ import com.sap.sailing.gwt.ui.simulator.util.ColorPalette;
 import com.sap.sailing.gwt.ui.simulator.util.ColorPaletteGenerator;
 import com.sap.sse.gwt.client.async.AsyncActionsExecutor;
 import com.sap.sse.gwt.client.async.MarkedAsyncCallback;
-import com.sap.sse.gwt.client.player.TimeListener;
-import com.sap.sse.gwt.client.player.Timer;
 
 /**
  * A Google Maps overlay based on an HTML5 canvas for drawing simulation results on the {@link RaceMap}.
@@ -37,7 +35,7 @@ import com.sap.sse.gwt.client.player.Timer;
  * @author Christopher Ronnewinkel (D036654)
  * 
  */
-public class RaceSimulationOverlay extends FullCanvasOverlay  implements TimeListener {
+public class RaceSimulationOverlay extends FullCanvasOverlay {
 
     public static final String GET_SIMULATION_CATEGORY = "getSimulation";
     private final String textColor = "Black";
@@ -47,21 +45,18 @@ public class RaceSimulationOverlay extends FullCanvasOverlay  implements TimeLis
     private double rectWidth = 20;
     private double rectHeight = 20;
     private final StringMessages stringMessages;
-    private final Timer timer;
-    private Date lastSimulationTime;
-    private final long deltaSimulationTime = 15000;
     private final RegattaAndRaceIdentifier raceIdentifier;
     private final SailingServiceAsync sailingService;
     private final AsyncActionsExecutor asyncActionsExecutor;
     private final ColorPalette colors;
     private SimulatorResultsDTO simulationResult;
     private PathDTO racePath;
+    private int raceLeg = 0;
     private Date prevStartTime;
     private Canvas simulationLegend;
     
-    public RaceSimulationOverlay(MapWidget map, int zIndex, final Timer timer, RegattaAndRaceIdentifier raceIdentifier, SailingServiceAsync sailingService, StringMessages stringMessages, AsyncActionsExecutor asyncActionsExecutor) {
+    public RaceSimulationOverlay(MapWidget map, int zIndex, RegattaAndRaceIdentifier raceIdentifier, SailingServiceAsync sailingService, StringMessages stringMessages, AsyncActionsExecutor asyncActionsExecutor) {
         super(map, zIndex);
-        this.timer = timer;
         this.raceIdentifier = raceIdentifier;
         this.sailingService = sailingService;
         this.stringMessages = stringMessages;
@@ -69,30 +64,22 @@ public class RaceSimulationOverlay extends FullCanvasOverlay  implements TimeLis
         this.colors = new ColorPaletteGenerator();
     }
     
-    @Override
-    public void timeChanged(final Date newTime, final Date oldTime) {
-        if (lastSimulationTime == null) {
-            lastSimulationTime = new Date(newTime.getTime() - deltaSimulationTime);
-        }
-        if (Math.abs(newTime.getTime() - lastSimulationTime.getTime()) >= deltaSimulationTime) {
-            lastSimulationTime = newTime;
-            this.simulate(newTime);
-        }
-    }
-    
-    @Override
-    public void addToMap() {
-        if (timer != null) {
-            timer.addTimeListener(this);
-        }
+    public void updateLeg(int newLeg, Date newTime, boolean clearCanvas) {
+    	if ((newLeg != raceLeg)&&(this.isVisible())) {
+    		raceLeg = newLeg;
+    		if (clearCanvas) {
+    			this.clearCanvas();
+    		}
+    		this.simulate(newTime);
+    	}
     }
 
     @Override
-    public void removeFromMap() {
-        if (timer != null) {
-            timer.removeTimeListener(this);
-        }
-        this.setVisible(false);
+    public void setVisible(boolean isVisible) {
+    	super.setVisible(isVisible);
+    	if (simulationLegend != null) {
+    		simulationLegend.setVisible(isVisible);
+    	}
     }
 
     @Override
