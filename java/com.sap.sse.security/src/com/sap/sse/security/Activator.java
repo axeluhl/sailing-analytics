@@ -2,6 +2,7 @@ package com.sap.sse.security;
 
 import java.io.File;
 import java.io.FileReader;
+import java.io.IOException;
 import java.util.Properties;
 import java.util.logging.Level;
 import java.util.logging.Logger;
@@ -51,10 +52,20 @@ public class Activator implements BundleActivator {
      */
     public void start(BundleContext bundleContext) throws Exception {
         // Load mail properties
-        File propertiesfile = new File(new File(System.getProperty("jetty.home")).getParent()
-                + "/security.properties");
+        final String jettyHome = System.getProperty("jetty.home");
+        final File propertiesDir;
+        if (jettyHome == null) {
+            propertiesDir = new File(".");
+        } else {
+            propertiesDir = new File(jettyHome).getParentFile();
+        }
+        File propertiesfile = new File(propertiesDir, "/security.properties");
         Properties mailProperties = new Properties();
-        mailProperties.load(new FileReader(propertiesfile));
+        try {
+            mailProperties.load(new FileReader(propertiesfile));
+        } catch (IOException ioe) {
+            logger.log(Level.SEVERE, "Couldn't read security properties from "+propertiesfile, ioe);
+        }
         if (testUserStore != null) {
             createAndRegisterSecurityService(testUserStore, mailProperties);
         } else {
