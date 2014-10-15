@@ -61,8 +61,8 @@ public class StringListInlineEditorComposite extends StringListEditorComposite {
 
     public static class ExpandedUi extends ExpandedListEditorUi<String> {
 
-        protected final MultiWordSuggestOracle inputOracle;
-        protected int textBoxSize;
+        private final MultiWordSuggestOracle inputOracle;
+        private final int textBoxSize;
 
         public ExpandedUi(StringMessages stringMessages, ImageResource removeImage, List<String> suggestValues, int textBoxSize) {
             super(stringMessages, removeImage, /*canRemoveItems*/true);

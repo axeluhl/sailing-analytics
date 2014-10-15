@@ -62,4 +62,16 @@ public interface StringMessages extends Messages {
 
     String couldNotCreateUser(String message);
 
+    String changePassword();
+
+    String userDetails();
+
+    String deleteUser();
+
+    String deleteUserQuestion();
+
+    String doYouReallyWantToDeleteUser(String username);
+
+    String errorDeletingUser();
+
 }

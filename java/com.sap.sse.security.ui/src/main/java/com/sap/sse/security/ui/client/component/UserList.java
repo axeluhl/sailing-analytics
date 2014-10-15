@@ -19,7 +19,7 @@ public class UserList extends CellList<UserDTO> {
                 return;
             }
             ImageResourceRenderer renderer = new ImageResourceRenderer();
-            final ImageResource userImageResource = com.sap.sse.security.ui.client.Resources.INSTANCE.userSmall();
+            final ImageResource userImageResource = com.sap.sse.security.ui.client.Resources.INSTANCE.userIcon();
             sb.appendHtmlConstant("<table>");
             sb.appendHtmlConstant("<tr>");
             sb.appendHtmlConstant("<td>");

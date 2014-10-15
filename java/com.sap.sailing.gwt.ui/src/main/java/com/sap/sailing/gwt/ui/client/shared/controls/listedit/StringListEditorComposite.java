@@ -63,7 +63,6 @@ public class StringListEditorComposite extends ListEditorComposite<String> {
         public ExpandedUi(StringMessages stringMessages, ImageResource removeImage, List<String> suggestValues) {
             super(stringMessages, removeImage, /*canRemoveItems*/true);
             this.inputOracle = new MultiWordSuggestOracle();
-
             inputOracle.addAll(suggestValues);
         }
         
@@ -77,12 +76,10 @@ public class StringListEditorComposite extends ListEditorComposite<String> {
         protected Widget createAddWidget() {
             final SuggestBox inputBox = new SuggestBox(inputOracle);
             inputBox.ensureDebugId("InputSuggestBox");
-            
             final Button addButton = new Button(stringMessages.add());
             addButton.ensureDebugId("AddButton");
             addButton.setEnabled(false);
             addButton.addClickHandler(new ClickHandler() {
-
                 @Override
                 public void onClick(ClickEvent event) {
                     addValue(inputBox.getValue());
@@ -90,13 +87,11 @@ public class StringListEditorComposite extends ListEditorComposite<String> {
                 }
             });
             inputBox.addKeyUpHandler(new KeyUpHandler() {
-
                 @Override
                 public void onKeyUp(KeyUpEvent event) {
                     addButton.setEnabled(!inputBox.getValue().isEmpty());
                 }
             });
-
             HorizontalPanel panel = new HorizontalPanel();
             panel.add(inputBox);
             panel.add(addButton);
