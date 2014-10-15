@@ -12,9 +12,9 @@ public interface HasTrackedLegContext {
 
     public TrackedLeg getTrackedLeg();
     
-    @Dimension(messageKey="LegType", ordinal=5)
+    @Dimension(messageKey="LegType", ordinal=6)
     public LegType getLegType();
-    @Dimension(messageKey="LegNumber", ordinal=6)
+    @Dimension(messageKey="LegNumber", ordinal=7)
     public int getLegNumber();
 
 }

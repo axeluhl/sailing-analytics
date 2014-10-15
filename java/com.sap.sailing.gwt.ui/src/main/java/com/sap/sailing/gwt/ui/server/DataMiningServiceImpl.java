@@ -96,14 +96,18 @@ public class DataMiningServiceImpl extends RemoteServiceServlet implements DataM
     
     @Override
     public QueryResult<Set<Object>> getDimensionValuesFor(Collection<FunctionDTO> dimensions) throws Exception {
-        Query<Set<Object>> dimensionValuesQuery = sailingDataMiningFactory.createDimensionValuesQuery(getRacingEventService(), dimensions, getDataMiningServer().getFunctionProvider());
+        Query<Set<Object>> dimensionValuesQuery = sailingDataMiningFactory.createDimensionValuesQuery(getRacingEventService(), dimensions,
+                                                                                                      getDataMiningServer().getFunctionProvider(),
+                                                                                                      getDataMiningServer().getDataRetrieverChainDefinitionRegistry());
         return dimensionValuesQuery.run();
     }
 
     @Override
     public <ResultType extends Number> QueryResult<ResultType> runQuery(QueryDefinition queryDefinition) throws Exception {
         @SuppressWarnings("unchecked") // TODO Fix after the data mining has been cleaned
-        Query<ResultType> query = (Query<ResultType>) sailingDataMiningFactory.createQuery(getRacingEventService(), queryDefinition, getDataMiningServer().getFunctionProvider());
+        Query<ResultType> query = (Query<ResultType>) sailingDataMiningFactory.createQuery(getRacingEventService(), queryDefinition,
+                                                                                           getDataMiningServer().getFunctionProvider(),
+                                                                                           getDataMiningServer().getDataRetrieverChainDefinitionRegistry());
         return query.run();
     }
     

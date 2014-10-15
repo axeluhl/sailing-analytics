@@ -13,13 +13,15 @@ import org.osgi.framework.ServiceRegistration;
 
 import com.sap.sse.datamining.ClassesWithFunctionsRegistrationService;
 import com.sap.sse.datamining.DataMiningServer;
+import com.sap.sse.datamining.DataRetrieverChainDefinition;
+import com.sap.sse.datamining.DataRetrieverChainDefinitionRegistrationService;
 import com.sap.sse.datamining.functions.FunctionProvider;
 import com.sap.sse.datamining.functions.FunctionRegistry;
 import com.sap.sse.datamining.i18n.DataMiningStringMessages;
 import com.sap.sse.datamining.impl.functions.RegistryFunctionProvider;
 import com.sap.sse.datamining.impl.functions.SimpleFunctionRegistry;
 
-public class DataMiningActivator implements BundleActivator, ClassesWithFunctionsRegistrationService {
+public class DataMiningActivator implements BundleActivator, ClassesWithFunctionsRegistrationService, DataRetrieverChainDefinitionRegistrationService {
 
     private static final int THREAD_POOL_SIZE = Math.max(Runtime.getRuntime().availableProcessors(), 3);
     private static final String STRING_MESSAGES_BASE_NAME = "stringmessages/StringMessages";
@@ -41,15 +43,17 @@ public class DataMiningActivator implements BundleActivator, ClassesWithFunction
 
         FunctionRegistry functionRegistry = new SimpleFunctionRegistry();
         FunctionProvider functionProvider = new RegistryFunctionProvider(functionRegistry);
-        dataMiningServer = new DataMiningServerImpl(stringMessages, functionRegistry, functionProvider);
+        DataRetrieverChainDefinitionRegistry dataRetrieverChainDefinitionRegistry = new SimpleDataRetrieverChainDefinitionRegistry();
+        dataMiningServer = new DataMiningServerImpl(stringMessages, functionRegistry, functionProvider, dataRetrieverChainDefinitionRegistry);
         
         serviceRegistrations = new HashSet<>();
         registerDataMiningServer();
-        registerClassesWithFunctionsRegistrationService();
+        registerRegistrationServices();
     }
 
-    private void registerClassesWithFunctionsRegistrationService() {
+    private void registerRegistrationServices() {
         serviceRegistrations.add(context.registerService(ClassesWithFunctionsRegistrationService.class, this, null));
+        serviceRegistrations.add(context.registerService(DataRetrieverChainDefinitionRegistrationService.class, this, null));
     }
 
     private void registerDataMiningServer() {
@@ -69,6 +73,17 @@ public class DataMiningActivator implements BundleActivator, ClassesWithFunction
     @Override
     public void unregisterAllFunctionsOf(Set<Class<?>> classesToUnregister) {
         dataMiningServer.getFunctionRegistry().unregisterAllFunctionsOf(classesToUnregister);
+    }
+    
+    @Override
+    public void addDataRetrieverChainDefinition(DataRetrieverChainDefinition<?> dataRetrieverChainDefinition) {
+        dataMiningServer.getDataRetrieverChainDefinitionRegistry().add(dataRetrieverChainDefinition);
+    }
+    
+    @Override
+    public void removeDataRetrieverChainDefinition(DataRetrieverChainDefinition<?> dataRetrieverChainDefinition) {
+        dataMiningServer.getDataRetrieverChainDefinitionRegistry().remove(dataRetrieverChainDefinition);
+        
     }
 
     @Override

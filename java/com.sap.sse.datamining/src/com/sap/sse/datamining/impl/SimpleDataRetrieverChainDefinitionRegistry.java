@@ -17,12 +17,20 @@ public class SimpleDataRetrieverChainDefinitionRegistry implements DataRetriever
     }
 
     @Override
-    public void add(DataRetrieverChainDefinition<?> raceRetrieverChainDefinition) {
-        RegistrationKey key = new RegistrationKey(raceRetrieverChainDefinition.getDataSourceType(), raceRetrieverChainDefinition.getRetrievedDataType());
+    public void add(DataRetrieverChainDefinition<?> dataRetrieverChainDefinition) {
+        RegistrationKey key = new RegistrationKey(dataRetrieverChainDefinition.getDataSourceType(), dataRetrieverChainDefinition.getRetrievedDataType());
         if (!chainDefinitions.containsKey(key)) {
             chainDefinitions.put(key, new HashSet<DataRetrieverChainDefinition<?>>());
         }
-        chainDefinitions.get(key).add(raceRetrieverChainDefinition);
+        chainDefinitions.get(key).add(dataRetrieverChainDefinition);
+    }
+
+    @Override
+    public void remove(DataRetrieverChainDefinition<?> dataRetrieverChainDefinition) {
+        RegistrationKey key = new RegistrationKey(dataRetrieverChainDefinition.getDataSourceType(), dataRetrieverChainDefinition.getRetrievedDataType());
+        if (chainDefinitions.containsKey(key)) {
+            chainDefinitions.get(key).remove(dataRetrieverChainDefinition);
+        }
     }
 
     @SuppressWarnings("unchecked")

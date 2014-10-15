@@ -65,9 +65,30 @@ public class TestDataRetrieverChainDefinitionRegistry {
         expectedDataRetrieverChainDefinitions.add(legRetrieverChainDefinition);
         assertThat(dataRetrieverChainDefinitionRegistry.getDataRetrieverChainDefinitions(dataSourceType, Test_HasLegOfCompetitorContext.class), is(expectedDataRetrieverChainDefinitions));
     }
+    
+    @SuppressWarnings("unchecked")
+    @Test
+    public void testRemoveDataRetrieverChainDefinition() {
+        Class<Collection<Test_Regatta>> dataSourceType = (Class<Collection<Test_Regatta>>)(Class<?>) Collection.class;
+
+        dataRetrieverChainDefinitionRegistry.remove(legRetrieverChainDefinition);
+        Collection<DataRetrieverChainDefinition<Collection<Test_Regatta>>> expectedEmptyDataRetrieverChainDefinitions = new HashSet<>();
+        assertThat(dataRetrieverChainDefinitionRegistry.getDataRetrieverChainDefinitions(dataSourceType, Test_HasLegOfCompetitorContext.class), is(expectedEmptyDataRetrieverChainDefinitions));
+    }
+    
+    @SuppressWarnings("unchecked")
+    @Test
+    public void testAddingDataRetrieverChainDefinitionTwice() {
+        Class<Collection<Test_Regatta>> dataSourceType = (Class<Collection<Test_Regatta>>)(Class<?>) Collection.class;
+
+        dataRetrieverChainDefinitionRegistry.add(legRetrieverChainDefinition);
+        Collection<DataRetrieverChainDefinition<Collection<Test_Regatta>>> expectedDataRetrieverChainDefinitions = new HashSet<>();
+        expectedDataRetrieverChainDefinitions.add(legRetrieverChainDefinition);
+        assertThat(dataRetrieverChainDefinitionRegistry.getDataRetrieverChainDefinitions(dataSourceType, Test_HasLegOfCompetitorContext.class), is(expectedDataRetrieverChainDefinitions));
+    }
 
     @Test
-    public void testGetDataRetrieverChainDefinitionsForNotRegisteresChain() {
+    public void testGetDataRetrieverChainDefinitionsForNotRegisteredChain() {
         Collection<DataRetrieverChainDefinition<Test_Regatta>> expectedEmptyDataRetrieverChainDefinitions = new HashSet<DataRetrieverChainDefinition<Test_Regatta>>();
         assertThat(dataRetrieverChainDefinitionRegistry.getDataRetrieverChainDefinitions(Test_Regatta.class, Test_HasRaceContextImpl.class), is(expectedEmptyDataRetrieverChainDefinitions));
     }
