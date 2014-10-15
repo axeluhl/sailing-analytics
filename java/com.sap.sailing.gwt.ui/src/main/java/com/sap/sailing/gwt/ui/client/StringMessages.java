@@ -1102,4 +1102,5 @@ public interface StringMessages extends com.sap.sse.gwt.client.StringMessages {
     String enterVideoURL();
     String enterSponsorImageURL();
     String enterRaceName();
+    String enterCourseName();
 }

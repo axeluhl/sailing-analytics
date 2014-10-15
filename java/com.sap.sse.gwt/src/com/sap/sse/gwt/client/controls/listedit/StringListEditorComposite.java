@@ -18,8 +18,13 @@ import com.sap.sse.gwt.client.StringMessages;
 public class StringListEditorComposite extends ListEditorComposite<String> {
     public StringListEditorComposite(Iterable<String> initialValues, StringMessages stringMessages,
             String popupDialogTitle, ImageResource removeImage, Iterable<String> suggestValues) {
+        this(initialValues, stringMessages, popupDialogTitle, removeImage, suggestValues, /* placeholderTextForAddTextbox */ null);
+    }
+
+    public StringListEditorComposite(Iterable<String> initialValues, StringMessages stringMessages,
+            String popupDialogTitle, ImageResource removeImage, Iterable<String> suggestValues, String placeholderTextForAddTextbox) {
         super(initialValues, new CollapsedUi(stringMessages, popupDialogTitle,
-                new ExpandedUi(stringMessages, removeImage, suggestValues)));
+                new ExpandedUi(stringMessages, removeImage, suggestValues, placeholderTextForAddTextbox)));
     }
 
     public StringListEditorComposite(Iterable<String> initialValues, StringMessages stringMessages,
