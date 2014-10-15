@@ -14,7 +14,6 @@ import org.junit.Before;
 import org.junit.Test;
 
 import com.sap.sse.datamining.components.Processor;
-import com.sap.sse.datamining.factories.FunctionFactory;
 import com.sap.sse.datamining.functions.Function;
 import com.sap.sse.datamining.shared.GroupKey;
 import com.sap.sse.datamining.shared.impl.GenericGroupKey;
@@ -54,10 +53,10 @@ public class TestParallelExtractionProcessor {
     @Before
     public void initializeExtractionFunctions() {
         Method getCrossSumMethod = FunctionTestsUtil.getMethodFromClass(Number.class, "getCrossSum");
-        getCrossSumFunction = FunctionFactory.createMethodWrappingFunction(getCrossSumMethod);
+        getCrossSumFunction = FunctionTestsUtil.getFunctionFactory().createMethodWrappingFunction(getCrossSumMethod);
         
         Method invalidMethod = FunctionTestsUtil.getMethodFromSimpleClassWithMarkedMethod("sideEffectFreeValue");
-        invalidFunction = FunctionFactory.createMethodWrappingFunction(invalidMethod);
+        invalidFunction = FunctionTestsUtil.getFunctionFactory().createMethodWrappingFunction(invalidMethod);
     }
 
     @Test

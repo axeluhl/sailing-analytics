@@ -13,8 +13,6 @@ import java.util.Locale;
 import org.junit.Before;
 import org.junit.Test;
 
-import com.sap.sse.datamining.factories.FunctionDTOFactory;
-import com.sap.sse.datamining.factories.FunctionFactory;
 import com.sap.sse.datamining.functions.Function;
 import com.sap.sse.datamining.functions.FunctionProvider;
 import com.sap.sse.datamining.functions.FunctionRegistry;
@@ -95,12 +93,12 @@ public class TestFunctionProvider {
     @Test
     public void testGetFunctionForDTO() throws NoSuchMethodException, SecurityException {
         Method getRegattaMethod = Test_HasRaceContext.class.getMethod("getRace", new Class<?>[0]);
-        Function<?> getRegatta = FunctionFactory.createMethodWrappingFunction(getRegattaMethod);
+        Function<?> getRegatta = FunctionTestsUtil.getFunctionFactory().createMethodWrappingFunction(getRegattaMethod);
         Method getNameMethod = Test_Named.class.getMethod("getName", new Class<?>[0]);
-        Function<?> getName = FunctionFactory.createMethodWrappingFunction(getNameMethod);
-        Function<Object> getRegattaName = FunctionFactory.createCompoundFunction(Arrays.asList(getRegatta, getName));
+        Function<?> getName = FunctionTestsUtil.getFunctionFactory().createMethodWrappingFunction(getNameMethod);
+        Function<Object> getRegattaName = FunctionTestsUtil.getFunctionFactory().createCompoundFunction(Arrays.asList(getRegatta, getName));
         
-        FunctionDTO getRegattaNameDTO = FunctionDTOFactory.createFunctionDTO(getRegattaName, Locale.ENGLISH, stringMessages);
+        FunctionDTO getRegattaNameDTO = FunctionTestsUtil.getFunctionDTOFactory().createFunctionDTO(getRegattaName, Locale.ENGLISH, stringMessages);
         
         FunctionProvider functionProvider = new RegistryFunctionProvider(functionRegistry);
         @SuppressWarnings("unchecked") // Hamcrest requires type matching of actual and expected type, so the Functions have to be specific (without <?>)
@@ -111,8 +109,8 @@ public class TestFunctionProvider {
     @Test
     public void testGetFunctionForUnregisteredDTO() {
         Method incrementMethod = FunctionTestsUtil.getMethodFromClass(SimpleClassWithMarkedMethods.class, "increment", int.class);
-        Function<Object> increment = FunctionFactory.createMethodWrappingFunction(incrementMethod);
-        FunctionDTO incrementDTO = FunctionDTOFactory.createFunctionDTO(increment, Locale.ENGLISH, stringMessages);
+        Function<Object> increment = FunctionTestsUtil.getFunctionFactory().createMethodWrappingFunction(incrementMethod);
+        FunctionDTO incrementDTO = FunctionTestsUtil.getFunctionDTOFactory().createFunctionDTO(increment, Locale.ENGLISH, stringMessages);
         
         FunctionProvider functionProvider = new RegistryFunctionProvider(functionRegistry);
         assertThat(functionProvider.getFunctionForDTO(incrementDTO), is(nullValue()));

@@ -6,17 +6,18 @@ import static org.junit.Assert.assertThat;
 import java.lang.reflect.Method;
 import java.util.ArrayList;
 import java.util.Collection;
+import java.util.List;
 
 import org.junit.Before;
 import org.junit.Test;
 
 import com.sap.sse.datamining.components.Processor;
-import com.sap.sse.datamining.factories.FunctionFactory;
 import com.sap.sse.datamining.functions.Function;
 import com.sap.sse.datamining.impl.functions.MethodWrappingFunction;
 import com.sap.sse.datamining.shared.GroupKey;
 import com.sap.sse.datamining.shared.impl.CompoundGroupKey;
 import com.sap.sse.datamining.shared.impl.GenericGroupKey;
+import com.sap.sse.datamining.test.util.ComponentTestsUtil;
 import com.sap.sse.datamining.test.util.ConcurrencyTestsUtil;
 import com.sap.sse.datamining.test.util.FunctionTestsUtil;
 import com.sap.sse.datamining.test.util.components.NullProcessor;
@@ -42,11 +43,11 @@ public class TestParallelMultiDimensionalGroupingProcessor {
         receivers = new ArrayList<>();
         receivers.add(receiver);
         
-        Collection<Function<?>> dimensions = new ArrayList<Function<?>>();
+        List<Function<?>> dimensions = new ArrayList<Function<?>>();
         dimensions.add(new MethodWrappingFunction<>(Number.class.getMethod("getLength", new Class<?>[0]), int.class));
         dimensions.add(new MethodWrappingFunction<>(Number.class.getMethod("getCrossSum", new Class<?>[0]), int.class));
         
-        processor = new ParallelMultiDimensionsValueNestingGroupingProcessor<Number>(Number.class, ConcurrencyTestsUtil.getExecutor(), receivers, dimensions);
+        processor = ComponentTestsUtil.getProcessorFactory().createGroupingProcessor(Number.class, receivers, dimensions);
     }
     
     @Test(expected=IllegalArgumentException.class)
@@ -64,7 +65,7 @@ public class TestParallelMultiDimensionalGroupingProcessor {
     public void testConstructionWithFunctionsInsteadOfDimensions() {
         Collection<Function<?>> functions = new ArrayList<>();
         Method method = FunctionTestsUtil.getMethodFromSimpleClassWithMarkedMethod("sideEffectFreeValue");
-        functions.add(FunctionFactory.createMethodWrappingFunction(method));
+        functions.add(FunctionTestsUtil.getFunctionFactory().createMethodWrappingFunction(method));
         new ParallelMultiDimensionsValueNestingGroupingProcessor<>(Number.class, ConcurrencyTestsUtil.getExecutor(), receivers, functions);
     }
 

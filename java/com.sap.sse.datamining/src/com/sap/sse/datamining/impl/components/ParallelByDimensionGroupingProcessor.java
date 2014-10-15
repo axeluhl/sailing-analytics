@@ -19,11 +19,14 @@ import com.sap.sse.datamining.shared.impl.GenericGroupKey;
 public class ParallelByDimensionGroupingProcessor<DataType> extends
         AbstractParallelMultiDimensionalGroupingProcessor<DataType> {
 
+    private final FunctionDTOFactory functionDTOFactory;
+
     public ParallelByDimensionGroupingProcessor(Class<DataType> dataType,
                                                 ExecutorService executor,
                                                 Collection<Processor<GroupedDataEntry<DataType>, ?>> resultReceivers,
                                                 Function<?> dimension) {
         super(dataType, executor, resultReceivers, asIterable(dimension));
+        functionDTOFactory = new FunctionDTOFactory();
     }
 
     private static Iterable<Function<?>> asIterable(Function<?> dimension) {
@@ -34,7 +37,7 @@ public class ParallelByDimensionGroupingProcessor<DataType> extends
 
     @Override
     protected GroupKey createGroupKeyFor(DataType input, Function<?> dimension) {
-        return new GenericGroupKey<FunctionDTO>(FunctionDTOFactory.createFunctionDTO(dimension));
+        return new GenericGroupKey<FunctionDTO>(functionDTOFactory.createFunctionDTO(dimension));
     }
 
 }

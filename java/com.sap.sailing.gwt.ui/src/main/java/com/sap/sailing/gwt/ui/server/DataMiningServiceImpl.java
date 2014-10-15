@@ -29,6 +29,7 @@ public class DataMiningServiceImpl extends RemoteServiceServlet implements DataM
     private final BundleContext context;
 
     private final SailingDataMiningFactory sailingDataMiningFactory;
+    private final FunctionDTOFactory functionDTOFactory;
 
     private final ServiceTracker<DataMiningServer, DataMiningServer> dataMiningServerTracker;
     private final ServiceTracker<RacingEventService, RacingEventService> racingEventServiceTracker;
@@ -36,10 +37,12 @@ public class DataMiningServiceImpl extends RemoteServiceServlet implements DataM
     public DataMiningServiceImpl() {
         context = Activator.getDefault();
         
-        sailingDataMiningFactory = new SailingDataMiningFactory();
-        
         dataMiningServerTracker = createAndOpenDataMiningServerTracker(context);
         racingEventServiceTracker = createAndOpenRacingEventServiceTracker(context);
+        
+        sailingDataMiningFactory = new SailingDataMiningFactory(getDataMiningServer().getFunctionProvider(),
+                                                                getDataMiningServer().getDataRetrieverChainDefinitionRegistry());
+        functionDTOFactory = new FunctionDTOFactory();
     }
 
     private ServiceTracker<DataMiningServer, DataMiningServer> createAndOpenDataMiningServerTracker(
@@ -89,25 +92,21 @@ public class DataMiningServiceImpl extends RemoteServiceServlet implements DataM
         
         Collection<FunctionDTO> functionDTOs = new ArrayList<FunctionDTO>();
         for (Function<?> function : functions) {
-            functionDTOs.add(FunctionDTOFactory.createFunctionDTO(function, locale, dataMiningStringMessages));
+            functionDTOs.add(functionDTOFactory.createFunctionDTO(function, locale, dataMiningStringMessages));
         }
         return functionDTOs;
     }
     
     @Override
     public QueryResult<Set<Object>> getDimensionValuesFor(Collection<FunctionDTO> dimensions) throws Exception {
-        Query<Set<Object>> dimensionValuesQuery = sailingDataMiningFactory.createDimensionValuesQuery(getRacingEventService(), dimensions,
-                                                                                                      getDataMiningServer().getFunctionProvider(),
-                                                                                                      getDataMiningServer().getDataRetrieverChainDefinitionRegistry());
+        Query<Set<Object>> dimensionValuesQuery = sailingDataMiningFactory.createDimensionValuesQuery(getRacingEventService(), dimensions);
         return dimensionValuesQuery.run();
     }
 
     @Override
     public <ResultType extends Number> QueryResult<ResultType> runQuery(QueryDefinition queryDefinition) throws Exception {
         @SuppressWarnings("unchecked") // TODO Fix after the data mining has been cleaned
-        Query<ResultType> query = (Query<ResultType>) sailingDataMiningFactory.createQuery(getRacingEventService(), queryDefinition,
-                                                                                           getDataMiningServer().getFunctionProvider(),
-                                                                                           getDataMiningServer().getDataRetrieverChainDefinitionRegistry());
+        Query<ResultType> query = (Query<ResultType>) sailingDataMiningFactory.createQuery(getRacingEventService(), queryDefinition);
         return query.run();
     }
     

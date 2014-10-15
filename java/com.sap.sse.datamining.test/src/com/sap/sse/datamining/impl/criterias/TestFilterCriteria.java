@@ -11,7 +11,6 @@ import java.util.Collection;
 import org.junit.Test;
 
 import com.sap.sse.datamining.components.FilterCriterion;
-import com.sap.sse.datamining.factories.FunctionFactory;
 import com.sap.sse.datamining.functions.Function;
 import com.sap.sse.datamining.test.functions.test_classes.DataTypeWithContext;
 import com.sap.sse.datamining.test.functions.test_classes.DataTypeWithContextImpl;
@@ -72,7 +71,7 @@ public class TestFilterCriteria {
     
     @Test
     public void testNullaryFunctionValuesFilterCriterion() {
-        Function<String> getRegattaName = FunctionFactory.createMethodWrappingFunction(FunctionTestsUtil.getMethodFromClass(DataTypeWithContext.class, "getRegattaName"));
+        Function<String> getRegattaName = FunctionTestsUtil.getFunctionFactory().createMethodWrappingFunction(FunctionTestsUtil.getMethodFromClass(DataTypeWithContext.class, "getRegattaName"));
         Collection<String> valuesToMatch = Arrays.asList("Regatta", "Other Regatta");
         FilterCriterion<DataTypeWithContext> nullaryFunctionFilterCriterion = new NullaryFunctionValuesFilterCriterion<>(DataTypeWithContext.class, getRegattaName, valuesToMatch);
         

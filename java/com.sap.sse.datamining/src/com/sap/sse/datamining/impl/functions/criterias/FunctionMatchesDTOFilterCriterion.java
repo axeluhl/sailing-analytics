@@ -7,14 +7,16 @@ import com.sap.sse.datamining.shared.dto.FunctionDTO;
 public class FunctionMatchesDTOFilterCriterion extends AbstractFunctionFilterCriterion {
 
     private FunctionDTO functionDTOToMatch;
+    private FunctionDTOFactory functionDTOFactory;
 
-    public FunctionMatchesDTOFilterCriterion(FunctionDTO functionDTOToMatch) {
+    public FunctionMatchesDTOFilterCriterion(FunctionDTOFactory functionDTOFactory, FunctionDTO functionDTOToMatch) {
         this.functionDTOToMatch = functionDTOToMatch;
+        this.functionDTOFactory = functionDTOFactory;
     }
 
     @Override
     public boolean matches(Function<?> function) {
-        FunctionDTO functionDTO = FunctionDTOFactory.createFunctionDTO(function);
+        FunctionDTO functionDTO = functionDTOFactory.createFunctionDTO(function);
         return functionDTOToMatch.equals(functionDTO);
     }
 

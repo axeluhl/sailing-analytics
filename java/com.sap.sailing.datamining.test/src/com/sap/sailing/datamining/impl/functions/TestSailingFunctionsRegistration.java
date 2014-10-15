@@ -8,7 +8,7 @@ import java.util.Arrays;
 import java.util.Collection;
 import java.util.HashSet;
 
-import org.junit.BeforeClass;
+import org.junit.Before;
 import org.junit.Test;
 
 import com.sap.sailing.datamining.Activator;
@@ -27,11 +27,13 @@ import com.sap.sse.datamining.functions.FunctionRegistry;
 import com.sap.sse.datamining.impl.functions.SimpleFunctionRegistry;
 
 public class TestSailingFunctionsRegistration {
+
+    private static FunctionFactory functionFactory = new FunctionFactory();
     
-    private static FunctionRegistry functionRegistry;
+    private FunctionRegistry functionRegistry;
     
-    @BeforeClass
-    public static void setUpFunctionRegistryAndProvider() {
+    @Before
+    public void setUpFunctionRegistryAndProvider() {
         functionRegistry = new SimpleFunctionRegistry();
         functionRegistry.registerAllWithInternalFunctionPolicy(Activator.getInternalClassesWithMarkedMethods());
     }
@@ -50,23 +52,23 @@ public class TestSailingFunctionsRegistration {
         Collection<Function<?>> expectedDimensions = new HashSet<>();
         
         Method getRegattaMethod = HasTrackedRaceContext.class.getMethod("getRegatta", new Class<?>[0]);
-        Function<?> getRegatta = FunctionFactory.createMethodWrappingFunction(getRegattaMethod);
+        Function<?> getRegatta = functionFactory.createMethodWrappingFunction(getRegattaMethod);
         Method getNameMethod = Named.class.getMethod("getName", new Class<?>[0]);
-        Function<?> getName = FunctionFactory.createMethodWrappingFunction(getNameMethod);
-        expectedDimensions.add(FunctionFactory.createCompoundFunction(Arrays.asList(getRegatta, getName)));
+        Function<?> getName = functionFactory.createMethodWrappingFunction(getNameMethod);
+        expectedDimensions.add(functionFactory.createCompoundFunction(Arrays.asList(getRegatta, getName)));
         
         Method getYearMethod = HasTrackedRaceContext.class.getMethod("getYear", new Class<?>[0]);
-        expectedDimensions.add(FunctionFactory.createMethodWrappingFunction(getYearMethod));
+        expectedDimensions.add(functionFactory.createMethodWrappingFunction(getYearMethod));
         
         Method getCompetitorMethod = HasTrackedLegOfCompetitorContext.class.getMethod("getCompetitor", new Class<?>[0]);
-        Function<?> getCompetitor = FunctionFactory.createMethodWrappingFunction(getCompetitorMethod);
+        Function<?> getCompetitor = functionFactory.createMethodWrappingFunction(getCompetitorMethod);
         Method getTeamMethod = Competitor.class.getMethod("getTeam", new Class<?>[0]);
-        Function<?> getTeam = FunctionFactory.createMethodWrappingFunction(getTeamMethod);
+        Function<?> getTeam = functionFactory.createMethodWrappingFunction(getTeamMethod);
         Method getNationalityMethod = Team.class.getMethod("getNationality", new Class<?>[0]);
-        Function<?> getNationality = FunctionFactory.createMethodWrappingFunction(getNationalityMethod);
+        Function<?> getNationality = functionFactory.createMethodWrappingFunction(getNationalityMethod);
         Method getAcronymMethod = Nationality.class.getMethod("getThreeLetterIOCAcronym", new Class<?>[0]);
-        Function<?> getAcronym = FunctionFactory.createMethodWrappingFunction(getAcronymMethod);
-        expectedDimensions.add(FunctionFactory.createCompoundFunction(Arrays.asList(getCompetitor, getTeam, getNationality, getAcronym)));
+        Function<?> getAcronym = functionFactory.createMethodWrappingFunction(getAcronymMethod);
+        expectedDimensions.add(functionFactory.createCompoundFunction(Arrays.asList(getCompetitor, getTeam, getNationality, getAcronym)));
         
         return expectedDimensions;
     }
@@ -85,15 +87,15 @@ public class TestSailingFunctionsRegistration {
         Collection<Function<?>> expectedStatistics = new HashSet<>();
         
         Method getDistanceTraveledMethod = HasTrackedLegOfCompetitorContext.class.getMethod("getDistanceTraveled", new Class<?>[0]);
-        expectedStatistics.add(FunctionFactory.createMethodWrappingFunction(getDistanceTraveledMethod));
+        expectedStatistics.add(functionFactory.createMethodWrappingFunction(getDistanceTraveledMethod));
         
         Method getGPSFixMethod = HasGPSFixContext.class.getMethod("getGPSFix", new Class<?>[0]);
-        Function<?> getGPSFix = FunctionFactory.createMethodWrappingFunction(getGPSFixMethod);
+        Function<?> getGPSFix = functionFactory.createMethodWrappingFunction(getGPSFixMethod);
         Method getSpeedMethod = Moving.class.getMethod("getSpeed", new Class<?>[0]);
-        Function<?> getSpeed = FunctionFactory.createMethodWrappingFunction(getSpeedMethod);
+        Function<?> getSpeed = functionFactory.createMethodWrappingFunction(getSpeedMethod);
         Method getKnotsMethod = Speed.class.getMethod("getKnots", new Class<?>[0]);
-        Function<?> getKnots = FunctionFactory.createMethodWrappingFunction(getKnotsMethod);
-        expectedStatistics.add(FunctionFactory.createCompoundFunction(Arrays.asList(getGPSFix, getSpeed, getKnots)));
+        Function<?> getKnots = functionFactory.createMethodWrappingFunction(getKnotsMethod);
+        expectedStatistics.add(functionFactory.createCompoundFunction(Arrays.asList(getGPSFix, getSpeed, getKnots)));
         
         return expectedStatistics;
     }

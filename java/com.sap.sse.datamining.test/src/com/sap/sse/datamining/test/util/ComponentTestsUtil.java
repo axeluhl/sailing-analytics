@@ -4,6 +4,7 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collection;
 
+import com.sap.sse.datamining.factories.ProcessorFactory;
 import com.sap.sse.datamining.test.functions.registry.test_classes.Test_Boat;
 import com.sap.sse.datamining.test.functions.registry.test_classes.Test_BoatClass;
 import com.sap.sse.datamining.test.functions.registry.test_classes.Test_Competitor;
@@ -19,7 +20,13 @@ import com.sap.sse.datamining.test.functions.registry.test_classes.impl.Test_Rac
 import com.sap.sse.datamining.test.functions.registry.test_classes.impl.Test_RegattaImpl;
 import com.sap.sse.datamining.test.functions.registry.test_classes.impl.Test_TeamImpl;
 
-public final class ComponentsAndQueriesTestsUtil {
+public final class ComponentTestsUtil {
+    
+    private final static ProcessorFactory processorFactory = new ProcessorFactory(ConcurrencyTestsUtil.getExecutor());
+    
+    public static ProcessorFactory getProcessorFactory() {
+        return processorFactory;
+    }
 
     /**
      * Creates a collection of {@link Test_Regatta Test_Regattas} containing the two regattas

@@ -14,7 +14,9 @@ import org.junit.Test;
 import com.sap.sse.datamining.components.Processor;
 import com.sap.sse.datamining.impl.components.GroupedDataEntry;
 import com.sap.sse.datamining.shared.GroupKey;
+import com.sap.sse.datamining.shared.components.AggregatorType;
 import com.sap.sse.datamining.shared.impl.GenericGroupKey;
+import com.sap.sse.datamining.test.util.ComponentTestsUtil;
 import com.sap.sse.datamining.test.util.ConcurrencyTestsUtil;
 import com.sap.sse.datamining.test.util.components.NullProcessor;
 
@@ -25,7 +27,7 @@ public class TestParallelDoubleAggregationProcessors {
 
     @Test
     public void testSumAggregationProcessor() throws InterruptedException {
-        Processor<GroupedDataEntry<Double>, Map<GroupKey, Double>> sumAggregationProcessor = new ParallelGroupedDoubleDataSumAggregationProcessor(ConcurrencyTestsUtil.getExecutor(), receivers);
+        Processor<GroupedDataEntry<Double>, Map<GroupKey, Double>> sumAggregationProcessor = ComponentTestsUtil.getProcessorFactory().createAggregationProcessor(receivers, AggregatorType.Sum);
         Collection<GroupedDataEntry<Double>> elements = createElements();
         ConcurrencyTestsUtil.processElements(sumAggregationProcessor, elements);
         
@@ -49,7 +51,7 @@ public class TestParallelDoubleAggregationProcessors {
 
     @Test
     public void testAverageAggregationProcessor() throws InterruptedException {
-        Processor<GroupedDataEntry<Double>, Map<GroupKey, Double>> averageAggregationProcessor = new ParallelGroupedDoubleDataAverageAggregationProcessor(ConcurrencyTestsUtil.getExecutor(), receivers);
+        Processor<GroupedDataEntry<Double>, Map<GroupKey, Double>> averageAggregationProcessor = ComponentTestsUtil.getProcessorFactory().createAggregationProcessor(receivers, AggregatorType.Average);
         Collection<GroupedDataEntry<Double>> elements = createElements();
         ConcurrencyTestsUtil.processElements(averageAggregationProcessor, elements);
         
@@ -85,7 +87,7 @@ public class TestParallelDoubleAggregationProcessors {
 
     @Test
     public void testMedianAggregationProcessor() throws InterruptedException {
-        Processor<GroupedDataEntry<Double>, Map<GroupKey, Double>> medianAggregationProcessor = new ParallelGroupedDoubleDataMedianAggregationProcessor(ConcurrencyTestsUtil.getExecutor(), receivers);
+        Processor<GroupedDataEntry<Double>, Map<GroupKey, Double>> medianAggregationProcessor = ComponentTestsUtil.getProcessorFactory().createAggregationProcessor(receivers, AggregatorType.Median);
         Collection<GroupedDataEntry<Double>> elements = createElements();
         ConcurrencyTestsUtil.processElements(medianAggregationProcessor, elements);
         

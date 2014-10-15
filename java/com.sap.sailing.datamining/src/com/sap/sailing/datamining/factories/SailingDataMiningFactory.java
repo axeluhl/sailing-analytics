@@ -35,26 +35,37 @@ import com.sap.sse.datamining.shared.dto.FunctionDTO;
 
 public class SailingDataMiningFactory {
 
-    public <ElementType> Query<Double> createQuery(RacingEventService dataSource, final QueryDefinition queryDefinition,
-                                                   final FunctionProvider functionProvider, final DataRetrieverChainDefinitionRegistry dataRetrieverChainDefinitionRegistry) {
+    private final ProcessorFactory processorFactory;
+    
+    private final FunctionProvider functionProvider;
+    private final DataRetrieverChainDefinitionRegistry dataRetrieverChainDefinitionRegistry;
+
+    public SailingDataMiningFactory(FunctionProvider functionProvider, DataRetrieverChainDefinitionRegistry dataRetrieverChainDefinitionRegistry) {
+        processorFactory = new ProcessorFactory(DataMiningActivator.getExecutor());
+        
+        this.functionProvider = functionProvider;
+        this.dataRetrieverChainDefinitionRegistry = dataRetrieverChainDefinitionRegistry;
+    }
+
+    public <ElementType> Query<Double> createQuery(RacingEventService dataSource, final QueryDefinition queryDefinition) {
         return new ProcessorQuery<Double, RacingEventService>(DataMiningActivator.getExecutor(), dataSource,
                 DataMiningActivator.getStringMessages(), DataMiningStringMessages.Util.getLocaleFor(queryDefinition.getLocaleInfoName())) {
             @Override
             protected Processor<RacingEventService, ?> createFirstProcessor() {
-                Processor<GroupedDataEntry<Double>, Map<GroupKey, Double>> aggregationProcessor = ProcessorFactory.createAggregationProcessor(/*query*/ this, queryDefinition.getAggregatorType());
-                
                 @SuppressWarnings("unchecked") // TODO Clean, after the deprecated components have been removed
                 Function<Double> extractionFunction = (Function<Double>) functionProvider.getFunctionForDTO(queryDefinition.getStatisticToCalculate());
-                Processor<GroupedDataEntry<ElementType>, GroupedDataEntry<Double>> extractionProcessor = ProcessorFactory.createExtractionProcessor(aggregationProcessor, extractionFunction);
-                
-                List<Function<?>> dimensionsToGroupBy = convertDTOsToFunctions(queryDefinition.getDimensionsToGroupBy(), functionProvider);
                 @SuppressWarnings("unchecked")
-                Processor<ElementType, GroupedDataEntry<ElementType>> groupingProcessor = ProcessorFactory.createGroupingProcessor((Class<ElementType>) extractionFunction.getDeclaringType(), extractionProcessor, dimensionsToGroupBy);
+                Class<ElementType> dataTypeToRetrieve = (Class<ElementType>) extractionFunction.getDeclaringType();
+                
+                Processor<GroupedDataEntry<Double>, Map<GroupKey, Double>> aggregationProcessor = processorFactory.createAggregationProcessor(/*query*/ this, queryDefinition.getAggregatorType());
+                Processor<GroupedDataEntry<ElementType>, GroupedDataEntry<Double>> extractionProcessor = processorFactory.createExtractionProcessor(aggregationProcessor, extractionFunction);
+                
+                List<Function<?>> dimensionsToGroupBy = convertDTOsToFunctions(queryDefinition.getDimensionsToGroupBy());
+                Processor<ElementType, GroupedDataEntry<ElementType>> groupingProcessor = processorFactory.createGroupingProcessor(dataTypeToRetrieve, extractionProcessor, dimensionsToGroupBy);
 
-                Class<?> dataTypeToRetrieve = extractionFunction.getDeclaringType();
-                DataRetrieverChainDefinition<RacingEventService> dataRetrieverChainDefinition = getDataRetrieverChainDefinition(dataRetrieverChainDefinitionRegistry, dataTypeToRetrieve);
+                DataRetrieverChainDefinition<RacingEventService> dataRetrieverChainDefinition = getDataRetrieverChainDefinition(dataTypeToRetrieve);
                 DataRetrieverChainBuilder<RacingEventService> chainBuilder = dataRetrieverChainDefinition.startBuilding(DataMiningActivator.getExecutor());
-                Map<Class<?>, FilterCriterion<?>> criteriaMappedByDataType = createFilterCriteria(queryDefinition.getFilterSelection(), functionProvider);
+                Map<Class<?>, FilterCriterion<?>> criteriaMappedByDataType = createFilterCriteria(queryDefinition.getFilterSelection());
                 do {
                     if (criteriaMappedByDataType.containsKey(chainBuilder.getCurrentRetrievedDataType())) {
                         chainBuilder.setFilter(criteriaMappedByDataType.get(chainBuilder.getCurrentRetrievedDataType()));
@@ -74,7 +85,7 @@ public class SailingDataMiningFactory {
     }
     
     @SuppressWarnings("unchecked")
-    private <T> Map<Class<?>, FilterCriterion<?>> createFilterCriteria(Map<FunctionDTO, Iterable<? extends Serializable>> filterSelection, FunctionProvider functionProvider) {
+    private <T> Map<Class<?>, FilterCriterion<?>> createFilterCriteria(Map<FunctionDTO, Iterable<? extends Serializable>> filterSelection) {
         Map<Class<?>, CompoundFilterCriterion<?>> criteriaMappedByDataType = new HashMap<>();
         for (Entry<FunctionDTO, Iterable<? extends Serializable>> filterSelectionEntry : filterSelection.entrySet()) {
             Function<?> function = functionProvider.getFunctionForDTO(filterSelectionEntry.getKey());
@@ -93,23 +104,22 @@ public class SailingDataMiningFactory {
         return (Map<Class<?>, FilterCriterion<?>>)(Map<Class<?>, ?>) criteriaMappedByDataType;
     }
 
-    public Query<Set<Object>> createDimensionValuesQuery(RacingEventService dataSource, final Collection<FunctionDTO> dimensionDTOs,
-            final FunctionProvider functionProvider, final DataRetrieverChainDefinitionRegistry dataRetrieverChainDefinitionRegistry) {
+    public Query<Set<Object>> createDimensionValuesQuery(RacingEventService dataSource, final Collection<FunctionDTO> dimensionDTOs) {
         return new ProcessorQuery<Set<Object>, RacingEventService>(DataMiningActivator.getExecutor(), dataSource) {
             @Override
             protected Processor<RacingEventService, ?> createFirstProcessor() {
-                Processor<GroupedDataEntry<Object>, Map<GroupKey, Set<Object>>> valueCollector = ProcessorFactory.createGroupedDataCollectingAsSetProcessor(/*query*/ this);
+                Processor<GroupedDataEntry<Object>, Map<GroupKey, Set<Object>>> valueCollector = processorFactory.createGroupedDataCollectingAsSetProcessor(/*query*/ this);
 
-                Collection<Function<?>> dimensions = convertDTOsToFunctions(dimensionDTOs, functionProvider);
+                Collection<Function<?>> dimensions = convertDTOsToFunctions(dimensionDTOs);
                 Class<?> dataTypeToRetrieve = getDeepestDataType(dimensions);
                 Map<Class<?>, Collection<Function<?>>> dimensionsMappedByDeclaringType = mapFunctionsByDeclaringType(dimensions);
-                DataRetrieverChainDefinition<RacingEventService> dataRetrieverChainDefinition = getDataRetrieverChainDefinition(dataRetrieverChainDefinitionRegistry, dataTypeToRetrieve);
+                DataRetrieverChainDefinition<RacingEventService> dataRetrieverChainDefinition = getDataRetrieverChainDefinition(dataTypeToRetrieve);
                 DataRetrieverChainBuilder<RacingEventService> chainBuilder = dataRetrieverChainDefinition.startBuilding(DataMiningActivator.getExecutor());
                 while (!dimensionsMappedByDeclaringType.isEmpty()) {
                     Class<?> dataType = chainBuilder.getCurrentRetrievedDataType();
                     
                     if (dimensionsMappedByDeclaringType.containsKey(dataType)) {
-                        for (Processor<?, ?> resultReceiver : ProcessorFactory.createGroupingExtractorsForDimensions(
+                        for (Processor<?, ?> resultReceiver : processorFactory.createGroupingExtractorsForDimensions(
                                                                 dataType, valueCollector, dimensionsMappedByDeclaringType.get(dataType))) {
                             chainBuilder.addResultReceiver(resultReceiver);
                         }
@@ -126,7 +136,7 @@ public class SailingDataMiningFactory {
         };
     }
 
-    private List<Function<?>> convertDTOsToFunctions(Collection<FunctionDTO> functionDTOs, FunctionProvider functionProvider) {
+    private List<Function<?>> convertDTOsToFunctions(Collection<FunctionDTO> functionDTOs) {
         List<Function<?>> dimensionsToGroupBy = new ArrayList<>();
         for (FunctionDTO functionDTO : functionDTOs) {
             dimensionsToGroupBy.add(functionProvider.getFunctionForDTO(functionDTO));
@@ -146,7 +156,7 @@ public class SailingDataMiningFactory {
         return mappedFunctions;
     }
 
-    protected Class<?> getDeepestDataType(Collection<Function<?>> dimensions) {
+    private Class<?> getDeepestDataType(Collection<Function<?>> dimensions) {
         List<Function<?>> sortedDimensions = new ArrayList<>(dimensions);
         Collections.sort(sortedDimensions, new Comparator<Function<?>>() {
             @Override
@@ -157,9 +167,7 @@ public class SailingDataMiningFactory {
         return sortedDimensions.get(sortedDimensions.size() - 1).getDeclaringType();
     }
 
-    private DataRetrieverChainDefinition<RacingEventService> getDataRetrieverChainDefinition(
-            final DataRetrieverChainDefinitionRegistry dataRetrieverChainDefinitionRegistry,
-            Class<?> dataTypeToRetrieve) {
+    private DataRetrieverChainDefinition<RacingEventService> getDataRetrieverChainDefinition(Class<?> dataTypeToRetrieve) {
         // There's currently only one DataRetrieverChainDefinition per possible dataTypeToRetrieve
         return dataRetrieverChainDefinitionRegistry.getDataRetrieverChainDefinitions(RacingEventService.class, dataTypeToRetrieve).iterator().next();
     }

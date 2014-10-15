@@ -19,7 +19,7 @@ import com.sap.sse.datamining.impl.criterias.AbstractFilterCriterion;
 import com.sap.sse.datamining.test.functions.registry.test_classes.Test_Regatta;
 import com.sap.sse.datamining.test.functions.registry.test_contexts.Test_HasLegOfCompetitorContext;
 import com.sap.sse.datamining.test.functions.registry.test_contexts.Test_HasRaceContext;
-import com.sap.sse.datamining.test.util.ComponentsAndQueriesTestsUtil;
+import com.sap.sse.datamining.test.util.ComponentTestsUtil;
 import com.sap.sse.datamining.test.util.ConcurrencyTestsUtil;
 import com.sap.sse.datamining.test.util.components.NullProcessor;
 import com.sap.sse.datamining.test.util.components.TestLegOfCompetitorWithContextRetrievalProcessor;
@@ -124,7 +124,7 @@ public class TestDataRetrieverChainCreation {
         assertThat(chainBuilder.canStepDeeper(), is(false));
         
         Processor<Collection<Test_Regatta>, ?> firstRetrieverInChain = chainBuilder.build();
-        firstRetrieverInChain.processElement(ComponentsAndQueriesTestsUtil.createExampleDataSource());
+        firstRetrieverInChain.processElement(ComponentTestsUtil.createExampleDataSource());
         firstRetrieverInChain.finish();
         ConcurrencyTestsUtil.sleepFor(100);
         assertThat(receivedLegOfCompetitorAmount, is(greaterThan(0)));

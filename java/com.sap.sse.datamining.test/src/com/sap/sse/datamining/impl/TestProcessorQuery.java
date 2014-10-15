@@ -8,6 +8,7 @@ import java.lang.reflect.Method;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Locale;
 import java.util.Map;
 import java.util.concurrent.Callable;
@@ -22,20 +23,18 @@ import com.sap.sse.datamining.AdditionalResultDataBuilder;
 import com.sap.sse.datamining.Query;
 import com.sap.sse.datamining.components.FilterCriterion;
 import com.sap.sse.datamining.components.Processor;
-import com.sap.sse.datamining.factories.FunctionFactory;
+import com.sap.sse.datamining.factories.ProcessorFactory;
 import com.sap.sse.datamining.functions.Function;
 import com.sap.sse.datamining.i18n.DataMiningStringMessages;
 import com.sap.sse.datamining.impl.components.AbstractSimpleParallelProcessor;
 import com.sap.sse.datamining.impl.components.AbstractSimpleRetrievalProcessor;
 import com.sap.sse.datamining.impl.components.GroupedDataEntry;
 import com.sap.sse.datamining.impl.components.ParallelFilteringProcessor;
-import com.sap.sse.datamining.impl.components.ParallelGroupedElementsValueExtractionProcessor;
-import com.sap.sse.datamining.impl.components.ParallelMultiDimensionsValueNestingGroupingProcessor;
-import com.sap.sse.datamining.impl.components.aggregators.ParallelGroupedDoubleDataSumAggregationProcessor;
 import com.sap.sse.datamining.impl.criterias.AbstractFilterCriterion;
 import com.sap.sse.datamining.shared.GroupKey;
 import com.sap.sse.datamining.shared.QueryResult;
 import com.sap.sse.datamining.shared.Unit;
+import com.sap.sse.datamining.shared.components.AggregatorType;
 import com.sap.sse.datamining.shared.impl.AdditionalResultDataImpl;
 import com.sap.sse.datamining.shared.impl.GenericGroupKey;
 import com.sap.sse.datamining.shared.impl.QueryResultImpl;
@@ -47,6 +46,8 @@ import com.sap.sse.datamining.test.util.components.NullProcessor;
 import com.sap.sse.datamining.test.util.components.Number;
 
 public class TestProcessorQuery {
+    
+    private final static ProcessorFactory processorFactory = new ProcessorFactory(ConcurrencyTestsUtil.getExecutor());
     
     private final static DataMiningStringMessages stringMessages = TestsUtil.getTestStringMessagesWithProductiveMessages();
 
@@ -101,28 +102,19 @@ public class TestProcessorQuery {
      */
     private Query<Double> createQueryWithStandardWorkflow(Collection<Number> dataSource) {
         final ThreadPoolExecutor executor = ConcurrencyTestsUtil.getExecutor();
-        ProcessorQuery<Double, Iterable<Number>> query = new ProcessorQuery<Double, Iterable<Number>>(executor,
-                dataSource, stringMessages, Locale.ENGLISH) {
+        ProcessorQuery<Double, Iterable<Number>> query = new ProcessorQuery<Double, Iterable<Number>>(executor, dataSource, stringMessages, Locale.ENGLISH) {
             @Override
             protected Processor<Iterable<Number>, ?> createFirstProcessor() {
-                Collection<Processor<Map<GroupKey, Double>, ?>> aggregationResultReceivers = new ArrayList<>();
-                aggregationResultReceivers.add(/*query*/ this.getResultReceiver());
-                
-                Processor<GroupedDataEntry<Double>, Map<GroupKey, Double>> sumAggregator = new ParallelGroupedDoubleDataSumAggregationProcessor(executor, aggregationResultReceivers);
-                Collection<Processor<GroupedDataEntry<Double>, ?>> extractionResultReceivers = new ArrayList<>();
-                extractionResultReceivers.add(sumAggregator);
+                Processor<GroupedDataEntry<Double>, Map<GroupKey, Double>> sumAggregator = processorFactory.createAggregationProcessor(this, AggregatorType.Sum);
                 
                 Method getCrossSumMethod = FunctionTestsUtil.getMethodFromClass(Number.class, "getCrossSum");
-                Function<Double> getCrossSumFunction = FunctionFactory.createMethodWrappingFunction(getCrossSumMethod);
-                Processor<GroupedDataEntry<Number>, GroupedDataEntry<Double>> crossSumExtractor = new ParallelGroupedElementsValueExtractionProcessor<Number, Double>(
-                        executor, extractionResultReceivers, getCrossSumFunction);
-                Collection<Processor<GroupedDataEntry<Number>, ?>> groupingResultReceivers = new ArrayList<>();
-                groupingResultReceivers.add(crossSumExtractor);
+                Function<Double> getCrossSumFunction = FunctionTestsUtil.getFunctionFactory().createMethodWrappingFunction(getCrossSumMethod);
+                Processor<GroupedDataEntry<Number>, GroupedDataEntry<Double>> crossSumExtractor = processorFactory.createExtractionProcessor(sumAggregator, getCrossSumFunction);
 
-                Collection<Function<?>> dimensions = new ArrayList<>();
-                Function<Integer> getLengthFunction = FunctionFactory.createMethodWrappingFunction(FunctionTestsUtil.getMethodFromClass(Number.class, "getLength"));
+                List<Function<?>> dimensions = new ArrayList<>();
+                Function<Integer> getLengthFunction = FunctionTestsUtil.getFunctionFactory().createMethodWrappingFunction(FunctionTestsUtil.getMethodFromClass(Number.class, "getLength"));
                 dimensions.add(getLengthFunction);
-                Processor<Number, GroupedDataEntry<Number>> lengthGrouper = new ParallelMultiDimensionsValueNestingGroupingProcessor<>(Number.class, executor, groupingResultReceivers, dimensions);
+                Processor<Number, GroupedDataEntry<Number>> lengthGrouper = processorFactory.createGroupingProcessor(Number.class, crossSumExtractor, dimensions);
                 Collection<Processor<Number, ?>> filtrationResultReceivers = new ArrayList<>();
                 filtrationResultReceivers.add(lengthGrouper);
                 
@@ -132,7 +124,7 @@ public class TestProcessorQuery {
                         return element.getValue() >= 10;
                     }
                 };
-                Processor<Number, Number> filtrationProcessor = new ParallelFilteringProcessor<>(Number.class, executor, filtrationResultReceivers, filterCriterion);
+                Processor<Number, Number> filtrationProcessor =  new ParallelFilteringProcessor<>(Number.class, executor, filtrationResultReceivers, filterCriterion);
                 Collection<Processor<Number, ?>> retrievalResultReceivers = new ArrayList<>();
                 retrievalResultReceivers.add(filtrationProcessor);
                 
