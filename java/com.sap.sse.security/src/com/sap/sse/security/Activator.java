@@ -52,19 +52,19 @@ public class Activator implements BundleActivator {
      */
     public void start(BundleContext bundleContext) throws Exception {
         // Load mail properties
-        final String jettyHome = System.getProperty("jetty.home");
+        final String jettyHome = System.getProperty("jetty.home", "configuration");
         final File propertiesDir;
         if (jettyHome == null) {
             propertiesDir = new File(".");
         } else {
             propertiesDir = new File(jettyHome).getParentFile();
         }
-        File propertiesfile = new File(propertiesDir, "/security.properties");
+        File propertiesfile = new File(propertiesDir, "security.properties");
         Properties mailProperties = new Properties();
         try {
             mailProperties.load(new FileReader(propertiesfile));
         } catch (IOException ioe) {
-            logger.log(Level.SEVERE, "Couldn't read security properties from "+propertiesfile, ioe);
+            logger.log(Level.SEVERE, "Couldn't read security properties from "+propertiesfile.getCanonicalPath(), ioe);
         }
         if (testUserStore != null) {
             createAndRegisterSecurityService(testUserStore, mailProperties);
