@@ -53,12 +53,7 @@ public class Activator implements BundleActivator {
     public void start(BundleContext bundleContext) throws Exception {
         // Load mail properties
         final String jettyHome = System.getProperty("jetty.home", "configuration");
-        final File propertiesDir;
-        if (jettyHome == null) {
-            propertiesDir = new File(".");
-        } else {
-            propertiesDir = new File(jettyHome).getParentFile();
-        }
+        final File propertiesDir = new File(jettyHome).getParentFile();
         File propertiesfile = new File(propertiesDir, "security.properties");
         Properties mailProperties = new Properties();
         try {
