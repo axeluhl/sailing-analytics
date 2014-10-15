@@ -1,0 +1,42 @@
+package com.sap.sailing.android.tracking.app.utils;
+
+import android.content.Context;
+import android.content.SharedPreferences;
+import android.preference.PreferenceManager;
+
+import com.sap.sailing.android.shared.util.PrefUtils;
+import com.sap.sailing.android.tracking.app.R;
+import com.sap.sailing.domain.racelog.RaceLogEventAuthor;
+import com.sap.sailing.domain.racelog.impl.RaceLogEventAuthorImpl;
+
+public class AppPreferences {
+    protected final Context context;
+    protected final SharedPreferences preferences;
+    public static final RaceLogEventAuthor raceLogEventAuthor = new RaceLogEventAuthorImpl("Tracking App", 0);
+    
+    public AppPreferences(Context context) {
+        this.context = context;
+        this.preferences = PreferenceManager.getDefaultSharedPreferences(context);
+    }
+
+    public String getDeviceIdentifier() {
+        return PrefUtils.getString(context, R.string.preference_device_identifier_key,
+                R.string.preference_device_identifier_default);
+    }
+
+    public String getServerURL() {
+        return PrefUtils.getString(context, R.string.preference_server_url_key, R.string.preference_server_url_default);
+    }
+
+    public int getGPSFixInterval() {
+        return PrefUtils.getInt(context, R.string.preference_gps_fix_interval_key, R.string.preference_gps_fix_interval_ms_default);
+    }
+    
+    public int getGPSFixFastestInterval() {
+        return PrefUtils.getInt(context, R.string.preference_gps_fix_fastest_interval_key, R.string.preference_gps_fastest_fix_interval_ms_default);
+    }
+    
+    public void setServerURL(String serverUrl) {
+        preferences.edit().putString(context.getString(R.string.preference_server_url_key), serverUrl);
+    }
+}

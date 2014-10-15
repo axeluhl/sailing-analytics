@@ -21,7 +21,7 @@ import android.widget.ListView;
 import android.widget.TextView;
 import android.widget.Toast;
 
-import com.sap.sailing.racecommittee.app.AppConstants;
+import com.sap.sailing.android.shared.util.FileHandlerUtils;
 import com.sap.sailing.racecommittee.app.AppPreferences;
 import com.sap.sailing.racecommittee.app.R;
 import com.sap.sailing.racecommittee.app.ui.adapters.PhotoAdapter;
@@ -157,7 +157,7 @@ public class ResultsCapturingActivity extends SessionActivity {
     }
 
     private void createAndAdvanceImageFile() {
-        currentImageFile = createFinisherImageFile(currentImageIndex++);
+        currentImageFile = createFinisherImageFile(currentImageIndex++, this);
     }
 
     private void setupListView() {
@@ -177,8 +177,8 @@ public class ResultsCapturingActivity extends SessionActivity {
         actionBar.setTitle(getString(R.string.results_capturing_title));
     }
 
-    private static File createFinisherImageFile(int index) {
-        return new File(AppConstants.getExternalApplicationFolder(), String.format("image_%d.jpg", index));
+    private static File createFinisherImageFile(int index, Context context) {
+        return new File(FileHandlerUtils.getExternalApplicationFolder(context), String.format("image_%d.jpg", index));
     }
 
     private PictureCallback pictureHandler = new PictureCallback() {

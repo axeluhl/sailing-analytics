@@ -3,6 +3,10 @@ package com.sap.sailing.domain.tracking.impl;
 import com.sap.sailing.domain.common.Position;
 import com.sap.sailing.domain.common.SpeedWithBearing;
 import com.sap.sailing.domain.common.TimePoint;
+import com.sap.sailing.domain.common.impl.DegreeBearingImpl;
+import com.sap.sailing.domain.common.impl.DegreePosition;
+import com.sap.sailing.domain.common.impl.KnotSpeedWithBearingImpl;
+import com.sap.sailing.domain.common.impl.MillisecondsTimePoint;
 import com.sap.sailing.domain.tracking.GPSFixMoving;
 
 public class GPSFixMovingImpl extends GPSFixImpl implements GPSFixMoving {
@@ -33,5 +37,11 @@ public class GPSFixMovingImpl extends GPSFixImpl implements GPSFixMoving {
     public boolean equals(Object other) {
         return super.equals(other) && other instanceof GPSFixMoving && getSpeed().equals(((GPSFixMoving) other).getSpeed());
     }
-
+    
+    public static GPSFixMovingImpl create(double lonDeg, double latDeg, long timeMillis,
+            double speedInKnots, double bearingDeg) {
+        return new GPSFixMovingImpl(new DegreePosition(latDeg, lonDeg),
+                new MillisecondsTimePoint(timeMillis), new KnotSpeedWithBearingImpl(
+                        speedInKnots, new DegreeBearingImpl(bearingDeg)));
+    }
 }

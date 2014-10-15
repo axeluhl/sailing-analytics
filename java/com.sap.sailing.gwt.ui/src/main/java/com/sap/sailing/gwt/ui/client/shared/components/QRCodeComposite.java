@@ -9,13 +9,25 @@ import com.google.gwt.user.client.ui.SimplePanel;
  *      <script type="text/javascript" src="qrcode/qrcode.min.js"></script>
  */
 public class QRCodeComposite extends Composite {
+    //https://github.com/davidshimjs/qrcodejs/blob/master/qrcode.js#L120
+    //L:1,M:0,Q:3,H:2
+    public static final int ERROR_CORRECTION_LEVEL_L = 1;
+    public static final int ERROR_CORRECTION_LEVEL_M = 0;
+    public static final int ERROR_CORRECTION_LEVEL_Q = 3;
+    public static final int ERROR_CORRECTION_LEVEL_H = 2;
     
     private static final String qrCodeDivId = "qr-code";
     
     private int sizeInPixel;
+    private int errorCorrectionLevel;
     
     public QRCodeComposite(int sizeInPixel) {
+        this(sizeInPixel, ERROR_CORRECTION_LEVEL_H);
+    }
+    
+    public QRCodeComposite(int sizeInPixel, int errorCorrectionLevel) {
         this.sizeInPixel = sizeInPixel;
+        this.errorCorrectionLevel = errorCorrectionLevel;
         
         SimplePanel qrCodeContainer = new SimplePanel();
         qrCodeContainer.getElement().setId(qrCodeDivId);
@@ -28,17 +40,17 @@ public class QRCodeComposite extends Composite {
     @Override
     protected void onAttach() {
         super.onAttach();
-        createQRCode(qrCodeDivId, sizeInPixel);
+        createQRCode(qrCodeDivId, sizeInPixel, errorCorrectionLevel);
     }
     
-    private native void createQRCode(String id, int size) /*-{
+    private native void createQRCode(String id, int size, int errorCorrectionLevel) /*-{
         $wnd.qrcode = new $wnd.QRCode(id, {
             text: "",
             width: size,
             height: size,
             colorDark : "#000000",
             colorLight : "#ffffff",
-            correctLevel : $wnd.QRCode.CorrectLevel.H
+            correctLevel : errorCorrectionLevel
         });
         $wnd.qrcode.clear();
     }-*/;

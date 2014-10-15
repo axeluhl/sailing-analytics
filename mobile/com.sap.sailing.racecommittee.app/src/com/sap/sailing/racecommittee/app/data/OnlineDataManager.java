@@ -11,6 +11,8 @@ import android.content.Context;
 import android.content.Loader;
 import android.os.Bundle;
 
+import com.sap.sailing.android.shared.logging.ExLog;
+import com.sap.sailing.android.shared.services.sending.MessageSendingService;
 import com.sap.sailing.domain.base.Competitor;
 import com.sap.sailing.domain.base.CourseArea;
 import com.sap.sailing.domain.base.CourseBase;
@@ -21,7 +23,7 @@ import com.sap.sailing.domain.base.configuration.ConfigurationLoader;
 import com.sap.sailing.domain.base.configuration.DeviceConfiguration;
 import com.sap.sailing.domain.base.configuration.DeviceConfigurationIdentifier;
 import com.sap.sailing.domain.base.configuration.RegattaConfiguration;
-import com.sap.sailing.domain.racelog.RaceLogServletConstants;
+import com.sap.sailing.domain.common.racelog.RaceLogServletConstants;
 import com.sap.sailing.racecommittee.app.data.clients.LoadClient;
 import com.sap.sailing.racecommittee.app.data.handlers.CompetitorsDataHandler;
 import com.sap.sailing.racecommittee.app.data.handlers.CourseBaseHandler;
@@ -45,8 +47,6 @@ import com.sap.sailing.racecommittee.app.data.parsers.MarksDataParser;
 import com.sap.sailing.racecommittee.app.domain.ManagedRace;
 import com.sap.sailing.racecommittee.app.domain.ManagedRaceIdentifier;
 import com.sap.sailing.racecommittee.app.domain.configuration.impl.PreferencesRegattaConfigurationLoader;
-import com.sap.sailing.racecommittee.app.logging.ExLog;
-import com.sap.sailing.racecommittee.app.services.sending.EventSendingService;
 import com.sap.sailing.server.gateway.deserialization.JsonDeserializer;
 import com.sap.sailing.server.gateway.deserialization.coursedata.impl.ControlPointDeserializer;
 import com.sap.sailing.server.gateway.deserialization.coursedata.impl.CourseBaseDeserializer;
@@ -105,12 +105,12 @@ public class OnlineDataManager extends DataManager {
                         new VenueJsonDeserializer(new CourseAreaJsonDeserializer(domainFactory)), new LeaderboardGroupBaseJsonDeserializer()));
                 DataHandler<Collection<EventBase>> handler = new EventsDataHandler(OnlineDataManager.this);
 
-                ExLog.i(TAG, "getEventsLoader created new loader...");
+                ExLog.i(context, TAG, "getEventsLoader created new loader...");
 
                 return new OnlineDataLoader<Collection<EventBase>>(context, 
                         new URL(preferences.getServerBaseURL() + "/sailingserver/events"), parser, handler);
             }
-        });
+        }, getContext());
     }
 
     @Override
@@ -145,9 +145,9 @@ public class OnlineDataManager extends DataManager {
                 return new OnlineDataLoader<Collection<ManagedRace>>(context, new URL(preferences.getServerBaseURL()
                     + "/sailingserver/rc/racegroups?"+
                     RaceLogServletConstants.PARAM_COURSE_AREA_FILTER + "=" + courseAreaId.toString()+"&"+
-                    RaceLogServletConstants.PARAMS_CLIENT_UUID + "=" + EventSendingService.uuid), parser, handler);
+                    RaceLogServletConstants.PARAMS_CLIENT_UUID + "=" + MessageSendingService.uuid), parser, handler);
             }
-        });
+        }, getContext());
     }
 
     @Override
@@ -171,7 +171,7 @@ public class OnlineDataManager extends DataManager {
                         "&"+RaceLogServletConstants.PARAMS_RACE_COLUMN_NAME+"=" + raceColumnName + 
                         "&"+RaceLogServletConstants.PARAMS_RACE_FLEET_NAME+"=" + fleetName), parser, handler);
             }
-        });
+        }, getContext());
     }
 
     @Override
@@ -197,7 +197,7 @@ public class OnlineDataManager extends DataManager {
                     + raceGroupName + "&" + RaceLogServletConstants.PARAMS_RACE_COLUMN_NAME + "=" + raceColumnName
                     + "&"+RaceLogServletConstants.PARAMS_RACE_FLEET_NAME+"=" + fleetName), parser, handler);
             }
-        });
+        }, getContext());
     }
 
     @Override
@@ -206,7 +206,7 @@ public class OnlineDataManager extends DataManager {
         return new DataLoaderCallbacks<Collection<Competitor>>(callback, new LoaderCreator<Collection<Competitor>>() {
             @Override
             public Loader<DataLoaderResult<Collection<Competitor>>> create(int id, Bundle args) throws Exception {
-                ExLog.i(TAG, String.format("Creating Competitor-OnlineDataLoader %d", id));
+                ExLog.i(context, TAG, String.format("Creating Competitor-OnlineDataLoader %d", id));
                 JsonDeserializer<Competitor> competitorDeserializer = new CompetitorJsonDeserializer(domainFactory.getCompetitorStore(),
                         new TeamJsonDeserializer(new PersonJsonDeserializer(new NationalityJsonDeserializer(domainFactory))), 
                         new BoatJsonDeserializer(new BoatClassJsonDeserializer(domainFactory)));
@@ -226,7 +226,7 @@ public class OnlineDataManager extends DataManager {
                                 + RaceLogServletConstants.PARAMS_RACE_COLUMN_NAME + "=" + raceColumnName + "&"
                                 + RaceLogServletConstants.PARAMS_RACE_FLEET_NAME + "=" + fleetName), parser, handler);
             }
-        });
+        }, getContext());
     }
 
     @Override
@@ -235,7 +235,7 @@ public class OnlineDataManager extends DataManager {
         return new DataLoaderCallbacks<DeviceConfiguration>(callback, new LoaderCreator<DeviceConfiguration>() {
             @Override
             public Loader<DataLoaderResult<DeviceConfiguration>> create(int id, Bundle args) throws Exception {
-                ExLog.i(TAG, String.format("Creating Configuration-OnlineDataLoader %d", id));
+                ExLog.i(context, TAG, String.format("Creating Configuration-OnlineDataLoader %d", id));
                 
                 DataHandler<DeviceConfiguration> handler = new NullDataHandler<DeviceConfiguration>();
                 DataParser<DeviceConfiguration> parser = new DeviceConfigurationParser(DeviceConfigurationJsonDeserializer.create());
@@ -248,6 +248,6 @@ public class OnlineDataManager extends DataManager {
                         new URL(preferences.getServerBaseURL() + "/sailingserver/rc/configuration?client="+ encodedIdentifier), 
                         parser, handler);
             }
-        });
+        }, getContext());
     }
 }
