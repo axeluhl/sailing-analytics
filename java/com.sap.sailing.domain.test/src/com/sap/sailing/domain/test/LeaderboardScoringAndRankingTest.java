@@ -981,8 +981,71 @@ public class LeaderboardScoringAndRankingTest extends AbstractLeaderboardTest {
     }
 
     @Test 
-    public void testHighPointScoringWithInterpolationWhenFleetNotComplete() {
-        // TODO: write some tests
+    public void testHighPointScoringEightWithInterpolationWhenFleetNotComplete() throws NoWindException {
+        int competitorsCount = 21;
+        List<Competitor> competitors = createCompetitors(competitorsCount);
+        Regatta regatta = createRegatta(/* qualifying */ 1, new String[] { "Fleet1", "Fleet2", "Fleet3" }, /* final */0,
+                new String[] { "Default" },
+                /* medal */false, "testHighPointScoringEightWithInterpolationWhenFleetNotComplete",
+                DomainFactory.INSTANCE.getOrCreateBoatClass("49er", /* typicallyStartsUpwind */true),
+                DomainFactory.INSTANCE.createScoringScheme(ScoringSchemeType.HIGH_POINT_WINNER_GETS_EIGHT_AND_INTERPOLATION));
+        Leaderboard leaderboard = createLeaderboard(regatta, /* discarding thresholds */ new int[0]);
+
+        Series firstSeries = regatta.getSeries().iterator().next();
+        TimePoint now = MillisecondsTimePoint.now();
+        TimePoint later = new MillisecondsTimePoint(now.asMillis()+1000);
+        // fleet 1 has 8 competitors
+        TrackedRace r1Fleet1 = new MockedTrackedRaceWithStartTimeAndRanks(now, competitors.subList(0, 8));
+        // fleet 2 has 7 competitors
+        TrackedRace r1Fleet2 = new MockedTrackedRaceWithStartTimeAndRanks(now, competitors.subList(8, 15));
+        // fleet 1 has 6 competitors
+        TrackedRace r1Fleet3 = new MockedTrackedRaceWithStartTimeAndRanks(now, competitors.subList(15, 21));
+        RaceColumn r1Column = firstSeries.getRaceColumnByName("Q1");
+        r1Column.setTrackedRace(r1Column.getFleetByName("Fleet1"), r1Fleet1);
+        r1Column.setTrackedRace(r1Column.getFleetByName("Fleet2"), r1Fleet2);
+        r1Column.setTrackedRace(r1Column.getFleetByName("Fleet3"), r1Fleet3);
+        
+        // first fleet is complete 
+        double[] expectedResultsFleet1 = { 8, 7, 6, 5, 4, 3, 2, 1 };
+        // second fleet has 1 missing boat
+        double diffX1 = 7.0 / 6.0; 
+        double[] expectedResultsFleet2 = { 8, 8 - diffX1 * 1, 8 - diffX1 * 2, 8 - diffX1 * 3, 8 - diffX1 * 4, 8 - diffX1 * 5, 1 };
+        // third fleet has 2 missing boats
+        double diffX2 = 7.0 / 5.0;
+        double[] expectedResultsFleet3 = { 8, 8 - diffX2 * 1, 8 - diffX2 * 2, 8 - diffX2 * 3, 8 - diffX2 * 4, 1 };
+
+        List<Competitor> rankedCompetitorsFleet1 = r1Fleet1.getCompetitorsFromBestToWorst(later);
+        assertEquals(8, rankedCompetitorsFleet1.size());
+        for (int i = 0; i < expectedResultsFleet1.length; i++) {
+            assertTrue(rankedCompetitorsFleet1.get(i) == competitors.get(i));
+            assertEquals(expectedResultsFleet1[i], leaderboard.getTotalPoints(rankedCompetitorsFleet1.get(i), later), 0.000000001);
+        }
+
+        List<Competitor> rankedCompetitorsFleet2 = r1Fleet2.getCompetitorsFromBestToWorst(later);
+        assertEquals(7, rankedCompetitorsFleet2.size());
+        for (int i = 0; i < expectedResultsFleet2.length; i++) {
+            assertTrue(rankedCompetitorsFleet2.get(i) == competitors.get(8+i));
+            assertEquals(expectedResultsFleet2[i], leaderboard.getTotalPoints(rankedCompetitorsFleet2.get(i), later), 0.000000001);
+        }
+        
+        List<Competitor> rankedCompetitorsFleet3 = r1Fleet3.getCompetitorsFromBestToWorst(later);
+        assertEquals(6, rankedCompetitorsFleet3.size());
+        for (int i = 0; i < expectedResultsFleet3.length; i++) {
+            assertTrue(rankedCompetitorsFleet3.get(i) == competitors.get(15+i));
+            assertEquals(expectedResultsFleet3[i], leaderboard.getTotalPoints(rankedCompetitorsFleet3.get(i), later), 0.000000001);
+        }
+        
+        List<Competitor> allCompetitorsFromBestToWorst = leaderboard.getCompetitorsFromBestToWorst(later);
+        assertEquals(competitorsCount, allCompetitorsFromBestToWorst.size());
+        // check that the fleet winners have all 8 points
+        assertEquals(8.0, leaderboard.getTotalPoints(allCompetitorsFromBestToWorst.get(0), later), 0.000000001);
+        assertEquals(8.0, leaderboard.getTotalPoints(allCompetitorsFromBestToWorst.get(1), later), 0.000000001);
+        assertEquals(8.0, leaderboard.getTotalPoints(allCompetitorsFromBestToWorst.get(2), later), 0.000000001);
+        // check that the fleet looser have all 1 point
+        
+        assertEquals(1.0, leaderboard.getTotalPoints(allCompetitorsFromBestToWorst.get(competitorsCount-1), later), 0.000000001);
+        assertEquals(1.0, leaderboard.getTotalPoints(allCompetitorsFromBestToWorst.get(competitorsCount-2), later), 0.000000001);
+        assertEquals(1.0, leaderboard.getTotalPoints(allCompetitorsFromBestToWorst.get(competitorsCount-3), later), 0.000000001);
     }
     
     @Test
