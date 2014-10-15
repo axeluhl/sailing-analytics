@@ -22,6 +22,7 @@ import com.sap.sailing.domain.common.dto.RaceColumnDTO;
 import com.sap.sailing.gwt.autoplay.client.shared.header.SAPHeader;
 import com.sap.sailing.gwt.autoplay.client.shared.oldleaderboard.OldLeaderboard;
 import com.sap.sailing.gwt.common.client.CSS3Util;
+import com.sap.sailing.gwt.common.client.FullscreenUtil;
 import com.sap.sailing.gwt.common.client.i18n.TextMessages;
 import com.sap.sailing.gwt.ui.client.CompetitorSelectionModel;
 import com.sap.sailing.gwt.ui.client.ErrorReporter;
@@ -59,13 +60,15 @@ public class AutoPlayController implements RaceTimesInfoProviderListener {
     private final Timer raceboardTimer;
     private final RaceTimesInfoProvider raceTimesInfoProvider;  
     private AutoPlayModes activeTvView;
+    private final boolean isfullscreenMode;
+    private boolean isInitialScreen = true;
 
     // leaderboard related attributes
     private LeaderboardDTO leaderboard;
     private final String leaderboardName;
     private final String leaderboardGroupName;
     private final String leaderboardZoom;
-    private LeaderboardSettings leaderboardSettings; 
+    private LeaderboardSettings leaderboardSettings;
    
     // raceboard related attributes
     private RegattaAndRaceIdentifier currentLiveRace;
@@ -77,12 +80,13 @@ public class AutoPlayController implements RaceTimesInfoProviderListener {
 
     private static int SAP_HEADER_HEIGHT = 70;
     
-    public AutoPlayController(SailingServiceAsync sailingService, MediaServiceAsync mediaService, 
-            ErrorReporter errorReporter, String leaderboardGroupName, String leaderboardName, final String leaderboardZoom, 
+    public AutoPlayController(SailingServiceAsync sailingService, MediaServiceAsync mediaService, ErrorReporter errorReporter, 
+            boolean isfullscreenMode, String leaderboardGroupName, String leaderboardName, final String leaderboardZoom, 
             UserAgentDetails userAgent, long delayToLiveInMillis, boolean showRaceDetails, RaceBoardViewConfiguration raceboardViewConfig, PlayerView playerView) {
         this.raceboardViewConfig = raceboardViewConfig;
         this.sailingService = sailingService;
         this.mediaService = mediaService;
+        this.isfullscreenMode = isfullscreenMode;
         this.errorReporter = errorReporter;
         this.leaderboardName = leaderboardName;
         this.leaderboardZoom = leaderboardZoom;
@@ -165,9 +169,11 @@ public class AutoPlayController implements RaceTimesInfoProviderListener {
     
     private void showLeaderboard() {
         if (activeTvView != AutoPlayModes.Leaderboard) {
-            playerView.clearDockPanel();
+            playerView.clear();
             
-            SAPHeader sapHeader = new SAPHeader(TextMessages.INSTANCE.leaderboard() +  ": " + leaderboardName);
+            boolean withFullscreenButton = isfullscreenMode && isInitialScreen;
+            
+            SAPHeader sapHeader = new SAPHeader(TextMessages.INSTANCE.leaderboard() +  ": " + leaderboardName, withFullscreenButton);
             playerView.getDockPanel().addNorth(sapHeader, SAP_HEADER_HEIGHT);
 
             LeaderboardPanel leaderboardPanel = createLeaderboardPanel(leaderboardGroupName, leaderboardName, showRaceDetails);
@@ -194,6 +200,8 @@ public class AutoPlayController implements RaceTimesInfoProviderListener {
             activeTvView = AutoPlayModes.Leaderboard;
             raceboardTimer.pause();
             leaderboardTimer.setPlayMode(PlayModes.Live);
+            
+            isInitialScreen = false;
         }
     }
 
@@ -204,6 +212,8 @@ public class AutoPlayController implements RaceTimesInfoProviderListener {
                     boolean invokeAgain = true;
                     if(currentContentWidget.getOffsetHeight() > 50) {
                         scaleContentWidget(headerHeight, contentWidget, scaleFactor);
+                        FullscreenUtil.requestFullscreen();
+
                         invokeAgain = false;
                     }
                     return invokeAgain;
@@ -264,7 +274,7 @@ public class AutoPlayController implements RaceTimesInfoProviderListener {
 
     private void showRaceBoard() {
         if (activeTvView != AutoPlayModes.Raceboard) {
-            playerView.clearDockPanel();
+            playerView.clear();
             RaceBoardPanel raceBoardPanel = createRaceBoardPanel(leaderboardName, currentLiveRace);
             raceBoardPanel.setSize("100%", "100%");
             if (showWindChart) {
@@ -279,6 +289,8 @@ public class AutoPlayController implements RaceTimesInfoProviderListener {
             activeTvView = AutoPlayModes.Raceboard;
             leaderboardTimer.pause();
             raceboardTimer.setPlayMode(PlayModes.Live);
+            
+            isInitialScreen = false;
         }
     }
 

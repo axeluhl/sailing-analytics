@@ -14,22 +14,9 @@
 		    	<div ui:field="pageTitleDiv" class="{local_res.css.pagetitle}"></div>
 		    </div>
 		    <div class="{local_res.css.siteheaderRight}">
-		        &nbsp;
+		        <g:Button ui:field="startFullScreenButton" styleName="{res.mainCss.button}" text="Fullscreen" />
+		        <span>&nbsp;</span>
 			</div>		        
 		</header>
-		    <!-- 
-			<div class="{res.mainCss.grid}">
-			  <div class="{res.mediaCss.small6} {res.mediaCss.column} {local_res.css.regattaleaderboard_meta_scoring}">
-			    <p ui:field="lastScoringCommentDiv" class="{local_res.css.regattaleaderboard_meta_scoring_comment}"></p>
-			    <p ui:field="scoringSchemeDiv" class="{local_res.css.regattaleaderboard_meta_scoring_type}"></p>
-			  </div>
-			  <div class="{res.mediaCss.small6} {res.mediaCss.column} {local_res.css.regattaleaderboard_meta_settings}">
-			    <div class="{local_res.css.regattaleaderboard_meta_update}">
-			      <p ui:field="lastScoringUpdateTextDiv" class="{local_res.css.regattaleaderboard_meta_update_text}"></p>
-			      <p ui:field="lastScoringUpdateTimeDiv" class="{local_res.css.regattaleaderboard_meta_update_timestamp}"></p>
-			    </div>
-			  </div>
-		  </div>
-		     -->
-		</g:HTMLPanel>    
+	</g:HTMLPanel>    
 </ui:UiBinder>    

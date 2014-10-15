@@ -7,7 +7,7 @@ import com.google.gwt.event.shared.EventBus;
 import com.google.gwt.user.client.Window;
 import com.google.gwt.user.client.rpc.AsyncCallback;
 import com.google.gwt.user.client.ui.AcceptsOneWidget;
-import com.sap.sailing.gwt.common.client.FullscreenUtil;
+import com.google.gwt.user.client.ui.RootLayoutPanel;
 import com.sap.sailing.gwt.ui.client.ErrorReporter;
 import com.sap.sailing.gwt.ui.raceboard.RaceBoardViewConfiguration;
 import com.sap.sailing.gwt.ui.shared.EventDTO;
@@ -44,13 +44,10 @@ public class PlayerActivity extends AbstractActivity implements ErrorReporter {
 
                 PlayerView view = clientFactory.createPlayerView();
                 panel.setWidget(view.asWidget());
-
-                if(playerPlace.isFullscreen()) {
-                    FullscreenUtil.requestFullscreen();
-                }
+                RootLayoutPanel.get().add(view.asWidget());
 
                 autoPlayController = new AutoPlayController(clientFactory.getSailingService(), clientFactory.getMediaService(),
-                        PlayerActivity.this, /*leaderboardGroupName*/ "" , playerPlace.getLeaderboardIdAsNameString(), 
+                        PlayerActivity.this, playerPlace.isFullscreen(), /*leaderboardGroupName*/ "" , playerPlace.getLeaderboardIdAsNameString(), 
                         playerPlace.getLeaderboardZoom(), userAgent, delayToLiveMillis, showRaceDetails, readRaceboardConfiguration, view);
                 autoPlayController.updatePlayMode(AutoPlayModes.Leaderboard);
             }

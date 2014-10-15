@@ -65,7 +65,7 @@ public class DesktopStartView extends Composite implements StartView {
         this.raceboardParameters = new HashMap<String, String>();
         this.leaderboardParameters = new HashMap<String, String>();
         
-        sapHeader = new SAPHeader("Auto player configuration");
+        sapHeader = new SAPHeader("Auto player configuration", false);
         eventSelectionBox = new ListBox(false);
         leaderboardSelectionBox = new ListBox(false);
         localeSelectionBox = new ListBox(false);

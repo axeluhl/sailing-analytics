@@ -6,6 +6,6 @@ import com.google.gwt.user.client.ui.Widget;
 public interface PlayerView {
     Widget asWidget();
     
-    public void clearDockPanel();
+    public void clear();
     public DockLayoutPanel getDockPanel();
 }
