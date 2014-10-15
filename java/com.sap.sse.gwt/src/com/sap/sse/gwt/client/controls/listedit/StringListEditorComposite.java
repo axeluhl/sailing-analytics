@@ -1,4 +1,4 @@
-package com.sap.sailing.gwt.ui.client.shared.controls.listedit;
+package com.sap.sse.gwt.client.controls.listedit;
 
 import java.util.List;
 
@@ -13,21 +13,21 @@ import com.google.gwt.user.client.ui.Label;
 import com.google.gwt.user.client.ui.MultiWordSuggestOracle;
 import com.google.gwt.user.client.ui.SuggestBox;
 import com.google.gwt.user.client.ui.Widget;
-import com.sap.sailing.gwt.ui.client.StringMessages;
+import com.sap.sse.gwt.client.StringMessages;
 
 public class StringListEditorComposite extends ListEditorComposite<String> {
-    public StringListEditorComposite(List<String> initialValues, StringMessages stringMessages,
-            String popupDialogTitle, ImageResource removeImage, List<String> suggestValues) {
+    public StringListEditorComposite(Iterable<String> initialValues, StringMessages stringMessages,
+            String popupDialogTitle, ImageResource removeImage, Iterable<String> suggestValues) {
         super(initialValues, new CollapsedUi(stringMessages, popupDialogTitle,
                 new ExpandedUi(stringMessages, removeImage, suggestValues)));
     }
 
-    public StringListEditorComposite(List<String> initialValues, StringMessages stringMessages,
-            ImageResource removeImage, List<String> suggestValues) {
+    public StringListEditorComposite(Iterable<String> initialValues, StringMessages stringMessages,
+            ImageResource removeImage, Iterable<String> suggestValues) {
         super(initialValues, new ExpandedUi(stringMessages, removeImage, suggestValues));
     }
 
-    public StringListEditorComposite(List<String> initialValues, ListEditorUiStrategy<String> activeUi) {
+    public StringListEditorComposite(Iterable<String> initialValues, ListEditorUiStrategy<String> activeUi) {
         super(initialValues, activeUi);
     }
 
@@ -51,7 +51,7 @@ public class StringListEditorComposite extends ListEditorComposite<String> {
         }
 
         @Override
-        protected ListEditorComposite<String> createExpandedUi(List<String> initialValues, ExpandedListEditorUi<String> ui) {
+        protected ListEditorComposite<String> createExpandedUi(Iterable<String> initialValues, ExpandedListEditorUi<String> ui) {
             return new StringListEditorComposite(initialValues, ui);
         }
     }
@@ -60,10 +60,12 @@ public class StringListEditorComposite extends ListEditorComposite<String> {
 
         protected final MultiWordSuggestOracle inputOracle;
 
-        public ExpandedUi(StringMessages stringMessages, ImageResource removeImage, List<String> suggestValues) {
+        public ExpandedUi(StringMessages stringMessages, ImageResource removeImage, Iterable<String> suggestValues) {
             super(stringMessages, removeImage, /*canRemoveItems*/true);
             this.inputOracle = new MultiWordSuggestOracle();
-            inputOracle.addAll(suggestValues);
+            for (String suggestValue : suggestValues) {
+                inputOracle.add(suggestValue);
+            }
         }
         
         @Override
@@ -76,7 +78,7 @@ public class StringListEditorComposite extends ListEditorComposite<String> {
         protected Widget createAddWidget() {
             final SuggestBox inputBox = new SuggestBox(inputOracle);
             inputBox.ensureDebugId("InputSuggestBox");
-            final Button addButton = new Button(stringMessages.add());
+            final Button addButton = new Button(getStringMessages().add());
             addButton.ensureDebugId("AddButton");
             addButton.setEnabled(false);
             addButton.addClickHandler(new ClickHandler() {

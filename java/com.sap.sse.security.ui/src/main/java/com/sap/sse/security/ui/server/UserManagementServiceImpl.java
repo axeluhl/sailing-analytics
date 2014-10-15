@@ -4,9 +4,11 @@ import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.Comparator;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
+import java.util.Set;
 import java.util.TreeMap;
 import java.util.concurrent.Callable;
 import java.util.concurrent.ExecutionException;
@@ -24,6 +26,7 @@ import org.osgi.util.tracker.ServiceTracker;
 
 import com.google.gwt.user.server.rpc.RemoteServiceServlet;
 import com.sap.sailing.domain.common.impl.NaturalComparator;
+import com.sap.sse.common.Util;
 import com.sap.sse.security.Credential;
 import com.sap.sse.security.DefaultRoles;
 import com.sap.sse.security.SecurityService;
@@ -157,7 +160,7 @@ public class UserManagementServiceImpl extends RemoteServiceServlet implements U
     }
 
     @Override
-    public SuccessInfo addRoleForUser(String username, String role) {
+    public SuccessInfo setRolesForUser(String username, Iterable<String> roles) {
         Subject currentSubject = SecurityUtils.getSubject();
         if (currentSubject.hasRole(DefaultRoles.ADMIN.getRolename())) {
             User u = getSecurityService().getUserByName(username);
@@ -165,8 +168,19 @@ public class UserManagementServiceImpl extends RemoteServiceServlet implements U
                 return new SuccessInfo(false, "User does not exist.", /* redirectURL */ null, null);
             }
             try {
-                getSecurityService().addRoleForUser(username, role);
-                return new SuccessInfo(true, "Added role: " + role + ".", /* redirectURL */ null, createUserDTOFromUser(u));
+                Set<String> rolesToRemove = new HashSet<>();
+                Util.addAll(u.getRoles(), rolesToRemove);
+                Util.removeAll(roles, rolesToRemove);
+                for (String roleToRemove : rolesToRemove) {
+                    getSecurityService().removeRoleFromUser(username, roleToRemove);
+                }
+                Set<String> rolesToAdd = new HashSet<>();
+                Util.addAll(roles, rolesToAdd);
+                Util.removeAll(u.getRoles(), rolesToAdd);
+                for (String roleToAdd : rolesToAdd) {
+                    getSecurityService().addRoleForUser(username, roleToAdd);
+                }
+                return new SuccessInfo(true, "Added role: " + roles + ".", /* redirectURL */ null, createUserDTOFromUser(u));
             } catch (UserManagementException e) {
                 return new SuccessInfo(false, e.getMessage(), /* redirectURL */ null, null);
             }

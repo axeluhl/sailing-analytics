@@ -25,4 +25,7 @@ public interface IconResources extends ClientBundle {
     
     @Source("../../images/delete.png")
     public ImageResource delete();
+    
+    @Source("com/sap/sse/gwt/client/images/remove.png")
+    public ImageResource remove();
 }

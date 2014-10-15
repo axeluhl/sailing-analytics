@@ -1,4 +1,4 @@
-package com.sap.sailing.gwt.ui.client.shared.controls.listedit;
+package com.sap.sse.gwt.client.controls.listedit;
 
 import java.util.List;
 
@@ -8,7 +8,7 @@ import com.google.gwt.user.client.ui.Button;
 import com.google.gwt.user.client.ui.HorizontalPanel;
 import com.google.gwt.user.client.ui.TextBox;
 import com.google.gwt.user.client.ui.Widget;
-import com.sap.sailing.gwt.ui.client.StringMessages;
+import com.sap.sse.gwt.client.StringMessages;
 import com.sap.sse.gwt.client.dialog.DataEntryDialog;
 import com.sap.sse.gwt.client.dialog.DataEntryDialog.DialogCallback;
 
@@ -49,7 +49,7 @@ public abstract class CollapsedListEditorUi<ValueType> extends ListEditorUi<Valu
 
     protected abstract String getCollapsedValueText(List<ValueType> value);
 
-    protected abstract ListEditorComposite<ValueType> createExpandedUi(List<ValueType> initialValues,
+    protected abstract ListEditorComposite<ValueType> createExpandedUi(Iterable<ValueType> initialValues,
             ExpandedListEditorUi<ValueType> ui);
 
     @Override
@@ -63,13 +63,12 @@ public abstract class CollapsedListEditorUi<ValueType> extends ListEditorUi<Valu
         collapsedValuesBox = new TextBox();
         collapsedValuesBox.setReadOnly(true);
 
-        collapsedEditButton = new Button(stringMessages.edit());
+        collapsedEditButton = new Button(getStringMessages().edit());
         collapsedEditButton.addClickHandler(new ClickHandler() {
             @Override
             public void onClick(ClickEvent event) {
                 new PopupEditDialog(context.getValue(), expandedUi, popupDialogTitle,
                         new DialogCallback<List<ValueType>>() {
-
                             @Override
                             public void ok(List<ValueType> editedObject) {
                                 context.setValue(editedObject);
@@ -104,7 +103,7 @@ public abstract class CollapsedListEditorUi<ValueType> extends ListEditorUi<Valu
         
         public PopupEditDialog(List<ValueType> initialValues, ExpandedListEditorUi<ValueType> ui, String dialogTitle,
                 DataEntryDialog.DialogCallback<List<ValueType>> callback) {
-            super(dialogTitle, "", stringMessages.save(), stringMessages.cancel(), null, callback);
+            super(dialogTitle, "", getStringMessages().save(), getStringMessages().cancel(), null, callback);
             expandedComposite = createExpandedUi(initialValues, ui);
         }
 

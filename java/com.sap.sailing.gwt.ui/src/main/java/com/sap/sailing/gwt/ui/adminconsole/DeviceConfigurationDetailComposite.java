@@ -26,11 +26,11 @@ import com.google.gwt.user.client.ui.VerticalPanel;
 import com.sap.sailing.gwt.ui.client.ErrorReporter;
 import com.sap.sailing.gwt.ui.client.SailingServiceAsync;
 import com.sap.sailing.gwt.ui.client.StringMessages;
-import com.sap.sailing.gwt.ui.client.shared.controls.listedit.ListEditorComposite;
-import com.sap.sailing.gwt.ui.client.shared.controls.listedit.StringListEditorComposite;
 import com.sap.sailing.gwt.ui.shared.DeviceConfigurationDTO;
 import com.sap.sailing.gwt.ui.shared.DeviceConfigurationDTO.RegattaConfigurationDTO;
 import com.sap.sailing.gwt.ui.shared.DeviceConfigurationMatcherDTO;
+import com.sap.sse.gwt.client.controls.listedit.ListEditorComposite;
+import com.sap.sse.gwt.client.controls.listedit.StringListEditorComposite;
 import com.sap.sse.gwt.client.dialog.DataEntryDialog.DialogCallback;
 
 public class DeviceConfigurationDetailComposite extends Composite {
@@ -300,9 +300,9 @@ public class DeviceConfigurationDetailComposite extends Composite {
         }
     };
     
-    private ValueChangeHandler<List<String>> dirtyValueMarker = new ValueChangeHandler<List<String>>() {
+    private ValueChangeHandler<Iterable<String>> dirtyValueMarker = new ValueChangeHandler<Iterable<String>>() {
         @Override
-        public void onValueChange(ValueChangeEvent<List<String>> event) {
+        public void onValueChange(ValueChangeEvent<Iterable<String>> event) {
             markAsDirty(true);
         }
     };

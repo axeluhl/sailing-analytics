@@ -1,4 +1,4 @@
-package com.sap.sailing.gwt.ui.client.shared.controls.listedit;
+package com.sap.sse.gwt.client.controls.listedit;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -9,6 +9,7 @@ import com.google.gwt.event.logical.shared.ValueChangeHandler;
 import com.google.gwt.event.shared.HandlerRegistration;
 import com.google.gwt.user.client.ui.Composite;
 import com.google.gwt.user.client.ui.HasValue;
+import com.sap.sse.common.Util;
 
 /**
  * A widget that lets users edit a list of <code>ValueType</code> objects. How the values are displayed and made
@@ -32,15 +33,16 @@ import com.google.gwt.user.client.ui.HasValue;
  * 
  * @param <ValueType>
  */
-public class ListEditorComposite<ValueType> extends Composite implements HasValue<List<ValueType>>,
-        HasValueChangeHandlers<List<ValueType>> {
+public class ListEditorComposite<ValueType> extends Composite implements HasValue<Iterable<ValueType>>,
+        HasValueChangeHandlers<Iterable<ValueType>> {
 
     private final ListEditorUiStrategy<ValueType> activeUi;
 
     private List<ValueType> values;
 
-    public ListEditorComposite(List<ValueType> initialValues, ListEditorUiStrategy<ValueType> activeUi) {
-        this.values = new ArrayList<ValueType>(initialValues);
+    public ListEditorComposite(Iterable<ValueType> initialValues, ListEditorUiStrategy<ValueType> activeUi) {
+        this.values = new ArrayList<ValueType>();
+        Util.addAll(initialValues, this.values);
         this.activeUi = activeUi;
         this.activeUi.setContext(this);
 
@@ -54,13 +56,14 @@ public class ListEditorComposite<ValueType> extends Composite implements HasValu
     }
 
     @Override
-    public void setValue(List<ValueType> newValues) {
+    public void setValue(Iterable<ValueType> newValues) {
         setValue(newValues, true);
     }
 
     @Override
-    public void setValue(List<ValueType> newValues, boolean fireEvents) {
-        this.values = newValues;
+    public void setValue(Iterable<ValueType> newValues, boolean fireEvents) {
+        this.values = new ArrayList<>();
+        Util.addAll(newValues, this.values);
         activeUi.refresh();
         if (fireEvents) {
             onChange();
@@ -68,7 +71,7 @@ public class ListEditorComposite<ValueType> extends Composite implements HasValu
     }
 
     @Override
-    public HandlerRegistration addValueChangeHandler(ValueChangeHandler<List<ValueType>> handler) {
+    public HandlerRegistration addValueChangeHandler(ValueChangeHandler<Iterable<ValueType>> handler) {
         return addHandler(handler, ValueChangeEvent.getType());
     }
 

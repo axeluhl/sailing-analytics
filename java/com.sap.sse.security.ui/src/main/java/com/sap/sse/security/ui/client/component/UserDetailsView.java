@@ -1,6 +1,7 @@
 package com.sap.sse.security.ui.client.component;
 
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.List;
 import java.util.Map.Entry;
 
@@ -8,6 +9,8 @@ import com.google.gwt.core.client.Scheduler;
 import com.google.gwt.dom.client.Style.Unit;
 import com.google.gwt.event.dom.client.ClickEvent;
 import com.google.gwt.event.dom.client.ClickHandler;
+import com.google.gwt.event.logical.shared.ValueChangeEvent;
+import com.google.gwt.event.logical.shared.ValueChangeHandler;
 import com.google.gwt.resources.client.ImageResource;
 import com.google.gwt.user.client.Window;
 import com.google.gwt.user.client.rpc.AsyncCallback;
@@ -21,9 +24,14 @@ import com.google.gwt.user.client.ui.HorizontalPanel;
 import com.google.gwt.user.client.ui.ImageResourceRenderer;
 import com.google.gwt.user.client.ui.Label;
 import com.google.gwt.user.client.ui.VerticalPanel;
+import com.sap.sse.gwt.client.async.MarkedAsyncCallback;
+import com.sap.sse.gwt.client.controls.listedit.StringListEditorComposite;
+import com.sap.sse.security.DefaultRoles;
 import com.sap.sse.security.ui.client.Resources;
 import com.sap.sse.security.ui.client.StringMessages;
 import com.sap.sse.security.ui.client.UserChangeEventHandler;
+import com.sap.sse.security.ui.client.UserService;
+import com.sap.sse.security.ui.client.resources.IconResources;
 import com.sap.sse.security.ui.oauth.client.SocialUserDTO;
 import com.sap.sse.security.ui.shared.AccountDTO;
 import com.sap.sse.security.ui.shared.SuccessInfo;
@@ -32,93 +40,128 @@ import com.sap.sse.security.ui.shared.UserManagementServiceAsync;
 import com.sap.sse.security.ui.shared.UsernamePasswordAccountDTO;
 
 public class UserDetailsView extends FlowPanel {
-    private UserManagementServiceAsync userManagementService;
-
     private List<UserChangeEventHandler> handlers = new ArrayList<>();
 
     private final StringMessages stringMessages;
+    
+    private final Label usernameLabel;
+    private final Label emailLabel;
+    private final StringListEditorComposite rolesEditor;
+    private final VerticalPanel accountPanels;
+    private final Button deleteButton;
 
-    public UserDetailsView(UserManagementServiceAsync userManagementService, UserDTO user, StringMessages stringMessages) {
+    private UserDTO user;
+
+    public UserDetailsView(final UserService userService, UserDTO user, final StringMessages stringMessages) {
+        final UserManagementServiceAsync userManagementService = userService.getUserManagementService();
         this.stringMessages = stringMessages;
-        this.userManagementService = userManagementService;
+        this.user = user;
         addStyleName("userDetailsView");
-        updateUser(user);
-    }
-
-    public void updateUser(final UserDTO user) {
-        this.clear();
-        Label title = new Label(stringMessages.userDetails());
-        if (user == null) {
-            return;
+        List<String> defaultRoleNames = new ArrayList<>();
+        for (DefaultRoles defaultRole : DefaultRoles.values()) {
+            defaultRoleNames.add(defaultRole.name());
         }
+        rolesEditor = new StringListEditorComposite(user==null?Collections.<String>emptySet():user.getRoles(), stringMessages, IconResources.INSTANCE.remove(), defaultRoleNames);
+        rolesEditor.addValueChangeHandler(new ValueChangeHandler<Iterable<String>>() {
+            @Override
+            public void onValueChange(ValueChangeEvent<Iterable<String>> event) {
+                Iterable<String> newRoleList = event.getValue();
+                userManagementService.setRolesForUser(UserDetailsView.this.user.getName(), newRoleList, new MarkedAsyncCallback<SuccessInfo>(
+                        new AsyncCallback<SuccessInfo>() {
+                            @Override
+                            public void onFailure(Throwable caught) {
+                                Window.alert(stringMessages.errorUpdatingRoles(UserDetailsView.this.user.getName(), caught.getMessage()));
+                            }
+
+                            @Override
+                            public void onSuccess(SuccessInfo result) {
+                                if (!result.isSuccessful()) {
+                                    Window.alert(stringMessages.errorUpdatingRoles(UserDetailsView.this.user.getName(), result.getMessage()));
+                                } else {
+                                    userService.updateUser(/* notify other instances */ true);
+                                }
+                            }
+                        }));
+            }
+        });
+        usernameLabel = new Label();
+        emailLabel = new Label();
+        Label title = new Label(stringMessages.userDetails());
         title.getElement().getStyle().setFontSize(25, Unit.PX);
         this.add(title);
-
         DecoratorPanel decoratorPanel = new DecoratorPanel();
         FlowPanel fp = new FlowPanel();
         fp.setWidth("100%");
         ImageResourceRenderer renderer = new ImageResourceRenderer();
         final ImageResource userImageResource = Resources.INSTANCE.userSmall();
         fp.add(new HTML(renderer.render(userImageResource)));
-        Label name = new Label(stringMessages.name() + ": " + user.getName());
-        fp.add(name);
-        Label email = new Label(stringMessages.email() + ": " + user.getEmail());
-        fp.add(email);
-        
-        for (AccountDTO a : user.getAccounts()){
-            DecoratorPanel accountPanelDecorator = new DecoratorPanel();
-            FlowPanel accountPanelContent = new FlowPanel();
-            accountPanelDecorator.setWidget(accountPanelContent);
-            accountPanelContent.add(new Label(a.getAccountType() + "-Account"));
-            if (a instanceof UsernamePasswordAccountDTO){
-                accountPanelContent.add(new Label(stringMessages.changePassword()));
-            }
-            else if (a instanceof SocialUserDTO){
-                SocialUserDTO sua = (SocialUserDTO) a;
-                FlexTable table = new FlexTable();
-                int i = 0;
-                for (Entry<String, String> e : sua.getProperties().entrySet()){
-                    if (e.getValue() != null){
-                        table.setText(i, 0, e.getKey().toLowerCase().replace('_', ' '));
-                        table.setText(i, 1, e.getValue());
-                        i++;
-                    }
-                }
-                accountPanelContent.add(table);
-            }
-            fp.add(accountPanelDecorator);
-        }
-        
+        HorizontalPanel namePanel = new HorizontalPanel();
+        fp.add(namePanel);
+        namePanel.add(new Label(stringMessages.name()+": "));
+        namePanel.add(usernameLabel);
+        HorizontalPanel emailPanel = new HorizontalPanel();
+        fp.add(emailPanel);
+        emailPanel.add(new Label(stringMessages.email() + ": "));
+        emailPanel.add(emailLabel);
+        accountPanels = new VerticalPanel();
+        fp.add(accountPanels);
         decoratorPanel.setWidget(fp);
         this.add(decoratorPanel);
-
-        RolesList rolesList = new RolesList(userManagementService, user);
-        rolesList.addUserChangeEventHandler(new UserChangeEventHandler() {
-            @Override
-            public void onUserChange(UserDTO user) {
-                for (UserChangeEventHandler handler : handlers){
-                    handler.onUserChange(user);
-                }
-            }
-        });
-        this.add(rolesList);
-        Button delete = new Button(stringMessages.deleteUser(), new ClickHandler() {
+        this.add(rolesEditor);
+        deleteButton = new Button(stringMessages.deleteUser(), new ClickHandler() {
             @Override
             public void onClick(ClickEvent event) {
-                final DeleteUserConfimDialog deleteUserConfimDialog = new DeleteUserConfimDialog(userManagementService,
-                        user.getName(), stringMessages);
+                final DeleteUserConfimDialog deleteUserConfimDialog = new DeleteUserConfimDialog(
+                        userManagementService, UserDetailsView.this.user.getName(), stringMessages);
                 Scheduler.get().scheduleDeferred(new Scheduler.ScheduledCommand() {
                     public void execute() {
                         deleteUserConfimDialog.center();
                     }
                 });
                 deleteUserConfimDialog.show();
-                for (UserChangeEventHandler handler : handlers){
-                    handler.onUserChange(user);
+                for (UserChangeEventHandler handler : handlers) {
+                    handler.onUserChange(UserDetailsView.this.user);
                 }
             }
         });
-        this.add(delete);
+        this.add(deleteButton);
+        updateUser(user);
+    }
+
+    public void updateUser(final UserDTO user) {
+        this.user = user;
+        deleteButton.setEnabled(user != null);
+        accountPanels.clear();
+        if (user == null) {
+            usernameLabel.setText("");
+            emailLabel.setText("");
+        } else {
+            usernameLabel.setText(user.getName());
+            emailLabel.setText(user.getEmail());
+            for (AccountDTO a : user.getAccounts()) {
+                DecoratorPanel accountPanelDecorator = new DecoratorPanel();
+                FlowPanel accountPanelContent = new FlowPanel();
+                accountPanelDecorator.setWidget(accountPanelContent);
+                accountPanelContent.add(new Label(stringMessages.account(a.getAccountType())));
+                if (a instanceof UsernamePasswordAccountDTO) {
+                    accountPanelContent.add(new Label(stringMessages.changePassword()));
+                } else if (a instanceof SocialUserDTO) {
+                    SocialUserDTO sua = (SocialUserDTO) a;
+                    FlexTable table = new FlexTable();
+                    int i = 0;
+                    for (Entry<String, String> e : sua.getProperties().entrySet()) {
+                        if (e.getValue() != null) {
+                            table.setText(i, 0, e.getKey().toLowerCase().replace('_', ' '));
+                            table.setText(i, 1, e.getValue());
+                            i++;
+                        }
+                    }
+                    accountPanelContent.add(table);
+                }
+                accountPanels.add(accountPanelDecorator);
+            }
+            rolesEditor.setValue(user.getRoles());
+        }
     }
 
     private static class DeleteUserConfimDialog extends DialogBox {

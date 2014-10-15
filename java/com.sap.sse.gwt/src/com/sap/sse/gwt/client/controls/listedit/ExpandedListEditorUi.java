@@ -1,4 +1,4 @@
-package com.sap.sailing.gwt.ui.client.shared.controls.listedit;
+package com.sap.sse.gwt.client.controls.listedit;
 
 import com.google.gwt.event.dom.client.ClickEvent;
 import com.google.gwt.event.dom.client.ClickHandler;
@@ -9,7 +9,7 @@ import com.google.gwt.user.client.ui.PushButton;
 import com.google.gwt.user.client.ui.ValueBoxBase;
 import com.google.gwt.user.client.ui.VerticalPanel;
 import com.google.gwt.user.client.ui.Widget;
-import com.sap.sailing.gwt.ui.client.StringMessages;
+import com.sap.sse.gwt.client.StringMessages;
 
 /**
  * A base class for an editing UI strategy for a list of objects of type <code>ValueType</code> for use in a
@@ -25,7 +25,9 @@ import com.sap.sailing.gwt.ui.client.StringMessages;
  * <p>
  * 
  * Implementing subclasses may choose to override the {@link #onRowAdded()} and/or the {@link #onRowRemoved()} method(s)
- * to be notified of changes to the list.
+ * to be notified of changes to the list. Alternatively or in addition, clients can
+ * {@link ListEditorComposite#addValueChangeHandler(com.google.gwt.event.logical.shared.ValueChangeHandler) add a value
+ * change handler} to the enclosing {@link ListEditorComposite}.
  * 
  * @author Lukas Niemeier
  * @author Axel Uhl (D043530)
@@ -80,7 +82,7 @@ public abstract class ExpandedListEditorUi<ValueType> extends ListEditorUi<Value
         if (canRemoveItems) {
             PushButton removeButton = new PushButton(new Image(removeImage));
             removeButton.ensureDebugId("RemoveButton");
-            removeButton.setTitle(stringMessages.remove());
+            removeButton.setTitle(getStringMessages().remove());
             removeButton.addClickHandler(new ClickHandler() {
                 @Override
                 public void onClick(ClickEvent event) {

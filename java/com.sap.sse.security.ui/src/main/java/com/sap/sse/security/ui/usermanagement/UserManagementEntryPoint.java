@@ -49,7 +49,7 @@ public class UserManagementEntryPoint implements EntryPoint {
                 UserManagementEntryPoint.this.user = user;
             }
         });
-        UserManagementPanel userManagementPanel = new UserManagementPanel(userManagementService, stringMessages);
+        UserManagementPanel userManagementPanel = new UserManagementPanel(userService, stringMessages);
         center.add(new ScrollPanel(userManagementPanel), stringMessages.users());
         final SettingsPanel settingsPanel = new SettingsPanel(userManagementService, stringMessages);
         center.add(new ScrollPanel(settingsPanel), stringMessages.settings());

@@ -22,7 +22,7 @@ public interface UserManagementService extends RemoteService {
 
     SuccessInfo logout();
 
-    SuccessInfo addRoleForUser(String username, String role);
+    SuccessInfo setRolesForUser(String username, Iterable<String> roles);
 
     Map<String, String> getSettings();
 

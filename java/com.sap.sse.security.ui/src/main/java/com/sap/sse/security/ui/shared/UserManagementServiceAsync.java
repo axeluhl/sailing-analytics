@@ -19,7 +19,7 @@ public interface UserManagementServiceAsync {
 
     void getFilteredSortedUserList(String filter, AsyncCallback<Collection<UserDTO>> callback);
 
-    void addRoleForUser(String username, String role, AsyncCallback<SuccessInfo> callback);
+    void setRolesForUser(String username, Iterable<String> roles, AsyncCallback<SuccessInfo> callback);
 
     void deleteUser(String username, AsyncCallback<SuccessInfo> callback);
 

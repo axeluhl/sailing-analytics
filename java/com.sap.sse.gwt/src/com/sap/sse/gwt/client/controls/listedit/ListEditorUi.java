@@ -1,9 +1,9 @@
-package com.sap.sailing.gwt.ui.client.shared.controls.listedit;
+package com.sap.sse.gwt.client.controls.listedit;
 
-import com.sap.sailing.gwt.ui.client.StringMessages;
+import com.sap.sse.gwt.client.StringMessages;
 
 public abstract class ListEditorUi<ValueType> implements ListEditorUiStrategy<ValueType> {
-    protected final StringMessages stringMessages;
+    private final StringMessages stringMessages;
     protected ListEditorComposite<ValueType> context;
 
     public ListEditorUi(StringMessages stringMessages) {
@@ -13,5 +13,9 @@ public abstract class ListEditorUi<ValueType> implements ListEditorUiStrategy<Va
     @Override
     public void setContext(ListEditorComposite<ValueType> context) {
         this.context = context;
+    }
+
+    protected StringMessages getStringMessages() {
+        return stringMessages;
     }
 }

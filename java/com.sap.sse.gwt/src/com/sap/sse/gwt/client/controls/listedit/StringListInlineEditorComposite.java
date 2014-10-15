@@ -1,4 +1,4 @@
-package com.sap.sailing.gwt.ui.client.shared.controls.listedit;
+package com.sap.sse.gwt.client.controls.listedit;
 
 import java.util.List;
 
@@ -16,7 +16,7 @@ import com.google.gwt.user.client.ui.MultiWordSuggestOracle;
 import com.google.gwt.user.client.ui.SuggestBox;
 import com.google.gwt.user.client.ui.TextBox;
 import com.google.gwt.user.client.ui.Widget;
-import com.sap.sailing.gwt.ui.client.StringMessages;
+import com.sap.sse.gwt.client.StringMessages;
 
 public class StringListInlineEditorComposite extends StringListEditorComposite {
     public StringListInlineEditorComposite(List<String> initialValues, StringMessages stringMessages,
@@ -25,42 +25,27 @@ public class StringListInlineEditorComposite extends StringListEditorComposite {
                 new ExpandedUi(stringMessages, removeImage, suggestValues, textBoxSize)));
     }
 
-    public StringListInlineEditorComposite(List<String> initialValues, StringMessages stringMessages,
+    public StringListInlineEditorComposite(Iterable<String> initialValues, StringMessages stringMessages,
             ImageResource removeImage, List<String> suggestValues, int textBoxSize) {
         super(initialValues, new ExpandedUi(stringMessages, removeImage, suggestValues, textBoxSize));
     }
 
-    public StringListInlineEditorComposite(List<String> initialValues, ListEditorUiStrategy<String> activeUi) {
+    public StringListInlineEditorComposite(Iterable<String> initialValues, ListEditorUiStrategy<String> activeUi) {
         super(initialValues, activeUi);
     }
 
-    public static class CollapsedUi extends CollapsedListEditorUi<String> {
-
+    public static class CollapsedUi extends StringListEditorComposite.CollapsedUi {
         public CollapsedUi(StringMessages stringMessages, String dialogTitle, ExpandedListEditorUi<String> expandedUi) {
             super(stringMessages, dialogTitle, expandedUi);
         }
 
         @Override
-        protected String getCollapsedValueText(List<String> value) {
-            StringBuilder valuesText = new StringBuilder();
-            for (int i = 0; i < value.size(); i++) {
-                if (i > 0) {
-                    valuesText.append(',');
-                }
-                valuesText.append(value.get(i));
-            }
-            String condensedValue = valuesText.toString();
-            return condensedValue;
-        }
-
-        @Override
-        protected ListEditorComposite<String> createExpandedUi(List<String> initialValues, ExpandedListEditorUi<String> ui) {
+        protected ListEditorComposite<String> createExpandedUi(Iterable<String> initialValues, ExpandedListEditorUi<String> ui) {
             return new StringListInlineEditorComposite(initialValues, ui);
         }
     }
 
     public static class ExpandedUi extends ExpandedListEditorUi<String> {
-
         private final MultiWordSuggestOracle inputOracle;
         private final int textBoxSize;
 
@@ -68,7 +53,6 @@ public class StringListInlineEditorComposite extends StringListEditorComposite {
             super(stringMessages, removeImage, /*canRemoveItems*/true);
             this.inputOracle = new MultiWordSuggestOracle();
             this.textBoxSize = textBoxSize;
-
             inputOracle.addAll(suggestValues);
         }
         
@@ -85,7 +69,7 @@ public class StringListInlineEditorComposite extends StringListEditorComposite {
             InputElement inputElement = inputBox.getElement().cast();
             inputElement.setSize(textBoxSize);
 
-            final Button addButton = new Button(stringMessages.add());
+            final Button addButton = new Button(getStringMessages().add());
             addButton.setEnabled(false);
             addButton.addClickHandler(new ClickHandler() {
 

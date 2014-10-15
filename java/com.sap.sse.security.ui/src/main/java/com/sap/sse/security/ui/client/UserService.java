@@ -97,7 +97,7 @@ public class UserService {
      * @param notifyOtherInstances
      *            if <code>true</code>, other instances of this class will be notified about the result of the call
      */
-    private void updateUser(final boolean notifyOtherInstances) {
+    public void updateUser(final boolean notifyOtherInstances) {
         userManagementService.getCurrentUser(new MarkedAsyncCallback<UserDTO>(
                 new AsyncCallback<UserDTO>() {
             @Override
