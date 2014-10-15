@@ -24,9 +24,10 @@ public class User {
 
     public User(String name, String email, Collection<Account> accounts) {
         super();
-        this.roles = new HashSet<>();
-        this.accounts = new ConcurrentHashMap<>();
         this.name = name;
+        this.roles = new HashSet<>();
+        this.email = email;
+        this.accounts = new ConcurrentHashMap<>();
         for (Account a : accounts) {
             this.accounts.put(a.getAccountType(), a);
         }
