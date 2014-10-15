@@ -3,16 +3,11 @@ package com.sap.sse.gwt.client.controls.listedit;
 import java.util.List;
 
 import com.google.gwt.dom.client.InputElement;
-import com.google.gwt.event.dom.client.ClickEvent;
-import com.google.gwt.event.dom.client.ClickHandler;
 import com.google.gwt.event.dom.client.KeyUpEvent;
 import com.google.gwt.event.dom.client.KeyUpHandler;
 import com.google.gwt.event.logical.shared.ValueChangeEvent;
 import com.google.gwt.event.logical.shared.ValueChangeHandler;
 import com.google.gwt.resources.client.ImageResource;
-import com.google.gwt.user.client.ui.Button;
-import com.google.gwt.user.client.ui.HorizontalPanel;
-import com.google.gwt.user.client.ui.MultiWordSuggestOracle;
 import com.google.gwt.user.client.ui.SuggestBox;
 import com.google.gwt.user.client.ui.TextBox;
 import com.google.gwt.user.client.ui.Widget;
@@ -45,52 +40,24 @@ public class StringListInlineEditorComposite extends StringListEditorComposite {
         }
     }
 
-    public static class ExpandedUi extends ExpandedListEditorUi<String> {
-        private final MultiWordSuggestOracle inputOracle;
+    public static class ExpandedUi extends StringListEditorComposite.ExpandedUi {
         private final int textBoxSize;
 
         public ExpandedUi(StringMessages stringMessages, ImageResource removeImage, List<String> suggestValues, int textBoxSize) {
-            super(stringMessages, removeImage, /*canRemoveItems*/true);
-            this.inputOracle = new MultiWordSuggestOracle();
+            this(stringMessages, removeImage, suggestValues, /* placeholderTextForAddTextbox */ null, textBoxSize);
+        }
+        
+        public ExpandedUi(StringMessages stringMessages, ImageResource removeImage, List<String> suggestValues, String placeholderTextForAddTextbox, int textBoxSize) {
+            super(stringMessages, removeImage, suggestValues, placeholderTextForAddTextbox);
             this.textBoxSize = textBoxSize;
-            inputOracle.addAll(suggestValues);
         }
         
         @Override
-        public void setContext(ListEditorComposite<String> context) {
-            super.setContext(context);
-            inputOracle.addAll(context.getValue());
-        }
-
-        @Override
-        protected Widget createAddWidget() {
-            final SuggestBox inputBox = new SuggestBox(inputOracle);
-            
-            InputElement inputElement = inputBox.getElement().cast();
+        protected SuggestBox createSuggestBox() {
+            SuggestBox result = super.createSuggestBox();
+            InputElement inputElement = result.getElement().cast();
             inputElement.setSize(textBoxSize);
-
-            final Button addButton = new Button(getStringMessages().add());
-            addButton.setEnabled(false);
-            addButton.addClickHandler(new ClickHandler() {
-
-                @Override
-                public void onClick(ClickEvent event) {
-                    addValue(inputBox.getValue());
-                    inputBox.setText("");
-                }
-            });
-            inputBox.addKeyUpHandler(new KeyUpHandler() {
-
-                @Override
-                public void onKeyUp(KeyUpEvent event) {
-                    addButton.setEnabled(!inputBox.getValue().isEmpty());
-                }
-            });
-
-            HorizontalPanel panel = new HorizontalPanel();
-            panel.add(inputBox);
-            panel.add(addButton);
-            return panel;
+            return result;
         }
 
         @Override

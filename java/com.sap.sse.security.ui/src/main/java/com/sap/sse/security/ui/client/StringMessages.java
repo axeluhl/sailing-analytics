@@ -84,5 +84,7 @@ public interface StringMessages extends com.sap.sse.gwt.client.StringMessages {
     String edit();
 
     String errorUpdatingRoles(String username, String message);
+
+    String enterRoleName();
     
 }

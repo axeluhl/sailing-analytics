@@ -27,6 +27,11 @@ public class StringListEditorComposite extends ListEditorComposite<String> {
         super(initialValues, new ExpandedUi(stringMessages, removeImage, suggestValues));
     }
 
+    public StringListEditorComposite(Iterable<String> initialValues, StringMessages stringMessages,
+            ImageResource removeImage, Iterable<String> suggestValues, String placeholderTextForAddTextbox) {
+        super(initialValues, new ExpandedUi(stringMessages, removeImage, suggestValues, placeholderTextForAddTextbox));
+    }
+
     public StringListEditorComposite(Iterable<String> initialValues, ListEditorUiStrategy<String> activeUi) {
         super(initialValues, activeUi);
     }
@@ -59,9 +64,16 @@ public class StringListEditorComposite extends ListEditorComposite<String> {
     public static class ExpandedUi extends ExpandedListEditorUi<String> {
 
         protected final MultiWordSuggestOracle inputOracle;
+        protected final String placeholderTextForAddTextbox;
+
 
         public ExpandedUi(StringMessages stringMessages, ImageResource removeImage, Iterable<String> suggestValues) {
+            this(stringMessages, removeImage, suggestValues, /* placeholderTextForAddTextbox */ null);
+        }
+        
+        public ExpandedUi(StringMessages stringMessages, ImageResource removeImage, Iterable<String> suggestValues, String placeholderTextForAddTextbox) {
             super(stringMessages, removeImage, /*canRemoveItems*/true);
+            this.placeholderTextForAddTextbox = placeholderTextForAddTextbox;
             this.inputOracle = new MultiWordSuggestOracle();
             for (String suggestValue : suggestValues) {
                 inputOracle.add(suggestValue);
@@ -74,9 +86,17 @@ public class StringListEditorComposite extends ListEditorComposite<String> {
             inputOracle.addAll(context.getValue());
         }
 
+        protected SuggestBox createSuggestBox() {
+            final SuggestBox result = new SuggestBox(inputOracle);
+            if (placeholderTextForAddTextbox != null) {
+                result.getElement().setAttribute("placeholder", placeholderTextForAddTextbox);
+            }
+            return result;
+        }
+
         @Override
         protected Widget createAddWidget() {
-            final SuggestBox inputBox = new SuggestBox(inputOracle);
+            final SuggestBox inputBox = createSuggestBox();
             inputBox.ensureDebugId("InputSuggestBox");
             final Button addButton = new Button(getStringMessages().add());
             addButton.ensureDebugId("AddButton");

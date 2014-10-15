@@ -4,6 +4,7 @@ import com.google.gwt.event.dom.client.ClickEvent;
 import com.google.gwt.event.dom.client.ClickHandler;
 import com.google.gwt.resources.client.ImageResource;
 import com.google.gwt.user.client.ui.Grid;
+import com.google.gwt.user.client.ui.HTMLTable.Cell;
 import com.google.gwt.user.client.ui.Image;
 import com.google.gwt.user.client.ui.PushButton;
 import com.google.gwt.user.client.ui.ValueBoxBase;
@@ -86,7 +87,8 @@ public abstract class ExpandedListEditorUi<ValueType> extends ListEditorUi<Value
             removeButton.addClickHandler(new ClickHandler() {
                 @Override
                 public void onClick(ClickEvent event) {
-                    int rowToRemove = expandedValuesGrid.getCellForEvent(event).getRowIndex();
+                    final Cell cellForEvent = expandedValuesGrid.getCellForEvent(event);
+                    int rowToRemove = cellForEvent.getRowIndex();
                     removeRow(rowToRemove);
                 }
             });

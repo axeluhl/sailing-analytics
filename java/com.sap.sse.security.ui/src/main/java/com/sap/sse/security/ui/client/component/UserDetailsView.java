@@ -59,9 +59,10 @@ public class UserDetailsView extends FlowPanel {
         addStyleName("userDetailsView");
         List<String> defaultRoleNames = new ArrayList<>();
         for (DefaultRoles defaultRole : DefaultRoles.values()) {
-            defaultRoleNames.add(defaultRole.name());
+            defaultRoleNames.add(defaultRole.getRolename());
         }
-        rolesEditor = new StringListEditorComposite(user==null?Collections.<String>emptySet():user.getRoles(), stringMessages, IconResources.INSTANCE.remove(), defaultRoleNames);
+        rolesEditor = new StringListEditorComposite(user==null?Collections.<String>emptySet():user.getRoles(), stringMessages, IconResources.INSTANCE.remove(), defaultRoleNames,
+                stringMessages.enterRoleName());
         rolesEditor.addValueChangeHandler(new ValueChangeHandler<Iterable<String>>() {
             @Override
             public void onValueChange(ValueChangeEvent<Iterable<String>> event) {
