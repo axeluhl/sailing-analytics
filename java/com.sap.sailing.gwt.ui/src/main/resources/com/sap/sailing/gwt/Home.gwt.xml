@@ -65,7 +65,7 @@
 	-->
 	
 	<set-property name="gwt.logging.enabled" value="TRUE"/> 
-	<set-property name="gwt.logging.logLevel" value="FINE"/>
+	<set-property name="gwt.logging.logLevel" value="INFO"/>
 	
 	<set-property name="gwt.logging.firebugHandler" value="ENABLED" />
 	<set-property name="gwt.logging.simpleRemoteHandler" value="DISABLED" />
@@ -85,5 +85,6 @@
 	<source path='ui/regattaoverview' />
 	<source path='ui/leaderboard'/>
 	<source path='home' />
+	<source path='common' />
 	<source path='idangerous' />
 </module>
