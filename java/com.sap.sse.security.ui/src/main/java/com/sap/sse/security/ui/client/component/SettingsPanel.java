@@ -40,7 +40,7 @@ public class SettingsPanel extends LayoutPanel {
 
     public SettingsPanel(UserManagementServiceAsync userManagementService, StringMessages stringMessages) {
         super();
-        setHeight("600px");
+        setHeight("600px"); // TODO this is ugly; it should be 100%, but then the nested tab panels lead to zero height for this panel's tab panel
         this.stringMessages = stringMessages;
         this.userManagementService = userManagementService;
         initComponents();
