@@ -23,6 +23,7 @@ public class SecurityResource extends AbstractSecurityResource {
     }
 
     @GET
+    @Path("/hello")
     @Produces("application/json;charset=UTF-8")
     public Response sayHello(){
         return Response.ok("Hello!", MediaType.TEXT_PLAIN).build();
@@ -40,6 +41,13 @@ public class SecurityResource extends AbstractSecurityResource {
             return getSecurityErrorResponse(e.getMessage());
         }
         return Response.ok("Logged in!", MediaType.TEXT_PLAIN).build();
+    }
+    
+    @GET
+    @Path("/logout")
+    public Response logout() {
+        getService().logout();
+        return Response.ok("Logger out", MediaType.TEXT_PLAIN).build();
     }
 }
  
