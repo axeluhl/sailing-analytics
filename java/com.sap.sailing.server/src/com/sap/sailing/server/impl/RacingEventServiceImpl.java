@@ -324,7 +324,7 @@ public class RacingEventServiceImpl implements RacingEventServiceWithTestSupport
      * This author should be used for server generated race log events
      */
     private final RaceLogEventAuthor raceLogEventAuthorForServer = new RaceLogEventAuthorImpl(
-            RacingEventService.class.getName(), 1);
+            RacingEventService.class.getName(), 0);
 
     /**
      * Allow only one master data import at a time to avoid situation where multiple Imports override each other in
