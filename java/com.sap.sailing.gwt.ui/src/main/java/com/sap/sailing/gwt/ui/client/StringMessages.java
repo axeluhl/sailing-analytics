@@ -1090,4 +1090,5 @@ public interface StringMessages extends Messages {
     String raceVisibilityColumn();
     String enterCarryValueFor(String competitorName);
     String basedOn();
+    String retrieveWith();
 }

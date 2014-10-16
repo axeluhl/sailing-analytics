@@ -2,7 +2,7 @@ package com.sap.sse.datamining.shared.impl.dto;
 
 import java.util.UUID;
 
-public class DataRetrieverChainDefinitionDTO {
+public class DataRetrieverChainDefinitionDTO implements Comparable<DataRetrieverChainDefinitionDTO> {
     
     private final UUID id;
     private final String name;
@@ -30,6 +30,11 @@ public class DataRetrieverChainDefinitionDTO {
 
     public String getRetrievedDataTypeName() {
         return retrievedDataTypeName;
+    }
+
+    @Override
+    public int compareTo(DataRetrieverChainDefinitionDTO d) {
+        return this.getName().compareTo(d.getName());
     }
     
 }
