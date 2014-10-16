@@ -43,7 +43,6 @@ public class TestLeaderboardEditing extends AbstractSeleniumTest {
     @Test
     public void testSimpleLeaderboardEditing() {
         createNewLeaderboardLoadRaceAndLink(LEADERBOARD);
-        
         LeaderboardEditingPage page = LeaderboardEditingPage.goToPage(LEADERBOARD, getWebDriver(), getContextRoot());
         LeaderboardTable table = page.getLeaderboardTable();
         assertNotNull(table);
@@ -53,7 +52,6 @@ public class TestLeaderboardEditing extends AbstractSeleniumTest {
     
     private void createNewLeaderboardLoadRaceAndLink(String leaderboardName) {
         AdminConsolePage adminConsole = AdminConsolePage.goToPage(getWebDriver(), getContextRoot());
-        
         createLeaderboard(leaderboardName, adminConsole);
         startTrackingRaceAndWait(adminConsole, BMW_CUP_JSON_URL, TRACKABLE_RACE, TRACKED_RACE, 30000 /* 30s timeout */);
         // now create two race columns
@@ -69,9 +67,8 @@ public class TestLeaderboardEditing extends AbstractSeleniumTest {
         tracTracEvents.listTrackableRaces(jsonUrl);
         tracTracEvents.setTrackSettings(false, true, false);
         tracTracEvents.startTrackingForRace(trackableRace);
-        
         TrackedRacesListPO trackedRacesList = tracTracEvents.getTrackedRacesList();
-        trackedRacesList.waitForTrackedRace(trackedRace, Status.TRACKING);
+        trackedRacesList.waitForTrackedRace(trackedRace, Status.FINISHED); // TracAPI puts REPLAY races into FINISHED mode when done loading
         trackedRacesList.stopTracking(trackedRace);
     }
     

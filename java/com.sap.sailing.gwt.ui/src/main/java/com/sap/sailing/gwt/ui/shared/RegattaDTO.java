@@ -4,12 +4,16 @@ import java.util.Date;
 import java.util.List;
 import java.util.UUID;
 
+import com.sap.sailing.domain.common.RegattaAndRaceIdentifier;
 import com.sap.sailing.domain.common.RegattaIdentifier;
 import com.sap.sailing.domain.common.RegattaName;
 import com.sap.sailing.domain.common.ScoringSchemeType;
 import com.sap.sailing.domain.common.dto.BoatClassDTO;
+import com.sap.sailing.domain.common.dto.FleetDTO;
 import com.sap.sailing.domain.common.dto.NamedDTO;
+import com.sap.sailing.domain.common.dto.RaceColumnDTO;
 import com.sap.sailing.domain.common.dto.RaceDTO;
+import com.sap.sse.common.Util.Pair;
 
 public class RegattaDTO extends NamedDTO {
     private static final long serialVersionUID = -4594784946348402759L;
@@ -23,12 +27,25 @@ public class RegattaDTO extends NamedDTO {
     public UUID defaultCourseAreaUuid;
     public String defaultCourseAreaName;
     public DeviceConfigurationDTO.RegattaConfigurationDTO configuration;
+    public boolean useStartTimeInference = true;
 
     public RegattaDTO() {}
 
     public RegattaDTO(String name, ScoringSchemeType scoringScheme /*, List<CompetitorDTO> competitors*/) {
         super(name);
         this.scoringScheme = scoringScheme;
+    }
+    
+    public Pair<SeriesDTO, FleetDTO> getSeriesAndFleet(RegattaAndRaceIdentifier raceIdentifier) {
+        for (SeriesDTO s : series) {
+            for (RaceColumnDTO raceColumn : s.getRaceColumns()) {
+                FleetDTO fleet = raceColumn.getFleet(raceIdentifier);
+                if (fleet != null) {
+                    return new Pair<SeriesDTO, FleetDTO>(s, fleet);
+                }
+            }
+        }
+        return null;
     }
 
     public RegattaIdentifier getRegattaIdentifier() {
@@ -39,7 +56,10 @@ public class RegattaDTO extends NamedDTO {
      * @return The start date of the first {@link #races Race}, or <code>null</code> if the start date isn't set
      */
     public Date getStartDate() {
-        return races.get(0).startOfRace;
+        if(races.size()>0){
+            return races.get(0).startOfRace;
+        }
+        return null;
     }
     
     /**

@@ -33,6 +33,7 @@ import com.sap.sailing.domain.base.Waypoint;
 import com.sap.sailing.domain.base.impl.CourseAreaImpl;
 import com.sap.sailing.domain.base.impl.CourseImpl;
 import com.sap.sailing.domain.base.impl.RaceDefinitionImpl;
+import com.sap.sailing.domain.base.impl.RegattaImpl;
 import com.sap.sailing.domain.common.Color;
 import com.sap.sailing.domain.common.RegattaName;
 import com.sap.sailing.domain.common.TimePoint;
@@ -116,8 +117,10 @@ public class SearchServiceTest {
         final TimePoint pfingstbuschStartDate = new MillisecondsTimePoint(cal.getTime());
         cal.set(2014, 5, 8, 16, 00);
         final TimePoint pfingstbuschEndDate = new MillisecondsTimePoint(cal.getTime());
-        pfingstbusch = server.apply(new CreateEvent("Pfingsbusch", pfingstbuschStartDate, pfingstbuschEndDate, "Kiel", /* isPublic */
-                true, UUID.randomUUID(), Collections.<URL>emptySet(), Collections.<URL>emptySet()));
+        pfingstbusch = server.apply(new CreateEvent("Pfingsbusch", /* eventDescription */ null, pfingstbuschStartDate, pfingstbuschEndDate, /* isPublic */
+                "Kiel", true, UUID.randomUUID(), Collections.<URL>emptySet(),
+                Collections.<URL>emptySet(),
+                /* sponsorImageURLs */ Collections.<URL>emptySet(), /* logoImageURLAsString */ null, /* officialWebsiteURLAsString */ null));
         kiel = pfingstbusch.getVenue();
         final CourseAreaImpl kielAlpha = new CourseAreaImpl("Alpha", UUID.randomUUID());
         kiel.addCourseArea(kielAlpha);
@@ -128,17 +131,16 @@ public class SearchServiceTest {
                 new SeriesCreationParametersDTO(Collections.singletonList(new FleetDTO("Default", /* order */-1, Color.RED)),
                 /* medal */false, /* startsWithZero */false, /* firstColumnIsNonDiscardableCarryForward */false,
                 /* discardingThresholds */null, /* hasSplitFleetContiguousScoring */false));
-        pfingstbusch29er = server.apply(new AddSpecificRegatta("Pfingstbusch", "29er", UUID.randomUUID(),
+        pfingstbusch29er = server.apply(new AddSpecificRegatta(RegattaImpl.getDefaultName("Pfingstbusch", "29er"), "29er", UUID.randomUUID(),
                 new RegattaCreationParametersDTO(seriesCreationParams), /* persistent */
-                true, new LowPoint(), kielAlpha.getId()));
+                true, new LowPoint(), kielAlpha.getId(), /* useStartTimeInference */ true));
         server.apply(new AddColumnToSeries(pfingstbusch29er.getRegattaIdentifier(), "Default", "R1"));
         server.apply(new AddColumnToSeries(pfingstbusch29er.getRegattaIdentifier(), "Default", "R2"));
         server.apply(new AddColumnToSeries(pfingstbusch29er.getRegattaIdentifier(), "Default", "R3"));
         RegattaLeaderboard pfingstbusch29erLeaderboard = server.apply(new CreateRegattaLeaderboard(pfingstbusch29er.getRegattaIdentifier(),
                 /* leaderboardDisplayName */ null, /* discardThresholds */ new int[0]));
-        pfingstbusch470 = server.apply(new AddSpecificRegatta("Pfingstbusch", "470", UUID.randomUUID(),
-                new RegattaCreationParametersDTO(seriesCreationParams), /* persistent */
-                true, new LowPoint(), kielBravo.getId()));
+        pfingstbusch470 = server.apply(new AddSpecificRegatta(RegattaImpl.getDefaultName("Pfingstbusch", "470"), "470", UUID.randomUUID(), new RegattaCreationParametersDTO(seriesCreationParams), /* persistent */
+                true, new LowPoint(), kielBravo.getId(), /* useStartTimeInference */ true));
         server.apply(new AddColumnToSeries(pfingstbusch470.getRegattaIdentifier(), "Default", "R1"));
         server.apply(new AddColumnToSeries(pfingstbusch470.getRegattaIdentifier(), "Default", "R2"));
         server.apply(new AddColumnToSeries(pfingstbusch470.getRegattaIdentifier(), "Default", "R3"));
@@ -148,14 +150,16 @@ public class SearchServiceTest {
         final TimePoint aalStartDate = new MillisecondsTimePoint(cal.getTime());
         cal.set(2014, 5, 8, 18, 00);
         final TimePoint aalEndDate = new MillisecondsTimePoint(cal.getTime());
-        aalEvent = server.apply(new CreateEvent("Aalregatta", aalStartDate, aalEndDate, "Flensburg", /* isPublic */
-                true, UUID.randomUUID(), Collections.<URL>emptySet(), Collections.<URL>emptySet()));
+        aalEvent = server.apply(new CreateEvent("Aalregatta", /* eventDescription */ null, aalStartDate, aalEndDate, /* isPublic */
+                "Flensburg", true, UUID.randomUUID(), Collections.<URL>emptySet(),
+                Collections.<URL>emptySet(), /* sponsorImageURLs */ Collections.<URL>emptySet(),
+                /* logoimageURL */ null, /* officialWebsiteURLAsString */ null));
         flensburg = aalEvent.getVenue();
         final CourseAreaImpl flensburgStandard = new CourseAreaImpl("Standard", UUID.randomUUID());
         flensburg.addCourseArea(flensburgStandard);
-        aalRegatta = server.apply(new AddSpecificRegatta("Aalregatta", "ORC", UUID.randomUUID(),
+        aalRegatta = server.apply(new AddSpecificRegatta(RegattaImpl.getDefaultName("Aalregatta", "ORC"), "ORC", UUID.randomUUID(),
                 new RegattaCreationParametersDTO(seriesCreationParams), /* persistent */
-                true, new LowPoint(), flensburgStandard.getId()));
+                true, new LowPoint(), flensburgStandard.getId(), /* useStartTimeInference */ true));
         server.apply(new AddColumnToSeries(aalRegatta.getRegattaIdentifier(), "Default", "R1"));
         server.apply(new AddColumnToSeries(aalRegatta.getRegattaIdentifier(), "Default", "R2"));
         RegattaLeaderboard aalRegattaLeaderboard = server.apply(new CreateRegattaLeaderboard(aalRegatta.getRegattaIdentifier(),

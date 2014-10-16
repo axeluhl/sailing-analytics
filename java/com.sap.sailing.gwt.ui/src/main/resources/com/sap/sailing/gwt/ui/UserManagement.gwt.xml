@@ -37,5 +37,8 @@
 	<source path='client'/>
 	<source path='simulator'/>
 	<source path='usermanagement'/>
+	<source path='masterdataimport'/>
+	<source path='adminconsole'/>
 	<source path='shared'/>
+	<source path='leaderboard'/>
 </module>

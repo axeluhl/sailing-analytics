@@ -52,23 +52,20 @@ public class TestLeaderboardConfiguration extends AbstractSeleniumTest {
     @Before
     public void setUp() {
         this.regatta = new RegattaDescriptor(REGATTA, BOAT_CLASS);
-        
         this.trackableRaces = new ArrayList<>();
         this.trackedRaces = new ArrayList<>();
         this.leaderboardRaces = new ArrayList<>();
-        
-        for(int i = 1; i <= 5; i++) {
-            TrackableRaceDescriptor trackableRace = new TrackableRaceDescriptor(EVENT,  String.format(RACE, i), BOAT_CLASS);
-            TrackedRaceDescriptor trackedRace = new TrackedRaceDescriptor(this.regatta.toString(), BOAT_CLASS, String.format(RACE, i));
+        for (int i = 1; i <= 5; i++) {
+            String raceName = String.format(RACE, i);
+            TrackableRaceDescriptor trackableRace = new TrackableRaceDescriptor(EVENT,  raceName, BOAT_CLASS);
+            TrackedRaceDescriptor trackedRace = new TrackedRaceDescriptor(this.regatta.toString(), BOAT_CLASS, raceName);
             RaceDescriptor leaderboardRace = new RaceDescriptor(String.format("R%s", i), "Default", false, false, 0);
             
             this.trackableRaces.add(trackableRace);
             this.trackedRaces.add(trackedRace);
             this.leaderboardRaces.add(leaderboardRace);
         }
-        
         clearState(getContextRoot());
-        
         configureLeaderboard();
     }
     
@@ -93,21 +90,17 @@ public class TestLeaderboardConfiguration extends AbstractSeleniumTest {
         LeaderboardDetailsPanelPO leaderboardDetails = leaderboardConfiguration.getLeaderboardDetails(this.regatta.toString());
         
         Integer[] expectedPointsForFindelJens = new Integer[] {2, 18, 12, 4, 7};
-        Integer[] expectedRankForFindelJens = new Integer[] {2, 8, 10, 6, 5};
+        Integer[] expectedRankForFindelJens = new Integer[] {3, 9, 11, 7, 6};
         
         // Link the races and check the leaderboard again
-        for(int i = 0; i < 5; i++) {
+        for (int i = 0; i < 5; i++) {
             leaderboardDetails.linkRace(this.leaderboardRaces.get(i), this.trackedRaces.get(i));
-            
             leaderboardWindow.switchToWindow();
-            
             leaderboard.refresh();
-            
             List<LeaderboardEntry> allEntries = table.getEntries();
             LeaderboardEntry findelJens = table.getEntry("8875");
             Integer points = findelJens.getPointsForRace(String.format("R%s", i + 1));
             Integer rank = findelJens.getTotalRank();
-            
             // Assertions
             assertThat("Number of competitors does not match",
                     allEntries.size(), equalTo(28));
@@ -115,7 +108,6 @@ public class TestLeaderboardConfiguration extends AbstractSeleniumTest {
                     points, equalTo(expectedPointsForFindelJens[i]));
             assertThat("Total rank after " + (i + 1) + " race(s) does not match for competitor '8875' (Findel, Jens)",
                     rank, equalTo(expectedRankForFindelJens[i]));
-            
             adminConsoleWindow.switchToWindow();
         }
     }
@@ -125,38 +117,29 @@ public class TestLeaderboardConfiguration extends AbstractSeleniumTest {
         WindowManager manager = this.environment.getWindowManager();
         WebDriverWindow adminConsoleWindow = manager.getCurrentWindow();
         WebDriverWindow leaderboardWindow = manager.openNewWindow();
-        
-        // Go to the administration console and link al 5 races
+        // Go to the administration console and link all 5 races
         AdminConsolePage adminConsole = AdminConsolePage.goToPage(getWebDriver(), getContextRoot());
         LeaderboardConfigurationPanelPO leaderboardConfiguration = adminConsole.goToLeaderboardConfiguration();
         LeaderboardDetailsPanelPO leaderboardDetails = leaderboardConfiguration.getLeaderboardDetails(this.regatta.toString());
-        
         leaderboardDetails.linkRace(this.leaderboardRaces.get(0), this.trackedRaces.get(0));
         leaderboardDetails.linkRace(this.leaderboardRaces.get(1), this.trackedRaces.get(1));
         leaderboardDetails.linkRace(this.leaderboardRaces.get(2), this.trackedRaces.get(2));
         leaderboardDetails.linkRace(this.leaderboardRaces.get(3), this.trackedRaces.get(3));
         leaderboardDetails.linkRace(this.leaderboardRaces.get(4), this.trackedRaces.get(4));
-        
         // Open the leaderboard in our second window
         leaderboardWindow.switchToWindow();
-        
         LeaderboardPage leaderboard = LeaderboardPage.goToPage(getWebDriver(), getContextRoot(), LEADERBOARD, false);
         LeaderboardTablePO table = leaderboard.getLeaderboardTable();
-        
         // Go back to the administration console and delete third race
         adminConsoleWindow.switchToWindow();
-        
         RegattaStructureManagementPanelPO regattaStructure = adminConsole.goToRegattaStructure();
         RegattaDetailsCompositePO regattaDetails = regattaStructure.getRegattaDetails(this.regatta);
         SeriesEditDialogPO seriesDialog = regattaDetails.editSeries(RegattaStructureManagementPanelPO.DEFAULT_SERIES_NAME);
         seriesDialog.deleteRace("R3");
         seriesDialog.pressOk(true);
-        
         // Now we can check the result with our expectation
         leaderboardWindow.switchToWindow();
-        
         leaderboard.refresh();
-        
         assertThat("Race names do not match after deletion of race 'R3'",
                 table.getRaceNames(), equalTo(Arrays.asList("R1", "R2", "R4", "R5")));
     }
@@ -168,7 +151,7 @@ public class TestLeaderboardConfiguration extends AbstractSeleniumTest {
         WebDriverWindow adminConsoleWindow = manager.getCurrentWindow();
         WebDriverWindow leaderboardWindow = manager.openNewWindow();
         
-        // Go to the administration console and link al 5 races
+        // Go to the administration console and link all 5 races
         AdminConsolePage adminConsole = AdminConsolePage.goToPage(getWebDriver(), getContextRoot());
         LeaderboardConfigurationPanelPO leaderboardConfiguration = adminConsole.goToLeaderboardConfiguration();
         LeaderboardDetailsPanelPO leaderboardDetails = leaderboardConfiguration.getLeaderboardDetails(this.regatta.toString());
@@ -196,11 +179,8 @@ public class TestLeaderboardConfiguration extends AbstractSeleniumTest {
         
         // Now we can check the result with our expectation
         leaderboardWindow.switchToWindow();
-        
         leaderboard.refresh();
-        
         List<String> races = table.getRaceNames();
-        
         assertThat("Race names do not match after renaming race 'R1' to 'Q'",
                 races, equalTo(Arrays.asList("Q", "R2", "R3", "R4", "R5")));
     }
@@ -234,11 +214,11 @@ public class TestLeaderboardConfiguration extends AbstractSeleniumTest {
         }
         
         TrackedRacesListPO trackedRacesList = tracTracEvents.getTrackedRacesList();
-        trackedRacesList.waitForTrackedRaces(this.trackedRaces, Status.TRACKING);
+        trackedRacesList.waitForTrackedRaces(this.trackedRaces, Status.FINISHED); // TracAPI puts REPLAY races into FINISHED mode when done loading
         // TODO: There exists a bug in Selenium with key modifiers (Issue 3734 and 6817), so we can't use multi
         //       selection (Firefox on Windows)
         //trackedRacesList.stopTracking(this.trackedRaces);
-        for(TrackedRaceDescriptor race : this.trackedRaces) {
+        for (TrackedRaceDescriptor race : this.trackedRaces) {
             trackedRacesList.stopTracking(race);
         }
     }

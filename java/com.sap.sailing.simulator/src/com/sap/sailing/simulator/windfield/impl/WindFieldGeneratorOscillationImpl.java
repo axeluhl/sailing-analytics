@@ -4,6 +4,7 @@ import java.util.logging.Logger;
 
 import com.sap.sailing.domain.common.Bearing;
 import com.sap.sailing.domain.common.Distance;
+import com.sap.sailing.domain.common.Duration;
 import com.sap.sailing.domain.common.Position;
 import com.sap.sailing.domain.common.Speed;
 import com.sap.sailing.domain.common.SpeedWithBearing;
@@ -13,7 +14,7 @@ import com.sap.sailing.domain.common.impl.KnotSpeedImpl;
 import com.sap.sailing.domain.common.impl.KnotSpeedWithBearingImpl;
 import com.sap.sailing.domain.tracking.Wind;
 import com.sap.sailing.domain.tracking.impl.WindImpl;
-import com.sap.sailing.simulator.Boundary;
+import com.sap.sailing.simulator.Grid;
 import com.sap.sailing.simulator.TimedPosition;
 import com.sap.sailing.simulator.windfield.WindControlParameters;
 import com.sap.sailing.simulator.windfield.WindFieldGenerator;
@@ -31,12 +32,12 @@ public class WindFieldGeneratorOscillationImpl extends WindFieldGeneratorImpl im
     
     private static Logger logger = Logger.getLogger(WindFieldGeneratorOscillationImpl.class.getName());
 
-    public WindFieldGeneratorOscillationImpl(Boundary boundary, WindControlParameters windParameters) {
+    public WindFieldGeneratorOscillationImpl(Grid boundary, WindControlParameters windParameters) {
         super(boundary, windParameters);
     }
 
     @Override
-    public void generate(TimePoint start, TimePoint end, TimePoint step) {
+    public void generate(TimePoint start, TimePoint end, Duration step) {
         super.generate(start,end,step);
         if (positions == null || positions.length < 1) {
             return;

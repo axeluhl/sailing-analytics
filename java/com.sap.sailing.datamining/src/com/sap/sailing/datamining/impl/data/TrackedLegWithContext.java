@@ -2,7 +2,6 @@ package com.sap.sailing.datamining.impl.data;
 
 import com.sap.sailing.datamining.data.HasTrackedLegContext;
 import com.sap.sailing.datamining.data.HasTrackedRaceContext;
-import com.sap.sailing.domain.base.Event;
 import com.sap.sailing.domain.base.Fleet;
 import com.sap.sailing.domain.base.Regatta;
 import com.sap.sailing.domain.common.LegType;
@@ -21,12 +20,12 @@ public class TrackedLegWithContext extends TrackedRaceWithContext implements Has
     private boolean legTypeHasBeenInitialized;
 
     public TrackedLegWithContext(HasTrackedRaceContext trackedRaceContext, TrackedLeg trackedLeg, int legNumber) {
-        this(trackedRaceContext.getEvent(), trackedRaceContext.getRegatta(), trackedRaceContext.getFleet(),
+        this(trackedRaceContext.getRegatta(), trackedRaceContext.getFleet(),
                 trackedRaceContext.getTrackedRace(), trackedLeg, legNumber);
     }
     
-    public TrackedLegWithContext(Event event, Regatta regatta, Fleet fleet, TrackedRace trackedRace, TrackedLeg trackedLeg, int legNumber) {
-        super(event, regatta, fleet, trackedRace);
+    public TrackedLegWithContext(Regatta regatta, Fleet fleet, TrackedRace trackedRace, TrackedLeg trackedLeg, int legNumber) {
+        super(regatta, fleet, trackedRace);
         this.trackedLeg = trackedLeg;
         this.legNumber = legNumber;
     }

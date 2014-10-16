@@ -24,7 +24,6 @@ import com.google.gwt.view.client.ListDataProvider;
 import com.google.gwt.view.client.ProvidesKey;
 import com.google.gwt.view.client.SelectionModel;
 import com.google.gwt.view.client.SingleSelectionModel;
-import com.sap.sailing.gwt.home.client.place.event.EventPlace;
 import com.sap.sailing.gwt.ui.shared.ClickableSafeHtmlCell;
 import com.sap.sailing.gwt.ui.shared.EventDTO;
 import com.sap.sse.common.Util;
@@ -46,8 +45,6 @@ public class EventsTable extends Composite {
     @UiField(provided = true)
     SimplePager pager;
 
-    private final EventsActivity activity;
-
     /**
      * Constructor.
      * 
@@ -55,7 +52,6 @@ public class EventsTable extends Composite {
      *            the constants
      */
     public EventsTable(EventsActivity activity) {
-        this.activity = activity;
         initTable();
         initWidget(uiBinder.createAndBindUi(this));
     }
@@ -124,7 +120,7 @@ public class EventsTable extends Composite {
         nameColumn.setFieldUpdater(new FieldUpdater<EventDTO, SafeHtml>() {
             @Override
             public void update(int index, EventDTO object, SafeHtml value) {
-                activity.goTo(new EventPlace(object.id.toString()));
+                // activity.goTo(new EventPlace(object.id.toString()));
             }
         });
         nameColumn.setSortable(true);

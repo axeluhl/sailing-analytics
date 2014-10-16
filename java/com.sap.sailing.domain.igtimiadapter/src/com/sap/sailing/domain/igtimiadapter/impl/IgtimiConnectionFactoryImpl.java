@@ -7,6 +7,8 @@ import java.net.URI;
 import java.net.URISyntaxException;
 import java.net.URLEncoder;
 import java.util.ArrayList;
+import java.util.Collections;
+import java.util.Comparator;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -55,13 +57,15 @@ public class IgtimiConnectionFactoryImpl implements IgtimiConnectionFactory {
     private static final Logger logger = Logger.getLogger(IgtimiConnectionFactoryImpl.class.getName());
     
     private final Map<Account, String> accessTokensByAccount;
-    private Map<String, Account> accountsByEmail;
+    private final Map<String, Account> accountsByEmail;
+    private final Map<Account, IgtimiConnection> connectionsByAccount;
     private final Client client;
     private final MongoObjectFactory mongoObjectFactory;
     
     public IgtimiConnectionFactoryImpl(Client client, DomainObjectFactory domainObjectFactory, MongoObjectFactory mongoObjectFactory) {
         this.accessTokensByAccount = new HashMap<>();
         this.accountsByEmail = new HashMap<>();
+        connectionsByAccount = new HashMap<>();
         this.client = client;
         this.mongoObjectFactory = mongoObjectFactory;
         for (String accessToken : domainObjectFactory.getAccessTokens()) {
@@ -131,7 +135,15 @@ public class IgtimiConnectionFactoryImpl implements IgtimiConnectionFactory {
 
     @Override
     public IgtimiConnection connect(Account account) {
-        return new IgtimiConnectionImpl(this, account);
+        IgtimiConnection connection;
+        synchronized (connectionsByAccount) {
+            connection = connectionsByAccount.get(account);
+            if (connection == null) {
+                connection = new IgtimiConnectionImpl(this, account);
+                connectionsByAccount.put(account, connection);
+            }
+        }
+        return connection;
     }
 
     private String getAccessTokenForAccount(Account account) {
@@ -488,6 +500,16 @@ public class IgtimiConnectionFactoryImpl implements IgtimiConnectionFactory {
             URI uri = new URI((String) serverUrl);
             result.add(uri);
         }
+        // sort those to the front that don't do port 443 nor wss://
+        Collections.sort(result, new Comparator<URI>() {
+            @Override
+            public int compare(URI o1, URI o2) {
+                int o1Score = (o1.toString().contains("443") ? 1 : 0) + (o1.toString().contains("wss") ? 1 : 0);
+                int o2Score = (o2.toString().contains("443") ? 1 : 0) + (o2.toString().contains("wss") ? 1 : 0);
+                return o1Score - o2Score;
+            }
+        });
+        logger.info("Trying Igtimi WebSocket servers in the following order: "+result);
         return result;
     }
 

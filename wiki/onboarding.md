@@ -2,19 +2,22 @@
 
 This document describes the onboarding process for a new team member (developer)
 
+First of all, make sure you've looked at http://www.amazon.de/Patterns-Elements-Reusable-Object-Oriented-Software/dp/0201633612. That's a great book, and knowing at least some of it will help you a great deal finding your way around our solution.
+
 ### Race Analysis Development Setup
 
 #### Installations
 
-1. Eclipse (e.g. Eclipse Classic 4.3.x (Kepler)), http://www.eclipse.org
+1. Eclipse (e.g. Eclipse Luna for Eclipse Committers), http://www.eclipse.org
 2. Eclipse Extensions
-  * Install Eclipse GWT should be version 2.6 (https://developers.google.com/eclipse/docs/download)
+  * Install Eclipse GWT should be version 2.6.1 (https://developers.google.com/eclipse/docs/download)
 3. Git (e.g. msysGit for Windows v1.7.10), http://git-scm.com
 4. MongoDB (e.g. Production Release 2.0.4), download: http://www.mongodb.org/
 5. RabbitMQ, download from http://www.rabbitmq.com/. Requires Erlang to be installed. RabbitMQ installer will assist in installing Erlang.
-6. JDK 1.6 (Java SE 6), http://jdk6.java.net (for GWT)
+6. JDK 1.6 (Java SE 6), http://jdk6.java.net (for Android)
 7. JDK 1.7 (Java SE 7), http://jdk7.java.net
-8. Maven 3.1.1 (or higher), http://maven.apache.org
+8. JDK 1.8 (Java SE 8), http://jdk8.java.net
+9. Maven 3.1.1 (or higher), http://maven.apache.org
 
 #### Further optional but recommended installations
 
@@ -43,7 +46,7 @@ This document describes the onboarding process for a new team member (developer)
  
 1. Get the content of the git repository
   * Generate SSH Keys with "ssh-keygen -t rsa -C "" " command in Cygwin Terminal (Not with Putty!!!)
-  * Clone the repository to your local file system from `ssh://[SAP-User]@git.wdf.sap.corp:29418/SAPSail/sapsailingcapture.git`  or `ssh://[user]@sapsailing.com/home/trac/git`
+  * Clone the repository to your local file system from `ssh://[SAP-User]@git.wdf.sap.corp:29418/SAPSail/sapsailingcapture.git`  or `ssh://[user]@sapsailing.com/home/trac/git`  User "trac" has all public ssh keys. 
 2. Check out the 'master' branch from the git repository. The 'master' branch is the main development branch. Please check that you start your work on this branch.
 3. Setup and configure Eclipse
   * Make absolutely sure to import CodeFormatter.xml (from $GIT_HOME/java) into your Eclipse preferences (Preferences->Java->Code Style->Fortmatter)

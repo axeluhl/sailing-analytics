@@ -1,5 +1,7 @@
 package com.sap.sailing.domain.leaderboard.impl;
 
+import java.io.IOException;
+import java.io.ObjectOutputStream;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.HashSet;
@@ -29,15 +31,21 @@ public class LeaderboardGroupImpl extends LeaderboardGroupBaseImpl implements Le
     /**
      * Creates a new leaderboard group with a new UUID as its ID.
      */
-    public LeaderboardGroupImpl(String name, String description, boolean displayGroupsInReverseOrder, List<? extends Leaderboard> leaderboards) {
-        this(UUID.randomUUID(), name, description, displayGroupsInReverseOrder, leaderboards);
+    public LeaderboardGroupImpl(String name, String description, String displayName,
+            boolean displayGroupsInReverseOrder, List<? extends Leaderboard> leaderboards) {
+        this(UUID.randomUUID(), name, description, displayName, displayGroupsInReverseOrder, leaderboards);
+    }
+    
+    private synchronized void writeObject(ObjectOutputStream oos) throws IOException {
+        oos.defaultWriteObject();
     }
 
     /**
      * Use this constructor when loading or deserializing a leaderboard group and the ID is known and is provided to the constructor.
      */
-    public LeaderboardGroupImpl(UUID id, String name, String description, boolean displayGroupsInReverseOrder, List<? extends Leaderboard> leaderboards) {
-        super(id, name, description);
+    public LeaderboardGroupImpl(UUID id, String name, String description, String displayName,
+            boolean displayGroupsInReverseOrder, List<? extends Leaderboard> leaderboards) {
+        super(id, name, description, displayName);
         this.displayGroupsInReverseOrder = displayGroupsInReverseOrder;
         this.leaderboards = new ArrayList<Leaderboard>(leaderboards);
         this.listeners = new HashSet<LeaderboardGroupListener>();
@@ -96,43 +104,47 @@ public class LeaderboardGroupImpl extends LeaderboardGroupBaseImpl implements Le
     }
 
     @Override
-    public int getIndexOf(Leaderboard leaderboard) {
+    public synchronized int getIndexOf(Leaderboard leaderboard) {
         return leaderboards.indexOf(leaderboard);
     }
 
     @Override
-    public synchronized void addLeaderboard(Leaderboard leaderboard) {
+    public void addLeaderboard(Leaderboard leaderboard) {
         addLeaderboardAt(leaderboard, leaderboards.size());
     }
     
     @Override
-    public synchronized void addLeaderboardAt(Leaderboard leaderboard, int index) {
-        leaderboards.add(index, leaderboard);
+    public void addLeaderboardAt(Leaderboard leaderboard, int index) {
+        synchronized (this) {
+            leaderboards.add(index, leaderboard);
+        }
         notifyLeaderboardGroupListenersAboutLeaderboardAdded(leaderboard);
     }
 
     @Override
-    public synchronized void addAllLeaderboards(Collection<Leaderboard> leaderboards) {
+    public void addAllLeaderboards(Collection<Leaderboard> leaderboards) {
         for (Leaderboard leaderboard : leaderboards) {
             addLeaderboard(leaderboard);
         }
     }
 
     @Override
-    public synchronized void removeLeaderboard(Leaderboard leaderboard) {
-        leaderboards.remove(leaderboard);
+    public void removeLeaderboard(Leaderboard leaderboard) {
+        synchronized (this) {
+            leaderboards.remove(leaderboard);
+        }
         notifyLeaderboardGroupListenersAboutLeaderboardRemoved(leaderboard);
     }
 
     @Override
-    public synchronized void removeAllLeaderboards(Collection<Leaderboard> leaderboards) {
+    public void removeAllLeaderboards(Collection<Leaderboard> leaderboards) {
         for (Leaderboard leaderboard : leaderboards) {
             removeLeaderboard(leaderboard);
         }
     }
 
     @Override
-    public synchronized void clearLeaderboards() {
+    public void clearLeaderboards() {
         for (Leaderboard leaderboard : getLeaderboards()) {
             removeLeaderboard(leaderboard);
         }

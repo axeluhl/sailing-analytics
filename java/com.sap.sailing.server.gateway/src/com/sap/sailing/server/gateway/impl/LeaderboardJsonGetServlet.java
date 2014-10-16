@@ -9,6 +9,7 @@ import java.util.LinkedHashMap;
 import java.util.LinkedHashSet;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
 import java.util.Map.Entry;
 import java.util.logging.Logger;
 
@@ -294,6 +295,8 @@ public class LeaderboardJsonGetServlet extends AbstractJsonHttpServlet implement
             jsonCompetitorEntries.add(jsonCompetitor);
             JSONObject jsonRaceColumns = new JSONObject();
             jsonCompetitor.put("raceScores", jsonRaceColumns);
+            final Set<RaceColumn> discardedRaceColumns = leaderboard.getResultDiscardingRule().getDiscardedRaceColumns(competitor, leaderboard,
+                    leaderboard.getRaceColumns(), resultTimePoint);
             for (RaceColumn raceColumn : leaderboard.getRaceColumns()) {
                 List<Competitor> rankedCompetitorsForColumn = rankedCompetitorsPerColumn.get(raceColumn);
                 if (rankedCompetitorsForColumn == null) {
@@ -306,7 +309,7 @@ public class LeaderboardJsonGetServlet extends AbstractJsonHttpServlet implement
                 jsonEntry.put("fleet", fleetOfCompetitor==null?"":fleetOfCompetitor.getName());
                 jsonEntry.put("netPoints", leaderboard.getNetPoints(competitor, raceColumn, resultTimePoint));
                 jsonEntry.put("uncorrectedNetPoints", leaderboard.getTrackedRank(competitor, raceColumn, resultTimePoint));
-                jsonEntry.put("totalPoints", leaderboard.getTotalPoints(competitor, raceColumn, resultTimePoint));
+                jsonEntry.put("totalPoints", leaderboard.getTotalPoints(competitor, raceColumn, resultTimePoint, discardedRaceColumns));
                 MaxPointsReason maxPointsReason = leaderboard.getMaxPointsReason(competitor, raceColumn, resultTimePoint);
                 jsonEntry.put("maxPointsReason", maxPointsReason != null ? maxPointsReason.toString(): null);
                 jsonEntry.put("rank", rankedCompetitorsForColumn.indexOf(competitor)+1);

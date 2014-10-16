@@ -52,6 +52,13 @@ public class TestFunctionProvider {
         externalClassesToScan.add(Test_ExternalLibraryClass.class);
         functionRegistry.registerAllWithExternalFunctionPolicy(externalClassesToScan);
     }
+    
+    @Test
+    public void testGetAllStatistics() {
+        FunctionProvider functionProvider = new RegistryFunctionProvider(functionRegistry);
+        Collection<Function<?>> expectedFunctions = functionRegistryUtil.getAllExpectedStatistics();
+        assertThat(functionProvider.getAllStatistics(), is(expectedFunctions));
+    }
 
     @Test
     public void testGetDimensionsForType() {

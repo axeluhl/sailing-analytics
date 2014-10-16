@@ -5,10 +5,11 @@ Bundle-SymbolicName: com.sap.sailing.freg.resultimport
 Bundle-Version: 1.0.0.qualifier
 Bundle-Activator: com.sap.sailing.freg.resultimport.impl.Activator
 Bundle-Vendor: SAP
-Bundle-RequiredExecutionEnvironment: JavaSE-1.7
+Bundle-RequiredExecutionEnvironment: JavaSE-1.8
 Import-Package: com.sap.sailing.resultimport,
  com.sap.sailing.resultimport.impl,
- org.osgi.framework;version="1.3.0"
+ org.osgi.framework;version="1.3.0",
+ org.osgi.util.tracker;version="1.5.1"
 Bundle-ActivationPolicy: lazy
 Require-Bundle: com.sap.sailing.domain.common,
  com.sap.sailing.domain,

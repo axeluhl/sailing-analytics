@@ -10,6 +10,7 @@ import com.sap.sailing.domain.base.Competitor;
 import com.sap.sailing.domain.base.CompetitorStore;
 import com.sap.sailing.domain.base.DomainFactory;
 import com.sap.sailing.domain.base.ObjectInputStreamResolvingAgainstDomainFactory;
+import com.sap.sailing.domain.base.Regatta;
 import com.sap.sailing.domain.base.impl.MasterDataImportInformation;
 import com.sap.sailing.domain.base.impl.RegattaImpl;
 import com.sap.sailing.domain.common.MasterDataImportObjectCreationCount;
@@ -44,8 +45,6 @@ public class MasterDataImporter {
         @SuppressWarnings("unchecked")
         final List<Serializable> competitorIds = (List<Serializable>) objectInputStream.readObject();
 
-
-
         if (override) {
             setAllowCompetitorsDataToBeReset(competitorIds);
         }
@@ -54,6 +53,13 @@ public class MasterDataImporter {
         TopLevelMasterData topLevelMasterData = (TopLevelMasterData) objectInputStream.readObject();
 
         RegattaImpl.setOngoingMasterDataImport(null);
+        
+        // in order to restore all listeners we need to initialize the regatta
+        // after the whole object graph has been restored
+        for (Regatta regatta : topLevelMasterData.getAllRegattas()) {
+            RegattaImpl regattaImpl = (RegattaImpl)regatta;
+            regattaImpl.initializeSeriesAfterDeserialize();
+        }
 
         racingEventService.createOrUpdateDataImportProgressWithReplication(importOperationId, 0.3,
                 "Data-Transfer Complete, Initializing Import Operation", 0.5);

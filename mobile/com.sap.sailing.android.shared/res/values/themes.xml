@@ -1,0 +1,55 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources xmlns:android="http://schemas.android.com/apk/res/android">
+
+    <style name="Theme.DimDisabledDialog" parent="Theme.Welter">
+        <item name="android:backgroundDimEnabled">false</item>
+    </style>
+
+    <style name="Theme.Welter" parent="android:Theme.Holo.Light">
+        <item name="android:actionDropDownStyle">@style/MyDropDownNav</item>
+        <item name="android:actionBarStyle">@style/Widget.Welter.ActionBar</item>
+        <item name="android:textColorPrimary">@color/welter_deep_gray</item>
+        <item name="android:actionOverflowButtonStyle">@android:style/Widget.Holo.ActionButton.Overflow</item>>
+        <!-- <item name="timePickerStyle">@style/Widget.TimePicker</item> -->
+
+
+        <!--
+        <item name="android:textColorSecondary">@color/welter_white</item>
+        <item name="android:textColorTertiary">@color/welter_white</item>
+        <item name="android:textColorPrimaryInverse">@color/welter_white</item>
+        <item name="android:textColorSecondaryInverse">@color/welter_white</item>
+        <item name="android:textColorTertiaryInverse">@color/welter_white</item>
+        <item name="android:textColorPrimaryDisableOnly">@color/welter_white</item>
+        <item name="android:textColorPrimaryInverseDisableOnly">@color/welter_white</item>
+        <item name="android:textColorPrimaryNoDisable">@color/welter_white</item>
+        <item name="android:textColorSecondaryNoDisable">@color/welter_white</item>
+        <item name="android:textColorPrimaryInverseNoDisable">@color/welter_white</item>
+        <item name="android:textColorSecondaryInverseNoDisable">@color/welter_white</item>
+        <item name="android:textColorHint">@color/welter_white</item>
+        <item name="android:textColorHintInverse">@color/welter_white</item>
+         
+        <item name="android:textColorSearchUrl">@color/welter_white</item>
+        
+        <item name="android:textColorHighlight">@color/welter_white</item>
+        <item name="android:textColorHighlightInverse">@color/welter_white</item>
+        <item name="android:textColorLink">@color/welter_white</item>
+        <item name="android:textColorLinkInverse">@color/welter_white</item>
+        <item name="android:textColorAlertDialogListItem">@color/welter_white</item>
+        -->
+
+
+        <!--
+ 		<item name="android:windowTitleStyle">@style/WindowTitle.Welter</item>
+ 		<item name="android:windowTitleSize">@dimen/Welter.TitleBarSize</item>
+ 		<item name="android:windowTitleBackgroundStyle">@style/WindowTitleBackground.Welter</item>
+ 		<item name="android:windowBackground">@color/welter_dark_gray</item>	
+		<item name="android:listViewStyle">@style/Widget.ListView.Welter</item>
+ 		 item name="android:windowNoTitle">true</item 
+        <item name="android:windowContentOverlay">@null</item>
+        <item name="android:tabWidgetStyle">@style/LightTabWidget</item>
+        -->
+    </style>
+
+    <style name="Theme" parent="android:Theme.Light.NoTitleBar"></style>
+
+</resources>

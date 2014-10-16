@@ -9,7 +9,7 @@ import org.moxieapps.gwt.highcharts.client.Series;
 import org.moxieapps.gwt.highcharts.client.plotOptions.LinePlotOptions;
 
 import com.google.gwt.user.client.ui.Widget;
-import com.sap.sailing.gwt.ui.datamining.client.ResultsPresenter;
+import com.sap.sailing.gwt.ui.datamining.ResultsPresenter;
 import com.sap.sse.datamining.shared.GroupKey;
 import com.sap.sse.datamining.shared.QueryResult;
 

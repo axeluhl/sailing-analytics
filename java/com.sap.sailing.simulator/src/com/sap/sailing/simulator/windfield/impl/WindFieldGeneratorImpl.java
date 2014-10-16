@@ -5,6 +5,7 @@ import java.util.Map;
 import java.util.logging.Logger;
 
 import com.sap.sailing.domain.base.impl.KilometersPerHourSpeedWithBearingImpl;
+import com.sap.sailing.domain.common.Duration;
 import com.sap.sailing.domain.common.Position;
 import com.sap.sailing.domain.common.SpeedWithBearing;
 import com.sap.sailing.domain.common.TimePoint;
@@ -12,7 +13,7 @@ import com.sap.sailing.domain.common.impl.DegreeBearingImpl;
 import com.sap.sailing.domain.common.impl.KnotSpeedImpl;
 import com.sap.sailing.domain.tracking.Wind;
 import com.sap.sailing.domain.tracking.impl.WindImpl;
-import com.sap.sailing.simulator.Boundary;
+import com.sap.sailing.simulator.Grid;
 import com.sap.sailing.simulator.Path;
 import com.sap.sailing.simulator.TimedPosition;
 import com.sap.sailing.simulator.TimedPositionWithSpeed;
@@ -26,7 +27,7 @@ import com.sap.sse.common.Util;
 public abstract class WindFieldGeneratorImpl implements WindFieldGenerator {
 
     private static final long serialVersionUID = -6366698648104363491L;
-    protected Boundary boundary;
+    protected Grid boundary;
     protected WindControlParameters windParameters;
     protected Position[][] positions;
   
@@ -41,11 +42,11 @@ public abstract class WindFieldGeneratorImpl implements WindFieldGenerator {
     /**
      * TimePoint which constitutes one unit of time
      */
-    protected TimePoint timeStep;
+    protected Duration timeStep;
 
     private static Logger logger = Logger.getLogger("com.sap.sailing.windfield");
 
-    public WindFieldGeneratorImpl(Boundary boundary, WindControlParameters windParameters) {
+    public WindFieldGeneratorImpl(Grid boundary, WindControlParameters windParameters) {
     	this.boundary = boundary;
     	this.windParameters = windParameters;
     	this.positions = null;
@@ -57,7 +58,7 @@ public abstract class WindFieldGeneratorImpl implements WindFieldGenerator {
     }
 
     @Override
-    public void setBoundary(Boundary boundary) {
+    public void setBoundary(Grid boundary) {
         this.boundary = boundary;
     }
 
@@ -76,7 +77,7 @@ public abstract class WindFieldGeneratorImpl implements WindFieldGenerator {
     }
 
     @Override
-    public Boundary getBoundaries() {
+    public Grid getGrid() {
     	return boundary;
     }
 
@@ -96,7 +97,7 @@ public abstract class WindFieldGeneratorImpl implements WindFieldGenerator {
     	LinkedList<TimedPositionWithSpeed> path = new LinkedList<TimedPositionWithSpeed>();
     	path.add(new TimedPositionWithSpeedImpl(currentTime, currentPosition, null));
 
-    	while(boundary.isWithinBoundaries(currentPosition)) {
+    	while(boundary.inBounds(currentPosition)) {
     		Wind currentWind = this.getWind(new TimedPositionImpl(startTime, currentPosition));
     		TimePoint middleTime = currentTime.plus(timeStep/2);
     		Position middlePosition;
@@ -137,7 +138,7 @@ public abstract class WindFieldGeneratorImpl implements WindFieldGenerator {
     }
 
     public Util.Pair<Integer, Integer> getPositionIndex(Position p) {
-    	Util.Pair<Integer, Integer> gIdx = boundary.getGridIndex(p);
+    	Util.Pair<Integer, Integer> gIdx = boundary.getIndex(p);
         if ((gIdx.getA() != null) && (gIdx.getB() != null)) {
             return gIdx;
         } else {
@@ -155,7 +156,7 @@ public abstract class WindFieldGeneratorImpl implements WindFieldGenerator {
     }
 
     @Override
-    public void generate(TimePoint start, TimePoint end, TimePoint step) {
+    public void generate(TimePoint start, TimePoint end, Duration step) {
         this.startTime = start;
         this.endTime = end;
         this.timeStep = step;
@@ -167,7 +168,7 @@ public abstract class WindFieldGeneratorImpl implements WindFieldGenerator {
     }
 
     @Override
-    public TimePoint getTimeStep() {
+    public Duration getTimeStep() {
         return this.timeStep;
     }
 

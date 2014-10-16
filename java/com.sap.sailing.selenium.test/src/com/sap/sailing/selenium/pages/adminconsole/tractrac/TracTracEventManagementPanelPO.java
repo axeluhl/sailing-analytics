@@ -170,9 +170,9 @@ public class TracTracEventManagementPanelPO extends PageArea {
         CellTablePO<DataEntryPO> table = getTrackableRacesTable();
         
         for(DataEntryPO entry : table.getEntries()) {
-            String event = entry.getColumnContent(0);
-            String race = entry.getColumnContent(1);
-            String boatClass = entry.getColumnContent(2);
+            String event = entry.getColumnContent("Event");
+            String race = entry.getColumnContent("Race");
+            String boatClass = entry.getColumnContent("Boat Class");
             
             descriptors.add(new TrackableRaceDescriptor(event, race, boatClass));
         }
@@ -204,7 +204,6 @@ public class TracTracEventManagementPanelPO extends PageArea {
     
     public void setReggataForTracking(String regatta) {
         Select select = new Select(this.availableRegattasListBox);
-        
         select.selectByValue(regatta);
     }
     
@@ -238,28 +237,22 @@ public class TracTracEventManagementPanelPO extends PageArea {
         CellTablePO<DataEntryPO> table = getTrackableRacesTable();
         List<DataEntryPO> entries = table.getEntries();
         Iterator<DataEntryPO> iterator = entries.iterator();
-        
-        while(iterator.hasNext()) {
+        while (iterator.hasNext()) {
             DataEntryPO entry = iterator.next();
-            
-            String event = entry.getColumnContent(0);
-            String race = entry.getColumnContent(1);
-            String boatClass = entry.getColumnContent(2);
-            
+            String event = entry.getColumnContent("Event");
+            String race = entry.getColumnContent("Race");
+            String boatClass = entry.getColumnContent("Boat Class");
             TrackableRaceDescriptor descriptor = new TrackableRaceDescriptor(event, race, boatClass);
-            
-            if(!races.contains(descriptor))
+            if (!races.contains(descriptor)) {
                 iterator.remove();
+            }
         }
-                
         table.selectEntries(entries);
-        
         this.startTrackingButton.click();
-        
         ExpectedCondition<Alert> condition = ExpectedConditions.alertIsPresent();
-        
-        if(condition.apply(this.driver) == null)
+        if (condition.apply(this.driver) == null) {
             waitForAjaxRequests();
+        }
     }
     
     public TrackedRacesListPO getTrackedRacesList() {

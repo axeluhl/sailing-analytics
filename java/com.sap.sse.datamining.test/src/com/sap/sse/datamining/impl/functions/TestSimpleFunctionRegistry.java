@@ -13,6 +13,7 @@ import org.junit.Test;
 
 import com.sap.sse.datamining.functions.Function;
 import com.sap.sse.datamining.functions.FunctionRegistry;
+import com.sap.sse.datamining.test.functions.registry.test_contexts.Test_HasContextWithDeadConnectorEnd;
 import com.sap.sse.datamining.test.functions.registry.test_contexts.Test_HasLegContext;
 import com.sap.sse.datamining.test.functions.registry.test_contexts.Test_HasRaceContext;
 import com.sap.sse.datamining.test.functions.test_classes.Test_ExternalLibraryClass;
@@ -36,6 +37,7 @@ public class TestSimpleFunctionRegistry {
         internalClassesToScan = new HashSet<>();
         internalClassesToScan.add(Test_HasLegContext.class);
         internalClassesToScan.add(Test_HasRaceContext.class);
+        internalClassesToScan.add(Test_HasContextWithDeadConnectorEnd.class);
         
         externalClassesToScan = new HashSet<>();
         externalClassesToScan.add(Test_ExternalLibraryClass.class);

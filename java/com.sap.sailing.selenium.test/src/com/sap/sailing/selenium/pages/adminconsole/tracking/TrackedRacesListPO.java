@@ -153,10 +153,10 @@ public class TrackedRacesListPO extends PageArea {
         CellTablePO<DataEntryPO> table = getTrackedRacesTable();
         
         for(DataEntryPO entry : table.getEntries()) {
-            String regatta = entry.getColumnContent(0);
-            String boatClass = entry.getColumnContent(1);
-            String race = entry.getColumnContent(2);
-            String status = entry.getColumnContent(6);
+            String regatta = entry.getColumnContent("Regatta");
+            String boatClass = entry.getColumnContent("Boat Class");
+            String race = entry.getColumnContent("Race");
+            String status = entry.getColumnContent("Status");
             
             TrackedRaceDescriptor descriptor = new TrackedRaceDescriptor(regatta, boatClass, race);
             
@@ -211,7 +211,7 @@ public class TrackedRacesListPO extends PageArea {
     }
     
     public void waitForTrackedRaces(List<TrackedRaceDescriptor> races, Status status) {
-        waitForTrackedRaces(races, status, DEFAULT_WAIT_TIMEOUT);
+        waitForTrackedRaces(races, status, DEFAULT_WAIT_TIMEOUT_SECONDS);
     }
     
     public void waitForTrackedRaces(List<TrackedRaceDescriptor> races, Status status, int timeout) {
@@ -222,15 +222,13 @@ public class TrackedRacesListPO extends PageArea {
             public Object apply(List<TrackedRaceDescriptor> races) {
                 try {
                     refresh();
-                    
-                    for(Status status : getStatus(races)) {
-                        if(status != statusToWaitFor)
+                    for (Status status : getStatus(races)) {
+                        if (status != statusToWaitFor)
                             return Boolean.FALSE;
                     }
-                } catch(TimeoutException exception) {
+                } catch (TimeoutException exception) {
                     return Boolean.FALSE;
                 }
-                
                 return Boolean.TRUE;
             }
         });
@@ -279,9 +277,9 @@ public class TrackedRacesListPO extends PageArea {
         while(iterator.hasNext()) {
             DataEntryPO entry = iterator.next();
             
-            String regatta = entry.getColumnContent(0);
-            String boatClass = entry.getColumnContent(1);
-            String race = entry.getColumnContent(2);
+            String regatta = entry.getColumnContent("Regatta");
+            String boatClass = entry.getColumnContent("Boat Class");
+            String race = entry.getColumnContent("Race");
             
             TrackedRaceDescriptor descriptor = new TrackedRaceDescriptor(regatta, boatClass, race);
             

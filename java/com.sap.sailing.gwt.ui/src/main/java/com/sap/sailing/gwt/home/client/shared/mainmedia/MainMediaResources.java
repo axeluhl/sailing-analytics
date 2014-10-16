@@ -12,8 +12,9 @@ public interface MainMediaResources extends ClientBundle {
 
     public interface LocalCss extends CssResource {
         String media();
-        String media_photo();
-        String media_slideshow();
+        String media_swipecontainer();
+        String media_swipewrapper();
+        String media_swiperslide();
         String media_slideshow_controls();
         String media_slideshow_controlsnext();
         String media_slideshow_controlsprev();
@@ -21,6 +22,8 @@ public interface MainMediaResources extends ClientBundle {
         String mediavideos();
         String mainsection_header_title();
         String videopreview();
+        String videopreview_videocontainer();
+        String videopreview_videocontainer_video();
         String videopreview_title();
     }
 }

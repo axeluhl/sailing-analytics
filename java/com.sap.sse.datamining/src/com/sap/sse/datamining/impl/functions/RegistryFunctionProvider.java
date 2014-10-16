@@ -6,11 +6,11 @@ import java.util.HashSet;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
-import com.sap.sse.datamining.components.FilterCriteria;
+import com.sap.sse.datamining.components.FilterCriterion;
 import com.sap.sse.datamining.functions.Function;
 import com.sap.sse.datamining.functions.FunctionProvider;
 import com.sap.sse.datamining.functions.FunctionRegistry;
-import com.sap.sse.datamining.impl.functions.criterias.FunctionMatchesDTOFilterCriteria;
+import com.sap.sse.datamining.impl.functions.criterias.FunctionMatchesDTOFilterCriterion;
 import com.sap.sse.datamining.shared.dto.FunctionDTO;
 
 public class RegistryFunctionProvider implements FunctionProvider {
@@ -49,6 +49,15 @@ public class RegistryFunctionProvider implements FunctionProvider {
     
     public RegistryFunctionProvider(Collection<FunctionRegistry> functionRegistries) {
         this.functionRegistries = new HashSet<>(functionRegistries);
+    }
+    
+    @Override
+    public Collection<Function<?>> getAllStatistics() {
+        Collection<Function<?>> allStatistics = new HashSet<>();
+        for (FunctionRegistry registry : functionRegistries) {
+            allStatistics.addAll(registry.getStatistics());
+        }
+        return allStatistics;
     }
 
     @Override
@@ -139,7 +148,7 @@ public class RegistryFunctionProvider implements FunctionProvider {
 
     private Collection<Function<?>> getFunctionsForDTO(FunctionDTO functionDTO) {
         Collection<Function<?>> functionsMatchingDTO = new HashSet<>();
-        FilterCriteria<Function<?>> functionDTOFilterCriteria = new FunctionMatchesDTOFilterCriteria(functionDTO);
+        FilterCriterion<Function<?>> functionDTOFilterCriteria = new FunctionMatchesDTOFilterCriterion(functionDTO);
         for (FunctionRegistry functionRegistry : functionRegistries) {
             for (Function<?> function : functionRegistry.getAllFunctions()) {
                 if (functionDTOFilterCriteria.matches(function)) {

@@ -27,6 +27,7 @@ import java.util.logging.Level;
 import java.util.logging.Logger;
 
 import com.sap.sailing.domain.base.BoatClass;
+import com.sap.sailing.domain.common.AbstractBearing;
 import com.sap.sailing.domain.common.Distance;
 import com.sap.sailing.domain.common.Position;
 import com.sap.sailing.domain.common.Speed;
@@ -64,7 +65,7 @@ import com.sap.sse.common.Util;
  * When the connector is used with SailMaster instances hidden behind a "bridge" / firewall, no explicit requests are
  * possible, and the connector has to rely solely on the events it receives. It may, though, load recorded race-specific
  * messages through a {@link RaceSpecificMessageLoader} object. If a non-<code>null</code> {@link RaceSpecificMessageLoader}
- * is provided to the constructor, the connector will fetch the {@link #getRaces() list of races} from that loader.
+ * is provided to the constructor, the connector will fetch the {@link #getRace() race} from that loader.
  * Additionally, the connector will use the loader upon each {@link #trackRace(String)} to load all messages recorded
  * by the loader for the race requested so far.
  * <p>
@@ -388,7 +389,7 @@ public class SailMasterConnectorImpl extends SailMasterTransceiverImpl implement
                 final Speed velocityMadeGood = fixSections[vmgIndex].trim().length() == 0 ? null : new KnotSpeedImpl(
                         Double.valueOf(fixSections[vmgIndex]));
                 fixDetailIndex += 2;
-                final DegreeBearingImpl cog = new DegreeBearingImpl(
+                final AbstractBearing cog = new DegreeBearingImpl(
                         Double.valueOf(fixSections[fixDetailIndex++]));
                 final SpeedWithBearing speed = new KnotSpeedWithBearingImpl(speedOverGroundInKnots, cog);
                 final Integer nextMarkIndex = fixSections.length <= fixDetailIndex

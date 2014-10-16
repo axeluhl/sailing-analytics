@@ -112,6 +112,14 @@ public class ExpectedFunctionRegistryUtil {
         expectedExternalFunctions.get(declaringType).add(externalFunction);
     }
     
+    public Collection<Function<?>> getAllExpectedStatistics() {
+        Collection<Function<?>> expectedStatistics = new HashSet<>();
+        for (Collection<Function<?>> statisticsForType : this.expectedStatistics.values()) {
+            expectedStatistics.addAll(statisticsForType);
+        }
+        return expectedStatistics;
+    }
+    
     public Collection<Function<?>> getExpectedDimensionsFor(Class<?> declaringType) {
         Collection<Function<?>> expectedDimensions = this.expectedDimensions.get(declaringType);
         return expectedDimensions != null ? expectedDimensions : new ArrayList<Function<?>>();

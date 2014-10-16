@@ -3,12 +3,16 @@ package com.sap.sailing.gwt.home.client.place.start;
 import java.util.List;
 
 import com.google.gwt.user.client.ui.Widget;
-import com.sap.sailing.gwt.ui.shared.EventDTO;
+import com.sap.sailing.gwt.home.client.shared.stage.StageEventType;
+import com.sap.sailing.gwt.ui.shared.EventBaseDTO;
+import com.sap.sse.common.Util.Pair;
 
 public interface StartView {
     Widget asWidget();
     
-    void setFeaturedEvent(EventDTO featuredEvent);
+    void setFeaturedEvents(List<Pair<StageEventType, EventBaseDTO>> featuredEvents);
 
-    void setRecentEvents(List<EventDTO> recentEvents);
+    void setRecentEvents(List<EventBaseDTO> recentEvents);
+    
+    void adjustSizes();
 }

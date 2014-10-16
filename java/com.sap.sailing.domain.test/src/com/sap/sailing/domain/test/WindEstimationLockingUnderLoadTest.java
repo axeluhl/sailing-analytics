@@ -17,7 +17,6 @@ import org.mockito.invocation.InvocationOnMock;
 import org.mockito.stubbing.Answer;
 
 import com.sap.sailing.domain.base.RaceDefinition;
-import com.sap.sailing.domain.common.Position;
 import com.sap.sailing.domain.common.TimePoint;
 import com.sap.sailing.domain.common.TrackedRaceStatusEnum;
 import com.sap.sailing.domain.common.WindSource;
@@ -82,7 +81,7 @@ public class WindEstimationLockingUnderLoadTest {
         RaceDefinition mockedRaceDefinition = mock(RaceDefinition.class);
         when(result.getRace()).thenReturn(mockedRaceDefinition);
         when(mockedRaceDefinition.getName()).thenReturn("Test Race");
-        when(result.getEstimatedWindDirectionWithConfidence((Position) any(), (TimePoint) any())).thenAnswer(new Answer<WindWithConfidence<TimePoint>>() {
+        when(result.getEstimatedWindDirectionWithConfidence((TimePoint) any())).thenAnswer(new Answer<WindWithConfidence<TimePoint>>() {
                  public WindWithConfidence<TimePoint> answer(InvocationOnMock invocation) {
                      return randomWindOrNull();
                  }
@@ -137,7 +136,7 @@ public class WindEstimationLockingUnderLoadTest {
             @Override
             public void run() {
                 TimePoint now = MillisecondsTimePoint.now();
-                for (int i = 0; i < 100000; i++) {
+                for (int i = 0; i < 10000; i++) {
                     final WindImpl wind = new WindImpl(new DegreePosition(49, 8), now, new KnotSpeedWithBearingImpl(
                             /* speedInKnots */12., new DegreeBearingImpl(47)));
                     addMeasuredWindFix(wind);
@@ -150,7 +149,7 @@ public class WindEstimationLockingUnderLoadTest {
             @Override
             public void run() {
                 TimePoint now = MillisecondsTimePoint.now();
-                for (int i=0; i<100000; i++) {
+                for (int i=0; i<10000; i++) {
                     estimationTrack.getAveragedWind(/* position */ null, now);
                     now = now.plus(10);   // the cache quantizes to a full second; so not all time points will automatically fetch uncached values
                 }

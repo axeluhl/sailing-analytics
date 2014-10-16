@@ -49,6 +49,15 @@ public abstract class AbstractRetrievalProcessor<InputType, WorkingType, ResultT
             retrievedDataAmountLock.unlock();
         }
     }
+    
+    protected void decrementRetrievedDataAmount() {
+        retrievedDataAmountLock.lock();
+        try {
+            retrievedDataAmount--;
+        } finally {
+            retrievedDataAmountLock.unlock();
+        }
+    }
 
     @Override
     protected void setAdditionalData(AdditionalResultDataBuilder additionalDataBuilder) {

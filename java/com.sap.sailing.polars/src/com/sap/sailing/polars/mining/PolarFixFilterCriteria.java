@@ -7,9 +7,9 @@ import com.sap.sailing.domain.tracking.GPSFixMoving;
 import com.sap.sailing.domain.tracking.GPSFixTrack;
 import com.sap.sailing.domain.tracking.MarkPassing;
 import com.sap.sailing.domain.tracking.TrackedRace;
-import com.sap.sse.datamining.components.FilterCriteria;
+import com.sap.sse.datamining.components.FilterCriterion;
 
-public class PolarFixFilterCriteria implements FilterCriteria<GPSFixMovingWithPolarContext> {
+public class PolarFixFilterCriteria implements FilterCriterion<GPSFixMovingWithPolarContext> {
 
     @Override
     public boolean matches(GPSFixMovingWithPolarContext element) {

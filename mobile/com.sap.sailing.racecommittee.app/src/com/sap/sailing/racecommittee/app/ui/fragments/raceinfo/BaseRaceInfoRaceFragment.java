@@ -14,7 +14,7 @@ import com.sap.sailing.domain.racelog.state.racingprocedure.RacingProcedure;
 import com.sap.sailing.domain.racelog.state.racingprocedure.ReadonlyRacingProcedure;
 import com.sap.sailing.domain.racelog.state.racingprocedure.impl.BaseRacingProcedureChangedListener;
 import com.sap.sailing.racecommittee.app.R;
-import com.sap.sailing.racecommittee.app.logging.ExLog;
+import com.sap.sailing.android.shared.logging.ExLog;
 import com.sap.sailing.racecommittee.app.ui.fragments.RaceFragment;
 import com.sap.sailing.racecommittee.app.ui.fragments.dialogs.RaceDialogFragment;
 import com.sap.sailing.racecommittee.app.ui.utils.CourseDesignerChooser;
@@ -95,14 +95,14 @@ public abstract class BaseRaceInfoRaceFragment<ProcedureType extends RacingProce
     
     protected boolean updateFlagChangesCountdown(TextView targetView) {
         if (flagPoleCache == null) {
-            ExLog.i(BaseRaceInfoRaceFragment.class.getSimpleName(), "Refilling next-flag cache.");
+            ExLog.i(getActivity(), BaseRaceInfoRaceFragment.class.getSimpleName(), "Refilling next-flag cache.");
             TimePoint now = MillisecondsTimePoint.now();
             TimePoint startTime = getRaceState().getStartTime();
             FlagPoleState flagState = getRaceState().getRacingProcedure().getActiveFlags(startTime, now);
             List<FlagPole> flagChanges = flagState.computeUpcomingChanges();
             if (!flagChanges.isEmpty()) {
                 TimePoint changeAt = flagState.getNextStateValidFrom();
-                FlagPole changePole = getMostInterestingFlagPole(flagChanges);
+                FlagPole changePole = FlagPoleState.getMostInterestingFlagPole(flagChanges);
                 
                 renderFlagChangesCountdown(targetView, changeAt, changePole);
                 flagPoleCache = new FlagPoleCache(changePole, changeAt);
@@ -123,15 +123,6 @@ public abstract class BaseRaceInfoRaceFragment<ProcedureType extends RacingProce
     
     protected void onIndividualRecallChanged(boolean displayed) {
         // overwrite in derived fragments
-    }
-
-    private FlagPole getMostInterestingFlagPole(List<FlagPole> poles) {
-        for (FlagPole pole : poles) {
-            if (pole.isDisplayed()) {
-                return pole;
-            }
-        }
-        return poles.get(0);
     }
 
     private void renderFlagChangesCountdown(TextView targetView, TimePoint changeAt, FlagPole changePole) {

@@ -40,6 +40,7 @@ import com.sap.sailing.domain.tracking.GPSFixTrack;
 import com.sap.sailing.domain.tracking.TrackedLeg;
 import com.sap.sailing.domain.tracking.TrackedLegOfCompetitor;
 import com.sap.sailing.domain.tracking.TrackedRace;
+import com.sap.sailing.domain.tracking.WindPositionMode;
 import com.sap.sailing.server.gateway.jaxrs.AbstractSailingServerResource;
 import com.sap.sailing.server.gateway.jaxrs.UnitSerializationUtil;
 import com.sap.sailing.server.gateway.serialization.JsonSerializer;
@@ -566,6 +567,7 @@ public class RegattasResource extends AbstractSailingServerResource {
                 JSONObject jsonRaceResults = new JSONObject();
                 jsonRaceResults.put("name", trackedRace.getRace().getName());
                 jsonRaceResults.put("regatta", regatta.getName());
+                jsonRaceResults.put("startOfRace-ms", trackedRace.getStartOfRace() == null ? null : trackedRace.getStartOfRace().asMillis());
 
                 JSONArray jsonLegs = new JSONArray();
                 for (TrackedLeg leg : trackedRace.getTrackedLegs()) {
@@ -596,15 +598,38 @@ public class RegattasResource extends AbstractSailingServerResource {
                                 jsonCompetitorInLeg.put("averageSOG-kts", UnitSerializationUtil.knotsDecimalFormatter.format(averageSpeedOverGround.getKnots()));
                             }
                             try {
-								Integer numberOfTacks = trackedLegOfCompetitor.getNumberOfTacks(timePoint);
-								Integer numberOfJibes = trackedLegOfCompetitor.getNumberOfJibes(timePoint);
-								Integer numberOfPenaltyCircles = trackedLegOfCompetitor.getNumberOfPenaltyCircles(timePoint);
+                                Integer numberOfTacks = trackedLegOfCompetitor.getNumberOfTacks(timePoint);
+                                Integer numberOfJibes = trackedLegOfCompetitor.getNumberOfJibes(timePoint);
+                                Integer numberOfPenaltyCircles = trackedLegOfCompetitor
+                                        .getNumberOfPenaltyCircles(timePoint);
                                 jsonCompetitorInLeg.put("tacks", numberOfTacks);
                                 jsonCompetitorInLeg.put("jibes", numberOfJibes);
                                 jsonCompetitorInLeg.put("penaltyCircles", numberOfPenaltyCircles);
-							} catch (NoWindException e) {
-							}
-                            
+                            } catch (NoWindException e) {
+                            }
+
+                            TimePoint startTime = trackedLegOfCompetitor.getStartTime();
+                            TimePoint finishTime = trackedLegOfCompetitor.getFinishTime();
+                            TimePoint startOfRace = trackedRace.getStartOfRace();
+                            // between the start of the race and the start of the first leg we have no 'timeSinceGun'
+                            // for the competitor
+                            if (startOfRace != null && startTime != null) {
+                                long timeSinceGun = -1;
+                                if (finishTime != null) {
+                                    timeSinceGun = finishTime.asMillis() - startOfRace.asMillis();
+                                } else {
+                                    timeSinceGun = timePoint.asMillis() - startOfRace.asMillis();
+                                }
+                                if (timeSinceGun > 0) {
+                                    jsonCompetitorInLeg.put("timeSinceGun-ms", timeSinceGun);
+                                }
+                                Distance distanceSinceGun = trackedRace.getTrack(competitor).getDistanceTraveled(startOfRace,
+                                        finishTime != null ? finishTime : timePoint);
+                                if (distanceSinceGun != null) {
+                                    jsonCompetitorInLeg.put("distanceSinceGun-m", distanceSinceGun.getMeters());
+                                }
+                            }
+
                             Distance distanceTraveled = trackedLegOfCompetitor.getDistanceTraveled(timePoint);
                             if (distanceTraveled != null) {
                                 jsonCompetitorInLeg.put("distanceTraveled-m", UnitSerializationUtil.distanceDecimalFormatter.format(distanceTraveled.getMeters()));
@@ -621,7 +646,7 @@ public class RegattasResource extends AbstractSailingServerResource {
                             }
                             try {
                                 jsonCompetitorInLeg.put("gapToLeader-s",
-                                        trackedLegOfCompetitor.getGapToLeaderInSeconds(timePoint));
+                                        trackedLegOfCompetitor.getGapToLeaderInSeconds(timePoint, WindPositionMode.LEG_MIDDLE));
                             } catch (NoWindException e1) {
                                 // well, we don't know the wind direction... then no gap to leader will be shown...
                             }
@@ -642,5 +667,105 @@ public class RegattasResource extends AbstractSailingServerResource {
         return response;
     }
 
+    @GET
+    @Produces("application/json;charset=UTF-8")
+    @Path("{regattaname}/races/{racename}/competitors/live")
+    public Response getCompetitorLiveRanks(@PathParam("regattaname") String regattaName, @PathParam("racename") String raceName,
+            @DefaultValue("-1") @QueryParam("topN") Integer topN) {
+        Response response;
+        Regatta regatta = findRegattaByName(regattaName);
+        if (regatta == null) {
+            response = Response.status(Status.NOT_FOUND).entity("Could not find a regatta with name '" + regattaName + "'.").type(MediaType.TEXT_PLAIN).build();
+        } else {
+            RaceDefinition race = findRaceByName(regatta, raceName);
+            if (race == null) {
+                response = Response.status(Status.NOT_FOUND).entity("Could not find a race with name '" + raceName + "'.").type(MediaType.TEXT_PLAIN).build();
+            } else {     
+                TrackedRace trackedRace = findTrackedRace(regattaName, raceName);
+                Course course = trackedRace.getRace().getCourse();
+                Waypoint lastWaypoint = course.getLastWaypoint();
+
+                TimePoint timePoint = trackedRace.getTimePointOfNewestEvent() == null ? MillisecondsTimePoint.now()
+                        : trackedRace.getTimePointOfNewestEvent();
+                // if(trackedRace.isLive(timePoint)) {
+
+                JSONObject jsonLiveData = new JSONObject();
+                jsonLiveData.put("name", trackedRace.getRace().getName());
+                jsonLiveData.put("regatta", regatta.getName());
+
+                if(trackedRace.getStartOfRace() != null) {
+                    TimePoint startOfRace = trackedRace.getStartOfRace();
+                    TimePoint now =  MillisecondsTimePoint.now();
+                    jsonLiveData.put("startTime", startOfRace.asMillis());
+                    jsonLiveData.put("liveTime", now.asMillis());
+                    if(startOfRace.before(now)) {
+                        jsonLiveData.put("timeSinceStart-s", (now.asMillis() - startOfRace.asMillis()) / 1000.0);
+                    } else {
+                        jsonLiveData.put("timeToStart-s", (startOfRace.asMillis() - now.asMillis()) / 1000.0);
+                    }
+                }
+                
+                JSONArray jsonCompetitors = new JSONArray();
+                try {
+                    List<Competitor> competitorsFromBestToWorst = trackedRace.getCompetitorsFromBestToWorst(timePoint);
+                    Integer rank = 1;
+                    for (Competitor competitor : competitorsFromBestToWorst) {
+                        JSONObject jsonCompetitorInLeg = new JSONObject();
+                        
+                        if(topN != null && topN > 0 && rank > topN) {
+                            break;
+                        }
+                        jsonCompetitorInLeg.put("id", competitor.getId() != null ? competitor.getId().toString() : null);
+                        jsonCompetitorInLeg.put("name", competitor.getName());
+                        jsonCompetitorInLeg.put("sailNumber", competitor.getBoat().getSailID());
+                        jsonCompetitorInLeg.put("color", competitor.getColor() != null ? competitor.getColor().getAsHtml() : null);
+                        jsonCompetitorInLeg.put("rank", rank++);
+
+                        TrackedLegOfCompetitor currentLegOfCompetitor = trackedRace.getCurrentLeg(competitor, timePoint);
+                        if (currentLegOfCompetitor != null) {
+                            int indexOfWaypoint = course.getIndexOfWaypoint(currentLegOfCompetitor.getLeg().getFrom());
+                            jsonCompetitorInLeg.put("leg", indexOfWaypoint+1);
+
+                            Speed speedOverGround = currentLegOfCompetitor.getSpeedOverGround(timePoint);
+                            if(speedOverGround != null) {
+                                jsonCompetitorInLeg.put("speedOverGround-kts", roundDouble(speedOverGround.getKnots(), 2));
+                            }
+    
+                            Distance distanceTraveled = currentLegOfCompetitor.getDistanceTraveled(timePoint);
+                            if (distanceTraveled != null) {
+                                jsonCompetitorInLeg.put("distanceTraveled-m", roundDouble(distanceTraveled.getMeters(), 2));
+                            }
+                            
+                            Double gapToLeaderInSeconds = currentLegOfCompetitor.getGapToLeaderInSeconds(timePoint, WindPositionMode.LEG_MIDDLE);
+                            if(gapToLeaderInSeconds != null) {
+                                jsonCompetitorInLeg.put("gapToLeader-s", roundDouble(gapToLeaderInSeconds, 2));
+                            }
+                            
+                            Distance windwardDistanceToOverallLeader = currentLegOfCompetitor.getWindwardDistanceToOverallLeader(timePoint, WindPositionMode.LEG_MIDDLE);
+                            if(windwardDistanceToOverallLeader != null) {
+                                jsonCompetitorInLeg.put("gapToLeader-m", roundDouble(windwardDistanceToOverallLeader.getMeters(), 2));
+                            }
+                            jsonCompetitorInLeg.put("finished", false);
+                        } else {
+                            // we need to distinguish between competitors which did not start and competitors which already finished
+                            if(trackedRace.getMarkPassing(competitor, lastWaypoint) != null) {
+                                jsonCompetitorInLeg.put("finished", true);
+                            } else {
+                                jsonCompetitorInLeg.put("finished", false);
+                            }
+                        }
+                        jsonCompetitors.add(jsonCompetitorInLeg);
+                    }
+                } catch (NoWindException e1) {
+                    // well, we don't know the wind direction... then no gap to leader will be shown...
+                }
+                jsonLiveData.put("competitors", jsonCompetitors);
+                
+                String json = jsonLiveData.toJSONString();
+                return Response.ok(json, MediaType.APPLICATION_JSON).build();
+            }
+        }
+        return response;
+    }
 }
  

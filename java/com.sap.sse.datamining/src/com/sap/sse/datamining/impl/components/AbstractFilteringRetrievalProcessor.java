@@ -3,26 +3,19 @@ package com.sap.sse.datamining.impl.components;
 import java.util.Collection;
 import java.util.concurrent.Callable;
 import java.util.concurrent.ExecutorService;
-import java.util.concurrent.locks.Lock;
-import java.util.concurrent.locks.ReentrantLock;
 
-import com.sap.sse.datamining.AdditionalResultDataBuilder;
-import com.sap.sse.datamining.components.FilterCriteria;
+import com.sap.sse.datamining.components.FilterCriterion;
 import com.sap.sse.datamining.components.Processor;
 
 public abstract class AbstractFilteringRetrievalProcessor<InputType, WorkingType, ResultType> 
              extends AbstractRetrievalProcessor<InputType, WorkingType, ResultType> {
 
-    private final FilterCriteria<ResultType> criteria;
-    
-    private Lock filteredDataAmountLock;
-    private int filteredDataAmount;
+    private final FilterCriterion<ResultType> criteria;
 
     public AbstractFilteringRetrievalProcessor(ExecutorService executor,
-            Collection<Processor<ResultType>> resultReceivers, FilterCriteria<ResultType> criteria) {
+            Collection<Processor<ResultType>> resultReceivers, FilterCriterion<ResultType> criteria) {
         super(executor, resultReceivers);
         this.criteria = criteria;
-        filteredDataAmountLock = new ReentrantLock();
     }
     
     @Override
@@ -33,27 +26,13 @@ public abstract class AbstractFilteringRetrievalProcessor<InputType, WorkingType
             public ResultType call() throws Exception {
                 ResultType elementWithContext = superInstruction.call();
                 if (criteria.matches(elementWithContext)) {
-                    incrementFilteredDataAmount();
                     return elementWithContext;
+                } else {
+                    AbstractFilteringRetrievalProcessor.super.decrementRetrievedDataAmount();
+                    return createInvalidResult();
                 }
-                return createInvalidResult();
             }
         };
-    }
-
-    private void incrementFilteredDataAmount() {
-        filteredDataAmountLock.lock();
-        try {
-            filteredDataAmount++;
-        } finally {
-            filteredDataAmountLock.unlock();
-        }
-    }
-    
-    @Override
-    protected void setAdditionalData(AdditionalResultDataBuilder additionalDataBuilder) {
-        super.setAdditionalData(additionalDataBuilder);
-        additionalDataBuilder.setFilteredDataAmount(filteredDataAmount);
     }
 
 }

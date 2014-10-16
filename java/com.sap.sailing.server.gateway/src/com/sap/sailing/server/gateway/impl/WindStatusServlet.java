@@ -14,6 +14,7 @@ import javax.servlet.http.HttpServletResponse;
 
 import org.osgi.util.tracker.ServiceTracker;
 
+import com.sap.sailing.declination.DeclinationService;
 import com.sap.sailing.domain.igtimiadapter.Account;
 import com.sap.sailing.domain.igtimiadapter.BulkFixReceiver;
 import com.sap.sailing.domain.igtimiadapter.IgtimiConnection;
@@ -38,8 +39,11 @@ import com.sap.sailing.server.gateway.SailingServerHttpServlet;
 public class WindStatusServlet extends SailingServerHttpServlet implements IgtimiWindListener, BulkFixReceiver {
     private static final long serialVersionUID = -6791613843435003810L;
     
+    private final int NUMBER_OF_MESSAGES_TO_SHOW=20;
+    
     private static List<ExpeditionMessageInfo> lastExpeditionMessages;
     
+    private static Object lock = new Object();
     private static int igtimiRawMessageCount;
     private static List<IgtimiMessageInfo> lastIgtimiMessages;
     private static IgtimiWindReceiver igtimiWindReceiver;
@@ -55,15 +59,18 @@ public class WindStatusServlet extends SailingServerHttpServlet implements Igtim
     }
     
     private void initializeWindReceiver() {
-        if(!isExpeditionListenerRegistered) {
-            isExpeditionListenerRegistered = registerExpeditionListener();
-            lastExpeditionMessages = new ArrayList<WindStatusServlet.ExpeditionMessageInfo>();
+        synchronized (lock) {
+            if (!isExpeditionListenerRegistered) {
+                isExpeditionListenerRegistered = registerExpeditionListener();
+                lastExpeditionMessages = new ArrayList<WindStatusServlet.ExpeditionMessageInfo>();
+            }
         }
-        
-        if (!isIgtimiListenerRegistered) {
-            isIgtimiListenerRegistered = registerIgtimiListener();
-            lastIgtimiMessages = new ArrayList<WindStatusServlet.IgtimiMessageInfo>();
-            igtimiRawMessageCount = 0;
+        synchronized (lock) {
+            if (!isIgtimiListenerRegistered) {
+                isIgtimiListenerRegistered = registerIgtimiListener();
+                lastIgtimiMessages = new ArrayList<WindStatusServlet.IgtimiMessageInfo>();
+                igtimiRawMessageCount = 0;
+            }
         }
     }
 
@@ -81,14 +88,18 @@ public class WindStatusServlet extends SailingServerHttpServlet implements Igtim
         out.println("</head>");
         out.println("<body>");
         out.println("<h3>Igtimi Wind Status ("+igtimiRawMessageCount+" raw messages received)</h3>");
-        if (lastIgtimiMessages != null && lastIgtimiMessages.size() > 0) {
+        if (lastIgtimiMessages != null && !lastIgtimiMessages.isEmpty()) {
+            final List<IgtimiMessageInfo> copyOfLastIgtimiMessages;
+            synchronized (lastIgtimiMessages) {
+                copyOfLastIgtimiMessages = new ArrayList<>(WindStatusServlet.lastIgtimiMessages);
+            }
             int counter = 0;
-            for (ListIterator<IgtimiMessageInfo> iterator = WindStatusServlet.lastIgtimiMessages.listIterator(WindStatusServlet.lastIgtimiMessages.size()); iterator.hasPrevious();) {
+            for (ListIterator<IgtimiMessageInfo> iterator = copyOfLastIgtimiMessages.listIterator(copyOfLastIgtimiMessages.size()); iterator.hasPrevious();) {
                 counter++;
                 IgtimiMessageInfo message = iterator.previous();
                 out.println(message);
                 out.println("<br/>");
-                if (counter >= 10) {
+                if (counter >= NUMBER_OF_MESSAGES_TO_SHOW) {
                     break;
                 }
             }
@@ -100,9 +111,20 @@ public class WindStatusServlet extends SailingServerHttpServlet implements Igtim
             }
         }
         out.println("<h3>Expedition Wind Status</h3>");
-        if (lastExpeditionMessages.size()>0) {
-            for (ExpeditionMessageInfo message : lastExpeditionMessages) {
+        if (lastExpeditionMessages != null && !lastExpeditionMessages.isEmpty()) {
+            final List<ExpeditionMessageInfo> copyOfLastExpeditionMessages;
+            synchronized (lastExpeditionMessages) {
+                copyOfLastExpeditionMessages = new ArrayList<>(WindStatusServlet.lastExpeditionMessages);
+            }
+            int expeditionMsgCounter = 0;
+            for (ListIterator<ExpeditionMessageInfo> iterator = copyOfLastExpeditionMessages.listIterator(copyOfLastExpeditionMessages.size()); iterator.hasPrevious();) {
+                expeditionMsgCounter++;
+                ExpeditionMessageInfo message = iterator.previous();
                 out.println(message);
+                out.println("<br/>");
+                if (expeditionMsgCounter >= NUMBER_OF_MESSAGES_TO_SHOW) {
+                    break;
+                }
             }
         } else {
             out.println("<i>No Expedition messages received so far!</i>");
@@ -117,13 +139,13 @@ public class WindStatusServlet extends SailingServerHttpServlet implements Igtim
         ServiceTracker<IgtimiConnectionFactory, IgtimiConnectionFactory> igtimiServiceTracker = new ServiceTracker<IgtimiConnectionFactory, IgtimiConnectionFactory>(getContext(), IgtimiConnectionFactory.class, null);
         igtimiServiceTracker.open();
         IgtimiConnectionFactory igtimiConnectionFactory = igtimiServiceTracker.getService();
+        igtimiWindReceiver = new IgtimiWindReceiver(DeclinationService.INSTANCE);
+        igtimiWindReceiver.addListener(this);
         for (Account account : igtimiConnectionFactory.getAllAccounts()) {
             if (account.getUser() != null) {
                 IgtimiConnection igtimiConnection = igtimiConnectionFactory.connect(account);
                 try {
                     liveDataConnection = igtimiConnection.getOrCreateLiveConnection(igtimiConnection.getWindDevices());
-                    igtimiWindReceiver = new IgtimiWindReceiver(igtimiConnection.getWindDevices());
-                    igtimiWindReceiver.addListener(this);
                     liveDataConnection.addListener(igtimiWindReceiver);
                     liveDataConnection.addListener(this);
                     result = true;
@@ -145,12 +167,14 @@ public class WindStatusServlet extends SailingServerHttpServlet implements Igtim
             receiver.addListener(new ExpeditionListener() {
                 @Override
                 public void received(ExpeditionMessage message) {
-                    if(message != null && message.getBoatID() >= 0) {
+                    if (message != null && message.getBoatID() >= 0) {
                         ExpeditionMessageInfo info = new ExpeditionMessageInfo();
                         info.boatID = message.getBoatID();
                         info.message = message;
                         info.messageReceivedAt = new Date();
-                        lastExpeditionMessages.add(info);
+                        synchronized (lastExpeditionMessages) {
+                            lastExpeditionMessages.add(info);
+                        }
                     }
                 }
             } 
@@ -169,9 +193,13 @@ public class WindStatusServlet extends SailingServerHttpServlet implements Igtim
         
         public String toString() {
             if (message.getTrueWind() != null) {
-                return messageReceivedAt.toString() + ": [" + boatID + "] Knots: " + message.getTrueWind().getKnots() + " Bearing: " + message.getTrueWindBearing().getDegrees();
+                return messageReceivedAt.toString() + ": [" + boatID + "] Knots: " + message.getTrueWind().getKnots() + " From: " + getFromAsDegrees();
             }
             return messageReceivedAt.toString() + ": [" + boatID + "] " + message.getOriginalMessage();
+        }
+
+        private double getFromAsDegrees() {
+            return message.getTrueWindBearing().reverse().getDegrees();
         }
     }
     

@@ -1,6 +1,6 @@
 package com.sap.sailing.domain.tracking.impl;
 
-import com.sap.sailing.domain.base.impl.HasConfidenceImpl;
+import com.sap.sailing.domain.common.confidence.impl.HasConfidenceImpl;
 import com.sap.sailing.domain.tracking.Wind;
 import com.sap.sailing.domain.tracking.WindWithConfidence;
 

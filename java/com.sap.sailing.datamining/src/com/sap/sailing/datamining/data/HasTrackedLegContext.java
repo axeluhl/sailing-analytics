@@ -8,9 +8,9 @@ public interface HasTrackedLegContext extends HasTrackedRaceContext {
 
     public TrackedLeg getTrackedLeg();
     
-    @Dimension(messageKey="LegType")
+    @Dimension(messageKey="LegType", ordinal=5)
     public LegType getLegType();
-    @Dimension(messageKey="LegNumber")
+    @Dimension(messageKey="LegNumber", ordinal=6)
     public int getLegNumber();
 
 }

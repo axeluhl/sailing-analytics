@@ -2,60 +2,59 @@ package com.sap.sailing.gwt.home.client.place.events;
 
 import com.google.gwt.core.client.GWT;
 import com.google.gwt.event.dom.client.ClickEvent;
-import com.google.gwt.event.dom.client.ClickHandler;
 import com.google.gwt.uibinder.client.UiBinder;
 import com.google.gwt.uibinder.client.UiField;
 import com.google.gwt.uibinder.client.UiHandler;
 import com.google.gwt.user.client.ui.Anchor;
-import com.google.gwt.user.client.ui.Button;
-import com.google.gwt.user.client.ui.Composite;
-import com.google.gwt.user.client.ui.FlowPanel;
-import com.google.gwt.user.client.ui.TextBox;
 import com.google.gwt.user.client.ui.Widget;
-import com.sap.sailing.gwt.home.client.place.event.EventPlace;
-import com.sap.sailing.gwt.ui.shared.EventDTO;
+import com.sap.sailing.gwt.home.client.HomeResources;
+import com.sap.sailing.gwt.home.client.app.PlaceNavigator;
+import com.sap.sailing.gwt.home.client.place.events.recent.EventsOverviewRecent;
+import com.sap.sailing.gwt.home.client.place.events.upcoming.EventsOverviewUpcoming;
 
-public class TabletAndDesktopEventsView extends Composite implements EventsView {
+public class TabletAndDesktopEventsView extends AbstractEventsView {
     private static EventsPageViewUiBinder uiBinder = GWT.create(EventsPageViewUiBinder.class);
 
+    private final HomeResources homeRes = GWT.create(HomeResources.class);
+    
     interface EventsPageViewUiBinder extends UiBinder<Widget, TabletAndDesktopEventsView> {
     }
     
-    private final EventsActivity activity;
-
-    @UiField
-    TextBox queryInput;
-    @UiField
-    Button searchButton;
-    @UiField
-    FlowPanel eventListPanel;
-    @UiField(provided=true)
-    EventsTable eventsTable;
-
-    public TabletAndDesktopEventsView(EventsActivity activity) {
+    @UiField(provided=true) EventsOverviewRecent recentEventsWidget;
+    @UiField(provided=true) EventsOverviewUpcoming upcomingEventsWidget;
+    @UiField Anchor recentEventsLink;
+    @UiField Anchor upcomingEventsLink;
+    
+    public TabletAndDesktopEventsView(PlaceNavigator navigator) {
         super();
-        this.activity = activity;
-        eventsTable = new EventsTable(activity);
+        recentEventsWidget = new EventsOverviewRecent(navigator);
+        upcomingEventsWidget = new EventsOverviewUpcoming(navigator);
+        upcomingEventsWidget.setVisible(false);
+        
         initWidget(uiBinder.createAndBindUi(this));
-        queryInput.getElement().setId("queryInput");
     }
     
-    public void setEvents(Iterable<EventDTO> events) {
-        eventListPanel.clear();
-        for (final EventDTO event : events) {
-            Anchor request = new Anchor(event.getName());
-            request.addClickHandler(new ClickHandler() {
-                @Override
-                public void onClick(ClickEvent e) {
-                    TabletAndDesktopEventsView.this.activity.goTo(new EventPlace(event.id.toString()));
-                }
-            });
-            eventListPanel.add(request);
-        }
-        eventsTable.setEvents(events);
+    @UiHandler("recentEventsLink")
+    void recentsEventsClicked(ClickEvent event) {
+        recentEventsWidget.setVisible(true);
+        upcomingEventsWidget.setVisible(false);
+        
+        recentEventsLink.getElement().addClassName(homeRes.mainCss().navbar_buttonactive());
+        upcomingEventsLink.getElement().removeClassName(homeRes.mainCss().navbar_buttonactive());
     }
-
-    @UiHandler("searchButton")
-    void buttonClick(ClickEvent event) {
+    
+    @UiHandler("upcomingEventsLink")
+    void upcomingEventsClicked(ClickEvent event) {
+        recentEventsWidget.setVisible(false);
+        upcomingEventsWidget.setVisible(true);
+        
+        upcomingEventsLink.getElement().addClassName(homeRes.mainCss().navbar_buttonactive());
+        recentEventsLink.getElement().removeClassName(homeRes.mainCss().navbar_buttonactive());
+    }
+    
+    @Override 
+    protected void updateEventsUI() {
+        recentEventsWidget.updateEvents(getRecentEventsByYearOrderedByEndDate());
+        upcomingEventsWidget.updateEvents(getUpcomingEvents());
     }
 }

@@ -76,7 +76,7 @@ public class GwtTestCaseColumnToggling extends GWTTestCase {
             public void onSuccess(Util.Pair<String, List<TracTracRaceRecordDTO>> result) {
                 System.out.println("Listed races.");
                 for (TracTracRaceRecordDTO rr : result.getB()){
-                    if (rr.name.equals(TRACKED_RACE)){
+                    if (rr.getName().equals(TRACKED_RACE)){
                         rrDao = rr;
                     }
                 }
@@ -149,7 +149,7 @@ public class GwtTestCaseColumnToggling extends GWTTestCase {
                     @Override
                     public void onSuccess(Void result) {
                         System.out.println("Added column to leaderboard.");
-                        RaceColumnDTO race = new RaceColumnDTO(/* isValidInTotalScore */ null);
+                        RaceColumnDTO race = new RaceColumnDTO();
                         race.setName(COLUMN1_NAME);
                         race.setMedalRace(false);
                         leaderboardPanel.addColumn(leaderboardPanel.createRaceColumn(race));
@@ -178,7 +178,8 @@ public class GwtTestCaseColumnToggling extends GWTTestCase {
     private void getLeaderboardByNameAndDeleteColumn(){
         ArrayList<String> al = new ArrayList<String>();
         al.add(COLUMN1_NAME);
-        service.getLeaderboardByName(LEADERBOARD_NAME, new Date(), al, /* addOverallDetails */ false, /* previousLeaderboardId */ null, new AsyncCallback<IncrementalOrFullLeaderboardDTO>() {
+        service.getLeaderboardByName(LEADERBOARD_NAME, new Date(), al, /* addOverallDetails */ false, /* previousLeaderboardId */ null,
+                /* fillUncorrectedNetPoints */ false, new AsyncCallback<IncrementalOrFullLeaderboardDTO>() {
             @Override
             public void onFailure(Throwable caught) {
                 fail("Failed to get leaderboard.");

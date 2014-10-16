@@ -1,5 +1,6 @@
 package com.sap.sailing.datamining.factories;
 
+import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collection;
@@ -19,15 +20,16 @@ import com.sap.sailing.datamining.impl.components.TrackedLegOfCompetitorFilterin
 import com.sap.sailing.datamining.impl.components.TrackedRaceFilteringRetrievalProcessor;
 import com.sap.sailing.domain.leaderboard.LeaderboardGroup;
 import com.sap.sailing.domain.leaderboard.RegattaLeaderboard;
-import com.sap.sse.datamining.components.FilterCriteria;
+import com.sap.sailing.server.RacingEventService;
+import com.sap.sse.datamining.components.FilterCriterion;
 import com.sap.sse.datamining.components.Processor;
 import com.sap.sse.datamining.functions.Function;
 import com.sap.sse.datamining.functions.FunctionProvider;
 import com.sap.sse.datamining.impl.DataMiningActivator;
-import com.sap.sse.datamining.impl.criterias.AndCompoundFilterCriteria;
-import com.sap.sse.datamining.impl.criterias.CompoundFilterCriteria;
-import com.sap.sse.datamining.impl.criterias.NonFilteringFilterCriteria;
-import com.sap.sse.datamining.impl.criterias.NullaryFunctionValuesFilterCriteria;
+import com.sap.sse.datamining.impl.criterias.AndCompoundFilterCriterion;
+import com.sap.sse.datamining.impl.criterias.CompoundFilterCriterion;
+import com.sap.sse.datamining.impl.criterias.NonFilteringFilterCriterion;
+import com.sap.sse.datamining.impl.criterias.NullaryFunctionValuesFilterCriterion;
 import com.sap.sse.datamining.shared.dto.FunctionDTO;
 
 public final class SailingDataRetrieverFactory {
@@ -43,19 +45,19 @@ public final class SailingDataRetrieverFactory {
      * @return The first processor of the retrieval chain.
      */
     @SuppressWarnings("unchecked")
-    public static <DataSourceType, ElementType> Processor<DataSourceType> createRetrievalProcessorChain(SailingDataRetrievalLevels dataRetrievalLevel, Processor<ElementType> groupingProcessor, Map<FunctionDTO, Iterable<?>> filterSelection, FunctionProvider functionProvider) {
+    public static <ElementType> Processor<RacingEventService> createRetrievalProcessorChain(SailingDataRetrievalLevels dataRetrievalLevel, Processor<ElementType> groupingProcessor, Map<FunctionDTO, Iterable<? extends Serializable>> filterSelection, FunctionProvider functionProvider) {
         Processor<?> resultReceiver = groupingProcessor;
         for (int i = dataRetrievalLevel.ordinal(); i >= 0; i--) {
             resultReceiver = createDataRetrieverFor(SailingDataRetrievalLevels.values()[i], resultReceiver, filterSelection, functionProvider);
         }
-        return (Processor<DataSourceType>) resultReceiver;
+        return (Processor<RacingEventService>) resultReceiver;
     }
 
     @SuppressWarnings("unchecked")
     /* The way this method is used should guarantee, that the result receiver matches the new processor 
      */
     private static Processor<?> createDataRetrieverFor(SailingDataRetrievalLevels dataRetrievalLevel,
-            Processor<?> resultReceiver, Map<FunctionDTO, Iterable<?>> filterSelection, FunctionProvider functionProvider) {
+            Processor<?> resultReceiver, Map<FunctionDTO, Iterable<? extends Serializable>> filterSelection, FunctionProvider functionProvider) {
         ThreadPoolExecutor executor = DataMiningActivator.getExecutor();
         
         switch (dataRetrievalLevel) {
@@ -82,24 +84,58 @@ public final class SailingDataRetrieverFactory {
                 + dataRetrievalLevel + "'");
     }
 
-    private static <BaseDataType> FilterCriteria<BaseDataType> getFilterCriteriaForBaseDataType(Class<BaseDataType> baseDataType,
-            Map<FunctionDTO, Iterable<?>> filterSelection, FunctionProvider functionProvider) {
-        CompoundFilterCriteria<BaseDataType> criteria = null;
-        for (Entry<FunctionDTO, Iterable<?>> filterSelectionEntry : filterSelection.entrySet()) {
+    private static <BaseDataType> FilterCriterion<BaseDataType> getFilterCriteriaForBaseDataType(Class<BaseDataType> baseDataType,
+            Map<FunctionDTO, Iterable<? extends Serializable>> filterSelection, FunctionProvider functionProvider) {
+        CompoundFilterCriterion<BaseDataType> criteria = null;
+        for (Entry<FunctionDTO, Iterable<? extends Serializable>> filterSelectionEntry : filterSelection.entrySet()) {
             Function<?> function = functionProvider.getFunctionForDTO(filterSelectionEntry.getKey());
             if (baseDataType.equals(function.getDeclaringType())) {
                 if (criteria == null) {
-                    criteria = new AndCompoundFilterCriteria<>();
+                    criteria = new AndCompoundFilterCriterion<>();
                 }
                 
                 Collection<Object> filterValues = new ArrayList<>();
                 for (Object filterValue : filterSelectionEntry.getValue()) {
                     filterValues.add(filterValue);
                 }
-                criteria.addCriteria(new NullaryFunctionValuesFilterCriteria<BaseDataType>(function, filterValues));
+                criteria.addCriteria(new NullaryFunctionValuesFilterCriterion<BaseDataType>(function, filterValues));
             }
         }
-        return criteria != null ? criteria : new NonFilteringFilterCriteria<BaseDataType>();
+        return criteria != null ? criteria : new NonFilteringFilterCriterion<BaseDataType>();
+    }
+
+    /**
+     * Creates a retrieval processor without filter for the given retrieval level and result receivers.<br>
+     * The input type of the result receivers has to match the result type of the created retrieval processor for the given retrievel level or a {@link ClassCastException} can be thrown.
+     * For example, if the retrieval Level is {@link SailingDataRetrievalLevels#TrackedRace} the input must be {@link HasTrackedRaceContext}.
+     */
+    @SuppressWarnings("unchecked")
+    public static Processor<?> createRetrievalProcessorWithoutFilter(SailingDataRetrievalLevels retrievalLevel,
+            Collection<Processor<?>> retrievalResultReceivers) throws ClassCastException {
+        ThreadPoolExecutor executor = DataMiningActivator.getExecutor();
+        
+        switch (retrievalLevel) {
+        case GPSFix:
+            Collection<Processor<HasGPSFixContext>> gpsFixSpecificResultReceivers = (Collection<Processor<HasGPSFixContext>>)(Collection<?>) retrievalResultReceivers;
+            return new GPSFixRetrievalProcessor(executor, gpsFixSpecificResultReceivers);
+        case LeaderboardGroup:
+            Collection<Processor<LeaderboardGroup>> leaderboardGroupSpecificResultReceivers = (Collection<Processor<LeaderboardGroup>>)(Collection<?>) retrievalResultReceivers;
+            return new LeaderboardGroupRetrievalProcessor(executor, leaderboardGroupSpecificResultReceivers);
+        case RegattaLeaderboard:
+            Collection<Processor<RegattaLeaderboard>> regattaLeaderboardSpecificResultReceivers = (Collection<Processor<RegattaLeaderboard>>)(Collection<?>) retrievalResultReceivers;
+            return new RegattaLeaderboardFilteringRetrievalProcessor(executor, regattaLeaderboardSpecificResultReceivers, new NonFilteringFilterCriterion<RegattaLeaderboard>());
+        case TrackedLeg:
+            Collection<Processor<HasTrackedLegContext>> trackedLegSpecificResultReceivers = (Collection<Processor<HasTrackedLegContext>>)(Collection<?>) retrievalResultReceivers;
+            return new TrackedLegFilteringRetrievalProcessor(executor, trackedLegSpecificResultReceivers, new NonFilteringFilterCriterion<HasTrackedLegContext>());
+        case TrackedLegOfCompetitor:
+            Collection<Processor<HasTrackedLegOfCompetitorContext>> trackedLegOfCompetitorSpecificResultReceivers = (Collection<Processor<HasTrackedLegOfCompetitorContext>>)(Collection<?>) retrievalResultReceivers;
+            return new TrackedLegOfCompetitorFilteringRetrievalProcessor(executor, trackedLegOfCompetitorSpecificResultReceivers, new NonFilteringFilterCriterion<HasTrackedLegOfCompetitorContext>());
+        case TrackedRace:
+            Collection<Processor<HasTrackedRaceContext>> trackedRaceSpecificResultReceivers = (Collection<Processor<HasTrackedRaceContext>>)(Collection<?>) retrievalResultReceivers;
+            return new TrackedRaceFilteringRetrievalProcessor(executor, trackedRaceSpecificResultReceivers, new NonFilteringFilterCriterion<HasTrackedRaceContext>());
+        }
+        throw new IllegalArgumentException("No data retriever implemented for the given data retrieval level '"
+                + retrievalLevel + "'");
     }
 
 }

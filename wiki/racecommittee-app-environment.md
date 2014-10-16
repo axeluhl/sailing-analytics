@@ -13,6 +13,18 @@ On CentOS 6.4 you should issue the following commands:
     yum install libstdc++-4.4.7-4.el6.x86_64 # ensure that x86_x64 stdlib is up to date
     yum install glibc.i686 glibc-devel.i686 libstdc++.i686 zlib-devel.i686 ncurses-devel.i686 libX11-devel.i686 libXrender.i686 libXrandr.i686
 
+On Ubuntu, use the following instead:
+
+    dpkg --add-architecture i386
+    apt-get update
+    apt-get install libncurses5:i386 libstdc++6:i386 zlib1g:i386
+
+On a Debian version 7.6 I succeeded with the following:
+
+    dpkg --add-architecture i386
+    apt-get update
+    apt-get install ia32-libs lib32asound2 lib32v4l-0 libv4l-0=0.8.0-1 libasound2=1.0.23-2.1
+
 Now we are ready to install the SDK. Pick up the [SDK Tools](http://developer.android.com/sdk/index.html) and install them on your server. Set an environment variable _ANDROID_HOME_ pointing to the install directory. It's a good idea to append some of the tools to your path:
 
     PATH=$PATH:$ANDROID_HOME/tools

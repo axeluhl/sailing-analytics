@@ -10,12 +10,10 @@ import com.google.gwt.user.client.ui.DockLayoutPanel;
 import com.google.gwt.user.client.ui.FlowPanel;
 import com.google.gwt.user.client.ui.RootLayoutPanel;
 import com.sap.sailing.gwt.ui.client.AbstractEntryPoint;
-import com.sap.sailing.gwt.ui.client.JavaScriptInjector;
 import com.sap.sailing.gwt.ui.client.LogoAndTitlePanel;
 import com.sap.sailing.gwt.ui.client.RemoteServiceMappingConstants;
 import com.sap.sailing.gwt.ui.client.SimulatorService;
 import com.sap.sailing.gwt.ui.client.SimulatorServiceAsync;
-import com.sap.sailing.gwt.ui.simulator.streamlets.SimulatorJSBundle;
 import com.sap.sailing.simulator.util.SailingSimulatorConstants;
 import com.sap.sse.gwt.client.EntryPointHelper;
 
@@ -27,36 +25,29 @@ public class SimulatorEntryPoint extends AbstractEntryPoint {
     private int xRes = 40;
     private int yRes = 20;
     private int border = 0;
-    private int particles = 0;
+    
+    private StreamletParameters streamletPars = new StreamletParameters();
+
     private boolean autoUpdate = false;
     private char mode = SailingSimulatorConstants.ModeEvent;  // default mode: 'e'vent
     private char event = SailingSimulatorConstants.EventKielerWoche; // default event: 'k'ieler woche
 
     private boolean showArrows = false; // show the wind arrows in wind display and replay modes.    
-    private boolean showGrid = true;   // show the "heat map" in the wind display and replay modes.
+    private boolean showGrid = false;   // show the "heat map" in the wind display and replay modes.
     private boolean showLines = false;  // show the wind lines in the wind display and replay modes.
     private boolean showMapControls = true; // show the map controls such as zoom and pan
     private char seedLines = 'b';  // seed lines at: 'b'ack, 'f'ront
-    private boolean showStreamlets = true; // show the wind streamlets in the wind display and replay modes.
-    private boolean showStreamlets2 = false; // show animated wind streamlets in the wind display and replay modes.
-    private boolean injectWindDataJS = false;
+    private boolean showLineGuides = false; // show the wind streamlets in the wind display and replay modes.
+    private boolean showStreamlets = true; // show animated wind streamlets in the wind display and replay modes.
+    
     
     private static Logger logger = Logger.getLogger(SimulatorEntryPoint.class.getName());
 
     @Override
     protected void doOnModuleLoad() {
-        
     	super.doOnModuleLoad();
-        
         EntryPointHelper.registerASyncService((ServiceDefTarget) simulatorService, RemoteServiceMappingConstants.simulatorServiceRemotePath);
-        
     	checkUrlParameters();
-
-    	if (this.injectWindDataJS) {
-    		SimulatorJSBundle bundle = GWT.create(SimulatorJSBundle.class);
-    		JavaScriptInjector.inject(bundle.windStreamletsDataJS().getText());
-    	}
-    	
         createSimulatorPanel();
     }
 
@@ -79,12 +70,43 @@ public class SimulatorEntryPoint extends AbstractEntryPoint {
         } else {
             this.border = Integer.parseInt(border);
         }
-        String particlesStr = Window.Location.getParameter("particles");
-        if (particlesStr == null || particlesStr.isEmpty()) {
-           logger.config("Using default particles " + this.particles);
+        
+        streamletPars.macroWeather = false;
+        streamletPars.motionScale = 1.0;
+        streamletPars.swarmScale = 1.0;
+        streamletPars.detailZoom = 15;
+
+        String tmpStr = Window.Location.getParameter("motionScale");
+        if (tmpStr == null || tmpStr.isEmpty()) {
+           logger.config("Using default motionScale.");
         } else {
-            this.particles = Integer.parseInt(particlesStr);
+            this.streamletPars.motionScale = Double.parseDouble(tmpStr);
         }
+        tmpStr = Window.Location.getParameter("swarmScale");
+        if (tmpStr == null || tmpStr.isEmpty()) {
+           logger.config("Using default swarmScale.");
+        } else {
+            this.streamletPars.swarmScale = Double.parseDouble(tmpStr);
+        }
+        tmpStr = Window.Location.getParameter("lineBase");
+        if (tmpStr == null || tmpStr.isEmpty()) {
+           logger.config("Using default lineBase.");
+        } else {
+            this.streamletPars.lineBase = Double.parseDouble(tmpStr);
+        }
+        tmpStr = Window.Location.getParameter("lineScale");
+        if (tmpStr == null || tmpStr.isEmpty()) {
+           logger.config("Using default lineScale.");
+        } else {
+            this.streamletPars.lineScale = Double.parseDouble(tmpStr);
+        }
+        tmpStr = Window.Location.getParameter("detailZoom");
+        if (tmpStr == null || tmpStr.isEmpty()) {
+           logger.config("Using default detailZoom.");
+        } else {
+            this.streamletPars.detailZoom = Integer.parseInt(tmpStr);
+        }
+        
         String autoUpdateStr = Window.Location.getParameter("autoUpdate");
         if (autoUpdateStr == null || autoUpdateStr.isEmpty()) {
             logger.config("Using default auto update " + autoUpdate);
@@ -106,7 +128,7 @@ public class SimulatorEntryPoint extends AbstractEntryPoint {
                 showArrows = true; // show the wind arrows in wind display and replay modes.    
                 showGrid = false;   // show the "heat map" in the wind display and replay modes.
                 showLines = false;  // show the wind lines in the wind display and replay modes.
-                showStreamlets = false; // show the wind streamlets in the wind display and replay modes.
+                showLineGuides = false; // show the wind streamlets in the wind display and replay modes.
             }
         }
         String eventStr = Window.Location.getParameter("event");
@@ -135,21 +157,14 @@ public class SimulatorEntryPoint extends AbstractEntryPoint {
                 showArrows = false;
             }
             if (windDisplayStr.contains("s")) {
+                showLineGuides = true;
+            } else {
+                showLineGuides = false;
+            }
+            if (windDisplayStr.contains("z")) {
                 showStreamlets = true;
             } else {
                 showStreamlets = false;
-            }
-            if (windDisplayStr.contains("z")) {
-                showStreamlets2 = true;
-            } else {
-                showStreamlets2 = false;
-            }
-            if (windDisplayStr.contains("y")) {
-                showStreamlets2 = true;
-                injectWindDataJS = true;
-            }
-            if ((showStreamlets2)&&(border==null)) {
-            	this.border = 10;
             }
             if (windDisplayStr.contains("b")) {
                 seedLines = 'b';
@@ -157,6 +172,12 @@ public class SimulatorEntryPoint extends AbstractEntryPoint {
             if (windDisplayStr.contains("f")) {
                 seedLines = 'f';
             }
+            if (windDisplayStr.contains("m")) {
+                streamletPars.macroWeather = true;
+            }
+        }
+        if ((showStreamlets)&&(border==null)) {
+            this.border = 10;
         }
     }
 
@@ -179,8 +200,8 @@ public class SimulatorEntryPoint extends AbstractEntryPoint {
     }
 
     private void createSimulatorPanel() {
-        SimulatorMainPanel simulatorPanel = new SimulatorMainPanel(simulatorService, stringMessages, this, xRes, yRes, border, particles,
-                autoUpdate, mode, event, showGrid, showLines, seedLines, showArrows, showStreamlets, showStreamlets2, injectWindDataJS, showMapControls);
+        SimulatorMainPanel simulatorPanel = new SimulatorMainPanel(simulatorService, stringMessages, this, xRes, yRes, border, streamletPars,
+                autoUpdate, mode, event, showGrid, showLines, seedLines, showArrows, showLineGuides, showStreamlets, showMapControls);
 
         DockLayoutPanel p = new DockLayoutPanel(Unit.PX);
         RootLayoutPanel.get().add(p);

@@ -6,6 +6,7 @@ import umontreal.iro.lecuyer.randvar.GeometricGen;
 import umontreal.iro.lecuyer.randvar.NormalGen;
 import umontreal.iro.lecuyer.rng.RandomStream;
 
+import com.sap.sailing.domain.common.Duration;
 import com.sap.sailing.domain.common.Position;
 import com.sap.sailing.domain.common.SpeedWithBearing;
 import com.sap.sailing.domain.common.TimePoint;
@@ -13,7 +14,7 @@ import com.sap.sailing.domain.common.impl.DegreeBearingImpl;
 import com.sap.sailing.domain.common.impl.KnotSpeedWithBearingImpl;
 import com.sap.sailing.domain.tracking.Wind;
 import com.sap.sailing.domain.tracking.impl.WindImpl;
-import com.sap.sailing.simulator.Boundary;
+import com.sap.sailing.simulator.Grid;
 import com.sap.sailing.simulator.TimedPosition;
 import com.sap.sailing.simulator.windfield.WindControlParameters;
 import com.sap.sailing.simulator.windfield.WindFieldGenerator;
@@ -31,7 +32,7 @@ public class WindFieldGeneratorBlastImpl extends WindFieldGeneratorImpl implemen
     private double blastSizeProbability = 70;
     private double blastEdgeProbability = 30;
     private double blastBearingMean = 0;
-    private double blastBearingVar = 8;
+    private double blastBearingVar = 6;
     private double defaultWindSpeed = 0;
     private double defaultWindBearing = 0;
     private SpeedWithBearing defaultSpeedWithBearing;
@@ -43,16 +44,16 @@ public class WindFieldGeneratorBlastImpl extends WindFieldGeneratorImpl implemen
 
     private static Logger logger = Logger.getLogger(WindFieldGeneratorBlastImpl.class.getName());
 
-    public WindFieldGeneratorBlastImpl(Boundary boundary, WindControlParameters windParameters) {
+    public WindFieldGeneratorBlastImpl(Grid boundary, WindControlParameters windParameters) {
         super(boundary, windParameters);
     }
 
     @Override
-    public void generate(TimePoint start, TimePoint end, TimePoint step) {
+    public void generate(TimePoint start, TimePoint end, Duration step) {
         generate(start, end, step, windParameters.baseWindSpeed, windParameters.baseWindBearing);
     }
 
-    protected void generate(TimePoint start, TimePoint end, TimePoint step, double defaultSpeed, double defaultBearing) {
+    protected void generate(TimePoint start, TimePoint end, Duration step, double defaultSpeed, double defaultBearing) {
         super.generate(start, end, step);
         // TODO Check the defaults
         setDefaultWindSpeed(defaultSpeed);
@@ -163,8 +164,7 @@ public class WindFieldGeneratorBlastImpl extends WindFieldGeneratorImpl implemen
         //System.out.println("blast speed mean: "+bSpeedMean+" var: "+bSpeedVar);
         //return NormalGen.nextDouble(new LFSR113("BlastSpeedStream"), bSpeedMean, bSpeedVar);
         RandomStream speedStream = windParameters.getBlastRandomStreamManager().getRandomStream(BlastRandomSeedManagerImpl.BlastStream.SPEED.name());
-        return NormalGen.nextDouble(speedStream, bSpeedMean, bSpeedVar);
-
+        return Math.max(0.5*bSpeedMean, Math.min(1.5*bSpeedMean, NormalGen.nextDouble(speedStream, bSpeedMean, bSpeedVar)));
     }
 
     private int getBlastSize() {
@@ -176,8 +176,7 @@ public class WindFieldGeneratorBlastImpl extends WindFieldGeneratorImpl implemen
     private double getBlastAngle() {
         //return NormalGen.nextDouble(new LFSR113("BlastAngleStream"), blastBearingMean, blastBearingVar);
         RandomStream bearingStream = windParameters.getBlastRandomStreamManager().getRandomStream(BlastRandomSeedManagerImpl.BlastStream.BEARING.name());
-        return NormalGen.nextDouble(bearingStream, blastBearingMean, blastBearingVar);
-
+        return Math.max(-1.5*blastBearingVar, Math.min(1.5*blastBearingVar, NormalGen.nextDouble(bearingStream, blastBearingMean, blastBearingVar)));
     }
 
     private SpeedWithBearing getSpeedWithBearing(TimedPosition timedPosition) {

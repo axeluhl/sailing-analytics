@@ -15,5 +15,9 @@ import java.lang.annotation.Target;
 @Target(ElementType.METHOD)
 @Retention(RetentionPolicy.RUNTIME)
 public @interface Connector {
+    
+    public String messageKey() default "";
+    
+    public int ordinal() default Integer.MAX_VALUE;
 
 }

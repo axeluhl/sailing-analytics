@@ -25,7 +25,7 @@
     <inherits name="com.sap.sailing.gwt.ui.EmulatedJRE" />
 	<inherits name="com.sap.sailing.datamining.DataMiningSailingDomain" />
 
-	<entry-point class="com.sap.sailing.gwt.ui.datamining.client.DataMiningEntryPoint" />
+	<entry-point class="com.sap.sailing.gwt.ui.datamining.DataMiningEntryPoint" />
 	
 	<!-- Specify the paths for translatable code -->
 <extend-property name="locale" values="de"/>
@@ -34,8 +34,12 @@
   	<source path='common'/>
   	<source path="client" />
 	<source path="datamining" />
+	<source path="adminconsole" />
+	<source path="masterdataimport" />
+	<source path="usermanagement" />
 	<source path="simulator" />
 	<source path='shared' />
 	<source path='common' />
 	<source path='actions' />
+	<source path='leaderboard' />
 </module>

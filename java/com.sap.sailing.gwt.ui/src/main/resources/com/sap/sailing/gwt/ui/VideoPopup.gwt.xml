@@ -10,12 +10,29 @@
   	<inherits name="com.sap.sse.SSECommon" />
 
   	<inherits name="com.sap.sailing.domain.SailingDomain" />
+  	<!-- Fancy DateTimePicker (without the rest of Bootstrap!) -->
+	<!-- GWT-Bootstrap License: Apache License, Version 2.0 -->
+	<inherits name="com.github.gwtbootstrap.BootstrapNoResources" />
+	<inherits name='com.github.gwtbootstrap.datetimepicker.DatetimepickerNoResources' />
   	
+	<!-- Highcharts API -->
+	<inherits name="org.moxieapps.gwt.highcharts.Highcharts" />
+	<!-- Google Maps API -->
+	<inherits name='com.google.gwt.ajaxloader.AjaxLoader' />
+	<inherits name='com.google.gwt.maps.Maps' />
+	<!-- GWT JSON Support -->
+	<inherits name='com.google.gwt.json.JSON' />
+				
 	<entry-point class="com.sap.sailing.gwt.ui.client.media.popup.VideoPopupWindow" />
 
 <extend-property name="locale" values="de"/>
-	
-	<source path='client/media/popup' />
-	<source path='client/shared/media' />
-	<source path='client/media/shared' />
+	<source path='client' />
+	<source path='actions'/>
+	<source path='shared'/>
+	<source path='common'/>
+	<source path='adminconsole'/>
+	<source path='usermanagement'/>
+	<source path='masterdataimport'/>
+	<source path='simulator'/>
+	<source path='leaderboard'/>
 </module>

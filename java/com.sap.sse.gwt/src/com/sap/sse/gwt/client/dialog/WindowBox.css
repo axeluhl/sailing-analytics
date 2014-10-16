@@ -2,6 +2,21 @@
 	clip: rect(auto auto auto auto);
 }
 
+.gwt-extras-WindowBox .dialogTopCenterInner {
+  background-color: #bbb;
+}
+
+.gwt-extras-WindowBox .Caption {
+   background: transparent;
+   border: none;
+    padding: 4px 45px 0px 5px;
+    width: auto;
+    max-width: 25em;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+}
+
 .gwt-extras-WindowBox .dialogMiddleCenter {
   padding: 0px !important;
 }
@@ -12,8 +27,8 @@
 
 .gwt-extras-WindowBox .gwt-extras-dialog-controls {
   position: absolute;
-  top: 12px;
-  right: 19px;
+  top: -1px;
+  right: 12px;
 }
 
 .gwt-extras-WindowBox .gwt-extras-dialog-controls a {
@@ -24,7 +39,7 @@
 }
 
 .gwt-extras-WindowBox .dialogMiddleCenterInner {
-	overflow: auto;
+	padding: 2px;
 }
 
 .gwt-extras-WindowBox .gwt-extras-dialog-controls a.gwt-extras-dialog-close {
@@ -36,9 +51,6 @@
 }
 
 .gwt-extras-WindowBox .gwt-extras-dialog-controls a.gwt-extras-dialog-minimize {
-  /*display: block;
-  height: 12px;
-  width: 12px;*/
   background: transparent url(images/min-4panel.png) left top no-repeat;
 }
 
@@ -51,7 +63,6 @@
 .gwt-extras-WindowBox .media-synch-control {
 	background: #efefef;
 	padding: 10px;
-	margin: 10px 0 10px 0;
 }
 
 .gwt-extras-WindowBox .media-synch-control:after {
@@ -75,5 +86,21 @@
 }
 
 .gwt-extras-WindowBox .video-root-panel {
-	display: inline-block;
+    display: inline-block;
+    width: 100%;
+    height: 100%;
+	min-width: 400px;
+    min-height: 225px;
 }
+
+.Youtube-Video-Panel {
+    display: block;
+    border: none;
+    min-height: 225px;
+ }
+ 
+ .gwt-extras-WindowBox .title-edit {
+    width: 100%;
+    margin-bottom: 10px;
+}
+

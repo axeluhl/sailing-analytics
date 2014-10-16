@@ -47,6 +47,7 @@ public class LeaderboardSettingsDialogComponent implements SettingsDialogCompone
     private LongBox refreshIntervalInSecondsBox;
     private final boolean autoExpandPreSelectedRace;
     private final boolean showAddedScores;
+    private final boolean showOverallColumnWithNumberOfRacesSailedPerCompetitor;
     private final long delayBetweenAutoAdvancesInMilliseconds;
     private final Integer numberOfLastRacesToShow;
     private RaceColumnSelectionStrategies activeRaceColumnSelectionStrategy;
@@ -54,13 +55,15 @@ public class LeaderboardSettingsDialogComponent implements SettingsDialogCompone
     private RadioButton lastNRacesColumnSelectionRadioBtn;
     private IntegerBox numberOfLastRacesToShowBox;
     private CheckBox showAddedScoresCheckBox;
+    private CheckBox showOverallColumnWithNumberOfRacesSailedPerCompetitorCheckBox;
     
     protected LeaderboardSettingsDialogComponent(List<DetailType> maneuverDetailSelection,
             List<DetailType> legDetailSelection, List<DetailType> raceDetailSelection,
             List<DetailType> overallDetailSelection, List<RaceColumnDTO> raceAllRaceColumns,
             Iterable<RaceColumnDTO> raceColumnSelection, RaceColumnSelection raceColumnSelectionStrategy,
             boolean autoExpandPreSelectedRace, boolean showAddedScores,
-            long delayBetweenAutoAdvancesInMilliseconds, StringMessages stringMessages) {
+            long delayBetweenAutoAdvancesInMilliseconds, boolean showOverallColumnWithNumberOfRacesSailedPerCompetitor,
+            StringMessages stringMessages) {
         this.raceAllRaceColumns = raceAllRaceColumns;
         this.numberOfLastRacesToShow = raceColumnSelectionStrategy.getNumberOfLastRaceColumnsToShow();
         this.activeRaceColumnSelectionStrategy = raceColumnSelectionStrategy.getType();
@@ -78,6 +81,7 @@ public class LeaderboardSettingsDialogComponent implements SettingsDialogCompone
         this.autoExpandPreSelectedRace = autoExpandPreSelectedRace;
         this.delayBetweenAutoAdvancesInMilliseconds = delayBetweenAutoAdvancesInMilliseconds;
         this.showAddedScores = showAddedScores;
+        this.showOverallColumnWithNumberOfRacesSailedPerCompetitor = showOverallColumnWithNumberOfRacesSailedPerCompetitor;
     }
 
     @Override
@@ -176,6 +180,10 @@ public class LeaderboardSettingsDialogComponent implements SettingsDialogCompone
                     overallDetailCheckboxes);
             overallDetailDialogContent.add(checkbox);
         }
+        showOverallColumnWithNumberOfRacesSailedPerCompetitorCheckBox = dialog.createCheckbox(stringMessages.showNumberOfRacesScored());
+        dialog.addTooltip(showOverallColumnWithNumberOfRacesSailedPerCompetitorCheckBox, stringMessages.showNumberOfRacesScored());
+        showOverallColumnWithNumberOfRacesSailedPerCompetitorCheckBox.setValue(showOverallColumnWithNumberOfRacesSailedPerCompetitor);
+        overallDetailDialogContent.add(showOverallColumnWithNumberOfRacesSailedPerCompetitorCheckBox);
         overallDetailDialog.add(overallDetailDialogContent);
         return overallDetailDialog;
     }
@@ -362,7 +370,8 @@ public class LeaderboardSettingsDialogComponent implements SettingsDialogCompone
                 autoExpandPreSelectedRace, 1000l * (delayBetweenAutoAdvancesValue == null ? 0l : delayBetweenAutoAdvancesValue.longValue()),
                 null,
                 true, /* updateUponPlayStateChange */ true, activeRaceColumnSelectionStrategy,
-                /*showAddedScores*/ showAddedScoresCheckBox.getValue().booleanValue());
+                /*showAddedScores*/ showAddedScoresCheckBox.getValue().booleanValue(),
+                /*showOverallColumnWithNumberOfRacesSailedPerCompetitor*/ showOverallColumnWithNumberOfRacesSailedPerCompetitorCheckBox.getValue().booleanValue());
     }
 
     @Override
@@ -388,6 +397,24 @@ public class LeaderboardSettingsDialogComponent implements SettingsDialogCompone
 
     @Override
     public FocusWidget getFocusWidget() {
-        return refreshIntervalInSecondsBox;
+        final FocusWidget result;
+        if (raceDetailCheckboxes.isEmpty()) {
+            if (legDetailCheckboxes.isEmpty()) {
+                if (maneuverDetailCheckboxes.isEmpty()) {
+                    if (overallDetailCheckboxes.isEmpty()) {
+                        result = refreshIntervalInSecondsBox;
+                    } else {
+                        result = overallDetailCheckboxes.values().iterator().next();
+                    }
+                } else {
+                    result = maneuverDetailCheckboxes.values().iterator().next();
+                }
+            } else {
+                result = legDetailCheckboxes.values().iterator().next();
+            }
+        } else {
+            result = raceDetailCheckboxes.values().iterator().next();
+        }
+        return result;
     }
 }

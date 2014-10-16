@@ -4,13 +4,14 @@ import java.util.List;
 import java.util.logging.Logger;
 
 import com.sap.sailing.domain.common.Bearing;
+import com.sap.sailing.domain.common.Duration;
 import com.sap.sailing.domain.common.SpeedWithBearing;
 import com.sap.sailing.domain.common.TimePoint;
 import com.sap.sailing.domain.common.impl.DegreeBearingImpl;
 import com.sap.sailing.domain.common.impl.KnotSpeedWithBearingImpl;
 import com.sap.sailing.domain.tracking.Wind;
 import com.sap.sailing.domain.tracking.impl.WindImpl;
-import com.sap.sailing.simulator.Boundary;
+import com.sap.sailing.simulator.Grid;
 import com.sap.sailing.simulator.Path;
 import com.sap.sailing.simulator.TimedPosition;
 import com.sap.sailing.simulator.TimedPositionWithSpeed;
@@ -29,7 +30,7 @@ public class WindFieldGeneratorMeasured extends WindFieldGeneratorImpl implement
     //        super();
     //    }
 
-    public WindFieldGeneratorMeasured(Boundary boundary, WindControlParameters windParameters) {
+    public WindFieldGeneratorMeasured(Grid boundary, WindControlParameters windParameters) {
         super(boundary, windParameters);
     }
 
@@ -38,7 +39,7 @@ public class WindFieldGeneratorMeasured extends WindFieldGeneratorImpl implement
     }
 
     @Override
-    public void generate(TimePoint start, TimePoint end, TimePoint step) {
+    public void generate(TimePoint start, TimePoint end, Duration step) {
         super.generate(start, end, step);
     }
 

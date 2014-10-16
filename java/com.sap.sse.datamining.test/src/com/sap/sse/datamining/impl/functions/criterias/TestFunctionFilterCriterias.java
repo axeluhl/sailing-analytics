@@ -7,14 +7,14 @@ import java.lang.reflect.Method;
 
 import org.junit.Test;
 
-import com.sap.sse.datamining.components.FilterCriteria;
+import com.sap.sse.datamining.components.FilterCriterion;
 import com.sap.sse.datamining.test.util.FunctionTestsUtil;
 
 public class TestFunctionFilterCriterias {
 
     @Test
     public void testMethodIsCorrectDimensionFilterCriteria() {
-        FilterCriteria<Method> filterCriteria = new MethodIsCorrectDimensionFilterCriteria();
+        FilterCriterion<Method> filterCriteria = new MethodIsCorrectDimensionFilterCriterion();
         
         Method dimension = FunctionTestsUtil.getMethodFromSimpleClassWithMarkedMethod("dimension");
         assertThat(filterCriteria.matches(dimension), is(true));
@@ -28,7 +28,7 @@ public class TestFunctionFilterCriterias {
 
     @Test
     public void testMethodIsCorrectSideEffectFreeValueFilterCriteria() {
-        FilterCriteria<Method> filterCriteria = new MethodIsCorrectStatisticFilterCriteria();
+        FilterCriterion<Method> filterCriteria = new MethodIsCorrectStatisticFilterCriterion();
         
         Method sideEffectFreeValue = FunctionTestsUtil.getMethodFromSimpleClassWithMarkedMethod("sideEffectFreeValue");
         assertThat(filterCriteria.matches(sideEffectFreeValue), is(true));
@@ -39,7 +39,7 @@ public class TestFunctionFilterCriterias {
 
     @Test
     public void testMethodIsCorrectExternalLibraryFunctionFilterCriteria() {
-        FilterCriteria<Method> filterCriteria = new MethodIsCorrectExternalFunctionFilterCriteria();
+        FilterCriterion<Method> filterCriteria = new MethodIsCorrectExternalFunctionFilterCriterion();
         
         Method foo = FunctionTestsUtil.getMethodFromExternalLibraryClass("foo");
         assertThat(filterCriteria.matches(foo), is(true));

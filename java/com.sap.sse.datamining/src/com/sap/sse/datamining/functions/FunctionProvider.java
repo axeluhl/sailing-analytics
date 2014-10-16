@@ -6,6 +6,8 @@ import com.sap.sse.datamining.shared.dto.FunctionDTO;
 
 public interface FunctionProvider {
 
+    public Collection<Function<?>> getAllStatistics();
+    
     public Collection<Function<?>> getFunctionsFor(Class<?> sourceType);
     
     public Collection<Function<?>> getStatisticsFor(Class<?> sourceType);

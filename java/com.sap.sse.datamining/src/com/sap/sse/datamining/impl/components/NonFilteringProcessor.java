@@ -22,7 +22,6 @@ public class NonFilteringProcessor<InputType> extends AbstractProcessor<InputTyp
 
     @Override
     protected void setAdditionalData(AdditionalResultDataBuilder additionalDataBuilder) {
-        additionalDataBuilder.setFilteredDataAmount(0);
     }
 
 }

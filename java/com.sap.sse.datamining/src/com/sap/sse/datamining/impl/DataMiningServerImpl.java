@@ -9,20 +9,23 @@ import com.sap.sse.datamining.ClassesWithFunctionsProvider;
 import com.sap.sse.datamining.DataMiningServer;
 import com.sap.sse.datamining.functions.FunctionProvider;
 import com.sap.sse.datamining.functions.FunctionRegistry;
+import com.sap.sse.datamining.i18n.DataMiningStringMessages;
 
 public class DataMiningServerImpl implements DataMiningServer {
     
     private final Set<Class<?>> registeredInternalClassesWithMarkedMethods;
     private final Set<Class<?>> registeredExternalLibraryClasses;
     
+    private final DataMiningStringMessages stringMessages;
     private final FunctionRegistry functionRegistry;
     private final FunctionProvider functionProvider;
-    private ClassesWithFunctionsProvider classesWithFunctionsProvider;
+    private final ClassesWithFunctionsProvider classesWithFunctionsProvider;
 
-    public DataMiningServerImpl(FunctionRegistry functionRegistry, FunctionProvider functionProvider, ClassesWithFunctionsProvider classesWithFunctionsProvider) {
+    public DataMiningServerImpl(DataMiningStringMessages stringMessages, FunctionRegistry functionRegistry, FunctionProvider functionProvider, ClassesWithFunctionsProvider classesWithFunctionsProvider) {
         registeredInternalClassesWithMarkedMethods = new HashSet<>();
         registeredExternalLibraryClasses = new HashSet<>();
         
+        this.stringMessages = stringMessages;
         this.functionRegistry = functionRegistry;
         this.functionProvider = functionProvider;
         this.classesWithFunctionsProvider = classesWithFunctionsProvider;
@@ -80,6 +83,11 @@ public class DataMiningServerImpl implements DataMiningServer {
         Collection<Class<?>> missingElements = new HashSet<>(from);
         missingElements.removeAll(in);
         return missingElements;
+    }
+    
+    @Override
+    public DataMiningStringMessages getStringMessages() {
+        return stringMessages;
     }
     
 }

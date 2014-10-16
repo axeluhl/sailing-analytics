@@ -25,7 +25,7 @@ import com.sap.sse.datamining.data.ClusterGroup;
 import com.sap.sse.datamining.functions.Function;
 import com.sap.sse.datamining.impl.components.GroupedDataEntry;
 import com.sap.sse.datamining.impl.components.ParallelFilteringProcessor;
-import com.sap.sse.datamining.impl.components.ParallelMultiDimensionalGroupingProcessor;
+import com.sap.sse.datamining.impl.components.ParallelMultiDimensionsValueNestingGroupingProcessor;
 
 public class PolarDataMiner {
 
@@ -65,7 +65,7 @@ public class PolarDataMiner {
 
         Collection<Function<?>> dimensions = PolarDataDimensionCollectionFactory.getClusterKeyDimensions();
 
-        Processor<GPSFixMovingWithPolarContext> groupingProcessor = new ParallelMultiDimensionalGroupingProcessor<GPSFixMovingWithPolarContext>(
+        Processor<GPSFixMovingWithPolarContext> groupingProcessor = new ParallelMultiDimensionsValueNestingGroupingProcessor<GPSFixMovingWithPolarContext>(
                 executor, grouperResultReceivers, dimensions);
 
         Collection<Processor<GPSFixMovingWithPolarContext>> filteringResultReceivers = Arrays.asList(groupingProcessor);

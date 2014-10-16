@@ -1,12 +1,13 @@
 package com.sap.sailing.simulator.windfield.impl;
 
 
+import com.sap.sailing.domain.common.Duration;
 import com.sap.sailing.domain.common.SpeedWithBearing;
 import com.sap.sailing.domain.common.TimePoint;
 import com.sap.sailing.domain.common.impl.KnotSpeedWithBearingImpl;
 import com.sap.sailing.domain.tracking.Wind;
 import com.sap.sailing.domain.tracking.impl.WindImpl;
-import com.sap.sailing.simulator.Boundary;
+import com.sap.sailing.simulator.Grid;
 import com.sap.sailing.simulator.TimedPosition;
 import com.sap.sailing.simulator.windfield.WindControlParameters;
 import com.sap.sailing.simulator.windfield.WindFieldGenerator;
@@ -17,14 +18,14 @@ public class WindFieldGeneratorCombined extends WindFieldGeneratorImpl implement
     private WindFieldGeneratorBlastImpl blastGen;
     private WindFieldGeneratorOscillationImpl oscillationGen;
     
-    public WindFieldGeneratorCombined(Boundary boundary, WindControlParameters windParameters) {
+    public WindFieldGeneratorCombined(Grid boundary, WindControlParameters windParameters) {
         super(boundary, windParameters);
         blastGen = new WindFieldGeneratorBlastImpl(boundary, windParameters);
         oscillationGen = new WindFieldGeneratorOscillationImpl(boundary, windParameters);
     }
 
     @Override
-    public void setBoundary(Boundary boundary) {
+    public void setBoundary(Grid boundary) {
         
         super.setBoundary(boundary);
         blastGen.setBoundary(boundary);
@@ -33,7 +34,7 @@ public class WindFieldGeneratorCombined extends WindFieldGeneratorImpl implement
     }
  
     @Override
-    public void generate(TimePoint start, TimePoint end, TimePoint step) {
+    public void generate(TimePoint start, TimePoint end, Duration step) {
         super.generate(start, end, step);
    
         blastGen.setPositionGrid(positions);

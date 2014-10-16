@@ -102,12 +102,11 @@ public class LeaderboardOfflineTest extends AbstractLeaderboardTest {
     public void ensureMedalRaceParamIsIgnoredIfRaceColumnAlreadyExists() {
         FlexibleLeaderboard leaderboard = new FlexibleLeaderboardImpl("Test Leaderboard", new ThresholdBasedResultDiscardingRuleImpl(
                 new int[] { 5, 8 }), new LowPoint(), null);
-        Fleet defaultFleet = leaderboard.getFleet(null);
         final String columnName = "abc";
         setupRaces(1, 0);
 
         leaderboard.addRaceColumn(columnName, /* medalRace */ true);
-        leaderboard.addRace(testRaces.iterator().next(), columnName, /* medalRace */ false, defaultFleet);
+        leaderboard.addRace(testRaces.iterator().next(), columnName, /* medalRace */false);
         assertTrue(leaderboard.getRaceColumnByName(columnName).isMedalRace());
     }
     
@@ -119,7 +118,7 @@ public class LeaderboardOfflineTest extends AbstractLeaderboardTest {
         final String columnName = "abc";
         setupRaces(1, 0);
         leaderboard.addRaceColumn(columnName, /* medalRace */ true);
-        leaderboard.addRace(testRaces.iterator().next(), columnName, /* medalRace */ false, defaultFleet);
+        leaderboard.addRace(testRaces.iterator().next(), columnName, /* medalRace */false);
         final Set<String> emptySet = Collections.emptySet();
         final MillisecondsTimePoint now = MillisecondsTimePoint.now();
         final TrackedRegattaRegistry trackedRegattaRegistry = new TrackedRegattaRegistry() {
@@ -147,17 +146,17 @@ public class LeaderboardOfflineTest extends AbstractLeaderboardTest {
                     InterruptedException {
             }
         };
-        LeaderboardDTO leaderboardDTO = leaderboard.getLeaderboardDTO(now, emptySet, /* addOverallDetails */ true, trackedRegattaRegistry, DomainFactory.INSTANCE);
+        LeaderboardDTO leaderboardDTO = leaderboard.getLeaderboardDTO(now, emptySet, /* addOverallDetails */ true, trackedRegattaRegistry, DomainFactory.INSTANCE, /* fillNetPointsUncorrected */ false);
         assertNotNull(leaderboardDTO);
-        assertSame(leaderboardDTO, leaderboard.getLeaderboardDTO(now, emptySet, /* addOverallDetails */ true, trackedRegattaRegistry, DomainFactory.INSTANCE)); // assert it's cached
+        assertSame(leaderboardDTO, leaderboard.getLeaderboardDTO(now, emptySet, /* addOverallDetails */ true, trackedRegattaRegistry, DomainFactory.INSTANCE, /* fillNetPointsUncorrected */ false)); // assert it's cached
         leaderboard.getRaceColumnByName(columnName).releaseTrackedRace(defaultFleet); // this should clear the cache
-        LeaderboardDTO leaderboardDTO2 = leaderboard.getLeaderboardDTO(now, emptySet, /* addOverallDetails */ true, trackedRegattaRegistry, DomainFactory.INSTANCE);
+        LeaderboardDTO leaderboardDTO2 = leaderboard.getLeaderboardDTO(now, emptySet, /* addOverallDetails */ true, trackedRegattaRegistry, DomainFactory.INSTANCE, /* fillNetPointsUncorrected */ false);
         assertNotSame(leaderboardDTO, leaderboardDTO2);
-        assertSame(leaderboardDTO2, leaderboard.getLeaderboardDTO(now, emptySet, /* addOverallDetails */ true, trackedRegattaRegistry, DomainFactory.INSTANCE)); // and cached again
+        assertSame(leaderboardDTO2, leaderboard.getLeaderboardDTO(now, emptySet, /* addOverallDetails */ true, trackedRegattaRegistry, DomainFactory.INSTANCE, /* fillNetPointsUncorrected */ false)); // and cached again
         leaderboard.getRaceColumnByName(columnName).setTrackedRace(defaultFleet, testRaces.iterator().next()); // clear cache again; requires listener(s) to still be attached
-        LeaderboardDTO leaderboardDTO3 = leaderboard.getLeaderboardDTO(now, emptySet, /* addOverallDetails */ true, trackedRegattaRegistry, DomainFactory.INSTANCE);
+        LeaderboardDTO leaderboardDTO3 = leaderboard.getLeaderboardDTO(now, emptySet, /* addOverallDetails */ true, trackedRegattaRegistry, DomainFactory.INSTANCE, /* fillNetPointsUncorrected */ false);
         assertNotSame(leaderboardDTO2, leaderboardDTO3);
-        assertSame(leaderboardDTO3, leaderboard.getLeaderboardDTO(now, emptySet, /* addOverallDetails */ true, trackedRegattaRegistry, DomainFactory.INSTANCE)); // and cached again
+        assertSame(leaderboardDTO3, leaderboard.getLeaderboardDTO(now, emptySet, /* addOverallDetails */ true, trackedRegattaRegistry, DomainFactory.INSTANCE, /* fillNetPointsUncorrected */ false)); // and cached again
     }
 
     @Test
@@ -180,7 +179,7 @@ public class LeaderboardOfflineTest extends AbstractLeaderboardTest {
         RaceColumn bestScoringRaceColumn = null;
         for (TrackedRace race : testRaces) {
             i++;
-            RaceColumn raceColumn = leaderboard.addRace(race, "Test Race " + i, /* medalRace */ false, defaultFleet);
+            RaceColumn raceColumn = leaderboard.addRace(race, "Test Race " + i, /* medalRace */false);
             raceColumnsInLeaderboard.put(race, raceColumn);
             if (race.getRank(competitor) < bestScore) {
                 bestScore = race.getRank(competitor);
@@ -207,8 +206,7 @@ public class LeaderboardOfflineTest extends AbstractLeaderboardTest {
         testRace.addCompetitor(c3); // this makes maxPoints==4
         FlexibleLeaderboard leaderboard = new FlexibleLeaderboardImpl("Test Leaderboard", new ThresholdBasedResultDiscardingRuleImpl(
                 new int[] { 2 }), new LowPoint(), null);
-        Fleet defaultFleet = leaderboard.getFleet(null);
-        leaderboard.addRace(testRace, "R1", /* medalRace */ false, defaultFleet);
+        leaderboard.addRace(testRace, "R1", /* medalRace */false);
         assertEquals(1., leaderboard.getTotalPoints(competitor, now), 0.00000001);
         assertEquals(1., leaderboard.getTotalPoints(c2, now), 0.00000001);
         assertEquals(1., leaderboard.getTotalPoints(c3, now), 0.00000001);
@@ -235,10 +233,9 @@ public class LeaderboardOfflineTest extends AbstractLeaderboardTest {
         testRace.addCompetitor(c3); // this makes maxPoints==4
         FlexibleLeaderboard leaderboard = new FlexibleLeaderboardImpl("Test Leaderboard", new ThresholdBasedResultDiscardingRuleImpl(
                 new int[] { 2 }), new LowPoint(), null);
-        Fleet defaultFleet = leaderboard.getFleet(null);
-        RaceColumn r1 = leaderboard.addRace(testRace, "R1", /* medalRace */ false, defaultFleet);
+        RaceColumn r1 = leaderboard.addRace(testRace, "R1", /* medalRace */false);
         raceColumnsInLeaderboard.put(testRace, r1);
-        RaceColumn r2 = leaderboard.addRaceColumn("R2", /* medalRace */ false, defaultFleet);
+        RaceColumn r2 = leaderboard.addRaceColumn("R2", /* medalRace */false);
         leaderboard.getScoreCorrection().setMaxPointsReason(competitor, r2, MaxPointsReason.DND); // non-discardable disqualification
         // assert that max points were given before discarding...
         assertEquals(4.0, leaderboard.getEntry(competitor, r2, MillisecondsTimePoint.now()).getNetPoints(), 0.000000001);
@@ -268,7 +265,7 @@ public class LeaderboardOfflineTest extends AbstractLeaderboardTest {
         RaceColumn bestScoringRaceColumn = null;
         for (TrackedRace race : testRaces) {
             i++;
-            RaceColumn raceColumn = leaderboard.addRace(race, "Test Race " + i, /* medalRace */ false, defaultFleet);
+            RaceColumn raceColumn = leaderboard.addRace(race, "Test Race " + i, /* medalRace */false);
             raceColumnsInLeaderboard.put(race, raceColumn);
             if (race.getRank(competitor) < bestScore) {
                 bestScore = race.getRank(competitor);
@@ -294,8 +291,7 @@ public class LeaderboardOfflineTest extends AbstractLeaderboardTest {
         for (TrackedRace race : testRaces) {
             i++;
             raceColumnsInLeaderboard.put(race, leaderboard.addRace(race, "Test Race "+i,
-                    /* medalRace */ numberOfUntrackedRaces == 0 && addOneMedalRace && i == testRaces.size(), 
-                    defaultFleet));
+            /* medalRace */numberOfUntrackedRaces == 0 && addOneMedalRace && i == testRaces.size()));
         }
         // add a few race columns not yet connected to a tracked race
         for (int j=0; j<numberOfUntrackedRaces; j++) {

@@ -35,7 +35,7 @@ import com.sap.sailing.domain.tracking.impl.WindImpl;
 import com.sap.sailing.racecommittee.app.AppConstants;
 import com.sap.sailing.racecommittee.app.AppPreferences;
 import com.sap.sailing.racecommittee.app.R;
-import com.sap.sailing.racecommittee.app.logging.ExLog;
+import com.sap.sailing.android.shared.logging.ExLog;
 import com.sap.sailing.racecommittee.app.ui.views.CompassView;
 import com.sap.sailing.racecommittee.app.ui.views.CompassView.CompassDirectionListener;
 
@@ -73,11 +73,6 @@ public class WindActivity extends SessionActivity implements CompassDirectionLis
             buildAlertMessageNoGps();
         }
         locationManager.requestLocationUpdates(LocationManager.GPS_PROVIDER, FIVE_SEC, EVERY_POSITION_CHANGE, this);
-        
-        //        Criteria crit = new Criteria();
-        //        crit.setAccuracy(Criteria.ACCURACY_FINE);
-        //        String provider = locationManager.getBestProvider(crit, true);
-        //        onLocationChanged(locationManager.getLastKnownLocation(provider));
 
         windSpeedSeekBar.setOnSeekBarChangeListener(new OnSeekBarChangeListener() {
 
@@ -113,7 +108,7 @@ public class WindActivity extends SessionActivity implements CompassDirectionLis
                     finish();
                 } catch (NumberFormatException nfe) {
                     Toast.makeText(WindActivity.this, R.string.wind_speed_direction_not_a_valid_number, Toast.LENGTH_LONG).show();
-                    ExLog.i(this.getClass().getCanonicalName(), nfe.getMessage());
+                    ExLog.i(WindActivity.this, this.getClass().getCanonicalName(), nfe.getMessage());
                 }
             }
 
@@ -124,7 +119,11 @@ public class WindActivity extends SessionActivity implements CompassDirectionLis
             @Override
             public void onFocusChange(View v, boolean hasFocus) {
                 if (!hasFocus) {
-                    compassView.setDirection(Float.valueOf(windBearingEditText.getText().toString()));
+                    String windBearingText = windBearingEditText.getText().toString();
+                    if (windBearingText.length() > 0) {
+                        compassView.setDirection(Float.valueOf(windBearingText));
+                    }
+                    
                 }
             }
         });
@@ -132,7 +131,10 @@ public class WindActivity extends SessionActivity implements CompassDirectionLis
             @Override
             public void onFocusChange(View v, boolean hasFocus) {
                 if (!hasFocus) {
-                    windSpeedSeekBar.setProgress(Double.valueOf(windSpeedEditText.getText().toString()).intValue() * 10);
+                    String windSpeedText = windSpeedEditText.getText().toString();
+                    if (windSpeedText.length() > 0) {
+                        windSpeedSeekBar.setProgress(Double.valueOf(windSpeedText).intValue() * 10);
+                    }
                 }
             }
         });

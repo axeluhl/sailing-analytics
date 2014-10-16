@@ -14,6 +14,7 @@ import java.util.logging.Logger;
 import com.google.gwt.canvas.dom.client.Context2d;
 import com.google.gwt.event.shared.HandlerRegistration;
 import com.google.gwt.maps.client.MapWidget;
+import com.sap.sailing.domain.common.AbstractBearing;
 import com.sap.sailing.domain.common.impl.DegreeBearingImpl;
 import com.sap.sailing.gwt.ui.shared.SimulatorWindDTO;
 import com.sap.sailing.gwt.ui.shared.WindFieldDTO;
@@ -149,7 +150,7 @@ public class WindFieldCanvasOverlay extends FullCanvasOverlay implements TimeLis
             while (windDTOIter.hasNext()) {
                 final SimulatorWindDTO windDTO = windDTOIter.next();
                 //System.out.println("wind angle: "+windDTO.trueWindBearingDeg);
-                final DegreeBearingImpl dbi = new DegreeBearingImpl(windDTO.trueWindBearingDeg);
+                final AbstractBearing dbi = new DegreeBearingImpl(windDTO.trueWindBearingDeg);
                 drawScaledArrow(windDTO, dbi.getRadians(), ++index, drawHead);
             }
             final String title = "Wind Field at " + windDTOList.size() + " points.";

@@ -18,6 +18,7 @@ import com.sap.sailing.domain.base.RaceColumn;
 import com.sap.sailing.domain.base.Regatta;
 import com.sap.sailing.domain.base.Series;
 import com.sap.sailing.domain.base.impl.FleetImpl;
+import com.sap.sailing.domain.base.impl.RegattaImpl;
 import com.sap.sailing.domain.base.impl.SeriesImpl;
 import com.sap.sailing.domain.common.ScoringSchemeType;
 import com.sap.sailing.domain.common.TimePoint;
@@ -45,8 +46,8 @@ public class LeaderboardGroupJsonExportTest extends AbstractJsonExportTest {
         Series testSeries = new SeriesImpl("TestSeries", /* isMedal */false, fleets,
                 raceColumnNames, /* trackedRegattaRegistry */null);
         series.add(testSeries);
-        regatta = racingEventService.createRegatta(regattaName, boatClassName, UUID.randomUUID(), series, /*persistent*/ true,
-                DomainFactory.INSTANCE.createScoringScheme(ScoringSchemeType.LOW_POINT), null);
+        regatta = racingEventService.createRegatta(RegattaImpl.getDefaultName(regattaName, boatClassName), boatClassName, UUID.randomUUID(), series, /*persistent*/ true,
+                DomainFactory.INSTANCE.createScoringScheme(ScoringSchemeType.LOW_POINT), null, /* useStartTimeInference */ true);
         testSeries.addRaceColumn("R1", /* trackedRegattaRegistry */ null);
         testSeries.addRaceColumn("R2", /* trackedRegattaRegistry */ null);
         List<Competitor> competitors = createCompetitors(4);
@@ -66,20 +67,17 @@ public class LeaderboardGroupJsonExportTest extends AbstractJsonExportTest {
         List<String> leaderboardNames = new ArrayList<String>();
         leaderboardNames.add(regatta.getName());
         leaderboardGroup = racingEventService.addLeaderboardGroup(UUID.randomUUID(), leaderboardGroupName, "description", 
-                /* displayGroupsInReverseOrder */ false, leaderboardNames, /* overallLeaderboardDiscardThresholds */ null, /* overallLeaderboardScoringSchemeType */ null);
+                "The LG displayName", /* displayGroupsInReverseOrder */ false,
+                leaderboardNames, /* overallLeaderboardDiscardThresholds */ null, /* overallLeaderboardScoringSchemeType */ null);
     }
 
     @Test
     public void testExportLeaderboardGroupsAsJson() throws Exception {   
         String jsonString = callJsonHttpServlet(new LeaderboardGroupsJsonGetServlet(), "GET", null);
-        
-        Object obj= JSONValue.parse(jsonString);
-        JSONArray array= (JSONArray) obj;
-        
+        Object obj = JSONValue.parse(jsonString);
+        JSONArray array = (JSONArray) obj;
         assertTrue(array.size() == 1);
-
         String jsonFirstLeaderboardGroup = (String) array.get(0);
-
         assertTrue(leaderboardGroup.getName().equals(jsonFirstLeaderboardGroup));
     }
 }

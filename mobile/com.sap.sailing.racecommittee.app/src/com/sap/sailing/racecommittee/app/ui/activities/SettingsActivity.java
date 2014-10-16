@@ -70,7 +70,10 @@ public class SettingsActivity extends PreferenceActivity {
         super.onCreate(savedInstanceState);
         
         Bundle arguments = getIntent().getExtras();
-        this.isRedirectedToTemp = arguments != null && arguments.containsKey(PreferenceActivity.EXTRA_SHOW_FRAGMENT_ARGUMENTS);
+        
+        //the additional null-check seems to be necessary (see bug 2377)
+        this.isRedirectedToTemp = arguments != null && arguments.containsKey(PreferenceActivity.EXTRA_SHOW_FRAGMENT_ARGUMENTS)
+                && arguments.get(PreferenceActivity.EXTRA_SHOW_FRAGMENT_ARGUMENTS) != null;
         if (isRedirectedToTemp) {
             Bundle info = arguments.getBundle(PreferenceActivity.EXTRA_SHOW_FRAGMENT_ARGUMENTS);
             if (info != null) {

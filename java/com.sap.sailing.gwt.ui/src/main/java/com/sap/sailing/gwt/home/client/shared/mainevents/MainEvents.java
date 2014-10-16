@@ -4,49 +4,58 @@ import java.util.ArrayList;
 import java.util.List;
 
 import com.google.gwt.core.client.GWT;
-import com.google.gwt.place.shared.PlaceController;
+import com.google.gwt.dom.client.DivElement;
+import com.google.gwt.event.dom.client.ClickEvent;
 import com.google.gwt.uibinder.client.UiBinder;
 import com.google.gwt.uibinder.client.UiField;
+import com.google.gwt.uibinder.client.UiHandler;
+import com.google.gwt.user.client.ui.Anchor;
 import com.google.gwt.user.client.ui.Composite;
 import com.google.gwt.user.client.ui.Widget;
-import com.sap.sailing.gwt.ui.shared.EventDTO;
+import com.sap.sailing.gwt.home.client.app.PlaceNavigator;
+import com.sap.sailing.gwt.home.client.shared.recentevent.RecentEvent;
+import com.sap.sailing.gwt.ui.shared.EventBaseDTO;
 
 public class MainEvents extends Composite {
-
-    private List<EventDTO> recentEvents;
-    
-    @UiField(provided=true) RecentEvent event1;
-    @UiField(provided=true) RecentEvent event2;
-    @UiField(provided=true) RecentEvent event3;
-
     interface MainEventsUiBinder extends UiBinder<Widget, MainEvents> {
     }
     
     private static MainEventsUiBinder uiBinder = GWT.create(MainEventsUiBinder.class);
 
-    public MainEvents(PlaceController placeController) {
-        event1 = new RecentEvent(placeController);
-        event2 = new RecentEvent(placeController);
-        event3 = new RecentEvent(placeController);
+    private List<EventBaseDTO> recentEvents;
+    
+    @UiField DivElement recentEventsDiv;
+    @UiField Anchor showAllEventsAnchor;
+    
+    private final PlaceNavigator navigator;
+    
+    public MainEvents(PlaceNavigator navigator) {
+        this.navigator = navigator;
+        
         MainEventsResources.INSTANCE.css().ensureInjected();
         initWidget(uiBinder.createAndBindUi(this));
         
-        recentEvents = new ArrayList<EventDTO>();
+        recentEvents = new ArrayList<EventBaseDTO>();
     }
 
-    public void setRecentEvents(List<EventDTO> theRecentEvents) {
+    public void setRecentEvents(List<EventBaseDTO> theRecentEvents) {
+        final int MAX_RECENT_EVENTS_ON_HOME_PAGE = 3;
+        recentEventsDiv.removeAllChildren();
         recentEvents.clear();
         recentEvents.addAll(theRecentEvents);
-        
-        int size = recentEvents.size();
-        if(size > 0) {
-            event1.setEvent(recentEvents.get(0));
-        }
-        if(size > 1) {
-            event2.setEvent(recentEvents.get(1));
-        }
-        if(size > 2) {
-            event3.setEvent(recentEvents.get(2));
+        for (int i=0; i<recentEvents.size() && i<MAX_RECENT_EVENTS_ON_HOME_PAGE; i++) {
+            createRecentEvent(recentEvents.get(i));
         }
     }
+
+    private void createRecentEvent(EventBaseDTO eventBase) {
+        RecentEvent event = new RecentEvent(navigator, eventBase);
+        recentEventsDiv.appendChild(event.getElement());
+    }
+    
+    @UiHandler("showAllEventsAnchor")
+    public void showAllEvents(ClickEvent e) {
+        navigator.goToEvents();;
+    }
+
 }

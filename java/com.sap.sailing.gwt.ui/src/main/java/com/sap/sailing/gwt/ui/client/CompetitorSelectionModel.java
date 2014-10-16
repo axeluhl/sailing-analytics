@@ -12,6 +12,7 @@ import com.sap.sailing.domain.common.Color;
 import com.sap.sailing.domain.common.ColorMap;
 import com.sap.sailing.domain.common.dto.CompetitorDTO;
 import com.sap.sailing.domain.common.impl.ColorMapImpl;
+import com.sap.sse.common.Util;
 import com.sap.sse.common.filter.Filter;
 import com.sap.sse.common.filter.FilterSet;
 
@@ -26,13 +27,13 @@ public class CompetitorSelectionModel implements CompetitorSelectionProvider {
     
     private final ColorMap<CompetitorDTO> competitorsColorMap;
     
-    private FilterSet<CompetitorDTO, ? extends Filter<CompetitorDTO>> competitorsFilterSet; 
+    private FilterSet<CompetitorDTO, Filter<CompetitorDTO>> competitorsFilterSet; 
 
     public CompetitorSelectionModel(boolean hasMultiSelection) {
         this(hasMultiSelection, null);
     }
 
-    public CompetitorSelectionModel(boolean hasMultiSelection, FilterSet<CompetitorDTO, ? extends Filter<CompetitorDTO>> competitorsFilterSet) {
+    private CompetitorSelectionModel(boolean hasMultiSelection, FilterSet<CompetitorDTO, Filter<CompetitorDTO>> competitorsFilterSet) {
         super();
         this.hasMultiSelection = hasMultiSelection;
         this.competitorsFilterSet = competitorsFilterSet;
@@ -110,6 +111,13 @@ public class CompetitorSelectionModel implements CompetitorSelectionProvider {
     @Override
     public Iterable<CompetitorDTO> getSelectedCompetitors() {
         return Collections.unmodifiableCollection(selectedCompetitors);
+    }
+
+    @Override
+    public Iterable<CompetitorDTO> getSelectedFilteredCompetitors() {
+        Set<CompetitorDTO> result = new HashSet<>(selectedCompetitors);
+        result.retainAll(getFilteredCompetitors());
+        return result;
     }
 
     @Override
@@ -223,28 +231,68 @@ public class CompetitorSelectionModel implements CompetitorSelectionProvider {
     
     @Override
     public Color getColor(CompetitorDTO competitor) {
-        Color result = null;
+        final Color result;
         if (allCompetitors.contains(competitor)) {
             if (competitor.getColor() != null) {
                 result = competitor.getColor();
             } else {
                 result = competitorsColorMap.getColorByID(competitor); 
             }
+        } else {
+            result = null;
         }
-        
         return result;
     }
 
     @Override
-    public FilterSet<CompetitorDTO, ? extends Filter<CompetitorDTO>> getCompetitorsFilterSet() {
+    public FilterSet<CompetitorDTO, Filter<CompetitorDTO>> getCompetitorsFilterSet() {
         return competitorsFilterSet;
+    }
+    
+    @Override 
+    public FilterSet<CompetitorDTO, Filter<CompetitorDTO>> getOrCreateCompetitorsFilterSet(String nameToAssignToNewFilterSet) {
+        if (competitorsFilterSet == null) {
+            competitorsFilterSet = new FilterSet<CompetitorDTO, Filter<CompetitorDTO>>(nameToAssignToNewFilterSet);
+        }
+        return getCompetitorsFilterSet();
     }
 
     @Override
-    public void setCompetitorsFilterSet(FilterSet<CompetitorDTO, ? extends Filter<CompetitorDTO>> competitorsFilterSet) {
+    public void setCompetitorsFilterSet(FilterSet<CompetitorDTO, Filter<CompetitorDTO>> competitorsFilterSet) {
+        FilterSet<CompetitorDTO, ? extends Filter<CompetitorDTO>> oldFilterSet = this.competitorsFilterSet;
         this.competitorsFilterSet = competitorsFilterSet;
+        if (!Util.equalsWithNull(competitorsFilterSet, oldFilterSet)) {
+            for (CompetitorSelectionChangeListener listener : listeners) {
+                listener.filterChanged(oldFilterSet, competitorsFilterSet);
+            }
+        }
         for (CompetitorSelectionChangeListener listener : listeners) {
             listener.filteredCompetitorsListChanged(getFilteredCompetitors());
         }
+    }
+
+    @Override
+    public boolean hasActiveFilters() {
+        return (competitorsFilterSet != null && !competitorsFilterSet.getFilters().isEmpty() 
+                && getFilteredCompetitors().size() != allCompetitors.size());
+    }
+
+    @Override
+    public void clearAllFilters() {
+        if (hasActiveFilters()) {
+            Iterator<CompetitorDTO> selIter = getSelectedCompetitors().iterator();
+            while (selIter.hasNext()) {
+                CompetitorDTO selected = selIter.next();
+                setSelected(selected, false);
+                selIter = getSelectedCompetitors().iterator();
+            }
+            competitorsFilterSet = null;
+            fireListChanged(getAllCompetitors());
+        }
+    }
+
+    @Override
+    public int getFilteredCompetitorsListSize() {
+        return getFilteredCompetitors().size();
     }
 }

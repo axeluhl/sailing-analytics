@@ -16,6 +16,7 @@ public abstract class EventBaseImpl implements EventBase {
     private static final long serialVersionUID = -5749964088848611074L;
 
     private String name;
+    private String description;
     private final Venue venue;
     private boolean isPublic;
     private final UUID id;
@@ -23,6 +24,9 @@ public abstract class EventBaseImpl implements EventBase {
     private TimePoint endDate;
     private ConcurrentLinkedQueue<URL> imageURLs;
     private ConcurrentLinkedQueue<URL> videoURLs;
+    private ConcurrentLinkedQueue<URL> sponsorImageURLs;
+    private URL logoImageURL;
+    private URL officialWebsiteURL;
 
     protected EventBaseImpl(String name, TimePoint startDate, TimePoint endDate, String venueName, boolean isPublic, UUID id) {
         this(name, startDate, endDate, new VenueImpl(venueName), isPublic, id);
@@ -41,6 +45,7 @@ public abstract class EventBaseImpl implements EventBase {
         this.isPublic = isPublic;
         this.imageURLs = new ConcurrentLinkedQueue<URL>();
         this.videoURLs = new ConcurrentLinkedQueue<URL>();
+        this.sponsorImageURLs = new ConcurrentLinkedQueue<URL>();
     }
     
     private void readObject(ObjectInputStream ois) throws IOException, ClassNotFoundException {
@@ -51,11 +56,24 @@ public abstract class EventBaseImpl implements EventBase {
         if (videoURLs == null) {
             videoURLs = new ConcurrentLinkedQueue<URL>();
         }
+        if (sponsorImageURLs == null) {
+            sponsorImageURLs = new ConcurrentLinkedQueue<URL>();
+        }
     }
 
     @Override
     public UUID getId() {
         return id;
+    }
+
+    @Override
+    public String getDescription() {
+        return description;
+    }
+
+    @Override
+    public void setDescription(String description) {
+        this.description = description;
     }
 
     @Override
@@ -128,7 +146,9 @@ public abstract class EventBaseImpl implements EventBase {
     @Override
     public void setImageURLs(Iterable<URL> imageURLs) {
         this.imageURLs.clear();
-        Util.addAll(imageURLs, this.imageURLs);
+        if (imageURLs != null) {
+            Util.addAll(imageURLs, this.imageURLs);
+        }
     }
 
     @Override
@@ -151,7 +171,54 @@ public abstract class EventBaseImpl implements EventBase {
     @Override
     public void setVideoURLs(Iterable<URL> videoURLs) {
         this.videoURLs.clear();
-        Util.addAll(videoURLs, this.videoURLs);
+        if (videoURLs != null) {
+            Util.addAll(videoURLs, this.videoURLs);
+        }
+    }
+
+    @Override
+    public Iterable<URL> getSponsorImageURLs() {
+        return Collections.unmodifiableCollection(sponsorImageURLs);
+    }
+    
+    @Override
+    public void addSponsorImageURL(URL sponsorImageURL) {
+        if (!sponsorImageURLs.contains(sponsorImageURL)) {
+            sponsorImageURLs.add(sponsorImageURL);
+        }
+    }
+
+    @Override
+    public void removeSponsorImageURL(URL sponsorImageURL) {
+        sponsorImageURLs.remove(sponsorImageURL);
+    }
+
+    @Override
+    public void setSponsorImageURLs(Iterable<URL> sponsorImageURLs) {
+        this.sponsorImageURLs.clear();
+        if (sponsorImageURLs != null) {
+            Util.addAll(sponsorImageURLs, this.sponsorImageURLs);
+        }
+    }
+
+    @Override
+    public URL getLogoImageURL() {
+        return logoImageURL;
+    }
+
+    @Override
+    public void setLogoImageURL(URL logoImageURL) {
+        this.logoImageURL = logoImageURL;
+    }
+
+    @Override
+    public URL getOfficialWebsiteURL() {
+        return officialWebsiteURL;
+    }
+
+    @Override
+    public void setOfficialWebsiteURL(URL officialWebsiteURL) {
+        this.officialWebsiteURL = officialWebsiteURL;
     }
 
 }

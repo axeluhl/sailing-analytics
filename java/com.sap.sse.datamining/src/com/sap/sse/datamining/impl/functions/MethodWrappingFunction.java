@@ -8,6 +8,7 @@ import java.util.logging.Level;
 
 import com.sap.sse.datamining.i18n.DataMiningStringMessages;
 import com.sap.sse.datamining.shared.Unit;
+import com.sap.sse.datamining.shared.annotations.Connector;
 import com.sap.sse.datamining.shared.annotations.Dimension;
 import com.sap.sse.datamining.shared.annotations.Statistic;
 
@@ -15,7 +16,7 @@ public class MethodWrappingFunction<ReturnType> extends AbstractFunction<ReturnT
 
     private final Method method;
     private Class<ReturnType> returnType;
-    private AdditionalFunctionData additionalData;
+    private AdditionalMethodWrappingFunctionData additionalData;
     
     /**
      * Throws an {@link IllegalArgumentException}, if the return type of the method and the given <code>returnType</code>
@@ -42,13 +43,21 @@ public class MethodWrappingFunction<ReturnType> extends AbstractFunction<ReturnT
     }
 
     private void initializeAdditionalData() {
+        additionalData = new AdditionalMethodWrappingFunctionData("", Unit.None, 0, Integer.MAX_VALUE);
+        
         if (method.getAnnotation(Dimension.class) != null) {
             Dimension dimensionData = method.getAnnotation(Dimension.class);
-            additionalData = new AdditionalFunctionData(dimensionData.messageKey(), Unit.None, 0);
+            additionalData = new AdditionalMethodWrappingFunctionData(dimensionData.messageKey(), Unit.None, 0, dimensionData.ordinal());
         }
+        
         if (method.getAnnotation(Statistic.class) != null) {
-            Statistic valueData = method.getAnnotation(Statistic.class);
-            additionalData = new AdditionalFunctionData(valueData.messageKey(), valueData.resultUnit(), valueData.resultDecimals());
+            Statistic statisticData = method.getAnnotation(Statistic.class);
+            additionalData = new AdditionalMethodWrappingFunctionData(statisticData.messageKey(), statisticData.resultUnit(), statisticData.resultDecimals(), statisticData.ordinal());
+        }
+        
+        if (method.getAnnotation(Connector.class) != null) {
+            Connector connectorData = method.getAnnotation(Connector.class);
+            additionalData = new AdditionalMethodWrappingFunctionData(connectorData.messageKey(), Unit.None, 0, connectorData.ordinal());
         }
     }
 
@@ -79,7 +88,7 @@ public class MethodWrappingFunction<ReturnType> extends AbstractFunction<ReturnT
             try {
                 return (ReturnType) method.invoke(instance, parameters);
             } catch (IllegalAccessException | IllegalArgumentException | InvocationTargetException e) {
-                getLogger().log(Level.FINER, "Error invoking the Function " + getMethodName(), e);
+                getLogger().log(Level.FINER, "Error invoking the Function " + method.getName(), e);
             }
         }
         return null;
@@ -94,6 +103,11 @@ public class MethodWrappingFunction<ReturnType> extends AbstractFunction<ReturnT
     public int getResultDecimals() {
         return additionalData.getResultDecimals();
     }
+    
+    @Override
+    public int getOrdinal() {
+        return additionalData.getOrdinal();
+    }
 
     @Override
     public String getSimpleName() {
@@ -102,19 +116,20 @@ public class MethodWrappingFunction<ReturnType> extends AbstractFunction<ReturnT
     
     @Override
     public String getLocalizedName(Locale locale, DataMiningStringMessages stringMessages) {
-        if (additionalData == null || additionalData.getMessageKey().isEmpty()) {
+        if (!isLocatable()) {
             return getSimpleName();
         }
         return stringMessages.get(locale, additionalData.getMessageKey());
     }
-    
-    private String getMethodName() {
-        return method.getName();
-    }
 
     @Override
+    public boolean isLocatable() {
+        return additionalData != null && !additionalData.getMessageKey().isEmpty();
+    }
+    
+    @Override
     public String toString() {
-        return getDeclaringType().getSimpleName() + "." + getMethodName() + "(" + parametersAsString() + ") : " + method.getReturnType().getSimpleName();
+        return getDeclaringType().getSimpleName() + "." + method.getName() + "(" + parametersAsString() + ") : " + method.getReturnType().getSimpleName();
     }
 
     private String parametersAsString() {

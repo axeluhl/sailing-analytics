@@ -23,7 +23,7 @@ import com.sap.sailing.domain.common.impl.KnotSpeedWithBearingImpl;
 import com.sap.sailing.domain.racelog.tracking.EmptyGPSFixStore;
 import com.sap.sailing.domain.tracking.GPSFixMoving;
 import com.sap.sailing.domain.tracking.GPSFixTrack;
-import com.sap.sailing.domain.tracking.RacesHandle;
+import com.sap.sailing.domain.tracking.RaceHandle;
 import com.sap.sailing.domain.tracking.TrackedRace;
 import com.sap.sailing.domain.tracking.Wind;
 import com.sap.sailing.domain.tracking.impl.EmptyWindStore;
@@ -42,7 +42,7 @@ public class PathGeneratorTracTrac extends PathGeneratorBase {
 
     private RacingEventServiceImpl service = null;
     private TracTracAdapterFactory tracTracAdapterFactory;
-    private RacesHandle raceHandle = null;
+    private RaceHandle raceHandle = null;
     private URL raceURL = null;
     private URI liveURI = null;
     private URI storedURI = null;
@@ -115,28 +115,21 @@ public class PathGeneratorTracTrac extends PathGeneratorBase {
     }
 
     public List<String> getLegsNames() {
-
         this.intializeRaceHandle();
-
         List<String> result = new ArrayList<String>();
-
-        for (RaceDefinition race : this.raceHandle.getRaces()) {
-            for (Leg leg : race.getCourse().getLegs()) {
-                result.add(leg.toString());
-            }
-            break;
+        RaceDefinition race = this.raceHandle.getRace();
+        for (Leg leg : race.getCourse().getLegs()) {
+            result.add(leg.toString());
         }
-
         return result;
     }
 
     @Override
     public Path getPath() {
-
         this.intializeRaceHandle();
 
         // getting the first race
-        RaceDefinition raceDef = this.raceHandle.getRaces().iterator().next();
+        RaceDefinition raceDef = this.raceHandle.getRace();
         Regatta regatta = this.raceHandle.getRegatta();
 
         TrackedRace trackedRace = this.service.getTrackedRace(regatta, raceDef);
@@ -184,11 +177,9 @@ public class PathGeneratorTracTrac extends PathGeneratorBase {
     }
 
     public Path getPathPolyline(Distance maxDistance) {
-
         this.intializeRaceHandle();
-
-        // getting the first race
-        RaceDefinition raceDef = this.raceHandle.getRaces().iterator().next();
+        // getting the race
+        RaceDefinition raceDef = this.raceHandle.getRace();
         Regatta regatta = this.raceHandle.getRegatta();
 
         TrackedRace trackedRace = this.service.getTrackedRace(regatta, raceDef);
@@ -252,20 +243,12 @@ public class PathGeneratorTracTrac extends PathGeneratorBase {
     }
 
     public List<String> getComeptitorsNames() {
-
         this.intializeRaceHandle();
-
         List<String> result = new ArrayList<String>();
-
-        for (RaceDefinition race : this.raceHandle.getRaces()) {
-            for (Competitor competitor : race.getCompetitors()) {
-                result.add(competitor.getName() + ", " + competitor.getBoat().getName());
-            }
-
-            break;
+        RaceDefinition race = this.raceHandle.getRace();
+        for (Competitor competitor : race.getCompetitors()) {
+            result.add(competitor.getName() + ", " + competitor.getBoat().getName());
         }
-
         return result;
-
     }
 }

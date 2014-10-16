@@ -1,25 +1,21 @@
 package com.sap.sailing.domain.tractracadapter.impl;
 
-import java.util.HashSet;
-import java.util.Set;
-
 import com.sap.sailing.domain.base.RaceDefinition;
 import com.sap.sailing.domain.tracking.DynamicTrackedRegatta;
+import com.sap.sailing.domain.tracking.RaceHandle;
 import com.sap.sailing.domain.tracking.RaceTracker;
-import com.sap.sailing.domain.tracking.RacesHandle;
 import com.sap.sailing.domain.tractracadapter.DomainFactory;
-import com.tractrac.clientmodule.Event;
-import com.tractrac.clientmodule.Race;
+import com.tractrac.model.lib.api.event.IRace;
 
-public class RaceHandleImpl implements RacesHandle {
-    private final Event tractracEvent;
+public class RaceHandleImpl implements RaceHandle {
+    private final IRace tractracRace;
     private final DomainFactory domainFactory;
     private final DynamicTrackedRegatta trackedRegatta;
     private final RaceTracker raceTracker;
     
-    public RaceHandleImpl(DomainFactory domainFactory, Event tractracEvent, DynamicTrackedRegatta trackedRegatta, RaceTracker raceTracker) {
+    public RaceHandleImpl(DomainFactory domainFactory, IRace tractracRace, DynamicTrackedRegatta trackedRegatta, RaceTracker raceTracker) {
         this.domainFactory = domainFactory;
-        this.tractracEvent = tractracEvent;
+        this.tractracRace = tractracRace;
         this.trackedRegatta = trackedRegatta;
         this.raceTracker = raceTracker;
     }
@@ -30,12 +26,8 @@ public class RaceHandleImpl implements RacesHandle {
     }
 
     @Override
-    public Set<RaceDefinition> getRaces() {
-        Set<RaceDefinition> result = new HashSet<RaceDefinition>();
-        for (Race r : tractracEvent.getRaceList()) {
-            result.add(domainFactory.getAndWaitForRaceDefinition(r.getId()));
-        }
-        return result;
+    public RaceDefinition getRace() {
+        return domainFactory.getAndWaitForRaceDefinition(tractracRace.getId());
     }
     
     @Override
@@ -49,13 +41,13 @@ public class RaceHandleImpl implements RacesHandle {
     }
 
     @Override
-    public Set<RaceDefinition> getRaces(long timeoutInMilliseconds) {
-        Set<RaceDefinition> result = new HashSet<RaceDefinition>();
-        for (Race race : tractracEvent.getRaceList()) {
-            final RaceDefinition raceDefinition = domainFactory.getAndWaitForRaceDefinition(race.getId(), timeoutInMilliseconds);
-            if (raceDefinition != null) { // may have time-outed
-                result.add(raceDefinition);
-            }
+    public RaceDefinition getRace(long timeoutInMilliseconds) {
+        final RaceDefinition result;
+        final RaceDefinition raceDefinition = domainFactory.getAndWaitForRaceDefinition(tractracRace.getId(), timeoutInMilliseconds);
+        if (raceDefinition != null) { // may have time-outed
+            result = raceDefinition;
+        } else {
+            result = null;
         }
         return result;
     }

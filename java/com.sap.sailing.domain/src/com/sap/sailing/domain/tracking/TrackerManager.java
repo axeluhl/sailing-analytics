@@ -20,7 +20,7 @@ public interface TrackerManager {
      *            {@link #setRegattaForRace(Regatta, RaceDefinition)} is called to remember the association
      *            persistently. Otherwise, a default regatta as described above will be created and used.
      */
-    RacesHandle addRace(RegattaIdentifier regattaToAddTo, RaceTrackingConnectivityParameters params, long timeoutInMilliseconds)
+    RaceHandle addRace(RegattaIdentifier regattaToAddTo, RaceTrackingConnectivityParameters params, long timeoutInMilliseconds)
             throws MalformedURLException, FileNotFoundException, URISyntaxException, Exception;
 
 }

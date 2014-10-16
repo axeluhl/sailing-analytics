@@ -253,6 +253,7 @@ public class WindPanel extends FormPanel implements RegattasDisplayer, WindShowe
         VerticalPanel contentPanel = new VerticalPanel();
         igtimiWindImportRootPanel.add(contentPanel);
         contentPanel.add(new Label(stringMessages.seeIgtimiTabForAccountSettings()));
+        final CheckBox correctByDeclination = new CheckBox(stringMessages.declinationCheckbox());
         final Button importButton = new Button(stringMessages.importWindFromIgtimi());
         final HTML resultReport = new HTML();
         importButton.addClickHandler(new ClickHandler() {
@@ -266,7 +267,8 @@ public class WindPanel extends FormPanel implements RegattasDisplayer, WindShowe
                 }
                 if (Window.confirm(warningMessage)) {
                     resultReport.setText(stringMessages.loading());
-                    sailingService.importWindFromIgtimi(trackedRacesListComposite.getSelectedRaces(), new AsyncCallback<Map<RegattaAndRaceIdentifier, Integer>>() {
+                    sailingService.importWindFromIgtimi(trackedRacesListComposite.getSelectedRaces(),
+                            correctByDeclination.getValue(), new AsyncCallback<Map<RegattaAndRaceIdentifier, Integer>>() {
                         @Override
                         public void onFailure(Throwable caught) {
                             errorReporter.reportError(stringMessages.errorImportingIgtimiWind(caught.getMessage()));
@@ -291,6 +293,7 @@ public class WindPanel extends FormPanel implements RegattasDisplayer, WindShowe
                 }
             }
         });
+        contentPanel.add(correctByDeclination);
         contentPanel.add(importButton);
         contentPanel.add(resultReport);
         return igtimiWindImportRootPanel;
@@ -573,7 +576,7 @@ public class WindPanel extends FormPanel implements RegattasDisplayer, WindShowe
         List<String> windSourceTypeNames = new ArrayList<String>();
         windSourceTypeNames.add(WindSourceType.COMBINED.name());
         sailingService.getAveragedWindInfo(selectedRace, raceDTO.startOfRace, 30000L, 100, windSourceTypeNames,
-                /* onlyUpToNewestEvent==true means to only use data "based on facts" */ true, new AsyncCallback<WindInfoForRaceDTO>() {
+                /* onlyUpToNewestEvent==true means to only use data "based on facts" */ true, /* includeCombinedWindForAllLegMiddles */ false, new AsyncCallback<WindInfoForRaceDTO>() {
 
             @Override
             public void onFailure(Throwable caught) {

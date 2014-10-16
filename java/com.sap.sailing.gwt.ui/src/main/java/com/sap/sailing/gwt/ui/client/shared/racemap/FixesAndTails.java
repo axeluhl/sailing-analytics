@@ -2,6 +2,7 @@ package com.sap.sailing.gwt.ui.client.shared.racemap;
 
 import java.util.ArrayList;
 import java.util.Collections;
+import java.util.Comparator;
 import java.util.Date;
 import java.util.HashMap;
 import java.util.Iterator;
@@ -133,6 +134,7 @@ public class FixesAndTails {
         int indexOfFirst = -1;
         int indexOfLast = -1;
         int i = 0;
+        // TODO consider binary search to find beginning of interesting segment faster
         for (Iterator<GPSFixDTO> fixIter = fixesForCompetitor.iterator(); fixIter.hasNext() && indexOfLast == -1;) {
             GPSFixDTO fix = fixIter.next();
             if (!fix.timepoint.before(to)) {
@@ -175,13 +177,13 @@ public class FixesAndTails {
      * not trimmed according to the specification for the tail length. This has to happen elsewhere (see also
      * {@link #updateTail}).
      * 
-     * @param result
+     * @param fixesForCompetitors
      *            For each list the invariant must hold that an {@link GPSFixDTO#extrapolated extrapolated} fix must be
      *            the last one in the list
      */
-    protected void updateFixes(Map<CompetitorDTO, List<GPSFixDTO>> result,
+    protected void updateFixes(Map<CompetitorDTO, List<GPSFixDTO>> fixesForCompetitors,
             Map<CompetitorDTO, Boolean> overlapsWithKnownFixes, TailFactory tailFactory, long timeForPositionTransitionMillis) {
-        for (Map.Entry<CompetitorDTO, List<GPSFixDTO>> e : result.entrySet()) {
+        for (Map.Entry<CompetitorDTO, List<GPSFixDTO>> e : fixesForCompetitors.entrySet()) {
             if (e.getValue() != null && !e.getValue().isEmpty()) {
                 List<GPSFixDTO> fixesForCompetitor = fixes.get(e.getKey());
                 if (fixesForCompetitor == null) {
@@ -238,10 +240,14 @@ public class FixesAndTails {
         final Polyline tail = getTail(competitorDTO);
         int intoThisIndex = 0;
         for (GPSFixDTO mergeThisFix : mergeThis) {
-            while (intoThisIndex < intoThis.size()
-                    && intoThis.get(intoThisIndex).timepoint.before(mergeThisFix.timepoint)) {
-                // TODO how about using Collections.binarySearch
-                intoThisIndex++;
+            intoThisIndex = Collections.binarySearch(intoThis, mergeThisFix, new Comparator<GPSFixDTO>() {
+                @Override
+                public int compare(GPSFixDTO o1, GPSFixDTO o2) {
+                    return o1.timepoint.compareTo(o2.timepoint);
+                }
+            });
+            if (intoThisIndex < 0) {
+                intoThisIndex = -intoThisIndex-1;
             }
             if (intoThisIndex < intoThis.size() && intoThis.get(intoThisIndex).timepoint.equals(mergeThisFix.timepoint)) {
                 // exactly same time point; replace with fix from mergeThis unless the new fix is extrapolated and there is a later fix in intoThis;
@@ -451,8 +457,7 @@ public class FixesAndTails {
                     && !tailstart.before(timepointOfFirstKnownFix) && timepointOfLastKnownFix != null
                     && !tailstart.after(timepointOfLastKnownFix)) {
                 // the beginning of what we need is contained in the interval we already have; skip what we already have
-                // FIXME requests the lastKnownFix again because "from" is *inclusive*; could lead to bug 319
-                fromDate = timepointOfLastKnownFix;
+                fromDate = new Date(timepointOfLastKnownFix.getTime()+1l); // "from" is "inclusive", so add 1ms to also skip the last fix we have
                 overlap = true;
             } else {
                 fromDate = tailstart;

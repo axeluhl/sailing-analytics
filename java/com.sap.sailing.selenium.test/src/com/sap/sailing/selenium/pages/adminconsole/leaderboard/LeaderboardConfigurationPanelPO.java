@@ -32,12 +32,11 @@ public class LeaderboardConfigurationPanelPO extends PageArea {
         }
         
         public String getName() {
-            return getColumnContent(0);
+            return getColumnContent("Name");
         }
         
         public String getLeaderboardURL() {
             WebElement link = this.context.findElement(By.xpath(".//td/div/a"));
-            
             return link.getAttribute("href");
         }
     }
@@ -68,9 +67,7 @@ public class LeaderboardConfigurationPanelPO extends PageArea {
         this.createFlexibleLeaderboardButton.click();
         // Wait, since we trigger an AJAX-request to get the available events
         waitForAjaxRequests();
-        
         WebElement dialog = findElementBySeleniumId(this.driver, "FlexibleLeaderboardCreateDialog");
-        
         return new FlexibleLeaderboardCreateDialogPO(this.driver, dialog);
     }
     
@@ -83,9 +80,7 @@ public class LeaderboardConfigurationPanelPO extends PageArea {
     
     public RegattaLeaderboardCreateDialogPO startCreatingRegattaLeaderboard() {
         this.createRegattaLeaderboardButton.click();
-        
         WebElement dialog = findElementBySeleniumId(this.driver, "RegattaLeaderboardCreateDialog");
-        
         return new RegattaLeaderboardCreateDialogPO(this.driver, dialog);
     }
     
@@ -97,49 +92,38 @@ public class LeaderboardConfigurationPanelPO extends PageArea {
     
     public void deleteLeaderboard(String leaderboard) {
         LeaderboardEntryPO entry = findLeaderboard(leaderboard);
-        
-        if(entry != null) {
+        if (entry != null) {
             WebElement removeAction = ActionsHelper.findRemoveAction(entry.getWebElement());
             removeAction.click();
-            
             ActionsHelper.acceptAlert(this.driver);
-            
             waitForAjaxRequests();
         }
     }
     
     public String getLeaderboardURL(String leaderboard) {
         LeaderboardEntryPO entry = findLeaderboard(leaderboard);
-        
-        if(entry != null) {
+        if (entry != null) {
             return entry.getLeaderboardURL();
         }
-        
         return null;
     }
     
     public List<String> getAvailableLeaderboards() {
         List<String> leaderboards = new ArrayList<>();
-        
         CellTablePO<LeaderboardEntryPO> table = getLeaderboardTable();
         List<LeaderboardEntryPO> entries = table.getEntries();
-        
-        for(LeaderboardEntryPO entry : entries) {
+        for (LeaderboardEntryPO entry : entries) {
             leaderboards.add(entry.getIdentifier());
         }
-        
         return leaderboards;
     }
     
     public LeaderboardDetailsPanelPO getLeaderboardDetails(String leaderboard) {
         LeaderboardEntryPO entry = findLeaderboard(leaderboard);
-        
-        if(entry == null) {
+        if (entry == null) {
             return null;
         }
-        
         entry.select();
-        
         return new LeaderboardDetailsPanelPO(this.driver, this.leaderboardDetailsPanel);
     }
     
@@ -149,7 +133,6 @@ public class LeaderboardConfigurationPanelPO extends PageArea {
     
     private LeaderboardEntryPO findLeaderboard(String name) {
         CellTablePO<LeaderboardEntryPO> table = getLeaderboardTable();
-        
         return table.getEntry(name);
     }
 }

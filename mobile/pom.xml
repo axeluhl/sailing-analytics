@@ -14,7 +14,28 @@
 
     <modules>
         <module>com.sap.sailing.racecommittee.app</module>
+        <module>com.sap.sailing.android.shared</module>
+        <module>com.sap.sailing.android.tracking.app</module>
     </modules>
+    
+    <dependencyManagement>
+        <dependencies>
+        	<!-- needed on remote repository -->
+        	<dependency>
+            	<groupId>android</groupId>
+            	<artifactId>android</artifactId>
+            	<version>3.2_r1</version>
+            	<scope>provided</scope>
+        	</dependency>
+
+       		<!-- needed on remote repository -->
+        	<dependency>
+          		<groupId>android.support</groupId>
+          		<artifactId>compatibility-v4</artifactId>
+          		<version>19</version>
+        	</dependency>
+        	</dependencies>
+    </dependencyManagement>
 
     <build>
         <pluginManagement>
@@ -24,10 +45,6 @@
                     <artifactId>android-maven-plugin</artifactId>
                     <version>3.8.0</version>
                     <extensions>true</extensions>
-                    <configuration>
-                        <undeployBeforeDeploy>true</undeployBeforeDeploy>
-                        <extractDuplicates>true</extractDuplicates>
-                    </configuration>
                 </plugin>
             </plugins>
         </pluginManagement>

@@ -286,7 +286,7 @@ public class PolarSheetGenerationTest {
         }
         
         @Override
-        public boolean isValid() {
+        public boolean isValidCached() {
             return true;
         }
         

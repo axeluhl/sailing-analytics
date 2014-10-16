@@ -43,6 +43,8 @@ public class SpectatorEntryPoint extends AbstractEntryPoint implements RegattaRe
                 RaceBoardViewConfiguration.PARAM_CAN_REPLAY_DURING_LIVE_RACES, /* defaultValue */ false);
         final boolean showMapControls = GwtHttpRequestUtils.getBooleanParameter(
                 RaceBoardViewConfiguration.PARAM_VIEW_SHOW_MAPCONTROLS, /* defaultValue */ true);
+        final boolean showNavigationPanel = GwtHttpRequestUtils.getBooleanParameter(
+                RaceBoardViewConfiguration.PARAM_VIEW_SHOW_NAVIGATION_PANEL, true /* default */);
         boolean showRaceDetails = Window.Location.getParameter("showRaceDetails") != null
                 && Window.Location.getParameter("showRaceDetails").equalsIgnoreCase("true");
         final String groupName;
@@ -74,7 +76,7 @@ public class SpectatorEntryPoint extends AbstractEntryPoint implements RegattaRe
             String title = groupName != null ? groupName : stringMessages.overview();
             LogoAndTitlePanel logoAndTitlePanel = new LogoAndTitlePanel(title, stringMessages, this);
             logoAndTitlePanel.addStyleName("LogoAndTitlePanel");
-            FlowPanel globalNavigationPanel = new GlobalNavigationPanel(stringMessages, true, null, null);
+            FlowPanel globalNavigationPanel = new GlobalNavigationPanel(stringMessages, true, null, null, /* event */ null, null);
             logoAndTitlePanel.add(globalNavigationPanel);
 
             rootPanel.add(logoAndTitlePanel);
@@ -93,7 +95,8 @@ public class SpectatorEntryPoint extends AbstractEntryPoint implements RegattaRe
             rootPanel.add(groupOverviewPanel);
         } else {
             LeaderboardGroupPanel groupPanel = new LeaderboardGroupPanel(sailingService, stringMessages, this,
-                    groupName, root, viewModeParamValue, embedded, showRaceDetails, canReplayDuringLiveRaces, showMapControls);
+                    groupName, root, viewModeParamValue, embedded, showRaceDetails, canReplayDuringLiveRaces,
+                    showMapControls, showNavigationPanel);
             groupAndFeedbackPanel.add(groupPanel);
             if (!embedded) {
                 groupPanel.setWelcomeWidget(new SimpleWelcomeWidget(stringMessages.welcomeToSailingAnalytics(),

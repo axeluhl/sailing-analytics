@@ -4,12 +4,11 @@ Bundle-Name: Domain
 Bundle-SymbolicName: com.sap.sailing.domain
 Bundle-Version: 1.0.0.qualifier
 Bundle-Vendor: SAP
-Bundle-RequiredExecutionEnvironment: JavaSE-1.7
+Bundle-RequiredExecutionEnvironment: JavaSE-1.8
 Bundle-ClassPath: .
 Export-Package: com.sap.sailing.domain.base,
  com.sap.sailing.domain.base.impl,
  com.sap.sailing.domain.confidence,
- com.sap.sailing.domain.confidence.impl;x-friends:="com.sap.sailing.domain.test",
  com.sap.sailing.domain.leaderboard,
  com.sap.sailing.domain.leaderboard.caching,
  com.sap.sailing.domain.leaderboard.impl,

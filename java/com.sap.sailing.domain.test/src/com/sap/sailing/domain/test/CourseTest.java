@@ -24,6 +24,7 @@ import com.sap.sailing.domain.base.Sideline;
 import com.sap.sailing.domain.base.Waypoint;
 import com.sap.sailing.domain.base.impl.BoatClassImpl;
 import com.sap.sailing.domain.base.impl.CompetitorImpl;
+import com.sap.sailing.domain.base.impl.ControlPointWithTwoMarksImpl;
 import com.sap.sailing.domain.base.impl.CourseImpl;
 import com.sap.sailing.domain.base.impl.MarkImpl;
 import com.sap.sailing.domain.base.impl.RaceDefinitionImpl;
@@ -34,9 +35,10 @@ import com.sap.sailing.domain.racelog.tracking.EmptyGPSFixStore;
 import com.sap.sailing.domain.tracking.DynamicTrackedRace;
 import com.sap.sailing.domain.tracking.TrackedLeg;
 import com.sap.sailing.domain.tracking.impl.DynamicTrackedRaceImpl;
+import com.sap.sailing.domain.tracking.impl.DynamicTrackedRegattaImpl;
 import com.sap.sailing.domain.tracking.impl.EmptyWindStore;
-import com.sap.sailing.domain.tracking.impl.TrackedRegattaImpl;
 import com.sap.sse.common.Util;
+import com.sap.sse.common.Util.Pair;
 
 import difflib.PatchFailedException;
 
@@ -186,6 +188,53 @@ public class CourseTest {
         course.update(courseToUpdate, DomainFactory.INSTANCE);
         assertWaypointIndexes(course);
     }
+    
+    /**
+     * This test tries to replicate the behavior described in bug 2223. The course was
+     * "RC-Black Conical -> Orange -> White Gate -> Red -> Yellow -> Finish Pole-Cylinder" and the delta was
+     * "[[DeleteDelta, position: 1, lines: [Orange, White Gate]], [InsertDelta, position: 4, lines: [White Gate, Red]]]"
+     * which was computed from the new sequence of control points
+     * "[Control, RC-Black Conical, Control, Red, Control, White Gate, Control, Red, Control, Yellow, Control, Finish Pole-Cylinder]".
+     */
+    @Test
+    public void testWaypointDeleteWithSubsequentInsertInOnePatch() throws PatchFailedException {
+        List<Waypoint> waypoints = new ArrayList<Waypoint>();
+        final WaypointImpl rcBlackConical = new WaypointImpl(new ControlPointWithTwoMarksImpl(new MarkImpl("RC"), new MarkImpl("Black Conical"), "RC-Black Conical"));
+        waypoints.add(rcBlackConical);
+        final WaypointImpl orange = new WaypointImpl(new MarkImpl("Orange"));
+        waypoints.add(orange);
+        final WaypointImpl whiteGate = new WaypointImpl(new ControlPointWithTwoMarksImpl(new MarkImpl("White L"), new MarkImpl("White R"), "White Gate"));
+        waypoints.add(whiteGate);
+        final WaypointImpl red = new WaypointImpl(new MarkImpl("Red"));
+        waypoints.add(red);
+        final WaypointImpl yellow = new WaypointImpl(new MarkImpl("Yellow"));
+        waypoints.add(yellow);
+        final WaypointImpl finishPoleCylinder = new WaypointImpl(new ControlPointWithTwoMarksImpl(new MarkImpl("Finish Pole"), new MarkImpl("Cylinder"), "Finish Pole-Cylinder"));
+        waypoints.add(finishPoleCylinder);
+        Course course = new CourseImpl("Race 24", waypoints);
+        assertWaypointIndexes(course);
+        List<com.sap.sse.common.Util.Pair<ControlPoint, PassingInstruction>> courseToUpdate = new ArrayList<com.sap.sse.common.Util.Pair<ControlPoint, PassingInstruction>>();
+        courseToUpdate.add(new Pair<>(rcBlackConical.getControlPoint(), rcBlackConical.getPassingInstructions()));
+        courseToUpdate.add(new Pair<>(red.getControlPoint(), red.getPassingInstructions()));
+        courseToUpdate.add(new Pair<>(whiteGate.getControlPoint(), whiteGate.getPassingInstructions()));
+        courseToUpdate.add(new Pair<>(red.getControlPoint(), red.getPassingInstructions()));
+        courseToUpdate.add(new Pair<>(yellow.getControlPoint(), yellow.getPassingInstructions()));
+        courseToUpdate.add(new Pair<>(finishPoleCylinder.getControlPoint(), finishPoleCylinder.getPassingInstructions()));
+        course.update(courseToUpdate, DomainFactory.INSTANCE);
+        assertWaypointIndexes(course);
+        List<ControlPoint> newControlPoints = new ArrayList<>();
+        for (Waypoint newWp : course.getWaypoints()) {
+            newControlPoints.add(newWp.getControlPoint());
+        }
+        assertTrue(Util.equals(Arrays.asList(
+                rcBlackConical.getControlPoint(),
+                red.getControlPoint(),
+                whiteGate.getControlPoint(),
+                red.getControlPoint(),
+                yellow.getControlPoint(),
+                finishPoleCylinder.getControlPoint()),
+            newControlPoints));
+    }
 
     @Test
     public void testRemoveWaypointFromCourseWithThreeWaypoints() {
@@ -249,7 +298,7 @@ public class CourseTest {
         Course course = new CourseImpl("Test Course", waypoints);
         assertWaypointIndexes(course);
         final Set<CompetitorImpl> hasso = Collections.singleton(AbstractLeaderboardTest.createCompetitor("Hasso"));
-        DynamicTrackedRace trackedRace = new DynamicTrackedRaceImpl(/* trackedRegatta */new TrackedRegattaImpl(
+        DynamicTrackedRace trackedRace = new DynamicTrackedRaceImpl(/* trackedRegatta */new DynamicTrackedRegattaImpl(
                 new RegattaImpl("test", null, new HashSet<Series>(), false, null, "test", null)),
                 new RaceDefinitionImpl("Test Race", course, new BoatClassImpl("49er", /* upwind start */true), hasso),
                 Collections.<Sideline> emptyList(), EmptyWindStore.INSTANCE, EmptyGPSFixStore.INSTANCE,/* delayToLiveInMillis */3000,
@@ -279,7 +328,7 @@ public class CourseTest {
         waypoints.add(wp2);
         Course course = new CourseImpl("Test Course", waypoints);
         final Set<CompetitorImpl> hasso = Collections.singleton(AbstractLeaderboardTest.createCompetitor("Hasso"));
-        DynamicTrackedRace trackedRace = new DynamicTrackedRaceImpl(/* trackedRegatta */ new TrackedRegattaImpl(
+        DynamicTrackedRace trackedRace = new DynamicTrackedRaceImpl(/* trackedRegatta */ new DynamicTrackedRegattaImpl(
                 new RegattaImpl("test", null, new HashSet<Series>(), false, null, "test", null)),
                 new RaceDefinitionImpl("Test Race", course, new BoatClassImpl("49er", /* upwind start */ true),
                         hasso), Collections.<Sideline> emptyList(),

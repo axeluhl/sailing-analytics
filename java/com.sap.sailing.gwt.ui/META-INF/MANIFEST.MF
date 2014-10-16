@@ -40,9 +40,9 @@ Bundle-ActivationPolicy: lazy
 Import-Package: com.sap.sailing.polars,
  com.sap.sailing.polars.factory,
  javax.jms;version="1.1.0",
- javax.servlet;version="2.6.0",
- javax.servlet.descriptor;version="2.6.0",
- javax.servlet.http;version="2.6.0",
+ javax.servlet;version="3.1.0",
+ javax.servlet.descriptor;version="3.1.0",
+ javax.servlet.http;version="3.1.0",
  org.apache.http.client;version="4.2.5",
  org.json.simple,
  org.json.simple.parser,
@@ -54,3 +54,4 @@ Bundle-ClassPath: WEB-INF/classes/,
  WEB-INF/lib/gwt-ajaxloader.jar,
  WEB-INF/lib/gwt-bootstrap-2.3.2.0.jar
 TrackLifecycle: true
+Export-Package: com.sap.sailing.gwt.ui.shared

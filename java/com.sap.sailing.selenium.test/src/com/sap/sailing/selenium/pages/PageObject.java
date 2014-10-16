@@ -44,7 +44,7 @@ import com.sap.sailing.selenium.core.SeleniumFieldDecorator;
  *   D049941
  */
 public class PageObject {
-    public static final int DEFAULT_WAIT_TIMEOUT = 30;
+    public static final int DEFAULT_WAIT_TIMEOUT_SECONDS = 60;
     
     public static final int DEFAULT_POLLING_INTERVAL = 5;
     
@@ -101,7 +101,7 @@ public class PageObject {
      *   
      */
     public static <T> FluentWait<T> createFluentWait(T input, Collection<Class<? extends Throwable>> exceptions) {
-        return createFluentWait(input, DEFAULT_WAIT_TIMEOUT, DEFAULT_POLLING_INTERVAL, exceptions);
+        return createFluentWait(input, DEFAULT_WAIT_TIMEOUT_SECONDS, DEFAULT_POLLING_INTERVAL, exceptions);
     }
     
     /**
@@ -321,7 +321,7 @@ public class PageObject {
      * @see #waitForAjaxRequests(int timeout, int polling)
      */
     protected void waitForAjaxRequests() {
-        waitForAjaxRequests(DEFAULT_WAIT_TIMEOUT, DEFAULT_POLLING_INTERVAL);
+        waitForAjaxRequests(DEFAULT_WAIT_TIMEOUT_SECONDS, DEFAULT_POLLING_INTERVAL);
     }
     
     /**
@@ -336,7 +336,7 @@ public class PageObject {
      * @see #waitForAjaxRequests(int timeout, int polling)
      */
     protected void waitForAjaxRequests(String category) {
-        waitForAjaxRequests(category, DEFAULT_WAIT_TIMEOUT, DEFAULT_POLLING_INTERVAL);
+        waitForAjaxRequests(category, DEFAULT_WAIT_TIMEOUT_SECONDS, DEFAULT_POLLING_INTERVAL);
     }
     
     /**
@@ -376,11 +376,11 @@ public class PageObject {
     }
     
     protected void waitForAjaxRequestsExecuted(int numberOfCalls) {
-        waitForAjaxRequestsExecuted(numberOfCalls, DEFAULT_WAIT_TIMEOUT, DEFAULT_POLLING_INTERVAL);
+        waitForAjaxRequestsExecuted(numberOfCalls, DEFAULT_WAIT_TIMEOUT_SECONDS, DEFAULT_POLLING_INTERVAL);
     }
     
     protected void waitForAjaxRequestsExecuted(String category, int numberOfCalls) {
-        waitForAjaxRequestsExecuted(category, numberOfCalls, DEFAULT_WAIT_TIMEOUT, DEFAULT_POLLING_INTERVAL);
+        waitForAjaxRequestsExecuted(category, numberOfCalls, DEFAULT_WAIT_TIMEOUT_SECONDS, DEFAULT_POLLING_INTERVAL);
     }
     
     protected void waitForAjaxRequestsExecuted(int numberOfCalls, int timeout, int polling) {

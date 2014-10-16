@@ -1,6 +1,7 @@
 package com.sap.sailing.server.operationaltransformation;
 
 import java.io.IOException;
+import java.io.ObjectInputStream;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Iterator;
@@ -15,6 +16,7 @@ import com.sap.sailing.domain.base.Fleet;
 import com.sap.sailing.domain.base.RaceColumn;
 import com.sap.sailing.domain.base.RaceDefinition;
 import com.sap.sailing.domain.base.Regatta;
+import com.sap.sailing.domain.base.impl.RegattaImpl;
 import com.sap.sailing.domain.common.DataImportProgress;
 import com.sap.sailing.domain.common.RaceIdentifier;
 import com.sap.sailing.domain.common.RegattaAndRaceIdentifier;
@@ -36,6 +38,7 @@ import com.sap.sailing.domain.tracking.TrackedRace;
 import com.sap.sailing.domain.tracking.TrackedRegatta;
 import com.sap.sailing.domain.tracking.Wind;
 import com.sap.sailing.domain.tracking.WindTrack;
+import com.sap.sailing.domain.tracking.impl.EmptyWindStore;
 import com.sap.sailing.server.RacingEventService;
 import com.sap.sailing.server.RacingEventServiceOperation;
 import com.sap.sailing.server.masterdata.DummyTrackedRace;
@@ -99,6 +102,9 @@ public class ImportMasterDataOperation extends
             createWindTracks(toState);
             toState.getDataImportLock().getProgress(importOperationId).setResult(creationCount);
             return creationCount;
+        } catch (Exception e) {
+            logger.severe("Error during execution of ImportMasterDataOperation");
+            throw new RuntimeException("Error during execution of ImportMasterDataOperation", e);
         } finally {
             toState.getDataImportLock().unlock();
         }
@@ -194,6 +200,7 @@ public class ImportMasterDataOperation extends
                 storeRaceLogEvents(leaderboard, toState.getMongoObjectFactory());
                 creationCount.addOneLeaderboard(leaderboard.getName());
                 relinkTrackedRacesIfPossible(toState, leaderboard);
+                toState.updateStoredLeaderboard(leaderboard);
             }
 
         }
@@ -223,15 +230,18 @@ public class ImportMasterDataOperation extends
         for (RaceColumn raceColumn : leaderboard.getRaceColumns()) {
             for (Fleet fleet : raceColumn.getFleets()) {
                 RaceLog log = raceColumn.getRaceLog(fleet);
-                RaceLogIdentifier identifier = raceColumn.getRaceLogIdentifier(fleet);
-                RaceLogEventVisitor storeVisitor = MongoRaceLogStoreFactory.INSTANCE.getMongoRaceLogStoreVisitor(identifier, mongoObjectFactory);
-                log.lockForRead();
-                try {
-                    for (RaceLogEvent event : log.getRawFixes()) {
-                        event.accept(storeVisitor);
+                if (log != null) {
+                    RaceLogIdentifier identifier = raceColumn.getRaceLogIdentifier(fleet);
+                    RaceLogEventVisitor storeVisitor = MongoRaceLogStoreFactory.INSTANCE.getMongoRaceLogStoreVisitor(
+                            identifier, mongoObjectFactory);
+                    log.lockForRead();
+                    try {
+                        for (RaceLogEvent event : log.getRawFixes()) {
+                            event.accept(storeVisitor);
+                        }
+                    } finally {
+                        log.unlockAfterRead();
                     }
-                } finally {
-                    log.unlockAfterRead();
                 }
             }
         }
@@ -271,7 +281,7 @@ public class ImportMasterDataOperation extends
             Iterator<? extends Fleet> fleetIterator = fleets.iterator();
             if (fleetIterator.hasNext()) {
                 fleet = fleetIterator.next();
-                DummyTrackedRace dummy = new DummyTrackedRace(leaderboard.getAllCompetitors(), regatta, null);
+                DummyTrackedRace dummy = new DummyTrackedRace(UUID.randomUUID(), leaderboard.getAllCompetitors(), regatta, null, EmptyWindStore.INSTANCE);
                 raceColumn.setTrackedRace(fleet, dummy);
             }
         }
@@ -401,6 +411,20 @@ public class ImportMasterDataOperation extends
     public RacingEventServiceOperation<?> transformServerOp(RacingEventServiceOperation<?> clientOp) {
         // TODO Auto-generated method stub
         return null;
+    }
+
+    /**
+     * in order to restore all listeners we need to initialize the regatta after the whole object graph has been
+     * restored. This applies to all replicas that receive this operation "over the wire".
+     * 
+     * Fixes bug2023
+     */
+    private void readObject(ObjectInputStream ois) throws IOException, ClassNotFoundException {
+        ois.defaultReadObject();
+        for (Regatta regatta : masterData.getAllRegattas()) {
+            RegattaImpl regattaImpl = (RegattaImpl) regatta;
+            regattaImpl.initializeSeriesAfterDeserialize();
+        }
     }
 
 }

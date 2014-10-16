@@ -3,7 +3,7 @@ call %CD%\\env.bat
 
 cd %CD%server
 
-set JAVA_BINARY=%JAVA_HOME%\bin\java
+set JAVA_BINARY=%JAVA_HOME%\bin\java.exe
 
 set SED_ARGS="-i"
 

@@ -186,13 +186,15 @@ dir-etc mongodb-databases mysql-databases
 - Let's assume that you want to recover some score corrections from the archive server. We need to have a look at mongodb-databases and check what is contained there. Keep in mind that wind information is only updated once a week so that not every named backup will contain wind information.
 
 <pre>
-[backup@ip-172-31-25-136 database]$ /opt/bup/bup -d /home/backup/database/ ls mongodb-databases
-2014-05-27-170544 latest
-[backup@ip-172-31-25-136 database]$ /opt/bup/bup -d /home/backup/database/ ls mongodb-databases/latest
+[backup@ip-172-31-25-136 restored-files]$ /opt/bup/bup -d /home/backup/database/ ls databases/
+2014-05-27-212037  2014-05-29-233001  2014-06-01-233001  2014-06-04-203001  2014-06-06-233001  2014-06-09-233001  2014-06-11-233001  2014-06-14-233002  2014-06-17-233001  2014-06-19-233001                                        
+2014-05-28-203001  2014-05-30-233001  2014-06-02-233001  2014-06-04-233001  2014-06-07-233001  2014-06-10-233001  2014-06-12-233001  2014-06-15-233002  2014-06-18-203001  latest                                                   
+2014-05-28-233001  2014-05-31-233001  2014-06-03-233001  2014-06-05-233001  2014-06-08-233001  2014-06-11-203001  2014-06-13-233001  2014-06-16-233001  2014-06-18-233001
+[backup@ip-172-31-25-136 database]$ /opt/bup/bup -d /home/backup/database/ ls databases/latest
 var
-[backup@ip-172-31-25-136 database]$ /opt/bup/bup -d /home/backup/database/ ls mongodb-databases/latest/var/lib/mysql/backup
+[backup@ip-172-31-25-136 database]$ /opt/bup/bup -d /home/backup/database/ ls databases/latest/var/lib/mysql/backup
 mongodb-10201       mongodb-10201-wind  mongodb-10202       mongodb-10202-wind  mysql
-[backup@ip-172-31-25-136 database]$ /opt/bup/bup -d /home/backup/database/ ls mongodb-databases/latest/var/lib/mysql/backup/mongodb-10202
+[backup@ip-172-31-25-136 database]$ /opt/bup/bup -d /home/backup/database/ ls databases/latest/var/lib/mysql/backup/mongodb-10202
 COMMAND_MESSAGES.json         CONFIGURATIONS.json           LAST_MESSAGE_COUNT.json       LEADERBOARD_GROUPS.json       RACE_LOGS.json                REGATTA_FOR_RACE_ID.json      VIDEOS.json                                                 
 COMPETITORS.json              EVENTS.json                   LEADERBOARDS.json             RACES_MESSAGES.json           REGATTAS.json                 TRACTRAC_CONFIGURATIONS.json                                                              
 </pre>

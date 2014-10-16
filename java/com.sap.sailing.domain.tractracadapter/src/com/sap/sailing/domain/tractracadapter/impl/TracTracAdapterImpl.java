@@ -12,7 +12,7 @@ import com.sap.sailing.domain.base.Regatta;
 import com.sap.sailing.domain.common.RegattaIdentifier;
 import com.sap.sailing.domain.common.TimePoint;
 import com.sap.sailing.domain.racelog.RaceLogStore;
-import com.sap.sailing.domain.tracking.RacesHandle;
+import com.sap.sailing.domain.tracking.RaceHandle;
 import com.sap.sailing.domain.tracking.TrackedRace;
 import com.sap.sailing.domain.tracking.TrackerManager;
 import com.sap.sailing.domain.tracking.WindStore;
@@ -46,29 +46,29 @@ public class TracTracAdapterImpl implements TracTracAdapter {
     }
     
     @Override
-    public RacesHandle addTracTracRace(TrackerManager trackerManager, URL paramURL, URI liveURI, URI storedURI,
+    public RaceHandle addTracTracRace(TrackerManager trackerManager, URL paramURL, URI liveURI, URI storedURI,
             URI courseDesignUpdateURI, RaceLogStore raceLogStore, long timeoutInMilliseconds,
-            String tracTracUsername, String tracTracPassword, String raceStatus) throws Exception {
+            String tracTracUsername, String tracTracPassword, String raceStatus, String raceVisibility) throws Exception {
         return trackerManager.addRace(
                 /* regattaToAddTo */null,
                 getTracTracDomainFactory().createTrackingConnectivityParameters(paramURL, liveURI, storedURI,
                         courseDesignUpdateURI,
                         /* startOfTracking */null,
                         /* endOfTracking */null, delayToLiveInMillis, /* simulateWithStartTimeNow */false,
-                        raceLogStore, tracTracUsername, tracTracPassword, raceStatus), timeoutInMilliseconds);
+                        raceLogStore, tracTracUsername, tracTracPassword, raceStatus, raceVisibility), timeoutInMilliseconds);
     }
 
     @Override
-    public RacesHandle addTracTracRace(TrackerManager trackerManager, RegattaIdentifier regattaToAddTo,
+    public RaceHandle addTracTracRace(TrackerManager trackerManager, RegattaIdentifier regattaToAddTo,
             URL paramURL, URI liveURI, URI storedURI, URI courseDesignUpdateURI, TimePoint startOfTracking,
             TimePoint endOfTracking, RaceLogStore raceLogStore,
             long timeoutInMilliseconds, boolean simulateWithStartTimeNow, String tracTracUsername, 
-            String tracTracPassword, String raceStatus) throws Exception {
+            String tracTracPassword, String raceStatus, String raceVisibility) throws Exception {
         return trackerManager.addRace(
                 regattaToAddTo,
                 getTracTracDomainFactory().createTrackingConnectivityParameters(paramURL, liveURI, storedURI,
                         courseDesignUpdateURI, startOfTracking, endOfTracking, delayToLiveInMillis,
-                        simulateWithStartTimeNow, raceLogStore, tracTracUsername, tracTracPassword, raceStatus),
+                        simulateWithStartTimeNow, raceLogStore, tracTracUsername, tracTracPassword, raceStatus, raceVisibility),
                 timeoutInMilliseconds);
     }
 
@@ -89,7 +89,7 @@ public class TracTracAdapterImpl implements TracTracAdapter {
         for (RaceRecord rr : jsonService.getRaceRecords()) {
             URL paramURL = rr.getParamURL();
             regatta = addTracTracRace(trackerManager, paramURL, liveURI, storedURI, courseDesignUpdateURI, raceLogStore,
-                    timeoutInMilliseconds, tracTracUsername, "", tracTracPassword).getRegatta();
+                    timeoutInMilliseconds, tracTracUsername, "", "", tracTracPassword).getRegatta();
         }
         return regatta;
     }
