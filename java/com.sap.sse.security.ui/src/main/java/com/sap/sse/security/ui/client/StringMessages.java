@@ -86,5 +86,11 @@ public interface StringMessages extends com.sap.sse.gwt.client.StringMessages {
     String errorUpdatingRoles(String username, String message);
 
     String enterRoleName();
+
+    String errorCreatingUser(String username, String message);
+
+    String signedUpSuccessfully(String username);
+
+    String unknownErrorCreatingUser(String username);
     
 }

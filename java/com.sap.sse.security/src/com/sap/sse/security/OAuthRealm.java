@@ -38,12 +38,9 @@ import org.scribe.model.Verb;
 import org.scribe.model.Verifier;
 import org.scribe.oauth.OAuthService;
 
-import com.sap.sse.security.userstore.shared.FieldNames.Social;
 // GWT has similar class. 
-import com.sap.sse.security.userstore.shared.SocialSettingsKeys;
 import com.sap.sse.security.userstore.shared.SocialUserAccount;
 import com.sap.sse.security.userstore.shared.User;
-import com.sap.sse.security.userstore.shared.UserManagementException;
 
 public class OAuthRealm extends AbstractUserStoreBasedRealm {
     private static final Logger logger = Logger.getLogger(OAuthRealm.class.getName());

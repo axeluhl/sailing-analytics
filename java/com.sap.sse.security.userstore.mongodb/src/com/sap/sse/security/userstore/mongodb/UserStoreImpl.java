@@ -8,10 +8,10 @@ import java.util.Set;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.logging.Logger;
 
+import com.sap.sse.security.SocialSettingsKeys;
+import com.sap.sse.security.UserManagementException;
 import com.sap.sse.security.userstore.shared.Account;
-import com.sap.sse.security.userstore.shared.SocialSettingsKeys;
 import com.sap.sse.security.userstore.shared.User;
-import com.sap.sse.security.userstore.shared.UserManagementException;
 import com.sap.sse.security.userstore.shared.UserStore;
 
 public class UserStoreImpl implements UserStore {

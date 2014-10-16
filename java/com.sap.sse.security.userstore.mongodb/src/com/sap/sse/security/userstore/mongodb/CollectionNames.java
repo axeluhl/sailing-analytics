@@ -1,4 +1,4 @@
-package com.sap.sse.security.userstore.shared;
+package com.sap.sse.security.userstore.mongodb;
 
 public enum CollectionNames {
     PREFERENCES,

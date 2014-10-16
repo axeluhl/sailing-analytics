@@ -22,7 +22,7 @@ import com.sap.sse.gwt.client.EntryPointHelper;
 import com.sap.sse.security.ui.client.RemoteServiceMappingConstants;
 import com.sap.sse.security.ui.client.StringMessages;
 import com.sap.sse.security.ui.client.component.NewAccountValidator;
-import com.sap.sse.security.ui.shared.SuccessInfo;
+import com.sap.sse.security.ui.shared.UserDTO;
 import com.sap.sse.security.ui.shared.UserManagementService;
 import com.sap.sse.security.ui.shared.UserManagementServiceAsync;
 
@@ -81,22 +81,20 @@ public class RegisterEntryPoint implements EntryPoint {
         formPanel.addSubmitHandler(new SubmitHandler() {
             @Override
             public void onSubmit(SubmitEvent event) {
-                userManagementService.login(nameText.getText(), pwText.getText(), new AsyncCallback<SuccessInfo>() {
+                userManagementService.createSimpleUser(nameText.getText(), emailText.getText(), pwText.getText(), new AsyncCallback<UserDTO>() {
                     @Override
                     public void onFailure(Throwable caught) {
+                        Window.alert(stringMessages.errorCreatingUser(nameText.getText(), caught.getMessage()));
                         GWT.log(caught.getMessage());
                     }
 
                     @Override
-                    public void onSuccess(SuccessInfo result) {
-                        if (result.isSuccessful() && !result.getMessage().equals("")){
-                            Window.Location.replace(result.getMessage());
-                        }
-                        else if (result.isSuccessful()) {
-                            Window.alert(stringMessages.loggedIn());
+                    public void onSuccess(UserDTO result) {
+                        if (result != null) {
+                            Window.alert(stringMessages.signedUpSuccessfully(result.getName()));
                         }
                         else {
-                            Window.alert(result.getMessage());
+                            Window.alert(stringMessages.unknownErrorCreatingUser(nameText.getText()));
                         }
                         
                     }

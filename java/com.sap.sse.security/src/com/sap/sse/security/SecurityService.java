@@ -13,7 +13,6 @@ import org.apache.shiro.mgt.SecurityManager;
 
 import com.sap.sse.security.userstore.shared.SocialUserAccount;
 import com.sap.sse.security.userstore.shared.User;
-import com.sap.sse.security.userstore.shared.UserManagementException;
 
 public interface SecurityService {
 

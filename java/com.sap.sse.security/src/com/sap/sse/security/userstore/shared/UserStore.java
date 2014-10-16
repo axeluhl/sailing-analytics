@@ -4,6 +4,8 @@ import java.util.Collection;
 import java.util.Map;
 import java.util.Set;
 
+import com.sap.sse.security.UserManagementException;
+
 public interface UserStore {
 
     String getName();

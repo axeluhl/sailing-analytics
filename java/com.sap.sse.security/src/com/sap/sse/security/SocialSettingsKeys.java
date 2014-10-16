@@ -1,4 +1,4 @@
-package com.sap.sse.security.userstore.shared;
+package com.sap.sse.security;
 
 public enum SocialSettingsKeys {
 
@@ -17,7 +17,7 @@ public enum SocialSettingsKeys {
     OAUTH_TUMBLR_LIVE_APP_NAME(null) , OAUTH_TUMBLR_LIVE_APP_ID(null) , OAUTH_TUMBLR_LIVE_APP_SECRET(null) ,
     OAUTH_FOURSQUARE_APP_NAME(null) , OAUTH_FOURSQUARE_APP_ID(null) , OAUTH_FOURSQUARE_APP_SECRET(null) ;
 
-private String value;
+    private String value;
 
     private SocialSettingsKeys(String value) {
         this.value = value;

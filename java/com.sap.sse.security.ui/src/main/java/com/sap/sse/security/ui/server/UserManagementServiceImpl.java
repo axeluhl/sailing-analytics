@@ -31,6 +31,8 @@ import com.sap.sse.security.Credential;
 import com.sap.sse.security.DefaultRoles;
 import com.sap.sse.security.SecurityService;
 import com.sap.sse.security.SessionUtils;
+import com.sap.sse.security.Social;
+import com.sap.sse.security.UserManagementException;
 import com.sap.sse.security.ui.oauth.client.CredentialDTO;
 import com.sap.sse.security.ui.oauth.client.SocialUserDTO;
 import com.sap.sse.security.ui.oauth.shared.OAuthException;
@@ -41,10 +43,8 @@ import com.sap.sse.security.ui.shared.UserManagementService;
 import com.sap.sse.security.ui.shared.UsernamePasswordAccountDTO;
 import com.sap.sse.security.userstore.shared.Account;
 import com.sap.sse.security.userstore.shared.Account.AccountType;
-import com.sap.sse.security.userstore.shared.FieldNames.Social;
 import com.sap.sse.security.userstore.shared.SocialUserAccount;
 import com.sap.sse.security.userstore.shared.User;
-import com.sap.sse.security.userstore.shared.UserManagementException;
 import com.sap.sse.security.userstore.shared.UsernamePasswordAccount;
 
 public class UserManagementServiceImpl extends RemoteServiceServlet implements UserManagementService {

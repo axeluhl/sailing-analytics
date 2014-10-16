@@ -1,4 +1,4 @@
-package com.sap.sse.security.userstore.shared;
+package com.sap.sse.security;
 
 public class UserManagementException extends Exception {
 

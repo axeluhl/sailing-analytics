@@ -5,9 +5,9 @@ import java.util.Map;
 
 
 /**
- * The object we send back and forth between client and server.
- * Note: More information is stored in server side in ServersideSession
- * object.
+ * The object we send back and forth between client and server. Note: More information is stored in server side in
+ * ServersideSession object.
+ * 
  * @author muquit@muquit.com
  */
 public class SocialUserAccount implements Account
@@ -15,8 +15,6 @@ public class SocialUserAccount implements Account
     private String sessionId;
     
     private Map<String, String> properties = new HashMap<String, String>();
-    
-    
     
     public String getSessionId()
     {
