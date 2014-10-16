@@ -1,13 +1,12 @@
 package com.sap.sailing.selenium.test.leaderboard;
 
-import static org.hamcrest.Matchers.*;
-import static org.junit.Assert.*;
+import static org.hamcrest.Matchers.equalTo;
+import static org.junit.Assert.assertThat;
 
 import java.util.List;
 
 import org.junit.Before;
 import org.junit.Test;
-import org.openqa.selenium.Cookie;
 
 import com.sap.sailing.selenium.pages.adminconsole.AdminConsolePage;
 import com.sap.sailing.selenium.pages.adminconsole.leaderboard.LeaderboardConfigurationPanelPO;
@@ -45,8 +44,6 @@ public class TestColumnsInLeaderboard extends AbstractSeleniumTest {
     
     @Before
     public void setUp() {
-        Cookie sessionCookie = authenticate(getContextRoot());
-        getWebDriver().manage().addCookie(sessionCookie);
         this.regatta = new RegattaDescriptor(REGATTA, BOAT_CLASS);
         this.trackableRace = new TrackableRaceDescriptor(EVENT,  RACE, BOAT_CLASS);
         this.trackedRace = new TrackedRaceDescriptor(this.regatta.toString(), BOAT_CLASS, RACE);

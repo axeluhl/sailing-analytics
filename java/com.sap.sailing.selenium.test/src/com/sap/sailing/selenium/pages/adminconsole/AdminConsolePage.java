@@ -12,7 +12,6 @@ import com.sap.sailing.selenium.core.BySeleniumId;
 import com.sap.sailing.selenium.core.ElementSearchConditions;
 import com.sap.sailing.selenium.core.FindBy;
 import com.sap.sailing.selenium.pages.HostPage;
-import com.sap.sailing.selenium.pages.LoginPage;
 import com.sap.sailing.selenium.pages.adminconsole.leaderboard.LeaderboardConfigurationPanelPO;
 import com.sap.sailing.selenium.pages.adminconsole.leaderboard.LeaderboardGroupConfigurationPanelPO;
 import com.sap.sailing.selenium.pages.adminconsole.regatta.RegattaStructureManagementPanelPO;
@@ -71,11 +70,6 @@ public class AdminConsolePage extends HostPage {
      */
     public static AdminConsolePage goToPage(WebDriver driver, String root) {
         driver.get(root + "gwt/AdminConsole.html?" + getGWTCodeServer()); //$NON-NLS-1$
-        if (driver.getTitle().contains("Login")) {
-            // we god re-directed to the login form; log in and hope we get re-directed accordingly
-            new LoginPage(driver).login("admin", "admin");
-        }
-        
         // TODO: As soon as the security API is available in Selenium we should use it to login into the admin console.
 //        FluentWait<WebDriver> wait = createFluentWait(driver, 5, 100);
 //        Alert alert = wait.until(new Function<WebDriver, Alert>() {

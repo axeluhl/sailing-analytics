@@ -1,20 +1,18 @@
 package com.sap.sailing.selenium.test;
 
-import java.io.BufferedReader;
 import java.io.ByteArrayInputStream;
 import java.io.File;
 import java.io.IOException;
 import java.io.InputStream;
-import java.io.InputStreamReader;
 import java.net.HttpURLConnection;
 import java.net.URL;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.StandardCopyOption;
+import java.util.List;
 import java.util.UUID;
 
-
-
+import org.junit.Before;
 import org.junit.Rule;
 import org.junit.rules.TestWatchman;
 import org.junit.runner.RunWith;
@@ -26,10 +24,13 @@ import org.openqa.selenium.WebDriver;
 import org.openqa.selenium.remote.Augmenter;
 import org.openqa.selenium.remote.RemoteWebDriver;
 
+import com.sap.sailing.domain.common.Duration;
+import com.sap.sailing.domain.common.impl.MillisecondsTimePoint;
 import com.sap.sailing.selenium.core.Managed;
 import com.sap.sailing.selenium.core.SeleniumRunner;
 import com.sap.sailing.selenium.core.TestEnvironment;
 import com.sap.sailing.selenium.core.WindowManager;
+import com.sap.sailing.selenium.pages.HostPage;
 
 /**
  * <p>Abstract base class for unit tests with Selenium. This class is already annotated as required to get executed
@@ -80,6 +81,13 @@ public abstract class AbstractSeleniumTest {
         }
     }
     
+    @Before
+    public void setUpAuthenticatedSession() {
+        Cookie sessionCookie = authenticate(getContextRoot());
+        getWebDriver().get(getContextRoot() + "security/ui/Login.html?" + HostPage.getGWTCodeServer()); // initialize web driver so setting a cookie for the local domain is possible
+        getWebDriver().manage().addCookie(sessionCookie);
+    }
+    
     /**
      * Obtains a session cookie for a session authenticated using the default admin user.
      * 
@@ -98,12 +106,13 @@ public abstract class AbstractSeleniumTest {
             if (connection.getResponseCode() != 200) {
                 throw new RuntimeException(connection.getResponseMessage());
             }
-            BufferedReader br = new BufferedReader(new InputStreamReader(connection.getInputStream()));
-            String line;
-            while ((line = br.readLine()) != null) {
-                if (line.startsWith("Set-Cookie: "+SESSION_COOKIE_NAME+"=")) {
-                    String cookieValue = line.substring(line.indexOf('='), line.indexOf(';'));
-                    result = new Cookie(SESSION_COOKIE_NAME, cookieValue);
+            List<String> cookies = connection.getHeaderFields().get("Set-Cookie");
+            if (cookies != null) {
+                for (String cookie : cookies) {
+                    if (cookie.startsWith(SESSION_COOKIE_NAME + "=")) {
+                        String cookieValue = cookie.substring(cookie.indexOf('=')+1, cookie.indexOf(';'));
+                        result = new Cookie(SESSION_COOKIE_NAME, cookieValue, /* domain */ "localhost", /* path */ "/", MillisecondsTimePoint.now().plus(Duration.ONE_WEEK).asDate());
+                    }
                 }
             }
             return result;
