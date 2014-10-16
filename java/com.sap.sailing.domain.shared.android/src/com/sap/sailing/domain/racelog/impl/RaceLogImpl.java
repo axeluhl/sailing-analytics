@@ -187,23 +187,7 @@ public class RaceLogImpl extends TrackImpl<RaceLogEvent> implements RaceLog {
 
     @Override
     public Iterable<RaceLogEvent> add(RaceLogEvent event, UUID clientId) {
-        boolean isAdded = false;
-        lockForWrite();
-        try {
-            isAdded = getInternalRawFixes().add(event);
-        } finally {
-            unlockAfterWrite();
-        }
-        if (isAdded) {
-            logger.finer(String.format("%s (%s) was added to log.", event, event.getClass().getName()));
-            // FIXME with out-of-order delivery would destroy currentPassId; need to check at least the createdAt time
-            // point
-            setCurrentPassId(Math.max(event.getPassId(), this.currentPassId));
-            revokeIfNecessary(event);
-            notifyListenersAboutReceive(event);
-        } else {
-            logger.fine(String.format("%s (%s) was not added to log because it already eists there.", event, event.getClass().getName()));
-        }
+        add(event);
         return getEventsToDeliver(clientId, event);
     }
     
