@@ -179,7 +179,7 @@ public class RaceLogImpl extends TrackImpl<RaceLogEvent> implements RaceLog {
 
             // make sure to compare only author priorities - assuming that revoke events are
             // independent of passes and times
-            if (revokeEvent.getAuthor().compareTo(revokedEvent.getAuthor()) < 0) {
+            if (revokeEvent.getAuthor().compareTo(revokedEvent.getAuthor()) <= 0) {
                 throw new NotRevokableException("RevokeEvent does not have sufficient priority");
             }
         }
