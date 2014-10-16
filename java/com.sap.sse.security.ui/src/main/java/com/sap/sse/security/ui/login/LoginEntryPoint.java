@@ -1,10 +1,14 @@
 package com.sap.sse.security.ui.login;
 
+import java.util.Collections;
+
 import com.google.gwt.core.client.GWT;
 import com.google.gwt.dom.client.Style.Unit;
+import com.google.gwt.safehtml.shared.SafeHtmlBuilder;
 import com.google.gwt.user.client.Window;
 import com.google.gwt.user.client.rpc.AsyncCallback;
 import com.google.gwt.user.client.rpc.ServiceDefTarget;
+import com.google.gwt.user.client.ui.Anchor;
 import com.google.gwt.user.client.ui.DockLayoutPanel;
 import com.google.gwt.user.client.ui.FlowPanel;
 import com.google.gwt.user.client.ui.FormPanel;
@@ -13,16 +17,14 @@ import com.google.gwt.user.client.ui.FormPanel.SubmitHandler;
 import com.google.gwt.user.client.ui.Label;
 import com.google.gwt.user.client.ui.PasswordTextBox;
 import com.google.gwt.user.client.ui.RootLayoutPanel;
-import com.google.gwt.user.client.ui.RootPanel;
 import com.google.gwt.user.client.ui.SubmitButton;
 import com.google.gwt.user.client.ui.TextBox;
 import com.sap.sse.gwt.client.AbstractEntryPoint;
 import com.sap.sse.gwt.client.EntryPointHelper;
+import com.sap.sse.security.ui.client.EntryPointLinkFactory;
 import com.sap.sse.security.ui.client.RemoteServiceMappingConstants;
-import com.sap.sse.security.ui.client.Resources;
 import com.sap.sse.security.ui.client.StringMessages;
 import com.sap.sse.security.ui.client.UserService;
-import com.sap.sse.security.ui.loginpanel.LoginPanel;
 import com.sap.sse.security.ui.shared.SuccessInfo;
 import com.sap.sse.security.ui.shared.UserManagementService;
 import com.sap.sse.security.ui.shared.UserManagementServiceAsync;
@@ -31,7 +33,7 @@ public class LoginEntryPoint extends AbstractEntryPoint {
     private final StringMessages stringMessages = GWT.create(StringMessages.class);
     private UserManagementServiceAsync userManagementService;
     private UserService userService;
-
+    
     @Override
     public void doOnModuleLoad() {
         userManagementService = GWT.create(UserManagementService.class);
@@ -43,14 +45,12 @@ public class LoginEntryPoint extends AbstractEntryPoint {
         rootPanel.add(dockPanel);
         
         FlowPanel fp = new FlowPanel();
-        RootPanel.get().add(new LoginPanel(Resources.INSTANCE.css(), userService));
-        
-        Label nameLabel = new Label(stringMessages.name()+": ");
+        Label nameLabel = new Label(stringMessages.username());
         fp.add(nameLabel);
         final TextBox nameText = new TextBox();
         nameText.ensureDebugId("username");
         fp.add(nameText);
-        Label pwLabel = new Label(stringMessages.password()+": ");
+        Label pwLabel = new Label(stringMessages.password());
         pwLabel.ensureDebugId("password");
         fp.add(pwLabel);
         final PasswordTextBox pwText = new PasswordTextBox();
@@ -58,6 +58,8 @@ public class LoginEntryPoint extends AbstractEntryPoint {
         SubmitButton submit = new SubmitButton(stringMessages.signIn());
         submit.ensureDebugId("login");
         fp.add(submit);
+        fp.add(new Anchor(new SafeHtmlBuilder().appendEscaped(stringMessages.signUp()).toSafeHtml(),
+                EntryPointLinkFactory.createRegistrationLink(Collections.<String, String> emptyMap())));
         FormPanel formPanel = new FormPanel();
         formPanel.addSubmitHandler(new SubmitHandler() {
             @Override

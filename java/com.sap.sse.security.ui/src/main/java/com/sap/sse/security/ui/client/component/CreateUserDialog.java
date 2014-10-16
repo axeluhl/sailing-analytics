@@ -21,9 +21,6 @@ import com.sap.sse.security.ui.shared.UserManagementServiceAsync;
  *
  */
 public class CreateUserDialog extends DataEntryDialog<UserData> {
-    private static final int MINIMUM_USERNAME_LENGTH = 3;
-    private static final int MINIMUM_PASSWORD_LENGTH = 5;
-    
     private final StringMessages stringMessages;
     private TextBox nameBox;
     private TextBox emailBox;
@@ -61,19 +58,10 @@ public class CreateUserDialog extends DataEntryDialog<UserData> {
             final Iterable<UserCreationEventHandler> handlers) {
         super(stringMessages.createUser(), stringMessages.createUser(), stringMessages.ok(), stringMessages.cancel(),
                 new DataEntryDialog.Validator<UserData>() {
+                    private final NewAccountValidator validator = new NewAccountValidator(stringMessages);
                     @Override
                     public String getErrorMessage(UserData valueToValidate) {
-                        final String result;
-                        if (valueToValidate.getUsername().length() < MINIMUM_USERNAME_LENGTH) {
-                            result = stringMessages.usernameMustHaveAtLeastNCharacters(MINIMUM_USERNAME_LENGTH);
-                        } else if (valueToValidate.getPassword().length() < MINIMUM_PASSWORD_LENGTH) {
-                            result = stringMessages.passwordMustHaveAtLeastNCharacters(MINIMUM_PASSWORD_LENGTH);
-                        } else if (!valueToValidate.getPassword().equals(valueToValidate.getPasswordRepeat())) {
-                            result = stringMessages.passwordsDontMatch();
-                        } else {
-                            result = null;
-                        }
-                        return result;
+                        return validator.validate(valueToValidate.getUsername(), valueToValidate.getPassword(), valueToValidate.getPasswordRepeat());
                     }
                 }, new DialogCallback<UserData>() {
                     @Override

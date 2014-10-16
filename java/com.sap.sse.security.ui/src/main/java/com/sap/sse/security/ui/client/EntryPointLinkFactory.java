@@ -1,9 +1,10 @@
-package com.sap.sse.security.ui.loginpanel;
+package com.sap.sse.security.ui.client;
 
 import java.util.Map;
 import java.util.Map.Entry;
 
 import com.google.gwt.user.client.Window;
+import com.sap.sse.security.ui.loginpanel.URLEncoder;
 
 public class EntryPointLinkFactory {
     

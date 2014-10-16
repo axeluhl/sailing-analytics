@@ -3,6 +3,8 @@ package com.sap.sse.security.ui.registration;
 import com.google.gwt.core.client.EntryPoint;
 import com.google.gwt.core.client.GWT;
 import com.google.gwt.dom.client.Style.Unit;
+import com.google.gwt.event.dom.client.KeyUpEvent;
+import com.google.gwt.event.dom.client.KeyUpHandler;
 import com.google.gwt.user.client.Window;
 import com.google.gwt.user.client.rpc.AsyncCallback;
 import com.google.gwt.user.client.rpc.ServiceDefTarget;
@@ -19,6 +21,7 @@ import com.google.gwt.user.client.ui.TextBox;
 import com.sap.sse.gwt.client.EntryPointHelper;
 import com.sap.sse.security.ui.client.RemoteServiceMappingConstants;
 import com.sap.sse.security.ui.client.StringMessages;
+import com.sap.sse.security.ui.client.component.NewAccountValidator;
 import com.sap.sse.security.ui.shared.SuccessInfo;
 import com.sap.sse.security.ui.shared.UserManagementService;
 import com.sap.sse.security.ui.shared.UserManagementServiceAsync;
@@ -32,22 +35,48 @@ public class RegisterEntryPoint implements EntryPoint {
         EntryPointHelper.registerASyncService((ServiceDefTarget) userManagementService,
                 RemoteServiceMappingConstants.WEB_CONTEXT_PATH,
                 RemoteServiceMappingConstants.userManagementServiceRemotePath);
+        final NewAccountValidator validator = new NewAccountValidator(stringMessages);
         RootLayoutPanel rootPanel = RootLayoutPanel.get();
         DockLayoutPanel dockPanel = new DockLayoutPanel(Unit.PX);
         rootPanel.add(dockPanel);
-        
         FlowPanel fp = new FlowPanel();
-        
-        Label nameLabel = new Label(stringMessages.name()+": ");
+        final Label errorLabel = new Label();
+        fp.add(errorLabel);
+        Label nameLabel = new Label(stringMessages.username());
         fp.add(nameLabel);
         final TextBox nameText = new TextBox();
         fp.add(nameText);
-        Label pwLabel = new Label(stringMessages.password()+": ");
+        Label emailLabel = new Label(stringMessages.email());
+        fp.add(emailLabel);
+        final TextBox emailText = new TextBox();
+        fp.add(emailText);
+        Label pwLabel = new Label(stringMessages.password());
         fp.add(pwLabel);
         final PasswordTextBox pwText = new PasswordTextBox();
         fp.add(pwText);
-        SubmitButton submit = new SubmitButton(stringMessages.signIn());
+        Label pw2Label = new Label(stringMessages.passwordRepeat());
+        fp.add(pw2Label);
+        final PasswordTextBox pw2Text = new PasswordTextBox();
+        fp.add(pw2Text);
+        final SubmitButton submit = new SubmitButton(stringMessages.signUp());
         fp.add(submit);
+        KeyUpHandler keyUpHandler = new KeyUpHandler() {
+            @Override
+            public void onKeyUp(KeyUpEvent event) {
+                String errorMessage = validator.validate(nameText.getText(), pwText.getText(), pw2Text.getText());
+                if (errorMessage == null) {
+                    errorLabel.setText("");
+                    submit.setEnabled(true);
+                } else {
+                    errorLabel.setText(errorMessage);
+                    submit.setEnabled(false);
+                }
+            }
+        };
+        keyUpHandler.onKeyUp(null); // enable/disable submit button and fill error label
+        nameText.addKeyUpHandler(keyUpHandler);
+        pwText.addKeyUpHandler(keyUpHandler);
+        pw2Text.addKeyUpHandler(keyUpHandler);
         FormPanel formPanel = new FormPanel();
         formPanel.addSubmitHandler(new SubmitHandler() {
             @Override
