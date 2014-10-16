@@ -78,8 +78,12 @@ public class LaunchActivity extends BaseActivity {
             String content = data.getStringExtra("SCAN_RESULT");
             ExLog.i(this, TAG, "Parsing URI: "+content);
             Uri uri = Uri.parse(content);
-            String host = uri.getHost();
-            prefs.setServerURL(host);
+            String server = uri.getScheme() + "://";
+            server += uri.getHost();
+            if (uri.getPort() != -1) {
+                server += ":" + uri.getPort();
+            }
+            prefs.setServerURL(server);
             String leaderboard = uri.getQueryParameter(RaceLogServletConstants.PARAMS_LEADERBOARD_NAME);
             String raceColumn = uri.getQueryParameter(RaceLogServletConstants.PARAMS_RACE_COLUMN_NAME);
             String fleet = uri.getQueryParameter(RaceLogServletConstants.PARAMS_RACE_FLEET_NAME);
