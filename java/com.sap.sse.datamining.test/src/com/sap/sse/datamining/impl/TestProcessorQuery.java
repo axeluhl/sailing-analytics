@@ -17,6 +17,7 @@ import java.util.concurrent.ThreadPoolExecutor;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.TimeoutException;
 
+import org.junit.Before;
 import org.junit.Test;
 
 import com.sap.sse.datamining.AdditionalResultDataBuilder;
@@ -47,12 +48,17 @@ import com.sap.sse.datamining.test.util.components.Number;
 
 public class TestProcessorQuery {
     
-    private final static ProcessorFactory processorFactory = new ProcessorFactory(ConcurrencyTestsUtil.getExecutor());
-    
     private final static DataMiningStringMessages stringMessages = TestsUtil.getTestStringMessagesWithProductiveMessages();
+    
+    private static ProcessorFactory processorFactory;
 
     private boolean receivedElementOrFinished;
     private boolean receivedAbort;
+    
+    @Before
+    public void initializeProcessorFactory() {
+        processorFactory = new ProcessorFactory(ConcurrencyTestsUtil.getExecutor());
+    }
 
     @Test
     public void testStandardWorkflow() throws InterruptedException, ExecutionException {

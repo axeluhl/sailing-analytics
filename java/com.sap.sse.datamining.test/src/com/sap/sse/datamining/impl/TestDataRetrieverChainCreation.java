@@ -78,10 +78,15 @@ public class TestDataRetrieverChainCreation {
         };
     }
     
+    @SuppressWarnings("unchecked")
     @Test
     public void testCreationWithExistingChainDefinition() {
         DataRetrieverChainDefinition<Collection<Test_Regatta>> chainClone = new SimpleDataRetrieverChainDefinition<>(dataRetrieverChainDefinition, "TestRetrieverChain");
-        assertThat(chainClone, is(dataRetrieverChainDefinition));
+        assertThat(chainClone.getDataSourceType().equals(dataRetrieverChainDefinition.getDataSourceType()), is(true));
+        assertThat(chainClone.getRetrievedDataType().equals(dataRetrieverChainDefinition.getRetrievedDataType()), is(true));
+        
+        Collection<DataRetrieverTypeWithInformation<?, ?>> cloneDataRetrieverTypesWithInformation = (Collection<DataRetrieverTypeWithInformation<?, ?>>) chainClone.getDataRetrieverTypesWithInformation();
+        assertThat(cloneDataRetrieverTypesWithInformation, is(dataRetrieverChainDefinition.getDataRetrieverTypesWithInformation()));
     }
 
     @SuppressWarnings("unchecked")
