@@ -108,5 +108,6 @@
 		<servlet-name>remoteLoggingServlet</servlet-name>
 		<url-pattern>/com.sap.sailing.gwt.ui.AdminConsole/remote_logging</url-pattern>
 		<url-pattern>/com.sap.sailing.gwt.ui.Simulator/remote_logging</url-pattern>
+		<url-pattern>/com.sap.sailing.gwt.ui.RaceBoard/remote_logging</url-pattern>
 	</servlet-mapping>
 </web-app>

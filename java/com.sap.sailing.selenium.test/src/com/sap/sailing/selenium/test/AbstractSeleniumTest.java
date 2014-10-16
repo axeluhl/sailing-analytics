@@ -1,9 +1,11 @@
 package com.sap.sailing.selenium.test;
 
+import java.io.BufferedReader;
 import java.io.ByteArrayInputStream;
 import java.io.File;
 import java.io.IOException;
 import java.io.InputStream;
+import java.io.InputStreamReader;
 import java.net.HttpURLConnection;
 import java.net.URL;
 import java.nio.file.Files;
@@ -11,10 +13,13 @@ import java.nio.file.Path;
 import java.nio.file.StandardCopyOption;
 import java.util.UUID;
 
+
+
 import org.junit.Rule;
 import org.junit.rules.TestWatchman;
 import org.junit.runner.RunWith;
 import org.junit.runners.model.FrameworkMethod;
+import org.openqa.selenium.Cookie;
 import org.openqa.selenium.OutputType;
 import org.openqa.selenium.TakesScreenshot;
 import org.openqa.selenium.WebDriver;
@@ -47,7 +52,11 @@ public abstract class AbstractSeleniumTest {
     
     private static final String CLEAR_STATE_URL = "sailingserver/test-support/clearState"; //$NON-NLS-1$
     
+    private static final String LOGIN_URL = "security/api/restsecurity/login";
+    
     private static final int CLEAR_STATE_SUCCESFUL_STATUS_CODE = 204;
+
+    private static final String SESSION_COOKIE_NAME = "JSESSIONID";
     
     /**
      * <p></p>
@@ -57,7 +66,7 @@ public abstract class AbstractSeleniumTest {
      * @return
      *   <code>true</code> if the state was reseted successfully and <code>false</code> otherwise.
      */
-    protected static void clearState(String contextRoot) {
+    protected void clearState(String contextRoot) {
         try {
             URL url = new URL(contextRoot + CLEAR_STATE_URL);
             HttpURLConnection connection = (HttpURLConnection) url.openConnection();
@@ -66,6 +75,38 @@ public abstract class AbstractSeleniumTest {
             if (connection.getResponseCode() != CLEAR_STATE_SUCCESFUL_STATUS_CODE) {
                 throw new RuntimeException(connection.getResponseMessage());
             }
+        } catch (IOException exception) {
+            throw new RuntimeException(exception);
+        }
+    }
+    
+    /**
+     * Obtains a session cookie for a session authenticated using the default admin user.
+     * 
+     * @return the cookie that represents the authenticated session or <code>null</code> if the session
+     * couldn't successfully be authenticated
+     */
+    protected Cookie authenticate(String contextRoot) {
+        try {
+            Cookie result = null;
+            URL url = new URL(contextRoot + LOGIN_URL);
+            HttpURLConnection connection = (HttpURLConnection) url.openConnection();
+            connection.setRequestMethod("POST");
+            connection.setDoOutput(true);
+            connection.connect();
+            connection.getOutputStream().write("username=admin&password=admin".getBytes());
+            if (connection.getResponseCode() != 200) {
+                throw new RuntimeException(connection.getResponseMessage());
+            }
+            BufferedReader br = new BufferedReader(new InputStreamReader(connection.getInputStream()));
+            String line;
+            while ((line = br.readLine()) != null) {
+                if (line.startsWith("Set-Cookie: "+SESSION_COOKIE_NAME+"=")) {
+                    String cookieValue = line.substring(line.indexOf('='), line.indexOf(';'));
+                    result = new Cookie(SESSION_COOKIE_NAME, cookieValue);
+                }
+            }
+            return result;
         } catch (IOException exception) {
             throw new RuntimeException(exception);
         }
