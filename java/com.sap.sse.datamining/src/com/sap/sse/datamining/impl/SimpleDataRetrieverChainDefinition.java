@@ -3,26 +3,45 @@ package com.sap.sse.datamining.impl;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;
+import java.util.Locale;
+import java.util.UUID;
 import java.util.concurrent.ExecutorService;
 
 import com.sap.sse.datamining.DataRetrieverChainBuilder;
 import com.sap.sse.datamining.DataRetrieverChainDefinition;
 import com.sap.sse.datamining.components.Processor;
+import com.sap.sse.datamining.i18n.DataMiningStringMessages;
 
 public class SimpleDataRetrieverChainDefinition<DataSourceType> implements
         DataRetrieverChainDefinition<DataSourceType> {
 
+    private final UUID id;
+    private final String nameMessageKey;
+    
     private final Class<DataSourceType> dataSourceType;
     private final List<DataRetrieverTypeWithInformation<?, ?>> dataRetrieverTypesWithInformation;
 
-    public SimpleDataRetrieverChainDefinition(Class<DataSourceType> dataSourceType) {
+    public SimpleDataRetrieverChainDefinition(Class<DataSourceType> dataSourceType, String nameMessageKey) {
+        id = UUID.randomUUID();
+        this.nameMessageKey = nameMessageKey;
+        
         this.dataSourceType = dataSourceType;
         dataRetrieverTypesWithInformation = new ArrayList<>();
     }
 
-    public SimpleDataRetrieverChainDefinition(DataRetrieverChainDefinition<DataSourceType> dataRetrieverChainDefinition) {
-        this(dataRetrieverChainDefinition.getDataSourceType());
+    public SimpleDataRetrieverChainDefinition(DataRetrieverChainDefinition<DataSourceType> dataRetrieverChainDefinition, String nameMessageKey) {
+        this(dataRetrieverChainDefinition.getDataSourceType(), nameMessageKey);
         dataRetrieverTypesWithInformation.addAll(dataRetrieverChainDefinition.getDataRetrieverTypesWithInformation());
+    }
+    
+    @Override
+    public UUID getUUID() {
+        return id;
+    }
+    
+    @Override
+    public String getLocalizedName(Locale locale, DataMiningStringMessages stringMessages) {
+        return stringMessages.get(locale, nameMessageKey);
     }
 
     @Override
@@ -101,6 +120,7 @@ public class SimpleDataRetrieverChainDefinition<DataSourceType> implements
         result = prime * result
                 + ((dataRetrieverTypesWithInformation == null) ? 0 : dataRetrieverTypesWithInformation.hashCode());
         result = prime * result + ((dataSourceType == null) ? 0 : dataSourceType.hashCode());
+        result = prime * result + ((id == null) ? 0 : id.hashCode());
         return result;
     }
 
@@ -122,6 +142,11 @@ public class SimpleDataRetrieverChainDefinition<DataSourceType> implements
             if (other.dataSourceType != null)
                 return false;
         } else if (!dataSourceType.equals(other.dataSourceType))
+            return false;
+        if (id == null) {
+            if (other.id != null)
+                return false;
+        } else if (!id.equals(other.id))
             return false;
         return true;
     }

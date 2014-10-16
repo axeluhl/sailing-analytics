@@ -34,7 +34,7 @@ public class SailingDataRetrieverChainDefinitions {
     private static void initializeDataRetrieverChainDefinitions() {
         dataRetrieverChainDefinitions = new ArrayList<>();
 
-        DataRetrieverChainDefinition<RacingEventService> legRetrieverChainDefinition = new SimpleDataRetrieverChainDefinition<>(RacingEventService.class);
+        DataRetrieverChainDefinition<RacingEventService> legRetrieverChainDefinition = new SimpleDataRetrieverChainDefinition<>(RacingEventService.class, "SailingDomainRetrieverChain");
         @SuppressWarnings("unchecked")
         Class<Processor<RacingEventService, LeaderboardGroup>> leaderboardGroupRetrieverType = (Class<Processor<RacingEventService, LeaderboardGroup>>)(Class<?>) LeaderboardGroupRetrievalProcessor.class;
         legRetrieverChainDefinition.startWith(leaderboardGroupRetrieverType, LeaderboardGroup.class);
@@ -52,7 +52,7 @@ public class SailingDataRetrieverChainDefinitions {
         legRetrieverChainDefinition.addAsLast(legRetrieverType, legOfCompetitorRetrieverType, HasTrackedLegOfCompetitorContext.class);
         dataRetrieverChainDefinitions.add(legRetrieverChainDefinition);
         
-        DataRetrieverChainDefinition<RacingEventService> gpsFixRetrieverChainDefinition = new SimpleDataRetrieverChainDefinition<>(legRetrieverChainDefinition);
+        DataRetrieverChainDefinition<RacingEventService> gpsFixRetrieverChainDefinition = new SimpleDataRetrieverChainDefinition<>(legRetrieverChainDefinition, "SailingDomainRetrieverChain");
         @SuppressWarnings("unchecked")
         Class<Processor<HasTrackedLegOfCompetitorContext, HasGPSFixContext>> gpsFixRetrieverType = (Class<Processor<HasTrackedLegOfCompetitorContext, HasGPSFixContext>>)(Class<?>) GPSFixRetrievalProcessor.class;
         gpsFixRetrieverChainDefinition.addAsLast(legOfCompetitorRetrieverType, gpsFixRetrieverType, HasGPSFixContext.class);

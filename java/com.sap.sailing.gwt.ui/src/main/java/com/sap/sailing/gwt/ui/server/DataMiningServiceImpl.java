@@ -14,6 +14,7 @@ import com.sap.sailing.datamining.shared.SailingDataMiningSerializationDummy;
 import com.sap.sailing.gwt.ui.datamining.DataMiningService;
 import com.sap.sailing.server.RacingEventService;
 import com.sap.sse.datamining.DataMiningServer;
+import com.sap.sse.datamining.DataRetrieverChainDefinition;
 import com.sap.sse.datamining.Query;
 import com.sap.sse.datamining.factories.FunctionDTOFactory;
 import com.sap.sse.datamining.functions.Function;
@@ -22,6 +23,7 @@ import com.sap.sse.datamining.shared.QueryDefinition;
 import com.sap.sse.datamining.shared.QueryResult;
 import com.sap.sse.datamining.shared.SSEDataMiningSerializationDummy;
 import com.sap.sse.datamining.shared.dto.FunctionDTO;
+import com.sap.sse.datamining.shared.impl.dto.DataRetrieverChainDefinitionDTO;
 
 public class DataMiningServiceImpl extends RemoteServiceServlet implements DataMiningService {
     private static final long serialVersionUID = -7951930891674894528L;
@@ -76,16 +78,35 @@ public class DataMiningServiceImpl extends RemoteServiceServlet implements DataM
 
     @Override
     public Collection<FunctionDTO> getDimensionsFor(FunctionDTO statisticToCalculate, String localeInfoName) {
-        Class<?> dataTypeBaseClass = getBaseClassFor(statisticToCalculate);
-        Collection<Function<?>> dimensions = getDataMiningServer().getFunctionProvider().getDimensionsFor(dataTypeBaseClass);
+        Class<?> baseDataType = getBaseDataType(statisticToCalculate);
+        Collection<Function<?>> dimensions = getDataMiningServer().getFunctionProvider().getDimensionsFor(baseDataType);
         return functionsAsFunctionDTOs(dimensions, localeInfoName);
     }
     
-    private Class<?> getBaseClassFor(FunctionDTO statisticToCalculate) {
+    @Override
+    public Collection<DataRetrieverChainDefinitionDTO> getDataRetrieverChainDefinitionsFor(FunctionDTO statisticToCalculate, String localeInfoName) {
+        Class<?> baseDataType = getBaseDataType(statisticToCalculate);
+        return dataRetrieverChainDefinitionsAsDTOs(getDataMiningServer().getDataRetrieverChainDefinitionRegistry().getDataRetrieverChainDefinitions(RacingEventService.class, baseDataType), localeInfoName);
+    }
+    
+    private Collection<DataRetrieverChainDefinitionDTO> dataRetrieverChainDefinitionsAsDTOs(
+            Collection<DataRetrieverChainDefinition<RacingEventService>> dataRetrieverChainDefinitions, String localeInfoName) {
+        Locale locale = DataMiningStringMessages.Util.getLocaleFor(localeInfoName);
+        DataMiningStringMessages dataMiningStringMessages = getDataMiningServer().getStringMessages();
+        
+        Collection<DataRetrieverChainDefinitionDTO> DTOs = new ArrayList<>();
+        for (DataRetrieverChainDefinition<RacingEventService> dataRetrieverChainDefinition : dataRetrieverChainDefinitions) {
+            DTOs.add(new DataRetrieverChainDefinitionDTO(dataRetrieverChainDefinition.getUUID(), dataRetrieverChainDefinition.getLocalizedName(locale, dataMiningStringMessages),
+                                                         dataRetrieverChainDefinition.getDataSourceType().getSimpleName(), dataRetrieverChainDefinition.getRetrievedDataType().getSimpleName()));
+        }
+        return DTOs;
+    }
+
+    private Class<?> getBaseDataType(FunctionDTO statisticToCalculate) {
         Function<?> function = getDataMiningServer().getFunctionProvider().getFunctionForDTO(statisticToCalculate);
         return function.getDeclaringType();
     }
-
+    
     private Collection<FunctionDTO> functionsAsFunctionDTOs(Collection<Function<?>> functions, String localeInfoName) {
         Locale locale = DataMiningStringMessages.Util.getLocaleFor(localeInfoName);
         DataMiningStringMessages dataMiningStringMessages = getDataMiningServer().getStringMessages();

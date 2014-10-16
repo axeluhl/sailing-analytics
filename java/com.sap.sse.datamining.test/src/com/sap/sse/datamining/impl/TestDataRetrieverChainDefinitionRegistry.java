@@ -28,7 +28,7 @@ public class TestDataRetrieverChainDefinitionRegistry {
     @SuppressWarnings("unchecked")
     @Before
     public void initializeRetrieverChainsAndRegistry() {
-        raceRetrieverChainDefinition = new SimpleDataRetrieverChainDefinition<>((Class<Collection<Test_Regatta>>)(Class<?>) Collection.class);
+        raceRetrieverChainDefinition = new SimpleDataRetrieverChainDefinition<>((Class<Collection<Test_Regatta>>)(Class<?>) Collection.class, "TestRaceRetrieverChain");
         Class<Processor<Collection<Test_Regatta>, Test_Regatta>> regattaRetrieverClass = (Class<Processor<Collection<Test_Regatta>, Test_Regatta>>)(Class<?>) TestRegattaRetrievalProcessor.class;
         raceRetrieverChainDefinition.startWith(regattaRetrieverClass, Test_Regatta.class);
         
@@ -38,7 +38,7 @@ public class TestDataRetrieverChainDefinitionRegistry {
                                                raceRetrieverClass,
                                                Test_HasRaceContext.class);
 
-        legRetrieverChainDefinition = new SimpleDataRetrieverChainDefinition<Collection<Test_Regatta>>(raceRetrieverChainDefinition);
+        legRetrieverChainDefinition = new SimpleDataRetrieverChainDefinition<Collection<Test_Regatta>>(raceRetrieverChainDefinition, "TestLegRetrieverChain");
         
         Class<Processor<Test_HasRaceContext, Test_HasLegOfCompetitorContext>> legRetrieverClass = 
                 (Class<Processor<Test_HasRaceContext, Test_HasLegOfCompetitorContext>>)(Class<?>) TestLegOfCompetitorWithContextRetrievalProcessor.class;

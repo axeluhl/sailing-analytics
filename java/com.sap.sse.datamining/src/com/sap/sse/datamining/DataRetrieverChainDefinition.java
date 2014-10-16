@@ -1,14 +1,21 @@
 package com.sap.sse.datamining;
 
 import java.util.Collection;
+import java.util.Locale;
+import java.util.UUID;
 import java.util.concurrent.ExecutorService;
 
 import com.sap.sse.datamining.components.Processor;
+import com.sap.sse.datamining.i18n.DataMiningStringMessages;
 import com.sap.sse.datamining.impl.DataRetrieverTypeWithInformation;
 
 public interface DataRetrieverChainDefinition<DataSourceType> {
     
+    public UUID getUUID();
+    
     public Class<DataSourceType> getDataSourceType();
+    
+    public String getLocalizedName(Locale locale, DataMiningStringMessages stringMessages);
     
     /**
      * Returns the retrieved data type of the complete chain of this definition,

@@ -10,12 +10,16 @@ import com.sap.sse.datamining.shared.QueryResult;
 import com.sap.sse.datamining.shared.SSEDataMiningSerializationDummy;
 import com.sap.sse.datamining.shared.dto.FunctionDTO;
 import com.sap.sse.datamining.shared.impl.GenericGroupKey;
+import com.sap.sse.datamining.shared.impl.dto.DataRetrieverChainDefinitionDTO;
 
 public interface DataMiningServiceAsync {
 
     void getAllStatistics(String localeInfoName, AsyncCallback<Collection<FunctionDTO>> callback);
 
     void getDimensionsFor(FunctionDTO statisticToCalculate, String localeInfoName, AsyncCallback<Collection<FunctionDTO>> callback);
+    
+    void getDataRetrieverChainDefinitionsFor(FunctionDTO statisticToCalculate, String localeInfoName,
+            AsyncCallback<Collection<DataRetrieverChainDefinitionDTO>> callback);
     
     void getDimensionValuesFor(Collection<FunctionDTO> dimensions, AsyncCallback<QueryResult<Set<Object>>> callback);
 
