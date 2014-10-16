@@ -139,7 +139,7 @@ public class AdminConsolePage extends HostPage {
      */
     @Override
     protected void verify() {
-        if(!PAGE_TITLE.equals(this.driver.getTitle())) {
+        if (!PAGE_TITLE.equals(this.driver.getTitle())) {
             throw new IllegalStateException("This is not the administration console: " + this.driver.getTitle()); //$NON-NLS-1$
         }
     }

@@ -23,7 +23,7 @@ public class LoginPage extends HostPage {
     public void login(String username, String password) {
         usernameField.clear();
         usernameField.sendKeys(username);
-        passwordField.clear();
+        passwordField.click();
         passwordField.sendKeys(password);
         loginButton.click();
     }

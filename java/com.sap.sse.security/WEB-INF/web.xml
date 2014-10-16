@@ -31,15 +31,6 @@
 	</filter-mapping>
     
 	<servlet>
-		<servlet-name>LoginServlet</servlet-name>
-		<servlet-class>com.sap.sse.security.LoginServlet</servlet-class>
-	</servlet>
-	<servlet-mapping>
-		<servlet-name>LoginServlet</servlet-name>
-		<url-pattern>/login</url-pattern>
-	</servlet-mapping>
-	
-	<servlet>
     	<servlet-name>Jersey REST API</servlet-name>
 		<servlet-class>com.sap.sse.security.jaxrs.RestServletContainer</servlet-class>
 		<init-param>
