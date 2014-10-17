@@ -43,8 +43,8 @@ public class UserManagementEntryPoint extends AbstractEntryPoint {
         userService.addUserStatusEventHandler(new UserStatusEventHandler() {
             @Override
             public void onUserStatusChange(UserDTO user) {
-                if (hasRequiredRole(user) != hasRequiredRole(UserManagementEntryPoint.this.user)) {
-                    Window.Location.reload();
+                if (!hasRequiredRole(user) && hasRequiredRole(UserManagementEntryPoint.this.user)) {
+                    Window.Location.reload(); // user signed out or lost required role; reload to take the user to the log-in screen
                 }
                 UserManagementEntryPoint.this.user = user;
             }
@@ -58,8 +58,8 @@ public class UserManagementEntryPoint extends AbstractEntryPoint {
         setTabPanelSize(center, ""+Window.getClientWidth()+"px", ""+Window.getClientHeight()+"px");
     }
 
-    private Object hasRequiredRole(UserDTO user) {
-        return user != null && user.hasRole(DefaultRoles.ADMIN.name());
+    private boolean hasRequiredRole(UserDTO user) {
+        return user != null && user.hasRole(DefaultRoles.ADMIN.getRolename());
     }
 
 }

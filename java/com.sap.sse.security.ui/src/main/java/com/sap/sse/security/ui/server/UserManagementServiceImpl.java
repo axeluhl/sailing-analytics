@@ -139,8 +139,23 @@ public class UserManagementServiceImpl extends RemoteServiceServlet implements U
 
 
     @Override
-    public void updateSimpleUserPassword(String name, String oldPassword, String newPassword) throws UserManagementException {
-        getSecurityService().updateSimpleUserPassword(name, oldPassword, newPassword);
+    public void updateSimpleUserPassword(String username, String oldPassword, String newPassword) throws UserManagementException {
+        final Subject subject = SecurityUtils.getSubject();
+        if (subject.hasRole(DefaultRoles.ADMIN.getRolename()) || username.equals(SessionUtils.loadUsername())) {
+            getSecurityService().updateSimpleUserPassword(username, oldPassword, newPassword);
+        } else {
+            throw new UserManagementException(UserManagementException.INVALID_CREDENTIALS);
+        }
+    }
+
+    @Override
+    public void updateSimpleUserEmail(String username, String newEmail) throws UserManagementException {
+        final Subject subject = SecurityUtils.getSubject();
+        if (subject.hasRole(DefaultRoles.ADMIN.getRolename()) || username.equals(SessionUtils.loadUsername())) {
+            getSecurityService().updateSimpleUserEmail(username, newEmail);
+        } else {
+            throw new UserManagementException(UserManagementException.INVALID_CREDENTIALS);
+        }
     }
 
     @Override

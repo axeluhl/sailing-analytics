@@ -212,24 +212,38 @@ public class SecurityServiceImpl extends RemoteServiceServlet implements Securit
     }
 
     @Override
-    public void updateSimpleUserPassword(String name, String oldPassword, String newPassword) throws UserManagementException {
-        final User user = store.getUserByName(name);
+    public void updateSimpleUserPassword(String username, String oldPassword, String newPassword) throws UserManagementException {
+        final User user = store.getUserByName(username);
         if (user == null) {
             throw new UserManagementException(UserManagementException.USER_DOES_NOT_EXIST);
         }
         if (newPassword == null || newPassword.length() < 5) {
             throw new UserManagementException(UserManagementException.PASSWORD_DOES_NOT_MEET_REQUIREMENTS);
         }
-        UsernamePasswordAccount account = (UsernamePasswordAccount) user.getAccount(AccountType.USERNAME_PASSWORD);
-        String hashedOldPassword = hashPassword(oldPassword, account.getSalt());
-        if (!hashedOldPassword.equals(account.getSaltedPassword())) {
-            throw new UserManagementException(UserManagementException.INVALID_CREDENTIALS);
+        final Subject subject = SecurityUtils.getSubject();
+        // for non-admins, check that the old password is correct
+        final UsernamePasswordAccount account = (UsernamePasswordAccount) user.getAccount(AccountType.USERNAME_PASSWORD);
+        if (!subject.hasRole(DefaultRoles.ADMIN.getRolename())) {
+            String hashedOldPassword = hashPassword(oldPassword, account.getSalt());
+            if (!hashedOldPassword.equals(account.getSaltedPassword())) {
+                throw new UserManagementException(UserManagementException.INVALID_CREDENTIALS);
+            }
         }
         RandomNumberGenerator rng = new SecureRandomNumberGenerator();
         Object salt = rng.nextBytes();
         String hashedPasswordBase64 = hashPassword(newPassword, salt);
         account.setSalt(salt);
         account.setSaltedPassword(hashedPasswordBase64);
+        store.updateUser(user);
+    }
+
+    @Override
+    public void updateSimpleUserEmail(String username, String newEmail) throws UserManagementException {
+        final User user = store.getUserByName(username);
+        if (user == null) {
+            throw new UserManagementException(UserManagementException.USER_DOES_NOT_EXIST);
+        }
+        user.setEmail(newEmail);
         store.updateUser(user);
     }
 

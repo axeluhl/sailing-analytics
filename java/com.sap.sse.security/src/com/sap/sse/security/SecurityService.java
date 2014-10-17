@@ -40,6 +40,8 @@ public interface SecurityService {
 
     void updateSimpleUserPassword(String name, String oldPassword, String newPassword) throws UserManagementException;
 
+    void updateSimpleUserEmail(String username, String newEmail) throws UserManagementException;
+
     User createSocialUser(String username, SocialUserAccount socialUserAccount) throws UserManagementException;
 
     void deleteUser(String username) throws UserManagementException;
@@ -65,4 +67,5 @@ public interface SecurityService {
     CacheManager getCacheManager();
     
     void sendMail(String username, String subject, String body) throws AddressException, MessagingException;
+
 }

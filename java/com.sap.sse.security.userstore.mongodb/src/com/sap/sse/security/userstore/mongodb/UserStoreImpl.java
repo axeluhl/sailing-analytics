@@ -79,8 +79,8 @@ public class UserStoreImpl implements UserStore {
 
     @Override
     public void updateUser(User user) {
-        // TODO Auto-generated method stub
-        
+        logger.info("Updating user "+user+" in DB");
+        mongoObjectFactory.storeUser(user);
     }
 
     @Override

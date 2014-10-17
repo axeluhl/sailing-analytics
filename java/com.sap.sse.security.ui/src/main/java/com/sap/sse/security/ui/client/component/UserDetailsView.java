@@ -5,6 +5,7 @@ import java.util.Collections;
 import java.util.List;
 import java.util.Map.Entry;
 
+import com.google.gwt.core.client.GWT;
 import com.google.gwt.core.client.Scheduler;
 import com.google.gwt.dom.client.Style.Unit;
 import com.google.gwt.event.dom.client.ClickEvent;
@@ -26,7 +27,10 @@ import com.google.gwt.user.client.ui.Label;
 import com.google.gwt.user.client.ui.VerticalPanel;
 import com.sap.sse.gwt.client.async.MarkedAsyncCallback;
 import com.sap.sse.gwt.client.controls.listedit.StringListEditorComposite;
+import com.sap.sse.gwt.client.dialog.DataEntryDialog;
+import com.sap.sse.gwt.client.dialog.DataEntryDialog.DialogCallback;
 import com.sap.sse.security.shared.DefaultRoles;
+import com.sap.sse.security.shared.UserManagementException;
 import com.sap.sse.security.ui.client.Resources;
 import com.sap.sse.security.ui.client.StringMessages;
 import com.sap.sse.security.ui.client.UserChangeEventHandler;
@@ -87,6 +91,30 @@ public class UserDetailsView extends FlowPanel {
         });
         usernameLabel = new Label();
         emailLabel = new Label();
+        final Button changeEmail = new Button(stringMessages.edit());
+        changeEmail.addClickHandler(new ClickHandler() {
+            @Override
+            public void onClick(ClickEvent event) {
+                new EditEmailDialog(stringMessages, UserDetailsView.this.user, new DialogCallback<String>() {
+                    @Override
+                    public void ok(String newEmail) {
+                        userManagementService.updateSimpleUserEmail(UserDetailsView.this.user.getName(), newEmail, new MarkedAsyncCallback<Void>(
+                                new AsyncCallback<Void>() {
+                                    @Override
+                                    public void onFailure(Throwable caught) {
+                                        Window.alert(stringMessages.errorUpdatingEmail(caught.getMessage()));
+                                    }
+
+                                    @Override
+                                    public void onSuccess(Void result) {
+                                        Window.alert(stringMessages.successfullyUpdatedEmail());
+                                    }
+                                }));
+                    }
+                    @Override public void cancel() {}
+                });
+            }
+        });
         Label title = new Label(stringMessages.userDetails());
         title.getElement().getStyle().setFontSize(25, Unit.PX);
         this.add(title);
@@ -126,10 +154,10 @@ public class UserDetailsView extends FlowPanel {
             }
         });
         this.add(deleteButton);
-        updateUser(user);
+        updateUser(user, userManagementService);
     }
 
-    public void updateUser(final UserDTO user) {
+    public void updateUser(final UserDTO user, final UserManagementServiceAsync userManagementService) {
         this.user = user;
         deleteButton.setEnabled(user != null);
         accountPanels.clear();
@@ -145,7 +173,43 @@ public class UserDetailsView extends FlowPanel {
                 accountPanelDecorator.setWidget(accountPanelContent);
                 accountPanelContent.add(new Label(stringMessages.account(a.getAccountType())));
                 if (a instanceof UsernamePasswordAccountDTO) {
-                    accountPanelContent.add(new Label(stringMessages.changePassword()));
+                    final Button changePasswordButton = new Button(stringMessages.changePassword());
+                    accountPanelContent.add(changePasswordButton);
+                    changePasswordButton.addClickHandler(new ClickHandler() {
+                        @Override
+                        public void onClick(ClickEvent event) {
+                            new ChangePasswordDialog(stringMessages, UserDetailsView.this.user, new DataEntryDialog.DialogCallback<String>() {
+                                @Override
+                                public void ok(String newPassword) {
+                                    userManagementService.updateSimpleUserPassword(UserDetailsView.this.user.getName(), /* admin doesn't need to provide old password */ null, newPassword, new MarkedAsyncCallback<Void>(
+                                            new AsyncCallback<Void>() {
+                                                @Override
+                                                public void onFailure(Throwable caught) {
+                                                    GWT.log(caught.getMessage());
+                                                    if (caught instanceof UserManagementException) {
+                                                        String message = ((UserManagementException) caught).getMessage();
+                                                        if (UserManagementException.PASSWORD_DOES_NOT_MEET_REQUIREMENTS.equals(message)) {
+                                                            Window.alert(stringMessages.passwordDoesNotMeetRequirements());
+                                                        } else if (UserManagementException.INVALID_CREDENTIALS.equals(message)) {
+                                                            Window.alert(stringMessages.invalidCredentials());
+                                                        } else {
+                                                            Window.alert(stringMessages.errorChangingPassword(caught.getMessage()));
+                                                        }
+                                                    } else {
+                                                        Window.alert(stringMessages.errorChangingPassword(caught.getMessage()));
+                                                    }
+                                                }
+
+                                                @Override
+                                                public void onSuccess(Void result) {
+                                                    Window.alert(stringMessages.passwordSuccessfullyChanged());
+                                                }
+                                            }));
+                                }
+                                @Override public void cancel() { }
+                            }).show();
+                        }
+                    });
                 } else if (a instanceof SocialUserDTO) {
                     SocialUserDTO sua = (SocialUserDTO) a;
                     FlexTable table = new FlexTable();

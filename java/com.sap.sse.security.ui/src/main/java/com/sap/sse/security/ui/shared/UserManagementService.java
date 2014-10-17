@@ -21,6 +21,8 @@ public interface UserManagementService extends RemoteService {
     
     void updateSimpleUserPassword(String name, String oldPassword, String newPassword) throws UserManagementException;
 
+    void updateSimpleUserEmail(String username, String newEmail) throws UserManagementException;
+
     SuccessInfo deleteUser(String username);
 
     SuccessInfo logout();
@@ -40,4 +42,5 @@ public interface UserManagementService extends RemoteService {
     public String getAuthorizationUrl(CredentialDTO credential) throws OAuthException;
 
     public UserDTO verifySocialUser(CredentialDTO credential) throws OAuthException;
+
 }

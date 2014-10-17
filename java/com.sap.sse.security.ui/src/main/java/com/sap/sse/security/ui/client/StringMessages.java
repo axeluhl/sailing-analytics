@@ -1,7 +1,6 @@
 package com.sap.sse.security.ui.client;
 
 import com.google.gwt.core.client.GWT;
-import com.google.gwt.safehtml.shared.SafeHtml;
 
 public interface StringMessages extends com.sap.sse.gwt.client.StringMessages {
     public static final StringMessages INSTANCE = GWT.create(StringMessages.class);
@@ -105,5 +104,11 @@ public interface StringMessages extends com.sap.sse.gwt.client.StringMessages {
     String errorChangingPassword(String message);
 
     String invalidCredentials();
+
+    String editEmail();
+
+    String errorUpdatingEmail(String message);
+
+    String successfullyUpdatedEmail();
 
 }

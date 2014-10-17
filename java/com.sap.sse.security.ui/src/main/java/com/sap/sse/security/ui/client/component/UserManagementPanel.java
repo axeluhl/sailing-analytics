@@ -58,7 +58,7 @@ public class UserManagementPanel extends DockPanel {
         singleSelectionModel.addSelectionChangeHandler(new Handler() {
             @Override
             public void onSelectionChange(SelectionChangeEvent event) {
-                userDetailsView.updateUser(singleSelectionModel.getSelectedObject());
+                userDetailsView.updateUser(singleSelectionModel.getSelectedObject(), userManagementService);
             }
         });
         userList.setPageSize(20);
