@@ -1,16 +1,14 @@
 package com.sap.sse.security.ui.usermanagement;
 
-import com.google.gwt.core.client.EntryPoint;
 import com.google.gwt.core.client.GWT;
 import com.google.gwt.dom.client.Style.Unit;
-import com.google.gwt.event.logical.shared.AttachEvent;
-import com.google.gwt.event.logical.shared.AttachEvent.Handler;
 import com.google.gwt.user.client.Window;
 import com.google.gwt.user.client.rpc.ServiceDefTarget;
 import com.google.gwt.user.client.ui.RootLayoutPanel;
 import com.google.gwt.user.client.ui.RootPanel;
 import com.google.gwt.user.client.ui.ScrollPanel;
 import com.google.gwt.user.client.ui.TabLayoutPanel;
+import com.sap.sse.gwt.client.AbstractEntryPoint;
 import com.sap.sse.gwt.client.EntryPointHelper;
 import com.sap.sse.security.ui.client.RemoteServiceMappingConstants;
 import com.sap.sse.security.ui.client.Resources;
@@ -24,7 +22,7 @@ import com.sap.sse.security.ui.shared.UserDTO;
 import com.sap.sse.security.ui.shared.UserManagementService;
 import com.sap.sse.security.ui.shared.UserManagementServiceAsync;
 
-public class UserManagementEntryPoint implements EntryPoint {
+public class UserManagementEntryPoint extends AbstractEntryPoint {
 
     private final UserManagementServiceAsync userManagementService = GWT.create(UserManagementService.class);
     
@@ -35,7 +33,8 @@ public class UserManagementEntryPoint implements EntryPoint {
     private UserDTO user;
     
     @Override
-    public void onModuleLoad() {
+    public void doOnModuleLoad() {
+        super.doOnModuleLoad();
         EntryPointHelper.registerASyncService((ServiceDefTarget) userManagementService,
                 RemoteServiceMappingConstants.userManagementServiceRemotePath);
         UserService userService = new UserService(userManagementService);
@@ -58,17 +57,4 @@ public class UserManagementEntryPoint implements EntryPoint {
         setTabPanelSize(center, ""+Window.getClientWidth()+"px", ""+Window.getClientHeight()+"px");
     }
     
-    /**
-     * Sets the size of the tab panel when the tab panel is attached to the DOM
-     */
-    public static void setTabPanelSize(final TabLayoutPanel advancedTabPanel, final String width, final String height) {
-        advancedTabPanel.addAttachHandler(new Handler() {
-            @Override
-            public void onAttachOrDetach(AttachEvent event) {
-                advancedTabPanel.getElement().getParentElement().getStyle().setProperty("width", width);
-                advancedTabPanel.getElement().getParentElement().getStyle().setProperty("height", height);
-            }
-        });
-    }
-
 }

@@ -38,7 +38,7 @@ public abstract class AbstractEntryPoint implements EntryPoint {
     /**
      * Sets the size of the tab panel when the tab panel is attached to the DOM
      */
-    protected void setTabPanelSize(final TabLayoutPanel advancedTabPanel, final String width, final String height) {
+    public static void setTabPanelSize(final TabLayoutPanel advancedTabPanel, final String width, final String height) {
         advancedTabPanel.addAttachHandler(new Handler() {
             @Override
             public void onAttachOrDetach(AttachEvent event) {

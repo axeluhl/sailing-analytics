@@ -1,6 +1,6 @@
 package com.sap.sailing.gwt.ui.usermanagement;
 
-import com.sap.sse.security.DefaultRoles;
+import com.sap.sse.security.shared.DefaultRoles;
 
 public enum UserRoles {
     administrator(DefaultRoles.ADMIN.getRolename()),

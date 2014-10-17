@@ -25,10 +25,10 @@ import com.google.gwt.user.client.ui.LayoutPanel;
 import com.google.gwt.user.client.ui.ScrollPanel;
 import com.google.gwt.user.client.ui.TabLayoutPanel;
 import com.google.gwt.user.client.ui.TextBox;
+import com.sap.sse.gwt.client.AbstractEntryPoint;
 import com.sap.sse.security.ui.client.StringMessages;
 import com.sap.sse.security.ui.client.resources.IconResources;
 import com.sap.sse.security.ui.shared.UserManagementServiceAsync;
-import com.sap.sse.security.ui.usermanagement.UserManagementEntryPoint;
 
 public class SettingsPanel extends LayoutPanel {
 
@@ -79,7 +79,7 @@ public class SettingsPanel extends LayoutPanel {
         }
         TabLayoutPanel tabPanel = new TabLayoutPanel(30, Unit.PX);
         tabPanel.setHeight("95%");
-        UserManagementEntryPoint.setTabPanelSize(tabPanel, "100%", "95%");
+        AbstractEntryPoint.setTabPanelSize(tabPanel, "100%", "95%");
 
         Map<String, Integer> numberOfSettings = new HashMap<>();
         for (Entry<String, String> e : settingTypes.entrySet()) {

@@ -2,10 +2,10 @@ package com.sap.sse.security.shared;
 
 import java.util.Arrays;
 import java.util.Collection;
+import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Map;
 import java.util.Set;
-import java.util.concurrent.ConcurrentHashMap;
 
 import com.sap.sse.security.shared.Account.AccountType;
 
@@ -27,7 +27,7 @@ public class User {
         this.name = name;
         this.roles = new HashSet<>();
         this.email = email;
-        this.accounts = new ConcurrentHashMap<>();
+        this.accounts = new HashMap<>();
         for (Account a : accounts) {
             this.accounts.put(a.getAccountType(), a);
         }
