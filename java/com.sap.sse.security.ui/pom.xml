@@ -62,6 +62,7 @@
 								<module>com.sap.sse.security.ui.OAuthLogin</module>
 								<module>com.sap.sse.security.ui.LoginPanel</module>
 								<module>com.sap.sse.security.ui.Register</module>
+								<module>com.sap.sse.security.ui.ChangePassword</module>
 							</modules>
 							<gen>${basedir}/.generated</gen>
 							<localWorkers>3</localWorkers>

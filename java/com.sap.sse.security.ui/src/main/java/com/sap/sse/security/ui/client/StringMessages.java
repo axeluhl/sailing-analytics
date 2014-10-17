@@ -92,5 +92,15 @@ public interface StringMessages extends com.sap.sse.gwt.client.StringMessages {
     String signedUpSuccessfully(String username);
 
     String unknownErrorCreatingUser(String username);
+
+    String userAlreadyExists(String text);
+
+    String currentPassword();
+
+    String passwordSuccessfullyChanged();
+
+    String passwordDoesNotMeetRequirements();
+
+    String errorChangingPassword(String message);
     
 }

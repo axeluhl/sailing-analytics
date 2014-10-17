@@ -17,6 +17,8 @@ public interface UserManagementServiceAsync {
 
     void createSimpleUser(String name, String email, String password, AsyncCallback<UserDTO> callback);
 
+    void updateSimpleUserPassword(String name, String oldPassword, String newPassword, AsyncCallback<Void> callback);
+
     void getFilteredSortedUserList(String filter, AsyncCallback<Collection<UserDTO>> callback);
 
     void setRolesForUser(String username, Iterable<String> roles, AsyncCallback<SuccessInfo> callback);

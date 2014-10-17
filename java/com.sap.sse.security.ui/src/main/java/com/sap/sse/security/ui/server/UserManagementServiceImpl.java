@@ -32,12 +32,12 @@ import com.sap.sse.security.SecurityService;
 import com.sap.sse.security.SessionUtils;
 import com.sap.sse.security.Social;
 import com.sap.sse.security.shared.Account;
+import com.sap.sse.security.shared.Account.AccountType;
 import com.sap.sse.security.shared.DefaultRoles;
 import com.sap.sse.security.shared.SocialUserAccount;
 import com.sap.sse.security.shared.User;
 import com.sap.sse.security.shared.UserManagementException;
 import com.sap.sse.security.shared.UsernamePasswordAccount;
-import com.sap.sse.security.shared.Account.AccountType;
 import com.sap.sse.security.ui.oauth.client.CredentialDTO;
 import com.sap.sse.security.ui.oauth.client.SocialUserDTO;
 import com.sap.sse.security.ui.oauth.shared.OAuthException;
@@ -135,6 +135,11 @@ public class UserManagementServiceImpl extends RemoteServiceServlet implements U
             return null;
         }
         return createUserDTOFromUser(u);
+    }
+
+
+    @Override
+    public void updateSimpleUserPassword(String name, String oldPassword, String newPassword) throws UserManagementException {
     }
 
     @Override

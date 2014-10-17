@@ -18,6 +18,8 @@ public interface UserManagementService extends RemoteService {
     SuccessInfo login(String username, String password);
 
     UserDTO createSimpleUser(String name, String email, String password) throws UserManagementException;
+    
+    void updateSimpleUserPassword(String name, String oldPassword, String newPassword) throws UserManagementException;
 
     SuccessInfo deleteUser(String username);
 

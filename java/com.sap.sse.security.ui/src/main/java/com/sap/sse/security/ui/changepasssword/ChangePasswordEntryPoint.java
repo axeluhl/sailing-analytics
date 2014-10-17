@@ -1,4 +1,4 @@
-package com.sap.sse.security.ui.registration;
+package com.sap.sse.security.ui.changepasssword;
 
 import com.google.gwt.core.client.EntryPoint;
 import com.google.gwt.core.client.GWT;
@@ -22,12 +22,14 @@ import com.sap.sse.gwt.client.EntryPointHelper;
 import com.sap.sse.security.shared.UserManagementException;
 import com.sap.sse.security.ui.client.RemoteServiceMappingConstants;
 import com.sap.sse.security.ui.client.StringMessages;
+import com.sap.sse.security.ui.client.UserService;
+import com.sap.sse.security.ui.client.UserStatusEventHandler;
 import com.sap.sse.security.ui.client.component.NewAccountValidator;
 import com.sap.sse.security.ui.shared.UserDTO;
 import com.sap.sse.security.ui.shared.UserManagementService;
 import com.sap.sse.security.ui.shared.UserManagementServiceAsync;
 
-public class RegisterEntryPoint implements EntryPoint {
+public class ChangePasswordEntryPoint implements EntryPoint {
     private final UserManagementServiceAsync userManagementService = GWT.create(UserManagementService.class);
     private final StringMessages stringMessages = GWT.create(StringMessages.class);
 
@@ -36,6 +38,7 @@ public class RegisterEntryPoint implements EntryPoint {
         EntryPointHelper.registerASyncService((ServiceDefTarget) userManagementService,
                 RemoteServiceMappingConstants.WEB_CONTEXT_PATH,
                 RemoteServiceMappingConstants.userManagementServiceRemotePath);
+        UserService userService = new UserService(userManagementService);
         final NewAccountValidator validator = new NewAccountValidator(stringMessages);
         RootLayoutPanel rootPanel = RootLayoutPanel.get();
         DockLayoutPanel dockPanel = new DockLayoutPanel(Unit.PX);
@@ -43,14 +46,25 @@ public class RegisterEntryPoint implements EntryPoint {
         FlowPanel fp = new FlowPanel();
         final Label errorLabel = new Label();
         fp.add(errorLabel);
-        Label nameLabel = new Label(stringMessages.username());
+        final Label nameLabel = new Label(stringMessages.username());
         fp.add(nameLabel);
         final TextBox nameText = new TextBox();
+        nameText.setEnabled(false);
+        userService.addUserStatusEventHandler(new UserStatusEventHandler() {
+            @Override
+            public void onUserStatusChange(UserDTO user) {
+                if (user == null) {
+                    nameLabel.setText("");
+                } else {
+                    nameLabel.setText(user.getName());
+                }
+            }
+        });
         fp.add(nameText);
-        Label emailLabel = new Label(stringMessages.email());
-        fp.add(emailLabel);
-        final TextBox emailText = new TextBox();
-        fp.add(emailText);
+        Label currentPasswordLabel = new Label(stringMessages.currentPassword());
+        fp.add(currentPasswordLabel);
+        final TextBox currentPasswordText = new PasswordTextBox();
+        fp.add(currentPasswordText);
         Label pwLabel = new Label(stringMessages.password());
         fp.add(pwLabel);
         final PasswordTextBox pwText = new PasswordTextBox();
@@ -82,29 +96,23 @@ public class RegisterEntryPoint implements EntryPoint {
         formPanel.addSubmitHandler(new SubmitHandler() {
             @Override
             public void onSubmit(SubmitEvent event) {
-                userManagementService.createSimpleUser(nameText.getText(), emailText.getText(), pwText.getText(), new AsyncCallback<UserDTO>() {
+                userManagementService.updateSimpleUserPassword(nameText.getText(), currentPasswordText.getText(), pwText.getText(), new AsyncCallback<Void>() {
                     @Override
                     public void onFailure(Throwable caught) {
                         GWT.log(caught.getMessage());
                         if (caught instanceof UserManagementException) {
                             String message = ((UserManagementException) caught).getMessage();
-                            if (UserManagementException.USER_ALREADY_EXISTS.equals(message)) {
-                                Window.alert(stringMessages.userAlreadyExists(nameText.getText()));
+                            if (UserManagementException.PASSWORD_DOES_NOT_MEET_REQUIREMENTS.equals(message)) {
+                                Window.alert(stringMessages.passwordDoesNotMeetRequirements());
                             }
                         } else {
-                            Window.alert(stringMessages.errorCreatingUser(nameText.getText(), caught.getMessage()));
+                            Window.alert(stringMessages.errorChangingPassword(caught.getMessage()));
                         }
                     }
 
                     @Override
-                    public void onSuccess(UserDTO result) {
-                        if (result != null) {
-                            Window.alert(stringMessages.signedUpSuccessfully(result.getName()));
-                        }
-                        else {
-                            Window.alert(stringMessages.unknownErrorCreatingUser(nameText.getText()));
-                        }
-                        
+                    public void onSuccess(Void result) {
+                        Window.alert(stringMessages.passwordSuccessfullyChanged());
                     }
                 });
             }
