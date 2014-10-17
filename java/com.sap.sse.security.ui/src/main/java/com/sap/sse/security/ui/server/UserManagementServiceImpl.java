@@ -34,6 +34,7 @@ import com.sap.sse.security.Social;
 import com.sap.sse.security.shared.Account;
 import com.sap.sse.security.shared.Account.AccountType;
 import com.sap.sse.security.shared.DefaultRoles;
+import com.sap.sse.security.shared.MailException;
 import com.sap.sse.security.shared.SocialUserAccount;
 import com.sap.sse.security.shared.User;
 import com.sap.sse.security.shared.UserManagementException;
@@ -139,15 +140,16 @@ public class UserManagementServiceImpl extends RemoteServiceServlet implements U
 
 
     @Override
-    public void updateSimpleUserPassword(String username, String oldPassword, String newPassword) throws UserManagementException {
+    public void updateSimpleUserPassword(String username, String oldPassword, String newPassword) throws UserManagementException, MailException {
         final Subject subject = SecurityUtils.getSubject();
         if (subject.hasRole(DefaultRoles.ADMIN.getRolename()) || username.equals(SessionUtils.loadUsername())) {
             getSecurityService().updateSimpleUserPassword(username, oldPassword, newPassword);
+            getSecurityService().sendMail(username, "Password Changed", "Somebody changed your password. If that wasn't you, I'd be worried...");
         } else {
             throw new UserManagementException(UserManagementException.INVALID_CREDENTIALS);
         }
     }
-
+    
     @Override
     public void updateSimpleUserEmail(String username, String newEmail) throws UserManagementException {
         final Subject subject = SecurityUtils.getSubject();

@@ -4,13 +4,12 @@ import java.util.Collection;
 import java.util.Map;
 import java.util.Set;
 
-import javax.mail.MessagingException;
-import javax.mail.internet.AddressException;
 import javax.servlet.ServletContext;
 
 import org.apache.shiro.cache.CacheManager;
 import org.apache.shiro.mgt.SecurityManager;
 
+import com.sap.sse.security.shared.MailException;
 import com.sap.sse.security.shared.SocialUserAccount;
 import com.sap.sse.security.shared.User;
 import com.sap.sse.security.shared.UserManagementException;
@@ -66,6 +65,6 @@ public interface SecurityService {
 
     CacheManager getCacheManager();
     
-    void sendMail(String username, String subject, String body) throws AddressException, MessagingException;
+    void sendMail(String username, String subject, String body) throws MailException;
 
 }

@@ -15,7 +15,6 @@ import javax.mail.MessagingException;
 import javax.mail.PasswordAuthentication;
 import javax.mail.Session;
 import javax.mail.Transport;
-import javax.mail.internet.AddressException;
 import javax.mail.internet.InternetAddress;
 import javax.mail.internet.MimeMessage;
 import javax.servlet.Filter;
@@ -63,6 +62,7 @@ import org.scribe.oauth.OAuthService;
 import com.google.gwt.user.server.rpc.RemoteServiceServlet;
 import com.sap.sse.security.shared.Account.AccountType;
 import com.sap.sse.security.shared.DefaultRoles;
+import com.sap.sse.security.shared.MailException;
 import com.sap.sse.security.shared.SocialUserAccount;
 import com.sap.sse.security.shared.User;
 import com.sap.sse.security.shared.UserManagementException;
@@ -134,21 +134,26 @@ public class SecurityServiceImpl extends RemoteServiceServlet implements Securit
     }
 
     @Override
-    public void sendMail(String username, String subject, String body) throws AddressException, MessagingException {
+    public void sendMail(String username, String subject, String body) throws MailException {
         final User user = getUserByName(username);
         if (user != null) {
             final String toAddress = user.getEmail();
             if (toAddress != null) {
                 Session session = Session.getInstance(this.mailProperties, new SMTPAuthenticator());
                 MimeMessage msg = new MimeMessage(session);
-                msg.setFrom(new InternetAddress("root@sapsailing.com"));
-                msg.setSubject(subject);
-                msg.setContent(body, "text/plain");
-                msg.addRecipient(RecipientType.TO, new InternetAddress(toAddress.trim()));
-                Transport ts = session.getTransport();
-                ts.connect();
-                ts.sendMessage(msg, msg.getRecipients(RecipientType.TO));
-                ts.close();
+                try {
+                    msg.setFrom(new InternetAddress(mailProperties.getProperty("mail.from", "root@sapsailing.com")));
+                    msg.setSubject(subject);
+                    msg.setContent(body, "text/plain");
+                    msg.addRecipient(RecipientType.TO, new InternetAddress(toAddress.trim()));
+                    Transport ts = session.getTransport();
+                    ts.connect();
+                    ts.sendMessage(msg, msg.getRecipients(RecipientType.TO));
+                    ts.close();
+                } catch (MessagingException e) {
+                    logger.log(Level.SEVERE, "Error trying to send mail to user "+username+" with e-mail address "+toAddress, e);
+                    throw new MailException(e.getMessage());
+                }
             }
         }
     }

@@ -4,6 +4,7 @@ import java.util.Collection;
 import java.util.Map;
 
 import com.google.gwt.user.client.rpc.RemoteService;
+import com.sap.sse.security.shared.MailException;
 import com.sap.sse.security.shared.UserManagementException;
 import com.sap.sse.security.ui.oauth.client.CredentialDTO;
 import com.sap.sse.security.ui.oauth.shared.OAuthException;
@@ -19,7 +20,7 @@ public interface UserManagementService extends RemoteService {
 
     UserDTO createSimpleUser(String name, String email, String password) throws UserManagementException;
     
-    void updateSimpleUserPassword(String name, String oldPassword, String newPassword) throws UserManagementException;
+    void updateSimpleUserPassword(String name, String oldPassword, String newPassword) throws UserManagementException, MailException;
 
     void updateSimpleUserEmail(String username, String newEmail) throws UserManagementException;
 
