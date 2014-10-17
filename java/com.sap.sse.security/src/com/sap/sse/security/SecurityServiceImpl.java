@@ -61,6 +61,7 @@ import org.scribe.model.Token;
 import org.scribe.oauth.OAuthService;
 
 import com.google.gwt.user.server.rpc.RemoteServiceServlet;
+import com.sap.sse.security.shared.Account.AccountType;
 import com.sap.sse.security.shared.DefaultRoles;
 import com.sap.sse.security.shared.SocialUserAccount;
 import com.sap.sse.security.shared.User;
@@ -198,14 +199,42 @@ public class SecurityServiceImpl extends RemoteServiceServlet implements Securit
         if (store.getUserByName(name) != null) {
             throw new UserManagementException(UserManagementException.USER_ALREADY_EXISTS);
         }
-        if (name == null || password == null || name.length() < 3 || password.length() < 5) {
+        if (name == null || name.length() < 3) {
+            throw new UserManagementException(UserManagementException.USERNAME_DOES_NOT_MEET_REQUIREMENTS);
+        } else if (password == null || password.length() < 5) {
+            throw new UserManagementException(UserManagementException.PASSWORD_DOES_NOT_MEET_REQUIREMENTS);
+        }
+        RandomNumberGenerator rng = new SecureRandomNumberGenerator();
+        Object salt = rng.nextBytes();
+        String hashedPasswordBase64 = hashPassword(password, salt);
+        UsernamePasswordAccount upa = new UsernamePasswordAccount(name, hashedPasswordBase64, salt);
+        return store.createUser(name, email, upa);
+    }
+
+    @Override
+    public void updateSimpleUserPassword(String name, String oldPassword, String newPassword) throws UserManagementException {
+        final User user = store.getUserByName(name);
+        if (user == null) {
+            throw new UserManagementException(UserManagementException.USER_DOES_NOT_EXIST);
+        }
+        if (newPassword == null || newPassword.length() < 5) {
+            throw new UserManagementException(UserManagementException.PASSWORD_DOES_NOT_MEET_REQUIREMENTS);
+        }
+        UsernamePasswordAccount account = (UsernamePasswordAccount) user.getAccount(AccountType.USERNAME_PASSWORD);
+        String hashedOldPassword = hashPassword(oldPassword, account.getSalt());
+        if (!hashedOldPassword.equals(account.getSaltedPassword())) {
             throw new UserManagementException(UserManagementException.INVALID_CREDENTIALS);
         }
         RandomNumberGenerator rng = new SecureRandomNumberGenerator();
         Object salt = rng.nextBytes();
-        String hashedPasswordBase64 = new Sha256Hash(password, salt, 1024).toBase64();
-        UsernamePasswordAccount upa = new UsernamePasswordAccount(name, hashedPasswordBase64, salt);
-        return store.createUser(name, email, upa);
+        String hashedPasswordBase64 = hashPassword(newPassword, salt);
+        account.setSalt(salt);
+        account.setSaltedPassword(hashedPasswordBase64);
+        store.updateUser(user);
+    }
+
+    protected String hashPassword(String password, Object salt) {
+        return new Sha256Hash(password, salt, 1024).toBase64();
     }
 
     @Override

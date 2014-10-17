@@ -76,7 +76,7 @@ public class LoginEntryPoint extends AbstractEntryPoint {
                             if (!result.getRedirectURL().equals("")) {
                                 Window.Location.replace(result.getRedirectURL());
                             } else  {
-                                Window.alert(stringMessages.loggedIn());
+                                Window.alert(stringMessages.loggedIn(result.getUserDTO().getName()));
                             }
                         } else {
                             Window.alert(result.getMessage());

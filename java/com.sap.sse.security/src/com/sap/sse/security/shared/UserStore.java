@@ -14,6 +14,8 @@ public interface UserStore {
 
     User createUser(String name, String email, Account... accounts) throws UserManagementException;
 
+    void updateUser(User user);
+
     Set<String> getRolesFromUser(String username) throws UserManagementException;
 
     void addRoleForUser(String name, String role) throws UserManagementException;
@@ -31,4 +33,5 @@ public interface UserStore {
     public Map<String, Object> getAllSettings();
 
     public Map<String, Class<?>> getAllSettingTypes();
+
 }

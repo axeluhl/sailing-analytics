@@ -10,6 +10,7 @@ import com.google.gwt.user.client.ui.ScrollPanel;
 import com.google.gwt.user.client.ui.TabLayoutPanel;
 import com.sap.sse.gwt.client.AbstractEntryPoint;
 import com.sap.sse.gwt.client.EntryPointHelper;
+import com.sap.sse.security.shared.DefaultRoles;
 import com.sap.sse.security.ui.client.RemoteServiceMappingConstants;
 import com.sap.sse.security.ui.client.Resources;
 import com.sap.sse.security.ui.client.StringMessages;
@@ -42,7 +43,7 @@ public class UserManagementEntryPoint extends AbstractEntryPoint {
         userService.addUserStatusEventHandler(new UserStatusEventHandler() {
             @Override
             public void onUserStatusChange(UserDTO user) {
-                if (user == null && UserManagementEntryPoint.this.user != null) {
+                if (hasRequiredRole(user) != hasRequiredRole(UserManagementEntryPoint.this.user)) {
                     Window.Location.reload();
                 }
                 UserManagementEntryPoint.this.user = user;
@@ -56,5 +57,9 @@ public class UserManagementEntryPoint extends AbstractEntryPoint {
         RootPanel.get().add(new LoginPanel(Resources.INSTANCE.css(), userService));
         setTabPanelSize(center, ""+Window.getClientWidth()+"px", ""+Window.getClientHeight()+"px");
     }
-    
+
+    private Object hasRequiredRole(UserDTO user) {
+        return user != null && user.hasRole(DefaultRoles.ADMIN.name());
+    }
+
 }

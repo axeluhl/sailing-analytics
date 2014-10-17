@@ -4,6 +4,17 @@
 	xsi:schemaLocation="http://java.sun.com/xml/ns/javaee http://java.sun.com/xml/ns/javaee/web-app_2_5.xsd"
 	version="2.5">
 
+	<!-- Disable directory listing: -->
+	<servlet>
+		<servlet-name>default</servlet-name>
+		<servlet-class>org.eclipse.jetty.servlet.DefaultServlet
+		</servlet-class>
+		<init-param>
+			<param-name>dirAllowed</param-name>
+			<param-value>false</param-value>
+		</init-param>
+	</servlet>
+    
 	<!-- Apache Shiro -->
 	<context-param>
 		<param-name>shiroEnvironmentClass</param-name>
@@ -59,5 +70,6 @@
 		<url-pattern>/com.sap.sse.security.ui.OAuthLogin/remote_logging</url-pattern>
 		<url-pattern>/com.sap.sse.security.ui.Login/remote_logging</url-pattern>
 		<url-pattern>/com.sap.sse.security.ui.UserManagement/remote_logging</url-pattern>
+		<url-pattern>/com.sap.sse.security.ui.ChangePassword/remote_logging</url-pattern>
 	</servlet-mapping>
 </web-app>

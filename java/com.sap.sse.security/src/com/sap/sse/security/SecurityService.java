@@ -38,6 +38,8 @@ public interface SecurityService {
 
     User createSimpleUser(String username, String email, String password) throws UserManagementException;
 
+    void updateSimpleUserPassword(String name, String oldPassword, String newPassword) throws UserManagementException;
+
     User createSocialUser(String username, SocialUserAccount socialUserAccount) throws UserManagementException;
 
     void deleteUser(String username) throws UserManagementException;

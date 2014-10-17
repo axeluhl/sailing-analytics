@@ -78,6 +78,12 @@ public class UserStoreImpl implements UserStore {
     }
 
     @Override
+    public void updateUser(User user) {
+        // TODO Auto-generated method stub
+        
+    }
+
+    @Override
     public Collection<User> getUserCollection() {
         return new ArrayList<User>(users.values());
     }

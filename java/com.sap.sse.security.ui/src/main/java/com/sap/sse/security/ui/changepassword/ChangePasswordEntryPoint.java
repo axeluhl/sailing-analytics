@@ -1,13 +1,16 @@
-package com.sap.sse.security.ui.changepasssword;
+package com.sap.sse.security.ui.changepassword;
 
 import com.google.gwt.core.client.EntryPoint;
 import com.google.gwt.core.client.GWT;
 import com.google.gwt.dom.client.Style.Unit;
+import com.google.gwt.event.dom.client.ClickEvent;
+import com.google.gwt.event.dom.client.ClickHandler;
 import com.google.gwt.event.dom.client.KeyUpEvent;
 import com.google.gwt.event.dom.client.KeyUpHandler;
 import com.google.gwt.user.client.Window;
 import com.google.gwt.user.client.rpc.AsyncCallback;
 import com.google.gwt.user.client.rpc.ServiceDefTarget;
+import com.google.gwt.user.client.ui.Button;
 import com.google.gwt.user.client.ui.DockLayoutPanel;
 import com.google.gwt.user.client.ui.FlowPanel;
 import com.google.gwt.user.client.ui.FormPanel;
@@ -38,7 +41,7 @@ public class ChangePasswordEntryPoint implements EntryPoint {
         EntryPointHelper.registerASyncService((ServiceDefTarget) userManagementService,
                 RemoteServiceMappingConstants.WEB_CONTEXT_PATH,
                 RemoteServiceMappingConstants.userManagementServiceRemotePath);
-        UserService userService = new UserService(userManagementService);
+        final UserService userService = new UserService(userManagementService);
         final NewAccountValidator validator = new NewAccountValidator(stringMessages);
         RootLayoutPanel rootPanel = RootLayoutPanel.get();
         DockLayoutPanel dockPanel = new DockLayoutPanel(Unit.PX);
@@ -54,9 +57,9 @@ public class ChangePasswordEntryPoint implements EntryPoint {
             @Override
             public void onUserStatusChange(UserDTO user) {
                 if (user == null) {
-                    nameLabel.setText("");
+                    nameText.setText("");
                 } else {
-                    nameLabel.setText(user.getName());
+                    nameText.setText(user.getName());
                 }
             }
         });
@@ -73,7 +76,7 @@ public class ChangePasswordEntryPoint implements EntryPoint {
         fp.add(pw2Label);
         final PasswordTextBox pw2Text = new PasswordTextBox();
         fp.add(pw2Text);
-        final SubmitButton submit = new SubmitButton(stringMessages.signUp());
+        final SubmitButton submit = new SubmitButton(stringMessages.changePassword());
         fp.add(submit);
         KeyUpHandler keyUpHandler = new KeyUpHandler() {
             @Override
@@ -104,6 +107,10 @@ public class ChangePasswordEntryPoint implements EntryPoint {
                             String message = ((UserManagementException) caught).getMessage();
                             if (UserManagementException.PASSWORD_DOES_NOT_MEET_REQUIREMENTS.equals(message)) {
                                 Window.alert(stringMessages.passwordDoesNotMeetRequirements());
+                            } else if (UserManagementException.INVALID_CREDENTIALS.equals(message)) {
+                                Window.alert(stringMessages.invalidCredentials());
+                            } else {
+                                Window.alert(stringMessages.errorChangingPassword(caught.getMessage()));
                             }
                         } else {
                             Window.alert(stringMessages.errorChangingPassword(caught.getMessage()));
@@ -117,6 +124,15 @@ public class ChangePasswordEntryPoint implements EntryPoint {
                 });
             }
         });
+        final Button logout = new Button(stringMessages.signOut());
+        logout.addClickHandler(new ClickHandler() {
+            @Override
+            public void onClick(ClickEvent event) {
+                userService.logout();
+                Window.Location.reload();
+            }
+        });
+        fp.add(logout);
         formPanel.add(fp);
         dockPanel.add(formPanel);
     }

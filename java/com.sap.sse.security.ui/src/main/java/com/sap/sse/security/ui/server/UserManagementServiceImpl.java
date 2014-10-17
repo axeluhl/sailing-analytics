@@ -140,6 +140,7 @@ public class UserManagementServiceImpl extends RemoteServiceServlet implements U
 
     @Override
     public void updateSimpleUserPassword(String name, String oldPassword, String newPassword) throws UserManagementException {
+        getSecurityService().updateSimpleUserPassword(name, oldPassword, newPassword);
     }
 
     @Override
