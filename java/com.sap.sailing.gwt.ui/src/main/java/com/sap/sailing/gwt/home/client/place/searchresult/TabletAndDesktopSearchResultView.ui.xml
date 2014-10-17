@@ -3,8 +3,7 @@
     xmlns:s="urn:import:com.sap.sailing.gwt.home.client.shared"
     xmlns:p="urn:import:com.sap.sailing.gwt.home.client.place.event"
 	xmlns:g="urn:import:com.google.gwt.user.client.ui">
-	<ui:with field="res" type="com.sap.sailing.gwt.home.client.HomeResources" />
- 
+	<ui:with field="res" type="com.sap.sailing.gwt.common.client.SharedResources" />
     <g:HTMLPanel>
 		<s:searchresult.SearchResult ui:field='searchResult'/>
 	</g:HTMLPanel>

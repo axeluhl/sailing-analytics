@@ -37,6 +37,6 @@ public class AppPreferences {
     }
     
     public void setServerURL(String serverUrl) {
-        preferences.edit().putString(context.getString(R.string.preference_server_url_key), serverUrl);
+        preferences.edit().putString(context.getString(R.string.preference_server_url_key), serverUrl).commit();
     }
 }

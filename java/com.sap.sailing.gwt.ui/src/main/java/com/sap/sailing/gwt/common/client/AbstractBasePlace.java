@@ -1,4 +1,4 @@
-package com.sap.sailing.gwt.home.client;
+package com.sap.sailing.gwt.common.client;
 
 import java.util.Arrays;
 import java.util.HashMap;

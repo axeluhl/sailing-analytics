@@ -15,6 +15,7 @@ import com.google.gwt.user.client.ui.FlowPanel;
 import com.google.gwt.user.client.ui.Label;
 import com.google.gwt.user.client.ui.MenuBar;
 import com.google.gwt.user.client.ui.SimplePanel;
+import com.google.gwt.user.client.ui.UIObject;
 import com.sap.sailing.domain.common.LeaderboardNameConstants;
 import com.sap.sailing.domain.common.RaceIdentifier;
 import com.sap.sailing.domain.common.RegattaAndRaceIdentifier;
@@ -36,6 +37,7 @@ import com.sap.sailing.gwt.ui.client.RegattasDisplayer;
 import com.sap.sailing.gwt.ui.client.SailingServiceAsync;
 import com.sap.sailing.gwt.ui.client.StringMessages;
 import com.sap.sailing.gwt.ui.client.media.MediaPlayerManagerComponent;
+import com.sap.sailing.gwt.ui.client.media.PopupPositionProvider;
 import com.sap.sailing.gwt.ui.client.shared.charts.MultiCompetitorRaceChart;
 import com.sap.sailing.gwt.ui.client.shared.charts.WindChart;
 import com.sap.sailing.gwt.ui.client.shared.charts.WindChartSettings;
@@ -68,7 +70,7 @@ import com.sap.sse.security.ui.client.UserService;
  * @author Frank Mittag, Axel Uhl (d043530)
  *
  */
-public class RaceBoardPanel extends SimplePanel implements RegattasDisplayer, RaceSelectionChangeListener, LeaderboardUpdateListener {
+public class RaceBoardPanel extends SimplePanel implements RegattasDisplayer, RaceSelectionChangeListener, LeaderboardUpdateListener, PopupPositionProvider {
     private final SailingServiceAsync sailingService;
     private final MediaServiceAsync mediaService;
     private final EventDTO event;
@@ -111,7 +113,6 @@ public class RaceBoardPanel extends SimplePanel implements RegattasDisplayer, Ra
     private boolean currentRaceHasBeenSelectedOnce;
     
     /**
-     * @param userService TODO
      * @param event
      *            an optional event that can be used for "back"-navigation in case the race board shows a race in the
      *            context of an event; may be <code>null</code>.
@@ -210,7 +211,9 @@ public class RaceBoardPanel extends SimplePanel implements RegattasDisplayer, Ra
         windChart.getEntryWidget().setTitle(stringMessages.windChart());
         components.add(windChart);
         boolean autoSelectMedia = getConfiguration().isAutoSelectMedia();
-        MediaPlayerManagerComponent mediaPlayerManagerComponent = new MediaPlayerManagerComponent(selectedRaceIdentifier, raceTimesInfoProvider, timer, mediaService, userService, stringMessages, errorReporter, userAgent, autoSelectMedia);
+        MediaPlayerManagerComponent mediaPlayerManagerComponent = new MediaPlayerManagerComponent(
+                selectedRaceIdentifier, raceTimesInfoProvider, timer, mediaService, userService, stringMessages,
+                errorReporter, userAgent, this, autoSelectMedia);
         leaderboardAndMapViewer = new SideBySideComponentViewer(leaderboardPanel, raceMap, mediaPlayerManagerComponent, components, stringMessages);
         componentViewers.add(leaderboardAndMapViewer);
         for (ComponentViewer componentViewer : componentViewers) {
@@ -377,7 +380,17 @@ public class RaceBoardPanel extends SimplePanel implements RegattasDisplayer, Ra
             currentRaceHasBeenSelectedOnce = true;
         }
     }
-    
+
+    @Override
+    public UIObject getXPositionUiObject() {
+        return timePanel;
+    }
+
+    @Override
+    public UIObject getYPositionUiObject() {
+        return timePanel;
+    }
+
     private Label computeRaceInformation(RaceColumnDTO raceColumn, FleetDTO fleet) {
         Label raceInformationLabel = new Label();
         raceInformationLabel.setStyleName("Race-Time-Label");
@@ -385,5 +398,6 @@ public class RaceBoardPanel extends SimplePanel implements RegattasDisplayer, Ra
         raceInformationLabel.setText(formatter.format(raceColumn.getStartDate(fleet)));
         return raceInformationLabel;
     }
+
 }
 

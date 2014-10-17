@@ -1,4 +1,4 @@
-package com.sap.sailing.gwt.home.client;
+package com.sap.sailing.gwt.common.client;
 
 import com.google.gwt.core.client.GWT;
 import com.google.gwt.resources.client.ClientBundle;

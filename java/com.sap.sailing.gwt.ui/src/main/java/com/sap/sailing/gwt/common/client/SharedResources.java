@@ -1,12 +1,12 @@
-package com.sap.sailing.gwt.home.client;
+package com.sap.sailing.gwt.common.client;
 
 import com.google.gwt.core.client.GWT;
 import com.google.gwt.resources.client.ClientBundle;
 import com.google.gwt.resources.client.CssResource;
 import com.google.gwt.resources.client.CssResource.Shared;
 
-public interface HomeResources extends ClientBundle {
-    public static final HomeResources INSTANCE = GWT.create(HomeResources.class);
+public interface SharedResources extends ClientBundle {
+    public static final SharedResources INSTANCE = GWT.create(SharedResources.class);
 
     @Source("com/sap/sailing/gwt/home/main.css")
     MainCss mainCss();
