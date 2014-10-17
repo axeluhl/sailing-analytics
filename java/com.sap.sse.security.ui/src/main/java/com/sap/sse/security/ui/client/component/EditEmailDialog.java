@@ -27,6 +27,11 @@ public class EditEmailDialog extends DataEntryDialog<String> {
         return result;
     }
 
+    @Override
+    public void show() {
+        super.show();
+        emailTextBox.setFocus(true);
+    }
 
     @Override
     protected String getResult() {

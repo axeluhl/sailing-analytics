@@ -97,7 +97,7 @@ public class UserDetailsView extends FlowPanel {
             public void onClick(ClickEvent event) {
                 new EditEmailDialog(stringMessages, UserDetailsView.this.user, new DialogCallback<String>() {
                     @Override
-                    public void ok(String newEmail) {
+                    public void ok(final String newEmail) {
                         userManagementService.updateSimpleUserEmail(UserDetailsView.this.user.getName(), newEmail, new MarkedAsyncCallback<Void>(
                                 new AsyncCallback<Void>() {
                                     @Override
@@ -107,12 +107,13 @@ public class UserDetailsView extends FlowPanel {
 
                                     @Override
                                     public void onSuccess(Void result) {
+                                        emailLabel.setText(newEmail);
                                         Window.alert(stringMessages.successfullyUpdatedEmail());
                                     }
                                 }));
                     }
                     @Override public void cancel() {}
-                });
+                }).show();
             }
         });
         Label title = new Label(stringMessages.userDetails());
@@ -132,6 +133,7 @@ public class UserDetailsView extends FlowPanel {
         fp.add(emailPanel);
         emailPanel.add(new Label(stringMessages.email() + ": "));
         emailPanel.add(emailLabel);
+        emailPanel.add(changeEmail);
         accountPanels = new VerticalPanel();
         fp.add(accountPanels);
         decoratorPanel.setWidget(fp);
