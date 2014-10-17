@@ -117,7 +117,7 @@
 	</modules>
 	
 	<properties>
-		<tycho-version>0.20.0</tycho-version>
+		<tycho-version>0.21.0</tycho-version>
         
 		<!--
           QUESTION: Which properties or settings are system dependent and differ across
@@ -280,8 +280,8 @@
 				<artifactId>tycho-compiler-plugin</artifactId>
                 <version>${tycho-version}</version>
 				<configuration>
-					<source>1.7</source>
-					<target>1.7</target>
+					<source>1.8</source>
+					<target>1.8</target>
 				</configuration>
 			</plugin>
 		</plugins>
