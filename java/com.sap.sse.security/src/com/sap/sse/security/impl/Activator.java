@@ -14,8 +14,8 @@ import org.osgi.util.tracker.ServiceTracker;
 
 import com.sap.sse.security.SecurityService;
 import com.sap.sse.security.SecurityServiceImpl;
+import com.sap.sse.security.UserStore;
 import com.sap.sse.security.UsernamePasswordRealm;
-import com.sap.sse.security.shared.UserStore;
 
 public class Activator implements BundleActivator {
     private static final Logger logger = Logger.getLogger(Activator.class.getName());

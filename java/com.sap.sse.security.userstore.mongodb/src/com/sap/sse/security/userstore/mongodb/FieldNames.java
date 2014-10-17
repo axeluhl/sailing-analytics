@@ -6,7 +6,9 @@ public class FieldNames {
         NAME,
         EMAIL,
         ACCOUNTS,
-        ROLES;
+        ROLES,
+        EMAIL_VALIDATED,
+        VALIDATION_SECRET;
     }
     
     public static enum Settings {

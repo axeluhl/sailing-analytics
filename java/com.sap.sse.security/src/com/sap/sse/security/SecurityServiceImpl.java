@@ -5,6 +5,7 @@ import java.util.Collection;
 import java.util.Map;
 import java.util.Map.Entry;
 import java.util.Properties;
+import java.util.Random;
 import java.util.Set;
 import java.util.UUID;
 import java.util.logging.Level;
@@ -64,9 +65,7 @@ import com.sap.sse.security.shared.Account.AccountType;
 import com.sap.sse.security.shared.DefaultRoles;
 import com.sap.sse.security.shared.MailException;
 import com.sap.sse.security.shared.SocialUserAccount;
-import com.sap.sse.security.shared.User;
 import com.sap.sse.security.shared.UserManagementException;
-import com.sap.sse.security.shared.UserStore;
 import com.sap.sse.security.shared.UsernamePasswordAccount;
 
 public class SecurityServiceImpl extends RemoteServiceServlet implements SecurityService {
@@ -101,7 +100,7 @@ public class SecurityServiceImpl extends RemoteServiceServlet implements Securit
                 createSimpleUser("admin", "nobody@sapsailing.com", "admin");
                 addRoleForUser("admin", DefaultRoles.ADMIN.getRolename());
                 addRoleForUser("admin", "moderator");
-            } catch (UserManagementException e) {
+            } catch (UserManagementException | MailException e) {
                 logger.log(Level.SEVERE, "Exception while creating default admin user", e);
             }
         }
@@ -158,6 +157,16 @@ public class SecurityServiceImpl extends RemoteServiceServlet implements Securit
             }
         }
     }
+    
+    @Override
+    public void resetPassword(String username) throws UserManagementException, MailException {
+        byte[] randomBytes = new byte[16];
+        new Random().nextBytes(randomBytes);
+        final String newPassword = new Sha256Hash(randomBytes).toBase64();
+        updateSimpleUserPassword(username, newPassword);
+        sendMail(username, "Password Reset", "Your new password for your username "+username+
+                " is \n    "+newPassword+"\nPlease change after next sign-in.");
+    }
 
     @Override
     public SecurityManager getSecurityManager() {
@@ -201,7 +210,7 @@ public class SecurityServiceImpl extends RemoteServiceServlet implements Securit
     }
 
     @Override
-    public User createSimpleUser(String name, String email, String password) throws UserManagementException {
+    public User createSimpleUser(String name, String email, String password) throws UserManagementException, MailException {
         if (store.getUserByName(name) != null) {
             throw new UserManagementException(UserManagementException.USER_ALREADY_EXISTS);
         }
@@ -214,44 +223,63 @@ public class SecurityServiceImpl extends RemoteServiceServlet implements Securit
         Object salt = rng.nextBytes();
         String hashedPasswordBase64 = hashPassword(password, salt);
         UsernamePasswordAccount upa = new UsernamePasswordAccount(name, hashedPasswordBase64, salt);
-        return store.createUser(name, email, upa);
+        final User result = store.createUser(name, email, upa);
+        startEmailValidation(result);
+        return result;
     }
 
     @Override
-    public void updateSimpleUserPassword(String username, String oldPassword, String newPassword) throws UserManagementException, MailException {
+    public void updateSimpleUserPassword(String username, String newPassword) throws UserManagementException, MailException {
         final User user = store.getUserByName(username);
         if (user == null) {
             throw new UserManagementException(UserManagementException.USER_DOES_NOT_EXIST);
         }
+        if (!user.isEmailValidated()) {
+            throw new UserManagementException(UserManagementException.CANNOT_RESET_PASSWORD_WITHOUT_VALIDATED_EMAIL);
+        }
         if (newPassword == null || newPassword.length() < 5) {
             throw new UserManagementException(UserManagementException.PASSWORD_DOES_NOT_MEET_REQUIREMENTS);
         }
-        final Subject subject = SecurityUtils.getSubject();
         // for non-admins, check that the old password is correct
         final UsernamePasswordAccount account = (UsernamePasswordAccount) user.getAccount(AccountType.USERNAME_PASSWORD);
-        if (!subject.hasRole(DefaultRoles.ADMIN.getRolename())) {
-            String hashedOldPassword = hashPassword(oldPassword, account.getSalt());
-            if (!hashedOldPassword.equals(account.getSaltedPassword())) {
-                throw new UserManagementException(UserManagementException.INVALID_CREDENTIALS);
-            }
-        }
         RandomNumberGenerator rng = new SecureRandomNumberGenerator();
         Object salt = rng.nextBytes();
         String hashedPasswordBase64 = hashPassword(newPassword, salt);
         account.setSalt(salt);
         account.setSaltedPassword(hashedPasswordBase64);
         store.updateUser(user);
-        sendMail(username, "Password Changed", "Somebody changed your password for your user named "+username+".\nIf that wasn't you, I'd be worried...");
     }
 
     @Override
-    public void updateSimpleUserEmail(String username, String newEmail) throws UserManagementException {
+    public boolean checkPassword(String username, String password) throws UserManagementException {
+        final User user = store.getUserByName(username);
+        if (user == null) {
+            throw new UserManagementException(UserManagementException.USER_DOES_NOT_EXIST);
+        }
+        final UsernamePasswordAccount account = (UsernamePasswordAccount) user.getAccount(AccountType.USERNAME_PASSWORD);
+        String hashedOldPassword = hashPassword(password, account.getSalt());
+        return hashedOldPassword.equals(account.getSaltedPassword());
+    }
+    
+    @Override
+    public void updateSimpleUserEmail(String username, String newEmail) throws UserManagementException, MailException {
         final User user = store.getUserByName(username);
         if (user == null) {
             throw new UserManagementException(UserManagementException.USER_DOES_NOT_EXIST);
         }
         user.setEmail(newEmail);
+        startEmailValidation(user);
         store.updateUser(user);
+    }
+
+    /**
+     * {@link User#startEmailValidation() Triggers} e-mail validation for the <code>user</code> object and
+     * sends out a URL to the user's e-mail that has the validation secret ready for validation by clicking.
+     */
+    private void startEmailValidation(User user) throws MailException {
+        String secret = user.startEmailValidation();
+        sendMail(user.getName(), "e-Mail Validation", "Please click on the link below to validate your e-mail address.\n   "+
+                "http://127.0.0.1:8888/security/ui/EmailValidation.html?gwt.codesvr=127.0.0.1:9997&v="+secret);
     }
 
     protected String hashPassword(String password, Object salt) {

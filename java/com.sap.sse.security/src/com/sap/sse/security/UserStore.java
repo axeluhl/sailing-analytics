@@ -1,8 +1,11 @@
-package com.sap.sse.security.shared;
+package com.sap.sse.security;
 
 import java.util.Collection;
 import java.util.Map;
 import java.util.Set;
+
+import com.sap.sse.security.shared.Account;
+import com.sap.sse.security.shared.UserManagementException;
 
 public interface UserStore {
 

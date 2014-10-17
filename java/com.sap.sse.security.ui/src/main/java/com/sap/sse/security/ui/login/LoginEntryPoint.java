@@ -4,11 +4,14 @@ import java.util.Collections;
 
 import com.google.gwt.core.client.GWT;
 import com.google.gwt.dom.client.Style.Unit;
+import com.google.gwt.event.dom.client.ClickEvent;
+import com.google.gwt.event.dom.client.ClickHandler;
 import com.google.gwt.safehtml.shared.SafeHtmlBuilder;
 import com.google.gwt.user.client.Window;
 import com.google.gwt.user.client.rpc.AsyncCallback;
 import com.google.gwt.user.client.rpc.ServiceDefTarget;
 import com.google.gwt.user.client.ui.Anchor;
+import com.google.gwt.user.client.ui.Button;
 import com.google.gwt.user.client.ui.DockLayoutPanel;
 import com.google.gwt.user.client.ui.FlowPanel;
 import com.google.gwt.user.client.ui.FormPanel;
@@ -21,6 +24,8 @@ import com.google.gwt.user.client.ui.SubmitButton;
 import com.google.gwt.user.client.ui.TextBox;
 import com.sap.sse.gwt.client.AbstractEntryPoint;
 import com.sap.sse.gwt.client.EntryPointHelper;
+import com.sap.sse.gwt.client.async.MarkedAsyncCallback;
+import com.sap.sse.security.shared.UserManagementException;
 import com.sap.sse.security.ui.client.EntryPointLinkFactory;
 import com.sap.sse.security.ui.client.RemoteServiceMappingConstants;
 import com.sap.sse.security.ui.client.StringMessages;
@@ -55,9 +60,34 @@ public class LoginEntryPoint extends AbstractEntryPoint {
         fp.add(pwLabel);
         final PasswordTextBox pwText = new PasswordTextBox();
         fp.add(pwText);
-        SubmitButton submit = new SubmitButton(stringMessages.signIn());
+        final SubmitButton submit = new SubmitButton(stringMessages.signIn());
         submit.ensureDebugId("login");
         fp.add(submit);
+        final Button passwordReset = new Button(stringMessages.resetPassword());
+        passwordReset.addClickHandler(new ClickHandler() {
+            @Override
+            public void onClick(ClickEvent event) {
+                userManagementService.resetPassword(nameText.getText(), new MarkedAsyncCallback<Void>(new AsyncCallback<Void>() {
+                    @Override
+                    public void onFailure(Throwable caught) {
+                        if (caught instanceof UserManagementException) {
+                            if (UserManagementException.CANNOT_RESET_PASSWORD_WITHOUT_VALIDATED_EMAIL.equals(caught.getMessage())) {
+                                Window.alert(stringMessages.cannotResetPasswordWithoutValidatedEmail(nameText.getText()));
+                            } else {
+                                Window.alert(stringMessages.errorDuringPasswordReset(caught.getMessage()));
+                            }
+                        } else {
+                            Window.alert(stringMessages.errorDuringPasswordReset(caught.getMessage()));
+                        }
+                    }
+
+                    @Override
+                    public void onSuccess(Void result) {
+                        Window.alert(stringMessages.newPasswordSent(nameText.getText()));
+                    }
+                }));
+            }
+        });
         fp.add(new Anchor(new SafeHtmlBuilder().appendEscaped(stringMessages.signUp()).toSafeHtml(),
                 EntryPointLinkFactory.createRegistrationLink(Collections.<String, String> emptyMap())));
         FormPanel formPanel = new FormPanel();

@@ -17,9 +17,9 @@ import com.mongodb.DB;
 import com.mongodb.DBCollection;
 import com.mongodb.DBObject;
 import com.sap.sse.security.Social;
+import com.sap.sse.security.User;
 import com.sap.sse.security.shared.Account;
 import com.sap.sse.security.shared.SocialUserAccount;
-import com.sap.sse.security.shared.User;
 import com.sap.sse.security.shared.UsernamePasswordAccount;
 import com.sap.sse.security.shared.Account.AccountType;
 import com.sap.sse.security.userstore.mongodb.CollectionNames;
@@ -70,6 +70,8 @@ public class DomainObjectFactoryImpl implements DomainObjectFactory {
     private User loadUser(DBObject userDBObject) {
         String name = (String) userDBObject.get(FieldNames.User.NAME.name());
         String email = (String) userDBObject.get(FieldNames.User.EMAIL.name());
+        Boolean emailValidated = (Boolean) userDBObject.get(FieldNames.User.EMAIL_VALIDATED.name());
+        String validationSecret = (String) userDBObject.get(FieldNames.User.VALIDATION_SECRET.name());
         Set<String> roles = new HashSet<String>();
         BasicDBList rolesO = (BasicDBList) userDBObject.get(FieldNames.User.ROLES.name());
         if (rolesO != null){
@@ -79,7 +81,7 @@ public class DomainObjectFactoryImpl implements DomainObjectFactory {
         }
         DBObject accountsMap = (DBObject) userDBObject.get(FieldNames.User.ACCOUNTS.name());
         Map<AccountType, Account> accounts = createAccountMapFromdDBObject(accountsMap);
-        User result = new User(name, email, accounts.values());
+        User result = new User(name, email, emailValidated, validationSecret, accounts.values());
         for (String role : roles) {
             result.addRole(role);
         }

@@ -9,9 +9,9 @@ import org.junit.BeforeClass;
 import org.junit.Test;
 
 import com.sap.sse.security.SecurityServiceImpl;
+import com.sap.sse.security.UserStore;
 import com.sap.sse.security.UsernamePasswordRealm;
 import com.sap.sse.security.impl.Activator;
-import com.sap.sse.security.shared.UserStore;
 import com.sap.sse.security.userstore.mongodb.UserStoreImpl;
 
 public class LoginTest {

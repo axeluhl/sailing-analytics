@@ -11,7 +11,6 @@ import org.apache.shiro.mgt.SecurityManager;
 
 import com.sap.sse.security.shared.MailException;
 import com.sap.sse.security.shared.SocialUserAccount;
-import com.sap.sse.security.shared.User;
 import com.sap.sse.security.shared.UserManagementException;
 
 public interface SecurityService {
@@ -35,11 +34,11 @@ public interface SecurityService {
 
     void logout();
 
-    User createSimpleUser(String username, String email, String password) throws UserManagementException;
+    User createSimpleUser(String username, String email, String password) throws UserManagementException, MailException;
 
-    void updateSimpleUserPassword(String name, String oldPassword, String newPassword) throws UserManagementException, MailException;
+    void updateSimpleUserPassword(String name, String newPassword) throws UserManagementException, MailException;
 
-    void updateSimpleUserEmail(String username, String newEmail) throws UserManagementException;
+    void updateSimpleUserEmail(String username, String newEmail) throws UserManagementException, MailException;
 
     User createSocialUser(String username, SocialUserAccount socialUserAccount) throws UserManagementException;
 
@@ -66,5 +65,19 @@ public interface SecurityService {
     CacheManager getCacheManager();
     
     void sendMail(String username, String subject, String body) throws MailException;
+
+    /**
+     * Checks whether <code>password</code> is the correct password for the user identified by <code>username</code>
+     * 
+     * @throws UserManagementException
+     *             in a user by that name does not exist
+     */
+    boolean checkPassword(String username, String password) throws UserManagementException;
+
+    /**
+     * Generates a new random password for the user identified by <code>username</code> and sends it
+     * to the user's e-mail address.
+     */
+    void resetPassword(String username) throws UserManagementException, MailException;
 
 }

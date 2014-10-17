@@ -39,7 +39,6 @@ import org.scribe.model.Verifier;
 import org.scribe.oauth.OAuthService;
 
 import com.sap.sse.security.shared.SocialUserAccount;
-import com.sap.sse.security.shared.User;
 import com.sap.sse.security.shared.UserManagementException;
 // GWT has similar class. 
 
