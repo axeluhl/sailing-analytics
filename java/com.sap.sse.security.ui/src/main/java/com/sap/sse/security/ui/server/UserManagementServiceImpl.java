@@ -172,6 +172,11 @@ public class UserManagementServiceImpl extends RemoteServiceServlet implements U
     }
 
     @Override
+    public void validateEmail(String username, String validationSecret) throws UserManagementException {
+        getSecurityService().validateEmail(username, validationSecret);
+    }
+
+    @Override
     public Collection<UserDTO> getFilteredSortedUserList(String filter) {
         List<UserDTO> users = new ArrayList<>();
         for (User u : getSecurityService().getUserList()) {

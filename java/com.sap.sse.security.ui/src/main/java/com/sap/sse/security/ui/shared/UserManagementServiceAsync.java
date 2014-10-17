@@ -20,6 +20,8 @@ public interface UserManagementServiceAsync {
     void updateSimpleUserPassword(String name, String oldPassword, String newPassword, AsyncCallback<Void> callback);
 
     void resetPassword(String username, AsyncCallback<Void> callback);
+    
+    void validateEmail(String username, String validationSecret, AsyncCallback<Void> markedAsyncCallback);
 
     void updateSimpleUserEmail(String username, String newEmail, AsyncCallback<Void> callback);
 

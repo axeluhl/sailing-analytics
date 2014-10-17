@@ -80,4 +80,6 @@ public interface SecurityService {
      */
     void resetPassword(String username) throws UserManagementException, MailException;
 
+    boolean validateEmail(String username, String validationSecret) throws UserManagementException;
+
 }

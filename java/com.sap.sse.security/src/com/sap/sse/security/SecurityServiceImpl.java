@@ -225,6 +225,7 @@ public class SecurityServiceImpl extends RemoteServiceServlet implements Securit
         UsernamePasswordAccount upa = new UsernamePasswordAccount(name, hashedPasswordBase64, salt);
         final User result = store.createUser(name, email, upa);
         startEmailValidation(result);
+        store.updateUser(result);
         return result;
     }
 
@@ -271,6 +272,15 @@ public class SecurityServiceImpl extends RemoteServiceServlet implements Securit
         startEmailValidation(user);
         store.updateUser(user);
     }
+    
+    @Override
+    public boolean validateEmail(String username, String validationSecret) throws UserManagementException {
+        final User user = store.getUserByName(username);
+        if (user == null) {
+            throw new UserManagementException(UserManagementException.USER_DOES_NOT_EXIST);
+        }
+        return user.validate(validationSecret);
+    }
 
     /**
      * {@link User#startEmailValidation() Triggers} e-mail validation for the <code>user</code> object and
@@ -279,7 +289,7 @@ public class SecurityServiceImpl extends RemoteServiceServlet implements Securit
     private void startEmailValidation(User user) throws MailException {
         String secret = user.startEmailValidation();
         sendMail(user.getName(), "e-Mail Validation", "Please click on the link below to validate your e-mail address.\n   "+
-                "http://127.0.0.1:8888/security/ui/EmailValidation.html?gwt.codesvr=127.0.0.1:9997&v="+secret);
+                "http://127.0.0.1:8888/security/ui/EmailValidation.html?gwt.codesvr=127.0.0.1:9997&u="+user.getName()+"&v="+secret);
     }
 
     protected String hashPassword(String password, Object salt) {

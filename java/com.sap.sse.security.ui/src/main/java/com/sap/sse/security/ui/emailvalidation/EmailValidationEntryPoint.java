@@ -2,33 +2,15 @@ package com.sap.sse.security.ui.emailvalidation;
 
 import com.google.gwt.core.client.EntryPoint;
 import com.google.gwt.core.client.GWT;
-import com.google.gwt.dom.client.Style.Unit;
-import com.google.gwt.event.dom.client.ClickEvent;
-import com.google.gwt.event.dom.client.ClickHandler;
-import com.google.gwt.event.dom.client.KeyUpEvent;
-import com.google.gwt.event.dom.client.KeyUpHandler;
 import com.google.gwt.user.client.Window;
 import com.google.gwt.user.client.rpc.AsyncCallback;
 import com.google.gwt.user.client.rpc.ServiceDefTarget;
-import com.google.gwt.user.client.ui.Button;
-import com.google.gwt.user.client.ui.DockLayoutPanel;
-import com.google.gwt.user.client.ui.FlowPanel;
-import com.google.gwt.user.client.ui.FormPanel;
-import com.google.gwt.user.client.ui.FormPanel.SubmitEvent;
-import com.google.gwt.user.client.ui.FormPanel.SubmitHandler;
 import com.google.gwt.user.client.ui.Label;
-import com.google.gwt.user.client.ui.PasswordTextBox;
 import com.google.gwt.user.client.ui.RootLayoutPanel;
-import com.google.gwt.user.client.ui.SubmitButton;
-import com.google.gwt.user.client.ui.TextBox;
 import com.sap.sse.gwt.client.EntryPointHelper;
-import com.sap.sse.security.shared.UserManagementException;
+import com.sap.sse.gwt.client.async.MarkedAsyncCallback;
 import com.sap.sse.security.ui.client.RemoteServiceMappingConstants;
 import com.sap.sse.security.ui.client.StringMessages;
-import com.sap.sse.security.ui.client.UserService;
-import com.sap.sse.security.ui.client.UserStatusEventHandler;
-import com.sap.sse.security.ui.client.component.NewAccountValidator;
-import com.sap.sse.security.ui.shared.UserDTO;
 import com.sap.sse.security.ui.shared.UserManagementService;
 import com.sap.sse.security.ui.shared.UserManagementServiceAsync;
 
@@ -41,99 +23,21 @@ public class EmailValidationEntryPoint implements EntryPoint {
         EntryPointHelper.registerASyncService((ServiceDefTarget) userManagementService,
                 RemoteServiceMappingConstants.WEB_CONTEXT_PATH,
                 RemoteServiceMappingConstants.userManagementServiceRemotePath);
-        final UserService userService = new UserService(userManagementService);
-        final NewAccountValidator validator = new NewAccountValidator(stringMessages);
+        final String username = Window.Location.getParameter("u");
+        final String validationSecret = Window.Location.getParameter("v");
         RootLayoutPanel rootPanel = RootLayoutPanel.get();
-        DockLayoutPanel dockPanel = new DockLayoutPanel(Unit.PX);
-        rootPanel.add(dockPanel);
-        FlowPanel fp = new FlowPanel();
-        final Label errorLabel = new Label();
-        fp.add(errorLabel);
-        final Label nameLabel = new Label(stringMessages.username());
-        fp.add(nameLabel);
-        final TextBox nameText = new TextBox();
-        nameText.setEnabled(false);
-        userService.addUserStatusEventHandler(new UserStatusEventHandler() {
+        final Label resultLabel = new Label();
+        userManagementService.validateEmail(username, validationSecret, new MarkedAsyncCallback<Void>(new AsyncCallback<Void>() {
             @Override
-            public void onUserStatusChange(UserDTO user) {
-                if (user == null) {
-                    nameText.setText("");
-                } else {
-                    nameText.setText(user.getName());
-                }
+            public void onFailure(Throwable caught) {
+                resultLabel.setText(stringMessages.errorValidatingEmail(username, caught.getMessage()));
             }
-        });
-        fp.add(nameText);
-        Label currentPasswordLabel = new Label(stringMessages.currentPassword());
-        fp.add(currentPasswordLabel);
-        final TextBox currentPasswordText = new PasswordTextBox();
-        fp.add(currentPasswordText);
-        Label pwLabel = new Label(stringMessages.password());
-        fp.add(pwLabel);
-        final PasswordTextBox pwText = new PasswordTextBox();
-        fp.add(pwText);
-        Label pw2Label = new Label(stringMessages.passwordRepeat());
-        fp.add(pw2Label);
-        final PasswordTextBox pw2Text = new PasswordTextBox();
-        fp.add(pw2Text);
-        final SubmitButton submit = new SubmitButton(stringMessages.changePassword());
-        fp.add(submit);
-        KeyUpHandler keyUpHandler = new KeyUpHandler() {
-            @Override
-            public void onKeyUp(KeyUpEvent event) {
-                String errorMessage = validator.validateUsernameAndPassword(nameText.getText(), pwText.getText(), pw2Text.getText());
-                if (errorMessage == null) {
-                    errorLabel.setText("");
-                    submit.setEnabled(true);
-                } else {
-                    errorLabel.setText(errorMessage);
-                    submit.setEnabled(false);
-                }
-            }
-        };
-        keyUpHandler.onKeyUp(null); // enable/disable submit button and fill error label
-        nameText.addKeyUpHandler(keyUpHandler);
-        pwText.addKeyUpHandler(keyUpHandler);
-        pw2Text.addKeyUpHandler(keyUpHandler);
-        FormPanel formPanel = new FormPanel();
-        formPanel.addSubmitHandler(new SubmitHandler() {
-            @Override
-            public void onSubmit(SubmitEvent event) {
-                userManagementService.updateSimpleUserPassword(nameText.getText(), currentPasswordText.getText(), pwText.getText(), new AsyncCallback<Void>() {
-                    @Override
-                    public void onFailure(Throwable caught) {
-                        GWT.log(caught.getMessage());
-                        if (caught instanceof UserManagementException) {
-                            String message = ((UserManagementException) caught).getMessage();
-                            if (UserManagementException.PASSWORD_DOES_NOT_MEET_REQUIREMENTS.equals(message)) {
-                                Window.alert(stringMessages.passwordDoesNotMeetRequirements());
-                            } else if (UserManagementException.INVALID_CREDENTIALS.equals(message)) {
-                                Window.alert(stringMessages.invalidCredentials());
-                            } else {
-                                Window.alert(stringMessages.errorChangingPassword(caught.getMessage()));
-                            }
-                        } else {
-                            Window.alert(stringMessages.errorChangingPassword(caught.getMessage()));
-                        }
-                    }
 
-                    @Override
-                    public void onSuccess(Void result) {
-                        Window.alert(stringMessages.passwordSuccessfullyChanged());
-                    }
-                });
-            }
-        });
-        final Button logout = new Button(stringMessages.signOut());
-        logout.addClickHandler(new ClickHandler() {
             @Override
-            public void onClick(ClickEvent event) {
-                userService.logout();
-                Window.Location.reload();
+            public void onSuccess(Void result) {
+                resultLabel.setText(stringMessages.emailValidatedSuccessfully(username));
             }
-        });
-        fp.add(logout);
-        formPanel.add(fp);
-        dockPanel.add(formPanel);
+        }));
+        rootPanel.add(resultLabel);
     }
 }
