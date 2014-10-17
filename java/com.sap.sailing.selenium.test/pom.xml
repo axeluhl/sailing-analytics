@@ -43,7 +43,7 @@
 								<versionRange>0.0.0</versionRange>
 							</requirement>
 							<requirement>
-								<type>eclipse-feature</type>
+								<type>eclipse-plugin</type>
 								<id>com.sap.sailing.server.gateway.test.support</id>
 								<versionRange>0.0.0</versionRange>
 							</requirement>
