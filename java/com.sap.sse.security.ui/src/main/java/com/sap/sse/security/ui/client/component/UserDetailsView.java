@@ -233,6 +233,8 @@ public class UserDetailsView extends FlowPanel {
     }
 
     private static class DeleteUserConfimDialog extends DialogBox {
+        final Button ok;
+        
         public DeleteUserConfimDialog(final UserManagementServiceAsync userManagementService, final String username, final StringMessages stringMessages) {
             setText(stringMessages.deleteUserQuestion());
             setAnimationEnabled(true);
@@ -240,7 +242,7 @@ public class UserDetailsView extends FlowPanel {
             VerticalPanel vp = new VerticalPanel();
             vp.add(new Label(stringMessages.doYouReallyWantToDeleteUser(username)));
             HorizontalPanel hp = new HorizontalPanel();
-            Button ok = new Button(stringMessages.ok());
+            ok = new Button(stringMessages.ok());
             ok.addClickHandler(new ClickHandler() {
                 public void onClick(ClickEvent event) {
                     userManagementService.deleteUser(username, new AsyncCallback<SuccessInfo>() {
@@ -268,6 +270,14 @@ public class UserDetailsView extends FlowPanel {
             vp.add(hp);
             setWidget(vp);
         }
+
+        @Override
+        public void show() {
+            super.show();
+            ok.setFocus(true);
+        }
+        
+        
     }
 
     public void addUserChangeEventHandler(UserChangeEventHandler handler) {

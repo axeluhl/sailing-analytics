@@ -279,7 +279,9 @@ public class SecurityServiceImpl extends RemoteServiceServlet implements Securit
         if (user == null) {
             throw new UserManagementException(UserManagementException.USER_DOES_NOT_EXIST);
         }
-        return user.validate(validationSecret);
+        final boolean result = user.validate(validationSecret);
+        store.updateUser(user);
+        return result;
     }
 
     /**

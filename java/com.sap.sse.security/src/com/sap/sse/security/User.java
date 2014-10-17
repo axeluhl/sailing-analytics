@@ -127,7 +127,9 @@ public class User {
      */
     public boolean validate(final String validationSecret) {
         final boolean result;
-        if (this.validationSecret.equals(validationSecret)) {
+        if (emailValidated) {
+            result = true;
+        } else if (validationSecret.equals(this.validationSecret)) {
             emailValidated = true;
             this.validationSecret = null;
             result = true;
