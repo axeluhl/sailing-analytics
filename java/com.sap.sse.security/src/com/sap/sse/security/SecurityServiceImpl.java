@@ -150,6 +150,7 @@ public class SecurityServiceImpl extends RemoteServiceServlet implements Securit
                     ts.connect();
                     ts.sendMessage(msg, msg.getRecipients(RecipientType.TO));
                     ts.close();
+                    logger.info("mail sent to user "+username+" with e-mail address "+toAddress+" with subject "+subject);
                 } catch (MessagingException e) {
                     logger.log(Level.SEVERE, "Error trying to send mail to user "+username+" with e-mail address "+toAddress, e);
                     throw new MailException(e.getMessage());
