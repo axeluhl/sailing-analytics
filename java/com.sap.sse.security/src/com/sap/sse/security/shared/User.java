@@ -1,4 +1,4 @@
-package com.sap.sse.security.userstore.shared;
+package com.sap.sse.security.shared;
 
 import java.util.Arrays;
 import java.util.Collection;
@@ -7,7 +7,7 @@ import java.util.Map;
 import java.util.Set;
 import java.util.concurrent.ConcurrentHashMap;
 
-import com.sap.sse.security.userstore.shared.Account.AccountType;
+import com.sap.sse.security.shared.Account.AccountType;
 
 public class User {
 

@@ -17,14 +17,14 @@ import com.mongodb.DB;
 import com.mongodb.DBCollection;
 import com.mongodb.DBObject;
 import com.sap.sse.security.Social;
+import com.sap.sse.security.shared.Account;
+import com.sap.sse.security.shared.SocialUserAccount;
+import com.sap.sse.security.shared.User;
+import com.sap.sse.security.shared.UsernamePasswordAccount;
+import com.sap.sse.security.shared.Account.AccountType;
 import com.sap.sse.security.userstore.mongodb.CollectionNames;
 import com.sap.sse.security.userstore.mongodb.DomainObjectFactory;
 import com.sap.sse.security.userstore.mongodb.FieldNames;
-import com.sap.sse.security.userstore.shared.Account;
-import com.sap.sse.security.userstore.shared.Account.AccountType;
-import com.sap.sse.security.userstore.shared.SocialUserAccount;
-import com.sap.sse.security.userstore.shared.User;
-import com.sap.sse.security.userstore.shared.UsernamePasswordAccount;
 
 public class DomainObjectFactoryImpl implements DomainObjectFactory {
     private static final Logger logger = Logger.getLogger(DomainObjectFactoryImpl.class.getName());

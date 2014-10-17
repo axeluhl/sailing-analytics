@@ -13,9 +13,10 @@ import org.apache.shiro.authz.SimpleAuthorizationInfo;
 import org.apache.shiro.subject.PrincipalCollection;
 import org.apache.shiro.util.ByteSource;
 
-import com.sap.sse.security.userstore.shared.Account.AccountType;
-import com.sap.sse.security.userstore.shared.User;
-import com.sap.sse.security.userstore.shared.UsernamePasswordAccount;
+import com.sap.sse.security.shared.User;
+import com.sap.sse.security.shared.UserManagementException;
+import com.sap.sse.security.shared.UsernamePasswordAccount;
+import com.sap.sse.security.shared.Account.AccountType;
 
 public class UsernamePasswordRealm extends AbstractUserStoreBasedRealm {
     

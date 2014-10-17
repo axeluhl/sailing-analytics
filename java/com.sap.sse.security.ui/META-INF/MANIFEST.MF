@@ -13,7 +13,7 @@ Bundle-ClassPath: WEB-INF/classes/
 Require-Bundle: javax.servlet;bundle-version="2.5.0",
  com.sap.sse.gwt;bundle-version="1.0.0",
  com.google.gwt.osgi;bundle-version="2.6.0",
- com.sap.sse.security;bundle-version="1.0.0",
+ com.sap.sse.security,
  org.json.simple,
  com.sap.sailing.domain.common,
  com.sap.sse.common,

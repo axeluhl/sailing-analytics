@@ -11,14 +11,14 @@ import com.mongodb.DBCollection;
 import com.mongodb.DBObject;
 import com.mongodb.WriteConcern;
 import com.sap.sse.security.Social;
+import com.sap.sse.security.shared.Account;
+import com.sap.sse.security.shared.SocialUserAccount;
+import com.sap.sse.security.shared.User;
+import com.sap.sse.security.shared.UsernamePasswordAccount;
+import com.sap.sse.security.shared.Account.AccountType;
 import com.sap.sse.security.userstore.mongodb.CollectionNames;
 import com.sap.sse.security.userstore.mongodb.FieldNames;
 import com.sap.sse.security.userstore.mongodb.MongoObjectFactory;
-import com.sap.sse.security.userstore.shared.Account;
-import com.sap.sse.security.userstore.shared.SocialUserAccount;
-import com.sap.sse.security.userstore.shared.User;
-import com.sap.sse.security.userstore.shared.Account.AccountType;
-import com.sap.sse.security.userstore.shared.UsernamePasswordAccount;
 
 public class MongoObjectFactoryImpl implements MongoObjectFactory {
 

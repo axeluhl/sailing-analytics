@@ -9,10 +9,10 @@ import java.util.concurrent.ConcurrentHashMap;
 import java.util.logging.Logger;
 
 import com.sap.sse.security.SocialSettingsKeys;
-import com.sap.sse.security.UserManagementException;
-import com.sap.sse.security.userstore.shared.Account;
-import com.sap.sse.security.userstore.shared.User;
-import com.sap.sse.security.userstore.shared.UserStore;
+import com.sap.sse.security.shared.Account;
+import com.sap.sse.security.shared.User;
+import com.sap.sse.security.shared.UserManagementException;
+import com.sap.sse.security.shared.UserStore;
 
 public class UserStoreImpl implements UserStore {
     private static final Logger logger = Logger.getLogger(UserStoreImpl.class.getName());

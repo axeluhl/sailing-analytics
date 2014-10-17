@@ -11,8 +11,8 @@ import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.Response;
 import javax.ws.rs.core.Response.Status;
 
-import com.sap.sse.security.UserManagementException;
 import com.sap.sse.security.jaxrs.AbstractSecurityResource;
+import com.sap.sse.security.shared.UserManagementException;
 
 @Path("/restsecurity")
 public class SecurityResource extends AbstractSecurityResource {

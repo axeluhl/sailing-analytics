@@ -61,10 +61,11 @@ import org.scribe.model.Token;
 import org.scribe.oauth.OAuthService;
 
 import com.google.gwt.user.server.rpc.RemoteServiceServlet;
-import com.sap.sse.security.userstore.shared.SocialUserAccount;
-import com.sap.sse.security.userstore.shared.User;
-import com.sap.sse.security.userstore.shared.UserStore;
-import com.sap.sse.security.userstore.shared.UsernamePasswordAccount;
+import com.sap.sse.security.shared.SocialUserAccount;
+import com.sap.sse.security.shared.User;
+import com.sap.sse.security.shared.UserManagementException;
+import com.sap.sse.security.shared.UserStore;
+import com.sap.sse.security.shared.UsernamePasswordAccount;
 
 public class SecurityServiceImpl extends RemoteServiceServlet implements SecurityService {
 

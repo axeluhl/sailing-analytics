@@ -1,4 +1,4 @@
-package com.sap.sse.security;
+package com.sap.sse.security.impl;
 
 import java.io.File;
 import java.io.FileReader;
@@ -12,7 +12,10 @@ import org.osgi.framework.BundleContext;
 import org.osgi.framework.ServiceRegistration;
 import org.osgi.util.tracker.ServiceTracker;
 
-import com.sap.sse.security.userstore.shared.UserStore;
+import com.sap.sse.security.SecurityService;
+import com.sap.sse.security.SecurityServiceImpl;
+import com.sap.sse.security.UsernamePasswordRealm;
+import com.sap.sse.security.shared.UserStore;
 
 public class Activator implements BundleActivator {
     private static final Logger logger = Logger.getLogger(Activator.class.getName());
@@ -36,11 +39,11 @@ public class Activator implements BundleActivator {
         UsernamePasswordRealm.setTestUserStore(theTestUserStore);
     }
     
-    static BundleContext getContext() {
+    public static BundleContext getContext() {
         return context;
     }
     
-    static SecurityService getSecurityService() {
+    public static SecurityService getSecurityService() {
         return securityService;
     }
 

@@ -8,11 +8,11 @@ import org.apache.shiro.SecurityUtils;
 import org.junit.BeforeClass;
 import org.junit.Test;
 
-import com.sap.sse.security.Activator;
 import com.sap.sse.security.SecurityServiceImpl;
 import com.sap.sse.security.UsernamePasswordRealm;
+import com.sap.sse.security.impl.Activator;
+import com.sap.sse.security.shared.UserStore;
 import com.sap.sse.security.userstore.mongodb.UserStoreImpl;
-import com.sap.sse.security.userstore.shared.UserStore;
 
 public class LoginTest {
     @BeforeClass

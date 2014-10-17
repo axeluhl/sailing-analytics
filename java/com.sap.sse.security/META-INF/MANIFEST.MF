@@ -3,7 +3,7 @@ Bundle-ManifestVersion: 2
 Bundle-Name: Security
 Bundle-SymbolicName: com.sap.sse.security
 Bundle-Version: 1.0.0.qualifier
-Bundle-Activator: com.sap.sse.security.Activator
+Bundle-Activator: com.sap.sse.security.impl.Activator
 Bundle-Vendor: SAP
 Bundle-RequiredExecutionEnvironment: JavaSE-1.7
 Import-Package: javax.mail;version="1.4.0",
@@ -29,7 +29,7 @@ Require-Bundle: javax.servlet;bundle-version="2.5.0",
  org.apache.commons.beanutils;bundle-version="1.8.0"
 Web-ContextPath: /security
 Export-Package: com.sap.sse.security,
- com.sap.sse.security.userstore.shared,
+ com.sap.sse.security.shared,
  org.apache.shiro,
  org.apache.shiro.authc,
  org.apache.shiro.authz,

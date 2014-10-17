@@ -11,8 +11,9 @@ import javax.servlet.ServletContext;
 import org.apache.shiro.cache.CacheManager;
 import org.apache.shiro.mgt.SecurityManager;
 
-import com.sap.sse.security.userstore.shared.SocialUserAccount;
-import com.sap.sse.security.userstore.shared.User;
+import com.sap.sse.security.shared.SocialUserAccount;
+import com.sap.sse.security.shared.User;
+import com.sap.sse.security.shared.UserManagementException;
 
 public interface SecurityService {
 

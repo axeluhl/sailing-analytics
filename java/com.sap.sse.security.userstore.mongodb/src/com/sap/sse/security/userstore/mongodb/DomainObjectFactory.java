@@ -2,7 +2,7 @@ package com.sap.sse.security.userstore.mongodb;
 
 import java.util.Map;
 
-import com.sap.sse.security.userstore.shared.User;
+import com.sap.sse.security.shared.User;
 
 public interface DomainObjectFactory {
 

@@ -6,7 +6,7 @@ import org.osgi.framework.BundleActivator;
 import org.osgi.framework.BundleContext;
 import org.osgi.framework.ServiceRegistration;
 
-import com.sap.sse.security.userstore.shared.UserStore;
+import com.sap.sse.security.shared.UserStore;
 
 public class Activator implements BundleActivator {
 

@@ -4,6 +4,8 @@ import org.apache.shiro.cache.Cache;
 import org.apache.shiro.cache.CacheException;
 import org.apache.shiro.cache.CacheManager;
 
+import com.sap.sse.security.impl.Activator;
+
 /**
  * Obtains the singleton cache manager instance from the singleton {@link SecurityService} instance. Using an instance
  * of this class as the cache manager in your Shiro configuration as in

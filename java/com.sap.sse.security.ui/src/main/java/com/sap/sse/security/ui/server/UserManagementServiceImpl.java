@@ -32,7 +32,12 @@ import com.sap.sse.security.DefaultRoles;
 import com.sap.sse.security.SecurityService;
 import com.sap.sse.security.SessionUtils;
 import com.sap.sse.security.Social;
-import com.sap.sse.security.UserManagementException;
+import com.sap.sse.security.shared.Account;
+import com.sap.sse.security.shared.SocialUserAccount;
+import com.sap.sse.security.shared.User;
+import com.sap.sse.security.shared.UserManagementException;
+import com.sap.sse.security.shared.UsernamePasswordAccount;
+import com.sap.sse.security.shared.Account.AccountType;
 import com.sap.sse.security.ui.oauth.client.CredentialDTO;
 import com.sap.sse.security.ui.oauth.client.SocialUserDTO;
 import com.sap.sse.security.ui.oauth.shared.OAuthException;
@@ -41,11 +46,6 @@ import com.sap.sse.security.ui.shared.SuccessInfo;
 import com.sap.sse.security.ui.shared.UserDTO;
 import com.sap.sse.security.ui.shared.UserManagementService;
 import com.sap.sse.security.ui.shared.UsernamePasswordAccountDTO;
-import com.sap.sse.security.userstore.shared.Account;
-import com.sap.sse.security.userstore.shared.Account.AccountType;
-import com.sap.sse.security.userstore.shared.SocialUserAccount;
-import com.sap.sse.security.userstore.shared.User;
-import com.sap.sse.security.userstore.shared.UsernamePasswordAccount;
 
 public class UserManagementServiceImpl extends RemoteServiceServlet implements UserManagementService {
     private static final long serialVersionUID = 4458564336368629101L;
@@ -129,7 +129,7 @@ public class UserManagementServiceImpl extends RemoteServiceServlet implements U
             u = getSecurityService().createSimpleUser(name, email, password);
         } catch (UserManagementException e) {
             logger.log(Level.SEVERE, "Error creating user "+name, e);
-            throw e;
+            throw new UserManagementException(e.getMessage());
         }
         if (u == null) {
             return null;

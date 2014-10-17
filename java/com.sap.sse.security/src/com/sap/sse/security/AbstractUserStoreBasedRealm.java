@@ -11,7 +11,8 @@ import org.apache.shiro.realm.AuthorizingRealm;
 import org.osgi.framework.BundleContext;
 import org.osgi.util.tracker.ServiceTracker;
 
-import com.sap.sse.security.userstore.shared.UserStore;
+import com.sap.sse.security.impl.Activator;
+import com.sap.sse.security.shared.UserStore;
 
 public abstract class AbstractUserStoreBasedRealm extends AuthorizingRealm {
     private static final Logger logger = Logger.getLogger(AbstractUserStoreBasedRealm.class.getName());
