@@ -1,7 +1,5 @@
 package com.sap.sse.security.ui.client.component;
 
-import com.google.gwt.user.client.Window;
-import com.google.gwt.user.client.rpc.AsyncCallback;
 import com.google.gwt.user.client.ui.Grid;
 import com.google.gwt.user.client.ui.Label;
 import com.google.gwt.user.client.ui.PasswordTextBox;
@@ -10,7 +8,6 @@ import com.google.gwt.user.client.ui.Widget;
 import com.sap.sse.gwt.client.dialog.DataEntryDialog;
 import com.sap.sse.security.ui.client.StringMessages;
 import com.sap.sse.security.ui.client.component.AbstractUserDialog.UserData;
-import com.sap.sse.security.ui.client.component.UserManagementPanel.UserCreationEventHandler;
 import com.sap.sse.security.ui.shared.UserDTO;
 import com.sap.sse.security.ui.shared.UserManagementServiceAsync;
 
@@ -24,18 +21,21 @@ public class AbstractUserDialog extends DataEntryDialog<UserData> {
     private final StringMessages stringMessages;
     private final TextBox nameBox;
     private final TextBox emailBox;
+    private final TextBox oldPwBox;
     private final PasswordTextBox pwBox;
     private final PasswordTextBox pwRepeat;
     
     public static class UserData {
         private final String username;
         private final String email;
+        private final String oldPassword;
         private final String password;
         private final String passwordRepeat;
-        protected UserData(String username, String email, String password, String passwordRepeat) {
+        protected UserData(String username, String email, String oldPassword, String password, String passwordRepeat) {
             super();
             this.username = username;
             this.email = email;
+            this.oldPassword = oldPassword;
             this.password = password;
             this.passwordRepeat = passwordRepeat;
         }
@@ -45,6 +45,9 @@ public class AbstractUserDialog extends DataEntryDialog<UserData> {
         public String getEmail() {
             return email;
         }
+        public String getOldPassword() {
+            return oldPassword;
+        }
         public String getPassword() {
             return password;
         }
@@ -53,42 +56,42 @@ public class AbstractUserDialog extends DataEntryDialog<UserData> {
         }
     }
 
-    public AbstractUserDialog(final StringMessages stringMessages,
+    /**
+     * Uses a default validator that validates the username and the two new passwords.
+     */
+    public AbstractUserDialog(final StringMessages stringMessages, String title,
             final UserManagementServiceAsync userManagementService,
-            final Iterable<UserCreationEventHandler> handlers) {
-        super(stringMessages.createUser(), stringMessages.createUser(), stringMessages.ok(), stringMessages.cancel(),
-                new DataEntryDialog.Validator<UserData>() {
-                    private final NewAccountValidator validator = new NewAccountValidator(stringMessages);
-                    @Override
-                    public String getErrorMessage(UserData valueToValidate) {
-                        return validator.validate(valueToValidate.getUsername(), valueToValidate.getPassword(), valueToValidate.getPasswordRepeat());
-                    }
-                }, new DialogCallback<UserData>() {
-                    @Override
-                    public void ok(UserData usernameEmailPassword) {
-                        userManagementService.createSimpleUser(usernameEmailPassword.getUsername(), usernameEmailPassword.getEmail(), usernameEmailPassword.getPassword(), new AsyncCallback<UserDTO>() {
-                            @Override
-                            public void onSuccess(UserDTO result) {
-                                for (UserCreationEventHandler handler : handlers) {
-                                    handler.onUserCreation(result);
-                                }
-                            }
-                            
-                            @Override
-                            public void onFailure(Throwable caught) {
-                                Window.alert(stringMessages.couldNotCreateUser(caught.getMessage()));
-                            }
-                        });
-                    }
-
-                    @Override
-                    public void cancel() {
-                    }
-                });
+            final UserDTO user,
+            final DialogCallback<UserData> callback) {
+        this(stringMessages, title, userManagementService, user, new DataEntryDialog.Validator<UserData>() {
+            private final NewAccountValidator validator = new NewAccountValidator(stringMessages);
+            @Override
+            public String getErrorMessage(UserData valueToValidate) {
+                return validator.validateUsernameAndPassword(valueToValidate.getUsername(), valueToValidate.getPassword(),
+                        valueToValidate.getPasswordRepeat());
+            }
+        }, callback);
+    }
+    
+    /**
+     * Allows the caller to provide their own validator, e.g., in order to skip password or username validation or to
+     * add validation for the current password
+     */
+    public AbstractUserDialog(final StringMessages stringMessages, String title,
+                final UserManagementServiceAsync userManagementService,
+                final UserDTO user, DataEntryDialog.Validator<UserData> validator,
+                final DialogCallback<UserData> callback) {
+        super(title, title, stringMessages.ok(), stringMessages.cancel(),
+                validator, callback);
         nameBox = createTextBox("", 30);
         emailBox = createTextBox("", 30);
+        oldPwBox = createPasswordTextBox("", 30);
         pwBox = createPasswordTextBox("", 30);
         pwRepeat = createPasswordTextBox("", 30);
+        if (user != null) {
+            nameBox.setText(user.getName());
+            emailBox.setText(user.getEmail());
+        }
         this.stringMessages = stringMessages;
     }
     
@@ -98,23 +101,50 @@ public class AbstractUserDialog extends DataEntryDialog<UserData> {
         nameBox.setFocus(true);
     }
     
+    protected StringMessages getStringMessages() {
+        return stringMessages;
+    }
+
+    protected TextBox getNameBox() {
+        return nameBox;
+    }
+
+    protected TextBox getEmailBox() {
+        return emailBox;
+    }
+
+    protected TextBox getOldPwBox() {
+        return oldPwBox;
+    }
+
+    protected PasswordTextBox getPwBox() {
+        return pwBox;
+    }
+
+    protected PasswordTextBox getPwRepeat() {
+        return pwRepeat;
+    }
+
+    /**
+     * This default implementation does not show the field for the current password.
+     */
     @Override
     protected Widget getAdditionalWidget() {
         Grid result = new Grid(4, 2);
-        result.setWidget(0, 0, new Label(stringMessages.username()));
-        result.setWidget(0, 1, nameBox);
-        result.setWidget(1, 0, new Label(stringMessages.email()));
-        result.setWidget(1, 1, emailBox);
-        result.setWidget(2, 0, new Label(stringMessages.password()));
-        result.setWidget(2,  1, pwBox);
-        result.setWidget(3, 0, new Label(stringMessages.passwordRepeat()));
-        result.setWidget(3, 1, pwRepeat);
+        result.setWidget(0, 0, new Label(getStringMessages().username()));
+        result.setWidget(0, 1, getNameBox());
+        result.setWidget(1, 0, new Label(getStringMessages().email()));
+        result.setWidget(1, 1, getEmailBox());
+        result.setWidget(2, 0, new Label(getStringMessages().password()));
+        result.setWidget(2,  1, getPwBox());
+        result.setWidget(3, 0, new Label(getStringMessages().passwordRepeat()));
+        result.setWidget(3, 1, getPwRepeat());
         return result;
     }
 
     @Override
     protected UserData getResult() {
-        return new UserData(nameBox.getText(), emailBox.getText(), pwBox.getText(), pwRepeat.getText());
+        return new UserData(nameBox.getText(), emailBox.getText(), oldPwBox.getText(), pwBox.getText(), pwRepeat.getText());
     }
 
 }

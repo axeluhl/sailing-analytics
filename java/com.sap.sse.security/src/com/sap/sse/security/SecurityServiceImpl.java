@@ -218,7 +218,7 @@ public class SecurityServiceImpl extends RemoteServiceServlet implements Securit
     }
 
     @Override
-    public void updateSimpleUserPassword(String username, String oldPassword, String newPassword) throws UserManagementException {
+    public void updateSimpleUserPassword(String username, String oldPassword, String newPassword) throws UserManagementException, MailException {
         final User user = store.getUserByName(username);
         if (user == null) {
             throw new UserManagementException(UserManagementException.USER_DOES_NOT_EXIST);
@@ -241,6 +241,7 @@ public class SecurityServiceImpl extends RemoteServiceServlet implements Securit
         account.setSalt(salt);
         account.setSaltedPassword(hashedPasswordBase64);
         store.updateUser(user);
+        sendMail(username, "Password Changed", "Somebody changed your password for your user named "+username+".\nIf that wasn't you, I'd be worried...");
     }
 
     @Override

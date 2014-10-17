@@ -144,7 +144,6 @@ public class UserManagementServiceImpl extends RemoteServiceServlet implements U
         final Subject subject = SecurityUtils.getSubject();
         if (subject.hasRole(DefaultRoles.ADMIN.getRolename()) || username.equals(SessionUtils.loadUsername())) {
             getSecurityService().updateSimpleUserPassword(username, oldPassword, newPassword);
-            getSecurityService().sendMail(username, "Password Changed", "Somebody changed your password. If that wasn't you, I'd be worried...");
         } else {
             throw new UserManagementException(UserManagementException.INVALID_CREDENTIALS);
         }

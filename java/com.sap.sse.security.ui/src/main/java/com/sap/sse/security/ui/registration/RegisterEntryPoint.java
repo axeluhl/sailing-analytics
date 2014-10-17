@@ -64,7 +64,7 @@ public class RegisterEntryPoint implements EntryPoint {
         KeyUpHandler keyUpHandler = new KeyUpHandler() {
             @Override
             public void onKeyUp(KeyUpEvent event) {
-                String errorMessage = validator.validate(nameText.getText(), pwText.getText(), pw2Text.getText());
+                String errorMessage = validator.validateUsernameAndPassword(nameText.getText(), pwText.getText(), pw2Text.getText());
                 if (errorMessage == null) {
                     errorLabel.setText("");
                     submit.setEnabled(true);

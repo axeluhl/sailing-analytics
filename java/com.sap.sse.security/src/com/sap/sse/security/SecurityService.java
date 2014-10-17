@@ -37,7 +37,7 @@ public interface SecurityService {
 
     User createSimpleUser(String username, String email, String password) throws UserManagementException;
 
-    void updateSimpleUserPassword(String name, String oldPassword, String newPassword) throws UserManagementException;
+    void updateSimpleUserPassword(String name, String oldPassword, String newPassword) throws UserManagementException, MailException;
 
     void updateSimpleUserEmail(String username, String newEmail) throws UserManagementException;
 

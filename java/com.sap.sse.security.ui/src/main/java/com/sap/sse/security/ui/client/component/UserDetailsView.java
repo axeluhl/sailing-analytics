@@ -35,6 +35,7 @@ import com.sap.sse.security.ui.client.Resources;
 import com.sap.sse.security.ui.client.StringMessages;
 import com.sap.sse.security.ui.client.UserChangeEventHandler;
 import com.sap.sse.security.ui.client.UserService;
+import com.sap.sse.security.ui.client.component.AbstractUserDialog.UserData;
 import com.sap.sse.security.ui.client.resources.IconResources;
 import com.sap.sse.security.ui.oauth.client.SocialUserDTO;
 import com.sap.sse.security.ui.shared.AccountDTO;
@@ -95,10 +96,10 @@ public class UserDetailsView extends FlowPanel {
         changeEmail.addClickHandler(new ClickHandler() {
             @Override
             public void onClick(ClickEvent event) {
-                new EditEmailDialog(stringMessages, UserDetailsView.this.user, new DialogCallback<String>() {
+                new EditEmailDialog(stringMessages, userManagementService, UserDetailsView.this.user, new DialogCallback<UserData>() {
                     @Override
-                    public void ok(final String newEmail) {
-                        userManagementService.updateSimpleUserEmail(UserDetailsView.this.user.getName(), newEmail, new MarkedAsyncCallback<Void>(
+                    public void ok(final UserData userData) {
+                        userManagementService.updateSimpleUserEmail(UserDetailsView.this.user.getName(), userData.getEmail(), new MarkedAsyncCallback<Void>(
                                 new AsyncCallback<Void>() {
                                     @Override
                                     public void onFailure(Throwable caught) {
@@ -107,7 +108,7 @@ public class UserDetailsView extends FlowPanel {
 
                                     @Override
                                     public void onSuccess(Void result) {
-                                        emailLabel.setText(newEmail);
+                                        emailLabel.setText(userData.getEmail());
                                         Window.alert(stringMessages.successfullyUpdatedEmail());
                                     }
                                 }));
@@ -180,10 +181,10 @@ public class UserDetailsView extends FlowPanel {
                     changePasswordButton.addClickHandler(new ClickHandler() {
                         @Override
                         public void onClick(ClickEvent event) {
-                            new ChangePasswordDialog(stringMessages, UserDetailsView.this.user, new DataEntryDialog.DialogCallback<String>() {
+                            new ChangePasswordDialog(stringMessages, userManagementService, UserDetailsView.this.user, new DataEntryDialog.DialogCallback<UserData>() {
                                 @Override
-                                public void ok(String newPassword) {
-                                    userManagementService.updateSimpleUserPassword(UserDetailsView.this.user.getName(), /* admin doesn't need to provide old password */ null, newPassword, new MarkedAsyncCallback<Void>(
+                                public void ok(UserData userData) {
+                                    userManagementService.updateSimpleUserPassword(UserDetailsView.this.user.getName(), /* admin doesn't need to provide old password */ null, userData.getPassword(), new MarkedAsyncCallback<Void>(
                                             new AsyncCallback<Void>() {
                                                 @Override
                                                 public void onFailure(Throwable caught) {

@@ -23,14 +23,30 @@ public class NewAccountValidator {
      * @return <code>null</code> if the credentials look good, or an end user-readable error message based on the
      *         {@link StringMessages} passed
      */
-    public String validate(String username, String password, String passwordRepeat) {
+    public String validateUsernameAndPassword(String username, String password, String passwordRepeat) {
+        String result = validateUsername(username);
+        if (result == null) {
+            result = validatePasswords(password, passwordRepeat);
+        }
+        return result;
+    }
+
+    private String validatePasswords(String password, String passwordRepeat) {
         final String result;
-        if (username.length() < MINIMUM_USERNAME_LENGTH) {
-            result = stringMessages.usernameMustHaveAtLeastNCharacters(MINIMUM_USERNAME_LENGTH);
-        } else if (password.length() < MINIMUM_PASSWORD_LENGTH) {
+        if (password.length() < MINIMUM_PASSWORD_LENGTH) {
             result = stringMessages.passwordMustHaveAtLeastNCharacters(MINIMUM_PASSWORD_LENGTH);
         } else if (!password.equals(passwordRepeat)) {
             result = stringMessages.passwordsDontMatch();
+        } else {
+            result = null;
+        }
+        return result;
+    }
+
+    private String validateUsername(String username) {
+        final String result;
+        if (username.length() < MINIMUM_USERNAME_LENGTH) {
+            result = stringMessages.usernameMustHaveAtLeastNCharacters(MINIMUM_USERNAME_LENGTH);
         } else {
             result = null;
         }
