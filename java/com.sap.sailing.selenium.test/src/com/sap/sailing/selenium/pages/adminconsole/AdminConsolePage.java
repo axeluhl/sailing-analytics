@@ -150,10 +150,11 @@ public class AdminConsolePage extends HostPage {
         waitForTab.until(ExpectedConditions.visibilityOf(tab)); // this will wait for tab to be visible for 20 seconds
         // We have to determine the location where we have to click at the tab for the case its not completely visible.
         // NOTE: We assume that the browser window is big enough to display at least 2 tabs!
-        Actions actions = new Actions(this.driver);
-        actions.moveToElement(tab, determineOffsetForClick(tab), 5);
-        actions.click();
-        actions.perform();
+//        Actions actions = new Actions(this.driver);
+//        actions.moveToElement(tab, determineOffsetForClick(tab), 5);
+//        actions.click();
+//        actions.perform();
+        tab.click();
         // Wait for the tab to become visible due to the used animations.
         FluentWait<WebElement> wait = createFluentWait(this.administrationTabPanel);
         WebElement content = wait.until(ElementSearchConditions.visibilityOfElementLocated(new BySeleniumId(id)));
@@ -161,7 +162,7 @@ public class AdminConsolePage extends HostPage {
         return content;
     }
     
-    private int determineOffsetForClick(WebElement tab) {
-        return tab.getSize().width / 2;
-    }
+//    private int determineOffsetForClick(WebElement tab) {
+//        return tab.getSize().width / 2;
+//    }
 }
