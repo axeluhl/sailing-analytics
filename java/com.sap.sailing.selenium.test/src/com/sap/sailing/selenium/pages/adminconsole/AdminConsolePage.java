@@ -6,7 +6,9 @@ import org.openqa.selenium.By;
 import org.openqa.selenium.WebDriver;
 import org.openqa.selenium.WebElement;
 import org.openqa.selenium.interactions.Actions;
+import org.openqa.selenium.support.ui.ExpectedConditions;
 import org.openqa.selenium.support.ui.FluentWait;
+import org.openqa.selenium.support.ui.WebDriverWait;
 
 import com.sap.sailing.selenium.core.BySeleniumId;
 import com.sap.sailing.selenium.core.ElementSearchConditions;
@@ -144,6 +146,8 @@ public class AdminConsolePage extends HostPage {
             expression = VERTICAL_TAB_EXPRESSION.format(new Object[] {label});
         }
         WebElement tab = this.administrationTabPanel.findElement(By.xpath(expression));
+        WebDriverWait waitForTab = new WebDriverWait(driver, 20); // here, wait time is 20 seconds
+        waitForTab.until(ExpectedConditions.visibilityOf(tab)); // this will wait for tab to be visible for 20 seconds
         // We have to determine the location where we have to click at the tab for the case its not completely visible.
         // NOTE: We assume that the browser window is big enough to display at least 2 tabs!
         Actions actions = new Actions(this.driver);
