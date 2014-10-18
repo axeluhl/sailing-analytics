@@ -5,7 +5,6 @@ import java.text.MessageFormat;
 import org.openqa.selenium.By;
 import org.openqa.selenium.WebDriver;
 import org.openqa.selenium.WebElement;
-import org.openqa.selenium.interactions.Actions;
 import org.openqa.selenium.support.ui.ExpectedConditions;
 import org.openqa.selenium.support.ui.FluentWait;
 import org.openqa.selenium.support.ui.WebDriverWait;
@@ -148,12 +147,6 @@ public class AdminConsolePage extends HostPage {
         WebElement tab = this.administrationTabPanel.findElement(By.xpath(expression));
         WebDriverWait waitForTab = new WebDriverWait(driver, 20); // here, wait time is 20 seconds
         waitForTab.until(ExpectedConditions.visibilityOf(tab)); // this will wait for tab to be visible for 20 seconds
-        // We have to determine the location where we have to click at the tab for the case its not completely visible.
-        // NOTE: We assume that the browser window is big enough to display at least 2 tabs!
-//        Actions actions = new Actions(this.driver);
-//        actions.moveToElement(tab, determineOffsetForClick(tab), 5);
-//        actions.click();
-//        actions.perform();
         tab.click();
         // Wait for the tab to become visible due to the used animations.
         FluentWait<WebElement> wait = createFluentWait(this.administrationTabPanel);
@@ -161,8 +154,4 @@ public class AdminConsolePage extends HostPage {
         waitForAjaxRequests(); // switching tabs can trigger asynchronous updates, replacing UI elements
         return content;
     }
-    
-//    private int determineOffsetForClick(WebElement tab) {
-//        return tab.getSize().width / 2;
-//    }
 }
