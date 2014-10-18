@@ -210,11 +210,11 @@ public class SecurityServiceImpl extends RemoteServiceServlet implements Securit
     }
 
     @Override
-    public User createSimpleUser(String name, String email, String password) throws UserManagementException, MailException {
-        if (store.getUserByName(name) != null) {
+    public User createSimpleUser(String username, String email, String password) throws UserManagementException, MailException {
+        if (store.getUserByName(username) != null) {
             throw new UserManagementException(UserManagementException.USER_ALREADY_EXISTS);
         }
-        if (name == null || name.length() < 3) {
+        if (username == null || username.length() < 3) {
             throw new UserManagementException(UserManagementException.USERNAME_DOES_NOT_MEET_REQUIREMENTS);
         } else if (password == null || password.length() < 5) {
             throw new UserManagementException(UserManagementException.PASSWORD_DOES_NOT_MEET_REQUIREMENTS);
@@ -222,9 +222,14 @@ public class SecurityServiceImpl extends RemoteServiceServlet implements Securit
         RandomNumberGenerator rng = new SecureRandomNumberGenerator();
         Object salt = rng.nextBytes();
         String hashedPasswordBase64 = hashPassword(password, salt);
-        UsernamePasswordAccount upa = new UsernamePasswordAccount(name, hashedPasswordBase64, salt);
-        final User result = store.createUser(name, email, upa);
-        startEmailValidation(result);
+        UsernamePasswordAccount upa = new UsernamePasswordAccount(username, hashedPasswordBase64, salt);
+        final User result = store.createUser(username, email, upa);
+        try {
+            startEmailValidation(result);
+        } catch (MailException e) {
+            logger.log(Level.SEVERE, "Error sending mail for new account validation of user "+username+
+                    " to address "+email, e);
+        }
         store.updateUser(result);
         return result;
     }
@@ -269,7 +274,12 @@ public class SecurityServiceImpl extends RemoteServiceServlet implements Securit
             throw new UserManagementException(UserManagementException.USER_DOES_NOT_EXIST);
         }
         user.setEmail(newEmail);
-        startEmailValidation(user);
+        try {
+            startEmailValidation(user);
+        } catch (MailException e) {
+            logger.log(Level.SEVERE, "Error sending mail to validate e-mail address change for user "+username+
+                    " to address "+newEmail, e);
+        }
         store.updateUser(user);
     }
     
