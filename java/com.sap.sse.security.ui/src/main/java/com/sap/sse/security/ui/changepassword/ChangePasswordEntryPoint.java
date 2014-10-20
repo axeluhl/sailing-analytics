@@ -16,6 +16,7 @@ import com.google.gwt.user.client.ui.FlowPanel;
 import com.google.gwt.user.client.ui.FormPanel;
 import com.google.gwt.user.client.ui.FormPanel.SubmitEvent;
 import com.google.gwt.user.client.ui.FormPanel.SubmitHandler;
+import com.google.gwt.user.client.ui.HorizontalPanel;
 import com.google.gwt.user.client.ui.Label;
 import com.google.gwt.user.client.ui.PasswordTextBox;
 import com.google.gwt.user.client.ui.RootLayoutPanel;
@@ -27,6 +28,8 @@ import com.sap.sse.security.ui.client.RemoteServiceMappingConstants;
 import com.sap.sse.security.ui.client.StringMessages;
 import com.sap.sse.security.ui.client.UserService;
 import com.sap.sse.security.ui.client.UserStatusEventHandler;
+import com.sap.sse.security.ui.client.component.AbstractUserDialog.UserData;
+import com.sap.sse.security.ui.client.component.EditEmailDialogWithDefaultCallback;
 import com.sap.sse.security.ui.client.component.NewAccountValidator;
 import com.sap.sse.security.ui.shared.UserDTO;
 import com.sap.sse.security.ui.shared.UserManagementService;
@@ -53,13 +56,36 @@ public class ChangePasswordEntryPoint implements EntryPoint {
         fp.add(nameLabel);
         final TextBox nameText = new TextBox();
         nameText.setEnabled(false);
+        final Label emailLabel = new Label(stringMessages.email());
+        fp.add(emailLabel);
+        HorizontalPanel emailTextBoxAndButtonPanel = new HorizontalPanel();
+        final TextBox emailText = new TextBox();
+        emailText.setEnabled(false);
+        emailTextBoxAndButtonPanel.add(emailText);
+        final Button updateEmailButton = new Button(stringMessages.editEmail());
+        updateEmailButton.addClickHandler(new ClickHandler() {
+            @Override
+            public void onClick(ClickEvent event) {
+                new EditEmailDialogWithDefaultCallback(stringMessages, userManagementService, userService.getCurrentUser(),
+                        new AsyncCallback<UserData>() {
+                            @Override
+                            public void onSuccess(UserData result) {
+                                emailText.setText(result.getEmail());
+                            }
+                            @Override public void onFailure(Throwable caught) {}
+                }).show();
+            }
+        });
+        fp.add(emailTextBoxAndButtonPanel);
         userService.addUserStatusEventHandler(new UserStatusEventHandler() {
             @Override
             public void onUserStatusChange(UserDTO user) {
                 if (user == null) {
                     nameText.setText("");
+                    emailText.setText("");
                 } else {
                     nameText.setText(user.getName());
+                    emailText.setText(user.getEmail());
                 }
             }
         });

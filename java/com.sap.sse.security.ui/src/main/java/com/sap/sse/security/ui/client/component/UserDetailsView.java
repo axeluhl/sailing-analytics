@@ -26,7 +26,6 @@ import com.google.gwt.user.client.ui.VerticalPanel;
 import com.sap.sse.gwt.client.async.MarkedAsyncCallback;
 import com.sap.sse.gwt.client.controls.listedit.StringListEditorComposite;
 import com.sap.sse.gwt.client.dialog.DataEntryDialog;
-import com.sap.sse.gwt.client.dialog.DataEntryDialog.DialogCallback;
 import com.sap.sse.security.shared.DefaultRoles;
 import com.sap.sse.security.shared.UserManagementException;
 import com.sap.sse.security.ui.client.Resources;
@@ -93,28 +92,17 @@ public class UserDetailsView extends FlowPanel {
             @Override
             public void onClick(ClickEvent event) {
                 final UserDTO clickedUser = UserDetailsView.this.user;
-                new EditEmailDialog(stringMessages, userManagementService, clickedUser, new DialogCallback<UserData>() {
-                    @Override
-                    public void ok(final UserData userData) {
-                        userManagementService.updateSimpleUserEmail(clickedUser.getName(), userData.getEmail(), new MarkedAsyncCallback<Void>(
-                                new AsyncCallback<Void>() {
-                                    @Override
-                                    public void onFailure(Throwable caught) {
-                                        Window.alert(stringMessages.errorUpdatingEmail(caught.getMessage()));
-                                    }
-
-                                    @Override
-                                    public void onSuccess(Void result) {
-                                        emailLabel.setText(userData.getEmail());
-                                        for (UserChangeEventHandler handler : handlers) {
-                                            handler.onUserChange(clickedUser);
-                                        }
-                                        Window.alert(stringMessages.successfullyUpdatedEmail());
-                                    }
-                                }));
-                    }
-                    @Override public void cancel() {}
-                }).show();
+                new EditEmailDialogWithDefaultCallback(stringMessages, userManagementService, clickedUser,
+                        new AsyncCallback<UserData>() {
+                            @Override
+                            public void onSuccess(UserData result) {
+                                emailLabel.setText(result.getEmail());
+                                for (UserChangeEventHandler handler : handlers) {
+                                    handler.onUserChange(clickedUser);
+                                }
+                            }
+                            @Override public void onFailure(Throwable caught) {}
+                        }).show();
             }
         });
         Label title = new Label(stringMessages.userDetails());
