@@ -31,8 +31,6 @@ public abstract class StageTeaser extends Composite {
     @UiField HTMLPanel stageTeaserBandsPanel;
     @UiField DivElement teaserImage;
 
-    private final static String DEFAULT_STAGE_IMAGE_URL = "http://static.sapsailing.com/ubilabsimages/default/default_stage_event_teaser.jpg"; 
-    
     interface StageTeaserUiBinder extends UiBinder<Widget, StageTeaser> {
     }
     
@@ -42,8 +40,8 @@ public abstract class StageTeaser extends Composite {
         StageResources.INSTANCE.css().ensureInjected();
         initWidget(uiBinder.createAndBindUi(this));
         
-        String stageImageUrl = event.getStageImageURL() != null ? event.getStageImageURL() : DEFAULT_STAGE_IMAGE_URL;
-
+        String stageImageUrl = event.getStageImageURL() != null ? event.getStageImageURL() : StageResources.INSTANCE.defaultStageEventTeaserImage().getSafeUri().asString();;
+        
         String backgroundImage = "url(" + stageImageUrl + ")";
         teaserImage.getStyle().setBackgroundImage(backgroundImage);
         
