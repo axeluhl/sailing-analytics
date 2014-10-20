@@ -31,8 +31,6 @@ public class CompactEventHeader extends Composite {
     private final EventDTO event;
     private final PlaceNavigator placeNavigator;
     private final String leaderboardName;
-    
-    private final String defaultLogoUrl = "http://static.sapsailing.com/ubilabsimages/default/default_event_logo.jpg";
 
     public CompactEventHeader(EventDTO event, String leaderboardName, PlaceNavigator placeNavigator) {
         this.event = event;
@@ -74,7 +72,7 @@ public class CompactEventHeader extends Composite {
         } else {
         }
         eventNameSpan.setInnerText(eventName);
-        String logoUrl = event.getLogoImageURL() != null ? event.getLogoImageURL() : defaultLogoUrl;
+        String logoUrl = event.getLogoImageURL() != null ? event.getLogoImageURL() : EventHeaderResources.INSTANCE.defaultEventLogoImage().getSafeUri().asString();
         eventLogo.setSrc(logoUrl);
     }
     
