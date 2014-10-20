@@ -18,11 +18,11 @@ public interface UserManagementService extends RemoteService {
 
     SuccessInfo login(String username, String password);
 
-    UserDTO createSimpleUser(String name, String email, String password) throws UserManagementException, MailException;
+    UserDTO createSimpleUser(String name, String email, String password, String validationBaseURL) throws UserManagementException, MailException;
     
     void updateSimpleUserPassword(String name, String oldPassword, String newPassword) throws UserManagementException, MailException;
 
-    void updateSimpleUserEmail(String username, String newEmail) throws UserManagementException, MailException;
+    void updateSimpleUserEmail(String username, String newEmail, String validationBaseURL) throws UserManagementException, MailException;
 
     void resetPassword(String username) throws UserManagementException, MailException;
 

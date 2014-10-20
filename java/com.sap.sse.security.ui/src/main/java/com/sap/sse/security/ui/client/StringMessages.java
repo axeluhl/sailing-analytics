@@ -131,4 +131,6 @@ public interface StringMessages extends com.sap.sse.gwt.client.StringMessages {
 
     String emailValidationUnsuccessful(String username);
 
+    String roles();
+
 }

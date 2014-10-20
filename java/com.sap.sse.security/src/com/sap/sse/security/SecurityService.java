@@ -34,11 +34,14 @@ public interface SecurityService {
 
     void logout();
 
-    User createSimpleUser(String username, String email, String password) throws UserManagementException, MailException;
+    /**
+     * @param validationBaseURL if <code>null</code>, no validation will be attempted
+     */
+    User createSimpleUser(String username, String email, String password, String validationBaseURL) throws UserManagementException, MailException;
 
     void updateSimpleUserPassword(String name, String newPassword) throws UserManagementException, MailException;
 
-    void updateSimpleUserEmail(String username, String newEmail) throws UserManagementException, MailException;
+    void updateSimpleUserEmail(String username, String newEmail, String validationBaseURL) throws UserManagementException, MailException;
 
     User createSocialUser(String username, SocialUserAccount socialUserAccount) throws UserManagementException;
 

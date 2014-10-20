@@ -57,6 +57,13 @@ public class EditProfileEntryPoint implements EntryPoint {
         final TextBox nameText = new TextBox();
         nameText.setEnabled(false);
         fp.add(nameText);
+        nameText.setEnabled(false);
+        fp.add(nameText);
+        HorizontalPanel rolesPanel = new HorizontalPanel();
+        rolesPanel.add(new Label(stringMessages.roles()));
+        final Label rolesLabel = new Label();
+        rolesPanel.add(rolesLabel);
+        fp.add(rolesPanel);
         final Label emailLabel = new Label(stringMessages.email());
         fp.add(emailLabel);
         HorizontalPanel emailTextBoxAndButtonPanel = new HorizontalPanel();
@@ -85,9 +92,11 @@ public class EditProfileEntryPoint implements EntryPoint {
                 if (user == null) {
                     nameText.setText("");
                     emailText.setText("");
+                    rolesLabel.setText("");
                 } else {
                     nameText.setText(user.getName());
                     emailText.setText(user.getEmail());
+                    rolesLabel.setText(user.getRoles().toString());
                 }
             }
         });

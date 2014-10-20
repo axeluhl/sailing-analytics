@@ -125,10 +125,10 @@ public class UserManagementServiceImpl extends RemoteServiceServlet implements U
     }
 
     @Override
-    public UserDTO createSimpleUser(String name, String email, String password) throws UserManagementException, MailException {
+    public UserDTO createSimpleUser(String name, String email, String password, String validationBaseURL) throws UserManagementException, MailException {
         User u = null;
         try {
-            u = getSecurityService().createSimpleUser(name, email, password);
+            u = getSecurityService().createSimpleUser(name, email, password, validationBaseURL);
         } catch (UserManagementException e) {
             logger.log(Level.SEVERE, "Error creating user "+name, e);
             throw new UserManagementException(e.getMessage());
@@ -158,10 +158,10 @@ public class UserManagementServiceImpl extends RemoteServiceServlet implements U
     }
     
     @Override
-    public void updateSimpleUserEmail(String username, String newEmail) throws UserManagementException, MailException {
+    public void updateSimpleUserEmail(String username, String newEmail, String validationBaseURL) throws UserManagementException, MailException {
         final Subject subject = SecurityUtils.getSubject();
         if (subject.hasRole(DefaultRoles.ADMIN.getRolename()) || username.equals(SessionUtils.loadUsername())) {
-            getSecurityService().updateSimpleUserEmail(username, newEmail);
+            getSecurityService().updateSimpleUserEmail(username, newEmail, validationBaseURL);
         } else {
             throw new UserManagementException(UserManagementException.INVALID_CREDENTIALS);
         }

@@ -4,6 +4,7 @@ import java.io.UnsupportedEncodingException;
 import java.net.URLEncoder;
 import java.util.Arrays;
 import java.util.Collection;
+import java.util.HashMap;
 import java.util.Map;
 import java.util.Map.Entry;
 import java.util.Properties;
@@ -99,7 +100,7 @@ public class SecurityServiceImpl extends RemoteServiceServlet implements Securit
         if (store.getUserCollection().isEmpty()) {
             try {
                 logger.info("No users found, creating default user \"admin\" with password \"admin\"");
-                createSimpleUser("admin", "nobody@sapsailing.com", "admin");
+                createSimpleUser("admin", "nobody@sapsailing.com", "admin", /* validationBaseURL */ null);
                 addRoleForUser("admin", DefaultRoles.ADMIN.getRolename());
                 addRoleForUser("admin", "moderator");
             } catch (UserManagementException | MailException e) {
@@ -219,7 +220,8 @@ public class SecurityServiceImpl extends RemoteServiceServlet implements Securit
     }
 
     @Override
-    public User createSimpleUser(final String username, final String email, String password) throws UserManagementException, MailException {
+    public User createSimpleUser(final String username, final String email, String password,
+            final String validationBaseURL) throws UserManagementException, MailException {
         if (store.getUserByName(username) != null) {
             throw new UserManagementException(UserManagementException.USER_ALREADY_EXISTS);
         }
@@ -234,17 +236,19 @@ public class SecurityServiceImpl extends RemoteServiceServlet implements Securit
         UsernamePasswordAccount upa = new UsernamePasswordAccount(username, hashedPasswordBase64, salt);
         final User result = store.createUser(username, email, upa);
         store.updateUser(result); // store user with unvalidated e-mail
-        new Thread("e-mail validation for user " + username + " with e-mail address " + email) {
-            @Override
-            public void run() {
-                try {
-                    startEmailValidation(result);
-                } catch (MailException e) {
-                    logger.log(Level.SEVERE, "Error sending mail for new account validation of user " + username
-                            + " to address " + email, e);
+        if (validationBaseURL != null) {
+            new Thread("e-mail validation for user " + username + " with e-mail address " + email) {
+                @Override
+                public void run() {
+                    try {
+                        startEmailValidation(result, validationBaseURL);
+                    } catch (MailException e) {
+                        logger.log(Level.SEVERE, "Error sending mail for new account validation of user " + username
+                                + " to address " + email, e);
+                    }
                 }
-            }
-        }.start();
+            }.start();
+        }
         return result;
     }
 
@@ -283,7 +287,8 @@ public class SecurityServiceImpl extends RemoteServiceServlet implements Securit
     }
     
     @Override
-    public void updateSimpleUserEmail(final String username, final String newEmail) throws UserManagementException, MailException {
+    public void updateSimpleUserEmail(final String username, final String newEmail, final String validationBaseURL)
+            throws UserManagementException, MailException {
         final User user = store.getUserByName(username);
         if (user == null) {
             throw new UserManagementException(UserManagementException.USER_DOES_NOT_EXIST);
@@ -294,7 +299,7 @@ public class SecurityServiceImpl extends RemoteServiceServlet implements Securit
             @Override
             public void run() {
                 try {
-                    startEmailValidation(user);
+                    startEmailValidation(user, validationBaseURL);
                 } catch (MailException e) {
                     logger.log(Level.SEVERE, "Error sending mail to validate e-mail address change for user "
                             + username + " to address " + newEmail, e);
@@ -316,16 +321,35 @@ public class SecurityServiceImpl extends RemoteServiceServlet implements Securit
     }
 
     /**
-     * {@link User#startEmailValidation() Triggers} e-mail validation for the <code>user</code> object and
-     * sends out a URL to the user's e-mail that has the validation secret ready for validation by clicking.
+     * {@link User#startEmailValidation() Triggers} e-mail validation for the <code>user</code> object and sends out a
+     * URL to the user's e-mail that has the validation secret ready for validation by clicking.
+     * 
+     * @param baserURL
+     *            the URL under which the user can reach the e-mail validation service; this URL is required to assemble a
+     *            validation URL that is sent by e-mail to the user, to make the user return the validation secret
+     *            to the right server again.
      */
-    private void startEmailValidation(User user) throws MailException {
+    private void startEmailValidation(User user, String baseURL) throws MailException {
         String secret = user.startEmailValidation();
         try {
+            Map<String, String> urlParameters = new HashMap<>();
+            urlParameters.put("u", URLEncoder.encode(user.getName(), "UTF-8"));
+            urlParameters.put("v", URLEncoder.encode(secret, "UTF-8"));
+            StringBuilder url = new StringBuilder(baseURL);
+            boolean first = !baseURL.contains("?");
+            for (Map.Entry<String, String> e : urlParameters.entrySet()) {
+                if (first) {
+                    url.append('?');
+                    first = false;
+                } else {
+                    url.append('&');
+                }
+                url.append(e.getKey());
+                url.append('=');
+                url.append(e.getValue());
+            }
             sendMail(user.getName(), "e-Mail Validation",
-                    "Please click on the link below to validate your e-mail address.\n   "
-                            + "http://127.0.0.1:8888/security/ui/EmailValidation.html?gwt.codesvr=127.0.0.1:9997&u="
-                            + URLEncoder.encode(user.getName(), "UTF-8") + "&v=" + URLEncoder.encode(secret, "UTF-8"));
+                    "Please click on the link below to validate your e-mail address.\n   "+url.toString());
         } catch (UnsupportedEncodingException e) {
             logger.log(Level.SEVERE,
                     "Internal error: encoding UTF-8 not found. Couldn't send e-mail to user " + user.getName()

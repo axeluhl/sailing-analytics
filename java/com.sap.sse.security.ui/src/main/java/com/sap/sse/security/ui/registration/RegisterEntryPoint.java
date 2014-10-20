@@ -1,5 +1,7 @@
 package com.sap.sse.security.ui.registration;
 
+import java.util.Collections;
+
 import com.google.gwt.core.client.EntryPoint;
 import com.google.gwt.core.client.GWT;
 import com.google.gwt.dom.client.Style.Unit;
@@ -20,6 +22,7 @@ import com.google.gwt.user.client.ui.SubmitButton;
 import com.google.gwt.user.client.ui.TextBox;
 import com.sap.sse.gwt.client.EntryPointHelper;
 import com.sap.sse.security.shared.UserManagementException;
+import com.sap.sse.security.ui.client.EntryPointLinkFactory;
 import com.sap.sse.security.ui.client.RemoteServiceMappingConstants;
 import com.sap.sse.security.ui.client.StringMessages;
 import com.sap.sse.security.ui.client.component.NewAccountValidator;
@@ -82,7 +85,8 @@ public class RegisterEntryPoint implements EntryPoint {
         formPanel.addSubmitHandler(new SubmitHandler() {
             @Override
             public void onSubmit(SubmitEvent event) {
-                userManagementService.createSimpleUser(nameText.getText(), emailText.getText(), pwText.getText(), new AsyncCallback<UserDTO>() {
+                userManagementService.createSimpleUser(nameText.getText(), emailText.getText(), pwText.getText(), EntryPointLinkFactory.createEmailValidationLink(Collections.<String, String>emptyMap()),
+                        new AsyncCallback<UserDTO>() {
                     @Override
                     public void onFailure(Throwable caught) {
                         GWT.log(caught.getMessage());

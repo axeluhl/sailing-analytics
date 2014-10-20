@@ -1,7 +1,10 @@
 package com.sap.sse.security.ui.client.component;
 
+import java.util.Collections;
+
 import com.google.gwt.user.client.Window;
 import com.google.gwt.user.client.rpc.AsyncCallback;
+import com.sap.sse.security.ui.client.EntryPointLinkFactory;
 import com.sap.sse.security.ui.client.StringMessages;
 import com.sap.sse.security.ui.client.component.UserManagementPanel.UserCreatedEventHandler;
 import com.sap.sse.security.ui.shared.UserDTO;
@@ -20,7 +23,8 @@ public class CreateUserDialog extends AbstractUserDialog {
         super(stringMessages, stringMessages.createUser(), userManagementService, /* start with no user */ null, new DialogCallback<UserData>() {
                     @Override
                     public void ok(UserData usernameEmailPassword) {
-                        userManagementService.createSimpleUser(usernameEmailPassword.getUsername(), usernameEmailPassword.getEmail(), usernameEmailPassword.getPassword(), new AsyncCallback<UserDTO>() {
+                        userManagementService.createSimpleUser(usernameEmailPassword.getUsername(), usernameEmailPassword.getEmail(), usernameEmailPassword.getPassword(),
+                                EntryPointLinkFactory.createEmailValidationLink(Collections.<String, String>emptyMap()), new AsyncCallback<UserDTO>() {
                             @Override
                             public void onSuccess(UserDTO result) {
                                 for (UserCreatedEventHandler handler : handlers) {
