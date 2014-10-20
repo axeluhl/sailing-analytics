@@ -283,18 +283,24 @@ public class SecurityServiceImpl extends RemoteServiceServlet implements Securit
     }
     
     @Override
-    public void updateSimpleUserEmail(String username, String newEmail) throws UserManagementException, MailException {
+    public void updateSimpleUserEmail(final String username, final String newEmail) throws UserManagementException, MailException {
         final User user = store.getUserByName(username);
         if (user == null) {
             throw new UserManagementException(UserManagementException.USER_DOES_NOT_EXIST);
         }
+        logger.info("Changing e-mail address of user "+username+" to "+newEmail);
         user.setEmail(newEmail);
-        try {
-            startEmailValidation(user);
-        } catch (MailException e) {
-            logger.log(Level.SEVERE, "Error sending mail to validate e-mail address change for user "+username+
-                    " to address "+newEmail, e);
-        }
+        new Thread("e-mail validation after changing e-mail of user " + username + " to " + newEmail) {
+            @Override
+            public void run() {
+                try {
+                    startEmailValidation(user);
+                } catch (MailException e) {
+                    logger.log(Level.SEVERE, "Error sending mail to validate e-mail address change for user "
+                            + username + " to address " + newEmail, e);
+                }
+            }
+        }.start();
         store.updateUser(user);
     }
     

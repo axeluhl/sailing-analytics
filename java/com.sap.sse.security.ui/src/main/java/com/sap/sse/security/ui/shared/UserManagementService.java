@@ -26,7 +26,7 @@ public interface UserManagementService extends RemoteService {
 
     void resetPassword(String username) throws UserManagementException, MailException;
 
-    void validateEmail(String username, String validationSecret) throws UserManagementException;
+    boolean validateEmail(String username, String validationSecret) throws UserManagementException;
 
     SuccessInfo deleteUser(String username);
 

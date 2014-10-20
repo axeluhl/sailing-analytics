@@ -27,15 +27,19 @@ public class EmailValidationEntryPoint implements EntryPoint {
         final String validationSecret = Window.Location.getParameter("v");
         RootLayoutPanel rootPanel = RootLayoutPanel.get();
         final Label resultLabel = new Label();
-        userManagementService.validateEmail(username, validationSecret, new MarkedAsyncCallback<Void>(new AsyncCallback<Void>() {
+        userManagementService.validateEmail(username, validationSecret, new MarkedAsyncCallback<Boolean>(new AsyncCallback<Boolean>() {
             @Override
             public void onFailure(Throwable caught) {
                 resultLabel.setText(stringMessages.errorValidatingEmail(username, caught.getMessage()));
             }
 
             @Override
-            public void onSuccess(Void result) {
-                resultLabel.setText(stringMessages.emailValidatedSuccessfully(username));
+            public void onSuccess(Boolean result) {
+                if (result) {
+                    resultLabel.setText(stringMessages.emailValidatedSuccessfully(username));
+                } else {
+                    resultLabel.setText(stringMessages.emailValidationUnsuccessful(username));
+                }
             }
         }));
         rootPanel.add(resultLabel);

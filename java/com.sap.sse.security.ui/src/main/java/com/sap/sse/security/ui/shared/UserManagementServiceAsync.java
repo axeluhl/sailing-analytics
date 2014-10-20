@@ -21,7 +21,7 @@ public interface UserManagementServiceAsync {
 
     void resetPassword(String username, AsyncCallback<Void> callback);
     
-    void validateEmail(String username, String validationSecret, AsyncCallback<Void> markedAsyncCallback);
+    void validateEmail(String username, String validationSecret, AsyncCallback<Boolean> markedAsyncCallback);
 
     void updateSimpleUserEmail(String username, String newEmail, AsyncCallback<Void> callback);
 

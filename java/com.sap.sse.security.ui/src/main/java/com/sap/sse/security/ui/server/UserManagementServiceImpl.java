@@ -173,8 +173,8 @@ public class UserManagementServiceImpl extends RemoteServiceServlet implements U
     }
 
     @Override
-    public void validateEmail(String username, String validationSecret) throws UserManagementException {
-        getSecurityService().validateEmail(username, validationSecret);
+    public boolean validateEmail(String username, String validationSecret) throws UserManagementException {
+        return getSecurityService().validateEmail(username, validationSecret);
     }
 
     @Override

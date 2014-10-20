@@ -92,10 +92,11 @@ public class UserDetailsView extends FlowPanel {
         changeEmail.addClickHandler(new ClickHandler() {
             @Override
             public void onClick(ClickEvent event) {
-                new EditEmailDialog(stringMessages, userManagementService, UserDetailsView.this.user, new DialogCallback<UserData>() {
+                final UserDTO clickedUser = UserDetailsView.this.user;
+                new EditEmailDialog(stringMessages, userManagementService, clickedUser, new DialogCallback<UserData>() {
                     @Override
                     public void ok(final UserData userData) {
-                        userManagementService.updateSimpleUserEmail(UserDetailsView.this.user.getName(), userData.getEmail(), new MarkedAsyncCallback<Void>(
+                        userManagementService.updateSimpleUserEmail(clickedUser.getName(), userData.getEmail(), new MarkedAsyncCallback<Void>(
                                 new AsyncCallback<Void>() {
                                     @Override
                                     public void onFailure(Throwable caught) {
@@ -105,6 +106,9 @@ public class UserDetailsView extends FlowPanel {
                                     @Override
                                     public void onSuccess(Void result) {
                                         emailLabel.setText(userData.getEmail());
+                                        for (UserChangeEventHandler handler : handlers) {
+                                            handler.onUserChange(clickedUser);
+                                        }
                                         Window.alert(stringMessages.successfullyUpdatedEmail());
                                     }
                                 }));
