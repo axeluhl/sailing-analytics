@@ -35,7 +35,7 @@ import com.sap.sse.security.ui.shared.UserDTO;
 import com.sap.sse.security.ui.shared.UserManagementService;
 import com.sap.sse.security.ui.shared.UserManagementServiceAsync;
 
-public class ChangePasswordEntryPoint implements EntryPoint {
+public class EditProfileEntryPoint implements EntryPoint {
     private final UserManagementServiceAsync userManagementService = GWT.create(UserManagementService.class);
     private final StringMessages stringMessages = GWT.create(StringMessages.class);
 

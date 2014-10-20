@@ -29,7 +29,7 @@
   <super-source path="jre" />
 
   <!-- Specify the app entry point class.                         -->
-  <entry-point class='com.sap.sse.security.ui.changepassword.ChangePasswordEntryPoint'/>
+  <entry-point class='com.sap.sse.security.ui.changepassword.EditProfileEntryPoint'/>
 
   <set-property name="gwt.logging.enabled" value="TRUE"/> 
   <set-property name="gwt.logging.logLevel" value="FINE"/>

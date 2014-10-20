@@ -62,7 +62,7 @@
 								<module>com.sap.sse.security.ui.OAuthLogin</module>
 								<module>com.sap.sse.security.ui.LoginPanel</module>
 								<module>com.sap.sse.security.ui.Register</module>
-								<module>com.sap.sse.security.ui.ChangePassword</module>
+								<module>com.sap.sse.security.ui.EditProfile</module>
 								<module>com.sap.sse.security.ui.EmailValidation</module>
 							</modules>
 							<gen>${basedir}/.generated</gen>
