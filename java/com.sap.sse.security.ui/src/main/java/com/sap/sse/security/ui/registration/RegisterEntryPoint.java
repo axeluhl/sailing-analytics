@@ -85,7 +85,8 @@ public class RegisterEntryPoint implements EntryPoint {
         formPanel.addSubmitHandler(new SubmitHandler() {
             @Override
             public void onSubmit(SubmitEvent event) {
-                userManagementService.createSimpleUser(nameText.getText(), emailText.getText(), pwText.getText(), EntryPointLinkFactory.createEmailValidationLink(Collections.<String, String>emptyMap()),
+                userManagementService.createSimpleUser(nameText.getText(), emailText.getText(), pwText.getText(),
+                        EntryPointLinkFactory.createEmailValidationLink(Collections.<String, String>emptyMap()),
                         new AsyncCallback<UserDTO>() {
                     @Override
                     public void onFailure(Throwable caught) {
