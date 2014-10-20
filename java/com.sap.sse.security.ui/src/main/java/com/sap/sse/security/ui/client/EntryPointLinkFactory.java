@@ -2,6 +2,8 @@ package com.sap.sse.security.ui.client;
 
 import java.util.Map;
 
+import com.google.gwt.http.client.UrlBuilder;
+import com.google.gwt.user.client.Window;
 import com.sap.sse.gwt.client.AbstractEntryPointLinkFactory;
 
 public class EntryPointLinkFactory extends AbstractEntryPointLinkFactory {
@@ -22,7 +24,14 @@ public class EntryPointLinkFactory extends AbstractEntryPointLinkFactory {
         return createEntryPointLink("/security/ui/UserManagement.html", parameters);
     }
 
+    /**
+     * Produces an absolute base URL for the validation 
+     */
     public static String createEmailValidationLink(Map<String, String> parameters) {
-        return createEntryPointLink("/security/ui/EmailValidation.html", parameters);
+        UrlBuilder builder = Window.Location.createUrlBuilder().setPath("/security/ui/EmailValidation.html");
+        for (Map.Entry<String, String> param : parameters.entrySet()) {
+            builder.setParameter(param.getKey(), param.getValue());
+        }
+        return builder.buildString();
     }
 }

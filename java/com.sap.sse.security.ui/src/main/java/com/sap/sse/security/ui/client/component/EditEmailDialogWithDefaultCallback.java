@@ -30,7 +30,8 @@ public class EditEmailDialogWithDefaultCallback extends EditEmailDialog {
         super(stringMessages, userManagementService, user, new DialogCallback<UserData>() {
             @Override
             public void ok(final UserData userData) {
-                userManagementService.updateSimpleUserEmail(userData.getUsername(), userData.getEmail(), EntryPointLinkFactory.createEmailValidationLink(Collections.<String, String>emptyMap()),
+                userManagementService.updateSimpleUserEmail(userData.getUsername(), userData.getEmail(),
+                        EntryPointLinkFactory.createEmailValidationLink(Collections.<String, String>emptyMap()),
                         new MarkedAsyncCallback<Void>(
                         new AsyncCallback<Void>() {
                             @Override

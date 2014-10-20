@@ -39,9 +39,9 @@ public interface SecurityService {
      */
     User createSimpleUser(String username, String email, String password, String validationBaseURL) throws UserManagementException, MailException;
 
-    void updateSimpleUserPassword(String name, String newPassword) throws UserManagementException, MailException;
+    void updateSimpleUserPassword(String name, String newPassword) throws UserManagementException;
 
-    void updateSimpleUserEmail(String username, String newEmail, String validationBaseURL) throws UserManagementException, MailException;
+    void updateSimpleUserEmail(String username, String newEmail, String validationBaseURL) throws UserManagementException;
 
     User createSocialUser(String username, SocialUserAccount socialUserAccount) throws UserManagementException;
 
@@ -81,7 +81,7 @@ public interface SecurityService {
      * Generates a new random password for the user identified by <code>username</code> and sends it
      * to the user's e-mail address.
      */
-    void resetPassword(String username) throws UserManagementException, MailException;
+    void resetPassword(String username) throws UserManagementException;
 
     boolean validateEmail(String username, String validationSecret) throws UserManagementException;
 

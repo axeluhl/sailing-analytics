@@ -141,7 +141,7 @@ public class UserManagementServiceImpl extends RemoteServiceServlet implements U
 
 
     @Override
-    public void updateSimpleUserPassword(String username, String oldPassword, String newPassword) throws UserManagementException, MailException {
+    public void updateSimpleUserPassword(final String username, String oldPassword, String newPassword) throws UserManagementException {
         final Subject subject = SecurityUtils.getSubject();
         if (!subject.hasRole(DefaultRoles.ADMIN.getRolename())) {
             // validate old password before proceeding
@@ -151,7 +151,15 @@ public class UserManagementServiceImpl extends RemoteServiceServlet implements U
         }
         if (subject.hasRole(DefaultRoles.ADMIN.getRolename()) || username.equals(SessionUtils.loadUsername())) {
             getSecurityService().updateSimpleUserPassword(username, newPassword);
-            getSecurityService().sendMail(username, "Password Changed", "Somebody changed your password for your user named "+username+".\nIf that wasn't you, I'd be worried...");
+            new Thread("sending updated password to user "+username+" by e-mail") {
+                @Override public void run() {
+                    try {
+                        getSecurityService().sendMail(username, "Password Changed", "Somebody changed your password for your user named "+username+".\nIf that wasn't you, I'd be worried...");
+                    } catch (MailException e) {
+                        logger.log(Level.SEVERE, "Error sending new password to user "+username+" by e-mail", e);
+                    }
+                }
+            }.start();
         } else {
             throw new UserManagementException(UserManagementException.INVALID_CREDENTIALS);
         }
@@ -168,7 +176,7 @@ public class UserManagementServiceImpl extends RemoteServiceServlet implements U
     }
     
     @Override
-    public void resetPassword(String username) throws UserManagementException, MailException {
+    public void resetPassword(String username) throws UserManagementException {
         getSecurityService().resetPassword(username);
     }
 

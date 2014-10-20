@@ -162,7 +162,7 @@ public class SecurityServiceImpl extends RemoteServiceServlet implements Securit
     }
     
     @Override
-    public void resetPassword(String username) throws UserManagementException, MailException {
+    public void resetPassword(final String username) throws UserManagementException {
         final User user = store.getUserByName(username);
         if (user == null) {
             throw new UserManagementException(UserManagementException.USER_DOES_NOT_EXIST);
@@ -174,8 +174,17 @@ public class SecurityServiceImpl extends RemoteServiceServlet implements Securit
         new Random().nextBytes(randomBytes);
         final String newPassword = new Sha256Hash(randomBytes).toBase64();
         updateSimpleUserPassword(user, newPassword);
-        sendMail(username, "Password Reset", "Your new password for your username "+username+
-                " is \n    "+newPassword+"\nPlease change after next sign-in.");
+        new Thread("sending new password to user "+username+" by e-mail") {
+            @Override public void run() {
+                try {
+                    sendMail(username, "Password Reset", "Your new password for your username "+username+
+                            " is \n    "+newPassword+"\nPlease change after next sign-in.");
+                } catch (MailException e) {
+                    // TODO Auto-generated catch block
+                    e.printStackTrace();
+                }
+            }
+        }.start();
     }
 
     @Override
@@ -253,7 +262,7 @@ public class SecurityServiceImpl extends RemoteServiceServlet implements Securit
     }
 
     @Override
-    public void updateSimpleUserPassword(String username, String newPassword) throws UserManagementException, MailException {
+    public void updateSimpleUserPassword(String username, String newPassword) throws UserManagementException {
         final User user = store.getUserByName(username);
         if (user == null) {
             throw new UserManagementException(UserManagementException.USER_DOES_NOT_EXIST);
@@ -287,8 +296,7 @@ public class SecurityServiceImpl extends RemoteServiceServlet implements Securit
     }
     
     @Override
-    public void updateSimpleUserEmail(final String username, final String newEmail, final String validationBaseURL)
-            throws UserManagementException, MailException {
+    public void updateSimpleUserEmail(final String username, final String newEmail, final String validationBaseURL) throws UserManagementException {
         final User user = store.getUserByName(username);
         if (user == null) {
             throw new UserManagementException(UserManagementException.USER_DOES_NOT_EXIST);

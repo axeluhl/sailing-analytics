@@ -11,6 +11,7 @@ import com.sap.sse.gwt.client.EntryPointHelper;
 import com.sap.sse.gwt.client.async.MarkedAsyncCallback;
 import com.sap.sse.security.ui.client.RemoteServiceMappingConstants;
 import com.sap.sse.security.ui.client.StringMessages;
+import com.sap.sse.security.ui.client.UserService;
 import com.sap.sse.security.ui.shared.UserManagementService;
 import com.sap.sse.security.ui.shared.UserManagementServiceAsync;
 
@@ -23,6 +24,7 @@ public class EmailValidationEntryPoint implements EntryPoint {
         EntryPointHelper.registerASyncService((ServiceDefTarget) userManagementService,
                 RemoteServiceMappingConstants.WEB_CONTEXT_PATH,
                 RemoteServiceMappingConstants.userManagementServiceRemotePath);
+        final UserService userService = new UserService(userManagementService);
         final String username = Window.Location.getParameter("u");
         final String validationSecret = Window.Location.getParameter("v");
         RootLayoutPanel rootPanel = RootLayoutPanel.get();
@@ -36,6 +38,7 @@ public class EmailValidationEntryPoint implements EntryPoint {
             @Override
             public void onSuccess(Boolean result) {
                 if (result) {
+                    userService.updateUser(/* notifyOtherInstances */ true);
                     resultLabel.setText(stringMessages.emailValidatedSuccessfully(username));
                 } else {
                     resultLabel.setText(stringMessages.emailValidationUnsuccessful(username));
