@@ -1,4 +1,4 @@
-package com.sap.sse.security.userstore.mongodb;
+package com.sap.sse.security.userstore.mongodb.impl;
 
 import java.util.logging.Logger;
 
@@ -6,7 +6,10 @@ import org.osgi.framework.BundleActivator;
 import org.osgi.framework.BundleContext;
 import org.osgi.framework.ServiceRegistration;
 
+import com.sap.sailing.domain.persistence.impl.CollectionNames;
+import com.sap.sailing.mongodb.MongoDBService;
 import com.sap.sse.security.UserStore;
+import com.sap.sse.security.userstore.mongodb.UserStoreImpl;
 
 public class Activator implements BundleActivator {
 
@@ -27,6 +30,9 @@ public class Activator implements BundleActivator {
         registration = context.registerService(UserStore.class.getName(),
                 new UserStoreImpl(), null);
         Logger.getLogger(Activator.class.getName()).info("User store registered.");
+        for (CollectionNames name : CollectionNames.values()) {
+            MongoDBService.INSTANCE.registerExclusively(CollectionNames.class, name.name());
+        }
     }
 
     /*

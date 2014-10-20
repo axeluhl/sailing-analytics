@@ -22,9 +22,7 @@ import com.sap.sse.security.shared.Account;
 import com.sap.sse.security.shared.SocialUserAccount;
 import com.sap.sse.security.shared.UsernamePasswordAccount;
 import com.sap.sse.security.shared.Account.AccountType;
-import com.sap.sse.security.userstore.mongodb.CollectionNames;
 import com.sap.sse.security.userstore.mongodb.DomainObjectFactory;
-import com.sap.sse.security.userstore.mongodb.FieldNames;
 
 public class DomainObjectFactoryImpl implements DomainObjectFactory {
     private static final Logger logger = Logger.getLogger(DomainObjectFactoryImpl.class.getName());

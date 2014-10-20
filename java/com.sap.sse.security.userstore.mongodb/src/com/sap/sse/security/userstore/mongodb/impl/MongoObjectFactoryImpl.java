@@ -16,8 +16,6 @@ import com.sap.sse.security.shared.Account;
 import com.sap.sse.security.shared.SocialUserAccount;
 import com.sap.sse.security.shared.UsernamePasswordAccount;
 import com.sap.sse.security.shared.Account.AccountType;
-import com.sap.sse.security.userstore.mongodb.CollectionNames;
-import com.sap.sse.security.userstore.mongodb.FieldNames;
 import com.sap.sse.security.userstore.mongodb.MongoObjectFactory;
 
 public class MongoObjectFactoryImpl implements MongoObjectFactory {
