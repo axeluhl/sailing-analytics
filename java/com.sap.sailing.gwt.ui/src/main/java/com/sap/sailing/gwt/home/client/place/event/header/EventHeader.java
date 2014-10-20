@@ -68,8 +68,6 @@ public class EventHeader extends AbstractEventComposite {
 //  private final List<Anchor> links2;
 //  private final List<Anchor> links3;
     
-    private final String defaultLogoUrl = "http://static.sapsailing.com/ubilabsimages/default/default_event_logo.jpg";
-    
     private final PlaceNavigator placeNavigator;
     
     public EventHeader(EventDTO event, PlaceNavigator placeNavigator, EventPageNavigator pageNavigator) {
@@ -188,7 +186,7 @@ public class EventHeader extends AbstractEventComposite {
             facebookAnchor.setVisible(false);
         }
         
-        String logoUrl = event.getLogoImageURL() != null ? event.getLogoImageURL() : defaultLogoUrl;
+        String logoUrl = event.getLogoImageURL() != null ? event.getLogoImageURL() : EventHeaderResources.INSTANCE.defaultEventLogoImage().getSafeUri().asString();;
         eventLogo.setSrc(logoUrl);
         eventLogo2.setSrc(logoUrl);
 //        eventLogo3.setSrc(logoUrl);
