@@ -217,7 +217,7 @@ public class SecurityServiceImpl extends RemoteServiceServlet implements Securit
     }
 
     @Override
-    public User createSimpleUser(String username, String email, String password) throws UserManagementException, MailException {
+    public User createSimpleUser(final String username, final String email, String password) throws UserManagementException, MailException {
         if (store.getUserByName(username) != null) {
             throw new UserManagementException(UserManagementException.USER_ALREADY_EXISTS);
         }
@@ -231,13 +231,18 @@ public class SecurityServiceImpl extends RemoteServiceServlet implements Securit
         String hashedPasswordBase64 = hashPassword(password, salt);
         UsernamePasswordAccount upa = new UsernamePasswordAccount(username, hashedPasswordBase64, salt);
         final User result = store.createUser(username, email, upa);
-        try {
-            startEmailValidation(result);
-        } catch (MailException e) {
-            logger.log(Level.SEVERE, "Error sending mail for new account validation of user "+username+
-                    " to address "+email, e);
-        }
-        store.updateUser(result);
+        store.updateUser(result); // store user with unvalidated e-mail
+        new Thread("e-mail validation for user " + username + " with e-mail address " + email) {
+            @Override
+            public void run() {
+                try {
+                    startEmailValidation(result);
+                } catch (MailException e) {
+                    logger.log(Level.SEVERE, "Error sending mail for new account validation of user " + username
+                            + " to address " + email, e);
+                }
+            }
+        }.start();
         return result;
     }
 

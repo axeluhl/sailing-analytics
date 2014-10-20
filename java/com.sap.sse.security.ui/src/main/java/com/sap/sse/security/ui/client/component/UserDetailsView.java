@@ -6,7 +6,6 @@ import java.util.List;
 import java.util.Map.Entry;
 
 import com.google.gwt.core.client.GWT;
-import com.google.gwt.core.client.Scheduler;
 import com.google.gwt.dom.client.Style.Unit;
 import com.google.gwt.event.dom.client.ClickEvent;
 import com.google.gwt.event.dom.client.ClickHandler;
@@ -17,7 +16,6 @@ import com.google.gwt.user.client.Window;
 import com.google.gwt.user.client.rpc.AsyncCallback;
 import com.google.gwt.user.client.ui.Button;
 import com.google.gwt.user.client.ui.DecoratorPanel;
-import com.google.gwt.user.client.ui.DialogBox;
 import com.google.gwt.user.client.ui.FlexTable;
 import com.google.gwt.user.client.ui.FlowPanel;
 import com.google.gwt.user.client.ui.HTML;
@@ -53,8 +51,6 @@ public class UserDetailsView extends FlowPanel {
     private final Label emailLabel;
     private final StringListEditorComposite rolesEditor;
     private final VerticalPanel accountPanels;
-    private final Button deleteButton;
-
     private UserDTO user;
 
     public UserDetailsView(final UserService userService, UserDTO user, final StringMessages stringMessages) {
@@ -140,29 +136,11 @@ public class UserDetailsView extends FlowPanel {
         decoratorPanel.setWidget(fp);
         this.add(decoratorPanel);
         this.add(rolesEditor);
-        deleteButton = new Button(stringMessages.deleteUser(), new ClickHandler() {
-            @Override
-            public void onClick(ClickEvent event) {
-                final DeleteUserConfimDialog deleteUserConfimDialog = new DeleteUserConfimDialog(
-                        userManagementService, UserDetailsView.this.user.getName(), stringMessages);
-                Scheduler.get().scheduleDeferred(new Scheduler.ScheduledCommand() {
-                    public void execute() {
-                        deleteUserConfimDialog.center();
-                    }
-                });
-                deleteUserConfimDialog.show();
-                for (UserChangeEventHandler handler : handlers) {
-                    handler.onUserChange(UserDetailsView.this.user);
-                }
-            }
-        });
-        this.add(deleteButton);
         updateUser(user, userManagementService);
     }
 
     public void updateUser(final UserDTO user, final UserManagementServiceAsync userManagementService) {
         this.user = user;
-        deleteButton.setEnabled(user != null);
         accountPanels.clear();
         if (user == null) {
             usernameLabel.setText("");
@@ -213,25 +191,30 @@ public class UserDetailsView extends FlowPanel {
                             }).show();
                         }
                     });
-                    final Button resetPasswordButton = new Button(stringMessages.resetPassword());
-                    accountPanelContent.add(resetPasswordButton);
-                    resetPasswordButton.addClickHandler(new ClickHandler() {
-                        @Override
-                        public void onClick(ClickEvent event) {
-                            userManagementService.resetPassword(UserDetailsView.this.user.getName(), new MarkedAsyncCallback<Void>(
-                                    new AsyncCallback<Void>() {
-                                        @Override
-                                        public void onFailure(Throwable caught) {
-                                            Window.alert(stringMessages.errorResettingPassword(UserDetailsView.this.user.getName(), caught.getMessage()));
-                                        }
+                    // only offer password reset if the user's e-mail address has successfully been validated
+                    if (UserDetailsView.this.user.isEmailValidated()) {
+                        final Button resetPasswordButton = new Button(stringMessages.resetPassword());
+                        accountPanelContent.add(resetPasswordButton);
+                        resetPasswordButton.addClickHandler(new ClickHandler() {
+                            @Override
+                            public void onClick(ClickEvent event) {
+                                userManagementService.resetPassword(UserDetailsView.this.user.getName(),
+                                        new MarkedAsyncCallback<Void>(new AsyncCallback<Void>() {
+                                            @Override
+                                            public void onFailure(Throwable caught) {
+                                                Window.alert(stringMessages.errorResettingPassword(
+                                                        UserDetailsView.this.user.getName(), caught.getMessage()));
+                                            }
 
-                                        @Override
-                                        public void onSuccess(Void result) {
-                                            Window.alert(stringMessages.successfullyResetPassword(UserDetailsView.this.user.getName()));
-                                        }
-                                    }));
-                        }
-                    });
+                                            @Override
+                                            public void onSuccess(Void result) {
+                                                Window.alert(stringMessages
+                                                        .successfullyResetPassword(UserDetailsView.this.user.getName()));
+                                            }
+                                        }));
+                            }
+                        });
+                    }
                 } else if (a instanceof SocialUserDTO) {
                     SocialUserDTO sua = (SocialUserDTO) a;
                     FlexTable table = new FlexTable();
@@ -249,54 +232,6 @@ public class UserDetailsView extends FlowPanel {
             }
             rolesEditor.setValue(user.getRoles());
         }
-    }
-
-    private static class DeleteUserConfimDialog extends DialogBox {
-        final Button ok;
-        
-        public DeleteUserConfimDialog(final UserManagementServiceAsync userManagementService, final String username, final StringMessages stringMessages) {
-            setText(stringMessages.deleteUserQuestion());
-            setAnimationEnabled(true);
-            setGlassEnabled(true);
-            VerticalPanel vp = new VerticalPanel();
-            vp.add(new Label(stringMessages.doYouReallyWantToDeleteUser(username)));
-            HorizontalPanel hp = new HorizontalPanel();
-            ok = new Button(stringMessages.ok());
-            ok.addClickHandler(new ClickHandler() {
-                public void onClick(ClickEvent event) {
-                    userManagementService.deleteUser(username, new AsyncCallback<SuccessInfo>() {
-                        @Override
-                        public void onSuccess(SuccessInfo result) {
-                            Window.alert(result.getMessage());
-                        }
-
-                        @Override
-                        public void onFailure(Throwable caught) {
-                            Window.alert(stringMessages.errorDeletingUser());
-                        }
-                    });
-                    DeleteUserConfimDialog.this.hide();
-                }
-            });
-            hp.add(ok);
-            Button cancel = new Button(stringMessages.cancel(), new ClickHandler() {
-                @Override
-                public void onClick(ClickEvent event) {
-                    DeleteUserConfimDialog.this.hide();
-                }
-            });
-            hp.add(cancel);
-            vp.add(hp);
-            setWidget(vp);
-        }
-
-        @Override
-        public void show() {
-            super.show();
-            ok.setFocus(true);
-        }
-        
-        
     }
 
     public void addUserChangeEventHandler(UserChangeEventHandler handler) {
