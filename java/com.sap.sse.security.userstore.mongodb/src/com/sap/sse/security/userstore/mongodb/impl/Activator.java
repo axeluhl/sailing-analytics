@@ -6,7 +6,6 @@ import org.osgi.framework.BundleActivator;
 import org.osgi.framework.BundleContext;
 import org.osgi.framework.ServiceRegistration;
 
-import com.sap.sailing.domain.persistence.impl.CollectionNames;
 import com.sap.sailing.mongodb.MongoDBService;
 import com.sap.sse.security.UserStore;
 import com.sap.sse.security.userstore.mongodb.UserStoreImpl;
