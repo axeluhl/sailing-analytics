@@ -163,27 +163,9 @@ public class PathGeneratorTreeGrowWind extends PathGeneratorBase {
         return new TimedPositionImpl(nextTime, nextPosition);
     }
 
-    // use base direction to distinguish direction changes that do or don't require a turn
-    char getBaseDirection(char direction) {
-        char baseDirection = direction;
-
-        if (direction == 'M') {
-            baseDirection = 'L';
-        }
-        if (direction == 'S') {
-            baseDirection = 'R';
-        }
-
-        return baseDirection;
-    }
-
     // check whether nextDirection is same base direction as previous direction, i.e. no turn
     boolean isSameDirection(char prevDirection, char nextDirection) {
-
-        char prevBaseDirection = this.getBaseDirection(prevDirection);
-        char nextBaseDirection = this.getBaseDirection(nextDirection);
-
-        return ((nextBaseDirection == prevBaseDirection)||(prevBaseDirection == '0'));
+        return ((nextDirection == prevDirection)||(prevDirection == '0'));
     }
 
     // get path candidate measuring height towards (local, current-apparent) wind
@@ -248,9 +230,8 @@ public class PathGeneratorTreeGrowWind extends PathGeneratorBase {
 
         // extend path-string by step-direction
         String pathStr = path.path + nextDirection;
-        char nextBaseDirection = this.getBaseDirection(nextDirection);
 
-        return (new PathCandidate(pathPos, reachedEnd, vrtDist, hrzDist, turnCount, pathStr, nextBaseDirection, appWind));
+        return (new PathCandidate(pathPos, reachedEnd, vrtDist, hrzDist, turnCount, pathStr, nextDirection, appWind));
     }
 
 
@@ -279,17 +260,9 @@ public class PathGeneratorTreeGrowWind extends PathGeneratorBase {
             newPathCand = getPathCandWind(path, 'L', timeStep, turnLoss, posStart, posEnd, tgtHeight);
             result.add(newPathCand);
 
-            // step wide left
-            //newPathCand = getPathCandWind(path, 'M', timeStep, turnLoss, posStart, posEnd, tgtHeight);
-            //result.add(newPathCand);
-
             // step right
             newPathCand = getPathCandWind(path, 'R', timeStep, turnLoss, posStart, posEnd, tgtHeight);
             result.add(newPathCand);
-
-            // step wide right
-            //newPathCand = getPathCandWind(path, 'S', timeStep, turnLoss, posStart, posEnd, tgtHeight);
-            //result.add(newPathCand);
 
         }
 
