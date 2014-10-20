@@ -1,5 +1,7 @@
 package com.sap.sse.security;
 
+import java.io.UnsupportedEncodingException;
+import java.net.URLEncoder;
 import java.util.Arrays;
 import java.util.Collection;
 import java.util.Map;
@@ -313,8 +315,16 @@ public class SecurityServiceImpl extends RemoteServiceServlet implements Securit
      */
     private void startEmailValidation(User user) throws MailException {
         String secret = user.startEmailValidation();
-        sendMail(user.getName(), "e-Mail Validation", "Please click on the link below to validate your e-mail address.\n   "+
-                "http://127.0.0.1:8888/security/ui/EmailValidation.html?gwt.codesvr=127.0.0.1:9997&u="+user.getName()+"&v="+secret);
+        try {
+            sendMail(user.getName(), "e-Mail Validation",
+                    "Please click on the link below to validate your e-mail address.\n   "
+                            + "http://127.0.0.1:8888/security/ui/EmailValidation.html?gwt.codesvr=127.0.0.1:9997&u="
+                            + URLEncoder.encode(user.getName(), "UTF-8") + "&v=" + URLEncoder.encode(secret, "UTF-8"));
+        } catch (UnsupportedEncodingException e) {
+            logger.log(Level.SEVERE,
+                    "Internal error: encoding UTF-8 not found. Couldn't send e-mail to user " + user.getName()
+                            + " at e-mail address " + user.getEmail(), e);
+        }
     }
 
     protected String hashPassword(String password, Object salt) {
