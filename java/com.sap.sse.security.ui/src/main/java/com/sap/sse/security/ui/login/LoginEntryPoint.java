@@ -55,14 +55,6 @@ public class LoginEntryPoint extends AbstractEntryPoint {
         final TextBox nameText = new TextBox();
         nameText.ensureDebugId("username");
         fp.add(nameText);
-        Label pwLabel = new Label(stringMessages.password());
-        pwLabel.ensureDebugId("password");
-        fp.add(pwLabel);
-        final PasswordTextBox pwText = new PasswordTextBox();
-        fp.add(pwText);
-        final SubmitButton submit = new SubmitButton(stringMessages.signIn());
-        submit.ensureDebugId("login");
-        fp.add(submit);
         final Button passwordReset = new Button(stringMessages.resetPassword());
         passwordReset.addClickHandler(new ClickHandler() {
             @Override
@@ -88,6 +80,15 @@ public class LoginEntryPoint extends AbstractEntryPoint {
                 }));
             }
         });
+        fp.add(passwordReset);
+        Label pwLabel = new Label(stringMessages.password());
+        pwLabel.ensureDebugId("password");
+        fp.add(pwLabel);
+        final PasswordTextBox pwText = new PasswordTextBox();
+        fp.add(pwText);
+        final SubmitButton submit = new SubmitButton(stringMessages.signIn());
+        submit.ensureDebugId("login");
+        fp.add(submit);
         fp.add(new Anchor(new SafeHtmlBuilder().appendEscaped(stringMessages.signUp()).toSafeHtml(),
                 EntryPointLinkFactory.createRegistrationLink(Collections.<String, String> emptyMap())));
         FormPanel formPanel = new FormPanel();
@@ -109,7 +110,11 @@ public class LoginEntryPoint extends AbstractEntryPoint {
                                 Window.alert(stringMessages.loggedIn(result.getUserDTO().getName()));
                             }
                         } else {
-                            Window.alert(result.getMessage());
+                            if (SuccessInfo.FAILED_TO_LOGIN.equals(result.getMessage())) {
+                                Window.alert(stringMessages.failedToSignIn());
+                            } else {
+                                Window.alert(result.getMessage());
+                            }
                         }
                     }
                 });
@@ -117,5 +122,6 @@ public class LoginEntryPoint extends AbstractEntryPoint {
         });
         formPanel.add(fp);
         dockPanel.add(formPanel);
+        nameText.setFocus(true);
     }
 }

@@ -213,6 +213,25 @@ public class UserDetailsView extends FlowPanel {
                             }).show();
                         }
                     });
+                    final Button resetPasswordButton = new Button(stringMessages.resetPassword());
+                    accountPanelContent.add(resetPasswordButton);
+                    resetPasswordButton.addClickHandler(new ClickHandler() {
+                        @Override
+                        public void onClick(ClickEvent event) {
+                            userManagementService.resetPassword(UserDetailsView.this.user.getName(), new MarkedAsyncCallback<Void>(
+                                    new AsyncCallback<Void>() {
+                                        @Override
+                                        public void onFailure(Throwable caught) {
+                                            Window.alert(stringMessages.errorResettingPassword(UserDetailsView.this.user.getName(), caught.getMessage()));
+                                        }
+
+                                        @Override
+                                        public void onSuccess(Void result) {
+                                            Window.alert(stringMessages.successfullyResetPassword(UserDetailsView.this.user.getName()));
+                                        }
+                                    }));
+                        }
+                    });
                 } else if (a instanceof SocialUserDTO) {
                     SocialUserDTO sua = (SocialUserDTO) a;
                     FlexTable table = new FlexTable();

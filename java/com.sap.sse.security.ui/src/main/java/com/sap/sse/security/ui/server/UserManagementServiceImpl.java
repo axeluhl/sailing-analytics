@@ -19,6 +19,7 @@ import java.util.logging.Logger;
 import javax.servlet.http.HttpSession;
 
 import org.apache.shiro.SecurityUtils;
+import org.apache.shiro.authc.AuthenticationException;
 import org.apache.shiro.subject.Subject;
 import org.apache.shiro.util.ByteSource;
 import org.osgi.framework.BundleContext;
@@ -109,8 +110,8 @@ public class UserManagementServiceImpl extends RemoteServiceServlet implements U
         try {
             String redirectURL = getSecurityService().login(username, password);
             return new SuccessInfo(true, "Success. Redirecting to "+redirectURL, redirectURL, createUserDTOFromUser(getSecurityService().getUserByName(username)));
-        } catch (UserManagementException e) {
-            return new SuccessInfo(false, "Failed to login.", /* redirectURL */ null, null);
+        } catch (UserManagementException | AuthenticationException e) {
+            return new SuccessInfo(false, SuccessInfo.FAILED_TO_LOGIN, /* redirectURL */ null, null);
         }
     }
 
@@ -254,7 +255,7 @@ public class UserManagementServiceImpl extends RemoteServiceServlet implements U
                 break;
             }
         }
-        userDTO = new UserDTO(user.getName(), user.getEmail(), accountDTOs);
+        userDTO = new UserDTO(user.getName(), user.getEmail(), user.isEmailValidated(), accountDTOs);
         userDTO.addRoles(user.getRoles());
         return userDTO;
     }

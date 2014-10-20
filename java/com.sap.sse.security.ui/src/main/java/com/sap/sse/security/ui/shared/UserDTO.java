@@ -12,21 +12,19 @@ public class UserDTO implements IsSerializable {
     private String email;
     private List<AccountDTO> accounts;
     private Set<String> roles = new HashSet<>();
+    private boolean emailValidated;
 
     UserDTO() {} // for serialization only
 
-    public UserDTO(String name, String email, List<AccountDTO> accounts) {
+    public UserDTO(String name, String email, boolean emailValidated, List<AccountDTO> accounts) {
         this.name = name;
         this.email = email;
+        this.emailValidated = emailValidated;
         this.accounts = accounts;
     }
 
     public String getName() {
         return name;
-    }
-
-    public void setName(String name) {
-        this.name = name;
     }
 
     public Iterable<String> getRoles() {
@@ -45,15 +43,11 @@ public class UserDTO implements IsSerializable {
         return accounts;
     }
 
-    public void setAccounts(List<AccountDTO> accounts) {
-        this.accounts = accounts;
-    }
-
     public String getEmail() {
         return email;
     }
 
-    public void setEmail(String email) {
-        this.email = email;
+    public boolean isEmailValidated() {
+        return emailValidated;
     }
 }

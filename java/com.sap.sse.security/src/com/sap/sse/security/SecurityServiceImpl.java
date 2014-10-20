@@ -160,10 +160,17 @@ public class SecurityServiceImpl extends RemoteServiceServlet implements Securit
     
     @Override
     public void resetPassword(String username) throws UserManagementException, MailException {
+        final User user = store.getUserByName(username);
+        if (user == null) {
+            throw new UserManagementException(UserManagementException.USER_DOES_NOT_EXIST);
+        }
+        if (!user.isEmailValidated()) {
+            throw new UserManagementException(UserManagementException.CANNOT_RESET_PASSWORD_WITHOUT_VALIDATED_EMAIL);
+        }
         byte[] randomBytes = new byte[16];
         new Random().nextBytes(randomBytes);
         final String newPassword = new Sha256Hash(randomBytes).toBase64();
-        updateSimpleUserPassword(username, newPassword);
+        updateSimpleUserPassword(user, newPassword);
         sendMail(username, "Password Reset", "Your new password for your username "+username+
                 " is \n    "+newPassword+"\nPlease change after next sign-in.");
     }
@@ -240,9 +247,10 @@ public class SecurityServiceImpl extends RemoteServiceServlet implements Securit
         if (user == null) {
             throw new UserManagementException(UserManagementException.USER_DOES_NOT_EXIST);
         }
-        if (!user.isEmailValidated()) {
-            throw new UserManagementException(UserManagementException.CANNOT_RESET_PASSWORD_WITHOUT_VALIDATED_EMAIL);
-        }
+        updateSimpleUserPassword(user, newPassword);
+    }
+
+    private void updateSimpleUserPassword(final User user, String newPassword) throws UserManagementException {
         if (newPassword == null || newPassword.length() < 5) {
             throw new UserManagementException(UserManagementException.PASSWORD_DOES_NOT_MEET_REQUIREMENTS);
         }
