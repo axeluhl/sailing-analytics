@@ -56,6 +56,7 @@ public class ChangePasswordEntryPoint implements EntryPoint {
         fp.add(nameLabel);
         final TextBox nameText = new TextBox();
         nameText.setEnabled(false);
+        fp.add(nameText);
         final Label emailLabel = new Label(stringMessages.email());
         fp.add(emailLabel);
         HorizontalPanel emailTextBoxAndButtonPanel = new HorizontalPanel();
@@ -76,6 +77,7 @@ public class ChangePasswordEntryPoint implements EntryPoint {
                 }).show();
             }
         });
+        emailTextBoxAndButtonPanel.add(updateEmailButton);
         fp.add(emailTextBoxAndButtonPanel);
         userService.addUserStatusEventHandler(new UserStatusEventHandler() {
             @Override
@@ -89,7 +91,6 @@ public class ChangePasswordEntryPoint implements EntryPoint {
                 }
             }
         });
-        fp.add(nameText);
         Label currentPasswordLabel = new Label(stringMessages.currentPassword());
         fp.add(currentPasswordLabel);
         final TextBox currentPasswordText = new PasswordTextBox();

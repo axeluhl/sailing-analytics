@@ -42,7 +42,7 @@ public class EditEmailDialogWithDefaultCallback extends EditEmailDialog {
                                 if (callback != null) {
                                     callback.onSuccess(userData);
                                 }
-                                Window.alert(stringMessages.successfullyUpdatedEmail());
+                                Window.alert(stringMessages.successfullyUpdatedEmail(userData.getUsername(), userData.getEmail()));
                             }
                         }));
             }
