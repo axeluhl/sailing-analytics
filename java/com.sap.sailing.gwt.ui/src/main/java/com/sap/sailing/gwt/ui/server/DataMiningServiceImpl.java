@@ -113,14 +113,20 @@ public class DataMiningServiceImpl extends RemoteServiceServlet implements DataM
         
         Collection<FunctionDTO> functionDTOs = new ArrayList<FunctionDTO>();
         for (Function<?> function : functions) {
-            functionDTOs.add(functionDTOFactory.createFunctionDTO(function, locale, dataMiningStringMessages));
+            functionDTOs.add(functionDTOFactory.createFunctionDTO(function, dataMiningStringMessages, locale));
         }
         return functionDTOs;
     }
     
+//    @Override
+//    public QueryResult<Set<Object>> getDimensionValuesFor(Collection<FunctionDTO> dimensions) throws Exception {
+//        Query<Set<Object>> dimensionValuesQuery = sailingDataMiningFactory.createDimensionValuesQuery(getRacingEventService(), null, dimensions);
+//        return dimensionValuesQuery.run();
+//    }
     @Override
-    public QueryResult<Set<Object>> getDimensionValuesFor(Collection<FunctionDTO> dimensions) throws Exception {
-        Query<Set<Object>> dimensionValuesQuery = sailingDataMiningFactory.createDimensionValuesQuery(getRacingEventService(), dimensions);
+    public QueryResult<Set<Object>> getDimensionValuesFor(DataRetrieverChainDefinitionDTO dataRetrieverChainDefinition,
+            String localeInfoName) throws Exception {
+        Query<Set<Object>> dimensionValuesQuery = sailingDataMiningFactory.createDimensionValuesQuery(getRacingEventService(), dataRetrieverChainDefinition, localeInfoName);
         return dimensionValuesQuery.run();
     }
 

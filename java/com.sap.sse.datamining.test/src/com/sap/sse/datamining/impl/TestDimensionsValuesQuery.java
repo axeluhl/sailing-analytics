@@ -6,6 +6,7 @@ import java.util.Arrays;
 import java.util.Collection;
 import java.util.HashMap;
 import java.util.HashSet;
+import java.util.Locale;
 import java.util.Map;
 import java.util.Set;
 import java.util.concurrent.ExecutionException;
@@ -18,6 +19,7 @@ import com.sap.sse.datamining.DataRetrieverChainDefinition;
 import com.sap.sse.datamining.Query;
 import com.sap.sse.datamining.components.Processor;
 import com.sap.sse.datamining.functions.Function;
+import com.sap.sse.datamining.i18n.DataMiningStringMessages;
 import com.sap.sse.datamining.impl.components.GroupedDataEntry;
 import com.sap.sse.datamining.shared.GroupKey;
 import com.sap.sse.datamining.shared.dto.FunctionDTO;
@@ -32,11 +34,15 @@ import com.sap.sse.datamining.test.functions.registry.test_contexts.Test_HasRace
 import com.sap.sse.datamining.test.util.ComponentTestsUtil;
 import com.sap.sse.datamining.test.util.ConcurrencyTestsUtil;
 import com.sap.sse.datamining.test.util.FunctionTestsUtil;
+import com.sap.sse.datamining.test.util.TestsUtil;
 import com.sap.sse.datamining.test.util.components.TestLegOfCompetitorWithContextRetrievalProcessor;
 import com.sap.sse.datamining.test.util.components.TestRaceWithContextRetrievalProcessor;
 import com.sap.sse.datamining.test.util.components.TestRegattaRetrievalProcessor;
 
 public class TestDimensionsValuesQuery {
+
+    private static final DataMiningStringMessages stringMessages = TestsUtil.getTestStringMessagesWithProductiveMessages();
+    private static final Locale locale = Locale.ENGLISH;
     
     private DataRetrieverChainDefinition<Collection<Test_Regatta>> dataRetrieverChainDefinition;
     private Collection<Test_Regatta> dataSource;
@@ -78,12 +84,12 @@ public class TestDimensionsValuesQuery {
                 
                 DataRetrieverChainBuilder<Collection<Test_Regatta>> chainBuilder = dataRetrieverChainDefinition.startBuilding(ConcurrencyTestsUtil.getExecutor());
                 chainBuilder.stepDeeper();
-                for (Processor<?, ?> resultReceiver : ComponentTestsUtil.getProcessorFactory().createGroupingExtractorsForDimensions(Test_HasRaceContext.class, resultCollector, raceDimensions)) {
+                for (Processor<?, ?> resultReceiver : ComponentTestsUtil.getProcessorFactory().createGroupingExtractorsForDimensions(Test_HasRaceContext.class, resultCollector, raceDimensions, stringMessages, locale)) {
                     chainBuilder.addResultReceiver(resultReceiver);
                 }
                 
                 chainBuilder.stepDeeper();
-                for (Processor<?, ?> resultReceiver : ComponentTestsUtil.getProcessorFactory().createGroupingExtractorsForDimensions(Test_HasLegOfCompetitorContext.class, resultCollector, legDimensions)) {
+                for (Processor<?, ?> resultReceiver : ComponentTestsUtil.getProcessorFactory().createGroupingExtractorsForDimensions(Test_HasLegOfCompetitorContext.class, resultCollector, legDimensions, stringMessages, locale)) {
                     chainBuilder.addResultReceiver(resultReceiver);
                 }
                 
@@ -96,21 +102,21 @@ public class TestDimensionsValuesQuery {
         Map<GroupKey, Set<Object>> expectedResultData = new HashMap<>();
 
         //Add empty sets for Test_HasRaceContext dimensions
-        GroupKey dimensionRegattaNameGroupKey = new GenericGroupKey<FunctionDTO>(FunctionTestsUtil.getFunctionDTOFactory().createFunctionDTO(dimensionRegattaName));
+        GroupKey dimensionRegattaNameGroupKey = new GenericGroupKey<FunctionDTO>(FunctionTestsUtil.getFunctionDTOFactory().createFunctionDTO(dimensionRegattaName, stringMessages, locale));
         expectedResultData.put(dimensionRegattaNameGroupKey, new HashSet<Object>());
-        GroupKey dimensionRaceNameGroupKey = new GenericGroupKey<FunctionDTO>(FunctionTestsUtil.getFunctionDTOFactory().createFunctionDTO(dimensionRaceName));
+        GroupKey dimensionRaceNameGroupKey = new GenericGroupKey<FunctionDTO>(FunctionTestsUtil.getFunctionDTOFactory().createFunctionDTO(dimensionRaceName, stringMessages, locale));
         expectedResultData.put(dimensionRaceNameGroupKey, new HashSet<Object>());
-        GroupKey dimensionBoatClassNameGroupKey = new GenericGroupKey<FunctionDTO>(FunctionTestsUtil.getFunctionDTOFactory().createFunctionDTO(dimensionBoatClassName));
+        GroupKey dimensionBoatClassNameGroupKey = new GenericGroupKey<FunctionDTO>(FunctionTestsUtil.getFunctionDTOFactory().createFunctionDTO(dimensionBoatClassName, stringMessages, locale));
         expectedResultData.put(dimensionBoatClassNameGroupKey, new HashSet<Object>());
-        GroupKey dimensionYearGroupKey = new GenericGroupKey<FunctionDTO>(FunctionTestsUtil.getFunctionDTOFactory().createFunctionDTO(dimensionYear));
+        GroupKey dimensionYearGroupKey = new GenericGroupKey<FunctionDTO>(FunctionTestsUtil.getFunctionDTOFactory().createFunctionDTO(dimensionYear, stringMessages, locale));
         expectedResultData.put(dimensionYearGroupKey, new HashSet<Object>());
 
         //Add empty sets for Test_HasLegContext dimensions
-        GroupKey dimensionLegNumberGroupKey = new GenericGroupKey<FunctionDTO>(FunctionTestsUtil.getFunctionDTOFactory().createFunctionDTO(dimensionLegNumber));
+        GroupKey dimensionLegNumberGroupKey = new GenericGroupKey<FunctionDTO>(FunctionTestsUtil.getFunctionDTOFactory().createFunctionDTO(dimensionLegNumber, stringMessages, locale));
         expectedResultData.put(dimensionLegNumberGroupKey, new HashSet<Object>());
-        GroupKey dimensionCompetitorNameGroupKey = new GenericGroupKey<FunctionDTO>(FunctionTestsUtil.getFunctionDTOFactory().createFunctionDTO(dimensionCompetitorName));
+        GroupKey dimensionCompetitorNameGroupKey = new GenericGroupKey<FunctionDTO>(FunctionTestsUtil.getFunctionDTOFactory().createFunctionDTO(dimensionCompetitorName, stringMessages, locale));
         expectedResultData.put(dimensionCompetitorNameGroupKey, new HashSet<Object>());
-        GroupKey dimensionCompetitorSailIDGroupKey = new GenericGroupKey<FunctionDTO>(FunctionTestsUtil.getFunctionDTOFactory().createFunctionDTO(dimensionCompetitorSailID));
+        GroupKey dimensionCompetitorSailIDGroupKey = new GenericGroupKey<FunctionDTO>(FunctionTestsUtil.getFunctionDTOFactory().createFunctionDTO(dimensionCompetitorSailID, stringMessages, locale));
         expectedResultData.put(dimensionCompetitorSailIDGroupKey, new HashSet<Object>());
         
         for (Test_Regatta regatta : dataSource) {

@@ -98,7 +98,7 @@ public class TestFunctionProvider {
         Function<?> getName = FunctionTestsUtil.getFunctionFactory().createMethodWrappingFunction(getNameMethod);
         Function<Object> getRegattaName = FunctionTestsUtil.getFunctionFactory().createCompoundFunction(Arrays.asList(getRegatta, getName));
         
-        FunctionDTO getRegattaNameDTO = FunctionTestsUtil.getFunctionDTOFactory().createFunctionDTO(getRegattaName, Locale.ENGLISH, stringMessages);
+        FunctionDTO getRegattaNameDTO = FunctionTestsUtil.getFunctionDTOFactory().createFunctionDTO(getRegattaName, stringMessages, Locale.ENGLISH);
         
         FunctionProvider functionProvider = new RegistryFunctionProvider(functionRegistry);
         @SuppressWarnings("unchecked") // Hamcrest requires type matching of actual and expected type, so the Functions have to be specific (without <?>)
@@ -110,7 +110,7 @@ public class TestFunctionProvider {
     public void testGetFunctionForUnregisteredDTO() {
         Method incrementMethod = FunctionTestsUtil.getMethodFromClass(SimpleClassWithMarkedMethods.class, "increment", int.class);
         Function<Object> increment = FunctionTestsUtil.getFunctionFactory().createMethodWrappingFunction(incrementMethod);
-        FunctionDTO incrementDTO = FunctionTestsUtil.getFunctionDTOFactory().createFunctionDTO(increment, Locale.ENGLISH, stringMessages);
+        FunctionDTO incrementDTO = FunctionTestsUtil.getFunctionDTOFactory().createFunctionDTO(increment, stringMessages, Locale.ENGLISH);
         
         FunctionProvider functionProvider = new RegistryFunctionProvider(functionRegistry);
         assertThat(functionProvider.getFunctionForDTO(incrementDTO), is(nullValue()));

@@ -11,7 +11,7 @@ import com.sap.sse.datamining.DataRetrieverChainDefinition;
 
 public class SimpleDataRetrieverChainDefinitionRegistry implements DataRetrieverChainDefinitionRegistry {
     
-    private Map<RegistrationKey, Map<UUID, DataRetrieverChainDefinition<?>>> chainDefinitions;
+    private Map<RegistrationKey, Collection<DataRetrieverChainDefinition<?>>> chainDefinitions;
     
     public SimpleDataRetrieverChainDefinitionRegistry() {
         chainDefinitions = new HashMap<>();
@@ -21,16 +21,16 @@ public class SimpleDataRetrieverChainDefinitionRegistry implements DataRetriever
     public void add(DataRetrieverChainDefinition<?> dataRetrieverChainDefinition) {
         RegistrationKey key = new RegistrationKey(dataRetrieverChainDefinition.getDataSourceType(), dataRetrieverChainDefinition.getRetrievedDataType());
         if (!chainDefinitions.containsKey(key)) {
-            chainDefinitions.put(key, new HashMap<UUID, DataRetrieverChainDefinition<?>>());
+            chainDefinitions.put(key, new HashSet<DataRetrieverChainDefinition<?>>());
         }
-        chainDefinitions.get(key).put(dataRetrieverChainDefinition.getUUID(), dataRetrieverChainDefinition);
+        chainDefinitions.get(key).add(dataRetrieverChainDefinition);
     }
 
     @Override
     public void remove(DataRetrieverChainDefinition<?> dataRetrieverChainDefinition) {
         RegistrationKey key = new RegistrationKey(dataRetrieverChainDefinition.getDataSourceType(), dataRetrieverChainDefinition.getRetrievedDataType());
         if (chainDefinitions.containsKey(key)) {
-            chainDefinitions.get(key).remove(dataRetrieverChainDefinition.getUUID());
+            chainDefinitions.get(key).remove(dataRetrieverChainDefinition);
         }
     }
 
@@ -39,19 +39,20 @@ public class SimpleDataRetrieverChainDefinitionRegistry implements DataRetriever
     public <DataSourceType> Collection<DataRetrieverChainDefinition<DataSourceType>> getDataRetrieverChainDefinitions(
             Class<DataSourceType> dataSourceType, Class<?> retrievedDataType) {
         RegistrationKey key = new RegistrationKey(dataSourceType, retrievedDataType);
-        return chainDefinitions.containsKey(key) ? (Collection<DataRetrieverChainDefinition<DataSourceType>>)(Collection<?>) new HashSet<>(chainDefinitions.get(key).values()) : new HashSet<DataRetrieverChainDefinition<DataSourceType>>();
+        return chainDefinitions.containsKey(key) ? (Collection<DataRetrieverChainDefinition<DataSourceType>>)(Collection<?>) new HashSet<>(chainDefinitions.get(key)) : new HashSet<DataRetrieverChainDefinition<DataSourceType>>();
     }
     
     @SuppressWarnings("unchecked")
     @Override
-    public <DataSourceType> DataRetrieverChainDefinition<DataSourceType> getDataRetrieverChainDefinition(
-            Class<DataSourceType> dataSourceType, Class<?> retrievedDataType, UUID id) {
-        RegistrationKey key = new RegistrationKey(dataSourceType, retrievedDataType);
-        if (!chainDefinitions.containsKey(key)) {
-            return null;
+    public <DataSourceType> DataRetrieverChainDefinition<DataSourceType> getDataRetrieverChainDefinition(Class<DataSourceType> dataSourceType, UUID id) {
+        for (Collection<DataRetrieverChainDefinition<?>> retrieverChainDefinitions : chainDefinitions.values()) {
+            for (DataRetrieverChainDefinition<?> retrieverChainDefinition : retrieverChainDefinitions) {
+                if (retrieverChainDefinition.getUUID().equals(id)) {
+                    return (DataRetrieverChainDefinition<DataSourceType>) retrieverChainDefinition;
+                }
+            }
         }
-        
-        return (DataRetrieverChainDefinition<DataSourceType>) chainDefinitions.get(key).get(id);
+        return null;
     }
     
     private class RegistrationKey extends Pair<Class<?>, Class<?>> {

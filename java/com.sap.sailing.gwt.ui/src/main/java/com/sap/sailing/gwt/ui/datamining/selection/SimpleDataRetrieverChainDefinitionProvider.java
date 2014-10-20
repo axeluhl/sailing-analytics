@@ -52,6 +52,7 @@ public class SimpleDataRetrieverChainDefinitionProvider implements DataRetriever
         currentStatisticToCalculate = null;
         
         mainPanel = new HorizontalPanel();
+        mainPanel.setSpacing(5);
         mainPanel.add(new Label(this.stringMessages.retrieveWith()));
         
         retrieverChainsListBox = createRetrieverChainsListBox();
@@ -80,9 +81,9 @@ public class SimpleDataRetrieverChainDefinitionProvider implements DataRetriever
     @Override
     public void statisticChanged(FunctionDTO newStatisticToCalculate, AggregatorType newAggregatorType) {
         if (!Objects.equals(currentStatisticToCalculate, newStatisticToCalculate)) {
-            String currentSourceType = currentStatisticToCalculate.getSourceTypeName();
+            String currentSourceType = currentStatisticToCalculate == null ? null : currentStatisticToCalculate.getSourceTypeName();
             currentStatisticToCalculate = newStatisticToCalculate;
-            if (currentSourceType.equals(newStatisticToCalculate.getSourceTypeName())) {
+            if (!Objects.equals(currentSourceType, newStatisticToCalculate.getSourceTypeName())) {
                 updateAvailableRetrieverChains();
             }
         }
@@ -105,7 +106,7 @@ public class SimpleDataRetrieverChainDefinitionProvider implements DataRetriever
                             retrieverChainsListBox.setValue(retrieverChainToBeSelected);
                             retrieverChainsListBox.setAcceptableValues(sortedRetrieverChains);
                             
-                            if (!currentRetrieverChain.equals(retrieverChainToBeSelected)) {
+                            if (!retrieverChainToBeSelected.equals(currentRetrieverChain)) {
                                 notifyListeners();
                             }
                         } else {
@@ -139,8 +140,7 @@ public class SimpleDataRetrieverChainDefinitionProvider implements DataRetriever
 
     @Override
     public void applyQueryDefinition(QueryDefinition queryDefinition) {
-        // TODO Auto-generated method stub
-
+        retrieverChainsListBox.setValue(queryDefinition.getDataRetrieverChainDefinition(), false);
     }
 
     @Override

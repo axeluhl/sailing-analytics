@@ -26,7 +26,7 @@ public class FunctionDTOFactory {
      * annotation.<br>
      * If the function has no message key, the function name is used as display name.
      */
-    public FunctionDTO createFunctionDTO(Function<?> function, Locale locale, DataMiningStringMessages stringMessages) {
+    public FunctionDTO createFunctionDTO(Function<?> function, DataMiningStringMessages stringMessages, Locale locale) {
         return createFunctionDTO(function, function.getLocalizedName(locale, stringMessages));
     }
     

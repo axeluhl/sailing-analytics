@@ -71,10 +71,10 @@ public class TestDataRetrieverChainDefinitionRegistry {
     public void testSingleGetDataRetrieverChainDefinition() {
         Class<Collection<Test_Regatta>> dataSourceType = (Class<Collection<Test_Regatta>>)(Class<?>) Collection.class;
         
-        assertThat(dataRetrieverChainDefinitionRegistry.getDataRetrieverChainDefinition(dataSourceType, Test_HasRaceContext.class, raceRetrieverChainDefinition.getUUID()),
+        assertThat(dataRetrieverChainDefinitionRegistry.getDataRetrieverChainDefinition(dataSourceType, raceRetrieverChainDefinition.getUUID()),
                 is(raceRetrieverChainDefinition));
         
-        assertThat(dataRetrieverChainDefinitionRegistry.getDataRetrieverChainDefinition(dataSourceType, Test_HasLegOfCompetitorContext.class, legRetrieverChainDefinition.getUUID()),
+        assertThat(dataRetrieverChainDefinitionRegistry.getDataRetrieverChainDefinition(dataSourceType, legRetrieverChainDefinition.getUUID()),
                 is(legRetrieverChainDefinition));
     }
     

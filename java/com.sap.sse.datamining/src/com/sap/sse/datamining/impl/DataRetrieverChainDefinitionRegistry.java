@@ -13,7 +13,6 @@ public interface DataRetrieverChainDefinitionRegistry {
     public <DataSourceType> Collection<DataRetrieverChainDefinition<DataSourceType>> getDataRetrieverChainDefinitions(
             Class<DataSourceType> dataSourceType, Class<?> retrievedDataType);
 
-    public <DataSourceType> DataRetrieverChainDefinition<DataSourceType> getDataRetrieverChainDefinition(
-            Class<DataSourceType> dataSourceType, Class<?> retrievedDataType, UUID id);
+    public <DataSourceType> DataRetrieverChainDefinition<DataSourceType> getDataRetrieverChainDefinition(Class<DataSourceType> dataSourceType, UUID id);
 
 }

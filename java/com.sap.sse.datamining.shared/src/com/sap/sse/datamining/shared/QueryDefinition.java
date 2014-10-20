@@ -6,17 +6,18 @@ import java.util.Map;
 
 import com.sap.sse.datamining.shared.components.AggregatorType;
 import com.sap.sse.datamining.shared.dto.FunctionDTO;
+import com.sap.sse.datamining.shared.impl.dto.DataRetrieverChainDefinitionDTO;
 
 public interface QueryDefinition extends Serializable {
     
     public String getLocaleInfoName();
     
+    public FunctionDTO getStatisticToCalculate();
+    public AggregatorType getAggregatorType();
+    
+    public DataRetrieverChainDefinitionDTO getDataRetrieverChainDefinition();
     public Map<FunctionDTO, Iterable<? extends Serializable>> getFilterSelection();
     
     public List<FunctionDTO> getDimensionsToGroupBy();
-    
-    public FunctionDTO getStatisticToCalculate();
-    
-    public AggregatorType getAggregatorType();
 
 }

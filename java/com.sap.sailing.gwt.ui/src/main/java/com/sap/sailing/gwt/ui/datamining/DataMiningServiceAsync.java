@@ -21,7 +21,7 @@ public interface DataMiningServiceAsync {
     void getDataRetrieverChainDefinitionsFor(FunctionDTO statisticToCalculate, String localeInfoName,
             AsyncCallback<Collection<DataRetrieverChainDefinitionDTO>> callback);
     
-    void getDimensionValuesFor(Collection<FunctionDTO> dimensions, AsyncCallback<QueryResult<Set<Object>>> callback);
+    void getDimensionValuesFor(DataRetrieverChainDefinitionDTO dataRetrieverChainDefinition, String localeInfoName, AsyncCallback<QueryResult<Set<Object>>> callback);
 
     <ResultType extends Number> void runQuery(QueryDefinition queryDefinition, AsyncCallback<QueryResult<ResultType>> callback);
     

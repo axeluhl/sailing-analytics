@@ -3,11 +3,10 @@ package com.sap.sailing.datamining.factories;
 import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.Collection;
-import java.util.Collections;
-import java.util.Comparator;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
+import java.util.Locale;
 import java.util.Map;
 import java.util.Map.Entry;
 import java.util.Set;
@@ -24,6 +23,7 @@ import com.sap.sse.datamining.functions.FunctionProvider;
 import com.sap.sse.datamining.i18n.DataMiningStringMessages;
 import com.sap.sse.datamining.impl.DataMiningActivator;
 import com.sap.sse.datamining.impl.DataRetrieverChainDefinitionRegistry;
+import com.sap.sse.datamining.impl.DataRetrieverTypeWithInformation;
 import com.sap.sse.datamining.impl.ProcessorQuery;
 import com.sap.sse.datamining.impl.components.GroupedDataEntry;
 import com.sap.sse.datamining.impl.criterias.AndCompoundFilterCriterion;
@@ -32,6 +32,7 @@ import com.sap.sse.datamining.impl.criterias.NullaryFunctionValuesFilterCriterio
 import com.sap.sse.datamining.shared.GroupKey;
 import com.sap.sse.datamining.shared.QueryDefinition;
 import com.sap.sse.datamining.shared.dto.FunctionDTO;
+import com.sap.sse.datamining.shared.impl.dto.DataRetrieverChainDefinitionDTO;
 
 public class SailingDataMiningFactory {
 
@@ -63,7 +64,7 @@ public class SailingDataMiningFactory {
                 List<Function<?>> dimensionsToGroupBy = convertDTOsToFunctions(queryDefinition.getDimensionsToGroupBy());
                 Processor<ElementType, GroupedDataEntry<ElementType>> groupingProcessor = processorFactory.createGroupingProcessor(dataTypeToRetrieve, extractionProcessor, dimensionsToGroupBy);
 
-                DataRetrieverChainDefinition<RacingEventService> dataRetrieverChainDefinition = getDataRetrieverChainDefinition(dataTypeToRetrieve);
+                DataRetrieverChainDefinition<RacingEventService> dataRetrieverChainDefinition = dataRetrieverChainDefinitionRegistry.getDataRetrieverChainDefinition(RacingEventService.class, queryDefinition.getDataRetrieverChainDefinition().getId());
                 DataRetrieverChainBuilder<RacingEventService> chainBuilder = dataRetrieverChainDefinition.startBuilding(DataMiningActivator.getExecutor());
                 Map<Class<?>, FilterCriterion<?>> criteriaMappedByDataType = createFilterCriteria(queryDefinition.getFilterSelection());
                 do {
@@ -82,6 +83,14 @@ public class SailingDataMiningFactory {
             }
             
         };
+    }
+
+    private List<Function<?>> convertDTOsToFunctions(Collection<FunctionDTO> functionDTOs) {
+        List<Function<?>> dimensionsToGroupBy = new ArrayList<>();
+        for (FunctionDTO functionDTO : functionDTOs) {
+            dimensionsToGroupBy.add(functionProvider.getFunctionForDTO(functionDTO));
+        }
+        return dimensionsToGroupBy;
     }
     
     @SuppressWarnings("unchecked")
@@ -104,23 +113,25 @@ public class SailingDataMiningFactory {
         return (Map<Class<?>, FilterCriterion<?>>)(Map<Class<?>, ?>) criteriaMappedByDataType;
     }
 
-    public Query<Set<Object>> createDimensionValuesQuery(RacingEventService dataSource, final Collection<FunctionDTO> dimensionDTOs) {
-        return new ProcessorQuery<Set<Object>, RacingEventService>(DataMiningActivator.getExecutor(), dataSource) {
+    public Query<Set<Object>> createDimensionValuesQuery(RacingEventService dataSource, final DataRetrieverChainDefinitionDTO dataRetrieverChainDefinitionDTO, final String localeInfoName) {
+        final DataMiningStringMessages stringMessages = DataMiningActivator.getStringMessages();
+        final Locale locale = DataMiningStringMessages.Util.getLocaleFor(localeInfoName);
+        return new ProcessorQuery<Set<Object>, RacingEventService>(DataMiningActivator.getExecutor(), dataSource, stringMessages, locale) {
             @Override
             protected Processor<RacingEventService, ?> createFirstProcessor() {
                 Processor<GroupedDataEntry<Object>, Map<GroupKey, Set<Object>>> valueCollector = processorFactory.createGroupedDataCollectingAsSetProcessor(/*query*/ this);
 
-                Collection<Function<?>> dimensions = convertDTOsToFunctions(dimensionDTOs);
-                Class<?> dataTypeToRetrieve = getDeepestDataType(dimensions);
-                Map<Class<?>, Collection<Function<?>>> dimensionsMappedByDeclaringType = mapFunctionsByDeclaringType(dimensions);
-                DataRetrieverChainDefinition<RacingEventService> dataRetrieverChainDefinition = getDataRetrieverChainDefinition(dataTypeToRetrieve);
+                DataRetrieverChainDefinition<RacingEventService> dataRetrieverChainDefinition = dataRetrieverChainDefinitionRegistry.getDataRetrieverChainDefinition(RacingEventService.class, dataRetrieverChainDefinitionDTO.getId());
                 DataRetrieverChainBuilder<RacingEventService> chainBuilder = dataRetrieverChainDefinition.startBuilding(DataMiningActivator.getExecutor());
+                Collection<Function<?>> dimensions = getDimensionsOf(dataRetrieverChainDefinition);
+                Map<Class<?>, Collection<Function<?>>> dimensionsMappedByDeclaringType = mapFunctionsByDeclaringType(dimensions);
                 while (!dimensionsMappedByDeclaringType.isEmpty()) {
                     Class<?> dataType = chainBuilder.getCurrentRetrievedDataType();
-                    
+
                     if (dimensionsMappedByDeclaringType.containsKey(dataType)) {
                         for (Processor<?, ?> resultReceiver : processorFactory.createGroupingExtractorsForDimensions(
-                                                                dataType, valueCollector, dimensionsMappedByDeclaringType.get(dataType))) {
+                                                                dataType, valueCollector, dimensionsMappedByDeclaringType.get(dataType),
+                                                                stringMessages, locale)) {
                             chainBuilder.addResultReceiver(resultReceiver);
                         }
                         dimensionsMappedByDeclaringType.remove(dataType);
@@ -136,12 +147,13 @@ public class SailingDataMiningFactory {
         };
     }
 
-    private List<Function<?>> convertDTOsToFunctions(Collection<FunctionDTO> functionDTOs) {
-        List<Function<?>> dimensionsToGroupBy = new ArrayList<>();
-        for (FunctionDTO functionDTO : functionDTOs) {
-            dimensionsToGroupBy.add(functionProvider.getFunctionForDTO(functionDTO));
+    private Collection<Function<?>> getDimensionsOf(
+            DataRetrieverChainDefinition<RacingEventService> dataRetrieverChainDefinition) {
+        Collection<Function<?>> dimensions = new HashSet<>();
+        for (DataRetrieverTypeWithInformation<?, ?> dataRetrieverTypeWithInformation : dataRetrieverChainDefinition.getDataRetrieverTypesWithInformation()) {
+            dimensions.addAll(functionProvider.getDimensionsFor(dataRetrieverTypeWithInformation.getRetrievedDataType()));
         }
-        return dimensionsToGroupBy;
+        return dimensions;
     }
     
     private Map<Class<?>, Collection<Function<?>>> mapFunctionsByDeclaringType(Collection<Function<?>> functions) {
@@ -154,22 +166,6 @@ public class SailingDataMiningFactory {
             mappedFunctions.get(declaringType).add(function);
         }
         return mappedFunctions;
-    }
-
-    private Class<?> getDeepestDataType(Collection<Function<?>> dimensions) {
-        List<Function<?>> sortedDimensions = new ArrayList<>(dimensions);
-        Collections.sort(sortedDimensions, new Comparator<Function<?>>() {
-            @Override
-            public int compare(Function<?> d1, Function<?> d2) {
-                return Integer.compare(d1.getOrdinal(), d2.getOrdinal());
-            }
-        });
-        return sortedDimensions.get(sortedDimensions.size() - 1).getDeclaringType();
-    }
-
-    private DataRetrieverChainDefinition<RacingEventService> getDataRetrieverChainDefinition(Class<?> dataTypeToRetrieve) {
-        // There's currently only one DataRetrieverChainDefinition per possible dataTypeToRetrieve
-        return dataRetrieverChainDefinitionRegistry.getDataRetrieverChainDefinitions(RacingEventService.class, dataTypeToRetrieve).iterator().next();
     }
 
 }

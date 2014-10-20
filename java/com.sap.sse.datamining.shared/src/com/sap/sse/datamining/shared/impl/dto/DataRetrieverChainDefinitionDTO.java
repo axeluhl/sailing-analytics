@@ -1,13 +1,21 @@
 package com.sap.sse.datamining.shared.impl.dto;
 
+import java.io.Serializable;
 import java.util.UUID;
 
-public class DataRetrieverChainDefinitionDTO implements Comparable<DataRetrieverChainDefinitionDTO> {
+public class DataRetrieverChainDefinitionDTO implements Serializable, Comparable<DataRetrieverChainDefinitionDTO> {
+    private static final long serialVersionUID = 7806173601799997214L;
     
-    private final UUID id;
-    private final String name;
-    private final String dataSourceTypeName;
-    private final String retrievedDataTypeName;
+    private UUID id;
+    private String name;
+    private String dataSourceTypeName;
+    private String retrievedDataTypeName;
+
+    /**
+     * <b>Constructor for the GWT-Serialization. Don't use this!</b>
+     */
+    @Deprecated
+    DataRetrieverChainDefinitionDTO() { }
 
     public DataRetrieverChainDefinitionDTO(UUID id, String name, String dataSourceTypeName, String retrievedDataTypeName) {
         this.id = id;

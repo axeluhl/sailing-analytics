@@ -3,12 +3,14 @@ package com.sap.sse.datamining.factories;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;
+import java.util.Locale;
 import java.util.Map;
 import java.util.Set;
 import java.util.concurrent.ExecutorService;
 
 import com.sap.sse.datamining.components.Processor;
 import com.sap.sse.datamining.functions.Function;
+import com.sap.sse.datamining.i18n.DataMiningStringMessages;
 import com.sap.sse.datamining.impl.ProcessorQuery;
 import com.sap.sse.datamining.impl.components.GroupedDataEntry;
 import com.sap.sse.datamining.impl.components.ParallelByDimensionGroupingProcessor;
@@ -95,7 +97,8 @@ public class ProcessorFactory {
      */
     @SuppressWarnings("unchecked")
     public <DataType> Collection<Processor<DataType, GroupedDataEntry<DataType>>> createGroupingExtractorsForDimensions(Class<DataType> dataType,
-            Processor<GroupedDataEntry<Object>, ?> valueCollector, Collection<Function<?>> dimensions) {
+            Processor<GroupedDataEntry<Object>, ?> valueCollector, Collection<Function<?>> dimensions,
+            DataMiningStringMessages stringMessages, Locale locale) {
         Collection<Processor<GroupedDataEntry<Object>, ?>> extractionResultReceivers = new ArrayList<>();
         extractionResultReceivers.add(valueCollector);
 
@@ -105,7 +108,7 @@ public class ProcessorFactory {
             Collection<Processor<GroupedDataEntry<DataType>, ?>> groupingResultReceivers = new ArrayList<>();
             groupingResultReceivers.add(dimensionValueExtractor);
             
-            Processor<DataType, GroupedDataEntry<DataType>> byDimensionGrouper = new ParallelByDimensionGroupingProcessor<>(dataType, executor, groupingResultReceivers, dimension);
+            Processor<DataType, GroupedDataEntry<DataType>> byDimensionGrouper = new ParallelByDimensionGroupingProcessor<>(dataType, executor, groupingResultReceivers, dimension, stringMessages, locale);
             groupingExtractors.add(byDimensionGrouper);
         }
         return groupingExtractors;
