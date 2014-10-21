@@ -52,7 +52,7 @@ public class DeviceMappingQRIdentifierWidget extends BaseQRIdentifierWidget {
     
     @Override
     protected String generateEncodedQRCodeContent() {
-        String serverUrl = serverBox.getValue();
+        String serverUrl = getServerUrlWithoutFinalSlash();
         if (serverUrl.isEmpty()) {
             setError("Server URL empty");
             return null;
