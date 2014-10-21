@@ -3,7 +3,6 @@ package com.sap.sailing.gwt.home.client.shared.mainsponsors;
 import com.google.gwt.core.client.GWT;
 import com.google.gwt.resources.client.ClientBundle;
 import com.google.gwt.resources.client.CssResource;
-import com.google.gwt.resources.client.ImageResource;
 
 public interface MainSponsorsResources extends ClientBundle {
     public static final MainSponsorsResources INSTANCE = GWT.create(MainSponsorsResources.class);
@@ -15,9 +14,6 @@ public interface MainSponsorsResources extends ClientBundle {
         String mainsponsors();
     }
     
-    @Source("com/sap/sailing/gwt/home/images/temp--sponsor-1.png")
-    ImageResource sponsorTeaserImage();
-
-    @Source("com/sap/sailing/gwt/home/images/temp--sponsor-1.png")
-    ImageResource solutionTeaserImage();
+//    @Source("com/sap/sailing/gwt/home/images/xxx.png")
+//    ImageResource sponsorTeaserImage();
 }
