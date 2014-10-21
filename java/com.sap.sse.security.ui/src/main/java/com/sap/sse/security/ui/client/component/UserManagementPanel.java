@@ -124,7 +124,11 @@ public class UserManagementPanel extends DockPanel {
             public void onUserCreated(UserDTO user) {
                 userListDataProvider.updateDisplays();
                 if (user != null) {
-                    singleSelectionModel.setSelected(user, true);
+                    for (UserDTO u : userList.getVisibleItems()) {
+                        if (u.getName().equals(user.getName())) {
+                            singleSelectionModel.setSelected(user, true);
+                        }
+                    }
                 }
             }
         });

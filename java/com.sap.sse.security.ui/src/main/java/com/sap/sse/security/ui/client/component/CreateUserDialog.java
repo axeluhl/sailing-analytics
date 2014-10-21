@@ -18,25 +18,28 @@ import com.sap.sse.security.ui.shared.UserManagementServiceAsync;
  */
 public class CreateUserDialog extends AbstractUserDialog {
     public CreateUserDialog(final StringMessages stringMessages,
-            final UserManagementServiceAsync userManagementService,
-            final Iterable<UserCreatedEventHandler> handlers) {
-        super(stringMessages, stringMessages.createUser(), userManagementService, /* start with no user */ null, new DialogCallback<UserData>() {
+            final UserManagementServiceAsync userManagementService, final Iterable<UserCreatedEventHandler> handlers) {
+        super(stringMessages, stringMessages.createUser(), userManagementService, /* start with no user */null,
+                new DialogCallback<UserData>() {
                     @Override
                     public void ok(UserData usernameEmailPassword) {
-                        userManagementService.createSimpleUser(usernameEmailPassword.getUsername(), usernameEmailPassword.getEmail(), usernameEmailPassword.getPassword(),
-                                EntryPointLinkFactory.createEmailValidationLink(Collections.<String, String>emptyMap()), new AsyncCallback<UserDTO>() {
-                            @Override
-                            public void onSuccess(UserDTO result) {
-                                for (UserCreatedEventHandler handler : handlers) {
-                                    handler.onUserCreated(result);
-                                }
-                            }
-                            
-                            @Override
-                            public void onFailure(Throwable caught) {
-                                Window.alert(stringMessages.couldNotCreateUser(caught.getMessage()));
-                            }
-                        });
+                        userManagementService
+                                .createSimpleUser(usernameEmailPassword.getUsername(),
+                                        usernameEmailPassword.getEmail(), usernameEmailPassword.getPassword(),
+                                        EntryPointLinkFactory.createEmailValidationLink(Collections
+                                                .<String, String> emptyMap()), new AsyncCallback<UserDTO>() {
+                                            @Override
+                                            public void onSuccess(UserDTO result) {
+                                                for (UserCreatedEventHandler handler : handlers) {
+                                                    handler.onUserCreated(result);
+                                                }
+                                            }
+
+                                            @Override
+                                            public void onFailure(Throwable caught) {
+                                                Window.alert(stringMessages.couldNotCreateUser(caught.getMessage()));
+                                            }
+                                        });
                     }
 
                     @Override
@@ -44,7 +47,7 @@ public class CreateUserDialog extends AbstractUserDialog {
                     }
                 });
     }
-    
+
     @Override
     public void show() {
         super.show();
