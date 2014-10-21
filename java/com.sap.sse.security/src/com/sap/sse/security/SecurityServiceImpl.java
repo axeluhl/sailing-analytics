@@ -357,7 +357,7 @@ public class SecurityServiceImpl extends RemoteServiceServlet implements Securit
                 url.append(e.getValue());
             }
             sendMail(user.getName(), "e-Mail Validation",
-                    "Please click on the link below to validate your e-mail address.\n   "+url.toString());
+                    "Please click on the link below to validate your e-mail address for user "+user.getName()+".\n   "+url.toString());
         } catch (UnsupportedEncodingException e) {
             logger.log(Level.SEVERE,
                     "Internal error: encoding UTF-8 not found. Couldn't send e-mail to user " + user.getName()

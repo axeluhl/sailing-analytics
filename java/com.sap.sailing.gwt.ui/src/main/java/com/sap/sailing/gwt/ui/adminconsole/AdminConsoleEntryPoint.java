@@ -370,10 +370,10 @@ public class AdminConsoleEntryPoint extends AbstractEntryPoint implements Regatt
     }
     
     private boolean isUserInRole(UserRoles[] roles) {
-        boolean result = true;
+        boolean result = false;
         UserDTO user = getUserService().getCurrentUser();
         for (UserRoles enabledRole : roles) {
-            if (user.hasRole(enabledRole.name())) {
+            if (user.hasRole(enabledRole.getRolename())) {
                 result = true;
                 break;
             }
