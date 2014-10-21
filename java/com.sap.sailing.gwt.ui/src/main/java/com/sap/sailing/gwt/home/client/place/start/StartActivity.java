@@ -107,8 +107,13 @@ public class StartActivity extends AbstractActivity {
         public int compare(Pair<StageEventType, EventBaseDTO> eventAndStageType1,
                 Pair<StageEventType, EventBaseDTO> eventAndStageType2) {
             int result;
+            Date now = new Date();
             if (eventAndStageType1.getA().ordinal() == eventAndStageType2.getA().ordinal()) {
-                result = eventAndStageType1.getB().startDate.compareTo(eventAndStageType2.getB().startDate);
+                if(eventAndStageType1.getB().startDate.before(now)) {
+                    result = eventAndStageType2.getB().startDate.compareTo(eventAndStageType1.getB().startDate);
+                } else {
+                    result = eventAndStageType1.getB().startDate.compareTo(eventAndStageType2.getB().startDate);
+                }
             } else {
                 result = eventAndStageType1.getA().ordinal() - eventAndStageType2.getA().ordinal();
             }
