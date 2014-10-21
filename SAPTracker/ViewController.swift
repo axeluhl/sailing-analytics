@@ -11,6 +11,8 @@ import UIKit
 class ViewController: UIViewController {
 
     
+    @IBOutlet weak var trackingButton: UIButton!
+    
     override func viewDidLoad() {
         super.viewDidLoad()
 
@@ -19,7 +21,6 @@ class ViewController: UIViewController {
         //DataManager.sharedManager
         // TODO: start only when button pressed
         DataManager.sharedManager
-        LocationManager.sharedManager.startTracking()
     }
 
     deinit {
@@ -36,7 +37,20 @@ class ViewController: UIViewController {
 
     func trackingStarted(notification: NSNotification) {
         println("trackingStarted")
+        trackingButton.setTitle("Stop Tracking", forState: UIControlState.Normal)
+    }
+    
+    func trackingStopped(notification: NSNotification) {
+        println("trackingStarted")
+        trackingButton.setTitle("Start Tracking", forState: UIControlState.Normal)
     }
 
+    @IBAction func trackingButtonTap(sender: AnyObject) {
+        if (LocationManager.sharedManager.isTracking) {
+            LocationManager.sharedManager.stopTracking()
+        } else {
+            LocationManager.sharedManager.startTracking()
+        }
+    }
 }
 

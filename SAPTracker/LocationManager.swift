@@ -26,11 +26,13 @@ class LocationManager: NSObject, CLLocationManagerDelegate {
         return Singleton.sharedLocationManager
     }
     
-    var locationManager: CLLocationManager = CLLocationManager();
+    private var coreLocationManager: CLLocationManager = CLLocationManager()
+    
+    var isTracking: Bool = false
     
     override init() {
         super.init()
-        locationManager.delegate = self
+        coreLocationManager.delegate = self
     }
     
     func startTracking() {
@@ -40,16 +42,18 @@ class LocationManager: NSObject, CLLocationManagerDelegate {
             NSNotificationQueue.defaultQueue().enqueueNotification(notification, postingStyle: NSPostingStyle.PostASAP)
             return
         }
-        locationManager.startUpdatingLocation()
-        locationManager.startUpdatingHeading()
-        locationManager.delegate = self
+        coreLocationManager.startUpdatingLocation()
+        coreLocationManager.startUpdatingHeading()
+        coreLocationManager.delegate = self
+        isTracking = true;
         let notification = NSNotification(name: NotificationType.trackingStartedNotificationKey, object: self)
         NSNotificationQueue.defaultQueue().enqueueNotification(notification, postingStyle: NSPostingStyle.PostASAP)
     }
 
     func stopTracking() {
-        locationManager.stopUpdatingLocation()
-        locationManager.stopUpdatingHeading()
+        coreLocationManager.stopUpdatingLocation()
+        coreLocationManager.stopUpdatingHeading()
+        isTracking = false;
         let notification = NSNotification(name: NotificationType.trackingStoppedNotificationKey, object: self)
         NSNotificationQueue.defaultQueue().enqueueNotification(notification, postingStyle: NSPostingStyle.PostASAP)
     }
