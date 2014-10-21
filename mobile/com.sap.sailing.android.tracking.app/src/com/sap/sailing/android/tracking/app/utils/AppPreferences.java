@@ -29,11 +29,15 @@ public class AppPreferences {
     }
 
     public int getGPSFixInterval() {
-        return PrefUtils.getInt(context, R.string.preference_gps_fix_interval_key, R.string.preference_gps_fix_interval_ms_default);
+        //EditTextPreference saves value as string, even if android:inputType="number" is set
+        String value = PrefUtils.getString(context, R.string.preference_gps_fix_interval_ms_key, R.string.preference_gps_fix_interval_ms_default);
+        return value == null ? -1 : Integer.valueOf(value);
     }
     
     public int getGPSFixFastestInterval() {
-        return PrefUtils.getInt(context, R.string.preference_gps_fix_fastest_interval_key, R.string.preference_gps_fastest_fix_interval_ms_default);
+        //EditTextPreference saves value as string, even if android:inputType="number" is set
+        String value = PrefUtils.getString(context, R.string.preference_gps_fix_fastest_interval_ms_key, R.string.preference_gps_fastest_fix_interval_ms_default);
+        return value == null ? -1 : Integer.valueOf(value);
     }
     
     public void setServerURL(String serverUrl) {
