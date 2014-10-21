@@ -27,12 +27,24 @@
                                     <action selector="trackingButtonTap:" destination="vXZ-lx-hvc" eventType="touchUpInside" id="YWK-JE-HP8"/>
                                 </connections>
                             </button>
+                            <button opaque="NO" contentMode="scaleToFill" contentHorizontalAlignment="center" contentVerticalAlignment="center" buttonType="roundedRect" lineBreakMode="middleTruncation" translatesAutoresizingMaskIntoConstraints="NO" id="Ieu-ch-jeI">
+                                <rect key="frame" x="16" y="512" width="568" height="30"/>
+                                <state key="normal" title="QR Code">
+                                    <color key="titleShadowColor" white="0.5" alpha="1" colorSpace="calibratedWhite"/>
+                                </state>
+                                <connections>
+                                    <action selector="qrCode:" destination="vXZ-lx-hvc" eventType="touchUpInside" id="bM5-Is-Ydg"/>
+                                </connections>
+                            </button>
                         </subviews>
                         <color key="backgroundColor" white="1" alpha="1" colorSpace="custom" customColorSpace="calibratedWhite"/>
                         <constraints>
-                            <constraint firstAttribute="bottom" secondItem="wn7-xc-GeE" secondAttribute="bottom" constant="20" symbolic="YES" id="Hcs-7I-pp6"/>
-                            <constraint firstItem="wn7-xc-GeE" firstAttribute="trailing" secondItem="kh9-bI-dsS" secondAttribute="trailingMargin" id="QF2-xS-Nz5"/>
-                            <constraint firstItem="wn7-xc-GeE" firstAttribute="leading" secondItem="kh9-bI-dsS" secondAttribute="leadingMargin" id="WcO-n7-hfK"/>
+                            <constraint firstAttribute="bottom" secondItem="wn7-xc-GeE" secondAttribute="bottom" constant="20" symbolic="YES" id="558-wL-TWR"/>
+                            <constraint firstItem="Ieu-ch-jeI" firstAttribute="trailing" secondItem="wn7-xc-GeE" secondAttribute="trailing" id="Dt1-Kg-GYq"/>
+                            <constraint firstItem="wn7-xc-GeE" firstAttribute="top" secondItem="Ieu-ch-jeI" secondAttribute="bottom" constant="8" symbolic="YES" id="ePh-n7-wI1"/>
+                            <constraint firstItem="wn7-xc-GeE" firstAttribute="trailing" secondItem="kh9-bI-dsS" secondAttribute="trailingMargin" id="ixi-wL-jKR"/>
+                            <constraint firstItem="Ieu-ch-jeI" firstAttribute="leading" secondItem="kh9-bI-dsS" secondAttribute="leadingMargin" id="mfC-Cg-niZ"/>
+                            <constraint firstItem="wn7-xc-GeE" firstAttribute="leading" secondItem="Ieu-ch-jeI" secondAttribute="leading" id="riP-KN-4zv"/>
                         </constraints>
                     </view>
                     <connections>

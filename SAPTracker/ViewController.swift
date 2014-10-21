@@ -7,8 +7,9 @@
 //
 
 import UIKit
+import AVFoundation
 
-class ViewController: UIViewController {
+class ViewController: UIViewController, AVCaptureMetadataOutputObjectsDelegate {
 
     
     @IBOutlet weak var trackingButton: UIButton!
@@ -17,9 +18,8 @@ class ViewController: UIViewController {
         super.viewDidLoad()
 
         addObservers()
-        
-        //DataManager.sharedManager
-        // TODO: start only when button pressed
+
+        // TODO: move someplace else, e.g. app delegate
         DataManager.sharedManager
     }
 
@@ -46,11 +46,54 @@ class ViewController: UIViewController {
     }
 
     @IBAction func trackingButtonTap(sender: AnyObject) {
-        if (LocationManager.sharedManager.isTracking) {
+        if LocationManager.sharedManager.isTracking {
             LocationManager.sharedManager.stopTracking()
         } else {
             LocationManager.sharedManager.startTracking()
         }
     }
+  
+    // MARK - QR Code
+    var session: AVCaptureSession!
+    var preview: AVCaptureVideoPreviewLayer!
+
+    @IBAction func qrCode(sender: AnyObject) {
+        var device = AVCaptureDevice.defaultDeviceWithMediaType(AVMediaTypeVideo)
+        
+        var writeError : NSError? = nil
+        var input = AVCaptureDeviceInput.deviceInputWithDevice(device, error: &writeError) as? AVCaptureDeviceInput
+        
+        var output = AVCaptureMetadataOutput()
+        output.setMetadataObjectsDelegate(self,queue: dispatch_get_main_queue())
+        
+        session = AVCaptureSession()
+        session.canSetSessionPreset(AVCaptureSessionPresetHigh)
+        if session.canAddInput(input) {
+            session.addInput(input)
+        }
+        if session.canAddOutput(output){
+            session.addOutput(output)
+        }
+        output.metadataObjectTypes = [AVMetadataObjectTypeEAN13Code,AVMetadataObjectTypeEAN8Code,AVMetadataObjectTypeQRCode]
+
+        preview = AVCaptureVideoPreviewLayer(session: session)
+        preview.videoGravity = AVLayerVideoGravityResizeAspectFill
+        preview.frame = CGRectMake(0,0,self.view.frame.size.width,self.view.frame.size.height)
+        self.view.layer.addSublayer(preview)
+        
+        session.startRunning()
+    }
+    
+    
+    func captureOutput(captureOutput: AVCaptureOutput!, didOutputMetadataObjects metadataObjects: [AnyObject]!, fromConnection connection: AVCaptureConnection!)
+    {
+        if metadataObjects.count > 0 {
+            let metadataObject: AVMetadataMachineReadableCodeObject = metadataObjects[0] as AVMetadataMachineReadableCodeObject
+            session.stopRunning()
+            preview.removeFromSuperlayer()
+            println(metadataObject.stringValue)
+        }
+    }
+
 }
 
