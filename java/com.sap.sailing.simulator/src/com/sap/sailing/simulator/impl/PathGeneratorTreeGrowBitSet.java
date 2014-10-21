@@ -4,6 +4,7 @@ import java.io.BufferedWriter;
 import java.io.FileWriter;
 import java.io.IOException;
 import java.util.ArrayList;
+import java.util.BitSet;
 import java.util.Collections;
 import java.util.Comparator;
 import java.util.List;
@@ -14,7 +15,6 @@ import com.sap.sailing.domain.common.Distance;
 import com.sap.sailing.domain.common.Position;
 import com.sap.sailing.domain.common.SpeedWithBearing;
 import com.sap.sailing.domain.common.TimePoint;
-import com.sap.sailing.domain.common.impl.DegreeBearingImpl;
 import com.sap.sailing.domain.common.impl.MillisecondsTimePoint;
 import com.sap.sailing.domain.tracking.Wind;
 import com.sap.sailing.domain.tracking.impl.WindImpl;
@@ -26,7 +26,7 @@ import com.sap.sailing.simulator.TimedPositionWithSpeed;
 import com.sap.sailing.simulator.windfield.WindFieldGenerator;
 import com.sap.sse.common.Util;
 
-public class PathGeneratorTreeGrowWind extends PathGeneratorBase {
+public class PathGeneratorTreeGrowBitSet extends PathGeneratorBase {
 
     private static Logger logger = Logger.getLogger("com.sap.sailing");
     private boolean debugMsgOn = false;
@@ -35,14 +35,16 @@ public class PathGeneratorTreeGrowWind extends PathGeneratorBase {
     int maxTurns = 0;
     boolean upwindLeg = false;
     String initPathStr = "0";
-    PathCandidate bestCand = null;
+    PathCandidateBitSet bestCand = null;
     long usedTimeStep = 0;
     boolean gridStore = false;
-    ArrayList<List<PathCandidate>> gridPositions = null;
-    ArrayList<List<PathCandidate>> isocPositions = null;
+    ArrayList<List<PathCandidateBitSet>> gridPositions = null;
+    ArrayList<List<PathCandidateBitSet>> isocPositions = null;
     String gridFile = null;
+    final static boolean LEFT = false;
+    final static boolean RIGHT = true;
 
-    public PathGeneratorTreeGrowWind(SimulationParameters params) {
+    public PathGeneratorTreeGrowBitSet(SimulationParameters params) {
         this.parameters = params;
     }
 
@@ -56,8 +58,8 @@ public class PathGeneratorTreeGrowWind extends PathGeneratorBase {
         this.gridFile = gridFile;
         if (this.gridFile != null) {
             this.gridStore = true;
-            this.gridPositions = new ArrayList<List<PathCandidate>>();
-            this.isocPositions = new ArrayList<List<PathCandidate>>();
+            this.gridPositions = new ArrayList<List<PathCandidateBitSet>>();
+            this.isocPositions = new ArrayList<List<PathCandidateBitSet>>();
         } else {
             this.gridStore = false;
             this.gridPositions = null;
@@ -65,10 +67,10 @@ public class PathGeneratorTreeGrowWind extends PathGeneratorBase {
         }
     }
 
-    class SortPathCandsAbsHorizontally implements Comparator<PathCandidate> {
+    class SortPathCandsAbsHorizontally implements Comparator<PathCandidateBitSet> {
 
         @Override
-        public int compare(PathCandidate p1, PathCandidate p2) {
+        public int compare(PathCandidateBitSet p1, PathCandidateBitSet p2) {
             if (Math.abs(p1.hrz) == Math.abs(p2.hrz)) {
                 return 0;
             } else {
@@ -78,10 +80,10 @@ public class PathGeneratorTreeGrowWind extends PathGeneratorBase {
 
     }
 
-    class SortPathCandsHorizontally implements Comparator<PathCandidate> {
+    class SortPathCandsHorizontally implements Comparator<PathCandidateBitSet> {
 
         @Override
-        public int compare(PathCandidate p1, PathCandidate p2) {
+        public int compare(PathCandidateBitSet p1, PathCandidateBitSet p2) {
             if (p1.hrz == p2.hrz) {
                 return 0;
             } else {
@@ -92,7 +94,7 @@ public class PathGeneratorTreeGrowWind extends PathGeneratorBase {
     }
 
     // getter for evaluating best path cand propoerties further
-    PathCandidate getBestCand() {
+    PathCandidateBitSet getBestCand() {
         return this.bestCand;
     }
     
@@ -103,10 +105,8 @@ public class PathGeneratorTreeGrowWind extends PathGeneratorBase {
 
     // generate step in one of the possible directions
     // default: L - left, R - right
-    // extended: M - wide left, S - wide right
-    TimedPosition getStep(TimedPosition pos, long timeStep, long turnLoss, boolean sameBaseDirection, char nextDirection) {
+    TimedPosition getStep(TimedPosition pos, long timeStep, long turnLoss, boolean sameBaseDirection, boolean nextDirection) {
 
-        double offDeg = 3.0;
         WindFieldGenerator wf = this.parameters.getWindField();
         TimePoint curTime = pos.getTimePoint();
         Position curPosition = pos.getPosition();
@@ -117,34 +117,17 @@ public class PathGeneratorTreeGrowWind extends PathGeneratorBase {
 
         // get beat-angle left and right
         Bearing travelBearing = null;
-        Bearing tmpBearing = null;
-        if (nextDirection == 'L') {
+        if (nextDirection == LEFT) {
         	if (this.upwindLeg) {
         		travelBearing = pd.optimalDirectionsUpwind()[0];
         	} else {
         		travelBearing = pd.optimalDirectionsDownwind()[0];        		
         	}
-        } else if (nextDirection == 'R') {
+        } else if (nextDirection == RIGHT) {
         	if (this.upwindLeg) {
         		travelBearing = pd.optimalDirectionsUpwind()[1];
         	} else {
         		travelBearing = pd.optimalDirectionsDownwind()[1];        		
-        	}
-        } else if (nextDirection == 'M') {
-        	if (this.upwindLeg) {
-                tmpBearing = pd.optimalDirectionsUpwind()[0];
-                travelBearing = tmpBearing.add(new DegreeBearingImpl(-offDeg));
-        	} else {
-                tmpBearing = pd.optimalDirectionsDownwind()[0];
-                travelBearing = tmpBearing.add(new DegreeBearingImpl(-offDeg));
-        	}
-        } else if (nextDirection == 'S') {
-        	if (this.upwindLeg) {
-        		tmpBearing = pd.optimalDirectionsUpwind()[1];
-        		travelBearing = tmpBearing.add(new DegreeBearingImpl(+offDeg));
-        	} else {
-        		tmpBearing = pd.optimalDirectionsDownwind()[1];
-        		travelBearing = tmpBearing.add(new DegreeBearingImpl(+offDeg));        		
         	}
         }
 
@@ -164,15 +147,15 @@ public class PathGeneratorTreeGrowWind extends PathGeneratorBase {
     }
 
     // check whether nextDirection is same base direction as previous direction, i.e. no turn
-    boolean isSameDirection(char prevDirection, char nextDirection) {
-        return ((nextDirection == prevDirection)||(prevDirection == '0'));
+    boolean isSameDirection(int length, boolean prevDirection, boolean nextDirection) {
+        return ((nextDirection == prevDirection)||(length <= 1));
     }
 
     // get path candidate measuring height towards (local, current-apparent) wind
-    PathCandidate getPathCandWind(PathCandidate path, char nextDirection, long timeStep, long turnLoss, Position posStart, Position posEnd, double tgtHeight) {
+    PathCandidateBitSet getPathCandWind(PathCandidateBitSet path, boolean nextDirection, long timeStep, long turnLoss, Position posStart, Position posEnd, double tgtHeight) {
 
-        char prevDirection = path.path.charAt(path.path.length()-1);
-        boolean sameBaseDirection = this.isSameDirection(prevDirection, nextDirection);
+        boolean prevDirection = path.path.get(path.length-1);
+        boolean sameBaseDirection = this.isSameDirection(path.length, prevDirection, nextDirection);
 
         int turnCount = path.trn;
         if (!sameBaseDirection) {
@@ -229,39 +212,42 @@ public class PathGeneratorTreeGrowWind extends PathGeneratorBase {
         double hrzDist = Math.round(posSide*posHeightTrgt.getDistance(pathPos.getPosition()).getMeters()*1000.0)/1000.0;
 
         // extend path-string by step-direction
-        String pathStr = path.path + nextDirection;
+        BitSet newPath = new BitSet(path.length+1);
+        newPath.or(path.path);
+        newPath.set(path.length, nextDirection);
 
-        return (new PathCandidate(pathPos, reachedEnd, vrtDist, hrzDist, turnCount, pathStr, nextDirection, appWind));
+        return (new PathCandidateBitSet(pathPos, reachedEnd, vrtDist, hrzDist, turnCount, newPath, path.length+1, nextDirection, appWind));
     }
 
 
     // generate path candidates based on beat angles
-    List<PathCandidate> getPathCandsBeatWind(PathCandidate path, long timeStep, long turnLoss, Position posStart, Position posEnd, double tgtHeight) {
+    List<PathCandidateBitSet> getPathCandsBeatWind(PathCandidateBitSet path, long timeStep, long turnLoss, Position posStart, Position posEnd, double tgtHeight) {
 
-        List<PathCandidate> result = new ArrayList<PathCandidate>();
-        PathCandidate newPathCand;
+        List<PathCandidateBitSet> result = new ArrayList<PathCandidateBitSet>();
+        PathCandidateBitSet newPathCand;
 
         if (this.maxTurns > 0) {
 
-            char prevDirection = path.path.charAt(path.path.length()-1);
-            if ((path.trn < this.maxTurns)||(this.isSameDirection(prevDirection, 'L'))) {
-                newPathCand = getPathCandWind(path, 'L', timeStep, turnLoss, posStart, posEnd, tgtHeight);
+            boolean prevDirection = path.path.get(path.length-1);
+
+            if ((path.trn < this.maxTurns)||(this.isSameDirection(path.length, prevDirection, LEFT))) {
+                newPathCand = getPathCandWind(path, LEFT, timeStep, turnLoss, posStart, posEnd, tgtHeight);
                 result.add(newPathCand);
             }
 
-            if ((path.trn < this.maxTurns)||(this.isSameDirection(prevDirection, 'R'))) {
-                newPathCand = getPathCandWind(path, 'R', timeStep, turnLoss, posStart, posEnd, tgtHeight);
+            if ((path.trn < this.maxTurns)||(this.isSameDirection(path.length, prevDirection, RIGHT))) {
+                newPathCand = getPathCandWind(path, RIGHT, timeStep, turnLoss, posStart, posEnd, tgtHeight);
                 result.add(newPathCand);
             }
 
         } else {
 
             // step left
-            newPathCand = getPathCandWind(path, 'L', timeStep, turnLoss, posStart, posEnd, tgtHeight);
+            newPathCand = getPathCandWind(path, LEFT, timeStep, turnLoss, posStart, posEnd, tgtHeight);
             result.add(newPathCand);
 
             // step right
-            newPathCand = getPathCandWind(path, 'R', timeStep, turnLoss, posStart, posEnd, tgtHeight);
+            newPathCand = getPathCandWind(path, RIGHT, timeStep, turnLoss, posStart, posEnd, tgtHeight);
             result.add(newPathCand);
 
         }
@@ -269,28 +255,28 @@ public class PathGeneratorTreeGrowWind extends PathGeneratorBase {
         return result;
     }
 
-    Util.Pair<List<PathCandidate>,List<PathCandidate>> generateCandidate(List<PathCandidate> oldPaths, long timeStep, long turnLoss, Position posStart, Position posMiddle, Position posEnd, double tgtHeight) {
+    Util.Pair<List<PathCandidateBitSet>,List<PathCandidateBitSet>> generateCandidate(List<PathCandidateBitSet> oldPaths, long timeStep, long turnLoss, Position posStart, Position posMiddle, Position posEnd, double tgtHeight) {
 
-        List<PathCandidate> newPathCands;
-        List<PathCandidate> leftPaths = new ArrayList<PathCandidate>();
-        List<PathCandidate> rightPaths = new ArrayList<PathCandidate>();
-        for(PathCandidate curPath : oldPaths) {
+        List<PathCandidateBitSet> newPathCands;
+        List<PathCandidateBitSet> leftPaths = new ArrayList<PathCandidateBitSet>();
+        List<PathCandidateBitSet> rightPaths = new ArrayList<PathCandidateBitSet>();
+        for(PathCandidateBitSet curPath : oldPaths) {
 
             if (curPath.reached) {
                 continue;
             }
             
             newPathCands = this.getPathCandsBeatWind(curPath, timeStep, turnLoss, posStart, posEnd, tgtHeight);
-            for (PathCandidate curNewPath : newPathCands) {
+            for (PathCandidateBitSet curNewPath : newPathCands) {
                 // check whether path is *outside* regatta-area
                 double distFromMiddleMeters = posMiddle.getDistance(curPath.pos.getPosition()).getMeters();
                 if (distFromMiddleMeters > oobFact * tgtHeight) {
                     continue; // ignore curPath
                 }
 
-                if (curNewPath.sid == 'L') {
+                if (curNewPath.sid == LEFT) {
                     leftPaths.add(curNewPath);
-                } else if (curNewPath.sid == 'R') {
+                } else if (curNewPath.sid == RIGHT) {
                     rightPaths.add(curNewPath);
                 }
 
@@ -298,17 +284,17 @@ public class PathGeneratorTreeGrowWind extends PathGeneratorBase {
 
         }
 
-        Util.Pair<List<PathCandidate>,List<PathCandidate>> newPaths = new Util.Pair<List<PathCandidate>,List<PathCandidate>>(leftPaths, rightPaths);
+        Util.Pair<List<PathCandidateBitSet>,List<PathCandidateBitSet>> newPaths = new Util.Pair<List<PathCandidateBitSet>,List<PathCandidateBitSet>>(leftPaths, rightPaths);
         return newPaths;
     }
 
 
-    List<PathCandidate> filterCandidates(List<PathCandidate> allCands, double hrzBinWidth) {
+    List<PathCandidateBitSet> filterCandidates(List<PathCandidateBitSet> allCands, double hrzBinWidth) {
 
         boolean[] filterMap = new boolean[allCands.size()];
 
         // sort candidates by horizontal distance
-        Comparator<PathCandidate> sortHorizontal = new SortPathCandsHorizontally();
+        Comparator<PathCandidateBitSet> sortHorizontal = new SortPathCandsHorizontally();
         Collections.sort(allCands, sortHorizontal);
 
         // start scan with index 0
@@ -365,7 +351,7 @@ public class PathGeneratorTreeGrowWind extends PathGeneratorBase {
         } // endfor each candidate
 
         // collect all good candidates (i.e. filterMap == false)
-        List<PathCandidate> filterCands = new ArrayList<PathCandidate>();
+        List<PathCandidateBitSet> filterCands = new ArrayList<PathCandidateBitSet>();
         for(int idx=0; idx < allCands.size(); idx++) {
             if (!filterMap[idx]) {
                 filterCands.add(allCands.get(idx));
@@ -377,7 +363,7 @@ public class PathGeneratorTreeGrowWind extends PathGeneratorBase {
     }
 
 
-    List<PathCandidate> filterIsochrone(List<PathCandidate> allCands, double hrzBinWidth) {
+    List<PathCandidateBitSet> filterIsochrone(List<PathCandidateBitSet> allCands, double hrzBinWidth) {
 
         boolean[] filterMap = new boolean[allCands.size()];
         for(int idx = 0; idx < allCands.size(); idx++) {
@@ -385,7 +371,7 @@ public class PathGeneratorTreeGrowWind extends PathGeneratorBase {
         }
 
         // sort candidates by horizontal distance
-        Comparator<PathCandidate> sortHorizontal = new SortPathCandsHorizontally();
+        Comparator<PathCandidateBitSet> sortHorizontal = new SortPathCandsHorizontally();
         Collections.sort(allCands, sortHorizontal);
 
         // start scan with index 0
@@ -444,7 +430,7 @@ public class PathGeneratorTreeGrowWind extends PathGeneratorBase {
         } // endfor each candidate
 
         // collect all good candidates (i.e. filterMap == false)
-        List<PathCandidate> filterCands = new ArrayList<PathCandidate>();
+        List<PathCandidateBitSet> filterCands = new ArrayList<PathCandidateBitSet>();
         for(int idx=0; idx < allCands.size(); idx++) {
             if (!filterMap[idx]) {
                 filterCands.add(allCands.get(idx));
@@ -509,23 +495,29 @@ public class PathGeneratorTreeGrowWind extends PathGeneratorBase {
         logger.info("Time step :" + usedTimeStep);
         
         // calculate initial position according to initPathStr
-        PathCandidate initPath = new PathCandidate(new TimedPositionImpl(currentTime, currentPosition), false, 0.0, 0.0, 0, "0", '0', wndStart);
+        PathCandidateBitSet initPath = new PathCandidateBitSet(new TimedPositionImpl(currentTime, currentPosition), false, 0.0, 0.0, 0, new BitSet(1), 1, LEFT, wndStart);
         if (initPathStr.length()>1) {
-            char nextDirection = '0';
+            char nextDirectionChar = '0';
             for(int idx=1; idx<initPathStr.length(); idx++) {
-                nextDirection = initPathStr.charAt(idx);
-                PathCandidate newPathCand = getPathCandWind(initPath, nextDirection, usedTimeStep, turnLoss, startPos, endPos, distStartEndMeters);
+                nextDirectionChar = initPathStr.charAt(idx);
+                boolean nextDirection;
+                if (nextDirectionChar == 'L') {
+                	nextDirection = LEFT;
+                } else {
+                	nextDirection = RIGHT;
+                }
+                PathCandidateBitSet newPathCand = getPathCandWind(initPath, nextDirection, usedTimeStep, turnLoss, startPos, endPos, distStartEndMeters);
                 initPath = newPathCand;
             }
         }
-        List<PathCandidate> allPaths = new ArrayList<PathCandidate>();
-        List<PathCandidate> trgPaths = new ArrayList<PathCandidate>();
+        List<PathCandidateBitSet> allPaths = new ArrayList<PathCandidateBitSet>();
+        List<PathCandidateBitSet> trgPaths = new ArrayList<PathCandidateBitSet>();
         allPaths.add(initPath);
 
 
-        TimedPosition tstPosition = this.getStep(new TimedPositionImpl(startTime, startPos), usedTimeStep, turnLoss, true, 'L');
+        TimedPosition tstPosition = this.getStep(new TimedPositionImpl(startTime, startPos), usedTimeStep, turnLoss, true, LEFT);
         double tstDist1 = startPos.getDistance(tstPosition.getPosition()).getMeters();
-        tstPosition = this.getStep(new TimedPositionImpl(startTime, startPos), usedTimeStep, turnLoss, true, 'R');
+        tstPosition = this.getStep(new TimedPositionImpl(startTime, startPos), usedTimeStep, turnLoss, true, RIGHT);
         double tstDist2 = startPos.getDistance(tstPosition.getPosition()).getMeters();
 
         double hrzBinSize = (tstDist1 + tstDist2)/6.0; // horizontal bin size in meters
@@ -544,14 +536,14 @@ public class PathGeneratorTreeGrowWind extends PathGeneratorBase {
             }
 
             // generate new candidates (inside regatta-area)
-            Util.Pair<List<PathCandidate>,List<PathCandidate>> newPaths = this.generateCandidate(allPaths, usedTimeStep, turnLoss, startPos, middlePos, endPos, distStartEndMeters);
+            Util.Pair<List<PathCandidateBitSet>,List<PathCandidateBitSet>> newPaths = this.generateCandidate(allPaths, usedTimeStep, turnLoss, startPos, middlePos, endPos, distStartEndMeters);
 
 
             // select good candidates
-            List<PathCandidate> leftPaths = this.filterCandidates(newPaths.getA(), hrzBinSize/2.0);
-            List<PathCandidate> rightPaths = this.filterCandidates(newPaths.getB(), hrzBinSize/2.0);
+            List<PathCandidateBitSet> leftPaths = this.filterCandidates(newPaths.getA(), hrzBinSize/2.0);
+            List<PathCandidateBitSet> rightPaths = this.filterCandidates(newPaths.getB(), hrzBinSize/2.0);
 
-            List<PathCandidate> nextPaths = new ArrayList<PathCandidate> ();
+            List<PathCandidateBitSet> nextPaths = new ArrayList<PathCandidateBitSet> ();
             nextPaths.addAll(leftPaths);
             nextPaths.addAll(rightPaths);
 
@@ -567,7 +559,7 @@ public class PathGeneratorTreeGrowWind extends PathGeneratorBase {
 
                 this.gridPositions.add(allPaths);
 
-                List<PathCandidate> isocPaths = this.filterIsochrone(allPaths, hrzBinSize);
+                List<PathCandidateBitSet> isocPaths = this.filterIsochrone(allPaths, hrzBinSize);
                 this.isocPositions.add(isocPaths);
 
             }
@@ -575,7 +567,7 @@ public class PathGeneratorTreeGrowWind extends PathGeneratorBase {
             // check if there are still paths in the regatta-area
             if (allPaths.size() > 0) {
 
-                for(PathCandidate curPath : allPaths) {
+                for(PathCandidateBitSet curPath : allPaths) {
                     // terminate path-search if paths are found that are close enough to target
                     //if ((curPath.vrt > distStartEndMeters)) {
                     if (curPath.reached) {
@@ -605,10 +597,10 @@ public class PathGeneratorTreeGrowWind extends PathGeneratorBase {
                 outputCSV.write("0; "+startPos.getLatDeg()+"; "+startPos.getLngDeg()+"; "+(startTime.asMillis()/1000)+"; 0; 0; "+(-distStartEndMeters)+"\n");
                 outputCSV.write("0; "+endPos.getLatDeg()+"; "+endPos.getLngDeg()+"; "+(startTime.asMillis()/1000)+"; 0; 0; 0\n");
                 int stepCount = 0;
-                for(List<PathCandidate> isoChrone : this.gridPositions) {
+                for(List<PathCandidateBitSet> isoChrone : this.gridPositions) {
                     stepCount++;
-                    PathCandidate prevPos = null;
-                    for(PathCandidate isoPos : isoChrone) {
+                    PathCandidateBitSet prevPos = null;
+                    for(PathCandidateBitSet isoPos : isoChrone) {
 
                         if (prevPos != null) {
                             if (prevPos.pos.getPosition().getDistance(isoPos.pos.getPosition()).getMeters() < distResolution) {
@@ -635,10 +627,10 @@ public class PathGeneratorTreeGrowWind extends PathGeneratorBase {
                 outputCSV.write("0; "+startPos.getLatDeg()+"; "+startPos.getLngDeg()+"; "+(startTime.asMillis()/1000)+"; 0; 0; "+(-distStartEndMeters)+"\n");
                 outputCSV.write("0; "+endPos.getLatDeg()+"; "+endPos.getLngDeg()+"; "+(startTime.asMillis()/1000)+"; 0; 0; 0\n");
                 int stepCount = 0;
-                for(List<PathCandidate> isoChrone : this.isocPositions) {
+                for(List<PathCandidateBitSet> isoChrone : this.isocPositions) {
                     stepCount++;
-                    PathCandidate prevPos = null;
-                    for(PathCandidate isoPos : isoChrone) {
+                    PathCandidateBitSet prevPos = null;
+                    for(PathCandidateBitSet isoPos : isoChrone) {
 
                         if (prevPos != null) {
                             if (prevPos.pos.getPosition().getDistance(isoPos.pos.getPosition()).getMeters() < distResolution) {
@@ -675,7 +667,7 @@ public class PathGeneratorTreeGrowWind extends PathGeneratorBase {
         Collections.sort(trgPaths);
 
         // debug output
-        for(PathCandidate curPath : trgPaths) {
+        for(PathCandidateBitSet curPath : trgPaths) {
             logger.info("\nPath: " + curPath.path + "\n      Time: " + (curPath.pos.getTimePoint().asMillis()-startTime.asMillis()) +", Height: "+curPath.vrt+" of "+(Math.round(startPos.getDistance(endPos).getMeters()*100.0)/100.0)+", Dist: "+curPath.hrz+"m ~ "+(Math.round(curPath.pos.getPosition().getDistance(endPos).getMeters()*100.0)/100.0)+"m");
             //System.out.print(""+curPath.path+": "+curPath.pos.getTimePoint().asMillis()+", "+curPath.pos.getPosition().getLatDeg()+", "+curPath.pos.getPosition().getLngDeg()+", ");
             //System.out.println(" height:"+curPath.vrt+" of "+startPos.getDistance(endPos).getMeters()+", dist:"+curPath.hrz+" ~ "+curPath.pos.getPosition().getDistance(endPos));
@@ -688,20 +680,20 @@ public class PathGeneratorTreeGrowWind extends PathGeneratorBase {
         // generate intermediate steps
         bestCand = trgPaths.get(0); // target-path ending closest to target
         TimedPositionWithSpeed curPosition = null;
-        char nextDirection = '0';
-        char prevDirection = '0';
-        for(int step=0; step<(bestCand.path.length()-1); step++) {
+        boolean nextDirection = LEFT;
+        boolean prevDirection = LEFT;
+        for(int step=0; step<(bestCand.length-1); step++) {
 
-            nextDirection = bestCand.path.charAt(step);
+        	nextDirection = bestCand.path.get(step);
 
-            if (nextDirection == '0') {
+            if (step == 0) {
 
                 curPosition = new TimedPositionWithSpeedImpl(startTime, startPos, null);
                 path.add(curPosition);
 
             } else {
 
-                boolean sameBaseDirection = this.isSameDirection(prevDirection, nextDirection);
+                boolean sameBaseDirection = this.isSameDirection(step, prevDirection, nextDirection);
                 TimedPosition newPosition = this.getStep(curPosition, usedTimeStep, turnLoss, sameBaseDirection, nextDirection);
                 curPosition = new TimedPositionWithSpeedImpl(newPosition.getTimePoint(), newPosition.getPosition(), null);
                 path.add(curPosition);
