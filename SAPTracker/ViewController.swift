@@ -29,7 +29,8 @@ class ViewController: UIViewController, AVCaptureMetadataOutputObjectsDelegate {
     
     func addObservers() {
         NSNotificationCenter.defaultCenter().addObserver(self, selector: "trackingStarted:", name: LocationManager.NotificationType.trackingStartedNotificationKey, object: nil)
-   }
+        NSNotificationCenter.defaultCenter().addObserver(self, selector: "trackingStopped:", name: LocationManager.NotificationType.trackingStoppedNotificationKey, object: nil)
+    }
     
     func removeObservers() {
         NSNotificationCenter.defaultCenter().removeObserver(self)
@@ -41,7 +42,7 @@ class ViewController: UIViewController, AVCaptureMetadataOutputObjectsDelegate {
     }
     
     func trackingStopped(notification: NSNotification) {
-        println("trackingStarted")
+        println("trackingStopped")
         trackingButton.setTitle("Start Tracking", forState: UIControlState.Normal)
     }
 
