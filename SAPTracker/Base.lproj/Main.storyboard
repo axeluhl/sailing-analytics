@@ -6,10 +6,10 @@
         <capability name="Constraints to layout margins" minToolsVersion="6.0"/>
     </dependencies>
     <scenes>
-        <!--View Controller-->
+        <!--Home View Controller-->
         <scene sceneID="ufC-wZ-h7g">
             <objects>
-                <viewController id="vXZ-lx-hvc" customClass="ViewController" customModule="SAPTracker" customModuleProvider="target" sceneMemberID="viewController">
+                <viewController id="vXZ-lx-hvc" customClass="HomeViewController" customModule="SAPTracker" customModuleProvider="target" sceneMemberID="viewController">
                     <layoutGuides>
                         <viewControllerLayoutGuide type="top" id="jyV-Pf-zRb"/>
                         <viewControllerLayoutGuide type="bottom" id="2fi-mo-0CV"/>
@@ -33,7 +33,7 @@
                                     <color key="titleShadowColor" white="0.5" alpha="1" colorSpace="calibratedWhite"/>
                                 </state>
                                 <connections>
-                                    <action selector="qrCode:" destination="vXZ-lx-hvc" eventType="touchUpInside" id="bM5-Is-Ydg"/>
+                                    <segue destination="plm-Uw-c62" kind="presentation" identifier="qrcode" id="B7H-Qz-fSS"/>
                                 </connections>
                             </button>
                         </subviews>
@@ -53,6 +53,51 @@
                 </viewController>
                 <placeholder placeholderIdentifier="IBFirstResponder" id="x5A-6p-PRh" sceneMemberID="firstResponder"/>
             </objects>
+        </scene>
+        <!--Code View Controller-->
+        <scene sceneID="k9g-QH-Z7I">
+            <objects>
+                <viewController id="plm-Uw-c62" customClass="QRCodeViewController" customModule="SAPTracker" customModuleProvider="target" sceneMemberID="viewController">
+                    <layoutGuides>
+                        <viewControllerLayoutGuide type="top" id="Ijn-E4-zGK"/>
+                        <viewControllerLayoutGuide type="bottom" id="1Le-Y7-h2R"/>
+                    </layoutGuides>
+                    <view key="view" contentMode="scaleToFill" id="pUL-en-Wee">
+                        <rect key="frame" x="0.0" y="0.0" width="600" height="600"/>
+                        <autoresizingMask key="autoresizingMask" widthSizable="YES" heightSizable="YES"/>
+                        <subviews>
+                            <button opaque="NO" contentMode="scaleToFill" contentHorizontalAlignment="center" contentVerticalAlignment="center" buttonType="roundedRect" lineBreakMode="middleTruncation" translatesAutoresizingMaskIntoConstraints="NO" id="bEG-Pg-x18">
+                                <rect key="frame" x="16" y="550" width="568" height="30"/>
+                                <state key="normal" title="Cancel">
+                                    <color key="titleShadowColor" white="0.5" alpha="1" colorSpace="calibratedWhite"/>
+                                </state>
+                                <connections>
+                                    <action selector="dismiss:" destination="plm-Uw-c62" eventType="touchUpInside" id="aUj-nq-AoI"/>
+                                </connections>
+                            </button>
+                            <view clipsSubviews="YES" contentMode="scaleToFill" translatesAutoresizingMaskIntoConstraints="NO" id="ttp-CB-QaR">
+                                <rect key="frame" x="16" y="28" width="568" height="514"/>
+                                <color key="backgroundColor" white="0.66666666666666663" alpha="1" colorSpace="calibratedWhite"/>
+                            </view>
+                        </subviews>
+                        <color key="backgroundColor" white="1" alpha="1" colorSpace="calibratedWhite"/>
+                        <constraints>
+                            <constraint firstItem="bEG-Pg-x18" firstAttribute="trailing" secondItem="ttp-CB-QaR" secondAttribute="trailing" id="CO7-EH-5QE"/>
+                            <constraint firstItem="bEG-Pg-x18" firstAttribute="trailing" secondItem="pUL-en-Wee" secondAttribute="trailingMargin" id="HUF-MF-TfN"/>
+                            <constraint firstItem="bEG-Pg-x18" firstAttribute="leading" secondItem="pUL-en-Wee" secondAttribute="leadingMargin" id="dd1-Rz-Jak"/>
+                            <constraint firstAttribute="bottom" secondItem="bEG-Pg-x18" secondAttribute="bottom" constant="20" symbolic="YES" id="m6D-zZ-jl0"/>
+                            <constraint firstItem="bEG-Pg-x18" firstAttribute="leading" secondItem="ttp-CB-QaR" secondAttribute="leading" id="oba-qs-rX8"/>
+                            <constraint firstItem="bEG-Pg-x18" firstAttribute="top" secondItem="ttp-CB-QaR" secondAttribute="bottom" constant="8" symbolic="YES" id="vpT-O1-eZk"/>
+                            <constraint firstItem="ttp-CB-QaR" firstAttribute="top" secondItem="Ijn-E4-zGK" secondAttribute="bottom" constant="8" symbolic="YES" id="x5y-fR-7Vr"/>
+                        </constraints>
+                    </view>
+                    <connections>
+                        <outlet property="previewView" destination="ttp-CB-QaR" id="D7j-aT-pIK"/>
+                    </connections>
+                </viewController>
+                <placeholder placeholderIdentifier="IBFirstResponder" id="xZl-Qp-1x0" userLabel="First Responder" sceneMemberID="firstResponder"/>
+            </objects>
+            <point key="canvasLocation" x="1216" y="447"/>
         </scene>
     </scenes>
 </document>
