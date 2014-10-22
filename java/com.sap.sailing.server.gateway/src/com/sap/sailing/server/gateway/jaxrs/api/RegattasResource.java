@@ -134,7 +134,13 @@ public class RegattasResource extends AbstractSailingServerResource {
     
     /**
      * Gets all GPS positions of the competitors for a given race.
-     * @param regattaName the name of the regatta
+     * 
+     * @param regattaName
+     *            the name of the regatta
+     * @param tack
+     *            whether or not to include the tack in the output for each fix. Determining tack requires an expensive
+     *            wind calculation for the competitor's position for each fix's time point. If this value is not
+     *            absolutely required, <code>false</code> should be provided here which is also the default.
      * @return
      */
     @GET
@@ -142,7 +148,7 @@ public class RegattasResource extends AbstractSailingServerResource {
     @Path("{regattaname}/races/{racename}/competitors/positions")
     public Response getCompetitorPositions(@PathParam("regattaname") String regattaName, @PathParam("racename") String raceName,
         @QueryParam("fromtime") String fromtime, @QueryParam("fromtimeasmillis") Long fromtimeasmillis,
-        @QueryParam("totime") String totime, @QueryParam("totimeasmillis") Long totimeasmillis) {
+        @QueryParam("totime") String totime, @QueryParam("totimeasmillis") Long totimeasmillis, @QueryParam("withtack") Boolean withTack) {
         Response response;
         Regatta regatta = findRegattaByName(regattaName);
         if (regatta == null) {
@@ -201,15 +207,17 @@ public class RegattasResource extends AbstractSailingServerResource {
                             jsonFix.put("lng-deg", UnitSerializationUtil.latLngDecimalFormatter.format(fix.getPosition().getLngDeg()));
                             jsonFix.put("truebearing-deg", fix.getSpeed().getBearing().getDegrees());
                             jsonFix.put("speed-kts", UnitSerializationUtil.knotsDecimalFormatter.format(fix.getSpeed().getKnots()));
-                            String tackName;
-                            try {
-                                final Tack tack = trackedRace.getTack(competitor, fix.getTimePoint());
-                                if (tack != null) {
-                                    tackName = tack.name();
-                                    jsonFix.put("tack", tackName);
+                            if (withTack != null && withTack) {
+                                String tackName;
+                                try {
+                                    final Tack tack = trackedRace.getTack(competitor, fix.getTimePoint());
+                                    if (tack != null) {
+                                        tackName = tack.name();
+                                        jsonFix.put("tack", tackName);
+                                    }
+                                } catch (NoWindException e) {
+                                    // don't output tack
                                 }
-                            } catch (NoWindException e) {
-                                // don't output tack
                             }
                             jsonFixes.add(jsonFix);
                         }
