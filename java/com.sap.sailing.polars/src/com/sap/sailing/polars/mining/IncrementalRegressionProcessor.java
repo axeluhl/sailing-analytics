@@ -1,7 +1,9 @@
 package com.sap.sailing.polars.mining;
 
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.Map;
+import java.util.Set;
 
 import com.sap.sailing.domain.base.BoatClass;
 import com.sap.sailing.domain.base.SpeedWithConfidence;
@@ -24,6 +26,8 @@ public class IncrementalRegressionProcessor implements Processor<GroupedDataEntr
     private final Map<GroupKey, BoatSpeedEstimator> boatSpeedEstimators = new HashMap<GroupKey, BoatSpeedEstimator>();
 
     private final ClusterGroup<Speed> speedClusterGroup;
+    
+    private final Set<BoatClass> availableBoatClasses = new HashSet<>();
 
     public IncrementalRegressionProcessor(ClusterGroup<Speed> speedClusterGroup) {
         this.speedClusterGroup = speedClusterGroup;
@@ -36,6 +40,7 @@ public class IncrementalRegressionProcessor implements Processor<GroupedDataEntr
         synchronized (boatSpeedEstimators) {
             if (!boatSpeedEstimators.containsKey(key)) {
                 boatSpeedEstimators.put(key, new BoatSpeedEstimator());
+                availableBoatClasses.add(element.getDataEntry().getBoatClass());
             }
 
             boatSpeedEstimator = boatSpeedEstimators.get(key);
@@ -102,6 +107,10 @@ public class IncrementalRegressionProcessor implements Processor<GroupedDataEntr
     public void onFailure(Throwable failure) {
         // TODO do something
 
+    }
+
+    public Set<BoatClass> getAvailableBoatClasses() {
+        return availableBoatClasses;
     }
 
 }

@@ -3,7 +3,10 @@ package com.sap.sailing.polars.mining;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collection;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
+import java.util.Set;
 import java.util.concurrent.LinkedBlockingQueue;
 import java.util.concurrent.ThreadPoolExecutor;
 import java.util.concurrent.TimeUnit;
@@ -11,10 +14,17 @@ import java.util.concurrent.TimeUnit;
 import com.sap.sailing.domain.base.BoatClass;
 import com.sap.sailing.domain.base.Competitor;
 import com.sap.sailing.domain.base.SpeedWithConfidence;
+import com.sap.sailing.domain.base.impl.SpeedWithConfidenceImpl;
 import com.sap.sailing.domain.common.Bearing;
 import com.sap.sailing.domain.common.PolarSheetGenerationSettings;
+import com.sap.sailing.domain.common.PolarSheetsData;
+import com.sap.sailing.domain.common.PolarSheetsHistogramData;
 import com.sap.sailing.domain.common.Speed;
+import com.sap.sailing.domain.common.impl.DegreeBearingImpl;
+import com.sap.sailing.domain.common.impl.KnotSpeedImpl;
 import com.sap.sailing.domain.common.impl.PolarSheetGenerationSettingsImpl;
+import com.sap.sailing.domain.common.impl.PolarSheetsDataImpl;
+import com.sap.sailing.domain.common.impl.PolarSheetsHistogramDataImpl;
 import com.sap.sailing.domain.common.impl.WindSteppingWithMaxDistance;
 import com.sap.sailing.domain.tracking.GPSFixMoving;
 import com.sap.sailing.domain.tracking.TrackedRace;
@@ -102,6 +112,58 @@ public class PolarDataMiner {
     public SpeedWithConfidence<Integer> estimateBoatSpeed(BoatClass boatClass, Speed windSpeed, Bearing angleToTheWind)
             throws NotEnoughDataHasBeenAddedException {
         return incrementalRegressionProcessor.estimateBoatSpeed(boatClass, windSpeed, angleToTheWind);
+    }
+
+
+
+    public PolarSheetsData createFullSheetForBoatClass(BoatClass boatClass) {
+        Integer[] defaultWindSpeeds = defaultPolarSheetGenerationSettings.getWindStepping().getRawStepping();
+        Number[][] averagedPolarDataByWindSpeed = new Number[defaultWindSpeeds.length][360];
+        for (int windIndex = 0; windIndex < defaultWindSpeeds.length - 1; windIndex++) {
+            Integer windSpeed = defaultWindSpeeds[windIndex];
+            for (int angle = 0; angle < 360; angle++) {
+                SpeedWithConfidence<Integer> speedWithConfidence;
+                try {
+                    speedWithConfidence = incrementalRegressionProcessor.estimateBoatSpeed(boatClass, new KnotSpeedImpl(windSpeed), new DegreeBearingImpl(angle));
+                } catch (NotEnoughDataHasBeenAddedException e) {
+                    speedWithConfidence = new SpeedWithConfidenceImpl<Integer>(new KnotSpeedImpl(0), 0, 0);
+                }
+                averagedPolarDataByWindSpeed[windIndex][angle] = speedWithConfidence.getScalableValue().getValue();
+            }
+        }
+        
+        // FIXME Remove hard coded size values
+        Map<Integer, Integer[]> dataCountPerAngleForWindspeed = new HashMap<>();
+        Map<Integer, Map<Integer, PolarSheetsHistogramData>> histogramDataMap = new HashMap<>();
+        for (int windIndex = 0; windIndex < defaultWindSpeeds.length - 1; windIndex++) {
+            Integer[] perAngle = new Integer[360];
+            Map<Integer, PolarSheetsHistogramData> perWindSpeed = new HashMap<>();
+            for (int angle = 0; angle < 360; angle++) {
+                perAngle[angle] = /* FIXME */100;
+                Number[] xValues = {5};
+                Number[] yValues = {10};;
+                Map<String, Integer[]> yValuesByGaugeIds = new HashMap<>();
+                Map<String, Integer[]> yValuesByDay = new HashMap<>();
+                Map<String, Integer[]> yValuesByDayAndGaugeId = new HashMap<>();
+                int dataCount = 100;
+                double coefficiantOfVariation = 0.8;
+                perWindSpeed.put(angle, new PolarSheetsHistogramDataImpl(angle, xValues, yValues, yValuesByGaugeIds,
+                        yValuesByDay, yValuesByDayAndGaugeId, dataCount, coefficiantOfVariation));
+            }
+            histogramDataMap.put(windIndex, perWindSpeed);
+            dataCountPerAngleForWindspeed.put(windIndex, perAngle);
+        }
+        
+        
+        PolarSheetsData data = new PolarSheetsDataImpl(averagedPolarDataByWindSpeed, /* FIXME */100000,
+                dataCountPerAngleForWindspeed, defaultPolarSheetGenerationSettings.getWindStepping(), histogramDataMap);
+        return data;
+    }
+
+
+
+    public Set<BoatClass> getAvailableBoatClasses() {
+        return incrementalRegressionProcessor.getAvailableBoatClasses();
     }
 
 }

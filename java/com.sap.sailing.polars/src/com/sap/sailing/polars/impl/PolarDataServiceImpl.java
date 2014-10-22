@@ -109,12 +109,14 @@ public class PolarDataServiceImpl implements PolarDataService {
 
     @Override
     public PolarSheetsData getPolarSheetForBoatClass(BoatClass boatClass) {
-        return polarSheetPerBoatClassCache.get(boatClass, false);
+        return polarDataMiner.createFullSheetForBoatClass(boatClass);
+        //return polarSheetPerBoatClassCache.get(boatClass, false);
     }
 
     @Override
     public Set<BoatClass> getAllBoatClassesWithPolarSheetsAvailable() {
-        return polarSheetPerBoatClassCache.keySet();
+        return polarDataMiner.getAvailableBoatClasses();
+        //return polarSheetPerBoatClassCache.keySet();
     }
 
     @Override
