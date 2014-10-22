@@ -104,7 +104,7 @@ public class SimpleDataRetrieverChainDefinition<DataSourceType> implements
     }
     
     @Override
-    public Collection<? extends DataRetrieverTypeWithInformation<?, ?>> getDataRetrieverTypesWithInformation() {
+    public List<? extends DataRetrieverTypeWithInformation<?, ?>> getDataRetrieverTypesWithInformation() {
         return dataRetrieverTypesWithInformation;
     }
 

@@ -3,9 +3,11 @@ package com.sap.sse.datamining.impl;
 import static org.hamcrest.Matchers.greaterThan;
 import static org.hamcrest.Matchers.is;
 import static org.hamcrest.Matchers.lessThanOrEqualTo;
+import static org.hamcrest.Matchers.not;
 import static org.junit.Assert.assertThat;
 
 import java.util.Collection;
+import java.util.List;
 
 import org.junit.Before;
 import org.junit.Test;
@@ -14,7 +16,6 @@ import com.sap.sse.datamining.DataRetrieverChainBuilder;
 import com.sap.sse.datamining.DataRetrieverChainDefinition;
 import com.sap.sse.datamining.components.FilterCriterion;
 import com.sap.sse.datamining.components.Processor;
-import com.sap.sse.datamining.impl.SimpleDataRetrieverChainDefinition;
 import com.sap.sse.datamining.impl.criterias.AbstractFilterCriterion;
 import com.sap.sse.datamining.test.functions.registry.test_classes.Test_Regatta;
 import com.sap.sse.datamining.test.functions.registry.test_contexts.Test_HasLegOfCompetitorContext;
@@ -85,8 +86,10 @@ public class TestDataRetrieverChainCreation {
         assertThat(chainClone.getDataSourceType().equals(dataRetrieverChainDefinition.getDataSourceType()), is(true));
         assertThat(chainClone.getRetrievedDataType().equals(dataRetrieverChainDefinition.getRetrievedDataType()), is(true));
         
-        Collection<DataRetrieverTypeWithInformation<?, ?>> cloneDataRetrieverTypesWithInformation = (Collection<DataRetrieverTypeWithInformation<?, ?>>) chainClone.getDataRetrieverTypesWithInformation();
+        List<DataRetrieverTypeWithInformation<?, ?>> cloneDataRetrieverTypesWithInformation = (List<DataRetrieverTypeWithInformation<?, ?>>) chainClone.getDataRetrieverTypesWithInformation();
         assertThat(cloneDataRetrieverTypesWithInformation, is(dataRetrieverChainDefinition.getDataRetrieverTypesWithInformation()));
+        
+        assertThat(chainClone.getUUID(), not(dataRetrieverChainDefinition.getUUID()));
     }
 
     @SuppressWarnings("unchecked")

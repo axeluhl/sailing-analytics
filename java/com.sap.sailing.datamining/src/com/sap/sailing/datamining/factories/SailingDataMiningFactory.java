@@ -17,6 +17,7 @@ import com.sap.sse.datamining.DataRetrieverChainDefinition;
 import com.sap.sse.datamining.Query;
 import com.sap.sse.datamining.components.FilterCriterion;
 import com.sap.sse.datamining.components.Processor;
+import com.sap.sse.datamining.factories.FunctionFactory;
 import com.sap.sse.datamining.factories.ProcessorFactory;
 import com.sap.sse.datamining.functions.Function;
 import com.sap.sse.datamining.functions.FunctionProvider;
@@ -37,12 +38,14 @@ import com.sap.sse.datamining.shared.impl.dto.DataRetrieverChainDefinitionDTO;
 public class SailingDataMiningFactory {
 
     private final ProcessorFactory processorFactory;
+    private final FunctionFactory functionFactory;
     
     private final FunctionProvider functionProvider;
     private final DataRetrieverChainDefinitionRegistry dataRetrieverChainDefinitionRegistry;
 
     public SailingDataMiningFactory(FunctionProvider functionProvider, DataRetrieverChainDefinitionRegistry dataRetrieverChainDefinitionRegistry) {
         processorFactory = new ProcessorFactory(DataMiningActivator.getExecutor());
+        functionFactory = new FunctionFactory();
         
         this.functionProvider = functionProvider;
         this.dataRetrieverChainDefinitionRegistry = dataRetrieverChainDefinitionRegistry;
@@ -150,12 +153,36 @@ public class SailingDataMiningFactory {
     private Collection<Function<?>> getDimensionsOf(
             DataRetrieverChainDefinition<RacingEventService> dataRetrieverChainDefinition) {
         Collection<Function<?>> dimensions = new HashSet<>();
-        for (DataRetrieverTypeWithInformation<?, ?> dataRetrieverTypeWithInformation : dataRetrieverChainDefinition.getDataRetrieverTypesWithInformation()) {
-            dimensions.addAll(functionProvider.getDimensionsFor(dataRetrieverTypeWithInformation.getRetrievedDataType()));
+        List<? extends DataRetrieverTypeWithInformation<?, ?>> dataRetrieverTypesWithInformation = dataRetrieverChainDefinition.getDataRetrieverTypesWithInformation();
+        for (int i = dataRetrieverTypesWithInformation.size() - 1; i >= 0; i--) {
+            DataRetrieverTypeWithInformation<?, ?> dataRetrieverTypeWithInformation = dataRetrieverTypesWithInformation.get(i);
+            Collection<Function<?>> dimensionsOfDataType = functionProvider.getDimensionsFor(dataRetrieverTypeWithInformation.getRetrievedDataType());
+            
+            if (!dimensions.isEmpty()) {
+                Map<Function<?>, Function<?>> dimensionsMappedByTrimmedDimensions = trimFirstMethodAndMapOriginal(dimensions);
+                for (Function<?> dimensionOfDataType : dimensionsOfDataType) {
+                    if (dimensionsMappedByTrimmedDimensions.containsKey(dimensionOfDataType)) {
+                        dimensions.remove(dimensionsMappedByTrimmedDimensions.get(dimensionOfDataType));
+                    }
+                }
+            }
+            
+            dimensions.addAll(dimensionsOfDataType);
         }
         return dimensions;
     }
     
+    private Map<Function<?>, Function<?>> trimFirstMethodAndMapOriginal(Collection<Function<?>> dimensions) {
+        Map<Function<?>, Function<?>> dimensionsMappedByTrimmedDimensions = new HashMap<>();
+        for (Function<?> dimension : dimensions) {
+            Function<?> trimmedDimension = functionFactory.trimFirstMethod(dimension);
+            if (trimmedDimension != null) {
+                dimensionsMappedByTrimmedDimensions.put(trimmedDimension, dimension);
+            }
+        }
+        return dimensionsMappedByTrimmedDimensions;
+    }
+
     private Map<Class<?>, Collection<Function<?>>> mapFunctionsByDeclaringType(Collection<Function<?>> functions) {
         Map<Class<?>, Collection<Function<?>>> mappedFunctions = new HashMap<>();
         for (Function<?> function : functions) {
