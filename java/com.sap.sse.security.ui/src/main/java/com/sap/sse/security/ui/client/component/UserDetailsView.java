@@ -67,19 +67,23 @@ public class UserDetailsView extends FlowPanel {
             @Override
             public void onValueChange(ValueChangeEvent<Iterable<String>> event) {
                 Iterable<String> newRoleList = event.getValue();
-                userManagementService.setRolesForUser(UserDetailsView.this.user.getName(), newRoleList, new MarkedAsyncCallback<SuccessInfo>(
+                final UserDTO selectedUser = UserDetailsView.this.user;
+                userManagementService.setRolesForUser(selectedUser.getName(), newRoleList, new MarkedAsyncCallback<SuccessInfo>(
                         new AsyncCallback<SuccessInfo>() {
                             @Override
                             public void onFailure(Throwable caught) {
-                                Window.alert(stringMessages.errorUpdatingRoles(UserDetailsView.this.user.getName(), caught.getMessage()));
+                                Window.alert(stringMessages.errorUpdatingRoles(selectedUser.getName(), caught.getMessage()));
                             }
 
                             @Override
                             public void onSuccess(SuccessInfo result) {
                                 if (!result.isSuccessful()) {
-                                    Window.alert(stringMessages.errorUpdatingRoles(UserDetailsView.this.user.getName(), result.getMessage()));
+                                    Window.alert(stringMessages.errorUpdatingRoles(selectedUser.getName(), result.getMessage()));
                                 } else {
-                                    userService.updateUser(/* notify other instances */ true);
+                                    if (userService.getCurrentUser().getName().equals(selectedUser.getName())) {
+                                        // if the current user's roles changed, update the user object in the user service and notify others
+                                        userService.updateUser(/* notify other instances */ true);
+                                    }
                                 }
                             }
                         }));
@@ -222,7 +226,7 @@ public class UserDetailsView extends FlowPanel {
                 }
                 accountPanels.add(accountPanelDecorator);
             }
-            rolesEditor.setValue(user.getRoles());
+            rolesEditor.setValue(user.getRoles(), /* fireEvents */ false);
         }
     }
 
