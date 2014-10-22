@@ -42,6 +42,10 @@ class LocationManager: NSObject, CLLocationManagerDelegate {
             NSNotificationQueue.defaultQueue().enqueueNotification(notification, postingStyle: NSPostingStyle.PostASAP)
             return
         }
+
+        if(coreLocationManager.respondsToSelector("requestAlwaysAuthorization")) {
+            coreLocationManager.requestAlwaysAuthorization()
+        }
         coreLocationManager.startUpdatingLocation()
         coreLocationManager.startUpdatingHeading()
         coreLocationManager.delegate = self
