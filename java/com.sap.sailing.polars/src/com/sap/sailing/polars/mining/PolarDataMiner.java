@@ -119,23 +119,27 @@ public class PolarDataMiner {
     public PolarSheetsData createFullSheetForBoatClass(BoatClass boatClass) {
         Integer[] defaultWindSpeeds = defaultPolarSheetGenerationSettings.getWindStepping().getRawStepping();
         Number[][] averagedPolarDataByWindSpeed = new Number[defaultWindSpeeds.length][360];
-        for (int windIndex = 0; windIndex < defaultWindSpeeds.length - 1; windIndex++) {
+        for (int windIndex = 0; windIndex < defaultWindSpeeds.length; windIndex++) {
             Integer windSpeed = defaultWindSpeeds[windIndex];
             for (int angle = 0; angle < 360; angle++) {
                 SpeedWithConfidence<Integer> speedWithConfidence;
                 try {
-                    speedWithConfidence = incrementalRegressionProcessor.estimateBoatSpeed(boatClass, new KnotSpeedImpl(windSpeed), new DegreeBearingImpl(angle));
+                    int convertedAngle = angle;
+                    if (angle > 180) {
+                        convertedAngle = angle - 360;
+                    }
+                    speedWithConfidence = incrementalRegressionProcessor.estimateBoatSpeed(boatClass, new KnotSpeedImpl(windSpeed), new DegreeBearingImpl(convertedAngle));
                 } catch (NotEnoughDataHasBeenAddedException e) {
                     speedWithConfidence = new SpeedWithConfidenceImpl<Integer>(new KnotSpeedImpl(0), 0, 0);
                 }
-                averagedPolarDataByWindSpeed[windIndex][angle] = speedWithConfidence.getScalableValue().getValue();
+                averagedPolarDataByWindSpeed[windIndex][angle] = speedWithConfidence.getObject().getKnots();
             }
         }
         
         // FIXME Remove hard coded size values
         Map<Integer, Integer[]> dataCountPerAngleForWindspeed = new HashMap<>();
         Map<Integer, Map<Integer, PolarSheetsHistogramData>> histogramDataMap = new HashMap<>();
-        for (int windIndex = 0; windIndex < defaultWindSpeeds.length - 1; windIndex++) {
+        for (int windIndex = 0; windIndex < defaultWindSpeeds.length; windIndex++) {
             Integer[] perAngle = new Integer[360];
             Map<Integer, PolarSheetsHistogramData> perWindSpeed = new HashMap<>();
             for (int angle = 0; angle < 360; angle++) {
@@ -147,8 +151,10 @@ public class PolarDataMiner {
                 Map<String, Integer[]> yValuesByDayAndGaugeId = new HashMap<>();
                 int dataCount = 100;
                 double coefficiantOfVariation = 0.8;
-                perWindSpeed.put(angle, new PolarSheetsHistogramDataImpl(angle, xValues, yValues, yValuesByGaugeIds,
-                        yValuesByDay, yValuesByDayAndGaugeId, dataCount, coefficiantOfVariation));
+                PolarSheetsHistogramDataImpl polarSheetsHistogramDataImpl = new PolarSheetsHistogramDataImpl(angle, xValues, yValues, yValuesByGaugeIds,
+                        yValuesByDay, yValuesByDayAndGaugeId, dataCount, coefficiantOfVariation);
+                polarSheetsHistogramDataImpl.setConfidenceMeasure(0.5);
+                perWindSpeed.put(angle, polarSheetsHistogramDataImpl);
             }
             histogramDataMap.put(windIndex, perWindSpeed);
             dataCountPerAngleForWindspeed.put(windIndex, perAngle);
