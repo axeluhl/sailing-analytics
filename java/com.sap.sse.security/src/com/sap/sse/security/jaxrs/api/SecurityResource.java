@@ -25,14 +25,14 @@ public class SecurityResource extends AbstractSecurityResource {
     @GET
     @Path("/hello")
     @Produces("application/json;charset=UTF-8")
-    public Response sayHello(){
+    public Response sayHello() {
         return Response.ok("Hello!", MediaType.TEXT_PLAIN).build();
     }
     
     @POST
     @Path("/login")
     @Produces("application/json;charset=UTF-8")
-    public Response login(@FormParam("username") String username, @FormParam("password") String password){
+    public Response login(@FormParam("username") String username, @FormParam("password") String password) {
         try {
             getService().login(username, password);
             logger.info("Successfully logged in " + username + " with password");

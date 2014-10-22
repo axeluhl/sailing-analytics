@@ -102,7 +102,6 @@ public class SecurityServiceImpl extends RemoteServiceServlet implements Securit
                 logger.info("No users found, creating default user \"admin\" with password \"admin\"");
                 createSimpleUser("admin", "nobody@sapsailing.com", "admin", /* validationBaseURL */ null);
                 addRoleForUser("admin", DefaultRoles.ADMIN.getRolename());
-                addRoleForUser("admin", "moderator");
             } catch (UserManagementException | MailException e) {
                 logger.log(Level.SEVERE, "Exception while creating default admin user", e);
             }
