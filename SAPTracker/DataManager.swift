@@ -23,9 +23,6 @@ class DataManager: NSObject {
         
         println(managedObjectContext!)
         
-        // TODO: test
-        NSNotificationCenter.defaultCenter().addObserver(self, selector: "trackingStarted:", name: LocationManager.NotificationType.trackingStartedNotificationKey, object: nil)
-     
         // store new locations to database
         NSNotificationCenter.defaultCenter().addObserver(self, selector: "newLocation:", name: LocationManager.NotificationType.newLocationNotificationKey, object: nil)
         
@@ -38,11 +35,6 @@ class DataManager: NSObject {
     }
     
     // MARK: - notification callbacks
-    
-    // TODO: test
-    func trackingStarted(notification: NSNotification) {
-        println("trackingStarted")
-    }
    
     func newLocation(notification: NSNotification) {
         println(notification)

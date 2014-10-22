@@ -14,11 +14,7 @@ class HomeViewController: UIViewController {
     
     override func viewDidLoad() {
         super.viewDidLoad()
-
         addObservers()
-
-        // TODO: move someplace else, e.g. app delegate
-        DataManager.sharedManager
     }
 
     deinit {
