@@ -21,6 +21,7 @@ class GPSFix: NSManagedObject {
     @NSManaged var sent: Bool
 
     func initWithDictionary(dictionary: Dictionary<NSObject, AnyObject>) {
+        deviceUuid = DeviceUDIDManager.UDID
         timeMillis = Int64((dictionary["timestamp"] as Double) * 1000)
         latDeg = dictionary["latitude"] as Double
         lonDeg = dictionary["longitude"] as Double
