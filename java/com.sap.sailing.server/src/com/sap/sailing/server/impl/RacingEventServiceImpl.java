@@ -331,7 +331,7 @@ public class RacingEventServiceImpl implements RacingEventServiceWithTestSupport
      * This author should be used for server generated race log events
      */
     private final RaceLogEventAuthor raceLogEventAuthorForServer = new RaceLogEventAuthorImpl(
-            RacingEventService.class.getName(), 1);
+            RacingEventService.class.getName(), 0);
 
     private final PolarDataService polarDataService;
 

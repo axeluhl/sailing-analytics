@@ -1,4 +1,4 @@
-package com.sap.sailing.gwt.home.client.i18n;
+package com.sap.sailing.gwt.common.client.i18n;
 
 import com.google.gwt.core.client.GWT;
 import com.google.gwt.i18n.client.Messages;

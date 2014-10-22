@@ -26,6 +26,8 @@ public class ScoringSchemeTypeFormatter {
             return stringMessages.scoringSchemeWinnerGetsSix();
         case HIGH_POINT_WINNER_GETS_EIGHT:
             return stringMessages.scoringSchemeWinnerGetsEight();
+        case HIGH_POINT_WINNER_GETS_EIGHT_AND_INTERPOLATION:
+            return stringMessages.scoringSchemeWinnerGetsEightAndInterpolation();
         case HIGH_POINT_FIRST_GETS_TEN_OR_EIGHT:
             return stringMessages.scoringSchemeHighPointFirstGetsTenOrEight();
         }

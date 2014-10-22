@@ -389,6 +389,7 @@ public interface StringMessages extends Messages {
     String scoringSchemeWinnerGetsFive();
     String scoringSchemeWinnerGetsSix();
     String scoringSchemeWinnerGetsEight();
+    String scoringSchemeWinnerGetsEightAndInterpolation();
     String scoringSystem();
     String createFlexibleLeaderboard();
     String createRegattaLeaderboard();

@@ -15,7 +15,7 @@
         
         <EditTextPreference
             android:defaultValue="@string/preference_gps_fix_interval_ms_default"
-            android:key="@string/preference_gps_fix_interval_key"
+            android:key="@string/preference_gps_fix_interval_ms_key"
             android:summary="@string/empty"
             android:title="@string/gps_fix_interval" 
         	android:inputType="number"

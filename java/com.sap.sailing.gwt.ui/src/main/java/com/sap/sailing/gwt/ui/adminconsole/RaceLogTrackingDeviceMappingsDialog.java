@@ -292,7 +292,9 @@ public class RaceLogTrackingDeviceMappingsDialog extends RaceLogTrackingDialog {
             }
 
             @Override
-            public void cancel() {}
+            public void cancel() {
+                refresh();
+            }
         }, mapping).show();
     }
     
