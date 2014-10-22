@@ -8,7 +8,7 @@
 
 import Foundation
 
-class QRCodeManager: NSObject {
+class QRCodeManager {
     
     struct Keys {
         static let leaderBoard = "leaderboard"
@@ -36,26 +36,24 @@ class QRCodeManager: NSObject {
         return Singleton.sharedQRCodeManager
     }
     
-    
-    override init() {
-        super.init()
-        NSNotificationCenter.defaultCenter().addObserver(self, selector: "qrcodeScanned:", name: QRCodeViewController.NotificationType.qrcodeScannedNotificationKey, object: nil)
-    }
-    
-    // MARK: - notification callbacks
-    
-    func qrcodeScanned(notification: NSNotification) {
-        parseString(notification.userInfo!["value"] as String)
-    }
-    
     // MARK: - methods
     
-    func parseString(urlString: String) {
+    func parseString(urlString: String) -> Bool {
         let url = NSURL(string: urlString)
         
-        server = url!.scheme! + "://" + url!.host! + ":" + url!.port!.stringValue
-
+        if (url == nil || url!.scheme == nil || url!.host == nil) {
+            return false
+        }
+        
+        server = url!.scheme! + "://" + url!.host!
+        if ((url!.port) != nil) {
+            server! += ":" + url!.port!.stringValue
+        }
+        
         let queryString = url!.query
+        if (queryString == nil) {
+            return false
+        }
         let urlComponents = queryString!.componentsSeparatedByString("&")
         var queryStringDictionary = [String:String]()
         for keyValuePair in urlComponents
@@ -73,5 +71,9 @@ class QRCodeManager: NSObject {
         mark = queryStringDictionary[QRCodeManager.Keys.mark]
         from = queryStringDictionary[QRCodeManager.Keys.from]?.toInt()
         to = queryStringDictionary[QRCodeManager.Keys.to]?.toInt()
+
+        // TODO: make sure minimum values set
+        
+        return true
     }
 }

@@ -98,6 +98,36 @@
 			name = Frameworks;
 			sourceTree = "<group>";
 		};
+		7F06590019F7FE750077FF95 /* Model */ = {
+			isa = PBXGroup;
+			children = (
+				7FA6551919F6661900A1B92D /* DataManager.swift */,
+				7FA6551719F65FBD00A1B92D /* GPSFix.swift */,
+				7F44095919F65B5B0021BF22 /* CoreData.xcdatamodeld */,
+			);
+			name = Model;
+			sourceTree = "<group>";
+		};
+		7F06590119F7FE920077FF95 /* View */ = {
+			isa = PBXGroup;
+			children = (
+				7F83F15719F154F000C53328 /* HomeViewController.swift */,
+				7F0658FC19F7D6700077FF95 /* QRCodeViewController.swift */,
+				7F83F15919F154F000C53328 /* Main.storyboard */,
+				7F83F15E19F154F000C53328 /* LaunchScreen.xib */,
+			);
+			name = View;
+			sourceTree = "<group>";
+		};
+		7F06590219F7FEA40077FF95 /* Controller */ = {
+			isa = PBXGroup;
+			children = (
+				7F2C605919F160E400C32D93 /* LocationManager.swift */,
+				7F0658FE19F7EE910077FF95 /* QRCodeManager.swift */,
+			);
+			name = Controller;
+			sourceTree = "<group>";
+		};
 		7F83F14719F154F000C53328 = {
 			isa = PBXGroup;
 			children = (
@@ -122,15 +152,9 @@
 			isa = PBXGroup;
 			children = (
 				7F83F15519F154F000C53328 /* AppDelegate.swift */,
-				7F83F15719F154F000C53328 /* HomeViewController.swift */,
-				7F0658FC19F7D6700077FF95 /* QRCodeViewController.swift */,
-				7F83F15919F154F000C53328 /* Main.storyboard */,
-				7F83F15E19F154F000C53328 /* LaunchScreen.xib */,
-				7F2C605919F160E400C32D93 /* LocationManager.swift */,
-				7FA6551919F6661900A1B92D /* DataManager.swift */,
-				7F0658FE19F7EE910077FF95 /* QRCodeManager.swift */,
-				7FA6551719F65FBD00A1B92D /* GPSFix.swift */,
-				7F44095919F65B5B0021BF22 /* CoreData.xcdatamodeld */,
+				7F06590119F7FE920077FF95 /* View */,
+				7F06590219F7FEA40077FF95 /* Controller */,
+				7F06590019F7FE750077FF95 /* Model */,
 				7F83F15C19F154F000C53328 /* Images.xcassets */,
 				7F83F15319F154F000C53328 /* Supporting Files */,
 			);

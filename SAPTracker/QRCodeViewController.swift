@@ -60,9 +60,13 @@ class QRCodeViewController: UIViewController, AVCaptureMetadataOutputObjectsDele
             let metadataObject: AVMetadataMachineReadableCodeObject = metadataObjects[0] as AVMetadataMachineReadableCodeObject
             println(metadataObject.stringValue)
             
-            let notification = NSNotification(name: NotificationType.qrcodeScannedNotificationKey, object: self, userInfo:["value": metadataObject.stringValue])
-            NSNotificationQueue.defaultQueue().enqueueNotification(notification, postingStyle: NSPostingStyle.PostASAP)
-
+            if (!QRCodeManager.sharedManager.parseString(metadataObject.stringValue)) {
+                var alert = UIAlertController(title: "SAP Tracker", message: "Incorrect QR Code", preferredStyle: UIAlertControllerStyle.Alert)
+                alert.addAction(UIAlertAction(title: "OK", style: UIAlertActionStyle.Default, handler: nil))
+                self.presentViewController(alert, animated: true, completion: nil)
+                return
+            }
+            
             session.stopRunning()
             previewLayer.removeFromSuperlayer()
             self.dismissViewControllerAnimated(true, completion: nil)
