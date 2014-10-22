@@ -149,7 +149,7 @@ public class RegattasResource extends AbstractSailingServerResource {
     public Response getCompetitorPositions(@PathParam("regattaname") String regattaName, @PathParam("racename") String raceName,
         @QueryParam("fromtime") String fromtime, @QueryParam("fromtimeasmillis") Long fromtimeasmillis,
         @QueryParam("totime") String totime, @QueryParam("totimeasmillis") Long totimeasmillis, @QueryParam("withtack") Boolean withTack,
-        @QueryParam("competitorId") List<String> competitorIds) {
+        @QueryParam("competitorId") Set<String> competitorIds) {
         Response response;
         Regatta regatta = findRegattaByName(regattaName);
         if (regatta == null) {
