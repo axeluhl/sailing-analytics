@@ -16,19 +16,19 @@ public interface HasTrackedRaceContext {
     @Connector(messageKey="Regatta", ordinal=0)
     public Regatta getRegatta();
     
-    @Connector(messageKey="CourseArea", ordinal=2)
+    @Connector(messageKey="CourseArea", ordinal=3)
     public CourseArea getCourseArea();
     
     @Connector(messageKey="BoatClass", ordinal=1)
     public BoatClass getBoatClass();
     
-    @Connector(messageKey="Fleet", ordinal=3)
+    @Connector(messageKey="Fleet", ordinal=4)
     public Fleet getFleet();
     
-    @Connector(messageKey="Race", ordinal=4)
+    @Connector(messageKey="Race", ordinal=5)
     public RaceDefinition getRace();
     
-    @Dimension(messageKey="Year", ordinal=10)
+    @Dimension(messageKey="Year", ordinal=2)
     public Integer getYear();
 
 }

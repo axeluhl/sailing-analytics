@@ -7,6 +7,7 @@ import java.util.Collection;
 import java.util.HashSet;
 import java.util.Set;
 
+import com.sap.sse.datamining.factories.FunctionDTOFactory;
 import com.sap.sse.datamining.factories.FunctionFactory;
 import com.sap.sse.datamining.functions.Function;
 import com.sap.sse.datamining.test.functions.test_classes.DataTypeInterface;
@@ -17,11 +18,22 @@ import com.sap.sse.datamining.test.functions.test_classes.SimpleClassWithMarkedM
 import com.sap.sse.datamining.test.functions.test_classes.Test_ExternalLibraryClass;
 
 public class FunctionTestsUtil extends ConcurrencyTestsUtil {
+
+    private static final FunctionFactory functionFactory = new FunctionFactory();
+    private static final FunctionDTOFactory functionDTOFactory = new FunctionDTOFactory();
     
+    public static FunctionFactory getFunctionFactory() {
+        return functionFactory;
+    }
+    
+    public static FunctionDTOFactory getFunctionDTOFactory() {
+        return functionDTOFactory;
+    }
+
     public static Collection<Function<?>> getMarkedMethodsOfSimpleClassWithMarkedMethod() {
         Set<Function<?>> markedMethods = new HashSet<>();
-        markedMethods.add(FunctionFactory.createMethodWrappingFunction(getMethodFromSimpleClassWithMarkedMethod("dimension")));
-        markedMethods.add(FunctionFactory.createMethodWrappingFunction(getMethodFromSimpleClassWithMarkedMethod("sideEffectFreeValue")));
+        markedMethods.add(functionFactory.createMethodWrappingFunction(getMethodFromSimpleClassWithMarkedMethod("dimension")));
+        markedMethods.add(functionFactory.createMethodWrappingFunction(getMethodFromSimpleClassWithMarkedMethod("sideEffectFreeValue")));
         return markedMethods;
     }
     
@@ -31,7 +43,7 @@ public class FunctionTestsUtil extends ConcurrencyTestsUtil {
 
     public static Collection<Function<?>> getMethodsOfExternalLibraryClass() {
         Set<Function<?>> markedMethods = new HashSet<>();
-        markedMethods.add(FunctionFactory.createMethodWrappingFunction(getMethodFromExternalLibraryClass("foo")));
+        markedMethods.add(functionFactory.createMethodWrappingFunction(getMethodFromExternalLibraryClass("foo")));
         return markedMethods;
     }
 
@@ -41,16 +53,16 @@ public class FunctionTestsUtil extends ConcurrencyTestsUtil {
 
     public static Collection<Function<?>> getMarkedMethodsOfDataTypeWithContextImplAndItsSupertypes() {
         Collection<Function<?>> markedMethods = getMarkedMethodsOfDataTypeWithContextAndItsSupertypes();
-        markedMethods.add(FunctionFactory.createMethodWrappingFunction(getMethodFromClass(ExtendingInterface.class, "getRaceNameLength")));
+        markedMethods.add(functionFactory.createMethodWrappingFunction(getMethodFromClass(ExtendingInterface.class, "getRaceNameLength")));
         return markedMethods;
     }
 
     public static Collection<Function<?>> getMarkedMethodsOfDataTypeWithContextAndItsSupertypes() {
         Collection<Function<?>> markedMethods = new HashSet<>();
-        markedMethods.add(FunctionFactory.createMethodWrappingFunction(getMethodFromClass(DataTypeInterface.class, "getSpeedInKnots")));
-        markedMethods.add(FunctionFactory.createMethodWrappingFunction(getMethodFromClass(DataTypeWithContext.class, "getRegattaName")));
-        markedMethods.add(FunctionFactory.createMethodWrappingFunction(getMethodFromClass(DataTypeWithContext.class, "getRaceName")));
-        markedMethods.add(FunctionFactory.createMethodWrappingFunction(getMethodFromClass(DataTypeWithContext.class, "getLegNumber")));
+        markedMethods.add(functionFactory.createMethodWrappingFunction(getMethodFromClass(DataTypeInterface.class, "getSpeedInKnots")));
+        markedMethods.add(functionFactory.createMethodWrappingFunction(getMethodFromClass(DataTypeWithContext.class, "getRegattaName")));
+        markedMethods.add(functionFactory.createMethodWrappingFunction(getMethodFromClass(DataTypeWithContext.class, "getRaceName")));
+        markedMethods.add(functionFactory.createMethodWrappingFunction(getMethodFromClass(DataTypeWithContext.class, "getLegNumber")));
         return markedMethods;
     }
     
@@ -80,15 +92,15 @@ public class FunctionTestsUtil extends ConcurrencyTestsUtil {
 
     private static Collection<Function<?>> getDimensionsForSimpleClassWithMarkedMethods() {
         Collection<Function<?>> dimensions = new HashSet<>();
-        dimensions.add(FunctionFactory.createMethodWrappingFunction(getMethodFromSimpleClassWithMarkedMethod("dimension")));
+        dimensions.add(functionFactory.createMethodWrappingFunction(getMethodFromSimpleClassWithMarkedMethod("dimension")));
         return dimensions;
     }
 
     private static Collection<Function<?>> getDimensionsForDataTypeWithContext() {
         Collection<Function<?>> dimensions = new HashSet<>();
-        dimensions.add(FunctionFactory.createMethodWrappingFunction(getMethodFromClass(DataTypeWithContext.class, "getRegattaName")));
-        dimensions.add(FunctionFactory.createMethodWrappingFunction(getMethodFromClass(DataTypeWithContext.class, "getRaceName")));
-        dimensions.add(FunctionFactory.createMethodWrappingFunction(getMethodFromClass(DataTypeWithContext.class, "getLegNumber")));
+        dimensions.add(functionFactory.createMethodWrappingFunction(getMethodFromClass(DataTypeWithContext.class, "getRegattaName")));
+        dimensions.add(functionFactory.createMethodWrappingFunction(getMethodFromClass(DataTypeWithContext.class, "getRaceName")));
+        dimensions.add(functionFactory.createMethodWrappingFunction(getMethodFromClass(DataTypeWithContext.class, "getLegNumber")));
         return dimensions;
     }
     

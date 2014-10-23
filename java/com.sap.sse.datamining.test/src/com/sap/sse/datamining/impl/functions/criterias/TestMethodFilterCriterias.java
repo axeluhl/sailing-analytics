@@ -10,7 +10,7 @@ import org.junit.Test;
 import com.sap.sse.datamining.components.FilterCriterion;
 import com.sap.sse.datamining.test.util.FunctionTestsUtil;
 
-public class TestFunctionFilterCriterias {
+public class TestMethodFilterCriterias {
 
     @Test
     public void testMethodIsCorrectDimensionFilterCriteria() {

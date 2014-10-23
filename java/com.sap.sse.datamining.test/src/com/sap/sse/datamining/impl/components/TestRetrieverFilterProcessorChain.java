@@ -13,14 +13,15 @@ import java.util.Set;
 import org.junit.Before;
 import org.junit.Test;
 
-import com.sap.sse.datamining.AdditionalResultDataBuilder;
 import com.sap.sse.datamining.components.FilterCriterion;
 import com.sap.sse.datamining.components.Processor;
+import com.sap.sse.datamining.impl.criterias.AbstractFilterCriterion;
 import com.sap.sse.datamining.test.util.ConcurrencyTestsUtil;
+import com.sap.sse.datamining.test.util.components.NullProcessor;
 
-public class TestAbstractFilteringRetrievalProcessor {
+public class TestRetrieverFilterProcessorChain {
     
-    private Processor<Iterable<Integer>> filteringRetrievalProcessor;
+    private Processor<Iterable<Integer>, Integer> retrievalProcessor;
     private Collection<Integer> dataSource;
     
     private Collection<Integer> receivedResults = new ArrayList<>();
@@ -32,8 +33,8 @@ public class TestAbstractFilteringRetrievalProcessor {
 
     @Test
     public void testFiltration() throws InterruptedException {
-        filteringRetrievalProcessor.processElement(dataSource);
-        filteringRetrievalProcessor.finish();
+        retrievalProcessor.processElement(dataSource);
+        retrievalProcessor.finish();
         ConcurrencyTestsUtil.sleepFor(500); //Giving the processor time to finish
 
         Collection<Integer> expectedResults = Arrays.asList(0, 1, 2);
@@ -49,14 +50,14 @@ public class TestAbstractFilteringRetrievalProcessor {
 
     @Test
     public void testProvidedAdditionalData() throws InterruptedException {
-        filteringRetrievalProcessor.processElement(dataSource);
-        filteringRetrievalProcessor.finish();
+        retrievalProcessor.processElement(dataSource);
+        retrievalProcessor.finish();
         ConcurrencyTestsUtil.sleepFor(500); //Giving the processor time to finish
         
         int expectedRetrievedDataAmount = receivedResults.size();
         
         OverwritingResultDataBuilder resultDataBuilder = new OverwritingResultDataBuilder();
-        filteringRetrievalProcessor.getAdditionalResultData(resultDataBuilder);
+        retrievalProcessor.getAdditionalResultData(resultDataBuilder);
         assertThat(resultDataBuilder.getRetrievedDataAmount(), is(expectedRetrievedDataAmount));
     }
     
@@ -67,7 +68,11 @@ public class TestAbstractFilteringRetrievalProcessor {
         layeredDataSource.add(dataSource);
         layeredDataSource.add(dataSource);
         
-        Processor<Iterable<Iterable<Integer>>> layeredRetrievalProcessor = new AbstractSimpleRetrievalProcessor<Iterable<Iterable<Integer>>, Iterable<Integer>>(ConcurrencyTestsUtil.getExecutor(), Arrays.asList(filteringRetrievalProcessor)) {
+        Collection<Processor<Iterable<Integer>, ?>> resultReceivers = new ArrayList<>();
+        resultReceivers.add(retrievalProcessor);
+        @SuppressWarnings("unchecked")
+        Processor<Iterable<Iterable<Integer>>, Iterable<Integer>> layeredRetrievalProcessor = new AbstractSimpleRetrievalProcessor<Iterable<Iterable<Integer>>, Iterable<Integer>>((Class<Iterable<Iterable<Integer>>>)(Class<?>) Iterable.class, (Class<Iterable<Integer>>)(Class<?>) Iterable.class,
+                                                                                                                                                                                    ConcurrencyTestsUtil.getExecutor(), resultReceivers) {
             @Override
             protected Iterable<Iterable<Integer>> retrieveData(Iterable<Iterable<Integer>> element) {
                 return element;
@@ -85,37 +90,31 @@ public class TestAbstractFilteringRetrievalProcessor {
         assertThat(resultDataBuilder.getRetrievedDataAmount(), is(expectedRetrievedDataAmount));
     }
     
+    @SuppressWarnings("unchecked")
     @Before
-    public void setUpResultReceiverAndProcessor() {
-        Processor<Integer> resultReceiver = new Processor<Integer>() {
+    public void setUpResultReceiverAndProcessors() {
+        Processor<Integer, Void> resultReceiver = new NullProcessor<Integer, Void>(Integer.class, Void.class) {
             @Override
             public void processElement(Integer element) {
                 synchronized (receivedResults) {
                     receivedResults.add(element);
                 }
             }
-            @Override
-            public void onFailure(Throwable failure) {
-            }
-            @Override
-            public void finish() throws InterruptedException {
-            }
-            @Override
-            public void abort() {
-            }
-            @Override
-            public AdditionalResultDataBuilder getAdditionalResultData(AdditionalResultDataBuilder additionalDataBuilder) {
-                return additionalDataBuilder;
-            }
         };
+        Collection<Processor<Integer, ?>> filtrationResultReceivers = new ArrayList<>();
+        filtrationResultReceivers.add(resultReceiver);
         
-        FilterCriterion<Integer> elementGreaterZeroFilterCriteria = new FilterCriterion<Integer>() {
+        FilterCriterion<Integer> elementGreaterZeroFilterCriteria = new AbstractFilterCriterion<Integer>(Integer.class) {
             @Override
             public boolean matches(Integer element) {
                 return element >= 0;
             }
         };
-        filteringRetrievalProcessor = new AbstractSimpleFilteringRetrievalProcessor<Iterable<Integer>, Integer>(ConcurrencyTestsUtil.getExecutor(), Arrays.asList(resultReceiver), elementGreaterZeroFilterCriteria) {
+        Processor<Integer, Integer> filtrationProcessor = new ParallelFilteringProcessor<>(Integer.class, ConcurrencyTestsUtil.getExecutor(), filtrationResultReceivers, elementGreaterZeroFilterCriteria);
+        
+        Collection<Processor<Integer, ?>> retrievalResultReceivers = new ArrayList<>();
+        retrievalResultReceivers.add(filtrationProcessor);
+        retrievalProcessor = new AbstractSimpleRetrievalProcessor<Iterable<Integer>, Integer>((Class<Iterable<Integer>>)(Class<?>) Iterable.class, Integer.class, ConcurrencyTestsUtil.getExecutor(), retrievalResultReceivers) {
             @Override
             protected Iterable<Integer> retrieveData(Iterable<Integer> element) {
                 return element;

@@ -8,13 +8,17 @@ import com.sap.sse.datamining.i18n.DataMiningStringMessages;
 public class DataMiningServerImpl implements DataMiningServer {
     
     private final DataMiningStringMessages stringMessages;
+    
     private final FunctionRegistry functionRegistry;
     private final FunctionProvider functionProvider;
+    
+    private DataRetrieverChainDefinitionRegistry dataRetrieverChainDefinitionRegistry;
 
-    public DataMiningServerImpl(DataMiningStringMessages stringMessages, FunctionRegistry functionRegistry, FunctionProvider functionProvider) {
+    public DataMiningServerImpl(DataMiningStringMessages stringMessages, FunctionRegistry functionRegistry, FunctionProvider functionProvider, DataRetrieverChainDefinitionRegistry dataRetrieverChainDefinitionRegistry) {
         this.stringMessages = stringMessages;
         this.functionRegistry = functionRegistry;
         this.functionProvider = functionProvider;
+        this.dataRetrieverChainDefinitionRegistry = dataRetrieverChainDefinitionRegistry;
     }
 
     @Override
@@ -30,6 +34,11 @@ public class DataMiningServerImpl implements DataMiningServer {
     @Override
     public DataMiningStringMessages getStringMessages() {
         return stringMessages;
+    }
+    
+    @Override
+    public DataRetrieverChainDefinitionRegistry getDataRetrieverChainDefinitionRegistry() {
+        return dataRetrieverChainDefinitionRegistry;
     }
     
 }

@@ -2,26 +2,22 @@ package com.sap.sailing.datamining.impl.data;
 
 import com.sap.sailing.datamining.data.HasGPSFixContext;
 import com.sap.sailing.datamining.data.HasTrackedLegOfCompetitorContext;
-import com.sap.sailing.domain.base.Fleet;
-import com.sap.sailing.domain.base.Regatta;
 import com.sap.sailing.domain.tracking.GPSFixMoving;
-import com.sap.sailing.domain.tracking.TrackedLeg;
-import com.sap.sailing.domain.tracking.TrackedLegOfCompetitor;
-import com.sap.sailing.domain.tracking.TrackedRace;
 
-public class GPSFixWithContext extends TrackedLegOfCompetitorWithContext implements HasGPSFixContext {
+public class GPSFixWithContext implements HasGPSFixContext {
+    
+    private final HasTrackedLegOfCompetitorContext trackedLegOfCompetitorContext;
     
     private final GPSFixMoving gpsFix;
 
-    public GPSFixWithContext(HasTrackedLegOfCompetitorContext legContext, GPSFixMoving gpsFix) {
-        this(legContext.getRegatta(), legContext.getFleet(), legContext.getTrackedRace(),
-                legContext.getTrackedLeg(), legContext.getLegNumber(), legContext.getTrackedLegOfCompetitor(), gpsFix);
-    }
-
-    public GPSFixWithContext(Regatta regatta, Fleet fleet, TrackedRace trackedRace,
-            TrackedLeg trackedLeg, int legNumber, TrackedLegOfCompetitor trackedLegOfCompetitor, GPSFixMoving gpsFix) {
-        super(regatta, fleet, trackedRace, trackedLeg, legNumber, trackedLegOfCompetitor);
+    public GPSFixWithContext(HasTrackedLegOfCompetitorContext trackedLegOfCompetitorContext, GPSFixMoving gpsFix) {
+        this.trackedLegOfCompetitorContext = trackedLegOfCompetitorContext;
         this.gpsFix = gpsFix;
+    }
+    
+    @Override
+    public HasTrackedLegOfCompetitorContext getTrackedLegOfCompetitorContext() {
+        return trackedLegOfCompetitorContext;
     }
 
     @Override

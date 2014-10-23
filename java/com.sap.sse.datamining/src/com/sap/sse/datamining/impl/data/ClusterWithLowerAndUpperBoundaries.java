@@ -5,9 +5,9 @@ import java.util.Iterator;
 
 import com.sap.sse.datamining.data.ClusterBoundary;
 
-public class ClusterWithBoundaries<ElementType> extends AbstractCluster<ElementType> {
+public class ClusterWithLowerAndUpperBoundaries<ElementType> extends AbstractCluster<ElementType> {
 
-    public ClusterWithBoundaries(String name, ClusterBoundary<ElementType> lowerBound,
+    public ClusterWithLowerAndUpperBoundaries(String name, ClusterBoundary<ElementType> lowerBound,
             ClusterBoundary<ElementType> upperBound) {
         super(name, Arrays.asList(lowerBound, upperBound));
     }

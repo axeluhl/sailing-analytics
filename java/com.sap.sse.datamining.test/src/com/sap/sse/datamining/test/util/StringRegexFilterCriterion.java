@@ -5,7 +5,7 @@ import com.sap.sse.datamining.impl.criterias.RegexFilterCriterion;
 public class StringRegexFilterCriterion extends RegexFilterCriterion<String> {
 
     public StringRegexFilterCriterion(String regex) {
-        super(regex);
+        super(String.class, regex);
     }
 
     @Override
