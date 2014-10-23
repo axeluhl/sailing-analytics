@@ -37,6 +37,9 @@ public class UpcomingEvent extends UIObject {
 
         EventsOverviewUpcomingResources.INSTANCE.css().ensureInjected();
         setElement(uiBinder.createAndBindUi(this));
+
+        final PlaceNavigation<EventPlace> eventNavigation = navigator.getEventNavigation(event.id.toString(), event.getBaseURL(), event.isOnRemoteServer());
+        eventOverviewLink.setHref(eventNavigation.getTargetUrl());
         
         Event.sinkEvents(eventOverviewLink, Event.ONCLICK);
         Event.setEventListener(eventOverviewLink, new EventListener() {
@@ -44,7 +47,6 @@ public class UpcomingEvent extends UIObject {
             public void onBrowserEvent(Event browserEvent) {
                 switch (DOM.eventGetType(browserEvent)) {
                     case Event.ONCLICK:
-                        PlaceNavigation<EventPlace> eventNavigation = navigator.getEventNavigation(event.id.toString(), event.getBaseURL(), event.isOnRemoteServer());
                         navigator.goToPlace(eventNavigation);
                         break;
                 }
