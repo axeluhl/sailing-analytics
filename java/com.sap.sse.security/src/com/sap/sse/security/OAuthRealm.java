@@ -51,9 +51,7 @@ public class OAuthRealm extends AbstractUserStoreBasedRealm {
 
     @Override
     protected AuthorizationInfo doGetAuthorizationInfo(PrincipalCollection token) {
-        System.out.println("authorization");
         AuthorizationInfo info = new AuthorizationInfo() {
-            
             private static final long serialVersionUID = 1L;
 
             @Override

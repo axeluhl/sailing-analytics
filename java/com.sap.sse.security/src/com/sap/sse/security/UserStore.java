@@ -3,6 +3,7 @@ package com.sap.sse.security;
 import java.util.Collection;
 import java.util.Map;
 import java.util.Set;
+import java.util.UUID;
 
 import com.sap.sse.security.shared.Account;
 import com.sap.sse.security.shared.UserManagementException;
@@ -27,9 +28,30 @@ public interface UserStore {
 
     void deleteUser(String name) throws UserManagementException;
 
+    /**
+     * Registers a settings key together with its type. Calling this method is necessary for {@link #setSetting(String, Object)}
+     * to have an effect for <code>key</code>. Calls to {@link #setSetting(String, Object)} will only accept values whose type
+     * is compatible with <code>type</code>. Note that the store implementation may impose constraints on the types supported.
+     * All store implementations are required to support at least {@link String} and {@link UUID} as types.
+     */
     public void addSetting(String key, Class<?> type);
 
-    public void setSetting(String key, Object setting);
+    /**
+     * Sets a value for a key if that key was previously added to this store using {@link #addSetting(String, Class)}.
+     * For user store implementations that maintain their data persistently and make it available after a server
+     * restart, it is sufficient to register the settings key once because these registrations will be stored
+     * persistently, too.
+     * <p>
+     * 
+     * If the <code>key</code> was not registered before by a call to {@link #addSetting(String, Class)}, or if the
+     * <code>setting</code> object does not conform with the type passed to {@link #addSetting(String, Class)}, a call
+     * to this method will have no effect and return <code>false</code>.
+     * 
+     * @Return whether applying the setting was successful; <code>false</code> means that no update was performed to the
+     * setting because either the key was not registered before by {@link #addSetting(String, Class)} or the type of the
+     * <code>setting</code> object does not conform to the type used in {@link #addSetting(String, Class)}
+     */
+    public boolean setSetting(String key, Object setting);
 
     public <T> T getSetting(String key, Class<T> clazz);
 

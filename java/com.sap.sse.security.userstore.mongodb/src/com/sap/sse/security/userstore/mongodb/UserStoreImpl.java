@@ -152,13 +152,17 @@ public class UserStoreImpl implements UserStore {
     }
 
     @Override
-    public void setSetting(String key, Object setting) {
+    public boolean setSetting(String key, Object setting) {
+        final boolean result;
         Class<?> clazz = settingTypes.get(key);
         if (clazz == null || !clazz.isInstance(setting)) {
-            return;
+            result = false;
+        } else {
+            settings.put(key, setting);
+            mongoObjectFactory.storeSettings(settings);
+            result = true;
         }
-        settings.put(key, setting);
-        mongoObjectFactory.storeSettings(settings);
+        return result;
     }
 
     @Override

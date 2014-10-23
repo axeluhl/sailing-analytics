@@ -389,12 +389,8 @@ public class SecurityServiceImpl extends RemoteServiceServlet implements Securit
     }
 
     @Override
-    public void setSetting(String key, Object setting) {
-        String[] split = key.split("_");
-        // TODO why this precondition that all keys have to start with "URLS_" to have their settings stored?
-        if (split[0].equals("URLS")) {
-            store.setSetting(key, setting);
-        }
+    public boolean setSetting(String key, Object setting) {
+        return store.setSetting(key, setting);
     }
 
     @Override

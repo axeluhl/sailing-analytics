@@ -55,13 +55,13 @@ public class UserManagementServiceImpl extends RemoteServiceServlet implements U
     private static final Logger logger = Logger.getLogger(UserManagementServiceImpl.class.getName());
 
     private final BundleContext context;
-    private FutureTask<SecurityService> securityService;
+    private final FutureTask<SecurityService> securityService;
 
     public UserManagementServiceImpl() {
         context = Activator.getContext();
         final ServiceTracker<SecurityService, SecurityService> tracker = new ServiceTracker<>(context, SecurityService.class, /* customizer */ null);
         tracker.open();
-        setSecurityService(new FutureTask<SecurityService>(new Callable<SecurityService>() {
+        securityService = new FutureTask<SecurityService>(new Callable<SecurityService>() {
             @Override
             public SecurityService call() {
                 SecurityService result = null;
@@ -75,7 +75,7 @@ public class UserManagementServiceImpl extends RemoteServiceServlet implements U
                 }
                 return result;
             }
-        }));
+        });
         new Thread("ServiceTracker in bundle com.sap.sse.security.ui waiting for SecurityService") {
             @Override
             public void run() {
@@ -382,9 +382,5 @@ public class UserManagementServiceImpl extends RemoteServiceServlet implements U
         } catch (InterruptedException | ExecutionException e) {
             throw new RuntimeException(e);
         }
-    }
-
-    private void setSecurityService(FutureTask<SecurityService> securityService) {
-        this.securityService = securityService;
     }
 }

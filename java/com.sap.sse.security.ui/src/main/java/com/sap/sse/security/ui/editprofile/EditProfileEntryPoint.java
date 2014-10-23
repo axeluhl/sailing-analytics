@@ -1,4 +1,4 @@
-package com.sap.sse.security.ui.changepassword;
+package com.sap.sse.security.ui.editprofile;
 
 import com.google.gwt.core.client.EntryPoint;
 import com.google.gwt.core.client.GWT;

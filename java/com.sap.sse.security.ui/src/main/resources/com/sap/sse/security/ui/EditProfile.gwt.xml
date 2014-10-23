@@ -29,7 +29,7 @@
   <super-source path="jre" />
 
   <!-- Specify the app entry point class.                         -->
-  <entry-point class='com.sap.sse.security.ui.changepassword.EditProfileEntryPoint'/>
+  <entry-point class='com.sap.sse.security.ui.editprofile.EditProfileEntryPoint'/>
 
   <set-property name="gwt.logging.enabled" value="TRUE"/> 
   <set-property name="gwt.logging.logLevel" value="FINE"/>
@@ -44,7 +44,7 @@
   <!-- Specify the paths for translatable code                    -->
   <extend-property name="locale" values="de"/>
   <source path='client'/>
-  <source path='changepassword'/>
+  <source path='editprofile'/>
   <source path='oauth'/>
   <source path='shared'/>
   <source path='loginpanel'/>
