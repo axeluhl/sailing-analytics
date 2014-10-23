@@ -84,6 +84,25 @@ securityManager.cacheManager = $cacheManager
 /YourFantasyURL.html = anyofroles[admin,eventmanager]
 </pre>
 
+In addition to URL-based security that is configured in `shiro.ini`, using bundles can do two more things:
+
+* Use `SecurityUtils.getSubject()` in server-side code to obtain the current subject on whose behalf the call is being executed. This allows the application to check for roles and permissions, as in
+<pre>
+    if (SecurityUtils.getSubject().checkRole("some-role")) {
+        ... // do something for which the subject must have role "some-role"
+    } else {
+        ... // throw some security exception or simply don't carry out the transaction
+    }
+</pre>
+
+* Use the `SecurityService` API to store and retrieve data such as preferences or settings and work with the user base, including creating, modifying and deleting user accounts and manipulating their roles. The `SecurityService` registers itself with the OSGi registry upon bundle activation. 
+<pre>
+    ServiceTracker<SecurityService, SecurityService> tracker = new ServiceTracker<>(context, SecurityService.class, /* customizer */ null);
+    tracker.open();
+    SecurityService securityService = tracker.waitForService(0);
+</pre>
+The security service offers methods such as `addSetting`, `setSetting` and `getSetting` to manage name/value pairs. The settings API is typed in the sense that when registering a setting 
+
 #### com.sap.sse.security.userstore.mongodb
 #### com.sap.sse.security.ui
 
