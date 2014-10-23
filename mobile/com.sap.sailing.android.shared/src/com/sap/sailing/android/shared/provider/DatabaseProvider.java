@@ -16,9 +16,9 @@ import android.database.sqlite.SQLiteDatabase;
 import android.database.sqlite.SQLiteOpenHelper;
 import android.database.sqlite.SQLiteQueryBuilder;
 import android.net.Uri;
-import android.provider.BaseColumns;
 
 import com.sap.sailing.android.shared.BuildConfig;
+import com.sap.sailing.android.shared.data.database.GpsTable;
 import com.sap.sailing.android.shared.logging.ExLog;
 
 public class DatabaseProvider extends ContentProvider {
@@ -35,26 +35,26 @@ public class DatabaseProvider extends ContentProvider {
 	private final static int DATA_GPS_ID = 2;
 
 	private final static UriMatcher uriMatcher;
-	private final static HashMap<String, String> dataGpsMap;
+	private final static HashMap<String, String> gpsTableMap;
 
 	static {
 		uriMatcher = new UriMatcher(UriMatcher.NO_MATCH);
 		uriMatcher.addURI(AUTHORITY, "data/gps", DATA_GPS);
 		uriMatcher.addURI(AUTHORITY, "data/gps/#", DATA_GPS_ID);
 
-		dataGpsMap = new HashMap<String, String>();
-		dataGpsMap.put(DataGps._ID, DataGps._ID);
-		dataGpsMap.put(DataGps._TIMESTAMP, DataGps._TIMESTAMP);
-		dataGpsMap.put(DataGps.ACCURACY, DataGps.ACCURACY);
-		dataGpsMap.put(DataGps.ALTITUDE, DataGps.ALTITUDE);
-		dataGpsMap.put(DataGps.BEARING, DataGps.BEARING);
-		dataGpsMap.put(DataGps.ELAPSEDREALTIME, DataGps.ELAPSEDREALTIME);
-		dataGpsMap.put(DataGps.LATITUDE, DataGps.LATITUDE);
-		dataGpsMap.put(DataGps.LONGITUDE, DataGps.LONGITUDE);
-		dataGpsMap.put(DataGps.PROVIDER, DataGps.PROVIDER);
-		dataGpsMap.put(DataGps.SPEED, DataGps.SPEED);
-		dataGpsMap.put(DataGps.TIME, DataGps.TIME);
-		dataGpsMap.put(DataGps._COUNT, DataGps._COUNT);
+		gpsTableMap = new HashMap<String, String>();
+		gpsTableMap.put(GpsTable._ID, GpsTable._ID);
+		gpsTableMap.put(GpsTable._TIMESTAMP, GpsTable._TIMESTAMP);
+		gpsTableMap.put(GpsTable.ACCURACY, GpsTable.ACCURACY);
+		gpsTableMap.put(GpsTable.ALTITUDE, GpsTable.ALTITUDE);
+		gpsTableMap.put(GpsTable.BEARING, GpsTable.BEARING);
+		gpsTableMap.put(GpsTable.ELAPSEDREALTIME, GpsTable.ELAPSEDREALTIME);
+		gpsTableMap.put(GpsTable.LATITUDE, GpsTable.LATITUDE);
+		gpsTableMap.put(GpsTable.LONGITUDE, GpsTable.LONGITUDE);
+		gpsTableMap.put(GpsTable.PROVIDER, GpsTable.PROVIDER);
+		gpsTableMap.put(GpsTable.SPEED, GpsTable.SPEED);
+		gpsTableMap.put(GpsTable.TIME, GpsTable.TIME);
+		gpsTableMap.put(GpsTable._COUNT, GpsTable._COUNT);
 	}
 
 	@Override
@@ -70,15 +70,15 @@ public class DatabaseProvider extends ContentProvider {
 		if (db != null) {
 			switch (uriMatcher.match(uri)) {
 			case DATA_GPS:
-				count = db.delete(DataGps.TABLENAME, selection, selectionArgs);
+				count = db.delete(GpsTable.TABLENAME, selection, selectionArgs);
 				break;
 
 			case DATA_GPS_ID:
-				finalWhere = DataGps._ID + " = " + uri.getLastPathSegment();
+				finalWhere = GpsTable._ID + " = " + uri.getLastPathSegment();
 				if (selection != null) {
 					finalWhere += " AND " + selection;
 				}
-				count = db.delete(DataGps.TABLENAME, finalWhere, selectionArgs);
+				count = db.delete(GpsTable.TABLENAME, finalWhere, selectionArgs);
 				break;
 
 			default:
@@ -98,10 +98,10 @@ public class DatabaseProvider extends ContentProvider {
 
 		switch (uriMatcher.match(uri)) {
 		case DATA_GPS:
-			return DataGps.CONTENT_TYPE;
+			return GpsTable.CONTENT_TYPE;
 
 		case DATA_GPS_ID:
-			return DataGps.CONTENT_ITEM_TYPE;
+			return GpsTable.CONTENT_ITEM_TYPE;
 
 		default:
 			throw new IllegalArgumentException("Unknow Uri: " + uri);
@@ -120,7 +120,7 @@ public class DatabaseProvider extends ContentProvider {
 		Uri contentUri;
 		switch (uriMatcher.match(uri)) {
 		case DATA_GPS:
-			tableName = DataGps.TABLENAME;
+			tableName = GpsTable.TABLENAME;
 			contentUri = DATA_GPS_URI;
 			break;
 
@@ -167,21 +167,21 @@ public class DatabaseProvider extends ContentProvider {
 		SQLiteQueryBuilder queryBuilder = new SQLiteQueryBuilder();
 		switch (uriMatcher.match(uri)) {
 		case DATA_GPS:
-			queryBuilder.setTables(DataGps.TABLENAME);
+			queryBuilder.setTables(GpsTable.TABLENAME);
 			if (projection == null) {
-				queryBuilder.setProjectionMap(dataGpsMap);
+				queryBuilder.setProjectionMap(gpsTableMap);
 			}
 			if (sortOrder == null) {
-				sortOrder = DataGps._TIMESTAMP + " DESC ";
+				sortOrder = GpsTable._TIMESTAMP + " DESC ";
 			}
 			break;
 
 		case DATA_GPS_ID:
-			queryBuilder.setTables(DataGps.TABLENAME);
+			queryBuilder.setTables(GpsTable.TABLENAME);
 			if (projection == null) {
-				queryBuilder.setProjectionMap(dataGpsMap);
+				queryBuilder.setProjectionMap(gpsTableMap);
 			}
-			queryBuilder.appendWhere(DataGps._ID + " = " + uri.getLastPathSegment());
+			queryBuilder.appendWhere(GpsTable._ID + " = " + uri.getLastPathSegment());
 			break;
 
 		default:
@@ -213,15 +213,15 @@ public class DatabaseProvider extends ContentProvider {
 		if (db != null) {
 			switch (uriMatcher.match(uri)) {
 			case DATA_GPS:
-				count = db.update(DataGps.TABLENAME, values, selection, selectionArgs);
+				count = db.update(GpsTable.TABLENAME, values, selection, selectionArgs);
 				break;
 
 			case DATA_GPS_ID:
-				finalWhere = DataGps._ID + " = " + uri.getLastPathSegment();
+				finalWhere = GpsTable._ID + " = " + uri.getLastPathSegment();
 				if (selection != null) {
 					finalWhere += " AND " + selection;
 				}
-				count = db.update(DataGps.TABLENAME, values, finalWhere, selectionArgs);
+				count = db.update(GpsTable.TABLENAME, values, finalWhere, selectionArgs);
 				break;
 
 			default:
@@ -237,7 +237,7 @@ public class DatabaseProvider extends ContentProvider {
 		private final static String DATABASE_NAME = "sap_sailing.db";
 		private final static int DATABASE_VERSION = 1;
 
-		private DataGps dataGps = new DataGps();
+		private GpsTable GpsTable = new GpsTable();
 
 		public DatabaseHelper (Context context) {
 			super(context, DATABASE_NAME, null, DATABASE_VERSION);
@@ -245,65 +245,18 @@ public class DatabaseProvider extends ContentProvider {
 
 		@Override
 		public void onCreate (SQLiteDatabase db) {
-			dataGps.onCreate(db);
+			GpsTable.onCreate(db);
 		}
 
 		@Override
 		public void onUpgrade (SQLiteDatabase db, int oldVersion, int newVersion) {
-			dataGps.onUpgrade(db, oldVersion, newVersion);
+			GpsTable.onUpgrade(db, oldVersion, newVersion);
 		}
 
 		@Override
 		public void onDowngrade (SQLiteDatabase db, int oldVersion, int newVersion) {
-			dataGps.onDowngrade(db, oldVersion, newVersion);
+			GpsTable.onDowngrade(db, oldVersion, newVersion);
 		}
 	}
 
-	public interface BaseTable {
-
-		public final static String _TIMESTAMP = "_timestamp";
-
-		public abstract void onCreate (SQLiteDatabase db);
-
-		public abstract void onUpgrade (SQLiteDatabase db, int oldVersion, int newVersion);
-
-		public abstract void onDowngrade (SQLiteDatabase db, int oldVersion, int newVersion);
-	}
-
-	public class DataGps implements BaseTable, BaseColumns {
-		
-		public final static String CONTENT_TYPE = ContentResolver.CURSOR_DIR_BASE_TYPE + "/vnd.sap.sailing.content.gpsdata";
-		public final static String CONTENT_ITEM_TYPE = ContentResolver.CURSOR_ITEM_BASE_TYPE + "/vnd.sap.sailing.content.gpsdata";
-
-		public final static String TABLENAME = "data_gps";
-
-		public final static String ACCURACY = "accuracy";
-		public final static String ALTITUDE = "altitude";
-		public final static String BEARING = "bearing";
-		public final static String ELAPSEDREALTIME = "elapsedrealtime";
-		public final static String LATITUDE = "latitude";
-		public final static String LONGITUDE = "longitude";
-		public final static String PROVIDER = "provider";
-		public final static String SPEED = "speed";
-		public final static String TIME = "time";
-
-		@Override
-		public void onCreate (SQLiteDatabase db) {
-			db.execSQL("CREATE TABLE " + TABLENAME + " (" + _ID + " INTEGER PRIMARY KEY AUTOINCREMENT, " + _TIMESTAMP + " TEXT, "
-				+ ACCURACY + " REAL, " + ALTITUDE + " REAL, " + BEARING + " REAL, " + ELAPSEDREALTIME + " TEXT, " + LATITUDE
-				+ " REAL, " + LONGITUDE + " REAL, " + PROVIDER + " TEXT, " + SPEED + " REAL, " + TIME + " TEXT " + ");");
-		}
-
-		@Override
-		public void onUpgrade (SQLiteDatabase db, int oldVersion, int newVersion) {
-			db.execSQL("DROP TABLE IF EXISTS " + TABLENAME);
-			onCreate(db);
-		}
-
-		@Override
-		public void onDowngrade (SQLiteDatabase db, int oldVersion, int newVersion) {
-			db.execSQL("DROP TABLE IF EXISTS " + TABLENAME);
-			onCreate(db);
-		}
-	}
 }
