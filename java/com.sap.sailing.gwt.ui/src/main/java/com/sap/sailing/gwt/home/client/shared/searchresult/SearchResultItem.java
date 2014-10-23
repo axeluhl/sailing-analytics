@@ -9,7 +9,9 @@ import com.google.gwt.uibinder.client.UiHandler;
 import com.google.gwt.user.client.ui.Anchor;
 import com.google.gwt.user.client.ui.Composite;
 import com.google.gwt.user.client.ui.Widget;
+import com.sap.sailing.gwt.home.client.app.PlaceNavigation;
 import com.sap.sailing.gwt.home.client.app.PlaceNavigator;
+import com.sap.sailing.gwt.home.client.place.event.EventPlace;
 import com.sap.sailing.gwt.home.client.shared.EventDatesFormatterUtil;
 import com.sap.sailing.gwt.ui.shared.EventBaseDTO;
 import com.sap.sailing.gwt.ui.shared.LeaderboardSearchResultDTO;
@@ -55,12 +57,14 @@ public class SearchResultItem extends Composite {
     @UiHandler("regattaLink")
     public void goToRegatta(ClickEvent e) {
         EventBaseDTO event = searchResult.getEvent();
-        placeNavigator.goToRegattaOfEvent(event.id.toString(),  searchResult.getLeaderboardName(), searchResult.getBaseURL(), searchResult.isOnRemoteServer());
+        PlaceNavigation<EventPlace> regattaNavigation = placeNavigator.getRegattaNavigation(event.id.toString(), 
+                searchResult.getLeaderboardName(), searchResult.getBaseURL(), searchResult.isOnRemoteServer());
+        placeNavigator.goToPlace(regattaNavigation);
     }
 
     @UiHandler("eventOverviewLink")
     public void goToEventPlace(ClickEvent e) {
         EventBaseDTO event = searchResult.getEvent();
-        placeNavigator.goToEvent(event.id.toString(), searchResult.getBaseURL(), searchResult.isOnRemoteServer());
+        placeNavigator.getEventNavigation(event.id.toString(), searchResult.getBaseURL(), searchResult.isOnRemoteServer());
     }
 }

@@ -8,7 +8,10 @@ import com.google.gwt.uibinder.client.UiHandler;
 import com.google.gwt.user.client.ui.Anchor;
 import com.google.gwt.user.client.ui.Composite;
 import com.google.gwt.user.client.ui.Widget;
+import com.sap.sailing.gwt.home.client.app.PlaceNavigation;
 import com.sap.sailing.gwt.home.client.app.PlaceNavigator;
+import com.sap.sailing.gwt.home.client.place.solutions.SolutionsPlace;
+import com.sap.sailing.gwt.home.client.place.sponsoring.SponsoringPlace;
 
 public class MainSponsors extends Composite {
 
@@ -22,21 +25,32 @@ public class MainSponsors extends Composite {
     
     private final PlaceNavigator navigator;
     
+    private final PlaceNavigation<SolutionsPlace> solutionsNavigation;
+    private final PlaceNavigation<SponsoringPlace> sponsoringNavigation;
+
     public MainSponsors(PlaceNavigator navigator) {
         this.navigator = navigator;
         
         MainSponsorsResources.INSTANCE.css().ensureInjected();
         initWidget(uiBinder.createAndBindUi(this));
+        
+        solutionsNavigation = navigator.getSolutionsNavigation();
+        sponsoringNavigation = navigator.getSponsoringNavigation();
+        
+        solutionsPageLink.setHref(solutionsNavigation.getTargetUrl());
+        sponsoringPageLink.setHref(sponsoringNavigation.getTargetUrl());
     }
 
     @UiHandler("solutionsPageLink")
     public void goToSolutions(ClickEvent e) {
-        navigator.goToSolutions();
+        navigator.goToPlace(solutionsNavigation);
+        e.preventDefault();
     }
 
     @UiHandler("sponsoringPageLink")
     public void goToSponsoring(ClickEvent e) {
-        navigator.goToSponsoring();
+        navigator.goToPlace(sponsoringNavigation);
+        e.preventDefault();
     }
 
 }

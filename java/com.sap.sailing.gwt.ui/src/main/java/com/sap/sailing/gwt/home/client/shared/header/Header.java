@@ -13,9 +13,6 @@ import com.google.gwt.event.dom.client.KeyPressHandler;
 import com.google.gwt.uibinder.client.UiBinder;
 import com.google.gwt.uibinder.client.UiField;
 import com.google.gwt.uibinder.client.UiHandler;
-import com.google.gwt.user.client.DOM;
-import com.google.gwt.user.client.Event;
-import com.google.gwt.user.client.EventListener;
 import com.google.gwt.user.client.Window;
 import com.google.gwt.user.client.ui.Anchor;
 import com.google.gwt.user.client.ui.Button;
@@ -23,7 +20,12 @@ import com.google.gwt.user.client.ui.Composite;
 import com.google.gwt.user.client.ui.TextBox;
 import com.google.gwt.user.client.ui.Widget;
 import com.sap.sailing.gwt.common.client.i18n.TextMessages;
+import com.sap.sailing.gwt.home.client.app.PlaceNavigation;
 import com.sap.sailing.gwt.home.client.app.PlaceNavigator;
+import com.sap.sailing.gwt.home.client.place.events.EventsPlace;
+import com.sap.sailing.gwt.home.client.place.searchresult.SearchResultPlace;
+import com.sap.sailing.gwt.home.client.place.solutions.SolutionsPlace;
+import com.sap.sailing.gwt.home.client.place.start.StartPlace;
 
 public class Header extends Composite {
     @UiField Anchor startPageLink;
@@ -38,6 +40,10 @@ public class Header extends Composite {
     private final List<Anchor> links;
     private final PlaceNavigator navigator;
 
+    private final PlaceNavigation<StartPlace> homeNavigation;
+    private final PlaceNavigation<EventsPlace> eventsNavigation;
+    private final PlaceNavigation<SolutionsPlace> solutionsNavigation;
+    
     interface HeaderUiBinder extends UiBinder<Widget, Header> {
     }
     
@@ -51,6 +57,14 @@ public class Header extends Composite {
 
         initWidget(uiBinder.createAndBindUi(this));
         links = Arrays.asList(new Anchor[] { startPageLink, eventsPageLink, solutionsPageLink });
+
+        homeNavigation = navigator.getHomeNavigation();
+        eventsNavigation = navigator.getEventsNavigation();
+        solutionsNavigation = navigator.getSolutionsNavigation();
+
+        startPageLink.setHref(homeNavigation.getTargetUrl());
+        eventsPageLink.setHref(eventsNavigation.getTargetUrl());
+        solutionsPageLink.setHref(solutionsNavigation.getTargetUrl());
         
         searchText.getElement().setAttribute("placeholder", TextMessages.INSTANCE.headerSearchPlaceholder());
         searchText.addKeyPressHandler(new KeyPressHandler() {
@@ -62,40 +76,45 @@ public class Header extends Composite {
             }
         });
         
-        Event.sinkEvents(homeLink, Event.ONCLICK);
-        Event.setEventListener(homeLink, new EventListener() {
-            @Override
-            public void onBrowserEvent(Event event) {
-                switch (DOM.eventGetType(event)) {
-                    case Event.ONCLICK:
-                       navigator.goToHome();
-                       break;
-                }
-            }
-        });
+//        Event.sinkEvents(homeLink, Event.ONCLICK);
+//        Event.setEventListener(homeLink, new EventListener() {
+//            @Override
+//            public void onBrowserEvent(Event event) {
+//                switch (DOM.eventGetType(event)) {
+//                    case Event.ONCLICK:
+//                       navigator.goToHome();
+//                       break;
+//                }
+//            }
+//        });
     }
 
     @UiHandler("startPageLink")
     public void goToHome(ClickEvent e) {
-        navigator.goToHome();
+        navigator.goToPlace(homeNavigation);
+        e.preventDefault();
         setActiveLink(startPageLink);
     }
 
     @UiHandler("eventsPageLink")
     public void goToEvents(ClickEvent e) {
-        navigator.goToEvents();
+        navigator.goToPlace(eventsNavigation);
+        e.preventDefault();
         setActiveLink(eventsPageLink);
     }
 
     @UiHandler("solutionsPageLink")
     public void goToSolutions(ClickEvent e) {
-        navigator.goToSolutions();
+        navigator.goToPlace(solutionsNavigation);
+        e.preventDefault();
         setActiveLink(solutionsPageLink);
     }
 
 //    @UiHandler("sponsoringPageLink")
 //    public void goToSponsoring(ClickEvent e) {
-//        navigator.goToSponsoring();
+//    navigator.goToPlace(sponsoringNavigation);
+//    e.preventDefault();
+//    setActiveLink(sponsoringPageLink);
 //    }
 
     @UiHandler("searchButton")
@@ -103,7 +122,8 @@ public class Header extends Composite {
         if(searchText.getText().isEmpty()) {
             Window.alert(TextMessages.INSTANCE.pleaseEnterASearchTerm());
         } else {
-            navigator.goToSearchResult(searchText.getText());
+            PlaceNavigation<SearchResultPlace> searchResultNavigation = navigator.getSearchResultNavigation(searchText.getText());
+            navigator.goToPlace(searchResultNavigation);
         }
     }
     

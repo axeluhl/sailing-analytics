@@ -11,7 +11,9 @@ import com.google.gwt.uibinder.client.UiHandler;
 import com.google.gwt.user.client.ui.Anchor;
 import com.google.gwt.user.client.ui.Composite;
 import com.google.gwt.user.client.ui.Widget;
+import com.sap.sailing.gwt.home.client.app.PlaceNavigation;
 import com.sap.sailing.gwt.home.client.app.PlaceNavigator;
+import com.sap.sailing.gwt.home.client.place.event.EventPlace;
 import com.sap.sailing.gwt.ui.shared.CourseAreaDTO;
 import com.sap.sailing.gwt.ui.shared.EventDTO;
 import com.sap.sailing.gwt.ui.shared.LeaderboardGroupDTO;
@@ -87,7 +89,8 @@ public class CompactEventHeader extends Composite {
     }
 
     private void showRegattaOfEvent() {
-        placeNavigator.goToRegattaOfEvent(event.id.toString(), leaderboardName, event.getBaseURL(), event.isOnRemoteServer());
+        PlaceNavigation<EventPlace> regattaNavigation = placeNavigator.getRegattaNavigation(event.id.toString(), leaderboardName, event.getBaseURL(), event.isOnRemoteServer());
+        placeNavigator.goToPlace(regattaNavigation);
     }
     
 }

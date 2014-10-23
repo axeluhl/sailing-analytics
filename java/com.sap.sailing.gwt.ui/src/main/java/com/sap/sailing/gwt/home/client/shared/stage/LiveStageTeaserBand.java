@@ -2,7 +2,9 @@ package com.sap.sailing.gwt.home.client.shared.stage;
 
 import com.google.gwt.dom.client.Style.Display;
 import com.sap.sailing.gwt.common.client.i18n.TextMessages;
+import com.sap.sailing.gwt.home.client.app.PlaceNavigation;
 import com.sap.sailing.gwt.home.client.app.PlaceNavigator;
+import com.sap.sailing.gwt.home.client.place.event.EventPlace;
 import com.sap.sailing.gwt.home.client.shared.EventDatesFormatterUtil;
 import com.sap.sailing.gwt.ui.shared.EventBaseDTO;
 
@@ -27,6 +29,7 @@ public class LiveStageTeaserBand extends StageTeaserBand {
     @Override
     public void actionLinkClicked() {
         EventBaseDTO event = getEvent();
-        getPlaceNavigator().goToEvent(event.id.toString(), event.getBaseURL(), event.isOnRemoteServer());
+        PlaceNavigation<EventPlace> eventNavigation = getPlaceNavigator().getEventNavigation(event.id.toString(), event.getBaseURL(), event.isOnRemoteServer());
+        getPlaceNavigator().goToPlace(eventNavigation);
     }
 }

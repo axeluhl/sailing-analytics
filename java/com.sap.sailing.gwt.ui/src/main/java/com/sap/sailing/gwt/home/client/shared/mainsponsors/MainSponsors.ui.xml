@@ -12,13 +12,13 @@
     <div class="{res.mediaCss.small6} {res.mediaCss.columns}">
       <h3>Solutions</h3>
       <figure><!--<g:Image resource="{local_res.solutionTeaserImage}" altText="Solutions" />-->
-        <figcaption>Here goes the solution description short text <g:Anchor ui:field="solutionsPageLink" text="Read more..." href="javascript:;" /></figcaption>
+        <figcaption>Here goes the solution description short text <g:Anchor ui:field="solutionsPageLink" text="Read more..." /></figcaption>
       </figure>
     </div>
     <div class="{res.mediaCss.small6} {res.mediaCss.columns}">
       <h3>Sponsored Teams</h3>
       <figure><!--<g:Image resource="{local_res.sponsorTeaserImage}" altText="Sponsoring" />-->
-        <figcaption>Here goes the solution description short text <g:Anchor ui:field="sponsoringPageLink" text="Read more..." href="javascript:;" /></figcaption>
+        <figcaption>Here goes the solution description short text <g:Anchor ui:field="sponsoringPageLink" text="Read more..." /></figcaption>
       </figure>
     </div>
   </div>
