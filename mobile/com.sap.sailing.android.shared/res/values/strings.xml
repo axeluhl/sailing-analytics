@@ -17,6 +17,6 @@
 	<string name="application_version" translatable="false">Version</string>
 	
 	<!-- Generic -->
-    <string name="empty"></string>
+    <string name="empty" translatable="false"></string>
 	<string name="generic_error">Error</string>
 </resources>

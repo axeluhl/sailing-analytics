@@ -24,6 +24,9 @@ public class FlatSmartphoneUuidAndGPSFixMovingJsonDeserializer implements JsonDe
     public static final String TIME_MILLIS = "timeMillis";
     public static final String SPEED_M_PER_S = "speedMperS";
     public static final String BEARING_DEG = "bearingDeg";
+    public static final String ACCURACY = "accuracy";
+    public static final String ALTITUDE = "altitude";
+    public static final String PROVIDER = "provider";
 
     @Override
     public Pair<UUID, GPSFixMoving> deserialize(JSONObject object) throws JsonDeserializationException {
@@ -34,7 +37,10 @@ public class FlatSmartphoneUuidAndGPSFixMovingJsonDeserializer implements JsonDe
         double speedMperS = Double.parseDouble(object.get(SPEED_M_PER_S).toString());
         double speedKnots = new MeterPerSecondSpeedImpl(speedMperS).getKnots();
         double bearingDeg = Double.parseDouble(object.get(BEARING_DEG).toString());
-        GPSFixMoving fix = GPSFixMovingImpl.create(lonDeg, latDeg, timeMillis, speedKnots, bearingDeg);
+        double accuracy = Double.parseDouble(object.get(ACCURACY).toString());
+        double altitude = Double.parseDouble(object.get(ALTITUDE).toString());
+        String provider = object.get(PROVIDER).toString();
+        GPSFixMoving fix = GPSFixMovingImpl.create(lonDeg, latDeg, timeMillis, speedKnots, bearingDeg, accuracy, altitude, provider);
         return new Pair<UUID, GPSFixMoving>(device, fix);
     }
 }
