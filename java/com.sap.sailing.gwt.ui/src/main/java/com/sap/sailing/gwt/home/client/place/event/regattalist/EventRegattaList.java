@@ -17,7 +17,7 @@ import com.google.gwt.user.client.DOM;
 import com.google.gwt.user.client.Event;
 import com.google.gwt.user.client.EventListener;
 import com.google.gwt.user.client.ui.Widget;
-import com.sap.sailing.gwt.home.client.HomeResources;
+import com.sap.sailing.gwt.common.client.SharedResources;
 import com.sap.sailing.gwt.home.client.app.PlaceNavigator;
 import com.sap.sailing.gwt.home.client.place.event.AbstractEventComposite;
 import com.sap.sailing.gwt.home.client.place.event.EventPageNavigator;
@@ -68,7 +68,7 @@ public class EventRegattaList extends AbstractEventComposite {
                 registerFilterLeaderboardGroupEvent(filterNoLeaderboardGroupsAnchor, null);
                 for(LeaderboardGroupDTO leaderboardGroup: event.getLeaderboardGroups()) {
                     AnchorElement filterLeaderboardGroupAnchor = Document.get().createAnchorElement();
-                    filterLeaderboardGroupAnchor.setClassName(HomeResources.INSTANCE.mainCss().navbar_button());
+                    filterLeaderboardGroupAnchor.setClassName(SharedResources.INSTANCE.mainCss().navbar_button());
                     filterLeaderboardGroupAnchor.setHref("javascript:;");
                     
                     String leaderboardGroupName = LongNamesUtil.shortenLeaderboardGroupName(event.getName(), leaderboardGroup.getName());
@@ -111,9 +111,9 @@ public class EventRegattaList extends AbstractEventComposite {
                          filterRegattaListByLeaderboardGroup(leaderboardGroup);
                          
                          for(AnchorElement anchor: leaderboardGroupFilterAnchors) {
-                             anchor.removeClassName(HomeResources.INSTANCE.mainCss().navbar_buttonactive());
+                             anchor.removeClassName(SharedResources.INSTANCE.mainCss().navbar_buttonactive());
                          }
-                         filterLeaderboardGroupAnchor.addClassName(HomeResources.INSTANCE.mainCss().navbar_buttonactive());
+                         filterLeaderboardGroupAnchor.addClassName(SharedResources.INSTANCE.mainCss().navbar_buttonactive());
                          break;
                 }
             }
@@ -123,7 +123,7 @@ public class EventRegattaList extends AbstractEventComposite {
     private void filterRegattaListByLeaderboardGroup(LeaderboardGroupDTO leaderboardGroup) {
         if (leaderboardGroup != null) {
             allBoatClassesSelected.getStyle().setDisplay(Display.NONE);
-            filterNoLeaderboardGroupsAnchor.removeClassName(HomeResources.INSTANCE.mainCss().navbar_buttonactive());
+            filterNoLeaderboardGroupsAnchor.removeClassName(SharedResources.INSTANCE.mainCss().navbar_buttonactive());
             // hide all regattas of the not selected leaderboardgroup
             for (LeaderboardGroupDTO lg : getEvent().getLeaderboardGroups()) {
                 boolean isVisible = leaderboardGroup.getName().equals(lg.getName());
@@ -135,7 +135,7 @@ public class EventRegattaList extends AbstractEventComposite {
         } else {
             // make all regattas visible
             allBoatClassesSelected.getStyle().setDisplay(Display.INLINE_BLOCK);
-            filterNoLeaderboardGroupsAnchor.addClassName(HomeResources.INSTANCE.mainCss().navbar_buttonactive());
+            filterNoLeaderboardGroupsAnchor.addClassName(SharedResources.INSTANCE.mainCss().navbar_buttonactive());
             for (LeaderboardGroupDTO lg : getEvent().getLeaderboardGroups()) {
                 List<Regatta> regattaElements = regattaElementsByLeaderboardGroup.get(lg.getName());
                 for (Regatta regatta : regattaElements) {

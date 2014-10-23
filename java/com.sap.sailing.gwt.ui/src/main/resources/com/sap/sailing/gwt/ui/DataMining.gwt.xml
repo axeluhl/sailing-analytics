@@ -34,6 +34,9 @@
   	<source path='common'/>
   	<source path="client" />
 	<source path="datamining" />
+	<source path="adminconsole" />
+	<source path="masterdataimport" />
+	<source path="usermanagement" />
 	<source path="simulator" />
 	<source path='shared' />
 	<source path='common' />

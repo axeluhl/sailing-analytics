@@ -35,9 +35,8 @@ body {
     line-height: 1;
     font-size: 14px;
     font-weight: 400;
-    padding: 80px 0 160px 0;
     margin: 0;
-  color: #3b3b3b;
+	color: #3b3b3b;
 }
 
 table td,select,button {
@@ -73,6 +72,16 @@ table {
     border-radius: 4px;
     background-color: rgba(255, 255, 255, 0.75);
     border: 1px solid #C9CACA;
+}
+
+.CombinedWindPanelParentDiv {
+	padding-top: 34px;
+	padding-left: 10px;
+}
+
+.MapSimulationLegendParentDiv {
+	padding-top: 10px;
+	padding-left: 10px;
 }
 
 .RaceMap-HeaderPanel {

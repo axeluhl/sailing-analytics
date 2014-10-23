@@ -388,6 +388,8 @@ public interface StringMessages extends Messages {
     String scoringSchemeLowPointWinnerGetsZero();
     String scoringSchemeWinnerGetsFive();
     String scoringSchemeWinnerGetsSix();
+    String scoringSchemeWinnerGetsEight();
+    String scoringSchemeWinnerGetsEightAndInterpolation();
     String scoringSystem();
     String createFlexibleLeaderboard();
     String createRegattaLeaderboard();
@@ -1051,6 +1053,8 @@ public interface StringMessages extends Messages {
     String showPingMarkMappings();
     String errorFetchingWindStreamletData(String message);
     String showWindStreamletOverlay();
+    String showSimulationOverlay();
+    String simulationLegendTooltip();
     String regattaNameMustNotContainSlashes();
     String showNumberOfRacesScored();
     String racesScored();
@@ -1095,4 +1099,7 @@ public interface StringMessages extends Messages {
     String enterCarryValueFor(String competitorName);
     String basedOn();
     String retrieveWith();
+    String mappingDetails();
+    String deviceMappingQrCodeExplanation();
+    String qrCode();
 }

@@ -2,7 +2,7 @@ package com.sap.sailing.racecommittee.app.ui.fragments.raceinfo;
 
 import android.os.Bundle;
 
-import com.sap.sailing.racecommittee.app.logging.ExLog;
+import com.sap.sailing.android.shared.logging.ExLog;
 import com.sap.sailing.racecommittee.app.ui.fragments.RaceFragment;
 
 public class ErrorRaceFragment extends RaceFragment {
@@ -11,7 +11,7 @@ public class ErrorRaceFragment extends RaceFragment {
     @Override
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        ExLog.e(TAG, "Somehow the error race fragment got selected...");
+        ExLog.e(getActivity(), TAG, "Somehow the error race fragment got selected...");
     }
 
 }

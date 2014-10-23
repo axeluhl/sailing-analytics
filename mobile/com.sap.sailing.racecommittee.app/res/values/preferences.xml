@@ -6,8 +6,6 @@
     <string name="preference_update_key">forceUpdatePreference</string>
 
     <string name="preference_language_key">languagePref</string>
-    <string name="preference_server_url_key">webserviceUrlPref</string>
-    <string name="preference_server_url_default">http://dev.sapsailing.com/</string>
     <string name="preference_course_areas_key">courseAreasPref</string>
     <string-array name="preference_course_areas_default">
         <item>Alpha</item>
@@ -76,4 +74,8 @@
     <bool name="preference_racing_procedure_basic_hasxray_default">false</bool>
     
     <string name="preference_regatta_specific_save_key">basicIndividualRecall</string>
+    
+    <!-- override android.shared default value -->
+    <string name="app_folder">racecommittee</string>
+    <bool name="preference_isSendingActive_default">false</bool>
 </resources>

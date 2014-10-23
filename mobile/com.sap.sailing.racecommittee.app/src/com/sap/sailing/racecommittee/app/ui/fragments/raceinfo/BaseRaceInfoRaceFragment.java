@@ -14,7 +14,7 @@ import com.sap.sailing.domain.racelog.state.racingprocedure.RacingProcedure;
 import com.sap.sailing.domain.racelog.state.racingprocedure.ReadonlyRacingProcedure;
 import com.sap.sailing.domain.racelog.state.racingprocedure.impl.BaseRacingProcedureChangedListener;
 import com.sap.sailing.racecommittee.app.R;
-import com.sap.sailing.racecommittee.app.logging.ExLog;
+import com.sap.sailing.android.shared.logging.ExLog;
 import com.sap.sailing.racecommittee.app.ui.fragments.RaceFragment;
 import com.sap.sailing.racecommittee.app.ui.fragments.dialogs.RaceDialogFragment;
 import com.sap.sailing.racecommittee.app.ui.utils.CourseDesignerChooser;
@@ -95,7 +95,7 @@ public abstract class BaseRaceInfoRaceFragment<ProcedureType extends RacingProce
     
     protected boolean updateFlagChangesCountdown(TextView targetView) {
         if (flagPoleCache == null) {
-            ExLog.i(BaseRaceInfoRaceFragment.class.getSimpleName(), "Refilling next-flag cache.");
+            ExLog.i(getActivity(), BaseRaceInfoRaceFragment.class.getSimpleName(), "Refilling next-flag cache.");
             TimePoint now = MillisecondsTimePoint.now();
             TimePoint startTime = getRaceState().getStartTime();
             FlagPoleState flagState = getRaceState().getRacingProcedure().getActiveFlags(startTime, now);

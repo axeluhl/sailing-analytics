@@ -8,10 +8,11 @@ import android.view.View.OnClickListener;
 import android.view.ViewGroup;
 import android.widget.ImageButton;
 
+import com.sap.sailing.android.shared.logging.ExLog;
 import com.sap.sailing.domain.common.racelog.Flags;
 import com.sap.sailing.racecommittee.app.AppConstants;
 import com.sap.sailing.racecommittee.app.R;
-import com.sap.sailing.racecommittee.app.logging.ExLog;
+import com.sap.sailing.racecommittee.app.logging.LogEvent;
 
 public class AbortTypeSelectionDialog extends RaceDialogFragment {
     private ImageButton apFlag;
@@ -35,7 +36,7 @@ public class AbortTypeSelectionDialog extends RaceDialogFragment {
         apFlag.setOnClickListener(new OnClickListener() {
 
             public void onClick(View arg0) {
-                ExLog.i(ExLog.RACE_CHOOSE_ABORT_AP, getRace().getId().toString(), getActivity());
+                ExLog.i(getActivity(), LogEvent.RACE_CHOOSE_ABORT_AP, getRace().getId().toString());
                 showAbortModeDialog(Flags.AP, "dialogAPFlag");
             }
 
@@ -44,7 +45,7 @@ public class AbortTypeSelectionDialog extends RaceDialogFragment {
         novemberFlag.setOnClickListener(new OnClickListener() {
 
             public void onClick(View arg0) {
-                ExLog.i(ExLog.RACE_CHOOSE_ABORT_NOVEMBER, getRace().getId().toString(), getActivity());
+                ExLog.i(getActivity(), LogEvent.RACE_CHOOSE_ABORT_NOVEMBER, getRace().getId().toString());
                 showAbortModeDialog(Flags.NOVEMBER, "dialogNovemberFlag");
             }
 
