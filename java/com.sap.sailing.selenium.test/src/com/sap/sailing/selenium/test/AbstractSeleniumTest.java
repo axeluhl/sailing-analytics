@@ -11,6 +11,7 @@ import java.nio.file.Path;
 import java.nio.file.StandardCopyOption;
 import java.util.List;
 import java.util.UUID;
+import java.util.logging.Logger;
 
 import org.junit.Before;
 import org.junit.Rule;
@@ -42,6 +43,8 @@ import com.sap.sailing.selenium.pages.HostPage;
  */
 @RunWith(SeleniumRunner.class)
 public abstract class AbstractSeleniumTest {
+    private static final Logger logger = Logger.getLogger(AbstractSeleniumTest.class.getName());
+    
     /**
      * <p>File extension for screenshots captured with a Selenium web driver.</p>
      */
@@ -68,6 +71,7 @@ public abstract class AbstractSeleniumTest {
      *   <code>true</code> if the state was reseted successfully and <code>false</code> otherwise.
      */
     protected void clearState(String contextRoot) {
+        logger.info("clearing server state");
         try {
             URL url = new URL(contextRoot + CLEAR_STATE_URL);
             HttpURLConnection connection = (HttpURLConnection) url.openConnection();
@@ -83,9 +87,11 @@ public abstract class AbstractSeleniumTest {
     
     @Before
     public void setUpAuthenticatedSession() {
+        logger.info("Authenticating session...");
         Cookie sessionCookie = authenticate(getContextRoot());
         getWebDriver().get(getContextRoot() + "security/ui/Login.html?" + HostPage.getGWTCodeServer()); // initialize web driver so setting a cookie for the local domain is possible
         getWebDriver().manage().addCookie(sessionCookie);
+        logger.info("...obtained session cookie "+sessionCookie);
     }
     
     /**
