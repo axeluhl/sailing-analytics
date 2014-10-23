@@ -13,12 +13,16 @@ import java.util.Locale;
 import org.junit.Before;
 import org.junit.Test;
 
+import com.sap.sse.datamining.DataRetrieverChainDefinition;
+import com.sap.sse.datamining.components.Processor;
 import com.sap.sse.datamining.functions.Function;
 import com.sap.sse.datamining.functions.FunctionProvider;
 import com.sap.sse.datamining.functions.FunctionRegistry;
 import com.sap.sse.datamining.i18n.DataMiningStringMessages;
+import com.sap.sse.datamining.impl.SimpleDataRetrieverChainDefinition;
 import com.sap.sse.datamining.shared.dto.FunctionDTO;
 import com.sap.sse.datamining.test.functions.registry.test_classes.Test_Named;
+import com.sap.sse.datamining.test.functions.registry.test_classes.Test_Regatta;
 import com.sap.sse.datamining.test.functions.registry.test_contexts.Test_HasLegOfCompetitorContext;
 import com.sap.sse.datamining.test.functions.registry.test_contexts.Test_HasLegOfCompetitorContextImpl;
 import com.sap.sse.datamining.test.functions.registry.test_contexts.Test_HasRaceContext;
@@ -28,6 +32,9 @@ import com.sap.sse.datamining.test.functions.test_classes.Test_ExternalLibraryCl
 import com.sap.sse.datamining.test.util.ExpectedFunctionRegistryUtil;
 import com.sap.sse.datamining.test.util.FunctionTestsUtil;
 import com.sap.sse.datamining.test.util.TestsUtil;
+import com.sap.sse.datamining.test.util.components.TestLegOfCompetitorWithContextRetrievalProcessor;
+import com.sap.sse.datamining.test.util.components.TestRaceWithContextRetrievalProcessor;
+import com.sap.sse.datamining.test.util.components.TestRegattaRetrievalProcessor;
 
 public class TestFunctionProvider {
     
@@ -69,6 +76,37 @@ public class TestFunctionProvider {
         expectedDimensions.addAll(functionRegistryUtil.getExpectedDimensionsFor(Test_HasLegOfCompetitorContext.class));
         assertThat(functionProvider.getDimensionsFor(Test_HasLegOfCompetitorContext.class), is(expectedDimensions));
         assertThat(functionProvider.getDimensionsFor(Test_HasLegOfCompetitorContextImpl.class), is(expectedDimensions));
+    }
+    
+    @Test
+    public void testGetDimensionsForDataRetrieverChainDefinition() {
+        FunctionProvider functionProvider = new RegistryFunctionProvider(functionRegistry);
+        DataRetrieverChainDefinition<Collection<Test_Regatta>> dataRetrieverChainDefinition = createDataRetrieverChainDefinition();
+
+        Collection<Function<?>> expectedDimensions = functionRegistryUtil.getExpectedDimensionsFor(Test_HasRaceContext.class);
+        expectedDimensions.addAll(functionRegistryUtil.getExpectedDimensionsFor(Test_HasLegOfCompetitorContext.class));
+        assertThat(functionProvider.getMinimizedDimensionsFor(dataRetrieverChainDefinition), is(expectedDimensions));
+    }
+    
+    @SuppressWarnings("unchecked")
+    public DataRetrieverChainDefinition<Collection<Test_Regatta>> createDataRetrieverChainDefinition() {
+        DataRetrieverChainDefinition<Collection<Test_Regatta>> dataRetrieverChainDefinition = new SimpleDataRetrieverChainDefinition<>((Class<Collection<Test_Regatta>>)(Class<?>) Collection.class, "TestRetrieverChain");
+        Class<Processor<Collection<Test_Regatta>, Test_Regatta>> regattaRetrieverClass = (Class<Processor<Collection<Test_Regatta>, Test_Regatta>>)(Class<?>) TestRegattaRetrievalProcessor.class;
+        dataRetrieverChainDefinition.startWith(regattaRetrieverClass, Test_Regatta.class);
+        
+        Class<Processor<Test_Regatta, Test_HasRaceContext>> raceRetrieverClass = 
+                (Class<Processor<Test_Regatta, Test_HasRaceContext>>)(Class<?>) TestRaceWithContextRetrievalProcessor.class;
+        dataRetrieverChainDefinition.addAsLast(regattaRetrieverClass,
+                                               raceRetrieverClass,
+                                               Test_HasRaceContext.class);
+        
+        Class<Processor<Test_HasRaceContext, Test_HasLegOfCompetitorContext>> legRetrieverClass = 
+                (Class<Processor<Test_HasRaceContext, Test_HasLegOfCompetitorContext>>)(Class<?>) TestLegOfCompetitorWithContextRetrievalProcessor.class;
+        dataRetrieverChainDefinition.addAsLast(raceRetrieverClass,
+                                               legRetrieverClass,
+                                               Test_HasLegOfCompetitorContext.class);
+        
+        return dataRetrieverChainDefinition;
     }
     
     @Test

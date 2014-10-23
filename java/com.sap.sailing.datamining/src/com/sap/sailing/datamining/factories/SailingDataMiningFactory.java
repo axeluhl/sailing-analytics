@@ -17,14 +17,12 @@ import com.sap.sse.datamining.DataRetrieverChainDefinition;
 import com.sap.sse.datamining.Query;
 import com.sap.sse.datamining.components.FilterCriterion;
 import com.sap.sse.datamining.components.Processor;
-import com.sap.sse.datamining.factories.FunctionFactory;
 import com.sap.sse.datamining.factories.ProcessorFactory;
 import com.sap.sse.datamining.functions.Function;
 import com.sap.sse.datamining.functions.FunctionProvider;
 import com.sap.sse.datamining.i18n.DataMiningStringMessages;
 import com.sap.sse.datamining.impl.DataMiningActivator;
 import com.sap.sse.datamining.impl.DataRetrieverChainDefinitionRegistry;
-import com.sap.sse.datamining.impl.DataRetrieverTypeWithInformation;
 import com.sap.sse.datamining.impl.ProcessorQuery;
 import com.sap.sse.datamining.impl.components.GroupedDataEntry;
 import com.sap.sse.datamining.impl.criterias.AndCompoundFilterCriterion;
@@ -38,14 +36,12 @@ import com.sap.sse.datamining.shared.impl.dto.DataRetrieverChainDefinitionDTO;
 public class SailingDataMiningFactory {
 
     private final ProcessorFactory processorFactory;
-    private final FunctionFactory functionFactory;
     
     private final FunctionProvider functionProvider;
     private final DataRetrieverChainDefinitionRegistry dataRetrieverChainDefinitionRegistry;
 
     public SailingDataMiningFactory(FunctionProvider functionProvider, DataRetrieverChainDefinitionRegistry dataRetrieverChainDefinitionRegistry) {
         processorFactory = new ProcessorFactory(DataMiningActivator.getExecutor());
-        functionFactory = new FunctionFactory();
         
         this.functionProvider = functionProvider;
         this.dataRetrieverChainDefinitionRegistry = dataRetrieverChainDefinitionRegistry;
@@ -126,7 +122,7 @@ public class SailingDataMiningFactory {
 
                 DataRetrieverChainDefinition<RacingEventService> dataRetrieverChainDefinition = dataRetrieverChainDefinitionRegistry.getDataRetrieverChainDefinition(RacingEventService.class, dataRetrieverChainDefinitionDTO.getId());
                 DataRetrieverChainBuilder<RacingEventService> chainBuilder = dataRetrieverChainDefinition.startBuilding(DataMiningActivator.getExecutor());
-                Collection<Function<?>> dimensions = getDimensionsOf(dataRetrieverChainDefinition);
+                Collection<Function<?>> dimensions = functionProvider.getMinimizedDimensionsFor(dataRetrieverChainDefinition);
                 Map<Class<?>, Collection<Function<?>>> dimensionsMappedByDeclaringType = mapFunctionsByDeclaringType(dimensions);
                 while (!dimensionsMappedByDeclaringType.isEmpty()) {
                     Class<?> dataType = chainBuilder.getCurrentRetrievedDataType();
@@ -148,39 +144,6 @@ public class SailingDataMiningFactory {
                 return chainBuilder.build();
             }
         };
-    }
-
-    private Collection<Function<?>> getDimensionsOf(
-            DataRetrieverChainDefinition<RacingEventService> dataRetrieverChainDefinition) {
-        Collection<Function<?>> dimensions = new HashSet<>();
-        List<? extends DataRetrieverTypeWithInformation<?, ?>> dataRetrieverTypesWithInformation = dataRetrieverChainDefinition.getDataRetrieverTypesWithInformation();
-        for (int i = dataRetrieverTypesWithInformation.size() - 1; i >= 0; i--) {
-            DataRetrieverTypeWithInformation<?, ?> dataRetrieverTypeWithInformation = dataRetrieverTypesWithInformation.get(i);
-            Collection<Function<?>> dimensionsOfDataType = functionProvider.getDimensionsFor(dataRetrieverTypeWithInformation.getRetrievedDataType());
-            
-            if (!dimensions.isEmpty()) {
-                Map<Function<?>, Function<?>> dimensionsMappedByTrimmedDimensions = trimFirstMethodAndMapOriginal(dimensions);
-                for (Function<?> dimensionOfDataType : dimensionsOfDataType) {
-                    if (dimensionsMappedByTrimmedDimensions.containsKey(dimensionOfDataType)) {
-                        dimensions.remove(dimensionsMappedByTrimmedDimensions.get(dimensionOfDataType));
-                    }
-                }
-            }
-            
-            dimensions.addAll(dimensionsOfDataType);
-        }
-        return dimensions;
-    }
-    
-    private Map<Function<?>, Function<?>> trimFirstMethodAndMapOriginal(Collection<Function<?>> dimensions) {
-        Map<Function<?>, Function<?>> dimensionsMappedByTrimmedDimensions = new HashMap<>();
-        for (Function<?> dimension : dimensions) {
-            Function<?> trimmedDimension = functionFactory.trimFirstMethod(dimension);
-            if (trimmedDimension != null) {
-                dimensionsMappedByTrimmedDimensions.put(trimmedDimension, dimension);
-            }
-        }
-        return dimensionsMappedByTrimmedDimensions;
     }
 
     private Map<Class<?>, Collection<Function<?>>> mapFunctionsByDeclaringType(Collection<Function<?>> functions) {
