@@ -2,6 +2,8 @@
 
 The following are the focus areas for the off-season activities until the first 2015 event, presumably the first ESS act in Singapore, early February 2015. We will tackle most of them in parallel, with separate people working on the different topics.
 
+[[_TOC_]]
+
 ## newhome (Frank, O.I.O.)
 
  - A number of bugs and issues have been recorded during and after the first events run with the newhome implementation. See [our Bugzilla Bug #1928](http://bugzilla.sapsailing.com/bugzilla/show_bug.cgi?id=1928).
