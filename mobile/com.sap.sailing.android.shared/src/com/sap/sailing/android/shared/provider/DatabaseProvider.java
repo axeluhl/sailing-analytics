@@ -19,6 +19,7 @@ import android.net.Uri;
 
 import com.sap.sailing.android.shared.BuildConfig;
 import com.sap.sailing.android.shared.data.database.GpsTable;
+import com.sap.sailing.android.shared.data.database.MessageTable;
 import com.sap.sailing.android.shared.logging.ExLog;
 
 public class DatabaseProvider extends ContentProvider {
@@ -26,35 +27,49 @@ public class DatabaseProvider extends ContentProvider {
 	private final static String TAG = DatabaseProvider.class.getName();
 
 	public final static String AUTHORITY = "com.sap.sailing.android.shared.provider.db";
-	public final static Uri DATA_GPS_URI = Uri.parse("content://" + AUTHORITY + "/data/gps");
+	public final static Uri GPS_URI = Uri.parse("content://" + AUTHORITY + "/gps");
+	public final static Uri MESSAGE_URI = Uri.parse("content://" + AUTHORITY + "/message");
 
 	private DatabaseHelper dbHelper;
 	private ContentResolver cr;
 
-	private final static int DATA_GPS = 1;
-	private final static int DATA_GPS_ID = 2;
+	private final static int GPS = 0;
+	private final static int GPS_ID = 1;
+	private final static int MESSAGE = 10;
+	private final static int MESSAGE_ID = 11;
 
 	private final static UriMatcher uriMatcher;
-	private final static HashMap<String, String> gpsTableMap;
+	private final static HashMap<String, String> gpsMap;
+	private final static HashMap<String, String> messageMap;
 
 	static {
 		uriMatcher = new UriMatcher(UriMatcher.NO_MATCH);
-		uriMatcher.addURI(AUTHORITY, "data/gps", DATA_GPS);
-		uriMatcher.addURI(AUTHORITY, "data/gps/#", DATA_GPS_ID);
+		uriMatcher.addURI(AUTHORITY, "gps", GPS);
+		uriMatcher.addURI(AUTHORITY, "gps/#", GPS_ID);
+		uriMatcher.addURI(AUTHORITY, "message", MESSAGE);
+		uriMatcher.addURI(AUTHORITY, "message/#", MESSAGE_ID);
 
-		gpsTableMap = new HashMap<String, String>();
-		gpsTableMap.put(GpsTable._ID, GpsTable._ID);
-		gpsTableMap.put(GpsTable._TIMESTAMP, GpsTable._TIMESTAMP);
-		gpsTableMap.put(GpsTable.ACCURACY, GpsTable.ACCURACY);
-		gpsTableMap.put(GpsTable.ALTITUDE, GpsTable.ALTITUDE);
-		gpsTableMap.put(GpsTable.BEARING, GpsTable.BEARING);
-		gpsTableMap.put(GpsTable.ELAPSEDREALTIME, GpsTable.ELAPSEDREALTIME);
-		gpsTableMap.put(GpsTable.LATITUDE, GpsTable.LATITUDE);
-		gpsTableMap.put(GpsTable.LONGITUDE, GpsTable.LONGITUDE);
-		gpsTableMap.put(GpsTable.PROVIDER, GpsTable.PROVIDER);
-		gpsTableMap.put(GpsTable.SPEED, GpsTable.SPEED);
-		gpsTableMap.put(GpsTable.TIME, GpsTable.TIME);
-		gpsTableMap.put(GpsTable._COUNT, GpsTable._COUNT);
+		gpsMap = new HashMap<String, String>();
+		gpsMap.put(GpsTable._ID, GpsTable._ID);
+		gpsMap.put(GpsTable._TIMESTAMP, GpsTable._TIMESTAMP);
+		gpsMap.put(GpsTable.ACCURACY, GpsTable.ACCURACY);
+		gpsMap.put(GpsTable.ALTITUDE, GpsTable.ALTITUDE);
+		gpsMap.put(GpsTable.BEARING, GpsTable.BEARING);
+		gpsMap.put(GpsTable.ELAPSEDREALTIME, GpsTable.ELAPSEDREALTIME);
+		gpsMap.put(GpsTable.LATITUDE, GpsTable.LATITUDE);
+		gpsMap.put(GpsTable.LONGITUDE, GpsTable.LONGITUDE);
+		gpsMap.put(GpsTable.PROVIDER, GpsTable.PROVIDER);
+		gpsMap.put(GpsTable.SPEED, GpsTable.SPEED);
+		gpsMap.put(GpsTable.TIME, GpsTable.TIME);
+		gpsMap.put(GpsTable._COUNT, GpsTable._COUNT);
+
+		messageMap = new HashMap<String, String>();
+		messageMap.put(MessageTable._ID, MessageTable._ID);
+		messageMap.put(MessageTable.URL, MessageTable.URL);
+		messageMap.put(MessageTable.CALLBACK_PAYLOAD, MessageTable.CALLBACK_PAYLOAD);
+		messageMap.put(MessageTable.PAYLOAD, MessageTable.PAYLOAD);
+		messageMap.put(MessageTable.CALLBACK_CLASS_STRING, MessageTable.CALLBACK_CLASS_STRING);
+		messageMap.put(MessageTable._COUNT, MessageTable._COUNT);
 	}
 
 	@Override
@@ -69,16 +84,28 @@ public class DatabaseProvider extends ContentProvider {
 		SQLiteDatabase db = dbHelper.getWritableDatabase();
 		if (db != null) {
 			switch (uriMatcher.match(uri)) {
-			case DATA_GPS:
+			case GPS:
 				count = db.delete(GpsTable.TABLENAME, selection, selectionArgs);
 				break;
 
-			case DATA_GPS_ID:
+			case GPS_ID:
 				finalWhere = GpsTable._ID + " = " + uri.getLastPathSegment();
 				if (selection != null) {
 					finalWhere += " AND " + selection;
 				}
 				count = db.delete(GpsTable.TABLENAME, finalWhere, selectionArgs);
+				break;
+
+			case MESSAGE:
+				count = db.delete(MessageTable.TABLENAME, selection, selectionArgs);
+				break;
+
+			case MESSAGE_ID:
+				finalWhere = MessageTable._ID + " = " + uri.getLastPathSegment();
+				if (selection != null) {
+					finalWhere += " AND " + selection;
+				}
+				count = db.delete(MessageTable.TABLENAME, finalWhere, selectionArgs);
 				break;
 
 			default:
@@ -97,11 +124,17 @@ public class DatabaseProvider extends ContentProvider {
 		}
 
 		switch (uriMatcher.match(uri)) {
-		case DATA_GPS:
+		case GPS:
 			return GpsTable.CONTENT_TYPE;
 
-		case DATA_GPS_ID:
+		case GPS_ID:
 			return GpsTable.CONTENT_ITEM_TYPE;
+
+		case MESSAGE:
+			return MessageTable.CONTENT_TYPE;
+
+		case MESSAGE_ID:
+			return MessageTable.CONTENT_ITEM_TYPE;
 
 		default:
 			throw new IllegalArgumentException("Unknow Uri: " + uri);
@@ -119,9 +152,14 @@ public class DatabaseProvider extends ContentProvider {
 		String tableName;
 		Uri contentUri;
 		switch (uriMatcher.match(uri)) {
-		case DATA_GPS:
+		case GPS:
 			tableName = GpsTable.TABLENAME;
-			contentUri = DATA_GPS_URI;
+			contentUri = GPS_URI;
+			break;
+
+		case MESSAGE:
+			tableName = MessageTable.TABLENAME;
+			contentUri = MESSAGE_URI;
 			break;
 
 		default:
@@ -166,22 +204,40 @@ public class DatabaseProvider extends ContentProvider {
 
 		SQLiteQueryBuilder queryBuilder = new SQLiteQueryBuilder();
 		switch (uriMatcher.match(uri)) {
-		case DATA_GPS:
+		case GPS:
 			queryBuilder.setTables(GpsTable.TABLENAME);
 			if (projection == null) {
-				queryBuilder.setProjectionMap(gpsTableMap);
+				queryBuilder.setProjectionMap(gpsMap);
 			}
 			if (sortOrder == null) {
 				sortOrder = GpsTable._TIMESTAMP + " DESC ";
 			}
 			break;
 
-		case DATA_GPS_ID:
+		case GPS_ID:
 			queryBuilder.setTables(GpsTable.TABLENAME);
 			if (projection == null) {
-				queryBuilder.setProjectionMap(gpsTableMap);
+				queryBuilder.setProjectionMap(gpsMap);
 			}
 			queryBuilder.appendWhere(GpsTable._ID + " = " + uri.getLastPathSegment());
+			break;
+
+		case MESSAGE:
+			queryBuilder.setTables(MessageTable.TABLENAME);
+			if (projection == null) {
+				queryBuilder.setProjectionMap(messageMap);
+			}
+			if (sortOrder == null) {
+				sortOrder = MessageTable._ID + " DESC ";
+			}
+			break;
+
+		case MESSAGE_ID:
+			queryBuilder.setTables(MessageTable.TABLENAME);
+			if (projection == null) {
+				queryBuilder.setProjectionMap(messageMap);
+			}
+			queryBuilder.appendWhere(MessageTable._ID + " = " + uri.getLastPathSegment());
 			break;
 
 		default:
@@ -212,16 +268,28 @@ public class DatabaseProvider extends ContentProvider {
 		SQLiteDatabase db = dbHelper.getWritableDatabase();
 		if (db != null) {
 			switch (uriMatcher.match(uri)) {
-			case DATA_GPS:
+			case GPS:
 				count = db.update(GpsTable.TABLENAME, values, selection, selectionArgs);
 				break;
 
-			case DATA_GPS_ID:
+			case GPS_ID:
 				finalWhere = GpsTable._ID + " = " + uri.getLastPathSegment();
 				if (selection != null) {
 					finalWhere += " AND " + selection;
 				}
 				count = db.update(GpsTable.TABLENAME, values, finalWhere, selectionArgs);
+				break;
+
+			case MESSAGE:
+				count = db.update(MessageTable.TABLENAME, values, selection, selectionArgs);
+				break;
+
+			case MESSAGE_ID:
+				finalWhere = MessageTable._ID + " = " + uri.getLastPathSegment();
+				if (selection != null) {
+					finalWhere += " AND " + selection;
+				}
+				count = db.update(MessageTable.TABLENAME, values, finalWhere, selectionArgs);
 				break;
 
 			default:
@@ -233,11 +301,12 @@ public class DatabaseProvider extends ContentProvider {
 	}
 
 	private class DatabaseHelper extends SQLiteOpenHelper {
-		
+
 		private final static String DATABASE_NAME = "sap_sailing.db";
 		private final static int DATABASE_VERSION = 1;
 
-		private GpsTable GpsTable = new GpsTable();
+		private GpsTable gpsTable = new GpsTable();
+		private MessageTable messageTable = new MessageTable();
 
 		public DatabaseHelper (Context context) {
 			super(context, DATABASE_NAME, null, DATABASE_VERSION);
@@ -245,18 +314,20 @@ public class DatabaseProvider extends ContentProvider {
 
 		@Override
 		public void onCreate (SQLiteDatabase db) {
-			GpsTable.onCreate(db);
+			gpsTable.onCreate(db);
+			messageTable.onCreate(db);
 		}
 
 		@Override
 		public void onUpgrade (SQLiteDatabase db, int oldVersion, int newVersion) {
-			GpsTable.onUpgrade(db, oldVersion, newVersion);
+			gpsTable.onUpgrade(db, oldVersion, newVersion);
+			messageTable.onUpgrade(db, oldVersion, newVersion);
 		}
 
 		@Override
 		public void onDowngrade (SQLiteDatabase db, int oldVersion, int newVersion) {
-			GpsTable.onDowngrade(db, oldVersion, newVersion);
+			gpsTable.onDowngrade(db, oldVersion, newVersion);
+			messageTable.onDowngrade(db, oldVersion, newVersion);
 		}
 	}
-
 }
