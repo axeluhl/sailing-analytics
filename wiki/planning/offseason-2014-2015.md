@@ -21,6 +21,15 @@ Serializable settings will also help in the context of user-specific preferences
 
 See [http://wiki.sapsailing.com/wiki/planning/usermanagement](http://wiki.sapsailing.com/wiki/planning/usermanagement) for a description. Some progress has already been made, but it's going to be a lot more work to update our existing UIs, no longer using HTTP Basic Authentication, replacing this with Shiro's authentication and authorization concepts. As briefly touched above, this also has implications on the newhome design.
 
+## Map Visualization Improvements (Christopher, Axel, Frank, Ubilabs)
+
+The map visualization currently has two main drawbacks:
+
+* the map doesn't rotate
+* boat, water and land visualization is not sufficiently appealing
+
+For the rotation problem we see two possible solutions: transforming coordinates while staying on Google Maps; or replacing the map provider, probably using OpenStreetMap. For the "appeal" issue we seem to agree that the use of plugin technology is to be avoided, and so the options have to be recruited from HTML5/CSS-land. In particular, we believe that better boat visualizations are more or less a matter of a good graphics designer painting hull and sail constellations for specific boat classes. Water visualizations will have to be experimented with on the basis of HTML5 canvas technology (performance, appeal). Land visualization would require satellite imagery with precise geo-location information to fit into a map provider and may be more difficult.
+
 ## Volume Business (Ubilabs, Fredrik, Jan)
 
 Reaching a broader audience with the SAP Sailing Analytics will mainly happen through two channels: smartphone tracking and a free-to-use race committee app. Both activities are underway with Ubilabs contributing the UI/UX design and SAP contributing additional development support. We plan to complete one major iteration of both, the smartphone tracking app for iOS and Android, and one major iteration of the race committee app until the end of this planning time frame. 
