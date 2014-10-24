@@ -1,33 +1,32 @@
 package com.sap.sailing.gwt.home.client.place.events.upcoming;
 
 import com.google.gwt.core.client.GWT;
-import com.google.gwt.dom.client.AnchorElement;
-import com.google.gwt.dom.client.DivElement;
 import com.google.gwt.dom.client.SpanElement;
+import com.google.gwt.event.dom.client.ClickEvent;
 import com.google.gwt.uibinder.client.UiBinder;
 import com.google.gwt.uibinder.client.UiField;
-import com.google.gwt.user.client.DOM;
-import com.google.gwt.user.client.Event;
-import com.google.gwt.user.client.EventListener;
-import com.google.gwt.user.client.ui.UIObject;
+import com.google.gwt.uibinder.client.UiHandler;
+import com.google.gwt.user.client.ui.Anchor;
+import com.google.gwt.user.client.ui.Composite;
+import com.google.gwt.user.client.ui.Widget;
 import com.sap.sailing.gwt.home.client.app.PlaceNavigation;
 import com.sap.sailing.gwt.home.client.app.PlaceNavigator;
 import com.sap.sailing.gwt.home.client.place.event.EventPlace;
 import com.sap.sailing.gwt.home.client.shared.EventDatesFormatterUtil;
 import com.sap.sailing.gwt.ui.shared.EventBaseDTO;
 
-public class UpcomingEvent extends UIObject {
+public class UpcomingEvent extends Composite {
 
     @UiField SpanElement eventName;
     @UiField SpanElement seriesName;
     @UiField SpanElement venueName;
     @UiField SpanElement eventStartDate;
-    @UiField AnchorElement eventOverviewLink;
+    @UiField Anchor eventOverviewLink;
 
-    @SuppressWarnings("unused")
     private final PlaceNavigator navigator;
+    private final PlaceNavigation<EventPlace> eventNavigation; 
 
-    interface UpcomingEventUiBinder extends UiBinder<DivElement, UpcomingEvent> {
+    interface UpcomingEventUiBinder extends UiBinder<Widget, UpcomingEvent> {
     }
     
     private static UpcomingEventUiBinder uiBinder = GWT.create(UpcomingEventUiBinder.class);
@@ -36,25 +35,20 @@ public class UpcomingEvent extends UIObject {
         this.navigator = navigator;
 
         EventsOverviewUpcomingResources.INSTANCE.css().ensureInjected();
-        setElement(uiBinder.createAndBindUi(this));
+        initWidget(uiBinder.createAndBindUi(this));
 
-        final PlaceNavigation<EventPlace> eventNavigation = navigator.getEventNavigation(event.id.toString(), event.getBaseURL(), event.isOnRemoteServer());
+        eventNavigation = navigator.getEventNavigation(event.id.toString(), event.getBaseURL(), event.isOnRemoteServer());
         eventOverviewLink.setHref(eventNavigation.getTargetUrl());
         
-        Event.sinkEvents(eventOverviewLink, Event.ONCLICK);
-        Event.setEventListener(eventOverviewLink, new EventListener() {
-            @Override
-            public void onBrowserEvent(Event browserEvent) {
-                switch (DOM.eventGetType(browserEvent)) {
-                    case Event.ONCLICK:
-                        navigator.goToPlace(eventNavigation);
-                        break;
-                }
-            }
-        });
-
         eventName.setInnerText(event.getName());
         venueName.setInnerText(event.venue.getName());
         eventStartDate.setInnerText(EventDatesFormatterUtil.formatDateRangeWithoutYear(event.startDate, event.endDate));
     }
+    
+    @UiHandler("eventOverviewLink")
+    public void goToEventOverview(ClickEvent e) {
+        navigator.goToPlace(eventNavigation);
+        e.preventDefault();
+    }
+
 }

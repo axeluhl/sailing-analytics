@@ -1,10 +1,9 @@
 package com.sap.sailing.gwt.home.client.shared.stage;
 
 import com.google.gwt.dom.client.Style.Display;
+import com.google.gwt.event.dom.client.ClickEvent;
 import com.sap.sailing.gwt.common.client.i18n.TextMessages;
-import com.sap.sailing.gwt.home.client.app.PlaceNavigation;
 import com.sap.sailing.gwt.home.client.app.PlaceNavigator;
-import com.sap.sailing.gwt.home.client.place.event.EventPlace;
 import com.sap.sailing.gwt.home.client.shared.EventDatesFormatterUtil;
 import com.sap.sailing.gwt.ui.shared.EventBaseDTO;
 
@@ -22,14 +21,14 @@ public class LiveStageTeaserBand extends StageTeaserBand {
         bandSubtitle.setInnerText(EventDatesFormatterUtil.formatDateRangeWithYear(event.startDate, event.endDate));
 
         isLiveDiv.getStyle().setDisplay(Display.INLINE_BLOCK);
-        actionLink.getStyle().setDisplay(Display.INLINE_BLOCK);
-        actionLink.setInnerText(TextMessages.INSTANCE.watchNow());
+        actionLink.setVisible(true);
+        actionLink.setText(TextMessages.INSTANCE.watchNow());
+        actionLink.setHref(getEventNavigation().getTargetUrl());
     }
 
     @Override
-    public void actionLinkClicked() {
-        EventBaseDTO event = getEvent();
-        PlaceNavigation<EventPlace> eventNavigation = getPlaceNavigator().getEventNavigation(event.id.toString(), event.getBaseURL(), event.isOnRemoteServer());
-        getPlaceNavigator().goToPlace(eventNavigation);
+    public void actionLinkClicked(ClickEvent e) {
+        getPlaceNavigator().goToPlace(getEventNavigation());
+        e.preventDefault();
     }
 }
