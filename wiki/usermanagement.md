@@ -1,6 +1,6 @@
 # User Management and Security
 
-As a feature of the Sports Sponsorships Engine (SSE) which underlies the SAP Sailing Analytics, our Tennis engagements, parts of the Equestrian contributions and in the future perhaps more, we are about to introduce user management to the platform. Based on [Benjamin Ebling's Bachelor thesis](/doc/theses/20140915_Ebling_Authentication_and_Authorization_for_SAP_Sailing_Analytics.pdf) we are introducing [Apache Shiro](http://shiro.apache.org) to the platform.
+As a feature of the Sports Sponsorships Engine (SSE) which underlies the SAP Sailing Analytics, our Tennis engagements, parts of the Equestrian contributions and in the future perhaps more, we are about to introduce user management to the platform. Based on [Benjamin Ebling's Bachelor thesis](/doc/theses/20140915_Ebling_Authentication_and_Authorization_for_SAP_Sailing_Analytics.pdf) we are introducing [Apache Shiro](http://shiro.apache.org) to the platform. Our Bugzilla has a separate [component for User and Account Management](http://bugzilla.sapsailing.com/bugzilla/buglist.cgi?query_format=advanced&bug_status=NEW&bug_status=ASSIGNED&bug_status=REOPENED&component=User%20and%20Account%20Management&product=Sailing%20Race%20Analytics) that documents the open issues.
 
 [[_TOC_]]
 
@@ -104,8 +104,30 @@ In addition to URL-based security that is configured in `shiro.ini`, using bundl
 The security service offers methods such as `addSetting`, `setSetting` and `getSetting` to manage name/value pairs. The settings API is typed in the sense that when registering a setting 
 
 #### com.sap.sse.security.userstore.mongodb
+
+The `UserStore` interface has an implementation provided by this bundle: `UserStoreImpl`. It uses MongoDB for persistence of all user store entries including the credentials for the `UsernamePasswordRealm` and all global and user-specific settings.
+
+The `UserStoreImpl` is created by the bundle activator and is registered under the `UserStore` interface in the OSGi service registry. The `com.sap.sse.security` bundle activator is implemented such that it waits for a service to appear for the `UserStore` interface in the service registry before it takes this service and passes it to the `SecurityServiceImpl` constructor, resulting in the `SecurityService` instance that is in turn registered with the OSGi service registry.
+
+The standard `MongoDBService` is used to obtain a configuration for the persistence layer. In particular, during test execution, the `winddbTest` DB will be used instead of the default database.
+
 #### com.sap.sse.security.ui
 
+This GWT web bundle provides a number of UI-related components and a number of entry points which implement basic user management and security features. Additionally, a GWT RPC service `UserManagementService` exposing user management services to GWT clients and a class `UserService` helping client-side applications to track, sign in and sign out the current user is provided.
+
+A GWT application that only wants to know what the currently signed-in user is (if any), which roles and permissions that user has and being notified about changes of the currently signed-in user (e.g., if the user signs out or if the set of roles and permissions change) uses the `UserService` class in conjunction with an instance of the `UserManagementServiceAsync` interface. Typical code in an entry point could look like this:
+<pre>
+        UserManagementServiceAsync userManagementService = GWT.create(UserManagementService.class);
+        EntryPointHelper.registerASyncService((ServiceDefTarget) userManagementService,
+                RemoteServiceMappingConstants.userManagementServiceRemotePath);
+        UserService userService = new UserService(userManagementService);
+</pre>
+
+The entry points, as of this writing, offer a simple sign-in form (`Login.html`), a sign-up form (`Register.html`), a form to edit the signed-in user's profile (`EditProfile.html`), an entry point linked to by e-mail bodies used for address validation (`EmailValidation.html`) and a page to be used by administrators to edit user accounts (`UserManagement.html`).
+
+The `LoginPanel` component may be used by applications to display sign-up/sign-in/sign-out features. Its styling is adjustable by a CSS resource which can be passed to the component's constructor, this way adjusting the component's style to that of the application using and embedding it.
+
+We plan to turn the `UserManagementPanel` which is the widget behind the `UserManagementEntryPoint` into a drop-in component for a generalized administration console concept. So, when the AdminConsole becomes an SSE concept then the user management tab can be made available to all applications using the AdminConsole concept. See also bugs [2424](http://bugzilla.sapsailing.com/bugzilla/show_bug.cgi?id=2424) and [2425](http://bugzilla.sapsailing.com/bugzilla/show_bug.cgi?id=2425).
 
 ### Using Shiro in SSE-Based Applications
 
