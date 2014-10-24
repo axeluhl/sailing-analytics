@@ -4,17 +4,16 @@ import java.util.ArrayList;
 import java.util.List;
 
 import com.google.gwt.core.client.GWT;
-import com.google.gwt.dom.client.AnchorElement;
 import com.google.gwt.dom.client.DivElement;
 import com.google.gwt.dom.client.HeadingElement;
 import com.google.gwt.dom.client.SpanElement;
 import com.google.gwt.dom.client.Style.Display;
 import com.google.gwt.dom.client.StyleInjector;
+import com.google.gwt.event.dom.client.ClickEvent;
 import com.google.gwt.uibinder.client.UiBinder;
 import com.google.gwt.uibinder.client.UiField;
-import com.google.gwt.user.client.DOM;
-import com.google.gwt.user.client.Event;
-import com.google.gwt.user.client.EventListener;
+import com.google.gwt.uibinder.client.UiHandler;
+import com.google.gwt.user.client.ui.Anchor;
 import com.google.gwt.user.client.ui.Composite;
 import com.google.gwt.user.client.ui.Image;
 import com.google.gwt.user.client.ui.Widget;
@@ -71,10 +70,12 @@ public class Regatta extends Composite {
 //    @UiField(provided=true) RegattaCompetitor competitorWithRank2;
 //    @UiField(provided=true) RegattaCompetitor competitorWithRank3;
 
-    @UiField AnchorElement regattaDetailsLink;
-    @UiField AnchorElement leaderboardLink;
+    @UiField Anchor regattaDetailsLink;
+    @UiField Anchor leaderboardLink;
     
     @UiField Image boatClassImage;
+
+    private PlaceNavigation<LeaderboardPlace> leaderboardNavigation;
     
     public Regatta(EventDTO event, Timer timerForClientServerOffset, boolean isSingleView, PlaceNavigator placeNavigator, EventPageNavigator pageNavigator) {
         this.event = event;
@@ -101,7 +102,13 @@ public class Regatta extends Composite {
         this.leaderboard = leaderboard;
         this.leaderboardGroup = leaderboardGroup;
 
-        registerEvents(leaderboardGroup);
+        if(isSingleView) {
+            regattaDetailsLink.setVisible(false);
+            leaderboardNavigation = placeNavigator.getLeaderboardNavigation(event.id.toString(), leaderboard.name, event.getBaseURL(), event.isOnRemoteServer());
+            leaderboardLink.setHref(leaderboardNavigation.getTargetUrl());
+        } else {
+            leaderboardLink.setVisible(false);
+        }
 
         boolean hasLiveRace = leaderboard.hasLiveRace(timerForClientServerOffset.getLiveTimePointInMillis());
         if(!hasLiveRace) {
@@ -154,36 +161,13 @@ public class Regatta extends Composite {
         trackedRacesCount.setInnerText(String.valueOf(leaderboard.getTrackedRacesCount()));
     }
 
-    private void registerEvents(final LeaderboardGroupDTO leaderboardGroup) {
-        if(isSingleView) {
-            regattaDetailsLink.getStyle().setDisplay(Display.NONE);
+    @UiHandler("regattaDetailsLink")
+    public void regattaDetailsLinkClicked(ClickEvent e) {
+        pageNavigator.goToRegattaRaces(leaderboardGroup, leaderboard, raceGroup);
+    }
 
-            Event.sinkEvents(leaderboardLink, Event.ONCLICK);
-            Event.setEventListener(leaderboardLink, new EventListener() {
-                @Override
-                public void onBrowserEvent(Event browserEvent) {
-                    switch (DOM.eventGetType(browserEvent)) {
-                        case Event.ONCLICK:
-                            PlaceNavigation<LeaderboardPlace> leaderboardNavigation = placeNavigator.getLeaderboardNavigation(event.id.toString(), leaderboard.name, event.getBaseURL(), event.isOnRemoteServer());
-                            placeNavigator.goToPlace(leaderboardNavigation);
-                            break;
-                    }
-                }
-            });
-        } else {
-            leaderboardLink.getStyle().setDisplay(Display.NONE);
-
-            Event.sinkEvents(regattaDetailsLink, Event.ONCLICK);
-            Event.setEventListener(regattaDetailsLink, new EventListener() {
-                @Override
-                public void onBrowserEvent(Event browserEvent) {
-                    switch (DOM.eventGetType(browserEvent)) {
-                        case Event.ONCLICK:
-                            pageNavigator.goToRegattaRaces(leaderboardGroup, leaderboard, raceGroup);
-                            break;
-                    }
-                }
-            });
-        }
+    @UiHandler("leaderboardLink")
+    public void leaderboardLinkClicked(ClickEvent e) {
+        placeNavigator.goToPlace(leaderboardNavigation);
     }
 }
