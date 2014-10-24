@@ -26,9 +26,4 @@ public interface PlaceNavigator {
     PlaceNavigation<EventPlace> getRegattaNavigation(String eventUuidAsString, String leaderboardIdAsNameString, String baseUrl, boolean isOnRemoteServer);
     PlaceNavigation<LeaderboardPlace> getLeaderboardNavigation(String eventUuidAsString, String leaderboardIdAsNameString, String baseUrl, boolean isOnRemoteServer);
     PlaceNavigation<SearchResultPlace> getSearchResultNavigation(String searchQuery);
-
-//    void goToEvent(String eventUuidAsString, String baseUrl, boolean isOnRemoteServer);
-//    void goToRegattaOfEvent(String eventUuidAsString, String leaderboardIdAsNameString, String baseUrl, boolean isOnRemoteServer);
-//    void goToLeaderboard(String eventUuidAsString, String leaderboardIdAsNameString, String baseUrl, boolean isOnRemoteServer);
-//    void goToSearchResult(String searchQuery);
 }

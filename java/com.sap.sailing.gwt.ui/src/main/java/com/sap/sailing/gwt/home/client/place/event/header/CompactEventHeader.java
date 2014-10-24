@@ -32,17 +32,21 @@ public class CompactEventHeader extends Composite {
     
     private final EventDTO event;
     private final PlaceNavigator placeNavigator;
-    private final String leaderboardName;
+    private final PlaceNavigation<EventPlace> regattaNavigation;
 
     public CompactEventHeader(EventDTO event, String leaderboardName, PlaceNavigator placeNavigator) {
         this.event = event;
-        this.leaderboardName = leaderboardName;
         this.placeNavigator = placeNavigator;
         
         EventHeaderResources.INSTANCE.css().ensureInjected();
         StyleInjector.injectAtEnd("@media (min-width: 50em) { "+EventHeaderResources.INSTANCE.largeCss().getText()+"}");
         
         initWidget(uiBinder.createAndBindUi(this));
+        
+        regattaNavigation = placeNavigator.getRegattaNavigation(event.id.toString(), leaderboardName, event.getBaseURL(), event.isOnRemoteServer());
+        regattaLink.setHref(regattaNavigation.getTargetUrl());
+        regattaLink2.setHref(regattaNavigation.getTargetUrl());
+        
         updateUI();
     }
 
@@ -80,17 +84,14 @@ public class CompactEventHeader extends Composite {
     
     @UiHandler("regattaLink")
     void gotoRegattaClicked(ClickEvent event) {
-        showRegattaOfEvent();        
+        placeNavigator.goToPlace(regattaNavigation);
+        event.preventDefault();
     }
 
     @UiHandler("regattaLink2")
     void gotoRegatta2Clicked(ClickEvent event) {
-        showRegattaOfEvent();        
+        placeNavigator.goToPlace(regattaNavigation);
+        event.preventDefault();
     }
 
-    private void showRegattaOfEvent() {
-        PlaceNavigation<EventPlace> regattaNavigation = placeNavigator.getRegattaNavigation(event.id.toString(), leaderboardName, event.getBaseURL(), event.isOnRemoteServer());
-        placeNavigator.goToPlace(regattaNavigation);
-    }
-    
 }
