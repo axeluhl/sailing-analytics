@@ -53,7 +53,7 @@
         </div>
         <div ui:field="seriesLeaderboardDiv" class="{local_res.css.eventheader_sharing}">
             <div class="{style.action}">
-               <g:Anchor ui:field="seriesLeaderboardAnchor" href="javascript:;" styleName="{res.mainCss.button} {style.action_link}"><ui:text from='{i18n.overallLeaderboard}'/></g:Anchor>
+               <g:Anchor ui:field="seriesLeaderboardAnchor" styleName="{res.mainCss.button} {style.action_link}"><ui:text from='{i18n.overallLeaderboard}'/></g:Anchor>
             </div>
 		</div>	          
       </div>

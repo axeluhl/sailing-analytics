@@ -71,7 +71,8 @@ public class EventHeader extends AbstractEventComposite {
 //  private final List<Anchor> links3;
     
     private final PlaceNavigator placeNavigator;
-    
+    private PlaceNavigation<LeaderboardPlace> overallLeaderboardNavigation = null; 
+            
     public EventHeader(EventDTO event, PlaceNavigator placeNavigator, EventPageNavigator pageNavigator) {
         super(event, pageNavigator);
         
@@ -143,6 +144,10 @@ public class EventHeader extends AbstractEventComposite {
         if(isSeries) {
             LeaderboardGroupDTO leaderboardGroupDTO = event.getLeaderboardGroups().get(0);
             eventName = leaderboardGroupDTO.getDisplayName() != null ? leaderboardGroupDTO.getDisplayName() : leaderboardGroupDTO.getName();
+
+            String overallLeaderboardName = leaderboardGroupDTO.getName() + " " + LeaderboardNameConstants.OVERALL;
+            overallLeaderboardNavigation = placeNavigator.getLeaderboardNavigation(event.id.toString(), overallLeaderboardName, event.getBaseURL(), event.isOnRemoteServer());
+            seriesLeaderboardAnchor.setHref(overallLeaderboardNavigation.getTargetUrl());
             
             StrippedLeaderboardDTO leaderboardFittingToEvent = findLeaderboardWithSameCourseArea(event);
             if(leaderboardFittingToEvent != null) {
@@ -229,12 +234,8 @@ public class EventHeader extends AbstractEventComposite {
     @UiHandler("seriesLeaderboardAnchor")
     void seriesLeaderboardClicked(ClickEvent clickevent) {
         EventDTO event = getEvent();
-        if(event.isFakeSeries()) {
-            LeaderboardGroupDTO leaderboardGroupDTO = getEvent().getLeaderboardGroups().get(0);
-            String overallLeaderboardName = leaderboardGroupDTO.getName() + " " + LeaderboardNameConstants.OVERALL;
-            
-            PlaceNavigation<LeaderboardPlace> leaderboardNavigation = placeNavigator.getLeaderboardNavigation(event.id.toString(), overallLeaderboardName, event.getBaseURL(), event.isOnRemoteServer());
-            placeNavigator.goToPlace(leaderboardNavigation);
+        if(event.isFakeSeries() && overallLeaderboardNavigation != null) {
+            placeNavigator.goToPlace(overallLeaderboardNavigation);
         }
     }
     
