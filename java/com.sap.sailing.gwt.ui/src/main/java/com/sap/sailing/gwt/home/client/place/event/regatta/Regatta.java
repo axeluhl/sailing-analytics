@@ -19,9 +19,9 @@ import com.google.gwt.user.client.ui.Image;
 import com.google.gwt.user.client.ui.Widget;
 import com.sap.sailing.gwt.common.client.BoatClassImageResolver;
 import com.sap.sailing.gwt.common.client.BoatClassImageResources;
+import com.sap.sailing.gwt.home.client.app.HomePlacesNavigator;
 import com.sap.sailing.gwt.home.client.app.PlaceNavigation;
-import com.sap.sailing.gwt.home.client.app.PlaceNavigator;
-import com.sap.sailing.gwt.home.client.place.event.EventPageNavigator;
+import com.sap.sailing.gwt.home.client.place.event.EventPlaceNavigator;
 import com.sap.sailing.gwt.home.client.place.leaderboard.LeaderboardPlace;
 import com.sap.sailing.gwt.home.client.shared.LongNamesUtil;
 import com.sap.sailing.gwt.ui.shared.EventDTO;
@@ -39,8 +39,7 @@ public class Regatta extends Composite {
 
     private final EventDTO event;
     private final Timer timerForClientServerOffset;
-    private final EventPageNavigator pageNavigator;
-    private final PlaceNavigator placeNavigator;
+    private final EventPlaceNavigator pageNavigator;
     private StrippedLeaderboardDTO leaderboard;
     private RaceGroupDTO raceGroup;
     private final List<RegattaPhase> phasesElements;
@@ -76,8 +75,9 @@ public class Regatta extends Composite {
     @UiField Image boatClassImage;
 
     private PlaceNavigation<LeaderboardPlace> leaderboardNavigation;
+    private final HomePlacesNavigator placeNavigator;
     
-    public Regatta(EventDTO event, Timer timerForClientServerOffset, boolean isSingleView, PlaceNavigator placeNavigator, EventPageNavigator pageNavigator) {
+    public Regatta(EventDTO event, Timer timerForClientServerOffset, boolean isSingleView, HomePlacesNavigator placeNavigator, EventPlaceNavigator pageNavigator) {
         this.event = event;
         this.timerForClientServerOffset = timerForClientServerOffset;
         this.isSingleView = isSingleView;

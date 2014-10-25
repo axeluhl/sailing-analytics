@@ -17,8 +17,8 @@ import com.google.gwt.user.client.ui.Widget;
 import com.sap.sailing.domain.common.LeaderboardNameConstants;
 import com.sap.sailing.domain.common.RegattaAndRaceIdentifier;
 import com.sap.sailing.domain.common.dto.RaceDTO;
+import com.sap.sailing.gwt.home.client.app.HomePlacesNavigator;
 import com.sap.sailing.gwt.home.client.place.event.EventPlace.NavigationTabs;
-import com.sap.sailing.gwt.home.client.app.PlaceNavigator;
 import com.sap.sailing.gwt.home.client.place.event.header.EventHeader;
 import com.sap.sailing.gwt.home.client.place.event.media.EventMedia;
 import com.sap.sailing.gwt.home.client.place.event.overview.EventOverview;
@@ -37,7 +37,7 @@ import com.sap.sailing.gwt.ui.shared.StrippedLeaderboardDTO;
 import com.sap.sse.common.Util.Triple;
 import com.sap.sse.gwt.client.player.Timer;
 
-public class TabletAndDesktopEventView extends Composite implements EventView, EventPageNavigator {
+public class TabletAndDesktopEventView extends Composite implements EventView, EventPlaceNavigator {
     private static EventViewUiBinder uiBinder = GWT.create(EventViewUiBinder.class);
 
     interface EventViewUiBinder extends UiBinder<Widget, TabletAndDesktopEventView> {
@@ -56,7 +56,7 @@ public class TabletAndDesktopEventView extends Composite implements EventView, E
     private final EventDTO event;
     
     public TabletAndDesktopEventView(SailingServiceAsync sailingService, EventDTO event, List<RaceGroupDTO> raceGroups, String leaderboardName,   
-            Timer timerForClientServerOffset, PlaceNavigator navigator) {
+            Timer timerForClientServerOffset, HomePlacesNavigator navigator) {
         this.event = event;
         Map<String, Triple<RaceGroupDTO, StrippedLeaderboardDTO, LeaderboardGroupDTO>> regattaStructure = getRegattaStructure(event, raceGroups);
 

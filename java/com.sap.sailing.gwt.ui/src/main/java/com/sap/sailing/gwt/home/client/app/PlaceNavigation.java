@@ -49,7 +49,7 @@ public class PlaceNavigation<T extends Place> {
     }
     
     private boolean isLocationOnDefaultSapSailingServer(String urlToCheck) {
-        return urlToCheck.contains(PlaceNavigatorImpl.DEFAULT_SAPSAILING_SERVER);
+        return urlToCheck.contains(HomePlacesNavigator.DEFAULT_SAPSAILING_SERVER);
     }
 
     private boolean isLocationOnLocalhost(String urlToCheck) {

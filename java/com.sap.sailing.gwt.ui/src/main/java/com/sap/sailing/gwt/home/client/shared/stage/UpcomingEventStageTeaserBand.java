@@ -2,7 +2,7 @@ package com.sap.sailing.gwt.home.client.shared.stage;
 
 import com.google.gwt.event.dom.client.ClickEvent;
 import com.sap.sailing.gwt.common.client.i18n.TextMessages;
-import com.sap.sailing.gwt.home.client.app.PlaceNavigator;
+import com.sap.sailing.gwt.home.client.app.HomePlacesNavigator;
 import com.sap.sailing.gwt.home.client.shared.EventDatesFormatterUtil;
 import com.sap.sailing.gwt.ui.shared.EventBaseDTO;
 
@@ -13,7 +13,7 @@ import com.sap.sailing.gwt.ui.shared.EventBaseDTO;
  */
 public class UpcomingEventStageTeaserBand extends StageTeaserBand {
 
-    public UpcomingEventStageTeaserBand(EventBaseDTO event, PlaceNavigator placeNavigator) {
+    public UpcomingEventStageTeaserBand(EventBaseDTO event, HomePlacesNavigator placeNavigator) {
         super(event, placeNavigator);
  
         bandTitle.setInnerText(event.getName());

@@ -9,8 +9,8 @@ import com.google.gwt.uibinder.client.UiHandler;
 import com.google.gwt.user.client.ui.Anchor;
 import com.google.gwt.user.client.ui.Composite;
 import com.google.gwt.user.client.ui.Widget;
+import com.sap.sailing.gwt.home.client.app.HomePlacesNavigator;
 import com.sap.sailing.gwt.home.client.app.PlaceNavigation;
-import com.sap.sailing.gwt.home.client.app.PlaceNavigator;
 import com.sap.sailing.gwt.home.client.place.event.EventPlace;
 import com.sap.sailing.gwt.home.client.shared.EventDatesFormatterUtil;
 import com.sap.sailing.gwt.ui.shared.EventBaseDTO;
@@ -23,7 +23,7 @@ public class UpcomingEvent extends Composite {
     @UiField SpanElement eventStartDate;
     @UiField Anchor eventOverviewLink;
 
-    private final PlaceNavigator navigator;
+    private final HomePlacesNavigator navigator;
     private final PlaceNavigation<EventPlace> eventNavigation; 
 
     interface UpcomingEventUiBinder extends UiBinder<Widget, UpcomingEvent> {
@@ -31,7 +31,7 @@ public class UpcomingEvent extends Composite {
     
     private static UpcomingEventUiBinder uiBinder = GWT.create(UpcomingEventUiBinder.class);
 
-    public UpcomingEvent(final EventBaseDTO event, final PlaceNavigator navigator) {
+    public UpcomingEvent(final EventBaseDTO event, final HomePlacesNavigator navigator) {
         this.navigator = navigator;
 
         EventsOverviewUpcomingResources.INSTANCE.css().ensureInjected();

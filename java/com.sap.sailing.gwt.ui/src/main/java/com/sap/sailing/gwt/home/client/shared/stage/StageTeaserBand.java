@@ -11,6 +11,7 @@ import com.google.gwt.uibinder.client.UiHandler;
 import com.google.gwt.user.client.ui.Anchor;
 import com.google.gwt.user.client.ui.Composite;
 import com.google.gwt.user.client.ui.Widget;
+import com.sap.sailing.gwt.home.client.app.HomePlacesNavigator;
 import com.sap.sailing.gwt.home.client.app.PlaceNavigation;
 import com.sap.sailing.gwt.home.client.app.PlaceNavigator;
 import com.sap.sailing.gwt.home.client.place.event.EventPlace;
@@ -28,11 +29,11 @@ public abstract class StageTeaserBand extends Composite {
     @UiField Anchor actionLink;
     @UiField DivElement isLiveDiv;
 
-    private final PlaceNavigator placeNavigator;
+    private final HomePlacesNavigator placeNavigator;
     private final EventBaseDTO event;
     private final PlaceNavigation<EventPlace> eventNavigation;
     
-    public StageTeaserBand(EventBaseDTO event, PlaceNavigator placeNavigator) {
+    public StageTeaserBand(EventBaseDTO event, HomePlacesNavigator placeNavigator) {
         this.event = event;
         this.placeNavigator = placeNavigator;
         

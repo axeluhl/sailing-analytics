@@ -15,11 +15,11 @@ import com.sap.sse.gwt.client.mvp.ClientFactoryImpl;
 public abstract class AbstractApplicationClientFactory extends ClientFactoryImpl implements ApplicationClientFactory {
     private final SailingServiceAsync sailingService;
     private final MediaServiceAsync mediaService;
-    private final PlaceNavigator navigator;
+    private final HomePlacesNavigator navigator;
 
     public AbstractApplicationClientFactory(ApplicationTopLevelView root, EventBus eventBus, PlaceController placeController) {
         super(root, eventBus, placeController);
-        navigator = new PlaceNavigatorImpl(placeController);
+        navigator = new HomePlacesNavigator(placeController);
         sailingService = GWT.create(SailingService.class);
         mediaService = GWT.create(MediaService.class);
     }
@@ -40,7 +40,7 @@ public abstract class AbstractApplicationClientFactory extends ClientFactoryImpl
     }
 
     @Override
-    public PlaceNavigator getPlaceNavigator() {
+    public HomePlacesNavigator getHomePlacesNavigator() {
         return navigator;
     }
 }

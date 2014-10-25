@@ -15,8 +15,8 @@ import com.google.gwt.uibinder.client.UiHandler;
 import com.google.gwt.user.client.ui.Anchor;
 import com.google.gwt.user.client.ui.Composite;
 import com.google.gwt.user.client.ui.Widget;
+import com.sap.sailing.gwt.home.client.app.HomePlacesNavigator;
 import com.sap.sailing.gwt.home.client.app.PlaceNavigation;
-import com.sap.sailing.gwt.home.client.app.PlaceNavigator;
 import com.sap.sailing.gwt.home.client.place.event.EventPlace;
 import com.sap.sailing.gwt.home.client.shared.EventDatesFormatterUtil;
 import com.sap.sailing.gwt.home.client.shared.LongNamesUtil;
@@ -33,7 +33,7 @@ public class RecentEvent extends Composite {
     
     private final EventBaseDTO event;
 
-    private final PlaceNavigator navigator;
+    private final HomePlacesNavigator navigator;
     private final PlaceNavigation<EventPlace> eventNavigation; 
 
     interface RecentEventUiBinder extends UiBinder<Widget, RecentEvent> {
@@ -41,7 +41,7 @@ public class RecentEvent extends Composite {
     
     private static RecentEventUiBinder uiBinder = GWT.create(RecentEventUiBinder.class);
 
-    public RecentEvent(final PlaceNavigator navigator, final EventBaseDTO event) {
+    public RecentEvent(final HomePlacesNavigator navigator, final EventBaseDTO event) {
         this.navigator = navigator;
         this.event = event;
         

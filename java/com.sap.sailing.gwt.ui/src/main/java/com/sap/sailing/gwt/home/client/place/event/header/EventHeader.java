@@ -4,8 +4,8 @@ import com.google.gwt.core.client.GWT;
 import com.google.gwt.dom.client.DivElement;
 import com.google.gwt.dom.client.ImageElement;
 import com.google.gwt.dom.client.SpanElement;
-import com.google.gwt.dom.client.Style.Display;
 import com.google.gwt.dom.client.StyleInjector;
+import com.google.gwt.dom.client.Style.Display;
 import com.google.gwt.event.dom.client.ClickEvent;
 import com.google.gwt.uibinder.client.UiBinder;
 import com.google.gwt.uibinder.client.UiField;
@@ -14,10 +14,10 @@ import com.google.gwt.user.client.ui.Anchor;
 import com.google.gwt.user.client.ui.Widget;
 import com.sap.sailing.domain.common.LeaderboardNameConstants;
 import com.sap.sailing.gwt.common.client.i18n.TextMessages;
+import com.sap.sailing.gwt.home.client.app.HomePlacesNavigator;
 import com.sap.sailing.gwt.home.client.app.PlaceNavigation;
-import com.sap.sailing.gwt.home.client.app.PlaceNavigator;
 import com.sap.sailing.gwt.home.client.place.event.AbstractEventComposite;
-import com.sap.sailing.gwt.home.client.place.event.EventPageNavigator;
+import com.sap.sailing.gwt.home.client.place.event.EventPlaceNavigator;
 import com.sap.sailing.gwt.home.client.place.leaderboard.LeaderboardPlace;
 import com.sap.sailing.gwt.home.client.shared.EventDatesFormatterUtil;
 import com.sap.sailing.gwt.ui.shared.CourseAreaDTO;
@@ -70,10 +70,10 @@ public class EventHeader extends AbstractEventComposite {
 //  private final List<Anchor> links2;
 //  private final List<Anchor> links3;
     
-    private final PlaceNavigator placeNavigator;
+    private final HomePlacesNavigator placeNavigator;
     private PlaceNavigation<LeaderboardPlace> overallLeaderboardNavigation = null; 
             
-    public EventHeader(EventDTO event, PlaceNavigator placeNavigator, EventPageNavigator pageNavigator) {
+    public EventHeader(EventDTO event, HomePlacesNavigator placeNavigator, EventPlaceNavigator pageNavigator) {
         super(event, pageNavigator);
         
         this.placeNavigator = placeNavigator;

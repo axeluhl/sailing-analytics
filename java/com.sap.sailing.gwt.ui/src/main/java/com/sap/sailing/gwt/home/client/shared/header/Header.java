@@ -20,8 +20,8 @@ import com.google.gwt.user.client.ui.Composite;
 import com.google.gwt.user.client.ui.TextBox;
 import com.google.gwt.user.client.ui.Widget;
 import com.sap.sailing.gwt.common.client.i18n.TextMessages;
+import com.sap.sailing.gwt.home.client.app.HomePlacesNavigator;
 import com.sap.sailing.gwt.home.client.app.PlaceNavigation;
-import com.sap.sailing.gwt.home.client.app.PlaceNavigator;
 import com.sap.sailing.gwt.home.client.place.events.EventsPlace;
 import com.sap.sailing.gwt.home.client.place.searchresult.SearchResultPlace;
 import com.sap.sailing.gwt.home.client.place.solutions.SolutionsPlace;
@@ -38,7 +38,7 @@ public class Header extends Composite {
     @UiField Button searchButton;
 
     private final List<Anchor> links;
-    private final PlaceNavigator navigator;
+    private final HomePlacesNavigator navigator;
 
     private final PlaceNavigation<StartPlace> homeNavigation;
     private final PlaceNavigation<EventsPlace> eventsNavigation;
@@ -49,7 +49,7 @@ public class Header extends Composite {
     
     private static HeaderUiBinder uiBinder = GWT.create(HeaderUiBinder.class);
 
-    public Header(final PlaceNavigator navigator) {
+    public Header(final HomePlacesNavigator navigator) {
         this.navigator = navigator;
 
         HeaderResources.INSTANCE.css().ensureInjected();

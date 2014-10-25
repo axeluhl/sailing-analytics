@@ -11,8 +11,8 @@ import com.google.gwt.uibinder.client.UiHandler;
 import com.google.gwt.user.client.ui.Anchor;
 import com.google.gwt.user.client.ui.Composite;
 import com.google.gwt.user.client.ui.Widget;
+import com.sap.sailing.gwt.home.client.app.HomePlacesNavigator;
 import com.sap.sailing.gwt.home.client.app.PlaceNavigation;
-import com.sap.sailing.gwt.home.client.app.PlaceNavigator;
 import com.sap.sailing.gwt.home.client.place.event.EventPlace;
 import com.sap.sailing.gwt.ui.shared.CourseAreaDTO;
 import com.sap.sailing.gwt.ui.shared.EventDTO;
@@ -31,10 +31,10 @@ public class CompactEventHeader extends Composite {
     @UiField SpanElement eventNameSpan;
     
     private final EventDTO event;
-    private final PlaceNavigator placeNavigator;
+    private final HomePlacesNavigator placeNavigator;
     private final PlaceNavigation<EventPlace> regattaNavigation;
 
-    public CompactEventHeader(EventDTO event, String leaderboardName, PlaceNavigator placeNavigator) {
+    public CompactEventHeader(EventDTO event, String leaderboardName, HomePlacesNavigator placeNavigator) {
         this.event = event;
         this.placeNavigator = placeNavigator;
         

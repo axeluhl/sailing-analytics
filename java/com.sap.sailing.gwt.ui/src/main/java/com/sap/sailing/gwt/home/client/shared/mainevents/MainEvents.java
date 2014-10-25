@@ -12,8 +12,8 @@ import com.google.gwt.uibinder.client.UiHandler;
 import com.google.gwt.user.client.ui.Anchor;
 import com.google.gwt.user.client.ui.Composite;
 import com.google.gwt.user.client.ui.Widget;
+import com.sap.sailing.gwt.home.client.app.HomePlacesNavigator;
 import com.sap.sailing.gwt.home.client.app.PlaceNavigation;
-import com.sap.sailing.gwt.home.client.app.PlaceNavigator;
 import com.sap.sailing.gwt.home.client.place.events.EventsPlace;
 import com.sap.sailing.gwt.home.client.shared.recentevent.RecentEvent;
 import com.sap.sailing.gwt.ui.shared.EventBaseDTO;
@@ -29,10 +29,10 @@ public class MainEvents extends Composite {
     @UiField DivElement recentEventsDiv;
     @UiField Anchor showAllEventsAnchor;
     
-    private final PlaceNavigator navigator;
+    private final HomePlacesNavigator navigator;
     private final PlaceNavigation<EventsPlace> eventsNavigation;
     
-    public MainEvents(PlaceNavigator navigator) {
+    public MainEvents(HomePlacesNavigator navigator) {
         this.navigator = navigator;
         
         MainEventsResources.INSTANCE.css().ensureInjected();

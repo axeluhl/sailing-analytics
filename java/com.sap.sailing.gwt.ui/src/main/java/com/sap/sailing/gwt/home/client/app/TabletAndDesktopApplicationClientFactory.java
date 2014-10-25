@@ -40,12 +40,12 @@ public class TabletAndDesktopApplicationClientFactory extends AbstractApplicatio
     }
 
     private TabletAndDesktopApplicationClientFactory(EventBus eventBus, PlaceController placeController) {
-        super(new TabletAndDesktopApplicationView(new PlaceNavigatorImpl(placeController)), eventBus, placeController);
+        super(new TabletAndDesktopApplicationView(new HomePlacesNavigator(placeController)), eventBus, placeController);
     }
 
     @Override
     public EventView createEventView(EventDTO event, List<RaceGroupDTO> raceGroups, String leaderboardName, Timer timerForClientServerOffset) {
-        return new TabletAndDesktopEventView(getSailingService(), event, raceGroups, leaderboardName, timerForClientServerOffset, getPlaceNavigator());
+        return new TabletAndDesktopEventView(getSailingService(), event, raceGroups, leaderboardName, timerForClientServerOffset, getHomePlacesNavigator());
     }
 
     @Override
@@ -60,12 +60,12 @@ public class TabletAndDesktopApplicationClientFactory extends AbstractApplicatio
 
     @Override
     public EventsView createEventsView(EventsActivity activity) {
-        return new TabletAndDesktopEventsView(getPlaceNavigator());
+        return new TabletAndDesktopEventsView(getHomePlacesNavigator());
     }
 
     @Override
     public StartView createStartView() {
-        return new TabletAndDesktopStartView(getPlaceNavigator());
+        return new TabletAndDesktopStartView(getHomePlacesNavigator());
     }
 
     @Override
@@ -80,11 +80,11 @@ public class TabletAndDesktopApplicationClientFactory extends AbstractApplicatio
 
     @Override
     public AnalyticsView createLeaderboardView(EventDTO event, String leaderboardName, Timer timerForClientServerOffset) {
-        return new TabletAndDesktopLeaderboardView(event, leaderboardName, timerForClientServerOffset, getPlaceNavigator());
+        return new TabletAndDesktopLeaderboardView(event, leaderboardName, timerForClientServerOffset, getHomePlacesNavigator());
     }
 
     @Override
     public SearchResultView createSearchResultView() {
-        return new TabletAndDesktopSearchResultView(getPlaceNavigator());
+        return new TabletAndDesktopSearchResultView(getHomePlacesNavigator());
     }
 }

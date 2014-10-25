@@ -8,8 +8,8 @@ import com.google.gwt.uibinder.client.UiHandler;
 import com.google.gwt.user.client.ui.Anchor;
 import com.google.gwt.user.client.ui.Composite;
 import com.google.gwt.user.client.ui.Widget;
+import com.sap.sailing.gwt.home.client.app.HomePlacesNavigator;
 import com.sap.sailing.gwt.home.client.app.PlaceNavigation;
-import com.sap.sailing.gwt.home.client.app.PlaceNavigator;
 import com.sap.sailing.gwt.home.client.place.solutions.SolutionsPlace;
 import com.sap.sailing.gwt.home.client.place.sponsoring.SponsoringPlace;
 
@@ -23,12 +23,12 @@ public class MainSponsors extends Composite {
     @UiField Anchor solutionsPageLink;
     @UiField Anchor sponsoringPageLink;
     
-    private final PlaceNavigator navigator;
+    private final HomePlacesNavigator navigator;
     
     private final PlaceNavigation<SolutionsPlace> solutionsNavigation;
     private final PlaceNavigation<SponsoringPlace> sponsoringNavigation;
 
-    public MainSponsors(PlaceNavigator navigator) {
+    public MainSponsors(HomePlacesNavigator navigator) {
         this.navigator = navigator;
         
         MainSponsorsResources.INSTANCE.css().ensureInjected();

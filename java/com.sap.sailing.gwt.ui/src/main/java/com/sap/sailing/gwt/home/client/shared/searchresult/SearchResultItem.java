@@ -9,8 +9,8 @@ import com.google.gwt.uibinder.client.UiHandler;
 import com.google.gwt.user.client.ui.Anchor;
 import com.google.gwt.user.client.ui.Composite;
 import com.google.gwt.user.client.ui.Widget;
+import com.sap.sailing.gwt.home.client.app.HomePlacesNavigator;
 import com.sap.sailing.gwt.home.client.app.PlaceNavigation;
-import com.sap.sailing.gwt.home.client.app.PlaceNavigator;
 import com.sap.sailing.gwt.home.client.place.event.EventPlace;
 import com.sap.sailing.gwt.home.client.shared.EventDatesFormatterUtil;
 import com.sap.sailing.gwt.ui.shared.EventBaseDTO;
@@ -28,11 +28,11 @@ public class SearchResultItem extends Composite {
     @UiField SpanElement resultEventVenue;
     @UiField Anchor eventOverviewLink;
     
-    private final PlaceNavigator placeNavigator;
+    private final HomePlacesNavigator placeNavigator;
     private final PlaceNavigation<EventPlace> regattaNavigation;
     private final PlaceNavigation<EventPlace> eventNavigation;
 
-    public SearchResultItem(PlaceNavigator navigator, LeaderboardSearchResultDTO searchResult) {
+    public SearchResultItem(HomePlacesNavigator navigator, LeaderboardSearchResultDTO searchResult) {
         this.placeNavigator = navigator;
         
         SearchResultResources.INSTANCE.css().ensureInjected();

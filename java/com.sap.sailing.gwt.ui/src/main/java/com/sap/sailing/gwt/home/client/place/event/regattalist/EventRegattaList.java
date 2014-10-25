@@ -18,9 +18,9 @@ import com.google.gwt.user.client.Event;
 import com.google.gwt.user.client.EventListener;
 import com.google.gwt.user.client.ui.Widget;
 import com.sap.sailing.gwt.common.client.SharedResources;
-import com.sap.sailing.gwt.home.client.app.PlaceNavigator;
+import com.sap.sailing.gwt.home.client.app.HomePlacesNavigator;
 import com.sap.sailing.gwt.home.client.place.event.AbstractEventComposite;
-import com.sap.sailing.gwt.home.client.place.event.EventPageNavigator;
+import com.sap.sailing.gwt.home.client.place.event.EventPlaceNavigator;
 import com.sap.sailing.gwt.home.client.place.event.regatta.Regatta;
 import com.sap.sailing.gwt.home.client.shared.LongNamesUtil;
 import com.sap.sailing.gwt.ui.shared.EventDTO;
@@ -49,7 +49,7 @@ public class EventRegattaList extends AbstractEventComposite {
     private final List<AnchorElement> leaderboardGroupFilterAnchors;
     
     public EventRegattaList(EventDTO event, Map<String, Triple<RaceGroupDTO, StrippedLeaderboardDTO, LeaderboardGroupDTO>> regattaStructure, 
-            Timer timerForClientServerOffset,  PlaceNavigator placeNavigator, EventPageNavigator pageNavigator) {
+            Timer timerForClientServerOffset, HomePlacesNavigator placeNavigator, EventPlaceNavigator pageNavigator) {
         super(event, pageNavigator);
         
         EventRegattaListResources.INSTANCE.css().ensureInjected();
