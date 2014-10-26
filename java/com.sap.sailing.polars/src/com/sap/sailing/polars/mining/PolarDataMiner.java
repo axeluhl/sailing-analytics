@@ -29,6 +29,7 @@ import com.sap.sailing.domain.common.impl.WindSteppingWithMaxDistance;
 import com.sap.sailing.domain.tracking.GPSFixMoving;
 import com.sap.sailing.domain.tracking.TrackedRace;
 import com.sap.sailing.polars.regression.NotEnoughDataHasBeenAddedException;
+import com.sap.sse.common.Util.Pair;
 import com.sap.sse.common.Util.Triple;
 import com.sap.sse.datamining.components.Processor;
 import com.sap.sse.datamining.data.ClusterGroup;
@@ -111,7 +112,7 @@ public class PolarDataMiner {
 
     public SpeedWithConfidence<Integer> estimateBoatSpeed(BoatClass boatClass, Speed windSpeed, Bearing angleToTheWind)
             throws NotEnoughDataHasBeenAddedException {
-        return incrementalRegressionProcessor.estimateBoatSpeed(boatClass, windSpeed, angleToTheWind);
+        return incrementalRegressionProcessor.estimateBoatSpeed(boatClass, windSpeed, angleToTheWind).getA();
     }
 
 
@@ -119,41 +120,39 @@ public class PolarDataMiner {
     public PolarSheetsData createFullSheetForBoatClass(BoatClass boatClass) {
         Integer[] defaultWindSpeeds = defaultPolarSheetGenerationSettings.getWindStepping().getRawStepping();
         Number[][] averagedPolarDataByWindSpeed = new Number[defaultWindSpeeds.length][360];
+        
+        Map<Integer, Integer[]> dataCountPerAngleForWindspeed = new HashMap<>();
+        Map<Integer, Map<Integer, PolarSheetsHistogramData>> histogramDataMap = new HashMap<>();
+        
+        int totalDataCount = 0;
+        
         for (int windIndex = 0; windIndex < defaultWindSpeeds.length; windIndex++) {
             Integer windSpeed = defaultWindSpeeds[windIndex];
+            
+            Integer[] perAngle = new Integer[360];
+            Map<Integer, PolarSheetsHistogramData> perWindSpeed = new HashMap<>();
             for (int angle = 0; angle < 360; angle++) {
-                SpeedWithConfidence<Integer> speedWithConfidence;
+                Pair<SpeedWithConfidence<Integer>, Integer> speedWithConfidenceAndDataCount;
                 try {
                     int convertedAngle = angle;
                     if (angle > 180) {
                         convertedAngle = angle - 360;
                     }
-                    speedWithConfidence = incrementalRegressionProcessor.estimateBoatSpeed(boatClass, new KnotSpeedImpl(windSpeed), new DegreeBearingImpl(convertedAngle));
+                    speedWithConfidenceAndDataCount = incrementalRegressionProcessor.estimateBoatSpeed(boatClass, new KnotSpeedImpl(windSpeed), new DegreeBearingImpl(convertedAngle));
                 } catch (NotEnoughDataHasBeenAddedException e) {
-                    speedWithConfidence = new SpeedWithConfidenceImpl<Integer>(new KnotSpeedImpl(0), 0, 0);
+                    speedWithConfidenceAndDataCount = new Pair<SpeedWithConfidence<Integer>, Integer>(new SpeedWithConfidenceImpl<Integer>(new KnotSpeedImpl(0), 0, 0), 0);
                 }
-                averagedPolarDataByWindSpeed[windIndex][angle] = speedWithConfidence.getObject().getKnots();
-            }
-        }
-        
-        // FIXME Remove hard coded size values
-        Map<Integer, Integer[]> dataCountPerAngleForWindspeed = new HashMap<>();
-        Map<Integer, Map<Integer, PolarSheetsHistogramData>> histogramDataMap = new HashMap<>();
-        for (int windIndex = 0; windIndex < defaultWindSpeeds.length; windIndex++) {
-            Integer[] perAngle = new Integer[360];
-            Map<Integer, PolarSheetsHistogramData> perWindSpeed = new HashMap<>();
-            for (int angle = 0; angle < 360; angle++) {
-                perAngle[angle] = /* FIXME */100;
-                Number[] xValues = {5};
-                Number[] yValues = {10};;
-                Map<String, Integer[]> yValuesByGaugeIds = new HashMap<>();
-                Map<String, Integer[]> yValuesByDay = new HashMap<>();
-                Map<String, Integer[]> yValuesByDayAndGaugeId = new HashMap<>();
-                int dataCount = 100;
+                            
+                averagedPolarDataByWindSpeed[windIndex][angle] = speedWithConfidenceAndDataCount.getA().getObject().getKnots();
+                int dataCount = speedWithConfidenceAndDataCount.getB();
+                
+                totalDataCount = totalDataCount + dataCount;
+                //FIXME hard coded
                 double coefficiantOfVariation = 0.8;
-                PolarSheetsHistogramDataImpl polarSheetsHistogramDataImpl = new PolarSheetsHistogramDataImpl(angle, xValues, yValues, yValuesByGaugeIds,
-                        yValuesByDay, yValuesByDayAndGaugeId, dataCount, coefficiantOfVariation);
-                polarSheetsHistogramDataImpl.setConfidenceMeasure(0.5);
+                double confidenceMeasure = 0.5;
+                
+                PolarSheetsHistogramDataImpl polarSheetsHistogramDataImpl = createEmptyHistogramData(perAngle, angle,
+                        dataCount, coefficiantOfVariation, confidenceMeasure);
                 perWindSpeed.put(angle, polarSheetsHistogramDataImpl);
             }
             histogramDataMap.put(windIndex, perWindSpeed);
@@ -161,9 +160,28 @@ public class PolarDataMiner {
         }
         
         
-        PolarSheetsData data = new PolarSheetsDataImpl(averagedPolarDataByWindSpeed, /* FIXME */100000,
+        PolarSheetsData data = new PolarSheetsDataImpl(averagedPolarDataByWindSpeed, totalDataCount,
                 dataCountPerAngleForWindspeed, defaultPolarSheetGenerationSettings.getWindStepping(), histogramDataMap);
         return data;
+    }
+
+
+
+    private PolarSheetsHistogramDataImpl createEmptyHistogramData(Integer[] perAngle, int angle, int dataCount,
+            double coefficiantOfVariation, double confidenceMeasure) {
+        perAngle[angle] = dataCount;
+        Number[] xValues = {};
+        Number[] yValues = {};;
+        Map<String, Integer[]> yValuesByGaugeIds = new HashMap<>();
+        Map<String, Integer[]> yValuesByDay = new HashMap<>();
+        Map<String, Integer[]> yValuesByDayAndGaugeId = new HashMap<>();
+        
+        
+        PolarSheetsHistogramDataImpl polarSheetsHistogramDataImpl = new PolarSheetsHistogramDataImpl(angle, xValues, yValues, yValuesByGaugeIds,
+                yValuesByDay, yValuesByDayAndGaugeId, dataCount, coefficiantOfVariation);
+        
+        polarSheetsHistogramDataImpl.setConfidenceMeasure(confidenceMeasure);
+        return polarSheetsHistogramDataImpl;
     }
 
 

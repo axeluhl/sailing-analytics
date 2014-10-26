@@ -5,9 +5,9 @@ import com.sap.sailing.domain.common.PolarSheetGenerationSettings;
 public class PolarSheetGenerationSettingsImpl implements PolarSheetGenerationSettings {
     
     public static PolarSheetGenerationSettings createStandardPolarSettings() {
-        Integer[] levels = { 2, 4, 6, 8, 10, 12, 14, 16, 18, 20, 22, 24, 26, 28, 30, 32, 34 };
+        Integer[] levels = { 4, 6, 8, 10, 12, 14, 16, 20, 25, 30 };
         WindSteppingWithMaxDistance windStepping = new WindSteppingWithMaxDistance(levels, 2.5);
-        return new PolarSheetGenerationSettingsImpl(200, 0.1, 10, 20, 0.1, true, true, 2, 0.05, true, windStepping,
+        return new PolarSheetGenerationSettingsImpl(50, 0.1, 20, 20, 0.1, true, true, 2, 0.05, true, windStepping,
                 false);
     }
 

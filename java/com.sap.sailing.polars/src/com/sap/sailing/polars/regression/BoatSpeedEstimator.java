@@ -47,4 +47,8 @@ public class BoatSpeedEstimator {
         }
     }
 
+    public int getDataCount() {
+        return windSpeedRegression.getDataCount();
+    }
+
 }

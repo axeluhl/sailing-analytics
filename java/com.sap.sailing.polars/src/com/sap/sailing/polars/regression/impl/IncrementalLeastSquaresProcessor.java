@@ -114,4 +114,9 @@ public class IncrementalLeastSquaresProcessor implements IncrementalLinearRegres
         return alpha0;
     }
 
+    @Override
+    public int getDataCount() {
+        return numberOfPointsAdded;
+    }
+
 }

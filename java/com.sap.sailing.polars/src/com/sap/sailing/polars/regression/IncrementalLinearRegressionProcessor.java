@@ -10,4 +10,6 @@ public interface IncrementalLinearRegressionProcessor {
 
     double getIntercept();
 
+    int getDataCount();
+
 }

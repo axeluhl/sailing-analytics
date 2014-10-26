@@ -13,6 +13,7 @@ import com.sap.sailing.domain.common.Speed;
 import com.sap.sailing.domain.common.impl.KnotSpeedImpl;
 import com.sap.sailing.polars.regression.BoatSpeedEstimator;
 import com.sap.sailing.polars.regression.NotEnoughDataHasBeenAddedException;
+import com.sap.sse.common.Util.Pair;
 import com.sap.sse.datamining.AdditionalResultDataBuilder;
 import com.sap.sse.datamining.components.Processor;
 import com.sap.sse.datamining.data.Cluster;
@@ -67,9 +68,10 @@ public class IncrementalRegressionProcessor implements Processor<GroupedDataEntr
         return null;
     }
 
-    public SpeedWithConfidence<Integer> estimateBoatSpeed(final BoatClass boatClass, final Speed windSpeed,
+    public Pair<SpeedWithConfidence<Integer>, Integer> estimateBoatSpeed(final BoatClass boatClass, final Speed windSpeed,
             final Bearing angleToTheWind)
             throws NotEnoughDataHasBeenAddedException {
+        int dataCount = 0;
         PolarClusterKey key = new PolarClusterKey() {
             @Override
             public RoundedAngleToTheWind getRoundedAngleToTheWind() {
@@ -100,7 +102,9 @@ public class IncrementalRegressionProcessor implements Processor<GroupedDataEntr
         }
         KnotSpeedImpl speedWithoutConfidence = new KnotSpeedImpl(boatSpeedEstimator.estimateSpeed(windSpeed.getKnots(),
                 angleToTheWind.getDegrees()));
-        return new SpeedWithConfidenceImpl<Integer>(speedWithoutConfidence, /* FIXME */1.0, /* FIXME */0);
+        dataCount = boatSpeedEstimator.getDataCount();
+        return new Pair<SpeedWithConfidence<Integer>, Integer>(new SpeedWithConfidenceImpl<Integer>(
+                speedWithoutConfidence, /* FIXME */1.0, /* FIXME */0), dataCount);
     }
 
     @Override
