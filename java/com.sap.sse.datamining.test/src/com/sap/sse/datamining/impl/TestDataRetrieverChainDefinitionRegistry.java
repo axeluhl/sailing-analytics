@@ -34,7 +34,7 @@ public class TestDataRetrieverChainDefinitionRegistry {
         
         Class<Processor<Test_Regatta, Test_HasRaceContext>> raceRetrieverClass = 
                 (Class<Processor<Test_Regatta, Test_HasRaceContext>>)(Class<?>) TestRaceWithContextRetrievalProcessor.class;
-        raceRetrieverChainDefinition.addAsLast(regattaRetrieverClass,
+        raceRetrieverChainDefinition.addAfter(regattaRetrieverClass,
                                                raceRetrieverClass,
                                                Test_HasRaceContext.class);
 
@@ -42,7 +42,7 @@ public class TestDataRetrieverChainDefinitionRegistry {
         
         Class<Processor<Test_HasRaceContext, Test_HasLegOfCompetitorContext>> legRetrieverClass = 
                 (Class<Processor<Test_HasRaceContext, Test_HasLegOfCompetitorContext>>)(Class<?>) TestLegOfCompetitorWithContextRetrievalProcessor.class;
-        legRetrieverChainDefinition.addAsLast(raceRetrieverClass,
+        legRetrieverChainDefinition.addAfter(raceRetrieverClass,
                                                legRetrieverClass,
                                                Test_HasLegOfCompetitorContext.class);
         

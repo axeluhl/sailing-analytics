@@ -1,5 +1,6 @@
 package com.sap.sailing.datamining;
 
+import java.util.Collections;
 import java.util.HashSet;
 import java.util.Set;
 import java.util.logging.Level;
@@ -19,31 +20,32 @@ import com.sap.sse.datamining.DataRetrieverChainDefinitionRegistrationService;
 
 public class Activator implements BundleActivator {
     
-    public static final String dataRetrieverGroupName = "Sailing";
     private static final Logger LOGGER = Logger.getLogger(Activator.class.getSimpleName());
 
-    private static BundleContext context;
-    private static ServiceReference<ClassesWithFunctionsRegistrationService> classesWithFunctionsRegistrationServiceReference;
-    private static ServiceReference<DataRetrieverChainDefinitionRegistrationService> dataRetrieverChainDefinitionRegistrationServiceServiceReference;
+    private SailingDataRetrieverChainDefinitions dataRetrieverChainDefinitions;
+    
+    private ServiceReference<ClassesWithFunctionsRegistrationService> classesWithFunctionsRegistrationServiceReference;
+    private ServiceReference<DataRetrieverChainDefinitionRegistrationService> dataRetrieverChainDefinitionRegistrationServiceServiceReference;
 
     @Override
     public void start(BundleContext context) throws Exception {
-        Activator.context = context;
+        dataRetrieverChainDefinitions = new SailingDataRetrieverChainDefinitions();
         
-        classesWithFunctionsRegistrationServiceReference = Activator.context.getServiceReference(ClassesWithFunctionsRegistrationService.class);
+        classesWithFunctionsRegistrationServiceReference = context.getServiceReference(ClassesWithFunctionsRegistrationService.class);
         if (classesWithFunctionsRegistrationServiceReference != null) {
-            Activator.context.getService(classesWithFunctionsRegistrationServiceReference)
+            context.getService(classesWithFunctionsRegistrationServiceReference)
                     .registerInternalClassesWithMarkedMethods(getInternalClassesWithMarkedMethods());
-            Activator.context.getService(classesWithFunctionsRegistrationServiceReference)
+            context.getService(classesWithFunctionsRegistrationServiceReference)
                     .registerExternalLibraryClasses(getExternalLibraryClasses());
         } else {
             LOGGER.log(Level.WARNING, "Couldn't register the sailing classes with functions. No registration service was available.");
         }
         
-        dataRetrieverChainDefinitionRegistrationServiceServiceReference = Activator.context.getServiceReference(DataRetrieverChainDefinitionRegistrationService.class);
+        dataRetrieverChainDefinitionRegistrationServiceServiceReference = context.getServiceReference(DataRetrieverChainDefinitionRegistrationService.class);
         if (dataRetrieverChainDefinitionRegistrationServiceServiceReference != null) {
-            for (DataRetrieverChainDefinition<?> dataRetrieverChainDefinition : SailingDataRetrieverChainDefinitions.getDataRetrieverChainDefinitions()) {
-                Activator.context.getService(dataRetrieverChainDefinitionRegistrationServiceServiceReference).addDataRetrieverChainDefinition(dataRetrieverChainDefinition);
+            DataRetrieverChainDefinitionRegistrationService dataRetrieverChainDefinitionRegistrationService = context.getService(dataRetrieverChainDefinitionRegistrationServiceServiceReference);
+            for (DataRetrieverChainDefinition<?> dataRetrieverChainDefinition : dataRetrieverChainDefinitions.getDataRetrieverChainDefinitions()) {
+                dataRetrieverChainDefinitionRegistrationService.addDataRetrieverChainDefinition(dataRetrieverChainDefinition);
             }
         } else {
             LOGGER.log(Level.WARNING, "Couldn't register the sailing data retriever chain definitions. No registration service was available.");
@@ -53,15 +55,15 @@ public class Activator implements BundleActivator {
     @Override
     public void stop(BundleContext context) throws Exception {
         if (classesWithFunctionsRegistrationServiceReference != null) {
-            Activator.context.getService(classesWithFunctionsRegistrationServiceReference).unregisterAllFunctionsOf(
+            context.getService(classesWithFunctionsRegistrationServiceReference).unregisterAllFunctionsOf(
                     getInternalClassesWithMarkedMethods());
-            Activator.context.getService(classesWithFunctionsRegistrationServiceReference).unregisterAllFunctionsOf(
+            context.getService(classesWithFunctionsRegistrationServiceReference).unregisterAllFunctionsOf(
                     getExternalLibraryClasses());
         }
         
         if (dataRetrieverChainDefinitionRegistrationServiceServiceReference != null) {
-            for (DataRetrieverChainDefinition<?> dataRetrieverChainDefinition : SailingDataRetrieverChainDefinitions.getDataRetrieverChainDefinitions()) {
-                Activator.context.getService(dataRetrieverChainDefinitionRegistrationServiceServiceReference).removeDataRetrieverChainDefinition(dataRetrieverChainDefinition);
+            for (DataRetrieverChainDefinition<?> dataRetrieverChainDefinition : dataRetrieverChainDefinitions.getDataRetrieverChainDefinitions()) {
+                context.getService(dataRetrieverChainDefinitionRegistrationServiceServiceReference).removeDataRetrieverChainDefinition(dataRetrieverChainDefinition);
             }
         }
     }
@@ -76,7 +78,7 @@ public class Activator implements BundleActivator {
     }
 
     public static Set<Class<?>> getExternalLibraryClasses() {
-        return new HashSet<>();
+        return Collections.emptySet();
     }
 
 }

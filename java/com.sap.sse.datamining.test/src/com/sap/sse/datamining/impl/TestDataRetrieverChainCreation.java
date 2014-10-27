@@ -1,8 +1,6 @@
 package com.sap.sse.datamining.impl;
 
-import static org.hamcrest.Matchers.greaterThan;
 import static org.hamcrest.Matchers.is;
-import static org.hamcrest.Matchers.lessThanOrEqualTo;
 import static org.hamcrest.Matchers.not;
 import static org.junit.Assert.assertThat;
 
@@ -38,7 +36,9 @@ public class TestDataRetrieverChainCreation {
     private Processor<Test_HasLegOfCompetitorContext, Void> legReceiver = new NullProcessor<Test_HasLegOfCompetitorContext, Void>(Test_HasLegOfCompetitorContext.class, Void.class) {
         @Override
         public void processElement(Test_HasLegOfCompetitorContext element) {
-            receivedLegOfCompetitorAmount++;
+            synchronized (this) {
+                receivedLegOfCompetitorAmount++;
+            }
         }
     };
 
@@ -51,13 +51,13 @@ public class TestDataRetrieverChainCreation {
         
         Class<Processor<Test_Regatta, Test_HasRaceContext>> raceRetrieverClass = 
                 (Class<Processor<Test_Regatta, Test_HasRaceContext>>)(Class<?>) TestRaceWithContextRetrievalProcessor.class;
-        dataRetrieverChainDefinition.addAsLast(regattaRetrieverClass,
+        dataRetrieverChainDefinition.addAfter(regattaRetrieverClass,
                                                raceRetrieverClass,
                                                Test_HasRaceContext.class);
         
         Class<Processor<Test_HasRaceContext, Test_HasLegOfCompetitorContext>> legRetrieverClass = 
                 (Class<Processor<Test_HasRaceContext, Test_HasLegOfCompetitorContext>>)(Class<?>) TestLegOfCompetitorWithContextRetrievalProcessor.class;
-        dataRetrieverChainDefinition.addAsLast(raceRetrieverClass,
+        dataRetrieverChainDefinition.addAfter(raceRetrieverClass,
                                                legRetrieverClass,
                                                Test_HasLegOfCompetitorContext.class);
     }
@@ -104,14 +104,14 @@ public class TestDataRetrieverChainCreation {
         
         Class<Processor<Test_Regatta, Test_HasRaceContext>> raceRetrieverClass = 
                 (Class<Processor<Test_Regatta, Test_HasRaceContext>>)(Class<?>) TestRaceWithContextRetrievalProcessor.class;
-        dataRetrieverChainDefinition.addAsLast(regattaRetrieverClass,
+        dataRetrieverChainDefinition.addAfter(regattaRetrieverClass,
                                                raceRetrieverClass,
                                                Test_HasRaceContext.class);
         assertThat(dataRetrieverChainDefinition.getRetrievedDataType().equals(Test_HasRaceContext.class), is(true));
         
         Class<Processor<Test_HasRaceContext, Test_HasLegOfCompetitorContext>> legRetrieverClass = 
                 (Class<Processor<Test_HasRaceContext, Test_HasLegOfCompetitorContext>>)(Class<?>) TestLegOfCompetitorWithContextRetrievalProcessor.class;
-        dataRetrieverChainDefinition.addAsLast(raceRetrieverClass,
+        dataRetrieverChainDefinition.addAfter(raceRetrieverClass,
                                                legRetrieverClass,
                                                Test_HasLegOfCompetitorContext.class);
         assertThat(dataRetrieverChainDefinition.getRetrievedDataType().equals(Test_HasLegOfCompetitorContext.class), is(true));
@@ -135,8 +135,7 @@ public class TestDataRetrieverChainCreation {
         firstRetrieverInChain.processElement(ComponentTestsUtil.createExampleDataSource());
         firstRetrieverInChain.finish();
         ConcurrencyTestsUtil.sleepFor(100);
-        assertThat(receivedLegOfCompetitorAmount, is(greaterThan(0)));
-        assertThat(receivedLegOfCompetitorAmount, is(lessThanOrEqualTo(3 /*races*/ * 3 /*legs*/ * 4 /*competitors*/)));
+        assertThat(receivedLegOfCompetitorAmount, is(3 /*races*/ * 3 /*legs*/ * 4 /*competitors*/));
     }
     
     @SuppressWarnings("unchecked")
@@ -147,7 +146,7 @@ public class TestDataRetrieverChainCreation {
         Class<Processor<Collection<Test_Regatta>, Test_Regatta>> regattaRetrieverClass = (Class<Processor<Collection<Test_Regatta>, Test_Regatta>>)(Class<?>) TestRegattaRetrievalProcessor.class;
         Class<Processor<Test_Regatta, Test_HasRaceContext>> raceRetrieverClass = 
                 (Class<Processor<Test_Regatta, Test_HasRaceContext>>)(Class<?>) TestRaceWithContextRetrievalProcessor.class;
-        dataRetrieverChainDefinition.addAsLast(regattaRetrieverClass,
+        dataRetrieverChainDefinition.addAfter(regattaRetrieverClass,
                                                raceRetrieverClass,
                                                Test_HasRaceContext.class);
     }
@@ -175,7 +174,7 @@ public class TestDataRetrieverChainCreation {
         Class<Processor<Collection<Test_Regatta>, Test_Regatta>> regattaRetrieverClass = (Class<Processor<Collection<Test_Regatta>, Test_Regatta>>)(Class<?>) TestRegattaRetrievalProcessor.class;
         dataRetrieverChainDefinition.startWith(regattaRetrieverClass, Test_Regatta.class);
         
-        dataRetrieverChainDefinition.addAsLast(regattaRetrieverClass,
+        dataRetrieverChainDefinition.addAfter(regattaRetrieverClass,
                                                (Class<Processor<Test_Regatta, Test_HasRaceContext>>)(Class<?>) Processor.class,
                                                Test_HasRaceContext.class);
     }
@@ -191,7 +190,7 @@ public class TestDataRetrieverChainCreation {
                 (Class<Processor<Test_Regatta, Test_HasRaceContext>>)(Class<?>) TestRaceWithContextRetrievalProcessor.class;
         Class<Processor<Test_HasRaceContext, Test_HasLegOfCompetitorContext>> legRetrieverClass = 
                 (Class<Processor<Test_HasRaceContext, Test_HasLegOfCompetitorContext>>)(Class<?>) TestLegOfCompetitorWithContextRetrievalProcessor.class;
-        dataRetrieverChainDefinition.addAsLast(raceRetrieverClass,
+        dataRetrieverChainDefinition.addAfter(raceRetrieverClass,
                                                legRetrieverClass,
                                                Test_HasLegOfCompetitorContext.class);
     }

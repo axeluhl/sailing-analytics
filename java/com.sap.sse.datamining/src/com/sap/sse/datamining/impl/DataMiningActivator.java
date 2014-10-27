@@ -3,6 +3,7 @@ package com.sap.sse.datamining.impl;
 import java.util.Collection;
 import java.util.HashSet;
 import java.util.Set;
+import java.util.concurrent.ExecutorService;
 import java.util.concurrent.LinkedBlockingQueue;
 import java.util.concurrent.ThreadPoolExecutor;
 import java.util.concurrent.TimeUnit;
@@ -25,21 +26,19 @@ public class DataMiningActivator implements BundleActivator, ClassesWithFunction
 
     private static final int THREAD_POOL_SIZE = Math.max(Runtime.getRuntime().availableProcessors(), 3);
     private static final String STRING_MESSAGES_BASE_NAME = "stringmessages/StringMessages";
-
-    private static BundleContext context;
     
-    private static DataMiningServer dataMiningServer;
-    private static DataMiningStringMessages stringMessages;
-    private static ThreadPoolExecutor executor;
+    private static DataMiningActivator INSTANCE;
     
-    private static Collection<ServiceRegistration<?>> serviceRegistrations;
-
-    @Override
-    public void start(BundleContext context) throws Exception {
-        DataMiningActivator.context = context;
+    private final DataMiningServer dataMiningServer;
+    private final DataMiningStringMessages stringMessages;
+    private final ExecutorService executor;
+    
+    private Collection<ServiceRegistration<?>> serviceRegistrations;
+    
+    public DataMiningActivator() {
         stringMessages = DataMiningStringMessages.Util.getInstanceFor(STRING_MESSAGES_BASE_NAME);
         executor = new ThreadPoolExecutor(THREAD_POOL_SIZE, THREAD_POOL_SIZE, 60, TimeUnit.SECONDS,
-                                          new LinkedBlockingQueue<Runnable>());
+                new LinkedBlockingQueue<Runnable>());
 
         FunctionRegistry functionRegistry = new SimpleFunctionRegistry();
         FunctionProvider functionProvider = new RegistryFunctionProvider(functionRegistry);
@@ -47,17 +46,16 @@ public class DataMiningActivator implements BundleActivator, ClassesWithFunction
         dataMiningServer = new DataMiningServerImpl(stringMessages, functionRegistry, functionProvider, dataRetrieverChainDefinitionRegistry);
         
         serviceRegistrations = new HashSet<>();
-        registerDataMiningServer();
-        registerRegistrationServices();
     }
 
-    private void registerRegistrationServices() {
+    @Override
+    public void start(BundleContext context) throws Exception {
+        INSTANCE = this;
+        
+        serviceRegistrations.add(context.registerService(DataMiningServer.class, dataMiningServer, null));
+        
         serviceRegistrations.add(context.registerService(ClassesWithFunctionsRegistrationService.class, this, null));
         serviceRegistrations.add(context.registerService(DataRetrieverChainDefinitionRegistrationService.class, this, null));
-    }
-
-    private void registerDataMiningServer() {
-        serviceRegistrations.add(context.registerService(DataMiningServer.class, dataMiningServer, null));
     }
 
     @Override
@@ -93,16 +91,19 @@ public class DataMiningActivator implements BundleActivator, ClassesWithFunction
         }
     }
 
-    public static ThreadPoolExecutor getExecutor() {
+    public ExecutorService getExecutor() {
         return executor;
     }
     
-    public static DataMiningStringMessages getStringMessages() {
+    public DataMiningStringMessages getStringMessages() {
         return stringMessages;
     }
     
-    public static BundleContext getContext() {
-        return context;
+    public static DataMiningActivator getDefault() {
+        if (INSTANCE == null) {
+            INSTANCE = new DataMiningActivator(); // probably non-OSGi case, as in test execution
+        }
+        return INSTANCE;
     }
 
 }

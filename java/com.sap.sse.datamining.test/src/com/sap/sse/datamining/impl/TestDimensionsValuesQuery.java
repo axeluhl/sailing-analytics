@@ -149,13 +149,13 @@ public class TestDimensionsValuesQuery {
         
         Class<Processor<Test_Regatta, Test_HasRaceContext>> raceRetrieverClass = 
                 (Class<Processor<Test_Regatta, Test_HasRaceContext>>)(Class<?>) TestRaceWithContextRetrievalProcessor.class;
-        dataRetrieverChainDefinition.addAsLast(regattaRetrieverClass,
+        dataRetrieverChainDefinition.addAfter(regattaRetrieverClass,
                                                raceRetrieverClass,
                                                Test_HasRaceContext.class);
         
         Class<Processor<Test_HasRaceContext, Test_HasLegOfCompetitorContext>> legRetrieverClass = 
                 (Class<Processor<Test_HasRaceContext, Test_HasLegOfCompetitorContext>>)(Class<?>) TestLegOfCompetitorWithContextRetrievalProcessor.class;
-        dataRetrieverChainDefinition.addAsLast(raceRetrieverClass,
+        dataRetrieverChainDefinition.addAfter(raceRetrieverClass,
                                                legRetrieverClass,
                                                Test_HasLegOfCompetitorContext.class);
     }

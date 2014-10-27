@@ -10,6 +10,7 @@ import java.util.Locale;
 import java.util.Map;
 import java.util.Map.Entry;
 import java.util.Set;
+import java.util.concurrent.ExecutorService;
 
 import com.sap.sailing.server.RacingEventService;
 import com.sap.sse.datamining.DataRetrieverChainBuilder;
@@ -35,21 +36,29 @@ import com.sap.sse.datamining.shared.impl.dto.DataRetrieverChainDefinitionDTO;
 
 public class SailingDataMiningFactory {
 
+    private final ExecutorService executorService;
+    
+    private final DataMiningStringMessages stringMessages;
+    
     private final ProcessorFactory processorFactory;
     
     private final FunctionProvider functionProvider;
     private final DataRetrieverChainDefinitionRegistry dataRetrieverChainDefinitionRegistry;
 
     public SailingDataMiningFactory(FunctionProvider functionProvider, DataRetrieverChainDefinitionRegistry dataRetrieverChainDefinitionRegistry) {
-        processorFactory = new ProcessorFactory(DataMiningActivator.getExecutor());
+        DataMiningActivator dataMiningActivator = DataMiningActivator.getDefault();
+        executorService = dataMiningActivator.getExecutor();
+        stringMessages = dataMiningActivator.getStringMessages();
+        
+        processorFactory = new ProcessorFactory(executorService);
         
         this.functionProvider = functionProvider;
         this.dataRetrieverChainDefinitionRegistry = dataRetrieverChainDefinitionRegistry;
     }
 
     public <ElementType> Query<Double> createQuery(RacingEventService dataSource, final QueryDefinition queryDefinition) {
-        return new ProcessorQuery<Double, RacingEventService>(DataMiningActivator.getExecutor(), dataSource,
-                DataMiningActivator.getStringMessages(), DataMiningStringMessages.Util.getLocaleFor(queryDefinition.getLocaleInfoName())) {
+        return new ProcessorQuery<Double, RacingEventService>(executorService, dataSource,
+                stringMessages, DataMiningStringMessages.Util.getLocaleFor(queryDefinition.getLocaleInfoName())) {
             @Override
             protected Processor<RacingEventService, ?> createFirstProcessor() {
                 @SuppressWarnings("unchecked") // TODO Clean, after the deprecated components have been removed
@@ -64,7 +73,7 @@ public class SailingDataMiningFactory {
                 Processor<ElementType, GroupedDataEntry<ElementType>> groupingProcessor = processorFactory.createGroupingProcessor(dataTypeToRetrieve, extractionProcessor, dimensionsToGroupBy);
 
                 DataRetrieverChainDefinition<RacingEventService> dataRetrieverChainDefinition = dataRetrieverChainDefinitionRegistry.getDataRetrieverChainDefinition(RacingEventService.class, queryDefinition.getDataRetrieverChainDefinition().getId());
-                DataRetrieverChainBuilder<RacingEventService> chainBuilder = dataRetrieverChainDefinition.startBuilding(DataMiningActivator.getExecutor());
+                DataRetrieverChainBuilder<RacingEventService> chainBuilder = dataRetrieverChainDefinition.startBuilding(executorService);
                 Map<Class<?>, FilterCriterion<?>> criteriaMappedByDataType = createFilterCriteria(queryDefinition.getFilterSelection());
                 do {
                     if (criteriaMappedByDataType.containsKey(chainBuilder.getCurrentRetrievedDataType())) {
@@ -113,15 +122,14 @@ public class SailingDataMiningFactory {
     }
 
     public Query<Set<Object>> createDimensionValuesQuery(RacingEventService dataSource, final DataRetrieverChainDefinitionDTO dataRetrieverChainDefinitionDTO, final String localeInfoName) {
-        final DataMiningStringMessages stringMessages = DataMiningActivator.getStringMessages();
         final Locale locale = DataMiningStringMessages.Util.getLocaleFor(localeInfoName);
-        return new ProcessorQuery<Set<Object>, RacingEventService>(DataMiningActivator.getExecutor(), dataSource, stringMessages, locale) {
+        return new ProcessorQuery<Set<Object>, RacingEventService>(executorService, dataSource, stringMessages, locale) {
             @Override
             protected Processor<RacingEventService, ?> createFirstProcessor() {
                 Processor<GroupedDataEntry<Object>, Map<GroupKey, Set<Object>>> valueCollector = processorFactory.createGroupedDataCollectingAsSetProcessor(/*query*/ this);
 
                 DataRetrieverChainDefinition<RacingEventService> dataRetrieverChainDefinition = dataRetrieverChainDefinitionRegistry.getDataRetrieverChainDefinition(RacingEventService.class, dataRetrieverChainDefinitionDTO.getId());
-                DataRetrieverChainBuilder<RacingEventService> chainBuilder = dataRetrieverChainDefinition.startBuilding(DataMiningActivator.getExecutor());
+                DataRetrieverChainBuilder<RacingEventService> chainBuilder = dataRetrieverChainDefinition.startBuilding(executorService);
                 Collection<Function<?>> dimensions = functionProvider.getMinimizedDimensionsFor(dataRetrieverChainDefinition);
                 Map<Class<?>, Collection<Function<?>>> dimensionsMappedByDeclaringType = mapFunctionsByDeclaringType(dimensions);
                 while (!dimensionsMappedByDeclaringType.isEmpty()) {

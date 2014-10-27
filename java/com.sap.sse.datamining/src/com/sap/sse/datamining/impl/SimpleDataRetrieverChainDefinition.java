@@ -72,7 +72,7 @@ public class SimpleDataRetrieverChainDefinition<DataSourceType> implements
     }
 
     @Override
-    public <NextInputType, NextResultType, PreviousInputType, PreviousResultType extends NextInputType> void addAsLast(
+    public <NextInputType, NextResultType, PreviousInputType, PreviousResultType extends NextInputType> void addAfter(
             Class<Processor<PreviousInputType, PreviousResultType>> previousRetrieverType,
             Class<Processor<NextInputType, NextResultType>> nextRetrieverType,
             Class<NextResultType> retrievedDataType) {
