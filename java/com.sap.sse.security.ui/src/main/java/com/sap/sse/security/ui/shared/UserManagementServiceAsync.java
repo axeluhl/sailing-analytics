@@ -45,4 +45,10 @@ public interface UserManagementServiceAsync {
 
     void addSetting(String key, String clazz, String setting, AsyncCallback<Void> callback);
 
+    void setPreference(String username, String key, String value, AsyncCallback<Void> callback);
+
+    void unsetPreference(String username, String key, AsyncCallback<Void> callback);
+
+    void getPreference(String username, String key, AsyncCallback<String> callback);
+
 }

@@ -383,4 +383,20 @@ public class UserManagementServiceImpl extends RemoteServiceServlet implements U
             throw new RuntimeException(e);
         }
     }
+
+    @Override
+    public void setPreference(String username, String key, String value) {
+        getSecurityService().setPreference(username, key, value);
+    }
+
+    @Override
+    public void unsetPreference(String username, String key) {
+        getSecurityService().unsetPreference(username, key);
+    }
+
+    @Override
+    public String getPreference(String username, String key) {
+        return getSecurityService().getPreference(username, key);
+    }
+
 }

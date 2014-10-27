@@ -111,6 +111,9 @@ public interface SecurityService {
     /**
      * Permitted only for users with role {@link DefaultRoles#ADMIN} or when the subject's user name matches
      * <code>username</code>.
+     * 
+     * @param key must not be <code>null</code>
+     * @param value must not be <code>null</code>
      */
     void setPreference(String username, String key, String value);
 
@@ -120,5 +123,8 @@ public interface SecurityService {
      */
     void unsetPreference(String username, String key);
 
+    /**
+     * @return <code>null</code> if no preference for the user identified by <code>username</code> is found
+     */
     String getPreference(String username, String key);
 }

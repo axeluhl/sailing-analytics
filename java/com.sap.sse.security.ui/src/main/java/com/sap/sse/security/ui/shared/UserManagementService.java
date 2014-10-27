@@ -4,6 +4,7 @@ import java.util.Collection;
 import java.util.Map;
 
 import com.google.gwt.user.client.rpc.RemoteService;
+import com.sap.sse.security.shared.DefaultRoles;
 import com.sap.sse.security.shared.MailException;
 import com.sap.sse.security.shared.UserManagementException;
 import com.sap.sse.security.ui.oauth.client.CredentialDTO;
@@ -41,6 +42,26 @@ public interface UserManagementService extends RemoteService {
     void setSetting(String key, String clazz, String setting);
 
     void addSetting(String key, String clazz, String setting);
+
+    /**
+     * Permitted only for users with role {@link DefaultRoles#ADMIN} or when the subject's user name matches
+     * <code>username</code>.
+     * 
+     * @param key must not be <code>null</code>
+     * @param value must not be <code>null</code>
+     */
+    void setPreference(String username, String key, String value);
+
+    /**
+     * Permitted only for users with role {@link DefaultRoles#ADMIN} or when the subject's user name matches
+     * <code>username</code>.
+     */
+    void unsetPreference(String username, String key);
+
+    /**
+     * @return <code>null</code> if no preference for the user identified by <code>username</code> is found
+     */
+    String getPreference(String username, String key);
 
     // ------------------------------------------------ OAuth Interface --------------------------------------------------------------
 
