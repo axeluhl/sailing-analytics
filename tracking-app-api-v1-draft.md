@@ -2,7 +2,7 @@
 
 ## General
 
-This is a design for a REST API to be used by the iOS and Android tracking apps.
+This is a design for the REST API to be used by the iOS and Android tracking apps.
 
 ## Event Data
 
@@ -12,7 +12,7 @@ This is a design for a REST API to be used by the iOS and Android tracking apps.
 
 A shortened URL is used. This URL is embedded in the QR code. In case a user does not have a QR code, she can manually enter the URL into the app.
 
-Note that a unique URL needs to be defined per compitetor and event.
+Note that a unique URL needs to be defined per competitor and event.
 
 ### Verb
 
@@ -52,6 +52,10 @@ Note that a unique URL needs to be defined per compitetor and event.
 **serverUrl** This is the endpoint to be used for all following REST requests.
 
 **eventDays** An event can be held for several days. This array contains all start and end times of an event day. This is used to remind a user to turn tracking on or off (in order to save battery).
+
+### Push Notifications
+
+Event data can be updated via push notifications. These are limited on iOS to 256 bytes (not characters). For this reason, on receiving a push notification, the app must GET the event data.
 
 ## Check-In
 
@@ -133,8 +137,6 @@ As general information, the tracking status of the smartphone is sent.
 
 This is the main data being sent by the app.
 
-Note that locations should be sent via web socket instead of HTTP POST in order to speed up communication. This POST request can be used as a fallback if web sockets aren't available.
-
 ### Path
 
     /event/{event_id}/competitor/{competitor_id}/location
@@ -157,11 +159,15 @@ Note that locations should be sent via web socket instead of HTTP POST in order 
 
 **course** Heading in degrees.
 
-## Bulk Upload Location
+### Web Sockets
+
+Note that locations should be sent via web socket instead of HTTP POST in order to speed up communication. This POST request can be used as a fallback if web sockets aren't available.
+
+## Bulk Upload Locations
 
 Locations should be sent live during an event. In case of missing network, locations are stored to the device and later uploaded to the server for analysis.
 
-As this could be a lot of data, GZIP compression is a must. Bulk uploads could be chunked, e.g. per day or per 1,000 locations.
+As this could be a lot of data, GZIP compression is a must. Bulk uploads should be chunked, e.g. per day or per 1,000 locations.
 
 ### Path
 
