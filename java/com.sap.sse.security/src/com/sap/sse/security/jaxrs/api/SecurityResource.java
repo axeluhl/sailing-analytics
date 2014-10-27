@@ -47,7 +47,7 @@ public class SecurityResource extends AbstractSecurityResource {
     @Path("/logout")
     public Response logout() {
         getService().logout();
-        return Response.ok("Logger out", MediaType.TEXT_PLAIN).build();
+        return Response.ok("Logged out", MediaType.TEXT_PLAIN).build();
     }
 }
  

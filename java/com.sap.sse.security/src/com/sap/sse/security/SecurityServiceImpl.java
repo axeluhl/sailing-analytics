@@ -718,4 +718,38 @@ public class SecurityServiceImpl extends RemoteServiceServlet implements Securit
     public CacheManager getCacheManager() {
         return cacheManager;
     }
+
+    @Override
+    public void setPreference(String username, String key, String value) {
+        Subject subject = SecurityUtils.getSubject();
+        if (subject.hasRole(DefaultRoles.ADMIN.name()) || username.equals(SessionUtils.loadUsername())) {
+            store.setPreference(username, key, value);
+        } else {
+            throw new SecurityException("User " + SessionUtils.loadUsername()
+                    + " does not have permission to set preference for user " + username);
+        }
+    }
+    
+    @Override
+    public void unsetPreference(String username, String key) {
+        Subject subject = SecurityUtils.getSubject();
+        if (subject.hasRole(DefaultRoles.ADMIN.name()) || username.equals(SessionUtils.loadUsername())) {
+            store.unsetPreference(username, key);
+        } else {
+            throw new SecurityException("User " + SessionUtils.loadUsername()
+                    + " does not have permission to unset preference for user " + username);
+        }
+    }
+
+    @Override
+    public String getPreference(String username, String key) {
+        Subject subject = SecurityUtils.getSubject();
+        if (subject.hasRole(DefaultRoles.ADMIN.name()) || username.equals(SessionUtils.loadUsername())) {
+            return store.getPreference(username, key);
+        } else {
+            throw new SecurityException("User " + SessionUtils.loadUsername()
+                    + " does not have permission to read preferences of user " + username);
+        }
+    }
+    
 }

@@ -13,4 +13,6 @@ public interface MongoObjectFactory {
     public void storeSettings(Map<String, Object> settings);
     
     public void storeSettingTypes(Map<String, Class<?>> settingTypes);
+
+    public void storePreferences(String username, Map<String, String> userMap);
 }

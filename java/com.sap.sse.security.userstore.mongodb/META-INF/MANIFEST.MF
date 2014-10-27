@@ -12,4 +12,5 @@ Bundle-ClassPath: .
 Require-Bundle: com.sap.sse.security;bundle-version="1.0.0",
  com.mongodb.driver;bundle-version="2.6.2",
  com.sap.sailing.mongodb
-Export-Package: com.sap.sse.security.userstore.mongodb
+Export-Package: com.sap.sse.security.userstore.mongodb,
+ com.sap.sse.security.userstore.mongodb.impl;x-friends:="com.sap.sse.security.test"

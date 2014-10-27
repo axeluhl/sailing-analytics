@@ -18,6 +18,13 @@ public class FieldNames {
         VALUES;
     }
     
+    public static enum Preferences {
+        USERNAME,
+        KEYS_AND_VALUES,
+        KEY,
+        VALUE;
+    }
+    
     public static enum Account {
         NAME;
     }

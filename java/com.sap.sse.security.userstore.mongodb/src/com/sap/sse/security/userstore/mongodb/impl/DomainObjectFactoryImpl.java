@@ -118,7 +118,7 @@ public class DomainObjectFactoryImpl implements DomainObjectFactory {
 
     @Override
     public Map<String, Object> loadSettings() {
-        Map<String, Object> result = new HashMap<String, Object>();
+        Map<String, Object> result = new HashMap<>();
         DBCollection settingsCollection = db.getCollection(CollectionNames.SETTINGS.name());
 
         try {
@@ -136,6 +136,35 @@ public class DomainObjectFactoryImpl implements DomainObjectFactory {
             logger.log(Level.SEVERE, "loadSettings", e);
         }
 
+        return result;
+    }
+
+    @Override
+    public Map<String, Map<String, String>> loadPreferences() {
+        Map<String, Map<String, String>> result = new HashMap<>();
+        DBCollection settingsCollection = db.getCollection(CollectionNames.PREFERENCES.name());
+        try {
+            for (Object o : settingsCollection.find()) {
+                DBObject usernameAndPreferencesMap = (DBObject) o;
+                Map<String, String> userMap = loadPreferencesMap((BasicDBList) usernameAndPreferencesMap.get(FieldNames.Preferences.KEYS_AND_VALUES.name()));
+                String username = (String) usernameAndPreferencesMap.get(FieldNames.Preferences.USERNAME.name());
+                result.put(username, userMap);
+            }
+        } catch (Exception e) {
+            logger.log(Level.SEVERE, "Error connecting to MongoDB, unable to load settings.");
+            logger.log(Level.SEVERE, "loadSettings", e);
+        }
+        return result;
+    }
+
+    private Map<String, String> loadPreferencesMap(BasicDBList preferencesDBObject) {
+        Map<String, String> result = new HashMap<>();
+        for (Object o : preferencesDBObject) {
+            DBObject keyValue = (DBObject) o;
+            String key = (String) keyValue.get(FieldNames.Preferences.KEY.name());
+            String value = (String) keyValue.get(FieldNames.Preferences.VALUE.name());
+            result.put(key, value);
+        }
         return result;
     }
 

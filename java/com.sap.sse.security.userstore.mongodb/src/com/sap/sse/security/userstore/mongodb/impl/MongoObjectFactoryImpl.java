@@ -5,6 +5,7 @@ import java.util.Map.Entry;
 
 import org.apache.shiro.util.SimpleByteSource;
 
+import com.mongodb.BasicDBList;
 import com.mongodb.BasicDBObject;
 import com.mongodb.DB;
 import com.mongodb.DBCollection;
@@ -13,9 +14,9 @@ import com.mongodb.WriteConcern;
 import com.sap.sse.security.Social;
 import com.sap.sse.security.User;
 import com.sap.sse.security.shared.Account;
+import com.sap.sse.security.shared.Account.AccountType;
 import com.sap.sse.security.shared.SocialUserAccount;
 import com.sap.sse.security.shared.UsernamePasswordAccount;
-import com.sap.sse.security.shared.Account.AccountType;
 import com.sap.sse.security.userstore.mongodb.MongoObjectFactory;
 
 public class MongoObjectFactoryImpl implements MongoObjectFactory {
@@ -85,6 +86,23 @@ public class MongoObjectFactoryImpl implements MongoObjectFactory {
         dbSettings.put(FieldNames.Settings.MAP.name(), createSettingsMapObject(settings));
 
         settingCollection.update(query, dbSettings, /* upsrt */true, /* multi */false, WriteConcern.SAFE);
+    }
+
+    @Override
+    public void storePreferences(String username, Map<String, String> userMap) {
+        DBCollection settingCollection = db.getCollection(CollectionNames.PREFERENCES.name());
+        settingCollection.ensureIndex(FieldNames.Preferences.USERNAME.name());
+        BasicDBList dbSettings = new BasicDBList();
+        for (Entry<String, String> e : userMap.entrySet()) {
+            DBObject entry = new BasicDBObject();
+            entry.put(FieldNames.Preferences.KEY.name(), e.getKey());
+            entry.put(FieldNames.Preferences.VALUE.name(), e.getValue());
+            dbSettings.add(entry);
+        }
+        DBObject query = new BasicDBObject(FieldNames.Preferences.USERNAME.name(), username);
+        DBObject update = new BasicDBObject(FieldNames.Preferences.KEYS_AND_VALUES.name(), dbSettings);
+        update.put(FieldNames.Preferences.USERNAME.name(), username);
+        settingCollection.update(query, update, /* upsrt */true, /* multi */false, WriteConcern.SAFE);
     }
 
     @Override

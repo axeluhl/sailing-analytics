@@ -13,4 +13,6 @@ public interface DomainObjectFactory {
     Map<String, Class<?>> loadSettingTypes();
     
     User loadUser(String name);
+
+    Map<String, Map<String, String>> loadPreferences();
 }

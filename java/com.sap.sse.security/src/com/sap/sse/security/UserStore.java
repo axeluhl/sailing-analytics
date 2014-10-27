@@ -34,7 +34,13 @@ public interface UserStore {
      * is compatible with <code>type</code>. Note that the store implementation may impose constraints on the types supported.
      * All store implementations are required to support at least {@link String} and {@link UUID} as types.
      */
-    public void addSetting(String key, Class<?> type);
+    void addSetting(String key, Class<?> type);
+    
+    void setPreference(String username, String key, String value);
+    
+    void unsetPreference(String username, String key);
+
+    String getPreference(String username, String key);
 
     /**
      * Sets a value for a key if that key was previously added to this store using {@link #addSetting(String, Class)}.
@@ -51,12 +57,12 @@ public interface UserStore {
      * setting because either the key was not registered before by {@link #addSetting(String, Class)} or the type of the
      * <code>setting</code> object does not conform to the type used in {@link #addSetting(String, Class)}
      */
-    public boolean setSetting(String key, Object setting);
+    boolean setSetting(String key, Object setting);
 
-    public <T> T getSetting(String key, Class<T> clazz);
+    <T> T getSetting(String key, Class<T> clazz);
 
-    public Map<String, Object> getAllSettings();
+    Map<String, Object> getAllSettings();
 
-    public Map<String, Class<?>> getAllSettingTypes();
+    Map<String, Class<?>> getAllSettingTypes();
 
 }

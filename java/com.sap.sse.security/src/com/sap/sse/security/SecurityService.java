@@ -10,6 +10,7 @@ import javax.servlet.ServletContext;
 import org.apache.shiro.cache.CacheManager;
 import org.apache.shiro.mgt.SecurityManager;
 
+import com.sap.sse.security.shared.DefaultRoles;
 import com.sap.sse.security.shared.MailException;
 import com.sap.sse.security.shared.SocialUserAccount;
 import com.sap.sse.security.shared.UserManagementException;
@@ -107,4 +108,17 @@ public interface SecurityService {
 
     boolean validateEmail(String username, String validationSecret) throws UserManagementException;
 
+    /**
+     * Permitted only for users with role {@link DefaultRoles#ADMIN} or when the subject's user name matches
+     * <code>username</code>.
+     */
+    void setPreference(String username, String key, String value);
+
+    /**
+     * Permitted only for users with role {@link DefaultRoles#ADMIN} or when the subject's user name matches
+     * <code>username</code>.
+     */
+    void unsetPreference(String username, String key);
+
+    String getPreference(String username, String key);
 }

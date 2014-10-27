@@ -22,6 +22,7 @@ public class UserStoreImpl implements UserStore {
     private final ConcurrentHashMap<String, User> users;
     private final ConcurrentHashMap<String, Object> settings;
     private final ConcurrentHashMap<String, Class<?>> settingTypes;
+    private final ConcurrentHashMap<String, Map<String, String>> preferences;
     private final DomainObjectFactory domainObjectFactory;
     private final MongoObjectFactory mongoObjectFactory;
 
@@ -29,6 +30,7 @@ public class UserStoreImpl implements UserStore {
         users = new ConcurrentHashMap<>();
         settings = new ConcurrentHashMap<>();
         settingTypes = new ConcurrentHashMap<String, Class<?>>();
+        preferences = new ConcurrentHashMap<>();
         domainObjectFactory = PersistenceFactory.INSTANCE.getDefaultDomainObjectFactory();
         mongoObjectFactory = PersistenceFactory.INSTANCE.getDefaultMongoObjectFactory();
         for (Entry<String, Class<?>> e : domainObjectFactory.loadSettingTypes().entrySet()) {
@@ -36,6 +38,9 @@ public class UserStoreImpl implements UserStore {
         }
         for (Entry<String, Object> e : domainObjectFactory.loadSettings().entrySet()) {
             settings.put(e.getKey(), e.getValue());
+        }
+        for (Entry<String, Map<String, String>> e : domainObjectFactory.loadPreferences().entrySet()) {
+            preferences.put(e.getKey(), e.getValue());
         }
         boolean changed = false;
         changed = changed || initSocialSettingsIfEmpty();
@@ -161,6 +166,44 @@ public class UserStoreImpl implements UserStore {
             settings.put(key, setting);
             mongoObjectFactory.storeSettings(settings);
             result = true;
+        }
+        return result;
+    }
+
+    @Override
+    public void setPreference(String username, String key, String value) {
+        Map<String, String> userMap = preferences.get(username);
+        if (userMap == null) {
+            synchronized (preferences) {
+                // only synchronize when necessary
+                userMap = preferences.get(username);
+                if (userMap == null) {
+                    userMap = new ConcurrentHashMap<>();
+                    preferences.put(username, userMap);
+                }
+            }
+        }
+        userMap.put(key, value);
+        mongoObjectFactory.storePreferences(username, userMap);
+    }
+
+    @Override
+    public void unsetPreference(String username, String key) {
+        Map<String, String> userMap = preferences.get(username);
+        if (userMap != null) {
+            userMap.remove(key);
+            mongoObjectFactory.storePreferences(username, userMap);
+        }
+    }
+
+    @Override
+    public String getPreference(String username, String key) {
+        final String result;
+        Map<String, String> userMap = preferences.get(username);
+        if (userMap != null) {
+            result = userMap.get(key);
+        } else {
+            result = null;
         }
         return result;
     }

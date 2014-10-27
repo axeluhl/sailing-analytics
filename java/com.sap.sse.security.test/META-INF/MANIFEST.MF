@@ -7,4 +7,6 @@ Bundle-Vendor: SAP
 Fragment-Host: com.sap.sse.security
 Bundle-RequiredExecutionEnvironment: JavaSE-1.7
 Require-Bundle: org.junit4;bundle-version="4.8.2",
- com.sap.sse.security.userstore.mongodb
+ com.sap.sse.security.userstore.mongodb,
+ com.mongodb.driver,
+ com.sap.sailing.mongodb
