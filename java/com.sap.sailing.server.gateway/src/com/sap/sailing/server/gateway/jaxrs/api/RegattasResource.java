@@ -611,10 +611,10 @@ public class RegattasResource extends AbstractSailingServerResource {
                                 jsonCompetitorInLeg.put("averageSOG-kts", UnitSerializationUtil.knotsDecimalFormatter.format(averageSpeedOverGround.getKnots()));
                             }
                             try {
-                                Integer numberOfTacks = trackedLegOfCompetitor.getNumberOfTacks(timePoint);
-                                Integer numberOfJibes = trackedLegOfCompetitor.getNumberOfJibes(timePoint);
+                                Integer numberOfTacks = trackedLegOfCompetitor.getNumberOfTacks(timePoint, /* waitForLatest */ false);
+                                Integer numberOfJibes = trackedLegOfCompetitor.getNumberOfJibes(timePoint, /* waitForLatest */ false);
                                 Integer numberOfPenaltyCircles = trackedLegOfCompetitor
-                                        .getNumberOfPenaltyCircles(timePoint);
+                                        .getNumberOfPenaltyCircles(timePoint, /* waitForLatest */ false);
                                 jsonCompetitorInLeg.put("tacks", numberOfTacks);
                                 jsonCompetitorInLeg.put("jibes", numberOfJibes);
                                 jsonCompetitorInLeg.put("penaltyCircles", numberOfPenaltyCircles);
