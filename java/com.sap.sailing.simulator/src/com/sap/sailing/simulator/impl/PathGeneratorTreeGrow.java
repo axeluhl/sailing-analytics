@@ -104,13 +104,11 @@ public class PathGeneratorTreeGrow extends PathGeneratorBase {
     // generate step in one of the possible directions
     // default: L - left, R - right
     // extended: M - wide left, S - wide right
-    TimedPosition getStep(TimedPosition pos, long timeStep, long turnLoss, boolean sameBaseDirection, char nextDirection) {
+    TimedPosition getStep(TimedPosition pos, Wind posWind, long timeStep, long turnLoss, boolean sameBaseDirection, char nextDirection) {
 
         double offDeg = 3.0;
-        WindFieldGenerator wf = this.parameters.getWindField();
         TimePoint curTime = pos.getTimePoint();
         Position curPosition = pos.getPosition();
-        Wind posWind = wf.getWind(new TimedPositionImpl(curTime, curPosition));
 
         PolarDiagram pd = this.parameters.getBoatPolarDiagram();
         pd.setWind(posWind);
@@ -180,7 +178,7 @@ public class PathGeneratorTreeGrow extends PathGeneratorBase {
         }
 
         // calculate next path position (taking turn-loss into account)
-        TimedPosition pathPos = this.getStep(path.pos, timeStep, turnLoss, sameBaseDirection, nextDirection);
+        TimedPosition pathPos = this.getStep(path.pos, path.wind, timeStep, turnLoss, sameBaseDirection, nextDirection);
         
         // determine apparent wind at next path position & time
         Wind posWind = this.parameters.getWindField().getWind(pathPos);
@@ -231,7 +229,7 @@ public class PathGeneratorTreeGrow extends PathGeneratorBase {
         // extend path-string by step-direction
         String pathStr = path.path + nextDirection;
 
-        return (new PathCandidate(pathPos, reachedEnd, vrtDist, hrzDist, turnCount, pathStr, nextDirection, appWind));
+        return (new PathCandidate(pathPos, reachedEnd, vrtDist, hrzDist, turnCount, pathStr, nextDirection, posWind));
     }
 
 
@@ -523,9 +521,9 @@ public class PathGeneratorTreeGrow extends PathGeneratorBase {
         allPaths.add(initPath);
 
 
-        TimedPosition tstPosition = this.getStep(new TimedPositionImpl(startTime, startPos), usedTimeStep, turnLoss, true, 'L');
+        TimedPosition tstPosition = this.getStep(new TimedPositionImpl(startTime, startPos), wndStart, usedTimeStep, turnLoss, true, 'L');
         double tstDist1 = startPos.getDistance(tstPosition.getPosition()).getMeters();
-        tstPosition = this.getStep(new TimedPositionImpl(startTime, startPos), usedTimeStep, turnLoss, true, 'R');
+        tstPosition = this.getStep(new TimedPositionImpl(startTime, startPos), wndStart, usedTimeStep, turnLoss, true, 'R');
         double tstDist2 = startPos.getDistance(tstPosition.getPosition()).getMeters();
 
         double hrzBinSize = (tstDist1 + tstDist2)/6.0; // horizontal bin size in meters
@@ -702,7 +700,8 @@ public class PathGeneratorTreeGrow extends PathGeneratorBase {
             } else {
 
                 boolean sameBaseDirection = this.isSameDirection(prevDirection, nextDirection);
-                TimedPosition newPosition = this.getStep(curPosition, usedTimeStep, turnLoss, sameBaseDirection, nextDirection);
+                Wind curWind = wf.getWind(curPosition);
+                TimedPosition newPosition = this.getStep(curPosition, curWind, usedTimeStep, turnLoss, sameBaseDirection, nextDirection);
                 curPosition = new TimedPositionWithSpeedImpl(newPosition.getTimePoint(), newPosition.getPosition(), null);
                 path.add(curPosition);
 
