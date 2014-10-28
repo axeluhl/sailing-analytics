@@ -1094,6 +1094,8 @@ public interface StringMessages extends com.sap.sse.gwt.client.StringMessages {
     String raceVisibilityColumn();
     String enterCarryValueFor(String competitorName);
     String advanced();
+    String basedOn();
+    String retrieveWith();
     String mappingDetails();
     String deviceMappingQrCodeExplanation();
     String qrCode();

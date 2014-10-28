@@ -6,7 +6,10 @@ import com.sap.sse.datamining.shared.Unit;
 import com.sap.sse.datamining.shared.annotations.Connector;
 import com.sap.sse.datamining.shared.annotations.Statistic;
 
-public interface HasTrackedLegOfCompetitorContext extends HasTrackedLegContext {
+public interface HasTrackedLegOfCompetitorContext {
+    
+    @Connector
+    public HasTrackedLegContext getTrackedLegContext();
     
     public TrackedLegOfCompetitor getTrackedLegOfCompetitor();
 

@@ -13,19 +13,18 @@ import java.util.Map;
 import org.junit.Before;
 import org.junit.Test;
 
-import com.sap.sse.datamining.AdditionalResultDataBuilder;
 import com.sap.sse.datamining.components.Processor;
-import com.sap.sse.datamining.factories.FunctionFactory;
 import com.sap.sse.datamining.functions.Function;
 import com.sap.sse.datamining.shared.GroupKey;
 import com.sap.sse.datamining.shared.impl.GenericGroupKey;
-import com.sap.sse.datamining.test.components.util.Number;
 import com.sap.sse.datamining.test.util.ConcurrencyTestsUtil;
 import com.sap.sse.datamining.test.util.FunctionTestsUtil;
+import com.sap.sse.datamining.test.util.components.NullProcessor;
+import com.sap.sse.datamining.test.util.components.Number;
 
 public class TestParallelExtractionProcessor {
     
-    private Collection<Processor<GroupedDataEntry<Integer>>> receivers;
+    private Collection<Processor<GroupedDataEntry<Integer>, ?>> receivers;
     private Map<GroupKey, Integer> receivedValues;
     
     private Function<Integer> getCrossSumFunction;
@@ -39,23 +38,11 @@ public class TestParallelExtractionProcessor {
     public void initializeReceivers() {
         receivedValues = new HashMap<>();
         
-        Processor<GroupedDataEntry<Integer>> receiver = new Processor<GroupedDataEntry<Integer>>() {
+        @SuppressWarnings("unchecked")
+        Processor<GroupedDataEntry<Integer>, Void> receiver = new NullProcessor<GroupedDataEntry<Integer>, Void>((Class<GroupedDataEntry<Integer>>)(Class<?>) GroupedDataEntry.class, Void.class) {
             @Override
             public void processElement(GroupedDataEntry<Integer> element) {
                 receivedValues.put(element.getKey(), element.getDataEntry());
-            }
-            @Override
-            public void onFailure(Throwable failure) {
-            }
-            @Override
-            public void finish() throws InterruptedException {
-            }
-            @Override
-            public void abort() {
-            }
-            @Override
-            public AdditionalResultDataBuilder getAdditionalResultData(AdditionalResultDataBuilder additionalDataBuilder) {
-                return additionalDataBuilder;
             }
         };
         
@@ -66,17 +53,17 @@ public class TestParallelExtractionProcessor {
     @Before
     public void initializeExtractionFunctions() {
         Method getCrossSumMethod = FunctionTestsUtil.getMethodFromClass(Number.class, "getCrossSum");
-        getCrossSumFunction = FunctionFactory.createMethodWrappingFunction(getCrossSumMethod);
+        getCrossSumFunction = FunctionTestsUtil.getFunctionFactory().createMethodWrappingFunction(getCrossSumMethod);
         
         Method invalidMethod = FunctionTestsUtil.getMethodFromSimpleClassWithMarkedMethod("sideEffectFreeValue");
-        invalidFunction = FunctionFactory.createMethodWrappingFunction(invalidMethod);
+        invalidFunction = FunctionTestsUtil.getFunctionFactory().createMethodWrappingFunction(invalidMethod);
     }
 
     @Test
     public void testValueExtraction() {
-        Processor<GroupedDataEntry<Number>> processor = new ParallelGroupedElementsValueExtractionProcessor<Number, Integer>(ConcurrencyTestsUtil.getExecutor(), receivers, getCrossSumFunction);
+        Processor<GroupedDataEntry<Number>, GroupedDataEntry<Integer>> processor = new ParallelGroupedElementsValueExtractionProcessor<Number, Integer>(ConcurrencyTestsUtil.getExecutor(), receivers, getCrossSumFunction);
         Collection<GroupedDataEntry<Number>> elements = createElements();
-        processElements(processor, elements);
+        ConcurrencyTestsUtil.processElements(processor, elements);
         ConcurrencyTestsUtil.sleepFor(100); //Giving the processor time to finish the instructions
         
         Collection<GroupedDataEntry<Integer>> expectedReceivedValues = buildExpectedReceivedValues(elements);
@@ -92,8 +79,8 @@ public class TestParallelExtractionProcessor {
     
     @Test
     public void testValueExtractionWithInvalidFunction() {
-        Processor<GroupedDataEntry<Number>> processor = new ParallelGroupedElementsValueExtractionProcessor<Number, Integer>(ConcurrencyTestsUtil.getExecutor(), receivers, invalidFunction);
-        processElements(processor, createElements());
+        Processor<GroupedDataEntry<Number>, GroupedDataEntry<Integer>> processor = new ParallelGroupedElementsValueExtractionProcessor<Number, Integer>(ConcurrencyTestsUtil.getExecutor(), receivers, invalidFunction);
+        ConcurrencyTestsUtil.processElements(processor, createElements());
         ConcurrencyTestsUtil.sleepFor(100); //Giving the processor time to finish the instructions
         assertThat("Values have been received, but the processor function is invalid.", receivedValues.isEmpty(), is(true));
     }
@@ -105,12 +92,6 @@ public class TestParallelExtractionProcessor {
         elements.add(new GroupedDataEntry<Number>(new GenericGroupKey<Integer>(3), new Number(111)));
         elements.add(new GroupedDataEntry<Number>(new GenericGroupKey<Integer>(4), new Number(1111)));
         return elements;
-    }
-
-    private void processElements(Processor<GroupedDataEntry<Number>> processor, Collection<GroupedDataEntry<Number>> elements) {
-        for (GroupedDataEntry<Number> element : elements) {
-            processor.processElement(element);
-        }
     }
 
     private Collection<GroupedDataEntry<Integer>> buildExpectedReceivedValues(Collection<GroupedDataEntry<Number>> elements) {

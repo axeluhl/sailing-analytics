@@ -2,10 +2,9 @@ package com.sap.sse.datamining.impl.functions.criterias;
 
 import java.lang.reflect.Method;
 
-import com.sap.sse.datamining.components.FilterCriterion;
 import com.sap.sse.datamining.shared.annotations.Statistic;
 
-public class MethodIsCorrectStatisticFilterCriterion implements FilterCriterion<Method> {
+public class MethodIsCorrectStatisticFilterCriterion extends AbstractMethodFilterCriterion {
 
     @Override
     public boolean matches(Method method) {

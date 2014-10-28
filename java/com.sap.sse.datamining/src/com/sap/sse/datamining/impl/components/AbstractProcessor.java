@@ -1,62 +1,25 @@
 package com.sap.sse.datamining.impl.components;
 
-import java.util.Collection;
-import java.util.HashSet;
-import java.util.Set;
-
-import com.sap.sse.datamining.AdditionalResultDataBuilder;
 import com.sap.sse.datamining.components.Processor;
 
-public abstract class AbstractProcessor<InputType, ResultType> implements Processor<InputType> {
-    
-    private final Set<Processor<ResultType>> resultReceivers;
+public abstract class AbstractProcessor<InputType, ResultType> implements Processor<InputType, ResultType> {
 
-    public AbstractProcessor(Collection<Processor<ResultType>> resultReceivers) {
-        this.resultReceivers = new HashSet<>(resultReceivers);
+    private final Class<InputType> inputType;
+    private final Class<ResultType> resultType;
+
+    public AbstractProcessor(Class<InputType> inputType, Class<ResultType> resultType) {
+        this.inputType = inputType;
+        this.resultType = resultType;
     }
 
     @Override
-    public void processElement(InputType element) {
-        ResultType result = handleElement(element);
-        forwardResultToTheReceivers(result);
-    }
-    
-    @Override
-    public void onFailure(Throwable failure) {
-        for (Processor<ResultType> resultReceiver : resultReceivers) {
-            resultReceiver.onFailure(failure);
-        }
+    public Class<InputType> getInputType() {
+        return inputType;
     }
     
     @Override
-    public void abort() {
-        // Can't be implemented in a single threaded processor
+    public Class<ResultType> getResultType() {
+        return resultType;
     }
-
-    private void forwardResultToTheReceivers(ResultType result) {
-        for (Processor<ResultType> resultReceiver : resultReceivers) {
-            resultReceiver.processElement(result);
-        }
-    }
-
-    protected abstract ResultType handleElement(InputType element);
-
-    @Override
-    public void finish() throws InterruptedException {
-        for (Processor<ResultType> resultReceiver : resultReceivers) {
-            resultReceiver.finish();
-        }
-    }
-    
-    @Override
-    public AdditionalResultDataBuilder getAdditionalResultData(AdditionalResultDataBuilder additionalDataBuilder) {
-        setAdditionalData(additionalDataBuilder);
-        for (Processor<ResultType> resultReceiver : resultReceivers) {
-            additionalDataBuilder = resultReceiver.getAdditionalResultData(additionalDataBuilder);
-        }
-        return additionalDataBuilder;
-    }
-
-    protected abstract void setAdditionalData(AdditionalResultDataBuilder additionalDataBuilder);
 
 }

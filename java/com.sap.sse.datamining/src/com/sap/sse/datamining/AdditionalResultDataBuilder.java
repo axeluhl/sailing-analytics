@@ -15,6 +15,8 @@ public interface AdditionalResultDataBuilder {
     public AdditionalResultData build(long calculationTimeInNanos, DataMiningStringMessages stringMessages, Locale locale);
 
     public void setRetrievedDataAmount(int retrievedDataAmount);
+    
+    public int getRetrievedDataAmount();
 
     public void setExtractionFunction(Function<?> extractionFunction);
 
