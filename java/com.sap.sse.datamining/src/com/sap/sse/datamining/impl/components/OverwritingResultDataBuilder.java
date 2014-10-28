@@ -6,7 +6,6 @@ import com.sap.sse.datamining.AdditionalResultDataBuilder;
 import com.sap.sse.datamining.functions.Function;
 import com.sap.sse.datamining.i18n.DataMiningStringMessages;
 import com.sap.sse.datamining.shared.AdditionalResultData;
-import com.sap.sse.datamining.shared.Message;
 import com.sap.sse.datamining.shared.Unit;
 import com.sap.sse.datamining.shared.impl.AdditionalResultDataImpl;
 
@@ -47,12 +46,17 @@ public class OverwritingResultDataBuilder implements AdditionalResultDataBuilder
         
         String extractedStatisticName = extractionFunction.getLocalizedName(locale, stringMessages);
         String aggregationName = stringMessages.get(locale, aggregationNameMessageKey);
-        return stringMessages.get(locale, Message.ResultSignifier.toString(), extractedStatisticName, aggregationName);
+        return stringMessages.get(locale, "ResultSignifier", extractedStatisticName, aggregationName);
     }
 
     @Override
     public void setRetrievedDataAmount(int retrievedDataAmount) {
         this.retrievedDataAmount = retrievedDataAmount;
+    }
+
+    @Override
+    public int getRetrievedDataAmount() {
+        return retrievedDataAmount;
     }
 
     @Override
@@ -65,26 +69,6 @@ public class OverwritingResultDataBuilder implements AdditionalResultDataBuilder
     @Override
     public void setAggregationNameMessageKey(String aggregationNameMessageKey) {
         this.aggregationNameMessageKey = aggregationNameMessageKey;
-    }
-
-    protected int getRetrievedDataAmount() {
-        return retrievedDataAmount;
-    }
-
-    protected Function<?> getExtractionFunction() {
-        return extractionFunction;
-    }
-
-    protected String getAggregationNameMessageKey() {
-        return aggregationNameMessageKey;
-    }
-
-    protected Unit getUnit() {
-        return unit;
-    }
-
-    protected int getResultDecimals() {
-        return resultDecimals;
     }
 
 }

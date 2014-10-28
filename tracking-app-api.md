@@ -299,8 +299,15 @@ _Is that correct?_
 
 ### Body
 
-    ???
+	{
+		"bearingDeg":48,
+		"timeMillis":1414504349713,
+		"speedMperS":0,
+		"lonDeg":9.9650613,
+		"deviceUuid":"147d8230-4db0-11e4-916c-0800200c9a66",
+		"latDeg":53.5510491
+	}
 
 ### Response
 
-    ???
+    200

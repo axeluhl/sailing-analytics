@@ -9,7 +9,6 @@ import java.util.Locale;
 import org.junit.Before;
 import org.junit.Test;
 
-import com.sap.sse.datamining.factories.FunctionFactory;
 import com.sap.sse.datamining.functions.Function;
 import com.sap.sse.datamining.i18n.DataMiningStringMessages;
 import com.sap.sse.datamining.test.functions.test_classes.SimpleClassWithMarkedMethods;
@@ -38,13 +37,13 @@ public class TestMethodWrappingFunction {
     
     @Test
     public void testIsDimension() {
-        Function<?> dimension = FunctionFactory.createMethodWrappingFunction(dimensionMethod);
+        Function<?> dimension = FunctionTestsUtil.getFunctionFactory().createMethodWrappingFunction(dimensionMethod);
         assertThat(dimension.isDimension(), is(true));
 
-        Function<?> sideEffectFreeValue = FunctionFactory.createMethodWrappingFunction(sideEffectFreeValueMethod);
+        Function<?> sideEffectFreeValue = FunctionTestsUtil.getFunctionFactory().createMethodWrappingFunction(sideEffectFreeValueMethod);
         assertThat(sideEffectFreeValue.isDimension(), is(false));
 
-        Function<?> externalLibraryFunction = FunctionFactory.createMethodWrappingFunction(externalLibraryMethod);
+        Function<?> externalLibraryFunction = FunctionTestsUtil.getFunctionFactory().createMethodWrappingFunction(externalLibraryMethod);
         assertThat(externalLibraryFunction.isDimension(), is(false));
     }
     
@@ -52,19 +51,19 @@ public class TestMethodWrappingFunction {
     public void testGetLocalizedName() {
         DataMiningStringMessages stringMessages = TestsUtil.getTestStringMessages();
 
-        Function<?> dimension = FunctionFactory.createMethodWrappingFunction(dimensionMethod);
+        Function<?> dimension = FunctionTestsUtil.getFunctionFactory().createMethodWrappingFunction(dimensionMethod);
         String expectedEnglishName = "dimension-english";
         assertThat(dimension.getLocalizedName(Locale.ENGLISH, stringMessages), is(expectedEnglishName));
         String expectedGermanName = "dimension-deutsch";
         assertThat(dimension.getLocalizedName(Locale.GERMAN, stringMessages), is(expectedGermanName));
 
-        Function<?> sideEffectFreeValue = FunctionFactory.createMethodWrappingFunction(sideEffectFreeValueMethod);
+        Function<?> sideEffectFreeValue = FunctionTestsUtil.getFunctionFactory().createMethodWrappingFunction(sideEffectFreeValueMethod);
         expectedEnglishName = "sideEffectFreeValue-english";
         assertThat(sideEffectFreeValue.getLocalizedName(Locale.ENGLISH, stringMessages), is(expectedEnglishName));
         expectedGermanName = "sideEffectFreeValue-deutsch";
         assertThat(sideEffectFreeValue.getLocalizedName(Locale.GERMAN, stringMessages), is(expectedGermanName));
 
-        Function<?> externalLibraryFunction = FunctionFactory.createMethodWrappingFunction(externalLibraryMethod);
+        Function<?> externalLibraryFunction = FunctionTestsUtil.getFunctionFactory().createMethodWrappingFunction(externalLibraryMethod);
         String expectedName = "foo";
         assertThat(externalLibraryFunction.getLocalizedName(Locale.ENGLISH, stringMessages), is(expectedName));
         assertThat(externalLibraryFunction.getLocalizedName(Locale.GERMAN, stringMessages), is(expectedName));

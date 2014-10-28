@@ -7,7 +7,6 @@ import org.junit.Before;
 import org.junit.Test;
 
 import com.sap.sse.datamining.components.FilterCriterion;
-import com.sap.sse.datamining.factories.FunctionFactory;
 import com.sap.sse.datamining.functions.Function;
 import com.sap.sse.datamining.test.functions.test_classes.DataTypeInterface;
 import com.sap.sse.datamining.test.functions.test_classes.DataTypeWithContext;
@@ -26,11 +25,11 @@ public class TestDeclaringTypeOrParameterTypeCriteria {
     
     @Before
     public void setUpFunctions() {
-        getSpeedInKnotsValue = FunctionFactory.createMethodWrappingFunction(FunctionTestsUtil.getMethodFromClass(DataTypeInterface.class, "getSpeedInKnots"));
-        getRaceNameLengthValue = FunctionFactory.createMethodWrappingFunction(FunctionTestsUtil.getMethodFromClass(ExtendingInterface.class, "getRaceNameLength"));
-        getRegattaNameDimension = FunctionFactory.createMethodWrappingFunction(FunctionTestsUtil.getMethodFromClass(DataTypeWithContext.class, "getRegattaName"));
+        getSpeedInKnotsValue = FunctionTestsUtil.getFunctionFactory().createMethodWrappingFunction(FunctionTestsUtil.getMethodFromClass(DataTypeInterface.class, "getSpeedInKnots"));
+        getRaceNameLengthValue = FunctionTestsUtil.getFunctionFactory().createMethodWrappingFunction(FunctionTestsUtil.getMethodFromClass(ExtendingInterface.class, "getRaceNameLength"));
+        getRegattaNameDimension = FunctionTestsUtil.getFunctionFactory().createMethodWrappingFunction(FunctionTestsUtil.getMethodFromClass(DataTypeWithContext.class, "getRegattaName"));
         
-        libraryFunction = FunctionFactory.createMethodWrappingFunction(FunctionTestsUtil.getMethodFromClass(Test_ExternalLibraryClass.class, "foo"));
+        libraryFunction = FunctionTestsUtil.getFunctionFactory().createMethodWrappingFunction(FunctionTestsUtil.getMethodFromClass(Test_ExternalLibraryClass.class, "foo"));
     }
 
     @Test
@@ -42,6 +41,12 @@ public class TestDeclaringTypeOrParameterTypeCriteria {
         assertThat(criteria.matches(getRegattaNameDimension), is(true));
 
         assertThat(criteria.matches(libraryFunction), is(false));
+    }
+    
+    @Test
+    public void testGetElementType() {
+        FilterCriterion<Function<?>> criteria = new IsDeclaringTypeFilterCriterion(DataTypeWithContextImpl.class);
+        assertThat(criteria.getElementType().equals(Function.class), is(true));
     }
 
 }
