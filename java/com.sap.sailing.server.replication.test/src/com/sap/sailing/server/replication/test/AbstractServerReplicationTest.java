@@ -290,6 +290,7 @@ public abstract class AbstractServerReplicationTest {
                 }
             }.start();
             ObjectInputStream dis = resolveAgainst.createObjectInputStreamResolvingAgainstThisFactory(pis);
+            getRacingEventService().clearReplicaState();
             getRacingEventService().initiallyFillFrom(dis);
             dis.close();
         }

@@ -321,10 +321,10 @@ public class TrackedLegOfCompetitorImpl implements TrackedLegOfCompetitor {
 
     
     @Override
-    public Integer getNumberOfTacks(TimePoint timePoint) throws NoWindException {
+    public Integer getNumberOfTacks(TimePoint timePoint, boolean waitForLatest) throws NoWindException {
         Integer result = null;
         if (hasStartedLeg(timePoint)) {
-            List<Maneuver> maneuvers = getManeuvers(timePoint, /* waitForLatest */ true);
+            List<Maneuver> maneuvers = getManeuvers(timePoint, waitForLatest);
             result = 0;
             for (Maneuver maneuver : maneuvers) {
                 if (maneuver.getType() == ManeuverType.TACK) {
@@ -349,10 +349,10 @@ public class TrackedLegOfCompetitorImpl implements TrackedLegOfCompetitor {
     }
 
     @Override
-    public Integer getNumberOfJibes(TimePoint timePoint) throws NoWindException {
+    public Integer getNumberOfJibes(TimePoint timePoint, boolean waitForLatest) throws NoWindException {
         Integer result = null;
         if (hasStartedLeg(timePoint)) {
-            List<Maneuver> maneuvers = getManeuvers(timePoint, /* waitForLatest */ true);
+            List<Maneuver> maneuvers = getManeuvers(timePoint, waitForLatest);
             result = 0;
             for (Maneuver maneuver : maneuvers) {
                 if (maneuver.getType() == ManeuverType.JIBE) {
@@ -364,10 +364,10 @@ public class TrackedLegOfCompetitorImpl implements TrackedLegOfCompetitor {
     }
 
     @Override
-    public Integer getNumberOfPenaltyCircles(TimePoint timePoint) throws NoWindException {
+    public Integer getNumberOfPenaltyCircles(TimePoint timePoint, boolean waitForLatest) throws NoWindException {
         Integer result = null;
         if (hasStartedLeg(timePoint)) {
-            List<Maneuver> maneuvers = getManeuvers(timePoint, /* waitForLatest */ true);
+            List<Maneuver> maneuvers = getManeuvers(timePoint, waitForLatest);
             result = 0;
             for (Maneuver maneuver : maneuvers) {
                 if (maneuver.getType() == ManeuverType.PENALTY_CIRCLE) {
