@@ -295,7 +295,7 @@ _Is that correct?_
 
 ### Path
 
-    ???
+    /tracking/recordFixesFlatJson
 
 ### Body
 
