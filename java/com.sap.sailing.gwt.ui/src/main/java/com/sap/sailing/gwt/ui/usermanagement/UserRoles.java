@@ -8,7 +8,8 @@ public enum UserRoles {
     moderator("moderator"),
     sailor("sailor"),
     coach("coach"),
-    eventmanager("eventmanager");
+    eventmanager("eventmanager"),
+    mediaeditor("mediaeditor");
     
     private UserRoles(String rolename) {
         this.rolename = rolename;
