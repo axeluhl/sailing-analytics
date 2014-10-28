@@ -2177,7 +2177,7 @@ public class RacingEventServiceImpl implements RacingEventServiceWithTestSupport
         logger.info(logoutput.toString());
     }
 
-    @SuppressWarnings("unchecked")
+    @SuppressWarnings("unchecked") // all the casts of ois.readObject()'s return value to Map<..., ...>
     // the type-parameters in the casts of the de-serialized collection objects can't be checked
     @Override
     public void initiallyFillFrom(ObjectInputStream ois) throws IOException, ClassNotFoundException,
@@ -2189,55 +2189,7 @@ public class RacingEventServiceImpl implements RacingEventServiceWithTestSupport
             // de-serialization; this will cause all classes to be visible that this bundle
             // (com.sap.sailing.server) can see
             Thread.currentThread().setContextClassLoader(getClass().getClassLoader());
-            LockUtil.lockForWrite(regattasByNameLock);
-            try {
-                regattasByName.clear();
-            } finally {
-                LockUtil.unlockAfterWrite(regattasByNameLock);
-            }
-            regattasObservedForDefaultLeaderboard.clear();
-
-            if (raceTrackersByRegatta != null && !raceTrackersByRegatta.isEmpty()) {
-                for (DynamicTrackedRegatta regatta : regattaTrackingCache.values()) {
-                    for (RaceTracker tracker : raceTrackersByRegatta.get(regatta)) {
-                        tracker.stop();
-                    }
-                }
-            }
-
-            logger.info("Clearing all data structures...");
-            LockUtil.lockForWrite(regattaTrackingCacheLock);
-            try {
-                regattaTrackingCache.clear();
-            } finally {
-                LockUtil.unlockAfterWrite(regattaTrackingCacheLock);
-            }
-            LockUtil.lockForWrite(raceTrackersByRegattaLock);
-            try {
-                raceTrackersByRegatta.clear();
-            } finally {
-                LockUtil.unlockAfterWrite(raceTrackersByRegattaLock);
-            }
-            LockUtil.lockForWrite(leaderboardGroupsByNameLock);
-            try {
-                leaderboardGroupsByName.clear();
-                leaderboardGroupsByID.clear();
-            } finally {
-                LockUtil.unlockAfterWrite(leaderboardGroupsByNameLock);
-            }
-            LockUtil.lockForWrite(leaderboardsByNameLock);
-            try {
-                leaderboardsByName.clear();
-            } finally {
-                LockUtil.unlockAfterWrite(leaderboardsByNameLock);
-            }
-            eventsById.clear();
-            mediaLibrary.clear();
-            competitorStore.clear();
-            remoteSailingServerSet.clear();
-
             StringBuffer logoutput = new StringBuffer();
-
             logger.info("Reading all events...");
             eventsById.putAll((Map<Serializable, Event>) ois.readObject());
             logoutput.append("\nReceived " + eventsById.size() + " NEW events\n");
@@ -2327,6 +2279,55 @@ public class RacingEventServiceImpl implements RacingEventServiceWithTestSupport
         } finally {
             Thread.currentThread().setContextClassLoader(oldContextClassloader);
         }
+    }
+
+    @Override
+    public void clearReplicaState() throws MalformedURLException, IOException, InterruptedException {
+        logger.info("Clearing all data structures...");
+        LockUtil.lockForWrite(regattasByNameLock);
+        try {
+            regattasByName.clear();
+        } finally {
+            LockUtil.unlockAfterWrite(regattasByNameLock);
+        }
+        regattasObservedForDefaultLeaderboard.clear();
+
+        if (raceTrackersByRegatta != null && !raceTrackersByRegatta.isEmpty()) {
+            for (DynamicTrackedRegatta regatta : regattaTrackingCache.values()) {
+                for (RaceTracker tracker : raceTrackersByRegatta.get(regatta)) {
+                    tracker.stop();
+                }
+            }
+        }
+        LockUtil.lockForWrite(regattaTrackingCacheLock);
+        try {
+            regattaTrackingCache.clear();
+        } finally {
+            LockUtil.unlockAfterWrite(regattaTrackingCacheLock);
+        }
+        LockUtil.lockForWrite(raceTrackersByRegattaLock);
+        try {
+            raceTrackersByRegatta.clear();
+        } finally {
+            LockUtil.unlockAfterWrite(raceTrackersByRegattaLock);
+        }
+        LockUtil.lockForWrite(leaderboardGroupsByNameLock);
+        try {
+            leaderboardGroupsByName.clear();
+            leaderboardGroupsByID.clear();
+        } finally {
+            LockUtil.unlockAfterWrite(leaderboardGroupsByNameLock);
+        }
+        LockUtil.lockForWrite(leaderboardsByNameLock);
+        try {
+            leaderboardsByName.clear();
+        } finally {
+            LockUtil.unlockAfterWrite(leaderboardsByNameLock);
+        }
+        eventsById.clear();
+        mediaLibrary.clear();
+        competitorStore.clear();
+        remoteSailingServerSet.clear();
     }
 
     // Used for TESTING only
