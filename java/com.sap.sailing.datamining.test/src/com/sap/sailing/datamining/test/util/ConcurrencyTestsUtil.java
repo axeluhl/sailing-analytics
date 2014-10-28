@@ -32,7 +32,7 @@ public class ConcurrencyTestsUtil {
         }
     }
 
-    public static void tryToFinishTheProcessorInAnotherThread(final Processor<?> processor) {
+    public static void tryToFinishTheProcessorInAnotherThread(final Processor<?, ?> processor) {
         Runnable finishingRunnable = new Runnable() {
             @Override
             public void run() {

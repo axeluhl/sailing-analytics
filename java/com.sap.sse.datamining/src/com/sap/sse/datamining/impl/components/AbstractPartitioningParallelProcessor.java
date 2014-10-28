@@ -14,20 +14,21 @@ import com.sap.sse.datamining.AdditionalResultDataBuilder;
 import com.sap.sse.datamining.components.Processor;
 
 public abstract class AbstractPartitioningParallelProcessor<InputType, WorkingType, ResultType>
-                      implements Processor<InputType> {
+                      extends AbstractProcessor<InputType, ResultType> {
 
     private static final Logger LOGGER = Logger.getLogger(AbstractPartitioningParallelProcessor.class.getName());
     private static final int SLEEP_TIME_DURING_FINISHING = 100;
 
-    private final Set<Processor<ResultType>> resultReceivers;
+    private final Set<Processor<ResultType, ?>> resultReceivers;
     private final ExecutorService executor;
     private final UnfinishedInstructionsCounter unfinishedInstructionsCounter;
     
     private boolean gotAborted = false;
 
-    public AbstractPartitioningParallelProcessor(ExecutorService executor, Collection<Processor<ResultType>> resultReceivers) {
+    public AbstractPartitioningParallelProcessor(Class<InputType> inputType, Class<ResultType> resultType, ExecutorService executor, Collection<Processor<ResultType, ?>> resultReceivers) {
+        super(inputType, resultType);
         this.executor = executor;
-        this.resultReceivers = new HashSet<Processor<ResultType>>(resultReceivers);
+        this.resultReceivers = new HashSet<Processor<ResultType, ?>>(resultReceivers);
         unfinishedInstructionsCounter = new UnfinishedInstructionsCounter();
     }
 
@@ -75,12 +76,12 @@ public abstract class AbstractPartitioningParallelProcessor<InputType, WorkingTy
     }
     
     protected void forwardResultToReceivers(ResultType result) {
-        for (Processor<ResultType> resultReceiver : resultReceivers) {
+        for (Processor<ResultType, ?> resultReceiver : resultReceivers) {
             resultReceiver.processElement(result);
         }
     }
 
-    protected Set<Processor<ResultType>> getResultReceivers() {
+    protected Set<Processor<ResultType, ?>> getResultReceivers() {
         return resultReceivers;
     }
 
@@ -90,7 +91,7 @@ public abstract class AbstractPartitioningParallelProcessor<InputType, WorkingTy
 
     @Override
     public void onFailure(Throwable failure) {
-        for (Processor<ResultType> resultReceiver : resultReceivers) {
+        for (Processor<ResultType, ?> resultReceiver : resultReceivers) {
             resultReceiver.onFailure(failure);
         }
     }
@@ -112,7 +113,7 @@ public abstract class AbstractPartitioningParallelProcessor<InputType, WorkingTy
     }
 
     protected void tellResultReceiversToFinish() {
-        for (Processor<ResultType> resultReceiver : getResultReceivers()) {
+        for (Processor<ResultType, ?> resultReceiver : getResultReceivers()) {
             try {
                 resultReceiver.finish();
             } catch (InterruptedException e) {
@@ -130,7 +131,7 @@ public abstract class AbstractPartitioningParallelProcessor<InputType, WorkingTy
     }
 
     private void tellResultReceiversToAbort() {
-        for (Processor<ResultType> resultReceiver : getResultReceivers()) {
+        for (Processor<ResultType, ?> resultReceiver : getResultReceivers()) {
             resultReceiver.abort();
         }
     }
@@ -138,7 +139,7 @@ public abstract class AbstractPartitioningParallelProcessor<InputType, WorkingTy
     @Override
     public AdditionalResultDataBuilder getAdditionalResultData(AdditionalResultDataBuilder additionalDataBuilder) {
         setAdditionalData(additionalDataBuilder);
-        for (Processor<ResultType> resultReceiver : getResultReceivers()) {
+        for (Processor<ResultType, ?> resultReceiver : getResultReceivers()) {
             additionalDataBuilder = resultReceiver.getAdditionalResultData(additionalDataBuilder);
         }
         return additionalDataBuilder;

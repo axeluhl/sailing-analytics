@@ -12,14 +12,15 @@ import java.util.Map;
 import org.junit.Before;
 import org.junit.Test;
 
-import com.sap.sse.datamining.AdditionalResultDataBuilder;
 import com.sap.sse.datamining.components.FilterCriterion;
 import com.sap.sse.datamining.components.Processor;
+import com.sap.sse.datamining.impl.criterias.AbstractFilterCriterion;
 import com.sap.sse.datamining.test.util.ConcurrencyTestsUtil;
+import com.sap.sse.datamining.test.util.components.NullProcessor;
 
 public class TestFilteringProcessors {
     
-    private Collection<Processor<Integer>> receivers;
+    private Collection<Processor<Integer, ?>> receivers;
     /**
      * Contains the last received elements as key and the amount of the received times as value;
      */
@@ -27,14 +28,14 @@ public class TestFilteringProcessors {
 
     @Test
     public void testFilteringProcessor() {
-        FilterCriterion<Integer> elementIsEvenCriteria = new FilterCriterion<Integer>() {
+        FilterCriterion<Integer> elementIsEvenCriteria = new AbstractFilterCriterion<Integer>(Integer.class) {
             @Override
             public boolean matches(Integer element) {
                 return element % 2 == 0;
             }
         };
-        Processor<Integer> filteringProcessor = new ParallelFilteringProcessor<Integer>(ConcurrencyTestsUtil.getExecutor(), receivers, elementIsEvenCriteria);
-        processElements(filteringProcessor, createElementsToProcess());
+        Processor<Integer, Integer> filteringProcessor = new ParallelFilteringProcessor<Integer>(Integer.class, ConcurrencyTestsUtil.getExecutor(), receivers, elementIsEvenCriteria);
+        ConcurrencyTestsUtil.processElements(filteringProcessor, createElementsToProcess());
         ConcurrencyTestsUtil.sleepFor(100); // Giving the processor time to process the instructions
         
         Collection<Integer> evenElements = new ArrayList<>();
@@ -51,19 +52,6 @@ public class TestFilteringProcessors {
     private void verifyThatUnexpectedElementsHasNotBeenReceived(Collection<Integer> unexpectedElements) {
         for (Integer unexpectedElement : unexpectedElements) {
             assertThat("The unexpected element '" + unexpectedElement + "' was received", receivedElements.containsKey(unexpectedElement), is(false));
-        }
-    }
-
-    @Test
-    public void testNonFilteringProcessorFiltration() {
-        Processor<Integer> nonFilteringProcessor = new NonFilteringProcessor<Integer>(receivers);
-        processElements(nonFilteringProcessor, createElementsToProcess());
-        verifyThatExpectedElementsHasBeenReceived(createElementsToProcess());
-    }
-
-    private void processElements(Processor<Integer> processor, Collection<Integer> elements) {
-        for (Integer element : elements) {
-            processor.processElement(element);
         }
     }
 
@@ -86,7 +74,7 @@ public class TestFilteringProcessors {
     public void initializeReceivers() {
         receivedElements = new HashMap<>();
         
-        Processor<Integer> receiver = new Processor<Integer>() {
+        Processor<Integer, Void> receiver = new NullProcessor<Integer, Void>(Integer.class, Void.class) {
             @Override
             public void processElement(Integer element) {
                 if (!receivedElements.containsKey(element)) {
@@ -94,19 +82,6 @@ public class TestFilteringProcessors {
                 }
                 Integer elementAmount = receivedElements.get(element) + 1;
                 receivedElements.put(element, elementAmount);
-            }
-            @Override
-            public void onFailure(Throwable failure) {
-            }
-            @Override
-            public void finish() throws InterruptedException {
-            }
-            @Override
-            public void abort() {
-            }
-            @Override
-            public AdditionalResultDataBuilder getAdditionalResultData(AdditionalResultDataBuilder additionalDataBuilder) {
-                return additionalDataBuilder;
             }
         };
         

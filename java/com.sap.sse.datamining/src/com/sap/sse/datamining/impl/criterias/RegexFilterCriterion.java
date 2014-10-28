@@ -1,21 +1,20 @@
 package com.sap.sse.datamining.impl.criterias;
 
-import com.sap.sse.datamining.components.FilterCriterion;
-
-public abstract class RegexFilterCriterion<DataType> implements FilterCriterion<DataType> {
+public abstract class RegexFilterCriterion<ElementType> extends AbstractFilterCriterion<ElementType> {
     
     private String regex;
 
-    public RegexFilterCriterion(String regex) {
+    public RegexFilterCriterion(Class<ElementType> elementType, String regex) {
+        super(elementType);
         this.regex = regex;
     }
 
     @Override
-    public boolean matches(DataType data) {
+    public boolean matches(ElementType data) {
         String valueToMatch = getValueToMatch(data);
         return valueToMatch != null && valueToMatch.matches(regex);
     }
     
-    protected abstract String getValueToMatch(DataType data);
+    protected abstract String getValueToMatch(ElementType data);
 
 }
