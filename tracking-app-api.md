@@ -18,7 +18,7 @@ Following POST call maps smartphones to competitors.
 
 _Are query parameters really necessary?_
 
-### Body
+### Request Body
 
     {
         "timestamp": 1413460233257,
@@ -48,29 +48,7 @@ _Are query parameters really necessary?_
         "toMillis": 1413460500000
     }
 
-#### Response
-
-The response is a JSON array containing all events pertaining to leaderboard.
-_Is that correct?_
-
-**@class**
-
-* `RaceLogStartProcedureChangedEvent` ???
-
-* `RaceLogStartTimeEvent` ???
-
-* `DenoteForTrackingEvent` ???
-
-* `RegisterCompetitorEvent` Add new competitor.
-
-* `DefineMarkEvent` Add new mark (e.g. buoy).
-
-* `RaceLogCourseDesignChangedEvent` Called when defining course with marks.
-
-* `DeviceCompetitorMappingEvent` Triggered when device and competitor are mapped.
-
-* `RevokeEvent` Called e.g. when deleting a device / competitor mapping.
-
+### Response Body
 
     [
         {
@@ -283,6 +261,27 @@ _Is that correct?_
         },
         ...
     ]
+
+The response is a JSON array containing all events pertaining to leaderboard.
+_Is that correct?_
+
+**@class**
+
+* `RaceLogStartProcedureChangedEvent` ???
+
+* `RaceLogStartTimeEvent` ???
+
+* `DenoteForTrackingEvent` ???
+
+* `RegisterCompetitorEvent` Add new competitor.
+
+* `DefineMarkEvent` Add new mark (e.g. buoy).
+
+* `RaceLogCourseDesignChangedEvent` Called when defining course with marks.
+
+* `DeviceCompetitorMappingEvent` Triggered when device and competitor are mapped.
+
+* `RevokeEvent` Called e.g. when deleting a device / competitor mapping.
 
 ## GPSFix
 
