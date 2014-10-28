@@ -20,13 +20,7 @@ Following POST call maps smartphones to competitors.
 
 Query parameters are required and are encoded in QR code.
 
-`leaderboard`
-
-`raceColumn`
-
-`fleet`
-
-`clientuuid`
+`clientuuid` ???
 
 ### Request Body
 
@@ -277,21 +271,21 @@ _Is that correct?_
 
 **@class**
 
-* `RaceLogStartProcedureChangedEvent` ???
+`RaceLogStartProcedureChangedEvent` ???
 
-* `RaceLogStartTimeEvent` ???
+`RaceLogStartTimeEvent` ???
 
-* `DenoteForTrackingEvent` ???
+`DenoteForTrackingEvent` ???
 
-* `RegisterCompetitorEvent` Add new competitor.
+`RegisterCompetitorEvent` Add new competitor.
 
-* `DefineMarkEvent` Add new mark (e.g. buoy).
+`DefineMarkEvent` Add new mark (e.g. buoy).
 
-* `RaceLogCourseDesignChangedEvent` Called when defining course with marks.
+`RaceLogCourseDesignChangedEvent` Called when defining course with marks.
 
-* `DeviceCompetitorMappingEvent` Triggered when device and competitor are mapped.
+`DeviceCompetitorMappingEvent` Triggered when device and competitor are mapped.
 
-* `RevokeEvent` Called e.g. when deleting a device / competitor mapping.
+`RevokeEvent` Called e.g. when deleting a device / competitor mapping.
 
 ## GPSFix
 
