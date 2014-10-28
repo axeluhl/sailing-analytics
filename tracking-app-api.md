@@ -16,7 +16,17 @@ Following POST call maps smartphones to competitors.
         &fleet=Default
         &clientuuid=92669a6c-72c9-46d2-a815-f51ff15a4369
 
-_Are query parameters really necessary?_
+#### Query Parameters
+
+Query parameters are required and are encoded in QR code.
+
+`leaderboard`
+
+`raceColumn`
+
+`fleet`
+
+`clientuuid`
 
 ### Request Body
 
