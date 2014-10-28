@@ -61,9 +61,11 @@ _Is that correct?_
 
 * `DenoteForTrackingEvent` ???
 
-* `RegisterCompetitorEvent` ???
+* `RegisterCompetitorEvent` Add new competitor.
 
-* `DefineMarkEvent` ???
+* `DefineMarkEvent` Add new mark (e.g. buoy).
+
+* `RaceLogCourseDesignChangedEvent` Called when defining course with marks.
 
 * `DeviceCompetitorMappingEvent` Triggered when device and competitor are mapped.
 
@@ -278,17 +280,6 @@ _Is that correct?_
             "raceName": "Guy's Regatta M1 Default",
             "boatClass": "Small",
             "raceId": "8fd69b14-f9bf-46bc-8bda-def5814d8758"
-        },
-        {
-            "@class": "RevokeEvent",
-            "id": "1946921b-8def-489d-ab7b-cc8927d897bb",
-            "createdAt": 1413793865764,
-            "timestamp": 1413793865764,
-            "passId": 0,
-            "competitors": [],
-            "authorName": "com.sap.sailing.server.RacingEventService",
-            "authorPriority": 0,
-            "revokedEventId": "cf5995a4-6cca-4cca-a6cc-2357a32bb436"
         },
         ...
     ]
