@@ -129,8 +129,57 @@ The `LoginPanel` component may be used by applications to display sign-up/sign-i
 
 We plan to turn the `UserManagementPanel` which is the widget behind the `UserManagementEntryPoint` into a drop-in component for a generalized administration console concept. So, when the AdminConsole becomes an SSE concept then the user management tab can be made available to all applications using the AdminConsole concept. See also bugs [2424](http://bugzilla.sapsailing.com/bugzilla/show_bug.cgi?id=2424) and [2425](http://bugzilla.sapsailing.com/bugzilla/show_bug.cgi?id=2425).
 
-### Using Shiro in SSE-Based Applications
-
-## Security and User Management-Related Entry Points
-
 ## Sample Session
+
+When you try to reach a protected resource without having the necessary permissions, Shiro will redirect you to the sign-in page.
+
+![Sign-in page](/wiki/images/LoginScreen.png)
+
+When a system is still in its initial state, the default credentials are `admin` as the user name and `admin` as the password. When the sign-in was successful, you will be redirected to the protected page you originally wanted to visit (or stay on the sign-in page in case that was the URL you explicitly visited).
+
+To edit your user profile, visit `/security/ui/EditProfile.html`.
+
+![Sign-in page](/wiki/images/EditProfile.png)
+
+It allows the signed-in user to change the e-mail address and reset or update the password. Changing the e-mail address will result in a validation e-mail sent to the new e-mail address provided. Until the user has confirmed the e-mail by clicking on the embedded link, the new e-mail address will be considered not validated.
+
+The password reset feature is only available for users whose e-mail address has successfully been validated. Otherwise, users who do not have the `admin` role need to provide their current password and the new password, including a confirmation of the new password. An e-mail notification will be sent to the user's e-mail address about the password change. Administrators can simply provide the new password and confirm it, leaving the field for the current password empty.
+
+A new user can sign up by visiting the `/security/ui/Register.html` page. 
+
+![Sign-in page](/wiki/images/Register.png)
+
+New users need to provide a unique name. Providing an e-mail address is optional, but if no validated e-mail address exists, certain services will not be made available to that user, in particular the password reset feature.
+
+A mail is sent out to the e-mail address provided, asking the user to confirm the e-mail address by clicking on a link embedded in the e-mail. Complying to do so will mark the e-mail address as validated, and features requiring a validated e-mail address will be made available to the user from then on.
+
+Administrators (users with role `admin`) can use the `/security/ui/UserManagement.html` entry point (future versions will probably integrate this into the AdminConsole framework as a standard tab).
+
+![Sign-in page](/wiki/images/UserManagement1.png)
+
+The user management page offers administrators to create and delete users, search for users and change their settings. Creating a new user works pretty much as in the `/security/ui/Register.html` entry point:
+
+![Sign-in page](/wiki/images/CreateUser.png)
+
+To delete a user, find it in the list on the left side of the page, using the filter text box above the list and the paging buttons. 
+
+![Sign-in page](/wiki/images/UserManagement2.png)
+
+The right-hand side of the view shows the user details and allows administrators to edit them, very similar to the `/security/ui/EditProfile.html` page. At the bottom of this view, there is a field to manage the roles assigned to the user selected. To add a role, enter the role name into the text field and press the `Add` button.
+
+![Sign-in page](/wiki/images/AddRole.png)
+
+Roles currently assigned to the user can be removed by pressing the red `X` button next to the role name:
+
+![Sign-in page](/wiki/images/RemovingRoles.png)
+
+These changes take effect immediately if the user that is being edited is the user currently signed in. Note that in particular if you are signed in with the `admin` role and remove this role for yourself, you will not be able to edit your roles any further but will need to ask another administrator to do so.
+
+## RESTful API
+
+There is a RESTful web service reachable at the URL `/security/api/restsecurity`:
+
+* `/security/api/restsecurity/login`, type POST, parameters are `username` and `password`. Use, e.g., with `curl` from the command line as in `curl -D /tmp/header -d "username=admin&password=admin" http://myserver.sapsailing.com/security/api/restsecurity/login` and find the cookie identifying the session in file `/tmp/header` which should contain a line of the form<pre>
+Set-Cookie: JSESSIONID=f563a4fc-2333-45c4-8f82-3069f502680d; Path=/; HttpOnly
+</pre>
+* `/security/api/restsecurity/logout`, type GET, which terminates the current session when provided with the right cookie. Example: `curl --cookie JSESSIONID=f563a4fc-2333-45c4-8f82-3069f502680d http://myserver.sapsailing.com/security/api/restsecurity/logout`
