@@ -64,5 +64,4 @@ public class ConnectivityChangedReceiver extends BroadcastReceiver {
         packageManager.setComponentEnabledSetting(receiver, PackageManager.COMPONENT_ENABLED_STATE_ENABLED, PackageManager.DONT_KILL_APP);
         ExLog.w(context, TAG, "Connectivity lost. ConnectivityChangedReceiver enabled");
     }
-
 }
