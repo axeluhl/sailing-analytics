@@ -1,7 +1,0 @@
-# Server-side Architecture
-
-On the server-side, the architecture of smartphone tracking is intended to be open for extension, so that different types of input devices can be used for tracking one race.
-
-Generic device identifiers that are qualified through a device type are used for mapping a device to a competitor in the race log. When the race is then created, the OSGi service registry is used to find services to which the appropriate device mappings in the race log are provided, e.g., a smartphone adapter registers a `RaceLogTrackingDeviceHandler` service for the device type `smartphoneImei`, and then receives all smartphone device mappings from the race log once the race is created. The same OSGi service logic is used to find services that deal with persistently storing device identifiers, so that loading and persisting race log events can be used for all types of device identifiers.
-
-The reason for using the OSGi service registry is that it enables decentralized implementation of different kinds of device adapters. E.g., implementing a new Igtimi adapter does not mean that you have to modify the object factory for device identifier objects in the persistence bundle, but simply register a new service from within your own bundle. This is more hindering than helpful in this stage of development, but - in future - means that other device adapters could be developed without having to touch the Sailing Analytics core code, so a vendor of tracking devices could recieve a current Sailing Analytics version as an SDK and implement additional bundles only.

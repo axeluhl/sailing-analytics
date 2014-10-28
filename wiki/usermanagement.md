@@ -176,3 +176,10 @@ Roles currently assigned to the user can be removed by pressing the red `X` butt
 These changes take effect immediately if the user that is being edited is the user currently signed in. Note that in particular if you are signed in with the `admin` role and remove this role for yourself, you will not be able to edit your roles any further but will need to ask another administrator to do so.
 
 ## RESTful API
+
+There is a RESTful web service reachable at the URL `/security/api/restsecurity`:
+
+* `/security/api/restsecurity/login`, type POST, parameters are `username` and `password`. Use, e.g., with `curl` from the command line as in `curl -D /tmp/header -d "username=admin&password=admin" http://myserver.sapsailing.com/security/api/restsecurity/login` and find the cookie identifying the session in file `/tmp/header` which should contain a line of the form<pre>
+Set-Cookie: JSESSIONID=f563a4fc-2333-45c4-8f82-3069f502680d; Path=/; HttpOnly
+</pre>
+* `/security/api/restsecurity/logout`, type GET, which terminates the current session when provided with the right cookie. Example: `curl --cookie JSESSIONID=f563a4fc-2333-45c4-8f82-3069f502680d http://myserver.sapsailing.com/security/api/restsecurity/logout`

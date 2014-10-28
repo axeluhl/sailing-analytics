@@ -312,6 +312,17 @@ public interface RacingEventService extends TrackedRegattaRegistry, RegattaFetch
     void serializeForInitialReplication(ObjectOutputStream oos) throws IOException;
 
     /**
+     * Before {@link #initiallyFillFrom(ObjectInputStream) initially loading a replica's state from a master instance},
+     * the replica's old state needs to be "detached". This method clears all top-level data structures and stops all
+     * tracking currently going on.<p>
+     * 
+     * The reason this operation needs to be callable separate from {@link #initiallyFillFrom(ObjectInputStream)} is that
+     * it needs to happen before subscribing to the operation feed received from the master instance through the message bus
+     * which in turn needs to happen before receiving the initial load.
+     */
+    void clearReplicaState() throws MalformedURLException, IOException, InterruptedException;
+
+    /**
      * Dual, reading operation for {@link #serializeForInitialReplication(ObjectOutputStream)}. In other words, when
      * this operation returns, this service instance is in a state "equivalent" to that of the service instance that
      * produced the stream contents in its {@link #serializeForInitialReplication(ObjectOutputStream)}. "Equivalent"
@@ -324,8 +335,8 @@ public interface RacingEventService extends TrackedRegattaRegistry, RegattaFetch
      * to the default leaderboard and for automatic linking to leaderboard columns. It is assumed that no explicit
      * replication of these operations will happen based on the changes performed on the replication master.<p>
      * 
-     * <b>Caution:</b> All relevant contents of this service instance will be replaced by the stream contents.
-     * @throws InterruptedException 
+     * <b>Caution:</b> All relevant contents of this service instance needs to be cleared before by a call to
+     * {@link #clearReplicaState()}. It will be replaced by the stream contents.
      */
     void initiallyFillFrom(ObjectInputStream ois) throws IOException, ClassNotFoundException, InterruptedException;
 
