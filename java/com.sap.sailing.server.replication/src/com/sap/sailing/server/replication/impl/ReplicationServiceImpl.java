@@ -428,13 +428,15 @@ public class ReplicationServiceImpl implements ReplicationService, OperationExec
         replicator = new Replicator(master, this, /* startSuspended */ true, consumer, getRacingEventService().getBaseDomainFactory());
         // start receiving messages already now, but start in suspended mode
         replicatorThread = new Thread(replicator, "Replicator receiving from "+master.getMessagingHostname()+"/"+master.getExchangeName());
+        final RacingEventService racingEventService = getRacingEventService();
+        // clear racingEventService state here, before starting to receive and de-serialized operations which builds up new state, e.g., in competitor store
+        racingEventService.clearReplicaState(); // see also bug 2437
         replicatorThread.start();
         logger.info("Started replicator thread");
         InputStream is = initialLoadURL.openStream();
         final String queueName = new BufferedReader(new InputStreamReader(is)).readLine();
         try {
             RabbitInputStreamProvider rabbitInputStreamProvider = new RabbitInputStreamProvider(master.createChannel(), queueName);
-            final RacingEventService racingEventService = getRacingEventService();
             ObjectInputStream ois = racingEventService.getBaseDomainFactory()
                     .createObjectInputStreamResolvingAgainstThisFactory(
                             new GZIPInputStream(rabbitInputStreamProvider.getInputStream()));

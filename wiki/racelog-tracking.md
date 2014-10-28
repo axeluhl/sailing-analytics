@@ -3,8 +3,6 @@ RaceLog-tracking allows fully self-sustained tracking with the Sailing Analytics
 
 The term itself should be revised at some point, and currently refers to the technical implementation on how master data related to a race (e.g. competitor registrations, course layout) is recorded and stored persistently: namely in a RaceLog.
 
-This is the second iteration of implementing this idea. For previous documentation, see [[smartphone tracking|wiki/smartphone-tracking]].
-
 ## Server Architecture
 [[Server Architecture|wiki/racelog-tracking/server]]
 
