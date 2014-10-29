@@ -42,10 +42,13 @@ public class PolarSheetsChartPanel extends DockLayoutPanel {
     private PolarSheetGenerationSettings settings;
     
     private final Map<String,PolarSheetsData> polarSheetsDataMap;
+    
+    private final AngleOverDataSizeHistogramPanel angleOverDataSizeHistogramPanel;
 
-    public PolarSheetsChartPanel(StringMessages stringMessages) {
+    public PolarSheetsChartPanel(StringMessages stringMessages, AngleOverDataSizeHistogramPanel angleOverDataSizeHistogramPanel) {
         super(Unit.PCT);
         this.stringMessages = stringMessages;
+        this.angleOverDataSizeHistogramPanel = angleOverDataSizeHistogramPanel;
         polarSheetsDataMap = new HashMap<String, PolarSheetsData>();
         setSize("100%", "100%");
         chart = createPolarSheetChart();
@@ -125,6 +128,7 @@ public class PolarSheetsChartPanel extends DockLayoutPanel {
                     Point[] points = createPointsWithMarkerAlphaAccordingToDataCount(result, i);
                     if (points != null) {
                         series.setPoints(points);
+                        angleOverDataSizeHistogramPanel.addData(result.getHistogramDataMap().get(i));
                     }
                 }
             }

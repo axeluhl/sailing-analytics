@@ -60,6 +60,7 @@ public class PolarSheetsPanel extends SplitLayoutPanel implements RaceSelectionC
     private List<RegattaAndRaceIdentifier> selectedRaces;
     private PolarSheetsChartPanel chartPanel;
     private PolarSheetsHistogramPanel histogramPanel;
+    private AngleOverDataSizeHistogramPanel angleOverDataSizeHistogramPanel;
 
     private Label polarSheetsGenerationLabel;
     private Label dataCountLabel;
@@ -97,7 +98,8 @@ public class PolarSheetsPanel extends SplitLayoutPanel implements RaceSelectionC
         leftPanel.add(namingContainer);
         addBoatClassDiagramArea(leftPanel);
         DockLayoutPanel rightPanel = new DockLayoutPanel(Unit.PCT);
-        PolarSheetsChartPanel polarSheetsChartPanel = createPolarSheetsChartPanel();
+        angleOverDataSizeHistogramPanel = new AngleOverDataSizeHistogramPanel(stringMessages);
+        PolarSheetsChartPanel polarSheetsChartPanel = createPolarSheetsChartPanel(angleOverDataSizeHistogramPanel);
         DockLayoutPanel polarChartAndControlPanel = new DockLayoutPanel(Unit.PCT);
         PolarChartControlPanel polarChartControlPanel = new PolarChartControlPanel(stringMessages,
                 polarSheetsChartPanel);
@@ -111,7 +113,11 @@ public class PolarSheetsPanel extends SplitLayoutPanel implements RaceSelectionC
         rightPanel.addNorth(polarChartAndControlPanel, 70);
         histogramPanel = new PolarSheetsHistogramPanel(stringMessages);
         histogramPanel.getElement().setAttribute("align", "top");
-        rightPanel.addSouth(histogramPanel, 30);
+        //rightPanel.addSouth(histogramPanel, 30);
+        
+        
+        angleOverDataSizeHistogramPanel.getElement().setAttribute("align", "top");
+        rightPanel.addSouth(angleOverDataSizeHistogramPanel, 30);
 
         
         add(rightPanel);
@@ -198,8 +204,8 @@ public class PolarSheetsPanel extends SplitLayoutPanel implements RaceSelectionC
         return polarSheetsGenerationStatusLabel;
     }
 
-    private PolarSheetsChartPanel createPolarSheetsChartPanel() {
-        chartPanel = new PolarSheetsChartPanel(stringMessages);
+    private PolarSheetsChartPanel createPolarSheetsChartPanel(AngleOverDataSizeHistogramPanel angleOverDataSizeHistogramPanel) {
+        chartPanel = new PolarSheetsChartPanel(stringMessages, angleOverDataSizeHistogramPanel);
         return chartPanel;
     }
 

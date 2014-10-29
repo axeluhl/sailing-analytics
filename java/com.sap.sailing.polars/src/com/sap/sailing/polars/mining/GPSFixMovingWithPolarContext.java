@@ -23,6 +23,7 @@ public class GPSFixMovingWithPolarContext implements PolarClusterKey {
     private final Competitor competitor;
     private final ClusterGroup<Speed> windSpeedClusterGroup;
     private final Set<WindSource> windSourcesToExcludeForBearing;
+    private final Iterable<WindSource> windSourcesToExcludeForSpeed;
 
     public GPSFixMovingWithPolarContext(GPSFixMoving fix, TrackedRace race, Competitor competitor,
             ClusterGroup<Speed> windSpeedClusterGroup) {
@@ -31,6 +32,7 @@ public class GPSFixMovingWithPolarContext implements PolarClusterKey {
         this.competitor = competitor;
         this.windSpeedClusterGroup = windSpeedClusterGroup;
         this.windSourcesToExcludeForBearing = collectWindSourcesToIgnoreForBearing();
+        this.windSourcesToExcludeForSpeed = collectWindSourcesToIgnoreForSpeed();
     }
 
     public GPSFixMoving getFix() {
@@ -64,7 +66,7 @@ public class GPSFixMovingWithPolarContext implements PolarClusterKey {
     }
 
     public Speed getWindSpeed() {
-        Wind wind = race.getWind(fix.getPosition(), fix.getTimePoint());
+        Wind wind = race.getWind(fix.getPosition(), fix.getTimePoint(), windSourcesToExcludeForSpeed);
         return wind;
     }
 
@@ -91,6 +93,31 @@ public class GPSFixMovingWithPolarContext implements PolarClusterKey {
         Iterable<WindSource> expSources = race.getWindSources(WindSourceType.EXPEDITION);
         for (WindSource expSource : expSources) {
             windSourcesToExclude.add(expSource);
+        }
+        Iterable<WindSource> rcSources = race.getWindSources(WindSourceType.RACECOMMITTEE);
+        for (WindSource rcSource : rcSources) {
+            windSourcesToExclude.add(rcSource);
+        }
+        Iterable<WindSource> webSources = race.getWindSources(WindSourceType.WEB);
+        for (WindSource webSource : webSources) {
+            windSourcesToExclude.add(webSource);
+        }
+        return windSourcesToExclude;
+    }
+    
+    private Iterable<WindSource> collectWindSourcesToIgnoreForSpeed() {
+        Set<WindSource> windSourcesToExclude = new HashSet<WindSource>();
+        Iterable<WindSource> combinedSources = race.getWindSources(WindSourceType.COMBINED);
+        for (WindSource combinedSource : combinedSources) {
+            windSourcesToExclude.add(combinedSource);
+        }
+        Iterable<WindSource> courseSources = race.getWindSources(WindSourceType.COURSE_BASED);
+        for (WindSource courseSource : courseSources) {
+            windSourcesToExclude.add(courseSource);
+        }
+        Iterable<WindSource> trackBasedSources = race.getWindSources(WindSourceType.TRACK_BASED_ESTIMATION);
+        for (WindSource trackBasedSource : trackBasedSources) {
+            windSourcesToExclude.add(trackBasedSource);
         }
         Iterable<WindSource> rcSources = race.getWindSources(WindSourceType.RACECOMMITTEE);
         for (WindSource rcSource : rcSources) {
