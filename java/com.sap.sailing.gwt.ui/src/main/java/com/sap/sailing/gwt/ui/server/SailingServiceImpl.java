@@ -1502,13 +1502,10 @@ public class SailingServiceImpl extends ProxiedRemoteServiceServlet implements S
             if (trackedLeg == null) {
                 return result;
             }
-            
-            Waypoint fromWaypoint = trackedLeg.getLeg().getFrom();
-            Position startPosition = trackedRace.getApproximatePosition(fromWaypoint, fromTimePoint);
+            Waypoint fromWaypoint = trackedLeg.getLeg().getFrom();            
             
             // get next mark as end-position
             Waypoint toWaypoint = trackedLeg.getLeg().getTo();
-            Position endPosition = trackedRace.getApproximatePosition(toWaypoint, fromTimePoint);
 
             TimePoint startTimePoint = null;
             TimePoint endTimePoint = null;
@@ -1525,6 +1522,8 @@ public class SailingServiceImpl extends ProxiedRemoteServiceServlet implements S
                 }
             }
             legDuration = endTimePoint.asMillis() - startTimePoint.asMillis();
+            Position startPosition = trackedRace.getApproximatePosition(fromWaypoint, startTimePoint);
+            Position endPosition = trackedRace.getApproximatePosition(toWaypoint, endTimePoint);
 
             if (startTimePoint.asDate().equals(prevStartTime)) {
                 return new SimulatorResultsDTO(startTimePoint.asDate(), 0, null, null, null, null);
