@@ -83,10 +83,28 @@ public abstract class AbstractQueryDefinitionProvider implements QueryDefinition
     protected void notifyQueryDefinitionChanged() {
         if (!blockChangeNotification) {
             QueryDefinition queryDefinition = getQueryDefinition();
-            for (QueryDefinitionChangedListener listener : listeners) {
-                listener.queryDefinitionChanged(queryDefinition);
+            if (isQueryDefinitionConsistent(queryDefinition)) {
+                for (QueryDefinitionChangedListener listener : listeners) {
+                    listener.queryDefinitionChanged(queryDefinition);
+                }
             }
         }
+    }
+
+    private boolean isQueryDefinitionConsistent(QueryDefinition queryDefinition) {
+        String sourceTypeName = queryDefinition.getStatisticToCalculate().getSourceTypeName();
+        
+        if (!sourceTypeName.equals(queryDefinition.getDataRetrieverChainDefinition().getRetrievedDataTypeName())) {
+            return false;
+        }
+        
+        for (FunctionDTO dimensionToGroupBy : queryDefinition.getDimensionsToGroupBy()) {
+            if (!sourceTypeName.equals(dimensionToGroupBy.getSourceTypeName())) {
+                return false;
+            }
+        }
+        
+        return true;
     }
 
     protected StringMessages getStringMessages() {

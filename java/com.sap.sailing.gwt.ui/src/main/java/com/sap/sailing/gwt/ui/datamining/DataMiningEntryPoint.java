@@ -25,7 +25,7 @@ import com.sap.sailing.gwt.ui.client.shared.components.SettingsDialog;
 import com.sap.sailing.gwt.ui.datamining.execution.SimpleQueryRunner;
 import com.sap.sailing.gwt.ui.datamining.presentation.BenchmarkResultsPanel;
 import com.sap.sailing.gwt.ui.datamining.presentation.ResultsChart;
-import com.sap.sailing.gwt.ui.datamining.selection.QueryDefinitionProviderWithControls;
+import com.sap.sailing.gwt.ui.datamining.selection.BufferingQueryDefinitionProviderWithControls;
 import com.sap.sailing.gwt.ui.datamining.settings.QueryRunnerSettings;
 import com.sap.sailing.gwt.ui.datamining.settings.RefreshingSelectionTablesSettings;
 import com.sap.sse.gwt.client.EntryPointHelper;
@@ -51,7 +51,7 @@ public class DataMiningEntryPoint extends AbstractEntryPoint {
 
         DockLayoutPanel dockPanel = new DockLayoutPanel(Unit.PX);
         dockPanel.addNorth(createLogoAndTitlePanel(), 68);
-        QueryDefinitionProviderWithControls queryDefinitionProviderWithControls = new QueryDefinitionProviderWithControls(stringMessages, sailingService, dataMiningService, this);
+        BufferingQueryDefinitionProviderWithControls queryDefinitionProviderWithControls = new BufferingQueryDefinitionProviderWithControls(stringMessages, sailingService, dataMiningService, this);
         queryDefinitionProviderWithControls.getEntryWidget().addStyleName("dataMiningPanel");
         dockPanel.add(queryDefinitionProviderWithControls.getEntryWidget());
         

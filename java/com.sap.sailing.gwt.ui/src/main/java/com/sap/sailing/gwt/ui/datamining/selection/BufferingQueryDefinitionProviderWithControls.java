@@ -7,6 +7,7 @@ import java.util.Map.Entry;
 import com.google.gwt.event.dom.client.ClickEvent;
 import com.google.gwt.event.dom.client.ClickHandler;
 import com.google.gwt.i18n.client.LocaleInfo;
+import com.google.gwt.user.client.Timer;
 import com.google.gwt.user.client.ui.Button;
 import com.google.gwt.user.client.ui.FlowPanel;
 import com.google.gwt.user.client.ui.HorizontalPanel;
@@ -32,9 +33,19 @@ import com.sap.sse.datamining.shared.dto.FunctionDTO;
 import com.sap.sse.datamining.shared.impl.QueryDefinitionImpl;
 import com.sap.sse.datamining.shared.impl.dto.DataRetrieverChainDefinitionDTO;
 
-public class QueryDefinitionProviderWithControls extends AbstractQueryDefinitionProvider implements DataMiningControls {
+public class BufferingQueryDefinitionProviderWithControls extends AbstractQueryDefinitionProvider implements DataMiningControls {
 
-    private FlowPanel mainPanel;
+    /**
+     * The delay before a changed query definition is submitted to the listeners.
+     * This prevents unnecessary queries caused by a change of the used data type, that then causes
+     * a change of the dimension to group by and the data retriever chain.
+     * Or caused by quick changes of the filter selection.
+     */
+    private static final int queryBufferTimeInMillis = 200;
+    
+    private final Timer queryDefinitionReleaseTimer;
+    
+    private final FlowPanel mainPanel;
     private HorizontalPanel controlsPanel;
     
     private StatisticProvider statisticProvider;
@@ -44,7 +55,7 @@ public class QueryDefinitionProviderWithControls extends AbstractQueryDefinition
     
     private SelectionProvider<?> selectionProvider;
 
-    public QueryDefinitionProviderWithControls(StringMessages stringMessages, SailingServiceAsync sailingService, DataMiningServiceAsync dataMiningService, ErrorReporter errorReporter) {
+    public BufferingQueryDefinitionProviderWithControls(StringMessages stringMessages, SailingServiceAsync sailingService, DataMiningServiceAsync dataMiningService, ErrorReporter errorReporter) {
         super(stringMessages, sailingService, dataMiningService, errorReporter);
         
         mainPanel = new ResizingFlowPanel() {
@@ -63,11 +74,17 @@ public class QueryDefinitionProviderWithControls extends AbstractQueryDefinition
         selectionProvider.addSelectionChangedListener(new SelectionChangedListener() {
             @Override
             public void selectionChanged() {
-                notifyQueryDefinitionChanged();
+                scheduleQueryDefinitionChanged();
             }
         });
         mainPanel.add(selectionProvider.getEntryWidget());
         
+        queryDefinitionReleaseTimer = new Timer() {
+            @Override
+            public void run() {
+                notifyQueryDefinitionChanged();
+            }
+        };
     }
 
     private Widget createFunctionsPanel() {
@@ -79,7 +96,7 @@ public class QueryDefinitionProviderWithControls extends AbstractQueryDefinition
         statisticProvider.addStatisticChangedListener(new StatisticChangedListener() {
             @Override
             public void statisticChanged(FunctionDTO newStatisticToCalculate, AggregatorType newAggregatorType) {
-                notifyQueryDefinitionChanged();
+                scheduleQueryDefinitionChanged();
             }
         });
         statisticAndRetrieverChainPanel.add(statisticProvider.getEntryWidget());
@@ -88,7 +105,7 @@ public class QueryDefinitionProviderWithControls extends AbstractQueryDefinition
         retrieverChainProvider.addDataRetrieverChainDefinitionChangedListener(new DataRetrieverChainDefinitionChangedListener() {
             @Override
             public void dataRetrieverChainDefinitionChanged(DataRetrieverChainDefinitionDTO newDataRetrieverChainDefinition) {
-                notifyQueryDefinitionChanged();
+                scheduleQueryDefinitionChanged();
             }
         });
         statisticAndRetrieverChainPanel.add(retrieverChainProvider.getEntryWidget());
@@ -98,7 +115,7 @@ public class QueryDefinitionProviderWithControls extends AbstractQueryDefinition
         groupBySelectionPanel.addGroupingChangedListener(new GroupingChangedListener() {
             @Override
             public void groupingChanged() {
-                notifyQueryDefinitionChanged();
+                scheduleQueryDefinitionChanged();
             }
         });
         functionsPanel.add(groupBySelectionPanel.getEntryWidget());
@@ -117,6 +134,10 @@ public class QueryDefinitionProviderWithControls extends AbstractQueryDefinition
         functionsPanel.add(controlsPanel);
 
         return functionsPanel;
+    }
+    
+    private void scheduleQueryDefinitionChanged() {
+        queryDefinitionReleaseTimer.schedule(queryBufferTimeInMillis);
     }
     
     @Override
@@ -144,7 +165,7 @@ public class QueryDefinitionProviderWithControls extends AbstractQueryDefinition
         selectionProvider.applySelection(queryDefinition);
         setBlockChangeNotification(false);
         
-        notifyQueryDefinitionChanged();
+        scheduleQueryDefinitionChanged();
     }
 
     @Override
