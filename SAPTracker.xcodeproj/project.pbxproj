@@ -7,10 +7,13 @@
 	objects = {
 
 /* Begin PBXBuildFile section */
+		7F03FD3E19FA44CD00FA1327 /* APIManager.swift in Sources */ = {isa = PBXBuildFile; fileRef = 7F03FD3D19FA44CD00FA1327 /* APIManager.swift */; };
 		7F0658FD19F7D6700077FF95 /* QRCodeViewController.swift in Sources */ = {isa = PBXBuildFile; fileRef = 7F0658FC19F7D6700077FF95 /* QRCodeViewController.swift */; };
-		7F0658FF19F7EE910077FF95 /* QRCodeManager.swift in Sources */ = {isa = PBXBuildFile; fileRef = 7F0658FE19F7EE910077FF95 /* QRCodeManager.swift */; };
+		7F0658FF19F7EE910077FF95 /* QRCodeData.swift in Sources */ = {isa = PBXBuildFile; fileRef = 7F0658FE19F7EE910077FF95 /* QRCodeData.swift */; };
 		7F06590419F8094C0077FF95 /* DeviceUDIDManager.swift in Sources */ = {isa = PBXBuildFile; fileRef = 7F06590319F8094C0077FF95 /* DeviceUDIDManager.swift */; };
 		7F2C605A19F160E400C32D93 /* LocationManager.swift in Sources */ = {isa = PBXBuildFile; fileRef = 7F2C605919F160E400C32D93 /* LocationManager.swift */; };
+		7F3663041A00FD4600F6102D /* RaceLogEvent.swift in Sources */ = {isa = PBXBuildFile; fileRef = 7F3663031A00FD4600F6102D /* RaceLogEvent.swift */; };
+		7F3663061A00FF0C00F6102D /* DeviceCompetitorMappingEvent.swift in Sources */ = {isa = PBXBuildFile; fileRef = 7F3663051A00FF0C00F6102D /* DeviceCompetitorMappingEvent.swift */; };
 		7F44095B19F65B5B0021BF22 /* CoreData.xcdatamodeld in Sources */ = {isa = PBXBuildFile; fileRef = 7F44095919F65B5B0021BF22 /* CoreData.xcdatamodeld */; };
 		7F83F15619F154F000C53328 /* AppDelegate.swift in Sources */ = {isa = PBXBuildFile; fileRef = 7F83F15519F154F000C53328 /* AppDelegate.swift */; };
 		7F83F15819F154F000C53328 /* HomeViewController.swift in Sources */ = {isa = PBXBuildFile; fileRef = 7F83F15719F154F000C53328 /* HomeViewController.swift */; };
@@ -37,10 +40,14 @@
 
 /* Begin PBXFileReference section */
 		06377F0B2F2854497073FC0E /* libPods.a */ = {isa = PBXFileReference; explicitFileType = archive.ar; includeInIndex = 0; path = libPods.a; sourceTree = BUILT_PRODUCTS_DIR; };
+		7F03FD3D19FA44CD00FA1327 /* APIManager.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = APIManager.swift; sourceTree = "<group>"; };
+		7F03FD3F19FA4D7400FA1327 /* bridge.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = bridge.h; sourceTree = "<group>"; };
 		7F0658FC19F7D6700077FF95 /* QRCodeViewController.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = QRCodeViewController.swift; sourceTree = "<group>"; };
-		7F0658FE19F7EE910077FF95 /* QRCodeManager.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = QRCodeManager.swift; sourceTree = "<group>"; };
+		7F0658FE19F7EE910077FF95 /* QRCodeData.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = QRCodeData.swift; sourceTree = "<group>"; };
 		7F06590319F8094C0077FF95 /* DeviceUDIDManager.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = DeviceUDIDManager.swift; sourceTree = "<group>"; };
 		7F2C605919F160E400C32D93 /* LocationManager.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = LocationManager.swift; sourceTree = "<group>"; };
+		7F3663031A00FD4600F6102D /* RaceLogEvent.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = RaceLogEvent.swift; sourceTree = "<group>"; };
+		7F3663051A00FF0C00F6102D /* DeviceCompetitorMappingEvent.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = DeviceCompetitorMappingEvent.swift; sourceTree = "<group>"; };
 		7F44095A19F65B5B0021BF22 /* CoreData.xcdatamodel */ = {isa = PBXFileReference; lastKnownFileType = wrapper.xcdatamodel; path = CoreData.xcdatamodel; sourceTree = "<group>"; };
 		7F83F15019F154F000C53328 /* SAPTracker.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = SAPTracker.app; sourceTree = BUILT_PRODUCTS_DIR; };
 		7F83F15419F154F000C53328 /* Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist.xml; path = Info.plist; sourceTree = "<group>"; };
@@ -104,6 +111,9 @@
 			isa = PBXGroup;
 			children = (
 				7FA6551919F6661900A1B92D /* DataManager.swift */,
+				7F0658FE19F7EE910077FF95 /* QRCodeData.swift */,
+				7F3663031A00FD4600F6102D /* RaceLogEvent.swift */,
+				7F3663051A00FF0C00F6102D /* DeviceCompetitorMappingEvent.swift */,
 				7FA6551719F65FBD00A1B92D /* GPSFix.swift */,
 				7F44095919F65B5B0021BF22 /* CoreData.xcdatamodeld */,
 			);
@@ -124,8 +134,8 @@
 		7F06590219F7FEA40077FF95 /* Controller */ = {
 			isa = PBXGroup;
 			children = (
+				7F03FD3D19FA44CD00FA1327 /* APIManager.swift */,
 				7F2C605919F160E400C32D93 /* LocationManager.swift */,
-				7F0658FE19F7EE910077FF95 /* QRCodeManager.swift */,
 				7F06590319F8094C0077FF95 /* DeviceUDIDManager.swift */,
 			);
 			name = Controller;
@@ -168,6 +178,7 @@
 			isa = PBXGroup;
 			children = (
 				7F83F15419F154F000C53328 /* Info.plist */,
+				7F03FD3F19FA4D7400FA1327 /* bridge.h */,
 			);
 			name = "Supporting Files";
 			sourceTree = "<group>";
@@ -326,14 +337,17 @@
 			buildActionMask = 2147483647;
 			files = (
 				7F83F15819F154F000C53328 /* HomeViewController.swift in Sources */,
+				7F3663061A00FF0C00F6102D /* DeviceCompetitorMappingEvent.swift in Sources */,
 				7F44095B19F65B5B0021BF22 /* CoreData.xcdatamodeld in Sources */,
+				7F03FD3E19FA44CD00FA1327 /* APIManager.swift in Sources */,
 				7FA6551819F65FBD00A1B92D /* GPSFix.swift in Sources */,
 				7FA6551A19F6661900A1B92D /* DataManager.swift in Sources */,
+				7F3663041A00FD4600F6102D /* RaceLogEvent.swift in Sources */,
 				7F2C605A19F160E400C32D93 /* LocationManager.swift in Sources */,
 				7F06590419F8094C0077FF95 /* DeviceUDIDManager.swift in Sources */,
 				7F0658FD19F7D6700077FF95 /* QRCodeViewController.swift in Sources */,
 				7F83F15619F154F000C53328 /* AppDelegate.swift in Sources */,
-				7F0658FF19F7EE910077FF95 /* QRCodeManager.swift in Sources */,
+				7F0658FF19F7EE910077FF95 /* QRCodeData.swift in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -464,6 +478,7 @@
 				LD_RUNPATH_SEARCH_PATHS = "$(inherited) @executable_path/Frameworks";
 				PRODUCT_NAME = "$(TARGET_NAME)";
 				PROVISIONING_PROFILE = "";
+				SWIFT_OBJC_BRIDGING_HEADER = SAPTracker/bridge.h;
 			};
 			name = Debug;
 		};
@@ -479,6 +494,7 @@
 				LD_RUNPATH_SEARCH_PATHS = "$(inherited) @executable_path/Frameworks";
 				PRODUCT_NAME = "$(TARGET_NAME)";
 				PROVISIONING_PROFILE = "";
+				SWIFT_OBJC_BRIDGING_HEADER = SAPTracker/bridge.h;
 			};
 			name = Release;
 		};

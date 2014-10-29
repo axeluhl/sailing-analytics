@@ -13,16 +13,16 @@ class QRCodeViewController: UIViewController, AVCaptureMetadataOutputObjectsDele
     struct NotificationType {
         static let qrcodeScannedNotificationKey = "qrcode_scanned"
     }
-
+    
     @IBOutlet weak var previewView: UIView!
     var session: AVCaptureSession!
     var previewLayer: AVCaptureVideoPreviewLayer!
-
+    
     override func viewDidLoad() {
         super.viewDidLoad()
         startScanning()
     }
-
+    
     @IBAction func dismiss(sender: AnyObject) {
         self.dismissViewControllerAnimated(true, completion: nil)
     }
@@ -34,7 +34,7 @@ class QRCodeViewController: UIViewController, AVCaptureMetadataOutputObjectsDele
         var input = AVCaptureDeviceInput.deviceInputWithDevice(device, error: &writeError) as? AVCaptureDeviceInput
         
         var output = AVCaptureMetadataOutput()
-        output.setMetadataObjectsDelegate(self,queue: dispatch_get_main_queue())
+        output.setMetadataObjectsDelegate(self, queue: dispatch_get_main_queue())
         
         session = AVCaptureSession()
         session.canSetSessionPreset(AVCaptureSessionPresetHigh)
@@ -49,6 +49,7 @@ class QRCodeViewController: UIViewController, AVCaptureMetadataOutputObjectsDele
         previewLayer = AVCaptureVideoPreviewLayer(session: session)
         previewLayer.videoGravity = AVLayerVideoGravityResizeAspectFill
         previewLayer.frame = previewView.bounds
+        previewLayer.position = CGPointMake(CGRectGetMidX(previewView.bounds), CGRectGetMidY(previewView.bounds));
         previewView.layer.addSublayer(previewLayer)
         
         session.startRunning()
@@ -60,16 +61,32 @@ class QRCodeViewController: UIViewController, AVCaptureMetadataOutputObjectsDele
             let metadataObject: AVMetadataMachineReadableCodeObject = metadataObjects[0] as AVMetadataMachineReadableCodeObject
             println(metadataObject.stringValue)
             
-            if (!QRCodeManager.sharedManager.parseString(metadataObject.stringValue)) {
+            var qrcodeData = QRCodeData()
+            if !qrcodeData.parseString(metadataObject.stringValue) {
                 var alert = UIAlertController(title: "SAP Tracker", message: "Incorrect QR Code", preferredStyle: UIAlertControllerStyle.Alert)
                 alert.addAction(UIAlertAction(title: "OK", style: UIAlertActionStyle.Default, handler: nil))
                 self.presentViewController(alert, animated: true, completion: nil)
                 return
             }
-            
+            // TODO: store qrcodeData somehow
             session.stopRunning()
-            previewLayer.removeFromSuperlayer()
-            self.dismissViewControllerAnimated(true, completion: nil)
+            APIManager.sharedManager.initManager(qrcodeData.server!)
+            APIManager.sharedManager.postDeviceMapping(qrcodeData,
+                success: { (AFHTTPRequestOperation operation, AnyObject responseObject) -> Void in
+                    var alert = UIAlertController(title: "SAP Tracker", message: "Connected to Server \(qrcodeData.server!)", preferredStyle: UIAlertControllerStyle.Alert)
+                    alert.addAction(UIAlertAction(title: "OK", style: UIAlertActionStyle.Default) { UIAlertAction in
+                        self.dismissViewControllerAnimated(true, completion: nil)
+                        })
+                    self.presentViewController(alert, animated: true, completion: nil)
+                    NSLog("success")
+                }, failure: { (AFHTTPRequestOperation operation, NSError error) -> Void in
+                    var alert = UIAlertController(title: "SAP Tracker", message: "Couldn't connect to Server \(qrcodeData.server!)", preferredStyle: UIAlertControllerStyle.Alert)
+                    alert.addAction(UIAlertAction(title: "Cancel", style: UIAlertActionStyle.Cancel) { UIAlertAction in
+                        self.session.startRunning()
+                        })
+                    self.presentViewController(alert, animated: true, completion: nil)
+                    NSLog("failure")
+            })
         }
     }
 }

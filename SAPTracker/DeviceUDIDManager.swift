@@ -17,7 +17,7 @@ struct DeviceUDIDManager {
         get {
             if (staticUdid == nil) {
                 if preferences.objectForKey("udid") == nil {
-                    staticUdid = NSUUID().UUIDString;
+                    staticUdid = NSUUID().UUIDString.lowercaseString
                     preferences.setObject(staticUdid, forKey: "udid")
                     preferences.synchronize()
                 } else {

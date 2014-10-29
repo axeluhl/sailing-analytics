@@ -8,7 +8,7 @@
 
 import Foundation
 
-class QRCodeManager {
+class QRCodeData {
     
     struct Keys {
         static let leaderBoard = "leaderboard"
@@ -26,17 +26,12 @@ class QRCodeManager {
     var fleet: String?
     var competitor: String?
     var mark: String?
-    var from: Int?
-    var to: Int?
-    
-    class var sharedManager: QRCodeManager {
-        struct Singleton {
-            static let sharedQRCodeManager = QRCodeManager()
-        }
-        return Singleton.sharedQRCodeManager
+    var from: Double?
+    var to: Double?
+ 
+    init() {
+        
     }
-    
-    // MARK: - methods
     
     func parseString(urlString: String) -> Bool {
         let url = NSURL(string: urlString)
@@ -64,13 +59,17 @@ class QRCodeManager {
             queryStringDictionary[key] = value
         }
        
-        leaderBoard = queryStringDictionary[QRCodeManager.Keys.leaderBoard]
-        raceColumn = queryStringDictionary[QRCodeManager.Keys.raceColumn]
-        fleet = queryStringDictionary[QRCodeManager.Keys.fleet]
-        competitor = queryStringDictionary[QRCodeManager.Keys.competitor]
-        mark = queryStringDictionary[QRCodeManager.Keys.mark]
-        from = queryStringDictionary[QRCodeManager.Keys.from]?.toInt()
-        to = queryStringDictionary[QRCodeManager.Keys.to]?.toInt()
+        leaderBoard = queryStringDictionary[QRCodeData.Keys.leaderBoard]
+        raceColumn = queryStringDictionary[QRCodeData.Keys.raceColumn]
+        fleet = queryStringDictionary[QRCodeData.Keys.fleet]
+        competitor = queryStringDictionary[QRCodeData.Keys.competitor]
+        mark = queryStringDictionary[QRCodeData.Keys.mark]
+        if queryStringDictionary[QRCodeData.Keys.from] != nil {
+            from = (queryStringDictionary[QRCodeData.Keys.from]! as NSString).doubleValue
+        }
+        if queryStringDictionary[QRCodeData.Keys.to] != nil {
+            to = (queryStringDictionary[QRCodeData.Keys.to]! as NSString).doubleValue
+        }
 
         // TODO: make sure minimum values set
         
