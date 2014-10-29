@@ -28,14 +28,17 @@ import com.sap.sse.gwt.client.async.MarkedAsyncCallback;
 import com.sap.sse.security.shared.UserManagementException;
 import com.sap.sse.security.ui.client.EntryPointLinkFactory;
 import com.sap.sse.security.ui.client.RemoteServiceMappingConstants;
+import com.sap.sse.security.ui.client.Resources;
 import com.sap.sse.security.ui.client.StringMessages;
 import com.sap.sse.security.ui.client.UserService;
+import com.sap.sse.security.ui.oauth.client.component.OAuthLoginPanel;
 import com.sap.sse.security.ui.shared.SuccessInfo;
 import com.sap.sse.security.ui.shared.UserManagementService;
 import com.sap.sse.security.ui.shared.UserManagementServiceAsync;
 
 public class LoginEntryPoint extends AbstractEntryPoint {
     private final StringMessages stringMessages = GWT.create(StringMessages.class);
+    private static final Resources resource = GWT.create(Resources.class);
     private UserManagementServiceAsync userManagementService;
     private UserService userService;
     
@@ -120,6 +123,7 @@ public class LoginEntryPoint extends AbstractEntryPoint {
                 });
             }
         });
+        fp.add(new OAuthLoginPanel(userManagementService, resource.css()));
         formPanel.add(fp);
         dockPanel.add(formPanel);
         nameText.setFocus(true);
