@@ -145,7 +145,7 @@ public class ReplicationMasterDescriptorImpl implements ReplicationMasterDescrip
                 // make sure to remove queue in order to avoid any exchanges filling it with messages
                 consumer.getChannel().queueUnbind(queueName, exchangeName, "");
                 consumer.getChannel().queueDelete(queueName);
-                consumer.getChannel().getConnection().close(1);
+                consumer.getChannel().getConnection().close(/* timeout in millis */ 1000);
             }
         } catch (Exception ex) {
             // ignore any exception during abort. close can yield a broad

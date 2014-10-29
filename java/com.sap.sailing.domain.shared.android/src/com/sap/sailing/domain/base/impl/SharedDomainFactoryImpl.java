@@ -12,6 +12,8 @@ import java.util.Map;
 import java.util.Set;
 import java.util.UUID;
 import java.util.concurrent.ConcurrentHashMap;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 
 import com.sap.sailing.domain.base.BoatClass;
 import com.sap.sailing.domain.base.Competitor;
@@ -34,6 +36,7 @@ import com.sap.sailing.domain.common.WithID;
 import com.sap.sailing.domain.common.configuration.DeviceConfigurationMatcherType;
 
 public class SharedDomainFactoryImpl implements SharedDomainFactory {
+    private static final Logger logger = Logger.getLogger(SharedDomainFactoryImpl.class.getName());
     
     /**
      * Ensure that the <em>same</em> string is used as key that is also used to set the {@link Nationality}
@@ -321,6 +324,9 @@ public class SharedDomainFactoryImpl implements SharedDomainFactory {
 
     @Override
     public Competitor getOrCreateCompetitor(Serializable competitorId, String name, Color displayColor, DynamicTeam team, DynamicBoat boat) {
+        if (logger.isLoggable(Level.FINEST)) {
+            logger.log(Level.FINEST, "getting or creating competitor "+name+" with ID "+competitorId+" in domain factory "+this);
+        }
         return getCompetitorStore().getOrCreateCompetitor(competitorId, name, displayColor, team, boat);
     }
 
