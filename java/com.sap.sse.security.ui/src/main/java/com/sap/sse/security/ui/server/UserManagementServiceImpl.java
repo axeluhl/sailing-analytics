@@ -306,13 +306,11 @@ public class UserManagementServiceImpl extends RemoteServiceServlet implements U
     public String getAuthorizationUrl(CredentialDTO credential) throws OAuthException {
         logger.info("callback url: " + credential.getRedirectUrl());
         String authorizationUrl = null;
-        
         try {
             authorizationUrl = getSecurityService().getAuthenticationUrl(createCredentialFromDTO(credential));
         } catch (UserManagementException e) {
             throw new OAuthException(e.getMessage());
         }
-
         return authorizationUrl;
     }
 

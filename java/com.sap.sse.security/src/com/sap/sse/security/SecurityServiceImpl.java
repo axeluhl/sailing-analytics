@@ -474,14 +474,11 @@ public class SecurityServiceImpl extends RemoteServiceServlet implements Securit
     public String getAuthenticationUrl(Credential credential) throws UserManagementException {
         Token requestToken = null;
         String authorizationUrl = null;
-
         int authProvider = credential.getAuthProvider();
-
         OAuthService service = getOAuthService(authProvider);
         if (service == null) {
             throw new UserManagementException("Could not build OAuthService");
         }
-
         if (authProvider == ClientUtils.TWITTER || authProvider == ClientUtils.YAHOO
                 || authProvider == ClientUtils.LINKEDIN || authProvider == ClientUtils.FLICKR
                 || authProvider == ClientUtils.IMGUR || authProvider == ClientUtils.TUMBLR
@@ -498,9 +495,7 @@ public class SecurityServiceImpl extends RemoteServiceServlet implements Securit
                 throw new UserManagementException("Could not get request token for " + authProvider + " "
                         + e.getMessage());
             }
-
         }
-
         logger.info("Getting Authorization url...");
         try {
             authorizationUrl = service.getAuthorizationUrl(requestToken);
