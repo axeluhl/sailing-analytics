@@ -60,6 +60,11 @@
         <extend-property name="locale" values="de"/>
 	<extend-property name="locale" values="ru"/>
 	
+	<!-- Turning CSS obfuscation off -->
+	<set-configuration-property name="CssResource.style" value="pretty"/>
+	<!-- Turning CSS obfuscation on -->
+	<!--  <set-configuration-property name="CssResource.style" value="obf"/> -->
+	
 	<source path='common'/>
 	<source path='client'/>
 	<source path='controls'/>

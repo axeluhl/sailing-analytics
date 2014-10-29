@@ -12,7 +12,10 @@ import com.sap.sse.security.ui.shared.UserDTO;
 import com.sap.sse.security.ui.shared.UserManagementServiceAsync;
 
 /**
- * Produces username, e-mail and password as the dialog's result.
+ * Produces username, e-mail and password as the dialog's result. This class's default implementation of
+ * {@link #getAdditionalWidget()} produces fields for username, e-mail, password and repeated password.
+ * Subclasses can override that method to produce their own set of controls or add other widgets to the
+ * dialog.
  * 
  * @author Axel Uhl (D043530)
  *
@@ -24,6 +27,7 @@ public class AbstractUserDialog extends DataEntryDialog<UserData> {
     private final TextBox oldPwBox;
     private final PasswordTextBox pwBox;
     private final PasswordTextBox pwRepeat;
+    private final UserManagementServiceAsync userManagementService;
     
     public static class UserData {
         private final String username;
@@ -93,8 +97,13 @@ public class AbstractUserDialog extends DataEntryDialog<UserData> {
             emailBox.setText(user.getEmail());
         }
         this.stringMessages = stringMessages;
+        this.userManagementService = userManagementService;
     }
     
+    protected UserManagementServiceAsync getUserManagementService() {
+        return userManagementService;
+    }
+
     @Override
     public void show() {
         super.show();
@@ -136,7 +145,7 @@ public class AbstractUserDialog extends DataEntryDialog<UserData> {
         result.setWidget(1, 0, new Label(getStringMessages().email()));
         result.setWidget(1, 1, getEmailBox());
         result.setWidget(2, 0, new Label(getStringMessages().password()));
-        result.setWidget(2,  1, getPwBox());
+        result.setWidget(2, 1, getPwBox());
         result.setWidget(3, 0, new Label(getStringMessages().passwordRepeat()));
         result.setWidget(3, 1, getPwRepeat());
         return result;

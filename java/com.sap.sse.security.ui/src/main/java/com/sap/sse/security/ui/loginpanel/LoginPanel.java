@@ -1,6 +1,6 @@
 package com.sap.sse.security.ui.loginpanel;
 
-import java.util.HashMap;
+import java.util.Collections;
 
 import com.google.gwt.core.client.GWT;
 import com.google.gwt.event.dom.client.ClickEvent;
@@ -9,230 +9,155 @@ import com.google.gwt.resources.client.ImageResource;
 import com.google.gwt.user.client.Window;
 import com.google.gwt.user.client.rpc.AsyncCallback;
 import com.google.gwt.user.client.ui.Anchor;
-import com.google.gwt.user.client.ui.FlowPanel;
-import com.google.gwt.user.client.ui.FocusPanel;
-import com.google.gwt.user.client.ui.FormPanel;
-import com.google.gwt.user.client.ui.FormPanel.SubmitEvent;
-import com.google.gwt.user.client.ui.FormPanel.SubmitHandler;
 import com.google.gwt.user.client.ui.HTML;
+import com.google.gwt.user.client.ui.HorizontalPanel;
 import com.google.gwt.user.client.ui.ImageResourceRenderer;
 import com.google.gwt.user.client.ui.Label;
-import com.google.gwt.user.client.ui.PasswordTextBox;
-import com.google.gwt.user.client.ui.SimplePanel;
-import com.google.gwt.user.client.ui.SubmitButton;
-import com.google.gwt.user.client.ui.TextBox;
+import com.sap.sse.gwt.client.async.MarkedAsyncCallback;
+import com.sap.sse.gwt.client.dialog.DataEntryDialog.DialogCallback;
 import com.sap.sse.security.ui.client.EntryPointLinkFactory;
 import com.sap.sse.security.ui.client.Resources;
 import com.sap.sse.security.ui.client.StringMessages;
 import com.sap.sse.security.ui.client.UserService;
 import com.sap.sse.security.ui.client.UserStatusEventHandler;
+import com.sap.sse.security.ui.client.component.AbstractUserDialog.UserData;
 import com.sap.sse.security.ui.oauth.client.component.OAuthLoginPanel;
 import com.sap.sse.security.ui.shared.SuccessInfo;
 import com.sap.sse.security.ui.shared.UserDTO;
 import com.sap.sse.security.ui.shared.UserManagementServiceAsync;
 
-public class LoginPanel extends FlowPanel implements UserStatusEventHandler {
+public class LoginPanel extends HorizontalPanel implements UserStatusEventHandler {
     public final UserManagementServiceAsync userManagementService;
     
     public static final StringMessages stringMessages = GWT.create(StringMessages.class);
 
-    private FormPanel loginPanel;
-    private FlowPanel userPanel;
-    private SimplePanel infoPanel;
-
-    private static int counter = 0;
-
-    private boolean expanded = false;
     private UserService userService;
 
-    private Label loginTitle;
-    private Anchor loginLink;
+    private final Anchor signInLink;
+    private final Anchor signOutLink;
+    private final Anchor signUpLink;
+    private final Label welcomeMessage;
 
-    private TextBox name;
+    private final OAuthLoginPanel oAuthPanel;
 
-    private PasswordTextBox password;
-
-    private FlowPanel wrapperPanel;
-
-    private final int id;
-
-    private final Css css;
-
-    public LoginPanel(final Css css, UserService userService) {
+    public LoginPanel(final Css css, final UserService userService) {
         this.userManagementService = userService.getUserManagementService();
         this.userService = userService;
-        this.css = css;
-        id = counter++;
         css.ensureInjected();
-        wrapperPanel = new FlowPanel();
-        wrapperPanel.addStyleName(css.loginPanel());
-        wrapperPanel.addStyleName(css.loginPanelCollapsed());
-        FocusPanel titleFocus = new FocusPanel();
-        FlowPanel titlePanel = new FlowPanel();
-        titleFocus.setWidget(titlePanel);
-        titlePanel.addStyleName(css.loginPanelTitlePanel());
-        loginTitle = new Label("");
-        loginLink = new Anchor(stringMessages.signIn());
-        final ImageResource userImageResource = Resources.INSTANCE.userIcon();
-        ImageResourceRenderer renderer = new ImageResourceRenderer();
-        titlePanel.add(new HTML(renderer.render(userImageResource)));
-        titlePanel.add(loginTitle);
-        titlePanel.add(loginLink);
-        wrapperPanel.add(titleFocus);
-        titleFocus.addClickHandler(new ClickHandler() {
+        getElement().addClassName(css.loginPanel());
+        welcomeMessage = new Label();
+        signInLink = new Anchor(stringMessages.signIn());
+        signInLink.addClickHandler(new ClickHandler() {
             @Override
             public void onClick(ClickEvent event) {
-                toggleLoginPanel();
-            }
-        });
-        infoPanel = new SimplePanel();
-        infoPanel.addStyleName(css.loginPanelInfoPanel());
-        initLoginContent();
-        initUserContent();
-        infoPanel.setWidget(loginPanel);
-        wrapperPanel.add(infoPanel);
-        add(wrapperPanel);
-        addUserStatusEventHandler(this);
-    }
-
-    private void initLoginContent() {
-        loginPanel = new FormPanel();
-        loginPanel.addSubmitHandler(new SubmitHandler() {
-            @Override
-            public void onSubmit(SubmitEvent event) {
-                userService.login(name.getText(), password.getText(),
-                        new AsyncCallback<SuccessInfo>() {
+                final SignInDialog signInDialog = new SignInDialog(stringMessages, userManagementService, css, new DialogCallback<UserData>() {
                     @Override
-                    public void onFailure(Throwable caught) {
-                        Window.alert(caught.getMessage());
+                    public void ok(UserData userData) {
+                        userService.login(userData.getUsername(), userData.getPassword(), new MarkedAsyncCallback<SuccessInfo>(new AsyncCallback<SuccessInfo>() {
+                            @Override
+                            public void onFailure(Throwable caught) {
+                                Window.alert(stringMessages.invalidCredentials());
+                            }
+                            @Override public void onSuccess(SuccessInfo result) {}
+                        }));
                     }
-
-                    @Override
-                    public void onSuccess(SuccessInfo result) {
-                        if (!result.isSuccessful()) {
-                            Window.alert(result.getMessage());
-                        }
-                    }
+                    @Override public void cancel() {}
                 });
+                signInDialog.show();
             }
         });
-        FlowPanel formContent = new FlowPanel();
-        Label nameLabel = new Label(stringMessages.name()+": ");
-        formContent.add(nameLabel);
-        name = new TextBox();
-        formContent.add(name);
-        Label passwordLabel = new Label(stringMessages.password()+": ");
-        formContent.add(passwordLabel);
-        password = new PasswordTextBox();
-        formContent.add(password);
-        SubmitButton submit = new SubmitButton(stringMessages.signIn());
-        formContent.add(submit);
-        Anchor register = new Anchor(stringMessages.signUp(),
-                EntryPointLinkFactory.createRegistrationLink(new HashMap<String, String>()));
-        formContent.add(register);
-        formContent.add(new OAuthLoginPanel(userManagementService));
-        loginPanel.setWidget(formContent);
-    }
+        signUpLink = new Anchor(stringMessages.signUp());
+        signUpLink.addClickHandler(new ClickHandler() {
+            @Override
+            public void onClick(ClickEvent event) {
+                final SignUpDialog signUpDialog = new SignUpDialog(stringMessages, userManagementService, new DialogCallback<UserData>() {
+                    @Override
+                    public void ok(final UserData userData) {
+                        userManagementService.createSimpleUser(userData.getUsername(), userData.getEmail(), userData.getPassword(),
+                                EntryPointLinkFactory.createEmailValidationLink(Collections.<String, String> emptyMap()),
+                                new MarkedAsyncCallback<UserDTO>(new AsyncCallback<UserDTO>() {
+                            @Override
+                            public void onFailure(Throwable caught) {
+                                Window.alert(stringMessages.errorCreatingUser(userData.getUsername(), caught.getMessage()));
+                            }
+                            @Override public void onSuccess(UserDTO result) {
+                                userService.login(userData.getUsername(), userData.getPassword(), new MarkedAsyncCallback<SuccessInfo>(new AsyncCallback<SuccessInfo>() {
+                                    @Override
+                                    public void onFailure(Throwable caught) {
+                                        // pretty strange; we just successfully created the user with these credentials...
+                                        Window.alert(stringMessages.invalidCredentials());
+                                    }
+                                    @Override public void onSuccess(SuccessInfo result) {}
+                                }));
+                            }
+                        }));
+                    }
+                    @Override public void cancel() {}
+                });
+                signUpDialog.show();
+            }
+        });
+        signOutLink = new Anchor(stringMessages.signOut());
+        signOutLink.addClickHandler(new ClickHandler() {
+            @Override
+            public void onClick(ClickEvent event) {
+                userService.logout();
+            }
+        });
 
-    private void initUserContent() {
-        userPanel = new FlowPanel();
-    }
-
-    private void updateUserContent() {
-        if (getCurrentUser() != null) {
-            userPanel.clear();
-            Anchor logout = new Anchor(stringMessages.signOut());
-            userPanel.add(logout);
-            logout.addClickHandler(new ClickHandler() {
-                @Override
-                public void onClick(ClickEvent event) {
-                    userService.logout();
-                }
-            });
-        }
+        final ImageResource userImageResource = Resources.INSTANCE.userIcon();
+        ImageResourceRenderer renderer = new ImageResourceRenderer();
+        final HTML imageContainer = new HTML(renderer.render(userImageResource));
+        imageContainer.getElement().addClassName(css.userIcon());
+        add(imageContainer);
+        welcomeMessage.getElement().addClassName(css.welcomeMessage());
+        signInLink.getElement().addClassName(css.link());
+        signUpLink.getElement().addClassName(css.link());
+        signOutLink.getElement().addClassName(css.link());
+        add(welcomeMessage);
+        add(signInLink);
+        add(signUpLink);
+        add(signOutLink);
+        oAuthPanel = new OAuthLoginPanel(userManagementService, css);
+        add(oAuthPanel);
+        userService.addUserStatusEventHandler(this);
+        updateStatus();
     }
 
     public void updateStatus() {
-        if (getCurrentUser() != null) {
-            String name = getCurrentUser().getName();
+        if (userService.getCurrentUser() != null) {
+            String name = userService.getCurrentUser().getName();
+            final String displayName;
             if (name == null) {
-                loginTitle.setText(stringMessages.invalidUsername());
-            } else {
-                if (name.contains("*")) {
-                    name = name.split("\\*")[1];
-                }
-                loginTitle.setTitle(name);
-                if (name.length() > 15) {
-                    name = name.substring(0, 12) + "...";
-                }
-                loginTitle.setText(stringMessages.welcome(name));
+                displayName = "";
+            } else if (name.contains("*")) {
+                // FIXME social user account and name is separated by '*' character; see bug 2441
+                displayName = name.split("\\*")[1];
+            } else { 
+                displayName = name;
             }
-            infoPanel.setWidget(userPanel);
-            loginLink.setText("");
-            updateUserContent();
+            final String croppedDisplayName;
+            if (displayName.length() > 15) {
+                croppedDisplayName = displayName.substring(0, 12) + "...";
+            } else {
+                croppedDisplayName = displayName;
+            }
+            welcomeMessage.setText(stringMessages.welcome(croppedDisplayName));
+            signInLink.setVisible(false);
+            signUpLink.setVisible(false);
+            oAuthPanel.setVisible(false);
+            signOutLink.setVisible(true);
         } else {
-            infoPanel.setWidget(loginPanel);
-            loginTitle.setText("");
-            loginLink.setText(stringMessages.signIn());
+            welcomeMessage.setText("");
+            signInLink.setVisible(true);
+            signUpLink.setVisible(true);
+            oAuthPanel.setVisible(true);
+            signOutLink.setVisible(false);
         }
-        expanded = false;
-        wrapperPanel.addStyleName(css.loginPanelCollapsed());
-        wrapperPanel.removeStyleName(css.loginPanelExpanded());
-    }
-
-    private void toggleLoginPanel() {
-        if (expanded) {
-            expanded = false;
-            wrapperPanel.addStyleName(css.loginPanelCollapsed());
-            wrapperPanel.removeStyleName(css.loginPanelExpanded());
-        } else {
-            expanded = true;
-            wrapperPanel.addStyleName(css.loginPanelExpanded());
-            wrapperPanel.removeStyleName(css.loginPanelCollapsed());
-        }
-    }
-
-    public UserDTO getCurrentUser() {
-        return userService.getCurrentUser();
-    }
-
-    public void addUserStatusEventHandler(UserStatusEventHandler handler) {
-        userService.addUserStatusEventHandler(handler);
-    }
-
-    public void removeUserStatusEventHandler(UserStatusEventHandler handler) {
-        userService.removeUserStatusEventHandler(handler);
     }
 
     @Override
     public void onUserStatusChange(UserDTO user) {
         updateStatus();
-    }
-
-    @Override
-    public int hashCode() {
-        final int prime = 31;
-        int result = 1;
-        result = prime * result + id;
-        return result;
-    }
-
-    @Override
-    public boolean equals(Object obj) {
-        if (this == obj)
-            return true;
-        if (obj == null)
-            return false;
-        if (getClass() != obj.getClass())
-            return false;
-        LoginPanel other = (LoginPanel) obj;
-        if (id != other.id)
-            return false;
-        return true;
-    }
-
-    @Override
-    public String toString() {
-        return "LoginPanel [id=" + id + "]";
     }
 }
