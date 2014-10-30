@@ -101,7 +101,6 @@
     <string name="availableFinishingCompetitors">Segler</string>
     <string name="choose_blue_flag_finishing">Rennen beenden</string>
     <string name="drag_handle_description">Cursor</string>
-    <string name="options_menu_live">Verbindungsinformationen</string>
     <string name="options_menu_reload">Neuladen</string>
     <string name="options_menu_settings">Einstellungen</string>
     <string name="results_capturing_title">Ergebnislisten</string>
@@ -111,7 +110,6 @@
     <string name="results_capturing_view_add_photo">Foto hinzufügen</string>
     <string name="results_capturing_view_list_header">Angehängte Fotos</string>
     <string name="results_capturing_view_list_empty">Bisher keine Fotos</string>
-    <string name="remove">Entfernen</string>
     
     <string name="results_mail_subject">[Race Committee] %s</string>
     <string name="results_mail_body">Ergebnislisten für Rennen %s sind angehängt.</string>
@@ -194,13 +192,9 @@
     <string name="login_type_officer_on_start_vessel">Als Startschiff-Wettfahrtleiter anmelden</string>
     <string name="login_type_officer_on_finish_vessel">Als Zielschiff-Wettfahrtleiter anmelden</string>
     <string name="login_type_shore_control">Als Regattaleitung an Land anmelden</string>
-    <string name="generic_error">Fehler</string>
     <string name="gate_launch_stops_after">Gate Launch stoppt nach %dmin</string>
     <string name="override_default_course_designer_type_select_header">Kursdesigner</string>
 	<string name="settings_course_designer_by_name_course_names_header">Kursnamen</string>
-	<string name="enter_new_item">Neues Element eingeben</string>
-	<string name="add">Hinzufügen</string>
-	<string name="there_are_no_items_yet_">Bisher keine Elemente.</string>
 	<string name="preference_racing_procedure_rrs26_startmode_flags_header">Startmodus Flaggen</string>
 	<string name="preference_racing_procedure_classflag_header">Klassenflagge</string>
 	<string name="preference_racing_procedure_hasxray_header">Einzelrückruf</string>
@@ -245,4 +239,7 @@
 	<string name="race_start_in_1_minute">1 Minute</string>
 	<string name="race_reset_course">Kurs ändern</string>
 	<string name="no_course_active">Kein Kurs gesetzt</string>
+	<string name="toggle_group_race_mode">Gruppenrennen?</string>
+	<string name="toggle_group_race_mode_off">Kein Gruppenrennen</string>
+	<string name="toggle_group_race_mode_on">Gruppenrennen</string>
 </resources>

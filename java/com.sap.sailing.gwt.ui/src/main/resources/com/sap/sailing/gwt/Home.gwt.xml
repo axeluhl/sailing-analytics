@@ -25,8 +25,9 @@
 	<inherits name="com.sap.sse.gwt.SSESharedGWT" />
 	<inherits name="com.sap.sse.SSECommon" />
 	<inherits name="com.sap.sailing.domain.SailingDomain" />
-
-		<!-- Highcharts API -->
+	<inherits name="com.sap.sse.security.ui.LoginPanel" />
+	
+	<!-- Highcharts API -->
 	<inherits name="org.moxieapps.gwt.highcharts.Highcharts" />
 	
 	<!-- Google Maps API -->
@@ -65,7 +66,7 @@
 	-->
 	
 	<set-property name="gwt.logging.enabled" value="TRUE"/> 
-	<set-property name="gwt.logging.logLevel" value="FINE"/>
+	<set-property name="gwt.logging.logLevel" value="INFO"/>
 	
 	<set-property name="gwt.logging.firebugHandler" value="ENABLED" />
 	<set-property name="gwt.logging.simpleRemoteHandler" value="DISABLED" />
@@ -79,8 +80,12 @@
 	<source path='ui/shared' />
 	<source path='ui/actions' />
 	<source path='ui/simulator' />
+	<source path='ui/adminconsole' />
+	<source path='ui/usermanagement' />
+	<source path='ui/masterdataimport' />
 	<source path='ui/regattaoverview' />
 	<source path='ui/leaderboard'/>
 	<source path='home' />
+	<source path='common' />
 	<source path='idangerous' />
 </module>

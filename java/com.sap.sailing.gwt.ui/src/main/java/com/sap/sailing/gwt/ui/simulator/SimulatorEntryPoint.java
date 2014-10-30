@@ -182,7 +182,7 @@ public class SimulatorEntryPoint extends AbstractEntryPoint {
     }
 
     private FlowPanel createLogoAndTitlePanel(SimulatorMainPanel simulatorPanel) {
-        LogoAndTitlePanel logoAndTitlePanel = new LogoAndTitlePanel(titleName, null, stringMessages, this);
+        LogoAndTitlePanel logoAndTitlePanel = new LogoAndTitlePanel(titleName, null, stringMessages, this, getUserService());
         /*{
             @Override
             public void onResize() {

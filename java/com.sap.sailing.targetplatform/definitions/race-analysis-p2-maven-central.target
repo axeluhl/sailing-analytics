@@ -15,15 +15,29 @@
 </location>
 <location includeAllPlatforms="false" includeMode="slicer" includeSource="true" type="InstallableUnit">
 <unit id="org.eclipse.osgi" version="3.10.1.v20140909-1633"/>
+<unit id="org.eclipse.osgi.source" version="3.10.1.v20140909-1633"/>
 <unit id="org.eclipse.osgi.services" version="3.4.0.v20140312-2051"/>
+<unit id="org.eclipse.osgi.services.source" version="3.4.0.v20140312-2051"/>
 <unit id="org.eclipse.equinox.common" version="3.6.200.v20130402-1505"/>
+<unit id="org.eclipse.equinox.common.source" version="3.6.200.v20130402-1505"/>
 <unit id="org.eclipse.equinox.util" version="1.0.500.v20130404-1337"/>
+<unit id="org.eclipse.equinox.util.source" version="1.0.500.v20130404-1337"/>
 <unit id="org.eclipse.equinox.simpleconfigurator" version="1.1.0.v20131217-1203"/>
+<unit id="org.eclipse.equinox.simpleconfigurator.source" version="1.1.0.v20131217-1203"/>
 <unit id="org.eclipse.equinox.console" version="1.1.0.v20140131-1639"/>
+<unit id="org.eclipse.equinox.console.source" version="1.1.0.v20140131-1639"/>
 <unit id="org.eclipse.equinox.launcher" version="1.3.0.v20140415-2008"/>
+<unit id="org.eclipse.equinox.launcher.source" version="1.3.0.v20140415-2008"/>
 <unit id="org.apache.felix.gogo.command" version="0.10.0.v201209301215"/>
+<unit id="org.apache.felix.gogo.command.source" version="0.10.0.v201209301215"/>
 <unit id="org.apache.felix.gogo.runtime" version="0.10.0.v201209301036"/>
+<unit id="org.apache.felix.gogo.runtime.source" version="0.10.0.v201209301036"/>
 <unit id="org.apache.felix.gogo.shell" version="0.10.0.v201212101605"/>
+<unit id="org.apache.felix.gogo.shell.source" version="0.10.0.v201212101605"/>
+<unit id="org.apache.commons.collections" version="3.2.0.v2013030210310"/>
+<unit id="org.apache.commons.collections.source" version="3.2.0.v2013030210310"/>
+<unit id="org.apache.commons.beanutils" version="1.8.0.v201205091237"/>
+<unit id="org.apache.commons.beanutils.source" version="1.8.0.v201205091237"/>
 <repository location="http://download.eclipse.org/releases/luna"/>
 </location>
 <location includeAllPlatforms="false" includeConfigurePhase="false" includeMode="slicer" includeSource="true" type="InstallableUnit">
@@ -66,10 +80,11 @@
 <plugin id="javax.ws.rs.source"/>
 <plugin id="jcl.over.slf4j"/>
 <plugin id="jul.to.slf4j"/>
-<plugin id="org.apache.activemq.activeio-core"/>
-<plugin id="org.apache.activemq.activemq-core"/>
-<plugin id="org.apache.activemq.kahadb"/>
+<plugin id="org.apache.commons.beanutils"/>
+<plugin id="org.apache.commons.beanutils.source"/>
 <plugin id="org.apache.commons.codec"/>
+<plugin id="org.apache.commons.collections"/>
+<plugin id="org.apache.commons.collections.source"/>
 <plugin id="org.apache.commons.fileupload"/>
 <plugin id="org.apache.commons.fileupload.source"/>
 <plugin id="org.apache.commons.io"/>

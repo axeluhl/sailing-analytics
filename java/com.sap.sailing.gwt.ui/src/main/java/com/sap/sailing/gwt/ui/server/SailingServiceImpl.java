@@ -4860,7 +4860,7 @@ public class SailingServiceImpl extends ProxiedRemoteServiceServlet implements S
     TransformationException {
         DeviceIdentifierStringSerializationHandler handler =
                 getDeviceIdentifierStringSerializerHandlerFinder(false).findService(type);
-        return handler.deserialize(deviceId, type, null);
+        return handler.deserialize(deviceId, type, deviceId);
     }
     
     private String serializeDeviceIdentifier(DeviceIdentifier deviceId) throws TransformationException {

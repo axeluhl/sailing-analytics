@@ -21,10 +21,10 @@ import com.sap.sailing.gwt.ui.client.LogoAndTitlePanel;
 import com.sap.sailing.gwt.ui.client.RemoteServiceMappingConstants;
 import com.sap.sailing.gwt.ui.client.SailingService;
 import com.sap.sailing.gwt.ui.client.SailingServiceAsync;
-import com.sap.sailing.gwt.ui.client.URLEncoder;
 import com.sap.sailing.gwt.ui.regattaoverview.RegattaRaceStatesComponent.EntryHandler;
 import com.sap.sailing.gwt.ui.shared.RegattaOverviewEntryDTO;
 import com.sap.sse.gwt.client.EntryPointHelper;
+import com.sap.sse.gwt.client.URLEncoder;
 
 public class RegattaOverviewEntryPoint extends AbstractEntryPoint  {
 
@@ -53,7 +53,7 @@ public class RegattaOverviewEntryPoint extends AbstractEntryPoint  {
         boolean embedded = Window.Location.getParameter("embedded") != null
                 && Window.Location.getParameter("embedded").equalsIgnoreCase("true");
         if (!embedded) {
-            LogoAndTitlePanel logoAndTitlePanel = new LogoAndTitlePanel(stringMessages.eventOverview(), stringMessages, this);
+            LogoAndTitlePanel logoAndTitlePanel = new LogoAndTitlePanel(stringMessages.eventOverview(), stringMessages, this, getUserService());
             logoAndTitlePanel.addStyleName("LogoAndTitlePanel");
             containerPanel.addNorth(logoAndTitlePanel, 68);
         } else {

@@ -4,10 +4,12 @@ import java.io.File;
 import java.io.InputStream;
 import java.net.URL;
 
-import com.sap.sailing.racecommittee.app.data.http.FileBasedHttpGetRequest;
-import com.sap.sailing.racecommittee.app.data.http.HttpRequest;
-import com.sap.sailing.racecommittee.app.data.http.HttpRequest.HttpRequestProgressListener;
-import com.sap.sailing.racecommittee.app.logging.ExLog;
+import android.content.Context;
+
+import com.sap.sailing.android.shared.data.http.FileBasedHttpGetRequest;
+import com.sap.sailing.android.shared.data.http.HttpRequest;
+import com.sap.sailing.android.shared.data.http.HttpRequest.HttpRequestProgressListener;
+import com.sap.sailing.android.shared.logging.ExLog;
 import com.sap.sailing.racecommittee.app.utils.autoupdate.AutoUpdaterChecker.AutoUpdaterState;
 
 public class AutoUpdaterApkDownloader extends AutoUpdaterDownloader<File> implements HttpRequestProgressListener {
@@ -16,15 +18,15 @@ public class AutoUpdaterApkDownloader extends AutoUpdaterDownloader<File> implem
     
     private final File targetFile;
     
-    public AutoUpdaterApkDownloader(AutoUpdaterState state, File targetFile) {
-        super(state);
+    public AutoUpdaterApkDownloader(AutoUpdaterState state, File targetFile, Context context) {
+        super(state, context);
         this.targetFile = targetFile;
     }
 
     @Override
     protected File downloadInBackground(final URL url) {
         try {
-            HttpRequest request = new FileBasedHttpGetRequest(url, this, targetFile);
+            HttpRequest request = new FileBasedHttpGetRequest(url, this, targetFile, context);
             InputStream result = null;
             try {
                 result = request.execute();
@@ -37,7 +39,7 @@ public class AutoUpdaterApkDownloader extends AutoUpdaterDownloader<File> implem
                 }
             }
         } catch (Exception e) {
-            ExLog.ex(TAG, e);
+            ExLog.ex(context, TAG, e);
         }
         return null;
     }

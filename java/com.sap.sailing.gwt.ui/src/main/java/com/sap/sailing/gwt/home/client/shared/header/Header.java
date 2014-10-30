@@ -22,8 +22,8 @@ import com.google.gwt.user.client.ui.Button;
 import com.google.gwt.user.client.ui.Composite;
 import com.google.gwt.user.client.ui.TextBox;
 import com.google.gwt.user.client.ui.Widget;
+import com.sap.sailing.gwt.common.client.i18n.TextMessages;
 import com.sap.sailing.gwt.home.client.app.PlaceNavigator;
-import com.sap.sailing.gwt.home.client.i18n.TextMessages;
 
 public class Header extends Composite {
     @UiField Anchor startPageLink;

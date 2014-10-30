@@ -1,7 +1,7 @@
 package com.sap.sailing.selenium.test.leaderboard;
 
-import static org.hamcrest.Matchers.*;
-import static org.junit.Assert.*;
+import static org.hamcrest.Matchers.equalTo;
+import static org.junit.Assert.assertThat;
 
 import java.util.List;
 

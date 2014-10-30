@@ -31,8 +31,6 @@ public class RecentEvent extends UIObject {
     
     private final EventBaseDTO event;
 
-    private final String defaultImageUrl = "http://static.sapsailing.com/ubilabsimages/default/default_event_photo.jpg";
-
     interface RecentEventUiBinder extends UiBinder<DivElement, RecentEvent> {
     }
     
@@ -66,7 +64,7 @@ public class RecentEvent extends UIObject {
         eventStartDate.setInnerText(EventDatesFormatterUtil.formatDateRangeWithoutYear(event.startDate, event.endDate));
         List<String> photoGalleryImageURLs = event.getPhotoGalleryImageURLs();
         if (photoGalleryImageURLs.isEmpty()) {
-            eventImage.setSrc(defaultImageUrl);
+            eventImage.setSrc(RecentEventResources.INSTANCE.defaultEventPhotoImage().getSafeUri().asString());
         } else {
             eventImage.setSrc(photoGalleryImageURLs.get(0));
         }

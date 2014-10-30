@@ -32,7 +32,7 @@ public class LeaderboardEditPage extends AbstractEntryPoint {
             public void onSuccess(List<String> leaderboardNames) {
                 String leaderboardName = Window.Location.getParameter("name");
                 if (leaderboardNames.contains(leaderboardName)) {
-                    LogoAndTitlePanel logoAndTitlePanel = new LogoAndTitlePanel(stringMessages.editScores(), stringMessages, LeaderboardEditPage.this);
+                    LogoAndTitlePanel logoAndTitlePanel = new LogoAndTitlePanel(stringMessages.editScores(), stringMessages, LeaderboardEditPage.this, getUserService());
                     logoAndTitlePanel.addStyleName("LogoAndTitlePanel");
                     EditableLeaderboardPanel leaderboardPanel = new EditableLeaderboardPanel(sailingService, new AsyncActionsExecutor(), leaderboardName, null,
                             LeaderboardEditPage.this, stringMessages, userAgent);

@@ -9,6 +9,7 @@ import static org.mockito.Mockito.when;
 
 import java.util.Arrays;
 import java.util.Collections;
+import java.util.HashSet;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Set;
@@ -103,7 +104,7 @@ public class WindJsonGetServletRefactoringTest {
     public void compareOldAndNewImplementation() {
         TrackedRace trackedRace = mock(TrackedRace.class);
         final WindSourceImpl webWindSource = new WindSourceImpl(WindSourceType.WEB);
-        when(trackedRace.getWindSources()).thenReturn(Arrays.asList(new WindSource[] { webWindSource }));
+        when(trackedRace.getWindSources()).thenReturn(new HashSet<>(Arrays.asList(new WindSource[] { webWindSource })));
         RaceDefinition race = mock(RaceDefinition.class);
         when(race.getName()).thenReturn("Race Name");
         when(trackedRace.getRace()).thenReturn(race);

@@ -5,8 +5,9 @@ import java.text.MessageFormat;
 import org.openqa.selenium.By;
 import org.openqa.selenium.WebDriver;
 import org.openqa.selenium.WebElement;
-import org.openqa.selenium.interactions.Actions;
+import org.openqa.selenium.support.ui.ExpectedConditions;
 import org.openqa.selenium.support.ui.FluentWait;
+import org.openqa.selenium.support.ui.WebDriverWait;
 
 import com.sap.sailing.selenium.core.BySeleniumId;
 import com.sap.sailing.selenium.core.ElementSearchConditions;
@@ -70,7 +71,6 @@ public class AdminConsolePage extends HostPage {
      */
     public static AdminConsolePage goToPage(WebDriver driver, String root) {
         driver.get(root + "gwt/AdminConsole.html?" + getGWTCodeServer()); //$NON-NLS-1$
-        
         // TODO: As soon as the security API is available in Selenium we should use it to login into the admin console.
 //        FluentWait<WebDriver> wait = createFluentWait(driver, 5, 100);
 //        Alert alert = wait.until(new Function<WebDriver, Alert>() {
@@ -134,7 +134,7 @@ public class AdminConsolePage extends HostPage {
      */
     @Override
     protected void verify() {
-        if(!PAGE_TITLE.equals(this.driver.getTitle())) {
+        if (!PAGE_TITLE.equals(this.driver.getTitle())) {
             throw new IllegalStateException("This is not the administration console: " + this.driver.getTitle()); //$NON-NLS-1$
         }
     }
@@ -145,20 +145,13 @@ public class AdminConsolePage extends HostPage {
             expression = VERTICAL_TAB_EXPRESSION.format(new Object[] {label});
         }
         WebElement tab = this.administrationTabPanel.findElement(By.xpath(expression));
-        // We have to determine the location where we have to click at the tab for the case its not completely visible.
-        // NOTE: We assume that the browser window is big enough to display at least 2 tabs!
-        Actions actions = new Actions(this.driver);
-        actions.moveToElement(tab, determineOffsetForClick(tab), 5);
-        actions.click();
-        actions.perform();
+        WebDriverWait waitForTab = new WebDriverWait(driver, 20); // here, wait time is 20 seconds
+        waitForTab.until(ExpectedConditions.visibilityOf(tab)); // this will wait for tab to be visible for 20 seconds
+        tab.click();
         // Wait for the tab to become visible due to the used animations.
         FluentWait<WebElement> wait = createFluentWait(this.administrationTabPanel);
         WebElement content = wait.until(ElementSearchConditions.visibilityOfElementLocated(new BySeleniumId(id)));
         waitForAjaxRequests(); // switching tabs can trigger asynchronous updates, replacing UI elements
         return content;
-    }
-    
-    private int determineOffsetForClick(WebElement tab) {
-        return tab.getSize().width / 2;
     }
 }

@@ -5,6 +5,7 @@ import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
 import java.util.NavigableSet;
+import java.util.Set;
 
 import com.sap.sailing.domain.base.Competitor;
 import com.sap.sailing.domain.base.Leg;
@@ -226,19 +227,19 @@ public class MockedTrackedRaceWithStartTimeAndRanks implements TrackedRace {
     }
 
     @Override
-    public Wind getWind(Position p, TimePoint at, Iterable<WindSource> windSourcesToExclude) {
+    public Wind getWind(Position p, TimePoint at, Set<WindSource> windSourcesToExclude) {
         // TODO Auto-generated method stub
         return null;
     }
 
     @Override
-    public Iterable<WindSource> getWindSources(WindSourceType type) {
-        return Collections.emptyList();
+    public Set<WindSource> getWindSources(WindSourceType type) {
+        return Collections.emptySet();
     }
 
     @Override
-    public Iterable<WindSource> getWindSources() {
-        return Collections.emptyList();
+    public Set<WindSource> getWindSources() {
+        return Collections.emptySet();
     }
 
     @Override
@@ -399,14 +400,14 @@ public class MockedTrackedRaceWithStartTimeAndRanks implements TrackedRace {
     }
 
     @Override
-    public Iterable<WindSource> getWindSourcesToExclude() {
+    public Set<WindSource> getWindSourcesToExclude() {
         // TODO Auto-generated method stub
         return null;
     }
 
     @Override
     public WindWithConfidence<Util.Pair<Position, TimePoint>> getWindWithConfidence(Position p, TimePoint at,
-            Iterable<WindSource> windSourcesToExclude) {
+            Set<WindSource> windSourcesToExclude) {
         // TODO Auto-generated method stub
         return null;
     }

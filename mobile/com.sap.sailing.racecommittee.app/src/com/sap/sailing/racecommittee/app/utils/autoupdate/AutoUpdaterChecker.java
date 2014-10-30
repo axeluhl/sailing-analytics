@@ -13,9 +13,9 @@ import android.content.DialogInterface.OnCancelListener;
 import android.content.DialogInterface.OnClickListener;
 import android.widget.Toast;
 
+import com.sap.sailing.android.shared.logging.ExLog;
+import com.sap.sailing.android.shared.util.AppUtils;
 import com.sap.sailing.racecommittee.app.R;
-import com.sap.sailing.racecommittee.app.RaceApplication;
-import com.sap.sailing.racecommittee.app.logging.ExLog;
 
 public class AutoUpdaterChecker {
 
@@ -75,9 +75,9 @@ public class AutoUpdaterChecker {
             
             try {
                 URL versionUrl = composeVersionUrl();
-                ExLog.i(TAG, context.getString(R.string.auto_update_downloading_version, versionUrl.toString()));
+                ExLog.i(context, TAG, context.getString(R.string.auto_update_downloading_version, versionUrl.toString()));
 
-                final AutoUpdaterVersionDownloader downloader = new AutoUpdaterVersionDownloader(this);
+                final AutoUpdaterVersionDownloader downloader = new AutoUpdaterVersionDownloader(this, context);
                 downloader.execute(versionUrl);
                 dialog.setOnCancelListener(new OnCancelListener() {
                     @Override
@@ -93,9 +93,9 @@ public class AutoUpdaterChecker {
 
         @Override
         public void updateToVersion(int serverVersion, final String apkFileName) {
-            int currentVersion = RaceApplication.getPackageInfo(context).versionCode;
+            int currentVersion = AppUtils.getPackageInfo(context).versionCode;
             boolean needsUpdate = currentVersion != serverVersion;
-            ExLog.i(TAG, String.format("Server version is %d. Local version is %d.", serverVersion, currentVersion));
+            ExLog.i(context, TAG, String.format("Server version is %d. Local version is %d.", serverVersion, currentVersion));
             
             DialogInterface.OnClickListener dismissListener = new OnClickListener() {
                 @Override
@@ -141,10 +141,10 @@ public class AutoUpdaterChecker {
             try {
                 File target = updater.createApkTargetFile();
                 
-                final AutoUpdaterApkDownloader downloader = new AutoUpdaterApkDownloader(this, target);
+                final AutoUpdaterApkDownloader downloader = new AutoUpdaterApkDownloader(this, target, context);
                 
                 URL downloadUrl = composeDownloadUrl(apkFileName);
-                ExLog.i(TAG, String.format("Download from %s to file %s.", downloadUrl.toString() , target.getAbsolutePath()));
+                ExLog.i(context, TAG, String.format("Download from %s to file %s.", downloadUrl.toString() , target.getAbsolutePath()));
                 downloader.execute(downloadUrl);
                 dialog.setOnCancelListener(new OnCancelListener() {
                     @Override
