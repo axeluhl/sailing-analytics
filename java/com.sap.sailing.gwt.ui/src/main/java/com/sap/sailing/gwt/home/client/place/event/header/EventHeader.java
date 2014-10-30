@@ -4,8 +4,8 @@ import com.google.gwt.core.client.GWT;
 import com.google.gwt.dom.client.DivElement;
 import com.google.gwt.dom.client.ImageElement;
 import com.google.gwt.dom.client.SpanElement;
-import com.google.gwt.dom.client.StyleInjector;
 import com.google.gwt.dom.client.Style.Display;
+import com.google.gwt.dom.client.StyleInjector;
 import com.google.gwt.event.dom.client.ClickEvent;
 import com.google.gwt.uibinder.client.UiBinder;
 import com.google.gwt.uibinder.client.UiField;
@@ -17,6 +17,7 @@ import com.sap.sailing.gwt.common.client.i18n.TextMessages;
 import com.sap.sailing.gwt.home.client.app.HomePlacesNavigator;
 import com.sap.sailing.gwt.home.client.app.PlaceNavigation;
 import com.sap.sailing.gwt.home.client.place.event.AbstractEventComposite;
+import com.sap.sailing.gwt.home.client.place.event.EventPlace;
 import com.sap.sailing.gwt.home.client.place.event.EventPlaceNavigator;
 import com.sap.sailing.gwt.home.client.place.leaderboard.LeaderboardPlace;
 import com.sap.sailing.gwt.home.client.shared.EventDatesFormatterUtil;
@@ -95,7 +96,7 @@ public class EventHeader extends AbstractEventComposite {
             isLiveDiv.getStyle().setDisplay(Display.NONE);
         }
         
-        setDataNavigationType("normal");
+        setFullsizeHeader();
         updateUI();
     }
 
@@ -108,7 +109,7 @@ public class EventHeader extends AbstractEventComposite {
         isFinishedDiv.getStyle().setDisplay(Display.NONE);
         isLiveDiv.getStyle().setDisplay(Display.NONE);
         
-        setDataNavigationType("normal");
+        setFullsizeHeader();
         updateUI();
     }
 
@@ -118,9 +119,18 @@ public class EventHeader extends AbstractEventComposite {
         
         initWidget(uiBinder.createAndBindUi(this));
     }
+
+    public void setFullsizeHeader() {
+        eventHeaderWrapperDiv.setAttribute("data-navigationtype", "normal");
+    }
     
-    public void setDataNavigationType(String dataNavigationType) {
-        eventHeaderWrapperDiv.setAttribute("data-navigationtype", dataNavigationType);
+    public void setCompactHeader() {
+        eventHeaderWrapperDiv.setAttribute("data-navigationtype", "compact");
+        EventDTO event = getEvent();
+        
+        PlaceNavigation<EventPlace> eventNavigation  = placeNavigator.getEventNavigation(event.id.toString(), event.getBaseURL(), event.isOnRemoteServer());
+        regattasLink.setHref(eventNavigation.getTargetUrl());
+        regattasLink2.setHref(eventNavigation.getTargetUrl());
     }
 
     private StrippedLeaderboardDTO findLeaderboardWithSameCourseArea(EventDTO event) {
@@ -223,12 +233,12 @@ public class EventHeader extends AbstractEventComposite {
 
     @UiHandler("regattasLink")
     void regattasClicked(ClickEvent event) {
-        showRegattas();        
+        showRegattas(event);        
     }
 
     @UiHandler("regattasLink2")
     void regattas2Clicked(ClickEvent event) {
-        showRegattas();        
+        showRegattas(event);        
     }
 
     @UiHandler("seriesLeaderboardAnchor")
@@ -244,8 +254,10 @@ public class EventHeader extends AbstractEventComposite {
 //        showRegattas();        
 //    }
 //
-    private void showRegattas() {
+    private void showRegattas(ClickEvent clickevent) {
         getPageNavigator().goToRegattas();
+        clickevent.preventDefault();
+        
 //        setActiveLink(links1, regattasLink);
 //        setActiveLink(links2, regattasLink2);
 //        setActiveLink(links3, regattasLink3);

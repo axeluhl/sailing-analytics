@@ -36,4 +36,10 @@ public abstract class AbstractPlaceNavigator implements PlaceNavigator {
     protected String getLocationURL() {
         return Window.Location.getProtocol() + "//" + Window.Location.getHostName();
     }
+    
+    
+    public <T extends Place> void pushPlaceToHistoryStack(T destinationPlace, PlaceTokenizer<T> tokenizer) {
+        String placeHistoryToken = destinationPlace.getClass().getSimpleName() + ":" + tokenizer.getToken(destinationPlace);
+        History.newItem(placeHistoryToken, false);
+    }
 }

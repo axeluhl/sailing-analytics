@@ -6,11 +6,8 @@ import java.util.List;
 import java.util.Map;
 
 import com.google.gwt.core.client.GWT;
-import com.google.gwt.place.shared.Place;
-import com.google.gwt.place.shared.PlaceTokenizer;
 import com.google.gwt.uibinder.client.UiBinder;
 import com.google.gwt.uibinder.client.UiField;
-import com.google.gwt.user.client.History;
 import com.google.gwt.user.client.Window;
 import com.google.gwt.user.client.ui.Composite;
 import com.google.gwt.user.client.ui.Widget;
@@ -54,6 +51,9 @@ public class TabletAndDesktopEventView extends Composite implements EventView, E
 
     private final List<Widget> pageElements;
     private final EventDTO event;
+    
+    @SuppressWarnings("unused")
+    private EventPlace currentInternalPlace;
     
     public TabletAndDesktopEventView(SailingServiceAsync sailingService, EventDTO event, List<RaceGroupDTO> raceGroups, String leaderboardName,   
             Timer timerForClientServerOffset, HomePlacesNavigator navigator) {
@@ -103,47 +103,42 @@ public class TabletAndDesktopEventView extends Composite implements EventView, E
     @Override
     public void goToOverview() {
         setVisibleEventElement(eventOverview);
-        eventHeader.setDataNavigationType("normal");
+        eventHeader.setFullsizeHeader();
         
-        EventPlace place = new EventPlace(event.id.toString(), NavigationTabs.Overview, null);
-        pushPlaceToHistoryStack(place, new EventPlace.Tokenizer());
+        currentInternalPlace = new EventPlace(event.id.toString(), NavigationTabs.Overview, null);
     }
 
     @Override
     public void goToRegattas() {
         setVisibleEventElement(eventRegattaList);
-        eventHeader.setDataNavigationType("normal");
+        eventHeader.setFullsizeHeader();
         
-        EventPlace place = new EventPlace(event.id.toString(), NavigationTabs.Regattas, null);
-        pushPlaceToHistoryStack(place, new EventPlace.Tokenizer());
+        currentInternalPlace = new EventPlace(event.id.toString(), NavigationTabs.Regattas, null);
     }
 
     @Override
     public void goToRegattaRaces(LeaderboardGroupDTO leaderboardGroup, StrippedLeaderboardDTO leaderboard, RaceGroupDTO raceGroup) {
         eventRegattaRaces.setRaces(leaderboardGroup, false, leaderboard, raceGroup);
-        eventHeader.setDataNavigationType("compact");
+        eventHeader.setCompactHeader();
         setVisibleEventElement(eventRegattaRaces);
         
-        EventPlace place = new EventPlace(event.id.toString(), NavigationTabs.Regatta, leaderboard.name);
-        pushPlaceToHistoryStack(place, new EventPlace.Tokenizer());
+        currentInternalPlace = new EventPlace(event.id.toString(), NavigationTabs.Regatta, leaderboard.name);
     }
 
     @Override
     public void goToSchedule() {
         setVisibleEventElement(eventSchedule);
-        eventHeader.setDataNavigationType("normal");
+        eventHeader.setFullsizeHeader();
         
-        EventPlace place = new EventPlace(event.id.toString(), NavigationTabs.Schedule, null);
-        pushPlaceToHistoryStack(place, new EventPlace.Tokenizer());
+        currentInternalPlace = new EventPlace(event.id.toString(), NavigationTabs.Schedule, null);
     }
 
     @Override
     public void goToMedia() {
         setVisibleEventElement(eventMedia);
-        eventHeader.setDataNavigationType("normal");
+        eventHeader.setFullsizeHeader();
         
-        EventPlace place = new EventPlace(event.id.toString(), NavigationTabs.Media, null);
-        pushPlaceToHistoryStack(place, new EventPlace.Tokenizer());
+        currentInternalPlace = new EventPlace(event.id.toString(), NavigationTabs.Media, null);
     }
 
     @Override
@@ -225,11 +220,6 @@ public class TabletAndDesktopEventView extends Composite implements EventView, E
             }
         }
         return result;
-    }
-    
-    private  <T extends Place> void pushPlaceToHistoryStack(T destinationPlace, PlaceTokenizer<T> tokenizer) {
-        String placeHistoryToken = destinationPlace.getClass().getSimpleName() + ":" + tokenizer.getToken(destinationPlace);
-        History.newItem(placeHistoryToken, false);
     }
 
 }

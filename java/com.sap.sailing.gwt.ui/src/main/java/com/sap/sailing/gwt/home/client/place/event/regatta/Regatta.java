@@ -21,6 +21,7 @@ import com.sap.sailing.gwt.common.client.BoatClassImageResolver;
 import com.sap.sailing.gwt.common.client.BoatClassImageResources;
 import com.sap.sailing.gwt.home.client.app.HomePlacesNavigator;
 import com.sap.sailing.gwt.home.client.app.PlaceNavigation;
+import com.sap.sailing.gwt.home.client.place.event.EventPlace;
 import com.sap.sailing.gwt.home.client.place.event.EventPlaceNavigator;
 import com.sap.sailing.gwt.home.client.place.leaderboard.LeaderboardPlace;
 import com.sap.sailing.gwt.home.client.shared.LongNamesUtil;
@@ -39,7 +40,6 @@ public class Regatta extends Composite {
 
     private final EventDTO event;
     private final Timer timerForClientServerOffset;
-    private final EventPlaceNavigator pageNavigator;
     private StrippedLeaderboardDTO leaderboard;
     private RaceGroupDTO raceGroup;
     private final List<RegattaPhase> phasesElements;
@@ -75,14 +75,16 @@ public class Regatta extends Composite {
     @UiField Image boatClassImage;
 
     private PlaceNavigation<LeaderboardPlace> leaderboardNavigation;
-    private final HomePlacesNavigator placeNavigator;
+    private PlaceNavigation<EventPlace> regattaNavigation;
+    private final HomePlacesNavigator placesNavigator;
+    private final EventPlaceNavigator eventPlaceNavigator;
     
-    public Regatta(EventDTO event, Timer timerForClientServerOffset, boolean isSingleView, HomePlacesNavigator placeNavigator, EventPlaceNavigator pageNavigator) {
+    public Regatta(EventDTO event, Timer timerForClientServerOffset, boolean isSingleView, HomePlacesNavigator placesNavigator, EventPlaceNavigator eventPlaceNavigator) {
         this.event = event;
         this.timerForClientServerOffset = timerForClientServerOffset;
         this.isSingleView = isSingleView;
-        this.placeNavigator = placeNavigator;
-        this.pageNavigator = pageNavigator;
+        this.placesNavigator = placesNavigator;
+        this.eventPlaceNavigator = eventPlaceNavigator;
         
         phasesElements = new ArrayList<RegattaPhase>();
         
@@ -104,10 +106,12 @@ public class Regatta extends Composite {
 
         if(isSingleView) {
             regattaDetailsLink.setVisible(false);
-            leaderboardNavigation = placeNavigator.getLeaderboardNavigation(event.id.toString(), leaderboard.name, event.getBaseURL(), event.isOnRemoteServer());
+            leaderboardNavigation = placesNavigator.getLeaderboardNavigation(event.id.toString(), leaderboard.name, event.getBaseURL(), event.isOnRemoteServer());
             leaderboardLink.setHref(leaderboardNavigation.getTargetUrl());
         } else {
             leaderboardLink.setVisible(false);
+            regattaNavigation = placesNavigator.getRegattaNavigation(event.id.toString(), leaderboard.name, event.getBaseURL(), event.isOnRemoteServer());
+            regattaDetailsLink.setHref(regattaNavigation.getTargetUrl());
         }
 
         boolean hasLiveRace = leaderboard.hasLiveRace(timerForClientServerOffset.getLiveTimePointInMillis());
@@ -150,7 +154,7 @@ public class Regatta extends Composite {
             } else {
                 for(RaceGroupSeriesDTO series: raceGroup.getSeries()) {
                     RegattaPhase regattaPhase = new RegattaPhase(series, leaderboardGroup,
-                            leaderboard, raceGroup, pageNavigator, timerForClientServerOffset); 
+                            leaderboard, raceGroup, eventPlaceNavigator, timerForClientServerOffset); 
                     regattaPhasesPanel.appendChild(regattaPhase.getElement());
                     phasesElements.add(regattaPhase);
                 }
@@ -162,12 +166,12 @@ public class Regatta extends Composite {
     }
 
     @UiHandler("regattaDetailsLink")
-    public void regattaDetailsLinkClicked(ClickEvent e) {
-        pageNavigator.goToRegattaRaces(leaderboardGroup, leaderboard, raceGroup);
+    void regattaDetailsLinkClicked(ClickEvent e) {
+        eventPlaceNavigator.goToRegattaRaces(leaderboardGroup, leaderboard, raceGroup);
     }
 
     @UiHandler("leaderboardLink")
-    public void leaderboardLinkClicked(ClickEvent e) {
-        placeNavigator.goToPlace(leaderboardNavigation);
+    void leaderboardLinkClicked(ClickEvent e) {
+        placesNavigator.goToPlace(leaderboardNavigation);
     }
 }
