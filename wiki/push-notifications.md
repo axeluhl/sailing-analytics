@@ -1,6 +1,6 @@
 # Push Notifications
 
-This page contains pointers on sending push notifications to Android and iOS.
+This page contains pointers on sending push notifications to Android and iOS from a Java Server.
 
 ## GCM (Android)
 
