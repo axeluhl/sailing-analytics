@@ -8,11 +8,9 @@ This is a design for the REST API to be used by the iOS and Android tracking app
 
 ### Path
 
-    http://sapsailing.com/b964b0
-
-A shortened URL is used. This URL is embedded in the QR code. In case a user does not have a QR code, she can manually enter the URL into the app.
-
-Note that a unique URL needs to be defined per competitor and event.
+    http://kielerwoche2015.sapsailing.com:8888
+        ?event_id=957fab64e36d240dd07aeed2bd5a84b6
+        &competitor_id=250cf8b51c773f3f8dc8b4be867a9a02
 
 ### Verb
 
@@ -21,24 +19,24 @@ Note that a unique URL needs to be defined per competitor and event.
 ### Response
 
     {
-        "serverUrl" : "http://ec2-54-171-89-140.eu-west-1.compute.amazonaws.com:8888"
+        "serverUrl" : "http://kielerwoche2015.sapsailing.com:8888"
         "event" : {
-            "eventId" : "123",
+            "eventId" : "957fab64e36d240dd07aeed2bd5a84b6",
             "eventTitle" : "Kieler Woche",
             "eventStartDate" : 1414414481000,
             "eventEndDate" : 1414609200000,
             "eventDays": [
                 {
-                    "eventDayStart" : "1414414481000",
-                    "eventDayEnd" : "1414436081000"
+                    "eventDayStart" : 1414414481000,
+                    "eventDayEnd" : 1414436081000
                 },
                 {
-                    "eventDayStart" : "1414497600000",
-                    "eventDayEnd" : "1414522800000"
+                    "eventDayStart" : 1414497600000,
+                    "eventDayEnd" : 1414522800000
                 },
                 {
-                    "eventDayStart" : "1414584000000",
-                    "eventDayEnd" : "1414609200000"
+                    "eventDayStart" : 1414584000000,
+                    "eventDayEnd" : 1414609200000
                 },
             ]
         }
@@ -124,51 +122,23 @@ As general information, the tracking status of the smartphone is sent.
 ### Request
 
     {
-        "timeStamp" : "14144158370000",
+        "timeStamp" : 14144158370000,
         "status" : "start"
     }
 
 **status** Either `start` or `stop`.
 
-## Send Location
+## Send Locations
 
 The main data sent by the app.
 
-### Path
+Locations should be sent live during an event. In case of missing network, locations are stored to the device and uploaded in a FIFO order as soon as a connection is available.
 
-    /event/{event_id}/competitor/{competitor_id}/location
-
-### Verb
-
-    POST
-
-### Request
-
-    {
-        "timestamp" : "14144160080000",
-        "latitude" : "54.325246",
-        "longitude" : "10.148556",
-        "speed" : "3.61",
-        "course" : "258.11",
-    }
-
-**speed** Speed over ground in meters per second.
-
-**course** Heading in degrees.
-
-### Web Sockets
-
-Note that locations should be sent via web socket instead of HTTP POST in order to speed up communication. POST requests can be used as a fallback in case web sockets aren't available.
-
-## Bulk Upload Locations
-
-Locations should be sent live during an event. In case of missing network, locations are stored to the device and uploaded to the server later for analysis.
-
-As this could be a lot of data, GZIP compression is a must. Bulk uploads should be chunked, e.g. per day or per 1,000 locations.
+GZIP compression is a must. Bulk uploads should be chunked, e.g. per 1,000 locations.
 
 ### Path
 
-    /event/{event_id}/competitor/{competitor_id}/location_bulk
+    /event/{event_id}/competitor/{competitor_id}/locations
 
 ### Verb
 
@@ -179,19 +149,23 @@ As this could be a lot of data, GZIP compression is a must. Bulk uploads should 
     {
         "locations" : [
             {
-                "timestamp" : "14144160080000",
-                "latitude" : "54.325246",
-                "longitude" : "10.148556",
-                "speed" : "3.61",
-                "course" : "258.11",
+                "timestamp" : 14144160080000,
+                "latitude" : 54.325246,
+                "longitude" : 10.148556,
+                "speed" : 3.61,
+                "course" : 258.11,
             },
             {
-                "timestamp" : "14144168490000",
-                "latitude" : "55.12456",
-                "longitude" : "8.03456",
-                "speed" : "5.1",
-                "course" : "14.2",
+                "timestamp" : 14144168490000,
+                "latitude" : 55.12456,
+                "longitude" : 8.03456,
+                "speed" : 5.1,
+                "course" : 14.2,
             },
             ...
         ]
     }
+
+**speed** Speed over ground in meters per second.
+
+**course** Heading in degrees.
