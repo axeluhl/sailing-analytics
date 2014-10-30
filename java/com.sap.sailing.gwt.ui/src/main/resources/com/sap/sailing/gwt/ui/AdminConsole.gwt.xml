@@ -61,8 +61,8 @@
 	<extend-property name="locale" values="ru"/>
 	
 	<!-- Turning CSS obfuscation off -->
-	<set-configuration-property name="CssResource.style" value="pretty"/>
-	<!-- Turning CSS obfuscation on -->
+	<!-- <set-configuration-property name="CssResource.style" value="pretty"/> -->
+	<!-- Turning CSS obfuscation on, which is the default -->
 	<!--  <set-configuration-property name="CssResource.style" value="obf"/> -->
 	
 	<source path='common'/>
