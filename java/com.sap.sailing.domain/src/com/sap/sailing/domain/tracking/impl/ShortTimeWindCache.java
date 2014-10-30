@@ -87,15 +87,15 @@ public class ShortTimeWindCache {
         wind = cache.get(key);
         if (wind == null) {
             misses++;
-            if (misses % 100000l == 0 && logger.isLoggable(Level.FINE)) {
-                logger.fine("hits: " + hits + ", misses: " + misses);
-            }
             wind = trackedRace.getWindWithConfidenceUncached(p, at, windSourcesToExclude);
             if (wind != null) {
                 add(key, wind);
             }
         } else {
             hits++;
+        }
+        if ((hits+misses) % 100000l == 0 && logger.isLoggable(Level.FINE)) {
+            logger.fine("hits: " + hits + ", misses: " + misses);
         }
         return wind;
     }
