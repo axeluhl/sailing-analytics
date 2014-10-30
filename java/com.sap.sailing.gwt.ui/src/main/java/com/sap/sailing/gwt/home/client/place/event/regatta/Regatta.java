@@ -168,10 +168,12 @@ public class Regatta extends Composite {
     @UiHandler("regattaDetailsLink")
     void regattaDetailsLinkClicked(ClickEvent e) {
         eventPlaceNavigator.goToRegattaRaces(leaderboardGroup, leaderboard, raceGroup);
+        e.preventDefault();
     }
 
     @UiHandler("leaderboardLink")
     void leaderboardLinkClicked(ClickEvent e) {
         placesNavigator.goToPlace(leaderboardNavigation);
+        e.preventDefault();
     }
 }
