@@ -19,7 +19,7 @@ This is a design for the REST API to be used by the iOS and Android tracking app
 ### Response
 
     {
-        "serverUrl" : "http://kielerwoche2015.sapsailing.com:8888"
+        "serverUrl" : "http://kielerwoche2015.sapsailing.com:8888",
         "event" : {
             "eventId" : "957fab64e36d240dd07aeed2bd5a84b6",
             "eventTitle" : "Kieler Woche",
@@ -37,9 +37,9 @@ This is a design for the REST API to be used by the iOS and Android tracking app
                 {
                     "eventDayStart" : 1414584000000,
                     "eventDayEnd" : 1414609200000
-                },
+                }
             ]
-        }
+        },
         "competitor" : {
             "competitorId" : "250cf8b51c773f3f8dc8b4be867a9a02",
             "competitorName" : "Alster Segel Club",
