@@ -178,7 +178,7 @@ public class StoreAndLoadRaceLogsTest extends AbstractMongoDBTest {
     private static final String OldFormatRaceLogIdentifier = "A%2EA%2EB%2EB%2EC%2EC";
 
     private String createOldFormatRaceLogEventJson(Serializable id) {
-        return "{ \"_id\" : { \"$oid\" : \""+ new ObjectId().toStringMongod() + "\"} , \"RACE_LOG_IDENTIFIER\" : \"" + OldFormatRaceLogIdentifier + "\" , \"RACE_LOG_EVENT\" : "
+        return "{ \"_id\" : { \"$oid\" : \""+ new ObjectId().toHexString() + "\"} , \"RACE_LOG_IDENTIFIER\" : \"" + OldFormatRaceLogIdentifier + "\" , \"RACE_LOG_EVENT\" : "
                 + "{ \"TIME_AS_MILLIS\" : 42 , \"RACE_LOG_EVENT_CREATED_AT\" : 1376058090051 , \"RACE_LOG_EVENT_ID\" : { \"$uuid\" : \"" + id.toString() + "\"} , "
                 + "\"RACE_LOG_EVENT_PASS_ID\" : 42 , \"RACE_LOG_EVENT_INVOLVED_BOATS\" : [ ] , \"RACE_LOG_EVENT_CLASS\" : \"RaceLogFlagEvent\" , \"RACE_LOG_EVENT_FLAG_UPPER\" : \"ALPHA\" , "
                 + "\"RACE_LOG_EVENT_FLAG_LOWER\" : \"BRAVO\" , \"RACE_LOG_EVENT_FLAG_DISPLAYED\" : \"true\"}}";
