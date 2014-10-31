@@ -158,8 +158,8 @@ public class RaceLogEventRestoreFactoryImpl extends RaceLogEventFactoryImpl impl
 
     @Override
     public RevokeEvent createRevokeEvent(TimePoint createdAt, RaceLogEventAuthor author, TimePoint logicalTimePoint,
-            Serializable pId, int passId, Serializable revokedEventId) {
-        return new RevokeEventImpl(createdAt, author, logicalTimePoint, pId, passId, revokedEventId);
+            Serializable pId, int passId, Serializable revokedEventId, String revokedEventType, String revokedEventShortInfo, String reason) {
+        return new RevokeEventImpl(createdAt, author, logicalTimePoint, pId, passId, revokedEventId, revokedEventType, revokedEventShortInfo, reason);
     }
 
     @Override
