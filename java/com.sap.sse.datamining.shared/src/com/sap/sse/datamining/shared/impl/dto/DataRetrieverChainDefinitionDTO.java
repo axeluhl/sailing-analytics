@@ -1,6 +1,9 @@
 package com.sap.sse.datamining.shared.impl.dto;
 
 import java.io.Serializable;
+import java.util.ArrayList;
+import java.util.Collection;
+import java.util.List;
 import java.util.UUID;
 
 public class DataRetrieverChainDefinitionDTO implements Serializable, Comparable<DataRetrieverChainDefinitionDTO> {
@@ -9,7 +12,8 @@ public class DataRetrieverChainDefinitionDTO implements Serializable, Comparable
     private UUID id;
     private String name;
     private String dataSourceTypeName;
-    private String retrievedDataTypeName;
+    
+    private List<String> retrievedDataTypesChain;
 
     /**
      * <b>Constructor for the GWT-Serialization. Don't use this!</b>
@@ -17,11 +21,12 @@ public class DataRetrieverChainDefinitionDTO implements Serializable, Comparable
     @Deprecated
     DataRetrieverChainDefinitionDTO() { }
 
-    public DataRetrieverChainDefinitionDTO(UUID id, String name, String dataSourceTypeName, String retrievedDataTypeName) {
+    public DataRetrieverChainDefinitionDTO(UUID id, String name, String dataSourceTypeName, Collection<String> retrievedDataTypesChain) {
         this.id = id;
         this.name = name;
         this.dataSourceTypeName = dataSourceTypeName;
-        this.retrievedDataTypeName = retrievedDataTypeName;
+        
+        this.retrievedDataTypesChain = new ArrayList<>(retrievedDataTypesChain);
     }
 
     public UUID getId() {
@@ -37,7 +42,11 @@ public class DataRetrieverChainDefinitionDTO implements Serializable, Comparable
     }
 
     public String getRetrievedDataTypeName() {
-        return retrievedDataTypeName;
+        return retrievedDataTypesChain.get(retrievedDataTypesChain.size() - 1);
+    }
+    
+    public List<String> getRetrievedDataTypesChain() {
+        return retrievedDataTypesChain;
     }
 
     @Override

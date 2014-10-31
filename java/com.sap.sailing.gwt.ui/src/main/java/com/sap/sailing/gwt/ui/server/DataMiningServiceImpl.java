@@ -19,6 +19,7 @@ import com.sap.sse.datamining.Query;
 import com.sap.sse.datamining.factories.FunctionDTOFactory;
 import com.sap.sse.datamining.functions.Function;
 import com.sap.sse.datamining.i18n.DataMiningStringMessages;
+import com.sap.sse.datamining.impl.DataRetrieverTypeWithInformation;
 import com.sap.sse.datamining.shared.QueryDefinition;
 import com.sap.sse.datamining.shared.QueryResult;
 import com.sap.sse.datamining.shared.SSEDataMiningSerializationDummy;
@@ -96,8 +97,12 @@ public class DataMiningServiceImpl extends RemoteServiceServlet implements DataM
         
         Collection<DataRetrieverChainDefinitionDTO> DTOs = new ArrayList<>();
         for (DataRetrieverChainDefinition<RacingEventService> dataRetrieverChainDefinition : dataRetrieverChainDefinitions) {
+            Collection<String> retrievedDataTypesChain = new ArrayList<>();
+            for (DataRetrieverTypeWithInformation<?, ?> retrieverTypeWithInformation : dataRetrieverChainDefinition.getDataRetrieverTypesWithInformation()) {
+                retrievedDataTypesChain.add(retrieverTypeWithInformation.getRetrievedDataType().getSimpleName());
+            }
             DTOs.add(new DataRetrieverChainDefinitionDTO(dataRetrieverChainDefinition.getUUID(), dataRetrieverChainDefinition.getLocalizedName(locale, dataMiningStringMessages),
-                                                         dataRetrieverChainDefinition.getDataSourceType().getSimpleName(), dataRetrieverChainDefinition.getRetrievedDataType().getSimpleName()));
+                                                         dataRetrieverChainDefinition.getDataSourceType().getSimpleName(), retrievedDataTypesChain));
         }
         return DTOs;
     }
@@ -117,12 +122,7 @@ public class DataMiningServiceImpl extends RemoteServiceServlet implements DataM
         }
         return functionDTOs;
     }
-    
-//    @Override
-//    public QueryResult<Set<Object>> getDimensionValuesFor(Collection<FunctionDTO> dimensions) throws Exception {
-//        Query<Set<Object>> dimensionValuesQuery = sailingDataMiningFactory.createDimensionValuesQuery(getRacingEventService(), null, dimensions);
-//        return dimensionValuesQuery.run();
-//    }
+
     @Override
     public QueryResult<Set<Object>> getDimensionValuesFor(DataRetrieverChainDefinitionDTO dataRetrieverChainDefinition,
             String localeInfoName) throws Exception {
