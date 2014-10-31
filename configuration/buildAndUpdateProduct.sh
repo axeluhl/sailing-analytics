@@ -126,6 +126,8 @@ if [ $# -eq 0 ]; then
     echo "remote-deploy: performs hot deployment of the java code to a remote server"
     echo "Example: $0 -s dev -w trac@sapsailing.com remote-deploy"
     echo ""
+    echo "clean: cleans all code and GWT files"
+    echo ""
     echo "Active branch is $active_branch"
     echo "Project home is $PROJECT_HOME"
     echo "Server home is $SERVERS_HOME"
@@ -173,6 +175,18 @@ if [[ $@ == "" ]]; then
 	exit 2
 fi
 
+
+if [[ "$@" == "clean" ]]; then
+	cd $PROJECT_HOME/java
+    rm -rf com.sap.$PROJECT_TYPE.gwt.ui/com.sap.$PROJECT_TYPE.*
+    cd $PROJECT_HOME
+    echo "Using following command: mvn $extra -DargLine=\"$APP_PARAMETERS\" -fae -s $MAVEN_SETTINGS $clean"
+    echo "Maven version used: `mvn --version`"
+    mvn $extra -DargLine="$APP_PARAMETERS" -fae -s $MAVEN_SETTINGS $clean 2>&1 | tee $START_DIR/build.log
+    MVN_EXIT_CODE=${PIPESTATUS[0]}
+    echo "Maven exit code is $MVN_EXIT_CODE"
+    exit 0
+fi
 
 if [[ "$@" == "release" ]]; then
     if [ ! -d $p2PluginRepository/plugins ]; then
