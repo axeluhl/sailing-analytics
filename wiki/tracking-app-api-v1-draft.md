@@ -19,7 +19,7 @@ This is a design for the REST API to be used by the iOS and Android tracking app
 ### Response
 
     {
-        "serverUrl" : "http://kielerwoche2015.sapsailing.com:8888"
+        "serverUrl" : "http://kielerwoche2015.sapsailing.com:8888",
         "event" : {
             "eventId" : "957fab64e36d240dd07aeed2bd5a84b6",
             "eventTitle" : "Kieler Woche",
@@ -37,9 +37,9 @@ This is a design for the REST API to be used by the iOS and Android tracking app
                 {
                     "eventDayStart" : 1414584000000,
                     "eventDayEnd" : 1414609200000
-                },
+                }
             ]
-        }
+        },
         "competitor" : {
             "competitorId" : "250cf8b51c773f3f8dc8b4be867a9a02",
             "competitorName" : "Alster Segel Club",
@@ -128,17 +128,17 @@ As general information, the tracking status of the smartphone is sent.
 
 **status** Either `start` or `stop`.
 
-## Send Locations
+## Send Measurements
 
 The main data sent by the app.
 
-Locations should be sent live during an event. In case of missing network, locations are stored to the device and uploaded in a FIFO order as soon as a connection is available.
+Measurements should be sent live during an event. In case of missing network, measurements are stored to the device and uploaded in a FIFO order as soon as a connection is available.
 
 GZIP compression is a must. Bulk uploads should be chunked, e.g. per 1,000 locations.
 
 ### Path
 
-    /event/{event_id}/competitor/{competitor_id}/locations
+    /event/{event_id}/competitor/{competitor_id}/measurements
 
 ### Verb
 
@@ -147,7 +147,7 @@ GZIP compression is a must. Bulk uploads should be chunked, e.g. per 1,000 locat
 ### Request
 
     {
-        "locations" : [
+        "measurements" : [
             {
                 "timestamp" : 14144160080000,
                 "latitude" : 54.325246,
