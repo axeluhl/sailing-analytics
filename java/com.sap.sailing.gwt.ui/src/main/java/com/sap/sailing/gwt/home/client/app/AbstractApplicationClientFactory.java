@@ -10,18 +10,25 @@ import com.sap.sailing.gwt.ui.client.MediaServiceAsync;
 import com.sap.sailing.gwt.ui.client.SailingService;
 import com.sap.sailing.gwt.ui.client.SailingServiceAsync;
 import com.sap.sse.gwt.client.mvp.ClientFactoryImpl;
+import com.sap.sse.security.ui.client.UserService;
+import com.sap.sse.security.ui.shared.UserManagementService;
+import com.sap.sse.security.ui.shared.UserManagementServiceAsync;
 
 
 public abstract class AbstractApplicationClientFactory extends ClientFactoryImpl implements ApplicationClientFactory {
     private final SailingServiceAsync sailingService;
     private final MediaServiceAsync mediaService;
     private final HomePlacesNavigator navigator;
+    private final UserManagementServiceAsync userManagementService;
+    private final UserService userService;
 
     public AbstractApplicationClientFactory(ApplicationTopLevelView root, EventBus eventBus, PlaceController placeController) {
         super(root, eventBus, placeController);
         navigator = new HomePlacesNavigator(placeController);
         sailingService = GWT.create(SailingService.class);
         mediaService = GWT.create(MediaService.class);
+        userManagementService = GWT.create(UserManagementService.class);
+        userService = new UserService(userManagementService);
     }
     
     @Override
@@ -42,5 +49,15 @@ public abstract class AbstractApplicationClientFactory extends ClientFactoryImpl
     @Override
     public HomePlacesNavigator getHomePlacesNavigator() {
         return navigator;
+    }
+
+    @Override
+    public UserManagementServiceAsync getUserManagementService() {
+        return userManagementService;
+    }
+
+    @Override
+    public UserService getUserService() {
+        return userService;
     }
 }

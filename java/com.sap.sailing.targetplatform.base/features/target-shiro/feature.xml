@@ -1,0 +1,35 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<feature
+      id="com.sap.sailing.target.jsp"
+      label="Apache Shiro libraries"
+      version="1.0.0">
+
+   <description>
+      Java Server Pages libraries
+   </description>
+
+   <license url="">
+      NA.
+   </license>
+
+   <plugin
+         id="org.apache.shiro"
+         download-size="0"
+         install-size="0"
+         version="2.1.0.v201105211819"
+         unpack="false"/>
+         
+   <plugin
+         id="org.apache.shiro.web"
+         download-size="0"
+         install-size="0"
+         version="2.1.0.v201105211819"
+         unpack="false"/>
+         
+   <plugin
+         id="org.scribe"
+         download-size="0"
+         install-size="0"
+         version="2.1.0.v201105211819"
+         unpack="false"/>
+</feature>

@@ -14,7 +14,8 @@ public class RevokeEventTest extends AbstractRaceLogTrackingTest {
     @Test
     public void revokedEventIsExcluded() {
         RaceLogEvent event = factory.createDeviceCompetitorMappingEvent(now, author, now, UUID.randomUUID(), null, null, 0, null, null);
-        RevokeEvent revokeEvent = factory.createRevokeEvent(now.plus(1), author, now.plus(1), UUID.randomUUID(), 0, event.getId());
+        RevokeEvent revokeEvent = factory.createRevokeEvent(now.plus(1), author, now.plus(1), UUID.randomUUID(), 0, event.getId(),
+                null, null, null);
         
         log.add(event);
         log.add(revokeEvent);
@@ -27,7 +28,8 @@ public class RevokeEventTest extends AbstractRaceLogTrackingTest {
     @Test
     public void eventRevokedByAuthorWithLowerPrioIsNotExcluded() {
     	RaceLogEvent event = factory.createDeviceCompetitorMappingEvent(now, author, now, UUID.randomUUID(), null, null, 0, null, null);
-        RevokeEvent revokeEvent = factory.createRevokeEvent(now.plus(1), author1, now.plus(1), UUID.randomUUID(), 0, event.getId());
+        RevokeEvent revokeEvent = factory.createRevokeEvent(now.plus(1), author1, now.plus(1), UUID.randomUUID(), 0, event.getId(),
+                null, null, null);
         
         log.add(event);
         log.add(revokeEvent);
@@ -40,8 +42,10 @@ public class RevokeEventTest extends AbstractRaceLogTrackingTest {
     @Test
     public void revokingRevokeEventIsNotHarmful() {
         RaceLogEvent event = factory.createDeviceCompetitorMappingEvent(now, author, now, UUID.randomUUID(), null, null, 0, null, null);
-        RevokeEvent revokeEvent = factory.createRevokeEvent(now.plus(1), author, now.plus(1), UUID.randomUUID(), 0, event.getId());
-        RevokeEvent revokeEvent2 = factory.createRevokeEvent(now.plus(2), author, now.plus(2), UUID.randomUUID(), 2, revokeEvent.getId());
+        RevokeEvent revokeEvent = factory.createRevokeEvent(now.plus(1), author, now.plus(1), UUID.randomUUID(), 0, event.getId(),
+                null, null, null);
+        RevokeEvent revokeEvent2 = factory.createRevokeEvent(now.plus(2), author, now.plus(2), UUID.randomUUID(), 2, revokeEvent.getId(),
+                null, null, null);
         
         log.add(event);
         log.add(revokeEvent);

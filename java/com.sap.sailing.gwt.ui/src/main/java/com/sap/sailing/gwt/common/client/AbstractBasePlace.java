@@ -7,7 +7,7 @@ import java.util.Map;
 import java.util.logging.Logger;
 
 import com.google.gwt.place.shared.Place;
-import com.sap.sailing.gwt.ui.client.URLEncoder;
+import com.sap.sse.gwt.client.URLEncoder;
 
 /**
  * An abstract Place which is able to manage and parse place parameters.

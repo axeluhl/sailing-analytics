@@ -40,7 +40,7 @@ import com.sap.sailing.gwt.ui.client.media.shared.VideoPlayer;
 import com.sap.sailing.gwt.ui.client.media.shared.VideoSynchPlayer;
 import com.sap.sailing.gwt.ui.client.shared.components.Component;
 import com.sap.sailing.gwt.ui.client.shared.components.SettingsDialogComponent;
-import com.sap.sailing.gwt.ui.shared.UserDTO;
+import com.sap.sailing.gwt.ui.usermanagement.UserRoles;
 import com.sap.sse.gwt.client.dialog.DataEntryDialog.DialogCallback;
 import com.sap.sse.gwt.client.player.PlayStateListener;
 import com.sap.sse.gwt.client.player.TimeListener;
@@ -49,6 +49,8 @@ import com.sap.sse.gwt.client.player.Timer.PlayModes;
 import com.sap.sse.gwt.client.player.Timer.PlayStates;
 import com.sap.sse.gwt.client.useragent.UserAgentDetails;
 import com.sap.sse.gwt.client.useragent.UserAgentDetails.AgentTypes;
+import com.sap.sse.security.ui.client.UserService;
+import com.sap.sse.security.ui.shared.UserDTO;
 
 public class MediaPlayerManagerComponent implements Component<Void>, PlayStateListener, TimeListener,
         MediaPlayerManager, CloseHandler<Window>, ClosingHandler {
@@ -59,6 +61,7 @@ public class MediaPlayerManagerComponent implements Component<Void>, PlayStateLi
     }
 
     private final SimplePanel rootPanel = new SimplePanel();
+    private final UserService userService;
 
     private MediaPlayer activeAudioPlayer;
     private VideoPlayer dockedVideoPlayer;
@@ -73,7 +76,6 @@ public class MediaPlayerManagerComponent implements Component<Void>, PlayStateLi
     private final StringMessages stringMessages;
     private final ErrorReporter errorReporter;
     private final UserAgentDetails userAgent;
-    private final UserDTO user;
     private final PopupPositionProvider popupPositionProvider;
     private boolean autoSelectMedia;
 
@@ -81,8 +83,9 @@ public class MediaPlayerManagerComponent implements Component<Void>, PlayStateLi
 
     public MediaPlayerManagerComponent(RegattaAndRaceIdentifier selectedRaceIdentifier,
             RaceTimesInfoProvider raceTimesInfoProvider, Timer raceTimer, MediaServiceAsync mediaService,
-            StringMessages stringMessages, ErrorReporter errorReporter, UserAgentDetails userAgent, UserDTO user,
-            PopupPositionProvider popupPositionProvider, boolean autoSelectMedia) {
+            UserService userService, StringMessages stringMessages, ErrorReporter errorReporter,
+            UserAgentDetails userAgent, PopupPositionProvider popupPositionProvider, boolean autoSelectMedia) {
+        this.userService = userService;
         this.raceIdentifier = selectedRaceIdentifier;
         this.raceTimesInfoProvider = raceTimesInfoProvider;
         this.raceTimer = raceTimer;
@@ -97,7 +100,6 @@ public class MediaPlayerManagerComponent implements Component<Void>, PlayStateLi
         this.stringMessages = stringMessages;
         this.errorReporter = errorReporter;
         this.userAgent = userAgent;
-        this.user = user;
         this.popupPositionProvider = popupPositionProvider;
         this.autoSelectMedia = autoSelectMedia;
 
@@ -440,12 +442,10 @@ public class MediaPlayerManagerComponent implements Component<Void>, PlayStateLi
         } else {
             // nothing changed
         }
-
     }
 
     private <T> T createAndWrapVideoPlayer(final MediaTrack videoTrack, VideoContainerFactory<T> videoContainerFactory) {
         final PopoutWindowPlayer.PlayerCloseListener playerCloseListener = new PopoutWindowPlayer.PlayerCloseListener() {
-
             private VideoContainer videoContainer;
 
             @Override
@@ -464,7 +464,6 @@ public class MediaPlayerManagerComponent implements Component<Void>, PlayStateLi
             }
         };
         PopoutListener popoutListener = new PopoutListener() {
-
             @Override
             public void popoutVideo(MediaTrack videoTrack) {
                 VideoContainer videoContainer;
@@ -477,10 +476,10 @@ public class MediaPlayerManagerComponent implements Component<Void>, PlayStateLi
                 closeFloatingVideo(videoTrack);
             }
         };
-
         final VideoSynchPlayer videoPlayer;
-        boolean showSynchControls = this.user != null;
-
+        final UserDTO currentUser = userService.getCurrentUser();
+        boolean showSynchControls = currentUser != null && (currentUser.hasRole(UserRoles.administrator.getRolename()) ||
+                currentUser.hasRole(UserRoles.eventmanager.getRolename()) || currentUser.hasRole(UserRoles.mediaeditor.getRolename()));
         if (videoTrack.isYoutube()) {
             videoPlayer = new VideoYoutubePlayer(videoTrack, getRaceStartTime(), showSynchControls, raceTimer);
         } else {
@@ -662,7 +661,7 @@ public class MediaPlayerManagerComponent implements Component<Void>, PlayStateLi
 
     @Override
     public boolean allowsEditing() {
-        return this.user != null;
+        return userService.getCurrentUser() != null;
     }
 
     @Override
