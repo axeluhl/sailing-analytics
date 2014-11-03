@@ -1,0 +1,16 @@
+<!DOCTYPE ui:UiBinder SYSTEM "http://dl.google.com/gwt/DTD/xhtml.ent">
+<ui:UiBinder xmlns:ui="urn:ui:com.google.gwt.uibinder" 
+	xmlns:g="urn:import:com.google.gwt.user.client.ui">
+    <ui:with field="i18n" type="com.sap.sse.security.ui.client.StringMessages"/>
+    <ui:with field="res" type="com.sap.sse.security.ui.login.LoginViewResources" />
+	<g:HTMLPanel ui:field="fp">
+		<div><ui:text from='{i18n.username}'/></div>
+		<div><g:TextBox ui:field="nameText" /></div>
+		<div><ui:text from='{i18n.password}'/></div>
+		<div><g:PasswordTextBox ui:field="pwText" /></div>
+		<g:Button ui:field="submit" text="{i18n.signIn}" />
+		<g:Button ui:field="passwordReset" text="{i18n.resetPassword}" />
+		<g:Anchor ui:field="signUpAnchor" text="{i18n.signUp}" />
+		<g:HTMLPanel ui:field="oAuthPanel" />
+	</g:HTMLPanel>     
+</ui:UiBinder>    
