@@ -1,4 +1,4 @@
-* S3 Controller
+# S3 Controller
 
 Here is a sample controller class that uploads or deletes a file from your S3 Bucket.
 
