@@ -10,6 +10,7 @@ import com.sap.sailing.gwt.home.client.place.event.EventView;
 import com.sap.sailing.gwt.home.client.place.event.EventWithoutRegattasView;
 import com.sap.sailing.gwt.home.client.place.event.TabletAndDesktopEventView;
 import com.sap.sailing.gwt.home.client.place.event.TabletAndDesktopEventWithoutRegattasView;
+import com.sap.sailing.gwt.home.client.place.event.EventPlace.EventNavigationTabs;
 import com.sap.sailing.gwt.home.client.place.events.EventsActivity;
 import com.sap.sailing.gwt.home.client.place.events.EventsView;
 import com.sap.sailing.gwt.home.client.place.events.TabletAndDesktopEventsView;
@@ -44,8 +45,8 @@ public class TabletAndDesktopApplicationClientFactory extends AbstractApplicatio
     }
 
     @Override
-    public EventView createEventView(EventDTO event, List<RaceGroupDTO> raceGroups, String leaderboardName, Timer timerForClientServerOffset) {
-        return new TabletAndDesktopEventView(getSailingService(), event, raceGroups, leaderboardName, timerForClientServerOffset, getHomePlacesNavigator());
+    public EventView createEventView(EventDTO event, EventNavigationTabs navigationTab, List<RaceGroupDTO> raceGroups, String leaderboardName, Timer timerForClientServerOffset) {
+        return new TabletAndDesktopEventView(getSailingService(), event, navigationTab, raceGroups, leaderboardName, timerForClientServerOffset, getHomePlacesNavigator());
     }
 
     @Override

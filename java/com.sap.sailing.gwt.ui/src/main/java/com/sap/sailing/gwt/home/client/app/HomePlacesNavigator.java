@@ -4,7 +4,7 @@ import com.google.gwt.place.shared.PlaceController;
 import com.sap.sailing.gwt.home.client.place.aboutus.AboutUsPlace;
 import com.sap.sailing.gwt.home.client.place.contact.ContactPlace;
 import com.sap.sailing.gwt.home.client.place.event.EventPlace;
-import com.sap.sailing.gwt.home.client.place.event.EventPlace.NavigationTabs;
+import com.sap.sailing.gwt.home.client.place.event.EventPlace.EventNavigationTabs;
 import com.sap.sailing.gwt.home.client.place.events.EventsPlace;
 import com.sap.sailing.gwt.home.client.place.leaderboard.LeaderboardPlace;
 import com.sap.sailing.gwt.home.client.place.searchresult.SearchResultPlace;
@@ -43,12 +43,12 @@ public class HomePlacesNavigator extends AbstractPlaceNavigator {
     }
 
     public PlaceNavigation<EventPlace> getEventNavigation(String eventUuidAsString, String baseUrl, boolean isOnRemoteServer) {
-        EventPlace eventPlace = new EventPlace(eventUuidAsString, NavigationTabs.Regattas, null);
+        EventPlace eventPlace = new EventPlace(eventUuidAsString, EventNavigationTabs.Regattas, null);
         return createPlaceNavigation(baseUrl, isOnRemoteServer, eventPlace, new EventPlace.Tokenizer());
     }
 
     public PlaceNavigation<EventPlace> getRegattaNavigation(String eventUuidAsString, String leaderboardIdAsNameString, String baseUrl, boolean isOnRemoteServer) {
-        EventPlace eventPlace = new EventPlace(eventUuidAsString, NavigationTabs.Regatta, leaderboardIdAsNameString);
+        EventPlace eventPlace = new EventPlace(eventUuidAsString, EventNavigationTabs.Regatta, leaderboardIdAsNameString);
         return createPlaceNavigation(baseUrl, isOnRemoteServer, eventPlace, new EventPlace.Tokenizer());
     }
 

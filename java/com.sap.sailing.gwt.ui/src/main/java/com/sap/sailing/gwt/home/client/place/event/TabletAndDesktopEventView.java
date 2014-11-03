@@ -15,7 +15,7 @@ import com.sap.sailing.domain.common.LeaderboardNameConstants;
 import com.sap.sailing.domain.common.RegattaAndRaceIdentifier;
 import com.sap.sailing.domain.common.dto.RaceDTO;
 import com.sap.sailing.gwt.home.client.app.HomePlacesNavigator;
-import com.sap.sailing.gwt.home.client.place.event.EventPlace.NavigationTabs;
+import com.sap.sailing.gwt.home.client.place.event.EventPlace.EventNavigationTabs;
 import com.sap.sailing.gwt.home.client.place.event.header.EventHeader;
 import com.sap.sailing.gwt.home.client.place.event.media.EventMedia;
 import com.sap.sailing.gwt.home.client.place.event.overview.EventOverview;
@@ -55,7 +55,7 @@ public class TabletAndDesktopEventView extends Composite implements EventView, E
     @SuppressWarnings("unused")
     private EventPlace currentInternalPlace;
     
-    public TabletAndDesktopEventView(SailingServiceAsync sailingService, EventDTO event, List<RaceGroupDTO> raceGroups, String leaderboardName,   
+    public TabletAndDesktopEventView(SailingServiceAsync sailingService, EventDTO event, EventNavigationTabs navigationTab, List<RaceGroupDTO> raceGroups, String leaderboardName,   
             Timer timerForClientServerOffset, HomePlacesNavigator navigator) {
         this.event = event;
         Map<String, Triple<RaceGroupDTO, StrippedLeaderboardDTO, LeaderboardGroupDTO>> regattaStructure = getRegattaStructure(event, raceGroups);
@@ -81,7 +81,7 @@ public class TabletAndDesktopEventView extends Composite implements EventView, E
             selectedRegatta = regattaStructure.get(0);
         }
 
-        if(selectedRegatta != null && !event.isFakeSeries()) {
+        if(selectedRegatta != null && (navigationTab == EventNavigationTabs.Regatta || !event.isFakeSeries())) {
             goToRegattaRaces(selectedRegatta.getC(), selectedRegatta.getB(), selectedRegatta.getA());
         } else {
             goToRegattas();
@@ -105,7 +105,7 @@ public class TabletAndDesktopEventView extends Composite implements EventView, E
         setVisibleEventElement(eventOverview);
         eventHeader.setFullsizeHeader();
         
-        currentInternalPlace = new EventPlace(event.id.toString(), NavigationTabs.Overview, null);
+        currentInternalPlace = new EventPlace(event.id.toString(), EventNavigationTabs.Overview, null);
     }
 
     @Override
@@ -113,7 +113,7 @@ public class TabletAndDesktopEventView extends Composite implements EventView, E
         setVisibleEventElement(eventRegattaList);
         eventHeader.setFullsizeHeader();
         
-        currentInternalPlace = new EventPlace(event.id.toString(), NavigationTabs.Regattas, null);
+        currentInternalPlace = new EventPlace(event.id.toString(), EventNavigationTabs.Regattas, null);
     }
 
     @Override
@@ -121,8 +121,8 @@ public class TabletAndDesktopEventView extends Composite implements EventView, E
         eventRegattaRaces.setRaces(leaderboardGroup, false, leaderboard, raceGroup);
         eventHeader.setCompactHeader();
         setVisibleEventElement(eventRegattaRaces);
-        
-        currentInternalPlace = new EventPlace(event.id.toString(), NavigationTabs.Regatta, leaderboard.name);
+
+        currentInternalPlace = new EventPlace(event.id.toString(), EventNavigationTabs.Regatta, leaderboard.name);
     }
 
     @Override
@@ -130,7 +130,7 @@ public class TabletAndDesktopEventView extends Composite implements EventView, E
         setVisibleEventElement(eventSchedule);
         eventHeader.setFullsizeHeader();
         
-        currentInternalPlace = new EventPlace(event.id.toString(), NavigationTabs.Schedule, null);
+        currentInternalPlace = new EventPlace(event.id.toString(), EventNavigationTabs.Schedule, null);
     }
 
     @Override
@@ -138,7 +138,7 @@ public class TabletAndDesktopEventView extends Composite implements EventView, E
         setVisibleEventElement(eventMedia);
         eventHeader.setFullsizeHeader();
         
-        currentInternalPlace = new EventPlace(event.id.toString(), NavigationTabs.Media, null);
+        currentInternalPlace = new EventPlace(event.id.toString(), EventNavigationTabs.Media, null);
     }
 
     @Override

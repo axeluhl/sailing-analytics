@@ -40,7 +40,6 @@ public class Regatta extends Composite {
 
     private final EventDTO event;
     private final Timer timerForClientServerOffset;
-    private StrippedLeaderboardDTO leaderboard;
     private RaceGroupDTO raceGroup;
     private final List<RegattaPhase> phasesElements;
     private LeaderboardGroupDTO leaderboardGroup;
@@ -101,7 +100,6 @@ public class Regatta extends Composite {
     public void setData(LeaderboardGroupDTO leaderboardGroup, boolean hasMultipleLeaderboardGroups, StrippedLeaderboardDTO leaderboard,
             RaceGroupDTO raceGroup) {
         this.raceGroup = raceGroup;
-        this.leaderboard = leaderboard;
         this.leaderboardGroup = leaderboardGroup;
 
         if(isSingleView) {
@@ -167,7 +165,7 @@ public class Regatta extends Composite {
 
     @UiHandler("regattaDetailsLink")
     void regattaDetailsLinkClicked(ClickEvent e) {
-        eventPlaceNavigator.goToRegattaRaces(leaderboardGroup, leaderboard, raceGroup);
+        placesNavigator.goToPlace(regattaNavigation);
         e.preventDefault();
     }
 
