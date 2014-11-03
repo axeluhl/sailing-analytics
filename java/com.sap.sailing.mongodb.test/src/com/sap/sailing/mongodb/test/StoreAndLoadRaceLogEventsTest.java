@@ -230,14 +230,21 @@ public class StoreAndLoadRaceLogEventsTest extends AbstractMongoDBTest {
     @Test
     public void testStoreAndLoadRevokeEvent() {
         UUID revokedEventId = UUID.randomUUID();
+        String revokedEventType = "type";
+        String revokedEventShortInfo = "short info";
+        String reason = "reason";
         RevokeEvent expectedEvent = eventFactory.createRevokeEvent(
-        		expectedEventTime, author, expectedEventTime, expectedId, expectedPassId, revokedEventId);
+        		expectedEventTime, author, expectedEventTime, expectedId, expectedPassId, revokedEventId,
+        		revokedEventType, revokedEventShortInfo, reason);
 
         DBObject dbObject = mongoFactory.storeRaceLogEntry(logIdentifier, expectedEvent);
         RevokeEvent actualEvent = loadEvent(dbObject);
 
         assertBaseFields(expectedEvent, actualEvent);
         assertEquals(revokedEventId, actualEvent.getRevokedEventId());
+        assertEquals(revokedEventType, actualEvent.getRevokedEventType());
+        assertEquals(revokedEventShortInfo, actualEvent.getRevokedEventShortInfo());
+        assertEquals(reason, actualEvent.getReason());
     }
 
     @Test
