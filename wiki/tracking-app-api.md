@@ -3,11 +3,17 @@ This document describes the API used by the tracking smartphone apps.
 
 ## Host, Protocol, Port
 
-There are many hosts (not one). Hosts are a subdomain in the `sapsailing.com` domain, e.g. `kielerwoche2014.sapsailing.com`.
+There are many hosts (not one). Hosts are a subdomain in `sapsailing.com`, e.g. `kielerwoche2014.sapsailing.com`.
 
-Protocol is `http`, port is `80`.
+Protocol is generally `http`, port is `80`.
 
-All three connection details are contained in the QR code.
+All connection details are contained in the QR code:
+
+    {protocol://server:port}/apps/com.sap.sailing.android.tracking.app.apk
+	  ?leaderboard={...}
+	  &raceColumn={...}
+	  &fleet={...}
+	  &competitor={...}
 
 ## Event Details
 
