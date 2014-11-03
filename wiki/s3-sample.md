@@ -1,6 +1,6 @@
 # S3 Controller
 
-Here is a sample controller class that uploads or deletes a file from your S3 Bucket.
+Here is a sample controller class that uploads a JPEG file from your local file system to your S3 Bucket.
 
 Dependencies: http://aws.amazon.com/de/sdk-for-java/
 
