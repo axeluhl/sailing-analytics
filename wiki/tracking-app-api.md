@@ -1,6 +1,77 @@
 # Tracking App API
 This document describes the API used by the tracking smartphone apps.
 
+## Host, Protocol, Port
+
+There are many hosts (not one). Hosts are a subdomain in the `sapsailing.com` domain, e.g. `kielerwoche2014.sapsailing.com`.
+
+Protocol is `http`, port is `80`.
+
+All three connection details are contained in the QR code.
+
+## Event Details
+
+The following GET call returns event details.
+
+### Verb
+
+    GET
+
+### Path
+
+For single event:
+
+    /sailingserver/api/v1/events/{event-id}
+
+e.g. http://kielerwoche2014.sapsailing.com/sailingserver/api/v1/events/863a5c30-cbea-4f1c-8fb1-54fffa6b7319
+
+### Response
+
+    {
+      "id": "863a5c30-cbea-4f1c-8fb1-54fffa6b7319",
+      "name": "Extreme Sailing Series 2012 Rio",
+      "description": "",
+      "officialWebsiteURL": "http://www.extremesailingseries.com",
+      "logoImageURL": "http://static.sapsailing.com/ubilabsimages/ESS2014/esslogo.jpg",
+      "startDate": 1354189140000,
+      "endDate": 1354448040000,
+      "venue": {
+        "name": "Rio",
+        "courseAreas": [
+          {
+            "name": "Rio",
+            "id": "e956b2d1-2429-4b18-b655-662c6098cbb9"
+          }
+        ]
+      },
+      "imageURLs": [
+        "http://www.extremesailingseries.com/images/gallery/2012/2012_ESS_map_800.jpg"
+      ],
+      "videoURLs": [],
+      "sponsorImageURLs": [],
+      "leaderboardGroups": [
+        {
+          "id": "d1d09698-81c1-4caf-9790-abb431c7a5dc",
+          "name": "Extreme Sailing Series 2012",
+          "description": "Muscat - Qingdao - Istanbul - Porto - Cardiff - Nice - Rio de Janeiro",
+          "displayName": null,
+          "hasOverallLeaderboard": true
+        }
+      ],
+      "imageSizes": [
+        {
+          "imageURL": "http://www.extremesailingseries.com/images/gallery/2012/2012_ESS_map_800.jpg",
+          "imageWidth": 800,
+          "imageHeight": 462
+        },
+        {
+          "imageURL": "http://static.sapsailing.com/ubilabsimages/ESS2014/esslogo.jpg",
+          "imageWidth": 209,
+          "imageHeight": 65
+        }
+      ]
+    }
+
 ## Device Mapping
 Following POST call maps smartphones to competitors.
 
@@ -306,7 +377,7 @@ The response is a JSON array containing all events pertaining to leaderboard.
 
 `authorName` Application that generated event log
 
-## GPSFix
+## Send Geolocation
 
 ### Verb
 
