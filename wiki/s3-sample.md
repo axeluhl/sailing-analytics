@@ -1,4 +1,6 @@
-Here is a sample controller class that uploads to your S3 Bucket.
+* S3 Controller
+
+Here is a sample controller class that uploads or deletes a file from your S3 Bucket.
 
 Dependencies: http://aws.amazon.com/de/sdk-for-java/
 
@@ -25,10 +27,6 @@ Dependencies: http://aws.amazon.com/de/sdk-for-java/
     import java.io.InputStream;
     import java.io.OutputStream;
 
-    /**
-     *
-     * @author Guy Saldanha
-     */
     public class S3Controller {
 
         public static final String s3endpoint = "https://s3-eu-west-1.amazonaws.com/";
