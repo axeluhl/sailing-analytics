@@ -128,6 +128,7 @@ public interface RaceLog extends Track<RaceLogEvent>, WithID {
      * 
      * @param author The author for the {@code RevokeEvent}.
      */
+    RevokeEvent revokeEvent(RaceLogEventAuthor author, RaceLogEvent toRevoke, String reason) throws NotRevokableException;
     RevokeEvent revokeEvent(RaceLogEventAuthor author, RaceLogEvent toRevoke) throws NotRevokableException;
 
     /**

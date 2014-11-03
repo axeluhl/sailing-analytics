@@ -59,11 +59,11 @@ public class CompetitorJsonDeserializer implements JsonDeserializer<Competitor> 
             }
             DynamicTeam team = null;
             DynamicBoat boat = null;
-            if (teamJsonDeserializer != null) {
+            if (teamJsonDeserializer != null && object.get(CompetitorJsonSerializer.FIELD_TEAM) != null) {
                 team = teamJsonDeserializer.deserialize(Helpers.getNestedObjectSafe(object,
                         CompetitorJsonSerializer.FIELD_TEAM));
             }
-            if (boatJsonDeserializer != null) {
+            if (boatJsonDeserializer != null && object.get(CompetitorJsonSerializer.FIELD_BOAT) != null) {
                 boat = boatJsonDeserializer.deserialize(Helpers.getNestedObjectSafe(object,
                         CompetitorJsonSerializer.FIELD_BOAT));
             }

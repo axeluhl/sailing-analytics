@@ -1,7 +1,7 @@
 package com.sap.sailing.gwt.home.client.place.event;
 
 import com.google.gwt.place.shared.PlaceTokenizer;
-import com.sap.sailing.gwt.home.client.AbstractBasePlace;
+import com.sap.sailing.gwt.common.client.AbstractBasePlace;
 
 public class EventPlace extends AbstractBasePlace {
     private final String eventUuidAsString;

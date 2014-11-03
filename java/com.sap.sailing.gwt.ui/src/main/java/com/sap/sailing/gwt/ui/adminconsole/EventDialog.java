@@ -20,12 +20,12 @@ import com.google.gwt.user.client.ui.VerticalPanel;
 import com.google.gwt.user.client.ui.Widget;
 import com.sap.sailing.gwt.ui.client.DataEntryDialogWithBootstrap;
 import com.sap.sailing.gwt.ui.client.StringMessages;
-import com.sap.sailing.gwt.ui.client.shared.controls.listedit.StringListInlineEditorComposite;
 import com.sap.sailing.gwt.ui.shared.BetterDateTimeBox;
 import com.sap.sailing.gwt.ui.shared.CourseAreaDTO;
 import com.sap.sailing.gwt.ui.shared.EventDTO;
 import com.sap.sailing.gwt.ui.shared.LeaderboardGroupDTO;
 import com.sap.sailing.gwt.ui.shared.VenueDTO;
+import com.sap.sse.gwt.client.controls.listedit.StringListInlineEditorComposite;
 
 public abstract class EventDialog extends DataEntryDialogWithBootstrap<EventDTO> {
     private final AdminConsoleResources resources = GWT.create(AdminConsoleResources.class);
@@ -122,30 +122,30 @@ public abstract class EventDialog extends DataEntryDialogWithBootstrap<EventDTO>
                 callback);
         this.leaderboardGroups = leaderboardGroups;
         this.stringMessages = stringMessages;
-        final ValueChangeHandler<List<String>> valueChangeHandler = new ValueChangeHandler<List<String>>() {
+        final ValueChangeHandler<Iterable<String>> valueChangeHandler = new ValueChangeHandler<Iterable<String>>() {
             @Override
-            public void onValueChange(ValueChangeEvent<List<String>> event) {
+            public void onValueChange(ValueChangeEvent<Iterable<String>> event) {
                 validate();
             }
         };
         courseAreaNameList = new StringListInlineEditorComposite(Collections.<String> emptyList(),
                 new StringListInlineEditorComposite.ExpandedUi(stringMessages, resources.removeIcon(), /* suggestValues */
-                        SuggestedCourseAreaNames.suggestedCourseAreaNames, 50));
+                        SuggestedCourseAreaNames.suggestedCourseAreaNames, stringMessages.enterCourseAreaName(), 50));
         courseAreaNameList.addValueChangeHandler(valueChangeHandler);
         final List<String> imageSuggestionURLs = Arrays.asList(new String[] { "http://", "https://", "http://www.", "https://www" });
         imageURLList = new StringListInlineEditorComposite(Collections.<String> emptyList(),
                 new StringListInlineEditorComposite.ExpandedUi(stringMessages, resources.removeIcon(),
-                /* suggestValues */ imageSuggestionURLs, 80));
+                /* suggestValues */ imageSuggestionURLs, stringMessages.enterImageURL(), 80));
         imageURLList.addValueChangeHandler(valueChangeHandler);
         List<String> videoURLSuggestions = new ArrayList<>(imageSuggestionURLs);
         videoURLSuggestions.add("http://www.youtube.com/watch?v=");
         videoURLList = new StringListInlineEditorComposite(Collections.<String> emptyList(),
                 new StringListInlineEditorComposite.ExpandedUi(stringMessages, resources.removeIcon(),
-                /* suggestValues */ videoURLSuggestions, 80));
+                /* suggestValues */ videoURLSuggestions, stringMessages.enterVideoURL(), 80));
         videoURLList.addValueChangeHandler(valueChangeHandler);
         sponsorImageURLList = new StringListInlineEditorComposite(Collections.<String> emptyList(),
                 new StringListInlineEditorComposite.ExpandedUi(stringMessages, resources.removeIcon(),
-                /* suggestValues */ imageSuggestionURLs, 80));
+                /* suggestValues */ imageSuggestionURLs, stringMessages.enterSponsorImageURL(), 80));
         sponsorImageURLList.addValueChangeHandler(valueChangeHandler);
     }
 

@@ -13,8 +13,8 @@ import com.google.gwt.uibinder.client.UiHandler;
 import com.google.gwt.user.client.ui.Anchor;
 import com.google.gwt.user.client.ui.Widget;
 import com.sap.sailing.domain.common.LeaderboardNameConstants;
+import com.sap.sailing.gwt.common.client.i18n.TextMessages;
 import com.sap.sailing.gwt.home.client.app.PlaceNavigator;
-import com.sap.sailing.gwt.home.client.i18n.TextMessages;
 import com.sap.sailing.gwt.home.client.place.event.AbstractEventComposite;
 import com.sap.sailing.gwt.home.client.place.event.EventPageNavigator;
 import com.sap.sailing.gwt.home.client.shared.EventDatesFormatterUtil;
@@ -67,8 +67,6 @@ public class EventHeader extends AbstractEventComposite {
 //  private final List<Anchor> links1;
 //  private final List<Anchor> links2;
 //  private final List<Anchor> links3;
-    
-    private final String defaultLogoUrl = "http://static.sapsailing.com/ubilabsimages/default/default_event_logo.jpg";
     
     private final PlaceNavigator placeNavigator;
     
@@ -188,7 +186,7 @@ public class EventHeader extends AbstractEventComposite {
             facebookAnchor.setVisible(false);
         }
         
-        String logoUrl = event.getLogoImageURL() != null ? event.getLogoImageURL() : defaultLogoUrl;
+        String logoUrl = event.getLogoImageURL() != null ? event.getLogoImageURL() : EventHeaderResources.INSTANCE.defaultEventLogoImage().getSafeUri().asString();;
         eventLogo.setSrc(logoUrl);
         eventLogo2.setSrc(logoUrl);
 //        eventLogo3.setSrc(logoUrl);

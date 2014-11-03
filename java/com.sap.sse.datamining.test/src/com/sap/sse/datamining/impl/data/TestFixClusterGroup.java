@@ -75,15 +75,15 @@ public class TestFixClusterGroup {
         
         ClusterBoundary<Integer> greaterEqualsThanZero = new ComparatorClusterBoundary<Integer>(new ComparableComparator<Integer>(), 0, ComparisonStrategy.GREATER_EQUALS_THAN);
         ClusterBoundary<Integer> lowerEqualsThanTen = new ComparatorClusterBoundary<Integer>(new ComparableComparator<Integer>(), 10, ComparisonStrategy.LOWER_EQUALS_THAN);
-        clusterFromZeroToTen = new ClusterWithBoundaries<>("Test", greaterEqualsThanZero, lowerEqualsThanTen);
+        clusterFromZeroToTen = new ClusterWithLowerAndUpperBoundaries<>("Test", greaterEqualsThanZero, lowerEqualsThanTen);
 
         ClusterBoundary<Integer> greaterThanTen = new ComparatorClusterBoundary<Integer>(new ComparableComparator<Integer>(), 10, ComparisonStrategy.GREATER_THAN);
         ClusterBoundary<Integer> lowerEqualsThanTwenty = new ComparatorClusterBoundary<Integer>(new ComparableComparator<Integer>(), 20, ComparisonStrategy.LOWER_EQUALS_THAN);
-        clusterFromElevenToTwenty = new ClusterWithBoundaries<>("Test", greaterThanTen, lowerEqualsThanTwenty);
+        clusterFromElevenToTwenty = new ClusterWithLowerAndUpperBoundaries<>("Test", greaterThanTen, lowerEqualsThanTwenty);
 
         ClusterBoundary<Integer> greaterThanTwenty = new ComparatorClusterBoundary<Integer>(new ComparableComparator<Integer>(), 20, ComparisonStrategy.GREATER_THAN);
         ClusterBoundary<Integer> lowerEqualsThanThirty = new ComparatorClusterBoundary<Integer>(new ComparableComparator<Integer>(), 30, ComparisonStrategy.LOWER_EQUALS_THAN);
-        clusterFromTwentyOneToThirty = new ClusterWithBoundaries<>("Test", greaterThanTwenty, lowerEqualsThanThirty);
+        clusterFromTwentyOneToThirty = new ClusterWithLowerAndUpperBoundaries<>("Test", greaterThanTwenty, lowerEqualsThanThirty);
 
         ClusterBoundary<Integer> greaterThanThirty = new ComparatorClusterBoundary<Integer>(comparator, 30, ComparisonStrategy.GREATER_THAN);
         clusterGreaterThanThirty = new ClusterWithSingleBoundary<>("Test", greaterThanThirty);

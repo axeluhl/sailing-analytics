@@ -1,6 +1,5 @@
 package com.sap.sailing.gwt.ui.client.media;
 
-import com.google.gwt.dom.client.Document;
 import com.google.gwt.event.logical.shared.CloseEvent;
 import com.google.gwt.event.logical.shared.CloseHandler;
 import com.google.gwt.user.client.ui.FlowPanel;
@@ -15,10 +14,13 @@ public class VideoFloatingContainer extends AbstractVideoContainer implements Vi
 
     private final WindowBox dialogBox;
     private final MediaSynchControl mediaSynchControl;
-
-    public VideoFloatingContainer(VideoSynchPlayer videoPlayer, boolean showSynchControls, MediaServiceAsync mediaService, ErrorReporter errorReporter, PlayerCloseListener playerCloseListener, PopoutListener popoutListener) {
+    private final PopupPositionProvider popupPositionProvider;
+    
+    public VideoFloatingContainer(VideoSynchPlayer videoPlayer, PopupPositionProvider popupPositionProvider, boolean showSynchControls, MediaServiceAsync mediaService, ErrorReporter errorReporter, PlayerCloseListener playerCloseListener, PopoutListener popoutListener) {
         super(new FlowPanel(), videoPlayer, popoutListener, playerCloseListener);
 
+        this.popupPositionProvider = popupPositionProvider;
+        
         rootPanel.addStyleName("video-root-panel");
         rootPanel.add(videoPlayer.getWidget());
 
@@ -56,8 +58,11 @@ public class VideoFloatingContainer extends AbstractVideoContainer implements Vi
 
     @Override
     void show() {
-        dialogBox.setPopupPosition(20, Document.get().getClientHeight()-dialogBox.getOffsetHeight()-500);
         dialogBox.show();
+
+        int absoluteTop = popupPositionProvider.getYPositionUiObject().getAbsoluteTop();
+        int posY = absoluteTop -300;
+        dialogBox.setPopupPosition(5, posY);
     }
 
     @Override

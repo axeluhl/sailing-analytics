@@ -1,0 +1,14 @@
+package com.sap.sse.security.ui.client.component;
+
+import com.sap.sse.security.ui.client.StringMessages;
+import com.sap.sse.security.ui.shared.UserDTO;
+import com.sap.sse.security.ui.shared.UserManagementServiceAsync;
+
+public class ChangePasswordDialog extends AbstractUserDialog {
+    public ChangePasswordDialog(StringMessages stringMessages, UserManagementServiceAsync userManagementService, UserDTO user,
+            com.sap.sse.gwt.client.dialog.DataEntryDialog.DialogCallback<UserData> callback) {
+        super(stringMessages, stringMessages.changePassword(), userManagementService, user, callback);
+        getNameBox().setEnabled(false);
+        getEmailBox().setEnabled(false);
+    }
+}

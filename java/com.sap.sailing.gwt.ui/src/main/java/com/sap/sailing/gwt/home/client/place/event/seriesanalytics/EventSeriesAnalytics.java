@@ -22,7 +22,7 @@ import com.sap.sailing.domain.common.RegattaAndRaceIdentifier;
 import com.sap.sailing.domain.common.dto.FleetDTO;
 import com.sap.sailing.domain.common.dto.LeaderboardDTO;
 import com.sap.sailing.domain.common.dto.RaceColumnDTO;
-import com.sap.sailing.gwt.home.client.HomeResources;
+import com.sap.sailing.gwt.common.client.SharedResources;
 import com.sap.sailing.gwt.home.client.app.PlaceNavigator;
 import com.sap.sailing.gwt.home.client.place.event.header.CompactEventHeader;
 import com.sap.sailing.gwt.home.client.place.event.oldcompetitorcharts.OldCompetitorCharts;
@@ -86,7 +86,7 @@ public class EventSeriesAnalytics extends Composite implements LeaderboardUpdate
         activeAnchor = overallLeaderboardAnchor;
         activeTabPanel = overallLeaderboardTabPanel;
         activeContentWidget = null;
-        activeAnchor.addStyleName(HomeResources.INSTANCE.mainCss().navbar_buttonactive());
+        activeAnchor.addStyleName(SharedResources.INSTANCE.mainCss().navbar_buttonactive());
 
         regattaLeaderboardsTabPanel.setVisible(false);
         competitorChartsTabPanel.setVisible(false);
@@ -181,7 +181,7 @@ public class EventSeriesAnalytics extends Composite implements LeaderboardUpdate
     private void setActiveTabPanel(HTMLPanel newActivePanel, Widget newActiveContentWidget, Anchor newActiveAnchor) {
         if(activeTabPanel != null) {
             activeTabPanel.setVisible(false);
-            activeAnchor.removeStyleName(HomeResources.INSTANCE.mainCss().navbar_buttonactive());
+            activeAnchor.removeStyleName(SharedResources.INSTANCE.mainCss().navbar_buttonactive());
         }
         if(activeContentWidget != null) {
             activeContentWidget.setVisible(false);
@@ -192,6 +192,6 @@ public class EventSeriesAnalytics extends Composite implements LeaderboardUpdate
         activeAnchor = newActiveAnchor;
         activeTabPanel.setVisible(true);
         activeContentWidget.setVisible(true);
-        activeAnchor.addStyleName(HomeResources.INSTANCE.mainCss().navbar_buttonactive());
+        activeAnchor.addStyleName(SharedResources.INSTANCE.mainCss().navbar_buttonactive());
     }
 }

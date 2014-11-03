@@ -253,8 +253,10 @@ public class RaceLogEventFactoryImpl implements RaceLogEventFactory {
     }
 
     @Override
-    public RevokeEvent createRevokeEvent(TimePoint logicalTimePoint, RaceLogEventAuthor author, int passId, Serializable revokedEventId) {
-        return new RevokeEventImpl(MillisecondsTimePoint.now(), author, logicalTimePoint, UUID.randomUUID(), passId, revokedEventId);
+    public RevokeEvent createRevokeEvent(TimePoint logicalTimePoint, RaceLogEventAuthor author, int passId, Serializable revokedEventId,
+            String revokedEventType, String revokedEventShortInfo, String reason) {
+        return new RevokeEventImpl(MillisecondsTimePoint.now(), author, logicalTimePoint, UUID.randomUUID(),
+                passId, revokedEventId, revokedEventType, revokedEventShortInfo, reason);
     }
 
     @Override

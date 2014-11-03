@@ -3,6 +3,7 @@ package com.sap.sailing.gwt.ui.test;
 import java.io.Serializable;
 import java.util.List;
 import java.util.NavigableSet;
+import java.util.Set;
 
 import com.sap.sailing.domain.base.BoatClass;
 import com.sap.sailing.domain.base.Competitor;
@@ -611,26 +612,26 @@ public class MockedTrackedRace implements DynamicTrackedRace {
     }
 
     @Override
-    public Wind getWind(Position p, TimePoint at, Iterable<WindSource> windSourcesToExclude) {
+    public Wind getWind(Position p, TimePoint at, Set<WindSource> windSourcesToExclude) {
         // TODO Auto-generated method stub
         return null;
     }
 
     @Override
-    public Iterable<WindSource> getWindSources(WindSourceType type) {
+    public Set<WindSource> getWindSources(WindSourceType type) {
         // TODO Auto-generated method stub
         return null;
     }
 
     @Override
-    public Iterable<WindSource> getWindSources() {
+    public Set<WindSource> getWindSources() {
         // TODO Auto-generated method stub
         return null;
     }
 
     @Override
     public WindWithConfidence<Util.Pair<Position, TimePoint>> getWindWithConfidence(Position p, TimePoint at,
-            Iterable<WindSource> windSourcesToExclude) {
+            Set<WindSource> windSourcesToExclude) {
         // TODO Auto-generated method stub
         return null;
     }
@@ -648,7 +649,7 @@ public class MockedTrackedRace implements DynamicTrackedRace {
     }
 
     @Override
-    public Iterable<WindSource> getWindSourcesToExclude() {
+    public Set<WindSource> getWindSourcesToExclude() {
         // TODO Auto-generated method stub
         return null;
     }

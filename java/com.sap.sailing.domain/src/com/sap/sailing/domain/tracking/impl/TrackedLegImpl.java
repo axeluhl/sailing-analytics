@@ -8,6 +8,7 @@ import java.util.HashMap;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
 import java.util.concurrent.Callable;
 import java.util.logging.Logger;
 
@@ -245,7 +246,7 @@ public class TrackedLegImpl implements TrackedLeg, RaceChangeListener {
         return effectivePosition;
     }
 
-    private Wind getWind(Position p, TimePoint at, Iterable<WindSource> windSourcesToExclude) {
+    private Wind getWind(Position p, TimePoint at, Set<WindSource> windSourcesToExclude) {
         return getTrackedRace().getWind(p, at, windSourcesToExclude);
     }
 

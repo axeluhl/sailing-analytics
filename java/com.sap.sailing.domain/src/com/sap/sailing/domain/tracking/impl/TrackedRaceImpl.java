@@ -1333,7 +1333,7 @@ public abstract class TrackedRaceImpl extends TrackedRaceWithWindEssentials impl
     }
 
     @Override
-    public Wind getWind(Position p, TimePoint at, Iterable<WindSource> windSourcesToExclude) {
+    public Wind getWind(Position p, TimePoint at, Set<WindSource> windSourcesToExclude) {
         final WindWithConfidence<com.sap.sse.common.Util.Pair<Position, TimePoint>> windWithConfidence = getWindWithConfidence(p, at,
                 windSourcesToExclude);
         return windWithConfidence == null ? null : windWithConfidence.getObject();
@@ -1345,9 +1345,9 @@ public abstract class TrackedRaceImpl extends TrackedRaceWithWindEssentials impl
     }
 
     @Override
-    public Iterable<WindSource> getWindSourcesToExclude() {
+    public Set<WindSource> getWindSourcesToExclude() {
         synchronized (windSourcesToExclude) {
-            return Collections.unmodifiableCollection(windSourcesToExclude);
+            return Collections.unmodifiableSet(windSourcesToExclude);
         }
     }
 
@@ -1373,7 +1373,7 @@ public abstract class TrackedRaceImpl extends TrackedRaceWithWindEssentials impl
 
     @Override
     public WindWithConfidence<com.sap.sse.common.Util.Pair<Position, TimePoint>> getWindWithConfidence(Position p, TimePoint at,
-            Iterable<WindSource> windSourcesToExclude) {
+            Set<WindSource> windSourcesToExclude) {
         return shortTimeWindCache.getWindWithConfidence(p, at, windSourcesToExclude);
     }
     

@@ -54,13 +54,15 @@ public class TVEntryPoint extends AbstractEntryPoint {
                 RaceBoardViewConfiguration.PARAM_VIEW_SHOW_WINDCHART, false /* default */);
         final boolean showViewStreamlets = GwtHttpRequestUtils.getBooleanParameter(
                 RaceBoardViewConfiguration.PARAM_VIEW_SHOW_STREAMLETS, false /* default */);
+        final boolean showViewSimulation = GwtHttpRequestUtils.getBooleanParameter(
+                RaceBoardViewConfiguration.PARAM_VIEW_SHOW_SIMULATION, false /* default */);
         final boolean showCompetitorsChart = GwtHttpRequestUtils.getBooleanParameter(
                 RaceBoardViewConfiguration.PARAM_VIEW_SHOW_COMPETITORSCHART, false /* default */);
         String activeCompetitorsFilterSetName = GwtHttpRequestUtils.getStringParameter(RaceBoardViewConfiguration.PARAM_VIEW_COMPETITOR_FILTER, null /* default*/);
         final String defaultMedia = GwtHttpRequestUtils.getStringParameter(RaceBoardViewConfiguration.PARAM_DEFAULT_MEDIA, null /* default */);
         final boolean autoSelectMedia = GwtHttpRequestUtils.getBooleanParameter(RaceBoardViewConfiguration.PARAM_AUTOSELECT_MEDIA, false);
         raceboardViewConfig = new RaceBoardViewConfiguration(activeCompetitorsFilterSetName, showLeaderboard,
-                showWindChart, showCompetitorsChart, showViewStreamlets, /* canReplayWhileLiveIsPossible */false, autoSelectMedia, defaultMedia);
+                showWindChart, showCompetitorsChart, showViewStreamlets, showViewSimulation, /* canReplayWhileLiveIsPossible */false, autoSelectMedia, defaultMedia);
 
         sailingService.getLeaderboardNames(new AsyncCallback<List<String>>() {
             @Override
@@ -90,14 +92,14 @@ public class TVEntryPoint extends AbstractEntryPoint {
             if(leaderboardDisplayName == null || leaderboardDisplayName.isEmpty()) {
                 leaderboardDisplayName = leaderboardName;
             }
-            logoAndTitlePanel = new LogoAndTitlePanel(leaderboardGroupName, leaderboardDisplayName, stringMessages, this);
+            logoAndTitlePanel = new LogoAndTitlePanel(leaderboardGroupName, leaderboardDisplayName, stringMessages, this, getUserService());
             logoAndTitlePanel.addStyleName("LogoAndTitlePanel");
             mainPanel.addNorth(logoAndTitlePanel, 68);
         }
         
-        tvViewController = new TVViewController(sailingService, mediaService, stringMessages, this,
-                leaderboardGroupName, leaderboardName, userAgent, logoAndTitlePanel, mainPanel, delayToLiveMillis,
-                showRaceDetails, raceboardViewConfig);
+        tvViewController = new TVViewController(sailingService, mediaService, getUserService(), stringMessages,
+                this, leaderboardGroupName, leaderboardName, userAgent, logoAndTitlePanel, mainPanel,
+                delayToLiveMillis, showRaceDetails, raceboardViewConfig);
         tvViewController.updateTvView(TVViews.Leaderboard);
     }
 }

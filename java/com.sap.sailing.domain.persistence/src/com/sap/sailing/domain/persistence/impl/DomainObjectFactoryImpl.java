@@ -1414,7 +1414,11 @@ public class DomainObjectFactoryImpl implements DomainObjectFactory {
             Serializable id, Integer passId, List<Competitor> competitors, DBObject dbObject) {
         Serializable revokedEventId = Helpers.tryUuidConversion(
         		(Serializable) dbObject.get(FieldNames.RACE_LOG_REVOKED_EVENT_ID.name()));
-        return raceLogEventFactory.createRevokeEvent(createdAt, author, logicalTimePoint, id, passId, revokedEventId);
+        String revokedEventType = (String) dbObject.get(FieldNames.RACE_LOG_REVOKED_EVENT_TYPE.name());
+        String revokedEventShortInfo = (String) dbObject.get(FieldNames.RACE_LOG_REVOKED_EVENT_SHORT_INFO.name());
+        String reason = (String) dbObject.get(FieldNames.RACE_LOG_REVOKED_REASON.name());
+        return raceLogEventFactory.createRevokeEvent(createdAt, author, logicalTimePoint, id, passId,
+                revokedEventId, revokedEventType, revokedEventShortInfo, reason);
     }
 
     private RaceLogEvent loadRaceLogRegisterCompetitorEvent(TimePoint createdAt, RaceLogEventAuthor author, TimePoint logicalTimePoint,

@@ -101,19 +101,22 @@ public interface TrackedLegOfCompetitor extends Serializable {
     List<Maneuver> getManeuvers(TimePoint timePoint, boolean waitForLatest) throws NoWindException;
     
     /**
+     * @param waitForLatest TODO
      * @return <code>null</code> if the competitor hasn't started this leg yet
      */
-    Integer getNumberOfTacks(TimePoint timePoint) throws NoWindException;
+    Integer getNumberOfTacks(TimePoint timePoint, boolean waitForLatest) throws NoWindException;
 
     /**
+     * @param waitForLatest TODO
      * @return <code>null</code> if the competitor hasn't started this leg yet
      */
-    Integer getNumberOfJibes(TimePoint timePoint) throws NoWindException;
+    Integer getNumberOfJibes(TimePoint timePoint, boolean waitForLatest) throws NoWindException;
 
     /**
+     * @param waitForLatest TODO
      * @return <code>null</code> if the competitor hasn't started this leg yet
      */
-    Integer getNumberOfPenaltyCircles(TimePoint timePoint) throws NoWindException;
+    Integer getNumberOfPenaltyCircles(TimePoint timePoint, boolean waitForLatest) throws NoWindException;
 
     /**
      * Computes the competitor's rank within this leg. If the competitor has already finished this leg at

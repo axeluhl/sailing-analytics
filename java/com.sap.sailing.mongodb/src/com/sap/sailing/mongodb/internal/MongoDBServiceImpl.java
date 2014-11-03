@@ -21,10 +21,16 @@ public class MongoDBServiceImpl implements MongoDBService {
     private final Map<com.sap.sse.common.Util.Pair<String, Integer>, Mongo> mongos;
     
     private final Map<com.sap.sse.common.Util.Pair<String, Integer>, DB> dbs;
-    
+
+    /**
+     * collection name -> fully qualified class name
+     */
+    private final Map<String, String> registered;
+
     public MongoDBServiceImpl() {
         mongos = new HashMap<com.sap.sse.common.Util.Pair<String, Integer>, Mongo>();
         dbs = new HashMap<com.sap.sse.common.Util.Pair<String,Integer>, DB>();
+        registered = new HashMap<String, String>();
     }
 
     public MongoDBServiceImpl(MongoDBConfiguration configuration) {
@@ -67,23 +73,19 @@ public class MongoDBServiceImpl implements MongoDBService {
         }
         return db;
     }
-    
-	/**
-	 * collection name -> fully qualified class name
-	 */
-	private Map<String, String> registered = new HashMap<String, String>();
-	
-	@Override
-	public void registerExclusively(Class<?> registerForInterface, String collectionName)
-			throws AlreadyRegisteredException {
-		String fullyQualified = registerForInterface.getName();
-		if (registered.keySet().contains(collectionName) && registered.get(collectionName) != fullyQualified) {
-			logger.log(Level.SEVERE, "Same collection name (" + collectionName + " is required in two different places - this may lead to problems: \n" 
-					+ " - already registered for: " + registered.get(collectionName) + "\n"
-					+ " - tried to register for: " + fullyQualified);
-			throw new AlreadyRegisteredException();
-		}
-		logger.log(Level.INFO, "Registered collection name: " + collectionName);
-		registered.put(collectionName, fullyQualified);
-	}
+
+    @Override
+    public void registerExclusively(Class<?> registerForInterface, String collectionName)
+            throws AlreadyRegisteredException {
+        String fullyQualified = registerForInterface.getName();
+        if (registered.keySet().contains(collectionName) && registered.get(collectionName) != fullyQualified) {
+            logger.log(Level.SEVERE, "Same collection name (" + collectionName
+                    + " is required in two different places - this may lead to problems: \n"
+                    + " - already registered for: " + registered.get(collectionName) + "\n"
+                    + " - tried to register for: " + fullyQualified);
+            throw new AlreadyRegisteredException();
+        }
+        logger.log(Level.INFO, "Registered collection name: " + collectionName);
+        registered.put(collectionName, fullyQualified);
+    }
 }

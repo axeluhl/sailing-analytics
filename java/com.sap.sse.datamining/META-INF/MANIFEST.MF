@@ -4,7 +4,7 @@ Bundle-Name: Datamining
 Bundle-SymbolicName: com.sap.sse.datamining
 Bundle-Version: 1.0.0.qualifier
 Bundle-Vendor: SAP
-Bundle-RequiredExecutionEnvironment: JavaSE-1.7
+Bundle-RequiredExecutionEnvironment: JavaSE-1.8
 Import-Package: org.osgi.framework;version="1.7.0"
 Export-Package: com.sap.sse.datamining,
  com.sap.sse.datamining.components,
@@ -20,6 +20,7 @@ Export-Package: com.sap.sse.datamining,
  com.sap.sse.datamining.impl.functions,
  com.sap.sse.datamining.impl.functions.criterias,
  com.sap.sse.datamining.impl.i18n
-Require-Bundle: com.sap.sse.datamining.shared;bundle-version="1.0.0"
+Require-Bundle: com.sap.sse.datamining.shared;bundle-version="1.0.0",
+ com.sap.sse.common;bundle-version="1.0.0"
 Bundle-Activator: com.sap.sse.datamining.impl.DataMiningActivator
 Bundle-ActivationPolicy: lazy

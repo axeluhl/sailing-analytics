@@ -209,7 +209,8 @@ public class RaceLogRaceTracker extends BaseRaceLogEventVisitor implements RaceT
             }
         }
 
-        trackedRace.setStartOfTrackingReceived(latestMappingEnd);
+        trackedRace.setStartOfTrackingReceived(earliestMappingStart);
+        trackedRace.setEndOfTrackingReceived(latestMappingEnd);
     }
 
     private <ItemT extends WithID, FixT extends GPSFix> boolean hasMappingAlreadyBeenLoaded(

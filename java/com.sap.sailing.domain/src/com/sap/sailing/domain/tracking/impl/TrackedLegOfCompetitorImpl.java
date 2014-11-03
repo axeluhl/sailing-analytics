@@ -5,6 +5,7 @@ import java.util.Iterator;
 import java.util.List;
 import java.util.ListIterator;
 import java.util.NavigableSet;
+import java.util.Set;
 import java.util.concurrent.Callable;
 
 import com.sap.sailing.domain.base.Competitor;
@@ -227,7 +228,7 @@ public class TrackedLegOfCompetitorImpl implements TrackedLegOfCompetitor {
      * Projects <code>speed</code> onto the wind direction for upwind/downwind legs to see how fast a boat travels
      * "along the wind's direction." For reaching legs (neither upwind nor downwind), the speed is projected onto
      * the leg's direction.
-     * @param windPositionMode see {@link #getWind(Position, TimePoint, WindPositionMode)}
+     * @param windPositionMode see {@link #getWind(Position, TimePoint, Set)}
      * 
      * @throws NoWindException in case the wind direction is not known
      */
@@ -321,10 +322,10 @@ public class TrackedLegOfCompetitorImpl implements TrackedLegOfCompetitor {
 
     
     @Override
-    public Integer getNumberOfTacks(TimePoint timePoint) throws NoWindException {
+    public Integer getNumberOfTacks(TimePoint timePoint, boolean waitForLatest) throws NoWindException {
         Integer result = null;
         if (hasStartedLeg(timePoint)) {
-            List<Maneuver> maneuvers = getManeuvers(timePoint, /* waitForLatest */ true);
+            List<Maneuver> maneuvers = getManeuvers(timePoint, waitForLatest);
             result = 0;
             for (Maneuver maneuver : maneuvers) {
                 if (maneuver.getType() == ManeuverType.TACK) {
@@ -349,10 +350,10 @@ public class TrackedLegOfCompetitorImpl implements TrackedLegOfCompetitor {
     }
 
     @Override
-    public Integer getNumberOfJibes(TimePoint timePoint) throws NoWindException {
+    public Integer getNumberOfJibes(TimePoint timePoint, boolean waitForLatest) throws NoWindException {
         Integer result = null;
         if (hasStartedLeg(timePoint)) {
-            List<Maneuver> maneuvers = getManeuvers(timePoint, /* waitForLatest */ true);
+            List<Maneuver> maneuvers = getManeuvers(timePoint, waitForLatest);
             result = 0;
             for (Maneuver maneuver : maneuvers) {
                 if (maneuver.getType() == ManeuverType.JIBE) {
@@ -364,10 +365,10 @@ public class TrackedLegOfCompetitorImpl implements TrackedLegOfCompetitor {
     }
 
     @Override
-    public Integer getNumberOfPenaltyCircles(TimePoint timePoint) throws NoWindException {
+    public Integer getNumberOfPenaltyCircles(TimePoint timePoint, boolean waitForLatest) throws NoWindException {
         Integer result = null;
         if (hasStartedLeg(timePoint)) {
-            List<Maneuver> maneuvers = getManeuvers(timePoint, /* waitForLatest */ true);
+            List<Maneuver> maneuvers = getManeuvers(timePoint, waitForLatest);
             result = 0;
             for (Maneuver maneuver : maneuvers) {
                 if (maneuver.getType() == ManeuverType.PENALTY_CIRCLE) {

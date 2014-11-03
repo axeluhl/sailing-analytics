@@ -1,14 +1,10 @@
 package com.sap.sailing.gwt.ui.client;
 
 import com.google.gwt.core.client.GWT;
-import com.google.gwt.i18n.client.Messages;
 
-public interface StringMessages extends Messages {
+public interface StringMessages extends com.sap.sse.gwt.client.StringMessages {
     public static final StringMessages INSTANCE = GWT.create(StringMessages.class);
     
-    String helloWorld();
-    String kielWeel2011();
-    String stgAccount();
     String tracTracEvents();
     String swissTimingEvents();
     String trackedBefore();
@@ -389,6 +385,8 @@ public interface StringMessages extends Messages {
     String scoringSchemeLowPointWinnerGetsZero();
     String scoringSchemeWinnerGetsFive();
     String scoringSchemeWinnerGetsSix();
+    String scoringSchemeWinnerGetsEight();
+    String scoringSchemeWinnerGetsEightAndInterpolation();
     String scoringSystem();
     String createFlexibleLeaderboard();
     String createRegattaLeaderboard();
@@ -1052,6 +1050,8 @@ public interface StringMessages extends Messages {
     String showPingMarkMappings();
     String errorFetchingWindStreamletData(String message);
     String showWindStreamletOverlay();
+    String showSimulationOverlay();
+    String simulationLegendTooltip();
     String regattaNameMustNotContainSlashes();
     String showNumberOfRacesScored();
     String racesScored();
@@ -1083,11 +1083,28 @@ public interface StringMessages extends Messages {
     String raceIsInLiveTimePanelMode();
     String backToLiveTimePanelMode();
     String windChart();
-    String showVideoPopup();
-    String hideVideoPopup();
-    String manageMedia();
-    String manageMediaTooltip();
+    String mediaShowVideoCaption();
+    String mediaShowVideoTooltip(String title);
+    String mediaHideVideoCaption();
+    String mediaHideVideoTooltip();
+    String mediaSelectVideoCaption(int mediaCount);
+    String mediaSelectVideoTooltip();
+    String mediaManageMediaCaption();
+    String mediaManageMediaTooltip();
     String showAll();
     String raceVisibilityColumn();
     String enterCarryValueFor(String competitorName);
+    String advanced();
+    String basedOn();
+    String retrieveWith();
+    String mappingDetails();
+    String deviceMappingQrCodeExplanation();
+    String qrCode();
+    String enterCourseAreaName();
+    String enterImageURL();
+    String enterVideoURL();
+    String enterSponsorImageURL();
+    String enterRaceName();
+    String enterCourseName();
+    String scoringSchemeHighPointFirstGetsTenOrEightDescription();
 }

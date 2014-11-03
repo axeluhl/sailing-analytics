@@ -14,12 +14,12 @@ public class SmartphoneUUIDSerializationHandler {
     }
 
     public Util.Pair<String, String> serialize(DeviceIdentifier deviceIdentifier) throws TransformationException {
-        return new Util.Pair<String, String>(castIdentifier(deviceIdentifier).getUUID().toString(), SmartphoneUUIDIdentifier.TYPE);
+        return new Util.Pair<String, String>(SmartphoneUUIDIdentifier.TYPE, castIdentifier(deviceIdentifier).getUUID().toString());
     }
 
     public DeviceIdentifier deserialize(String input, String type, String stringRep) throws TransformationException {
         try {
-            return new SmartphoneUUIDIdentifierImpl(UUID.fromString(stringRep));
+            return new SmartphoneUUIDIdentifierImpl(UUID.fromString(input));
         } catch (IllegalArgumentException e) {
             throw new TransformationException("Invalid string representation of smartphone UUID", e);
         }

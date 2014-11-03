@@ -111,7 +111,8 @@ public interface RaceLogEventFactory {
 
     StartTrackingEvent createStartTrackingEvent(TimePoint logicalTimePoint, RaceLogEventAuthor author, int passId);
     
-    RevokeEvent createRevokeEvent(TimePoint logicalTimePoint, RaceLogEventAuthor author, int passId, Serializable revokedEventId);
+    RevokeEvent createRevokeEvent(TimePoint logicalTimePoint, RaceLogEventAuthor author, int passId, Serializable revokedEventId,
+            String revokedEventType, String revokedEventShortInfo, String reason);
     
     RegisterCompetitorEvent createRegisterCompetitorEvent(TimePoint logicalTimePoint, RaceLogEventAuthor author, int passId, Competitor competitor);
     

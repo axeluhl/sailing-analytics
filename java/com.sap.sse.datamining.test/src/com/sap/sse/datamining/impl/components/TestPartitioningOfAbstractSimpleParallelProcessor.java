@@ -20,7 +20,7 @@ public class TestPartitioningOfAbstractSimpleParallelProcessor {
 
     @Test
     public void testPartitioning() {
-        Processor<Integer> processor = new AbstractSimpleParallelProcessor<Integer, Integer>(FunctionTestsUtil.getExecutor(), new HashSet<Processor<Integer>>()) {
+        Processor<Integer, Integer> processor = new AbstractSimpleParallelProcessor<Integer, Integer>(Integer.class, Integer.class, FunctionTestsUtil.getExecutor(), new HashSet<Processor<Integer, ?>>()) {
             @Override
             protected Iterable<Integer> partitionElement(Integer element) {
                 partitionedElements = super.partitionElement(element);

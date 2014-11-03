@@ -50,6 +50,7 @@ public class VideoYoutubePlayer extends AbstractMediaPlayer implements VideoSync
         this.raceStartTime = raceStartTime;
 
         this.videoContainer = new SimplePanel();
+        this.videoContainer.setStyleName("Youtube-Video-Panel");
         final String videoContainerId = "videoContainer-" + videoTrack.url + ++videoCounter;
         this.videoContainer.getElement().setId(videoContainerId);
         this.videoContainer
