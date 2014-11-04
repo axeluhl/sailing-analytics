@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="UTF-8" standalone="no"?>
-<?pde version="3.8"?><target name="Race Analysis Target (IDE)" sequenceNumber="78">
+<?pde version="3.8"?><target name="Race Analysis Target (IDE)" sequenceNumber="82">
 <locations>
 <location includeAllPlatforms="false" includeConfigurePhase="false" includeMode="slicer" includeSource="true" type="InstallableUnit">
 <unit id="com.sap.sailing.target.base.feature.group" version="1.0.0"/>
@@ -72,17 +72,19 @@
 <plugin id="javax.security.auth.message"/>
 <plugin id="javax.security.auth.message.source"/>
 <plugin id="javax.servlet" version="3.1.0.v20140303-1611"/>
-<plugin id="javax.servlet.source"/>
+<plugin id="javax.servlet.source" version="3.1.0.v20140303-1611"/>
 <plugin id="javax.validation"/>
 <plugin id="javax.validation.source"/>
 <plugin id="javax.ws.rs"/>
 <plugin id="javax.ws.rs.source"/>
 <plugin id="jcl.over.slf4j"/>
 <plugin id="jul.to.slf4j"/>
-<plugin id="org.apache.commons.beanutils" version="1.9.0"/>
+<plugin id="org.apache.commons.beanutils"/>
+<plugin id="org.apache.commons.beanutils"/>
 <plugin id="org.apache.commons.beanutils.source"/>
 <plugin id="org.apache.commons.codec"/>
-<plugin id="org.apache.commons.collections" version="3.2.1"/>
+<plugin id="org.apache.commons.collections"/>
+<plugin id="org.apache.commons.collections"/>
 <plugin id="org.apache.commons.collections.source"/>
 <plugin id="org.apache.commons.fileupload"/>
 <plugin id="org.apache.commons.fileupload.source"/>
@@ -90,7 +92,8 @@
 <plugin id="org.apache.commons.io.source"/>
 <plugin id="org.apache.commons.lang"/>
 <plugin id="org.apache.commons.lang.source"/>
-<plugin id="org.apache.commons.logging" version="1.1.3"/>
+<plugin id="org.apache.commons.logging"/>
+<plugin id="org.apache.commons.logging"/>
 <plugin id="org.apache.commons.logging.source"/>
 <plugin id="org.apache.felix.gogo.command"/>
 <plugin id="org.apache.felix.gogo.command.source"/>
