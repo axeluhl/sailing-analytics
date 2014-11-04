@@ -17,6 +17,6 @@ Amount of data processed by the SAP Sailing Analytics during events.
 ## Extreme Sailing Series 2014 (without Sydney)
 
 - 2,875,949 GPS fixes (220MB)
-- 4,850,371 Wind fixes (310MB)
+- 4,850,371 Wind fixes (270MB)
 
 
