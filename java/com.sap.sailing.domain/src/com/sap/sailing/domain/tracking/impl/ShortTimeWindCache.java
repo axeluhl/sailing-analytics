@@ -69,7 +69,7 @@ public class ShortTimeWindCache {
         order = new ConcurrentLinkedDeque<>();
     }
     
-    public void add(Triple<Position, TimePoint, Set<WindSource>> key, WindWithConfidence<com.sap.sse.common.Util.Pair<Position, TimePoint>> wind) {
+    private void add(Triple<Position, TimePoint, Set<WindSource>> key, WindWithConfidence<com.sap.sse.common.Util.Pair<Position, TimePoint>> wind) {
         cache.put(key, wind);
         boolean orderEmpty = order.isEmpty();
         synchronized (order) {
