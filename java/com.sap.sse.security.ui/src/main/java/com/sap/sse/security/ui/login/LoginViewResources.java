@@ -14,5 +14,9 @@ public interface LoginViewResources extends ClientBundle {
         String loginform();
         String loginform_header();
         String loginform_content();
+        String textInput_watermark();
+        String passwordTextInput_watermark();
+        String glowing_border();
+        String button();
     }
 }

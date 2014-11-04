@@ -6,41 +6,41 @@
 	<g:HTMLPanel>
 	    <div>
 	        <ui:text from='{i18n.signInWith}'/>
-	        <g:Anchor href="javascript:;" styleName="{local_res.css.oauthLogo}" ui:field="facebookAnchor">
-	        	<img src="{local_res.facebookIcon.getSafeUri}" title="facebook" />
+	        <g:Anchor href="javascript:;" ui:field="facebookAnchor">
+	        	<img src="{local_res.facebookIcon.getSafeUri}" class="{local_res.css.oauthLogo}" title="facebook" />
 	        </g:Anchor>
-	        <g:Anchor href="javascript:;" styleName="{local_res.css.oauthLogo}" ui:field="googleAnchor">
-	        	<img src="{local_res.googleIcon.getSafeUri}" title="Google"/>
+	        <g:Anchor href="javascript:;" ui:field="googleAnchor">
+	        	<img src="{local_res.googleIcon.getSafeUri}" class="{local_res.css.oauthLogo}" title="Google"/>
 	        </g:Anchor>
-	        <g:Anchor href="javascript:;" styleName="{local_res.css.oauthLogo}" ui:field="twitterAnchor">
-	        	<img src="{local_res.twitterIcon.getSafeUri}" title="Twitter" />
+	        <g:Anchor href="javascript:;" ui:field="twitterAnchor">
+	        	<img src="{local_res.twitterIcon.getSafeUri}" class="{local_res.css.oauthLogo}" title="Twitter" />
 	        </g:Anchor>
-	        <g:Anchor href="javascript:;" styleName="{local_res.css.oauthLogo}" ui:field="linkedinAnchor">
-	        	<img src="{local_res.linkedinIcon.getSafeUri}" title="LinkedIn" />
+	        <g:Anchor href="javascript:;" ui:field="linkedinAnchor">
+	        	<img src="{local_res.linkedinIcon.getSafeUri}" class="{local_res.css.oauthLogo}" title="LinkedIn" />
 	        </g:Anchor>
-	        <g:Anchor href="javascript:;" styleName="{local_res.css.oauthLogo}" ui:field="yahooAnchor">
-	        	<img src="{local_res.yahooIcon.getSafeUri}" title="Yahoo" />
+	        <g:Anchor href="javascript:;" ui:field="yahooAnchor">
+	        	<img src="{local_res.yahooIcon.getSafeUri}" class="{local_res.css.oauthLogo}" title="Yahoo" />
 	        </g:Anchor>
-	        <g:Anchor href="javascript:;" styleName="{local_res.css.oauthLogo}" ui:field="vimeoAnchor">
-	        	<img src="{local_res.vimeoIcon.getSafeUri}" title="Vimeo" />
+	        <g:Anchor href="javascript:;" ui:field="vimeoAnchor">
+	        	<img src="{local_res.vimeoIcon.getSafeUri}" class="{local_res.css.oauthLogo}" title="Vimeo" />
 	        </g:Anchor>
-	        <g:Anchor href="javascript:;" styleName="{local_res.css.oauthLogo}" ui:field="githubAnchor">
-	        	<img src="{local_res.githubIcon.getSafeUri}" title="github" />
+	        <g:Anchor href="javascript:;" ui:field="githubAnchor">
+	        	<img src="{local_res.githubIcon.getSafeUri}" class="{local_res.css.oauthLogo}" title="github" />
 	        </g:Anchor>
-	        <g:Anchor href="javascript:;" styleName="{local_res.css.oauthLogo}" ui:field="instagramAnchor">
-	        	<img src="{local_res.instagramIcon.getSafeUri}" title="Instagram" />
+	        <g:Anchor href="javascript:;" ui:field="instagramAnchor">
+	        	<img src="{local_res.instagramIcon.getSafeUri}" class="{local_res.css.oauthLogo}" title="Instagram" />
 	        </g:Anchor>
-	        <g:Anchor href="javascript:;" styleName="{local_res.css.oauthLogo}" ui:field="flickrAnchor">
-	        	<img src="{local_res.flickrIcon.getSafeUri}" title="flickr" />
+	        <g:Anchor href="javascript:;" ui:field="flickrAnchor">
+	        	<img src="{local_res.flickrIcon.getSafeUri}" class="{local_res.css.oauthLogo}" title="flickr" />
 	        </g:Anchor>
-	        <g:Anchor href="javascript:;" styleName="{local_res.css.oauthLogo}" ui:field="liveAnchor">
-	        	<img src="{local_res.liveIcon.getSafeUri}" title="Windows Live" />
+	        <g:Anchor href="javascript:;" ui:field="liveAnchor">
+	        	<img src="{local_res.liveIcon.getSafeUri}" class="{local_res.css.oauthLogo}" title="Windows Live" />
 	        </g:Anchor>
-	        <g:Anchor href="javascript:;" styleName="{local_res.css.oauthLogo}" ui:field="tumblrAnchor">
-	        	<img src="{local_res.tumblrIcon.getSafeUri}" title="tumblr." />
+	        <g:Anchor href="javascript:;" ui:field="tumblrAnchor">
+	        	<img src="{local_res.tumblrIcon.getSafeUri}" class="{local_res.css.oauthLogo}" title="tumblr." />
 	        </g:Anchor>
-	        <g:Anchor href="javascript:;" styleName="{local_res.css.oauthLogo}" ui:field="foursquareAnchor">
-	        	<img src="{local_res.foursquareIcon.getSafeUri}" title="foursquare" />
+	        <g:Anchor href="javascript:;" ui:field="foursquareAnchor">
+	        	<img src="{local_res.foursquareIcon.getSafeUri}" class="{local_res.css.oauthLogo}" title="foursquare" />
 	        </g:Anchor>
 	    </div>
 	</g:HTMLPanel>     

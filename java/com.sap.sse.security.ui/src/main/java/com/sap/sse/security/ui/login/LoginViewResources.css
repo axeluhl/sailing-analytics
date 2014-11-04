@@ -13,13 +13,58 @@ body {
 	display:table;/* shrinks to fit conntent */
     margin:auto;
 	border: 1px solid gray;
+	line-height: 2.0;	
 }
 
 .loginform_header {
-	height: 1.5em;
-	background-color: lightgray;
-	color: blue;
+	min-height: 40px;
+	background-color: #333333;
+	border-bottom: 4px solid #f0ab00;
+	color: white;
 }
 
 .loginform_content {
+	padding: 10px;
+}
+
+.textInput_watermark {
+	color: gray;
+}
+
+.passwordTextInput_watermark {
+	color: ;
+}
+
+.glowing_border {
+    border: 2px solid #dadada;
+}
+
+.glowing_border:focus { 
+    outline: none;
+    border-color: #9ecaed;
+    box-shadow: 0 0 10px #9ecaed;
+}
+
+.button {
+  font-size: 15px;
+  font-size: 1rem;
+  display: inline-block;
+  font-weight: 600;
+  color: #fff;
+  border: none;
+  line-height: 0.75em;
+  padding: 0.666666666666667em 1.133333333333333em;
+  background-color: #f0ab00;
+  -webkit-transition: background-color 0.2s;
+  -moz-transition: background-color 0.2s;
+  -o-transition: background-color 0.2s;
+  -ms-transition: background-color 0.2s;
+  transition: background-color 0.2s;
+  text-decoration: none;
+}
+.button:hover,
+.button:focus {
+  background-color: #d89a00;
+  outline: none;
+  text-decoration: none;
 }

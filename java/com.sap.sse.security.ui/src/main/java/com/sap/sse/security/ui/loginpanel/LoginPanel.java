@@ -16,7 +16,7 @@ import com.google.gwt.user.client.ui.Label;
 import com.sap.sse.gwt.client.async.MarkedAsyncCallback;
 import com.sap.sse.gwt.client.dialog.DataEntryDialog.DialogCallback;
 import com.sap.sse.security.ui.client.EntryPointLinkFactory;
-import com.sap.sse.security.ui.client.Resources;
+import com.sap.sse.security.ui.client.IconResources;
 import com.sap.sse.security.ui.client.StringMessages;
 import com.sap.sse.security.ui.client.UserService;
 import com.sap.sse.security.ui.client.UserStatusEventHandler;
@@ -105,7 +105,7 @@ public class LoginPanel extends HorizontalPanel implements UserStatusEventHandle
             }
         });
 
-        final ImageResource userImageResource = Resources.INSTANCE.userIcon();
+        final ImageResource userImageResource = IconResources.INSTANCE.userIcon();
         ImageResourceRenderer renderer = new ImageResourceRenderer();
         final HTML imageContainer = new HTML(renderer.render(userImageResource));
         imageContainer.getElement().addClassName(css.userIcon());
