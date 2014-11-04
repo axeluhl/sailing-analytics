@@ -33,7 +33,7 @@ public class LoginView extends Composite {
     private final UserService userService;
     
     @UiField TextBoxWithWatermark userNameTextBox;
-    @UiField Button passwordResetButton; 
+    @UiField Anchor passwordResetAnchor; 
     @UiField PasswordTextBoxWithWatermark passwordTextBox;
     @UiField Button loginButton;
     @UiField Anchor signUpAnchor;
@@ -85,7 +85,7 @@ public class LoginView extends Composite {
         });        
     }
     
-    @UiHandler("passwordResetButton")
+    @UiHandler("passwordResetAnchor")
     void passwordResetClicked(ClickEvent e) {
         userManagementService.resetPassword(userNameTextBox.getText(), new MarkedAsyncCallback<Void>(new AsyncCallback<Void>() {
             @Override

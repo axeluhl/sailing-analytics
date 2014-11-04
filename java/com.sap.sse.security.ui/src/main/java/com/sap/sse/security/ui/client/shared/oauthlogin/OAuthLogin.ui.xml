@@ -4,8 +4,7 @@
     <ui:with field="i18n" type="com.sap.sse.security.ui.client.StringMessages"/>
     <ui:with field="local_res" type="com.sap.sse.security.ui.client.shared.oauthlogin.OAuthLoginResources" />
 	<g:HTMLPanel>
-	    <div>
-	        <ui:text from='{i18n.signInWith}'/>
+	    <div class="{local_res.css.oauthPanel}">
 	        <g:Anchor href="javascript:;" ui:field="facebookAnchor">
 	        	<img src="{local_res.facebookIcon.getSafeUri}" class="{local_res.css.oauthLogo}" title="facebook" />
 	        </g:Anchor>

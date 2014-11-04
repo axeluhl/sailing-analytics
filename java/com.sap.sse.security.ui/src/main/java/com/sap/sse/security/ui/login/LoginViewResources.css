@@ -17,7 +17,7 @@ body {
 }
 
 .loginform_header {
-	min-height: 40px;
+	height: 40px;
 	background-color: #333333;
 	border-bottom: 4px solid #f0ab00;
 	color: white;
@@ -48,13 +48,13 @@ body {
 .button {
   font-size: 15px;
   font-size: 1rem;
-  display: inline-block;
-  font-weight: 600;
+  font-weight: 400;
+  line-height: 1.7em;
   color: #fff;
   border: none;
-  line-height: 0.75em;
-  padding: 0.666666666666667em 1.133333333333333em;
   background-color: #f0ab00;
+  padding-left: 20px;
+  padding-right: 20px;
   -webkit-transition: background-color 0.2s;
   -moz-transition: background-color 0.2s;
   -o-transition: background-color 0.2s;

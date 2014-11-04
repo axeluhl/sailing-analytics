@@ -13,6 +13,7 @@ public interface OAuthLoginResources extends ClientBundle {
 
     public interface LocalCss extends CssResource {
         String oauthLogo();
+        String oauthPanel();
     }
     
     @Source("com/sap/sse/security/ui/oauth/images/facebook.png")
