@@ -11,7 +11,6 @@ public interface LoginViewResources extends ClientBundle {
     LocalCss css();
 
     public interface LocalCss extends CssResource {
-        String a();
-        String b();
+        String centerForm();
     }
 }

@@ -1,10 +1,8 @@
 package com.sap.sse.security.ui.login;
 
 import com.google.gwt.core.client.GWT;
-import com.google.gwt.dom.client.Style.Unit;
 import com.google.gwt.user.client.rpc.ServiceDefTarget;
-import com.google.gwt.user.client.ui.DockLayoutPanel;
-import com.google.gwt.user.client.ui.RootLayoutPanel;
+import com.google.gwt.user.client.ui.RootPanel;
 import com.sap.sse.gwt.client.AbstractEntryPoint;
 import com.sap.sse.gwt.client.EntryPointHelper;
 import com.sap.sse.security.ui.client.RemoteServiceMappingConstants;
@@ -22,10 +20,8 @@ public class LoginEntryPoint extends AbstractEntryPoint {
         EntryPointHelper.registerASyncService((ServiceDefTarget) userManagementService, RemoteServiceMappingConstants.userManagementServiceRemotePath);
         userService = new UserService(userManagementService);
 
-        RootLayoutPanel rootPanel = RootLayoutPanel.get();
-        DockLayoutPanel dockPanel = new DockLayoutPanel(Unit.PX);
-        rootPanel.add(dockPanel);
+        RootPanel rootPanel = RootPanel.get();
 
-        dockPanel.add(new LoginView(userManagementService, userService));
+        rootPanel.add(new LoginView(userManagementService, userService));
     }
 }

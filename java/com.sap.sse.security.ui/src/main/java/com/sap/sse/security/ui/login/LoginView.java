@@ -35,10 +35,10 @@ public class LoginView extends Composite {
     private final UserManagementServiceAsync userManagementService;
     private final UserService userService;
     
-    @UiField TextBox nameText;
-    @UiField Button passwordReset; 
-    @UiField PasswordTextBox pwText;
-    @UiField Button submit;
+    @UiField TextBox userNameTextBox;
+    @UiField Button passwordResetButton; 
+    @UiField PasswordTextBox passwordTextBox;
+    @UiField Button loginButton;
     @UiField Anchor signUpAnchor;
     @UiField HTMLPanel oAuthPanel;
     
@@ -53,12 +53,12 @@ public class LoginView extends Composite {
         
         oAuthPanel.add(new OAuthLoginPanel(userManagementService, Resources.INSTANCE.css()));
         
-        nameText.setFocus(true);
+        userNameTextBox.setFocus(true);
     }
     
-    @UiHandler("submit")
-    void submitClicked(ClickEvent e) {
-        userService.login(nameText.getText(), pwText.getText(), new AsyncCallback<SuccessInfo>() {
+    @UiHandler("loginButton")
+    void loginButtonClicked(ClickEvent e) {
+        userService.login(userNameTextBox.getText(), passwordTextBox.getText(), new AsyncCallback<SuccessInfo>() {
             @Override
             public void onFailure(Throwable caught) {
                 GWT.log(caught.getMessage());
@@ -83,14 +83,14 @@ public class LoginView extends Composite {
         });        
     }
     
-    @UiHandler("passwordReset")
+    @UiHandler("passwordResetButton")
     void passwordResetClicked(ClickEvent e) {
-        userManagementService.resetPassword(nameText.getText(), new MarkedAsyncCallback<Void>(new AsyncCallback<Void>() {
+        userManagementService.resetPassword(userNameTextBox.getText(), new MarkedAsyncCallback<Void>(new AsyncCallback<Void>() {
             @Override
             public void onFailure(Throwable caught) {
                 if (caught instanceof UserManagementException) {
                     if (UserManagementException.CANNOT_RESET_PASSWORD_WITHOUT_VALIDATED_EMAIL.equals(caught.getMessage())) {
-                        Window.alert(StringMessages.INSTANCE.cannotResetPasswordWithoutValidatedEmail(nameText.getText()));
+                        Window.alert(StringMessages.INSTANCE.cannotResetPasswordWithoutValidatedEmail(userNameTextBox.getText()));
                     } else {
                         Window.alert(StringMessages.INSTANCE.errorDuringPasswordReset(caught.getMessage()));
                     }
@@ -101,7 +101,7 @@ public class LoginView extends Composite {
 
             @Override
             public void onSuccess(Void result) {
-                Window.alert(StringMessages.INSTANCE.newPasswordSent(nameText.getText()));
+                Window.alert(StringMessages.INSTANCE.newPasswordSent(userNameTextBox.getText()));
             }
         }));
     }
