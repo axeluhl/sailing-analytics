@@ -1,0 +1,47 @@
+<!DOCTYPE ui:UiBinder SYSTEM "http://dl.google.com/gwt/DTD/xhtml.ent">
+<ui:UiBinder xmlns:ui="urn:ui:com.google.gwt.uibinder" 
+	xmlns:g="urn:import:com.google.gwt.user.client.ui">
+    <ui:with field="i18n" type="com.sap.sse.security.ui.client.StringMessages"/>
+    <ui:with field="local_res" type="com.sap.sse.security.ui.client.shared.oauthlogin.OAuthLoginResources" />
+	<g:HTMLPanel>
+	    <div>
+	        <ui:text from='{i18n.signInWith}'/>
+	        <g:Anchor href="javascript:;" styleName="{local_res.css.oauthLogo}" ui:field="facebookAnchor">
+	        	<img src="{local_res.facebookIcon.getSafeUri}" title="facebook" />
+	        </g:Anchor>
+	        <g:Anchor href="javascript:;" styleName="{local_res.css.oauthLogo}" ui:field="googleAnchor">
+	        	<img src="{local_res.googleIcon.getSafeUri}" title="Google"/>
+	        </g:Anchor>
+	        <g:Anchor href="javascript:;" styleName="{local_res.css.oauthLogo}" ui:field="twitterAnchor">
+	        	<img src="{local_res.twitterIcon.getSafeUri}" title="Twitter" />
+	        </g:Anchor>
+	        <g:Anchor href="javascript:;" styleName="{local_res.css.oauthLogo}" ui:field="linkedinAnchor">
+	        	<img src="{local_res.linkedinIcon.getSafeUri}" title="LinkedIn" />
+	        </g:Anchor>
+	        <g:Anchor href="javascript:;" styleName="{local_res.css.oauthLogo}" ui:field="yahooAnchor">
+	        	<img src="{local_res.yahooIcon.getSafeUri}" title="Yahoo" />
+	        </g:Anchor>
+	        <g:Anchor href="javascript:;" styleName="{local_res.css.oauthLogo}" ui:field="vimeoAnchor">
+	        	<img src="{local_res.vimeoIcon.getSafeUri}" title="Vimeo" />
+	        </g:Anchor>
+	        <g:Anchor href="javascript:;" styleName="{local_res.css.oauthLogo}" ui:field="githubAnchor">
+	        	<img src="{local_res.githubIcon.getSafeUri}" title="github" />
+	        </g:Anchor>
+	        <g:Anchor href="javascript:;" styleName="{local_res.css.oauthLogo}" ui:field="instagramAnchor">
+	        	<img src="{local_res.instagramIcon.getSafeUri}" title="Instagram" />
+	        </g:Anchor>
+	        <g:Anchor href="javascript:;" styleName="{local_res.css.oauthLogo}" ui:field="flickrAnchor">
+	        	<img src="{local_res.flickrIcon.getSafeUri}" title="flickr" />
+	        </g:Anchor>
+	        <g:Anchor href="javascript:;" styleName="{local_res.css.oauthLogo}" ui:field="liveAnchor">
+	        	<img src="{local_res.liveIcon.getSafeUri}" title="Windows Live" />
+	        </g:Anchor>
+	        <g:Anchor href="javascript:;" styleName="{local_res.css.oauthLogo}" ui:field="tumblrAnchor">
+	        	<img src="{local_res.tumblrIcon.getSafeUri}" title="tumblr." />
+	        </g:Anchor>
+	        <g:Anchor href="javascript:;" styleName="{local_res.css.oauthLogo}" ui:field="foursquareAnchor">
+	        	<img src="{local_res.foursquareIcon.getSafeUri}" title="foursquare" />
+	        </g:Anchor>
+	    </div>
+	</g:HTMLPanel>     
+</ui:UiBinder>    

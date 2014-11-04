@@ -5,7 +5,7 @@ import com.google.gwt.user.client.ui.Label;
 import com.google.gwt.user.client.ui.Widget;
 import com.sap.sse.security.ui.client.StringMessages;
 import com.sap.sse.security.ui.client.component.AbstractUserDialog;
-import com.sap.sse.security.ui.oauth.client.component.OAuthLoginPanel;
+import com.sap.sse.security.ui.client.shared.oauthlogin.OAuthLogin;
 import com.sap.sse.security.ui.shared.UserManagementServiceAsync;
 
 public class SignInDialog extends AbstractUserDialog {
@@ -23,7 +23,7 @@ public class SignInDialog extends AbstractUserDialog {
         result.setWidget(0, 1, getNameBox());
         result.setWidget(1, 0, new Label(getStringMessages().password()));
         result.setWidget(1, 1, getPwBox());
-        result.setWidget(2, 0, new OAuthLoginPanel(getUserManagementService(), css));
+        result.setWidget(2, 0, new OAuthLogin(getUserManagementService()));
         return result;
     }
 }

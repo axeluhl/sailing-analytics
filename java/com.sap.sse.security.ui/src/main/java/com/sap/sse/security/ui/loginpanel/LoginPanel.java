@@ -21,7 +21,7 @@ import com.sap.sse.security.ui.client.StringMessages;
 import com.sap.sse.security.ui.client.UserService;
 import com.sap.sse.security.ui.client.UserStatusEventHandler;
 import com.sap.sse.security.ui.client.component.AbstractUserDialog.UserData;
-import com.sap.sse.security.ui.oauth.client.component.OAuthLoginPanel;
+import com.sap.sse.security.ui.client.shared.oauthlogin.OAuthLogin;
 import com.sap.sse.security.ui.shared.SuccessInfo;
 import com.sap.sse.security.ui.shared.UserDTO;
 import com.sap.sse.security.ui.shared.UserManagementServiceAsync;
@@ -38,7 +38,7 @@ public class LoginPanel extends HorizontalPanel implements UserStatusEventHandle
     private final Anchor signUpLink;
     private final Label welcomeMessage;
 
-    private final OAuthLoginPanel oAuthPanel;
+    private final OAuthLogin oAuthPanel;
 
     public LoginPanel(final Css css, final UserService userService) {
         this.userManagementService = userService.getUserManagementService();
@@ -118,7 +118,7 @@ public class LoginPanel extends HorizontalPanel implements UserStatusEventHandle
         add(signInLink);
         add(signUpLink);
         add(signOutLink);
-        oAuthPanel = new OAuthLoginPanel(userManagementService, css);
+        oAuthPanel = new OAuthLogin(userManagementService);
         add(oAuthPanel);
         userService.addUserStatusEventHandler(this);
         updateStatus();

@@ -19,10 +19,9 @@ import com.google.gwt.user.client.ui.Widget;
 import com.sap.sse.gwt.client.async.MarkedAsyncCallback;
 import com.sap.sse.security.shared.UserManagementException;
 import com.sap.sse.security.ui.client.EntryPointLinkFactory;
-import com.sap.sse.security.ui.client.Resources;
 import com.sap.sse.security.ui.client.StringMessages;
 import com.sap.sse.security.ui.client.UserService;
-import com.sap.sse.security.ui.oauth.client.component.OAuthLoginPanel;
+import com.sap.sse.security.ui.client.shared.oauthlogin.OAuthLogin;
 import com.sap.sse.security.ui.shared.SuccessInfo;
 import com.sap.sse.security.ui.shared.UserManagementServiceAsync;
 
@@ -46,12 +45,14 @@ public class LoginView extends Composite {
         this.userManagementService = userManagementService;
         this.userService = userService;
 
+        LoginViewResources.INSTANCE.css().ensureInjected();
+        
         initWidget(uiBinder.createAndBindUi(this));
 
         String registrationLink = EntryPointLinkFactory.createRegistrationLink(Collections.<String, String> emptyMap());
         signUpAnchor.setHref(registrationLink);
         
-        oAuthPanel.add(new OAuthLoginPanel(userManagementService, Resources.INSTANCE.css()));
+        oAuthPanel.add(new OAuthLogin(userManagementService));
         
         userNameTextBox.setFocus(true);
     }

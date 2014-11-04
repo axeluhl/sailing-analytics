@@ -1,4 +1,12 @@
-.centerForm {
+.centered {
     margin: 0 auto;
     width:60%;
+}
+
+.login {
+	text-align: center;
+}
+
+.form {
+	border: 1px solid black;
 }

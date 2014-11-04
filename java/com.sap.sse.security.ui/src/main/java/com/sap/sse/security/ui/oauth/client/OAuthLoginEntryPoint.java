@@ -14,11 +14,10 @@ import com.google.gwt.user.client.ui.RootPanel;
 import com.google.gwt.user.client.ui.Widget;
 import com.sap.sse.gwt.client.EntryPointHelper;
 import com.sap.sse.security.ui.client.RemoteServiceMappingConstants;
-import com.sap.sse.security.ui.client.Resources;
 import com.sap.sse.security.ui.client.StringMessages;
 import com.sap.sse.security.ui.client.UserChangeEventHandler;
 import com.sap.sse.security.ui.client.UserService;
-import com.sap.sse.security.ui.oauth.client.component.OAuthLoginPanel;
+import com.sap.sse.security.ui.client.shared.oauthlogin.OAuthLogin;
 import com.sap.sse.security.ui.oauth.client.util.ClientUtils;
 import com.sap.sse.security.ui.shared.UserDTO;
 import com.sap.sse.security.ui.shared.UserManagementService;
@@ -28,9 +27,8 @@ public class OAuthLoginEntryPoint implements EntryPoint, UserChangeEventHandler 
     private final UserManagementServiceAsync userManagementService = GWT.create(UserManagementService.class);
     private final StringMessages stringMessages = GWT.create(StringMessages.class);
     private final UserService userService = new UserService(userManagementService);
-    private final Resources resources = GWT.create(Resources.class);
 
-    private OAuthLoginPanel loginScreen = new OAuthLoginPanel(userManagementService, resources.css());
+    private OAuthLogin loginScreen = new OAuthLogin(userManagementService);
     private FlowPanel content = new FlowPanel();
 
     public void onModuleLoad() {
