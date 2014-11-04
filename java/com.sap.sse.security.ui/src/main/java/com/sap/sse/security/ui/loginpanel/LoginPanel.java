@@ -50,7 +50,7 @@ public class LoginPanel extends HorizontalPanel implements UserStatusEventHandle
         signInLink.addClickHandler(new ClickHandler() {
             @Override
             public void onClick(ClickEvent event) {
-                final SignInDialog signInDialog = new SignInDialog(stringMessages, userManagementService, css, new DialogCallback<UserData>() {
+                final SignInDialog signInDialog = new SignInDialog(stringMessages, userManagementService, new DialogCallback<UserData>() {
                     @Override
                     public void ok(UserData userData) {
                         userService.login(userData.getUsername(), userData.getPassword(), new MarkedAsyncCallback<SuccessInfo>(new AsyncCallback<SuccessInfo>() {

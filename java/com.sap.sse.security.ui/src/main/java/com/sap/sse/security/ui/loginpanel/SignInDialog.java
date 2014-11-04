@@ -9,11 +9,8 @@ import com.sap.sse.security.ui.client.shared.oauthlogin.OAuthLogin;
 import com.sap.sse.security.ui.shared.UserManagementServiceAsync;
 
 public class SignInDialog extends AbstractUserDialog {
-    private final Css css;
-
-    public SignInDialog(StringMessages stringMessages, UserManagementServiceAsync userManagementService, Css css, DialogCallback<UserData> callback) {
+    public SignInDialog(StringMessages stringMessages, UserManagementServiceAsync userManagementService, DialogCallback<UserData> callback) {
         super(stringMessages, stringMessages.signIn(), userManagementService, /* user */ null, /* validator */ null, callback);
-        this.css = css;
     }
 
     @Override
