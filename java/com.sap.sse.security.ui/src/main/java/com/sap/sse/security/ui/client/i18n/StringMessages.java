@@ -1,4 +1,4 @@
-package com.sap.sse.security.ui.client;
+package com.sap.sse.security.ui.client.i18n;
 
 import com.google.gwt.core.client.GWT;
 
