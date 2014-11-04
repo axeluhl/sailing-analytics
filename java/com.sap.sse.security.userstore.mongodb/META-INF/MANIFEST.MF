@@ -11,6 +11,7 @@ Bundle-ActivationPolicy: lazy
 Bundle-ClassPath: .
 Require-Bundle: com.sap.sse.security;bundle-version="1.0.0",
  com.mongodb.driver;bundle-version="2.6.2",
- com.sap.sailing.mongodb
+ com.sap.sailing.mongodb,
+ org.apache.shiro.core;bundle-version="1.2.2"
 Export-Package: com.sap.sse.security.userstore.mongodb,
  com.sap.sse.security.userstore.mongodb.impl;x-friends:="com.sap.sse.security.test"

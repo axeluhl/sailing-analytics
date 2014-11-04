@@ -1,13 +1,11 @@
 <?xml version="1.0" encoding="UTF-8" standalone="no"?>
-<?pde version="3.6"?>
-
-<target name="Race Analysis Target (IDE) for the p2 Admin" sequenceNumber="58">
+<?pde version="3.8"?><target name="Race Analysis Target (IDE) for the p2 Admin" sequenceNumber="66">
 <locations>
-<location includeAllPlatforms="false" includeMode="slicer" includeSource="true" type="InstallableUnit">
+<location includeAllPlatforms="false" includeConfigurePhase="false" includeMode="slicer" includeSource="true" type="InstallableUnit">
 <unit id="org.eclipse.jetty.bundles.f.feature.group" version="9.2.2.201407241931"/>
 <repository location="http://download.eclipse.org/jetty/updates/jetty-bundles-9.x/9.2.2.v20140723/"/>
 </location>
-<location includeAllPlatforms="false" includeMode="slicer" includeSource="true" type="InstallableUnit">
+<location includeAllPlatforms="false" includeConfigurePhase="false" includeMode="slicer" includeSource="true" type="InstallableUnit">
 <unit id="org.eclipse.osgi" version="3.10.1.v20140909-1633"/>
 <unit id="org.eclipse.osgi.source" version="3.10.1.v20140909-1633"/>
 <unit id="org.eclipse.osgi.services" version="3.4.0.v20140312-2051"/>
@@ -34,13 +32,8 @@
 <unit id="org.apache.commons.beanutils.source" version="1.8.0.v201205091237"/>
 <repository location="http://download.eclipse.org/releases/luna"/>
 </location>
-<location path="${project_loc:com.sap.sailing.targetplatform.base}/gen/p2" type="Directory">
-<unit id="com.sap.sailing.target.base.feature.group" version="1.0.0"/>
-<unit id="com.sap.sailing.target.jms.feature.group" version="1.0.0"/>
-<unit id="com.sap.sailing.target.shiro.feature.group" version="1.0.0"/>
-<unit id="com.sap.sailing.target.test.feature.group" version="1.0.0"/>
-</location>
-<location includeAllPlatforms="false" includeMode="slicer" includeSource="true" type="InstallableUnit">
+<location path="${project_loc:com.sap.sailing.targetplatform.base}/gen/p2" type="Directory"/>
+<location includeAllPlatforms="false" includeConfigurePhase="false" includeMode="slicer" includeSource="true" type="InstallableUnit">
 <unit id="org.apache.commons.fileupload" version="1.2.2.v20111214-1400"/>
 <unit id="org.apache.commons.fileupload.source" version="1.2.2.v20111214-1400"/>
 <unit id="org.apache.commons.io" version="2.2.0.v201405211200"/>
@@ -73,17 +66,17 @@
 <plugin id="javax.security.auth.message"/>
 <plugin id="javax.security.auth.message.source"/>
 <plugin id="javax.servlet" version="3.1.0.v20140303-1611"/>
-<plugin id="javax.servlet.source" version="3.1.0.v20140303-1611"/>
+<plugin id="javax.servlet.source"/>
 <plugin id="javax.validation"/>
 <plugin id="javax.validation.source"/>
 <plugin id="javax.ws.rs"/>
 <plugin id="javax.ws.rs.source"/>
 <plugin id="jcl.over.slf4j"/>
 <plugin id="jul.to.slf4j"/>
-<plugin id="org.apache.commons.beanutils"/>
+<plugin id="org.apache.commons.beanutils" version="1.9.0"/>
 <plugin id="org.apache.commons.beanutils.source"/>
 <plugin id="org.apache.commons.codec"/>
-<plugin id="org.apache.commons.collections"/>
+<plugin id="org.apache.commons.collections" version="3.2.1"/>
 <plugin id="org.apache.commons.collections.source"/>
 <plugin id="org.apache.commons.fileupload"/>
 <plugin id="org.apache.commons.fileupload.source"/>
@@ -91,7 +84,7 @@
 <plugin id="org.apache.commons.io.source"/>
 <plugin id="org.apache.commons.lang"/>
 <plugin id="org.apache.commons.lang.source"/>
-<plugin id="org.apache.commons.logging"/>
+<plugin id="org.apache.commons.logging" version="1.1.3"/>
 <plugin id="org.apache.commons.logging.source"/>
 <plugin id="org.apache.felix.gogo.command"/>
 <plugin id="org.apache.felix.gogo.command.source"/>
@@ -109,6 +102,11 @@
 <plugin id="org.apache.httpcomponents.httpclient.source"/>
 <plugin id="org.apache.httpcomponents.httpcore"/>
 <plugin id="org.apache.httpcomponents.httpcore.source"/>
+<plugin id="org.apache.servicemix.bundles.ehcache"/>
+<plugin id="org.apache.servicemix.bundles.scribe"/>
+<plugin id="org.apache.shiro.core"/>
+<plugin id="org.apache.shiro.ehcache"/>
+<plugin id="org.apache.shiro.web"/>
 <plugin id="org.eclipse.equinox.common"/>
 <plugin id="org.eclipse.equinox.common.source"/>
 <plugin id="org.eclipse.equinox.console"/>
@@ -198,12 +196,9 @@
 <plugin id="org.eclipse.osgi.source"/>
 <plugin id="org.hamcrest"/>
 <plugin id="org.hamcrest.core"/>
-<plugin id="org.hamcrest.core.source"/>
 <plugin id="org.hamcrest.integration"/>
 <plugin id="org.hamcrest.library"/>
-<plugin id="org.hamcrest.library.source"/>
 <plugin id="org.hamcrest.text"/>
-<plugin id="org.hamcrest.text.source"/>
 <plugin id="org.hyperic.sigar"/>
 <plugin id="org.jdom"/>
 <plugin id="org.jdom.source"/>
