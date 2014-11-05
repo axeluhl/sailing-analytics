@@ -26,8 +26,8 @@ import com.google.gwt.user.client.ui.ScrollPanel;
 import com.google.gwt.user.client.ui.TabLayoutPanel;
 import com.google.gwt.user.client.ui.TextBox;
 import com.sap.sse.gwt.client.AbstractEntryPoint;
-import com.sap.sse.security.ui.client.StringMessages;
-import com.sap.sse.security.ui.client.resources.IconResources;
+import com.sap.sse.security.ui.client.IconResources;
+import com.sap.sse.security.ui.client.i18n.StringMessages;
 import com.sap.sse.security.ui.shared.UserManagementServiceAsync;
 
 public class SettingsPanel extends LayoutPanel {

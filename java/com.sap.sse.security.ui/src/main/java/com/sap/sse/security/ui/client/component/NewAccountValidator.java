@@ -1,6 +1,6 @@
 package com.sap.sse.security.ui.client.component;
 
-import com.sap.sse.security.ui.client.StringMessages;
+import com.sap.sse.security.ui.client.i18n.StringMessages;
 
 /**
  * Encapsulates the rules for client-side username/password accounts, such as minimum username length,
@@ -15,7 +15,7 @@ public class NewAccountValidator {
     
     private final StringMessages stringMessages;
     
-    public NewAccountValidator(com.sap.sse.security.ui.client.StringMessages stringMessages) {
+    public NewAccountValidator(com.sap.sse.security.ui.client.i18n.StringMessages stringMessages) {
         this.stringMessages = stringMessages;
     }
 

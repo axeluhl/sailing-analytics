@@ -6,8 +6,8 @@ import com.google.gwt.user.client.ui.PasswordTextBox;
 import com.google.gwt.user.client.ui.TextBox;
 import com.google.gwt.user.client.ui.Widget;
 import com.sap.sse.gwt.client.dialog.DataEntryDialog;
-import com.sap.sse.security.ui.client.StringMessages;
 import com.sap.sse.security.ui.client.component.AbstractUserDialog.UserData;
+import com.sap.sse.security.ui.client.i18n.StringMessages;
 import com.sap.sse.security.ui.shared.UserDTO;
 import com.sap.sse.security.ui.shared.UserManagementServiceAsync;
 
