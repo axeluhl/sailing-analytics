@@ -18,6 +18,7 @@ import com.google.gwt.user.client.ui.Label;
 import com.google.gwt.user.client.ui.Widget;
 import com.sap.sse.gwt.client.async.MarkedAsyncCallback;
 import com.sap.sse.gwt.client.dialog.DataEntryDialog.DialogCallback;
+import com.sap.sse.gwt.client.dialog.DialogUtils;
 import com.sap.sse.security.shared.UserManagementException;
 import com.sap.sse.security.ui.client.EntryPointLinkFactory;
 import com.sap.sse.security.ui.client.UserService;
@@ -57,6 +58,8 @@ public class LoginView extends Composite {
         signUpAnchor.setHref(registrationLink);
         oAuthPanel.add(new OAuthLogin(userManagementService));
         userNameTextBox.setFocus(true);
+        
+        DialogUtils.linkEnterToButton(loginButton, userNameTextBox, passwordTextBox);
     }
     
     @UiHandler("loginButton")
