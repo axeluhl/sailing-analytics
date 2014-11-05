@@ -295,6 +295,7 @@ public class SecurityServiceImpl extends RemoteServiceServlet implements Securit
         String hashedPasswordBase64 = hashPassword(newPassword, salt);
         account.setSalt(salt);
         account.setSaltedPassword(hashedPasswordBase64);
+        user.passwordWasReset();
         store.updateUser(user);
     }
 

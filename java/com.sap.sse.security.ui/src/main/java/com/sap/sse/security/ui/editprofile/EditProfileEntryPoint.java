@@ -103,20 +103,23 @@ public class EditProfileEntryPoint implements EntryPoint {
                 }).show();
             }
         });
-        userService.addUserStatusEventHandler(new UserStatusEventHandler() {
-            @Override
-            public void onUserStatusChange(UserDTO user) {
-                if (user == null) {
-                    nameText.setText("");
-                    emailText.setText("");
-                    rolesLabel.setText("");
-                } else {
-                    nameText.setText(user.getName());
-                    emailText.setText(user.getEmail());
-                    rolesLabel.setText(user.getRoles().toString());
+        // when a username is provided through the URL, don't update the user display based on the signed-in user
+        if (usernameFromURL == null) {
+            userService.addUserStatusEventHandler(new UserStatusEventHandler() {
+                @Override
+                public void onUserStatusChange(UserDTO user) {
+                    if (user == null) {
+                        nameText.setText("");
+                        emailText.setText("");
+                        rolesLabel.setText("");
+                    } else {
+                        nameText.setText(user.getName());
+                        emailText.setText(user.getEmail());
+                        rolesLabel.setText(user.getRoles().toString());
+                    }
                 }
-            }
-        });
+            });
+        }
         Label pwLabel = new Label(stringMessages.password());
         fp.add(pwLabel);
         final PasswordTextBox pwText = new PasswordTextBox();

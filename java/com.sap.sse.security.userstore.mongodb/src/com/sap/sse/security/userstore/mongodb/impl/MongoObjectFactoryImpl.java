@@ -36,6 +36,7 @@ public class MongoObjectFactoryImpl implements MongoObjectFactory {
         dbUser.put(FieldNames.User.NAME.name(), user.getName());
         dbUser.put(FieldNames.User.EMAIL.name(), user.getEmail());
         dbUser.put(FieldNames.User.EMAIL_VALIDATED.name(), user.isEmailValidated());
+        dbUser.put(FieldNames.User.PASSWORD_RESET_SECRET.name(), user.getPasswordResetSecret());
         dbUser.put(FieldNames.User.VALIDATION_SECRET.name(), user.getValidationSecret());
         dbUser.put(FieldNames.User.ACCOUNTS.name(), createAccountMapObject(user.getAllAccounts()));
         dbUser.put(FieldNames.User.ROLES.name(), user.getRoles());

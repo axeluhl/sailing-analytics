@@ -142,7 +142,7 @@ public class UserDetailsView extends FlowPanel {
             emailLabel.setText("");
         } else {
             usernameLabel.setText(user.getName());
-            emailLabel.setText(user.getEmail());
+            emailLabel.setText(user.getEmail()+(user.isEmailValidated()?" \u2713":""));
             for (AccountDTO a : user.getAccounts()) {
                 DecoratorPanel accountPanelDecorator = new DecoratorPanel();
                 FlowPanel accountPanelContent = new FlowPanel();

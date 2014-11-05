@@ -46,15 +46,16 @@ public class User {
     }
 
     public User(String name, String email, Collection<Account> accounts) {
-        this(name, email, /* is email validated */ false, /* validation secret */ null, accounts);
+        this(name, email, /* is email validated */ false, /* password reset secret */ null, /* validation secret */ null, accounts);
     }
 
-    public User(String name, String email, Boolean emailValidated, String validationSecret,
+    public User(String name, String email, Boolean emailValidated, String passwordResetSecret, String validationSecret,
             Collection<Account> accounts) {
         super();
         this.name = name;
         this.roles = new HashSet<>();
         this.email = email;
+        this.passwordResetSecret = passwordResetSecret;
         this.validationSecret = validationSecret;
         this.emailValidated = emailValidated;
         this.accounts = new HashMap<>();
@@ -163,6 +164,13 @@ public class User {
             result = false;
         }
         return result;
+    }
+    
+    /**
+     * Clears the {@link #passwordResetSecret}.
+     */
+    public void passwordWasReset() {
+        passwordResetSecret = null;
     }
 
     public boolean isEmailValidated() {
