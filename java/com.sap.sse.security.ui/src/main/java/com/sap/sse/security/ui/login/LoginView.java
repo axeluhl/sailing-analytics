@@ -13,6 +13,7 @@ import com.google.gwt.user.client.ui.Anchor;
 import com.google.gwt.user.client.ui.Button;
 import com.google.gwt.user.client.ui.Composite;
 import com.google.gwt.user.client.ui.HTMLPanel;
+import com.google.gwt.user.client.ui.Label;
 import com.google.gwt.user.client.ui.Widget;
 import com.sap.sse.gwt.client.async.MarkedAsyncCallback;
 import com.sap.sse.security.shared.UserManagementException;
@@ -33,17 +34,19 @@ public class LoginView extends Composite {
     private final UserService userService;
     
     @UiField TextBoxWithWatermark userNameTextBox;
+    @UiField Label appName;
     @UiField Anchor forgotPasswordAnchor; 
     @UiField PasswordTextBoxWithWatermark passwordTextBox;
     @UiField Button loginButton;
     @UiField Anchor signUpAnchor;
     @UiField HTMLPanel oAuthPanel;
     
-    public LoginView(UserManagementServiceAsync userManagementService, UserService userService) {
+    public LoginView(UserManagementServiceAsync userManagementService, UserService userService, String appName) {
         this.userManagementService = userManagementService;
         this.userService = userService;
         LoginViewResources.INSTANCE.css().ensureInjected();
         initWidget(uiBinder.createAndBindUi(this));
+        this.appName.setText(appName);
         userNameTextBox.setWatermark(StringMessages.INSTANCE.username());
         passwordTextBox.setWatermark(StringMessages.INSTANCE.password());
         String registrationLink = EntryPointLinkFactory.createRegistrationLink(Collections.<String, String> emptyMap());

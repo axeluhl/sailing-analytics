@@ -6,8 +6,9 @@
     <ui:with field="icon_res" type="com.sap.sse.security.ui.client.IconResources" />
     <ui:with field="local_res" type="com.sap.sse.security.ui.login.LoginViewResources" />
 	<g:HTMLPanel styleName="{local_res.css.loginform}">
-		<div class="{local_res.css.loginform_header}">
-		    <img src="{icon_res.sapLogo.getSafeUri}" />
+	    <div class="{local_res.css.loginform_header}">
+		<img src="{icon_res.sapLogo.getSafeUri}" />
+		<g:Label ui:field="appName" />
 	    </div>
 	    <div class="{local_res.css.loginform_content}">
 			    <div><ui:text from="{i18n.generalWelcome}" /></div>
