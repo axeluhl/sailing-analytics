@@ -46,6 +46,9 @@ public class EditProfileEntryPoint implements EntryPoint {
                 RemoteServiceMappingConstants.userManagementServiceRemotePath);
         final UserService userService = new UserService(userManagementService);
         final NewAccountValidator validator = new NewAccountValidator(stringMessages);
+        final String usernameFromURL = Window.Location.getParameter("u");
+        final String emailFromURL = Window.Location.getParameter("e");
+        final String passwordResetSecret = Window.Location.getParameter("s");
         RootLayoutPanel rootPanel = RootLayoutPanel.get();
         DockLayoutPanel dockPanel = new DockLayoutPanel(Unit.PX);
         rootPanel.add(dockPanel);
@@ -58,7 +61,9 @@ public class EditProfileEntryPoint implements EntryPoint {
         nameText.setEnabled(false);
         fp.add(nameText);
         nameText.setEnabled(false);
-        fp.add(nameText);
+        if (usernameFromURL != null) {
+            nameText.setText(usernameFromURL);
+        }
         HorizontalPanel rolesPanel = new HorizontalPanel();
         rolesPanel.add(new Label(stringMessages.roles()));
         final Label rolesLabel = new Label();
@@ -69,14 +74,22 @@ public class EditProfileEntryPoint implements EntryPoint {
         HorizontalPanel emailTextBoxAndButtonPanel = new HorizontalPanel();
         final TextBox emailText = new TextBox();
         emailText.setEnabled(false);
+        if (emailFromURL != null) {
+            emailText.setText(emailFromURL);
+        }
         emailTextBoxAndButtonPanel.add(emailText);
         final Button updateEmailButton = new Button(stringMessages.editEmail());
         emailTextBoxAndButtonPanel.add(updateEmailButton);
         fp.add(emailTextBoxAndButtonPanel);
-        Label currentPasswordLabel = new Label(stringMessages.currentPassword());
-        fp.add(currentPasswordLabel);
-        final TextBox currentPasswordText = new PasswordTextBox();
-        fp.add(currentPasswordText);
+        final TextBox currentPasswordText;
+        if (passwordResetSecret == null) {
+            Label currentPasswordLabel = new Label(stringMessages.currentPassword());
+            fp.add(currentPasswordLabel);
+            currentPasswordText = new PasswordTextBox();
+            fp.add(currentPasswordText);
+        } else {
+            currentPasswordText = null;
+        }
         updateEmailButton.addClickHandler(new ClickHandler() {
             @Override
             public void onClick(ClickEvent event) {
@@ -135,7 +148,9 @@ public class EditProfileEntryPoint implements EntryPoint {
         formPanel.addSubmitHandler(new SubmitHandler() {
             @Override
             public void onSubmit(SubmitEvent event) {
-                userManagementService.updateSimpleUserPassword(nameText.getText(), currentPasswordText.getText(), pwText.getText(), new AsyncCallback<Void>() {
+                userManagementService.updateSimpleUserPassword(nameText.getText(),
+                        currentPasswordText==null?null:currentPasswordText.getText(),
+                                passwordResetSecret, pwText.getText(), new AsyncCallback<Void>() {
                     @Override
                     public void onFailure(Throwable caught) {
                         GWT.log(caught.getMessage());

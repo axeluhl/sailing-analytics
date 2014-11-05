@@ -61,7 +61,7 @@ public interface StringMessages extends com.sap.sse.gwt.client.StringMessages {
     String forgotPassword();
     String errorDuringPasswordReset(String message);
     String cannotResetPasswordWithoutValidatedEmail(String username);
-    String newPasswordSent(String username);
+    String passwordResetLinkSent(String username);
     String errorValidatingEmail(String username, String message);
     String emailValidatedSuccessfully(String username);
     String errorResettingPassword(String username, String message);

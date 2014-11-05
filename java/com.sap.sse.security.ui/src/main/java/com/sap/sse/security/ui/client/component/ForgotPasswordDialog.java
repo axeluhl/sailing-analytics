@@ -11,7 +11,7 @@ public class ForgotPasswordDialog extends AbstractUserDialog {
     public ForgotPasswordDialog(StringMessages stringMessages, UserManagementServiceAsync userManagementService, UserDTO user,
             com.sap.sse.gwt.client.dialog.DataEntryDialog.DialogCallback<UserData> callback) {
         super(stringMessages, stringMessages.forgotPassword(), stringMessages.enterUsernameOrEmail(),
-                userManagementService, user, callback);
+                userManagementService, user, /* validator */ null, callback);
     }
 
     @Override

@@ -1,6 +1,6 @@
 package com.sap.sse.security.ui.loginpanel;
 
-import java.util.Collections;
+import java.util.HashMap;
 
 import com.google.gwt.core.client.GWT;
 import com.google.gwt.event.dom.client.ClickEvent;
@@ -74,7 +74,7 @@ public class LoginPanel extends HorizontalPanel implements UserStatusEventHandle
                     @Override
                     public void ok(final UserData userData) {
                         userManagementService.createSimpleUser(userData.getUsername(), userData.getEmail(), userData.getPassword(),
-                                EntryPointLinkFactory.createEmailValidationLink(Collections.<String, String> emptyMap()),
+                                EntryPointLinkFactory.createEmailValidationLink(new HashMap<String, String>()),
                                 new MarkedAsyncCallback<UserDTO>(new AsyncCallback<UserDTO>() {
                             @Override
                             public void onFailure(Throwable caught) {
