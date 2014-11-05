@@ -15,6 +15,7 @@ import com.google.gwt.user.client.ui.Composite;
 import com.google.gwt.user.client.ui.HTMLPanel;
 import com.google.gwt.user.client.ui.Label;
 import com.google.gwt.user.client.ui.Widget;
+import com.sap.sse.gwt.client.dialog.DialogUtils;
 import com.sap.sse.security.ui.client.EntryPointLinkFactory;
 import com.sap.sse.security.ui.client.UserService;
 import com.sap.sse.security.ui.client.component.ForgotPasswordDialog;
@@ -52,6 +53,8 @@ public class LoginView extends Composite {
         signUpAnchor.setHref(registrationLink);
         oAuthPanel.add(new OAuthLogin(userManagementService));
         userNameTextBox.setFocus(true);
+        
+        DialogUtils.linkEnterToButton(loginButton, userNameTextBox, passwordTextBox);
     }
     
     @UiHandler("loginButton")
