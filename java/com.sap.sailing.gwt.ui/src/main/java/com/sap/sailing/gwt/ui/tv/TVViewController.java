@@ -34,6 +34,7 @@ import com.sap.sse.gwt.client.async.AsyncActionsExecutor;
 import com.sap.sse.gwt.client.player.Timer;
 import com.sap.sse.gwt.client.player.Timer.PlayModes;
 import com.sap.sse.gwt.client.useragent.UserAgentDetails;
+import com.sap.sse.security.ui.client.UserService;
 
 public class TVViewController implements RaceTimesInfoProviderListener {
     private static final int REFRESH_INTERVAL_IN_MILLIS_LEADERBOARD = 10000;
@@ -67,8 +68,10 @@ public class TVViewController implements RaceTimesInfoProviderListener {
     private boolean showRaceDetails;
     private boolean showWindChart;
     private final RaceBoardViewConfiguration raceboardViewConfig;
+    private final UserService userService;
     
     /**
+     * @param userService TODO
      * @param logoAndTitlePanel
      *            allowed to be <code>null</code>
      * @param showNavigationPanel
@@ -76,10 +79,11 @@ public class TVViewController implements RaceTimesInfoProviderListener {
      *            the various components and lets them configure them; makes sense to use only if intended for "manned" mode.
      */
     public TVViewController(SailingServiceAsync sailingService, MediaServiceAsync mediaService,
-            StringMessages stringMessages, ErrorReporter errorReporter, String leaderboardGroupName,
-            String leaderboardName, UserAgentDetails userAgent, LogoAndTitlePanel logoAndTitlePanel,
-            DockLayoutPanel dockPanel, long delayToLiveInMillis, boolean showRaceDetails,
-            RaceBoardViewConfiguration raceboardViewConfig) {
+            UserService userService, StringMessages stringMessages, ErrorReporter errorReporter,
+            String leaderboardGroupName, String leaderboardName, UserAgentDetails userAgent,
+            LogoAndTitlePanel logoAndTitlePanel, DockLayoutPanel dockPanel, long delayToLiveInMillis,
+            boolean showRaceDetails, RaceBoardViewConfiguration raceboardViewConfig) {
+        this.userService = userService;
         this.raceboardViewConfig = raceboardViewConfig;
         this.sailingService = sailingService;
         this.mediaService = mediaService;
@@ -149,9 +153,9 @@ public class TVViewController implements RaceTimesInfoProviderListener {
         RaceSelectionModel raceSelectionModel = new RaceSelectionModel();
         List<RegattaAndRaceIdentifier> singletonList = Collections.singletonList(raceToShow);
         raceSelectionModel.setSelection(singletonList);
-        RaceBoardPanel raceBoardPanel = new RaceBoardPanel(sailingService, mediaService, asyncActionsExecutor, null,
-                raceboardTimer, raceSelectionModel, leaderboardName, null, /* event */null, raceboardViewConfig,
-                errorReporter, stringMessages, userAgent, raceTimesInfoProvider, /* showMapControls */false);
+        RaceBoardPanel raceBoardPanel = new RaceBoardPanel(sailingService, mediaService, userService,
+                asyncActionsExecutor, raceboardTimer, raceSelectionModel, leaderboardName, null, /* event */null,
+                raceboardViewConfig, errorReporter, stringMessages, userAgent, raceTimesInfoProvider, /* showMapControls */false);
         return raceBoardPanel;
     }
     

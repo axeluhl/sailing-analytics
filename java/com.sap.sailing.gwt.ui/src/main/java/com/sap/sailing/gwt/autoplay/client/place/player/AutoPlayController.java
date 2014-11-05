@@ -42,12 +42,14 @@ import com.sap.sse.gwt.client.async.AsyncActionsExecutor;
 import com.sap.sse.gwt.client.player.Timer;
 import com.sap.sse.gwt.client.player.Timer.PlayModes;
 import com.sap.sse.gwt.client.useragent.UserAgentDetails;
+import com.sap.sse.security.ui.client.UserService;
 
 public class AutoPlayController implements RaceTimesInfoProviderListener {
     private static final int REFRESH_INTERVAL_IN_MILLIS_LEADERBOARD = 10000;
     private static final long REFRESH_INTERVAL_IN_MILLIS_RACEBOARD = 1000;
     private final SailingServiceAsync sailingService;
     private final MediaServiceAsync mediaService;
+    private final UserService userService;
     private final ErrorReporter errorReporter;
     private final UserAgentDetails userAgent;
     private final AsyncActionsExecutor asyncActionsExecutor;
@@ -80,12 +82,15 @@ public class AutoPlayController implements RaceTimesInfoProviderListener {
 
     private static int SAP_HEADER_HEIGHT = 70;
     
-    public AutoPlayController(SailingServiceAsync sailingService, MediaServiceAsync mediaService, ErrorReporter errorReporter, 
-            boolean isfullscreenMode, String leaderboardGroupName, String leaderboardName, final String leaderboardZoom, 
-            UserAgentDetails userAgent, long delayToLiveInMillis, boolean showRaceDetails, RaceBoardViewConfiguration raceboardViewConfig, PlayerView playerView) {
+    public AutoPlayController(SailingServiceAsync sailingService, MediaServiceAsync mediaService,
+            UserService userService, ErrorReporter errorReporter, boolean isfullscreenMode,
+            String leaderboardGroupName, String leaderboardName, final String leaderboardZoom,
+            UserAgentDetails userAgent, long delayToLiveInMillis, boolean showRaceDetails,
+            RaceBoardViewConfiguration raceboardViewConfig, PlayerView playerView) {
         this.raceboardViewConfig = raceboardViewConfig;
         this.sailingService = sailingService;
         this.mediaService = mediaService;
+        this.userService = userService;
         this.isfullscreenMode = isfullscreenMode;
         this.errorReporter = errorReporter;
         this.leaderboardName = leaderboardName;
@@ -161,7 +166,7 @@ public class AutoPlayController implements RaceTimesInfoProviderListener {
         RaceSelectionModel raceSelectionModel = new RaceSelectionModel();
         List<RegattaAndRaceIdentifier> singletonList = Collections.singletonList(raceToShow);
         raceSelectionModel.setSelection(singletonList);
-        RaceBoardPanel raceBoardPanel = new RaceBoardPanel(sailingService, mediaService, asyncActionsExecutor, null,
+        RaceBoardPanel raceBoardPanel = new RaceBoardPanel(sailingService, mediaService, userService, asyncActionsExecutor,
                 raceboardTimer, raceSelectionModel, leaderboardName, null, /* event */null, raceboardViewConfig,
                 errorReporter, StringMessages.INSTANCE, userAgent, raceTimesInfoProvider, /* showMapControls */false);
         return raceBoardPanel;

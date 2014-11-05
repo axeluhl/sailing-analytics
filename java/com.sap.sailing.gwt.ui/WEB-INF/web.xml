@@ -15,6 +15,30 @@
 		</init-param>
 	</servlet>
 
+	<!-- Apache Shiro -->
+	<context-param>
+		<param-name>shiroEnvironmentClass</param-name>
+		<param-value>org.apache.shiro.web.env.IniWebEnvironment</param-value>
+	</context-param>
+	<listener>
+		<listener-class>org.apache.shiro.web.env.EnvironmentLoaderListener</listener-class>
+	</listener>
+	<filter>
+		<filter-name>ShiroFilter</filter-name>
+		<filter-class>org.apache.shiro.web.servlet.ShiroFilter</filter-class>
+	</filter>
+	<!-- Make sure any request you want accessible to Shiro is filtered. "/*" 
+		catches all requests. Usually this filter mapping is defined first (before all 
+		others) to ensure that Shiro works in subsequent filters in the filter chain: -->
+	<filter-mapping>
+		<filter-name>ShiroFilter</filter-name>
+		<url-pattern>/*</url-pattern>
+		<dispatcher>REQUEST</dispatcher>
+		<dispatcher>FORWARD</dispatcher>
+		<dispatcher>INCLUDE</dispatcher>
+		<dispatcher>ERROR</dispatcher>
+	</filter-mapping>
+
 	<filter>
 		<filter-name>GWTCacheControlServletFilter</filter-name>
 		<filter-class>com.sap.sse.gwt.server.GWTCacheControlServletFilter</filter-class>
@@ -25,7 +49,7 @@
 	</filter-mapping>
 
 	<servlet>
-		<display-name>Sailing Service</display-name>
+	    <display-name>Sailing Service</display-name>
 	    <servlet-name>SailingService</servlet-name>
     	<servlet-class>com.sap.sailing.gwt.ui.server.SailingServiceImpl</servlet-class>
 	</servlet>
@@ -55,16 +79,6 @@
 	</servlet-mapping>
 
 	<servlet>
-		<display-name>User Management Service</display-name>
-	    <servlet-name>UserManagementService</servlet-name>
-    	<servlet-class>com.sap.sailing.gwt.ui.server.UserManagementServiceImpl</servlet-class>
-	</servlet>
-	<servlet-mapping>
-		<servlet-name>UserManagementService</servlet-name>
-		<url-pattern>/service/usermanagement</url-pattern>
-	</servlet-mapping>
-
-	<servlet>
 		<display-name>Data Mining Service</display-name>
 	    <servlet-name>DataMiningService</servlet-name>
     	<servlet-class>com.sap.sailing.gwt.ui.server.DataMiningServiceImpl</servlet-class>
@@ -73,6 +87,16 @@
 		<servlet-name>DataMiningService</servlet-name>
 		<url-pattern>/service/datamining</url-pattern>
 	</servlet-mapping>
+	<servlet>
+		<display-name>User Management Service</display-name>
+		<servlet-name>UserManagementService</servlet-name>
+		<servlet-class>com.sap.sse.security.ui.server.UserManagementServiceImpl</servlet-class>
+	</servlet>
+	<servlet-mapping>
+		<servlet-name>UserManagementService</servlet-name>
+		<url-pattern>/service/usermanagement</url-pattern>
+	</servlet-mapping>
+
 	
 	<!-- enabling remote logging -->
 	<servlet>
@@ -84,42 +108,6 @@
 		<servlet-name>remoteLoggingServlet</servlet-name>
 		<url-pattern>/com.sap.sailing.gwt.ui.AdminConsole/remote_logging</url-pattern>
 		<url-pattern>/com.sap.sailing.gwt.ui.Simulator/remote_logging</url-pattern>
+		<url-pattern>/com.sap.sailing.gwt.ui.RaceBoard/remote_logging</url-pattern>
 	</servlet-mapping>
-	
-  <security-constraint>
-    <web-resource-collection>
-      <web-resource-name>Administration pages</web-resource-name>
-      <url-pattern>/AdminConsole.html</url-pattern>
-    </web-resource-collection>
-    <auth-constraint>
-      <role-name>administrator</role-name>
-      <role-name>eventmanager</role-name>
-    </auth-constraint>
-  </security-constraint>
-
-  <security-constraint>
-    <web-resource-collection>
-      <web-resource-name>Leaderboard editing pages</web-resource-name>
-      <url-pattern>/LeaderboardEditing.html</url-pattern>
-    </web-resource-collection>
-    <auth-constraint>
-      <role-name>administrator</role-name>
-      <role-name>eventmanager</role-name>
-    </auth-constraint>
-  </security-constraint>
-
-  <security-constraint>
-    <web-resource-collection>
-      <web-resource-name>user management pages</web-resource-name>
-      <url-pattern>/UserManagement.html</url-pattern>
-    </web-resource-collection>
-    <auth-constraint>
-      <role-name>administrator</role-name>
-    </auth-constraint>
-  </security-constraint>
- 
-  <login-config>
-    <auth-method>BASIC</auth-method>
-    <realm-name>SailingServerRealm</realm-name>
-  </login-config>	
 </web-app>

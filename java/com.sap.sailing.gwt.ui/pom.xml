@@ -72,6 +72,18 @@
       <version>2.3.2.0</version>
       <scope>provided</scope>
     </dependency>
+    <dependency>
+    	<groupId>com.sap.sailing</groupId>
+    	<artifactId>com.sap.sse.security</artifactId>
+    	<version>1.0.0-SNAPSHOT</version>
+    	<classifier>sources</classifier>
+    </dependency>
+    <dependency>
+    	<groupId>com.sap.sailing</groupId>
+    	<artifactId>com.sap.sse.security.ui</artifactId>
+    	<version>1.0.0-SNAPSHOT</version>
+    	<classifier>sources</classifier>
+    </dependency>
   </dependencies>
 
   <build>
@@ -102,6 +114,7 @@
 		        <module>com.sap.sailing.gwt.ui.UserManagement</module>
 		        <module>com.sap.sailing.gwt.ui.VideoPopup</module>
 		        <module>com.sap.sailing.gwt.ui.YoutubePopup</module>
+		        <module>com.sap.sailing.gwt.ui.Search</module>
 		        <module>com.sap.sailing.gwt.ui.Simulator</module>
 		        <module>com.sap.sailing.gwt.ui.RegattaOverview</module>
 		        <module>com.sap.sailing.gwt.ui.PolarSheets</module>

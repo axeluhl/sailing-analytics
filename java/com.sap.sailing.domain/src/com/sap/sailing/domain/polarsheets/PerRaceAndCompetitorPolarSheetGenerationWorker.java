@@ -172,7 +172,7 @@ public class PerRaceAndCompetitorPolarSheetGenerationWorker implements Runnable 
                             = new ArrayList<Util.Pair<String, WindWithConfidence<Util.Pair<Position, TimePoint>>>>();
         for (WindSource windGaugeSource : windGaugeSources) {
             Iterable<WindSource> allSources = race.getWindSources();
-            List<WindSource> allSourcesButTheSingleWindGaugeSource = new ArrayList<WindSource>();
+            Set<WindSource> allSourcesButTheSingleWindGaugeSource = new HashSet<WindSource>();
             for (WindSource windSource : allSources) {
                 if (windSource != windGaugeSource) {
                     allSourcesButTheSingleWindGaugeSource.add(windSource);
@@ -202,7 +202,7 @@ public class PerRaceAndCompetitorPolarSheetGenerationWorker implements Runnable 
         return done;
     }
     
-    private Iterable<WindSource> collectWindSourcesToIgnoreForSpeed() {
+    private Set<WindSource> collectWindSourcesToIgnoreForSpeed() {
         Set<WindSource> windSourcesToExclude = new HashSet<WindSource>();
         Iterable<WindSource> combinedSources = race.getWindSources(WindSourceType.COMBINED);
         for (WindSource combinedSource : combinedSources) {

@@ -82,7 +82,8 @@ public interface RaceLogEventRestoreFactory extends RaceLogEventFactory {
     		TimePoint logicalTimePoint, Serializable pId, int passId);
     
     RevokeEvent createRevokeEvent(TimePoint createdAt, RaceLogEventAuthor author,
-    		TimePoint logicalTimePoint, Serializable pId, int passId, Serializable revokedEventId);
+    		TimePoint logicalTimePoint, Serializable pId, int passId, Serializable revokedEventId,
+    		String revokedEventType, String revokedEventShortInfo, String reason);
     
     RegisterCompetitorEvent createRegisterCompetitorEvent(TimePoint createdAt, RaceLogEventAuthor author,
     		TimePoint logicalTimePoint, Serializable pId, int passId, Competitor competitor);

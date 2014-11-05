@@ -45,6 +45,7 @@ SAP is at the center of today’s technology revolution, developing innovations 
   * [[Working with GWT UI Binder|wiki/gwt-ui-binder]]
   * [[Working with GWT Locally|wiki/local-gwt]]
   * [[Mobile Development|wiki/mobile-development]]
+  * [[Security|wiki/security]]
   * [[Java De(Serialization) and Circular Dependencies|wiki/java-de-serialization-and-circular-dependencies]]
 * Information for Webdesigners
   * [[Layout repository|wiki/webdesign]]

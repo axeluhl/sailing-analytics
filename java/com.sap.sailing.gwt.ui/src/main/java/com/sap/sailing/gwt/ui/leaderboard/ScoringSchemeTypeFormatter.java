@@ -33,4 +33,13 @@ public class ScoringSchemeTypeFormatter {
         }
         return null;
     }
+    
+    public static String getDescription(ScoringSchemeType scoringSchemeType, StringMessages stringMessages) {
+        switch(scoringSchemeType) {
+        case HIGH_POINT_FIRST_GETS_TEN_OR_EIGHT:
+            return stringMessages.scoringSchemeHighPointFirstGetsTenOrEightDescription();
+        default:
+            return format(scoringSchemeType, stringMessages);
+        }
+    }
 }
