@@ -35,6 +35,7 @@ public class LoginTest {
         store = new UserStoreImpl();
         UsernamePasswordRealm.setTestUserStore(store);
         Activator.setTestUserStore(store);
+        Thread.currentThread().setContextClassLoader(getClass().getClassLoader()); // to enable shiro to find classes from com.sap.sse.security
         new SecurityServiceImpl(store, /* mailProperties */ new Properties());
     }
 
