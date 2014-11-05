@@ -141,11 +141,9 @@ public class TabletAndDesktopEventView extends Composite implements EventView, E
         currentInternalPlace = new EventPlace(event.id.toString(), EventNavigationTabs.Media, null);
     }
 
-    @Override
-    public void openRaceViewer(StrippedLeaderboardDTO leaderboard, RaceDTO race) {
+    public String getRaceViewerURL(StrippedLeaderboardDTO leaderboard, RaceDTO race) {
         RegattaAndRaceIdentifier raceIdentifier = race.getRaceIdentifier();
-        String link = EntryPointLinkFactory.createRaceBoardLink(createRaceBoardLinkParameters(leaderboard.name, raceIdentifier));
-        Window.open(link, "_blank", "");
+        return EntryPointLinkFactory.createRaceBoardLink(createRaceBoardLinkParameters(leaderboard.name, raceIdentifier));
     }
     
     @Override

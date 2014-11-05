@@ -1,7 +1,6 @@
 package com.sap.sailing.gwt.home.client.place.event.regattaraces;
 
 import com.google.gwt.core.client.GWT;
-import com.google.gwt.dom.client.AnchorElement;
 import com.google.gwt.dom.client.DivElement;
 import com.google.gwt.dom.client.Element;
 import com.google.gwt.dom.client.SpanElement;
@@ -10,10 +9,9 @@ import com.google.gwt.dom.client.Style.Visibility;
 import com.google.gwt.i18n.shared.DateTimeFormat;
 import com.google.gwt.uibinder.client.UiBinder;
 import com.google.gwt.uibinder.client.UiField;
-import com.google.gwt.user.client.DOM;
-import com.google.gwt.user.client.Event;
-import com.google.gwt.user.client.EventListener;
-import com.google.gwt.user.client.ui.UIObject;
+import com.google.gwt.user.client.ui.Anchor;
+import com.google.gwt.user.client.ui.Composite;
+import com.google.gwt.user.client.ui.Widget;
 import com.sap.sailing.domain.common.dto.CompetitorDTO;
 import com.sap.sailing.domain.common.dto.FleetDTO;
 import com.sap.sailing.domain.common.dto.RaceColumnDTO;
@@ -22,12 +20,12 @@ import com.sap.sailing.gwt.home.client.place.event.EventPlaceNavigator;
 import com.sap.sailing.gwt.ui.shared.StrippedLeaderboardDTO;
 import com.sap.sse.gwt.client.player.Timer;
 
-public class EventRegattaRacesRace extends UIObject {
+public class EventRegattaRacesRace extends Composite {
     private static EventRegattaRacesRaceUiBinder uiBinder = GWT.create(EventRegattaRacesRaceUiBinder.class);
 
     private enum SimpleRaceStates { NOT_TRACKED, TRACKED, TRACKED_AND_LIVE, TRACKED_BUT_NOT_SCHEDULED };
     
-    interface EventRegattaRacesRaceUiBinder extends UiBinder<DivElement, EventRegattaRacesRace> {
+    interface EventRegattaRacesRaceUiBinder extends UiBinder<Widget, EventRegattaRacesRace> {
     }
 
     @UiField DivElement fleetColor;
@@ -41,8 +39,8 @@ public class EventRegattaRacesRace extends UIObject {
     @UiField DivElement raceNotScheduledDiv;
     @UiField DivElement watchRaceDiv;
     @UiField DivElement analyzeRaceDiv;
-    @UiField AnchorElement watchRaceLink;
-    @UiField AnchorElement analyzeRaceLink;
+    @UiField Anchor watchRaceLink;
+    @UiField Anchor analyzeRaceLink;
     
     @UiField DivElement raceWinnerDiv;
     @UiField SpanElement raceWinner;
@@ -64,25 +62,21 @@ public class EventRegattaRacesRace extends UIObject {
     
     private final DateTimeFormat raceTimeFormat = DateTimeFormat.getFormat("EEE, h:mm a");
     
-    private final StrippedLeaderboardDTO leaderboard;
     private final FleetDTO fleet;
     private final RaceColumnDTO raceColumn;
     private final RaceDTO race;
-    private final EventPlaceNavigator pageNavigator;
     private final Timer timerForClientServerOffset;
 
     private Element[] allConditionalElements;
     
     public EventRegattaRacesRace(StrippedLeaderboardDTO leaderboard, FleetDTO fleet, RaceColumnDTO raceColumn, Timer timerForClientServerOffset, EventPlaceNavigator pageNavigator) {
-        this.leaderboard = leaderboard;
         this.fleet = fleet;
         this.raceColumn = raceColumn;
-        this.pageNavigator = pageNavigator;
         this.timerForClientServerOffset = timerForClientServerOffset;
         race = raceColumn.getRace(fleet);
         
         EventRegattaRacesResources.INSTANCE.css().ensureInjected();
-        setElement(uiBinder.createAndBindUi(this));
+        initWidget(uiBinder.createAndBindUi(this));
 
         allConditionalElements = new Element[] {raceWinnerDiv, raceLeaderDiv, watchRaceDiv, analyzeRaceDiv, raceNotTrackedDiv, raceNotScheduledDiv,
                 raceFeaturesDiv, legProgressDiv, raceFlagDiv, windStatusDiv };
@@ -94,34 +88,13 @@ public class EventRegattaRacesRace extends UIObject {
         raceName.setInnerText(raceColumn.getName());
         raceName2.setInnerText(raceColumn.getName());
 
-        registerEvents();
+        if(race != null && race.trackedRace != null) {
+            String raceViewerURL = pageNavigator.getRaceViewerURL(leaderboard, race);
+            analyzeRaceLink.setHref(raceViewerURL);
+            watchRaceLink.setHref(raceViewerURL);
+        }
+        
         updateUI();    
-    }
-
-    private void registerEvents() {
-        Event.sinkEvents(analyzeRaceLink, Event.ONCLICK);
-        Event.setEventListener(analyzeRaceLink, new EventListener() {
-            @Override
-            public void onBrowserEvent(Event event) {
-                switch (DOM.eventGetType(event)) {
-                    case Event.ONCLICK:
-                        openRaceViewer();
-                        break;
-                }
-            }
-        });
-
-        Event.sinkEvents(watchRaceLink, Event.ONCLICK);
-        Event.setEventListener(watchRaceLink, new EventListener() {
-            @Override
-            public void onBrowserEvent(Event event) {
-                switch (DOM.eventGetType(event)) {
-                    case Event.ONCLICK:
-                        openRaceViewer();
-                        break;
-                }
-            }
-        });
     }
     
     private SimpleRaceStates getSimpleRaceState() {
@@ -226,11 +199,5 @@ public class EventRegattaRacesRace extends UIObject {
     private void showElement(Element el) {
         el.getStyle().setVisibility(Visibility.VISIBLE);
         el.getStyle().setDisplay(Display.INLINE_BLOCK);
-    }
-
-    private void openRaceViewer() {
-        if(race != null && race.trackedRace != null) {
-            pageNavigator.openRaceViewer(leaderboard, race);
-        }
     }
 }

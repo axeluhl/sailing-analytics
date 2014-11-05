@@ -11,7 +11,7 @@ public interface EventPlaceNavigator {
     void goToSchedule();
     void goToMedia();
     void goToRegattaRaces(LeaderboardGroupDTO leaderboardGroup, StrippedLeaderboardDTO leaderboard, RaceGroupDTO raceGroup);
-    void openRaceViewer(StrippedLeaderboardDTO leaderboard, RaceDTO race);
+    String getRaceViewerURL(StrippedLeaderboardDTO leaderboard, RaceDTO race);
     void openOverallLeaderboardViewer(LeaderboardGroupDTO leaderboardGroup);
     void openLeaderboardViewer(LeaderboardGroupDTO leaderboardGroup, StrippedLeaderboardDTO leaderboard);
 }
