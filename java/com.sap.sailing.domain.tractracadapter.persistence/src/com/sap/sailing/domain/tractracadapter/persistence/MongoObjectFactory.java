@@ -4,7 +4,7 @@ package com.sap.sailing.domain.tractracadapter.persistence;
 import com.mongodb.DBObject;
 import com.sap.sailing.domain.tractracadapter.TracTracConfiguration;
 import com.sap.sailing.domain.tractracadapter.persistence.impl.MongoObjectFactoryImpl;
-import com.sap.sailing.mongodb.MongoDBService;
+import com.sap.sse.mongodb.MongoDBService;
 
 /**
  * Offers methods to construct {@link DBObject MongoDB objects} from domain objects.

@@ -21,11 +21,15 @@ public interface UserManagementService extends RemoteService {
 
     UserDTO createSimpleUser(String name, String email, String password, String validationBaseURL) throws UserManagementException, MailException;
     
-    void updateSimpleUserPassword(String name, String oldPassword, String newPassword) throws UserManagementException, MailException;
+    /**
+     * Either <code>oldPassword</code> or <code>passwordResetSecret</code> need to be provided, or the current user needs to have
+     * the {@link DefaultRoles#ADMIN} role to be able to set the new password.
+     */
+    void updateSimpleUserPassword(String name, String oldPassword, String passwordResetSecret, String newPassword) throws UserManagementException;
 
     void updateSimpleUserEmail(String username, String newEmail, String validationBaseURL) throws UserManagementException, MailException;
 
-    void resetPassword(String username) throws UserManagementException;
+    void resetPassword(String username, String eMailAddress, String baseURL) throws UserManagementException, MailException;
 
     boolean validateEmail(String username, String validationSecret) throws UserManagementException;
 

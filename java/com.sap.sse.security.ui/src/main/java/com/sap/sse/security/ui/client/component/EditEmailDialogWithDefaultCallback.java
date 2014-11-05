@@ -1,6 +1,6 @@
 package com.sap.sse.security.ui.client.component;
 
-import java.util.Collections;
+import java.util.HashMap;
 
 import com.google.gwt.user.client.Window;
 import com.google.gwt.user.client.rpc.AsyncCallback;
@@ -31,7 +31,7 @@ public class EditEmailDialogWithDefaultCallback extends EditEmailDialog {
             @Override
             public void ok(final UserData userData) {
                 userManagementService.updateSimpleUserEmail(userData.getUsername(), userData.getEmail(),
-                        EntryPointLinkFactory.createEmailValidationLink(Collections.<String, String>emptyMap()),
+                        EntryPointLinkFactory.createEmailValidationLink(new HashMap<String, String>()),
                         new MarkedAsyncCallback<Void>(
                         new AsyncCallback<Void>() {
                             @Override

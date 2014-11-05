@@ -1,6 +1,6 @@
 package com.sap.sse.security.ui.registration;
 
-import java.util.Collections;
+import java.util.HashMap;
 
 import com.google.gwt.core.client.EntryPoint;
 import com.google.gwt.core.client.GWT;
@@ -86,7 +86,7 @@ public class RegisterEntryPoint implements EntryPoint {
             @Override
             public void onSubmit(SubmitEvent event) {
                 userManagementService.createSimpleUser(nameText.getText(), emailText.getText(), pwText.getText(),
-                        EntryPointLinkFactory.createEmailValidationLink(Collections.<String, String>emptyMap()),
+                        EntryPointLinkFactory.createEmailValidationLink(new HashMap<String, String>()),
                         new AsyncCallback<UserDTO>() {
                     @Override
                     public void onFailure(Throwable caught) {

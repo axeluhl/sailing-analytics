@@ -141,15 +141,14 @@ public class UserManagementServiceImpl extends RemoteServiceServlet implements U
 
 
     @Override
-    public void updateSimpleUserPassword(final String username, String oldPassword, String newPassword) throws UserManagementException {
+    public void updateSimpleUserPassword(final String username, String oldPassword, String passwordResetSecret, String newPassword) throws UserManagementException {
         final Subject subject = SecurityUtils.getSubject();
-        if (!subject.hasRole(DefaultRoles.ADMIN.getRolename())) {
-            // validate old password before proceeding
-            if (!getSecurityService().checkPassword(username, oldPassword)) {
-                throw new UserManagementException(UserManagementException.INVALID_CREDENTIALS);
-            }
-        }
-        if (subject.hasRole(DefaultRoles.ADMIN.getRolename()) || username.equals(SessionUtils.loadUsername())) {
+        // the signed-in subject has role ADMIN
+        if (subject.hasRole(DefaultRoles.ADMIN.getRolename()) 
+            // someone knew a username and the correct password for that user
+         || (oldPassword != null && getSecurityService().checkPassword(username, oldPassword))
+            // someone provided the correct password reset secret for the correct username
+         || (passwordResetSecret != null && getSecurityService().checkPasswordResetSecret(username, passwordResetSecret))) {
             getSecurityService().updateSimpleUserPassword(username, newPassword);
             new Thread("sending updated password to user "+username+" by e-mail") {
                 @Override public void run() {
@@ -176,8 +175,11 @@ public class UserManagementServiceImpl extends RemoteServiceServlet implements U
     }
     
     @Override
-    public void resetPassword(String username) throws UserManagementException {
-        getSecurityService().resetPassword(username);
+    public void resetPassword(String username, String email, String baseURL) throws UserManagementException, MailException {
+        if (username == null || username.isEmpty()) {
+            username = getSecurityService().getUserByEmail(email).getName();
+        }
+        getSecurityService().resetPassword(username, baseURL);
     }
 
     @Override

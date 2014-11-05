@@ -45,7 +45,6 @@ import com.sap.sailing.domain.persistence.media.MediaDBFactory;
 import com.sap.sailing.domain.racelog.tracking.EmptyGPSFixStore;
 import com.sap.sailing.domain.test.TrackBasedTest;
 import com.sap.sailing.domain.tracking.impl.EmptyWindStore;
-import com.sap.sailing.mongodb.MongoDBService;
 import com.sap.sailing.server.impl.RacingEventServiceImpl;
 import com.sap.sailing.server.operationaltransformation.AddDefaultRegatta;
 import com.sap.sailing.server.operationaltransformation.AddRaceDefinition;
@@ -53,6 +52,7 @@ import com.sap.sailing.server.operationaltransformation.CreateFlexibleLeaderboar
 import com.sap.sailing.server.replication.ReplicationMasterDescriptor;
 import com.sap.sailing.server.replication.impl.Replicator;
 import com.sap.sse.common.Util;
+import com.sap.sse.mongodb.MongoDBService;
 
 public class InitialLoadReplicationObjectIdentityTest extends AbstractServerReplicationTest {
     private Util.Pair<ReplicationServiceTestImpl, ReplicationMasterDescriptor> replicationDescriptorPair;

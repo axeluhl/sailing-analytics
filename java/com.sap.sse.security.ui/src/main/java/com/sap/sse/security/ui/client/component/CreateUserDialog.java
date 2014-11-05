@@ -1,6 +1,6 @@
 package com.sap.sse.security.ui.client.component;
 
-import java.util.Collections;
+import java.util.HashMap;
 
 import com.google.gwt.user.client.Window;
 import com.google.gwt.user.client.rpc.AsyncCallback;
@@ -26,8 +26,7 @@ public class CreateUserDialog extends AbstractUserDialog {
                         userManagementService
                                 .createSimpleUser(usernameEmailPassword.getUsername(),
                                         usernameEmailPassword.getEmail(), usernameEmailPassword.getPassword(),
-                                        EntryPointLinkFactory.createEmailValidationLink(Collections
-                                                .<String, String> emptyMap()), new AsyncCallback<UserDTO>() {
+                                        EntryPointLinkFactory.createEmailValidationLink(new HashMap<String, String>()), new AsyncCallback<UserDTO>() {
                                             @Override
                                             public void onSuccess(UserDTO result) {
                                                 for (UserCreatedEventHandler handler : handlers) {
