@@ -4,6 +4,7 @@ import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Map;
 import java.util.Set;
+import java.util.logging.Logger;
 
 import com.sap.sailing.domain.base.BoatClass;
 import com.sap.sailing.domain.base.SpeedWithConfidence;
@@ -23,6 +24,8 @@ import com.sap.sse.datamining.impl.components.GroupedDataEntry;
 import com.sap.sse.datamining.shared.GroupKey;
 
 public class IncrementalRegressionProcessor implements Processor<GroupedDataEntry<GPSFixMovingWithPolarContext>,Void> {
+    
+    private static final Logger logger = Logger.getLogger(IncrementalRegressionProcessor.class.getName());
 
     private final Map<GroupKey, BoatSpeedEstimator> boatSpeedEstimators = new HashMap<GroupKey, BoatSpeedEstimator>();
 
@@ -109,8 +112,8 @@ public class IncrementalRegressionProcessor implements Processor<GroupedDataEntr
 
     @Override
     public void onFailure(Throwable failure) {
-        // TODO do something
-
+        logger.severe("Polar Data Mining Pipe failed.");
+        throw new RuntimeException("Polar Data Miner failed.", failure);
     }
 
     public Set<BoatClass> getAvailableBoatClasses() {

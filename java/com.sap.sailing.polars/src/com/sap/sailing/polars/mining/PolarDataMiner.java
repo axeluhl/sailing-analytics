@@ -29,7 +29,6 @@ import com.sap.sailing.domain.tracking.GPSFixMoving;
 import com.sap.sailing.domain.tracking.TrackedRace;
 import com.sap.sailing.polars.regression.NotEnoughDataHasBeenAddedException;
 import com.sap.sse.common.Util.Pair;
-import com.sap.sse.common.Util.Triple;
 import com.sap.sse.datamining.components.Processor;
 import com.sap.sse.datamining.data.ClusterGroup;
 import com.sap.sse.datamining.functions.Function;
@@ -49,7 +48,7 @@ public class PolarDataMiner {
     }
 
 
-    private AbstractEnrichingProcessor<Triple<GPSFixMoving, TrackedRace, Competitor>, GPSFixMovingWithPolarContext> enrichingProcessor;
+    private AbstractEnrichingProcessor<GPSFixMovingWithOriginInfo, GPSFixMovingWithPolarContext> enrichingProcessor;
     private IncrementalRegressionProcessor incrementalRegressionProcessor;
 
     public PolarDataMiner() {
@@ -82,16 +81,16 @@ public class PolarDataMiner {
         Processor<GPSFixMovingWithPolarContext, GPSFixMovingWithPolarContext> filteringProcessor = new ParallelFilteringProcessor<GPSFixMovingWithPolarContext>(
                 GPSFixMovingWithPolarContext.class, executor, filteringResultReceivers, new PolarFixFilterCriteria());
 
-        Collection<Processor<GPSFixMovingWithPolarContext, GPSFixMovingWithPolarContext>> enrichingResultReceivers = Arrays
+        Collection<Processor<GPSFixMovingWithPolarContext, ?>> enrichingResultReceivers = Arrays
                 .asList(filteringProcessor);
 
 
-        enrichingProcessor = new AbstractEnrichingProcessor<Triple<GPSFixMoving, TrackedRace, Competitor>, GPSFixMovingWithPolarContext>(
-                executor, enrichingResultReceivers) {
+        enrichingProcessor = new AbstractEnrichingProcessor<GPSFixMovingWithOriginInfo, GPSFixMovingWithPolarContext>(
+                GPSFixMovingWithOriginInfo.class, GPSFixMovingWithPolarContext.class, executor, enrichingResultReceivers) {
 
             @Override
-            protected GPSFixMovingWithPolarContext enrich(Triple<GPSFixMoving, TrackedRace, Competitor> element) {
-                return new GPSFixMovingWithPolarContext(element.getA(), element.getB(), element.getC(),
+            protected GPSFixMovingWithPolarContext enrich(GPSFixMovingWithOriginInfo element) {
+                return new GPSFixMovingWithPolarContext(element.getFix(), element.getTrackedRace(), element.getCompetitor(),
                         speedClusterGroup);
             }
         };
@@ -99,7 +98,7 @@ public class PolarDataMiner {
 
 
     public void addFix(GPSFixMoving fix, Competitor competitor, TrackedRace trackedRace) {
-        enrichingProcessor.processElement(new Triple<GPSFixMoving, TrackedRace, Competitor>(fix, trackedRace,
+        enrichingProcessor.processElement(new GPSFixMovingWithOriginInfo(fix, trackedRace,
                 competitor));
     }
 

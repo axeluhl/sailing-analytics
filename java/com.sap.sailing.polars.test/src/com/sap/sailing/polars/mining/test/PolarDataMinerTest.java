@@ -171,6 +171,7 @@ public class PolarDataMinerTest {
         Wind wind = new WindImpl(new DegreePosition(54.431952, 10.186767), startOfRace, windSpeed);
         // Always return same wind
         when(trackedRace.getWind(any(Position.class), any(TimePoint.class))).thenReturn(wind);
+        when(trackedRace.getWind(any(Position.class), any(TimePoint.class), any())).thenReturn(wind);
 
         return trackedRace;
     }
