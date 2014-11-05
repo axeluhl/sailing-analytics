@@ -21,11 +21,16 @@ body {
 	background-color: #333333;
 	border-bottom: 4px solid #f0ab00;
 	color: white;
+	position: relative
 }
 
 .loginform_header_appname {
 	display: inline;
 	font-size: 20px;
+	margin: 0;
+	position: absolute;
+	top: 50%;
+	transform: translate(0, -50%)
 }
 
 .loginform_content {
