@@ -23,6 +23,11 @@ body {
 	color: white;
 }
 
+.loginform_header_appname {
+	display: inline;
+	font-size: 20px;
+}
+
 .loginform_content {
 	padding: 10px;
 }

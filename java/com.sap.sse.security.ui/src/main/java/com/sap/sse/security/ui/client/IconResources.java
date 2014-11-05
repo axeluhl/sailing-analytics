@@ -9,7 +9,7 @@ public interface IconResources extends ClientBundle {
     public static final IconResources INSTANCE = GWT.create(IconResources.class);
 
     @Source("com/sap/sse/security/ui/images/logo.png")
-    public ImageResource sapLogo();
+    ImageResource sapLogo();
 
     @Source("com/sap/sse/security/ui/images/user.png")
     ImageResource user();
@@ -21,23 +21,23 @@ public interface IconResources extends ClientBundle {
     ImageResource userIcon();
 
     @Source("com/sap/sse/security/ui/images/status_red.png")
-    public ImageResource statusRed();
+    ImageResource statusRed();
     
     @Source("com/sap/sse/security/ui/images/status_green.png")
-    public ImageResource statusGreen();
+    ImageResource statusGreen();
     
     @Source("com/sap/sse/security/ui/images/status_yellow.png")
-    public ImageResource statusYellow();
+    ImageResource statusYellow();
     
     @Source("com/sap/sse/security/ui/images/status_blue.png")
-    public ImageResource statusBlue();
+    ImageResource statusBlue();
     
     @Source("com/sap/sse/security/ui/images/status_grey.png")
-    public ImageResource statusGrey();
+    ImageResource statusGrey();
     
     @Source("com/sap/sse/security/ui/images/delete.png")
-    public ImageResource delete();
+    ImageResource delete();
     
     @Source("com/sap/sse/gwt/client/images/remove.png")
-    public ImageResource remove();
+    ImageResource remove();
 }

@@ -8,7 +8,7 @@
 	<g:HTMLPanel styleName="{local_res.css.loginform}">
 	    <div class="{local_res.css.loginform_header}">
 		<img src="{icon_res.sapLogo.getSafeUri}" />
-		<g:Label ui:field="appName" />
+		<g:Label styleName="{local_res.css.loginform_header_appname}" ui:field="appName" />
 	    </div>
 	    <div class="{local_res.css.loginform_content}">
 			    <div><ui:text from="{i18n.generalWelcome}" /></div>
