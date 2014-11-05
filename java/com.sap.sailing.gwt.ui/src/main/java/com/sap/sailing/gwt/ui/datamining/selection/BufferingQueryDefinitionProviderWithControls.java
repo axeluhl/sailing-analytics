@@ -70,7 +70,7 @@ public class BufferingQueryDefinitionProviderWithControls extends AbstractQueryD
 
         mainPanel.add(createFunctionsPanel());
 
-        selectionProvider = new RefreshingSelectionTablesPanel(stringMessages, dataMiningService, errorReporter, retrieverChainProvider);
+        selectionProvider = new RetrieverLevelSpecificSelectionProvider(stringMessages, dataMiningService, errorReporter, retrieverChainProvider);
         selectionProvider.addSelectionChangedListener(new SelectionChangedListener() {
             @Override
             public void selectionChanged() {
@@ -78,6 +78,15 @@ public class BufferingQueryDefinitionProviderWithControls extends AbstractQueryD
             }
         });
         mainPanel.add(selectionProvider.getEntryWidget());
+
+//        selectionProvider = new RefreshingSelectionTablesPanel(stringMessages, dataMiningService, errorReporter, retrieverChainProvider);
+//        selectionProvider.addSelectionChangedListener(new SelectionChangedListener() {
+//            @Override
+//            public void selectionChanged() {
+//                scheduleQueryDefinitionChanged();
+//            }
+//        });
+//        mainPanel.add(selectionProvider.getEntryWidget());
         
         queryDefinitionReleaseTimer = new Timer() {
             @Override

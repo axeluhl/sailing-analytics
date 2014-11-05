@@ -47,19 +47,19 @@ public class TestDataRetrieverChainCreation {
     public void initializeRetrieverChain() {
         dataRetrieverChainDefinition = new SimpleDataRetrieverChainDefinition<>((Class<Collection<Test_Regatta>>)(Class<?>) Collection.class, "TestRetrieverChain");
         Class<Processor<Collection<Test_Regatta>, Test_Regatta>> regattaRetrieverClass = (Class<Processor<Collection<Test_Regatta>, Test_Regatta>>)(Class<?>) TestRegattaRetrievalProcessor.class;
-        dataRetrieverChainDefinition.startWith(regattaRetrieverClass, Test_Regatta.class);
+        dataRetrieverChainDefinition.startWith(regattaRetrieverClass, Test_Regatta.class, "regatta");
         
         Class<Processor<Test_Regatta, Test_HasRaceContext>> raceRetrieverClass = 
                 (Class<Processor<Test_Regatta, Test_HasRaceContext>>)(Class<?>) TestRaceWithContextRetrievalProcessor.class;
         dataRetrieverChainDefinition.addAfter(regattaRetrieverClass,
                                                raceRetrieverClass,
-                                               Test_HasRaceContext.class);
+                                               Test_HasRaceContext.class, "race");
         
         Class<Processor<Test_HasRaceContext, Test_HasLegOfCompetitorContext>> legRetrieverClass = 
                 (Class<Processor<Test_HasRaceContext, Test_HasLegOfCompetitorContext>>)(Class<?>) TestLegOfCompetitorWithContextRetrievalProcessor.class;
         dataRetrieverChainDefinition.addAfter(raceRetrieverClass,
                                                legRetrieverClass,
-                                               Test_HasLegOfCompetitorContext.class);
+                                               Test_HasLegOfCompetitorContext.class, "legOfCompetitor");
     }
     
     @Before
@@ -99,21 +99,21 @@ public class TestDataRetrieverChainCreation {
         assertThat(dataRetrieverChainDefinition.getDataSourceType().equals(Collection.class), is(true));
         
         Class<Processor<Collection<Test_Regatta>, Test_Regatta>> regattaRetrieverClass = (Class<Processor<Collection<Test_Regatta>, Test_Regatta>>)(Class<?>) TestRegattaRetrievalProcessor.class;
-        dataRetrieverChainDefinition.startWith(regattaRetrieverClass, Test_Regatta.class);
+        dataRetrieverChainDefinition.startWith(regattaRetrieverClass, Test_Regatta.class, "regatta");
         assertThat(dataRetrieverChainDefinition.getRetrievedDataType().equals(Test_Regatta.class), is(true));
         
         Class<Processor<Test_Regatta, Test_HasRaceContext>> raceRetrieverClass = 
                 (Class<Processor<Test_Regatta, Test_HasRaceContext>>)(Class<?>) TestRaceWithContextRetrievalProcessor.class;
         dataRetrieverChainDefinition.addAfter(regattaRetrieverClass,
                                                raceRetrieverClass,
-                                               Test_HasRaceContext.class);
+                                               Test_HasRaceContext.class, "race");
         assertThat(dataRetrieverChainDefinition.getRetrievedDataType().equals(Test_HasRaceContext.class), is(true));
         
         Class<Processor<Test_HasRaceContext, Test_HasLegOfCompetitorContext>> legRetrieverClass = 
                 (Class<Processor<Test_HasRaceContext, Test_HasLegOfCompetitorContext>>)(Class<?>) TestLegOfCompetitorWithContextRetrievalProcessor.class;
         dataRetrieverChainDefinition.addAfter(raceRetrieverClass,
                                                legRetrieverClass,
-                                               Test_HasLegOfCompetitorContext.class);
+                                               Test_HasLegOfCompetitorContext.class, "legOfCompetitor");
         assertThat(dataRetrieverChainDefinition.getRetrievedDataType().equals(Test_HasLegOfCompetitorContext.class), is(true));
     }
 
@@ -148,7 +148,7 @@ public class TestDataRetrieverChainCreation {
                 (Class<Processor<Test_Regatta, Test_HasRaceContext>>)(Class<?>) TestRaceWithContextRetrievalProcessor.class;
         dataRetrieverChainDefinition.addAfter(regattaRetrieverClass,
                                                raceRetrieverClass,
-                                               Test_HasRaceContext.class);
+                                               Test_HasRaceContext.class, "race");
     }
     
     @SuppressWarnings("unchecked")
@@ -156,15 +156,15 @@ public class TestDataRetrieverChainCreation {
     public void testStartingTwice() {
         DataRetrieverChainDefinition<Collection<Test_Regatta>> dataRetrieverChainDefinition = new SimpleDataRetrieverChainDefinition<>((Class<Collection<Test_Regatta>>)(Class<?>) Collection.class, "TestRetrieverChain");
         Class<Processor<Collection<Test_Regatta>, Test_Regatta>> regattaRetrieverClass = (Class<Processor<Collection<Test_Regatta>, Test_Regatta>>)(Class<?>) TestRegattaRetrievalProcessor.class;
-        dataRetrieverChainDefinition.startWith(regattaRetrieverClass, Test_Regatta.class);
-        dataRetrieverChainDefinition.startWith(regattaRetrieverClass, Test_Regatta.class);
+        dataRetrieverChainDefinition.startWith(regattaRetrieverClass, Test_Regatta.class, "regatta");
+        dataRetrieverChainDefinition.startWith(regattaRetrieverClass, Test_Regatta.class, "regatta");
     }
     
     @SuppressWarnings("unchecked")
     @Test(expected=IllegalArgumentException.class)
     public void testStartingWithProcessorWithoutUsableConstructor() {
         DataRetrieverChainDefinition<Collection<Test_Regatta>> dataRetrieverChainDefinition = new SimpleDataRetrieverChainDefinition<>((Class<Collection<Test_Regatta>>)(Class<?>) Collection.class, "TestRetrieverChain");
-        dataRetrieverChainDefinition.startWith((Class<Processor<Collection<Test_Regatta>, Test_Regatta>>)(Class<?>) Processor.class, Test_Regatta.class);
+        dataRetrieverChainDefinition.startWith((Class<Processor<Collection<Test_Regatta>, Test_Regatta>>)(Class<?>) Processor.class, Test_Regatta.class, "regatta");
     }
     
     @SuppressWarnings("unchecked")
@@ -172,11 +172,11 @@ public class TestDataRetrieverChainCreation {
     public void testAddingProcessorWithoutUsableConstructor() {
         DataRetrieverChainDefinition<Collection<Test_Regatta>> dataRetrieverChainDefinition = new SimpleDataRetrieverChainDefinition<>((Class<Collection<Test_Regatta>>)(Class<?>) Collection.class, "TestRetrieverChain");
         Class<Processor<Collection<Test_Regatta>, Test_Regatta>> regattaRetrieverClass = (Class<Processor<Collection<Test_Regatta>, Test_Regatta>>)(Class<?>) TestRegattaRetrievalProcessor.class;
-        dataRetrieverChainDefinition.startWith(regattaRetrieverClass, Test_Regatta.class);
+        dataRetrieverChainDefinition.startWith(regattaRetrieverClass, Test_Regatta.class, "regatta");
         
         dataRetrieverChainDefinition.addAfter(regattaRetrieverClass,
                                                (Class<Processor<Test_Regatta, Test_HasRaceContext>>)(Class<?>) Processor.class,
-                                               Test_HasRaceContext.class);
+                                               Test_HasRaceContext.class, "race");
     }
     
     @SuppressWarnings("unchecked")
@@ -184,7 +184,7 @@ public class TestDataRetrieverChainCreation {
     public void testAddingRetrieverThatDoesntMatch() {
         DataRetrieverChainDefinition<Collection<Test_Regatta>> dataRetrieverChainDefinition = new SimpleDataRetrieverChainDefinition<>((Class<Collection<Test_Regatta>>)(Class<?>) Collection.class, "TestRetrieverChain");
         Class<Processor<Collection<Test_Regatta>, Test_Regatta>> regattaRetrieverClass = (Class<Processor<Collection<Test_Regatta>, Test_Regatta>>)(Class<?>) TestRegattaRetrievalProcessor.class;
-        dataRetrieverChainDefinition.startWith(regattaRetrieverClass, Test_Regatta.class);
+        dataRetrieverChainDefinition.startWith(regattaRetrieverClass, Test_Regatta.class, "regatta");
         
         Class<Processor<Test_Regatta, Test_HasRaceContext>> raceRetrieverClass = 
                 (Class<Processor<Test_Regatta, Test_HasRaceContext>>)(Class<?>) TestRaceWithContextRetrievalProcessor.class;
@@ -192,7 +192,7 @@ public class TestDataRetrieverChainCreation {
                 (Class<Processor<Test_HasRaceContext, Test_HasLegOfCompetitorContext>>)(Class<?>) TestLegOfCompetitorWithContextRetrievalProcessor.class;
         dataRetrieverChainDefinition.addAfter(raceRetrieverClass,
                                                legRetrieverClass,
-                                               Test_HasLegOfCompetitorContext.class);
+                                               Test_HasLegOfCompetitorContext.class, "legOfCompetitor");
     }
     
     @Test(expected=IllegalArgumentException.class)

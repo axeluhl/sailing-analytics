@@ -56,14 +56,14 @@ public class SimpleDataRetrieverChainDefinition<DataSourceType> implements
 
     @Override
     public <ResultType> void startWith(Class<Processor<DataSourceType, ResultType>> retrieverType,
-                                       Class<ResultType> retrievedDataType) {
+                                       Class<ResultType> retrievedDataType, String retrievedDataTypeMessageKey) {
         if (isInitialized()) {
             throw new UnsupportedOperationException("This retriever chain definition already has been started with '"
                                                     + dataRetrieverTypesWithInformation.get(0).getRetrieverType().getSimpleName() + "'");
         }
         checkThatRetrieverHasUsableConstructor(retrieverType);
         
-        DataRetrieverTypeWithInformation<?, ?> retrieverTypeWithInformation = new DataRetrieverTypeWithInformation<>(retrieverType, retrievedDataType);
+        DataRetrieverTypeWithInformation<?, ?> retrieverTypeWithInformation = new DataRetrieverTypeWithInformation<>(retrieverType, retrievedDataType, retrievedDataTypeMessageKey);
         dataRetrieverTypesWithInformation.add(retrieverTypeWithInformation);
     }
 
@@ -75,7 +75,7 @@ public class SimpleDataRetrieverChainDefinition<DataSourceType> implements
     public <NextInputType, NextResultType, PreviousInputType, PreviousResultType extends NextInputType> void addAfter(
             Class<Processor<PreviousInputType, PreviousResultType>> previousRetrieverType,
             Class<Processor<NextInputType, NextResultType>> nextRetrieverType,
-            Class<NextResultType> retrievedDataType) {
+            Class<NextResultType> retrievedDataType, String retrievedDataTypeMessageKey) {
         if (!isInitialized()) {
             throw new UnsupportedOperationException("This retriever chain definition hasn't been started yet");
         }
@@ -89,7 +89,7 @@ public class SimpleDataRetrieverChainDefinition<DataSourceType> implements
         }
         checkThatRetrieverHasUsableConstructor(nextRetrieverType);
 
-        DataRetrieverTypeWithInformation<?, ?> retrieverTypeWithInformation = new DataRetrieverTypeWithInformation<>(nextRetrieverType, retrievedDataType);
+        DataRetrieverTypeWithInformation<?, ?> retrieverTypeWithInformation = new DataRetrieverTypeWithInformation<>(nextRetrieverType, retrievedDataType, retrievedDataTypeMessageKey);
         dataRetrieverTypesWithInformation.add(retrieverTypeWithInformation);
     }
 

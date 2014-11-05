@@ -31,22 +31,22 @@ public class SailingDataRetrieverChainDefinitions {
                 RacingEventService.class, "SailingDomainRetrieverChain");
         @SuppressWarnings("unchecked")
         Class<Processor<RacingEventService, LeaderboardGroup>> leaderboardGroupRetrieverType = (Class<Processor<RacingEventService, LeaderboardGroup>>) (Class<?>) LeaderboardGroupRetrievalProcessor.class;
-        legOfCompetitorRetrieverChainDefinition.startWith(leaderboardGroupRetrieverType, LeaderboardGroup.class);
+        legOfCompetitorRetrieverChainDefinition.startWith(leaderboardGroupRetrieverType, LeaderboardGroup.class, "LeaderboardGroup");
         @SuppressWarnings("unchecked")
         Class<Processor<LeaderboardGroup, RegattaLeaderboard>> regattaLeaderboardRetrieverType = (Class<Processor<LeaderboardGroup, RegattaLeaderboard>>) (Class<?>) RegattaLeaderboardFilteringRetrievalProcessor.class;
         legOfCompetitorRetrieverChainDefinition.addAfter(leaderboardGroupRetrieverType, regattaLeaderboardRetrieverType,
-                RegattaLeaderboard.class);
+                RegattaLeaderboard.class, "RegattaLeaderboard");
         @SuppressWarnings("unchecked")
         Class<Processor<RegattaLeaderboard, HasTrackedRaceContext>> raceRetrieverType = (Class<Processor<RegattaLeaderboard, HasTrackedRaceContext>>) (Class<?>) TrackedRaceFilteringRetrievalProcessor.class;
         legOfCompetitorRetrieverChainDefinition.addAfter(regattaLeaderboardRetrieverType, raceRetrieverType,
-                HasTrackedRaceContext.class);
+                HasTrackedRaceContext.class, "Race");
         @SuppressWarnings("unchecked")
         Class<Processor<HasTrackedRaceContext, HasTrackedLegContext>> legRetrieverType = (Class<Processor<HasTrackedRaceContext, HasTrackedLegContext>>) (Class<?>) TrackedLegFilteringRetrievalProcessor.class;
-        legOfCompetitorRetrieverChainDefinition.addAfter(raceRetrieverType, legRetrieverType, HasTrackedLegContext.class);
+        legOfCompetitorRetrieverChainDefinition.addAfter(raceRetrieverType, legRetrieverType, HasTrackedLegContext.class, "Leg");
         @SuppressWarnings("unchecked")
         Class<Processor<HasTrackedLegContext, HasTrackedLegOfCompetitorContext>> legOfCompetitorRetrieverType = (Class<Processor<HasTrackedLegContext, HasTrackedLegOfCompetitorContext>>) (Class<?>) TrackedLegOfCompetitorFilteringRetrievalProcessor.class;
         legOfCompetitorRetrieverChainDefinition.addAfter(legRetrieverType, legOfCompetitorRetrieverType,
-                HasTrackedLegOfCompetitorContext.class);
+                HasTrackedLegOfCompetitorContext.class, "LegOfCompetitor");
         dataRetrieverChainDefinitions.add(legOfCompetitorRetrieverChainDefinition);
 
         DataRetrieverChainDefinition<RacingEventService> gpsFixRetrieverChainDefinition = new SimpleDataRetrieverChainDefinition<>(
@@ -54,7 +54,7 @@ public class SailingDataRetrieverChainDefinitions {
         @SuppressWarnings("unchecked")
         Class<Processor<HasTrackedLegOfCompetitorContext, HasGPSFixContext>> gpsFixRetrieverType = (Class<Processor<HasTrackedLegOfCompetitorContext, HasGPSFixContext>>) (Class<?>) GPSFixRetrievalProcessor.class;
         gpsFixRetrieverChainDefinition.addAfter(legOfCompetitorRetrieverType, gpsFixRetrieverType,
-                HasGPSFixContext.class);
+                HasGPSFixContext.class, "GpsFix");
         dataRetrieverChainDefinitions.add(gpsFixRetrieverChainDefinition);
     }
 

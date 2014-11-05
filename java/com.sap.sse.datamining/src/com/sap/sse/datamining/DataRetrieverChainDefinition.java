@@ -25,12 +25,12 @@ public interface DataRetrieverChainDefinition<DataSourceType> {
      */
     public Class<?> getRetrievedDataType();
 
-    public <ResultType> void startWith(Class<Processor<DataSourceType, ResultType>> retrieverType, Class<ResultType> retrievedDataType);
+    public <ResultType> void startWith(Class<Processor<DataSourceType, ResultType>> retrieverType, Class<ResultType> retrievedDataType, String retrievedDataTypeMessageKey);
 
     public <NextInputType, NextResultType, PreviousInputType, PreviousResultType extends NextInputType> void
            addAfter(Class<Processor<PreviousInputType, PreviousResultType>> previousRetrieverType,
                      Class<Processor<NextInputType, NextResultType>> nextRetrieverType,
-                     Class<NextResultType> retrievedDataType);
+                     Class<NextResultType> retrievedDataType, String retrievedDataTypeMessageKey);
     
     public List<? extends DataRetrieverTypeWithInformation<?, ?>> getDataRetrieverTypesWithInformation();
 

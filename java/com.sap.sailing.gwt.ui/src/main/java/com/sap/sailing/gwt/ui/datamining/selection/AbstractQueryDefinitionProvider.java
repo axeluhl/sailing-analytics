@@ -94,7 +94,8 @@ public abstract class AbstractQueryDefinitionProvider implements QueryDefinition
     private boolean isQueryDefinitionConsistent(QueryDefinition queryDefinition) {
         String sourceTypeName = queryDefinition.getStatisticToCalculate().getSourceTypeName();
         
-        if (!sourceTypeName.equals(queryDefinition.getDataRetrieverChainDefinition().getRetrievedDataTypeName())) {
+        if (queryDefinition.getDataRetrieverChainDefinition() == null || 
+            !sourceTypeName.equals(queryDefinition.getDataRetrieverChainDefinition().getRetrievedDataTypeName())) {
             return false;
         }
         

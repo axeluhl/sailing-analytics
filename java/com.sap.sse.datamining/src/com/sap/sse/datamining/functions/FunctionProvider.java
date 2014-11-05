@@ -14,9 +14,10 @@ public interface FunctionProvider {
     public Collection<Function<?>> getStatisticsFor(Class<?> sourceType);
 
     public Collection<Function<?>> getDimensionsFor(Class<?> sourceType);
+    
+    public Collection<Function<?>> getDimensionsFor(DataRetrieverChainDefinition<?> dataRetrieverChainDefinition);
 
-    public <DataSourceType> Collection<Function<?>> getMinimizedDimensionsFor(
-            DataRetrieverChainDefinition<DataSourceType> dataRetrieverChainDefinition);
+    public Collection<Function<?>> getMinimizedDimensionsFor(DataRetrieverChainDefinition<?> dataRetrieverChainDefinition);
 
     /**
      * @return The first function, that matches the given DTO or <code>null</code>

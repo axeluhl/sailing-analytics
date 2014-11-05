@@ -30,13 +30,13 @@ public class TestDataRetrieverChainDefinitionRegistry {
     public void initializeRetrieverChainsAndRegistry() {
         raceRetrieverChainDefinition = new SimpleDataRetrieverChainDefinition<>((Class<Collection<Test_Regatta>>)(Class<?>) Collection.class, "TestRaceRetrieverChain");
         Class<Processor<Collection<Test_Regatta>, Test_Regatta>> regattaRetrieverClass = (Class<Processor<Collection<Test_Regatta>, Test_Regatta>>)(Class<?>) TestRegattaRetrievalProcessor.class;
-        raceRetrieverChainDefinition.startWith(regattaRetrieverClass, Test_Regatta.class);
+        raceRetrieverChainDefinition.startWith(regattaRetrieverClass, Test_Regatta.class, "regatta");
         
         Class<Processor<Test_Regatta, Test_HasRaceContext>> raceRetrieverClass = 
                 (Class<Processor<Test_Regatta, Test_HasRaceContext>>)(Class<?>) TestRaceWithContextRetrievalProcessor.class;
         raceRetrieverChainDefinition.addAfter(regattaRetrieverClass,
                                                raceRetrieverClass,
-                                               Test_HasRaceContext.class);
+                                               Test_HasRaceContext.class, "race");
 
         legRetrieverChainDefinition = new SimpleDataRetrieverChainDefinition<Collection<Test_Regatta>>(raceRetrieverChainDefinition, "TestLegRetrieverChain");
         
@@ -44,7 +44,7 @@ public class TestDataRetrieverChainDefinitionRegistry {
                 (Class<Processor<Test_HasRaceContext, Test_HasLegOfCompetitorContext>>)(Class<?>) TestLegOfCompetitorWithContextRetrievalProcessor.class;
         legRetrieverChainDefinition.addAfter(raceRetrieverClass,
                                                legRetrieverClass,
-                                               Test_HasLegOfCompetitorContext.class);
+                                               Test_HasLegOfCompetitorContext.class, "legOfCompetitor");
         
         dataRetrieverChainDefinitionRegistry = new SimpleDataRetrieverChainDefinitionRegistry();
         dataRetrieverChainDefinitionRegistry.add(raceRetrieverChainDefinition);

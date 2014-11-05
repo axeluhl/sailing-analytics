@@ -82,7 +82,16 @@ public class RegistryFunctionProvider implements FunctionProvider {
     }
     
     @Override
-    public <DataSourceType> Collection<Function<?>> getMinimizedDimensionsFor(DataRetrieverChainDefinition<DataSourceType> dataRetrieverChainDefinition) {
+    public Collection<Function<?>> getDimensionsFor(DataRetrieverChainDefinition<?> dataRetrieverChainDefinition) {
+        Collection<Function<?>> dimensions = new HashSet<>();
+        for (DataRetrieverTypeWithInformation<?, ?> dataRetrieverTypeWithInformation : dataRetrieverChainDefinition.getDataRetrieverTypesWithInformation()) {
+            dimensions.addAll(getDimensionsFor(dataRetrieverTypeWithInformation.getRetrievedDataType()));
+        }
+        return dimensions;
+    }
+    
+    @Override
+    public Collection<Function<?>> getMinimizedDimensionsFor(DataRetrieverChainDefinition<?> dataRetrieverChainDefinition) {
         Collection<Function<?>> dimensions = new HashSet<>();
         List<? extends DataRetrieverTypeWithInformation<?, ?>> dataRetrieverTypesWithInformation = dataRetrieverChainDefinition.getDataRetrieverTypesWithInformation();
         for (int i = dataRetrieverTypesWithInformation.size() - 1; i >= 0; i--) {
