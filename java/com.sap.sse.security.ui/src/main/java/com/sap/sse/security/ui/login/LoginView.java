@@ -42,19 +42,13 @@ public class LoginView extends Composite {
     public LoginView(UserManagementServiceAsync userManagementService, UserService userService) {
         this.userManagementService = userManagementService;
         this.userService = userService;
-
         LoginViewResources.INSTANCE.css().ensureInjected();
-        
         initWidget(uiBinder.createAndBindUi(this));
-
         userNameTextBox.setWatermark(StringMessages.INSTANCE.username());
         passwordTextBox.setWatermark(StringMessages.INSTANCE.password());
-        
         String registrationLink = EntryPointLinkFactory.createRegistrationLink(Collections.<String, String> emptyMap());
         signUpAnchor.setHref(registrationLink);
-        
         oAuthPanel.add(new OAuthLogin(userManagementService));
-        
         userNameTextBox.setFocus(true);
     }
     
