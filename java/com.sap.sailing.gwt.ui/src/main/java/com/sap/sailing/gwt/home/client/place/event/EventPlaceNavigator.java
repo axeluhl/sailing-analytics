@@ -5,7 +5,7 @@ import com.sap.sailing.gwt.ui.shared.LeaderboardGroupDTO;
 import com.sap.sailing.gwt.ui.shared.RaceGroupDTO;
 import com.sap.sailing.gwt.ui.shared.StrippedLeaderboardDTO;
 
-public interface EventPageNavigator {
+public interface EventPlaceNavigator {
     void goToOverview();
     void goToRegattas();
     void goToSchedule();

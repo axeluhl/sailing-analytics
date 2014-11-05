@@ -5,8 +5,8 @@ import java.util.Collections;
 import com.google.gwt.user.client.Window;
 import com.google.gwt.user.client.rpc.AsyncCallback;
 import com.sap.sse.security.ui.client.EntryPointLinkFactory;
-import com.sap.sse.security.ui.client.StringMessages;
 import com.sap.sse.security.ui.client.component.UserManagementPanel.UserCreatedEventHandler;
+import com.sap.sse.security.ui.client.i18n.StringMessages;
 import com.sap.sse.security.ui.shared.UserDTO;
 import com.sap.sse.security.ui.shared.UserManagementServiceAsync;
 

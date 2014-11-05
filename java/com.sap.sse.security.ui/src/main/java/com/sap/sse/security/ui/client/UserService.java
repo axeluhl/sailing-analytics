@@ -12,6 +12,7 @@ import com.sap.sse.gwt.client.Storage;
 import com.sap.sse.gwt.client.StorageEvent;
 import com.sap.sse.gwt.client.StorageEvent.Handler;
 import com.sap.sse.gwt.client.async.MarkedAsyncCallback;
+import com.sap.sse.security.ui.client.i18n.StringMessages;
 import com.sap.sse.security.ui.oauth.client.util.ClientUtils;
 import com.sap.sse.security.ui.shared.SuccessInfo;
 import com.sap.sse.security.ui.shared.UserDTO;
