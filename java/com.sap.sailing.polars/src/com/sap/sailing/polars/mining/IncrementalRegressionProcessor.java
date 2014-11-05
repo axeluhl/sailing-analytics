@@ -22,7 +22,7 @@ import com.sap.sse.datamining.factories.GroupKeyFactory;
 import com.sap.sse.datamining.impl.components.GroupedDataEntry;
 import com.sap.sse.datamining.shared.GroupKey;
 
-public class IncrementalRegressionProcessor implements Processor<GroupedDataEntry<GPSFixMovingWithPolarContext>> {
+public class IncrementalRegressionProcessor implements Processor<GroupedDataEntry<GPSFixMovingWithPolarContext>,Void> {
 
     private final Map<GroupKey, BoatSpeedEstimator> boatSpeedEstimators = new HashMap<GroupKey, BoatSpeedEstimator>();
 
@@ -115,6 +115,17 @@ public class IncrementalRegressionProcessor implements Processor<GroupedDataEntr
 
     public Set<BoatClass> getAvailableBoatClasses() {
         return availableBoatClasses;
+    }
+
+    @Override
+    public Class<GroupedDataEntry<GPSFixMovingWithPolarContext>> getInputType() {
+        // TODO Auto-generated method stub
+        return null;
+    }
+
+    @Override
+    public Class<Void> getResultType() {
+        return null;
     }
 
 }

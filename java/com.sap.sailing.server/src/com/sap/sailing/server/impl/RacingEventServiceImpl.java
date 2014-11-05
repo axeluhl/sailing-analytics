@@ -527,6 +527,7 @@ public class RacingEventServiceImpl implements RacingEventServiceWithTestSupport
         for (MediaTrack mediaTrack : this.mediaLibrary.allTracks()) {
             mediaTrackDeleted(mediaTrack);
         }
+        // TODO clear user store? See bug 2430.
         this.competitorStore.clear();
         // Add one default leaderboard that aggregates all races currently tracked by this service.
         // This is more for debugging purposes than for anything else.

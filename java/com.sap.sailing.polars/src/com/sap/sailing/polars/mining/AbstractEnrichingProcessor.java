@@ -11,8 +11,8 @@ import com.sap.sse.datamining.impl.components.AbstractSimpleParallelProcessor;
 public abstract class AbstractEnrichingProcessor<InputType, ResultType> extends
         AbstractSimpleParallelProcessor<InputType, ResultType> {
 
-    public AbstractEnrichingProcessor(ExecutorService executor, Collection<Processor<ResultType>> resultReceivers) {
-        super(executor, resultReceivers);
+    public AbstractEnrichingProcessor(ExecutorService executor, Collection<Processor<InputType, ResultType>> resultReceivers) {
+        super(InputType, ResultType, executor, resultReceivers);
     }
 
     @Override

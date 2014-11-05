@@ -46,9 +46,11 @@ public class PlayerActivity extends AbstractActivity implements ErrorReporter {
                 panel.setWidget(view.asWidget());
                 RootLayoutPanel.get().add(view.asWidget());
 
-                autoPlayController = new AutoPlayController(clientFactory.getSailingService(), clientFactory.getMediaService(),
-                        PlayerActivity.this, playerPlace.isFullscreen(), /*leaderboardGroupName*/ "" , playerPlace.getLeaderboardIdAsNameString(), 
-                        playerPlace.getLeaderboardZoom(), userAgent, delayToLiveMillis, showRaceDetails, readRaceboardConfiguration, view);
+                autoPlayController = new AutoPlayController(clientFactory.getSailingService(), clientFactory
+                        .getMediaService(), clientFactory.getUserService(), PlayerActivity.this, playerPlace
+                        .isFullscreen(), /* leaderboardGroupName */"", playerPlace.getLeaderboardIdAsNameString(),
+                        playerPlace.getLeaderboardZoom(), userAgent, delayToLiveMillis, showRaceDetails,
+                        readRaceboardConfiguration, view);
                 autoPlayController.updatePlayMode(AutoPlayModes.Leaderboard);
             }
 

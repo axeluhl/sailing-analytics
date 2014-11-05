@@ -117,14 +117,14 @@ public class WindEstimationOnConstructedTracksTest extends StoredTrackBasedTest 
         setBearingForCompetitor(competitors.get(0), now, 305);
         setBearingForCompetitor(competitors.get(1), now, 35);
         WindWithConfidence<Util.Pair<Position, TimePoint>> combinedWindDirectionMinClusterSizeOne = getTrackedRace()
-                .getWindWithConfidence(/* position */null, now);
+                .getWindWithConfidenceUncached(/* position */null, now, getTrackedRace().getWindSourcesToExclude());
         final double combinedDegreesMinClusterSizeOne = combinedWindDirectionMinClusterSizeOne.getObject().getBearing().getDegrees();
         assertTrue(combinedDegreesMinClusterSizeOne > 170 && combinedDegreesMinClusterSizeOne < 180);
         // now produce a minimum cluster size of 2, raising the estimation's confidence
         setBearingForCompetitor(competitors.get(2), now, 305);
         setBearingForCompetitor(competitors.get(3), now, 35);
         WindWithConfidence<Util.Pair<Position, TimePoint>> combinedWindDirectionMinClusterSizeTwo = getTrackedRace()
-                .getWindWithConfidence(/* position */null, now);
+                .getWindWithConfidenceUncached(/* position */null, now, getTrackedRace().getWindSourcesToExclude());
         final double combinedDegreesNow = combinedWindDirectionMinClusterSizeTwo.getObject().getBearing().getDegrees();
         assertTrue(combinedDegreesNow > 170 && combinedDegreesNow < 180);
         // we expect the combined direction now to be closer to the estimation as compared to before because the estimation is more confident

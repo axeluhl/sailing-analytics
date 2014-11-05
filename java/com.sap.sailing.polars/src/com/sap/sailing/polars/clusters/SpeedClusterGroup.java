@@ -7,7 +7,7 @@ import com.sap.sailing.domain.common.Speed;
 import com.sap.sailing.domain.common.impl.KnotSpeedImpl;
 import com.sap.sse.datamining.data.Cluster;
 import com.sap.sse.datamining.data.ClusterBoundary;
-import com.sap.sse.datamining.impl.data.ClusterWithBoundaries;
+import com.sap.sse.datamining.impl.data.ClusterWithLowerAndUpperBoundaries;
 import com.sap.sse.datamining.impl.data.ComparableClusterBoundary;
 import com.sap.sse.datamining.impl.data.ComparisonStrategy;
 import com.sap.sse.datamining.impl.data.FixClusterGroup;
@@ -36,7 +36,7 @@ public class SpeedClusterGroup extends FixClusterGroup<Speed> {
         for (int index = 0; index < levelMidsInKnots.length; index++) {
             ClusterBoundary<Speed> lowerBoundary = createLowerBoundary(levelMidsInKnots, maxDistanceInKnots, index);
             ClusterBoundary<Speed> upperBoundary = createUpperBoundary(levelMidsInKnots, maxDistanceInKnots, index);
-            Cluster<Speed> cluster = new ClusterWithBoundaries<Speed>(levelMidsInKnots[index] + "kn", lowerBoundary,
+            Cluster<Speed> cluster = new ClusterWithLowerAndUpperBoundaries<Speed>(levelMidsInKnots[index] + "kn", lowerBoundary,
                     upperBoundary);
             clusterList.add(cluster);
         }

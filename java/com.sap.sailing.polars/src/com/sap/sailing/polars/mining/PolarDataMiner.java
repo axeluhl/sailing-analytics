@@ -4,7 +4,6 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collection;
 import java.util.HashMap;
-import java.util.List;
 import java.util.Map;
 import java.util.Set;
 import java.util.concurrent.LinkedBlockingQueue;
@@ -71,19 +70,19 @@ public class PolarDataMiner {
         final ClusterGroup<Speed> speedClusterGroup = SpeedClusterGroupFromWindSteppingCreator
                 .createSpeedClusterGroupFrom(stepping);
         incrementalRegressionProcessor = new IncrementalRegressionProcessor(speedClusterGroup);
-        List<Processor<GroupedDataEntry<GPSFixMovingWithPolarContext>>> grouperResultReceivers = new ArrayList<Processor<GroupedDataEntry<GPSFixMovingWithPolarContext>>>();
+        Collection<Processor<GroupedDataEntry<GPSFixMovingWithPolarContext>, ?>> grouperResultReceivers = new ArrayList<Processor<GroupedDataEntry<GPSFixMovingWithPolarContext>, ?>>();
         grouperResultReceivers.add(incrementalRegressionProcessor);
 
         Collection<Function<?>> dimensions = PolarDataDimensionCollectionFactory.getClusterKeyDimensions();
 
-        Processor<GPSFixMovingWithPolarContext> groupingProcessor = new ParallelMultiDimensionsValueNestingGroupingProcessor<GPSFixMovingWithPolarContext>(
-                executor, grouperResultReceivers, dimensions);
+        Processor<GPSFixMovingWithPolarContext, GroupedDataEntry<GPSFixMovingWithPolarContext>> groupingProcessor = new ParallelMultiDimensionsValueNestingGroupingProcessor<GPSFixMovingWithPolarContext>(
+                GPSFixMovingWithPolarContext.class, executor, grouperResultReceivers, dimensions);
 
-        Collection<Processor<GPSFixMovingWithPolarContext>> filteringResultReceivers = Arrays.asList(groupingProcessor);
-        Processor<GPSFixMovingWithPolarContext> filteringProcessor = new ParallelFilteringProcessor<GPSFixMovingWithPolarContext>(
-                executor, filteringResultReceivers, new PolarFixFilterCriteria());
+        Collection<Processor<GPSFixMovingWithPolarContext, ?>> filteringResultReceivers = Arrays.asList(groupingProcessor);
+        Processor<GPSFixMovingWithPolarContext, GPSFixMovingWithPolarContext> filteringProcessor = new ParallelFilteringProcessor<GPSFixMovingWithPolarContext>(
+                GPSFixMovingWithPolarContext.class, executor, filteringResultReceivers, new PolarFixFilterCriteria());
 
-        Collection<Processor<GPSFixMovingWithPolarContext>> enrichingResultReceivers = Arrays
+        Collection<Processor<GPSFixMovingWithPolarContext, GPSFixMovingWithPolarContext>> enrichingResultReceivers = Arrays
                 .asList(filteringProcessor);
 
 

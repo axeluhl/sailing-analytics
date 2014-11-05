@@ -19,6 +19,10 @@
 		<module>com.sap.sse.datamining</module>
 		<module>com.sap.sse.datamining.shared</module>
 		<module>com.sap.sse.datamining.test</module>
+		<module>com.sap.sse.security</module>
+		<module>com.sap.sse.security.test</module>
+		<module>com.sap.sse.security.ui</module>
+		<module>com.sap.sse.security.userstore.mongodb</module>
 		<module>com.sap.sailing.domain.common</module>
 		<module>com.sap.sailing.domain.shared.android</module>
 		<module>com.sap.sailing.domain</module>

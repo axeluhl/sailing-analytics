@@ -27,7 +27,6 @@ import com.sap.sailing.gwt.ui.datamining.StatisticChangedListener;
 import com.sap.sailing.gwt.ui.datamining.StatisticProvider;
 import com.sap.sse.datamining.shared.QueryDefinition;
 import com.sap.sse.datamining.shared.components.AggregatorType;
-import com.sap.sse.datamining.shared.components.GrouperType;
 import com.sap.sse.datamining.shared.dto.FunctionDTO;
 
 public class MultiDimensionalGroupingProvider implements GroupingProvider, StatisticChangedListener {
@@ -156,11 +155,6 @@ public class MultiDimensionalGroupingProvider implements GroupingProvider, Stati
             acceptableValues.add(null);
             dimensionToGroupByBox.setAcceptableValues(acceptableValues);
         }
-    }
-
-    @Override
-    public GrouperType getGrouperType() {
-        return GrouperType.Dimensions;
     }
 
     @Override

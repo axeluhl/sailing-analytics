@@ -23,7 +23,7 @@ public class GPSFixMovingWithPolarContext implements PolarClusterKey {
     private final Competitor competitor;
     private final ClusterGroup<Speed> windSpeedClusterGroup;
     private final Set<WindSource> windSourcesToExcludeForBearing;
-    private final Iterable<WindSource> windSourcesToExcludeForSpeed;
+    private final Set<WindSource> windSourcesToExcludeForSpeed;
 
     public GPSFixMovingWithPolarContext(GPSFixMoving fix, TrackedRace race, Competitor competitor,
             ClusterGroup<Speed> windSpeedClusterGroup) {
@@ -105,7 +105,7 @@ public class GPSFixMovingWithPolarContext implements PolarClusterKey {
         return windSourcesToExclude;
     }
     
-    private Iterable<WindSource> collectWindSourcesToIgnoreForSpeed() {
+    private Set<WindSource> collectWindSourcesToIgnoreForSpeed() {
         Set<WindSource> windSourcesToExclude = new HashSet<WindSource>();
         Iterable<WindSource> combinedSources = race.getWindSources(WindSourceType.COMBINED);
         for (WindSource combinedSource : combinedSources) {

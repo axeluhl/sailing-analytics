@@ -10,14 +10,13 @@ import java.util.HashSet;
 import org.junit.Before;
 import org.junit.Test;
 
-import com.sap.sse.datamining.AdditionalResultDataBuilder;
 import com.sap.sse.datamining.components.Processor;
-import com.sap.sse.datamining.shared.Message;
 import com.sap.sse.datamining.test.util.ConcurrencyTestsUtil;
+import com.sap.sse.datamining.test.util.components.NullProcessor;
 
 public class TestAbstractStoringParallelAggregationProcessor {
 
-    private Collection<Processor<Integer>> receivers;
+    private Collection<Processor<Integer, ?>> receivers;
     private boolean receiverWasToldToFinish = false;
     private Integer receivedElement = null;
     
@@ -25,24 +24,14 @@ public class TestAbstractStoringParallelAggregationProcessor {
     
     @Before
     public void initializeReceivers() {
-        Processor<Integer> receiver = new Processor<Integer>() {
+        Processor<Integer, Void> receiver = new NullProcessor<Integer, Void>(Integer.class, Void.class) {
             @Override
             public void processElement(Integer element) {
                 receivedElement = element;
             }
             @Override
-            public void onFailure(Throwable failure) {
-            }
-            @Override
             public void finish() throws InterruptedException {
                 receiverWasToldToFinish = true;
-            }
-            @Override
-            public void abort() {
-            }
-            @Override
-            public AdditionalResultDataBuilder getAdditionalResultData(AdditionalResultDataBuilder additionalDataBuilder) {
-                return additionalDataBuilder;
             }
         };
         
@@ -52,7 +41,7 @@ public class TestAbstractStoringParallelAggregationProcessor {
 
     @Test
     public void testAbstractAggregationHandling() throws InterruptedException {
-        Processor<Integer> processor = new AbstractParallelStoringAggregationProcessor<Integer, Integer>(ConcurrencyTestsUtil.getExecutor(), receivers, Message.Sum.toString()) {
+        Processor<Integer, Integer> processor = new AbstractParallelStoringAggregationProcessor<Integer, Integer>(Integer.class, Integer.class, ConcurrencyTestsUtil.getExecutor(), receivers, "Sum") {
             @Override
             protected void storeElement(Integer element) {
                 elementStore.add(element);
@@ -76,7 +65,7 @@ public class TestAbstractStoringParallelAggregationProcessor {
         assertThat(receivedElement, is(expectedReceivedElement));
     }
 
-    private void processElementAndVerifyThatItWasStored(Processor<Integer> processor, int element) {
+    private void processElementAndVerifyThatItWasStored(Processor<Integer, Integer> processor, int element) {
         processor.processElement(element);
         ConcurrencyTestsUtil.sleepFor(100); //Giving the processor time to process the instructions
         assertThat("The element store doesn't contain the previously processed element '" + element + "'", elementStore.contains(element), is(true));
@@ -84,7 +73,7 @@ public class TestAbstractStoringParallelAggregationProcessor {
     
     @Test(timeout=5000)
     public void testThatTheLockIsReleasedAfterStoringFailed() throws InterruptedException {
-        Processor<Integer> processor = new AbstractParallelStoringAggregationProcessor<Integer, Integer>(ConcurrencyTestsUtil.getExecutor(), receivers, Message.Sum.toString()) {
+        Processor<Integer, Integer> processor = new AbstractParallelStoringAggregationProcessor<Integer, Integer>(Integer.class, Integer.class, ConcurrencyTestsUtil.getExecutor(), receivers, "Sum") {
             @Override
             protected void storeElement(Integer element) {
                 if (element < 0) {

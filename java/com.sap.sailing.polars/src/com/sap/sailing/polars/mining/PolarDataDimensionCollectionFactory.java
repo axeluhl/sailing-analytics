@@ -11,12 +11,13 @@ public class PolarDataDimensionCollectionFactory {
 
     public static Collection<Function<?>> getClusterKeyDimensions() throws NoSuchMethodException {
         Collection<Function<?>> dimensions = new ArrayList<>();
-        Function<RoundedAngleToTheWind> angleFunction = FunctionFactory
+        FunctionFactory functionFactory = new FunctionFactory();
+        Function<RoundedAngleToTheWind> angleFunction = functionFactory
                 .createMethodWrappingFunction(PolarClusterKey.class.getMethod("getRoundedAngleToTheWind",
                         new Class<?>[0]));
-        Function<WindSpeedLevel> windSpeedFunction = FunctionFactory.createMethodWrappingFunction(PolarClusterKey.class
+        Function<WindSpeedLevel> windSpeedFunction = functionFactory.createMethodWrappingFunction(PolarClusterKey.class
                 .getMethod("getWindSpeedCluster", new Class<?>[0]));
-        Function<BoatClass> boatClassFunction = FunctionFactory.createMethodWrappingFunction(PolarClusterKey.class
+        Function<BoatClass> boatClassFunction = functionFactory.createMethodWrappingFunction(PolarClusterKey.class
                 .getMethod("getBoatClass", new Class<?>[0]));
 
         dimensions.add(boatClassFunction);

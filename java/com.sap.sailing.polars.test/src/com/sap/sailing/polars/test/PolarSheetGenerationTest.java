@@ -224,7 +224,7 @@ public class PolarSheetGenerationTest {
         }
         
         @Override
-        public Wind getWind(Position p, TimePoint at, Iterable<WindSource> windSourcesToExclude) {
+        public Wind getWind(Position p, TimePoint at, Set<WindSource> windSourcesToExclude) {
             return getWind(p, at);
         }
         
@@ -237,7 +237,7 @@ public class PolarSheetGenerationTest {
         
         @Override
         public WindWithConfidence<com.sap.sse.common.Util.Pair<Position, TimePoint>> getWindWithConfidence(Position p, TimePoint at,
-                Iterable<WindSource> windSourcesToExclude) {
+                Set<WindSource> windSourcesToExclude) {
             return getWindWithConfidence(p, at);
         }
         
@@ -271,8 +271,8 @@ public class PolarSheetGenerationTest {
         }
         
         @Override
-        public Iterable<WindSource> getWindSources(WindSourceType type) {
-            List<WindSource> sources = new ArrayList<WindSource>();
+        public Set<WindSource> getWindSources(WindSourceType type) {
+            Set<WindSource> sources = new HashSet<>();
             sources.add(new WindSourceImpl(type));
             return sources;
         }

@@ -80,4 +80,9 @@ public class PolarFixFilterCriteria implements FilterCriterion<GPSFixMovingWithP
         private static final long serialVersionUID = 7906688735433666009L;
     }
 
+    @Override
+    public Class<GPSFixMovingWithPolarContext> getElementType() {
+        return GPSFixMovingWithPolarContext.class;
+    }
+
 }

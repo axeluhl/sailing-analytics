@@ -414,11 +414,17 @@ public class RaceLogImpl extends TrackImpl<RaceLogEvent> implements RaceLog {
     
     @Override
     public RevokeEvent revokeEvent(RaceLogEventAuthor author, RaceLogEvent toRevoke) throws NotRevokableException {
+        return revokeEvent(author, toRevoke, null);
+    }
+    
+    @Override
+    public RevokeEvent revokeEvent(RaceLogEventAuthor author, RaceLogEvent toRevoke, String reason) throws NotRevokableException {
         if (toRevoke == null) {
             throw new NotRevokableException("Received null as event to revoke");
         }
-        RevokeEvent revokeEvent = RaceLogEventFactory.INSTANCE.createRevokeEvent(MillisecondsTimePoint.now(), author,
-                getCurrentPassId(), toRevoke.getId());
+        RevokeEvent revokeEvent = RaceLogEventFactory.INSTANCE.createRevokeEvent(
+                MillisecondsTimePoint.now(), author, getCurrentPassId(), toRevoke.getId(),
+                toRevoke.getClass().getSimpleName(), toRevoke.getShortInfo(), reason);
         checkIfSuccessfullyRevokes(revokeEvent);
         add(revokeEvent);
         return revokeEvent;

@@ -3,6 +3,7 @@ package com.sap.sailing.domain.tracking;
 import java.io.Serializable;
 import java.util.List;
 import java.util.NavigableSet;
+import java.util.Set;
 import java.util.SortedSet;
 
 import com.sap.sailing.domain.base.Competitor;
@@ -238,7 +239,7 @@ public interface TrackedRace extends Serializable {
     Position getApproximatePosition(Waypoint waypoint, TimePoint timePoint);
 
     /**
-     * Same as {@link #getWind(Position, TimePoint, Iterable) getWind(p, at, Collections.emptyList())}
+     * Same as {@link #getWind(Position, TimePoint, Set) getWind(p, at, Collections.emptyList())}
      */
     Wind getWind(Position p, TimePoint at);
 
@@ -247,7 +248,7 @@ public interface TrackedRace extends Serializable {
      * from all wind sources available except for those listed in <code>windSourcesToExclude</code>, using the
      * confidences of the wind values provided by the various sources during averaging.
      */
-    Wind getWind(Position p, TimePoint at, Iterable<WindSource> windSourcesToExclude);
+    Wind getWind(Position p, TimePoint at, Set<WindSource> windSourcesToExclude);
 
     /**
      * Retrieves the wind sources used so far by this race that have the specified <code>type</code> as their
@@ -255,13 +256,13 @@ public interface TrackedRace extends Serializable {
      * race does not use any wind source of the specified type (yet). Additional sources may be returned after
      * 
      */
-    Iterable<WindSource> getWindSources(WindSourceType type);
+    Set<WindSource> getWindSources(WindSourceType type);
 
     /**
      * Retrieves all wind sources known to this race, including those {@link #getWindSourcesToExclude() to exclude}.
      * Callers can freely iterate because a copied collection is returned.
      */
-    Iterable<WindSource> getWindSources();
+    Set<WindSource> getWindSources();
 
     /**
      * Same as {@link #getOrCreateWindTrack(WindSource, long) getOrCreateWindTrack(windSource,
@@ -484,7 +485,7 @@ public interface TrackedRace extends Serializable {
      * Lists those wind sources which by default are not considered in {@link #getWind(Position, TimePoint)} and
      * {@link #getWindWithConfidence(Position, TimePoint)}.
      */
-    Iterable<WindSource> getWindSourcesToExclude();
+    Set<WindSource> getWindSourcesToExclude();
 
     /**
      * Loops over this tracked race's wind sources and from each asks its averaged wind for the position <code>p</code>
@@ -493,7 +494,7 @@ public interface TrackedRace extends Serializable {
      * averaged confidence attached.
      */
     WindWithConfidence<Util.Pair<Position, TimePoint>> getWindWithConfidence(Position p, TimePoint at,
-            Iterable<WindSource> windSourcesToExclude);
+            Set<WindSource> windSourcesToExclude);
 
     /**
      * Same as {@link #getEstimatedWindDirection(TimePoint)}, but propagates the confidence of the wind

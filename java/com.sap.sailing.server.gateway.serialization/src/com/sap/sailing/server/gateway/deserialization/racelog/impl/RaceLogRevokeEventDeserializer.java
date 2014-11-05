@@ -24,7 +24,11 @@ public class RaceLogRevokeEventDeserializer extends BaseRaceLogEventDeserializer
             throws JsonDeserializationException {
     	Serializable revokedEventId = Helpers.tryUuidConversion(
     			(Serializable) object.get(RaceLogRevokeEventSerializer.FIELD_REVOKED_EVENT_ID));
+        String revokedEventType = (String) object.get(RaceLogRevokeEventSerializer.FIELD_REVOKED_EVENT_TYPE);
+        String revokedEventShortInfo = (String) object.get(RaceLogRevokeEventSerializer.FIELD_REVOKED_EVENT_SHORT_INFO);
+        String reason = (String) object.get(RaceLogRevokeEventSerializer.FIELD_REASON);
     	
-        return factory.createRevokeEvent(createdAt, author, timePoint, id, passId, revokedEventId);
+        return factory.createRevokeEvent(createdAt, author, timePoint, id, passId, revokedEventId,
+                revokedEventType, revokedEventShortInfo, reason);
     }
 }
