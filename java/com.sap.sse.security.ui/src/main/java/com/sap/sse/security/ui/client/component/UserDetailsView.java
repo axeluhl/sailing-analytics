@@ -188,7 +188,7 @@ public class UserDetailsView extends FlowPanel {
                     });
                     // only offer password reset if the user's e-mail address has successfully been validated
                     if (UserDetailsView.this.user.isEmailValidated()) {
-                        final Button resetPasswordButton = new Button(stringMessages.resetPassword());
+                        final Button resetPasswordButton = new Button(stringMessages.forgotPassword());
                         accountPanelContent.add(resetPasswordButton);
                         resetPasswordButton.addClickHandler(new ClickHandler() {
                             @Override

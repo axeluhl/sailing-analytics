@@ -58,7 +58,7 @@ public interface StringMessages extends com.sap.sse.gwt.client.StringMessages {
     String editEmail();
     String errorUpdatingEmail(String message);
     String successfullyUpdatedEmail(String username, String email);
-    String resetPassword();
+    String forgotPassword();
     String errorDuringPasswordReset(String message);
     String cannotResetPasswordWithoutValidatedEmail(String username);
     String newPasswordSent(String username);
@@ -70,7 +70,8 @@ public interface StringMessages extends com.sap.sse.gwt.client.StringMessages {
     String emailValidationUnsuccessful(String username);
     String roles();
     String signInWith();
-    String welcomeToSapSailing();
-    String newToSapSailing();
+    String welcome();
+    String newUser();
     String pleaseSignIn();
+    String enterUsernameOrEmail();
 }

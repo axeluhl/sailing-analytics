@@ -10,7 +10,7 @@ import com.sap.sse.security.ui.shared.UserManagementServiceAsync;
 
 public class SignInDialog extends AbstractUserDialog {
     public SignInDialog(StringMessages stringMessages, UserManagementServiceAsync userManagementService, DialogCallback<UserData> callback) {
-        super(stringMessages, stringMessages.signIn(), userManagementService, /* user */ null, /* validator */ null, callback);
+        super(stringMessages, stringMessages.signIn(), stringMessages.signIn(), userManagementService, /* user */ null, /* validator */ null, callback);
     }
 
     @Override
