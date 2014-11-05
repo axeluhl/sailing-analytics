@@ -50,7 +50,7 @@ public class LoginPanel extends HorizontalPanel implements UserStatusEventHandle
         signInLink.addClickHandler(new ClickHandler() {
             @Override
             public void onClick(ClickEvent event) {
-                final SignInDialog signInDialog = new SignInDialog(stringMessages, userManagementService, new DialogCallback<UserData>() {
+                final SignInDialog signInDialog = new SignInDialog(stringMessages, userManagementService, userService, new DialogCallback<UserData>() {
                     @Override
                     public void ok(UserData userData) {
                         userService.login(userData.getUsername(), userData.getPassword(), new MarkedAsyncCallback<SuccessInfo>(new AsyncCallback<SuccessInfo>() {
@@ -58,7 +58,11 @@ public class LoginPanel extends HorizontalPanel implements UserStatusEventHandle
                             public void onFailure(Throwable caught) {
                                 Window.alert(stringMessages.invalidCredentials());
                             }
-                            @Override public void onSuccess(SuccessInfo result) {}
+                            @Override public void onSuccess(SuccessInfo result) {
+                                if (!result.isSuccessful()) {
+                                    Window.alert(stringMessages.invalidCredentials());
+                                }
+                            }
                         }));
                     }
                     @Override public void cancel() {}

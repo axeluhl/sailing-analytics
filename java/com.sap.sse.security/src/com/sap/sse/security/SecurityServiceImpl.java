@@ -170,6 +170,7 @@ public class SecurityServiceImpl extends RemoteServiceServlet implements Securit
             throw new UserManagementException(UserManagementException.CANNOT_RESET_PASSWORD_WITHOUT_VALIDATED_EMAIL);
         }
         final String passwordResetSecret = user.startPasswordReset();
+        store.updateUser(user); // durably storing the password reset secret
         Map<String, String> urlParameters = new HashMap<>();
         try {
             urlParameters.put("u", URLEncoder.encode(user.getName(), "UTF-8"));
