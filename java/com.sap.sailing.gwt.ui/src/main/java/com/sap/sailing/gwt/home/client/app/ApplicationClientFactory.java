@@ -13,5 +13,5 @@ import com.sap.sailing.gwt.home.client.place.start.StartClientFactory;
 public interface ApplicationClientFactory extends AboutUsClientFactory, ContactClientFactory, EventClientFactory,
     EventsClientFactory, StartClientFactory, SponsoringClientFactory, SolutionsClientFactory, SearchResultClientFactory,
     LeaderboardClientFactory {
-    PlaceNavigator getPlaceNavigator();
+    HomePlacesNavigator getHomePlacesNavigator();
 }

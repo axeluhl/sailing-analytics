@@ -11,10 +11,10 @@
   <div class="{local_res.css.eventnavigation} {local_res.css.eventnavigationcompact}">
     <div class="{res.mainCss.grid}">
         <div class="{res.mediaCss.columns}">
-            <g:Anchor href="javascript:;" ui:field="regattaLink">
+            <g:Anchor ui:field="regattaLink">
               	<img ui:field="eventLogo" alt="" height="41" width="41" class="{local_res.css.eventnavigationcompact_logo}"></img>
 			</g:Anchor>
-            <g:Anchor href="javascript:;" ui:field="regattaLink2" styleName="{res.mainCss.button} {local_res.css.eventnavigation_link}">
+            <g:Anchor ui:field="regattaLink2" styleName="{res.mainCss.button} {local_res.css.eventnavigation_link}">
                 <span ui:field='eventNameSpan' />
             </g:Anchor>
       </div>

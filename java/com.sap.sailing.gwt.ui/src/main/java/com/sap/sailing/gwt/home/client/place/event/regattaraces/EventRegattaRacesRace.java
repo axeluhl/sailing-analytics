@@ -18,7 +18,7 @@ import com.sap.sailing.domain.common.dto.CompetitorDTO;
 import com.sap.sailing.domain.common.dto.FleetDTO;
 import com.sap.sailing.domain.common.dto.RaceColumnDTO;
 import com.sap.sailing.domain.common.dto.RaceDTO;
-import com.sap.sailing.gwt.home.client.place.event.EventPageNavigator;
+import com.sap.sailing.gwt.home.client.place.event.EventPlaceNavigator;
 import com.sap.sailing.gwt.ui.shared.StrippedLeaderboardDTO;
 import com.sap.sse.gwt.client.player.Timer;
 
@@ -68,12 +68,12 @@ public class EventRegattaRacesRace extends UIObject {
     private final FleetDTO fleet;
     private final RaceColumnDTO raceColumn;
     private final RaceDTO race;
-    private final EventPageNavigator pageNavigator;
+    private final EventPlaceNavigator pageNavigator;
     private final Timer timerForClientServerOffset;
 
     private Element[] allConditionalElements;
     
-    public EventRegattaRacesRace(StrippedLeaderboardDTO leaderboard, FleetDTO fleet, RaceColumnDTO raceColumn, Timer timerForClientServerOffset, EventPageNavigator pageNavigator) {
+    public EventRegattaRacesRace(StrippedLeaderboardDTO leaderboard, FleetDTO fleet, RaceColumnDTO raceColumn, Timer timerForClientServerOffset, EventPlaceNavigator pageNavigator) {
         this.leaderboard = leaderboard;
         this.fleet = fleet;
         this.raceColumn = raceColumn;

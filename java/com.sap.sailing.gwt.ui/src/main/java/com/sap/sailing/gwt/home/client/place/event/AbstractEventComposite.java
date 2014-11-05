@@ -10,9 +10,9 @@ import com.sap.sailing.gwt.ui.shared.EventDTO;
  */
 public class AbstractEventComposite extends Composite {
     private final EventDTO event;
-    private final EventPageNavigator pageNavigator;
+    private final EventPlaceNavigator pageNavigator;
 
-    public AbstractEventComposite(EventDTO event, EventPageNavigator pageNavigator) {
+    public AbstractEventComposite(EventDTO event, EventPlaceNavigator pageNavigator) {
         this.event = event;
         this.pageNavigator = pageNavigator;
     }
@@ -21,7 +21,7 @@ public class AbstractEventComposite extends Composite {
         return event;
     }
 
-    public EventPageNavigator getPageNavigator() {
+    public EventPlaceNavigator getPageNavigator() {
         return pageNavigator;
     }
 }

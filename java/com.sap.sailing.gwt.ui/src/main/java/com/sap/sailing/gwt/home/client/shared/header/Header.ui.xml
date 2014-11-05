@@ -17,14 +17,14 @@
 		    <div class="{res.mediaCss.small9} {res.mediaCss.medium7} {res.mediaCss.large6} {res.mediaCss.columns}">
 				<nav class="{local_res.css.sitenavigation}">
 					<g:Anchor ui:field="startPageLink"
-						styleName="{local_res.css.sitenavigation_link}" text="{i18n.home}" href="javascript:;"/>
+						styleName="{local_res.css.sitenavigation_link}" text="{i18n.home}" />
 					<g:Anchor ui:field="eventsPageLink"
-						styleName="{local_res.css.sitenavigation_link}" text="{i18n.events}" href="javascript:;"/>
+						styleName="{local_res.css.sitenavigation_link}" text="{i18n.events}" />
 					<g:Anchor ui:field="solutionsPageLink"
-						styleName="{local_res.css.sitenavigation_link}" text="{i18n.solutions}" href="javascript:;"/>
+						styleName="{local_res.css.sitenavigation_link}" text="{i18n.solutions}" />
 					<!-- 
 					<g:Anchor ui:field="sponsoringPageLink"
-						styleName="{local_res.css.sitenavigation_link}" text="{i18n.sponsoring}" href="javascript:;" />
+						styleName="{local_res.css.sitenavigation_link}" text="{i18n.sponsoring}" />
 					 -->
 				</nav>
 		    </div>
