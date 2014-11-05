@@ -14,3 +14,9 @@ Amount of data processed by the SAP Sailing Analytics during events.
 - 1,036,846 wind measurements with position, speed, course and heading of the unit, and speed and direction of the wind (58,063,376 bytes of memory)
 - 205,532 maneuvers analyzed (9,865,536 bytes or memory)
 
+## Extreme Sailing Series 2014 (without Sydney)
+
+- 2,875,949 GPS fixes (220MB)
+- 4,850,371 Wind fixes (270MB)
+
+

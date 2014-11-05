@@ -653,6 +653,10 @@ if [[ "$@" == "install" ]] || [[ "$@" == "all" ]]; then
         mkdir $ACDIR/configuration
     fi
 
+    if [ ! -d "$ACDIR/configuration/jetty/etc" ]; then
+        mkdir -p $ACDIR/configuration/jetty/etc
+    fi
+
     cd $ACDIR
 
     rm -rf $ACDIR/plugins/*.*
@@ -664,23 +668,23 @@ if [[ "$@" == "install" ]] || [[ "$@" == "all" ]]; then
     cp -v $PROJECT_HOME/java/target/start $ACDIR/
     cp -v $PROJECT_HOME/java/target/stop $ACDIR/
     cp -v $PROJECT_HOME/java/target/status $ACDIR/
+
     cp -v $PROJECT_HOME/java/target/refreshInstance.sh $ACDIR/
+    cp -v $PROJECT_HOME/java/target/udpmirror $ACDIR/
+    cp -v $PROJECT_HOME/java/target/http2udpmirror $ACDIR
+
+    # overwrite configurations that should never be customized and belong to the build
+    cp -v $p2PluginRepository/configuration/config.ini configuration/
+    cp -v $PROJECT_HOME/java/target/configuration/jetty/etc/jetty.xml configuration/jetty/etc
+    cp -v $PROJECT_HOME/java/target/configuration/jetty/etc/jetty-selector.xml configuration/jetty/etc
+    cp -v $PROJECT_HOME/java/target/configuration/jetty/etc/jetty-deployer.xml configuration/jetty/etc
+    cp -v $PROJECT_HOME/java/target/configuration/jetty/etc/realm.properties configuration/jetty/etc
 
     if [ ! -f "$ACDIR/env.sh" ]; then
         cp -v $PROJECT_HOME/java/target/env.sh $ACDIR/
-        cp -v $p2PluginRepository/configuration/config.ini configuration/
-
-        mkdir -p configuration/jetty/etc
-        cp -v $PROJECT_HOME/java/target/configuration/jetty/etc/jetty.xml configuration/jetty/etc
-        cp -v $PROJECT_HOME/java/target/configuration/jetty/etc/jetty-selector.xml configuration/jetty/etc
-        cp -v $PROJECT_HOME/java/target/configuration/jetty/etc/jetty-deployer.xml configuration/jetty/etc
-        cp -v $PROJECT_HOME/java/target/configuration/jetty/etc/realm.properties configuration/jetty/etc
-        cp -v $PROJECT_HOME/java/target/configuration/monitoring.properties configuration/
-        cp -v $PROJECT_HOME/java/target/configuration/security.properties configuration/
-
-        cp -v $PROJECT_HOME/java/target/udpmirror $ACDIR/
-        cp -v $PROJECT_HOME/java/target/http2udpmirror $ACDIR
-        cp -v $PROJECT_HOME/java/target/configuration/logging.properties $ACDIR/configuration
+        cp -v $PROJECT_HOME/java/target/configuration/monitoring.properties $ACDIR/configuration/
+        cp -v $PROJECT_HOME/java/target/configuration/security.properties $ACDIR/configuration/
+        cp -v $PROJECT_HOME/java/target/configuration/logging.properties $ACDIR/configuration/
     fi
 
     cp -r -v $p2PluginRepository/configuration/org.eclipse.equinox.simpleconfigurator configuration/
