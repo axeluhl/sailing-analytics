@@ -53,7 +53,6 @@ public class LoginView extends Composite {
         signUpAnchor.setHref(registrationLink);
         oAuthPanel.add(new OAuthLogin(userManagementService));
         userNameTextBox.setFocus(true);
-        
         DialogUtils.linkEnterToButton(loginButton, userNameTextBox, passwordTextBox);
     }
     
