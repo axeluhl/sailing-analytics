@@ -19,9 +19,7 @@ public class LoginEntryPoint extends AbstractEntryPoint {
         userManagementService = GWT.create(UserManagementService.class);
         EntryPointHelper.registerASyncService((ServiceDefTarget) userManagementService, RemoteServiceMappingConstants.userManagementServiceRemotePath);
         userService = new UserService(userManagementService);
-
         RootPanel rootPanel = RootPanel.get();
-
         rootPanel.add(new LoginView(userManagementService, userService));
     }
 }

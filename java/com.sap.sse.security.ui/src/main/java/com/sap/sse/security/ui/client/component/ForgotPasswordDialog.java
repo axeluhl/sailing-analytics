@@ -7,8 +7,8 @@ import com.sap.sse.security.ui.client.i18n.StringMessages;
 import com.sap.sse.security.ui.shared.UserDTO;
 import com.sap.sse.security.ui.shared.UserManagementServiceAsync;
 
-public class ResetPasswordDialog extends AbstractUserDialog {
-    public ResetPasswordDialog(StringMessages stringMessages, UserManagementServiceAsync userManagementService, UserDTO user,
+public class ForgotPasswordDialog extends AbstractUserDialog {
+    public ForgotPasswordDialog(StringMessages stringMessages, UserManagementServiceAsync userManagementService, UserDTO user,
             com.sap.sse.gwt.client.dialog.DataEntryDialog.DialogCallback<UserData> callback) {
         super(stringMessages, stringMessages.forgotPassword(), stringMessages.enterUsernameOrEmail(),
                 userManagementService, user, callback);

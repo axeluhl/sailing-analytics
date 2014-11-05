@@ -10,11 +10,11 @@
 		    <img src="{icon_res.sapLogo.getSafeUri}" />
 	    </div>
 	    <div class="{local_res.css.loginform_content}">
-			    <div><ui:text from="{i18n.welcome}" /></div>
+			    <div><ui:text from="{i18n.generalWelcome}" /></div>
 			    <div><s:TextBoxWithWatermark ui:field="userNameTextBox" styleName="{local_res.css.glowing_border}" /></div>
 				<div>
 				    <s:PasswordTextBoxWithWatermark ui:field="passwordTextBox" styleName="{local_res.css.glowing_border}" />
-				    <g:Anchor href="javascript:;" ui:field="passwordResetAnchor" text="{i18n.forgotPassword}" />
+				    <g:Anchor href="javascript:;" ui:field="forgotPasswordAnchor" text="{i18n.forgotPassword}" />
 				</div>
 				<div>
 				    <g:Button ui:field="loginButton" text="{i18n.signIn}" styleName="{local_res.css.button}" />
