@@ -3,7 +3,7 @@ package com.sap.sailing.domain.tractracadapter.persistence.impl;
 import org.osgi.framework.BundleActivator;
 import org.osgi.framework.BundleContext;
 
-import com.sap.sailing.mongodb.MongoDBService;
+import com.sap.sse.mongodb.MongoDBService;
 
 public class Activator implements BundleActivator {
     @Override

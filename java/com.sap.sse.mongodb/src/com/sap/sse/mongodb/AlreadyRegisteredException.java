@@ -1,4 +1,4 @@
-package com.sap.sailing.mongodb;
+package com.sap.sse.mongodb;
 
 public class AlreadyRegisteredException extends Exception {
 
