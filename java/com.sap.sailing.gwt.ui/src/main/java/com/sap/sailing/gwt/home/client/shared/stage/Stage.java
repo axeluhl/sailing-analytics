@@ -12,7 +12,7 @@ import com.google.gwt.user.client.ui.Anchor;
 import com.google.gwt.user.client.ui.Composite;
 import com.google.gwt.user.client.ui.HTMLPanel;
 import com.google.gwt.user.client.ui.Widget;
-import com.sap.sailing.gwt.home.client.app.PlaceNavigator;
+import com.sap.sailing.gwt.home.client.app.HomePlacesNavigator;
 import com.sap.sailing.gwt.idangerous.Swiper;
 import com.sap.sailing.gwt.ui.shared.EventBaseDTO;
 import com.sap.sse.common.Util.Pair;
@@ -32,14 +32,14 @@ public class Stage extends Composite {
     
     private Swiper swiper;
 
-    private final PlaceNavigator placeNavigator;
+    private final HomePlacesNavigator placeNavigator;
     
     interface StageUiBinder extends UiBinder<Widget, Stage> {
     }
     
     private static StageUiBinder uiBinder = GWT.create(StageUiBinder.class);
 
-    public Stage(PlaceNavigator placeNavigator) {
+    public Stage(HomePlacesNavigator placeNavigator) {
         this.placeNavigator = placeNavigator;
         
         StageResources.INSTANCE.css().ensureInjected();

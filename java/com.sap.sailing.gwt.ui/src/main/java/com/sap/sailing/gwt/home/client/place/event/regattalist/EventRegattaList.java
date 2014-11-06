@@ -16,11 +16,12 @@ import com.google.gwt.uibinder.client.UiField;
 import com.google.gwt.user.client.DOM;
 import com.google.gwt.user.client.Event;
 import com.google.gwt.user.client.EventListener;
+import com.google.gwt.user.client.ui.HTMLPanel;
 import com.google.gwt.user.client.ui.Widget;
 import com.sap.sailing.gwt.common.client.SharedResources;
-import com.sap.sailing.gwt.home.client.app.PlaceNavigator;
+import com.sap.sailing.gwt.home.client.app.HomePlacesNavigator;
 import com.sap.sailing.gwt.home.client.place.event.AbstractEventComposite;
-import com.sap.sailing.gwt.home.client.place.event.EventPageNavigator;
+import com.sap.sailing.gwt.home.client.place.event.EventPlaceNavigator;
 import com.sap.sailing.gwt.home.client.place.event.regatta.Regatta;
 import com.sap.sailing.gwt.home.client.shared.LongNamesUtil;
 import com.sap.sailing.gwt.ui.shared.EventDTO;
@@ -41,7 +42,7 @@ public class EventRegattaList extends AbstractEventComposite {
     
     @UiField DivElement regattaGroupsNavigationPanel;
     @UiField DivElement regattaListNavigationDiv;
-    @UiField DivElement regattaListItemsDiv;
+    @UiField HTMLPanel regattaListItemsPanel;
     @UiField AnchorElement filterNoLeaderboardGroupsAnchor;
     @UiField SpanElement allBoatClassesSelected;
     
@@ -49,7 +50,7 @@ public class EventRegattaList extends AbstractEventComposite {
     private final List<AnchorElement> leaderboardGroupFilterAnchors;
     
     public EventRegattaList(EventDTO event, Map<String, Triple<RaceGroupDTO, StrippedLeaderboardDTO, LeaderboardGroupDTO>> regattaStructure, 
-            Timer timerForClientServerOffset,  PlaceNavigator placeNavigator, EventPageNavigator pageNavigator) {
+            Timer timerForClientServerOffset, HomePlacesNavigator placeNavigator, EventPlaceNavigator pageNavigator) {
         super(event, pageNavigator);
         
         EventRegattaListResources.INSTANCE.css().ensureInjected();
@@ -89,7 +90,7 @@ public class EventRegattaList extends AbstractEventComposite {
                 if (r != null) {
                     Regatta regatta = new Regatta(event, timerForClientServerOffset, false, placeNavigator, pageNavigator);
                     regatta.setData(r.getC(), hasMultipleLeaderboardGroups, r.getB(), r.getA());
-                    regattaListItemsDiv.appendChild(regatta.getElement());
+                    regattaListItemsPanel.add(regatta);
                     List<Regatta> regattaElements = regattaElementsByLeaderboardGroup.get(leaderboardGroup.getName());
                     if (regattaElements == null) {
                         regattaElements = new ArrayList<Regatta>();
@@ -99,7 +100,7 @@ public class EventRegattaList extends AbstractEventComposite {
                 }
             }
         }
-    }
+    }   
     
     private void registerFilterLeaderboardGroupEvent(final AnchorElement filterLeaderboardGroupAnchor, final LeaderboardGroupDTO leaderboardGroup) {
         Event.sinkEvents(filterLeaderboardGroupAnchor, Event.ONCLICK);

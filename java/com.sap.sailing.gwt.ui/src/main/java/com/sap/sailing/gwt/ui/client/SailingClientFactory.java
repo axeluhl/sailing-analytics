@@ -2,6 +2,8 @@ package com.sap.sailing.gwt.ui.client;
 
 import com.sap.sse.gwt.client.mvp.ClientFactory;
 import com.sap.sse.gwt.client.mvp.ErrorView;
+import com.sap.sse.security.ui.client.UserService;
+import com.sap.sse.security.ui.shared.UserManagementServiceAsync;
 
 /**
  * A client factory that can deliver the sailing-specific services.
@@ -13,6 +15,10 @@ public interface SailingClientFactory extends ClientFactory {
     SailingServiceAsync getSailingService();
 
     MediaServiceAsync getMediaService();
+    
+    UserManagementServiceAsync getUserManagementService();
+    
+    UserService getUserService();
     
     ErrorView createErrorView(String errorMessage, Throwable errorReason);
 }

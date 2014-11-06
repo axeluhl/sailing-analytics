@@ -1,0 +1,22 @@
+.loginPanel {
+}
+
+.loginPanel-welcomeMessage {
+    padding-left: 5px;
+    padding-right: 5px;
+}
+
+.loginPanel-link {
+    padding-left: 5px;
+    padding-right: 5px;
+}
+
+.loginPanel-userIcon {
+    padding-left: 5px;
+    padding-right: 5px;
+}
+
+.loginPanel-providerIcon {
+    padding-left: 2px;
+    padding-right: 2px;
+}

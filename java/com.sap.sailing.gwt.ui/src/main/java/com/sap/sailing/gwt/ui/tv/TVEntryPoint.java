@@ -92,14 +92,14 @@ public class TVEntryPoint extends AbstractEntryPoint {
             if(leaderboardDisplayName == null || leaderboardDisplayName.isEmpty()) {
                 leaderboardDisplayName = leaderboardName;
             }
-            logoAndTitlePanel = new LogoAndTitlePanel(leaderboardGroupName, leaderboardDisplayName, stringMessages, this);
+            logoAndTitlePanel = new LogoAndTitlePanel(leaderboardGroupName, leaderboardDisplayName, stringMessages, this, getUserService());
             logoAndTitlePanel.addStyleName("LogoAndTitlePanel");
             mainPanel.addNorth(logoAndTitlePanel, 68);
         }
         
-        tvViewController = new TVViewController(sailingService, mediaService, stringMessages, this,
-                leaderboardGroupName, leaderboardName, userAgent, logoAndTitlePanel, mainPanel, delayToLiveMillis,
-                showRaceDetails, raceboardViewConfig);
+        tvViewController = new TVViewController(sailingService, mediaService, getUserService(), stringMessages,
+                this, leaderboardGroupName, leaderboardName, userAgent, logoAndTitlePanel, mainPanel,
+                delayToLiveMillis, showRaceDetails, raceboardViewConfig);
         tvViewController.updateTvView(TVViews.Leaderboard);
     }
 }

@@ -11,4 +11,19 @@ import java.io.Serializable;
  */
 public interface RevokeEvent extends RaceLogEvent {
     Serializable getRevokedEventId();
+    
+    /**
+     * Short info of the revoked event, automatically added by {@link RaceLog#revokeEvent}.
+     */
+    String getRevokedEventShortInfo();
+    
+    /**
+     * Optional reason for revocation of event.
+     */
+    String getReason();
+
+    /**
+     * {@link Class#getSimpleName() Simple class name} of the revoked event.
+     */
+    String getRevokedEventType();
 }

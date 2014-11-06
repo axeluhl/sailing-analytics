@@ -4,7 +4,7 @@ import com.sap.sailing.domain.swisstimingadapter.SwissTimingArchiveConfiguration
 import com.sap.sailing.domain.swisstimingadapter.SwissTimingConfiguration;
 import com.sap.sailing.domain.swisstimingadapter.SwissTimingFactory;
 import com.sap.sailing.domain.swisstimingadapter.persistence.impl.SwissTimingAdapterPersistenceImpl;
-import com.sap.sailing.mongodb.MongoDBService;
+import com.sap.sse.mongodb.MongoDBService;
 
 public interface SwissTimingAdapterPersistence {
 
