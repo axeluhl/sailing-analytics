@@ -13,7 +13,7 @@ public class AdminConsoleFeatures extends NamedImpl {
     private static final long serialVersionUID = 7441608351911944793L;
     private String[] enabledRoles;
     
-    AdminConsoleFeatures(String name, String... enabledRoles) {
+    public AdminConsoleFeatures(String name, String... enabledRoles) {
         super(name);
         this.enabledRoles = enabledRoles;
     }

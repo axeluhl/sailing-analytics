@@ -7,17 +7,18 @@ import java.util.Map;
 import com.google.gwt.dom.client.Style.Unit;
 import com.google.gwt.event.logical.shared.SelectionEvent;
 import com.google.gwt.event.logical.shared.SelectionHandler;
+import com.google.gwt.safehtml.shared.SafeHtmlBuilder;
 import com.google.gwt.user.client.ui.Anchor;
+import com.google.gwt.user.client.ui.DockLayoutPanel;
 import com.google.gwt.user.client.ui.DockPanel;
+import com.google.gwt.user.client.ui.HasHorizontalAlignment;
 import com.google.gwt.user.client.ui.Label;
 import com.google.gwt.user.client.ui.ScrollPanel;
 import com.google.gwt.user.client.ui.TabLayoutPanel;
 import com.google.gwt.user.client.ui.Widget;
-import com.sap.sailing.gwt.ui.adminconsole.AdminConsoleFeatures;
 import com.sap.sailing.gwt.ui.shared.SecurityStylesheetResources;
 import com.sap.sse.common.Util.Triple;
 import com.sap.sse.gwt.client.AbstractEntryPoint;
-import com.sap.sse.gwt.client.EntryPointHelper;
 import com.sap.sse.gwt.client.ErrorReporter;
 import com.sap.sse.gwt.client.panels.VerticalTabLayoutPanel;
 import com.sap.sse.security.ui.client.UserService;
@@ -25,7 +26,7 @@ import com.sap.sse.security.ui.client.UserStatusEventHandler;
 import com.sap.sse.security.ui.loginpanel.LoginPanel;
 import com.sap.sse.security.ui.shared.UserDTO;
 
-public class AdminConsolePanel extends DockPanel {
+public class AdminConsolePanel extends DockLayoutPanel {
     private final UserService userService;
     
     /**
@@ -88,7 +89,8 @@ public class AdminConsolePanel extends DockPanel {
         }
     }
     
-    public AdminConsolePanel(UserService userService, BuildVersionRetriever buildVersionRetriever, Label persistentAlertLabel, String releaseNotesURL, ErrorReporter errorReporter) {
+    public AdminConsolePanel(UserService userService, BuildVersionRetriever buildVersionRetriever, Label persistentAlertLabel, String releaseNotesAnchorLabel, String releaseNotesURL, ErrorReporter errorReporter) {
+        super(Unit.EM);
         this.userService = userService;
         roleSpecificTabs = new LinkedHashMap<>();
         this.panelsByWidget = new HashMap<>();
@@ -122,12 +124,10 @@ public class AdminConsolePanel extends DockPanel {
         informationPanel.add(persistentAlertLabel, DockPanel.CENTER);
         SystemInformationPanel sysinfoPanel = new SystemInformationPanel(buildVersionRetriever, errorReporter);
         sysinfoPanel.ensureDebugId("SystemInformation");
-        final Anchor releaseNotesLink = new Anchor(new SafeHtmlBuilder().appendEscaped(
-                getStringMessages().releaseNotes()).toSafeHtml(), releaseNotesURL);
+        final Anchor releaseNotesLink = new Anchor(new SafeHtmlBuilder().appendEscaped(releaseNotesAnchorLabel).toSafeHtml(), releaseNotesURL);
         sysinfoPanel.add(releaseNotesLink);
         informationPanel.add(sysinfoPanel, DockPanel.EAST);
         informationPanel.setCellHorizontalAlignment(sysinfoPanel, HasHorizontalAlignment.ALIGN_RIGHT);
-
         this.addSouth(informationPanel, 2.5);
         this.add(topLevelTabPanel);
         createUI(releaseNotesURL);
@@ -156,7 +156,7 @@ public class AdminConsolePanel extends DockPanel {
      * @return the horizontal tab panel that was created and added to the top-level vertical tab panel; the panel returned can be specified
      * as argument to {@link #addToTabPanel(TabLayoutPanel, Widget, String, AdminConsoleFeatures)}.
      */
-    public TabLayoutPanel addVerticalTab(RefreshableAdminConsolePanel panelToAdd, String tabTitle, String tabDebugId, AdminConsoleFeatures feature) {
+    public TabLayoutPanel addVerticalTab(String tabTitle, String tabDebugId, AdminConsoleFeatures feature) {
         final TabLayoutPanel newTabPanel = new TabLayoutPanel(2.5, Unit.EM);
         AbstractEntryPoint.setTabPanelSize(newTabPanel, "100%", "100%");
         newTabPanel.addSelectionHandler(tabSelectionHandler);
@@ -173,7 +173,7 @@ public class AdminConsolePanel extends DockPanel {
                 newTabPanel.remove(child);
             }
         };
-        addToTabPanel(wrapper, panelToAdd.getWidget(), tabTitle, feature);
+        remeberWidgetLocationAndFeature(wrapper, newTabPanel, tabTitle, feature);
         return newTabPanel;
     }
 
@@ -183,7 +183,7 @@ public class AdminConsolePanel extends DockPanel {
      * top-level category.
      */
     public void addToVerticalTabPanel(final RefreshableAdminConsolePanel panelToAdd, String tabTitle, AdminConsoleFeatures feature) {
-        addToTabPanel(topLevelTabPanelWrapper, panelToAdd.getWidget(), tabTitle, feature);
+        addToTabPanel(topLevelTabPanelWrapper, panelToAdd, tabTitle, feature);
     }
 
     private ScrollPanel wrapInScrollPanel(Widget panelToAdd) {
@@ -193,7 +193,7 @@ public class AdminConsolePanel extends DockPanel {
         return scrollPanel;
     }
 
-    public void addToTabPanel(final TabLayoutPanel tabPanel, Widget panelToAdd, String tabTitle, AdminConsoleFeatures feature) {
+    public void addToTabPanel(final TabLayoutPanel tabPanel, RefreshableAdminConsolePanel panelToAdd, String tabTitle, AdminConsoleFeatures feature) {
         VerticalOrHorizontalTabLayoutPanel wrapper = new VerticalOrHorizontalTabLayoutPanel() {
             @Override
             public void add(Widget child, String text, boolean asHtml) {
@@ -209,9 +209,23 @@ public class AdminConsolePanel extends DockPanel {
         addToTabPanel(wrapper, panelToAdd, tabTitle, feature);
     }
 
-    private void addToTabPanel(VerticalOrHorizontalTabLayoutPanel tabPanel, Widget panelToAdd, String tabTitle, AdminConsoleFeatures feature) {
+    /**
+     * Remembers in which tab panel the <code>panelToAdd</code> is to be displayed and for which feature; additionally, remembers adds
+     * a hook so that when the <code>panelToAdd</code>'s widget is selected then the {@link RefreshableAdminConsolePanel#refreshAfterBecomingVisible()}
+     * method can be called.
+     */
+    private void addToTabPanel(VerticalOrHorizontalTabLayoutPanel tabPanel, RefreshableAdminConsolePanel panelToAdd, String tabTitle, AdminConsoleFeatures feature) {
+        remeberWidgetLocationAndFeature(tabPanel, panelToAdd.getWidget(), tabTitle, feature);
+        panelsByWidget.put(panelToAdd.getWidget(), panelToAdd);
+    }
+
+    /**
+     * Remembers the tab panel in which the <code>widgetToAdd</code> is to be displayed and for which feature.
+     */
+    private void remeberWidgetLocationAndFeature(VerticalOrHorizontalTabLayoutPanel tabPanel, Widget widgetToAdd,
+            String tabTitle, AdminConsoleFeatures feature) {
         roleSpecificTabs.put(new Triple<VerticalOrHorizontalTabLayoutPanel, Widget, String>(tabPanel,
-                wrapInScrollPanel(panelToAdd), tabTitle), feature);
+                wrapInScrollPanel(widgetToAdd), tabTitle), feature);
     }
 
     /**

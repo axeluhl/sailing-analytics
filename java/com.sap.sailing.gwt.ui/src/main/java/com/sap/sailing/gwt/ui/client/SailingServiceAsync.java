@@ -76,11 +76,12 @@ import com.sap.sailing.gwt.ui.shared.WindDTO;
 import com.sap.sailing.gwt.ui.shared.WindInfoForRaceDTO;
 import com.sap.sse.common.Util;
 import com.sap.sse.common.search.KeywordQuery;
+import com.sap.sse.gwt.adminconsole.BuildVersionRetriever;
 
 /**
  * The async counterpart of {@link SailingService}
  */
-public interface SailingServiceAsync {
+public interface SailingServiceAsync extends BuildVersionRetriever {
 
     void getRegattas(AsyncCallback<List<RegattaDTO>> callback);
 
