@@ -36,22 +36,22 @@ public class PolarSheetAnalyzerTest {
         PolarSheetAnalyzer analyzer = new PolarSheetAnalyzerImpl(createMockedPolarDataService());
         BoatClass boatClass = mock(BoatClass.class);
         
-        SpeedWithBearing result = analyzer.getOptimalUpwindSpeedWithBearingOnStarboardTackFor(boatClass,
+        SpeedWithBearing result = analyzer.getAverageUpwindSpeedWithBearingOnStarboardTackFor(boatClass,
                 new KnotSpeedImpl(14));
         assertThat(result.getKnots(), closeTo(8.5, 0.1));
         assertThat(result.getBearing().getDegrees(), closeTo(50, 0.1));
         
-        SpeedWithBearing result2 = analyzer.getOptimalDownwindSpeedWithBearingOnStarboardTackFor(boatClass,
+        SpeedWithBearing result2 = analyzer.getAverageDownwindSpeedWithBearingOnStarboardTackFor(boatClass,
                 new KnotSpeedImpl(14));
-        assertThat(result2.getKnots(), closeTo(13.8, 0.1));
+        assertThat(result2.getKnots(), closeTo(13.7, 0.1));
         assertThat(result2.getBearing().getDegrees(), closeTo(142, 0.1));
         
-        SpeedWithBearing result3 = analyzer.getOptimalUpwindSpeedWithBearingOnPortTackFor(boatClass,
+        SpeedWithBearing result3 = analyzer.getAverageUpwindSpeedWithBearingOnPortTackFor(boatClass,
                 new KnotSpeedImpl(14));
         assertThat(result3.getKnots(), closeTo(8.5, 0.1));
         assertThat(result3.getBearing().getDegrees(), closeTo(-50, 0.1));
         
-        SpeedWithBearing result4 = analyzer.getOptimalDownwindSpeedWithBearingOnPortTackFor(boatClass,
+        SpeedWithBearing result4 = analyzer.getAverageDownwindSpeedWithBearingOnPortTackFor(boatClass,
                 new KnotSpeedImpl(14));
         assertThat(result4.getKnots(), closeTo(13.5, 0.1));
         assertThat(result4.getBearing().getDegrees(), closeTo(-144, 0.1));

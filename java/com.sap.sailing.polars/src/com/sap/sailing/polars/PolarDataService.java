@@ -11,6 +11,7 @@ import com.sap.sailing.domain.common.Bearing;
 import com.sap.sailing.domain.common.PolarSheetGenerationSettings;
 import com.sap.sailing.domain.common.PolarSheetsData;
 import com.sap.sailing.domain.common.Speed;
+import com.sap.sailing.domain.common.SpeedWithBearing;
 import com.sap.sailing.domain.tracking.GPSFixMoving;
 import com.sap.sailing.domain.tracking.TrackedRace;
 import com.sap.sailing.polars.analysis.PolarSheetAnalyzer;
@@ -23,7 +24,7 @@ import com.sap.sailing.polars.regression.NotEnoughDataHasBeenAddedException;
  * @author Frederik Petersen (D054528)
  * 
  */
-public interface PolarDataService {
+public interface PolarDataService extends PolarSheetAnalyzer {
 
     /**
      * 
@@ -35,6 +36,18 @@ public interface PolarDataService {
      * @throws NotEnoughDataHasBeenAddedException
      */
     SpeedWithConfidence<Integer> getSpeed(BoatClass boatClass, Speed windSpeed, Bearing bearingToTheWind)
+            throws NotEnoughDataHasBeenAddedException;
+    
+    SpeedWithBearing getAverageUpwindSpeedWithBearingOnStarboardTackFor(BoatClass boatClass, Speed windSpeed)
+            throws NotEnoughDataHasBeenAddedException;
+
+    SpeedWithBearing getAverageDownwindSpeedWithBearingOnStarboardTackFor(BoatClass boatClass, Speed windSpeed)
+            throws NotEnoughDataHasBeenAddedException;
+
+    SpeedWithBearing getAverageUpwindSpeedWithBearingOnPortTackFor(BoatClass boatClass, Speed windSpeed)
+            throws NotEnoughDataHasBeenAddedException;
+
+    SpeedWithBearing getAverageDownwindSpeedWithBearingOnPortTackFor(BoatClass boatClass, Speed windSpeed)
             throws NotEnoughDataHasBeenAddedException;
 
     /**
@@ -76,9 +89,8 @@ public interface PolarDataService {
      *         {@link PolarDataService#getPolarSheetForBoatClass(BoatClass)}
      */
     Set<BoatClass> getAllBoatClassesWithPolarSheetsAvailable();
-    
-    PolarSheetAnalyzer getAnalyzer();
 
     void competitorPositionChanged(GPSFixMoving fix, Competitor competitor, TrackedRace createdTrackedRace);
+    
 
 }

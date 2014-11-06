@@ -15,6 +15,7 @@ import com.sap.sailing.domain.common.PolarSheetGenerationSettings;
 import com.sap.sailing.domain.common.PolarSheetsData;
 import com.sap.sailing.domain.common.RegattaAndRaceIdentifier;
 import com.sap.sailing.domain.common.Speed;
+import com.sap.sailing.domain.common.SpeedWithBearing;
 import com.sap.sailing.domain.tracking.GPSFixMoving;
 import com.sap.sailing.domain.tracking.TrackedRace;
 import com.sap.sailing.polars.PolarDataService;
@@ -59,6 +60,30 @@ public class PolarDataServiceImpl implements PolarDataService {
     public SpeedWithConfidence<Integer> getSpeed(BoatClass boatClass, Speed windSpeed, Bearing bearingToTheWind)
             throws NotEnoughDataHasBeenAddedException {
         return polarDataMiner.estimateBoatSpeed(boatClass, windSpeed, bearingToTheWind);
+    }
+    
+    @Override
+    public SpeedWithBearing getAverageUpwindSpeedWithBearingOnStarboardTackFor(BoatClass boatClass, Speed windSpeed)
+            throws NotEnoughDataHasBeenAddedException {
+        return polarSheetAnalyzer.getAverageUpwindSpeedWithBearingOnStarboardTackFor(boatClass, windSpeed);
+    }
+
+    @Override
+    public SpeedWithBearing getAverageDownwindSpeedWithBearingOnStarboardTackFor(BoatClass boatClass, Speed windSpeed)
+            throws NotEnoughDataHasBeenAddedException {
+        return polarSheetAnalyzer.getAverageDownwindSpeedWithBearingOnStarboardTackFor(boatClass, windSpeed);
+    }
+
+    @Override
+    public SpeedWithBearing getAverageUpwindSpeedWithBearingOnPortTackFor(BoatClass boatClass, Speed windSpeed)
+            throws NotEnoughDataHasBeenAddedException {
+        return polarSheetAnalyzer.getAverageUpwindSpeedWithBearingOnPortTackFor(boatClass, windSpeed);
+    }
+
+    @Override
+    public SpeedWithBearing getAverageDownwindSpeedWithBearingOnPortTackFor(BoatClass boatClass, Speed windSpeed)
+            throws NotEnoughDataHasBeenAddedException {
+        return polarSheetAnalyzer.getAverageDownwindSpeedWithBearingOnPortTackFor(boatClass, windSpeed);
     }
 
 
@@ -117,11 +142,6 @@ public class PolarDataServiceImpl implements PolarDataService {
     public Set<BoatClass> getAllBoatClassesWithPolarSheetsAvailable() {
         return polarDataMiner.getAvailableBoatClasses();
         //return polarSheetPerBoatClassCache.keySet();
-    }
-
-    @Override
-    public PolarSheetAnalyzer getAnalyzer() {
-        return polarSheetAnalyzer;
     }
 
     @Override

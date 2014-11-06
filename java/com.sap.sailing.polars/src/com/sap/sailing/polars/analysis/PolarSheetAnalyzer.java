@@ -7,16 +7,16 @@ import com.sap.sailing.polars.regression.NotEnoughDataHasBeenAddedException;
 
 public interface PolarSheetAnalyzer {
 
-	SpeedWithBearing getOptimalUpwindSpeedWithBearingOnStarboardTackFor(BoatClass boatClass,
+	SpeedWithBearing getAverageUpwindSpeedWithBearingOnStarboardTackFor(BoatClass boatClass,
 			Speed windSpeed) throws NotEnoughDataHasBeenAddedException;
 
-	SpeedWithBearing getOptimalDownwindSpeedWithBearingOnStarboardTackFor(BoatClass boatClass,
+	SpeedWithBearing getAverageDownwindSpeedWithBearingOnStarboardTackFor(BoatClass boatClass,
 			Speed windSpeed) throws NotEnoughDataHasBeenAddedException;
 	
-	SpeedWithBearing getOptimalUpwindSpeedWithBearingOnPortTackFor(BoatClass boatClass,
+	SpeedWithBearing getAverageUpwindSpeedWithBearingOnPortTackFor(BoatClass boatClass,
                 Speed windSpeed) throws NotEnoughDataHasBeenAddedException;
 
-	SpeedWithBearing getOptimalDownwindSpeedWithBearingOnPortTackFor(BoatClass boatClass,
+	SpeedWithBearing getAverageDownwindSpeedWithBearingOnPortTackFor(BoatClass boatClass,
                 Speed windSpeed) throws NotEnoughDataHasBeenAddedException;
 
 }
