@@ -33,4 +33,6 @@ public interface LineDetails {
     Mark getPortMarkWhileApproachingLine();
 
     Distance getAdvantage();
+
+    Distance getGeometricAdvantage();
 }

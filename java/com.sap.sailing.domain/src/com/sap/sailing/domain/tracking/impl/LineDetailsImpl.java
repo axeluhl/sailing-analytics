@@ -15,12 +15,14 @@ public class LineDetailsImpl implements LineDetails {
     private final Bearing absoluteAngleDifferenceToTrueWind;
     private final NauticalSide advantageousSidewhileApproachingLine;
     private final Distance advantage;
+    private final Distance geometricAdvantage;
     private final Mark portMarkWhileApproachingLine;
     private final Mark starboardMarkWhileApproachingLine;
     
     public LineDetailsImpl(TimePoint timePoint, Waypoint waypoint, Distance length,
             Bearing absoluteAngleDifferenceToTrueWind, NauticalSide advantageousSideWhileApproachingLine,
-            Distance advantage, Mark portMarkWhileApproachingLine, Mark starboardMarkWhileApproachingLine) {
+            Distance advantage, Mark portMarkWhileApproachingLine, Mark starboardMarkWhileApproachingLine,
+            Distance geometricAdvantage) {
         super();
         this.timePoint = timePoint;
         this.waypoint = waypoint;
@@ -28,6 +30,7 @@ public class LineDetailsImpl implements LineDetails {
         this.absoluteAngleDifferenceToTrueWind = absoluteAngleDifferenceToTrueWind;
         this.advantageousSidewhileApproachingLine = advantageousSideWhileApproachingLine;
         this.advantage = advantage;
+        this.geometricAdvantage = geometricAdvantage;
         this.portMarkWhileApproachingLine = portMarkWhileApproachingLine;
         this.starboardMarkWhileApproachingLine = starboardMarkWhileApproachingLine;
     }
@@ -60,6 +63,11 @@ public class LineDetailsImpl implements LineDetails {
     @Override
     public Distance getAdvantage() {
         return advantage;
+    }
+    
+    @Override
+    public Distance getGeometricAdvantage() {
+        return geometricAdvantage;
     }
 
     @Override
