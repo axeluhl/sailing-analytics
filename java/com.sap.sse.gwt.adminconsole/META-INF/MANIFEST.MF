@@ -1,0 +1,12 @@
+Manifest-Version: 1.0
+Bundle-ManifestVersion: 2
+Bundle-Name: Adminconsole
+Bundle-SymbolicName: com.sap.sse.gwt.adminconsole
+Bundle-Version: 1.0.0.qualifier
+Bundle-Vendor: SAP
+Bundle-RequiredExecutionEnvironment: JavaSE-1.7
+Require-Bundle: com.sap.sse.gwt,
+ com.sap.sse.security.ui,
+ com.sap.sse.common,
+ com.sap.sailing.gwt.ui
+Export-Package: com.sap.sse.gwt.adminconsole

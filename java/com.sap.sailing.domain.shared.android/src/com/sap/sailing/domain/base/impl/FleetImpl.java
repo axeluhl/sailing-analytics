@@ -2,7 +2,7 @@ package com.sap.sailing.domain.base.impl;
 
 import com.sap.sailing.domain.base.Fleet;
 import com.sap.sailing.domain.common.Color;
-import com.sap.sailing.domain.common.impl.NamedImpl;
+import com.sap.sse.common.impl.NamedImpl;
 
 /**
  * The comparability is implemented by an integer field. For fleets of a series to compare equal, the constructor

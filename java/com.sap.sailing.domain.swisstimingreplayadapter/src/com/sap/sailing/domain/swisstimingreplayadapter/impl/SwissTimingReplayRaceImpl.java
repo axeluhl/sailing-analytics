@@ -2,8 +2,8 @@ package com.sap.sailing.domain.swisstimingreplayadapter.impl;
 
 import java.util.Date;
 
-import com.sap.sailing.domain.common.impl.NamedImpl;
 import com.sap.sailing.domain.swisstimingreplayadapter.SwissTimingReplayRace;
+import com.sap.sse.common.impl.NamedImpl;
 
 public class SwissTimingReplayRaceImpl extends NamedImpl implements SwissTimingReplayRace {
     private static final long serialVersionUID = -8863753739203404760L;

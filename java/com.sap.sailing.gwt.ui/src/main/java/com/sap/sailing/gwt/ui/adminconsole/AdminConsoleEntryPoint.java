@@ -33,7 +33,6 @@ import com.sap.sailing.gwt.ui.client.RegattasDisplayer;
 import com.sap.sailing.gwt.ui.client.RemoteServiceMappingConstants;
 import com.sap.sailing.gwt.ui.client.SailingService;
 import com.sap.sailing.gwt.ui.client.SailingServiceAsync;
-import com.sap.sailing.gwt.ui.client.shared.panels.SystemInformationPanel;
 import com.sap.sailing.gwt.ui.masterdataimport.MasterDataImportPanel;
 import com.sap.sailing.gwt.ui.shared.BetterDateTimeBox;
 import com.sap.sailing.gwt.ui.shared.LeaderboardGroupDTO;
@@ -42,6 +41,8 @@ import com.sap.sailing.gwt.ui.shared.SecurityStylesheetResources;
 import com.sap.sailing.gwt.ui.shared.StrippedLeaderboardDTO;
 import com.sap.sailing.gwt.ui.usermanagement.UserRoles;
 import com.sap.sse.common.Util.Triple;
+import com.sap.sse.gwt.adminconsole.AdminConsolePanel;
+import com.sap.sse.gwt.adminconsole.SystemInformationPanel;
 import com.sap.sse.gwt.client.EntryPointHelper;
 import com.sap.sse.gwt.client.async.AsyncActionsExecutor;
 import com.sap.sse.gwt.client.async.MarkedAsyncCallback;
@@ -80,6 +81,7 @@ public class AdminConsoleEntryPoint extends AbstractSailingEntryPoint implements
     }
      
     private void createUI() {
+        AdminConsolePanel panel = new AdminConsolePanel(getUserService(), sailingService, "/release_notes_admin.html");
         /* Generic selection handler that forwards selected tabs to a refresher that ensures
          * that data gets reloaded. If you add a new tab then make sure to have a look at
          * #refreshDataFor(Widget widget) to ensure that upon selection your tab gets the 

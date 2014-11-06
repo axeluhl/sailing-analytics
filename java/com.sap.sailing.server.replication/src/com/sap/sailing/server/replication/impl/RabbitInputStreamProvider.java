@@ -13,7 +13,7 @@ import com.rabbitmq.client.ConsumerCancelledException;
 import com.rabbitmq.client.QueueingConsumer;
 import com.rabbitmq.client.QueueingConsumer.Delivery;
 import com.rabbitmq.client.ShutdownSignalException;
-import com.sap.sailing.domain.common.impl.NamedImpl;
+import com.sap.sse.common.impl.NamedImpl;
 
 /**
  * Input stream that reads messages from a RabbitMQ queue filled by a {@link RabbitOutputStream} and lets a client read

@@ -22,11 +22,11 @@ import com.sap.sailing.domain.base.DomainFactory;
 import com.sap.sailing.domain.base.Leg;
 import com.sap.sailing.domain.base.Waypoint;
 import com.sap.sailing.domain.common.PassingInstruction;
-import com.sap.sailing.domain.common.impl.NamedImpl;
 import com.sap.sailing.util.CourseAsWaypointList;
 import com.sap.sailing.util.impl.LockUtil;
 import com.sap.sailing.util.impl.NamedReentrantReadWriteLock;
 import com.sap.sse.common.Util;
+import com.sap.sse.common.impl.NamedImpl;
 
 import difflib.DiffUtils;
 import difflib.Patch;

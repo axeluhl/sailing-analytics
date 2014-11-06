@@ -6,7 +6,7 @@ import com.sap.sailing.domain.common.BoatClassMasterdata;
 import com.sap.sailing.domain.common.BoatHullType;
 import com.sap.sailing.domain.common.Distance;
 import com.sap.sailing.domain.common.impl.MeterDistance;
-import com.sap.sailing.domain.common.impl.NamedImpl;
+import com.sap.sse.common.impl.NamedImpl;
 
 public class BoatClassImpl extends NamedImpl implements BoatClass {
     private static final long serialVersionUID = 7194912853476256420L;
