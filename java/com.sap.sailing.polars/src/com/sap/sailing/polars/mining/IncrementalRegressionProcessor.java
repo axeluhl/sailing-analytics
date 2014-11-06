@@ -51,8 +51,11 @@ public class IncrementalRegressionProcessor implements Processor<GroupedDataEntr
         }
         GPSFixMovingWithPolarContext fix = element.getDataEntry();
 
-        boatSpeedEstimator.addData(fix.getWindSpeed().getKnots(), fix.getAngleToTheWind().getDegrees(), fix
-                .getBoatSpeed().getKnots());
+        Bearing angleToTheWind = fix.getAngleToTheWind();
+        if (angleToTheWind != null) {
+            boatSpeedEstimator.addData(fix.getWindSpeed().getKnots(), angleToTheWind.getDegrees(), fix.getBoatSpeed()
+                    .getKnots());
+        }
     }
 
     @Override

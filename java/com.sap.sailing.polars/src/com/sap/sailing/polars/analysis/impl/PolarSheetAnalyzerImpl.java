@@ -78,9 +78,19 @@ public class PolarSheetAnalyzerImpl implements PolarSheetAnalyzer {
         
         double averagedSpeed = averageSpeed(boatClass, windSpeed, estimatedPeak);
         
-        Bearing bearing = new DegreeBearingImpl(estimatedPeak);
+        int convertedAngleIfOver180 = convertAngleIfNecessary(estimatedPeak);
+        
+        Bearing bearing = new DegreeBearingImpl(convertedAngleIfOver180);
         SpeedWithBearing speedWithBearing = new KnotSpeedWithBearingImpl(averagedSpeed, bearing);
         return speedWithBearing;
+    }
+
+    private int convertAngleIfNecessary(int estimatedPeak) {
+        int convertedAngleIfOver180 = estimatedPeak;
+        if (estimatedPeak > 180) {
+            convertedAngleIfOver180 = estimatedPeak - 360;
+        }
+        return convertedAngleIfOver180;
     }
 
     private double averageSpeed(BoatClass boatClass, Speed windSpeed, int estimatedPeak)
@@ -92,10 +102,7 @@ public class PolarSheetAnalyzerImpl implements PolarSheetAnalyzer {
         for (int i = estimatedPeak - 1; i < estimatedPeak + 2; i++) {
             try {
 
-                int convertedAngleIfOver180 = i;
-                if (i > 180) {
-                    convertedAngleIfOver180 = i - 360;
-                }
+                int convertedAngleIfOver180 = convertAngleIfNecessary(i);
                 SpeedWithConfidence<Integer> speed = polarDataService.getSpeed(boatClass, windSpeed,
                         new DegreeBearingImpl(convertedAngleIfOver180));
                 // TODO use the confidence (has to be implemented Bottom to Top through the polar pipe
@@ -121,7 +128,8 @@ public class PolarSheetAnalyzerImpl implements PolarSheetAnalyzer {
         Integer[] dataCountPerAngle = sheet.getDataCountPerAngleForWindspeed(windIndex);
 
         // Find peak by averaging the angles that have at least 50% of the max datacount
-        List<Integer> dataCountList = Arrays.asList(dataCountPerAngle);
+        List<Integer> dataCountList = Arrays.asList(Arrays.copyOfRange(dataCountPerAngle, startAngleInclusive,
+                endAngleExclusive));
         int maxDataCount = Collections.max(dataCountList);
         if (maxDataCount < MINIMUM_DATA_COUNT_FOR_ONE_ANGLE) {
             // The angle with the most data points doesn't have sufficient data, for the polar data to have any
@@ -131,7 +139,7 @@ public class PolarSheetAnalyzerImpl implements PolarSheetAnalyzer {
         int sumOfAllUpperHalfAngles = 0;
         int numberOfAnglesAdded = 0;
         for (int i = startAngleInclusive; i < endAngleExclusive; i++) {
-            if (dataCountList.get(i) > maxDataCount / 2) {
+            if (dataCountPerAngle[i] > maxDataCount / 2) {
                 sumOfAllUpperHalfAngles = sumOfAllUpperHalfAngles + i;
                 numberOfAnglesAdded = numberOfAnglesAdded + 1;
             }
