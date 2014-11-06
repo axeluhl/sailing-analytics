@@ -40,7 +40,7 @@ public class LoginPanel extends HorizontalPanel implements UserStatusEventHandle
 
     private final OAuthLogin oAuthPanel;
 
-    public LoginPanel(final Css css, final UserService userService) {
+    public LoginPanel(final LoginPanelCss css, final UserService userService) {
         this.userManagementService = userService.getUserManagementService();
         this.userService = userService;
         css.ensureInjected();
