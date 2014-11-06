@@ -27,6 +27,7 @@ import com.sap.sse.security.ui.shared.UserDTO;
 public class RegisterEntryPoint extends AbstractSecurityEntryPoint {
     @Override
     public void doOnModuleLoad() {
+        super.doOnModuleLoad();
         final NewAccountValidator validator = new NewAccountValidator(getStringMessages());
         RootLayoutPanel rootPanel = RootLayoutPanel.get();
         DockLayoutPanel dockPanel = new DockLayoutPanel(Unit.PX);

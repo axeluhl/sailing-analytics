@@ -10,6 +10,7 @@ import com.sap.sse.security.ui.client.AbstractSecurityEntryPoint;
 public class EmailValidationEntryPoint extends AbstractSecurityEntryPoint {
     @Override
     public void doOnModuleLoad() {
+        super.doOnModuleLoad();
         final String username = Window.Location.getParameter("u");
         final String validationSecret = Window.Location.getParameter("v");
         RootLayoutPanel rootPanel = RootLayoutPanel.get();
