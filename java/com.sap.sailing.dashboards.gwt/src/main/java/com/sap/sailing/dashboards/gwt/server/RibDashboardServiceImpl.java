@@ -240,7 +240,7 @@ public class RibDashboardServiceImpl extends RemoteServiceServlet implements Rib
             if (runningRace == null) {
                 return false;
             } else {
-                //runningRace.addListener(startAnalyisisRacesStore);
+                startAnalyisisRacesStore.addAsListener(runningRace);
                 return true;
             }
         } else {

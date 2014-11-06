@@ -21,7 +21,6 @@ import com.sap.sailing.domain.common.RegattaAndRaceIdentifier;
 import com.sap.sailing.domain.common.SpeedWithBearing;
 import com.sap.sailing.domain.common.Tack;
 import com.sap.sailing.domain.common.TimePoint;
-import com.sap.sailing.domain.common.WindSource;
 import com.sap.sailing.domain.common.dto.CompetitorDTO;
 import com.sap.sailing.domain.common.dto.PositionDTO;
 import com.sap.sailing.domain.common.impl.MillisecondsTimePoint;
@@ -30,10 +29,9 @@ import com.sap.sailing.domain.tracking.GPSFixMoving;
 import com.sap.sailing.domain.tracking.GPSFixTrack;
 import com.sap.sailing.domain.tracking.LineDetails;
 import com.sap.sailing.domain.tracking.MarkPassing;
-import com.sap.sailing.domain.tracking.RaceChangeListener;
 import com.sap.sailing.domain.tracking.TrackedRace;
-import com.sap.sailing.domain.tracking.TrackedRaceStatus;
 import com.sap.sailing.domain.tracking.Wind;
+import com.sap.sailing.domain.tracking.impl.AbstractRaceChangeListener;
 import com.sap.sailing.gwt.ui.shared.GPSFixDTO;
 import com.sap.sailing.gwt.ui.shared.MarkDTO;
 import com.sap.sailing.gwt.ui.shared.SpeedWithBearingDTO;
@@ -46,7 +44,7 @@ import com.sap.sailing.server.RacingEventService;
  * StartAnalysisDTOs for Competitors from races that are starting when the server is running. It achieves this basically
  * by registering as RaceChangeListener and receiving so markRoundings for competitors.
  */
-public class StartAnalyisisRacesStore implements RaceChangeListener {
+public class StartAnalyisisRacesStore {
 
     private RacingEventService racingEventService;
     private final com.sap.sailing.domain.base.DomainFactory baseDomainFactory;
@@ -432,129 +430,53 @@ public class StartAnalyisisRacesStore implements RaceChangeListener {
             clone.add(item);
         return clone;
     }
+    
+    public void addAsListener(TrackedRace trackedRace) {
+        trackedRace.addListener(new Listener(trackedRace));
+    }
 
-    @Override
-    public void markPassingReceived(Competitor competitor, Map<Waypoint, MarkPassing> oldMarkPassings,
-            Iterable<MarkPassing> markPassings, TrackedRace trackedRace) {
-        if (markPassings.iterator().hasNext()) {
-            if (getIndexOfMarkPassingMark(markPassings, trackedRace) == 1) {
+    private class Listener extends AbstractRaceChangeListener {
+        private final TrackedRace trackedRace;
+        
+        protected Listener(TrackedRace trackedRace) {
+            this.trackedRace = trackedRace;
+        }
 
-                // Add Competitor name to raning list at mark one for TrackedRace
-                getOrCreateRankingListAtMarkOneForTrackedRace(trackedRace).add(competitor.getName());
-                // Create StartAnalysisCompetitorDTO
-                StartAnalysisCompetitorDTO startAnalysisCompetitorDTO = createStartAnalysisCompetitorDTO(trackedRace,
-                        getOrCreateRankingListAtMarkOneForTrackedRace(trackedRace).size(), competitor);
-                // Add created StartAnalysisiCompetitorDTO to StartAnalyisisCompetitorDTOsMap for TrackedRace
-                getOrCreateStartAnalysisCompetitorDTOsMapForTrackedRace(trackedRace).put(
-                        startAnalysisCompetitorDTO.rankingTableEntryDTO.teamName, startAnalysisCompetitorDTO);
-
-                if (getOrCreateRankingListAtMarkOneForTrackedRace(trackedRace).size() == 3) {
-                    StartAnalysisDTO staticStartAnalysisDTO = getOrCreateStaticStartAnalysisDTOForTrackedRace(trackedRace);
-                    for (String competitorName : getOrCreateRankingListAtMarkOneForTrackedRace(trackedRace)) {
+        @Override
+        public void markPassingReceived(Competitor competitor, Map<Waypoint, MarkPassing> oldMarkPassings,
+                Iterable<MarkPassing> markPassings) {
+            if (markPassings.iterator().hasNext()) {
+                if (getIndexOfMarkPassingMark(markPassings, trackedRace) == 1) {
+                    // Add Competitor name to raning list at mark one for TrackedRace
+                    getOrCreateRankingListAtMarkOneForTrackedRace(trackedRace).add(competitor.getName());
+                    // Create StartAnalysisCompetitorDTO
+                    StartAnalysisCompetitorDTO startAnalysisCompetitorDTO = createStartAnalysisCompetitorDTO(
+                            trackedRace, getOrCreateRankingListAtMarkOneForTrackedRace(trackedRace).size(), competitor);
+                    // Add created StartAnalysisiCompetitorDTO to StartAnalyisisCompetitorDTOsMap for TrackedRace
+                    getOrCreateStartAnalysisCompetitorDTOsMapForTrackedRace(trackedRace).put(
+                            startAnalysisCompetitorDTO.rankingTableEntryDTO.teamName, startAnalysisCompetitorDTO);
+                    if (getOrCreateRankingListAtMarkOneForTrackedRace(trackedRace).size() == 3) {
+                        StartAnalysisDTO staticStartAnalysisDTO = getOrCreateStaticStartAnalysisDTOForTrackedRace(trackedRace);
+                        for (String competitorName : getOrCreateRankingListAtMarkOneForTrackedRace(trackedRace)) {
+                            List<StartAnalysisDTO> startAnalysisListForCompetitor = startAnalysisDTOListForCompetitorName
+                                    .get(competitorName);
+                            startAnalysisListForCompetitor.add(createStartAnalysisDTOForCompetitorName(
+                                    staticStartAnalysisDTO, competitorName, trackedRace));
+                            startAnalysisDTOListForCompetitorName.put(competitorName, startAnalysisListForCompetitor);
+                        }
+                        notifyListernersAboutStartAnalysisDTOsChanges();
+                    } else if (getOrCreateRankingListAtMarkOneForTrackedRace(trackedRace).size() > 3) {
+                        StartAnalysisDTO staticStartAnalysisDTO = getOrCreateStaticStartAnalysisDTOForTrackedRace(trackedRace);
                         List<StartAnalysisDTO> startAnalysisListForCompetitor = startAnalysisDTOListForCompetitorName
-                                .get(competitorName);
+                                .get(competitor.getName());
                         startAnalysisListForCompetitor.add(createStartAnalysisDTOForCompetitorName(
-                                staticStartAnalysisDTO, competitorName, trackedRace));
-                        startAnalysisDTOListForCompetitorName.put(competitorName, startAnalysisListForCompetitor);
+                                staticStartAnalysisDTO, competitor.getName(), trackedRace));
+                        startAnalysisDTOListForCompetitorName.put(competitor.getName(), startAnalysisListForCompetitor);
+                        notifyListernersAboutStartAnalysisDTOsChanges();
+                        trackedRace.removeListener(this);
                     }
-                    notifyListernersAboutStartAnalysisDTOsChanges();
-
-                } else if (getOrCreateRankingListAtMarkOneForTrackedRace(trackedRace).size() > 3) {
-                    StartAnalysisDTO staticStartAnalysisDTO = getOrCreateStaticStartAnalysisDTOForTrackedRace(trackedRace);
-                    List<StartAnalysisDTO> startAnalysisListForCompetitor = startAnalysisDTOListForCompetitorName
-                            .get(competitor.getName());
-                    startAnalysisListForCompetitor.add(createStartAnalysisDTOForCompetitorName(staticStartAnalysisDTO,
-                            competitor.getName(), trackedRace));
-                    startAnalysisDTOListForCompetitorName.put(competitor.getName(), startAnalysisListForCompetitor);
-                    notifyListernersAboutStartAnalysisDTOsChanges();
                 }
             }
         }
     }
-
-    @Override
-    public void waypointAdded(int zeroBasedIndex, Waypoint waypointThatGotAdded) {
-        // TODO Auto-generated method stub
-
-    }
-
-    @Override
-    public void waypointRemoved(int zeroBasedIndex, Waypoint waypointThatGotRemoved) {
-        // TODO Auto-generated method stub
-
-    }
-
-    @Override
-    public void competitorPositionChanged(GPSFixMoving fix, Competitor competitor) {
-        // TODO Auto-generated method stub
-
-    }
-
-    @Override
-    public void markPassingReceived(Competitor competitor, Map<Waypoint, MarkPassing> oldMarkPassings,
-            Iterable<MarkPassing> markPassings) {
-        // TODO Auto-generated method stub
-
-    }
-
-    @Override
-    public void speedAveragingChanged(long oldMillisecondsOverWhichToAverage, long newMillisecondsOverWhichToAverage) {
-        // TODO Auto-generated method stub
-
-    }
-
-    @Override
-    public void windDataReceived(Wind wind, WindSource windSource) {
-        // TODO Auto-generated method stub
-
-    }
-
-    @Override
-    public void windDataRemoved(Wind wind, WindSource windSource) {
-        // TODO Auto-generated method stub
-
-    }
-
-    @Override
-    public void windAveragingChanged(long oldMillisecondsOverWhichToAverage, long newMillisecondsOverWhichToAverage) {
-        // TODO Auto-generated method stub
-
-    }
-
-    @Override
-    public void raceTimesChanged(TimePoint startOfTracking, TimePoint endOfTracking, TimePoint startTimeReceived) {
-        // TODO Auto-generated method stub
-
-    }
-
-    @Override
-    public void delayToLiveChanged(long delayToLiveInMillis) {
-        // TODO Auto-generated method stub
-
-    }
-
-    @Override
-    public void windSourcesToExcludeChanged(Iterable<? extends WindSource> windSourcesToExclude) {
-        // TODO Auto-generated method stub
-
-    }
-
-    @Override
-    public void statusChanged(TrackedRaceStatus newStatus) {
-        // TODO Auto-generated method stub
-
-    }
-
-    @Override
-    public void markPositionChanged(GPSFix fix, Mark mark, boolean firstInTrack) {
-        // TODO Auto-generated method stub
-
-    }
-
-    @Override
-    public void startOfRaceChanged(TimePoint oldStartOfRace, TimePoint newStartOfRace) {
-        // TODO Auto-generated method stub
-
-    }
-
 }
