@@ -1228,4 +1228,15 @@ public class Series extends Configurable<Series> {
     private static native boolean nativeIsVisible(JavaScriptObject series) /*-{
         return series.visible;
     }-*/;
+
+    public void updateThreshold(String threshold) {
+        updateNativeWay(this.getNativeSeries(), threshold);
+    }
+
+    public static native void updateNativeWay(JavaScriptObject series, String threshold) /*-{
+        series.update({
+           threshold: threshold,
+           borderColor: '#FF0000'
+        })
+    }-*/;
 }
