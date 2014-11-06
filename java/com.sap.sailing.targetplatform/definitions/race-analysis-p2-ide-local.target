@@ -1,9 +1,10 @@
 <?xml version="1.0" encoding="UTF-8" standalone="no"?>
-<?pde version="3.8"?><target name="Race Analysis Target (IDE)" sequenceNumber="78">
+<?pde version="3.8"?><target name="Race Analysis Target (IDE)" sequenceNumber="82">
 <locations>
 <location includeAllPlatforms="false" includeConfigurePhase="false" includeMode="slicer" includeSource="true" type="InstallableUnit">
 <unit id="com.sap.sailing.target.base.feature.group" version="1.0.0"/>
 <unit id="com.sap.sailing.target.jms.feature.group" version="1.0.0"/>
+<unit id="com.sap.sailing.target.shiro.feature.group" version="1.0.0"/>
 <unit id="com.sap.sailing.target.test.feature.group" version="1.0.0"/>
 <repository location="http://p2.sapsailing.com/p2/sailing/"/>
 </location>
@@ -79,8 +80,10 @@
 <plugin id="jcl.over.slf4j"/>
 <plugin id="jul.to.slf4j"/>
 <plugin id="org.apache.commons.beanutils"/>
+<plugin id="org.apache.commons.beanutils"/>
 <plugin id="org.apache.commons.beanutils.source"/>
 <plugin id="org.apache.commons.codec"/>
+<plugin id="org.apache.commons.collections"/>
 <plugin id="org.apache.commons.collections"/>
 <plugin id="org.apache.commons.collections.source"/>
 <plugin id="org.apache.commons.fileupload"/>
@@ -89,6 +92,7 @@
 <plugin id="org.apache.commons.io.source"/>
 <plugin id="org.apache.commons.lang"/>
 <plugin id="org.apache.commons.lang.source"/>
+<plugin id="org.apache.commons.logging"/>
 <plugin id="org.apache.commons.logging"/>
 <plugin id="org.apache.commons.logging.source"/>
 <plugin id="org.apache.felix.gogo.command"/>
@@ -107,6 +111,11 @@
 <plugin id="org.apache.httpcomponents.httpclient.source"/>
 <plugin id="org.apache.httpcomponents.httpcore"/>
 <plugin id="org.apache.httpcomponents.httpcore.source"/>
+<plugin id="org.apache.servicemix.bundles.ehcache"/>
+<plugin id="org.apache.servicemix.bundles.scribe"/>
+<plugin id="org.apache.shiro.core"/>
+<plugin id="org.apache.shiro.ehcache"/>
+<plugin id="org.apache.shiro.web"/>
 <plugin id="org.eclipse.equinox.common"/>
 <plugin id="org.eclipse.equinox.common.source"/>
 <plugin id="org.eclipse.equinox.console"/>
@@ -196,12 +205,9 @@
 <plugin id="org.eclipse.osgi.source"/>
 <plugin id="org.hamcrest"/>
 <plugin id="org.hamcrest.core"/>
-<plugin id="org.hamcrest.core.source"/>
 <plugin id="org.hamcrest.integration"/>
 <plugin id="org.hamcrest.library"/>
-<plugin id="org.hamcrest.library.source"/>
 <plugin id="org.hamcrest.text"/>
-<plugin id="org.hamcrest.text.source"/>
 <plugin id="org.hyperic.sigar"/>
 <plugin id="org.jdom"/>
 <plugin id="org.jdom.source"/>

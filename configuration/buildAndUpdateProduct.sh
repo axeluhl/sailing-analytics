@@ -126,6 +126,8 @@ if [ $# -eq 0 ]; then
     echo "remote-deploy: performs hot deployment of the java code to a remote server"
     echo "Example: $0 -s dev -w trac@sapsailing.com remote-deploy"
     echo ""
+    echo "clean: cleans all code and GWT files"
+    echo ""
     echo "Active branch is $active_branch"
     echo "Project home is $PROJECT_HOME"
     echo "Server home is $SERVERS_HOME"
@@ -173,6 +175,18 @@ if [[ $@ == "" ]]; then
 	exit 2
 fi
 
+
+if [[ "$@" == "clean" ]]; then
+	cd $PROJECT_HOME/java
+    rm -rf com.sap.$PROJECT_TYPE.gwt.ui/com.sap.$PROJECT_TYPE.*
+    cd $PROJECT_HOME
+    echo "Using following command: mvn $extra -DargLine=\"$APP_PARAMETERS\" -fae -s $MAVEN_SETTINGS $clean"
+    echo "Maven version used: `mvn --version`"
+    mvn $extra -DargLine="$APP_PARAMETERS" -fae -s $MAVEN_SETTINGS $clean 2>&1 | tee $START_DIR/build.log
+    MVN_EXIT_CODE=${PIPESTATUS[0]}
+    echo "Maven exit code is $MVN_EXIT_CODE"
+    exit 0
+fi
 
 if [[ "$@" == "release" ]]; then
     if [ ! -d $p2PluginRepository/plugins ]; then
@@ -639,6 +653,10 @@ if [[ "$@" == "install" ]] || [[ "$@" == "all" ]]; then
         mkdir $ACDIR/configuration
     fi
 
+    if [ ! -d "$ACDIR/configuration/jetty/etc" ]; then
+        mkdir -p $ACDIR/configuration/jetty/etc
+    fi
+
     cd $ACDIR
 
     rm -rf $ACDIR/plugins/*.*
@@ -650,23 +668,23 @@ if [[ "$@" == "install" ]] || [[ "$@" == "all" ]]; then
     cp -v $PROJECT_HOME/java/target/start $ACDIR/
     cp -v $PROJECT_HOME/java/target/stop $ACDIR/
     cp -v $PROJECT_HOME/java/target/status $ACDIR/
+
     cp -v $PROJECT_HOME/java/target/refreshInstance.sh $ACDIR/
+    cp -v $PROJECT_HOME/java/target/udpmirror $ACDIR/
+    cp -v $PROJECT_HOME/java/target/http2udpmirror $ACDIR
+
+    # overwrite configurations that should never be customized and belong to the build
+    cp -v $p2PluginRepository/configuration/config.ini configuration/
+    cp -v $PROJECT_HOME/java/target/configuration/jetty/etc/jetty.xml configuration/jetty/etc
+    cp -v $PROJECT_HOME/java/target/configuration/jetty/etc/jetty-selector.xml configuration/jetty/etc
+    cp -v $PROJECT_HOME/java/target/configuration/jetty/etc/jetty-deployer.xml configuration/jetty/etc
+    cp -v $PROJECT_HOME/java/target/configuration/jetty/etc/realm.properties configuration/jetty/etc
 
     if [ ! -f "$ACDIR/env.sh" ]; then
         cp -v $PROJECT_HOME/java/target/env.sh $ACDIR/
-        cp -v $p2PluginRepository/configuration/config.ini configuration/
-
-        mkdir -p configuration/jetty/etc
-        cp -v $PROJECT_HOME/java/target/configuration/jetty/etc/jetty.xml configuration/jetty/etc
-        cp -v $PROJECT_HOME/java/target/configuration/jetty/etc/jetty-selector.xml configuration/jetty/etc
-        cp -v $PROJECT_HOME/java/target/configuration/jetty/etc/jetty-deployer.xml configuration/jetty/etc
-        cp -v $PROJECT_HOME/java/target/configuration/jetty/etc/realm.properties configuration/jetty/etc
-        cp -v $PROJECT_HOME/java/target/configuration/monitoring.properties configuration/
-        cp -v $PROJECT_HOME/java/target/configuration/security.properties configuration/
-
-        cp -v $PROJECT_HOME/java/target/udpmirror $ACDIR/
-        cp -v $PROJECT_HOME/java/target/http2udpmirror $ACDIR
-        cp -v $PROJECT_HOME/java/target/configuration/logging.properties $ACDIR/configuration
+        cp -v $PROJECT_HOME/java/target/configuration/monitoring.properties $ACDIR/configuration/
+        cp -v $PROJECT_HOME/java/target/configuration/security.properties $ACDIR/configuration/
+        cp -v $PROJECT_HOME/java/target/configuration/logging.properties $ACDIR/configuration/
     fi
 
     cp -r -v $p2PluginRepository/configuration/org.eclipse.equinox.simpleconfigurator configuration/

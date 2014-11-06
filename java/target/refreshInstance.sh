@@ -80,9 +80,13 @@ copy_user_data_to_tmp_file ()
     echo "Reading user-data provided by Amazon instance data to $ec2EnvVars_tmpFile"
 
     VARS=$(ec2-metadata -d | sed "s/user-data\: //g")
-    for var in $VARS; do
-      echo $var >>"$ec2EnvVars_tmpFile"
-    done
+    if [[ "$VARS" != "not available" ]]; then
+        for var in $VARS; do
+          echo $var >>"$ec2EnvVars_tmpFile"
+        done
+    else
+        echo "No user data has been provided."
+    fi
 }
 
 # loads the user data-provided variables by sourcing the script
@@ -223,12 +227,12 @@ checks
 if [[ $OPERATION == "auto-install" ]]; then
     if [[ ! -z "$ON_AMAZON" ]]; then
         # first check and activate everything found in user data
-	copy_user_data_to_tmp_file
+	    copy_user_data_to_tmp_file
         activate_user_data
         # then download and install environment and append to env.sh
         install_environment
-	# finally, append user data to env.sh as it shall take precedence over the installed environment's defaults
-	append_user_data_to_envsh
+	    # finally, append user data to env.sh as it shall take precedence over the installed environment's defaults
+	    append_user_data_to_envsh
 
         # make sure to reload data
         source `pwd`/env.sh

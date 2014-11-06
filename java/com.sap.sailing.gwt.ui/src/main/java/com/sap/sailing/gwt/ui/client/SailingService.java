@@ -299,7 +299,7 @@ public interface SailingService extends RemoteService {
 
     void renameEvent(UUID eventId, String newName);
 
-    EventDTO getEventById(UUID id, boolean withStatisticalData);
+    EventDTO getEventById(UUID id, boolean withStatisticalData) throws Exception;
 
     Iterable<String> getScoreCorrectionProviderNames();
 

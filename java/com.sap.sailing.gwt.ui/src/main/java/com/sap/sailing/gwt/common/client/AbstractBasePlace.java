@@ -7,6 +7,7 @@ import java.util.Map;
 import java.util.logging.Logger;
 
 import com.google.gwt.place.shared.Place;
+import com.sap.sse.gwt.client.URLEncoder;
 
 /**
  * An abstract Place which is able to manage and parse place parameters.
@@ -33,7 +34,7 @@ public abstract class AbstractBasePlace extends Place {
                     if(stringBuilder.length() > 0) {
                         stringBuilder.append("&");
                     }
-                    stringBuilder.append(paramName + "=" + paramValue);
+                    stringBuilder.append(paramName + "=" + URLEncoder.encode(paramValue));
                 }
             }
     

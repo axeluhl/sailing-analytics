@@ -3401,11 +3401,14 @@ public class SailingServiceImpl extends ProxiedRemoteServiceServlet implements S
     }
 
     @Override
-    public EventDTO getEventById(UUID id, boolean withStatisticalData) {
+    public EventDTO getEventById(UUID id, boolean withStatisticalData) throws MalformedURLException {
         EventDTO result = null;
+        String requestBaseURL = getRequestBaseURL().toString();
         Event event = getService().getEvent(id);
         if (event != null) {
             result = convertToEventDTO(event, withStatisticalData);
+            result.setBaseURL(requestBaseURL);
+            result.setIsOnRemoteServer(false);
         }
         return result;
     }

@@ -86,6 +86,7 @@ public class Activator implements BundleActivator {
             @Override
             public void run() {
                 try {
+                    Thread.currentThread().setContextClassLoader(getClass().getClassLoader()); // ensure that classpath:... Shiro ini files are resolved properly
                     logger.info("Waiting for UserStore service...");
                     UserStore userStore = tracker.waitForService(0);
                     logger.info("Obtained UserStore service "+userStore);

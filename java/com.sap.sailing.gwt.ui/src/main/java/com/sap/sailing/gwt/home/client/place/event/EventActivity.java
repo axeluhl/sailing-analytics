@@ -113,7 +113,7 @@ public class EventActivity extends AbstractActivity {
     }
     
     private void createEventView(EventDTO event, List<RaceGroupDTO> raceGroups, AcceptsOneWidget panel) {
-        view = clientFactory.createEventView(event, raceGroups, eventPlace.getLeaderboardIdAsNameString(), timerForClientServerOffset);
+        view = clientFactory.createEventView(event, eventPlace.getNavigationTab(), raceGroups, eventPlace.getLeaderboardIdAsNameString(), timerForClientServerOffset);
         panel.setWidget(view.asWidget());
     }
 
