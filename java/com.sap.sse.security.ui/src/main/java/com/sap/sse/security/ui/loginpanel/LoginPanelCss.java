@@ -2,7 +2,7 @@ package com.sap.sse.security.ui.loginpanel;
 
 import com.google.gwt.resources.client.CssResource;
 
-public interface Css extends CssResource {
+public interface LoginPanelCss extends CssResource {
     String loginPanel();
     
     @ClassName("loginPanel-welcomeMessage")

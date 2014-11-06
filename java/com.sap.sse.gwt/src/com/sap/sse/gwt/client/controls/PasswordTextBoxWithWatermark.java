@@ -1,33 +1,39 @@
-package com.sap.sse.security.ui.login;
+package com.sap.sse.gwt.client.controls;
 
 import com.google.gwt.event.dom.client.BlurEvent;
 import com.google.gwt.event.dom.client.BlurHandler;
 import com.google.gwt.event.dom.client.FocusEvent;
 import com.google.gwt.event.dom.client.FocusHandler;
-import com.google.gwt.user.client.ui.TextBox;
+import com.google.gwt.user.client.ui.PasswordTextBox;
 import com.google.web.bindery.event.shared.HandlerRegistration;
 
-public class TextBoxWithWatermark extends TextBox implements BlurHandler, FocusHandler {
+/**
+ * A password textbox with a watermark property (HTML5 placeholder attribute)
+ * @author Frank
+ *
+ */
+public class PasswordTextBoxWithWatermark extends PasswordTextBox implements BlurHandler, FocusHandler {
     private String watermark;
+    private String watermarkStyleName;
     private HandlerRegistration blurHandler;
     private HandlerRegistration focusHandler;
 
-    public TextBoxWithWatermark() {
+    public PasswordTextBoxWithWatermark() {
         super();
     }
 
-    public TextBoxWithWatermark(String defaultValue) {
+    public PasswordTextBoxWithWatermark(String defaultValue) {
         this();
         setText(defaultValue);
     }
 
-    public TextBoxWithWatermark(String defaultValue, String watermark) {
+    public PasswordTextBoxWithWatermark(String defaultValue, String watermark) {
         this(defaultValue);
         setWatermark(watermark);
     }
 
     /**
-     * Adds a watermark if the parameter is not NULL or EMPTY
+     * Adds a watermark if the parameter is not Null
      *
      * @param watermark
      */
@@ -45,23 +51,31 @@ public class TextBoxWithWatermark extends TextBox implements BlurHandler, FocusH
         }
     }
 
+    public void setWatermarkStyleName(String styleName) {
+        this.watermarkStyleName = styleName;
+    }
+    
     @Override
     public void onBlur(BlurEvent event) {
         enableWatermark();
     }
 
-    void enableWatermark() {
+    private void enableWatermark() {
         String text = getText();
         if ((text.length() == 0) || (text.equalsIgnoreCase(watermark))) {
             // Show watermark
             setText(watermark);
-            addStyleName(LoginViewResources.INSTANCE.css().textInput_watermark());
+            if(watermarkStyleName != null && !watermarkStyleName.isEmpty()) {
+                addStyleName(watermarkStyleName);
+            }
         }
     }
 
     @Override
     public void onFocus(FocusEvent event) {
-        removeStyleName(LoginViewResources.INSTANCE.css().textInput_watermark());
+        if(watermarkStyleName != null && !watermarkStyleName.isEmpty()) {
+            removeStyleName(watermarkStyleName);
+        }
 
         if (getText().equalsIgnoreCase(watermark)) {
             // Hide watermark
