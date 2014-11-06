@@ -145,7 +145,7 @@ public class RaceBoardEntryPoint extends AbstractEntryPoint {
             boolean showMapControls) {
         if (!leaderboardNames.contains(leaderboardName)) {
             createErrorPage(stringMessages.noSuchLeaderboard());
-          return;
+            return;
         }
         if (eventId != null && event == null) {
             createErrorPage(stringMessages.noSuchEvent());
