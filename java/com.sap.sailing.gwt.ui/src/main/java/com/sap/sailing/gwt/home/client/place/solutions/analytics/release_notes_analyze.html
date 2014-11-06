@@ -1,0 +1,246 @@
+<!DOCTYPE html>
+<html>
+<head>
+</head>
+<body>
+	<div id="yield_content">
+		<div id="contentWrapper">
+			<div id="mainContent">
+				<div class="innerContent">
+					<h4 class="articleSubheadline">September 2014</h4>
+
+					<ul class="bulletList">
+					    <li>The search feature now also includes results from currently ongoing events that may not yet be
+					        included in our archive. Search keywords are now properly used in constructing the query.
+					    </li>
+					</ul>
+					
+					<h4 class="articleSubheadline">August 2014</h4>
+
+					<ul class="bulletList">
+					    <li>The 2D race viewer, also known as the "Race Board," now comes with a fresh, new design. The orange
+					        checkbox toggle buttons that open or close views such as the leaderboard or the charts for wind
+					        and competitor comparison, have been replaced by tabs with "&gt;&gt;" symbols. Clicking on those
+					        will expand or collapse the respective view. The views can now be resized using the handles attached
+					        to the dividers separating the views. They work much better on mobile and touch devices than the splitters
+					        used previously did. The settings buttons that used to be integrated with the orange toggle
+					        checkbox buttons have now been moved into the views that they control. For example, the map settings
+					        button is now displayed on the map, below the zoom control on the right map border.
+					    </li>
+					    <li>The leaderboard now has an improved search and filter control. Above the table displaying the
+					        competitors and their figures is a new field with a text input that you can use to filter for
+					        competitors, by their sail number or their name. While filtered, use the checkboxes in front of
+					        the table row to add the competitor to or remove it from the selection. Use the "X" button to the
+					        right of the search input field to clear the search. To the left of the search input field is a
+					        filter symbol that you can use to select and create advanced filtering rules, such as filtering
+					        by rank or nationality. Left of the filter button is the leaderboard settings button.
+					    </li>
+						<li>The leaderboard has a new first column: a selection check box. We hope this makes it easier in
+						    particular for users on mobile or other touch devices to select more than one competitor at a time.
+						    The old-style multi-selection using the Control and Shift keys, as known well from typical desktop
+						    file explorers, still work like they did before. Note that it is possible to sort for the checkbox
+						    column, putting the selected competitors at the top of the leaderboard.
+						</li>
+						<li>When using the auto-zoom feature from the map settings, boats and wind streamlets will now
+						    continue to move smoothly as long as the map only needs panning. Please also note that auto-zooming
+						    to "tails" may slow down the display considerable, particularly when tracking at high frequency.
+						</li>
+				        <li>When viewing a single race, the leaderboard now by default does no longer show the regatta rank as
+						    the first column (and not as the second one either, given that the first column now usually shows
+						    the checkboxes used for selecting items). If you'd like to get the regatta rank column back, also when
+						    looking at a single race, please choose it from the leaderboard settings dialog where you can find it
+						    in the "Overall Details" section. It may still be a nice column to have when following the last race
+						    in a regatta. If you're just interested in the relative regatta rank ordering you may as well sort by
+						    the right-most total points column which (surprising to some but welcome by most) sorts by the regatta
+						    rank and not by the plain points sum (taking into account medal race and gold/silver/... fleet participations).
+						</li>
+					</ul>
+
+					<h4 class="articleSubheadline">July 2014</h4>
+
+					<ul class="bulletList">
+						<li>The advantage line now uses the wind at the position in the middle of the leg that the
+						    competitor to which the line is attached is currently sailing in. Before, the "global" wind
+						    average was used which is still displayed in the top left corner of the map. You can understand
+						    the details by turning on the "Streamlet" wind visualization in the Map Settings.
+						</li>
+						<li>Faster wind streamlet loading: when you activate the streamlets for wind visualization, they now
+						    display much faster.
+						</li>
+						<li>Faster boat position display: We found that what you're probably the most interested in when
+						    you first open a race map or move the time slider to some very different point in time is the
+						    position of the boats at that point in time; and you want to know it fast.
+						    The tails which show how the boats got there are also interesting, but you won't blame us as much
+						    if it takes a little bit to update them. So we've separated the placement of the boats from the
+						    drawing of their tails. Now you may blame us for the tails temporarily not being attached to the
+						    boats anymore ;-).
+						</li>
+					</ul>
+				    
+					<h4 class="articleSubheadline">June 2014</h4>
+
+					<ul class="bulletList">
+						<li>In the "Maps" settings in the RaceBoard page there is a new checkbox named
+						    "Show wind streamlets overlay." If you select it and wait for about a minute,
+						    a complete wind field will be calculated and visualized as an overlay on top
+						    of the race course display. It reacts to you moving the time slider and shows
+						    how the wind differs at different locations on the course. Stronger and faster-moving
+						    streamlets mean stronger breeze.
+						</li>
+						<li>Wind is now calculated location-based. At locations closer to a sensor, that sensor
+						    has a higher influence on the local wind field than sensors further away. The wind
+						    estimations based on the courses sailed are assigned a location that corresponds with
+						    the "center of gravity" of the field that was used for the estimation. For example,
+						    if the fleet is approaching the windward mark and the wind sensor in on the committee
+						    boat on the leeward side of the course, the course-based estimation influences the
+						    assumed wind field more on the windward side whereas the sensor counts more for
+						    the leeward side.
+						</li>
+						<li>Switched to the latest version of the Highcharts charting framework. This leads to improvements
+						    especially on mobile devices. Charts can be zoomed using pinch gestures now.
+						</li>
+						<li>To support the use of the SAP Sailing Analytics also for live video streaming formats, we
+						    introduced a new URL parameter <tt>viewShowMapControls</tt> for the <tt>Spectator.html</tt>
+						    and the <tt>RaceBoard.html</tt> pages. Setting this parameter to "false"
+						    will suppress the zoom, pan and map type selection
+						    controls on the map display. Example:
+						    <a href="http://danishleague2014.sapsailing.com/gwt/Spectator.html?leaderboardGroupName=Danish%20League%202014&showRaceDetails=true&viewShowMapControls=false">http://danishleague2014.sapsailing.com/gwt/Spectator.html?leaderboardGroupName=Danish%20League%202014&showRaceDetails=true&viewShowMapControls=false</a>.
+						    When used for the <tt>Spectator.html</tt> URL, this will apply
+						    to all <tt>RaceBoard.html</tt> pages (all races) reached from there. Of course, the map
+						    can still be panned and zoomed using the usual mouse gestures. A left double click zooms
+						    in, a right double click zooms out. Zoom can also be controlled using the mouse wheel.
+						    And panning works by clicking on the map and dragging the mouse. Without the map type
+						    control, switching to satellite view is not possible (keep this in mind when tracking
+						    races in China, see below for Google's random coordinate transformations there).
+						</li>
+					</ul>
+					
+					<h4 class="articleSubheadline">May 2014</h4>
+
+					<ul class="bulletList">
+						<li>Fixed an issue with the wind speed charts. Charts that only had a single, unchanged
+						    wind speed crashed the browser. The solution scales the right hand side Y-axis denoting
+						    the wind speed such that it always starts at 0kts.
+						</li> 
+						<li>Analysis of tacks and jibes around mark passings has now been improved. Before,
+						    a jibe followed by a tack that turns in the same direction (e.g., to port) so far
+						    was always called a penalty maneuver. Now, if a mark passing separates such a tack
+						    from such a jibe, no penalty is called anymore, and the two maneuvers are identified
+						    correctly.
+						</li>
+						<li>Another note on maneuver analysis: we received questions regarding the maneuvers
+						    involved in clearing an OCS. The SAP Sailing Analytics treat a clearing of
+						    an OCS, going back behind the start line and crossing it again, as if the competitor
+						    started again. In particular this means that all maneuvers prior to this new start
+						    do not count for the metrics; neither does the distance sailed between the first (OCS)
+						    start and the clear start.
+						</li>
+						<li>A hint regarding the "distance to start line" metrics: please keep in mind that currently this
+						    measurement is calculated as the distance of the GPS tracker from the line. Unless the tracker
+						    is mounted near the bow (or at the bow sprit, if any), the distance calculated this way will
+						    be greater than what counts for crossing the line. Ordering, comparing and aggregating over this
+						    figure still makes sense as long as you remember this detail.
+						</li>
+						<li>Introduced a new leaderboard entry "XTE +/-" featuring a signed cross-track error which shows
+						    for a leg and also aggregated for an entire race on which side of the leg a competitor stayed on
+						    average. Currently, the "side" is defined as viewing in the leg's direction, so "left" for a downwind
+						    leg is the same side as "right" for the corresponding upwind leg.
+						</li>
+					</ul>
+					
+					<h4 class="articleSubheadline">April 2014</h4>
+
+					<ul class="bulletList">
+						<li>China races, such as in Qingdao, may have the map background displayed at slightly wrong locations.
+						    This is due to an intentional random transformation that Google applies to GPS locations for
+						    China. You can circumvent this issue by switching to satellite view where the map background is displayed
+						    correctly. <img src="images/mapsatellite.png"/>
+						</li>
+						<li>Fixed a bug that in some cases has caused the wind chart, the advantage line, the wind indicator on the map
+						    and the leaderboard to use slightly different wind values. The problem was related to different averaging and
+						    damping methods used for these values which has now been aligned.
+						</li>
+						<li>Fixed a bug that caused the time spent in a leg, race or regatta to always show the time at the end of the leg
+						    if the leg has been started by the competitor at the time point queried, e.g., by the time slider. While this
+						    did not have any serious effects in live mode, for replay races this left the leg time and race time constant
+							at the total time spent so far up to the end of the last leg the competitor had started at that time.
+					    </li>
+					</ul>
+					
+					<h4 class="articleSubheadline">March 2014</h4>
+
+					<ul class="bulletList">
+						<li>Added a new setting for a leaderboard called "Show added scores". Using this feature one
+						can display added scores for each leaderboard entry. An added score is the sum over all scores
+						from the first column to the current column. One can describe it as an intermediate overall score.
+						This feature can be used to know the score until a specific race while another race is live and
+						constantly changes the overall score.</li>
+						
+						<li>Added tooltips for leaderboard settings.</li>
+						
+						<li>Fixed HighPointOverall scheme to also break a tie by looking at the ranks of the last regatta.</li>
+
+						<li>Progress indicator when expanding a race in the RaceBoard view</li>
+
+						<li>Leaderboard column "GPS Lag" shows how far a competitor's GPS signal lags behind the average
+						    tracking quality. A background color bar classifies into good/ok/bad (green/yellow/red).</li>
+					</ul>
+					
+					<h4 class="articleSubheadline">February 2014</h4>
+
+					<ul class="bulletList">
+						<li>Fixed an issue with boat rotation on Safari browsers</li>
+
+						<li>Maneuver analysis now counts tacks and jibes based on wind
+						    at boat position and not based on leg type; subsequently,
+						    penalty circle analysis is now based on a tack and a jibe
+						    in close succession instead of a full circle.</li>
+
+						<li>Regatta rank and overall rank in competitor chart of leaderboard panel
+						    has been fixed; it did erroneously display the rank of the particular
+						    race, not the regatta/overall rank after that race.</li>
+
+						<li>Regatta overview now also displays all regatta leaderboards</li>
+
+						<li>Boat colors match tail colors</li>
+						
+						<li>When selecting boats in leaderboard, de-selected boats' tails turn grey</li>
+
+					</ul>
+
+
+					<h4 class="articleSubheadline">January 2014</h4>
+
+					<ul class="bulletList">
+						<li>Boat movement animated smoothly</li>
+
+						<li>Start and Finish line show line parameters (length, angle to wind,
+					advantage) when mouse hovers over them</li>
+
+						<li>Start line has a count-down indicator displayed next to it
+					before the start. The count-down is also displayed underneath the time
+					slider</li>
+
+						<li>Competitor and Wind charts show pre-start data where possible</li>
+
+						<li>Competitors can be assigned a fixed color which they will keep
+					for all races in a regatta</li>
+
+						<li>By default, videos are now shown in a moveable, resizable box embedded in
+					the web page. For a two screen setup, the embedded box can be popped out to a
+					dedicated browser window.</li>
+
+						<li>Official score corrections for historic races are only applied after
+					the respective competitor finished the race. Therefore, in-between race
+					scores now correspond with tracking, regardless of final corrected score.</li>
+					
+					    <li>By using negative playback speed (e.g., -1), replays can be run backwards.</li>
+
+					</ul>
+				</div>
+			</div>
+	  </div>
+	</div>
+</body>
+
+</html>
