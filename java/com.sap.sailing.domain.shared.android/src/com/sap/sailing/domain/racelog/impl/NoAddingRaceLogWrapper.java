@@ -238,4 +238,10 @@ public class NoAddingRaceLogWrapper implements RaceLog {
     public RevokeEvent revokeEvent(RaceLogEventAuthor author, RaceLogEvent toRevoke) throws NotRevokableException {
         return innerRaceLog.revokeEvent(author, toRevoke);
     }
+    
+    @Override
+    public RevokeEvent revokeEvent(RaceLogEventAuthor author, RaceLogEvent toRevoke, String reason)
+            throws NotRevokableException {
+        return innerRaceLog.revokeEvent(author, toRevoke, reason);
+    }
 }

@@ -223,7 +223,7 @@ public class RaceLogEventSerializerTest {
     @Test
     public void testRevokeEventSerializer() {
         // we use the real event type here because we do not want to re-implement the dispatching.
-        RaceLogEvent event = factory.createRevokeEvent(null, author, 0, null);
+        RaceLogEvent event = factory.createRevokeEvent(null, author, 0, null, null, null, null);
         serializer.serialize(event);
         verify(revokeEventSerializer).serialize(event);
     }

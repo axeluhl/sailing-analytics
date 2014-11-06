@@ -5,7 +5,7 @@ import com.sap.sailing.domain.common.racelog.tracking.TypeBasedServiceFinderFact
 import com.sap.sailing.domain.persistence.DomainObjectFactory;
 import com.sap.sailing.domain.persistence.MongoObjectFactory;
 import com.sap.sailing.domain.persistence.PersistenceFactory;
-import com.sap.sailing.mongodb.MongoDBService;
+import com.sap.sse.mongodb.MongoDBService;
 
 public class PersistenceFactoryImpl implements PersistenceFactory {
     private final DomainObjectFactory defaultDomainObjectFactory;

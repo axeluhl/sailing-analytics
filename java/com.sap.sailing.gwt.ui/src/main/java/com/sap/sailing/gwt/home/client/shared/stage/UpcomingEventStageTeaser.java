@@ -1,11 +1,11 @@
 package com.sap.sailing.gwt.home.client.shared.stage;
 
-import com.sap.sailing.gwt.home.client.app.PlaceNavigator;
+import com.sap.sailing.gwt.home.client.app.HomePlacesNavigator;
 import com.sap.sailing.gwt.ui.shared.EventBaseDTO;
 
 public class UpcomingEventStageTeaser extends StageTeaser {
 
-    public UpcomingEventStageTeaser(EventBaseDTO event, PlaceNavigator placeNavigator) {
+    public UpcomingEventStageTeaser(EventBaseDTO event, HomePlacesNavigator placeNavigator) {
         super(event);
 
         title.setInnerText(event.getName());

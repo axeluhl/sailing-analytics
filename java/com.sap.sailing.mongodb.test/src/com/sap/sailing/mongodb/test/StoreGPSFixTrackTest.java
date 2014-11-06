@@ -45,11 +45,11 @@ import com.sap.sse.common.Util;
 
 public class StoreGPSFixTrackTest extends AbstractMongoDBTest {
     public StoreGPSFixTrackTest() throws UnknownHostException, MongoException {
-		super();
-	}
+        super();
+    }
 
     @After
-	public void dropCollection() {
+    public void dropCollection() {
         DB db = getMongoService().getDB();
         db.getCollection(CollectionNames.GPS_FIXES.name()).drop();
     }

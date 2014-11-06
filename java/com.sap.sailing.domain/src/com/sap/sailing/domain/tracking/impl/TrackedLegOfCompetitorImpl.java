@@ -5,6 +5,7 @@ import java.util.Iterator;
 import java.util.List;
 import java.util.ListIterator;
 import java.util.NavigableSet;
+import java.util.Set;
 import java.util.concurrent.Callable;
 
 import com.sap.sailing.domain.base.Competitor;
@@ -227,7 +228,7 @@ public class TrackedLegOfCompetitorImpl implements TrackedLegOfCompetitor {
      * Projects <code>speed</code> onto the wind direction for upwind/downwind legs to see how fast a boat travels
      * "along the wind's direction." For reaching legs (neither upwind nor downwind), the speed is projected onto
      * the leg's direction.
-     * @param windPositionMode see {@link #getWind(Position, TimePoint, WindPositionMode)}
+     * @param windPositionMode see {@link #getWind(Position, TimePoint, Set)}
      * 
      * @throws NoWindException in case the wind direction is not known
      */

@@ -27,4 +27,9 @@ public class RegisterCompetitorEventImpl extends RaceLogEventImpl implements Reg
     public Competitor getCompetitor() {
         return getInvolvedBoats().get(0);
     } 
+
+    @Override
+    public String getShortInfo() {
+        return "competitor: " + getCompetitor().toString();
+    }
 }

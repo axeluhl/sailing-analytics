@@ -14,9 +14,12 @@ import com.google.gwt.user.client.ui.Anchor;
 import com.google.gwt.user.client.ui.Widget;
 import com.sap.sailing.domain.common.LeaderboardNameConstants;
 import com.sap.sailing.gwt.common.client.i18n.TextMessages;
-import com.sap.sailing.gwt.home.client.app.PlaceNavigator;
+import com.sap.sailing.gwt.home.client.app.HomePlacesNavigator;
+import com.sap.sailing.gwt.home.client.app.PlaceNavigation;
 import com.sap.sailing.gwt.home.client.place.event.AbstractEventComposite;
-import com.sap.sailing.gwt.home.client.place.event.EventPageNavigator;
+import com.sap.sailing.gwt.home.client.place.event.EventPlace;
+import com.sap.sailing.gwt.home.client.place.event.EventPlaceNavigator;
+import com.sap.sailing.gwt.home.client.place.leaderboard.LeaderboardPlace;
 import com.sap.sailing.gwt.home.client.shared.EventDatesFormatterUtil;
 import com.sap.sailing.gwt.ui.shared.CourseAreaDTO;
 import com.sap.sailing.gwt.ui.shared.EventDTO;
@@ -68,9 +71,10 @@ public class EventHeader extends AbstractEventComposite {
 //  private final List<Anchor> links2;
 //  private final List<Anchor> links3;
     
-    private final PlaceNavigator placeNavigator;
-    
-    public EventHeader(EventDTO event, PlaceNavigator placeNavigator, EventPageNavigator pageNavigator) {
+    private final HomePlacesNavigator placeNavigator;
+    private PlaceNavigation<LeaderboardPlace> overallLeaderboardNavigation = null; 
+            
+    public EventHeader(EventDTO event, HomePlacesNavigator placeNavigator, EventPlaceNavigator pageNavigator) {
         super(event, pageNavigator);
         
         this.placeNavigator = placeNavigator;
@@ -92,7 +96,7 @@ public class EventHeader extends AbstractEventComposite {
             isLiveDiv.getStyle().setDisplay(Display.NONE);
         }
         
-        setDataNavigationType("normal");
+        setFullsizeHeader();
         updateUI();
     }
 
@@ -105,7 +109,7 @@ public class EventHeader extends AbstractEventComposite {
         isFinishedDiv.getStyle().setDisplay(Display.NONE);
         isLiveDiv.getStyle().setDisplay(Display.NONE);
         
-        setDataNavigationType("normal");
+        setFullsizeHeader();
         updateUI();
     }
 
@@ -115,9 +119,18 @@ public class EventHeader extends AbstractEventComposite {
         
         initWidget(uiBinder.createAndBindUi(this));
     }
+
+    public void setFullsizeHeader() {
+        eventHeaderWrapperDiv.setAttribute("data-navigationtype", "normal");
+    }
     
-    public void setDataNavigationType(String dataNavigationType) {
-        eventHeaderWrapperDiv.setAttribute("data-navigationtype", dataNavigationType);
+    public void setCompactHeader() {
+        eventHeaderWrapperDiv.setAttribute("data-navigationtype", "compact");
+        EventDTO event = getEvent();
+        
+        PlaceNavigation<EventPlace> eventNavigation  = placeNavigator.getEventNavigation(event.id.toString(), event.getBaseURL(), event.isOnRemoteServer());
+        regattasLink.setHref(eventNavigation.getTargetUrl());
+        regattasLink2.setHref(eventNavigation.getTargetUrl());
     }
 
     private StrippedLeaderboardDTO findLeaderboardWithSameCourseArea(EventDTO event) {
@@ -141,6 +154,10 @@ public class EventHeader extends AbstractEventComposite {
         if(isSeries) {
             LeaderboardGroupDTO leaderboardGroupDTO = event.getLeaderboardGroups().get(0);
             eventName = leaderboardGroupDTO.getDisplayName() != null ? leaderboardGroupDTO.getDisplayName() : leaderboardGroupDTO.getName();
+
+            String overallLeaderboardName = leaderboardGroupDTO.getName() + " " + LeaderboardNameConstants.OVERALL;
+            overallLeaderboardNavigation = placeNavigator.getLeaderboardNavigation(event.id.toString(), overallLeaderboardName, event.getBaseURL(), event.isOnRemoteServer());
+            seriesLeaderboardAnchor.setHref(overallLeaderboardNavigation.getTargetUrl());
             
             StrippedLeaderboardDTO leaderboardFittingToEvent = findLeaderboardWithSameCourseArea(event);
             if(leaderboardFittingToEvent != null) {
@@ -216,22 +233,19 @@ public class EventHeader extends AbstractEventComposite {
 
     @UiHandler("regattasLink")
     void regattasClicked(ClickEvent event) {
-        showRegattas();        
+        showRegattas(event);        
     }
 
     @UiHandler("regattasLink2")
     void regattas2Clicked(ClickEvent event) {
-        showRegattas();        
+        showRegattas(event);        
     }
 
     @UiHandler("seriesLeaderboardAnchor")
     void seriesLeaderboardClicked(ClickEvent clickevent) {
         EventDTO event = getEvent();
-        if(event.isFakeSeries()) {
-            LeaderboardGroupDTO leaderboardGroupDTO = getEvent().getLeaderboardGroups().get(0);
-            String overallLeaderboardName = leaderboardGroupDTO.getName() + " " + LeaderboardNameConstants.OVERALL;
-            
-            placeNavigator.goToLeaderboard(event.id.toString(), overallLeaderboardName, event.getBaseURL(), event.isOnRemoteServer());
+        if(event.isFakeSeries() && overallLeaderboardNavigation != null) {
+            placeNavigator.goToPlace(overallLeaderboardNavigation);
         }
     }
     
@@ -240,8 +254,10 @@ public class EventHeader extends AbstractEventComposite {
 //        showRegattas();        
 //    }
 //
-    private void showRegattas() {
+    private void showRegattas(ClickEvent clickevent) {
         getPageNavigator().goToRegattas();
+        clickevent.preventDefault();
+        
 //        setActiveLink(links1, regattasLink);
 //        setActiveLink(links2, regattasLink2);
 //        setActiveLink(links3, regattasLink3);

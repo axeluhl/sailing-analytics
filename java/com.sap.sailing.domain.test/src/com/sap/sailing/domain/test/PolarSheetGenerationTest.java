@@ -6,6 +6,7 @@ import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.NavigableSet;
+import java.util.Set;
 import java.util.UUID;
 import java.util.concurrent.ConcurrentSkipListSet;
 import java.util.concurrent.Executor;
@@ -216,7 +217,7 @@ public class PolarSheetGenerationTest {
         }
         
         @Override
-        public Wind getWind(Position p, TimePoint at, Iterable<WindSource> windSourcesToExclude) {
+        public Wind getWind(Position p, TimePoint at, Set<WindSource> windSourcesToExclude) {
             return getWind(p, at);
         }
         
@@ -229,7 +230,7 @@ public class PolarSheetGenerationTest {
         
         @Override
         public WindWithConfidence<com.sap.sse.common.Util.Pair<Position, TimePoint>> getWindWithConfidence(Position p, TimePoint at,
-                Iterable<WindSource> windSourcesToExclude) {
+                Set<WindSource> windSourcesToExclude) {
             return getWindWithConfidence(p, at);
         }
         
@@ -263,8 +264,8 @@ public class PolarSheetGenerationTest {
         }
         
         @Override
-        public Iterable<WindSource> getWindSources(WindSourceType type) {
-            List<WindSource> sources = new ArrayList<WindSource>();
+        public Set<WindSource> getWindSources(WindSourceType type) {
+            Set<WindSource> sources = new HashSet<>();
             sources.add(new WindSourceImpl(type));
             return sources;
         }

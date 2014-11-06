@@ -2,7 +2,7 @@ package com.sap.sailing.domain.persistence.media.impl;
 
 import com.sap.sailing.domain.persistence.media.MediaDB;
 import com.sap.sailing.domain.persistence.media.MediaDBFactory;
-import com.sap.sailing.mongodb.MongoDBService;
+import com.sap.sse.mongodb.MongoDBService;
 
 public class MediaDBFactoryImpl implements MediaDBFactory {
     private final MediaDB defaultMediaDB;

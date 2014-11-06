@@ -41,6 +41,7 @@ import com.sap.sailing.domain.tracking.DynamicTrackedRace;
 import com.sap.sailing.domain.tracking.GPSFix;
 import com.sap.sailing.domain.tracking.GPSFixMoving;
 import com.sap.sailing.domain.tracking.MarkPassing;
+import com.sap.sailing.domain.tracking.impl.DynamicTrackedRaceImpl;
 import com.sap.sailing.domain.tracking.impl.WindImpl;
 import com.sap.sailing.domain.tractracadapter.ReceiverType;
 import com.tractrac.model.lib.api.event.CreateModelException;
@@ -137,8 +138,8 @@ public abstract class MartinAbstractMarkPassingTest extends OnlineTracTracBasedT
             }
         }
 
-        if (obj != null && obj instanceof DynamicTrackedRace) {
-            setTrackedRace((DynamicTrackedRace) obj);
+        if (obj != null && obj instanceof DynamicTrackedRaceImpl) {
+            setTrackedRace((DynamicTrackedRaceImpl) obj);
             setRace(getTrackedRace().getRace());
             return true;
         }

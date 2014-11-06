@@ -1,8 +1,8 @@
 package com.sap.sailing.domain.igtimiadapter.persistence;
 
 import com.sap.sailing.domain.igtimiadapter.persistence.impl.PersistenceFactoryImpl;
-import com.sap.sailing.mongodb.MongoDBConfiguration;
-import com.sap.sailing.mongodb.MongoDBService;
+import com.sap.sse.mongodb.MongoDBConfiguration;
+import com.sap.sse.mongodb.MongoDBService;
 
 public interface PersistenceFactory {
     PersistenceFactory INSTANCE = new PersistenceFactoryImpl();

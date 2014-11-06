@@ -25,8 +25,9 @@
 	<inherits name="com.sap.sse.gwt.SSESharedGWT" />
 	<inherits name="com.sap.sse.SSECommon" />
 	<inherits name="com.sap.sailing.domain.SailingDomain" />
-
-		<!-- Highcharts API -->
+	<inherits name="com.sap.sse.security.ui.LoginPanel" />
+	
+	<!-- Highcharts API -->
 	<inherits name="org.moxieapps.gwt.highcharts.Highcharts" />
 	
 	<!-- Google Maps API -->

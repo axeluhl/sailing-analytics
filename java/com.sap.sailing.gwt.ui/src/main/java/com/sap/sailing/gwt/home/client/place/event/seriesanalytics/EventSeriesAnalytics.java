@@ -22,7 +22,7 @@ import com.sap.sailing.domain.common.dto.FleetDTO;
 import com.sap.sailing.domain.common.dto.LeaderboardDTO;
 import com.sap.sailing.domain.common.dto.RaceColumnDTO;
 import com.sap.sailing.gwt.common.client.SharedResources;
-import com.sap.sailing.gwt.home.client.app.PlaceNavigator;
+import com.sap.sailing.gwt.home.client.app.HomePlacesNavigator;
 import com.sap.sailing.gwt.home.client.place.event.header.CompactEventHeader;
 import com.sap.sailing.gwt.home.client.place.event.oldcompetitorcharts.OldCompetitorCharts;
 import com.sap.sailing.gwt.home.client.place.event.oldleaderboard.OldLeaderboard;
@@ -67,7 +67,7 @@ public class EventSeriesAnalytics extends Composite implements LeaderboardUpdate
     private EventSeriesAnalyticsDataManager eventSeriesAnalyticsManager;
     private Timer autoRefreshTimer;
         
-    public EventSeriesAnalytics(EventDTO event, String leaderboardName, Timer timerForClientServerOffset, PlaceNavigator placeNavigator) {
+    public EventSeriesAnalytics(EventDTO event, String leaderboardName, Timer timerForClientServerOffset, HomePlacesNavigator placeNavigator) {
         eventHeader = new CompactEventHeader(event, leaderboardName, placeNavigator);
     
         EventRegattaLeaderboardResources.INSTANCE.css().ensureInjected();
