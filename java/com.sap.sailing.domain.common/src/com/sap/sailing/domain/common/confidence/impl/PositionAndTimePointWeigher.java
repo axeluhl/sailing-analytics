@@ -28,7 +28,7 @@ public class PositionAndTimePointWeigher implements Weigher<Util.Pair<Position, 
     public PositionAndTimePointWeigher(long halfConfidenceAfterMilliseconds, Distance halfConfidenceDistance) {
         timeWeigher = ConfidenceFactory.INSTANCE.createHyperbolicTimeDifferenceWeigher(halfConfidenceAfterMilliseconds);
         distanceWeigher = ConfidenceFactory.INSTANCE.createHyperbolicDistanceWeigher(halfConfidenceDistance);
-        this.usePosition = Boolean.valueOf(System.getProperty(USE_POSITION_SYSTEM_PROPERTY_NAME, "false"));
+        this.usePosition = Boolean.valueOf(System.getProperty(USE_POSITION_SYSTEM_PROPERTY_NAME, "true"));
     }
     
     @Override
