@@ -63,7 +63,7 @@ _Question: What should be done if a second device is mapped to competitor?_
 
 ### Path
 
-    /event/{event_id}/competitor/{competitor_id}/device
+    /leaderboard/{unique_leaderboard_name}/competitor/{competitor_id}/device
 
 ### Verb
 
