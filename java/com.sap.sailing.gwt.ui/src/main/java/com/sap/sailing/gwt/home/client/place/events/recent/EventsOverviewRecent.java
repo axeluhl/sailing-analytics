@@ -15,7 +15,7 @@ import com.google.gwt.uibinder.client.UiField;
 import com.google.gwt.user.client.ui.Composite;
 import com.google.gwt.user.client.ui.HTMLPanel;
 import com.google.gwt.user.client.ui.Widget;
-import com.sap.sailing.gwt.home.client.app.PlaceNavigator;
+import com.sap.sailing.gwt.home.client.app.HomePlacesNavigator;
 import com.sap.sailing.gwt.ui.shared.EventBaseDTO;
 
 public class EventsOverviewRecent extends Composite {
@@ -25,13 +25,13 @@ public class EventsOverviewRecent extends Composite {
     
     private static EventsOverviewUiBinder uiBinder = GWT.create(EventsOverviewUiBinder.class);
 
-    private final PlaceNavigator navigator;
+    private final HomePlacesNavigator navigator;
 
     @UiField HTMLPanel recentEventsPerYearPanel;
     
     private final Map<Integer, EventsOverviewRecentYear> recentEventsComposites;
     
-    public EventsOverviewRecent(PlaceNavigator navigator) {
+    public EventsOverviewRecent(HomePlacesNavigator navigator) {
         this.navigator = navigator;
         recentEventsComposites = new HashMap<Integer, EventsOverviewRecentYear>();
         

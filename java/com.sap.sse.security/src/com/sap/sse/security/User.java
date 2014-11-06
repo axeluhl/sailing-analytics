@@ -28,6 +28,14 @@ public class User {
      */
     private String validationSecret;
     
+    /**
+     * When someone has requested a password reset, only the owner of the validated e-mail address is
+     * permitted to actually carry out the reset. This is verified by sending a "reset secret" to the
+     * validated e-mail address, giving the user a link to an entry point for actually carrying out the
+     * reset. The reset is only accepted if the reset secret was provided correctly.
+     */
+    private String passwordResetSecret;
+    
     private boolean emailValidated;
 
     private final Set<String> roles;
@@ -38,15 +46,16 @@ public class User {
     }
 
     public User(String name, String email, Collection<Account> accounts) {
-        this(name, email, /* is email validated */ false, /* validation secret */ null, accounts);
+        this(name, email, /* is email validated */ false, /* password reset secret */ null, /* validation secret */ null, accounts);
     }
 
-    public User(String name, String email, Boolean emailValidated, String validationSecret,
+    public User(String name, String email, Boolean emailValidated, String passwordResetSecret, String validationSecret,
             Collection<Account> accounts) {
         super();
         this.name = name;
         this.roles = new HashSet<>();
         this.email = email;
+        this.passwordResetSecret = passwordResetSecret;
         this.validationSecret = validationSecret;
         this.emailValidated = emailValidated;
         this.accounts = new HashMap<>();
@@ -111,13 +120,31 @@ public class User {
      * can be used in a call to {@link #validate(String)} to validate the e-mail address.
      */
     public String startEmailValidation() {
+        validationSecret = createRandomSecret();
+        emailValidated = false;
+        return validationSecret;
+    }
+    
+    /**
+     * Creates, remembers and returns a new password reset secret. This secret can later again be obtained
+     * by calling {@link #getPasswordResetSecret()}. A user store should only allow a service call to reset
+     * a user's password in case the service can provide the correct password reset secret.
+     */
+    public String startPasswordReset() {
+        passwordResetSecret = createRandomSecret();
+        return passwordResetSecret;
+    }
+    
+    public String getPasswordResetSecret() {
+        return passwordResetSecret;
+    }
+    
+    private String createRandomSecret() {
         final byte[] bytes1 = new byte[64];
         new Random().nextBytes(bytes1);
         final byte[] bytes2 = new byte[64];
         new Random().nextBytes(bytes2);
-        validationSecret = new Sha256Hash(bytes1, bytes2, 1024).toBase64();
-        emailValidated = false;
-        return validationSecret;
+        return new Sha256Hash(bytes1, bytes2, 1024).toBase64();
     }
     
     /**
@@ -137,6 +164,13 @@ public class User {
             result = false;
         }
         return result;
+    }
+    
+    /**
+     * Clears the {@link #passwordResetSecret}.
+     */
+    public void passwordWasReset() {
+        passwordResetSecret = null;
     }
 
     public boolean isEmailValidated() {

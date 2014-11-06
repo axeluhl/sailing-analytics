@@ -6,7 +6,7 @@ import com.google.gwt.uibinder.client.UiField;
 import com.google.gwt.user.client.ui.Composite;
 import com.google.gwt.user.client.ui.Widget;
 import com.sap.sailing.domain.common.RegattaAndRaceIdentifier;
-import com.sap.sailing.gwt.home.client.app.PlaceNavigator;
+import com.sap.sailing.gwt.home.client.app.HomePlacesNavigator;
 import com.sap.sailing.gwt.home.client.place.event.regattaanalytics.RegattaAnalytics;
 import com.sap.sailing.gwt.home.client.place.event.seriesanalytics.EventSeriesAnalytics;
 import com.sap.sailing.gwt.ui.client.ErrorReporter;
@@ -26,7 +26,7 @@ public class TabletAndDesktopLeaderboardView extends Composite implements Analyt
     @UiField(provided=true) RegattaAnalytics regattaAnalytics;
     @UiField(provided=true) EventSeriesAnalytics seriesAnalytics;
     
-    public TabletAndDesktopLeaderboardView(EventDTO event, String leaderboardName, Timer timerForClientServerOffset, PlaceNavigator placeNavigator) {
+    public TabletAndDesktopLeaderboardView(EventDTO event, String leaderboardName, Timer timerForClientServerOffset, HomePlacesNavigator placeNavigator) {
         regattaAnalytics = new RegattaAnalytics(event, leaderboardName, timerForClientServerOffset, placeNavigator);
         seriesAnalytics = new EventSeriesAnalytics(event, leaderboardName, timerForClientServerOffset, placeNavigator);
         

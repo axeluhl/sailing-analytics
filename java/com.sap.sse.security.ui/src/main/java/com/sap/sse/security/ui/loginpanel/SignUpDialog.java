@@ -1,7 +1,7 @@
 package com.sap.sse.security.ui.loginpanel;
 
-import com.sap.sse.security.ui.client.StringMessages;
 import com.sap.sse.security.ui.client.component.AbstractUserDialog;
+import com.sap.sse.security.ui.client.i18n.StringMessages;
 import com.sap.sse.security.ui.shared.UserManagementServiceAsync;
 
 public class SignUpDialog extends AbstractUserDialog {

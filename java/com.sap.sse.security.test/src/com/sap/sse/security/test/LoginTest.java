@@ -13,8 +13,8 @@ import org.junit.Test;
 
 import com.mongodb.DB;
 import com.mongodb.MongoException;
-import com.sap.sailing.mongodb.MongoDBConfiguration;
-import com.sap.sailing.mongodb.MongoDBService;
+import com.sap.sse.mongodb.MongoDBConfiguration;
+import com.sap.sse.mongodb.MongoDBService;
 import com.sap.sse.security.SecurityServiceImpl;
 import com.sap.sse.security.UsernamePasswordRealm;
 import com.sap.sse.security.impl.Activator;
@@ -35,6 +35,7 @@ public class LoginTest {
         store = new UserStoreImpl();
         UsernamePasswordRealm.setTestUserStore(store);
         Activator.setTestUserStore(store);
+        Thread.currentThread().setContextClassLoader(getClass().getClassLoader()); // to enable shiro to find classes from com.sap.sse.security
         new SecurityServiceImpl(store, /* mailProperties */ new Properties());
     }
 

@@ -8,6 +8,7 @@ public class FieldNames {
         ACCOUNTS,
         ROLES,
         EMAIL_VALIDATED,
+        PASSWORD_RESET_SECRET,
         VALIDATION_SECRET;
     }
     

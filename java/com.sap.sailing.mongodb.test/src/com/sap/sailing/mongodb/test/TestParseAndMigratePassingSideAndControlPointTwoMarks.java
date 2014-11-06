@@ -18,7 +18,7 @@ import com.sap.sailing.domain.common.PassingInstruction;
 import com.sap.sailing.domain.persistence.impl.DomainObjectFactoryImpl;
 import com.sap.sailing.domain.persistence.impl.FieldNames;
 import com.sap.sailing.domain.racelog.RaceLogCourseDesignChangedEvent;
-import com.sap.sailing.mongodb.MongoDBConfiguration;
+import com.sap.sse.mongodb.MongoDBConfiguration;
 
 public class TestParseAndMigratePassingSideAndControlPointTwoMarks {
     public TestParseAndMigratePassingSideAndControlPointTwoMarks() {

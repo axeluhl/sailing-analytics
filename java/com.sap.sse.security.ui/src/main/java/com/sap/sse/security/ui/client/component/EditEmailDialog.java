@@ -3,13 +3,14 @@ package com.sap.sse.security.ui.client.component;
 import com.google.gwt.user.client.ui.Grid;
 import com.google.gwt.user.client.ui.Label;
 import com.google.gwt.user.client.ui.Widget;
-import com.sap.sse.security.ui.client.StringMessages;
+import com.sap.sse.security.ui.client.i18n.StringMessages;
 import com.sap.sse.security.ui.shared.UserDTO;
 import com.sap.sse.security.ui.shared.UserManagementServiceAsync;
 
 public class EditEmailDialog extends AbstractUserDialog {
     public EditEmailDialog(final StringMessages stringMessages, UserManagementServiceAsync userManagementService, UserDTO user, DialogCallback<UserData> callback) {
-        super(stringMessages, stringMessages.editEmail(), userManagementService, user, /* no validator; any address is considered valid */ null, callback);
+        super(stringMessages, stringMessages.editEmail(), stringMessages.editEmail(), userManagementService,
+                user, /* no validator; any address is considered valid */ null, callback);
     }
 
     @Override

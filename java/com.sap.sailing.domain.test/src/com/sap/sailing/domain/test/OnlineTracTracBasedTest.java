@@ -31,6 +31,7 @@ import com.sap.sailing.domain.racelog.impl.EmptyRaceLogStore;
 import com.sap.sailing.domain.tracking.DynamicRaceDefinitionSet;
 import com.sap.sailing.domain.tracking.DynamicTrackedRace;
 import com.sap.sailing.domain.tracking.DynamicTrackedRegatta;
+import com.sap.sailing.domain.tracking.impl.DynamicTrackedRaceImpl;
 import com.sap.sailing.domain.tracking.impl.DynamicTrackedRegattaImpl;
 import com.sap.sailing.domain.tracking.impl.EmptyWindStore;
 import com.sap.sailing.domain.tracking.impl.GPSFixImpl;
@@ -63,7 +64,7 @@ public abstract class OnlineTracTracBasedTest extends AbstractTracTracLiveTest {
     private Regatta domainEvent;
     private DynamicTrackedRegatta trackedRegatta;
     private RaceDefinition race;
-    private DynamicTrackedRace trackedRace;
+    private DynamicTrackedRaceImpl trackedRace;
 
     private final Object semaphor = new Object();
     
@@ -159,7 +160,7 @@ public abstract class OnlineTracTracBasedTest extends AbstractTracTracLiveTest {
             receiver.join();
             logger.info("Joined receiver "+receiver);
         }
-        trackedRace = getTrackedRegatta().getTrackedRace(race);
+        trackedRace = (DynamicTrackedRaceImpl) getTrackedRegatta().getTrackedRace(race);
     }
 
     private void setStoredDataLoaded(boolean storedDataLoaded) {
@@ -232,11 +233,11 @@ public abstract class OnlineTracTracBasedTest extends AbstractTracTracLiveTest {
         this.race = race;
     }
 
-    protected DynamicTrackedRace getTrackedRace() {
+    protected DynamicTrackedRaceImpl getTrackedRace() {
         return trackedRace;
     }
     
-    protected void setTrackedRace(DynamicTrackedRace race) {
+    protected void setTrackedRace(DynamicTrackedRaceImpl race) {
         this.trackedRace = race;
     }
 

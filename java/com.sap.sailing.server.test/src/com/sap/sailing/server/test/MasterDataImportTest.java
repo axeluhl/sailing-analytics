@@ -104,8 +104,6 @@ import com.sap.sailing.domain.tracking.Wind;
 import com.sap.sailing.domain.tracking.WindTrack;
 import com.sap.sailing.domain.tracking.impl.EmptyWindStore;
 import com.sap.sailing.domain.tracking.impl.WindImpl;
-import com.sap.sailing.mongodb.MongoDBConfiguration;
-import com.sap.sailing.mongodb.MongoDBService;
 import com.sap.sailing.server.RacingEventService;
 import com.sap.sailing.server.gateway.jaxrs.AbstractSailingServerResource;
 import com.sap.sailing.server.gateway.jaxrs.spi.MasterDataResource;
@@ -113,6 +111,8 @@ import com.sap.sailing.server.impl.RacingEventServiceImpl;
 import com.sap.sailing.server.masterdata.DummyTrackedRace;
 import com.sap.sailing.server.masterdata.MasterDataImporter;
 import com.sap.sse.common.Util;
+import com.sap.sse.mongodb.MongoDBConfiguration;
+import com.sap.sse.mongodb.MongoDBService;
 
 public class MasterDataImportTest {
 

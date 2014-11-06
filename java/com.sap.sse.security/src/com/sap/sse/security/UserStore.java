@@ -16,6 +16,8 @@ public interface UserStore {
 
     User getUserByName(String name);
 
+    User getUserByEmail(String email);
+
     User createUser(String name, String email, Account... accounts) throws UserManagementException;
 
     void updateUser(User user);

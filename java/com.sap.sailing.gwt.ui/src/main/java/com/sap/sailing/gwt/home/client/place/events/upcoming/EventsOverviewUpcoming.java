@@ -9,7 +9,7 @@ import com.google.gwt.uibinder.client.UiField;
 import com.google.gwt.user.client.ui.Composite;
 import com.google.gwt.user.client.ui.HTMLPanel;
 import com.google.gwt.user.client.ui.Widget;
-import com.sap.sailing.gwt.home.client.app.PlaceNavigator;
+import com.sap.sailing.gwt.home.client.app.HomePlacesNavigator;
 import com.sap.sailing.gwt.ui.shared.EventBaseDTO;
 
 public class EventsOverviewUpcoming extends Composite {
@@ -21,11 +21,11 @@ public class EventsOverviewUpcoming extends Composite {
     
     private static EventsOverviewUiBinder uiBinder = GWT.create(EventsOverviewUiBinder.class);
 
-    private final PlaceNavigator navigator;
+    private final HomePlacesNavigator navigator;
 
     private final List<UpcomingEvent> upcomingEventComposites;
 
-    public EventsOverviewUpcoming(PlaceNavigator navigator) {
+    public EventsOverviewUpcoming(HomePlacesNavigator navigator) {
         this.navigator = navigator;
         upcomingEventComposites = new ArrayList<UpcomingEvent>();
         EventsOverviewUpcomingResources.INSTANCE.css().ensureInjected();

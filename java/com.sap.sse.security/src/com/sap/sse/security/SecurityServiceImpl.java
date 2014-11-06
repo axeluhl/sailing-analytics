@@ -8,7 +8,6 @@ import java.util.HashMap;
 import java.util.Map;
 import java.util.Map.Entry;
 import java.util.Properties;
-import java.util.Random;
 import java.util.Set;
 import java.util.UUID;
 import java.util.logging.Level;
@@ -64,6 +63,7 @@ import org.scribe.model.Token;
 import org.scribe.oauth.OAuthService;
 
 import com.google.gwt.user.server.rpc.RemoteServiceServlet;
+import com.sap.sse.common.Util;
 import com.sap.sse.security.shared.Account.AccountType;
 import com.sap.sse.security.shared.DefaultRoles;
 import com.sap.sse.security.shared.MailException;
@@ -161,7 +161,7 @@ public class SecurityServiceImpl extends RemoteServiceServlet implements Securit
     }
     
     @Override
-    public void resetPassword(final String username) throws UserManagementException {
+    public void resetPassword(final String username, String baseURL) throws UserManagementException, MailException {
         final User user = store.getUserByName(username);
         if (user == null) {
             throw new UserManagementException(UserManagementException.USER_DOES_NOT_EXIST);
@@ -169,21 +169,32 @@ public class SecurityServiceImpl extends RemoteServiceServlet implements Securit
         if (!user.isEmailValidated()) {
             throw new UserManagementException(UserManagementException.CANNOT_RESET_PASSWORD_WITHOUT_VALIDATED_EMAIL);
         }
-        byte[] randomBytes = new byte[16];
-        new Random().nextBytes(randomBytes);
-        final String newPassword = new Sha256Hash(randomBytes).toBase64();
-        updateSimpleUserPassword(user, newPassword);
-        new Thread("sending new password to user "+username+" by e-mail") {
-            @Override public void run() {
-                try {
-                    sendMail(username, "Password Reset", "Your new password for your username "+username+
-                            " is \n    "+newPassword+"\nPlease change after next sign-in.");
-                } catch (MailException e) {
-                    // TODO Auto-generated catch block
-                    e.printStackTrace();
+        final String passwordResetSecret = user.startPasswordReset();
+        store.updateUser(user); // durably storing the password reset secret
+        Map<String, String> urlParameters = new HashMap<>();
+        try {
+            urlParameters.put("u", URLEncoder.encode(user.getName(), "UTF-8"));
+            urlParameters.put("e", URLEncoder.encode(user.getEmail(), "UTF-8"));
+            urlParameters.put("s", URLEncoder.encode(passwordResetSecret, "UTF-8"));
+            final StringBuilder url = buildURL(baseURL, urlParameters);
+            new Thread("sending password reset e-mail to user " + username) {
+                @Override
+                public void run() {
+                    try {
+                        sendMail(user.getName(), "Password Reset",
+                                "Please click on the link below to reset your password for user " + user.getName()
+                                        + ".\n   " + url.toString());
+                    } catch (MailException e) {
+                        logger.log(Level.SEVERE, "Error sending mail for password reset of user " + user.getName()
+                                + " to address " + user.getEmail(), e);
+                    }
                 }
-            }
-        }.start();
+            }.start();
+        } catch (UnsupportedEncodingException e) {
+            logger.log(Level.SEVERE,
+                    "Internal error: encoding UTF-8 not found. Couldn't send e-mail to user " + user.getName()
+                            + " at e-mail address " + user.getEmail(), e);
+        }
     }
 
     @Override
@@ -225,6 +236,11 @@ public class SecurityServiceImpl extends RemoteServiceServlet implements Securit
     @Override
     public User getUserByName(String name) {
         return store.getUserByName(name);
+    }
+
+    @Override
+    public User getUserByEmail(String email) {
+        return store.getUserByEmail(email);
     }
 
     @Override
@@ -280,6 +296,7 @@ public class SecurityServiceImpl extends RemoteServiceServlet implements Securit
         String hashedPasswordBase64 = hashPassword(newPassword, salt);
         account.setSalt(salt);
         account.setSaltedPassword(hashedPasswordBase64);
+        user.passwordWasReset();
         store.updateUser(user);
     }
 
@@ -291,9 +308,18 @@ public class SecurityServiceImpl extends RemoteServiceServlet implements Securit
         }
         final UsernamePasswordAccount account = (UsernamePasswordAccount) user.getAccount(AccountType.USERNAME_PASSWORD);
         String hashedOldPassword = hashPassword(password, account.getSalt());
-        return hashedOldPassword.equals(account.getSaltedPassword());
+        return Util.equalsWithNull(hashedOldPassword, account.getSaltedPassword());
     }
     
+    @Override
+    public boolean checkPasswordResetSecret(String username, String passwordResetSecret) throws UserManagementException {
+        final User user = store.getUserByName(username);
+        if (user == null) {
+            throw new UserManagementException(UserManagementException.USER_DOES_NOT_EXIST);
+        }
+        return Util.equalsWithNull(user.getPasswordResetSecret(), passwordResetSecret);
+    }
+
     @Override
     public void updateSimpleUserEmail(final String username, final String newEmail, final String validationBaseURL) throws UserManagementException {
         final User user = store.getUserByName(username);
@@ -331,7 +357,7 @@ public class SecurityServiceImpl extends RemoteServiceServlet implements Securit
      * {@link User#startEmailValidation() Triggers} e-mail validation for the <code>user</code> object and sends out a
      * URL to the user's e-mail that has the validation secret ready for validation by clicking.
      * 
-     * @param baserURL
+     * @param baseURL
      *            the URL under which the user can reach the e-mail validation service; this URL is required to assemble a
      *            validation URL that is sent by e-mail to the user, to make the user return the validation secret
      *            to the right server again.
@@ -342,19 +368,7 @@ public class SecurityServiceImpl extends RemoteServiceServlet implements Securit
             Map<String, String> urlParameters = new HashMap<>();
             urlParameters.put("u", URLEncoder.encode(user.getName(), "UTF-8"));
             urlParameters.put("v", URLEncoder.encode(secret, "UTF-8"));
-            StringBuilder url = new StringBuilder(baseURL);
-            boolean first = !baseURL.contains("?");
-            for (Map.Entry<String, String> e : urlParameters.entrySet()) {
-                if (first) {
-                    url.append('?');
-                    first = false;
-                } else {
-                    url.append('&');
-                }
-                url.append(e.getKey());
-                url.append('=');
-                url.append(e.getValue());
-            }
+            StringBuilder url = buildURL(baseURL, urlParameters);
             sendMail(user.getName(), "e-Mail Validation",
                     "Please click on the link below to validate your e-mail address for user "+user.getName()+".\n   "+url.toString());
         } catch (UnsupportedEncodingException e) {
@@ -362,6 +376,23 @@ public class SecurityServiceImpl extends RemoteServiceServlet implements Securit
                     "Internal error: encoding UTF-8 not found. Couldn't send e-mail to user " + user.getName()
                             + " at e-mail address " + user.getEmail(), e);
         }
+    }
+
+    public StringBuilder buildURL(String baseURL, Map<String, String> urlParameters) {
+        StringBuilder url = new StringBuilder(baseURL);
+        boolean first = !baseURL.contains("?");
+        for (Map.Entry<String, String> e : urlParameters.entrySet()) {
+            if (first) {
+                url.append('?');
+                first = false;
+            } else {
+                url.append('&');
+            }
+            url.append(e.getKey());
+            url.append('=');
+            url.append(e.getValue());
+        }
+        return url;
     }
 
     protected String hashPassword(String password, Object salt) {

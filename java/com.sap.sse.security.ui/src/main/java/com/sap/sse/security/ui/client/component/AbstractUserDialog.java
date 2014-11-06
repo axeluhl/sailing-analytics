@@ -6,8 +6,8 @@ import com.google.gwt.user.client.ui.PasswordTextBox;
 import com.google.gwt.user.client.ui.TextBox;
 import com.google.gwt.user.client.ui.Widget;
 import com.sap.sse.gwt.client.dialog.DataEntryDialog;
-import com.sap.sse.security.ui.client.StringMessages;
 import com.sap.sse.security.ui.client.component.AbstractUserDialog.UserData;
+import com.sap.sse.security.ui.client.i18n.StringMessages;
 import com.sap.sse.security.ui.shared.UserDTO;
 import com.sap.sse.security.ui.shared.UserManagementServiceAsync;
 
@@ -63,11 +63,22 @@ public class AbstractUserDialog extends DataEntryDialog<UserData> {
     /**
      * Uses a default validator that validates the username and the two new passwords.
      */
-    public AbstractUserDialog(final StringMessages stringMessages, String title,
+    public AbstractUserDialog(final StringMessages stringMessages, final String title,
             final UserManagementServiceAsync userManagementService,
             final UserDTO user,
             final DialogCallback<UserData> callback) {
-        this(stringMessages, title, userManagementService, user, new DataEntryDialog.Validator<UserData>() {
+        this(stringMessages, title, title, userManagementService, user, callback);
+    }
+    
+    /**
+     * Uses a default validator that validates the username and the two new passwords and allows
+     * callers to specify distinct title and message strings.
+     */
+    public AbstractUserDialog(final StringMessages stringMessages, final String title, final String message,
+            final UserManagementServiceAsync userManagementService,
+            final UserDTO user,
+            final DialogCallback<UserData> callback) {
+        this(stringMessages, title, message, userManagementService, user, new DataEntryDialog.Validator<UserData>() {
             private final NewAccountValidator validator = new NewAccountValidator(stringMessages);
             @Override
             public String getErrorMessage(UserData valueToValidate) {
@@ -81,11 +92,10 @@ public class AbstractUserDialog extends DataEntryDialog<UserData> {
      * Allows the caller to provide their own validator, e.g., in order to skip password or username validation or to
      * add validation for the current password
      */
-    public AbstractUserDialog(final StringMessages stringMessages, String title,
-                final UserManagementServiceAsync userManagementService,
-                final UserDTO user, DataEntryDialog.Validator<UserData> validator,
-                final DialogCallback<UserData> callback) {
-        super(title, title, stringMessages.ok(), stringMessages.cancel(),
+    public AbstractUserDialog(final StringMessages stringMessages, final String title, final String message,
+                final UserManagementServiceAsync userManagementService, final UserDTO user,
+                DataEntryDialog.Validator<UserData> validator, final DialogCallback<UserData> callback) {
+        super(title, message, stringMessages.ok(), stringMessages.cancel(),
                 validator, callback);
         nameBox = createTextBox("", 30);
         emailBox = createTextBox("", 30);

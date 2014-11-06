@@ -2,6 +2,7 @@ package com.sap.sse.security.userstore.mongodb;
 
 import java.util.ArrayList;
 import java.util.Collection;
+import java.util.HashSet;
 import java.util.Map;
 import java.util.Map.Entry;
 import java.util.Set;
@@ -20,6 +21,8 @@ public class UserStoreImpl implements UserStore {
     private String name = "MongoDB user store";
 
     private final ConcurrentHashMap<String, User> users;
+    private final ConcurrentHashMap<String, Set<User>> usersByEmail;
+    private final ConcurrentHashMap<User, String> emailForUser;
     private final ConcurrentHashMap<String, Object> settings;
     private final ConcurrentHashMap<String, Class<?>> settingTypes;
     private final ConcurrentHashMap<String, Map<String, String>> preferences;
@@ -28,6 +31,8 @@ public class UserStoreImpl implements UserStore {
 
     public UserStoreImpl() {
         users = new ConcurrentHashMap<>();
+        usersByEmail = new ConcurrentHashMap<>();
+        emailForUser = new ConcurrentHashMap<>();
         settings = new ConcurrentHashMap<>();
         settingTypes = new ConcurrentHashMap<String, Class<?>>();
         preferences = new ConcurrentHashMap<>();
@@ -50,9 +55,32 @@ public class UserStoreImpl implements UserStore {
         }
         for (User u : domainObjectFactory.loadAllUsers()) {
             users.put(u.getName(), u);
+            addToUsersByEmail(u);
         }
     }
 
+    private void addToUsersByEmail(User u) {
+        if (u.getEmail() != null && !u.getEmail().isEmpty()) {
+            Set<User> set = usersByEmail.get(u.getEmail());
+            if (set == null) {
+                set = new HashSet<>();
+                usersByEmail.put(u.getEmail(), set);
+            }
+            set.add(u);
+            emailForUser.put(u, u.getEmail());
+        }
+    }
+
+    private void removeFromUsersByEmail(User u) {
+        if (u != null) {
+            Set<User> set = usersByEmail.get(emailForUser.get(u)); // this also works if the user's e-mail has changed meanwhile
+            if (set != null) {
+                set.remove(u);
+            }
+            emailForUser.remove(u);
+        }
+    }
+    
     private boolean initSocialSettingsIfEmpty() {
         boolean changed = false;
         for (SocialSettingsKeys ssk : SocialSettingsKeys.values()) {
@@ -79,12 +107,15 @@ public class UserStoreImpl implements UserStore {
         logger.info("Creating user: " + user);
         mongoObjectFactory.storeUser(user);
         users.put(name, user);
+        addToUsersByEmail(user);
         return user;
     }
 
     @Override
     public void updateUser(User user) {
         logger.info("Updating user "+user+" in DB");
+        removeFromUsersByEmail(user);
+        addToUsersByEmail(user);
         mongoObjectFactory.storeUser(user);
     }
 
@@ -99,6 +130,22 @@ public class UserStoreImpl implements UserStore {
             return null;
         }
         return users.get(name);
+    }
+
+    @Override
+    public User getUserByEmail(String email) {
+        final User result;
+        if (email == null) {
+            result = null;
+        } else {
+            Set<User> set = usersByEmail.get(email);
+            if (set.isEmpty()) {
+                result = null;
+            } else {
+                result = set.iterator().next();
+            }
+        }
+        return result;
     }
 
     @Override
@@ -135,7 +182,7 @@ public class UserStoreImpl implements UserStore {
         }
         logger.info("Deleting user: " + users.get(name).toString());
         mongoObjectFactory.deleteUser(users.get(name));
-        users.remove(name);
+        removeFromUsersByEmail(users.remove(name));
     }
 
     @Override

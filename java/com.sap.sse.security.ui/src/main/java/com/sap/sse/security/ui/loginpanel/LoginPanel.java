@@ -1,6 +1,6 @@
 package com.sap.sse.security.ui.loginpanel;
 
-import java.util.Collections;
+import java.util.HashMap;
 
 import com.google.gwt.core.client.GWT;
 import com.google.gwt.event.dom.client.ClickEvent;
@@ -16,12 +16,12 @@ import com.google.gwt.user.client.ui.Label;
 import com.sap.sse.gwt.client.async.MarkedAsyncCallback;
 import com.sap.sse.gwt.client.dialog.DataEntryDialog.DialogCallback;
 import com.sap.sse.security.ui.client.EntryPointLinkFactory;
-import com.sap.sse.security.ui.client.Resources;
-import com.sap.sse.security.ui.client.StringMessages;
+import com.sap.sse.security.ui.client.IconResources;
 import com.sap.sse.security.ui.client.UserService;
 import com.sap.sse.security.ui.client.UserStatusEventHandler;
 import com.sap.sse.security.ui.client.component.AbstractUserDialog.UserData;
-import com.sap.sse.security.ui.oauth.client.component.OAuthLoginPanel;
+import com.sap.sse.security.ui.client.i18n.StringMessages;
+import com.sap.sse.security.ui.client.shared.oauthlogin.OAuthLogin;
 import com.sap.sse.security.ui.shared.SuccessInfo;
 import com.sap.sse.security.ui.shared.UserDTO;
 import com.sap.sse.security.ui.shared.UserManagementServiceAsync;
@@ -38,7 +38,7 @@ public class LoginPanel extends HorizontalPanel implements UserStatusEventHandle
     private final Anchor signUpLink;
     private final Label welcomeMessage;
 
-    private final OAuthLoginPanel oAuthPanel;
+    private final OAuthLogin oAuthPanel;
 
     public LoginPanel(final Css css, final UserService userService) {
         this.userManagementService = userService.getUserManagementService();
@@ -50,7 +50,7 @@ public class LoginPanel extends HorizontalPanel implements UserStatusEventHandle
         signInLink.addClickHandler(new ClickHandler() {
             @Override
             public void onClick(ClickEvent event) {
-                final SignInDialog signInDialog = new SignInDialog(stringMessages, userManagementService, css, new DialogCallback<UserData>() {
+                final SignInDialog signInDialog = new SignInDialog(stringMessages, userManagementService, userService, new DialogCallback<UserData>() {
                     @Override
                     public void ok(UserData userData) {
                         userService.login(userData.getUsername(), userData.getPassword(), new MarkedAsyncCallback<SuccessInfo>(new AsyncCallback<SuccessInfo>() {
@@ -58,7 +58,11 @@ public class LoginPanel extends HorizontalPanel implements UserStatusEventHandle
                             public void onFailure(Throwable caught) {
                                 Window.alert(stringMessages.invalidCredentials());
                             }
-                            @Override public void onSuccess(SuccessInfo result) {}
+                            @Override public void onSuccess(SuccessInfo result) {
+                                if (!result.isSuccessful()) {
+                                    Window.alert(stringMessages.invalidCredentials());
+                                }
+                            }
                         }));
                     }
                     @Override public void cancel() {}
@@ -74,7 +78,7 @@ public class LoginPanel extends HorizontalPanel implements UserStatusEventHandle
                     @Override
                     public void ok(final UserData userData) {
                         userManagementService.createSimpleUser(userData.getUsername(), userData.getEmail(), userData.getPassword(),
-                                EntryPointLinkFactory.createEmailValidationLink(Collections.<String, String> emptyMap()),
+                                EntryPointLinkFactory.createEmailValidationLink(new HashMap<String, String>()),
                                 new MarkedAsyncCallback<UserDTO>(new AsyncCallback<UserDTO>() {
                             @Override
                             public void onFailure(Throwable caught) {
@@ -105,7 +109,7 @@ public class LoginPanel extends HorizontalPanel implements UserStatusEventHandle
             }
         });
 
-        final ImageResource userImageResource = Resources.INSTANCE.userIcon();
+        final ImageResource userImageResource = IconResources.INSTANCE.userIcon();
         ImageResourceRenderer renderer = new ImageResourceRenderer();
         final HTML imageContainer = new HTML(renderer.render(userImageResource));
         imageContainer.getElement().addClassName(css.userIcon());
@@ -118,7 +122,7 @@ public class LoginPanel extends HorizontalPanel implements UserStatusEventHandle
         add(signInLink);
         add(signUpLink);
         add(signOutLink);
-        oAuthPanel = new OAuthLoginPanel(userManagementService, css);
+        oAuthPanel = new OAuthLogin(userManagementService);
         add(oAuthPanel);
         userService.addUserStatusEventHandler(this);
         updateStatus();

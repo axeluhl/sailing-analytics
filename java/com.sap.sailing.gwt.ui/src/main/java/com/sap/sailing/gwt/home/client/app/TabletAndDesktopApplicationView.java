@@ -29,7 +29,7 @@ public class TabletAndDesktopApplicationView extends Composite implements Applic
     @UiField
     SimplePanel mainContentPanel;
 
-    public TabletAndDesktopApplicationView(PlaceNavigator navigator) {
+    public TabletAndDesktopApplicationView(HomePlacesNavigator navigator) {
         headerPanel = new Header(navigator);
         initWidget(uiBinder.createAndBindUi(this));
     }
