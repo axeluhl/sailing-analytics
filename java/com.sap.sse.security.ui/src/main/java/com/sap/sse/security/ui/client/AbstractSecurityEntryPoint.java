@@ -1,7 +1,7 @@
 package com.sap.sse.security.ui.client;
 
 import com.google.gwt.core.client.GWT;
-import com.sap.sse.gwt.client.StringMessages;
+import com.sap.sse.security.ui.client.i18n.StringMessages;
 
 /**
  * Abstract entry point class, using this bundle's {@link com.sap.sse.security.ui.client.i18n.StringMessages}
@@ -10,16 +10,9 @@ import com.sap.sse.gwt.client.StringMessages;
  * @author Axel Uhl (D043530)
  *
  */
-public abstract class AbstractSecurityEntryPoint extends AbstractSecureEntryPoint {
-
+public abstract class AbstractSecurityEntryPoint extends AbstractSecureEntryPoint<StringMessages> {
     @Override
     protected StringMessages createStringMessages() {
-        return GWT.create(com.sap.sse.security.ui.client.i18n.StringMessages.class);
+        return GWT.create(StringMessages.class);
     }
-
-    @Override
-    protected com.sap.sse.security.ui.client.i18n.StringMessages getStringMessages() {
-        return (com.sap.sse.security.ui.client.i18n.StringMessages) super.getStringMessages();
-    }
-
 }

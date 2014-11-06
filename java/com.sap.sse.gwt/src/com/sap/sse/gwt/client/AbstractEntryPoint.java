@@ -20,12 +20,12 @@ import com.sap.sse.gwt.client.async.PendingAjaxCallMarker;
 import com.sap.sse.gwt.client.useragent.UserAgentDetails;
 import com.sap.sse.gwt.shared.DebugConstants;
 
-public abstract class AbstractEntryPoint implements EntryPoint, ErrorReporter, WindowSizeDetector  {
+public abstract class AbstractEntryPoint<S extends StringMessages> implements EntryPoint, ErrorReporter, WindowSizeDetector  {
     protected UserAgentDetails userAgent;
     private DialogBox errorDialogBox;
     private HTML serverResponseLabel;
     private Button dialogCloseButton;
-    private StringMessages stringMessages;
+    private S stringMessages;
     protected Label persistentAlertLabel;
 
     @Override
@@ -48,7 +48,7 @@ public abstract class AbstractEntryPoint implements EntryPoint, ErrorReporter, W
      * Provides the concrete implementation the opportunity to specify a concrete subclass of the {@link StringMessages} type to
      * use for i18n support.
      */
-    protected abstract StringMessages createStringMessages();
+    protected abstract S createStringMessages();
     
     protected void doOnModuleLoad() {
         userAgent = new UserAgentDetails(Window.Navigator.getUserAgent());
@@ -126,7 +126,7 @@ public abstract class AbstractEntryPoint implements EntryPoint, ErrorReporter, W
         return myErrorDialogBox;
     }
 
-    protected StringMessages getStringMessages() {
+    protected S getStringMessages() {
         return stringMessages;
     }
 }
