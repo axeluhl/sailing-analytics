@@ -17,15 +17,27 @@ class GPSFix: NSManagedObject {
     @NSManaged var latDeg: Double
     @NSManaged var lonDeg: Double
     @NSManaged var speedMperS: Double
-    @NSManaged var timeMillis: Int64
+    @NSManaged var timeMillis: Double
     @NSManaged var sent: Bool
 
     func initWithDictionary(dictionary: Dictionary<NSObject, AnyObject>) {
         deviceUuid = DeviceUDIDManager.UDID
-        timeMillis = Int64((dictionary["timestamp"] as Double) * 1000)
+        timeMillis = round(dictionary["timestamp"] as Double * 1000)
         latDeg = dictionary["latitude"] as Double
         lonDeg = dictionary["longitude"] as Double
         speedMperS = dictionary["speed"] as Double
         bearingDeg = dictionary["course"] as Double
+    }
+    
+    func dictionary() -> [String: AnyObject] {
+        var dictionary = [String: AnyObject]()
+        dictionary["bearingDeg"] = bearingDeg
+        dictionary["deviceUuid"] = deviceUuid
+        dictionary["latDeg"] = latDeg
+        dictionary["lonDeg"] = lonDeg
+        dictionary["speedMperS"] = speedMperS
+        dictionary["timeMillis"] = timeMillis
+        return dictionary
+        
     }
 }
