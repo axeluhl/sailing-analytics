@@ -7,12 +7,15 @@
 //
 
 import Foundation
+import CoreData
 
-class APIManager {
+class APIManager: NSObject {
     
     private var baseUrlString: String?
     private var manager: AFHTTPRequestOperationManager?
- 
+    private let postDeviceMapping = "/sailingserver/rc/racelog"
+    private let postGPSFixPath = "/tracking/recordFixesFlatJson"
+    
     class var sharedManager: APIManager {
         struct Singleton {
             static let sharedAPIManager = APIManager()
@@ -20,6 +23,10 @@ class APIManager {
         return Singleton.sharedAPIManager
     }
     
+    deinit {
+        NSNotificationCenter.defaultCenter().removeObserver(self)
+    }
+
     /* Sets base URL for all requests. Starts reachability listener. */
     func initManager(baseUrlString: String) {
         if self.baseUrlString == baseUrlString {
@@ -46,12 +53,18 @@ class APIManager {
             }
         })
         manager!.reachabilityManager.startMonitoring()
+        
+        // set up notifications
+        
+        NSNotificationCenter.defaultCenter().addObserver(self, selector: "sendGPSFixes:", name: DataManager.NotificationType.newGPSFix, object: nil)
+        
     }
     
+    /* Send a device / competitor mapping. */
     func postDeviceMapping(qrcodeData: QRCodeData!, success: (AFHTTPRequestOperation!, AnyObject!) -> Void, failure: (AFHTTPRequestOperation!, AnyObject!) -> Void) {
-
+        
         // resource path contains query parameters, note QR code data is already URL encoded
-        var urlString = baseUrlString! + "/sailingserver/rc/racelog"
+        var urlString = baseUrlString! + postDeviceMapping
         urlString += "?leaderboard=\(qrcodeData.leaderBoard!)"
         urlString += "&raceColumn=\(qrcodeData.raceColumn!)"
         urlString += "&fleet=\(qrcodeData.fleet!)"
@@ -60,6 +73,17 @@ class APIManager {
         var body = DeviceCompetitorMappingEvent(deviceId: DeviceUDIDManager.UDID, competitor: qrcodeData.competitor!, from: qrcodeData.from!, to: qrcodeData.to!).dictionary()
         
         manager!.POST(urlString, parameters: body, success: success, failure: failure)
-     }
+    }
+    
+    func sendGPSFixes(notification: NSNotification) {
+        var body = notification.userInfo
+        var urlString = baseUrlString! + postGPSFixPath
+        manager!.POST(urlString, parameters: body, success: { (AFHTTPRequestOperation operation, AnyObject responseObject) -> Void in
+            NSLog("success")
+            }, failure: { (AFHTTPRequestOperation operation, NSError error) -> Void in
+                NSLog("failure")
+        })
+        
+    }
     
 }
