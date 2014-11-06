@@ -17,6 +17,8 @@ import com.sap.sailing.gwt.home.client.place.searchresult.SearchResultActivityPr
 import com.sap.sailing.gwt.home.client.place.searchresult.SearchResultPlace;
 import com.sap.sailing.gwt.home.client.place.solutions.SolutionsActivityProxy;
 import com.sap.sailing.gwt.home.client.place.solutions.SolutionsPlace;
+import com.sap.sailing.gwt.home.client.place.solutions.analytics.SailingAnalyticsActivityProxy;
+import com.sap.sailing.gwt.home.client.place.solutions.analytics.SailingAnalyticsPlace;
 import com.sap.sailing.gwt.home.client.place.sponsoring.SponsoringActivityProxy;
 import com.sap.sailing.gwt.home.client.place.sponsoring.SponsoringPlace;
 import com.sap.sailing.gwt.home.client.place.start.StartActivityProxy;
@@ -46,6 +48,8 @@ public class ApplicationActivityMapper implements ActivityMapper {
             return new SponsoringActivityProxy((SponsoringPlace) place, clientFactory);
         } else if (place instanceof SolutionsPlace) {
             return new SolutionsActivityProxy((SolutionsPlace) place, clientFactory);
+        } else if (place instanceof SailingAnalyticsPlace) {
+            return new SailingAnalyticsActivityProxy((SailingAnalyticsPlace) place, clientFactory);
         } else if (place instanceof LeaderboardPlace) {
             return new LeaderboardActivityProxy((LeaderboardPlace) place, clientFactory);
         } else if (place instanceof SearchResultPlace) {

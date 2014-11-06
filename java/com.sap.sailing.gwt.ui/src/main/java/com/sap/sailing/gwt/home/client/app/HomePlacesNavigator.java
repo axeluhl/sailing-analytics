@@ -9,6 +9,7 @@ import com.sap.sailing.gwt.home.client.place.events.EventsPlace;
 import com.sap.sailing.gwt.home.client.place.leaderboard.LeaderboardPlace;
 import com.sap.sailing.gwt.home.client.place.searchresult.SearchResultPlace;
 import com.sap.sailing.gwt.home.client.place.solutions.SolutionsPlace;
+import com.sap.sailing.gwt.home.client.place.solutions.analytics.SailingAnalyticsPlace;
 import com.sap.sailing.gwt.home.client.place.sponsoring.SponsoringPlace;
 import com.sap.sailing.gwt.home.client.place.start.StartPlace;
 
@@ -28,6 +29,10 @@ public class HomePlacesNavigator extends AbstractPlaceNavigator {
 
     public PlaceNavigation<SolutionsPlace> getSolutionsNavigation() {
         return createPlaceNavigation(getLocationURL(), new SolutionsPlace(), new SolutionsPlace.Tokenizer());
+    }
+
+    public PlaceNavigation<SailingAnalyticsPlace> getSailingAnalyticsNavigation() {
+        return createPlaceNavigation(getLocationURL(), new SailingAnalyticsPlace(), new SailingAnalyticsPlace.Tokenizer());
     }
 
     public PlaceNavigation<SponsoringPlace> getSponsoringNavigation() {

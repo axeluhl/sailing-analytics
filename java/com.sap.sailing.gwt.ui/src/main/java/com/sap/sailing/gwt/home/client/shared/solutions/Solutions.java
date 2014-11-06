@@ -10,8 +10,15 @@ import com.google.gwt.uibinder.client.UiHandler;
 import com.google.gwt.user.client.ui.Anchor;
 import com.google.gwt.user.client.ui.Composite;
 import com.google.gwt.user.client.ui.Widget;
+import com.sap.sailing.gwt.home.client.app.HomePlacesNavigator;
+import com.sap.sailing.gwt.home.client.app.PlaceNavigation;
+import com.sap.sailing.gwt.home.client.place.solutions.analytics.SailingAnalyticsPlace;
 
 public class Solutions extends Composite {
+    interface SolutionsUiBinder extends UiBinder<Widget, Solutions> {
+    }
+    
+    private static SolutionsUiBinder uiBinder = GWT.create(SolutionsUiBinder.class);
 
     @UiField Anchor sailingAnalyticsAnchor;
     @UiField Anchor raceAnchor;
@@ -25,18 +32,23 @@ public class Solutions extends Composite {
     @UiField DivElement trainingDiaryDiv;
     @UiField DivElement simulatorDiv;
 
-    interface SolutionsUiBinder extends UiBinder<Widget, Solutions> {
-    }
+    @UiField Anchor sailingAnalyticsDetailsAnchor;
     
-    private static SolutionsUiBinder uiBinder = GWT.create(SolutionsUiBinder.class);
-
-    public Solutions() {
+    private final PlaceNavigation<SailingAnalyticsPlace> sailingAnalyticsNavigation;
+    private final HomePlacesNavigator placeNavigator;
+    
+    public Solutions(HomePlacesNavigator placeNavigator) {
+        this.placeNavigator = placeNavigator;
+        
         SolutionsResources.INSTANCE.css().ensureInjected();
         
         StyleInjector.injectAtEnd("@media (min-width: 25em) { "+SolutionsResources.INSTANCE.mediumCss().getText()+"}");
         StyleInjector.injectAtEnd("@media (min-width: 50em) { "+SolutionsResources.INSTANCE.largeCss().getText()+"}");
 
         initWidget(uiBinder.createAndBindUi(this));
+        
+        sailingAnalyticsNavigation = placeNavigator.getSailingAnalyticsNavigation();
+        sailingAnalyticsDetailsAnchor.setHref(sailingAnalyticsNavigation.getTargetUrl());
     }
 
     @UiHandler("sailingAnalyticsAnchor")
@@ -62,4 +74,9 @@ public class Solutions extends Composite {
         simulatorDiv.scrollIntoView();
     }
 
+    @UiHandler("sailingAnalyticsDetailsAnchor")
+    public void sailingAnalyticsDetailsClicked(ClickEvent e) {
+        placeNavigator.goToPlace(sailingAnalyticsNavigation);
+        e.preventDefault();
+    }
 }
