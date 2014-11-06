@@ -21,7 +21,7 @@ import com.google.gwt.user.client.ui.RootLayoutPanel;
 import com.google.gwt.user.client.ui.ScrollPanel;
 import com.google.gwt.user.client.ui.TabLayoutPanel;
 import com.google.gwt.user.client.ui.Widget;
-import com.sap.sailing.gwt.ui.client.AbstractEntryPoint;
+import com.sap.sailing.gwt.ui.client.AbstractSailingEntryPoint;
 import com.sap.sailing.gwt.ui.client.LeaderboardGroupsDisplayer;
 import com.sap.sailing.gwt.ui.client.LeaderboardGroupsRefresher;
 import com.sap.sailing.gwt.ui.client.LeaderboardsDisplayer;
@@ -50,7 +50,7 @@ import com.sap.sse.security.ui.client.UserStatusEventHandler;
 import com.sap.sse.security.ui.loginpanel.LoginPanel;
 import com.sap.sse.security.ui.shared.UserDTO;
 
-public class AdminConsoleEntryPoint extends AbstractEntryPoint implements RegattaRefresher, LeaderboardsRefresher, LeaderboardGroupsRefresher {
+public class AdminConsoleEntryPoint extends AbstractSailingEntryPoint implements RegattaRefresher, LeaderboardsRefresher, LeaderboardGroupsRefresher {
     private Set<RegattasDisplayer> regattasDisplayers;
     private Set<LeaderboardsDisplayer> leaderboardsDisplayers;
     private Set<LeaderboardGroupsDisplayer> leaderboardGroupsDisplayers;
@@ -119,14 +119,14 @@ public class AdminConsoleEntryPoint extends AbstractEntryPoint implements Regatt
         leaderboardsDisplayers = new HashSet<>();
         leaderboardGroupsDisplayers = new HashSet<>();
 
-        final EventManagementPanel eventManagementPanel = new EventManagementPanel(sailingService, this, stringMessages);
-        addToTabPanel(tabPanel, eventManagementPanel, stringMessages.events(), AdminConsoleFeatures.MANAGE_EVENTS);
+        final EventManagementPanel eventManagementPanel = new EventManagementPanel(sailingService, this, getStringMessages());
+        addToTabPanel(tabPanel, eventManagementPanel, getStringMessages().events(), AdminConsoleFeatures.MANAGE_EVENTS);
         leaderboardGroupsDisplayers.add(eventManagementPanel);
 
         RegattaStructureManagementPanel regattaManagementPanel = new RegattaStructureManagementPanel(
-                sailingService, this, stringMessages, this);
+                sailingService, this, getStringMessages(), this);
         regattaManagementPanel.ensureDebugId("RegattaStructureManagement");
-        addToTabPanel(tabPanel, regattaManagementPanel, stringMessages.regattas(), AdminConsoleFeatures.MANAGE_REGATTAS);
+        addToTabPanel(tabPanel, regattaManagementPanel, getStringMessages().regattas(), AdminConsoleFeatures.MANAGE_REGATTAS);
         regattasDisplayers.add(regattaManagementPanel);
         
         /* LEADERBOARDS */
@@ -135,19 +135,19 @@ public class AdminConsoleEntryPoint extends AbstractEntryPoint implements Regatt
         setTabPanelSize(leaderboardTabPanel, "100%", "100%");
         leaderboardTabPanel.addSelectionHandler(tabSelectionHandler);
         leaderboardTabPanel.ensureDebugId("LeaderboardPanel");
-        addToTabPanel(tabPanel, leaderboardTabPanel, stringMessages.leaderboards(), AdminConsoleFeatures.MANAGE_LEADERBOARDS);
+        addToTabPanel(tabPanel, leaderboardTabPanel, getStringMessages().leaderboards(), AdminConsoleFeatures.MANAGE_LEADERBOARDS);
         
         final LeaderboardConfigPanel leaderboardConfigPanel = new LeaderboardConfigPanel(sailingService, this, this,
-                stringMessages, /* showRaceDetails */true, this);
+                getStringMessages(), /* showRaceDetails */true, this);
         leaderboardConfigPanel.ensureDebugId("LeaderboardConfiguration");
-        addToTabPanel(leaderboardTabPanel, leaderboardConfigPanel, stringMessages.leaderboardConfiguration(), AdminConsoleFeatures.MANAGE_LEADERBOARDS);
+        addToTabPanel(leaderboardTabPanel, leaderboardConfigPanel, getStringMessages().leaderboardConfiguration(), AdminConsoleFeatures.MANAGE_LEADERBOARDS);
         regattasDisplayers.add(leaderboardConfigPanel);
         leaderboardsDisplayers.add(leaderboardConfigPanel);
 
         final LeaderboardGroupConfigPanel leaderboardGroupConfigPanel = new LeaderboardGroupConfigPanel(sailingService,
-                this, this, this, this, stringMessages);
+                this, this, this, this, getStringMessages());
         leaderboardGroupConfigPanel.ensureDebugId("LeaderboardGroupConfiguration");
-        addToTabPanel(leaderboardTabPanel, leaderboardGroupConfigPanel, stringMessages.leaderboardGroups(), AdminConsoleFeatures.MANAGE_LEADERBOARD_GROUPS);
+        addToTabPanel(leaderboardTabPanel, leaderboardGroupConfigPanel, getStringMessages().leaderboardGroups(), AdminConsoleFeatures.MANAGE_LEADERBOARD_GROUPS);
         regattasDisplayers.add(leaderboardGroupConfigPanel);
         leaderboardGroupsDisplayers.add(leaderboardGroupConfigPanel);
         leaderboardsDisplayers.add(leaderboardGroupConfigPanel);
@@ -158,29 +158,29 @@ public class AdminConsoleEntryPoint extends AbstractEntryPoint implements Regatt
         setTabPanelSize(racesTabPanel, "100%", "100%");
         racesTabPanel.addSelectionHandler(tabSelectionHandler);
         racesTabPanel.ensureDebugId("RacesPanel");
-        addToTabPanel(tabPanel, racesTabPanel, stringMessages.races(), AdminConsoleFeatures.MANAGE_TRACKED_RACES);
+        addToTabPanel(tabPanel, racesTabPanel, getStringMessages().races(), AdminConsoleFeatures.MANAGE_TRACKED_RACES);
         
         TrackedRacesManagementPanel trackedRacesManagementPanel = new TrackedRacesManagementPanel(sailingService, this,
-                this, stringMessages);
+                this, getStringMessages());
         trackedRacesManagementPanel.ensureDebugId("TrackedRacesManagement");
-        addToTabPanel(racesTabPanel, trackedRacesManagementPanel, stringMessages.trackedRaces(), AdminConsoleFeatures.SHOW_TRACKED_RACES);
+        addToTabPanel(racesTabPanel, trackedRacesManagementPanel, getStringMessages().trackedRaces(), AdminConsoleFeatures.SHOW_TRACKED_RACES);
         regattasDisplayers.add(trackedRacesManagementPanel);
 
-        final CompetitorPanel competitorPanel = new CompetitorPanel(sailingService, stringMessages, this);
-        addToTabPanel(racesTabPanel, competitorPanel, stringMessages.competitors(), AdminConsoleFeatures.MANAGE_ALL_COMPETITORS);
+        final CompetitorPanel competitorPanel = new CompetitorPanel(sailingService, getStringMessages(), this);
+        addToTabPanel(racesTabPanel, competitorPanel, getStringMessages().competitors(), AdminConsoleFeatures.MANAGE_ALL_COMPETITORS);
 
-        RaceCourseManagementPanel raceCourseManagementPanel = new RaceCourseManagementPanel(sailingService, this, this, stringMessages);
-        addToTabPanel(racesTabPanel, raceCourseManagementPanel, stringMessages.courseLayout(), AdminConsoleFeatures.MANAGE_COURSE_LAYOUT);
+        RaceCourseManagementPanel raceCourseManagementPanel = new RaceCourseManagementPanel(sailingService, this, this, getStringMessages());
+        addToTabPanel(racesTabPanel, raceCourseManagementPanel, getStringMessages().courseLayout(), AdminConsoleFeatures.MANAGE_COURSE_LAYOUT);
         regattasDisplayers.add(raceCourseManagementPanel);
 
         final AsyncActionsExecutor asyncActionsExecutor = new AsyncActionsExecutor();
 
-        WindPanel windPanel = new WindPanel(sailingService, asyncActionsExecutor, this, this, stringMessages);
+        WindPanel windPanel = new WindPanel(sailingService, asyncActionsExecutor, this, this, getStringMessages());
         regattasDisplayers.add(windPanel);
-        addToTabPanel(racesTabPanel, windPanel, stringMessages.wind(), AdminConsoleFeatures.MANAGE_WIND);
+        addToTabPanel(racesTabPanel, windPanel, getStringMessages().wind(), AdminConsoleFeatures.MANAGE_WIND);
 
-        final MediaPanel mediaPanel = new MediaPanel(regattasDisplayers, sailingService, this, mediaService, this, stringMessages);
-        addToTabPanel(racesTabPanel, mediaPanel, stringMessages.mediaPanel(), AdminConsoleFeatures.MANAGE_MEDIA);
+        final MediaPanel mediaPanel = new MediaPanel(regattasDisplayers, sailingService, this, mediaService, this, getStringMessages());
+        addToTabPanel(racesTabPanel, mediaPanel, getStringMessages().mediaPanel(), AdminConsoleFeatures.MANAGE_MEDIA);
 
         /* CONNECTORS */
         
@@ -188,36 +188,36 @@ public class AdminConsoleEntryPoint extends AbstractEntryPoint implements Regatt
         setTabPanelSize(connectorsTabPanel, "100%", "100%");
         connectorsTabPanel.addSelectionHandler(tabSelectionHandler);
         connectorsTabPanel.ensureDebugId("TrackingProviderPanel");
-        addToTabPanel(tabPanel, connectorsTabPanel, stringMessages.connectors(), AdminConsoleFeatures.MANAGE_TRACKED_RACES);
+        addToTabPanel(tabPanel, connectorsTabPanel, getStringMessages().connectors(), AdminConsoleFeatures.MANAGE_TRACKED_RACES);
 
         AbstractEventManagementPanel tractracEventManagementPanel = new TracTracEventManagementPanel(sailingService,
-                this, this, stringMessages);
+                this, this, getStringMessages());
         tractracEventManagementPanel.ensureDebugId("TracTracEventManagement");
-        addToTabPanel(connectorsTabPanel, tractracEventManagementPanel, stringMessages.tracTracEvents(), AdminConsoleFeatures.MANAGE_TRACKED_RACES);
+        addToTabPanel(connectorsTabPanel, tractracEventManagementPanel, getStringMessages().tracTracEvents(), AdminConsoleFeatures.MANAGE_TRACKED_RACES);
         regattasDisplayers.add(tractracEventManagementPanel);
 
         SwissTimingReplayConnectorPanel swissTimingReplayConnectorPanel = new SwissTimingReplayConnectorPanel(
-                sailingService, this, this, stringMessages);
-        addToTabPanel(connectorsTabPanel, swissTimingReplayConnectorPanel, stringMessages.swissTimingArchiveConnector(), AdminConsoleFeatures.MANAGE_TRACKED_RACES);
+                sailingService, this, this, getStringMessages());
+        addToTabPanel(connectorsTabPanel, swissTimingReplayConnectorPanel, getStringMessages().swissTimingArchiveConnector(), AdminConsoleFeatures.MANAGE_TRACKED_RACES);
         regattasDisplayers.add(swissTimingReplayConnectorPanel);
 
         SwissTimingEventManagementPanel swisstimingEventManagementPanel = new SwissTimingEventManagementPanel(
-                sailingService, this, this, stringMessages);
-        addToTabPanel(connectorsTabPanel, swisstimingEventManagementPanel, stringMessages.swissTimingEvents(), AdminConsoleFeatures.MANAGE_TRACKED_RACES);
+                sailingService, this, this, getStringMessages());
+        addToTabPanel(connectorsTabPanel, swisstimingEventManagementPanel, getStringMessages().swissTimingEvents(), AdminConsoleFeatures.MANAGE_TRACKED_RACES);
         regattasDisplayers.add(swisstimingEventManagementPanel);
 
         final RaceLogTrackingEventManagementPanel raceLogTrackingEventManagementPanel = new RaceLogTrackingEventManagementPanel(
-                sailingService, this, this, this, stringMessages);
-        addToTabPanel(connectorsTabPanel, raceLogTrackingEventManagementPanel, stringMessages.raceLogTracking(), AdminConsoleFeatures.MANAGE_RACELOG_TRACKING);
+                sailingService, this, this, this, getStringMessages());
+        addToTabPanel(connectorsTabPanel, raceLogTrackingEventManagementPanel, getStringMessages().raceLogTracking(), AdminConsoleFeatures.MANAGE_RACELOG_TRACKING);
         regattasDisplayers.add(raceLogTrackingEventManagementPanel);
         leaderboardsDisplayers.add(raceLogTrackingEventManagementPanel);
 
-        IgtimiAccountsPanel igtimiAccountsPanel = new IgtimiAccountsPanel(sailingService, this, stringMessages);
+        IgtimiAccountsPanel igtimiAccountsPanel = new IgtimiAccountsPanel(sailingService, this, getStringMessages());
         igtimiAccountsPanel.ensureDebugId("IgtimiAccounts");
-        addToTabPanel(connectorsTabPanel, igtimiAccountsPanel, stringMessages.igtimiAccounts(), AdminConsoleFeatures.MANAGE_IGTIMI_ACCOUNTS);
+        addToTabPanel(connectorsTabPanel, igtimiAccountsPanel, getStringMessages().igtimiAccounts(), AdminConsoleFeatures.MANAGE_IGTIMI_ACCOUNTS);
         
-        ResultImportUrlsManagementPanel resultImportUrlsManagementPanel = new ResultImportUrlsManagementPanel(sailingService, this, stringMessages);
-        addToTabPanel(connectorsTabPanel, resultImportUrlsManagementPanel, stringMessages.resultImportUrls(), AdminConsoleFeatures.MANAGE_RESULT_IMPORT_URLS);
+        ResultImportUrlsManagementPanel resultImportUrlsManagementPanel = new ResultImportUrlsManagementPanel(sailingService, this, getStringMessages());
+        addToTabPanel(connectorsTabPanel, resultImportUrlsManagementPanel, getStringMessages().resultImportUrls(), AdminConsoleFeatures.MANAGE_RESULT_IMPORT_URLS);
 
         /* ADVANCED */
         
@@ -225,21 +225,21 @@ public class AdminConsoleEntryPoint extends AbstractEntryPoint implements Regatt
         setTabPanelSize(advancedTabPanel, "100%", "100%");
         advancedTabPanel.addSelectionHandler(tabSelectionHandler);
         advancedTabPanel.ensureDebugId("AdvancedPanel");
-        addToTabPanel(tabPanel, advancedTabPanel, stringMessages.advanced(), AdminConsoleFeatures.MANAGE_REPLICATION);
+        addToTabPanel(tabPanel, advancedTabPanel, getStringMessages().advanced(), AdminConsoleFeatures.MANAGE_REPLICATION);
 
-        final ReplicationPanel replicationPanel = new ReplicationPanel(sailingService, this, stringMessages);
-        addToTabPanel(advancedTabPanel, replicationPanel, stringMessages.replication(), AdminConsoleFeatures.MANAGE_REPLICATION);
+        final ReplicationPanel replicationPanel = new ReplicationPanel(sailingService, this, getStringMessages());
+        addToTabPanel(advancedTabPanel, replicationPanel, getStringMessages().replication(), AdminConsoleFeatures.MANAGE_REPLICATION);
 
-        final MasterDataImportPanel masterDataImportPanel = new MasterDataImportPanel(stringMessages, sailingService,
+        final MasterDataImportPanel masterDataImportPanel = new MasterDataImportPanel(getStringMessages(), sailingService,
                 this, eventManagementPanel, this, this);
-        addToTabPanel(advancedTabPanel, masterDataImportPanel, stringMessages.masterDataImportPanel(), AdminConsoleFeatures.MANAGE_MASTERDATA_IMPORT);
+        addToTabPanel(advancedTabPanel, masterDataImportPanel, getStringMessages().masterDataImportPanel(), AdminConsoleFeatures.MANAGE_MASTERDATA_IMPORT);
 
-        RemoteSailingServerInstancesManagementPanel sailingServerInstancesManagementPanel = new RemoteSailingServerInstancesManagementPanel(sailingService, this, stringMessages);
-        addToTabPanel(advancedTabPanel, sailingServerInstancesManagementPanel, stringMessages.sailingServers(), AdminConsoleFeatures.MANAGE_SAILING_SERVER_INSTANCES);
+        RemoteSailingServerInstancesManagementPanel sailingServerInstancesManagementPanel = new RemoteSailingServerInstancesManagementPanel(sailingService, this, getStringMessages());
+        addToTabPanel(advancedTabPanel, sailingServerInstancesManagementPanel, getStringMessages().sailingServers(), AdminConsoleFeatures.MANAGE_SAILING_SERVER_INSTANCES);
 
         final DeviceConfigurationPanel deviceConfigurationUserPanel = new DeviceConfigurationUserPanel(sailingService,
-                stringMessages, this);
-        addToTabPanel(advancedTabPanel, deviceConfigurationUserPanel, stringMessages.deviceConfiguration(), AdminConsoleFeatures.MANAGE_DEVICE_CONFIGURATION);
+                getStringMessages(), this);
+        addToTabPanel(advancedTabPanel, deviceConfigurationUserPanel, getStringMessages().deviceConfiguration(), AdminConsoleFeatures.MANAGE_DEVICE_CONFIGURATION);
         updateTabDisplayForCurrentUser(getUserService().getCurrentUser());
         if (tabPanel.getWidgetCount() > 0) {
             tabPanel.selectTab(0);
@@ -257,7 +257,7 @@ public class AdminConsoleEntryPoint extends AbstractEntryPoint implements Regatt
         SystemInformationPanel sysinfoPanel = new SystemInformationPanel(sailingService, this);
         sysinfoPanel.ensureDebugId("SystemInformation");
 
-        final Anchor releaseNotesLink = new Anchor(new SafeHtmlBuilder().appendEscaped(stringMessages.releaseNotes()).toSafeHtml(), "/release_notes_admin.html");
+        final Anchor releaseNotesLink = new Anchor(new SafeHtmlBuilder().appendEscaped(getStringMessages().releaseNotes()).toSafeHtml(), "/release_notes_admin.html");
         sysinfoPanel.add(releaseNotesLink);
         informationPanel.add(sysinfoPanel, DockPanel.EAST);
         informationPanel.setCellHorizontalAlignment(sysinfoPanel, HasHorizontalAlignment.ALIGN_RIGHT);

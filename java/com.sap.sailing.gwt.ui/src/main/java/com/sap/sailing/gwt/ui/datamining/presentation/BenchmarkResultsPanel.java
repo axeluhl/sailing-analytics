@@ -8,11 +8,11 @@ import com.google.gwt.user.client.ui.FlowPanel;
 import com.google.gwt.user.client.ui.HorizontalPanel;
 import com.google.gwt.user.client.ui.IntegerBox;
 import com.google.gwt.user.client.ui.Label;
-import com.sap.sailing.gwt.ui.client.ErrorReporter;
 import com.sap.sailing.gwt.ui.client.StringMessages;
 import com.sap.sailing.gwt.ui.datamining.DataMiningServiceAsync;
 import com.sap.sailing.gwt.ui.datamining.QueryDefinitionProvider;
 import com.sap.sse.datamining.shared.QueryResult;
+import com.sap.sse.gwt.client.ErrorReporter;
 
 public class BenchmarkResultsPanel extends FlowPanel {
     

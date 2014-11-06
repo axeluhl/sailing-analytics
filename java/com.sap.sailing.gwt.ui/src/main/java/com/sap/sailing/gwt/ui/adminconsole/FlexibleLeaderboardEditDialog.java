@@ -4,12 +4,12 @@ import java.util.Collection;
 import java.util.List;
 
 import com.sap.sailing.domain.common.ScoringSchemeType;
-import com.sap.sailing.gwt.ui.client.ErrorReporter;
 import com.sap.sailing.gwt.ui.client.StringMessages;
 import com.sap.sailing.gwt.ui.leaderboard.ScoringSchemeTypeFormatter;
 import com.sap.sailing.gwt.ui.shared.CourseAreaDTO;
 import com.sap.sailing.gwt.ui.shared.EventDTO;
 import com.sap.sailing.gwt.ui.shared.StrippedLeaderboardDTO;
+import com.sap.sse.gwt.client.ErrorReporter;
 
 public class FlexibleLeaderboardEditDialog extends FlexibleLeaderboardDialog {
     

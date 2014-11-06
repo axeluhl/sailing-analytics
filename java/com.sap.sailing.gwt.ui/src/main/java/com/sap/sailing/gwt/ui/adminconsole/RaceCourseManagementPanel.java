@@ -4,11 +4,11 @@ import java.util.Date;
 
 import com.google.gwt.user.client.Window;
 import com.google.gwt.user.client.rpc.AsyncCallback;
-import com.sap.sailing.gwt.ui.client.ErrorReporter;
 import com.sap.sailing.gwt.ui.client.RegattaRefresher;
 import com.sap.sailing.gwt.ui.client.SailingServiceAsync;
 import com.sap.sailing.gwt.ui.client.StringMessages;
 import com.sap.sailing.gwt.ui.shared.RaceCourseDTO;
+import com.sap.sse.gwt.client.ErrorReporter;
 
 /**
  * A panel that has a race selection (inherited from {@link AbstractRaceManagementPanel}) and which adds a table

@@ -13,11 +13,11 @@ import com.google.gwt.user.client.ui.CheckBox;
 import com.google.gwt.user.client.ui.Widget;
 import com.google.gwt.view.client.SingleSelectionModel;
 import com.sap.sailing.domain.common.dto.CompetitorDTO;
-import com.sap.sailing.gwt.ui.client.ErrorReporter;
 import com.sap.sailing.gwt.ui.client.SailingServiceAsync;
 import com.sap.sailing.gwt.ui.client.StringMessages;
 import com.sap.sailing.gwt.ui.common.client.DateAndTimeFormatterUtil;
 import com.sap.sailing.gwt.ui.shared.DeviceMappingDTO;
+import com.sap.sse.gwt.client.ErrorReporter;
 
 public class DeviceMappingTableWrapper extends TableWrapper<DeviceMappingDTO, SingleSelectionModel<DeviceMappingDTO>> {
     static interface FilterChangedHandler {

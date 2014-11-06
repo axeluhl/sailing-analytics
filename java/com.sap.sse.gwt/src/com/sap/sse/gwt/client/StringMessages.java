@@ -18,4 +18,7 @@ public interface StringMessages extends Messages {
 
     String edit();
 
+    String serverError();
+    
+    String close();
 }
