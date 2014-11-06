@@ -10,7 +10,7 @@ import Foundation
 import CoreData
 
 class DataManager: NSObject {
-    
+
     class var sharedManager: DataManager {
         struct Singleton {
             static let sharedDataManager = DataManager()
@@ -24,10 +24,10 @@ class DataManager: NSObject {
         println(managedObjectContext!)
         
         // store new locations to database
-        NSNotificationCenter.defaultCenter().addObserver(self, selector: "newLocation:", name: LocationManager.NotificationType.newLocationNotificationKey, object: nil)
+        NSNotificationCenter.defaultCenter().addObserver(self, selector: "newLocation:", name: LocationManager.NotificationType.newLocation, object: nil)
         
         // save context when done tracking
-        NSNotificationCenter.defaultCenter().addObserver(self, selector: "trackingStopped:", name: LocationManager.NotificationType.trackingStoppedNotificationKey, object: nil)
+        NSNotificationCenter.defaultCenter().addObserver(self, selector: "trackingStopped:", name: LocationManager.NotificationType.trackingStopped, object: nil)
     }
 
     deinit {
@@ -37,18 +37,13 @@ class DataManager: NSObject {
     // MARK: - notification callbacks
    
     func newLocation(notification: NSNotification) {
-        println(notification)
         let gpsFix = NSEntityDescription.insertNewObjectForEntityForName("GPSFix", inManagedObjectContext: self.managedObjectContext!) as GPSFix;
-        
-        // TODO: calc UDID
-        // gpsFix.deviceUuid =
-        gpsFix.initWithDictionary(notification.userInfo!)
-        
-        // TODO: notify new location in store
-    }
+        gpsFix.deviceUuid = DeviceUDIDManager.UDID
+        gpsFix.initWithDictionary(notification.userInfo!)        
+        return
+   }
 
     func trackingStopped(notification: NSNotification) {
-        println(notification)
         saveContext()
     }
 

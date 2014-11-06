@@ -110,7 +110,6 @@
 		7F06590019F7FE750077FF95 /* Model */ = {
 			isa = PBXGroup;
 			children = (
-				7FA6551919F6661900A1B92D /* DataManager.swift */,
 				7F0658FE19F7EE910077FF95 /* QRCodeData.swift */,
 				7F3663031A00FD4600F6102D /* RaceLogEvent.swift */,
 				7F3663051A00FF0C00F6102D /* DeviceCompetitorMappingEvent.swift */,
@@ -134,8 +133,9 @@
 		7F06590219F7FEA40077FF95 /* Controller */ = {
 			isa = PBXGroup;
 			children = (
-				7F03FD3D19FA44CD00FA1327 /* APIManager.swift */,
 				7F2C605919F160E400C32D93 /* LocationManager.swift */,
+				7FA6551919F6661900A1B92D /* DataManager.swift */,
+				7F03FD3D19FA44CD00FA1327 /* APIManager.swift */,
 				7F06590319F8094C0077FF95 /* DeviceUDIDManager.swift */,
 			);
 			name = Controller;
