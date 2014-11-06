@@ -55,12 +55,12 @@ class APIManager: NSObject {
         manager!.reachabilityManager.startMonitoring()
         
         // set up notifications
-        
+        /*
         NSNotificationCenter.defaultCenter().addObserver(self, selector: "sendGPSFixes:", name: DataManager.NotificationType.newGPSFix, object: nil)
-        
+        */
     }
     
-    /* Send a device / competitor mapping. */
+    /* Send a device to competitor mapping. */
     func postDeviceMapping(qrcodeData: QRCodeData!, success: (AFHTTPRequestOperation!, AnyObject!) -> Void, failure: (AFHTTPRequestOperation!, AnyObject!) -> Void) {
         
         // resource path contains query parameters, note QR code data is already URL encoded
@@ -75,15 +75,15 @@ class APIManager: NSObject {
         manager!.POST(urlString, parameters: body, success: success, failure: failure)
     }
     
-    func sendGPSFixes(notification: NSNotification) {
-        var body = notification.userInfo
+    /* Send GPS location to server. Delete row from cache. */
+    func postGPSFix(gpsFix: GPSFix!, success: (AFHTTPRequestOperation!, AnyObject!) -> Void, failure: (AFHTTPRequestOperation!, AnyObject!) -> Void) {
         var urlString = baseUrlString! + postGPSFixPath
-        manager!.POST(urlString, parameters: body, success: { (AFHTTPRequestOperation operation, AnyObject responseObject) -> Void in
-            NSLog("success")
+        manager!.POST(urlString, parameters: gpsFix.dictionary(), success: { (AFHTTPRequestOperation operation, AnyObject responseObject) -> Void in
+            // delete GPS fix from database
+            DataManager.sharedManager.managedObjectContext!.deleteObject(gpsFix)
             }, failure: { (AFHTTPRequestOperation operation, NSError error) -> Void in
                 NSLog("failure")
         })
-        
     }
     
 }

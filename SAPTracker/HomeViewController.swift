@@ -8,10 +8,13 @@
 
 import UIKit
 
-class HomeViewController: UIViewController {
+class HomeViewController: UIViewController, UIAlertViewDelegate {
     
     @IBOutlet weak var trackingButton: UIButton!
-    
+    enum AlertViewTag: Int {
+        case StopTracking
+    }
+   
     override func viewDidLoad() {
         super.viewDidLoad()
         addObservers()
@@ -42,11 +45,28 @@ class HomeViewController: UIViewController {
 
     @IBAction func trackingButtonTap(sender: AnyObject) {
         if LocationManager.sharedManager.isTracking {
-            LocationManager.sharedManager.stopTracking()
+            let alertView = UIAlertView(title: "SAP Tracker", message: "Stop tracking?", delegate: self, cancelButtonTitle: "Cancel", otherButtonTitles: "Stop")
+            alertView.tag = AlertViewTag.StopTracking.rawValue;
+            alertView.alertViewStyle = .Default
+            alertView.show()
         } else {
             LocationManager.sharedManager.startTracking()
         }
     }
-  
+ 
+    func alertView(alertView: UIAlertView, clickedButtonAtIndex buttonIndex: Int) {
+        switch alertView.tag {
+        case AlertViewTag.StopTracking.rawValue:
+            switch buttonIndex {
+            case alertView.cancelButtonIndex:
+                break;
+            default:
+                LocationManager.sharedManager.stopTracking()
+            }
+            break;
+        default:
+            break;
+        }
+    }
 }
 
