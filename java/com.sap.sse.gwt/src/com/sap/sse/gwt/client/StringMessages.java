@@ -21,4 +21,10 @@ public interface StringMessages extends Messages {
     String serverError();
     
     String close();
+
+    String remoteProcedureCall();
+
+    String serverReplies();
+
+    String errorCommunicatingWithServer();
 }

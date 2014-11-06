@@ -30,6 +30,7 @@ public abstract class AbstractEntryPoint implements EntryPoint, ErrorReporter, W
 
     @Override
     public final void onModuleLoad() {
+        this.stringMessages = createStringMessages();
         if (DebugInfo.isDebugIdEnabled()) {
             PendingAjaxCallBundle bundle = GWT.create(PendingAjaxCallBundle.class);
             TextResource script = bundle.ajaxSemaphoreJS();
@@ -42,6 +43,12 @@ public abstract class AbstractEntryPoint implements EntryPoint, ErrorReporter, W
             PendingAjaxCallMarker.decrementPendingAjaxCalls(MarkedAsyncCallback.CATEGORY_GLOBAL);
         }
     }
+    
+    /**
+     * Provides the concrete implementation the opportunity to specify a concrete subclass of the {@link StringMessages} type to
+     * use for i18n support.
+     */
+    protected abstract StringMessages createStringMessages();
     
     protected void doOnModuleLoad() {
         userAgent = new UserAgentDetails(Window.Navigator.getUserAgent());
@@ -95,17 +102,17 @@ public abstract class AbstractEntryPoint implements EntryPoint, ErrorReporter, W
     private DialogBox createErrorDialog() {
         // Create the popup dialog box
         final DialogBox myErrorDialogBox = new DialogBox();
-        myErrorDialogBox.setText("Remote Procedure Call"); //$NON-NLS-1$
+        myErrorDialogBox.setText(getStringMessages().remoteProcedureCall());
         myErrorDialogBox.setAnimationEnabled(true);
-        dialogCloseButton = new Button(getStringMessages().close()); //$NON-NLS-1$
+        dialogCloseButton = new Button(getStringMessages().close());
         // We can set the id of a widget by accessing its Element
         dialogCloseButton.getElement().setId("closeButton"); //$NON-NLS-1$
         final Label textToServerLabel = new Label();
         serverResponseLabel = new HTML();
         VerticalPanel dialogVPanel = new VerticalPanel();
-        dialogVPanel.add(new HTML("<b>Error communicating with server</b>")); //$NON-NLS-1$
+        dialogVPanel.add(new HTML("<b>"+stringMessages.errorCommunicatingWithServer()+"</b>")); //$NON-NLS-1$
         dialogVPanel.add(textToServerLabel);
-        dialogVPanel.add(new HTML("<br><b>Server replies:</b>")); //$NON-NLS-1$
+        dialogVPanel.add(new HTML("<br><b>"+stringMessages.serverReplies()+"</b>")); //$NON-NLS-1$
         dialogVPanel.add(serverResponseLabel);
         dialogVPanel.setHorizontalAlignment(VerticalPanel.ALIGN_RIGHT);
         dialogVPanel.add(dialogCloseButton);
@@ -121,9 +128,5 @@ public abstract class AbstractEntryPoint implements EntryPoint, ErrorReporter, W
 
     protected StringMessages getStringMessages() {
         return stringMessages;
-    }
-
-    protected void setStringMessages(StringMessages stringMessages) {
-        this.stringMessages = stringMessages;
     }
 }
