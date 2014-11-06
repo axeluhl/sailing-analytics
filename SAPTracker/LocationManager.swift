@@ -12,11 +12,11 @@ import CoreLocation
 class LocationManager: NSObject, CLLocationManagerDelegate {
 
     struct NotificationType {
-        static let locationServicesDisabledNotificationKey = "location_services_disabled"
-        static let trackingStartedNotificationKey = "tracking_started"
-        static let trackingStoppedNotificationKey = "tracking_stopped"
-        static let newLocationNotificationKey = "new_location"
-        static let locationManagerFailedNotificationKey = "location_manager_failed"
+        static let locationServicesDisabled = "location_services_disabled"
+        static let trackingStarted = "tracking_started"
+        static let trackingStopped = "tracking_stopped"
+        static let newLocation = "new_location"
+        static let locationManagerFailed = "location_manager_failed"
     }
 
     class var sharedManager: LocationManager {
@@ -38,7 +38,7 @@ class LocationManager: NSObject, CLLocationManagerDelegate {
     func startTracking() {
         if (!CLLocationManager.locationServicesEnabled())
         {
-            let notification = NSNotification(name: NotificationType.locationServicesDisabledNotificationKey, object: self)
+            let notification = NSNotification(name: NotificationType.locationServicesDisabled, object: self)
             NSNotificationQueue.defaultQueue().enqueueNotification(notification, postingStyle: NSPostingStyle.PostASAP)
             return
         }
@@ -50,7 +50,7 @@ class LocationManager: NSObject, CLLocationManagerDelegate {
         coreLocationManager.startUpdatingHeading()
         coreLocationManager.delegate = self
         isTracking = true;
-        let notification = NSNotification(name: NotificationType.trackingStartedNotificationKey, object: self)
+        let notification = NSNotification(name: NotificationType.trackingStarted, object: self)
         NSNotificationQueue.defaultQueue().enqueueNotification(notification, postingStyle: NSPostingStyle.PostASAP)
     }
 
@@ -58,19 +58,18 @@ class LocationManager: NSObject, CLLocationManagerDelegate {
         coreLocationManager.stopUpdatingLocation()
         coreLocationManager.stopUpdatingHeading()
         isTracking = false;
-        let notification = NSNotification(name: NotificationType.trackingStoppedNotificationKey, object: self)
+        let notification = NSNotification(name: NotificationType.trackingStopped, object: self)
         NSNotificationQueue.defaultQueue().enqueueNotification(notification, postingStyle: NSPostingStyle.PostASAP)
     }
     
     func locationManager(manager: CLLocationManager!, didUpdateLocations locations: [AnyObject]!) {
         let location = locations.last as CLLocation
-        println(location.coordinate)
-        let notification = NSNotification(name: NotificationType.newLocationNotificationKey, object: self, userInfo:LocationManager.dictionaryForLocation(location))
+        let notification = NSNotification(name: NotificationType.newLocation, object: self, userInfo:LocationManager.dictionaryForLocation(location))
         NSNotificationQueue.defaultQueue().enqueueNotification(notification, postingStyle: NSPostingStyle.PostASAP)
     }
     
     func locationManager(manager: CLLocationManager!, didFailWithError error: NSError!) {
-        let notification = NSNotification(name: NotificationType.locationManagerFailedNotificationKey, object: self, userInfo: ["error": error])
+        let notification = NSNotification(name: NotificationType.locationManagerFailed, object: self, userInfo: ["error": error])
         NSNotificationQueue.defaultQueue().enqueueNotification(notification, postingStyle: NSPostingStyle.PostASAP)
     }
     
