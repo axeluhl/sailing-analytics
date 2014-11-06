@@ -1,0 +1,31 @@
+@CHARSET "UTF-8";
+
+.startLineAdvantageComponent_liveAveragePanel {
+	bottom: 25pt;
+	margin-top: 4pt;
+}
+
+.startLineAdvantageComponent_header {
+	font-size: 15pt;
+}
+
+.startLineAdvantageComponent_livePanel {
+	top: 35%;
+	bottom: 20%;
+}
+
+.startLineAdvantageComponent_averagePanel {
+	top: 35%;
+	bottom: 20%;
+}
+
+.startLineAdvantageComponent_middleLine{
+	top: 35%
+	bottom: 20%;
+}
+
+.startLineAdvantageComponent_wrapper{
+	position: absolute;
+	width: 100%;
+	height: 100%;
+}
