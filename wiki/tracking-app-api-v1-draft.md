@@ -69,6 +69,19 @@ _Question: What should be done if a second device is mapped to competitor?_
 
 **pushDeviceId** On Android the GCM regId, on iOS the APNS push token. This is needed for sending push notifications to the device.
 
+## Checkout
+
+Needed to destroy a device coupling with leaderboard & competitor. AKA checkout.
+
+### Path
+
+    {serverUrl}/api/v1/leaderboard/{unique_leaderboard_name}/competitor/{competitor_id}/device/{deviceUdid}.json
+
+### Verb
+ 
+    DELETE
+
+
 ## Regatta Info
 
 Informations regarding a regatta. We need the list of (scheduled) races to remind the user to start tracking.
