@@ -10,7 +10,9 @@
 	<!-- <inherits name="com.sap.sailing.gwt.ui.EmulatedJRE" /> -->
 	<inherits name="com.sap.sse.gwt.SSESharedGWT" />
 	<inherits name="com.sap.sse.SSECommon" />
-
+	<inherits name="com.sap.sse.Security" />
+	<inherits name="com.sap.sse.security.ui.LoginPanel" />
+	
 	<inherits name="com.googlecode.mgwt.MGWT" />
 	<inherits name="com.googlecode.mgwt.linker.Linker" />
 

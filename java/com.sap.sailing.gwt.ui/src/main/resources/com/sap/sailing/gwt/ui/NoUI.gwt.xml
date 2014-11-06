@@ -25,6 +25,9 @@
 	<inherits name="com.sap.sse.SSECommon" />
 
 	<inherits name="com.sap.sailing.domain.SailingDomain" />
+  	<!--  Bootstrap API -->
+	<inherits name="com.github.gwtbootstrap.BootstrapNoResources" />
+	<inherits name='com.github.gwtbootstrap.datetimepicker.DatetimepickerNoResources' />
 
 	<super-source path="jre" />
 
@@ -47,5 +50,13 @@
 	<extend-property name="locale" values="de" />
 	<extend-property name="locale" values="ru" />
 	
+	<source path='client' />
+	<source path='actions' />
 	<source path='shared' />
+	<source path='simulator' />
+	<source path='leaderboard' />
+	<source path='masterdataimport' />
+	<source path='adminconsole' />
+	<source path='usermanagement' />
+	<source path='common/client' />
 </module>
