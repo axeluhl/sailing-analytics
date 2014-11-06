@@ -16,7 +16,6 @@ import com.google.gwt.user.client.ui.Label;
 import com.google.gwt.user.client.ui.ScrollPanel;
 import com.google.gwt.user.client.ui.TabLayoutPanel;
 import com.google.gwt.user.client.ui.Widget;
-import com.sap.sailing.gwt.ui.shared.SecurityStylesheetResources;
 import com.sap.sse.common.Util.Triple;
 import com.sap.sse.gwt.client.AbstractEntryPoint;
 import com.sap.sse.gwt.client.ErrorReporter;
@@ -24,8 +23,37 @@ import com.sap.sse.gwt.client.panels.VerticalTabLayoutPanel;
 import com.sap.sse.security.ui.client.UserService;
 import com.sap.sse.security.ui.client.UserStatusEventHandler;
 import com.sap.sse.security.ui.loginpanel.LoginPanel;
+import com.sap.sse.security.ui.loginpanel.LoginPanelCss;
 import com.sap.sse.security.ui.shared.UserDTO;
 
+/**
+ * A panel that can be used to implement an administration console. Widgets can be arranged in vertical and horizontal tabs ("L-shape").
+ * The top-level element is the vertical tab panel. Widgets may either be added directly as the content of one vertical tab, or a horizontal
+ * tab panel can be added as the content widget of a vertical tab, in turn holding widgets in horizontal tabs.<p>
+ * 
+ * After constructing an instance of this class, there are three ways for adding widgets:<ul>
+ *   <li>{@link #addToVerticalTabPanel(RefreshableAdminConsolePanel, String, AdminConsoleFeatures) adds a widget as a content element
+ *   of a vertical tab</li>
+ *   <li>{@link #addVerticalTab(String, String, AdminConsoleFeatures) creates a horizontal tab panel and adds it as a content element of
+ *   a vertical tab</li>
+ *   <li>{@link #addToTabPanel(TabLayoutPanel, RefreshableAdminConsolePanel, String, AdminConsoleFeatures) adds a widget as a content element
+ *   of a horizontal tab</li>
+ * </ul>
+ * 
+ * Widgets to be added need to be wrapped as {@link RefreshableAdminConsolePanel} holding the widget and receiving the refresh call when
+ * the widget is shown because the user has selected the tab. If the component doesn't require any refresh logic, an instance of
+ * {@link DefaultRefreshableAdminConsolePanel} can be used to wrap the widget.<p>
+ * 
+ * After the widgets have been added, {@link #initUI()} must be called to assemble all tabs for the current user's roles. The {@link #initUI()}
+ * method must be called each time more widgets have been added dynamically.<p>
+ * 
+ * For each widget added, a {@link AdminConsoleFeatures feature} needs to be specified. The feature tells the roles of which the logged-in user
+ * needs to have at least one in order to see the tab. When the user changes or has his/her roles updated the set of tabs visible will be
+ * adjusted according to the new roles available for the logged-in user.<p> 
+ * 
+ * @author Axel Uhl (D043530)
+ *
+ */
 public class AdminConsolePanel extends DockLayoutPanel {
     private final UserService userService;
     
@@ -89,7 +117,9 @@ public class AdminConsolePanel extends DockLayoutPanel {
         }
     }
     
-    public AdminConsolePanel(UserService userService, BuildVersionRetriever buildVersionRetriever, Label persistentAlertLabel, String releaseNotesAnchorLabel, String releaseNotesURL, ErrorReporter errorReporter) {
+    public AdminConsolePanel(UserService userService, BuildVersionRetriever buildVersionRetriever,
+            Label persistentAlertLabel, String releaseNotesAnchorLabel, String releaseNotesURL,
+            ErrorReporter errorReporter, LoginPanelCss loginPanelCss) {
         super(Unit.EM);
         this.userService = userService;
         roleSpecificTabs = new LinkedHashMap<>();
@@ -119,8 +149,7 @@ public class AdminConsolePanel extends DockLayoutPanel {
         final DockPanel informationPanel = new DockPanel();
         informationPanel.setSize("100%", "95%");
         informationPanel.setSpacing(10);
-        informationPanel.add(new LoginPanel(SecurityStylesheetResources.INSTANCE.css(), getUserService()),
-                DockPanel.WEST);
+        informationPanel.add(new LoginPanel(loginPanelCss, getUserService()), DockPanel.WEST);
         informationPanel.add(persistentAlertLabel, DockPanel.CENTER);
         SystemInformationPanel sysinfoPanel = new SystemInformationPanel(buildVersionRetriever, errorReporter);
         sysinfoPanel.ensureDebugId("SystemInformation");
@@ -130,18 +159,25 @@ public class AdminConsolePanel extends DockLayoutPanel {
         informationPanel.setCellHorizontalAlignment(sysinfoPanel, HasHorizontalAlignment.ALIGN_RIGHT);
         this.addSouth(informationPanel, 2.5);
         this.add(topLevelTabPanel);
-        createUI(releaseNotesURL);
-    }
-    
-    private UserService getUserService() {
-        return userService;
     }
 
-    private void createUI(String releaseNotesURL) {
+    /**
+     * Invoke this method after having added all panels using
+     * {@link #addToTabPanel(TabLayoutPanel, RefreshableAdminConsolePanel, String, AdminConsoleFeatures)} or
+     * {@link #addToVerticalTabPanel(RefreshableAdminConsolePanel, String, AdminConsoleFeatures)} or
+     * {@link #addVerticalTab(String, String, AdminConsoleFeatures)}. Tabs can also dynamically be added after calling
+     * this method, but then this method needs to be invoked again to ensure that all all tabs are properly displayed
+     * for the current panel's state.
+     */
+    public void initUI() {
         updateTabDisplayForCurrentUser(getUserService().getCurrentUser());
         if (topLevelTabPanel.getWidgetCount() > 0) {
             topLevelTabPanel.selectTab(0);
         }
+    }
+
+    private UserService getUserService() {
+        return userService;
     }
 
     private static interface VerticalOrHorizontalTabLayoutPanel {

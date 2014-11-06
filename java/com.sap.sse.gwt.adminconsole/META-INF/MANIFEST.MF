@@ -7,6 +7,6 @@ Bundle-Vendor: SAP
 Bundle-RequiredExecutionEnvironment: JavaSE-1.7
 Require-Bundle: com.sap.sse.gwt,
  com.sap.sse.security.ui,
- com.sap.sse.common,
- com.sap.sailing.gwt.ui
+ com.sap.sse.security,
+ com.sap.sse.common
 Export-Package: com.sap.sse.gwt.adminconsole
