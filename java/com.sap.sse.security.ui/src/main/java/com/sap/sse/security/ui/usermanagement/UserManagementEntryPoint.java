@@ -38,7 +38,7 @@ public class UserManagementEntryPoint extends AbstractSecurityEntryPoint {
         final SettingsPanel settingsPanel = new SettingsPanel(getUserManagementService(), getStringMessages());
         center.add(new ScrollPanel(settingsPanel), getStringMessages().settings());
         RootLayoutPanel.get().add(center);
-        RootPanel.get().add(new LoginPanel(Resources.INSTANCE.css(), getUserService()));
+        RootPanel.get().add(new LoginPanel(Resources.INSTANCE.loginPanelCss(), getUserService()));
         setTabPanelSize(center, ""+Window.getClientWidth()+"px", ""+Window.getClientHeight()+"px");
     }
 
