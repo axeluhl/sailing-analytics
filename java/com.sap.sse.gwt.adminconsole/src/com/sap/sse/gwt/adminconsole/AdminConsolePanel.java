@@ -197,19 +197,7 @@ public class AdminConsolePanel extends DockLayoutPanel {
         AbstractEntryPoint.setTabPanelSize(newTabPanel, "100%", "100%");
         newTabPanel.addSelectionHandler(tabSelectionHandler);
         newTabPanel.ensureDebugId(tabDebugId);
-        VerticalOrHorizontalTabLayoutPanel wrapper = new VerticalOrHorizontalTabLayoutPanel() {
-            @Override
-            public void add(Widget child, String text, boolean asHtml) {
-                newTabPanel.add(child, text, asHtml);
-                newTabPanel.forceLayout();
-            }
-
-            @Override
-            public void remove(Widget child) {
-                newTabPanel.remove(child);
-            }
-        };
-        remeberWidgetLocationAndFeature(wrapper, newTabPanel, tabTitle, feature);
+        remeberWidgetLocationAndFeature(topLevelTabPanelWrapper, newTabPanel, tabTitle, feature);
         return newTabPanel;
     }
 
