@@ -25,13 +25,6 @@ public abstract class AbstractEntryPoint extends com.sap.sse.gwt.client.Abstract
     private UserService userService;
     private UserManagementServiceAsync userManagementService;
 
-    /**
-     * The message displayed to the user when the server cannot be reached or
-     * returns an error.
-     */
-    private static final String SERVER_ERROR = "An error occurred while " //$NON-NLS-1$
-            + "attempting to contact the server. Please check your network " + "connection and try again."; //$NON-NLS-1$ //$NON-NLS-2$
-
     protected void doOnModuleLoad() {
         super.doOnModuleLoad();
         userManagementService = GWT.create(UserManagementService.class);
@@ -55,7 +48,7 @@ public abstract class AbstractEntryPoint extends com.sap.sse.gwt.client.Abstract
     public void reportError(String message) {
         errorDialogBox.setText(message);
         serverResponseLabel.addStyleName("serverResponseLabelError"); //$NON-NLS-1$
-        serverResponseLabel.setHTML(SERVER_ERROR);
+        serverResponseLabel.setHTML(stringMessages.serverError());
         errorDialogBox.center();
         dialogCloseButton.setFocus(true);
     }
