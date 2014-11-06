@@ -8,20 +8,20 @@ Bundle-Vendor: SAP
 Bundle-RequiredExecutionEnvironment: JavaSE-1.7
 Require-Bundle: com.sap.sailing.domain,
  com.sap.sailing.server,
- com.google.gwt.osgi;bundle-version="2.6.0",
- com.sap.sse.common;bundle-version="1.0.0",
+ com.google.gwt.osgi;bundle-version="2.6.1",
+ com.sap.sse.common,
  com.sap.sailing.domain.common,
- com.sap.sailing.domain.shared.android;bundle-version="1.0.0",
+ com.sap.sailing.domain.shared.android,
  com.sap.sailing.gwt.ui,
  org.moxieapps.gwt.highcharts;bundle-version="1.6.0",
- com.sap.sse.gwt;bundle-version="1.0.0",
+ com.sap.sse.gwt,
  com.sap.sailing.domain.igtimiadapter,
- com.sap.sailing.expeditionconnector;bundle-version="1.0.0",
- com.sap.sailing.server.gateway;bundle-version="1.0.0",
- com.sap.sailing.declination;bundle-version="1.0.0",
+ com.sap.sailing.expeditionconnector,
+ com.sap.sailing.server.gateway,
+ com.sap.sailing.declination,
  org.json.simple;bundle-version="1.1.0",
- com.sap.sailing.udpconnector;bundle-version="1.0.0",
- com.googlecode.mgwt;bundle-version="2.6.1"
+ com.sap.sailing.udpconnector,
+ com.googlecode.mgwt;bundle-version="2.0.0"
 Bundle-ActivationPolicy: lazy
 Import-Package: org.osgi.framework;version="1.5.0",
  org.osgi.util.tracker

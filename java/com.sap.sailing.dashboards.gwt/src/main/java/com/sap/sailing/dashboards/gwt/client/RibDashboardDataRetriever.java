@@ -7,7 +7,6 @@ import com.google.gwt.core.client.GWT;
 import com.google.gwt.user.client.Timer;
 import com.google.gwt.user.client.Window;
 import com.google.gwt.user.client.rpc.AsyncCallback;
-import com.google.gwt.user.client.rpc.ServiceDefTarget;
 import com.sap.sailing.dashboards.gwt.client.device.Location;
 import com.sap.sailing.dashboards.gwt.client.popups.RacingNotYetStartedPopup;
 import com.sap.sailing.dashboards.gwt.client.popups.RacingNotYetStartedPopupListener;
@@ -16,10 +15,6 @@ import com.sap.sailing.dashboards.gwt.client.popups.competitorselection.Competit
 import com.sap.sailing.dashboards.gwt.client.startanalysis.NewStartAnalysisListener;
 import com.sap.sailing.dashboards.gwt.shared.dto.RibDashboardRaceInfoDTO;
 import com.sap.sailing.dashboards.gwt.shared.dto.startanalysis.StartAnalysisDTO;
-import com.sap.sailing.gwt.ui.client.RemoteServiceMappingConstants;
-import com.sap.sailing.gwt.ui.client.SailingService;
-import com.sap.sailing.gwt.ui.client.SailingServiceAsync;
-import com.sap.sse.gwt.client.EntryPointHelper;
 
 /**
  * Class calls method {@link #requestLiveRaceInfoFromRibDashboadService()) to retrieve new
@@ -38,7 +33,6 @@ public class RibDashboardDataRetriever implements RacingNotYetStartedPopupListen
     private ArrayList<NewStartAnalysisListener> newStartAnalysisListeners;
 
     private final RibDashboardServiceAsync ribDashboardService;
-    private final SailingServiceAsync sailingService = GWT.create(SailingService.class);
     private final Object MUTEX = new Object();
 
     private static RibDashboardDataRetriever INSTANCE = null;
@@ -55,8 +49,6 @@ public class RibDashboardDataRetriever implements RacingNotYetStartedPopupListen
         dataRetrieverListener = new ArrayList<RibDashboardDataRetrieverListener>();
         newStartAnalysisListeners = new ArrayList<NewStartAnalysisListener>();
         ribDashboardService = GWT.create(RibDashboardService.class);
-        EntryPointHelper.registerASyncService((ServiceDefTarget) sailingService,
-                RemoteServiceMappingConstants.sailingServiceRemotePath);
         this.leaderboardGroupName = Window.Location.getParameter(PARAM_LEADERBOARD_GROUP_NAME);
         numberOfChachedStartAnalysisDTOs = 0;
         popupRacingNotYetStarted = new RacingNotYetStartedPopup();
