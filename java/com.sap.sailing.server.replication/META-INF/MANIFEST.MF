@@ -13,9 +13,8 @@ Require-Bundle: com.sap.sailing.server,
  com.sap.sailing.server.gateway,
  com.sap.sailing.domain.common,
  com.sap.sailing.domain,
- com.sap.sailing.operationaltransformation,
- com.sap.sailing.domain.persistence,
- com.sap.sailing.domain.shared.android;bundle-version="1.0.0",
+ com.sap.sse.operationaltransformation,
+ com.sap.sailing.domain.shared.android,
  com.sap.sse.common
 Bundle-ClassPath: .
 Web-ContextPath: /replication

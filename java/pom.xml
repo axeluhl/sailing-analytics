@@ -25,10 +25,12 @@
 		<module>com.sap.sse.security.test</module>
 		<module>com.sap.sse.security.ui</module>
 		<module>com.sap.sse.security.userstore.mongodb</module>
+		<module>com.sap.sse.operationaltransformation</module>
+		<module>com.sap.sse.operationaltransformation.test</module>
+		<module>com.sap.sse.common.test</module>
 		<module>com.sap.sailing.domain.common</module>
 		<module>com.sap.sailing.domain.shared.android</module>
 		<module>com.sap.sailing.domain</module>
-		<module>com.sap.sailing.operationaltransformation</module>
 		<module>com.sap.sailing.geocoding</module>
 		<module>com.sap.sailing.datamining</module>
 		<module>com.sap.sailing.datamining.shared</module>
@@ -79,10 +81,8 @@
 		<module>com.sap.sailing.server.trackfiles</module>
 		<module>com.sap.sailing.feature.runtime</module>
 		<module>com.sap.sailing.gwt.ui</module>
-		<module>com.sap.sse.common.test</module>
 		<module>com.sap.sailing.domain.test</module>
 		<module>com.sap.sailing.domain.shared.android.test</module>
-		<module>com.sap.sailing.operationaltransformation.test</module>
 		<module>com.sap.sailing.geocoding.test</module>
 		<module>com.sap.sailing.domain.swisstimingadapter.test</module>
 		<module>com.sap.sailing.domain.swisstimingreplayadapter.test</module>
