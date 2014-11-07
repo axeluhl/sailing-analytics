@@ -18,16 +18,16 @@ import com.sap.sailing.domain.racelog.RaceLogEvent;
 import com.sap.sailing.domain.racelog.RaceLogEventAuthor;
 import com.sap.sailing.domain.racelog.RaceLogEventFactory;
 import com.sap.sailing.domain.racelog.impl.RaceLogEventAuthorImpl;
-import com.sap.sailing.operationaltransformation.OperationalTransformer;
-import com.sap.sailing.operationaltransformation.Peer;
-import com.sap.sailing.operationaltransformation.Peer.Role;
-import com.sap.sailing.operationaltransformation.PeerImpl;
 import com.sap.sailing.server.RacingEventService;
 import com.sap.sailing.server.RacingEventServiceOperation;
 import com.sap.sailing.server.impl.RacingEventServiceImpl;
 import com.sap.sailing.server.operationaltransformation.AddColumnToLeaderboard;
 import com.sap.sailing.server.operationaltransformation.CreateFlexibleLeaderboard;
 import com.sap.sse.mongodb.MongoDBService;
+import com.sap.sse.operationaltransformation.OperationalTransformer;
+import com.sap.sse.operationaltransformation.Peer;
+import com.sap.sse.operationaltransformation.PeerImpl;
+import com.sap.sse.operationaltransformation.Peer.Role;
 
 
 public class RaceLogInRaceColumnTest {

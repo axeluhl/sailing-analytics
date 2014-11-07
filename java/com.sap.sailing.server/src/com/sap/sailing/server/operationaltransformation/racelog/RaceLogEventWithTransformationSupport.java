@@ -2,7 +2,7 @@ package com.sap.sailing.server.operationaltransformation.racelog;
 
 import com.sap.sailing.domain.racelog.RaceLog;
 import com.sap.sailing.domain.racelog.RaceLogEvent;
-import com.sap.sailing.operationaltransformation.OperationWithTransformationSupport;
+import com.sap.sse.operationaltransformation.OperationWithTransformationSupport;
 
 public abstract class RaceLogEventWithTransformationSupport<E extends RaceLogEvent> implements OperationWithTransformationSupport<RaceLog, RaceLogEventWithTransformationSupport<?>> {
     private final E raceLogEvent;

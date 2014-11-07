@@ -1,4 +1,4 @@
-package com.sap.sailing.operationaltransformation;
+package com.sap.sse.operationaltransformation;
 
 /**
  * Accepts change operations from clients and maintains a shared state. If new

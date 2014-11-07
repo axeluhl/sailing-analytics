@@ -1,4 +1,4 @@
-package com.sap.sailing.operationaltransformation.test.util;
+package com.sap.sse.operationaltransformation.test.util;
 
 /**
  * Implements a BASE64 encoder and decoder. Class <code>Base64</code> provides

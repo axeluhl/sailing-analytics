@@ -2,7 +2,6 @@ package com.sap.sailing.server;
 
 import java.io.Serializable;
 
-import com.sap.sailing.operationaltransformation.OperationWithTransformationSupport;
 import com.sap.sailing.server.operationaltransformation.AddColumnToLeaderboard;
 import com.sap.sailing.server.operationaltransformation.CreateFlexibleLeaderboard;
 import com.sap.sailing.server.operationaltransformation.CreatePersistentCompetitor;
@@ -12,6 +11,7 @@ import com.sap.sailing.server.operationaltransformation.MoveLeaderboardColumnUp;
 import com.sap.sailing.server.operationaltransformation.RemoveLeaderboard;
 import com.sap.sailing.server.operationaltransformation.RemoveLeaderboardColumn;
 import com.sap.sailing.server.operationaltransformation.RenameLeaderboardColumn;
+import com.sap.sse.operationaltransformation.OperationWithTransformationSupport;
 
 public interface RacingEventServiceOperation<ResultType> extends OperationWithTransformationSupport<RacingEventService, RacingEventServiceOperation<?>>, Serializable {
     /**

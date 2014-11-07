@@ -1,4 +1,4 @@
-package com.sap.sailing.operationaltransformation;
+package com.sap.sse.operationaltransformation;
 
 
 

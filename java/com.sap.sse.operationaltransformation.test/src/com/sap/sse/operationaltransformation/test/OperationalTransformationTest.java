@@ -1,4 +1,4 @@
-package com.sap.sailing.operationaltransformation.test;
+package com.sap.sse.operationaltransformation.test;
 
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertTrue;
@@ -9,13 +9,13 @@ import java.util.UUID;
 import org.junit.Before;
 import org.junit.Test;
 
-import com.sap.sailing.operationaltransformation.ClientServerOperationPair;
-import com.sap.sailing.operationaltransformation.Operation;
-import com.sap.sailing.operationaltransformation.Peer;
-import com.sap.sailing.operationaltransformation.Peer.Role;
-import com.sap.sailing.operationaltransformation.PeerImpl;
-import com.sap.sailing.operationaltransformation.Transformer;
-import com.sap.sailing.operationaltransformation.test.util.Base64;
+import com.sap.sse.operationaltransformation.ClientServerOperationPair;
+import com.sap.sse.operationaltransformation.Operation;
+import com.sap.sse.operationaltransformation.Peer;
+import com.sap.sse.operationaltransformation.PeerImpl;
+import com.sap.sse.operationaltransformation.Transformer;
+import com.sap.sse.operationaltransformation.Peer.Role;
+import com.sap.sse.operationaltransformation.test.util.Base64;
 
 public class OperationalTransformationTest {
     private Peer<StringInsertOperation, StringState> server;
