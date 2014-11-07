@@ -9,7 +9,8 @@ import com.sap.sse.security.ui.shared.UserManagementServiceAsync;
 
 public class EditEmailDialog extends AbstractUserDialog {
     public EditEmailDialog(final StringMessages stringMessages, UserManagementServiceAsync userManagementService, UserDTO user, DialogCallback<UserData> callback) {
-        super(stringMessages, stringMessages.editEmail(), userManagementService, user, /* no validator; any address is considered valid */ null, callback);
+        super(stringMessages, stringMessages.editEmail(), stringMessages.editEmail(), userManagementService,
+                user, /* no validator; any address is considered valid */ null, callback);
     }
 
     @Override

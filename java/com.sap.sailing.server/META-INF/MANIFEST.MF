@@ -17,7 +17,7 @@ Bundle-ActivationPolicy: lazy
 Require-Bundle: com.sap.sailing.domain,
  com.sap.sailing.expeditionconnector,
  com.sap.sailing.declination,
- com.sap.sailing.mongodb,
+ com.sap.sse.mongodb,
  com.mongodb.driver;bundle-version="2.6.2",
  com.sap.sailing.domain.persistence,
  com.sap.sailing.domain.common,

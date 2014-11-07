@@ -15,7 +15,9 @@
 
 	<modules>
 		<module>com.sap.sse.common</module>
+		<module>com.sap.sse.mongodb</module>
 		<module>com.sap.sse.gwt</module>
+		<module>com.sap.sse.gwt.adminconsole</module>
 		<module>com.sap.sse.datamining</module>
 		<module>com.sap.sse.datamining.shared</module>
 		<module>com.sap.sse.datamining.test</module>
@@ -57,7 +59,6 @@
 		<module>com.sap.sailing.www.events</module>
 		<module>com.sap.sailing.xmlexport</module>
 		<module>com.google.gwt.osgi</module>
-		<module>com.sap.sailing.mongodb</module>
 		<module>com.tractrac.clientmodule</module>
 		<module>org.json.simple</module>
 		<module>com.mongodb.driver</module>

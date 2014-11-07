@@ -8,7 +8,7 @@ Bundle-RequiredExecutionEnvironment: JavaSE-1.8
 Require-Bundle: org.hamcrest;bundle-version="1.1.0",
  org.junit4;bundle-version="4.8.2",
  org.openqa.selenium.osgi;bundle-version="2.40.0",
- com.sap.sailing.mongodb;bundle-version="1.0.0",
+ com.sap.sse.mongodb;bundle-version="1.0.0",
  com.mongodb.driver;bundle-version="2.6.2",
  com.sap.sailing.domain.common,
  com.sap.sse.common

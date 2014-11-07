@@ -13,6 +13,7 @@ public interface LoginViewResources extends ClientBundle {
     public interface LocalCss extends CssResource {
         String loginform();
         String loginform_header();
+        String loginform_header_appname();
         String loginform_content();
         String textInput_watermark();
         String passwordTextInput_watermark();
