@@ -1,6 +1,6 @@
 package com.sap.sse.security.userstore.mongodb.impl;
 
-import com.sap.sailing.mongodb.MongoDBService;
+import com.sap.sse.mongodb.MongoDBService;
 import com.sap.sse.security.userstore.mongodb.DomainObjectFactory;
 import com.sap.sse.security.userstore.mongodb.MongoObjectFactory;
 import com.sap.sse.security.userstore.mongodb.PersistenceFactory;

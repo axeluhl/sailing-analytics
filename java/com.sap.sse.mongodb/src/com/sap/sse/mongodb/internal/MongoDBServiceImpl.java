@@ -1,4 +1,4 @@
-package com.sap.sailing.mongodb.internal;
+package com.sap.sse.mongodb.internal;
 
 import java.net.UnknownHostException;
 import java.util.HashMap;
@@ -8,9 +8,9 @@ import java.util.logging.Logger;
 
 import com.mongodb.DB;
 import com.mongodb.Mongo;
-import com.sap.sailing.mongodb.AlreadyRegisteredException;
-import com.sap.sailing.mongodb.MongoDBConfiguration;
-import com.sap.sailing.mongodb.MongoDBService;
+import com.sap.sse.mongodb.AlreadyRegisteredException;
+import com.sap.sse.mongodb.MongoDBConfiguration;
+import com.sap.sse.mongodb.MongoDBService;
 
 public class MongoDBServiceImpl implements MongoDBService {
 

@@ -1,6 +1,6 @@
 package com.sap.sse.security.ui.loginpanel;
 
-import java.util.Collections;
+import java.util.HashMap;
 
 import com.google.gwt.core.client.GWT;
 import com.google.gwt.event.dom.client.ClickEvent;
@@ -40,7 +40,7 @@ public class LoginPanel extends HorizontalPanel implements UserStatusEventHandle
 
     private final OAuthLogin oAuthPanel;
 
-    public LoginPanel(final Css css, final UserService userService) {
+    public LoginPanel(final LoginPanelCss css, final UserService userService) {
         this.userManagementService = userService.getUserManagementService();
         this.userService = userService;
         css.ensureInjected();
@@ -50,7 +50,7 @@ public class LoginPanel extends HorizontalPanel implements UserStatusEventHandle
         signInLink.addClickHandler(new ClickHandler() {
             @Override
             public void onClick(ClickEvent event) {
-                final SignInDialog signInDialog = new SignInDialog(stringMessages, userManagementService, new DialogCallback<UserData>() {
+                final SignInDialog signInDialog = new SignInDialog(stringMessages, userManagementService, userService, new DialogCallback<UserData>() {
                     @Override
                     public void ok(UserData userData) {
                         userService.login(userData.getUsername(), userData.getPassword(), new MarkedAsyncCallback<SuccessInfo>(new AsyncCallback<SuccessInfo>() {
@@ -58,7 +58,11 @@ public class LoginPanel extends HorizontalPanel implements UserStatusEventHandle
                             public void onFailure(Throwable caught) {
                                 Window.alert(stringMessages.invalidCredentials());
                             }
-                            @Override public void onSuccess(SuccessInfo result) {}
+                            @Override public void onSuccess(SuccessInfo result) {
+                                if (!result.isSuccessful()) {
+                                    Window.alert(stringMessages.invalidCredentials());
+                                }
+                            }
                         }));
                     }
                     @Override public void cancel() {}
@@ -74,7 +78,7 @@ public class LoginPanel extends HorizontalPanel implements UserStatusEventHandle
                     @Override
                     public void ok(final UserData userData) {
                         userManagementService.createSimpleUser(userData.getUsername(), userData.getEmail(), userData.getPassword(),
-                                EntryPointLinkFactory.createEmailValidationLink(Collections.<String, String> emptyMap()),
+                                EntryPointLinkFactory.createEmailValidationLink(new HashMap<String, String>()),
                                 new MarkedAsyncCallback<UserDTO>(new AsyncCallback<UserDTO>() {
                             @Override
                             public void onFailure(Throwable caught) {

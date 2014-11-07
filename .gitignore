@@ -8,6 +8,7 @@ reporting.log
 manifest.txt
 java/com.sap.sailing.gwt.ui/gwt-unitCache/*
 java/com.sap.sailing.gwt.ui/war/WEB-INF/deploy/*
+java/com.sap.sse.security.ui/WEB-INF/deploy/*
 sailing_debug0*
 dist
 build

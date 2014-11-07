@@ -1,4 +1,4 @@
-package com.sap.sailing.mongodb;
+package com.sap.sse.mongodb;
 
 import java.util.logging.Level;
 import java.util.logging.Logger;
@@ -6,7 +6,7 @@ import java.util.logging.Logger;
 import org.osgi.framework.BundleActivator;
 import org.osgi.framework.BundleContext;
 
-import com.sap.sailing.mongodb.internal.MongoDBServiceImpl;
+import com.sap.sse.mongodb.internal.MongoDBServiceImpl;
 
 public class Activator implements BundleActivator {
     private static final Logger logger = Logger.getLogger(Activator.class.getName());

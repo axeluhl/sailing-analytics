@@ -1,7 +1,11 @@
 #!/bin/bash
 set -u
-ECLIPSE_HOME=C:/Users/D056866/Sailing/eclipse
-SAILING_GIT_HOME=C:/Users/D056866/Sailing/git
+if [ "$ECLIPSE_HOME" = "" ]; then
+    ECLIPSE_HOME=C:/Users/D056866/Sailing/eclipse
+fi
+if [ "$SAILING_GIT_HOME" = "" ]; then
+    SAILING_GIT_HOME=C:/Users/D056866/Sailing/git
+fi
 TARGET_PLATFORM_BASE_DIR=${SAILING_GIT_HOME}/java/com.sap.sailing.targetplatform.base
 
 ECLIPSE_VM_ARGS="-Xmx256m"

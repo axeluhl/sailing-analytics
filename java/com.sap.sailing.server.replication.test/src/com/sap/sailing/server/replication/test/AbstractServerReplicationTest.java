@@ -34,7 +34,6 @@ import com.sap.sailing.domain.persistence.PersistenceFactory;
 import com.sap.sailing.domain.persistence.media.MediaDBFactory;
 import com.sap.sailing.domain.racelog.tracking.EmptyGPSFixStore;
 import com.sap.sailing.domain.tracking.impl.EmptyWindStore;
-import com.sap.sailing.mongodb.MongoDBService;
 import com.sap.sailing.server.RacingEventService;
 import com.sap.sailing.server.impl.RacingEventServiceImpl;
 import com.sap.sailing.server.replication.ReplicationMasterDescriptor;
@@ -47,6 +46,7 @@ import com.sap.sailing.server.replication.impl.ReplicationMasterDescriptorImpl;
 import com.sap.sailing.server.replication.impl.ReplicationServiceImpl;
 import com.sap.sailing.server.replication.impl.Replicator;
 import com.sap.sse.common.Util;
+import com.sap.sse.mongodb.MongoDBService;
 
 public abstract class AbstractServerReplicationTest {
     protected static final int SERVLET_PORT = 9990;

@@ -42,9 +42,9 @@ import com.sap.sailing.domain.tracking.impl.WindImpl;
 import com.sap.sailing.domain.tractracadapter.DomainFactory;
 import com.sap.sailing.domain.tractracadapter.Receiver;
 import com.sap.sailing.domain.tractracadapter.ReceiverType;
-import com.sap.sailing.mongodb.MongoDBConfiguration;
 import com.sap.sailing.server.impl.RacingEventServiceImpl;
 import com.sap.sse.common.Util;
+import com.sap.sse.mongodb.MongoDBConfiguration;
 
 public class TestStoringAndRetrievingWindTracksTest extends AbstractTracTracLiveTest {
 

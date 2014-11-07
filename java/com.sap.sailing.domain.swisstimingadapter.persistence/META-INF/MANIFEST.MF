@@ -8,7 +8,7 @@ Bundle-RequiredExecutionEnvironment: JavaSE-1.8
 Bundle-ActivationPolicy: lazy
 Require-Bundle: com.sap.sailing.domain.swisstimingadapter,
  com.mongodb.driver;bundle-version="2.6.2",
- com.sap.sailing.mongodb,
+ com.sap.sse.mongodb,
  com.sap.sailing.domain,
  com.sap.sailing.domain.common
 Export-Package: com.sap.sailing.domain.swisstimingadapter.persistence,

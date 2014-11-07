@@ -1,6 +1,6 @@
-package com.sap.sailing.mongodb;
+package com.sap.sse.mongodb;
 
-import com.sap.sailing.mongodb.internal.MongoDBServiceImpl;
+import com.sap.sse.mongodb.internal.MongoDBServiceImpl;
 
 /**
  * A readonly Mongo Database connection configuration

@@ -54,7 +54,7 @@ public class UserManagementEntryPoint extends AbstractEntryPoint {
         final SettingsPanel settingsPanel = new SettingsPanel(userManagementService, stringMessages);
         center.add(new ScrollPanel(settingsPanel), stringMessages.settings());
         RootLayoutPanel.get().add(center);
-        RootPanel.get().add(new LoginPanel(Resources.INSTANCE.css(), userService));
+        RootPanel.get().add(new LoginPanel(Resources.INSTANCE.loginPanelCss(), userService));
         setTabPanelSize(center, ""+Window.getClientWidth()+"px", ""+Window.getClientHeight()+"px");
     }
 

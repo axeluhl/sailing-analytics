@@ -9,7 +9,7 @@ Require-Bundle: com.sap.sailing.domain,
  com.sap.sailing.domain.shared.android;bundle-version="1.0.0",
  com.sap.sailing.server,
  com.sap.sailing.domain.tractracadapter,
- com.sap.sailing.mongodb,
+ com.sap.sse.mongodb,
  com.mongodb.driver;bundle-version="2.6.2",
  com.sap.sailing.domain.swisstimingadapter,
  com.sap.sailing.domain.persistence,
@@ -36,7 +36,9 @@ Require-Bundle: com.sap.sailing.domain,
  com.sap.sse.datamining.shared;bundle-version="1.0.0",
  com.sap.sse.datamining;bundle-version="1.0.0",
  com.sap.sse.security;bundle-version="1.0.0",
- com.sap.sse.security.ui;bundle-version="1.0.0"
+ com.sap.sse.security.ui;bundle-version="1.0.0",
+ org.apache.shiro.web;bundle-version="1.2.2",
+ org.apache.shiro.ehcache;bundle-version="1.2.3"
 Bundle-Activator: com.sap.sailing.gwt.ui.server.Activator
 Bundle-ActivationPolicy: lazy
 Import-Package: javax.jms;version="1.1.0",

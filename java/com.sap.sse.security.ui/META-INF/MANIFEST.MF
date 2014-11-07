@@ -17,7 +17,9 @@ Require-Bundle: javax.servlet;bundle-version="2.5.0",
  org.json.simple,
  com.sap.sailing.domain.common,
  com.sap.sse.common,
- com.sap.sse.gwt
+ com.sap.sse.gwt,
+ org.apache.shiro.core;bundle-version="1.2.2",
+ org.apache.shiro.web;bundle-version="1.2.2"
 Web-ContextPath: /security/ui
 Export-Package: com.sap.sse.security.ui.client,
  com.sap.sse.security.ui.loginpanel,

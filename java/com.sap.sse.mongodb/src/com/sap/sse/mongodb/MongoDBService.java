@@ -1,7 +1,7 @@
-package com.sap.sailing.mongodb;
+package com.sap.sse.mongodb;
 
 import com.mongodb.DB;
-import com.sap.sailing.mongodb.internal.MongoDBServiceImpl;
+import com.sap.sse.mongodb.internal.MongoDBServiceImpl;
 
 public interface MongoDBService {
 
