@@ -36,14 +36,29 @@ class DataManager: NSObject {
     
     // MARK: - notification callbacks
    
+    /* New location detected, store to database. */
     func newLocation(notification: NSNotification) {
         let gpsFix = NSEntityDescription.insertNewObjectForEntityForName("GPSFix", inManagedObjectContext: self.managedObjectContext!) as GPSFix;
         gpsFix.deviceUuid = DeviceUDIDManager.UDID
         gpsFix.initWithDictionary(notification.userInfo!)
-   }
-
+    }
+    
+    /* Tracking stopped, save data to disk. */
     func trackingStopped(notification: NSNotification) {
         saveContext()
+    }
+
+    // MARK: - public database access
+
+    /* Get latest locations. Limited by the max number of objects that can be sent. */
+    func latestLocations() -> [GPSFix] {
+        let request = NSFetchRequest()
+        request.entity = NSEntityDescription.entityForName("GPSFix", inManagedObjectContext: self.managedObjectContext!)
+        request.sortDescriptors = [NSSortDescriptor(key: "timeMillis", ascending: false)]
+        request.fetchLimit = APIManager.Constants.maxSendGPSFix
+        var error: NSError? = nil
+        let results = self.managedObjectContext!.executeFetchRequest(request, error: &error)
+        return results as [GPSFix]
     }
 
     // MARK: - Core Data stack
@@ -108,6 +123,5 @@ class DataManager: NSObject {
             }
         }
     }
-    
 
 }

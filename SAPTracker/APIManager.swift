@@ -28,6 +28,10 @@ class APIManager: NSObject {
         static let BatterySaving: NSTimeInterval = 30
     }
     
+    struct Constants {
+        static let maxSendGPSFix = 100
+    }
+    
     /* Number of seconds between syncs */
     private var syncPeriod: NSTimeInterval = BatteryManager.sharedManager.batterySaving ? SyncPeriod.BatterySaving : SyncPeriod.Normal
     
@@ -53,8 +57,6 @@ class APIManager: NSObject {
         // register for notifications
         NSNotificationCenter.defaultCenter().addObserver(self, selector:"batteryChanged", name:BatteryManager.NotificationType.batterySavingChanged, object: nil);
         
-        // TODO: move to initManager
-        timer()
     }
     
     deinit {
@@ -91,7 +93,9 @@ class APIManager: NSObject {
         
         // TODO: only one operation at a time?
         //manager!.operationQueue.maxConcurrentOperationCount = 0
-        
+ 
+        // start timer
+        timer()
     }
     
     // MARK: - REST
@@ -112,11 +116,17 @@ class APIManager: NSObject {
     }
     
     /* Send GPS location to server. Delete row from cache. */
-    func postGPSFix(gpsFix: GPSFix!, success: (AFHTTPRequestOperation!, AnyObject!) -> Void, failure: (AFHTTPRequestOperation!, AnyObject!) -> Void) {
+    private func postGPSFixes(gpsFixes: [GPSFix]!) {
         var urlString = baseUrlString! + postGPSFixPath
-        manager!.POST(urlString, parameters: gpsFix.dictionary(), success: { (AFHTTPRequestOperation operation, AnyObject responseObject) -> Void in
-            // delete GPS fix from database
-            DataManager.sharedManager.managedObjectContext!.deleteObject(gpsFix)
+        var array: [[String: AnyObject]] = []
+        for gpsFix in gpsFixes {
+            array.append(gpsFix.dictionary())
+        }
+        manager!.POST(urlString, parameters: array, success: { (AFHTTPRequestOperation operation, AnyObject responseObject) -> Void in
+            // delete GPS fixes from database
+            for gpsFix in gpsFixes {
+                DataManager.sharedManager.managedObjectContext!.deleteObject(gpsFix)
+            }
             }, failure: { (AFHTTPRequestOperation operation, NSError error) -> Void in
                 NSLog("failure")
         })
@@ -129,6 +139,11 @@ class APIManager: NSObject {
         NSLog("timer")
         let loop = NSTimer.scheduledTimerWithTimeInterval(syncPeriod, target:self, selector:"timer", userInfo:nil, repeats:false);
         NSRunLoop.currentRunLoop().addTimer(loop, forMode:NSRunLoopCommonModes);
+        
+        if (manager != nil && !manager!.operationQueue.suspended) {
+            let lastestGPSFixes = DataManager.sharedManager.latestLocations()
+            postGPSFixes(lastestGPSFixes)
+        }
     }
     
     func batteryChanged() {
