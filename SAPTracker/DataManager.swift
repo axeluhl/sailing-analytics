@@ -39,8 +39,7 @@ class DataManager: NSObject {
     func newLocation(notification: NSNotification) {
         let gpsFix = NSEntityDescription.insertNewObjectForEntityForName("GPSFix", inManagedObjectContext: self.managedObjectContext!) as GPSFix;
         gpsFix.deviceUuid = DeviceUDIDManager.UDID
-        gpsFix.initWithDictionary(notification.userInfo!)        
-        return
+        gpsFix.initWithDictionary(notification.userInfo!)
    }
 
     func trackingStopped(notification: NSNotification) {
