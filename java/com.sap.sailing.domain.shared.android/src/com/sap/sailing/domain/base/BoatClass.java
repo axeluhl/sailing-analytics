@@ -5,7 +5,7 @@ import com.sap.sailing.domain.common.Distance;
 import com.sap.sailing.domain.common.TimePoint;
 import com.sap.sse.common.Named;
 
-public interface BoatClass extends Named, IsManagedBySharedDomainFactory {
+public interface BoatClass extends Named, IsManagedByCache {
     /**
      * The distance returned by this method should be appropriate for use in
      * {@link TrackedRace#approximate(Competitor, Distance, TimePoint, TimePoint)} so that penalty circles and other

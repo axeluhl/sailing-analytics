@@ -263,7 +263,7 @@ public abstract class AbstractServerReplicationTest {
             masterReplicationService.registerReplica(replicaDescriptor);
             registerReplicaUuidForMaster(replicaDescriptor.getUuid().toString(), master);
             QueueingConsumer consumer = master.getConsumer();
-            final Replicator replicator = new Replicator(master, this, startReplicatorSuspended, consumer, DomainFactory.INSTANCE);
+            final Replicator replicator = new Replicator(master, this, startReplicatorSuspended, consumer);
             new Thread(replicator).start();
             return replicator;
         }

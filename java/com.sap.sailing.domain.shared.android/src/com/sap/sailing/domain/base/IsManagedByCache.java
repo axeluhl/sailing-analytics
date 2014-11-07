@@ -13,6 +13,6 @@ package com.sap.sailing.domain.base;
  * @author Axel Uhl (D043530)
  *
  */
-public interface IsManagedBySharedDomainFactory {
-    IsManagedBySharedDomainFactory resolve(SharedDomainFactory domainFactory);
+public interface IsManagedByCache {
+    IsManagedByCache resolve(SharedDomainFactory domainFactory);
 }

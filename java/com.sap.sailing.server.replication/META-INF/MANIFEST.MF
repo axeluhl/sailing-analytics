@@ -12,10 +12,9 @@ Export-Package: com.sap.sailing.server.replication,
 Require-Bundle: com.sap.sailing.server,
  com.sap.sailing.server.gateway,
  com.sap.sailing.domain.common,
- com.sap.sailing.domain,
- com.sap.sse.operationaltransformation,
  com.sap.sailing.domain.shared.android,
- com.sap.sse.common
+ com.sap.sse.common,
+ com.sap.sse.operationaltransformation
 Bundle-ClassPath: .
 Web-ContextPath: /replication
 Import-Package: com.rabbitmq.client;version="2.8.4",

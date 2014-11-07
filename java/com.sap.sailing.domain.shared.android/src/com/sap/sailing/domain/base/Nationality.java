@@ -4,7 +4,7 @@ import com.sap.sailing.domain.common.CountryCode;
 import com.sap.sse.common.Named;
 import com.sap.sse.datamining.shared.annotations.Dimension;
 
-public interface Nationality extends Named, WithImage, IsManagedBySharedDomainFactory {
+public interface Nationality extends Named, WithImage, IsManagedByCache {
     @Dimension(messageKey="NationalityAcronym")
     String getThreeLetterIOCAcronym();
     

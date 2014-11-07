@@ -5,7 +5,7 @@ import com.sap.sailing.domain.common.WithID;
 import com.sap.sse.datamining.shared.annotations.Connector;
 import com.sap.sse.common.Named;
 
-public interface Competitor extends Named, WithID, IsManagedBySharedDomainFactory {
+public interface Competitor extends Named, WithID, IsManagedByCache {
     @Connector(messageKey="Team", ordinal=9)
     Team getTeam();
 

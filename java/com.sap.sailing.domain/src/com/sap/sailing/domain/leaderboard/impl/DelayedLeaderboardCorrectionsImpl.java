@@ -12,7 +12,7 @@ import java.util.Set;
 import com.sap.sailing.domain.base.Competitor;
 import com.sap.sailing.domain.base.CompetitorFactory;
 import com.sap.sailing.domain.base.Fleet;
-import com.sap.sailing.domain.base.IsManagedBySharedDomainFactory;
+import com.sap.sailing.domain.base.IsManagedByCache;
 import com.sap.sailing.domain.base.RaceColumn;
 import com.sap.sailing.domain.base.RaceColumnListener;
 import com.sap.sailing.domain.base.SharedDomainFactory;
@@ -41,7 +41,7 @@ import com.sap.sailing.domain.tracking.TrackedRace;
  * @author Axel Uhl (d043530)
  * 
  */
-public class DelayedLeaderboardCorrectionsImpl implements DelayedLeaderboardCorrections, IsManagedBySharedDomainFactory {
+public class DelayedLeaderboardCorrectionsImpl implements DelayedLeaderboardCorrections, IsManagedByCache {
     private static final long serialVersionUID = 8824782847677232275L;
     
     // deprecated structures that key corrections by name; to be removed once all databases have been migrated
@@ -457,7 +457,7 @@ public class DelayedLeaderboardCorrectionsImpl implements DelayedLeaderboardCorr
     }
 
     @Override
-    public IsManagedBySharedDomainFactory resolve(SharedDomainFactory domainFactory) {
+    public IsManagedByCache resolve(SharedDomainFactory domainFactory) {
         this.competitorFactory = domainFactory;
         return this;
     }

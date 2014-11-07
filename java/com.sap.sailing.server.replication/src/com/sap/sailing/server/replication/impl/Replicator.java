@@ -90,7 +90,7 @@ public class Replicator implements Runnable {
      * @param consumer
      *            the RabbitMQ consumer from which to load messages
      */
-    public Replicator(ReplicationMasterDescriptor master, HasRacingEventService racingEventServiceTracker, boolean startSuspended, QueueingConsumer consumer, DomainFactory baseDomainFactory) {
+    public Replicator(ReplicationMasterDescriptor master, HasRacingEventService racingEventServiceTracker, boolean startSuspended, QueueingConsumer consumer) {
         this.queue = new ArrayList<RacingEventServiceOperation<?>>();
         this.master = master;
         this.racingEventServiceTracker = racingEventServiceTracker;

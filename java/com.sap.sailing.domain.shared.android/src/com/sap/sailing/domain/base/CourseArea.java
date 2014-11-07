@@ -12,6 +12,6 @@ import com.sap.sse.common.Named;
  * @author Axel Uhl (D043530)
  *
  */
-public interface CourseArea extends Named, WithID, IsManagedBySharedDomainFactory {
+public interface CourseArea extends Named, WithID, IsManagedByCache {
     UUID getId();
 }

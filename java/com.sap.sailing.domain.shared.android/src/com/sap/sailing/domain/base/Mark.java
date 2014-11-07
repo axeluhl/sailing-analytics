@@ -11,7 +11,7 @@ import com.sap.sailing.domain.common.WithID;
  * @author Axel Uhl (D043530)
  * 
  */
-public interface Mark extends WithID, ControlPoint, IsManagedBySharedDomainFactory {
+public interface Mark extends WithID, ControlPoint, IsManagedByCache {
     public String getColor();
     public String getShape();
     public String getPattern();

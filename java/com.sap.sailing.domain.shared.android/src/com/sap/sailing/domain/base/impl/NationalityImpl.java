@@ -2,7 +2,7 @@ package com.sap.sailing.domain.base.impl;
 
 import java.io.InputStream;
 
-import com.sap.sailing.domain.base.IsManagedBySharedDomainFactory;
+import com.sap.sailing.domain.base.IsManagedByCache;
 import com.sap.sailing.domain.base.Nationality;
 import com.sap.sailing.domain.base.SharedDomainFactory;
 import com.sap.sailing.domain.common.CountryCode;
@@ -44,7 +44,7 @@ public class NationalityImpl implements Nationality {
     }
 
     @Override
-    public IsManagedBySharedDomainFactory resolve(SharedDomainFactory domainFactory) {
+    public IsManagedByCache resolve(SharedDomainFactory domainFactory) {
         return domainFactory.getOrCreateNationality(getThreeLetterIOCAcronym());
     }
 

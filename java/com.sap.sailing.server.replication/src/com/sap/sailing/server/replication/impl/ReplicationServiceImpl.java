@@ -425,7 +425,7 @@ public class ReplicationServiceImpl implements ReplicationService, OperationExec
         logger.info("Connection to exchange successful.");
         URL initialLoadURL = master.getInitialLoadURL();
         logger.info("Initial load URL is "+initialLoadURL);
-        replicator = new Replicator(master, this, /* startSuspended */ true, consumer, getRacingEventService().getBaseDomainFactory());
+        replicator = new Replicator(master, this, /* startSuspended */ true, consumer);
         // start receiving messages already now, but start in suspended mode
         replicatorThread = new Thread(replicator, "Replicator receiving from "+master.getMessagingHostname()+"/"+master.getExchangeName());
         final RacingEventService racingEventService = getRacingEventService();
