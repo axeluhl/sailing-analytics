@@ -3,6 +3,24 @@
 <booleanAttribute key="com.google.gdt.eclipse.core.RUN_SERVER" value="false"/>
 <stringAttribute key="com.google.gdt.eclipse.suiteMainTypeProcessor.PREVIOUSLY_SET_MAIN_TYPE_NAME" value="com.google.gwt.dev.GWTShell"/>
 <booleanAttribute key="com.google.gdt.eclipse.suiteWarArgumentProcessor.IS_WAR_FROM_PROJECT_PROPERTIES" value="true"/>
+<listAttribute key="com.google.gwt.eclipse.core.ENTRY_POINT_MODULES">
+<listEntry value="com.sap.sailing.gwt.ui.RaceBoard"/>
+<listEntry value="com.sap.sailing.gwt.Home"/>
+<listEntry value="com.sap.sailing.gwt.ui.DataMining"/>
+<listEntry value="com.sap.sailing.gwt.ui.YoutubePopup"/>
+<listEntry value="com.sap.sailing.gwt.ui.LeaderboardEditing"/>
+<listEntry value="com.sap.sailing.gwt.ui.AdminConsole"/>
+<listEntry value="com.sap.sailing.gwt.ui.Search"/>
+<listEntry value="com.sap.sailing.gwt.ui.UserManagement"/>
+<listEntry value="com.sap.sailing.gwt.ui.TvView"/>
+<listEntry value="com.sap.sailing.gwt.ui.Spectator"/>
+<listEntry value="com.sap.sailing.gwt.ui.RegattaOverview"/>
+<listEntry value="com.sap.sailing.gwt.AutoPlay"/>
+<listEntry value="com.sap.sailing.gwt.ui.VideoPopup"/>
+<listEntry value="com.sap.sailing.gwt.ui.PolarSheets"/>
+<listEntry value="com.sap.sailing.gwt.ui.Leaderboard"/>
+<listEntry value="com.sap.sailing.gwt.ui.Simulator"/>
+</listAttribute>
 <stringAttribute key="com.google.gwt.eclipse.core.URL" value="/gwt/Home.html"/>
 <listAttribute key="org.eclipse.debug.core.MAPPED_RESOURCE_PATHS">
 <listEntry value="/com.sap.sailing.gwt.ui"/>
@@ -45,6 +63,7 @@
 <listEntry value="&lt;?xml version=&quot;1.0&quot; encoding=&quot;UTF-8&quot; standalone=&quot;no&quot;?&gt;&#13;&#10;&lt;runtimeClasspathEntry id=&quot;org.eclipse.jdt.launching.classpathentry.defaultClasspath&quot;&gt;&#13;&#10;&lt;memento exportedEntriesOnly=&quot;false&quot; project=&quot;com.sap.sailing.gwt.ui&quot;/&gt;&#13;&#10;&lt;/runtimeClasspathEntry&gt;&#13;&#10;"/>
 <listEntry value="&lt;?xml version=&quot;1.0&quot; encoding=&quot;UTF-8&quot; standalone=&quot;no&quot;?&gt;&#13;&#10;&lt;runtimeClasspathEntry internalArchive=&quot;/com.sap.sse.security/src&quot; path=&quot;3&quot; type=&quot;2&quot;/&gt;&#13;&#10;"/>
 <listEntry value="&lt;?xml version=&quot;1.0&quot; encoding=&quot;UTF-8&quot; standalone=&quot;no&quot;?&gt;&#13;&#10;&lt;runtimeClasspathEntry internalArchive=&quot;/com.sap.sse.security.ui/src/main/java&quot; path=&quot;3&quot; type=&quot;2&quot;/&gt;&#13;&#10;"/>
+<listEntry value="&lt;?xml version=&quot;1.0&quot; encoding=&quot;UTF-8&quot; standalone=&quot;no&quot;?&gt;&#13;&#10;&lt;runtimeClasspathEntry internalArchive=&quot;/com.sap.sse.gwt.adminconsole/src&quot; path=&quot;3&quot; type=&quot;2&quot;/&gt;&#13;&#10;"/>
 </listAttribute>
 <stringAttribute key="org.eclipse.jdt.launching.CLASSPATH_PROVIDER" value="com.google.gwt.eclipse.core.moduleClasspathProvider"/>
 <booleanAttribute key="org.eclipse.jdt.launching.DEFAULT_CLASSPATH" value="false"/>

@@ -6,8 +6,8 @@ import java.util.Set;
 
 import com.sap.sailing.domain.common.RegattaAndRaceIdentifier;
 import com.sap.sailing.domain.common.media.MediaTrack;
-import com.sap.sailing.gwt.ui.client.ErrorReporter;
 import com.sap.sailing.gwt.ui.client.MediaServiceAsync;
+import com.sap.sse.gwt.client.ErrorReporter;
 import com.sap.sse.gwt.client.useragent.UserAgentDetails;
 
 public interface MediaPlayerManager {
