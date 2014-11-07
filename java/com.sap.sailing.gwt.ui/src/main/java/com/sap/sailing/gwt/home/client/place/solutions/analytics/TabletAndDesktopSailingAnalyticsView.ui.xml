@@ -3,6 +3,7 @@
     xmlns:s="urn:import:com.sap.sailing.gwt.home.client.shared"
 	xmlns:g="urn:import:com.google.gwt.user.client.ui">
 	<ui:with field="res" type="com.sap.sailing.gwt.common.client.SharedResources" />
+	<ui:with field="i18n" type="com.sap.sailing.gwt.common.client.i18n.TextMessages" />
 	<ui:style>
 	    .analyticsheader {
 			background: #f2f2f2;
@@ -38,26 +39,30 @@
 		.analytics_nav_link:last-child {
   			margin-right: 0;
 		}
+		.analytics_subtitle {
+			font-weight: bold;
+		}
 	</ui:style>
     <g:HTMLPanel>
     <div class="{res.mainCss.grid} {style.analyticsheader}">
 		<div class="{res.mediaCss.small9} {res.mediaCss.large8} {res.mediaCss.columns}">
         	<h3>SAP Sailing Analytics</h3>
-        	<span><b>Release notes</b></span>
+        	<div class="{style.analytics_subtitle}" ui:field="subTitle"></div>
         </div>
 	</div>
 	<div class="{style.analytics_nav}">
 	    <div class="{res.mainCss.grid}">
 	      <div class="{res.mediaCss.small12} {res.mediaCss.columns}">
-	          <g:Anchor ui:field="featuresAnchor" href="javascript:;" styleName="{style.analytics_nav_link}">Features</g:Anchor>
-	          <g:Anchor ui:field="releaseNotesAnchor" href="javascript:;" styleName="{style.analytics_nav_link}">Release notes</g:Anchor>
+	          <g:Anchor ui:field="featuresAnchor" href="javascript:;" styleName="{style.analytics_nav_link}"><ui:text from='{i18n.features}'/></g:Anchor>
+	          <g:Anchor ui:field="releaseNotesAnchor" href="javascript:;" styleName="{style.analytics_nav_link}"><ui:text from='{i18n.releaseNotes}'/></g:Anchor>
 		  </div>
 	    </div>
 	</div>
     <div class="{res.mainCss.grid}">
 		<div class="{res.mediaCss.small9} {res.mediaCss.large8} {res.mediaCss.columns}">
-    	    <g:HTML ui:field="content" />
-		</div>
+    	    <g:HTML ui:field="contentFeatures" />
+    	    <g:HTML ui:field="contentReleaseNotes" />
+    	</div>
 	</div>
 		    
 	</g:HTMLPanel>
