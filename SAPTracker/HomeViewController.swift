@@ -11,38 +11,33 @@ import UIKit
 class HomeViewController: UIViewController, UIAlertViewDelegate {
     
     @IBOutlet weak var trackingButton: UIButton!
+    @IBOutlet weak var batterySavingSwitch: UISwitch!
     enum AlertViewTag: Int {
         case StopTracking
     }
-   
+    
     override func viewDidLoad() {
         super.viewDidLoad()
-        addObservers()
-    }
-
-    deinit {
-        removeObservers()
-    }
-    
-    func addObservers() {
         NSNotificationCenter.defaultCenter().addObserver(self, selector: "trackingStarted:", name: LocationManager.NotificationType.trackingStarted, object: nil)
         NSNotificationCenter.defaultCenter().addObserver(self, selector: "trackingStopped:", name: LocationManager.NotificationType.trackingStopped, object: nil)
+        
+        batterySavingSwitch.setOn(BatteryManager.sharedManager.batterySavingPreference, animated: true)
     }
     
-    func removeObservers() {
+    deinit {
         NSNotificationCenter.defaultCenter().removeObserver(self)
     }
-
+    
+    // MARK: - Notification Listeners
     func trackingStarted(notification: NSNotification) {
-        println("trackingStarted")
         trackingButton.setTitle("Stop Tracking", forState: UIControlState.Normal)
     }
     
     func trackingStopped(notification: NSNotification) {
-        println("trackingStopped")
         trackingButton.setTitle("Start Tracking", forState: UIControlState.Normal)
     }
-
+    
+    // MARK: - Button actions
     @IBAction func trackingButtonTap(sender: AnyObject) {
         if LocationManager.sharedManager.isTracking {
             let alertView = UIAlertView(title: "SAP Tracker", message: "Stop tracking?", delegate: self, cancelButtonTitle: "Cancel", otherButtonTitles: "Stop")
@@ -53,7 +48,8 @@ class HomeViewController: UIViewController, UIAlertViewDelegate {
             LocationManager.sharedManager.startTracking()
         }
     }
- 
+    
+    /* Alert view delegate */
     func alertView(alertView: UIAlertView, clickedButtonAtIndex buttonIndex: Int) {
         switch alertView.tag {
         case AlertViewTag.StopTracking.rawValue:
@@ -68,5 +64,10 @@ class HomeViewController: UIViewController, UIAlertViewDelegate {
             break;
         }
     }
+    
+    @IBAction func batterySavingChanged(sender: UISwitch) {
+        BatteryManager.sharedManager.batterySavingPreference = sender.on
+    }
+    
 }
 

@@ -20,20 +20,16 @@ class APIManager: NSObject {
     /* Date of last GPS position upload */
     var lastSync: NSDate?
     
-    /* Normal rate of upload is every 3s */
-    private let syncPeriodNormal: NSTimeInterval = 3
-
-    /* To save battery, upload rate is lowered to every 30s */
-    private let syncPeriodBatterySaving: NSTimeInterval = 30
+    private struct SyncPeriod {
+        /* Normal rate of upload is every 3s */
+        static let Normal: NSTimeInterval = 3
+        
+        /* To save battery, upload rate is lowered to every 30s */
+        static let BatterySaving: NSTimeInterval = 30
+    }
     
     /* Number of seconds between syncs */
-    private var syncPeriod: NSTimeInterval = 3
-    
-    /* Reference to device needed for reading battery level */
-    let device = UIDevice.currentDevice()
-
-    /* Minimum battery level for sending data is 20% */
-    let minBatteryLevel: Float = 0.2
+    private var syncPeriod: NSTimeInterval = BatteryManager.sharedManager.batterySaving ? SyncPeriod.BatterySaving : SyncPeriod.Normal
     
     /* REST Paths */
     /* Map device to competitor */
@@ -49,21 +45,22 @@ class APIManager: NSObject {
         }
         return Singleton.sharedAPIManager
     }
-
+    
+    /* Register for notifications */
     override init() {
         super.init()
         
-        // register for battery events
-        device.batteryMonitoringEnabled = true;
-        NSNotificationCenter.defaultCenter().addObserver(self, selector:"batteryChanged", name:"UIDeviceBatteryLevelDidChangeNotification", object:device);
-        NSNotificationCenter.defaultCenter().addObserver(self, selector:"batteryChanged", name:"UIDeviceBatteryStateDidChangeNotification", object:device);
-
-        // batteryChanged()
+        // register for notifications
+        NSNotificationCenter.defaultCenter().addObserver(self, selector:"batteryChanged", name:BatteryManager.NotificationType.batterySavingChanged, object: nil);
         
         // TODO: move to initManager
         timer()
     }
-
+    
+    deinit {
+        NSNotificationCenter.defaultCenter().removeObserver(self)
+    }
+    
     /* Sets base URL for all requests. Request and response are JSON. Starts reachability listener. Starts timer for uploading data. */
     func initManager(baseUrlString: String) {
         if self.baseUrlString == baseUrlString {
@@ -96,7 +93,7 @@ class APIManager: NSObject {
         //manager!.operationQueue.maxConcurrentOperationCount = 0
         
     }
-
+    
     // MARK: - REST
     
     /* Send a device to competitor mapping. */
@@ -134,13 +131,8 @@ class APIManager: NSObject {
         NSRunLoop.currentRunLoop().addTimer(loop, forMode:NSRunLoopCommonModes);
     }
     
-    // MARK: - Battery
-
     func batteryChanged() {
-        if device.batteryLevel < minBatteryLevel && (device.batteryState == UIDeviceBatteryState.Unplugged || device.batteryState == UIDeviceBatteryState.Unknown) {
-            syncPeriod = syncPeriodBatterySaving
-        } else {
-            syncPeriod = syncPeriodNormal
-        }
+        syncPeriod = BatteryManager.sharedManager.batterySaving ? SyncPeriod.BatterySaving : SyncPeriod.Normal
     }
+    
 }

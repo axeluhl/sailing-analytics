@@ -18,7 +18,7 @@
                         <rect key="frame" x="0.0" y="0.0" width="600" height="600"/>
                         <autoresizingMask key="autoresizingMask" flexibleMaxX="YES" flexibleMaxY="YES"/>
                         <subviews>
-                            <button opaque="NO" contentMode="scaleToFill" contentHorizontalAlignment="center" contentVerticalAlignment="center" buttonType="roundedRect" lineBreakMode="middleTruncation" translatesAutoresizingMaskIntoConstraints="NO" id="wn7-xc-GeE">
+                            <button opaque="NO" contentMode="scaleToFill" misplaced="YES" contentHorizontalAlignment="center" contentVerticalAlignment="center" buttonType="roundedRect" lineBreakMode="middleTruncation" translatesAutoresizingMaskIntoConstraints="NO" id="wn7-xc-GeE">
                                 <rect key="frame" x="16" y="550" width="568" height="30"/>
                                 <state key="normal" title="Start Tracking">
                                     <color key="titleShadowColor" white="0.5" alpha="1" colorSpace="calibratedWhite"/>
@@ -27,7 +27,7 @@
                                     <action selector="trackingButtonTap:" destination="vXZ-lx-hvc" eventType="touchUpInside" id="YWK-JE-HP8"/>
                                 </connections>
                             </button>
-                            <button opaque="NO" contentMode="scaleToFill" contentHorizontalAlignment="center" contentVerticalAlignment="center" buttonType="roundedRect" lineBreakMode="middleTruncation" translatesAutoresizingMaskIntoConstraints="NO" id="Ieu-ch-jeI">
+                            <button opaque="NO" contentMode="scaleToFill" misplaced="YES" contentHorizontalAlignment="center" contentVerticalAlignment="center" buttonType="roundedRect" lineBreakMode="middleTruncation" translatesAutoresizingMaskIntoConstraints="NO" id="Ieu-ch-jeI">
                                 <rect key="frame" x="16" y="512" width="568" height="30"/>
                                 <state key="normal" title="QR Code">
                                     <color key="titleShadowColor" white="0.5" alpha="1" colorSpace="calibratedWhite"/>
@@ -36,18 +36,44 @@
                                     <segue destination="plm-Uw-c62" kind="presentation" identifier="qrcode" id="B7H-Qz-fSS"/>
                                 </connections>
                             </button>
+                            <view contentMode="scaleToFill" horizontalHuggingPriority="1000" verticalHuggingPriority="1000" horizontalCompressionResistancePriority="1000" verticalCompressionResistancePriority="1000" translatesAutoresizingMaskIntoConstraints="NO" id="fuA-ux-BxT">
+                                <rect key="frame" x="201" y="453" width="198" height="51"/>
+                                <subviews>
+                                    <label opaque="NO" userInteractionEnabled="NO" contentMode="left" horizontalHuggingPriority="251" verticalHuggingPriority="251" text="Battery Saving" textAlignment="right" lineBreakMode="tailTruncation" baselineAdjustment="alignBaselines" adjustsFontSizeToFit="NO" translatesAutoresizingMaskIntoConstraints="NO" id="akn-yO-5IC">
+                                        <rect key="frame" x="8" y="15" width="113" height="21"/>
+                                        <fontDescription key="fontDescription" type="system" pointSize="17"/>
+                                        <color key="textColor" cocoaTouchSystemColor="darkTextColor"/>
+                                        <nil key="highlightedColor"/>
+                                    </label>
+                                    <switch opaque="NO" contentMode="scaleToFill" horizontalHuggingPriority="750" verticalHuggingPriority="750" contentHorizontalAlignment="center" contentVerticalAlignment="center" on="YES" translatesAutoresizingMaskIntoConstraints="NO" id="eRo-BT-bqn">
+                                        <rect key="frame" x="129" y="10" width="51" height="31"/>
+                                        <connections>
+                                            <action selector="batterySavingChanged:" destination="vXZ-lx-hvc" eventType="valueChanged" id="VuJ-6b-yBl"/>
+                                        </connections>
+                                    </switch>
+                                </subviews>
+                                <constraints>
+                                    <constraint firstAttribute="trailing" secondItem="eRo-BT-bqn" secondAttribute="trailing" constant="20" id="3pG-CW-Zgz"/>
+                                    <constraint firstItem="eRo-BT-bqn" firstAttribute="leading" secondItem="akn-yO-5IC" secondAttribute="trailing" constant="8" symbolic="YES" id="Sns-Na-kJP"/>
+                                    <constraint firstAttribute="centerY" secondItem="eRo-BT-bqn" secondAttribute="centerY" id="Wst-aj-Qbk"/>
+                                    <constraint firstItem="eRo-BT-bqn" firstAttribute="top" secondItem="fuA-ux-BxT" secondAttribute="top" constant="10" id="bc8-HL-Mbh"/>
+                                    <constraint firstItem="akn-yO-5IC" firstAttribute="leading" secondItem="fuA-ux-BxT" secondAttribute="leadingMargin" id="itm-4B-b91"/>
+                                    <constraint firstAttribute="centerY" secondItem="akn-yO-5IC" secondAttribute="centerY" id="nfZ-Ee-Dl0"/>
+                                </constraints>
+                            </view>
                         </subviews>
                         <color key="backgroundColor" white="1" alpha="1" colorSpace="custom" customColorSpace="calibratedWhite"/>
                         <constraints>
-                            <constraint firstAttribute="bottom" secondItem="wn7-xc-GeE" secondAttribute="bottom" constant="20" symbolic="YES" id="558-wL-TWR"/>
-                            <constraint firstItem="Ieu-ch-jeI" firstAttribute="trailing" secondItem="wn7-xc-GeE" secondAttribute="trailing" id="Dt1-Kg-GYq"/>
-                            <constraint firstItem="wn7-xc-GeE" firstAttribute="top" secondItem="Ieu-ch-jeI" secondAttribute="bottom" constant="8" symbolic="YES" id="ePh-n7-wI1"/>
-                            <constraint firstItem="wn7-xc-GeE" firstAttribute="trailing" secondItem="kh9-bI-dsS" secondAttribute="trailingMargin" id="ixi-wL-jKR"/>
-                            <constraint firstItem="Ieu-ch-jeI" firstAttribute="leading" secondItem="kh9-bI-dsS" secondAttribute="leadingMargin" id="mfC-Cg-niZ"/>
-                            <constraint firstItem="wn7-xc-GeE" firstAttribute="leading" secondItem="Ieu-ch-jeI" secondAttribute="leading" id="riP-KN-4zv"/>
+                            <constraint firstItem="Ieu-ch-jeI" firstAttribute="top" secondItem="fuA-ux-BxT" secondAttribute="bottom" constant="8" id="8SM-up-jfF"/>
+                            <constraint firstAttribute="centerX" secondItem="wn7-xc-GeE" secondAttribute="centerX" id="9uQ-08-c7M"/>
+                            <constraint firstAttribute="centerX" secondItem="Ieu-ch-jeI" secondAttribute="centerX" id="E2n-AD-Uyz"/>
+                            <constraint firstAttribute="centerX" secondItem="fuA-ux-BxT" secondAttribute="centerX" id="UWg-LW-Qzk"/>
+                            <constraint firstItem="wn7-xc-GeE" firstAttribute="top" secondItem="Ieu-ch-jeI" secondAttribute="bottom" constant="8" id="bg0-CX-shO"/>
+                            <constraint firstAttribute="bottom" secondItem="wn7-xc-GeE" secondAttribute="bottom" constant="20" id="xX5-6k-0T2"/>
                         </constraints>
                     </view>
                     <connections>
+                        <outlet property="batterySavingSwitch" destination="eRo-BT-bqn" id="Hfx-9j-pJx"/>
                         <outlet property="trackingButton" destination="wn7-xc-GeE" id="Yui-KO-5Jr"/>
                     </connections>
                 </viewController>
