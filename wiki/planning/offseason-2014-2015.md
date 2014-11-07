@@ -25,10 +25,13 @@ See [http://wiki.sapsailing.com/wiki/planning/usermanagement](http://wiki.sapsai
 
 ## Map Visualization Improvements (Christopher, Axel, Frank, Ubilabs)
 
-The map visualization currently has two main drawbacks:
+The map visualization currently has some drawbacks:
 
 * the map doesn't rotate
 * boat, water and land visualization is not sufficiently appealing
+* boat animation does not work for playspeed > 1
+* the time synchronization of the drawn items is difficult as we use 2 different overlay techniques (google map overlays, HTML overlays)
+* performance might become a problem when we go for a fullscreen map in the future with even more overlays (e.g. the leaderboard will become an overlay)
 
 For the rotation problem we see two possible solutions: transforming coordinates while staying on Google Maps; or replacing the map provider, probably using OpenStreetMap. For the "appeal" issue we seem to agree that the use of plugin technology is to be avoided, and so the options have to be recruited from HTML5/CSS-land. In particular, we believe that better boat visualizations are more or less a matter of a good graphics designer painting hull and sail constellations for specific boat classes. Water visualizations will have to be experimented with on the basis of HTML5 canvas technology (performance, appeal). Land visualization would require satellite imagery with precise geo-location information to fit into a map provider and may be more difficult. See also [[here | /wiki/planning/MapRenewal]] for the discussion.
 
