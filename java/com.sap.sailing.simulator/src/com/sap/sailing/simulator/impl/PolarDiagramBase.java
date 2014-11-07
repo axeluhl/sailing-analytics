@@ -650,16 +650,34 @@ public class PolarDiagramBase implements PolarDiagram, Serializable {
             windBearing = wind.getBearing().reverse();
             estGybeAngleRight = null;
             estGybeAngleLeft = null;
-            Bearing floorGybeAngle = gybeAngles.floorEntry(wind).getValue();
-            Bearing ceilingGybeAngle = gybeAngles.ceilingEntry(wind).getValue();
+            // lookup gybe-angles based on wind-values
+            Map.Entry<Speed, Bearing> floorEntry = gybeAngles.floorEntry(wind);
+            Bearing floorGybeAngle = null;
+            if (floorEntry != null) {
+            	floorGybeAngle = floorEntry.getValue();
+            }
+            Map.Entry<Speed, Bearing> ceilingEntry = gybeAngles.ceilingEntry(wind);            
+            Bearing ceilingGybeAngle = null;
+            if (ceilingEntry != null) {
+            	ceilingGybeAngle = ceilingEntry.getValue();
+            }
+            // handle gybe-angles for out-of-definition-range wind-values 
             if (floorGybeAngle == null) {
-                floorGybeAngle = new DegreeBearingImpl(0);
+                floorGybeAngle = ceilingGybeAngle;
             }
             if (ceilingGybeAngle == null) {
-                ceilingGybeAngle = new DegreeBearingImpl(0);
+                ceilingGybeAngle = floorGybeAngle;
             }
+            // lookup wind-support-values based on wind-values
             Speed floorSpeed = gybeAngles.floorKey(wind);
             Speed ceilingSpeed = gybeAngles.ceilingKey(wind);
+            // handle out-of-definition-range wind-values 
+            if (floorSpeed == null) {
+                floorSpeed = ceilingSpeed;
+            }
+            if (ceilingSpeed == null) {
+                ceilingSpeed = floorSpeed;
+            }
             double gybeAngle;
             if (floorSpeed.equals(ceilingSpeed)) {
                 gybeAngle = floorGybeAngle.getRadians();
