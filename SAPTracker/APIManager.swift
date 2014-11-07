@@ -20,12 +20,20 @@ class APIManager: NSObject {
     /* Date of last GPS position upload */
     var lastSync: NSDate?
     
+    /* Normal rate of upload is every 3s */
+    private let syncPeriodNormal: NSTimeInterval = 3
+
+    /* To save battery, upload rate is lowered to every 30s */
+    private let syncPeriodBatterySaving: NSTimeInterval = 30
+    
     /* Number of seconds between syncs */
     private var syncPeriod: NSTimeInterval = 3
     
-    var loop: NSTimer?
-    
-    var backgroundTaskIdentifier: UIBackgroundTaskIdentifier?
+    /* Reference to device needed for reading battery level */
+    let device = UIDevice.currentDevice()
+
+    /* Minimum battery level for sending data is 20% */
+    let minBatteryLevel: Float = 0.2
     
     /* REST Paths */
     /* Map device to competitor */
@@ -41,11 +49,19 @@ class APIManager: NSObject {
         }
         return Singleton.sharedAPIManager
     }
+
     override init() {
         super.init()
         
+        // register for battery events
+        device.batteryMonitoringEnabled = true;
+        NSNotificationCenter.defaultCenter().addObserver(self, selector:"batteryChanged", name:"UIDeviceBatteryLevelDidChangeNotification", object:device);
+        NSNotificationCenter.defaultCenter().addObserver(self, selector:"batteryChanged", name:"UIDeviceBatteryStateDidChangeNotification", object:device);
+
+        // batteryChanged()
+        
         // TODO: move to initManager
-        uploadData()
+        timer()
     }
 
     /* Sets base URL for all requests. Request and response are JSON. Starts reachability listener. Starts timer for uploading data. */
@@ -80,6 +96,8 @@ class APIManager: NSObject {
         //manager!.operationQueue.maxConcurrentOperationCount = 0
         
     }
+
+    // MARK: - REST
     
     /* Send a device to competitor mapping. */
     func postDeviceMapping(qrcodeData: QRCodeData!, success: (AFHTTPRequestOperation!, AnyObject!) -> Void, failure: (AFHTTPRequestOperation!, AnyObject!) -> Void) {
@@ -107,10 +125,22 @@ class APIManager: NSObject {
         })
     }
     
+    // MARK: - Timer
+    
     /* See if any rows need to be uploaded. Schedule timer again. */
-    func uploadData() {
-        NSLog("uploadData")
-        let loop = NSTimer.scheduledTimerWithTimeInterval(syncPeriod++, target:self, selector:"uploadData", userInfo:nil, repeats:false);
+    func timer() {
+        NSLog("timer")
+        let loop = NSTimer.scheduledTimerWithTimeInterval(syncPeriod, target:self, selector:"timer", userInfo:nil, repeats:false);
         NSRunLoop.currentRunLoop().addTimer(loop, forMode:NSRunLoopCommonModes);
+    }
+    
+    // MARK: - Battery
+
+    func batteryChanged() {
+        if device.batteryLevel < minBatteryLevel && (device.batteryState == UIDeviceBatteryState.Unplugged || device.batteryState == UIDeviceBatteryState.Unknown) {
+            syncPeriod = syncPeriodBatterySaving
+        } else {
+            syncPeriod = syncPeriodNormal
+        }
     }
 }
