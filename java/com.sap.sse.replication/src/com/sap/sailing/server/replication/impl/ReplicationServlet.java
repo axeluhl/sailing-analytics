@@ -21,10 +21,8 @@ import org.osgi.framework.BundleContext;
 import org.osgi.util.tracker.ServiceTracker;
 
 import com.rabbitmq.client.Channel;
-import com.sap.sailing.server.RacingEventService;
-import com.sap.sailing.server.gateway.SailingServerHttpServlet;
 import com.sap.sailing.server.replication.ReplicationService;
-import com.sap.sailing.util.impl.CountingOutputStream;
+import com.sap.sse.util.impl.CountingOutputStream;
 
 /**
  * As the response to any type of <code>GET</code> request, sends a serialized copy of the {@link RacingEventService} to

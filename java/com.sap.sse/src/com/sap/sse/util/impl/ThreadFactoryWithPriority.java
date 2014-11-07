@@ -1,4 +1,4 @@
-package com.sap.sailing.util.impl;
+package com.sap.sse.util.impl;
 
 import java.util.concurrent.Executors;
 import java.util.concurrent.ThreadFactory;

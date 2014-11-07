@@ -94,7 +94,8 @@ import com.sap.sse.common.search.Searchable;
  *
  */
 public interface RacingEventService extends TrackedRegattaRegistry, RegattaFetcher, RegattaRegistry, RaceFetcher,
-        LeaderboardRegistry, EventResolver, LeaderboardGroupResolver, TrackerManager, Searchable<LeaderboardSearchResult, KeywordQuery>, Replicable<RacingEventService, RacingEventServiceOperation<?>> {
+        LeaderboardRegistry, EventResolver, LeaderboardGroupResolver, TrackerManager, Searchable<LeaderboardSearchResult, KeywordQuery>,
+        Replicable<RacingEventService, RacingEventServiceOperation<?>> {
     @Override
     Regatta getRegatta(RegattaName regattaName);
 

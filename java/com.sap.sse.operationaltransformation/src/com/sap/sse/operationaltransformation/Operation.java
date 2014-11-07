@@ -18,4 +18,8 @@ public interface Operation<S> extends Cloneable {
      */
     S applyTo(S toState);
     
+    /**
+     * Tells if this operation needs to be executed in order with other operations requesting synchronous execution.
+     */
+    boolean requiresSynchronousExecution();
 }

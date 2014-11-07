@@ -22,6 +22,7 @@ import com.rabbitmq.client.QueueingConsumer;
 import com.rabbitmq.client.QueueingConsumer.Delivery;
 import com.rabbitmq.client.ShutdownSignalException;
 import com.sap.sailing.server.replication.ReplicationMasterDescriptor;
+import com.sap.sse.operationaltransformation.Operation;
 import com.sap.sse.operationaltransformation.OperationWithTransformationSupport;
 
 /**
@@ -45,7 +46,7 @@ public class Replicator implements Runnable {
     
     private final ReplicationMasterDescriptor master;
     private final HasReplicable replicableProvider;
-    private final List<OperationWithTransformationSupport<?, ?>> queue;
+    private final List<Operation<?>> queue;
     
     private QueueingConsumer consumer;
     
@@ -89,7 +90,7 @@ public class Replicator implements Runnable {
      *            the RabbitMQ consumer from which to load messages
      */
     public Replicator(ReplicationMasterDescriptor master, HasReplicable racingEventServiceTracker, boolean startSuspended, QueueingConsumer consumer) {
-        this.queue = new ArrayList<OperationWithTransformationSupport<?, ?>>();
+        this.queue = new ArrayList<Operation<?>>();
         this.master = master;
         this.replicableProvider = racingEventServiceTracker;
         this.suspended = startSuspended;
@@ -137,8 +138,8 @@ public class Replicator implements Runnable {
                 // Set this object's class's class loader as context for de-serialization so that all exported classes
                 // of all required bundles/packages can be deserialized at least
                 Thread.currentThread().setContextClassLoader(getClass().getClassLoader());
-                ObjectInputStream ois = replicableProvider.getReplicable().getBaseDomainFactory()
-                        .createObjectInputStreamResolvingAgainstThisFactory(
+                ObjectInputStream ois = replicableProvider.getReplicable()
+                        .createObjectInputStreamResolvingAgainstCache(
                                 new GZIPInputStream(new ByteArrayInputStream(bytesFromMessage)));
                 int operationsInMessage = 0;
                 try {
@@ -229,7 +230,7 @@ public class Replicator implements Runnable {
         }
     }
 
-    private synchronized void apply(final OperationWithTransformationSupport<?, ?> operation) {
+    private synchronized void apply(final Operation<?> operation) {
         Runnable runnable = new Runnable() {
             @Override
             public void run() {
@@ -243,7 +244,7 @@ public class Replicator implements Runnable {
         }
     }
     
-    private synchronized void queue(RacingEventServiceOperation<?> operation) {
+    private synchronized void queue(Operation<?> operation) {
         if (queue.isEmpty()) {
             notifyAll();
         }
@@ -261,8 +262,8 @@ public class Replicator implements Runnable {
     }
     
     private synchronized void applyQueue() {
-        for (Iterator<RacingEventServiceOperation<?>> i=queue.iterator(); i.hasNext(); ) {
-            RacingEventServiceOperation<?> operation = i.next();
+        for (Iterator<Operation<?>> i=queue.iterator(); i.hasNext(); ) {
+            Operation<?> operation = i.next();
             i.remove();
             try {
                 apply(operation);

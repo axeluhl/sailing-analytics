@@ -5,11 +5,11 @@ import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
 
-import com.sap.sailing.domain.base.IsManagedByCache;
 import com.sap.sailing.domain.base.SharedDomainFactory;
 import com.sap.sailing.domain.base.configuration.DeviceConfigurationIdentifier;
 import com.sap.sailing.domain.base.configuration.DeviceConfigurationMatcher;
 import com.sap.sailing.domain.common.configuration.DeviceConfigurationMatcherType;
+import com.sap.sse.IsManagedByCache;
 
 /**
  * Matches a set of {@link DeviceConfigurationIdentifier}s.
@@ -55,7 +55,7 @@ public class DeviceConfigurationMatcherMulti implements DeviceConfigurationMatch
     }
 
     @Override
-    public IsManagedByCache resolve(SharedDomainFactory domainFactory) {
+    public IsManagedByCache<SharedDomainFactory> resolve(SharedDomainFactory domainFactory) {
         return domainFactory.getOrCreateDeviceConfigurationMatcher(getMatcherType(), clientIdentifiers);
     }
     

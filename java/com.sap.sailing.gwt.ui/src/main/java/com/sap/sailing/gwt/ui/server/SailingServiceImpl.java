@@ -398,7 +398,7 @@ import com.sap.sailing.simulator.util.SailingSimulatorConstants;
 import com.sap.sailing.simulator.windfield.WindFieldGenerator;
 import com.sap.sailing.simulator.windfield.impl.WindFieldTrackedRaceImpl;
 import com.sap.sailing.xrr.resultimport.schema.RegattaResults;
-import com.sap.sse.common.BuildVersion;
+import com.sap.sse.BuildVersion;
 import com.sap.sse.common.Duration;
 import com.sap.sse.common.TimePoint;
 import com.sap.sse.common.Util;

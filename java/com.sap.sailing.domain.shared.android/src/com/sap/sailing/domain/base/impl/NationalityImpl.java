@@ -2,11 +2,11 @@ package com.sap.sailing.domain.base.impl;
 
 import java.io.InputStream;
 
-import com.sap.sailing.domain.base.IsManagedByCache;
 import com.sap.sailing.domain.base.Nationality;
 import com.sap.sailing.domain.base.SharedDomainFactory;
 import com.sap.sailing.domain.common.CountryCode;
 import com.sap.sailing.domain.common.CountryCodeFactory;
+import com.sap.sse.IsManagedByCache;
 
 public class NationalityImpl implements Nationality {
     private static final long serialVersionUID = 238906193483424259L;
@@ -44,7 +44,7 @@ public class NationalityImpl implements Nationality {
     }
 
     @Override
-    public IsManagedByCache resolve(SharedDomainFactory domainFactory) {
+    public IsManagedByCache<SharedDomainFactory> resolve(SharedDomainFactory domainFactory) {
         return domainFactory.getOrCreateNationality(getThreeLetterIOCAcronym());
     }
 

@@ -185,7 +185,7 @@ import com.sap.sailing.server.replication.OperationExecutionListener;
 import com.sap.sailing.server.test.support.RacingEventServiceWithTestSupport;
 import com.sap.sailing.util.impl.LockUtil;
 import com.sap.sailing.util.impl.NamedReentrantReadWriteLock;
-import com.sap.sse.common.BuildVersion;
+import com.sap.sse.BuildVersion;
 import com.sap.sse.common.TimePoint;
 import com.sap.sse.common.Util;
 import com.sap.sse.common.impl.MillisecondsTimePoint;
@@ -2084,7 +2084,7 @@ public class RacingEventServiceImpl implements RacingEventServiceWithTestSupport
      * this service known.
      */
     @Override
-    public <T> T apply(RacingEventServiceOperation<T> operation) {
+    public <T> T apply(RacingEventServiceOperation<?> operation) {
         try {
             T result = operation.internalApplyTo(this);
             replicate(operation);

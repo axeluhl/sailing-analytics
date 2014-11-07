@@ -33,7 +33,7 @@ import com.sap.sailing.server.replication.OperationExecutionListener;
 import com.sap.sailing.server.replication.Replicable;
 import com.sap.sailing.server.replication.ReplicationMasterDescriptor;
 import com.sap.sailing.server.replication.ReplicationService;
-import com.sap.sse.common.BuildVersion;
+import com.sap.sse.BuildVersion;
 import com.sap.sse.operationaltransformation.Operation;
 import com.sap.sse.operationaltransformation.OperationWithTransformationSupport;
 
@@ -293,7 +293,7 @@ public class ReplicationServiceImpl implements ReplicationService, OperationExec
      * Schedules a single operation for broadcast. The operation is added to {@link #outboundBuffer}, and if not already scheduled,
      * a {@link #timer} is created and scheduled to send in {@link #TRANSMISSION_DELAY_MILLIS} milliseconds.
      */
-    private void broadcastOperation(OperationWithTransformationSupport<?, ?> operation) throws IOException {
+    private void broadcastOperation(Operation<?> operation) throws IOException {
         // need to write the operations one by one, making sure the ObjectOutputStream always writes
         // identical objects again if required because they may have changed state in between
         ByteArrayOutputStream bos = new ByteArrayOutputStream();
@@ -497,7 +497,7 @@ public class ReplicationServiceImpl implements ReplicationService, OperationExec
      * replicas by publishing it to the fan-out exchange.
      */
     @Override
-    public <T> void executed(OperationWithTransformationSupport<?, ? extends Operation<T>> operation) {
+    public <T> void executed(Operation<T> operation) {
         try {
             broadcastOperation(operation);
         } catch (Exception e) {

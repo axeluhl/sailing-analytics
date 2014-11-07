@@ -4,8 +4,8 @@ import java.io.Serializable;
 import java.net.InetAddress;
 import java.util.UUID;
 
-import com.sap.sailing.domain.common.TimePoint;
-import com.sap.sailing.domain.common.impl.MillisecondsTimePoint;
+import com.sap.sse.common.TimePoint;
+import com.sap.sse.common.impl.MillisecondsTimePoint;
 
 /**
  * Describes a replica by remembering its IP address as well as the replication time and a UUID. Hash code and equality

@@ -22,26 +22,35 @@ public class OperationalTransformationTest {
     private Peer<StringInsertOperation, StringState> client1, client2;
     
     public static class StringInsertOperation implements Operation<StringState> {
-	private int pos;
-	private String s;
-	public StringInsertOperation(int pos, String s) {
-	    this.pos = pos;
-	    this.s = s;
-	}
-	public int getPos() {
-	    return pos;
-	}
-	public String getS() {
-	    return s;
-	}
-	public String toString() {
-	    return "insert("+getPos()+", \""+getS()+"\")";
-	}
-	
-	@Override
-	public StringState applyTo(StringState toState) {
-	    return toState.apply(this);
-	}
+        private int pos;
+        private String s;
+
+        public StringInsertOperation(int pos, String s) {
+            this.pos = pos;
+            this.s = s;
+        }
+
+        public int getPos() {
+            return pos;
+        }
+
+        public String getS() {
+            return s;
+        }
+
+        public String toString() {
+            return "insert(" + getPos() + ", \"" + getS() + "\")";
+        }
+
+        @Override
+        public StringState applyTo(StringState toState) {
+            return toState.apply(this);
+        }
+
+        @Override
+        public boolean requiresSynchronousExecution() {
+            return false;
+        }
     }
    
     public static class StringInsertTransformer implements Transformer<StringInsertOperation> {

@@ -5,7 +5,8 @@ import java.io.InputStream;
 import java.io.ObjectInputStream;
 import java.io.ObjectStreamClass;
 
-import com.sap.sailing.domain.base.IsManagedByCache;
+import com.sap.sailing.server.replication.Replicable;
+import com.sap.sse.IsManagedByCache;
 
 /**
  * During de-serialization, resolves objects managed by a {@link DomainFactory} using the domain factory instance passed
@@ -51,7 +52,9 @@ public abstract class ObjectInputStreamResolvingAgainstCache<C> extends ObjectIn
     protected Object resolveObject(Object o) {
         Object result;
         if (o instanceof IsManagedByCache) {
-            result = ((IsManagedByCache) o).resolve(getCache());
+            @SuppressWarnings("unchecked")
+            IsManagedByCache<C> castResult = ((IsManagedByCache<C>) o).resolve(getCache());
+            result = castResult;
         } else {
             result = o;
         }

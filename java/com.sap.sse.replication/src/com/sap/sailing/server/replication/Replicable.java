@@ -41,7 +41,7 @@ import com.sap.sse.operationaltransformation.OperationWithTransformationSupport;
  * @author Axel Uhl (D043530)
  *
  */
-public interface Replicable<S, O extends OperationWithTransformationSupport<S, O>> extends WithID {
+public interface Replicable<S, O extends Operation<?>> extends WithID {
     /**
      * The name of the property to use in the <code>properties</code> dictionary in a call to
      * {@link BundleContext#registerService(Class, Object, java.util.Dictionary)} when registering a {@link Replicable}.
@@ -58,15 +58,10 @@ public interface Replicable<S, O extends OperationWithTransformationSupport<S, O
 
     /**
      * Executes an operation whose effects need to be replicated to any replica of this service known and
-     * {@link OperationExecutionListener#executed(RacingEventServiceOperation) notifies} all registered
+     * {@link OperationExecutionListener#executed(OperationWithTransformationSupport) notifies} all registered
      * operation execution listeners about the execution of the operation.
      */
-    <T> T apply(RacingEventServiceOperation<T> operation);
-
-// FIXME the problem here: Operation<R> is used inconsistently; for one thing, in terms of operationaltransformation,
-// the operation is expected to return the same state type (e.g., a RacingEventService); however, in our use as in
-// RacingEventService, the operation can be modeled to return an actual return type, such as a String or a Regatta.
-    void apply(O operation);
+    <T> T apply(O operation);
 
     void addOperationExecutionListener(OperationExecutionListener listener);
 

@@ -13,4 +13,5 @@ Require-Bundle: com.sap.sailing.domain.common;bundle-version="1.0.0",
  org.mockito.mockito-core;bundle-version="1.9.5",
  com.sap.sailing.domain.test,
  com.sap.sailing.domain.racelogtrackingadapter.testsupport;bundle-version="1.0.0",
- com.sap.sse.common
+ com.sap.sse.common,
+ com.sap.sse

@@ -1,4 +1,4 @@
-package com.sap.sse.common;
+package com.sap.sse;
 
 import java.io.BufferedReader;
 import java.io.File;

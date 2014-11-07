@@ -5,6 +5,8 @@ import java.io.InputStream;
 import java.io.ObjectInputStream;
 import java.io.ObjectStreamClass;
 
+import com.sap.sse.IsManagedByCache;
+
 /**
  * During de-serialization, resolves objects managed by a {@link DomainFactory} using the domain factory instance passed
  * to the constructor. Additionally, class loading is managed using the current thread's context class loader which is
@@ -49,7 +51,9 @@ public abstract class ObjectInputStreamResolvingAgainstDomainFactory extends Obj
     protected Object resolveObject(Object o) {
         Object result;
         if (o instanceof IsManagedByCache) {
-            result = ((IsManagedByCache) o).resolve(getDomainFactory());
+            @SuppressWarnings("unchecked")
+            IsManagedByCache<SharedDomainFactory> castResult = ((IsManagedByCache<SharedDomainFactory>) o).resolve(getDomainFactory());
+            result = castResult;
         } else {
             result = o;
         }

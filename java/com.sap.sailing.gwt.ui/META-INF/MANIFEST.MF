@@ -40,7 +40,8 @@ Require-Bundle: com.sap.sailing.domain,
  org.apache.shiro.web;bundle-version="1.2.2",
  org.apache.shiro.ehcache;bundle-version="1.2.3",
  com.sap.sse.gwt.adminconsole,
- com.sap.sse.operationaltransformation
+ com.sap.sse.operationaltransformation,
+ com.sap.sse
 Bundle-Activator: com.sap.sailing.gwt.ui.server.Activator
 Bundle-ActivationPolicy: lazy
 Import-Package: javax.jms;version="1.1.0",

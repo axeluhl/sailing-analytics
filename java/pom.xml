@@ -14,6 +14,7 @@
 	<packaging>pom</packaging>
 
 	<modules>
+		<module>com.sap.sse</module>
 		<module>com.sap.sse.common</module>
 		<module>com.sap.sse.mongodb</module>
 		<module>com.sap.sse.gwt</module>

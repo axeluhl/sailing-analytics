@@ -14,6 +14,7 @@ Require-Bundle: com.sap.sailing.server,
  com.sap.sailing.domain,
  com.sap.sailing.domain.tractracadapter,
  com.sap.sailing.domain.common,
+ com.sap.sse,
  com.sap.sse.common
 Bundle-ClassPath: lib/jdom.jar,
  .

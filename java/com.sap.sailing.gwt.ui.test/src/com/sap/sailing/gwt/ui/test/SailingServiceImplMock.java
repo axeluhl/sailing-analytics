@@ -34,6 +34,7 @@ import com.sap.sailing.domain.tractracadapter.TracTracAdapterFactory;
 import com.sap.sailing.gwt.ui.server.SailingServiceImpl;
 import com.sap.sailing.server.RacingEventService;
 import com.sap.sailing.server.impl.RacingEventServiceImpl;
+import com.sap.sailing.server.replication.Replicable;
 import com.sap.sailing.server.replication.ReplicationService;
 import com.sap.sailing.server.replication.impl.ReplicationInstancesManager;
 import com.sap.sailing.server.replication.impl.ReplicationServiceImpl;
@@ -65,9 +66,9 @@ public class SailingServiceImplMock extends SailingServiceImpl {
         try {
             final ReplicationServiceImpl replicationService = new ReplicationServiceImpl("test exchange", "localhost", 0, new ReplicationInstancesManager()) {
                 @Override
-                protected ServiceTracker<RacingEventService, RacingEventService> getRacingEventServiceTracker() {
+                protected ServiceTracker<Replicable<?, ?>, Replicable<?, ?>> getRacingEventServiceTracker() {
                     @SuppressWarnings("unchecked")
-                    ServiceTracker<RacingEventService, RacingEventService> result = (ServiceTracker<RacingEventService, RacingEventService>) mock(ServiceTracker.class);
+                    ServiceTracker<Replicable<?, ?>, Replicable<?, ?>> result = (ServiceTracker<Replicable<?, ?>, Replicable<?, ?>>) mock(ServiceTracker.class);
                     doReturn("Humba Humba").when(result).toString();
                     when(result.getService()).thenReturn(new RacingEventServiceImpl());
                     return result;

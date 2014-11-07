@@ -25,6 +25,11 @@ public class ClientServerOperationPair<O extends Operation<?>> {
             public S applyTo(S toState) {
                 return toState; // don't change anything, return state unchanged
             }
+
+            @Override
+            public boolean requiresSynchronousExecution() {
+                return false;
+            }
         };
     }
 }

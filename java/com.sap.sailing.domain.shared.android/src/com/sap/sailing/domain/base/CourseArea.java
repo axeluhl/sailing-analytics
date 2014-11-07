@@ -2,6 +2,7 @@ package com.sap.sailing.domain.base;
 
 import java.util.UUID;
 
+import com.sap.sse.IsManagedByCache;
 import com.sap.sse.common.Named;
 import com.sap.sse.common.WithID;
 
@@ -12,6 +13,6 @@ import com.sap.sse.common.WithID;
  * @author Axel Uhl (D043530)
  *
  */
-public interface CourseArea extends Named, WithID, IsManagedByCache {
+public interface CourseArea extends Named, WithID, IsManagedByCache<SharedDomainFactory> {
     UUID getId();
 }
