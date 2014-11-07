@@ -1,7 +1,7 @@
 package com.sap.sailing.domain.racelog.impl;
 
-import com.sap.sailing.domain.common.impl.NamedImpl;
 import com.sap.sailing.domain.racelog.RaceLogEventAuthor;
+import com.sap.sse.common.impl.NamedImpl;
 
 public class RaceLogEventAuthorImpl extends NamedImpl implements RaceLogEventAuthor {
     private static final long serialVersionUID = -5602802911563685812L;

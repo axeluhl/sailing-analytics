@@ -11,24 +11,35 @@
 	<artifactId>com.sap.sse.security.ui</artifactId>
 	<packaging>eclipse-plugin</packaging>
 	<dependencies>
-	      <dependency>
-	    	<groupId>com.sap.sailing</groupId>
-	    	<artifactId>com.sap.sse.common</artifactId>
-	    	<version>1.0.0-SNAPSHOT</version>
-	    	<classifier>sources</classifier>
-	      </dependency>
-	    	      <dependency>
-	    	<groupId>com.sap.sailing</groupId>
-	    	<artifactId>com.sap.sse.gwt</artifactId>
-	    	<version>1.0.0-SNAPSHOT</version>
-	    	<classifier>sources</classifier>
-	      </dependency>
-	      <dependency>
-	    	<groupId>com.sap.sailing</groupId>
-	    	<artifactId>com.sap.sse.security</artifactId>
-	    	<version>1.0.0-SNAPSHOT</version>
-	    	<classifier>sources</classifier>
-	      </dependency>
+		<dependency>
+			<groupId>javax.validation</groupId>
+			<artifactId>validation-api</artifactId>
+			<version>1.0.0.GA</version>
+		</dependency>
+		<dependency>
+			<groupId>javax.validation</groupId>
+			<artifactId>validation-api</artifactId>
+			<version>1.0.0.GA</version>
+			<classifier>sources</classifier>
+		</dependency>
+		<dependency>
+			<groupId>com.sap.sailing</groupId>
+			<artifactId>com.sap.sse.common</artifactId>
+			<version>1.0.0-SNAPSHOT</version>
+			<classifier>sources</classifier>
+		</dependency>
+		<dependency>
+			<groupId>com.sap.sailing</groupId>
+			<artifactId>com.sap.sse.gwt</artifactId>
+			<version>1.0.0-SNAPSHOT</version>
+			<classifier>sources</classifier>
+		</dependency>
+		<dependency>
+			<groupId>com.sap.sailing</groupId>
+			<artifactId>com.sap.sse.security</artifactId>
+			<version>1.0.0-SNAPSHOT</version>
+			<classifier>sources</classifier>
+		</dependency>
 	</dependencies>
 	<build>
 		<plugins>

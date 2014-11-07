@@ -16,7 +16,6 @@ import com.google.gwt.user.client.ui.HorizontalPanel;
 import com.google.gwt.user.client.ui.Label;
 import com.google.gwt.user.client.ui.ValueListBox;
 import com.google.gwt.user.client.ui.Widget;
-import com.sap.sailing.gwt.ui.client.ErrorReporter;
 import com.sap.sailing.gwt.ui.client.StringMessages;
 import com.sap.sailing.gwt.ui.client.shared.components.AbstractObjectRenderer;
 import com.sap.sailing.gwt.ui.client.shared.components.SettingsDialogComponent;
@@ -28,6 +27,7 @@ import com.sap.sailing.gwt.ui.datamining.StatisticProvider;
 import com.sap.sse.datamining.shared.QueryDefinition;
 import com.sap.sse.datamining.shared.components.AggregatorType;
 import com.sap.sse.datamining.shared.dto.FunctionDTO;
+import com.sap.sse.gwt.client.ErrorReporter;
 
 public class MultiDimensionalGroupingProvider implements GroupingProvider, StatisticChangedListener {
     

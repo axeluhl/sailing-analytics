@@ -15,9 +15,9 @@ import java.util.UUID;
 
 import com.sap.sailing.domain.common.MarkType;
 import com.sap.sailing.domain.common.PassingInstruction;
-import com.sap.sailing.domain.common.impl.NamedImpl;
 import com.sap.sailing.domain.tractracadapter.MetadataParser;
 import com.sap.sailing.domain.tractracadapter.TracTracControlPoint;
+import com.sap.sse.common.impl.NamedImpl;
 
 /**
  * TracTrac objects can be augmented by what TracTrac calls a "DataSheet." These optional data sheets can provide
