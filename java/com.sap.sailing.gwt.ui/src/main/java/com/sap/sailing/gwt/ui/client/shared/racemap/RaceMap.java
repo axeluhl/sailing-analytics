@@ -738,7 +738,7 @@ public class RaceMap extends AbsolutePanel implements TimeListener, CompetitorSe
             public void onSuccess(RaceMapDataDTO raceMapDataDTO) {
                 if (map != null && raceMapDataDTO != null) {
                     quickRanks = raceMapDataDTO.quickRanks;
-                    if (showViewSimulation) {
+                    if (showViewSimulation && settings.isShowSimulationOverlay()) {
                     	simulationOverlay.updateLeg(getCurrentLeg(), newTime, false);
                     }
                     // process response only if not received out of order
@@ -2219,7 +2219,12 @@ public class RaceMap extends AbsolutePanel implements TimeListener, CompetitorSe
     }
     
     public int getCurrentLeg() {
-    	return this.getLeadingVisibleCompetitorWithOneBasedLegNumber(getCompetitorsToShow()).getA();
+    	com.sap.sse.common.Util.Pair<Integer, CompetitorDTO> leaderWithLeg = this.getLeadingVisibleCompetitorWithOneBasedLegNumber(getCompetitorsToShow());
+    	if (leaderWithLeg == null) {
+    		return 0;
+    	} else {
+    		return leaderWithLeg.getA();
+    	}
     }
 
     private Image createSAPLogo() {
