@@ -12,7 +12,9 @@ import javax.ws.rs.core.Response.ResponseBuilder;
 import com.sap.sailing.domain.base.BoatClass;
 import com.sap.sailing.domain.base.SpeedWithBearingWithConfidence;
 import com.sap.sailing.domain.base.SpeedWithConfidence;
+import com.sap.sailing.domain.common.LegType;
 import com.sap.sailing.domain.common.Speed;
+import com.sap.sailing.domain.common.Tack;
 import com.sap.sailing.domain.common.impl.DegreeBearingImpl;
 import com.sap.sailing.domain.common.impl.KnotSpeedImpl;
 import com.sap.sailing.polars.PolarDataService;
@@ -55,27 +57,15 @@ public class PolarResource extends AbstractSailingServerResource {
     @Produces("text/plain;charset=UTF-8")
     @Path("average/{boatClassName}")
     public Response getAverageSpeedAndBearing(@PathParam("boatClassName") String boatClassName,
-            @QueryParam("windspeed") double wSpeed, @QueryParam("coursetype") String courseType, @QueryParam("tack") String tack) {
+            @QueryParam("windspeed") double wSpeed, @QueryParam("legtype") LegType legType, @QueryParam("tack") Tack tack) {
         BoatClass boatClass = getService().getDomainObjectFactory().getBaseDomainFactory()
                 .getOrCreateBoatClass(boatClassName);
         ResponseBuilder responseBuilder;
         Speed windSpeed = new KnotSpeedImpl(wSpeed);
         try {
             PolarDataService service = getService().getPolarDataService();
-            SpeedWithBearingWithConfidence<Void> speedWithBearing = null;
-            if (tack.matches("starboard")) {
-                if (courseType.matches("downwind")) {
-                    speedWithBearing = service.getAverageDownwindSpeedWithBearingOnStarboardTackFor(boatClass, windSpeed);
-                } else if (courseType.matches("upwind")) {
-                    speedWithBearing = service.getAverageUpwindSpeedWithBearingOnStarboardTackFor(boatClass, windSpeed);
-                }
-            } else if (tack.matches("port")) {
-                if (courseType.matches("downwind")) {
-                    speedWithBearing = service.getAverageDownwindSpeedWithBearingOnPortTackFor(boatClass, windSpeed);
-                } else if (courseType.matches("upwind")) {
-                    speedWithBearing = service.getAverageUpwindSpeedWithBearingOnPortTackFor(boatClass, windSpeed);
-                }
-            }
+            SpeedWithBearingWithConfidence<Void> speedWithBearing = service.getAverageSpeedWithBearing(boatClass,
+                    windSpeed, legType, tack);
             String resultString = "Speed: " + speedWithBearing.getObject().getKnots() + "kn; Angle: "
                     + speedWithBearing.getObject().getBearing().getDegrees() + "°; Confidence: "
                     + speedWithBearing.getConfidence();

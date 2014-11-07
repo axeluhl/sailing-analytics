@@ -9,9 +9,11 @@ import com.sap.sailing.domain.base.Competitor;
 import com.sap.sailing.domain.base.SpeedWithBearingWithConfidence;
 import com.sap.sailing.domain.base.SpeedWithConfidence;
 import com.sap.sailing.domain.common.Bearing;
+import com.sap.sailing.domain.common.LegType;
 import com.sap.sailing.domain.common.PolarSheetGenerationSettings;
 import com.sap.sailing.domain.common.PolarSheetsData;
 import com.sap.sailing.domain.common.Speed;
+import com.sap.sailing.domain.common.Tack;
 import com.sap.sailing.domain.tracking.GPSFixMoving;
 import com.sap.sailing.domain.tracking.TrackedRace;
 import com.sap.sailing.polars.analysis.PolarSheetAnalyzer;
@@ -19,7 +21,14 @@ import com.sap.sailing.polars.data.PolarFix;
 import com.sap.sailing.polars.regression.NotEnoughDataHasBeenAddedException;
 
 /**
- * Public Facade interface allowing access to the polars of {@link TrackedRace}s and per {@link BoatClass}.
+ * Public Facade interface allowing access to the polars of {@link BoatClass}es.
+ * 
+ * It uses a {@link PolarSheetAnalyzer} for more advanced analysis. It's methods are facaded in this interface for
+ * central access.
+ * 
+ * The interesting methods for a user are {@link #getSpeed(BoatClass, Speed, Bearing)} if data for a specific angle is
+ * needed and {@link #getAverageSpeedWithBearing(BoatClass, Speed, LegType, Tack)} (and the equivalents for
+ * different tacks and leg types) which also returns the average angle for the provided parameters.
  * 
  * @author Frederik Petersen (D054528)
  * 
@@ -38,15 +47,53 @@ public interface PolarDataService extends PolarSheetAnalyzer {
     SpeedWithConfidence<Void> getSpeed(BoatClass boatClass, Speed windSpeed, Bearing bearingToTheWind)
             throws NotEnoughDataHasBeenAddedException;
     
+    /**
+     * 
+     * @param boatClass
+     * @param windSpeed 
+     * @param legType
+     *            Should be UpWind or DownWind, there is no information for other courses yet. Use getSpeed for the
+     *            desired angle to get rawer information on other courses for now.
+     * @param tack
+     *            Polar data can vary depending on the tack the boat is on.
+     * @return The estimated average speed of a boat for the supplied parameters with the estimated average bearing to
+     *         the wind and a confidence which consists of the confidences of the wind speed, and boat speed sources (50%)
+     *         and a confidence calculated using the amount of underlying fixes (50%). 0 <= confidence < 1<br/>
+     *         A value with zero confidence doesn't have any significance!<br/><br/>
+     *         
+     *         The bearing is somewhere between -179 to +180<br/><br/>
+     *         
+     *         Get the speed using returnValue.getObject()<br/><br/>
+     *         
+     *         Returns null if the leg type is not up or downwind.
+     *         
+     * @throws NotEnoughDataHasBeenAddedException
+     *             If there is not enough data to supply a value with some kind of significance.
+     */
+    SpeedWithBearingWithConfidence<Void> getAverageSpeedWithBearing(BoatClass boatClass, Speed windSpeed,
+            LegType legType, Tack tack) throws NotEnoughDataHasBeenAddedException;
+
+    /**
+     * see {@link #getAverageSpeedWithBearing(BoatClass, Speed, LegType, Tack)}
+     */
     SpeedWithBearingWithConfidence<Void> getAverageUpwindSpeedWithBearingOnStarboardTackFor(BoatClass boatClass, Speed windSpeed)
             throws NotEnoughDataHasBeenAddedException;
 
+    /**
+     * see {@link #getAverageSpeedWithBearing(BoatClass, Speed, LegType, Tack)}
+     */
     SpeedWithBearingWithConfidence<Void> getAverageDownwindSpeedWithBearingOnStarboardTackFor(BoatClass boatClass, Speed windSpeed)
             throws NotEnoughDataHasBeenAddedException;
 
+    /**
+     * see {@link #getAverageSpeedWithBearing(BoatClass, Speed, LegType, Tack)}
+     */
     SpeedWithBearingWithConfidence<Void> getAverageUpwindSpeedWithBearingOnPortTackFor(BoatClass boatClass, Speed windSpeed)
             throws NotEnoughDataHasBeenAddedException;
 
+    /**
+     * see {@link #getAverageSpeedWithBearing(BoatClass, Speed, LegType, Tack)}
+     */
     SpeedWithBearingWithConfidence<Void> getAverageDownwindSpeedWithBearingOnPortTackFor(BoatClass boatClass, Speed windSpeed)
             throws NotEnoughDataHasBeenAddedException;
 

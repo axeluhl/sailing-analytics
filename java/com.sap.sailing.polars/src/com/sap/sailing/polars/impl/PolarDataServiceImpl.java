@@ -12,10 +12,12 @@ import com.sap.sailing.domain.base.Competitor;
 import com.sap.sailing.domain.base.SpeedWithBearingWithConfidence;
 import com.sap.sailing.domain.base.SpeedWithConfidence;
 import com.sap.sailing.domain.common.Bearing;
+import com.sap.sailing.domain.common.LegType;
 import com.sap.sailing.domain.common.PolarSheetGenerationSettings;
 import com.sap.sailing.domain.common.PolarSheetsData;
 import com.sap.sailing.domain.common.RegattaAndRaceIdentifier;
 import com.sap.sailing.domain.common.Speed;
+import com.sap.sailing.domain.common.Tack;
 import com.sap.sailing.domain.tracking.GPSFixMoving;
 import com.sap.sailing.domain.tracking.TrackedRace;
 import com.sap.sailing.polars.PolarDataService;
@@ -60,6 +62,26 @@ public class PolarDataServiceImpl implements PolarDataService {
     public SpeedWithConfidence<Void> getSpeed(BoatClass boatClass, Speed windSpeed, Bearing bearingToTheWind)
             throws NotEnoughDataHasBeenAddedException {
         return polarDataMiner.estimateBoatSpeed(boatClass, windSpeed, bearingToTheWind);
+    }
+    
+    @Override
+    public SpeedWithBearingWithConfidence<Void> getAverageSpeedWithBearing(BoatClass boatClass, Speed windSpeed,
+            LegType legType, Tack tack) throws NotEnoughDataHasBeenAddedException {
+        SpeedWithBearingWithConfidence<Void> speedWithBearing = null;
+        if (tack.equals(Tack.STARBOARD)) {
+            if (legType.equals(LegType.UPWIND)) {
+                speedWithBearing = getAverageUpwindSpeedWithBearingOnStarboardTackFor(boatClass, windSpeed);
+            } else if (legType.equals(LegType.DOWNWIND)) {
+                speedWithBearing = getAverageUpwindSpeedWithBearingOnStarboardTackFor(boatClass, windSpeed);
+            }
+        } else if (tack.equals(Tack.PORT)) {
+            if (legType.equals(LegType.UPWIND)) {
+                speedWithBearing = getAverageUpwindSpeedWithBearingOnPortTackFor(boatClass, windSpeed);
+            } else if (legType.equals(LegType.DOWNWIND)) {
+                speedWithBearing = getAverageDownwindSpeedWithBearingOnPortTackFor(boatClass, windSpeed);
+            }
+        }
+        return speedWithBearing;
     }
     
     @Override

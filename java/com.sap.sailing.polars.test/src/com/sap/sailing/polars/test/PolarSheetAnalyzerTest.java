@@ -114,6 +114,14 @@ public class PolarSheetAnalyzerTest {
         return mockedPolarDataService;
     }
 
+    /**
+     * The following data is taken from a real race. (49ER yellow R2, KW 2014)
+     * Only the data for windspeed 14kn is used. The first block contains the 
+     * boatspeeds for every angle to the wind. The second block contains the
+     * datacount for each angle (number of underlying fixes).
+     * 
+     * @return
+     */
     private PolarSheetsData createPolarSheetsData() {
         PolarSheetGenerationSettings settings = PolarSheetGenerationSettingsImpl.createStandardPolarSettings();
         Number[][] averagedPolarDataByWindSpeed = {
