@@ -52,15 +52,6 @@ public class HomePlacesNavigator extends AbstractPlaceNavigator {
         return createPlaceNavigation(baseUrl, isOnRemoteServer, eventPlace, new EventPlace.Tokenizer());
     }
 
-//    void goToOverview();
-//    void goToRegattas();
-//    void goToSchedule();
-//    void goToMedia();
-//    void goToRegattaRaces(LeaderboardGroupDTO leaderboardGroup, StrippedLeaderboardDTO leaderboard, RaceGroupDTO raceGroup);
-//    void openRaceViewer(StrippedLeaderboardDTO leaderboard, RaceDTO race);
-//    void openOverallLeaderboardViewer(LeaderboardGroupDTO leaderboardGroup);
-//    void openLeaderboardViewer(LeaderboardGroupDTO leaderboardGroup, StrippedLeaderboardDTO leaderboard);
-    
     public PlaceNavigation<LeaderboardPlace> getLeaderboardNavigation(String eventUuidAsString, String leaderboardIdAsNameString, String baseUrl, boolean isOnRemoteServer) {
         LeaderboardPlace leaderboardPlace = new LeaderboardPlace(eventUuidAsString, leaderboardIdAsNameString, true, true);
         return createPlaceNavigation(baseUrl, isOnRemoteServer, leaderboardPlace, new LeaderboardPlace.Tokenizer());
