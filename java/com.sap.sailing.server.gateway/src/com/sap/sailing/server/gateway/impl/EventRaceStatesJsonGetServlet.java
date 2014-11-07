@@ -13,6 +13,15 @@ import javax.servlet.http.HttpServletResponse;
 import org.json.simple.JSONArray;
 import org.json.simple.JSONObject;
 
+import com.sap.sailing.domain.abstractlog.race.RaceLog;
+import com.sap.sailing.domain.abstractlog.race.RaceLogFlagEvent;
+import com.sap.sailing.domain.abstractlog.race.analyzing.impl.AbortingFlagFinder;
+import com.sap.sailing.domain.abstractlog.race.analyzing.impl.FinishedTimeFinder;
+import com.sap.sailing.domain.abstractlog.race.analyzing.impl.LastFlagsFinder;
+import com.sap.sailing.domain.abstractlog.race.analyzing.impl.StartTimeFinder;
+import com.sap.sailing.domain.abstractlog.race.state.ReadonlyRaceState;
+import com.sap.sailing.domain.abstractlog.race.state.impl.ReadonlyRaceStateImpl;
+import com.sap.sailing.domain.abstractlog.race.state.racingprocedure.gate.ReadonlyGateStartRacingProcedure;
 import com.sap.sailing.domain.base.CourseArea;
 import com.sap.sailing.domain.base.Event;
 import com.sap.sailing.domain.base.Fleet;
@@ -21,16 +30,7 @@ import com.sap.sailing.domain.common.RaceIdentifier;
 import com.sap.sailing.domain.common.TimePoint;
 import com.sap.sailing.domain.common.racelog.RaceLogRaceStatus;
 import com.sap.sailing.domain.leaderboard.Leaderboard;
-import com.sap.sailing.domain.racelog.RaceLog;
-import com.sap.sailing.domain.racelog.RaceLogFlagEvent;
 import com.sap.sailing.domain.racelog.RaceStateOfSameDayHelper;
-import com.sap.sailing.domain.racelog.analyzing.impl.AbortingFlagFinder;
-import com.sap.sailing.domain.racelog.analyzing.impl.FinishedTimeFinder;
-import com.sap.sailing.domain.racelog.analyzing.impl.LastFlagsFinder;
-import com.sap.sailing.domain.racelog.analyzing.impl.StartTimeFinder;
-import com.sap.sailing.domain.racelog.state.ReadonlyRaceState;
-import com.sap.sailing.domain.racelog.state.impl.ReadonlyRaceStateImpl;
-import com.sap.sailing.domain.racelog.state.racingprocedure.gate.ReadonlyGateStartRacingProcedure;
 import com.sap.sailing.server.gateway.AbstractJsonHttpServlet;
 
 public class EventRaceStatesJsonGetServlet extends AbstractJsonHttpServlet {

@@ -8,6 +8,8 @@ import java.util.List;
 import org.junit.Before;
 
 import com.mongodb.MongoException;
+import com.sap.sailing.domain.abstractlog.race.RaceLogEventAuthor;
+import com.sap.sailing.domain.abstractlog.race.impl.RaceLogEventAuthorImpl;
 import com.sap.sailing.domain.base.BoatClass;
 import com.sap.sailing.domain.base.CourseArea;
 import com.sap.sailing.domain.base.DomainFactory;
@@ -23,9 +25,7 @@ import com.sap.sailing.domain.persistence.DomainObjectFactory;
 import com.sap.sailing.domain.persistence.MongoObjectFactory;
 import com.sap.sailing.domain.persistence.MongoRaceLogStoreFactory;
 import com.sap.sailing.domain.persistence.PersistenceFactory;
-import com.sap.sailing.domain.racelog.RaceLogEventAuthor;
 import com.sap.sailing.domain.racelog.RaceLogStore;
-import com.sap.sailing.domain.racelog.impl.RaceLogEventAuthorImpl;
 
 public abstract class AbstractTestStoringAndRetrievingRaceLogInRegatta extends RaceLogMongoDBTest {
 

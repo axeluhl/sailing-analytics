@@ -11,11 +11,11 @@ import android.content.SharedPreferences.OnSharedPreferenceChangeListener;
 import android.preference.PreferenceManager;
 import android.provider.Settings.Secure;
 
+import com.sap.sailing.domain.abstractlog.race.RaceLogEventAuthor;
+import com.sap.sailing.domain.abstractlog.race.impl.RaceLogEventAuthorImpl;
 import com.sap.sailing.domain.common.CourseDesignerMode;
 import com.sap.sailing.domain.common.racelog.Flags;
 import com.sap.sailing.domain.common.racelog.RacingProcedureType;
-import com.sap.sailing.domain.racelog.RaceLogEventAuthor;
-import com.sap.sailing.domain.racelog.impl.RaceLogEventAuthorImpl;
 import com.sap.sailing.racecommittee.app.domain.coursedesign.BoatClassType;
 import com.sap.sailing.racecommittee.app.domain.coursedesign.CourseLayouts;
 import com.sap.sailing.racecommittee.app.domain.coursedesign.NumberOfRounds;

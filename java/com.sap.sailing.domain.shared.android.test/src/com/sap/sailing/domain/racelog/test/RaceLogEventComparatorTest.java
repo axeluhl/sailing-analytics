@@ -8,11 +8,11 @@ import static org.mockito.Mockito.when;
 import org.junit.Before;
 import org.junit.Test;
 
+import com.sap.sailing.domain.abstractlog.race.RaceLogEvent;
+import com.sap.sailing.domain.abstractlog.race.RaceLogEventAuthor;
+import com.sap.sailing.domain.abstractlog.race.impl.RaceLogEventComparator;
 import com.sap.sailing.domain.base.Timed;
 import com.sap.sailing.domain.common.impl.MillisecondsTimePoint;
-import com.sap.sailing.domain.racelog.RaceLogEvent;
-import com.sap.sailing.domain.racelog.RaceLogEventAuthor;
-import com.sap.sailing.domain.racelog.impl.RaceLogEventComparator;
 
 public class RaceLogEventComparatorTest {
 

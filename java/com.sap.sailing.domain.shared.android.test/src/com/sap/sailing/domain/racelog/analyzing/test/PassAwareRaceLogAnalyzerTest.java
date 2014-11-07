@@ -10,10 +10,10 @@ import java.util.UUID;
 
 import org.junit.Test;
 
-import com.sap.sailing.domain.racelog.RaceLog;
-import com.sap.sailing.domain.racelog.RaceLogEvent;
-import com.sap.sailing.domain.racelog.RaceLogEventAuthor;
-import com.sap.sailing.domain.racelog.analyzing.impl.RaceLogAnalyzer;
+import com.sap.sailing.domain.abstractlog.race.RaceLog;
+import com.sap.sailing.domain.abstractlog.race.RaceLogEvent;
+import com.sap.sailing.domain.abstractlog.race.RaceLogEventAuthor;
+import com.sap.sailing.domain.abstractlog.race.analyzing.impl.RaceLogAnalyzer;
 
 public abstract class PassAwareRaceLogAnalyzerTest<AnalyzerType extends RaceLogAnalyzer<ResultType>, ResultType>
         extends RaceLogAnalyzerTest<AnalyzerType> {

@@ -14,10 +14,10 @@ import java.util.List;
 import org.junit.Before;
 import org.junit.Test;
 
+import com.sap.sailing.domain.abstractlog.race.tracking.DeviceIdentifier;
 import com.sap.sailing.domain.base.Competitor;
 import com.sap.sailing.domain.common.racelog.tracking.NoCorrespondingServiceRegisteredException;
 import com.sap.sailing.domain.common.racelog.tracking.TransformationException;
-import com.sap.sailing.domain.racelog.tracking.DeviceIdentifier;
 import com.sap.sailing.domain.racelog.tracking.test.mock.MockDeviceAndSessioinIdentifierWithGPSFixesDeserializer;
 import com.sap.sailing.domain.racelog.tracking.test.mock.SmartphoneImeiIdentifier;
 import com.sap.sailing.domain.racelogtracking.servlet.RecordFixesPostServlet;

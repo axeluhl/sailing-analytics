@@ -9,11 +9,11 @@ import javax.servlet.http.HttpServletResponse;
 
 import org.json.simple.JSONArray;
 
+import com.sap.sailing.domain.abstractlog.race.RaceLog;
 import com.sap.sailing.domain.base.CourseArea;
 import com.sap.sailing.domain.base.racegroup.RaceGroup;
 import com.sap.sailing.domain.common.racelog.RaceLogServletConstants;
 import com.sap.sailing.domain.leaderboard.Leaderboard;
-import com.sap.sailing.domain.racelog.RaceLog;
 import com.sap.sailing.server.gateway.AbstractJsonHttpServlet;
 import com.sap.sailing.server.gateway.serialization.JsonSerializer;
 import com.sap.sailing.server.gateway.serialization.impl.BoatClassJsonSerializer;

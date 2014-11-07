@@ -6,8 +6,8 @@ import android.preference.PreferenceManager;
 
 import com.sap.sailing.android.shared.util.PrefUtils;
 import com.sap.sailing.android.tracking.app.R;
-import com.sap.sailing.domain.racelog.RaceLogEventAuthor;
-import com.sap.sailing.domain.racelog.impl.RaceLogEventAuthorImpl;
+import com.sap.sailing.domain.abstractlog.race.RaceLogEventAuthor;
+import com.sap.sailing.domain.abstractlog.race.impl.RaceLogEventAuthorImpl;
 
 public class AppPreferences {
     protected final Context context;

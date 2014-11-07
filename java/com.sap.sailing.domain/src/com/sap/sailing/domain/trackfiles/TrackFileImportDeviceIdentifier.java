@@ -2,8 +2,8 @@ package com.sap.sailing.domain.trackfiles;
 
 import java.util.UUID;
 
+import com.sap.sailing.domain.abstractlog.race.tracking.DeviceIdentifier;
 import com.sap.sailing.domain.common.TimePoint;
-import com.sap.sailing.domain.racelog.tracking.DeviceIdentifier;
 
 /**
  * Identifies a device that generated fixes imported from a track file, such as a GPX file.

@@ -2,8 +2,8 @@ package com.sap.sailing.server.gateway.serialization.racegroup.impl;
 
 import org.json.simple.JSONObject;
 
+import com.sap.sailing.domain.abstractlog.race.RaceLog;
 import com.sap.sailing.domain.base.racegroup.RaceCell;
-import com.sap.sailing.domain.racelog.RaceLog;
 import com.sap.sailing.server.gateway.serialization.JsonSerializer;
 
 public class RaceCellJsonSerializer implements JsonSerializer<RaceCell> {

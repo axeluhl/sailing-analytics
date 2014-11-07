@@ -8,12 +8,12 @@ import java.util.Arrays;
 
 import org.junit.Test;
 
-import com.sap.sailing.domain.racelog.RaceLog;
-import com.sap.sailing.domain.racelog.RaceLogEvent;
-import com.sap.sailing.domain.racelog.RaceLogEventAuthor;
-import com.sap.sailing.domain.racelog.RaceLogGateLineOpeningTimeEvent;
-import com.sap.sailing.domain.racelog.RaceLogGateLineOpeningTimeEvent.GateLineOpeningTimes;
-import com.sap.sailing.domain.racelog.analyzing.impl.GateLineOpeningTimeFinder;
+import com.sap.sailing.domain.abstractlog.race.RaceLog;
+import com.sap.sailing.domain.abstractlog.race.RaceLogEvent;
+import com.sap.sailing.domain.abstractlog.race.RaceLogEventAuthor;
+import com.sap.sailing.domain.abstractlog.race.RaceLogGateLineOpeningTimeEvent;
+import com.sap.sailing.domain.abstractlog.race.RaceLogGateLineOpeningTimeEvent.GateLineOpeningTimes;
+import com.sap.sailing.domain.abstractlog.race.analyzing.impl.GateLineOpeningTimeFinder;
 
 public class GateLineOpeningTimeFinderTest extends PassAwareRaceLogAnalyzerTest<GateLineOpeningTimeFinder, GateLineOpeningTimes> {
 

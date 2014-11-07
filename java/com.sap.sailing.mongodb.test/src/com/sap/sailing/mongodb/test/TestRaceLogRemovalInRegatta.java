@@ -9,14 +9,14 @@ import java.util.List;
 import org.junit.Test;
 
 import com.mongodb.MongoException;
+import com.sap.sailing.domain.abstractlog.race.RaceLog;
+import com.sap.sailing.domain.abstractlog.race.RaceLogEventFactory;
+import com.sap.sailing.domain.abstractlog.race.RaceLogProtestStartTimeEvent;
+import com.sap.sailing.domain.abstractlog.race.RaceLogStartTimeEvent;
 import com.sap.sailing.domain.base.Fleet;
 import com.sap.sailing.domain.base.Series;
 import com.sap.sailing.domain.base.impl.FleetImpl;
 import com.sap.sailing.domain.common.impl.MillisecondsTimePoint;
-import com.sap.sailing.domain.racelog.RaceLog;
-import com.sap.sailing.domain.racelog.RaceLogEventFactory;
-import com.sap.sailing.domain.racelog.RaceLogProtestStartTimeEvent;
-import com.sap.sailing.domain.racelog.RaceLogStartTimeEvent;
 import com.sap.sse.common.Util;
 
 public class TestRaceLogRemovalInRegatta extends AbstractTestStoringAndRetrievingRaceLogInRegatta {

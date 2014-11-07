@@ -6,8 +6,8 @@ import android.content.DialogInterface.OnClickListener;
 import android.os.Bundle;
 
 import com.sap.sailing.android.shared.logging.ExLog;
-import com.sap.sailing.domain.racelog.RaceLogEventAuthor;
-import com.sap.sailing.domain.racelog.impl.RaceLogEventAuthorImpl;
+import com.sap.sailing.domain.abstractlog.race.RaceLogEventAuthor;
+import com.sap.sailing.domain.abstractlog.race.impl.RaceLogEventAuthorImpl;
 import com.sap.sailing.racecommittee.app.R;
 import com.sap.sailing.racecommittee.app.logging.LogEvent;
 

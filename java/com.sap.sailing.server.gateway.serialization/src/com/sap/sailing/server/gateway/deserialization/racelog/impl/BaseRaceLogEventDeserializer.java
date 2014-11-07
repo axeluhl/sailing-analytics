@@ -7,13 +7,13 @@ import java.util.List;
 import org.json.simple.JSONArray;
 import org.json.simple.JSONObject;
 
+import com.sap.sailing.domain.abstractlog.race.RaceLogEvent;
+import com.sap.sailing.domain.abstractlog.race.RaceLogEventAuthor;
+import com.sap.sailing.domain.abstractlog.race.RaceLogEventRestoreFactory;
+import com.sap.sailing.domain.abstractlog.race.impl.RaceLogEventAuthorImpl;
 import com.sap.sailing.domain.base.Competitor;
 import com.sap.sailing.domain.common.TimePoint;
 import com.sap.sailing.domain.common.impl.MillisecondsTimePoint;
-import com.sap.sailing.domain.racelog.RaceLogEvent;
-import com.sap.sailing.domain.racelog.RaceLogEventAuthor;
-import com.sap.sailing.domain.racelog.RaceLogEventRestoreFactory;
-import com.sap.sailing.domain.racelog.impl.RaceLogEventAuthorImpl;
 import com.sap.sailing.server.gateway.deserialization.JsonDeserializationException;
 import com.sap.sailing.server.gateway.deserialization.JsonDeserializer;
 import com.sap.sailing.server.gateway.deserialization.impl.Helpers;

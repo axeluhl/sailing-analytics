@@ -13,6 +13,19 @@ import static org.mockito.Mockito.when;
 import org.junit.Before;
 import org.junit.Test;
 
+import com.sap.sailing.domain.abstractlog.race.RaceLog;
+import com.sap.sailing.domain.abstractlog.race.RaceLogEventAuthor;
+import com.sap.sailing.domain.abstractlog.race.RaceLogEventFactory;
+import com.sap.sailing.domain.abstractlog.race.impl.RaceLogEventAuthorImpl;
+import com.sap.sailing.domain.abstractlog.race.impl.RaceLogImpl;
+import com.sap.sailing.domain.abstractlog.race.impl.RaceLogStartProcedureChangedEventImpl;
+import com.sap.sailing.domain.abstractlog.race.state.RaceState;
+import com.sap.sailing.domain.abstractlog.race.state.RaceStateChangedListener;
+import com.sap.sailing.domain.abstractlog.race.state.impl.RaceStateImpl;
+import com.sap.sailing.domain.abstractlog.race.state.impl.ReadonlyRaceStateImpl;
+import com.sap.sailing.domain.abstractlog.race.state.racingprocedure.RacingProcedure;
+import com.sap.sailing.domain.abstractlog.race.state.racingprocedure.gate.GateStartRacingProcedure;
+import com.sap.sailing.domain.abstractlog.race.state.racingprocedure.impl.RacingProcedureFactoryImpl;
 import com.sap.sailing.domain.base.CourseBase;
 import com.sap.sailing.domain.base.configuration.ConfigurationLoader;
 import com.sap.sailing.domain.base.configuration.RacingProcedureConfiguration;
@@ -25,19 +38,6 @@ import com.sap.sailing.domain.common.impl.MillisecondsTimePoint;
 import com.sap.sailing.domain.common.racelog.Flags;
 import com.sap.sailing.domain.common.racelog.RaceLogRaceStatus;
 import com.sap.sailing.domain.common.racelog.RacingProcedureType;
-import com.sap.sailing.domain.racelog.RaceLog;
-import com.sap.sailing.domain.racelog.RaceLogEventAuthor;
-import com.sap.sailing.domain.racelog.RaceLogEventFactory;
-import com.sap.sailing.domain.racelog.impl.RaceLogEventAuthorImpl;
-import com.sap.sailing.domain.racelog.impl.RaceLogImpl;
-import com.sap.sailing.domain.racelog.impl.RaceLogStartProcedureChangedEventImpl;
-import com.sap.sailing.domain.racelog.state.RaceState;
-import com.sap.sailing.domain.racelog.state.RaceStateChangedListener;
-import com.sap.sailing.domain.racelog.state.impl.RaceStateImpl;
-import com.sap.sailing.domain.racelog.state.impl.ReadonlyRaceStateImpl;
-import com.sap.sailing.domain.racelog.state.racingprocedure.RacingProcedure;
-import com.sap.sailing.domain.racelog.state.racingprocedure.gate.GateStartRacingProcedure;
-import com.sap.sailing.domain.racelog.state.racingprocedure.impl.RacingProcedureFactoryImpl;
 
 public class RaceStateTest {
     

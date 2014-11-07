@@ -6,12 +6,12 @@ import static org.mockito.Mockito.mock;
 import java.io.Serializable;
 import java.util.List;
 
+import com.sap.sailing.domain.abstractlog.race.RaceLogEvent;
+import com.sap.sailing.domain.abstractlog.race.RaceLogEventAuthor;
+import com.sap.sailing.domain.abstractlog.race.RaceLogEventVisitor;
+import com.sap.sailing.domain.abstractlog.race.impl.RaceLogEventImpl;
 import com.sap.sailing.domain.base.Competitor;
 import com.sap.sailing.domain.common.TimePoint;
-import com.sap.sailing.domain.racelog.RaceLogEvent;
-import com.sap.sailing.domain.racelog.RaceLogEventAuthor;
-import com.sap.sailing.domain.racelog.RaceLogEventVisitor;
-import com.sap.sailing.domain.racelog.impl.RaceLogEventImpl;
 
 public class RaceLogEventImplTest {
     

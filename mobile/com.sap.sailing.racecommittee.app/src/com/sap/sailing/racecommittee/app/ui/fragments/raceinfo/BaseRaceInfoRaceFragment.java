@@ -5,14 +5,14 @@ import java.util.List;
 import android.app.Activity;
 import android.widget.TextView;
 
+import com.sap.sailing.domain.abstractlog.race.state.racingprocedure.FlagPoleState;
+import com.sap.sailing.domain.abstractlog.race.state.racingprocedure.RacingProcedure;
+import com.sap.sailing.domain.abstractlog.race.state.racingprocedure.ReadonlyRacingProcedure;
+import com.sap.sailing.domain.abstractlog.race.state.racingprocedure.impl.BaseRacingProcedureChangedListener;
 import com.sap.sailing.domain.common.TimePoint;
 import com.sap.sailing.domain.common.impl.MillisecondsTimePoint;
 import com.sap.sailing.domain.common.racelog.FlagPole;
 import com.sap.sailing.domain.common.racelog.Flags;
-import com.sap.sailing.domain.racelog.state.racingprocedure.FlagPoleState;
-import com.sap.sailing.domain.racelog.state.racingprocedure.RacingProcedure;
-import com.sap.sailing.domain.racelog.state.racingprocedure.ReadonlyRacingProcedure;
-import com.sap.sailing.domain.racelog.state.racingprocedure.impl.BaseRacingProcedureChangedListener;
 import com.sap.sailing.racecommittee.app.R;
 import com.sap.sailing.android.shared.logging.ExLog;
 import com.sap.sailing.racecommittee.app.ui.fragments.RaceFragment;

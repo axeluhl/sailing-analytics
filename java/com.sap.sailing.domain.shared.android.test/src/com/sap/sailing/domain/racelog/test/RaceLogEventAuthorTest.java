@@ -5,8 +5,8 @@ import static org.junit.Assert.assertTrue;
 
 import org.junit.Test;
 
-import com.sap.sailing.domain.racelog.RaceLogEventAuthor;
-import com.sap.sailing.domain.racelog.impl.RaceLogEventAuthorImpl;
+import com.sap.sailing.domain.abstractlog.race.RaceLogEventAuthor;
+import com.sap.sailing.domain.abstractlog.race.impl.RaceLogEventAuthorImpl;
 
 public class RaceLogEventAuthorTest {
     

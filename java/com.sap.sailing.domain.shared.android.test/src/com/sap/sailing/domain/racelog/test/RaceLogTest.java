@@ -19,18 +19,18 @@ import org.junit.Test;
 import org.mockito.invocation.InvocationOnMock;
 import org.mockito.stubbing.Answer;
 
+import com.sap.sailing.domain.abstractlog.race.RaceLog;
+import com.sap.sailing.domain.abstractlog.race.RaceLogEvent;
+import com.sap.sailing.domain.abstractlog.race.RaceLogEventAuthor;
+import com.sap.sailing.domain.abstractlog.race.RaceLogEventFactory;
+import com.sap.sailing.domain.abstractlog.race.RaceLogEventVisitor;
+import com.sap.sailing.domain.abstractlog.race.RaceLogFlagEvent;
+import com.sap.sailing.domain.abstractlog.race.RaceLogStartTimeEvent;
+import com.sap.sailing.domain.abstractlog.race.impl.RaceLogEventAuthorImpl;
+import com.sap.sailing.domain.abstractlog.race.impl.RaceLogEventImpl;
+import com.sap.sailing.domain.abstractlog.race.impl.RaceLogImpl;
 import com.sap.sailing.domain.common.TimePoint;
 import com.sap.sailing.domain.common.impl.MillisecondsTimePoint;
-import com.sap.sailing.domain.racelog.RaceLog;
-import com.sap.sailing.domain.racelog.RaceLogEvent;
-import com.sap.sailing.domain.racelog.RaceLogEventAuthor;
-import com.sap.sailing.domain.racelog.RaceLogEventFactory;
-import com.sap.sailing.domain.racelog.RaceLogEventVisitor;
-import com.sap.sailing.domain.racelog.RaceLogFlagEvent;
-import com.sap.sailing.domain.racelog.RaceLogStartTimeEvent;
-import com.sap.sailing.domain.racelog.impl.RaceLogEventAuthorImpl;
-import com.sap.sailing.domain.racelog.impl.RaceLogEventImpl;
-import com.sap.sailing.domain.racelog.impl.RaceLogImpl;
 import com.sap.sse.common.Util;
 
 public class RaceLogTest {

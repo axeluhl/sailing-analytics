@@ -1,12 +1,12 @@
 package com.sap.sailing.server.impl;
 
+import com.sap.sailing.domain.abstractlog.race.RaceLog;
+import com.sap.sailing.domain.abstractlog.race.RaceLogEvent;
 import com.sap.sailing.domain.base.Competitor;
 import com.sap.sailing.domain.base.Fleet;
 import com.sap.sailing.domain.base.RaceColumn;
 import com.sap.sailing.domain.base.RaceColumnListener;
 import com.sap.sailing.domain.leaderboard.ResultDiscardingRule;
-import com.sap.sailing.domain.racelog.RaceLog;
-import com.sap.sailing.domain.racelog.RaceLogEvent;
 import com.sap.sailing.domain.racelog.RaceLogIdentifier;
 import com.sap.sailing.domain.racelog.RaceLogIdentifierTemplateResolver;
 import com.sap.sailing.domain.racelog.impl.RaceLogOnLeaderboardIdentifier;

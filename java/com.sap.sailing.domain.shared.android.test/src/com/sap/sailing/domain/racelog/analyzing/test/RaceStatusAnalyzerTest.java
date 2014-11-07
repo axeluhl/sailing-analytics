@@ -12,18 +12,18 @@ import org.junit.Test;
 import org.mockito.invocation.InvocationOnMock;
 import org.mockito.stubbing.Answer;
 
+import com.sap.sailing.domain.abstractlog.race.RaceLog;
+import com.sap.sailing.domain.abstractlog.race.RaceLogEvent;
+import com.sap.sailing.domain.abstractlog.race.RaceLogEventAuthor;
+import com.sap.sailing.domain.abstractlog.race.RaceLogEventVisitor;
+import com.sap.sailing.domain.abstractlog.race.RaceLogRaceStatusEvent;
+import com.sap.sailing.domain.abstractlog.race.RaceLogStartTimeEvent;
+import com.sap.sailing.domain.abstractlog.race.analyzing.impl.RaceStatusAnalyzer;
+import com.sap.sailing.domain.abstractlog.race.impl.RaceLogEventAuthorImpl;
+import com.sap.sailing.domain.abstractlog.race.state.racingprocedure.RacingProcedure;
 import com.sap.sailing.domain.common.TimePoint;
 import com.sap.sailing.domain.common.impl.MillisecondsTimePoint;
 import com.sap.sailing.domain.common.racelog.RaceLogRaceStatus;
-import com.sap.sailing.domain.racelog.RaceLog;
-import com.sap.sailing.domain.racelog.RaceLogEvent;
-import com.sap.sailing.domain.racelog.RaceLogEventAuthor;
-import com.sap.sailing.domain.racelog.RaceLogEventVisitor;
-import com.sap.sailing.domain.racelog.RaceLogRaceStatusEvent;
-import com.sap.sailing.domain.racelog.RaceLogStartTimeEvent;
-import com.sap.sailing.domain.racelog.analyzing.impl.RaceStatusAnalyzer;
-import com.sap.sailing.domain.racelog.impl.RaceLogEventAuthorImpl;
-import com.sap.sailing.domain.racelog.state.racingprocedure.RacingProcedure;
 
 public class RaceStatusAnalyzerTest extends PassAwareRaceLogAnalyzerTest<RaceStatusAnalyzer, RaceLogRaceStatus> {
 

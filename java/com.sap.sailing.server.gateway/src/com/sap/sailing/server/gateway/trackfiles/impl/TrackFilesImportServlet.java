@@ -28,10 +28,10 @@ import org.osgi.framework.Filter;
 import org.osgi.framework.InvalidSyntaxException;
 import org.osgi.framework.ServiceReference;
 
+import com.sap.sailing.domain.abstractlog.race.tracking.DeviceIdentifier;
 import com.sap.sailing.domain.common.TimePoint;
 import com.sap.sailing.domain.common.racelog.tracking.NoCorrespondingServiceRegisteredException;
 import com.sap.sailing.domain.common.racelog.tracking.TransformationException;
-import com.sap.sailing.domain.racelog.tracking.DeviceIdentifier;
 import com.sap.sailing.domain.trackfiles.TrackFileImportDeviceIdentifier;
 import com.sap.sailing.domain.trackimport.FormatNotSupportedException;
 import com.sap.sailing.domain.trackimport.GPSFixImporter;

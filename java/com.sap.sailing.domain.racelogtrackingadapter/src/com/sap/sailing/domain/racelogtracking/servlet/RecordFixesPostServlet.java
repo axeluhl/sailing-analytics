@@ -8,10 +8,10 @@ import java.util.logging.Level;
 import javax.servlet.ServletConfig;
 import javax.servlet.ServletException;
 
+import com.sap.sailing.domain.abstractlog.race.tracking.DeviceIdentifier;
 import com.sap.sailing.domain.common.racelog.tracking.NoCorrespondingServiceRegisteredException;
 import com.sap.sailing.domain.common.racelog.tracking.TransformationException;
 import com.sap.sailing.domain.common.racelog.tracking.TypeBasedServiceFinder;
-import com.sap.sailing.domain.racelog.tracking.DeviceIdentifier;
 import com.sap.sailing.domain.tracking.GPSFix;
 import com.sap.sailing.server.gateway.AbstractJsonPostServlet;
 import com.sap.sailing.server.gateway.HttpExceptionWithMessage;

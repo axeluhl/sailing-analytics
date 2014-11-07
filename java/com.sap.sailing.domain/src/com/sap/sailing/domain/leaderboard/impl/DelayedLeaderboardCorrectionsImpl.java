@@ -9,6 +9,7 @@ import java.util.Iterator;
 import java.util.Map;
 import java.util.Set;
 
+import com.sap.sailing.domain.abstractlog.race.RaceLogEvent;
 import com.sap.sailing.domain.base.Competitor;
 import com.sap.sailing.domain.base.CompetitorFactory;
 import com.sap.sailing.domain.base.Fleet;
@@ -20,7 +21,6 @@ import com.sap.sailing.domain.common.MaxPointsReason;
 import com.sap.sailing.domain.leaderboard.DelayedLeaderboardCorrections;
 import com.sap.sailing.domain.leaderboard.Leaderboard;
 import com.sap.sailing.domain.leaderboard.ResultDiscardingRule;
-import com.sap.sailing.domain.racelog.RaceLogEvent;
 import com.sap.sailing.domain.racelog.RaceLogIdentifier;
 import com.sap.sailing.domain.tracking.TrackedRace;
 

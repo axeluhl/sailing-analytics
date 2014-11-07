@@ -20,8 +20,8 @@ import android.widget.Toast;
 
 import com.sap.sailing.android.shared.logging.ExLog;
 import com.sap.sailing.android.shared.util.CollectionUtils;
+import com.sap.sailing.domain.abstractlog.race.RaceLogEventAuthor;
 import com.sap.sailing.domain.base.CourseArea;
-import com.sap.sailing.domain.racelog.RaceLogEventAuthor;
 import com.sap.sailing.racecommittee.app.AppConstants;
 import com.sap.sailing.racecommittee.app.R;
 import com.sap.sailing.racecommittee.app.data.DataManager;

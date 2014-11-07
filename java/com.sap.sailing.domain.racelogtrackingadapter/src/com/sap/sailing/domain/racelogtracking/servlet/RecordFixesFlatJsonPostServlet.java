@@ -4,10 +4,10 @@ import java.util.Map;
 import java.util.UUID;
 import java.util.logging.Level;
 
+import com.sap.sailing.domain.abstractlog.race.tracking.DeviceIdentifier;
+import com.sap.sailing.domain.abstractlog.race.tracking.impl.SmartphoneUUIDIdentifierImpl;
 import com.sap.sailing.domain.common.racelog.tracking.NoCorrespondingServiceRegisteredException;
 import com.sap.sailing.domain.common.racelog.tracking.TransformationException;
-import com.sap.sailing.domain.racelog.tracking.DeviceIdentifier;
-import com.sap.sailing.domain.racelog.tracking.impl.SmartphoneUUIDIdentifierImpl;
 import com.sap.sailing.domain.tracking.GPSFixMoving;
 import com.sap.sailing.server.gateway.AbstractJsonPostServlet;
 import com.sap.sailing.server.gateway.HttpExceptionWithMessage;

@@ -9,6 +9,9 @@ import java.util.Set;
 import java.util.UUID;
 
 import com.google.gwt.user.client.rpc.RemoteService;
+import com.sap.sailing.domain.abstractlog.race.RaceLog;
+import com.sap.sailing.domain.abstractlog.race.Revokable;
+import com.sap.sailing.domain.abstractlog.race.tracking.DenoteForTrackingEvent;
 import com.sap.sailing.domain.base.RaceDefinition;
 import com.sap.sailing.domain.base.RemoteSailingServerReference;
 import com.sap.sailing.domain.common.DataImportProgress;
@@ -38,9 +41,6 @@ import com.sap.sailing.domain.common.racelog.tracking.NoCorrespondingServiceRegi
 import com.sap.sailing.domain.common.racelog.tracking.NotDenotedForRaceLogTrackingException;
 import com.sap.sailing.domain.common.racelog.tracking.NotRevokableException;
 import com.sap.sailing.domain.common.racelog.tracking.TransformationException;
-import com.sap.sailing.domain.racelog.RaceLog;
-import com.sap.sailing.domain.racelog.Revokable;
-import com.sap.sailing.domain.racelog.tracking.DenoteForTrackingEvent;
 import com.sap.sailing.domain.racelog.tracking.GPSFixStore;
 import com.sap.sailing.domain.racelogtracking.RaceLogTrackingAdapter;
 import com.sap.sailing.domain.tracking.TrackedRace;
