@@ -108,7 +108,7 @@ public class PolarDataMiner {
         return isActive || hasQueue;
     }
 
-    public SpeedWithConfidence<Integer> estimateBoatSpeed(BoatClass boatClass, Speed windSpeed, Bearing angleToTheWind)
+    public SpeedWithConfidence<Void> estimateBoatSpeed(BoatClass boatClass, Speed windSpeed, Bearing angleToTheWind)
             throws NotEnoughDataHasBeenAddedException {
         return incrementalRegressionProcessor.estimateBoatSpeed(boatClass, windSpeed, angleToTheWind).getA();
     }
@@ -130,15 +130,18 @@ public class PolarDataMiner {
             Integer[] perAngle = new Integer[360];
             Map<Integer, PolarSheetsHistogramData> perWindSpeed = new HashMap<>();
             for (int angle = 0; angle < 360; angle++) {
-                Pair<SpeedWithConfidence<Integer>, Integer> speedWithConfidenceAndDataCount;
+                Pair<SpeedWithConfidence<Void>, Integer> speedWithConfidenceAndDataCount;
                 try {
                     int convertedAngle = angle;
                     if (angle > 180) {
                         convertedAngle = angle - 360;
                     }
-                    speedWithConfidenceAndDataCount = incrementalRegressionProcessor.estimateBoatSpeed(boatClass, new KnotSpeedImpl(windSpeed), new DegreeBearingImpl(convertedAngle));
+                    speedWithConfidenceAndDataCount = incrementalRegressionProcessor.estimateBoatSpeed(boatClass,
+                            new KnotSpeedImpl(windSpeed), new DegreeBearingImpl(convertedAngle));
                 } catch (NotEnoughDataHasBeenAddedException e) {
-                    speedWithConfidenceAndDataCount = new Pair<SpeedWithConfidence<Integer>, Integer>(new SpeedWithConfidenceImpl<Integer>(new KnotSpeedImpl(0), 0, 0), 0);
+                    // No data so put in a 0 speed with 0 confidence
+                    speedWithConfidenceAndDataCount = new Pair<SpeedWithConfidence<Void>, Integer>(
+                            new SpeedWithConfidenceImpl<Void>(new KnotSpeedImpl(0), 0, null), 0);
                 }
                             
                 averagedPolarDataByWindSpeed[windIndex][angle] = speedWithConfidenceAndDataCount.getA().getObject().getKnots();

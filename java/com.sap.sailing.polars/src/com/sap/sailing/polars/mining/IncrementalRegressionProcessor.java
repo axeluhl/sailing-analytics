@@ -7,11 +7,16 @@ import java.util.Set;
 import java.util.logging.Logger;
 
 import com.sap.sailing.domain.base.BoatClass;
+import com.sap.sailing.domain.base.SpeedWithBearingWithConfidence;
 import com.sap.sailing.domain.base.SpeedWithConfidence;
 import com.sap.sailing.domain.base.impl.SpeedWithConfidenceImpl;
 import com.sap.sailing.domain.common.Bearing;
+import com.sap.sailing.domain.common.Position;
 import com.sap.sailing.domain.common.Speed;
+import com.sap.sailing.domain.common.TimePoint;
+import com.sap.sailing.domain.common.confidence.BearingWithConfidence;
 import com.sap.sailing.domain.common.impl.KnotSpeedImpl;
+import com.sap.sailing.domain.tracking.WindWithConfidence;
 import com.sap.sailing.polars.regression.BoatSpeedEstimator;
 import com.sap.sailing.polars.regression.NotEnoughDataHasBeenAddedException;
 import com.sap.sse.common.Util.Pair;
@@ -51,10 +56,20 @@ public class IncrementalRegressionProcessor implements Processor<GroupedDataEntr
         }
         GPSFixMovingWithPolarContext fix = element.getDataEntry();
 
-        Bearing angleToTheWind = fix.getAngleToTheWind();
+        BearingWithConfidence<Integer> angleToTheWind = fix.getAngleToTheWind();
+        
+        
+        
+        
         if (angleToTheWind != null) {
-            boatSpeedEstimator.addData(fix.getWindSpeed().getKnots(), angleToTheWind.getDegrees(), fix.getBoatSpeed()
-                    .getKnots());
+            WindWithConfidence<Pair<Position, TimePoint>> windWithConfidenceForSpeed = fix.getWindSpeed();
+            SpeedWithBearingWithConfidence<TimePoint> boatSpeedWithConfidence = fix.getBoatSpeed();
+            double confidenceForWindSpeed = windWithConfidenceForSpeed.getConfidence();
+            double confidenceForWindBearing = angleToTheWind.getConfidence();
+            double confidenceForBoatSpeed = boatSpeedWithConfidence.getConfidence();
+            double averagedConfidence = (confidenceForBoatSpeed + confidenceForWindBearing + confidenceForWindSpeed) / 3;
+            boatSpeedEstimator.addData(windWithConfidenceForSpeed.getObject().getKnots(), angleToTheWind.getObject()
+                    .getDegrees(), boatSpeedWithConfidence.getObject().getKnots(), averagedConfidence);
         }
     }
 
@@ -74,7 +89,7 @@ public class IncrementalRegressionProcessor implements Processor<GroupedDataEntr
         return null;
     }
 
-    public Pair<SpeedWithConfidence<Integer>, Integer> estimateBoatSpeed(final BoatClass boatClass, final Speed windSpeed,
+    public Pair<SpeedWithConfidence<Void>, Integer> estimateBoatSpeed(final BoatClass boatClass, final Speed windSpeed,
             final Bearing angleToTheWind)
             throws NotEnoughDataHasBeenAddedException {
         int dataCount = 0;
@@ -109,8 +124,9 @@ public class IncrementalRegressionProcessor implements Processor<GroupedDataEntr
         KnotSpeedImpl speedWithoutConfidence = new KnotSpeedImpl(boatSpeedEstimator.estimateSpeed(windSpeed.getKnots(),
                 angleToTheWind.getDegrees()));
         dataCount = boatSpeedEstimator.getDataCount();
-        return new Pair<SpeedWithConfidence<Integer>, Integer>(new SpeedWithConfidenceImpl<Integer>(
-                speedWithoutConfidence, /* FIXME */1.0, /* FIXME */0), dataCount);
+        double confidence = boatSpeedEstimator.getConfidence();
+        return new Pair<SpeedWithConfidence<Void>, Integer>(new SpeedWithConfidenceImpl<Void>(
+                speedWithoutConfidence, confidence, null), dataCount);
     }
 
     @Override
@@ -131,6 +147,7 @@ public class IncrementalRegressionProcessor implements Processor<GroupedDataEntr
 
     @Override
     public Class<Void> getResultType() {
+        // No result type here, since this is a special case of a processor. It's the end of the pipe so to say.
         return null;
     }
 

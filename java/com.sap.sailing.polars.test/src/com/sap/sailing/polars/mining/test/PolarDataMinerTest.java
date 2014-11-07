@@ -39,10 +39,13 @@ import com.sap.sailing.domain.tracking.GPSFixMoving;
 import com.sap.sailing.domain.tracking.MarkPassing;
 import com.sap.sailing.domain.tracking.TrackedRace;
 import com.sap.sailing.domain.tracking.Wind;
+import com.sap.sailing.domain.tracking.WindWithConfidence;
 import com.sap.sailing.domain.tracking.impl.DynamicGPSFixMovingTrackImpl;
 import com.sap.sailing.domain.tracking.impl.WindImpl;
+import com.sap.sailing.domain.tracking.impl.WindWithConfidenceImpl;
 import com.sap.sailing.polars.mining.PolarDataMiner;
 import com.sap.sailing.polars.regression.NotEnoughDataHasBeenAddedException;
+import com.sap.sse.common.Util.Pair;
 
 public class PolarDataMinerTest {
 
@@ -103,17 +106,17 @@ public class PolarDataMinerTest {
             }
         }
 
-        SpeedWithConfidence<Integer> estimatedSpeed1 = miner.estimateBoatSpeed(mockedBoatClass, new KnotSpeedImpl(15),
+        SpeedWithConfidence<Void> estimatedSpeed1 = miner.estimateBoatSpeed(mockedBoatClass, new KnotSpeedImpl(15),
                 new DegreeBearingImpl(44.9));
         assertThat(estimatedSpeed1, is(notNullValue()));
         assertThat(estimatedSpeed1.getObject().getKnots(), is(closeTo(10.55, EPSILON)));
 
-        SpeedWithConfidence<Integer> estimatedSpeed2 = miner.estimateBoatSpeed(mockedBoatClass, new KnotSpeedImpl(15),
+        SpeedWithConfidence<Void> estimatedSpeed2 = miner.estimateBoatSpeed(mockedBoatClass, new KnotSpeedImpl(15),
                 new DegreeBearingImpl(42));
         assertThat(estimatedSpeed2, is(notNullValue()));
         assertThat(estimatedSpeed2.getObject().getKnots(), is(closeTo(10.05, EPSILON)));
 
-        SpeedWithConfidence<Integer> estimatedSpeed3 = miner.estimateBoatSpeed(mockedBoatClass, new KnotSpeedImpl(15),
+        SpeedWithConfidence<Void> estimatedSpeed3 = miner.estimateBoatSpeed(mockedBoatClass, new KnotSpeedImpl(15),
                 new DegreeBearingImpl(42.8));
         assertThat(estimatedSpeed3, is(notNullValue()));
         assertThat(estimatedSpeed3.getObject().getKnots(), is(closeTo(10, EPSILON)));
@@ -169,9 +172,11 @@ public class PolarDataMinerTest {
         SpeedWithBearing windSpeed = new KnotSpeedWithBearingImpl(15, windBearing);
         
         Wind wind = new WindImpl(new DegreePosition(54.431952, 10.186767), startOfRace, windSpeed);
+        WindWithConfidence<Pair<Position, TimePoint>> windWithConfidence = new WindWithConfidenceImpl<>(wind, 0.5, null, false);
         // Always return same wind
         when(trackedRace.getWind(any(Position.class), any(TimePoint.class))).thenReturn(wind);
         when(trackedRace.getWind(any(Position.class), any(TimePoint.class), any())).thenReturn(wind);
+        when(trackedRace.getWindWithConfidence(any(Position.class), any(TimePoint.class), any())).thenReturn(windWithConfidence);
 
         return trackedRace;
     }

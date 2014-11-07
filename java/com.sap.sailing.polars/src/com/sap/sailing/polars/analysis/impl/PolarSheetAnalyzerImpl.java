@@ -5,7 +5,9 @@ import java.util.Collections;
 import java.util.List;
 
 import com.sap.sailing.domain.base.BoatClass;
+import com.sap.sailing.domain.base.SpeedWithBearingWithConfidence;
 import com.sap.sailing.domain.base.SpeedWithConfidence;
+import com.sap.sailing.domain.base.impl.SpeedWithBearingWithConfidenceImpl;
 import com.sap.sailing.domain.common.Bearing;
 import com.sap.sailing.domain.common.PolarSheetsData;
 import com.sap.sailing.domain.common.Speed;
@@ -24,7 +26,7 @@ import com.sap.sailing.polars.regression.NotEnoughDataHasBeenAddedException;
  */
 public class PolarSheetAnalyzerImpl implements PolarSheetAnalyzer {
 
-    private static final int MINIMUM_DATA_COUNT_FOR_ONE_ANGLE = 10;
+    private static final int MINIMUM_DATA_COUNT_FOR_ONE_ANGLE = 5;
     private PolarDataService polarDataService;
 
     public PolarSheetAnalyzerImpl(PolarDataService polarDataService) {
@@ -32,59 +34,88 @@ public class PolarSheetAnalyzerImpl implements PolarSheetAnalyzer {
     }
 
     @Override
-    public SpeedWithBearing getAverageUpwindSpeedWithBearingOnStarboardTackFor(BoatClass boatClass, Speed windSpeed)
+    public SpeedWithBearingWithConfidence<Void> getAverageUpwindSpeedWithBearingOnStarboardTackFor(BoatClass boatClass, Speed windSpeed)
             throws NotEnoughDataHasBeenAddedException {
         int startAngleInclusive = 1;
         int endAngleExclusive = 90;
-        SpeedWithBearing speedWithBearing = estimateAnglePeakAndAverageSpeed(boatClass, windSpeed, startAngleInclusive,
+        SpeedWithBearingWithConfidence<Void> speedWithBearing = estimateAnglePeakAndAverageSpeed(boatClass, windSpeed, startAngleInclusive,
                 endAngleExclusive);
         return speedWithBearing;
     }
 
     
     @Override
-    public SpeedWithBearing getAverageDownwindSpeedWithBearingOnStarboardTackFor(BoatClass boatClass, Speed windSpeed)
+    public SpeedWithBearingWithConfidence<Void> getAverageDownwindSpeedWithBearingOnStarboardTackFor(BoatClass boatClass, Speed windSpeed)
             throws NotEnoughDataHasBeenAddedException {
         int startAngleInclusive = 91;
         int endAngleExclusive = 180;
-        SpeedWithBearing speedWithBearing = estimateAnglePeakAndAverageSpeed(boatClass, windSpeed, startAngleInclusive,
+        SpeedWithBearingWithConfidence<Void> speedWithBearing = estimateAnglePeakAndAverageSpeed(boatClass, windSpeed, startAngleInclusive,
                 endAngleExclusive);
         return speedWithBearing;
     }
     
     @Override
-    public SpeedWithBearing getAverageDownwindSpeedWithBearingOnPortTackFor(BoatClass boatClass, Speed windSpeed)
+    public SpeedWithBearingWithConfidence<Void> getAverageDownwindSpeedWithBearingOnPortTackFor(BoatClass boatClass, Speed windSpeed)
             throws NotEnoughDataHasBeenAddedException {
         int startAngleInclusive = 181;
         int endAngleExclusive = 270;
-        SpeedWithBearing speedWithBearing = estimateAnglePeakAndAverageSpeed(boatClass, windSpeed, startAngleInclusive,
+        SpeedWithBearingWithConfidence<Void> speedWithBearing = estimateAnglePeakAndAverageSpeed(boatClass, windSpeed, startAngleInclusive,
                 endAngleExclusive);
         return speedWithBearing;
     }
 
     @Override
-    public SpeedWithBearing getAverageUpwindSpeedWithBearingOnPortTackFor(BoatClass boatClass, Speed windSpeed)
+    public SpeedWithBearingWithConfidence<Void> getAverageUpwindSpeedWithBearingOnPortTackFor(BoatClass boatClass, Speed windSpeed)
         throws NotEnoughDataHasBeenAddedException {
             int startAngleInclusive = 271;
             int endAngleExclusive = 360;
-            SpeedWithBearing speedWithBearing = estimateAnglePeakAndAverageSpeed(boatClass, windSpeed, startAngleInclusive,
+            SpeedWithBearingWithConfidence<Void> speedWithBearing = estimateAnglePeakAndAverageSpeed(boatClass, windSpeed, startAngleInclusive,
                     endAngleExclusive);
             return speedWithBearing;
     }
     
-    private SpeedWithBearing estimateAnglePeakAndAverageSpeed(BoatClass boatClass, Speed windSpeed,
+    private SpeedWithBearingWithConfidence<Void> estimateAnglePeakAndAverageSpeed(BoatClass boatClass, Speed windSpeed,
             int startAngleInclusive, int endAngleExclusive) throws NotEnoughDataHasBeenAddedException {
-        double estimatedPeak = estimatePeak(boatClass, windSpeed, startAngleInclusive, endAngleExclusive);
+        Integer[] dataCountPerAngle = getDataCountArray(boatClass, windSpeed);
+
+        
+        
+        double estimatedPeak = estimatePeak(boatClass, windSpeed, startAngleInclusive, endAngleExclusive, dataCountPerAngle);
         
         double convertedAngleIfOver180 = convertAngleIfNecessary(estimatedPeak);
         
-        double averagedSpeed = estimatedSpeed(boatClass, windSpeed, convertedAngleIfOver180);
+        SpeedWithConfidence<Void> averagedSpeedWithConfidence = estimatedSpeed(boatClass, windSpeed, convertedAngleIfOver180);
         
+        double originConfidence = averagedSpeedWithConfidence.getConfidence();
         
+        double overallConfidence = (originConfidence + calcDataCountConfidence(dataCountPerAngle, estimatedPeak)) / 2;
         
         Bearing bearing = new DegreeBearingImpl(convertedAngleIfOver180);
-        SpeedWithBearing speedWithBearing = new KnotSpeedWithBearingImpl(averagedSpeed, bearing);
-        return speedWithBearing;
+        SpeedWithBearing speedWithBearing = new KnotSpeedWithBearingImpl(averagedSpeedWithConfidence.getObject().getKnots(), bearing);
+        return new SpeedWithBearingWithConfidenceImpl<>(speedWithBearing, overallConfidence, null);
+    }
+
+    /**
+     * Uses the formula 1-​e^​((‑x)/​150) to create a confidence for the estimated peak. 
+     * 
+     * If the peak has 100 data points underlying, the confidence will be approx. 0.5
+     * 
+     * @param dataCountPerAngle
+     * @param estimatedPeak
+     * @return
+     */
+    private double calcDataCountConfidence(Integer[] dataCountPerAngle, double estimatedPeak) {
+        int dataCount = dataCountPerAngle[(int) Math.round(estimatedPeak)];
+        double confidence = 1 - Math.pow(Math.E, - dataCount / 150);
+        return confidence;
+    }
+
+    private Integer[] getDataCountArray(BoatClass boatClass, Speed windSpeed) {
+        PolarSheetsData sheet = polarDataService.getPolarSheetForBoatClass(boatClass);
+        
+        int windIndex = sheet.getStepping().getLevelIndexForValue(windSpeed.getKnots());
+        Integer[] dataCountPerAngle = sheet.getDataCountPerAngleForWindspeed(windIndex);
+        return dataCountPerAngle;
     }
 
     private double convertAngleIfNecessary(double estimatedPeak) {
@@ -95,20 +126,15 @@ public class PolarSheetAnalyzerImpl implements PolarSheetAnalyzer {
         return convertedAngleIfOver180;
     }
 
-    private double estimatedSpeed(BoatClass boatClass, Speed windSpeed, double estimatedPeak)
+    private SpeedWithConfidence<Void> estimatedSpeed(BoatClass boatClass, Speed windSpeed, double estimatedPeak)
             throws NotEnoughDataHasBeenAddedException {
-        SpeedWithConfidence<Integer> speed = polarDataService.getSpeed(boatClass, windSpeed, new DegreeBearingImpl(
+        SpeedWithConfidence<Void> speed = polarDataService.getSpeed(boatClass, windSpeed, new DegreeBearingImpl(
                 estimatedPeak));
-        // TODO use the confidence (has to be implemented Bottom to Top through the polar pipe
-
-        return speed.getObject().getKnots();
+        return speed;
     }
 
-    private double estimatePeak(BoatClass boatClass, Speed windSpeed, int startAngleInclusive, int endAngleExclusive)
+    private double estimatePeak(BoatClass boatClass, Speed windSpeed, int startAngleInclusive, int endAngleExclusive, Integer[] dataCountPerAngle)
             throws NotEnoughDataHasBeenAddedException {
-        PolarSheetsData sheet = polarDataService.getPolarSheetForBoatClass(boatClass);
-        int windIndex = sheet.getStepping().getLevelIndexForValue(windSpeed.getKnots());
-        Integer[] dataCountPerAngle = sheet.getDataCountPerAngleForWindspeed(windIndex);
 
         // Find peak by averaging the angles that have at least 50% of the max datacount
         List<Integer> dataCountList = Arrays.asList(Arrays.copyOfRange(dataCountPerAngle, startAngleInclusive,
@@ -117,14 +143,16 @@ public class PolarSheetAnalyzerImpl implements PolarSheetAnalyzer {
         if (maxDataCount < MINIMUM_DATA_COUNT_FOR_ONE_ANGLE) {
             // The angle with the most data points doesn't have sufficient data, for the polar data to have any
             // significance.
-            throw new NotEnoughDataHasBeenAddedException();
+            throw new NotEnoughDataHasBeenAddedException("Only " + maxDataCount
+                    + " points have been added for the angle with the most points. No significance.");
         }
         int sumOfAllUpperHalfAngles = 0;
         int numberOfAnglesAdded = 0;
         for (int i = startAngleInclusive; i < endAngleExclusive; i++) {
-            if (dataCountPerAngle[i] > maxDataCount / 2) {
-                sumOfAllUpperHalfAngles = sumOfAllUpperHalfAngles + i;
-                numberOfAnglesAdded = numberOfAnglesAdded + 1;
+            Integer dataCount = dataCountPerAngle[i];
+            if (dataCount > maxDataCount / 2) {
+                sumOfAllUpperHalfAngles = sumOfAllUpperHalfAngles + i * dataCount;
+                numberOfAnglesAdded = numberOfAnglesAdded + dataCount;
             }
         }
         

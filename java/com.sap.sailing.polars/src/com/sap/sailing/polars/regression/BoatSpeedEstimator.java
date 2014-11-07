@@ -26,6 +26,10 @@ public class BoatSpeedEstimator {
 
     private ReentrantReadWriteLock lock = new ReentrantReadWriteLock(true);
 
+    private double confidenceSum = 0;
+    
+    private int dataCount = 0;
+
     public double estimateSpeed(double windSpeed, double angleToTheWind) throws NotEnoughDataHasBeenAddedException {
         lock.readLock().lock();
         try {
@@ -37,18 +41,24 @@ public class BoatSpeedEstimator {
         }
     }
 
-    public void addData(double windSpeed, double angleToTheWind, double boatSpeed) {
+    public void addData(double windSpeed, double angleToTheWind, double boatSpeed, double confidence) {
         lock.writeLock().lock();
         try {
             angleRegression.addMeasuredPoint(angleToTheWind, boatSpeed);
             windSpeedRegression.addMeasuredPoint(windSpeed, boatSpeed);
+            dataCount++;
+            confidenceSum  = confidenceSum + confidence;
         } finally {
             lock.writeLock().unlock();
         }
     }
 
     public int getDataCount() {
-        return windSpeedRegression.getDataCount();
+        return dataCount;
+    }
+
+    public double getConfidence() {
+        return confidenceSum / dataCount;
     }
 
 }

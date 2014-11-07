@@ -8,4 +8,8 @@ public class NotEnoughDataHasBeenAddedException extends Exception {
         super("No data has been added to the Processor yet. At least to value-pairs have to be added.");
     }
 
+    public NotEnoughDataHasBeenAddedException(String string) {
+        super(string);
+    }
+
 }

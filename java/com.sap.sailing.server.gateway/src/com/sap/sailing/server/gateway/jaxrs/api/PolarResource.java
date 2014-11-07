@@ -9,37 +9,41 @@ import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.Response;
 import javax.ws.rs.core.Response.ResponseBuilder;
 
-import org.json.simple.JSONObject;
-
 import com.sap.sailing.domain.base.BoatClass;
+import com.sap.sailing.domain.base.SpeedWithBearingWithConfidence;
 import com.sap.sailing.domain.base.SpeedWithConfidence;
 import com.sap.sailing.domain.common.Speed;
-import com.sap.sailing.domain.common.SpeedWithBearing;
 import com.sap.sailing.domain.common.impl.DegreeBearingImpl;
 import com.sap.sailing.domain.common.impl.KnotSpeedImpl;
 import com.sap.sailing.polars.PolarDataService;
 import com.sap.sailing.polars.regression.NotEnoughDataHasBeenAddedException;
 import com.sap.sailing.server.gateway.jaxrs.AbstractSailingServerResource;
-import com.sap.sailing.server.gateway.serialization.impl.SpeedWithConfidenceWithIntegerRelationJsonSerializer;
 
+/**
+ * Right now this service is only used for quick debugging and testing of the polar api. It used plain text responses.
+ * JSON should be used if this resource is to be consumed.
+ * 
+ * @author Frederik Petersen
+ *
+ */
 @Path("/v1/polars")
 public class PolarResource extends AbstractSailingServerResource {
 
     @GET
-    @Produces("application/json;charset=UTF-8")
+    @Produces("text/plain;charset=UTF-8")
     @Path("{boatClassName}")
     public Response getSpeed(@PathParam("boatClassName") String boatClassName, @QueryParam("angle") double angle,
             @QueryParam("windspeed") double windSpeed) {
         BoatClass boatClass = getService().getDomainObjectFactory().getBaseDomainFactory()
                 .getOrCreateBoatClass(boatClassName);
-        SpeedWithConfidence<Integer> speedWithConfidence;
+        SpeedWithConfidence<Void> speedWithConfidence;
         ResponseBuilder responseBuilder;
         try {
             speedWithConfidence = getService().getPolarDataService().getSpeed(boatClass, new KnotSpeedImpl(windSpeed),
                     new DegreeBearingImpl(angle));
-            SpeedWithConfidenceWithIntegerRelationJsonSerializer serializer = new SpeedWithConfidenceWithIntegerRelationJsonSerializer();
-            JSONObject jsonObj = serializer.serialize(speedWithConfidence);
-            responseBuilder = Response.ok(jsonObj.toJSONString(), MediaType.APPLICATION_JSON);
+            String resultString = "Speed: " + speedWithConfidence.getObject().getKnots() + "kn; Confidence: "
+                    + speedWithConfidence.getConfidence();
+            responseBuilder = Response.ok(resultString, MediaType.TEXT_PLAIN);
         } catch (NotEnoughDataHasBeenAddedException e) {
             responseBuilder = Response.noContent();
         }
@@ -58,7 +62,7 @@ public class PolarResource extends AbstractSailingServerResource {
         Speed windSpeed = new KnotSpeedImpl(wSpeed);
         try {
             PolarDataService service = getService().getPolarDataService();
-            SpeedWithBearing speedWithBearing = null;
+            SpeedWithBearingWithConfidence<Void> speedWithBearing = null;
             if (tack.matches("starboard")) {
                 if (courseType.matches("downwind")) {
                     speedWithBearing = service.getAverageDownwindSpeedWithBearingOnStarboardTackFor(boatClass, windSpeed);
@@ -72,7 +76,9 @@ public class PolarResource extends AbstractSailingServerResource {
                     speedWithBearing = service.getAverageUpwindSpeedWithBearingOnPortTackFor(boatClass, windSpeed);
                 }
             }
-            String resultString = "Speed: " + speedWithBearing.getKnots() + "kn; Angle: " + speedWithBearing.getBearing().getDegrees() + "°";
+            String resultString = "Speed: " + speedWithBearing.getObject().getKnots() + "kn; Angle: "
+                    + speedWithBearing.getObject().getBearing().getDegrees() + "°; Confidence: "
+                    + speedWithBearing.getConfidence();
             responseBuilder = Response.ok(resultString, MediaType.TEXT_PLAIN);
         } catch (NotEnoughDataHasBeenAddedException e) {
             responseBuilder = Response.noContent();
