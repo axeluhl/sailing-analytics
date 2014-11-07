@@ -27,13 +27,13 @@ import com.sap.sailing.polars.regression.NotEnoughDataHasBeenAddedException;
  * central access.
  * 
  * The interesting methods for a user are {@link #getSpeed(BoatClass, Speed, Bearing)} if data for a specific angle is
- * needed and {@link #getAverageSpeedWithBearing(BoatClass, Speed, LegType, Tack)} (and the equivalents for
- * different tacks and leg types) which also returns the average angle for the provided parameters.
+ * needed and {@link #getAverageSpeedWithBearing(BoatClass, Speed, LegType, Tack)} 
+ *  which also returns the average angle for the provided parameters.
  * 
  * @author Frederik Petersen (D054528)
  * 
  */
-public interface PolarDataService extends PolarSheetAnalyzer {
+public interface PolarDataService {
 
     /**
      * 
@@ -73,29 +73,6 @@ public interface PolarDataService extends PolarSheetAnalyzer {
     SpeedWithBearingWithConfidence<Void> getAverageSpeedWithBearing(BoatClass boatClass, Speed windSpeed,
             LegType legType, Tack tack) throws NotEnoughDataHasBeenAddedException;
 
-    /**
-     * see {@link #getAverageSpeedWithBearing(BoatClass, Speed, LegType, Tack)}
-     */
-    SpeedWithBearingWithConfidence<Void> getAverageUpwindSpeedWithBearingOnStarboardTackFor(BoatClass boatClass, Speed windSpeed)
-            throws NotEnoughDataHasBeenAddedException;
-
-    /**
-     * see {@link #getAverageSpeedWithBearing(BoatClass, Speed, LegType, Tack)}
-     */
-    SpeedWithBearingWithConfidence<Void> getAverageDownwindSpeedWithBearingOnStarboardTackFor(BoatClass boatClass, Speed windSpeed)
-            throws NotEnoughDataHasBeenAddedException;
-
-    /**
-     * see {@link #getAverageSpeedWithBearing(BoatClass, Speed, LegType, Tack)}
-     */
-    SpeedWithBearingWithConfidence<Void> getAverageUpwindSpeedWithBearingOnPortTackFor(BoatClass boatClass, Speed windSpeed)
-            throws NotEnoughDataHasBeenAddedException;
-
-    /**
-     * see {@link #getAverageSpeedWithBearing(BoatClass, Speed, LegType, Tack)}
-     */
-    SpeedWithBearingWithConfidence<Void> getAverageDownwindSpeedWithBearingOnPortTackFor(BoatClass boatClass, Speed windSpeed)
-            throws NotEnoughDataHasBeenAddedException;
 
     /**
      * Generates a polar sheet for geven races and settings using the provided executor for the worker threads. This

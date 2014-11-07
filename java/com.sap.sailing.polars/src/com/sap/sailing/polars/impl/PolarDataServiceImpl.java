@@ -70,42 +70,18 @@ public class PolarDataServiceImpl implements PolarDataService {
         SpeedWithBearingWithConfidence<Void> speedWithBearing = null;
         if (tack.equals(Tack.STARBOARD)) {
             if (legType.equals(LegType.UPWIND)) {
-                speedWithBearing = getAverageUpwindSpeedWithBearingOnStarboardTackFor(boatClass, windSpeed);
+                speedWithBearing = polarSheetAnalyzer.getAverageUpwindSpeedWithBearingOnStarboardTackFor(boatClass, windSpeed);
             } else if (legType.equals(LegType.DOWNWIND)) {
-                speedWithBearing = getAverageUpwindSpeedWithBearingOnStarboardTackFor(boatClass, windSpeed);
+                speedWithBearing = polarSheetAnalyzer.getAverageDownwindSpeedWithBearingOnStarboardTackFor(boatClass, windSpeed);
             }
         } else if (tack.equals(Tack.PORT)) {
             if (legType.equals(LegType.UPWIND)) {
-                speedWithBearing = getAverageUpwindSpeedWithBearingOnPortTackFor(boatClass, windSpeed);
+                return polarSheetAnalyzer.getAverageUpwindSpeedWithBearingOnPortTackFor(boatClass, windSpeed);
             } else if (legType.equals(LegType.DOWNWIND)) {
-                speedWithBearing = getAverageDownwindSpeedWithBearingOnPortTackFor(boatClass, windSpeed);
+                return polarSheetAnalyzer.getAverageDownwindSpeedWithBearingOnPortTackFor(boatClass, windSpeed);
             }
         }
         return speedWithBearing;
-    }
-    
-    @Override
-    public SpeedWithBearingWithConfidence<Void> getAverageUpwindSpeedWithBearingOnStarboardTackFor(BoatClass boatClass, Speed windSpeed)
-            throws NotEnoughDataHasBeenAddedException {
-        return polarSheetAnalyzer.getAverageUpwindSpeedWithBearingOnStarboardTackFor(boatClass, windSpeed);
-    }
-
-    @Override
-    public SpeedWithBearingWithConfidence<Void> getAverageDownwindSpeedWithBearingOnStarboardTackFor(BoatClass boatClass, Speed windSpeed)
-            throws NotEnoughDataHasBeenAddedException {
-        return polarSheetAnalyzer.getAverageDownwindSpeedWithBearingOnStarboardTackFor(boatClass, windSpeed);
-    }
-
-    @Override
-    public SpeedWithBearingWithConfidence<Void> getAverageUpwindSpeedWithBearingOnPortTackFor(BoatClass boatClass, Speed windSpeed)
-            throws NotEnoughDataHasBeenAddedException {
-        return polarSheetAnalyzer.getAverageUpwindSpeedWithBearingOnPortTackFor(boatClass, windSpeed);
-    }
-
-    @Override
-    public SpeedWithBearingWithConfidence<Void> getAverageDownwindSpeedWithBearingOnPortTackFor(BoatClass boatClass, Speed windSpeed)
-            throws NotEnoughDataHasBeenAddedException {
-        return polarSheetAnalyzer.getAverageDownwindSpeedWithBearingOnPortTackFor(boatClass, windSpeed);
     }
 
 
