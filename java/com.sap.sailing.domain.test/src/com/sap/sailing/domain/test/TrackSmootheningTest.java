@@ -17,11 +17,11 @@ import org.junit.Test;
 import com.sap.sailing.domain.base.Competitor;
 import com.sap.sailing.domain.common.Distance;
 import com.sap.sailing.domain.common.Speed;
-import com.sap.sailing.domain.common.TimePoint;
 import com.sap.sailing.domain.tracking.DynamicGPSFixTrack;
 import com.sap.sailing.domain.tracking.DynamicTrackedRace;
 import com.sap.sailing.domain.tracking.GPSFixMoving;
 import com.sap.sailing.domain.tracking.impl.GPSFixMovingImpl;
+import com.sap.sse.common.TimePoint;
 
 /**
  * Receives GPS tracks from a race. One test (if not ignored) stores these tracks in the resources/

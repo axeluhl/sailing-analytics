@@ -8,13 +8,13 @@ import java.util.Arrays;
 
 import org.junit.Test;
 
-import com.sap.sailing.domain.common.TimePoint;
 import com.sap.sailing.domain.common.racelog.RaceLogRaceStatus;
 import com.sap.sailing.domain.racelog.RaceLog;
 import com.sap.sailing.domain.racelog.RaceLogEvent;
 import com.sap.sailing.domain.racelog.RaceLogEventAuthor;
 import com.sap.sailing.domain.racelog.RaceLogRaceStatusEvent;
 import com.sap.sailing.domain.racelog.analyzing.impl.FinishedTimeFinder;
+import com.sap.sse.common.TimePoint;
 
 public class FinishedTimeFinderTest extends PassAwareRaceLogAnalyzerTest<FinishedTimeFinder, TimePoint> {
 

@@ -5,7 +5,6 @@ import java.util.Collection;
 import java.util.Collections;
 
 import com.sap.sailing.domain.base.configuration.RacingProcedureConfiguration;
-import com.sap.sailing.domain.common.TimePoint;
 import com.sap.sailing.domain.common.racelog.FlagPole;
 import com.sap.sailing.domain.common.racelog.RacingProcedureType;
 import com.sap.sailing.domain.racelog.RaceLog;
@@ -21,6 +20,7 @@ import com.sap.sailing.domain.racelog.state.racingprocedure.RacingProcedurePrere
 import com.sap.sailing.domain.racelog.state.racingprocedure.impl.BaseRacingProcedure;
 import com.sap.sailing.domain.racelog.state.racingprocedure.impl.NoMorePrerequisite;
 import com.sap.sailing.domain.racelog.state.racingprocedure.impl.RacingProcedureChangedListeners;
+import com.sap.sse.common.TimePoint;
 
 public class BasicRacingProcedureImpl extends BaseRacingProcedure {
 

@@ -17,7 +17,6 @@ import java.util.logging.Logger;
 import com.sap.sailing.domain.base.DomainFactory;
 import com.sap.sailing.domain.base.RaceColumnListener;
 import com.sap.sailing.domain.common.NoWindException;
-import com.sap.sailing.domain.common.TimePoint;
 import com.sap.sailing.domain.common.dto.LeaderboardDTO;
 import com.sap.sailing.domain.leaderboard.Leaderboard;
 import com.sap.sailing.domain.leaderboard.LeaderboardCacheManager;
@@ -28,11 +27,12 @@ import com.sap.sailing.domain.tracking.TrackedRegattaRegistry;
 import com.sap.sailing.util.impl.LockUtil;
 import com.sap.sailing.util.impl.NamedReentrantReadWriteLock;
 import com.sap.sailing.util.impl.ThreadFactoryWithPriority;
+import com.sap.sse.common.TimePoint;
 import com.sap.sse.common.Util;
 
 /**
  * Caches the expensive to compute {@link LeaderboardDTO} results of a
- * {@link SailingServiceImpl#computeLeaderboardByName(String, com.sap.sailing.domain.common.TimePoint, Collection, boolean)} call.
+ * {@link SailingServiceImpl#computeLeaderboardByName(String, com.sap.sse.common.TimePoint, Collection, boolean)} call.
  * By listening as {@link RaceChangeListener} on all tracked races attached to the leaderboard, and by updating this list
  * by listening as {@link RaceColumnListener} on the {@link Leaderboard}, each time a race attached to a leaderboard for which
  * this cache holds one or more {@link LeaderboardDTO}s changes, the cache entries for that leaderboard are removed. Also,

@@ -1,4 +1,4 @@
-package com.sap.sailing.domain.common.impl;
+package com.sap.sse.common.impl;
 
 import java.util.Date;
 

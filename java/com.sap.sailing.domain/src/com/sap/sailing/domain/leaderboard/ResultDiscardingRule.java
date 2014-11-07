@@ -5,7 +5,7 @@ import java.util.Set;
 
 import com.sap.sailing.domain.base.Competitor;
 import com.sap.sailing.domain.base.RaceColumn;
-import com.sap.sailing.domain.common.TimePoint;
+import com.sap.sse.common.TimePoint;
 
 /**
  * A result discarding rule is used to determine for a competitor those races from a list of

@@ -14,10 +14,10 @@ import com.sap.sailing.domain.base.LeaderboardGroupBase;
 import com.sap.sailing.domain.base.Venue;
 import com.sap.sailing.domain.base.impl.StrippedEventImpl;
 import com.sap.sailing.domain.common.impl.ImageSizeImpl;
-import com.sap.sailing.domain.common.impl.MillisecondsTimePoint;
 import com.sap.sailing.server.gateway.deserialization.JsonDeserializationException;
 import com.sap.sailing.server.gateway.deserialization.JsonDeserializer;
 import com.sap.sailing.server.gateway.serialization.impl.EventBaseJsonSerializer;
+import com.sap.sse.common.impl.MillisecondsTimePoint;
 
 public class EventBaseJsonDeserializer implements JsonDeserializer<EventBase> {
     private final JsonDeserializer<Venue> venueDeserializer;

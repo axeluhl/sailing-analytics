@@ -13,7 +13,7 @@ import com.rabbitmq.client.Connection;
 import com.rabbitmq.client.ConnectionFactory;
 import com.rabbitmq.client.QueueingConsumer;
 import com.sap.sailing.server.replication.ReplicationMasterDescriptor;
-import com.sap.sailing.util.BuildVersion;
+import com.sap.sse.common.BuildVersion;
 
 public class ReplicationMasterDescriptorImpl implements ReplicationMasterDescriptor {
     private static final String REPLICATION_SERVLET = "/replication/replication";

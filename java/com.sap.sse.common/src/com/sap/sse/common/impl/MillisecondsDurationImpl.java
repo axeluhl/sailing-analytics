@@ -1,6 +1,6 @@
-package com.sap.sailing.domain.common.impl;
+package com.sap.sse.common.impl;
 
-import com.sap.sailing.domain.common.Duration;
+import com.sap.sse.common.Duration;
 
 public class MillisecondsDurationImpl implements Duration {
     private static final long serialVersionUID = -4257982564719184723L;

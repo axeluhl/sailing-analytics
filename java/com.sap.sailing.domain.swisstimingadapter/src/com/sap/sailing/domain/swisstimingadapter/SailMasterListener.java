@@ -4,7 +4,7 @@ import java.util.Collection;
 import java.util.List;
 
 import com.sap.sailing.domain.common.Distance;
-import com.sap.sailing.domain.common.TimePoint;
+import com.sap.sse.common.TimePoint;
 import com.sap.sse.common.Util;
 
 public interface SailMasterListener {

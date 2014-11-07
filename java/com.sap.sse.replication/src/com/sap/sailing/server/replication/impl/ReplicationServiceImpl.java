@@ -29,12 +29,13 @@ import com.rabbitmq.client.AMQP.Queue.DeleteOk;
 import com.rabbitmq.client.Channel;
 import com.rabbitmq.client.ConnectionFactory;
 import com.rabbitmq.client.QueueingConsumer;
-import com.sap.sailing.server.OperationExecutionListener;
-import com.sap.sailing.server.RacingEventService;
-import com.sap.sailing.server.RacingEventServiceOperation;
+import com.sap.sailing.server.replication.OperationExecutionListener;
+import com.sap.sailing.server.replication.Replicable;
 import com.sap.sailing.server.replication.ReplicationMasterDescriptor;
 import com.sap.sailing.server.replication.ReplicationService;
-import com.sap.sailing.util.BuildVersion;
+import com.sap.sse.common.BuildVersion;
+import com.sap.sse.operationaltransformation.Operation;
+import com.sap.sse.operationaltransformation.OperationWithTransformationSupport;
 
 /**
  * Can observe a {@link RacingEventService} for the operations it performs that require replication. Only observes as
@@ -51,14 +52,14 @@ import com.sap.sailing.util.BuildVersion;
  * @author Frank Mittag, Axel Uhl (d043530)
  * 
  */
-public class ReplicationServiceImpl implements ReplicationService, OperationExecutionListener, HasRacingEventService {
+public class ReplicationServiceImpl implements ReplicationService, OperationExecutionListener, HasReplicable {
     private static final Logger logger = Logger.getLogger(ReplicationServiceImpl.class.getName());
     
     private final ReplicationInstancesManager replicationInstancesManager;
     
-    private final ServiceTracker<RacingEventService, RacingEventService> racingEventServiceTracker;
+    private final ServiceTracker<Replicable<?, ?>, Replicable<?, ?>> racingEventServiceTracker;
     
-    private final RacingEventService localService;
+    private final Replicable<?, ?> localService;
     
     /**
      * <code>null</code>, if this instance is not currently replicating from some master; the master's descriptor otherwise
@@ -177,7 +178,7 @@ public class ReplicationServiceImpl implements ReplicationService, OperationExec
     
     private ReplicationServiceImpl(String exchangeName, String exchangeHost,
             int exchangePort, final ReplicationInstancesManager replicationInstancesManager,
-            RacingEventService localService, boolean createRacingEventServiceTracker) throws IOException {
+            Replicable<?, ?> localService, boolean createRacingEventServiceTracker) throws IOException {
         timer = new Timer("ReplicationServiceImpl timer for delayed task sending");
         this.replicationInstancesManager = replicationInstancesManager;
         replicaUUIDs = new HashMap<ReplicationMasterDescriptor, String>();
@@ -205,13 +206,13 @@ public class ReplicationServiceImpl implements ReplicationService, OperationExec
      *            the name of the exchange to which replicas can bind
      */
     public ReplicationServiceImpl(String exchangeName, String exchangeHost,
-            final ReplicationInstancesManager replicationInstancesManager, RacingEventService localService) throws IOException {
+            final ReplicationInstancesManager replicationInstancesManager, Replicable<?, ?> localService) throws IOException {
         this(exchangeName, exchangeHost, 0, replicationInstancesManager, localService, /* create RacingEventServiceTracker */ false);
     }
     
-    protected ServiceTracker<RacingEventService, RacingEventService> getRacingEventServiceTracker() {
-        return new ServiceTracker<RacingEventService, RacingEventService>(
-                Activator.getDefaultContext(), RacingEventService.class.getName(), null);
+    protected ServiceTracker<Replicable<?, ?>, Replicable<?, ?>> getRacingEventServiceTracker() {
+        return new ServiceTracker<Replicable<?, ?>, Replicable<?, ?>>(
+                Activator.getDefaultContext(), Replicable.class.getName(), null);
     }
     
     private Channel createMasterChannelAndDeclareFanoutExchange() throws IOException {
@@ -241,8 +242,8 @@ public class ReplicationServiceImpl implements ReplicationService, OperationExec
     }
 
     @Override
-    public RacingEventService getRacingEventService() {
-        RacingEventService result;
+    public Replicable<?, ?> getReplicable() {
+        Replicable<?, ?> result;
         if (localService != null) {
             result = localService;
         } else {
@@ -266,7 +267,7 @@ public class ReplicationServiceImpl implements ReplicationService, OperationExec
     }
     
     private void addAsListenerToRacingEventService() {
-        getRacingEventService().addOperationExecutionListener(this);
+        getReplicable().addOperationExecutionListener(this);
     }
 
     @Override
@@ -285,14 +286,14 @@ public class ReplicationServiceImpl implements ReplicationService, OperationExec
     }
 
     private void removeAsListenerFromRacingEventService() {
-        getRacingEventService().removeOperationExecutionListener(this);
+        getReplicable().removeOperationExecutionListener(this);
     }
 
     /**
      * Schedules a single operation for broadcast. The operation is added to {@link #outboundBuffer}, and if not already scheduled,
      * a {@link #timer} is created and scheduled to send in {@link #TRANSMISSION_DELAY_MILLIS} milliseconds.
      */
-    private void broadcastOperation(RacingEventServiceOperation<?> operation) throws IOException {
+    private void broadcastOperation(OperationWithTransformationSupport<?, ?> operation) throws IOException {
         // need to write the operations one by one, making sure the ObjectOutputStream always writes
         // identical objects again if required because they may have changed state in between
         ByteArrayOutputStream bos = new ByteArrayOutputStream();
@@ -428,20 +429,19 @@ public class ReplicationServiceImpl implements ReplicationService, OperationExec
         replicator = new Replicator(master, this, /* startSuspended */ true, consumer);
         // start receiving messages already now, but start in suspended mode
         replicatorThread = new Thread(replicator, "Replicator receiving from "+master.getMessagingHostname()+"/"+master.getExchangeName());
-        final RacingEventService racingEventService = getRacingEventService();
+        final Replicable<?, ?> replicable = getReplicable();
         // clear racingEventService state here, before starting to receive and de-serialized operations which builds up new state, e.g., in competitor store
-        racingEventService.clearReplicaState(); // see also bug 2437
+        replicable.clearReplicaState(); // see also bug 2437
         replicatorThread.start();
         logger.info("Started replicator thread");
         InputStream is = initialLoadURL.openStream();
         final String queueName = new BufferedReader(new InputStreamReader(is)).readLine();
         try {
             RabbitInputStreamProvider rabbitInputStreamProvider = new RabbitInputStreamProvider(master.createChannel(), queueName);
-            ObjectInputStream ois = racingEventService.getBaseDomainFactory()
-                    .createObjectInputStreamResolvingAgainstThisFactory(
+            ObjectInputStream ois = replicable.createObjectInputStreamResolvingAgainstCache(
                             new GZIPInputStream(rabbitInputStreamProvider.getInputStream()));
             logger.info("Starting to receive initial load");
-            racingEventService.initiallyFillFrom(ois);
+            replicable.initiallyFillFrom(ois);
             logger.info("Done receiving initial load");
             replicator.setSuspended(false); // apply queued operations
         } finally {
@@ -497,7 +497,7 @@ public class ReplicationServiceImpl implements ReplicationService, OperationExec
      * replicas by publishing it to the fan-out exchange.
      */
     @Override
-    public <T> void executed(RacingEventServiceOperation<T> operation) {
+    public <T> void executed(OperationWithTransformationSupport<?, ? extends Operation<T>> operation) {
         try {
             broadcastOperation(operation);
         } catch (Exception e) {
@@ -510,7 +510,7 @@ public class ReplicationServiceImpl implements ReplicationService, OperationExec
     }
 
     @Override
-    public Map<Class<? extends RacingEventServiceOperation<?>>, Integer> getStatistics(ReplicaDescriptor replicaDescriptor) {
+    public Map<Class<? extends OperationWithTransformationSupport<?, ?>>, Integer> getStatistics(ReplicaDescriptor replicaDescriptor) {
         return replicationInstancesManager.getStatistics(replicaDescriptor);
     }
     

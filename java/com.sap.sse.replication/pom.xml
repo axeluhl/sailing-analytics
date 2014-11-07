@@ -7,6 +7,6 @@
     <groupId>com.sap.sailing</groupId>
     <version>1.0.0-SNAPSHOT</version>
   </parent>
-  <artifactId>com.sap.sailing.server.replication</artifactId>
+  <artifactId>com.sap.sse.replication</artifactId>
   <packaging>eclipse-plugin</packaging>
 </project>

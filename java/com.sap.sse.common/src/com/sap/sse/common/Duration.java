@@ -1,8 +1,8 @@
-package com.sap.sailing.domain.common;
+package com.sap.sse.common;
 
 import java.io.Serializable;
 
-import com.sap.sailing.domain.common.impl.MillisecondsDurationImpl;
+import com.sap.sse.common.impl.MillisecondsDurationImpl;
 
 /**
  * A time duration that can be converted to various time units and that interoperates with {@link TimePoint}.

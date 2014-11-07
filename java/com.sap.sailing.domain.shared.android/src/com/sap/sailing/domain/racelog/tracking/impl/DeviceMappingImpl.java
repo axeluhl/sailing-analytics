@@ -4,13 +4,13 @@ import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.List;
 
-import com.sap.sailing.domain.common.TimePoint;
 import com.sap.sailing.domain.common.TimeRange;
-import com.sap.sailing.domain.common.WithID;
 import com.sap.sailing.domain.common.impl.TimeRangeImpl;
 import com.sap.sailing.domain.racelog.tracking.DeviceIdentifier;
 import com.sap.sailing.domain.racelog.tracking.DeviceMapping;
 import com.sap.sailing.domain.racelog.tracking.DeviceMappingEvent;
+import com.sap.sse.common.TimePoint;
+import com.sap.sse.common.WithID;
 
 public class DeviceMappingImpl<ItemType extends WithID> implements DeviceMapping<ItemType> {
     private static final long serialVersionUID = -4602948402371623654L;

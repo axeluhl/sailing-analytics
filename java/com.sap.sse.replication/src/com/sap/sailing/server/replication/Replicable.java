@@ -1,11 +1,15 @@
 package com.sap.sailing.server.replication;
 
+import java.io.IOException;
 import java.io.InputStream;
 import java.io.ObjectInputStream;
+import java.net.MalformedURLException;
 
 import org.osgi.framework.BundleContext;
 
-import com.sap.sailing.domain.common.WithID;
+import com.sap.sse.common.WithID;
+import com.sap.sse.operationaltransformation.Operation;
+import com.sap.sse.operationaltransformation.OperationWithTransformationSupport;
 
 /**
  * Represents a replicable part of an application. Such a replicable part is usually holder of the application state and
@@ -31,10 +35,13 @@ import com.sap.sailing.domain.common.WithID;
  * operation need to identify the {@link Replicable} they refer to. This identification is added as an OSGi service registry
  * parameter that is used during service discovery.
  * 
+ * @param <S> the type of state to which the operations are applied; usually this will be set to the implementing subclass
+ * @param <O> type of operation that the replicable accepts
+ * 
  * @author Axel Uhl (D043530)
  *
  */
-public interface Replicable extends WithID {
+public interface Replicable<S, O extends OperationWithTransformationSupport<S, O>> extends WithID {
     /**
      * The name of the property to use in the <code>properties</code> dictionary in a call to
      * {@link BundleContext#registerService(Class, Object, java.util.Dictionary)} when registering a {@link Replicable}.
@@ -47,7 +54,25 @@ public interface Replicable extends WithID {
      * Produces an object input stream that can choose to resolve objects against a cache so that duplicate instances
      * are avoided.
      */
-    ObjectInputStream createObjectInputStreamResolvingAgainstCache(InputStream is);
-    
-    
+    ObjectInputStream createObjectInputStreamResolvingAgainstCache(InputStream is) throws IOException;
+
+    /**
+     * Executes an operation whose effects need to be replicated to any replica of this service known and
+     * {@link OperationExecutionListener#executed(RacingEventServiceOperation) notifies} all registered
+     * operation execution listeners about the execution of the operation.
+     */
+    <T> T apply(RacingEventServiceOperation<T> operation);
+
+// FIXME the problem here: Operation<R> is used inconsistently; for one thing, in terms of operationaltransformation,
+// the operation is expected to return the same state type (e.g., a RacingEventService); however, in our use as in
+// RacingEventService, the operation can be modeled to return an actual return type, such as a String or a Regatta.
+    void apply(O operation);
+
+    void addOperationExecutionListener(OperationExecutionListener listener);
+
+    void removeOperationExecutionListener(OperationExecutionListener listener);
+
+    void clearReplicaState() throws MalformedURLException, IOException, InterruptedException;
+
+    void initiallyFillFrom(ObjectInputStream ois) throws IOException, ClassNotFoundException, InterruptedException;
 }

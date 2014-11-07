@@ -21,10 +21,8 @@ import com.rabbitmq.client.ConsumerCancelledException;
 import com.rabbitmq.client.QueueingConsumer;
 import com.rabbitmq.client.QueueingConsumer.Delivery;
 import com.rabbitmq.client.ShutdownSignalException;
-import com.sap.sailing.domain.base.DomainFactory;
-import com.sap.sailing.server.RacingEventService;
-import com.sap.sailing.server.RacingEventServiceOperation;
 import com.sap.sailing.server.replication.ReplicationMasterDescriptor;
+import com.sap.sse.operationaltransformation.OperationWithTransformationSupport;
 
 /**
  * Receives {@link RacingEventServiceOperation}s through JMS and
@@ -46,8 +44,8 @@ public class Replicator implements Runnable {
     private static final int CHECK_COUNT = 150; // how long to check, value is CHECK_INTERVAL second steps
     
     private final ReplicationMasterDescriptor master;
-    private final HasRacingEventService racingEventServiceTracker;
-    private final List<RacingEventServiceOperation<?>> queue;
+    private final HasReplicable replicableProvider;
+    private final List<OperationWithTransformationSupport<?, ?>> queue;
     
     private QueueingConsumer consumer;
     
@@ -90,10 +88,10 @@ public class Replicator implements Runnable {
      * @param consumer
      *            the RabbitMQ consumer from which to load messages
      */
-    public Replicator(ReplicationMasterDescriptor master, HasRacingEventService racingEventServiceTracker, boolean startSuspended, QueueingConsumer consumer) {
-        this.queue = new ArrayList<RacingEventServiceOperation<?>>();
+    public Replicator(ReplicationMasterDescriptor master, HasReplicable racingEventServiceTracker, boolean startSuspended, QueueingConsumer consumer) {
+        this.queue = new ArrayList<OperationWithTransformationSupport<?, ?>>();
         this.master = master;
-        this.racingEventServiceTracker = racingEventServiceTracker;
+        this.replicableProvider = racingEventServiceTracker;
         this.suspended = startSuspended;
         this.consumer = consumer;
     }
@@ -139,16 +137,16 @@ public class Replicator implements Runnable {
                 // Set this object's class's class loader as context for de-serialization so that all exported classes
                 // of all required bundles/packages can be deserialized at least
                 Thread.currentThread().setContextClassLoader(getClass().getClassLoader());
-                ObjectInputStream ois = racingEventServiceTracker.getRacingEventService().getBaseDomainFactory()
+                ObjectInputStream ois = replicableProvider.getReplicable().getBaseDomainFactory()
                         .createObjectInputStreamResolvingAgainstThisFactory(
                                 new GZIPInputStream(new ByteArrayInputStream(bytesFromMessage)));
                 int operationsInMessage = 0;
                 try {
                     while (true) {
                         byte[] serializedOperation = (byte[]) ois.readObject();
-                        ObjectInputStream operationOIS = racingEventServiceTracker.getRacingEventService().getBaseDomainFactory()
-                                .createObjectInputStreamResolvingAgainstThisFactory(new ByteArrayInputStream(serializedOperation));
-                        RacingEventServiceOperation<?> operation = (RacingEventServiceOperation<?>) operationOIS.readObject();
+                        ObjectInputStream operationOIS = replicableProvider.getReplicable()
+                                .createObjectInputStreamResolvingAgainstCache(new ByteArrayInputStream(serializedOperation));
+                        OperationWithTransformationSupport<?, ?> operation = (OperationWithTransformationSupport<?, ?>) operationOIS.readObject();
                         operationCount++;
                         operationsInMessage++;
                         if (operationCount % 10000l == 0) {
@@ -223,7 +221,7 @@ public class Replicator implements Runnable {
      * If the replicator is currently {@link #suspended}, the <code>operation</code> is queued, otherwise immediately applied to
      * the receiving replica.
      */
-    private synchronized void applyOrQueue(RacingEventServiceOperation<?> operation) {
+    private synchronized void applyOrQueue(OperationWithTransformationSupport<?, ?> operation) {
         if (suspended) {
             queue(operation);
         } else {
@@ -231,11 +229,11 @@ public class Replicator implements Runnable {
         }
     }
 
-    private synchronized void apply(final RacingEventServiceOperation<?> operation) {
+    private synchronized void apply(final OperationWithTransformationSupport<?, ?> operation) {
         Runnable runnable = new Runnable() {
             @Override
             public void run() {
-                racingEventServiceTracker.getRacingEventService().apply(operation);
+                replicableProvider.getReplicable().apply(operation);
             }
         };
         if (operation.requiresSynchronousExecution()) {

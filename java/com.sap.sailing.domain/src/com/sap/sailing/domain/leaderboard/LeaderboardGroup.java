@@ -4,7 +4,7 @@ import java.util.Collection;
 import java.util.UUID;
 
 import com.sap.sailing.domain.base.LeaderboardGroupBase;
-import com.sap.sailing.domain.common.WithID;
+import com.sap.sse.common.WithID;
 
 /**
  * A leaderboard group is used to group one or more {@link Leaderboard}s. If can be used to represent all or part of the

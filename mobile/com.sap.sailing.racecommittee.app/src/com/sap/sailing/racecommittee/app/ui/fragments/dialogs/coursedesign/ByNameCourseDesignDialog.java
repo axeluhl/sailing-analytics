@@ -17,10 +17,10 @@ import android.widget.ListAdapter;
 
 import com.sap.sailing.domain.base.CourseBase;
 import com.sap.sailing.domain.base.impl.CourseDataImpl;
-import com.sap.sailing.domain.common.impl.MillisecondsTimePoint;
 import com.sap.sailing.domain.common.impl.NaturalComparator;
 import com.sap.sailing.racecommittee.app.R;
 import com.sap.sailing.racecommittee.app.ui.fragments.dialogs.RaceDialogFragment;
+import com.sap.sse.common.impl.MillisecondsTimePoint;
 
 public class ByNameCourseDesignDialog extends RaceDialogFragment {
 

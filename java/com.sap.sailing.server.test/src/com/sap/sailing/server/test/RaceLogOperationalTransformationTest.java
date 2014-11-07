@@ -12,7 +12,6 @@ import org.junit.Before;
 import org.junit.Test;
 
 import com.sap.sailing.domain.base.Competitor;
-import com.sap.sailing.domain.common.impl.MillisecondsTimePoint;
 import com.sap.sailing.domain.racelog.RaceLog;
 import com.sap.sailing.domain.racelog.RaceLogEventAuthor;
 import com.sap.sailing.domain.racelog.RaceLogStartTimeEvent;
@@ -22,6 +21,7 @@ import com.sap.sailing.domain.racelog.impl.RaceLogStartTimeEventImpl;
 import com.sap.sailing.server.operationaltransformation.racelog.RaceLogEventWithTransformationSupport;
 import com.sap.sailing.server.operationaltransformation.racelog.RaceLogStartTimeEventWithTransformationSupport;
 import com.sap.sse.common.Util;
+import com.sap.sse.common.impl.MillisecondsTimePoint;
 import com.sap.sse.operationaltransformation.OperationalTransformer;
 import com.sap.sse.operationaltransformation.Peer;
 import com.sap.sse.operationaltransformation.PeerImpl;

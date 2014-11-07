@@ -1,7 +1,7 @@
 Manifest-Version: 1.0
 Bundle-ManifestVersion: 2
 Bundle-Name: Server Replication
-Bundle-SymbolicName: com.sap.sailing.server.replication
+Bundle-SymbolicName: com.sap.sse.replication
 Bundle-Version: 1.0.0.qualifier
 Bundle-Activator: com.sap.sailing.server.replication.impl.Activator
 Bundle-Vendor: SAP
@@ -9,11 +9,7 @@ Bundle-RequiredExecutionEnvironment: JavaSE-1.8
 Bundle-ActivationPolicy: lazy
 Export-Package: com.sap.sailing.server.replication,
  com.sap.sailing.server.replication.impl
-Require-Bundle: com.sap.sailing.server,
- com.sap.sailing.server.gateway,
- com.sap.sailing.domain.common,
- com.sap.sailing.domain.shared.android,
- com.sap.sse.common,
+Require-Bundle: com.sap.sse.common,
  com.sap.sse.operationaltransformation
 Bundle-ClassPath: .
 Web-ContextPath: /replication

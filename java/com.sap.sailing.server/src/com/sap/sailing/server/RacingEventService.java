@@ -40,7 +40,6 @@ import com.sap.sailing.domain.common.RegattaFetcher;
 import com.sap.sailing.domain.common.RegattaIdentifier;
 import com.sap.sailing.domain.common.RegattaName;
 import com.sap.sailing.domain.common.ScoringSchemeType;
-import com.sap.sailing.domain.common.TimePoint;
 import com.sap.sailing.domain.common.media.MediaTrack;
 import com.sap.sailing.domain.common.racelog.RacingProcedureType;
 import com.sap.sailing.domain.common.racelog.tracking.TypeBasedServiceFinderFactory;
@@ -67,6 +66,9 @@ import com.sap.sailing.domain.tracking.TrackedRegattaRegistry;
 import com.sap.sailing.domain.tracking.TrackerManager;
 import com.sap.sailing.domain.tracking.WindStore;
 import com.sap.sailing.server.masterdata.DataImportLockWithProgress;
+import com.sap.sailing.server.replication.OperationExecutionListener;
+import com.sap.sailing.server.replication.Replicable;
+import com.sap.sse.common.TimePoint;
 import com.sap.sse.common.Util;
 import com.sap.sse.common.Util.Triple;
 import com.sap.sse.common.search.KeywordQuery;
@@ -92,7 +94,7 @@ import com.sap.sse.common.search.Searchable;
  *
  */
 public interface RacingEventService extends TrackedRegattaRegistry, RegattaFetcher, RegattaRegistry, RaceFetcher,
-        LeaderboardRegistry, EventResolver, LeaderboardGroupResolver, TrackerManager, Searchable<LeaderboardSearchResult, KeywordQuery> {
+        LeaderboardRegistry, EventResolver, LeaderboardGroupResolver, TrackerManager, Searchable<LeaderboardSearchResult, KeywordQuery>, Replicable<RacingEventService, RacingEventServiceOperation<?>> {
     @Override
     Regatta getRegatta(RegattaName regattaName);
 
@@ -292,13 +294,6 @@ public interface RacingEventService extends TrackedRegattaRegistry, RegattaFetch
 
     void updateLeaderboardGroup(String oldName, String newName, String description, String displayName,
             List<String> leaderboardNames, int[] overallLeaderboardDiscardThresholds, ScoringSchemeType overallLeaderboardScoringSchemeType);
-
-    /**
-     * Executes an operation whose effects need to be replicated to any replica of this service known and
-     * {@link OperationExecutionListener#executed(RacingEventServiceOperation) notifies} all registered
-     * operation execution listeners about the execution of the operation.
-     */
-    <T> T apply(RacingEventServiceOperation<T> operation);
 
     void addOperationExecutionListener(OperationExecutionListener listener);
 

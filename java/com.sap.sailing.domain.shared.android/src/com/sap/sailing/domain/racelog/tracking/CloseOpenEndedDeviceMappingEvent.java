@@ -2,9 +2,9 @@ package com.sap.sailing.domain.racelog.tracking;
 
 import java.io.Serializable;
 
-import com.sap.sailing.domain.common.TimePoint;
 import com.sap.sailing.domain.racelog.RaceLogEvent;
 import com.sap.sailing.domain.racelog.Revokable;
+import com.sap.sse.common.TimePoint;
 
 /**
  * Closes the time range of a {@link DeviceMappingEvent}. This means that the {@link #getClosingTimePoint() timepoint} provided

@@ -5,11 +5,11 @@ import java.util.Iterator;
 import java.util.NavigableSet;
 
 import com.sap.sailing.domain.common.Distance;
-import com.sap.sailing.domain.common.TimePoint;
 import com.sap.sailing.domain.tracking.GPSFix;
 import com.sap.sailing.util.impl.ArrayListNavigableSet;
 import com.sap.sailing.util.impl.LockUtil;
 import com.sap.sailing.util.impl.NamedReentrantReadWriteLock;
+import com.sap.sse.common.TimePoint;
 import com.sap.sse.common.Util;
 
 /**

@@ -18,7 +18,6 @@ import com.sap.sailing.domain.base.Waypoint;
 import com.sap.sailing.domain.base.WithNationality;
 import com.sap.sailing.domain.common.Color;
 import com.sap.sailing.domain.common.MaxPointsReason;
-import com.sap.sailing.domain.common.TimePoint;
 import com.sap.sailing.domain.common.WindSource;
 import com.sap.sailing.domain.leaderboard.caching.LeaderboardCache;
 import com.sap.sailing.domain.racelog.RaceLogEvent;
@@ -33,6 +32,7 @@ import com.sap.sailing.domain.tracking.Wind;
 import com.sap.sailing.util.impl.ConcurrentWeakHashMap;
 import com.sap.sailing.util.impl.LockUtil;
 import com.sap.sailing.util.impl.NamedReentrantReadWriteLock;
+import com.sap.sse.common.TimePoint;
 
 /**
  * Manages a {@link LeaderboardCache}. When a {@link Leaderboard} is {@link LeaderboardCache#add added} to the cache, it

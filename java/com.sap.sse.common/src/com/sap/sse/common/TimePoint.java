@@ -1,4 +1,4 @@
-package com.sap.sailing.domain.common;
+package com.sap.sse.common;
 
 import java.io.Serializable;
 import java.util.Date;

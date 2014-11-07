@@ -3,9 +3,9 @@ package com.sap.sailing.xrr.resultimport.impl;
 import javax.xml.datatype.DatatypeConstants;
 import javax.xml.datatype.XMLGregorianCalendar;
 
-import com.sap.sailing.domain.common.TimePoint;
-import com.sap.sailing.domain.common.impl.MillisecondsTimePoint;
 import com.sap.sailing.xrr.resultimport.schema.RegattaResults;
+import com.sap.sse.common.TimePoint;
+import com.sap.sse.common.impl.MillisecondsTimePoint;
 
 public class XRRParserUtil {
     public static TimePoint calculateTimePointForRegattaResults(RegattaResults regattaResult) {

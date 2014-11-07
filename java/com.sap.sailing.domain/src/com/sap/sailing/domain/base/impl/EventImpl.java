@@ -25,9 +25,9 @@ import com.sap.sailing.domain.base.Event;
 import com.sap.sailing.domain.base.Regatta;
 import com.sap.sailing.domain.base.Venue;
 import com.sap.sailing.domain.common.ImageSize;
-import com.sap.sailing.domain.common.TimePoint;
 import com.sap.sailing.domain.common.impl.ImageSizeImpl;
 import com.sap.sailing.domain.leaderboard.LeaderboardGroup;
+import com.sap.sse.common.TimePoint;
 import com.sap.sse.common.Util;
 
 public class EventImpl extends EventBaseImpl implements Event {

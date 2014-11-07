@@ -7,10 +7,8 @@ import java.util.logging.Level;
 import java.util.logging.Logger;
 
 import com.rabbitmq.client.Channel;
-import com.sap.sailing.domain.common.Duration;
-import com.sap.sailing.domain.common.TimePoint;
-import com.sap.sailing.domain.common.impl.MillisecondsDurationImpl;
-import com.sap.sailing.domain.common.impl.MillisecondsTimePoint;
+import com.sap.sse.common.Duration;
+import com.sap.sse.common.impl.MillisecondsDurationImpl;
 
 /**
  * Output stream that can split its contents into messages for RabbitMQ. This stream creates a RabbitMQ queue and sends

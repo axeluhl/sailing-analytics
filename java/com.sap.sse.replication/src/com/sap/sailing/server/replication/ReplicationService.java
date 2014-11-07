@@ -6,9 +6,9 @@ import java.util.Map;
 import java.util.UUID;
 
 import com.rabbitmq.client.Channel;
-import com.sap.sailing.server.RacingEventServiceOperation;
 import com.sap.sailing.server.replication.impl.ReplicaDescriptor;
 import com.sap.sailing.server.replication.impl.ReplicationServlet;
+import com.sap.sse.operationaltransformation.OperationWithTransformationSupport;
 
 public interface ReplicationService {
     static String SAILING_SERVER_REPLICATION_TOPIC = "SailingServerReplicationTopic";
@@ -44,7 +44,7 @@ public interface ReplicationService {
      * For a replica replicating off this master, provides statistics in the form of number of operations sent to that
      * replica by type, where the operation type is the key, represented as the operation's class name
      */
-    Map<Class<? extends RacingEventServiceOperation<?>>, Integer> getStatistics(ReplicaDescriptor replicaDescriptor);
+    Map<Class<? extends OperationWithTransformationSupport<?, ?>>, Integer> getStatistics(ReplicaDescriptor replicaDescriptor);
     
     double getAverageNumberOfOperationsPerMessage(ReplicaDescriptor replicaDescriptor);
 
