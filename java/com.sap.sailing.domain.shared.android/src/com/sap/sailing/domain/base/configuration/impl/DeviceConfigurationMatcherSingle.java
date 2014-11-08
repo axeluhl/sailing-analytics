@@ -7,7 +7,7 @@ import com.sap.sailing.domain.base.SharedDomainFactory;
 import com.sap.sailing.domain.base.configuration.DeviceConfigurationIdentifier;
 import com.sap.sailing.domain.base.configuration.DeviceConfigurationMatcher;
 import com.sap.sailing.domain.common.configuration.DeviceConfigurationMatcherType;
-import com.sap.sse.IsManagedByCache;
+import com.sap.sse.common.IsManagedByCache;
 
 /**
  * Matches a single {@link DeviceConfigurationIdentifier}.

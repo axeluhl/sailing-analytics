@@ -3,7 +3,7 @@ package com.sap.sailing.domain.leaderboard.impl;
 import com.sap.sailing.domain.base.SharedDomainFactory;
 import com.sap.sailing.domain.base.impl.FleetImpl;
 import com.sap.sailing.domain.common.LeaderboardNameConstants;
-import com.sap.sse.IsManagedByCache;
+import com.sap.sse.common.IsManagedByCache;
 
 public class DefaultFleetImpl extends FleetImpl implements IsManagedByCache<SharedDomainFactory> {
 

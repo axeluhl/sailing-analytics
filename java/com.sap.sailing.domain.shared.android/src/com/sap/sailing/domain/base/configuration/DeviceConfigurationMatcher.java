@@ -5,7 +5,7 @@ import java.io.Serializable;
 import com.sap.sailing.domain.base.SharedDomainFactory;
 import com.sap.sailing.domain.base.configuration.impl.DeviceConfigurationMapImpl;
 import com.sap.sailing.domain.common.configuration.DeviceConfigurationMatcherType;
-import com.sap.sse.IsManagedByCache;
+import com.sap.sse.common.IsManagedByCache;
 
 /**
  * <p>

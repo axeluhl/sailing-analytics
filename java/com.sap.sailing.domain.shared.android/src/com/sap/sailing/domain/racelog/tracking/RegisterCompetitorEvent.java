@@ -4,7 +4,7 @@ import com.sap.sailing.domain.base.Competitor;
 import com.sap.sailing.domain.racelog.RaceLog;
 import com.sap.sailing.domain.racelog.RaceLogEvent;
 import com.sap.sailing.domain.racelog.Revokable;
-import com.sap.sse.IsManagedByCache;
+import com.sap.sse.common.IsManagedByCache;
 
 /**
  * Register a competitor for that race using the {@link RaceLog} in racelog-tracked races.

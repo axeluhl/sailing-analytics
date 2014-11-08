@@ -22,7 +22,7 @@ import com.sap.sailing.domain.leaderboard.ResultDiscardingRule;
 import com.sap.sailing.domain.racelog.RaceLogEvent;
 import com.sap.sailing.domain.racelog.RaceLogIdentifier;
 import com.sap.sailing.domain.tracking.TrackedRace;
-import com.sap.sse.IsManagedByCache;
+import com.sap.sse.common.IsManagedByCache;
 
 /**
  * Keeps a record of carried points and score corrections to be applied, keyed by the competitor names to which they

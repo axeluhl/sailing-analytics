@@ -6,7 +6,7 @@ import java.io.ObjectInputStream;
 import java.io.ObjectStreamClass;
 
 import com.sap.sailing.server.replication.Replicable;
-import com.sap.sse.IsManagedByCache;
+import com.sap.sse.common.IsManagedByCache;
 
 /**
  * During de-serialization, resolves objects managed by a {@link DomainFactory} using the domain factory instance passed

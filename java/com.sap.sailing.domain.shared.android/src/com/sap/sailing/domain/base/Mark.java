@@ -1,7 +1,7 @@
 package com.sap.sailing.domain.base;
 
 import com.sap.sailing.domain.common.MarkType;
-import com.sap.sse.IsManagedByCache;
+import com.sap.sse.common.IsManagedByCache;
 import com.sap.sse.common.WithID;
 
 

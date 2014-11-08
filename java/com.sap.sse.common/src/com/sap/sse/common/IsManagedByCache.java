@@ -1,4 +1,4 @@
-package com.sap.sse;
+package com.sap.sse.common;
 
 
 

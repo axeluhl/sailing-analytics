@@ -2,7 +2,7 @@ package com.sap.sailing.domain.base;
 
 import com.sap.sailing.domain.common.Bearing;
 import com.sap.sailing.domain.common.PassingInstruction;
-import com.sap.sse.IsManagedByCache;
+import com.sap.sse.common.IsManagedByCache;
 import com.sap.sse.common.Named;
 import com.sap.sse.common.WithID;
 
