@@ -29,10 +29,6 @@ public abstract class AbstractPlaceNavigator implements PlaceNavigator {
         return new PlaceNavigation<T>(destinationPlace, tokenizer);
     }
 
-//    protected <T extends Place> PlaceNavigation<T> createPlaceNavigation(String baseUrl, T destinationPlace, PlaceTokenizer<T> tokenizer) {
-//        return new PlaceNavigation<T>(baseUrl, destinationPlace, tokenizer);
-//    }
-
     protected <T extends Place> PlaceNavigation<T> createPlaceNavigation(String baseUrl, boolean isOnRemoteServer, T destinationPlace, PlaceTokenizer<T> tokenizer) {
         return new PlaceNavigation<T>(baseUrl, destinationPlace, tokenizer, isOnRemoteServer);
     }

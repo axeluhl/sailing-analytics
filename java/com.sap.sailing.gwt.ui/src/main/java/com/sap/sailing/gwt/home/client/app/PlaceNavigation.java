@@ -17,7 +17,7 @@ public class PlaceNavigation<T extends Place> {
         String locationURL = getLocationURL();
         this.isDestinationOnRemoteServer = !(isLocationOnLocalhost(locationURL) || isLocationOnDefaultSapSailingServer(locationURL));
         if(isDestinationOnRemoteServer) {
-            this.baseUrl = HomePlacesNavigator.DEFAULT_SAPSAILING_SERVER; 
+            this.baseUrl = AbstractPlaceNavigator.DEFAULT_SAPSAILING_SERVER_URL; 
         } else {
             this.baseUrl = locationURL;
         }
