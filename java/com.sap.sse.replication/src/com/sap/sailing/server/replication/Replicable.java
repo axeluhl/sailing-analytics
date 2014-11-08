@@ -61,7 +61,7 @@ public interface Replicable<S, O extends Operation<?>> extends WithID {
      * {@link OperationExecutionListener#executed(OperationWithTransformationSupport) notifies} all registered
      * operation execution listeners about the execution of the operation.
      */
-    <T> T apply(O operation);
+    <T> T apply(Operation<T> operation);
 
     void addOperationExecutionListener(OperationExecutionListener listener);
 

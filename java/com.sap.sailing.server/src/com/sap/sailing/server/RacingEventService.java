@@ -296,10 +296,6 @@ public interface RacingEventService extends TrackedRegattaRegistry, RegattaFetch
     void updateLeaderboardGroup(String oldName, String newName, String description, String displayName,
             List<String> leaderboardNames, int[] overallLeaderboardDiscardThresholds, ScoringSchemeType overallLeaderboardScoringSchemeType);
 
-    void addOperationExecutionListener(OperationExecutionListener listener);
-
-    void removeOperationExecutionListener(OperationExecutionListener listener);
-
     /**
      * Produces a one-shot serializable copy of those elements required for replication into <code>oos</code> so that
      * afterwards the {@link RacingEventServiceOperation}s can be {@link #apply(RacingEventServiceOperation) applied} to

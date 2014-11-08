@@ -2084,10 +2084,11 @@ public class RacingEventServiceImpl implements RacingEventServiceWithTestSupport
      * this service known.
      */
     @Override
-    public <T> T apply(RacingEventServiceOperation<?> operation) {
+    public <T> T apply(Operation<T> operation) {
+        RacingEventServiceOperation<T> reso = (RacingEventServiceOperation<T>) operation;
         try {
-            T result = operation.internalApplyTo(this);
-            replicate(operation);
+            T result = reso.internalApplyTo(this);
+            replicate(reso);
             return result;
         } catch (Exception e) {
             logger.log(Level.SEVERE, "apply", e);
