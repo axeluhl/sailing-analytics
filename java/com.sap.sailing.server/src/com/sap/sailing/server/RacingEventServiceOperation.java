@@ -11,15 +11,9 @@ import com.sap.sailing.server.operationaltransformation.MoveLeaderboardColumnUp;
 import com.sap.sailing.server.operationaltransformation.RemoveLeaderboard;
 import com.sap.sailing.server.operationaltransformation.RemoveLeaderboardColumn;
 import com.sap.sailing.server.operationaltransformation.RenameLeaderboardColumn;
-import com.sap.sse.operationaltransformation.Operation;
+import com.sap.sailing.server.replication.OperationWithResult;
 
-public interface RacingEventServiceOperation<ResultType> extends Operation<ResultType>, Serializable {
-    /**
-     * Performs the actual operation, applying it to the <code>toState</code> service. The operation's result is
-     * returned.
-     */
-    ResultType internalApplyTo(RacingEventService toState) throws Exception;
-    
+public interface RacingEventServiceOperation<ResultType> extends OperationWithResult<RacingEventService, ResultType>, Serializable {
     /**
      * Assumes this is the "server" operation and transforms the client's <code>removeColumnFromLeaderboardClientOp</code> according to this
      * operation. The default implementation will probably pass on the untransformed client operation. However, if this

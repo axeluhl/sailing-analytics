@@ -296,7 +296,7 @@ public class RacingEventServiceImpl implements RacingEventServiceWithTestSupport
      */
     private final NamedReentrantReadWriteLock regattaTrackingCacheLock;
 
-    private final ConcurrentHashMap<OperationExecutionListener, OperationExecutionListener> operationExecutionListeners;
+    private final ConcurrentHashMap<OperationExecutionListener<RacingEventService>, OperationExecutionListener<RacingEventService>> operationExecutionListeners;
 
     /**
      * Keys are the toString() representation of the {@link RaceDefinition#getId() IDs} of races passed to
@@ -2084,7 +2084,7 @@ public class RacingEventServiceImpl implements RacingEventServiceWithTestSupport
      * this service known.
      */
     @Override
-    public <T> T apply(Operation<T> operation) {
+    public <T> T apply(Operation<RacingEventService> operation) {
         RacingEventServiceOperation<T> reso = (RacingEventServiceOperation<T>) operation;
         try {
             T result = reso.internalApplyTo(this);
@@ -2108,7 +2108,7 @@ public class RacingEventServiceImpl implements RacingEventServiceWithTestSupport
 
     @Override
     public <T> void replicate(RacingEventServiceOperation<T> operation) {
-        for (OperationExecutionListener listener : operationExecutionListeners.keySet()) {
+        for (OperationExecutionListener<RacingEventService> listener : operationExecutionListeners.keySet()) {
             try {
                 listener.executed(operation);
             } catch (Exception e) {
@@ -2120,12 +2120,12 @@ public class RacingEventServiceImpl implements RacingEventServiceWithTestSupport
     }
 
     @Override
-    public void addOperationExecutionListener(OperationExecutionListener listener) {
+    public void addOperationExecutionListener(OperationExecutionListener<RacingEventService> listener) {
         operationExecutionListeners.put(listener, listener);
     }
 
     @Override
-    public void removeOperationExecutionListener(OperationExecutionListener listener) {
+    public void removeOperationExecutionListener(OperationExecutionListener<RacingEventService> listener) {
         operationExecutionListeners.remove(listener);
     }
 

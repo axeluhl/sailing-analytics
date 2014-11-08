@@ -1,8 +1,15 @@
 package com.sap.sse.operationaltransformation;
 
-
+/**
+ * A default implementation for the {@link Transformer} interface, assuming operations implement the
+ * {@link OperationWithTransformationSupport} interface which standardizes how operations are being transformed.
+ * 
+ * @author Axel Uhl (D043530)
+ *
+ * @param <S>
+ * @param <O>
+ */
 public class OperationalTransformer<S, O extends OperationWithTransformationSupport<S, O>> implements Transformer<O> {
-
     @Override
     public ClientServerOperationPair<O> transform(O clientOp, O serverOp) {
         ClientServerOperationPair<O> result = new ClientServerOperationPair<O>(
@@ -10,5 +17,4 @@ public class OperationalTransformer<S, O extends OperationWithTransformationSupp
                         serverOp == null ? null : serverOp.transformServerOp(clientOp));
         return result;
     }
-
 }

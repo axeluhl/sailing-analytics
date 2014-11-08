@@ -21,9 +21,8 @@ import com.rabbitmq.client.ConsumerCancelledException;
 import com.rabbitmq.client.QueueingConsumer;
 import com.rabbitmq.client.QueueingConsumer.Delivery;
 import com.rabbitmq.client.ShutdownSignalException;
+import com.sap.sailing.server.replication.OperationWithResult;
 import com.sap.sailing.server.replication.ReplicationMasterDescriptor;
-import com.sap.sse.operationaltransformation.Operation;
-import com.sap.sse.operationaltransformation.OperationWithTransformationSupport;
 
 /**
  * Receives {@link RacingEventServiceOperation}s through JMS and
@@ -38,15 +37,15 @@ import com.sap.sse.operationaltransformation.OperationWithTransformationSupport;
  * @author Axel Uhl (d043530)
  * 
  */
-public class Replicator implements Runnable {
+public class Replicator<S, O extends OperationWithResult<S, ?>> implements Runnable {
     private final static Logger logger = Logger.getLogger(Replicator.class.getName());
     
     private static final long CHECK_INTERVAL_MILLIS = 2000; // how long (milliseconds) to pause before checking connection again
     private static final int CHECK_COUNT = 150; // how long to check, value is CHECK_INTERVAL second steps
     
     private final ReplicationMasterDescriptor master;
-    private final HasReplicable replicableProvider;
-    private final List<Operation<?>> queue;
+    private final HasReplicable<S, O> replicableProvider;
+    private final List<OperationWithResult<S, ?>> queue;
     
     private QueueingConsumer consumer;
     
@@ -89,8 +88,8 @@ public class Replicator implements Runnable {
      * @param consumer
      *            the RabbitMQ consumer from which to load messages
      */
-    public Replicator(ReplicationMasterDescriptor master, HasReplicable racingEventServiceTracker, boolean startSuspended, QueueingConsumer consumer) {
-        this.queue = new ArrayList<Operation<?>>();
+    public Replicator(ReplicationMasterDescriptor master, HasReplicable<S, O> racingEventServiceTracker, boolean startSuspended, QueueingConsumer consumer) {
+        this.queue = new ArrayList<OperationWithResult<S, ?>>();
         this.master = master;
         this.replicableProvider = racingEventServiceTracker;
         this.suspended = startSuspended;
@@ -147,7 +146,8 @@ public class Replicator implements Runnable {
                         byte[] serializedOperation = (byte[]) ois.readObject();
                         ObjectInputStream operationOIS = replicableProvider.getReplicable()
                                 .createObjectInputStreamResolvingAgainstCache(new ByteArrayInputStream(serializedOperation));
-                        OperationWithTransformationSupport<?, ?> operation = (OperationWithTransformationSupport<?, ?>) operationOIS.readObject();
+                        @SuppressWarnings("unchecked")
+                        OperationWithResult<S, ?> operation = (OperationWithResult<S, ?>) operationOIS.readObject();
                         operationCount++;
                         operationsInMessage++;
                         if (operationCount % 10000l == 0) {
@@ -222,7 +222,7 @@ public class Replicator implements Runnable {
      * If the replicator is currently {@link #suspended}, the <code>operation</code> is queued, otherwise immediately applied to
      * the receiving replica.
      */
-    private synchronized void applyOrQueue(OperationWithTransformationSupport<?, ?> operation) {
+    private synchronized void applyOrQueue(OperationWithResult<S, ?> operation) {
         if (suspended) {
             queue(operation);
         } else {
@@ -230,7 +230,7 @@ public class Replicator implements Runnable {
         }
     }
 
-    private synchronized void apply(final Operation<?> operation) {
+    private synchronized void apply(final OperationWithResult<S, ?> operation) {
         Runnable runnable = new Runnable() {
             @Override
             public void run() {
@@ -244,7 +244,7 @@ public class Replicator implements Runnable {
         }
     }
     
-    private synchronized void queue(Operation<?> operation) {
+    private synchronized void queue(OperationWithResult<S, ?> operation) {
         if (queue.isEmpty()) {
             notifyAll();
         }
@@ -262,8 +262,8 @@ public class Replicator implements Runnable {
     }
     
     private synchronized void applyQueue() {
-        for (Iterator<Operation<?>> i=queue.iterator(); i.hasNext(); ) {
-            Operation<?> operation = i.next();
+        for (Iterator<OperationWithResult<S, ?>> i=queue.iterator(); i.hasNext(); ) {
+            OperationWithResult<S, ?> operation = i.next();
             i.remove();
             try {
                 apply(operation);

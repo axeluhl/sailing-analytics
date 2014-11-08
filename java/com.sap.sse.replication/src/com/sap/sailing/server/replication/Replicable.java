@@ -41,7 +41,7 @@ import com.sap.sse.operationaltransformation.OperationWithTransformationSupport;
  * @author Axel Uhl (D043530)
  *
  */
-public interface Replicable<S, O extends Operation<?>> extends WithID {
+public interface Replicable<S, O extends OperationWithResult<S, ?>> extends WithID {
     /**
      * The name of the property to use in the <code>properties</code> dictionary in a call to
      * {@link BundleContext#registerService(Class, Object, java.util.Dictionary)} when registering a {@link Replicable}.
@@ -61,11 +61,11 @@ public interface Replicable<S, O extends Operation<?>> extends WithID {
      * {@link OperationExecutionListener#executed(OperationWithTransformationSupport) notifies} all registered
      * operation execution listeners about the execution of the operation.
      */
-    <T> T apply(Operation<T> operation);
+    <T> T apply(OperationWithResult<S, T> operation);
 
-    void addOperationExecutionListener(OperationExecutionListener listener);
+    void addOperationExecutionListener(OperationExecutionListener<S> listener);
 
-    void removeOperationExecutionListener(OperationExecutionListener listener);
+    void removeOperationExecutionListener(OperationExecutionListener<S> listener);
 
     void clearReplicaState() throws MalformedURLException, IOException, InterruptedException;
 

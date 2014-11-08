@@ -1,7 +1,13 @@
 package com.sap.sse.operationaltransformation;
 
-
-
+/**
+ * Returns the same state object as was passed in. This is required for the Operational Transformation algorithm to work.
+ * 
+ * @author Axel Uhl (D043530)
+ *
+ * @param <S>
+ * @param <O>
+ */
 public interface OperationWithTransformationSupport<S, O extends OperationWithTransformationSupport<S, O>> extends Operation<S> {
     /**
      * Implements the specific transformation rule for the implementing subclass for the set of possible peer operations

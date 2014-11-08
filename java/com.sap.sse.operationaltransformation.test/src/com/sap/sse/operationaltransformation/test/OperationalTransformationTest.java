@@ -12,9 +12,9 @@ import org.junit.Test;
 import com.sap.sse.operationaltransformation.ClientServerOperationPair;
 import com.sap.sse.operationaltransformation.Operation;
 import com.sap.sse.operationaltransformation.Peer;
+import com.sap.sse.operationaltransformation.Peer.Role;
 import com.sap.sse.operationaltransformation.PeerImpl;
 import com.sap.sse.operationaltransformation.Transformer;
-import com.sap.sse.operationaltransformation.Peer.Role;
 import com.sap.sse.operationaltransformation.test.util.Base64;
 
 public class OperationalTransformationTest {

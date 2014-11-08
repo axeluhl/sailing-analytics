@@ -42,6 +42,8 @@ import com.sap.sailing.domain.persistence.media.MediaDBFactory;
 import com.sap.sailing.domain.racelog.tracking.EmptyGPSFixStore;
 import com.sap.sailing.domain.test.TrackBasedTest;
 import com.sap.sailing.domain.tracking.impl.EmptyWindStore;
+import com.sap.sailing.server.RacingEventService;
+import com.sap.sailing.server.RacingEventServiceOperation;
 import com.sap.sailing.server.impl.RacingEventServiceImpl;
 import com.sap.sailing.server.operationaltransformation.AddDefaultRegatta;
 import com.sap.sailing.server.operationaltransformation.AddRaceDefinition;
@@ -140,7 +142,7 @@ public class InitialLoadReplicationObjectIdentityTest extends AbstractServerRepl
         /* fire up replication */
         performReplicationSetup();
         ReplicationMasterDescriptor the_master = replicationDescriptorPair.getB(); /* master descriptor */
-        Replicator replicator = replicationDescriptorPair.getA().startToReplicateFromButDontYetFetchInitialLoad(the_master, /* startReplicatorSuspended */ true);
+        Replicator<RacingEventService, RacingEventServiceOperation<?>> replicator = replicationDescriptorPair.getA().startToReplicateFromButDontYetFetchInitialLoad(the_master, /* startReplicatorSuspended */ true);
         replicationDescriptorPair.getA().initialLoad();
         replicator.setSuspended(false);
         synchronized (replicator) {

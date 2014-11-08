@@ -111,7 +111,8 @@ public class Activator implements BundleActivator {
             logger.severe("Couldn't parse the replication port specification \""+exchangePortAsString+"\". Using default.");
         }
         replicationInstancesManager = new ReplicationInstancesManager();
-        ReplicationService serverReplicationMasterService = new ReplicationServiceImpl(exchangeName, exchangeHost, exchangePort, replicationInstancesManager);
+        ReplicationService serverReplicationMasterService = new ReplicationServiceImpl<>(
+                exchangeName, exchangeHost, exchangePort, replicationInstancesManager);
         bundleContext.registerService(ReplicationService.class, serverReplicationMasterService, null);
         logger.info("Registered replication service "+serverReplicationMasterService+" using exchange name "+exchangeName+" on host "+exchangeHost);
         checkIfAutomaticReplicationShouldStart(serverReplicationMasterService, exchangeName);

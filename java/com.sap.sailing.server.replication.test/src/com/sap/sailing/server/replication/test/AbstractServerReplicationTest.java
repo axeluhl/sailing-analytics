@@ -35,6 +35,7 @@ import com.sap.sailing.domain.persistence.media.MediaDBFactory;
 import com.sap.sailing.domain.racelog.tracking.EmptyGPSFixStore;
 import com.sap.sailing.domain.tracking.impl.EmptyWindStore;
 import com.sap.sailing.server.RacingEventService;
+import com.sap.sailing.server.RacingEventServiceOperation;
 import com.sap.sailing.server.impl.RacingEventServiceImpl;
 import com.sap.sailing.server.replication.ReplicationMasterDescriptor;
 import com.sap.sailing.server.replication.ReplicationService;
@@ -55,7 +56,7 @@ public abstract class AbstractServerReplicationTest {
     protected RacingEventServiceImpl master;
     protected ReplicationServiceTestImpl replicaReplicator;
     private ReplicaDescriptor replicaDescriptor;
-    private ReplicationServiceImpl masterReplicator;
+    private ReplicationServiceImpl<RacingEventService, RacingEventServiceOperation<?>> masterReplicator;
     private ReplicationMasterDescriptor  masterDescriptor;
     
     @Rule public Timeout AbstractTracTracLiveTestTimeout = new Timeout(5 * 60 * 1000); // timeout after 5 minutes
@@ -115,7 +116,7 @@ public abstract class AbstractServerReplicationTest {
                     new DomainFactoryImpl()), mongoObjectFactory, MediaDBFactory.INSTANCE.getMediaDB(mongoDBService), EmptyWindStore.INSTANCE, EmptyGPSFixStore.INSTANCE);
         }
         ReplicationInstancesManager rim = new ReplicationInstancesManager();
-        masterReplicator = new ReplicationServiceImpl(exchangeName, exchangeHost, rim, this.master);
+        masterReplicator = new ReplicationServiceImpl<RacingEventService, RacingEventServiceOperation<?>>(exchangeName, exchangeHost, rim, this.master);
         replicaDescriptor = new ReplicaDescriptor(InetAddress.getLocalHost(), serverUuid, "");
         masterReplicator.registerReplica(replicaDescriptor);
         // connect to exchange host and local server running as master
@@ -166,7 +167,7 @@ public abstract class AbstractServerReplicationTest {
         replicaReplicator.stopToReplicateFromMaster();
     }
     
-    static class ReplicationServiceTestImpl extends ReplicationServiceImpl {
+    static class ReplicationServiceTestImpl extends ReplicationServiceImpl<RacingEventService, RacingEventServiceOperation<?>> {
         protected static final int INITIAL_LOAD_PACKAGE_SIZE = 1024*1024;
         private final DomainFactory resolveAgainst;
         private final RacingEventService master;
@@ -258,12 +259,13 @@ public abstract class AbstractServerReplicationTest {
 //            replicator.setSuspended(false); // resume after initial load
 //        }
 
-        protected Replicator startToReplicateFromButDontYetFetchInitialLoad(ReplicationMasterDescriptor master, boolean startReplicatorSuspended)
+        protected Replicator<RacingEventService, RacingEventServiceOperation<?>> startToReplicateFromButDontYetFetchInitialLoad(ReplicationMasterDescriptor master, boolean startReplicatorSuspended)
                 throws IOException {
             masterReplicationService.registerReplica(replicaDescriptor);
             registerReplicaUuidForMaster(replicaDescriptor.getUuid().toString(), master);
             QueueingConsumer consumer = master.getConsumer();
-            final Replicator replicator = new Replicator(master, this, startReplicatorSuspended, consumer);
+            final Replicator<RacingEventService, RacingEventServiceOperation<?>> replicator = new Replicator<RacingEventService, RacingEventServiceOperation<?>>(
+                    master, this, startReplicatorSuspended, consumer);
             new Thread(replicator).start();
             return replicator;
         }

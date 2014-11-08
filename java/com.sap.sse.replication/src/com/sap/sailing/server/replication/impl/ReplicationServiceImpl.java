@@ -30,11 +30,11 @@ import com.rabbitmq.client.Channel;
 import com.rabbitmq.client.ConnectionFactory;
 import com.rabbitmq.client.QueueingConsumer;
 import com.sap.sailing.server.replication.OperationExecutionListener;
+import com.sap.sailing.server.replication.OperationWithResult;
 import com.sap.sailing.server.replication.Replicable;
 import com.sap.sailing.server.replication.ReplicationMasterDescriptor;
 import com.sap.sailing.server.replication.ReplicationService;
 import com.sap.sse.BuildVersion;
-import com.sap.sse.operationaltransformation.Operation;
 import com.sap.sse.operationaltransformation.OperationWithTransformationSupport;
 
 /**
@@ -52,14 +52,14 @@ import com.sap.sse.operationaltransformation.OperationWithTransformationSupport;
  * @author Frank Mittag, Axel Uhl (d043530)
  * 
  */
-public class ReplicationServiceImpl implements ReplicationService, OperationExecutionListener, HasReplicable {
+public class ReplicationServiceImpl<S, O extends OperationWithResult<S, ?>> implements ReplicationService, OperationExecutionListener<S>, HasReplicable<S, O> {
     private static final Logger logger = Logger.getLogger(ReplicationServiceImpl.class.getName());
     
     private final ReplicationInstancesManager replicationInstancesManager;
     
-    private final ServiceTracker<Replicable<?, ?>, Replicable<?, ?>> racingEventServiceTracker;
+    private final ServiceTracker<Replicable<S, O>, Replicable<S, O>> racingEventServiceTracker;
     
-    private final Replicable<?, ?> localService;
+    private final Replicable<S, O> localService;
     
     /**
      * <code>null</code>, if this instance is not currently replicating from some master; the master's descriptor otherwise
@@ -97,7 +97,7 @@ public class ReplicationServiceImpl implements ReplicationService, OperationExec
      */
     private final UUID serverUUID;
     
-    private Replicator replicator;
+    private Replicator<S, O> replicator;
     private Thread replicatorThread;
     
     /**
@@ -178,7 +178,7 @@ public class ReplicationServiceImpl implements ReplicationService, OperationExec
     
     private ReplicationServiceImpl(String exchangeName, String exchangeHost,
             int exchangePort, final ReplicationInstancesManager replicationInstancesManager,
-            Replicable<?, ?> localService, boolean createRacingEventServiceTracker) throws IOException {
+            Replicable<S, O> localService, boolean createRacingEventServiceTracker) throws IOException {
         timer = new Timer("ReplicationServiceImpl timer for delayed task sending");
         this.replicationInstancesManager = replicationInstancesManager;
         replicaUUIDs = new HashMap<ReplicationMasterDescriptor, String>();
@@ -206,12 +206,12 @@ public class ReplicationServiceImpl implements ReplicationService, OperationExec
      *            the name of the exchange to which replicas can bind
      */
     public ReplicationServiceImpl(String exchangeName, String exchangeHost,
-            final ReplicationInstancesManager replicationInstancesManager, Replicable<?, ?> localService) throws IOException {
+            final ReplicationInstancesManager replicationInstancesManager, Replicable<S, O> localService) throws IOException {
         this(exchangeName, exchangeHost, 0, replicationInstancesManager, localService, /* create RacingEventServiceTracker */ false);
     }
     
-    protected ServiceTracker<Replicable<?, ?>, Replicable<?, ?>> getRacingEventServiceTracker() {
-        return new ServiceTracker<Replicable<?, ?>, Replicable<?, ?>>(
+    protected ServiceTracker<Replicable<S, O>, Replicable<S, O>> getRacingEventServiceTracker() {
+        return new ServiceTracker<Replicable<S, O>, Replicable<S, O>>(
                 Activator.getDefaultContext(), Replicable.class.getName(), null);
     }
     
@@ -242,8 +242,8 @@ public class ReplicationServiceImpl implements ReplicationService, OperationExec
     }
 
     @Override
-    public Replicable<?, ?> getReplicable() {
-        Replicable<?, ?> result;
+    public Replicable<S, O> getReplicable() {
+        Replicable<S, O> result;
         if (localService != null) {
             result = localService;
         } else {
@@ -293,7 +293,7 @@ public class ReplicationServiceImpl implements ReplicationService, OperationExec
      * Schedules a single operation for broadcast. The operation is added to {@link #outboundBuffer}, and if not already scheduled,
      * a {@link #timer} is created and scheduled to send in {@link #TRANSMISSION_DELAY_MILLIS} milliseconds.
      */
-    private void broadcastOperation(Operation<?> operation) throws IOException {
+    private void broadcastOperation(OperationWithResult<S, ?> operation) throws IOException {
         // need to write the operations one by one, making sure the ObjectOutputStream always writes
         // identical objects again if required because they may have changed state in between
         ByteArrayOutputStream bos = new ByteArrayOutputStream();
@@ -426,7 +426,7 @@ public class ReplicationServiceImpl implements ReplicationService, OperationExec
         logger.info("Connection to exchange successful.");
         URL initialLoadURL = master.getInitialLoadURL();
         logger.info("Initial load URL is "+initialLoadURL);
-        replicator = new Replicator(master, this, /* startSuspended */ true, consumer);
+        replicator = new Replicator<S, O>(master, this, /* startSuspended */ true, consumer);
         // start receiving messages already now, but start in suspended mode
         replicatorThread = new Thread(replicator, "Replicator receiving from "+master.getMessagingHostname()+"/"+master.getExchangeName());
         final Replicable<?, ?> replicable = getReplicable();
@@ -497,7 +497,7 @@ public class ReplicationServiceImpl implements ReplicationService, OperationExec
      * replicas by publishing it to the fan-out exchange.
      */
     @Override
-    public <T> void executed(Operation<T> operation) {
+    public <T> void executed(OperationWithResult<S, T> operation) {
         try {
             broadcastOperation(operation);
         } catch (Exception e) {

@@ -66,7 +66,6 @@ import com.sap.sailing.domain.tracking.TrackedRegattaRegistry;
 import com.sap.sailing.domain.tracking.TrackerManager;
 import com.sap.sailing.domain.tracking.WindStore;
 import com.sap.sailing.server.masterdata.DataImportLockWithProgress;
-import com.sap.sailing.server.replication.OperationExecutionListener;
 import com.sap.sailing.server.replication.Replicable;
 import com.sap.sse.common.TimePoint;
 import com.sap.sse.common.Util;

@@ -32,6 +32,7 @@ import com.sap.sailing.domain.tracking.DynamicTrackedRace;
 import com.sap.sailing.domain.tracking.RaceHandle;
 import com.sap.sailing.domain.tracking.RaceTrackingConnectivityParameters;
 import com.sap.sailing.domain.tracking.TrackedRace;
+import com.sap.sailing.server.RacingEventService;
 import com.sap.sailing.server.operationaltransformation.AddColumnToLeaderboard;
 import com.sap.sailing.server.operationaltransformation.ConnectTrackedRaceToLeaderboardColumn;
 import com.sap.sailing.server.operationaltransformation.CreateFlexibleLeaderboard;
@@ -40,7 +41,6 @@ import com.sap.sailing.server.replication.OperationExecutionListener;
 import com.sap.sse.common.Util;
 import com.sap.sse.common.impl.MillisecondsTimePoint;
 import com.sap.sse.operationaltransformation.Operation;
-import com.sap.sse.operationaltransformation.OperationWithTransformationSupport;
 
 public class TrackRaceReplicationTest extends AbstractServerReplicationTest {
     private TrackedRace masterTrackedRace;
@@ -71,9 +71,9 @@ public class TrackRaceReplicationTest extends AbstractServerReplicationTest {
         MillisecondsTimePoint startOfTracking = new MillisecondsTimePoint(cal.getTimeInMillis());
         cal.set(2011, 05, 23, 15, 14, 31);
         MillisecondsTimePoint endOfTracking = new MillisecondsTimePoint(cal.getTimeInMillis());
-        master.addOperationExecutionListener(new OperationExecutionListener() {
+        master.addOperationExecutionListener(new OperationExecutionListener<RacingEventService>() {
             @Override
-            public <T> void executed(OperationWithTransformationSupport<?, ? extends Operation<T>> operation) {
+            public <T> void executed(Operation<RacingEventService, T> operation) {
                 if (operation instanceof CreateTrackedRace) {
                     synchronized (notifier) {
                         notifier[0] = true;
