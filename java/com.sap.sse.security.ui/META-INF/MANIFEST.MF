@@ -11,8 +11,8 @@ Import-Package: org.osgi.framework;version="1.3.0",
 Bundle-ActivationPolicy: lazy
 Bundle-ClassPath: WEB-INF/classes/
 Require-Bundle: javax.servlet;bundle-version="2.5.0",
- com.sap.sse.gwt;bundle-version="1.0.0",
- com.google.gwt.osgi;bundle-version="2.6.0",
+ com.sap.sse.gwt,
+ com.google.gwt.osgi;bundle-version="2.6.1",
  com.sap.sse.security,
  org.json.simple,
  com.sap.sailing.domain.common,
@@ -22,6 +22,8 @@ Require-Bundle: javax.servlet;bundle-version="2.5.0",
  org.apache.shiro.web;bundle-version="1.2.2"
 Web-ContextPath: /security/ui
 Export-Package: com.sap.sse.security.ui.client,
+ com.sap.sse.security.ui.client.component,
+ com.sap.sse.security.ui.client.i18n,
  com.sap.sse.security.ui.loginpanel,
  com.sap.sse.security.ui.server,
  com.sap.sse.security.ui.shared

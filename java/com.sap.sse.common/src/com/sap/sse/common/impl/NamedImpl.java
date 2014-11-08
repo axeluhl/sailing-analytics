@@ -1,6 +1,7 @@
-package com.sap.sailing.domain.common.impl;
+package com.sap.sse.common.impl;
 
 import com.sap.sse.common.Named;
+
 
 public class NamedImpl implements Named {
     private static final long serialVersionUID = -4815125282671451300L;

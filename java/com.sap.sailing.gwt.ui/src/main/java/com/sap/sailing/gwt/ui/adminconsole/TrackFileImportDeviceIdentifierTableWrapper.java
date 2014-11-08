@@ -2,11 +2,11 @@ package com.sap.sailing.gwt.ui.adminconsole;
 
 import com.google.gwt.user.cellview.client.TextColumn;
 import com.google.gwt.view.client.SingleSelectionModel;
-import com.sap.sailing.gwt.ui.client.ErrorReporter;
 import com.sap.sailing.gwt.ui.client.SailingServiceAsync;
 import com.sap.sailing.gwt.ui.client.StringMessages;
 import com.sap.sailing.gwt.ui.common.client.DateAndTimeFormatterUtil;
 import com.sap.sailing.gwt.ui.shared.TrackFileImportDeviceIdentifierDTO;
+import com.sap.sse.gwt.client.ErrorReporter;
 
 public class TrackFileImportDeviceIdentifierTableWrapper extends TableWrapper<TrackFileImportDeviceIdentifierDTO,
 SingleSelectionModel<TrackFileImportDeviceIdentifierDTO>> {

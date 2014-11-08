@@ -10,7 +10,7 @@ import com.google.gwt.user.client.ui.Anchor;
 import com.google.gwt.user.client.ui.FlowPanel;
 import com.google.gwt.user.client.ui.RootPanel;
 import com.google.gwt.user.client.ui.SimplePanel;
-import com.sap.sailing.gwt.ui.client.AbstractEntryPoint;
+import com.sap.sailing.gwt.ui.client.AbstractSailingEntryPoint;
 import com.sap.sailing.gwt.ui.client.GlobalNavigationPanel;
 import com.sap.sailing.gwt.ui.client.LogoAndTitlePanel;
 import com.sap.sailing.gwt.ui.client.RegattaRefresher;
@@ -28,7 +28,7 @@ import com.sap.sse.gwt.shared.GwtHttpRequestUtils;
  * @author Lennart Hensler (D054527)
  *
  */
-public class SpectatorEntryPoint extends AbstractEntryPoint implements RegattaRefresher {
+public class SpectatorEntryPoint extends AbstractSailingEntryPoint implements RegattaRefresher {
     private final SailingServiceAsync sailingService = GWT.create(SailingService.class);
     
     @Override
@@ -56,7 +56,7 @@ public class SpectatorEntryPoint extends AbstractEntryPoint implements RegattaRe
             sailingService.getLeaderboardGroupByName(groupName, false /*withGeoLocationData*/, new AsyncCallback<LeaderboardGroupDTO>() {
                 @Override
                 public void onFailure(Throwable t) {
-                    reportError(stringMessages.noLeaderboardGroupWithNameFound(groupName));
+                    reportError(getStringMessages().noLeaderboardGroupWithNameFound(groupName));
                 }
                 @Override
                 public void onSuccess(LeaderboardGroupDTO group) {                }
@@ -73,10 +73,10 @@ public class SpectatorEntryPoint extends AbstractEntryPoint implements RegattaRe
         boolean embedded = Window.Location.getParameter("embedded") != null
                 && Window.Location.getParameter("embedded").equalsIgnoreCase("true");
         if (!embedded) {
-            String title = groupName != null ? groupName : stringMessages.overview();
-            LogoAndTitlePanel logoAndTitlePanel = new LogoAndTitlePanel(title, stringMessages, this, getUserService());
+            String title = groupName != null ? groupName : getStringMessages().overview();
+            LogoAndTitlePanel logoAndTitlePanel = new LogoAndTitlePanel(title, getStringMessages(), this, getUserService());
             logoAndTitlePanel.addStyleName("LogoAndTitlePanel");
-            FlowPanel globalNavigationPanel = new GlobalNavigationPanel(stringMessages, true, null, null, /* event */ null, null);
+            FlowPanel globalNavigationPanel = new GlobalNavigationPanel(getStringMessages(), true, null, null, /* event */ null, null);
             logoAndTitlePanel.add(globalNavigationPanel);
 
             rootPanel.add(logoAndTitlePanel);
@@ -90,17 +90,17 @@ public class SpectatorEntryPoint extends AbstractEntryPoint implements RegattaRe
             // DON'T DELETE -> the EventOverviewPanel will replace the LeaderboardGroupOverviewPanel later on
 //            EventOverviewPanel eventOverviewPanel = new EventOverviewPanel(sailingService, this, stringMessages, showRaceDetails);
 //            groupOverviewPanel.add( eventOverviewPanel);
-            LeaderboardGroupOverviewPanel leaderboardGroupOverviewPanel = new LeaderboardGroupOverviewPanel(sailingService, this, stringMessages, showRaceDetails);
+            LeaderboardGroupOverviewPanel leaderboardGroupOverviewPanel = new LeaderboardGroupOverviewPanel(sailingService, this, getStringMessages(), showRaceDetails);
             groupOverviewPanel.add(leaderboardGroupOverviewPanel);
             rootPanel.add(groupOverviewPanel);
         } else {
-            LeaderboardGroupPanel groupPanel = new LeaderboardGroupPanel(sailingService, stringMessages, this,
+            LeaderboardGroupPanel groupPanel = new LeaderboardGroupPanel(sailingService, getStringMessages(), this,
                     groupName, root, viewModeParamValue, embedded, showRaceDetails, canReplayDuringLiveRaces,
                     showMapControls, showNavigationPanel);
             groupAndFeedbackPanel.add(groupPanel);
             if (!embedded) {
-                groupPanel.setWelcomeWidget(new SimpleWelcomeWidget(stringMessages.welcomeToSailingAnalytics(),
-                        stringMessages.welcomeToSailingAnalyticsBody()));
+                groupPanel.setWelcomeWidget(new SimpleWelcomeWidget(getStringMessages().welcomeToSailingAnalytics(),
+                        getStringMessages().welcomeToSailingAnalyticsBody()));
                 SimplePanel feedbackPanel = new SimplePanel();
                 feedbackPanel.getElement().getStyle().setProperty("clear", "right");
                 feedbackPanel.addStyleName("feedbackPanel");

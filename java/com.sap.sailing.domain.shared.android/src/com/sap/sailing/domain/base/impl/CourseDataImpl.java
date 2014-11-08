@@ -7,7 +7,7 @@ import com.sap.sailing.domain.base.ControlPoint;
 import com.sap.sailing.domain.base.CourseBase;
 import com.sap.sailing.domain.base.Leg;
 import com.sap.sailing.domain.base.Waypoint;
-import com.sap.sailing.domain.common.impl.NamedImpl;
+import com.sap.sse.common.impl.NamedImpl;
 
 public class CourseDataImpl extends NamedImpl implements CourseBase {
 

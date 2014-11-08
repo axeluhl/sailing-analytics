@@ -11,7 +11,7 @@ import com.google.gwt.user.client.ui.DockLayoutPanel;
 import com.google.gwt.user.client.ui.Label;
 import com.google.gwt.user.client.ui.RootLayoutPanel;
 import com.google.gwt.user.client.ui.RootPanel;
-import com.sap.sailing.gwt.ui.client.AbstractEntryPoint;
+import com.sap.sailing.gwt.ui.client.AbstractSailingEntryPoint;
 import com.sap.sailing.gwt.ui.client.LogoAndTitlePanel;
 import com.sap.sailing.gwt.ui.client.MediaService;
 import com.sap.sailing.gwt.ui.client.MediaServiceAsync;
@@ -22,7 +22,7 @@ import com.sap.sailing.gwt.ui.raceboard.RaceBoardViewConfiguration;
 import com.sap.sse.gwt.client.EntryPointHelper;
 import com.sap.sse.gwt.shared.GwtHttpRequestUtils;
 
-public class TVEntryPoint extends AbstractEntryPoint {
+public class TVEntryPoint extends AbstractSailingEntryPoint {
     
     private static final String PARAM_LEADERBOARD_NAME = "name";
     private static final String PARAM_LEADERBOARD_GROUP_NAME = "leaderboardGroupName";
@@ -72,7 +72,7 @@ public class TVEntryPoint extends AbstractEntryPoint {
                 if (leaderboardNames.contains(leaderboardName)) {
                     createUI(showRaceDetails, embedded, delayToLiveMillis);
                 } else {
-                    RootPanel.get().add(new Label(stringMessages.noSuchLeaderboard()));
+                    RootPanel.get().add(new Label(getStringMessages().noSuchLeaderboard()));
                 }
             }
 
@@ -92,12 +92,12 @@ public class TVEntryPoint extends AbstractEntryPoint {
             if(leaderboardDisplayName == null || leaderboardDisplayName.isEmpty()) {
                 leaderboardDisplayName = leaderboardName;
             }
-            logoAndTitlePanel = new LogoAndTitlePanel(leaderboardGroupName, leaderboardDisplayName, stringMessages, this, getUserService());
+            logoAndTitlePanel = new LogoAndTitlePanel(leaderboardGroupName, leaderboardDisplayName, getStringMessages(), this, getUserService());
             logoAndTitlePanel.addStyleName("LogoAndTitlePanel");
             mainPanel.addNorth(logoAndTitlePanel, 68);
         }
         
-        tvViewController = new TVViewController(sailingService, mediaService, getUserService(), stringMessages,
+        tvViewController = new TVViewController(sailingService, mediaService, getUserService(), getStringMessages(),
                 this, leaderboardGroupName, leaderboardName, userAgent, logoAndTitlePanel, mainPanel,
                 delayToLiveMillis, showRaceDetails, raceboardViewConfig);
         tvViewController.updateTvView(TVViews.Leaderboard);

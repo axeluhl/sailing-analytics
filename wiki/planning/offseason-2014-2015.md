@@ -8,6 +8,7 @@ The following are the focus areas for the off-season activities until the first 
 
  - A number of bugs and issues have been recorded during and after the first events run with the newhome implementation. See [our Bugzilla Bug #1928](http://bugzilla.sapsailing.com/bugzilla/show_bug.cgi?id=1928).
  - Navigation Clean-Up: in several sessions with Ubilabs we learned that the current navigation structure is not yet ideal. Ubilabs will come up with an improved suggestions for the site's overall navigational structure that we then have to jointly implement.
+ - Better series support: A growing number of events are actually part of a series (all leagues, ESS). This is not sufficiently reflected in the UI as we only have event related views right now.
  - Regatta Overview: This has so far been the tool for the race committees and regatta organizers. We need to find out whether the newhome implementation takes over the role that so far was fulfilled by the RegattaOverview.html entry point or if we still need a page specifically geared towards this audience.
  - Live Center support: Media updates and live streams, information coming from the Race Committee App, mixed with the live tracking and scoring information shall constitute the live center content to be implemented in the newhome architecture.
  - User Management in the UI: we need support for Sign Up/In/Out on all newhome pages and the race viewer.
@@ -25,12 +26,15 @@ See [http://wiki.sapsailing.com/wiki/planning/usermanagement](http://wiki.sapsai
 
 ## Map Visualization Improvements (Christopher, Axel, Frank, Ubilabs)
 
-The map visualization currently has two main drawbacks:
+The map visualization currently has some drawbacks:
 
 * the map doesn't rotate
 * boat, water and land visualization is not sufficiently appealing
+* boat animation does not work for playspeed > 1
+* the time synchronization of the drawn items is difficult as we use 2 different overlay techniques (google map overlays, HTML overlays)
+* performance might become a problem when we go for a fullscreen map in the future with even more overlays (e.g. the leaderboard will become an overlay)
 
-For the rotation problem we see two possible solutions: transforming coordinates while staying on Google Maps; or replacing the map provider, probably using OpenStreetMap. For the "appeal" issue we seem to agree that the use of plugin technology is to be avoided, and so the options have to be recruited from HTML5/CSS-land. In particular, we believe that better boat visualizations are more or less a matter of a good graphics designer painting hull and sail constellations for specific boat classes. Water visualizations will have to be experimented with on the basis of HTML5 canvas technology (performance, appeal). Land visualization would require satellite imagery with precise geo-location information to fit into a map provider and may be more difficult.
+For the rotation problem we see two possible solutions: transforming coordinates while staying on Google Maps; or replacing the map provider, probably using OpenStreetMap. For the "appeal" issue we seem to agree that the use of plugin technology is to be avoided, and so the options have to be recruited from HTML5/CSS-land. In particular, we believe that better boat visualizations are more or less a matter of a good graphics designer painting hull and sail constellations for specific boat classes. Water visualizations will have to be experimented with on the basis of HTML5 canvas technology (performance, appeal). Land visualization would require satellite imagery with precise geo-location information to fit into a map provider and may be more difficult. See also [[here | /wiki/planning/MapRenewal]] for the discussion.
 
 ## Volume Business (Ubilabs, Fredrik, Jan)
 
