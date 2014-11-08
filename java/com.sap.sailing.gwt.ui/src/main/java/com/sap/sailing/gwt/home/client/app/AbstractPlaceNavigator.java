@@ -34,7 +34,7 @@ public abstract class AbstractPlaceNavigator implements PlaceNavigator {
     }
     
     protected String getLocationURL() {
-        return Window.Location.getProtocol() + "//" + Window.Location.getHostName();
+        return Window.Location.getProtocol() + "//" + Window.Location.getHostName() + ":" + Window.Location.getPort();
     }
     
     

@@ -36,18 +36,27 @@ public class PlaceNavigation<T extends Place> {
     }
 
     private String buildPlaceUrl() {
-        String url = baseUrl + "/gwt/Home.html";
-        if(!GWT.isProdMode() && !isDestinationOnRemoteServer) {
-            url += "?gwt.codesvr=127.0.0.1:9997"; 
+        String url = "";
+        if(isRemotePlace()) {
+            url = baseUrl + "/gwt/Home.html";
+            if(!GWT.isProdMode() && !isDestinationOnRemoteServer) {
+                url += "?gwt.codesvr=127.0.0.1:9997"; 
+            }
+            url += getPlaceToken();
+        } else {
+            url = getPlaceToken();
         }
-        url += "#" + destinationPlace.getClass().getSimpleName() + ":" + tokenizer.getToken(destinationPlace);
         return url;
     }
     
     public boolean isRemotePlace() {
         return isDestinationOnRemoteServer;
     }
-    
+
+    private String getPlaceToken() {
+        return "#" + destinationPlace.getClass().getSimpleName() + ":" + tokenizer.getToken(destinationPlace);
+    }
+
     private boolean isLocationOnDefaultSapSailingServer(String urlToCheck) {
         return urlToCheck.contains(HomePlacesNavigator.DEFAULT_SAPSAILING_SERVER);
     }
