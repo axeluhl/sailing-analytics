@@ -402,13 +402,13 @@ public class ImportMasterDataOperation extends
     }
 
     @Override
-    public RacingEventServiceOperation<?> transformClientOp(RacingEventServiceOperation<?> serverOp) {
+    public RacingEventServiceOperation<?> transformClientOp(RacingEventServiceOperation<MasterDataImportObjectCreationCountImpl> serverOp) {
         // TODO Auto-generated method stub
         return null;
     }
 
     @Override
-    public RacingEventServiceOperation<?> transformServerOp(RacingEventServiceOperation<?> clientOp) {
+    public RacingEventServiceOperation<?> transformServerOp(RacingEventServiceOperation<MasterDataImportObjectCreationCountImpl> clientOp) {
         // TODO Auto-generated method stub
         return null;
     }

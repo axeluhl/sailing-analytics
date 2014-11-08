@@ -47,15 +47,15 @@ public class ReplicationServlet extends SailingServerHttpServlet {
      */
     private static final int INITIAL_LOAD_PACKAGE_SIZE = 1024*1024;
 
-    private ServiceTracker<ReplicationService, ReplicationService> replicationServiceTracker;
+    private ServiceTracker<ReplicationService<?>, ReplicationService<?>> replicationServiceTracker;
     
     public ReplicationServlet() throws Exception {
         BundleContext context = Activator.getDefaultContext();
-        replicationServiceTracker = new ServiceTracker<ReplicationService, ReplicationService>(context, ReplicationService.class.getName(), null);
+        replicationServiceTracker = new ServiceTracker<ReplicationService<?>, ReplicationService<?>>(context, ReplicationService.class.getName(), null);
         replicationServiceTracker.open();
     }
 
-    protected ReplicationService getReplicationService() {
+    protected ReplicationService<?> getReplicationService() {
         return replicationServiceTracker.getService();
     }
 

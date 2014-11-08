@@ -5,8 +5,8 @@ package com.sap.sse.operationaltransformation;
  * 
  * @author Axel Uhl (D043530)
  *
- * @param <S>
- * @param <O>
+ * @param <S> server state to which the operation is applied
+ * @param <O> the operation type
  */
 public interface OperationWithTransformationSupport<S, O extends OperationWithTransformationSupport<S, O>> extends Operation<S> {
     /**
@@ -16,7 +16,7 @@ public interface OperationWithTransformationSupport<S, O extends OperationWithTr
      * 
      * @return the result of transforming <code>this</code> operation along <code>serverOp</code>
      */
-    O transformClientOp(O serverOp);
+    OperationWithTransformationSupport<S, ?> transformClientOp(O serverOp);
 
     /**
      * Implements the specific transformation rule for the implementing subclass for the set of possible peer operations
@@ -25,5 +25,5 @@ public interface OperationWithTransformationSupport<S, O extends OperationWithTr
      * 
      * @return the result of transforming <code>this</code> operation along <code>clientOp</code>
      */
-    O transformServerOp(O clientOp);
+    OperationWithTransformationSupport<S, ?> transformServerOp(O clientOp);
 }

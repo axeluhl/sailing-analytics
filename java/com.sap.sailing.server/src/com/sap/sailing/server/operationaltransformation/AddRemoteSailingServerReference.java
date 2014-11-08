@@ -31,14 +31,14 @@ public class AddRemoteSailingServerReference extends AbstractRacingEventServiceO
 
     @Override
     public RacingEventServiceOperation<?> transformClientOp(
-            RacingEventServiceOperation<?> serverOp) {
+            RacingEventServiceOperation<RemoteSailingServerReference> serverOp) {
         // TODO Auto-generated method stub
         return null;
     }
 
     @Override
     public RacingEventServiceOperation<?> transformServerOp(
-            RacingEventServiceOperation<?> clientOp) {
+            RacingEventServiceOperation<RemoteSailingServerReference> clientOp) {
         // TODO Auto-generated method stub
         return null;
     }

@@ -38,9 +38,9 @@ import com.sap.sailing.server.operationaltransformation.ConnectTrackedRaceToLead
 import com.sap.sailing.server.operationaltransformation.CreateFlexibleLeaderboard;
 import com.sap.sailing.server.operationaltransformation.CreateTrackedRace;
 import com.sap.sailing.server.replication.OperationExecutionListener;
+import com.sap.sailing.server.replication.OperationWithResult;
 import com.sap.sse.common.Util;
 import com.sap.sse.common.impl.MillisecondsTimePoint;
-import com.sap.sse.operationaltransformation.Operation;
 
 public class TrackRaceReplicationTest extends AbstractServerReplicationTest {
     private TrackedRace masterTrackedRace;
@@ -73,7 +73,7 @@ public class TrackRaceReplicationTest extends AbstractServerReplicationTest {
         MillisecondsTimePoint endOfTracking = new MillisecondsTimePoint(cal.getTimeInMillis());
         master.addOperationExecutionListener(new OperationExecutionListener<RacingEventService>() {
             @Override
-            public <T> void executed(Operation<RacingEventService, T> operation) {
+            public <T> void executed(OperationWithResult<RacingEventService, T> operation) {
                 if (operation instanceof CreateTrackedRace) {
                     synchronized (notifier) {
                         notifier[0] = true;

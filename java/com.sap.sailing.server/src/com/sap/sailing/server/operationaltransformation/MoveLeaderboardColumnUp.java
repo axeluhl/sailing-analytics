@@ -19,12 +19,12 @@ public class MoveLeaderboardColumnUp extends AbstractLeaderboardColumnOperation<
 
 
     @Override
-    public RacingEventServiceOperation<?> transformClientOp(RacingEventServiceOperation<?> serverOp) {
+    public RacingEventServiceOperation<?> transformClientOp(RacingEventServiceOperation<Void> serverOp) {
         return serverOp.transformMoveLeaderboardColumnUpClientOp(this);
     }
 
     @Override
-    public RacingEventServiceOperation<?> transformServerOp(RacingEventServiceOperation<?> clientOp) {
+    public RacingEventServiceOperation<?> transformServerOp(RacingEventServiceOperation<Void> clientOp) {
         return clientOp.transformMoveLeaderboardColumnUpServerOp(this);
     }
 

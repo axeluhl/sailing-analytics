@@ -58,15 +58,14 @@ public class AddLeaderboardGroupToEvent extends AbstractRacingEventServiceOperat
     }
 
     @Override
-    public RacingEventServiceOperation<?> transformClientOp(RacingEventServiceOperation<?> serverOp) {
+    public RacingEventServiceOperation<?> transformClientOp(RacingEventServiceOperation<Iterable<LeaderboardGroup>> serverOp) {
         // TODO Auto-generated method stub
         return null;
     }
 
     @Override
-    public RacingEventServiceOperation<?> transformServerOp(RacingEventServiceOperation<?> clientOp) {
+    public RacingEventServiceOperation<?> transformServerOp(RacingEventServiceOperation<Iterable<LeaderboardGroup>> clientOp) {
         // TODO Auto-generated method stub
         return null;
     }
-
 }

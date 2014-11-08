@@ -11,18 +11,19 @@ import java.util.UUID;
 import org.junit.Before;
 import org.junit.Test;
 
+import com.sap.sailing.server.RacingEventService;
 import com.sap.sailing.server.operationaltransformation.CreateLeaderboardGroup;
 import com.sap.sailing.server.replication.impl.ReplicaDescriptor;
 import com.sap.sailing.server.replication.impl.ReplicationInstancesManager;
 
 public class ReplicationInstancesManagerLoggingPerformanceTest {
-    private ReplicationInstancesManager replicationInstanceManager;
+    private ReplicationInstancesManager<RacingEventService> replicationInstanceManager;
     private CreateLeaderboardGroup operation;
     private ReplicaDescriptor replica;
 
     @Before
     public void setUp() throws UnknownHostException {
-        replicationInstanceManager = new ReplicationInstancesManager();
+        replicationInstanceManager = new ReplicationInstancesManager<RacingEventService>();
         replica = new ReplicaDescriptor(InetAddress.getLocalHost(), UUID.randomUUID(), "");
         replicationInstanceManager.registerReplica(replica);
         operation = new CreateLeaderboardGroup("Test Leaderboard Group", "Description of Test Leaderboard Group", /* displayName */ null,

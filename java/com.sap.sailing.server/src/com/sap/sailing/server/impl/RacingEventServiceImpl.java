@@ -182,6 +182,7 @@ import com.sap.sailing.server.operationaltransformation.UpdateTrackedRaceStatus;
 import com.sap.sailing.server.operationaltransformation.UpdateWindAveragingTime;
 import com.sap.sailing.server.operationaltransformation.UpdateWindSourcesToExclude;
 import com.sap.sailing.server.replication.OperationExecutionListener;
+import com.sap.sailing.server.replication.OperationWithResult;
 import com.sap.sailing.server.test.support.RacingEventServiceWithTestSupport;
 import com.sap.sailing.util.impl.LockUtil;
 import com.sap.sailing.util.impl.NamedReentrantReadWriteLock;
@@ -2084,7 +2085,7 @@ public class RacingEventServiceImpl implements RacingEventServiceWithTestSupport
      * this service known.
      */
     @Override
-    public <T> T apply(Operation<RacingEventService> operation) {
+    public <T> T apply(OperationWithResult<RacingEventService, T> operation) {
         RacingEventServiceOperation<T> reso = (RacingEventServiceOperation<T>) operation;
         try {
             T result = reso.internalApplyTo(this);

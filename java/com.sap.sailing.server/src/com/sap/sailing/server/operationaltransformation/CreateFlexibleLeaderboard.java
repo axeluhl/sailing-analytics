@@ -36,12 +36,12 @@ public class CreateFlexibleLeaderboard extends AbstractLeaderboardOperation<Flex
     }
 
     @Override
-    public RacingEventServiceOperation<?> transformClientOp(RacingEventServiceOperation<?> serverOp) {
+    public RacingEventServiceOperation<?> transformClientOp(RacingEventServiceOperation<FlexibleLeaderboard> serverOp) {
         return serverOp.transformAddFlexibleLeaderboardClientOp(this);
     }
 
     @Override
-    public RacingEventServiceOperation<?> transformServerOp(RacingEventServiceOperation<?> clientOp) {
+    public RacingEventServiceOperation<?> transformServerOp(RacingEventServiceOperation<FlexibleLeaderboard> clientOp) {
         return clientOp.transformAddFlexibleLeaderboardServerOp(this);
     }
 }

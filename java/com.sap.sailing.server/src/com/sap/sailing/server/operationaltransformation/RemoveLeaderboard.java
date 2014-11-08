@@ -11,12 +11,12 @@ public class RemoveLeaderboard extends AbstractLeaderboardOperation<Void> {
     }
 
     @Override
-    public RacingEventServiceOperation<?> transformClientOp(RacingEventServiceOperation<?> serverOp) {
+    public RacingEventServiceOperation<?> transformClientOp(RacingEventServiceOperation<Void> serverOp) {
         return serverOp.transformRemoveLeaderboardClientOp(this);
     }
 
     @Override
-    public RacingEventServiceOperation<?> transformServerOp(RacingEventServiceOperation<?> clientOp) {
+    public RacingEventServiceOperation<?> transformServerOp(RacingEventServiceOperation<Void> clientOp) {
         return clientOp.transformRemoveLeaderboardServerOp(this);
     }
 

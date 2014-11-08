@@ -74,7 +74,7 @@ public class Activator implements BundleActivator {
     public static final String PROPERTY_NAME_REPLICATE_MASTER_QUEUE_PORT = "replicate.master.queue.port";
     public static final String PROPERTY_NAME_REPLICATE_MASTER_EXCHANGE_NAME = "replicate.master.exchange.name";
 
-    private ReplicationInstancesManager replicationInstancesManager;
+    private ReplicationInstancesManager<?> replicationInstancesManager;
     
     private static BundleContext defaultContext;
     
@@ -110,15 +110,15 @@ public class Activator implements BundleActivator {
         } catch (NumberFormatException nfe) {
             logger.severe("Couldn't parse the replication port specification \""+exchangePortAsString+"\". Using default.");
         }
-        replicationInstancesManager = new ReplicationInstancesManager();
-        ReplicationService serverReplicationMasterService = new ReplicationServiceImpl<>(
+        replicationInstancesManager = new ReplicationInstancesManager<>();
+        ReplicationService<?> serverReplicationMasterService = new ReplicationServiceImpl<>(
                 exchangeName, exchangeHost, exchangePort, replicationInstancesManager);
         bundleContext.registerService(ReplicationService.class, serverReplicationMasterService, null);
         logger.info("Registered replication service "+serverReplicationMasterService+" using exchange name "+exchangeName+" on host "+exchangeHost);
         checkIfAutomaticReplicationShouldStart(serverReplicationMasterService, exchangeName);
     }
     
-    private void checkIfAutomaticReplicationShouldStart(ReplicationService serverReplicationMasterService, String masterExchangeName) {
+    private void checkIfAutomaticReplicationShouldStart(ReplicationService<?> serverReplicationMasterService, String masterExchangeName) {
         String replicateOnStart = System.getProperty(PROPERTY_NAME_REPLICATE_ON_START);
         if (Boolean.valueOf(replicateOnStart)) {
             logger.info("Configuration requested automatic replication. Starting it up...");

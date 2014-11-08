@@ -35,12 +35,12 @@ public class CreatePersistentCompetitor extends AbstractRacingEventServiceOperat
     }
 
     @Override
-    public RacingEventServiceOperation<?> transformClientOp(RacingEventServiceOperation<?> serverOp) {
+    public RacingEventServiceOperation<?> transformClientOp(RacingEventServiceOperation<Competitor> serverOp) {
         return serverOp.transformCreatePersistentCompetitorClientOp(this);
     }
 
     @Override
-    public RacingEventServiceOperation<?> transformServerOp(RacingEventServiceOperation<?> clientOp) {
+    public RacingEventServiceOperation<?> transformServerOp(RacingEventServiceOperation<Competitor> clientOp) {
         return clientOp.transformCreatePersistentCompetitorServerOp(this);
     }
 }

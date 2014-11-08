@@ -35,7 +35,6 @@ import com.sap.sailing.server.replication.Replicable;
 import com.sap.sailing.server.replication.ReplicationMasterDescriptor;
 import com.sap.sailing.server.replication.ReplicationService;
 import com.sap.sse.BuildVersion;
-import com.sap.sse.operationaltransformation.OperationWithTransformationSupport;
 
 /**
  * Can observe a {@link RacingEventService} for the operations it performs that require replication. Only observes as
@@ -52,10 +51,11 @@ import com.sap.sse.operationaltransformation.OperationWithTransformationSupport;
  * @author Frank Mittag, Axel Uhl (d043530)
  * 
  */
-public class ReplicationServiceImpl<S, O extends OperationWithResult<S, ?>> implements ReplicationService, OperationExecutionListener<S>, HasReplicable<S, O> {
+public class ReplicationServiceImpl<S, O extends OperationWithResult<S, ?>> implements ReplicationService<S>,
+OperationExecutionListener<S>, HasReplicable<S, O> {
     private static final Logger logger = Logger.getLogger(ReplicationServiceImpl.class.getName());
     
-    private final ReplicationInstancesManager replicationInstancesManager;
+    private final ReplicationInstancesManager<S> replicationInstancesManager;
     
     private final ServiceTracker<Replicable<S, O>, Replicable<S, O>> racingEventServiceTracker;
     
@@ -172,12 +172,12 @@ public class ReplicationServiceImpl<S, O extends OperationWithResult<S, ?>> impl
      * @param exchangeHost name of the host under which the RabbitMQ server can be reached 
      * @param exchangePort port of the RabbitMQ server, or 0 for default port
      */
-    public ReplicationServiceImpl(String exchangeName, String exchangeHost, int exchangePort, final ReplicationInstancesManager replicationInstancesManager) throws IOException {
+    public ReplicationServiceImpl(String exchangeName, String exchangeHost, int exchangePort, final ReplicationInstancesManager<S> replicationInstancesManager) throws IOException {
         this(exchangeName, exchangeHost, exchangePort, replicationInstancesManager, /* localService */ null, /* create RacingEventServiceTracker */ true);
     }
     
     private ReplicationServiceImpl(String exchangeName, String exchangeHost,
-            int exchangePort, final ReplicationInstancesManager replicationInstancesManager,
+            int exchangePort, final ReplicationInstancesManager<S> replicationInstancesManager,
             Replicable<S, O> localService, boolean createRacingEventServiceTracker) throws IOException {
         timer = new Timer("ReplicationServiceImpl timer for delayed task sending");
         this.replicationInstancesManager = replicationInstancesManager;
@@ -206,7 +206,7 @@ public class ReplicationServiceImpl<S, O extends OperationWithResult<S, ?>> impl
      *            the name of the exchange to which replicas can bind
      */
     public ReplicationServiceImpl(String exchangeName, String exchangeHost,
-            final ReplicationInstancesManager replicationInstancesManager, Replicable<S, O> localService) throws IOException {
+            final ReplicationInstancesManager<S> replicationInstancesManager, Replicable<S, O> localService) throws IOException {
         this(exchangeName, exchangeHost, 0, replicationInstancesManager, localService, /* create RacingEventServiceTracker */ false);
     }
     
@@ -510,7 +510,7 @@ public class ReplicationServiceImpl<S, O extends OperationWithResult<S, ?>> impl
     }
 
     @Override
-    public Map<Class<? extends OperationWithTransformationSupport<?, ?>>, Integer> getStatistics(ReplicaDescriptor replicaDescriptor) {
+    public Map<Class<? extends OperationWithResult<S, ?>>, Integer> getStatistics(ReplicaDescriptor replicaDescriptor) {
         return replicationInstancesManager.getStatistics(replicaDescriptor);
     }
     

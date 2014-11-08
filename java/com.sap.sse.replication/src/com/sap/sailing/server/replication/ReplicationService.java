@@ -8,9 +8,15 @@ import java.util.UUID;
 import com.rabbitmq.client.Channel;
 import com.sap.sailing.server.replication.impl.ReplicaDescriptor;
 import com.sap.sailing.server.replication.impl.ReplicationServlet;
-import com.sap.sse.operationaltransformation.OperationWithTransformationSupport;
 
-public interface ReplicationService {
+/**
+ * A service that organizes a master server and its replicas.
+ * 
+ * @author Axel Uhl (D043530)
+ *
+ * @param <S> the type representing the master's state
+ */
+public interface ReplicationService<S> {
     static String SAILING_SERVER_REPLICATION_TOPIC = "SailingServerReplicationTopic";
 
     /**
@@ -44,7 +50,7 @@ public interface ReplicationService {
      * For a replica replicating off this master, provides statistics in the form of number of operations sent to that
      * replica by type, where the operation type is the key, represented as the operation's class name
      */
-    Map<Class<? extends OperationWithTransformationSupport<?, ?>>, Integer> getStatistics(ReplicaDescriptor replicaDescriptor);
+    Map<Class<? extends OperationWithResult<S, ?>>, Integer> getStatistics(ReplicaDescriptor replicaDescriptor);
     
     double getAverageNumberOfOperationsPerMessage(ReplicaDescriptor replicaDescriptor);
 

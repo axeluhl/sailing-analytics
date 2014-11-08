@@ -115,7 +115,7 @@ public abstract class AbstractServerReplicationTest {
                     // replica gets its own base DomainFactory:
                     new DomainFactoryImpl()), mongoObjectFactory, MediaDBFactory.INSTANCE.getMediaDB(mongoDBService), EmptyWindStore.INSTANCE, EmptyGPSFixStore.INSTANCE);
         }
-        ReplicationInstancesManager rim = new ReplicationInstancesManager();
+        ReplicationInstancesManager<RacingEventService> rim = new ReplicationInstancesManager<>();
         masterReplicator = new ReplicationServiceImpl<RacingEventService, RacingEventServiceOperation<?>>(exchangeName, exchangeHost, rim, this.master);
         replicaDescriptor = new ReplicaDescriptor(InetAddress.getLocalHost(), serverUuid, "");
         masterReplicator.registerReplica(replicaDescriptor);
@@ -172,12 +172,12 @@ public abstract class AbstractServerReplicationTest {
         private final DomainFactory resolveAgainst;
         private final RacingEventService master;
         private final ReplicaDescriptor replicaDescriptor;
-        private final ReplicationService masterReplicationService;
+        private final ReplicationService<RacingEventService> masterReplicationService;
         private final ReplicationMasterDescriptor masterDescriptor;
         
         public ReplicationServiceTestImpl(String exchangeName, String exchangeHost, DomainFactory resolveAgainst,
-                ReplicationInstancesManager replicationInstancesManager, ReplicaDescriptor replicaDescriptor,
-                RacingEventService replica, RacingEventService master, ReplicationService masterReplicationService,
+                ReplicationInstancesManager<RacingEventService> replicationInstancesManager, ReplicaDescriptor replicaDescriptor,
+                RacingEventService replica, RacingEventService master, ReplicationService<RacingEventService> masterReplicationService,
                 ReplicationMasterDescriptor masterDescriptor)
                 throws IOException {
             super(exchangeName, exchangeHost, replicationInstancesManager, replica);
