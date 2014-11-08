@@ -19,27 +19,27 @@ public class HomePlacesNavigator extends AbstractPlaceNavigator {
     }
 
     public PlaceNavigation<StartPlace> getHomeNavigation() {
-        return createPlaceNavigation(getLocationURL(), new StartPlace(), new StartPlace.Tokenizer());
+        return createGlobalPlaceNavigation(new StartPlace(), new StartPlace.Tokenizer());
     }
 
     public PlaceNavigation<EventsPlace> getEventsNavigation() {
-        return createPlaceNavigation(getLocationURL(), new EventsPlace(), new EventsPlace.Tokenizer());
+        return createGlobalPlaceNavigation(new EventsPlace(), new EventsPlace.Tokenizer());
     }
 
     public PlaceNavigation<SolutionsPlace> getSolutionsNavigation() {
-        return createPlaceNavigation(getLocationURL(), new SolutionsPlace(), new SolutionsPlace.Tokenizer());
+        return createGlobalPlaceNavigation(new SolutionsPlace(), new SolutionsPlace.Tokenizer());
     }
 
     public PlaceNavigation<SponsoringPlace> getSponsoringNavigation() {
-        return createPlaceNavigation(getLocationURL(), new SponsoringPlace(), new SponsoringPlace.Tokenizer());
+        return createGlobalPlaceNavigation(new SponsoringPlace(), new SponsoringPlace.Tokenizer());
     }
 
     public PlaceNavigation<AboutUsPlace> getAboutUsNavigation() {
-        return createPlaceNavigation(getLocationURL(), new AboutUsPlace(), new AboutUsPlace.Tokenizer());
+        return createGlobalPlaceNavigation(new AboutUsPlace(), new AboutUsPlace.Tokenizer());
     }
 
     public PlaceNavigation<ContactPlace> getContactNavigation() {
-        return createPlaceNavigation(getLocationURL(), new ContactPlace(), new ContactPlace.Tokenizer());
+        return createGlobalPlaceNavigation(new ContactPlace(), new ContactPlace.Tokenizer());
     }
 
     public PlaceNavigation<EventPlace> getEventNavigation(String eventUuidAsString, String baseUrl, boolean isOnRemoteServer) {
@@ -58,6 +58,6 @@ public class HomePlacesNavigator extends AbstractPlaceNavigator {
     }
 
     public PlaceNavigation<SearchResultPlace> getSearchResultNavigation(String searchQuery) {
-        return createPlaceNavigation(getLocationURL(), new SearchResultPlace(searchQuery), new SearchResultPlace.Tokenizer());
+        return createGlobalPlaceNavigation(new SearchResultPlace(searchQuery), new SearchResultPlace.Tokenizer());
     }
 }

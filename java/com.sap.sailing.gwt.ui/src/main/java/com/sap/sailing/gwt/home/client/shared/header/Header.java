@@ -39,7 +39,7 @@ public class Header extends Composite {
     @UiField TextBox searchText;
     @UiField Button searchButton;
 
-    private static final HyperlinkImpl IMPL = GWT.create(HyperlinkImpl.class);
+    private static final HyperlinkImpl HYPERLINK_IMPL = GWT.create(HyperlinkImpl.class);
     
     private final List<Anchor> links;
     private final HomePlacesNavigator navigator;
@@ -83,33 +83,22 @@ public class Header extends Composite {
 
     @UiHandler("startPageLink")
     public void goToHome(ClickEvent e) {
-        navigator.goToPlace(homeNavigation);
-        e.preventDefault();
-        setActiveLink(startPageLink);
+        handleClickEvent(e, homeNavigation, startPageLink);
     }
 
     @UiHandler("eventsPageLink")
     public void goToEvents(ClickEvent e) {
-        if (IMPL.handleAsClick((Event) e.getNativeEvent())) {
-            navigator.goToPlace(eventsNavigation);
-            e.preventDefault();
-            setActiveLink(eventsPageLink);
-         }
-        
+        handleClickEvent(e, eventsNavigation, eventsPageLink);
     }
 
     @UiHandler("solutionsPageLink")
     public void goToSolutions(ClickEvent e) {
-        navigator.goToPlace(solutionsNavigation);
-        e.preventDefault();
-        setActiveLink(solutionsPageLink);
+        handleClickEvent(e, solutionsNavigation, solutionsPageLink);
     }
 
 //    @UiHandler("sponsoringPageLink")
 //    public void goToSponsoring(ClickEvent e) {
-//    navigator.goToPlace(sponsoringNavigation);
-//    e.preventDefault();
-//    setActiveLink(sponsoringPageLink);
+//        handleClickEvent(e, sponsoringNavigation, sponsoringPageLink);
 //    }
 
     @UiHandler("searchButton")
@@ -133,4 +122,11 @@ public class Header extends Composite {
         }
     }
 
+    private void handleClickEvent(ClickEvent e, PlaceNavigation<?> placeNavigation, Anchor activeLink) {
+        if (HYPERLINK_IMPL.handleAsClick((Event) e.getNativeEvent())) {
+            navigator.goToPlace(placeNavigation);
+            e.preventDefault();
+            setActiveLink(activeLink);
+         }
+    }
 }

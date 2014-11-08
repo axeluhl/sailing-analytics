@@ -3,6 +3,7 @@ package com.sap.sailing.gwt.home.client.app;
 import com.google.gwt.core.client.GWT;
 import com.google.gwt.place.shared.Place;
 import com.google.gwt.place.shared.PlaceTokenizer;
+import com.google.gwt.user.client.Window;
 
 public class PlaceNavigation<T extends Place> {
     private final T destinationPlace;
@@ -10,11 +11,16 @@ public class PlaceNavigation<T extends Place> {
     private final String baseUrl;
     private final boolean isDestinationOnRemoteServer;
     
-    public PlaceNavigation(String baseUrl, T destinationPlace, PlaceTokenizer<T> tokenizer) {
+    public PlaceNavigation(T destinationPlace, PlaceTokenizer<T> tokenizer) {
         this.destinationPlace = destinationPlace;
         this.tokenizer = tokenizer;
-        this.baseUrl = baseUrl;
-        this.isDestinationOnRemoteServer = !(isLocationOnLocalhost(baseUrl) || isLocationOnDefaultSapSailingServer(baseUrl));
+        String locationURL = getLocationURL();
+        this.isDestinationOnRemoteServer = !(isLocationOnLocalhost(locationURL) || isLocationOnDefaultSapSailingServer(locationURL));
+        if(isDestinationOnRemoteServer) {
+            this.baseUrl = HomePlacesNavigator.DEFAULT_SAPSAILING_SERVER; 
+        } else {
+            this.baseUrl = locationURL;
+        }
     }
 
     public PlaceNavigation(String baseUrl, T destinationPlace, PlaceTokenizer<T> tokenizer, boolean isDestinationOnRemoteServer) {
@@ -63,5 +69,9 @@ public class PlaceNavigation<T extends Place> {
 
     private boolean isLocationOnLocalhost(String urlToCheck) {
         return urlToCheck.contains("localhost") || urlToCheck.contains("127.0.0.1");
+    }
+    
+    private String getLocationURL() {
+        return Window.Location.getProtocol() + "//" + Window.Location.getHostName() + ":" + Window.Location.getPort();
     }
 }

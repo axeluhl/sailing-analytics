@@ -25,18 +25,17 @@ public abstract class AbstractPlaceNavigator implements PlaceNavigator {
         }
     }
 
-    protected <T extends Place> PlaceNavigation<T> createPlaceNavigation(String baseUrl, T destinationPlace, PlaceTokenizer<T> tokenizer) {
-        return new PlaceNavigation<T>(baseUrl, destinationPlace, tokenizer);
+    protected <T extends Place> PlaceNavigation<T> createGlobalPlaceNavigation(T destinationPlace, PlaceTokenizer<T> tokenizer) {
+        return new PlaceNavigation<T>(destinationPlace, tokenizer);
     }
+
+//    protected <T extends Place> PlaceNavigation<T> createPlaceNavigation(String baseUrl, T destinationPlace, PlaceTokenizer<T> tokenizer) {
+//        return new PlaceNavigation<T>(baseUrl, destinationPlace, tokenizer);
+//    }
 
     protected <T extends Place> PlaceNavigation<T> createPlaceNavigation(String baseUrl, boolean isOnRemoteServer, T destinationPlace, PlaceTokenizer<T> tokenizer) {
         return new PlaceNavigation<T>(baseUrl, destinationPlace, tokenizer, isOnRemoteServer);
     }
-    
-    protected String getLocationURL() {
-        return Window.Location.getProtocol() + "//" + Window.Location.getHostName() + ":" + Window.Location.getPort();
-    }
-    
     
     public <T extends Place> void pushPlaceToHistoryStack(T destinationPlace, PlaceTokenizer<T> tokenizer) {
         String placeHistoryToken = destinationPlace.getClass().getSimpleName() + ":" + tokenizer.getToken(destinationPlace);
