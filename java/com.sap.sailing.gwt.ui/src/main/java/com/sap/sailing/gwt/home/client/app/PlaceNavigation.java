@@ -15,6 +15,7 @@ public class PlaceNavigation<T extends Place> {
         this.destinationPlace = destinationPlace;
         this.tokenizer = tokenizer;
         String locationURL = getLocationURL();
+        Window.alert(locationURL);
         this.isDestinationOnRemoteServer = !(isLocationOnLocalhost(locationURL) || isLocationOnDefaultSapSailingServer(locationURL));
         if(isDestinationOnRemoteServer) {
             this.baseUrl = AbstractPlaceNavigator.DEFAULT_SAPSAILING_SERVER_URL; 
@@ -45,7 +46,7 @@ public class PlaceNavigation<T extends Place> {
         String url = "";
         if(isRemotePlace()) {
             url = baseUrl + "/gwt/Home.html";
-            if(!GWT.isProdMode() && !isDestinationOnRemoteServer) {
+            if(!GWT.isProdMode()) {
                 url += "?gwt.codesvr=127.0.0.1:9997"; 
             }
             url += getPlaceToken();
