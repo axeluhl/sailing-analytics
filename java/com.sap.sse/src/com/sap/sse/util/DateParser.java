@@ -2,7 +2,7 @@
 // $Id: DateParser.java,v 1.5 2005/05/14 15:53:00 dbarashev Exp $
 // (c) COPYRIGHT MIT, INRIA and Keio, 2000.
 // Please first read the full copyright statement in file COPYRIGHT.html
-package com.sap.sailing.util;
+package com.sap.sse.util;
 
 import java.util.Calendar;
 import java.util.Date;
@@ -12,12 +12,14 @@ import java.util.SimpleTimeZone;
 import java.util.StringTokenizer;
 import java.util.TimeZone;
 
+import com.sap.sse.InvalidDateException;
+
 /**
  * Date parser for ISO 8601 format
  * http://www.w3.org/TR/1998/NOTE-datetime-19980827
  * 
  * @version $Revision: 1.5 $
- * @author BenoûÕ Mah(bmahe@w3.org)
+ * @author Benoï¿½ï¿½ Mah(bmahe@w3.org)
  */
 public class DateParser {
 

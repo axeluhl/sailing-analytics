@@ -331,7 +331,6 @@ import com.sap.sailing.manage2sail.RegattaResultDescriptor;
 import com.sap.sailing.resultimport.ResultUrlProvider;
 import com.sap.sailing.resultimport.ResultUrlRegistry;
 import com.sap.sailing.server.RacingEventService;
-import com.sap.sailing.server.RacingEventServiceOperation;
 import com.sap.sailing.server.masterdata.MasterDataImporter;
 import com.sap.sailing.server.operationaltransformation.AddColumnToLeaderboard;
 import com.sap.sailing.server.operationaltransformation.AddColumnToSeries;
@@ -382,6 +381,7 @@ import com.sap.sailing.server.operationaltransformation.UpdateLeaderboardScoreCo
 import com.sap.sailing.server.operationaltransformation.UpdateRaceDelayToLive;
 import com.sap.sailing.server.operationaltransformation.UpdateSeries;
 import com.sap.sailing.server.operationaltransformation.UpdateSpecificRegatta;
+import com.sap.sailing.server.replication.OperationWithResult;
 import com.sap.sailing.server.replication.ReplicationFactory;
 import com.sap.sailing.server.replication.ReplicationMasterDescriptor;
 import com.sap.sailing.server.replication.ReplicationService;
@@ -419,7 +419,7 @@ public class SailingServiceImpl extends ProxiedRemoteServiceServlet implements S
 
     private final ServiceTracker<RacingEventService, RacingEventService> racingEventServiceTracker;
 
-    private final ServiceTracker<ReplicationService, ReplicationService> replicationServiceTracker;
+    private final ServiceTracker<ReplicationService<RacingEventService>, ReplicationService<RacingEventService>> replicationServiceTracker;
 
     private final ServiceTracker<ResultUrlRegistry, ResultUrlRegistry> resultUrlRegistryServiceTracker;
 
@@ -662,9 +662,10 @@ public class SailingServiceImpl extends ProxiedRemoteServiceServlet implements S
         return new ScoreCorrectionProviderDTO(scoreCorrectionProvider.getName(), hasResultsForBoatClassFromDateByEventName);
     }
 
-    protected ServiceTracker<ReplicationService, ReplicationService> createAndOpenReplicationServiceTracker(
+    protected ServiceTracker<ReplicationService<RacingEventService>, ReplicationService<RacingEventService>> createAndOpenReplicationServiceTracker(
             BundleContext context) {
-        ServiceTracker<ReplicationService, ReplicationService> result = new ServiceTracker<ReplicationService, ReplicationService>(
+        ServiceTracker<ReplicationService<RacingEventService>, ReplicationService<RacingEventService>> result =
+                new ServiceTracker<ReplicationService<RacingEventService>, ReplicationService<RacingEventService>>(
                 context, ReplicationService.class.getName(), null);
         result.open();
         return result;
@@ -2205,7 +2206,7 @@ public class SailingServiceImpl extends ProxiedRemoteServiceServlet implements S
         return racingEventServiceTracker.getService(); // grab the service
     }
 
-    private ReplicationService getReplicationService() {
+    private ReplicationService<RacingEventService> getReplicationService() {
         return replicationServiceTracker.getService();
     }
     
@@ -3192,12 +3193,12 @@ public class SailingServiceImpl extends ProxiedRemoteServiceServlet implements S
 
     @Override
     public ReplicationStateDTO getReplicaInfo() {
-        ReplicationService service = getReplicationService();
+        ReplicationService<RacingEventService> service = getReplicationService();
         Set<ReplicaDTO> replicaDTOs = new HashSet<ReplicaDTO>();
         for (ReplicaDescriptor replicaDescriptor : service.getReplicaInfo()) {
-            final Map<Class<? extends RacingEventServiceOperation<?>>, Integer> statistics = service.getStatistics(replicaDescriptor);
+            final Map<Class<? extends OperationWithResult<RacingEventService, ?>>, Integer> statistics = service.getStatistics(replicaDescriptor);
             Map<String, Integer> replicationCountByOperationClassName = new HashMap<String, Integer>();
-            for (Map.Entry<Class<? extends RacingEventServiceOperation<?>>, Integer> e : statistics.entrySet()) {
+            for (Entry<Class<? extends OperationWithResult<RacingEventService, ?>>, Integer> e : statistics.entrySet()) {
                 replicationCountByOperationClassName.put(e.getKey().getName(), e.getValue());
             }
             replicaDTOs.add(new ReplicaDTO(replicaDescriptor.getIpAddress().getHostName(), replicaDescriptor

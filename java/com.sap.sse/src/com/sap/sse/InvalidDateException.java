@@ -1,4 +1,4 @@
-package com.sap.sailing.util;
+package com.sap.sse;
 
 public class InvalidDateException extends Exception {
     private static final long serialVersionUID = 1144913537358071746L;

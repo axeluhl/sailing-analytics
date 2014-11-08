@@ -21,7 +21,9 @@ import org.osgi.framework.BundleContext;
 import org.osgi.util.tracker.ServiceTracker;
 
 import com.rabbitmq.client.Channel;
+import com.sap.sailing.server.replication.Replicable;
 import com.sap.sailing.server.replication.ReplicationService;
+import com.sap.sse.gateway.AbstractHttpServlet;
 import com.sap.sse.util.impl.CountingOutputStream;
 
 /**
@@ -31,7 +33,7 @@ import com.sap.sse.util.impl.CountingOutputStream;
  * @author Axel Uhl (D043530)
  * 
  */
-public class ReplicationServlet extends SailingServerHttpServlet {
+public class ReplicationServlet extends AbstractHttpServlet {
     private static final Logger logger = Logger.getLogger(ReplicationServlet.class.getName());
     
     private static final long serialVersionUID = 4835516998934433846L;
@@ -49,10 +51,14 @@ public class ReplicationServlet extends SailingServerHttpServlet {
 
     private ServiceTracker<ReplicationService<?>, ReplicationService<?>> replicationServiceTracker;
     
+    private ServiceTracker<Replicable<?, ?>, Replicable<?, ?>> replicableServiceTracker;
+    
     public ReplicationServlet() throws Exception {
         BundleContext context = Activator.getDefaultContext();
         replicationServiceTracker = new ServiceTracker<ReplicationService<?>, ReplicationService<?>>(context, ReplicationService.class.getName(), null);
         replicationServiceTracker.open();
+        replicableServiceTracker = new ServiceTracker<Replicable<?, ?>, Replicable<?, ?>>(context, Replicable.class.getName(), null);
+        replicableServiceTracker.open();
     }
 
     protected ReplicationService<?> getReplicationService() {
@@ -91,7 +97,7 @@ public class ReplicationServlet extends SailingServerHttpServlet {
             final GZIPOutputStream gzipOutputStream = new GZIPOutputStream(countingOutputStream);
             ObjectOutputStream oos = new ObjectOutputStream(gzipOutputStream);
             try {
-                getService().serializeForInitialReplication(oos);
+                getReplicable().serializeForInitialReplication(oos);
                 gzipOutputStream.finish();
             } catch (Exception e) {
                 logger.info("Error trying to serialize initial load for replication: "+e.getMessage());
@@ -105,6 +111,10 @@ public class ReplicationServlet extends SailingServerHttpServlet {
             resp.sendError(HttpServletResponse.SC_BAD_REQUEST, "Action " + action + " not understood. Must be one of "
                     + Arrays.toString(Action.values()));
         }
+    }
+
+    private Replicable<?, ?> getReplicable() {
+        return replicableServiceTracker.getService();
     }
 
     private void deregisterClientWithReplicationService(HttpServletRequest req, HttpServletResponse resp) throws IOException {

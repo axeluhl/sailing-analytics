@@ -33,6 +33,7 @@ import com.sap.sailing.domain.tracking.TrackerManager;
 import com.sap.sailing.domain.tractracadapter.TracTracAdapterFactory;
 import com.sap.sailing.gwt.ui.server.SailingServiceImpl;
 import com.sap.sailing.server.RacingEventService;
+import com.sap.sailing.server.RacingEventServiceOperation;
 import com.sap.sailing.server.impl.RacingEventServiceImpl;
 import com.sap.sailing.server.replication.Replicable;
 import com.sap.sailing.server.replication.ReplicationService;
@@ -59,16 +60,19 @@ public class SailingServiceImplMock extends SailingServiceImpl {
     }
     
     @Override
-    protected ServiceTracker<ReplicationService, ReplicationService> createAndOpenReplicationServiceTracker(
+    protected ServiceTracker<ReplicationService<RacingEventService>, ReplicationService<RacingEventService>> createAndOpenReplicationServiceTracker(
             BundleContext context) {
         @SuppressWarnings("unchecked")
-        ServiceTracker<ReplicationService, ReplicationService> result = mock(ServiceTracker.class);
+        ServiceTracker<ReplicationService<RacingEventService>, ReplicationService<RacingEventService>> result = mock(ServiceTracker.class);
         try {
-            final ReplicationServiceImpl replicationService = new ReplicationServiceImpl("test exchange", "localhost", 0, new ReplicationInstancesManager()) {
+            final ReplicationServiceImpl<RacingEventService, RacingEventServiceOperation<?>> replicationService =
+                    new ReplicationServiceImpl<RacingEventService, RacingEventServiceOperation<?>>("test exchange", "localhost", 0,
+                            new ReplicationInstancesManager<RacingEventService>()) {
                 @Override
-                protected ServiceTracker<Replicable<?, ?>, Replicable<?, ?>> getRacingEventServiceTracker() {
+                protected ServiceTracker<Replicable<RacingEventService, RacingEventServiceOperation<?>>, Replicable<RacingEventService, RacingEventServiceOperation<?>>> getRacingEventServiceTracker() {
                     @SuppressWarnings("unchecked")
-                    ServiceTracker<Replicable<?, ?>, Replicable<?, ?>> result = (ServiceTracker<Replicable<?, ?>, Replicable<?, ?>>) mock(ServiceTracker.class);
+                    ServiceTracker<Replicable<RacingEventService, RacingEventServiceOperation<?>>, Replicable<RacingEventService, RacingEventServiceOperation<?>>> result =
+                        (ServiceTracker<Replicable<RacingEventService, RacingEventServiceOperation<?>>, Replicable<RacingEventService, RacingEventServiceOperation<?>>>) mock(ServiceTracker.class);
                     doReturn("Humba Humba").when(result).toString();
                     when(result.getService()).thenReturn(new RacingEventServiceImpl());
                     return result;

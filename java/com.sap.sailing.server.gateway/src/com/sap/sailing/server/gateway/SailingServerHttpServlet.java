@@ -15,10 +15,10 @@ import com.sap.sailing.domain.tracking.TrackedRace;
 import com.sap.sailing.domain.tractracadapter.TracTracAdapterFactory;
 import com.sap.sailing.server.RacingEventService;
 import com.sap.sailing.server.racelog.tracking.CachedOsgiTypeBasedServiceFinderFactory;
-import com.sap.sailing.util.DateParser;
-import com.sap.sailing.util.InvalidDateException;
+import com.sap.sse.InvalidDateException;
 import com.sap.sse.common.TimePoint;
 import com.sap.sse.common.impl.MillisecondsTimePoint;
+import com.sap.sse.util.DateParser;
 
 public abstract class SailingServerHttpServlet extends HttpServlet {
     private static final long serialVersionUID = -6514453597593669376L;
