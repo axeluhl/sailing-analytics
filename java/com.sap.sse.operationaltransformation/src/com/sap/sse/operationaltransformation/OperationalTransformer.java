@@ -9,10 +9,10 @@ package com.sap.sse.operationaltransformation;
  * @param <S>
  * @param <O>
  */
-public class OperationalTransformer<S, O extends OperationWithTransformationSupport<S, O>> implements Transformer<O> {
+public class OperationalTransformer<S, O extends OperationWithTransformationSupport<S, O>> implements Transformer<S, O> {
     @Override
-    public ClientServerOperationPair<O> transform(O clientOp, O serverOp) {
-        ClientServerOperationPair<O> result = new ClientServerOperationPair<O>(
+    public ClientServerOperationPair<S, O> transform(O clientOp, O serverOp) {
+        ClientServerOperationPair<O> result = new ClientServerOperationPair<S, O>(
                 clientOp == null ? null : clientOp.transformClientOp(serverOp),
                         serverOp == null ? null : serverOp.transformServerOp(clientOp));
         return result;

@@ -1,6 +1,6 @@
 package com.sap.sse.operationaltransformation;
 
-public class ClientServerOperationPair<O extends Operation<?>> {
+public class ClientServerOperationPair<S, O extends Operation<S>> {
     private O clientOp;
     private O serverOp;
 

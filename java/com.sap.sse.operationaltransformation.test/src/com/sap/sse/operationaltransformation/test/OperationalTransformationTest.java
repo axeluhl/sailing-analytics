@@ -53,9 +53,9 @@ public class OperationalTransformationTest {
         }
     }
    
-    public static class StringInsertTransformer implements Transformer<StringInsertOperation> {
+    public static class StringInsertTransformer implements Transformer<StringState, StringInsertOperation> {
         @Override
-	public ClientServerOperationPair<StringInsertOperation> transform(StringInsertOperation clientOp, StringInsertOperation serverOp) {
+	public ClientServerOperationPair<StringState, StringInsertOperation> transform(StringInsertOperation clientOp, StringInsertOperation serverOp) {
 	    final StringInsertOperation resultClientOp;
 	    final StringInsertOperation resultServerOp;
 	    if (clientOp == null || serverOp == null) {
@@ -68,7 +68,7 @@ public class OperationalTransformationTest {
 		resultClientOp = clientOp;
 		resultServerOp = new StringInsertOperation(serverOp.getPos()+clientOp.getS().length(), serverOp.getS());
 	    }
-	    return new ClientServerOperationPair<StringInsertOperation>(resultClientOp, resultServerOp);
+	    return new ClientServerOperationPair<StringState, StringInsertOperation>(resultClientOp, resultServerOp);
 	}
     }
     

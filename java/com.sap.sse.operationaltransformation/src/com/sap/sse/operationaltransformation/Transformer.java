@@ -1,6 +1,6 @@
 package com.sap.sse.operationaltransformation;
 
-public interface Transformer<O extends Operation<?>> {
+public interface Transformer<S, O extends Operation<S>> {
     /**
      * Takes an operation from the client and an operation from the server, both based on the same state. The
      * complementary pair of operations is computed such that if the client applies the server operation returned, and
@@ -15,5 +15,5 @@ public interface Transformer<O extends Operation<?>> {
      * @param serverOp
      *            operation that was executed on the SERVER; never called with <code>null</code>
      */
-    ClientServerOperationPair<O> transform(O clientOp, O serverOp);
+    ClientServerOperationPair<S, O> transform(O clientOp, O serverOp);
 }

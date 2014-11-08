@@ -53,21 +53,21 @@ public class PeerImpl<O extends Operation<S>, S> implements Peer<O, S> {
      */
     private final Map<Peer<O, S>, Integer> numberOfMergedOperations = new HashMap<Peer<O, S>, Integer>();
 
-    private final Transformer<O> transformer;
+    private final Transformer<S, O> transformer;
     
     /**
      * The background task handler which sends out the asynchronous updates to the peers.
      */
     private final ExecutorService merger;
 
-    public PeerImpl(Transformer<O> transformer, S initialState, Role role) {
+    public PeerImpl(Transformer<S, O> transformer, S initialState, Role role) {
 	this.transformer = transformer;
 	currentState = initialState;
 	this.role = role;
 	this.merger = Executors.newSingleThreadExecutor();
     }
     
-    public PeerImpl(String name, Transformer<O> transformer, S initialState, Role role) {
+    public PeerImpl(String name, Transformer<S, O> transformer, S initialState, Role role) {
 	this(transformer, initialState, role);
 	this.name = name;
     }
@@ -77,7 +77,7 @@ public class PeerImpl<O extends Operation<S>, S> implements Peer<O, S> {
      * the two-way link between client and server peers. The initial state is taken from
      * the server.
      */
-    public PeerImpl(Transformer<O> transformer, Peer<O, S> server) {
+    public PeerImpl(Transformer<S, O> transformer, Peer<O, S> server) {
 	this.transformer = transformer;
 	S initialState = server.addPeer(this);
         currentState = initialState;
@@ -91,7 +91,7 @@ public class PeerImpl<O extends Operation<S>, S> implements Peer<O, S> {
      * <tt>server</tt> peer, establishing the two-way link between client and
      * server peers. The initial state is taken from the server.
      */
-    public PeerImpl(String name, Transformer<O> transformer, Peer<O, S> server) {
+    public PeerImpl(String name, Transformer<S, O> transformer, Peer<O, S> server) {
 	this(transformer, server);
 	this.name = name;
     }
@@ -101,7 +101,7 @@ public class PeerImpl<O extends Operation<S>, S> implements Peer<O, S> {
 	merger.shutdown();
     }
 
-    private Transformer<O> getTransformer() {
+    private Transformer<S, O> getTransformer() {
         return transformer;
     }
     
@@ -154,7 +154,7 @@ public class PeerImpl<O extends Operation<S>, S> implements Peer<O, S> {
             for (O unconfirmedOperation : unmergedOperationsForSource
                     .getUnmergedOperations(numberOfOperationsSourceHasMergedFromThis)) {
                 if (role == Role.SERVER) {
-                    final ClientServerOperationPair<O> pair;
+                    final ClientServerOperationPair<S, O> pair;
                     if (transformedOp == null || unconfirmedOperation == null) {
                         pair = new ClientServerOperationPair<>(transformedOp, unconfirmedOperation);
                     } else {
@@ -163,7 +163,7 @@ public class PeerImpl<O extends Operation<S>, S> implements Peer<O, S> {
                     transformedOp = pair.getClientOp();
                     unmergedOperationsForSource.updateWithTransformed(localOpNumber, pair.getServerOp());
                 } else {
-                    final ClientServerOperationPair<O> pair;
+                    final ClientServerOperationPair<S, O> pair;
                     if (transformedOp == null || unconfirmedOperation == null) {
                         pair = new ClientServerOperationPair<>(unconfirmedOperation, transformedOp);
                     } else {
