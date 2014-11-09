@@ -41,13 +41,6 @@ Computes leaderboard information for sailing races and offers RESTful APIs to al
          unpack="false"/>
 
    <plugin
-         id="com.sap.sailing.operationaltransformation"
-         download-size="0"
-         install-size="0"
-         version="0.0.0"
-         unpack="false"/>
-
-   <plugin
          id="com.sap.sailing.domain.common"
          download-size="0"
          install-size="0"
@@ -105,13 +98,6 @@ Computes leaderboard information for sailing races and offers RESTful APIs to al
 
    <plugin
          id="com.sap.sailing.declination"
-         download-size="0"
-         install-size="0"
-         version="0.0.0"
-         unpack="false"/>
-
-   <plugin
-         id="com.sap.sailing.mongodb"
          download-size="0"
          install-size="0"
          version="0.0.0"
@@ -221,13 +207,6 @@ Computes leaderboard information for sailing races and offers RESTful APIs to al
          version="0.0.0"/>
 
    <plugin
-         id="com.sap.sailing.server.replication"
-         download-size="0"
-         install-size="0"
-         version="0.0.0"
-         unpack="false"/>
-
-   <plugin
          id="com.sap.sailing.resultimport"
          download-size="0"
          install-size="0"
@@ -327,6 +306,69 @@ Computes leaderboard information for sailing races and offers RESTful APIs to al
 
    <plugin
          id="com.sap.sailing.autoload"
+         download-size="0"
+         install-size="0"
+         version="0.0.0"
+         unpack="false"/>
+
+   <plugin
+         id="com.sap.sse"
+         download-size="0"
+         install-size="0"
+         version="0.0.0"
+         unpack="false"/>
+
+   <plugin
+         id="com.sap.sse.common"
+         download-size="0"
+         install-size="0"
+         version="0.0.0"
+         unpack="false"/>
+
+   <plugin
+         id="com.sap.sse.datamining"
+         download-size="0"
+         install-size="0"
+         version="0.0.0"
+         unpack="false"/>
+
+   <plugin
+         id="com.sap.sse.datamining.shared"
+         download-size="0"
+         install-size="0"
+         version="0.0.0"
+         unpack="false"/>
+
+   <plugin
+         id="com.sap.sse.gateway"
+         download-size="0"
+         install-size="0"
+         version="0.0.0"
+         unpack="false"/>
+
+   <plugin
+         id="com.sap.sse.gwt.adminconsole"
+         download-size="0"
+         install-size="0"
+         version="0.0.0"
+         unpack="false"/>
+
+   <plugin
+         id="com.sap.sse.mongodb"
+         download-size="0"
+         install-size="0"
+         version="0.0.0"
+         unpack="false"/>
+
+   <plugin
+         id="com.sap.sse.operationaltransformation"
+         download-size="0"
+         install-size="0"
+         version="0.0.0"
+         unpack="false"/>
+
+   <plugin
+         id="com.sap.sse.replication"
          download-size="0"
          install-size="0"
          version="0.0.0"
