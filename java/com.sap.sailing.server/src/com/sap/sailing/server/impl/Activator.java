@@ -27,6 +27,7 @@ import com.sap.sailing.domain.tracking.impl.GPSFixMovingImpl;
 import com.sap.sailing.server.RacingEventService;
 import com.sap.sailing.server.RacingEventServiceMXBean;
 import com.sap.sailing.server.racelog.tracking.CachedOsgiTypeBasedServiceFinderFactory;
+import com.sap.sailing.server.replication.Replicable;
 import com.sap.sailing.server.test.support.RacingEventServiceWithTestSupport;
 import com.sap.sse.common.Util;
 
@@ -67,6 +68,7 @@ public class Activator implements BundleActivator {
 
         // register the racing service in the OSGi registry
         racingEventService.setBundleContext(context);
+        context.registerService(Replicable.class.getName(), racingEventService, null);
         context.registerService(RacingEventService.class.getName(), racingEventService, null);
         context.registerService(RacingEventServiceWithTestSupport.class.getName(), racingEventService, null);
                 
