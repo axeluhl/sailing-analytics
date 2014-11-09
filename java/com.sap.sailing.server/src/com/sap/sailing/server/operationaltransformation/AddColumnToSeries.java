@@ -27,13 +27,13 @@ public class AddColumnToSeries extends AbstractColumnInSeriesOperation<RaceColum
     }
 
     @Override
-    public RacingEventServiceOperation<?> transformClientOp(RacingEventServiceOperation<RaceColumnInSeries> serverOp) {
+    public RacingEventServiceOperation<?> transformClientOp(RacingEventServiceOperation<?> serverOp) {
         // TODO Auto-generated method stub
         return null;
     }
 
     @Override
-    public RacingEventServiceOperation<?> transformServerOp(RacingEventServiceOperation<RaceColumnInSeries> clientOp) {
+    public RacingEventServiceOperation<?> transformServerOp(RacingEventServiceOperation<?> clientOp) {
         // TODO Auto-generated method stub
         return null;
     }

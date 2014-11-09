@@ -14,14 +14,12 @@ public abstract class AbstractMediaTrackOperation extends AbstractRacingEventSer
     }
 
     @Override
-    public RacingEventServiceOperation<?> transformClientOp(RacingEventServiceOperation<Void> serverOp) {
-        // TODO Auto-generated method stub
+    public RacingEventServiceOperation<?> transformClientOp(RacingEventServiceOperation<?> serverOp) {
         return null;
     }
 
     @Override
-    public RacingEventServiceOperation<?> transformServerOp(RacingEventServiceOperation<Void> clientOp) {
-        // TODO Auto-generated method stub
+    public RacingEventServiceOperation<?> transformServerOp(RacingEventServiceOperation<?> clientOp) {
         return null;
     }
 

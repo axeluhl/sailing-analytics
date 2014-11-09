@@ -35,14 +35,14 @@ public class AddCourseArea extends AbstractRacingEventServiceOperation<CourseAre
 
     @Override
     public RacingEventServiceOperation<?> transformClientOp(
-            RacingEventServiceOperation<CourseArea> serverOp) {
+            RacingEventServiceOperation<?> serverOp) {
         // TODO Auto-generated method stub
         return null;
     }
 
     @Override
     public RacingEventServiceOperation<?> transformServerOp(
-            RacingEventServiceOperation<CourseArea> clientOp) {
+            RacingEventServiceOperation<?> clientOp) {
         // TODO Auto-generated method stub
         return null;
     }

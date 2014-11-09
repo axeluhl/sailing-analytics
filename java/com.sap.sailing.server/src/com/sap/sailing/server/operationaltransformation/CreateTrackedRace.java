@@ -62,13 +62,13 @@ public class CreateTrackedRace extends AbstractRaceOperation<DynamicTrackedRace>
     }
 
     @Override
-    public RacingEventServiceOperation<?> transformClientOp(RacingEventServiceOperation<DynamicTrackedRace> serverOp) {
+    public RacingEventServiceOperation<?> transformClientOp(RacingEventServiceOperation<?> serverOp) {
         // TODO Auto-generated method stub
         return null;
     }
 
     @Override
-    public RacingEventServiceOperation<?> transformServerOp(RacingEventServiceOperation<DynamicTrackedRace> clientOp) {
+    public RacingEventServiceOperation<?> transformServerOp(RacingEventServiceOperation<?> clientOp) {
         // TODO Auto-generated method stub
         return null;
     }

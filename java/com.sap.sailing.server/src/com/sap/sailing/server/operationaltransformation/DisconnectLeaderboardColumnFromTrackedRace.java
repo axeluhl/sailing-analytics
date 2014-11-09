@@ -33,13 +33,13 @@ public class DisconnectLeaderboardColumnFromTrackedRace extends AbstractLeaderbo
     }
 
     @Override
-    public RacingEventServiceOperation<?> transformClientOp(RacingEventServiceOperation<Void> serverOp) {
+    public RacingEventServiceOperation<?> transformClientOp(RacingEventServiceOperation<?> serverOp) {
         // TODO Auto-generated method stub
         return null;
     }
 
     @Override
-    public RacingEventServiceOperation<?> transformServerOp(RacingEventServiceOperation<Void> clientOp) {
+    public RacingEventServiceOperation<?> transformServerOp(RacingEventServiceOperation<?> clientOp) {
         // TODO Auto-generated method stub
         return null;
     }

@@ -18,12 +18,12 @@ public class MoveLeaderboardColumnDown extends AbstractLeaderboardColumnOperatio
     }
 
     @Override
-    public RacingEventServiceOperation<?> transformClientOp(RacingEventServiceOperation<Void> serverOp) {
+    public RacingEventServiceOperation<?> transformClientOp(RacingEventServiceOperation<?> serverOp) {
         return serverOp.transformMoveLeaderboardColumnDownClientOp(this);
     }
 
     @Override
-    public RacingEventServiceOperation<?> transformServerOp(RacingEventServiceOperation<Void> clientOp) {
+    public RacingEventServiceOperation<?> transformServerOp(RacingEventServiceOperation<?> clientOp) {
         return clientOp.transformMoveLeaderboardColumnDownServerOp(this);
     }
 

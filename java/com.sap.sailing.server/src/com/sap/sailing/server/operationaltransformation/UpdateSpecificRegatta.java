@@ -31,12 +31,12 @@ public class UpdateSpecificRegatta extends AbstractRacingEventServiceOperation<R
     }
 
     @Override
-    public RacingEventServiceOperation<?> transformClientOp(RacingEventServiceOperation<Regatta> serverOp) {
+    public RacingEventServiceOperation<?> transformClientOp(RacingEventServiceOperation<?> serverOp) {
         return null;
     }
 
     @Override
-    public RacingEventServiceOperation<?> transformServerOp(RacingEventServiceOperation<Regatta> clientOp) {
+    public RacingEventServiceOperation<?> transformServerOp(RacingEventServiceOperation<?> clientOp) {
         return null;
     }
 

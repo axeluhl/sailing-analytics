@@ -33,15 +33,15 @@ public class ConnectTrackedRaceToLeaderboardColumn extends AbstractLeaderboardCo
         this.fleetName = fleetName;
     }
 
+    
     @Override
-    public RacingEventServiceOperation<?> transformClientOp(RacingEventServiceOperation<Boolean> serverOp) {
-        // TODO Auto-generated method stub
+    public RacingEventServiceOperation<?> transformClientOp(RacingEventServiceOperation<?> serverOp) {
         return null;
     }
 
+
     @Override
-    public RacingEventServiceOperation<?> transformServerOp(RacingEventServiceOperation<Boolean> clientOp) {
-        // TODO Auto-generated method stub
+    public RacingEventServiceOperation<?> transformServerOp(RacingEventServiceOperation<?> clientOp) {
         return null;
     }
 
@@ -71,5 +71,4 @@ public class ConnectTrackedRaceToLeaderboardColumn extends AbstractLeaderboardCo
         }
         return success;
     }
-
 }

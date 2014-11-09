@@ -15,7 +15,7 @@ import com.sap.sailing.server.replication.OperationWithResult;
 import com.sap.sse.operationaltransformation.OperationWithTransformationSupport;
 
 public interface RacingEventServiceOperation<ResultType> extends OperationWithResult<RacingEventService, ResultType>,
-OperationWithTransformationSupport<RacingEventService, RacingEventServiceOperation<ResultType>>, Serializable {
+OperationWithTransformationSupport<RacingEventService, RacingEventServiceOperation<?>>, Serializable {
     /**
      * Assumes this is the "server" operation and transforms the client's <code>removeColumnFromLeaderboardClientOp</code> according to this
      * operation. The default implementation will probably pass on the untransformed client operation. However, if this

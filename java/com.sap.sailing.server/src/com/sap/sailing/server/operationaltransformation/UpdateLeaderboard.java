@@ -27,13 +27,13 @@ public class UpdateLeaderboard extends AbstractLeaderboardOperation<Leaderboard>
     }
 
     @Override
-    public RacingEventServiceOperation<?> transformClientOp(RacingEventServiceOperation<Leaderboard> serverOp) {
+    public RacingEventServiceOperation<?> transformClientOp(RacingEventServiceOperation<?> serverOp) {
         // TODO Auto-generated method stub
         return null;
     }
 
     @Override
-    public RacingEventServiceOperation<?> transformServerOp(RacingEventServiceOperation<Leaderboard> clientOp) {
+    public RacingEventServiceOperation<?> transformServerOp(RacingEventServiceOperation<?> clientOp) {
         // TODO Auto-generated method stub
         return null;
     }

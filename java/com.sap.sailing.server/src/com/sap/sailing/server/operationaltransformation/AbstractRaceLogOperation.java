@@ -26,12 +26,12 @@ public abstract class AbstractRaceLogOperation<T> extends AbstractRacingEventSer
     abstract protected RaceColumn getRaceColumn(RacingEventService toState);
     
     @Override
-    public RacingEventServiceOperation<?> transformClientOp(RacingEventServiceOperation<T> serverOp) {
+    public RacingEventServiceOperation<?> transformClientOp(RacingEventServiceOperation<?> serverOp) {
         return null;
     }
 
     @Override
-    public RacingEventServiceOperation<?> transformServerOp(RacingEventServiceOperation<T> clientOp) {
+    public RacingEventServiceOperation<?> transformServerOp(RacingEventServiceOperation<?> clientOp) {
         return null;
     }
 }

@@ -20,13 +20,13 @@ public class RenameLeaderboardColumn extends AbstractLeaderboardColumnOperation<
     }
 
     @Override
-    public RacingEventServiceOperation<?> transformClientOp(RacingEventServiceOperation<Void> serverOp) {
+    public RacingEventServiceOperation<?> transformClientOp(RacingEventServiceOperation<?> serverOp) {
         return serverOp.transformRenameLeaderboardColumnClientOp(this);
     }
 
 
     @Override
-    public RacingEventServiceOperation<?> transformServerOp(RacingEventServiceOperation<Void> clientOp) {
+    public RacingEventServiceOperation<?> transformServerOp(RacingEventServiceOperation<?> clientOp) {
         return clientOp.transformRenameLeaderboardColumnServerOp(this);
     }
 

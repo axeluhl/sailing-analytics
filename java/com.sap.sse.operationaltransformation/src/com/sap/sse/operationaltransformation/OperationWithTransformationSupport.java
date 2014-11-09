@@ -16,7 +16,7 @@ public interface OperationWithTransformationSupport<S, O extends OperationWithTr
      * 
      * @return the result of transforming <code>this</code> operation along <code>serverOp</code>
      */
-    OperationWithTransformationSupport<S, ?> transformClientOp(O serverOp);
+    O transformClientOp(O serverOp);
 
     /**
      * Implements the specific transformation rule for the implementing subclass for the set of possible peer operations
@@ -25,5 +25,5 @@ public interface OperationWithTransformationSupport<S, O extends OperationWithTr
      * 
      * @return the result of transforming <code>this</code> operation along <code>clientOp</code>
      */
-    OperationWithTransformationSupport<S, ?> transformServerOp(O clientOp);
+    O transformServerOp(O clientOp);
 }

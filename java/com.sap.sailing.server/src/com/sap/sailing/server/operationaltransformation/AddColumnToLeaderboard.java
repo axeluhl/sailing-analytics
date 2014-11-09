@@ -26,12 +26,12 @@ public class AddColumnToLeaderboard extends AbstractLeaderboardColumnOperation<R
     }
 
     @Override
-    public RacingEventServiceOperation<?> transformClientOp(RacingEventServiceOperation<RaceColumn> serverOp) {
+    public RacingEventServiceOperation<?> transformClientOp(RacingEventServiceOperation<?> serverOp) {
         return serverOp.transformAddColumnToLeaderboardClientOp(this);
     }
 
     @Override
-    public RacingEventServiceOperation<?> transformServerOp(RacingEventServiceOperation<RaceColumn> clientOp) {
+    public RacingEventServiceOperation<?> transformServerOp(RacingEventServiceOperation<?> clientOp) {
         return clientOp.transformAddColumnToLeaderboardServerOp(this);
     }
 }

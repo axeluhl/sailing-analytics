@@ -32,14 +32,14 @@ public class RemoveCourseArea extends AbstractRacingEventServiceOperation<Void> 
 
     @Override
     public RacingEventServiceOperation<?> transformClientOp(
-            RacingEventServiceOperation<Void> serverOp) {
+            RacingEventServiceOperation<?> serverOp) {
         // TODO Auto-generated method stub
         return null;
     }
 
     @Override
     public RacingEventServiceOperation<?> transformServerOp(
-            RacingEventServiceOperation<Void> clientOp) {
+            RacingEventServiceOperation<?> clientOp) {
         // TODO Auto-generated method stub
         return null;
     }
