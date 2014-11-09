@@ -403,11 +403,11 @@ import com.sap.sse.common.impl.MillisecondsDurationImpl;
 import com.sap.sse.common.impl.MillisecondsTimePoint;
 import com.sap.sse.common.search.KeywordQuery;
 import com.sap.sse.common.search.Result;
-import com.sap.sse.server.replication.OperationWithResult;
-import com.sap.sse.server.replication.ReplicationFactory;
-import com.sap.sse.server.replication.ReplicationMasterDescriptor;
-import com.sap.sse.server.replication.ReplicationService;
-import com.sap.sse.server.replication.impl.ReplicaDescriptor;
+import com.sap.sse.replication.OperationWithResult;
+import com.sap.sse.replication.ReplicationFactory;
+import com.sap.sse.replication.ReplicationMasterDescriptor;
+import com.sap.sse.replication.ReplicationService;
+import com.sap.sse.replication.impl.ReplicaDescriptor;
 
 /**
  * The server side implementation of the RPC service.

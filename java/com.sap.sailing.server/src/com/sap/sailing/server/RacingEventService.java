@@ -69,7 +69,7 @@ import com.sap.sse.common.Util.Triple;
 import com.sap.sse.common.search.KeywordQuery;
 import com.sap.sse.common.search.Result;
 import com.sap.sse.common.search.Searchable;
-import com.sap.sse.server.replication.Replicable;
+import com.sap.sse.replication.Replicable;
 
 /**
  * An OSGi service that can be used to track boat races using a TracTrac connector that pushes

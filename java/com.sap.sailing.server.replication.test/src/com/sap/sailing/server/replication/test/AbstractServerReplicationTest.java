@@ -39,15 +39,15 @@ import com.sap.sailing.server.RacingEventServiceOperation;
 import com.sap.sailing.server.impl.RacingEventServiceImpl;
 import com.sap.sse.common.Util;
 import com.sap.sse.mongodb.MongoDBService;
-import com.sap.sse.server.replication.ReplicationMasterDescriptor;
-import com.sap.sse.server.replication.ReplicationService;
-import com.sap.sse.server.replication.impl.Activator;
-import com.sap.sse.server.replication.impl.RabbitOutputStream;
-import com.sap.sse.server.replication.impl.ReplicaDescriptor;
-import com.sap.sse.server.replication.impl.ReplicationInstancesManager;
-import com.sap.sse.server.replication.impl.ReplicationMasterDescriptorImpl;
-import com.sap.sse.server.replication.impl.ReplicationServiceImpl;
-import com.sap.sse.server.replication.impl.Replicator;
+import com.sap.sse.replication.ReplicationMasterDescriptor;
+import com.sap.sse.replication.ReplicationService;
+import com.sap.sse.replication.impl.Activator;
+import com.sap.sse.replication.impl.RabbitOutputStream;
+import com.sap.sse.replication.impl.ReplicaDescriptor;
+import com.sap.sse.replication.impl.ReplicationInstancesManager;
+import com.sap.sse.replication.impl.ReplicationMasterDescriptorImpl;
+import com.sap.sse.replication.impl.ReplicationServiceImpl;
+import com.sap.sse.replication.impl.Replicator;
 
 public abstract class AbstractServerReplicationTest {
     protected static final int SERVLET_PORT = 9990;

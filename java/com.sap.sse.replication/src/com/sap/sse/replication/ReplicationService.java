@@ -1,4 +1,4 @@
-package com.sap.sse.server.replication;
+package com.sap.sse.replication;
 
 import java.io.IOException;
 import java.net.ConnectException;
@@ -6,8 +6,8 @@ import java.util.Map;
 import java.util.UUID;
 
 import com.rabbitmq.client.Channel;
-import com.sap.sse.server.replication.impl.ReplicaDescriptor;
-import com.sap.sse.server.replication.impl.ReplicationServlet;
+import com.sap.sse.replication.impl.ReplicaDescriptor;
+import com.sap.sse.replication.impl.ReplicationServlet;
 
 /**
  * A service that organizes a master server and its replicas.

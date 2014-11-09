@@ -1,4 +1,4 @@
-package com.sap.sse.server.replication.impl;
+package com.sap.sse.replication.impl;
 
 import java.io.ByteArrayInputStream;
 import java.io.EOFException;
@@ -21,8 +21,8 @@ import com.rabbitmq.client.ConsumerCancelledException;
 import com.rabbitmq.client.QueueingConsumer;
 import com.rabbitmq.client.QueueingConsumer.Delivery;
 import com.rabbitmq.client.ShutdownSignalException;
-import com.sap.sse.server.replication.OperationWithResult;
-import com.sap.sse.server.replication.ReplicationMasterDescriptor;
+import com.sap.sse.replication.OperationWithResult;
+import com.sap.sse.replication.ReplicationMasterDescriptor;
 
 /**
  * Receives {@link RacingEventServiceOperation}s through JMS and

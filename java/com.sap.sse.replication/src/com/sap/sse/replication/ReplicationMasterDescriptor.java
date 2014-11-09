@@ -1,4 +1,4 @@
-package com.sap.sse.server.replication;
+package com.sap.sse.replication;
 
 import java.io.IOException;
 import java.io.UnsupportedEncodingException;
@@ -8,7 +8,7 @@ import java.util.UUID;
 
 import com.rabbitmq.client.Channel;
 import com.rabbitmq.client.QueueingConsumer;
-import com.sap.sse.server.replication.impl.RabbitInputStreamProvider;
+import com.sap.sse.replication.impl.RabbitInputStreamProvider;
 
 /**
  * Identifies a master server instance from which a replica can obtain an initial load and continuous updates.

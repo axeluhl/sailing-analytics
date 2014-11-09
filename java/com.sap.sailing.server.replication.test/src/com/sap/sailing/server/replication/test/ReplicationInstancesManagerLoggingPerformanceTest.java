@@ -13,8 +13,8 @@ import org.junit.Test;
 
 import com.sap.sailing.server.RacingEventService;
 import com.sap.sailing.server.operationaltransformation.CreateLeaderboardGroup;
-import com.sap.sse.server.replication.impl.ReplicaDescriptor;
-import com.sap.sse.server.replication.impl.ReplicationInstancesManager;
+import com.sap.sse.replication.impl.ReplicaDescriptor;
+import com.sap.sse.replication.impl.ReplicationInstancesManager;
 
 public class ReplicationInstancesManagerLoggingPerformanceTest {
     private ReplicationInstancesManager<RacingEventService> replicationInstanceManager;

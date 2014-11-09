@@ -25,8 +25,8 @@ import com.sap.sailing.domain.base.Event;
 import com.sap.sse.common.TimePoint;
 import com.sap.sse.common.Util;
 import com.sap.sse.common.impl.MillisecondsTimePoint;
-import com.sap.sse.server.replication.ReplicationMasterDescriptor;
-import com.sap.sse.server.replication.impl.ReplicationMasterDescriptorImpl;
+import com.sap.sse.replication.ReplicationMasterDescriptor;
+import com.sap.sse.replication.impl.ReplicationMasterDescriptorImpl;
 
 public class ConnectionResetAndReconnectTest extends AbstractServerReplicationTest {
     static final Logger logger = Logger.getLogger(ConnectionResetAndReconnectTest.class.getName());

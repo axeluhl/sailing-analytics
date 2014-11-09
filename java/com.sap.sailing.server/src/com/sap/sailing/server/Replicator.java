@@ -1,6 +1,6 @@
 package com.sap.sailing.server;
 
-import com.sap.sse.server.replication.OperationExecutionListener;
+import com.sap.sse.replication.OperationExecutionListener;
 
 public interface Replicator {
     

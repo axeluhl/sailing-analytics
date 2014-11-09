@@ -1,4 +1,4 @@
-package com.sap.sse.server.replication.impl;
+package com.sap.sse.replication.impl;
 
 import java.io.Serializable;
 import java.net.InetAddress;

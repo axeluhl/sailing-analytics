@@ -1,4 +1,4 @@
-package com.sap.sse.server.replication.impl;
+package com.sap.sse.replication.impl;
 
 import java.io.IOException;
 import java.io.InputStream;
@@ -6,7 +6,7 @@ import java.io.ObjectInputStream;
 import java.io.ObjectStreamClass;
 
 import com.sap.sse.common.IsManagedByCache;
-import com.sap.sse.server.replication.Replicable;
+import com.sap.sse.replication.Replicable;
 
 /**
  * During de-serialization, resolves objects managed by a {@link DomainFactory} using the domain factory instance passed

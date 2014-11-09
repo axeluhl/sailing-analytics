@@ -1,4 +1,4 @@
-package com.sap.sse.server.replication.impl;
+package com.sap.sse.replication.impl;
 
 import java.util.Collections;
 import java.util.HashMap;
@@ -8,8 +8,8 @@ import java.util.Map;
 import java.util.Set;
 
 import com.sap.sse.common.Util;
-import com.sap.sse.server.replication.OperationWithResult;
-import com.sap.sse.server.replication.ReplicationMasterDescriptor;
+import com.sap.sse.replication.OperationWithResult;
+import com.sap.sse.replication.ReplicationMasterDescriptor;
 
 /**
  * Manages the replicas and keeps statistics.

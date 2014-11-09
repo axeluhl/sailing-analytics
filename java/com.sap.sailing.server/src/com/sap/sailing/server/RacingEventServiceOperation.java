@@ -12,7 +12,7 @@ import com.sap.sailing.server.operationaltransformation.RemoveLeaderboard;
 import com.sap.sailing.server.operationaltransformation.RemoveLeaderboardColumn;
 import com.sap.sailing.server.operationaltransformation.RenameLeaderboardColumn;
 import com.sap.sse.operationaltransformation.OperationWithTransformationSupport;
-import com.sap.sse.server.replication.OperationWithResult;
+import com.sap.sse.replication.OperationWithResult;
 
 public interface RacingEventServiceOperation<ResultType> extends OperationWithResult<RacingEventService, ResultType>,
 OperationWithTransformationSupport<RacingEventService, RacingEventServiceOperation<?>>, Serializable {

@@ -1,4 +1,4 @@
-package com.sap.sse.server.replication.impl;
+package com.sap.sse.replication.impl;
 
 import java.io.IOException;
 import java.io.ObjectOutputStream;
@@ -22,8 +22,8 @@ import org.osgi.util.tracker.ServiceTracker;
 
 import com.rabbitmq.client.Channel;
 import com.sap.sse.gateway.AbstractHttpServlet;
-import com.sap.sse.server.replication.Replicable;
-import com.sap.sse.server.replication.ReplicationService;
+import com.sap.sse.replication.Replicable;
+import com.sap.sse.replication.ReplicationService;
 import com.sap.sse.util.impl.CountingOutputStream;
 
 /**

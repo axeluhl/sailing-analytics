@@ -43,8 +43,8 @@ import com.sap.sailing.server.operationaltransformation.UpdateLeaderboardMaxPoin
 import com.sap.sse.common.Util;
 import com.sap.sse.common.impl.MillisecondsTimePoint;
 import com.sap.sse.mongodb.MongoDBService;
-import com.sap.sse.server.replication.ReplicationMasterDescriptor;
-import com.sap.sse.server.replication.ReplicationService;
+import com.sap.sse.replication.ReplicationMasterDescriptor;
+import com.sap.sse.replication.ReplicationService;
 
 public class DelayedLeaderboardCorrectionsReplicationTest extends AbstractServerReplicationTest {
     private static final Logger logger = Logger.getLogger(DelayedLeaderboardCorrectionsReplicationTest.class.getName());

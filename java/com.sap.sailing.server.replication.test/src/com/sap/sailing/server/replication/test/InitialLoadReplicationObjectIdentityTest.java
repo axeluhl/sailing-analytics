@@ -53,8 +53,8 @@ import com.sap.sse.common.Util;
 import com.sap.sse.common.impl.MillisecondsDurationImpl;
 import com.sap.sse.common.impl.MillisecondsTimePoint;
 import com.sap.sse.mongodb.MongoDBService;
-import com.sap.sse.server.replication.ReplicationMasterDescriptor;
-import com.sap.sse.server.replication.impl.Replicator;
+import com.sap.sse.replication.ReplicationMasterDescriptor;
+import com.sap.sse.replication.impl.Replicator;
 
 public class InitialLoadReplicationObjectIdentityTest extends AbstractServerReplicationTest {
     private Util.Pair<ReplicationServiceTestImpl, ReplicationMasterDescriptor> replicationDescriptorPair;

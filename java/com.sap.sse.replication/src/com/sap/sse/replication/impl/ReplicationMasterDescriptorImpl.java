@@ -1,4 +1,4 @@
-package com.sap.sse.server.replication.impl;
+package com.sap.sse.replication.impl;
 
 import java.io.IOException;
 import java.io.UnsupportedEncodingException;
@@ -13,7 +13,7 @@ import com.rabbitmq.client.Connection;
 import com.rabbitmq.client.ConnectionFactory;
 import com.rabbitmq.client.QueueingConsumer;
 import com.sap.sse.BuildVersion;
-import com.sap.sse.server.replication.ReplicationMasterDescriptor;
+import com.sap.sse.replication.ReplicationMasterDescriptor;
 
 public class ReplicationMasterDescriptorImpl implements ReplicationMasterDescriptor {
     private static final String REPLICATION_SERVLET = "/replication/replication";

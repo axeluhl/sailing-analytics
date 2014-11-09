@@ -29,7 +29,7 @@ import com.sap.sailing.server.RacingEventServiceMXBean;
 import com.sap.sailing.server.racelog.tracking.CachedOsgiTypeBasedServiceFinderFactory;
 import com.sap.sailing.server.test.support.RacingEventServiceWithTestSupport;
 import com.sap.sse.common.Util;
-import com.sap.sse.server.replication.Replicable;
+import com.sap.sse.replication.Replicable;
 
 public class Activator implements BundleActivator {
     private static final Logger logger = Logger.getLogger(Activator.class.getName());

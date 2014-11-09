@@ -36,10 +36,10 @@ import com.sap.sailing.server.RacingEventService;
 import com.sap.sailing.server.RacingEventServiceOperation;
 import com.sap.sailing.server.impl.RacingEventServiceImpl;
 import com.sap.sailing.xrr.resultimport.schema.RegattaResults;
-import com.sap.sse.server.replication.Replicable;
-import com.sap.sse.server.replication.ReplicationService;
-import com.sap.sse.server.replication.impl.ReplicationInstancesManager;
-import com.sap.sse.server.replication.impl.ReplicationServiceImpl;
+import com.sap.sse.replication.Replicable;
+import com.sap.sse.replication.ReplicationService;
+import com.sap.sse.replication.impl.ReplicationInstancesManager;
+import com.sap.sse.replication.impl.ReplicationServiceImpl;
 
 public class SailingServiceImplMock extends SailingServiceImpl {
     private static final long serialVersionUID = 8564037671550730455L;

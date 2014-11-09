@@ -192,8 +192,8 @@ import com.sap.sse.common.search.KeywordQuery;
 import com.sap.sse.common.search.Result;
 import com.sap.sse.common.search.ResultImpl;
 import com.sap.sse.operationaltransformation.Operation;
-import com.sap.sse.server.replication.OperationExecutionListener;
-import com.sap.sse.server.replication.OperationWithResult;
+import com.sap.sse.replication.OperationExecutionListener;
+import com.sap.sse.replication.OperationWithResult;
 
 public class RacingEventServiceImpl implements RacingEventServiceWithTestSupport, RegattaListener, LeaderboardRegistry,
         Replicator {
