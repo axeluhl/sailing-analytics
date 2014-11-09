@@ -1,4 +1,4 @@
-package com.sap.sailing.server.replication.impl;
+package com.sap.sse.server.replication.impl;
 
 import java.io.IOException;
 import java.io.InputStream;

@@ -1,6 +1,6 @@
-package com.sap.sailing.server.replication;
+package com.sap.sse.server.replication;
 
-import com.sap.sailing.server.replication.impl.ReplicationFactoryImpl;
+import com.sap.sse.server.replication.impl.ReplicationFactoryImpl;
 
 public interface ReplicationFactory {
     static ReplicationFactory INSTANCE = new ReplicationFactoryImpl();

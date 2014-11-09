@@ -1,4 +1,4 @@
-package com.sap.sailing.server.replication.impl;
+package com.sap.sse.server.replication.impl;
 
 import java.util.Collections;
 import java.util.HashMap;
@@ -7,9 +7,9 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
-import com.sap.sailing.server.replication.OperationWithResult;
-import com.sap.sailing.server.replication.ReplicationMasterDescriptor;
 import com.sap.sse.common.Util;
+import com.sap.sse.server.replication.OperationWithResult;
+import com.sap.sse.server.replication.ReplicationMasterDescriptor;
 
 /**
  * Manages the replicas and keeps statistics.

@@ -1,4 +1,4 @@
-package com.sap.sailing.server.replication.impl;
+package com.sap.sse.server.replication.impl;
 
 import java.io.BufferedReader;
 import java.io.ByteArrayOutputStream;
@@ -29,12 +29,12 @@ import com.rabbitmq.client.AMQP.Queue.DeleteOk;
 import com.rabbitmq.client.Channel;
 import com.rabbitmq.client.ConnectionFactory;
 import com.rabbitmq.client.QueueingConsumer;
-import com.sap.sailing.server.replication.OperationExecutionListener;
-import com.sap.sailing.server.replication.OperationWithResult;
-import com.sap.sailing.server.replication.Replicable;
-import com.sap.sailing.server.replication.ReplicationMasterDescriptor;
-import com.sap.sailing.server.replication.ReplicationService;
 import com.sap.sse.BuildVersion;
+import com.sap.sse.server.replication.OperationExecutionListener;
+import com.sap.sse.server.replication.OperationWithResult;
+import com.sap.sse.server.replication.Replicable;
+import com.sap.sse.server.replication.ReplicationMasterDescriptor;
+import com.sap.sse.server.replication.ReplicationService;
 
 /**
  * Can observe a {@link RacingEventService} for the operations it performs that require replication. Only observes as

@@ -1,5 +1,10 @@
 package com.sap.sailing.server.replication.test;
 
+import static org.hamcrest.core.Is.is;
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertNotSame;
+import static org.junit.Assert.assertThat;
+
 import java.util.HashSet;
 import java.util.Set;
 
@@ -13,9 +18,6 @@ import com.sap.sse.common.Duration;
 import com.sap.sse.common.TimePoint;
 import com.sap.sse.common.impl.MillisecondsDurationImpl;
 import com.sap.sse.common.impl.MillisecondsTimePoint;
-
-import static org.junit.Assert.*;
-import static org.hamcrest.core.Is.*;
 
 public class MediaReplicationTest extends AbstractServerReplicationTest {
       

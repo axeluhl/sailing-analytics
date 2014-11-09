@@ -1,4 +1,4 @@
-package com.sap.sailing.server.replication;
+package com.sap.sse.server.replication;
 
 
 /**

@@ -19,8 +19,8 @@ import org.junit.Test;
 import com.rabbitmq.client.Channel;
 import com.rabbitmq.client.Connection;
 import com.rabbitmq.client.ConnectionFactory;
-import com.sap.sailing.server.replication.impl.RabbitInputStreamProvider;
-import com.sap.sailing.server.replication.impl.RabbitOutputStream;
+import com.sap.sse.server.replication.impl.RabbitInputStreamProvider;
+import com.sap.sse.server.replication.impl.RabbitOutputStream;
 
 /**
  * A number of tests for the {@link OutputStream} / {@link InputStream} implementation using an underlying RabbitMQ message queue.

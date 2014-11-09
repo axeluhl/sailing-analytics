@@ -381,11 +381,6 @@ import com.sap.sailing.server.operationaltransformation.UpdateLeaderboardScoreCo
 import com.sap.sailing.server.operationaltransformation.UpdateRaceDelayToLive;
 import com.sap.sailing.server.operationaltransformation.UpdateSeries;
 import com.sap.sailing.server.operationaltransformation.UpdateSpecificRegatta;
-import com.sap.sailing.server.replication.OperationWithResult;
-import com.sap.sailing.server.replication.ReplicationFactory;
-import com.sap.sailing.server.replication.ReplicationMasterDescriptor;
-import com.sap.sailing.server.replication.ReplicationService;
-import com.sap.sailing.server.replication.impl.ReplicaDescriptor;
 import com.sap.sailing.simulator.Path;
 import com.sap.sailing.simulator.PolarDiagram;
 import com.sap.sailing.simulator.SailingSimulator;
@@ -408,6 +403,11 @@ import com.sap.sse.common.impl.MillisecondsDurationImpl;
 import com.sap.sse.common.impl.MillisecondsTimePoint;
 import com.sap.sse.common.search.KeywordQuery;
 import com.sap.sse.common.search.Result;
+import com.sap.sse.server.replication.OperationWithResult;
+import com.sap.sse.server.replication.ReplicationFactory;
+import com.sap.sse.server.replication.ReplicationMasterDescriptor;
+import com.sap.sse.server.replication.ReplicationService;
+import com.sap.sse.server.replication.impl.ReplicaDescriptor;
 
 /**
  * The server side implementation of the RPC service.

@@ -13,9 +13,9 @@ import com.sap.sailing.domain.leaderboard.impl.LowPoint;
 import com.sap.sailing.server.RacingEventService;
 import com.sap.sailing.server.RacingEventServiceOperation;
 import com.sap.sailing.server.operationaltransformation.CreateFlexibleLeaderboard;
-import com.sap.sailing.server.replication.ReplicationMasterDescriptor;
-import com.sap.sailing.server.replication.impl.Replicator;
 import com.sap.sse.common.Util;
+import com.sap.sse.server.replication.ReplicationMasterDescriptor;
+import com.sap.sse.server.replication.impl.Replicator;
 
 public class PrematureOperationReceiptTest extends AbstractServerReplicationTest {
     private Replicator<RacingEventService, RacingEventServiceOperation<?>> replicator;

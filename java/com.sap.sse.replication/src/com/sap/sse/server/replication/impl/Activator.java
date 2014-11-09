@@ -1,4 +1,4 @@
-package com.sap.sailing.server.replication.impl;
+package com.sap.sse.server.replication.impl;
 
 import java.io.IOException;
 import java.util.logging.Logger;
@@ -6,7 +6,7 @@ import java.util.logging.Logger;
 import org.osgi.framework.BundleActivator;
 import org.osgi.framework.BundleContext;
 
-import com.sap.sailing.server.replication.ReplicationService;
+import com.sap.sse.server.replication.ReplicationService;
 
 /**
  * Initializes the replication sub-system. A hierarchy of parameter specifications is evaluated to configure this

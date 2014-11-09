@@ -1,7 +1,7 @@
-package com.sap.sailing.server.replication.impl;
+package com.sap.sse.server.replication.impl;
 
-import com.sap.sailing.server.replication.ReplicationFactory;
-import com.sap.sailing.server.replication.ReplicationMasterDescriptor;
+import com.sap.sse.server.replication.ReplicationFactory;
+import com.sap.sse.server.replication.ReplicationMasterDescriptor;
 
 public class ReplicationFactoryImpl implements ReplicationFactory {
     @Override
