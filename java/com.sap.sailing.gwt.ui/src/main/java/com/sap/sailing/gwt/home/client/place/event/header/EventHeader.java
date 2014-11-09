@@ -10,8 +10,10 @@ import com.google.gwt.event.dom.client.ClickEvent;
 import com.google.gwt.uibinder.client.UiBinder;
 import com.google.gwt.uibinder.client.UiField;
 import com.google.gwt.uibinder.client.UiHandler;
+import com.google.gwt.user.client.Event;
 import com.google.gwt.user.client.ui.Anchor;
 import com.google.gwt.user.client.ui.Widget;
+import com.google.gwt.user.client.ui.impl.HyperlinkImpl;
 import com.sap.sailing.domain.common.LeaderboardNameConstants;
 import com.sap.sailing.gwt.common.client.i18n.TextMessages;
 import com.sap.sailing.gwt.home.client.app.HomePlacesNavigator;
@@ -31,6 +33,8 @@ public class EventHeader extends AbstractEventComposite {
 
     interface EventHeaderUiBinder extends UiBinder<Widget, EventHeader> {
     }
+
+    private static final HyperlinkImpl HYPERLINK_IMPL = GWT.create(HyperlinkImpl.class);
 
 //    @UiField Anchor overviewLink;
       @UiField Anchor regattasLink;
@@ -73,7 +77,8 @@ public class EventHeader extends AbstractEventComposite {
     
     private final HomePlacesNavigator placeNavigator;
     private PlaceNavigation<LeaderboardPlace> overallLeaderboardNavigation = null; 
-            
+    private PlaceNavigation<EventPlace> regattasNavigation = null;
+    
     public EventHeader(EventDTO event, HomePlacesNavigator placeNavigator, EventPlaceNavigator pageNavigator) {
         super(event, pageNavigator);
         
@@ -128,9 +133,9 @@ public class EventHeader extends AbstractEventComposite {
         eventHeaderWrapperDiv.setAttribute("data-navigationtype", "compact");
         EventDTO event = getEvent();
         
-        PlaceNavigation<EventPlace> eventNavigation  = placeNavigator.getEventNavigation(event.id.toString(), event.getBaseURL(), event.isOnRemoteServer());
-        regattasLink.setHref(eventNavigation.getTargetUrl());
-        regattasLink2.setHref(eventNavigation.getTargetUrl());
+        PlaceNavigation<EventPlace> regattaDetailsNavigation  = placeNavigator.getEventNavigation(event.id.toString(), event.getBaseURL(), event.isOnRemoteServer());
+        regattasLink.setHref(regattaDetailsNavigation.getTargetUrl());
+        regattasLink2.setHref(regattaDetailsNavigation.getTargetUrl());
     }
 
     private StrippedLeaderboardDTO findLeaderboardWithSameCourseArea(EventDTO event) {
@@ -242,10 +247,10 @@ public class EventHeader extends AbstractEventComposite {
     }
 
     @UiHandler("seriesLeaderboardAnchor")
-    void seriesLeaderboardClicked(ClickEvent clickevent) {
+    void seriesLeaderboardClicked(ClickEvent e) {
         EventDTO event = getEvent();
-        if(event.isFakeSeries() && overallLeaderboardNavigation != null) {
-            placeNavigator.goToPlace(overallLeaderboardNavigation);
+        if(event.isFakeSeries()) {
+            handleClickEvent(e, overallLeaderboardNavigation);
         }
     }
     
@@ -254,10 +259,8 @@ public class EventHeader extends AbstractEventComposite {
 //        showRegattas();        
 //    }
 //
-    private void showRegattas(ClickEvent clickevent) {
-        getPageNavigator().goToRegattas();
-        clickevent.preventDefault();
-        
+    private void showRegattas(ClickEvent e) {
+        handleClickEvent(e, regattasNavigation);
 //        setActiveLink(links1, regattasLink);
 //        setActiveLink(links2, regattasLink2);
 //        setActiveLink(links3, regattasLink3);
@@ -306,7 +309,13 @@ public class EventHeader extends AbstractEventComposite {
 //        setActiveLink(links2, mediaLink2);
 //        setActiveLink(links3, mediaLink3);
 //    }
-    
+
+    private void handleClickEvent(ClickEvent e, PlaceNavigation<?> placeNavigation) {
+        if (HYPERLINK_IMPL.handleAsClick((Event) e.getNativeEvent())) {
+            placeNavigator.goToPlace(placeNavigation);
+            e.preventDefault();
+         }
+    }
     @Override
     protected void onLoad() {
         super.onLoad();
