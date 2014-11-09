@@ -316,6 +316,7 @@ public class EventHeader extends AbstractEventComposite {
             e.preventDefault();
          }
     }
+    
     @Override
     protected void onLoad() {
         super.onLoad();

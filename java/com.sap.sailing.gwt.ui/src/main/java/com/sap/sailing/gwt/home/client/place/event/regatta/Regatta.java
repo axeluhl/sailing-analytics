@@ -13,10 +13,12 @@ import com.google.gwt.event.dom.client.ClickEvent;
 import com.google.gwt.uibinder.client.UiBinder;
 import com.google.gwt.uibinder.client.UiField;
 import com.google.gwt.uibinder.client.UiHandler;
+import com.google.gwt.user.client.Event;
 import com.google.gwt.user.client.ui.Anchor;
 import com.google.gwt.user.client.ui.Composite;
 import com.google.gwt.user.client.ui.Image;
 import com.google.gwt.user.client.ui.Widget;
+import com.google.gwt.user.client.ui.impl.HyperlinkImpl;
 import com.sap.sailing.gwt.common.client.BoatClassImageResolver;
 import com.sap.sailing.gwt.common.client.BoatClassImageResources;
 import com.sap.sailing.gwt.home.client.app.HomePlacesNavigator;
@@ -37,6 +39,8 @@ public class Regatta extends Composite {
 
     interface RegattaUiBinder extends UiBinder<Widget, Regatta> {
     }
+
+    private static final HyperlinkImpl HYPERLINK_IMPL = GWT.create(HyperlinkImpl.class);
 
     private final EventDTO event;
     private final Timer timerForClientServerOffset;
@@ -165,13 +169,18 @@ public class Regatta extends Composite {
 
     @UiHandler("regattaDetailsLink")
     void regattaDetailsLinkClicked(ClickEvent e) {
-        placesNavigator.goToPlace(regattaNavigation);
-        e.preventDefault();
+        handleClickEvent(e, regattaNavigation);
     }
 
     @UiHandler("leaderboardLink")
     void leaderboardLinkClicked(ClickEvent e) {
-        placesNavigator.goToPlace(leaderboardNavigation);
-        e.preventDefault();
+        handleClickEvent(e, leaderboardNavigation);
+    }
+    
+    private void handleClickEvent(ClickEvent e, PlaceNavigation<?> placeNavigation) {
+        if (HYPERLINK_IMPL.handleAsClick((Event) e.getNativeEvent())) {
+            placesNavigator.goToPlace(placeNavigation);
+            e.preventDefault();
+         }
     }
 }
