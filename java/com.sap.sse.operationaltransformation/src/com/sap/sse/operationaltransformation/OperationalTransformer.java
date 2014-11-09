@@ -12,7 +12,7 @@ package com.sap.sse.operationaltransformation;
 public class OperationalTransformer<S, O extends OperationWithTransformationSupport<S, O>> implements Transformer<S, O> {
     @Override
     public ClientServerOperationPair<S, O> transform(O clientOp, O serverOp) {
-        ClientServerOperationPair<O> result = new ClientServerOperationPair<S, O>(
+        ClientServerOperationPair<S, O> result = new ClientServerOperationPair<S, O>(
                 clientOp == null ? null : clientOp.transformClientOp(serverOp),
                         serverOp == null ? null : serverOp.transformServerOp(clientOp));
         return result;
