@@ -15,7 +15,6 @@ public class PlaceNavigation<T extends Place> {
         this.destinationPlace = destinationPlace;
         this.tokenizer = tokenizer;
         String locationURL = getLocationURL();
-        Window.alert(locationURL);
         this.isDestinationOnRemoteServer = !(isLocationOnLocalhost(locationURL) || isLocationOnDefaultSapSailingServer(locationURL));
         if(isDestinationOnRemoteServer) {
             this.baseUrl = AbstractPlaceNavigator.DEFAULT_SAPSAILING_SERVER_URL; 
