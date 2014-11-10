@@ -57,6 +57,10 @@ http://sapsailing.com/tracking/checkin
 
 see [events/{event_id}](http://www.sapsailing.com/sailingserver/webservices/api/v1/eventGetDoc.html)
 
+### Leaderboard Information
+
+see [leaderboards/{leaderboard_name}](http://www.sapsailing.com/sailingserver/webservices/api/v1/leaderboardGetDoc.html)
+
 ### Competitor Information
 
 **Path:** ``competitors/{competitor-id}``
