@@ -110,7 +110,7 @@ public class AdminConsolePanel extends DockLayoutPanel {
         }
 
         private void refreshDataFor(Widget target) {
-            RefreshableAdminConsolePanel refreshTarget = panelsByWidget.get(target);
+            RefreshableAdminConsolePanel refreshTarget = panelsByWidget.get(unwrapScrollPanel(target));
             if (refreshTarget != null) {
                 refreshTarget.refreshAfterBecomingVisible();
             }
