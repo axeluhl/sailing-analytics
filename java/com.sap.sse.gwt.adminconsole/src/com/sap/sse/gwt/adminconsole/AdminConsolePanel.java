@@ -33,11 +33,11 @@ import com.sap.sse.security.ui.shared.UserDTO;
  * tab panel can be added as the content widget of a vertical tab, in turn holding widgets in horizontal tabs.<p>
  * 
  * After constructing an instance of this class, there are three ways for adding widgets:<ul>
- *   <li>{@link #addToVerticalTabPanel(RefreshableAdminConsolePanel, String, AdminConsoleFeatures) adds a widget as a content element
+ *   <li>{@link #addToVerticalTabPanel(RefreshableAdminConsolePanel, String, AdminConsoleFeatures)} adds a widget as a content element
  *   of a vertical tab</li>
- *   <li>{@link #addVerticalTab(String, String, AdminConsoleFeatures) creates a horizontal tab panel and adds it as a content element of
+ *   <li>{@link #addVerticalTab(String, String, AdminConsoleFeatures)} creates a horizontal tab panel and adds it as a content element of
  *   a vertical tab</li>
- *   <li>{@link #addToTabPanel(TabLayoutPanel, RefreshableAdminConsolePanel, String, AdminConsoleFeatures) adds a widget as a content element
+ *   <li>{@link #addToTabPanel(TabLayoutPanel, RefreshableAdminConsolePanel, String, AdminConsoleFeatures)} adds a widget as a content element
  *   of a horizontal tab</li>
  * </ul>
  * 
@@ -93,11 +93,10 @@ public class AdminConsolePanel extends DockLayoutPanel {
                 if (source instanceof TabLayoutPanel) {
                     final TabLayoutPanel tabPanel = ((TabLayoutPanel) source);
                     final Widget selectedPanel = tabPanel.getWidget(event.getSelectedItem());
-                    refreshDataFor(selectedPanel);
+                    refreshDataFor(unwrapScrollPanel(selectedPanel));
                 } else if (source instanceof VerticalTabLayoutPanel) {
                     final VerticalTabLayoutPanel verticalTabLayoutPanel = (VerticalTabLayoutPanel) source;
-                    Widget widgetAssociatedToVerticalTab = verticalTabLayoutPanel.getWidget(verticalTabLayoutPanel
-                            .getSelectedIndex());
+                    Widget widgetAssociatedToVerticalTab = verticalTabLayoutPanel.getWidget(verticalTabLayoutPanel.getSelectedIndex());
                     if (widgetAssociatedToVerticalTab instanceof TabLayoutPanel) {
                         TabLayoutPanel selectedTabLayoutPanel = (TabLayoutPanel) widgetAssociatedToVerticalTab;
                         final int selectedIndex = selectedTabLayoutPanel.getSelectedIndex();
@@ -110,11 +109,25 @@ public class AdminConsolePanel extends DockLayoutPanel {
             }
         }
 
-        private void refreshDataFor(Widget widgetAssociatedToVerticalTab) {
-            RefreshableAdminConsolePanel refreshTarget = panelsByWidget.get(widgetAssociatedToVerticalTab);
+        private void refreshDataFor(Widget target) {
+            RefreshableAdminConsolePanel refreshTarget = panelsByWidget.get(target);
             if (refreshTarget != null) {
                 refreshTarget.refreshAfterBecomingVisible();
             }
+        }
+
+        /**
+         * If the <code>widgetMaybeWrappedByScrollPanel</code> is a scroll panel, returns the content widget,
+         * otherwise <code>widgetMaybeWrappedByScrollPanel</code> is returned.
+         */
+        private Widget unwrapScrollPanel(Widget widgetMaybeWrappedByScrollPanel) {
+            final Widget target;
+            if (widgetMaybeWrappedByScrollPanel instanceof ScrollPanel) {
+                target = ((ScrollPanel) widgetMaybeWrappedByScrollPanel).getWidget();
+            } else {
+                target = widgetMaybeWrappedByScrollPanel;
+            }
+            return target;
         }
     }
     
@@ -240,7 +253,7 @@ public class AdminConsolePanel extends DockLayoutPanel {
      * method can be called.
      */
     private void addToTabPanel(VerticalOrHorizontalTabLayoutPanel tabPanel, RefreshableAdminConsolePanel panelToAdd, String tabTitle, AdminConsoleFeatures feature) {
-        remeberWidgetLocationAndFeature(tabPanel, panelToAdd.getWidget(), tabTitle, feature);
+        remeberWidgetLocationAndFeature(tabPanel, wrapInScrollPanel(panelToAdd.getWidget()), tabTitle, feature);
         panelsByWidget.put(panelToAdd.getWidget(), panelToAdd);
     }
 
@@ -250,7 +263,7 @@ public class AdminConsolePanel extends DockLayoutPanel {
     private void remeberWidgetLocationAndFeature(VerticalOrHorizontalTabLayoutPanel tabPanel, Widget widgetToAdd,
             String tabTitle, AdminConsoleFeatures feature) {
         roleSpecificTabs.put(new Triple<VerticalOrHorizontalTabLayoutPanel, Widget, String>(tabPanel,
-                wrapInScrollPanel(widgetToAdd), tabTitle), feature);
+                widgetToAdd, tabTitle), feature);
     }
 
     /**
