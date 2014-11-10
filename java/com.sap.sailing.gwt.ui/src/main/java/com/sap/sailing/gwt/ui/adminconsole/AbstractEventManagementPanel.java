@@ -13,7 +13,6 @@ import java.util.Set;
 import com.google.gwt.user.client.Window;
 import com.google.gwt.user.client.ui.ListBox;
 import com.sap.sailing.gwt.ui.client.AbstractRegattaPanel;
-import com.sap.sailing.gwt.ui.client.ErrorReporter;
 import com.sap.sailing.gwt.ui.client.RaceSelectionProvider;
 import com.sap.sailing.gwt.ui.client.RegattaRefresher;
 import com.sap.sailing.gwt.ui.client.SailingServiceAsync;
@@ -21,6 +20,7 @@ import com.sap.sailing.gwt.ui.client.StringMessages;
 import com.sap.sailing.gwt.ui.shared.RaceRecordDTO;
 import com.sap.sailing.gwt.ui.shared.RegattaDTO;
 import com.sap.sse.common.Util;
+import com.sap.sse.gwt.client.ErrorReporter;
 
 public abstract class AbstractEventManagementPanel extends AbstractRegattaPanel {
     protected final TrackedRacesListComposite trackedRacesListComposite;

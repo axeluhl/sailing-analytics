@@ -14,9 +14,9 @@ import com.sap.sailing.gwt.ui.adminconsole.AbstractLeaderboardConfigPanel.RaceCo
 import com.sap.sailing.gwt.ui.adminconsole.LeaderboardConfigPanel.AnchorCell;
 import com.sap.sailing.gwt.ui.adminconsole.LeaderboardConfigPanel.AnchorTemplates;
 import com.sap.sailing.gwt.ui.client.EntryPointLinkFactory;
-import com.sap.sailing.gwt.ui.client.ErrorReporter;
 import com.sap.sailing.gwt.ui.client.SailingServiceAsync;
 import com.sap.sailing.gwt.ui.client.StringMessages;
+import com.sap.sse.gwt.client.ErrorReporter;
 
 public class RaceTableWrapper<S extends SelectionModel<RaceColumnDTOAndFleetDTOWithNameBasedEquality>>
 extends TableWrapper<RaceColumnDTOAndFleetDTOWithNameBasedEquality, S> {

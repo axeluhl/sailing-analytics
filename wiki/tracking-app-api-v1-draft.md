@@ -4,13 +4,15 @@
 
 This is a design for the REST API to be used by the iOS and Android tracking apps.
 
-## Event Data
+## Push Notifications
+
+Event data can be updated via push notifications. These are limited on iOS to 256 bytes (not characters). For this reason, on receiving a push notification, the app must GET the event data.
+
+## Checkin Information
 
 ### Path
 
-    http://kielerwoche2015.sapsailing.com:8888
-        ?event_id=957fab64e36d240dd07aeed2bd5a84b6
-        &competitor_id=250cf8b51c773f3f8dc8b4be867a9a02
+   http://kielerwoche2015.sapsailing.com:8888/api/v1/checkin_info.json?leaderboard={unique_leaderboard_name}&competitor_id={competitor_id}
 
 ### Verb
 
@@ -21,39 +23,23 @@ This is a design for the REST API to be used by the iOS and Android tracking app
     {
         "serverUrl" : "http://kielerwoche2015.sapsailing.com:8888",
         "event" : {
-            "eventId" : "957fab64e36d240dd07aeed2bd5a84b6",
-            "eventTitle" : "Kieler Woche",
-            "eventStartDate" : 1414414481000,
-            "eventEndDate" : 1414609200000,
-            "eventDays": [
-                {
-                    "eventDayStart" : 1414414481000,
-                    "eventDayEnd" : 1414436081000
-                },
-                {
-                    "eventDayStart" : 1414497600000,
-                    "eventDayEnd" : 1414522800000
-                },
-                {
-                    "eventDayStart" : 1414584000000,
-                    "eventDayEnd" : 1414609200000
-                }
-            ]
+            "id" : "957fab64e36d240dd07aeed2bd5a84b6",
+            "title" : "Kieler Woche",
+            "startDate" : 1414414481000,
+            "endDate" : 1414609200000
         },
-        "competitor" : {
-            "competitorId" : "250cf8b51c773f3f8dc8b4be867a9a02",
-            "competitorName" : "Alster Segel Club",
-            "competitorProfileImageUrl" : "http://s3.amazonaws.com/sapsailing/profile_images/68053af2923e00204c3ca7c6a3150cf7.jpeg"
+        "regatta": {
+            "id": "237fab64e36d240dd07aeed2bd5a8426",
+            "title": "49ers"
+        },
+        "competitor":{
+             "id" : "e45fab64e36d240dd07aeed2bd5a8a21",
+             "name" : "Alster Segel Club",
+             "registration" : "GER 13"
         }
     }
 
 **serverUrl** This is the endpoint to be used for all following REST requests.
-
-**eventDays** An event can be held for several days. This array contains all start and end times of an event day. This is used to remind a user to turn tracking on or off (in order to save battery).
-
-### Push Notifications
-
-Event data can be updated via push notifications. These are limited on iOS to 256 bytes (not characters). For this reason, on receiving a push notification, the app must GET the event data.
 
 ## Check-In
 
@@ -63,7 +49,7 @@ _Question: What should be done if a second device is mapped to competitor?_
 
 ### Path
 
-    /event/{event_id}/competitor/{competitor_id}/device
+    {serverUrl}/api/v1/leaderboard/{unique_leaderboard_name}/competitor/{competitor_id}/checkin.json
 
 ### Verb
 
@@ -83,13 +69,104 @@ _Question: What should be done if a second device is mapped to competitor?_
 
 **pushDeviceId** On Android the GCM regId, on iOS the APNS push token. This is needed for sending push notifications to the device.
 
-## Upload Profile Image
+## Checkout
 
-An image can be uploaded per competitor and event.
+Needed to destroy a device coupling with leaderboard & competitor. AKA checkout.
 
 ### Path
 
-    /event/{event_id}/competitor/{competitor_id}/profile_image
+    {serverUrl}/api/v1/leaderboard/{unique_leaderboard_name}/competitor/{competitor_id}/device/{deviceUdid}.json
+
+### Verb
+ 
+    DELETE
+
+
+## Regatta Info
+
+Informations regarding a regatta. We need the list of (scheduled) races to remind the user to start tracking.
+
+### Path
+
+    {serverUrl}/api/v1/leaderboard/{unique_leaderboard_name}/regatta.json
+
+or
+  
+    {serverUrl}/api/v1/event/{event_id}/regatta/{regatta_id}.json
+
+### Verb
+
+    GET
+
+### Response
+
+    {
+      "id": "237fab64e36d240dd07aeed2bd5a8426",
+      "title": "49ers",
+      "event_id" : "237fab64e36d240dd07aeed2bd5a8426"
+      "leaderboard" : "Leaderboard Identifier",
+      "races":[
+        {
+          "startTime" : 1414414481000,
+          "status" : "finished",
+          "fleet" : "Blue"
+          "phase" : "Qualification"
+          "name" : "Q1"
+        },
+        {
+          "startTime" : 1414414481005,
+          "status" : "running",
+          "fleet" : "Red"
+          "phase" : "Qualification"
+          "name" : "Q1"
+        },
+        {
+          "startTime" : 1414414481010,
+          "status" : "scheduled",
+          "fleet" : "Blue"
+          "phase" : "Qualification"
+          "name" : "Q2"
+        },
+        {
+          "startTime" : "",
+          "status" : "unscheduled",
+          "fleet" : "Red"
+          "phase" : "Qualification"
+          "name" : "Q2"
+        }
+       ]
+    },
+
+
+## Competitor Info
+
+Informations for a competitor can be requested.
+
+### Path
+
+    {serverUrl}/api/v1/competitor/{competitor_id}.json
+
+### Verb
+
+    GET
+
+### Response
+
+    {
+     "Id" : "250cf8b51c773f3f8dc8b4be867a9a02",
+     "Name" : "Alster Segel Club",
+     "ProfileImageUrl" : "http://s3.amazonaws.com/sapsailing/profile_images/68053af2923e00204c3ca7c6a3150cf7.jpeg"
+     "Flag": {BASE64STRING or URL},
+     "Registration": "GER 14"
+    }
+
+## Upload Profile Image
+
+An image can be uploaded per competitor.
+
+### Path
+
+    {serverUrl}/api/v1/competitor/{competitor_id}/profile_image.json
 
 ### Verb
 
@@ -107,28 +184,7 @@ Multipart upload with part `image` containing JPEG image 80%, max dimension 1200
 
 **profileImageUrl** URL of uploaded image.
 
-## Tracking Status
-
-As general information, the tracking status of the smartphone is sent.
-
-### Path
-
-    /event/{event_id}/competitor/{competitor_id}/tracking_status
-
-### Verb
-
-    POST
-
-### Request
-
-    {
-        "timeStamp" : 14144158370000,
-        "status" : "start"
-    }
-
-**status** Either `start` or `stop`.
-
-## Send Measurements
+## Send Measurements (to the Fix Store)
 
 The main data sent by the app.
 
@@ -138,7 +194,7 @@ GZIP compression is a must. Bulk uploads should be chunked, e.g. per 1,000 locat
 
 ### Path
 
-    /event/{event_id}/competitor/{competitor_id}/measurements
+    {serverUrl}/api/v1/fix_store.json
 
 ### Verb
 

@@ -4,6 +4,8 @@ import java.util.Collections;
 
 import com.google.gwt.core.client.GWT;
 import com.google.gwt.event.dom.client.ClickEvent;
+import com.google.gwt.event.logical.shared.AttachEvent;
+import com.google.gwt.event.logical.shared.AttachEvent.Handler;
 import com.google.gwt.uibinder.client.UiBinder;
 import com.google.gwt.uibinder.client.UiField;
 import com.google.gwt.uibinder.client.UiHandler;
@@ -49,8 +51,6 @@ public class LoginView extends Composite {
         LoginViewResources.INSTANCE.css().ensureInjected();
         initWidget(uiBinder.createAndBindUi(this));
         this.appName.setText(appName);
-        
-        
         userNameTextBox.setWatermark(StringMessages.INSTANCE.username());
         userNameTextBox.setWatermarkStyleName(LoginViewResources.INSTANCE.css().textInput_watermark());
         passwordTextBox.setWatermark(StringMessages.INSTANCE.password());
@@ -60,6 +60,12 @@ public class LoginView extends Composite {
         oAuthPanel.add(new OAuthLogin(userManagementService));
         userNameTextBox.setFocus(true);
         DialogUtils.linkEnterToButton(loginButton, userNameTextBox, passwordTextBox);
+        userNameTextBox.addAttachHandler(new Handler() {
+            @Override
+            public void onAttachOrDetach(AttachEvent event) {
+                userNameTextBox.setFocus(true);
+            }
+        });
     }
     
     @UiHandler("loginButton")

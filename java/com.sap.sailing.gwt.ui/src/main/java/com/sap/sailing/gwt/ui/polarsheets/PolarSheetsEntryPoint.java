@@ -8,7 +8,7 @@ import com.google.gwt.core.client.GWT;
 import com.google.gwt.user.client.rpc.AsyncCallback;
 import com.google.gwt.user.client.rpc.ServiceDefTarget;
 import com.google.gwt.user.client.ui.RootLayoutPanel;
-import com.sap.sailing.gwt.ui.client.AbstractEntryPoint;
+import com.sap.sailing.gwt.ui.client.AbstractSailingEntryPoint;
 import com.sap.sailing.gwt.ui.client.RegattaRefresher;
 import com.sap.sailing.gwt.ui.client.RegattasDisplayer;
 import com.sap.sailing.gwt.ui.client.RemoteServiceMappingConstants;
@@ -17,7 +17,7 @@ import com.sap.sailing.gwt.ui.client.SailingServiceAsync;
 import com.sap.sailing.gwt.ui.shared.RegattaDTO;
 import com.sap.sse.gwt.client.EntryPointHelper;
 
-public class PolarSheetsEntryPoint extends AbstractEntryPoint implements RegattaRefresher {
+public class PolarSheetsEntryPoint extends AbstractSailingEntryPoint implements RegattaRefresher {
 
     private Set<RegattasDisplayer> regattaDisplayers;
 
@@ -36,7 +36,7 @@ public class PolarSheetsEntryPoint extends AbstractEntryPoint implements Regatta
 
     private void createUI() {
         RootLayoutPanel rootPanel = RootLayoutPanel.get();
-        PolarSheetsPanel polarSheetsPanel = new PolarSheetsPanel(sailingService, this, stringMessages, this);
+        PolarSheetsPanel polarSheetsPanel = new PolarSheetsPanel(sailingService, this, getStringMessages(), this);
         polarSheetsPanel.addStyleName(PolarSheetsPanel.POLARSHEETS_STYLE);
         regattaDisplayers.add(polarSheetsPanel);
         rootPanel.add(polarSheetsPanel);
