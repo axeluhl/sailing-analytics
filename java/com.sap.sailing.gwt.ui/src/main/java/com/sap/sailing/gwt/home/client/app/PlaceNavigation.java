@@ -16,18 +16,14 @@ public class PlaceNavigation<T extends Place> {
         this.tokenizer = tokenizer;
         String locationURL = getLocationURL();
         this.isDestinationOnRemoteServer = !(isLocationOnLocalhost(locationURL) || isLocationOnDefaultSapSailingServer(locationURL));
-        if(isDestinationOnRemoteServer) {
-            this.baseUrl = AbstractPlaceNavigator.DEFAULT_SAPSAILING_SERVER_URL; 
-        } else {
-            this.baseUrl = locationURL;
-        }
+        this.baseUrl = isDestinationOnRemoteServer ? AbstractPlaceNavigator.DEFAULT_SAPSAILING_SERVER_URL : locationURL; 
     }
 
     public PlaceNavigation(String baseUrl, T destinationPlace, PlaceTokenizer<T> tokenizer, boolean isDestinationOnRemoteServer) {
         this.destinationPlace = destinationPlace;
         this.tokenizer = tokenizer;
-        this.baseUrl = baseUrl;
         this.isDestinationOnRemoteServer = isDestinationOnRemoteServer;
+        this.baseUrl = isDestinationOnRemoteServer ? baseUrl : getLocationURL(); 
     }
     
     public void gotoPlace() {
