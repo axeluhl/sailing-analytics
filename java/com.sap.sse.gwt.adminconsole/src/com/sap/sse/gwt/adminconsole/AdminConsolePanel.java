@@ -253,7 +253,7 @@ public class AdminConsolePanel extends DockLayoutPanel {
      * method can be called.
      */
     private void addToTabPanel(VerticalOrHorizontalTabLayoutPanel tabPanel, RefreshableAdminConsolePanel panelToAdd, String tabTitle, AdminConsoleFeatures feature) {
-        remeberWidgetLocationAndFeature(tabPanel, panelToAdd.getWidget(), tabTitle, feature);
+        remeberWidgetLocationAndFeature(tabPanel, wrapInScrollPanel(panelToAdd.getWidget()), tabTitle, feature);
         panelsByWidget.put(panelToAdd.getWidget(), panelToAdd);
     }
 
@@ -263,7 +263,7 @@ public class AdminConsolePanel extends DockLayoutPanel {
     private void remeberWidgetLocationAndFeature(VerticalOrHorizontalTabLayoutPanel tabPanel, Widget widgetToAdd,
             String tabTitle, AdminConsoleFeatures feature) {
         roleSpecificTabs.put(new Triple<VerticalOrHorizontalTabLayoutPanel, Widget, String>(tabPanel,
-                wrapInScrollPanel(widgetToAdd), tabTitle), feature);
+                widgetToAdd, tabTitle), feature);
     }
 
     /**
