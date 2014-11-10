@@ -22,6 +22,7 @@ import com.rabbitmq.client.QueueingConsumer;
 import com.rabbitmq.client.QueueingConsumer.Delivery;
 import com.rabbitmq.client.ShutdownSignalException;
 import com.sap.sse.replication.OperationWithResult;
+import com.sap.sse.replication.Replicable;
 import com.sap.sse.replication.ReplicationMasterDescriptor;
 
 /**
@@ -80,7 +81,7 @@ public class Replicator<S, O extends OperationWithResult<S, ?>> implements Runna
     /**
      * @param master
      *            descriptor of the master server from which this replicator receives messages
-     * @param racingEventServiceTracker
+     * @param replicableProvider
      *            OSGi service tracker for the replica to which to apply the messages received
      * @param startSuspended
      *            decides whether to stars the replicator immediately, not holding back messages received but forwarding
@@ -88,10 +89,10 @@ public class Replicator<S, O extends OperationWithResult<S, ?>> implements Runna
      * @param consumer
      *            the RabbitMQ consumer from which to load messages
      */
-    public Replicator(ReplicationMasterDescriptor master, HasReplicable<S, O> racingEventServiceTracker, boolean startSuspended, QueueingConsumer consumer) {
+    public Replicator(ReplicationMasterDescriptor master, HasReplicable<S, O> replicableProvider, boolean startSuspended, QueueingConsumer consumer) {
         this.queue = new ArrayList<OperationWithResult<S, ?>>();
         this.master = master;
-        this.replicableProvider = racingEventServiceTracker;
+        this.replicableProvider = replicableProvider;
         this.suspended = startSuspended;
         this.consumer = consumer;
     }
@@ -136,15 +137,16 @@ public class Replicator<S, O extends OperationWithResult<S, ?>> implements Runna
                 checksPerformed = 0;
                 // Set this object's class's class loader as context for de-serialization so that all exported classes
                 // of all required bundles/packages can be deserialized at least
-                Thread.currentThread().setContextClassLoader(getClass().getClassLoader());
-                ObjectInputStream ois = replicableProvider.getReplicable()
+                Replicable<S, O> replicable = replicableProvider.getReplicable();
+                Thread.currentThread().setContextClassLoader(replicable.getClass().getClassLoader());
+                ObjectInputStream ois = replicable
                         .createObjectInputStreamResolvingAgainstCache(
                                 new GZIPInputStream(new ByteArrayInputStream(bytesFromMessage)));
                 int operationsInMessage = 0;
                 try {
                     while (true) {
                         byte[] serializedOperation = (byte[]) ois.readObject();
-                        ObjectInputStream operationOIS = replicableProvider.getReplicable()
+                        ObjectInputStream operationOIS = replicable
                                 .createObjectInputStreamResolvingAgainstCache(new ByteArrayInputStream(serializedOperation));
                         @SuppressWarnings("unchecked")
                         OperationWithResult<S, ?> operation = (OperationWithResult<S, ?>) operationOIS.readObject();

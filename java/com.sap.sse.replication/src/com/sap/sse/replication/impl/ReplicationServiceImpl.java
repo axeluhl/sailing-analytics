@@ -57,7 +57,7 @@ OperationExecutionListener<S>, HasReplicable<S, O> {
     
     private final ReplicationInstancesManager<S> replicationInstancesManager;
     
-    private final ServiceTracker<Replicable<S, O>, Replicable<S, O>> racingEventServiceTracker;
+    private final ServiceTracker<Replicable<S, O>, Replicable<S, O>> replicableTracker;
     
     private final Replicable<S, O> localService;
     
@@ -183,10 +183,10 @@ OperationExecutionListener<S>, HasReplicable<S, O> {
         this.replicationInstancesManager = replicationInstancesManager;
         replicaUUIDs = new HashMap<ReplicationMasterDescriptor, String>();
         if (createRacingEventServiceTracker) {
-            racingEventServiceTracker = getRacingEventServiceTracker();
-            racingEventServiceTracker.open();
+            replicableTracker = getReplicableTracker();
+            replicableTracker.open();
         } else {
-            racingEventServiceTracker = null;
+            replicableTracker = null;
         }
         this.localService = localService;
         this.exchangeName = exchangeName;
@@ -210,7 +210,7 @@ OperationExecutionListener<S>, HasReplicable<S, O> {
         this(exchangeName, exchangeHost, 0, replicationInstancesManager, localService, /* create RacingEventServiceTracker */ false);
     }
     
-    protected ServiceTracker<Replicable<S, O>, Replicable<S, O>> getRacingEventServiceTracker() {
+    protected ServiceTracker<Replicable<S, O>, Replicable<S, O>> getReplicableTracker() {
         return new ServiceTracker<Replicable<S, O>, Replicable<S, O>>(
                 Activator.getDefaultContext(), Replicable.class.getName(), null);
     }
@@ -247,7 +247,7 @@ OperationExecutionListener<S>, HasReplicable<S, O> {
         if (localService != null) {
             result = localService;
         } else {
-            result = racingEventServiceTracker.getService();
+            result = replicableTracker.getService();
         }
         return result;
     }

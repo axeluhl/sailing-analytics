@@ -69,7 +69,7 @@ public class SailingServiceImplMock extends SailingServiceImpl {
                     new ReplicationServiceImpl<RacingEventService, RacingEventServiceOperation<?>>("test exchange", "localhost", 0,
                             new ReplicationInstancesManager<RacingEventService>()) {
                 @Override
-                protected ServiceTracker<Replicable<RacingEventService, RacingEventServiceOperation<?>>, Replicable<RacingEventService, RacingEventServiceOperation<?>>> getRacingEventServiceTracker() {
+                protected ServiceTracker<Replicable<RacingEventService, RacingEventServiceOperation<?>>, Replicable<RacingEventService, RacingEventServiceOperation<?>>> getReplicableTracker() {
                     @SuppressWarnings("unchecked")
                     ServiceTracker<Replicable<RacingEventService, RacingEventServiceOperation<?>>, Replicable<RacingEventService, RacingEventServiceOperation<?>>> result =
                         (ServiceTracker<Replicable<RacingEventService, RacingEventServiceOperation<?>>, Replicable<RacingEventService, RacingEventServiceOperation<?>>>) mock(ServiceTracker.class);
