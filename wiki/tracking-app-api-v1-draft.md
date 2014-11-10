@@ -152,22 +152,25 @@ GZIP compression is a must. Bulk uploads should be chunked, e.g. per 1,000 locat
 
 **Request:**
 ```
-[
-  {
-    "timestamp" : 14144160080000,
-    "latitude" : 54.325246,
-    "longitude" : 10.148556,
-    "speed" : 3.61,
-    "course" : 258.11,
-  },
-  {
-    "timestamp" : 14144168490000,
-    "latitude" : 55.12456,
-    "longitude" : 8.03456,
-    "speed" : 5.1,
-    "course" : 14.2,
-  }
-]
+{
+  deviceUuid: "af855a56-9726-4a9c-a77e-da955bd289bf",
+  fixes: [
+    {
+      "timestamp" : 14144160080000,
+      "latitude" : 54.325246,
+      "longitude" : 10.148556,
+      "speed" : 3.61,
+      "course" : 258.11,
+    },
+    {
+      "timestamp" : 14144168490000,
+      "latitude" : 55.12456,
+      "longitude" : 8.03456,
+      "speed" : 5.1,
+      "course" : 14.2,
+    }
+  ]
+}
 ```
 * JSON array may contain one or several fixes
 * **speed** Speed over ground in meters per second.
