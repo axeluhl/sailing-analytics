@@ -8,65 +8,56 @@
 
 import UIKit
 
-class HomeViewController: UIViewController, UIAlertViewDelegate {
+class HomeViewController: UIViewController, UITableViewDataSource, UITableViewDelegate {
     
-    @IBOutlet weak var trackingButton: UIButton!
-    @IBOutlet weak var batterySavingSwitch: UISwitch!
+    //private var regatta: Regatta
+    
     enum AlertViewTag: Int {
-        case StopTracking
+        case NoCameraAvailable
     }
     
-    override func viewDidLoad() {
-        super.viewDidLoad()
-        NSNotificationCenter.defaultCenter().addObserver(self, selector: "trackingStarted:", name: LocationManager.NotificationType.trackingStarted, object: nil)
-        NSNotificationCenter.defaultCenter().addObserver(self, selector: "trackingStopped:", name: LocationManager.NotificationType.trackingStopped, object: nil)
-        
-        batterySavingSwitch.setOn(BatteryManager.sharedManager.batterySavingPreference, animated: true)
+    override func prepareForSegue(segue: UIStoryboardSegue, sender: AnyObject?) {
+        if (segue.identifier! == "Regatta") {
+            let regattaViewController = segue.destinationViewController as RegattaViewController;
+            // TODO
+            // regattaViewController.regatta =  selectedRegatta
+        }
     }
     
-    deinit {
-        NSNotificationCenter.defaultCenter().removeObserver(self)
+    // MARK: - UITableViewDataSource
+    func tableView(tableView: UITableView, numberOfRowsInSection section: Int) -> Int {
+        // TODO
+        return 1
     }
     
-    // MARK: - Notification Listeners
-    func trackingStarted(notification: NSNotification) {
-        trackingButton.setTitle("Stop Tracking", forState: UIControlState.Normal)
+    func tableView(tableView: UITableView, cellForRowAtIndexPath indexPath: NSIndexPath) -> UITableViewCell {
+        var cell = tableView.dequeueReusableCellWithIdentifier("Regatta") as UITableViewCell!
+        // TODO
+        cell.textLabel.text = "Kieler Wocher 49er"
+        return cell
     }
     
-    func trackingStopped(notification: NSNotification) {
-        trackingButton.setTitle("Start Tracking", forState: UIControlState.Normal)
+    func tableView(tableView: UITableView, titleForHeaderInSection section: Int) -> String? {
+        return "Your Regattas"
+    }
+    
+    // MARK: - UITableViewDelegate
+    func tableView(tableView: UITableView, didSelectRowAtIndexPath indexPath: NSIndexPath) {
+        tableView.deselectRowAtIndexPath(indexPath, animated: true)
+        performSegueWithIdentifier("Regatta", sender: tableView)
     }
     
     // MARK: - Button actions
-    @IBAction func trackingButtonTap(sender: AnyObject) {
-        if LocationManager.sharedManager.isTracking {
-            let alertView = UIAlertView(title: "SAP Tracker", message: "Stop tracking?", delegate: self, cancelButtonTitle: "Cancel", otherButtonTitles: "Stop")
-            alertView.tag = AlertViewTag.StopTracking.rawValue;
+    @IBAction func scanButtonTap(sender: AnyObject) {
+        if (UIImagePickerController.isSourceTypeAvailable(UIImagePickerControllerSourceType.Camera)) {
+            performSegueWithIdentifier("Scan", sender: sender)
+        } else {
+            let alertView = UIAlertView(title: "SAP Tracker", message: "No camera available.", delegate: self, cancelButtonTitle: "Cancel")
+            alertView.tag = AlertViewTag.NoCameraAvailable.rawValue;
             alertView.alertViewStyle = .Default
             alertView.show()
-        } else {
-            LocationManager.sharedManager.startTracking()
+            
         }
-    }
-    
-    /* Alert view delegate */
-    func alertView(alertView: UIAlertView, clickedButtonAtIndex buttonIndex: Int) {
-        switch alertView.tag {
-        case AlertViewTag.StopTracking.rawValue:
-            switch buttonIndex {
-            case alertView.cancelButtonIndex:
-                break;
-            default:
-                LocationManager.sharedManager.stopTracking()
-            }
-            break;
-        default:
-            break;
-        }
-    }
-    
-    @IBAction func batterySavingChanged(sender: UISwitch) {
-        BatteryManager.sharedManager.batterySavingPreference = sender.on
     }
     
 }

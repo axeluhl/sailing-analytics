@@ -9,7 +9,7 @@
 import UIKit
 import AVFoundation
 
-class QRCodeViewController: UIViewController, AVCaptureMetadataOutputObjectsDelegate {
+class ScanViewController: UIViewController, AVCaptureMetadataOutputObjectsDelegate {
     struct NotificationType {
         static let qrcodeScannedNotificationKey = "qrcode_scanned"
     }
@@ -23,10 +23,7 @@ class QRCodeViewController: UIViewController, AVCaptureMetadataOutputObjectsDele
         startScanning()
     }
     
-    @IBAction func dismiss(sender: AnyObject) {
-        self.dismissViewControllerAnimated(true, completion: nil)
-    }
-    
+    /* Set up camera and QR code scanner */
     @IBAction func startScanning() {
         var device = AVCaptureDevice.defaultDeviceWithMediaType(AVMediaTypeVideo)
         
@@ -55,6 +52,7 @@ class QRCodeViewController: UIViewController, AVCaptureMetadataOutputObjectsDele
         session.startRunning()
     }
     
+    /* AVCaptureMetadataOutputObjectsDelegate. Parse scanned QR code */
     func captureOutput(captureOutput: AVCaptureOutput!, didOutputMetadataObjects metadataObjects: [AnyObject]!, fromConnection connection: AVCaptureConnection!)
     {
         if metadataObjects.count > 0 {
@@ -75,7 +73,7 @@ class QRCodeViewController: UIViewController, AVCaptureMetadataOutputObjectsDele
                 success: { (AFHTTPRequestOperation operation, AnyObject responseObject) -> Void in
                     var alert = UIAlertController(title: "SAP Tracker", message: "Connected to Server \(qrcodeData.server!)", preferredStyle: UIAlertControllerStyle.Alert)
                     alert.addAction(UIAlertAction(title: "OK", style: UIAlertActionStyle.Default) { UIAlertAction in
-                        self.dismissViewControllerAnimated(true, completion: nil)
+                        self.dismiss()
                         })
                     self.presentViewController(alert, animated: true, completion: nil)
                     NSLog("success")
@@ -88,5 +86,9 @@ class QRCodeViewController: UIViewController, AVCaptureMetadataOutputObjectsDele
                     NSLog("failure")
             })
         }
+    }
+    
+    func dismiss() {
+        navigationController!.popViewControllerAnimated(true)
     }
 }

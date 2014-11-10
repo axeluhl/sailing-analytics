@@ -8,9 +8,11 @@
 
 /* Begin PBXBuildFile section */
 		7F03FD3E19FA44CD00FA1327 /* APIManager.swift in Sources */ = {isa = PBXBuildFile; fileRef = 7F03FD3D19FA44CD00FA1327 /* APIManager.swift */; };
-		7F0658FD19F7D6700077FF95 /* QRCodeViewController.swift in Sources */ = {isa = PBXBuildFile; fileRef = 7F0658FC19F7D6700077FF95 /* QRCodeViewController.swift */; };
+		7F0658FD19F7D6700077FF95 /* ScanViewController.swift in Sources */ = {isa = PBXBuildFile; fileRef = 7F0658FC19F7D6700077FF95 /* ScanViewController.swift */; };
 		7F0658FF19F7EE910077FF95 /* QRCodeData.swift in Sources */ = {isa = PBXBuildFile; fileRef = 7F0658FE19F7EE910077FF95 /* QRCodeData.swift */; };
 		7F06590419F8094C0077FF95 /* DeviceUDIDManager.swift in Sources */ = {isa = PBXBuildFile; fileRef = 7F06590319F8094C0077FF95 /* DeviceUDIDManager.swift */; };
+		7F1875B31A10F1B800C25BE0 /* TrackingViewController.swift in Sources */ = {isa = PBXBuildFile; fileRef = 7F1875B21A10F1B800C25BE0 /* TrackingViewController.swift */; };
+		7F1875B51A10F1CE00C25BE0 /* RegattaViewController.swift in Sources */ = {isa = PBXBuildFile; fileRef = 7F1875B41A10F1CE00C25BE0 /* RegattaViewController.swift */; };
 		7F1B66F91A0CDCF600904A41 /* BatteryManager.swift in Sources */ = {isa = PBXBuildFile; fileRef = 7F1B66F81A0CDCF600904A41 /* BatteryManager.swift */; };
 		7F2C605A19F160E400C32D93 /* LocationManager.swift in Sources */ = {isa = PBXBuildFile; fileRef = 7F2C605919F160E400C32D93 /* LocationManager.swift */; };
 		7F3663041A00FD4600F6102D /* RaceLogEvent.swift in Sources */ = {isa = PBXBuildFile; fileRef = 7F3663031A00FD4600F6102D /* RaceLogEvent.swift */; };
@@ -23,6 +25,7 @@
 		7F83F16019F154F000C53328 /* LaunchScreen.xib in Resources */ = {isa = PBXBuildFile; fileRef = 7F83F15E19F154F000C53328 /* LaunchScreen.xib */; };
 		7F83F16C19F154F000C53328 /* SAPTrackerTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 7F83F16B19F154F000C53328 /* SAPTrackerTests.swift */; };
 		7F83F17619F1574700C53328 /* CoreLocation.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 7F83F17519F1574700C53328 /* CoreLocation.framework */; };
+		7F8CC2081A10D47A00C56D7F /* SettingsViewController.swift in Sources */ = {isa = PBXBuildFile; fileRef = 7F8CC2071A10D47A00C56D7F /* SettingsViewController.swift */; };
 		7FA6551819F65FBD00A1B92D /* GPSFix.swift in Sources */ = {isa = PBXBuildFile; fileRef = 7FA6551719F65FBD00A1B92D /* GPSFix.swift */; };
 		7FA6551A19F6661900A1B92D /* DataManager.swift in Sources */ = {isa = PBXBuildFile; fileRef = 7FA6551919F6661900A1B92D /* DataManager.swift */; };
 		7FC5232D19F6AEE800BBFDCC /* AVFoundation.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 7FC5232C19F6AEE800BBFDCC /* AVFoundation.framework */; };
@@ -43,9 +46,11 @@
 		06377F0B2F2854497073FC0E /* libPods.a */ = {isa = PBXFileReference; explicitFileType = archive.ar; includeInIndex = 0; path = libPods.a; sourceTree = BUILT_PRODUCTS_DIR; };
 		7F03FD3D19FA44CD00FA1327 /* APIManager.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = APIManager.swift; sourceTree = "<group>"; };
 		7F03FD3F19FA4D7400FA1327 /* bridge.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = bridge.h; sourceTree = "<group>"; };
-		7F0658FC19F7D6700077FF95 /* QRCodeViewController.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = QRCodeViewController.swift; sourceTree = "<group>"; };
+		7F0658FC19F7D6700077FF95 /* ScanViewController.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = ScanViewController.swift; sourceTree = "<group>"; };
 		7F0658FE19F7EE910077FF95 /* QRCodeData.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = QRCodeData.swift; sourceTree = "<group>"; };
 		7F06590319F8094C0077FF95 /* DeviceUDIDManager.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = DeviceUDIDManager.swift; sourceTree = "<group>"; };
+		7F1875B21A10F1B800C25BE0 /* TrackingViewController.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = TrackingViewController.swift; sourceTree = "<group>"; };
+		7F1875B41A10F1CE00C25BE0 /* RegattaViewController.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = RegattaViewController.swift; sourceTree = "<group>"; };
 		7F1B66F81A0CDCF600904A41 /* BatteryManager.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = BatteryManager.swift; sourceTree = "<group>"; };
 		7F2C605919F160E400C32D93 /* LocationManager.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = LocationManager.swift; sourceTree = "<group>"; };
 		7F3663031A00FD4600F6102D /* RaceLogEvent.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = RaceLogEvent.swift; sourceTree = "<group>"; };
@@ -62,6 +67,7 @@
 		7F83F16A19F154F000C53328 /* Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist.xml; path = Info.plist; sourceTree = "<group>"; };
 		7F83F16B19F154F000C53328 /* SAPTrackerTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SAPTrackerTests.swift; sourceTree = "<group>"; };
 		7F83F17519F1574700C53328 /* CoreLocation.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = CoreLocation.framework; path = System/Library/Frameworks/CoreLocation.framework; sourceTree = SDKROOT; };
+		7F8CC2071A10D47A00C56D7F /* SettingsViewController.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = SettingsViewController.swift; sourceTree = "<group>"; };
 		7FA6551719F65FBD00A1B92D /* GPSFix.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = GPSFix.swift; sourceTree = "<group>"; };
 		7FA6551919F6661900A1B92D /* DataManager.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = DataManager.swift; sourceTree = "<group>"; };
 		7FC5232C19F6AEE800BBFDCC /* AVFoundation.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = AVFoundation.framework; path = System/Library/Frameworks/AVFoundation.framework; sourceTree = SDKROOT; };
@@ -125,7 +131,10 @@
 			isa = PBXGroup;
 			children = (
 				7F83F15719F154F000C53328 /* HomeViewController.swift */,
-				7F0658FC19F7D6700077FF95 /* QRCodeViewController.swift */,
+				7F0658FC19F7D6700077FF95 /* ScanViewController.swift */,
+				7F1875B41A10F1CE00C25BE0 /* RegattaViewController.swift */,
+				7F8CC2071A10D47A00C56D7F /* SettingsViewController.swift */,
+				7F1875B21A10F1B800C25BE0 /* TrackingViewController.swift */,
 				7F83F15919F154F000C53328 /* Main.storyboard */,
 				7F83F15E19F154F000C53328 /* LaunchScreen.xib */,
 			);
@@ -339,6 +348,7 @@
 			isa = PBXSourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				7F1875B31A10F1B800C25BE0 /* TrackingViewController.swift in Sources */,
 				7F83F15819F154F000C53328 /* HomeViewController.swift in Sources */,
 				7F3663061A00FF0C00F6102D /* DeviceCompetitorMappingEvent.swift in Sources */,
 				7F44095B19F65B5B0021BF22 /* CoreData.xcdatamodeld in Sources */,
@@ -348,8 +358,10 @@
 				7FA6551A19F6661900A1B92D /* DataManager.swift in Sources */,
 				7F3663041A00FD4600F6102D /* RaceLogEvent.swift in Sources */,
 				7F2C605A19F160E400C32D93 /* LocationManager.swift in Sources */,
+				7F8CC2081A10D47A00C56D7F /* SettingsViewController.swift in Sources */,
 				7F06590419F8094C0077FF95 /* DeviceUDIDManager.swift in Sources */,
-				7F0658FD19F7D6700077FF95 /* QRCodeViewController.swift in Sources */,
+				7F0658FD19F7D6700077FF95 /* ScanViewController.swift in Sources */,
+				7F1875B51A10F1CE00C25BE0 /* RegattaViewController.swift in Sources */,
 				7F83F15619F154F000C53328 /* AppDelegate.swift in Sources */,
 				7F0658FF19F7EE910077FF95 /* QRCodeData.swift in Sources */,
 			);

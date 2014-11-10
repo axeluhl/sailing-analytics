@@ -146,6 +146,7 @@ class APIManager: NSObject {
         }
     }
     
+    /* Callback for BatteryManager.NotificationType.batterySavingChanged notification. */
     func batteryChanged() {
         syncPeriod = BatteryManager.sharedManager.batterySaving ? SyncPeriod.BatterySaving : SyncPeriod.Normal
     }
