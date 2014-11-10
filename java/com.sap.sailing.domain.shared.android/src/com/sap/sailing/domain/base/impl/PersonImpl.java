@@ -9,8 +9,8 @@ import java.util.Set;
 
 import com.sap.sailing.domain.base.Nationality;
 import com.sap.sailing.domain.base.NationalityChangeListener;
-import com.sap.sailing.domain.common.impl.NamedImpl;
 import com.sap.sse.common.Util;
+import com.sap.sse.common.impl.NamedImpl;
 
 public class PersonImpl extends NamedImpl implements DynamicPerson {
     private static final long serialVersionUID = -2104903799224233508L;

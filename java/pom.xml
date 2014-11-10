@@ -17,6 +17,7 @@
 		<module>com.sap.sse.common</module>
 		<module>com.sap.sse.mongodb</module>
 		<module>com.sap.sse.gwt</module>
+		<module>com.sap.sse.gwt.adminconsole</module>
 		<module>com.sap.sse.datamining</module>
 		<module>com.sap.sse.datamining.shared</module>
 		<module>com.sap.sse.datamining.test</module>

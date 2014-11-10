@@ -1,25 +1,22 @@
-package com.sap.sailing.gwt.ui.client.shared.panels;
+package com.sap.sse.gwt.adminconsole;
 
 import com.google.gwt.dom.client.Style;
 import com.google.gwt.user.client.rpc.AsyncCallback;
 import com.google.gwt.user.client.ui.FlowPanel;
 import com.google.gwt.user.client.ui.Label;
 import com.google.gwt.user.client.ui.Widget;
-import com.sap.sailing.gwt.ui.client.ErrorReporter;
-import com.sap.sailing.gwt.ui.client.SailingServiceAsync;
+import com.sap.sse.gwt.client.BuildVersionRetriever;
+import com.sap.sse.gwt.client.ErrorReporter;
 
 public class SystemInformationPanel extends FlowPanel {
 
     private final Label buildVersionText;
     
-    public SystemInformationPanel(final SailingServiceAsync sailingService, final ErrorReporter errorReporter) {
+    public SystemInformationPanel(final BuildVersionRetriever buildVersionRetriever, final ErrorReporter errorReporter) {
         super();
-        
         buildVersionText = new Label("");
         addFloatingWidget(buildVersionText);
-        
-        sailingService.getBuildVersion(new AsyncCallback<String>() {
-            
+        buildVersionRetriever.getBuildVersion(new AsyncCallback<String>() {
             @Override
             public void onSuccess(String result) {
                 buildVersionText.setText("Version: " + result);

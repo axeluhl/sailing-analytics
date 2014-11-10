@@ -15,10 +15,13 @@ import com.google.gwt.user.client.rpc.ServiceDefTarget;
 import com.google.gwt.user.client.ui.Button;
 import com.google.gwt.user.client.ui.DockLayoutPanel;
 import com.google.gwt.user.client.ui.FlowPanel;
+import com.google.gwt.user.client.ui.Label;
 import com.google.gwt.user.client.ui.RootLayoutPanel;
+import com.google.gwt.user.client.ui.RootPanel;
 import com.sap.sailing.domain.common.RegattaAndRaceIdentifier;
 import com.sap.sailing.domain.common.dto.RaceDTO;
-import com.sap.sailing.gwt.ui.client.AbstractEntryPoint;
+import com.sap.sailing.gwt.ui.client.AbstractSailingEntryPoint;
+import com.sap.sailing.gwt.ui.client.LogoAndTitlePanel;
 import com.sap.sailing.gwt.ui.client.MediaService;
 import com.sap.sailing.gwt.ui.client.MediaServiceAsync;
 import com.sap.sailing.gwt.ui.client.ParallelExecutionCallback;
@@ -38,7 +41,7 @@ import com.sap.sse.gwt.client.player.Timer;
 import com.sap.sse.gwt.client.player.Timer.PlayModes;
 import com.sap.sse.gwt.shared.GwtHttpRequestUtils;
 
-public class RaceBoardEntryPoint extends AbstractEntryPoint {
+public class RaceBoardEntryPoint extends AbstractSailingEntryPoint {
     private RaceDTO selectedRace;
 
     private static final String PARAM_REGATTA_NAME = "regattaName";
@@ -139,16 +142,23 @@ public class RaceBoardEntryPoint extends AbstractEntryPoint {
             sailingService.getLeaderboardGroupByName(leaderboardGroupNameParamValue, false /*withGeoLocationData*/, getLeaderboardGroupByNameCallback);
         }
     }
+    
+    private void createErrorPage(String message) {
+        LogoAndTitlePanel logoAndTitlePanel = new LogoAndTitlePanel(getStringMessages(), this, getUserService());
+        logoAndTitlePanel.addStyleName("LogoAndTitlePanel");
+        RootPanel.get().add(logoAndTitlePanel);
+        RootPanel.get().add(new Label(message));
+    }
 
     private void checkUrlParameters(List<String> leaderboardNames, LeaderboardGroupDTO leaderboardGroup,
             boolean canReplayWhileLiveIsPossible, List<RegattaDTO> regattas, EventDTO event,
             boolean showMapControls) {
         if (!leaderboardNames.contains(leaderboardName)) {
-            createErrorPage(stringMessages.noSuchLeaderboard());
-          return;
+            createErrorPage(getStringMessages().noSuchLeaderboard());
+            return;
         }
         if (eventId != null && event == null) {
-            createErrorPage(stringMessages.noSuchEvent());
+            createErrorPage(getStringMessages().noSuchEvent());
         }
         if (leaderboardGroupName != null && leaderboardGroup != null) {
             boolean foundLeaderboard = false;
@@ -159,7 +169,7 @@ public class RaceBoardEntryPoint extends AbstractEntryPoint {
                 }
             }
             if (!foundLeaderboard) {
-                createErrorPage(stringMessages.leaderboardNotContainedInLeaderboardGroup(leaderboardName, leaderboardGroupName));
+                createErrorPage(getStringMessages().leaderboardNotContainedInLeaderboardGroup(leaderboardName, leaderboardGroupName));
                 return;
             }
             if (event != null) {
@@ -171,7 +181,7 @@ public class RaceBoardEntryPoint extends AbstractEntryPoint {
                     }
                 }
                 if (!foundLeaderboardGroupInEvent) {
-                    createErrorPage(stringMessages.leaderboardGroupNotContainedInEvent(leaderboardGroupName, event.getName()));
+                    createErrorPage(getStringMessages().leaderboardGroupNotContainedInEvent(leaderboardGroupName, event.getName()));
                 }
             }
         }
@@ -189,7 +199,7 @@ public class RaceBoardEntryPoint extends AbstractEntryPoint {
         AsyncActionsExecutor asyncActionsExecutor = new AsyncActionsExecutor();
         RaceTimesInfoProvider raceTimesInfoProvider = new RaceTimesInfoProvider(sailingService, asyncActionsExecutor, this, singletonList, 5000l /* requestInterval*/);
         RaceBoardPanel raceBoardPanel = new RaceBoardPanel(sailingService, mediaService, getUserService(), asyncActionsExecutor, timer, raceSelectionModel,
-                leaderboardName, leaderboardGroupName, event, raceboardViewConfig, RaceBoardEntryPoint.this, stringMessages, userAgent, raceTimesInfoProvider, showMapControls);
+                leaderboardName, leaderboardGroupName, event, raceboardViewConfig, RaceBoardEntryPoint.this, getStringMessages(), userAgent, raceTimesInfoProvider, showMapControls);
         raceBoardPanel.fillRegattas(regattas);
         createRaceBoardInOneScreenMode(raceBoardPanel, raceboardViewConfig);
     }  
