@@ -37,6 +37,8 @@ import com.sap.sse.gwt.adminconsole.SystemInformationPanel;
 import com.sap.sse.gwt.client.EntryPointHelper;
 import com.sap.sse.gwt.client.async.AsyncActionsExecutor;
 import com.sap.sse.gwt.client.async.MarkedAsyncCallback;
+import com.sap.sse.security.ui.client.component.UserManagementPanel;
+import com.sap.sse.security.ui.client.i18n.StringMessages;
 import com.sap.sse.security.ui.loginpanel.LoginPanel;
 
 public class AdminConsoleEntryPoint extends AbstractSailingEntryPoint implements RegattaRefresher, LeaderboardsRefresher, LeaderboardGroupsRefresher {
@@ -216,6 +218,10 @@ public class AdminConsoleEntryPoint extends AbstractSailingEntryPoint implements
                 getStringMessages(), this);
         panel.addToTabPanel(advancedTabPanel, new DefaultRefreshableAdminConsolePanel<DeviceConfigurationUserPanel>(deviceConfigurationUserPanel),
                 getStringMessages().deviceConfiguration(), SailingAdminConsoleFeatures.MANAGE_DEVICE_CONFIGURATION);
+
+        final UserManagementPanel userManagementPanel = new UserManagementPanel(getUserService(), StringMessages.INSTANCE);
+        panel.addToTabPanel(advancedTabPanel, new DefaultRefreshableAdminConsolePanel<UserManagementPanel>(userManagementPanel),
+                getStringMessages().userManagement(), SailingAdminConsoleFeatures.MANAGE_USERS);
 
         panel.initUI();
         fillRegattas();

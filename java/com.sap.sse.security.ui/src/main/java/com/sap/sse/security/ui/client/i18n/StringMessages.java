@@ -78,4 +78,5 @@ public interface StringMessages extends com.sap.sse.gwt.client.StringMessages {
     String remoteProcedureCall();
     String serverReplies();
     String errorCommunicatingWithServer();
+    String editProfile();
 }

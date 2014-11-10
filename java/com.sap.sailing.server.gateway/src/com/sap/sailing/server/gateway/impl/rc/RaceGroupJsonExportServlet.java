@@ -12,7 +12,9 @@ import org.json.simple.JSONArray;
 import com.sap.sailing.domain.base.CourseArea;
 import com.sap.sailing.domain.base.racegroup.RaceGroup;
 import com.sap.sailing.domain.common.racelog.RaceLogServletConstants;
+import com.sap.sailing.domain.leaderboard.FlexibleLeaderboard;
 import com.sap.sailing.domain.leaderboard.Leaderboard;
+import com.sap.sailing.domain.leaderboard.RegattaLeaderboard;
 import com.sap.sailing.domain.racelog.RaceLog;
 import com.sap.sailing.server.gateway.AbstractJsonHttpServlet;
 import com.sap.sailing.server.gateway.serialization.JsonSerializer;
@@ -66,7 +68,12 @@ public class RaceGroupJsonExportServlet extends AbstractJsonHttpServlet {
         RaceGroupFactory raceGroupFactory = new RaceGroupFactory();
         for (Leaderboard leaderboard : getService().getLeaderboards().values()) {
             if (filterCourseArea.equals(leaderboard.getDefaultCourseArea())) {
-                RaceGroup raceGroup = raceGroupFactory.convert(leaderboard);
+                RaceGroup raceGroup = null;
+                if (leaderboard instanceof RegattaLeaderboard) {
+                    raceGroup = raceGroupFactory.convert((RegattaLeaderboard) leaderboard);
+                } else if (leaderboard instanceof FlexibleLeaderboard) {
+                    raceGroup = raceGroupFactory.convert((FlexibleLeaderboard) leaderboard);
+                }
                 result.add(serializer.serialize(raceGroup));
             }
         }
