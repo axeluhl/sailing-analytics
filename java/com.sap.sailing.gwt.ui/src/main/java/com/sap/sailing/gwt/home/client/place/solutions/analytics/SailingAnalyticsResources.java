@@ -7,9 +7,12 @@ import com.google.gwt.resources.client.TextResource;
 public interface SailingAnalyticsResources extends ClientBundle {
     public static final SailingAnalyticsResources INSTANCE = GWT.create(SailingAnalyticsResources.class);
 
-    @Source("release_notes_analyze.html")
+    @Source("com/sap/sailing/gwt/home/solutions/analytics_releasenotes.html")
     public TextResource getReleaseNotesHtml();
 
-    @Source("features_analyze.html")
+    @Source("com/sap/sailing/gwt/home/solutions/analytics_features.html")
     public TextResource getFeaturesHtml();
+    
+    @Source("com/sap/sailing/gwt/home/solutions/analytics_overview.html")
+    public TextResource getOverviewHtml();
 }

@@ -53,6 +53,7 @@
 	<div class="{style.analytics_nav}">
 	    <div class="{res.mainCss.grid}">
 	      <div class="{res.mediaCss.small12} {res.mediaCss.columns}">
+	          <g:Anchor ui:field="overviewAnchor" href="javascript:;" styleName="{style.analytics_nav_link}"><ui:text from='{i18n.overview}'/></g:Anchor>
 	          <g:Anchor ui:field="featuresAnchor" href="javascript:;" styleName="{style.analytics_nav_link}"><ui:text from='{i18n.features}'/></g:Anchor>
 	          <g:Anchor ui:field="releaseNotesAnchor" href="javascript:;" styleName="{style.analytics_nav_link}"><ui:text from='{i18n.releaseNotes}'/></g:Anchor>
 		  </div>
@@ -60,7 +61,8 @@
 	</div>
     <div class="{res.mainCss.grid}">
 		<div class="{res.mediaCss.small9} {res.mediaCss.large8} {res.mediaCss.columns}">
-    	    <g:HTML ui:field="contentFeatures" />
+    	    <g:HTML ui:field="contentOverview" />
+		    <g:HTML ui:field="contentFeatures" />
     	    <g:HTML ui:field="contentReleaseNotes" />
     	</div>
 	</div>

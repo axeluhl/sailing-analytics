@@ -18,9 +18,11 @@ public class TabletAndDesktopSailingAnalyticsView extends Composite implements S
     interface SailingAnalyticsPageViewUiBinder extends UiBinder<Widget, TabletAndDesktopSailingAnalyticsView> {
     }
 
+    @UiField HTML contentOverview;
     @UiField HTML contentFeatures;
     @UiField HTML contentReleaseNotes;
     
+    @UiField Anchor overviewAnchor;
     @UiField Anchor featuresAnchor;
     @UiField Anchor releaseNotesAnchor;
     
@@ -33,13 +35,24 @@ public class TabletAndDesktopSailingAnalyticsView extends Composite implements S
         
         contentReleaseNotes.setHTML(SailingAnalyticsResources.INSTANCE.getReleaseNotesHtml().getText());
         contentFeatures.setHTML(SailingAnalyticsResources.INSTANCE.getFeaturesHtml().getText());
+        contentOverview.setHTML(SailingAnalyticsResources.INSTANCE.getOverviewHtml().getText());
         
         contentReleaseNotes.setVisible(false);
-        subTitle.setInnerText(TextMessages.INSTANCE.features());
+        contentFeatures.setVisible(false);
+        subTitle.setInnerText(TextMessages.INSTANCE.overview());
     }
-    
+
+    @UiHandler("overviewAnchor")
+    void overviewClicked(ClickEvent event) {
+        contentOverview.setVisible(true);
+        contentFeatures.setVisible(false);
+        contentReleaseNotes.setVisible(false);
+        subTitle.setInnerText(TextMessages.INSTANCE.overview());
+    }
+
     @UiHandler("featuresAnchor")
     void featuresClicked(ClickEvent event) {
+        contentOverview.setVisible(false);
         contentFeatures.setVisible(true);
         contentReleaseNotes.setVisible(false);
         subTitle.setInnerText(TextMessages.INSTANCE.features());
@@ -47,6 +60,7 @@ public class TabletAndDesktopSailingAnalyticsView extends Composite implements S
 
     @UiHandler("releaseNotesAnchor")
     void releaseNotesClicked(ClickEvent event) {
+        contentOverview.setVisible(false);
         contentFeatures.setVisible(false);
         contentReleaseNotes.setVisible(true);
         subTitle.setInnerText(TextMessages.INSTANCE.releaseNotes());
