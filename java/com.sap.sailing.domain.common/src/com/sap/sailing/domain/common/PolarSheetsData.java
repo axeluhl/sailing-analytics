@@ -8,10 +8,8 @@ public interface PolarSheetsData extends Serializable {
     Number[][] getAveragedPolarDataByWindSpeed();
     
     int getDataCount();
-    
-    boolean isComplete();
 
-    Integer[] getDataCountPerAngleForWindspeed(int beaufort);
+    Integer[] getDataCountPerAngleForWindspeed(int windIndex);
 
     WindStepping getStepping();
 

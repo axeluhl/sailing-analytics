@@ -13,9 +13,9 @@ import org.junit.Test;
 import org.junit.rules.Timeout;
 
 import com.sap.sailing.domain.igtimiadapter.persistence.PersistenceFactory;
-import com.sap.sailing.mongodb.MongoDBConfiguration;
-import com.sap.sailing.mongodb.MongoDBService;
 import com.sap.sse.common.Util;
+import com.sap.sse.mongodb.MongoDBConfiguration;
+import com.sap.sse.mongodb.MongoDBService;
 
 public class WebSocketServerListTest {
     @Rule public Timeout AbstractTracTracLiveTestTimeout = new Timeout(2 * 60 * 1000);

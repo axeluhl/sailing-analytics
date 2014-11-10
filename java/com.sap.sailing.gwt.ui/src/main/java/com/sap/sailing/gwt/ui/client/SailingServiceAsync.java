@@ -76,11 +76,12 @@ import com.sap.sailing.gwt.ui.shared.WindDTO;
 import com.sap.sailing.gwt.ui.shared.WindInfoForRaceDTO;
 import com.sap.sse.common.Util;
 import com.sap.sse.common.search.KeywordQuery;
+import com.sap.sse.gwt.adminconsole.BuildVersionRetriever;
 
 /**
  * The async counterpart of {@link SailingService}
  */
-public interface SailingServiceAsync {
+public interface SailingServiceAsync extends BuildVersionRetriever {
 
     void getRegattas(AsyncCallback<List<RegattaDTO>> callback);
 
@@ -554,8 +555,13 @@ public interface SailingServiceAsync {
 
     void importWindFromIgtimi(List<RaceDTO> selectedRaces, boolean correctByDeclination, AsyncCallback<Map<RegattaAndRaceIdentifier, Integer>> asyncCallback);
 
+    void getBoatClassNamesWithPolarSheetsAvailable(AsyncCallback<List<String>> asyncCallback);
+    
     void getEventById(UUID id, boolean withStatisticalData, AsyncCallback<EventDTO> callback);
+    
 
+    void showCachedPolarSheetForBoatClass(String boatClassName,
+            AsyncCallback<PolarSheetGenerationResponse> asyncCallback);
     void getLeaderboardsByEvent(EventDTO event, AsyncCallback<List<StrippedLeaderboardDTO>> callback);
 
     void denoteForRaceLogTracking(String leaderboardName,

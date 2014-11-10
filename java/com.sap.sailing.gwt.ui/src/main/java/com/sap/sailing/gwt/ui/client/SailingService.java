@@ -357,9 +357,15 @@ public interface SailingService extends RemoteService {
     
     void createCourseArea(UUID eventId, String courseAreaName);
     
+    List<String> getBoatClassNamesWithPolarSheetsAvailable();
+    
     void removeCourseArea(UUID eventId, UUID courseAreaId);
 
     List<Util.Pair<String, String>> getLeaderboardsNamesOfMetaLeaderboard(String metaLeaderboardName);
+
+    PolarSheetGenerationResponse showCachedPolarSheetForBoatClass(String boatClassName);
+
+    
 
     Util.Pair<String, LeaderboardType> checkLeaderboardName(String leaderboardName);
 

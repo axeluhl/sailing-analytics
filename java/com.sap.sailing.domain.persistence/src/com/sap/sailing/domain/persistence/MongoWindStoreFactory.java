@@ -4,7 +4,7 @@ import java.net.UnknownHostException;
 
 import com.mongodb.MongoException;
 import com.sap.sailing.domain.persistence.impl.MongoWindStoreFactoryImpl;
-import com.sap.sailing.mongodb.MongoDBService;
+import com.sap.sse.mongodb.MongoDBService;
 
 public interface MongoWindStoreFactory {
     MongoWindStoreFactory INSTANCE = new MongoWindStoreFactoryImpl(MongoDBService.INSTANCE.getDB());

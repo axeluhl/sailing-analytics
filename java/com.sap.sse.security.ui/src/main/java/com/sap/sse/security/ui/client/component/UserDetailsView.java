@@ -142,7 +142,7 @@ public class UserDetailsView extends FlowPanel {
             emailLabel.setText("");
         } else {
             usernameLabel.setText(user.getName());
-            emailLabel.setText(user.getEmail());
+            emailLabel.setText(user.getEmail()+(user.isEmailValidated()?" \u2713":""));
             for (AccountDTO a : user.getAccounts()) {
                 DecoratorPanel accountPanelDecorator = new DecoratorPanel();
                 FlowPanel accountPanelContent = new FlowPanel();
@@ -157,7 +157,8 @@ public class UserDetailsView extends FlowPanel {
                             new ChangePasswordDialog(stringMessages, userManagementService, UserDetailsView.this.user, new DataEntryDialog.DialogCallback<UserData>() {
                                 @Override
                                 public void ok(UserData userData) {
-                                    userManagementService.updateSimpleUserPassword(UserDetailsView.this.user.getName(), /* admin doesn't need to provide old password */ null, userData.getPassword(), new MarkedAsyncCallback<Void>(
+                                    userManagementService.updateSimpleUserPassword(UserDetailsView.this.user.getName(), /* admin doesn't need to provide old password */ null,
+                                            /* resetPasswordSecret */ null, userData.getPassword(), new MarkedAsyncCallback<Void>(
                                             new AsyncCallback<Void>() {
                                                 @Override
                                                 public void onFailure(Throwable caught) {
@@ -186,30 +187,6 @@ public class UserDetailsView extends FlowPanel {
                             }).show();
                         }
                     });
-                    // only offer password reset if the user's e-mail address has successfully been validated
-                    if (UserDetailsView.this.user.isEmailValidated()) {
-                        final Button resetPasswordButton = new Button(stringMessages.resetPassword());
-                        accountPanelContent.add(resetPasswordButton);
-                        resetPasswordButton.addClickHandler(new ClickHandler() {
-                            @Override
-                            public void onClick(ClickEvent event) {
-                                userManagementService.resetPassword(UserDetailsView.this.user.getName(),
-                                        new MarkedAsyncCallback<Void>(new AsyncCallback<Void>() {
-                                            @Override
-                                            public void onFailure(Throwable caught) {
-                                                Window.alert(stringMessages.errorResettingPassword(
-                                                        UserDetailsView.this.user.getName(), caught.getMessage()));
-                                            }
-
-                                            @Override
-                                            public void onSuccess(Void result) {
-                                                Window.alert(stringMessages
-                                                        .successfullyResetPassword(UserDetailsView.this.user.getName()));
-                                            }
-                                        }));
-                            }
-                        });
-                    }
                 } else if (a instanceof SocialUserDTO) {
                     SocialUserDTO sua = (SocialUserDTO) a;
                     FlexTable table = new FlexTable();

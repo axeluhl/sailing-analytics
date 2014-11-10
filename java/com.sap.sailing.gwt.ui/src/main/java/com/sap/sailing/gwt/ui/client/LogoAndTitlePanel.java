@@ -5,6 +5,7 @@ import com.google.gwt.user.client.ui.Anchor;
 import com.google.gwt.user.client.ui.FlowPanel;
 import com.google.gwt.user.client.ui.Label;
 import com.google.gwt.user.client.ui.RequiresResize;
+import com.sap.sse.gwt.client.WindowSizeDetector;
 import com.sap.sse.security.ui.client.UserService;
 
 public class LogoAndTitlePanel extends FlowPanel implements RequiresResize {

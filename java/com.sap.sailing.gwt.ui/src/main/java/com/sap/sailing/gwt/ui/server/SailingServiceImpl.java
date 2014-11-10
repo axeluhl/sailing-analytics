@@ -190,7 +190,6 @@ import com.sap.sailing.domain.leaderboard.caching.LiveLeaderboardUpdater;
 import com.sap.sailing.domain.persistence.DomainObjectFactory;
 import com.sap.sailing.domain.persistence.MongoObjectFactory;
 import com.sap.sailing.domain.persistence.MongoRaceLogStoreFactory;
-import com.sap.sailing.domain.polarsheets.PolarSheetGenerationWorker;
 import com.sap.sailing.domain.racelog.RaceLog;
 import com.sap.sailing.domain.racelog.RaceLogEvent;
 import com.sap.sailing.domain.racelog.RaceLogEventFactory;
@@ -332,6 +331,7 @@ import com.sap.sailing.manage2sail.EventResultDescriptor;
 import com.sap.sailing.manage2sail.Manage2SailEventResultsParserImpl;
 import com.sap.sailing.manage2sail.RaceResultDescriptor;
 import com.sap.sailing.manage2sail.RegattaResultDescriptor;
+import com.sap.sailing.polars.PolarDataService;
 import com.sap.sailing.resultimport.ResultUrlProvider;
 import com.sap.sailing.resultimport.ResultUrlRegistry;
 import com.sap.sailing.server.RacingEventService;
@@ -474,7 +474,6 @@ public class SailingServiceImpl extends ProxiedRemoteServiceServlet implements S
     private final SwissTimingReplayService swissTimingReplayService;
 
     private final QuickRanksLiveCache quickRanksLiveCache;
-
     public SailingServiceImpl() {
         BundleContext context = Activator.getDefault();
         Activator activator = Activator.getInstance();
@@ -3897,13 +3896,31 @@ public class SailingServiceImpl extends ProxiedRemoteServiceServlet implements S
         for (RegattaAndRaceIdentifier race : selectedRaces) {
             trackedRaces.add(service.getTrackedRace(race));
         }
-        PolarSheetGenerationWorker genWorker = new PolarSheetGenerationWorker(trackedRaces, settings, executor);
-        genWorker.startPolarSheetGeneration();
         if (name == null || name.isEmpty()) {
             name = getCommonBoatClass(trackedRaces);
         }
-        PolarSheetsData result = genWorker.get();
+        PolarDataService polarDataService = service.getPolarDataService();
+        PolarSheetsData result = polarDataService.generatePolarSheet(trackedRaces, settings, executor);
         return new PolarSheetGenerationResponseImpl(id, name, result);
+    }
+
+    @Override
+    public List<String> getBoatClassNamesWithPolarSheetsAvailable() {
+        Set<BoatClass> boatClasses = getService().getPolarDataService().getAllBoatClassesWithPolarSheetsAvailable();
+        List<String> names = new ArrayList<String>();
+        for (BoatClass boatClass : boatClasses) {
+            names.add(boatClass.getName());
+        }
+        return names;
+    }
+
+    @Override
+    public PolarSheetGenerationResponse showCachedPolarSheetForBoatClass(String boatClassName) {
+        BoatClass boatClass = getService().getBaseDomainFactory().getOrCreateBoatClass(boatClassName);
+        PolarSheetsData data = getService().getPolarDataService().getPolarSheetForBoatClass(boatClass);
+        String name = boatClassName + "_OVERALL";
+        String id = name;
+        return new PolarSheetGenerationResponseImpl(id, name, data);
     }
 
     private String getCommonBoatClass(Set<TrackedRace> trackedRaces) {

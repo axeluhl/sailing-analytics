@@ -23,6 +23,8 @@ public interface SecurityService {
 
     User getUserByName(String username);
 
+    User getUserByEmail(String email);
+
     User getCurrentUser();
 
     /**
@@ -100,11 +102,13 @@ public interface SecurityService {
      */
     boolean checkPassword(String username, String password) throws UserManagementException;
 
+    boolean checkPasswordResetSecret(String username, String passwordResetSecret) throws UserManagementException;
+
     /**
      * Generates a new random password for the user identified by <code>username</code> and sends it
      * to the user's e-mail address.
      */
-    void resetPassword(String username) throws UserManagementException;
+    void resetPassword(String username, String baseURL) throws UserManagementException, MailException;
 
     boolean validateEmail(String username, String validationSecret) throws UserManagementException;
 
@@ -127,4 +131,5 @@ public interface SecurityService {
      * @return <code>null</code> if no preference for the user identified by <code>username</code> is found
      */
     String getPreference(String username, String key);
+
 }

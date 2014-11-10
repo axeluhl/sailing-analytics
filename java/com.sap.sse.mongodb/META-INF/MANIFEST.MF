@@ -1,0 +1,14 @@
+Manifest-Version: 1.0
+Bundle-ManifestVersion: 2
+Bundle-Name: Mongodb
+Bundle-SymbolicName: com.sap.sse.mongodb
+Bundle-Version: 1.0.0.qualifier
+Bundle-Vendor: SAP
+Bundle-RequiredExecutionEnvironment: JavaSE-1.8
+Require-Bundle: com.mongodb.driver;bundle-version="2.6.2",
+ com.sap.sse.common
+Export-Package: com.sap.sse.mongodb
+Bundle-ActivationPolicy: lazy
+Import-Package: com.sap.sailing.util,
+ org.osgi.framework;version="1.6.0"
+Bundle-Activator: com.sap.sse.mongodb.Activator
