@@ -164,7 +164,20 @@ public class RaceSimulationOverlay extends FullCanvasOverlay {
                 }
             }
             ctxt.stroke();
-            ctxt.setGlobalAlpha(1.0);
+            SimulatorWindDTO start = points.get(0);
+        	long timeStep = simulationResult.getTimeStep();
+            for(SimulatorWindDTO point : points) {
+            	if ((point.timepoint - start.timepoint) % (timeStep) != 0) {
+            		continue;
+            	}
+
+
+                Point px = mapProjection.fromLatLngToContainerPixel(LatLng.newInstance(point.position.latDeg, point.position.lngDeg));
+            	ctxt.beginPath();
+            	ctxt.arc(px.getX(), px.getY(), 1.5, 0, 2*Math.PI);
+            	ctxt.closePath();
+                ctxt.stroke();
+            }
             colorIdx--;
         }
         
