@@ -1514,7 +1514,7 @@ public class SailingServiceImpl extends ProxiedRemoteServiceServlet implements S
             Position endPosition = trackedRace.getApproximatePosition(toWaypoint, endTimePoint);
 
             if (startTimePoint.asDate().equals(prevStartTime)) {
-                return new SimulatorResultsDTO(startTimePoint.asDate(), 0, null, null, null, null);
+                return new SimulatorResultsDTO(startTimePoint.asDate(), 0, 0, null, null, null, null);
             }
             
             // determine legtype upwind/downwind/reaching
@@ -1573,7 +1573,7 @@ public class SailingServiceImpl extends ProxiedRemoteServiceServlet implements S
                 rcDTO.coursePositions.waypointPositions.add(posDTO);
                 posDTO = SimulatorServiceUtils.toPositionDTO(endPosition);
                 rcDTO.coursePositions.waypointPositions.add(posDTO);
-                result = new SimulatorResultsDTO(startTimePoint.asDate(), legDuration, rcDTO, pathDTOs, null, null);
+                result = new SimulatorResultsDTO(startTimePoint.asDate(), timeStep.asMillis(), legDuration, rcDTO, pathDTOs, null, null);
             }
         }
         

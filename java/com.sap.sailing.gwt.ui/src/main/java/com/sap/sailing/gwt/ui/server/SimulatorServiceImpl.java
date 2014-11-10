@@ -301,7 +301,7 @@ public class SimulatorServiceImpl extends RemoteServiceServlet implements Simula
             windFieldDTO = this.createWindFieldDTO(wf, startTime, endTime, timeStep, params); // params.isShowStreamlets2(), params.isShowLines(), params.getSeedLines());
         }
 
-        return new SimulatorResultsDTO(null, 0, rcDTO, pathDTOs, windFieldDTO, simulatedPaths.notificationMessage);
+        return new SimulatorResultsDTO(null, timeStep.asMillis(), 0, rcDTO, pathDTOs, windFieldDTO, simulatedPaths.notificationMessage);
     }
 
     @Override
