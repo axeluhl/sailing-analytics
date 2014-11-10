@@ -1,6 +1,13 @@
 package com.sap.sailing.android.tracking.app.ui.activities;
 
+import android.content.Intent;
 import android.os.Bundle;
+import android.support.v4.app.Fragment;
+import android.support.v4.app.FragmentManager;
+import android.support.v4.app.FragmentTransaction;
+import android.support.v7.app.ActionBarActivity;
+import android.view.Menu;
+import android.view.MenuInflater;
 import android.view.MenuItem;
 
 import com.sap.sailing.android.shared.logging.ExLog;
@@ -8,7 +15,7 @@ import com.sap.sailing.android.shared.ui.activities.SendingServiceAwareActivity;
 import com.sap.sailing.android.tracking.app.R;
 import com.sap.sailing.android.tracking.app.utils.AppPreferences;
 
-public class BaseActivity extends SendingServiceAwareActivity {
+public class BaseActivity extends ActionBarActivity {
     private static final String TAG = SendingServiceAwareActivity.class.getName();
     protected AppPreferences prefs;
     
@@ -17,10 +24,12 @@ public class BaseActivity extends SendingServiceAwareActivity {
         super.onCreate(savedInstanceState);
         prefs = new AppPreferences(this);
     }
-
+    
     @Override
-    protected int getOptionsMenuResId() {
-        return R.menu.options_menu;
+    public boolean onCreateOptionsMenu(Menu menu) {
+        MenuInflater inflater = getMenuInflater();
+        inflater.inflate(R.menu.options_menu, menu);
+        return true;
     }
     
     @Override
@@ -28,15 +37,23 @@ public class BaseActivity extends SendingServiceAwareActivity {
         switch (item.getItemId()) {
         case R.id.options_menu_settings:
             ExLog.i(this, TAG, "Clicked SETTINGS.");
-            fadeActivity(SettingsActivity.class, false);
+            startActivity(new Intent(this, SettingsActivity.class));
             return true;
         case R.id.options_menu_info:
             ExLog.i(this, TAG, "Clicked INFO.");
-            fadeActivity(SystemInformationActivity.class, false);
+            startActivity(new Intent(this, SystemInformationActivity.class));
             return true;
         default:
             return super.onOptionsItemSelected(item);
         }
     }
 
+    public void replaceFragment(int view, Fragment fragment) {
+        ExLog.i(this, TAG, "Set new Fragment: " + fragment.toString());
+        
+        FragmentManager manager = getSupportFragmentManager();
+        FragmentTransaction transaction = manager.beginTransaction();
+        transaction.replace(view, fragment);
+        transaction.commit();
+    }
 }

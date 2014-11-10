@@ -7,16 +7,16 @@ import com.sap.sailing.android.shared.ui.activities.SystemInformationActivityHel
 public class SystemInformationActivity extends BaseActivity {
     private SystemInformationActivityHelper helper;
 
-    @Override
-    public void onCreate(Bundle savedInstanceState) {
-        super.onCreate(savedInstanceState);
-        helper = new SystemInformationActivityHelper(this, prefs.getDeviceIdentifier());
-    }
-    
-    @Override
-    protected void updateSendingServiceInformation() {
-        helper.updateSendingServiceInformation();
-        super.updateSendingServiceInformation();
-    }
+//    @Override
+//    public void onCreate(Bundle savedInstanceState) {
+//        super.onCreate(savedInstanceState);
+//        helper = new SystemInformationActivityHelper(this, prefs.getDeviceIdentifier());
+//    }
+//    
+//    @Override
+//    protected void updateSendingServiceInformation() {
+//        helper.updateSendingServiceInformation();
+//        super.updateSendingServiceInformation();
+//    }
 
 }

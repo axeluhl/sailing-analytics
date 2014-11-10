@@ -11,23 +11,22 @@ import android.database.Cursor;
 import android.net.Uri;
 import android.os.Bundle;
 
-import com.sap.sailing.android.shared.data.database.MessageTable;
 import com.sap.sailing.android.shared.logging.ExLog;
-import com.sap.sailing.android.shared.provider.DatabaseProvider;
+import com.sap.sailing.android.shared.provider.AnalyticsContract;
 
 public class MessagePersistenceManager {
 
     private final static String TAG = MessagePersistenceManager.class.getName();
 
     protected Context context;
-    protected ContentResolver contentResolver;
+    protected ContentResolver resolver;
 
-    private final MessageRestorer messageRestorer;
+    private final MessageRestorer restorer;
 
     public MessagePersistenceManager(Context context, MessageRestorer messageRestorer) {
         this.context = context;
-        this.messageRestorer = messageRestorer;
-        this.contentResolver = context.getContentResolver();
+        this.restorer = messageRestorer;
+        this.resolver = context.getContentResolver();
     }
 
     public boolean areIntentsDelayed() {
@@ -45,11 +44,11 @@ public class MessagePersistenceManager {
 
     private void persistMessage(String url, String callbackPayload, String payload, String callbackClass) {
         ContentValues values = new ContentValues();
-        values.put(MessageTable.URL, url);
-        values.put(MessageTable.CALLBACK_PAYLOAD, callbackPayload);
-        values.put(MessageTable.PAYLOAD, payload);
-        values.put(MessageTable.CALLBACK_CLASS_STRING, callbackClass);
-        Uri result = contentResolver.insert(DatabaseProvider.MESSAGE_URI, values);
+        values.put(AnalyticsContract.Message.MESSAGE_URL, url);
+        values.put(AnalyticsContract.Message.MESSAGE_CALLBACK_PAYLOAD, callbackPayload);
+        values.put(AnalyticsContract.Message.MESSAGE_PAYLOAD, payload);
+        values.put(AnalyticsContract.Message.MESSAGE_CALLBACK_CLASS_STRING, callbackClass);
+        Uri result = resolver.insert(AnalyticsContract.Message.CONTENT_URI, values);
         if (result != null) {
             ExLog.i(context, TAG, "Message saved.");
         }
@@ -66,9 +65,11 @@ public class MessagePersistenceManager {
 
     private void removeMessage(String url, String callbackPayload, String payload, String callbackClass) {
         ExLog.i(context, TAG, String.format("Removing message \"%s\".", payload));
-        String where = MessageTable.URL + " = ? AND " + MessageTable.CALLBACK_PAYLOAD + " = ? AND "
-                + MessageTable.PAYLOAD + " = ? AND " + MessageTable.CALLBACK_CLASS_STRING + " = ?";
-        int count = contentResolver.delete(DatabaseProvider.MESSAGE_URI, where, new String[] { url, callbackPayload,
+        String where = AnalyticsContract.Message.MESSAGE_URL + " = ? AND "
+                + AnalyticsContract.Message.MESSAGE_CALLBACK_PAYLOAD + " = ? AND "
+                + AnalyticsContract.Message.MESSAGE_PAYLOAD + " = ? AND "
+                + AnalyticsContract.Message.MESSAGE_CALLBACK_CLASS_STRING + " = ?";
+        int count = resolver.delete(AnalyticsContract.Message.CONTENT_URI, where, new String[] { url, callbackPayload,
                 payload, callbackClass });
         if (count != 0) {
             ExLog.i(context, TAG, "Message removed.");
@@ -76,12 +77,12 @@ public class MessagePersistenceManager {
     }
 
     public synchronized void removeAllMessages() {
-        contentResolver.delete(DatabaseProvider.MESSAGE_URI, null, null);
+        resolver.delete(AnalyticsContract.Message.CONTENT_URI, null, null);
     }
 
     public int getMessageCount() {
         int result = 0;
-        Cursor cursor = contentResolver.query(DatabaseProvider.MESSAGE_URI, null, null, null, null);
+        Cursor cursor = resolver.query(AnalyticsContract.Message.CONTENT_URI, null, null, null, null);
         if (cursor != null) {
             cursor.moveToFirst();
             result = cursor.getCount();
@@ -91,7 +92,7 @@ public class MessagePersistenceManager {
     }
 
     public Cursor getContent() {
-        return contentResolver.query(DatabaseProvider.MESSAGE_URI, null, null, null, null);
+        return resolver.query(AnalyticsContract.Message.CONTENT_URI, null, null, null, null);
     }
 
     public static interface MessageRestorer {
@@ -100,14 +101,15 @@ public class MessagePersistenceManager {
 
     public List<Intent> restoreMessages() {
         List<Intent> delayedIntents = new ArrayList<Intent>();
-        Cursor cursor = contentResolver.query(DatabaseProvider.MESSAGE_URI, null, null, null, null);
+        Cursor cursor = resolver.query(AnalyticsContract.Message.CONTENT_URI, null, null, null, null);
         if (cursor != null) {
             for (cursor.moveToFirst(); !cursor.isAfterLast(); cursor.moveToNext()) {
-                String url = cursor.getString(cursor.getColumnIndex(MessageTable.URL));
-                String callbackPayload = cursor.getString(cursor.getColumnIndex(MessageTable.CALLBACK_PAYLOAD));
-                String payload = cursor.getString(cursor.getColumnIndex(MessageTable.PAYLOAD));
-                String callbackClassString = cursor
-                        .getString(cursor.getColumnIndex(MessageTable.CALLBACK_CLASS_STRING));
+                String url = cursor.getString(cursor.getColumnIndex(AnalyticsContract.Message.MESSAGE_URL));
+                String callbackPayload = cursor.getString(cursor
+                        .getColumnIndex(AnalyticsContract.Message.MESSAGE_CALLBACK_PAYLOAD));
+                String payload = cursor.getString(cursor.getColumnIndex(AnalyticsContract.Message.MESSAGE_PAYLOAD));
+                String callbackClassString = cursor.getString(cursor
+                        .getColumnIndex(AnalyticsContract.Message.MESSAGE_CALLBACK_CLASS_STRING));
 
                 Class<? extends ServerReplyCallback> callbackClass = null;
                 if (callbackClassString != null) {
@@ -126,8 +128,8 @@ public class MessagePersistenceManager {
                 Intent messageIntent = MessageSendingService.createMessageIntent(context, url, callbackPayload, null,
                         payload, callbackClass);
 
-                if (messageRestorer != null) {
-                    messageRestorer.restoreMessage(context, messageIntent);
+                if (restorer != null) {
+                    restorer.restoreMessage(context, messageIntent);
                 }
 
                 if (messageIntent != null) {

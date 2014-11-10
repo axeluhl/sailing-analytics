@@ -1,0 +1,11 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    
+    <string name="id">id</string>
+    <string name="tracking_service">Tracking Service</string>
+    <string name="tracking_service_start">tracking_start</string>
+    <string name="tracking_service_stop">tracking_stop</string>
+    <string name="tracking_service_change">tracking_change</string>
+    <string name="transmitting_service">Transmitting Service</string>
+    
+</resources>
