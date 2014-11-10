@@ -1,0 +1,22 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources xmlns:tools="http://schemas.android.com/tools">
+
+    <string name="regatta_list_title">Checked-In Regattas</string>
+    <string name="show_more">Show more</string>
+    <string name="scan_intro">GPS-Tracker Configuration for Regatta</string>
+    <string name="scan_qr">Scan QR-Code</string>
+    <string name="scan_hint">The QR-code can you find on your confirmation of participation</string>
+    <string name="no_qr_code">Didn\'t received a QR-code?</string>
+    <string name="add_team_picture">Add team picture</string>
+    <string name="messages">Messages:</string>
+    <string name="last_refresh">(last refresh XX min ago)</string>
+    <string name="next_race">Next race in approximately XX min</string>
+    <string name="announcement">Note announcement</string>
+    <string name="start_tracking">Start tracking</string>
+    <string name="stop_tracking">Stop tracking</string>
+    <string name="empty_regatta_listview">Sie sind für keine Regatta gemeldet</string>
+    <string name="homefragment_volley_404">This data is not available at the server. Please retry.</string>
+    <string name="homefragment_volley_unknown">The server returned an unknown code (%s).</string>
+    <string name="homefragment_volley_unexpected">The server returned an unexpected value.</string>
+
+</resources>

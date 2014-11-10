@@ -43,4 +43,20 @@ public class AppPreferences {
     public void setServerURL(String serverUrl) {
         preferences.edit().putString(context.getString(R.string.preference_server_url_key), serverUrl).commit();
     }
+    
+    public String getEventId() {
+        return PrefUtils.getString(context, R.string.preference_eventid_key, R.string.preference_eventid_default);
+    }
+    
+    public void setEventId(String id) {
+        preferences.edit().putString(context.getString(R.string.preference_eventid_key), id).commit();
+    }
+    
+    public String getCompetitorId() {
+        return PrefUtils.getString(context, R.string.preference_competitor_key, R.string.preference_competitor_default);
+    }
+    
+    public void setCompetitorId(String id) {
+        preferences.edit().putString(context.getString(R.string.preference_competitor_key), id).commit();
+    }
 }

@@ -1,0 +1,15 @@
+<resources xmlns:android="http://schemas.android.com/apk/res/android">
+
+    <string name="yes">Yes</string>
+    <string name="no">No</string>
+    <string name="correct">Correct</string>
+    <string name="not_correct">No, I\'m not</string>
+    <string name="stop_race">Close Race</string>
+    <string name="stop_race_question">Do you want to stop the race tracking?</string>
+    <string name="confirm_profile">Hello #USERNAME#\nYou are listed on #EVENT#.</string>
+	<string name="checkout_regatta">Checkout Regatta</string>
+	<string name="stop_tracking">Disable tracking of this regatta?</string>
+	<string name="confirm_picture">Declaration of consent</string>
+	<string name="confirm_picture_usage">I agree that the pictures made by me in the tracking app can be used by SAP.</string>
+    
+</resources>
