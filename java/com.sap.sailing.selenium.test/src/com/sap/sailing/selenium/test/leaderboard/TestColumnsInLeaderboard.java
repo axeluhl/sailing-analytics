@@ -95,20 +95,6 @@ public class TestColumnsInLeaderboard extends AbstractSeleniumTest {
         // Remove the tracked race, expecting the column in the leaderboard configuration page to show linked=No after the refresh
         TracTracEventManagementPanelPO tracTracEvents = adminConsole.goToTracTracEvents();
         tracTracEvents.getTrackedRacesList().remove(trackedRace);
-        
-        tracTracEvents.listTrackableRaces(KIELER_WOCHE_2013_JSON_URL);
-        tracTracEvents.setReggataForTracking(this.regatta);
-        tracTracEvents.setTrackSettings(false, false, false);
-        tracTracEvents.startTrackingForRace(this.trackableRace);
-        {
-            TrackedRacesListPO trackedRacesList = tracTracEvents.getTrackedRacesList();
-            trackedRacesList.waitForTrackedRace(this.trackedRace, Status.FINISHED); // TracAPI puts REPLAY races into FINISHED mode when done loading
-        }
-        {
-            // Create the TrackedRacesListPO again; the contents may have been updated by the transition to FINISHED
-            TrackedRacesListPO trackedRacesList = tracTracEvents.getTrackedRacesList();
-            trackedRacesList.stopTracking(this.trackedRace);
-        }
         {
             LeaderboardConfigurationPanelPO leaderboardConfiguration = adminConsole.goToLeaderboardConfiguration();
             LeaderboardDetailsPanelPO leaderboardDetails = leaderboardConfiguration.getLeaderboardDetails(LEADERBOARD);
@@ -116,7 +102,6 @@ public class TestColumnsInLeaderboard extends AbstractSeleniumTest {
             assertEquals(1, races.size());
             assertFalse(races.iterator().next().isLinked()); // removing the race must make the race column unlinked.
         }
-        
         // now back to the TracTrac management panel, load the race again and make sure it is auto-linked to the column
         startTrackingRaceAndStopWhenFinished(adminConsole);
         {
