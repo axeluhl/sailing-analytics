@@ -15,7 +15,7 @@ import com.sap.sailing.polars.PolarDataService;
 import com.sap.sailing.polars.regression.NotEnoughDataHasBeenAddedException;
 import com.sap.sailing.simulator.PolarDiagram;
 
-public class PolarDiagramGPSRaw implements PolarDiagram, Serializable  {
+public class PolarDiagramGPSDirect implements PolarDiagram, Serializable  {
 
     private static final long serialVersionUID = -9219705955440602679L;
     private final BoatClass boatClass;
@@ -26,7 +26,7 @@ public class PolarDiagramGPSRaw implements PolarDiagram, Serializable  {
 	private SpeedWithBearing jibePort = null;
 	private SpeedWithBearing jibeStar = null;
     
-    public PolarDiagramGPSRaw(BoatClass boatClass, PolarDataService polarData) {
+    public PolarDiagramGPSDirect(BoatClass boatClass, PolarDataService polarData) {
     	this.boatClass = boatClass;
     	this.polarData = polarData;
     }
@@ -212,7 +212,7 @@ public class PolarDiagramGPSRaw implements PolarDiagram, Serializable  {
 	}
 
 	@Override
-	public NavigableMap<Speed, Bearing> getGybeAngles() {
+	public NavigableMap<Speed, Bearing> getJibeAngles() {
 		// TODO Auto-generated method stub
 		return null;
 	}
@@ -224,7 +224,7 @@ public class PolarDiagramGPSRaw implements PolarDiagram, Serializable  {
 	}
 
 	@Override
-	public NavigableMap<Speed, Speed> getGybeSOG() {
+	public NavigableMap<Speed, Speed> getJibeSOG() {
 		// TODO Auto-generated method stub
 		return null;
 	}
