@@ -5,6 +5,7 @@ import java.util.Arrays;
 import java.util.Comparator;
 import java.util.HashSet;
 import java.util.Map;
+import java.util.Map.Entry;
 import java.util.NavigableMap;
 import java.util.Set;
 import java.util.TreeMap;
@@ -406,31 +407,75 @@ public class PolarDiagramBase implements PolarDiagram, Serializable {
         NavigableMap<Bearing, Speed> floorSpeeds = speedTable.get(floorWind);
         NavigableMap<Bearing, Speed> ceilingSpeeds = speedTable.get(ceilingWind);
 
-        // Taylor estimations of order 1
-        Speed floorSpeed1 = floorSpeeds.floorEntry(relativeBearing).getValue();
-        Speed floorSpeed2 = floorSpeeds.ceilingEntry(relativeBearing).getValue();
-        Bearing floorBearing1 = floorSpeeds.floorKey(relativeBearing);
-        Bearing floorBearing2 = floorSpeeds.ceilingKey(relativeBearing);
-        double floorSpeed;
-        if (floorSpeed1.equals(floorSpeed2)) {
-            floorSpeed = floorSpeed1.getKnots();
-        } else {
-            floorSpeed = floorSpeed1.getKnots() + (relativeBearing.getRadians() - floorBearing1.getRadians())
-                    * (floorSpeed2.getKnots() - floorSpeed1.getKnots())
-                    / (floorBearing2.getRadians() - floorBearing1.getRadians());
-        }
+		double floorSpeed;
+		if (floorSpeeds.size() == 0) {
+			floorSpeed = 0.0;
+		} else {
+			// Taylor estimations of order 1
+			Speed floorSpeed1 = null;
+			Entry<Bearing, Speed> floorEntry = floorSpeeds.floorEntry(relativeBearing);
+			if (floorEntry != null) {
+				floorSpeed1 = floorEntry.getValue();
+			}
+			Speed floorSpeed2 = null;
+			floorEntry = floorSpeeds.ceilingEntry(relativeBearing);
+			if (floorEntry != null) {
+				floorSpeed2 = floorEntry.getValue();
+			}
+			Bearing floorBearing1 = floorSpeeds.floorKey(relativeBearing);
+			Bearing floorBearing2 = floorSpeeds.ceilingKey(relativeBearing);
+			if (floorBearing1 == null) {
+				floorSpeed = floorSpeed2.getKnots();
+			} else if (floorBearing2 == null) {
+				floorSpeed = floorSpeed1.getKnots();
+			} else if (floorSpeed1.equals(floorSpeed2)) {
+				floorSpeed = floorSpeed1.getKnots();
+			} else {
+				floorSpeed = floorSpeed1.getKnots()
+						+ (relativeBearing.getRadians() - floorBearing1
+								.getRadians())
+						* (floorSpeed2.getKnots() - floorSpeed1.getKnots())
+						/ (floorBearing2.getRadians() - floorBearing1
+								.getRadians());
+			}
+		}
 
-        Speed ceilingSpeed1 = ceilingSpeeds.floorEntry(relativeBearing).getValue();
-        Speed ceilingSpeed2 = ceilingSpeeds.ceilingEntry(relativeBearing).getValue();
-        Bearing ceilingBearing1 = ceilingSpeeds.floorKey(relativeBearing);
-        Bearing ceilingBearing2 = ceilingSpeeds.ceilingKey(relativeBearing);
         double ceilingSpeed;
-        if (ceilingSpeed1.equals(ceilingSpeed2)) {
-            ceilingSpeed = ceilingSpeed1.getKnots();
-        } else {
-            ceilingSpeed = ceilingSpeed1.getKnots() + (relativeBearing.getRadians() - ceilingBearing1.getRadians())
-                    * (ceilingSpeed2.getKnots() - ceilingSpeed1.getKnots())
-                    / (ceilingBearing2.getRadians() - ceilingBearing1.getRadians());
+		if (ceilingSpeeds.size() == 0) {
+			ceilingSpeed = 0.0;
+		} else {
+			Speed ceilingSpeed1 = null;
+			Entry<Bearing, Speed> entry = ceilingSpeeds.floorEntry(relativeBearing);
+			if (entry != null) {
+				ceilingSpeed1 = entry.getValue();
+			}
+			Speed ceilingSpeed2 = null;
+			entry = ceilingSpeeds.ceilingEntry(relativeBearing);
+			if (entry != null) {
+				ceilingSpeed2 = entry.getValue();
+			}
+			Bearing ceilingBearing1 = ceilingSpeeds.floorKey(relativeBearing);
+			Bearing ceilingBearing2 = ceilingSpeeds.ceilingKey(relativeBearing);
+			if (ceilingBearing1 == null) {
+				ceilingSpeed = ceilingSpeed2.getKnots();
+			} else if (ceilingBearing2 == null) {
+				ceilingSpeed = ceilingSpeed1.getKnots();
+			} else if (ceilingSpeed1.equals(ceilingSpeed2)) {
+				ceilingSpeed = ceilingSpeed1.getKnots();
+			} else {
+				ceilingSpeed = ceilingSpeed1.getKnots()
+						+ (relativeBearing.getRadians() - ceilingBearing1
+								.getRadians())
+						* (ceilingSpeed2.getKnots() - ceilingSpeed1.getKnots())
+						/ (ceilingBearing2.getRadians() - ceilingBearing1
+								.getRadians());
+			}
+		}
+        if (floorSpeeds.size() == 0) {
+        	floorSpeed = ceilingSpeed * floorWind.getKnots() / ceilingWind.getKnots();
+        }
+        if (ceilingSpeeds.size() == 0) {
+        	ceilingSpeed = floorSpeed * ceilingWind.getKnots() / floorWind.getKnots();
         }
 
         double speed;
