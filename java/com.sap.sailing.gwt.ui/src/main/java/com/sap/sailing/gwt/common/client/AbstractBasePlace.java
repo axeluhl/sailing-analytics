@@ -6,6 +6,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.logging.Logger;
 
+import com.google.gwt.http.client.URL;
 import com.google.gwt.place.shared.Place;
 import com.sap.sse.gwt.client.URLEncoder;
 
@@ -46,7 +47,7 @@ public abstract class AbstractBasePlace extends Place {
 
     public AbstractBasePlace(String url) {
         if (url != null && !url.isEmpty()) {
-            this.placeParametersAsToken = url;
+            this.placeParametersAsToken = URL.decode(url);
 
             List<String> list = Arrays.asList(url.split("&"));
     
