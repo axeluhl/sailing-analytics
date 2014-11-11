@@ -2,6 +2,9 @@ package com.sap.sailing.android.tracking.app.services;
 
 import java.util.concurrent.ScheduledExecutorService;
 
+import org.json.JSONException;
+import org.json.JSONObject;
+
 import android.annotation.TargetApi;
 import android.app.Notification;
 import android.app.NotificationManager;
@@ -11,12 +14,17 @@ import android.content.ContentResolver;
 import android.content.ContentValues;
 import android.content.Intent;
 import android.location.Location;
+import android.net.Uri;
 import android.os.Build;
 import android.os.Bundle;
 import android.os.IBinder;
 import android.support.v4.app.NotificationCompat;
 import android.widget.Toast;
 
+import com.android.volley.Response.ErrorListener;
+import com.android.volley.Response.Listener;
+import com.android.volley.VolleyError;
+import com.android.volley.toolbox.JsonObjectRequest;
 import com.google.android.gms.common.ConnectionResult;
 import com.google.android.gms.common.GooglePlayServicesClient.ConnectionCallbacks;
 import com.google.android.gms.common.GooglePlayServicesClient.OnConnectionFailedListener;
@@ -24,10 +32,11 @@ import com.google.android.gms.location.LocationClient;
 import com.google.android.gms.location.LocationListener;
 import com.google.android.gms.location.LocationRequest;
 import com.sap.sailing.android.shared.logging.ExLog;
-import com.sap.sailing.android.shared.provider.AnalyticsContract;
+import com.sap.sailing.android.shared.provider.AnalyticsContract.SensorGps;
 import com.sap.sailing.android.tracking.app.R;
 import com.sap.sailing.android.tracking.app.ui.activities.RegattaActivity;
 import com.sap.sailing.android.tracking.app.utils.AppPreferences;
+import com.sap.sailing.android.tracking.app.utils.VolleyHelper;
 
 public class TrackingService extends Service implements ConnectionCallbacks, OnConnectionFailedListener,
         LocationListener {
@@ -120,20 +129,35 @@ public class TrackingService extends Service implements ConnectionCallbacks, OnC
     public void onLocationChanged(Location location) {
         ContentResolver cr = getContentResolver();
         ContentValues cv = new ContentValues();
-        cv.put(AnalyticsContract.SensorGps.GPS_ACCURACY, location.getAccuracy());
-        cv.put(AnalyticsContract.SensorGps.GPS_ALTITUDE, location.getAltitude());
-        cv.put(AnalyticsContract.SensorGps.GPS_BEARING, location.getBearing());
-        cv.put(AnalyticsContract.SensorGps.GPS_DEVICE, prefs.getDeviceIdentifier());
+        cv.put(SensorGps.GPS_ACCURACY, location.getAccuracy());
+        cv.put(SensorGps.GPS_ALTITUDE, location.getAltitude());
+        cv.put(SensorGps.GPS_BEARING, location.getBearing());
+        cv.put(SensorGps.GPS_DEVICE, prefs.getDeviceIdentifier());
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.JELLY_BEAN_MR1) {
-            cv.put(AnalyticsContract.SensorGps.GPS_ELAPSED_REALTIME, location.getElapsedRealtimeNanos());
+            cv.put(SensorGps.GPS_ELAPSED_REALTIME, location.getElapsedRealtimeNanos());
         }
-        cv.put(AnalyticsContract.SensorGps.GPS_LATITUDE, location.getLatitude());
-        cv.put(AnalyticsContract.SensorGps.GPS_LONGITUDE, location.getLongitude());
-        cv.put(AnalyticsContract.SensorGps.GPS_PROVIDER, location.getProvider());
-        cv.put(AnalyticsContract.SensorGps.GPS_SPEED, location.getSpeed());
-        cv.put(AnalyticsContract.SensorGps.GPS_TIME, location.getTime());
+        cv.put(SensorGps.GPS_LATITUDE, location.getLatitude());
+        cv.put(SensorGps.GPS_LONGITUDE, location.getLongitude());
+        cv.put(SensorGps.GPS_PROVIDER, location.getProvider());
+        cv.put(SensorGps.GPS_SPEED, location.getSpeed());
+        cv.put(SensorGps.GPS_TIME, location.getTime());
 
-        cr.insert(AnalyticsContract.SensorGps.CONTENT_URI, cv);
+        Uri result = cr.insert(SensorGps.CONTENT_URI, cv);
+
+        JSONObject json = new JSONObject();
+        try {
+            json.put("bearingDeg", cv.get(SensorGps.GPS_BEARING));
+            json.put("timeMillis", cv.get(SensorGps.GPS_TIME));
+            json.put("speedMperS", cv.get(SensorGps.GPS_SPEED));
+            json.put("lonDeg", cv.get(SensorGps.GPS_LONGITUDE));
+            json.put("deviceUuid", prefs.getDeviceIdentifier());
+            json.put("latDeg", cv.get(SensorGps.GPS_LATITUDE));
+        } catch (JSONException ex) {
+            ExLog.i(this, TAG, "Error while building geolocation json " + ex.getMessage());
+        }
+        VolleyHelper.getInstance(this).addRequest(
+                new JsonObjectRequest(prefs.getServerURL() + "/tracking/recordFixesFlatJson", json, new FixListener(
+                        SensorGps.getGpsId(result)), new FixErrorListener()));
     }
 
     @Override
@@ -153,13 +177,31 @@ public class TrackingService extends Service implements ConnectionCallbacks, OnC
         intent.setFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP | Intent.FLAG_ACTIVITY_SINGLE_TOP);
         PendingIntent pi = PendingIntent.getActivity(this, 0, intent, 0);
         CharSequence text = getText(R.string.tracker_started);
-        Notification notification = new NotificationCompat.Builder(this)
-            .setContentTitle(getText(R.string.app_name))
-            .setContentText(text)
-            .setContentIntent(pi)
-            .setSmallIcon(R.drawable.icon)
-            .build();
+        Notification notification = new NotificationCompat.Builder(this).setContentTitle(getText(R.string.app_name))
+                .setContentText(text).setContentIntent(pi).setSmallIcon(R.drawable.icon).build();
         notification.flags |= Notification.FLAG_NO_CLEAR;
         startForeground(NOTIFICATION_ID, notification);
+    }
+
+    private class FixListener implements Listener<JSONObject> {
+
+        private String id;
+
+        public FixListener(String id) {
+            this.id = id;
+        }
+
+        @Override
+        public void onResponse(JSONObject response) {
+            getContentResolver().delete(SensorGps.CONTENT_URI, SensorGps._ID + " = ?", new String[] { id });
+        }
+    }
+
+    private class FixErrorListener implements ErrorListener {
+
+        @Override
+        public void onErrorResponse(VolleyError error) {
+            ExLog.e(TrackingService.this, TAG, "Error while sending GPS fix " + error.getMessage());
+        }
     }
 }

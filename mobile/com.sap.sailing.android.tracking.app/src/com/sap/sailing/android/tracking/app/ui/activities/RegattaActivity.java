@@ -3,9 +3,13 @@ package com.sap.sailing.android.tracking.app.ui.activities;
 import com.sap.sailing.android.tracking.app.R;
 import com.sap.sailing.android.tracking.app.ui.fragments.RegattaFragment;
 
+import android.graphics.Typeface;
 import android.os.Bundle;
 import android.support.v4.app.NavUtils;
 import android.support.v7.widget.Toolbar;
+import android.text.Spannable;
+import android.text.SpannableString;
+import android.text.style.StyleSpan;
 import android.view.MenuItem;
 
 public class RegattaActivity extends BaseActivity {
@@ -25,8 +29,11 @@ public class RegattaActivity extends BaseActivity {
         if (getSupportActionBar() != null) {
             getSupportActionBar().setDisplayHomeAsUpEnabled(true);
             getSupportActionBar().setHomeButtonEnabled(true);
-            getSupportActionBar().setTitle("Titel");
-            getSupportActionBar().setSubtitle("SubTitel");
+            getSupportActionBar().setTitle("Kieler Woche 2014");
+            Spannable subtitle = new SpannableString("Registered for: 49er");
+            StyleSpan styleBold = new StyleSpan(Typeface.BOLD);
+            subtitle.setSpan(styleBold, 16, 20, Spannable.SPAN_EXCLUSIVE_EXCLUSIVE);
+            getSupportActionBar().setSubtitle(subtitle);
         }
 
         replaceFragment(R.id.content_frame, new RegattaFragment());

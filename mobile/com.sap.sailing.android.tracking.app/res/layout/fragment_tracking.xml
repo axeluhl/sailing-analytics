@@ -1,0 +1,61 @@
+<?xml version="1.0" encoding="utf-8"?>
+<RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:background="@color/black" >
+
+    <TextView
+        android:id="@+id/mode_label"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_alignParentLeft="true"
+        android:layout_below="@+id/qps_quality"
+        android:layout_marginTop="26dp"
+        android:text="@string/tracking_mode" />
+
+    <TextView
+        android:id="@+id/mode"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_alignBaseline="@id/mode_label"
+        android:layout_alignBottom="@id/mode_label"
+        android:layout_alignParentRight="true"
+        android:text="@string/tracking_mode_caching" />
+
+    <TextView
+        android:id="@+id/tracking_time_label"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_alignParentLeft="true"
+        android:layout_below="@id/mode_label"
+        android:layout_marginTop="30dp"
+        android:text="@string/tracking_time" />
+
+    <Button
+        android:id="@+id/stop_tracking"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_alignParentBottom="true"
+        android:layout_alignParentLeft="true"
+        android:layout_alignParentRight="true"
+        android:text="@string/stop_tracking" />
+
+    <TextView
+        android:id="@+id/quality_icons"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_alignBaseline="@id/qps_quality"
+        android:layout_alignBottom="@id/qps_quality"
+        android:layout_alignParentRight="true"
+        android:text="DUMMY" />
+
+    <TextView
+        android:id="@+id/qps_quality"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_alignParentLeft="true"
+        android:layout_alignParentTop="true"
+        android:text="@string/tracking_qps_quality" />
+
+</RelativeLayout>

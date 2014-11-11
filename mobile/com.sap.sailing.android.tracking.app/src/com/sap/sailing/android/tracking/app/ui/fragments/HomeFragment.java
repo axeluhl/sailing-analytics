@@ -9,8 +9,8 @@ import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
 
+import android.annotation.SuppressLint;
 import android.app.Activity;
-import android.content.ContentResolver;
 import android.content.Intent;
 import android.content.pm.PackageManager;
 import android.content.pm.ResolveInfo;
@@ -68,18 +68,18 @@ public class HomeFragment extends BaseFragment implements LoaderCallbacks<Cursor
     private final static String REQUEST_TAG = "request_homefragment";
     private final static int REGATTA_LOADER = 1;
 
-    private final JsonSerializer<RaceLogEvent> eventSerializer =
-            RaceLogEventSerializer.create(new CompetitorJsonSerializer());
+    private final JsonSerializer<RaceLogEvent> eventSerializer = RaceLogEventSerializer
+            .create(new CompetitorJsonSerializer());
     private Button scan;
     private int requestCodeQRCode = 442;
-    private ContentResolver cr;
     private RegattaAdapter mAdapter;
 
+    @SuppressLint("InflateParams")
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
         super.onCreateView(inflater, container, savedInstanceState);
 
-        cr = getActivity().getContentResolver();
+        getActivity().getContentResolver();
 
         View view = inflater.inflate(R.layout.fragment_home, container, false);
 
@@ -117,7 +117,7 @@ public class HomeFragment extends BaseFragment implements LoaderCallbacks<Cursor
             if (infos.size() != 0) {
                 startActivity(marketIntent);
             } else {
-                Toast.makeText(getActivity(), "PlayStore and Scanning not available.", Toast.LENGTH_LONG);
+                Toast.makeText(getActivity(), "PlayStore and Scanning not available.", Toast.LENGTH_LONG).show();
             }
             return false;
         }
@@ -131,11 +131,11 @@ public class HomeFragment extends BaseFragment implements LoaderCallbacks<Cursor
             Uri uri = Uri.parse(scanResult);
             final String server = uri.getScheme() + "://" + uri.getHost();
             final int port = (uri.getPort() == -1) ? 80 : uri.getPort();
+            prefs.setServerURL(server + ":" + port);
             final String leaderboard = uri.getQueryParameter(RaceLogServletConstants.PARAMS_LEADERBOARD_NAME);
             final String raceColumn = uri.getQueryParameter(RaceLogServletConstants.PARAMS_RACE_COLUMN_NAME);
             final String fleet = uri.getQueryParameter(RaceLogServletConstants.PARAMS_RACE_FLEET_NAME);
             final String competitorIdAsString = uri.getQueryParameter(DeviceMappingConstants.COMPETITOR_ID_AS_STRING);
-            final String markId = uri.getQueryParameter(DeviceMappingConstants.MARK_ID_AS_STRING);
             final Long fromMillis = Long.parseLong(uri.getQueryParameter(DeviceMappingConstants.FROM_MILLIS));
             final Long toMillis = Long.parseLong(uri.getQueryParameter(DeviceMappingConstants.TO_MILLIS));
 
@@ -146,15 +146,13 @@ public class HomeFragment extends BaseFragment implements LoaderCallbacks<Cursor
                     .appendQueryParameter("clientuuid", prefs.getDeviceIdentifier()).build().toString();
             ExLog.i(getActivity(), TAG, "Device Mapping: " + deviceMapping);
 
-            DeviceIdentifier device = new SmartphoneUUIDIdentifierImpl(
-                    UUID.fromString(prefs.getDeviceIdentifier()));
+            DeviceIdentifier device = new SmartphoneUUIDIdentifierImpl(UUID.fromString(prefs.getDeviceIdentifier()));
             TimePoint from = new MillisecondsTimePoint(fromMillis);
             TimePoint to = new MillisecondsTimePoint(toMillis);
             UUID competitorId = UUID.fromString(competitorIdAsString);
             Competitor competitor = new CompetitorImpl(competitorId, null, null, null, null);
             RaceLogEvent event = RaceLogEventFactory.INSTANCE.createDeviceCompetitorMappingEvent(
-                    MillisecondsTimePoint.now(), AppPreferences.raceLogEventAuthor, device,
-                    competitor, 0, from, to);
+                    MillisecondsTimePoint.now(), AppPreferences.raceLogEventAuthor, device, competitor, 0, from, to);
             String eventJson = eventSerializer.serialize(event).toString();
             DeviceMappingRequest dataRequest = new DeviceMappingRequest(deviceMapping, eventJson,
                     new DeviceMappingListener(), new DeviceMappingErrorListener());
@@ -302,7 +300,7 @@ public class HomeFragment extends BaseFragment implements LoaderCallbacks<Cursor
 
         @Override
         public void onErrorResponse(VolleyError error) {
-            ExLog.i(getActivity(), TAG, error.getMessage().toString());
+            ExLog.e(getActivity(), TAG, error.getMessage().toString());
             Toast.makeText(getActivity(), "Error while receiving server data", Toast.LENGTH_LONG).show();
         }
     }

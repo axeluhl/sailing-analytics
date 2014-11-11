@@ -18,5 +18,10 @@
     <string name="homefragment_volley_404">This data is not available at the server. Please retry.</string>
     <string name="homefragment_volley_unknown">The server returned an unknown code (%s).</string>
     <string name="homefragment_volley_unexpected">The server returned an unexpected value.</string>
-
+	<string name="tracking_qps_quality">GPS Quality</string>
+	<string name="tracking_mode">Mode</string>
+	<string name="tracking_mode_live">Live</string>
+	<string name="tracking_mode_caching">Caching</string>
+	<string name="tracking_time">Tracking Time</string>
+	
 </resources>

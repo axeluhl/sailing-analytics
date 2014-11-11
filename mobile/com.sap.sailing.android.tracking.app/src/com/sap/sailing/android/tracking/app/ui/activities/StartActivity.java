@@ -18,8 +18,12 @@ public class StartActivity extends BaseActivity {
         Toolbar toolbar = (Toolbar) findViewById(R.id.toolbar);
         if (toolbar != null) {
             setSupportActionBar(toolbar);
+            
             toolbar.setNavigationIcon(R.drawable.ic_launcher);
             toolbar.setBackgroundColor(getResources().getColor(R.color.colorPrimary));
+        }
+        if (getSupportActionBar() != null) {
+            getSupportActionBar().setHomeButtonEnabled(false);
         }
 
         replaceFragment(R.id.content_frame, new HomeFragment());
