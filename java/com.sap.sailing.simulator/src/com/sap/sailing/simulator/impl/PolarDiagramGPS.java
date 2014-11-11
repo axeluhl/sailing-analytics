@@ -28,80 +28,78 @@ public class PolarDiagramGPS extends PolarDiagramBase {
     	this.boatClass = boatClass;
     	this.polarData = polarData;
 
-        List<Speed> velocities = new ArrayList<Speed>();
+        List<Speed> windSpeeds = new ArrayList<Speed>();
         List<Bearing> beatAngles = new ArrayList<Bearing>();
-        List<Speed> beatVMG = new ArrayList<Speed>();
+        List<Speed> beatSpeed = new ArrayList<Speed>();
         Map<Bearing, List<Speed>> speeds = new HashMap<Bearing, List<Speed>>();
-        List<Speed> runVMG = new ArrayList<Speed>();
-        List<Bearing> gybeAngles = new ArrayList<Bearing>();
+        List<Speed> jibeSpeed = new ArrayList<Speed>();
+        List<Bearing> jibeAngles = new ArrayList<Bearing>();
 
         // initialize wind speeds
-        velocities.add(new KnotSpeedImpl(0.0));
-        velocities.add(new KnotSpeedImpl(6.0));
-        velocities.add(new KnotSpeedImpl(8.0));
-        velocities.add(new KnotSpeedImpl(10.0));
-        velocities.add(new KnotSpeedImpl(12.0));
-        velocities.add(new KnotSpeedImpl(14.0));
-        velocities.add(new KnotSpeedImpl(16.0));
-        velocities.add(new KnotSpeedImpl(20.0));
+        windSpeeds.add(new KnotSpeedImpl(0.0));
+        windSpeeds.add(new KnotSpeedImpl(6.0));
+        windSpeeds.add(new KnotSpeedImpl(8.0));
+        windSpeeds.add(new KnotSpeedImpl(10.0));
+        windSpeeds.add(new KnotSpeedImpl(12.0));
+        windSpeeds.add(new KnotSpeedImpl(14.0));
+        windSpeeds.add(new KnotSpeedImpl(16.0));
+        windSpeeds.add(new KnotSpeedImpl(20.0));
 
         // initialize beat-angles and -speeds
         //SpeedWithBearing beatPort;
         SpeedWithBearing beatStar;
-        for (int i = 0; i < velocities.size(); i++) {
+        for (int i = 0; i < windSpeeds.size(); i++) {
     		try {
-    			//beatPort = this.polarData.getAverageSpeedWithBearing(this.boatClass, velocities.get(i), LegType.UPWIND, Tack.PORT).getObject();
-    			beatStar = this.polarData.getAverageSpeedWithBearing(this.boatClass, velocities.get(i), LegType.UPWIND, Tack.STARBOARD).getObject();
+    			//beatPort = this.polarData.getAverageSpeedWithBearing(this.boatClass, windSpeeds.get(i), LegType.UPWIND, Tack.PORT).getObject();
+    			beatStar = this.polarData.getAverageSpeedWithBearing(this.boatClass, windSpeeds.get(i), LegType.UPWIND, Tack.STARBOARD).getObject();
     		} catch (NotEnoughDataHasBeenAddedException e) {
     			//beatPort = null;
     			beatStar = null;
     		}
     		if (beatStar != null) {
     			beatAngles.add(beatStar.getBearing());
-    			beatVMG.add(beatStar);
+    			beatSpeed.add(beatStar);
     		} else {
     			beatAngles.add(null);
-    			beatVMG.add(null);    			
+    			beatSpeed.add(null);    			
     		}
         }
 
         // initialize jibe-angles and -speeds
         //SpeedWithBearing jibePort;
         SpeedWithBearing jibeStar;
-        for (int i = 0; i < velocities.size(); i++) {
+        for (int i = 0; i < windSpeeds.size(); i++) {
     		try {
-    			//jibePort = this.polarData.getAverageSpeedWithBearing(this.boatClass, velocities.get(i), LegType.DOWNWIND, Tack.PORT).getObject();
-    			jibeStar = this.polarData.getAverageSpeedWithBearing(this.boatClass, velocities.get(i), LegType.DOWNWIND, Tack.STARBOARD).getObject();
+    			//jibePort = this.polarData.getAverageSpeedWithBearing(this.boatClass, windSpeeds.get(i), LegType.DOWNWIND, Tack.PORT).getObject();
+    			jibeStar = this.polarData.getAverageSpeedWithBearing(this.boatClass, windSpeeds.get(i), LegType.DOWNWIND, Tack.STARBOARD).getObject();
     		} catch (NotEnoughDataHasBeenAddedException e) {
-    			// TODO Auto-generated catch block
-    			//e.printStackTrace();
     			//jibePort = null;
     			jibeStar = null;
     		}
     		if (jibeStar != null) {
-    			gybeAngles.add(jibeStar.getBearing());
-    			runVMG.add(jibeStar);
+    			jibeAngles.add(jibeStar.getBearing());
+    			jibeSpeed.add(jibeStar);
     		} else {
-    			gybeAngles.add(null);
-    			runVMG.add(null);    			
+    			jibeAngles.add(null);
+    			jibeSpeed.add(null);    			
     		}
         }
 
         NavigableMap<Speed, NavigableMap<Bearing, Speed>> mapSpeedTable = new TreeMap<Speed, NavigableMap<Bearing, Speed>>();
         NavigableMap<Speed, Bearing> mapBeatAngles = new TreeMap<Speed, Bearing>();
-        NavigableMap<Speed, Bearing> mapGybeAngles = new TreeMap<Speed, Bearing>();
+        NavigableMap<Speed, Bearing> mapJibeAngles = new TreeMap<Speed, Bearing>();
         NavigableMap<Speed, Speed> mapBeatSOG = new TreeMap<Speed, Speed>();
-        NavigableMap<Speed, Speed> mapGybeSOG = new TreeMap<Speed, Speed>();
+        NavigableMap<Speed, Speed> mapJibeSOG = new TreeMap<Speed, Speed>();
 
-        Speed velocity = null;
-        Speed speed = null;
+        Speed windSpeed = null;
+        Speed boatSpeed = null;
         NavigableMap<Bearing, Speed> speedTableLine = null;
 
-        for (int index = 0; index < velocities.size(); index++) {
-            velocity = velocities.get(index);
-            if (velocity.getKnots() == 0.0) {
+        for (int index = 0; index < windSpeeds.size(); index++) {
+            windSpeed = windSpeeds.get(index);
+            if (windSpeed.getKnots() == 0.0) {
             	mapBeatSOG.put(new KnotSpeedImpl(0.0), new KnotSpeedImpl(0.0));
-            	mapGybeSOG.put(new KnotSpeedImpl(0.0), new KnotSpeedImpl(0.0));
+            	mapJibeSOG.put(new KnotSpeedImpl(0.0), new KnotSpeedImpl(0.0));
             }
             speedTableLine = new TreeMap<Bearing, Speed>(bearingComparator);
             for (Entry<Bearing, List<Speed>> entry : speeds.entrySet()) {
@@ -109,33 +107,33 @@ public class PolarDiagramGPS extends PolarDiagramBase {
                     continue;
                 }
 
-                speed = entry.getValue().get(index);
+                boatSpeed = entry.getValue().get(index);
 
-                if (speed != Speed.NULL) {
-                    speedTableLine.put(entry.getKey(), speed);
+                if (boatSpeed != Speed.NULL) {
+                    speedTableLine.put(entry.getKey(), boatSpeed);
                 }
             }
 
-            mapSpeedTable.put(velocity, speedTableLine);
+            mapSpeedTable.put(windSpeed, speedTableLine);
             if (beatAngles.get(index) != null) {
-            	mapBeatAngles.put(velocity, beatAngles.get(index));
+            	mapBeatAngles.put(windSpeed, beatAngles.get(index));
             }
-            if (gybeAngles.get(index) != null) {
-            	mapGybeAngles.put(velocity, gybeAngles.get(index));
+            if (jibeAngles.get(index) != null) {
+            	mapJibeAngles.put(windSpeed, jibeAngles.get(index));
             }
-            if (beatVMG.get(index) != null) {
-            	mapBeatSOG.put(velocity, beatVMG.get(index));
+            if (beatSpeed.get(index) != null) {
+            	mapBeatSOG.put(windSpeed, beatSpeed.get(index));
             }
-            if (runVMG.get(index) != null) {
-            	mapGybeSOG.put(velocity, runVMG.get(index));
+            if (jibeSpeed.get(index) != null) {
+            	mapJibeSOG.put(windSpeed, jibeSpeed.get(index));
             }
         }
 
         super.speedTable = mapSpeedTable;
         super.beatAngles = mapBeatAngles;
-        super.gybeAngles = mapGybeAngles;
+        super.jibeAngles = mapJibeAngles;
         super.beatSOG = mapBeatSOG;
-        super.gybeSOG = mapGybeSOG;
+        super.jibeSOG = mapJibeSOG;
 
         for (Speed s : super.speedTable.keySet()) {
 
@@ -143,8 +141,8 @@ public class PolarDiagramGPS extends PolarDiagramBase {
                 super.speedTable.get(s).put(super.beatAngles.get(s), super.beatSOG.get(s));
             }
 
-            if (super.gybeAngles.containsKey(s) && !super.speedTable.get(s).containsKey(super.gybeAngles.get(s))) {
-                super.speedTable.get(s).put(super.gybeAngles.get(s), super.gybeSOG.get(s));
+            if (super.jibeAngles.containsKey(s) && !super.speedTable.get(s).containsKey(super.jibeAngles.get(s))) {
+                super.speedTable.get(s).put(super.jibeAngles.get(s), super.jibeSOG.get(s));
             }
 
         }
