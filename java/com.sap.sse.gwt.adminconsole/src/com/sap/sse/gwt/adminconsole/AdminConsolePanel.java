@@ -93,7 +93,7 @@ public class AdminConsolePanel extends DockLayoutPanel {
                 if (source instanceof TabLayoutPanel) {
                     final TabLayoutPanel tabPanel = ((TabLayoutPanel) source);
                     final Widget selectedPanel = tabPanel.getWidget(event.getSelectedItem());
-                    refreshDataFor(unwrapScrollPanel(selectedPanel));
+                    refreshDataFor(selectedPanel);
                 } else if (source instanceof VerticalTabLayoutPanel) {
                     final VerticalTabLayoutPanel verticalTabLayoutPanel = (VerticalTabLayoutPanel) source;
                     Widget widgetAssociatedToVerticalTab = verticalTabLayoutPanel.getWidget(verticalTabLayoutPanel.getSelectedIndex());
@@ -101,7 +101,7 @@ public class AdminConsolePanel extends DockLayoutPanel {
                         TabLayoutPanel selectedTabLayoutPanel = (TabLayoutPanel) widgetAssociatedToVerticalTab;
                         final int selectedIndex = selectedTabLayoutPanel.getSelectedIndex();
                         if (selectedIndex >= 0) {
-                            widgetAssociatedToVerticalTab = unwrapScrollPanel(selectedTabLayoutPanel.getWidget(selectedIndex));
+                            widgetAssociatedToVerticalTab = selectedTabLayoutPanel.getWidget(selectedIndex);
                         }
                     }
                     refreshDataFor(widgetAssociatedToVerticalTab);
