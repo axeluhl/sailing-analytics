@@ -101,7 +101,7 @@ public class AdminConsolePanel extends DockLayoutPanel {
                         TabLayoutPanel selectedTabLayoutPanel = (TabLayoutPanel) widgetAssociatedToVerticalTab;
                         final int selectedIndex = selectedTabLayoutPanel.getSelectedIndex();
                         if (selectedIndex >= 0) {
-                            widgetAssociatedToVerticalTab = selectedTabLayoutPanel.getWidget(selectedIndex);
+                            widgetAssociatedToVerticalTab = unwrapScrollPanel(selectedTabLayoutPanel.getWidget(selectedIndex));
                         }
                     }
                     refreshDataFor(widgetAssociatedToVerticalTab);
