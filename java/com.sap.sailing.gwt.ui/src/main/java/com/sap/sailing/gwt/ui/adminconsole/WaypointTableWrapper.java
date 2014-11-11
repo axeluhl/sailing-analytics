@@ -2,13 +2,13 @@ package com.sap.sailing.gwt.ui.adminconsole;
 
 import com.google.gwt.user.cellview.client.TextColumn;
 import com.google.gwt.view.client.SelectionModel;
-import com.sap.sailing.gwt.ui.client.ErrorReporter;
 import com.sap.sailing.gwt.ui.client.SailingServiceAsync;
 import com.sap.sailing.gwt.ui.client.StringMessages;
 import com.sap.sailing.gwt.ui.shared.ControlPointDTO;
 import com.sap.sailing.gwt.ui.shared.GateDTO;
 import com.sap.sailing.gwt.ui.shared.MarkDTO;
 import com.sap.sailing.gwt.ui.shared.WaypointDTO;
+import com.sap.sse.gwt.client.ErrorReporter;
 
 public class WaypointTableWrapper<S extends SelectionModel<WaypointDTO>> extends TableWrapper<WaypointDTO, S> {    
     public WaypointTableWrapper(S selectionModel, SailingServiceAsync sailingService, final StringMessages stringMessages,
