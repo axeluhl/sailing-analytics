@@ -8,7 +8,6 @@ import java.util.logging.Logger;
 
 import com.google.gwt.http.client.URL;
 import com.google.gwt.place.shared.Place;
-import com.sap.sse.gwt.client.URLEncoder;
 
 /**
  * An abstract Place which is able to manage and parse place parameters.
@@ -35,7 +34,7 @@ public abstract class AbstractBasePlace extends Place {
                     if(stringBuilder.length() > 0) {
                         stringBuilder.append("&");
                     }
-                    stringBuilder.append(paramName + "=" + URLEncoder.encode(paramValue));
+                    stringBuilder.append(paramName + "=" + URL.encode(paramValue));
                 }
             }
     
@@ -49,7 +48,7 @@ public abstract class AbstractBasePlace extends Place {
         if (url != null && !url.isEmpty()) {
             this.placeParametersAsToken = URL.decode(url);
 
-            List<String> list = Arrays.asList(url.split("&"));
+            List<String> list = Arrays.asList(placeParametersAsToken.split("&"));
     
             if (list == null || list.size() < 1) {
                 logger.warning("Token empty, no-op");
