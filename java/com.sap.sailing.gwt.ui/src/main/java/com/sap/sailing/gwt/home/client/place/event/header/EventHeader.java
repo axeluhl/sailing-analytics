@@ -156,6 +156,8 @@ public class EventHeader extends AbstractEventComposite {
         boolean isSeries = event.isFakeSeries(); 
 
         String eventName = event.getName();
+        
+        regattasNavigation = placeNavigator.getEventNavigation(event.id.toString(), event.getBaseURL(), event.isOnRemoteServer());
         if(isSeries) {
             LeaderboardGroupDTO leaderboardGroupDTO = event.getLeaderboardGroups().get(0);
             eventName = leaderboardGroupDTO.getDisplayName() != null ? leaderboardGroupDTO.getDisplayName() : leaderboardGroupDTO.getName();
