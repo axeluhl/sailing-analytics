@@ -9,16 +9,13 @@ import org.openqa.selenium.WebElement;
 
 import com.sap.sailing.selenium.core.BySeleniumId;
 import com.sap.sailing.selenium.core.FindBy;
-
 import com.sap.sailing.selenium.pages.PageArea;
-
 import com.sap.sailing.selenium.pages.adminconsole.ActionsHelper;
-
 import com.sap.sailing.selenium.pages.adminconsole.tracking.TrackedRacesListPO.TrackedRaceDescriptor;
-
 import com.sap.sailing.selenium.pages.gwt.CellTablePO;
 import com.sap.sailing.selenium.pages.gwt.DataEntryPO;
 import com.sap.sailing.selenium.pages.gwt.GenericCellTablePO;
+import com.sap.sse.common.Util;
 
 public class LeaderboardDetailsPanelPO extends PageArea {
     public static class RaceDescriptor {
@@ -124,22 +121,22 @@ public class LeaderboardDetailsPanelPO extends PageArea {
     
     public List<RaceDescriptor> getRaces() {
         List<RaceDescriptor> result = new ArrayList<>();
-        
         CellTablePO<DataEntryPO> racesTable = getRacesTable();
-        
         for(DataEntryPO entry : racesTable.getEntries()) {
-            String name = entry.getColumnContent("Race");
-            String fleet = entry.getColumnContent("Fleet");
-            //String medalRace = entry.getColumnContent("Medal Race");
-            //String linked = entry.getColumnContent("Is linked");
-            //String factor = entry.getColumnContent("Factor");
-            
-            result.add(new RaceDescriptor(name, fleet, false, false, 0.0));
+            result.add(createRaceDescriptor(entry));
         }
-        
         return result;
     }
-    
+
+    private RaceDescriptor createRaceDescriptor(DataEntryPO entry) {
+        String name = entry.getColumnContent("Race");
+        String fleet = entry.getColumnContent("Fleet");
+        String medalRace = entry.getColumnContent("Medal Race");
+        String linked = entry.getColumnContent("Is linked");
+        String factorColumnContent = entry.getColumnContent("Factor");
+        double factor = factorColumnContent.trim().isEmpty() ? 0.0 : Double.valueOf(factorColumnContent);
+        return new RaceDescriptor(name, fleet, Util.equalsWithNull("x", medalRace), Util.equalsWithNull("Yes", linked), factor);
+    }
     
     
 //    public RaceEditDialog editRace(RaceDescriptor race) {
@@ -183,20 +180,12 @@ public class LeaderboardDetailsPanelPO extends PageArea {
     
     private DataEntryPO findRace(RaceDescriptor race) {
         CellTablePO<DataEntryPO> racesTable = getRacesTable();
-        
         for(DataEntryPO entry : racesTable.getEntries()) {
-            String name = entry.getColumnContent("Race");
-            String fleet = entry.getColumnContent("Fleet");
-            //String medalRace = entry.getColumnContent("Medal Race");
-            //String linked = entry.getColumnContent("Is linked");
-            //String factor = entry.getColumnContent("Factor");
-            
-            RaceDescriptor descriptor = new RaceDescriptor(name, fleet, false, false, 0.0);
-            
-            if(descriptor.equals(race))
+            RaceDescriptor descriptor = createRaceDescriptor(entry);
+            if (descriptor.equals(race)) {
                 return entry;
+            }
         }
-        
         return null;
     }
     
