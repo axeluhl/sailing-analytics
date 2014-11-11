@@ -17,10 +17,11 @@ class TrackingViewController : UIViewController, UIAlertViewDelegate {
     @IBOutlet weak var trackingStatusLabel: UILabel!
     @IBOutlet weak var onlineModeLabel: UILabel!
     @IBOutlet weak var trackingTimeLabel: UILabel!
-
-    // MARK:- Notifications
     
-    /* Register for notifications */
+    let startDate = NSDate()
+    let dateFormatter = NSDateFormatter()
+    
+    /* Register for notifications. Set up timer */
     override func viewDidLoad() {
         super.viewDidLoad()
         
@@ -29,7 +30,15 @@ class TrackingViewController : UIViewController, UIAlertViewDelegate {
         // register for notifications
         NSNotificationCenter.defaultCenter().addObserver(self, selector:"networkAvailabilityChanged", name:APIManager.NotificationType.networkAvailabilityChanged, object: nil)
         
+        // timer
+        let timer = NSTimer(timeInterval: 0.1, target: self, selector: "timerTick:", userInfo: nil, repeats: true)
+        NSRunLoop.currentRunLoop().addTimer(timer, forMode:NSRunLoopCommonModes)
+        
+        dateFormatter.dateFormat = "HH:mm:ss.S"
+        dateFormatter.timeZone = NSTimeZone(forSecondsFromGMT: 0)
     }
+    
+    // MARK:- Notifications
     
     deinit {
         NSNotificationCenter.defaultCenter().removeObserver(self)
@@ -43,6 +52,15 @@ class TrackingViewController : UIViewController, UIAlertViewDelegate {
             onlineModeLabel.text = "Offline"
             onlineModeLabel.textColor = UIColor(netHex: 0xFF0000)
         }
+    }
+    
+    // MARK:- Timer
+    
+    func timerTick(timer: NSTimer) {
+        let currentDate = NSDate()
+        let timeInterval = currentDate.timeIntervalSinceDate(startDate)
+        let timerDate = NSDate(timeIntervalSince1970: timeInterval)
+        trackingTimeLabel.text = dateFormatter.stringFromDate(timerDate)
     }
     
     // MARK:- Buttons

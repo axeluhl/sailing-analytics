@@ -8,6 +8,7 @@
 
 import Foundation
 
+// http://stackoverflow.com/a/24263296
 extension UIColor {
     convenience init(red: Int, green: Int, blue: Int) {
         assert(red >= 0 && red <= 255, "Invalid red component")
