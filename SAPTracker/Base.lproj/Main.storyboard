@@ -85,10 +85,19 @@
                             <constraint firstItem="OqX-q3-43s" firstAttribute="trailing" secondItem="Fp0-61-7he" secondAttribute="trailing" id="iyu-co-a6t"/>
                         </constraints>
                     </view>
-                    <navigationItem key="navigationItem" title="SAP Tracker" id="lqI-5f-PEI"/>
+                    <toolbarItems/>
+                    <navigationItem key="navigationItem" title="SAP Tracker" id="lqI-5f-PEI">
+                        <barButtonItem key="rightBarButtonItem" image="list" id="1wU-M4-Vaw">
+                            <connections>
+                                <action selector="showActionSheet:" destination="vXZ-lx-hvc" id="dxA-5U-l3L"/>
+                            </connections>
+                        </barButtonItem>
+                    </navigationItem>
                     <connections>
                         <segue destination="G3a-SV-Maf" kind="show" identifier="Regatta" id="FMW-37-go1"/>
                         <segue destination="plm-Uw-c62" kind="show" identifier="Scan" id="U8l-If-CrF"/>
+                        <segue destination="4Fb-v3-mkB" kind="presentation" identifier="Settings" id="Xxn-jp-xEB"/>
+                        <segue destination="dfN-Ch-vpm" kind="presentation" identifier="About" id="QMa-LQ-D8c"/>
                     </connections>
                 </viewController>
                 <placeholder placeholderIdentifier="IBFirstResponder" id="x5A-6p-PRh" sceneMemberID="firstResponder"/>
@@ -159,6 +168,7 @@
                         <subviews>
                             <imageView userInteractionEnabled="NO" contentMode="scaleToFill" horizontalHuggingPriority="251" verticalHuggingPriority="251" translatesAutoresizingMaskIntoConstraints="NO" id="D89-pe-zpv">
                                 <rect key="frame" x="0.0" y="64" width="600" height="160"/>
+                                <color key="backgroundColor" white="0.66666666666666663" alpha="1" colorSpace="calibratedWhite"/>
                                 <constraints>
                                     <constraint firstAttribute="height" constant="160" id="mkX-AL-rOE"/>
                                 </constraints>
@@ -186,12 +196,16 @@
                     </view>
                     <toolbarItems/>
                     <navigationItem key="navigationItem" title="Regatta" id="BjQ-Fx-PEX">
-                        <barButtonItem key="rightBarButtonItem" image="settings" id="Zdh-kJ-UMg">
+                        <barButtonItem key="rightBarButtonItem" image="list" id="Zdh-kJ-UMg">
                             <connections>
-                                <segue destination="H1Q-9y-gn2" kind="show" identifier="Settings" id="lA6-DS-hdJ"/>
+                                <action selector="showActionSheet:" destination="G3a-SV-Maf" id="67c-QJ-wIs"/>
                             </connections>
                         </barButtonItem>
                     </navigationItem>
+                    <connections>
+                        <segue destination="4Fb-v3-mkB" kind="presentation" identifier="Settings" id="Irs-ey-Uhs"/>
+                        <segue destination="dfN-Ch-vpm" kind="presentation" identifier="About" id="tzB-PL-31j"/>
+                    </connections>
                 </viewController>
                 <placeholder placeholderIdentifier="IBFirstResponder" id="ULD-PN-zII" userLabel="First Responder" sceneMemberID="firstResponder"/>
             </objects>
@@ -323,29 +337,69 @@
             </objects>
             <point key="canvasLocation" x="3421" y="-272"/>
         </scene>
+        <!--About-->
+        <scene sceneID="GmT-NU-h1e">
+            <objects>
+                <viewController id="WMr-pC-C12" customClass="AboutViewController" customModule="SAPTracker" customModuleProvider="target" sceneMemberID="viewController">
+                    <layoutGuides>
+                        <viewControllerLayoutGuide type="top" id="TdH-NN-ozb"/>
+                        <viewControllerLayoutGuide type="bottom" id="UkO-Wl-zJn"/>
+                    </layoutGuides>
+                    <view key="view" contentMode="scaleToFill" id="wZ4-L7-UtM">
+                        <rect key="frame" x="0.0" y="0.0" width="600" height="600"/>
+                        <autoresizingMask key="autoresizingMask" widthSizable="YES" heightSizable="YES"/>
+                        <subviews>
+                            <webView contentMode="scaleToFill" translatesAutoresizingMaskIntoConstraints="NO" id="I2y-QN-QpG">
+                                <rect key="frame" x="0.0" y="0.0" width="600" height="600"/>
+                                <color key="backgroundColor" white="1" alpha="1" colorSpace="calibratedWhite"/>
+                            </webView>
+                        </subviews>
+                        <color key="backgroundColor" white="1" alpha="1" colorSpace="calibratedWhite"/>
+                        <constraints>
+                            <constraint firstItem="I2y-QN-QpG" firstAttribute="leading" secondItem="wZ4-L7-UtM" secondAttribute="leading" id="Hkv-p7-fnG"/>
+                            <constraint firstItem="I2y-QN-QpG" firstAttribute="top" secondItem="wZ4-L7-UtM" secondAttribute="top" id="Rs0-0o-pmL"/>
+                            <constraint firstAttribute="trailing" secondItem="I2y-QN-QpG" secondAttribute="trailing" id="rSB-ei-JNg"/>
+                            <constraint firstItem="I2y-QN-QpG" firstAttribute="bottom" secondItem="UkO-Wl-zJn" secondAttribute="top" id="xoO-Wa-F9H"/>
+                        </constraints>
+                    </view>
+                    <navigationItem key="navigationItem" title="About" id="8o6-Yh-CuN">
+                        <barButtonItem key="rightBarButtonItem" systemItem="done" id="Bw1-bK-skL">
+                            <connections>
+                                <action selector="done:" destination="WMr-pC-C12" id="dtz-fc-tKq"/>
+                            </connections>
+                        </barButtonItem>
+                    </navigationItem>
+                    <connections>
+                        <outlet property="webView" destination="I2y-QN-QpG" id="UvH-Il-mu9"/>
+                    </connections>
+                </viewController>
+                <placeholder placeholderIdentifier="IBFirstResponder" id="4QC-nX-XeK" userLabel="First Responder" sceneMemberID="firstResponder"/>
+            </objects>
+            <point key="canvasLocation" x="2042" y="548"/>
+        </scene>
         <!--Settings-->
         <scene sceneID="yOw-OU-u8M">
             <objects>
                 <tableViewController id="H1Q-9y-gn2" customClass="SettingsViewController" customModule="SAPTracker" customModuleProvider="target" sceneMemberID="viewController">
-                    <tableView key="view" clipsSubviews="YES" contentMode="scaleToFill" alwaysBounceVertical="YES" dataMode="static" style="plain" separatorStyle="default" rowHeight="44" sectionHeaderHeight="22" sectionFooterHeight="22" id="dYc-OA-C1C">
+                    <tableView key="view" clipsSubviews="YES" contentMode="scaleToFill" alwaysBounceVertical="YES" dataMode="static" style="grouped" separatorStyle="default" rowHeight="44" sectionHeaderHeight="10" sectionFooterHeight="10" id="dYc-OA-C1C">
                         <rect key="frame" x="0.0" y="0.0" width="600" height="600"/>
                         <autoresizingMask key="autoresizingMask" widthSizable="YES" heightSizable="YES"/>
-                        <color key="backgroundColor" white="1" alpha="1" colorSpace="calibratedWhite"/>
+                        <color key="backgroundColor" cocoaTouchSystemColor="groupTableViewBackgroundColor"/>
                         <sections>
-                            <tableViewSection headerTitle="Energy Management" id="U1P-rq-Wgr">
+                            <tableViewSection headerTitle="Energy Management" id="PQM-l6-Zw8">
                                 <cells>
-                                    <tableViewCell contentMode="scaleToFill" selectionStyle="default" indentationWidth="10" id="kmq-3P-7Ly">
+                                    <tableViewCell contentMode="scaleToFill" selectionStyle="default" indentationWidth="10" reuseIdentifier="BatterySaving" id="nnw-vJ-ZW6">
                                         <autoresizingMask key="autoresizingMask"/>
-                                        <tableViewCellContentView key="contentView" opaque="NO" clipsSubviews="YES" multipleTouchEnabled="YES" contentMode="center" tableViewCell="kmq-3P-7Ly" id="uQh-Sb-2nP">
+                                        <tableViewCellContentView key="contentView" opaque="NO" clipsSubviews="YES" multipleTouchEnabled="YES" contentMode="center" tableViewCell="nnw-vJ-ZW6" id="wMb-jA-3a7">
                                             <autoresizingMask key="autoresizingMask"/>
                                             <subviews>
-                                                <switch opaque="NO" contentMode="scaleToFill" horizontalHuggingPriority="750" verticalHuggingPriority="750" contentHorizontalAlignment="center" contentVerticalAlignment="center" on="YES" translatesAutoresizingMaskIntoConstraints="NO" id="fMV-QC-M7e">
+                                                <switch opaque="NO" contentMode="scaleToFill" horizontalHuggingPriority="750" verticalHuggingPriority="750" contentHorizontalAlignment="center" contentVerticalAlignment="center" on="YES" translatesAutoresizingMaskIntoConstraints="NO" id="WvA-dL-zOH">
                                                     <rect key="frame" x="536" y="6" width="51" height="31"/>
                                                     <connections>
-                                                        <action selector="batterySavingChanged:" destination="H1Q-9y-gn2" eventType="valueChanged" id="c1b-v8-mec"/>
+                                                        <action selector="batterySavingChanged:" destination="H1Q-9y-gn2" eventType="valueChanged" id="6fN-hp-Ux5"/>
                                                     </connections>
                                                 </switch>
-                                                <label opaque="NO" userInteractionEnabled="NO" contentMode="left" horizontalHuggingPriority="251" verticalHuggingPriority="251" fixedFrame="YES" text="Battery Saving" textAlignment="right" lineBreakMode="tailTruncation" baselineAdjustment="alignBaselines" adjustsFontSizeToFit="NO" translatesAutoresizingMaskIntoConstraints="NO" id="8To-0R-bQG">
+                                                <label opaque="NO" userInteractionEnabled="NO" contentMode="left" horizontalHuggingPriority="251" verticalHuggingPriority="251" fixedFrame="YES" text="Battery Saving" lineBreakMode="tailTruncation" baselineAdjustment="alignBaselines" adjustsFontSizeToFit="NO" translatesAutoresizingMaskIntoConstraints="NO" id="eRQ-p8-ydN">
                                                     <rect key="frame" x="15" y="11" width="113" height="21"/>
                                                     <fontDescription key="fontDescription" type="system" pointSize="17"/>
                                                     <color key="textColor" cocoaTouchSystemColor="darkTextColor"/>
@@ -353,8 +407,8 @@
                                                 </label>
                                             </subviews>
                                             <constraints>
-                                                <constraint firstAttribute="centerY" secondItem="fMV-QC-M7e" secondAttribute="centerY" id="549-7Q-qgs"/>
-                                                <constraint firstAttribute="trailing" secondItem="fMV-QC-M7e" secondAttribute="trailing" constant="15" id="nD4-6f-Vcy"/>
+                                                <constraint firstAttribute="centerY" secondItem="WvA-dL-zOH" secondAttribute="centerY" id="NQx-Tf-6C8"/>
+                                                <constraint firstAttribute="trailing" secondItem="WvA-dL-zOH" secondAttribute="trailing" constant="15" id="dTo-Dk-nrE"/>
                                             </constraints>
                                         </tableViewCellContentView>
                                     </tableViewCell>
@@ -366,17 +420,63 @@
                             <outlet property="delegate" destination="H1Q-9y-gn2" id="kho-xy-7j7"/>
                         </connections>
                     </tableView>
-                    <navigationItem key="navigationItem" title="Settings" id="SbA-xV-4ro"/>
+                    <navigationItem key="navigationItem" title="Settings" id="SbA-xV-4ro">
+                        <barButtonItem key="rightBarButtonItem" systemItem="done" id="Ta8-ro-B8t">
+                            <connections>
+                                <action selector="done:" destination="H1Q-9y-gn2" id="ely-kW-9Sw"/>
+                            </connections>
+                        </barButtonItem>
+                    </navigationItem>
                     <connections>
-                        <outlet property="batterySavingSwitch" destination="fMV-QC-M7e" id="7WQ-p3-73C"/>
+                        <outlet property="batterySavingSwitch" destination="WvA-dL-zOH" id="sRv-ja-xXy"/>
                     </connections>
                 </tableViewController>
                 <placeholder placeholderIdentifier="IBFirstResponder" id="esa-2Y-AeG" userLabel="First Responder" sceneMemberID="firstResponder"/>
             </objects>
-            <point key="canvasLocation" x="1971" y="548"/>
+            <point key="canvasLocation" x="3595" y="548"/>
+        </scene>
+        <!--Navigation Controller-->
+        <scene sceneID="F7s-H3-l3b">
+            <objects>
+                <navigationController automaticallyAdjustsScrollViewInsets="NO" id="4Fb-v3-mkB" sceneMemberID="viewController">
+                    <toolbarItems/>
+                    <navigationBar key="navigationBar" contentMode="scaleToFill" id="opw-zV-Qak">
+                        <rect key="frame" x="0.0" y="0.0" width="320" height="44"/>
+                        <autoresizingMask key="autoresizingMask"/>
+                    </navigationBar>
+                    <nil name="viewControllers"/>
+                    <connections>
+                        <segue destination="H1Q-9y-gn2" kind="relationship" relationship="rootViewController" id="nIX-ux-OSn"/>
+                    </connections>
+                </navigationController>
+                <placeholder placeholderIdentifier="IBFirstResponder" id="gzU-WF-4hc" userLabel="First Responder" sceneMemberID="firstResponder"/>
+            </objects>
+            <point key="canvasLocation" x="2783" y="548"/>
+        </scene>
+        <!--Navigation Controller-->
+        <scene sceneID="vrg-wI-Zwb">
+            <objects>
+                <navigationController automaticallyAdjustsScrollViewInsets="NO" id="dfN-Ch-vpm" sceneMemberID="viewController">
+                    <toolbarItems/>
+                    <navigationBar key="navigationBar" contentMode="scaleToFill" id="IvG-lp-FEV">
+                        <rect key="frame" x="0.0" y="0.0" width="320" height="44"/>
+                        <autoresizingMask key="autoresizingMask"/>
+                    </navigationBar>
+                    <nil name="viewControllers"/>
+                    <connections>
+                        <segue destination="WMr-pC-C12" kind="relationship" relationship="rootViewController" id="fsP-Bo-6IJ"/>
+                    </connections>
+                </navigationController>
+                <placeholder placeholderIdentifier="IBFirstResponder" id="qiD-oM-t3P" userLabel="First Responder" sceneMemberID="firstResponder"/>
+            </objects>
+            <point key="canvasLocation" x="1222" y="548"/>
         </scene>
     </scenes>
     <resources>
-        <image name="settings" width="22" height="22"/>
+        <image name="list" width="22" height="22"/>
     </resources>
+    <inferredMetricsTieBreakers>
+        <segue reference="QMa-LQ-D8c"/>
+        <segue reference="Irs-ey-Uhs"/>
+    </inferredMetricsTieBreakers>
 </document>

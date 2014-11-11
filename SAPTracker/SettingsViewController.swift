@@ -9,17 +9,19 @@
 import Foundation
 
 class SettingsViewController: UITableViewController {
-
+    
     @IBOutlet weak var batterySavingSwitch: UISwitch!
-
+    
     override func viewDidLoad() {
         super.viewDidLoad()
-        
         batterySavingSwitch.setOn(BatteryManager.sharedManager.batterySavingPreference, animated: true)
     }
     
     @IBAction func batterySavingChanged(sender: UISwitch) {
         BatteryManager.sharedManager.batterySavingPreference = sender.on
     }
-
+    
+    @IBAction func done(sender: AnyObject) {
+        presentingViewController!.dismissViewControllerAnimated(true, nil)
+    }
 }
