@@ -13,6 +13,10 @@ class TrackingViewController : UIViewController, UIAlertViewDelegate {
     enum AlertViewTag: Int {
         case StopTracking
     }
+    @IBOutlet weak var gpsQualityImageView: UIImageView!
+    @IBOutlet weak var trackingStatusLabel: UILabel!
+    @IBOutlet weak var onlineModeLabel: UILabel!
+    @IBOutlet weak var trackingTimeLabel: UILabel!
     
     /* Stop tracking, go back to regattas view */
     @IBAction func stopTrackingButtonTapped(sender: AnyObject) {
@@ -25,6 +29,7 @@ class TrackingViewController : UIViewController, UIAlertViewDelegate {
     /* Alert view delegate */
     func alertView(alertView: UIAlertView, clickedButtonAtIndex buttonIndex: Int) {
         switch alertView.tag {
+            // Stop tracking?
         case AlertViewTag.StopTracking.rawValue:
             switch buttonIndex {
             case alertView.cancelButtonIndex:
