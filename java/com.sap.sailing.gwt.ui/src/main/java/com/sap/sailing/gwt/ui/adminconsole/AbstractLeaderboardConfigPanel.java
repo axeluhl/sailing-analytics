@@ -449,12 +449,20 @@ public abstract class AbstractLeaderboardConfigPanel extends FormPanel implement
     }
 
     @Override
-    public void changeTrackingRace(Iterable<? extends RegattaAndRaceIdentifier> regattaAndRaceIdentifiers, boolean isTracked) {
+    public void racesStoppedTracking(Iterable<? extends RegattaAndRaceIdentifier> regattaAndRaceIdentifiers) {
+        // nothing needs to be done here; the race doesn't change its linkedness status only because it stopped tracking
+    }
+
+    /**
+     * When a race is removed from the server, it will also have been unlinked. Represent the unlinking by clearing the
+     * tracked race link for any race column / fleet that points to it:
+     */
+    @Override
+    public void racesRemoved(Iterable<? extends RegattaAndRaceIdentifier> regattaAndRaceIdentifiers) {
         for (RegattaAndRaceIdentifier regattaAndRaceIdentifier : regattaAndRaceIdentifiers) {
             for (RaceColumnDTOAndFleetDTOWithNameBasedEquality raceColumnAndFleetName : raceColumnTable.getDataProvider().getList()) {
-                if (raceColumnAndFleetName.getA().getRaceColumnName().equals(regattaAndRaceIdentifier.getRaceName())) {
-                    raceColumnAndFleetName.getA().setRaceIdentifier(raceColumnAndFleetName.getB(),
-                            regattaAndRaceIdentifier);
+                if (Util.equalsWithNull(raceColumnAndFleetName.getA().getRaceIdentifier(raceColumnAndFleetName.getB()), regattaAndRaceIdentifier)) {
+                    raceColumnAndFleetName.getA().setRaceIdentifier(raceColumnAndFleetName.getB(), null);
                 }
             }
             raceColumnTable.getDataProvider().refresh();
