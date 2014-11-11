@@ -396,6 +396,7 @@ import com.sap.sailing.simulator.PolarDiagramFactory;
 import com.sap.sailing.simulator.SailingSimulator;
 import com.sap.sailing.simulator.SimulationParameters;
 import com.sap.sailing.simulator.TimedPositionWithSpeed;
+import com.sap.sailing.simulator.impl.PolarDiagramGPS;
 import com.sap.sailing.simulator.impl.SailingSimulatorImpl;
 import com.sap.sailing.simulator.impl.SimulationParametersImpl;
 import com.sap.sailing.simulator.util.SailingSimulatorConstants;
@@ -1535,10 +1536,8 @@ public class SailingServiceImpl extends ProxiedRemoteServiceServlet implements S
             course.add(startPosition);
             course.add(endPosition);
             BoatClass boatClass = trackedRace.getRace().getBoatClass();
-            PolarDiagram polarDiagram = polarDiagramService.getService().getPolarDiagram(boatClass);
-            if (polarDiagram == null) {
-            	return null;
-            }
+            PolarDataService polarData = getService().getPolarDataService();
+            PolarDiagram polarDiagram = new PolarDiagramGPS(boatClass, polarData);
             SimulationParameters simulationPars = new SimulationParametersImpl(course, polarDiagram, windField, SailingSimulatorConstants.ModeEvent, true, true);
             
             // for upwind/downwind, run simulation with start-time, start-position, end-position and windfield
