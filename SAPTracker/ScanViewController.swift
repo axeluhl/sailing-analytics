@@ -9,9 +9,10 @@
 import UIKit
 import AVFoundation
 
-class ScanViewController: UIViewController, AVCaptureMetadataOutputObjectsDelegate {
-    struct NotificationType {
-        static let qrcodeScannedNotificationKey = "qrcode_scanned"
+class ScanViewController: UIViewController, AVCaptureMetadataOutputObjectsDelegate, UIAlertViewDelegate {
+    
+    enum AlertViewTag: Int {
+        case IncorrectQRCode, ConnectedToServer, CouldNotConnectToServer
     }
     
     @IBOutlet weak var previewView: UIView!
@@ -61,10 +62,10 @@ class ScanViewController: UIViewController, AVCaptureMetadataOutputObjectsDelega
             
             var qrcodeData = QRCodeData()
             if !qrcodeData.parseString(metadataObject.stringValue) {
-                var alert = UIAlertController(title: "SAP Tracker", message: "Incorrect QR Code", preferredStyle: UIAlertControllerStyle.Alert)
-                alert.addAction(UIAlertAction(title: "OK", style: UIAlertActionStyle.Default, handler: nil))
-                self.presentViewController(alert, animated: true, completion: nil)
-                return
+                let alertView = UIAlertView(title: "SAP Tracker", message: "Incorrect QR Code", delegate: self, cancelButtonTitle: nil, otherButtonTitles: "OK")
+                alertView.tag = AlertViewTag.IncorrectQRCode.rawValue;
+                alertView.alertViewStyle = .Default
+                alertView.show()
             }
             // TODO: store qrcodeData somehow
             session.stopRunning()
@@ -72,23 +73,36 @@ class ScanViewController: UIViewController, AVCaptureMetadataOutputObjectsDelega
             APIManager.sharedManager.postDeviceMapping(qrcodeData,
                 success: { (AFHTTPRequestOperation operation, AnyObject responseObject) -> Void in
                     var alert = UIAlertController(title: "SAP Tracker", message: "Connected to Server \(qrcodeData.server!)", preferredStyle: UIAlertControllerStyle.Alert)
-                    alert.addAction(UIAlertAction(title: "OK", style: UIAlertActionStyle.Default) { UIAlertAction in
-                        self.dismiss()
-                        })
-                    self.presentViewController(alert, animated: true, completion: nil)
+                    let alertView = UIAlertView(title: "SAP Tracker", message: "Connected to Server \(qrcodeData.server!)", delegate: self, cancelButtonTitle: nil, otherButtonTitles: "OK")
+                    alertView.tag = AlertViewTag.ConnectedToServer.rawValue;
+                    alertView.alertViewStyle = .Default
+                    alertView.show()
+                    
                     NSLog("success")
                 }, failure: { (AFHTTPRequestOperation operation, NSError error) -> Void in
-                    var alert = UIAlertController(title: "SAP Tracker", message: "Couldn't connect to Server \(qrcodeData.server!)", preferredStyle: UIAlertControllerStyle.Alert)
-                    alert.addAction(UIAlertAction(title: "Cancel", style: UIAlertActionStyle.Cancel) { UIAlertAction in
-                        self.session.startRunning()
-                        })
-                    self.presentViewController(alert, animated: true, completion: nil)
-                    NSLog("failure")
+                    let alertView = UIAlertView(title: "SAP Tracker", message: "Couldn't connect to Server \(qrcodeData.server!)", delegate: self, cancelButtonTitle: "Cancel")
+                    alertView.tag = AlertViewTag.CouldNotConnectToServer.rawValue;
+                    alertView.alertViewStyle = .Default
+                    alertView.show()
             })
         }
     }
     
-    func dismiss() {
-        navigationController!.popViewControllerAnimated(true)
+    /* Alert view delegate */
+    func alertView(alertView: UIAlertView, clickedButtonAtIndex buttonIndex: Int) {
+        switch alertView.tag {
+            // Stop tracking?
+        case AlertViewTag.ConnectedToServer.rawValue:
+            navigationController!.popViewControllerAnimated(true)
+            break
+        case AlertViewTag.CouldNotConnectToServer.rawValue:
+            self.session.startRunning()
+            break
+        default:
+            
+            break
+        }
     }
+    
+    
 }

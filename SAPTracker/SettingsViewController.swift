@@ -18,7 +18,6 @@ class SettingsViewController: UITableViewController {
         batterySavingSwitch.setOn(BatteryManager.sharedManager.batterySavingPreference, animated: true)
     }
     
-
     @IBAction func batterySavingChanged(sender: UISwitch) {
         BatteryManager.sharedManager.batterySavingPreference = sender.on
     }

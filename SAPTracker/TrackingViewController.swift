@@ -17,6 +17,35 @@ class TrackingViewController : UIViewController, UIAlertViewDelegate {
     @IBOutlet weak var trackingStatusLabel: UILabel!
     @IBOutlet weak var onlineModeLabel: UILabel!
     @IBOutlet weak var trackingTimeLabel: UILabel!
+
+    // MARK:- Notifications
+    
+    /* Register for notifications */
+    override func viewDidLoad() {
+        super.viewDidLoad()
+        
+        networkAvailabilityChanged()
+        
+        // register for notifications
+        NSNotificationCenter.defaultCenter().addObserver(self, selector:"networkAvailabilityChanged", name:APIManager.NotificationType.networkAvailabilityChanged, object: nil)
+        
+    }
+    
+    deinit {
+        NSNotificationCenter.defaultCenter().removeObserver(self)
+    }
+    
+    func networkAvailabilityChanged() {
+        if (APIManager.sharedManager.networkAvailable) {
+            onlineModeLabel.text = "Online"
+            onlineModeLabel.textColor = UIColor(netHex: 0x408000)
+        } else {
+            onlineModeLabel.text = "Offline"
+            onlineModeLabel.textColor = UIColor(netHex: 0xFF0000)
+        }
+    }
+    
+    // MARK:- Buttons
     
     /* Stop tracking, go back to regattas view */
     @IBAction func stopTrackingButtonTapped(sender: AnyObject) {
@@ -33,14 +62,14 @@ class TrackingViewController : UIViewController, UIAlertViewDelegate {
         case AlertViewTag.StopTracking.rawValue:
             switch buttonIndex {
             case alertView.cancelButtonIndex:
-                break;
+                break
             default:
                 LocationManager.sharedManager.stopTracking()
                 self.dismissViewControllerAnimated(true, nil)
             }
-            break;
+            break
         default:
-            break;
+            break
         }
     }
     

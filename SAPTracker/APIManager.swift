@@ -10,7 +10,25 @@ import Foundation
 import CoreData
 
 class APIManager: NSObject {
-    
+ 
+    struct NotificationType {
+        static let networkAvailabilityChanged = "networkAvailabilityChanged"
+    }
+
+    private struct SyncPeriod {
+        /* Normal rate of upload is every 3s */
+        static let Normal: NSTimeInterval = 3
+        
+        /* To save battery, upload rate is lowered to every 30s */
+        static let BatterySaving: NSTimeInterval = 30
+    }
+
+    /* Constants */
+    struct Constants {
+        /* Max number of fix objects to be sent per POST request. */
+        static let maxSendGPSFix = 100
+    }
+
     /* Base url of all requests */
     private var baseUrlString: String?
     
@@ -20,21 +38,10 @@ class APIManager: NSObject {
     /* Date of last GPS position upload */
     var lastSync: NSDate?
     
-    private struct SyncPeriod {
-        /* Normal rate of upload is every 3s */
-        static let Normal: NSTimeInterval = 3
-        
-        /* To save battery, upload rate is lowered to every 30s */
-        static let BatterySaving: NSTimeInterval = 30
-    }
-    
-    struct Constants {
-        static let maxSendGPSFix = 100
-    }
-    
     /* Number of seconds between syncs */
     private var syncPeriod: NSTimeInterval = BatteryManager.sharedManager.batterySaving ? SyncPeriod.BatterySaving : SyncPeriod.Normal
     
+    // TODO
     /* REST Paths */
     /* Map device to competitor */
     private let postDeviceMapping = "/sailingserver/rc/racelog"
@@ -42,6 +49,15 @@ class APIManager: NSObject {
     /* Send location to server */
     private let postGPSFixPath = "/tracking/recordFixesFlatJson"
     
+    var networkAvailable: Bool {
+        get {
+            if manager == nil {
+                return false
+            }
+            return !manager!.operationQueue.suspended
+        }
+    }
+
     /* Singleton */
     class var sharedManager: APIManager {
         struct Singleton {
@@ -55,7 +71,7 @@ class APIManager: NSObject {
         super.init()
         
         // register for notifications
-        NSNotificationCenter.defaultCenter().addObserver(self, selector:"batteryChanged", name:BatteryManager.NotificationType.batterySavingChanged, object: nil);
+        NSNotificationCenter.defaultCenter().addObserver(self, selector:"batteryChanged", name:BatteryManager.NotificationType.batterySavingChanged, object: nil)
         
     }
     
@@ -69,11 +85,11 @@ class APIManager: NSObject {
             return
         }
         
-        self.baseUrlString = baseUrlString;
+        self.baseUrlString = baseUrlString
         
         manager = AFHTTPRequestOperationManager(baseURL: NSURL(string: baseUrlString)) // baseUrl needed for checking reachability
         
-        // encode body as JSON
+        // encode/decode body as JSON
         manager!.requestSerializer = AFJSONRequestSerializer() as AFHTTPRequestSerializer
         manager!.responseSerializer = AFCompoundResponseSerializer() as AFHTTPResponseSerializer
         
@@ -82,12 +98,16 @@ class APIManager: NSObject {
         manager!.reachabilityManager.setReachabilityStatusChangeBlock({(AFNetworkReachabilityStatus status) -> Void in
             switch (status) {
             case AFNetworkReachabilityStatus.ReachableViaWWAN, AFNetworkReachabilityStatus.ReachableViaWiFi:
-                operationQueue?.suspended = false;
-                break;
+                operationQueue?.suspended = false
+                break
             default:
-                operationQueue?.suspended = true;
+                operationQueue?.suspended = true
                 
             }
+            
+            // send notification (e.g. to tracker view controller)
+            let notification = NSNotification(name: NotificationType.networkAvailabilityChanged, object: self)
+            NSNotificationQueue.defaultQueue().enqueueNotification(notification, postingStyle: NSPostingStyle.PostASAP)
         })
         manager!.reachabilityManager.startMonitoring()
         
@@ -137,8 +157,8 @@ class APIManager: NSObject {
     /* See if any rows need to be uploaded. Schedule timer again. */
     func timer() {
         NSLog("timer")
-        let loop = NSTimer.scheduledTimerWithTimeInterval(syncPeriod, target:self, selector:"timer", userInfo:nil, repeats:false);
-        NSRunLoop.currentRunLoop().addTimer(loop, forMode:NSRunLoopCommonModes);
+        let loop = NSTimer.scheduledTimerWithTimeInterval(syncPeriod, target:self, selector:"timer", userInfo:nil, repeats:false)
+        NSRunLoop.currentRunLoop().addTimer(loop, forMode:NSRunLoopCommonModes)
         
         if (manager != nil && !manager!.operationQueue.suspended) {
             let lastestGPSFixes = DataManager.sharedManager.latestLocations()
