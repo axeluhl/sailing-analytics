@@ -105,10 +105,10 @@ public class EventHeader extends AbstractEventComposite {
         updateUI();
     }
 
-    public EventHeader(EventDTO event) {
+    public EventHeader(EventDTO event, HomePlacesNavigator placeNavigator) {
         super(event, null);
 
-        this.placeNavigator = null;
+        this.placeNavigator = placeNavigator;
         initResources();
         
         isFinishedDiv.getStyle().setDisplay(Display.NONE);

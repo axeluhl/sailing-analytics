@@ -56,7 +56,7 @@ public class TabletAndDesktopApplicationClientFactory extends AbstractApplicatio
 
     @Override
     public EventWithoutRegattasView createEventWithoutRegattasView(EventDTO event) {
-        return new TabletAndDesktopEventWithoutRegattasView(getSailingService(), event);
+        return new TabletAndDesktopEventWithoutRegattasView(getSailingService(), event, getHomePlacesNavigator());
     }
 
     @Override
