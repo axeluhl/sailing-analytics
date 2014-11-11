@@ -29,6 +29,9 @@
 		7FA6551819F65FBD00A1B92D /* GPSFix.swift in Sources */ = {isa = PBXBuildFile; fileRef = 7FA6551719F65FBD00A1B92D /* GPSFix.swift */; };
 		7FA6551A19F6661900A1B92D /* DataManager.swift in Sources */ = {isa = PBXBuildFile; fileRef = 7FA6551919F6661900A1B92D /* DataManager.swift */; };
 		7FC5232D19F6AEE800BBFDCC /* AVFoundation.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 7FC5232C19F6AEE800BBFDCC /* AVFoundation.framework */; };
+		7FD9D2FD1A122C750058FEAD /* Event.swift in Sources */ = {isa = PBXBuildFile; fileRef = 7FD9D2FC1A122C750058FEAD /* Event.swift */; };
+		7FD9D2FF1A122C760058FEAD /* Competitor.swift in Sources */ = {isa = PBXBuildFile; fileRef = 7FD9D2FE1A122C760058FEAD /* Competitor.swift */; };
+		7FD9D3011A122C760058FEAD /* Leaderboard.swift in Sources */ = {isa = PBXBuildFile; fileRef = 7FD9D3001A122C760058FEAD /* Leaderboard.swift */; };
 		EAFE4EA346FB83C2B67C60B7 /* libPods.a in Frameworks */ = {isa = PBXBuildFile; fileRef = 06377F0B2F2854497073FC0E /* libPods.a */; };
 /* End PBXBuildFile section */
 
@@ -71,6 +74,9 @@
 		7FA6551719F65FBD00A1B92D /* GPSFix.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = GPSFix.swift; sourceTree = "<group>"; };
 		7FA6551919F6661900A1B92D /* DataManager.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = DataManager.swift; sourceTree = "<group>"; };
 		7FC5232C19F6AEE800BBFDCC /* AVFoundation.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = AVFoundation.framework; path = System/Library/Frameworks/AVFoundation.framework; sourceTree = SDKROOT; };
+		7FD9D2FC1A122C750058FEAD /* Event.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = Event.swift; sourceTree = "<group>"; };
+		7FD9D2FE1A122C760058FEAD /* Competitor.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = Competitor.swift; sourceTree = "<group>"; };
+		7FD9D3001A122C760058FEAD /* Leaderboard.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = Leaderboard.swift; sourceTree = "<group>"; };
 		CF98F25F363113C51C7CB1F3 /* Pods.release.xcconfig */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.xcconfig; name = Pods.release.xcconfig; path = "Pods/Target Support Files/Pods/Pods.release.xcconfig"; sourceTree = "<group>"; };
 		EA431711E588F5A2B31A62AC /* Pods.debug.xcconfig */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.xcconfig; name = Pods.debug.xcconfig; path = "Pods/Target Support Files/Pods/Pods.debug.xcconfig"; sourceTree = "<group>"; };
 /* End PBXFileReference section */
@@ -122,6 +128,9 @@
 				7F3663031A00FD4600F6102D /* RaceLogEvent.swift */,
 				7F3663051A00FF0C00F6102D /* DeviceCompetitorMappingEvent.swift */,
 				7FA6551719F65FBD00A1B92D /* GPSFix.swift */,
+				7FD9D3001A122C760058FEAD /* Leaderboard.swift */,
+				7FD9D2FE1A122C760058FEAD /* Competitor.swift */,
+				7FD9D2FC1A122C750058FEAD /* Event.swift */,
 				7F44095919F65B5B0021BF22 /* CoreData.xcdatamodeld */,
 			);
 			name = Model;
@@ -349,6 +358,7 @@
 			buildActionMask = 2147483647;
 			files = (
 				7F1875B31A10F1B800C25BE0 /* TrackingViewController.swift in Sources */,
+				7FD9D2FF1A122C760058FEAD /* Competitor.swift in Sources */,
 				7F83F15819F154F000C53328 /* HomeViewController.swift in Sources */,
 				7F3663061A00FF0C00F6102D /* DeviceCompetitorMappingEvent.swift in Sources */,
 				7F44095B19F65B5B0021BF22 /* CoreData.xcdatamodeld in Sources */,
@@ -356,6 +366,8 @@
 				7F03FD3E19FA44CD00FA1327 /* APIManager.swift in Sources */,
 				7FA6551819F65FBD00A1B92D /* GPSFix.swift in Sources */,
 				7FA6551A19F6661900A1B92D /* DataManager.swift in Sources */,
+				7FD9D3011A122C760058FEAD /* Leaderboard.swift in Sources */,
+				7FD9D2FD1A122C750058FEAD /* Event.swift in Sources */,
 				7F3663041A00FD4600F6102D /* RaceLogEvent.swift in Sources */,
 				7F2C605A19F160E400C32D93 /* LocationManager.swift in Sources */,
 				7F8CC2081A10D47A00C56D7F /* SettingsViewController.swift in Sources */,

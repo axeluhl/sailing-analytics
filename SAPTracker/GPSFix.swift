@@ -9,7 +9,6 @@
 import Foundation
 import CoreData
 
-@objc(GPSFix)
 class GPSFix: NSManagedObject {
 
     @NSManaged var bearingDeg: Double
