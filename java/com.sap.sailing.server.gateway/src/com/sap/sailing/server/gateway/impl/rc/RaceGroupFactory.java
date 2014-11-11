@@ -25,6 +25,7 @@ import com.sap.sailing.domain.base.racegroup.impl.RaceGroupImpl;
 import com.sap.sailing.domain.base.racegroup.impl.RaceRowImpl;
 import com.sap.sailing.domain.base.racegroup.impl.SeriesWithRowsImpl;
 import com.sap.sailing.domain.common.LeaderboardNameConstants;
+import com.sap.sailing.domain.leaderboard.FlexibleLeaderboard;
 import com.sap.sailing.domain.leaderboard.Leaderboard;
 import com.sap.sailing.domain.leaderboard.RegattaLeaderboard;
 
@@ -34,22 +35,32 @@ import com.sap.sailing.domain.leaderboard.RegattaLeaderboard;
 public class RaceGroupFactory {
 
     /**
-     * Convert given {@link Leaderboard} to a {@link RaceGroup}.
+     * Convert given {@link RegattaLeaderboard} to a {@link RaceGroup}.
      * @param leaderboard to be converted.
      * @return the {@link RaceGroup}.
      */
-    public RaceGroup convert(Leaderboard leaderboard) {
+    public RaceGroup convert(RegattaLeaderboard leaderboard) {
+        String name = leaderboard.getName();
+        CourseArea courseArea = leaderboard.getDefaultCourseArea();
+        Regatta regatta = ((RegattaLeaderboard) leaderboard).getRegatta();
+
+        Iterable<SeriesWithRows> series = getSeries(leaderboard);
+
+        return new RaceGroupImpl(name, regatta.getBoatClass(), courseArea, series,
+                regatta.getRegattaConfiguration());
+    }
+
+    /**
+     * Convert given {@link FlexibleLeaderboard} to a {@link RaceGroup}.
+     * @param leaderboard to be converted.
+     * @return the {@link RaceGroup}.
+     */
+    public RaceGroup convert(FlexibleLeaderboard leaderboard) {
         String name = leaderboard.getName();
 
         CourseArea courseArea = leaderboard.getDefaultCourseArea();
         BoatClass boatClass = null;
         RegattaConfiguration configuration = null;
-        
-        if (leaderboard instanceof RegattaLeaderboard) {
-            Regatta regatta = ((RegattaLeaderboard) leaderboard).getRegatta();
-            boatClass = regatta.getBoatClass();
-            configuration = regatta.getRegattaConfiguration();
-        }
 
         Iterable<SeriesWithRows> series = getSeries(leaderboard);
 
