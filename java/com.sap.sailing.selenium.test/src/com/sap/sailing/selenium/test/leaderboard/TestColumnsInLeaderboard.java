@@ -100,9 +100,15 @@ public class TestColumnsInLeaderboard extends AbstractSeleniumTest {
         tracTracEvents.setReggataForTracking(this.regatta);
         tracTracEvents.setTrackSettings(false, false, false);
         tracTracEvents.startTrackingForRace(this.trackableRace);
-        TrackedRacesListPO trackedRacesList = tracTracEvents.getTrackedRacesList();
-        trackedRacesList.waitForTrackedRace(this.trackedRace, Status.FINISHED); // TracAPI puts REPLAY races into FINISHED mode when done loading
-        trackedRacesList.stopTracking(this.trackedRace);
+        {
+            TrackedRacesListPO trackedRacesList = tracTracEvents.getTrackedRacesList();
+            trackedRacesList.waitForTrackedRace(this.trackedRace, Status.FINISHED); // TracAPI puts REPLAY races into FINISHED mode when done loading
+        }
+        {
+            // Create the TrackedRacesListPO again; the contents may have been updated by the transition to FINISHED
+            TrackedRacesListPO trackedRacesList = tracTracEvents.getTrackedRacesList();
+            trackedRacesList.stopTracking(this.trackedRace);
+        }
         {
             LeaderboardConfigurationPanelPO leaderboardConfiguration = adminConsole.goToLeaderboardConfiguration();
             LeaderboardDetailsPanelPO leaderboardDetails = leaderboardConfiguration.getLeaderboardDetails(LEADERBOARD);
