@@ -2077,12 +2077,10 @@ public class RacingEventServiceImpl implements RacingEventServiceWithTestSupport
     }
 
     /**
-     * Currently, the operation is executed by immediately {@link Operation#internalApplyTo(Object) applying} it to this
-     * service object.
-     * <p>
+     * The operation is executed by immediately {@link Operation#internalApplyTo(Object) applying} it to this
+     * service object. It is then replicated to all replicas.
      * 
-     * Future implementations of this method will need to also replicate the effects of the operation to all replica of
-     * this service known.
+     * @see {@link #replicate(RacingEventServiceOperation)}
      */
     @Override
     public <T> T apply(OperationWithResult<RacingEventService, T> operation) {

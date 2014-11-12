@@ -37,16 +37,17 @@ import com.sap.sse.replication.ReplicationMasterDescriptor;
 import com.sap.sse.replication.ReplicationService;
 
 /**
- * Can observe a {@link RacingEventService} for the operations it performs that require replication. Only observes as
- * long as there are replicas registered. If the last replica is de-registered, the service stops observing the
- * {@link RacingEventService}. Operations received that require replication are sent to the {@link Exchange} to which
- * replica queues can bind. The exchange name is provided to this service during construction.
+ * Can observe a {@link Replicable} for the operations it performs that require replication. Only observes as long as
+ * there are replicas registered. If the last replica is de-registered, the service stops observing the
+ * {@link Replicable}. Operations received that require replication are sent to the {@link Exchange} to which replica
+ * queues can bind, using a {@link Replicator}. The exchange name and connectivity information for the message queuing
+ * system is provided to this service during construction.
  * <p>
  * 
- * This service object {@link RacingEventService#addOperationExecutionListener(OperationExecutionListener) registers} as
- * listener at the {@link RacingEventService} so it {@link #executed(RacingEventServiceOperation) receives}
- * notifications about operations executed by the {@link RacingEventService} that require replication if and only if
- * there is at least one replica registered.
+ * This service object {@link Replicable#addOperationExecutionListener(OperationExecutionListener) registers} as
+ * listener at the {@link Replicable} so it {@link #executed(OperationWithResult) receives} notifications about
+ * operations executed by the {@link Replicable} that require replication if and only if there is at least one
+ * replica registered.
  * 
  * @author Frank Mittag, Axel Uhl (d043530)
  * 
