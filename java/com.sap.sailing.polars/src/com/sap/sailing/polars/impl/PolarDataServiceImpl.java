@@ -154,6 +154,11 @@ public class PolarDataServiceImpl implements PolarDataService {
 
     }
 
+    @Override
+    public Integer[] getDataCountsForWindSpeed(BoatClass boatClass, Speed windSpeed) {
+        return polarDataMiner.getDataCountsForWindSpeed(boatClass, windSpeed);
+    }
+
     // private Map<TrackedRace, Map<Competitor, Pair<TimePoint, TimePoint>>> createIntervalSpecification(
     // TrackedRace createdTrackedRace, Competitor competitor, TimePoint timePoint) {
     // HashMap<TrackedRace, Map<Competitor, Pair<TimePoint, TimePoint>>> result = new HashMap<TrackedRace,

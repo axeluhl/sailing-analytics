@@ -191,4 +191,19 @@ public class PolarDataMiner {
         return incrementalRegressionProcessor.getAvailableBoatClasses();
     }
 
+
+
+    public Integer[] getDataCountsForWindSpeed(BoatClass boatClass, Speed windSpeed) {
+        Integer[] dataCounts = new Integer[360];
+        for (int angle = 0; angle < 360; angle++) {
+            try {
+                dataCounts[angle] = incrementalRegressionProcessor.estimateBoatSpeed(boatClass, windSpeed,
+                        new DegreeBearingImpl(angle)).getB();
+            } catch (NotEnoughDataHasBeenAddedException e) {
+                dataCounts[angle] = 0;
+            }
+        }
+        return dataCounts;
+    }
+
 }

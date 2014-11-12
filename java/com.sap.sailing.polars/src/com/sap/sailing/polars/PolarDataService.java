@@ -115,6 +115,8 @@ public interface PolarDataService {
     Set<BoatClass> getAllBoatClassesWithPolarSheetsAvailable();
 
     void competitorPositionChanged(GPSFixMoving fix, Competitor competitor, TrackedRace createdTrackedRace);
+
+    Integer[] getDataCountsForWindSpeed(BoatClass boatClass, Speed windSpeed);
     
 
 }
