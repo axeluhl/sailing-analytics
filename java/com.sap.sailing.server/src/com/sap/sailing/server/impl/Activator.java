@@ -68,7 +68,9 @@ public class Activator implements BundleActivator {
 
         // register the racing service in the OSGi registry
         racingEventService.setBundleContext(context);
-        context.registerService(Replicable.class.getName(), racingEventService, null);
+        final Dictionary<String, String> replicableServiceProperties = new Hashtable<>();
+        replicableServiceProperties.put(Replicable.OSGi_Service_Registry_ID_Property_Name, racingEventService.getId().toString());
+        context.registerService(Replicable.class.getName(), racingEventService, replicableServiceProperties);
         context.registerService(RacingEventService.class.getName(), racingEventService, null);
         context.registerService(RacingEventServiceWithTestSupport.class.getName(), racingEventService, null);
                 
