@@ -1,4 +1,4 @@
-package com.sap.sailing.android.shared.ui.activities;
+package com.sap.sailing.android.tracking.app.ui.activities;
 
 import java.util.Date;
 

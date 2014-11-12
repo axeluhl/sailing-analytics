@@ -12,12 +12,12 @@ import android.net.Uri;
 import android.provider.BaseColumns;
 
 import com.sap.sailing.android.shared.logging.ExLog;
-import com.sap.sailing.android.shared.provider.AnalyticsContract.Competitor;
-import com.sap.sailing.android.shared.provider.AnalyticsContract.Event;
-import com.sap.sailing.android.shared.provider.AnalyticsContract.Message;
-import com.sap.sailing.android.shared.provider.AnalyticsContract.SensorGps;
 import com.sap.sailing.android.shared.util.SelectionBuilder;
 import com.sap.sailing.android.tracking.app.BuildConfig;
+import com.sap.sailing.android.tracking.app.provider.AnalyticsContract.Competitor;
+import com.sap.sailing.android.tracking.app.provider.AnalyticsContract.Event;
+import com.sap.sailing.android.tracking.app.provider.AnalyticsContract.Message;
+import com.sap.sailing.android.tracking.app.provider.AnalyticsContract.SensorGps;
 import com.sap.sailing.android.tracking.app.provider.AnalyticsDatabase.Tables;
 
 public class AnalyticsProvider extends ContentProvider {

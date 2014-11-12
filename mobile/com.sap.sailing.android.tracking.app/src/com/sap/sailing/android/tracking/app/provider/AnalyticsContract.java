@@ -41,7 +41,7 @@ public class AnalyticsContract {
         String MESSAGE_CALLBACK_CLASS_STRING = "message_callback_class_string";
     }
     
-    public static final String CONTENT_AUTHORITY = "com.sap.sailing.android.shared.provider.db";
+    public static final String CONTENT_AUTHORITY = "com.sap.sailing.android.tracking.app.provider.db";
     
     public static final Uri BASE_CONTENT_URI = Uri.parse("content://" + CONTENT_AUTHORITY);
     

@@ -6,8 +6,8 @@ import android.support.v4.widget.ResourceCursorAdapter;
 import android.view.View;
 import android.widget.TextView;
 
-import com.sap.sailing.android.shared.provider.AnalyticsContract;
 import com.sap.sailing.android.tracking.app.R;
+import com.sap.sailing.android.tracking.app.provider.AnalyticsContract;
 
 public class RegattaAdapter extends ResourceCursorAdapter {
 

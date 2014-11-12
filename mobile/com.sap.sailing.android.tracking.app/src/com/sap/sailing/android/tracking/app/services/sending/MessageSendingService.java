@@ -1,4 +1,4 @@
-package com.sap.sailing.android.shared.services.sending;
+package com.sap.sailing.android.tracking.app.services.sending;
 
 import java.io.InputStream;
 import java.io.Serializable;
@@ -25,9 +25,9 @@ import android.os.IBinder;
 
 import com.sap.sailing.android.shared.R;
 import com.sap.sailing.android.shared.logging.ExLog;
-import com.sap.sailing.android.shared.services.sending.MessagePersistenceManager.MessageRestorer;
-import com.sap.sailing.android.shared.services.sending.MessageSenderTask.MessageSendingListener;
 import com.sap.sailing.android.shared.util.PrefUtils;
+import com.sap.sailing.android.tracking.app.services.sending.MessagePersistenceManager.MessageRestorer;
+import com.sap.sailing.android.tracking.app.services.sending.MessageSenderTask.MessageSendingListener;
 import com.sap.sailing.domain.common.racelog.RaceLogServletConstants;
 
 /**
@@ -36,15 +36,15 @@ import com.sap.sailing.domain.common.racelog.RaceLogServletConstants;
  * 
  * <b>Use in the following way:</b> Add the service declaration to your {@code AndroidManifest.xml}, and also specify
  * your class implementing the {@link MessagePersistenceManager.MessageRestorer} as a meta-data tag with the key
- * {@code com.sap.sailing.android.shared.services.sending.messageRestorer}. Also refer to
+ * {@code com.sap.sailing.android.tracking.app..services.sending.messageRestorer}. Also refer to
  * {@link ConnectivityChangedReceiver}, which has to be registered as well. For example:
  * 
  * <pre>
  * {@code
  * <service
- *   android:name="com.sap.sailing.android.shared.services.sending.MessageSendingService"
+ *   android:name="com.sap.sailing.android.tracking.app.services.sending.MessageSendingService"
  *   android:exported="false" >
- *   <meta-data android:name="com.sap.sailing.android.shared.services.sending.messageRestorer"
+ *   <meta-data android:name="com.sap.sailing.android.tracking.app.services.sending.messageRestorer"
  *     android:value="com.sap.sailing.racecommittee.app.services.sending.EventRestorer" />
  * </service>
  * }
@@ -164,7 +164,7 @@ public class MessageSendingService extends Service implements MessageSendingList
         MessageRestorer restorer = null;
         try {
             Bundle data = getPackageManager().getServiceInfo(thisService, PackageManager.GET_META_DATA).metaData;
-            String className = data.getString("com.sap.sailing.android.shared.services.sending.messageRestorer");
+            String className = data.getString("com.sap.sailing.android.tracking.app.services.sending.messageRestorer");
             Class<?> clazz = Class.forName(className);
             if (!MessageRestorer.class.isAssignableFrom(clazz)) {
                 throw new Exception("Class does not conform to expected type.");

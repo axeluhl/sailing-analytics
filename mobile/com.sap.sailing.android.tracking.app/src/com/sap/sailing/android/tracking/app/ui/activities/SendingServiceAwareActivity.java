@@ -1,4 +1,4 @@
-package com.sap.sailing.android.shared.ui.activities;
+package com.sap.sailing.android.tracking.app.ui.activities;
 
 import java.util.Date;
 
@@ -14,10 +14,11 @@ import android.widget.Toast;
 
 import com.sap.sailing.android.shared.R;
 import com.sap.sailing.android.shared.logging.ExLog;
-import com.sap.sailing.android.shared.services.sending.MessageSendingService;
-import com.sap.sailing.android.shared.services.sending.MessageSendingService.MessageSendingBinder;
-import com.sap.sailing.android.shared.services.sending.MessageSendingService.MessageSendingServiceLogger;
+import com.sap.sailing.android.shared.ui.activities.ResilientActivity;
 import com.sap.sailing.android.shared.util.PrefUtils;
+import com.sap.sailing.android.tracking.app.services.sending.MessageSendingService;
+import com.sap.sailing.android.tracking.app.services.sending.MessageSendingService.MessageSendingBinder;
+import com.sap.sailing.android.tracking.app.services.sending.MessageSendingService.MessageSendingServiceLogger;
 
 public abstract class SendingServiceAwareActivity extends ResilientActivity {
     

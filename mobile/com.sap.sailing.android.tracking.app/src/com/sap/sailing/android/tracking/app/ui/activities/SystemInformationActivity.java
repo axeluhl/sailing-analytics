@@ -1,8 +1,5 @@
 package com.sap.sailing.android.tracking.app.ui.activities;
 
-import android.os.Bundle;
-
-import com.sap.sailing.android.shared.ui.activities.SystemInformationActivityHelper;
 
 public class SystemInformationActivity extends BaseActivity {
     private SystemInformationActivityHelper helper;
