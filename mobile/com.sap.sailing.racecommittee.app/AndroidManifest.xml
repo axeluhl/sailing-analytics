@@ -84,17 +84,20 @@
             </intent-filter>
         </service>
         <service
-            android:name="com.sap.sailing.android.shared.services.sending.MessageSendingService"
+            android:name="com.sap.sailing.racecommittee.app.services.sending.MessageSendingService"
             android:exported="false" >
             <intent-filter>
                 <action android:name="com.sap.sailing.racecommittee.app.action.sendSavedIntents" />
                 <action android:name="com.sap.sailing.racecommittee.app.action.sendMessage" />
             </intent-filter>
-            <meta-data android:name="com.sap.sailing.android.shared.services.sending.messageRestorer"
+
+            <meta-data
+                android:name="com.sap.sailing.android.shared.services.sending.messageRestorer"
                 android:value="com.sap.sailing.racecommittee.app.services.sending.EventRestorer" />
+
         </service>
 
-        <receiver android:name="com.sap.sailing.android.shared.services.sending.ConnectivityChangedReceiver" >
+        <receiver android:name="com.sap.sailing.racecommittee.app.services.sending.ConnectivityChangedReceiver" >
             <intent-filter>
                 <action android:name="android.net.conn.CONNECTIVITY_CHANGE" />
             </intent-filter>
