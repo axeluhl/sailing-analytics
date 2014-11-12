@@ -80,7 +80,7 @@
             android:icon="@drawable/icon"
             android:label="@string/tracking_service" />
         <service
-            android:name=".service.TransmittingService"
+            android:name=".services.TransmittingService"
             android:exported="false"
             android:icon="@drawable/icon"
             android:label="@string/transmitting_service" />

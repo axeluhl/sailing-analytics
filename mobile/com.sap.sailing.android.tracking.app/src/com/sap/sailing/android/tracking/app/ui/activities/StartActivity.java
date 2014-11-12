@@ -1,10 +1,12 @@
 package com.sap.sailing.android.tracking.app.ui.activities;
 
-import com.sap.sailing.android.tracking.app.R;
-import com.sap.sailing.android.tracking.app.ui.fragments.HomeFragment;
-
+import android.content.Intent;
 import android.os.Bundle;
 import android.support.v7.widget.Toolbar;
+
+import com.sap.sailing.android.tracking.app.R;
+import com.sap.sailing.android.tracking.app.services.TransmittingService;
+import com.sap.sailing.android.tracking.app.ui.fragments.HomeFragment;
 
 public class StartActivity extends BaseActivity {
     
@@ -27,5 +29,17 @@ public class StartActivity extends BaseActivity {
         }
 
         replaceFragment(R.id.content_frame, new HomeFragment());
+    }
+    
+    @Override
+    protected void onStart() {
+    	// TODO Auto-generated method stub
+    	super.onStart();
+        
+        // start transmitting service that will henceforth run in the background
+        
+        Intent intent = new Intent(this, TransmittingService.class);
+        intent.setAction(getString(R.string.transmitting_service_start));
+        this.startService(intent);
     }
 }
