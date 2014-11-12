@@ -685,6 +685,7 @@ public class PathGeneratorTreeGrow extends PathGeneratorBase {
 
         // generate intermediate steps
         bestCand = trgPaths.get(0); // target-path ending closest to target
+        long endTime = bestCand.pos.getTimePoint().asMillis();
         TimedPositionWithSpeed curPosition = null;
         char nextDirection = '0';
         char prevDirection = '0';
@@ -702,9 +703,10 @@ public class PathGeneratorTreeGrow extends PathGeneratorBase {
                 boolean sameBaseDirection = this.isSameDirection(prevDirection, nextDirection);
                 Wind curWind = wf.getWind(curPosition);
                 TimedPosition newPosition = this.getStep(curPosition, curWind, usedTimeStep, turnLoss, sameBaseDirection, nextDirection);
-                curPosition = new TimedPositionWithSpeedImpl(newPosition.getTimePoint(), newPosition.getPosition(), null);
-                path.add(curPosition);
-
+                if (newPosition.getTimePoint().asMillis() < endTime) {
+                	curPosition = new TimedPositionWithSpeedImpl(newPosition.getTimePoint(), newPosition.getPosition(), null);
+                	path.add(curPosition);
+                }
             }
 
             prevDirection = nextDirection;
