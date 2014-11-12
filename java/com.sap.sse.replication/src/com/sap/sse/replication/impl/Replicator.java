@@ -26,14 +26,15 @@ import com.sap.sse.replication.Replicable;
 import com.sap.sse.replication.ReplicationMasterDescriptor;
 
 /**
- * Receives {@link RacingEventServiceOperation}s through JMS and
- * {@link RacingEventService#apply(RacingEventServiceOperation) applies} them to the {@link RacingEventService} passed
- * to this replicator at construction. When started in suspended mode, messages received will be turned into
- * {@link RacingEventServiceOperation}s and then queued until {@link #setSuspended(boolean) setSuspended(false)} is invoked
- * which applies all queued operations before applying the ones received later.<p>
+ * Receives {@link OperationWithResult} objects from a message queue and {@link Replicable#apply(OperationWithResult)
+ * applies} them to the {@link Replicable} passed to this replicator at construction. When started in suspended mode,
+ * messages received will be turned into {@link OperationWithResult} objects and then queued until
+ * {@link #setSuspended(boolean) setSuspended(false)} is invoked which applies all queued operations before applying the
+ * ones received later.
+ * <p>
  * 
- * The receiver takes care of synchronizing receiving, suspending/resuming and queuing. Waiters are notified
- * whenever the result of {@link #isQueueEmpty} changes.
+ * The receiver takes care of synchronizing receiving, suspending/resuming and queuing. Waiters are notified whenever
+ * the result of {@link #isQueueEmpty} changes.
  * 
  * @author Axel Uhl (d043530)
  * 

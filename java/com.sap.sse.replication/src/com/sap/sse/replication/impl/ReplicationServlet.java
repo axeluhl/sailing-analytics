@@ -27,8 +27,11 @@ import com.sap.sse.replication.ReplicationService;
 import com.sap.sse.util.impl.CountingOutputStream;
 
 /**
- * As the response to any type of <code>GET</code> request, sends a serialized copy of the {@link RacingEventService} to
- * the response's output stream.
+ * The servlet supports registering and de-registering a replica from a master and can send the serialized initial load
+ * data of the {@link Replicable}s registered as replicable OSGi service from the master to a requesting replica. The
+ * initial load is transmitted through a {@link RabbitOutputStream}, and the response to the servlet request is only the
+ * name of the queue the replica can use to obtain the initial load from the message queuing system. This guarantees
+ * a more robust transmission of the initial load, even in the face of a flaky connection between master and replica.
  * 
  * @author Axel Uhl (D043530)
  * 
