@@ -35,14 +35,13 @@ class LocationManager: NSObject, CLLocationManagerDelegate {
         coreLocationManager.delegate = self
     }
     
-    func startTracking() {
-        if (!CLLocationManager.locationServicesEnabled())
-        {
-            let notification = NSNotification(name: NotificationType.locationServicesDisabled, object: self)
-            NSNotificationQueue.defaultQueue().enqueueNotification(notification, postingStyle: NSPostingStyle.PostASAP)
-            return
+    func startTracking() -> String? {
+        if (!CLLocationManager.locationServicesEnabled()) {
+            return "Please enable location services."
         }
-
+        if (CLLocationManager.authorizationStatus() == CLAuthorizationStatus.Denied) {
+            return "Please enable location services for this app."
+        }
         if(coreLocationManager.respondsToSelector("requestAlwaysAuthorization")) {
             coreLocationManager.requestAlwaysAuthorization()
         }
@@ -52,6 +51,7 @@ class LocationManager: NSObject, CLLocationManagerDelegate {
         isTracking = true;
         let notification = NSNotification(name: NotificationType.trackingStarted, object: self)
         NSNotificationQueue.defaultQueue().enqueueNotification(notification, postingStyle: NSPostingStyle.PostASAP)
+        return nil
     }
 
     func stopTracking() {

@@ -7,6 +7,7 @@
 //
 
 import Foundation
+import CoreLocation
 
 class RegattaViewController : UIViewController, UIActionSheetDelegate {
     
@@ -32,7 +33,13 @@ class RegattaViewController : UIViewController, UIActionSheetDelegate {
     }
     
     @IBAction func startTrackingButtonTapped(sender: AnyObject) {
-        LocationManager.sharedManager.startTracking()
+        let errorMessage = LocationManager.sharedManager.startTracking()
+        if errorMessage != nil {
+            let alertView = UIAlertView(title: nil, message: errorMessage, delegate: nil, cancelButtonTitle: "Cancel")
+            alertView.show()
+        } else {
+            performSegueWithIdentifier("Tracking", sender: sender)
+        }
     }
     
 }

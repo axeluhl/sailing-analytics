@@ -179,8 +179,7 @@
                                     <color key="titleShadowColor" white="0.5" alpha="1" colorSpace="calibratedWhite"/>
                                 </state>
                                 <connections>
-                                    <action selector="trackingButtonTap:" destination="vXZ-lx-hvc" eventType="touchUpInside" id="Q9C-PP-PtF"/>
-                                    <segue destination="I54-NN-JAf" kind="presentation" id="ru2-aH-cBs"/>
+                                    <action selector="startTrackingButtonTapped:" destination="G3a-SV-Maf" eventType="touchUpInside" id="x7w-dz-qiZ"/>
                                 </connections>
                             </button>
                         </subviews>
@@ -205,6 +204,7 @@
                     <connections>
                         <segue destination="4Fb-v3-mkB" kind="presentation" identifier="Settings" id="Irs-ey-Uhs"/>
                         <segue destination="dfN-Ch-vpm" kind="presentation" identifier="About" id="tzB-PL-31j"/>
+                        <segue destination="I54-NN-JAf" kind="presentation" identifier="Tracking" id="fgS-yf-c3u"/>
                     </connections>
                 </viewController>
                 <placeholder placeholderIdentifier="IBFirstResponder" id="ULD-PN-zII" userLabel="First Responder" sceneMemberID="firstResponder"/>
@@ -476,7 +476,7 @@
         <image name="list" width="22" height="22"/>
     </resources>
     <inferredMetricsTieBreakers>
-        <segue reference="QMa-LQ-D8c"/>
+        <segue reference="tzB-PL-31j"/>
         <segue reference="Irs-ey-Uhs"/>
     </inferredMetricsTieBreakers>
 </document>
