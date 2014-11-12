@@ -6,9 +6,9 @@ import android.database.sqlite.SQLiteOpenHelper;
 import android.provider.BaseColumns;
 
 import com.sap.sailing.android.shared.logging.ExLog;
-import com.sap.sailing.android.shared.provider.AnalyticsContract.Competitor;
-import com.sap.sailing.android.shared.provider.AnalyticsContract.Event;
+import com.sap.sailing.android.tracking.app.provider.AnalyticsContract.Competitor;
 import com.sap.sailing.android.tracking.app.provider.AnalyticsContract.CompetitorColumns;
+import com.sap.sailing.android.tracking.app.provider.AnalyticsContract.Event;
 import com.sap.sailing.android.tracking.app.provider.AnalyticsContract.EventColumns;
 import com.sap.sailing.android.tracking.app.provider.AnalyticsContract.MessageColumns;
 import com.sap.sailing.android.tracking.app.provider.AnalyticsContract.SensorGpsColumns;

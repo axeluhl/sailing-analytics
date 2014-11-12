@@ -1,7 +1,7 @@
 /**
  * 
  */
-package com.sap.sailing.android.shared.services.sending;
+package com.sap.sailing.android.tracking.app.services.sending;
 
 import android.content.BroadcastReceiver;
 import android.content.ComponentName;
@@ -19,7 +19,7 @@ import com.sap.sailing.android.shared.logging.ExLog;
  * 
  * Register in manifest:
  * <pre>{@code
- * <receiver android:name="com.sap.sailing.android.shared.services.sending.ConnectivityChangedReceiver" >
+ * <receiver android:name="com.sap.sailing.android.tracking.app.services.sending.ConnectivityChangedReceiver" >
  *   <intent-filter>
  *     <action android:name="android.net.conn.CONNECTIVITY_CHANGE" />
  *   </intent-filter>

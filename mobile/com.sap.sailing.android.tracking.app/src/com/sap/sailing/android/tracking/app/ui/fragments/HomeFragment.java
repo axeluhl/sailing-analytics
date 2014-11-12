@@ -40,10 +40,10 @@ import com.android.volley.toolbox.HttpHeaderParser;
 import com.android.volley.toolbox.JsonObjectRequest;
 import com.android.volley.toolbox.JsonRequest;
 import com.sap.sailing.android.shared.logging.ExLog;
-import com.sap.sailing.android.shared.provider.AnalyticsContract;
-import com.sap.sailing.android.shared.provider.AnalyticsContract.Event;
 import com.sap.sailing.android.tracking.app.R;
 import com.sap.sailing.android.tracking.app.adapter.RegattaAdapter;
+import com.sap.sailing.android.tracking.app.provider.AnalyticsContract;
+import com.sap.sailing.android.tracking.app.provider.AnalyticsContract.Event;
 import com.sap.sailing.android.tracking.app.ui.activities.RegattaActivity;
 import com.sap.sailing.android.tracking.app.utils.AppPreferences;
 import com.sap.sailing.android.tracking.app.utils.BackendHelper;
@@ -222,8 +222,8 @@ public class HomeFragment extends BaseFragment implements LoaderCallbacks<Cursor
         switch (loaderId) {
         case REGATTA_LOADER:
             String[] projection = new String[] { Event._ID, Event.EVENT_TITLE, Event.EVENT_SERVER,
-                    com.sap.sailing.android.shared.provider.AnalyticsContract.Competitor.COMPETITOR_NAME,
-                    Event.EVENT_ID, com.sap.sailing.android.shared.provider.AnalyticsContract.Competitor.COMPETITOR_ID };
+                    com.sap.sailing.android.tracking.app.provider.AnalyticsContract.Competitor.COMPETITOR_NAME,
+                    Event.EVENT_ID, com.sap.sailing.android.tracking.app.provider.AnalyticsContract.Competitor.COMPETITOR_ID };
             return new CursorLoader(getActivity(), AnalyticsContract.EventCompetitor.CONTENT_URI, projection, null,
                     null, null);
 
@@ -278,7 +278,7 @@ public class HomeFragment extends BaseFragment implements LoaderCallbacks<Cursor
                 String eventId = cursor.getString(cursor.getColumnIndex(Event.EVENT_ID));
                 String competitorId = cursor
                         .getString(cursor
-                                .getColumnIndex(com.sap.sailing.android.shared.provider.AnalyticsContract.Competitor.COMPETITOR_ID));
+                                .getColumnIndex(com.sap.sailing.android.tracking.app.provider.AnalyticsContract.Competitor.COMPETITOR_ID));
 
                 VolleyHelper.getInstance(getActivity()).addRequest(
                         checkInRequest(prefs.getServerURL(), eventId, competitorId));

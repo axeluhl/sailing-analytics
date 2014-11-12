@@ -1,4 +1,4 @@
-package com.sap.sailing.android.shared.services.sending;
+package com.sap.sailing.android.tracking.app.services.sending;
 
 import android.content.Context;
 

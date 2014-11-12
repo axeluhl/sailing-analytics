@@ -85,7 +85,7 @@
             android:icon="@drawable/icon"
             android:label="@string/transmitting_service" />
         <service
-            android:name="com.sap.sailing.android.shared.services.sending.MessageSendingService"
+            android:name="com.sap.sailing.android.tracking.app.services.sending.MessageSendingService"
             android:exported="false" >
             <intent-filter>
                 <action android:name="com.sap.sailing.android.tracking.app.action.sendSavedIntents" />
@@ -94,7 +94,7 @@
         </service>
         <service android:name=".service.GcmIntentService" />
 
-        <receiver android:name="com.sap.sailing.android.shared.services.sending.ConnectivityChangedReceiver" >
+        <receiver android:name="com.sap.sailing.android.tracking.app.services.sending.ConnectivityChangedReceiver" >
             <intent-filter>
                 <action android:name="android.net.conn.CONNECTIVITY_CHANGE" />
             </intent-filter>
@@ -116,8 +116,8 @@
         </receiver>
 
         <provider
-            android:name="com.sap.sailing.android.shared.provider.AnalyticsProvider"
-            android:authorities="com.sap.sailing.android.shared.provider.db"
+            android:name="com.sap.sailing.android.tracking.app.provider.AnalyticsProvider"
+            android:authorities="com.sap.sailing.android.tracking.app.provider.db"
             android:exported="false" />
     </application>
 

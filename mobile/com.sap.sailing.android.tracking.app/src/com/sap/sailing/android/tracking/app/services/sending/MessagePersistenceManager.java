@@ -1,4 +1,4 @@
-package com.sap.sailing.android.shared.services.sending;
+package com.sap.sailing.android.tracking.app.services.sending;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -12,7 +12,7 @@ import android.net.Uri;
 import android.os.Bundle;
 
 import com.sap.sailing.android.shared.logging.ExLog;
-import com.sap.sailing.android.shared.provider.AnalyticsContract;
+import com.sap.sailing.android.tracking.app.provider.AnalyticsContract;
 
 public class MessagePersistenceManager {
 
