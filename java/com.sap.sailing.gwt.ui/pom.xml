@@ -127,7 +127,6 @@
 		        <module>com.sap.sailing.gwt.ui.RaceBoard</module>
 		        <module>com.sap.sailing.gwt.ui.Spectator</module>
 		        <module>com.sap.sailing.gwt.ui.DataMining</module>
-		        <module>com.sap.sailing.gwt.ui.TvView</module>
 		        <module>com.sap.sailing.gwt.ui.VideoPopup</module>
 		        <module>com.sap.sailing.gwt.ui.YoutubePopup</module>
 		        <module>com.sap.sailing.gwt.ui.Simulator</module>
