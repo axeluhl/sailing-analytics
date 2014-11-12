@@ -1,6 +1,7 @@
 package com.sap.sse.datamining.shared;
 
 import java.io.Serializable;
+import java.util.Collection;
 import java.util.List;
 import java.util.Map;
 
@@ -16,7 +17,7 @@ public interface QueryDefinition extends Serializable {
     public AggregatorType getAggregatorType();
     
     public DataRetrieverChainDefinitionDTO getDataRetrieverChainDefinition();
-    public Map<FunctionDTO, Iterable<? extends Serializable>> getFilterSelection();
+    public Map<Integer, Map<FunctionDTO, Collection<? extends Serializable>>> getFilterSelection();
     
     public List<FunctionDTO> getDimensionsToGroupBy();
 

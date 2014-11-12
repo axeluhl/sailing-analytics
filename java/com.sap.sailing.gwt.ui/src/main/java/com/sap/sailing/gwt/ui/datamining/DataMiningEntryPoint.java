@@ -20,14 +20,12 @@ import com.sap.sailing.gwt.ui.client.LogoAndTitlePanel;
 import com.sap.sailing.gwt.ui.client.RemoteServiceMappingConstants;
 import com.sap.sailing.gwt.ui.client.SailingService;
 import com.sap.sailing.gwt.ui.client.SailingServiceAsync;
-import com.sap.sailing.gwt.ui.client.shared.components.Component;
 import com.sap.sailing.gwt.ui.client.shared.components.SettingsDialog;
 import com.sap.sailing.gwt.ui.datamining.execution.SimpleQueryRunner;
 import com.sap.sailing.gwt.ui.datamining.presentation.BenchmarkResultsPanel;
 import com.sap.sailing.gwt.ui.datamining.presentation.ResultsChart;
 import com.sap.sailing.gwt.ui.datamining.selection.BufferingQueryDefinitionProviderWithControls;
 import com.sap.sailing.gwt.ui.datamining.settings.QueryRunnerSettings;
-import com.sap.sailing.gwt.ui.datamining.settings.RefreshingSelectionTablesSettings;
 import com.sap.sse.gwt.client.EntryPointHelper;
 import com.sap.sse.gwt.shared.GwtHttpRequestUtils;
 
@@ -93,19 +91,6 @@ public class DataMiningEntryPoint extends AbstractSailingEntryPoint {
             }
         });
         panel.add(runnerSettingsAnchor);
-        
-        Label selectionTablesSettingsLabel = new Label(queryDefinitionProvider.getSelectionProvider().getLocalizedShortName() + ":");
-        panel.add(selectionTablesSettingsLabel);
-        Anchor selectionTablesSettingsAnchor = new Anchor(AbstractImagePrototype.create(resources.settingsIcon()).getSafeHtml());
-        selectionTablesSettingsAnchor.setTitle(getStringMessages().settings());
-        selectionTablesSettingsAnchor.addClickHandler(new ClickHandler() {
-            @SuppressWarnings("unchecked")
-            @Override
-            public void onClick(ClickEvent event) {
-                new SettingsDialog<RefreshingSelectionTablesSettings>((Component<RefreshingSelectionTablesSettings>) queryDefinitionProvider.getSelectionProvider(), getStringMessages()).show();
-            }
-        });
-        panel.add(selectionTablesSettingsAnchor);
         
         return panel;
     }

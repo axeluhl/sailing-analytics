@@ -1,6 +1,7 @@
 package com.sap.sailing.gwt.ui.datamining.selection;
 
 import java.io.Serializable;
+import java.util.ArrayList;
 import java.util.Collection;
 import java.util.HashMap;
 import java.util.HashSet;
@@ -33,12 +34,13 @@ public class RetrieverLevelSpecificSelectionProvider implements SelectionProvide
     private final DataMiningServiceAsync dataMiningService;
     private final ErrorReporter errorReporter;
     private final Set<SelectionChangedListener> listeners;
+    private final SelectionChangedListener singleRetrieverLevelSelectionProvidersListener;
     
     private DataRetrieverChainDefinitionDTO retrieverChain;
     
     private final ScrollPanel mainPanel;
     private final VerticalPanel contentPanel;
-    private final Map<LocalizedTypeDTO, SingleRetrieverLevelSelectionProvider> singleRetrieverLevelSelectionProviders;
+    private final Collection<SingleRetrieverLevelSelectionProviderPrototype> singleRetrieverLevelSelectionProviders;
     
     public RetrieverLevelSpecificSelectionProvider(StringMessages stringMessages, DataMiningServiceAsync dataMiningService, ErrorReporter errorReporter,
                                                    DataRetrieverChainDefinitionProvider dataRetrieverChainDefinitionProvider) {
@@ -46,8 +48,16 @@ public class RetrieverLevelSpecificSelectionProvider implements SelectionProvide
         this.dataMiningService = dataMiningService;
         this.errorReporter = errorReporter;
         listeners = new HashSet<>();
+        singleRetrieverLevelSelectionProvidersListener = new SelectionChangedListener() {
+            @Override
+            public void selectionChanged() {
+                for (SelectionChangedListener listener : listeners) {
+                    listener.selectionChanged();
+                }
+            }
+        };
         
-        singleRetrieverLevelSelectionProviders = new HashMap<>();
+        singleRetrieverLevelSelectionProviders = new ArrayList<>();
         
         contentPanel = new VerticalPanel();
         mainPanel = new ScrollPanel(contentPanel);
@@ -67,6 +77,7 @@ public class RetrieverLevelSpecificSelectionProvider implements SelectionProvide
         contentPanel.clear();
         singleRetrieverLevelSelectionProviders.clear();
         
+        int retrieverLevel = 0;
         boolean first = true;
         for (LocalizedTypeDTO retrievedDataType : retrieverChain.getRetrievedDataTypesChain()) {
             if (!first) {
@@ -74,9 +85,14 @@ public class RetrieverLevelSpecificSelectionProvider implements SelectionProvide
             }
             first = false;
             
-            SingleRetrieverLevelSelectionProvider singleRetrieverLevelSelectionProvider = new SingleRetrieverLevelSelectionProvider(retrievedDataType, stringMessages);
+            SingleRetrieverLevelSelectionProviderPrototype singleRetrieverLevelSelectionProvider = new SingleRetrieverLevelSelectionProviderPrototype(stringMessages, dataMiningService, errorReporter,
+                                                                                                                                    retrieverChain, retrievedDataType, retrieverLevel );
+            singleRetrieverLevelSelectionProvider.addSelectionChangedListener(singleRetrieverLevelSelectionProvidersListener);
+            
             contentPanel.add(singleRetrieverLevelSelectionProvider);
-            singleRetrieverLevelSelectionProviders.put(retrievedDataType, singleRetrieverLevelSelectionProvider);
+            singleRetrieverLevelSelectionProviders.add(singleRetrieverLevelSelectionProvider);
+            
+            retrieverLevel++;
         }
         
         udpateAvailableDimensions();
@@ -89,29 +105,53 @@ public class RetrieverLevelSpecificSelectionProvider implements SelectionProvide
                 errorReporter.reportError("Error fetching the dimensions of the retrieval chain from the server: " + caught.getMessage());
             }
             @Override
-            public void onSuccess(Collection<FunctionDTO> result) {
-                // TODO Auto-generated method stub
+            public void onSuccess(Collection<FunctionDTO> dimensions) {
+                Map<String, Collection<FunctionDTO>> dimensionsMappedBySourceType = mapBySourceType(dimensions);
                 
+                for (SingleRetrieverLevelSelectionProviderPrototype singleRetrieverLevelSelectionProvider : singleRetrieverLevelSelectionProviders) {
+                    String sourceType = singleRetrieverLevelSelectionProvider.getRetrievedDataType().getTypeName();
+                    if (dimensionsMappedBySourceType.containsKey(sourceType)) {
+                        singleRetrieverLevelSelectionProvider.setAvailableDimensions(dimensionsMappedBySourceType.get(sourceType));
+                    }
+                }
             }
         });
     }
 
+    private Map<String, Collection<FunctionDTO>> mapBySourceType(Collection<FunctionDTO> dimensions) {
+        Map<String, Collection<FunctionDTO>> dimensionsMappedBySourceType = new HashMap<>();
+        for (FunctionDTO dimension : dimensions) {
+            if (!dimensionsMappedBySourceType.containsKey(dimension.getSourceTypeName())) {
+                dimensionsMappedBySourceType.put(dimension.getSourceTypeName(), new HashSet<FunctionDTO>());
+            }
+            dimensionsMappedBySourceType.get(dimension.getSourceTypeName()).add(dimension);
+        }
+        return dimensionsMappedBySourceType;
+    }
+
     @Override
-    public Map<FunctionDTO, Collection<? extends Serializable>> getFilterSelection() {
-        // TODO Auto-generated method stub
-        return new HashMap<>();
+    public Map<Integer, Map<FunctionDTO, Collection<? extends Serializable>>> getFilterSelection() {
+        Map<Integer, Map<FunctionDTO, Collection<? extends Serializable>>> filterSelection = new HashMap<>();
+        for (SingleRetrieverLevelSelectionProviderPrototype singleRetrieverLevelSelectionProvider : singleRetrieverLevelSelectionProviders) {
+            Map<FunctionDTO, Collection<? extends Serializable>> levelFilterSelection = singleRetrieverLevelSelectionProvider.getFilterSelection();
+            if (!levelFilterSelection.isEmpty()) {
+                filterSelection.put(singleRetrieverLevelSelectionProvider.getRetrieverLevel(),
+                        new HashMap<FunctionDTO, Collection<? extends Serializable>>(levelFilterSelection));
+            }
+        }
+        return filterSelection;
     }
 
     @Override
     public void applySelection(QueryDefinition queryDefinition) {
-        // TODO Auto-generated method stub
-
+        // TODO
     }
 
     @Override
     public void clearSelection() {
-        // TODO Auto-generated method stub
-
+        for (SingleRetrieverLevelSelectionProviderPrototype singleRetrieverLevelSelectionProvider : singleRetrieverLevelSelectionProviders) {
+            singleRetrieverLevelSelectionProvider.clearSelection();
+        }
     }
 
     @Override

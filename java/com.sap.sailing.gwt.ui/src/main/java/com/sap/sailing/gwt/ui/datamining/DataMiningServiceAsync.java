@@ -17,14 +17,13 @@ public interface DataMiningServiceAsync {
     void getAllStatistics(String localeInfoName, AsyncCallback<Collection<FunctionDTO>> callback);
 
     void getDimensionsFor(FunctionDTO statisticToCalculate, String localeInfoName, AsyncCallback<Collection<FunctionDTO>> callback);
-
     void getDimensionsFor(DataRetrieverChainDefinitionDTO dataRetrieverChainDefinitionDTO, String localeInfoName,
             AsyncCallback<Collection<FunctionDTO>> callback);
     
     void getDataRetrieverChainDefinitionsFor(FunctionDTO statisticToCalculate, String localeInfoName,
             AsyncCallback<Collection<DataRetrieverChainDefinitionDTO>> callback);
-    
-    void getDimensionValuesFor(DataRetrieverChainDefinitionDTO dataRetrieverChainDefinition, String localeInfoName, AsyncCallback<QueryResult<Set<Object>>> callback);
+
+    void getDimensionValuesFor(DataRetrieverChainDefinitionDTO dataRetrieverChainDefinition, int retrieverLevel, Collection<FunctionDTO> dimensions, String localeInfoName, AsyncCallback<QueryResult<Set<Object>>> callback);
 
     <ResultType extends Number> void runQuery(QueryDefinition queryDefinition, AsyncCallback<QueryResult<ResultType>> callback);
     

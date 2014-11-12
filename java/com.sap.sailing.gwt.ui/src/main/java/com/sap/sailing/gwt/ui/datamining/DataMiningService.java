@@ -16,12 +16,11 @@ public interface DataMiningService extends RemoteService {
     Collection<FunctionDTO> getAllStatistics(String localeInfoName);
     
     Collection<FunctionDTO> getDimensionsFor(FunctionDTO statisticToCalculate, String localeInfoName);
-    
     Collection<FunctionDTO> getDimensionsFor(DataRetrieverChainDefinitionDTO dataRetrieverChainDefinitionDTO, String localeInfoName);
 
     Collection<DataRetrieverChainDefinitionDTO> getDataRetrieverChainDefinitionsFor(FunctionDTO statisticToCalculate, String localeInfoName);
 
-    QueryResult<Set<Object>> getDimensionValuesFor(DataRetrieverChainDefinitionDTO dataRetrieverChainDefinition, String localeInfoName) throws Exception;
+    QueryResult<Set<Object>> getDimensionValuesFor(DataRetrieverChainDefinitionDTO dataRetrieverChainDefinition, int retrieverLevel, Collection<FunctionDTO> dimensions, String localeInfoName) throws Exception;
     
     <ResultType extends Number> QueryResult<ResultType> runQuery(QueryDefinition queryDefinition) throws Exception;
 

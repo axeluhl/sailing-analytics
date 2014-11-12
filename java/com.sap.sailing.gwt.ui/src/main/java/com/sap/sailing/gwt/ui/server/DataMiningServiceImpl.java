@@ -86,8 +86,7 @@ public class DataMiningServiceImpl extends RemoteServiceServlet implements DataM
     }
     
     @Override
-    public Collection<FunctionDTO> getDimensionsFor(DataRetrieverChainDefinitionDTO dataRetrieverChainDefinitionDTO,
-            String localeInfoName) {
+    public Collection<FunctionDTO> getDimensionsFor(DataRetrieverChainDefinitionDTO dataRetrieverChainDefinitionDTO, String localeInfoName) {
         DataRetrieverChainDefinition<?> dataRetrieverChainDefinition = getDataMiningServer().getDataRetrieverChainDefinitionRegistry().getDataRetrieverChainDefinition(RacingEventService.class, dataRetrieverChainDefinitionDTO.getId());
         Collection<Function<?>> dimensions = getDataMiningServer().getFunctionProvider().getDimensionsFor(dataRetrieverChainDefinition);
         return functionsAsFunctionDTOs(dimensions, localeInfoName);
@@ -138,9 +137,8 @@ public class DataMiningServiceImpl extends RemoteServiceServlet implements DataM
     }
 
     @Override
-    public QueryResult<Set<Object>> getDimensionValuesFor(DataRetrieverChainDefinitionDTO dataRetrieverChainDefinition,
-            String localeInfoName) throws Exception {
-        Query<Set<Object>> dimensionValuesQuery = sailingDataMiningFactory.createDimensionValuesQuery(getRacingEventService(), dataRetrieverChainDefinition, localeInfoName);
+    public QueryResult<Set<Object>> getDimensionValuesFor(DataRetrieverChainDefinitionDTO dataRetrieverChainDefinition, int retrieverLevel, Collection<FunctionDTO> dimensions, String localeInfoName) throws Exception {
+        Query<Set<Object>> dimensionValuesQuery = sailingDataMiningFactory.createDimensionValuesQuery(getRacingEventService(), dataRetrieverChainDefinition, retrieverLevel, dimensions, localeInfoName);
         return dimensionValuesQuery.run();
     }
 

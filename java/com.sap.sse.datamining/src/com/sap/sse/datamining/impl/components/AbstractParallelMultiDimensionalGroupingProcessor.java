@@ -9,7 +9,7 @@ import com.sap.sse.datamining.AdditionalResultDataBuilder;
 import com.sap.sse.datamining.components.Processor;
 import com.sap.sse.datamining.functions.Function;
 import com.sap.sse.datamining.shared.GroupKey;
-import com.sap.sse.datamining.shared.impl.CompoundGroupKey;
+import com.sap.sse.datamining.shared.impl.NestingCompoundGroupKey;
 
 public abstract class AbstractParallelMultiDimensionalGroupingProcessor<DataType>
                       extends AbstractSimpleParallelProcessor<DataType, GroupedDataEntry<DataType>> {
@@ -58,7 +58,7 @@ public abstract class AbstractParallelMultiDimensionalGroupingProcessor<DataType
         Function<?> mainDimension = dimensionsIterator.next();
         GroupKey key = createGroupKeyFor(input, mainDimension);
         if (dimensionsIterator.hasNext()) {
-            key = new CompoundGroupKey(key, createCompoundKeyFor(input, dimensionsIterator));
+            key = new NestingCompoundGroupKey(key, createCompoundKeyFor(input, dimensionsIterator));
         }
         return key;
     }

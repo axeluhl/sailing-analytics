@@ -4,7 +4,6 @@ import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.HashMap;
-import java.util.HashSet;
 import java.util.List;
 import java.util.Locale;
 import java.util.Map;
@@ -74,16 +73,16 @@ public class SailingDataMiningFactory {
 
                 DataRetrieverChainDefinition<RacingEventService> dataRetrieverChainDefinition = dataRetrieverChainDefinitionRegistry.getDataRetrieverChainDefinition(RacingEventService.class, queryDefinition.getDataRetrieverChainDefinition().getId());
                 DataRetrieverChainBuilder<RacingEventService> chainBuilder = dataRetrieverChainDefinition.startBuilding(executorService);
-                Map<Class<?>, FilterCriterion<?>> criteriaMappedByDataType = createFilterCriteria(queryDefinition.getFilterSelection());
+                Map<Integer, FilterCriterion<?>> criteriaMappedByDataType = createFilterCriteria(queryDefinition.getFilterSelection());
                 do {
-                    if (criteriaMappedByDataType.containsKey(chainBuilder.getCurrentRetrievedDataType())) {
-                        chainBuilder.setFilter(criteriaMappedByDataType.get(chainBuilder.getCurrentRetrievedDataType()));
+                    if (criteriaMappedByDataType.containsKey(chainBuilder.getCurrentRetrieverLevel())) {
+                        chainBuilder.setFilter(criteriaMappedByDataType.get(chainBuilder.getCurrentRetrieverLevel()));
                     }
                     
                     chainBuilder.stepDeeper();
-                } while (!dataTypeToRetrieve.equals(chainBuilder.getCurrentRetrievedDataType()));
-                if (criteriaMappedByDataType.containsKey(chainBuilder.getCurrentRetrievedDataType())) {
-                    chainBuilder.setFilter(criteriaMappedByDataType.get(chainBuilder.getCurrentRetrievedDataType()));
+                } while (chainBuilder.canStepDeeper());
+                if (criteriaMappedByDataType.containsKey(chainBuilder.getCurrentRetrieverLevel())) {
+                    chainBuilder.setFilter(criteriaMappedByDataType.get(chainBuilder.getCurrentRetrieverLevel()));
                 }
                 chainBuilder.addResultReceiver(groupingProcessor);
                 
@@ -94,34 +93,35 @@ public class SailingDataMiningFactory {
     }
 
     private List<Function<?>> convertDTOsToFunctions(Collection<FunctionDTO> functionDTOs) {
-        List<Function<?>> dimensionsToGroupBy = new ArrayList<>();
+        List<Function<?>> functions = new ArrayList<>();
         for (FunctionDTO functionDTO : functionDTOs) {
-            dimensionsToGroupBy.add(functionProvider.getFunctionForDTO(functionDTO));
+            functions.add(functionProvider.getFunctionForDTO(functionDTO));
         }
-        return dimensionsToGroupBy;
+        return functions;
     }
     
     @SuppressWarnings("unchecked")
-    private <T> Map<Class<?>, FilterCriterion<?>> createFilterCriteria(Map<FunctionDTO, Iterable<? extends Serializable>> filterSelection) {
-        Map<Class<?>, CompoundFilterCriterion<?>> criteriaMappedByDataType = new HashMap<>();
-        for (Entry<FunctionDTO, Iterable<? extends Serializable>> filterSelectionEntry : filterSelection.entrySet()) {
-            Function<?> function = functionProvider.getFunctionForDTO(filterSelectionEntry.getKey());
-            Class<T> dataType = (Class<T>) function.getDeclaringType();
-            
-            if (!criteriaMappedByDataType.containsKey(dataType)) {
-                criteriaMappedByDataType.put(dataType, new AndCompoundFilterCriterion<>(dataType));
-            }
+    private <T> Map<Integer, FilterCriterion<?>> createFilterCriteria(Map<Integer, Map<FunctionDTO, Collection<? extends Serializable>>> filterSelection) {
+        Map<Integer, CompoundFilterCriterion<?>> criteriaMappedByRetrieverLevel = new HashMap<>();
+        for (Entry<Integer, Map<FunctionDTO, Collection<? extends Serializable>>> levelFilterSelection : filterSelection.entrySet()) {
+            for (Entry<FunctionDTO, Collection<? extends Serializable>> levelFilterSelectionEntry : levelFilterSelection.getValue().entrySet()) {
+                Function<?> function = functionProvider.getFunctionForDTO(levelFilterSelectionEntry.getKey());
+                Class<T> dataType = (Class<T>) function.getDeclaringType();
+                
+                if (!criteriaMappedByRetrieverLevel.containsKey(levelFilterSelection.getKey())) {
+                    criteriaMappedByRetrieverLevel.put(levelFilterSelection.getKey(), new AndCompoundFilterCriterion<>(dataType));
+                }
 
-            Collection<Object> filterValues = new ArrayList<>();
-            for (Object filterValue : filterSelectionEntry.getValue()) {
-                filterValues.add(filterValue);
+                Collection<Object> filterValues = new ArrayList<>(levelFilterSelectionEntry.getValue());
+                ((CompoundFilterCriterion<T>) criteriaMappedByRetrieverLevel.get(levelFilterSelection.getKey())).addCriteria(new NullaryFunctionValuesFilterCriterion<>(dataType, function, filterValues));
             }
-            ((CompoundFilterCriterion<T>) criteriaMappedByDataType.get(dataType)).addCriteria(new NullaryFunctionValuesFilterCriterion<>(dataType, function, filterValues));
         }
-        return (Map<Class<?>, FilterCriterion<?>>)(Map<Class<?>, ?>) criteriaMappedByDataType;
+        return (Map<Integer, FilterCriterion<?>>)(Map<Integer, ?>) criteriaMappedByRetrieverLevel;
     }
 
-    public Query<Set<Object>> createDimensionValuesQuery(RacingEventService dataSource, final DataRetrieverChainDefinitionDTO dataRetrieverChainDefinitionDTO, final String localeInfoName) {
+    public Query<Set<Object>> createDimensionValuesQuery(RacingEventService dataSource,
+            DataRetrieverChainDefinitionDTO dataRetrieverChainDefinitionDTO, int retrieverLevel,
+            Collection<FunctionDTO> dimensionDTOs, String localeInfoName) {
         final Locale locale = DataMiningStringMessages.Util.getLocaleFor(localeInfoName);
         return new ProcessorQuery<Set<Object>, RacingEventService>(executorService, dataSource, stringMessages, locale) {
             @Override
@@ -130,40 +130,18 @@ public class SailingDataMiningFactory {
 
                 DataRetrieverChainDefinition<RacingEventService> dataRetrieverChainDefinition = dataRetrieverChainDefinitionRegistry.getDataRetrieverChainDefinition(RacingEventService.class, dataRetrieverChainDefinitionDTO.getId());
                 DataRetrieverChainBuilder<RacingEventService> chainBuilder = dataRetrieverChainDefinition.startBuilding(executorService);
-                Collection<Function<?>> dimensions = functionProvider.getMinimizedDimensionsFor(dataRetrieverChainDefinition);
-                Map<Class<?>, Collection<Function<?>>> dimensionsMappedByDeclaringType = mapFunctionsByDeclaringType(dimensions);
-                while (!dimensionsMappedByDeclaringType.isEmpty()) {
-                    Class<?> dataType = chainBuilder.getCurrentRetrievedDataType();
-
-                    if (dimensionsMappedByDeclaringType.containsKey(dataType)) {
-                        for (Processor<?, ?> resultReceiver : processorFactory.createGroupingExtractorsForDimensions(
-                                                                dataType, valueCollector, dimensionsMappedByDeclaringType.get(dataType),
-                                                                stringMessages, locale)) {
-                            chainBuilder.addResultReceiver(resultReceiver);
-                        }
-                        dimensionsMappedByDeclaringType.remove(dataType);
-                    }
-                    
-                    if (!dimensionsMappedByDeclaringType.isEmpty()) {
-                        chainBuilder.stepDeeper();
-                    }
+                Collection<Function<?>> dimensions = convertDTOsToFunctions(dimensionDTOs);
+                for (int level = 0; level < retrieverLevel; level++) {
+                    chainBuilder.stepDeeper();
+                }
+                for (Processor<?, ?> resultReceiver : processorFactory.createGroupingExtractorsForDimensions(
+                        chainBuilder.getCurrentRetrievedDataType(), valueCollector, dimensions, stringMessages, locale)) {
+                    chainBuilder.addResultReceiver(resultReceiver);
                 }
                 
                 return chainBuilder.build();
             }
         };
-    }
-
-    private Map<Class<?>, Collection<Function<?>>> mapFunctionsByDeclaringType(Collection<Function<?>> functions) {
-        Map<Class<?>, Collection<Function<?>>> mappedFunctions = new HashMap<>();
-        for (Function<?> function : functions) {
-            Class<?> declaringType = function.getDeclaringType();
-            if (!mappedFunctions.containsKey(declaringType)) {
-                mappedFunctions.put(declaringType, new HashSet<Function<?>>());
-            }
-            mappedFunctions.get(declaringType).add(function);
-        }
-        return mappedFunctions;
     }
 
 }

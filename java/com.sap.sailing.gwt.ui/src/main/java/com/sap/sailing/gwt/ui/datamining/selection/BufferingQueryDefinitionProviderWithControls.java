@@ -2,6 +2,7 @@ package com.sap.sailing.gwt.ui.datamining.selection;
 
 import java.io.Serializable;
 import java.util.Collection;
+import java.util.Map;
 import java.util.Map.Entry;
 
 import com.google.gwt.event.dom.client.ClickEvent;
@@ -158,7 +159,7 @@ public class BufferingQueryDefinitionProviderWithControls extends AbstractQueryD
             queryDTO.appendDimensionToGroupBy(dimension);
         }
         
-        for (Entry<FunctionDTO, Collection<? extends Serializable>> filterSelectionEntry : selectionProvider.getFilterSelection().entrySet()) {
+        for (Entry<Integer, Map<FunctionDTO, Collection<? extends Serializable>>> filterSelectionEntry : selectionProvider.getFilterSelection().entrySet()) {
             queryDTO.setFilterSelectionFor(filterSelectionEntry.getKey(), filterSelectionEntry.getValue());
         }
         

@@ -91,6 +91,11 @@ public class SimpleDataRetrieverChainBuilder<DataSourceType> implements DataRetr
     public Class<?> getCurrentRetrievedDataType() {
         return dataRetrieverTypesWithInformation.get(currentRetrieverTypeIndex).getRetrievedDataType();
     }
+    
+    @Override
+    public int getCurrentRetrieverLevel() {
+        return currentRetrieverTypeIndex;
+    }
 
     @SuppressWarnings("unchecked")
     @Override

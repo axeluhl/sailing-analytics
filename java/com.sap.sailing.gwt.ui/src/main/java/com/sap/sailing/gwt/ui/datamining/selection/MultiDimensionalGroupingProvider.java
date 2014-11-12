@@ -40,7 +40,7 @@ public class MultiDimensionalGroupingProvider implements GroupingProvider, Stati
     private final List<ValueListBox<FunctionDTO>> dimensionToGroupByBoxes;
 
     private FunctionDTO currentStatisticToCalculate;
-    private List<FunctionDTO> availableDimensions;
+    private final List<FunctionDTO> availableDimensions;
 
     public MultiDimensionalGroupingProvider(StringMessages stringMessages, DataMiningServiceAsync dataMiningService, ErrorReporter errorReporter,
                                             StatisticProvider statisticProvider) {

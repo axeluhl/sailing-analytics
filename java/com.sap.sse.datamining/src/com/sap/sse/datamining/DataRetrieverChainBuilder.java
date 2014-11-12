@@ -6,6 +6,7 @@ import com.sap.sse.datamining.components.Processor;
 public interface DataRetrieverChainBuilder<DataSourceType> {
 
     public Class<?> getCurrentRetrievedDataType();
+    public int getCurrentRetrieverLevel();
 
     public DataRetrieverChainBuilder<DataSourceType> setFilter(FilterCriterion<?> filter);
     public DataRetrieverChainBuilder<DataSourceType> addResultReceiver(Processor<?, ?> resultReceiver);

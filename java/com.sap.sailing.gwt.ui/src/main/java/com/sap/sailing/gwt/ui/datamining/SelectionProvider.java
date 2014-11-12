@@ -12,7 +12,7 @@ public interface SelectionProvider<SettingsType> extends Component<SettingsType>
 
     public void addSelectionChangedListener(SelectionChangedListener listener);
 
-    public Map<FunctionDTO, Collection<? extends Serializable>> getFilterSelection();
+    public Map<Integer, Map<FunctionDTO, Collection<? extends Serializable>>> getFilterSelection();
 
     public void applySelection(QueryDefinition queryDefinition);
 
