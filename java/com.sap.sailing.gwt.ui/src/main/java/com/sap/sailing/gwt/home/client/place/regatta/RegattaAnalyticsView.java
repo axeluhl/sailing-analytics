@@ -1,4 +1,4 @@
-package com.sap.sailing.gwt.home.client.place.leaderboard;
+package com.sap.sailing.gwt.home.client.place.regatta;
 
 import com.google.gwt.user.client.ui.Widget;
 import com.sap.sailing.domain.common.RaceIdentifier;
@@ -9,7 +9,7 @@ import com.sap.sse.gwt.client.async.AsyncActionsExecutor;
 import com.sap.sse.gwt.client.player.Timer;
 import com.sap.sse.gwt.client.useragent.UserAgentDetails;
 
-public interface AnalyticsView {
+public interface RegattaAnalyticsView {
     Widget asWidget();
     
     void createRegattaAnalyticsViewer(final SailingServiceAsync sailingService, final AsyncActionsExecutor asyncActionsExecutor,

@@ -1,4 +1,4 @@
-package com.sap.sailing.gwt.home.client.place.leaderboard;
+package com.sap.sailing.gwt.home.client.place.regatta;
 
 import java.util.ArrayList;
 import java.util.Collections;
@@ -33,16 +33,16 @@ import com.sap.sse.gwt.client.player.Timer.PlayStates;
 import com.sap.sse.gwt.client.useragent.UserAgentDetails;
 import com.sap.sse.gwt.shared.GwtHttpRequestUtils;
 
-public class LeaderboardActivity extends AbstractActivity implements ErrorReporter {
-    private final LeaderboardClientFactory clientFactory;
-    private final LeaderboardPlace leaderboardPlace;
+public class RegattaActivity extends AbstractActivity implements ErrorReporter {
+    private final RegattaClientFactory clientFactory;
+    private final RegattaPlace regattaPlace;
     private final Timer timerForClientServerOffset;
 
     private final UserAgentDetails userAgent = new UserAgentDetails(Window.Navigator.getUserAgent());
 
-    public LeaderboardActivity(LeaderboardPlace place, LeaderboardClientFactory clientFactory) {
+    public RegattaActivity(RegattaPlace place, RegattaClientFactory clientFactory) {
         this.clientFactory = clientFactory;
-        this.leaderboardPlace = place;
+        this.regattaPlace = place;
         
         timerForClientServerOffset = new Timer(PlayModes.Replay);
     }
@@ -51,9 +51,9 @@ public class LeaderboardActivity extends AbstractActivity implements ErrorReport
     public void start(final AcceptsOneWidget panel, EventBus eventBus) {
         panel.setWidget(new Placeholder());
 
-        UUID eventUUID = UUID.fromString(leaderboardPlace.getEventUuidAsString());
-        final String leaderboardName = leaderboardPlace.getLeaderboardIdAsNameString();
-        final boolean showRaceDetails = leaderboardPlace.getShowRaceDetails();
+        UUID eventUUID = UUID.fromString(regattaPlace.getEventUuidAsString());
+        final String leaderboardName = regattaPlace.getLeaderboardIdAsNameString();
+        final boolean showRaceDetails = regattaPlace.getShowRaceDetails();
 
         clientFactory.getSailingService().getEventById(eventUUID, true, new AsyncCallback<EventDTO>() {
             @Override
@@ -105,8 +105,8 @@ public class LeaderboardActivity extends AbstractActivity implements ErrorReport
         boolean showOverallLeaderboard = GwtHttpRequestUtils.getBooleanParameter(LeaderboardUrlSettings.PARAM_SHOW_OVERALL_LEADERBOARD, false);
         boolean showSeriesLeaderboards = GwtHttpRequestUtils.getBooleanParameter(LeaderboardUrlSettings.PARAM_SHOW_SERIES_LEADERBOARDS, false);
         
-        AnalyticsView analyticsView = clientFactory.createLeaderboardView(event, leaderboardName, timerForClientServerOffset);
-        Window.setTitle(leaderboardPlace.getTitle(event.getName(), leaderboardDisplayName));
+        RegattaAnalyticsView analyticsView = clientFactory.createRegattaAnalyticsView(event, leaderboardName, timerForClientServerOffset);
+        Window.setTitle(regattaPlace.getTitle(event.getName(), leaderboardDisplayName));
         
         if (leaderboardType.isMetaLeaderboard()) {
             analyticsView.createSeriesAnalyticsViewer(clientFactory.getSailingService(), new AsyncActionsExecutor(),

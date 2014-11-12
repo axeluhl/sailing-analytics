@@ -1,4 +1,4 @@
-package com.sap.sailing.gwt.home.client.place.leaderboard;
+package com.sap.sailing.gwt.home.client.place.regatta;
 
 import com.google.gwt.core.client.GWT;
 import com.google.gwt.uibinder.client.UiBinder;
@@ -17,16 +17,16 @@ import com.sap.sse.gwt.client.async.AsyncActionsExecutor;
 import com.sap.sse.gwt.client.player.Timer;
 import com.sap.sse.gwt.client.useragent.UserAgentDetails;
 
-public class TabletAndDesktopLeaderboardView extends Composite implements AnalyticsView {
+public class TabletAndDesktopRegattaView extends Composite implements RegattaAnalyticsView {
     private static LeaderboardPageViewUiBinder uiBinder = GWT.create(LeaderboardPageViewUiBinder.class);
 
-    interface LeaderboardPageViewUiBinder extends UiBinder<Widget, TabletAndDesktopLeaderboardView> {
+    interface LeaderboardPageViewUiBinder extends UiBinder<Widget, TabletAndDesktopRegattaView> {
     }
 
     @UiField(provided=true) RegattaAnalytics regattaAnalytics;
     @UiField(provided=true) EventSeriesAnalytics seriesAnalytics;
     
-    public TabletAndDesktopLeaderboardView(EventDTO event, String leaderboardName, Timer timerForClientServerOffset, HomePlacesNavigator placeNavigator) {
+    public TabletAndDesktopRegattaView(EventDTO event, String leaderboardName, Timer timerForClientServerOffset, HomePlacesNavigator placeNavigator) {
         regattaAnalytics = new RegattaAnalytics(event, leaderboardName, timerForClientServerOffset, placeNavigator);
         seriesAnalytics = new EventSeriesAnalytics(event, leaderboardName, timerForClientServerOffset, placeNavigator);
         

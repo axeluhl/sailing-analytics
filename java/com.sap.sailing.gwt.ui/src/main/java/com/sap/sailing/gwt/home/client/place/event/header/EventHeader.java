@@ -21,7 +21,8 @@ import com.sap.sailing.gwt.home.client.app.PlaceNavigation;
 import com.sap.sailing.gwt.home.client.place.event.AbstractEventComposite;
 import com.sap.sailing.gwt.home.client.place.event.EventPlace;
 import com.sap.sailing.gwt.home.client.place.event.EventPlaceNavigator;
-import com.sap.sailing.gwt.home.client.place.leaderboard.LeaderboardPlace;
+import com.sap.sailing.gwt.home.client.place.series.SeriesPlace;
+import com.sap.sailing.gwt.home.client.place.series.SeriesPlace.SeriesNavigationTabs;
 import com.sap.sailing.gwt.home.client.shared.EventDatesFormatterUtil;
 import com.sap.sailing.gwt.ui.shared.CourseAreaDTO;
 import com.sap.sailing.gwt.ui.shared.EventDTO;
@@ -76,7 +77,7 @@ public class EventHeader extends AbstractEventComposite {
 //  private final List<Anchor> links3;
     
     private final HomePlacesNavigator placeNavigator;
-    private PlaceNavigation<LeaderboardPlace> overallLeaderboardNavigation = null; 
+    private PlaceNavigation<SeriesPlace> overallLeaderboardNavigation = null; 
     private PlaceNavigation<EventPlace> regattasNavigation = null;
     
     public EventHeader(EventDTO event, HomePlacesNavigator placeNavigator, EventPlaceNavigator pageNavigator) {
@@ -163,7 +164,7 @@ public class EventHeader extends AbstractEventComposite {
             eventName = leaderboardGroupDTO.getDisplayName() != null ? leaderboardGroupDTO.getDisplayName() : leaderboardGroupDTO.getName();
 
             String overallLeaderboardName = leaderboardGroupDTO.getName() + " " + LeaderboardNameConstants.OVERALL;
-            overallLeaderboardNavigation = placeNavigator.getLeaderboardNavigation(event.id.toString(), overallLeaderboardName, event.getBaseURL(), event.isOnRemoteServer());
+            overallLeaderboardNavigation = placeNavigator.getSeriesAnalyticsNavigation(event.id.toString(), SeriesNavigationTabs.OverallLeaderboard, overallLeaderboardName, event.getBaseURL(), event.isOnRemoteServer());
             seriesLeaderboardAnchor.setHref(overallLeaderboardNavigation.getTargetUrl());
             
             StrippedLeaderboardDTO leaderboardFittingToEvent = findLeaderboardWithSameCourseArea(event);

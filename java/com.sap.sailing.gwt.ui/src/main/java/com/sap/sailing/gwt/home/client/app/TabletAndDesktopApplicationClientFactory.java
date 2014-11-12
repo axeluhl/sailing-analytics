@@ -6,18 +6,20 @@ import com.google.gwt.event.shared.SimpleEventBus;
 import com.google.gwt.place.shared.PlaceController;
 import com.google.web.bindery.event.shared.EventBus;
 import com.sap.sailing.gwt.home.client.place.error.TabletAndDesktopErrorView;
+import com.sap.sailing.gwt.home.client.place.event.EventPlace.EventNavigationTabs;
 import com.sap.sailing.gwt.home.client.place.event.EventView;
 import com.sap.sailing.gwt.home.client.place.event.EventWithoutRegattasView;
 import com.sap.sailing.gwt.home.client.place.event.TabletAndDesktopEventView;
 import com.sap.sailing.gwt.home.client.place.event.TabletAndDesktopEventWithoutRegattasView;
-import com.sap.sailing.gwt.home.client.place.event.EventPlace.EventNavigationTabs;
 import com.sap.sailing.gwt.home.client.place.events.EventsActivity;
 import com.sap.sailing.gwt.home.client.place.events.EventsView;
 import com.sap.sailing.gwt.home.client.place.events.TabletAndDesktopEventsView;
-import com.sap.sailing.gwt.home.client.place.leaderboard.AnalyticsView;
-import com.sap.sailing.gwt.home.client.place.leaderboard.TabletAndDesktopLeaderboardView;
+import com.sap.sailing.gwt.home.client.place.regatta.RegattaAnalyticsView;
+import com.sap.sailing.gwt.home.client.place.regatta.TabletAndDesktopRegattaView;
 import com.sap.sailing.gwt.home.client.place.searchresult.SearchResultView;
 import com.sap.sailing.gwt.home.client.place.searchresult.TabletAndDesktopSearchResultView;
+import com.sap.sailing.gwt.home.client.place.series.SeriesAnalyticsView;
+import com.sap.sailing.gwt.home.client.place.series.TabletAndDesktopSeriesView;
 import com.sap.sailing.gwt.home.client.place.solutions.SolutionsActivity;
 import com.sap.sailing.gwt.home.client.place.solutions.SolutionsView;
 import com.sap.sailing.gwt.home.client.place.solutions.TabletAndDesktopSolutionsView;
@@ -80,8 +82,13 @@ public class TabletAndDesktopApplicationClientFactory extends AbstractApplicatio
     }
 
     @Override
-    public AnalyticsView createLeaderboardView(EventDTO event, String leaderboardName, Timer timerForClientServerOffset) {
-        return new TabletAndDesktopLeaderboardView(event, leaderboardName, timerForClientServerOffset, getHomePlacesNavigator());
+    public RegattaAnalyticsView createRegattaAnalyticsView(EventDTO event, String leaderboardName, Timer timerForClientServerOffset) {
+        return new TabletAndDesktopRegattaView(event, leaderboardName, timerForClientServerOffset, getHomePlacesNavigator());
+    }
+
+    @Override
+    public SeriesAnalyticsView createSeriesAnalyticsView(EventDTO event, String leaderboardName, Timer timerForClientServerOffset) {
+        return new TabletAndDesktopSeriesView(event, leaderboardName, timerForClientServerOffset, getHomePlacesNavigator());
     }
 
     @Override
