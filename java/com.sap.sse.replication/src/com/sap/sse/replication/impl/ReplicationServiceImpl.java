@@ -174,16 +174,16 @@ OperationExecutionListener<S>, HasReplicable<S, O> {
      * @param exchangePort port of the RabbitMQ server, or 0 for default port
      */
     public ReplicationServiceImpl(String exchangeName, String exchangeHost, int exchangePort, final ReplicationInstancesManager<S> replicationInstancesManager) throws IOException {
-        this(exchangeName, exchangeHost, exchangePort, replicationInstancesManager, /* localService */ null, /* create RacingEventServiceTracker */ true);
+        this(exchangeName, exchangeHost, exchangePort, replicationInstancesManager, /* localService */ null, /* create ReplicableServiceTracker */ true);
     }
     
     private ReplicationServiceImpl(String exchangeName, String exchangeHost,
             int exchangePort, final ReplicationInstancesManager<S> replicationInstancesManager,
-            Replicable<S, O> localService, boolean createRacingEventServiceTracker) throws IOException {
+            Replicable<S, O> localService, boolean createReplicableServiceTracker) throws IOException {
         timer = new Timer("ReplicationServiceImpl timer for delayed task sending");
         this.replicationInstancesManager = replicationInstancesManager;
         replicaUUIDs = new HashMap<ReplicationMasterDescriptor, String>();
-        if (createRacingEventServiceTracker) {
+        if (createReplicableServiceTracker) {
             replicableTracker = getReplicableTracker();
             replicableTracker.open();
         } else {
@@ -201,14 +201,14 @@ OperationExecutionListener<S>, HasReplicable<S, O> {
 
     /**
      * Like {@link #ReplicationServiceImpl(String, ReplicationInstancesManager)}, only that instead of using an OSGi
-     * service tracker to discover the {@link RacingEventService}, the service to replicate is "injected" here.
+     * service tracker to discover the {@link Replicable}, the service to replicate is "injected" here.
      * 
      * @param exchangeName
      *            the name of the exchange to which replicas can bind
      */
     public ReplicationServiceImpl(String exchangeName, String exchangeHost,
             final ReplicationInstancesManager<S> replicationInstancesManager, Replicable<S, O> localService) throws IOException {
-        this(exchangeName, exchangeHost, 0, replicationInstancesManager, localService, /* create RacingEventServiceTracker */ false);
+        this(exchangeName, exchangeHost, 0, replicationInstancesManager, localService, /* create ReplicableServiceTracker */ false);
     }
     
     protected ServiceTracker<Replicable<S, O>, Replicable<S, O>> getReplicableTracker() {
@@ -256,7 +256,7 @@ OperationExecutionListener<S>, HasReplicable<S, O> {
     @Override
     public void registerReplica(ReplicaDescriptor replica) throws IOException {
         if (!replicationInstancesManager.hasReplicas()) {
-            addAsListenerToRacingEventService();
+            addAsListenerToReplicables();
             synchronized (this) {
                 if (masterChannel == null) {
                     masterChannel = createMasterChannelAndDeclareFanoutExchange();
@@ -267,7 +267,7 @@ OperationExecutionListener<S>, HasReplicable<S, O> {
         logger.info("Registered replica " + replica);
     }
     
-    private void addAsListenerToRacingEventService() {
+    private void addAsListenerToReplicables() {
         getReplicable().addOperationExecutionListener(this);
     }
 
@@ -276,7 +276,7 @@ OperationExecutionListener<S>, HasReplicable<S, O> {
         logger.info("Unregistering replica " + replica);
         replicationInstancesManager.unregisterReplica(replica);
         if (!replicationInstancesManager.hasReplicas()) {
-            removeAsListenerFromRacingEventService();
+            removeAsListenerFromReplicables();
             synchronized (this) {
                 if (masterChannel != null) {
                     masterChannel.close();
@@ -286,7 +286,7 @@ OperationExecutionListener<S>, HasReplicable<S, O> {
         }
     }
 
-    private void removeAsListenerFromRacingEventService() {
+    private void removeAsListenerFromReplicables() {
         getReplicable().removeOperationExecutionListener(this);
     }
 
@@ -431,7 +431,7 @@ OperationExecutionListener<S>, HasReplicable<S, O> {
         // start receiving messages already now, but start in suspended mode
         replicatorThread = new Thread(replicator, "Replicator receiving from "+master.getMessagingHostname()+"/"+master.getExchangeName());
         final Replicable<?, ?> replicable = getReplicable();
-        // clear racingEventService state here, before starting to receive and de-serialized operations which builds up new state, e.g., in competitor store
+        // clear Replicable state here, before starting to receive and de-serialized operations which builds up new state, e.g., in competitor store
         replicable.clearReplicaState(); // see also bug 2437
         replicatorThread.start();
         logger.info("Started replicator thread");
@@ -494,7 +494,7 @@ OperationExecutionListener<S>, HasReplicable<S, O> {
     }
 
     /**
-     * {@link #broadcastOperation(RacingEventServiceOperation) Broadcasts} the <code>operation</code> to all registered
+     * {@link #broadcastOperation(OperationWithResult) Broadcasts} the <code>operation</code> to all registered
      * replicas by publishing it to the fan-out exchange.
      */
     @Override
@@ -559,7 +559,7 @@ OperationExecutionListener<S>, HasReplicable<S, O> {
     public void stopAllReplica() throws IOException {
         if (replicationInstancesManager.hasReplicas()) {
             replicationInstancesManager.removeAll();
-            removeAsListenerFromRacingEventService();
+            removeAsListenerFromReplicables();
             synchronized (this) {
                 if (masterChannel != null) {
                     masterChannel.close();
