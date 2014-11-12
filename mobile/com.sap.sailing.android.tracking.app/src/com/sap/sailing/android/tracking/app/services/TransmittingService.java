@@ -1,12 +1,20 @@
 package com.sap.sailing.android.tracking.app.services;
 
+import java.util.ArrayList;
+import java.util.List;
+
 import android.app.Service;
+import android.content.ContentUris;
+import android.content.ContentValues;
 import android.content.Intent;
+import android.database.Cursor;
+import android.net.Uri;
 import android.os.Handler;
 import android.os.IBinder;
 
 import com.sap.sailing.android.shared.logging.ExLog;
 import com.sap.sailing.android.tracking.app.R;
+import com.sap.sailing.android.tracking.app.provider.AnalyticsContract.SensorGps;
 
 public class TransmittingService extends Service {
 	
@@ -63,9 +71,76 @@ public class TransmittingService extends Service {
 	}
 	
 	private void sendFixesToAPI() {
-		// IMPLEMENT ME
+		// first, lets fetch all unsent fixes
+		System.out.println("sendFixesToAPI");
+		List<GpsFix> fixes = getAllUnsentFixes();
+		
+		// SEND AWAY
+		
+		for (GpsFix fix : fixes)
+		{
+			//ExLog.i(this, "GPSFIX", "todo: send to api");
+		}
+		
+		//markAsSynced(fixes);
+	}
+	
+	private void markAsSynced(List<GpsFix> fixes)
+	{
+		// TODO: 
+		
+		for (GpsFix fix : fixes)
+		{
+			ContentValues updateValues = new ContentValues();
+			updateValues.put(SensorGps.GPS_SYNCED, 1);
+			Uri uri = ContentUris.withAppendedId(SensorGps.CONTENT_URI, fix.id);
+			getContentResolver().update(uri, updateValues, null, null);
+		}
+		
+	}
+	
+	private List<GpsFix> getAllUnsentFixes()
+	{
+		String selectionClause = SensorGps.GPS_SYNCED + " = 0";
+		ArrayList<GpsFix> list = new ArrayList<GpsFix>();
+		
+		Cursor cur = getContentResolver().query(SensorGps.CONTENT_URI, null, selectionClause, null, null);
+		while (cur.moveToNext()) {
+			GpsFix gpsFix = new GpsFix();
+			
+			gpsFix.id = cur.getInt(cur.getColumnIndex(SensorGps._ID));
+			gpsFix.timestamp = cur.getLong(cur.getColumnIndex(SensorGps.GPS_TIME));
+			gpsFix.latitude  = cur.getDouble(cur.getColumnIndex(SensorGps.GPS_LATITUDE));
+			gpsFix.longitude  = cur.getDouble(cur.getColumnIndex(SensorGps.GPS_LONGITUDE));
+			gpsFix.speed  = cur.getDouble(cur.getColumnIndex(SensorGps.GPS_SPEED));
+			gpsFix.course  = cur.getDouble(cur.getColumnIndex(SensorGps.GPS_BEARING));
+			gpsFix.synced = cur.getInt(cur.getColumnIndex(SensorGps.GPS_SYNCED));
+			
+			list.add(gpsFix);
+        }
+		
+		cur.close();
+		return list;
 	}
 
+	class GpsFix
+	{
+		public int id;
+		public long timestamp;
+		public double latitude;
+		public double longitude;
+		public double speed;
+		public double course;
+		public int synced;
+
+		@Override
+		public String toString() {
+			return "ID: " + id + ", T: " + timestamp + ", LAT: " + latitude
+					+ ", LON: " + longitude + ", SPD: " + speed + ", CRS: "
+					+ course + ", SYN: " + synced;
+		}
+	}
+	
 	class Timer implements Runnable {
 		public Thread t;
 		public volatile boolean endExecution;
