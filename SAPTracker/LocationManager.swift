@@ -79,7 +79,8 @@ class LocationManager: NSObject, CLLocationManagerDelegate {
             "latitude" : location.coordinate.latitude,
             "longitude": location.coordinate.longitude,
             "speed": location.speed,
-            "course": location.course
+            "course": location.course,
+            "horizontalAccuracy": location.horizontalAccuracy
         ]
     }
 }

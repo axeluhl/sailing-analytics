@@ -13,11 +13,18 @@ class TrackingViewController : UIViewController, UIAlertViewDelegate {
     enum AlertViewTag: Int {
         case StopTracking
     }
-    @IBOutlet weak var gpsQualityImageView: UIImageView!
+    @IBOutlet weak var gpsQuality1: UIView!
+    @IBOutlet weak var gpsQuality2: UIView!
+    @IBOutlet weak var gpsQuality3: UIView!
+    @IBOutlet weak var gpsQuality4: UIView!
     @IBOutlet weak var trackingStatusLabel: UILabel!
     @IBOutlet weak var onlineModeLabel: UILabel!
     @IBOutlet weak var trackingTimeLabel: UILabel!
     
+    let gpsActiveColor = UIColor(hex: 0x8AB54D)
+    let gpsInactiveColor = UIColor(hex: 0x445A2F)
+    let onlineColor = UIColor(hex: 0x408000)
+    let offlineColor = UIColor(hex: 0xFF0000)
     let startDate = NSDate()
     let dateFormatter = NSDateFormatter()
     
@@ -29,6 +36,7 @@ class TrackingViewController : UIViewController, UIAlertViewDelegate {
         
         // register for notifications
         NSNotificationCenter.defaultCenter().addObserver(self, selector:"networkAvailabilityChanged", name:APIManager.NotificationType.networkAvailabilityChanged, object: nil)
+        NSNotificationCenter.defaultCenter().addObserver(self, selector:"newLocation:", name:LocationManager.NotificationType.newLocation, object: nil)
         
         // timer
         let timer = NSTimer(timeInterval: 0.1, target: self, selector: "timerTick:", userInfo: nil, repeats: true)
@@ -47,10 +55,35 @@ class TrackingViewController : UIViewController, UIAlertViewDelegate {
     func networkAvailabilityChanged() {
         if (APIManager.sharedManager.networkAvailable) {
             onlineModeLabel.text = "Online"
-            onlineModeLabel.textColor = UIColor(netHex: 0x408000)
+            onlineModeLabel.textColor = onlineColor
         } else {
             onlineModeLabel.text = "Offline"
-            onlineModeLabel.textColor = UIColor(netHex: 0xFF0000)
+            onlineModeLabel.textColor = offlineColor
+        }
+    }
+    
+    func newLocation(notification: NSNotification) {
+        let horizontalAccuracy = notification.userInfo!["horizontalAccuracy"] as Double
+        gpsQuality1.backgroundColor = gpsInactiveColor
+        gpsQuality2.backgroundColor = gpsInactiveColor
+        gpsQuality3.backgroundColor = gpsInactiveColor
+        gpsQuality4.backgroundColor = gpsInactiveColor
+        if (horizontalAccuracy < 0) {
+        }
+        else if (horizontalAccuracy > 163) {
+            gpsQuality1.backgroundColor = gpsActiveColor
+            gpsQuality2.backgroundColor = gpsActiveColor
+        }
+        else if (horizontalAccuracy > 48) {
+            gpsQuality1.backgroundColor = gpsActiveColor
+            gpsQuality2.backgroundColor = gpsActiveColor
+            gpsQuality3.backgroundColor = gpsActiveColor
+        }
+        else {
+            gpsQuality1.backgroundColor = gpsActiveColor
+            gpsQuality2.backgroundColor = gpsActiveColor
+            gpsQuality3.backgroundColor = gpsActiveColor
+            gpsQuality4.backgroundColor = gpsActiveColor
         }
     }
     
