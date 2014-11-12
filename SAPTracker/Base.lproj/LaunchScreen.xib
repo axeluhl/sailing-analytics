@@ -17,55 +17,53 @@
                 </imageView>
                 <label opaque="NO" clipsSubviews="YES" userInteractionEnabled="NO" contentMode="left" horizontalHuggingPriority="251" verticalHuggingPriority="251" text="  Copyright © 2014 SAP Sailing. All rights reserved." textAlignment="center" lineBreakMode="tailTruncation" baselineAdjustment="alignBaselines" minimumFontSize="9" adjustsLetterSpacingToFitWidth="YES" translatesAutoresizingMaskIntoConstraints="NO" id="xsV-NT-Tsf">
                     <rect key="frame" x="0.0" y="438" width="480" height="42"/>
-                    <color key="backgroundColor" red="0.0" green="0.0" blue="0.0" alpha="0.33000000000000002" colorSpace="calibratedRGB"/>
+                    <color key="backgroundColor" red="1" green="1" blue="1" alpha="0.5" colorSpace="calibratedRGB"/>
                     <constraints>
-                        <constraint firstAttribute="height" constant="42" id="H4z-np-VIk"/>
+                        <constraint firstAttribute="height" constant="42" id="JZi-oi-Fft"/>
                     </constraints>
                     <fontDescription key="fontDescription" type="system" pointSize="14"/>
-                    <color key="textColor" white="1" alpha="1" colorSpace="calibratedWhite"/>
                     <nil key="highlightedColor"/>
                 </label>
                 <view contentMode="scaleToFill" translatesAutoresizingMaskIntoConstraints="NO" id="xlm-Lq-17D">
                     <rect key="frame" x="0.0" y="0.0" width="480" height="64"/>
                     <subviews>
-                        <imageView userInteractionEnabled="NO" contentMode="scaleAspectFit" horizontalHuggingPriority="251" verticalHuggingPriority="251" image="sap_logo" translatesAutoresizingMaskIntoConstraints="NO" id="l6c-ii-VxH">
-                            <rect key="frame" x="8" y="8" width="64" height="48"/>
-                            <constraints>
-                                <constraint firstAttribute="width" constant="64" id="RbV-dc-RJ8"/>
-                            </constraints>
-                        </imageView>
                         <label opaque="NO" clipsSubviews="YES" userInteractionEnabled="NO" contentMode="left" horizontalHuggingPriority="1000" verticalHuggingPriority="1000" text="Tracker" textAlignment="center" lineBreakMode="middleTruncation" baselineAdjustment="alignBaselines" minimumFontSize="18" translatesAutoresizingMaskIntoConstraints="NO" id="2AI-iM-b3E">
-                            <rect key="frame" x="199" y="0.0" width="82" height="64"/>
+                            <rect key="frame" x="199" y="8" width="82" height="64"/>
                             <fontDescription key="fontDescription" type="boldSystem" pointSize="24"/>
-                            <color key="textColor" white="1" alpha="1" colorSpace="calibratedWhite"/>
                             <nil key="highlightedColor"/>
                         </label>
+                        <imageView userInteractionEnabled="NO" contentMode="scaleAspectFit" horizontalHuggingPriority="251" verticalHuggingPriority="251" image="sap_logo" translatesAutoresizingMaskIntoConstraints="NO" id="l6c-ii-VxH">
+                            <rect key="frame" x="8" y="16" width="64" height="48"/>
+                            <constraints>
+                                <constraint firstAttribute="width" constant="64" id="yLd-Fu-Qpw"/>
+                            </constraints>
+                        </imageView>
                     </subviews>
-                    <color key="backgroundColor" red="0.0" green="0.0" blue="0.0" alpha="0.33000000000000002" colorSpace="calibratedRGB"/>
+                    <color key="backgroundColor" red="1" green="1" blue="1" alpha="0.5" colorSpace="calibratedRGB"/>
                     <constraints>
-                        <constraint firstItem="l6c-ii-VxH" firstAttribute="leading" secondItem="xlm-Lq-17D" secondAttribute="leadingMargin" id="6Gj-pF-Q8n"/>
-                        <constraint firstItem="2AI-iM-b3E" firstAttribute="centerY" secondItem="l6c-ii-VxH" secondAttribute="centerY" id="8e7-5T-o04"/>
-                        <constraint firstItem="l6c-ii-VxH" firstAttribute="top" secondItem="xlm-Lq-17D" secondAttribute="topMargin" id="UL8-al-ski"/>
-                        <constraint firstAttribute="bottom" secondItem="2AI-iM-b3E" secondAttribute="bottom" id="VxX-hb-I9v"/>
-                        <constraint firstAttribute="height" constant="64" id="YSt-J6-H3b"/>
-                        <constraint firstAttribute="centerX" secondItem="2AI-iM-b3E" secondAttribute="centerX" id="fEq-sn-ea2"/>
-                        <constraint firstItem="2AI-iM-b3E" firstAttribute="centerX" secondItem="xlm-Lq-17D" secondAttribute="centerX" id="nMu-ry-LeL"/>
-                        <constraint firstAttribute="centerY" secondItem="2AI-iM-b3E" secondAttribute="centerY" id="qd6-UH-hh2"/>
+                        <constraint firstItem="l6c-ii-VxH" firstAttribute="leading" secondItem="xlm-Lq-17D" secondAttribute="leadingMargin" id="9hw-xl-0DG"/>
+                        <constraint firstItem="2AI-iM-b3E" firstAttribute="top" secondItem="xlm-Lq-17D" secondAttribute="topMargin" id="FaJ-hT-UbA"/>
+                        <constraint firstItem="2AI-iM-b3E" firstAttribute="centerX" secondItem="xlm-Lq-17D" secondAttribute="centerX" id="Im1-GO-INC"/>
+                        <constraint firstItem="l6c-ii-VxH" firstAttribute="top" secondItem="xlm-Lq-17D" secondAttribute="top" constant="16" id="RC6-F7-IRf"/>
+                        <constraint firstAttribute="bottom" secondItem="l6c-ii-VxH" secondAttribute="bottom" id="enI-OE-cXg"/>
+                        <constraint firstAttribute="height" constant="64" id="lmv-o5-StP"/>
+                        <constraint firstItem="2AI-iM-b3E" firstAttribute="centerY" secondItem="l6c-ii-VxH" secondAttribute="centerY" id="uAZ-lF-k5u"/>
                     </constraints>
                 </view>
             </subviews>
             <color key="backgroundColor" white="1" alpha="1" colorSpace="custom" customColorSpace="calibratedWhite"/>
             <constraints>
-                <constraint firstAttribute="trailing" secondItem="xlm-Lq-17D" secondAttribute="trailing" id="35d-SE-YG0"/>
-                <constraint firstItem="xW9-IB-N8v" firstAttribute="leading" secondItem="xlm-Lq-17D" secondAttribute="leading" id="3Nw-6z-v9b"/>
-                <constraint firstItem="xsV-NT-Tsf" firstAttribute="bottom" secondItem="xW9-IB-N8v" secondAttribute="bottom" id="8kY-kJ-8Mc"/>
-                <constraint firstItem="xlm-Lq-17D" firstAttribute="trailing" secondItem="xW9-IB-N8v" secondAttribute="trailing" id="91K-EQ-b4o"/>
-                <constraint firstItem="xW9-IB-N8v" firstAttribute="top" secondItem="xlm-Lq-17D" secondAttribute="top" id="PeN-0P-T5W"/>
-                <constraint firstItem="xsV-NT-Tsf" firstAttribute="trailing" secondItem="xW9-IB-N8v" secondAttribute="trailing" id="Ut5-5q-8d1"/>
-                <constraint firstAttribute="bottom" secondItem="xsV-NT-Tsf" secondAttribute="bottom" id="ciE-qm-O28"/>
-                <constraint firstItem="xW9-IB-N8v" firstAttribute="top" secondItem="aUI-WX-4F1" secondAttribute="top" id="iuE-5G-14H"/>
-                <constraint firstItem="xW9-IB-N8v" firstAttribute="leading" secondItem="xsV-NT-Tsf" secondAttribute="leading" id="obB-yt-66W"/>
-                <constraint firstItem="xsV-NT-Tsf" firstAttribute="leading" secondItem="aUI-WX-4F1" secondAttribute="leading" id="zOi-e1-gBT"/>
+                <constraint firstItem="xlm-Lq-17D" firstAttribute="leading" secondItem="xsV-NT-Tsf" secondAttribute="leading" id="3TA-sy-3KL"/>
+                <constraint firstItem="xW9-IB-N8v" firstAttribute="leading" secondItem="xsV-NT-Tsf" secondAttribute="leading" id="3eD-Qa-cxy"/>
+                <constraint firstItem="xsV-NT-Tsf" firstAttribute="bottom" secondItem="xW9-IB-N8v" secondAttribute="bottom" id="J7L-aL-fJn"/>
+                <constraint firstItem="xlm-Lq-17D" firstAttribute="top" secondItem="aUI-WX-4F1" secondAttribute="top" id="P4N-3u-qsN"/>
+                <constraint firstItem="xW9-IB-N8v" firstAttribute="top" secondItem="xlm-Lq-17D" secondAttribute="top" id="StR-zl-qk2"/>
+                <constraint firstAttribute="trailing" secondItem="xsV-NT-Tsf" secondAttribute="trailing" id="V1n-k9-yzd"/>
+                <constraint firstAttribute="bottom" secondItem="xlm-Lq-17D" secondAttribute="bottom" constant="416" id="a6R-UP-YMh"/>
+                <constraint firstItem="xW9-IB-N8v" firstAttribute="trailing" secondItem="xsV-NT-Tsf" secondAttribute="trailing" id="ofr-OQ-hRN"/>
+                <constraint firstAttribute="bottom" secondItem="xW9-IB-N8v" secondAttribute="bottom" id="poS-4Q-9Ff"/>
+                <constraint firstItem="xsV-NT-Tsf" firstAttribute="leading" secondItem="aUI-WX-4F1" secondAttribute="leading" id="ugy-ho-O0h"/>
+                <constraint firstItem="xlm-Lq-17D" firstAttribute="trailing" secondItem="xW9-IB-N8v" secondAttribute="trailing" id="xzC-9K-CNU"/>
             </constraints>
             <nil key="simulatedStatusBarMetrics"/>
             <freeformSimulatedSizeMetrics key="simulatedDestinationMetrics"/>

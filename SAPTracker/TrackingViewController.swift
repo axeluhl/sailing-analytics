@@ -23,8 +23,8 @@ class TrackingViewController : UIViewController, UIAlertViewDelegate {
     
     let gpsActiveColor = UIColor(hex: 0x8AB54D)
     let gpsInactiveColor = UIColor(hex: 0x445A2F)
-    let onlineColor = UIColor(hex: 0x408000)
-    let offlineColor = UIColor(hex: 0xFF0000)
+    let greenColor = UIColor(hex: 0x408000)
+    let redColor = UIColor(hex: 0xFF0000)
     let startDate = NSDate()
     let dateFormatter = NSDateFormatter()
     
@@ -37,6 +37,7 @@ class TrackingViewController : UIViewController, UIAlertViewDelegate {
         // register for notifications
         NSNotificationCenter.defaultCenter().addObserver(self, selector:"networkAvailabilityChanged", name:APIManager.NotificationType.networkAvailabilityChanged, object: nil)
         NSNotificationCenter.defaultCenter().addObserver(self, selector:"newLocation:", name:LocationManager.NotificationType.newLocation, object: nil)
+        NSNotificationCenter.defaultCenter().addObserver(self, selector:"locationManagerFailed:", name:LocationManager.NotificationType.locationManagerFailed, object: nil)
         
         // timer
         let timer = NSTimer(timeInterval: 0.1, target: self, selector: "timerTick:", userInfo: nil, repeats: true)
@@ -55,10 +56,10 @@ class TrackingViewController : UIViewController, UIAlertViewDelegate {
     func networkAvailabilityChanged() {
         if (APIManager.sharedManager.networkAvailable) {
             onlineModeLabel.text = "Online"
-            onlineModeLabel.textColor = onlineColor
+            onlineModeLabel.textColor = greenColor
         } else {
             onlineModeLabel.text = "Offline"
-            onlineModeLabel.textColor = offlineColor
+            onlineModeLabel.textColor = redColor
         }
     }
     
@@ -85,6 +86,13 @@ class TrackingViewController : UIViewController, UIAlertViewDelegate {
             gpsQuality3.backgroundColor = gpsActiveColor
             gpsQuality4.backgroundColor = gpsActiveColor
         }
+        trackingStatusLabel.text = "Tracking"
+        trackingStatusLabel.textColor = greenColor
+    }
+    
+    func locationManagerFailed(notification: NSNotification) {
+        trackingStatusLabel.text = "Not Tracking"
+        trackingStatusLabel.textColor = redColor
     }
     
     // MARK:- Timer
