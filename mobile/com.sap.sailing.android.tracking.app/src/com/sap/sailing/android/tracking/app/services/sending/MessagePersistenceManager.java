@@ -1,36 +1,42 @@
 package com.sap.sailing.android.tracking.app.services.sending;
 
+import java.io.FileInputStream;
+import java.io.FileNotFoundException;
+import java.io.FileOutputStream;
+import java.io.IOException;
+import java.net.URLDecoder;
+import java.net.URLEncoder;
 import java.util.ArrayList;
 import java.util.List;
 
-import android.content.ContentResolver;
-import android.content.ContentValues;
 import android.content.Context;
 import android.content.Intent;
-import android.database.Cursor;
-import android.net.Uri;
 import android.os.Bundle;
 
 import com.sap.sailing.android.shared.logging.ExLog;
 import com.sap.sailing.android.tracking.app.provider.AnalyticsContract;
+import com.sap.sailing.android.shared.util.FileHandlerUtils;
 
 public class MessagePersistenceManager {
-
+    
     private final static String TAG = MessagePersistenceManager.class.getName();
 
-    protected Context context;
-    protected ContentResolver resolver;
+    private final static String delayedMessagesFileName = "delayedMessages.txt";
 
-    private final MessageRestorer restorer;
+    protected Context context;
+    protected List<String> persistedMessages;
+    
+    private final MessageRestorer messageRestorer;
 
     public MessagePersistenceManager(Context context, MessageRestorer messageRestorer) {
         this.context = context;
-        this.restorer = messageRestorer;
-        this.resolver = context.getContentResolver();
+        persistedMessages = new ArrayList<String>();
+        this.messageRestorer = messageRestorer;
+        initializeFileAndPersistedMessages();
     }
 
     public boolean areIntentsDelayed() {
-        return getMessageCount() != 0;
+        return !persistedMessages.isEmpty();
     }
 
     public void persistIntent(Intent intent) {
@@ -43,15 +49,23 @@ public class MessagePersistenceManager {
     }
 
     private void persistMessage(String url, String callbackPayload, String payload, String callbackClass) {
-        ContentValues values = new ContentValues();
-        values.put(AnalyticsContract.Message.MESSAGE_URL, url);
-        values.put(AnalyticsContract.Message.MESSAGE_CALLBACK_PAYLOAD, callbackPayload);
-        values.put(AnalyticsContract.Message.MESSAGE_PAYLOAD, payload);
-        values.put(AnalyticsContract.Message.MESSAGE_CALLBACK_CLASS_STRING, callbackClass);
-        Uri result = resolver.insert(AnalyticsContract.Message.CONTENT_URI, values);
-        if (result != null) {
-            ExLog.i(context, TAG, "Message saved.");
+        String messageLine = getSerializedIntentForPersistence(url, callbackPayload, payload, callbackClass);
+        ExLog.i(context, TAG, String.format("Persisting message \"%s\".", messageLine));
+        if (persistedMessages.contains(messageLine)) {
+            ExLog.i(context, TAG, "The message already exists. Ignoring.");
+            return;
         }
+        saveMessage(messageLine);
+    }
+
+    /**
+     * @param payload will be URL-encoded to ensure that the resulting string does not contain newlines
+     */
+    private String getSerializedIntentForPersistence(String url, String callbackPayload, 
+            String payload, String callbackClass) {
+        String messageLine = String.format("%s;%s;%s;%s", callbackPayload, URLEncoder.encode(payload), 
+                url, callbackClass);
+        return messageLine;
     }
 
     public void removeIntent(Intent intent) {
@@ -64,81 +78,142 @@ public class MessagePersistenceManager {
     }
 
     private void removeMessage(String url, String callbackPayload, String payload, String callbackClass) {
-        ExLog.i(context, TAG, String.format("Removing message \"%s\".", payload));
-        String where = AnalyticsContract.Message.MESSAGE_URL + " = ? AND "
-                + AnalyticsContract.Message.MESSAGE_CALLBACK_PAYLOAD + " = ? AND "
-                + AnalyticsContract.Message.MESSAGE_PAYLOAD + " = ? AND "
-                + AnalyticsContract.Message.MESSAGE_CALLBACK_CLASS_STRING + " = ?";
-        int count = resolver.delete(AnalyticsContract.Message.CONTENT_URI, where, new String[] { url, callbackPayload,
-                payload, callbackClass });
-        if (count != 0) {
+        if (!persistedMessages.isEmpty()) {
+            ExLog.i(context, TAG, String.format("Removing message \"%s\".", payload));
+            String messageLine = getSerializedIntentForPersistence(url, callbackPayload, payload, callbackClass);
+            removePersistedMessage(messageLine);
+        }
+    }
+    
+    /**
+     * Removes all pending messages and clears the persistence file.
+     */
+    public synchronized void removeAllMessages() {
+        persistedMessages.clear();
+        writePersistedMessagesToFile();
+    }
+
+    private void removePersistedMessage(String messageLine) {
+        if (persistedMessages.contains(messageLine)) {
+            persistedMessages.remove(messageLine);
+            writePersistedMessagesToFile();
             ExLog.i(context, TAG, "Message removed.");
         }
     }
 
-    public synchronized void removeAllMessages() {
-        resolver.delete(AnalyticsContract.Message.CONTENT_URI, null, null);
-    }
-
     public int getMessageCount() {
-        int result = 0;
-        Cursor cursor = resolver.query(AnalyticsContract.Message.CONTENT_URI, null, null, null, null);
-        if (cursor != null) {
-            cursor.moveToFirst();
-            result = cursor.getCount();
-            cursor.close();
-        }
-        return result;
+        return persistedMessages.size();
     }
-
-    public Cursor getContent() {
-        return resolver.query(AnalyticsContract.Message.CONTENT_URI, null, null, null, null);
+    
+    public List<String> getContent() {
+        return persistedMessages;
     }
-
+    
     public static interface MessageRestorer {
         void restoreMessage(Context context, Intent messageIntent);
     }
 
     public List<Intent> restoreMessages() {
         List<Intent> delayedIntents = new ArrayList<Intent>();
-        Cursor cursor = resolver.query(AnalyticsContract.Message.CONTENT_URI, null, null, null, null);
-        if (cursor != null) {
-            for (cursor.moveToFirst(); !cursor.isAfterLast(); cursor.moveToNext()) {
-                String url = cursor.getString(cursor.getColumnIndex(AnalyticsContract.Message.MESSAGE_URL));
-                String callbackPayload = cursor.getString(cursor
-                        .getColumnIndex(AnalyticsContract.Message.MESSAGE_CALLBACK_PAYLOAD));
-                String payload = cursor.getString(cursor.getColumnIndex(AnalyticsContract.Message.MESSAGE_PAYLOAD));
-                String callbackClassString = cursor.getString(cursor
-                        .getColumnIndex(AnalyticsContract.Message.MESSAGE_CALLBACK_CLASS_STRING));
+        for (String persistedMessage : persistedMessages) {
+            String[] lineParts = persistedMessage.split(";");
+            String url = lineParts[2];
+            String callbackPayload = lineParts[0];
+            String payload = URLDecoder.decode(lineParts[1]);
+            String callbackClassString = lineParts[3];
 
-                Class<? extends ServerReplyCallback> callbackClass = null;
-                if (callbackClassString != null) {
-                    try {
-                        @SuppressWarnings("unchecked")
-                        Class<? extends ServerReplyCallback> tmp = (Class<? extends ServerReplyCallback>) Class
-                                .forName(callbackClassString);
-                        callbackClass = tmp;
-                    } catch (ClassNotFoundException e) {
-                        ExLog.e(context, TAG, "Could not find class for callback name: " + callbackClassString);
-                    }
-                }
-
-                // We are passing no message id, because we know it used to suppress message sending and
-                // we want this message to be sent.
-                Intent messageIntent = MessageSendingService.createMessageIntent(context, url, callbackPayload, null,
-                        payload, callbackClass);
-
-                if (restorer != null) {
-                    restorer.restoreMessage(context, messageIntent);
-                }
-
-                if (messageIntent != null) {
-                    delayedIntents.add(messageIntent);
+            Class<? extends ServerReplyCallback> callbackClass = null;
+            if (! "null".equals(callbackClassString)) {
+                try {
+                    @SuppressWarnings("unchecked")
+                    Class<? extends ServerReplyCallback> tmp =
+                    (Class<? extends ServerReplyCallback>) Class.forName(callbackClassString);
+                    callbackClass = tmp;
+                } catch (ClassNotFoundException e) {
+                    ExLog.e(context, TAG, "Could not find class for callback name: " + callbackClassString);
                 }
             }
-            cursor.close();
+            
+            // We are passing no message id, because we know it used to suppress message sending and
+            // we want this message to be sent.
+            Intent messageIntent = MessageSendingService.createMessageIntent(context, url, callbackPayload,
+                    null, payload, callbackClass);
+            
+            if (messageRestorer != null) {
+                messageRestorer.restoreMessage(context, messageIntent);
+            }
+            
+            if (messageIntent != null) {
+                delayedIntents.add(messageIntent);
+            }
         }
         ExLog.i(context, TAG, "Restored " + delayedIntents.size() + " messages");
         return delayedIntents;
     }
+
+    /**
+     * @return
+     * @throws FileNotFoundException
+     */
+    private String getFileContent() throws FileNotFoundException {
+        String fileContent = "";
+        FileInputStream inputStream;
+        try {
+            inputStream = context.openFileInput(delayedMessagesFileName);
+
+            fileContent = FileHandlerUtils.convertStreamToString(inputStream, context);
+            inputStream.close();
+        } catch (IOException e) {
+            ExLog.w(context, TAG, "In Method getFileContent(): " + e.getMessage() + " fileContent is empty");
+        }
+        return fileContent;
+    }
+
+    private void saveMessage(String messageLine) {
+        persistedMessages.add(messageLine);
+        writePersistedMessagesToFile();
+        ExLog.i(context, TAG, "Wrote message to file: " + messageLine);
+    }
+
+    private void writePersistedMessagesToFile() {
+        StringBuilder newFileContent = new StringBuilder();
+        for (String persistedMessage : persistedMessages) {
+            newFileContent.append(persistedMessage);
+            newFileContent.append('\n');
+        }
+        writeToFile(newFileContent.toString(), Context.MODE_PRIVATE);
+        ExLog.i(context, TAG, "Wrote file content to file: " + newFileContent);
+    }
+
+    private void initializeFileAndPersistedMessages() {
+        try {
+            String fileContent = getFileContent();
+            String[] messageLines = fileContent.split("\n");
+            for (String messageLine : messageLines) {
+                if (!messageLine.isEmpty()) {
+                    persistedMessages.add(messageLine);
+                }
+            }
+        } catch (FileNotFoundException e) {
+            ExLog.w(context, TAG, "persistence file not found in internal storage. The file will be created.");
+            clearPersistedMessages();
+        }
+        ExLog.i(context, TAG, "Initialized file");
+    }
+
+    private void clearPersistedMessages() {
+        persistedMessages.clear();
+        writePersistedMessagesToFile();
+    }
+
+    private void writeToFile(String content, int mode) {
+        try {
+            FileOutputStream outputStream = context.openFileOutput(delayedMessagesFileName, mode);
+            outputStream.write(content.getBytes());
+            outputStream.close();
+        } catch (IOException e) {
+            ExLog.e(context, TAG, "In Method writeToFile: " + e.getMessage() + " with content " + content + " and mode " + mode);
+        }
+    }
+
 }

@@ -15,7 +15,6 @@ import android.content.ComponentName;
 import android.content.Context;
 import android.content.Intent;
 import android.content.pm.PackageManager;
-import android.database.Cursor;
 import android.net.ConnectivityManager;
 import android.net.NetworkInfo;
 import android.os.Binder;
@@ -31,8 +30,9 @@ import com.sap.sailing.android.tracking.app.services.sending.MessageSenderTask.M
 import com.sap.sailing.domain.common.racelog.RaceLogServletConstants;
 
 /**
- * Service that handles sending messages to a webservice. Deals with an offline setting by buffering the messages in a
- * file, so that they can be sent when the connection is re-established.<br>
+ * Service that handles sending messages to a webservice. Deals with an offline setting
+ * by buffering the messages in a file, so that they can be sent when the connection is
+ * re-established.<br>
  * 
  * <b>Use in the following way:</b> Add the service declaration to your {@code AndroidManifest.xml}, and also specify
  * your class implementing the {@link MessagePersistenceManager.MessageRestorer} as a meta-data tag with the key
@@ -47,18 +47,14 @@ import com.sap.sailing.domain.common.racelog.RaceLogServletConstants;
  *   <meta-data android:name="com.sap.sailing.android.tracking.app.services.sending.messageRestorer"
  *     android:value="com.sap.sailing.racecommittee.app.services.sending.EventRestorer" />
  * </service>
- * }
- * </pre>
+ * }</pre>
  * 
  * 
- * Message sending example:
- * 
- * <pre>
- * {@code
+ * Message sending example: 
+ * <pre>{@code
  * context.startService(MessageSendingService.createMessageIntent(
  *      context, url, race.getId(), eventId, serializedEventAsJson, callbackClass));
- * }
- * </pre>
+ * }</pre>
  */
 public class MessageSendingService extends Service implements MessageSendingListener {
     public final static String URL = "url";
@@ -74,9 +70,9 @@ public class MessageSendingService extends Service implements MessageSendingList
     private final IBinder mBinder = new MessageSendingBinder();
     private MessagePersistenceManager persistenceManager;
     private boolean isHandlerSet;
-
+    
     private Set<Serializable> suppressedMessageIds = new HashSet<Serializable>();
-
+    
     public void registerMessageForSuppression(Serializable messageId) {
         suppressedMessageIds.add(messageId);
     }
@@ -113,8 +109,8 @@ public class MessageSendingService extends Service implements MessageSendingList
     }
 
     private Date lastSuccessfulSend;
-
-    public Cursor getDelayedIntensContent() {
+    
+    public List<String> getDelayedIntensContent() {
         return persistenceManager.getContent();
     }
 
@@ -125,15 +121,15 @@ public class MessageSendingService extends Service implements MessageSendingList
     public Date getLastSuccessfulSend() {
         return lastSuccessfulSend;
     }
-
+    
     public void clearDelayedIntents() {
         persistenceManager.removeAllMessages();
         // let's fake a successful send!
         serviceLogger.onMessageSentSuccessful();
     }
 
-    public static Intent createMessageIntent(Context context, String url, Serializable callbackPayload,
-            Serializable messageId, String payload, Class<? extends ServerReplyCallback> callbackClass) {
+    public static Intent createMessageIntent(Context context, String url, Serializable callbackPayload, Serializable messageId, String payload,
+            Class<? extends ServerReplyCallback> callbackClass) {
         Intent messageIntent = new Intent(context, MessageSendingService.class);
         messageIntent.setAction(context.getString(R.string.intent_send_message));
         messageIntent.putExtra(CALLBACK_PAYLOAD, callbackPayload);
@@ -143,7 +139,7 @@ public class MessageSendingService extends Service implements MessageSendingList
         messageIntent.putExtra(CALLBACK_CLASS, callbackClass == null ? null : callbackClass.getName());
         return messageIntent;
     }
-
+    
     public static Intent createSendDelayedIntent(Context context) {
         Intent intent = new Intent(context, MessageSendingService.class);
         intent.setAction(context.getString(R.string.intent_send_saved_intents));
@@ -158,7 +154,7 @@ public class MessageSendingService extends Service implements MessageSendingList
         ExLog.w(this, TAG, "Unable to extract message identifier from message intent.");
         return null;
     }
-
+    
     private MessagePersistenceManager getPersistenceManager() {
         ComponentName thisService = new ComponentName(this, this.getClass());
         MessageRestorer restorer = null;
@@ -166,11 +162,10 @@ public class MessageSendingService extends Service implements MessageSendingList
             Bundle data = getPackageManager().getServiceInfo(thisService, PackageManager.GET_META_DATA).metaData;
             String className = data.getString("com.sap.sailing.android.tracking.app.services.sending.messageRestorer");
             Class<?> clazz = Class.forName(className);
-            if (!MessageRestorer.class.isAssignableFrom(clazz)) {
+            if (! MessageRestorer.class.isAssignableFrom(clazz)) {
                 throw new Exception("Class does not conform to expected type.");
             }
-            @SuppressWarnings("unchecked")
-            // checked above
+            @SuppressWarnings("unchecked") //checked above
             Class<MessageRestorer> castedClass = (Class<MessageRestorer>) clazz;
             restorer = castedClass.getConstructor().newInstance();
         } catch (Exception e) {
@@ -253,7 +248,7 @@ public class MessageSendingService extends Service implements MessageSendingList
     private void sendMessage(Intent intent) {
         boolean sendingActive = PrefUtils.getBoolean(this, R.string.preference_isSendingActive_key,
                 R.bool.preference_isSendingActive_default);
-        if (!sendingActive) {
+        if (! sendingActive) {
             ExLog.i(this, TAG, "Sending deactivated. Message will not be sent to server.");
         } else {
             Serializable messageId = getMessageId(intent);
@@ -287,7 +282,7 @@ public class MessageSendingService extends Service implements MessageSendingList
             }
             lastSuccessfulSend = Calendar.getInstance().getTime();
             serviceLogger.onMessageSentSuccessful();
-
+            
             String callbackClassString = intent.getStringExtra(CALLBACK_CLASS);
             ServerReplyCallback callback = null;
             if (callbackClassString != null) {
@@ -317,21 +312,22 @@ public class MessageSendingService extends Service implements MessageSendingList
         }
         return activeNetwork.isConnected();
     }
-
+    
     /**
-     * a UUID that identifies this client session; can be used, e.g., to let the server identify subsequent requests
-     * coming from the same client
+     * a UUID that identifies this client session; can be used, e.g., to let the server identify subsequent requests coming from the same client
      */
     public final static UUID uuid = UUID.randomUUID();
-
+    
     public static String getRaceLogEventSendAndReceiveUrl(Context context, final String raceGroupName,
             final String raceName, final String fleetName) {
-        String url = String.format("%s/sailingserver/rc/racelog?" + RaceLogServletConstants.PARAMS_LEADERBOARD_NAME
-                + "=%s&" + RaceLogServletConstants.PARAMS_RACE_COLUMN_NAME + "=%s&"
-                + RaceLogServletConstants.PARAMS_RACE_FLEET_NAME + "=%s&" + RaceLogServletConstants.PARAMS_CLIENT_UUID
-                + "=%s", PrefUtils.getString(context, R.string.preference_server_url_key,
-                R.string.preference_server_url_default), URLEncoder.encode(raceGroupName), URLEncoder.encode(raceName),
-                URLEncoder.encode(fleetName), uuid);
+        String url = String.format("%s/sailingserver/rc/racelog?"+
+                RaceLogServletConstants.PARAMS_LEADERBOARD_NAME+"=%s&"+
+                RaceLogServletConstants.PARAMS_RACE_COLUMN_NAME+"=%s&"+
+                RaceLogServletConstants.PARAMS_RACE_FLEET_NAME+"=%s&"+
+                RaceLogServletConstants.PARAMS_CLIENT_UUID+"=%s",
+                PrefUtils.getString(context, R.string.preference_server_url_key, R.string.preference_server_url_default),
+                URLEncoder.encode(raceGroupName),
+                URLEncoder.encode(raceName), URLEncoder.encode(fleetName), uuid);
         return url;
     }
 }
