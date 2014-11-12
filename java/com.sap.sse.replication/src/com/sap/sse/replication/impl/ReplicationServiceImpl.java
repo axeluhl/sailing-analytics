@@ -398,7 +398,7 @@ OperationExecutionListener<S>, HasReplicable<S, O> {
     }
 
     @Override
-    public ReplicationMasterDescriptor isReplicatingFromMaster() {
+    public ReplicationMasterDescriptor getReplicatingFromMaster() {
         return replicatingFromMaster;
     }
 
@@ -537,7 +537,7 @@ OperationExecutionListener<S>, HasReplicable<S, O> {
     
     @Override
     public void stopToReplicateFromMaster() throws IOException {
-        ReplicationMasterDescriptor descriptor = isReplicatingFromMaster();
+        ReplicationMasterDescriptor descriptor = getReplicatingFromMaster();
         if (descriptor != null) {
             synchronized(replicaUUIDs) {
                 if (replicator != null) {

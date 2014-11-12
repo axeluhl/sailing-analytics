@@ -28,13 +28,14 @@ public interface ReplicationService<S> {
      * If this server instance is a replica of some other master server instance, this method returns that master's
      * descriptor. Otherwise (if this instance is not a replica), returns <code>null</code>.
      */
-    ReplicationMasterDescriptor isReplicatingFromMaster();
+    ReplicationMasterDescriptor getReplicatingFromMaster();
     
     /**
-     * Performs a servlet request to the server's {@link ReplicationServlet}, first registering this replica, ensuring
-     * the JMS replication topic is created, then subscribing for the master's JMS replication topic and asking the servlet
-     * for the stream containing the initial load. 
-     * @throws InterruptedException 
+     * Performs a servlet request to the remote master server's {@link ReplicationServlet}, first registering this
+     * replica, ensuring the message queue for replicating operations is created, then subscribing to the master's
+     * replication message queue and asking the servlet for the stream containing the initial load which will then be
+     * used to {@link Replicable#initiallyFillFrom(java.io.ObjectInputStream) replace} the current {@link Replicable}'s
+     * state.
      */
     void startToReplicateFrom(ReplicationMasterDescriptor master) throws IOException, ClassNotFoundException, InterruptedException;
 
@@ -63,13 +64,11 @@ public interface ReplicationService<S> {
 
     /**
      * Stops all replica currently registered with this server.
-     * @throws IOException 
      */
     void stopAllReplica() throws IOException;
     
     /**
      * Returns an unique server identifier
-     * @return
      */
     UUID getServerIdentifier();
 

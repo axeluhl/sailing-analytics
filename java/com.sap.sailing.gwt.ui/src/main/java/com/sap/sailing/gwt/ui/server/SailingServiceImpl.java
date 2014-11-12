@@ -3207,7 +3207,7 @@ public class SailingServiceImpl extends ProxiedRemoteServiceServlet implements S
                     service.getNumberOfMessagesSent(replicaDescriptor), service.getNumberOfBytesSent(replicaDescriptor), service.getAverageNumberOfBytesPerMessage(replicaDescriptor)));
         }
         ReplicationMasterDTO master;
-        ReplicationMasterDescriptor replicatingFromMaster = service.isReplicatingFromMaster();
+        ReplicationMasterDescriptor replicatingFromMaster = service.getReplicatingFromMaster();
         if (replicatingFromMaster == null) {
             master = null;
         } else {
