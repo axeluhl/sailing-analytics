@@ -108,7 +108,7 @@ class TrackingViewController : UIViewController, UIAlertViewDelegate {
     
     /* Stop tracking, go back to regattas view */
     @IBAction func stopTrackingButtonTapped(sender: AnyObject) {
-        let alertView = UIAlertView(title: "", message: "Stop tracking?", delegate: self, cancelButtonTitle: "Cancel", otherButtonTitles: "Stop")
+        let alertView = UIAlertView(title: "Stop tracking?", message: "", delegate: self, cancelButtonTitle: "Cancel", otherButtonTitles: "Stop")
         alertView.tag = AlertViewTag.StopTracking.rawValue;
         alertView.show()
     }

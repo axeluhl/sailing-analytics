@@ -72,7 +72,7 @@ class HomeViewController: UIViewController, UITableViewDataSource, UITableViewDe
         if (UIImagePickerController.isSourceTypeAvailable(UIImagePickerControllerSourceType.Camera)) {
             performSegueWithIdentifier("Scan", sender: sender)
         } else {
-            let alertView = UIAlertView(title: "", message: "No camera available.", delegate: self, cancelButtonTitle: "Cancel")
+            let alertView = UIAlertView(title: "No camera available.", message: nil, delegate: self, cancelButtonTitle: "Cancel")
             alertView.tag = AlertViewTag.NoCameraAvailable.rawValue;
             alertView.show()          
         }

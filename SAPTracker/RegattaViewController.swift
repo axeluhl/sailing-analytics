@@ -39,9 +39,9 @@ class RegattaViewController : UIViewController, UIActionSheetDelegate, UINavigat
     }
     
     @IBAction func showMenuActionSheet(sender: AnyObject) {
-        let actionSheet = UIActionSheet(title: nil, delegate: self, cancelButtonTitle: nil, destructiveButtonTitle: nil, otherButtonTitles: "Checkout", "Settings", "Edit Photo", "About", "Cancel")
+        let actionSheet = UIActionSheet(title: nil, delegate: self, cancelButtonTitle: nil, destructiveButtonTitle: nil, otherButtonTitles: "Checkout", "Settings", "Edit Photo", "Cancel")
         actionSheet.tag = ActionSheet.Menu.rawValue
-        actionSheet.cancelButtonIndex = 4
+        actionSheet.cancelButtonIndex = 3
         actionSheet.showInView(self.view)
     }
     
@@ -53,9 +53,6 @@ class RegattaViewController : UIViewController, UIActionSheetDelegate, UINavigat
                 break
             case 2:
                 showImageActionSheet(actionSheet)
-                break
-            case 3:
-                performSegueWithIdentifier("About", sender: actionSheet)
                 break
             default:
                 break
@@ -70,7 +67,7 @@ class RegattaViewController : UIViewController, UIActionSheetDelegate, UINavigat
     @IBAction func startTrackingButtonTapped(sender: AnyObject) {
         let errorMessage = LocationManager.sharedManager.startTracking()
         if errorMessage != nil {
-            let alertView = UIAlertView(title: nil, message: errorMessage, delegate: nil, cancelButtonTitle: "Cancel")
+            let alertView = UIAlertView(title: errorMessage, message: nil, delegate: nil, cancelButtonTitle: "Cancel")
             alertView.show()
         } else {
             performSegueWithIdentifier("Tracking", sender: sender)

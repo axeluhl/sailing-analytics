@@ -62,7 +62,7 @@ class ScanViewController: UIViewController, AVCaptureMetadataOutputObjectsDelega
             
             var qrcodeData = QRCodeData()
             if !qrcodeData.parseString(metadataObject.stringValue) {
-                let alertView = UIAlertView(title: "", message: "Incorrect QR Code", delegate: self, cancelButtonTitle: nil, otherButtonTitles: "OK")
+                let alertView = UIAlertView(title: "Incorrect QR Code", message: "", delegate: self, cancelButtonTitle: nil, otherButtonTitles: "OK")
                 alertView.tag = AlertViewTag.IncorrectQRCode.rawValue;
                 alertView.show()
             }
@@ -71,13 +71,13 @@ class ScanViewController: UIViewController, AVCaptureMetadataOutputObjectsDelega
             APIManager.sharedManager.initManager(qrcodeData.server!)
             APIManager.sharedManager.postDeviceMapping(qrcodeData,
                 success: { (AFHTTPRequestOperation operation, AnyObject responseObject) -> Void in
-                    let alertView = UIAlertView(title: "", message: "Connected to Server \(qrcodeData.server!)", delegate: self, cancelButtonTitle: nil, otherButtonTitles: "OK")
+                    let alertView = UIAlertView(title: "Connected to Server \(qrcodeData.server!)", message: "", delegate: self, cancelButtonTitle: nil, otherButtonTitles: "OK")
                     alertView.tag = AlertViewTag.ConnectedToServer.rawValue;
                     alertView.show()
                     
                     NSLog("success")
                 }, failure: { (AFHTTPRequestOperation operation, NSError error) -> Void in
-                    let alertView = UIAlertView(title: "", message: "Couldn't connect to Server \(qrcodeData.server!)", delegate: self, cancelButtonTitle: "Cancel")
+                    let alertView = UIAlertView(title: "Couldn't connect to Server \(qrcodeData.server!)", message: nil, delegate: self, cancelButtonTitle: "Cancel")
                     alertView.tag = AlertViewTag.CouldNotConnectToServer.rawValue;
                     alertView.show()
             })
