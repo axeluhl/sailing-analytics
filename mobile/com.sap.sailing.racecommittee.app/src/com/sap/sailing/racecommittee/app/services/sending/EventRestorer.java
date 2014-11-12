@@ -8,11 +8,10 @@ import android.content.Context;
 import android.content.Intent;
 
 import com.sap.sailing.android.shared.logging.ExLog;
-import com.sap.sailing.android.shared.services.sending.MessagePersistenceManager.MessageRestorer;
-import com.sap.sailing.android.shared.services.sending.MessageSendingService;
 import com.sap.sailing.domain.racelog.RaceLogEvent;
 import com.sap.sailing.racecommittee.app.data.DataManager;
 import com.sap.sailing.racecommittee.app.data.DataStore;
+import com.sap.sailing.racecommittee.app.services.sending.MessagePersistenceManager.MessageRestorer;
 import com.sap.sailing.server.gateway.deserialization.JsonDeserializationException;
 import com.sap.sailing.server.gateway.deserialization.racelog.impl.RaceLogEventDeserializer;
 

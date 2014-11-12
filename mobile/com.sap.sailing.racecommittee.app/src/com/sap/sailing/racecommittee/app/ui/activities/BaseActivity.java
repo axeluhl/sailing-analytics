@@ -4,7 +4,6 @@ import android.os.Bundle;
 import android.view.MenuItem;
 
 import com.sap.sailing.android.shared.logging.ExLog;
-import com.sap.sailing.android.shared.ui.activities.SendingServiceAwareActivity;
 import com.sap.sailing.racecommittee.app.AppPreferences;
 import com.sap.sailing.racecommittee.app.R;
 import com.sap.sailing.racecommittee.app.RaceApplication;
