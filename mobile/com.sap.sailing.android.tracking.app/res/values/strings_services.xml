@@ -7,5 +7,9 @@
     <string name="tracking_service_stop">tracking_stop</string>
     <string name="tracking_service_change">tracking_change</string>
     <string name="transmitting_service">Transmitting Service</string>
+    <string name="transmitting_service_start">transmitting_start</string>
+    <string name="transmitting_service_stop">transmitting_stop</string>
+    <string name="transmitting_service_switch_to_power_saving_mode">transmitting_switch_to_power_saving_mode</string>
+    <string name="transmitting_service_switch_to_default_power_mode">transmitting_switch_to_default_power_mode</string>
     
 </resources>
