@@ -194,14 +194,28 @@ public class AnalyticsProvider extends ContentProvider {
 
     @Override
     public int update(Uri uri, ContentValues values, String selection, String[] selectionArgs) {
-        if (BuildConfig.DEBUG) {
-            String message = "update: uri=" + uri + " values=[" + values == null ? "null" : values.toString()
-                    + "] selection=[" + selection + "]" + " args=" + Arrays.toString(selectionArgs);
-            ExLog.i(getContext(), TAG, message);
-        }
+		if (BuildConfig.DEBUG) {
+			String message = "update: uri=" + uri + " values=[" + values == null ? "null"
+					: values.toString() + "] selection=[" + selection + "]"
+							+ " args=" + Arrays.toString(selectionArgs);
+			ExLog.i(getContext(), TAG, message);
+		}
 
-        return 0;
-    }
+		final SQLiteDatabase db = mOpenHelper.getWritableDatabase();
+
+		switch (sUriMatcher.match(uri)) {
+
+		case SENSOR_GPS_ID:
+			String idStr = uri.getLastPathSegment();
+		    String where = SensorGps._ID + " = " + idStr;
+			int numRowsAffected = db.update(Tables.SENSOR_GPS, values, where, selectionArgs);
+			notifyChange(uri);
+			return numRowsAffected;
+
+		default:
+			throw new UnsupportedOperationException("Unknown uri: " + uri);
+		}		
+	}
 
     private void notifyChange(Uri uri) {
         getContext().getContentResolver().notifyChange(uri, null);
