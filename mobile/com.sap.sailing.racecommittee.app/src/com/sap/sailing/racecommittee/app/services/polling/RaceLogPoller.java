@@ -15,12 +15,12 @@ import android.os.Handler;
 import android.os.Looper;
 
 import com.sap.sailing.android.shared.logging.ExLog;
-import com.sap.sailing.android.shared.services.sending.MessageSendingService;
 import com.sap.sailing.racecommittee.app.AppPreferences;
 import com.sap.sailing.racecommittee.app.AppPreferences.PollingActiveChangedListener;
 import com.sap.sailing.racecommittee.app.domain.ManagedRace;
 import com.sap.sailing.racecommittee.app.domain.racelog.impl.RaceLogEventsCallback;
 import com.sap.sailing.racecommittee.app.services.polling.RaceLogPollerTask.PollingResultListener;
+import com.sap.sailing.racecommittee.app.services.sending.MessageSendingService;
 import com.sap.sse.common.Util;
 
 /**

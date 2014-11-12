@@ -17,14 +17,14 @@ import android.content.ServiceConnection;
 import android.os.IBinder;
 
 import com.sap.sailing.android.shared.logging.ExLog;
-import com.sap.sailing.android.shared.services.sending.MessageSendingService;
-import com.sap.sailing.android.shared.services.sending.MessageSendingService.MessageSendingBinder;
-import com.sap.sailing.android.shared.services.sending.ServerReplyCallback;
 import com.sap.sailing.domain.base.SharedDomainFactory;
 import com.sap.sailing.domain.racelog.RaceLog;
 import com.sap.sailing.domain.racelog.RaceLogEvent;
 import com.sap.sailing.racecommittee.app.data.DataManager;
 import com.sap.sailing.racecommittee.app.data.ReadonlyDataManager;
+import com.sap.sailing.racecommittee.app.services.sending.MessageSendingService;
+import com.sap.sailing.racecommittee.app.services.sending.MessageSendingService.MessageSendingBinder;
+import com.sap.sailing.racecommittee.app.services.sending.ServerReplyCallback;
 import com.sap.sailing.server.gateway.deserialization.JsonDeserializationException;
 import com.sap.sailing.server.gateway.deserialization.racelog.impl.RaceLogEventDeserializer;
 
