@@ -20,6 +20,9 @@ class RegattaViewController : UIViewController, UIActionSheetDelegate, UINavigat
     // var regatta: Regatta
     
     @IBOutlet weak var imageView: UIImageView!
+    @IBOutlet weak var nameLabel: UILabel!
+    @IBOutlet weak var flagImageView: UIImageView!
+    @IBOutlet weak var sailLabel: UILabel!
     
     override func viewDidLoad() {
     

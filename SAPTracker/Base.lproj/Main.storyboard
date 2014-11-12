@@ -166,7 +166,7 @@
                         <rect key="frame" x="0.0" y="0.0" width="600" height="600"/>
                         <autoresizingMask key="autoresizingMask" widthSizable="YES" heightSizable="YES"/>
                         <subviews>
-                            <imageView clipsSubviews="YES" userInteractionEnabled="NO" contentMode="scaleAspectFill" horizontalHuggingPriority="251" verticalHuggingPriority="251" translatesAutoresizingMaskIntoConstraints="NO" id="D89-pe-zpv">
+                            <imageView clipsSubviews="YES" userInteractionEnabled="NO" contentMode="scaleAspectFill" translatesAutoresizingMaskIntoConstraints="NO" id="D89-pe-zpv">
                                 <rect key="frame" x="0.0" y="64" width="600" height="160"/>
                                 <color key="backgroundColor" white="0.66666666666666663" alpha="1" colorSpace="calibratedWhite"/>
                                 <constraints>
@@ -182,6 +182,25 @@
                                     <action selector="showImageActionSheet:" destination="G3a-SV-Maf" eventType="touchUpInside" id="Oez-Vb-VqS"/>
                                 </connections>
                             </button>
+                            <label opaque="NO" userInteractionEnabled="NO" contentMode="left" horizontalHuggingPriority="251" verticalHuggingPriority="251" text="Max Mustermann" lineBreakMode="tailTruncation" baselineAdjustment="alignBaselines" adjustsFontSizeToFit="NO" translatesAutoresizingMaskIntoConstraints="NO" id="oJS-dM-2B6">
+                                <rect key="frame" x="16" y="232" width="134" height="21"/>
+                                <fontDescription key="fontDescription" type="system" pointSize="17"/>
+                                <color key="textColor" cocoaTouchSystemColor="darkTextColor"/>
+                                <nil key="highlightedColor"/>
+                            </label>
+                            <label opaque="NO" userInteractionEnabled="NO" contentMode="left" horizontalHuggingPriority="251" verticalHuggingPriority="251" text="GER 17" textAlignment="right" lineBreakMode="tailTruncation" baselineAdjustment="alignBaselines" adjustsFontSizeToFit="NO" translatesAutoresizingMaskIntoConstraints="NO" id="iIf-9z-7fe">
+                                <rect key="frame" x="525" y="232" width="59" height="21"/>
+                                <fontDescription key="fontDescription" type="system" pointSize="17"/>
+                                <color key="textColor" cocoaTouchSystemColor="darkTextColor"/>
+                                <nil key="highlightedColor"/>
+                            </label>
+                            <imageView userInteractionEnabled="NO" contentMode="scaleAspectFit" horizontalHuggingPriority="251" verticalHuggingPriority="251" image="DE.png" translatesAutoresizingMaskIntoConstraints="NO" id="szG-Mg-huO">
+                                <rect key="frame" x="485" y="227" width="32" height="32"/>
+                                <constraints>
+                                    <constraint firstAttribute="height" constant="32" id="6vF-l4-zmw"/>
+                                    <constraint firstAttribute="width" constant="32" id="FqC-Te-9As"/>
+                                </constraints>
+                            </imageView>
                             <button opaque="NO" contentMode="scaleToFill" contentHorizontalAlignment="center" contentVerticalAlignment="center" buttonType="roundedRect" lineBreakMode="middleTruncation" translatesAutoresizingMaskIntoConstraints="NO" id="mj9-m1-nYY">
                                 <rect key="frame" x="16" y="550" width="568" height="30"/>
                                 <state key="normal" title="Start Tracking">
@@ -194,14 +213,20 @@
                         </subviews>
                         <color key="backgroundColor" white="1" alpha="1" colorSpace="calibratedWhite"/>
                         <constraints>
+                            <constraint firstItem="oJS-dM-2B6" firstAttribute="top" secondItem="qVe-AE-cJY" secondAttribute="bottom" constant="8" symbolic="YES" id="5Qk-UM-Jco"/>
                             <constraint firstItem="mj9-m1-nYY" firstAttribute="centerX" secondItem="D89-pe-zpv" secondAttribute="centerX" id="5tP-Ko-XGd"/>
+                            <constraint firstItem="iIf-9z-7fe" firstAttribute="leading" secondItem="szG-Mg-huO" secondAttribute="trailing" constant="8" symbolic="YES" id="SuJ-xb-y9x"/>
                             <constraint firstAttribute="trailing" secondItem="D89-pe-zpv" secondAttribute="trailing" id="UhM-Sv-R4W"/>
                             <constraint firstItem="D89-pe-zpv" firstAttribute="top" secondItem="wYi-P2-UTF" secondAttribute="bottom" id="WBW-Lw-5P6"/>
                             <constraint firstItem="qVe-AE-cJY" firstAttribute="leading" secondItem="D89-pe-zpv" secondAttribute="leading" id="b0x-d3-irS"/>
+                            <constraint firstItem="oJS-dM-2B6" firstAttribute="baseline" secondItem="iIf-9z-7fe" secondAttribute="baseline" id="cHp-rQ-M9R"/>
                             <constraint firstItem="qVe-AE-cJY" firstAttribute="top" secondItem="D89-pe-zpv" secondAttribute="top" id="gFt-eL-RcX"/>
+                            <constraint firstItem="oJS-dM-2B6" firstAttribute="leading" secondItem="mj9-m1-nYY" secondAttribute="leading" id="hvT-eZ-7PA"/>
                             <constraint firstItem="D89-pe-zpv" firstAttribute="leading" secondItem="Ezh-Sq-hsb" secondAttribute="leading" id="iJL-tT-ZPm"/>
                             <constraint firstAttribute="bottom" secondItem="mj9-m1-nYY" secondAttribute="bottom" constant="20" symbolic="YES" id="lo2-OK-G9f"/>
+                            <constraint firstItem="iIf-9z-7fe" firstAttribute="trailing" secondItem="mj9-m1-nYY" secondAttribute="trailing" id="n37-LM-4pm"/>
                             <constraint firstItem="qVe-AE-cJY" firstAttribute="trailing" secondItem="D89-pe-zpv" secondAttribute="trailing" id="pP4-5A-ZAW"/>
+                            <constraint firstItem="szG-Mg-huO" firstAttribute="top" secondItem="qVe-AE-cJY" secondAttribute="bottom" constant="3" id="pyY-cl-FNG"/>
                             <constraint firstItem="mj9-m1-nYY" firstAttribute="leading" secondItem="Ezh-Sq-hsb" secondAttribute="leadingMargin" id="qMV-dL-JA1"/>
                             <constraint firstItem="qVe-AE-cJY" firstAttribute="bottom" secondItem="D89-pe-zpv" secondAttribute="bottom" id="tbu-Hy-0bb"/>
                         </constraints>
@@ -215,7 +240,10 @@
                         </barButtonItem>
                     </navigationItem>
                     <connections>
+                        <outlet property="flagImageView" destination="szG-Mg-huO" id="m3b-Wx-2on"/>
                         <outlet property="imageView" destination="D89-pe-zpv" id="tE7-Fb-xBq"/>
+                        <outlet property="nameLabel" destination="oJS-dM-2B6" id="fXn-FX-UbJ"/>
+                        <outlet property="sailLabel" destination="iIf-9z-7fe" id="xPM-y9-Tjg"/>
                         <segue destination="4Fb-v3-mkB" kind="presentation" identifier="Settings" id="Irs-ey-Uhs"/>
                         <segue destination="dfN-Ch-vpm" kind="presentation" identifier="About" id="tzB-PL-31j"/>
                         <segue destination="I54-NN-JAf" kind="presentation" identifier="Tracking" id="fgS-yf-c3u"/>
@@ -521,6 +549,7 @@
         </scene>
     </scenes>
     <resources>
+        <image name="DE.png" width="64" height="64"/>
         <image name="list" width="22" height="22"/>
     </resources>
     <inferredMetricsTieBreakers>
