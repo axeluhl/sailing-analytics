@@ -45,6 +45,12 @@ public interface ReplicationService<S> {
      */
     void registerReplica(ReplicaDescriptor replica) throws IOException;
 
+    /**
+     * When this service runs on a master instance, the <code>replica</code> will no longer be considered part of this
+     * master's replica set. In particular, if this was the last replica that got de-registered, this replication
+     * service will stop to pump replication operations into the message queue until a replica is
+     * {@link #registerReplica(ReplicaDescriptor) registered} again.
+     */
     void unregisterReplica(ReplicaDescriptor replica) throws IOException;
 
     /**
@@ -56,9 +62,8 @@ public interface ReplicationService<S> {
     double getAverageNumberOfOperationsPerMessage(ReplicaDescriptor replicaDescriptor);
 
     /**
-     * Stops the currently running replication. As there can be only one replication running
-     * this method needs no parameters.
-     * @throws IOException 
+     * For this instance running on a replica, stops the currently running replication. As a replica has exactly one
+     * master server that it replicates, this method needs no parameters.
      */
     void stopToReplicateFromMaster() throws IOException;
 

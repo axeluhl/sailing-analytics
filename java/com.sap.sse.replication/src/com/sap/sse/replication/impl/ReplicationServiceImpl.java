@@ -98,7 +98,12 @@ OperationExecutionListener<S>, HasReplicable<S, O> {
      */
     private final UUID serverUUID;
     
+    /**
+     * For this instance running as a replica, the replicator receives messages from the master's queue and applies them
+     * to the local replica.
+     */
     private Replicator<S, O> replicator;
+    
     private Thread replicatorThread;
     
     /**
