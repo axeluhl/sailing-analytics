@@ -106,6 +106,7 @@ public class LeaderboardActivity extends AbstractActivity implements ErrorReport
         boolean showSeriesLeaderboards = GwtHttpRequestUtils.getBooleanParameter(LeaderboardUrlSettings.PARAM_SHOW_SERIES_LEADERBOARDS, false);
         
         AnalyticsView analyticsView = clientFactory.createLeaderboardView(event, leaderboardName, timerForClientServerOffset);
+        Window.setTitle(leaderboardPlace.getTitle(event.getName(), leaderboardDisplayName));
         
         if (leaderboardType.isMetaLeaderboard()) {
             analyticsView.createSeriesAnalyticsViewer(clientFactory.getSailingService(), new AsyncActionsExecutor(),

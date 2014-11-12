@@ -33,7 +33,7 @@ public class LeaderboardPlace extends AbstractBasePlace {
     }
 
     public String getTitle(String eventName, String leaderboardName) {
-        return TextMessages.INSTANCE.sapSailing() + " - " + eventName + " - " + leaderboardName;
+        return TextMessages.INSTANCE.sapSailing() + " - " + TextMessages.INSTANCE.leaderboard() + ": " + leaderboardName;
     }
     
     public String getEventUuidAsString() {
