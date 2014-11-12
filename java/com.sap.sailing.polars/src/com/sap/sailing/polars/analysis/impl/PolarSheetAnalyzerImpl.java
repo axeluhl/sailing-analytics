@@ -75,7 +75,7 @@ public class PolarSheetAnalyzerImpl implements PolarSheetAnalyzer {
     
     private SpeedWithBearingWithConfidence<Void> estimateAnglePeakAndAverageSpeed(BoatClass boatClass, Speed windSpeed,
             int startAngleInclusive, int endAngleExclusive) throws NotEnoughDataHasBeenAddedException {
-        Integer[] dataCountPerAngle = getDataCountArray(boatClass, windSpeed);
+        Integer[] dataCountPerAngle = getDataCountArray(boatClass, windSpeed, startAngleInclusive, endAngleExclusive);
 
         
         
@@ -109,8 +109,8 @@ public class PolarSheetAnalyzerImpl implements PolarSheetAnalyzer {
         return confidence;
     }
 
-    private Integer[] getDataCountArray(BoatClass boatClass, Speed windSpeed) {
-        Integer[] dataCountPerAngle = polarDataService.getDataCountsForWindSpeed(boatClass, windSpeed);
+    private Integer[] getDataCountArray(BoatClass boatClass, Speed windSpeed, int startAngleInclusive, int endAngleExclusive) {
+        Integer[] dataCountPerAngle = polarDataService.getDataCountsForWindSpeed(boatClass, windSpeed, startAngleInclusive, endAngleExclusive);
         return dataCountPerAngle;
     }
 

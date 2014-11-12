@@ -155,8 +155,8 @@ public class PolarDataServiceImpl implements PolarDataService {
     }
 
     @Override
-    public Integer[] getDataCountsForWindSpeed(BoatClass boatClass, Speed windSpeed) {
-        return polarDataMiner.getDataCountsForWindSpeed(boatClass, windSpeed);
+    public Integer[] getDataCountsForWindSpeed(BoatClass boatClass, Speed windSpeed, int startAngleInclusive, int endAngleExclusive) {
+        return polarDataMiner.getDataCountsForWindSpeed(boatClass, windSpeed, startAngleInclusive, endAngleExclusive);
     }
 
     // private Map<TrackedRace, Map<Competitor, Pair<TimePoint, TimePoint>>> createIntervalSpecification(
