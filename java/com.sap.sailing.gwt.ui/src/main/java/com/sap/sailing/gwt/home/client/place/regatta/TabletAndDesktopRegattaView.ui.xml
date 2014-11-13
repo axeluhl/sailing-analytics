@@ -6,6 +6,5 @@
 	<ui:with field="res" type="com.sap.sailing.gwt.common.client.SharedResources" />
 	<g:HTMLPanel>
 		<s:regattaanalytics.RegattaAnalytics ui:field='regattaAnalytics'/>
-		<s:seriesanalytics.EventSeriesAnalytics ui:field='seriesAnalytics'/>
 	</g:HTMLPanel>
 </ui:UiBinder>    

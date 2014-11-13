@@ -17,10 +17,4 @@ public interface RegattaAnalyticsView {
             final String leaderboardGroupName, String leaderboardName, final ErrorReporter errorReporter,
             final UserAgentDetails userAgent, boolean showRaceDetails,  
             boolean autoExpandLastRaceColumn,  boolean showOverallLeaderboard);
-
-    void createSeriesAnalyticsViewer(SailingServiceAsync sailingService, AsyncActionsExecutor asyncActionsExecutor, 
-            Timer timer, LeaderboardSettings leaderboardSettings, String preselectedLeaderboardName, RaceIdentifier preselectedRace,
-            String leaderboardGroupName, String metaLeaderboardName, ErrorReporter errorReporter,
-            UserAgentDetails userAgent, boolean showRaceDetails,  
-            boolean autoExpandLastRaceColumn, boolean showSeriesLeaderboards);
 }

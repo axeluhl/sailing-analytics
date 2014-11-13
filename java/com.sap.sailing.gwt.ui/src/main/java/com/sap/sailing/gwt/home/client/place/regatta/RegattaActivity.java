@@ -63,8 +63,12 @@ public class RegattaActivity extends AbstractActivity implements ErrorReporter {
                             new AsyncCallback<Util.Pair<String, LeaderboardType>>() {
                                 @Override
                                 public void onSuccess(Util.Pair<String, LeaderboardType> leaderboardNameAndType) {
-                                    if (leaderboardNameAndType != null && leaderboardName.equals(leaderboardNameAndType.getA())) {
-                                        createAnalyticsViewer(panel, event, leaderboardNameAndType.getA(), leaderboardNameAndType.getB(), showRaceDetails);
+                                    if(leaderboardNameAndType != null && leaderboardName.equals(leaderboardNameAndType.getA())) {
+                                        if(leaderboardNameAndType.getB().isMetaLeaderboard()) {
+                                            createErrorView("Leaderboard is a meta leaderboard.", null, panel);
+                                        } else {
+                                            createAnalyticsViewer(panel, event, leaderboardNameAndType.getA(), leaderboardNameAndType.getB(), showRaceDetails);
+                                        }
                                     } else {
                                         createErrorView(TextMessages.INSTANCE.errorMessageNoSuchLeaderboard(), null, panel);
                                     }
@@ -103,20 +107,13 @@ public class RegattaActivity extends AbstractActivity implements ErrorReporter {
         } // interval has been specified
         boolean autoExpandLastRaceColumn = GwtHttpRequestUtils.getBooleanParameter(LeaderboardUrlSettings.PARAM_AUTO_EXPAND_LAST_RACE_COLUMN, false);
         boolean showOverallLeaderboard = GwtHttpRequestUtils.getBooleanParameter(LeaderboardUrlSettings.PARAM_SHOW_OVERALL_LEADERBOARD, false);
-        boolean showSeriesLeaderboards = GwtHttpRequestUtils.getBooleanParameter(LeaderboardUrlSettings.PARAM_SHOW_SERIES_LEADERBOARDS, false);
         
         RegattaAnalyticsView analyticsView = clientFactory.createRegattaAnalyticsView(event, leaderboardName, timerForClientServerOffset);
         Window.setTitle(regattaPlace.getTitle(event.getName(), leaderboardDisplayName));
         
-        if (leaderboardType.isMetaLeaderboard()) {
-            analyticsView.createSeriesAnalyticsViewer(clientFactory.getSailingService(), new AsyncActionsExecutor(),
-                    timer, leaderboardSettings, null, preselectedRace, "leaderboardGroupName", leaderboardName, this,
-                    userAgent, showRaceDetails, autoExpandLastRaceColumn, showSeriesLeaderboards);
-        } else {
-            analyticsView.createRegattaAnalyticsViewer(clientFactory.getSailingService(), new AsyncActionsExecutor(),
-                    timer, leaderboardSettings, preselectedRace, "leaderboardGroupName", leaderboardName, this,
-                    userAgent, showRaceDetails, autoExpandLastRaceColumn, showOverallLeaderboard);
-        }
+        analyticsView.createRegattaAnalyticsViewer(clientFactory.getSailingService(), new AsyncActionsExecutor(),
+                timer, leaderboardSettings, preselectedRace, "leaderboardGroupName", leaderboardName, this,
+                userAgent, showRaceDetails, autoExpandLastRaceColumn, showOverallLeaderboard);
 
         panel.setWidget(analyticsView.asWidget());
     }

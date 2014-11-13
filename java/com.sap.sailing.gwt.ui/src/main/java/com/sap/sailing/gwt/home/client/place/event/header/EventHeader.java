@@ -77,7 +77,7 @@ public class EventHeader extends AbstractEventComposite {
 //  private final List<Anchor> links3;
     
     private final HomePlacesNavigator placeNavigator;
-    private PlaceNavigation<SeriesPlace> overallLeaderboardNavigation = null; 
+    private PlaceNavigation<SeriesPlace> seriesAnalyticsNavigation = null; 
     private PlaceNavigation<EventPlace> regattasNavigation = null;
     
     public EventHeader(EventDTO event, HomePlacesNavigator placeNavigator, EventPlaceNavigator pageNavigator) {
@@ -164,8 +164,8 @@ public class EventHeader extends AbstractEventComposite {
             eventName = leaderboardGroupDTO.getDisplayName() != null ? leaderboardGroupDTO.getDisplayName() : leaderboardGroupDTO.getName();
 
             String overallLeaderboardName = leaderboardGroupDTO.getName() + " " + LeaderboardNameConstants.OVERALL;
-            overallLeaderboardNavigation = placeNavigator.getSeriesAnalyticsNavigation(event.id.toString(), SeriesNavigationTabs.OverallLeaderboard, overallLeaderboardName, event.getBaseURL(), event.isOnRemoteServer());
-            seriesLeaderboardAnchor.setHref(overallLeaderboardNavigation.getTargetUrl());
+            seriesAnalyticsNavigation = placeNavigator.getSeriesAnalyticsNavigation(event.id.toString(), SeriesNavigationTabs.OverallLeaderboard, overallLeaderboardName, event.getBaseURL(), event.isOnRemoteServer());
+            seriesLeaderboardAnchor.setHref(seriesAnalyticsNavigation.getTargetUrl());
             
             StrippedLeaderboardDTO leaderboardFittingToEvent = findLeaderboardWithSameCourseArea(event);
             if(leaderboardFittingToEvent != null) {
@@ -253,7 +253,7 @@ public class EventHeader extends AbstractEventComposite {
     void seriesLeaderboardClicked(ClickEvent e) {
         EventDTO event = getEvent();
         if(event.isFakeSeries()) {
-            handleClickEvent(e, overallLeaderboardNavigation);
+            handleClickEvent(e, seriesAnalyticsNavigation);
         }
     }
     

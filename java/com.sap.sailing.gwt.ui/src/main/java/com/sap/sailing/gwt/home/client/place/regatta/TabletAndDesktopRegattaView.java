@@ -8,7 +8,6 @@ import com.google.gwt.user.client.ui.Widget;
 import com.sap.sailing.domain.common.RaceIdentifier;
 import com.sap.sailing.gwt.home.client.app.HomePlacesNavigator;
 import com.sap.sailing.gwt.home.client.place.event.regattaanalytics.RegattaAnalytics;
-import com.sap.sailing.gwt.home.client.place.event.seriesanalytics.EventSeriesAnalytics;
 import com.sap.sailing.gwt.ui.client.SailingServiceAsync;
 import com.sap.sailing.gwt.ui.leaderboard.LeaderboardSettings;
 import com.sap.sailing.gwt.ui.shared.EventDTO;
@@ -18,22 +17,19 @@ import com.sap.sse.gwt.client.player.Timer;
 import com.sap.sse.gwt.client.useragent.UserAgentDetails;
 
 public class TabletAndDesktopRegattaView extends Composite implements RegattaAnalyticsView {
-    private static LeaderboardPageViewUiBinder uiBinder = GWT.create(LeaderboardPageViewUiBinder.class);
+    private static TabletAndDesktopRegattaViewUiBinder uiBinder = GWT.create(TabletAndDesktopRegattaViewUiBinder.class);
 
-    interface LeaderboardPageViewUiBinder extends UiBinder<Widget, TabletAndDesktopRegattaView> {
+    interface TabletAndDesktopRegattaViewUiBinder extends UiBinder<Widget, TabletAndDesktopRegattaView> {
     }
 
     @UiField(provided=true) RegattaAnalytics regattaAnalytics;
-    @UiField(provided=true) EventSeriesAnalytics seriesAnalytics;
     
     public TabletAndDesktopRegattaView(EventDTO event, String leaderboardName, Timer timerForClientServerOffset, HomePlacesNavigator placeNavigator) {
         regattaAnalytics = new RegattaAnalytics(event, leaderboardName, timerForClientServerOffset, placeNavigator);
-        seriesAnalytics = new EventSeriesAnalytics(event, leaderboardName, timerForClientServerOffset, placeNavigator);
-        
-        regattaAnalytics.setVisible(false);
-        seriesAnalytics.setVisible(false);
         
         initWidget(uiBinder.createAndBindUi(this));
+        
+        regattaAnalytics.setVisible(false);
     }
     
     public void createRegattaAnalyticsViewer(final SailingServiceAsync sailingService, final AsyncActionsExecutor asyncActionsExecutor,
@@ -44,14 +40,5 @@ public class TabletAndDesktopRegattaView extends Composite implements RegattaAna
         regattaAnalytics.createRegattaAnalyticsViewer(sailingService, asyncActionsExecutor, timer, leaderboardSettings, preselectedRace,
                 leaderboardGroupName, leaderboardName, errorReporter, userAgent, showRaceDetails, autoExpandLastRaceColumn, showOverallLeaderboard);
         regattaAnalytics.setVisible(true);
-    }
-
-    public void createSeriesAnalyticsViewer(SailingServiceAsync sailingService, AsyncActionsExecutor asyncActionsExecutor, 
-            Timer timer, LeaderboardSettings leaderboardSettings, String preselectedLeaderboardName, RaceIdentifier preselectedRace,
-            String leaderboardGroupName, String metaLeaderboardName, ErrorReporter errorReporter,
-            UserAgentDetails userAgent, boolean showRaceDetails, boolean autoExpandLastRaceColumn, boolean showSeriesLeaderboards) {
-        seriesAnalytics.createSeriesAnalyticsViewer(sailingService, asyncActionsExecutor, timer, leaderboardSettings, preselectedLeaderboardName,
-                preselectedRace, leaderboardGroupName, metaLeaderboardName, errorReporter, userAgent, showRaceDetails, autoExpandLastRaceColumn, showSeriesLeaderboards);
-        seriesAnalytics.setVisible(true);
     }
 }

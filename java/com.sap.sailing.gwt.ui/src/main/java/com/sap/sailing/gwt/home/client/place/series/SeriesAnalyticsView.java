@@ -12,12 +12,6 @@ import com.sap.sse.gwt.client.useragent.UserAgentDetails;
 public interface SeriesAnalyticsView {
     Widget asWidget();
     
-    void createRegattaAnalyticsViewer(final SailingServiceAsync sailingService, final AsyncActionsExecutor asyncActionsExecutor,
-            final Timer timer, final LeaderboardSettings leaderboardSettings, final RaceIdentifier preselectedRace,
-            final String leaderboardGroupName, String leaderboardName, final ErrorReporter errorReporter,
-            final UserAgentDetails userAgent, boolean showRaceDetails,  
-            boolean autoExpandLastRaceColumn,  boolean showOverallLeaderboard);
-
     void createSeriesAnalyticsViewer(SailingServiceAsync sailingService, AsyncActionsExecutor asyncActionsExecutor, 
             Timer timer, LeaderboardSettings leaderboardSettings, String preselectedLeaderboardName, RaceIdentifier preselectedRace,
             String leaderboardGroupName, String metaLeaderboardName, ErrorReporter errorReporter,
