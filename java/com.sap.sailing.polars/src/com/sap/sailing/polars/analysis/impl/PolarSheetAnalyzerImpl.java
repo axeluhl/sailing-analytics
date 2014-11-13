@@ -9,7 +9,6 @@ import com.sap.sailing.domain.base.SpeedWithBearingWithConfidence;
 import com.sap.sailing.domain.base.SpeedWithConfidence;
 import com.sap.sailing.domain.base.impl.SpeedWithBearingWithConfidenceImpl;
 import com.sap.sailing.domain.common.Bearing;
-import com.sap.sailing.domain.common.PolarSheetsData;
 import com.sap.sailing.domain.common.Speed;
 import com.sap.sailing.domain.common.SpeedWithBearing;
 import com.sap.sailing.domain.common.impl.DegreeBearingImpl;
@@ -76,7 +75,7 @@ public class PolarSheetAnalyzerImpl implements PolarSheetAnalyzer {
     
     private SpeedWithBearingWithConfidence<Void> estimateAnglePeakAndAverageSpeed(BoatClass boatClass, Speed windSpeed,
             int startAngleInclusive, int endAngleExclusive) throws NotEnoughDataHasBeenAddedException {
-        Integer[] dataCountPerAngle = getDataCountArray(boatClass, windSpeed);
+        Integer[] dataCountPerAngle = getDataCountArray(boatClass, windSpeed, startAngleInclusive, endAngleExclusive);
 
         
         
@@ -110,11 +109,8 @@ public class PolarSheetAnalyzerImpl implements PolarSheetAnalyzer {
         return confidence;
     }
 
-    private Integer[] getDataCountArray(BoatClass boatClass, Speed windSpeed) {
-        PolarSheetsData sheet = polarDataService.getPolarSheetForBoatClass(boatClass);
-        
-        int windIndex = sheet.getStepping().getLevelIndexForValue(windSpeed.getKnots());
-        Integer[] dataCountPerAngle = sheet.getDataCountPerAngleForWindspeed(windIndex);
+    private Integer[] getDataCountArray(BoatClass boatClass, Speed windSpeed, int startAngleInclusive, int endAngleExclusive) {
+        Integer[] dataCountPerAngle = polarDataService.getDataCountsForWindSpeed(boatClass, windSpeed, startAngleInclusive, endAngleExclusive);
         return dataCountPerAngle;
     }
 

@@ -132,10 +132,7 @@ public class PolarDataMiner {
             for (int angle = 0; angle < 360; angle++) {
                 Pair<SpeedWithConfidence<Void>, Integer> speedWithConfidenceAndDataCount;
                 try {
-                    int convertedAngle = angle;
-                    if (angle > 180) {
-                        convertedAngle = angle - 360;
-                    }
+                    int convertedAngle = convertAngleIfNecessary(angle);
                     speedWithConfidenceAndDataCount = incrementalRegressionProcessor.estimateBoatSpeed(boatClass,
                             new KnotSpeedImpl(windSpeed), new DegreeBearingImpl(convertedAngle));
                 } catch (NotEnoughDataHasBeenAddedException e) {
@@ -168,6 +165,16 @@ public class PolarDataMiner {
 
 
 
+    private int convertAngleIfNecessary(int angle) {
+        int convertedAngle = angle;
+        if (angle > 180) {
+            convertedAngle = angle - 360;
+        }
+        return convertedAngle;
+    }
+
+
+
     private PolarSheetsHistogramDataImpl createEmptyHistogramData(Integer[] perAngle, int angle, int dataCount,
             double coefficiantOfVariation, double confidenceMeasure) {
         perAngle[angle] = dataCount;
@@ -189,6 +196,25 @@ public class PolarDataMiner {
 
     public Set<BoatClass> getAvailableBoatClasses() {
         return incrementalRegressionProcessor.getAvailableBoatClasses();
+    }
+
+
+
+    public Integer[] getDataCountsForWindSpeed(BoatClass boatClass, Speed windSpeed, int startAngleInclusive, int endAngleExclusive) {
+        Integer[] dataCounts = new Integer[360];
+        for (int angle = 0; angle < 360; angle++) {
+            if (angle >= startAngleInclusive && angle < endAngleExclusive) {
+                try {
+                    dataCounts[angle] = incrementalRegressionProcessor.estimateBoatSpeed(boatClass, windSpeed,
+                            new DegreeBearingImpl(convertAngleIfNecessary(angle))).getB();
+                } catch (NotEnoughDataHasBeenAddedException e) {
+                    dataCounts[angle] = 0;
+                }
+            } else {
+                dataCounts[angle] = null;
+            }
+        }
+        return dataCounts;
     }
 
 }

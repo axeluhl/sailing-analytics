@@ -160,11 +160,11 @@ public class PolarDiagramCSVTest {
 
         testMapOfSpeedsAndBearings(expectedPD.getBeatAngles(), actualPD.getBeatAngles(), "beatAngles", typeName);
 
-        testMapOfSpeedsAndBearings(expectedPD.getGybeAngles(), actualPD.getGybeAngles(), "gypeAngles", typeName);
+        testMapOfSpeedsAndBearings(expectedPD.getJibeAngles(), actualPD.getJibeAngles(), "jibeAngles", typeName);
 
         testMapOfSpeedsAndSpeeds(expectedPD.getBeatSOG(), actualPD.getBeatSOG(), "beatSOG", typeName);
 
-        testMapOfSpeedsAndSpeeds(expectedPD.getGybeSOG(), actualPD.getGybeSOG(), "gybeSOG", typeName);
+        testMapOfSpeedsAndSpeeds(expectedPD.getJibeSOG(), actualPD.getJibeSOG(), "jibeSOG", typeName);
     }
 
     private static void testSpeedsAtBearingsOfPolarDiagrams(PolarDiagram expectedPD, PolarDiagram actualPD,
