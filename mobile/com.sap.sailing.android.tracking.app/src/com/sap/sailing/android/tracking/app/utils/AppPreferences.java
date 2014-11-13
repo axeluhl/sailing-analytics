@@ -27,6 +27,10 @@ public class AppPreferences {
     public String getServerURL() {
         return PrefUtils.getString(context, R.string.preference_server_url_key, R.string.preference_server_url_default);
     }
+    
+    public String getServerGpsFixesPostPath() {
+        return PrefUtils.getString(context, R.string.preference_server_gps_fixes_post_path, R.string.preference_server_gps_fixes_post_path);
+    }
 
     public int getGPSFixInterval() {
         //EditTextPreference saves value as string, even if android:inputType="number" is set

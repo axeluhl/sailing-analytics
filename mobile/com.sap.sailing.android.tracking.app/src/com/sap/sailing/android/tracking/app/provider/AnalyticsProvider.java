@@ -95,6 +95,7 @@ public class AnalyticsProvider extends ContentProvider {
                 Cursor cursor = builder
                         .where(selection, selectionArgs)
                         .query(db, false, projection, sortOrder, null);
+                
                 Context context = getContext();
                 if (context != null) {
                     cursor.setNotificationUri(context.getContentResolver(), uri);

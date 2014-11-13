@@ -3,27 +3,44 @@ package com.sap.sailing.android.tracking.app.services;
 import java.util.ArrayList;
 import java.util.List;
 
+import org.json.JSONArray;
+import org.json.JSONException;
+import org.json.JSONObject;
+
 import android.app.Service;
 import android.content.ContentUris;
 import android.content.ContentValues;
 import android.content.Intent;
 import android.database.Cursor;
 import android.net.Uri;
-import android.os.Handler;
+//import android.os.Handler;
 import android.os.IBinder;
 
+import com.android.volley.Request.Method;
+import com.android.volley.Response.ErrorListener;
+import com.android.volley.Response.Listener;
+import com.android.volley.VolleyError;
+import com.android.volley.toolbox.JsonArrayRequest;
+import com.android.volley.toolbox.JsonObjectRequest;
 import com.sap.sailing.android.shared.logging.ExLog;
 import com.sap.sailing.android.tracking.app.R;
 import com.sap.sailing.android.tracking.app.provider.AnalyticsContract.SensorGps;
+import com.sap.sailing.android.tracking.app.utils.AppPreferences;
+import com.sap.sailing.android.tracking.app.utils.VolleyHelper;
 
 public class TransmittingService extends Service {
 	
+	private static final String TAG = TransmittingService.class.getName();
+	
+	private int UPDATE_BATCH_SIZE = 10;
 	private int UPDATE_INTERVAL_DEFAULT = 3000;
 	private int UPDATE_INTERVAL_POWERSAVE_MODE = 30000;
 	private int currentUpdateInterval = UPDATE_INTERVAL_DEFAULT;
 	
+	private AppPreferences prefs;
+	
 	private Timer timer;
-	private Handler handler;
+	//private Handler handler;
 	
 	@Override
 	public IBinder onBind(Intent intent) {
@@ -32,7 +49,8 @@ public class TransmittingService extends Service {
 	
 	@Override
 	public int onStartCommand(Intent intent, int flags, int startId) {
-		handler = new Handler();
+		
+		prefs = new AppPreferences(this);
 		
 		if (intent != null) {
 			if (intent.getAction() != null) {
@@ -72,40 +90,85 @@ public class TransmittingService extends Service {
 	
 	private void sendFixesToAPI() {
 		// first, lets fetch all unsent fixes
-		System.out.println("sendFixesToAPI");
-		List<GpsFix> fixes = getAllUnsentFixes();
+		List<GpsFix> fixes = getUnsentFixes();
 		
-		// SEND AWAY
+		// store ids
+		ArrayList<String> ids = new ArrayList<String>();
+		
+		// create JSON
+        JSONArray jsonArray = new JSONArray();
 		
 		for (GpsFix fix : fixes)
 		{
-			//ExLog.i(this, "GPSFIX", "todo: send to api");
+			ids.add(String.valueOf(fix.id));
+			
+			JSONObject json = new JSONObject();
+	        try {
+	            json.put("bearingDeg", fix.course);
+	            json.put("timeMillis", fix.timestamp);
+	            json.put("speedMperS", fix.speed);
+	            json.put("lonDeg", fix.longitude);
+	            //json.put("deviceUuid", prefs.getDeviceIdentifier());
+	            json.put("latDeg", fix.latitude);
+	        } catch (JSONException ex) {
+	            ExLog.i(this, TAG, "Error while building geolocation json " + ex.getMessage());
+	        }
+	        
+	        System.out.println("adding gps fix json: " + json.toString());
+	        jsonArray.put(json);
 		}
 		
-		//markAsSynced(fixes);
+		if (jsonArray.length() > 0) {
+			// send
+
+			String[] idsArr = new String[ids.size()];
+
+			JSONObject requestObject = new JSONObject();
+			try {
+				requestObject.put("fixes", jsonArray);
+				requestObject.put("deviceUuid", prefs.getDeviceIdentifier());
+			} catch (JSONException e) {
+				e.printStackTrace();
+			}
+
+			// TODO: Clean up
+			System.out.println("sending gps fix json: "
+					+ requestObject.toString());
+			System.out.println("url: " + prefs.getServerURL()
+					+ prefs.getServerGpsFixesPostPath());
+
+			VolleyHelper.getInstance(this).addRequest(
+					new JsonObjectRequest(prefs.getServerURL()
+							+ prefs.getServerGpsFixesPostPath(), requestObject,
+							new FixSubmitListener(ids.toArray(idsArr)),
+							new FixSubmitErrorListener()));
+		}
 	}
 	
-	private void markAsSynced(List<GpsFix> fixes)
+	private void markAsSynced(String[] fixIdStrings)
 	{
 		// TODO: 
-		
-		for (GpsFix fix : fixes)
+		for (String idStr: fixIdStrings)
 		{
 			ContentValues updateValues = new ContentValues();
 			updateValues.put(SensorGps.GPS_SYNCED, 1);
-			Uri uri = ContentUris.withAppendedId(SensorGps.CONTENT_URI, fix.id);
+			Uri uri = ContentUris.withAppendedId(SensorGps.CONTENT_URI, Long.parseLong(idStr));
 			getContentResolver().update(uri, updateValues, null, null);
 		}
-		
 	}
 	
-	private List<GpsFix> getAllUnsentFixes()
+	private List<GpsFix> getUnsentFixes()
 	{
 		String selectionClause = SensorGps.GPS_SYNCED + " = 0";
+		String sortAndLimitClause = SensorGps.GPS_TIME + " DESC LIMIT " + UPDATE_BATCH_SIZE;
+		
 		ArrayList<GpsFix> list = new ArrayList<GpsFix>();
 		
-		Cursor cur = getContentResolver().query(SensorGps.CONTENT_URI, null, selectionClause, null, null);
+		Cursor cur = getContentResolver().query(SensorGps.CONTENT_URI, null, selectionClause, null, sortAndLimitClause);
 		while (cur.moveToNext()) {
+			System.out.println("BREAKING");
+			if (1 == 2) { break; }
+			
 			GpsFix gpsFix = new GpsFix();
 			
 			gpsFix.id = cur.getInt(cur.getColumnIndex(SensorGps._ID));
@@ -117,11 +180,41 @@ public class TransmittingService extends Service {
 			gpsFix.synced = cur.getInt(cur.getColumnIndex(SensorGps.GPS_SYNCED));
 			
 			list.add(gpsFix);
+			
+			if (list.size() >= UPDATE_BATCH_SIZE)
+			{
+				break;
+			}
         }
 		
 		cur.close();
 		return list;
 	}
+	
+	private class FixSubmitListener implements Listener<JSONObject> {
+
+        private String[] ids;
+
+        public FixSubmitListener(String[] ids) {
+            this.ids = ids;
+        }
+
+        @Override
+        public void onResponse(JSONObject response) {
+        	System.out.println("FixListener#onResponse: " + response);
+        	System.out.println("ids: " + ids);
+
+			markAsSynced(ids);
+        }
+    }
+	
+    private class FixSubmitErrorListener implements ErrorListener {
+
+        @Override
+        public void onErrorResponse(VolleyError error) {
+            ExLog.e(TransmittingService.this, TAG, "Error while sending GPS fix " + error.getMessage());
+        }
+    }
 
 	class GpsFix
 	{
@@ -154,12 +247,7 @@ public class TransmittingService extends Service {
 					e.printStackTrace();
 				}
 				
-				handler.post(new Runnable() {
-					@Override
-					public void run() {
-						sendFixesToAPI();
-					}
-				});
+				sendFixesToAPI();
 			}
 		}
 
