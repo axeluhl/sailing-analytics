@@ -156,16 +156,29 @@ public class TransmittingService extends Service {
 		}
 	}
 	
-	private void markAsSynced(String[] fixIdStrings)
+	private void deleteSynced(String[] fixIdStrings)
 	{
 		for (String idStr: fixIdStrings)
 		{
 			ContentValues updateValues = new ContentValues();
 			updateValues.put(SensorGps.GPS_SYNCED, 1);
 			Uri uri = ContentUris.withAppendedId(SensorGps.CONTENT_URI, Long.parseLong(idStr));
-			getContentResolver().update(uri, updateValues, null, null);
+			getContentResolver().delete(uri, null, null);
 		}
 	}
+	
+//  might need this class in the future:  
+//
+//	private void markAsSynced(String[] fixIdStrings)
+//	{
+//		for (String idStr: fixIdStrings)
+//		{
+//			ContentValues updateValues = new ContentValues();
+//			updateValues.put(SensorGps.GPS_SYNCED, 1);
+//			Uri uri = ContentUris.withAppendedId(SensorGps.CONTENT_URI, Long.parseLong(idStr));
+//			getContentResolver().update(uri, updateValues, null, null);
+//		}
+//	}
 	
 	private List<GpsFix> getUnsentFixes()
 	{
@@ -211,7 +224,8 @@ public class TransmittingService extends Service {
         	System.out.println("FixListener#onResponse: " + response);
         	System.out.println("ids: " + ids);
 
-			markAsSynced(ids);
+        	deleteSynced(ids);
+        	//markAsSynced(ids);
         }
     }
 	
