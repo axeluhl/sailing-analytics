@@ -10,4 +10,14 @@ public interface WindStepping extends Serializable{
 
     Integer[] getRawStepping();
 
+    public abstract int getLevelIndexFloorForValue(double speed);
+
+    public abstract int getLevelIndexCeilingForValue(double speed);
+
+    double getDistanceToLevelFloor(double speed);
+
+    int hashCode();
+
+    boolean equals(Object obj);
+
 }
