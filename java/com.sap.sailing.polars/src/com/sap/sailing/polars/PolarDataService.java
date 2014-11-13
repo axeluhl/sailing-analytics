@@ -115,6 +115,16 @@ public interface PolarDataService {
     Set<BoatClass> getAllBoatClassesWithPolarSheetsAvailable();
 
     void competitorPositionChanged(GPSFixMoving fix, Competitor competitor, TrackedRace createdTrackedRace);
+
+    /**
+     * Returns underlying datacount for a given boat class and windspeed. 
+     * @param boatClass
+     * @param windSpeed
+     * @param startAngleInclusive between 0 and 359; smaller than (or equal to) endAngleExclusive
+     * @param endAngleExclusive between 0 and 359; bigger than startAngleInclusive
+     * @return array with datacount for all angles in the given area, else null
+     */
+    Integer[] getDataCountsForWindSpeed(BoatClass boatClass, Speed windSpeed, int startAngleInclusive, int endAngleExclusive);
     
 
 }
