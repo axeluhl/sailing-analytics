@@ -1,6 +1,8 @@
 package com.sap.sailing.selenium.pages.adminconsole;
 
 import java.text.MessageFormat;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 
 import org.openqa.selenium.By;
 import org.openqa.selenium.WebDriver;
@@ -27,6 +29,7 @@ import com.sap.sailing.selenium.pages.adminconsole.tractrac.TracTracEventManagem
  *   D049941
  */
 public class AdminConsolePage extends HostPage {
+    private static final Logger logger = Logger.getLogger(AdminConsolePage.class.getName());
     private static final String PAGE_TITLE = "SAP Sailing Analytics Administration Console"; //$NON-NLS-1$
     
     private static final MessageFormat TAB_EXPRESSION = new MessageFormat(
@@ -122,6 +125,11 @@ public class AdminConsolePage extends HostPage {
      */
     @Override
     protected void verify() {
+        try {
+            Thread.sleep(1000);
+        } catch (InterruptedException e) {
+            logger.log(Level.WARNING, "Interrupted while waiting for an admin console tab to appear", e);
+        } // wait a bit for the page to have initialized and set its title
         if (!PAGE_TITLE.equals(this.driver.getTitle())) {
             throw new IllegalStateException("This is not the administration console: " + this.driver.getTitle()); //$NON-NLS-1$
         }
