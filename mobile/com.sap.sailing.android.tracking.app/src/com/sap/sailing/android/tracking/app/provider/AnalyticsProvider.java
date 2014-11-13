@@ -189,8 +189,21 @@ public class AnalyticsProvider extends ContentProvider {
                     + Arrays.toString(selectionArgs);
             ExLog.i(getContext(), TAG, message);
         }
+        
+        final SQLiteDatabase db = mOpenHelper.getWritableDatabase();
 
-        return 0;
+		switch (sUriMatcher.match(uri)) {
+
+		case SENSOR_GPS_ID:
+			String idStr = uri.getLastPathSegment();
+		    String where = SensorGps._ID + " = " + idStr;
+		    int numRowsDeleted = db.delete(Tables.SENSOR_GPS, where, selectionArgs);
+			notifyChange(uri);
+			return numRowsDeleted;
+
+		default:
+			throw new UnsupportedOperationException("Unknown uri: " + uri);
+		}		
     }
 
     @Override
