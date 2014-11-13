@@ -24,6 +24,18 @@ public abstract class AbstractReplicablesProvider implements ReplicablesProvider
     public void removeReplicableLifeCycleListener(ReplicableLifeCycleListener listener) {
         listeners.remove(listener);
     }
+    
+    protected void notifyReplicableLifeCycleListenersAboutReplicableAdded(Replicable<?, ?> replicable) {
+        for (ReplicableLifeCycleListener listener : listeners) {
+            listener.replicableAdded(replicable);
+        }
+    }
+
+    protected void notifyReplicableLifeCycleListenersAboutReplicableRemoved(String replicableIdAsString) {
+        for (ReplicableLifeCycleListener listener : listeners) {
+            listener.replicableRemoved(replicableIdAsString);
+        }
+    }
 
     /**
      * This default implementation loops over the result of {@link #getReplicables()} and returns the first object whose

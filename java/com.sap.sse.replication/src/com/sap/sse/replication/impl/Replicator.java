@@ -345,4 +345,11 @@ public class Replicator implements Runnable {
         return "Replicator for master "+master+", queue size: "+queueSize;
     }
 
+    /**
+     * @return <code>true</code> if all queues for all replicables are empty
+     */
+    public boolean isQueueEmpty() {
+        return !queueByReplicableIdAsString.values().stream().anyMatch(q->!q.isEmpty());
+    }
+
 }

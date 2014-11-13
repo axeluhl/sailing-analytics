@@ -12,10 +12,8 @@ import java.net.URL;
 import java.net.URLConnection;
 import java.util.ArrayList;
 import java.util.HashMap;
-import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
-import java.util.Set;
 import java.util.Timer;
 import java.util.TimerTask;
 import java.util.UUID;
@@ -117,7 +115,7 @@ public class ReplicationServiceImpl implements ReplicationService {
      */
     private Replicator replicator;
     
-    private final Set<ReplicationServiceExecutionListener<?>> executionListeners;
+    private final Map<String, ReplicationServiceExecutionListener<?>> executionListenersByReplicableIdAsString;
     
     private Thread replicatorThread;
     
@@ -206,8 +204,11 @@ public class ReplicationServiceImpl implements ReplicationService {
         }
 
         @Override
-        public void replicableRemoved(Replicable<?, ?> replicable) {
-            // TODO
+        public void replicableRemoved(String replicableIdAsString) {
+            ReplicationServiceExecutionListener<?> listener = executionListenersByReplicableIdAsString.remove(replicableIdAsString);
+            if (listener != null) {
+                listener.unsubscribe();
+            }
         }
     }
     
@@ -229,7 +230,7 @@ public class ReplicationServiceImpl implements ReplicationService {
             int exchangePort, final ReplicationInstancesManager replicationInstancesManager,
             ReplicablesProvider replicablesProvider) throws IOException {
         timer = new Timer("ReplicationServiceImpl timer for delayed task sending");
-        executionListeners = new HashSet<>();
+        executionListenersByReplicableIdAsString = new HashMap<>();
         this.replicationInstancesManager = replicationInstancesManager;
         replicaUUIDs = new HashMap<ReplicationMasterDescriptor, String>();
         this.replicablesProvider = replicablesProvider;
@@ -246,6 +247,10 @@ public class ReplicationServiceImpl implements ReplicationService {
     protected ServiceTracker<Replicable<?, ?>, Replicable<?, ?>> getReplicableTracker() {
         return new ServiceTracker<Replicable<?, ?>, Replicable<?, ?>>(
                 Activator.getDefaultContext(), Replicable.class.getName(), null);
+    }
+    
+    protected ReplicablesProvider getReplicablesProvider() {
+        return replicablesProvider;
     }
     
     private Channel createMasterChannelAndDeclareFanoutExchange() throws IOException {
@@ -300,7 +305,7 @@ public class ReplicationServiceImpl implements ReplicationService {
 
     private <S> void addNewOperationExecutionListener(Replicable<S, ?> replicable) {
         final ReplicationServiceExecutionListener<S> listener = new ReplicationServiceExecutionListener<S>(this, replicable);
-        executionListeners.add(listener);
+        executionListenersByReplicableIdAsString.put(replicable.getId().toString(), listener);
     }
 
     @Override
@@ -319,9 +324,10 @@ public class ReplicationServiceImpl implements ReplicationService {
     }
 
     private void removeAsListenerFromReplicables() {
-        for (ReplicationServiceExecutionListener<?> listener : executionListeners) {
+        for (ReplicationServiceExecutionListener<?> listener : executionListenersByReplicableIdAsString.values()) {
             listener.unsubscribe();
         }
+        executionListenersByReplicableIdAsString.clear();
     }
 
     /**

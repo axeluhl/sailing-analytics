@@ -35,7 +35,6 @@ import com.sap.sailing.domain.persistence.media.MediaDBFactory;
 import com.sap.sailing.domain.racelog.tracking.EmptyGPSFixStore;
 import com.sap.sailing.domain.tracking.impl.EmptyWindStore;
 import com.sap.sailing.server.RacingEventService;
-import com.sap.sailing.server.RacingEventServiceOperation;
 import com.sap.sailing.server.impl.RacingEventServiceImpl;
 import com.sap.sse.common.Util;
 import com.sap.sse.mongodb.MongoDBService;
@@ -49,10 +48,10 @@ import com.sap.sse.replication.impl.ReplicationInstancesManager;
 import com.sap.sse.replication.impl.ReplicationMasterDescriptorImpl;
 import com.sap.sse.replication.impl.ReplicationServiceImpl;
 import com.sap.sse.replication.impl.Replicator;
+import com.sap.sse.replication.impl.SingletonReplicablesProvider;
 
 public abstract class AbstractServerReplicationTest {
     protected static final int SERVLET_PORT = 9990;
-    private DomainFactory resolveAgainst;
     protected RacingEventServiceImpl replica;
     protected RacingEventServiceImpl master;
     protected ReplicationServiceTestImpl replicaReplicator;
@@ -101,7 +100,6 @@ public abstract class AbstractServerReplicationTest {
         if (dropDB) {
             mongoDBService.getDB().dropDatabase();
         }
-        resolveAgainst = DomainFactory.INSTANCE;
         final MongoObjectFactory mongoObjectFactory = PersistenceFactory.INSTANCE.getMongoObjectFactory(mongoDBService);
         mongoObjectFactory.getDatabase().requestStart();
         if (master != null) {
@@ -116,15 +114,15 @@ public abstract class AbstractServerReplicationTest {
                     // replica gets its own base DomainFactory:
                     new DomainFactoryImpl()), mongoObjectFactory, MediaDBFactory.INSTANCE.getMediaDB(mongoDBService), EmptyWindStore.INSTANCE, EmptyGPSFixStore.INSTANCE);
         }
-        ReplicationInstancesManager<RacingEventService> rim = new ReplicationInstancesManager<>();
-        masterReplicator = new ReplicationServiceImpl<RacingEventService, RacingEventServiceOperation<?>>(exchangeName, exchangeHost, rim, this.master);
+        ReplicationInstancesManager rim = new ReplicationInstancesManager();
+        masterReplicator = new ReplicationServiceImpl(exchangeName, exchangeHost, 0, rim, new SingletonReplicablesProvider(this.master));
         replicaDescriptor = new ReplicaDescriptor(InetAddress.getLocalHost(), serverUuid, "");
         masterReplicator.registerReplica(replicaDescriptor);
         // connect to exchange host and local server running as master
         // master server and exchange host can be two different hosts
         masterDescriptor = new ReplicationMasterDescriptorImpl(exchangeHost, exchangeName, 0, UUID.randomUUID().toString(), "localhost", SERVLET_PORT);
-        ReplicationServiceTestImpl replicaReplicator = new ReplicationServiceTestImpl(exchangeName, exchangeHost, resolveAgainst, rim,
-                replicaDescriptor, this.replica, this.master, masterReplicator, masterDescriptor);
+        ReplicationServiceTestImpl replicaReplicator = new ReplicationServiceTestImpl(exchangeName, exchangeHost, rim, replicaDescriptor,
+                this.replica, this.master, masterReplicator, masterDescriptor);
         Util.Pair<ReplicationServiceTestImpl, ReplicationMasterDescriptor> result = new Util.Pair<>(replicaReplicator, masterDescriptor);
         initialLoadTestServerThread = replicaReplicator.startInitialLoadTransmissionServlet();
         this.replicaReplicator = replicaReplicator; 
@@ -170,19 +168,16 @@ public abstract class AbstractServerReplicationTest {
     
     static class ReplicationServiceTestImpl extends ReplicationServiceImpl {
         protected static final int INITIAL_LOAD_PACKAGE_SIZE = 1024*1024;
-        private final DomainFactory resolveAgainst;
         private final RacingEventService master;
         private final ReplicaDescriptor replicaDescriptor;
         private final ReplicationService masterReplicationService;
         private final ReplicationMasterDescriptor masterDescriptor;
         
-        public ReplicationServiceTestImpl(String exchangeName, String exchangeHost, DomainFactory resolveAgainst,
-                ReplicationInstancesManager replicationInstancesManager, ReplicaDescriptor replicaDescriptor,
-                RacingEventService replica, RacingEventService master, ReplicationService masterReplicationService,
-                ReplicationMasterDescriptor masterDescriptor)
+        public ReplicationServiceTestImpl(String exchangeName, String exchangeHost, ReplicationInstancesManager replicationInstancesManager,
+                ReplicaDescriptor replicaDescriptor, RacingEventService replica,
+                RacingEventService master, ReplicationService masterReplicationService, ReplicationMasterDescriptor masterDescriptor)
                 throws IOException {
-            super(exchangeName, exchangeHost, replicationInstancesManager, replica);
-            this.resolveAgainst = resolveAgainst;
+            super(exchangeName, exchangeHost, 0, replicationInstancesManager, new SingletonReplicablesProvider(replica));
             this.replicaDescriptor = replicaDescriptor;
             this.master = master;
             this.masterReplicationService = masterReplicationService;
@@ -249,13 +244,12 @@ public abstract class AbstractServerReplicationTest {
             return initialLoadTestServerThread;
         }
 
-        protected Replicator<RacingEventService, RacingEventServiceOperation<?>> startToReplicateFromButDontYetFetchInitialLoad(ReplicationMasterDescriptor master, boolean startReplicatorSuspended)
+        protected Replicator startToReplicateFromButDontYetFetchInitialLoad(ReplicationMasterDescriptor master, boolean startReplicatorSuspended)
                 throws IOException {
             masterReplicationService.registerReplica(replicaDescriptor);
             registerReplicaUuidForMaster(replicaDescriptor.getUuid().toString(), master);
             QueueingConsumer consumer = master.getConsumer();
-            final Replicator<RacingEventService, RacingEventServiceOperation<?>> replicator = new Replicator<RacingEventService, RacingEventServiceOperation<?>>(
-                    master, this, startReplicatorSuspended, consumer);
+            final Replicator replicator = new Replicator(master, getReplicablesProvider(), startReplicatorSuspended, consumer);
             new Thread(replicator).start();
             return replicator;
         }
@@ -269,19 +263,18 @@ public abstract class AbstractServerReplicationTest {
         protected void initialLoad() throws IOException, ClassNotFoundException, InterruptedException {
             PipedOutputStream pos = new PipedOutputStream();
             PipedInputStream pis = new PipedInputStream(pos);
-            final ObjectOutputStream oos = new ObjectOutputStream(pos);
             new Thread("clone writer") {
                 public void run() {
                     try {
-                        master.serializeForInitialReplication(oos);
-                        oos.close();
+                        master.serializeForInitialReplication(pos);
+                        pos.close();
                     } catch (IOException e) {
                         e.printStackTrace();
                         throw new RuntimeException(e);
                     }
                 }
             }.start();
-            for (Replicable<?, ?> replicable : getReplicables()) {
+            for (Replicable<?, ?> replicable : getReplicablesProvider().getReplicables()) {
                 replicable.clearReplicaState();
                 replicable.initiallyFillFrom(pis);
             }

@@ -36,6 +36,7 @@ public class OSGiReplicableTracker extends AbstractReplicablesProvider {
                         final Replicable<?, ?> result = bundleContext.getService(reference);
                         serviceReferenceByIdAsString.put(result.getId().toString(), reference);
                         idAsStringByServiceReference.put(reference, result.getId().toString());
+                        notifyReplicableLifeCycleListenersAboutReplicableAdded(result);
                         return result;
                     }
 
@@ -44,6 +45,8 @@ public class OSGiReplicableTracker extends AbstractReplicablesProvider {
                             Replicable<?, ?> service) {
                         serviceReferenceByIdAsString.remove(idAsStringByServiceReference.get(reference));
                         idAsStringByServiceReference.remove(reference);
+                        notifyReplicableLifeCycleListenersAboutReplicableRemoved(
+                                (String) reference.getProperty(Replicable.OSGi_Service_Registry_ID_Property_Name));
                     }
                     
                     @Override public void modifiedService(ServiceReference<Replicable<?, ?>> reference, Replicable<?, ?> service) {}

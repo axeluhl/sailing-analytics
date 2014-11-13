@@ -34,7 +34,6 @@ import com.sap.sailing.domain.test.mock.MockedTrackedRaceWithFixedRank;
 import com.sap.sailing.domain.tracking.DynamicTrackedRace;
 import com.sap.sailing.domain.tracking.TrackedRace;
 import com.sap.sailing.domain.tracking.impl.EmptyWindStore;
-import com.sap.sailing.server.RacingEventService;
 import com.sap.sailing.server.impl.RacingEventServiceImpl;
 import com.sap.sailing.server.operationaltransformation.AddColumnToLeaderboard;
 import com.sap.sailing.server.operationaltransformation.ConnectTrackedRaceToLeaderboardColumn;
@@ -50,7 +49,7 @@ public class DelayedLeaderboardCorrectionsReplicationTest extends AbstractServer
     private static final Logger logger = Logger.getLogger(DelayedLeaderboardCorrectionsReplicationTest.class.getName());
     
     private static final String Q2 = "Q2";
-    private ReplicationService<RacingEventService> replicaReplicator;
+    private ReplicationService replicaReplicator;
     private ReplicationMasterDescriptor masterDescriptor;
     
     @Before
