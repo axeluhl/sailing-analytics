@@ -219,8 +219,7 @@ public abstract class AbstractServerReplicationTest {
                                         /* queueName */ "initial-load-for-TestClient-"+UUID.randomUUID(), /* syncAfterTimeout */ false);
                                 pw.println(ros.getQueueName());
                                 final GZIPOutputStream gzipOutputStream = new GZIPOutputStream(ros);
-                                final ObjectOutputStream oos = new ObjectOutputStream(gzipOutputStream);
-                                master.serializeForInitialReplication(oos);
+                                master.serializeForInitialReplication(gzipOutputStream);
                                 gzipOutputStream.finish();
                                 ros.close();
                             } else if (request.contains("STOP")) {

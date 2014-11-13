@@ -497,12 +497,12 @@ public class ReplicationServiceImpl implements ReplicationService {
         logger.info("Started replicator thread");
         InputStream is = initialLoadURL.openStream();
         final String queueName = new BufferedReader(new InputStreamReader(is)).readLine();
-        RabbitInputStreamProvider rabbitInputStreamProvider = new RabbitInputStreamProvider(master.createChannel(),
-                queueName);
+        RabbitInputStreamProvider rabbitInputStreamProvider = new RabbitInputStreamProvider(master.createChannel(), queueName);
         try {
+            final GZIPInputStream gzipInputStream = new GZIPInputStream(rabbitInputStreamProvider.getInputStream());
             for (Replicable<?, ?> replicable : getReplicables()) {
                 logger.info("Starting to receive initial load");
-                replicable.initiallyFillFrom(new GZIPInputStream(rabbitInputStreamProvider.getInputStream()));
+                replicable.initiallyFillFrom(gzipInputStream);
                 logger.info("Done receiving initial load");
                 replicator.setSuspended(false); // apply queued operations
             }

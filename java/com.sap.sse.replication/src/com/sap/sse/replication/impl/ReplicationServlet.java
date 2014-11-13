@@ -1,7 +1,6 @@
 package com.sap.sse.replication.impl;
 
 import java.io.IOException;
-import java.io.ObjectOutputStream;
 import java.io.OutputStreamWriter;
 import java.io.PrintWriter;
 import java.net.InetAddress;
@@ -102,9 +101,8 @@ public class ReplicationServlet extends AbstractHttpServlet {
             final GZIPOutputStream gzipOutputStream = new GZIPOutputStream(countingOutputStream);
             for (String replicableIdAsString : replicableIdsAsStrings) {
                 Replicable<?, ?> replicable = replicablesProvider.getReplicable(replicableIdAsString);
-                ObjectOutputStream oos = new ObjectOutputStream(gzipOutputStream);
                 try {
-                    replicable.serializeForInitialReplication(oos);
+                    replicable.serializeForInitialReplication(gzipOutputStream);
                     gzipOutputStream.finish();
                 } catch (Exception e) {
                     logger.info("Error trying to serialize initial load for replication: " + e.getMessage());
