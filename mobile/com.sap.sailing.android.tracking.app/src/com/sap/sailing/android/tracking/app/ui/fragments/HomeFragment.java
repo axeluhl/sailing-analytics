@@ -146,11 +146,7 @@ public class HomeFragment extends BaseFragment implements LoaderCallbacks<Cursor
 			
             final String competitorId = uri.getQueryParameter(CheckinQRCodeHelper.COMPETITOR_ID);
             final String checkinURLStr = prefs.getServerURL() + prefs.getServerCheckinPath().replace("{leaderboard-name}", leaderboardName);
-          
-            System.out.println("LEADERBOARD-NAME: " + leaderboardName);
-            System.out.println("COMPETITOR-ID: " + competitorId);
-            System.out.println("CHECKIN-URL-STR: " + checkinURLStr);
-            
+
             DeviceIdentifier deviceUuid = new SmartphoneUUIDIdentifierImpl(UUID.fromString(prefs.getDeviceIdentifier()));
             Date date= new java.util.Date();
             
