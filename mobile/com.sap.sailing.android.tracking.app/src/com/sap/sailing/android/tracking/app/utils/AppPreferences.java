@@ -31,6 +31,10 @@ public class AppPreferences {
     public String getServerGpsFixesPostPath() {
         return PrefUtils.getString(context, R.string.preference_server_gps_fixes_post_path, R.string.preference_server_gps_fixes_post_path);
     }
+    
+    public String getServerCheckinPath() {
+        return PrefUtils.getString(context, R.string.preference_server_gps_checkin_path, R.string.preference_server_gps_checkin_path);
+    }
 
     public int getGPSFixInterval() {
         //EditTextPreference saves value as string, even if android:inputType="number" is set

@@ -130,12 +130,9 @@ public class TransmittingService extends Service {
 			} catch (JSONException e) {
 				e.printStackTrace();
 			}
-
-			// TODO: Clean up
-			System.out.println("sending gps fix json: "
-					+ requestObject.toString());
-			System.out.println("url: " + prefs.getServerURL()
-					+ prefs.getServerGpsFixesPostPath());
+			
+			ExLog.i(this, TAG, "sending gps fix json: " + requestObject.toString());
+			ExLog.i(this, TAG, "url: " + prefs.getServerURL() + prefs.getServerGpsFixesPostPath());
 
 			VolleyHelper.getInstance(this).addRequest(
 					new JsonObjectRequest(prefs.getServerURL()
@@ -166,9 +163,6 @@ public class TransmittingService extends Service {
 		
 		Cursor cur = getContentResolver().query(SensorGps.CONTENT_URI, null, selectionClause, null, sortAndLimitClause);
 		while (cur.moveToNext()) {
-			System.out.println("BREAKING");
-			if (1 == 2) { break; }
-			
 			GpsFix gpsFix = new GpsFix();
 			
 			gpsFix.id = cur.getInt(cur.getColumnIndex(SensorGps._ID));

@@ -1,6 +1,9 @@
 package com.sap.sailing.android.tracking.app.ui.fragments;
 
 import java.io.UnsupportedEncodingException;
+import java.net.URLEncoder;
+import java.nio.charset.Charset;
+import java.util.Date;
 import java.util.List;
 import java.util.UUID;
 
@@ -31,14 +34,11 @@ import android.widget.ListView;
 import android.widget.Toast;
 
 import com.android.volley.NetworkResponse;
-import com.android.volley.ParseError;
 import com.android.volley.Response;
 import com.android.volley.Response.ErrorListener;
 import com.android.volley.Response.Listener;
 import com.android.volley.VolleyError;
-import com.android.volley.toolbox.HttpHeaderParser;
 import com.android.volley.toolbox.JsonObjectRequest;
-import com.android.volley.toolbox.JsonRequest;
 import com.sap.sailing.android.shared.logging.ExLog;
 import com.sap.sailing.android.tracking.app.R;
 import com.sap.sailing.android.tracking.app.adapter.RegattaAdapter;
@@ -47,15 +47,10 @@ import com.sap.sailing.android.tracking.app.provider.AnalyticsContract.Event;
 import com.sap.sailing.android.tracking.app.ui.activities.RegattaActivity;
 import com.sap.sailing.android.tracking.app.utils.AppPreferences;
 import com.sap.sailing.android.tracking.app.utils.BackendHelper;
+import com.sap.sailing.android.tracking.app.utils.CheckinQRCodeHelper;
 import com.sap.sailing.android.tracking.app.utils.VolleyHelper;
-import com.sap.sailing.domain.base.Competitor;
-import com.sap.sailing.domain.base.impl.CompetitorImpl;
-import com.sap.sailing.domain.common.TimePoint;
-import com.sap.sailing.domain.common.impl.MillisecondsTimePoint;
 import com.sap.sailing.domain.common.racelog.RaceLogServletConstants;
-import com.sap.sailing.domain.common.racelog.tracking.DeviceMappingConstants;
 import com.sap.sailing.domain.racelog.RaceLogEvent;
-import com.sap.sailing.domain.racelog.RaceLogEventFactory;
 import com.sap.sailing.domain.racelog.tracking.DeviceIdentifier;
 import com.sap.sailing.domain.racelog.tracking.impl.SmartphoneUUIDIdentifierImpl;
 import com.sap.sailing.server.gateway.serialization.JsonSerializer;
@@ -68,6 +63,8 @@ public class HomeFragment extends BaseFragment implements LoaderCallbacks<Cursor
     private final static String REQUEST_TAG = "request_homefragment";
     private final static int REGATTA_LOADER = 1;
 
+    private AppPreferences prefs;
+    
     private final JsonSerializer<RaceLogEvent> eventSerializer = RaceLogEventSerializer
             .create(new CompetitorJsonSerializer());
     private Button scan;
@@ -79,6 +76,8 @@ public class HomeFragment extends BaseFragment implements LoaderCallbacks<Cursor
     public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
         super.onCreateView(inflater, container, savedInstanceState);
 
+        prefs = new AppPreferences(getActivity());
+        
         getActivity().getContentResolver();
 
         View view = inflater.inflate(R.layout.fragment_home, container, false);
@@ -127,36 +126,61 @@ public class HomeFragment extends BaseFragment implements LoaderCallbacks<Cursor
     public void onActivityResult(int requestCode, int resultCode, Intent data) {
         if (resultCode == Activity.RESULT_OK) {
             String scanResult = data.getStringExtra("SCAN_RESULT");
+            
             ExLog.i(getActivity(), TAG, "Parsing URI: " + scanResult);
+            
             Uri uri = Uri.parse(scanResult);
+            
             final String server = uri.getScheme() + "://" + uri.getHost();
             final int port = (uri.getPort() == -1) ? 80 : uri.getPort();
+            
             prefs.setServerURL(server + ":" + port);
-            final String leaderboard = uri.getQueryParameter(RaceLogServletConstants.PARAMS_LEADERBOARD_NAME);
-            final String raceColumn = uri.getQueryParameter(RaceLogServletConstants.PARAMS_RACE_COLUMN_NAME);
-            final String fleet = uri.getQueryParameter(RaceLogServletConstants.PARAMS_RACE_FLEET_NAME);
-            final String competitorIdAsString = uri.getQueryParameter(DeviceMappingConstants.COMPETITOR_ID_AS_STRING);
-            final Long fromMillis = Long.parseLong(uri.getQueryParameter(DeviceMappingConstants.FROM_MILLIS));
-            final Long toMillis = Long.parseLong(uri.getQueryParameter(DeviceMappingConstants.TO_MILLIS));
-
-            String deviceMapping = Uri.parse(server + ":" + port + getString(R.string.uri_device_mapping)).buildUpon()
-                    .appendQueryParameter(RaceLogServletConstants.PARAMS_LEADERBOARD_NAME, leaderboard)
-                    .appendQueryParameter(RaceLogServletConstants.PARAMS_RACE_COLUMN_NAME, raceColumn)
-                    .appendQueryParameter(RaceLogServletConstants.PARAMS_RACE_FLEET_NAME, fleet)
-                    .appendQueryParameter("clientuuid", prefs.getDeviceIdentifier()).build().toString();
-            ExLog.i(getActivity(), TAG, "Device Mapping: " + deviceMapping);
-
-            DeviceIdentifier device = new SmartphoneUUIDIdentifierImpl(UUID.fromString(prefs.getDeviceIdentifier()));
-            TimePoint from = new MillisecondsTimePoint(fromMillis);
-            TimePoint to = new MillisecondsTimePoint(toMillis);
-            UUID competitorId = UUID.fromString(competitorIdAsString);
-            Competitor competitor = new CompetitorImpl(competitorId, null, null, null, null);
-            RaceLogEvent event = RaceLogEventFactory.INSTANCE.createDeviceCompetitorMappingEvent(
-                    MillisecondsTimePoint.now(), AppPreferences.raceLogEventAuthor, device, competitor, 0, from, to);
-            String eventJson = eventSerializer.serialize(event).toString();
-            DeviceMappingRequest dataRequest = new DeviceMappingRequest(deviceMapping, eventJson,
-                    new DeviceMappingListener(), new DeviceMappingErrorListener());
-            VolleyHelper.getInstance(getActivity()).addRequest(dataRequest, REQUEST_TAG);
+            
+            String leaderboardName;
+			try {
+				leaderboardName = URLEncoder.encode(uri.getQueryParameter(CheckinQRCodeHelper.LEADERBOARD_NAME), "UTF-8").replace("+", "%20");
+			} catch (UnsupportedEncodingException e) {
+				ExLog.e(getActivity(), TAG, "Failed to encode leaderboard name: " + e.getMessage());
+				leaderboardName = "";
+			}
+			
+            final String competitorId = uri.getQueryParameter(CheckinQRCodeHelper.COMPETITOR_ID);
+            final String checkinURLStr = prefs.getServerURL() + prefs.getServerCheckinPath().replace("{leaderboard-name}", leaderboardName);
+          
+            System.out.println("LEADERBOARD-NAME: " + leaderboardName);
+            System.out.println("COMPETITOR-ID: " + competitorId);
+            System.out.println("CHECKIN-URL-STR: " + checkinURLStr);
+            
+            DeviceIdentifier deviceUuid = new SmartphoneUUIDIdentifierImpl(UUID.fromString(prefs.getDeviceIdentifier()));
+            Date date= new java.util.Date();
+            
+            // TODO: Push notification token
+            
+            try {
+				JSONObject requestObject = CheckinQRCodeHelper.getCheckinJson(competitorId, deviceUuid.getStringRepresentation(), "TODO!!", date.getTime());
+				JsonObjectRequest request = new JsonObjectRequest(checkinURLStr, requestObject, new CheckinListener(), new CheckinErrorListener());
+				VolleyHelper.getInstance(getActivity()).addRequest(request);
+				
+			} catch (JSONException e) {
+				ExLog.e(getActivity(), TAG, "Failed to generate checkin JSON: " + e.getMessage());
+			}
+            
+            
+            
+            
+//            
+//            Competitor competitor = new CompetitorImpl(competitorId, null, null, null, null);
+//            RaceLogEvent event = RaceLogEventFactory.INSTANCE.createDeviceCompetitorMappingEvent(
+//                    MillisecondsTimePoint.now(), AppPreferences.raceLogEventAuthor, device, competitor, 0, from, to);
+//            String eventJson = eventSerializer.serialize(event).toString();
+//            
+//            
+//            
+//            DeviceMappingRequest dataRequest = new DeviceMappingRequest(deviceMapping, eventJson,
+//                    new DeviceMappingListener(), new DeviceMappingErrorListener());
+//            
+            
+//            VolleyHelper.getInstance(getActivity()).addRequest(dataRequest, REQUEST_TAG);
         } else if (resultCode == Activity.RESULT_CANCELED) {
             Toast.makeText(getActivity(), "Scanning canceled", Toast.LENGTH_LONG).show();
         } else {
@@ -286,17 +310,17 @@ public class HomeFragment extends BaseFragment implements LoaderCallbacks<Cursor
         }
     }
 
-    private class DeviceMappingListener implements Listener<JSONArray> {
+    private class CheckinListener implements Listener<JSONObject> {
 
         @Override
-        public void onResponse(JSONArray response) {
+        public void onResponse(JSONObject response) {
             ExLog.i(getActivity(), TAG, response.toString());
             Intent intent = new Intent(getActivity(), RegattaActivity.class);
             startActivity(intent);
         }
     }
 
-    private class DeviceMappingErrorListener implements ErrorListener {
+    private class CheckinErrorListener implements ErrorListener {
 
         @Override
         public void onErrorResponse(VolleyError error) {
@@ -305,23 +329,4 @@ public class HomeFragment extends BaseFragment implements LoaderCallbacks<Cursor
         }
     }
 
-    private class DeviceMappingRequest extends JsonRequest<JSONArray> {
-
-        public DeviceMappingRequest(String url, String requestBody, Listener<JSONArray> listener,
-                ErrorListener errorListener) {
-            super(Method.POST, url, requestBody, listener, errorListener);
-        }
-
-        @Override
-        protected Response<JSONArray> parseNetworkResponse(NetworkResponse response) {
-            try {
-                String jsonString = new String(response.data, HttpHeaderParser.parseCharset(response.headers));
-                return Response.success(new JSONArray(jsonString), HttpHeaderParser.parseCacheHeaders(response));
-            } catch (UnsupportedEncodingException e) {
-                return Response.error(new ParseError(e));
-            } catch (JSONException je) {
-                return Response.error(new ParseError(je));
-            }
-        }
-    }
 }
