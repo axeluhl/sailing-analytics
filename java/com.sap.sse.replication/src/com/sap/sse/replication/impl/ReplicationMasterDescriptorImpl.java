@@ -7,6 +7,8 @@ import java.net.URL;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.UUID;
+import java.util.stream.Collectors;
+import java.util.stream.StreamSupport;
 
 import com.rabbitmq.client.Channel;
 import com.rabbitmq.client.Connection;
@@ -74,8 +76,11 @@ public class ReplicationMasterDescriptorImpl implements ReplicationMasterDescrip
 
     @Override
     public URL getInitialLoadURL(Iterable<Replicable<?, ?>> replicables) throws MalformedURLException {
+        final String replicablesIdsAsStringSeparatedByCommas = StreamSupport.stream(replicables.spliterator(), /* parallel */ false).
+            map(r->r.getId().toString()).collect(Collectors.joining(","));
         return new URL("http", getHostname(), servletPort, REPLICATION_SERVLET + "?" + ReplicationServlet.ACTION + "="
-                + ReplicationServlet.Action.INITIAL_LOAD.name());
+                + ReplicationServlet.Action.INITIAL_LOAD.name() +
+                "&"+ReplicationServlet.REPLICA_IDS_AS_STRINGS_COMMA_SEPARATED+"="+replicablesIdsAsStringSeparatedByCommas);
     }
 
     @Override
