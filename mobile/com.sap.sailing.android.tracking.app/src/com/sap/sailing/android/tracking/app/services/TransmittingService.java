@@ -7,22 +7,24 @@ import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
 
+import android.app.ActivityManager;
+import android.app.ActivityManager.RunningServiceInfo;
 import android.app.Service;
 import android.content.ContentUris;
 import android.content.ContentValues;
+import android.content.Context;
 import android.content.Intent;
 import android.database.Cursor;
 import android.net.Uri;
 //import android.os.Handler;
 import android.os.IBinder;
 
-import com.android.volley.Request.Method;
 import com.android.volley.Response.ErrorListener;
 import com.android.volley.Response.Listener;
 import com.android.volley.VolleyError;
-import com.android.volley.toolbox.JsonArrayRequest;
 import com.android.volley.toolbox.JsonObjectRequest;
 import com.sap.sailing.android.shared.logging.ExLog;
+import com.sap.sailing.android.tracking.app.BuildConfig;
 import com.sap.sailing.android.tracking.app.R;
 import com.sap.sailing.android.tracking.app.provider.AnalyticsContract.SensorGps;
 import com.sap.sailing.android.tracking.app.utils.AppPreferences;
@@ -77,14 +79,18 @@ public class TransmittingService extends Service {
 	private void startTimer() {
 		timer = new Timer();
 		timer.start();
-		ExLog.i(this, "TIMER:", "Background update-timer start");
+		if (BuildConfig.DEBUG) {
+			ExLog.i(this, "TIMER:", "Background update-timer start");
+		}
 	}
 
 	private void stopTimer() {
 		if (timer != null)
 		{
 			timer.stop();	
-			ExLog.i(this, "TIMER:", "Background update-timer stop");
+			if (BuildConfig.DEBUG) {
+				ExLog.i(this, "TIMER:", "Background update-timer stop");
+			}
 		}
 	}
 	
@@ -114,7 +120,6 @@ public class TransmittingService extends Service {
 	            ExLog.i(this, TAG, "Error while building geolocation json " + ex.getMessage());
 	        }
 	        
-	        System.out.println("adding gps fix json: " + json.toString());
 	        jsonArray.put(json);
 		}
 		
@@ -131,20 +136,28 @@ public class TransmittingService extends Service {
 				e.printStackTrace();
 			}
 			
-			ExLog.i(this, TAG, "sending gps fix json: " + requestObject.toString());
-			ExLog.i(this, TAG, "url: " + prefs.getServerURL() + prefs.getServerGpsFixesPostPath());
+			if (BuildConfig.DEBUG) {
+				ExLog.i(this, TAG, "sending gps fix json: " + requestObject.toString());
+				ExLog.i(this, TAG, "url: " + prefs.getServerURL() + prefs.getServerGpsFixesPostPath());
+			}
 
 			VolleyHelper.getInstance(this).addRequest(
 					new JsonObjectRequest(prefs.getServerURL()
 							+ prefs.getServerGpsFixesPostPath(), requestObject,
 							new FixSubmitListener(ids.toArray(idsArr)),
 							new FixSubmitErrorListener()));
+		} else {
+			if (BuildConfig.DEBUG) {
+				ExLog.i(this, TAG, "Nothing to send, Transmitting Service is terminating.");
+			}
+
+			stopTimer();
+			stopSelf();
 		}
 	}
 	
 	private void markAsSynced(String[] fixIdStrings)
 	{
-		// TODO: 
 		for (String idStr: fixIdStrings)
 		{
 			ContentValues updateValues = new ContentValues();

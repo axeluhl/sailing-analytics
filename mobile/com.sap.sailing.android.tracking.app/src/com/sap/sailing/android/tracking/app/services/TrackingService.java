@@ -6,12 +6,15 @@ import org.json.JSONException;
 import org.json.JSONObject;
 
 import android.annotation.TargetApi;
+import android.app.ActivityManager;
 import android.app.Notification;
 import android.app.NotificationManager;
 import android.app.PendingIntent;
 import android.app.Service;
+import android.app.ActivityManager.RunningServiceInfo;
 import android.content.ContentResolver;
 import android.content.ContentValues;
+import android.content.Context;
 import android.content.Intent;
 import android.location.Location;
 import android.net.Uri;
@@ -32,6 +35,7 @@ import com.google.android.gms.location.LocationClient;
 import com.google.android.gms.location.LocationListener;
 import com.google.android.gms.location.LocationRequest;
 import com.sap.sailing.android.shared.logging.ExLog;
+import com.sap.sailing.android.tracking.app.BuildConfig;
 import com.sap.sailing.android.tracking.app.R;
 import com.sap.sailing.android.tracking.app.provider.AnalyticsContract.SensorGps;
 import com.sap.sailing.android.tracking.app.ui.activities.RegattaActivity;
@@ -143,7 +147,43 @@ public class TrackingService extends Service implements ConnectionCallbacks, OnC
         cv.put(SensorGps.GPS_TIME, location.getTime());
 
         cr.insert(SensorGps.CONTENT_URI, cv);
+        
+        checkIfTransmittingServiceIsRunningAndStartIfNot();
     }
+    
+    /**
+     * start transmitting service when a new fix arrives, because it ends itself,
+     * if there's no data to send.
+     */
+    private void checkIfTransmittingServiceIsRunningAndStartIfNot()
+    {
+    	if (!isMyServiceRunning(TransmittingService.class))
+    	{
+    		Intent intent = new Intent(this, TransmittingService.class);
+            intent.setAction(getString(R.string.transmitting_service_start));
+            this.startService(intent);
+            
+            if (BuildConfig.DEBUG)
+            {
+            	ExLog.i(this, TAG, "starting transmitting service, because it's not running while a location fix was received.");
+            }
+    	}
+    }
+    
+    /**
+     * check if a service is running, see: http://stackoverflow.com/a/5921190/3589281
+     * @param serviceClass
+     * @return
+     */
+	private boolean isMyServiceRunning(Class<?> serviceClass) {
+	    ActivityManager manager = (ActivityManager) getSystemService(Context.ACTIVITY_SERVICE);
+	    for (RunningServiceInfo service : manager.getRunningServices(Integer.MAX_VALUE)) {
+	        if (serviceClass.getName().equals(service.service.getClassName())) {
+	            return true;
+	        }
+	    }
+	    return false;
+	}
 
     @Override
     public IBinder onBind(Intent intent) {
