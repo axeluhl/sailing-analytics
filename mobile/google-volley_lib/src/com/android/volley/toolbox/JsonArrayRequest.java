@@ -16,16 +16,18 @@
 
 package com.android.volley.toolbox;
 
-import com.android.volley.NetworkResponse;
-import com.android.volley.ParseError;
-import com.android.volley.Response;
-import com.android.volley.Response.ErrorListener;
-import com.android.volley.Response.Listener;
+import java.io.UnsupportedEncodingException;
 
 import org.json.JSONArray;
 import org.json.JSONException;
+import org.json.JSONObject;
 
-import java.io.UnsupportedEncodingException;
+import com.android.volley.NetworkResponse;
+import com.android.volley.ParseError;
+import com.android.volley.Response;
+import com.android.volley.Request.Method;
+import com.android.volley.Response.ErrorListener;
+import com.android.volley.Response.Listener;
 
 /**
  * A request for retrieving a {@link JSONArray} response body at a given URL.
@@ -40,6 +42,20 @@ public class JsonArrayRequest extends JsonRequest<JSONArray> {
      */
     public JsonArrayRequest(String url, Listener<JSONArray> listener, ErrorListener errorListener) {
         super(Method.GET, url, null, listener, errorListener);
+    }
+    
+    /**
+     * So we can send JSON-arrays directly, see http://stackoverflow.com/a/18052417/3589281
+     * @param method
+     * @param url
+     * @param jsonRequest
+     * @param listener
+     * @param errorListener
+     */
+    public JsonArrayRequest(int method, String url, JSONObject jsonRequest,
+            Listener<JSONArray> listener, ErrorListener errorListener) {
+        super(method, url, (jsonRequest == null) ? null : jsonRequest.toString(), 
+            listener, errorListener);
     }
     
     @Override

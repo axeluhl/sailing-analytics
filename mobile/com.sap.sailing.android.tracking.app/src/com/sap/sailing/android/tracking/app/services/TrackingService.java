@@ -144,20 +144,20 @@ public class TrackingService extends Service implements ConnectionCallbacks, OnC
 
         Uri result = cr.insert(SensorGps.CONTENT_URI, cv);
 
-        JSONObject json = new JSONObject();
-        try {
-            json.put("bearingDeg", cv.get(SensorGps.GPS_BEARING));
-            json.put("timeMillis", cv.get(SensorGps.GPS_TIME));
-            json.put("speedMperS", cv.get(SensorGps.GPS_SPEED));
-            json.put("lonDeg", cv.get(SensorGps.GPS_LONGITUDE));
-            json.put("deviceUuid", prefs.getDeviceIdentifier());
-            json.put("latDeg", cv.get(SensorGps.GPS_LATITUDE));
-        } catch (JSONException ex) {
-            ExLog.i(this, TAG, "Error while building geolocation json " + ex.getMessage());
-        }
-        VolleyHelper.getInstance(this).addRequest(
-                new JsonObjectRequest(prefs.getServerURL() + "/tracking/recordFixesFlatJson", json, new FixListener(
-                        SensorGps.getGpsId(result)), new FixErrorListener()));
+//        JSONObject json = new JSONObject();
+//        try {
+//            json.put("bearingDeg", cv.get(SensorGps.GPS_BEARING));
+//            json.put("timeMillis", cv.get(SensorGps.GPS_TIME));
+//            json.put("speedMperS", cv.get(SensorGps.GPS_SPEED));
+//            json.put("lonDeg", cv.get(SensorGps.GPS_LONGITUDE));
+//            json.put("deviceUuid", prefs.getDeviceIdentifier());
+//            json.put("latDeg", cv.get(SensorGps.GPS_LATITUDE));
+//        } catch (JSONException ex) {
+//            ExLog.i(this, TAG, "Error while building geolocation json " + ex.getMessage());
+//        }
+//        VolleyHelper.getInstance(this).addRequest(
+//                new JsonObjectRequest(prefs.getServerURL() + "/tracking/recordFixesFlatJson", json, new FixListener(
+//                        SensorGps.getGpsId(result)), new FixErrorListener()));
     }
 
     @Override
@@ -181,27 +181,5 @@ public class TrackingService extends Service implements ConnectionCallbacks, OnC
                 .setContentText(text).setContentIntent(pi).setSmallIcon(R.drawable.icon).build();
         notification.flags |= Notification.FLAG_NO_CLEAR;
         startForeground(NOTIFICATION_ID, notification);
-    }
-
-    private class FixListener implements Listener<JSONObject> {
-
-        private String id;
-
-        public FixListener(String id) {
-            this.id = id;
-        }
-
-        @Override
-        public void onResponse(JSONObject response) {
-            getContentResolver().delete(SensorGps.CONTENT_URI, SensorGps._ID + " = ?", new String[] { id });
-        }
-    }
-
-    private class FixErrorListener implements ErrorListener {
-
-        @Override
-        public void onErrorResponse(VolleyError error) {
-            ExLog.e(TrackingService.this, TAG, "Error while sending GPS fix " + error.getMessage());
-        }
     }
 }
