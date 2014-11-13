@@ -1,8 +1,7 @@
 package com.sap.sailing.android.tracking.app.ui.fragments;
 
-import com.sap.sailing.android.tracking.app.R;
-import com.sap.sailing.android.tracking.app.services.TrackingService;
-
+import android.app.AlertDialog;
+import android.content.DialogInterface;
 import android.content.Intent;
 import android.os.Bundle;
 import android.view.LayoutInflater;
@@ -10,6 +9,10 @@ import android.view.View;
 import android.view.View.OnClickListener;
 import android.view.ViewGroup;
 import android.widget.Button;
+import android.widget.Toast;
+
+import com.sap.sailing.android.tracking.app.R;
+import com.sap.sailing.android.tracking.app.services.TrackingService;
 
 public class RegattaFragment extends BaseFragment implements OnClickListener {
 
@@ -18,8 +21,7 @@ public class RegattaFragment extends BaseFragment implements OnClickListener {
 			Bundle savedInstanceState) {
 		super.onCreateView(inflater, container, savedInstanceState);
 
-		View view = inflater.inflate(R.layout.fragment_regatta, container,
-				false);
+		View view = inflater.inflate(R.layout.fragment_regatta, container, false);
 
 		Button startTracking = (Button) view.findViewById(R.id.startTracking);
 		startTracking.setOnClickListener(this);
@@ -31,19 +33,46 @@ public class RegattaFragment extends BaseFragment implements OnClickListener {
 
 	@Override
 	public void onClick(View view) {
-		Intent intent = new Intent(getActivity(), TrackingService.class);
 		switch (view.getId()) {
 		case R.id.startTracking:
-			intent.setAction(getString(R.string.tracking_service_start));
+			startTracking();
 			break;
 
 		case R.id.stopTracking:
-			intent.setAction(getString(R.string.tracking_service_stop));
+			showStopTrackingConfirmationDialog();
 			break;
 
 		default:
 			break;
 		}
+	}
+	
+	private void startTracking() {
+		Intent intent = new Intent(getActivity(), TrackingService.class);
+		intent.setAction(getString(R.string.tracking_service_start));
 		getActivity().startService(intent);
+	}
+
+	private void stopTracking() {
+		Intent intent = new Intent(getActivity(), TrackingService.class);
+		intent.setAction(getString(R.string.tracking_service_stop));
+		getActivity().startService(intent);
+	}
+
+	private void showStopTrackingConfirmationDialog() {
+		AlertDialog dialog = new AlertDialog.Builder(getActivity())
+				.setTitle(R.string.please_confirm)
+				.setMessage(R.string.do_you_really_want_to_stop_tracking)
+				.setIcon(android.R.drawable.ic_dialog_alert)
+				.setPositiveButton(android.R.string.yes,
+						new DialogInterface.OnClickListener() {
+
+							public void onClick(DialogInterface dialog,
+									int whichButton) {
+								stopTracking();
+							}
+						}).setNegativeButton(android.R.string.no, null).create();
+		
+		dialog.show();
 	}
 }
