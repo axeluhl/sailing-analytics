@@ -18,7 +18,7 @@ import com.sap.sse.replication.ReplicationMasterDescriptor;
  *
  * @param <S> the state to which replication operations are applied
  */
-public class ReplicationInstancesManager<S> {
+public class ReplicationInstancesManager {
 
     /**
      * The set of descriptors of all registered slaves. All broadcast operations will send the messages to all
@@ -26,7 +26,7 @@ public class ReplicationInstancesManager<S> {
      */
     private Set<ReplicaDescriptor> replicaDescriptors;
     
-    private Map<ReplicaDescriptor, Map<Class<? extends OperationWithResult<S, ?>>, Integer>> replicationCounts;
+    private Map<ReplicaDescriptor, Map<Class<? extends OperationWithResult<?, ?>>, Integer>> replicationCounts;
     
     /**
      * Used to calculate the average number of operations per message sent/received for each replica.
@@ -54,7 +54,7 @@ public class ReplicationInstancesManager<S> {
 
     public ReplicationInstancesManager() {
         replicaDescriptors = new HashSet<ReplicaDescriptor>();
-        replicationCounts = new HashMap<ReplicaDescriptor, Map<Class<? extends OperationWithResult<S, ?>>,Integer>>();
+        replicationCounts = new HashMap<ReplicaDescriptor, Map<Class<? extends OperationWithResult<?, ?>>,Integer>>();
         totalMessageCount = new HashMap<>();
         totalNumberOfOperations = new HashMap<>();
         totalQueueMessagesRawSizeInBytes = new HashMap<ReplicaDescriptor, Long>();
@@ -80,7 +80,7 @@ public class ReplicationInstancesManager<S> {
     
     public void registerReplica(ReplicaDescriptor replica) {
         replicaDescriptors.add(replica);
-        replicationCounts.put(replica, new HashMap<Class<? extends OperationWithResult<S, ?>>, Integer>());
+        replicationCounts.put(replica, new HashMap<Class<? extends OperationWithResult<?, ?>>, Integer>());
     }
 
     public void unregisterReplica(ReplicaDescriptor replica) {
@@ -96,15 +96,15 @@ public class ReplicationInstancesManager<S> {
      */
     public void log(List<Class<?>> classes, long sizeOfQueueMessageInBytes) {
         for (ReplicaDescriptor replica : getReplicaDescriptors()) {
-            Map<Class<? extends OperationWithResult<S, ?>>, Integer> counts = replicationCounts.get(replica);
+            Map<Class<? extends OperationWithResult<?, ?>>, Integer> counts = replicationCounts.get(replica);
             if (counts == null) {
-                counts = new HashMap<Class<? extends OperationWithResult<S, ?>>, Integer>();
+                counts = new HashMap<Class<? extends OperationWithResult<?, ?>>, Integer>();
                 replicationCounts.put(replica, counts);
             }
             for (Class<?> replicatedOperationClass : classes) {
                 // safe because replicatedOperation is declared of type RacingEventserviceOperation<T>
                 @SuppressWarnings("unchecked")
-                Class<? extends OperationWithResult<S, ?>> operationClass = (Class<? extends OperationWithResult<S, ?>>) replicatedOperationClass;
+                Class<? extends OperationWithResult<?, ?>> operationClass = (Class<? extends OperationWithResult<?, ?>>) replicatedOperationClass;
                 Integer count = counts.get(operationClass);
                 if (count == null) {
                     count = 0;
@@ -130,7 +130,7 @@ public class ReplicationInstancesManager<S> {
         }
     }
     
-    public Map<Class<? extends OperationWithResult<S, ?>>, Integer> getStatistics(ReplicaDescriptor replica) {
+    public Map<Class<? extends OperationWithResult<?, ?>>, Integer> getStatistics(ReplicaDescriptor replica) {
         return replicationCounts.get(replica);
     }
     

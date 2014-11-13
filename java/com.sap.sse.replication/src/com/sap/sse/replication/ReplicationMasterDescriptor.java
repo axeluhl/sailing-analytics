@@ -23,10 +23,13 @@ public interface ReplicationMasterDescriptor {
     URL getReplicationDeRegistrationRequestURL(UUID uuid) throws MalformedURLException;
 
     /**
-     * The content produced by the URL returned is the name of the queue from which the client can read the
-     * initial load using a {@link RabbitInputStreamProvider}.
+     * The content produced by the URL returned is the name of the queue from which the client can read the initial load
+     * using a {@link RabbitInputStreamProvider}.
+     * 
+     * @param replicables
+     *            the replicables for which to request the initial load
      */
-    URL getInitialLoadURL() throws MalformedURLException;
+    URL getInitialLoadURL(Iterable<Replicable<?, ?>> replicables) throws MalformedURLException;
 
     int getMessagingPort();
     

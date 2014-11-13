@@ -9,15 +9,22 @@ import com.sap.sse.common.IsManagedByCache;
 import com.sap.sse.replication.Replicable;
 
 /**
- * During de-serialization, resolves objects managed by a {@link DomainFactory} using the domain factory instance passed
- * to the constructor. Additionally, class loading is managed using the current thread's context class loader which is
- * required in and works well for OSGi environments.
+ * During de-serialization, resolves objects managed by a cache of type <C> using a cache of that type passed to the
+ * constructor. Objects are identified as being managed by such a cache by means of the marker interface
+ * {@link IsManagedByCache} that their classes then have to implement, telling how resolving against the cache
+ * has to work for instances of that type.
  * <p>
  * 
- * Create an instance of this class using
- * {@link DomainFactory#createObjectInputStreamResolvingAgainstThisFactory(InputStream)}.
+ * Additionally, class loading is managed using the current thread's context class loader which is required in and works
+ * well for OSGi environments.
+ * <p>
  * 
- * @param <C> the cache type used for resolving objects
+ * Create an instance of this class by first creating a subclass in the bundle that has all the dependencies required to
+ * resolve all the classes whose instances are to be read from the stream and then instantiating this subclass. Otherwise,
+ * the stream won't be able to find the classes. To make this need clear, this class is declared <code>abstract</code>.
+ * 
+ * @param <C>
+ *            the cache type used for resolving objects
  * 
  * @author Axel Uhl (D043530)
  * 

@@ -22,6 +22,7 @@ import com.sap.sailing.domain.tracking.MarkPassing;
 import com.sap.sailing.domain.tracking.TrackedRace;
 import com.sap.sailing.domain.tracking.TrackedRegattaRegistry;
 import com.sap.sse.common.TimePoint;
+import com.sap.sse.replication.impl.ObjectInputStreamResolvingAgainstCache;
 
 public interface DomainFactory extends SharedDomainFactory {
     /**
@@ -38,7 +39,7 @@ public interface DomainFactory extends SharedDomainFactory {
      * de-serialized instances need to be replaced by / resolved to the counterparts already known by this factory.
      * The stream returned by this method can be used 
      */
-    ObjectInputStreamResolvingAgainstDomainFactory createObjectInputStreamResolvingAgainstThisFactory(InputStream inputStream) throws IOException;
+    ObjectInputStreamResolvingAgainstCache<DomainFactory> createObjectInputStreamResolvingAgainstThisFactory(InputStream inputStream) throws IOException;
     
     ScoringScheme createScoringScheme(ScoringSchemeType scoringSchemeType);
 

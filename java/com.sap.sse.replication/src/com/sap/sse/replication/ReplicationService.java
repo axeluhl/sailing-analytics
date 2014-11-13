@@ -16,7 +16,7 @@ import com.sap.sse.replication.impl.ReplicationServlet;
  *
  * @param <S> the type representing the master's state
  */
-public interface ReplicationService<S> {
+public interface ReplicationService {
     static String SAILING_SERVER_REPLICATION_TOPIC = "SailingServerReplicationTopic";
 
     /**
@@ -57,7 +57,7 @@ public interface ReplicationService<S> {
      * For a replica replicating off this master, provides statistics in the form of number of operations sent to that
      * replica by type, where the operation type is the key, represented as the operation's class name
      */
-    Map<Class<? extends OperationWithResult<S, ?>>, Integer> getStatistics(ReplicaDescriptor replicaDescriptor);
+    Map<Class<? extends OperationWithResult<?, ?>>, Integer> getStatistics(ReplicaDescriptor replicaDescriptor);
     
     double getAverageNumberOfOperationsPerMessage(ReplicaDescriptor replicaDescriptor);
 

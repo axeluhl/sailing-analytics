@@ -13,6 +13,7 @@ import com.rabbitmq.client.Connection;
 import com.rabbitmq.client.ConnectionFactory;
 import com.rabbitmq.client.QueueingConsumer;
 import com.sap.sse.BuildVersion;
+import com.sap.sse.replication.Replicable;
 import com.sap.sse.replication.ReplicationMasterDescriptor;
 
 public class ReplicationMasterDescriptorImpl implements ReplicationMasterDescriptor {
@@ -72,7 +73,7 @@ public class ReplicationMasterDescriptorImpl implements ReplicationMasterDescrip
     }
 
     @Override
-    public URL getInitialLoadURL() throws MalformedURLException {
+    public URL getInitialLoadURL(Iterable<Replicable<?, ?>> replicables) throws MalformedURLException {
         return new URL("http", getHostname(), servletPort, REPLICATION_SERVLET + "?" + ReplicationServlet.ACTION + "="
                 + ReplicationServlet.Action.INITIAL_LOAD.name());
     }

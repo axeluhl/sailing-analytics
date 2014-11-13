@@ -419,7 +419,7 @@ public class SailingServiceImpl extends ProxiedRemoteServiceServlet implements S
 
     private final ServiceTracker<RacingEventService, RacingEventService> racingEventServiceTracker;
 
-    private final ServiceTracker<ReplicationService<RacingEventService>, ReplicationService<RacingEventService>> replicationServiceTracker;
+    private final ServiceTracker<ReplicationService, ReplicationService> replicationServiceTracker;
 
     private final ServiceTracker<ResultUrlRegistry, ResultUrlRegistry> resultUrlRegistryServiceTracker;
 
@@ -662,10 +662,10 @@ public class SailingServiceImpl extends ProxiedRemoteServiceServlet implements S
         return new ScoreCorrectionProviderDTO(scoreCorrectionProvider.getName(), hasResultsForBoatClassFromDateByEventName);
     }
 
-    protected ServiceTracker<ReplicationService<RacingEventService>, ReplicationService<RacingEventService>> createAndOpenReplicationServiceTracker(
+    protected ServiceTracker<ReplicationService, ReplicationService> createAndOpenReplicationServiceTracker(
             BundleContext context) {
-        ServiceTracker<ReplicationService<RacingEventService>, ReplicationService<RacingEventService>> result =
-                new ServiceTracker<ReplicationService<RacingEventService>, ReplicationService<RacingEventService>>(
+        ServiceTracker<ReplicationService, ReplicationService> result =
+                new ServiceTracker<ReplicationService, ReplicationService>(
                 context, ReplicationService.class.getName(), null);
         result.open();
         return result;
@@ -2206,7 +2206,7 @@ public class SailingServiceImpl extends ProxiedRemoteServiceServlet implements S
         return racingEventServiceTracker.getService(); // grab the service
     }
 
-    private ReplicationService<RacingEventService> getReplicationService() {
+    private ReplicationService getReplicationService() {
         return replicationServiceTracker.getService();
     }
     
@@ -3193,12 +3193,12 @@ public class SailingServiceImpl extends ProxiedRemoteServiceServlet implements S
 
     @Override
     public ReplicationStateDTO getReplicaInfo() {
-        ReplicationService<RacingEventService> service = getReplicationService();
+        ReplicationService service = getReplicationService();
         Set<ReplicaDTO> replicaDTOs = new HashSet<ReplicaDTO>();
         for (ReplicaDescriptor replicaDescriptor : service.getReplicaInfo()) {
-            final Map<Class<? extends OperationWithResult<RacingEventService, ?>>, Integer> statistics = service.getStatistics(replicaDescriptor);
+            final Map<Class<? extends OperationWithResult<?, ?>>, Integer> statistics = service.getStatistics(replicaDescriptor);
             Map<String, Integer> replicationCountByOperationClassName = new HashMap<String, Integer>();
-            for (Entry<Class<? extends OperationWithResult<RacingEventService, ?>>, Integer> e : statistics.entrySet()) {
+            for (Entry<Class<? extends OperationWithResult<?, ?>>, Integer> e : statistics.entrySet()) {
                 replicationCountByOperationClassName.put(e.getKey().getName(), e.getValue());
             }
             replicaDTOs.add(new ReplicaDTO(replicaDescriptor.getIpAddress().getHostName(), replicaDescriptor

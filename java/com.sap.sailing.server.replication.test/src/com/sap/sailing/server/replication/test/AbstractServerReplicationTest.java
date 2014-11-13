@@ -39,6 +39,7 @@ import com.sap.sailing.server.RacingEventServiceOperation;
 import com.sap.sailing.server.impl.RacingEventServiceImpl;
 import com.sap.sse.common.Util;
 import com.sap.sse.mongodb.MongoDBService;
+import com.sap.sse.replication.Replicable;
 import com.sap.sse.replication.ReplicationMasterDescriptor;
 import com.sap.sse.replication.ReplicationService;
 import com.sap.sse.replication.impl.Activator;
@@ -56,7 +57,7 @@ public abstract class AbstractServerReplicationTest {
     protected RacingEventServiceImpl master;
     protected ReplicationServiceTestImpl replicaReplicator;
     private ReplicaDescriptor replicaDescriptor;
-    private ReplicationServiceImpl<RacingEventService, RacingEventServiceOperation<?>> masterReplicator;
+    private ReplicationServiceImpl masterReplicator;
     private ReplicationMasterDescriptor  masterDescriptor;
     
     @Rule public Timeout AbstractTracTracLiveTestTimeout = new Timeout(5 * 60 * 1000); // timeout after 5 minutes
@@ -167,17 +168,17 @@ public abstract class AbstractServerReplicationTest {
         replicaReplicator.stopToReplicateFromMaster();
     }
     
-    static class ReplicationServiceTestImpl extends ReplicationServiceImpl<RacingEventService, RacingEventServiceOperation<?>> {
+    static class ReplicationServiceTestImpl extends ReplicationServiceImpl {
         protected static final int INITIAL_LOAD_PACKAGE_SIZE = 1024*1024;
         private final DomainFactory resolveAgainst;
         private final RacingEventService master;
         private final ReplicaDescriptor replicaDescriptor;
-        private final ReplicationService<RacingEventService> masterReplicationService;
+        private final ReplicationService masterReplicationService;
         private final ReplicationMasterDescriptor masterDescriptor;
         
         public ReplicationServiceTestImpl(String exchangeName, String exchangeHost, DomainFactory resolveAgainst,
-                ReplicationInstancesManager<RacingEventService> replicationInstancesManager, ReplicaDescriptor replicaDescriptor,
-                RacingEventService replica, RacingEventService master, ReplicationService<RacingEventService> masterReplicationService,
+                ReplicationInstancesManager replicationInstancesManager, ReplicaDescriptor replicaDescriptor,
+                RacingEventService replica, RacingEventService master, ReplicationService masterReplicationService,
                 ReplicationMasterDescriptor masterDescriptor)
                 throws IOException {
             super(exchangeName, exchangeHost, replicationInstancesManager, replica);
@@ -248,17 +249,6 @@ public abstract class AbstractServerReplicationTest {
             return initialLoadTestServerThread;
         }
 
-        /**
-         * Ignore the master descriptor and replicate from the local master passed to the constructor instead.
-         */
-//        @Override
-//        public void startToReplicateFrom(ReplicationMasterDescriptor master) throws IOException,
-//                ClassNotFoundException {
-//            Replicator replicator = startToReplicateFromButDontYetFetchInitialLoad(master, /* startReplicatorSuspended */ true);
-//            initialLoad();
-//            replicator.setSuspended(false); // resume after initial load
-//        }
-
         protected Replicator<RacingEventService, RacingEventServiceOperation<?>> startToReplicateFromButDontYetFetchInitialLoad(ReplicationMasterDescriptor master, boolean startReplicatorSuspended)
                 throws IOException {
             masterReplicationService.registerReplica(replicaDescriptor);
@@ -291,10 +281,11 @@ public abstract class AbstractServerReplicationTest {
                     }
                 }
             }.start();
-            ObjectInputStream dis = resolveAgainst.createObjectInputStreamResolvingAgainstThisFactory(pis);
-            getReplicable().clearReplicaState();
-            getReplicable().initiallyFillFrom(dis);
-            dis.close();
+            for (Replicable<?, ?> replicable : getReplicables()) {
+                replicable.clearReplicaState();
+                replicable.initiallyFillFrom(pis);
+            }
+            pis.close();
         }
     }
 }

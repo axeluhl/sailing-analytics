@@ -13,7 +13,6 @@ import com.sap.sailing.domain.base.CompetitorStore;
 import com.sap.sailing.domain.base.DomainFactory;
 import com.sap.sailing.domain.base.Fleet;
 import com.sap.sailing.domain.base.Mark;
-import com.sap.sailing.domain.base.ObjectInputStreamResolvingAgainstDomainFactory;
 import com.sap.sailing.domain.base.RaceColumn;
 import com.sap.sailing.domain.base.RaceDefinition;
 import com.sap.sailing.domain.base.Waypoint;
@@ -61,6 +60,7 @@ import com.sap.sailing.geocoding.ReverseGeocoder;
 import com.sap.sse.common.TimePoint;
 import com.sap.sse.common.Util;
 import com.sap.sse.common.impl.MillisecondsTimePoint;
+import com.sap.sse.replication.impl.ObjectInputStreamResolvingAgainstCache;
 
 public class DomainFactoryImpl extends SharedDomainFactoryImpl implements DomainFactory {
     private static Logger logger = Logger.getLogger(DomainFactoryImpl.class.getName());
@@ -82,7 +82,7 @@ public class DomainFactoryImpl extends SharedDomainFactoryImpl implements Domain
     }
 
     @Override
-    public ObjectInputStreamResolvingAgainstDomainFactory createObjectInputStreamResolvingAgainstThisFactory(InputStream inputStream) throws IOException {
+    public ObjectInputStreamResolvingAgainstCache<DomainFactory> createObjectInputStreamResolvingAgainstThisFactory(InputStream inputStream) throws IOException {
         return new ObjectInputStreamResolvingAgainstDomainFactoryImpl(inputStream, this);
     }
 

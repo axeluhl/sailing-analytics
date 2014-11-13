@@ -2,18 +2,20 @@ package com.sap.sse.replication.impl;
 
 import java.io.BufferedReader;
 import java.io.ByteArrayOutputStream;
+import java.io.DataOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
-import java.io.ObjectInputStream;
 import java.io.ObjectOutputStream;
 import java.net.ConnectException;
 import java.net.URL;
 import java.net.URLConnection;
 import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
 import java.util.Timer;
 import java.util.TimerTask;
 import java.util.UUID;
@@ -30,37 +32,48 @@ import com.rabbitmq.client.Channel;
 import com.rabbitmq.client.ConnectionFactory;
 import com.rabbitmq.client.QueueingConsumer;
 import com.sap.sse.BuildVersion;
+import com.sap.sse.common.Util;
 import com.sap.sse.replication.OperationExecutionListener;
 import com.sap.sse.replication.OperationWithResult;
 import com.sap.sse.replication.Replicable;
+import com.sap.sse.replication.ReplicablesProvider;
+import com.sap.sse.replication.ReplicablesProvider.ReplicableLifeCycleListener;
 import com.sap.sse.replication.ReplicationMasterDescriptor;
 import com.sap.sse.replication.ReplicationService;
 
 /**
- * Can observe a {@link Replicable} for the operations it performs that require replication. Only observes as long as
- * there are replicas registered. If the last replica is de-registered, the service stops observing the
- * {@link Replicable}. Operations received that require replication are sent to the {@link Exchange} to which replica
- * queues can bind, using a {@link Replicator}. The exchange name and connectivity information for the message queuing
- * system is provided to this service during construction.
+ * Manages a set of observers of {@link Replicable}, receiving notifications for the operations they perform that
+ * require replication. This service provides the connectivity and central management including central keeping of
+ * replication statistics for this server instance. Triggering the broadcast of an operation notified by a
+ * {@link Replicable} is in the responsibility of each individual observer.
  * <p>
  * 
- * This service object {@link Replicable#addOperationExecutionListener(OperationExecutionListener) registers} as
- * listener at the {@link Replicable} so it {@link #executed(OperationWithResult) receives} notifications about
- * operations executed by the {@link Replicable} that require replication if and only if there is at least one
- * replica registered.
+ * The observers are registered only when there are replicas registered. If the last replica is de-registered, the
+ * service stops observing the {@link Replicable}. Operations received that require replication are sent to the
+ * {@link Exchange} to which replica queues can bind, using a {@link Replicator}. By prefixing each message with the
+ * {@link Object#toString()} representation of the {@link Replicable}'s {@link Replicable#getId() ID} the receiver can
+ * determine to which {@link Replicable} to forward the operation. As such, this service multiplexes the replication
+ * channels for potentially many {@link Replicable}s living in this server instance.
+ * <p>
+ * 
+ * The exchange name and connectivity information for the message queuing system are provided to this service during
+ * construction.
+ * <p>
+ * 
+ * This service object {@link Replicable#addOperationExecutionListener(OperationExecutionListener) registers} individual
+ * listeners at the {@link Replicable}s so it {@link #executed(OperationWithResult) receives} notifications about
+ * operations executed by the {@link Replicable} that require replication if and only if there is at least one replica
+ * registered.
  * 
  * @author Frank Mittag, Axel Uhl (d043530)
  * 
  */
-public class ReplicationServiceImpl<S, O extends OperationWithResult<S, ?>> implements ReplicationService<S>,
-OperationExecutionListener<S>, HasReplicable<S, O> {
+public class ReplicationServiceImpl implements ReplicationService {
     private static final Logger logger = Logger.getLogger(ReplicationServiceImpl.class.getName());
     
-    private final ReplicationInstancesManager<S> replicationInstancesManager;
+    private final ReplicationInstancesManager replicationInstancesManager;
     
-    private final ServiceTracker<Replicable<S, O>, Replicable<S, O>> replicableTracker;
-    
-    private final Replicable<S, O> localService;
+    private final ReplicablesProvider replicablesProvider;
     
     /**
      * <code>null</code>, if this instance is not currently replicating from some master; the master's descriptor otherwise
@@ -102,7 +115,9 @@ OperationExecutionListener<S>, HasReplicable<S, O> {
      * For this instance running as a replica, the replicator receives messages from the master's queue and applies them
      * to the local replica.
      */
-    private Replicator<S, O> replicator;
+    private Replicator replicator;
+    
+    private final Set<ReplicationServiceExecutionListener<?>> executionListeners;
     
     private Thread replicatorThread;
     
@@ -120,6 +135,17 @@ OperationExecutionListener<S>, HasReplicable<S, O> {
      * are replaced or cleared when the timer scoops up the currently buffered operations to send them out.
      */
     private ByteArrayOutputStream outboundBuffer;
+    
+    /**
+     * The {@link #outboundBuffer} contains a message with serialized operations originating from a single
+     * {@link Replicable} whose {@link Replicable#getId() ID} is written as its string value to the beginning
+     * of the stream using {@link DataOutputStream#writeUTF(String)}. When an operation of a {@link Replicable}
+     * with a different ID is to be {@link #broadcastOperation(OperationWithResult, Replicable) broadcast}, the
+     * existing {@link #outboundBuffer} needs to be transmitted and a new one is started for the {@link Replicable}
+     * now wanting to replicate an operation. Access is synchronized, as for {@link #outboundBuffer} using the
+     * {@link #outboundBufferMonitor}.
+     */
+    private String outboundBufferReplicableIdAsString;
 
     /**
      * An object output stream that writes to {@link #outboundBuffer}. Operations are serialized into this stream until the timer
@@ -173,51 +199,52 @@ OperationExecutionListener<S>, HasReplicable<S, O> {
      */
     private long messageCount;
     
-    /**
-     * @param exchangeName name of the fan-out exchange to which replication operations will be sent
-     * @param exchangeHost name of the host under which the RabbitMQ server can be reached 
-     * @param exchangePort port of the RabbitMQ server, or 0 for default port
-     */
-    public ReplicationServiceImpl(String exchangeName, String exchangeHost, int exchangePort, final ReplicationInstancesManager<S> replicationInstancesManager) throws IOException {
-        this(exchangeName, exchangeHost, exchangePort, replicationInstancesManager, /* localService */ null, /* create ReplicableServiceTracker */ true);
+    private class LifeCycleListener implements ReplicableLifeCycleListener {
+        @Override
+        public void replicableAdded(Replicable<?, ?> replicable) {
+            addNewOperationExecutionListener(replicable);
+        }
+
+        @Override
+        public void replicableRemoved(Replicable<?, ?> replicable) {
+            // TODO
+        }
     }
     
-    private ReplicationServiceImpl(String exchangeName, String exchangeHost,
-            int exchangePort, final ReplicationInstancesManager<S> replicationInstancesManager,
-            Replicable<S, O> localService, boolean createReplicableServiceTracker) throws IOException {
+    /**
+     * @param exchangeName
+     *            name of the fan-out exchange to which replication operations will be sent
+     * @param exchangeHost
+     *            name of the host under which the RabbitMQ server can be reached
+     * @param exchangePort
+     *            port of the RabbitMQ server, or 0 for default port
+     * @param replicablesProvider
+     *            lets this service request the currently known {@link Replicable} objects to be observed for
+     *            replication; it also offers this service the possibility to register for life cycle events of those
+     *            {@link Replicable} objects so that this service can stop observing them for operations to be
+     *            replicated when they have been removed, or start observing new {@link Recpliable} objects that were
+     *            added.
+     */
+    public ReplicationServiceImpl(String exchangeName, String exchangeHost,
+            int exchangePort, final ReplicationInstancesManager replicationInstancesManager,
+            ReplicablesProvider replicablesProvider) throws IOException {
         timer = new Timer("ReplicationServiceImpl timer for delayed task sending");
+        executionListeners = new HashSet<>();
         this.replicationInstancesManager = replicationInstancesManager;
         replicaUUIDs = new HashMap<ReplicationMasterDescriptor, String>();
-        if (createReplicableServiceTracker) {
-            replicableTracker = getReplicableTracker();
-            replicableTracker.open();
-        } else {
-            replicableTracker = null;
-        }
-        this.localService = localService;
+        this.replicablesProvider = replicablesProvider;
         this.exchangeName = exchangeName;
         this.exchangeHost = exchangeHost;
         this.exchangePort = exchangePort;
+        replicablesProvider.addReplicableLifeCycleListener(new LifeCycleListener());
         replicator = null;
         serverUUID = UUID.randomUUID();
         logger.info("Setting " + serverUUID.toString() + " as unique replication identifier.");
         
     }
 
-    /**
-     * Like {@link #ReplicationServiceImpl(String, ReplicationInstancesManager)}, only that instead of using an OSGi
-     * service tracker to discover the {@link Replicable}, the service to replicate is "injected" here.
-     * 
-     * @param exchangeName
-     *            the name of the exchange to which replicas can bind
-     */
-    public ReplicationServiceImpl(String exchangeName, String exchangeHost,
-            final ReplicationInstancesManager<S> replicationInstancesManager, Replicable<S, O> localService) throws IOException {
-        this(exchangeName, exchangeHost, 0, replicationInstancesManager, localService, /* create ReplicableServiceTracker */ false);
-    }
-    
-    protected ServiceTracker<Replicable<S, O>, Replicable<S, O>> getReplicableTracker() {
-        return new ServiceTracker<Replicable<S, O>, Replicable<S, O>>(
+    protected ServiceTracker<Replicable<?, ?>, Replicable<?, ?>> getReplicableTracker() {
+        return new ServiceTracker<Replicable<?, ?>, Replicable<?, ?>>(
                 Activator.getDefaultContext(), Replicable.class.getName(), null);
     }
     
@@ -247,15 +274,8 @@ OperationExecutionListener<S>, HasReplicable<S, O> {
         return result;
     }
 
-    @Override
-    public Replicable<S, O> getReplicable() {
-        Replicable<S, O> result;
-        if (localService != null) {
-            result = localService;
-        } else {
-            result = replicableTracker.getService();
-        }
-        return result;
+    private Iterable<Replicable<?, ?>> getReplicables() {
+        return replicablesProvider.getReplicables();
     }
 
     @Override
@@ -273,7 +293,14 @@ OperationExecutionListener<S>, HasReplicable<S, O> {
     }
     
     private void addAsListenerToReplicables() {
-        getReplicable().addOperationExecutionListener(this);
+        for (Replicable<?, ?> replicable : getReplicables()) {
+            addNewOperationExecutionListener(replicable);
+        }
+    }
+
+    private <S> void addNewOperationExecutionListener(Replicable<S, ?> replicable) {
+        final ReplicationServiceExecutionListener<S> listener = new ReplicationServiceExecutionListener<S>(this, replicable);
+        executionListeners.add(listener);
     }
 
     @Override
@@ -292,29 +319,41 @@ OperationExecutionListener<S>, HasReplicable<S, O> {
     }
 
     private void removeAsListenerFromReplicables() {
-        getReplicable().removeOperationExecutionListener(this);
+        for (ReplicationServiceExecutionListener<?> listener : executionListeners) {
+            listener.unsubscribe();
+        }
     }
 
     /**
-     * Schedules a single operation for broadcast. The operation is added to {@link #outboundBuffer}, and if not already scheduled,
-     * a {@link #timer} is created and scheduled to send in {@link #TRANSMISSION_DELAY_MILLIS} milliseconds.
+     * Schedules a single operation for broadcast. The operation is added to {@link #outboundBuffer}, and if not already
+     * scheduled, a {@link #timer} is created and scheduled to send in {@link #TRANSMISSION_DELAY_MILLIS} milliseconds.
+     * 
+     * @param replicable
+     *            the replicable by which the operation was executed that now will be broadcast to all replicas; the {@link Replicable#getId() ID}
+     *            of this replica in its string form will be used to prefix the operation
      */
-    private void broadcastOperation(OperationWithResult<S, ?> operation) throws IOException {
+    <S, O extends OperationWithResult<S, ?>> void broadcastOperation(OperationWithResult<?, ?> operation, Replicable<S, O> replicable) throws IOException {
         // need to write the operations one by one, making sure the ObjectOutputStream always writes
         // identical objects again if required because they may have changed state in between
         ByteArrayOutputStream bos = new ByteArrayOutputStream();
         ObjectOutputStream oos = new ObjectOutputStream(bos);
         oos.writeObject(operation);
         oos.close();
-        final byte[] bytes = bos.toByteArray();
+        final byte[] serializedOperation = bos.toByteArray();
         synchronized (outboundBufferMonitor) {
+            final String replicaIdAsString = replicable.getId().toString();
+            if (outboundBuffer != null && !Util.equalsWithNull(outboundBufferReplicableIdAsString, replicaIdAsString)) {
+                flushBufferToRabbitMQ(); // operation from a replicable different from that for which operations are buffered so far --> flush
+            } // still holding the monitor, so no other broadcast request from a different replicable can step in between
             if (outboundBuffer == null) {
                 outboundBuffer = new ByteArrayOutputStream();
+                outboundBufferReplicableIdAsString = replicaIdAsString;
                 GZIPOutputStream zipper = new GZIPOutputStream(outboundBuffer);
+                new DataOutputStream(zipper).writeUTF(replicaIdAsString);
                 outboundObjectBuffer = new ObjectOutputStream(zipper);
                 outboundBufferClasses = new ArrayList<>();
             }
-            outboundObjectBuffer.writeObject(bytes);
+            outboundObjectBuffer.writeObject(serializedOperation);
             outboundBufferClasses.add(operation.getClass());
             if (outboundBuffer.size() > TRIGGER_MESSAGE_SIZE_IN_BYTES) {
                 logger.info("Triggering replication because buffer holds " + outboundBuffer.size()
@@ -367,6 +406,7 @@ OperationExecutionListener<S>, HasReplicable<S, O> {
                 classesOfOperationsToSend = outboundBufferClasses;
                 doSend = true;
                 outboundBuffer = null;
+                outboundBufferReplicableIdAsString = null;
                 outboundObjectBuffer = null;
                 outboundBufferClasses = null;
             } else {
@@ -407,6 +447,11 @@ OperationExecutionListener<S>, HasReplicable<S, O> {
         return replicatingFromMaster;
     }
 
+    /**
+     * The peer for this method is
+     * {@link ReplicationServlet#doGet(javax.servlet.http.HttpServletRequest, javax.servlet.http.HttpServletResponse)}
+     * which implements the initial load sending process.
+     */
     @Override
     public void startToReplicateFrom(ReplicationMasterDescriptor master) throws IOException, ClassNotFoundException, InterruptedException {
         logger.info("Starting to replicate from "+master);
@@ -430,30 +475,35 @@ OperationExecutionListener<S>, HasReplicable<S, O> {
             throw ex;
         }
         logger.info("Connection to exchange successful.");
-        URL initialLoadURL = master.getInitialLoadURL();
+        final Iterable<Replicable<?, ?>> replicables = replicablesProvider.getReplicables();
+        URL initialLoadURL = master.getInitialLoadURL(replicables);
         logger.info("Initial load URL is "+initialLoadURL);
-        replicator = new Replicator<S, O>(master, this, /* startSuspended */ true, consumer);
         // start receiving messages already now, but start in suspended mode
-        replicatorThread = new Thread(replicator, "Replicator receiving from "+master.getMessagingHostname()+"/"+master.getExchangeName());
-        final Replicable<?, ?> replicable = getReplicable();
-        // clear Replicable state here, before starting to receive and de-serialized operations which builds up new state, e.g., in competitor store
-        replicable.clearReplicaState(); // see also bug 2437
+        replicator = new Replicator(master, replicablesProvider, /* startSuspended */true, consumer);
+        // clear Replicable state here, before starting to receive and de-serialized operations which builds up
+        // new state, e.g., in competitor store
+        for (Replicable<?, ?> r : getReplicables()) {
+            r.clearReplicaState();
+        }
+        replicatorThread = new Thread(replicator, "Replicator receiving from " + master.getMessagingHostname() + "/"
+                + master.getExchangeName());
         replicatorThread.start();
         logger.info("Started replicator thread");
         InputStream is = initialLoadURL.openStream();
         final String queueName = new BufferedReader(new InputStreamReader(is)).readLine();
+        RabbitInputStreamProvider rabbitInputStreamProvider = new RabbitInputStreamProvider(master.createChannel(),
+                queueName);
         try {
-            RabbitInputStreamProvider rabbitInputStreamProvider = new RabbitInputStreamProvider(master.createChannel(), queueName);
-            ObjectInputStream ois = replicable.createObjectInputStreamResolvingAgainstCache(
-                            new GZIPInputStream(rabbitInputStreamProvider.getInputStream()));
-            logger.info("Starting to receive initial load");
-            replicable.initiallyFillFrom(ois);
-            logger.info("Done receiving initial load");
-            replicator.setSuspended(false); // apply queued operations
+            for (Replicable<?, ?> replicable : getReplicables()) {
+                logger.info("Starting to receive initial load");
+                replicable.initiallyFillFrom(new GZIPInputStream(rabbitInputStreamProvider.getInputStream()));
+                logger.info("Done receiving initial load");
+                replicator.setSuspended(false); // apply queued operations
+            }
         } finally {
             // delete initial load queue
             DeleteOk deleteOk = consumer.getChannel().queueDelete(queueName);
-            logger.info("Deleted queue "+queueName+" used for initial load: "+deleteOk.toString());
+            logger.info("Deleted queue " + queueName + " used for initial load: " + deleteOk.toString());
         }
     }
 
@@ -498,25 +548,12 @@ OperationExecutionListener<S>, HasReplicable<S, O> {
         }
     }
 
-    /**
-     * {@link #broadcastOperation(OperationWithResult) Broadcasts} the <code>operation</code> to all registered
-     * replicas by publishing it to the fan-out exchange.
-     */
-    @Override
-    public <T> void executed(OperationWithResult<S, T> operation) {
-        try {
-            broadcastOperation(operation);
-        } catch (Exception e) {
-            throw new RuntimeException(e);
-        }
-    }
-
     protected void registerReplicaUuidForMaster(String uuid, ReplicationMasterDescriptor master) {
         replicaUUIDs.put(master, uuid);
     }
 
     @Override
-    public Map<Class<? extends OperationWithResult<S, ?>>, Integer> getStatistics(ReplicaDescriptor replicaDescriptor) {
+    public Map<Class<? extends OperationWithResult<?, ?>>, Integer> getStatistics(ReplicaDescriptor replicaDescriptor) {
         return replicationInstancesManager.getStatistics(replicaDescriptor);
     }
     

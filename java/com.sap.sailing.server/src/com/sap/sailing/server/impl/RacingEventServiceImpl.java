@@ -325,8 +325,7 @@ public class RacingEventServiceImpl implements RacingEventServiceWithTestSupport
     /**
      * This author should be used for server generated race log events
      */
-    private final RaceLogEventAuthor raceLogEventAuthorForServer = new RaceLogEventAuthorImpl(
-            RacingEventService.class.getName(), 0);
+    private final RaceLogEventAuthor raceLogEventAuthorForServer = new RaceLogEventAuthorImpl(RacingEventService.class.getName(), 0);
 
     /**
      * Allow only one master data import at a time to avoid situation where multiple Imports override each other in
@@ -2129,7 +2128,7 @@ public class RacingEventServiceImpl implements RacingEventServiceWithTestSupport
     }
 
     @Override
-    public void serializeForInitialReplication(ObjectOutputStream oos) throws IOException {
+    public void serializeForInitialReplicationInternal(ObjectOutputStream oos) throws IOException {
         StringBuffer logoutput = new StringBuffer();
 
         logger.info("Serializing events...");
@@ -2191,8 +2190,7 @@ public class RacingEventServiceImpl implements RacingEventServiceWithTestSupport
     @SuppressWarnings("unchecked") // all the casts of ois.readObject()'s return value to Map<..., ...>
     // the type-parameters in the casts of the de-serialized collection objects can't be checked
     @Override
-    public void initiallyFillFrom(ObjectInputStream ois) throws IOException, ClassNotFoundException,
-            InterruptedException {
+    public void initiallyFillFromInternal(ObjectInputStream ois) throws IOException, ClassNotFoundException, InterruptedException {
         logger.info("Performing initial replication load on " + this);
         ClassLoader oldContextClassloader = Thread.currentThread().getContextClassLoader();
         try {

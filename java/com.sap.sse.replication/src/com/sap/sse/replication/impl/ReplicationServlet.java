@@ -52,19 +52,20 @@ public class ReplicationServlet extends AbstractHttpServlet {
      */
     private static final int INITIAL_LOAD_PACKAGE_SIZE = 1024*1024;
 
-    private ServiceTracker<ReplicationService<?>, ReplicationService<?>> replicationServiceTracker;
+    public static final String REPLICA_IDS_AS_STRINGS_COMMA_SEPARATED = "replicaIdsAsStringsCommaSeparated";
+
+    private final ServiceTracker<ReplicationService, ReplicationService> replicationServiceTracker;
     
-    private ServiceTracker<Replicable<?, ?>, Replicable<?, ?>> replicableServiceTracker;
+    private final OSGiReplicableTracker replicablesProvider;
     
     public ReplicationServlet() throws Exception {
         BundleContext context = Activator.getDefaultContext();
-        replicationServiceTracker = new ServiceTracker<ReplicationService<?>, ReplicationService<?>>(context, ReplicationService.class.getName(), null);
+        replicablesProvider = new OSGiReplicableTracker(context);
+        replicationServiceTracker = new ServiceTracker<ReplicationService, ReplicationService>(context, ReplicationService.class.getName(), null);
         replicationServiceTracker.open();
-        replicableServiceTracker = new ServiceTracker<Replicable<?, ?>, Replicable<?, ?>>(context, Replicable.class.getName(), null);
-        replicableServiceTracker.open();
     }
 
-    protected ReplicationService<?> getReplicationService() {
+    protected ReplicationService getReplicationService() {
         return replicationServiceTracker.getService();
     }
 
@@ -87,6 +88,7 @@ public class ReplicationServlet extends AbstractHttpServlet {
             deregisterClientWithReplicationService(req, resp);
             break;
         case INITIAL_LOAD:
+            String[] replicableIdsAsStrings = req.getParameter(REPLICA_IDS_AS_STRINGS_COMMA_SEPARATED).split(",");
             Channel channel = getReplicationService().createMasterChannel();
             RabbitOutputStream ros = new RabbitOutputStream(INITIAL_LOAD_PACKAGE_SIZE, channel,
                     /* queueName */ "initialLoad-for-"+req.getRemoteHost()+"@"+new Date()+"-"+UUID.randomUUID(),
@@ -98,15 +100,18 @@ public class ReplicationServlet extends AbstractHttpServlet {
                     ros, /* log every megabyte */1024l * 1024l, Level.INFO,
                     "HTTP output for initial load for " + req.getRemoteHost());
             final GZIPOutputStream gzipOutputStream = new GZIPOutputStream(countingOutputStream);
-            ObjectOutputStream oos = new ObjectOutputStream(gzipOutputStream);
-            try {
-                getReplicable().serializeForInitialReplication(oos);
-                gzipOutputStream.finish();
-            } catch (Exception e) {
-                logger.info("Error trying to serialize initial load for replication: "+e.getMessage());
-                logger.log(Level.SEVERE, "doGet", e);
-                resp.setStatus(HttpServletResponse.SC_INTERNAL_SERVER_ERROR);
-                e.printStackTrace(resp.getWriter());
+            for (String replicableIdAsString : replicableIdsAsStrings) {
+                Replicable<?, ?> replicable = replicablesProvider.getReplicable(replicableIdAsString);
+                ObjectOutputStream oos = new ObjectOutputStream(gzipOutputStream);
+                try {
+                    replicable.serializeForInitialReplication(oos);
+                    gzipOutputStream.finish();
+                } catch (Exception e) {
+                    logger.info("Error trying to serialize initial load for replication: " + e.getMessage());
+                    logger.log(Level.SEVERE, "doGet", e);
+                    resp.setStatus(HttpServletResponse.SC_INTERNAL_SERVER_ERROR);
+                    e.printStackTrace(resp.getWriter());
+                }
             }
             countingOutputStream.close();
             break;
@@ -114,10 +119,6 @@ public class ReplicationServlet extends AbstractHttpServlet {
             resp.sendError(HttpServletResponse.SC_BAD_REQUEST, "Action " + action + " not understood. Must be one of "
                     + Arrays.toString(Action.values()));
         }
-    }
-
-    private Replicable<?, ?> getReplicable() {
-        return replicableServiceTracker.getService();
     }
 
     private void deregisterClientWithReplicationService(HttpServletRequest req, HttpServletResponse resp) throws IOException {

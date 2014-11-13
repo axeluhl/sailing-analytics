@@ -1,13 +1,16 @@
 package com.sap.sse.replication.impl;
 
 import java.io.ByteArrayInputStream;
+import java.io.DataInputStream;
 import java.io.EOFException;
 import java.io.IOException;
 import java.io.ObjectInputStream;
 import java.lang.reflect.Field;
-import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.Iterator;
 import java.util.List;
+import java.util.Map;
+import java.util.Map.Entry;
 import java.util.concurrent.BlockingQueue;
 import java.util.concurrent.Executor;
 import java.util.concurrent.LinkedBlockingQueue;
@@ -15,22 +18,35 @@ import java.util.concurrent.ThreadPoolExecutor;
 import java.util.concurrent.TimeUnit;
 import java.util.logging.Level;
 import java.util.logging.Logger;
+import java.util.stream.Stream;
+import java.util.stream.StreamSupport;
 import java.util.zip.GZIPInputStream;
 
 import com.rabbitmq.client.ConsumerCancelledException;
 import com.rabbitmq.client.QueueingConsumer;
 import com.rabbitmq.client.QueueingConsumer.Delivery;
 import com.rabbitmq.client.ShutdownSignalException;
+import com.sap.sse.common.Named;
+import com.sap.sse.common.Util;
+import com.sap.sse.common.Util.Pair;
 import com.sap.sse.replication.OperationWithResult;
 import com.sap.sse.replication.Replicable;
+import com.sap.sse.replication.ReplicablesProvider;
 import com.sap.sse.replication.ReplicationMasterDescriptor;
 
 /**
  * Receives {@link OperationWithResult} objects from a message queue and {@link Replicable#apply(OperationWithResult)
- * applies} them to the {@link Replicable} passed to this replicator at construction. When started in suspended mode,
- * messages received will be turned into {@link OperationWithResult} objects and then queued until
- * {@link #setSuspended(boolean) setSuspended(false)} is invoked which applies all queued operations before applying the
- * ones received later.
+ * applies} them to the {@link Replicable} objects that can be found through the {@link ReplicablesProvider} passed to
+ * this replicator at construction, based on the {@link Replicable#getId() replicable's ID} which is used in the stream
+ * to prefix the operations.
+ * <p>
+ * 
+ * The corresponding writer for this protocol is implemented by
+ * {@link ReplicationServiceImpl#broadcastOperation(OperationWithResult, Replicable)}.<p>
+ * 
+ * When started in suspended mode, messages received will be turned into {@link OperationWithResult} objects and then
+ * queued until {@link #setSuspended(boolean) setSuspended(false)} is invoked which applies all queued operations before
+ * applying the ones received later.
  * <p>
  * 
  * The receiver takes care of synchronizing receiving, suspending/resuming and queuing. Waiters are notified whenever
@@ -39,15 +55,20 @@ import com.sap.sse.replication.ReplicationMasterDescriptor;
  * @author Axel Uhl (d043530)
  * 
  */
-public class Replicator<S, O extends OperationWithResult<S, ?>> implements Runnable {
+public class Replicator implements Runnable {
     private final static Logger logger = Logger.getLogger(Replicator.class.getName());
     
     private static final long CHECK_INTERVAL_MILLIS = 2000; // how long (milliseconds) to pause before checking connection again
     private static final int CHECK_COUNT = 150; // how long to check, value is CHECK_INTERVAL second steps
     
     private final ReplicationMasterDescriptor master;
-    private final HasReplicable<S, O> replicableProvider;
-    private final List<OperationWithResult<S, ?>> queue;
+    private final ReplicablesProvider replicableProvider;
+    
+    /**
+     * Keys are the {@link Replicable}s' IDs as string; values are the operation queues for the replicable identified by the
+     * key.
+     */
+    private final Map<String, List<Pair<String, OperationWithResult<?, ?>>>> queueByReplicableIdAsString;
     
     private QueueingConsumer consumer;
     
@@ -90,8 +111,8 @@ public class Replicator<S, O extends OperationWithResult<S, ?>> implements Runna
      * @param consumer
      *            the RabbitMQ consumer from which to load messages
      */
-    public Replicator(ReplicationMasterDescriptor master, HasReplicable<S, O> replicableProvider, boolean startSuspended, QueueingConsumer consumer) {
-        this.queue = new ArrayList<OperationWithResult<S, ?>>();
+    public Replicator(ReplicationMasterDescriptor master, ReplicablesProvider replicableProvider, boolean startSuspended, QueueingConsumer consumer) {
+        this.queueByReplicableIdAsString = new HashMap<>();
         this.master = master;
         this.replicableProvider = replicableProvider;
         this.suspended = startSuspended;
@@ -136,31 +157,37 @@ public class Replicator<S, O extends OperationWithResult<S, ?>> implements Runna
                 }
                 byte[] bytesFromMessage = delivery.getBody();
                 checksPerformed = 0;
-                // Set this object's class's class loader as context for de-serialization so that all exported classes
+                // Set the replicable's class's class loader as context for deserialization so that all exported classes
                 // of all required bundles/packages can be deserialized at least
-                Replicable<S, O> replicable = replicableProvider.getReplicable();
-                Thread.currentThread().setContextClassLoader(replicable.getClass().getClassLoader());
-                ObjectInputStream ois = replicable
-                        .createObjectInputStreamResolvingAgainstCache(
-                                new GZIPInputStream(new ByteArrayInputStream(bytesFromMessage)));
-                int operationsInMessage = 0;
-                try {
-                    while (true) {
-                        byte[] serializedOperation = (byte[]) ois.readObject();
-                        ObjectInputStream operationOIS = replicable
-                                .createObjectInputStreamResolvingAgainstCache(new ByteArrayInputStream(serializedOperation));
-                        @SuppressWarnings("unchecked")
-                        OperationWithResult<S, ?> operation = (OperationWithResult<S, ?>) operationOIS.readObject();
-                        operationCount++;
-                        operationsInMessage++;
-                        if (operationCount % 10000l == 0) {
-                            logger.info("Received " + operationCount + " operations so far");
+                final GZIPInputStream uncompressedInputStream = new GZIPInputStream(new ByteArrayInputStream(bytesFromMessage));
+                String replicableIdAsString = new DataInputStream(uncompressedInputStream).readUTF();
+                Replicable<?, ?> replicable = replicableProvider.getReplicable(replicableIdAsString);
+                if (replicable != null) {
+                    Thread.currentThread().setContextClassLoader(replicable.getClass().getClassLoader());
+                    ObjectInputStream ois = new ObjectInputStream(uncompressedInputStream); // no special stream required; only reading a generic byte[]
+                    int operationsInMessage = 0;
+                    try {
+                        while (true) {
+                            byte[] serializedOperation = (byte[]) ois.readObject();
+                            readOperationAndApplyOrQueueIt(replicable, serializedOperation);
+                            operationCount++;
+                            operationsInMessage++;
+                            if (operationCount % 10000l == 0) {
+                                logger.info("Received " + operationCount + " operations so far");
+                            }
                         }
-                        applyOrQueue(operation);
+                    } catch (EOFException eof) {
+                        logger.fine("Reached EOF on replication message after having read " + operationsInMessage
+                                + " operations");
+                        // reached EOF; expected
                     }
-                } catch (EOFException eof) {
-                    logger.fine("Reached EOF on replication message after having read "+operationsInMessage+" operations");
-                    // reached EOF; expected
+                } else {
+                    // otherwise, we don't know the replicable and simply drop the message with all the operations for the unknown recipient
+                    Stream<Named> sn = StreamSupport.stream(replicableProvider.getReplicables().spliterator(), /* parallel */ false)
+                        .map(r->(() -> r.getId().toString()));
+                    logger.warning("received replication message for replicable with ID "+replicableIdAsString+" which is unknnown by this replicator "+
+                            "which only knows "+
+                            Util.join(", ", sn::iterator));
                 }
             } catch (ConsumerCancelledException cce) {
                 logger.info("Consumer has been shut down properly.");
@@ -217,27 +244,38 @@ public class Replicator<S, O extends OperationWithResult<S, ?>> implements Runna
         logger.info("Stopped replicator thread. This server will no longer receive events from a master.");
     }
     
-    public synchronized boolean isQueueEmpty() {
-        return queue.isEmpty();
+    private <S, O extends OperationWithResult<S, ?>> void readOperationAndApplyOrQueueIt(Replicable<S, O> replicable,
+            byte[] serializedOperation) throws ClassNotFoundException, IOException {
+        OperationWithResult<S, ?> operation = replicable.readOperation(new ByteArrayInputStream(serializedOperation));
+        applyOrQueue(operation, replicable);
     }
 
     /**
-     * If the replicator is currently {@link #suspended}, the <code>operation</code> is queued, otherwise immediately applied to
-     * the receiving replica.
+     * If the replicator is currently {@link #suspended}, the <code>operation</code> is queued, otherwise immediately
+     * applied to the receiving replica.
+     * 
+     * @param replicable
+     *            the replicable to which to apply or for which to queue the operation
      */
-    private synchronized void applyOrQueue(OperationWithResult<S, ?> operation) {
+    private synchronized <S, O extends OperationWithResult<S, ?>> void applyOrQueue(OperationWithResult<S, ?> operation, Replicable<S, O> replicable) {
         if (suspended) {
-            queue(operation);
+            queue(operation, replicable);
         } else {
-            apply(operation);
+            apply(operation, replicable);
         }
     }
 
-    private synchronized void apply(final OperationWithResult<S, ?> operation) {
+    private synchronized <S, O extends OperationWithResult<S, ?>> void apply(final OperationWithResult<S, ?> operation, String replicableIdAsString) {
+        @SuppressWarnings("unchecked")
+        Replicable<S, O> replicable = (Replicable<S, O>) replicableProvider.getReplicable(replicableIdAsString);
+        apply(operation, replicable);
+    }
+    
+    private synchronized <S, O extends OperationWithResult<S, ?>> void apply(final OperationWithResult<S, ?> operation, Replicable<S, O> replicable) {
         Runnable runnable = new Runnable() {
             @Override
             public void run() {
-                replicableProvider.getReplicable().apply(operation);
+                replicable.apply(operation);
             }
         };
         if (operation.requiresSynchronousExecution()) {
@@ -247,11 +285,12 @@ public class Replicator<S, O extends OperationWithResult<S, ?>> implements Runna
         }
     }
     
-    private synchronized void queue(OperationWithResult<S, ?> operation) {
+    private synchronized void queue(OperationWithResult<?, ?> operation, Replicable<?, ?> replicable) {
+        List<Pair<String, OperationWithResult<?, ?>>> queue = queueByReplicableIdAsString.get(replicable.getId().toString());
         if (queue.isEmpty()) {
             notifyAll();
         }
-        queue.add(operation);
+        queue.add(new Pair<String, OperationWithResult<?, ?>>(replicable.getId().toString(), operation));
         assert !queue.isEmpty();
     }
     
@@ -259,22 +298,26 @@ public class Replicator<S, O extends OperationWithResult<S, ?>> implements Runna
         if (this.suspended != suspended) {
             this.suspended = suspended;
             if (!this.suspended) {
-                applyQueue();
+                applyQueues();
             }
         }
     }
     
-    private synchronized void applyQueue() {
-        for (Iterator<OperationWithResult<S, ?>> i=queue.iterator(); i.hasNext(); ) {
-            OperationWithResult<S, ?> operation = i.next();
-            i.remove();
-            try {
-                apply(operation);
-            } catch (Exception e) {
-                logger.log(Level.SEVERE, "Error applying queued, replicated operation "+operation+". Continuing with next queued operation.", e);
+    private synchronized void applyQueues() {
+        for (Entry<String, List<Pair<String, OperationWithResult<?, ?>>>> r : queueByReplicableIdAsString.entrySet()) {
+            final List<Pair<String, OperationWithResult<?, ?>>> queue = r.getValue();
+            for (Iterator<Pair<String, OperationWithResult<?, ?>>> i = queue.iterator(); i.hasNext();) {
+                Pair<String, OperationWithResult<?, ?>> replicableIdAsStringAndOperation = i.next();
+                i.remove();
+                try {
+                    apply(replicableIdAsStringAndOperation.getB(), replicableIdAsStringAndOperation.getA());
+                } catch (Exception e) {
+                    logger.log(Level.SEVERE, "Error applying queued, replicated operation "
+                            + replicableIdAsStringAndOperation + ". Continuing with next queued operation.", e);
+                }
             }
+            assert queue.isEmpty();
         }
-        assert queue.isEmpty();
         notifyAll();
     }
 
@@ -285,7 +328,7 @@ public class Replicator<S, O extends OperationWithResult<S, ?>> implements Runna
     public synchronized void stop() {
         if (isSuspended()) {
             /* make sure to apply everything in queue before stopping this thread */
-            applyQueue();
+            applyQueues();
         }
         logger.info("Signaled Replicator thread to stop asap.");
         stopped = true;
@@ -298,7 +341,8 @@ public class Replicator<S, O extends OperationWithResult<S, ?>> implements Runna
 
     @Override
     public String toString() {
-        return "Replicator for master "+master+", queue size: "+queue.size();
+        long queueSize = queueByReplicableIdAsString.values().stream().mapToLong(l->l.size()).sum();
+        return "Replicator for master "+master+", queue size: "+queueSize;
     }
 
 }

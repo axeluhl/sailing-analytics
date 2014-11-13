@@ -9,7 +9,6 @@ import java.util.UUID;
 import com.sap.sailing.domain.base.Competitor;
 import com.sap.sailing.domain.base.CompetitorStore;
 import com.sap.sailing.domain.base.DomainFactory;
-import com.sap.sailing.domain.base.ObjectInputStreamResolvingAgainstDomainFactory;
 import com.sap.sailing.domain.base.Regatta;
 import com.sap.sailing.domain.base.impl.MasterDataImportInformation;
 import com.sap.sailing.domain.base.impl.RegattaImpl;
@@ -20,6 +19,7 @@ import com.sap.sailing.domain.persistence.MongoRaceLogStoreFactory;
 import com.sap.sailing.domain.racelog.RaceLogStore;
 import com.sap.sailing.server.RacingEventService;
 import com.sap.sailing.server.operationaltransformation.ImportMasterDataOperation;
+import com.sap.sse.replication.impl.ObjectInputStreamResolvingAgainstCache;
 
 public class MasterDataImporter {
     private final DomainFactory baseDomainFactory;
@@ -33,7 +33,7 @@ public class MasterDataImporter {
 
     public void importFromStream(InputStream inputStream, UUID importOperationId, boolean override) throws IOException,
             ClassNotFoundException {
-        ObjectInputStreamResolvingAgainstDomainFactory objectInputStream = racingEventService.getBaseDomainFactory()
+        ObjectInputStreamResolvingAgainstCache<DomainFactory> objectInputStream = racingEventService.getBaseDomainFactory()
                 .createObjectInputStreamResolvingAgainstThisFactory(inputStream);
         racingEventService
                 .createOrUpdateDataImportProgressWithReplication(importOperationId, 0.03, "Reading Data", 0.5);
