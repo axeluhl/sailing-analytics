@@ -10,9 +10,12 @@ import org.json.JSONObject;
 import android.app.Service;
 import android.content.ContentUris;
 import android.content.ContentValues;
+import android.content.Context;
 import android.content.Intent;
+import android.content.IntentFilter;
 import android.database.Cursor;
 import android.net.Uri;
+import android.os.BatteryManager;
 import android.os.IBinder;
 
 import com.android.volley.Response.ErrorListener;
@@ -33,6 +36,7 @@ public class TransmittingService extends Service {
 	private int UPDATE_INTERVAL_DEFAULT = 3000;
 	private int UPDATE_INTERVAL_POWERSAVE_MODE = 30000;
 	private long AUTO_END_SERVICE_AFTER_NANO_PASSED = 10000000000L; // 10 sec
+	private final float BATTERY_POWER_SAVE_TRESHOLD = 0.2f;
 	private int currentUpdateInterval = UPDATE_INTERVAL_DEFAULT;
 	
 	private boolean sendingAttempted = false;
@@ -57,10 +61,6 @@ public class TransmittingService extends Service {
 			if (intent.getAction() != null) {
 				if (intent.getAction().equals(getString(R.string.transmitting_service_start))) {
 					startTimer();
-				} else if (intent.getAction().equals(getString(R.string.transmitting_service_switch_to_power_saving_mode))) {
-					this.currentUpdateInterval = UPDATE_INTERVAL_POWERSAVE_MODE;
-				} else if (intent.getAction().equals(getString(R.string.transmitting_service_switch_to_default_power_mode))) {
-					this.currentUpdateInterval = UPDATE_INTERVAL_DEFAULT;
 				} else {
 					stopTimer();
 				}
@@ -137,6 +137,25 @@ public class TransmittingService extends Service {
 		return false;
 	}
 	
+	private void timerFired()
+	{
+		float batteryPct = getBatteryPercentage();
+		boolean batteryIsCharging = prefs.getBatteryIsCharging(); 
+				
+		if (batteryPct < BATTERY_POWER_SAVE_TRESHOLD && !batteryIsCharging)
+		{
+			ExLog.iDebug(this, "POWER-LEVELS", "in power saving mode");
+			currentUpdateInterval = UPDATE_INTERVAL_POWERSAVE_MODE;
+		}
+		else
+		{
+			ExLog.iDebug(this, "POWER-LEVELS", "in default power mode");
+			currentUpdateInterval = UPDATE_INTERVAL_DEFAULT;
+		}
+		
+		sendFixesToAPI();
+	}
+	
 	
 	private void sendFixesToAPI() {
 		// first, lets fetch all unsent fixes
@@ -195,13 +214,26 @@ public class TransmittingService extends Service {
 			
 			if (serviceCanShutItselfDown())
 			{
-				
-				ExLog.iDebug(this, TAG, "Nothing to send or timeout occurred, Transmitting Service is terminating.");
-				
-				stopTimer();
+				ExLog.iDebug(this, TAG, "Nothing to send or timeout occurred, Transmitting Service is stopping timer and terminating itself.");
 				stopSelf();
+				stopTimer();
 			}
 		}
+	}
+	
+	private float getBatteryPercentage()
+	{
+		IntentFilter ifilter = new IntentFilter(Intent.ACTION_BATTERY_CHANGED);
+		Intent batteryStatus = this.registerReceiver(null, ifilter);
+		
+		int level = batteryStatus.getIntExtra(BatteryManager.EXTRA_LEVEL, -1);
+		int scale = batteryStatus.getIntExtra(BatteryManager.EXTRA_SCALE, -1);
+
+		float batteryPct = level / (float)scale;
+		
+		ExLog.iDebug(this, TAG, "Battery: " + (batteryPct * 100) + "%");
+		
+		return batteryPct;
 	}
 	
 	private void deleteSynced(String[] fixIdStrings)
@@ -319,7 +351,7 @@ public class TransmittingService extends Service {
 					e.printStackTrace();
 				}
 				
-				sendFixesToAPI();
+				timerFired();
 			}
 		}
 

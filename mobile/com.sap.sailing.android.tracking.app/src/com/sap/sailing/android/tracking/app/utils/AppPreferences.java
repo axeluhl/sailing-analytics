@@ -64,6 +64,16 @@ public class AppPreferences {
         return PrefUtils.getString(context, R.string.preference_competitor_key, R.string.preference_competitor_default);
     }
     
+    public void setBatteryIsCharging(boolean batteryIsCharging)
+    {
+    	preferences.edit().putBoolean(context.getString(R.string.preference_battery_is_charging), batteryIsCharging);
+    }
+    
+    public boolean getBatteryIsCharging()
+    {
+    	return preferences.getBoolean(context.getString(R.string.preference_battery_is_charging), false);
+    }
+    
     public void setCompetitorId(String id) {
         preferences.edit().putString(context.getString(R.string.preference_competitor_key), id).commit();
     }
