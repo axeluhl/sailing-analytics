@@ -81,7 +81,6 @@ public class MasterDataResource extends AbstractSailingServerResource {
         ResponseBuilder resp;
         if (compress) {
             StreamingOutput streamingOutput = new StreamingOutput() {
-
                 @Override
                 public void write(OutputStream output) throws IOException, WebApplicationException {
                     ObjectOutputStream objectOutputStream = null;
