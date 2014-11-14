@@ -342,9 +342,7 @@ public class ReplicationServiceImpl implements ReplicationService {
         // need to write the operations one by one, making sure the ObjectOutputStream always writes
         // identical objects again if required because they may have changed state in between
         ByteArrayOutputStream bos = new ByteArrayOutputStream();
-        ObjectOutputStream oos = new ObjectOutputStream(bos);
-        oos.writeObject(operation);
-        oos.close();
+        replicable.writeOperation(operation, bos, /* close stream */ true);
         final byte[] serializedOperation = bos.toByteArray();
         synchronized (outboundBufferMonitor) {
             final String replicaIdAsString = replicable.getId().toString();
