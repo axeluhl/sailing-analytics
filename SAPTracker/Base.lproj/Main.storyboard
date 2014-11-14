@@ -136,10 +136,16 @@
                                 <rect key="frame" x="0.0" y="0.0" width="600" height="600"/>
                                 <color key="backgroundColor" white="0.66666666666666663" alpha="1" colorSpace="calibratedWhite"/>
                             </view>
+                            <activityIndicatorView hidden="YES" opaque="NO" contentMode="scaleToFill" horizontalHuggingPriority="750" verticalHuggingPriority="750" hidesWhenStopped="YES" style="whiteLarge" translatesAutoresizingMaskIntoConstraints="NO" id="X78-1b-OJ2">
+                                <rect key="frame" x="282" y="282" width="37" height="37"/>
+                                <color key="color" white="0.66666666666666663" alpha="1" colorSpace="calibratedWhite"/>
+                            </activityIndicatorView>
                         </subviews>
                         <color key="backgroundColor" white="1" alpha="1" colorSpace="calibratedWhite"/>
                         <constraints>
                             <constraint firstItem="ttp-CB-QaR" firstAttribute="top" secondItem="pUL-en-Wee" secondAttribute="top" id="0Oz-0F-erF"/>
+                            <constraint firstItem="X78-1b-OJ2" firstAttribute="centerX" secondItem="ttp-CB-QaR" secondAttribute="centerX" id="20x-Dg-Tu3"/>
+                            <constraint firstItem="X78-1b-OJ2" firstAttribute="centerY" secondItem="ttp-CB-QaR" secondAttribute="centerY" id="5l0-FR-Fd4"/>
                             <constraint firstAttribute="trailing" secondItem="ttp-CB-QaR" secondAttribute="trailing" id="GFG-je-7LA"/>
                             <constraint firstItem="ttp-CB-QaR" firstAttribute="bottom" secondItem="1Le-Y7-h2R" secondAttribute="top" id="Iss-zA-ra0"/>
                             <constraint firstItem="ttp-CB-QaR" firstAttribute="leading" secondItem="pUL-en-Wee" secondAttribute="leading" id="tda-yG-hJZ"/>
@@ -147,6 +153,7 @@
                     </view>
                     <navigationItem key="navigationItem" title="Scan QR Code" id="LQ4-39-f6l"/>
                     <connections>
+                        <outlet property="activityView" destination="X78-1b-OJ2" id="7fR-yg-bVB"/>
                         <outlet property="previewView" destination="ttp-CB-QaR" id="D7j-aT-pIK"/>
                     </connections>
                 </viewController>
@@ -428,12 +435,21 @@
                             <webView contentMode="scaleToFill" translatesAutoresizingMaskIntoConstraints="NO" id="I2y-QN-QpG">
                                 <rect key="frame" x="0.0" y="0.0" width="600" height="600"/>
                                 <color key="backgroundColor" white="1" alpha="1" colorSpace="calibratedWhite"/>
+                                <connections>
+                                    <outlet property="delegate" destination="WMr-pC-C12" id="Zqy-hM-GBO"/>
+                                </connections>
                             </webView>
+                            <activityIndicatorView opaque="NO" contentMode="scaleToFill" horizontalHuggingPriority="750" verticalHuggingPriority="750" hidesWhenStopped="YES" animating="YES" style="whiteLarge" translatesAutoresizingMaskIntoConstraints="NO" id="4M0-kf-Pv9">
+                                <rect key="frame" x="282" y="282" width="37" height="37"/>
+                                <color key="color" white="0.66666666666666663" alpha="1" colorSpace="calibratedWhite"/>
+                            </activityIndicatorView>
                         </subviews>
                         <color key="backgroundColor" white="1" alpha="1" colorSpace="calibratedWhite"/>
                         <constraints>
                             <constraint firstItem="I2y-QN-QpG" firstAttribute="leading" secondItem="wZ4-L7-UtM" secondAttribute="leading" id="Hkv-p7-fnG"/>
+                            <constraint firstItem="4M0-kf-Pv9" firstAttribute="centerY" secondItem="I2y-QN-QpG" secondAttribute="centerY" id="MAQ-CJ-HkF"/>
                             <constraint firstItem="I2y-QN-QpG" firstAttribute="top" secondItem="wZ4-L7-UtM" secondAttribute="top" id="Rs0-0o-pmL"/>
+                            <constraint firstItem="4M0-kf-Pv9" firstAttribute="centerX" secondItem="I2y-QN-QpG" secondAttribute="centerX" id="oI5-En-TPJ"/>
                             <constraint firstAttribute="trailing" secondItem="I2y-QN-QpG" secondAttribute="trailing" id="rSB-ei-JNg"/>
                             <constraint firstItem="I2y-QN-QpG" firstAttribute="bottom" secondItem="UkO-Wl-zJn" secondAttribute="top" id="xoO-Wa-F9H"/>
                         </constraints>
@@ -446,6 +462,7 @@
                         </barButtonItem>
                     </navigationItem>
                     <connections>
+                        <outlet property="activityIndicator" destination="4M0-kf-Pv9" id="mGK-Hf-h73"/>
                         <outlet property="webView" destination="I2y-QN-QpG" id="UvH-Il-mu9"/>
                     </connections>
                 </viewController>

@@ -12,10 +12,12 @@ import AVFoundation
 class ScanViewController: UIViewController, AVCaptureMetadataOutputObjectsDelegate, UIAlertViewDelegate {
     
     enum AlertViewTag: Int {
-        case IncorrectQRCode, ConnectedToServer, CouldNotConnectToServer
+        case IncorrectQRCode, ConnectedToServer, ServerError
     }
     
     @IBOutlet weak var previewView: UIView!
+    @IBOutlet weak var activityView: UIActivityIndicatorView!
+    
     var session: AVCaptureSession!
     var previewLayer: AVCaptureVideoPreviewLayer!
     
@@ -68,17 +70,38 @@ class ScanViewController: UIViewController, AVCaptureMetadataOutputObjectsDelega
             }
             // TODO: store qrcodeData somehow
             session.stopRunning()
+            activityView.startAnimating()
             APIManager.sharedManager.initManager(qrcodeData.server!)
-            APIManager.sharedManager.postDeviceMapping(qrcodeData,
+            APIManager.sharedManager.getEvent(qrcodeData.eventId,
                 success: { (AFHTTPRequestOperation operation, AnyObject responseObject) -> Void in
-                    let alertView = UIAlertView(title: "Connected to Server \(qrcodeData.server!)", message: "", delegate: self, cancelButtonTitle: nil, otherButtonTitles: "OK")
-                    alertView.tag = AlertViewTag.ConnectedToServer.rawValue;
-                    alertView.show()
+                    var event = DataManager.sharedManager.event(qrcodeData.eventId!)
+                    event.initWithDictionary(responseObject as Dictionary)
+                    APIManager.sharedManager.getLeaderboard(qrcodeData.leaderboardName,
+                        success: { (AFHTTPRequestOperation operation, AnyObject responseObject) -> Void in
+                            var leaderboard = DataManager.sharedManager.leaderboard(event)
+                            leaderboard.initWithDictionary(responseObject as Dictionary)
+                            APIManager.sharedManager.getCompetitor(qrcodeData.competitorId,
+                                success: { (AFHTTPRequestOperation operation, AnyObject responseObject) -> Void in
+                                    self.activityView.stopAnimating()
+                                    var competitor = DataManager.sharedManager.competitor(leaderboard)
+                                    competitor.initWithDictionary(responseObject as Dictionary)
+                                    navigationController!.popViewControllerAnimated(true)
+                                }, failure: { (AFHTTPRequestOperation operation, NSError error) -> Void in
+                                    self.activityView.stopAnimating()
+                                    let alertView = UIAlertView(title: "Couldn't get competitor \(qrcodeData.competitorId)", message: nil, delegate: self, cancelButtonTitle: "Cancel")
+                                    alertView.tag = AlertViewTag.ServerError.rawValue;
+                                    alertView.show()
+                            }) }, failure: { (AFHTTPRequestOperation operation, NSError error) -> Void in
+                                self.activityView.stopAnimating()
+                                let alertView = UIAlertView(title: "Couldn't get leaderboard \(qrcodeData.leaderboardName)", message: nil, delegate: self, cancelButtonTitle: "Cancel")
+                                alertView.tag = AlertViewTag.ServerError.rawValue;
+                                alertView.show()
+                    })
                     
-                    NSLog("success")
                 }, failure: { (AFHTTPRequestOperation operation, NSError error) -> Void in
-                    let alertView = UIAlertView(title: "Couldn't connect to Server \(qrcodeData.server!)", message: nil, delegate: self, cancelButtonTitle: "Cancel")
-                    alertView.tag = AlertViewTag.CouldNotConnectToServer.rawValue;
+                    self.activityView.stopAnimating()
+                    let alertView = UIAlertView(title: "Couldn't get event \(qrcodeData.eventId)", message: nil, delegate: self, cancelButtonTitle: "Cancel")
+                    alertView.tag = AlertViewTag.ServerError.rawValue;
                     alertView.show()
             })
         }
@@ -91,7 +114,7 @@ class ScanViewController: UIViewController, AVCaptureMetadataOutputObjectsDelega
         case AlertViewTag.ConnectedToServer.rawValue:
             navigationController!.popViewControllerAnimated(true)
             break
-        case AlertViewTag.CouldNotConnectToServer.rawValue:
+        case AlertViewTag.ServerError.rawValue:
             self.session.startRunning()
             break
         default:

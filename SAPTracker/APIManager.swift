@@ -29,7 +29,10 @@ class APIManager: NSObject {
         static let maxSendGPSFix = 100
     }
 
-    /* Base url of all requests */
+    /* Server URL */
+    private var serverUrlString: String?
+
+    /* Base url of all requests, contains serverUrlString */
     private var baseUrlString: String?
     
     /* AFNetworking operation manager */
@@ -40,14 +43,6 @@ class APIManager: NSObject {
     
     /* Number of seconds between syncs */
     private var syncPeriod: NSTimeInterval = BatteryManager.sharedManager.batterySaving ? SyncPeriod.BatterySaving : SyncPeriod.Normal
-    
-    // TODO
-    /* REST Paths */
-    /* Map device to competitor */
-    private let postDeviceMapping = "/sailingserver/rc/racelog"
-    
-    /* Send location to server */
-    private let postGPSFixPath = "/tracking/recordFixesFlatJson"
     
     var networkAvailable: Bool {
         get {
@@ -75,23 +70,24 @@ class APIManager: NSObject {
         
     }
     
+    /* Unregister notifications */
     deinit {
         NSNotificationCenter.defaultCenter().removeObserver(self)
     }
     
     /* Sets base URL for all requests. Request and response are JSON. Starts reachability listener. Starts timer for uploading data. */
-    func initManager(baseUrlString: String) {
-        if self.baseUrlString == baseUrlString {
+    func initManager(serverUrlString: String) {
+        if self.serverUrlString == serverUrlString {
             return
         }
         
-        self.baseUrlString = baseUrlString
+        self.baseUrlString = serverUrlString + "/api/v1"
         
-        manager = AFHTTPRequestOperationManager(baseURL: NSURL(string: baseUrlString)) // baseUrl needed for checking reachability
+        manager = AFHTTPRequestOperationManager(baseURL: NSURL(string: serverUrlString)) // baseUrl needed for checking reachability
         
         // encode/decode body as JSON
         manager!.requestSerializer = AFJSONRequestSerializer() as AFHTTPRequestSerializer
-        manager!.responseSerializer = AFCompoundResponseSerializer() as AFHTTPResponseSerializer
+        manager!.responseSerializer = AFJSONResponseSerializer() as AFHTTPResponseSerializer
         
         // set up reachability
         let operationQueue = manager!.operationQueue
@@ -102,7 +98,6 @@ class APIManager: NSObject {
                 break
             default:
                 operationQueue?.suspended = true
-                
             }
             
             // send notification (e.g. to tracker view controller)
@@ -118,37 +113,73 @@ class APIManager: NSObject {
         timer()
     }
     
-    // MARK: - REST
+    // MARK: - REST API
+
+    /* Get event */
+    func getEvent(eventId: String!, success: (AFHTTPRequestOperation!, AnyObject!) -> Void, failure: (AFHTTPRequestOperation!, AnyObject!) -> Void) {
+        let urlString = baseUrlString! + "/events/\(eventId)"
+        manager!.GET(urlString, parameters: nil, success: success, failure: failure)
+    }
+
+    /* Get leaderboard */
+    func getLeaderboard(leaderboardName: String!, success: (AFHTTPRequestOperation!, AnyObject!) -> Void, failure: (AFHTTPRequestOperation!, AnyObject!) -> Void) {
+        let urlString = baseUrlString! + "/leaderboards/\(leaderboardName)"
+        manager!.GET(urlString, parameters: nil, success: success, failure: failure)
+    }
     
-    /* Send a device to competitor mapping. */
-    func postDeviceMapping(qrcodeData: QRCodeData!, success: (AFHTTPRequestOperation!, AnyObject!) -> Void, failure: (AFHTTPRequestOperation!, AnyObject!) -> Void) {
+    /* Get competitor */
+    func getCompetitor(competitorId: String!, success: (AFHTTPRequestOperation!, AnyObject!) -> Void, failure: (AFHTTPRequestOperation!, AnyObject!) -> Void) {
+        let urlString = baseUrlString! + "/competitors/\(competitorId)"
+        manager!.GET(urlString, parameters: nil, success: success, failure: failure)
+    }
+
+    /* Map a device to competitor. */
+    func checkIn(leaderboardName: String!, competitorId: String!, deviceUuid: String!, pushId: String!, fromMillis: Int!, success: (AFHTTPRequestOperation!, AnyObject!) -> Void, failure: (AFHTTPRequestOperation!, AnyObject!) -> Void) {
         
-        // resource path contains query parameters, note QR code data is already URL encoded
-        var urlString = baseUrlString! + postDeviceMapping
-        urlString += "?leaderboard=\(qrcodeData.leaderBoard!)"
-        urlString += "&raceColumn=\(qrcodeData.raceColumn!)"
-        urlString += "&fleet=\(qrcodeData.fleet!)"
-        urlString += "&clientuuid=\(qrcodeData.competitor!)"
+        let urlString = baseUrlString! + "/leaderboards/\(leaderboardName)/device_mappings/start"
         
-        var body = DeviceCompetitorMappingEvent(deviceId: DeviceUDIDManager.UDID, competitor: qrcodeData.competitor!, from: qrcodeData.from!, to: qrcodeData.to!).dictionary()
+        var body = [String: AnyObject]()
+        body["competitorId"] = competitorId
+        body["deviceUuid"] = deviceUuid
+        body["pushId"] = pushId
+        body["fromMillis"] = fromMillis
         
         manager!.POST(urlString, parameters: body, success: success, failure: failure)
     }
+  
+    /* Disconnect a device from competitor. */
+    func checkOut(leaderboardName: String!, competitorId: String!, deviceUuid: String!, toMillis: Int!, success:(AFHTTPRequestOperation!, AnyObject!) -> Void, failure: (AFHTTPRequestOperation!, AnyObject!) -> Void) {
+        
+        let urlString = baseUrlString! + "/leaderboards/\(leaderboardName)/device_mappings/end"
+        
+        var body = [String: AnyObject]()
+        body["competitorId"] = competitorId
+        body["deviceUuid"] = deviceUuid
+        body["toMillis"] = toMillis
+        
+        manager!.POST(urlString, parameters: body, success: success, failure: failure)
+   }
     
     /* Send GPS location to server. Delete row from cache. */
-    private func postGPSFixes(gpsFixes: [GPSFix]!) {
-        var urlString = baseUrlString! + postGPSFixPath
+    private func postGPSFixes(deviceUuid: String!, gpsFixes: [GPSFix]!) {
+        let urlString = baseUrlString! + "/gps_fixes"
+
+        var body = [String: AnyObject]()
+        body["deviceUuid"] = deviceUuid
         var array: [[String: AnyObject]] = []
         for gpsFix in gpsFixes {
             array.append(gpsFix.dictionary())
         }
+        body["fixes"] = array
+        
         manager!.POST(urlString, parameters: array, success: { (AFHTTPRequestOperation operation, AnyObject responseObject) -> Void in
             // delete GPS fixes from database
             for gpsFix in gpsFixes {
+                NSLog("sent GPS fixes")
                 DataManager.sharedManager.managedObjectContext!.deleteObject(gpsFix)
             }
             }, failure: { (AFHTTPRequestOperation operation, NSError error) -> Void in
-                NSLog("failure")
+                NSLog("error sending GPS fixes")
         })
     }
     
@@ -156,15 +187,17 @@ class APIManager: NSObject {
     
     /* See if any rows need to be uploaded. Schedule timer again. */
     func timer() {
-        NSLog("timer")
         let loop = NSTimer.scheduledTimerWithTimeInterval(syncPeriod, target:self, selector:"timer", userInfo:nil, repeats:false)
         NSRunLoop.currentRunLoop().addTimer(loop, forMode:NSRunLoopCommonModes)
         
         if (manager != nil && !manager!.operationQueue.suspended) {
+            let deviceUuid = DeviceUDIDManager.UDID
             let lastestGPSFixes = DataManager.sharedManager.latestLocations()
-            postGPSFixes(lastestGPSFixes)
+            postGPSFixes(deviceUuid, gpsFixes: lastestGPSFixes)
         }
     }
+    
+    // MARK: - Notifications
     
     /* Callback for BatteryManager.NotificationType.batterySavingChanged notification. */
     func batteryChanged() {

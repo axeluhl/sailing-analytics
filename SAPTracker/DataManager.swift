@@ -34,17 +34,42 @@ class DataManager: NSObject {
         NSNotificationCenter.defaultCenter().removeObserver(self)
     }
     
+    // MARK: - access methods
+    
+    func event(eventId: String) -> Event {
+        let fetchRequest = NSFetchRequest(entityName: "Event")
+        fetchRequest.predicate = NSPredicate(format: "eventId = %s", eventId)
+        var error: NSError? = nil
+        let results = self.managedObjectContext!.executeFetchRequest(fetchRequest, error: &error)
+        if (results != nil && results!.count > 0) {
+            return results![0] as Event
+        } else {
+            return NSEntityDescription.insertNewObjectForEntityForName("Event", inManagedObjectContext: self.managedObjectContext!) as Event
+        }
+    }
+    
+    func leaderboard(event: Event) -> LeaderBoard {
+        var leaderBoard = NSEntityDescription.insertNewObjectForEntityForName("LeaderBoard", inManagedObjectContext: self.managedObjectContext!) as LeaderBoard
+        leaderBoard.event = event
+        return leaderBoard
+    }
+    
+    func competitor(leaderBoard: LeaderBoard) -> Competitor {
+        var competitor = NSEntityDescription.insertNewObjectForEntityForName("Competitor", inManagedObjectContext: self.managedObjectContext!) as Competitor
+        competitor.leaderBoard = leaderBoard
+        return competitor
+    }
+    
     // MARK: - notification callbacks
-   
+
     /* New location detected, store to database. */
-    func newLocation(notification: NSNotification) {
-        let gpsFix = NSEntityDescription.insertNewObjectForEntityForName("GPSFix", inManagedObjectContext: self.managedObjectContext!) as GPSFix;
-        gpsFix.deviceUuid = DeviceUDIDManager.UDID
+    private func newLocation(notification: NSNotification) {
+        let gpsFix = NSEntityDescription.insertNewObjectForEntityForName("GPSFix", inManagedObjectContext: self.managedObjectContext!) as GPSFix
         gpsFix.initWithDictionary(notification.userInfo!)
     }
     
     /* Tracking stopped, save data to disk. */
-    func trackingStopped(notification: NSNotification) {
+    private func trackingStopped(notification: NSNotification) {
         saveContext()
     }
 
@@ -52,12 +77,12 @@ class DataManager: NSObject {
 
     /* Get latest locations. Limited by the max number of objects that can be sent. */
     func latestLocations() -> [GPSFix] {
-        let request = NSFetchRequest()
-        request.entity = NSEntityDescription.entityForName("GPSFix", inManagedObjectContext: self.managedObjectContext!)
-        request.sortDescriptors = [NSSortDescriptor(key: "timeMillis", ascending: false)]
-        request.fetchLimit = APIManager.Constants.maxSendGPSFix
+        let fetchRequest = NSFetchRequest()
+        fetchRequest.entity = NSEntityDescription.entityForName("GPSFix", inManagedObjectContext: self.managedObjectContext!)
+        fetchRequest.sortDescriptors = [NSSortDescriptor(key: "timeMillis", ascending: false)]
+        fetchRequest.fetchLimit = APIManager.Constants.maxSendGPSFix
         var error: NSError? = nil
-        let results = self.managedObjectContext!.executeFetchRequest(request, error: &error)
+        let results = self.managedObjectContext!.executeFetchRequest(fetchRequest, error: &error)
         return results as [GPSFix]
     }
 
@@ -80,8 +105,25 @@ class DataManager: NSObject {
         // Create the coordinator and store
         var coordinator: NSPersistentStoreCoordinator? = NSPersistentStoreCoordinator(managedObjectModel: self.managedObjectModel)
         let url = self.applicationDocumentsDirectory.URLByAppendingPathComponent("CoreData.sqlite")
-        let options = [NSMigratePersistentStoresAutomaticallyOption: 1, NSInferMappingModelAutomaticallyOption: 1]
         var error: NSError? = nil
+        
+        // http://stackoverflow.com/a/8890373
+        // Check if we already have a persistent store
+        if (NSFileManager.defaultManager().fileExistsAtPath(url.path!)) {
+            let existingPersistentStoreMetadata = NSPersistentStoreCoordinator.metadataForPersistentStoreOfType(NSSQLiteStoreType, URL: url, error: &error)
+            if (existingPersistentStoreMetadata == nil) {
+                // Something *really* bad has happened to the persistent store
+                NSException.raise(NSInternalInconsistencyException, format: "Failed to read metadata for persistent store %@: %@", arguments:getVaList([url, error!]));
+            }
+            
+            if ( !self.managedObjectModel.isConfiguration(nil, compatibleWithStoreMetadata: existingPersistentStoreMetadata)) {
+                if (!NSFileManager.defaultManager().removeItemAtURL(url, error: &error)) {
+                    NSLog("*** Could not delete persistent store, %@", error!);
+                } // else the existing persistent store is compatible with the current model - nice!
+            } // else no database file yet
+        }
+        
+        let options = [NSMigratePersistentStoresAutomaticallyOption: 1, NSInferMappingModelAutomaticallyOption: 1]
         var failureReason = "There was an error creating or loading the application's saved data."
         if coordinator!.addPersistentStoreWithType(NSSQLiteStoreType, configuration: nil, URL: url, options: options, error: &error) == nil {
             coordinator = nil
@@ -94,7 +136,9 @@ class DataManager: NSObject {
             // Replace this with code to handle the error appropriately.
             // abort() causes the application to generate a crash log and terminate. You should not use this function in a shipping application, although it may be useful during development.
             NSLog("Unresolved error \(error), \(error!.userInfo)")
-            abort()
+            //abort()
+            NSFileManager.defaultManager().removeItemAtURL(url, error:nil);
+            return nil
         }
         
         return coordinator
@@ -124,5 +168,5 @@ class DataManager: NSObject {
             }
         }
     }
-
+    
 }

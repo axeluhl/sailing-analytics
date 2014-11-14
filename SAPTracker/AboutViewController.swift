@@ -8,9 +8,10 @@
 
 import Foundation
 
-class AboutViewController: UIViewController {
+class AboutViewController: UIViewController, UIWebViewDelegate, UIAlertViewDelegate {
     
     @IBOutlet weak var webView: UIWebView!
+    @IBOutlet weak var activityIndicator: UIActivityIndicatorView!
     
     override func viewDidLoad() {
         super.viewDidLoad()
@@ -19,5 +20,19 @@ class AboutViewController: UIViewController {
     
     @IBAction func done(sender: AnyObject) {
         presentingViewController!.dismissViewControllerAnimated(true, nil)
+    }
+    
+    func webViewDidFinishLoad(webView: UIWebView) {
+        activityIndicator.stopAnimating()
+    }
+    
+    func wwebView(webView: UIWebView, didFailLoadWithError error: NSError) {
+        activityIndicator.hidden = true
+        let alertView = UIAlertView(title: "Couldn't load about view", message: nil, delegate: nil, cancelButtonTitle: "Cancel")
+        alertView.show()
+    }
+    
+    func alertView(alertView: UIAlertView, clickedButtonAtIndex buttonIndex: Int) {
+        presentingViewController!.dismissViewControllerAnimated(true, completion: nil)
     }
 }

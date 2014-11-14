@@ -11,26 +11,17 @@ import Foundation
 class QRCodeData {
     
     struct Keys {
-        static let leaderBoard = "leaderboard"
-        static let raceColumn = "raceColumn"
-        static let fleet = "fleet"
-        static let competitor = "competitor"
-        static let mark = "mark"
-        static let from = "from"
-        static let to = "to"
+        static let eventId = "event_id"
+        static let leaderboardName = "leaderboard_name"
+        static let competitorId = "competitor_id"        
     }
     
     var server: String?
-    var leaderBoard: String?
-    var raceColumn: String?
-    var fleet: String?
-    var competitor: String?
-    var mark: String?
-    var from: Double?
-    var to: Double?
+    var eventId: String?
+    var leaderboardName: String?
+    var competitorId: String?
  
     init() {
-        
     }
     
     func parseString(urlString: String) -> Bool {
@@ -58,21 +49,9 @@ class QRCodeData {
             let value = pairComponents[1]
             queryStringDictionary[key] = value
         }
-       
-        leaderBoard = queryStringDictionary[QRCodeData.Keys.leaderBoard]
-        raceColumn = queryStringDictionary[QRCodeData.Keys.raceColumn]
-        fleet = queryStringDictionary[QRCodeData.Keys.fleet]
-        competitor = queryStringDictionary[QRCodeData.Keys.competitor]
-        mark = queryStringDictionary[QRCodeData.Keys.mark]
-        if queryStringDictionary[QRCodeData.Keys.from] != nil {
-            from = (queryStringDictionary[QRCodeData.Keys.from]! as NSString).doubleValue
-        }
-        if queryStringDictionary[QRCodeData.Keys.to] != nil {
-            to = (queryStringDictionary[QRCodeData.Keys.to]! as NSString).doubleValue
-        }
-
-        // TODO: make sure minimum values set
-        
-        return true
-    }
+        eventId = queryStringDictionary[QRCodeData.Keys.eventId]
+        leaderboardName = queryStringDictionary[QRCodeData.Keys.leaderboardName]
+        competitorId = queryStringDictionary[QRCodeData.Keys.competitorId]
+        return eventId != nil && leaderboardName != nil && competitorId != nil
+     }
 }
