@@ -174,4 +174,4 @@ GZIP compression is a must. Bulk uploads should be chunked, e.g. per 1,000 locat
 ```
 * JSON array may contain one or several fixes
 * **speed** Speed over ground in meters per second.
-* **course** Heading in degrees.
+* **course** Bearing in degrees.
