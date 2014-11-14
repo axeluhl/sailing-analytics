@@ -37,7 +37,12 @@ public class TransmittingService extends Service {
 	private int UPDATE_BATCH_SIZE = 10;
 	private int UPDATE_INTERVAL_DEFAULT = 3000;
 	private int UPDATE_INTERVAL_POWERSAVE_MODE = 30000;
+	private long AUTO_END_SERVICE_AFTER_NANO_PASSED = 10000000000L; // 10 sec
 	private int currentUpdateInterval = UPDATE_INTERVAL_DEFAULT;
+	
+	private boolean sendingAttempted = false;
+	private boolean lastTransmissionFailed = false;
+	private long lastTransmissionTimestamp = 0;
 	
 	private AppPreferences prefs;
 	
@@ -75,24 +80,77 @@ public class TransmittingService extends Service {
 		return Service.START_STICKY;
 	}
 	
-
 	private void startTimer() {
 		timer = new Timer();
 		timer.start();
-		if (BuildConfig.DEBUG) {
-			ExLog.i(this, "TIMER:", "Background update-timer start");
-		}
+		ExLog.iDebug(this, "TIMER", "Background update-timer start");
 	}
 
 	private void stopTimer() {
 		if (timer != null)
 		{
 			timer.stop();	
-			if (BuildConfig.DEBUG) {
-				ExLog.i(this, "TIMER:", "Background update-timer stop");
-			}
+			ExLog.iDebug(this, "TIMER", "Background update-timer stop");
 		}
 	}
+	
+//	/**
+//	 * initial time is 1, it means no error, but also no send yet.
+//	 */
+//	private void markInitialTransmissionTime()
+//	{
+//		lastTransmissionTimestamp = 1;
+//	}
+	
+	private void markSuccessfulTransmission()
+	{
+		ExLog.iDebug(this, "TRANSMISSION", "markSuccessfulTransmission");
+		lastTransmissionFailed = false;
+		lastTransmissionTimestamp = System.nanoTime();
+	}
+	
+	private void markFailedTransmission()
+	{
+		ExLog.iDebug(this, "TRANSMISSION", "markFailedTransmission");
+		lastTransmissionFailed = true;
+		lastTransmissionTimestamp = 0;
+	}
+	
+	/**
+	 * If time interval has passed without any transmission, the service can turn
+	 * itself off. Same for 
+	 * @return
+	 */
+	private boolean serviceCanShutItselfDown()
+	{
+		long currentNanoTime = System.nanoTime();
+		
+		ExLog.iDebug(this, "TRANSMISSION", "serviceCanShutItselfDown?");
+		ExLog.iDebug(this, "TRANSMISSION", "DELTA:" + (currentNanoTime - lastTransmissionTimestamp));
+		
+		// if we had a failure, never go to sleep until data is sent successfully.
+		if (lastTransmissionFailed)
+		{
+			ExLog.iDebug(this, "TRANSMISSION", "returning false, have failed transmission");
+			return false;
+		}
+		
+		if (!sendingAttempted)
+		{
+			ExLog.iDebug(this, "TRANSMISSION", "returning true, no sending attempt");
+			return true;
+		}
+		
+		if (currentNanoTime - lastTransmissionTimestamp > AUTO_END_SERVICE_AFTER_NANO_PASSED)
+		{
+			ExLog.iDebug(this, "TRANSMISSION", "returning true, timeout");
+			return true;
+		}
+		
+		ExLog.iDebug(this, "TRANSMISSION", "returning false, don't terminate");
+		return false;
+	}
+	
 	
 	private void sendFixesToAPI() {
 		// first, lets fetch all unsent fixes
@@ -129,6 +187,7 @@ public class TransmittingService extends Service {
 			String[] idsArr = new String[ids.size()];
 
 			JSONObject requestObject = new JSONObject();
+			
 			try {
 				requestObject.put("fixes", jsonArray);
 				requestObject.put("deviceUuid", prefs.getDeviceIdentifier());
@@ -136,23 +195,26 @@ public class TransmittingService extends Service {
 				e.printStackTrace();
 			}
 			
-			if (BuildConfig.DEBUG) {
-				ExLog.i(this, TAG, "sending gps fix json: " + requestObject.toString());
-				ExLog.i(this, TAG, "url: " + prefs.getServerURL() + prefs.getServerGpsFixesPostPath());
-			}
-
+			ExLog.iDebug(this, TAG, "sending gps fix json: " + requestObject.toString());
+			ExLog.iDebug(this, TAG, "url: " + prefs.getServerURL() + prefs.getServerGpsFixesPostPath());
+			
+			sendingAttempted = true;
+			
 			VolleyHelper.getInstance(this).addRequest(
 					new JsonObjectRequest(prefs.getServerURL()
 							+ prefs.getServerGpsFixesPostPath(), requestObject,
 							new FixSubmitListener(ids.toArray(idsArr)),
 							new FixSubmitErrorListener()));
 		} else {
-			if (BuildConfig.DEBUG) {
-				ExLog.i(this, TAG, "Nothing to send, Transmitting Service is terminating.");
+			
+			if (serviceCanShutItselfDown())
+			{
+				
+				ExLog.iDebug(this, TAG, "Nothing to send or timeout occurred, Transmitting Service is terminating.");
+				
+				stopTimer();
+				stopSelf();
 			}
-
-			stopTimer();
-			stopSelf();
 		}
 	}
 	
@@ -225,6 +287,8 @@ public class TransmittingService extends Service {
         	System.out.println("ids: " + ids);
 
         	deleteSynced(ids);
+        	
+        	markSuccessfulTransmission();
         	//markAsSynced(ids);
         }
     }
@@ -233,6 +297,7 @@ public class TransmittingService extends Service {
 
         @Override
         public void onErrorResponse(VolleyError error) {
+        	markFailedTransmission();
             ExLog.e(TransmittingService.this, TAG, "Error while sending GPS fix " + error.getMessage());
         }
     }
