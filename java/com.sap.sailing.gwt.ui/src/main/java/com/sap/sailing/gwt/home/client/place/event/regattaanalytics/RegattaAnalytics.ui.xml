@@ -20,8 +20,8 @@
 		      </div>
 		  </div>
 		  <div class="{res.mediaCss.small12} {res.mediaCss.columns} {local_res.css.regattaleaderboard_meta_navigation}">
-			<g:Anchor ui:field="leaderboardAnchor" href="javascript:;" styleName="{res.mainCss.navbar_button}"><ui:text from="{i18n.leaderboard}" /></g:Anchor>
-			<g:Anchor ui:field="competitorChartsAnchor" href="javascript:;" styleName="{res.mainCss.navbar_button}"><ui:text from="{i18n.competitorsAnalytics}" /></g:Anchor>
+			<g:Anchor ui:field="leaderboardAnchor" styleName="{res.mainCss.navbar_button}"><ui:text from="{i18n.leaderboard}" /></g:Anchor>
+			<g:Anchor ui:field="competitorChartsAnchor" styleName="{res.mainCss.navbar_button}"><ui:text from="{i18n.competitorsAnalytics}" /></g:Anchor>
 		  </div>
 		</div>
 		<g:HTMLPanel ui:field="leaderboardTabPanel">
