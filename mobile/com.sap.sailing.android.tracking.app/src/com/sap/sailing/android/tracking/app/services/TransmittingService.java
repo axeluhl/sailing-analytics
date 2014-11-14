@@ -33,6 +33,26 @@ import com.sap.sailing.android.tracking.app.services.sending.ConnectivityChanged
 import com.sap.sailing.android.tracking.app.utils.AppPreferences;
 import com.sap.sailing.android.tracking.app.utils.VolleyHelper;
 
+/**
+ * Service that handles sending of GPS-fixes (fixes) to the Sailing-API.
+ * 
+ * It checks, after a certain time-interval has passed, if any fixes are available in the database 
+ * and attempts to send them batch-wise.
+ * 
+ * It keeps track of when the last successful sending occurred and, if no new data is available 
+ * (i.e., if tracking is disabled), ends itself after a certain period. It relies on being restarted 
+ * by the {@link TrackingService}. 
+ * 
+ * It also ends itself when connectivity is lost. In that case it relies on being restarted by 
+ * the {@link ConnectivityChangedReceiver}.   
+ * 
+ * It switches into a power saving mode, if a certain battery discharge is reached. It does, however,
+ * not do so, if the device is plugged in (= when it is charging). The power saving mode causes the
+ * time-interval between check- and transmit-cycles to be increased to conserve power.
+ * 
+ * @author lukas
+ *
+ */
 public class TransmittingService extends Service {
 	
 	private static final String TAG = TransmittingService.class.getName();
