@@ -15,7 +15,7 @@
         <attribute name="imageUrl" optional="YES" attributeType="String" syncable="YES"/>
         <attribute name="name" optional="YES" attributeType="String" syncable="YES"/>
         <attribute name="startDate" optional="YES" attributeType="Date" syncable="YES"/>
-        <relationship name="leaderboard" optional="YES" maxCount="1" deletionRule="Nullify" destinationEntity="LeaderBoard" inverseName="event" inverseEntity="LeaderBoard" syncable="YES"/>
+        <relationship name="leaderBoard" optional="YES" maxCount="1" deletionRule="Cascade" destinationEntity="LeaderBoard" inverseName="event" inverseEntity="LeaderBoard" syncable="YES"/>
     </entity>
     <entity name="GPSFix" representedClassName="GPSFix" syncable="YES">
         <attribute name="bearingDeg" optional="YES" attributeType="Double" defaultValueString="0.0" syncable="YES"/>
@@ -26,8 +26,8 @@
     </entity>
     <entity name="LeaderBoard" representedClassName="LeaderBoard" syncable="YES">
         <attribute name="name" optional="YES" attributeType="String" indexed="YES" syncable="YES"/>
-        <relationship name="competitor" optional="YES" maxCount="1" deletionRule="Nullify" destinationEntity="Competitor" inverseName="leaderBoard" inverseEntity="Competitor" syncable="YES"/>
-        <relationship name="event" optional="YES" maxCount="1" deletionRule="Nullify" destinationEntity="Event" inverseName="leaderboard" inverseEntity="Event" syncable="YES"/>
+        <relationship name="competitor" optional="YES" maxCount="1" deletionRule="Cascade" destinationEntity="Competitor" inverseName="leaderBoard" inverseEntity="Competitor" syncable="YES"/>
+        <relationship name="event" optional="YES" maxCount="1" deletionRule="Nullify" destinationEntity="Event" inverseName="leaderBoard" inverseEntity="Event" syncable="YES"/>
     </entity>
     <elements>
         <element name="Competitor" positionX="-9" positionY="81" width="128" height="148"/>

@@ -18,7 +18,7 @@ class Competitor: NSManagedObject {
     @NSManaged var name: String
     @NSManaged var nationality: String
     @NSManaged var sailId: String
-    @NSManaged var leaderBoard: LeaderBoard
+    @NSManaged var leaderBoard: LeaderBoard?
     
     func initWithDictionary(dictionary: Dictionary<NSObject, AnyObject>) {
         competitorId = dictionary["id"] as String

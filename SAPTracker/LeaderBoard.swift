@@ -13,8 +13,8 @@ import CoreData
 class LeaderBoard: NSManagedObject {
 
     @NSManaged var name: String
-    @NSManaged var competitor: Competitor
-    @NSManaged var event: Event
+    @NSManaged var competitor: Competitor?
+    @NSManaged var event: Event?
     
     func initWithDictionary(dictionary: Dictionary<NSObject, AnyObject>) {
         name = dictionary["name"] as String

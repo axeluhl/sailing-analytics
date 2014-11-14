@@ -85,7 +85,7 @@ class ScanViewController: UIViewController, AVCaptureMetadataOutputObjectsDelega
                                     self.activityView.stopAnimating()
                                     var competitor = DataManager.sharedManager.competitor(leaderboard)
                                     competitor.initWithDictionary(responseObject as Dictionary)
-                                    navigationController!.popViewControllerAnimated(true)
+                                    self.navigationController!.popViewControllerAnimated(true)
                                 }, failure: { (AFHTTPRequestOperation operation, NSError error) -> Void in
                                     self.activityView.stopAnimating()
                                     let alertView = UIAlertView(title: "Couldn't get competitor \(qrcodeData.competitorId)", message: nil, delegate: self, cancelButtonTitle: "Cancel")

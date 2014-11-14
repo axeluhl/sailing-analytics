@@ -34,32 +34,6 @@ class DataManager: NSObject {
         NSNotificationCenter.defaultCenter().removeObserver(self)
     }
     
-    // MARK: - access methods
-    
-    func event(eventId: String) -> Event {
-        let fetchRequest = NSFetchRequest(entityName: "Event")
-        fetchRequest.predicate = NSPredicate(format: "eventId = %s", eventId)
-        var error: NSError? = nil
-        let results = self.managedObjectContext!.executeFetchRequest(fetchRequest, error: &error)
-        if (results != nil && results!.count > 0) {
-            return results![0] as Event
-        } else {
-            return NSEntityDescription.insertNewObjectForEntityForName("Event", inManagedObjectContext: self.managedObjectContext!) as Event
-        }
-    }
-    
-    func leaderboard(event: Event) -> LeaderBoard {
-        var leaderBoard = NSEntityDescription.insertNewObjectForEntityForName("LeaderBoard", inManagedObjectContext: self.managedObjectContext!) as LeaderBoard
-        leaderBoard.event = event
-        return leaderBoard
-    }
-    
-    func competitor(leaderBoard: LeaderBoard) -> Competitor {
-        var competitor = NSEntityDescription.insertNewObjectForEntityForName("Competitor", inManagedObjectContext: self.managedObjectContext!) as Competitor
-        competitor.leaderBoard = leaderBoard
-        return competitor
-    }
-    
     // MARK: - notification callbacks
 
     /* New location detected, store to database. */
@@ -75,6 +49,40 @@ class DataManager: NSObject {
 
     // MARK: - public database access
 
+    func event(eventId: String) -> Event {
+        let fetchRequest = NSFetchRequest(entityName: "Event")
+        fetchRequest.predicate = NSPredicate(format: "eventId = %@", eventId)
+        var error: NSError? = nil
+        let results = self.managedObjectContext!.executeFetchRequest(fetchRequest, error: &error)
+        if (results != nil && results!.count > 0) {
+            NSLog("XXX")
+            return results![0] as Event
+        } else {
+            NSLog("YYY")
+            return NSEntityDescription.insertNewObjectForEntityForName("Event", inManagedObjectContext: self.managedObjectContext!) as Event
+        }
+    }
+    
+    func leaderboard(event: Event) -> LeaderBoard {
+        if event.leaderBoard != nil {
+            return event.leaderBoard!
+        }
+        var leaderBoard = NSEntityDescription.insertNewObjectForEntityForName("LeaderBoard", inManagedObjectContext: self.managedObjectContext!) as LeaderBoard
+        leaderBoard.event = event
+        event.leaderBoard = leaderBoard
+        return leaderBoard
+    }
+    
+    func competitor(leaderBoard: LeaderBoard) -> Competitor {
+        if leaderBoard.competitor != nil {
+            return leaderBoard.competitor!
+        }
+        var competitor = NSEntityDescription.insertNewObjectForEntityForName("Competitor", inManagedObjectContext: self.managedObjectContext!) as Competitor
+        competitor.leaderBoard = leaderBoard
+        leaderBoard.competitor = competitor
+        return competitor
+    }
+    
     /* Get latest locations. Limited by the max number of objects that can be sent. */
     func latestLocations() -> [GPSFix] {
         let fetchRequest = NSFetchRequest()
