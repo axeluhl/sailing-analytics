@@ -1202,7 +1202,7 @@ public class RacingEventServiceImpl implements RacingEventServiceWithTestSupport
     }
 
     /**
-     * The regatta and all its contained {@link Regatta#getAllRaces() races} are replicated to all replica.
+     * The regatta and all its contained {@link Regatta#getAllRaces() races} are replicated to all replicas.
      * 
      * @param regatta
      *            the series of this regatta must not have any {@link Series#getRaceColumns() race columns associated
