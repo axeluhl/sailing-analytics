@@ -16,7 +16,6 @@ import android.content.Context;
 import android.content.Intent;
 import android.database.Cursor;
 import android.net.Uri;
-//import android.os.Handler;
 import android.os.IBinder;
 
 import com.android.volley.Response.ErrorListener;
@@ -47,7 +46,6 @@ public class TransmittingService extends Service {
 	private AppPreferences prefs;
 	
 	private Timer timer;
-	//private Handler handler;
 	
 	@Override
 	public IBinder onBind(Intent intent) {
@@ -93,14 +91,6 @@ public class TransmittingService extends Service {
 			ExLog.iDebug(this, "TIMER", "Background update-timer stop");
 		}
 	}
-	
-//	/**
-//	 * initial time is 1, it means no error, but also no send yet.
-//	 */
-//	private void markInitialTransmissionTime()
-//	{
-//		lastTransmissionTimestamp = 1;
-//	}
 	
 	private void markSuccessfulTransmission()
 	{
