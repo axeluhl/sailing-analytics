@@ -118,7 +118,6 @@ public interface Replicable<S, O extends OperationWithResult<S, ?>> extends With
      * From an input stream, reads an operation that can be {@link #apply(OperationWithResult) applied} to this object.
      * Separating reading and applying gives clients an opportunity to queue operations, e.g., in order to wait until
      * receiving and {@link #initiallyFillFrom(InputStream) filling} the initial load has completed.
-     * @throws ClassNotFoundException 
      */
     O readOperation(InputStream inputStream) throws IOException, ClassNotFoundException;
 

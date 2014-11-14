@@ -41,6 +41,8 @@ public class MasterDataImporter {
         RaceLogStore raceLogStore = MongoRaceLogStoreFactory.INSTANCE.getMongoRaceLogStore(
                 racingEventService.getMongoObjectFactory(), racingEventService.getDomainObjectFactory());
         RegattaImpl.setOngoingMasterDataImport(new MasterDataImportInformation(raceLogStore));
+        ClassLoader oldContextClassLoader = Thread.currentThread().getContextClassLoader();
+        Thread.currentThread().setContextClassLoader(TopLevelMasterData.class.getClassLoader());
 
         @SuppressWarnings("unchecked")
         final List<Serializable> competitorIds = (List<Serializable>) objectInputStream.readObject();
@@ -53,6 +55,7 @@ public class MasterDataImporter {
         TopLevelMasterData topLevelMasterData = (TopLevelMasterData) objectInputStream.readObject();
 
         RegattaImpl.setOngoingMasterDataImport(null);
+        Thread.currentThread().setContextClassLoader(oldContextClassLoader);
         
         // in order to restore all listeners we need to initialize the regatta
         // after the whole object graph has been restored
