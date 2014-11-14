@@ -8,6 +8,7 @@ import android.os.BatteryManager;
 import android.widget.Toast;
 
 import com.sap.sailing.android.shared.logging.ExLog;
+import com.sap.sailing.android.tracking.app.BuildConfig;
 import com.sap.sailing.android.tracking.app.utils.AppPreferences;
 
 public class PowerConnectionReceiver extends BroadcastReceiver {
@@ -30,7 +31,10 @@ public class PowerConnectionReceiver extends BroadcastReceiver {
     
     private void storeBatteryIsCharging(Context context, boolean batteryIsCharging)
     {
-    	ExLog.iDebug(context, TAG, "Storing battery is charging: " + batteryIsCharging);
+    	if (BuildConfig.DEBUG)
+    	{
+    		ExLog.i(context, TAG, "Storing battery is charging: " + batteryIsCharging);
+    	}
     	new AppPreferences(context).setBatteryIsCharging(batteryIsCharging);
     }
     
