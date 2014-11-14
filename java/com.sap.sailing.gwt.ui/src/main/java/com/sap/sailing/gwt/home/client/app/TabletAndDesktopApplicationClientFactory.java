@@ -21,6 +21,7 @@ import com.sap.sailing.gwt.home.client.place.searchresult.SearchResultView;
 import com.sap.sailing.gwt.home.client.place.searchresult.TabletAndDesktopSearchResultView;
 import com.sap.sailing.gwt.home.client.place.series.SeriesAnalyticsView;
 import com.sap.sailing.gwt.home.client.place.series.TabletAndDesktopSeriesView;
+import com.sap.sailing.gwt.home.client.place.series.SeriesPlace.SeriesNavigationTabs;
 import com.sap.sailing.gwt.home.client.place.solutions.SolutionsActivity;
 import com.sap.sailing.gwt.home.client.place.solutions.SolutionsView;
 import com.sap.sailing.gwt.home.client.place.solutions.TabletAndDesktopSolutionsView;
@@ -88,8 +89,8 @@ public class TabletAndDesktopApplicationClientFactory extends AbstractApplicatio
     }
 
     @Override
-    public SeriesAnalyticsView createSeriesAnalyticsView(EventDTO event, String leaderboardName, Timer timerForClientServerOffset) {
-        return new TabletAndDesktopSeriesView(event, leaderboardName, timerForClientServerOffset, getHomePlacesNavigator());
+    public SeriesAnalyticsView createSeriesAnalyticsView(EventDTO event, String leaderboardName, SeriesNavigationTabs navigationTab, Timer timerForClientServerOffset) {
+        return new TabletAndDesktopSeriesView(event, leaderboardName, navigationTab, timerForClientServerOffset, getHomePlacesNavigator());
     }
 
     @Override

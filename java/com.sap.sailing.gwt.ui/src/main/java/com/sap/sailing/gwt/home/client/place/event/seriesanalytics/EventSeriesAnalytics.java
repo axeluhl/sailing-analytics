@@ -77,8 +77,11 @@ public class EventSeriesAnalytics extends Composite implements LeaderboardUpdate
     private Anchor activeAnchor;
     private EventSeriesAnalyticsDataManager eventSeriesAnalyticsManager;
     private Timer autoRefreshTimer;
+    private SeriesNavigationTabs navigationTab;
         
-    public EventSeriesAnalytics(EventDTO event, String leaderboardName, Timer timerForClientServerOffset, HomePlacesNavigator placesNavigator) {
+    public EventSeriesAnalytics(EventDTO event, String leaderboardName, SeriesNavigationTabs navigationTab, Timer timerForClientServerOffset, HomePlacesNavigator placesNavigator) {
+        this.navigationTab = navigationTab;
+        
         eventHeader = new CompactEventHeader(event, leaderboardName, placesNavigator);
     
         EventRegattaLeaderboardResources.INSTANCE.css().ensureInjected();
@@ -93,11 +96,7 @@ public class EventSeriesAnalytics extends Composite implements LeaderboardUpdate
         }
         title.setInnerText(seriesTitle);
 
-        activeAnchor = overallLeaderboardAnchor;
-        activeTabPanel = overallLeaderboardTabPanel;
-        activeContentWidget = null;
-        activeAnchor.addStyleName(SharedResources.INSTANCE.mainCss().navbar_buttonactive());
-
+        overallLeaderboardTabPanel.setVisible(false);
         regattaLeaderboardsTabPanel.setVisible(false);
         competitorChartsTabPanel.setVisible(false);
         liveRaceDiv.getStyle().setVisibility(Visibility.HIDDEN);
@@ -139,7 +138,21 @@ public class EventSeriesAnalytics extends Composite implements LeaderboardUpdate
 
         eventSeriesAnalyticsManager.getLeaderboardPanel().addLeaderboardUpdateListener(this);
         eventSeriesAnalyticsManager.getMultiLeaderboardPanel().addLeaderboardUpdateListener(this);
-        
+
+        switch(navigationTab) {
+        case OverallLeaderboard:
+            setActiveTabPanel(overallLeaderboardTabPanel, eventSeriesAnalyticsManager.getLeaderboardPanel(), overallLeaderboardAnchor);
+            break;
+        case RegattaLeaderboards:
+            setActiveTabPanel(regattaLeaderboardsTabPanel, eventSeriesAnalyticsManager.getMultiLeaderboardPanel(), regattaLeaderboardsAnchor);
+            break;
+        case CompetitorAnalytics:
+            setActiveTabPanel(competitorChartsTabPanel, eventSeriesAnalyticsManager.getMultiCompetitorChart(), competitorChartsAnchor);
+            DetailType selectedChartDetailType = oldCompetitorChartsComposite.getSelectedChartDetailType();
+            eventSeriesAnalyticsManager.showCompetitorChart(selectedChartDetailType);
+            break;
+    }
+
         activeContentWidget = eventSeriesAnalyticsManager.getLeaderboardPanel();
     }
 

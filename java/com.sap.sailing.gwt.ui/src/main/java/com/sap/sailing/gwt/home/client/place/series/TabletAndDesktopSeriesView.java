@@ -8,6 +8,7 @@ import com.google.gwt.user.client.ui.Widget;
 import com.sap.sailing.domain.common.RaceIdentifier;
 import com.sap.sailing.gwt.home.client.app.HomePlacesNavigator;
 import com.sap.sailing.gwt.home.client.place.event.seriesanalytics.EventSeriesAnalytics;
+import com.sap.sailing.gwt.home.client.place.series.SeriesPlace.SeriesNavigationTabs;
 import com.sap.sailing.gwt.ui.client.SailingServiceAsync;
 import com.sap.sailing.gwt.ui.leaderboard.LeaderboardSettings;
 import com.sap.sailing.gwt.ui.shared.EventDTO;
@@ -24,8 +25,8 @@ public class TabletAndDesktopSeriesView extends Composite implements SeriesAnaly
 
     @UiField(provided=true) EventSeriesAnalytics seriesAnalytics;
     
-    public TabletAndDesktopSeriesView(EventDTO event, String leaderboardName, Timer timerForClientServerOffset, HomePlacesNavigator placeNavigator) {
-        seriesAnalytics = new EventSeriesAnalytics(event, leaderboardName, timerForClientServerOffset, placeNavigator);
+    public TabletAndDesktopSeriesView(EventDTO event, String leaderboardName, SeriesNavigationTabs navigationTab, Timer timerForClientServerOffset, HomePlacesNavigator placeNavigator) {
+        seriesAnalytics = new EventSeriesAnalytics(event, leaderboardName, navigationTab, timerForClientServerOffset, placeNavigator);
         
         initWidget(uiBinder.createAndBindUi(this));
 

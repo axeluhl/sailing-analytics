@@ -108,7 +108,8 @@ public class SeriesActivity extends AbstractActivity implements ErrorReporter {
         boolean autoExpandLastRaceColumn = GwtHttpRequestUtils.getBooleanParameter(LeaderboardUrlSettings.PARAM_AUTO_EXPAND_LAST_RACE_COLUMN, false);
         boolean showSeriesLeaderboards = GwtHttpRequestUtils.getBooleanParameter(LeaderboardUrlSettings.PARAM_SHOW_SERIES_LEADERBOARDS, false);
         
-        SeriesAnalyticsView analyticsView = clientFactory.createSeriesAnalyticsView(event, leaderboardName, timerForClientServerOffset);
+        SeriesAnalyticsView analyticsView = clientFactory.createSeriesAnalyticsView(event, leaderboardName, 
+                seriesPlace.getNavigationTab(), timerForClientServerOffset);
         Window.setTitle(seriesPlace.getTitle(event.getName(), leaderboardDisplayName));
         
         analyticsView.createSeriesAnalyticsViewer(clientFactory.getSailingService(), new AsyncActionsExecutor(),
