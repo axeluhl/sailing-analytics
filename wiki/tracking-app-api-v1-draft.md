@@ -37,19 +37,15 @@ The app has to receive the following information:
 
 This information is represented in a URL with the following structure:
 ```
-http://sapsailing.com/tracking/checkin
-  ?host=<server-for-tracking>
-  &event_id=<event-id>
+http://<host>/tracking/checkin
+  ?event_id=<event-id>
   &leaderboard_name=<leaderboard-name>
   &competitor_id=<competitor-id>
 ```
 
 **Additional Notes:**
 * The URL is **only symbolic**. Requesting it will for now result in a 404. In the future, it might be used to redirect to the .apk, play store or app store in case the app is not installed.
-* The structure of the URL was chosen for the following reasons:
-  * If presented to a user as text, it is immediately obvious that he is dealing with sapsailing.com
-  * If we want to redirect to a server-version-specific .apk under Android, the sapsailing.com server can still simply redirect to the ``host``
-  * The variable-length leaderboard name is problematic when thinking about length restrictions in QRCodes anyway. We will have to think about URL-shortening anyhow, so legible parameter names were chosen instead of short ones (e.g. ``e=`` instead of ``event_id=``)
+* The variable-length leaderboard name is problematic when thinking about length restrictions in QRCodes anyway. We will have to think about URL-shortening anyhow, so legible parameter names were chosen instead of short ones (e.g. ``event_id=`` instead of ``e=``)
 * The app has to get event and competitor data by performing additional REST API calls
 * The returned JSON-document for an event includes the names of the associated LeaderboardGroups. The JSON for the LeaderboardGroup in turn includes the names of the associated leaderboards. This structure of the returned resources does not follow the [REST constraints](http://en.wikipedia.org/wiki/Representational_state_transfer#Uniform_interface) in the sense that it does not use URIs to refer to associated resources. Instead, only the unique identifier is given, and one has to refer to the API documentation to construct the URI through which the related resource can be addressed.
 
@@ -178,4 +174,4 @@ GZIP compression is a must. Bulk uploads should be chunked, e.g. per 1,000 locat
 ```
 * JSON array may contain one or several fixes
 * **speed** Speed over ground in meters per second.
-* **course** Heading in degrees.
+* **course** Bearing in degrees.
