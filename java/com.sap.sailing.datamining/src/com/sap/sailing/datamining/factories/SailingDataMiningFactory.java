@@ -22,7 +22,7 @@ import com.sap.sse.datamining.functions.Function;
 import com.sap.sse.datamining.functions.FunctionProvider;
 import com.sap.sse.datamining.i18n.DataMiningStringMessages;
 import com.sap.sse.datamining.impl.DataMiningActivator;
-import com.sap.sse.datamining.impl.DataRetrieverChainDefinitionRegistry;
+import com.sap.sse.datamining.impl.DataRetrieverChainDefinitionProvider;
 import com.sap.sse.datamining.impl.ProcessorQuery;
 import com.sap.sse.datamining.impl.components.GroupedDataEntry;
 import com.sap.sse.datamining.impl.criterias.AndCompoundFilterCriterion;
@@ -42,9 +42,9 @@ public class SailingDataMiningFactory {
     private final ProcessorFactory processorFactory;
     
     private final FunctionProvider functionProvider;
-    private final DataRetrieverChainDefinitionRegistry dataRetrieverChainDefinitionRegistry;
+    private final DataRetrieverChainDefinitionProvider dataRetrieverChainDefinitionProvider;
 
-    public SailingDataMiningFactory(FunctionProvider functionProvider, DataRetrieverChainDefinitionRegistry dataRetrieverChainDefinitionRegistry) {
+    public SailingDataMiningFactory(FunctionProvider functionProvider, DataRetrieverChainDefinitionProvider dataRetrieverChainDefinitionRegistry) {
         DataMiningActivator dataMiningActivator = DataMiningActivator.getDefault();
         executorService = dataMiningActivator.getExecutor();
         stringMessages = dataMiningActivator.getStringMessages();
@@ -52,7 +52,7 @@ public class SailingDataMiningFactory {
         processorFactory = new ProcessorFactory(executorService);
         
         this.functionProvider = functionProvider;
-        this.dataRetrieverChainDefinitionRegistry = dataRetrieverChainDefinitionRegistry;
+        this.dataRetrieverChainDefinitionProvider = dataRetrieverChainDefinitionRegistry;
     }
 
     public <ElementType> Query<Double> createQuery(RacingEventService dataSource, final QueryDefinition queryDefinition) {
@@ -71,7 +71,7 @@ public class SailingDataMiningFactory {
                 List<Function<?>> dimensionsToGroupBy = convertDTOsToFunctions(queryDefinition.getDimensionsToGroupBy());
                 Processor<ElementType, GroupedDataEntry<ElementType>> groupingProcessor = processorFactory.createGroupingProcessor(dataTypeToRetrieve, extractionProcessor, dimensionsToGroupBy);
 
-                DataRetrieverChainDefinition<RacingEventService> dataRetrieverChainDefinition = dataRetrieverChainDefinitionRegistry.getDataRetrieverChainDefinition(RacingEventService.class, queryDefinition.getDataRetrieverChainDefinition().getId());
+                DataRetrieverChainDefinition<RacingEventService> dataRetrieverChainDefinition = dataRetrieverChainDefinitionProvider.get(RacingEventService.class, queryDefinition.getDataRetrieverChainDefinition().getId());
                 DataRetrieverChainBuilder<RacingEventService> chainBuilder = dataRetrieverChainDefinition.startBuilding(executorService);
                 Map<Integer, FilterCriterion<?>> criteriaMappedByDataType = createFilterCriteria(queryDefinition.getFilterSelection());
                 do {
@@ -128,7 +128,7 @@ public class SailingDataMiningFactory {
             protected Processor<RacingEventService, ?> createFirstProcessor() {
                 Processor<GroupedDataEntry<Object>, Map<GroupKey, Set<Object>>> valueCollector = processorFactory.createGroupedDataCollectingAsSetProcessor(/*query*/ this);
 
-                DataRetrieverChainDefinition<RacingEventService> dataRetrieverChainDefinition = dataRetrieverChainDefinitionRegistry.getDataRetrieverChainDefinition(RacingEventService.class, dataRetrieverChainDefinitionDTO.getId());
+                DataRetrieverChainDefinition<RacingEventService> dataRetrieverChainDefinition = dataRetrieverChainDefinitionProvider.get(RacingEventService.class, dataRetrieverChainDefinitionDTO.getId());
                 DataRetrieverChainBuilder<RacingEventService> chainBuilder = dataRetrieverChainDefinition.startBuilding(executorService);
                 Collection<Function<?>> dimensions = convertDTOsToFunctions(dimensionDTOs);
                 for (int level = 0; level < retrieverLevel; level++) {

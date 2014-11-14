@@ -18,7 +18,7 @@ public class SimpleDataRetrieverChainDefinitionRegistry implements DataRetriever
     }
 
     @Override
-    public void add(DataRetrieverChainDefinition<?> dataRetrieverChainDefinition) {
+    public void register(DataRetrieverChainDefinition<?> dataRetrieverChainDefinition) {
         RegistrationKey key = new RegistrationKey(dataRetrieverChainDefinition.getDataSourceType(), dataRetrieverChainDefinition.getRetrievedDataType());
         if (!chainDefinitions.containsKey(key)) {
             chainDefinitions.put(key, new HashSet<DataRetrieverChainDefinition<?>>());
@@ -27,7 +27,7 @@ public class SimpleDataRetrieverChainDefinitionRegistry implements DataRetriever
     }
 
     @Override
-    public void remove(DataRetrieverChainDefinition<?> dataRetrieverChainDefinition) {
+    public void unregister(DataRetrieverChainDefinition<?> dataRetrieverChainDefinition) {
         RegistrationKey key = new RegistrationKey(dataRetrieverChainDefinition.getDataSourceType(), dataRetrieverChainDefinition.getRetrievedDataType());
         if (chainDefinitions.containsKey(key)) {
             chainDefinitions.get(key).remove(dataRetrieverChainDefinition);
@@ -36,7 +36,7 @@ public class SimpleDataRetrieverChainDefinitionRegistry implements DataRetriever
 
     @SuppressWarnings("unchecked")
     @Override
-    public <DataSourceType> Collection<DataRetrieverChainDefinition<DataSourceType>> getDataRetrieverChainDefinitions(
+    public <DataSourceType> Collection<DataRetrieverChainDefinition<DataSourceType>> get(
             Class<DataSourceType> dataSourceType, Class<?> retrievedDataType) {
         RegistrationKey key = new RegistrationKey(dataSourceType, retrievedDataType);
         return chainDefinitions.containsKey(key) ? (Collection<DataRetrieverChainDefinition<DataSourceType>>)(Collection<?>) new HashSet<>(chainDefinitions.get(key)) : new HashSet<DataRetrieverChainDefinition<DataSourceType>>();
@@ -44,7 +44,7 @@ public class SimpleDataRetrieverChainDefinitionRegistry implements DataRetriever
     
     @SuppressWarnings("unchecked")
     @Override
-    public <DataSourceType> DataRetrieverChainDefinition<DataSourceType> getDataRetrieverChainDefinition(Class<DataSourceType> dataSourceType, UUID id) {
+    public <DataSourceType> DataRetrieverChainDefinition<DataSourceType> get(Class<DataSourceType> dataSourceType, UUID id) {
         for (Collection<DataRetrieverChainDefinition<?>> retrieverChainDefinitions : chainDefinitions.values()) {
             for (DataRetrieverChainDefinition<?> retrieverChainDefinition : retrieverChainDefinitions) {
                 if (retrieverChainDefinition.getUUID().equals(id)) {

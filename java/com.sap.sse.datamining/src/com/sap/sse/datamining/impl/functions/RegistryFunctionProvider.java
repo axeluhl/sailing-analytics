@@ -2,17 +2,13 @@ package com.sap.sse.datamining.impl.functions;
 
 import java.util.Arrays;
 import java.util.Collection;
-import java.util.HashMap;
 import java.util.HashSet;
-import java.util.List;
-import java.util.Map;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
 import com.sap.sse.datamining.DataRetrieverChainDefinition;
 import com.sap.sse.datamining.components.FilterCriterion;
 import com.sap.sse.datamining.factories.FunctionDTOFactory;
-import com.sap.sse.datamining.factories.FunctionFactory;
 import com.sap.sse.datamining.functions.Function;
 import com.sap.sse.datamining.functions.FunctionProvider;
 import com.sap.sse.datamining.functions.FunctionRegistry;
@@ -48,7 +44,6 @@ public class RegistryFunctionProvider implements FunctionProvider {
     
     private static final Logger LOGGER = Logger.getLogger(RegistryFunctionProvider.class.getName());
 
-    private final FunctionFactory functionFactory;
     private final FunctionDTOFactory functionDTOFactory;
     private final Collection<FunctionRegistry> functionRegistries;
 
@@ -57,7 +52,6 @@ public class RegistryFunctionProvider implements FunctionProvider {
     }
     
     public RegistryFunctionProvider(Collection<FunctionRegistry> functionRegistries) {
-        functionFactory = new FunctionFactory();
         functionDTOFactory = new FunctionDTOFactory();
         this.functionRegistries = new HashSet<>(functionRegistries);
     }
@@ -88,39 +82,6 @@ public class RegistryFunctionProvider implements FunctionProvider {
             dimensions.addAll(getDimensionsFor(dataRetrieverTypeWithInformation.getRetrievedDataType()));
         }
         return dimensions;
-    }
-    
-    @Override
-    public Collection<Function<?>> getMinimizedDimensionsFor(DataRetrieverChainDefinition<?> dataRetrieverChainDefinition) {
-        Collection<Function<?>> dimensions = new HashSet<>();
-        List<? extends DataRetrieverTypeWithInformation<?, ?>> dataRetrieverTypesWithInformation = dataRetrieverChainDefinition.getDataRetrieverTypesWithInformation();
-        for (int i = dataRetrieverTypesWithInformation.size() - 1; i >= 0; i--) {
-            DataRetrieverTypeWithInformation<?, ?> dataRetrieverTypeWithInformation = dataRetrieverTypesWithInformation.get(i);
-            Collection<Function<?>> dimensionsOfDataType = getDimensionsFor(dataRetrieverTypeWithInformation.getRetrievedDataType());
-            
-            if (!dimensions.isEmpty()) {
-                Map<Function<?>, Function<?>> dimensionsMappedByTrimmedDimensions = trimFirstMethodAndMapOriginal(dimensions);
-                for (Function<?> dimensionOfDataType : dimensionsOfDataType) {
-                    if (dimensionsMappedByTrimmedDimensions.containsKey(dimensionOfDataType)) {
-                        dimensions.remove(dimensionsMappedByTrimmedDimensions.get(dimensionOfDataType));
-                    }
-                }
-            }
-            
-            dimensions.addAll(dimensionsOfDataType);
-        }
-        return dimensions;
-    }
-    
-    private Map<Function<?>, Function<?>> trimFirstMethodAndMapOriginal(Collection<Function<?>> dimensions) {
-        Map<Function<?>, Function<?>> dimensionsMappedByTrimmedDimensions = new HashMap<>();
-        for (Function<?> dimension : dimensions) {
-            Function<?> trimmedDimension = functionFactory.trimFirstMethod(dimension);
-            if (trimmedDimension != null) {
-                dimensionsMappedByTrimmedDimensions.put(trimmedDimension, dimension);
-            }
-        }
-        return dimensionsMappedByTrimmedDimensions;
     }
     
     @Override

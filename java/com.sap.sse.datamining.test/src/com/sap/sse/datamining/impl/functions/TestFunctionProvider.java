@@ -88,16 +88,6 @@ public class TestFunctionProvider {
         assertThat(functionProvider.getDimensionsFor(dataRetrieverChainDefinition), is(expectedDimensions));
     }
     
-    @Test
-    public void testGetMinimizedDimensionsForDataRetrieverChainDefinition() {
-        FunctionProvider functionProvider = new RegistryFunctionProvider(functionRegistry);
-        DataRetrieverChainDefinition<Collection<Test_Regatta>> dataRetrieverChainDefinition = createDataRetrieverChainDefinition();
-
-        Collection<Function<?>> expectedDimensions = functionRegistryUtil.getExpectedDimensionsFor(Test_HasRaceContext.class);
-        expectedDimensions.addAll(functionRegistryUtil.getExpectedDimensionsFor(Test_HasLegOfCompetitorContext.class));
-        assertThat(functionProvider.getMinimizedDimensionsFor(dataRetrieverChainDefinition), is(expectedDimensions));
-    }
-    
     @SuppressWarnings("unchecked")
     public DataRetrieverChainDefinition<Collection<Test_Regatta>> createDataRetrieverChainDefinition() {
         DataRetrieverChainDefinition<Collection<Test_Regatta>> dataRetrieverChainDefinition = new SimpleDataRetrieverChainDefinition<>((Class<Collection<Test_Regatta>>)(Class<?>) Collection.class, "TestRetrieverChain");

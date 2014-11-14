@@ -45,7 +45,7 @@ public class DataMiningServiceImpl extends RemoteServiceServlet implements DataM
         racingEventServiceTracker = createAndOpenRacingEventServiceTracker(context);
         
         sailingDataMiningFactory = new SailingDataMiningFactory(getDataMiningServer().getFunctionProvider(),
-                                                                getDataMiningServer().getDataRetrieverChainDefinitionRegistry());
+                                                                getDataMiningServer().getDataRetrieverChainDefinitionProvider());
         functionDTOFactory = new FunctionDTOFactory();
     }
 
@@ -74,28 +74,28 @@ public class DataMiningServiceImpl extends RemoteServiceServlet implements DataM
     
     @Override
     public Collection<FunctionDTO> getAllStatistics(String localeInfoName) {
-        Collection<Function<?>> statistics = getDataMiningServer().getFunctionProvider().getAllStatistics();
+        Collection<Function<?>> statistics = getDataMiningServer().getAllStatistics();
         return functionsAsFunctionDTOs(statistics, localeInfoName);
     }
 
     @Override
     public Collection<FunctionDTO> getDimensionsFor(FunctionDTO statisticToCalculate, String localeInfoName) {
         Class<?> baseDataType = getBaseDataType(statisticToCalculate);
-        Collection<Function<?>> dimensions = getDataMiningServer().getFunctionProvider().getDimensionsFor(baseDataType);
+        Collection<Function<?>> dimensions = getDataMiningServer().getDimensionsFor(baseDataType);
         return functionsAsFunctionDTOs(dimensions, localeInfoName);
     }
     
     @Override
     public Collection<FunctionDTO> getDimensionsFor(DataRetrieverChainDefinitionDTO dataRetrieverChainDefinitionDTO, String localeInfoName) {
-        DataRetrieverChainDefinition<?> dataRetrieverChainDefinition = getDataMiningServer().getDataRetrieverChainDefinitionRegistry().getDataRetrieverChainDefinition(RacingEventService.class, dataRetrieverChainDefinitionDTO.getId());
-        Collection<Function<?>> dimensions = getDataMiningServer().getFunctionProvider().getDimensionsFor(dataRetrieverChainDefinition);
+        DataRetrieverChainDefinition<?> dataRetrieverChainDefinition = getDataMiningServer().getDataRetrieverChainDefinition(RacingEventService.class, dataRetrieverChainDefinitionDTO.getId());
+        Collection<Function<?>> dimensions = getDataMiningServer().getDimensionsFor(dataRetrieverChainDefinition);
         return functionsAsFunctionDTOs(dimensions, localeInfoName);
     }
     
     @Override
     public Collection<DataRetrieverChainDefinitionDTO> getDataRetrieverChainDefinitionsFor(FunctionDTO statisticToCalculate, String localeInfoName) {
         Class<?> baseDataType = getBaseDataType(statisticToCalculate);
-        return dataRetrieverChainDefinitionsAsDTOs(getDataMiningServer().getDataRetrieverChainDefinitionRegistry().getDataRetrieverChainDefinitions(RacingEventService.class, baseDataType), localeInfoName);
+        return dataRetrieverChainDefinitionsAsDTOs(getDataMiningServer().getDataRetrieverChainDefinitions(RacingEventService.class, baseDataType), localeInfoName);
     }
     
     private Collection<DataRetrieverChainDefinitionDTO> dataRetrieverChainDefinitionsAsDTOs(
@@ -121,7 +121,7 @@ public class DataMiningServiceImpl extends RemoteServiceServlet implements DataM
     }
 
     private Class<?> getBaseDataType(FunctionDTO statisticToCalculate) {
-        Function<?> function = getDataMiningServer().getFunctionProvider().getFunctionForDTO(statisticToCalculate);
+        Function<?> function = getDataMiningServer().getFunctionForDTO(statisticToCalculate);
         return function.getDeclaringType();
     }
     

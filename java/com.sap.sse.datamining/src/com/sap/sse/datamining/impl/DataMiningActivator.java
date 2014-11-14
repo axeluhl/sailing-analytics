@@ -16,6 +16,7 @@ import com.sap.sse.datamining.ClassesWithFunctionsRegistrationService;
 import com.sap.sse.datamining.DataMiningServer;
 import com.sap.sse.datamining.DataRetrieverChainDefinition;
 import com.sap.sse.datamining.DataRetrieverChainDefinitionRegistrationService;
+import com.sap.sse.datamining.ModifiableDataMiningServer;
 import com.sap.sse.datamining.functions.FunctionProvider;
 import com.sap.sse.datamining.functions.FunctionRegistry;
 import com.sap.sse.datamining.i18n.DataMiningStringMessages;
@@ -29,7 +30,7 @@ public class DataMiningActivator implements BundleActivator, ClassesWithFunction
     
     private static DataMiningActivator INSTANCE;
     
-    private final DataMiningServer dataMiningServer;
+    private final ModifiableDataMiningServer dataMiningServer;
     private final DataMiningStringMessages stringMessages;
     private final ExecutorService executor;
     
@@ -60,27 +61,27 @@ public class DataMiningActivator implements BundleActivator, ClassesWithFunction
 
     @Override
     public void registerInternalClassesWithMarkedMethods(Set<Class<?>> classesToScan) {
-        dataMiningServer.getFunctionRegistry().registerAllWithInternalFunctionPolicy(classesToScan);
+        dataMiningServer.registerAllWithInternalFunctionPolicy(classesToScan);
     }
 
     @Override
     public void registerExternalLibraryClasses(Set<Class<?>> externalClassesToScan) {
-        dataMiningServer.getFunctionRegistry().registerAllWithExternalFunctionPolicy(externalClassesToScan);
+        dataMiningServer.registerAllWithExternalFunctionPolicy(externalClassesToScan);
     }
 
     @Override
     public void unregisterAllFunctionsOf(Set<Class<?>> classesToUnregister) {
-        dataMiningServer.getFunctionRegistry().unregisterAllFunctionsOf(classesToUnregister);
+        dataMiningServer.unregisterAllFunctionsOf(classesToUnregister);
     }
     
     @Override
     public void addDataRetrieverChainDefinition(DataRetrieverChainDefinition<?> dataRetrieverChainDefinition) {
-        dataMiningServer.getDataRetrieverChainDefinitionRegistry().add(dataRetrieverChainDefinition);
+        dataMiningServer.registerDataRetrieverChainDefinition(dataRetrieverChainDefinition);
     }
     
     @Override
     public void removeDataRetrieverChainDefinition(DataRetrieverChainDefinition<?> dataRetrieverChainDefinition) {
-        dataMiningServer.getDataRetrieverChainDefinitionRegistry().remove(dataRetrieverChainDefinition);
+        dataMiningServer.unregisterDataRetrieverChainDefinition(dataRetrieverChainDefinition);
         
     }
 
