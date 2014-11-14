@@ -13,7 +13,10 @@ import android.content.ContentValues;
 import android.content.Context;
 import android.content.Intent;
 import android.content.IntentFilter;
+import android.content.pm.PackageManager;
 import android.database.Cursor;
+import android.net.ConnectivityManager;
+import android.net.NetworkInfo;
 import android.net.Uri;
 import android.os.BatteryManager;
 import android.os.IBinder;
@@ -23,8 +26,10 @@ import com.android.volley.Response.Listener;
 import com.android.volley.VolleyError;
 import com.android.volley.toolbox.JsonObjectRequest;
 import com.sap.sailing.android.shared.logging.ExLog;
+import com.sap.sailing.android.tracking.app.BuildConfig;
 import com.sap.sailing.android.tracking.app.R;
 import com.sap.sailing.android.tracking.app.provider.AnalyticsContract.SensorGps;
+import com.sap.sailing.android.tracking.app.services.sending.ConnectivityChangedReceiver;
 import com.sap.sailing.android.tracking.app.utils.AppPreferences;
 import com.sap.sailing.android.tracking.app.utils.VolleyHelper;
 
@@ -32,11 +37,12 @@ public class TransmittingService extends Service {
 	
 	private static final String TAG = TransmittingService.class.getName();
 	
-	private int UPDATE_BATCH_SIZE = 10;
-	private int UPDATE_INTERVAL_DEFAULT = 3000;
-	private int UPDATE_INTERVAL_POWERSAVE_MODE = 30000;
-	private long AUTO_END_SERVICE_AFTER_NANO_PASSED = 10000000000L; // 10 sec
+	private final int UPDATE_BATCH_SIZE = 10;
+	private final int UPDATE_INTERVAL_DEFAULT = 3000;
+	private final int UPDATE_INTERVAL_POWERSAVE_MODE = 30000;
+	private final long AUTO_END_SERVICE_AFTER_NANO_PASSED = 10000000000L; // 10 sec
 	private final float BATTERY_POWER_SAVE_TRESHOLD = 0.2f;
+	
 	private int currentUpdateInterval = UPDATE_INTERVAL_DEFAULT;
 	
 	private boolean sendingAttempted = false;
@@ -44,7 +50,6 @@ public class TransmittingService extends Service {
 	private long lastTransmissionTimestamp = 0;
 	
 	private AppPreferences prefs;
-	
 	private Timer timer;
 	
 	@Override
@@ -77,27 +82,39 @@ public class TransmittingService extends Service {
 	private void startTimer() {
 		timer = new Timer();
 		timer.start();
-		ExLog.iDebug(this, "TIMER", "Background update-timer start");
+		if (BuildConfig.DEBUG) {
+			ExLog.i(this, "TIMER", "Background update-timer start");
+		}
+		
 	}
 
 	private void stopTimer() {
 		if (timer != null)
 		{
 			timer.stop();	
-			ExLog.iDebug(this, "TIMER", "Background update-timer stop");
+			if (BuildConfig.DEBUG) {
+				ExLog.i(this, "TIMER", "Background update-timer stop");
+			}
+			
 		}
 	}
 	
 	private void markSuccessfulTransmission()
 	{
-		ExLog.iDebug(this, "TRANSMISSION", "markSuccessfulTransmission");
+		if (BuildConfig.DEBUG) {
+			ExLog.i(this, "TRANSMISSION", "markSuccessfulTransmission");
+		}
+		
 		lastTransmissionFailed = false;
 		lastTransmissionTimestamp = System.nanoTime();
 	}
 	
 	private void markFailedTransmission()
 	{
-		ExLog.iDebug(this, "TRANSMISSION", "markFailedTransmission");
+		if (BuildConfig.DEBUG) {
+			ExLog.i(this, "TRANSMISSION", "markFailedTransmission");
+		}
+		
 		lastTransmissionFailed = true;
 		lastTransmissionTimestamp = 0;
 	}
@@ -111,29 +128,55 @@ public class TransmittingService extends Service {
 	{
 		long currentNanoTime = System.nanoTime();
 		
-		ExLog.iDebug(this, "TRANSMISSION", "serviceCanShutItselfDown?");
-		ExLog.iDebug(this, "TRANSMISSION", "DELTA:" + (currentNanoTime - lastTransmissionTimestamp));
+		if (BuildConfig.DEBUG)
+		{
+			ExLog.i(this, "TRANSMISSION", "serviceCanShutItselfDown?");
+			ExLog.i(this, "TRANSMISSION", "DELTA:" + (currentNanoTime - lastTransmissionTimestamp));
+		}
+		
+		// if network is not connected, shutdown. ConnevtivityChangedReceiver should restart us.
+		if (!isConnected())
+		{
+			enabledConnectivityReceiver(); // make sure ConnectivityReceiver is running
+			return true;
+		}
 		
 		// if we had a failure, never go to sleep until data is sent successfully.
 		if (lastTransmissionFailed)
 		{
-			ExLog.iDebug(this, "TRANSMISSION", "returning false, have failed transmission");
+			if (BuildConfig.DEBUG)
+			{
+				ExLog.i(this, "TRANSMISSION", "returning false, have failed transmission");	
+			}
+			
 			return false;
 		}
 		
 		if (!sendingAttempted)
 		{
-			ExLog.iDebug(this, "TRANSMISSION", "returning true, no sending attempt");
+			if (BuildConfig.DEBUG)
+			{
+				ExLog.i(this, "TRANSMISSION", "returning true, no sending attempt");	
+			}
+			
 			return true;
 		}
 		
 		if (currentNanoTime - lastTransmissionTimestamp > AUTO_END_SERVICE_AFTER_NANO_PASSED)
 		{
-			ExLog.iDebug(this, "TRANSMISSION", "returning true, timeout");
+			if (BuildConfig.DEBUG)
+			{
+				ExLog.i(this, "TRANSMISSION", "returning true, timeout");	
+			}
+			
 			return true;
 		}
 		
-		ExLog.iDebug(this, "TRANSMISSION", "returning false, don't terminate");
+		if (BuildConfig.DEBUG)
+		{
+			ExLog.i(this, "TRANSMISSION", "returning false, don't terminate");	
+		}
+		
 		return false;
 	}
 	
@@ -144,12 +187,20 @@ public class TransmittingService extends Service {
 				
 		if (batteryPct < BATTERY_POWER_SAVE_TRESHOLD && !batteryIsCharging)
 		{
-			ExLog.iDebug(this, "POWER-LEVELS", "in power saving mode");
+			if (BuildConfig.DEBUG)
+			{
+				ExLog.i(this, "POWER-LEVELS", "in power saving mode");	
+			}
+			
 			currentUpdateInterval = UPDATE_INTERVAL_POWERSAVE_MODE;
 		}
 		else
 		{
-			ExLog.iDebug(this, "POWER-LEVELS", "in default power mode");
+			if (BuildConfig.DEBUG)
+			{
+				ExLog.i(this, "POWER-LEVELS", "in default power mode");	
+			}
+			
 			currentUpdateInterval = UPDATE_INTERVAL_DEFAULT;
 		}
 		
@@ -200,8 +251,11 @@ public class TransmittingService extends Service {
 				e.printStackTrace();
 			}
 			
-			ExLog.iDebug(this, TAG, "sending gps fix json: " + requestObject.toString());
-			ExLog.iDebug(this, TAG, "url: " + prefs.getServerURL() + prefs.getServerGpsFixesPostPath());
+			if (BuildConfig.DEBUG) {
+				ExLog.i(this, TAG, "sending gps fix json: " + requestObject.toString());
+				ExLog.i(this, TAG, "url: " + prefs.getServerURL() + prefs.getServerGpsFixesPostPath());
+			}
+			
 			
 			sendingAttempted = true;
 			
@@ -214,7 +268,10 @@ public class TransmittingService extends Service {
 			
 			if (serviceCanShutItselfDown())
 			{
-				ExLog.iDebug(this, TAG, "Nothing to send or timeout occurred, Transmitting Service is stopping timer and terminating itself.");
+				if (BuildConfig.DEBUG) {
+					ExLog.i(this, TAG, "Nothing to send or timeout occurred, Transmitting Service is stopping timer and terminating itself.");	
+				}
+				
 				stopSelf();
 				stopTimer();
 			}
@@ -231,7 +288,10 @@ public class TransmittingService extends Service {
 
 		float batteryPct = level / (float)scale;
 		
-		ExLog.iDebug(this, TAG, "Battery: " + (batteryPct * 100) + "%");
+		if (BuildConfig.DEBUG) {
+			ExLog.i(this, TAG, "Battery: " + (batteryPct * 100) + "%");
+		}
+		
 		
 		return batteryPct;
 	}
@@ -246,6 +306,25 @@ public class TransmittingService extends Service {
 			getContentResolver().delete(uri, null, null);
 		}
 	}
+	
+	/**
+     * checks if there is network connectivity
+     * 
+     * @return connectivity check value
+     */
+    private boolean isConnected() {
+    	ConnectivityManager connectivityManager = (ConnectivityManager) getSystemService(Context.CONNECTIVITY_SERVICE);
+        NetworkInfo activeNetwork = connectivityManager.getActiveNetworkInfo();
+        if (activeNetwork == null) {
+            return false;
+        }
+        return activeNetwork.isConnected();
+    }
+    
+    private void enabledConnectivityReceiver()
+    {
+    	ConnectivityChangedReceiver.enable(this);
+    }
 	
 //  might need this class in the future:  
 //

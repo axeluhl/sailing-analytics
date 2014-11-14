@@ -12,6 +12,9 @@ import android.net.ConnectivityManager;
 import android.net.NetworkInfo;
 
 import com.sap.sailing.android.shared.logging.ExLog;
+import com.sap.sailing.android.tracking.app.BuildConfig;
+import com.sap.sailing.android.tracking.app.R;
+import com.sap.sailing.android.tracking.app.services.TransmittingService;
 
 /**
  * Informs {@link MessageSendingService} whenever connectivity is restored, so that it can start sending
@@ -29,17 +32,27 @@ import com.sap.sailing.android.shared.logging.ExLog;
 public class ConnectivityChangedReceiver extends BroadcastReceiver {
     
     private final static String TAG = ConnectivityChangedReceiver.class.getName();
-
+    
     /* (non-Javadoc)
      * @see android.content.BroadcastReceiver#onReceive(android.content.Context, android.content.Intent)
      */
     @Override
     public void onReceive(Context context, Intent intent) {
-        NetworkInfo networkInfo = (NetworkInfo)intent.getParcelableExtra(ConnectivityManager.EXTRA_NETWORK_INFO);
-        if (!networkInfo.isConnected())
-            return;
-        context.startService(MessageSendingService.createSendDelayedIntent(context));
+		final ConnectivityManager connManager = (ConnectivityManager) context.getSystemService(Context.CONNECTIVITY_SERVICE);
+		final NetworkInfo networkInfo = connManager.getActiveNetworkInfo();
 
+		if (!networkInfo.isConnected()) {
+			return;
+		}
+		
+		if (BuildConfig.DEBUG) {
+			ExLog.i(context, TAG, "Starting TransmittingService");
+    	}
+		
+        Intent transmitStartIntent = new Intent(context, TransmittingService.class);
+        transmitStartIntent.setAction(context.getString(R.string.transmitting_service_start));
+        context.startService(transmitStartIntent);
+        
         disable(context);
     }
 

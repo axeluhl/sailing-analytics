@@ -55,6 +55,8 @@ import com.sap.sailing.domain.common.racelog.RaceLogServletConstants;
  * context.startService(MessageSendingService.createMessageIntent(
  *      context, url, race.getId(), eventId, serializedEventAsJson, callbackClass));
  * }</pre>
+ * 
+ * NOTE: Started using TransmittingService.java, perhaps this class can be dismissed? -LZ
  */
 public class MessageSendingService extends Service implements MessageSendingListener {
     public final static String URL = "url";

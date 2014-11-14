@@ -54,12 +54,6 @@ public class ExLog {
 
     public static String UNIQUE_ID = null;
 
-	public synchronized static void iDebug(Context context, String tag, String msg) {
-		if (BuildConfig.DEBUG) {
-			getInstance().info(context, tag, msg);
-		}
-	}
-
     public synchronized static void i(Context context, String tag, String msg) {
         getInstance().info(context, tag, msg);
     }
