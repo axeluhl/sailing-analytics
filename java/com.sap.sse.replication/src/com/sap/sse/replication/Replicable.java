@@ -1,5 +1,6 @@
 package com.sap.sse.replication;
 
+import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.ObjectInputStream;
@@ -121,4 +122,14 @@ public interface Replicable<S, O extends OperationWithResult<S, ?>> extends With
      * @throws ClassNotFoundException 
      */
     O readOperation(InputStream inputStream) throws IOException, ClassNotFoundException;
+
+    /**
+     * Writes an operation to an output stream such that it can be read by {@link #readOperation}.
+     * 
+     * @param closeStream
+     *            if <code>true</code>, the stream will be closed after having written the operation; in any case, the
+     *            content written will be flushed to the <code>outputStream</code> so that the caller may continue to
+     *            invoke this method for other operations and/or on other replicables without producing corrupt data.
+     */
+    void writeOperation(OperationWithResult<?, ?> operation, OutputStream outputStream, boolean closeStream) throws IOException;
 }

@@ -56,4 +56,13 @@ public interface ReplicableWithObjectInputStream<S, O extends OperationWithResul
         return readOperationInternal(createObjectInputStreamResolvingAgainstCache(inputStream));
     }
 
+    @Override
+    default void writeOperation(OperationWithResult<?, ?> operation, OutputStream outputStream, boolean closeStream) throws IOException {
+        ObjectOutputStream oos = new ObjectOutputStream(outputStream);
+        oos.writeObject(operation);
+        oos.flush();
+        if (closeStream) {
+            oos.close();
+        }
+    }
 }
