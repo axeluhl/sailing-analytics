@@ -7,6 +7,8 @@ import java.util.EnumSet;
 import java.util.concurrent.ArrayBlockingQueue;
 import java.util.concurrent.BlockingQueue;
 
+import com.sap.sailing.android.shared.BuildConfig;
+
 import android.content.Context;
 import android.provider.Settings.Secure;
 import android.util.Log;
@@ -51,6 +53,12 @@ public class ExLog {
     }
 
     public static String UNIQUE_ID = null;
+
+	public synchronized static void iDebug(Context context, String tag, String msg) {
+		if (BuildConfig.DEBUG) {
+			getInstance().info(context, tag, msg);
+		}
+	}
 
     public synchronized static void i(Context context, String tag, String msg) {
         getInstance().info(context, tag, msg);
