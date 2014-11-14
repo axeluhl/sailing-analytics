@@ -94,6 +94,12 @@ class DataManager: NSObject {
         return results as [GPSFix]
     }
 
+    func eventsFetchedResultsController()->NSFetchedResultsController {
+        let fetchRequest = NSFetchRequest(entityName: "Event")
+        fetchRequest.sortDescriptors = [NSSortDescriptor(key: "startDate", ascending: true)]
+        return NSFetchedResultsController(fetchRequest: fetchRequest, managedObjectContext: self.managedObjectContext!, sectionNameKeyPath: nil, cacheName: nil)
+    }
+    
     // MARK: - Core Data stack
     
     lazy var applicationDocumentsDirectory: NSURL = {
