@@ -16,6 +16,7 @@ import com.sap.sailing.gwt.home.client.place.events.EventsView;
 import com.sap.sailing.gwt.home.client.place.events.TabletAndDesktopEventsView;
 import com.sap.sailing.gwt.home.client.place.regatta.RegattaAnalyticsView;
 import com.sap.sailing.gwt.home.client.place.regatta.TabletAndDesktopRegattaView;
+import com.sap.sailing.gwt.home.client.place.regatta.RegattaPlace.RegattaNavigationTabs;
 import com.sap.sailing.gwt.home.client.place.searchresult.SearchResultView;
 import com.sap.sailing.gwt.home.client.place.searchresult.TabletAndDesktopSearchResultView;
 import com.sap.sailing.gwt.home.client.place.series.SeriesAnalyticsView;
@@ -82,8 +83,8 @@ public class TabletAndDesktopApplicationClientFactory extends AbstractApplicatio
     }
 
     @Override
-    public RegattaAnalyticsView createRegattaAnalyticsView(EventDTO event, String leaderboardName, Timer timerForClientServerOffset) {
-        return new TabletAndDesktopRegattaView(event, leaderboardName, timerForClientServerOffset, getHomePlacesNavigator());
+    public RegattaAnalyticsView createRegattaAnalyticsView(EventDTO event, String leaderboardName, RegattaNavigationTabs navigationTab, Timer timerForClientServerOffset) {
+        return new TabletAndDesktopRegattaView(event, leaderboardName, navigationTab, timerForClientServerOffset, getHomePlacesNavigator());
     }
 
     @Override

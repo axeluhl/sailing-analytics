@@ -71,8 +71,11 @@ public class RegattaAnalytics extends Composite implements LeaderboardUpdateList
 
     private RegattaAnalyticsDataManager regattaAnalyticsManager;
     private Timer autoRefreshTimer;
+    private RegattaNavigationTabs navigationTab;
     
-    public RegattaAnalytics(EventDTO event, String leaderboardName, Timer timerForClientServerOffset, HomePlacesNavigator placesNavigator) {
+    public RegattaAnalytics(EventDTO event, String leaderboardName, RegattaNavigationTabs navigationTab, Timer timerForClientServerOffset, HomePlacesNavigator placesNavigator) {
+        this.navigationTab = navigationTab;
+        
         eventHeader = new CompactEventHeader(event, leaderboardName, placesNavigator);
     
         EventRegattaLeaderboardResources.INSTANCE.css().ensureInjected();
@@ -82,11 +85,8 @@ public class RegattaAnalytics extends Composite implements LeaderboardUpdateList
         
         title.setInnerText(leaderboardName);
 
-        activeAnchor = leaderboardAnchor;
-        activeTabPanel = leaderboardTabPanel;
-        activeAnchor.addStyleName(SharedResources.INSTANCE.mainCss().navbar_buttonactive());
-
         competitorChartsTabPanel.setVisible(false);
+        leaderboardTabPanel.setVisible(false);
         liveRaceDiv.getStyle().setVisibility(Visibility.HIDDEN);
         
         leaderboardNavigation = placesNavigator.getRegattaAnalyticsNavigation(event.id.toString(), RegattaNavigationTabs.Leaderboard, leaderboardName, 
@@ -119,6 +119,17 @@ public class RegattaAnalytics extends Composite implements LeaderboardUpdateList
         
         oldCompetitorChartsComposite.setChart(regattaAnalyticsManager.getMultiCompetitorChart(), availableDetailsTypes, initialDetailType);
         regattaAnalyticsManager.hideCompetitorChart();
+        
+        switch(navigationTab) {
+            case Leaderboard:
+                setActiveTabPanel(leaderboardTabPanel, leaderboardAnchor);
+                break;
+            case CompetitorAnalytics:
+                setActiveTabPanel(competitorChartsTabPanel, competitorChartsAnchor);
+                DetailType selectedChartDetailType = oldCompetitorChartsComposite.getSelectedChartDetailType();
+                regattaAnalyticsManager.showCompetitorChart(selectedChartDetailType);
+                break;
+        }
     }
 
     @Override

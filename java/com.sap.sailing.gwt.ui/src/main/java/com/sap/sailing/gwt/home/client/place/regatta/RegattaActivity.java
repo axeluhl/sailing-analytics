@@ -108,7 +108,7 @@ public class RegattaActivity extends AbstractActivity implements ErrorReporter {
         boolean autoExpandLastRaceColumn = GwtHttpRequestUtils.getBooleanParameter(LeaderboardUrlSettings.PARAM_AUTO_EXPAND_LAST_RACE_COLUMN, false);
         boolean showOverallLeaderboard = GwtHttpRequestUtils.getBooleanParameter(LeaderboardUrlSettings.PARAM_SHOW_OVERALL_LEADERBOARD, false);
         
-        RegattaAnalyticsView analyticsView = clientFactory.createRegattaAnalyticsView(event, leaderboardName, timerForClientServerOffset);
+        RegattaAnalyticsView analyticsView = clientFactory.createRegattaAnalyticsView(event, leaderboardName, regattaPlace.getNavigationTab(), timerForClientServerOffset);
         Window.setTitle(regattaPlace.getTitle(event.getName(), leaderboardDisplayName));
         
         analyticsView.createRegattaAnalyticsViewer(clientFactory.getSailingService(), new AsyncActionsExecutor(),
