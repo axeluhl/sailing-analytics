@@ -3,6 +3,7 @@ package com.sap.sailing.android.tracking.app.ui.activities;
 import com.sap.sailing.android.tracking.app.R;
 import com.sap.sailing.android.tracking.app.ui.fragments.RegattaFragment;
 
+import android.content.Intent;
 import android.graphics.Typeface;
 import android.os.Bundle;
 import android.support.v4.app.NavUtils;
@@ -19,6 +20,11 @@ public class RegattaActivity extends BaseActivity {
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
+        
+        Intent intent = getIntent();
+        
+        String regattaName = intent.getStringExtra(getString(R.string.regatta_name));
+        String eventName 	= intent.getStringExtra(getString(R.string.event_name));
 
         setContentView(R.layout.fragment_container);
         Toolbar toolbar = (Toolbar) findViewById(R.id.toolbar);
@@ -29,8 +35,8 @@ public class RegattaActivity extends BaseActivity {
         if (getSupportActionBar() != null) {
             getSupportActionBar().setDisplayHomeAsUpEnabled(true);
             getSupportActionBar().setHomeButtonEnabled(true);
-            getSupportActionBar().setTitle("Kieler Woche 2014");
-            Spannable subtitle = new SpannableString("Registered for: 49er");
+            getSupportActionBar().setTitle(regattaName);
+            Spannable subtitle = new SpannableString("Registered for: " + eventName);
             StyleSpan styleBold = new StyleSpan(Typeface.BOLD);
             subtitle.setSpan(styleBold, 16, 20, Spannable.SPAN_EXCLUSIVE_EXCLUSIVE);
             getSupportActionBar().setSubtitle(subtitle);

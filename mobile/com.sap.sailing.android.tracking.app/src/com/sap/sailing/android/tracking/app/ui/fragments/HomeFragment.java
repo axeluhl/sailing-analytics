@@ -1,14 +1,13 @@
 package com.sap.sailing.android.tracking.app.ui.fragments;
 
 import java.io.UnsupportedEncodingException;
+import java.net.URLDecoder;
 import java.net.URLEncoder;
-import java.nio.charset.Charset;
 import java.util.Date;
 import java.util.List;
 import java.util.UUID;
 
 import org.apache.http.HttpStatus;
-import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
 
@@ -49,7 +48,6 @@ import com.sap.sailing.android.tracking.app.utils.AppPreferences;
 import com.sap.sailing.android.tracking.app.utils.BackendHelper;
 import com.sap.sailing.android.tracking.app.utils.CheckinQRCodeHelper;
 import com.sap.sailing.android.tracking.app.utils.VolleyHelper;
-import com.sap.sailing.domain.common.racelog.RaceLogServletConstants;
 import com.sap.sailing.domain.racelog.RaceLogEvent;
 import com.sap.sailing.domain.racelog.tracking.DeviceIdentifier;
 import com.sap.sailing.domain.racelog.tracking.impl.SmartphoneUUIDIdentifierImpl;
@@ -154,13 +152,13 @@ public class HomeFragment extends BaseFragment implements LoaderCallbacks<Cursor
             
             try {
 				JSONObject requestObject = CheckinQRCodeHelper.getCheckinJson(competitorId, deviceUuid.getStringRepresentation(), "TODO!!", date.getTime());
-				JsonObjectRequest request = new JsonObjectRequest(checkinURLStr, requestObject, new CheckinListener(), new CheckinErrorListener());
+				CheckinListener listener = new CheckinListener(leaderboardName, leaderboardName); // TODO: twice the same? where do the correct values come from?
+				JsonObjectRequest request = new JsonObjectRequest(checkinURLStr, requestObject, listener, new CheckinErrorListener());
 				VolleyHelper.getInstance(getActivity()).addRequest(request);
 				
 			} catch (JSONException e) {
 				ExLog.e(getActivity(), TAG, "Failed to generate checkin JSON: " + e.getMessage());
 			}
-            
             
             
             
@@ -191,8 +189,11 @@ public class HomeFragment extends BaseFragment implements LoaderCallbacks<Cursor
         VolleyHelper.getInstance(getActivity()).cancelRequest(REQUEST_TAG);
     }
 
-    private void startRegatta(String eventId, String competitorId) {
-        getActivity().startActivity(new Intent(getActivity(), RegattaActivity.class));
+    private void startRegatta(String regattaName, String eventName) {
+    	Intent intent = new Intent(getActivity(), RegattaActivity.class);
+    	intent.putExtra(getString(R.string.regatta_name), regattaName);
+    	intent.putExtra(getString(R.string.event_name), eventName);
+        getActivity().startActivity(intent);
     }
 
     private JsonObjectRequest checkInRequest(String server, final String eventId, final String competitorId) {
@@ -209,7 +210,7 @@ public class HomeFragment extends BaseFragment implements LoaderCallbacks<Cursor
 
                     @Override
                     public void onResponse(JSONObject result) {
-                        startRegatta(eventId, competitorId);
+                       // startRegatta(eventId, competitorId);
                     }
                 }, new Response.ErrorListener() {
 
@@ -307,12 +308,23 @@ public class HomeFragment extends BaseFragment implements LoaderCallbacks<Cursor
     }
 
     private class CheckinListener implements Listener<JSONObject> {
+    	
+    	public String eventName;
+    	public String regattaName;
+    	
+    	public CheckinListener(String eventName, String regattaName) {
+    		try {
+    			this.eventName = URLDecoder.decode(eventName, "UTF-8");
+				this.regattaName = URLDecoder.decode(regattaName, "UTF-8");
+			} catch (UnsupportedEncodingException e) {
+				// TODO Auto-generated catch block
+				ExLog.e(getActivity(), TAG, "UnsupportedEncodingException: " + e.getMessage());
+			}
+		}
 
         @Override
         public void onResponse(JSONObject response) {
-            ExLog.i(getActivity(), TAG, response.toString());
-            Intent intent = new Intent(getActivity(), RegattaActivity.class);
-            startActivity(intent);
+            startRegatta(eventName, regattaName);
         }
     }
 

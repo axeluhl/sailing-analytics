@@ -23,5 +23,6 @@
 	<string name="tracking_mode_live">Live</string>
 	<string name="tracking_mode_caching">Caching</string>
 	<string name="tracking_time">Tracking Time</string>
-	
+	<string name="regatta_name">RegattaName</string>
+	<string name="event_name">EventName</string>
 </resources>
