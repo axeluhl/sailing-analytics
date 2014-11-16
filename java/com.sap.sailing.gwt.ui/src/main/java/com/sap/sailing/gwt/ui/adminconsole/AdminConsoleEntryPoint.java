@@ -5,12 +5,8 @@ import java.util.List;
 import java.util.Set;
 
 import com.google.gwt.core.client.GWT;
-import com.google.gwt.safehtml.shared.SafeHtmlBuilder;
 import com.google.gwt.user.client.rpc.AsyncCallback;
 import com.google.gwt.user.client.rpc.ServiceDefTarget;
-import com.google.gwt.user.client.ui.Anchor;
-import com.google.gwt.user.client.ui.DockPanel;
-import com.google.gwt.user.client.ui.HasHorizontalAlignment;
 import com.google.gwt.user.client.ui.RootLayoutPanel;
 import com.google.gwt.user.client.ui.TabLayoutPanel;
 import com.sap.sailing.gwt.ui.client.AbstractSailingEntryPoint;
@@ -33,13 +29,11 @@ import com.sap.sailing.gwt.ui.shared.SecurityStylesheetResources;
 import com.sap.sailing.gwt.ui.shared.StrippedLeaderboardDTO;
 import com.sap.sse.gwt.adminconsole.AdminConsolePanel;
 import com.sap.sse.gwt.adminconsole.DefaultRefreshableAdminConsolePanel;
-import com.sap.sse.gwt.adminconsole.SystemInformationPanel;
 import com.sap.sse.gwt.client.EntryPointHelper;
 import com.sap.sse.gwt.client.async.AsyncActionsExecutor;
 import com.sap.sse.gwt.client.async.MarkedAsyncCallback;
 import com.sap.sse.security.ui.client.component.UserManagementPanel;
 import com.sap.sse.security.ui.client.i18n.StringMessages;
-import com.sap.sse.security.ui.loginpanel.LoginPanel;
 
 public class AdminConsoleEntryPoint extends AbstractSailingEntryPoint implements RegattaRefresher, LeaderboardsRefresher, LeaderboardGroupsRefresher {
     private Set<RegattasDisplayer> regattasDisplayers;
@@ -227,21 +221,6 @@ public class AdminConsoleEntryPoint extends AbstractSailingEntryPoint implements
         fillRegattas();
         fillLeaderboardGroups();
         fillLeaderboards();
-
-        final DockPanel informationPanel = new DockPanel();
-        informationPanel.setSize("100%", "95%");
-        informationPanel.setSpacing(10);
-        informationPanel.add(new LoginPanel(SecurityStylesheetResources.INSTANCE.css(), getUserService()), DockPanel.WEST);
-        informationPanel.add(persistentAlertLabel, DockPanel.CENTER);
-
-        SystemInformationPanel sysinfoPanel = new SystemInformationPanel(sailingService, this);
-        sysinfoPanel.ensureDebugId("SystemInformation");
-
-        final Anchor releaseNotesLink = new Anchor(new SafeHtmlBuilder().appendEscaped(getStringMessages().releaseNotes()).toSafeHtml(), "/release_notes_admin.html");
-        sysinfoPanel.add(releaseNotesLink);
-        informationPanel.add(sysinfoPanel, DockPanel.EAST);
-        informationPanel.setCellHorizontalAlignment(sysinfoPanel, HasHorizontalAlignment.ALIGN_RIGHT);
-
         RootLayoutPanel rootPanel = RootLayoutPanel.get();
         rootPanel.add(panel);
     }
