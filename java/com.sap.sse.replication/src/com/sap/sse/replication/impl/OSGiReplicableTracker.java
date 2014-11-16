@@ -75,6 +75,9 @@ public class OSGiReplicableTracker extends AbstractReplicablesProvider {
             addReplicableLifeCycleListener((AddOnlyReplicableLifeCycleListener) replicable -> {
                 if (replicable.getId().equals(replicableIdAsString)) {
                     foundReplicable[0] = replicable;
+                    synchronized (monitor) {
+                        monitor.notifyAll();
+                    }
                 }
             });
             synchronized (monitor) {

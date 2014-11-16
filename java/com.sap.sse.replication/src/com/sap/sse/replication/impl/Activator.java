@@ -147,6 +147,7 @@ public class Activator implements BundleActivator {
                             System.getProperty(PROPERTY_NAME_REPLICATE_MASTER_SERVLET_HOST), 
                             Integer.valueOf(System.getProperty(PROPERTY_NAME_REPLICATE_MASTER_SERVLET_PORT).trim()));
                     try {
+                        // TODO pass on the replicables to wait for
                         serverReplicationMasterService.startToReplicateFrom(master);
                         logger.info("Automatic replication has been started.");
                     } catch (ClassNotFoundException | IOException | InterruptedException e) {
