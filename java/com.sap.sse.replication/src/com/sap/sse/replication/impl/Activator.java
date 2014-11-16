@@ -35,8 +35,9 @@ import com.sap.sse.replication.ReplicationService;
  * Properties to control replication when replication shall automatically be started, replicating from a specific master
  * server:
  * <ul>
- * <li><code>replicate.on.start</code>: use <code>true</code> to start replication from a specific master when this
- * instance is started; the following parameters are only evaluated if this property is <code>true</code>.</li>
+ * <li><code>replicate.on.start</code>: use a comma-separated list of fully-qualified class names of the
+ * {@link Replicable} objects you want to replicate from a master server to start replication from a specific master when this
+ * instance is started; the following parameters are only evaluated if this property is present and not empty.</li>
  * <li><code>replicate.master.servlet.host</code>: the host name to use for the HTTP connection through which the
  * request to register this replica with the master is sent to the master and the queue name for receiving the initial
  * load is requested</li>
@@ -123,9 +124,8 @@ public class Activator implements BundleActivator {
     
     private void checkIfAutomaticReplicationShouldStart(ReplicationService serverReplicationMasterService, String masterExchangeName, final ReplicablesProvider replicablesProvider) {
         String replicateOnStart = System.getProperty(PROPERTY_NAME_REPLICATE_ON_START);
-        if (Boolean.valueOf(replicateOnStart)) {
-            // TODO obtain list of Replicable objects to wait for from system property
-            final String[] replicableIdsAsStrings = { "com.sap.sailing.server.impl.RacingEventServiceImpl" };
+        if (replicateOnStart != null && !replicateOnStart.isEmpty()) {
+            final String[] replicableIdsAsStrings = replicateOnStart.split(",");
             new Thread("ServiceTracker waiting for Replicables "+Arrays.toString(replicableIdsAsStrings)) {
                 @Override
                 public void run() {
