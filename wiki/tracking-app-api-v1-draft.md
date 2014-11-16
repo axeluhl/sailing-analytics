@@ -146,7 +146,7 @@ Measurements should be sent live during an event. In case of missing network, me
 
 GZIP compression is a must. Bulk uploads should be chunked, e.g. per 1,000 locations.
 
-**Path:** ``gps_fixes``
+**Path:** ``gps_fixes/``
 
 **Verb:** ``POST``
 
