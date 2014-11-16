@@ -24,7 +24,5 @@ Import-Package: com.mongodb,
  org.json.simple.parser,
  org.osgi.framework;version="1.6.0"
 Export-Package: com.sap.sailing.domain.racelogtracking,
- com.sap.sailing.domain.racelogtracking.impl;x-friends:="com.sap.sailing.domain.racelogtrackingadapter.testsupport,com.sap.sailing.gwt.ui.test",
- com.sap.sailing.domain.racelogtracking.servlet;x-friends:="com.sap.sailing.domain.racelogtrackingadapter.test"
-Web-ContextPath: /tracking
+ com.sap.sailing.domain.racelogtracking.impl;x-friends:="com.sap.sailing.domain.racelogtrackingadapter.testsupport,com.sap.sailing.gwt.ui.test"
 Bundle-Activator: com.sap.sailing.domain.racelogtracking.impl.Activator
