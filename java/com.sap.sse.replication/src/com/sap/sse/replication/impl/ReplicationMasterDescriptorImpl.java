@@ -189,7 +189,7 @@ public class ReplicationMasterDescriptorImpl implements ReplicationMasterDescrip
     }
 
     public String toString() {
-        return getHostname() + ":" + getServletPort() + " / " + getMessagingHostname() + ":" + getMessagingPort();
+        return getHostname() + ":" + getServletPort() + " / " + getMessagingHostname() + ":" + getMessagingPort()+":"+getExchangeName();
     }
 
 }

@@ -101,9 +101,11 @@ public class ReplicationServlet extends AbstractHttpServlet {
             final GZIPOutputStream gzipOutputStream = new GZIPOutputStream(countingOutputStream);
             for (String replicableIdAsString : replicableIdsAsStrings) {
                 Replicable<?, ?> replicable = replicablesProvider.getReplicable(replicableIdAsString);
+                if (replicable == null) {
+                    break; // causing an error on the replica which is expecting the replica's initial load
+                }
                 try {
                     replicable.serializeForInitialReplication(gzipOutputStream);
-                    gzipOutputStream.finish();
                 } catch (Exception e) {
                     logger.info("Error trying to serialize initial load for replication: " + e.getMessage());
                     logger.log(Level.SEVERE, "doGet", e);
@@ -111,6 +113,7 @@ public class ReplicationServlet extends AbstractHttpServlet {
                     e.printStackTrace(resp.getWriter());
                 }
             }
+            gzipOutputStream.finish();
             countingOutputStream.close();
             break;
         default:

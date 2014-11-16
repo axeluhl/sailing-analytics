@@ -61,6 +61,7 @@ public class OSGiReplicableTracker extends AbstractReplicablesProvider {
 
     @Override
     public Replicable<?, ?> getReplicable(String replicableIdAsString) {
-        return bundleContext.getService(serviceReferenceByIdAsString.get(replicableIdAsString));
+        final ServiceReference<Replicable<?, ?>> serviceReference = serviceReferenceByIdAsString.get(replicableIdAsString);
+        return serviceReference == null ? null : bundleContext.getService(serviceReference);
     }
 }
