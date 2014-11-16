@@ -4,7 +4,7 @@ Bundle-Name: Testsupport
 Bundle-SymbolicName: com.sap.sailing.domain.racelogtrackingadapter.testsupport
 Bundle-Version: 1.0.0.qualifier
 Bundle-Vendor: SAP
-Bundle-RequiredExecutionEnvironment: JavaSE-1.6
+Bundle-RequiredExecutionEnvironment: JavaSE-1.8
 Require-Bundle: com.sap.sailing.domain.shared.android,
  com.sap.sailing.domain,
  com.sap.sailing.domain.common,
