@@ -100,7 +100,7 @@ public class ReplicationServlet extends AbstractHttpServlet {
                     "HTTP output for initial load for " + req.getRemoteHost());
             final GZIPOutputStream gzipOutputStream = new GZIPOutputStream(countingOutputStream);
             for (String replicableIdAsString : replicableIdsAsStrings) {
-                Replicable<?, ?> replicable = replicablesProvider.getReplicable(replicableIdAsString);
+                Replicable<?, ?> replicable = replicablesProvider.getReplicable(replicableIdAsString, /* wait */ false);
                 if (replicable == null) {
                     break; // causing an error on the replica which is expecting the replica's initial load
                 }

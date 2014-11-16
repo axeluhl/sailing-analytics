@@ -17,15 +17,26 @@ public interface ReplicablesProvider {
         void replicableRemoved(String replicableIdAsString);
     }
     
+    @FunctionalInterface
+    public static interface AddOnlyReplicableLifeCycleListener extends ReplicableLifeCycleListener {
+        @Override
+        default void replicableRemoved(String replicableIdAsString) {}
+    }
+    
     Iterable<Replicable<?, ?>> getReplicables();
 
     /**
-     * Tries to obtain a {@link Replicable> by its {@link Replicable#getId() ID}, converted to a string using {@link Object#toString()}
-     * on the ID.
+     * Tries to obtain a {@link Replicable> by its {@link Replicable#getId() ID}, converted to a string using
+     * {@link Object#toString()} on the ID.
+     * 
+     * @param wait
+     *            if <code>true</code> and the replicable with the ID specified is not currently available, wait for it
+     *            to become available; otherwise, return <code>null</code> immediately in case a replicable with the ID
+     *            specified is not currently available
      * 
      * @return <code>null</code> if no such replicable can be found; the replicable otherwise
      */
-    Replicable<?, ?> getReplicable(String replicableIdAsString);
+    Replicable<?, ?> getReplicable(String replicableIdAsString, boolean wait);
     
     void addReplicableLifeCycleListener(ReplicableLifeCycleListener listener);
     

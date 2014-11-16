@@ -161,7 +161,7 @@ public class Replicator implements Runnable {
                 // of all required bundles/packages can be deserialized at least
                 final GZIPInputStream uncompressedInputStream = new GZIPInputStream(new ByteArrayInputStream(bytesFromMessage));
                 String replicableIdAsString = new DataInputStream(uncompressedInputStream).readUTF();
-                Replicable<?, ?> replicable = replicableProvider.getReplicable(replicableIdAsString);
+                Replicable<?, ?> replicable = replicableProvider.getReplicable(replicableIdAsString, /* wait */ false);
                 if (replicable != null) {
                     Thread.currentThread().setContextClassLoader(replicable.getClass().getClassLoader());
                     ObjectInputStream ois = new ObjectInputStream(uncompressedInputStream); // no special stream required; only reading a generic byte[]
@@ -267,7 +267,7 @@ public class Replicator implements Runnable {
 
     private synchronized <S, O extends OperationWithResult<S, ?>> void apply(final OperationWithResult<S, ?> operation, String replicableIdAsString) {
         @SuppressWarnings("unchecked")
-        Replicable<S, O> replicable = (Replicable<S, O>) replicableProvider.getReplicable(replicableIdAsString);
+        Replicable<S, O> replicable = (Replicable<S, O>) replicableProvider.getReplicable(replicableIdAsString, /* wait */ false);
         apply(operation, replicable);
     }
     

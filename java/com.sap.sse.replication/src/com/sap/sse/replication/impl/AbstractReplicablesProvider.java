@@ -44,7 +44,7 @@ public abstract class AbstractReplicablesProvider implements ReplicablesProvider
      * @throws NoSuchElementException if no replicable by that name is found
      */
     @Override
-    public Replicable<?, ?> getReplicable(String replicableIdAsString) {
+    public Replicable<?, ?> getReplicable(String replicableIdAsString, boolean wait) {
         return StreamSupport.stream(getReplicables().spliterator(), /* parallel */false)
                 .filter(r -> r.getId().toString().equals(replicableIdAsString)).findAny().orElse(null);
     }

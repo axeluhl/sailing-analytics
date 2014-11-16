@@ -3,6 +3,8 @@ package com.sap.sse.replication.impl;
 import java.util.Arrays;
 import java.util.HashMap;
 import java.util.Map;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 
 import org.osgi.framework.BundleContext;
 import org.osgi.framework.ServiceReference;
@@ -14,12 +16,14 @@ import com.sap.sse.replication.Replicable;
 /**
  * Uses an OSGi {@link ServiceTracker} to track and follow the set of {@link Replicable} objects registered with
  * the OSGi service registry under that interface and uses the information and the events from the tracker to
- * prepare the responses to the {@link #getReplicable(String)} and {@link #getReplicables()} method calls.
+ * prepare the responses to the {@link #getReplicable(String, boolean)} and {@link #getReplicables()} method calls.
  * 
  * @author Axel Uhl (D043530)
  *
  */
 public class OSGiReplicableTracker extends AbstractReplicablesProvider {
+    private static final Logger logger = Logger.getLogger(OSGiReplicableTracker.class.getName());
+    
     private final ServiceTracker<Replicable<?, ?>, Replicable<?, ?>> serviceTracker;
     private final Map<String, ServiceReference<Replicable<?, ?>>> serviceReferenceByIdAsString;
     private final Map<ServiceReference<Replicable<?, ?>>, String> idAsStringByServiceReference;
@@ -60,8 +64,33 @@ public class OSGiReplicableTracker extends AbstractReplicablesProvider {
     }
 
     @Override
-    public Replicable<?, ?> getReplicable(String replicableIdAsString) {
+    public Replicable<?, ?> getReplicable(final String replicableIdAsString, boolean wait) {
         final ServiceReference<Replicable<?, ?>> serviceReference = serviceReferenceByIdAsString.get(replicableIdAsString);
-        return serviceReference == null ? null : bundleContext.getService(serviceReference);
+        final Replicable<?, ?> preResult = serviceReference == null ? null : bundleContext.getService(serviceReference);
+        final Replicable<?, ?> result;
+        if (preResult == null && wait) {
+            final Replicable<?, ?> foundReplicable[] = new Replicable[1];
+            Object monitor = new Object();
+            // FIXME synchronize so that we won't miss a relevant service registration
+            addReplicableLifeCycleListener((AddOnlyReplicableLifeCycleListener) replicable -> {
+                if (replicable.getId().equals(replicableIdAsString)) {
+                    foundReplicable[0] = replicable;
+                }
+            });
+            synchronized (monitor) {
+                while (foundReplicable[0] == null) {
+                    try {
+                        monitor.wait();
+                    } catch (InterruptedException e) {
+                        logger.log(Level.WARNING, "Exception while waiting for replicable "+replicableIdAsString+
+                                ". Continuing to wait...", e);
+                    }
+                }
+            }
+            result = foundReplicable[0];
+        } else {
+            result = preResult;
+        }
+        return result;
     }
 }

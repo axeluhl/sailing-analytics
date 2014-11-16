@@ -1,11 +1,13 @@
 package com.sap.sse.replication.impl;
 
 import java.io.IOException;
+import java.util.Arrays;
 import java.util.logging.Logger;
 
 import org.osgi.framework.BundleActivator;
 import org.osgi.framework.BundleContext;
 
+import com.sap.sse.replication.ReplicablesProvider;
 import com.sap.sse.replication.ReplicationService;
 
 /**
@@ -111,34 +113,47 @@ public class Activator implements BundleActivator {
             logger.severe("Couldn't parse the replication port specification \""+exchangePortAsString+"\". Using default.");
         }
         replicationInstancesManager = new ReplicationInstancesManager();
+        final OSGiReplicableTracker replicablesProvider = new OSGiReplicableTracker(bundleContext);
         ReplicationService serverReplicationMasterService = new ReplicationServiceImpl(
-                exchangeName, exchangeHost, exchangePort, replicationInstancesManager, new OSGiReplicableTracker(bundleContext));
+                exchangeName, exchangeHost, exchangePort, replicationInstancesManager, replicablesProvider);
         bundleContext.registerService(ReplicationService.class, serverReplicationMasterService, null);
         logger.info("Registered replication service "+serverReplicationMasterService+" using exchange name "+exchangeName+" on host "+exchangeHost);
-        checkIfAutomaticReplicationShouldStart(serverReplicationMasterService, exchangeName);
+        checkIfAutomaticReplicationShouldStart(serverReplicationMasterService, exchangeName, replicablesProvider);
     }
     
-    private void checkIfAutomaticReplicationShouldStart(ReplicationService serverReplicationMasterService, String masterExchangeName) {
+    private void checkIfAutomaticReplicationShouldStart(ReplicationService serverReplicationMasterService, String masterExchangeName, final ReplicablesProvider replicablesProvider) {
         String replicateOnStart = System.getProperty(PROPERTY_NAME_REPLICATE_ON_START);
         if (Boolean.valueOf(replicateOnStart)) {
-            logger.info("Configuration requested automatic replication. Starting it up...");
-            String replicateFromExchangeName = System.getProperty(PROPERTY_NAME_REPLICATE_MASTER_EXCHANGE_NAME);
-            if (replicateFromExchangeName == null) {
-                replicateFromExchangeName = masterExchangeName;
-            }
-            ReplicationMasterDescriptorImpl master = new ReplicationMasterDescriptorImpl(
-                    System.getProperty(PROPERTY_NAME_REPLICATE_MASTER_QUEUE_HOST),
-                    replicateFromExchangeName,
-                    Integer.valueOf(System.getProperty(PROPERTY_NAME_REPLICATE_MASTER_QUEUE_PORT).trim()), 
-                    serverReplicationMasterService.getServerIdentifier().toString(), 
-                    System.getProperty(PROPERTY_NAME_REPLICATE_MASTER_SERVLET_HOST), 
-                    Integer.valueOf(System.getProperty(PROPERTY_NAME_REPLICATE_MASTER_SERVLET_PORT).trim()));
-            try {
-                serverReplicationMasterService.startToReplicateFrom(master);
-                logger.info("Automatic replication has been started.");
-            } catch (ClassNotFoundException | IOException | InterruptedException e) {
-                e.printStackTrace();
-            }
+            // TODO obtain list of Replicable objects to wait for from system property
+            final String[] replicableIdsAsStrings = { "com.sap.sailing.server.impl.RacingEventServiceImpl" };
+            new Thread("ServiceTracker waiting for Replicables "+Arrays.toString(replicableIdsAsStrings)) {
+                @Override
+                public void run() {
+                    logger.info("Waiting for Replicables " + replicableIdsAsStrings + " before firing up replication automatically...");
+                    for (String replicableIdAsString : replicableIdsAsStrings) {
+                        replicablesProvider.getReplicable(replicableIdAsString, /* wait */true);
+                        logger.info("Obtained Replicable " + replicableIdAsString);
+                    }
+                    logger.info("Configuration requested automatic replication. Starting it up...");
+                    String replicateFromExchangeName = System.getProperty(PROPERTY_NAME_REPLICATE_MASTER_EXCHANGE_NAME);
+                    if (replicateFromExchangeName == null) {
+                        replicateFromExchangeName = masterExchangeName;
+                    }
+                    ReplicationMasterDescriptorImpl master = new ReplicationMasterDescriptorImpl(
+                            System.getProperty(PROPERTY_NAME_REPLICATE_MASTER_QUEUE_HOST),
+                            replicateFromExchangeName,
+                            Integer.valueOf(System.getProperty(PROPERTY_NAME_REPLICATE_MASTER_QUEUE_PORT).trim()), 
+                            serverReplicationMasterService.getServerIdentifier().toString(), 
+                            System.getProperty(PROPERTY_NAME_REPLICATE_MASTER_SERVLET_HOST), 
+                            Integer.valueOf(System.getProperty(PROPERTY_NAME_REPLICATE_MASTER_SERVLET_PORT).trim()));
+                    try {
+                        serverReplicationMasterService.startToReplicateFrom(master);
+                        logger.info("Automatic replication has been started.");
+                    } catch (ClassNotFoundException | IOException | InterruptedException e) {
+                        e.printStackTrace();
+                    }
+                }
+            }.start();
         }
     }
 
