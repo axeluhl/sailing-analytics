@@ -153,8 +153,8 @@ GZIP compression is a must. Bulk uploads should be chunked, e.g. per 1,000 locat
 **Request:**
 ```
 {
-  deviceUuid: "af855a56-9726-4a9c-a77e-da955bd289bf",
-  fixes: [
+  "deviceUuid" : "af855a56-9726-4a9c-a77e-da955bd289bf",
+  "fixes" : [
     {
       "timestamp" : 14144160080000,
       "latitude" : 54.325246,
@@ -174,4 +174,4 @@ GZIP compression is a must. Bulk uploads should be chunked, e.g. per 1,000 locat
 ```
 * JSON array may contain one or several fixes
 * **speed** Speed over ground in meters per second.
-* **course** Heading in degrees.
+* **course** Bearing in degrees.
