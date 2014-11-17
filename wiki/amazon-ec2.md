@@ -235,7 +235,7 @@ ssh -i .ssh/SailingUser.pem sailing@ec2-54-246-247-194.eu-west-1.compute.amazona
 If you want to connect your instance to a subdomain then log onto the main webserver with the Administrator key as root, open the file `/etc/httpd/conf.d/001-events.conf` and put something like this there. As you can see you have to specify the IP address and the port the java server is running on. Make sure to always use the internal IP.
 
 <pre>
-Use Spectator idm.sapsailing.com "505 IDM 2013" 172.31.22.12 8888
+Use Event idm.sapsailing.com "&lt;uuid-of-event-object&gt;" 172.31.22.12 8888
 </pre>
 
 ### Testing code on a server
@@ -258,6 +258,10 @@ The main concept behind ELB is that there is one instance that you configure in 
 
 A closer look reveals that an ELB instance consists itself of many other invisible instances. These are behind a DNS round robin configuration that redirects each incoming request to one of these instances. These invisible instances then decide upon the rules you've created how and where to distribute this request to one of the associated instances.
 
+In a live event scenario, the SAP Sailing Analytics are largely bandwidth bound. Adding more users that watch races live doesn't add much CPU load, but it adds traffic linearly. Therefore, as the number of concurrent users grows, a single instance can quickly max out its bandwidth which for usual instances peaks at around 100Mbit/s. It is then essential that an ELB can offload the traffic to multiple instances which are replicas of a common master in our case.
+
+To still get the usual logging and URL re-writing features, replicas need to run their local Apache server with a bit of configuration. Luckily, most of the grunt work is done for you automatically. You simply need to tell the replicas in their instance details to start replicating automatically, provide an `EVENT_ID` and set the `SERVER_NAME` variable properly. The Apache configuration on the replica will then automatically be adjusted such that the lower-case version of $SERVER_NAME.sapsailing.com will re-direct users to the event page for the event with ID $EVENT_ID.
+
 Here are the steps to create a load balanced setup:
 
 - Create a master instance holding all data (see http://wiki.sapsailing.com/wiki/amazon-ec2#Setting-up-Master-and-Replica)
@@ -269,7 +273,31 @@ Here are the steps to create a load balanced setup:
 - Associate all your instances
 - Connect your domain with the IP of the load balancer. It could be a good idea to use an Elastic IP that always stays the same for the domain and associate it with your load balancer. That way you can also easily switch between a load balancer and a single instance setup. Again, remember not to let the RCApp devices point to the ELB domain as their updates could hit a replica which wouldn't know how to handle!
 
+It is important to understand that it wouldn't help to let all traffic run through our central Apache httpd server which usually acts as a reverse proxy with comprehensive URL rewriting rules and macros. This would make the Apache server the bandwidth bottleneck. Instead, the event traffic needs to go straight to the ELB which requires the event DNS domain name to be mapped to the ELB's host name. You need to set this up in the "Route 53" DNS server which you find in the Amazon Services drop-down.
+
+<img src="/wiki/images/amazon/Route53_1.png" width="100%" height="100%"/>
+
+Go to the "Hosted Zones" entry
+
+<img src="/wiki/images/amazon/Route53_2.png" width="100%" height="100%"/>
+
+and select the `sapsailing.com.` row,
+
+<img src="/wiki/images/amazon/Route53_3.png" width="100%" height="100%"/>
+
+then click on "Go to Record Sets." You will then see the record sets for the `sapsailing.com.` domain:
+
+<img src="/wiki/images/amazon/Route53_4.png" width="100%" height="100%"/>
+
+Click on "Create Record Set" and fill in the subdomain name (`myspecificevent` in the example shown below) and as the value use the host name (A-record) of the ELB that you find in the ELB configuration. 
+
+<img src="/wiki/images/amazon/Route53_5.png" width="100%" height="100%"/>
+
 Amazon ELB is designed to handle unlimited concurrent requests per second with “gradually increasing” load pattern (although it's initial capacity is described to reach 20k requests/secs). It is not designed to handle heavy sudden spike of load or flash traffic because of its internal structure where it needs to fire up more instances when load increases. ELB's can be pre-warmed though by writing to the AWS Support Team.
+
+With this set-up, please keep in mind that administration of the sailing server instance always needs to happen through the master instance. A fat, red warning is displayed in the administration console of the replica instances that shall keep you from making administrative changes there. Change them on the master, and the changes will be replicated to the replicas.
+
+You can monitor the central RabbitMQ message queueing system at [http://54.246.250.138:15672/#/exchanges](http://54.246.250.138:15672/#/exchanges). Use `guest/guest` for username and password. You should find the exchange name you configured for you master there and will be able to see the queues bound to the exchange as well as the traffic running through the exchange.
 
 ### Access MongoDB database
 
