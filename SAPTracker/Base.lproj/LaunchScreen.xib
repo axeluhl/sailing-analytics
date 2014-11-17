@@ -80,6 +80,7 @@
             <freeformSimulatedSizeMetrics key="simulatedDestinationMetrics"/>
             <variation key="default">
                 <mask key="constraints">
+                    <exclude reference="AxZ-9Q-xTE"/>
                     <exclude reference="h6g-gh-KET"/>
                 </mask>
             </variation>
