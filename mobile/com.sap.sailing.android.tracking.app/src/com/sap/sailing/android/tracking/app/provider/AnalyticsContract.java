@@ -7,17 +7,27 @@ import android.provider.BaseColumns;
 public class AnalyticsContract {
 
     interface CompetitorColumns {
-        String COMPETITOR_ID = "competitor_id";
-        String COMPETITOR_NAME = "competitor_name";
-        String COMPETITOR_PROFILE_IMAGE_URL = "profile_image_url";
+        String COMPETITOR_ID = "id";
+        String COMPETITOR_DISPLAY_NAME = "display_name";
+        String COMPETITOR_COUNTRY_CODE = "country_code";
+        String COMPETITOR_NATIONALITY = "nationality";
+        String COMPETITOR_SAIL_ID = "saild_id";
+        String COMPETITOR_LEADERBOARD_FK = "leaderboard_id";
+    }
+    
+    interface LeaderboardColumns {
+    	String LEADERBOARD_ID = "id";
+    	String LEADERBOARD_NAME = "name";
     }
     
     interface EventColumns {
-        String EVENT_ID = "event_id";
-        String EVENT_DATE_END = "event_date_end";
-        String EVENT_DATE_START = "event_date_start";
-        String EVENT_SERVER = "event_server";
-        String EVENT_TITLE = "event_title";
+        String EVENT_ID = "id";
+        String EVENT_DATE_END = "date_end";
+        String EVENT_DATE_START = "date_start";
+        String EVENT_SERVER = "server";
+        String EVENT_IMAGE_URL = "image_url";
+        String EVENT_NAME = "name";
+        String COMPETITOR_LEADERBOARD_FK = "leaderboard_id";
     }
     
     interface SensorGpsColumns {
@@ -32,13 +42,7 @@ public class AnalyticsContract {
         String GPS_SYNCED = "gps_synced";
         String GPS_SPEED = "gps_speed";
         String GPS_TIME = "gps_time";
-    }
-    
-    interface MessageColumns {
-        String MESSAGE_URL = "message_url";
-        String MESSAGE_CALLBACK_PAYLOAD = "message_callback_payload";
-        String MESSAGE_PAYLOAD = "message_payload";
-        String MESSAGE_CALLBACK_CLASS_STRING = "message_callback_class_string";
+        String GPS_EVENT_FK = "event_id";
     }
     
     public static final String CONTENT_AUTHORITY = "com.sap.sailing.android.tracking.app.provider.db";
@@ -47,7 +51,7 @@ public class AnalyticsContract {
     
     private static final String PATH_COMPETITOR = "competitors";
     private static final String PATH_EVENT = "events";
-    private static final String PATH_MESSAGE = "messages";
+    private static final String PATH_LEADERBOARD = "leaderboards";
     private static final String PATH_SENSOR_GPS = "sensor_gps";
     
     public static class Competitor implements CompetitorColumns, BaseColumns {
@@ -55,8 +59,7 @@ public class AnalyticsContract {
         
         public static final String CONTENT_TYPE = ContentResolver.CURSOR_DIR_BASE_TYPE + "/vnd.sap_sailing_analytics.competitor";
         public static final String CONTENT_ITEM_TYPE = ContentResolver.CURSOR_ITEM_BASE_TYPE + "/vnd.sap_sailing_analytics.competitor";
-        
-        public static final String DEFAULT_SORT = CompetitorColumns.COMPETITOR_NAME + " COLLATE NOCASE ASC";
+        public static final String DEFAULT_SORT = CompetitorColumns.COMPETITOR_ID + " COLLATE NOCASE ASC";
         
         public static Uri buildCompetitorUri(String competitorId) {
             return CONTENT_URI.buildUpon().appendPath(competitorId).build();
@@ -76,8 +79,7 @@ public class AnalyticsContract {
         
         public static final String CONTENT_TYPE = ContentResolver.CURSOR_DIR_BASE_TYPE + "/vnd.sap_sailing_analytics.event";
         public static final String CONTENT_ITEM_TYPE = ContentResolver.CURSOR_ITEM_BASE_TYPE + "/vnd.sap_sailing_analytics.event";
-        
-        public static final String DEFAULT_SORT = EventColumns.EVENT_TITLE + " COLLATE NOCASE ASC ";
+        public static final String DEFAULT_SORT = EventColumns.EVENT_NAME + " COLLATE NOCASE ASC ";
         
         public static Uri buildEventUri(String eventId) {
             return CONTENT_URI.buildUpon().appendPath(eventId).build();
@@ -92,35 +94,11 @@ public class AnalyticsContract {
         }
     }
     
-    public static class EventCompetitor implements EventColumns, CompetitorColumns, BaseColumns {
-        public static final Uri CONTENT_URI = BASE_CONTENT_URI.buildUpon().appendPath(PATH_EVENT).appendPath(PATH_COMPETITOR).build();
-        
-        public static final String CONTENT_TYPE = ContentResolver.CURSOR_DIR_BASE_TYPE + "/vnd.sap_sailing_analytics.event.competitor";
-    }
-    
-    public static class Message implements MessageColumns, BaseColumns {
-        public static final Uri CONTENT_URI = BASE_CONTENT_URI.buildUpon().appendPath(PATH_MESSAGE).build();
-        
-        public static final String CONTENT_TYPE = ContentResolver.CURSOR_DIR_BASE_TYPE + "/vnd.sap_sailing_analytics.message";
-        public static final String CONTENT_ITEM_TYPE = ContentResolver.CURSOR_ITEM_BASE_TYPE + "/vnd.sap_sailing_analytics.message";
-        
-        public static final String DEFAULT_SORT = BaseColumns._ID + " ASC ";
-        
-        public static Uri buildMessageUri(String messageId) {
-            return CONTENT_URI.buildUpon().appendPath(messageId).build();
-        }
-        
-        public static String getMessageId(Uri uri) {
-            return uri.getPathSegments().get(1);
-        }
-    }
-   
     public static class SensorGps implements SensorGpsColumns, BaseColumns {
         public static final Uri CONTENT_URI = BASE_CONTENT_URI.buildUpon().appendPath(PATH_SENSOR_GPS).build();
         
         public static final String CONTENT_TYPE = ContentResolver.CURSOR_DIR_BASE_TYPE + "/vnd.sap_sailing_analytics.sensor.gps";
         public static final String CONTENT_ITEM_TYPE = ContentResolver.CURSOR_ITEM_BASE_TYPE + "/vnd.sap_sailing_analytics.sensor.gps";
-        
         public static final String DEFAULT_SORT = BaseColumns._ID + " ASC ";
         
         public static Uri buildSensorGpsUri(String gpsId) {
@@ -131,6 +109,24 @@ public class AnalyticsContract {
             return uri.getPathSegments().get(1);
         }
     }
+    
+    public static class Leaderboard implements LeaderboardColumns {
+        public static final Uri CONTENT_URI = BASE_CONTENT_URI.buildUpon().appendPath(PATH_LEADERBOARD).build();
+        
+        public static final String CONTENT_TYPE = ContentResolver.CURSOR_DIR_BASE_TYPE + "/vnd.sap_sailing_analytics.leaderboard";
+        public static final String CONTENT_ITEM_TYPE = ContentResolver.CURSOR_ITEM_BASE_TYPE + "/vnd.sap_sailing_analytics.leaderboard";
+        public static final String DEFAULT_SORT = BaseColumns._ID + " ASC ";
+        
+        public static Uri buildLeaderboardUri(String leaderboardId)
+        {
+        	return CONTENT_URI.buildUpon().appendPath(leaderboardId).build();
+        }
+        
+        public static String getLeaderboardId(Uri uri) {
+        	return uri.getPathSegments().get(1);
+        }
+    }
+    
     
     private AnalyticsContract() {
         
