@@ -39,22 +39,24 @@ public class AnalyticsDatabase extends SQLiteOpenHelper {
     public void onCreate(SQLiteDatabase db) {        
         db.execSQL("CREATE TABLE " + Tables.COMPETITORS + " ("
                 + BaseColumns._ID + " INTEGER PRIMARY KEY AUTOINCREMENT, "
-                + CompetitorColumns.COMPETITOR_ID + " TEXT NOT NULL, "
-                + CompetitorColumns.COMPETITOR_DISPLAY_NAME + " TEXT NOT NULL, "
+                + CompetitorColumns.COMPETITOR_ID + " TEXT, "
+                + CompetitorColumns.COMPETITOR_DISPLAY_NAME + " TEXT, "
                 + CompetitorColumns.COMPETITOR_COUNTRY_CODE + " TEXT, "
                 + CompetitorColumns.COMPETITOR_NATIONALITY + " TEXT, "
                 + CompetitorColumns.COMPETITOR_SAIL_ID + " TEXT, "
+                + CompetitorColumns.COMPETITOR_LEADERBOARD_FK + " INTEGER, "
                 + "FOREIGN KEY (" + CompetitorColumns.COMPETITOR_LEADERBOARD_FK + ") " 
                 + "REFERENCES " + Tables.LEADERBOARDS + "( " + LeaderboardColumns.LEADERBOARD_ID + " ))");
         
         db.execSQL("CREATE TABLE " + Tables.EVENTS + " ( "
                 + BaseColumns._ID + " INTEGER PRIMARY KEY AUTOINCREMENT, "
-                + EventColumns.EVENT_ID + " TEXT NOT NULL, "
-                + EventColumns.EVENT_NAME + " TEXT NOT NULL, "
+                + EventColumns.EVENT_ID + " TEXT, "
+                + EventColumns.EVENT_NAME + " TEXTL, "
                 + EventColumns.EVENT_DATE_START + " INTEGER, "
                 + EventColumns.EVENT_DATE_END + " INTEGER, "
                 + EventColumns.EVENT_SERVER + " TEXT, "
                 + EventColumns.EVENT_IMAGE_URL + " TEXT, "
+                + CompetitorColumns.COMPETITOR_LEADERBOARD_FK + " INTEGER, "
                 + "FOREIGN KEY (" + EventColumns.COMPETITOR_LEADERBOARD_FK + ") " 
                 + "REFERENCES " + Tables.LEADERBOARDS + "( " + LeaderboardColumns.LEADERBOARD_ID + " ))");
 
@@ -70,7 +72,8 @@ public class AnalyticsDatabase extends SQLiteOpenHelper {
                 + SensorGpsColumns.GPS_PROVIDER + " TEXT, "
                 + SensorGpsColumns.GPS_SPEED + " TEXT, "
                 + SensorGpsColumns.GPS_SYNCED + " INTEGER DEFAULT 0, "
-                + SensorGpsColumns.GPS_TIME + " TEXT "
+                + SensorGpsColumns.GPS_TIME + " TEXT, "
+                + SensorGpsColumns.GPS_EVENT_FK + " INTEGER, "
                 + "FOREIGN KEY (" + SensorGpsColumns.GPS_EVENT_FK + ") " 
                 + "REFERENCES " + Tables.EVENTS + "( " + EventColumns.EVENT_ID  + " ))");
     }
