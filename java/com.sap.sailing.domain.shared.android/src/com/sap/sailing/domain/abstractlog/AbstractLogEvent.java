@@ -13,7 +13,7 @@ import com.sap.sailing.domain.common.WithID;
 
 /**
  * <p>
- * A {@link AbstractLogEvent} is an entry in a race's log (typically a {@link RaceLog}.
+ * A {@link AbstractLogEvent} is an entry in a race's log (typically a {@link RaceLog}).
  * </p>
  * 
  * <p>

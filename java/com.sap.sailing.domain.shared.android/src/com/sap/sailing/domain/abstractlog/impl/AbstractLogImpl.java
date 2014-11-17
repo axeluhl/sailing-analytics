@@ -17,15 +17,12 @@ import java.util.logging.Logger;
 import com.sap.sailing.domain.abstractlog.AbstractLog;
 import com.sap.sailing.domain.abstractlog.AbstractLogEvent;
 import com.sap.sailing.domain.abstractlog.race.RaceLogEvent;
-import com.sap.sailing.domain.abstractlog.race.RaceLogEventAuthor;
-import com.sap.sailing.domain.abstractlog.race.RaceLogEventFactory;
 import com.sap.sailing.domain.abstractlog.race.RaceLogEventVisitor;
 import com.sap.sailing.domain.abstractlog.race.Revokable;
 import com.sap.sailing.domain.abstractlog.race.RevokeEvent;
 import com.sap.sailing.domain.abstractlog.race.impl.RaceLogEventComparator;
 import com.sap.sailing.domain.abstractlog.race.impl.RaceLogImpl;
 import com.sap.sailing.domain.base.Timed;
-import com.sap.sailing.domain.common.impl.MillisecondsTimePoint;
 import com.sap.sailing.domain.common.racelog.tracking.NotRevokableException;
 import com.sap.sailing.domain.tracking.Track;
 import com.sap.sailing.domain.tracking.impl.PartialNavigableSetView;
@@ -413,23 +410,5 @@ public class AbstractLogImpl<T extends AbstractLogEvent> extends TrackImpl<T> im
             other.unlockAfterRead();
             unlockAfterWrite();
         }
-    }
-    
-    @Override
-    public RevokeEvent revokeEvent(RaceLogEventAuthor author, T toRevoke) throws NotRevokableException {
-        return revokeEvent(author, toRevoke, null);
-    }
-    
-    @Override
-    public RevokeEvent revokeEvent(RaceLogEventAuthor author, T toRevoke, String reason) throws NotRevokableException {
-        if (toRevoke == null) {
-            throw new NotRevokableException("Received null as event to revoke");
-        }
-        RevokeEvent revokeEvent = RaceLogEventFactory.INSTANCE.createRevokeEvent(
-                MillisecondsTimePoint.now(), author, getCurrentPassId(), toRevoke.getId(),
-                toRevoke.getClass().getSimpleName(), toRevoke.getShortInfo(), reason);
-        checkIfSuccessfullyRevokes(revokeEvent);
-        add((T) revokeEvent);
-        return revokeEvent;
     }
 }

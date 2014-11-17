@@ -6,12 +6,9 @@ import java.util.NavigableSet;
 import java.util.UUID;
 
 import com.sap.sailing.domain.abstractlog.race.RaceLog;
-import com.sap.sailing.domain.abstractlog.race.RaceLogEventAuthor;
 import com.sap.sailing.domain.abstractlog.race.RaceLogEventVisitor;
-import com.sap.sailing.domain.abstractlog.race.RevokeEvent;
 import com.sap.sailing.domain.common.TimePoint;
 import com.sap.sailing.domain.common.WithID;
-import com.sap.sailing.domain.common.racelog.tracking.NotRevokableException;
 import com.sap.sailing.domain.tracking.Track;
 
 /**
@@ -124,15 +121,6 @@ public interface AbstractLog<T extends AbstractLogEvent> extends Track<T>, WithI
      * @return
      */
     NavigableSet<T> getUnrevokedEventsDescending();
-    
-    /**
-     * Inserts a {@link RevokeEvent} for {@code toRevoke}, if latter is revokable, exists in the racelog
-     * and has not yet been revoked.
-     * 
-     * @param author The author for the {@code RevokeEvent}.
-     */
-    RevokeEvent revokeEvent(RaceLogEventAuthor author, T toRevoke, String reason) throws NotRevokableException;
-    RevokeEvent revokeEvent(RaceLogEventAuthor author, T toRevoke) throws NotRevokableException;
 
     /**
      * Merges all events from the <code>other</code> race log into this.

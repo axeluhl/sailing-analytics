@@ -2,13 +2,17 @@ package com.sap.sailing.domain.abstractlog.race.tracking.events;
 
 import java.io.Serializable;
 import java.util.Collections;
+import java.util.UUID;
 
+import com.sap.sailing.domain.abstractlog.AbstractLog;
+import com.sap.sailing.domain.abstractlog.AbstractLogEvent;
 import com.sap.sailing.domain.abstractlog.race.RaceLogEventAuthor;
 import com.sap.sailing.domain.abstractlog.race.RaceLogEventVisitor;
 import com.sap.sailing.domain.abstractlog.race.RevokeEvent;
 import com.sap.sailing.domain.abstractlog.race.impl.RaceLogEventImpl;
 import com.sap.sailing.domain.base.Competitor;
 import com.sap.sailing.domain.common.TimePoint;
+import com.sap.sailing.domain.common.impl.MillisecondsTimePoint;
 
 public class RevokeEventImpl extends RaceLogEventImpl implements RevokeEvent {
     private static final long serialVersionUID = -30864810737555657L;
@@ -61,5 +65,14 @@ public class RevokeEventImpl extends RaceLogEventImpl implements RevokeEvent {
     @Override
     public String getReason() {
         return reason;
-    }                
+    }
+    
+    public static RevokeEvent create(AbstractLog<?> log, RaceLogEventAuthor author, AbstractLogEvent toRevoke, String reason) {
+        return new RevokeEventImpl(MillisecondsTimePoint.now(), author, MillisecondsTimePoint.now(), UUID.randomUUID(),
+                log.getCurrentPassId(), toRevoke.getId(), toRevoke.getClass().getName(), toRevoke.getShortInfo(), reason);
+    }
+    
+    public static RevokeEvent create(AbstractLog<?> log, RaceLogEventAuthor author, AbstractLogEvent toRevoke) {
+        return create(log, author, toRevoke, null);
+    }
 }

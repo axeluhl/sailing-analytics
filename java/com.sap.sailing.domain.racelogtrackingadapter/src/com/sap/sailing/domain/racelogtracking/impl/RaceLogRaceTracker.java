@@ -26,6 +26,7 @@ import com.sap.sailing.domain.abstractlog.race.tracking.analyzing.impl.DeviceMar
 import com.sap.sailing.domain.abstractlog.race.tracking.analyzing.impl.RaceInformationFinder;
 import com.sap.sailing.domain.abstractlog.race.tracking.analyzing.impl.RaceLogTrackingStateAnalyzer;
 import com.sap.sailing.domain.abstractlog.race.tracking.analyzing.impl.RegisteredCompetitorsAnalyzer;
+import com.sap.sailing.domain.abstractlog.race.tracking.events.RevokeEventImpl;
 import com.sap.sailing.domain.base.BoatClass;
 import com.sap.sailing.domain.base.Competitor;
 import com.sap.sailing.domain.base.ControlPoint;
@@ -48,7 +49,6 @@ import com.sap.sailing.domain.common.TrackedRaceStatusEnum;
 import com.sap.sailing.domain.common.WithID;
 import com.sap.sailing.domain.common.impl.MillisecondsTimePoint;
 import com.sap.sailing.domain.common.racelog.tracking.NoCorrespondingServiceRegisteredException;
-import com.sap.sailing.domain.common.racelog.tracking.NotRevokableException;
 import com.sap.sailing.domain.common.racelog.tracking.RaceLogTrackingState;
 import com.sap.sailing.domain.common.racelog.tracking.RaceNotCreatedException;
 import com.sap.sailing.domain.common.racelog.tracking.TransformationException;
@@ -373,9 +373,7 @@ public class RaceLogRaceTracker extends BaseRaceLogEventVisitor implements RaceT
         Course course = new CourseImpl(raceName + " course", courseBase.getWaypoints());
 
         if (raceColumn.getTrackedRace(fleet) != null) {
-            try {
-                raceLog.revokeEvent(params.getService().getServerAuthor(), event);
-            } catch (NotRevokableException e) {}
+            raceLog.add(RevokeEventImpl.create(raceLog, params.getService().getServerAuthor(), event));
             throw new RaceNotCreatedException(String.format("Race for racelog (%s) has already been created", raceLog));
         }
 
