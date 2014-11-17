@@ -9,14 +9,13 @@ import android.content.UriMatcher;
 import android.database.Cursor;
 import android.database.sqlite.SQLiteDatabase;
 import android.net.Uri;
-import android.provider.BaseColumns;
 
 import com.sap.sailing.android.shared.logging.ExLog;
 import com.sap.sailing.android.shared.util.SelectionBuilder;
 import com.sap.sailing.android.tracking.app.BuildConfig;
 import com.sap.sailing.android.tracking.app.provider.AnalyticsContract.Competitor;
 import com.sap.sailing.android.tracking.app.provider.AnalyticsContract.Event;
-import com.sap.sailing.android.tracking.app.provider.AnalyticsContract.Message;
+import com.sap.sailing.android.tracking.app.provider.AnalyticsContract.Leaderboard;
 import com.sap.sailing.android.tracking.app.provider.AnalyticsContract.SensorGps;
 import com.sap.sailing.android.tracking.app.provider.AnalyticsDatabase.Tables;
 
@@ -33,9 +32,9 @@ public class AnalyticsProvider extends ContentProvider {
     
     private static final int EVENT = 200;
     private static final int EVENT_ID = 201;
-    private static final int EVENT_ID_COMPETITOR = 202;
     
-    private static final int EVENT_COMPETITOR = 300;
+    private static final int LEADERBOARD = 300;
+    private static final int LEADERBOARD_ID = 301;
     
     private static final int MESSAGE = 400;
     private static final int MESSAGE_ID = 401;
@@ -50,11 +49,11 @@ public class AnalyticsProvider extends ContentProvider {
         matcher.addURI(authority, "competitors", COMPETITOR);
         matcher.addURI(authority, "competitors/*", COMPETITOR_ID);
         
-        matcher.addURI(authority, "events/competitors", EVENT_COMPETITOR);
+        matcher.addURI(authority, "leaderboards", LEADERBOARD);
+        matcher.addURI(authority, "leaderboards/*", LEADERBOARD_ID);
 
         matcher.addURI(authority, "events", EVENT);
         matcher.addURI(authority, "events/*", EVENT_ID);
-        matcher.addURI(authority, "events/*/competitors", EVENT_ID_COMPETITOR);
 
         matcher.addURI(authority, "messages", MESSAGE);
         matcher.addURI(authority, "messages/#", MESSAGE_ID);
@@ -71,12 +70,12 @@ public class AnalyticsProvider extends ContentProvider {
         return true;
     }
     
-    private void deleteDatabase() {
-        Context context = getContext();
-        mOpenHelper.close();
-        AnalyticsDatabase.deleteDatabase(context);
-        mOpenHelper = new AnalyticsDatabase(context);
-    }
+//    private void deleteDatabase() {
+//        Context context = getContext();
+//        mOpenHelper.close();
+//        AnalyticsDatabase.deleteDatabase(context);
+//        mOpenHelper = new AnalyticsDatabase(context);
+//    }
 
     @Override
     public Cursor query(Uri uri, String[] projection, String selection, String[] selectionArgs, String sortOrder) {
@@ -119,17 +118,11 @@ public class AnalyticsProvider extends ContentProvider {
         case EVENT_ID:
             return Event.CONTENT_ITEM_TYPE;
             
-        case EVENT_ID_COMPETITOR:
-            return Event.CONTENT_ITEM_TYPE;
-            
-        case EVENT_COMPETITOR:
-            return AnalyticsContract.EventCompetitor.CONTENT_TYPE;
-            
-        case MESSAGE:
-            return Message.CONTENT_TYPE;
-            
-        case MESSAGE_ID:
-            return Message.CONTENT_ITEM_TYPE;
+        case LEADERBOARD:
+        	return Leaderboard.CONTENT_TYPE;
+        	
+        case LEADERBOARD_ID:
+        	return Leaderboard.CONTENT_ITEM_TYPE;
             
         case SENSOR_GPS:
             return SensorGps.CONTENT_TYPE;
@@ -162,15 +155,10 @@ public class AnalyticsProvider extends ContentProvider {
             notifyChange(uri);
             return Event.buildEventUri(values.getAsString(Event.EVENT_ID));
             
-        case EVENT_ID_COMPETITOR:
-            db.insertOrThrow(Tables.EVENTS_COMPETITORS, null, values);
-            notifyChange(uri);
-            return Event.buildCompetitorsDirUri(values.getAsString(Event.EVENT_ID));
-            
-        case MESSAGE:
-            db.insertOrThrow(Tables.MESSAGES, null, values);
-            notifyChange(uri);
-            return Message.buildMessageUri("XX");
+        case LEADERBOARD:
+        	db.insertOrThrow(Tables.LEADERBOARDS, null, values);
+        	notifyChange(uri);
+        	return Leaderboard.buildLeaderboardUri(values.getAsString(Leaderboard.LEADERBOARD_ID));
             
         case SENSOR_GPS:
             db.insertOrThrow(Tables.SENSOR_GPS, null, values);
@@ -247,6 +235,14 @@ public class AnalyticsProvider extends ContentProvider {
             return builder.table(Tables.COMPETITORS)
                     .where(Competitor.COMPETITOR_ID + " = ?", competitor_id);
             
+        case LEADERBOARD:
+        	return builder.table(Tables.LEADERBOARDS);
+        	
+        case LEADERBOARD_ID:
+        	final String leaderboard_id = Leaderboard.getLeaderboardId(uri);
+            return builder.table(Tables.LEADERBOARDS)
+                    .where(Leaderboard.LEADERBOARD_ID + " = ?", leaderboard_id);
+            
         case EVENT:
             return builder.table(Tables.EVENTS);
             
@@ -254,23 +250,6 @@ public class AnalyticsProvider extends ContentProvider {
             final String event_id = Event.getEventId(uri);
             return builder.table(Tables.EVENTS)
                     .where(Event.EVENT_ID + " = ?", event_id);
-            
-        case EVENT_ID_COMPETITOR:
-            final String event_competitor_id = Event.getEventId(uri);
-            return builder.table(Tables.EVENTS_JOIN_COMPETITOR)
-                    .mapToTable(BaseColumns._ID, Tables.EVENTS_COMPETITORS)
-                    .mapToTable(Competitor.COMPETITOR_ID, Tables.COMPETITORS)
-                    .mapToTable(Event.EVENT_ID, Tables.EVENTS)
-                    .where(Event.EVENT_ID + " = ?", event_competitor_id);
-            
-        case EVENT_COMPETITOR:
-            return builder.table(Tables.EVENTS_JOIN_COMPETITOR)
-                    .mapToTable(BaseColumns._ID, Tables.EVENTS_COMPETITORS)
-                    .mapToTable(Competitor.COMPETITOR_ID, Tables.COMPETITORS)
-                    .mapToTable(Event.EVENT_ID, Tables.EVENTS);
-            
-        case MESSAGE:
-            return builder.table(Tables.MESSAGES);
             
         case SENSOR_GPS:
             return builder.table(Tables.SENSOR_GPS);
