@@ -3,14 +3,18 @@ package com.sap.sailing.server.gateway.serialization.test.racelog;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.verify;
 
+import java.util.UUID;
+
 import org.junit.Before;
 import org.junit.Test;
 
 import com.sap.sailing.domain.abstractlog.AbstractLogEventAuthor;
 import com.sap.sailing.domain.abstractlog.race.RaceLogEvent;
 import com.sap.sailing.domain.abstractlog.race.RaceLogEventFactory;
+import com.sap.sailing.domain.abstractlog.race.RaceLogEventRestoreFactory;
 import com.sap.sailing.domain.abstractlog.race.impl.RaceLogEventAuthorImpl;
 import com.sap.sailing.domain.base.DomainFactory;
+import com.sap.sailing.domain.common.impl.MillisecondsTimePoint;
 import com.sap.sailing.domain.common.racelog.RaceLogRaceStatus;
 import com.sap.sailing.domain.common.racelog.RacingProcedureType;
 import com.sap.sailing.server.gateway.serialization.JsonSerializer;
@@ -223,7 +227,8 @@ public class RaceLogEventSerializerTest {
     @Test
     public void testRevokeEventSerializer() {
         // we use the real event type here because we do not want to re-implement the dispatching.
-        RaceLogEvent event = factory.createRevokeEvent(author, 0, null, null);
+        RaceLogEvent event = RaceLogEventRestoreFactory.INSTANCE.createRevokeEvent(MillisecondsTimePoint.now(),
+                author, MillisecondsTimePoint.now(), 0, 0, UUID.randomUUID(), "type", "short info", "reason");
         serializer.serialize(event);
         verify(revokeEventSerializer).serialize(event);
     }

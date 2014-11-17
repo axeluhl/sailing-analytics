@@ -244,10 +244,12 @@ public class RaceLogTest {
         when(eventOne.getPassId()).thenReturn(0);
         when(eventOne.getAuthor()).thenReturn(mock(AbstractLogEventAuthor.class));
         when(eventOne.getCreatedAt()).thenReturn(new MillisecondsTimePoint(0));
+        when(eventOne.getLogicalTimePoint()).thenReturn(new MillisecondsTimePoint(0));
         when(eventOne.getId()).thenReturn("a");
         when(eventTwo.getPassId()).thenReturn(1);
         when(eventTwo.getAuthor()).thenReturn(mock(AbstractLogEventAuthor.class));
         when(eventTwo.getCreatedAt()).thenReturn(new MillisecondsTimePoint(0));
+        when(eventTwo.getLogicalTimePoint()).thenReturn(new MillisecondsTimePoint(0));
         when(eventTwo.getId()).thenReturn("b");
         
         assertTrue(raceLog.add(eventOne));
@@ -268,10 +270,12 @@ public class RaceLogTest {
         when(eventOne.getPassId()).thenReturn(0);
         when(eventOne.getAuthor()).thenReturn(author);
         when(eventOne.getCreatedAt()).thenReturn(new MillisecondsTimePoint(0));
+        when(eventOne.getLogicalTimePoint()).thenReturn(new MillisecondsTimePoint(0));
         when(eventOne.getId()).thenReturn("a");
         when(eventTwo.getPassId()).thenReturn(0);
         when(eventTwo.getAuthor()).thenReturn(author);
         when(eventTwo.getCreatedAt()).thenReturn(new MillisecondsTimePoint(0));
+        when(eventTwo.getLogicalTimePoint()).thenReturn(new MillisecondsTimePoint(0));
         when(eventTwo.getId()).thenReturn("b");
         
         assertTrue(raceLog.add(eventOne));
@@ -292,10 +296,12 @@ public class RaceLogTest {
         when(eventOne.getPassId()).thenReturn(0);
         when(eventOne.getAuthor()).thenReturn(author);
         when(eventOne.getCreatedAt()).thenReturn(new MillisecondsTimePoint(0));
+        when(eventOne.getLogicalTimePoint()).thenReturn(new MillisecondsTimePoint(0));
         when(eventOne.getId()).thenReturn("a");
         when(eventTwo.getPassId()).thenReturn(0);
         when(eventTwo.getAuthor()).thenReturn(author);
         when(eventTwo.getCreatedAt()).thenReturn(new MillisecondsTimePoint(0));
+        when(eventTwo.getLogicalTimePoint()).thenReturn(new MillisecondsTimePoint(0));
         when(eventTwo.getId()).thenReturn("a");
         
         assertTrue(raceLog.add(eventOne));
