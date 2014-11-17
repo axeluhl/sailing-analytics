@@ -31,31 +31,21 @@ SERVER_STARTUP_NOTIFY=simon.marcel.pamies@sap.com
 
 Note that when you select to install an environment using the `USE_ENVIRONMENT` variable, any other variable that you specify in the user data, such as the `MONGODB_NAME` or `REPLICATION_CHANNEL` properties in the example above, these additional user data properties will override whatever comes from the environment specified by the `USE_ENVIRONMENT` parameter.
 
-- To build from git, install and start, set the following in the instance's user data, adjusting the MONGODB_PORT and memory settings according to your needs:
+- To build from git, install and start, set the following in the instance's user data, adjusting the branch name (`BUILD_FROM`), the `myspecificevent` naming and memory settings according to your needs:
 <pre>
 BUILD_BEFORE_START=True
 BUILD_FROM=master
 RUN_TESTS=False
 COMPILE_GWT=True
-BUILD_COMPLETE_NOTIFY=simon.marcel.pamies@sap.com
+BUILD_COMPLETE_NOTIFY=you@email.com
 SERVER_STARTUP_NOTIFY=
 SERVER_NAME=MYSPECIFICEVENT
 MEMORY=2048m
 REPLICATION_HOST=172.31.25.253
 REPLICATION_CHANNEL=myspecificevent
-TELNET_PORT=14888
-SERVER_PORT=8888
 MONGODB_HOST=172.31.25.253
 MONGODB_PORT=10202
 MONGODB_NAME=myspecificevent
-EXPEDITION_PORT=2010
-REPLICATE_ON_START=False
-REPLICATE_MASTER_SERVLET_HOST=
-REPLICATE_MASTER_SERVLET_PORT=
-REPLICATE_MASTER_QUEUE_HOST=
-REPLICATE_MASTER_QUEUE_PORT=
-INSTALL_FROM_RELEASE=
-USE_ENVIRONMENT=
 </pre>
 
 #### Receiving wind from Expedition
@@ -69,18 +59,23 @@ USE_ENVIRONMENT=
 <pre>
 INSTALL_FROM_RELEASE=(name-of-release)
 USE_ENVIRONMENT=live-master-server
-BUILD_COMPLETE_NOTIFY=simon.marcel.pamies@sap.com
-SERVER_STARTUP_NOTIFY=simon.marcel.pamies@sap.com
+SERVER_NAME=MYSPECIFICEVENT
+REPLICATION_CHANNEL=myspecificevent
+MONGODB_NAME=myspecificevent
+SERVER_STARTUP_NOTIFY=you@email.com
 </pre>
 
-- After your master server is ready, note the internal IP and configure your replica instances. Make sure to use the preconfigured environment from http://releases.sapsailing.com/environments/live-replica-server. Then absolutely make sure to add the line "REPLICATE_MASTER_SERVLET_HOST" to the user-data!
+- After your master server is ready, note the internal IP and configure your replica instances. Make sure to use the preconfigured environment from http://releases.sapsailing.com/environments/live-replica-server. Then absolutely make sure to add the line "REPLICATE_MASTER_SERVLET_HOST" to the user-data and adjust the `myspecificevent` master exchange name to the `REPLICATION_CHANNEL` setting you used for the master configuration. 
 
 <pre>
 INSTALL_FROM_RELEASE=(name-of-release)
 USE_ENVIRONMENT=live-replica-server
 REPLICATE_MASTER_SERVLET_HOST=(IP of your master server)
-SERVER_STARTUP_NOTIFY=simon.marcel.pamies@sap.com
-BUILD_COMPLETE_NOTIFY=
+REPLICATE_MASTER_EXCHANGE_NAME=myspecificevent
+SERVER_NAME=MYSPECIFICEVENT
+MONGODB_NAME=myspecificevent-replica
+EVENT_ID=&lt;some-uuid-of-an-event-you-want-to-feature&gt;
+SERVER_STARTUP_NOTIFY=you@email.com
 </pre>
 
 ## Costs per month

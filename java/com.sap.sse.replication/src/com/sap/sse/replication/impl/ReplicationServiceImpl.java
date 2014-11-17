@@ -200,7 +200,12 @@ public class ReplicationServiceImpl implements ReplicationService {
     private class LifeCycleListener implements ReplicableLifeCycleListener {
         @Override
         public void replicableAdded(Replicable<?, ?> replicable) {
-            addNewOperationExecutionListener(replicable);
+            // add a replication listener to the new replicable only if there are replicas currently registered
+            synchronized (replicationInstancesManager) {
+                if (replicationInstancesManager.hasReplicas()) {
+                    addNewOperationExecutionListener(replicable);
+                }
+            }
         }
 
         @Override
@@ -285,15 +290,17 @@ public class ReplicationServiceImpl implements ReplicationService {
 
     @Override
     public void registerReplica(ReplicaDescriptor replica) throws IOException {
-        if (!replicationInstancesManager.hasReplicas()) {
-            addAsListenerToReplicables();
-            synchronized (this) {
-                if (masterChannel == null) {
-                    masterChannel = createMasterChannelAndDeclareFanoutExchange();
+        synchronized (replicationInstancesManager) {
+            if (!replicationInstancesManager.hasReplicas()) {
+                addAsListenerToReplicables();
+                synchronized (this) {
+                    if (masterChannel == null) {
+                        masterChannel = createMasterChannelAndDeclareFanoutExchange();
+                    }
                 }
             }
+            replicationInstancesManager.registerReplica(replica);
         }
-        replicationInstancesManager.registerReplica(replica);
         logger.info("Registered replica " + replica);
     }
     
@@ -311,13 +318,15 @@ public class ReplicationServiceImpl implements ReplicationService {
     @Override
     public void unregisterReplica(ReplicaDescriptor replica) throws IOException {
         logger.info("Unregistering replica " + replica);
-        replicationInstancesManager.unregisterReplica(replica);
-        if (!replicationInstancesManager.hasReplicas()) {
-            removeAsListenerFromReplicables();
-            synchronized (this) {
-                if (masterChannel != null) {
-                    masterChannel.close();
-                    masterChannel = null;
+        synchronized (replicationInstancesManager) {
+            replicationInstancesManager.unregisterReplica(replica);
+            if (!replicationInstancesManager.hasReplicas()) {
+                removeAsListenerFromReplicables();
+                synchronized (this) {
+                    if (masterChannel != null) {
+                        masterChannel.close();
+                        masterChannel = null;
+                    }
                 }
             }
         }
