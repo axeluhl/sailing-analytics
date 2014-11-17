@@ -45,6 +45,10 @@
                                 <color key="textColor" cocoaTouchSystemColor="darkTextColor"/>
                                 <nil key="highlightedColor"/>
                             </label>
+                            <activityIndicatorView hidden="YES" opaque="NO" contentMode="scaleToFill" horizontalHuggingPriority="750" verticalHuggingPriority="750" hidesWhenStopped="YES" style="whiteLarge" translatesAutoresizingMaskIntoConstraints="NO" id="3y9-Us-aIu">
+                                <rect key="frame" x="281" y="282" width="37" height="37"/>
+                                <color key="color" white="0.33333333333333331" alpha="1" colorSpace="calibratedWhite"/>
+                            </activityIndicatorView>
                             <tableView clipsSubviews="YES" contentMode="scaleToFill" alwaysBounceVertical="YES" dataMode="prototypes" style="plain" separatorStyle="default" rowHeight="44" sectionHeaderHeight="22" sectionFooterHeight="22" translatesAutoresizingMaskIntoConstraints="NO" id="OXU-ft-TXZ">
                                 <rect key="frame" x="0.0" y="64" width="600" height="425"/>
                                 <color key="backgroundColor" white="1" alpha="1" colorSpace="calibratedWhite"/>
@@ -79,6 +83,7 @@
                             <constraint firstItem="Ieu-ch-jeI" firstAttribute="centerX" secondItem="OXU-ft-TXZ" secondAttribute="centerX" id="Fs4-TF-lvN"/>
                             <constraint firstItem="Fp0-61-7he" firstAttribute="leading" secondItem="OqX-q3-43s" secondAttribute="leading" id="JNp-b9-MZy"/>
                             <constraint firstItem="OXU-ft-TXZ" firstAttribute="leading" secondItem="kh9-bI-dsS" secondAttribute="leading" id="Tut-Ec-FlM"/>
+                            <constraint firstItem="3y9-Us-aIu" firstAttribute="centerY" secondItem="kh9-bI-dsS" secondAttribute="centerY" id="U4G-OG-UdY"/>
                             <constraint firstItem="2fi-mo-0CV" firstAttribute="top" secondItem="OqX-q3-43s" secondAttribute="bottom" constant="8" symbolic="YES" id="VQD-Ce-g9U"/>
                             <constraint firstItem="OXU-ft-TXZ" firstAttribute="top" secondItem="jyV-Pf-zRb" secondAttribute="bottom" id="aWC-ez-qqQ"/>
                             <constraint firstItem="Fp0-61-7he" firstAttribute="trailing" secondItem="Ieu-ch-jeI" secondAttribute="trailing" id="aqe-io-fwd"/>
@@ -86,7 +91,14 @@
                             <constraint firstItem="Ieu-ch-jeI" firstAttribute="top" secondItem="OXU-ft-TXZ" secondAttribute="bottom" constant="8" symbolic="YES" id="fxg-fL-f98"/>
                             <constraint firstItem="OqX-q3-43s" firstAttribute="top" secondItem="Fp0-61-7he" secondAttribute="bottom" constant="6" id="hHG-JW-lCs"/>
                             <constraint firstItem="OqX-q3-43s" firstAttribute="trailing" secondItem="Fp0-61-7he" secondAttribute="trailing" id="iyu-co-a6t"/>
+                            <constraint firstItem="3y9-Us-aIu" firstAttribute="leading" secondItem="kh9-bI-dsS" secondAttribute="leading" constant="281" id="kp0-bS-p2b"/>
+                            <constraint firstAttribute="centerX" secondItem="3y9-Us-aIu" secondAttribute="centerX" id="oid-U0-Qzx"/>
                         </constraints>
+                        <variation key="default">
+                            <mask key="constraints">
+                                <exclude reference="kp0-bS-p2b"/>
+                            </mask>
+                        </variation>
                     </view>
                     <toolbarItems/>
                     <navigationItem key="navigationItem" title="SAP Tracker" id="lqI-5f-PEI">
@@ -97,6 +109,7 @@
                         </barButtonItem>
                     </navigationItem>
                     <connections>
+                        <outlet property="activityIndicatorView" destination="3y9-Us-aIu" id="NSb-XJ-NZ9"/>
                         <outlet property="tableView" destination="OXU-ft-TXZ" id="1BA-dy-00A"/>
                         <segue destination="G3a-SV-Maf" kind="show" identifier="Regatta" id="FMW-37-go1"/>
                         <segue destination="plm-Uw-c62" kind="show" identifier="Scan" id="U8l-If-CrF"/>
@@ -142,7 +155,6 @@
                             </view>
                             <activityIndicatorView hidden="YES" opaque="NO" contentMode="scaleToFill" horizontalHuggingPriority="750" verticalHuggingPriority="750" hidesWhenStopped="YES" style="whiteLarge" translatesAutoresizingMaskIntoConstraints="NO" id="X78-1b-OJ2">
                                 <rect key="frame" x="282" y="282" width="37" height="37"/>
-                                <color key="color" white="0.66666666666666663" alpha="1" colorSpace="calibratedWhite"/>
                             </activityIndicatorView>
                         </subviews>
                         <color key="backgroundColor" white="1" alpha="1" colorSpace="calibratedWhite"/>
@@ -157,7 +169,7 @@
                     </view>
                     <navigationItem key="navigationItem" title="Scan QR Code" id="LQ4-39-f6l"/>
                     <connections>
-                        <outlet property="activityView" destination="X78-1b-OJ2" id="7fR-yg-bVB"/>
+                        <outlet property="activityIndicatorView" destination="X78-1b-OJ2" id="2dM-WI-lMq"/>
                         <outlet property="previewView" destination="ttp-CB-QaR" id="D7j-aT-pIK"/>
                     </connections>
                 </viewController>
@@ -445,7 +457,7 @@
                             </webView>
                             <activityIndicatorView opaque="NO" contentMode="scaleToFill" horizontalHuggingPriority="750" verticalHuggingPriority="750" hidesWhenStopped="YES" animating="YES" style="whiteLarge" translatesAutoresizingMaskIntoConstraints="NO" id="4M0-kf-Pv9">
                                 <rect key="frame" x="282" y="282" width="37" height="37"/>
-                                <color key="color" white="0.66666666666666663" alpha="1" colorSpace="calibratedWhite"/>
+                                <color key="color" white="0.33333333333333331" alpha="1" colorSpace="calibratedWhite"/>
                             </activityIndicatorView>
                         </subviews>
                         <color key="backgroundColor" white="1" alpha="1" colorSpace="calibratedWhite"/>

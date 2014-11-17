@@ -31,7 +31,14 @@ class QRCodeData {
             return false
         }
         
-        serverUrl = url!.scheme! + "://" + url!.host!
+        // TODO: add a flag http / https
+        if url!.scheme != "comsapsailingtracker" {
+            serverUrl = url!.scheme!
+        } else {
+            serverUrl = "http"
+        }
+        
+        serverUrl! += "://" + url!.host!
         if ((url!.port) != nil) {
             serverUrl! += ":" + url!.port!.stringValue
         }

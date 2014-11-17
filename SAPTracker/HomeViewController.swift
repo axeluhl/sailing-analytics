@@ -9,7 +9,7 @@
 import UIKit
 import CoreData
 
-class HomeViewController: UIViewController, UITableViewDataSource, UITableViewDelegate, UIActionSheetDelegate, NSFetchedResultsControllerDelegate {
+class HomeViewController: UIViewController, UITableViewDataSource, UITableViewDelegate, UIActionSheetDelegate, NSFetchedResultsControllerDelegate, QRCodeManagerDelegate {
     
     //private var regatta: Regatta
     
@@ -17,9 +17,13 @@ class HomeViewController: UIViewController, UITableViewDataSource, UITableViewDe
         case NoCameraAvailable
     }
     @IBOutlet weak var tableView: UITableView!
+    @IBOutlet weak var activityIndicatorView: UIActivityIndicatorView?
     var fetchedResultsController: NSFetchedResultsController?
+    private var qrCodeManager: QRCodeManager?
     
     override func viewDidLoad() {
+        qrCodeManager = QRCodeManager(delegate: self)
+        
         fetchedResultsController = DataManager.sharedManager.eventsFetchedResultsController()
         fetchedResultsController!.delegate = self
         fetchedResultsController!.performFetch(nil)
@@ -32,7 +36,22 @@ class HomeViewController: UIViewController, UITableViewDataSource, UITableViewDe
             // regattaViewController.regatta =  selectedRegatta
         }
     }
+
+    // MARK: - QR code
+
+    func openUrl(url: NSURL) {
+        println(url)
+        qrCodeManager!.parseUrl(url.absoluteString!)
+    }
     
+    func qrCodeOK() {
+        
+    }
+    
+    func qrCodeCancel() {
+        
+    }
+
     // MARK: - UIActionSheetDelegate
     @IBAction func showActionSheet(sender: AnyObject) {
         let actionSheet = UIActionSheet(title: nil, delegate: self, cancelButtonTitle: nil, destructiveButtonTitle: nil, otherButtonTitles: "Settings", "About", "Cancel")
@@ -129,7 +148,7 @@ class HomeViewController: UIViewController, UITableViewDataSource, UITableViewDe
     // Für die Verwendung des Regatta-Trackers ist ein Checkin mit QR-Code oder ein Checkin-Link aus der E-Mail notwendig. Sollten Sie diesen nicht erhalten haben, wenden Sie sich bitte an die Wettfahrtleitung.
     
     @IBAction func noQrCodeButtonTap(sender: AnyObject) {
-        let alertView = UIAlertView(title:  "In order to use this app you need to check-in either by QR code or a check-in link sent by mail. Please contact the racing committee if you need either.", message: nil, delegate: nil, cancelButtonTitle: "Cancel")
+        let alertView = UIAlertView(title:  "In order to use this app you need to check-in via QR code or email link. Please contact the racing committee if you need either.", message: nil, delegate: nil, cancelButtonTitle: "Cancel")
         alertView.tag = AlertViewTag.NoCameraAvailable.rawValue;
         alertView.show()
     }

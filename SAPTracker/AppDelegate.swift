@@ -14,11 +14,20 @@ class AppDelegate: UIResponder, UIApplicationDelegate {
 
     var window: UIWindow?
 
-
     func application(application: UIApplication, didFinishLaunchingWithOptions launchOptions: [NSObject: AnyObject]?) -> Bool {
         // Override point for customization after application launch.
         DataManager.sharedManager
         APIManager.sharedManager
+        return true
+    }
+    
+    func application(application: UIApplication, openURL url: NSURL, sourceApplication: String, annotation: AnyObject?) -> Bool {
+        println(url)
+        var rootViewController = self.window!.rootViewController as UINavigationController
+        rootViewController.popToRootViewControllerAnimated(false)
+        rootViewController.dismissViewControllerAnimated(false, completion: nil)
+        var homeViewController = rootViewController.viewControllers[0] as HomeViewController
+        homeViewController.openUrl(url)
         return true
     }
 
