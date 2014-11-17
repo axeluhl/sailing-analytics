@@ -1,13 +1,14 @@
 package com.sap.sailing.gwt.home.client.shared.solutions;
 
 import com.google.gwt.core.client.GWT;
+import com.google.gwt.core.client.Scheduler;
 import com.google.gwt.dom.client.DivElement;
 import com.google.gwt.dom.client.StyleInjector;
 import com.google.gwt.event.dom.client.ClickEvent;
-import com.google.gwt.event.logical.shared.AttachEvent;
 import com.google.gwt.uibinder.client.UiBinder;
 import com.google.gwt.uibinder.client.UiField;
 import com.google.gwt.uibinder.client.UiHandler;
+import com.google.gwt.user.client.Command;
 import com.google.gwt.user.client.Event;
 import com.google.gwt.user.client.History;
 import com.google.gwt.user.client.ui.Anchor;
@@ -70,11 +71,14 @@ public class Solutions extends Composite {
     }
 
     @Override
-    protected void onAttach() {
-        super.onAttach();
-        if(navigationTab != SolutionsNavigationTabs.SailingAnalytics) {
-            scrollToView(navigationTab);
-        }
+    protected void onLoad() {
+        Scheduler.get().scheduleDeferred(new Command() {
+            public void execute() {
+                if (navigationTab != SolutionsNavigationTabs.SailingAnalytics) {
+                    scrollToView(navigationTab);
+                }
+            }
+        });
     }
 
     @UiHandler("sailingAnalyticsAnchor")
