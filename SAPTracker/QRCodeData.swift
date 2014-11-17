@@ -12,13 +12,13 @@ class QRCodeData {
     
     struct Keys {
         static let eventId = "event_id"
-        static let leaderboardName = "leaderboard_name"
+        static let leaderBoardName = "leaderboard_name"
         static let competitorId = "competitor_id"        
     }
     
     var server: String?
     var eventId: String?
-    var leaderboardName: String?
+    var leaderBoardName: String?
     var competitorId: String?
  
     init() {
@@ -50,8 +50,8 @@ class QRCodeData {
             queryStringDictionary[key] = value
         }
         eventId = queryStringDictionary[QRCodeData.Keys.eventId]
-        leaderboardName = queryStringDictionary[QRCodeData.Keys.leaderboardName]
+        leaderBoardName = queryStringDictionary[QRCodeData.Keys.leaderBoardName]
         competitorId = queryStringDictionary[QRCodeData.Keys.competitorId]
-        return eventId != nil && leaderboardName != nil && competitorId != nil
+        return eventId != nil && leaderBoardName != nil && competitorId != nil
      }
 }

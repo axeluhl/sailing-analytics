@@ -63,7 +63,7 @@ class DataManager: NSObject {
         }
     }
     
-    func leaderboard(event: Event) -> LeaderBoard {
+    func leaderBoard(event: Event) -> LeaderBoard {
         if event.leaderBoard != nil {
             return event.leaderBoard!
         }

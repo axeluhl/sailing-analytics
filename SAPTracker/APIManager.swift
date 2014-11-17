@@ -121,9 +121,9 @@ class APIManager: NSObject {
         manager!.GET(urlString, parameters: nil, success: success, failure: failure)
     }
 
-    /* Get leaderboard */
-    func getLeaderboard(leaderboardName: String!, success: (AFHTTPRequestOperation!, AnyObject!) -> Void, failure: (AFHTTPRequestOperation!, AnyObject!) -> Void) {
-        let urlString = baseUrlString! + "/leaderboards/\(leaderboardName)"
+    /* Get leader board */
+    func getLeaderBoard(leaderBoardName: String!, success: (AFHTTPRequestOperation!, AnyObject!) -> Void, failure: (AFHTTPRequestOperation!, AnyObject!) -> Void) {
+        let urlString = baseUrlString! + "/leaderboards/\(leaderBoardName)"
         manager!.GET(urlString, parameters: nil, success: success, failure: failure)
     }
     
@@ -134,9 +134,9 @@ class APIManager: NSObject {
     }
 
     /* Map a device to competitor. */
-    func checkIn(leaderboardName: String!, competitorId: String!, deviceUuid: String!, pushId: String!, fromMillis: Int!, success: (AFHTTPRequestOperation!, AnyObject!) -> Void, failure: (AFHTTPRequestOperation!, AnyObject!) -> Void) {
+    func checkIn(leaderBoardName: String!, competitorId: String!, deviceUuid: String!, pushId: String!, fromMillis: Int!, success: (AFHTTPRequestOperation!, AnyObject!) -> Void, failure: (AFHTTPRequestOperation!, AnyObject!) -> Void) {
         
-        let urlString = baseUrlString! + "/leaderboards/\(leaderboardName)/device_mappings/start"
+        let urlString = baseUrlString! + "/leaderboards/\(leaderBoardName)/device_mappings/start"
         
         var body = [String: AnyObject]()
         body["competitorId"] = competitorId
@@ -148,9 +148,9 @@ class APIManager: NSObject {
     }
   
     /* Disconnect a device from competitor. */
-    func checkOut(leaderboardName: String!, competitorId: String!, deviceUuid: String!, toMillis: Int!, success:(AFHTTPRequestOperation!, AnyObject!) -> Void, failure: (AFHTTPRequestOperation!, AnyObject!) -> Void) {
+    func checkOut(leaderBoardName: String!, competitorId: String!, deviceUuid: String!, toMillis: Int!, success:(AFHTTPRequestOperation!, AnyObject!) -> Void, failure: (AFHTTPRequestOperation!, AnyObject!) -> Void) {
         
-        let urlString = baseUrlString! + "/leaderboards/\(leaderboardName)/device_mappings/end"
+        let urlString = baseUrlString! + "/leaderboards/\(leaderBoardName)/device_mappings/end"
         
         var body = [String: AnyObject]()
         body["competitorId"] = competitorId

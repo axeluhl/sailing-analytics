@@ -18,8 +18,13 @@ class ScanViewController: UIViewController, AVCaptureMetadataOutputObjectsDelega
     @IBOutlet weak var previewView: UIView!
     @IBOutlet weak var activityView: UIActivityIndicatorView!
     
-    var session: AVCaptureSession!
-    var previewLayer: AVCaptureVideoPreviewLayer!
+    private var session: AVCaptureSession!
+    private var previewLayer: AVCaptureVideoPreviewLayer!
+    
+    private var qrcodeData: QRCodeData?
+    private var eventDictionary: [String: AnyObject]?
+    private var leaderBoardDictionary: [String: AnyObject]?
+    private var competitorDictionary: [String: AnyObject]?
     
     override func viewDidLoad() {
         super.viewDidLoad()
@@ -59,48 +64,65 @@ class ScanViewController: UIViewController, AVCaptureMetadataOutputObjectsDelega
     func captureOutput(captureOutput: AVCaptureOutput!, didOutputMetadataObjects metadataObjects: [AnyObject]!, fromConnection connection: AVCaptureConnection!)
     {
         if metadataObjects.count > 0 {
+            session.stopRunning()
+            activityView.startAnimating()
+            
             let metadataObject: AVMetadataMachineReadableCodeObject = metadataObjects[0] as AVMetadataMachineReadableCodeObject
             println(metadataObject.stringValue)
             
-            var qrcodeData = QRCodeData()
-            if !qrcodeData.parseString(metadataObject.stringValue) {
+            qrcodeData = QRCodeData()
+            let parseSuccess = qrcodeData!.parseString(metadataObject.stringValue)
+            if !parseSuccess {
                 let alertView = UIAlertView(title: "Incorrect QR Code", message: "", delegate: self, cancelButtonTitle: nil, otherButtonTitles: "OK")
                 alertView.tag = AlertViewTag.IncorrectQRCode.rawValue;
                 alertView.show()
+                return
             }
-            // TODO: store qrcodeData somehow
-            session.stopRunning()
-            activityView.startAnimating()
-            APIManager.sharedManager.initManager(qrcodeData.server!)
-            APIManager.sharedManager.getEvent(qrcodeData.eventId,
-                success: { (AFHTTPRequestOperation operation, AnyObject responseObject) -> Void in
-                    var event = DataManager.sharedManager.event(qrcodeData.eventId!)
-                    event.initWithDictionary(responseObject as Dictionary)
-                    APIManager.sharedManager.getLeaderboard(qrcodeData.leaderboardName,
-                        success: { (AFHTTPRequestOperation operation, AnyObject responseObject) -> Void in
-                            var leaderboard = DataManager.sharedManager.leaderboard(event)
-                            leaderboard.initWithDictionary(responseObject as Dictionary)
-                            APIManager.sharedManager.getCompetitor(qrcodeData.competitorId,
-                                success: { (AFHTTPRequestOperation operation, AnyObject responseObject) -> Void in
+            
+            APIManager.sharedManager.initManager(qrcodeData!.server!)
+            
+            // get event
+            APIManager.sharedManager.getEvent(qrcodeData!.eventId,
+                success: { (AFHTTPRequestOperation operation, AnyObject eventResponseObject) -> Void in
+                    self.eventDictionary = eventResponseObject as? [String: AnyObject]
+                    APIManager.sharedManager.getLeaderBoard(self.qrcodeData!.leaderBoardName,
+                        
+                        // get leader board
+                        success: { (AFHTTPRequestOperation operation, AnyObject leaderBoardResponseObject) -> Void in
+                            self.leaderBoardDictionary = leaderBoardResponseObject as? [String: AnyObject]
+                            APIManager.sharedManager.getCompetitor(self.qrcodeData!.competitorId,
+                                
+                                // get competitor
+                                success: { (AFHTTPRequestOperation operation, AnyObject competitorResponseObject) -> Void in
                                     self.activityView.stopAnimating()
-                                    var competitor = DataManager.sharedManager.competitor(leaderboard)
-                                    competitor.initWithDictionary(responseObject as Dictionary)
-                                    self.navigationController!.popViewControllerAnimated(true)
-                                }, failure: { (AFHTTPRequestOperation operation, NSError error) -> Void in
-                                    self.activityView.stopAnimating()
-                                    let alertView = UIAlertView(title: "Couldn't get competitor \(qrcodeData.competitorId)", message: nil, delegate: self, cancelButtonTitle: "Cancel")
+                                    
+                                    self.competitorDictionary = competitorResponseObject as? [String: AnyObject]
+                                    var title = "Hello "
+                                    title += (self.competitorDictionary!["displayName"]) as String
+                                    title += ". Welcome to "
+                                    title += (self.leaderBoardDictionary!["name"]) as String
+                                    title += ". You are registered as "
+                                    title += (self.competitorDictionary!["sailID"]) as String
+                                    title += "."
+                                    let alertView = UIAlertView(title: title, message: "", delegate: self, cancelButtonTitle: "Cancel", otherButtonTitles: "OK")
                                     alertView.tag = AlertViewTag.ServerError.rawValue;
                                     alertView.show()
+                                }, failure: { (AFHTTPRequestOperation operation, NSError error) -> Void in
+                                    self.activityView.stopAnimating()
+                                    let alertView = UIAlertView(title: "Couldn't get competitor \(self.qrcodeData!.competitorId!)", message: "", delegate: self, cancelButtonTitle: "Cancel")
+                                    alertView.tag = AlertViewTag.ServerError.rawValue;
+                                    alertView.show()
+                                    
                             }) }, failure: { (AFHTTPRequestOperation operation, NSError error) -> Void in
                                 self.activityView.stopAnimating()
-                                let alertView = UIAlertView(title: "Couldn't get leaderboard \(qrcodeData.leaderboardName)", message: nil, delegate: self, cancelButtonTitle: "Cancel")
+                                let alertView = UIAlertView(title: "Couldn't get leader board \(self.qrcodeData!.leaderBoardName!)", message: "", delegate: self, cancelButtonTitle: "Cancel")
                                 alertView.tag = AlertViewTag.ServerError.rawValue;
                                 alertView.show()
                     })
                     
                 }, failure: { (AFHTTPRequestOperation operation, NSError error) -> Void in
                     self.activityView.stopAnimating()
-                    let alertView = UIAlertView(title: "Couldn't get event \(qrcodeData.eventId)", message: nil, delegate: self, cancelButtonTitle: "Cancel")
+                    let alertView = UIAlertView(title: "Couldn't get event \(self.qrcodeData!.eventId!)", message: "", delegate: self, cancelButtonTitle: "Cancel")
                     alertView.tag = AlertViewTag.ServerError.rawValue;
                     alertView.show()
             })
@@ -112,13 +134,29 @@ class ScanViewController: UIViewController, AVCaptureMetadataOutputObjectsDelega
         switch alertView.tag {
             // Stop tracking?
         case AlertViewTag.ConnectedToServer.rawValue:
-            navigationController!.popViewControllerAnimated(true)
-            break
-        case AlertViewTag.ServerError.rawValue:
-            self.session.startRunning()
+            switch buttonIndex {
+            case alertView.cancelButtonIndex:
+                break
+            default:
+                // create core data objects
+                var event = DataManager.sharedManager.event(qrcodeData!.eventId!)
+                event.initWithDictionary(eventDictionary!)
+                var leaderBoard = DataManager.sharedManager.leaderBoard(event)
+                leaderBoard.initWithDictionary(leaderBoardDictionary!)
+                var competitor = DataManager.sharedManager.competitor(leaderBoard)
+                competitor.initWithDictionary(competitorDictionary!)
+                DataManager.sharedManager.saveContext()
+                
+                // pop back to home view
+                navigationController!.popViewControllerAnimated(true)
+                break
+            }
             break
         default:
-            
+            self.session.startRunning()
+            eventDictionary = nil
+            leaderBoardDictionary = nil
+            competitorDictionary = nil
             break
         }
     }

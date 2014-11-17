@@ -1,5 +1,5 @@
 //
-//  Leaderboard.swift
+//  LeaderBoard.swift
 //  SAPTracker
 //
 //  Created by computing on 14/11/14.
