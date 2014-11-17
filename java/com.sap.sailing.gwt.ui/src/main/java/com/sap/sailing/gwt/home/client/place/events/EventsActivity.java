@@ -28,7 +28,7 @@ public class EventsActivity extends AbstractActivity {
         clientFactory.getSailingService().getPublicEventsOfAllSailingServers(new AsyncCallback<List<EventBaseDTO>>() {
             @Override
             public void onSuccess(List<EventBaseDTO> events) {
-                final EventsView eventsView = clientFactory.createEventsView(EventsActivity.this);
+                final EventsView eventsView = clientFactory.createEventsView();
                 panel.setWidget(eventsView.asWidget());
                 Window.setTitle(place.getTitle());
 

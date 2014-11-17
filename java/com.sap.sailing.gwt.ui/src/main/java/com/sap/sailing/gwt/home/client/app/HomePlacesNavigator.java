@@ -12,6 +12,7 @@ import com.sap.sailing.gwt.home.client.place.searchresult.SearchResultPlace;
 import com.sap.sailing.gwt.home.client.place.series.SeriesPlace;
 import com.sap.sailing.gwt.home.client.place.series.SeriesPlace.SeriesNavigationTabs;
 import com.sap.sailing.gwt.home.client.place.solutions.SolutionsPlace;
+import com.sap.sailing.gwt.home.client.place.solutions.SolutionsPlace.SolutionsNavigationTabs;
 import com.sap.sailing.gwt.home.client.place.sponsoring.SponsoringPlace;
 import com.sap.sailing.gwt.home.client.place.start.StartPlace;
 
@@ -29,8 +30,8 @@ public class HomePlacesNavigator extends AbstractPlaceNavigator {
         return createGlobalPlaceNavigation(new EventsPlace(), new EventsPlace.Tokenizer());
     }
 
-    public PlaceNavigation<SolutionsPlace> getSolutionsNavigation() {
-        return createGlobalPlaceNavigation(new SolutionsPlace(), new SolutionsPlace.Tokenizer());
+    public PlaceNavigation<SolutionsPlace> getSolutionsNavigation(SolutionsNavigationTabs navigationTab) {
+        return createGlobalPlaceNavigation(new SolutionsPlace(navigationTab), new SolutionsPlace.Tokenizer());
     }
 
     public PlaceNavigation<SponsoringPlace> getSponsoringNavigation() {
