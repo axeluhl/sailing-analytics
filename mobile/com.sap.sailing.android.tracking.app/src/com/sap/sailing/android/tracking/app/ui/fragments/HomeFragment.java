@@ -21,6 +21,7 @@ import android.content.pm.ResolveInfo;
 import android.database.Cursor;
 import android.net.Uri;
 import android.os.Bundle;
+import android.preference.DialogPreference;
 import android.support.v4.app.LoaderManager.LoaderCallbacks;
 import android.support.v4.content.CursorLoader;
 import android.support.v4.content.Loader;
@@ -187,7 +188,7 @@ public class HomeFragment extends BaseFragment implements LoaderCallbacks<Cursor
 								public void onResponse(JSONObject response) {
 									System.out.println("got response: " + response);
 									// TODO: get data, eventually save to db
-									displayUserConfirmationScreen("TODO", "TODO");
+									displayUserConfirmationScreen("TODO", "TODO"); 
 								}
 							}, new ErrorListener() {
 
@@ -239,10 +240,10 @@ public class HomeFragment extends BaseFragment implements LoaderCallbacks<Cursor
 //            
 //            
 //            DeviceMappingRequest dataRequest = new DeviceMappingRequest(deviceMapping, eventJson,
-//                    new DeviceMappingListener(), new DeviceMappingErrorListener());
-//            
-            
+//                    new DeviceMappingListener(), new DeviceMappingErrorListener());      
 //            VolleyHelper.getInstance(getActivity()).addRequest(dataRequest, REQUEST_TAG);
+// 
+            
         } else if (resultCode == Activity.RESULT_CANCELED) {
             Toast.makeText(getActivity(), "Scanning canceled", Toast.LENGTH_LONG).show();
         } else {
@@ -257,52 +258,90 @@ public class HomeFragment extends BaseFragment implements LoaderCallbacks<Cursor
         VolleyHelper.getInstance(getActivity()).cancelRequest(REQUEST_TAG);
     }
     
-    private void displayUserConfirmationScreen(String fullNameOfUser, String sailId)
+    private void displayUserConfirmationScreen(String fullNameOfUser, String sailId, final DeviceMappingData deviceMappingData)
     {
-    
+    	String message1 = getString(R.string.confirm_data_hello_name).replace("{full_name}", fullNameOfUser);
+    	String message2 = getString(R.string.confirm_data_you_are_signed_in_as_sail_id).replace("{sail_id}", sailId);
+    	
+    	AlertDialog.Builder builder = new AlertDialog.Builder(getActivity());
+        builder.setMessage(message1 + "\n\n" + message2);
+        builder.setCancelable(true);
+        builder.setPositiveButton(getString(R.string.confirm_data_is_correct), new DialogInterface.OnClickListener(){
+
+			@Override
+			public void onClick(DialogInterface dialog, int which) {
+				checkInWithAPIAndDisplayTrackingActivity(deviceMappingData);
+			}
+			
+        }).setNegativeButton(R.string.decline_data_is_incorrect, new DialogInterface.OnClickListener() {
+			
+			@Override
+			public void onClick(DialogInterface dialog, int which) {
+				dialog.cancel();
+				
+			}
+		});
+	
+        AlertDialog alert = builder.create();
+        alert.show();
     }
     
-    private void checkInWithAPIAndDisplayTrackingActivity()
-    {
-    	
-    	/**
-    	 * // TODO: Push token?
-        try {
-			JSONObject requestObject = CheckinQRCodeHelper.getCheckinJson(competitorId, 
-					deviceUuid.getStringRepresentation(), "TODO!!", date.getTime());
-			CheckinListener listener = new CheckinListener(leaderboardName); // TODO: twice the same? where do the correct values come from?
-			
-			JsonObjectRequest checkinRequest = new JsonObjectRequest(checkinURLStr, requestObject, new CheckinListener(leaderboardName), new CheckinErrorListener());
-			
-			
+    /**
+	 * Perform a checking request and launch RegattaAcitivity afterwards
+	 * 
+	 * TODO: Google Cloud Messaging token?
+	 * 
+	 * @param deviceMappingData
+	 */
+	private void checkInWithAPIAndDisplayTrackingActivity(
+			DeviceMappingData deviceMappingData) {
+		Date date = new Date();
+
+		try {
+			JSONObject requestObject = CheckinQRCodeHelper.getCheckinJson(
+					deviceMappingData.competitorId,
+					deviceMappingData.deviceUid, "TODO!!", date.getTime());
+
+			JsonObjectRequest checkinRequest = new JsonObjectRequest(
+					deviceMappingData.hostUrl, requestObject,
+					new CheckinListener(deviceMappingData.leaderboardName),
+					new CheckinErrorListener());
+
 			VolleyHelper.getInstance(getActivity()).addRequest(checkinRequest);
-			
+
 		} catch (JSONException e) {
-			ExLog.e(getActivity(), TAG, "Failed to generate checkin JSON: " + e.getMessage());
+			ExLog.e(getActivity(), TAG,
+					"Failed to generate checkin JSON: " + e.getMessage());
+			displayAPIErrorRecommendRetry();
 		}
-		**/
     }
     
     /**
      * Shows a pop-up-dialog that informs the user than an API-call has failed and recommends a retry.
      */
-    private void displayAPIErrorRecommendRetry()
-    {
-    	AlertDialog.Builder builder = new AlertDialog.Builder(getActivity());
-        builder.setMessage(getString(R.string.notify_user_api_call_failed));
-        builder.setCancelable(true);
-        builder.setPositiveButton(getString(R.string.ok), new DialogInterface.OnClickListener(){
+	private void displayAPIErrorRecommendRetry() {
+		AlertDialog.Builder builder = new AlertDialog.Builder(getActivity());
+		builder.setMessage(getString(R.string.notify_user_api_call_failed));
+		builder.setCancelable(true);
+		builder.setPositiveButton(getString(R.string.ok),
+				new DialogInterface.OnClickListener() {
 
-			@Override
-			public void onClick(DialogInterface dialog, int which) {
-				dialog.cancel();
-			}
-			
-        });
-        AlertDialog alert = builder.create();
-        alert.show();
-    }
+					@Override
+					public void onClick(DialogInterface dialog, int which) {
+						dialog.cancel();
+					}
 
+				});
+		AlertDialog alert = builder.create();
+		alert.show();
+	}
+
+	/**
+	 * Start regatta activity.
+	 * 
+	 * @param regattaName
+	 * @param eventName
+	 */
     private void startRegatta(String regattaName, String eventName) {
     	Intent intent = new Intent(getActivity(), RegattaActivity.class);
     	intent.putExtra(getString(R.string.regatta_name), regattaName);
@@ -310,47 +349,47 @@ public class HomeFragment extends BaseFragment implements LoaderCallbacks<Cursor
         getActivity().startActivity(intent);
     }
 
-    private JsonObjectRequest checkInRequest(String server, final String eventId, final String competitorId) {
-        JSONObject json = new JSONObject();
-        try {
-            json.put("deviceUdid", prefs.getDeviceIdentifier());
-            json.put("deviceType", "android");
-            json.put("pushDeviceId", "notImplementedYet");
-        } catch (JSONException ex) {
-            ex.printStackTrace();
-        }
-        JsonObjectRequest result = new JsonObjectRequest(BackendHelper.getUrl(server, eventId, competitorId, "device"),
-                json, new Response.Listener<JSONObject>() {
-
-                    @Override
-                    public void onResponse(JSONObject result) {
-                       // startRegatta(eventId, competitorId);
-                    }
-                }, new Response.ErrorListener() {
-
-                    @Override
-                    public void onErrorResponse(VolleyError error) {
-                        String message = null;
-                        NetworkResponse response = error.networkResponse;
-                        if (response != null) {
-                            if (response.statusCode == HttpStatus.SC_NOT_FOUND) {
-                                message = getString(R.string.homefragment_volley_404);
-                            } else {
-                                message = String.format(getString(R.string.homefragment_volley_unknown),
-                                        response.statusCode);
-                            }
-                        } else {
-                            message = getString(R.string.homefragment_volley_unexpected);
-                            ExLog.i(getActivity(), TAG, error.toString());
-                        }
-                        if (message != null) {
-                            Toast.makeText(getActivity(), message, Toast.LENGTH_LONG).show();
-                        }
-                    }
-                });
-
-        return result;
-    }
+//    private JsonObjectRequest checkInRequest(String server, final String eventId, final String competitorId) {
+//        JSONObject json = new JSONObject();
+//        try {
+//            json.put("deviceUdid", prefs.getDeviceIdentifier());
+//            json.put("deviceType", "android");
+//            json.put("pushDeviceId", "notImplementedYet");
+//        } catch (JSONException ex) {
+//            ex.printStackTrace();
+//        }
+//        JsonObjectRequest result = new JsonObjectRequest(BackendHelper.getUrl(server, eventId, competitorId, "device"),
+//                json, new Response.Listener<JSONObject>() {
+//
+//                    @Override
+//                    public void onResponse(JSONObject result) {
+//                       // startRegatta(eventId, competitorId);
+//                    }
+//                }, new Response.ErrorListener() {
+//
+//                    @Override
+//                    public void onErrorResponse(VolleyError error) {
+//                        String message = null;
+//                        NetworkResponse response = error.networkResponse;
+//                        if (response != null) {
+//                            if (response.statusCode == HttpStatus.SC_NOT_FOUND) {
+//                                message = getString(R.string.homefragment_volley_404);
+//                            } else {
+//                                message = String.format(getString(R.string.homefragment_volley_unknown),
+//                                        response.statusCode);
+//                            }
+//                        } else {
+//                            message = getString(R.string.homefragment_volley_unexpected);
+//                            ExLog.i(getActivity(), TAG, error.toString());
+//                        }
+//                        if (message != null) {
+//                            Toast.makeText(getActivity(), message, Toast.LENGTH_LONG).show();
+//                        }
+//                    }
+//                });
+//
+//        return result;
+//    }
 
     @Override
     public Loader<Cursor> onCreateLoader(int loaderId, Bundle bundle) {
@@ -389,6 +428,16 @@ public class HomeFragment extends BaseFragment implements LoaderCallbacks<Cursor
         default:
             break;
         }
+    }
+    
+    
+    private class DeviceMappingData
+    {
+    	//public String gcmId;
+    	public String leaderboardName;
+    	public String hostUrl;
+    	public String competitorId;
+    	public String deviceUid;
     }
 
     private class ClickListener implements OnClickListener {
@@ -449,5 +498,5 @@ public class HomeFragment extends BaseFragment implements LoaderCallbacks<Cursor
             Toast.makeText(getActivity(), "Error while receiving server data", Toast.LENGTH_LONG).show();
         }
     }
-
+       
 }
