@@ -31,11 +31,7 @@ import com.sap.sailing.domain.tracking.impl.TrackImpl;
 import com.sap.sailing.util.impl.ArrayListNavigableSet;
 
 /**
- * {@link Track} implementation for {@link RaceLogEvent}s.
- * 
- * <p>
- * "Fix" validity is decided based on the {@link #getCurrentPassId() current pass}. The validity is not cached.
- * </p>
+ * {@link Track} implementation for {@link AbstractLogEvent}s.
  * 
  * <p>
  * {@link TrackImpl#getDummyFix(com.sap.sailing.domain.common.TimePoint)} is not overridden, see
@@ -86,8 +82,15 @@ extends TrackImpl<EventT> implements AbstractLog<EventT, VisitorT> {
         return this.id;
     }
     
-    @Override
-    public boolean add(EventT event) {
+    protected void onSuccessfulAdd(EventT event, boolean notifyListeners) {
+        revokeIfNecessary(event);
+        eventsById.put(event.getId(), event);
+        if (notifyListeners) {
+            notifyListenersAboutReceive(event);
+        }
+    }
+    
+    protected boolean add(EventT event, boolean notifyListeners) {
         boolean isAdded = false;
         lockForWrite();
         try {
@@ -97,35 +100,21 @@ extends TrackImpl<EventT> implements AbstractLog<EventT, VisitorT> {
         }
         if (isAdded) {
             logger.finer(String.format("%s (%s) was added to log %s.", event, event.getClass().getName(), getId()));
-            // FIXME with out-of-order delivery would destroy currentPassId; need to check at least the createdAt time
-            // point
-            revokeIfNecessary(event);
-            eventsById.put(event.getId(), event);
-            notifyListenersAboutReceive(event);
+            onSuccessfulAdd(event, true);
         } else {
             logger.fine(String.format("%s (%s) was not added to race log %s because it already existed there.", event, event.getClass().getName(), getId()));
         }
         return isAdded;
     }
+    
+    @Override
+    public boolean add(EventT event) {
+        return add(event, true);
+    }
 
     @Override
     public boolean load(EventT event) {
-        boolean isAdded = false;
-        lockForWrite();
-        try {
-            isAdded = getInternalRawFixes().add(event);
-        } finally {
-            unlockAfterWrite();
-        }
-        if (isAdded) {
-            logger.finer(String.format("%s (%s) was loaded into log.", event, event.getClass().getName()));
-            revokeIfNecessary(event);
-            eventsById.put(event.getId(), event);
-        } else {
-            logger.finer(String
-                    .format("%s (%s) was not loaded into log because it already existed there.", event, event.getClass().getName()));
-        }
-        return isAdded;
+        return add(event, false);
     }
     
     private void revokeIfNecessary(EventT newEvent) {

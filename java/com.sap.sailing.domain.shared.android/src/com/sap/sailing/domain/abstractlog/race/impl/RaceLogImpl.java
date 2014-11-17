@@ -63,21 +63,11 @@ public class RaceLogImpl extends AbstractLogImpl<RaceLogEvent, RaceLogEventVisit
     }
     
     @Override
-    public boolean add(RaceLogEvent event) {
-        boolean isAdded = super.add(event);
-        if (isAdded) {
-            setCurrentPassId(Math.max(event.getPassId(), this.currentPassId));
-        }
-        return isAdded;
-    }
-    
-    @Override
-    public boolean load(RaceLogEvent event) {
-        boolean isAdded = super.load(event);
-        if (isAdded) {
-            setCurrentPassId(Math.max(event.getPassId(), this.currentPassId));
-        }
-        return isAdded;
+    protected void onSuccessfulAdd(RaceLogEvent event, boolean notifyListeners) {
+        // FIXME with out-of-order delivery would destroy currentPassId; need to check at least the createdAt time
+        // point
+        setCurrentPassId(Math.max(event.getPassId(), this.currentPassId));
+        super.onSuccessfulAdd(event, notifyListeners);
     }
     
     @Override
