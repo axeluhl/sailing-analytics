@@ -10,11 +10,11 @@ import Foundation
 import CoreData
 
 class APIManager: NSObject {
- 
+    
     struct NotificationType {
         static let networkAvailabilityChanged = "networkAvailabilityChanged"
     }
-
+    
     private struct SyncPeriod {
         /* Normal rate of upload is every 3s */
         static let Normal: NSTimeInterval = 3
@@ -22,16 +22,16 @@ class APIManager: NSObject {
         /* To save battery, upload rate is lowered to every 30s */
         static let BatterySaving: NSTimeInterval = 30
     }
-
+    
     /* Constants */
     struct Constants {
         /* Max number of fix objects to be sent per POST request. */
         static let maxSendGPSFix = 100
     }
-
+    
     /* Server URL */
     private var serverUrlString: String?
-
+    
     /* Base url of all requests, contains serverUrlString */
     private var baseUrlString: String?
     
@@ -52,7 +52,7 @@ class APIManager: NSObject {
             return !manager!.operationQueue.suspended
         }
     }
-
+    
     /* Singleton */
     class var sharedManager: APIManager {
         struct Singleton {
@@ -108,19 +108,19 @@ class APIManager: NSObject {
         
         // TODO: only one operation at a time?
         //manager!.operationQueue.maxConcurrentOperationCount = 0
- 
+        
         // start timer
         timer()
     }
     
     // MARK: - REST API
-
+    
     /* Get event */
     func getEvent(eventId: String!, success: (AFHTTPRequestOperation!, AnyObject!) -> Void, failure: (AFHTTPRequestOperation!, AnyObject!) -> Void) {
         let urlString = baseUrlString! + "/events/\(eventId)"
         manager!.GET(urlString, parameters: nil, success: success, failure: failure)
     }
-
+    
     /* Get leader board */
     func getLeaderBoard(leaderBoardName: String!, success: (AFHTTPRequestOperation!, AnyObject!) -> Void, failure: (AFHTTPRequestOperation!, AnyObject!) -> Void) {
         let urlString = baseUrlString! + "/leaderboards/\(leaderBoardName)"
@@ -132,7 +132,7 @@ class APIManager: NSObject {
         let urlString = baseUrlString! + "/competitors/\(competitorId)"
         manager!.GET(urlString, parameters: nil, success: success, failure: failure)
     }
-
+    
     /* Map a device to competitor. */
     func checkIn(leaderBoardName: String!, competitorId: String!, deviceUuid: String!, pushId: String!, fromMillis: Int!, success: (AFHTTPRequestOperation!, AnyObject!) -> Void, failure: (AFHTTPRequestOperation!, AnyObject!) -> Void) {
         
@@ -146,7 +146,7 @@ class APIManager: NSObject {
         
         manager!.POST(urlString, parameters: body, success: success, failure: failure)
     }
-  
+    
     /* Disconnect a device from competitor. */
     func checkOut(leaderBoardName: String!, competitorId: String!, deviceUuid: String!, toMillis: Int!, success:(AFHTTPRequestOperation!, AnyObject!) -> Void, failure: (AFHTTPRequestOperation!, AnyObject!) -> Void) {
         
@@ -158,12 +158,16 @@ class APIManager: NSObject {
         body["toMillis"] = toMillis
         
         manager!.POST(urlString, parameters: body, success: success, failure: failure)
-   }
+    }
     
     /* Send GPS location to server. Delete row from cache. */
     private func postGPSFixes(deviceUuid: String!, gpsFixes: [GPSFix]!) {
+        if gpsFixes.count == 0 {
+            return
+        }
+        
         let urlString = baseUrlString! + "/gps_fixes"
-
+        
         var body = [String: AnyObject]()
         body["deviceUuid"] = deviceUuid
         var array: [[String: AnyObject]] = []
@@ -193,7 +197,9 @@ class APIManager: NSObject {
         if (manager != nil && !manager!.operationQueue.suspended) {
             let deviceUuid = DeviceUDIDManager.UDID
             let lastestGPSFixes = DataManager.sharedManager.latestLocations()
-            postGPSFixes(deviceUuid, gpsFixes: lastestGPSFixes)
+            if lastestGPSFixes.count > 0 {
+                postGPSFixes(deviceUuid, gpsFixes: lastestGPSFixes)
+            }
         }
     }
     

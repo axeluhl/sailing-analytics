@@ -109,8 +109,9 @@ class ScanViewController: UIViewController, AVCaptureMetadataOutputObjectsDelega
                                     alertView.show()
                                 }, failure: { (AFHTTPRequestOperation operation, NSError error) -> Void in
                                     self.activityView.stopAnimating()
+                                    // TODO urk decode competitor ID
                                     let alertView = UIAlertView(title: "Couldn't get competitor \(self.qrcodeData!.competitorId!)", message: "", delegate: self, cancelButtonTitle: "Cancel")
-                                    alertView.tag = AlertViewTag.ServerError.rawValue;
+                                    alertView.tag = AlertViewTag.ConnectedToServer.rawValue;
                                     alertView.show()
                                     
                             }) }, failure: { (AFHTTPRequestOperation operation, NSError error) -> Void in
