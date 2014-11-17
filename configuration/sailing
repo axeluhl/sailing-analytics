@@ -47,9 +47,8 @@ stop_servers() {
 
 # launch_httpd(server_name, port, event_id)
 launch_httpd() {
-	echo $REPLICATE_ON_START | grep -iq "True"
-	if [ "$?" = "0" ]; then
-		echo "REPLICATE_ON_START is True"
+	if [ "$REPLICATE_ON_START" != "" ]; then
+		echo "REPLICATE_ON_START is $REPLICATE_ON_START. Will try to launch httpd so this replica can work with an ELB easily."
 		if [ -x /etc/init.d/httpd ]; then
 			server_name="`echo $SERVER_NAME | tr [A-Z] [a-z]`"
 			echo "Use Event $server_name.sapsailing.com \"$EVENT_ID\" 127.0.0.1 $SERVER_PORT" >>/etc/httpd/conf.d/001-events.conf
