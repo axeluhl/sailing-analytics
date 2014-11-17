@@ -4,8 +4,8 @@ import java.util.Arrays;
 import java.util.Collection;
 import java.util.Collections;
 
+import com.sap.sailing.domain.abstractlog.AbstractLogEventAuthor;
 import com.sap.sailing.domain.abstractlog.race.RaceLog;
-import com.sap.sailing.domain.abstractlog.race.RaceLogEventAuthor;
 import com.sap.sailing.domain.abstractlog.race.RaceLogEventFactory;
 import com.sap.sailing.domain.abstractlog.race.analyzing.impl.RRS26StartModeFlagFinder;
 import com.sap.sailing.domain.abstractlog.race.analyzing.impl.RacingProcedureTypeAnalyzer;
@@ -38,7 +38,7 @@ public class RRS26RacingProcedureImpl extends BaseRacingProcedure implements RRS
     private Flags cachedStartmodeFlag;
     private boolean startmodeFlagHasBeenSet;
 
-    public RRS26RacingProcedureImpl(RaceLog raceLog, RaceLogEventAuthor author, 
+    public RRS26RacingProcedureImpl(RaceLog raceLog, AbstractLogEventAuthor author, 
             RaceLogEventFactory factory, RRS26Configuration configuration) {
         super(raceLog, author, factory, configuration);
         

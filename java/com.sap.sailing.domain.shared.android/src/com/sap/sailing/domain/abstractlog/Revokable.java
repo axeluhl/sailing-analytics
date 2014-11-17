@@ -1,4 +1,7 @@
-package com.sap.sailing.domain.abstractlog.race;
+package com.sap.sailing.domain.abstractlog;
+
+import com.sap.sailing.domain.abstractlog.race.RaceLog;
+import com.sap.sailing.domain.abstractlog.race.RaceLogEvent;
 
 
 /**

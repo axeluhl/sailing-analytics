@@ -11,6 +11,8 @@ import com.sap.sailing.domain.abstractlog.race.tracking.StartTrackingEvent;
 
 
 public interface RaceLogEventVisitor {
+    public void visit(RaceLogRevokeEvent event);
+    
     public void visit(RaceLogFlagEvent event);
 
     public void visit(RaceLogPassChangeEvent event);
@@ -44,8 +46,6 @@ public interface RaceLogEventVisitor {
     public void visit(DenoteForTrackingEvent event);
     
     public void visit(StartTrackingEvent event);
-    
-    public void visit(RevokeEvent event);
     
     public void visit(RegisterCompetitorEvent event);
     

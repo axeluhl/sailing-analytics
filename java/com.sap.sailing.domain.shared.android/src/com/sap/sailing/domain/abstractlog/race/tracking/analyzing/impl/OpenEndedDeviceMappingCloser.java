@@ -4,8 +4,8 @@ import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.List;
 
+import com.sap.sailing.domain.abstractlog.AbstractLogEventAuthor;
 import com.sap.sailing.domain.abstractlog.race.RaceLog;
-import com.sap.sailing.domain.abstractlog.race.RaceLogEventAuthor;
 import com.sap.sailing.domain.abstractlog.race.RaceLogEventFactory;
 import com.sap.sailing.domain.abstractlog.race.analyzing.impl.RaceLogAnalyzer;
 import com.sap.sailing.domain.abstractlog.race.tracking.CloseOpenEndedDeviceMappingEvent;
@@ -22,10 +22,10 @@ import com.sap.sailing.domain.common.impl.MillisecondsTimePoint;
  */
 public class OpenEndedDeviceMappingCloser extends RaceLogAnalyzer<List<CloseOpenEndedDeviceMappingEvent>> {
     private final DeviceMapping<?> mapping;
-    private final RaceLogEventAuthor author;
+    private final AbstractLogEventAuthor author;
     private final TimePoint closingTimePoint;
 
-    public OpenEndedDeviceMappingCloser(RaceLog raceLog, DeviceMapping<?> mapping, RaceLogEventAuthor author,
+    public OpenEndedDeviceMappingCloser(RaceLog raceLog, DeviceMapping<?> mapping, AbstractLogEventAuthor author,
             TimePoint closingTimePoint) {
         super(raceLog);
         this.mapping = mapping;

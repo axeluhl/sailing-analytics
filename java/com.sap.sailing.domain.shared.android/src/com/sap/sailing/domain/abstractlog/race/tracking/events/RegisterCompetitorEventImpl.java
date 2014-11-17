@@ -3,7 +3,7 @@ package com.sap.sailing.domain.abstractlog.race.tracking.events;
 import java.io.Serializable;
 import java.util.Collections;
 
-import com.sap.sailing.domain.abstractlog.race.RaceLogEventAuthor;
+import com.sap.sailing.domain.abstractlog.AbstractLogEventAuthor;
 import com.sap.sailing.domain.abstractlog.race.RaceLogEventVisitor;
 import com.sap.sailing.domain.abstractlog.race.impl.RaceLogEventImpl;
 import com.sap.sailing.domain.abstractlog.race.tracking.RegisterCompetitorEvent;
@@ -13,7 +13,7 @@ import com.sap.sailing.domain.common.TimePoint;
 public class RegisterCompetitorEventImpl extends RaceLogEventImpl implements RegisterCompetitorEvent {
     private static final long serialVersionUID = -30864810737555657L;
     
-    public RegisterCompetitorEventImpl(TimePoint createdAt, RaceLogEventAuthor author, TimePoint logicalTimePoint,
+    public RegisterCompetitorEventImpl(TimePoint createdAt, AbstractLogEventAuthor author, TimePoint logicalTimePoint,
             Serializable pId, int pPassId, Competitor competitor) {
         super(createdAt, author, logicalTimePoint, pId, Collections.singletonList(competitor), pPassId);
     }

@@ -6,8 +6,8 @@ import static org.mockito.Mockito.verify;
 import org.junit.Before;
 import org.junit.Test;
 
+import com.sap.sailing.domain.abstractlog.AbstractLogEventAuthor;
 import com.sap.sailing.domain.abstractlog.race.RaceLogEvent;
-import com.sap.sailing.domain.abstractlog.race.RaceLogEventAuthor;
 import com.sap.sailing.domain.abstractlog.race.RaceLogEventFactory;
 import com.sap.sailing.domain.abstractlog.race.impl.RaceLogEventAuthorImpl;
 import com.sap.sailing.domain.base.DomainFactory;
@@ -44,7 +44,7 @@ public class RaceLogEventSerializerTest {
     private JsonSerializer<RaceLogEvent> additionalScoringInformationSerializer;
 
     private RaceLogEventFactory factory;
-    private RaceLogEventAuthor author = new RaceLogEventAuthorImpl("Test Author", 1);
+    private AbstractLogEventAuthor author = new RaceLogEventAuthorImpl("Test Author", 1);
 
     @SuppressWarnings("unchecked")
     @Before
@@ -223,7 +223,7 @@ public class RaceLogEventSerializerTest {
     @Test
     public void testRevokeEventSerializer() {
         // we use the real event type here because we do not want to re-implement the dispatching.
-        RaceLogEvent event = factory.createRevokeEvent(null, author, 0, null, null, null, null);
+        RaceLogEvent event = factory.createRevokeEvent(author, 0, null, null);
         serializer.serialize(event);
         verify(revokeEventSerializer).serialize(event);
     }

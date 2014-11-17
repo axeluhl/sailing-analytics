@@ -1,7 +1,7 @@
 package com.sap.sailing.domain.abstractlog.race.state.racingprocedure.impl;
 
+import com.sap.sailing.domain.abstractlog.AbstractLogEventAuthor;
 import com.sap.sailing.domain.abstractlog.race.RaceLog;
-import com.sap.sailing.domain.abstractlog.race.RaceLogEventAuthor;
 import com.sap.sailing.domain.abstractlog.race.RaceLogEventFactory;
 import com.sap.sailing.domain.abstractlog.race.impl.NoAddingRaceLogWrapper;
 import com.sap.sailing.domain.abstractlog.race.impl.RaceLogEventAuthorImpl;
@@ -36,7 +36,7 @@ public class ReadonlyRacingProcedureFactory implements RacingProcedureFactory {
     }
 
     protected ReadonlyRacingProcedure createProcedure(RacingProcedureType type, RaceLog raceLog,
-            RaceLogEventAuthor author, RaceLogEventFactory factory) {
+            AbstractLogEventAuthor author, RaceLogEventFactory factory) {
         RegattaConfiguration loadedConfiguration = configuration.load();
         switch (type) {
         case ESS:
@@ -56,7 +56,7 @@ public class ReadonlyRacingProcedureFactory implements RacingProcedureFactory {
     @Override
     public ReadonlyRacingProcedure createRacingProcedure(RacingProcedureType type, RaceLog raceLog) {
         // Just a mock author since we will never add anything to the racelog
-        RaceLogEventAuthor author = new RaceLogEventAuthorImpl("Illegal Author", 128);
+        AbstractLogEventAuthor author = new RaceLogEventAuthorImpl("Illegal Author", 128);
         // Wrap the racelog to disable adding...
         RaceLog wrappedRaceLog = new NoAddingRaceLogWrapper(raceLog);
         return createProcedure(type, wrappedRaceLog, author, RaceLogEventFactory.INSTANCE);

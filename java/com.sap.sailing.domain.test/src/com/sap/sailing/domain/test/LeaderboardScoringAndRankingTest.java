@@ -29,7 +29,6 @@ import com.sap.sailing.domain.abstractlog.race.scoring.AdditionalScoringInformat
 import com.sap.sailing.domain.abstractlog.race.scoring.impl.AdditionalScoringInformationEventImpl;
 import com.sap.sailing.domain.abstractlog.race.state.RaceState;
 import com.sap.sailing.domain.abstractlog.race.state.impl.RaceStateImpl;
-import com.sap.sailing.domain.abstractlog.race.tracking.events.RevokeEventImpl;
 import com.sap.sailing.domain.base.BoatClass;
 import com.sap.sailing.domain.base.Competitor;
 import com.sap.sailing.domain.base.DomainFactory;
@@ -53,6 +52,7 @@ import com.sap.sailing.domain.common.ScoringSchemeType;
 import com.sap.sailing.domain.common.TimePoint;
 import com.sap.sailing.domain.common.dto.LeaderboardDTO;
 import com.sap.sailing.domain.common.impl.MillisecondsTimePoint;
+import com.sap.sailing.domain.common.racelog.tracking.NotRevokableException;
 import com.sap.sailing.domain.leaderboard.FlexibleLeaderboard;
 import com.sap.sailing.domain.leaderboard.Leaderboard;
 import com.sap.sailing.domain.leaderboard.LeaderboardGroup;
@@ -846,7 +846,11 @@ public class LeaderboardScoringAndRankingTest extends AbstractLeaderboardTest {
         AdditionalScoringInformationFinder finder = new AdditionalScoringInformationFinder(raceLogForRace2);
         AdditionalScoringInformationEvent event = finder.analyze(/*filterBy*/AdditionalScoringInformationType.MAX_POINTS_DECREASE_MAX_SCORE);
         assert event != null;
-        raceLogForRace2.add(RevokeEventImpl.create(raceLogForRace2, new RaceLogEventAuthorImpl("Plopp", 1), event));
+        try {
+            raceLogForRace2.revokeEvent(new RaceLogEventAuthorImpl("Plopp", 1), event);
+        } catch (NotRevokableException e1) {
+            e1.printStackTrace();
+        }
         event = finder.analyze(/*filterBy*/AdditionalScoringInformationType.MAX_POINTS_DECREASE_MAX_SCORE);
         assert event == null;
         assertEquals(new Double(30), leaderboardHighPoint10Or8AndLastBreaksTie.getTotalPoints(competitors[0], later));

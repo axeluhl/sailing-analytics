@@ -6,8 +6,8 @@ import static junit.framework.Assert.assertEquals;
 import org.junit.After;
 import org.junit.Before;
 
+import com.sap.sailing.domain.abstractlog.AbstractLogEventAuthor;
 import com.sap.sailing.domain.abstractlog.race.RaceLog;
-import com.sap.sailing.domain.abstractlog.race.RaceLogEventAuthor;
 import com.sap.sailing.domain.abstractlog.race.RaceLogEventFactory;
 import com.sap.sailing.domain.abstractlog.race.impl.RaceLogEventAuthorImpl;
 import com.sap.sailing.domain.abstractlog.race.impl.RaceLogImpl;
@@ -43,7 +43,7 @@ public class AbstractGPSFixStoreTest {
     protected final Competitor comp = DomainFactory.INSTANCE.getOrCreateCompetitor("comp", "comp", null, null, null);
     protected final Mark mark = DomainFactory.INSTANCE.getOrCreateMark("mark");
 
-    private final RaceLogEventAuthor author = new RaceLogEventAuthorImpl("author", 0);
+    private final AbstractLogEventAuthor author = new RaceLogEventAuthorImpl("author", 0);
 
     protected GPSFixMoving createFix(long millis, double lat, double lng, double knots, double degrees) {
         return new GPSFixMovingImpl(new DegreePosition(lat, lng),

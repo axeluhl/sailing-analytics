@@ -1,32 +1,26 @@
 package com.sap.sailing.domain.abstractlog.impl;
 
 import java.io.Serializable;
-import java.util.List;
 
 import com.sap.sailing.domain.abstractlog.AbstractLogEvent;
-import com.sap.sailing.domain.abstractlog.race.RaceLogEventAuthor;
-import com.sap.sailing.domain.base.Competitor;
+import com.sap.sailing.domain.abstractlog.AbstractLogEventAuthor;
 import com.sap.sailing.domain.common.TimePoint;
 
-public abstract class AbstractLogEventImpl implements AbstractLogEvent {
+public abstract class AbstractLogEventImpl<VisitorT> implements AbstractLogEvent<VisitorT> {
 
     private static final long serialVersionUID = -5810258278984777732L;
 
     private final TimePoint createdAt;
     private final TimePoint logicalTimePoint;
     private final Serializable id;
-    private final List<Competitor> involvedBoats;
-    private final int passId;
-    private final RaceLogEventAuthor author;
+    private final AbstractLogEventAuthor author;
 
-    public AbstractLogEventImpl(TimePoint createdAt, RaceLogEventAuthor author, TimePoint logicalTimePoint,
-            Serializable pId, List<Competitor> pInvolvedBoats, int pPassId) {
+    public AbstractLogEventImpl(TimePoint createdAt, AbstractLogEventAuthor author, TimePoint logicalTimePoint,
+            Serializable pId) {
         this.createdAt = createdAt;
         this.author = author;
         this.logicalTimePoint = logicalTimePoint;
         this.id = pId;
-        this.involvedBoats = pInvolvedBoats;
-        this.passId = pPassId;
     }
 
     @Override
@@ -51,27 +45,16 @@ public abstract class AbstractLogEventImpl implements AbstractLogEvent {
     public Serializable getId() {
         return id;
     }
-
-    @Override
-    public List<Competitor> getInvolvedBoats() {
-        return involvedBoats;
-    }
-
-    @Override
-    public int getPassId() {
-        return passId;
-    }
     
     @Override
-    public RaceLogEventAuthor getAuthor() {
+    public AbstractLogEventAuthor getAuthor() {
         return author;
     }
 
     @Override
     public String toString() {
         return getClass().getName() + ": createdAt: " + getCreatedAt() + ", logicalTimePoint: " + getLogicalTimePoint()
-                + ", id: " + getId() + ", involvedBoats: " + getInvolvedBoats() + ", passId: " + getPassId() +
-                ", author: "+ getAuthor();
+                + ", id: " + getId() + ", author: "+ getAuthor();
     }
     
     @Override

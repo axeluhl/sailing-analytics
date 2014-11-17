@@ -10,11 +10,13 @@ import java.util.logging.Level;
 import java.util.logging.Logger;
 
 import com.sap.sailing.domain.abstractlog.AbstractLog;
+import com.sap.sailing.domain.abstractlog.AbstractLogEventAuthor;
 import com.sap.sailing.domain.abstractlog.race.RaceLog;
 import com.sap.sailing.domain.abstractlog.race.RaceLogEvent;
 import com.sap.sailing.domain.abstractlog.race.RaceLogEventVisitor;
 import com.sap.sailing.domain.common.Duration;
 import com.sap.sailing.domain.common.TimePoint;
+import com.sap.sailing.domain.common.racelog.tracking.NotRevokableException;
 
 /**
  * Wrapper for a {@link RaceLog} which will ignore all calls trying to add an {@link RaceLogEvent}. All other
@@ -228,7 +230,18 @@ public class NoAddingRaceLogWrapper implements RaceLog {
     }
 
     @Override
-    public void merge(AbstractLog<RaceLogEvent> other) {
+    public void merge(AbstractLog<RaceLogEvent, RaceLogEventVisitor> other) {
         innerRaceLog.merge(other);
+    }
+
+    @Override
+    public void revokeEvent(AbstractLogEventAuthor author, RaceLogEvent toRevoke, String reason)
+            throws NotRevokableException {
+        innerRaceLog.revokeEvent(author, toRevoke, reason);
+    }
+
+    @Override
+    public void revokeEvent(AbstractLogEventAuthor author, RaceLogEvent toRevoke) throws NotRevokableException {
+        innerRaceLog.revokeEvent(author, toRevoke);
     }
 }

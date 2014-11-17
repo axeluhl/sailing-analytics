@@ -6,7 +6,7 @@ import android.content.DialogInterface.OnClickListener;
 import android.os.Bundle;
 
 import com.sap.sailing.android.shared.logging.ExLog;
-import com.sap.sailing.domain.abstractlog.race.RaceLogEventAuthor;
+import com.sap.sailing.domain.abstractlog.AbstractLogEventAuthor;
 import com.sap.sailing.domain.abstractlog.race.impl.RaceLogEventAuthorImpl;
 import com.sap.sailing.racecommittee.app.R;
 import com.sap.sailing.racecommittee.app.logging.LogEvent;
@@ -20,7 +20,7 @@ public class LoginDialog extends ActivityAttachedDialogFragment {
 
     private CharSequence[] loginTypeDescriptions;
     private LoginType selectedLoginType;
-    private RaceLogEventAuthor author;
+    private AbstractLogEventAuthor author;
     
     @Override
     public void onCreate(Bundle savedInstanceState) {
@@ -37,7 +37,7 @@ public class LoginDialog extends ActivityAttachedDialogFragment {
         return selectedLoginType;
     }
     
-    public RaceLogEventAuthor getAuthor() {
+    public AbstractLogEventAuthor getAuthor() {
         return author;
     }
 

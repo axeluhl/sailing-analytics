@@ -9,9 +9,9 @@ import java.util.Arrays;
 
 import org.junit.Test;
 
+import com.sap.sailing.domain.abstractlog.AbstractLogEventAuthor;
 import com.sap.sailing.domain.abstractlog.race.RaceLog;
 import com.sap.sailing.domain.abstractlog.race.RaceLogEvent;
-import com.sap.sailing.domain.abstractlog.race.RaceLogEventAuthor;
 import com.sap.sailing.domain.abstractlog.race.RaceLogProtestStartTimeEvent;
 import com.sap.sailing.domain.abstractlog.race.analyzing.impl.ProtestStartTimeFinder;
 import com.sap.sailing.domain.common.TimePoint;
@@ -24,7 +24,7 @@ public class ProtestStartTimeFinderTest extends PassAwareRaceLogAnalyzerTest<Pro
     }
 
     @Override
-    protected TargetPair getTargetEventsAndResultForPassAwareTests(int passId, RaceLogEventAuthor author) {
+    protected TargetPair getTargetEventsAndResultForPassAwareTests(int passId, AbstractLogEventAuthor author) {
         RaceLogProtestStartTimeEvent event = createEvent(RaceLogProtestStartTimeEvent.class, 1, passId, author);
         when(event.getProtestStartTime()).thenReturn(mock(TimePoint.class));
         return new TargetPair(Arrays.asList(event), event.getProtestStartTime());

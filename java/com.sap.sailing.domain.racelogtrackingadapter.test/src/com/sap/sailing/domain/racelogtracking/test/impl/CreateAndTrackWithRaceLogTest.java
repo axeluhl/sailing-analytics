@@ -17,8 +17,8 @@ import org.junit.Rule;
 import org.junit.Test;
 import org.junit.rules.ExpectedException;
 
+import com.sap.sailing.domain.abstractlog.AbstractLogEventAuthor;
 import com.sap.sailing.domain.abstractlog.race.RaceLog;
-import com.sap.sailing.domain.abstractlog.race.RaceLogEventAuthor;
 import com.sap.sailing.domain.abstractlog.race.RaceLogEventFactory;
 import com.sap.sailing.domain.abstractlog.race.tracking.DeviceIdentifier;
 import com.sap.sailing.domain.base.Competitor;
@@ -57,7 +57,7 @@ public class CreateAndTrackWithRaceLogTest {
     private RegattaLeaderboard leaderboard;
     private RaceLogTrackingAdapter adapter;
     private Regatta regatta;
-    private RaceLogEventAuthor author;
+    private AbstractLogEventAuthor author;
     private GPSFixStore gpsFixStore;
 
     private long time = 0;

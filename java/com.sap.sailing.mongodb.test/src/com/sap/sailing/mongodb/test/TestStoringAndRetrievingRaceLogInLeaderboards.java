@@ -19,12 +19,12 @@ import com.mongodb.BasicDBList;
 import com.mongodb.BasicDBObject;
 import com.mongodb.DBObject;
 import com.mongodb.MongoException;
+import com.sap.sailing.domain.abstractlog.AbstractLogEventAuthor;
 import com.sap.sailing.domain.abstractlog.race.CompetitorResults;
 import com.sap.sailing.domain.abstractlog.race.RaceLog;
 import com.sap.sailing.domain.abstractlog.race.RaceLogCourseAreaChangedEvent;
 import com.sap.sailing.domain.abstractlog.race.RaceLogCourseDesignChangedEvent;
 import com.sap.sailing.domain.abstractlog.race.RaceLogEvent;
-import com.sap.sailing.domain.abstractlog.race.RaceLogEventAuthor;
 import com.sap.sailing.domain.abstractlog.race.RaceLogEventFactory;
 import com.sap.sailing.domain.abstractlog.race.RaceLogFinishPositioningConfirmedEvent;
 import com.sap.sailing.domain.abstractlog.race.RaceLogFinishPositioningListChangedEvent;
@@ -71,7 +71,7 @@ public class TestStoringAndRetrievingRaceLogInLeaderboards extends RaceLogMongoD
     String leaderboardName = "TestLeaderboard";
     final int[] discardIndexResultsStartingWithHowManyRaces = new int[] { 5, 8 };
     FlexibleLeaderboardImpl leaderboard = null;
-    private RaceLogEventAuthor author = new RaceLogEventAuthorImpl("Test Author", 1);
+    private AbstractLogEventAuthor author = new RaceLogEventAuthorImpl("Test Author", 1);
     
     public TestStoringAndRetrievingRaceLogInLeaderboards() throws UnknownHostException, MongoException {
         super();
@@ -168,7 +168,7 @@ public class TestStoringAndRetrievingRaceLogInLeaderboards extends RaceLogMongoD
         reloadedRenamedRaceLog.lockForRead();
         try {
             assertEquals(1, Util.size(reloadedRenamedRaceLog.getRawFixes()));
-            assertEquals(0, RaceLogEventComparator.INSTANCE.compare(expectedEvent, reloadedRenamedRaceLog.getRawFixes().iterator().next()));
+            assertEquals(0, new RaceLogEventComparator().compare(expectedEvent, reloadedRenamedRaceLog.getRawFixes().iterator().next()));
         } finally {
             reloadedRenamedRaceLog.unlockAfterRead();
         }

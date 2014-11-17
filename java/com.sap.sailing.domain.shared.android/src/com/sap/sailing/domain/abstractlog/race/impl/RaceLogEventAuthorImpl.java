@@ -1,13 +1,13 @@
 package com.sap.sailing.domain.abstractlog.race.impl;
 
-import com.sap.sailing.domain.abstractlog.race.RaceLogEventAuthor;
+import com.sap.sailing.domain.abstractlog.AbstractLogEventAuthor;
 import com.sap.sse.common.impl.NamedImpl;
 
-public class RaceLogEventAuthorImpl extends NamedImpl implements RaceLogEventAuthor {
+public class RaceLogEventAuthorImpl extends NamedImpl implements AbstractLogEventAuthor {
     private static final long serialVersionUID = -5602802911563685812L;
     private final int priority;
     
-    public static RaceLogEventAuthor createCompatibilityAuthor() {
+    public static AbstractLogEventAuthor createCompatibilityAuthor() {
         return new RaceLogEventAuthorImpl(NAME_COMPATIBILITY, PRIORITY_COMPATIBILITY);
     }
     
@@ -22,7 +22,7 @@ public class RaceLogEventAuthorImpl extends NamedImpl implements RaceLogEventAut
     }
 
     @Override
-    public int compareTo(RaceLogEventAuthor other) {
+    public int compareTo(AbstractLogEventAuthor other) {
         /** as '0' has a higher priority than '1' the compare method ranks a '0' priority higher than a '1' priority */
         Integer result = new Integer(getPriority()).compareTo(other.getPriority());
         return -result;

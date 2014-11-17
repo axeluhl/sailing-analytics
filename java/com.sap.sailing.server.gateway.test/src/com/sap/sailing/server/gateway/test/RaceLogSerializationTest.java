@@ -10,8 +10,8 @@ import org.json.simple.JSONObject;
 import org.junit.Before;
 import org.junit.Test;
 
+import com.sap.sailing.domain.abstractlog.AbstractLogEventAuthor;
 import com.sap.sailing.domain.abstractlog.race.RaceLogEvent;
-import com.sap.sailing.domain.abstractlog.race.RaceLogEventAuthor;
 import com.sap.sailing.domain.abstractlog.race.RaceLogEventFactory;
 import com.sap.sailing.domain.abstractlog.race.impl.RaceLogEventAuthorImpl;
 import com.sap.sailing.domain.abstractlog.race.tracking.DeviceCompetitorMappingEvent;
@@ -46,7 +46,7 @@ import com.sap.sailing.server.gateway.serialization.racelog.tracking.impl.PlaceH
 public class RaceLogSerializationTest {
     private JsonSerializer<RaceLogEvent> serializer;
     private JsonDeserializer<RaceLogEvent> deserializer;
-    private final RaceLogEventAuthor author = new RaceLogEventAuthorImpl("test", 0);
+    private final AbstractLogEventAuthor author = new RaceLogEventAuthorImpl("test", 0);
     private static final Competitor competitor = new CompetitorImpl("a", "b", null,
             new TeamImpl("a", Collections.singletonList(new PersonImpl("a", new NationalityImpl("GER"), new Date(), "abc")), null),
             new BoatImpl("a", new BoatClassImpl("a", true), "abc"));

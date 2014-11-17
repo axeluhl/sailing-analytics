@@ -1,6 +1,8 @@
-package com.sap.sailing.domain.abstractlog.race;
+package com.sap.sailing.domain.abstractlog;
 
 import java.io.Serializable;
+
+import com.sap.sailing.domain.abstractlog.race.RaceLog;
 
 /**
  * Revokes the event referenced by {@link #getRevokedEventId()}.
@@ -9,7 +11,7 @@ import java.io.Serializable;
  * @see Revokable
  *
  */
-public interface RevokeEvent extends RaceLogEvent {
+public interface RevokeEvent<VisitorT> extends AbstractLogEvent<VisitorT> {
     Serializable getRevokedEventId();
     
     /**

@@ -6,13 +6,13 @@ import android.preference.PreferenceManager;
 
 import com.sap.sailing.android.shared.util.PrefUtils;
 import com.sap.sailing.android.tracking.app.R;
-import com.sap.sailing.domain.abstractlog.race.RaceLogEventAuthor;
+import com.sap.sailing.domain.abstractlog.AbstractLogEventAuthor;
 import com.sap.sailing.domain.abstractlog.race.impl.RaceLogEventAuthorImpl;
 
 public class AppPreferences {
     protected final Context context;
     protected final SharedPreferences preferences;
-    public static final RaceLogEventAuthor raceLogEventAuthor = new RaceLogEventAuthorImpl("Tracking App", 0);
+    public static final AbstractLogEventAuthor raceLogEventAuthor = new RaceLogEventAuthorImpl("Tracking App", 0);
     
     public AppPreferences(Context context) {
         this.context = context;

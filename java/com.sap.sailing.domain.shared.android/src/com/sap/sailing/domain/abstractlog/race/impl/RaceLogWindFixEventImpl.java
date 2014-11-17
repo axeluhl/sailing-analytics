@@ -3,7 +3,7 @@ package com.sap.sailing.domain.abstractlog.race.impl;
 import java.io.Serializable;
 import java.util.List;
 
-import com.sap.sailing.domain.abstractlog.race.RaceLogEventAuthor;
+import com.sap.sailing.domain.abstractlog.AbstractLogEventAuthor;
 import com.sap.sailing.domain.abstractlog.race.RaceLogEventVisitor;
 import com.sap.sailing.domain.abstractlog.race.RaceLogWindFixEvent;
 import com.sap.sailing.domain.base.Competitor;
@@ -15,7 +15,7 @@ public class RaceLogWindFixEventImpl extends RaceLogEventImpl implements RaceLog
     
     private final Wind windFix;
     
-    public RaceLogWindFixEventImpl(TimePoint createdAt, RaceLogEventAuthor author, TimePoint pTimePoint,
+    public RaceLogWindFixEventImpl(TimePoint createdAt, AbstractLogEventAuthor author, TimePoint pTimePoint,
             Serializable pId, List<Competitor> pInvolvedBoats, int pPassId, Wind windFix) {
         super(createdAt, author, pTimePoint, pId, pInvolvedBoats, pPassId);
         this.windFix = windFix;

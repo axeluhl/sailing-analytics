@@ -18,15 +18,15 @@ import org.junit.Test;
 
 import com.mongodb.DBObject;
 import com.mongodb.MongoException;
+import com.sap.sailing.domain.abstractlog.AbstractLogEventAuthor;
 import com.sap.sailing.domain.abstractlog.race.RaceLogCourseAreaChangedEvent;
 import com.sap.sailing.domain.abstractlog.race.RaceLogEvent;
-import com.sap.sailing.domain.abstractlog.race.RaceLogEventAuthor;
 import com.sap.sailing.domain.abstractlog.race.RaceLogEventRestoreFactory;
 import com.sap.sailing.domain.abstractlog.race.RaceLogFlagEvent;
 import com.sap.sailing.domain.abstractlog.race.RaceLogPassChangeEvent;
 import com.sap.sailing.domain.abstractlog.race.RaceLogRaceStatusEvent;
+import com.sap.sailing.domain.abstractlog.race.RaceLogRevokeEvent;
 import com.sap.sailing.domain.abstractlog.race.RaceLogStartTimeEvent;
-import com.sap.sailing.domain.abstractlog.race.RevokeEvent;
 import com.sap.sailing.domain.abstractlog.race.impl.RaceLogEventAuthorImpl;
 import com.sap.sailing.domain.abstractlog.race.tracking.CloseOpenEndedDeviceMappingEvent;
 import com.sap.sailing.domain.abstractlog.race.tracking.DefineMarkEvent;
@@ -67,7 +67,7 @@ public class StoreAndLoadRaceLogEventsTest extends AbstractMongoDBTest {
     protected Serializable expectedId = UUID.randomUUID();
     protected List<Competitor> expectedInvolvedBoats = Collections.emptyList();
     protected int expectedPassId = 42;
-    private RaceLogEventAuthor author = new RaceLogEventAuthorImpl("Test Author", 1);
+    private AbstractLogEventAuthor author = new RaceLogEventAuthorImpl("Test Author", 1);
 
     public StoreAndLoadRaceLogEventsTest() throws UnknownHostException, MongoException {
         super();
@@ -98,8 +98,8 @@ public class StoreAndLoadRaceLogEventsTest extends AbstractMongoDBTest {
         
         assertNull(expectedEvent.getAuthor());
         assertNotNull(actualEvent.getAuthor());
-        assertEquals(RaceLogEventAuthor.PRIORITY_COMPATIBILITY, actualEvent.getAuthor().getPriority());
-        assertEquals(RaceLogEventAuthor.NAME_COMPATIBILITY, actualEvent.getAuthor().getName());
+        assertEquals(AbstractLogEventAuthor.PRIORITY_COMPATIBILITY, actualEvent.getAuthor().getPriority());
+        assertEquals(AbstractLogEventAuthor.NAME_COMPATIBILITY, actualEvent.getAuthor().getName());
     }
 
     @Test
@@ -233,12 +233,12 @@ public class StoreAndLoadRaceLogEventsTest extends AbstractMongoDBTest {
         String revokedEventType = "type";
         String revokedEventShortInfo = "short info";
         String reason = "reason";
-        RevokeEvent expectedEvent = eventFactory.createRevokeEvent(
+        RaceLogRevokeEvent expectedEvent = eventFactory.createRevokeEvent(
         		expectedEventTime, author, expectedEventTime, expectedId, expectedPassId, revokedEventId,
         		revokedEventType, revokedEventShortInfo, reason);
 
         DBObject dbObject = mongoFactory.storeRaceLogEntry(logIdentifier, expectedEvent);
-        RevokeEvent actualEvent = loadEvent(dbObject);
+        RaceLogRevokeEvent actualEvent = loadEvent(dbObject);
 
         assertBaseFields(expectedEvent, actualEvent);
         assertEquals(revokedEventId, actualEvent.getRevokedEventId());

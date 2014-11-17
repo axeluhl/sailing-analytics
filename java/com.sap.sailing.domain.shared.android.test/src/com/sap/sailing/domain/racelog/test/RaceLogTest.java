@@ -19,9 +19,9 @@ import org.junit.Test;
 import org.mockito.invocation.InvocationOnMock;
 import org.mockito.stubbing.Answer;
 
+import com.sap.sailing.domain.abstractlog.AbstractLogEventAuthor;
 import com.sap.sailing.domain.abstractlog.race.RaceLog;
 import com.sap.sailing.domain.abstractlog.race.RaceLogEvent;
-import com.sap.sailing.domain.abstractlog.race.RaceLogEventAuthor;
 import com.sap.sailing.domain.abstractlog.race.RaceLogEventFactory;
 import com.sap.sailing.domain.abstractlog.race.RaceLogEventVisitor;
 import com.sap.sailing.domain.abstractlog.race.RaceLogFlagEvent;
@@ -242,11 +242,11 @@ public class RaceLogTest {
         RaceLogEvent eventTwo = mock(RaceLogEvent.class);
         
         when(eventOne.getPassId()).thenReturn(0);
-        when(eventOne.getAuthor()).thenReturn(mock(RaceLogEventAuthor.class));
+        when(eventOne.getAuthor()).thenReturn(mock(AbstractLogEventAuthor.class));
         when(eventOne.getCreatedAt()).thenReturn(new MillisecondsTimePoint(0));
         when(eventOne.getId()).thenReturn("a");
         when(eventTwo.getPassId()).thenReturn(1);
-        when(eventTwo.getAuthor()).thenReturn(mock(RaceLogEventAuthor.class));
+        when(eventTwo.getAuthor()).thenReturn(mock(AbstractLogEventAuthor.class));
         when(eventTwo.getCreatedAt()).thenReturn(new MillisecondsTimePoint(0));
         when(eventTwo.getId()).thenReturn("b");
         
@@ -263,7 +263,7 @@ public class RaceLogTest {
     public void testAddEventSamePassAndSameAuthorAndSameTimePointButDifferentId() {
         RaceLogEvent eventOne = mock(RaceLogEvent.class);
         RaceLogEvent eventTwo = mock(RaceLogEvent.class);
-        RaceLogEventAuthor author = mock(RaceLogEventAuthor.class);
+        AbstractLogEventAuthor author = mock(AbstractLogEventAuthor.class);
         
         when(eventOne.getPassId()).thenReturn(0);
         when(eventOne.getAuthor()).thenReturn(author);
@@ -287,7 +287,7 @@ public class RaceLogTest {
     public void testWontAddEventSamePassAndSameAuthorAndSameTimePointAndSameId() {
         RaceLogEvent eventOne = mock(RaceLogEvent.class);
         RaceLogEvent eventTwo = mock(RaceLogEvent.class);
-        RaceLogEventAuthor author = mock(RaceLogEventAuthor.class);
+        AbstractLogEventAuthor author = mock(AbstractLogEventAuthor.class);
         
         when(eventOne.getPassId()).thenReturn(0);
         when(eventOne.getAuthor()).thenReturn(author);
@@ -360,8 +360,8 @@ public class RaceLogTest {
         RaceLogEvent event1 = mock(RaceLogEvent.class);
         RaceLogEvent event2 = mock(RaceLogEvent.class);
         RaceLogEvent event3 = mock(RaceLogEvent.class);
-        RaceLogEventAuthor minorAuthor = mock(RaceLogEventAuthor.class);
-        RaceLogEventAuthor majorAuthor = mock(RaceLogEventAuthor.class);
+        AbstractLogEventAuthor minorAuthor = mock(AbstractLogEventAuthor.class);
+        AbstractLogEventAuthor majorAuthor = mock(AbstractLogEventAuthor.class);
         when(minorAuthor.compareTo(majorAuthor)).thenReturn(-1);
         when(majorAuthor.compareTo(minorAuthor)).thenReturn(1);
         
@@ -389,8 +389,8 @@ public class RaceLogTest {
         RaceLogEvent event2 = mock(RaceLogEvent.class);
         RaceLogEvent event3 = mock(RaceLogEvent.class);
         RaceLogEvent event4 = mock(RaceLogEvent.class);
-        RaceLogEventAuthor minorAuthor = mock(RaceLogEventAuthor.class);
-        RaceLogEventAuthor majorAuthor = mock(RaceLogEventAuthor.class);
+        AbstractLogEventAuthor minorAuthor = mock(AbstractLogEventAuthor.class);
+        AbstractLogEventAuthor majorAuthor = mock(AbstractLogEventAuthor.class);
         when(minorAuthor.compareTo(majorAuthor)).thenReturn(-1);
         when(majorAuthor.compareTo(minorAuthor)).thenReturn(1);
         
@@ -419,7 +419,7 @@ public class RaceLogTest {
         assertEquals(event2, Util.get(raceLog.getFixesDescending(), 2));
         raceLog.unlockAfterRead();
     }
-    private RaceLogEventAuthor author = new RaceLogEventAuthorImpl("Test Author", 1);
+    private AbstractLogEventAuthor author = new RaceLogEventAuthorImpl("Test Author", 1);
     
     @Test
     public void testAddingEventsFromMultipleClients() {
@@ -446,14 +446,14 @@ public class RaceLogTest {
         
         TimePoint createdAtEventOne = new MillisecondsTimePoint(100);
         RaceLogEvent eventOne = mock(RaceLogEvent.class);
-        when(eventOne.getAuthor()).thenReturn(mock(RaceLogEventAuthor.class));
+        when(eventOne.getAuthor()).thenReturn(mock(AbstractLogEventAuthor.class));
         when(eventOne.getCreatedAt()).thenReturn(createdAtEventOne);
         when(eventOne.getTimePoint()).thenReturn(createdAtEventOne);
         raceLog.add(eventOne);
         
         TimePoint createdAtEventTwo = new MillisecondsTimePoint(99);
         RaceLogEvent eventTwo = mock(RaceLogEvent.class);
-        when(eventTwo.getAuthor()).thenReturn(mock(RaceLogEventAuthor.class));
+        when(eventTwo.getAuthor()).thenReturn(mock(AbstractLogEventAuthor.class));
         when(eventTwo.getCreatedAt()).thenReturn(createdAtEventTwo);
         when(eventTwo.getTimePoint()).thenReturn(createdAtEventTwo);
         raceLog.add(eventTwo);

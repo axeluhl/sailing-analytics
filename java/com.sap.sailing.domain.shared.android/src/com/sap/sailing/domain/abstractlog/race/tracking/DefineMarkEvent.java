@@ -1,7 +1,7 @@
 package com.sap.sailing.domain.abstractlog.race.tracking;
 
+import com.sap.sailing.domain.abstractlog.Revokable;
 import com.sap.sailing.domain.abstractlog.race.RaceLogEvent;
-import com.sap.sailing.domain.abstractlog.race.Revokable;
 import com.sap.sailing.domain.base.Mark;
 
 /**

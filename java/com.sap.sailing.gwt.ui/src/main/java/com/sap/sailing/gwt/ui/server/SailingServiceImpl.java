@@ -54,11 +54,11 @@ import org.osgi.framework.InvalidSyntaxException;
 import org.osgi.framework.ServiceReference;
 import org.osgi.util.tracker.ServiceTracker;
 
+import com.sap.sailing.domain.abstractlog.Revokable;
 import com.sap.sailing.domain.abstractlog.race.RaceLog;
 import com.sap.sailing.domain.abstractlog.race.RaceLogEvent;
 import com.sap.sailing.domain.abstractlog.race.RaceLogEventFactory;
 import com.sap.sailing.domain.abstractlog.race.RaceLogFlagEvent;
-import com.sap.sailing.domain.abstractlog.race.Revokable;
 import com.sap.sailing.domain.abstractlog.race.analyzing.impl.AbortingFlagFinder;
 import com.sap.sailing.domain.abstractlog.race.analyzing.impl.LastPublishedCourseDesignFinder;
 import com.sap.sailing.domain.abstractlog.race.state.ReadonlyRaceState;
@@ -78,7 +78,6 @@ import com.sap.sailing.domain.abstractlog.race.tracking.analyzing.impl.LastPingM
 import com.sap.sailing.domain.abstractlog.race.tracking.analyzing.impl.OpenEndedDeviceMappingCloser;
 import com.sap.sailing.domain.abstractlog.race.tracking.analyzing.impl.RaceLogTrackingStateAnalyzer;
 import com.sap.sailing.domain.abstractlog.race.tracking.analyzing.impl.RegisteredCompetitorsAnalyzer;
-import com.sap.sailing.domain.abstractlog.race.tracking.events.RevokeEventImpl;
 import com.sap.sailing.domain.abstractlog.race.tracking.impl.DeviceMappingImpl;
 import com.sap.sailing.domain.base.BoatClass;
 import com.sap.sailing.domain.base.Competitor;
@@ -197,6 +196,7 @@ import com.sap.sailing.domain.common.racelog.RaceLogRaceStatus;
 import com.sap.sailing.domain.common.racelog.RacingProcedureType;
 import com.sap.sailing.domain.common.racelog.tracking.NoCorrespondingServiceRegisteredException;
 import com.sap.sailing.domain.common.racelog.tracking.NotDenotedForRaceLogTrackingException;
+import com.sap.sailing.domain.common.racelog.tracking.NotRevokableException;
 import com.sap.sailing.domain.common.racelog.tracking.RaceLogTrackingState;
 import com.sap.sailing.domain.common.racelog.tracking.TransformationException;
 import com.sap.sailing.domain.common.racelog.tracking.TypeBasedServiceFinder;
@@ -4970,14 +4970,14 @@ public class SailingServiceImpl extends ProxiedRemoteServiceServlet implements S
     
     @Override
     public void revokeRaceLogEvents(String leaderboardName, String raceColumnName, String fleetName,
-            List<Serializable> eventIds) {
+            List<Serializable> eventIds) throws NotRevokableException {
         RaceLog raceLog = getRaceLog(leaderboardName, raceColumnName, fleetName);
         for (Serializable idToRevoke : eventIds) {
             raceLog.lockForRead();
             RaceLogEvent event = raceLog.getEventById(idToRevoke);
             raceLog.unlockAfterRead();
             if (event instanceof Revokable) {
-                raceLog.add(RevokeEventImpl.create(raceLog, getService().getServerAuthor(), (Revokable) event));
+                raceLog.revokeEvent(getService().getServerAuthor(), (Revokable) event, "revoke triggered by GWT user action");
             }
         }
     }

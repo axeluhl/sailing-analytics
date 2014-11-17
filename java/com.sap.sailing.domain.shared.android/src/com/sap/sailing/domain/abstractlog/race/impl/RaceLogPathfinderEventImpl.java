@@ -3,7 +3,7 @@ package com.sap.sailing.domain.abstractlog.race.impl;
 import java.io.Serializable;
 import java.util.List;
 
-import com.sap.sailing.domain.abstractlog.race.RaceLogEventAuthor;
+import com.sap.sailing.domain.abstractlog.AbstractLogEventAuthor;
 import com.sap.sailing.domain.abstractlog.race.RaceLogEventVisitor;
 import com.sap.sailing.domain.abstractlog.race.RaceLogPathfinderEvent;
 import com.sap.sailing.domain.base.Competitor;
@@ -15,7 +15,7 @@ public class RaceLogPathfinderEventImpl extends RaceLogEventImpl implements Race
     private final String pathfinderId;
 
     public RaceLogPathfinderEventImpl(TimePoint createdAt,
-            RaceLogEventAuthor author, TimePoint pTimePoint, Serializable pId, List<Competitor> pCompetitors, int pPassId, String pathfinderId) {
+            AbstractLogEventAuthor author, TimePoint pTimePoint, Serializable pId, List<Competitor> pCompetitors, int pPassId, String pathfinderId) {
         super(createdAt, author, pTimePoint, pId, pCompetitors, pPassId);
         this.pathfinderId = pathfinderId;
     }

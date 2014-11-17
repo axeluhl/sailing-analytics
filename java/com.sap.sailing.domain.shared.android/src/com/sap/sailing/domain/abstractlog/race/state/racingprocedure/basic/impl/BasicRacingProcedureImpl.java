@@ -4,8 +4,8 @@ import java.util.Arrays;
 import java.util.Collection;
 import java.util.Collections;
 
+import com.sap.sailing.domain.abstractlog.AbstractLogEventAuthor;
 import com.sap.sailing.domain.abstractlog.race.RaceLog;
-import com.sap.sailing.domain.abstractlog.race.RaceLogEventAuthor;
 import com.sap.sailing.domain.abstractlog.race.RaceLogEventFactory;
 import com.sap.sailing.domain.abstractlog.race.state.RaceStateEvent;
 import com.sap.sailing.domain.abstractlog.race.state.impl.RaceStateEventImpl;
@@ -24,7 +24,7 @@ import com.sap.sailing.domain.common.racelog.RacingProcedureType;
 
 public class BasicRacingProcedureImpl extends BaseRacingProcedure {
 
-    public BasicRacingProcedureImpl(RaceLog raceLog, RaceLogEventAuthor author, RaceLogEventFactory factory,
+    public BasicRacingProcedureImpl(RaceLog raceLog, AbstractLogEventAuthor author, RaceLogEventFactory factory,
             RacingProcedureConfiguration configuration) {
         super(raceLog, author, factory, configuration);
     }

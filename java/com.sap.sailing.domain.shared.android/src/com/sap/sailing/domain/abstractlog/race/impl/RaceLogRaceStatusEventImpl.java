@@ -3,7 +3,7 @@ package com.sap.sailing.domain.abstractlog.race.impl;
 import java.io.Serializable;
 import java.util.List;
 
-import com.sap.sailing.domain.abstractlog.race.RaceLogEventAuthor;
+import com.sap.sailing.domain.abstractlog.AbstractLogEventAuthor;
 import com.sap.sailing.domain.abstractlog.race.RaceLogEventVisitor;
 import com.sap.sailing.domain.abstractlog.race.RaceLogRaceStatusEvent;
 import com.sap.sailing.domain.base.Competitor;
@@ -15,7 +15,7 @@ public class RaceLogRaceStatusEventImpl extends RaceLogEventImpl implements Race
 
     private final RaceLogRaceStatus nextStatus;
 
-    public RaceLogRaceStatusEventImpl(TimePoint createdAt, RaceLogEventAuthor author, TimePoint pTimePoint,
+    public RaceLogRaceStatusEventImpl(TimePoint createdAt, AbstractLogEventAuthor author, TimePoint pTimePoint,
             Serializable pId, List<Competitor> pInvolvedBoats, int pPassId, RaceLogRaceStatus nextStatus) {
         super(createdAt, author, pTimePoint, pId, pInvolvedBoats, pPassId);
         this.nextStatus = nextStatus;

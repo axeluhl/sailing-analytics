@@ -3,7 +3,7 @@ package com.sap.sailing.domain.abstractlog.race.tracking.events;
 import java.io.Serializable;
 import java.util.Collections;
 
-import com.sap.sailing.domain.abstractlog.race.RaceLogEventAuthor;
+import com.sap.sailing.domain.abstractlog.AbstractLogEventAuthor;
 import com.sap.sailing.domain.abstractlog.race.RaceLogEventVisitor;
 import com.sap.sailing.domain.abstractlog.race.impl.RaceLogEventImpl;
 import com.sap.sailing.domain.abstractlog.race.tracking.DefineMarkEvent;
@@ -16,7 +16,7 @@ public class DefineMarkEventImpl extends RaceLogEventImpl implements DefineMarkE
     
     private final Mark mark;
     
-    public DefineMarkEventImpl(TimePoint createdAt, RaceLogEventAuthor author, TimePoint logicalTimePoint,
+    public DefineMarkEventImpl(TimePoint createdAt, AbstractLogEventAuthor author, TimePoint logicalTimePoint,
             Serializable pId, int pPassId, Mark mark) {
         super(createdAt, author, logicalTimePoint, pId, Collections.<Competitor>emptyList(), pPassId);
          this.mark = mark;

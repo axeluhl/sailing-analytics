@@ -11,8 +11,8 @@ import org.json.simple.JSONObject;
 import org.junit.Before;
 import org.junit.Test;
 
+import com.sap.sailing.domain.abstractlog.AbstractLogEventAuthor;
 import com.sap.sailing.domain.abstractlog.race.CompetitorResults;
-import com.sap.sailing.domain.abstractlog.race.RaceLogEventAuthor;
 import com.sap.sailing.domain.abstractlog.race.RaceLogEventFactory;
 import com.sap.sailing.domain.abstractlog.race.RaceLogFinishPositioningConfirmedEvent;
 import com.sap.sailing.domain.abstractlog.race.impl.CompetitorResultsImpl;
@@ -39,7 +39,7 @@ public class RaceLogFinishPositioningConfirmedEventSerializerTest {
     private RaceLogFinishPositioningConfirmedEvent event;
     private TimePoint now;
     private CompetitorResults positioningList;
-    private RaceLogEventAuthor author = new RaceLogEventAuthorImpl("Test Author", 1);
+    private AbstractLogEventAuthor author = new RaceLogEventAuthorImpl("Test Author", 1);
     
     @Before
     public void setUp() {

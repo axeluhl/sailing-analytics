@@ -3,12 +3,12 @@ package com.sap.sailing.domain.abstractlog.race.impl;
 import java.io.Serializable;
 import java.util.Comparator;
 
+import com.sap.sailing.domain.abstractlog.AbstractLogEventAuthor;
 import com.sap.sailing.domain.abstractlog.race.RaceLogEvent;
-import com.sap.sailing.domain.abstractlog.race.RaceLogEventAuthor;
 import com.sap.sailing.domain.abstractlog.race.RaceLogRaceStatusEvent;
 
 /**
- * Comparator sorting by pass, then by state order number, then by {@link RaceLogEventAuthor}, then by {@link RaceLogEvent#getCreatedAt()} timestamp.
+ * Comparator sorting by pass, then by state order number, then by {@link AbstractLogEventAuthor}, then by {@link RaceLogEvent#getCreatedAt()} timestamp.
  */
 public enum RaceLogRaceStatusEventComparator implements Comparator<RaceLogRaceStatusEvent>, Serializable {
     INSTANCE;

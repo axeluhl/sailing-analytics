@@ -1,10 +1,12 @@
 package com.sap.sailing.domain.abstractlog.race.state.impl;
 
 import java.util.UUID;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 
+import com.sap.sailing.domain.abstractlog.AbstractLogEventAuthor;
 import com.sap.sailing.domain.abstractlog.race.CompetitorResults;
 import com.sap.sailing.domain.abstractlog.race.RaceLog;
-import com.sap.sailing.domain.abstractlog.race.RaceLogEventAuthor;
 import com.sap.sailing.domain.abstractlog.race.RaceLogEventFactory;
 import com.sap.sailing.domain.abstractlog.race.analyzing.impl.AdditionalScoringInformationFinder;
 import com.sap.sailing.domain.abstractlog.race.analyzing.impl.RaceStatusAnalyzer;
@@ -15,7 +17,6 @@ import com.sap.sailing.domain.abstractlog.race.state.racingprocedure.RacingProce
 import com.sap.sailing.domain.abstractlog.race.state.racingprocedure.RacingProcedureFactory;
 import com.sap.sailing.domain.abstractlog.race.state.racingprocedure.RacingProcedurePrerequisite;
 import com.sap.sailing.domain.abstractlog.race.state.racingprocedure.impl.RacingProcedureFactoryImpl;
-import com.sap.sailing.domain.abstractlog.race.tracking.events.RevokeEventImpl;
 import com.sap.sailing.domain.base.CourseBase;
 import com.sap.sailing.domain.base.configuration.ConfigurationLoader;
 import com.sap.sailing.domain.base.configuration.RegattaConfiguration;
@@ -24,38 +25,40 @@ import com.sap.sailing.domain.common.TimePoint;
 import com.sap.sailing.domain.common.racelog.Flags;
 import com.sap.sailing.domain.common.racelog.RaceLogRaceStatus;
 import com.sap.sailing.domain.common.racelog.RacingProcedureType;
+import com.sap.sailing.domain.common.racelog.tracking.NotRevokableException;
 import com.sap.sailing.domain.tracking.Wind;
 
 /**
  * Write-enabled {@link RaceState}.
  */
 public class RaceStateImpl extends ReadonlyRaceStateImpl implements RaceState {
+    private static final Logger logger = Logger.getLogger(RaceStateImpl.class.getName());
     
-    private final RaceLogEventAuthor author;
+    private final AbstractLogEventAuthor author;
     private final RaceLogEventFactory factory;
     
     /**
      * Creates a {@link RaceState} with the initial racing procedure type set to a fallback value and an empty configuration.
      */
-    public static RaceState create(RaceLog raceLog, RaceLogEventAuthor author) {
+    public static RaceState create(RaceLog raceLog, AbstractLogEventAuthor author) {
         return create(raceLog, author, new EmptyRegattaConfiguration());
     }
     
     /**
      * Creates a {@link RaceState}.
      */
-    public static RaceState create(RaceLog raceLog, RaceLogEventAuthor author, ConfigurationLoader<RegattaConfiguration> configuration) {
+    public static RaceState create(RaceLog raceLog, AbstractLogEventAuthor author, ConfigurationLoader<RegattaConfiguration> configuration) {
         return new RaceStateImpl(raceLog, author, 
                 RaceLogEventFactory.INSTANCE,
                 new RacingProcedureFactoryImpl(author, RaceLogEventFactory.INSTANCE, configuration));
     }
     
-    public RaceStateImpl(RaceLog raceLog, RaceLogEventAuthor author, RaceLogEventFactory eventFactory,
+    public RaceStateImpl(RaceLog raceLog, AbstractLogEventAuthor author, RaceLogEventFactory eventFactory,
             RacingProcedureFactory procedureFactory) {
         this(raceLog, author, eventFactory, new RaceStatusAnalyzer.StandardClock(), procedureFactory);
     }
 
-    private RaceStateImpl(RaceLog raceLog, RaceLogEventAuthor author, RaceLogEventFactory eventFactory, RaceStatusAnalyzer.Clock analyzersClock,
+    private RaceStateImpl(RaceLog raceLog, AbstractLogEventAuthor author, RaceLogEventFactory eventFactory, RaceStatusAnalyzer.Clock analyzersClock,
             RacingProcedureFactory procedureFactory) {
         super(raceLog, analyzersClock, procedureFactory, /* update */ true);
         this.author = author;
@@ -85,7 +88,7 @@ public class RaceStateImpl extends ReadonlyRaceStateImpl implements RaceState {
     }
 
     @Override
-    public RaceLogEventAuthor getAuthor() {
+    public AbstractLogEventAuthor getAuthor() {
         return author;
     }
 
@@ -174,7 +177,11 @@ public class RaceStateImpl extends ReadonlyRaceStateImpl implements RaceState {
         } else {
             if (event != null) {
                 // revoke the newest one
-                raceLog.add(RevokeEventImpl.create(raceLog, author, event));
+                try {
+                    raceLog.revokeEvent(author, event, "disable additional scoring information");
+                } catch (NotRevokableException e) {
+                    logger.log(Level.WARNING, "Could not disable scoring information by adding RevokeEvent", e);
+                }
             }
         }
     }

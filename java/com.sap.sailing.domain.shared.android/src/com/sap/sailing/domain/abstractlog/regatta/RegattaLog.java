@@ -16,6 +16,6 @@ import com.sap.sailing.domain.tracking.Track;
  * Implementations should use the {@link RegattaLogEventComparator} for sorting its content.
  * </p>
  */
-public interface RegattaLog extends AbstractLog<RegattaLogEvent>, WithID {
+public interface RegattaLog extends AbstractLog<RegattaLogEvent, RegattaLogEventVisitor>, WithID {
 
 }

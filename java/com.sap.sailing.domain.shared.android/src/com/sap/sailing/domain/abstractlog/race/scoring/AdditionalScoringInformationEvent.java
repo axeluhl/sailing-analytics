@@ -1,8 +1,8 @@
 package com.sap.sailing.domain.abstractlog.race.scoring;
 
+import com.sap.sailing.domain.abstractlog.Revokable;
 import com.sap.sailing.domain.abstractlog.race.InvalidatesLeaderboardCache;
 import com.sap.sailing.domain.abstractlog.race.RaceLogEvent;
-import com.sap.sailing.domain.abstractlog.race.Revokable;
 
 /**
  * Event that could possibly overwrite scoring for a leaderboard column. The idea

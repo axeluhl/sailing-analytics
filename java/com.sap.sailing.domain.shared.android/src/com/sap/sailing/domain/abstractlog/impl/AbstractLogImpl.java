@@ -3,6 +3,7 @@ package com.sap.sailing.domain.abstractlog.impl;
 import java.io.IOException;
 import java.io.ObjectInputStream;
 import java.io.Serializable;
+import java.util.Comparator;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Iterator;
@@ -16,10 +17,10 @@ import java.util.logging.Logger;
 
 import com.sap.sailing.domain.abstractlog.AbstractLog;
 import com.sap.sailing.domain.abstractlog.AbstractLogEvent;
+import com.sap.sailing.domain.abstractlog.AbstractLogEventAuthor;
+import com.sap.sailing.domain.abstractlog.Revokable;
+import com.sap.sailing.domain.abstractlog.RevokeEvent;
 import com.sap.sailing.domain.abstractlog.race.RaceLogEvent;
-import com.sap.sailing.domain.abstractlog.race.RaceLogEventVisitor;
-import com.sap.sailing.domain.abstractlog.race.Revokable;
-import com.sap.sailing.domain.abstractlog.race.RevokeEvent;
 import com.sap.sailing.domain.abstractlog.race.impl.RaceLogEventComparator;
 import com.sap.sailing.domain.abstractlog.race.impl.RaceLogImpl;
 import com.sap.sailing.domain.base.Timed;
@@ -43,7 +44,8 @@ import com.sap.sailing.util.impl.ArrayListNavigableSet;
  * </p>
  * 
  */
-public class AbstractLogImpl<T extends AbstractLogEvent> extends TrackImpl<T> implements AbstractLog<T> {
+public abstract class AbstractLogImpl<EventT extends AbstractLogEvent<VisitorT>, VisitorT>
+extends TrackImpl<EventT> implements AbstractLog<EventT, VisitorT> {
     private static final long serialVersionUID = -176745401321893502L;
     private static final String DefaultLockName = AbstractLogImpl.class.getName() + ".lock";
     private final static Logger logger = Logger.getLogger(AbstractLogImpl.class.getName());
@@ -52,19 +54,18 @@ public class AbstractLogImpl<T extends AbstractLogEvent> extends TrackImpl<T> im
     /**
      * Clients can use the {@link #add(RaceLogEvent, UUID)} method
      */
-    private transient Map<UUID, Set<T>> eventsDeliveredToClient = new HashMap<UUID, Set<T>>();
+    private transient Map<UUID, Set<EventT>> eventsDeliveredToClient = new HashMap<UUID, Set<EventT>>();
     
-    private Map<Serializable, T> eventsById = new HashMap<Serializable, T>();
+    private Map<Serializable, EventT> eventsById = new HashMap<Serializable, EventT>();
 
     private final Serializable id;
-    private transient Set<RaceLogEventVisitor> listeners;
-    private int currentPassId;
+    private transient Set<VisitorT> listeners;
 
     /**
      * Initializes a new {@link RaceLogImpl} with the default lock name.
      */
-    public AbstractLogImpl(Serializable identifier) {
-        this(DefaultLockName, identifier);
+    public AbstractLogImpl(Serializable identifier, Comparator<Timed> comparator) {
+        this(DefaultLockName, identifier, comparator);
     }
 
     /**
@@ -73,11 +74,10 @@ public class AbstractLogImpl<T extends AbstractLogEvent> extends TrackImpl<T> im
      * @param nameForReadWriteLock
      *            name of lock.
      */
-    public AbstractLogImpl(String nameForReadWriteLock, Serializable identifier) {
-        super(new ArrayListNavigableSet<Timed>(RaceLogEventComparator.INSTANCE), nameForReadWriteLock);
+    public AbstractLogImpl(String nameForReadWriteLock, Serializable identifier, Comparator<Timed> comparator) {
+        super(new ArrayListNavigableSet<Timed>(comparator), nameForReadWriteLock);
 
-        this.listeners = new HashSet<RaceLogEventVisitor>();
-        this.currentPassId = DefaultPassId;
+        this.listeners = new HashSet<VisitorT>();
         this.id = identifier;
     }
 
@@ -85,27 +85,9 @@ public class AbstractLogImpl<T extends AbstractLogEvent> extends TrackImpl<T> im
     public Serializable getId() {
         return this.id;
     }
-
-    @Override
-    public int getCurrentPassId() {
-        return currentPassId;
-    }
-
-    /**
-     * Sets a new active pass id. Ignored if new and current are equal.
-     * 
-     * @param newPassId
-     *            to be set.
-     */
-    public void setCurrentPassId(int newPassId) {
-        if (newPassId != this.currentPassId) {
-            logger.finer(String.format("Changing pass id to %d", newPassId));
-            this.currentPassId = newPassId;
-        }
-    }
     
     @Override
-    public boolean add(T event) {
+    public boolean add(EventT event) {
         boolean isAdded = false;
         lockForWrite();
         try {
@@ -117,7 +99,6 @@ public class AbstractLogImpl<T extends AbstractLogEvent> extends TrackImpl<T> im
             logger.finer(String.format("%s (%s) was added to log %s.", event, event.getClass().getName(), getId()));
             // FIXME with out-of-order delivery would destroy currentPassId; need to check at least the createdAt time
             // point
-            setCurrentPassId(Math.max(event.getPassId(), this.currentPassId));
             revokeIfNecessary(event);
             eventsById.put(event.getId(), event);
             notifyListenersAboutReceive(event);
@@ -128,7 +109,7 @@ public class AbstractLogImpl<T extends AbstractLogEvent> extends TrackImpl<T> im
     }
 
     @Override
-    public boolean load(T event) {
+    public boolean load(EventT event) {
         boolean isAdded = false;
         lockForWrite();
         try {
@@ -138,7 +119,6 @@ public class AbstractLogImpl<T extends AbstractLogEvent> extends TrackImpl<T> im
         }
         if (isAdded) {
             logger.finer(String.format("%s (%s) was loaded into log.", event, event.getClass().getName()));
-            setCurrentPassId(Math.max(event.getPassId(), this.currentPassId));
             revokeIfNecessary(event);
             eventsById.put(event.getId(), event);
         } else {
@@ -148,9 +128,9 @@ public class AbstractLogImpl<T extends AbstractLogEvent> extends TrackImpl<T> im
         return isAdded;
     }
     
-    private void revokeIfNecessary(T newEvent) {
+    private void revokeIfNecessary(EventT newEvent) {
         if (newEvent instanceof RevokeEvent) {
-            RevokeEvent revokeEvent = (RevokeEvent) newEvent;
+            RevokeEvent<?> revokeEvent = (RevokeEvent<?>) newEvent;
             try {
                 checkIfSuccessfullyRevokes(revokeEvent);
                 lockForWrite();
@@ -162,9 +142,9 @@ public class AbstractLogImpl<T extends AbstractLogEvent> extends TrackImpl<T> im
         }
     }
     
-    private void checkIfSuccessfullyRevokes(RevokeEvent revokeEvent) throws NotRevokableException {
+    private void checkIfSuccessfullyRevokes(RevokeEvent<?> revokeEvent) throws NotRevokableException {
         lockForRead();
-        T revokedEvent = getEventById(revokeEvent.getRevokedEventId());
+        EventT revokedEvent = getEventById(revokeEvent.getRevokedEventId());
         unlockAfterRead();
 
         if (revokedEvent == null) {
@@ -186,30 +166,30 @@ public class AbstractLogImpl<T extends AbstractLogEvent> extends TrackImpl<T> im
     }
 
     @Override
-    public Iterable<T> add(T event, UUID clientId) {
+    public Iterable<EventT> add(EventT event, UUID clientId) {
         add(event);
         return getEventsToDeliver(clientId, event);
     }
     
     @Override
-    public Iterable<T> getEventsToDeliver(UUID clientId) {
+    public Iterable<EventT> getEventsToDeliver(UUID clientId) {
         return getEventsToDeliver(clientId, null);
     }
 
-    protected Iterable<T> getEventsToDeliver(UUID clientId, T suppressedEvent) {
-        final LinkedHashSet<T> stillToDeliverToClient;
+    protected Iterable<EventT> getEventsToDeliver(UUID clientId, EventT suppressedEvent) {
+        final LinkedHashSet<EventT> stillToDeliverToClient;
         lockForRead();
         try {
-            stillToDeliverToClient = new LinkedHashSet<T>(getInternalRawFixes());
+            stillToDeliverToClient = new LinkedHashSet<EventT>(getInternalRawFixes());
         } finally {
             unlockAfterRead();
         }
         stillToDeliverToClient.remove(suppressedEvent);
-        Set<T> deliveredToClient = eventsDeliveredToClient.get(clientId);
+        Set<EventT> deliveredToClient = eventsDeliveredToClient.get(clientId);
         if (deliveredToClient != null) {
             stillToDeliverToClient.removeAll(deliveredToClient);
         } else {
-            deliveredToClient = new HashSet<T>();
+            deliveredToClient = new HashSet<EventT>();
             eventsDeliveredToClient.put(clientId, deliveredToClient);
         }
         deliveredToClient.addAll(stillToDeliverToClient);
@@ -217,12 +197,12 @@ public class AbstractLogImpl<T extends AbstractLogEvent> extends TrackImpl<T> im
         return stillToDeliverToClient;
     }
 
-    protected void notifyListenersAboutReceive(T event) {
-        Set<RaceLogEventVisitor> workingListeners = new HashSet<RaceLogEventVisitor>();
+    protected void notifyListenersAboutReceive(EventT event) {
+        Set<VisitorT> workingListeners = new HashSet<VisitorT>();
         synchronized (listeners) {
             workingListeners.addAll(listeners);
         }
-        for (RaceLogEventVisitor listener : workingListeners) {
+        for (VisitorT listener : workingListeners) {
             try {
                 event.accept(listener);
             } catch (Throwable t) {
@@ -239,27 +219,17 @@ public class AbstractLogImpl<T extends AbstractLogEvent> extends TrackImpl<T> im
     }
 
     @Override
-    public void addListener(RaceLogEventVisitor listener) {
+    public void addListener(VisitorT listener) {
         synchronized (listeners) {
             listeners.add(listener);
         }
     }
 
     @Override
-    public void removeListener(RaceLogEventVisitor listener) {
+    public void removeListener(VisitorT listener) {
         synchronized (listeners) {
             listeners.remove(listener);
         }
-    }
-
-    @Override
-    protected NavigableSet<T> getInternalFixes() {
-        return new PartialNavigableSetView<T>(super.getInternalFixes()) {
-            @Override
-            protected boolean isValid(T e) {
-                return e.getPassId() == getCurrentPassId();
-            }
-        };
     }
 
     /**
@@ -270,13 +240,13 @@ public class AbstractLogImpl<T extends AbstractLogEvent> extends TrackImpl<T> im
      */
     private void readObject(ObjectInputStream ois) throws ClassNotFoundException, IOException {
         ois.defaultReadObject();
-        listeners = new HashSet<RaceLogEventVisitor>();
-        eventsDeliveredToClient = new HashMap<UUID, Set<T>>();
+        listeners = new HashSet<VisitorT>();
+        eventsDeliveredToClient = new HashMap<UUID, Set<EventT>>();
         if (eventsById == null) {
-            eventsById = new HashMap<Serializable, T>();
+            eventsById = new HashMap<Serializable, EventT>();
             lockForRead();
             try {
-                for (T event : getRawFixes()) {
+                for (EventT event : getRawFixes()) {
                     eventsById.put(event.getId(), event);
                 }
             } finally {
@@ -287,9 +257,9 @@ public class AbstractLogImpl<T extends AbstractLogEvent> extends TrackImpl<T> im
             revokedEventIds = new HashSet<Serializable>();
             lockForRead();
             try {
-                for (T event : getRawFixes()) {
+                for (EventT event : getRawFixes()) {
                     if (event instanceof RevokeEvent) {
-                        revokedEventIds.add(((RevokeEvent)event).getRevokedEventId());
+                        revokedEventIds.add(((RevokeEvent<?>)event).getRevokedEventId());
                     }
                 }
             } finally {
@@ -299,43 +269,43 @@ public class AbstractLogImpl<T extends AbstractLogEvent> extends TrackImpl<T> im
     }
 
     @Override
-    public Iterable<T> getRawFixesDescending() {
+    public Iterable<EventT> getRawFixesDescending() {
         return getRawFixes().descendingSet();
     }
 
     @Override
-    public Iterable<T> getFixesDescending() {
+    public Iterable<EventT> getFixesDescending() {
         return getFixes().descendingSet();
     }
 
     @Override
-    public HashSet<RaceLogEventVisitor> removeAllListeners() {
+    public HashSet<VisitorT> removeAllListeners() {
         synchronized (listeners) {
-            HashSet<RaceLogEventVisitor> clonedListeners = new HashSet<RaceLogEventVisitor>(listeners);
-            listeners = new HashSet<RaceLogEventVisitor>();
+            HashSet<VisitorT> clonedListeners = new HashSet<VisitorT>(listeners);
+            listeners = new HashSet<VisitorT>();
             return clonedListeners;
         }
     }
 
     @Override
-    public void addAllListeners(HashSet<RaceLogEventVisitor> listeners) {
+    public void addAllListeners(HashSet<VisitorT> listeners) {
         synchronized (listeners) {
             this.listeners.addAll(listeners);
         }
     }
 
     @Override
-    public Iterable<RaceLogEventVisitor> getAllListeners() {
+    public Iterable<VisitorT> getAllListeners() {
         return this.listeners;
     }
 
     @Override
-    public Iterable<T> getRawFixes(UUID clientId) {
+    public Iterable<EventT> getRawFixes(UUID clientId) {
         assertReadLock();
-        NavigableSet<T> result = getRawFixes();
-        Set<T> edtc = eventsDeliveredToClient.get(clientId);
+        NavigableSet<EventT> result = getRawFixes();
+        Set<EventT> edtc = eventsDeliveredToClient.get(clientId);
         if (edtc == null) {
-            edtc = new HashSet<T>();
+            edtc = new HashSet<EventT>();
             eventsDeliveredToClient.put(clientId, edtc);
         }
         edtc.addAll(result);
@@ -343,41 +313,41 @@ public class AbstractLogImpl<T extends AbstractLogEvent> extends TrackImpl<T> im
     }
 
     @Override
-    public T getEventById(Serializable id) {
+    public EventT getEventById(Serializable id) {
         assertReadLock();
         return eventsById.get(id);
     }
     
     @Override
-    public NavigableSet<T> getUnrevokedEvents() {
-        return new PartialNavigableSetView<T>(super.getInternalFixes()) {
+    public NavigableSet<EventT> getUnrevokedEvents() {
+        return new PartialNavigableSetView<EventT>(super.getInternalFixes()) {
             @Override
-            protected boolean isValid(T e) {
+            protected boolean isValid(EventT e) {
             	return ! (e instanceof RevokeEvent) && ! revokedEventIds.contains(e.getId());
             }
         };
     }
     
     @Override
-    public NavigableSet<T> getUnrevokedEventsDescending() {
-        return new PartialNavigableSetView<T>(super.getInternalFixes().descendingSet()) {
+    public NavigableSet<EventT> getUnrevokedEventsDescending() {
+        return new PartialNavigableSetView<EventT>(super.getInternalFixes().descendingSet()) {
             @Override
-            protected boolean isValid(T e) {
+            protected boolean isValid(EventT e) {
             	return ! (e instanceof RevokeEvent) && ! revokedEventIds.contains(e.getId());
             }
         };
     }
 
     @Override
-    public void merge(AbstractLog<T> other) {
+    public void merge(AbstractLog<EventT, VisitorT> other) {
         lockForWrite();
         other.lockForRead();
         try {
-            RaceLogEventComparator comparator = RaceLogEventComparator.INSTANCE;
-            Iterator<T> thisIter = getRawFixes().iterator();
-            Iterator<T> otherIter = other.getRawFixes().iterator();
-            T thisEvent = null;
-            T otherEvent = null;
+            RaceLogEventComparator comparator = new RaceLogEventComparator();
+            Iterator<EventT> thisIter = getRawFixes().iterator();
+            Iterator<EventT> otherIter = other.getRawFixes().iterator();
+            EventT thisEvent = null;
+            EventT otherEvent = null;
             while (otherIter.hasNext() || otherEvent != null) {
                 if (thisEvent == null && thisIter.hasNext()) {
                     thisEvent = thisIter.next();
@@ -410,5 +380,22 @@ public class AbstractLogImpl<T extends AbstractLogEvent> extends TrackImpl<T> im
             other.unlockAfterRead();
             unlockAfterWrite();
         }
+    }
+    
+    @Override
+    public void revokeEvent(AbstractLogEventAuthor author, EventT toRevoke) throws NotRevokableException {
+        revokeEvent(author, toRevoke, null);
+    }
+    
+    protected abstract EventT createRevokeEvent(AbstractLogEventAuthor author, EventT toRevoke, String reason);
+    
+    @Override
+    public void revokeEvent(AbstractLogEventAuthor author, EventT toRevoke, String reason) throws NotRevokableException {
+        if (toRevoke == null) {
+            throw new NotRevokableException("Received null as event to revoke");
+        }
+        EventT revokeEvent = createRevokeEvent(author, toRevoke, reason);
+        checkIfSuccessfullyRevokes((RevokeEvent<?>) revokeEvent);
+        add(revokeEvent);
     }
 }

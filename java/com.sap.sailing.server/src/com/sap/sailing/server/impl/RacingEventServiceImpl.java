@@ -38,9 +38,9 @@ import org.json.simple.parser.ParseException;
 import org.osgi.framework.BundleContext;
 import org.osgi.util.tracker.ServiceTracker;
 
+import com.sap.sailing.domain.abstractlog.AbstractLogEventAuthor;
 import com.sap.sailing.domain.abstractlog.race.RaceLog;
 import com.sap.sailing.domain.abstractlog.race.RaceLogEvent;
-import com.sap.sailing.domain.abstractlog.race.RaceLogEventAuthor;
 import com.sap.sailing.domain.abstractlog.race.RaceLogEventVisitor;
 import com.sap.sailing.domain.abstractlog.race.impl.RaceLogEventAuthorImpl;
 import com.sap.sailing.domain.abstractlog.race.state.RaceState;
@@ -323,7 +323,7 @@ public class RacingEventServiceImpl implements RacingEventServiceWithTestSupport
     /**
      * This author should be used for server generated race log events
      */
-    private final RaceLogEventAuthor raceLogEventAuthorForServer = new RaceLogEventAuthorImpl(
+    private final AbstractLogEventAuthor raceLogEventAuthorForServer = new RaceLogEventAuthorImpl(
             RacingEventService.class.getName(), 0);
 
     /**
@@ -2728,7 +2728,7 @@ public class RacingEventServiceImpl implements RacingEventServiceWithTestSupport
     }
 
     @Override
-    public RaceLogEventAuthor getServerAuthor() {
+    public AbstractLogEventAuthor getServerAuthor() {
         return raceLogEventAuthorForServer;
     }
 

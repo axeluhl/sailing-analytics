@@ -11,8 +11,8 @@ import java.util.concurrent.CountDownLatch;
 import org.junit.Before;
 import org.junit.Test;
 
+import com.sap.sailing.domain.abstractlog.AbstractLogEventAuthor;
 import com.sap.sailing.domain.abstractlog.race.RaceLog;
-import com.sap.sailing.domain.abstractlog.race.RaceLogEventAuthor;
 import com.sap.sailing.domain.abstractlog.race.RaceLogStartTimeEvent;
 import com.sap.sailing.domain.abstractlog.race.impl.RaceLogEventAuthorImpl;
 import com.sap.sailing.domain.abstractlog.race.impl.RaceLogImpl;
@@ -35,7 +35,7 @@ public class RaceLogOperationalTransformationTest {
     private Peer<RaceLogEventWithTransformationSupport<?>, RaceLog> client2;
     private Peer<RaceLogEventWithTransformationSupport<?>, RaceLog> server;
     private OperationalTransformer<RaceLog, RaceLogEventWithTransformationSupport<?>> transformer;
-    private RaceLogEventAuthor author = new RaceLogEventAuthorImpl("Test Author", 1);
+    private AbstractLogEventAuthor author = new RaceLogEventAuthorImpl("Test Author", 1);
     private CountDownLatch client1Latch;
     private CountDownLatch client2Latch;
     private CountDownLatch serverLatch;

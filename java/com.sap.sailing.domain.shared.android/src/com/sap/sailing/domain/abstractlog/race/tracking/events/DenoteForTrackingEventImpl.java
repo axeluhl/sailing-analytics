@@ -3,7 +3,7 @@ package com.sap.sailing.domain.abstractlog.race.tracking.events;
 import java.io.Serializable;
 import java.util.Collections;
 
-import com.sap.sailing.domain.abstractlog.race.RaceLogEventAuthor;
+import com.sap.sailing.domain.abstractlog.AbstractLogEventAuthor;
 import com.sap.sailing.domain.abstractlog.race.RaceLogEventVisitor;
 import com.sap.sailing.domain.abstractlog.race.impl.RaceLogEventImpl;
 import com.sap.sailing.domain.abstractlog.race.tracking.DenoteForTrackingEvent;
@@ -20,7 +20,7 @@ DenoteForTrackingEvent {
     private final Serializable raceId;
 
     public DenoteForTrackingEventImpl(TimePoint createdAt,
-            RaceLogEventAuthor author, TimePoint logicalTimePoint,
+            AbstractLogEventAuthor author, TimePoint logicalTimePoint,
             Serializable pId, int pPassId,
             String raceName, BoatClass boatClass, Serializable raceId) {
         super(createdAt, author, logicalTimePoint, pId, Collections.<Competitor>emptyList(), pPassId);

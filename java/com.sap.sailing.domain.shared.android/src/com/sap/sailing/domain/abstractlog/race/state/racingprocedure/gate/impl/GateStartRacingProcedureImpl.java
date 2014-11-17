@@ -3,8 +3,8 @@ package com.sap.sailing.domain.abstractlog.race.state.racingprocedure.gate.impl;
 import java.util.Arrays;
 import java.util.Collection;
 
+import com.sap.sailing.domain.abstractlog.AbstractLogEventAuthor;
 import com.sap.sailing.domain.abstractlog.race.RaceLog;
-import com.sap.sailing.domain.abstractlog.race.RaceLogEventAuthor;
 import com.sap.sailing.domain.abstractlog.race.RaceLogEventFactory;
 import com.sap.sailing.domain.abstractlog.race.RaceLogGateLineOpeningTimeEvent.GateLineOpeningTimes;
 import com.sap.sailing.domain.abstractlog.race.analyzing.impl.GateLineOpeningTimeFinder;
@@ -42,7 +42,7 @@ public class GateStartRacingProcedureImpl extends BaseRacingProcedure implements
     private boolean gateLineOpeningTimesHasBeenSet;
     private String cachedPathfinder;
 
-    public GateStartRacingProcedureImpl(RaceLog raceLog, RaceLogEventAuthor author, RaceLogEventFactory factory,
+    public GateStartRacingProcedureImpl(RaceLog raceLog, AbstractLogEventAuthor author, RaceLogEventFactory factory,
             GateStartConfiguration configuration) {
         super(raceLog, author, factory, configuration);
         this.gateLineOpeningTimeAnalyzer = new GateLineOpeningTimeFinder(raceLog);

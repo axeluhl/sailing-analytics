@@ -4,8 +4,8 @@ import java.util.Arrays;
 import java.util.Collection;
 import java.util.Collections;
 
+import com.sap.sailing.domain.abstractlog.AbstractLogEventAuthor;
 import com.sap.sailing.domain.abstractlog.race.RaceLog;
-import com.sap.sailing.domain.abstractlog.race.RaceLogEventAuthor;
 import com.sap.sailing.domain.abstractlog.race.RaceLogEventFactory;
 import com.sap.sailing.domain.abstractlog.race.analyzing.impl.FinishingTimeFinder;
 import com.sap.sailing.domain.abstractlog.race.state.RaceStateEvent;
@@ -36,7 +36,7 @@ public class ESSRacingProcedureImpl extends BaseRacingProcedure implements ESSRa
     @SuppressWarnings("unused")
     private final ESSConfiguration configuration;
     
-    public ESSRacingProcedureImpl(RaceLog raceLog, RaceLogEventAuthor author, 
+    public ESSRacingProcedureImpl(RaceLog raceLog, AbstractLogEventAuthor author, 
             RaceLogEventFactory factory, ESSConfiguration configuration) {
         super(raceLog, author, factory, configuration);
         this.configuration = configuration;

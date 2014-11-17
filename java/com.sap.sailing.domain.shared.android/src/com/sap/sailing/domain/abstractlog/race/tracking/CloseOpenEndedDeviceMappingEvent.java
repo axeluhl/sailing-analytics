@@ -2,8 +2,8 @@ package com.sap.sailing.domain.abstractlog.race.tracking;
 
 import java.io.Serializable;
 
+import com.sap.sailing.domain.abstractlog.Revokable;
 import com.sap.sailing.domain.abstractlog.race.RaceLogEvent;
-import com.sap.sailing.domain.abstractlog.race.Revokable;
 import com.sap.sailing.domain.common.TimePoint;
 
 /**

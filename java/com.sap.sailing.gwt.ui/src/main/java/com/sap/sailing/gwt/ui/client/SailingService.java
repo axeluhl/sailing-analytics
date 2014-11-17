@@ -9,8 +9,8 @@ import java.util.Set;
 import java.util.UUID;
 
 import com.google.gwt.user.client.rpc.RemoteService;
+import com.sap.sailing.domain.abstractlog.Revokable;
 import com.sap.sailing.domain.abstractlog.race.RaceLog;
-import com.sap.sailing.domain.abstractlog.race.Revokable;
 import com.sap.sailing.domain.abstractlog.race.tracking.DenoteForTrackingEvent;
 import com.sap.sailing.domain.base.RaceDefinition;
 import com.sap.sailing.domain.base.RemoteSailingServerReference;

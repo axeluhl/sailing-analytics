@@ -3,8 +3,8 @@ package com.sap.sailing.domain.abstractlog.race.impl;
 import java.io.Serializable;
 import java.util.List;
 
+import com.sap.sailing.domain.abstractlog.AbstractLogEventAuthor;
 import com.sap.sailing.domain.abstractlog.race.RaceLogCourseAreaChangedEvent;
-import com.sap.sailing.domain.abstractlog.race.RaceLogEventAuthor;
 import com.sap.sailing.domain.abstractlog.race.RaceLogEventVisitor;
 import com.sap.sailing.domain.base.Competitor;
 import com.sap.sailing.domain.common.TimePoint;
@@ -16,7 +16,7 @@ RaceLogCourseAreaChangedEvent {
     private final Serializable courseAreaId;
 
     public RaceLogCourseAreaChangeEventImpl(TimePoint createdAt,
-            RaceLogEventAuthor author, TimePoint pTimePoint, Serializable pId, List<Competitor> pInvolvedBoats, int pPassId, Serializable courseAreaId) {
+            AbstractLogEventAuthor author, TimePoint pTimePoint, Serializable pId, List<Competitor> pInvolvedBoats, int pPassId, Serializable courseAreaId) {
         super(createdAt, author, pTimePoint, pId, pInvolvedBoats, pPassId);
         this.courseAreaId = courseAreaId;
     }

@@ -1,19 +1,14 @@
 package com.sap.sailing.domain.abstractlog;
 
 import java.io.Serializable;
-import java.util.List;
 
-import com.sap.sailing.domain.abstractlog.race.RaceLog;
-import com.sap.sailing.domain.abstractlog.race.RaceLogEventAuthor;
-import com.sap.sailing.domain.abstractlog.race.RaceLogEventVisitor;
-import com.sap.sailing.domain.base.Competitor;
 import com.sap.sailing.domain.base.Timed;
 import com.sap.sailing.domain.common.TimePoint;
 import com.sap.sailing.domain.common.WithID;
 
 /**
  * <p>
- * A {@link AbstractLogEvent} is an entry in a race's log (typically a {@link RaceLog}).
+ * A {@link AbstractLogEvent} is an entry in an AbstractLog.
  * </p>
  * 
  * <p>
@@ -47,13 +42,13 @@ import com.sap.sailing.domain.common.WithID;
  * </p>
  * 
  * <p>
- * Race log events have an author that has a name and a priority assigned. This can be used to represent multiple
- * concurrent race log authors such as a device used on a starting vessel, another device used at the finish line and
+ * AbstractLog events have an author that has a name and a priority assigned. This can be used to represent multiple
+ * concurrent authors such as a device used on a starting vessel, another device used at the finish line and
  * yet another device used on shore. In case more than one device make a statement about something, such as the start
  * time or the start procedure, the statement from the device with the highest priority needs to take precedence.
  * </p>
  */
-public interface AbstractLogEvent extends Timed, WithID, Serializable {
+public interface AbstractLogEvent<VisitorT> extends Timed, WithID, Serializable {
 
     /**
      * Gets the {@link TimePoint} this event was created at.
@@ -68,32 +63,14 @@ public interface AbstractLogEvent extends Timed, WithID, Serializable {
     TimePoint getLogicalTimePoint();
 
     /**
-     * Gets the event's pass identifier.
-     * 
-     * Each {@link AbstractLogEvent} is associated to a certain pass. A pass is every attempt to start and run a race. A
-     * new pass is initiated when a new start time is proposed (e.g. after the race was aborted). There might be certain
-     * event type that are not strictly bound to its pass.
-     * 
-     */
-    int getPassId();
-
-    /**
-     * Gets the list of associated {@link Competitor}s.
-     * 
-     * A {@link AbstractLogEvent} might be associated with a list of competitors, which are somehow relevant for this
-     * kind of event. An example is a list of competitors who are marked for an individual recall.
-     */
-    List<Competitor> getInvolvedBoats();
-
-    /**
      * Visitor pattern to implement certain {@link AbstractLogEvent} subclass specific behavior.
      */
-    void accept(RaceLogEventVisitor visitor);
+    void accept(VisitorT visitor);
 
     /**
-     * Gets the {@link RaceLogEventAuthor} author of this event.
+     * Gets the {@link AbstractLogEventAuthor} author of this event.
      */
-    RaceLogEventAuthor getAuthor();
+    AbstractLogEventAuthor getAuthor();
 
     /**
      * Gets a short info about the most relevant data of the event.

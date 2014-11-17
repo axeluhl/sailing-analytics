@@ -3,8 +3,8 @@ package com.sap.sailing.domain.abstractlog.race.impl;
 import java.io.Serializable;
 import java.util.List;
 
+import com.sap.sailing.domain.abstractlog.AbstractLogEventAuthor;
 import com.sap.sailing.domain.abstractlog.race.CompetitorResults;
-import com.sap.sailing.domain.abstractlog.race.RaceLogEventAuthor;
 import com.sap.sailing.domain.abstractlog.race.RaceLogEventVisitor;
 import com.sap.sailing.domain.abstractlog.race.RaceLogFinishPositioningListChangedEvent;
 import com.sap.sailing.domain.base.Competitor;
@@ -15,7 +15,7 @@ public class RaceLogFinishPositioningListChangedEventImpl extends RaceLogFinishP
     private static final long serialVersionUID = -8167472925561954739L;
     
     public RaceLogFinishPositioningListChangedEventImpl(TimePoint createdAt,
-            RaceLogEventAuthor author, TimePoint pTimePoint, Serializable pId, List<Competitor> competitors, int pPassId, CompetitorResults positionedCompetitors) {
+            AbstractLogEventAuthor author, TimePoint pTimePoint, Serializable pId, List<Competitor> competitors, int pPassId, CompetitorResults positionedCompetitors) {
         super(createdAt, author, pTimePoint, pId, competitors, pPassId, positionedCompetitors);
     }
 

@@ -1,9 +1,9 @@
 package com.sap.sailing.domain.abstractlog.race.state;
 
+import com.sap.sailing.domain.abstractlog.AbstractLogEventAuthor;
 import com.sap.sailing.domain.abstractlog.race.CompetitorResults;
 import com.sap.sailing.domain.abstractlog.race.RaceLog;
 import com.sap.sailing.domain.abstractlog.race.RaceLogEvent;
-import com.sap.sailing.domain.abstractlog.race.RaceLogEventAuthor;
 import com.sap.sailing.domain.abstractlog.race.scoring.AdditionalScoringInformationEvent;
 import com.sap.sailing.domain.abstractlog.race.scoring.AdditionalScoringInformationType;
 import com.sap.sailing.domain.abstractlog.race.state.racingprocedure.RacingProcedure;
@@ -29,9 +29,9 @@ import com.sap.sailing.domain.tracking.Wind;
 public interface RaceState extends ReadonlyRaceState {
 
     /**
-     * Gets the {@link RaceLogEventAuthor} that is used for all created {@link RaceLogEvent}s.
+     * Gets the {@link AbstractLogEventAuthor} that is used for all created {@link RaceLogEvent}s.
      */
-    RaceLogEventAuthor getAuthor();
+    AbstractLogEventAuthor getAuthor();
 
     /**
      * Gets the currently attached {@link RacingProcedure}.

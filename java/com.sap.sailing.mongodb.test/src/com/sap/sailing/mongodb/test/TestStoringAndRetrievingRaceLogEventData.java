@@ -12,7 +12,7 @@ import com.mongodb.BasicDBObject;
 import com.mongodb.DBCollection;
 import com.mongodb.DBObject;
 import com.mongodb.MongoException;
-import com.sap.sailing.domain.abstractlog.race.RaceLogEventAuthor;
+import com.sap.sailing.domain.abstractlog.AbstractLogEventAuthor;
 import com.sap.sailing.domain.abstractlog.race.RaceLogEventFactory;
 import com.sap.sailing.domain.abstractlog.race.RaceLogFlagEvent;
 import com.sap.sailing.domain.abstractlog.race.impl.RaceLogEventAuthorImpl;
@@ -25,7 +25,7 @@ import com.sap.sailing.domain.persistence.impl.MongoObjectFactoryImpl;
 
 public class TestStoringAndRetrievingRaceLogEventData extends AbstractMongoDBTest {
     private static final String RACELOG_TEST_COLLECTION = "racelog_test_collection";
-    private RaceLogEventAuthor author = new RaceLogEventAuthorImpl("Test Author", 1);
+    private AbstractLogEventAuthor author = new RaceLogEventAuthorImpl("Test Author", 1);
     
     public TestStoringAndRetrievingRaceLogEventData() throws UnknownHostException, MongoException {
         super();

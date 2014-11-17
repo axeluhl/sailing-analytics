@@ -3,10 +3,10 @@ package com.sap.sailing.domain.abstractlog.race.state.racingprocedure.impl;
 import java.util.Arrays;
 import java.util.Collection;
 
+import com.sap.sailing.domain.abstractlog.AbstractLogEventAuthor;
 import com.sap.sailing.domain.abstractlog.race.RaceLog;
 import com.sap.sailing.domain.abstractlog.race.RaceLogChangedListener;
 import com.sap.sailing.domain.abstractlog.race.RaceLogEvent;
-import com.sap.sailing.domain.abstractlog.race.RaceLogEventAuthor;
 import com.sap.sailing.domain.abstractlog.race.RaceLogEventFactory;
 import com.sap.sailing.domain.abstractlog.race.RaceLogEventVisitor;
 import com.sap.sailing.domain.abstractlog.race.analyzing.impl.FinishedTimeFinder;
@@ -44,7 +44,7 @@ public abstract class BaseRacingProcedure extends BaseRaceStateChangedListener i
     private RaceStateEventScheduler scheduler;
 
     protected final RaceLog raceLog;
-    protected final RaceLogEventAuthor author;
+    protected final AbstractLogEventAuthor author;
     protected final RaceLogEventFactory factory;
     private final RacingProcedureConfiguration configuration;
 
@@ -61,7 +61,7 @@ public abstract class BaseRacingProcedure extends BaseRaceStateChangedListener i
     /**
      * When calling me, call {@link BaseRacingProcedure#update()} afterwards!
      */
-    public BaseRacingProcedure(RaceLog raceLog, RaceLogEventAuthor author, RaceLogEventFactory factory,
+    public BaseRacingProcedure(RaceLog raceLog, AbstractLogEventAuthor author, RaceLogEventFactory factory,
             RacingProcedureConfiguration configuration) {
         if (configuration == null) {
             throw new IllegalArgumentException("configuration must not be null");

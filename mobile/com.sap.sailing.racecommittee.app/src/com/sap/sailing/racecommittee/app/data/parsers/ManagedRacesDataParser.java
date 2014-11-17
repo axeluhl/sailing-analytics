@@ -8,8 +8,8 @@ import org.json.simple.JSONArray;
 import org.json.simple.JSONObject;
 import org.json.simple.JSONValue;
 
+import com.sap.sailing.domain.abstractlog.AbstractLogEventAuthor;
 import com.sap.sailing.domain.abstractlog.race.RaceLog;
-import com.sap.sailing.domain.abstractlog.race.RaceLogEventAuthor;
 import com.sap.sailing.domain.abstractlog.race.state.RaceState;
 import com.sap.sailing.domain.abstractlog.race.state.impl.RaceStateImpl;
 import com.sap.sailing.domain.base.Fleet;
@@ -34,9 +34,9 @@ public class ManagedRacesDataParser implements DataParser<Collection<ManagedRace
 
     private final JsonDeserializer<RaceGroup> deserializer;
     private final ConfigurationLoader<RegattaConfiguration> globalConfigurationLoader;
-    private final RaceLogEventAuthor author;
+    private final AbstractLogEventAuthor author;
 
-    public ManagedRacesDataParser(RaceLogEventAuthor author, ConfigurationLoader<RegattaConfiguration> globalConfiguration,
+    public ManagedRacesDataParser(AbstractLogEventAuthor author, ConfigurationLoader<RegattaConfiguration> globalConfiguration,
             JsonDeserializer<RaceGroup> deserializer) {
         this.author = author;
         this.globalConfigurationLoader = globalConfiguration;

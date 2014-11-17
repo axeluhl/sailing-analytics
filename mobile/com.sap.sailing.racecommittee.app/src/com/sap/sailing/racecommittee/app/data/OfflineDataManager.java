@@ -14,8 +14,8 @@ import java.util.concurrent.Callable;
 import android.app.LoaderManager.LoaderCallbacks;
 import android.content.Context;
 
+import com.sap.sailing.domain.abstractlog.AbstractLogEventAuthor;
 import com.sap.sailing.domain.abstractlog.race.RaceLog;
-import com.sap.sailing.domain.abstractlog.race.RaceLogEventAuthor;
 import com.sap.sailing.domain.abstractlog.race.RaceLogEventFactory;
 import com.sap.sailing.domain.abstractlog.race.impl.RaceLogEventFactoryImpl;
 import com.sap.sailing.domain.abstractlog.race.impl.RaceLogImpl;
@@ -98,7 +98,7 @@ public class OfflineDataManager extends DataManager {
 
         RaceLogEventFactory factory = new RaceLogEventFactoryImpl();
         RaceLog log = new RaceLogImpl(UUID.randomUUID());
-        final RaceLogEventAuthor author = AppPreferences.on(context).getAuthor();
+        final AbstractLogEventAuthor author = AppPreferences.on(context).getAuthor();
         ConfigurationLoader<RegattaConfiguration> configuration = PreferencesRegattaConfigurationLoader.loadFromPreferences(preferences);
         
         log.add(factory.createStartTimeEvent(new MillisecondsTimePoint(new Date().getTime() - 2000), author,

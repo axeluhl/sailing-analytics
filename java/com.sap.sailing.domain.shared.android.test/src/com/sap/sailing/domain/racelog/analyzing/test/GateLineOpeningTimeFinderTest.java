@@ -8,9 +8,9 @@ import java.util.Arrays;
 
 import org.junit.Test;
 
+import com.sap.sailing.domain.abstractlog.AbstractLogEventAuthor;
 import com.sap.sailing.domain.abstractlog.race.RaceLog;
 import com.sap.sailing.domain.abstractlog.race.RaceLogEvent;
-import com.sap.sailing.domain.abstractlog.race.RaceLogEventAuthor;
 import com.sap.sailing.domain.abstractlog.race.RaceLogGateLineOpeningTimeEvent;
 import com.sap.sailing.domain.abstractlog.race.RaceLogGateLineOpeningTimeEvent.GateLineOpeningTimes;
 import com.sap.sailing.domain.abstractlog.race.analyzing.impl.GateLineOpeningTimeFinder;
@@ -23,7 +23,7 @@ public class GateLineOpeningTimeFinderTest extends PassAwareRaceLogAnalyzerTest<
     }
 
     @Override
-    protected TargetPair getTargetEventsAndResultForPassAwareTests(int passId, RaceLogEventAuthor author) {
+    protected TargetPair getTargetEventsAndResultForPassAwareTests(int passId, AbstractLogEventAuthor author) {
         RaceLogGateLineOpeningTimeEvent event = createEvent(RaceLogGateLineOpeningTimeEvent.class, 1, passId, author);
         when(event.getGateLineOpeningTimes()).thenReturn(new GateLineOpeningTimes(2, 3));
         return new TargetPair(Arrays.asList(event), new GateLineOpeningTimes(2, 3));

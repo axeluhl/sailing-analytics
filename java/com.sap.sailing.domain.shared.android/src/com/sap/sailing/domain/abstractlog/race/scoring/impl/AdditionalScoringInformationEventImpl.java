@@ -3,7 +3,7 @@ package com.sap.sailing.domain.abstractlog.race.scoring.impl;
 import java.io.Serializable;
 import java.util.List;
 
-import com.sap.sailing.domain.abstractlog.race.RaceLogEventAuthor;
+import com.sap.sailing.domain.abstractlog.AbstractLogEventAuthor;
 import com.sap.sailing.domain.abstractlog.race.RaceLogEventVisitor;
 import com.sap.sailing.domain.abstractlog.race.impl.RaceLogEventImpl;
 import com.sap.sailing.domain.abstractlog.race.scoring.AdditionalScoringInformationEvent;
@@ -16,7 +16,7 @@ public class AdditionalScoringInformationEventImpl extends RaceLogEventImpl impl
     
     private final AdditionalScoringInformationType informationType;
     
-    public AdditionalScoringInformationEventImpl(TimePoint createdAt, RaceLogEventAuthor author, TimePoint logicalTimePoint,
+    public AdditionalScoringInformationEventImpl(TimePoint createdAt, AbstractLogEventAuthor author, TimePoint logicalTimePoint,
             Serializable pId, List<Competitor> competitors, int pPassId, AdditionalScoringInformationType informationType) {
         super(createdAt, author, logicalTimePoint, pId, competitors, pPassId);
         this.informationType = informationType;

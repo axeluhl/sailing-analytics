@@ -11,7 +11,7 @@ import android.content.SharedPreferences.OnSharedPreferenceChangeListener;
 import android.preference.PreferenceManager;
 import android.provider.Settings.Secure;
 
-import com.sap.sailing.domain.abstractlog.race.RaceLogEventAuthor;
+import com.sap.sailing.domain.abstractlog.AbstractLogEventAuthor;
 import com.sap.sailing.domain.abstractlog.race.impl.RaceLogEventAuthorImpl;
 import com.sap.sailing.domain.common.CourseDesignerMode;
 import com.sap.sailing.domain.common.racelog.Flags;
@@ -74,12 +74,12 @@ public class AppPreferences {
         return identifier.isEmpty() ? Secure.getString(context.getContentResolver(), Secure.ANDROID_ID) : identifier;
     }
 
-    public void setAuthor(RaceLogEventAuthor author) {
+    public void setAuthor(AbstractLogEventAuthor author) {
         preferences.edit().putString(HIDDEN_PREFERENCE_AUTHOR_NAME, author.getName()).commit();
         preferences.edit().putInt(HIDDEN_PREFERENCE_AUTHOR_PRIORITY, author.getPriority()).commit();
     }
 
-    public RaceLogEventAuthor getAuthor() {
+    public AbstractLogEventAuthor getAuthor() {
         String authorName = preferences.getString(HIDDEN_PREFERENCE_AUTHOR_NAME, "<anonymous>");
         int authorPriority = preferences.getInt(HIDDEN_PREFERENCE_AUTHOR_PRIORITY, 0);
         return new RaceLogEventAuthorImpl(authorName, authorPriority);

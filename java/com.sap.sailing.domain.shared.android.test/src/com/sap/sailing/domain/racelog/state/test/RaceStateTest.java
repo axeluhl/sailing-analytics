@@ -13,8 +13,8 @@ import static org.mockito.Mockito.when;
 import org.junit.Before;
 import org.junit.Test;
 
+import com.sap.sailing.domain.abstractlog.AbstractLogEventAuthor;
 import com.sap.sailing.domain.abstractlog.race.RaceLog;
-import com.sap.sailing.domain.abstractlog.race.RaceLogEventAuthor;
 import com.sap.sailing.domain.abstractlog.race.RaceLogEventFactory;
 import com.sap.sailing.domain.abstractlog.race.impl.RaceLogEventAuthorImpl;
 import com.sap.sailing.domain.abstractlog.race.impl.RaceLogImpl;
@@ -42,7 +42,7 @@ import com.sap.sailing.domain.common.racelog.RacingProcedureType;
 public class RaceStateTest {
     
     private RaceLog raceLog;
-    private RaceLogEventAuthor author;
+    private AbstractLogEventAuthor author;
     private RaceLogEventFactory factory;
     private RacingProcedureType defaultRacingProcedureType;
     private ConfigurationLoader<RegattaConfiguration> configuration;

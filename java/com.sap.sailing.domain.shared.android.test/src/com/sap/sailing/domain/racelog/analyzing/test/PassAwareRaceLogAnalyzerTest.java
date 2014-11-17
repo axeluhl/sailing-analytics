@@ -10,9 +10,9 @@ import java.util.UUID;
 
 import org.junit.Test;
 
+import com.sap.sailing.domain.abstractlog.AbstractLogEventAuthor;
 import com.sap.sailing.domain.abstractlog.race.RaceLog;
 import com.sap.sailing.domain.abstractlog.race.RaceLogEvent;
-import com.sap.sailing.domain.abstractlog.race.RaceLogEventAuthor;
 import com.sap.sailing.domain.abstractlog.race.analyzing.impl.RaceLogAnalyzer;
 
 public abstract class PassAwareRaceLogAnalyzerTest<AnalyzerType extends RaceLogAnalyzer<ResultType>, ResultType>
@@ -41,18 +41,18 @@ public abstract class PassAwareRaceLogAnalyzerTest<AnalyzerType extends RaceLogA
      * @param author author to be used by your events
      * @return {@link TargetPair}
      */
-    protected abstract TargetPair getTargetEventsAndResultForPassAwareTests(int passId, RaceLogEventAuthor author);
+    protected abstract TargetPair getTargetEventsAndResultForPassAwareTests(int passId, AbstractLogEventAuthor author);
     
     /**
      * Most of the times you do not need to implement this (only when your ResultType is a primitive). 
      */
-    protected TargetPair getBlockingEventsAndResultForPassAwareTests(int passId, RaceLogEventAuthor author) {
+    protected TargetPair getBlockingEventsAndResultForPassAwareTests(int passId, AbstractLogEventAuthor author) {
         return getTargetEventsAndResultForPassAwareTests(passId, author);
     }
     
     @Test
     public void testPassAwareWrongPass() {
-        RaceLogEventAuthor author = mock(RaceLogEventAuthor.class);
+        AbstractLogEventAuthor author = mock(AbstractLogEventAuthor.class);
         TargetPair pair = getTargetEventsAndResultForPassAwareTests(0, author);
         ResultType nonExpectedResult = pair.getB();
         RaceLogEvent blockingEvent = createEvent(RaceLogEvent.class, 1, 1, UUID.randomUUID(), author);
@@ -65,7 +65,7 @@ public abstract class PassAwareRaceLogAnalyzerTest<AnalyzerType extends RaceLogA
     
     @Test
     public void testPassAwareCorrectPass() {
-        RaceLogEventAuthor author = mock(RaceLogEventAuthor.class);
+        AbstractLogEventAuthor author = mock(AbstractLogEventAuthor.class);
         RaceLogEvent minorEvent = createEvent(RaceLogEvent.class, 0, 0, UUID.randomUUID(), author);
         TargetPair pair = getTargetEventsAndResultForPassAwareTests(1, author);
         ResultType expectedResult = pair.getB();
@@ -78,8 +78,8 @@ public abstract class PassAwareRaceLogAnalyzerTest<AnalyzerType extends RaceLogA
     
     @Test
     public void testPassAwareBlockedByMajorAuthor() {
-        RaceLogEventAuthor minorAuthor = mock(RaceLogEventAuthor.class);
-        RaceLogEventAuthor majorAuthor = mock(RaceLogEventAuthor.class);
+        AbstractLogEventAuthor minorAuthor = mock(AbstractLogEventAuthor.class);
+        AbstractLogEventAuthor majorAuthor = mock(AbstractLogEventAuthor.class);
         when(minorAuthor.compareTo(majorAuthor)).thenReturn(-1);
         when(majorAuthor.compareTo(minorAuthor)).thenReturn(1);
         
@@ -95,8 +95,8 @@ public abstract class PassAwareRaceLogAnalyzerTest<AnalyzerType extends RaceLogA
     
     @Test
     public void testPassAwareHidingMinorAuthor() {
-        RaceLogEventAuthor minorAuthor = mock(RaceLogEventAuthor.class);
-        RaceLogEventAuthor majorAuthor = mock(RaceLogEventAuthor.class);
+        AbstractLogEventAuthor minorAuthor = mock(AbstractLogEventAuthor.class);
+        AbstractLogEventAuthor majorAuthor = mock(AbstractLogEventAuthor.class);
         when(minorAuthor.compareTo(majorAuthor)).thenReturn(-1);
         when(majorAuthor.compareTo(minorAuthor)).thenReturn(1);
         

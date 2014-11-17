@@ -20,7 +20,7 @@ import android.widget.Toast;
 
 import com.sap.sailing.android.shared.logging.ExLog;
 import com.sap.sailing.android.shared.util.CollectionUtils;
-import com.sap.sailing.domain.abstractlog.race.RaceLogEventAuthor;
+import com.sap.sailing.domain.abstractlog.AbstractLogEventAuthor;
 import com.sap.sailing.domain.base.CourseArea;
 import com.sap.sailing.racecommittee.app.AppConstants;
 import com.sap.sailing.racecommittee.app.R;
@@ -203,7 +203,7 @@ public class RacingActivity extends SessionActivity implements RaceInfoListener 
 
     private void setupActionBar(CourseArea courseArea) {
         ActionBar actionBar = getActionBar();
-        RaceLogEventAuthor author = preferences.getAuthor();
+        AbstractLogEventAuthor author = preferences.getAuthor();
         String title = String.format(getString(R.string.racingview_header), courseArea.getName());
         title += " (" + author.getName() + ")";
 
