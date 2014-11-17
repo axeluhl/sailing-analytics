@@ -12,7 +12,7 @@ import AVFoundation
 class ScanViewController: UIViewController, AVCaptureMetadataOutputObjectsDelegate, UIAlertViewDelegate {
     
     enum AlertViewTag: Int {
-        case IncorrectQRCode, ConnectedToServer, ServerError
+        case IncorrectQRCode, AcceptMapping, ServerError
     }
     
     @IBOutlet weak var previewView: UIView!
@@ -105,18 +105,17 @@ class ScanViewController: UIViewController, AVCaptureMetadataOutputObjectsDelega
                                     title += (self.competitorDictionary!["sailID"]) as String
                                     title += "."
                                     let alertView = UIAlertView(title: title, message: "", delegate: self, cancelButtonTitle: "Cancel", otherButtonTitles: "OK")
-                                    alertView.tag = AlertViewTag.ServerError.rawValue;
+                                    alertView.tag = AlertViewTag.AcceptMapping.rawValue;
                                     alertView.show()
                                 }, failure: { (AFHTTPRequestOperation operation, NSError error) -> Void in
                                     self.activityView.stopAnimating()
-                                    // TODO urk decode competitor ID
                                     let alertView = UIAlertView(title: "Couldn't get competitor \(self.qrcodeData!.competitorId!)", message: "", delegate: self, cancelButtonTitle: "Cancel")
-                                    alertView.tag = AlertViewTag.ConnectedToServer.rawValue;
+                                    alertView.tag = AlertViewTag.ServerError.rawValue;
                                     alertView.show()
                                     
                             }) }, failure: { (AFHTTPRequestOperation operation, NSError error) -> Void in
                                 self.activityView.stopAnimating()
-                                let alertView = UIAlertView(title: "Couldn't get leader board \(self.qrcodeData!.leaderBoardName!)", message: "", delegate: self, cancelButtonTitle: "Cancel")
+                                let alertView = UIAlertView(title: "Couldn't get leader board \(self.qrcodeData!.leaderBoardName!.stringByReplacingPercentEscapesUsingEncoding(NSUTF8StringEncoding))", message: "", delegate: self, cancelButtonTitle: "Cancel")
                                 alertView.tag = AlertViewTag.ServerError.rawValue;
                                 alertView.show()
                     })
@@ -134,7 +133,7 @@ class ScanViewController: UIViewController, AVCaptureMetadataOutputObjectsDelega
     func alertView(alertView: UIAlertView, clickedButtonAtIndex buttonIndex: Int) {
         switch alertView.tag {
             // Stop tracking?
-        case AlertViewTag.ConnectedToServer.rawValue:
+        case AlertViewTag.AcceptMapping.rawValue:
             switch buttonIndex {
             case alertView.cancelButtonIndex:
                 break
