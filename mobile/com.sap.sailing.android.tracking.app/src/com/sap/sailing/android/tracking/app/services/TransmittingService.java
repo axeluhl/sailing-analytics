@@ -57,7 +57,7 @@ public class TransmittingService extends Service {
 	
 	private static final String TAG = TransmittingService.class.getName();
 	
-	private final int UPDATE_BATCH_SIZE = 10;
+	private final int UPDATE_BATCH_SIZE = 1000;
 	private final int UPDATE_INTERVAL_DEFAULT = 3000;
 	private final int UPDATE_INTERVAL_POWERSAVE_MODE = 30000;
 	private final long AUTO_END_SERVICE_AFTER_NANO_PASSED = 10000000000L; // 10 sec

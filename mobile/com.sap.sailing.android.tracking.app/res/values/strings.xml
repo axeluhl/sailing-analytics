@@ -25,5 +25,6 @@
     <string name="action_settings">Settings</string>
     <string name="please_confirm">Please confirm</string>
     <string name="do_you_really_want_to_stop_tracking">Do you really want to stop tracking?</string>
+    <string name="ok">OK</string>
 
 </resources>

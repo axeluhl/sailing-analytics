@@ -24,5 +24,6 @@
     <string name="action_settings">Einstellungen</string>
     <string name="please_confirm">Bitte bestätigen</string>
     <string name="do_you_really_want_to_stop_tracking">Soll das Tracking wirklich beendet werden?</string>
+    <string name="ok">OK</string>
 
 </resources>

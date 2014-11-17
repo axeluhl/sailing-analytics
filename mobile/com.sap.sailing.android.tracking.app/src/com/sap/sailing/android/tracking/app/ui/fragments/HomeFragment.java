@@ -13,6 +13,8 @@ import org.json.JSONObject;
 
 import android.annotation.SuppressLint;
 import android.app.Activity;
+import android.app.AlertDialog;
+import android.content.DialogInterface;
 import android.content.Intent;
 import android.content.pm.PackageManager;
 import android.content.pm.ResolveInfo;
@@ -134,33 +136,99 @@ public class HomeFragment extends BaseFragment implements LoaderCallbacks<Cursor
             
             prefs.setServerURL(server + ":" + port);
             
-            String leaderboardName;
+            String leaderboardNameFromQR;
 			try {
-				leaderboardName = URLEncoder.encode(uri.getQueryParameter(CheckinQRCodeHelper.LEADERBOARD_NAME), "UTF-8").replace("+", "%20");
+				leaderboardNameFromQR = URLEncoder.encode(uri.getQueryParameter(CheckinQRCodeHelper.LEADERBOARD_NAME), "UTF-8").replace("+", "%20");
 			} catch (UnsupportedEncodingException e) {
 				ExLog.e(getActivity(), TAG, "Failed to encode leaderboard name: " + e.getMessage());
-				leaderboardName = "";
+				leaderboardNameFromQR = "";
 			}
 			
             final String competitorId = uri.getQueryParameter(CheckinQRCodeHelper.COMPETITOR_ID);
-            final String checkinURLStr = prefs.getServerURL() + prefs.getServerCheckinPath().replace("{leaderboard-name}", leaderboardName);
+            final String checkinURLStr = prefs.getServerURL() + prefs.getServerCheckinPath().replace("{leaderboard-name}", leaderboardNameFromQR);
+            final String eventId = uri.getQueryParameter(CheckinQRCodeHelper.EVENT_ID);
+            final String leaderboardName = leaderboardNameFromQR;
+            
+            final DeviceIdentifier deviceUuid = new SmartphoneUUIDIdentifierImpl(UUID.fromString(prefs.getDeviceIdentifier()));
+            final Date date= new java.util.Date();
+            
+            
+            // TODO: GET EVENT, LEADERBOARD, COMPETITOR
+            
+            
+            
+            // There are 5 Stages after the QR-Code scan is complete:
+            //   1. Get Event
+            //   2. Get Leaderboard
+            //   3. Get Competitor
+            //   4. Let user confirm that the information is correct
+            //   5. Checkin
+            
+            
+            final String getEventUrl = prefs.getServerURL() + prefs.getServerEventPath(eventId);
+            final String getLeaderboardUrl = prefs.getServerURL() + prefs.getServerLeaderboardPath(leaderboardName);
+            final String getCompetitorUrl = prefs.getServerURL() + prefs.getServerCompetitorPath(competitorId);
+            
+            JsonObjectRequest getEventRequest = new JsonObjectRequest(getEventUrl, null, new Listener<JSONObject>() {
 
-            DeviceIdentifier deviceUuid = new SmartphoneUUIDIdentifierImpl(UUID.fromString(prefs.getDeviceIdentifier()));
-            Date date= new java.util.Date();
+				@Override
+				public void onResponse(JSONObject response) {
+					System.out.println("got response: " + response);
+					// TODO: get data, eventually save to db
+					
+					JsonObjectRequest getLeaderboardRequest = new JsonObjectRequest(getLeaderboardUrl,null, new Listener<JSONObject>() {
+						@Override
+						public void onResponse(JSONObject response) {
+							System.out.println("got response: " + response);
+							// TODO: get data, eventually save to db
+							
+							JsonObjectRequest getCompetitorRequest = new JsonObjectRequest(getCompetitorUrl, null, new Listener<JSONObject>() {
+								@Override
+								public void onResponse(JSONObject response) {
+									System.out.println("got response: " + response);
+									// TODO: get data, eventually save to db
+									displayUserConfirmationScreen("TODO", "TODO");
+								}
+							}, new ErrorListener() {
+
+								@Override
+								public void onErrorResponse(VolleyError error) {
+									ExLog.e(getActivity(), TAG, "Failed to get competitor from API: " + error.getMessage());
+									displayAPIErrorRecommendRetry();	
+								}
+							});
+							
+							VolleyHelper.getInstance(getActivity()).addRequest(getCompetitorRequest);
+						}
+					}, new ErrorListener() {
+						@Override
+						public void onErrorResponse(VolleyError error) {
+							ExLog.e(getActivity(), TAG, "Failed to get leaderboard from API: " + error.getMessage());
+							displayAPIErrorRecommendRetry();							
+						}
+					});
+					
+					VolleyHelper.getInstance(getActivity()).addRequest(getLeaderboardRequest);
+				}
+			}, new ErrorListener() {
+						@Override
+						public void onErrorResponse(VolleyError error) {
+							ExLog.e(getActivity(), TAG, "Failed to get event from API: " + error.getMessage());
+							displayAPIErrorRecommendRetry();
+						}
+			});
+            
+            
+            
+            VolleyHelper.getInstance(getActivity()).addRequest(getEventRequest);
+            
+            
             
             // TODO: Push notification token
             
-            try {
-				JSONObject requestObject = CheckinQRCodeHelper.getCheckinJson(competitorId, deviceUuid.getStringRepresentation(), "TODO!!", date.getTime());
-				CheckinListener listener = new CheckinListener(leaderboardName, leaderboardName); // TODO: twice the same? where do the correct values come from?
-				JsonObjectRequest request = new JsonObjectRequest(checkinURLStr, requestObject, listener, new CheckinErrorListener());
-				VolleyHelper.getInstance(getActivity()).addRequest(request);
-				
-			} catch (JSONException e) {
-				ExLog.e(getActivity(), TAG, "Failed to generate checkin JSON: " + e.getMessage());
-			}
-            
-            
+
+//            
+//            
             
 //            
 //            Competitor competitor = new CompetitorImpl(competitorId, null, null, null, null);
@@ -187,6 +255,52 @@ public class HomeFragment extends BaseFragment implements LoaderCallbacks<Cursor
         super.onDetach();
 
         VolleyHelper.getInstance(getActivity()).cancelRequest(REQUEST_TAG);
+    }
+    
+    private void displayUserConfirmationScreen(String fullNameOfUser, String sailId)
+    {
+    
+    }
+    
+    private void checkInWithAPIAndDisplayTrackingActivity()
+    {
+    	
+    	/**
+    	 * // TODO: Push token?
+        try {
+			JSONObject requestObject = CheckinQRCodeHelper.getCheckinJson(competitorId, 
+					deviceUuid.getStringRepresentation(), "TODO!!", date.getTime());
+			CheckinListener listener = new CheckinListener(leaderboardName); // TODO: twice the same? where do the correct values come from?
+			
+			JsonObjectRequest checkinRequest = new JsonObjectRequest(checkinURLStr, requestObject, new CheckinListener(leaderboardName), new CheckinErrorListener());
+			
+			
+			VolleyHelper.getInstance(getActivity()).addRequest(checkinRequest);
+			
+		} catch (JSONException e) {
+			ExLog.e(getActivity(), TAG, "Failed to generate checkin JSON: " + e.getMessage());
+		}
+		**/
+    }
+    
+    /**
+     * Shows a pop-up-dialog that informs the user than an API-call has failed and recommends a retry.
+     */
+    private void displayAPIErrorRecommendRetry()
+    {
+    	AlertDialog.Builder builder = new AlertDialog.Builder(getActivity());
+        builder.setMessage(getString(R.string.notify_user_api_call_failed));
+        builder.setCancelable(true);
+        builder.setPositiveButton(getString(R.string.ok), new DialogInterface.OnClickListener(){
+
+			@Override
+			public void onClick(DialogInterface dialog, int which) {
+				dialog.cancel();
+			}
+			
+        });
+        AlertDialog alert = builder.create();
+        alert.show();
     }
 
     private void startRegatta(String regattaName, String eventName) {
@@ -309,13 +423,11 @@ public class HomeFragment extends BaseFragment implements LoaderCallbacks<Cursor
 
     private class CheckinListener implements Listener<JSONObject> {
     	
-    	public String eventName;
-    	public String regattaName;
+    	public String leaderboardName;
     	
-    	public CheckinListener(String eventName, String regattaName) {
+    	public CheckinListener(String leaderboardName) {
     		try {
-    			this.eventName = URLDecoder.decode(eventName, "UTF-8");
-				this.regattaName = URLDecoder.decode(regattaName, "UTF-8");
+				this.leaderboardName = URLDecoder.decode(leaderboardName, "UTF-8");
 			} catch (UnsupportedEncodingException e) {
 				// TODO Auto-generated catch block
 				ExLog.e(getActivity(), TAG, "UnsupportedEncodingException: " + e.getMessage());
@@ -324,7 +436,8 @@ public class HomeFragment extends BaseFragment implements LoaderCallbacks<Cursor
 
         @Override
         public void onResponse(JSONObject response) {
-            startRegatta(eventName, regattaName);
+        	// TODO: twice the same string here
+            startRegatta(leaderboardName, leaderboardName);
         }
     }
 
