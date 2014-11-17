@@ -9,9 +9,14 @@ import java.util.concurrent.TimeUnit;
 
 import org.osgi.framework.BundleActivator;
 import org.osgi.framework.BundleContext;
+import org.osgi.framework.ServiceReference;
 import org.osgi.framework.ServiceRegistration;
+import org.osgi.util.tracker.ServiceTracker;
+import org.osgi.util.tracker.ServiceTrackerCustomizer;
 
+import com.sap.sse.datamining.DataMiningBundleService;
 import com.sap.sse.datamining.DataMiningServer;
+import com.sap.sse.datamining.DataRetrieverChainDefinition;
 import com.sap.sse.datamining.ModifiableDataMiningServer;
 import com.sap.sse.datamining.functions.FunctionProvider;
 import com.sap.sse.datamining.functions.FunctionRegistry;
@@ -25,10 +30,11 @@ public class DataMiningActivator implements BundleActivator {
     private static final String STRING_MESSAGES_BASE_NAME = "stringmessages/StringMessages";
     
     private static DataMiningActivator INSTANCE;
+
+    private ServiceTracker<DataMiningBundleService, DataMiningBundleService> dataMiningBundleServiceTracker;
+    private final Collection<ServiceRegistration<?>> serviceRegistrations;
     
     private final ModifiableDataMiningServer dataMiningServer;
-    
-    private Collection<ServiceRegistration<?>> serviceRegistrations;
     
     public DataMiningActivator() {
         ExecutorService executor = new ThreadPoolExecutor(THREAD_POOL_SIZE, THREAD_POOL_SIZE, 60, TimeUnit.SECONDS,
@@ -46,13 +52,54 @@ public class DataMiningActivator implements BundleActivator {
     @Override
     public void start(BundleContext context) throws Exception {
         INSTANCE = this;
+        
+        dataMiningBundleServiceTracker = new ServiceTracker<>(context, DataMiningBundleService.class, new ServiceTrackerCustomizer<DataMiningBundleService, DataMiningBundleService>() {
+            @Override
+            public DataMiningBundleService addingService(ServiceReference<DataMiningBundleService> reference) {
+                DataMiningBundleService dataMiningBundleService = context.getService(reference);
+                registerDataMiningBundle(dataMiningBundleService);
+                return dataMiningBundleService;
+            }
+            @Override
+            public void modifiedService(ServiceReference<DataMiningBundleService> reference,
+                    DataMiningBundleService service) { }
+            @Override
+            public void removedService(ServiceReference<DataMiningBundleService> reference,
+                    DataMiningBundleService dataMiningBundleService) {
+                unregisterDataMiningBundle(dataMiningBundleService);
+            }
+        });
+        dataMiningBundleServiceTracker.open();
 
         serviceRegistrations.add(context.registerService(DataMiningServer.class, dataMiningServer, null));
-        serviceRegistrations.add(context.registerService(ModifiableDataMiningServer.class, dataMiningServer, null));
+    }
+
+    private void registerDataMiningBundle(DataMiningBundleService dataMiningBundleService) {
+        dataMiningServer.addStringMessages(dataMiningBundleService.getStringMessages());
+        
+        dataMiningServer.registerAllWithInternalFunctionPolicy(dataMiningBundleService.getInternalClassesWithMarkedMethods());
+        dataMiningServer.registerAllWithExternalFunctionPolicy(dataMiningBundleService.getExternalLibraryClasses());
+        
+        for (DataRetrieverChainDefinition<?> dataRetrieverChainDefinition : dataMiningBundleService.getDataRetrieverChainDefinitions()) {
+            dataMiningServer.registerDataRetrieverChainDefinition(dataRetrieverChainDefinition);
+        }
+    }
+
+    private void unregisterDataMiningBundle(DataMiningBundleService dataMiningBundleService) {
+        dataMiningServer.removeStringMessages(dataMiningBundleService.getStringMessages());
+        
+        dataMiningServer.unregisterAllFunctionsOf(dataMiningBundleService.getInternalClassesWithMarkedMethods());
+        dataMiningServer.unregisterAllFunctionsOf(dataMiningBundleService.getExternalLibraryClasses());
+        
+        for (DataRetrieverChainDefinition<?> dataRetrieverChainDefinition : dataMiningBundleService.getDataRetrieverChainDefinitions()) {
+            dataMiningServer.unregisterDataRetrieverChainDefinition(dataRetrieverChainDefinition);
+        }
     }
 
     @Override
     public void stop(BundleContext context) throws Exception {
+        dataMiningBundleServiceTracker.close();
+        
         for (ServiceRegistration<?> serviceRegistration : serviceRegistrations) {
             context.ungetService(serviceRegistration.getReference());
         }

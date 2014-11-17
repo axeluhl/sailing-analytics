@@ -57,17 +57,17 @@ public class DataMiningServerImpl implements ModifiableDataMiningServer {
     }
     
     @Override
-    public void registerAllWithInternalFunctionPolicy(Collection<Class<?>> classesToScan) {
+    public void registerAllWithInternalFunctionPolicy(Iterable<Class<?>> classesToScan) {
         functionRegistry.registerAllWithInternalFunctionPolicy(classesToScan);
     }
     
     @Override
-    public void registerAllWithExternalFunctionPolicy(Collection<Class<?>> externalClassesToScan) {
+    public void registerAllWithExternalFunctionPolicy(Iterable<Class<?>> externalClassesToScan) {
         functionRegistry.registerAllWithExternalFunctionPolicy(externalClassesToScan);
     }
     
     @Override
-    public void unregisterAllFunctionsOf(Collection<Class<?>> classesToUnregister) {
+    public void unregisterAllFunctionsOf(Iterable<Class<?>> classesToUnregister) {
         functionRegistry.unregisterAllFunctionsOf(classesToUnregister);
     }
 
