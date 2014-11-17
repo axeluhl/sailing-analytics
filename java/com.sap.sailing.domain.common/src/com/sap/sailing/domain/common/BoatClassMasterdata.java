@@ -89,12 +89,10 @@ public enum BoatClassMasterdata {
 
     public static BoatClassMasterdata resolveBoatClass(String boatClassName) {
         String boatClassNameToResolve = unifyBoatClassName(boatClassName);
-        
         for (BoatClassMasterdata boatClass : values()) {
             if (unifyBoatClassName(boatClass.displayName).equals(boatClassNameToResolve)) {
                 return boatClass;
-            }
-            if(boatClass.alternativeNames != null) {
+            } else if (boatClass.alternativeNames != null) {
                 for (String name : boatClass.alternativeNames) {
                     if (unifyBoatClassName(name).equals(boatClassNameToResolve)) {
                         return boatClass;

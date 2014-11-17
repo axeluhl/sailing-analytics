@@ -1904,22 +1904,24 @@ public class MasterDataImportTest {
         raceColumnNames.add("T2");
         final List<String> emptyRaceColumnNamesList = Collections.emptyList();
 
-        List<Series> series = new ArrayList<Series>();
+        List<Series> seriesOnSource = new ArrayList<>();
+        List<Series> seriesOnTarget = new ArrayList<>();
         List<Fleet> fleets = new ArrayList<Fleet>();
         String testFleet1Name = "testFleet1";
         FleetImpl testFleet1 = new FleetImpl(testFleet1Name);
         fleets.add(testFleet1);
         fleets.add(new FleetImpl("testFleet2"));
-        series.add(new SeriesImpl("testSeries", false, fleets, emptyRaceColumnNamesList, sourceService));
+        seriesOnSource.add(new SeriesImpl("testSeries", false, fleets, emptyRaceColumnNamesList, sourceService));
+        seriesOnTarget.add(new SeriesImpl("testSeries", false, fleets, emptyRaceColumnNamesList, sourceService));
         UUID regattaUUID = UUID.randomUUID();
         Regatta regatta = sourceService.createRegatta(
                 RegattaImpl.getDefaultName(TEST_REGATTA_NAME, TEST_BOAT_CLASS_NAME), TEST_BOAT_CLASS_NAME, regattaUUID,
-                series, true, new LowPoint(), courseAreaUUID, /* useStartTimeInference */true);
+                seriesOnSource, true, new LowPoint(), courseAreaUUID, /* useStartTimeInference */true);
         for (String name : raceColumnNames) {
-            series.get(0).addRaceColumn(name, sourceService);
+            seriesOnSource.get(0).addRaceColumn(name, sourceService);
         }
         double factor = 3.0;
-        series.get(0).getRaceColumnByName(raceColumnName).setFactor(factor);
+        seriesOnSource.get(0).getRaceColumnByName(raceColumnName).setFactor(factor);
 
         int[] discardRule = { 1, 2, 3, 4 };
         ScoringScheme scoringScheme = new LowPoint();
@@ -2044,7 +2046,7 @@ public class MasterDataImportTest {
 
         Regatta regattaOnTarget = destService.createRegatta(
                 RegattaImpl.getDefaultName(TEST_REGATTA_NAME, TEST_BOAT_CLASS_NAME), TEST_BOAT_CLASS_NAME, regattaUUID,
-                series, true, new LowPoint(), courseAreaUUID, /* useStartTimeInference */true);
+                seriesOnTarget, true, new LowPoint(), courseAreaUUID, /* useStartTimeInference */true);
 
         raceColumnOnTarget.setTrackedRace(defaultFleetOnTarget,
                 new DummyTrackedRace(raceId, 
