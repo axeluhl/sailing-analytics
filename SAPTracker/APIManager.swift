@@ -179,11 +179,11 @@ class APIManager: NSObject {
         manager!.POST(urlString, parameters: array, success: { (AFHTTPRequestOperation operation, AnyObject responseObject) -> Void in
             // delete GPS fixes from database
             for gpsFix in gpsFixes {
-                NSLog("sent GPS fixes")
+                println("sent GPS fixes")
                 DataManager.sharedManager.managedObjectContext!.deleteObject(gpsFix)
             }
             }, failure: { (AFHTTPRequestOperation operation, NSError error) -> Void in
-                NSLog("error sending GPS fixes")
+                println("error sending GPS fixes")
         })
     }
     

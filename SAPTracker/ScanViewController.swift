@@ -79,7 +79,7 @@ class ScanViewController: UIViewController, AVCaptureMetadataOutputObjectsDelega
                 return
             }
             
-            APIManager.sharedManager.initManager(qrcodeData!.server!)
+            APIManager.sharedManager.initManager(qrcodeData!.serverUrl!)
             
             // get event
             APIManager.sharedManager.getEvent(qrcodeData!.eventId,
@@ -140,6 +140,7 @@ class ScanViewController: UIViewController, AVCaptureMetadataOutputObjectsDelega
             default:
                 // create core data objects
                 var event = DataManager.sharedManager.event(qrcodeData!.eventId!)
+                event.serverUrl = qrcodeData!.serverUrl!
                 event.initWithDictionary(eventDictionary!)
                 var leaderBoard = DataManager.sharedManager.leaderBoard(event)
                 leaderBoard.initWithDictionary(leaderBoardDictionary!)

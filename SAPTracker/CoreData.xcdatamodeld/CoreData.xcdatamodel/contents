@@ -14,7 +14,9 @@
         <attribute name="eventId" optional="YES" attributeType="String" indexed="YES" syncable="YES"/>
         <attribute name="imageUrl" optional="YES" attributeType="String" syncable="YES"/>
         <attribute name="name" optional="YES" attributeType="String" syncable="YES"/>
+        <attribute name="serverUrl" optional="YES" attributeType="String" syncable="YES"/>
         <attribute name="startDate" optional="YES" attributeType="Date" syncable="YES"/>
+        <relationship name="gpsFixes" optional="YES" toMany="YES" deletionRule="Nullify" destinationEntity="GPSFix" inverseName="event" inverseEntity="GPSFix" syncable="YES"/>
         <relationship name="leaderBoard" optional="YES" maxCount="1" deletionRule="Cascade" destinationEntity="LeaderBoard" inverseName="event" inverseEntity="LeaderBoard" syncable="YES"/>
     </entity>
     <entity name="GPSFix" representedClassName="GPSFix" syncable="YES">
@@ -23,6 +25,7 @@
         <attribute name="lonDeg" optional="YES" attributeType="Double" defaultValueString="0.0" syncable="YES"/>
         <attribute name="speedMperS" optional="YES" attributeType="Double" defaultValueString="0.0" syncable="YES"/>
         <attribute name="timeMillis" optional="YES" attributeType="Double" defaultValueString="0.0" syncable="YES"/>
+        <relationship name="event" optional="YES" maxCount="1" deletionRule="Nullify" destinationEntity="Event" inverseName="gpsFixes" inverseEntity="Event" syncable="YES"/>
     </entity>
     <entity name="LeaderBoard" representedClassName="LeaderBoard" syncable="YES">
         <attribute name="name" optional="YES" attributeType="String" indexed="YES" syncable="YES"/>
@@ -31,8 +34,8 @@
     </entity>
     <elements>
         <element name="Competitor" positionX="-9" positionY="81" width="128" height="148"/>
-        <element name="Event" positionX="-63" positionY="27" width="128" height="133"/>
-        <element name="GPSFix" positionX="-63" positionY="-18" width="128" height="118"/>
+        <element name="Event" positionX="-63" positionY="27" width="128" height="163"/>
+        <element name="GPSFix" positionX="-63" positionY="-18" width="128" height="133"/>
         <element name="LeaderBoard" positionX="-36" positionY="72" width="128" height="90"/>
     </elements>
 </model>

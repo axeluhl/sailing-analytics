@@ -12,6 +12,7 @@ import CoreData
 @objc(Event)
 class Event: NSManagedObject {
 
+    @NSManaged var serverUrl: String
     @NSManaged var eventId: String
     @NSManaged var name: String
     @NSManaged var startDate: NSDate

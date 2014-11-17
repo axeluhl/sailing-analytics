@@ -16,7 +16,7 @@ class QRCodeData {
         static let competitorId = "competitor_id"        
     }
     
-    var server: String?
+    var serverUrl: String?
     var eventId: String?
     var leaderBoardName: String?
     var competitorId: String?
@@ -31,9 +31,9 @@ class QRCodeData {
             return false
         }
         
-        server = url!.scheme! + "://" + url!.host!
+        serverUrl = url!.scheme! + "://" + url!.host!
         if ((url!.port) != nil) {
-            server! += ":" + url!.port!.stringValue
+            serverUrl! += ":" + url!.port!.stringValue
         }
         
         let queryString = url!.query
@@ -42,8 +42,7 @@ class QRCodeData {
         }
         let urlComponents = queryString!.componentsSeparatedByString("&")
         var queryStringDictionary = [String:String]()
-        for keyValuePair in urlComponents
-        {
+        for keyValuePair in urlComponents {
             let pairComponents = keyValuePair.componentsSeparatedByString("=")
             let key = pairComponents[0]
             let value = pairComponents[1]

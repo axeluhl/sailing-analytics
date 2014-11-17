@@ -11,6 +11,8 @@ import CoreData
 
 class DataManager: NSObject {
 
+    var selectedEvent: Event?
+
     class var sharedManager: DataManager {
         struct Singleton {
             static let sharedDataManager = DataManager()
@@ -40,6 +42,7 @@ class DataManager: NSObject {
     private func newLocation(notification: NSNotification) {
         let gpsFix = NSEntityDescription.insertNewObjectForEntityForName("GPSFix", inManagedObjectContext: self.managedObjectContext!) as GPSFix
         gpsFix.initWithDictionary(notification.userInfo!)
+        gpsFix.event = selectedEvent!
     }
     
     /* Tracking stopped, save data to disk. */
@@ -55,10 +58,8 @@ class DataManager: NSObject {
         var error: NSError? = nil
         let results = self.managedObjectContext!.executeFetchRequest(fetchRequest, error: &error)
         if (results != nil && results!.count > 0) {
-            NSLog("XXX")
             return results![0] as Event
         } else {
-            NSLog("YYY")
             return NSEntityDescription.insertNewObjectForEntityForName("Event", inManagedObjectContext: self.managedObjectContext!) as Event
         }
     }

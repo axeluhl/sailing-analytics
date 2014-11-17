@@ -649,10 +649,10 @@
 			isa = PBXGroup;
 			children = (
 				7F0658FE19F7EE910077FF95 /* QRCodeData.swift */,
-				7FCDB65E1A1636610075D7D9 /* GPSFix.swift */,
 				7FCDB65F1A1636610075D7D9 /* Event.swift */,
 				7FCDB6601A1636610075D7D9 /* LeaderBoard.swift */,
 				7FCDB6611A1636610075D7D9 /* Competitor.swift */,
+				7FCDB65E1A1636610075D7D9 /* GPSFix.swift */,
 				7F44095919F65B5B0021BF22 /* CoreData.xcdatamodeld */,
 			);
 			name = Model;
