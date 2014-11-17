@@ -16,7 +16,6 @@ public interface DataMiningStringMessages {
     public String get(Locale locale, String messageKey);
     public String get(Locale locale, String messageKey, String... parameters);
     
-    //TODO Replace with static method, after Java 8 can be used
     public static final class Util {
 
         private static boolean supportedLocalesHaveBeenInitialized = false;

@@ -2,6 +2,7 @@ package com.sap.sse.datamining;
 
 import java.util.Collection;
 import java.util.UUID;
+import java.util.concurrent.ExecutorService;
 
 import com.sap.sse.datamining.functions.Function;
 import com.sap.sse.datamining.functions.FunctionProvider;
@@ -10,6 +11,8 @@ import com.sap.sse.datamining.impl.DataRetrieverChainDefinitionProvider;
 import com.sap.sse.datamining.shared.dto.FunctionDTO;
 
 public interface DataMiningServer {
+    
+    public ExecutorService getExecutorService();
 
     public DataMiningStringMessages getStringMessages();
     

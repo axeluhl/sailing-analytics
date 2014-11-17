@@ -2,6 +2,7 @@ package com.sap.sse.datamining.impl;
 
 import java.util.Collection;
 import java.util.UUID;
+import java.util.concurrent.ExecutorService;
 
 import com.sap.sse.datamining.DataRetrieverChainDefinition;
 import com.sap.sse.datamining.ModifiableDataMiningServer;
@@ -9,22 +10,45 @@ import com.sap.sse.datamining.functions.Function;
 import com.sap.sse.datamining.functions.FunctionProvider;
 import com.sap.sse.datamining.functions.FunctionRegistry;
 import com.sap.sse.datamining.i18n.DataMiningStringMessages;
+import com.sap.sse.datamining.impl.i18n.CompoundDataMiningStringMessages;
 import com.sap.sse.datamining.shared.dto.FunctionDTO;
 
 public class DataMiningServerImpl implements ModifiableDataMiningServer {
     
-    private final DataMiningStringMessages stringMessages;
+    private final CompoundDataMiningStringMessages stringMessages;
+    private final ExecutorService executorService;
     
     private final FunctionRegistry functionRegistry;
     private final FunctionProvider functionProvider;
     
     private DataRetrieverChainDefinitionRegistry dataRetrieverChainDefinitionRegistry;
 
-    public DataMiningServerImpl(DataMiningStringMessages stringMessages, FunctionRegistry functionRegistry, FunctionProvider functionProvider, DataRetrieverChainDefinitionRegistry dataRetrieverChainDefinitionRegistry) {
-        this.stringMessages = stringMessages;
+    public DataMiningServerImpl(ExecutorService executorService, FunctionRegistry functionRegistry, FunctionProvider functionProvider, DataRetrieverChainDefinitionRegistry dataRetrieverChainDefinitionRegistry) {
+        this.stringMessages = new CompoundDataMiningStringMessages();
+        this.executorService = executorService;
         this.functionRegistry = functionRegistry;
         this.functionProvider = functionProvider;
         this.dataRetrieverChainDefinitionRegistry = dataRetrieverChainDefinitionRegistry;
+    }
+    
+    @Override
+    public ExecutorService getExecutorService() {
+        return executorService;
+    }
+    
+    @Override
+    public DataMiningStringMessages getStringMessages() {
+        return stringMessages;
+    }
+
+    @Override
+    public void addStringMessages(DataMiningStringMessages stringMessages) {
+        this.stringMessages.addStringMessages(stringMessages);
+    }
+
+    @Override
+    public void removeStringMessages(DataMiningStringMessages stringMessages) {
+        this.stringMessages.removeStringMessages(stringMessages);
     }
 
     @Override
@@ -50,11 +74,6 @@ public class DataMiningServerImpl implements ModifiableDataMiningServer {
     @Override
     public FunctionProvider getFunctionProvider() {
         return functionProvider;
-    }
-    
-    @Override
-    public DataMiningStringMessages getStringMessages() {
-        return stringMessages;
     }
 
     @Override

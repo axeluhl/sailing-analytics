@@ -21,7 +21,6 @@ import com.sap.sse.datamining.factories.ProcessorFactory;
 import com.sap.sse.datamining.functions.Function;
 import com.sap.sse.datamining.functions.FunctionProvider;
 import com.sap.sse.datamining.i18n.DataMiningStringMessages;
-import com.sap.sse.datamining.impl.DataMiningActivator;
 import com.sap.sse.datamining.impl.DataRetrieverChainDefinitionProvider;
 import com.sap.sse.datamining.impl.ProcessorQuery;
 import com.sap.sse.datamining.impl.components.GroupedDataEntry;
@@ -36,7 +35,6 @@ import com.sap.sse.datamining.shared.impl.dto.DataRetrieverChainDefinitionDTO;
 public class SailingDataMiningFactory {
 
     private final ExecutorService executorService;
-    
     private final DataMiningStringMessages stringMessages;
     
     private final ProcessorFactory processorFactory;
@@ -44,12 +42,11 @@ public class SailingDataMiningFactory {
     private final FunctionProvider functionProvider;
     private final DataRetrieverChainDefinitionProvider dataRetrieverChainDefinitionProvider;
 
-    public SailingDataMiningFactory(FunctionProvider functionProvider, DataRetrieverChainDefinitionProvider dataRetrieverChainDefinitionRegistry) {
-        DataMiningActivator dataMiningActivator = DataMiningActivator.getDefault();
-        executorService = dataMiningActivator.getExecutor();
-        stringMessages = dataMiningActivator.getStringMessages();
+    public SailingDataMiningFactory(ExecutorService executorService, DataMiningStringMessages stringMessages, FunctionProvider functionProvider, DataRetrieverChainDefinitionProvider dataRetrieverChainDefinitionRegistry) {
+        this.executorService = executorService;
+        this.stringMessages = stringMessages;
         
-        processorFactory = new ProcessorFactory(executorService);
+        processorFactory = new ProcessorFactory(this.executorService);
         
         this.functionProvider = functionProvider;
         this.dataRetrieverChainDefinitionProvider = dataRetrieverChainDefinitionRegistry;

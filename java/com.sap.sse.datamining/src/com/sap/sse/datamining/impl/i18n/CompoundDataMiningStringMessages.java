@@ -17,9 +17,21 @@ public class CompoundDataMiningStringMessages implements DataMiningStringMessage
     private static final Logger LOGGER = Logger.getLogger(CompoundDataMiningStringMessages.class.getSimpleName());
     
     private final Collection<DataMiningStringMessages> stringMessages;
+    
+    public CompoundDataMiningStringMessages() {
+        stringMessages = new HashSet<>();
+    }
 
     public CompoundDataMiningStringMessages(Collection<DataMiningStringMessages> stringMessages) {
         this.stringMessages = new HashSet<>(stringMessages);
+    }
+    
+    public void addStringMessages(DataMiningStringMessages stringMessages) {
+        this.stringMessages.add(stringMessages);
+    }
+    
+    public void removeStringMessages(DataMiningStringMessages stringMessages) {
+        this.stringMessages.remove(stringMessages);
     }
     
     @Override

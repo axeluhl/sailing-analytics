@@ -14,56 +14,57 @@ import com.sap.sailing.datamining.data.HasGPSFixContext;
 import com.sap.sailing.datamining.data.HasTrackedLegContext;
 import com.sap.sailing.datamining.data.HasTrackedLegOfCompetitorContext;
 import com.sap.sailing.datamining.data.HasTrackedRaceContext;
-import com.sap.sse.datamining.ClassesWithFunctionsRegistrationService;
 import com.sap.sse.datamining.DataRetrieverChainDefinition;
-import com.sap.sse.datamining.DataRetrieverChainDefinitionRegistrationService;
+import com.sap.sse.datamining.ModifiableDataMiningServer;
+import com.sap.sse.datamining.i18n.DataMiningStringMessages;
+import com.sap.sse.datamining.impl.i18n.DataMiningStringMessagesImpl;
 
 public class Activator implements BundleActivator {
     
     private static final Logger LOGGER = Logger.getLogger(Activator.class.getSimpleName());
+    private static final String STRING_MESSAGES_BASE_NAME = "stringmessages/StringMessages";
 
+    private DataMiningStringMessages sailingDataMiningStringMessages;
     private SailingDataRetrieverChainDefinitions dataRetrieverChainDefinitions;
     
-    private ServiceReference<ClassesWithFunctionsRegistrationService> classesWithFunctionsRegistrationServiceReference;
-    private ServiceReference<DataRetrieverChainDefinitionRegistrationService> dataRetrieverChainDefinitionRegistrationServiceServiceReference;
+    private ServiceReference<ModifiableDataMiningServer> dataMiningServerServiceReference;
 
     @Override
     public void start(BundleContext context) throws Exception {
         dataRetrieverChainDefinitions = new SailingDataRetrieverChainDefinitions();
+        sailingDataMiningStringMessages = new DataMiningStringMessagesImpl(STRING_MESSAGES_BASE_NAME);
         
-        classesWithFunctionsRegistrationServiceReference = context.getServiceReference(ClassesWithFunctionsRegistrationService.class);
-        if (classesWithFunctionsRegistrationServiceReference != null) {
-            context.getService(classesWithFunctionsRegistrationServiceReference)
-                    .registerInternalClassesWithMarkedMethods(getInternalClassesWithMarkedMethods());
-            context.getService(classesWithFunctionsRegistrationServiceReference)
-                    .registerExternalLibraryClasses(getExternalLibraryClasses());
-        } else {
-            LOGGER.log(Level.WARNING, "Couldn't register the sailing classes with functions. No registration service was available.");
-        }
-        
-        dataRetrieverChainDefinitionRegistrationServiceServiceReference = context.getServiceReference(DataRetrieverChainDefinitionRegistrationService.class);
-        if (dataRetrieverChainDefinitionRegistrationServiceServiceReference != null) {
-            DataRetrieverChainDefinitionRegistrationService dataRetrieverChainDefinitionRegistrationService = context.getService(dataRetrieverChainDefinitionRegistrationServiceServiceReference);
+        dataMiningServerServiceReference = context.getServiceReference(ModifiableDataMiningServer.class);
+        if (dataMiningServerServiceReference != null) {
+            ModifiableDataMiningServer dataMiningServer = context.getService(dataMiningServerServiceReference);
+            
+            dataMiningServer.addStringMessages(sailingDataMiningStringMessages);
+            
+            dataMiningServer.registerAllWithInternalFunctionPolicy(getInternalClassesWithMarkedMethods());
+            dataMiningServer.registerAllWithExternalFunctionPolicy(getExternalLibraryClasses());
+
             for (DataRetrieverChainDefinition<?> dataRetrieverChainDefinition : dataRetrieverChainDefinitions.getDataRetrieverChainDefinitions()) {
-                dataRetrieverChainDefinitionRegistrationService.addDataRetrieverChainDefinition(dataRetrieverChainDefinition);
+                dataMiningServer.registerDataRetrieverChainDefinition(dataRetrieverChainDefinition);
             }
         } else {
-            LOGGER.log(Level.WARNING, "Couldn't register the sailing data retriever chain definitions. No registration service was available.");
+            LOGGER.log(Level.WARNING,
+                    "Couldn't register the sailing classes with functions and data retriever chain definitions."
+                    + " No data mining server was available.");
         }
     }
 
     @Override
     public void stop(BundleContext context) throws Exception {
-        if (classesWithFunctionsRegistrationServiceReference != null) {
-            context.getService(classesWithFunctionsRegistrationServiceReference).unregisterAllFunctionsOf(
-                    getInternalClassesWithMarkedMethods());
-            context.getService(classesWithFunctionsRegistrationServiceReference).unregisterAllFunctionsOf(
-                    getExternalLibraryClasses());
-        }
-        
-        if (dataRetrieverChainDefinitionRegistrationServiceServiceReference != null) {
+        if (dataMiningServerServiceReference != null) {
+            ModifiableDataMiningServer dataMiningServer = context.getService(dataMiningServerServiceReference);
+
+            dataMiningServer.removeStringMessages(sailingDataMiningStringMessages);
+            
+            dataMiningServer.unregisterAllFunctionsOf(getInternalClassesWithMarkedMethods());
+            dataMiningServer.unregisterAllFunctionsOf(getExternalLibraryClasses());
+
             for (DataRetrieverChainDefinition<?> dataRetrieverChainDefinition : dataRetrieverChainDefinitions.getDataRetrieverChainDefinitions()) {
-                context.getService(dataRetrieverChainDefinitionRegistrationServiceServiceReference).removeDataRetrieverChainDefinition(dataRetrieverChainDefinition);
+                dataMiningServer.unregisterDataRetrieverChainDefinition(dataRetrieverChainDefinition);
             }
         }
     }

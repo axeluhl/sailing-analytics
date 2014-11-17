@@ -44,7 +44,9 @@ public class DataMiningServiceImpl extends RemoteServiceServlet implements DataM
         dataMiningServerTracker = createAndOpenDataMiningServerTracker(context);
         racingEventServiceTracker = createAndOpenRacingEventServiceTracker(context);
         
-        sailingDataMiningFactory = new SailingDataMiningFactory(getDataMiningServer().getFunctionProvider(),
+        sailingDataMiningFactory = new SailingDataMiningFactory(getDataMiningServer().getExecutorService(),
+                                                                getDataMiningServer().getStringMessages(),
+                                                                getDataMiningServer().getFunctionProvider(),
                                                                 getDataMiningServer().getDataRetrieverChainDefinitionProvider());
         functionDTOFactory = new FunctionDTOFactory();
     }
