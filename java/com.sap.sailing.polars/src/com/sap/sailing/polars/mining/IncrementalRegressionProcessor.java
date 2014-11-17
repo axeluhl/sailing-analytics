@@ -58,19 +58,23 @@ public class IncrementalRegressionProcessor implements Processor<GroupedDataEntr
 
         BearingWithConfidence<Integer> angleToTheWind = fix.getAngleToTheWind();
         
+        WindWithConfidence<Pair<Position, TimePoint>> windSpeed = fix.getWindSpeed();
+        
+        SpeedWithBearingWithConfidence<TimePoint> boatSpeedWithConfidence = fix.getBoatSpeed();
         
         
-        
-        if (angleToTheWind != null) {
-            WindWithConfidence<Pair<Position, TimePoint>> windWithConfidenceForSpeed = fix.getWindSpeed();
-            SpeedWithBearingWithConfidence<TimePoint> boatSpeedWithConfidence = fix.getBoatSpeed();
+        //Only add GPS data if speeds and angles are not null, else do nothing!
+        if (angleToTheWind != null && windSpeed != null && boatSpeedWithConfidence != null) {
+            
+            WindWithConfidence<Pair<Position, TimePoint>> windWithConfidenceForSpeed = windSpeed;
+            
             double confidenceForWindSpeed = windWithConfidenceForSpeed.getConfidence();
             double confidenceForWindBearing = angleToTheWind.getConfidence();
             double confidenceForBoatSpeed = boatSpeedWithConfidence.getConfidence();
             double averagedConfidence = (confidenceForBoatSpeed + confidenceForWindBearing + confidenceForWindSpeed) / 3;
             boatSpeedEstimator.addData(windWithConfidenceForSpeed.getObject().getKnots(), angleToTheWind.getObject()
                     .getDegrees(), boatSpeedWithConfidence.getObject().getKnots(), averagedConfidence);
-        }
+        } 
     }
 
     @Override

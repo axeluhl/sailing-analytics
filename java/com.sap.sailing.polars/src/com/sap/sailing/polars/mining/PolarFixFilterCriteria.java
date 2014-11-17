@@ -29,19 +29,21 @@ public class PolarFixFilterCriteria implements FilterCriterion<GPSFixMovingWithP
         TimePoint timepointOfFix = element.getFix().getTimePoint();
         boolean isBeforeFinish;
         TimePoint finishTime = calculateFinishTime(element.getRace(), element.getCompetitor());
-        isBeforeFinish = timepointOfFix.before(finishTime);
+        isBeforeFinish = finishTime == null || timepointOfFix.before(finishTime);
         return isBeforeFinish;
     }
 
     private TimePoint calculateFinishTime(TrackedRace race, Competitor competitor) {
         TimePoint finishTime = race.getEndOfRace();
-        Course course = race.getRace().getCourse();
-        if (course.getLastWaypoint() != course.getFirstWaypoint()) {
-            MarkPassing finishPassing = race.getMarkPassing(competitor, course.getLastWaypoint());
-            if (finishPassing != null) {
-                TimePoint passedFinishTimePoint = finishPassing.getTimePoint();
-                if (passedFinishTimePoint.before(finishTime)) {
-                    finishTime = passedFinishTimePoint;
+        if (finishTime != null) {
+            Course course = race.getRace().getCourse();
+            if (course.getLastWaypoint() != course.getFirstWaypoint()) {
+                MarkPassing finishPassing = race.getMarkPassing(competitor, course.getLastWaypoint());
+                if (finishPassing != null) {
+                    TimePoint passedFinishTimePoint = finishPassing.getTimePoint();
+                    if (passedFinishTimePoint.before(finishTime)) {
+                        finishTime = passedFinishTimePoint;
+                    }
                 }
             }
         }
