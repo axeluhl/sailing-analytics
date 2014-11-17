@@ -7,7 +7,6 @@ import java.util.Date;
 import java.util.List;
 import java.util.UUID;
 
-import org.apache.http.HttpStatus;
 import org.json.JSONException;
 import org.json.JSONObject;
 
@@ -21,7 +20,6 @@ import android.content.pm.ResolveInfo;
 import android.database.Cursor;
 import android.net.Uri;
 import android.os.Bundle;
-import android.preference.DialogPreference;
 import android.support.v4.app.LoaderManager.LoaderCallbacks;
 import android.support.v4.content.CursorLoader;
 import android.support.v4.content.Loader;
@@ -35,8 +33,6 @@ import android.widget.Button;
 import android.widget.ListView;
 import android.widget.Toast;
 
-import com.android.volley.NetworkResponse;
-import com.android.volley.Response;
 import com.android.volley.Response.ErrorListener;
 import com.android.volley.Response.Listener;
 import com.android.volley.VolleyError;
@@ -45,10 +41,10 @@ import com.sap.sailing.android.shared.logging.ExLog;
 import com.sap.sailing.android.tracking.app.R;
 import com.sap.sailing.android.tracking.app.adapter.RegattaAdapter;
 import com.sap.sailing.android.tracking.app.provider.AnalyticsContract;
+import com.sap.sailing.android.tracking.app.provider.AnalyticsContract.Competitor;
 import com.sap.sailing.android.tracking.app.provider.AnalyticsContract.Event;
 import com.sap.sailing.android.tracking.app.ui.activities.RegattaActivity;
 import com.sap.sailing.android.tracking.app.utils.AppPreferences;
-import com.sap.sailing.android.tracking.app.utils.BackendHelper;
 import com.sap.sailing.android.tracking.app.utils.CheckinQRCodeHelper;
 import com.sap.sailing.android.tracking.app.utils.VolleyHelper;
 import com.sap.sailing.domain.racelog.RaceLogEvent;
@@ -188,7 +184,7 @@ public class HomeFragment extends BaseFragment implements LoaderCallbacks<Cursor
 								public void onResponse(JSONObject response) {
 									System.out.println("got response: " + response);
 									// TODO: get data, eventually save to db
-									displayUserConfirmationScreen("TODO", "TODO"); 
+									//displayUserConfirmationScreen("TODO", "TODO"); 
 								}
 							}, new ErrorListener() {
 
@@ -395,10 +391,8 @@ public class HomeFragment extends BaseFragment implements LoaderCallbacks<Cursor
     public Loader<Cursor> onCreateLoader(int loaderId, Bundle bundle) {
         switch (loaderId) {
         case REGATTA_LOADER:
-            String[] projection = new String[] { Event._ID, Event.EVENT_TITLE, Event.EVENT_SERVER,
-                    com.sap.sailing.android.tracking.app.provider.AnalyticsContract.Competitor.COMPETITOR_NAME,
-                    Event.EVENT_ID, com.sap.sailing.android.tracking.app.provider.AnalyticsContract.Competitor.COMPETITOR_ID };
-            return new CursorLoader(getActivity(), AnalyticsContract.EventCompetitor.CONTENT_URI, projection, null,
+            String[] projection = new String[] { Event._ID, Event.EVENT_NAME, Event.EVENT_SERVER  };
+            return new CursorLoader(getActivity(), AnalyticsContract.Event.CONTENT_URI, projection, null,
                     null, null);
 
         default:
@@ -458,14 +452,19 @@ public class HomeFragment extends BaseFragment implements LoaderCallbacks<Cursor
         public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
             Cursor cursor = (Cursor) mAdapter.getItem(position);
             if (cursor.moveToFirst()) {
-                prefs.setServerURL(cursor.getString(cursor.getColumnIndex(Event.EVENT_SERVER)));
-                String eventId = cursor.getString(cursor.getColumnIndex(Event.EVENT_ID));
-                String competitorId = cursor
-                        .getString(cursor
-                                .getColumnIndex(com.sap.sailing.android.tracking.app.provider.AnalyticsContract.Competitor.COMPETITOR_ID));
-
-                VolleyHelper.getInstance(getActivity()).addRequest(
-                        checkInRequest(prefs.getServerURL(), eventId, competitorId));
+            	ExLog.e(getActivity(), TAG, "TODO: onItemClick not implemented yet.");
+//                prefs.setServerURL(cursor.getString(cursor.getColumnIndex(Event.EVENT_SERVER)));
+//                String eventId = cursor.getString(cursor.getColumnIndex(Event.EVENT_ID));
+//                String competitorId = cursor
+//                        .getString(cursor
+//                                .getColumnIndex(com.sap.sailing.android.tracking.app.provider.AnalyticsContract.Competitor.COMPETITOR_ID));
+//
+//                
+//                
+//                checkInWithAPIAndDisplayTrackingActivity(deviceMappingData);
+//                
+//                VolleyHelper.getInstance(getActivity()).addRequest(
+//                        checkInRequest(prefs.getServerURL(), eventId, competitorId));
             }
         }
     }
@@ -478,7 +477,6 @@ public class HomeFragment extends BaseFragment implements LoaderCallbacks<Cursor
     		try {
 				this.leaderboardName = URLDecoder.decode(leaderboardName, "UTF-8");
 			} catch (UnsupportedEncodingException e) {
-				// TODO Auto-generated catch block
 				ExLog.e(getActivity(), TAG, "UnsupportedEncodingException: " + e.getMessage());
 			}
 		}
