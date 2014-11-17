@@ -8,7 +8,10 @@ import android.content.Context;
 import android.content.UriMatcher;
 import android.database.Cursor;
 import android.database.sqlite.SQLiteDatabase;
+import android.database.sqlite.SQLiteQueryBuilder;
 import android.net.Uri;
+import android.provider.BaseColumns;
+import android.widget.BaseExpandableListAdapter;
 
 import com.sap.sailing.android.shared.logging.ExLog;
 import com.sap.sailing.android.shared.util.SelectionBuilder;
@@ -42,6 +45,8 @@ public class AnalyticsProvider extends ContentProvider {
     private static final int SENSOR_GPS = 500;
     private static final int SENSOR_GPS_ID = 501;
     
+    private static final int CHECK_EVENT_LEADERBOARD_COMPETITOR_EXISTS = 600;
+    
     private static UriMatcher buildUriMatcher() {
         final UriMatcher matcher = new UriMatcher(UriMatcher.NO_MATCH);
         final String authority = AnalyticsContract.CONTENT_AUTHORITY;
@@ -61,6 +66,8 @@ public class AnalyticsProvider extends ContentProvider {
         matcher.addURI(authority, "sensor_gps", SENSOR_GPS);
         matcher.addURI(authority, "sensor_gps/#", SENSOR_GPS_ID);
         
+        matcher.addURI(authority, "check_event_leaderboard_competitor_exists", CHECK_EVENT_LEADERBOARD_COMPETITOR_EXISTS);
+        
         return matcher;
     }
 
@@ -76,6 +83,8 @@ public class AnalyticsProvider extends ContentProvider {
 //        AnalyticsDatabase.deleteDatabase(context);
 //        mOpenHelper = new AnalyticsDatabase(context);
 //    }
+    
+    
 
     @Override
     public Cursor query(Uri uri, String[] projection, String selection, String[] selectionArgs, String sortOrder) {
@@ -87,11 +96,20 @@ public class AnalyticsProvider extends ContentProvider {
 
         final SQLiteDatabase db = mOpenHelper.getWritableDatabase();
         
+        Cursor cursor;
+        
         switch (sUriMatcher.match(uri)) {
+        
+            case CHECK_EVENT_LEADERBOARD_COMPETITOR_EXISTS:
+            	SQLiteQueryBuilder qb = new SQLiteQueryBuilder();
+            	qb.setTables(Tables.EVENTS_JOIN_LEADERBOARDS_JOIN_COMPETITORS);
+            	cursor = qb.query(db, projection, selection, selectionArgs, null, null, sortOrder);
+            	return cursor;
+            	
             default:
-                final SelectionBuilder builder = buildExpandedSelection(uri);
+            	final SelectionBuilder builder = buildExpandedSelection(uri);
                 
-                Cursor cursor = builder
+                cursor = builder
                         .where(selection, selectionArgs)
                         .query(db, false, projection, sortOrder, null);
                 
@@ -99,6 +117,7 @@ public class AnalyticsProvider extends ContentProvider {
                 if (context != null) {
                     cursor.setNotificationUri(context.getContentResolver(), uri);
                 }
+                
                 return cursor;
         }
     }
@@ -158,7 +177,7 @@ public class AnalyticsProvider extends ContentProvider {
         case LEADERBOARD:
         	db.insertOrThrow(Tables.LEADERBOARDS, null, values);
         	notifyChange(uri);
-        	return Leaderboard.buildLeaderboardUri(values.getAsString(Leaderboard.LEADERBOARD_ID));
+        	return Leaderboard.buildLeaderboardUri(values.getAsString(BaseColumns._ID));
             
         case SENSOR_GPS:
             db.insertOrThrow(Tables.SENSOR_GPS, null, values);
@@ -241,7 +260,7 @@ public class AnalyticsProvider extends ContentProvider {
         case LEADERBOARD_ID:
         	final String leaderboard_id = Leaderboard.getLeaderboardId(uri);
             return builder.table(Tables.LEADERBOARDS)
-                    .where(Leaderboard.LEADERBOARD_ID + " = ?", leaderboard_id);
+                    .where(BaseColumns._ID + " = ?", leaderboard_id);
             
         case EVENT:
             return builder.table(Tables.EVENTS);

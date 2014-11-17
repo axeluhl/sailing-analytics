@@ -6,5 +6,6 @@
     <string name="confirm_data_you_are_signed_in_as_sail_id">Sie sind als {sail_id} gemeldet</string>
     <string name="confirm_data_is_correct">Stimmt</string>
     <string name="decline_data_is_incorrect">Das bin nicht ich!</string>
+    <string name="notify_user_db_operation_failed">Fehler: Datenbank-Operation ist fehlgeschlagen.</string>
     
 </resources>

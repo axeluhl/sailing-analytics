@@ -8,6 +8,7 @@ import android.provider.BaseColumns;
 import com.sap.sailing.android.shared.logging.ExLog;
 import com.sap.sailing.android.tracking.app.provider.AnalyticsContract.CompetitorColumns;
 import com.sap.sailing.android.tracking.app.provider.AnalyticsContract.EventColumns;
+import com.sap.sailing.android.tracking.app.provider.AnalyticsContract.Leaderboard;
 import com.sap.sailing.android.tracking.app.provider.AnalyticsContract.LeaderboardColumns;
 import com.sap.sailing.android.tracking.app.provider.AnalyticsContract.SensorGpsColumns;
 
@@ -28,15 +29,22 @@ public class AnalyticsDatabase extends SQLiteOpenHelper {
         String EVENTS_COMPETITORS = "events_competitors";
         String SENSOR_GPS = "sensor_gps";
         String LEADERBOARDS = "leaderboards";
+        String EVENTS_JOIN_LEADERBOARDS_JOIN_COMPETITORS = Tables.LEADERBOARDS +
+        " INNER JOIN " + Tables.EVENTS + " ON (" + Tables.LEADERBOARDS + "." + BaseColumns._ID + " = " + Tables.EVENTS + ".leaderboard_id ) " +
+        " INNER JOIN " + Tables.COMPETITORS + " ON (" + Tables.LEADERBOARDS + "."+ BaseColumns._ID + " = " + Tables.COMPETITORS + ".leaderboard_id ) ";
     }
     
     public AnalyticsDatabase(Context context) {
         super(context, DATABASE_NAME, null, CUR_DATABASE_VERSION);
         mContext = context;
     }
-
+    
     @Override
-    public void onCreate(SQLiteDatabase db) {        
+    public void onCreate(SQLiteDatabase db) { 
+    	db.execSQL("CREATE TABLE " + Tables.LEADERBOARDS + " ("
+    			+ BaseColumns._ID + " INTEGER PRIMARY KEY AUTOINCREMENT, "
+    			+ LeaderboardColumns.LEADERBOARD_NAME + " TEXT );");
+    	
         db.execSQL("CREATE TABLE " + Tables.COMPETITORS + " ("
                 + BaseColumns._ID + " INTEGER PRIMARY KEY AUTOINCREMENT, "
                 + CompetitorColumns.COMPETITOR_ID + " TEXT, "
@@ -46,7 +54,7 @@ public class AnalyticsDatabase extends SQLiteOpenHelper {
                 + CompetitorColumns.COMPETITOR_SAIL_ID + " TEXT, "
                 + CompetitorColumns.COMPETITOR_LEADERBOARD_FK + " INTEGER, "
                 + "FOREIGN KEY (" + CompetitorColumns.COMPETITOR_LEADERBOARD_FK + ") " 
-                + "REFERENCES " + Tables.LEADERBOARDS + "( " + LeaderboardColumns.LEADERBOARD_ID + " ))");
+                + "REFERENCES " + Tables.LEADERBOARDS + "( " + BaseColumns._ID + " ))");
         
         db.execSQL("CREATE TABLE " + Tables.EVENTS + " ( "
                 + BaseColumns._ID + " INTEGER PRIMARY KEY AUTOINCREMENT, "
@@ -56,9 +64,9 @@ public class AnalyticsDatabase extends SQLiteOpenHelper {
                 + EventColumns.EVENT_DATE_END + " INTEGER, "
                 + EventColumns.EVENT_SERVER + " TEXT, "
                 + EventColumns.EVENT_IMAGE_URL + " TEXT, "
-                + CompetitorColumns.COMPETITOR_LEADERBOARD_FK + " INTEGER, "
-                + "FOREIGN KEY (" + EventColumns.COMPETITOR_LEADERBOARD_FK + ") " 
-                + "REFERENCES " + Tables.LEADERBOARDS + "( " + LeaderboardColumns.LEADERBOARD_ID + " ))");
+                + EventColumns.EVENT_LEADERBOARD_FK + " INTEGER, "
+                + "FOREIGN KEY (" + EventColumns.EVENT_LEADERBOARD_FK + ") " 
+                + "REFERENCES " + Tables.LEADERBOARDS + "( " + BaseColumns._ID + " ))");
 
         db.execSQL("CREATE TABLE " + Tables.SENSOR_GPS + " ( "
                 + BaseColumns._ID + " INTEGER PRIMARY KEY AUTOINCREMENT, "

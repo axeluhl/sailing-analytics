@@ -16,5 +16,6 @@
 	<string name="confirm_data_you_are_signed_in_as_sail_id">You are signing in as {sail_id}</string>
     <string name="confirm_data_is_correct">Correct</string>
     <string name="decline_data_is_incorrect">That\'s not me!</string>
+    <string name="notify_user_db_operation_failed">Error: Database operation has failed.</string>
     
 </resources>
