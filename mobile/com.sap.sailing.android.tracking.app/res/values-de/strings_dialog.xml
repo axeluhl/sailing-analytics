@@ -1,0 +1,6 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    
+    <string name="notify_user_api_call_failed">Bei der Kommunikation mit dem Server ist ein Fehler aufgetreten. Bitte versuchen Sie es noch einmal.</string>
+    
+</resources>

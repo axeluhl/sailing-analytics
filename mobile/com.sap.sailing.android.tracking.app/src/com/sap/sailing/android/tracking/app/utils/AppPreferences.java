@@ -35,7 +35,19 @@ public class AppPreferences {
     public String getServerCheckinPath() {
         return PrefUtils.getString(context, R.string.preference_server_gps_checkin_path, R.string.preference_server_gps_checkin_path);
     }
+    
+    public String getServerEventPath(String eventId) {
+    	return context.getString(R.string.preference_server_event_path, "/events").replace("{event_id}", eventId);
+    }
 
+    public String getServerLeaderboardPath(String leaderboardName) {
+    	return context.getString(R.string.preference_server_leaderboard_path, "/leaderboards").replace("{leaderboard_name}", leaderboardName);
+    }
+    
+    public String getServerCompetitorPath(String competitorId) {
+    	return context.getString(R.string.preference_server_competitor_path, "/competitors").replace("{competitor_id}", competitorId);
+    }
+    
     public int getGPSFixInterval() {
         //EditTextPreference saves value as string, even if android:inputType="number" is set
         String value = PrefUtils.getString(context, R.string.preference_gps_fix_interval_ms_key, R.string.preference_gps_fix_interval_ms_default);
