@@ -199,7 +199,7 @@ public class RegattaAnalytics extends Composite implements LeaderboardUpdateList
     private void handleClickEvent(ClickEvent e, PlaceNavigation<?> placeNavigation) {
         if (HYPERLINK_IMPL.handleAsClick((Event) e.getNativeEvent())) {
             // don't use the placecontroller for navigation here as we want to avoid a page reload
-            History.newItem(placeNavigation.getTargetUrl(), false);
+            History.newItem(placeNavigation.getHistoryUrl(), false);
             e.preventDefault();
          }
     }

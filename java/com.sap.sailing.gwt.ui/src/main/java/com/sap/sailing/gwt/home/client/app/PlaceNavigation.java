@@ -33,6 +33,14 @@ public class PlaceNavigation<T extends Place> {
         return buildPlaceUrl();
     }
 
+    public String getHistoryUrl() {
+        String placeUrl = buildPlaceUrl();
+        if(placeUrl.startsWith("#")) {
+            placeUrl = placeUrl.substring(1, placeUrl.length());
+        }
+        return placeUrl;
+    }
+
     public Place getPlace() {
         return destinationPlace;
     }
