@@ -7,12 +7,15 @@ import java.util.Date;
 import java.util.List;
 import java.util.UUID;
 
+import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
 
 import android.annotation.SuppressLint;
 import android.app.Activity;
 import android.app.AlertDialog;
+import android.content.ContentResolver;
+import android.content.ContentValues;
 import android.content.DialogInterface;
 import android.content.Intent;
 import android.content.pm.PackageManager;
@@ -41,8 +44,8 @@ import com.sap.sailing.android.shared.logging.ExLog;
 import com.sap.sailing.android.tracking.app.R;
 import com.sap.sailing.android.tracking.app.adapter.RegattaAdapter;
 import com.sap.sailing.android.tracking.app.provider.AnalyticsContract;
-import com.sap.sailing.android.tracking.app.provider.AnalyticsContract.Competitor;
 import com.sap.sailing.android.tracking.app.provider.AnalyticsContract.Event;
+import com.sap.sailing.android.tracking.app.provider.AnalyticsContract.Leaderboard;
 import com.sap.sailing.android.tracking.app.ui.activities.RegattaActivity;
 import com.sap.sailing.android.tracking.app.utils.AppPreferences;
 import com.sap.sailing.android.tracking.app.utils.CheckinQRCodeHelper;
@@ -166,28 +169,88 @@ public class HomeFragment extends BaseFragment implements LoaderCallbacks<Cursor
             final String getLeaderboardUrl = prefs.getServerURL() + prefs.getServerLeaderboardPath(leaderboardName);
             final String getCompetitorUrl = prefs.getServerURL() + prefs.getServerCompetitorPath(competitorId);
             
-            JsonObjectRequest getEventRequest = new JsonObjectRequest(getEventUrl, null, new Listener<JSONObject>() {
+            JsonObjectRequest getLeaderboardRequest = new JsonObjectRequest(getLeaderboardUrl, null, new Listener<JSONObject>() {
 
 				@Override
 				public void onResponse(JSONObject response) {
-					System.out.println("got response: " + response);
-					// TODO: get data, eventually save to db
 					
-					JsonObjectRequest getLeaderboardRequest = new JsonObjectRequest(getLeaderboardUrl,null, new Listener<JSONObject>() {
+					final String leaderboardName;
+					
+					try {
+						leaderboardName = response.getString("name");
+					} catch (JSONException e) {
+						ExLog.e(getActivity(), TAG, "Error getting data from call on URL: " + getLeaderboardUrl + ", Error: " + e.getMessage());
+						displayAPIErrorRecommendRetry();
+						return;
+					}
+
+					JsonObjectRequest getEventRequest = new JsonObjectRequest(getEventUrl, null, new Listener<JSONObject>() {
+						
 						@Override
 						public void onResponse(JSONObject response) {
-							System.out.println("got response: " + response);
-							// TODO: get data, eventually save to db
+							final String eventId;
+							final String eventName;
+							final String eventStartDateStr;
+							final String eventEndDateStr;
+							final String eventFirstImageUrl;
+							
+							try {
+								eventId = response.getString("id");
+								eventName = response.getString("name");
+								eventStartDateStr = response.getString("startDate");
+								eventEndDateStr = response.getString("endDate");
+								
+								JSONArray imageUrls = response.getJSONArray("imageURLs");
+								eventFirstImageUrl = imageUrls.getString(0);
+								
+							} catch (JSONException e) {
+								ExLog.e(getActivity(), TAG, "Error getting data from call on URL: " + getEventUrl + ", Error: " + e.getMessage());
+								displayAPIErrorRecommendRetry();
+								return;
+							}
 							
 							JsonObjectRequest getCompetitorRequest = new JsonObjectRequest(getCompetitorUrl, null, new Listener<JSONObject>() {
 								@Override
 								public void onResponse(JSONObject response) {
-									System.out.println("got response: " + response);
-									// TODO: get data, eventually save to db
-									//displayUserConfirmationScreen("TODO", "TODO"); 
+									final String competitorName;
+									final String competitorDisplayName;
+									final String competitorId;
+									final String competitorSailId;
+									final String competitorNationality;
+									final String competitorCountryCode;
+									
+									try {
+										competitorName = response.getString("name");
+										competitorDisplayName = response.getString("displayName");
+										competitorId = response.getString("id");
+										competitorSailId = response.getString("sailID");
+										competitorNationality = response.getString("nationality");
+										competitorCountryCode = response.getString("countryCode");
+									} catch (JSONException e) {
+										ExLog.e(getActivity(), TAG, "Error getting data from call on URL: " + getCompetitorUrl + ", Error: " + e.getMessage());
+										displayAPIErrorRecommendRetry();
+										return;
+									}
+									
+									CheckinData data = new CheckinData();
+									data.competitorName = competitorName;
+									data.competitorDisplayName = competitorDisplayName;
+									data.competitorId = competitorId;
+									data.competitorSailId = competitorSailId;
+									data.competitorNationality = competitorNationality;
+									data.competitorCountryCode = competitorCountryCode;
+									data.eventId = eventId;
+									data.eventName = eventName;
+									data.eventStartDateStr = eventStartDateStr;
+									data.eventEndDateStr = eventEndDateStr;
+									data.eventFirstImageUrl = eventFirstImageUrl;
+									data.eventServerUrl = checkinURLStr;
+									data.leaderboardName = leaderboardName;
+
+									displayUserConfirmationScreen(data);
+									
 								}
 							}, new ErrorListener() {
-
 								@Override
 								public void onErrorResponse(VolleyError error) {
 									ExLog.e(getActivity(), TAG, "Failed to get competitor from API: " + error.getMessage());
@@ -205,7 +268,7 @@ public class HomeFragment extends BaseFragment implements LoaderCallbacks<Cursor
 						}
 					});
 					
-					VolleyHelper.getInstance(getActivity()).addRequest(getLeaderboardRequest);
+					VolleyHelper.getInstance(getActivity()).addRequest(getEventRequest);
 				}
 			}, new ErrorListener() {
 						@Override
@@ -217,7 +280,7 @@ public class HomeFragment extends BaseFragment implements LoaderCallbacks<Cursor
             
             
             
-            VolleyHelper.getInstance(getActivity()).addRequest(getEventRequest);
+            VolleyHelper.getInstance(getActivity()).addRequest(getLeaderboardRequest);
             
             
             
@@ -254,10 +317,10 @@ public class HomeFragment extends BaseFragment implements LoaderCallbacks<Cursor
         VolleyHelper.getInstance(getActivity()).cancelRequest(REQUEST_TAG);
     }
     
-    private void displayUserConfirmationScreen(String fullNameOfUser, String sailId, final DeviceMappingData deviceMappingData)
+    private void displayUserConfirmationScreen(final CheckinData checkinData)
     {
-    	String message1 = getString(R.string.confirm_data_hello_name).replace("{full_name}", fullNameOfUser);
-    	String message2 = getString(R.string.confirm_data_you_are_signed_in_as_sail_id).replace("{sail_id}", sailId);
+    	String message1 = getString(R.string.confirm_data_hello_name).replace("{full_name}", checkinData.competitorDisplayName);
+    	String message2 = getString(R.string.confirm_data_you_are_signed_in_as_sail_id).replace("{sail_id}", checkinData.competitorSailId);
     	
     	AlertDialog.Builder builder = new AlertDialog.Builder(getActivity());
         builder.setMessage(message1 + "\n\n" + message2);
@@ -266,7 +329,7 @@ public class HomeFragment extends BaseFragment implements LoaderCallbacks<Cursor
 
 			@Override
 			public void onClick(DialogInterface dialog, int which) {
-				checkInWithAPIAndDisplayTrackingActivity(deviceMappingData);
+				checkInWithAPIAndDisplayTrackingActivity(checkinData);
 			}
 			
         }).setNegativeButton(R.string.decline_data_is_incorrect, new DialogInterface.OnClickListener() {
@@ -289,18 +352,44 @@ public class HomeFragment extends BaseFragment implements LoaderCallbacks<Cursor
 	 * 
 	 * @param deviceMappingData
 	 */
-	private void checkInWithAPIAndDisplayTrackingActivity(
-			DeviceMappingData deviceMappingData) {
+	private void checkInWithAPIAndDisplayTrackingActivity(CheckinData checkinData) {
+		
+
+//		/**
+//		 *         ContentResolver cr = getContentResolver();
+//ContentValues cv = new ContentValues();
+//cv.put(SensorGps.GPS_ACCURACY, location.getAccuracy());
+//cv.put(SensorGps.GPS_ALTITUDE, location.getAltitude());
+//cv.put(SensorGps.GPS_BEARING, location.getBearing());
+//cv.put(SensorGps.GPS_DEVICE, prefs.getDeviceIdentifier());
+//if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.JELLY_BEAN_MR1) {
+//cv.put(SensorGps.GPS_ELAPSED_REALTIME, location.getElapsedRealtimeNanos());
+//}
+//cv.put(SensorGps.GPS_LATITUDE, location.getLatitude());
+//cv.put(SensorGps.GPS_LONGITUDE, location.getLongitude());
+//cv.put(SensorGps.GPS_PROVIDER, location.getProvider());
+//cv.put(SensorGps.GPS_SPEED, location.getSpeed());
+//cv.put(SensorGps.GPS_TIME, location.getTime());
+//
+//cr.insert(SensorGps.CONTENT_URI, cv);
+//
+//checkIfTransmittingServiceIsRunningAndStartIfNot(); 
+//		 */
+//		
+//		ContentResolver cr = getActivity().getContentResolver();
+//		ContentValues cv = new ContentValues();
+//		
+//		cv.put(Leaderboard.LEADERBOARD_NAME, value);
 		Date date = new Date();
 
 		try {
 			JSONObject requestObject = CheckinQRCodeHelper.getCheckinJson(
-					deviceMappingData.competitorId,
-					deviceMappingData.deviceUid, "TODO!!", date.getTime());
+					checkinData.competitorId,
+					checkinData.deviceUid, "TODO!!", date.getTime());
 
 			JsonObjectRequest checkinRequest = new JsonObjectRequest(
-					deviceMappingData.hostUrl, requestObject,
-					new CheckinListener(deviceMappingData.leaderboardName),
+					checkinData.eventServerUrl, requestObject,
+					new CheckinListener(checkinData.leaderboardName),
 					new CheckinErrorListener());
 
 			VolleyHelper.getInstance(getActivity()).addRequest(checkinRequest);
@@ -425,12 +514,22 @@ public class HomeFragment extends BaseFragment implements LoaderCallbacks<Cursor
     }
     
     
-    private class DeviceMappingData
+    private class CheckinData
     {
     	//public String gcmId;
     	public String leaderboardName;
-    	public String hostUrl;
+    	public String eventId;
+    	public String eventName;
+    	public String eventStartDateStr;
+    	public String eventEndDateStr;
+    	public String eventFirstImageUrl;
+    	public String eventServerUrl;
+    	public String competitorName;
+    	public String competitorDisplayName;
     	public String competitorId;
+    	public String competitorSailId;
+    	public String competitorNationality;
+    	public String competitorCountryCode;
     	public String deviceUid;
     }
 
