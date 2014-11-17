@@ -120,11 +120,18 @@ class HomeViewController: UIViewController, UITableViewDataSource, UITableViewDe
         if (UIImagePickerController.isSourceTypeAvailable(UIImagePickerControllerSourceType.Camera)) {
             performSegueWithIdentifier("Scan", sender: sender)
         } else {
-            let alertView = UIAlertView(title: "No camera available.", message: nil, delegate: self, cancelButtonTitle: "Cancel")
+            let alertView = UIAlertView(title: "No camera available.", message: nil, delegate: nil, cancelButtonTitle: "Cancel")
             alertView.tag = AlertViewTag.NoCameraAvailable.rawValue;
             alertView.show()
         }
     }
     
+    // Für die Verwendung des Regatta-Trackers ist ein Checkin mit QR-Code oder ein Checkin-Link aus der E-Mail notwendig. Sollten Sie diesen nicht erhalten haben, wenden Sie sich bitte an die Wettfahrtleitung.
+    
+    @IBAction func noQrCodeButtonTap(sender: AnyObject) {
+        let alertView = UIAlertView(title:  "In order to use this app you need to check-in either by QR code or a check-in link sent by mail. Please contact the racing committee if you need either.", message: nil, delegate: nil, cancelButtonTitle: "Cancel")
+        alertView.tag = AlertViewTag.NoCameraAvailable.rawValue;
+        alertView.show()
+    }
 }
 

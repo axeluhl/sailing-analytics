@@ -39,7 +39,7 @@ class RegattaViewController : UIViewController, UIActionSheetDelegate, UINavigat
     }
     
     @IBAction func showMenuActionSheet(sender: AnyObject) {
-        let actionSheet = UIActionSheet(title: nil, delegate: self, cancelButtonTitle: nil, destructiveButtonTitle: nil, otherButtonTitles: "Checkout", "Settings", "Edit Photo", "Cancel")
+        let actionSheet = UIActionSheet(title: nil, delegate: self, cancelButtonTitle: nil, destructiveButtonTitle: nil, otherButtonTitles: "Check-Out", "Settings", "Edit Photo", "Cancel")
         actionSheet.tag = ActionSheet.Menu.rawValue
         actionSheet.cancelButtonIndex = 3
         actionSheet.showInView(self.view)

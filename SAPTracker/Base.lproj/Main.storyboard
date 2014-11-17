@@ -32,6 +32,9 @@
                                 <state key="normal" title="Don't have a QR Code?">
                                     <color key="titleShadowColor" white="0.5" alpha="1" colorSpace="calibratedWhite"/>
                                 </state>
+                                <connections>
+                                    <action selector="noQrCodeButtonTap:" destination="vXZ-lx-hvc" eventType="touchUpInside" id="z4z-oj-wN7"/>
+                                </connections>
                             </button>
                             <label opaque="NO" userInteractionEnabled="NO" contentMode="left" horizontalHuggingPriority="251" verticalHuggingPriority="251" text="You can find your QR code on your registration confirmation" textAlignment="center" lineBreakMode="tailTruncation" baselineAdjustment="alignBaselines" minimumScaleFactor="0.5" adjustsLetterSpacingToFitWidth="YES" translatesAutoresizingMaskIntoConstraints="NO" id="OqX-q3-43s">
                                 <rect key="frame" x="16" y="571" width="568" height="21"/>
@@ -571,7 +574,7 @@
         <image name="list" width="22" height="22"/>
     </resources>
     <inferredMetricsTieBreakers>
-        <segue reference="tzB-PL-31j"/>
-        <segue reference="Irs-ey-Uhs"/>
+        <segue reference="QMa-LQ-D8c"/>
+        <segue reference="Xxn-jp-xEB"/>
     </inferredMetricsTieBreakers>
 </document>
