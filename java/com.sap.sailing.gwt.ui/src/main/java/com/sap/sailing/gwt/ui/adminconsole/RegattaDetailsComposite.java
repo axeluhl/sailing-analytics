@@ -374,6 +374,7 @@ public class RegattaDetailsComposite extends Composite {
 
     private void updateRegattaDetails() {
         if (regatta != null) {
+            mainPanel.setCaptionText(stringMessages.regatta() + " " + regatta.getName());
             regattaName.setText(regatta.getName());
             boatClassName.setText(regatta.boatClass != null ? regatta.boatClass.getName() : "");
             defaultCourseArea.setText(regatta.defaultCourseAreaUuid == null ? "" : regatta.defaultCourseAreaName);
