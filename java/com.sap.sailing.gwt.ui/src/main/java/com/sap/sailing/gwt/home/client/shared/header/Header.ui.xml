@@ -9,7 +9,7 @@
 		<header class="{local_res.css.siteheader}">
 		  <div class="{res.mainCss.grid}">
 		    <div class="{res.mediaCss.small2} {res.mediaCss.large3} {res.mediaCss.columns}">
-		        <a ui:field="homeLink" href="javascript:;">
+		        <a href="http://sapsponsorships.com">
 					<g:Image resource="{local_res.logo}" pixelSize="80, 40" altText="SAP Sailing Analytics" styleName="{local_res.css.logo}"/>
 				</a>					
 				<p class="{local_res.css.logotitle}">Sailing Analytics</p>

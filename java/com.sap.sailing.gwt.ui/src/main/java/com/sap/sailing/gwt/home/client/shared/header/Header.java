@@ -4,7 +4,6 @@ import java.util.Arrays;
 import java.util.List;
 
 import com.google.gwt.core.client.GWT;
-import com.google.gwt.dom.client.AnchorElement;
 import com.google.gwt.dom.client.StyleInjector;
 import com.google.gwt.event.dom.client.ClickEvent;
 import com.google.gwt.event.dom.client.KeyCodes;
@@ -34,7 +33,6 @@ public class Header extends Composite {
     @UiField Anchor startPageLink;
     @UiField Anchor eventsPageLink;
     @UiField Anchor solutionsPageLink;
-    @UiField AnchorElement homeLink;
 //    @UiField Anchor sponsoringPageLink;
     
     @UiField TextBox searchText;
