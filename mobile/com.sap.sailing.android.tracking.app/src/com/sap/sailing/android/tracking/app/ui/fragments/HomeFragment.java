@@ -53,6 +53,7 @@ import com.sap.sailing.android.tracking.app.provider.AnalyticsContract;
 import com.sap.sailing.android.tracking.app.provider.AnalyticsContract.Competitor;
 import com.sap.sailing.android.tracking.app.provider.AnalyticsContract.Event;
 import com.sap.sailing.android.tracking.app.provider.AnalyticsContract.Leaderboard;
+import com.sap.sailing.android.tracking.app.provider.AnalyticsProvider;
 import com.sap.sailing.android.tracking.app.ui.activities.RegattaActivity;
 import com.sap.sailing.android.tracking.app.utils.AppPreferences;
 import com.sap.sailing.android.tracking.app.utils.CheckinQRCodeHelper;
@@ -424,17 +425,31 @@ public class HomeFragment extends BaseFragment implements
 	private void checkInWithAPIAndDisplayTrackingActivity(CheckinData checkinData) {		
 		if (eventLeaderboardCompetitorCombnationAvailable(checkinData.eventId,
 				checkinData.leaderboardName, checkinData.competitorId)) {
-			ContentResolver cr = getActivity().getContentResolver();
 			
-			ArrayList<ContentProviderOperation> opList = new
-		            ArrayList<ContentProviderOperation>();
+			// inserting leaderboard first in order to get the ID. 
+			// This should be atomic, but couldn't get withValueBackReference to work yet.
+			
+			ContentResolver cr = getActivity().getContentResolver();
 			
 			ContentValues clv = new ContentValues();
 			clv.put(Leaderboard.LEADERBOARD_NAME, checkinData.leaderboardName);
-			clv.put(BaseColumns._ID, 0);
+			cr.insert(Leaderboard.CONTENT_URI, clv);
 			
-			opList.add(ContentProviderOperation.
-		            newInsert(Leaderboard.CONTENT_URI).withValues(clv).build());
+			Cursor cur = cr.query(Leaderboard.CONTENT_URI, null, null, null, null);
+			long lastLeaderboardId = 0;
+			
+			if (cur.moveToLast())
+			{
+				lastLeaderboardId = cur.getLong(cur.getColumnIndex(BaseColumns._ID));
+			}
+			
+			cur.close();
+			
+			// now, with the leaderboard id, insert event and competitor
+			// todo: fix this so its atomic.
+			
+			ArrayList<ContentProviderOperation> opList = new
+		            ArrayList<ContentProviderOperation>();
 		
 			ContentValues cev = new ContentValues();
 			cev.put(Event.EVENT_ID, checkinData.eventId);
@@ -443,10 +458,10 @@ public class HomeFragment extends BaseFragment implements
 			cev.put(Event.EVENT_DATE_END, Long.parseLong(checkinData.eventEndDateStr));
 			cev.put(Event.EVENT_SERVER, checkinData.eventServerUrl);
 			cev.put(Event.EVENT_IMAGE_URL, checkinData.eventFirstImageUrl);
-			cev.put(Event.EVENT_LEADERBOARD_FK, 0);
-			
+			cev.put(Event.EVENT_LEADERBOARD_FK, lastLeaderboardId);
+
 			opList.add(ContentProviderOperation.
-		            newInsert(Event.CONTENT_URI).withValues(cev).withValueBackReference(Event.EVENT_LEADERBOARD_FK, 0).build());
+		            newInsert(Event.CONTENT_URI).withValues(cev).build());
 			
 			ContentValues ccv = new ContentValues();
 			
@@ -455,12 +470,17 @@ public class HomeFragment extends BaseFragment implements
 			ccv.put(Competitor.COMPETITOR_ID, checkinData.competitorId);
 			ccv.put(Competitor.COMPETITOR_NATIONALITY, checkinData.competitorNationality);
 			ccv.put(Competitor.COMPETITOR_SAIL_ID, checkinData.competitorSailId);
-			ccv.put(Competitor.COMPETITOR_LEADERBOARD_FK, 0);
+			ccv.put(Competitor.COMPETITOR_LEADERBOARD_FK, lastLeaderboardId);
 			
 			opList.add(ContentProviderOperation.
-		            newInsert(Competitor.CONTENT_URI).withValues(ccv).withValueBackReference(Competitor.COMPETITOR_LEADERBOARD_FK, 0).build());
+		            newInsert(Competitor.CONTENT_URI).withValues(ccv).build());
 
 			try {
+				for (ContentProviderOperation op: opList)
+				{
+					System.out.println("** INSERT: " + op);
+				}
+				
 				cr.applyBatch(AnalyticsContract.CONTENT_AUTHORITY, opList);
 			} catch (RemoteException e1) {
 				ExLog.e(getActivity(), TAG, "Batch insert failed: " + e1.getMessage());
