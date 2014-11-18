@@ -13,18 +13,21 @@ import com.google.gwt.event.dom.client.KeyPressHandler;
 import com.google.gwt.uibinder.client.UiBinder;
 import com.google.gwt.uibinder.client.UiField;
 import com.google.gwt.uibinder.client.UiHandler;
+import com.google.gwt.user.client.Event;
 import com.google.gwt.user.client.Window;
 import com.google.gwt.user.client.ui.Anchor;
 import com.google.gwt.user.client.ui.Button;
 import com.google.gwt.user.client.ui.Composite;
 import com.google.gwt.user.client.ui.TextBox;
 import com.google.gwt.user.client.ui.Widget;
+import com.google.gwt.user.client.ui.impl.HyperlinkImpl;
 import com.sap.sailing.gwt.common.client.i18n.TextMessages;
 import com.sap.sailing.gwt.home.client.app.HomePlacesNavigator;
 import com.sap.sailing.gwt.home.client.app.PlaceNavigation;
 import com.sap.sailing.gwt.home.client.place.events.EventsPlace;
 import com.sap.sailing.gwt.home.client.place.searchresult.SearchResultPlace;
 import com.sap.sailing.gwt.home.client.place.solutions.SolutionsPlace;
+import com.sap.sailing.gwt.home.client.place.solutions.SolutionsPlace.SolutionsNavigationTabs;
 import com.sap.sailing.gwt.home.client.place.start.StartPlace;
 
 public class Header extends Composite {
@@ -37,6 +40,8 @@ public class Header extends Composite {
     @UiField TextBox searchText;
     @UiField Button searchButton;
 
+    private static final HyperlinkImpl HYPERLINK_IMPL = GWT.create(HyperlinkImpl.class);
+    
     private final List<Anchor> links;
     private final HomePlacesNavigator navigator;
 
@@ -60,7 +65,7 @@ public class Header extends Composite {
 
         homeNavigation = navigator.getHomeNavigation();
         eventsNavigation = navigator.getEventsNavigation();
-        solutionsNavigation = navigator.getSolutionsNavigation();
+        solutionsNavigation = navigator.getSolutionsNavigation(SolutionsNavigationTabs.SailingAnalytics);
 
         startPageLink.setHref(homeNavigation.getTargetUrl());
         eventsPageLink.setHref(eventsNavigation.getTargetUrl());
@@ -75,46 +80,26 @@ public class Header extends Composite {
                 }
             }
         });
-        
-//        Event.sinkEvents(homeLink, Event.ONCLICK);
-//        Event.setEventListener(homeLink, new EventListener() {
-//            @Override
-//            public void onBrowserEvent(Event event) {
-//                switch (DOM.eventGetType(event)) {
-//                    case Event.ONCLICK:
-//                       navigator.goToHome();
-//                       break;
-//                }
-//            }
-//        });
     }
 
     @UiHandler("startPageLink")
     public void goToHome(ClickEvent e) {
-        navigator.goToPlace(homeNavigation);
-        e.preventDefault();
-        setActiveLink(startPageLink);
+        handleClickEvent(e, homeNavigation, startPageLink);
     }
 
     @UiHandler("eventsPageLink")
     public void goToEvents(ClickEvent e) {
-        navigator.goToPlace(eventsNavigation);
-        e.preventDefault();
-        setActiveLink(eventsPageLink);
+        handleClickEvent(e, eventsNavigation, eventsPageLink);
     }
 
     @UiHandler("solutionsPageLink")
     public void goToSolutions(ClickEvent e) {
-        navigator.goToPlace(solutionsNavigation);
-        e.preventDefault();
-        setActiveLink(solutionsPageLink);
+        handleClickEvent(e, solutionsNavigation, solutionsPageLink);
     }
 
 //    @UiHandler("sponsoringPageLink")
 //    public void goToSponsoring(ClickEvent e) {
-//    navigator.goToPlace(sponsoringNavigation);
-//    e.preventDefault();
-//    setActiveLink(sponsoringPageLink);
+//        handleClickEvent(e, sponsoringNavigation, sponsoringPageLink);
 //    }
 
     @UiHandler("searchButton")
@@ -138,4 +123,11 @@ public class Header extends Composite {
         }
     }
 
+    private void handleClickEvent(ClickEvent e, PlaceNavigation<?> placeNavigation, Anchor activeLink) {
+        if (HYPERLINK_IMPL.handleAsClick((Event) e.getNativeEvent())) {
+            navigator.goToPlace(placeNavigation);
+            e.preventDefault();
+            setActiveLink(activeLink);
+         }
+    }
 }

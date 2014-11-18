@@ -11,10 +11,13 @@ import com.google.gwt.event.dom.client.ClickEvent;
 import com.google.gwt.uibinder.client.UiBinder;
 import com.google.gwt.uibinder.client.UiField;
 import com.google.gwt.uibinder.client.UiHandler;
+import com.google.gwt.user.client.Event;
+import com.google.gwt.user.client.History;
 import com.google.gwt.user.client.ui.Anchor;
 import com.google.gwt.user.client.ui.Composite;
 import com.google.gwt.user.client.ui.HTMLPanel;
 import com.google.gwt.user.client.ui.Widget;
+import com.google.gwt.user.client.ui.impl.HyperlinkImpl;
 import com.sap.sailing.domain.common.DetailType;
 import com.sap.sailing.domain.common.RaceIdentifier;
 import com.sap.sailing.domain.common.dto.FleetDTO;
@@ -22,10 +25,13 @@ import com.sap.sailing.domain.common.dto.LeaderboardDTO;
 import com.sap.sailing.domain.common.dto.RaceColumnDTO;
 import com.sap.sailing.gwt.common.client.SharedResources;
 import com.sap.sailing.gwt.home.client.app.HomePlacesNavigator;
+import com.sap.sailing.gwt.home.client.app.PlaceNavigation;
 import com.sap.sailing.gwt.home.client.place.event.header.CompactEventHeader;
 import com.sap.sailing.gwt.home.client.place.event.oldcompetitorcharts.OldCompetitorCharts;
 import com.sap.sailing.gwt.home.client.place.event.oldleaderboard.OldLeaderboard;
 import com.sap.sailing.gwt.home.client.place.event.regattaleaderboard.EventRegattaLeaderboardResources;
+import com.sap.sailing.gwt.home.client.place.regatta.RegattaPlace;
+import com.sap.sailing.gwt.home.client.place.regatta.RegattaPlace.RegattaNavigationTabs;
 import com.sap.sailing.gwt.ui.client.LeaderboardUpdateListener;
 import com.sap.sailing.gwt.ui.client.SailingServiceAsync;
 import com.sap.sailing.gwt.ui.client.StringMessages;
@@ -43,6 +49,8 @@ public class RegattaAnalytics extends Composite implements LeaderboardUpdateList
     interface RegattaAnalyticsUiBinder extends UiBinder<Widget, RegattaAnalytics> {
     }
 
+    private static final HyperlinkImpl HYPERLINK_IMPL = GWT.create(HyperlinkImpl.class);
+
     @UiField OldLeaderboard oldLeaderboardComposite;
     @UiField OldCompetitorCharts oldCompetitorChartsComposite;
     @UiField(provided=true) CompactEventHeader eventHeader;
@@ -57,12 +65,18 @@ public class RegattaAnalytics extends Composite implements LeaderboardUpdateList
     
     @UiField Anchor leaderboardAnchor;
     @UiField Anchor competitorChartsAnchor;
-    
+
+    private final PlaceNavigation<RegattaPlace> leaderboardNavigation; 
+    private final PlaceNavigation<RegattaPlace> competitorChartsNavigation; 
+
     private RegattaAnalyticsDataManager regattaAnalyticsManager;
     private Timer autoRefreshTimer;
+    private RegattaNavigationTabs navigationTab;
     
-    public RegattaAnalytics(EventDTO event, String leaderboardName, Timer timerForClientServerOffset, HomePlacesNavigator placeNavigator) {
-        eventHeader = new CompactEventHeader(event, leaderboardName, placeNavigator);
+    public RegattaAnalytics(EventDTO event, String leaderboardName, RegattaNavigationTabs navigationTab, Timer timerForClientServerOffset, HomePlacesNavigator placesNavigator) {
+        this.navigationTab = navigationTab;
+        
+        eventHeader = new CompactEventHeader(event, leaderboardName, placesNavigator);
     
         EventRegattaLeaderboardResources.INSTANCE.css().ensureInjected();
         RegattaAnalyticsResources.INSTANCE.css().ensureInjected();
@@ -71,13 +85,17 @@ public class RegattaAnalytics extends Composite implements LeaderboardUpdateList
         
         title.setInnerText(leaderboardName);
 
-        activeAnchor = leaderboardAnchor;
-        activeTabPanel = leaderboardTabPanel;
-        activeAnchor.addStyleName(SharedResources.INSTANCE.mainCss().navbar_buttonactive());
-
         competitorChartsTabPanel.setVisible(false);
+        leaderboardTabPanel.setVisible(false);
         liveRaceDiv.getStyle().setVisibility(Visibility.HIDDEN);
-
+        
+        leaderboardNavigation = placesNavigator.getRegattaAnalyticsNavigation(event.id.toString(), RegattaNavigationTabs.Leaderboard, leaderboardName, 
+                event.getBaseURL(), event.isOnRemoteServer());
+        competitorChartsNavigation = placesNavigator.getRegattaAnalyticsNavigation(event.id.toString(), RegattaNavigationTabs.CompetitorAnalytics, leaderboardName, 
+                event.getBaseURL(), event.isOnRemoteServer());
+        
+        leaderboardAnchor.setHref(leaderboardNavigation.getTargetUrl());
+        competitorChartsAnchor.setHref(competitorChartsNavigation.getTargetUrl());
     }
     
     public void createRegattaAnalyticsViewer(final SailingServiceAsync sailingService, final AsyncActionsExecutor asyncActionsExecutor,
@@ -101,6 +119,17 @@ public class RegattaAnalytics extends Composite implements LeaderboardUpdateList
         
         oldCompetitorChartsComposite.setChart(regattaAnalyticsManager.getMultiCompetitorChart(), availableDetailsTypes, initialDetailType);
         regattaAnalyticsManager.hideCompetitorChart();
+        
+        switch(navigationTab) {
+            case Leaderboard:
+                setActiveTabPanel(leaderboardTabPanel, leaderboardAnchor);
+                break;
+            case CompetitorAnalytics:
+                setActiveTabPanel(competitorChartsTabPanel, competitorChartsAnchor);
+                DetailType selectedChartDetailType = oldCompetitorChartsComposite.getSelectedChartDetailType();
+                regattaAnalyticsManager.showCompetitorChart(selectedChartDetailType);
+                break;
+        }
     }
 
     @Override
@@ -144,6 +173,7 @@ public class RegattaAnalytics extends Composite implements LeaderboardUpdateList
     void leaderboardTabClicked(ClickEvent event) {
         setActiveTabPanel(leaderboardTabPanel, leaderboardAnchor);
         regattaAnalyticsManager.hideCompetitorChart();
+        handleClickEvent(event, leaderboardNavigation);
     }
     
     @UiHandler("competitorChartsAnchor")
@@ -151,6 +181,7 @@ public class RegattaAnalytics extends Composite implements LeaderboardUpdateList
         setActiveTabPanel(competitorChartsTabPanel, competitorChartsAnchor);
         DetailType selectedChartDetailType = oldCompetitorChartsComposite.getSelectedChartDetailType();
         regattaAnalyticsManager.showCompetitorChart(selectedChartDetailType);
+        handleClickEvent(event, competitorChartsNavigation);
     }
 
     private void setActiveTabPanel(HTMLPanel newActivePanel, Anchor newActiveAnchor) {
@@ -164,4 +195,13 @@ public class RegattaAnalytics extends Composite implements LeaderboardUpdateList
         activeTabPanel.setVisible(true);
         activeAnchor.addStyleName(SharedResources.INSTANCE.mainCss().navbar_buttonactive());
     }
+    
+    private void handleClickEvent(ClickEvent e, PlaceNavigation<?> placeNavigation) {
+        if (HYPERLINK_IMPL.handleAsClick((Event) e.getNativeEvent())) {
+            // don't use the placecontroller for navigation here as we want to avoid a page reload
+            History.newItem(placeNavigation.getHistoryUrl(), false);
+            e.preventDefault();
+         }
+    }
 }
+
