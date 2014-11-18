@@ -2,5 +2,5 @@
 <preference-headers xmlns:android="http://schemas.android.com/apk/res/android">
     <header
         android:fragment="com.sap.sailing.android.tracking.app.ui.fragments.preference.GeneralPreferenceFragment"
-        android:title="@string/settings_category_general" />
+        android:title="@string/settings_category_general" />    
 </preference-headers>
