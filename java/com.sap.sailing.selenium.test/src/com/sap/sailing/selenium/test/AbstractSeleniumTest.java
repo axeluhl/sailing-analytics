@@ -85,7 +85,7 @@ public abstract class AbstractSeleniumTest {
     }
     
     @Before
-    public void setUpAuthenticatedSession() throws InterruptedException {
+    public void setUpAuthenticatedSession() {
         logger.info("Authenticating session...");
         Cookie sessionCookie = authenticate(getContextRoot());
         getWebDriver().get(getContextRoot() + "index.html"); // initialize web driver so setting a cookie for the local domain is possible
