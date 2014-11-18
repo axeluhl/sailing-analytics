@@ -40,6 +40,11 @@ import com.sap.sse.gwt.client.async.MarkedAsyncCallback;
 import com.sap.sse.gwt.client.dialog.DataEntryDialog.DialogCallback;
 import com.sap.sse.gwt.client.panels.LabeledAbstractFilterablePanel;
 
+/**
+ * A composite showing the list of all regattas 
+ * @author Frank
+ *
+ */
 public class RegattaListComposite extends Composite implements RegattasDisplayer {
 
     private final MultiSelectionModel<RegattaDTO> regattaSelectionModel;
