@@ -7,8 +7,10 @@ import com.sap.sailing.domain.common.racelog.tracking.TypeBasedServiceFinder;
 import com.sap.sailing.domain.common.racelog.tracking.TypeBasedServiceFinderFactory;
 import com.sap.sailing.domain.persistence.racelog.tracking.DeviceIdentifierMongoHandler;
 import com.sap.sailing.domain.persistence.racelog.tracking.GPSFixMongoHandler;
+import com.sap.sailing.domain.racelogtracking.impl.SmartphoneUUIDMongoHandler;
 import com.sap.sailing.server.gateway.serialization.racelog.tracking.DeviceIdentifierJsonHandler;
 import com.sap.sailing.server.gateway.serialization.racelog.tracking.GPSFixJsonHandler;
+import com.sap.sailing.server.gateway.serialization.racelog.tracking.impl.SmartphoneUUIDJsonHandler;
 
 /**
  * A simplified implementation of the {@link TypeBasedServiceFinder} interface that, when the device type
@@ -18,12 +20,12 @@ import com.sap.sailing.server.gateway.serialization.racelog.tracking.GPSFixJsonH
  * @author Fredrik Teschke
  *
  */
-public class MockSmartphoneImeiServiceFinderFactory implements TypeBasedServiceFinderFactory {
+public class MockSmartphoneUuidServiceFinderFactory implements TypeBasedServiceFinderFactory {
     Map<Class<?>, TypeBasedServiceFinder<?>> serviceFinders = new HashMap<Class<?>, TypeBasedServiceFinder<?>>();
 
-    public MockSmartphoneImeiServiceFinderFactory() {
-        serviceFinders.put(DeviceIdentifierMongoHandler.class, new MockServiceFinder<>(new SmartphoneImeiMongoHandler()));
-        serviceFinders.put(DeviceIdentifierJsonHandler.class, new MockServiceFinder<>(new SmartphoneImeiJsonHandler()));
+    public MockSmartphoneUuidServiceFinderFactory() {
+        serviceFinders.put(DeviceIdentifierMongoHandler.class, new MockServiceFinder<>(new SmartphoneUUIDMongoHandler()));
+        serviceFinders.put(DeviceIdentifierJsonHandler.class, new MockServiceFinder<>(new SmartphoneUUIDJsonHandler()));
         serviceFinders.put(GPSFixMongoHandler.class, new MockGPSFixMongoServiceFinder());
         serviceFinders.put(GPSFixJsonHandler.class, new MockServiceFinder<>(new MockGPSFixJsonHandler()));
     }
