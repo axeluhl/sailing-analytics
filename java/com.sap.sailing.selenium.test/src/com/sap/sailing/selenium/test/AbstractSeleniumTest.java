@@ -31,12 +31,6 @@ import com.sap.sailing.selenium.core.Managed;
 import com.sap.sailing.selenium.core.SeleniumRunner;
 import com.sap.sailing.selenium.core.TestEnvironment;
 import com.sap.sailing.selenium.core.WindowManager;
-<<<<<<< Updated upstream
-import com.sap.sailing.selenium.pages.HostPage;
-=======
-import com.sap.sse.common.Duration;
-import com.sap.sse.common.impl.MillisecondsTimePoint;
->>>>>>> Stashed changes
 
 /**
  * <p>Abstract base class for unit tests with Selenium. This class is already annotated as required to get executed
