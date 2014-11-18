@@ -11,6 +11,7 @@ import com.google.gwt.uibinder.client.UiHandler;
 import com.google.gwt.user.client.Command;
 import com.google.gwt.user.client.Event;
 import com.google.gwt.user.client.History;
+import com.google.gwt.user.client.Window;
 import com.google.gwt.user.client.ui.Anchor;
 import com.google.gwt.user.client.ui.Composite;
 import com.google.gwt.user.client.ui.Widget;
@@ -74,9 +75,7 @@ public class Solutions extends Composite {
     protected void onLoad() {
         Scheduler.get().scheduleDeferred(new Command() {
             public void execute() {
-                if (navigationTab != SolutionsNavigationTabs.SailingAnalytics) {
-                    scrollToView(navigationTab);
-                }
+                scrollToView(navigationTab);
             }
         });
     }
@@ -114,7 +113,7 @@ public class Solutions extends Composite {
     private void scrollToView(SolutionsNavigationTabs navigationTab) {
         switch (navigationTab) {
             case SailingAnalytics:
-                sailingAnalyticsDiv.scrollIntoView();
+                Window.scrollTo(0, 0);
                 break;
             case RaceCommiteeApp:
                 raceDiv.scrollIntoView();
