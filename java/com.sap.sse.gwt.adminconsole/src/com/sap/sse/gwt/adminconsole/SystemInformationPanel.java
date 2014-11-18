@@ -5,6 +5,7 @@ import com.google.gwt.user.client.rpc.AsyncCallback;
 import com.google.gwt.user.client.ui.FlowPanel;
 import com.google.gwt.user.client.ui.Label;
 import com.google.gwt.user.client.ui.Widget;
+import com.sap.sse.gwt.client.BuildVersionRetriever;
 import com.sap.sse.gwt.client.ErrorReporter;
 
 public class SystemInformationPanel extends FlowPanel {

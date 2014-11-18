@@ -1,4 +1,4 @@
-package com.sap.sse.gwt.adminconsole;
+package com.sap.sse.gwt.client;
 
 import com.google.gwt.user.client.rpc.AsyncCallback;
 
