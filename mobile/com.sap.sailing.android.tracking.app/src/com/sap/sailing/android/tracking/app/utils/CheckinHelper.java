@@ -3,7 +3,7 @@ package com.sap.sailing.android.tracking.app.utils;
 import org.json.JSONException;
 import org.json.JSONObject;
 
-public class CheckinQRCodeHelper {
+public class CheckinHelper {
 	public static final String LEADERBOARD_NAME = "leaderboard_name";
 	public static final String COMPETITOR_ID = "competitor_id";
 	public static final String EVENT_ID = "event_id";
