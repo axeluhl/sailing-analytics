@@ -9,6 +9,7 @@ import android.app.LoaderManager.LoaderCallbacks;
 import android.app.ProgressDialog;
 import android.content.Intent;
 import android.os.Bundle;
+import android.support.v7.widget.Toolbar;
 import android.view.Window;
 import android.widget.Toast;
 
@@ -71,6 +72,11 @@ public class LoginActivity extends BaseActivity implements EventSelectedListener
         setContentView(R.layout.login_view);
         setProgressBarIndeterminateVisibility(false);
 
+        Toolbar toolbar = (Toolbar) findViewById(R.id.toolbar);
+        if (toolbar != null) {
+            setSupportActionBar(toolbar);
+        }
+
         // on first create add event list fragment
         if (savedInstanceState == null) {
             ExLog.i(this, TAG, "Seems to be first start. Creating event fragment.");
@@ -116,8 +122,8 @@ public class LoginActivity extends BaseActivity implements EventSelectedListener
             ReadonlyDataManager dataManager = OnlineDataManager.create(LoginActivity.this);
             DeviceConfigurationIdentifier identifier = new DeviceConfigurationIdentifierImpl(AppPreferences.on(
                     getApplicationContext()).getDeviceIdentifier());
-            
-            LoaderCallbacks<?> configurationLoader = dataManager.createConfigurationLoader(identifier, 
+
+            LoaderCallbacks<?> configurationLoader = dataManager.createConfigurationLoader(identifier,
                     new LoadClient<DeviceConfiguration>() {
 
                         @Override
@@ -139,10 +145,15 @@ public class LoginActivity extends BaseActivity implements EventSelectedListener
                             progressDialog.dismiss();
 
                             if (reason instanceof FileNotFoundException) {
-                                Toast.makeText(getApplicationContext(), getString(R.string.loading_configuration_not_found), Toast.LENGTH_LONG).show();
-                                ExLog.w(LoginActivity.this, TAG, String.format("There seems to be no configuration for this device: %s", reason.toString()));
+                                Toast.makeText(getApplicationContext(),
+                                        getString(R.string.loading_configuration_not_found), Toast.LENGTH_LONG).show();
+                                ExLog.w(LoginActivity.this,
+                                        TAG,
+                                        String.format("There seems to be no configuration for this device: %s",
+                                                reason.toString()));
                             } else {
-                                Toast.makeText(getApplicationContext(), getString(R.string.loading_configuration_failed), Toast.LENGTH_LONG).show();
+                                Toast.makeText(getApplicationContext(),
+                                        getString(R.string.loading_configuration_failed), Toast.LENGTH_LONG).show();
                                 ExLog.ex(LoginActivity.this, TAG, reason);
                             }
 
@@ -207,7 +218,8 @@ public class LoginActivity extends BaseActivity implements EventSelectedListener
 
                 if (selectedCourseArea == null) {
                     Toast.makeText(LoginActivity.this, "The selected course area was lost.", Toast.LENGTH_LONG).show();
-                    ExLog.e(LoginActivity.this, TAG, "Course area reference was not set - cannot start racing activity.");
+                    ExLog.e(LoginActivity.this, TAG,
+                            "Course area reference was not set - cannot start racing activity.");
                     return;
                 }
 

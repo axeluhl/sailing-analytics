@@ -1,10 +1,13 @@
 <?xml version="1.0" encoding="utf-8"?>
-<LinearLayout  xmlns:android="http://schemas.android.com/apk/res/android"
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
     android:layout_width="fill_parent"
     android:layout_height="fill_parent" >
-   	<TextView
+
+    <TextView
         android:id="@+id/textHeader"
-        android:layout_width="fill_parent" 
+        android:layout_width="fill_parent"
         android:layout_height="wrap_content"
-        android:textAppearance="@style/TextAppearance.Welter.BigTitleLabel" android:padding="6dip"/>
+        android:padding="6dip"
+        android:textAppearance="@style/TextAppearance.Welter.BigTitleLabel" />
+
 </LinearLayout>

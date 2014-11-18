@@ -177,7 +177,7 @@ public class ManagedRaceListFragment extends LoggableListFragment implements Jur
     }
 
     private void filterChanged() {
-        adapter.getFilter().filterByMode(getFilterMode());
+        //adapter.getFilter().filterByMode(getFilterMode());
         adapter.notifyDataSetChanged();
     }
 

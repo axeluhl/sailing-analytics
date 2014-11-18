@@ -2,6 +2,7 @@ package com.sap.sailing.racecommittee.app.services.sending;
 
 import java.io.InputStream;
 import java.io.Serializable;
+import java.io.UnsupportedEncodingException;
 import java.net.URLEncoder;
 import java.util.Calendar;
 import java.util.Date;
@@ -160,7 +161,7 @@ public class MessageSendingService extends Service implements MessageSendingList
         MessageRestorer restorer = null;
         try {
             Bundle data = getPackageManager().getServiceInfo(thisService, PackageManager.GET_META_DATA).metaData;
-            String className = data.getString("com.sap.sailing.android.tracking.app.services.sending.messageRestorer");
+            String className = data.getString("com.sap.sailing.racecommittee.app.services.sending.messageRestorer");
             Class<?> clazz = Class.forName(className);
             if (! MessageRestorer.class.isAssignableFrom(clazz)) {
                 throw new Exception("Class does not conform to expected type.");
@@ -238,10 +239,14 @@ public class MessageSendingService extends Service implements MessageSendingList
     }
 
     private void sendDelayedMessages() {
-        List<Intent> delayedIntents = persistenceManager.restoreMessages();
-        ExLog.i(this, TAG, String.format("Resending %d messages...", delayedIntents.size()));
-        for (Intent intent : delayedIntents) {
-            sendMessage(intent);
+        try {
+            List<Intent> delayedIntents = persistenceManager.restoreMessages();
+            ExLog.i(this, TAG, String.format("Resending %d messages...", delayedIntents.size()));
+            for (Intent intent : delayedIntents) {
+                sendMessage(intent);
+            }
+        } catch (UnsupportedEncodingException e) {
+            ExLog.ex(this, TAG, e);
         }
     }
 
@@ -319,15 +324,17 @@ public class MessageSendingService extends Service implements MessageSendingList
     public final static UUID uuid = UUID.randomUUID();
     
     public static String getRaceLogEventSendAndReceiveUrl(Context context, final String raceGroupName,
-            final String raceName, final String fleetName) {
+            final String raceName, final String fleetName) throws UnsupportedEncodingException {
         String url = String.format("%s/sailingserver/rc/racelog?"+
                 RaceLogServletConstants.PARAMS_LEADERBOARD_NAME+"=%s&"+
                 RaceLogServletConstants.PARAMS_RACE_COLUMN_NAME+"=%s&"+
                 RaceLogServletConstants.PARAMS_RACE_FLEET_NAME+"=%s&"+
                 RaceLogServletConstants.PARAMS_CLIENT_UUID+"=%s",
                 PrefUtils.getString(context, R.string.preference_server_url_key, R.string.preference_server_url_default),
-                URLEncoder.encode(raceGroupName),
-                URLEncoder.encode(raceName), URLEncoder.encode(fleetName), uuid);
+                URLEncoder.encode(raceGroupName, "UTF-8"),
+                URLEncoder.encode(raceName, "UTF-8"), 
+                URLEncoder.encode(fleetName, "UTF-8"), 
+                uuid);
         return url;
     }
 }

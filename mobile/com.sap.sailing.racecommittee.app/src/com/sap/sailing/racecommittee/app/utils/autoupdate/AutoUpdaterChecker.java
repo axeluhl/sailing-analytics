@@ -44,7 +44,7 @@ public class AutoUpdaterChecker {
         this.dialog = new ProgressDialog(context);
         dialog.setTitle(context.getString(R.string.auto_update));
         dialog.setCancelable(true);
-        dialog.setButton(context.getString(android.R.string.cancel), new DialogInterface.OnClickListener() {
+        dialog.setButton(DialogInterface.BUTTON_POSITIVE, context.getString(android.R.string.cancel), new DialogInterface.OnClickListener() {
             @Override
             public void onClick(DialogInterface arg0, int arg1) {
                 dialog.cancel();

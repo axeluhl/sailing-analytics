@@ -1,21 +1,21 @@
 package com.sap.sailing.racecommittee.app.ui.activities;
 
 import java.io.Serializable;
-import java.util.Arrays;
 import java.util.Collection;
-import java.util.List;
 
-import android.app.ActionBar;
-import android.app.ActionBar.OnNavigationListener;
 import android.app.AlertDialog;
 import android.app.Fragment;
 import android.app.FragmentTransaction;
 import android.content.DialogInterface;
 import android.content.Intent;
 import android.os.Bundle;
+import android.support.v4.widget.DrawerLayout;
+import android.support.v7.app.ActionBar;
+import android.support.v7.widget.Toolbar;
 import android.util.Log;
+import android.view.View;
 import android.view.Window;
-import android.widget.ArrayAdapter;
+import android.widget.ImageView;
 import android.widget.Toast;
 
 import com.sap.sailing.android.shared.logging.ExLog;
@@ -28,49 +28,25 @@ import com.sap.sailing.racecommittee.app.data.DataManager;
 import com.sap.sailing.racecommittee.app.data.ReadonlyDataManager;
 import com.sap.sailing.racecommittee.app.data.clients.LoadClient;
 import com.sap.sailing.racecommittee.app.domain.ManagedRace;
+import com.sap.sailing.racecommittee.app.logging.LogEvent;
+import com.sap.sailing.racecommittee.app.services.RaceStateService;
+import com.sap.sailing.racecommittee.app.ui.adapters.racelist.RaceListDataType;
+import com.sap.sailing.racecommittee.app.ui.adapters.racelist.RaceListDataTypeHeader;
+import com.sap.sailing.racecommittee.app.ui.adapters.racelist.RaceListDataTypeRace;
+import com.sap.sailing.racecommittee.app.ui.fragments.NavigationDrawerFragment;
+import com.sap.sailing.racecommittee.app.ui.fragments.NavigationDrawerFragment.NavigationDrawerCallbacks;
 import com.sap.sailing.racecommittee.app.ui.fragments.RaceFragment;
 import com.sap.sailing.racecommittee.app.ui.fragments.RaceInfoFragment;
 import com.sap.sailing.racecommittee.app.ui.fragments.lists.ManagedRaceListFragment;
-import com.sap.sailing.racecommittee.app.ui.fragments.lists.ManagedRaceListFragment.FilterMode;
 import com.sap.sailing.racecommittee.app.ui.fragments.raceinfo.RaceInfoListener;
 
-public class RacingActivity extends SessionActivity implements RaceInfoListener {
+public class RacingActivity extends SessionActivity implements RaceInfoListener, NavigationDrawerCallbacks {
     // private final static String TAG = RacingActivity.class.getName();
     private final static String ListFragmentTag = RacingActivity.class.getName() + ".ManagedRaceListFragment";
 
     private static final String TAG = RacingActivity.class.getName();
 
     private static final int RacesLoaderId = 0;
-
-    private class FilterModeSelectionBinder implements OnNavigationListener {
-
-        private ManagedRaceListFragment targetList;
-        private ActionBar actionBar;
-        private List<FilterMode> items;
-
-        public FilterModeSelectionBinder(ManagedRaceListFragment list, ActionBar actionBar,
-                ArrayAdapter<FilterMode> adapter, FilterMode... rawItems) {
-            this.targetList = list;
-            this.actionBar = actionBar;
-            this.items = Arrays.asList(rawItems);
-            adapter.addAll(this.items);
-            this.actionBar.setListNavigationCallbacks(adapter, this);
-            trackSelection(list);
-        }
-
-        private void trackSelection(ManagedRaceListFragment list) {
-            int selectedIndex = this.items.indexOf(list.getFilterMode());
-            if (selectedIndex >= 0) {
-                this.actionBar.setSelectedNavigationItem(selectedIndex);
-            }
-        }
-
-        @Override
-        public boolean onNavigationItemSelected(int position, long id) {
-            targetList.setFilterMode(items.get(position));
-            return true;
-        }
-    }
 
     private class RaceLoadClient implements LoadClient<Collection<ManagedRace>> {
 
@@ -92,7 +68,7 @@ public class RacingActivity extends SessionActivity implements RaceInfoListener 
                 lastSeenRaces = data;
 
                 registerOnService(data);
-                raceListFragment.setupOn(data);
+                navDrawerFragment.setupOn(data);
 
                 Toast.makeText(RacingActivity.this,
                         String.format(getString(R.string.racing_load_success), data.size()), Toast.LENGTH_SHORT).show();
@@ -126,16 +102,13 @@ public class RacingActivity extends SessionActivity implements RaceInfoListener 
     };
 
     /**
-     * Selection list of all races
-     */
-    private ManagedRaceListFragment raceListFragment;
-
-    /**
      * Container fragment for currently selected race
      */
     private RaceInfoFragment infoFragment;
 
     private ReadonlyDataManager dataManager;
+
+    private NavigationDrawerFragment navDrawerFragment;
 
     @Override
     public void onCreate(Bundle savedInstanceState) {
@@ -149,7 +122,13 @@ public class RacingActivity extends SessionActivity implements RaceInfoListener 
         setContentView(R.layout.racing_view);
         setProgressBarIndeterminateVisibility(false);
 
-        raceListFragment = getOrCreateRaceListFragment();
+        Toolbar toolbar = (Toolbar) findViewById(R.id.toolbar);
+        if (toolbar != null) {
+            setSupportActionBar(toolbar);
+        }
+
+        navDrawerFragment = (NavigationDrawerFragment) getFragmentManager().findFragmentById(R.id.navigation_drawer);
+        navDrawerFragment.setUp((DrawerLayout) findViewById(R.id.drawer_layout));
 
         Serializable courseAreaId = getCourseAreaIdFromIntent();
         if (courseAreaId == null) {
@@ -169,24 +148,6 @@ public class RacingActivity extends SessionActivity implements RaceInfoListener 
         logoutSession();
     }
 
-    private ManagedRaceListFragment getOrCreateRaceListFragment() {
-        Fragment fragment = getFragmentManager().findFragmentByTag(ListFragmentTag);
-        // on first create add race list fragment
-        if (fragment == null) {
-            fragment = createRaceListFragment();
-        }
-        return (ManagedRaceListFragment) fragment;
-    }
-
-    private Fragment createRaceListFragment() {
-        Fragment fragment = new ManagedRaceListFragment();
-        FragmentTransaction transaction = getFragmentManager().beginTransaction();
-        transaction.add(R.id.racing_view_left_container, fragment, ListFragmentTag);
-        transaction.setTransition(FragmentTransaction.TRANSIT_NONE);
-        transaction.commit();
-        return fragment;
-    }
-
     private Serializable getCourseAreaIdFromIntent() {
         if (getIntent() == null || getIntent().getExtras() == null) {
             Log.e(getClass().getName(), "Expected an intent carrying event extras.");
@@ -202,18 +163,11 @@ public class RacingActivity extends SessionActivity implements RaceInfoListener 
     }
 
     private void setupActionBar(CourseArea courseArea) {
-        ActionBar actionBar = getActionBar();
         RaceLogEventAuthor author = preferences.getAuthor();
         String title = String.format(getString(R.string.racingview_header), courseArea.getName());
         title += " (" + author.getName() + ")";
 
-        actionBar.setTitle(title);
-
-        actionBar.setNavigationMode(ActionBar.NAVIGATION_MODE_LIST);
-        ArrayAdapter<ManagedRaceListFragment.FilterMode> adapter = new ArrayAdapter<ManagedRaceListFragment.FilterMode>(
-                this, R.layout.action_bar_spinner_item);
-        adapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item);
-        new FilterModeSelectionBinder(raceListFragment, actionBar, adapter, ManagedRaceListFragment.FilterMode.values());
+        getSupportActionBar().setTitle(title);
     }
 
     private void loadRaces(final CourseArea courseArea) {
@@ -229,26 +183,43 @@ public class RacingActivity extends SessionActivity implements RaceInfoListener 
         // he should decide whether these races are already
         // registered or not.
         for (ManagedRace race : races) {
-            Intent registerIntent = new Intent(AppConstants.INTENT_ACTION_REGISTER_RACE);
+            Intent registerIntent = new Intent(this, RaceStateService.class);
+            registerIntent.setAction(AppConstants.INTENT_ACTION_REGISTER_RACE);
             registerIntent.putExtra(AppConstants.RACE_ID_KEY, race.getId());
             this.startService(registerIntent);
         }
     }
 
     public void onRaceItemClicked(ManagedRace managedRace) {
+        getSupportActionBar().setSubtitle(managedRace.getSeries().getName() + " (" + managedRace.getRaceName() + ")");
         infoFragment = new RaceInfoFragment();
         infoFragment.setArguments(RaceFragment.createArguments(managedRace));
 
-        FragmentTransaction transaction = getFragmentManager().beginTransaction();
-        transaction.setCustomAnimations(R.animator.slide_in, R.animator.slide_out);
-        transaction.replace(R.id.racing_view_right_container, infoFragment);
-        transaction.setTransition(FragmentTransaction.TRANSIT_FRAGMENT_FADE);
-        transaction.commit();
+        getFragmentManager().beginTransaction().setCustomAnimations(R.animator.slide_in, R.animator.slide_out)
+                .replace(R.id.racing_view_right_container, infoFragment)
+                .setTransition(FragmentTransaction.TRANSIT_FRAGMENT_FADE).commit();
     }
 
     @Override
     public void onResetTime() {
         infoFragment.onResetTime();
+    }
+
+    @Override
+    public void onNavigationDrawerItemSelected(RaceListDataType selectedItem) {
+        if (selectedItem instanceof RaceListDataTypeRace) {
+            RaceListDataTypeRace selectedElement = (RaceListDataTypeRace) selectedItem;
+            selectedElement.setUpdateIndicatorVisible(false);
+            // ((ImageView) findViewById(R.id.Welter_Cell_UpdateLabel)).setVisibility(View.GONE);
+
+            ManagedRace selectedRace = selectedElement.getRace();
+            ExLog.i(this, LogEvent.RACE_SELECTED_ELEMENT, selectedRace.getId() + " " + selectedRace.getStatus());
+            onRaceItemClicked(selectedRace);
+        } else if (selectedItem instanceof RaceListDataTypeHeader) {
+            // This is for logging purposes only!
+            RaceListDataTypeHeader selectedTitle = (RaceListDataTypeHeader) selectedItem;
+            ExLog.i(this, LogEvent.RACE_SELECTED_TITLE, selectedTitle.toString());
+        }
     }
 
 }
