@@ -25,6 +25,10 @@ public abstract class AbstractPlaceNavigator implements PlaceNavigator {
         }
     }
 
+    protected <T extends Place> PlaceNavigation<T> createLocalPlaceNavigation(T destinationPlace, PlaceTokenizer<T> tokenizer) {
+        return new PlaceNavigation<T>(null, destinationPlace, tokenizer, false);
+    }
+
     protected <T extends Place> PlaceNavigation<T> createGlobalPlaceNavigation(T destinationPlace, PlaceTokenizer<T> tokenizer) {
         return new PlaceNavigation<T>(destinationPlace, tokenizer);
     }

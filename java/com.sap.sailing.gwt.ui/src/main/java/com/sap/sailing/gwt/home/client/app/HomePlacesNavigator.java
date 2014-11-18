@@ -31,7 +31,7 @@ public class HomePlacesNavigator extends AbstractPlaceNavigator {
     }
 
     public PlaceNavigation<SolutionsPlace> getSolutionsNavigation(SolutionsNavigationTabs navigationTab) {
-        return createGlobalPlaceNavigation(new SolutionsPlace(navigationTab), new SolutionsPlace.Tokenizer());
+        return createLocalPlaceNavigation(new SolutionsPlace(navigationTab), new SolutionsPlace.Tokenizer());
     }
 
     public PlaceNavigation<SponsoringPlace> getSponsoringNavigation() {
