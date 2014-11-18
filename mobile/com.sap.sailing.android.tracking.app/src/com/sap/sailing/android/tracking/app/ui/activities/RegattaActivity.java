@@ -42,7 +42,7 @@ public class RegattaActivity extends BaseActivity {
             getSupportActionBar().setSubtitle(subtitle);
         }
 
-        replaceFragment(R.id.content_frame, new RegattaFragment());
+        replaceFragment(R.id.home_fragment_id, new RegattaFragment());
     }
 
     @Override

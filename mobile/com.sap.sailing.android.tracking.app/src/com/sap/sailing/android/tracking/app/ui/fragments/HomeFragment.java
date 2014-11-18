@@ -136,206 +136,8 @@ public class HomeFragment extends BaseFragment implements
 			String scanResult = data.getStringExtra("SCAN_RESULT");
 
 			ExLog.i(getActivity(), TAG, "Parsing URI: " + scanResult);
-
 			Uri uri = Uri.parse(scanResult);
-
-			final String server = uri.getScheme() + "://" + uri.getHost();
-			final int port = (uri.getPort() == -1) ? 80 : uri.getPort();
-
-			prefs.setServerURL(server + ":" + port);
-
-			String leaderboardNameFromQR;
-			try {
-				leaderboardNameFromQR = URLEncoder.encode(
-						uri.getQueryParameter(CheckinHelper.LEADERBOARD_NAME),
-						"UTF-8").replace("+", "%20");
-			} catch (UnsupportedEncodingException e) {
-				ExLog.e(getActivity(), TAG,
-						"Failed to encode leaderboard name: " + e.getMessage());
-				leaderboardNameFromQR = "";
-			}
-
-			final String competitorId = uri
-					.getQueryParameter(CheckinHelper.COMPETITOR_ID);
-			final String checkinURLStr = prefs.getServerURL()
-					+ prefs.getServerCheckinPath().replace(
-							"{leaderboard-name}", leaderboardNameFromQR);
-			final String eventId = uri
-					.getQueryParameter(CheckinHelper.EVENT_ID);
-			final String leaderboardName = leaderboardNameFromQR;
-
-			final DeviceIdentifier deviceUuid = new SmartphoneUUIDIdentifierImpl(
-					UUID.fromString(prefs.getDeviceIdentifier()));
-
-			// There are 5 Stages after the QR-Code scan is complete:
-			// 1. Get Event
-			// 2. Get Leaderboard
-			// 3. Get Competitor
-			// 4. Let user confirm that the information is correct
-			// 5. Checkin
-
-			final String getEventUrl = prefs.getServerURL()
-					+ prefs.getServerEventPath(eventId);
-			final String getLeaderboardUrl = prefs.getServerURL()
-					+ prefs.getServerLeaderboardPath(leaderboardName);
-			final String getCompetitorUrl = prefs.getServerURL()
-					+ prefs.getServerCompetitorPath(competitorId);
-
-			JsonObjectRequest getLeaderboardRequest = new JsonObjectRequest(
-					getLeaderboardUrl, null, new Listener<JSONObject>() {
-
-						@Override
-						public void onResponse(JSONObject response) {
-
-							final String leaderboardName;
-
-							try {
-								leaderboardName = response.getString("name");
-							} catch (JSONException e) {
-								ExLog.e(getActivity(), TAG,
-										"Error getting data from call on URL: "
-												+ getLeaderboardUrl
-												+ ", Error: " + e.getMessage());
-								displayAPIErrorRecommendRetry();
-								return;
-							}
-
-							JsonObjectRequest getEventRequest = new JsonObjectRequest(
-									getEventUrl, null,
-									new Listener<JSONObject>() {
-
-										@Override
-										public void onResponse(
-												JSONObject response) {
-											final String eventId;
-											final String eventName;
-											final String eventStartDateStr;
-											final String eventEndDateStr;
-											final String eventFirstImageUrl;
-
-											try {
-												eventId = response
-														.getString("id");
-												eventName = response
-														.getString("name");
-												eventStartDateStr = response
-														.getString("startDate");
-												eventEndDateStr = response
-														.getString("endDate");
-
-												JSONArray imageUrls = response
-														.getJSONArray("imageURLs");
-												eventFirstImageUrl = imageUrls
-														.getString(0);
-
-											} catch (JSONException e) {
-												ExLog.e(getActivity(),
-														TAG,
-														"Error getting data from call on URL: "
-																+ getEventUrl
-																+ ", Error: "
-																+ e.getMessage());
-												displayAPIErrorRecommendRetry();
-												return;
-											}
-
-											JsonObjectRequest getCompetitorRequest = new JsonObjectRequest(
-													getCompetitorUrl, null,
-													new Listener<JSONObject>() {
-														@Override
-														public void onResponse(
-																JSONObject response) {
-															final String competitorDisplayName;
-															final String competitorId;
-															final String competitorSailId;
-															final String competitorNationality;
-															final String competitorCountryCode;
-
-															try {
-																competitorDisplayName = response
-																		.getString("displayName");
-																competitorId = response
-																		.getString("id");
-																competitorSailId = response
-																		.getString("sailID");
-																competitorNationality = response
-																		.getString("nationality");
-																competitorCountryCode = response
-																		.getString("countryCode");
-															} catch (JSONException e) {
-																ExLog.e(getActivity(),
-																		TAG,
-																		"Error getting data from call on URL: "
-																				+ getCompetitorUrl
-																				+ ", Error: "
-																				+ e.getMessage());
-																displayAPIErrorRecommendRetry();
-																return;
-															}
-
-															CheckinData data = new CheckinData();
-															data.competitorDisplayName = competitorDisplayName;
-															data.competitorId = competitorId;
-															data.competitorSailId = competitorSailId;
-															data.competitorNationality = competitorNationality;
-															data.competitorCountryCode = competitorCountryCode;
-															data.eventId = eventId;
-															data.eventName = eventName;
-															data.eventStartDateStr = eventStartDateStr;
-															data.eventEndDateStr = eventEndDateStr;
-															data.eventFirstImageUrl = eventFirstImageUrl;
-															data.eventServerUrl = checkinURLStr;
-															data.leaderboardName = leaderboardName;
-															data.deviceUid = deviceUuid
-																	.getStringRepresentation();
-
-															displayUserConfirmationScreen(data);
-
-														}
-													}, new ErrorListener() {
-														@Override
-														public void onErrorResponse(
-																VolleyError error) {
-															ExLog.e(getActivity(),
-																	TAG,
-																	"Failed to get competitor from API: "
-																			+ error.getMessage());
-															displayAPIErrorRecommendRetry();
-														}
-													});
-
-											VolleyHelper.getInstance(
-													getActivity()).addRequest(
-													getCompetitorRequest);
-										}
-									}, new ErrorListener() {
-										@Override
-										public void onErrorResponse(
-												VolleyError error) {
-											ExLog.e(getActivity(),
-													TAG,
-													"Failed to get leaderboard from API: "
-															+ error.getMessage());
-											displayAPIErrorRecommendRetry();
-										}
-									});
-
-							VolleyHelper.getInstance(getActivity()).addRequest(
-									getEventRequest);
-						}
-					}, new ErrorListener() {
-						@Override
-						public void onErrorResponse(VolleyError error) {
-							ExLog.e(getActivity(),
-									TAG,
-									"Failed to get event from API: "
-											+ error.getMessage());
-							displayAPIErrorRecommendRetry();
-						}
-					});
-
-			VolleyHelper.getInstance(getActivity()).addRequest(
-					getLeaderboardRequest);
+			handleScannedOrUrlMatchedUri(uri);
 
 		} else if (resultCode == Activity.RESULT_CANCELED) {
 			Toast.makeText(getActivity(), "Scanning canceled",
@@ -347,6 +149,214 @@ public class HomeFragment extends BaseFragment implements
 		}
 	}
 
+	public void handleScannedOrUrlMatchedUri(Uri uri)
+	{
+		// TODO: assuming scheme is http, is this valid?
+		String scheme = uri.getScheme();
+		if (scheme != "http" && scheme != "https")
+		{
+			scheme = "http";
+		}
+		
+		final String server = scheme + "://" + uri.getHost();
+		final int port = (uri.getPort() == -1) ? 80 : uri.getPort();
+
+		prefs.setServerURL(server + ":" + port);
+
+		String leaderboardNameFromQR;
+		try {
+			leaderboardNameFromQR = URLEncoder.encode(
+					uri.getQueryParameter(CheckinHelper.LEADERBOARD_NAME),
+					"UTF-8").replace("+", "%20");
+		} catch (UnsupportedEncodingException e) {
+			ExLog.e(getActivity(), TAG,
+					"Failed to encode leaderboard name: " + e.getMessage());
+			leaderboardNameFromQR = "";
+		}
+
+		final String competitorId = uri
+				.getQueryParameter(CheckinHelper.COMPETITOR_ID);
+		final String checkinURLStr = prefs.getServerURL()
+				+ prefs.getServerCheckinPath().replace(
+						"{leaderboard-name}", leaderboardNameFromQR);
+		final String eventId = uri
+				.getQueryParameter(CheckinHelper.EVENT_ID);
+		final String leaderboardName = leaderboardNameFromQR;
+
+		final DeviceIdentifier deviceUuid = new SmartphoneUUIDIdentifierImpl(
+				UUID.fromString(prefs.getDeviceIdentifier()));
+
+		// There are 5 Stages after the QR-Code scan is complete:
+		// 1. Get Event
+		// 2. Get Leaderboard
+		// 3. Get Competitor
+		// 4. Let user confirm that the information is correct
+		// 5. Checkin
+
+		final String getEventUrl = prefs.getServerURL()
+				+ prefs.getServerEventPath(eventId);
+		final String getLeaderboardUrl = prefs.getServerURL()
+				+ prefs.getServerLeaderboardPath(leaderboardName);
+		final String getCompetitorUrl = prefs.getServerURL()
+				+ prefs.getServerCompetitorPath(competitorId);
+
+		JsonObjectRequest getLeaderboardRequest = new JsonObjectRequest(
+				getLeaderboardUrl, null, new Listener<JSONObject>() {
+
+					@Override
+					public void onResponse(JSONObject response) {
+
+						final String leaderboardName;
+
+						try {
+							leaderboardName = response.getString("name");
+						} catch (JSONException e) {
+							ExLog.e(getActivity(), TAG,
+									"Error getting data from call on URL: "
+											+ getLeaderboardUrl
+											+ ", Error: " + e.getMessage());
+							displayAPIErrorRecommendRetry();
+							return;
+						}
+
+						JsonObjectRequest getEventRequest = new JsonObjectRequest(
+								getEventUrl, null,
+								new Listener<JSONObject>() {
+
+									@Override
+									public void onResponse(
+											JSONObject response) {
+										final String eventId;
+										final String eventName;
+										final String eventStartDateStr;
+										final String eventEndDateStr;
+										final String eventFirstImageUrl;
+
+										try {
+											eventId = response
+													.getString("id");
+											eventName = response
+													.getString("name");
+											eventStartDateStr = response
+													.getString("startDate");
+											eventEndDateStr = response
+													.getString("endDate");
+
+											JSONArray imageUrls = response
+													.getJSONArray("imageURLs");
+											eventFirstImageUrl = imageUrls
+													.getString(0);
+
+										} catch (JSONException e) {
+											ExLog.e(getActivity(),
+													TAG,
+													"Error getting data from call on URL: "
+															+ getEventUrl
+															+ ", Error: "
+															+ e.getMessage());
+											displayAPIErrorRecommendRetry();
+											return;
+										}
+
+										JsonObjectRequest getCompetitorRequest = new JsonObjectRequest(
+												getCompetitorUrl, null,
+												new Listener<JSONObject>() {
+													@Override
+													public void onResponse(
+															JSONObject response) {
+														final String competitorDisplayName;
+														final String competitorId;
+														final String competitorSailId;
+														final String competitorNationality;
+														final String competitorCountryCode;
+
+														try {
+															competitorDisplayName = response
+																	.getString("displayName");
+															competitorId = response
+																	.getString("id");
+															competitorSailId = response
+																	.getString("sailID");
+															competitorNationality = response
+																	.getString("nationality");
+															competitorCountryCode = response
+																	.getString("countryCode");
+														} catch (JSONException e) {
+															ExLog.e(getActivity(),
+																	TAG,
+																	"Error getting data from call on URL: "
+																			+ getCompetitorUrl
+																			+ ", Error: "
+																			+ e.getMessage());
+															displayAPIErrorRecommendRetry();
+															return;
+														}
+
+														CheckinData data = new CheckinData();
+														data.competitorDisplayName = competitorDisplayName;
+														data.competitorId = competitorId;
+														data.competitorSailId = competitorSailId;
+														data.competitorNationality = competitorNationality;
+														data.competitorCountryCode = competitorCountryCode;
+														data.eventId = eventId;
+														data.eventName = eventName;
+														data.eventStartDateStr = eventStartDateStr;
+														data.eventEndDateStr = eventEndDateStr;
+														data.eventFirstImageUrl = eventFirstImageUrl;
+														data.eventServerUrl = checkinURLStr;
+														data.leaderboardName = leaderboardName;
+														data.deviceUid = deviceUuid
+																.getStringRepresentation();
+
+														displayUserConfirmationScreen(data);
+
+													}
+												}, new ErrorListener() {
+													@Override
+													public void onErrorResponse(
+															VolleyError error) {
+														ExLog.e(getActivity(),
+																TAG,
+																"Failed to get competitor from API: "
+																		+ error.getMessage());
+														displayAPIErrorRecommendRetry();
+													}
+												});
+
+										VolleyHelper.getInstance(
+												getActivity()).addRequest(
+												getCompetitorRequest);
+									}
+								}, new ErrorListener() {
+									@Override
+									public void onErrorResponse(
+											VolleyError error) {
+										ExLog.e(getActivity(),
+												TAG,
+												"Failed to get leaderboard from API: "
+														+ error.getMessage());
+										displayAPIErrorRecommendRetry();
+									}
+								});
+
+						VolleyHelper.getInstance(getActivity()).addRequest(
+								getEventRequest);
+					}
+				}, new ErrorListener() {
+					@Override
+					public void onErrorResponse(VolleyError error) {
+						ExLog.e(getActivity(),
+								TAG,
+								"Failed to get event from API: "
+										+ error.getMessage());
+						displayAPIErrorRecommendRetry();
+					}
+				});
+
+		VolleyHelper.getInstance(getActivity()).addRequest(
+				getLeaderboardRequest);
+	}
+	
 	@Override
 	public void onDetach() {
 		super.onDetach();
