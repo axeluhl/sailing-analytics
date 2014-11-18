@@ -70,10 +70,10 @@ public class CreateAndTrackWithRaceLogTest {
         gpsFixStore = service.getGPSFixStore();
         service.getMongoObjectFactory().getDatabase().dropDatabase();
         author = service.getServerAuthor();
-        Series series = new SeriesImpl("series", false, Collections.singletonList(fleet),
-                Collections.singletonList(columnName), service);
+        Series series = new SeriesImpl("series", false, Collections.singletonList(fleet), Collections.emptySet(), service);
         regatta = service.createRegatta(RegattaImpl.getDefaultName("regatta", "Laser"), "Laser", UUID.randomUUID(), Collections.<Series>singletonList(series),
                 false, new HighPoint(), UUID.randomUUID(), /* useStartTimeInference */ true);
+        series.addRaceColumn(columnName, /* trackedRegattaRegistry */ null);
         leaderboard = service.addRegattaLeaderboard(regatta.getRegattaIdentifier(), "RegattaLeaderboard", new int[] {});
         adapter = RaceLogTrackingAdapterFactoryImpl.INSTANCE.getAdapter(DomainFactory.INSTANCE);
     }

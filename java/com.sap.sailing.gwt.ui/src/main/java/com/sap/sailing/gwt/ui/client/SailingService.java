@@ -1,6 +1,5 @@
 package com.sap.sailing.gwt.ui.client;
 
-import java.io.Serializable;
 import java.util.Collection;
 import java.util.Date;
 import java.util.List;
@@ -490,7 +489,7 @@ public interface SailingService extends RemoteService {
      * Revoke the events in the {@code RaceLog} that are identified by the {@code eventIds}.
      * This only affects such events that implement {@link Revokable}.
      */
-    void revokeRaceLogEvents(String leaderboardName, String raceColumnName, String fleetName, List<Serializable> eventIds)
+    void revokeRaceLogEvents(String leaderboardName, String raceColumnName, String fleetName, List<UUID> eventIds)
             throws NotRevokableException;
     
     Collection<String> getGPSFixImporterTypes();

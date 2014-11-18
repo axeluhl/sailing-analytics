@@ -3,8 +3,9 @@ package com.sap.sailing.domain.common.dto;
 import java.io.Serializable;
 
 import com.sap.sailing.domain.common.Color;
+import com.sap.sailing.domain.common.racelog.tracking.MappableToDevice;
 
-public interface CompetitorDTO extends Serializable {
+public interface CompetitorDTO extends Serializable, MappableToDevice {
     
     String getTwoLetterIsoCountryCode();
 
