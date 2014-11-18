@@ -48,7 +48,7 @@ The links above lead to short write-ups of the respective business case behind t
 
 [[Live Audio Streaming Support|wiki/planning/LiveAudioStreaming]]
 
-[[Renewing the Map (Maps v2.0 discontinued) |wiki/planning/GoogleEarth]]
+[[Renewing the Map |wiki/planning/MapRenewal]]
 
 [[Mobile Version SAP Sailing Analytics|wiki/planning/MobileSailingAnalytics]]
 

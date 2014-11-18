@@ -4,6 +4,8 @@ import java.util.ArrayList;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Objects;
+import java.util.function.Supplier;
+import java.util.stream.Stream;
 
 import org.openqa.selenium.By;
 import org.openqa.selenium.WebDriver;
@@ -51,7 +53,7 @@ public abstract class CellTablePO<T extends DataEntryPO> extends PageArea {
     
     private static final String LOADING_ANIMATION_XPATH = "./td/div/div/div/img";
     
-    protected static final String SELECTED_ROW_CSS_CLASS = "GICBSJYCCQ"; //$NON-NLS-1$
+    protected static final String SELECTED_ROW_CSS_CLASS = "GP42FT2DCQ"; //$NON-NLS-1$
     
     private static final String LOADING_ANIMATION_IMAGE = "data:image/gif;base64," +               //$NON-NLS-1$
             "R0lGODlhKwALAPEAAP///0tKSqampktKSiH/C05FVFNDQVBFMi4wAwEAAAAh/hpDcmVhdGVkIHdpdGggYWpheGx" +  //$NON-NLS-1$
@@ -226,22 +228,20 @@ public abstract class CellTablePO<T extends DataEntryPO> extends PageArea {
      * <p>Selects the specified entries.</p>
      * 
      * <p>Note: If an entry is not contained in the table it will not be selected.</p>
-     * 
-     * @param entries
-     *   The entries to select.
+     * @param entryFetcher
+     *   The provider to use to obtain the table entries to select
      */
-    public void selectEntries(List<T> entries) {
+    public void selectEntries(Supplier<Stream<T>> entryFetcher) {
         // First deselect all selected entries
         for (T entry : getSelectedEntries()) {
             entry.deselect();
         }
-
         // Select all specified entries
-        for (T entry : entries) {
+        entryFetcher.get().forEach(entry -> {
             if (this.getWebElement().equals(entry.table.getWebElement())) {
                 entry.appendToSelection();
             }
-        }
+        });
     }
     
     /**

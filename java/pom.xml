@@ -17,6 +17,7 @@
 		<module>com.sap.sse.common</module>
 		<module>com.sap.sse.mongodb</module>
 		<module>com.sap.sse.gwt</module>
+		<module>com.sap.sse.gwt.adminconsole</module>
 		<module>com.sap.sse.datamining</module>
 		<module>com.sap.sse.datamining.shared</module>
 		<module>com.sap.sse.datamining.test</module>
@@ -129,7 +130,7 @@
 		  -Dfile.encoding=cp1252 -Dreplication.brokerURL=tcp://localhost:61615 -Dmongo.dbName=winddbTest -DspatialWind=true
         </parameters.common>
 		<parameters.vm-settings>
-          -Xmx1024m -XX:PermSize=256m -XX:-UseGCOverheadLimit -XX:+UseParallelGC
+          -ea -Xmx1024m -XX:PermSize=256m -XX:+UseG1GC
 		</parameters.vm-settings>
 		<parameters.tractrac>
           -Dtractrac.tunnel=true -Dtractrac.tunnel.host=localhost

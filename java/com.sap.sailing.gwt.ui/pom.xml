@@ -67,6 +67,12 @@
     </dependency>
     <dependency>
     	<groupId>com.sap.sailing</groupId>
+    	<artifactId>com.sap.sse.gwt.adminconsole</artifactId>
+    	<version>1.0.0-SNAPSHOT</version>
+    	<classifier>sources</classifier>
+    </dependency>
+    <dependency>
+    	<groupId>com.sap.sailing</groupId>
     	<artifactId>com.sap.sailing.datamining.shared</artifactId>
     	<version>1.0.0-SNAPSHOT</version>
     	<classifier>sources</classifier>
@@ -121,11 +127,8 @@
 		        <module>com.sap.sailing.gwt.ui.RaceBoard</module>
 		        <module>com.sap.sailing.gwt.ui.Spectator</module>
 		        <module>com.sap.sailing.gwt.ui.DataMining</module>
-		        <module>com.sap.sailing.gwt.ui.TvView</module>
-		        <module>com.sap.sailing.gwt.ui.UserManagement</module>
 		        <module>com.sap.sailing.gwt.ui.VideoPopup</module>
 		        <module>com.sap.sailing.gwt.ui.YoutubePopup</module>
-		        <module>com.sap.sailing.gwt.ui.Search</module>
 		        <module>com.sap.sailing.gwt.ui.Simulator</module>
 		        <module>com.sap.sailing.gwt.ui.RegattaOverview</module>
 		        <module>com.sap.sailing.gwt.ui.PolarSheets</module>
