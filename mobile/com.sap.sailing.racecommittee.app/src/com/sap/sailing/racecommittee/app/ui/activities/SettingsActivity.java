@@ -7,6 +7,11 @@ import android.content.Intent;
 import android.content.SharedPreferences;
 import android.os.Bundle;
 import android.preference.PreferenceActivity;
+import android.support.v7.widget.Toolbar;
+import android.view.View;
+import android.view.ViewGroup;
+import android.view.Window;
+import android.widget.LinearLayout;
 import android.widget.Toast;
 
 import com.sap.sailing.domain.base.configuration.RegattaConfiguration;
@@ -21,10 +26,11 @@ import com.sap.sailing.racecommittee.app.utils.PreferenceHelper;
 
 public class SettingsActivity extends PreferenceActivity {
     
+    private static final String TAG = SettingsActivity.class.getName();
+    
     public static final String specificRegattaPreferencesName = "TEMP_PREFERENCE_KEY";
     public static final String EXTRA_SPECIFIC_REGATTA_NAME = "EXTRA_SPECIFIC_REGATTA_NAME";
     public static final String EXTRA_SPECIFIC_REGATTA_PREFERENCES_NAME = "EXTRA_SPECIFIC_REGATTA_PREFERENCE_KEY";
-    
     
     public static void openSpecificRegattaConfiguration(Context context, RaceGroup raceGroup) {
         // reset temp preferences
@@ -64,6 +70,7 @@ public class SettingsActivity extends PreferenceActivity {
     
     private boolean isRedirectedToTemp;
     private String sharedPreferencesName;
+    private Toolbar toolbar;
     
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -83,6 +90,16 @@ public class SettingsActivity extends PreferenceActivity {
             showBreadCrumbs(title, title);
             }
         }
+        
+//        ViewGroup root = ((ViewGroup) findViewById(android.R.id.content));
+//        LinearLayout content = (LinearLayout) root.getChildAt(0);
+//        LinearLayout toolbarContainer = (LinearLayout) View.inflate(this, R.layout.activity_settings, null);
+//        
+//        root.removeAllViews();
+//        toolbarContainer.addView(content);
+//        root.addView(toolbar);
+//        
+//        toolbar = (Toolbar) toolbarContainer.findViewById(R.id.toolbar);
     }
    
     @Override
@@ -100,5 +117,9 @@ public class SettingsActivity extends PreferenceActivity {
 
     public boolean isRedirected() {
         return isRedirectedToTemp;
+    }
+    
+    protected boolean isValidFragment(String fragmentName) {
+        return true;
     }
 }

@@ -1,0 +1,28 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources xmlns:android="http://schemas.android.com/apk/res/android">
+
+    <!-- Base application theme. -->
+    <style name="AppTheme" parent="AppTheme.Base" />
+
+    <style name="AppTheme.Base" parent="Theme.AppCompat">
+        <item name="windowActionBar">false</item>
+        
+        <!-- colorPrimary is used for the default action bar background -->
+        <item name="colorPrimary">@color/colorPrimary</item>
+
+        <!-- colorPrimaryDark is used for the status bar -->
+        <item name="colorPrimaryDark">@color/colorPrimaryDark</item>
+
+        <!-- colorAccent is used as the default value for colorControlActivated which is used to tint widgets -->
+        <item name="colorAccent">@color/colorAccent</item>
+
+        <!-- control style -->
+        <!-- <item name="android:spinnerStyle">@style/Widget.Spinner</item> -->
+    </style>
+    
+    <style name="Widget.Spinner" parent="android:Widget">
+        <item name="android:background">@color/colorAccent</item>
+        <item name="android:clickable">true</item>
+    </style>
+
+</resources>

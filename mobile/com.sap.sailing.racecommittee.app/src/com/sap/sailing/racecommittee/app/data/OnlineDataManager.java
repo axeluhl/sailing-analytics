@@ -162,9 +162,9 @@ public class OnlineDataManager extends DataManager {
 
                 ManagedRaceIdentifier identifier = managedRace.getIdentifier();
 
-                String raceGroupName = URLEncoder.encode(identifier.getRaceGroup().getName());
-                String raceColumnName = URLEncoder.encode(identifier.getRaceName());
-                String fleetName = URLEncoder.encode(identifier.getFleet().getName());
+                String raceGroupName = URLEncoder.encode(identifier.getRaceGroup().getName(), "UTF-8");
+                String raceColumnName = URLEncoder.encode(identifier.getRaceName(), "UTF-8");
+                String fleetName = URLEncoder.encode(identifier.getFleet().getName(), "UTF-8");
 
                 return new OnlineDataLoader<Collection<Mark>>(context, new URL(preferences.getServerBaseURL() + 
                         "/sailingserver/rc/marks?"+RaceLogServletConstants.PARAMS_LEADERBOARD_NAME + "=" + raceGroupName +
@@ -188,9 +188,9 @@ public class OnlineDataManager extends DataManager {
 
                 ManagedRaceIdentifier identifier = managedRace.getIdentifier();
 
-                String raceGroupName = URLEncoder.encode(identifier.getRaceGroup().getName());
-                String raceColumnName = URLEncoder.encode(identifier.getRaceName());
-                String fleetName = URLEncoder.encode(identifier.getFleet().getName());
+                String raceGroupName = URLEncoder.encode(identifier.getRaceGroup().getName(), "UTF-8");
+                String raceColumnName = URLEncoder.encode(identifier.getRaceName(), "UTF-8");
+                String fleetName = URLEncoder.encode(identifier.getFleet().getName(), "UTF-8");
 
                 return new OnlineDataLoader<CourseBase>(context, new URL(preferences.getServerBaseURL()
                     + "/sailingserver/rc/currentcourse?" + RaceLogServletConstants.PARAMS_LEADERBOARD_NAME + "="
@@ -216,9 +216,9 @@ public class OnlineDataManager extends DataManager {
 
                 ManagedRaceIdentifier identifier = managedRace.getIdentifier();
 
-                String raceGroupName = URLEncoder.encode(identifier.getRaceGroup().getName());
-                String raceColumnName = URLEncoder.encode(identifier.getRaceName());
-                String fleetName = URLEncoder.encode(identifier.getFleet().getName());
+                String raceGroupName = URLEncoder.encode(identifier.getRaceGroup().getName(), "UTF-8");
+                String raceColumnName = URLEncoder.encode(identifier.getRaceName(), "UTF-8");
+                String fleetName = URLEncoder.encode(identifier.getFleet().getName(), "UTF-8");
 
                 return new OnlineDataLoader<Collection<Competitor>>(context, new URL(
                         preferences.getServerBaseURL() + "/sailingserver/rc/competitors?"
@@ -240,7 +240,7 @@ public class OnlineDataManager extends DataManager {
                 DataHandler<DeviceConfiguration> handler = new NullDataHandler<DeviceConfiguration>();
                 DataParser<DeviceConfiguration> parser = new DeviceConfigurationParser(DeviceConfigurationJsonDeserializer.create());
                 
-                String encodedIdentifier = URLEncoder.encode(identifier.getClientIdentifier());
+                String encodedIdentifier = URLEncoder.encode(identifier.getClientIdentifier(), "UTF-8");
                 encodedIdentifier = encodedIdentifier.replace("+", "%20");
                 
                 return new OnlineDataLoader<DeviceConfiguration>(

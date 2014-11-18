@@ -5,21 +5,20 @@
     android:versionName="6 - Laser" >
 
     <uses-sdk
-        android:maxSdkVersion="17"
         android:minSdkVersion="13"
-        android:targetSdkVersion="17" />
+        android:targetSdkVersion="21" />
 
     <permission
         android:name="com.sap.sailing.racecommittee.app.MAPS_RECEIVE"
         android:protectionLevel="signature" />
 
-    <uses-permission android:name="android.permission.INTERNET" />
-    <uses-permission android:name="android.permission.ACCESS_NETWORK_STATE" />
     <uses-permission android:name="android.permission.ACCESS_FINE_LOCATION" />
-    <uses-permission android:name="android.permission.WRITE_EXTERNAL_STORAGE" />
-    <uses-permission android:name="android.permission.VIBRATE" />
+    <uses-permission android:name="android.permission.ACCESS_NETWORK_STATE" />
     <uses-permission android:name="android.permission.CAMERA" />
+    <uses-permission android:name="android.permission.INTERNET" />
     <uses-permission android:name="android.permission.RECORD_AUDIO" />
+    <uses-permission android:name="android.permission.VIBRATE" />
+    <uses-permission android:name="android.permission.WRITE_EXTERNAL_STORAGE" />
     <uses-permission android:name="com.google.android.providers.gsf.permission.READ_GSERVICES" />
     <uses-permission android:name="com.sap.sailing.racecommittee.app.MAPS_RECEIVE" />
 
@@ -33,53 +32,36 @@
         android:name=".RaceApplication"
         android:allowBackup="true"
         android:hardwareAccelerated="true"
-        android:icon="@drawable/sap_sailing_app_icon"
+        android:icon="@drawable/ic_launcher"
         android:label="@string/app_name"
-        android:theme="@style/Theme.Welter" >
-
-	<meta-data
-        android:name="com.google.android.gms.version"
-        android:value="@integer/google_play_services_version" />
+        android:theme="@style/AppTheme" >
+        <meta-data
+            android:name="com.google.android.gms.version"
+            android:value="@integer/google_play_services_version" />
 
         <activity
             android:name=".ui.activities.LoginActivity"
-            android:screenOrientation="sensorLandscape"
-            android:launchMode="standard"
-            android:finishOnTaskLaunch="true" >
+            android:finishOnTaskLaunch="true"
+            android:launchMode="standard" >
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />
+
                 <category android:name="android.intent.category.LAUNCHER" />
             </intent-filter>
         </activity>
-        <activity
-            android:name=".ui.activities.RacingActivity"
-            android:screenOrientation="sensorLandscape" >
-        </activity>
-        <activity
-            android:name=".ui.activities.ResultsCapturingActivity"
-            android:screenOrientation="sensorLandscape" >
-        </activity>
-        <activity
-            android:name=".ui.activities.WindActivity"
-            android:screenOrientation="sensorLandscape" >
-        </activity>
+        <activity android:name=".ui.activities.RacingActivity" />
+        <activity android:name=".ui.activities.ResultsCapturingActivity" />
+        <activity android:name=".ui.activities.WindActivity" />
         <activity
             android:name=".ui.activities.SettingsActivity"
-             >
-        </activity>
-        <activity
-            android:name="com.sap.sailing.racecommittee.app.ui.activities.SystemInformationActivity"
-            android:screenOrientation="sensorLandscape" >
-        </activity>
+            android:theme="@style/Theme.Welter" />
+        <activity android:name=".ui.activities.SystemInformationActivity" />
 
         <service
             android:name="com.sap.sailing.racecommittee.app.services.RaceStateService"
             android:enabled="true"
             android:exported="false" >
             <intent-filter>
-                <action android:name="com.sap.sailing.racecommittee.app.action.registerRace" />
-                <action android:name="com.sap.sailing.racecommittee.app.action.clearRaces" />
-                <action android:name="com.sap.sailing.racecommittee.app.action.alarmAction" />
                 <action android:name="com.sap.sailing.racecommittee.app.action.startProcedureSpecificAction" />
             </intent-filter>
         </service>
@@ -92,9 +74,8 @@
             </intent-filter>
 
             <meta-data
-                android:name="com.sap.sailing.android.shared.services.sending.messageRestorer"
+                android:name="com.sap.sailing.racecommittee.app.services.sending.messageRestorer"
                 android:value="com.sap.sailing.racecommittee.app.services.sending.EventRestorer" />
-
         </service>
 
         <receiver android:name="com.sap.sailing.racecommittee.app.services.sending.ConnectivityChangedReceiver" >
