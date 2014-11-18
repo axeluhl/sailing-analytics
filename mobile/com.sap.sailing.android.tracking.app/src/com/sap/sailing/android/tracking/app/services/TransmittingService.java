@@ -400,11 +400,7 @@ public class TransmittingService extends Service {
 
         @Override
         public void onResponse(JSONObject response) {
-        	System.out.println("FixListener#onResponse: " + response);
-        	System.out.println("ids: " + ids);
-
-        	deleteSynced(ids);
-        	
+        	deleteSynced(ids);        	
         	markSuccessfulTransmission();
         	//markAsSynced(ids);
         }
