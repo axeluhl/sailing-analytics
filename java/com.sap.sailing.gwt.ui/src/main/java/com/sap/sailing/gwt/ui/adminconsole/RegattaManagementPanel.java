@@ -6,14 +6,12 @@ import java.util.HashSet;
 import java.util.LinkedHashMap;
 import java.util.List;
 
-import com.google.gwt.dom.client.Style.Unit;
 import com.google.gwt.event.dom.client.ClickEvent;
 import com.google.gwt.event.dom.client.ClickHandler;
 import com.google.gwt.user.client.Window;
 import com.google.gwt.user.client.rpc.AsyncCallback;
 import com.google.gwt.user.client.ui.Button;
-import com.google.gwt.user.client.ui.Grid;
-import com.google.gwt.user.client.ui.HasVerticalAlignment;
+import com.google.gwt.user.client.ui.CaptionPanel;
 import com.google.gwt.user.client.ui.HorizontalPanel;
 import com.google.gwt.user.client.ui.SimplePanel;
 import com.google.gwt.user.client.ui.VerticalPanel;
@@ -40,7 +38,7 @@ import com.sap.sse.gwt.client.dialog.DataEntryDialog.DialogCallback;
  * @author Frank Mittag (C5163974)
  * 
  */
-public class RegattaStructureManagementPanel extends SimplePanel implements RegattasDisplayer, RegattaSelectionChangeListener {
+public class RegattaManagementPanel extends SimplePanel implements RegattasDisplayer, RegattaSelectionChangeListener {
     private final SailingServiceAsync sailingService;
     private final ErrorReporter errorReporter;
     private final StringMessages stringMessages;
@@ -51,8 +49,10 @@ public class RegattaStructureManagementPanel extends SimplePanel implements Rega
 
     private RegattaListComposite regattaListComposite;
     private RegattaDetailsComposite regattaDetailsComposite;
+
+    private final CaptionPanel regattasPanel;
     
-    public RegattaStructureManagementPanel(SailingServiceAsync sailingService, ErrorReporter errorReporter,
+    public RegattaManagementPanel(SailingServiceAsync sailingService, ErrorReporter errorReporter,
             StringMessages stringMessages, RegattaRefresher regattaRefresher) {
         this.sailingService = sailingService;
         this.stringMessages = stringMessages;
@@ -63,6 +63,11 @@ public class RegattaStructureManagementPanel extends SimplePanel implements Rega
         setWidget(mainPanel);
         mainPanel.setWidth("100%");
 
+        regattasPanel = new CaptionPanel(stringMessages.regattas());
+        mainPanel.add(regattasPanel);
+        VerticalPanel regattasContentPanel = new VerticalPanel();
+        regattasPanel.setContentWidget(regattasContentPanel);
+        
         HorizontalPanel regattaManagementControlsPanel = new HorizontalPanel();
         regattaManagementControlsPanel.setSpacing(5);
         
@@ -94,23 +99,19 @@ public class RegattaStructureManagementPanel extends SimplePanel implements Rega
             }
         });
         regattaManagementControlsPanel.add(removeRegattaButton);
-        mainPanel.add(regattaManagementControlsPanel);
+        regattasContentPanel.add(regattaManagementControlsPanel);
 
-        Grid grid = new Grid(1 ,2);
-        mainPanel.add(grid);
-        
         regattaSelectionProvider = new RegattaSelectionModel(true);
         regattaSelectionProvider.addRegattaSelectionChangeListener(this);
         
         regattaListComposite = new RegattaListComposite(sailingService, regattaSelectionProvider, regattaRefresher, errorReporter, stringMessages);
         regattaListComposite.ensureDebugId("RegattaListComposite");
-        grid.setWidget(0, 0, regattaListComposite);
-        grid.getRowFormatter().setVerticalAlign(0, HasVerticalAlignment.ALIGN_TOP);
-        grid.getColumnFormatter().getElement(1).getStyle().setPaddingTop(2.0, Unit.EM);
+        regattasContentPanel.add(regattaListComposite);
+        
         regattaDetailsComposite = new RegattaDetailsComposite(sailingService, regattaRefresher, errorReporter, stringMessages);
         regattaDetailsComposite.ensureDebugId("RegattaDetailsComposite");
         regattaDetailsComposite.setVisible(false);
-        grid.setWidget(0, 1, regattaDetailsComposite);
+        mainPanel.add(regattaDetailsComposite);
     }
 
     protected void removeRegattas(Collection<RegattaIdentifier> regattas) {
