@@ -31,7 +31,7 @@ public class DeviceMappingImpl<ItemType extends WithID> implements DeviceMapping
         if (originalRaceLogEventId != null) originalRaceLogEventIds.add(originalRaceLogEventId);
     }
 
-    public DeviceMappingImpl(ItemType mappedTo, DeviceIdentifier device, TimeRange timeRange, List<Serializable> originalRaceLogEventIds) {
+    public DeviceMappingImpl(ItemType mappedTo, DeviceIdentifier device, TimeRange timeRange, List<? extends Serializable> originalRaceLogEventIds) {
         this(mappedTo, device, timeRange);
         if (originalRaceLogEventIds != null) this.originalRaceLogEventIds.addAll(originalRaceLogEventIds);
     }
