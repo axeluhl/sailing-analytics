@@ -1,21 +1,23 @@
 package com.sap.sailing.gwt.ui.shared;
 
-import java.io.Serializable;
 import java.util.Date;
 import java.util.List;
+import java.util.UUID;
 
-public class DeviceMappingDTO implements Serializable {
-    private static final long serialVersionUID = -3272980620254526040L;
+import com.google.gwt.user.client.rpc.IsSerializable;
+import com.sap.sailing.domain.common.racelog.tracking.MappableToDevice;
+
+public class DeviceMappingDTO implements IsSerializable {
     public DeviceIdentifierDTO deviceIdentifier;
     public Date from;
     public Date to;
-    public Serializable mappedTo;
-    public List<Serializable> originalRaceLogEventIds;
+    public MappableToDevice mappedTo;
+    public List<UUID> originalRaceLogEventIds;
     
     protected DeviceMappingDTO() {}
     
-    public DeviceMappingDTO(DeviceIdentifierDTO deviceId, Date from, Date to, Serializable mappedTo,
-            List<Serializable> originalRaceLogEventIds) {
+    public DeviceMappingDTO(DeviceIdentifierDTO deviceId, Date from, Date to, MappableToDevice mappedTo,
+            List<UUID> originalRaceLogEventIds) {
         this.deviceIdentifier = deviceId;
         this.from = from;
         this.to = to;

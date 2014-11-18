@@ -11,6 +11,7 @@ import com.google.gwt.user.client.ui.Widget;
 import com.sap.sailing.gwt.home.client.app.HomePlacesNavigator;
 import com.sap.sailing.gwt.home.client.app.PlaceNavigation;
 import com.sap.sailing.gwt.home.client.place.solutions.SolutionsPlace;
+import com.sap.sailing.gwt.home.client.place.solutions.SolutionsPlace.SolutionsNavigationTabs;
 import com.sap.sailing.gwt.home.client.place.sponsoring.SponsoringPlace;
 
 public class MainSponsors extends Composite {
@@ -34,7 +35,7 @@ public class MainSponsors extends Composite {
         MainSponsorsResources.INSTANCE.css().ensureInjected();
         initWidget(uiBinder.createAndBindUi(this));
         
-        solutionsNavigation = navigator.getSolutionsNavigation();
+        solutionsNavigation = navigator.getSolutionsNavigation(SolutionsNavigationTabs.SailingAnalytics);
         sponsoringNavigation = navigator.getSponsoringNavigation();
         
         solutionsPageLink.setHref(solutionsNavigation.getTargetUrl());

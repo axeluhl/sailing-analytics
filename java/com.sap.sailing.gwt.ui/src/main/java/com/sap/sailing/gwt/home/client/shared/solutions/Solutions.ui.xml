@@ -12,11 +12,11 @@
   <div class="{local_res.css.solutions_nav}">
     <div class="{res.mainCss.grid} {local_res.css.gridalternator}">
       <div class="{res.mediaCss.small12} {res.mediaCss.columns}">
-          <g:Anchor ui:field="sailingAnalyticsAnchor" href="javascript:;" styleName="{local_res.css.solutions_nav_link}"><ui:text from='{i18n.solutionsSAPHeadline}'/></g:Anchor>
-          <g:Anchor ui:field="raceAnchor" href="javascript:;" styleName="{local_res.css.solutions_nav_link}"><ui:text from='{i18n.solutionsRaceHeadline}'/></g:Anchor>
-          <g:Anchor ui:field="postRaceAnchor" href="javascript:;" styleName="{local_res.css.solutions_nav_link}"><ui:text from='{i18n.solutionsPostHeadline}'/></g:Anchor>
-          <g:Anchor ui:field="trainingDiaryAnchor" href="javascript:;" styleName="{local_res.css.solutions_nav_link}"><ui:text from='{i18n.solutionsTrainingHeadline}'/></g:Anchor>
-          <g:Anchor ui:field="simulatorAnchor" href="javascript:;" styleName="{local_res.css.solutions_nav_link}" ><ui:text from='{i18n.solutionsSimulatorHeadline}'/></g:Anchor>
+          <g:Anchor ui:field="sailingAnalyticsAnchor" styleName="{local_res.css.solutions_nav_link}"><ui:text from='{i18n.solutionsSAPHeadline}'/></g:Anchor>
+          <g:Anchor ui:field="raceAnchor" styleName="{local_res.css.solutions_nav_link}"><ui:text from='{i18n.solutionsRaceHeadline}'/></g:Anchor>
+          <g:Anchor ui:field="postRaceAnchor" styleName="{local_res.css.solutions_nav_link}"><ui:text from='{i18n.solutionsPostHeadline}'/></g:Anchor>
+          <g:Anchor ui:field="trainingDiaryAnchor" styleName="{local_res.css.solutions_nav_link}"><ui:text from='{i18n.solutionsTrainingHeadline}'/></g:Anchor>
+          <g:Anchor ui:field="simulatorAnchor" styleName="{local_res.css.solutions_nav_link}" ><ui:text from='{i18n.solutionsSimulatorHeadline}'/></g:Anchor>
 	  </div>
     </div>
   </div>

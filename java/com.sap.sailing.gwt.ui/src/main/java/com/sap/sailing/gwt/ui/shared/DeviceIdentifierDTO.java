@@ -1,9 +1,8 @@
 package com.sap.sailing.gwt.ui.shared;
 
-import java.io.Serializable;
+import com.google.gwt.user.client.rpc.IsSerializable;
 
-public class DeviceIdentifierDTO implements Serializable {
-    private static final long serialVersionUID = 1171014272760543228L;
+public class DeviceIdentifierDTO implements IsSerializable {
     public String deviceType;
     public String deviceId;
     
