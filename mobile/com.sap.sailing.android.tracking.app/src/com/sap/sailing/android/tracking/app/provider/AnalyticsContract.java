@@ -7,25 +7,25 @@ import android.provider.BaseColumns;
 public class AnalyticsContract {
 
 	interface CompetitorColumns {
-		String COMPETITOR_ID = "id";
-		String COMPETITOR_DISPLAY_NAME = "display_name";
-		String COMPETITOR_COUNTRY_CODE = "country_code";
-		String COMPETITOR_NATIONALITY = "nationality";
-		String COMPETITOR_SAIL_ID = "saild_id";
+		String COMPETITOR_ID = "competitor_id";
+		String COMPETITOR_DISPLAY_NAME = "competitor_display_name";
+		String COMPETITOR_COUNTRY_CODE = "competitor_country_code";
+		String COMPETITOR_NATIONALITY = "competitor_nationality";
+		String COMPETITOR_SAIL_ID = "competitor_saild_id";
 		String COMPETITOR_LEADERBOARD_FK = "leaderboard_id";
 	}
 
 	interface LeaderboardColumns {
-		String LEADERBOARD_NAME = "name";
+		String LEADERBOARD_NAME = "leaderboard_name";
 	}
 
 	interface EventColumns {
-		String EVENT_ID = "id";
+		String EVENT_ID = "event_id";
 		String EVENT_DATE_END = "date_end";
 		String EVENT_DATE_START = "date_start";
-		String EVENT_SERVER = "server";
+		String EVENT_SERVER = "event_server";
 		String EVENT_IMAGE_URL = "image_url";
-		String EVENT_NAME = "name";
+		String EVENT_NAME = "event_name";
 		String EVENT_LEADERBOARD_FK = "leaderboard_id";
 	}
 
@@ -54,9 +54,9 @@ public class AnalyticsContract {
 	private static final String PATH_LEADERBOARD = "leaderboards";
 	private static final String PATH_SENSOR_GPS = "sensor_gps";
 
-	public static class CheckEventLeaderboardCompetitorExists {
+	public static class EventLeaderboardCompetitorJoined {
 		public final static Uri CONTENT_URI = BASE_CONTENT_URI.buildUpon()
-				.appendPath("check_event_leaderboard_competitor_exists")
+				.appendPath("event_leaderboard_competitor_joined")
 				.build();
 	}
 

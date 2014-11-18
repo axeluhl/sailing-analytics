@@ -45,7 +45,7 @@ public class AnalyticsProvider extends ContentProvider {
     private static final int SENSOR_GPS = 500;
     private static final int SENSOR_GPS_ID = 501;
     
-    private static final int CHECK_EVENT_LEADERBOARD_COMPETITOR_EXISTS = 600;
+    private static final int EVENT_LEADERBOARD_COMPETITOR_JOINED = 600;
     
     private static UriMatcher buildUriMatcher() {
         final UriMatcher matcher = new UriMatcher(UriMatcher.NO_MATCH);
@@ -66,7 +66,7 @@ public class AnalyticsProvider extends ContentProvider {
         matcher.addURI(authority, "sensor_gps", SENSOR_GPS);
         matcher.addURI(authority, "sensor_gps/#", SENSOR_GPS_ID);
         
-        matcher.addURI(authority, "check_event_leaderboard_competitor_exists", CHECK_EVENT_LEADERBOARD_COMPETITOR_EXISTS);
+        matcher.addURI(authority, "event_leaderboard_competitor_joined", EVENT_LEADERBOARD_COMPETITOR_JOINED);
         
         return matcher;
     }
@@ -100,7 +100,7 @@ public class AnalyticsProvider extends ContentProvider {
         
         switch (sUriMatcher.match(uri)) {
         
-            case CHECK_EVENT_LEADERBOARD_COMPETITOR_EXISTS:
+            case EVENT_LEADERBOARD_COMPETITOR_JOINED:
             	SQLiteQueryBuilder qb = new SQLiteQueryBuilder();
             	qb.setTables(Tables.EVENTS_JOIN_LEADERBOARDS_JOIN_COMPETITORS);
             	cursor = qb.query(db, projection, selection, selectionArgs, null, null, sortOrder);

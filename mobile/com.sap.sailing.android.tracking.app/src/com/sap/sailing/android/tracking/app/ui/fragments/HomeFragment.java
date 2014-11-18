@@ -53,10 +53,9 @@ import com.sap.sailing.android.tracking.app.provider.AnalyticsContract;
 import com.sap.sailing.android.tracking.app.provider.AnalyticsContract.Competitor;
 import com.sap.sailing.android.tracking.app.provider.AnalyticsContract.Event;
 import com.sap.sailing.android.tracking.app.provider.AnalyticsContract.Leaderboard;
-import com.sap.sailing.android.tracking.app.provider.AnalyticsProvider;
 import com.sap.sailing.android.tracking.app.ui.activities.RegattaActivity;
 import com.sap.sailing.android.tracking.app.utils.AppPreferences;
-import com.sap.sailing.android.tracking.app.utils.CheckinQRCodeHelper;
+import com.sap.sailing.android.tracking.app.utils.CheckinHelper;
 import com.sap.sailing.android.tracking.app.utils.VolleyHelper;
 import com.sap.sailing.domain.racelog.tracking.DeviceIdentifier;
 import com.sap.sailing.domain.racelog.tracking.impl.SmartphoneUUIDIdentifierImpl;
@@ -147,10 +146,9 @@ public class HomeFragment extends BaseFragment implements
 
 			String leaderboardNameFromQR;
 			try {
-				leaderboardNameFromQR = URLEncoder
-						.encode(uri
-								.getQueryParameter(CheckinQRCodeHelper.LEADERBOARD_NAME),
-								"UTF-8").replace("+", "%20");
+				leaderboardNameFromQR = URLEncoder.encode(
+						uri.getQueryParameter(CheckinHelper.LEADERBOARD_NAME),
+						"UTF-8").replace("+", "%20");
 			} catch (UnsupportedEncodingException e) {
 				ExLog.e(getActivity(), TAG,
 						"Failed to encode leaderboard name: " + e.getMessage());
@@ -158,12 +156,12 @@ public class HomeFragment extends BaseFragment implements
 			}
 
 			final String competitorId = uri
-					.getQueryParameter(CheckinQRCodeHelper.COMPETITOR_ID);
+					.getQueryParameter(CheckinHelper.COMPETITOR_ID);
 			final String checkinURLStr = prefs.getServerURL()
 					+ prefs.getServerCheckinPath().replace(
 							"{leaderboard-name}", leaderboardNameFromQR);
 			final String eventId = uri
-					.getQueryParameter(CheckinQRCodeHelper.EVENT_ID);
+					.getQueryParameter(CheckinHelper.EVENT_ID);
 			final String leaderboardName = leaderboardNameFromQR;
 
 			final DeviceIdentifier deviceUuid = new SmartphoneUUIDIdentifierImpl(
@@ -288,7 +286,8 @@ public class HomeFragment extends BaseFragment implements
 															data.eventFirstImageUrl = eventFirstImageUrl;
 															data.eventServerUrl = checkinURLStr;
 															data.leaderboardName = leaderboardName;
-															data.deviceUid = deviceUuid.getStringRepresentation();
+															data.deviceUid = deviceUuid
+																	.getStringRepresentation();
 
 															displayUserConfirmationScreen(data);
 
@@ -337,7 +336,7 @@ public class HomeFragment extends BaseFragment implements
 
 			VolleyHelper.getInstance(getActivity()).addRequest(
 					getLeaderboardRequest);
-			
+
 		} else if (resultCode == Activity.RESULT_CANCELED) {
 			Toast.makeText(getActivity(), "Scanning canceled",
 					Toast.LENGTH_LONG).show();
@@ -403,111 +402,128 @@ public class HomeFragment extends BaseFragment implements
 	 */
 	private boolean eventLeaderboardCompetitorCombnationAvailable(
 			String eventId, String leaderboardName, String competitorId) {
-		
-		ContentResolver cr = getActivity().getContentResolver();
-		String sel = "leaderboards.name = \"" + leaderboardName
-				+ "\" AND competitors.id = \"" + competitorId + "\" AND events.id = \"" + eventId + "\"";
 
-		int count = cr
-				.query(AnalyticsContract.CheckEventLeaderboardCompetitorExists.CONTENT_URI,
-						null, sel, null, null).getCount();
+		ContentResolver cr = getActivity().getContentResolver();
+		String sel = "leaderboards.leaderboard_name = \"" + leaderboardName
+				+ "\" AND competitors.competitor_id = \"" + competitorId
+				+ "\" AND events.event_id = \"" + eventId + "\"";
+
+		int count = cr.query(
+				AnalyticsContract.EventLeaderboardCompetitorJoined.CONTENT_URI,
+				null, sel, null, null).getCount();
 
 		return count == 0;
 	}
 
 	/**
-	 * Perform a checking request and launch RegattaAcitivity afterwards
+	 * Perform a checkin request and launch RegattaAcitivity afterwards
 	 * 
 	 * TODO: Google Cloud Messaging token?
 	 * 
 	 * @param deviceMappingData
 	 */
-	private void checkInWithAPIAndDisplayTrackingActivity(CheckinData checkinData) {		
+	private void checkInWithAPIAndDisplayTrackingActivity(
+			CheckinData checkinData) {
 		if (eventLeaderboardCompetitorCombnationAvailable(checkinData.eventId,
 				checkinData.leaderboardName, checkinData.competitorId)) {
-			
-			// inserting leaderboard first in order to get the ID. 
-			// This should be atomic, but couldn't get withValueBackReference to work yet.
-			
+
+			// inserting leaderboard first in order to get the ID.
+			// This should be atomic, but couldn't get withValueBackReference to
+			// work yet.
+
 			ContentResolver cr = getActivity().getContentResolver();
-			
+
 			ContentValues clv = new ContentValues();
 			clv.put(Leaderboard.LEADERBOARD_NAME, checkinData.leaderboardName);
 			cr.insert(Leaderboard.CONTENT_URI, clv);
-			
-			Cursor cur = cr.query(Leaderboard.CONTENT_URI, null, null, null, null);
+
+			Cursor cur = cr.query(Leaderboard.CONTENT_URI, null, null, null,
+					null);
 			long lastLeaderboardId = 0;
-			
-			if (cur.moveToLast())
-			{
-				lastLeaderboardId = cur.getLong(cur.getColumnIndex(BaseColumns._ID));
+
+			if (cur.moveToLast()) {
+				lastLeaderboardId = cur.getLong(cur
+						.getColumnIndex(BaseColumns._ID));
 			}
-			
+
 			cur.close();
-			
+
 			// now, with the leaderboard id, insert event and competitor
 			// todo: fix this so its atomic.
-			
-			ArrayList<ContentProviderOperation> opList = new
-		            ArrayList<ContentProviderOperation>();
-		
+
+			ArrayList<ContentProviderOperation> opList = new ArrayList<ContentProviderOperation>();
+
 			ContentValues cev = new ContentValues();
 			cev.put(Event.EVENT_ID, checkinData.eventId);
 			cev.put(Event.EVENT_NAME, checkinData.eventName);
-			cev.put(Event.EVENT_DATE_START, Long.parseLong(checkinData.eventStartDateStr));
-			cev.put(Event.EVENT_DATE_END, Long.parseLong(checkinData.eventEndDateStr));
+			cev.put(Event.EVENT_DATE_START,
+					Long.parseLong(checkinData.eventStartDateStr));
+			cev.put(Event.EVENT_DATE_END,
+					Long.parseLong(checkinData.eventEndDateStr));
 			cev.put(Event.EVENT_SERVER, checkinData.eventServerUrl);
 			cev.put(Event.EVENT_IMAGE_URL, checkinData.eventFirstImageUrl);
 			cev.put(Event.EVENT_LEADERBOARD_FK, lastLeaderboardId);
 
-			opList.add(ContentProviderOperation.
-		            newInsert(Event.CONTENT_URI).withValues(cev).build());
-			
+			opList.add(ContentProviderOperation.newInsert(Event.CONTENT_URI)
+					.withValues(cev).build());
+
 			ContentValues ccv = new ContentValues();
-			
-			ccv.put(Competitor.COMPETITOR_COUNTRY_CODE, checkinData.competitorCountryCode);
-			ccv.put(Competitor.COMPETITOR_DISPLAY_NAME, checkinData.competitorDisplayName);
+
+			ccv.put(Competitor.COMPETITOR_COUNTRY_CODE,
+					checkinData.competitorCountryCode);
+			ccv.put(Competitor.COMPETITOR_DISPLAY_NAME,
+					checkinData.competitorDisplayName);
 			ccv.put(Competitor.COMPETITOR_ID, checkinData.competitorId);
-			ccv.put(Competitor.COMPETITOR_NATIONALITY, checkinData.competitorNationality);
+			ccv.put(Competitor.COMPETITOR_NATIONALITY,
+					checkinData.competitorNationality);
 			ccv.put(Competitor.COMPETITOR_SAIL_ID, checkinData.competitorSailId);
 			ccv.put(Competitor.COMPETITOR_LEADERBOARD_FK, lastLeaderboardId);
-			
-			opList.add(ContentProviderOperation.
-		            newInsert(Competitor.CONTENT_URI).withValues(ccv).build());
+
+			opList.add(ContentProviderOperation
+					.newInsert(Competitor.CONTENT_URI).withValues(ccv).build());
 
 			try {
-				for (ContentProviderOperation op: opList)
-				{
+				for (ContentProviderOperation op : opList) {
 					System.out.println("** INSERT: " + op);
 				}
-				
+
 				cr.applyBatch(AnalyticsContract.CONTENT_AUTHORITY, opList);
 			} catch (RemoteException e1) {
-				ExLog.e(getActivity(), TAG, "Batch insert failed: " + e1.getMessage());
+				ExLog.e(getActivity(), TAG,
+						"Batch insert failed: " + e1.getMessage());
 				displayDatabaseError();
 				return;
 			} catch (OperationApplicationException e1) {
-				ExLog.e(getActivity(), TAG, "Batch insert failed: " + e1.getMessage());
+				ExLog.e(getActivity(), TAG,
+						"Batch insert failed: " + e1.getMessage());
 				displayDatabaseError();
 				return;
 			}
-			
-			if (BuildConfig.DEBUG)
-			{
-				ExLog.i(getActivity(), TAG, "Batch-insert of checkinData completed.");
+
+			if (BuildConfig.DEBUG) {
+				ExLog.i(getActivity(), TAG,
+						"Batch-insert of checkinData completed.");
 			}
+		} else {
+			ExLog.w(getActivity(), TAG,
+					"Combination of eventId, leaderboardName and competitorId already exists!");
 		}
-		else
-		{
-			ExLog.w(getActivity(), TAG, "Combination of eventId, leaderboardName and competitorId already exists!");
-		}
-		
+
+		performAPICheckin(checkinData);
+	}
+
+	/**
+	 * Checkin with API.
+	 * 
+	 * @param checkinData
+	 */
+	private void performAPICheckin(CheckinData checkinData) {
 		Date date = new Date();
 
 		try {
-			JSONObject requestObject = CheckinQRCodeHelper.getCheckinJson(
-					checkinData.competitorId,
-					checkinData.deviceUid, "TODO!!", date.getTime());
+			JSONObject requestObject = CheckinHelper.getCheckinJson(
+					checkinData.competitorId, checkinData.deviceUid, "TODO!!",
+					date.getTime());
 
 			JsonObjectRequest checkinRequest = new JsonObjectRequest(
 					checkinData.eventServerUrl, requestObject,
@@ -521,7 +537,7 @@ public class HomeFragment extends BaseFragment implements
 					"Failed to generate checkin JSON: " + e.getMessage());
 			displayAPIErrorRecommendRetry();
 		}
-    }
+	}
 
 	/**
 	 * Shows a pop-up-dialog that informs the user than an API-call has failed
@@ -582,11 +598,13 @@ public class HomeFragment extends BaseFragment implements
 	public Loader<Cursor> onCreateLoader(int loaderId, Bundle bundle) {
 		switch (loaderId) {
 		case REGATTA_LOADER:
-			String[] projection = new String[] { Event._ID, Event.EVENT_NAME,
-					Event.EVENT_SERVER };
-			return new CursorLoader(getActivity(),
-					AnalyticsContract.Event.CONTENT_URI, projection, null,
-					null, null);
+			String[] projection = new String[] { "events.event_id",
+					"events._id", "events.event_name", "events.event_server",
+					"competitors.competitor_id", "leaderboards.leaderboard_name" };
+			return new CursorLoader(
+					getActivity(),
+					AnalyticsContract.EventLeaderboardCompetitorJoined.CONTENT_URI,
+					projection, null, null, null);
 
 		default:
 			return null;
@@ -651,24 +669,25 @@ public class HomeFragment extends BaseFragment implements
 		@Override
 		public void onItemClick(AdapterView<?> parent, View view, int position,
 				long id) {
-			Cursor cursor = (Cursor) mAdapter.getItem(position);
-			if (cursor.moveToFirst()) {
-				ExLog.e(getActivity(), TAG,
-						"TODO: onItemClick not implemented yet.");
-				// prefs.setServerURL(cursor.getString(cursor.getColumnIndex(Event.EVENT_SERVER)));
-				// String eventId =
-				// cursor.getString(cursor.getColumnIndex(Event.EVENT_ID));
-				// String competitorId = cursor
-				// .getString(cursor
-				// .getColumnIndex(com.sap.sailing.android.tracking.app.provider.AnalyticsContract.Competitor.COMPETITOR_ID));
-				//
-				//
-				//
-				// checkInWithAPIAndDisplayTrackingActivity(deviceMappingData);
-				//
-				// VolleyHelper.getInstance(getActivity()).addRequest(
-				// checkInRequest(prefs.getServerURL(), eventId, competitorId));
-			}
+			Cursor cursor = (Cursor) mAdapter.getItem(position - 1); // -1, because there's a header row
+
+			prefs.setServerURL(cursor.getString(cursor
+					.getColumnIndex(Event.EVENT_SERVER)));
+
+			String competitorId = cursor.getString(cursor.getColumnIndex("competitor_id"));
+			String eventServer = cursor.getString(cursor.getColumnIndex("event_server"));
+			String leaderboardName = cursor.getString(cursor.getColumnIndex("leaderboard_name"));
+
+			CheckinData data = new CheckinData();
+
+			data.competitorId = competitorId;
+			data.deviceUid = new SmartphoneUUIDIdentifierImpl(
+					UUID.fromString(prefs.getDeviceIdentifier()))
+					.getStringRepresentation();
+			data.eventServerUrl = eventServer;
+			data.leaderboardName = leaderboardName;
+
+			performAPICheckin(data);
 		}
 	}
 
