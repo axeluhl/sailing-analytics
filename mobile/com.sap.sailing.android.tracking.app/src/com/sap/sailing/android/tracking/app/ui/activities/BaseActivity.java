@@ -13,6 +13,7 @@ import android.view.MenuItem;
 import com.sap.sailing.android.shared.logging.ExLog;
 import com.sap.sailing.android.tracking.app.R;
 import com.sap.sailing.android.tracking.app.utils.AppPreferences;
+import com.sap.sailing.android.tracking.app.utils.SqlDebugHelper;
 
 public class BaseActivity extends ActionBarActivity {
     private static final String TAG = SendingServiceAwareActivity.class.getName();
@@ -22,6 +23,9 @@ public class BaseActivity extends ActionBarActivity {
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         prefs = new AppPreferences(this);
+        
+        // TODO: Remove debug string
+        SqlDebugHelper.dumpAllTablesToConsole(this);
     }
     
     @Override
