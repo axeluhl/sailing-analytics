@@ -1,6 +1,19 @@
 <?xml version="1.0" encoding="utf-8"?>
 <PreferenceScreen xmlns:android="http://schemas.android.com/apk/res/android" >
     
+    <!--  Energy Saving -->
+    <PreferenceCategory android:title="@string/settings_category_energy_saving" >
+        <SwitchPreference
+            android:defaultValue="false"
+            android:key="@string/preference_energy_saving_enabled_key"
+            android:switchTextOn="@string/preference_energy_saving_is_enabled"
+            android:switchTextOff="@string/preference_energy_saving_is_disabled"
+            android:summaryOn="@string/prefrence_energy_saving_summary_is_enabled"
+            android:summaryOff="@string/prefrence_energy_saving_summary_is_disabled"
+            android:title="@string/energy_saving_enabled" />
+    </PreferenceCategory>
+    
+    <!--  Connection -->
     <PreferenceCategory android:title="@string/settings_category_connection" >
         <EditTextPreference
             android:defaultValue="@string/preference_device_identifier_default"

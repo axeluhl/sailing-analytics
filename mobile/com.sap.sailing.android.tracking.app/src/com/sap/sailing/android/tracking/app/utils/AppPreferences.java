@@ -89,4 +89,8 @@ public class AppPreferences {
     public void setCompetitorId(String id) {
         preferences.edit().putString(context.getString(R.string.preference_competitor_key), id).commit();
     }
+    
+    public boolean getEnergySavingEnabledByUser() {
+    	return preferences.getBoolean(context.getString(R.string.preference_energy_saving_enabled_key), false);
+    }
 }
