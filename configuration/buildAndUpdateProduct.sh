@@ -281,7 +281,7 @@ SERVER_NAME=subdomain_name_in_elb
 EVENT_ID=event_uid_this_replica_is_serving
 USE_ENVIRONMENT=replica
 MEMORY=4096m
-REPLICATE_ON_START=True
+REPLICATE_ON_START=com.sap.sailing.server.impl.RacingEventServiceImpl
 INSTALL_FROM_RELEASE=$SIMPLE_VERSION_INFO
     " >> $PROJECT_HOME/dist/$SIMPLE_VERSION_INFO/amazon-launch-config_replica.txt
      
