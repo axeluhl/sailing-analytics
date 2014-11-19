@@ -12,8 +12,6 @@ import org.junit.Test;
 import org.mockito.invocation.InvocationOnMock;
 import org.mockito.stubbing.Answer;
 
-import com.sap.sailing.domain.common.TimePoint;
-import com.sap.sailing.domain.common.impl.MillisecondsTimePoint;
 import com.sap.sailing.domain.common.racelog.RaceLogRaceStatus;
 import com.sap.sailing.domain.racelog.RaceLog;
 import com.sap.sailing.domain.racelog.RaceLogEvent;
@@ -24,6 +22,8 @@ import com.sap.sailing.domain.racelog.RaceLogStartTimeEvent;
 import com.sap.sailing.domain.racelog.analyzing.impl.RaceStatusAnalyzer;
 import com.sap.sailing.domain.racelog.impl.RaceLogEventAuthorImpl;
 import com.sap.sailing.domain.racelog.state.racingprocedure.RacingProcedure;
+import com.sap.sse.common.TimePoint;
+import com.sap.sse.common.impl.MillisecondsTimePoint;
 
 public class RaceStatusAnalyzerTest extends PassAwareRaceLogAnalyzerTest<RaceStatusAnalyzer, RaceLogRaceStatus> {
 

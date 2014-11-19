@@ -7,9 +7,7 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
-import com.sap.sailing.domain.common.TimePoint;
 import com.sap.sailing.domain.common.TimeRange;
-import com.sap.sailing.domain.common.WithID;
 import com.sap.sailing.domain.common.impl.TimeRangeImpl;
 import com.sap.sailing.domain.racelog.RaceLog;
 import com.sap.sailing.domain.racelog.RaceLogEvent;
@@ -19,6 +17,8 @@ import com.sap.sailing.domain.racelog.tracking.DeviceIdentifier;
 import com.sap.sailing.domain.racelog.tracking.DeviceMapping;
 import com.sap.sailing.domain.racelog.tracking.DeviceMappingEvent;
 import com.sap.sailing.domain.racelog.tracking.impl.DeviceMappingImpl;
+import com.sap.sse.common.TimePoint;
+import com.sap.sse.common.WithID;
 
 /**
  * Extracts the {@link DeviceMapping}s with the appropriate {@link TimeRange}s from the {@link RaceLog}.

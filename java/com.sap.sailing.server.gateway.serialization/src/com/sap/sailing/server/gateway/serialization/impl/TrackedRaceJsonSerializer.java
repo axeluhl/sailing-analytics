@@ -2,9 +2,9 @@ package com.sap.sailing.server.gateway.serialization.impl;
 
 import org.json.simple.JSONObject;
 
-import com.sap.sailing.domain.common.TimePoint;
 import com.sap.sailing.domain.tracking.TrackedRace;
 import com.sap.sailing.server.gateway.serialization.JsonSerializer;
+import com.sap.sse.common.TimePoint;
 
 public class TrackedRaceJsonSerializer implements JsonSerializer<TrackedRace> {
     public static final String FIELD_NAME = "name";

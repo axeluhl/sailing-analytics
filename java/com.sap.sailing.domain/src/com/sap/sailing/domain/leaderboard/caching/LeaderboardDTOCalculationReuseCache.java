@@ -7,19 +7,19 @@ import com.sap.sailing.domain.base.Leg;
 import com.sap.sailing.domain.common.Bearing;
 import com.sap.sailing.domain.common.LegType;
 import com.sap.sailing.domain.common.NoWindException;
-import com.sap.sailing.domain.common.TimePoint;
 import com.sap.sailing.domain.leaderboard.impl.AbstractSimpleLeaderboardImpl;
 import com.sap.sailing.domain.tracking.GPSFixTrack;
 import com.sap.sailing.domain.tracking.TrackedLeg;
 import com.sap.sailing.domain.tracking.TrackedRace;
 import com.sap.sailing.domain.tracking.Wind;
 import com.sap.sailing.domain.tracking.WindLegTypeAndLegBearingCache;
+import com.sap.sse.common.TimePoint;
 import com.sap.sse.common.Util;
 import com.sap.sse.common.Util.Triple;
 
 /**
  * A cache structure that is used for a single call to
- * {@link AbstractSimpleLeaderboardImpl#computeDTO(com.sap.sailing.domain.common.TimePoint, java.util.Collection, boolean, boolean, com.sap.sailing.domain.tracking.TrackedRegattaRegistry, com.sap.sailing.domain.base.DomainFactory)}.
+ * {@link AbstractSimpleLeaderboardImpl#computeDTO(com.sap.sse.common.TimePoint, java.util.Collection, boolean, boolean, com.sap.sailing.domain.tracking.TrackedRegattaRegistry, com.sap.sailing.domain.base.DomainFactory)}.
  * It is to be passed on to various query methods that may required common data that is expensive to compute and
  * depends on equal parameters, such as an equal time point. The underlying assumption is that during one leaderboard (re-)calculation cycle the
  * dynamic changes in the wind field and the mark positions can safely be ignored so that wind data for competitors and legs and the legs'

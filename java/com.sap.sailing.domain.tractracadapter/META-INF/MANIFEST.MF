@@ -10,6 +10,7 @@ Require-Bundle: com.sap.sailing.domain,
  com.googlecode.java-diff-utils;bundle-version="1.3.0",
  com.sap.sailing.domain.common,
  com.sap.sailing.server.gateway.serialization;bundle-version="1.0.0",
+ com.sap.sse, 
  com.sap.sse.common
 Export-Package: com.sap.sailing.domain.tractracadapter,
  com.sap.sailing.domain.tractracadapter.impl;

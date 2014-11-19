@@ -25,8 +25,8 @@ import org.openqa.selenium.WebDriver;
 import org.openqa.selenium.remote.Augmenter;
 import org.openqa.selenium.remote.RemoteWebDriver;
 
-import com.sap.sailing.domain.common.Duration;
-import com.sap.sailing.domain.common.impl.MillisecondsTimePoint;
+import com.sap.sse.common.Duration;
+import com.sap.sse.common.impl.MillisecondsTimePoint;
 import com.sap.sailing.selenium.core.Managed;
 import com.sap.sailing.selenium.core.SeleniumRunner;
 import com.sap.sailing.selenium.core.TestEnvironment;

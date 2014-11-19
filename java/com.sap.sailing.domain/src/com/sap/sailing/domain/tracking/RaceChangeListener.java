@@ -6,8 +6,8 @@ import com.sap.sailing.domain.base.Competitor;
 import com.sap.sailing.domain.base.CourseListener;
 import com.sap.sailing.domain.base.Mark;
 import com.sap.sailing.domain.base.Waypoint;
-import com.sap.sailing.domain.common.TimePoint;
 import com.sap.sailing.domain.common.WindSource;
+import com.sap.sse.common.TimePoint;
 
 
 public interface RaceChangeListener extends CourseListener {

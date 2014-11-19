@@ -7,12 +7,12 @@ import com.sap.sailing.domain.base.Competitor;
 import com.sap.sailing.domain.base.Leg;
 import com.sap.sailing.domain.common.Bearing;
 import com.sap.sailing.domain.common.Distance;
-import com.sap.sailing.domain.common.Duration;
 import com.sap.sailing.domain.common.LegType;
 import com.sap.sailing.domain.common.NoWindException;
 import com.sap.sailing.domain.common.Speed;
 import com.sap.sailing.domain.common.SpeedWithBearing;
-import com.sap.sailing.domain.common.TimePoint;
+import com.sap.sse.common.Duration;
+import com.sap.sse.common.TimePoint;
 import com.sap.sse.common.Util;
 
 public interface TrackedLegOfCompetitor extends Serializable {

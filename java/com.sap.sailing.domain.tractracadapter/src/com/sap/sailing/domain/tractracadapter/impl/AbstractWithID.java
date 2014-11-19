@@ -1,6 +1,6 @@
 package com.sap.sailing.domain.tractracadapter.impl;
 
-import com.sap.sailing.domain.common.WithID;
+import com.sap.sse.common.WithID;
 
 /**
  * Implements hash code and equality based on the control point's UUID.

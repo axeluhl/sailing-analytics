@@ -15,10 +15,10 @@ import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ConcurrentMap;
 
 import com.sap.sailing.domain.common.RegattaAndRaceIdentifier;
-import com.sap.sailing.domain.common.TimePoint;
 import com.sap.sailing.domain.common.media.MediaTrack;
 import com.sap.sailing.util.impl.LockUtil;
 import com.sap.sailing.util.impl.NamedReentrantReadWriteLock;
+import com.sap.sse.common.TimePoint;
 
 class MediaLibrary {
 

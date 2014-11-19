@@ -2,8 +2,8 @@ package com.sap.sailing.domain.common.confidence;
 
 import com.sap.sailing.domain.common.Distance;
 import com.sap.sailing.domain.common.Position;
-import com.sap.sailing.domain.common.TimePoint;
 import com.sap.sailing.domain.common.confidence.impl.ConfidenceBasedAveragerFactoryImpl;
+import com.sap.sse.common.TimePoint;
 
 public interface ConfidenceFactory {
     ConfidenceFactory INSTANCE = new ConfidenceBasedAveragerFactoryImpl();

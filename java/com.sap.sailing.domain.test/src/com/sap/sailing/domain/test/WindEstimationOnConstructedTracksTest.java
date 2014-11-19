@@ -24,12 +24,10 @@ import com.sap.sailing.domain.common.Distance;
 import com.sap.sailing.domain.common.LegType;
 import com.sap.sailing.domain.common.NoWindException;
 import com.sap.sailing.domain.common.Position;
-import com.sap.sailing.domain.common.TimePoint;
 import com.sap.sailing.domain.common.WindSourceType;
 import com.sap.sailing.domain.common.impl.DegreeBearingImpl;
 import com.sap.sailing.domain.common.impl.DegreePosition;
 import com.sap.sailing.domain.common.impl.KnotSpeedWithBearingImpl;
-import com.sap.sailing.domain.common.impl.MillisecondsTimePoint;
 import com.sap.sailing.domain.common.impl.NauticalMileDistance;
 import com.sap.sailing.domain.common.impl.WindSourceImpl;
 import com.sap.sailing.domain.tracking.DynamicGPSFixTrack;
@@ -44,7 +42,9 @@ import com.sap.sailing.domain.tracking.impl.GPSFixMovingImpl;
 import com.sap.sailing.domain.tracking.impl.MarkPassingImpl;
 import com.sap.sailing.domain.tracking.impl.TrackBasedEstimationWindTrackImpl;
 import com.sap.sailing.domain.tracking.impl.WindImpl;
+import com.sap.sse.common.TimePoint;
 import com.sap.sse.common.Util;
+import com.sap.sse.common.impl.MillisecondsTimePoint;
 
 public class WindEstimationOnConstructedTracksTest extends StoredTrackBasedTest {
     private List<Competitor> competitors;

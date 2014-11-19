@@ -23,23 +23,24 @@ import com.sap.sailing.domain.common.LeaderboardNameConstants;
 import com.sap.sailing.domain.common.RegattaAndRaceIdentifier;
 import com.sap.sailing.domain.common.RegattaNameAndRaceName;
 import com.sap.sailing.domain.common.WindSourceType;
-import com.sap.sailing.domain.common.impl.MillisecondsTimePoint;
 import com.sap.sailing.domain.common.impl.WindSourceImpl;
 import com.sap.sailing.domain.leaderboard.Leaderboard;
 import com.sap.sailing.domain.leaderboard.impl.LowPoint;
 import com.sap.sailing.domain.racelog.impl.EmptyRaceLogStore;
 import com.sap.sailing.domain.test.AbstractTracTracLiveTest;
 import com.sap.sailing.domain.tracking.DynamicTrackedRace;
-import com.sap.sailing.domain.tracking.RaceTrackingConnectivityParameters;
 import com.sap.sailing.domain.tracking.RaceHandle;
+import com.sap.sailing.domain.tracking.RaceTrackingConnectivityParameters;
 import com.sap.sailing.domain.tracking.TrackedRace;
-import com.sap.sailing.server.OperationExecutionListener;
-import com.sap.sailing.server.RacingEventServiceOperation;
+import com.sap.sailing.server.RacingEventService;
 import com.sap.sailing.server.operationaltransformation.AddColumnToLeaderboard;
 import com.sap.sailing.server.operationaltransformation.ConnectTrackedRaceToLeaderboardColumn;
 import com.sap.sailing.server.operationaltransformation.CreateFlexibleLeaderboard;
 import com.sap.sailing.server.operationaltransformation.CreateTrackedRace;
 import com.sap.sse.common.Util;
+import com.sap.sse.common.impl.MillisecondsTimePoint;
+import com.sap.sse.replication.OperationExecutionListener;
+import com.sap.sse.replication.OperationWithResult;
 
 public class TrackRaceReplicationTest extends AbstractServerReplicationTest {
     private TrackedRace masterTrackedRace;
@@ -70,9 +71,9 @@ public class TrackRaceReplicationTest extends AbstractServerReplicationTest {
         MillisecondsTimePoint startOfTracking = new MillisecondsTimePoint(cal.getTimeInMillis());
         cal.set(2011, 05, 23, 15, 14, 31);
         MillisecondsTimePoint endOfTracking = new MillisecondsTimePoint(cal.getTimeInMillis());
-        master.addOperationExecutionListener(new OperationExecutionListener() {
+        master.addOperationExecutionListener(new OperationExecutionListener<RacingEventService>() {
             @Override
-            public <T> void executed(RacingEventServiceOperation<T> operation) {
+            public <T> void executed(OperationWithResult<RacingEventService, T> operation) {
                 if (operation instanceof CreateTrackedRace) {
                     synchronized (notifier) {
                         notifier[0] = true;

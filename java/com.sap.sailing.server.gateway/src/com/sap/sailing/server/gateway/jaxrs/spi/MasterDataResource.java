@@ -73,62 +73,80 @@ public class MasterDataResource extends AbstractSailingServerResource {
                 }
             }
         }
-
         final TopLevelMasterData masterData = new TopLevelMasterData(groupsToExport,
                 getService().getAllEvents(), getService().getPersistentRegattasForRaceIDs(), getService()
                 .getAllMediaTracks(), exportWind);
-
-        ResponseBuilder resp;
+        final StreamingOutput streamingOutput;
         if (compress) {
-            StreamingOutput streamingOutput = new StreamingOutput() {
-
-                @Override
-                public void write(OutputStream output) throws IOException, WebApplicationException {
-                    ObjectOutputStream objectOutputStream = null;
-                    try {
-                        GZIPOutputStream gzip = new GZIPOutputStream(output);
-                        OutputStream outputStreamWithByteCounter = new ByteCountOutputStreamDecorator(gzip);
-                        objectOutputStream = new ObjectOutputStream(outputStreamWithByteCounter);
-
-                        masterData.setMasterDataExportFlagOnRaceColumns(true);
-                        // Actual start of streaming
-                        writeObjects(competitorIds, masterData, objectOutputStream);
-                    } finally {
-                        objectOutputStream.close();
-                        masterData.setMasterDataExportFlagOnRaceColumns(false);
-                    }
-                    long timeToExport = System.currentTimeMillis() - startTime;
-                    logger.info(String.format("Took %s ms to finish masterdataexport", timeToExport));
-                }
-            };
-            resp = Response.ok(streamingOutput).header("Content-Encoding", "gzip");
+            streamingOutput= new CompressingStreamingOutput(masterData, competitorIds, startTime);
         } else {
-            StreamingOutput streamingOutput = new StreamingOutput() {
-
-                @Override
-                public void write(OutputStream output) throws IOException, WebApplicationException {
-                    ObjectOutputStream objectOutputStream = null;
-                    try {
-                        OutputStream outputStreamWithByteCounter = new ByteCountOutputStreamDecorator(output);
-                        objectOutputStream = new ObjectOutputStream(outputStreamWithByteCounter);
-                        masterData.setMasterDataExportFlagOnRaceColumns(true);
-
-                        writeObjects(competitorIds, masterData, objectOutputStream);
-                    } finally {
-                        objectOutputStream.close();
-                        masterData.setMasterDataExportFlagOnRaceColumns(false);
-                        long timeToExport = System.currentTimeMillis() - startTime;
-                        logger.info(String.format("Took %s ms to finish masterdataexport", timeToExport));
-                    }
-                }
-            };
-            resp = Response.ok(streamingOutput);
+            streamingOutput = new NonCompressingStreamingOutput(masterData, competitorIds, startTime);
         }
-
+        final ResponseBuilder resp = Response.ok(streamingOutput);
+        if (compress) {
+            resp.header("Content-Encoding", "gzip");
+        }
         Response builtResponse = resp.build();
         long timeToExport = System.currentTimeMillis() - startTime;
         logger.info(String.format("Took %s ms to start masterdataexport-streaming.", timeToExport));
         return builtResponse;
+    }
+    
+    private abstract class AbstractStreamingOutput implements StreamingOutput {
+        private final TopLevelMasterData masterData;
+        private final List<Serializable> competitorIds;
+        private final long startTime;
+
+        protected AbstractStreamingOutput(TopLevelMasterData masterData, List<Serializable> competitorIds, long startTime) {
+            super();
+            this.masterData = masterData;
+            this.competitorIds = competitorIds;
+            this.startTime = startTime;
+        }
+        
+        protected abstract OutputStream wrapOutputStream(OutputStream outputStream) throws IOException;
+
+        @Override
+        public void write(OutputStream output) throws IOException, WebApplicationException {
+            ObjectOutputStream objectOutputStream = null;
+            try {
+                OutputStream gzipOrNot = wrapOutputStream(output);
+                OutputStream outputStreamWithByteCounter = new ByteCountOutputStreamDecorator(gzipOrNot);
+                objectOutputStream = new ObjectOutputStream(outputStreamWithByteCounter);
+                masterData.setMasterDataExportFlagOnRaceColumns(true);
+                // Actual start of streaming
+                writeObjects(competitorIds, masterData, objectOutputStream);
+            } finally {
+                objectOutputStream.close();
+                masterData.setMasterDataExportFlagOnRaceColumns(false);
+            }
+            long timeToExport = System.currentTimeMillis() - startTime;
+            logger.info(String.format("Took %s ms to finish masterdataexport", timeToExport));
+        }
+    }
+    
+    private class NonCompressingStreamingOutput extends AbstractStreamingOutput {
+        protected NonCompressingStreamingOutput(TopLevelMasterData masterData, List<Serializable> competitorIds,
+                long startTime) {
+            super(masterData, competitorIds, startTime);
+        }
+
+        @Override
+        protected OutputStream wrapOutputStream(OutputStream outputStream) {
+            return outputStream;
+        }
+    }
+    
+    private class CompressingStreamingOutput extends AbstractStreamingOutput {
+        protected CompressingStreamingOutput(TopLevelMasterData masterData, List<Serializable> competitorIds,
+                long startTime) {
+            super(masterData, competitorIds, startTime);
+        }
+
+        @Override
+        protected OutputStream wrapOutputStream(OutputStream outputStream) throws IOException {
+            return new GZIPOutputStream(outputStream);
+        }
     }
 
     private void writeObjects(final List<Serializable> competitorIds, final TopLevelMasterData masterData,

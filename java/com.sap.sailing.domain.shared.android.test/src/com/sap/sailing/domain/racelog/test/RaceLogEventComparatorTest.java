@@ -9,10 +9,10 @@ import org.junit.Before;
 import org.junit.Test;
 
 import com.sap.sailing.domain.base.Timed;
-import com.sap.sailing.domain.common.impl.MillisecondsTimePoint;
 import com.sap.sailing.domain.racelog.RaceLogEvent;
 import com.sap.sailing.domain.racelog.RaceLogEventAuthor;
 import com.sap.sailing.domain.racelog.impl.RaceLogEventComparator;
+import com.sap.sse.common.impl.MillisecondsTimePoint;
 
 public class RaceLogEventComparatorTest {
 

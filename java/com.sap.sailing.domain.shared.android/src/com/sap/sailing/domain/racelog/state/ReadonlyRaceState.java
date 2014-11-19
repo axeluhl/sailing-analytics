@@ -2,7 +2,6 @@ package com.sap.sailing.domain.racelog.state;
 
 import com.sap.sailing.domain.base.CourseBase;
 import com.sap.sailing.domain.base.configuration.RegattaConfiguration;
-import com.sap.sailing.domain.common.TimePoint;
 import com.sap.sailing.domain.common.racelog.RaceLogRaceStatus;
 import com.sap.sailing.domain.racelog.CompetitorResults;
 import com.sap.sailing.domain.racelog.RaceLog;
@@ -13,6 +12,7 @@ import com.sap.sailing.domain.racelog.impl.RaceLogEventComparator;
 import com.sap.sailing.domain.racelog.impl.RaceLogImpl;
 import com.sap.sailing.domain.racelog.state.racingprocedure.ReadonlyRacingProcedure;
 import com.sap.sailing.domain.tracking.Wind;
+import com.sap.sse.common.TimePoint;
 
 /**
  * This interface gives you reading access to the state of a race. You can query various properties of the race
