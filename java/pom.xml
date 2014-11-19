@@ -10,12 +10,18 @@
     <version>1.0.0-SNAPSHOT</version>
   </parent>
 
+  <properties>
+      <gwt.version>2.6.1</gwt.version>
+  </properties>
+
 	<artifactId>root</artifactId>
 	<packaging>pom</packaging>
 
 	<modules>
+		<module>com.sap.sse</module>
 		<module>com.sap.sse.common</module>
 		<module>com.sap.sse.mongodb</module>
+		<module>com.sap.sse.gateway</module>
 		<module>com.sap.sse.gwt</module>
 		<module>com.sap.sse.gwt.adminconsole</module>
 		<module>com.sap.sse.datamining</module>
@@ -25,10 +31,13 @@
 		<module>com.sap.sse.security.test</module>
 		<module>com.sap.sse.security.ui</module>
 		<module>com.sap.sse.security.userstore.mongodb</module>
+		<module>com.sap.sse.operationaltransformation</module>
+		<module>com.sap.sse.operationaltransformation.test</module>
+		<module>com.sap.sse.replication</module>
+		<module>com.sap.sse.common.test</module>
 		<module>com.sap.sailing.domain.common</module>
 		<module>com.sap.sailing.domain.shared.android</module>
 		<module>com.sap.sailing.domain</module>
-		<module>com.sap.sailing.operationaltransformation</module>
 		<module>com.sap.sailing.geocoding</module>
 		<module>com.sap.sailing.datamining</module>
 		<module>com.sap.sailing.datamining.shared</module>
@@ -54,7 +63,6 @@
 		<module>com.sap.sailing.server.gateway</module>
 		<module>com.sap.sailing.server.gateway.ess40</module>
 		<module>com.sap.sailing.server.gateway.serialization</module>
-		<module>com.sap.sailing.server.replication</module>
 		<module>com.sap.sailing.www</module>
 		<module>com.sap.sailing.www.events</module>
 		<module>com.sap.sailing.xmlexport</module>
@@ -79,10 +87,8 @@
 		<module>com.sap.sailing.server.trackfiles</module>
 		<module>com.sap.sailing.feature.runtime</module>
 		<module>com.sap.sailing.gwt.ui</module>
-		<module>com.sap.sse.common.test</module>
 		<module>com.sap.sailing.domain.test</module>
 		<module>com.sap.sailing.domain.shared.android.test</module>
-		<module>com.sap.sailing.operationaltransformation.test</module>
 		<module>com.sap.sailing.geocoding.test</module>
 		<module>com.sap.sailing.domain.swisstimingadapter.test</module>
 		<module>com.sap.sailing.domain.swisstimingreplayadapter.test</module>

@@ -5,7 +5,7 @@ import com.sap.sailing.domain.common.Distance;
 import com.sap.sailing.domain.common.Position;
 import com.sap.sailing.domain.tracking.Positioned;
 
-public interface Located extends Positioned{
+public interface Located extends Positioned {
     Bearing getBearingFrom(Position other);
     Distance getDistanceFromPosition(Position other);
 }

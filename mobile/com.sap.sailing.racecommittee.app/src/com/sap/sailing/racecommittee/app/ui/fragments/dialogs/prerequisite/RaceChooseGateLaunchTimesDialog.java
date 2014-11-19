@@ -9,12 +9,12 @@ import android.widget.Button;
 import android.widget.EditText;
 import android.widget.Toast;
 
-import com.sap.sailing.domain.common.impl.MillisecondsTimePoint;
 import com.sap.sailing.domain.racelog.RaceLogGateLineOpeningTimeEvent;
 import com.sap.sailing.domain.racelog.RaceLogGateLineOpeningTimeEvent.GateLineOpeningTimes;
 import com.sap.sailing.domain.racelog.state.racingprocedure.gate.GateStartRacingProcedure;
 import com.sap.sailing.domain.racelog.state.racingprocedure.gate.impl.GateLaunchTimePrerequisite;
 import com.sap.sailing.racecommittee.app.R;
+import com.sap.sse.common.impl.MillisecondsTimePoint;
 
 public class RaceChooseGateLaunchTimesDialog extends PrerequisiteRaceDialog<GateLaunchTimePrerequisite, RaceLogGateLineOpeningTimeEvent.GateLineOpeningTimes> {
 

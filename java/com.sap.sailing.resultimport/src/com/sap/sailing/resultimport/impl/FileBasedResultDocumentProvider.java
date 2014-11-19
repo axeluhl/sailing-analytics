@@ -7,9 +7,9 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.logging.Logger;
 
-import com.sap.sailing.domain.common.impl.MillisecondsTimePoint;
 import com.sap.sailing.resultimport.ResultDocumentDescriptor;
 import com.sap.sailing.resultimport.ResultDocumentProvider;
+import com.sap.sse.common.impl.MillisecondsTimePoint;
 
 public class FileBasedResultDocumentProvider implements ResultDocumentProvider {
     private static final Logger logger = Logger.getLogger(FileBasedResultDocumentProvider.class.getName());

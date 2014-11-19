@@ -8,12 +8,12 @@ import java.util.UUID;
 
 import org.junit.Before;
 
-import com.sap.sailing.domain.common.impl.MillisecondsTimePoint;
 import com.sap.sailing.domain.racelog.RaceLog;
 import com.sap.sailing.domain.racelog.RaceLogEvent;
 import com.sap.sailing.domain.racelog.RaceLogEventAuthor;
 import com.sap.sailing.domain.racelog.analyzing.impl.RaceLogAnalyzer;
 import com.sap.sailing.domain.racelog.impl.RaceLogImpl;
+import com.sap.sse.common.impl.MillisecondsTimePoint;
 
 public abstract class RaceLogAnalyzerTest<AnalyzerType extends RaceLogAnalyzer<?>> {
 

@@ -4,11 +4,11 @@ import java.util.Collection;
 
 import com.sap.sailing.domain.base.Competitor;
 import com.sap.sailing.domain.base.CourseBase;
-import com.sap.sailing.domain.common.WithID;
 import com.sap.sailing.domain.common.racelog.RaceLogRaceStatus;
 import com.sap.sailing.domain.racelog.RaceLog;
 import com.sap.sailing.domain.racelog.state.RaceState;
 import com.sap.sse.common.Named;
+import com.sap.sse.common.WithID;
 
 public interface ManagedRace extends ManagedRaceIdentifier, Named, WithID {
     

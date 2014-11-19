@@ -13,7 +13,6 @@ import com.sap.sailing.domain.base.Competitor;
 import com.sap.sailing.domain.base.Mark;
 import com.sap.sailing.domain.base.Waypoint;
 import com.sap.sailing.domain.common.RegattaAndRaceIdentifier;
-import com.sap.sailing.domain.common.TimePoint;
 import com.sap.sailing.domain.common.WindSource;
 import com.sap.sailing.domain.tracking.GPSFix;
 import com.sap.sailing.domain.tracking.GPSFixMoving;
@@ -28,6 +27,7 @@ import com.sap.sailing.server.masterdata.DummyTrackedRace;
 import com.sap.sailing.util.SmartFutureCache;
 import com.sap.sailing.util.SmartFutureCache.AbstractCacheUpdater;
 import com.sap.sailing.util.SmartFutureCache.UpdateInterval;
+import com.sap.sse.common.TimePoint;
 
 /**
  * Calculating the quick ranks for many clients for a live race is expensive and therefore benefits from consolidation

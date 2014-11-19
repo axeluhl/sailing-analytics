@@ -10,11 +10,11 @@ import java.util.Map;
 import org.junit.Before;
 
 import com.sap.sailing.domain.base.Competitor;
-import com.sap.sailing.domain.common.impl.MillisecondsTimePoint;
 import com.sap.sailing.domain.tracking.DynamicGPSFixTrack;
 import com.sap.sailing.domain.tracking.GPSFixMoving;
 import com.sap.sailing.domain.tracking.MarkPassing;
 import com.sap.sailing.domain.tracking.impl.MarkPassingImpl;
+import com.sap.sse.common.impl.MillisecondsTimePoint;
 
 public class StoredTrackBasedTestWithTrackedRace extends StoredTrackBasedTest {
     @Before

@@ -1,9 +1,9 @@
 package com.sap.sailing.domain.racelog.state.racingprocedure.rrs26.impl;
 
-import com.sap.sailing.domain.common.TimePoint;
 import com.sap.sailing.domain.racelog.state.racingprocedure.RacingProcedurePrerequisite;
 import com.sap.sailing.domain.racelog.state.racingprocedure.impl.BaseRacingProcedurePrerequisite;
 import com.sap.sailing.domain.racelog.state.racingprocedure.rrs26.RRS26RacingProcedure;
+import com.sap.sse.common.TimePoint;
 
 /**
  * Easy access to the {@link RRS26RacingProcedure}.

@@ -1,9 +1,9 @@
 package com.sap.sailing.domain.racelog.analyzing.impl;
 
-import com.sap.sailing.domain.common.TimePoint;
 import com.sap.sailing.domain.racelog.RaceLog;
 import com.sap.sailing.domain.racelog.RaceLogEvent;
 import com.sap.sailing.domain.racelog.RaceLogFlagEvent;
+import com.sap.sse.common.TimePoint;
 
 public abstract class IndividualRecallFinder extends RaceLogAnalyzer<TimePoint> {
 

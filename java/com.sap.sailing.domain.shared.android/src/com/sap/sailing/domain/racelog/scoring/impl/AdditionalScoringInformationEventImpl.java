@@ -4,12 +4,12 @@ import java.io.Serializable;
 import java.util.List;
 
 import com.sap.sailing.domain.base.Competitor;
-import com.sap.sailing.domain.common.TimePoint;
 import com.sap.sailing.domain.racelog.RaceLogEventAuthor;
 import com.sap.sailing.domain.racelog.RaceLogEventVisitor;
 import com.sap.sailing.domain.racelog.impl.RaceLogEventImpl;
 import com.sap.sailing.domain.racelog.scoring.AdditionalScoringInformationEvent;
 import com.sap.sailing.domain.racelog.scoring.AdditionalScoringInformationType;
+import com.sap.sse.common.TimePoint;
 
 public class AdditionalScoringInformationEventImpl extends RaceLogEventImpl implements AdditionalScoringInformationEvent {
     private static final long serialVersionUID = -7627714111951381979L;

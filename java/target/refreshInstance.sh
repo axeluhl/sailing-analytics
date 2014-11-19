@@ -227,7 +227,7 @@ checks
 if [[ $OPERATION == "auto-install" ]]; then
     if [[ ! -z "$ON_AMAZON" ]]; then
         # first check and activate everything found in user data
-	    copy_user_data_to_tmp_file
+	copy_user_data_to_tmp_file
         activate_user_data
         # then download and install environment and append to env.sh
         install_environment
