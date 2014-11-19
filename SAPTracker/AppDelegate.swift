@@ -22,7 +22,6 @@ class AppDelegate: UIResponder, UIApplicationDelegate {
     }
     
     func application(application: UIApplication, openURL url: NSURL, sourceApplication: String, annotation: AnyObject?) -> Bool {
-        println(url)
         var rootViewController = self.window!.rootViewController as UINavigationController
         rootViewController.popToRootViewControllerAnimated(false)
         rootViewController.dismissViewControllerAnimated(false, completion: nil)

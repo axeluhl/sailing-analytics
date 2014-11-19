@@ -43,14 +43,6 @@ class HomeViewController: UIViewController, UITableViewDataSource, UITableViewDe
         println(url)
         qrCodeManager!.parseUrl(url.absoluteString!)
     }
-    
-    func qrCodeOK() {
-        
-    }
-    
-    func qrCodeCancel() {
-        
-    }
 
     // MARK: - UIActionSheetDelegate
     @IBAction func showActionSheet(sender: AnyObject) {
@@ -76,7 +68,6 @@ class HomeViewController: UIViewController, UITableViewDataSource, UITableViewDe
     
     func tableView(tableView: UITableView, numberOfRowsInSection section: Int) -> Int {
         let info = fetchedResultsController!.sections![section] as NSFetchedResultsSectionInfo
-        println("\(info.numberOfObjects)")
         return info.numberOfObjects
     }
     
@@ -124,7 +115,7 @@ class HomeViewController: UIViewController, UITableViewDataSource, UITableViewDe
     func controllerDidChangeContent(controller: NSFetchedResultsController) {
         self.tableView.endUpdates()
     }
-
+    
     
     // MARK: - UITableViewDelegate
     

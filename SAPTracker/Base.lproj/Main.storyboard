@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="UTF-8" standalone="no"?>
-<document type="com.apple.InterfaceBuilder3.CocoaTouch.Storyboard.XIB" version="3.0" toolsVersion="6250" systemVersion="14A389" targetRuntime="iOS.CocoaTouch" propertyAccessControl="none" useAutolayout="YES" useTraitCollections="YES" initialViewController="pqQ-jd-OwW">
+<document type="com.apple.InterfaceBuilder3.CocoaTouch.Storyboard.XIB" version="3.0" toolsVersion="6250" systemVersion="14B25" targetRuntime="iOS.CocoaTouch" propertyAccessControl="none" useAutolayout="YES" useTraitCollections="YES" initialViewController="pqQ-jd-OwW">
     <dependencies>
         <deployment identifier="iOS"/>
         <plugIn identifier="com.apple.InterfaceBuilder.IBCocoaTouchPlugin" version="6244"/>
@@ -102,7 +102,7 @@
                     </view>
                     <toolbarItems/>
                     <navigationItem key="navigationItem" title="SAP Tracker" id="lqI-5f-PEI">
-                        <barButtonItem key="rightBarButtonItem" image="list" id="1wU-M4-Vaw">
+                        <barButtonItem key="rightBarButtonItem" image="settings" id="1wU-M4-Vaw">
                             <connections>
                                 <action selector="showActionSheet:" destination="vXZ-lx-hvc" id="dxA-5U-l3L"/>
                             </connections>
@@ -256,7 +256,7 @@
                     </view>
                     <toolbarItems/>
                     <navigationItem key="navigationItem" title="Regatta" id="BjQ-Fx-PEX">
-                        <barButtonItem key="rightBarButtonItem" image="list" id="Zdh-kJ-UMg">
+                        <barButtonItem key="rightBarButtonItem" image="settings" id="Zdh-kJ-UMg">
                             <connections>
                                 <action selector="showMenuActionSheet:" destination="G3a-SV-Maf" id="eCP-ZE-AS5"/>
                             </connections>
@@ -583,10 +583,10 @@
     </scenes>
     <resources>
         <image name="DE.png" width="64" height="64"/>
-        <image name="list" width="22" height="22"/>
+        <image name="settings" width="22" height="22"/>
     </resources>
     <inferredMetricsTieBreakers>
-        <segue reference="QMa-LQ-D8c"/>
         <segue reference="Xxn-jp-xEB"/>
+        <segue reference="QMa-LQ-D8c"/>
     </inferredMetricsTieBreakers>
 </document>

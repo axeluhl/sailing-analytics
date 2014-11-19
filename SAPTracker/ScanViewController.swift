@@ -59,7 +59,6 @@ class ScanViewController: UIViewController, AVCaptureMetadataOutputObjectsDelega
         if metadataObjects.count > 0 {
             session.stopRunning()
             let metadataObject: AVMetadataMachineReadableCodeObject = metadataObjects[0] as AVMetadataMachineReadableCodeObject
-            println(metadataObject.stringValue)
             qrCodeManager!.parseUrl(metadataObject.stringValue)
         }
     }

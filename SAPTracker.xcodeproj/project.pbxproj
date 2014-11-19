@@ -278,10 +278,10 @@
 		7F23F0881A1A3DEF00F03F1C /* QRCodeManager.swift in Sources */ = {isa = PBXBuildFile; fileRef = 7F23F0871A1A3DEF00F03F1C /* QRCodeManager.swift */; };
 		7F2C605A19F160E400C32D93 /* LocationManager.swift in Sources */ = {isa = PBXBuildFile; fileRef = 7F2C605919F160E400C32D93 /* LocationManager.swift */; };
 		7F44095B19F65B5B0021BF22 /* CoreData.xcdatamodeld in Sources */ = {isa = PBXBuildFile; fileRef = 7F44095919F65B5B0021BF22 /* CoreData.xcdatamodeld */; };
+		7F4D2F541A1C8EE50038E7D1 /* Images.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = 7F4D2F531A1C8EE50038E7D1 /* Images.xcassets */; };
 		7F83F15619F154F000C53328 /* AppDelegate.swift in Sources */ = {isa = PBXBuildFile; fileRef = 7F83F15519F154F000C53328 /* AppDelegate.swift */; };
 		7F83F15819F154F000C53328 /* HomeViewController.swift in Sources */ = {isa = PBXBuildFile; fileRef = 7F83F15719F154F000C53328 /* HomeViewController.swift */; };
 		7F83F15B19F154F000C53328 /* Main.storyboard in Resources */ = {isa = PBXBuildFile; fileRef = 7F83F15919F154F000C53328 /* Main.storyboard */; };
-		7F83F15D19F154F000C53328 /* Images.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = 7F83F15C19F154F000C53328 /* Images.xcassets */; };
 		7F83F16019F154F000C53328 /* LaunchScreen.xib in Resources */ = {isa = PBXBuildFile; fileRef = 7F83F15E19F154F000C53328 /* LaunchScreen.xib */; };
 		7F83F16C19F154F000C53328 /* SAPTrackerTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 7F83F16B19F154F000C53328 /* SAPTrackerTests.swift */; };
 		7F83F17619F1574700C53328 /* CoreLocation.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 7F83F17519F1574700C53328 /* CoreLocation.framework */; };
@@ -582,12 +582,12 @@
 		7F23F0871A1A3DEF00F03F1C /* QRCodeManager.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = QRCodeManager.swift; sourceTree = "<group>"; };
 		7F2C605919F160E400C32D93 /* LocationManager.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = LocationManager.swift; sourceTree = "<group>"; };
 		7F44095A19F65B5B0021BF22 /* CoreData.xcdatamodel */ = {isa = PBXFileReference; lastKnownFileType = wrapper.xcdatamodel; path = CoreData.xcdatamodel; sourceTree = "<group>"; };
+		7F4D2F531A1C8EE50038E7D1 /* Images.xcassets */ = {isa = PBXFileReference; lastKnownFileType = folder.assetcatalog; path = Images.xcassets; sourceTree = "<group>"; };
 		7F83F15019F154F000C53328 /* SAPTracker.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = SAPTracker.app; sourceTree = BUILT_PRODUCTS_DIR; };
 		7F83F15419F154F000C53328 /* Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist.xml; path = Info.plist; sourceTree = "<group>"; };
 		7F83F15519F154F000C53328 /* AppDelegate.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AppDelegate.swift; sourceTree = "<group>"; };
 		7F83F15719F154F000C53328 /* HomeViewController.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = HomeViewController.swift; sourceTree = "<group>"; };
 		7F83F15A19F154F000C53328 /* Base */ = {isa = PBXFileReference; lastKnownFileType = file.storyboard; name = Base; path = Base.lproj/Main.storyboard; sourceTree = "<group>"; };
-		7F83F15C19F154F000C53328 /* Images.xcassets */ = {isa = PBXFileReference; lastKnownFileType = folder.assetcatalog; path = Images.xcassets; sourceTree = "<group>"; };
 		7F83F15F19F154F000C53328 /* Base */ = {isa = PBXFileReference; lastKnownFileType = file.xib; name = Base; path = Base.lproj/LaunchScreen.xib; sourceTree = "<group>"; };
 		7F83F16519F154F000C53328 /* SAPTrackerTests.xctest */ = {isa = PBXFileReference; explicitFileType = wrapper.cfbundle; includeInIndex = 0; path = SAPTrackerTests.xctest; sourceTree = BUILT_PRODUCTS_DIR; };
 		7F83F16A19F154F000C53328 /* Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist.xml; path = Info.plist; sourceTree = "<group>"; };
@@ -672,6 +672,7 @@
 				7FD9D3021A1236080058FEAD /* Extensions.swift */,
 				7F83F15919F154F000C53328 /* Main.storyboard */,
 				7F83F15E19F154F000C53328 /* LaunchScreen.xib */,
+				7F4D2F531A1C8EE50038E7D1 /* Images.xcassets */,
 			);
 			name = View;
 			sourceTree = "<group>";
@@ -986,7 +987,6 @@
 				7F06590219F7FEA40077FF95 /* Controller */,
 				7F06590019F7FE750077FF95 /* Model */,
 				7F14A0031A13B9A6001C1ECB /* flags */,
-				7F83F15C19F154F000C53328 /* Images.xcassets */,
 				7F83F15319F154F000C53328 /* Supporting Files */,
 			);
 			path = SAPTracker;
@@ -1287,6 +1287,7 @@
 				7F14A1B21A13B9A6001C1ECB /* MR.png in Resources */,
 				7F14A1FC1A13B9A6001C1ECB /* TZ.png in Resources */,
 				7F14A1A91A13B9A6001C1ECB /* MG.png in Resources */,
+				7F4D2F541A1C8EE50038E7D1 /* Images.xcassets in Resources */,
 				7F14A1D51A13B9A6001C1ECB /* QA.png in Resources */,
 				7F14A10A1A13B9A6001C1ECB /* _abkhazia.png in Resources */,
 				7F14A1851A13B9A6001C1ECB /* IQ.png in Resources */,
@@ -1329,7 +1330,6 @@
 				7F14A11B1A13B9A6001C1ECB /* _unknown.png in Resources */,
 				7F14A19B1A13B9A6001C1ECB /* LI.png in Resources */,
 				7F14A1EB1A13B9A6001C1ECB /* SY.png in Resources */,
-				7F83F15D19F154F000C53328 /* Images.xcassets in Resources */,
 				7F14A1191A13B9A6001C1ECB /* _south-ossetia.png in Resources */,
 				7F14A12B1A13B9A6001C1ECB /* AW.png in Resources */,
 				7F14A10D1A13B9A6001C1ECB /* _commonwealth.png in Resources */,

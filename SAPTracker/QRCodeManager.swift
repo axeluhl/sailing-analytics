@@ -9,10 +9,10 @@
 import Foundation
 import UIKit
 
-protocol QRCodeManagerDelegate {
-    var activityIndicatorView: UIActivityIndicatorView?{get}
-    func qrCodeOK()
-    func qrCodeCancel()
+@objc protocol QRCodeManagerDelegate {
+    optional var activityIndicatorView: UIActivityIndicatorView { get }
+    optional func qrCodeOK()
+    optional func qrCodeCancel()
 }
 
 class QRCodeManager: NSObject, UIAlertViewDelegate {
@@ -49,6 +49,7 @@ class QRCodeManager: NSObject, UIAlertViewDelegate {
         APIManager.sharedManager.getEvent(qrcodeData!.eventId,
             success: { (AFHTTPRequestOperation operation, AnyObject eventResponseObject) -> Void in
                 self.eventDictionary = eventResponseObject as? [String: AnyObject]
+                NSThread.sleepForTimeInterval(10);
                 APIManager.sharedManager.getLeaderBoard(self.qrcodeData!.leaderBoardName,
                     
                     // get leader board
@@ -113,7 +114,7 @@ class QRCodeManager: NSObject, UIAlertViewDelegate {
                 competitor.initWithDictionary(competitorDictionary!)
                 DataManager.sharedManager.saveContext()
                 
-                delegate.qrCodeOK()
+                delegate.qrCodeOK?()
                 break
             }
             break
@@ -127,7 +128,7 @@ class QRCodeManager: NSObject, UIAlertViewDelegate {
         eventDictionary = nil
         leaderBoardDictionary = nil
         competitorDictionary = nil
-        delegate.qrCodeCancel()
+        delegate.qrCodeCancel?()
     }
     
 }
