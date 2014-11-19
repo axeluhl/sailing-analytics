@@ -268,11 +268,22 @@ if [[ "$@" == "release" ]]; then
     mkdir $PROJECT_HOME/dist/$SIMPLE_VERSION_INFO
     echo "MONGODB_NAME=myspecificevent
 REPLICATION_CHANNEL=myspecificevent
-SERVER_STARTUP_NOTIFY=simon.marcel.pamies@sap.com
 SERVER_NAME=MYSPECIFICEVENT
 USE_ENVIRONMENT=live-server
+MEMORY=4096m
 INSTALL_FROM_RELEASE=$SIMPLE_VERSION_INFO
     " >> $PROJECT_HOME/dist/$SIMPLE_VERSION_INFO/amazon-launch-config.txt
+
+    echo "MONGODB_NAME=myspecificevent
+REPLICATION_CHANNEL=name_of_replication_channel_matching_master_config
+REPLICATION_MASTER_SERVLET_HOST=ip_of_master_host
+SERVER_NAME=subdomain_name_in_elb
+EVENT_ID=event_uid_this_replica_is_serving
+USE_ENVIRONMENT=replica
+MEMORY=4096m
+REPLICATE_ON_START=True
+INSTALL_FROM_RELEASE=$SIMPLE_VERSION_INFO
+    " >> $PROJECT_HOME/dist/$SIMPLE_VERSION_INFO/amazon-launch-config_replica.txt
      
     `which tar` cvzf $PROJECT_HOME/dist/$SIMPLE_VERSION_INFO/$SIMPLE_VERSION_INFO.tar.gz *
     cp $ACDIR/env.sh $PROJECT_HOME/dist/$SIMPLE_VERSION_INFO
