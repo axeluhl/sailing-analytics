@@ -272,9 +272,9 @@ public class SharedDomainFactoryImpl implements SharedDomainFactory {
     public BoatClass getOrCreateBoatClass(String name, boolean typicallyStartsUpwind) {
         synchronized (boatClassCache) {
             BoatClass result = boatClassCache.get(name);
-            if(result == null) {
+            if (result == null && name != null) {
                 BoatClassMasterdata boatClassMasterdata = BoatClassMasterdata.resolveBoatClass(name);
-                if(boatClassMasterdata != null) {
+                if (boatClassMasterdata != null) {
                     result = new BoatClassImpl(name, boatClassMasterdata);
                     boatClassCache.put(name, result);
                 }
@@ -289,7 +289,7 @@ public class SharedDomainFactoryImpl implements SharedDomainFactory {
     
     @Override
     public BoatClass getOrCreateBoatClass(String name) {
-        return getOrCreateBoatClass(name, /* typicallyStartsUpwind */!mayStartWithNoUpwindLeg.contains(name.toLowerCase()));
+        return getOrCreateBoatClass(name, name == null || /* typicallyStartsUpwind */!mayStartWithNoUpwindLeg.contains(name.toLowerCase()));
     }
     
     @Override

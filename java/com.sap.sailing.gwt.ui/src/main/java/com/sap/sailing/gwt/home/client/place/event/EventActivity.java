@@ -56,7 +56,7 @@ public class EventActivity extends AbstractActivity {
         clientFactory.getSailingService().getEventById(eventUUID, true, new AsyncCallback<EventDTO>() {
             @Override
             public void onSuccess(final EventDTO event) {
-                loadRegattaStructure(panel, clientTimeWhenRequestWasSent, event);
+                loadRegattaStructureAndCreateEventView(panel, clientTimeWhenRequestWasSent, event);
             }
 
             @Override
@@ -66,8 +66,9 @@ public class EventActivity extends AbstractActivity {
         }); 
     }
 
-    private void loadRegattaStructure(final AcceptsOneWidget panel, final long clientTimeWhenRequestWasSent, final EventDTO event) {
+    private void loadRegattaStructureAndCreateEventView(final AcceptsOneWidget panel, final long clientTimeWhenRequestWasSent, final EventDTO event) {
         this.event = event;
+
         if(event.getLeaderboardGroups().size() > 0) {
             clientFactory.getSailingService().getRegattaStructureOfEvent(event.id, new AsyncCallback<List<RaceGroupDTO>>() {
                 @Override
@@ -115,12 +116,14 @@ public class EventActivity extends AbstractActivity {
     private void createEventView(EventDTO event, List<RaceGroupDTO> raceGroups, AcceptsOneWidget panel) {
         view = clientFactory.createEventView(event, eventPlace.getNavigationTab(), raceGroups, eventPlace.getLeaderboardIdAsNameString(), timerForClientServerOffset);
         panel.setWidget(view.asWidget());
+        Window.setTitle(eventPlace.getTitle(event.getName()));
     }
 
     private void createEventWithoutRegattasView(EventDTO event, AcceptsOneWidget panel) {
         // no leaderboard groups defined yet -> show a teaser page
         EventWithoutRegattasView view = clientFactory.createEventWithoutRegattasView(event);
         panel.setWidget(view.asWidget());
+        Window.setTitle(eventPlace.getTitle(event.getName()));
     }
     
     protected void loadAndUpdateEventRaceStatesLog() {

@@ -4,6 +4,29 @@
     android:layout_width="match_parent"
     android:layout_height="wrap_content"
     android:background="@color/colorPrimary"
-    android:minHeight="?attr/actionBarSize">
-    
+    android:minHeight="?attr/actionBarSize" >
+
+    <LinearLayout
+        android:id="@+id/toolbar_extended"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_gravity="right"
+        android:gravity="center"
+        android:minHeight="?attr/actionBarSize"
+        android:orientation="horizontal"
+        android:visibility="gone" >
+
+        <TextView
+            android:id="@+id/time"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="Uhrzeit" />
+
+        <Button
+            android:id="@+id/windButton"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="Wind" />
+    </LinearLayout>
+
 </android.support.v7.widget.Toolbar>

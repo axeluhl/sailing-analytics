@@ -10,8 +10,10 @@ import com.google.gwt.event.dom.client.ClickEvent;
 import com.google.gwt.uibinder.client.UiBinder;
 import com.google.gwt.uibinder.client.UiField;
 import com.google.gwt.uibinder.client.UiHandler;
+import com.google.gwt.user.client.Event;
 import com.google.gwt.user.client.ui.Anchor;
 import com.google.gwt.user.client.ui.Widget;
+import com.google.gwt.user.client.ui.impl.HyperlinkImpl;
 import com.sap.sailing.domain.common.LeaderboardNameConstants;
 import com.sap.sailing.gwt.common.client.i18n.TextMessages;
 import com.sap.sailing.gwt.home.client.app.HomePlacesNavigator;
@@ -19,7 +21,8 @@ import com.sap.sailing.gwt.home.client.app.PlaceNavigation;
 import com.sap.sailing.gwt.home.client.place.event.AbstractEventComposite;
 import com.sap.sailing.gwt.home.client.place.event.EventPlace;
 import com.sap.sailing.gwt.home.client.place.event.EventPlaceNavigator;
-import com.sap.sailing.gwt.home.client.place.leaderboard.LeaderboardPlace;
+import com.sap.sailing.gwt.home.client.place.series.SeriesPlace;
+import com.sap.sailing.gwt.home.client.place.series.SeriesPlace.SeriesNavigationTabs;
 import com.sap.sailing.gwt.home.client.shared.EventDatesFormatterUtil;
 import com.sap.sailing.gwt.ui.shared.CourseAreaDTO;
 import com.sap.sailing.gwt.ui.shared.EventDTO;
@@ -31,6 +34,8 @@ public class EventHeader extends AbstractEventComposite {
 
     interface EventHeaderUiBinder extends UiBinder<Widget, EventHeader> {
     }
+
+    private static final HyperlinkImpl HYPERLINK_IMPL = GWT.create(HyperlinkImpl.class);
 
 //    @UiField Anchor overviewLink;
       @UiField Anchor regattasLink;
@@ -72,8 +77,9 @@ public class EventHeader extends AbstractEventComposite {
 //  private final List<Anchor> links3;
     
     private final HomePlacesNavigator placeNavigator;
-    private PlaceNavigation<LeaderboardPlace> overallLeaderboardNavigation = null; 
-            
+    private PlaceNavigation<SeriesPlace> seriesAnalyticsNavigation = null; 
+    private PlaceNavigation<EventPlace> regattasNavigation = null;
+    
     public EventHeader(EventDTO event, HomePlacesNavigator placeNavigator, EventPlaceNavigator pageNavigator) {
         super(event, pageNavigator);
         
@@ -100,10 +106,10 @@ public class EventHeader extends AbstractEventComposite {
         updateUI();
     }
 
-    public EventHeader(EventDTO event) {
+    public EventHeader(EventDTO event, HomePlacesNavigator placeNavigator) {
         super(event, null);
 
-        this.placeNavigator = null;
+        this.placeNavigator = placeNavigator;
         initResources();
         
         isFinishedDiv.getStyle().setDisplay(Display.NONE);
@@ -128,9 +134,9 @@ public class EventHeader extends AbstractEventComposite {
         eventHeaderWrapperDiv.setAttribute("data-navigationtype", "compact");
         EventDTO event = getEvent();
         
-        PlaceNavigation<EventPlace> eventNavigation  = placeNavigator.getEventNavigation(event.id.toString(), event.getBaseURL(), event.isOnRemoteServer());
-        regattasLink.setHref(eventNavigation.getTargetUrl());
-        regattasLink2.setHref(eventNavigation.getTargetUrl());
+        PlaceNavigation<EventPlace> regattaDetailsNavigation  = placeNavigator.getEventNavigation(event.id.toString(), event.getBaseURL(), event.isOnRemoteServer());
+        regattasLink.setHref(regattaDetailsNavigation.getTargetUrl());
+        regattasLink2.setHref(regattaDetailsNavigation.getTargetUrl());
     }
 
     private StrippedLeaderboardDTO findLeaderboardWithSameCourseArea(EventDTO event) {
@@ -151,13 +157,15 @@ public class EventHeader extends AbstractEventComposite {
         boolean isSeries = event.isFakeSeries(); 
 
         String eventName = event.getName();
+        
+        regattasNavigation = placeNavigator.getEventNavigation(event.id.toString(), event.getBaseURL(), event.isOnRemoteServer());
         if(isSeries) {
             LeaderboardGroupDTO leaderboardGroupDTO = event.getLeaderboardGroups().get(0);
             eventName = leaderboardGroupDTO.getDisplayName() != null ? leaderboardGroupDTO.getDisplayName() : leaderboardGroupDTO.getName();
 
             String overallLeaderboardName = leaderboardGroupDTO.getName() + " " + LeaderboardNameConstants.OVERALL;
-            overallLeaderboardNavigation = placeNavigator.getLeaderboardNavigation(event.id.toString(), overallLeaderboardName, event.getBaseURL(), event.isOnRemoteServer());
-            seriesLeaderboardAnchor.setHref(overallLeaderboardNavigation.getTargetUrl());
+            seriesAnalyticsNavigation = placeNavigator.getSeriesAnalyticsNavigation(event.id.toString(), SeriesNavigationTabs.OverallLeaderboard, overallLeaderboardName, event.getBaseURL(), event.isOnRemoteServer());
+            seriesLeaderboardAnchor.setHref(seriesAnalyticsNavigation.getTargetUrl());
             
             StrippedLeaderboardDTO leaderboardFittingToEvent = findLeaderboardWithSameCourseArea(event);
             if(leaderboardFittingToEvent != null) {
@@ -242,10 +250,10 @@ public class EventHeader extends AbstractEventComposite {
     }
 
     @UiHandler("seriesLeaderboardAnchor")
-    void seriesLeaderboardClicked(ClickEvent clickevent) {
+    void seriesLeaderboardClicked(ClickEvent e) {
         EventDTO event = getEvent();
-        if(event.isFakeSeries() && overallLeaderboardNavigation != null) {
-            placeNavigator.goToPlace(overallLeaderboardNavigation);
+        if(event.isFakeSeries()) {
+            handleClickEvent(e, seriesAnalyticsNavigation);
         }
     }
     
@@ -254,10 +262,8 @@ public class EventHeader extends AbstractEventComposite {
 //        showRegattas();        
 //    }
 //
-    private void showRegattas(ClickEvent clickevent) {
-        getPageNavigator().goToRegattas();
-        clickevent.preventDefault();
-        
+    private void showRegattas(ClickEvent e) {
+        handleClickEvent(e, regattasNavigation);
 //        setActiveLink(links1, regattasLink);
 //        setActiveLink(links2, regattasLink2);
 //        setActiveLink(links3, regattasLink3);
@@ -306,6 +312,13 @@ public class EventHeader extends AbstractEventComposite {
 //        setActiveLink(links2, mediaLink2);
 //        setActiveLink(links3, mediaLink3);
 //    }
+
+    private void handleClickEvent(ClickEvent e, PlaceNavigation<?> placeNavigation) {
+        if (HYPERLINK_IMPL.handleAsClick((Event) e.getNativeEvent())) {
+            placeNavigator.goToPlace(placeNavigation);
+            e.preventDefault();
+         }
+    }
     
     @Override
     protected void onLoad() {
