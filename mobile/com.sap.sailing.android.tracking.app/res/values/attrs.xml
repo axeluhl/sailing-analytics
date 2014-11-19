@@ -1,0 +1,11 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <declare-styleable name="SignalQualityIndicatorView">
+       <attr name="signalQuality" format="enum">
+           <enum name="none" value="0"/>
+           <enum name="poor" value="2"/>
+           <enum name="good" value="3"/>
+           <enum name="great" value="4"/>
+       </attr>
+   </declare-styleable>
+</resources>

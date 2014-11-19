@@ -1,9 +1,9 @@
-<?xml version="1.0" encoding="utf-8"?>
-<RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
+<?xml version="1.0" encoding="utf-8"?><RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:custom="http://schemas.android.com/apk/res/com.sap.sailing.android.tracking.app.views"
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    android:background="@color/black" >
+    android:background="@color/black" xmlns:app="http://schemas.android.com/apk/res/com.sap.sailing.android.tracking.app">
 
     <TextView
         android:id="@+id/mode_label"
@@ -45,14 +45,18 @@
         android:layout_marginRight="4px"
         />
 
-    <TextView
-        android:id="@+id/quality_icons"
+    
+    <com.sap.sailing.android.tracking.app.views.SignalQualityIndicatorView 
+        app:signalQuality="good"
+        android:id="@+id/qps_quality_indicator"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:layout_alignBaseline="@id/qps_quality"
         android:layout_alignBottom="@id/qps_quality"
         android:layout_alignParentRight="true"
-        android:text="DUMMY" />
+        android:contentDescription="@string/signal_quality_indicator_view_description"
+        android:focusable="true"
+        />
 
     <TextView
         android:id="@+id/qps_quality"
@@ -60,6 +64,6 @@
         android:layout_height="wrap_content"
         android:layout_alignParentLeft="true"
         android:layout_alignParentTop="true"
-        android:text="@string/tracking_qps_quality" />
+        android:text="@string/tracking_qps_quality" /> 
 
 </RelativeLayout>

@@ -293,8 +293,8 @@ public class TransmittingService extends Service {
 					ExLog.i(this, TAG, "Nothing to send or timeout occurred, Transmitting Service is stopping timer and terminating itself.");	
 				}
 				
-				stopSelf();
 				stopTimer();
+				stopSelf();
 			}
 		}
 	}

@@ -12,7 +12,7 @@
         android:layout_alignParentBottom="true"
         android:contentDescription="@string/empty"
         android:scaleType="centerCrop"
-        android:src="@drawable/settings_grey" />
+        android:src="@drawable/working_title" />
 
     <RelativeLayout
         android:id="@+id/bottomLayout"
