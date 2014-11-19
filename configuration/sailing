@@ -19,18 +19,21 @@ start_tmux() {
 }
 
 start_servers() {
-	if [ "$launch_httpd" = "true" ]; then
-		launch_httpd $SERVER_NAME $SERVER_PORT $EVENT_ID
-	fi
-
+	NUMBER_OF_INSTANCES=`echo "$JAVA_START_INSTANCES" | wc -w`
+	MEMORY_PER_INSTANCE_IN_MB=`cat /proc/meminfo  | grep MemTotal | awk '{printf("%i\n", ($2 / 1024 - 1500) / '$NUMBER_OF_INSTANCES' );}'`
+	echo "Using ${MEMORY_PER_INSTANCE_IN_MB}MB as default heap size per instance."
 	for conf in $JAVA_START_INSTANCES; do
 		echo "Checking for amazon update..."
+		echo "MEMORY=\"${MEMORY_PER_INSTANCE_IN_MB}m\"" >>/home/sailing/servers/$conf/env.sh
 		su - sailing -c "cd /home/sailing/servers/$conf && $GIT_REPOSITORY/java/target/refreshInstance.sh auto-install" 2>/var/log/sailing.err >/var/log/sailing.out
-		# execute env.sh which now has the same set of variables that the server will see
-		source /home/sailing/servers/$conf/env.sh
-		launch_httpd
-		echo "Starting Java server $conf"
-		su - sailing -c "cd /home/sailing/servers/$conf && ./start" 2>/var/log/sailing.err >/var/log/sailing.out
+		(
+			# execute env.sh in a subshell which now has the same set of variables that the server will see
+			source /home/sailing/servers/$conf/env.sh
+			launch_httpd
+			echo "Starting Java server $conf"
+			su - sailing -c "cd /home/sailing/servers/$conf && ./start" 2>/var/log/sailing.err >/var/log/sailing.out
+			# terminating the subshell will forget all the variable assignments brought in by env.sh, clearing for the next server instance
+		)
 		RETVAL=$?
 		[ $RETVAL -eq 0 ] && success || failure
 	done

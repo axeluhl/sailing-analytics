@@ -275,23 +275,23 @@ Here are the steps to create a load balanced setup:
 
 It is important to understand that it wouldn't help to let all traffic run through our central Apache httpd server which usually acts as a reverse proxy with comprehensive URL rewriting rules and macros. This would make the Apache server the bandwidth bottleneck. Instead, the event traffic needs to go straight to the ELB which requires the event DNS domain name to be mapped to the ELB's host name. You need to set this up in the "Route 53" DNS server which you find in the Amazon Services drop-down.
 
-<img src="/wiki/images/amazon/Route53_1.png" width="100%" height="100%"/>
+<img src="/wiki/images/amazon/Route53_1.png" />
 
 Go to the "Hosted Zones" entry
 
-<img src="/wiki/images/amazon/Route53_2.png" width="100%" height="100%"/>
+<img src="/wiki/images/amazon/Route53_2.png" />
 
 and select the `sapsailing.com.` row,
 
-<img src="/wiki/images/amazon/Route53_3.png" width="100%" height="100%"/>
+<img src="/wiki/images/amazon/Route53_3.png" />
 
 then click on "Go to Record Sets." You will then see the record sets for the `sapsailing.com.` domain:
 
-<img src="/wiki/images/amazon/Route53_4.png" width="100%" height="100%"/>
+<img src="/wiki/images/amazon/Route53_4.png" />
 
 Click on "Create Record Set" and fill in the subdomain name (`myspecificevent` in the example shown below) and as the value use the host name (A-record) of the ELB that you find in the ELB configuration. 
 
-<img src="/wiki/images/amazon/Route53_5.png" width="100%" height="100%"/>
+<img src="/wiki/images/amazon/Route53_5.png" />
 
 Amazon ELB is designed to handle unlimited concurrent requests per second with “gradually increasing” load pattern (although it's initial capacity is described to reach 20k requests/secs). It is not designed to handle heavy sudden spike of load or flash traffic because of its internal structure where it needs to fire up more instances when load increases. ELB's can be pre-warmed though by writing to the AWS Support Team.
 
