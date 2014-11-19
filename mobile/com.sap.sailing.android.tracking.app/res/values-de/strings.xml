@@ -26,5 +26,10 @@
     <string name="please_confirm">Bitte bestätigen</string>
     <string name="do_you_really_want_to_stop_tracking">Soll das Tracking wirklich beendet werden?</string>
     <string name="ok">OK</string>
+    <string name="signal_quality_indicator_view_description">GPS Qualität</string>
+    <string name="poor">schwach</string>
+    <string name="good">gut</string>
+    <string name="great">sehr gut</string>
+    <string name="no_signal">kein signal</string>
 
 </resources>

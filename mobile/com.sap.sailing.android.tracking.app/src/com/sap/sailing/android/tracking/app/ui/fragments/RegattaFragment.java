@@ -22,7 +22,7 @@ public class RegattaFragment extends BaseFragment implements OnClickListener {
 		super.onCreateView(inflater, container, savedInstanceState);
 
 		View view = inflater.inflate(R.layout.fragment_regatta, container, false);
-
+		
 		Button startTracking = (Button) view.findViewById(R.id.start_tracking);
 		startTracking.setOnClickListener(this);
 

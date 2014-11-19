@@ -1,0 +1,189 @@
+package com.sap.sailing.android.tracking.app.views;
+
+import android.content.Context;
+import android.content.res.TypedArray;
+import android.graphics.Canvas;
+import android.graphics.Color;
+import android.graphics.Paint;
+import android.graphics.Rect;
+import android.text.TextUtils;
+import android.util.AttributeSet;
+import android.view.View;
+import android.view.accessibility.AccessibilityEvent;
+
+import com.sap.sailing.android.tracking.app.R;
+
+/**
+ * Draws 4 boxes that can be filled or empty, depending on the value passed for
+ * singal-quality;
+ * 
+ * @author Lukas Zielinski
+ *
+ */
+public class SignalQualityIndicatorView extends View {
+
+	private int signalQuality;
+	
+	private Paint paint; 
+	private Paint paintBlack;
+	
+	private float height;
+	private float width;
+	private Rect rect;
+	
+
+	public SignalQualityIndicatorView(Context context, AttributeSet attrs) {
+		super(context, attrs);
+
+		TypedArray a = context.getTheme().obtainStyledAttributes(attrs,
+				R.styleable.SignalQualityIndicatorView, 0, 0);
+		try {
+			signalQuality = a.getInteger(R.styleable.SignalQualityIndicatorView_signalQuality, 0);
+		} finally {
+			a.recycle();
+		}
+		
+		setAccessibilityString();
+		initPaint();
+	}
+	
+	public Integer getSignalQuality() {
+		return signalQuality;
+	}
+	
+	private void setAccessibilityString()
+	{
+		if (this.signalQuality == 2)
+		{
+			this.setContentDescription(getContext().getString(R.string.signal_quality_indicator_view_description) + getContext().getString(R.string.poor));
+		}
+		else if (this.signalQuality == 3)
+		{
+			this.setContentDescription(getContext().getString(R.string.signal_quality_indicator_view_description) + getContext().getString(R.string.good));
+		}
+		else if (this.signalQuality == 4)
+		{
+			this.setContentDescription(getContext().getString(R.string.signal_quality_indicator_view_description) + getContext().getString(R.string.great));
+		}
+		else
+		{
+			this.setContentDescription(getContext().getString(R.string.signal_quality_indicator_view_description) + getContext().getString(R.string.no_signal));
+		}
+
+	}
+
+	private void initPaint() {
+		paint = new Paint(Paint.ANTI_ALIAS_FLAG);
+		paint.setColor(Color.parseColor("#8ab54e"));
+		paintBlack = new Paint(Paint.ANTI_ALIAS_FLAG);
+		paintBlack.setColor(Color.BLACK);
+	}
+	
+	@Override
+	protected void onDraw(Canvas canvas) {
+		super.onDraw(canvas);
+		
+		float boxWidthWithPadding = width / 4;
+		float boxWidth = width / 4.5f;
+		
+		for (int i = 0; i < 4; i++)
+		{
+			// first draw green
+			
+			rect.top = 0;
+			rect.left = (int)(i * boxWidthWithPadding);
+			rect.right = (int)(rect.left + boxWidth);
+			rect.bottom = (int)this.height;
+			canvas.drawRect(rect, paint);	
+			
+			if (i >= signalQuality)
+			{
+				// draw smaller black to make it appear like an empty green box
+				
+				rect.top = 3;
+				rect.left = (int)(i * boxWidthWithPadding + 3);
+				rect.right = (int)(rect.left + boxWidth - 6);
+				rect.bottom = (int)this.height - 3;
+				canvas.drawRect(rect, paintBlack);	
+			}
+			
+			
+		}
+	}
+	
+	@Override
+	protected void onSizeChanged(int w, int h, int oldw, int oldh) {
+		super.onSizeChanged(w, h, oldw, oldh);
+		
+		float boxWidth = w / 4.5f;
+		float boxHeight = h;
+		
+		rect = new Rect(0, 0, (int)boxWidth, (int)boxHeight);
+		
+		float xpad = (float)(getPaddingLeft() + getPaddingRight());
+	    float ypad = (float)(getPaddingTop() + getPaddingBottom());
+	    this.width = (float)w - xpad;
+	    this.height = (float)h - ypad;
+	}
+	
+
+	/**
+	 * Must be 0,2,3 or 4, otherwise 1 will be set
+	 * 
+	 * @param signalQuality
+	 */
+	public void setSignalQuality(Integer signalQuality) {
+		Integer previousSingalQuality = this.signalQuality;
+		
+		if (signalQuality == 0) {
+			this.signalQuality = 0;
+		} else if (signalQuality == 2) {
+			this.signalQuality = 2;
+		} else if (signalQuality == 3) {
+			this.signalQuality = 3;
+		} else if (signalQuality == 4) {
+			this.signalQuality = 4;
+		} else {
+			this.signalQuality = 0;
+		}
+
+		if (this.signalQuality != previousSingalQuality)
+		{
+			sendAccessibilityEvent(AccessibilityEvent.TYPE_VIEW_TEXT_CHANGED);
+		}
+		
+		setAccessibilityString();
+		
+		invalidate();
+		requestLayout();
+	}
+	
+	@Override
+	protected void onMeasure(int widthMeasureSpec, int heightMeasureSpec) {
+	   int minw = getPaddingLeft() + getPaddingRight() + 200;
+	   int w = resolveSizeAndState(minw, widthMeasureSpec, 1);
+	   int minh = 50;
+	   setMeasuredDimension(w, minh);
+	}
+	
+	/**
+	 * generate some accessibility info
+	 */
+	public String getAccessibilityText()
+	{
+		if (this.signalQuality == 2) return "poor signal quality";
+		if (this.signalQuality == 3) return "good signal quality";
+		if (this.signalQuality == 4) return "great signal quality";
+		return "no signal";
+	}
+	
+	@Override
+	public void onPopulateAccessibilityEvent(AccessibilityEvent event) {
+		super.onPopulateAccessibilityEvent(event);
+		
+		CharSequence text = getAccessibilityText();
+        if (!TextUtils.isEmpty(text)) {
+            event.getText().add(text);
+        }
+	}
+}

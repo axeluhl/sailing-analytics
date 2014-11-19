@@ -24,7 +24,7 @@ public class TrackingFragment extends BaseFragment implements OnClickListener{
 		
 		Button startTracking = (Button) view.findViewById(R.id.stop_tracking);
 		startTracking.setOnClickListener(this);
-		
+	
 		return view;
 	}
 	
