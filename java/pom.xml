@@ -120,6 +120,7 @@
 	</modules>
 	
 	<properties>
+      		<gwt.version>2.6.1</gwt.version>
 		<tycho-version>0.21.0</tycho-version>
        		<gwt.version>2.6.1</gwt.version> 
 		<!--
