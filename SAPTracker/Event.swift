@@ -20,6 +20,7 @@ class Event: NSManagedObject {
     @NSManaged var imageUrl: String?
     @NSManaged var leaderBoard: LeaderBoard?
     @NSManaged var userImage: NSData?
+    @NSManaged var gpsFixes: NSSet?
 
     func initWithDictionary(dictionary: [String: AnyObject]) {
         eventId = dictionary["id"] as String
