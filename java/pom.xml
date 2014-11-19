@@ -10,10 +10,6 @@
     <version>1.0.0-SNAPSHOT</version>
   </parent>
 
-  <properties>
-      <gwt.version>2.6.1</gwt.version>
-  </properties>
-
 	<artifactId>root</artifactId>
 	<packaging>pom</packaging>
 
@@ -124,6 +120,7 @@
 	</modules>
 	
 	<properties>
+      		<gwt.version>2.6.1</gwt.version>
 		<tycho-version>0.21.0</tycho-version>
         
 		<!--
