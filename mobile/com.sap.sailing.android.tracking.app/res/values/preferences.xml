@@ -9,14 +9,14 @@
     <string name="preference_server_url_key">http://95.85.58.11:8000</string>
     <string name="preference_server_url_default">http://95.85.58.11:8000</string>
     
-    <!-- api endpoints -->
+    <string name="preference_energy_saving_enabled_key">preferenceEnergySavingEnabled</string>
     
-    <string name="preference_server_gps_fixes_post_path">/api/v1/gps_fixes</string>
-    <string name="preference_server_gps_checkin_path">/api/v1/leaderboards/{leaderboard-name}/device_mappings/start</string>
-    <string name="preference_server_event_path">/api/v1/events/{event_id}</string>
-    <string name="preference_server_leaderboard_path">/api/v1/leaderboards/{leaderboard_name}</string>
-    <string name="preference_server_competitor_path">/api/v1/competitors/{competitor_id}</string>
-    
+    <string name="settings_category_energy_saving">Battery Saving</string>
+    <string name="energy_saving_enabled">Save Energy</string>
+    <string name="preference_energy_saving_is_enabled">On</string>
+    <string name="preference_energy_saving_is_disabled">Off</string>
+    <string name="prefrence_energy_saving_summary_is_enabled">GPS Updates are being sent to server every 30 seconds.</string>
+    <string name="prefrence_energy_saving_summary_is_disabled">GPS Updates are being sent to server every 3 seconds.</string>
     
     <string name="preference_gps_fix_interval_ms_key">gpsFixInterval</string>
     <string name="preference_gps_fix_interval_ms_default">500</string>
