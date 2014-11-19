@@ -29,14 +29,6 @@ class HomeViewController: UIViewController, UITableViewDataSource, UITableViewDe
         fetchedResultsController!.performFetch(nil)
     }
     
-    override func prepareForSegue(segue: UIStoryboardSegue, sender: AnyObject?) {
-        if (segue.identifier! == "Regatta") {
-            let regattaViewController = segue.destinationViewController as RegattaViewController;
-            // TODO
-            // regattaViewController.regatta =  selectedRegatta
-        }
-    }
-
     // MARK: - QR code
 
     func openUrl(url: NSURL) {
@@ -120,6 +112,7 @@ class HomeViewController: UIViewController, UITableViewDataSource, UITableViewDe
     // MARK: - UITableViewDelegate
     
     func tableView(tableView: UITableView, didSelectRowAtIndexPath indexPath: NSIndexPath) {
+        DataManager.sharedManager.selectedEvent = (fetchedResultsController!.objectAtIndexPath(indexPath) as Event)
         tableView.deselectRowAtIndexPath(indexPath, animated: true)
         performSegueWithIdentifier("Regatta", sender: tableView)
     }

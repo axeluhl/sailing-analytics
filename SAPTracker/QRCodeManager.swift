@@ -62,13 +62,10 @@ class QRCodeManager: NSObject, UIAlertViewDelegate {
                                 self.delegate.activityIndicatorView?.stopAnimating()
                                 
                                 self.competitorDictionary = competitorResponseObject as? [String: AnyObject]
-                                var title = "Hello "
-                                title += (self.competitorDictionary!["displayName"]) as String
-                                title += ". Welcome to "
-                                title += (self.leaderBoardDictionary!["name"]) as String
-                                title += ". You are registered as "
-                                title += (self.competitorDictionary!["sailID"]) as String
-                                title += "."
+                                let competitorName = (self.competitorDictionary!["displayName"]) as String
+                                let leaderBoardName = (self.leaderBoardDictionary!["name"]) as String
+                                let sailId = (self.competitorDictionary!["sailID"]) as String
+                                var title = "Hello \(competitorName). Welcome to \(leaderBoardName). You are registered as \(sailId)."
                                 let alertView = UIAlertView(title: title, message: "", delegate: self, cancelButtonTitle: "Cancel", otherButtonTitles: "OK")
                                 alertView.tag = AlertViewTag.AcceptMapping.rawValue;
                                 alertView.show()

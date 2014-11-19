@@ -10,5 +10,6 @@
 #define SAPTracker_bridge_h
 
 #import <AFNetworking/AFNetworking.h>
+#import "UIImageView+AFNetworking.h"
 
 #endif

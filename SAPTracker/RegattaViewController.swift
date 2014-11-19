@@ -25,7 +25,23 @@ class RegattaViewController : UIViewController, UIActionSheetDelegate, UINavigat
     @IBOutlet weak var sailLabel: UILabel!
     
     override func viewDidLoad() {
-    
+        
+        // set values
+        navigationItem.title = DataManager.sharedManager.selectedEvent!.leaderBoard!.name
+        
+        if DataManager.sharedManager.selectedEvent!.imageUrl != nil {
+            let imageUrl = NSURL(string: DataManager.sharedManager.selectedEvent!.imageUrl!)
+            let urlRequest = NSURLRequest(URL: imageUrl!)
+            imageView.setImageWithURLRequest(urlRequest, placeholderImage: nil, success: { (request:NSURLRequest!,response:NSHTTPURLResponse!, image:UIImage!) -> Void in
+                self.imageView.image = image
+                }, failure: {
+                    (request:NSURLRequest!,response:NSHTTPURLResponse!, error:NSError!) -> Void in
+            })
+        }
+        nameLabel.text = DataManager.sharedManager.selectedEvent!.leaderBoard!.competitor!.displayName
+        flagImageView.image = UIImage(named: DataManager.sharedManager.selectedEvent!.leaderBoard!.competitor!.countryCode)
+        sailLabel.text = DataManager.sharedManager.selectedEvent!.leaderBoard!.competitor!.sailId
+        
         // get image sources
         super.viewDidLoad()
         if UIImagePickerController.isSourceTypeAvailable(UIImagePickerControllerSourceType.Camera) {
