@@ -4996,7 +4996,7 @@ public class SailingServiceImpl extends ProxiedRemoteServiceServlet implements S
     }
 
     @Override
-    public void revokeRaceLogEvents(String leaderboardName, String raceColumnName, String fleetName, List<Serializable> eventIds)
+    public void revokeRaceLogEvents(String leaderboardName, String raceColumnName, String fleetName,
             List<UUID> eventIds) throws NotRevokableException {
         RaceLog raceLog = getRaceLog(leaderboardName, raceColumnName, fleetName);
         for (Serializable idToRevoke : eventIds) {
