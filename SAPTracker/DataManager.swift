@@ -39,14 +39,14 @@ class DataManager: NSObject {
     // MARK: - notification callbacks
 
     /* New location detected, store to database. */
-    private func newLocation(notification: NSNotification) {
+    func newLocation(notification: NSNotification) {
         let gpsFix = NSEntityDescription.insertNewObjectForEntityForName("GPSFix", inManagedObjectContext: self.managedObjectContext!) as GPSFix
         gpsFix.initWithDictionary(notification.userInfo!)
         gpsFix.event = selectedEvent!
     }
     
     /* Tracking stopped, save data to disk. */
-    private func trackingStopped(notification: NSNotification) {
+    func trackingStopped(notification: NSNotification) {
         saveContext()
     }
 
