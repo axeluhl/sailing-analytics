@@ -249,11 +249,8 @@ public class TrackedRacesListPO extends PageArea {
     
     public void stopTracking(List<TrackedRaceDescriptor> races, boolean waitForFinished) {
         selectRaces(races);
-        
         this.stopTrackingButton.click();
-        
         waitForAjaxRequests();
-        
         if(waitForFinished) {
             waitForTrackedRaces(races, Status.FINISHED);
         }
@@ -292,18 +289,7 @@ public class TrackedRacesListPO extends PageArea {
     }
     
     private void selectRaces(List<TrackedRaceDescriptor> races) {
-        List<DataEntryPO> trackedRaces = getTrackedRaces(races);
-        Iterator<DataEntryPO> iterator = trackedRaces.iterator();
-        
-        while(iterator.hasNext()) {
-            DataEntryPO trackedRace = iterator.next();
-            
-            if(trackedRace == null) {
-                iterator.remove();
-            }
-        }
-        
         CellTablePO<DataEntryPO> table = getTrackedRacesTable();
-        table.selectEntries(trackedRaces);
+        table.selectEntries(() -> getTrackedRaces(races).stream().filter(tr -> tr != null));
     }
 }

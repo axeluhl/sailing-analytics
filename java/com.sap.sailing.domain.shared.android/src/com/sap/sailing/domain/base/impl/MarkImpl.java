@@ -6,7 +6,7 @@ import java.util.Collections;
 import com.sap.sailing.domain.base.Mark;
 import com.sap.sailing.domain.base.SharedDomainFactory;
 import com.sap.sailing.domain.common.MarkType;
-import com.sap.sailing.domain.common.impl.NamedImpl;
+import com.sap.sse.common.impl.NamedImpl;
 
 public class MarkImpl extends NamedImpl implements Mark {
     private static final long serialVersionUID = 1900673146064411979L;

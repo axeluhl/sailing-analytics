@@ -2,7 +2,6 @@ package com.sap.sailing.selenium.pages.adminconsole.tractrac;
 
 import java.util.ArrayList;
 import java.util.Arrays;
-import java.util.Iterator;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Objects;
@@ -15,13 +14,13 @@ import org.openqa.selenium.support.ui.ExpectedCondition;
 import org.openqa.selenium.support.ui.ExpectedConditions;
 import org.openqa.selenium.support.ui.Select;
 
-import com.sap.sailing.selenium.core.FindBy;
 import com.sap.sailing.selenium.core.BySeleniumId;
+import com.sap.sailing.selenium.core.FindBy;
 import com.sap.sailing.selenium.pages.PageArea;
 import com.sap.sailing.selenium.pages.adminconsole.regatta.RegattaListCompositePO.RegattaDescriptor;
 import com.sap.sailing.selenium.pages.adminconsole.tracking.TrackedRacesListPO;
-import com.sap.sailing.selenium.pages.gwt.DataEntryPO;
 import com.sap.sailing.selenium.pages.gwt.CellTablePO;
+import com.sap.sailing.selenium.pages.gwt.DataEntryPO;
 import com.sap.sailing.selenium.pages.gwt.GenericCellTablePO;
 
 /**
@@ -235,19 +234,8 @@ public class TracTracEventManagementPanelPO extends PageArea {
     
     public void startTrackingForRaces(List<TrackableRaceDescriptor> races) {
         CellTablePO<DataEntryPO> table = getTrackableRacesTable();
-        List<DataEntryPO> entries = table.getEntries();
-        Iterator<DataEntryPO> iterator = entries.iterator();
-        while (iterator.hasNext()) {
-            DataEntryPO entry = iterator.next();
-            String event = entry.getColumnContent("Event");
-            String race = entry.getColumnContent("Race");
-            String boatClass = entry.getColumnContent("Boat Class");
-            TrackableRaceDescriptor descriptor = new TrackableRaceDescriptor(event, race, boatClass);
-            if (!races.contains(descriptor)) {
-                iterator.remove();
-            }
-        }
-        table.selectEntries(entries);
+        table.selectEntries(() -> table.getEntries().stream().filter(e -> races.contains(
+                new TrackableRaceDescriptor(e.getColumnContent("Event"), e.getColumnContent("Race"), e.getColumnContent("Boat Class")))));
         this.startTrackingButton.click();
         ExpectedCondition<Alert> condition = ExpectedConditions.alertIsPresent();
         if (condition.apply(this.driver) == null) {

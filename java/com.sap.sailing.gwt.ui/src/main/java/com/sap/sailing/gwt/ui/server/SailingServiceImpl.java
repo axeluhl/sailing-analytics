@@ -171,6 +171,7 @@ import com.sap.sailing.domain.common.racelog.FlagPole;
 import com.sap.sailing.domain.common.racelog.Flags;
 import com.sap.sailing.domain.common.racelog.RaceLogRaceStatus;
 import com.sap.sailing.domain.common.racelog.RacingProcedureType;
+import com.sap.sailing.domain.common.racelog.tracking.MappableToDevice;
 import com.sap.sailing.domain.common.racelog.tracking.NoCorrespondingServiceRegisteredException;
 import com.sap.sailing.domain.common.racelog.tracking.NotDenotedForRaceLogTrackingException;
 import com.sap.sailing.domain.common.racelog.tracking.NotRevokableException;
@@ -4878,7 +4879,7 @@ public class SailingServiceImpl extends ProxiedRemoteServiceServlet implements S
                 .getTimeRange().from().asDate();
         Date to = mapping.getTimeRange().to() == null || mapping.getTimeRange().to().asMillis() == Long.MAX_VALUE ? null : mapping
                 .getTimeRange().to().asDate();
-        Serializable item = null;
+        MappableToDevice item = null;
         if (mapping.getMappedTo() instanceof Competitor) {
             item = baseDomainFactory.convertToCompetitorDTO((Competitor) mapping.getMappedTo());
         } else if (mapping.getMappedTo() instanceof Mark) {
@@ -4886,8 +4887,20 @@ public class SailingServiceImpl extends ProxiedRemoteServiceServlet implements S
         } else {
             throw new RuntimeException("Can only handle Competitor or Mark as mapped item type");
         }
-        return new DeviceMappingDTO(new DeviceIdentifierDTO(mapping.getDevice().getIdentifierType(), deviceId), from, to, item,
-                mapping.getOriginalRaceLogEventIds());
+        //Only deal with UUIDs - otherwise we would have to pass Serializable to browser context - which
+        //has a large performance implact for GWT.
+        //As any Serializable subclass is converted to String by the BaseRaceLogEventSerializer, and only UUIDs are
+        //recovered by the BaseRaceLogEventDeserializer, only UUIDs are safe to use anyway.
+        List<UUID> originalRaceLogEventUUIDs = new ArrayList<UUID>();
+        for (Serializable id : mapping.getOriginalRaceLogEventIds()) {
+            if (! (id instanceof UUID)) {
+                logger.log(Level.WARNING, "Got RaceLogEvent with id that was not UUID, but " + id.getClass().getName());
+                throw new TransformationException("Could not send device mapping to browser: can only deal with UUIDs");
+            }
+            originalRaceLogEventUUIDs.add((UUID) id);
+        }
+       return new DeviceMappingDTO(new DeviceIdentifierDTO(mapping.getDevice().getIdentifierType(),
+                 deviceId), from, to, item, originalRaceLogEventUUIDs);
     }
 
     @Override
@@ -4958,6 +4971,7 @@ public class SailingServiceImpl extends ProxiedRemoteServiceServlet implements S
         TimeRange timeRange = new TimeRangeImpl(from, to);
         if (dto.mappedTo instanceof MarkDTO) {
             Mark mark = convertToMark(((MarkDTO) dto.mappedTo), true);
+            //expect UUIDs
             return new DeviceMappingImpl<Mark>(mark, device, timeRange, dto.originalRaceLogEventIds);
         } else if (dto.mappedTo instanceof CompetitorDTO) {
             Competitor competitor = getService().getCompetitorStore().getExistingCompetitorByIdAsString(
@@ -4983,7 +4997,7 @@ public class SailingServiceImpl extends ProxiedRemoteServiceServlet implements S
 
     @Override
     public void revokeRaceLogEvents(String leaderboardName, String raceColumnName, String fleetName, List<Serializable> eventIds)
-            throws NotRevokableException {
+            List<UUID> eventIds) throws NotRevokableException {
         RaceLog raceLog = getRaceLog(leaderboardName, raceColumnName, fleetName);
         for (Serializable idToRevoke : eventIds) {
             raceLog.lockForRead();

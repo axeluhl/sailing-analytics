@@ -96,7 +96,7 @@ public class DataEntryPO extends CellTableRowPO {
      * @return
      *   The element on which to click to select or deselect the data entry in the table.
      */
-    protected WebElement getElementForSelect() {
+    private WebElement getElementForSelect() {
         final int columnToUseForSelection;
         if (this.columns.size() > 1) {
             // could be a selection checkbox column in the first column, so use second column to be on the safe side:
@@ -109,11 +109,16 @@ public class DataEntryPO extends CellTableRowPO {
     
     protected Action getModifiedSelectAction() {
         Actions actions = new Actions(this.driver);
-        actions.keyDown(Keys.CONTROL);
-        actions.moveToElement(getElementForSelect(), 1, 1);
-        actions.click();
-        actions.keyUp(Keys.CONTROL);
-        
+        if (table.getColumnHeaders().get(0).equals("\u2713")) {
+            // it's a checkbox column
+            actions.moveToElement(this.columns.isEmpty() ? getWebElement() : this.columns.get(0));
+            actions.click();
+        } else {
+            actions.keyDown(Keys.CONTROL);
+            actions.moveToElement(getElementForSelect(), 1, 1);
+            actions.click();
+            actions.keyUp(Keys.CONTROL);
+        }
         return actions.build();
     }
     

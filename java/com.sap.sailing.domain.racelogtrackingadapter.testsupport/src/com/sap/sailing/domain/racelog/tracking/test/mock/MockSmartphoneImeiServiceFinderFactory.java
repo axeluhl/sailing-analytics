@@ -22,10 +22,10 @@ public class MockSmartphoneImeiServiceFinderFactory implements TypeBasedServiceF
     Map<Class<?>, TypeBasedServiceFinder<?>> serviceFinders = new HashMap<Class<?>, TypeBasedServiceFinder<?>>();
 
     public MockSmartphoneImeiServiceFinderFactory() {
-        serviceFinders.put(DeviceIdentifierMongoHandler.class, new MockSmartphoneImeiMongoServiceFinder());
-        serviceFinders.put(DeviceIdentifierJsonHandler.class, new MockSmartphoneImeiJsonServiceFinder());
+        serviceFinders.put(DeviceIdentifierMongoHandler.class, new MockServiceFinder<>(new SmartphoneImeiMongoHandler()));
+        serviceFinders.put(DeviceIdentifierJsonHandler.class, new MockServiceFinder<>(new SmartphoneImeiJsonHandler()));
         serviceFinders.put(GPSFixMongoHandler.class, new MockGPSFixMongoServiceFinder());
-        serviceFinders.put(GPSFixJsonHandler.class, new MockGPSFixJsonServiceFinder());
+        serviceFinders.put(GPSFixJsonHandler.class, new MockServiceFinder<>(new MockGPSFixJsonHandler()));
     }
 
     @SuppressWarnings("unchecked")

@@ -5,7 +5,7 @@ import com.sap.sailing.domain.base.CourseArea;
 import com.sap.sailing.domain.base.configuration.RegattaConfiguration;
 import com.sap.sailing.domain.base.racegroup.RaceGroup;
 import com.sap.sailing.domain.base.racegroup.SeriesWithRows;
-import com.sap.sailing.domain.common.impl.NamedImpl;
+import com.sap.sse.common.impl.NamedImpl;
 
 
 public class RaceGroupImpl extends NamedImpl implements RaceGroup {

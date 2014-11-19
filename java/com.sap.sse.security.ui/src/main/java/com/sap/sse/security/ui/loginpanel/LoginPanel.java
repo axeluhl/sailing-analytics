@@ -9,7 +9,6 @@ import com.google.gwt.resources.client.ImageResource;
 import com.google.gwt.user.client.Window;
 import com.google.gwt.user.client.rpc.AsyncCallback;
 import com.google.gwt.user.client.ui.Anchor;
-import com.google.gwt.user.client.ui.HTML;
 import com.google.gwt.user.client.ui.HorizontalPanel;
 import com.google.gwt.user.client.ui.ImageResourceRenderer;
 import com.google.gwt.user.client.ui.Label;
@@ -40,7 +39,7 @@ public class LoginPanel extends HorizontalPanel implements UserStatusEventHandle
 
     private final OAuthLogin oAuthPanel;
 
-    public LoginPanel(final Css css, final UserService userService) {
+    public LoginPanel(final LoginPanelCss css, final UserService userService) {
         this.userManagementService = userService.getUserManagementService();
         this.userService = userService;
         css.ensureInjected();
@@ -111,7 +110,9 @@ public class LoginPanel extends HorizontalPanel implements UserStatusEventHandle
 
         final ImageResource userImageResource = IconResources.INSTANCE.userIcon();
         ImageResourceRenderer renderer = new ImageResourceRenderer();
-        final HTML imageContainer = new HTML(renderer.render(userImageResource));
+        final Anchor imageContainer = new Anchor(renderer.render(userImageResource));
+        imageContainer.setHref(EntryPointLinkFactory.createPasswordResetLink(new HashMap<String, String>()));
+        imageContainer.setTitle(stringMessages.editProfile());
         imageContainer.getElement().addClassName(css.userIcon());
         add(imageContainer);
         welcomeMessage.getElement().addClassName(css.welcomeMessage());
