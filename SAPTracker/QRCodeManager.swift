@@ -49,7 +49,6 @@ class QRCodeManager: NSObject, UIAlertViewDelegate {
         APIManager.sharedManager.getEvent(qrcodeData!.eventId,
             success: { (AFHTTPRequestOperation operation, AnyObject eventResponseObject) -> Void in
                 self.eventDictionary = eventResponseObject as? [String: AnyObject]
-                NSThread.sleepForTimeInterval(10);
                 APIManager.sharedManager.getLeaderBoard(self.qrcodeData!.leaderBoardName,
                     
                     // get leader board
