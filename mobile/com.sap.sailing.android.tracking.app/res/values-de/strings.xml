@@ -20,6 +20,7 @@
     <string name="gps_fix_interval">GPS Fix Interval</string>
     <string name="title_activity_regatta">Regatta</string>
     <string name="title_activity_start">GPS Tracker gestartetp</string>
+    <string name="title_activity_tracking">Tracking</string>
     <string name="hello_world">Hello wörld!</string>
     <string name="action_settings">Einstellungen</string>
     <string name="please_confirm">Bitte bestätigen</string>

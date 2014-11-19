@@ -205,7 +205,8 @@ public class TransmittingService extends Service {
 		float batteryPct = getBatteryPercentage();
 		boolean batteryIsCharging = prefs.getBatteryIsCharging(); 
 				
-		if (batteryPct < BATTERY_POWER_SAVE_TRESHOLD && !batteryIsCharging)
+		if (	prefs.getEnergySavingEnabledByUser() ||
+				(batteryPct < BATTERY_POWER_SAVE_TRESHOLD && !batteryIsCharging))
 		{
 			if (BuildConfig.DEBUG)
 			{

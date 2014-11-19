@@ -56,6 +56,14 @@
                 android:value=".ui.activities.StartActivity" />
         </activity>
         <activity
+            android:name=".ui.activities.TrackingActivity"
+            android:label="@string/title_activity_tracking"
+            android:screenOrientation="portrait" >
+            <meta-data
+                android:name="android.support.PARENT_ACTIVITY"
+                android:value=".ui.activities.StartActivity" />
+        </activity>
+        <activity
             android:name=".ui.activities.StartTrackingActivity"
             android:screenOrientation="portrait" >
             <intent-filter>
