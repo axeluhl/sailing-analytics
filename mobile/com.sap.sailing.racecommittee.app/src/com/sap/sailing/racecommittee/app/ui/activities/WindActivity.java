@@ -6,12 +6,9 @@ import java.text.DecimalFormatSymbols;
 import java.util.Locale;
 
 import android.app.AlertDialog;
-import android.content.Context;
 import android.content.DialogInterface;
 import android.content.Intent;
 import android.location.Location;
-import android.location.LocationListener;
-import android.location.LocationManager;
 import android.os.Bundle;
 import android.view.View;
 import android.view.View.OnClickListener;
@@ -23,6 +20,13 @@ import android.widget.SeekBar.OnSeekBarChangeListener;
 import android.widget.TextView;
 import android.widget.Toast;
 
+import com.google.android.gms.common.ConnectionResult;
+import com.google.android.gms.common.GooglePlayServicesClient.ConnectionCallbacks;
+import com.google.android.gms.common.GooglePlayServicesClient.OnConnectionFailedListener;
+import com.google.android.gms.location.LocationClient;
+import com.google.android.gms.location.LocationListener;
+import com.google.android.gms.location.LocationRequest;
+import com.sap.sailing.android.shared.logging.ExLog;
 import com.sap.sailing.domain.common.Bearing;
 import com.sap.sailing.domain.common.Position;
 import com.sap.sailing.domain.common.SpeedWithBearing;
@@ -35,26 +39,27 @@ import com.sap.sailing.domain.tracking.impl.WindImpl;
 import com.sap.sailing.racecommittee.app.AppConstants;
 import com.sap.sailing.racecommittee.app.AppPreferences;
 import com.sap.sailing.racecommittee.app.R;
-import com.sap.sailing.android.shared.logging.ExLog;
 import com.sap.sailing.racecommittee.app.ui.views.CompassView;
 import com.sap.sailing.racecommittee.app.ui.views.CompassView.CompassDirectionListener;
 
-public class WindActivity extends SessionActivity implements CompassDirectionListener, LocationListener {
+public class WindActivity extends SessionActivity implements CompassDirectionListener, ConnectionCallbacks, OnConnectionFailedListener, LocationListener {
 
+    private final static String TAG = WindActivity.class.getName();
     private final static int FIVE_SEC = 5000;
     private final static int EVERY_POSITION_CHANGE = 0;
 
-    CompassView compassView;
-    EditText windBearingEditText;
-    EditText windSpeedEditText;
-    SeekBar windSpeedSeekBar;
-    Button sendButton;
-    TextView waitingForGpsTextView;
+    private CompassView compassView;
+    private EditText windBearingEditText;
+    private EditText windSpeedEditText;
+    private SeekBar windSpeedSeekBar;
+    private Button sendButton;
+    private TextView waitingForGpsTextView;
     
-    LocationManager locationManager;
-    Location currentLocation;
-    DecimalFormat speedFormat;
-    DecimalFormat bearingFormat;
+    private LocationClient locationClient;
+    private LocationRequest locationRequest;
+    private Location currentLocation;
+    private DecimalFormat speedFormat;
+    private DecimalFormat bearingFormat;
 
     @Override
     public void onCreate(Bundle savedInstanceState) {
@@ -68,11 +73,13 @@ public class WindActivity extends SessionActivity implements CompassDirectionLis
         sendButton = (Button) findViewById(R.id.btn_wind_send);
         waitingForGpsTextView = (TextView) findViewById(R.id.textWaitingForGPS);
 
-        locationManager = (LocationManager) getSystemService(Context.LOCATION_SERVICE);
-        if (!locationManager.isProviderEnabled(LocationManager.GPS_PROVIDER)) {
-            buildAlertMessageNoGps();
-        }
-        locationManager.requestLocationUpdates(LocationManager.GPS_PROVIDER, FIVE_SEC, EVERY_POSITION_CHANGE, this);
+        // http://developer.android.com/training/location/receive-location-updates.html
+        locationRequest = LocationRequest.create();
+        locationRequest.setPriority(LocationRequest.PRIORITY_HIGH_ACCURACY);
+        locationRequest.setInterval(FIVE_SEC);
+        locationRequest.setFastestInterval(EVERY_POSITION_CHANGE);
+
+        locationClient = new LocationClient(this, this, this);
 
         windSpeedSeekBar.setOnSeekBarChangeListener(new OnSeekBarChangeListener() {
 
@@ -181,6 +188,7 @@ public class WindActivity extends SessionActivity implements CompassDirectionLis
     public void onStart() {
         super.onStart();
 
+        locationClient.connect();
         compassView.setDirectionListener(this);
     }
 
@@ -192,7 +200,11 @@ public class WindActivity extends SessionActivity implements CompassDirectionLis
 
     @Override
     public void onPause() {
-        locationManager.removeUpdates(this);
+        if (locationClient.isConnected()) {
+            locationClient.removeLocationUpdates(this);
+        }
+        locationClient.disconnect();
+        
         super.onPause();
     }
 
@@ -201,19 +213,6 @@ public class WindActivity extends SessionActivity implements CompassDirectionLis
         currentLocation = location;
         waitingForGpsTextView.setText("");
         sendButton.setEnabled(true);
-    }
-
-    @Override
-    public void onProviderDisabled(String provider) {
-    }
-
-    @Override
-    public void onProviderEnabled(String provider) {
-        locationManager.requestLocationUpdates(LocationManager.GPS_PROVIDER, FIVE_SEC, EVERY_POSITION_CHANGE, this);
-    }
-
-    @Override
-    public void onStatusChanged(String provider, int status, Bundle extras) {
     }
 
     protected static float round(float unrounded, int precision) {
@@ -235,6 +234,21 @@ public class WindActivity extends SessionActivity implements CompassDirectionLis
         // to match the assumption that a bearing is always the direction the wind flows to
         SpeedWithBearing speedBearing = new KnotSpeedWithBearingImpl(windSpeed, bearing_from.reverse());
         return new WindImpl(currentPosition, MillisecondsTimePoint.now(), speedBearing);
+    }
+
+    @Override
+    public void onConnectionFailed(ConnectionResult arg0) {
+        ExLog.e(this, TAG, "Failed to connect to Google Play Services for location updates");
+    }
+
+    @Override
+    public void onConnected(Bundle arg0) {
+        locationClient.requestLocationUpdates(locationRequest, this);
+    }
+
+    @Override
+    public void onDisconnected() {
+        ExLog.i(this, TAG, "LocationClient was disconnected");
     }
 
 }

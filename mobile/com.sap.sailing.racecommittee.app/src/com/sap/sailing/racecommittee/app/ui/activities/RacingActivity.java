@@ -168,8 +168,10 @@ public class RacingActivity extends SessionActivity implements RaceInfoListener,
             if (resultCode == Activity.RESULT_OK) {
                 if (data.getExtras().containsKey(AppConstants.EXTRAS_WIND_FIX)) {
                     Wind windFix = (Wind) data.getSerializableExtra(AppConstants.EXTRAS_WIND_FIX);
-                    selectedRace.getState().setWindFix(MillisecondsTimePoint.now(), windFix);
                     windButton.setText(String.format(getString(R.string.wind_info), windFix.getKnots(), windFix.getBearing().reverse().toString()));
+                    if (selectedRace != null) {
+                        selectedRace.getState().setWindFix(MillisecondsTimePoint.now(), windFix);
+                    }
                 }
             }
         }
@@ -189,6 +191,10 @@ public class RacingActivity extends SessionActivity implements RaceInfoListener,
         Toolbar toolbar = (Toolbar) findViewById(R.id.toolbar);
         if (toolbar != null) {
             setSupportActionBar(toolbar);
+            View view = findViewById(R.id.toolbar_extended);
+            if (view != null) {
+                view.setVisibility(View.VISIBLE);
+            }
         }
 
         navDrawerFragment = (NavigationDrawerFragment) getFragmentManager().findFragmentById(R.id.navigation_drawer);
