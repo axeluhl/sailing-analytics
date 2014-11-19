@@ -1,11 +1,11 @@
 package com.sap.sailing.domain.leaderboard.impl;
 
-import com.sap.sailing.domain.base.IsManagedBySharedDomainFactory;
 import com.sap.sailing.domain.base.SharedDomainFactory;
 import com.sap.sailing.domain.base.impl.FleetImpl;
 import com.sap.sailing.domain.common.LeaderboardNameConstants;
+import com.sap.sse.common.IsManagedByCache;
 
-public class DefaultFleetImpl extends FleetImpl implements IsManagedBySharedDomainFactory {
+public class DefaultFleetImpl extends FleetImpl implements IsManagedByCache<SharedDomainFactory> {
 
     private static final long serialVersionUID = 6233489616955255401L;
 
@@ -14,7 +14,7 @@ public class DefaultFleetImpl extends FleetImpl implements IsManagedBySharedDoma
     }
 
     @Override
-    public IsManagedBySharedDomainFactory resolve(SharedDomainFactory domainFactory) {
+    public IsManagedByCache<SharedDomainFactory> resolve(SharedDomainFactory domainFactory) {
         return FlexibleLeaderboardImpl.defaultFleet;
     }
 

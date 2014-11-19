@@ -2,9 +2,9 @@ package com.sap.sailing.sailwave.resultimport.impl;
 
 import java.io.InputStream;
 
-import com.sap.sailing.domain.common.TimePoint;
 import com.sap.sailing.sailwave.resultimport.CsvParser;
 import com.sap.sailing.sailwave.resultimport.CsvParserFactory;
+import com.sap.sse.common.TimePoint;
 
 public class CsvParserFactoryImpl implements CsvParserFactory {
     @Override

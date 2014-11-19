@@ -9,7 +9,7 @@ import java.util.concurrent.ConcurrentLinkedQueue;
 
 import com.sap.sailing.domain.base.EventBase;
 import com.sap.sailing.domain.base.Venue;
-import com.sap.sailing.domain.common.TimePoint;
+import com.sap.sse.common.TimePoint;
 import com.sap.sse.common.Util;
 
 public abstract class EventBaseImpl implements EventBase {

@@ -3,7 +3,6 @@ package com.sap.sailing.domain.tracking.impl;
 import java.util.logging.Logger;
 
 import com.sap.sailing.domain.base.CourseBase;
-import com.sap.sailing.domain.common.TimePoint;
 import com.sap.sailing.domain.common.WindSource;
 import com.sap.sailing.domain.common.WindSourceType;
 import com.sap.sailing.domain.common.impl.WindSourceImpl;
@@ -21,6 +20,7 @@ import com.sap.sailing.domain.racelog.analyzing.impl.WindFixesFinder;
 import com.sap.sailing.domain.racelog.impl.BaseRaceLogEventVisitor;
 import com.sap.sailing.domain.tracking.DynamicTrackedRace;
 import com.sap.sailing.domain.tracking.Wind;
+import com.sap.sse.common.TimePoint;
 
 /**
  * TODO: this class could be a good place to leverage more information about a race containing in the {@link RaceLog}.

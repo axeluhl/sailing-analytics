@@ -17,6 +17,8 @@ Require-Bundle: com.sap.sailing.domain,
  javax.servlet;bundle-version="2.6.0",
  com.sap.sailing.domain.common,
  com.sap.sailing.server.gateway,
- com.sap.sse.common
+ com.sap.sse.common,
+ com.sap.sse.replication,
+ com.sap.sse
 Bundle-ClassPath: .
 Web-ContextPath: /gateway-ess40

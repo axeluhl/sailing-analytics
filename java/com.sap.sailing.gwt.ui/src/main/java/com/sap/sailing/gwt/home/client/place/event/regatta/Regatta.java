@@ -13,17 +13,20 @@ import com.google.gwt.event.dom.client.ClickEvent;
 import com.google.gwt.uibinder.client.UiBinder;
 import com.google.gwt.uibinder.client.UiField;
 import com.google.gwt.uibinder.client.UiHandler;
+import com.google.gwt.user.client.Event;
 import com.google.gwt.user.client.ui.Anchor;
 import com.google.gwt.user.client.ui.Composite;
 import com.google.gwt.user.client.ui.Image;
 import com.google.gwt.user.client.ui.Widget;
+import com.google.gwt.user.client.ui.impl.HyperlinkImpl;
 import com.sap.sailing.gwt.common.client.BoatClassImageResolver;
 import com.sap.sailing.gwt.common.client.BoatClassImageResources;
 import com.sap.sailing.gwt.home.client.app.HomePlacesNavigator;
 import com.sap.sailing.gwt.home.client.app.PlaceNavigation;
 import com.sap.sailing.gwt.home.client.place.event.EventPlace;
 import com.sap.sailing.gwt.home.client.place.event.EventPlaceNavigator;
-import com.sap.sailing.gwt.home.client.place.leaderboard.LeaderboardPlace;
+import com.sap.sailing.gwt.home.client.place.regatta.RegattaPlace;
+import com.sap.sailing.gwt.home.client.place.regatta.RegattaPlace.RegattaNavigationTabs;
 import com.sap.sailing.gwt.home.client.shared.LongNamesUtil;
 import com.sap.sailing.gwt.ui.shared.EventDTO;
 import com.sap.sailing.gwt.ui.shared.LeaderboardGroupDTO;
@@ -37,6 +40,8 @@ public class Regatta extends Composite {
 
     interface RegattaUiBinder extends UiBinder<Widget, Regatta> {
     }
+
+    private static final HyperlinkImpl HYPERLINK_IMPL = GWT.create(HyperlinkImpl.class);
 
     private final EventDTO event;
     private final Timer timerForClientServerOffset;
@@ -73,7 +78,7 @@ public class Regatta extends Composite {
     
     @UiField Image boatClassImage;
 
-    private PlaceNavigation<LeaderboardPlace> leaderboardNavigation;
+    private PlaceNavigation<RegattaPlace> leaderboardNavigation;
     private PlaceNavigation<EventPlace> regattaNavigation;
     private final HomePlacesNavigator placesNavigator;
     private final EventPlaceNavigator eventPlaceNavigator;
@@ -104,7 +109,8 @@ public class Regatta extends Composite {
 
         if(isSingleView) {
             regattaDetailsLink.setVisible(false);
-            leaderboardNavigation = placesNavigator.getLeaderboardNavigation(event.id.toString(), leaderboard.name, event.getBaseURL(), event.isOnRemoteServer());
+            leaderboardNavigation = placesNavigator.getRegattaAnalyticsNavigation(event.id.toString(), RegattaNavigationTabs.Leaderboard, 
+                    leaderboard.name, event.getBaseURL(), event.isOnRemoteServer());
             leaderboardLink.setHref(leaderboardNavigation.getTargetUrl());
         } else {
             leaderboardLink.setVisible(false);
@@ -165,13 +171,18 @@ public class Regatta extends Composite {
 
     @UiHandler("regattaDetailsLink")
     void regattaDetailsLinkClicked(ClickEvent e) {
-        placesNavigator.goToPlace(regattaNavigation);
-        e.preventDefault();
+        handleClickEvent(e, regattaNavigation);
     }
 
     @UiHandler("leaderboardLink")
     void leaderboardLinkClicked(ClickEvent e) {
-        placesNavigator.goToPlace(leaderboardNavigation);
-        e.preventDefault();
+        handleClickEvent(e, leaderboardNavigation);
+    }
+    
+    private void handleClickEvent(ClickEvent e, PlaceNavigation<?> placeNavigation) {
+        if (HYPERLINK_IMPL.handleAsClick((Event) e.getNativeEvent())) {
+            placesNavigator.goToPlace(placeNavigation);
+            e.preventDefault();
+         }
     }
 }

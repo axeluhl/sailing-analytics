@@ -1,10 +1,10 @@
 package com.sap.sailing.domain.racelog.analyzing.impl;
 
-import com.sap.sailing.domain.common.TimePoint;
 import com.sap.sailing.domain.common.racelog.RaceLogRaceStatus;
 import com.sap.sailing.domain.racelog.RaceLog;
 import com.sap.sailing.domain.racelog.RaceLogEvent;
 import com.sap.sailing.domain.racelog.RaceLogRaceStatusEvent;
+import com.sap.sse.common.TimePoint;
 
 public class FinishedTimeFinder extends RaceLogAnalyzer<TimePoint> {
 

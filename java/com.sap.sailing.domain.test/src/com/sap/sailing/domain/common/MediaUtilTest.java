@@ -2,8 +2,9 @@ package com.sap.sailing.domain.common;
 
 import org.junit.Test;
 
-import com.sap.sailing.domain.common.impl.MillisecondsTimePoint;
 import com.sap.sailing.domain.common.media.MediaUtil;
+import com.sap.sse.common.TimePoint;
+import com.sap.sse.common.impl.MillisecondsTimePoint;
 
 import static org.junit.Assert.*;
 

@@ -29,7 +29,7 @@ public class SessionCacheManager implements CacheManager {
     @Override
     public <K, V> Cache<K, V> getCache(String name) throws CacheException {
         final SecurityService securityService = Activator.getSecurityService();
-        if (securityService == null){
+        if (securityService == null) {
             return null;
         }
         return securityService.getCacheManager().getCache(name);

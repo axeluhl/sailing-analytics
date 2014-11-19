@@ -287,7 +287,6 @@ public class Util {
     /**
      * <code>null</code> is permissible for both, <code>o1</code> and <code>o2</code>, where a <code>null</code> value
      * is considered less than a non-null value if <code>nullIsLess</code> is <code>true</code>, greater otherwise.
-     * @param nullIsLess TODO
      */
     public static <T> int compareToWithNull(Comparable<T> o1, T o2, boolean nullIsLess) {
         final int result;

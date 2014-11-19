@@ -12,8 +12,8 @@ import org.junit.Before;
 import org.junit.Test;
 
 import com.sap.sailing.server.operationaltransformation.CreateLeaderboardGroup;
-import com.sap.sailing.server.replication.impl.ReplicaDescriptor;
-import com.sap.sailing.server.replication.impl.ReplicationInstancesManager;
+import com.sap.sse.replication.impl.ReplicaDescriptor;
+import com.sap.sse.replication.impl.ReplicationInstancesManager;
 
 public class ReplicationInstancesManagerLoggingPerformanceTest {
     private ReplicationInstancesManager replicationInstanceManager;

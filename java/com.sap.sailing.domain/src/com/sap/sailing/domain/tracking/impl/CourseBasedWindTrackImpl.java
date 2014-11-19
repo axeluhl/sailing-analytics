@@ -2,13 +2,13 @@ package com.sap.sailing.domain.tracking.impl;
 
 import java.util.NavigableSet;
 
-import com.sap.sailing.domain.common.TimePoint;
 import com.sap.sailing.domain.common.WindSourceType;
-import com.sap.sailing.domain.common.impl.MillisecondsTimePoint;
 import com.sap.sailing.domain.tracking.TrackedRace;
 import com.sap.sailing.domain.tracking.Wind;
 import com.sap.sailing.util.impl.ArrayListNavigableSet;
 import com.sap.sailing.util.impl.UnmodifiableNavigableSet;
+import com.sap.sse.common.TimePoint;
+import com.sap.sse.common.impl.MillisecondsTimePoint;
 
 /**
  * The only "raw" fix produced by this wind track implementation is based on the course layout of the tracked race to

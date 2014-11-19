@@ -8,13 +8,13 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
-import com.sap.sailing.domain.common.TimePoint;
 import com.sap.sailing.resultimport.CompetitorEntry;
 import com.sap.sailing.resultimport.CompetitorRow;
 import com.sap.sailing.resultimport.RegattaResults;
 import com.sap.sailing.resultimport.impl.CompetitorRowImpl;
 import com.sap.sailing.resultimport.impl.DefaultCompetitorEntryImpl;
 import com.sap.sailing.sailwave.resultimport.CsvParser;
+import com.sap.sse.common.TimePoint;
 
 public class CsvParserImpl implements CsvParser {
 

@@ -5,8 +5,8 @@ import java.util.Iterator;
 import java.util.concurrent.locks.ReadWriteLock;
 
 import com.sap.sailing.domain.base.Timed;
-import com.sap.sailing.domain.common.Duration;
-import com.sap.sailing.domain.common.TimePoint;
+import com.sap.sse.common.Duration;
+import com.sap.sse.common.TimePoint;
 
 /**
  * A track records {@link Timed} items for an object of type <code>ItemType</code>. It allows clients to ask for a value
