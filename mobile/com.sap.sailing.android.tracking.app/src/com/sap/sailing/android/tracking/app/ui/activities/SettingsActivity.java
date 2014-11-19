@@ -8,6 +8,13 @@ import android.preference.PreferenceActivity;
 import com.sap.sailing.android.tracking.app.ui.fragments.preference.GeneralPreferenceFragment;
 
 public class SettingsActivity extends PreferenceActivity {
+	
+	@Override
+	protected void onCreate(Bundle savedInstanceState) {
+		// TODO Auto-generated method stub
+		super.onCreate(savedInstanceState);
+	}
+	
     @Override
     public void onBuildHeaders(List<Header> target) {
         //loadHeadersFromResource(R.xml.preference_headers, target);

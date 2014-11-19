@@ -9,10 +9,10 @@
         android:layout_height="wrap_content"
         android:theme="@style/ThemeOverlay.AppCompat.ActionBar" />
 
-    <fragment android:name="com.sap.sailing.android.tracking.app.ui.fragments.HomeFragment"
-            android:id="@+id/home_fragment_id"
-            android:layout_width="match_parent"
-        	android:layout_height="match_parent"
-       	 	android:layout_below="@id/toolbar" />
+    <FrameLayout
+        android:id="@+id/content_frame"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:layout_below="@id/toolbar" />
     
 </RelativeLayout>
