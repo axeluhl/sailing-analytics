@@ -122,7 +122,7 @@
 	<properties>
 		<tycho-version>0.21.0</tycho-version>
        		<gwt.version>2.6.1</gwt.version> 
-		<p2-target>race-analysis-p2-maven-default</p2-target><!--can be overidden through p2-target.maven-p2admin profile-->
+		<p2-target>race-analysis-p2-remote</p2-target><!--can be overidden through p2-target.local profile-->
 		<!--
           QUESTION: Which properties or settings are system dependent and differ across
                     different machines/environments?
@@ -191,15 +191,15 @@
             </properties>
         </profile>
         <profile>
-            <id>p2-target.maven-p2admin</id>
+            <id>p2-target.local</id>
             <properties>
                 <p2-target>
-		  race-analysis-p2-maven-p2admin
+		  race-analysis-p2-local
 		</p2-target>
             </properties>
             <activation>
 		<property>
-                     <name>p2admin</name>
+                     <name>p2-local</name><!-- activiated by ``mvn -Dp2-local``-->
                 </property>
             </activation>
         </profile>

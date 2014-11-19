@@ -85,7 +85,7 @@ reporting=0
 suppress_confirmation=0
 extra=''
 parallelexecution=0
-mavenp2admin=0
+p2local=0
 
 if [ $# -eq 0 ]; then
     echo "buildAndUpdateProduct [-b -u -g -t -a -r -o -c -p -v -m <config> -n <package> -l <port>] [build|install|all|hot-deploy|remote-deploy|local-deploy|release]"
@@ -164,7 +164,7 @@ do
            HAS_OVERWRITTEN_TARGET=1;;
         w) REMOTE_SERVER_LOGIN=$OPTARG;;
         u) suppress_confirmation=1;;
-        v) mavenp2admin=1;;
+        v) p2local=1;;
         \?) echo "Invalid option"
             exit 4;;
     esac
@@ -541,17 +541,12 @@ if [[ "$@" == "build" ]] || [[ "$@" == "all" ]]; then
 	    extra="$extra -Pdebug.no-gwt-compile"
 	fi
 
-	if [ $mavenp2admin -eq 1 ]; then
+	if [ $p2local -eq 1 ]; then
 	    echo "INFO: Building and using local p2 repo"
-	    (cd com.sap.$PROJECT_TYPE.targetplatform/scripts; ./createLocalBaseP2repositoryLinux.sh)
-	    extra="$extra -Dp2admin" # activates the p2-target.maven-p2admin profile in java/pom.xml
-            targetdef=com.sap.$PROJECT_TYPE.targetplatform/definitions/race-analysis-p2-maven-p2admin.target
-            echo "INFO: Patching $targetdef with absolute path to \$PROJECT_HOME"
-	    cp -n $targetdef $targetdef.bak
-            cat $targetdef | sed -e "s@file://\$PROJECT_HOME@file://$PROJECT_HOME@" > $targetdef.sed
-            mv $targetdef.sed $targetdef
+	    (cd com.sap.$PROJECT_TYPE.targetplatform/scripts; ./createLocalBaseP2repositoryLinux.sh; ./createLocalTargetDef.sh)
+	    extra="$extra -Dp2-local" # activates the p2-target.local profile in java/pom.xml
 	else
-	    echo "INFO: Using central p2 repo"
+	    echo "INFO: Using remote p2 repo (http://p2.sapsailing.com/p2/sailing/)"
         fi
 
     # back to root!
@@ -635,12 +630,6 @@ if [[ "$@" == "build" ]] || [[ "$@" == "all" ]]; then
 	for i in com.sap.$PROJECT_TYPE.gwt.ui/src/main/resources/com/sap/$PROJECT_TYPE/gwt/ui/*.gwt.xml; do
 	    mv -v $i.bak $i
 	done
-    fi
-
-    if [ $mavenp2admin -eq 1 ]; then
-        # And also move back patched target definition
-        echo "INFO: restoring maven p2admin target definition after it was patched before"
-        mv -v $targetdef.bak $targetdef
     fi
 
     if [ $MVN_EXIT_CODE -eq 0 ]; then
