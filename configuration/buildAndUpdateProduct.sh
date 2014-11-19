@@ -276,7 +276,8 @@ INSTALL_FROM_RELEASE=$SIMPLE_VERSION_INFO
 
     echo "MONGODB_NAME=myspecificevent
 REPLICATION_CHANNEL=name_of_replication_channel_matching_master_config
-REPLICATION_MASTER_SERVLET_HOST=ip_of_master_host
+REPLICATE_MASTER_EXCHANGE_NAME=myspecificevent_name_used_as_channel
+REPLICATE_MASTER_SERVLET_HOST=ip_of_master_host
 SERVER_NAME=subdomain_name_in_elb
 EVENT_ID=event_uid_this_replica_is_serving
 USE_ENVIRONMENT=replica
