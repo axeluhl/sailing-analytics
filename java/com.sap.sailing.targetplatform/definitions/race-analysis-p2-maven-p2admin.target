@@ -6,8 +6,6 @@
 <location includeAllPlatforms="false" includeMode="slicer" includeSource="true" type="InstallableUnit">
 <unit id="com.sap.sailing.target.base.feature.group" version="1.0.0"/>
 <unit id="com.sap.sailing.target.jms.feature.group" version="1.0.0"/>
-<unit id="com.sap.sailing.target.jackson.feature.group" version="1.0.0"/>
-<unit id="com.sap.sailing.target.mongodb.feature.group" version="1.0.0"/>
 <unit id="com.sap.sailing.target.shiro.feature.group" version="1.0.0"/>
 <unit id="com.sap.sailing.target.test.feature.group" version="1.0.0"/>
 <!-- $PROJECT_HOME variable is not resolved automatically, but has to be replaced (i.e. by build script buildAndUpdateProduct.sh) -->

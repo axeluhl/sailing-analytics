@@ -85,9 +85,10 @@ reporting=0
 suppress_confirmation=0
 extra=''
 parallelexecution=0
+mavenp2admin=0
 
 if [ $# -eq 0 ]; then
-    echo "buildAndUpdateProduct [-b -u -g -t -a -o -c -m <config> -n <package> -l <port>] [build|install|all|hot-deploy|remote-deploy|local-deploy|release]"
+    echo "buildAndUpdateProduct [-b -u -g -t -a -r -o -c -p -v -m <config> -n <package> -l <port>] [build|install|all|hot-deploy|remote-deploy|local-deploy|release]"
     echo ""
     echo "-g Disable GWT compile, no gwt files will be generated, old ones will be preserved."
     echo "-b Build GWT permutation only for one browser and English language."
@@ -105,6 +106,7 @@ if [ $# -eq 0 ]; then
     echo "-s <target server> Name of server you want to use as target for install, hot-deploy or remote-reploy. This overrides default behaviour."
     echo "-w <ssh target> Target for remote-deploy and release. Must comply with the following format: user@server."
     echo "-u Run without confirmation messages. Use with extreme care."
+    echo "-v Build local p2 respository, and use this instead of p2.sapsailing.com. Requires \$ECLIPSE_HOME to be set"
     echo ""
     echo "build: builds the server code using Maven to $PROJECT_HOME (log to $START_DIR/build.log)"
     echo ""
@@ -133,6 +135,7 @@ if [ $# -eq 0 ]; then
     echo "Server home is $SERVERS_HOME"
     echo "Version info: $VERSION_INFO"
     echo "P2 home is $p2PluginRepository"
+    echo "Eclipse home is $ECLIPSE_HOME"
     exit 2
 fi
 
@@ -140,8 +143,9 @@ echo PROJECT_HOME is $PROJECT_HOME
 echo SERVERS_HOME is $SERVERS_HOME
 echo BRANCH is $active_branch
 echo VERSION is $VERSION_INFO
+echo Eclipse home is $ECLIPSE_HOME
 
-options=':bgtocparm:n:l:s:w:u'
+options=':bgtocparvm:n:l:s:w:u'
 while getopts $options option
 do
     case $option in
@@ -160,6 +164,7 @@ do
            HAS_OVERWRITTEN_TARGET=1;;
         w) REMOTE_SERVER_LOGIN=$OPTARG;;
         u) suppress_confirmation=1;;
+        v) mavenp2admin=1;;
         \?) echo "Invalid option"
             exit 4;;
     esac
@@ -533,8 +538,21 @@ if [[ "$@" == "build" ]] || [[ "$@" == "all" ]]; then
 
 	else
 	    echo "INFO: GWT Compilation disabled"
-	    extra="-Pdebug.no-gwt-compile"
+	    extra="$extra -Pdebug.no-gwt-compile"
 	fi
+
+	if [ $mavenp2admin -eq 1 ]; then
+	    echo "INFO: Building and using local p2 repo"
+	    (cd com.sap.$PROJECT_TYPE.targetplatform/scripts; ./createLocalBaseP2repositoryLinux.sh)
+	    extra="$extra -Dp2admin" # activates the p2-target.maven-p2admin profile in java/pom.xml
+            targetdef=com.sap.$PROJECT_TYPE.targetplatform/definitions/race-analysis-p2-maven-p2admin.target
+            echo "INFO: Patching $targetdef with absolute path to \$PROJECT_HOME"
+	    cp -n $targetdef $targetdef.bak
+            cat $targetdef | sed -e "s@file://\$PROJECT_HOME@file://$PROJECT_HOME@" > $targetdef.sed
+            mv $targetdef.sed $targetdef
+	else
+	    echo "INFO: Using central p2 repo"
+        fi
 
     # back to root!
     cd $PROJECT_HOME
@@ -617,6 +635,12 @@ if [[ "$@" == "build" ]] || [[ "$@" == "all" ]]; then
 	for i in com.sap.$PROJECT_TYPE.gwt.ui/src/main/resources/com/sap/$PROJECT_TYPE/gwt/ui/*.gwt.xml; do
 	    mv -v $i.bak $i
 	done
+    fi
+
+    if [ $mavenp2admin -eq 1 ]; then
+        # And also move back patched target definition
+        echo "INFO: restoring maven p2admin target definition after it was patched before"
+        mv -v $targetdef.bak $targetdef
     fi
 
     if [ $MVN_EXIT_CODE -eq 0 ]; then
