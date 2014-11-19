@@ -33,6 +33,8 @@ class TrackingViewController : UIViewController, UIAlertViewDelegate {
     override func viewDidLoad() {
         super.viewDidLoad()
         
+        APIManager.sharedManager.initManager(DataManager.sharedManager.selectedEvent!.serverUrl)
+        
         // set online/buffering label
         networkAvailabilityChanged()
         

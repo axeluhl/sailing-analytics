@@ -33,16 +33,17 @@ class APIManager: NSObject {
     private var serverUrlString: String?
     
     /* Base url of all requests, contains serverUrlString */
-    private var baseUrlString: String?
+    private let baseUrlString = "/api/v1"
     
     /* AFNetworking operation manager */
     private var manager: AFHTTPRequestOperationManager?
     
-    /* Date of last GPS position upload */
-    var lastSync: NSDate?
-    
     /* Number of seconds between syncs */
-    private var syncPeriod: NSTimeInterval = BatteryManager.sharedManager.batterySaving ? SyncPeriod.BatterySaving : SyncPeriod.Normal
+    private var syncPeriod: NSTimeInterval {
+        get {
+            return BatteryManager.sharedManager.batterySaving ? SyncPeriod.BatterySaving : SyncPeriod.Normal
+        }
+    }
     
     var networkAvailable: Bool {
         get {
@@ -61,27 +62,11 @@ class APIManager: NSObject {
         return Singleton.sharedAPIManager
     }
     
-    /* Register for notifications */
-    override init() {
-        super.init()
-        
-        // register for notifications
-        NSNotificationCenter.defaultCenter().addObserver(self, selector:"batteryChanged", name:BatteryManager.NotificationType.batterySavingChanged, object: nil)
-        
-    }
-    
-    /* Unregister notifications */
-    deinit {
-        NSNotificationCenter.defaultCenter().removeObserver(self)
-    }
-    
     /* Sets base URL for all requests. Request and response are JSON. Starts reachability listener. Starts timer for uploading data. */
     func initManager(serverUrlString: String) {
         if self.serverUrlString == serverUrlString {
             return
         }
-        
-        self.baseUrlString = serverUrlString + "/api/v1"
         
         manager = AFHTTPRequestOperationManager(baseURL: NSURL(string: serverUrlString)) // baseUrl needed for checking reachability
         
@@ -117,26 +102,26 @@ class APIManager: NSObject {
     
     /* Get event */
     func getEvent(eventId: String!, success: (AFHTTPRequestOperation!, AnyObject!) -> Void, failure: (AFHTTPRequestOperation!, AnyObject!) -> Void) {
-        let urlString = baseUrlString! + "/events/\(eventId)"
+        let urlString = baseUrlString + "/events/\(eventId)"
         manager!.GET(urlString, parameters: nil, success: success, failure: failure)
     }
     
     /* Get leader board */
     func getLeaderBoard(leaderBoardName: String!, success: (AFHTTPRequestOperation!, AnyObject!) -> Void, failure: (AFHTTPRequestOperation!, AnyObject!) -> Void) {
-        let urlString = baseUrlString! + "/leaderboards/\(leaderBoardName)"
+        let urlString = baseUrlString + "/leaderboards/\(leaderBoardName)"
         manager!.GET(urlString, parameters: nil, success: success, failure: failure)
     }
     
     /* Get competitor */
     func getCompetitor(competitorId: String!, success: (AFHTTPRequestOperation!, AnyObject!) -> Void, failure: (AFHTTPRequestOperation!, AnyObject!) -> Void) {
-        let urlString = baseUrlString! + "/competitors/\(competitorId)"
+        let urlString = baseUrlString + "/competitors/\(competitorId)"
         manager!.GET(urlString, parameters: nil, success: success, failure: failure)
     }
     
     /* Map a device to competitor. */
     func checkIn(leaderBoardName: String!, competitorId: String!, deviceUuid: String!, pushId: String!, fromMillis: Int!, success: (AFHTTPRequestOperation!, AnyObject!) -> Void, failure: (AFHTTPRequestOperation!, AnyObject!) -> Void) {
         
-        let urlString = baseUrlString! + "/leaderboards/\(leaderBoardName)/device_mappings/start"
+        let urlString = baseUrlString + "/leaderboards/\(leaderBoardName)/device_mappings/start"
         
         var body = [String: AnyObject]()
         body["competitorId"] = competitorId
@@ -150,7 +135,7 @@ class APIManager: NSObject {
     /* Disconnect a device from competitor. */
     func checkOut(leaderBoardName: String!, competitorId: String!, deviceUuid: String!, toMillis: Int!, success:(AFHTTPRequestOperation!, AnyObject!) -> Void, failure: (AFHTTPRequestOperation!, AnyObject!) -> Void) {
         
-        let urlString = baseUrlString! + "/leaderboards/\(leaderBoardName)/device_mappings/end"
+        let urlString = baseUrlString + "/leaderboards/\(leaderBoardName)/device_mappings/end"
         
         var body = [String: AnyObject]()
         body["competitorId"] = competitorId
@@ -166,7 +151,7 @@ class APIManager: NSObject {
             return
         }
         
-        let urlString = baseUrlString! + "/gps_fixes"
+        let urlString = baseUrlString + "/gps_fixes"
         
         var body = [String: AnyObject]()
         body["deviceUuid"] = deviceUuid
@@ -202,12 +187,5 @@ class APIManager: NSObject {
             }
         }
     }
-    
-    // MARK: - Notifications
-    
-    /* Callback for BatteryManager.NotificationType.batterySavingChanged notification. */
-    func batteryChanged() {
-        syncPeriod = BatteryManager.sharedManager.batterySaving ? SyncPeriod.BatterySaving : SyncPeriod.Normal
-    }
-    
+
 }
