@@ -28,8 +28,10 @@ class RegattaViewController : UIViewController, UIActionSheetDelegate, UINavigat
         
         // set values
         navigationItem.title = DataManager.sharedManager.selectedEvent!.leaderBoard!.name
-        
-        if DataManager.sharedManager.selectedEvent!.imageUrl != nil {
+    
+        if DataManager.sharedManager.selectedEvent!.userImage != nil {
+            imageView.image = UIImage(data:  DataManager.sharedManager.selectedEvent!.userImage!)
+        } else if DataManager.sharedManager.selectedEvent!.imageUrl != nil {
             let imageUrl = NSURL(string: DataManager.sharedManager.selectedEvent!.imageUrl!)
             let urlRequest = NSURLRequest(URL: imageUrl!)
             imageView.setImageWithURLRequest(urlRequest, placeholderImage: nil, success: { (request:NSURLRequest!,response:NSHTTPURLResponse!, image:UIImage!) -> Void in
@@ -115,7 +117,8 @@ class RegattaViewController : UIViewController, UIActionSheetDelegate, UINavigat
     
     func imagePickerController(picker: UIImagePickerController!, didFinishPickingImage image: UIImage!, editingInfo: NSDictionary!) {
         dismissViewControllerAnimated(true, completion: nil)
-        let selectedImage : UIImage = image
         imageView.image = image
+        DataManager.sharedManager.selectedEvent!.userImage = UIImageJPEGRepresentation(image, 0.8)
     }
+
 }

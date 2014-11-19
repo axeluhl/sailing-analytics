@@ -25,6 +25,7 @@ class TrackingViewController : UIViewController, UIAlertViewDelegate {
     let gpsInactiveColor = UIColor(hex: 0x445A2F)
     let greenColor = UIColor(hex: 0x408000)
     let redColor = UIColor(hex: 0xFF0000)
+    let orangeColor = UIColor(hex: 0xFF8000)
     let startDate = NSDate()
     let dateFormatter = NSDateFormatter()
     
@@ -32,6 +33,7 @@ class TrackingViewController : UIViewController, UIAlertViewDelegate {
     override func viewDidLoad() {
         super.viewDidLoad()
         
+        // set online/buffering label
         networkAvailabilityChanged()
         
         // register for notifications
@@ -39,10 +41,9 @@ class TrackingViewController : UIViewController, UIAlertViewDelegate {
         NSNotificationCenter.defaultCenter().addObserver(self, selector:"newLocation:", name:LocationManager.NotificationType.newLocation, object: nil)
         NSNotificationCenter.defaultCenter().addObserver(self, selector:"locationManagerFailed:", name:LocationManager.NotificationType.locationManagerFailed, object: nil)
         
-        // timer
-        let timer = NSTimer(timeInterval: 0.1, target: self, selector: "timerTick:", userInfo: nil, repeats: true)
+        // start tracking timer
+        let timer = NSTimer(timeInterval: 0.1, target: self, selector: "timer:", userInfo: nil, repeats: true)
         NSRunLoop.currentRunLoop().addTimer(timer, forMode:NSRunLoopCommonModes)
-        
         dateFormatter.dateFormat = "HH:mm:ss.S"
         dateFormatter.timeZone = NSTimeZone(forSecondsFromGMT: 0)
     }
@@ -58,8 +59,8 @@ class TrackingViewController : UIViewController, UIAlertViewDelegate {
             onlineModeLabel.text = "Online"
             onlineModeLabel.textColor = greenColor
         } else {
-            onlineModeLabel.text = "Offline"
-            onlineModeLabel.textColor = redColor
+            onlineModeLabel.text = "Buffering"
+            onlineModeLabel.textColor = orangeColor
         }
     }
     
@@ -97,7 +98,7 @@ class TrackingViewController : UIViewController, UIAlertViewDelegate {
     
     // MARK:- Timer
     
-    func timerTick(timer: NSTimer) {
+    func timer(timer: NSTimer) {
         let currentDate = NSDate()
         let timeInterval = currentDate.timeIntervalSinceDate(startDate)
         let timerDate = NSDate(timeIntervalSince1970: timeInterval)

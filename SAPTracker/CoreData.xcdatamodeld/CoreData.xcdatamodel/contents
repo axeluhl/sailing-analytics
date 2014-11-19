@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="UTF-8" standalone="yes"?>
-<model userDefinedModelVersionIdentifier="" type="com.apple.IDECoreDataModeler.DataModel" documentVersion="1.0" lastSavedToolsVersion="6252" systemVersion="14A389" minimumToolsVersion="Xcode 4.3" macOSVersion="Automatic" iOSVersion="Automatic">
+<model userDefinedModelVersionIdentifier="" type="com.apple.IDECoreDataModeler.DataModel" documentVersion="1.0" lastSavedToolsVersion="6252" systemVersion="14B25" minimumToolsVersion="Xcode 4.3" macOSVersion="Automatic" iOSVersion="Automatic">
     <entity name="Competitor" representedClassName="Competitor" syncable="YES">
         <attribute name="competitorId" optional="YES" attributeType="String" indexed="YES" syncable="YES"/>
         <attribute name="countryCode" optional="YES" attributeType="String" syncable="YES"/>
@@ -16,6 +16,7 @@
         <attribute name="name" optional="YES" attributeType="String" syncable="YES"/>
         <attribute name="serverUrl" optional="YES" attributeType="String" syncable="YES"/>
         <attribute name="startDate" optional="YES" attributeType="Date" syncable="YES"/>
+        <attribute name="userImage" optional="YES" attributeType="Binary" syncable="YES"/>
         <relationship name="gpsFixes" optional="YES" toMany="YES" deletionRule="Nullify" destinationEntity="GPSFix" inverseName="event" inverseEntity="GPSFix" syncable="YES"/>
         <relationship name="leaderBoard" optional="YES" maxCount="1" deletionRule="Cascade" destinationEntity="LeaderBoard" inverseName="event" inverseEntity="LeaderBoard" syncable="YES"/>
     </entity>
@@ -34,7 +35,7 @@
     </entity>
     <elements>
         <element name="Competitor" positionX="-9" positionY="81" width="128" height="148"/>
-        <element name="Event" positionX="-63" positionY="27" width="128" height="163"/>
+        <element name="Event" positionX="-63" positionY="27" width="128" height="180"/>
         <element name="GPSFix" positionX="-63" positionY="-18" width="128" height="133"/>
         <element name="LeaderBoard" positionX="-36" positionY="72" width="128" height="90"/>
     </elements>
