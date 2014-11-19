@@ -1,6 +1,5 @@
 package com.sap.sse.datamining;
 
-import java.util.Collection;
 import java.util.UUID;
 import java.util.concurrent.ExecutorService;
 
@@ -18,15 +17,15 @@ public interface DataMiningServer {
     
     public FunctionProvider getFunctionProvider();
 
-    public Collection<Function<?>> getAllStatistics();
+    public Iterable<Function<?>> getAllStatistics();
     
-    public Collection<Function<?>> getFunctionsFor(Class<?> sourceType);
+    public Iterable<Function<?>> getFunctionsFor(Class<?> sourceType);
     
-    public Collection<Function<?>> getStatisticsFor(Class<?> sourceType);
+    public Iterable<Function<?>> getStatisticsFor(Class<?> sourceType);
 
-    public Collection<Function<?>> getDimensionsFor(Class<?> sourceType);
+    public Iterable<Function<?>> getDimensionsFor(Class<?> sourceType);
     
-    public Collection<Function<?>> getDimensionsFor(DataRetrieverChainDefinition<?> dataRetrieverChainDefinition);
+    public Iterable<Function<?>> getDimensionsFor(DataRetrieverChainDefinition<?> dataRetrieverChainDefinition);
 
     /**
      * @return The first function, that matches the given DTO or <code>null</code>
@@ -35,7 +34,7 @@ public interface DataMiningServer {
 
     public DataRetrieverChainDefinitionProvider getDataRetrieverChainDefinitionProvider();
 
-    public <DataSourceType> Collection<DataRetrieverChainDefinition<DataSourceType>> getDataRetrieverChainDefinitions(
+    public <DataSourceType> Iterable<DataRetrieverChainDefinition<DataSourceType>> getDataRetrieverChainDefinitions(
             Class<DataSourceType> dataSourceType, Class<?> retrievedDataType);
 
     public <DataSourceType> DataRetrieverChainDefinition<DataSourceType> getDataRetrieverChainDefinition(Class<DataSourceType> dataSourceType, UUID id);

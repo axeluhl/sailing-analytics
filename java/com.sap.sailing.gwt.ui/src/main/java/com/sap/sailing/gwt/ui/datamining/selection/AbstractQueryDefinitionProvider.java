@@ -92,16 +92,18 @@ public abstract class AbstractQueryDefinitionProvider implements QueryDefinition
     }
 
     private boolean isQueryDefinitionConsistent(QueryDefinition queryDefinition) {
-        String sourceTypeName = queryDefinition.getStatisticToCalculate().getSourceTypeName();
-        
-        if (queryDefinition.getDataRetrieverChainDefinition() == null || 
-            !sourceTypeName.equals(queryDefinition.getDataRetrieverChainDefinition().getRetrievedDataTypeName())) {
-            return false;
-        }
-        
-        for (FunctionDTO dimensionToGroupBy : queryDefinition.getDimensionsToGroupBy()) {
-            if (!sourceTypeName.equals(dimensionToGroupBy.getSourceTypeName())) {
+        if (queryDefinition.getStatisticToCalculate() != null) { // The consistency can't be checked, if no statistic is selected
+            String sourceTypeName = queryDefinition.getStatisticToCalculate().getSourceTypeName();
+            
+            if (queryDefinition.getDataRetrieverChainDefinition() == null || 
+                !sourceTypeName.equals(queryDefinition.getDataRetrieverChainDefinition().getRetrievedDataTypeName())) {
                 return false;
+            }
+            
+            for (FunctionDTO dimensionToGroupBy : queryDefinition.getDimensionsToGroupBy()) {
+                if (!sourceTypeName.equals(dimensionToGroupBy.getSourceTypeName())) {
+                    return false;
+                }
             }
         }
         

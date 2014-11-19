@@ -1,6 +1,5 @@
 package com.sap.sse.datamining.impl;
 
-import java.util.Collection;
 import java.util.UUID;
 import java.util.concurrent.ExecutorService;
 
@@ -77,27 +76,27 @@ public class DataMiningServerImpl implements ModifiableDataMiningServer {
     }
 
     @Override
-    public Collection<Function<?>> getAllStatistics() {
+    public Iterable<Function<?>> getAllStatistics() {
         return functionProvider.getAllStatistics();
     }
 
     @Override
-    public Collection<Function<?>> getFunctionsFor(Class<?> sourceType) {
+    public Iterable<Function<?>> getFunctionsFor(Class<?> sourceType) {
         return functionProvider.getFunctionsFor(sourceType);
     }
 
     @Override
-    public Collection<Function<?>> getStatisticsFor(Class<?> sourceType) {
+    public Iterable<Function<?>> getStatisticsFor(Class<?> sourceType) {
         return functionProvider.getStatisticsFor(sourceType);
     }
 
     @Override
-    public Collection<Function<?>> getDimensionsFor(Class<?> sourceType) {
+    public Iterable<Function<?>> getDimensionsFor(Class<?> sourceType) {
         return functionProvider.getDimensionsFor(sourceType);
     }
 
     @Override
-    public Collection<Function<?>> getDimensionsFor(DataRetrieverChainDefinition<?> dataRetrieverChainDefinition) {
+    public Iterable<Function<?>> getDimensionsFor(DataRetrieverChainDefinition<?> dataRetrieverChainDefinition) {
         return functionProvider.getDimensionsFor(dataRetrieverChainDefinition);
     }
 
@@ -122,7 +121,7 @@ public class DataMiningServerImpl implements ModifiableDataMiningServer {
     }
 
     @Override
-    public <DataSourceType> Collection<DataRetrieverChainDefinition<DataSourceType>> getDataRetrieverChainDefinitions(
+    public <DataSourceType> Iterable<DataRetrieverChainDefinition<DataSourceType>> getDataRetrieverChainDefinitions(
             Class<DataSourceType> dataSourceType, Class<?> retrievedDataType) {
         return dataRetrieverChainDefinitionRegistry.get(dataSourceType, retrievedDataType);
     }

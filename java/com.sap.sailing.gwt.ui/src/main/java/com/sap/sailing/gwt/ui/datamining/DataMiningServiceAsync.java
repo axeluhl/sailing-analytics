@@ -14,14 +14,14 @@ import com.sap.sse.datamining.shared.impl.dto.DataRetrieverChainDefinitionDTO;
 
 public interface DataMiningServiceAsync {
 
-    void getAllStatistics(String localeInfoName, AsyncCallback<Collection<FunctionDTO>> callback);
+    void getAllStatistics(String localeInfoName, AsyncCallback<Iterable<FunctionDTO>> callback);
 
-    void getDimensionsFor(FunctionDTO statisticToCalculate, String localeInfoName, AsyncCallback<Collection<FunctionDTO>> callback);
+    void getDimensionsFor(FunctionDTO statisticToCalculate, String localeInfoName, AsyncCallback<Iterable<FunctionDTO>> callback);
     void getDimensionsFor(DataRetrieverChainDefinitionDTO dataRetrieverChainDefinitionDTO, String localeInfoName,
-            AsyncCallback<Collection<FunctionDTO>> callback);
+            AsyncCallback<Iterable<FunctionDTO>> callback);
     
     void getDataRetrieverChainDefinitionsFor(FunctionDTO statisticToCalculate, String localeInfoName,
-            AsyncCallback<Collection<DataRetrieverChainDefinitionDTO>> callback);
+            AsyncCallback<Iterable<DataRetrieverChainDefinitionDTO>> callback);
 
     void getDimensionValuesFor(DataRetrieverChainDefinitionDTO dataRetrieverChainDefinition, int retrieverLevel, Collection<FunctionDTO> dimensions, String localeInfoName, AsyncCallback<QueryResult<Set<Object>>> callback);
 

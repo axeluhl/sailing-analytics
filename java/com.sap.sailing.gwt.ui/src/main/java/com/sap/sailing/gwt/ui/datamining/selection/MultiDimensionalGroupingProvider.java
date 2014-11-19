@@ -72,11 +72,13 @@ public class MultiDimensionalGroupingProvider implements GroupingProvider, Stati
     private void updateAvailableDimensionsFor() {
         if (currentStatisticToCalculate != null) {
             dataMiningService.getDimensionsFor(currentStatisticToCalculate, LocaleInfo.getCurrentLocale()
-                    .getLocaleName(), new AsyncCallback<Collection<FunctionDTO>>() {
+                    .getLocaleName(), new AsyncCallback<Iterable<FunctionDTO>>() {
                 @Override
-                public void onSuccess(Collection<FunctionDTO> dimensions) {
+                public void onSuccess(Iterable<FunctionDTO> dimensions) {
                     clearAvailableDimensionsAndGroupByBoxes();
-                    availableDimensions.addAll(dimensions);
+                    for (FunctionDTO dimension : dimensions) {
+                        availableDimensions.add(dimension);
+                    }
                     Collections.sort(availableDimensions);
                     ValueListBox<FunctionDTO> firstDimensionToGroupByBox = createDimensionToGroupByBox();
                     addDimensionToGroupByBoxAndUpdateAcceptableValues(firstDimensionToGroupByBox);

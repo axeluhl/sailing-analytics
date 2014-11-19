@@ -99,13 +99,13 @@ public class RetrieverLevelSpecificSelectionProvider implements SelectionProvide
     }
 
     private void udpateAvailableDimensions() {
-        dataMiningService.getDimensionsFor(retrieverChain, LocaleInfo.getCurrentLocale().getLocaleName(), new AsyncCallback<Collection<FunctionDTO>>() {
+        dataMiningService.getDimensionsFor(retrieverChain, LocaleInfo.getCurrentLocale().getLocaleName(), new AsyncCallback<Iterable<FunctionDTO>>() {
             @Override
             public void onFailure(Throwable caught) {
                 errorReporter.reportError("Error fetching the dimensions of the retrieval chain from the server: " + caught.getMessage());
             }
             @Override
-            public void onSuccess(Collection<FunctionDTO> dimensions) {
+            public void onSuccess(Iterable<FunctionDTO> dimensions) {
                 Map<String, Collection<FunctionDTO>> dimensionsMappedBySourceType = mapBySourceType(dimensions);
                 
                 for (SingleRetrieverLevelSelectionProviderPrototype singleRetrieverLevelSelectionProvider : singleRetrieverLevelSelectionProviders) {
@@ -118,7 +118,7 @@ public class RetrieverLevelSpecificSelectionProvider implements SelectionProvide
         });
     }
 
-    private Map<String, Collection<FunctionDTO>> mapBySourceType(Collection<FunctionDTO> dimensions) {
+    private Map<String, Collection<FunctionDTO>> mapBySourceType(Iterable<FunctionDTO> dimensions) {
         Map<String, Collection<FunctionDTO>> dimensionsMappedBySourceType = new HashMap<>();
         for (FunctionDTO dimension : dimensions) {
             if (!dimensionsMappedBySourceType.containsKey(dimension.getSourceTypeName())) {

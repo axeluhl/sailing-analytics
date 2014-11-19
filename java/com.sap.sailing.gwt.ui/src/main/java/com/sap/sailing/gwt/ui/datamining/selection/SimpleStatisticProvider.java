@@ -69,13 +69,13 @@ public class SimpleStatisticProvider implements StatisticProvider {
     }
 
     private void updateExtractionFunctions() {
-        dataMiningService.getAllStatistics(LocaleInfo.getCurrentLocale().getLocaleName(), new AsyncCallback<Collection<FunctionDTO>>() {
+        dataMiningService.getAllStatistics(LocaleInfo.getCurrentLocale().getLocaleName(), new AsyncCallback<Iterable<FunctionDTO>>() {
             
             @Override
-            public void onSuccess(Collection<FunctionDTO> extractionFunctions) {
+            public void onSuccess(Iterable<FunctionDTO> extractionFunctions) {
                 extractionFunctionSet.clear();
                 
-                if (!extractionFunctions.isEmpty()) {
+                if (extractionFunctions.iterator().hasNext()) {
                     extractionFunctionSet.addAll(extractionFunctions);
 
                     StrippedFunctionDTO previousExtractionFunction = extractionFunctionListBox.getValue();

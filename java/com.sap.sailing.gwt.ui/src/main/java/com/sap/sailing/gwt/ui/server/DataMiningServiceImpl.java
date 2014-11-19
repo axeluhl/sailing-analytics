@@ -75,33 +75,49 @@ public class DataMiningServiceImpl extends RemoteServiceServlet implements DataM
     }
     
     @Override
-    public Collection<FunctionDTO> getAllStatistics(String localeInfoName) {
-        Collection<Function<?>> statistics = getDataMiningServer().getAllStatistics();
+    public Iterable<FunctionDTO> getAllStatistics(String localeInfoName) {
+        Iterable<Function<?>> statistics = getDataMiningServer().getAllStatistics();
         return functionsAsFunctionDTOs(statistics, localeInfoName);
     }
 
     @Override
-    public Collection<FunctionDTO> getDimensionsFor(FunctionDTO statisticToCalculate, String localeInfoName) {
+    public Iterable<FunctionDTO> getDimensionsFor(FunctionDTO statisticToCalculate, String localeInfoName) {
         Class<?> baseDataType = getBaseDataType(statisticToCalculate);
-        Collection<Function<?>> dimensions = getDataMiningServer().getDimensionsFor(baseDataType);
+        Iterable<Function<?>> dimensions = getDataMiningServer().getDimensionsFor(baseDataType);
         return functionsAsFunctionDTOs(dimensions, localeInfoName);
     }
     
     @Override
-    public Collection<FunctionDTO> getDimensionsFor(DataRetrieverChainDefinitionDTO dataRetrieverChainDefinitionDTO, String localeInfoName) {
+    public Iterable<FunctionDTO> getDimensionsFor(DataRetrieverChainDefinitionDTO dataRetrieverChainDefinitionDTO, String localeInfoName) {
         DataRetrieverChainDefinition<?> dataRetrieverChainDefinition = getDataMiningServer().getDataRetrieverChainDefinition(RacingEventService.class, dataRetrieverChainDefinitionDTO.getId());
-        Collection<Function<?>> dimensions = getDataMiningServer().getDimensionsFor(dataRetrieverChainDefinition);
+        Iterable<Function<?>> dimensions = getDataMiningServer().getDimensionsFor(dataRetrieverChainDefinition);
         return functionsAsFunctionDTOs(dimensions, localeInfoName);
+    }
+
+    private Class<?> getBaseDataType(FunctionDTO statisticToCalculate) {
+        Function<?> function = getDataMiningServer().getFunctionForDTO(statisticToCalculate);
+        return function.getDeclaringType();
+    }
+    
+    private Collection<FunctionDTO> functionsAsFunctionDTOs(Iterable<Function<?>> functions, String localeInfoName) {
+        Locale locale = DataMiningStringMessages.Util.getLocaleFor(localeInfoName);
+        DataMiningStringMessages dataMiningStringMessages = getDataMiningServer().getStringMessages();
+        
+        Collection<FunctionDTO> functionDTOs = new ArrayList<FunctionDTO>();
+        for (Function<?> function : functions) {
+            functionDTOs.add(functionDTOFactory.createFunctionDTO(function, dataMiningStringMessages, locale));
+        }
+        return functionDTOs;
     }
     
     @Override
-    public Collection<DataRetrieverChainDefinitionDTO> getDataRetrieverChainDefinitionsFor(FunctionDTO statisticToCalculate, String localeInfoName) {
+    public Iterable<DataRetrieverChainDefinitionDTO> getDataRetrieverChainDefinitionsFor(FunctionDTO statisticToCalculate, String localeInfoName) {
         Class<?> baseDataType = getBaseDataType(statisticToCalculate);
         return dataRetrieverChainDefinitionsAsDTOs(getDataMiningServer().getDataRetrieverChainDefinitions(RacingEventService.class, baseDataType), localeInfoName);
     }
     
     private Collection<DataRetrieverChainDefinitionDTO> dataRetrieverChainDefinitionsAsDTOs(
-            Collection<DataRetrieverChainDefinition<RacingEventService>> dataRetrieverChainDefinitions, String localeInfoName) {
+            Iterable<DataRetrieverChainDefinition<RacingEventService>> dataRetrieverChainDefinitions, String localeInfoName) {
         Locale locale = DataMiningStringMessages.Util.getLocaleFor(localeInfoName);
         DataMiningStringMessages dataMiningStringMessages = getDataMiningServer().getStringMessages();
         
@@ -120,22 +136,6 @@ public class DataMiningServiceImpl extends RemoteServiceServlet implements DataM
                                                          dataRetrieverChainDefinition.getDataSourceType().getSimpleName(), retrievedDataTypesChain));
         }
         return DTOs;
-    }
-
-    private Class<?> getBaseDataType(FunctionDTO statisticToCalculate) {
-        Function<?> function = getDataMiningServer().getFunctionForDTO(statisticToCalculate);
-        return function.getDeclaringType();
-    }
-    
-    private Collection<FunctionDTO> functionsAsFunctionDTOs(Collection<Function<?>> functions, String localeInfoName) {
-        Locale locale = DataMiningStringMessages.Util.getLocaleFor(localeInfoName);
-        DataMiningStringMessages dataMiningStringMessages = getDataMiningServer().getStringMessages();
-        
-        Collection<FunctionDTO> functionDTOs = new ArrayList<FunctionDTO>();
-        for (Function<?> function : functions) {
-            functionDTOs.add(functionDTOFactory.createFunctionDTO(function, dataMiningStringMessages, locale));
-        }
-        return functionDTOs;
     }
 
     @Override
