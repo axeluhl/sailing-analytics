@@ -5,8 +5,8 @@ import com.sap.sailing.domain.base.Waypoint;
 import com.sap.sailing.domain.common.Bearing;
 import com.sap.sailing.domain.common.Distance;
 import com.sap.sailing.domain.common.NauticalSide;
-import com.sap.sailing.domain.common.TimePoint;
 import com.sap.sailing.domain.tracking.LineDetails;
+import com.sap.sse.common.TimePoint;
 
 public class LineDetailsImpl implements LineDetails {
     private final TimePoint timePoint;

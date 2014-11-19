@@ -8,10 +8,10 @@ import junit.framework.Assert;
 
 import org.junit.Test;
 
-import com.sap.sailing.domain.common.TimePoint;
 import com.sap.sailing.domain.common.TimeRange;
-import com.sap.sailing.domain.common.impl.MillisecondsTimePoint;
 import com.sap.sailing.domain.common.impl.TimeRangeImpl;
+import com.sap.sse.common.TimePoint;
+import com.sap.sse.common.impl.MillisecondsTimePoint;
 
 public class TimeRangeTest {
     protected TimeRange create(long from, long to) {

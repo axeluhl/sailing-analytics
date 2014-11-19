@@ -9,8 +9,6 @@ import android.widget.Button;
 import android.widget.ImageButton;
 import android.widget.TextView;
 
-import com.sap.sailing.domain.common.TimePoint;
-import com.sap.sailing.domain.common.impl.MillisecondsTimePoint;
 import com.sap.sailing.domain.common.racelog.Flags;
 import com.sap.sailing.domain.racelog.state.racingprocedure.RacingProcedure;
 import com.sap.sailing.racecommittee.app.AppConstants;
@@ -20,6 +18,8 @@ import com.sap.sailing.racecommittee.app.ui.fragments.dialogs.RaceDialogFragment
 import com.sap.sailing.racecommittee.app.ui.fragments.dialogs.RaceFinishedTimeDialog;
 import com.sap.sailing.racecommittee.app.ui.fragments.raceinfo.BaseRaceInfoRaceFragment;
 import com.sap.sailing.racecommittee.app.utils.TimeUtils;
+import com.sap.sse.common.TimePoint;
+import com.sap.sse.common.impl.MillisecondsTimePoint;
 
 public abstract class BaseFinishingRaceFragment<ProcedureType extends RacingProcedure> extends BaseRaceInfoRaceFragment<ProcedureType> {   
     

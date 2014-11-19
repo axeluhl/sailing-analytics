@@ -27,10 +27,12 @@ MONGODB_PORT=27017
 MONGODB_NAME=winddb
 EXPEDITION_PORT=2010
 
-# Start replication upon startup? If you activate this make sure to
+# To start replication upon startup provide the fully-qualified names of the Replicable service classes
+# for which to trigger replication. If you activate this make sure to
 # set the REPLICATE_MASTER_EXCHANGE_NAME variable to the
 # same channel the master is using in its REPLICATION_CHANNEL variable
-REPLICATE_ON_START=False
+
+# REPLICATE_ON_START=com.sap.sailing.server.impl.RacingEventServiceImpl
 
 # Host where the master Java instance is running
 # Make sure firewall configurations allow access

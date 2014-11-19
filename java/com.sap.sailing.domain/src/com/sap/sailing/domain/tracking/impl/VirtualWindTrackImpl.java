@@ -3,10 +3,10 @@ package com.sap.sailing.domain.tracking.impl;
 import java.util.NavigableSet;
 
 import com.sap.sailing.domain.common.Position;
-import com.sap.sailing.domain.common.TimePoint;
 import com.sap.sailing.domain.tracking.TrackedRace;
 import com.sap.sailing.domain.tracking.Wind;
 import com.sap.sailing.domain.tracking.WindWithConfidence;
+import com.sap.sse.common.TimePoint;
 import com.sap.sse.common.Util;
 
 /**

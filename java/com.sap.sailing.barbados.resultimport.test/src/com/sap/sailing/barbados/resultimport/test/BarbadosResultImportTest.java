@@ -26,13 +26,13 @@ import com.sap.sailing.barbados.resultimport.impl.ScoreCorrectionProviderImpl;
 import com.sap.sailing.domain.common.MaxPointsReason;
 import com.sap.sailing.domain.common.RegattaScoreCorrections;
 import com.sap.sailing.domain.common.RegattaScoreCorrections.ScoreCorrectionsForRace;
-import com.sap.sailing.domain.common.TimePoint;
-import com.sap.sailing.domain.common.impl.MillisecondsTimePoint;
 import com.sap.sailing.resultimport.RegattaResults;
 import com.sap.sailing.resultimport.ResultDocumentDescriptor;
 import com.sap.sailing.resultimport.ResultDocumentProvider;
 import com.sap.sailing.resultimport.impl.ResultDocumentDescriptorImpl;
+import com.sap.sse.common.TimePoint;
 import com.sap.sse.common.Util;
+import com.sap.sse.common.impl.MillisecondsTimePoint;
 
 public class BarbadosResultImportTest {
     private static final MillisecondsTimePoint NOW = MillisecondsTimePoint.now();

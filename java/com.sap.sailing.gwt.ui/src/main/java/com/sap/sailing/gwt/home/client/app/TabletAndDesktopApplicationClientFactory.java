@@ -11,13 +11,17 @@ import com.sap.sailing.gwt.home.client.place.event.EventView;
 import com.sap.sailing.gwt.home.client.place.event.EventWithoutRegattasView;
 import com.sap.sailing.gwt.home.client.place.event.TabletAndDesktopEventView;
 import com.sap.sailing.gwt.home.client.place.event.TabletAndDesktopEventWithoutRegattasView;
-import com.sap.sailing.gwt.home.client.place.events.EventsActivity;
 import com.sap.sailing.gwt.home.client.place.events.EventsView;
 import com.sap.sailing.gwt.home.client.place.events.TabletAndDesktopEventsView;
-import com.sap.sailing.gwt.home.client.place.leaderboard.AnalyticsView;
-import com.sap.sailing.gwt.home.client.place.leaderboard.TabletAndDesktopLeaderboardView;
+import com.sap.sailing.gwt.home.client.place.regatta.RegattaAnalyticsView;
+import com.sap.sailing.gwt.home.client.place.regatta.RegattaPlace.RegattaNavigationTabs;
+import com.sap.sailing.gwt.home.client.place.regatta.TabletAndDesktopRegattaView;
 import com.sap.sailing.gwt.home.client.place.searchresult.SearchResultView;
 import com.sap.sailing.gwt.home.client.place.searchresult.TabletAndDesktopSearchResultView;
+import com.sap.sailing.gwt.home.client.place.series.SeriesAnalyticsView;
+import com.sap.sailing.gwt.home.client.place.series.SeriesPlace.SeriesNavigationTabs;
+import com.sap.sailing.gwt.home.client.place.series.TabletAndDesktopSeriesView;
+import com.sap.sailing.gwt.home.client.place.solutions.SolutionsPlace.SolutionsNavigationTabs;
 import com.sap.sailing.gwt.home.client.place.solutions.SolutionsView;
 import com.sap.sailing.gwt.home.client.place.solutions.TabletAndDesktopSolutionsView;
 import com.sap.sailing.gwt.home.client.place.solutions.analytics.SailingAnalyticsView;
@@ -56,11 +60,11 @@ public class TabletAndDesktopApplicationClientFactory extends AbstractApplicatio
 
     @Override
     public EventWithoutRegattasView createEventWithoutRegattasView(EventDTO event) {
-        return new TabletAndDesktopEventWithoutRegattasView(getSailingService(), event);
+        return new TabletAndDesktopEventWithoutRegattasView(getSailingService(), event, getHomePlacesNavigator());
     }
 
     @Override
-    public EventsView createEventsView(EventsActivity activity) {
+    public EventsView createEventsView() {
         return new TabletAndDesktopEventsView(getHomePlacesNavigator());
     }
 
@@ -75,13 +79,18 @@ public class TabletAndDesktopApplicationClientFactory extends AbstractApplicatio
     }
 
     @Override
-    public SolutionsView createSolutionsView() {
-        return new TabletAndDesktopSolutionsView(getHomePlacesNavigator());
+    public SolutionsView createSolutionsView(SolutionsNavigationTabs navigationTab) {
+        return new TabletAndDesktopSolutionsView(navigationTab, getHomePlacesNavigator());
+    }
+    
+    @Override
+    public RegattaAnalyticsView createRegattaAnalyticsView(EventDTO event, String leaderboardName, RegattaNavigationTabs navigationTab, Timer timerForClientServerOffset) {
+        return new TabletAndDesktopRegattaView(event, leaderboardName, navigationTab, timerForClientServerOffset, getHomePlacesNavigator());
     }
 
     @Override
-    public AnalyticsView createLeaderboardView(EventDTO event, String leaderboardName, Timer timerForClientServerOffset) {
-        return new TabletAndDesktopLeaderboardView(event, leaderboardName, timerForClientServerOffset, getHomePlacesNavigator());
+    public SeriesAnalyticsView createSeriesAnalyticsView(EventDTO event, String leaderboardName, SeriesNavigationTabs navigationTab, Timer timerForClientServerOffset) {
+        return new TabletAndDesktopSeriesView(event, leaderboardName, navigationTab, timerForClientServerOffset, getHomePlacesNavigator());
     }
 
     @Override

@@ -10,6 +10,7 @@ import com.google.gwt.activity.shared.AbstractActivity;
 import com.google.gwt.core.client.Scheduler;
 import com.google.gwt.core.client.Scheduler.ScheduledCommand;
 import com.google.gwt.event.shared.EventBus;
+import com.google.gwt.user.client.Window;
 import com.google.gwt.user.client.rpc.AsyncCallback;
 import com.google.gwt.user.client.ui.AcceptsOneWidget;
 import com.sap.sailing.gwt.common.client.DateUtil;
@@ -20,9 +21,11 @@ import com.sap.sse.common.Util.Pair;
 
 public class StartActivity extends AbstractActivity {
     private final StartClientFactory clientFactory;
+    private final StartPlace place;
 
     public StartActivity(StartPlace place, StartClientFactory clientFactory) {
         this.clientFactory = clientFactory;
+        this.place = place;
     }
 
     @Override
@@ -33,6 +36,7 @@ public class StartActivity extends AbstractActivity {
             public void onSuccess(List<EventBaseDTO> result) {
                 final StartView view = clientFactory.createStartView();
                 panel.setWidget(view.asWidget());
+                Window.setTitle(place.getTitle());
                 fillStartPageEvents(view, result);
             }
             

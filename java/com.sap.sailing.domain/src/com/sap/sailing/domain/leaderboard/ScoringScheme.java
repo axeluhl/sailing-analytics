@@ -11,8 +11,8 @@ import com.sap.sailing.domain.base.Regatta;
 import com.sap.sailing.domain.common.MaxPointsReason;
 import com.sap.sailing.domain.common.NoWindException;
 import com.sap.sailing.domain.common.ScoringSchemeType;
-import com.sap.sailing.domain.common.TimePoint;
 import com.sap.sailing.domain.leaderboard.meta.LeaderboardGroupMetaLeaderboard;
+import com.sap.sse.common.TimePoint;
 import com.sap.sse.common.Util;
 
 /**

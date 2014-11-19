@@ -3,7 +3,7 @@ package com.sap.sailing.domain.tractracadapter;
 import java.util.UUID;
 
 import com.sap.sailing.domain.common.Position;
-import com.sap.sailing.domain.common.WithID;
+import com.sap.sse.common.WithID;
 import com.tractrac.model.lib.api.event.IEvent;
 import com.tractrac.model.lib.api.route.IControlPoint;
 

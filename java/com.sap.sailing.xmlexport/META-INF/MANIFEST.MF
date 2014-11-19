@@ -14,7 +14,9 @@ Require-Bundle: com.sap.sailing.server,
  com.sap.sailing.domain,
  com.sap.sailing.domain.tractracadapter,
  com.sap.sailing.domain.common,
- com.sap.sse.common
+ com.sap.sse,
+ com.sap.sse.common,
+ com.sap.sse.replication
 Bundle-ClassPath: lib/jdom.jar,
  .
 Web-ContextPath: /export

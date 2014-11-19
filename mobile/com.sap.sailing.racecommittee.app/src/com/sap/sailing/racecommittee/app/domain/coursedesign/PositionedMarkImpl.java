@@ -9,10 +9,6 @@ import com.sap.sailing.domain.common.impl.DegreeBearingImpl;
 import com.sap.sailing.domain.common.impl.MeterDistance;
 
 public class PositionedMarkImpl extends MarkImpl implements PositionedMark {
-
-    /**
-     * 
-     */
     private static final long serialVersionUID = -7903960088124343841L;
     private Position position;
 

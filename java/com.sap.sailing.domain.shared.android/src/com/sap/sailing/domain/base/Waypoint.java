@@ -2,8 +2,9 @@ package com.sap.sailing.domain.base;
 
 import com.sap.sailing.domain.common.Bearing;
 import com.sap.sailing.domain.common.PassingInstruction;
-import com.sap.sailing.domain.common.WithID;
+import com.sap.sse.common.IsManagedByCache;
 import com.sap.sse.common.Named;
+import com.sap.sse.common.WithID;
 
 /**
  * Waypoints constitute {@link Course}s and demarcate their {@link Leg}s. A waypoint's position is defined by a
@@ -13,7 +14,7 @@ import com.sap.sse.common.Named;
  * @author Axel Uhl (d043530)
  * 
  */
-public interface Waypoint extends Named, WithID, IsManagedBySharedDomainFactory {
+public interface Waypoint extends Named, WithID, IsManagedByCache<SharedDomainFactory> {
     ControlPoint getControlPoint();
 
     Iterable<Mark> getMarks();

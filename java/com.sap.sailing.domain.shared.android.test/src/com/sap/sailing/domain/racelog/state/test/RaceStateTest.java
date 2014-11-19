@@ -20,8 +20,6 @@ import com.sap.sailing.domain.base.configuration.RegattaConfiguration;
 import com.sap.sailing.domain.base.configuration.impl.EmptyRegattaConfiguration;
 import com.sap.sailing.domain.base.configuration.impl.RegattaConfigurationImpl;
 import com.sap.sailing.domain.base.configuration.procedures.ESSConfiguration;
-import com.sap.sailing.domain.common.TimePoint;
-import com.sap.sailing.domain.common.impl.MillisecondsTimePoint;
 import com.sap.sailing.domain.common.racelog.Flags;
 import com.sap.sailing.domain.common.racelog.RaceLogRaceStatus;
 import com.sap.sailing.domain.common.racelog.RacingProcedureType;
@@ -38,6 +36,8 @@ import com.sap.sailing.domain.racelog.state.impl.ReadonlyRaceStateImpl;
 import com.sap.sailing.domain.racelog.state.racingprocedure.RacingProcedure;
 import com.sap.sailing.domain.racelog.state.racingprocedure.gate.GateStartRacingProcedure;
 import com.sap.sailing.domain.racelog.state.racingprocedure.impl.RacingProcedureFactoryImpl;
+import com.sap.sse.common.TimePoint;
+import com.sap.sse.common.impl.MillisecondsTimePoint;
 
 public class RaceStateTest {
     

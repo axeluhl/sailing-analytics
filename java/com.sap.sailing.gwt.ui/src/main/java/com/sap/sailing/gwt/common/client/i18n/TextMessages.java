@@ -37,6 +37,8 @@ public interface TextMessages extends Messages {
     String features();
     String releaseNotes();
     String overview();
+    String sapSailing();
+    String search();
     
     String countdownDays();
     String countdownHours();

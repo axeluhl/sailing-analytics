@@ -2,9 +2,9 @@ package com.sap.sailing.velum.resultimport.impl;
 
 import java.io.InputStream;
 
-import com.sap.sailing.domain.common.TimePoint;
 import com.sap.sailing.velum.resultimport.CsvParser;
 import com.sap.sailing.velum.resultimport.CsvParserFactory;
+import com.sap.sse.common.TimePoint;
 
 public class CsvParserFactoryImpl implements CsvParserFactory {
     @Override

@@ -6,10 +6,14 @@ import com.sap.sailing.gwt.home.client.place.contact.ContactPlace;
 import com.sap.sailing.gwt.home.client.place.event.EventPlace;
 import com.sap.sailing.gwt.home.client.place.event.EventPlace.EventNavigationTabs;
 import com.sap.sailing.gwt.home.client.place.events.EventsPlace;
-import com.sap.sailing.gwt.home.client.place.leaderboard.LeaderboardPlace;
+import com.sap.sailing.gwt.home.client.place.regatta.RegattaPlace;
+import com.sap.sailing.gwt.home.client.place.regatta.RegattaPlace.RegattaNavigationTabs;
 import com.sap.sailing.gwt.home.client.place.searchresult.SearchResultPlace;
+import com.sap.sailing.gwt.home.client.place.series.SeriesPlace;
+import com.sap.sailing.gwt.home.client.place.series.SeriesPlace.SeriesNavigationTabs;
 import com.sap.sailing.gwt.home.client.place.solutions.SolutionsPlace;
 import com.sap.sailing.gwt.home.client.place.solutions.analytics.SailingAnalyticsPlace;
+import com.sap.sailing.gwt.home.client.place.solutions.SolutionsPlace.SolutionsNavigationTabs;
 import com.sap.sailing.gwt.home.client.place.sponsoring.SponsoringPlace;
 import com.sap.sailing.gwt.home.client.place.start.StartPlace;
 
@@ -20,31 +24,31 @@ public class HomePlacesNavigator extends AbstractPlaceNavigator {
     }
 
     public PlaceNavigation<StartPlace> getHomeNavigation() {
-        return createPlaceNavigation(getLocationURL(), new StartPlace(), new StartPlace.Tokenizer());
+        return createGlobalPlaceNavigation(new StartPlace(), new StartPlace.Tokenizer());
     }
 
     public PlaceNavigation<EventsPlace> getEventsNavigation() {
-        return createPlaceNavigation(getLocationURL(), new EventsPlace(), new EventsPlace.Tokenizer());
+        return createGlobalPlaceNavigation(new EventsPlace(), new EventsPlace.Tokenizer());
     }
 
-    public PlaceNavigation<SolutionsPlace> getSolutionsNavigation() {
-        return createPlaceNavigation(getLocationURL(), new SolutionsPlace(), new SolutionsPlace.Tokenizer());
+    public PlaceNavigation<SolutionsPlace> getSolutionsNavigation(SolutionsNavigationTabs navigationTab) {
+        return createLocalPlaceNavigation(new SolutionsPlace(navigationTab), new SolutionsPlace.Tokenizer());
     }
 
     public PlaceNavigation<SailingAnalyticsPlace> getSailingAnalyticsNavigation() {
-        return createPlaceNavigation(getLocationURL(), new SailingAnalyticsPlace(), new SailingAnalyticsPlace.Tokenizer());
+        return createLocalPlaceNavigation(new SailingAnalyticsPlace(), new SailingAnalyticsPlace.Tokenizer());
     }
 
     public PlaceNavigation<SponsoringPlace> getSponsoringNavigation() {
-        return createPlaceNavigation(getLocationURL(), new SponsoringPlace(), new SponsoringPlace.Tokenizer());
+        return createGlobalPlaceNavigation(new SponsoringPlace(), new SponsoringPlace.Tokenizer());
     }
 
     public PlaceNavigation<AboutUsPlace> getAboutUsNavigation() {
-        return createPlaceNavigation(getLocationURL(), new AboutUsPlace(), new AboutUsPlace.Tokenizer());
+        return createGlobalPlaceNavigation(new AboutUsPlace(), new AboutUsPlace.Tokenizer());
     }
 
     public PlaceNavigation<ContactPlace> getContactNavigation() {
-        return createPlaceNavigation(getLocationURL(), new ContactPlace(), new ContactPlace.Tokenizer());
+        return createGlobalPlaceNavigation(new ContactPlace(), new ContactPlace.Tokenizer());
     }
 
     public PlaceNavigation<EventPlace> getEventNavigation(String eventUuidAsString, String baseUrl, boolean isOnRemoteServer) {
@@ -57,21 +61,19 @@ public class HomePlacesNavigator extends AbstractPlaceNavigator {
         return createPlaceNavigation(baseUrl, isOnRemoteServer, eventPlace, new EventPlace.Tokenizer());
     }
 
-//    void goToOverview();
-//    void goToRegattas();
-//    void goToSchedule();
-//    void goToMedia();
-//    void goToRegattaRaces(LeaderboardGroupDTO leaderboardGroup, StrippedLeaderboardDTO leaderboard, RaceGroupDTO raceGroup);
-//    void openRaceViewer(StrippedLeaderboardDTO leaderboard, RaceDTO race);
-//    void openOverallLeaderboardViewer(LeaderboardGroupDTO leaderboardGroup);
-//    void openLeaderboardViewer(LeaderboardGroupDTO leaderboardGroup, StrippedLeaderboardDTO leaderboard);
-    
-    public PlaceNavigation<LeaderboardPlace> getLeaderboardNavigation(String eventUuidAsString, String leaderboardIdAsNameString, String baseUrl, boolean isOnRemoteServer) {
-        LeaderboardPlace leaderboardPlace = new LeaderboardPlace(eventUuidAsString, leaderboardIdAsNameString, true, true);
-        return createPlaceNavigation(baseUrl, isOnRemoteServer, leaderboardPlace, new LeaderboardPlace.Tokenizer());
+    /** this place will be merged into the common regatta view as tab later on */
+    public PlaceNavigation<RegattaPlace> getRegattaAnalyticsNavigation(String eventUuidAsString, RegattaNavigationTabs navigationTab, String leaderboardIdAsNameString, String baseUrl, boolean isOnRemoteServer) {
+        RegattaPlace regattaPlace = new RegattaPlace(eventUuidAsString, navigationTab, leaderboardIdAsNameString, true, true);
+        return createPlaceNavigation(baseUrl, isOnRemoteServer, regattaPlace, new RegattaPlace.Tokenizer());
+    }
+
+    /** this place will be merged into the common series event view as tab later on */
+    public PlaceNavigation<SeriesPlace> getSeriesAnalyticsNavigation(String eventUuidAsString, SeriesNavigationTabs navigationTab, String leaderboardIdAsNameString, String baseUrl, boolean isOnRemoteServer) {
+        SeriesPlace seriesPlace = new SeriesPlace(eventUuidAsString, navigationTab, leaderboardIdAsNameString, true, true);
+        return createPlaceNavigation(baseUrl, isOnRemoteServer, seriesPlace, new SeriesPlace.Tokenizer());
     }
 
     public PlaceNavigation<SearchResultPlace> getSearchResultNavigation(String searchQuery) {
-        return createPlaceNavigation(getLocationURL(), new SearchResultPlace(searchQuery), new SearchResultPlace.Tokenizer());
+        return createGlobalPlaceNavigation(new SearchResultPlace(searchQuery), new SearchResultPlace.Tokenizer());
     }
 }

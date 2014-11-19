@@ -21,11 +21,11 @@ import org.xml.sax.SAXException;
 import com.sap.sailing.declination.Declination;
 import com.sap.sailing.domain.common.Bearing;
 import com.sap.sailing.domain.common.Position;
-import com.sap.sailing.domain.common.TimePoint;
 import com.sap.sailing.domain.common.impl.DegreeBearingImpl;
 import com.sap.sailing.domain.common.impl.DegreePosition;
-import com.sap.sailing.domain.common.impl.MillisecondsTimePoint;
 import com.sap.sailing.domain.common.quadtree.QuadTree;
+import com.sap.sse.common.TimePoint;
+import com.sap.sse.common.impl.MillisecondsTimePoint;
 
 /**
  * Manages resources in which declinations can be stored for off-line look-up. Time resolution is

@@ -19,7 +19,6 @@ import com.sap.sailing.domain.base.Mark;
 import com.sap.sailing.domain.base.Waypoint;
 import com.sap.sailing.domain.common.Bearing;
 import com.sap.sailing.domain.common.Position;
-import com.sap.sailing.domain.common.TimePoint;
 import com.sap.sailing.domain.common.impl.DegreePosition;
 import com.sap.sailing.domain.markpassingcalculation.splining.HermiteCurve;
 import com.sap.sailing.domain.markpassingcalculation.splining.StraightLine;
@@ -28,6 +27,7 @@ import com.sap.sailing.domain.tracking.DynamicGPSFixTrack;
 import com.sap.sailing.domain.tracking.GPSFix;
 import com.sap.sailing.domain.tracking.GPSFixMoving;
 import com.sap.sailing.domain.tracking.MarkPassing;
+import com.sap.sse.common.TimePoint;
 
 /**
  * This class tests a mark passing detection algorithm that interpolates the boats' positions between
@@ -94,7 +94,7 @@ public class MartinMarkPassingSplineBasedTest extends MartinAbstractMarkPassingT
 		}
 		Vector2D point1 = new Vector2D(prevFix.getPosition());
 		Vector2D point2 = new Vector2D(fix.getPosition());
-		Vector2D tangent1 = new Vector2D(prevFix.getSpeed().getBearing(), prevFix.getSpeed().getKnots() * TANGENT_SCALING_FACTOR /* abhängig von Bootsklasse, zeitl. Abstand zw. Fixes */);
+		Vector2D tangent1 = new Vector2D(prevFix.getSpeed().getBearing(), prevFix.getSpeed().getKnots() * TANGENT_SCALING_FACTOR /* abhï¿½ngig von Bootsklasse, zeitl. Abstand zw. Fixes */);
 		Vector2D tangent2 = new Vector2D(fix.getSpeed().getBearing(), fix.getSpeed().getKnots() * TANGENT_SCALING_FACTOR);
 		HermiteCurve interpolatedCourse = new HermiteCurve(point1, point2, tangent1, tangent2);
 
