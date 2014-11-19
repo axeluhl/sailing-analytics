@@ -11,6 +11,7 @@ import android.view.LayoutInflater;
 import android.view.View;
 import android.view.View.OnClickListener;
 import android.view.ViewGroup;
+import android.webkit.WebView.FindListener;
 import android.widget.Button;
 import android.widget.TextView;
 
@@ -42,7 +43,7 @@ public class RaceInfoFragment extends RaceFragment implements RaceInfoListener {
     private TextView fleetInfoHeader;
     private TextView raceInfoHeader;
     private TextView courseInfoHeader;
-    private TextView windInfoHeader;
+    private Button windInfoHeader;
 
     private View resetRaceDialogView;
 
@@ -60,12 +61,13 @@ public class RaceInfoFragment extends RaceFragment implements RaceInfoListener {
     public void onActivityCreated(Bundle savedInstanceState) {
         super.onActivityCreated(savedInstanceState);
 
-        this.infoFragmentChooser = RaceInfoFragmentChooser.on(getRaceState().getRacingProcedure().getType());
+        infoFragmentChooser = RaceInfoFragmentChooser.on(getRaceState().getRacingProcedure().getType());
 
-        this.fleetInfoHeader = (TextView) getView().findViewById(R.id.regattaGroupInfoHeader);
-        this.raceInfoHeader = (TextView) getView().findViewById(R.id.raceInfoHeader);
-        this.courseInfoHeader = (TextView) getView().findViewById(R.id.courseInfoHeader);
-        this.windInfoHeader = (TextView) getView().findViewById(R.id.windInfoHeader);
+        fleetInfoHeader = (TextView) getView().findViewById(R.id.regattaGroupInfoHeader);
+        raceInfoHeader = (TextView) getView().findViewById(R.id.raceInfoHeader);
+        courseInfoHeader = (TextView) getView().findViewById(R.id.courseInfoHeader);
+        //windInfoHeader = (TextView) getView().findViewById(R.id.windInfoHeader);
+        windInfoHeader = (Button) getActivity().findViewById(R.id.windButton);
 
         windInfoHeader.setText(getString(R.string.wind_unknown));
         fleetInfoHeader.setText(String.format("%s - %s", getRace().getRaceGroup().getName(), getRace().getFleet()
