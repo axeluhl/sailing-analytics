@@ -8,7 +8,7 @@
 	<g:HTMLPanel styleName="{local_res.css.loginform}">
 	    <div class="{local_res.css.loginform_header}">
 		<img src="{icon_res.sapLogo.getSafeUri}" />
-		<g:Label styleName="{local_res.css.loginform_header_appname}" ui:field="appName" />
+		<g:Label styleName="{local_res.css.loginform_header_appname}" ui:field="appNameLabel" />
 	    </div>
 	    <div class="{local_res.css.loginform_content}">
 			    <div><ui:text from="{i18n.generalWelcome}" /></div>
@@ -24,7 +24,7 @@
 				<hr/>
 				<div>
 				    <ui:text from="{i18n.newUser}" />
-					<g:Anchor ui:field="signUpAnchor" text="{i18n.signUp}" />    
+					<g:Anchor href="javascript:;" ui:field="signUpAnchor" text="{i18n.signUp}" />    
 				</div>
 		</div>
 	</g:HTMLPanel>     
