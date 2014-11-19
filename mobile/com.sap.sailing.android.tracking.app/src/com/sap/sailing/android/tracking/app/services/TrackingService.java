@@ -2,32 +2,28 @@ package com.sap.sailing.android.tracking.app.services;
 
 import java.util.concurrent.ScheduledExecutorService;
 
+import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
 
 import android.annotation.TargetApi;
 import android.app.ActivityManager;
+import android.app.ActivityManager.RunningServiceInfo;
 import android.app.Notification;
 import android.app.NotificationManager;
 import android.app.PendingIntent;
 import android.app.Service;
-import android.app.ActivityManager.RunningServiceInfo;
 import android.content.ContentResolver;
 import android.content.ContentValues;
 import android.content.Context;
 import android.content.Intent;
 import android.location.Location;
-import android.net.Uri;
 import android.os.Build;
 import android.os.Bundle;
 import android.os.IBinder;
 import android.support.v4.app.NotificationCompat;
 import android.widget.Toast;
 
-import com.android.volley.Response.ErrorListener;
-import com.android.volley.Response.Listener;
-import com.android.volley.VolleyError;
-import com.android.volley.toolbox.JsonObjectRequest;
 import com.google.android.gms.common.ConnectionResult;
 import com.google.android.gms.common.GooglePlayServicesClient.ConnectionCallbacks;
 import com.google.android.gms.common.GooglePlayServicesClient.OnConnectionFailedListener;
@@ -40,7 +36,7 @@ import com.sap.sailing.android.tracking.app.R;
 import com.sap.sailing.android.tracking.app.provider.AnalyticsContract.SensorGps;
 import com.sap.sailing.android.tracking.app.ui.activities.RegattaActivity;
 import com.sap.sailing.android.tracking.app.utils.AppPreferences;
-import com.sap.sailing.android.tracking.app.utils.VolleyHelper;
+import com.sap.sailing.server.gateway.deserialization.impl.FlatSmartphoneUuidAndGPSFixMovingJsonDeserializer;
 
 public class TrackingService extends Service implements ConnectionCallbacks, OnConnectionFailedListener,
         LocationListener {
@@ -54,6 +50,7 @@ public class TrackingService extends Service implements ConnectionCallbacks, OnC
 
     private static final String TAG = TrackingService.class.getName();
 
+    public static final String WEB_SERVICE_PATH = "/sailingserver/api/v1/gps_fixes";
     // Unique Identification Number for the Notification.
     // We use it on Notification start, and to cancel it.
     private int NOTIFICATION_ID = R.string.tracker_started;
@@ -131,15 +128,24 @@ public class TrackingService extends Service implements ConnectionCallbacks, OnC
     @TargetApi(Build.VERSION_CODES.JELLY_BEAN_MR1)
     @Override
     public void onLocationChanged(Location location) {
+        JSONObject json = new JSONObject();
+        try {
+            json.put(FlatSmartphoneUuidAndGPSFixMovingJsonDeserializer.DEVICE_UUID,
+                    prefs.getDeviceIdentifier());
+            JSONArray fixes = new JSONArray();
+            JSONObject fix = new JSONObject();
+            fix.put(FlatSmartphoneUuidAndGPSFixMovingJsonDeserializer.LAT_DEG, location.getLatitude());
+            fix.put(FlatSmartphoneUuidAndGPSFixMovingJsonDeserializer.LON_DEG, location.getLongitude());
+            fix.put(FlatSmartphoneUuidAndGPSFixMovingJsonDeserializer.TIME_MILLIS, location.getTime());
+            fix.put(FlatSmartphoneUuidAndGPSFixMovingJsonDeserializer.SPEED_M_PER_S, location.getSpeed());
+            fix.put(FlatSmartphoneUuidAndGPSFixMovingJsonDeserializer.BEARING_DEG, location.getBearing());
+            fixes.put(0, fix);
+            json.put(FlatSmartphoneUuidAndGPSFixMovingJsonDeserializer.FIXES, fixes);
+        } catch (JSONException e) {
+            ExLog.e(this, TAG, "Error serializing fix: " + e.getMessage());
+        }
         ContentResolver cr = getContentResolver();
         ContentValues cv = new ContentValues();
-        cv.put(SensorGps.GPS_ACCURACY, location.getAccuracy());
-        cv.put(SensorGps.GPS_ALTITUDE, location.getAltitude());
-        cv.put(SensorGps.GPS_BEARING, location.getBearing());
-        cv.put(SensorGps.GPS_DEVICE, prefs.getDeviceIdentifier());
-        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.JELLY_BEAN_MR1) {
-            cv.put(SensorGps.GPS_ELAPSED_REALTIME, location.getElapsedRealtimeNanos());
-        }
         cv.put(SensorGps.GPS_LATITUDE, location.getLatitude());
         cv.put(SensorGps.GPS_LONGITUDE, location.getLongitude());
         cv.put(SensorGps.GPS_PROVIDER, location.getProvider());
