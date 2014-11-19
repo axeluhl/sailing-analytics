@@ -41,30 +41,25 @@ public class CompoundDataMiningStringMessages implements DataMiningStringMessage
     
     @Override
     public String get(Locale locale, String messageKey, String... parameters) {
-        Map<String, String> messages = new HashMap<>();
+        Map<DataMiningStringMessages, String> messages = new HashMap<>();
         for (DataMiningStringMessages stringMessages : this.stringMessages) {
-            messages.put(stringMessages.getResourceBaseName(), getFrom(stringMessages, locale, messageKey, parameters));
+            try {
+                messages.put(stringMessages, stringMessages.get(locale, messageKey, parameters));
+            } catch (MissingResourceException e) {
+            }
         }
         return getBestMessageAndLogConflicts(messageKey, messages);
     }
 
-    private String getFrom(DataMiningStringMessages stringMessages, Locale locale, String messageKey, String... parameters) {
-        try {
-            return stringMessages.get(locale, messageKey, parameters);
-        } catch (MissingResourceException e) {
-            return null;
-        }
-    }
-
-    private String getBestMessageAndLogConflicts(String messageKey, Map<String, String> messages) throws MissingResourceException {
+    private String getBestMessageAndLogConflicts(String messageKey, Map<DataMiningStringMessages, String> messages) throws MissingResourceException {
         String bestMessageResourceBaseName = null;
         String bestMessage = null;
-        for (Entry<String, String> messagesEntry : messages.entrySet()) {
+        for (Entry<DataMiningStringMessages, String> messagesEntry : messages.entrySet()) {
             String message = messagesEntry.getValue();
             if (message != null) {
                 if (bestMessage == null) {
                     bestMessage = message;
-                    bestMessageResourceBaseName = messagesEntry.getKey();
+                    bestMessageResourceBaseName = messagesEntry.getKey().getResourceBaseName();
                 } else {
                     logPossibleConflicts(messageKey, bestMessageResourceBaseName, bestMessage, messagesEntry);
                 }
@@ -79,8 +74,8 @@ public class CompoundDataMiningStringMessages implements DataMiningStringMessage
     }
 
     private void logPossibleConflicts(String messageKey, String bestMessageResourceBaseName, String bestMessage,
-            Entry<String, String> messagesEntry) {
-        String messageResourceBaseName = messagesEntry.getKey();
+            Entry<DataMiningStringMessages, String> messagesEntry) {
+        String messageResourceBaseName = messagesEntry.getKey().getResourceBaseName();
         String message = messagesEntry.getValue();
         
         if (bestMessage.equals(message)) {

@@ -19,7 +19,7 @@ import com.sap.sse.datamining.impl.i18n.DataMiningStringMessagesImpl;
 
 public class Activator implements BundleActivator, DataMiningBundleService {
     
-    private static final String STRING_MESSAGES_BASE_NAME = "stringmessages/StringMessages";
+    private static final String STRING_MESSAGES_BASE_NAME = "stringmessages/Sailing_StringMessages";
     
     private static Activator INSTANCE;
 
@@ -30,7 +30,7 @@ public class Activator implements BundleActivator, DataMiningBundleService {
     
     public Activator() {
         dataRetrieverChainDefinitions = new SailingDataRetrieverChainDefinitions();
-        sailingDataMiningStringMessages = new DataMiningStringMessagesImpl(STRING_MESSAGES_BASE_NAME);
+        sailingDataMiningStringMessages = new DataMiningStringMessagesImpl(STRING_MESSAGES_BASE_NAME, Activator.class.getClassLoader());
     }
 
     @Override
