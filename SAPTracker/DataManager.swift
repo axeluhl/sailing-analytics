@@ -15,9 +15,9 @@ class DataManager: NSObject {
 
     class var sharedManager: DataManager {
         struct Singleton {
-            static let sharedDataManager = DataManager()
+            static let sharedManager = DataManager()
         }
-        return Singleton.sharedDataManager
+        return Singleton.sharedManager
     }
 
     override init() {
@@ -95,6 +95,7 @@ class DataManager: NSObject {
         return results as [GPSFix]
     }
 
+    /* Get all sailing events. */
     func eventsFetchedResultsController()->NSFetchedResultsController {
         let fetchRequest = NSFetchRequest(entityName: "Event")
         fetchRequest.sortDescriptors = [NSSortDescriptor(key: "startDate", ascending: true)]

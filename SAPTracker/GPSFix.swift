@@ -17,7 +17,7 @@ class GPSFix: NSManagedObject {
     @NSManaged var lonDeg: Double
     @NSManaged var speedMperS: Double
     @NSManaged var timeMillis: Double
-    @NSManaged var event: Event?
+    @NSManaged var event: Event
     
     func initWithDictionary(dictionary: Dictionary<NSObject, AnyObject>) {
         timeMillis = round(dictionary["timestamp"] as Double * 1000)

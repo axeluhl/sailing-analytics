@@ -29,6 +29,11 @@ class HomeViewController: UIViewController, UITableViewDataSource, UITableViewDe
         fetchedResultsController!.performFetch(nil)
     }
     
+    override func viewWillAppear(animated: Bool) {
+        super.viewWillAppear(animated)
+        DataManager.sharedManager.selectedEvent = nil;
+    }
+    
     // MARK: - QR code
 
     func openUrl(url: NSURL) {

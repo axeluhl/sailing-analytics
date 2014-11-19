@@ -277,6 +277,7 @@
 		7F1B66F91A0CDCF600904A41 /* BatteryManager.swift in Sources */ = {isa = PBXBuildFile; fileRef = 7F1B66F81A0CDCF600904A41 /* BatteryManager.swift */; };
 		7F23F0881A1A3DEF00F03F1C /* QRCodeManager.swift in Sources */ = {isa = PBXBuildFile; fileRef = 7F23F0871A1A3DEF00F03F1C /* QRCodeManager.swift */; };
 		7F2C605A19F160E400C32D93 /* LocationManager.swift in Sources */ = {isa = PBXBuildFile; fileRef = 7F2C605919F160E400C32D93 /* LocationManager.swift */; };
+		7F3AA7C81A1CD7D700F8861F /* SendGPSFixController.swift in Sources */ = {isa = PBXBuildFile; fileRef = 7F3AA7C71A1CD7D700F8861F /* SendGPSFixController.swift */; };
 		7F44095B19F65B5B0021BF22 /* CoreData.xcdatamodeld in Sources */ = {isa = PBXBuildFile; fileRef = 7F44095919F65B5B0021BF22 /* CoreData.xcdatamodeld */; };
 		7F4D2F541A1C8EE50038E7D1 /* Images.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = 7F4D2F531A1C8EE50038E7D1 /* Images.xcassets */; };
 		7F83F15619F154F000C53328 /* AppDelegate.swift in Sources */ = {isa = PBXBuildFile; fileRef = 7F83F15519F154F000C53328 /* AppDelegate.swift */; };
@@ -581,6 +582,7 @@
 		7F1B66F81A0CDCF600904A41 /* BatteryManager.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = BatteryManager.swift; sourceTree = "<group>"; };
 		7F23F0871A1A3DEF00F03F1C /* QRCodeManager.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = QRCodeManager.swift; sourceTree = "<group>"; };
 		7F2C605919F160E400C32D93 /* LocationManager.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = LocationManager.swift; sourceTree = "<group>"; };
+		7F3AA7C71A1CD7D700F8861F /* SendGPSFixController.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = SendGPSFixController.swift; sourceTree = "<group>"; };
 		7F44095A19F65B5B0021BF22 /* CoreData.xcdatamodel */ = {isa = PBXFileReference; lastKnownFileType = wrapper.xcdatamodel; path = CoreData.xcdatamodel; sourceTree = "<group>"; };
 		7F4D2F531A1C8EE50038E7D1 /* Images.xcassets */ = {isa = PBXFileReference; lastKnownFileType = folder.assetcatalog; path = Images.xcassets; sourceTree = "<group>"; };
 		7F83F15019F154F000C53328 /* SAPTracker.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = SAPTracker.app; sourceTree = BUILT_PRODUCTS_DIR; };
@@ -686,6 +688,7 @@
 				7F03FD3D19FA44CD00FA1327 /* APIManager.swift */,
 				7F06590319F8094C0077FF95 /* DeviceUDIDManager.swift */,
 				7F1B66F81A0CDCF600904A41 /* BatteryManager.swift */,
+				7F3AA7C71A1CD7D700F8861F /* SendGPSFixController.swift */,
 			);
 			name = Controller;
 			sourceTree = "<group>";
@@ -1430,6 +1433,7 @@
 				7F99DE3C1A126554009B3619 /* RegattaViewController.swift in Sources */,
 				7F8CC2081A10D47A00C56D7F /* SettingsViewController.swift in Sources */,
 				7F06590419F8094C0077FF95 /* DeviceUDIDManager.swift in Sources */,
+				7F3AA7C81A1CD7D700F8861F /* SendGPSFixController.swift in Sources */,
 				7FCDB6641A1636610075D7D9 /* LeaderBoard.swift in Sources */,
 				7FD9D3031A1236080058FEAD /* Extensions.swift in Sources */,
 				7F0658FD19F7D6700077FF95 /* ScanViewController.swift in Sources */,

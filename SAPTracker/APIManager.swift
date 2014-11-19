@@ -15,14 +15,6 @@ class APIManager: NSObject {
         static let networkAvailabilityChanged = "networkAvailabilityChanged"
     }
     
-    private struct SyncPeriod {
-        /* Normal rate of upload is every 3s */
-        static let Normal: NSTimeInterval = 3
-        
-        /* To save battery, upload rate is lowered to every 30s */
-        static let BatterySaving: NSTimeInterval = 30
-    }
-    
     /* Constants */
     struct Constants {
         /* Max number of fix objects to be sent per POST request. */
@@ -38,13 +30,6 @@ class APIManager: NSObject {
     /* AFNetworking operation manager */
     private var manager: AFHTTPRequestOperationManager?
     
-    /* Number of seconds between syncs */
-    private var syncPeriod: NSTimeInterval {
-        get {
-            return BatteryManager.sharedManager.batterySaving ? SyncPeriod.BatterySaving : SyncPeriod.Normal
-        }
-    }
-    
     var networkAvailable: Bool {
         get {
             if manager == nil {
@@ -57,9 +42,9 @@ class APIManager: NSObject {
     /* Singleton */
     class var sharedManager: APIManager {
         struct Singleton {
-            static let sharedAPIManager = APIManager()
+            static let sharedManager = APIManager()
         }
-        return Singleton.sharedAPIManager
+        return Singleton.sharedManager
     }
     
     /* Sets base URL for all requests. Request and response are JSON. Starts reachability listener. Starts timer for uploading data. */
@@ -68,6 +53,8 @@ class APIManager: NSObject {
             return
         }
         
+        self.serverUrlString = serverUrlString
+
         manager = AFHTTPRequestOperationManager(baseURL: NSURL(string: serverUrlString)) // baseUrl needed for checking reachability
         
         // encode/decode body as JSON
@@ -90,12 +77,6 @@ class APIManager: NSObject {
             NSNotificationQueue.defaultQueue().enqueueNotification(notification, postingStyle: NSPostingStyle.PostASAP)
         })
         manager!.reachabilityManager.startMonitoring()
-        
-        // TODO: only one operation at a time?
-        //manager!.operationQueue.maxConcurrentOperationCount = 0
-        
-        // start timer
-        timer()
     }
     
     // MARK: - REST API
@@ -146,7 +127,7 @@ class APIManager: NSObject {
     }
     
     /* Send GPS location to server. Delete row from cache. */
-    private func postGPSFixes(deviceUuid: String!, gpsFixes: [GPSFix]!) {
+    func postGPSFixes(deviceUuid: String!, gpsFixes: [GPSFix]!) {
         if gpsFixes.count == 0 {
             return
         }
@@ -170,22 +151,6 @@ class APIManager: NSObject {
             }, failure: { (AFHTTPRequestOperation operation, NSError error) -> Void in
                 println("error sending GPS fixes")
         })
-    }
-    
-    // MARK: - Timer
-    
-    /* See if any rows need to be uploaded. Schedule timer again. */
-    func timer() {
-        let loop = NSTimer.scheduledTimerWithTimeInterval(syncPeriod, target:self, selector:"timer", userInfo:nil, repeats:false)
-        NSRunLoop.currentRunLoop().addTimer(loop, forMode:NSRunLoopCommonModes)
-        
-        if (manager != nil && !manager!.operationQueue.suspended) {
-            let deviceUuid = DeviceUDIDManager.UDID
-            let lastestGPSFixes = DataManager.sharedManager.latestLocations()
-            if lastestGPSFixes.count > 0 {
-                postGPSFixes(deviceUuid, gpsFixes: lastestGPSFixes)
-            }
-        }
     }
 
 }

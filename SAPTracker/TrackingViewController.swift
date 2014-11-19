@@ -34,6 +34,7 @@ class TrackingViewController : UIViewController, UIAlertViewDelegate {
         super.viewDidLoad()
         
         APIManager.sharedManager.initManager(DataManager.sharedManager.selectedEvent!.serverUrl)
+        SendGPSFixController.sharedManager.trackingEvent = DataManager.sharedManager.selectedEvent
         
         // set online/buffering label
         networkAvailabilityChanged()
@@ -49,7 +50,7 @@ class TrackingViewController : UIViewController, UIAlertViewDelegate {
         dateFormatter.dateFormat = "HH:mm:ss.S"
         dateFormatter.timeZone = NSTimeZone(forSecondsFromGMT: 0)
     }
-    
+
     // MARK:- Notifications
     
     deinit {
@@ -126,6 +127,7 @@ class TrackingViewController : UIViewController, UIAlertViewDelegate {
                 break
             default:
                 LocationManager.sharedManager.stopTracking()
+                SendGPSFixController.sharedManager.trackingEvent = nil
                 self.dismissViewControllerAnimated(true, nil)
             }
             break

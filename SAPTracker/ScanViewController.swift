@@ -64,6 +64,7 @@ class ScanViewController: UIViewController, AVCaptureMetadataOutputObjectsDelega
     }
     
     // MARK: - QRCodeManagerDelegate
+    
     func qrCodeOK() {
         // pop back to home view
         navigationController!.popViewControllerAnimated(true)

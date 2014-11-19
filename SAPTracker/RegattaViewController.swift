@@ -17,8 +17,6 @@ class RegattaViewController : UIViewController, UIActionSheetDelegate, UINavigat
     var sourceTypes = [UIImagePickerControllerSourceType]()
     var sourceTypeNames = [String]()
     
-    // var regatta: Regatta
-    
     @IBOutlet weak var imageView: UIImageView!
     @IBOutlet weak var nameLabel: UILabel!
     @IBOutlet weak var flagImageView: UIImageView!
@@ -55,7 +53,9 @@ class RegattaViewController : UIViewController, UIActionSheetDelegate, UINavigat
             sourceTypeNames.append("Photo Library")
         }
     }
-    
+
+    // MARK: - Menu
+
     @IBAction func showMenuActionSheet(sender: AnyObject) {
         let actionSheet = UIActionSheet(title: nil, delegate: self, cancelButtonTitle: nil, destructiveButtonTitle: nil, otherButtonTitles: "Check-Out", "Settings", "Edit Photo", "Cancel")
         actionSheet.tag = ActionSheet.Menu.rawValue
@@ -92,7 +92,7 @@ class RegattaViewController : UIViewController, UIActionSheetDelegate, UINavigat
         }
     }
     
-    // MARK:- Image picker
+    // MARK: - Image picker
     
     @IBAction func showImageActionSheet(sender: AnyObject) {
         if sourceTypes.count == 1 {

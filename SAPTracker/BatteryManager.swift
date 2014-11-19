@@ -43,9 +43,9 @@ class BatteryManager: NSObject {
     /* Singleton */
     class var sharedManager: BatteryManager {
         struct Singleton {
-            static let sharedBatteryManager = BatteryManager()
+            static let sharedManager = BatteryManager()
         }
-        return Singleton.sharedBatteryManager
+        return Singleton.sharedManager
     }
     
     /* Register for battery events */

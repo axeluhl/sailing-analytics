@@ -21,9 +21,9 @@ class LocationManager: NSObject, CLLocationManagerDelegate {
 
     class var sharedManager: LocationManager {
         struct Singleton {
-            static let sharedLocationManager = LocationManager()
+            static let sharedManager = LocationManager()
         }
-        return Singleton.sharedLocationManager
+        return Singleton.sharedManager
     }
     
     private var coreLocationManager: CLLocationManager = CLLocationManager()
