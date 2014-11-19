@@ -50,7 +50,7 @@ public class FlatSmartphoneUuidAndGPSFixMovingJsonDeserializer implements
             double accuracy = Double.parseDouble(object.get(ACCURACY).toString());
             double altitude = Double.parseDouble(object.get(ALTITUDE).toString());
             String provider = object.get(PROVIDER).toString();
-            GPSFixMoving fix = GPSFixMovingImpl.create(lonDeg, latDeg, timeMillis, speedKnots, bearingDeg);
+            GPSFixMoving fix = GPSFixMovingImpl.create(lonDeg, latDeg, timeMillis, speedKnots, bearingDeg, accuracy, altitude, provider);
             fixes.add(fix);
         }
 
