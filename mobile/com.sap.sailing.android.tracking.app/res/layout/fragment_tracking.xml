@@ -39,7 +39,11 @@
         android:layout_alignParentBottom="true"
         android:layout_alignParentLeft="true"
         android:layout_alignParentRight="true"
-        android:text="@string/stop_tracking" />
+        android:text="@string/stop_tracking"
+        android:background="#e94a1b" 
+        android:layout_marginLeft="4px"
+        android:layout_marginRight="4px"
+        />
 
     <TextView
         android:id="@+id/quality_icons"

@@ -12,43 +12,43 @@ import android.widget.Button;
 
 import com.sap.sailing.android.tracking.app.R;
 import com.sap.sailing.android.tracking.app.services.TrackingService;
-import com.sap.sailing.android.tracking.app.ui.activities.TrackingActivity;
 
-public class RegattaFragment extends BaseFragment implements OnClickListener {
+public class TrackingFragment extends BaseFragment implements OnClickListener{
 
 	@Override
 	public View onCreateView(LayoutInflater inflater, ViewGroup container,
 			Bundle savedInstanceState) {
 		super.onCreateView(inflater, container, savedInstanceState);
 
-		View view = inflater.inflate(R.layout.fragment_regatta, container, false);
-
-		Button startTracking = (Button) view.findViewById(R.id.start_tracking);
+		View view = inflater.inflate(R.layout.fragment_tracking, container, false);
+		
+		Button startTracking = (Button) view.findViewById(R.id.stop_tracking);
 		startTracking.setOnClickListener(this);
-
+		
 		return view;
 	}
-
+	
 	@Override
 	public void onClick(View view) {
 		switch (view.getId()) {
-		case R.id.start_tracking:
-			showTrackingActivity();
+		case R.id.stop_tracking:
+			showStopTrackingConfirmationDialog();
 			break;
 		default:
 			break;
 		}
 	}
 	
-	private void showTrackingActivity() {
-		Intent intent = new Intent(getActivity(), TrackingActivity.class);
-		getActivity().startActivity(intent);
+	public void userTappedBackButton()
+	{
+		showStopTrackingConfirmationDialog();
 	}
-
+	
 	private void stopTracking() {
 		Intent intent = new Intent(getActivity(), TrackingService.class);
 		intent.setAction(getString(R.string.tracking_service_stop));
 		getActivity().startService(intent);
+		getActivity().finish();
 	}
 
 	private void showStopTrackingConfirmationDialog() {
@@ -67,4 +67,5 @@ public class RegattaFragment extends BaseFragment implements OnClickListener {
 		
 		dialog.show();
 	}
+	
 }
