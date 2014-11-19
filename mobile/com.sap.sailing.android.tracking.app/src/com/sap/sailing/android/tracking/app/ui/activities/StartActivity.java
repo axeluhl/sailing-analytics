@@ -30,6 +30,8 @@ public class StartActivity extends BaseActivity {
         if (getSupportActionBar() != null) {
             getSupportActionBar().setHomeButtonEnabled(false);
         }
+        
+        replaceFragment(R.id.content_frame, new HomeFragment());
     }
     
     
@@ -51,7 +53,7 @@ public class StartActivity extends BaseActivity {
 			Uri uri = Uri.parse(urlStr);
 			
 			HomeFragment homeFragment = (HomeFragment) getSupportFragmentManager()
-					.findFragmentById(R.id.home_fragment_id);
+					.findFragmentById(R.id.content_frame);
 			
 			homeFragment.handleScannedOrUrlMatchedUri(uri);
 		}
