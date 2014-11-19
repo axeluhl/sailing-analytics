@@ -225,3 +225,44 @@ After you have setup s3cmd you need to retrieve data from S3.
 </pre>
 
 That process can take a while. After it has finished you can proceed with the steps described in "Data has been lost or overwritten (Backup Server is available)"
+
+## Details about Backups
+
+In order to give you an overview over how some Backups are configured and stored this section aims to provide some details.
+
+### Bugzilla
+
+Bugzilla Database is being stored on the Database server in a MySQL database. The MySQL database contains everything that is needed to restore a Bugzilla that has crashed. The configuration for the backup can be found at `/opt/backup.sh` and consists of the following lines:
+
+<pre>
+# Directory for temporary files
+TARGET_DIR=/var/lib/mysql/backup
+
+# Configuration for MySQL
+MYSQL_DATABASES="bugs mysql"
+MYSQLEXPORT_CMD="mysqldump -u root --password=sailaway"
+
+[...]
+
+# Export MySQL dump for selected databases
+for MYSQL_DB in $MYSQL_DATABASES; do
+	mkdir $TARGET_DIR/mysql
+	echo "$MYSQLEXPORT_CMD $MYSQL_DB > $TARGET_DIR/mysql/$MYSQL_DB.sql"
+	$MYSQLEXPORT_CMD $MYSQL_DB > $TARGET_DIR/mysql/$MYSQL_DB.sql
+done
+</pre>
+
+As one can see a dump is taken for each database specified in the configuration and moved to `/var/lib/mysql/backup/mysql`. This directory is then indexed and pushed to the backup server.
+
+If you want to check the backup or restore a Bugzilla then use the following steps:
+
+<pre>
+[root@ip-172-31-25-136 ~]# su - backup
+[backup@ip-172-31-25-136 ~]$ /opt/bup/bup -d /home/backup/database/ ls
+databases            dir-etc              dir-var-log-mongodb
+[backup@ip-172-31-25-136 ~]$ /opt/bup/bup -d /home/backup/database/ ls databases/latest/var/lib/mysql/backup/mysql
+bugs.sql   mysql.sql
+[backup@ip-172-31-25-136 ~]$ /opt/bup/bup -d /home/backup/database/ cat-file databases/latest/var/lib/mysql/backup/mysql/bugs.sql | more                                                                                                                                                                                                               
+</pre>
+
+Restoring can be performed as described in "Data-has-been-lost-or-overwritten-(Backup-Server-is-available)"

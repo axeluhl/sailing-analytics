@@ -4,6 +4,7 @@ import java.util.List;
 
 import com.google.gwt.activity.shared.AbstractActivity;
 import com.google.gwt.event.shared.EventBus;
+import com.google.gwt.user.client.Window;
 import com.google.gwt.user.client.rpc.AsyncCallback;
 import com.google.gwt.user.client.ui.AcceptsOneWidget;
 import com.sap.sailing.gwt.home.client.shared.placeholder.Placeholder;
@@ -13,9 +14,11 @@ import com.sap.sse.gwt.client.mvp.ErrorView;
 public class EventsActivity extends AbstractActivity {
 
     private final EventsClientFactory clientFactory;
+    private final EventsPlace place;
 
     public EventsActivity(EventsPlace place, EventsClientFactory clientFactory) {
         this.clientFactory = clientFactory;
+        this.place = place;
     }
 
     @Override
@@ -25,8 +28,9 @@ public class EventsActivity extends AbstractActivity {
         clientFactory.getSailingService().getPublicEventsOfAllSailingServers(new AsyncCallback<List<EventBaseDTO>>() {
             @Override
             public void onSuccess(List<EventBaseDTO> events) {
-                final EventsView eventsView = clientFactory.createEventsView(EventsActivity.this);
+                final EventsView eventsView = clientFactory.createEventsView();
                 panel.setWidget(eventsView.asWidget());
+                Window.setTitle(place.getTitle());
 
                 eventsView.setEvents(events);
             }

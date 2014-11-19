@@ -3,25 +3,29 @@ package com.sap.sailing.racecommittee.app.ui.activities;
 import java.io.Serializable;
 import java.util.Collection;
 
+import android.app.Activity;
 import android.app.AlertDialog;
-import android.app.Fragment;
 import android.app.FragmentTransaction;
 import android.content.DialogInterface;
 import android.content.Intent;
 import android.os.Bundle;
 import android.support.v4.widget.DrawerLayout;
-import android.support.v7.app.ActionBar;
 import android.support.v7.widget.Toolbar;
+import android.text.format.Time;
 import android.util.Log;
 import android.view.View;
+import android.view.View.OnClickListener;
 import android.view.Window;
-import android.widget.ImageView;
+import android.widget.Button;
+import android.widget.TextView;
 import android.widget.Toast;
 
 import com.sap.sailing.android.shared.logging.ExLog;
 import com.sap.sailing.android.shared.util.CollectionUtils;
 import com.sap.sailing.domain.base.CourseArea;
+import com.sap.sailing.domain.common.impl.MillisecondsTimePoint;
 import com.sap.sailing.domain.racelog.RaceLogEventAuthor;
+import com.sap.sailing.domain.tracking.Wind;
 import com.sap.sailing.racecommittee.app.AppConstants;
 import com.sap.sailing.racecommittee.app.R;
 import com.sap.sailing.racecommittee.app.data.DataManager;
@@ -37,29 +41,49 @@ import com.sap.sailing.racecommittee.app.ui.fragments.NavigationDrawerFragment;
 import com.sap.sailing.racecommittee.app.ui.fragments.NavigationDrawerFragment.NavigationDrawerCallbacks;
 import com.sap.sailing.racecommittee.app.ui.fragments.RaceFragment;
 import com.sap.sailing.racecommittee.app.ui.fragments.RaceInfoFragment;
-import com.sap.sailing.racecommittee.app.ui.fragments.lists.ManagedRaceListFragment;
 import com.sap.sailing.racecommittee.app.ui.fragments.raceinfo.RaceInfoListener;
+import com.sap.sailing.racecommittee.app.utils.TickListener;
+import com.sap.sailing.racecommittee.app.utils.TickSingleton;
 
-public class RacingActivity extends SessionActivity implements RaceInfoListener, NavigationDrawerCallbacks {
-    // private final static String TAG = RacingActivity.class.getName();
-    private final static String ListFragmentTag = RacingActivity.class.getName() + ".ManagedRaceListFragment";
-
-    private static final String TAG = RacingActivity.class.getName();
-
-    private static final int RacesLoaderId = 0;
-
+public class RacingActivity extends SessionActivity implements RaceInfoListener, NavigationDrawerCallbacks,
+        TickListener, OnClickListener {
     private class RaceLoadClient implements LoadClient<Collection<ManagedRace>> {
 
-        private Collection<ManagedRace> lastSeenRaces = null;
         private CourseArea courseArea;
+        private Collection<ManagedRace> lastSeenRaces = null;
 
         public RaceLoadClient(CourseArea courseArea) {
             this.courseArea = courseArea;
         }
 
         @Override
+        public void onLoadFailed(Exception reason) {
+            setSupportProgressBarIndeterminateVisibility(false);
+
+            AlertDialog.Builder builder = new AlertDialog.Builder(RacingActivity.this);
+            builder.setMessage(String.format(getString(R.string.generic_load_failure), reason.getMessage()))
+                    .setTitle(getString(R.string.loading_failure)).setIcon(R.drawable.ic_dialog_alert_holo_light)
+                    .setCancelable(true)
+                    .setPositiveButton(getString(R.string.retry), new DialogInterface.OnClickListener() {
+                        public void onClick(DialogInterface dialog, int id) {
+                            setSupportProgressBarIndeterminateVisibility(true);
+
+                            ExLog.i(RacingActivity.this, TAG, "Issuing a reload of managed races");
+                            getLoaderManager().restartLoader(RacesLoaderId, null,
+                                    dataManager.createRacesLoader(courseArea.getId(), RaceLoadClient.this));
+                            dialog.cancel();
+                        }
+                    }).setNegativeButton(getString(R.string.cancel), new DialogInterface.OnClickListener() {
+                        public void onClick(DialogInterface dialog, int id) {
+                            dialog.cancel();
+                        }
+                    });
+            builder.create().show();
+        }
+
+        @Override
         public void onLoadSucceded(Collection<ManagedRace> data, boolean isCached) {
-            setProgressBarIndeterminateVisibility(false);
+            setSupportProgressBarIndeterminateVisibility(false);
 
             // Let's do the setup stuff only when the data is changed (or its the first time)
             if (lastSeenRaces != null && CollectionUtils.isEqualCollection(data, lastSeenRaces)) {
@@ -74,79 +98,19 @@ public class RacingActivity extends SessionActivity implements RaceInfoListener,
                         String.format(getString(R.string.racing_load_success), data.size()), Toast.LENGTH_SHORT).show();
             }
         }
+    }
 
-        @Override
-        public void onLoadFailed(Exception reason) {
-            setProgressBarIndeterminateVisibility(false);
+    private static int WIND_ACTIVITY_REQUEST_CODE = 7331;
+    private static final int RacesLoaderId = 0;
 
-            AlertDialog.Builder builder = new AlertDialog.Builder(RacingActivity.this);
-            builder.setMessage(String.format(getString(R.string.generic_load_failure), reason.getMessage()))
-                    .setTitle(getString(R.string.loading_failure)).setIcon(R.drawable.ic_dialog_alert_holo_light)
-                    .setCancelable(true)
-                    .setPositiveButton(getString(R.string.retry), new DialogInterface.OnClickListener() {
-                        public void onClick(DialogInterface dialog, int id) {
-                            setProgressBarIndeterminateVisibility(true);
-
-                            ExLog.i(RacingActivity.this, TAG, "Issuing a reload of managed races");
-                            getLoaderManager().restartLoader(RacesLoaderId, null,
-                                    dataManager.createRacesLoader(courseArea.getId(), RaceLoadClient.this));
-                            dialog.cancel();
-                        }
-                    }).setNegativeButton(getString(R.string.cancel), new DialogInterface.OnClickListener() {
-                        public void onClick(DialogInterface dialog, int id) {
-                            dialog.cancel();
-                        }
-                    });
-            builder.create().show();
-        }
-    };
-
-    /**
-     * Container fragment for currently selected race
-     */
-    private RaceInfoFragment infoFragment;
+    private static final String TAG = RacingActivity.class.getName();;
 
     private ReadonlyDataManager dataManager;
-
+    private RaceInfoFragment infoFragment;
     private NavigationDrawerFragment navDrawerFragment;
-
-    @Override
-    public void onCreate(Bundle savedInstanceState) {
-        // features must be requested before anything else
-        getWindow().requestFeature(Window.FEATURE_INDETERMINATE_PROGRESS);
-
-        super.onCreate(savedInstanceState);
-
-        dataManager = DataManager.create(this);
-
-        setContentView(R.layout.racing_view);
-        setProgressBarIndeterminateVisibility(false);
-
-        Toolbar toolbar = (Toolbar) findViewById(R.id.toolbar);
-        if (toolbar != null) {
-            setSupportActionBar(toolbar);
-        }
-
-        navDrawerFragment = (NavigationDrawerFragment) getFragmentManager().findFragmentById(R.id.navigation_drawer);
-        navDrawerFragment.setUp((DrawerLayout) findViewById(R.id.drawer_layout));
-
-        Serializable courseAreaId = getCourseAreaIdFromIntent();
-        if (courseAreaId == null) {
-            throw new IllegalStateException("There was no course area id transmitted...");
-        }
-        CourseArea courseArea = dataManager.getDataStore().getCourseArea(courseAreaId);
-        if (courseArea == null) {
-            Toast.makeText(this, getString(R.string.racing_course_area_missing), Toast.LENGTH_LONG).show();
-        } else {
-            setupActionBar(courseArea);
-            loadRaces(courseArea);
-        }
-    }
-
-    @Override
-    public void onBackPressed() {
-        logoutSession();
-    }
+    private ManagedRace selectedRace;
+    private TextView systemTime;
+    private Button windButton;
 
     private Serializable getCourseAreaIdFromIntent() {
         if (getIntent() == null || getIntent().getExtras() == null) {
@@ -162,31 +126,107 @@ public class RacingActivity extends SessionActivity implements RaceInfoListener,
         return courseId;
     }
 
-    private void setupActionBar(CourseArea courseArea) {
-        RaceLogEventAuthor author = preferences.getAuthor();
-        String title = String.format(getString(R.string.racingview_header), courseArea.getName());
-        title += " (" + author.getName() + ")";
-
-        getSupportActionBar().setTitle(title);
-    }
-
     private void loadRaces(final CourseArea courseArea) {
-        setProgressBarIndeterminateVisibility(true);
+        setSupportProgressBarIndeterminateVisibility(true);
 
         ExLog.i(this, TAG, "Issuing loading of managed races from data manager");
         getLoaderManager().initLoader(RacesLoaderId, null,
                 dataManager.createRacesLoader(courseArea.getId(), new RaceLoadClient(courseArea)));
     }
 
-    private void registerOnService(Collection<ManagedRace> races) {
-        // since the service is the long-living component
-        // he should decide whether these races are already
-        // registered or not.
-        for (ManagedRace race : races) {
-            Intent registerIntent = new Intent(this, RaceStateService.class);
-            registerIntent.setAction(AppConstants.INTENT_ACTION_REGISTER_RACE);
-            registerIntent.putExtra(AppConstants.RACE_ID_KEY, race.getId());
-            this.startService(registerIntent);
+    @Override
+    public void notifyTick() {
+        if (systemTime != null) {
+            Time now = new Time();
+            now.setToNow();
+            systemTime.setText(now.format2445());
+        }
+    }
+
+    @Override
+    public void onBackPressed() {
+        logoutSession();
+    }
+
+    @Override
+    public void onClick(View view) {
+        switch (view.getId()) {
+        case R.id.windButton:
+            Intent intent = new Intent(this, WindActivity.class);
+            startActivityForResult(intent, WIND_ACTIVITY_REQUEST_CODE);
+            overridePendingTransition(android.R.anim.fade_in, android.R.anim.fade_out);
+            break;
+
+        default:
+            break;
+        }
+    }
+
+    @Override
+    public void onActivityResult(int requestCode, int resultCode, Intent data) {
+        if (requestCode == WIND_ACTIVITY_REQUEST_CODE) {
+            if (resultCode == Activity.RESULT_OK) {
+                if (data.getExtras().containsKey(AppConstants.EXTRAS_WIND_FIX)) {
+                    Wind windFix = (Wind) data.getSerializableExtra(AppConstants.EXTRAS_WIND_FIX);
+                    selectedRace.getState().setWindFix(MillisecondsTimePoint.now(), windFix);
+                    windButton.setText(String.format(getString(R.string.wind_info), windFix.getKnots(), windFix.getBearing().reverse().toString()));
+                }
+            }
+        }
+    }
+
+    @Override
+    public void onCreate(Bundle savedInstanceState) {
+        // features must be requested before anything else
+        getWindow().requestFeature(Window.FEATURE_INDETERMINATE_PROGRESS);
+
+        super.onCreate(savedInstanceState);
+
+        setContentView(R.layout.racing_view);
+
+        dataManager = DataManager.create(this);
+
+        Toolbar toolbar = (Toolbar) findViewById(R.id.toolbar);
+        if (toolbar != null) {
+            setSupportActionBar(toolbar);
+        }
+
+        navDrawerFragment = (NavigationDrawerFragment) getFragmentManager().findFragmentById(R.id.navigation_drawer);
+        navDrawerFragment.setUp((DrawerLayout) findViewById(R.id.drawer_layout));
+
+        Serializable courseAreaId = getCourseAreaIdFromIntent();
+        if (courseAreaId == null) {
+            throw new IllegalStateException("There was no course area id transmitted...");
+        }
+        CourseArea courseArea = dataManager.getDataStore().getCourseArea(courseAreaId);
+        if (courseArea != null) {
+            setupActionBar(courseArea);
+            loadRaces(courseArea);
+        } else {
+            Toast.makeText(this, getString(R.string.racing_course_area_missing), Toast.LENGTH_LONG).show();
+        }
+
+        systemTime = (TextView) findViewById(R.id.time);
+        windButton = (Button) findViewById(R.id.windButton);
+        if (windButton != null) {
+            windButton.setOnClickListener(this);
+        }
+    }
+
+    @Override
+    public void onNavigationDrawerItemSelected(RaceListDataType selectedItem) {
+        if (selectedItem instanceof RaceListDataTypeRace) {
+            RaceListDataTypeRace selectedElement = (RaceListDataTypeRace) selectedItem;
+            selectedElement.setUpdateIndicatorVisible(false);
+            // ((ImageView) findViewById(R.id.Welter_Cell_UpdateLabel)).setVisibility(View.GONE);
+
+            selectedRace = selectedElement.getRace();
+            ExLog.i(this, LogEvent.RACE_SELECTED_ELEMENT, selectedRace.getId() + " " + selectedRace.getStatus());
+            onRaceItemClicked(selectedRace);
+        } else if (selectedItem instanceof RaceListDataTypeHeader) {
+            // This is for logging purposes only!
+            RaceListDataTypeHeader selectedTitle = (RaceListDataTypeHeader) selectedItem;
+            ExLog.i(this, LogEvent.RACE_SELECTED_TITLE, selectedTitle.toString());
         }
     }
 
@@ -206,20 +246,37 @@ public class RacingActivity extends SessionActivity implements RaceInfoListener,
     }
 
     @Override
-    public void onNavigationDrawerItemSelected(RaceListDataType selectedItem) {
-        if (selectedItem instanceof RaceListDataTypeRace) {
-            RaceListDataTypeRace selectedElement = (RaceListDataTypeRace) selectedItem;
-            selectedElement.setUpdateIndicatorVisible(false);
-            // ((ImageView) findViewById(R.id.Welter_Cell_UpdateLabel)).setVisibility(View.GONE);
+    public void onStart() {
+        super.onStart();
 
-            ManagedRace selectedRace = selectedElement.getRace();
-            ExLog.i(this, LogEvent.RACE_SELECTED_ELEMENT, selectedRace.getId() + " " + selectedRace.getStatus());
-            onRaceItemClicked(selectedRace);
-        } else if (selectedItem instanceof RaceListDataTypeHeader) {
-            // This is for logging purposes only!
-            RaceListDataTypeHeader selectedTitle = (RaceListDataTypeHeader) selectedItem;
-            ExLog.i(this, LogEvent.RACE_SELECTED_TITLE, selectedTitle.toString());
+        TickSingleton.INSTANCE.registerListener(this);
+        notifyTick();
+    }
+
+    @Override
+    public void onStop() {
+        super.onStop();
+
+        TickSingleton.INSTANCE.unregisterListener(this);
+    }
+
+    private void registerOnService(Collection<ManagedRace> races) {
+        // since the service is the long-living component
+        // he should decide whether these races are already
+        // registered or not.
+        for (ManagedRace race : races) {
+            Intent registerIntent = new Intent(this, RaceStateService.class);
+            registerIntent.setAction(AppConstants.INTENT_ACTION_REGISTER_RACE);
+            registerIntent.putExtra(AppConstants.RACE_ID_KEY, race.getId());
+            this.startService(registerIntent);
         }
     }
 
+    private void setupActionBar(CourseArea courseArea) {
+        RaceLogEventAuthor author = preferences.getAuthor();
+        String title = String.format(getString(R.string.racingview_header), courseArea.getName());
+        title += " (" + author.getName() + ")";
+
+        getSupportActionBar().setTitle(title);
+    }
 }

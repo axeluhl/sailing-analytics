@@ -3,13 +3,41 @@
     android:layout_width="match_parent"
     android:layout_height="match_parent" >
 
-    <include layout="@layout/toolbar" />
+    <LinearLayout
+        android:id="@+id/header"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:background="@color/colorPrimary"
+        android:clickable="true"
+        android:orientation="vertical" >
+
+        <include layout="@layout/toolbar" />
+
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginLeft="72dp"
+            android:orientation="horizontal" >
+
+            <TextView
+                android:id="@+id/time"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="Uhrzeit" />
+
+            <Button
+                android:id="@+id/windButton"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="Wind" />
+        </LinearLayout>
+    </LinearLayout>
 
     <android.support.v4.widget.DrawerLayout
         android:id="@+id/drawer_layout"
         android:layout_width="match_parent"
         android:layout_height="match_parent"
-        android:layout_below="@id/toolbar" >
+        android:layout_below="@id/header" >
 
         <LinearLayout
             android:id="@+id/racingLayout"
@@ -20,25 +48,9 @@
             android:orientation="horizontal" >
 
             <FrameLayout
-                android:id="@+id/racing_view_left_container"
-                android:layout_width="match_parent"
-                android:layout_height="match_parent"
-                android:layout_weight="0.70"
-                android:visibility="gone" />
-
-            <LinearLayout
-                android:layout_width="match_parent"
-                android:layout_height="match_parent"
-                android:layout_weight="0.99"
-                android:background="@color/welter_deep_gray"
-                android:orientation="vertical"
-                android:visibility="gone" />
-
-            <FrameLayout
                 android:id="@+id/racing_view_right_container"
                 android:layout_width="match_parent"
-                android:layout_height="match_parent"
-                android:layout_weight="0.30" />
+                android:layout_height="match_parent" />
         </LinearLayout>
 
         <fragment
