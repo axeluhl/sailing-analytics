@@ -102,6 +102,10 @@ class DataManager: NSObject {
         return NSFetchedResultsController(fetchRequest: fetchRequest, managedObjectContext: self.managedObjectContext!, sectionNameKeyPath: nil, cacheName: nil)
     }
     
+    func deleteEvent(event: Event) {
+        self.managedObjectContext!.deleteObject(event)
+    }
+    
     // MARK: - Core Data stack
     
     lazy var applicationDocumentsDirectory: NSURL = {

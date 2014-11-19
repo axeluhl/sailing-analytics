@@ -17,7 +17,7 @@ import UIKit
 
 class QRCodeManager: NSObject, UIAlertViewDelegate {
     
-    enum AlertViewTag: Int {
+    enum AlertView: Int {
         case IncorrectQRCode, AcceptMapping, ServerError
     }
     
@@ -38,7 +38,7 @@ class QRCodeManager: NSObject, UIAlertViewDelegate {
         let parseSuccess = qrcodeData!.parseString(url)
         if !parseSuccess {
             let alertView = UIAlertView(title: "Incorrect QR Code", message: "", delegate: self, cancelButtonTitle: nil, otherButtonTitles: "OK")
-            alertView.tag = AlertViewTag.IncorrectQRCode.rawValue;
+            alertView.tag = AlertView.IncorrectQRCode.rawValue;
             alertView.show()
             return
         }
@@ -66,25 +66,25 @@ class QRCodeManager: NSObject, UIAlertViewDelegate {
                                 let sailId = (self.competitorDictionary!["sailID"]) as String
                                 var title = "Hello \(competitorName). Welcome to \(leaderBoardName). You are registered as \(sailId)."
                                 let alertView = UIAlertView(title: title, message: "", delegate: self, cancelButtonTitle: "Cancel", otherButtonTitles: "OK")
-                                alertView.tag = AlertViewTag.AcceptMapping.rawValue;
+                                alertView.tag = AlertView.AcceptMapping.rawValue;
                                 alertView.show()
                             }, failure: { (AFHTTPRequestOperation operation, NSError error) -> Void in
                                 self.delegate.activityIndicatorView?.stopAnimating()
                                 let alertView = UIAlertView(title: "Couldn't get competitor \(self.qrcodeData!.competitorId!)", message: "", delegate: self, cancelButtonTitle: "Cancel")
-                                alertView.tag = AlertViewTag.ServerError.rawValue;
+                                alertView.tag = AlertView.ServerError.rawValue;
                                 alertView.show()
                                 
                         }) }, failure: { (AFHTTPRequestOperation operation, NSError error) -> Void in
                             self.delegate.activityIndicatorView?.stopAnimating()
                             let alertView = UIAlertView(title: "Couldn't get leader board \(self.qrcodeData!.leaderBoardName!.stringByReplacingPercentEscapesUsingEncoding(NSUTF8StringEncoding))", message: "", delegate: self, cancelButtonTitle: "Cancel")
-                            alertView.tag = AlertViewTag.ServerError.rawValue;
+                            alertView.tag = AlertView.ServerError.rawValue;
                             alertView.show()
                 })
                 
             }, failure: { (AFHTTPRequestOperation operation, NSError error) -> Void in
                 self.delegate.activityIndicatorView?.stopAnimating()
                 let alertView = UIAlertView(title: "Couldn't get event \(self.qrcodeData!.eventId!)", message: "", delegate: self, cancelButtonTitle: "Cancel")
-                alertView.tag = AlertViewTag.ServerError.rawValue;
+                alertView.tag = AlertView.ServerError.rawValue;
                 alertView.show()
         })
     }
@@ -94,23 +94,13 @@ class QRCodeManager: NSObject, UIAlertViewDelegate {
     func alertView(alertView: UIAlertView, clickedButtonAtIndex buttonIndex: Int) {
         switch alertView.tag {
             // Stop tracking?
-        case AlertViewTag.AcceptMapping.rawValue:
+        case AlertView.AcceptMapping.rawValue:
             switch buttonIndex {
             case alertView.cancelButtonIndex:
                 cancel()
                 break
             default:
-                // create core data objects
-                var event = DataManager.sharedManager.event(qrcodeData!.eventId!)
-                event.serverUrl = qrcodeData!.serverUrl!
-                event.initWithDictionary(eventDictionary!)
-                var leaderBoard = DataManager.sharedManager.leaderBoard(event)
-                leaderBoard.initWithDictionary(leaderBoardDictionary!)
-                var competitor = DataManager.sharedManager.competitor(leaderBoard)
-                competitor.initWithDictionary(competitorDictionary!)
-                DataManager.sharedManager.saveContext()
-                
-                delegate.qrCodeOK?()
+                checkIn()
                 break
             }
             break
@@ -120,6 +110,33 @@ class QRCodeManager: NSObject, UIAlertViewDelegate {
         }
     }
     
+    private func checkIn() {
+        let leaderBoardName = leaderBoardDictionary!["name"] as String
+        let competitorId = competitorDictionary!["id"] as String
+        let now = NSDate()
+        let fromMillis = now.timeIntervalSince1970 * 1000
+        APIManager.sharedManager.checkIn(leaderBoardName, competitorId: competitorId, deviceUuid: DeviceUDIDManager.UDID, pushId: nil, fromMillis: fromMillis,
+            success: { (AFHTTPRequestOperation operation, AnyObject eventResponseObject) -> Void in
+                
+                // create core data objects
+                var event = DataManager.sharedManager.event(self.qrcodeData!.eventId!)
+                event.serverUrl = self.qrcodeData!.serverUrl!
+                event.initWithDictionary(self.eventDictionary!)
+                var leaderBoard = DataManager.sharedManager.leaderBoard(event)
+                leaderBoard.initWithDictionary(self.leaderBoardDictionary!)
+                var competitor = DataManager.sharedManager.competitor(leaderBoard)
+                competitor.initWithDictionary(self.competitorDictionary!)
+                DataManager.sharedManager.saveContext()
+
+                self.delegate.qrCodeOK?()
+            }, failure: { (AFHTTPRequestOperation operation, NSError error) -> Void in
+                self.delegate.activityIndicatorView?.stopAnimating()
+                let alertView = UIAlertView(title: "Couldn't get event \(self.qrcodeData!.eventId!)", message: "", delegate: self, cancelButtonTitle: "Cancel")
+                alertView.tag = AlertView.ServerError.rawValue;
+                alertView.show()
+        })
+    }
+
     private func cancel() {
         eventDictionary = nil
         leaderBoardDictionary = nil

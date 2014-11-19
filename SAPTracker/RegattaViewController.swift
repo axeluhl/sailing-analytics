@@ -9,11 +9,15 @@
 import Foundation
 import CoreLocation
 
-class RegattaViewController : UIViewController, UIActionSheetDelegate, UINavigationControllerDelegate, UIImagePickerControllerDelegate {
+class RegattaViewController : UIViewController, UIActionSheetDelegate, UINavigationControllerDelegate, UIImagePickerControllerDelegate, UIAlertViewDelegate {
     
     enum ActionSheet: Int {
         case Menu, Image
     }
+    enum AlertView: Int {
+        case CheckOut
+    }
+    
     var sourceTypes = [UIImagePickerControllerSourceType]()
     var sourceTypeNames = [String]()
     
@@ -26,7 +30,7 @@ class RegattaViewController : UIViewController, UIActionSheetDelegate, UINavigat
         
         // set values
         navigationItem.title = DataManager.sharedManager.selectedEvent!.leaderBoard!.name
-    
+        
         if DataManager.sharedManager.selectedEvent!.userImage != nil {
             imageView.image = UIImage(data:  DataManager.sharedManager.selectedEvent!.userImage!)
         } else if DataManager.sharedManager.selectedEvent!.imageUrl != nil {
@@ -53,9 +57,9 @@ class RegattaViewController : UIViewController, UIActionSheetDelegate, UINavigat
             sourceTypeNames.append("Photo Library")
         }
     }
-
+    
     // MARK: - Menu
-
+    
     @IBAction func showMenuActionSheet(sender: AnyObject) {
         let actionSheet = UIActionSheet(title: nil, delegate: self, cancelButtonTitle: nil, destructiveButtonTitle: nil, otherButtonTitles: "Check-Out", "Settings", "Edit Photo", "Cancel")
         actionSheet.tag = ActionSheet.Menu.rawValue
@@ -66,6 +70,8 @@ class RegattaViewController : UIViewController, UIActionSheetDelegate, UINavigat
     func actionSheet(actionSheet: UIActionSheet!, clickedButtonAtIndex buttonIndex: Int) {
         if actionSheet.tag == ActionSheet.Menu.rawValue {
             switch buttonIndex{
+            case 0:
+                showCheckOutAlertView()
             case 1:
                 performSegueWithIdentifier("Settings", sender: actionSheet)
                 break
@@ -81,6 +87,8 @@ class RegattaViewController : UIViewController, UIActionSheetDelegate, UINavigat
             }
         }
     }
+    
+    // MARK: - Start tracking
     
     @IBAction func startTrackingButtonTapped(sender: AnyObject) {
         let errorMessage = LocationManager.sharedManager.startTracking()
@@ -120,5 +128,39 @@ class RegattaViewController : UIViewController, UIActionSheetDelegate, UINavigat
         imageView.image = image
         DataManager.sharedManager.selectedEvent!.userImage = UIImageJPEGRepresentation(image, 0.8)
     }
-
+    
+    // MARK: - Check-out
+    func showCheckOutAlertView() {
+        let alertView = UIAlertView(title: "Check-out of Regatta?", message: "", delegate: self, cancelButtonTitle: "Cancel", otherButtonTitles: "OK")
+        alertView.tag = AlertView.CheckOut.rawValue;
+        alertView.show()
+    }
+    
+    func alertView(alertView: UIAlertView, clickedButtonAtIndex buttonIndex: Int) {
+        switch alertView.tag {
+            // Check-out
+        case AlertView.CheckOut.rawValue:
+            switch buttonIndex {
+            case alertView.cancelButtonIndex:
+                break
+            default:
+                let now = NSDate()
+                let toMillis = round(now.timeIntervalSince1970 * 1000)
+                APIManager.sharedManager.checkOut(DataManager.sharedManager.selectedEvent!.leaderBoard!.name, competitorId: DataManager.sharedManager.selectedEvent!.leaderBoard!.competitor!.competitorId, deviceUuid: DeviceUDIDManager.UDID, toMillis: toMillis,
+                    success: { (AFHTTPRequestOperation operation, AnyObject competitorResponseObject) -> Void in
+                        DataManager.sharedManager.deleteEvent(DataManager.sharedManager.selectedEvent!)
+                        DataManager.sharedManager.saveContext()
+                        self.navigationController!.popViewControllerAnimated(true)
+                    }, failure: { (AFHTTPRequestOperation operation, NSError error) -> Void in
+                        let alertView = UIAlertView(title: "Couldn't check-out", message: "", delegate: nil, cancelButtonTitle: "Cancel")
+                        alertView.show()
+                })
+                break
+            }
+            break
+        default:
+            break
+        }
+    }
+    
 }

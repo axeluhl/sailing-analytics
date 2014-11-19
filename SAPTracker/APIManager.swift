@@ -100,9 +100,9 @@ class APIManager: NSObject {
     }
     
     /* Map a device to competitor. */
-    func checkIn(leaderBoardName: String!, competitorId: String!, deviceUuid: String!, pushId: String!, fromMillis: Int!, success: (AFHTTPRequestOperation!, AnyObject!) -> Void, failure: (AFHTTPRequestOperation!, AnyObject!) -> Void) {
+    func checkIn(leaderBoardName: String!, competitorId: String!, deviceUuid: String!, pushId: String!, fromMillis: Double!, success: (AFHTTPRequestOperation!, AnyObject!) -> Void, failure: (AFHTTPRequestOperation!, AnyObject!) -> Void) {
         
-        let urlString = baseUrlString + "/leaderboards/\(leaderBoardName)/device_mappings/start"
+        let urlString = baseUrlString + "/leaderboards/\(leaderBoardName.stringByAddingPercentEncodingWithAllowedCharacters(.URLHostAllowedCharacterSet())!)/device_mappings/start"
         
         var body = [String: AnyObject]()
         body["competitorId"] = competitorId
@@ -114,9 +114,9 @@ class APIManager: NSObject {
     }
     
     /* Disconnect a device from competitor. */
-    func checkOut(leaderBoardName: String!, competitorId: String!, deviceUuid: String!, toMillis: Int!, success:(AFHTTPRequestOperation!, AnyObject!) -> Void, failure: (AFHTTPRequestOperation!, AnyObject!) -> Void) {
+    func checkOut(leaderBoardName: String!, competitorId: String!, deviceUuid: String!, toMillis: Double!, success:(AFHTTPRequestOperation!, AnyObject!) -> Void, failure: (AFHTTPRequestOperation!, AnyObject!) -> Void) {
         
-        let urlString = baseUrlString + "/leaderboards/\(leaderBoardName)/device_mappings/end"
+        let urlString = baseUrlString + "/leaderboards/\(leaderBoardName.stringByAddingPercentEncodingWithAllowedCharacters(.URLHostAllowedCharacterSet())!)/device_mappings/end"
         
         var body = [String: AnyObject]()
         body["competitorId"] = competitorId

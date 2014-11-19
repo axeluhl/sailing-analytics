@@ -17,7 +17,7 @@
         <attribute name="serverUrl" optional="YES" attributeType="String" syncable="YES"/>
         <attribute name="startDate" optional="YES" attributeType="Date" syncable="YES"/>
         <attribute name="userImage" optional="YES" attributeType="Binary" syncable="YES"/>
-        <relationship name="gpsFixes" optional="YES" toMany="YES" deletionRule="Nullify" destinationEntity="GPSFix" inverseName="event" inverseEntity="GPSFix" syncable="YES"/>
+        <relationship name="gpsFixes" optional="YES" toMany="YES" deletionRule="Cascade" destinationEntity="GPSFix" inverseName="event" inverseEntity="GPSFix" syncable="YES"/>
         <relationship name="leaderBoard" optional="YES" maxCount="1" deletionRule="Cascade" destinationEntity="LeaderBoard" inverseName="event" inverseEntity="LeaderBoard" syncable="YES"/>
     </entity>
     <entity name="GPSFix" representedClassName="GPSFix" syncable="YES">

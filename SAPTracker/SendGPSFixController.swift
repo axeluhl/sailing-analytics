@@ -41,8 +41,7 @@ class SendGPSFixController: NSObject {
     func timer() {
         let loop = NSTimer.scheduledTimerWithTimeInterval(syncPeriod, target:self, selector:"timer", userInfo:nil, repeats:false)
         NSRunLoop.currentRunLoop().addTimer(loop, forMode:NSRunLoopCommonModes)
-        
-        
+
         // get last 100 locations
         let lastestGPSFixes = DataManager.sharedManager.latestLocations()
         
