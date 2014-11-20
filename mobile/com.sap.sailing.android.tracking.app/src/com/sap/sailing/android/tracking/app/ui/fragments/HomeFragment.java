@@ -679,6 +679,12 @@ public class HomeFragment extends BaseFragment implements
 		@Override
 		public void onItemClick(AdapterView<?> parent, View view, int position,
 				long id) {
+			
+			if (position < 1) // tapped header
+			{
+				return;
+			}
+			
 			Cursor cursor = (Cursor) mAdapter.getItem(position - 1); // -1, because there's a header row
 
 			prefs.setServerURL(cursor.getString(cursor

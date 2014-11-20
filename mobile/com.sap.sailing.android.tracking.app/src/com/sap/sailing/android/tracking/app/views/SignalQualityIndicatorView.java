@@ -128,8 +128,8 @@ public class SignalQualityIndicatorView extends View {
 	
 	@Override
 	public int getBaseline() {
-		return getMeasuredHeight() / 2;
-	}	
+		return getMeasuredHeight() - 10;
+	}
 
 	/**
 	 * Must be 0,2,3 or 4, otherwise 1 will be set
