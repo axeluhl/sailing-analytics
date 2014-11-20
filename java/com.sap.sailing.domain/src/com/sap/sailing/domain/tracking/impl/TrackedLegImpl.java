@@ -2,6 +2,7 @@ package com.sap.sailing.domain.tracking.impl;
 
 import java.io.IOException;
 import java.io.ObjectInputStream;
+import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.HashMap;
@@ -256,7 +257,9 @@ public class TrackedLegImpl implements TrackedLeg {
      * @author Axel Uhl (D043530)
      *
      */
-    private class CacheClearingRaceChangeListener extends AbstractRaceChangeListener {
+    private class CacheClearingRaceChangeListener extends AbstractRaceChangeListener implements Serializable {
+        private static final long serialVersionUID = 4455608396760152359L;
+
         @Override
         protected void defaultAction() {
             clearCaches();

@@ -583,7 +583,9 @@ public class TrackBasedEstimationWindTrackImpl extends VirtualWindTrackImpl {
      * @author Axel Uhl (D043530)
      *
      */
-    private class CacheInvalidationRaceChangeListener extends AbstractRaceChangeListener {
+    private class CacheInvalidationRaceChangeListener extends AbstractRaceChangeListener implements Serializable {
+        private static final long serialVersionUID = -6623310087193133466L;
+
         @Override
         protected void defaultAction() {
             clearCache();
