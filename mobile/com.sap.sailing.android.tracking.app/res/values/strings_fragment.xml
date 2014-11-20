@@ -1,6 +1,5 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources xmlns:tools="http://schemas.android.com/tools">
-
     <string name="regatta_list_title">Checked-In Regattas</string>
     <string name="show_more">Show more</string>
     <string name="scan_intro">GPS-Tracker Configuration for Regatta</string>

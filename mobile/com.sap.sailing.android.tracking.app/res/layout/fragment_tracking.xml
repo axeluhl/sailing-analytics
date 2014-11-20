@@ -10,10 +10,11 @@
     <TextView
         android:id="@+id/mode_label"
         android:layout_width="wrap_content"
+        android:layout_height="50dp"
         android:layout_alignParentLeft="true"
         android:layout_below="@+id/qps_quality"
-        android:layout_height="50dp"
         android:gravity="center_vertical"
+        android:paddingLeft="20dp"
         android:text="@string/tracking_mode" />
 
     <TextView
@@ -23,14 +24,16 @@
         android:layout_alignBaseline="@id/mode_label"
         android:layout_alignBottom="@id/mode_label"
         android:layout_alignParentRight="true"
+        android:paddingRight="20dp"
         android:text="@string/tracking_mode_caching" />
 
     <TextView
         android:id="@+id/tracking_status_label"
         android:layout_width="wrap_content"
-        android:layout_below="@+id/mode_label"
         android:layout_height="50dp"
+        android:layout_below="@+id/mode_label"
         android:gravity="center_vertical"
+        android:paddingLeft="20dp"
         android:text="@string/tracking_status" />
 
     <TextView
@@ -41,18 +44,19 @@
         android:layout_alignBottom="@id/tracking_status_label"
         android:layout_alignParentBottom="true"
         android:layout_alignParentRight="true"
+        android:paddingRight="20dp"
         android:text="@string/tracking_status_tracking" />
 
     <Button
         android:id="@+id/stop_tracking"
-        android:layout_width="wrap_content"
+        android:layout_width="fill_parent"
         android:layout_height="wrap_content"
         android:layout_alignParentBottom="true"
         android:layout_alignParentLeft="true"
         android:layout_alignParentRight="true"
-        android:layout_marginLeft="4sp"
-        android:layout_marginRight="4sp"
         android:background="#e94a1b"
+        android:padding="20dp"
+        android:layout_margin="30dp"
         android:text="@string/stop_tracking" />
 
     <com.sap.sailing.android.tracking.app.views.SignalQualityIndicatorView
@@ -62,16 +66,17 @@
         android:layout_alignBaseline="@id/qps_quality"
         android:layout_alignParentRight="true"
         android:contentDescription="@string/signal_quality_indicator_view_description"
-        android:gravity="center_vertical"
         android:focusable="true"
+        android:paddingRight="20dp"
         app:signalQuality="good" />
 
     <TextView
         android:id="@+id/qps_quality"
         android:layout_width="wrap_content"
         android:layout_height="50dp"
-        android:gravity="center_vertical"
         android:layout_alignParentTop="true"
+        android:gravity="center_vertical"
+        android:paddingLeft="20dp"
         android:text="@string/tracking_qps_quality" />
 
     <LinearLayout
@@ -86,9 +91,10 @@
         <TextView
             android:id="@+id/tracking_time_info_label"
             android:layout_width="fill_parent"
-            android:layout_marginTop="30dp"
             android:layout_height="50dp"
-        android:gravity="center_vertical"
+            android:layout_marginTop="30dp"
+            android:gravity="center_vertical"
+            android:paddingLeft="20dp"
             android:text="@string/tracking_time" />
 
         <View
@@ -96,14 +102,15 @@
             android:layout_height="1dp"
             android:background="@android:color/darker_gray" />
 
-        <TextView
+        <com.sap.sailing.android.tracking.app.views.AutoResizeTextView
             android:id="@+id/tracking_time_label"
-            android:layout_width="fill_parent"
-            android:layout_height="wrap_content"
-            android:layout_marginTop="10dp"
+            android:layout_width="match_parent"
+            android:layout_height="150dp"
             android:gravity="center"
             android:text="00:00:00"
-            android:textSize="80sp" />
+            android:paddingLeft="20dp"
+            android:paddingRight="20dp"
+            android:textSize="5000sp" />
     </LinearLayout>
 
     <!-- Separators -->
