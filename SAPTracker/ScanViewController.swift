@@ -10,7 +10,7 @@ import UIKit
 import AVFoundation
 
 class ScanViewController: UIViewController, AVCaptureMetadataOutputObjectsDelegate, QRCodeManagerDelegate {
-
+    
     @IBOutlet weak var previewView: UIView!
     
     var activityIndicatorView: UIActivityIndicatorView!
@@ -20,12 +20,12 @@ class ScanViewController: UIViewController, AVCaptureMetadataOutputObjectsDelega
     
     override func viewDidLoad() {
         super.viewDidLoad()
-
+        
         activityIndicatorView = UIActivityIndicatorView(activityIndicatorStyle: UIActivityIndicatorViewStyle.Gray)
         activityIndicatorView.hidesWhenStopped = true
         let barButton = UIBarButtonItem(customView: activityIndicatorView)
         self.navigationItem.rightBarButtonItem = barButton
- 
+        
         qrCodeManager = QRCodeManager(delegate: self)
         startScanning()
     }
@@ -69,6 +69,16 @@ class ScanViewController: UIViewController, AVCaptureMetadataOutputObjectsDelega
         }
     }
     
+    override func willRotateToInterfaceOrientation(toInterfaceOrientation: UIInterfaceOrientation, duration: NSTimeInterval) {
+        if UIDevice.currentDevice().orientation == UIDeviceOrientation.LandscapeLeft {
+            previewLayer!.connection.videoOrientation = AVCaptureVideoOrientation.LandscapeRight
+        } else if UIDevice.currentDevice().orientation == UIDeviceOrientation.LandscapeRight {
+            previewLayer!.connection.videoOrientation = AVCaptureVideoOrientation.LandscapeLeft
+        } else {
+            previewLayer!.connection.videoOrientation = AVCaptureVideoOrientation.Portrait
+        }
+    }
+    
     // MARK: - QRCodeManagerDelegate
     
     func qrCodeOK() {
@@ -77,7 +87,7 @@ class ScanViewController: UIViewController, AVCaptureMetadataOutputObjectsDelega
     }
     
     func qrCodeCancel() {
-        self.session.startRunning()        
+        self.session.startRunning()
     }
     
 }
