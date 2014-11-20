@@ -5,10 +5,9 @@ import com.sap.sailing.domain.base.Waypoint;
 import com.sap.sailing.domain.markpassingcalculation.impl.CandidateImpl;
 import com.sap.sailing.domain.tracking.DynamicTrackedRace;
 import com.sap.sailing.domain.tracking.MarkPassing;
-
-public interface CandidateChooser {
 import com.sap.sse.common.TimePoint;
 
+public interface CandidateChooser {
     /**
      * Calculates any new {@link MarkPassing}s and notifies the {@link DynamicTrackedRace}.
      * 
@@ -23,9 +22,9 @@ import com.sap.sse.common.TimePoint;
     void setFixedPassing(Competitor c, Integer zeroBasedIndexOfWaypoint, TimePoint t);
 
     void removeFixedPassing(Competitor c, Integer zeroBasedIndexOfWaypoint);
-    
+
     void suppressMarkPassings(Competitor c, Integer zeroBasedIndexOfWaypoint);
-    
+
     void stopSuppressingMarkPassings(Competitor c);
-    
+
 }

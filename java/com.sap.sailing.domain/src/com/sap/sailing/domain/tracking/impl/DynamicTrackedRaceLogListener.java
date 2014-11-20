@@ -29,8 +29,8 @@ import com.sap.sailing.domain.racelog.tracking.FixedMarkPassingEvent;
 import com.sap.sailing.domain.racelog.tracking.SuppressedMarkPassingsEvent;
 import com.sap.sailing.domain.tracking.DynamicTrackedRace;
 import com.sap.sailing.domain.tracking.Wind;
-import com.sap.sse.common.Util.Triple;
 import com.sap.sse.common.TimePoint;
+import com.sap.sse.common.Util.Triple;
 
 /**
  * TODO: this class could be a good place to leverage more information about a race containing in the {@link RaceLog}.
