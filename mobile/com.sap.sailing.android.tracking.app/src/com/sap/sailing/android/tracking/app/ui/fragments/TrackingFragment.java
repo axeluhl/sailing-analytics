@@ -1,25 +1,38 @@
 package com.sap.sailing.android.tracking.app.ui.fragments;
 
+import android.annotation.TargetApi;
 import android.app.AlertDialog;
+import android.content.Context;
 import android.content.DialogInterface;
 import android.content.Intent;
+import android.os.Build;
 import android.os.Bundle;
 import android.os.Handler;
+import android.provider.Settings;
+import android.provider.Settings.SettingNotFoundException;
+import android.text.TextUtils;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.View.OnClickListener;
 import android.view.ViewGroup;
 import android.widget.Button;
 
+import com.sap.sailing.android.shared.logging.ExLog;
+import com.sap.sailing.android.tracking.app.BuildConfig;
 import com.sap.sailing.android.tracking.app.R;
 import com.sap.sailing.android.tracking.app.services.TrackingService;
+import com.sap.sailing.android.tracking.app.services.TrackingService.GPSQuality;
 import com.sap.sailing.android.tracking.app.utils.AppPreferences;
 import com.sap.sailing.android.tracking.app.views.AutoResizeTextView;
+import com.sap.sailing.android.tracking.app.views.SignalQualityIndicatorView;
 
 public class TrackingFragment extends BaseFragment implements OnClickListener {
 
 	private TimerRunnable timer;
 	private AppPreferences prefs;
+	private long lastGPSQualityUpdate;
+	
+	private String TAG = TrackingFragment.class.getName(); 
 	
 	@Override
 	public View onCreateView(LayoutInflater inflater, ViewGroup container,
@@ -77,6 +90,42 @@ public class TrackingFragment extends BaseFragment implements OnClickListener {
 		textView.setText(getTimeFormatString(diff));
 	}
 	
+	/**
+	 * If last GPS update is too long ago, let's assume there's no signal and set quality to .noSignal
+	 */
+	public void checkLastGPSReceived()
+	{
+		if (System.currentTimeMillis() - lastGPSQualityUpdate > 3000 && !isLocationEnabled(getActivity()))
+		{
+			if (BuildConfig.DEBUG)
+			{
+				ExLog.i(getActivity(), TAG, "Setting GPS Quality to 0 because timeout occurred and location is reported as disabled.");
+			}
+			setGPSQuality(GPSQuality.noSignal);
+		}
+	}
+	
+    @TargetApi(Build.VERSION_CODES.KITKAT)
+    @SuppressWarnings("deprecation")
+    private boolean isLocationEnabled(Context context) {
+        int locationMode = 0;
+        String locationProviders;
+
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.KITKAT){
+            try {
+                locationMode = Settings.Secure.getInt(context.getContentResolver(), Settings.Secure.LOCATION_MODE);
+
+            } catch (SettingNotFoundException e) {
+                e.printStackTrace();
+            }
+
+            return locationMode != Settings.Secure.LOCATION_MODE_OFF;
+
+        } else {
+            locationProviders = Settings.Secure.getString(context.getContentResolver(), Settings.Secure.LOCATION_PROVIDERS_ALLOWED);
+            return !TextUtils.isEmpty(locationProviders);
+        }
+    } 
 	public void userTappedBackButton()
 	{
 		showStopTrackingConfirmationDialog();
@@ -114,6 +163,14 @@ public class TrackingFragment extends BaseFragment implements OnClickListener {
 		return String.format(getResources().getConfiguration().locale, "%02d:%02d:%02d", hours, minutes, seconds);
 	}
 	
+	public void setGPSQuality( GPSQuality quality )
+	{
+		SignalQualityIndicatorView indicatorView = (SignalQualityIndicatorView) getActivity().findViewById(R.id.qps_quality_indicator);
+		indicatorView.setSignalQuality( quality.toInt() );
+		
+		lastGPSQualityUpdate = System.currentTimeMillis();
+	}
+	
 	private class TimerRunnable implements Runnable {
 		
 		public Thread t;
@@ -132,6 +189,7 @@ public class TrackingFragment extends BaseFragment implements OnClickListener {
 				getActivity().runOnUiThread(new Runnable() {
 					@Override
 					public void run() {
+						checkLastGPSReceived();
 						updateTimer();
 					}
 				});

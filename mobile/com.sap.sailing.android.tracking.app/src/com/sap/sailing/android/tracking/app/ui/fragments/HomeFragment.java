@@ -160,8 +160,9 @@ public class HomeFragment extends BaseFragment implements
 		
 		final String server = scheme + "://" + uri.getHost();
 		final int port = (uri.getPort() == -1) ? 80 : uri.getPort();
+		final String hostWithPort = server + ":" + port;
 
-		prefs.setServerURL(server + ":" + port);
+		prefs.setServerURL(hostWithPort);
 
 		String leaderboardNameFromQR;
 		try {
@@ -174,13 +175,9 @@ public class HomeFragment extends BaseFragment implements
 			leaderboardNameFromQR = "";
 		}
 
-		final String competitorId = uri
-				.getQueryParameter(CheckinHelper.COMPETITOR_ID);
-		final String checkinURLStr = prefs.getServerURL()
-				+ prefs.getServerCheckinPath().replace(
-						"{leaderboard-name}", leaderboardNameFromQR);
-		final String eventId = uri
-				.getQueryParameter(CheckinHelper.EVENT_ID);
+		final String competitorId = uri.getQueryParameter(CheckinHelper.COMPETITOR_ID);
+		final String checkinURLStr = prefs.getServerURL() + prefs.getServerCheckinPath().replace("{leaderboard-name}", leaderboardNameFromQR);
+		final String eventId = uri.getQueryParameter(CheckinHelper.EVENT_ID);
 		final String leaderboardName = leaderboardNameFromQR;
 
 		final DeviceIdentifier deviceUuid = new SmartphoneUUIDIdentifierImpl(
@@ -193,12 +190,9 @@ public class HomeFragment extends BaseFragment implements
 		// 4. Let user confirm that the information is correct
 		// 5. Checkin
 
-		final String getEventUrl = prefs.getServerURL()
-				+ prefs.getServerEventPath(eventId);
-		final String getLeaderboardUrl = prefs.getServerURL()
-				+ prefs.getServerLeaderboardPath(leaderboardName);
-		final String getCompetitorUrl = prefs.getServerURL()
-				+ prefs.getServerCompetitorPath(competitorId);
+		final String getEventUrl = prefs.getServerURL() + prefs.getServerEventPath(eventId);
+		final String getLeaderboardUrl = prefs.getServerURL() + prefs.getServerLeaderboardPath(leaderboardName);
+		final String getCompetitorUrl = prefs.getServerURL() + prefs.getServerCompetitorPath(competitorId);
 
 		JsonObjectRequest getLeaderboardRequest = new JsonObjectRequest(
 				getLeaderboardUrl, null, new Listener<JSONObject>() {
@@ -303,7 +297,8 @@ public class HomeFragment extends BaseFragment implements
 														data.eventStartDateStr = eventStartDateStr;
 														data.eventEndDateStr = eventEndDateStr;
 														data.eventFirstImageUrl = eventFirstImageUrl;
-														data.eventServerUrl = checkinURLStr;
+														data.eventServerUrl = hostWithPort;
+														data.checkinURL = checkinURLStr;
 														data.leaderboardName = leaderboardName;
 														data.deviceUid = deviceUuid
 																.getStringRepresentation();
@@ -534,9 +529,9 @@ public class HomeFragment extends BaseFragment implements
 			JSONObject requestObject = CheckinHelper.getCheckinJson(
 					checkinData.competitorId, checkinData.deviceUid, "TODO!!",
 					date.getTime());
-
+			
 			JsonObjectRequest checkinRequest = new JsonObjectRequest(
-					checkinData.eventServerUrl, requestObject,
+					checkinData.checkinURL, requestObject,
 					new CheckinListener(checkinData.leaderboardName),
 					new CheckinErrorListener());
 
@@ -654,6 +649,7 @@ public class HomeFragment extends BaseFragment implements
 		public String eventEndDateStr;
 		public String eventFirstImageUrl;
 		public String eventServerUrl;
+		public String checkinURL;
 		public String competitorDisplayName;
 		public String competitorId;
 		public String competitorSailId;
@@ -687,23 +683,14 @@ public class HomeFragment extends BaseFragment implements
 			
 			Cursor cursor = (Cursor) mAdapter.getItem(position - 1); // -1, because there's a header row
 
-			prefs.setServerURL(cursor.getString(cursor
-					.getColumnIndex(Event.EVENT_SERVER)));
+			prefs.setServerURL(cursor.getString(cursor.getColumnIndex(Event.EVENT_SERVER)));
 
-			String competitorId = cursor.getString(cursor.getColumnIndex("competitor_id"));
-			String eventServer = cursor.getString(cursor.getColumnIndex("event_server"));
+//			String competitorId = cursor.getString(cursor.getColumnIndex("competitor_id"));
+//			String eventServer = cursor.getString(cursor.getColumnIndex("event_server"));
 			String leaderboardName = cursor.getString(cursor.getColumnIndex("leaderboard_name"));
 
-			CheckinData data = new CheckinData();
 
-			data.competitorId = competitorId;
-			data.deviceUid = new SmartphoneUUIDIdentifierImpl(
-					UUID.fromString(prefs.getDeviceIdentifier()))
-					.getStringRepresentation();
-			data.eventServerUrl = eventServer;
-			data.leaderboardName = leaderboardName;
-
-			performAPICheckin(data);
+			startRegatta(leaderboardName, leaderboardName);
 		}
 	}
 
