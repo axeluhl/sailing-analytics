@@ -27,15 +27,11 @@ of java classes (from a set of jars/libs) your compiler can use to
 build the sources.  We have defined some target-platforms for the
 project which can be found inside the project
 "com.sap.sailing.targetplatform" in the folder 'definitions'.  There
-you will find 4 definitions: race-analysis-p2-ide-local,
-race-analysis-p2-ide-p2admin, race-analysis-p2-maven-p2remote and
-race-analysis-p2-maven-p2admin. The definition
-'race-analysis-p2-ide-local' is intended to be used for the IDE in most
-cases. The definition 'race-analysis-p2-ide-p2admin' is to be used for
-testing changes to the target platform within the IDE. The same is true
-for 'race-analysis-p2-maven-p2admin', which is used by maven for testing
-target platform changes. For a default maven build,
-'race-analysis-p2-maven-default' is used.
+you will find 1 definition: race-analysis-p2-remote. This is the default
+to use in your IDE and the maven build. When testing changes to the
+target platform, generate the race-analysis-p2-lcoal target definition
+with the java/com.sap.sailing.targetplatform/scripts/createLocalTargetDef.sh
+script.
 The target definition contains a list of URLs to
 different p2 repositories containing the actual bundles. The URLs can
 be either URLs to local or remote repositories depending on your
