@@ -10,7 +10,7 @@ import Foundation
 
 class TrackingViewController : UIViewController, UIAlertViewDelegate {
     
-    enum AlertViewTag: Int {
+    enum AlertView: Int {
         case StopTracking
     }
     @IBOutlet weak var gpsQuality1: UIView!
@@ -113,7 +113,7 @@ class TrackingViewController : UIViewController, UIAlertViewDelegate {
     /* Stop tracking, go back to regattas view */
     @IBAction func stopTrackingButtonTapped(sender: AnyObject) {
         let alertView = UIAlertView(title: "Stop tracking?", message: "", delegate: self, cancelButtonTitle: "Cancel", otherButtonTitles: "Stop")
-        alertView.tag = AlertViewTag.StopTracking.rawValue;
+        alertView.tag = AlertView.StopTracking.rawValue;
         alertView.show()
     }
     
@@ -121,7 +121,7 @@ class TrackingViewController : UIViewController, UIAlertViewDelegate {
     func alertView(alertView: UIAlertView, clickedButtonAtIndex buttonIndex: Int) {
         switch alertView.tag {
             // Stop tracking?
-        case AlertViewTag.StopTracking.rawValue:
+        case AlertView.StopTracking.rawValue:
             switch buttonIndex {
             case alertView.cancelButtonIndex:
                 break

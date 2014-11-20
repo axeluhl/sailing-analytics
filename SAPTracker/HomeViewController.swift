@@ -11,9 +11,7 @@ import CoreData
 
 class HomeViewController: UIViewController, UITableViewDataSource, UITableViewDelegate, UIActionSheetDelegate, NSFetchedResultsControllerDelegate, QRCodeManagerDelegate {
     
-    //private var regatta: Regatta
-    
-    enum AlertViewTag: Int {
+    enum AlertView: Int {
         case NoCameraAvailable
     }
     @IBOutlet weak var tableView: UITableView!
@@ -42,6 +40,7 @@ class HomeViewController: UIViewController, UITableViewDataSource, UITableViewDe
     }
 
     // MARK: - UIActionSheetDelegate
+    
     @IBAction func showActionSheet(sender: AnyObject) {
         let actionSheet = UIActionSheet(title: nil, delegate: self, cancelButtonTitle: nil, destructiveButtonTitle: nil, otherButtonTitles: "Feedback", "Settings", "About", "Cancel")
         actionSheet.cancelButtonIndex = 3
@@ -134,7 +133,7 @@ class HomeViewController: UIViewController, UITableViewDataSource, UITableViewDe
             performSegueWithIdentifier("Scan", sender: sender)
         } else {
             let alertView = UIAlertView(title: "No camera available.", message: nil, delegate: nil, cancelButtonTitle: "Cancel")
-            alertView.tag = AlertViewTag.NoCameraAvailable.rawValue;
+            alertView.tag = AlertView.NoCameraAvailable.rawValue;
             alertView.show()
         }
     }
@@ -143,7 +142,7 @@ class HomeViewController: UIViewController, UITableViewDataSource, UITableViewDe
     
     @IBAction func noQrCodeButtonTap(sender: AnyObject) {
         let alertView = UIAlertView(title:  "In order to use this app you need to check-in via QR code or email link. Please contact the racing committee if you need either.", message: nil, delegate: nil, cancelButtonTitle: "Cancel")
-        alertView.tag = AlertViewTag.NoCameraAvailable.rawValue;
+        alertView.tag = AlertView.NoCameraAvailable.rawValue;
         alertView.show()
     }
 }
