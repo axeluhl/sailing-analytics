@@ -141,12 +141,11 @@ public abstract class BaseRaceLogEventVisitor implements RaceLogEventVisitor {
         
     }
     
-        @Override
+    @Override
     public void visit(FixedMarkPassingEvent event){
         
     }
 
-    
     @Override
     public void visit(SuppressedMarkPassingsEvent event) {
         
