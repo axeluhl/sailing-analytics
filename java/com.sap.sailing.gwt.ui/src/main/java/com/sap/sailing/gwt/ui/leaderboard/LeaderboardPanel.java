@@ -169,7 +169,6 @@ public class LeaderboardPanel extends SimplePanel implements TimeListener, PlayS
     private final SelectionCheckboxColumn<LeaderboardRowDTO> selectionCheckboxColumn;
 
     private final EditMarkPassingsPanel markPassingsPanel;
-    
 
     /**
      * Passed to the {@link ManeuverCountRaceColumn}. Modifications to this list will modify the column's children list
@@ -1721,14 +1720,9 @@ public class LeaderboardPanel extends SimplePanel implements TimeListener, PlayS
 
         contentPanel = new VerticalPanel();
         contentPanel.setStyleName(STYLE_LEADERBOARD_CONTENT);
-        
         busyIndicator = new SimpleBusyIndicator(false, 0.8f);
         busyIndicator.ensureDebugId("BusyIndicator");
         
-        // the mark passings panel
-        markPassingsPanel = new EditMarkPassingsPanel(sailingService, asyncActionsExecutor, preSelectedRace, stringMessages,
-                competitorSelectionProvider, errorReporter, timer);
-
         // the information panel
         if (!isEmbedded) {
             Widget toolbarPanel = createToolbarPanel();
@@ -1745,6 +1739,9 @@ public class LeaderboardPanel extends SimplePanel implements TimeListener, PlayS
             });
             this.competitorFilterPanel = competitorSearchTextBox;
         }
+        // the mark passings panel
+        markPassingsPanel = new EditMarkPassingsPanel(sailingService, asyncActionsExecutor, preSelectedRace, stringMessages,
+                competitorSelectionProvider, errorReporter, timer);
         contentPanel.add(markPassingsPanel);
         contentPanel.add(markPassingsPanel.getEditButton());
         SortedCellTable<LeaderboardRowDTO> leaderboardTable = getLeaderboardTable();

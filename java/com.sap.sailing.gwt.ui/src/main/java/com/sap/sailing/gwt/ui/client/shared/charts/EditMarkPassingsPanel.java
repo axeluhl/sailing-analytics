@@ -79,16 +79,12 @@ public class EditMarkPassingsPanel extends FlexTable implements RaceSelectionCha
     public EditMarkPassingsPanel(final SailingServiceAsync sailingService, AsyncActionsExecutor asyncActionsExecutor,
             final RegattaAndRaceIdentifier raceIdentifier, StringMessages stringMessages,
             final CompetitorSelectionProvider competitorSelectionModel, final ErrorReporter errorReporter, final Timer timer) {
-
         this.sailingService = sailingService;
         this.raceIdentifier = raceIdentifier;
         this.asyncExecutor = asyncActionsExecutor;
         this.errorReporter = errorReporter;
-
         editMarkPassingsButton = new Button("Edit MarkPassings");
-
         this.competitorSelectionModel = competitorSelectionModel;
-
         editMarkPassingsButton.setEnabled(false);
         competitorSelectionModel.addCompetitorSelectionChangeListener(this);
         editMarkPassingsButton.addClickHandler(new ClickHandler() {
