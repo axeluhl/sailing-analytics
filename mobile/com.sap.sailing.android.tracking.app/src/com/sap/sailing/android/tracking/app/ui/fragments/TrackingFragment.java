@@ -4,6 +4,7 @@ import android.app.AlertDialog;
 import android.content.DialogInterface;
 import android.content.Intent;
 import android.os.Bundle;
+import android.os.Handler;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.View.OnClickListener;
@@ -12,9 +13,14 @@ import android.widget.Button;
 
 import com.sap.sailing.android.tracking.app.R;
 import com.sap.sailing.android.tracking.app.services.TrackingService;
+import com.sap.sailing.android.tracking.app.utils.AppPreferences;
+import com.sap.sailing.android.tracking.app.views.AutoResizeTextView;
 
-public class TrackingFragment extends BaseFragment implements OnClickListener{
+public class TrackingFragment extends BaseFragment implements OnClickListener {
 
+	private TimerRunnable timer;
+	private AppPreferences prefs;
+	
 	@Override
 	public View onCreateView(LayoutInflater inflater, ViewGroup container,
 			Bundle savedInstanceState) {
@@ -22,10 +28,20 @@ public class TrackingFragment extends BaseFragment implements OnClickListener{
 
 		View view = inflater.inflate(R.layout.fragment_tracking, container, false);
 		
-		Button startTracking = (Button) view.findViewById(R.id.stop_tracking);
-		startTracking.setOnClickListener(this);
+		Button stopTracking = (Button) view.findViewById(R.id.stop_tracking);
+		stopTracking.setOnClickListener(this);
 	
+		prefs = new AppPreferences(getActivity());
+		prefs.setTrackingTimerStarted(System.currentTimeMillis());
+		
 		return view;
+	}
+	
+	@Override
+	public void onResume() {
+		super.onResume();
+		timer = new TimerRunnable();
+		timer.start();
 	}
 	
 	@Override
@@ -37,6 +53,28 @@ public class TrackingFragment extends BaseFragment implements OnClickListener{
 		default:
 			break;
 		}
+	}
+	
+	@Override
+	public void onPause() {
+		super.onPause();
+		timer.stop();
+	}
+	
+	@Override
+	public void onDestroy() {
+		super.onDestroy();
+		timer.stop();
+	}
+	
+	/**
+	 * Update UI with a string containing the time since tracking started, e.g. 01:22:45
+	 */
+	public void updateTimer()
+	{
+		long diff = System.currentTimeMillis() - prefs.getTrackingTimerStarted();
+		AutoResizeTextView textView = (AutoResizeTextView) getActivity().findViewById(R.id.tracking_time_label);
+		textView.setText(getTimeFormatString(diff));
 	}
 	
 	public void userTappedBackButton()
@@ -68,4 +106,46 @@ public class TrackingFragment extends BaseFragment implements OnClickListener{
 		dialog.show();
 	}
 	
+	private String getTimeFormatString(long milliseconds) {
+		int seconds = (int) (milliseconds / 1000) % 60 ;
+		int minutes = (int) ((milliseconds / (1000*60)) % 60);
+		int hours   = (int) ((milliseconds / (1000*60*60)) % 24);
+		
+		return String.format(getResources().getConfiguration().locale, "%02d:%02d:%02d", hours, minutes, seconds);
+	}
+	
+	private class TimerRunnable implements Runnable {
+		
+		public Thread t;
+		public volatile boolean running = true;
+		
+		public void start() {
+			running = true;
+			if (t == null) {
+				t = new Thread(this);
+				t.start();
+			}
+		}
+		@Override
+		public void run() {
+			while (running) {
+				getActivity().runOnUiThread(new Runnable() {
+					@Override
+					public void run() {
+						updateTimer();
+					}
+				});
+				try {
+					Thread.sleep(1000);
+				} catch (InterruptedException e) {
+					e.printStackTrace();
+				}
+			}
+		}
+		
+		public void stop()
+		{
+			running = false;
+		}
+	}
 }
