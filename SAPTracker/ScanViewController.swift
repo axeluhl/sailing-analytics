@@ -12,14 +12,20 @@ import AVFoundation
 class ScanViewController: UIViewController, AVCaptureMetadataOutputObjectsDelegate, QRCodeManagerDelegate {
 
     @IBOutlet weak var previewView: UIView!
-    @IBOutlet weak var activityIndicatorView: UIActivityIndicatorView?
     
+    var activityIndicatorView: UIActivityIndicatorView!
     private var session: AVCaptureSession!
     private var previewLayer: AVCaptureVideoPreviewLayer!
     private var qrCodeManager: QRCodeManager?
     
     override func viewDidLoad() {
         super.viewDidLoad()
+
+        activityIndicatorView = UIActivityIndicatorView(activityIndicatorStyle: UIActivityIndicatorViewStyle.Gray)
+        activityIndicatorView.hidesWhenStopped = true
+        let barButton = UIBarButtonItem(customView: activityIndicatorView)
+        self.navigationItem.rightBarButtonItem = barButton
+ 
         qrCodeManager = QRCodeManager(delegate: self)
         startScanning()
     }

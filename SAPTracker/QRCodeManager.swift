@@ -32,7 +32,6 @@ class QRCodeManager: NSObject, UIAlertViewDelegate {
     }
     
     func parseUrl(url: NSString) {
-        self.delegate.activityIndicatorView?.startAnimating()
         
         qrcodeData = QRCodeData()
         let parseSuccess = qrcodeData!.parseString(url)
@@ -43,6 +42,7 @@ class QRCodeManager: NSObject, UIAlertViewDelegate {
             return
         }
         
+        self.delegate.activityIndicatorView?.startAnimating()
         APIManager.sharedManager.initManager(qrcodeData!.serverUrl!)
         
         // get event
