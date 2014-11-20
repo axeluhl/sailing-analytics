@@ -15,12 +15,15 @@ class AppDelegate: UIResponder, UIApplicationDelegate {
     var window: UIWindow?
 
     func application(application: UIApplication, didFinishLaunchingWithOptions launchOptions: [NSObject: AnyObject]?) -> Bool {
-        // Override point for customization after application launch.
+        // set up hockey app, used for crash reports and beta testing
         BITHockeyManager.sharedHockeyManager().configureWithIdentifier("8c2070839f98ada3aff80a0882dd29e0")
         BITHockeyManager.sharedHockeyManager().startManager()
         BITHockeyManager.sharedHockeyManager().authenticator.authenticateInstallation()
-
+  
+        // initialize core data, migrate database if needed, or delete if migration needed but not possible
         DataManager.sharedManager
+        
+        // start timer in case GPS fixes need to be sent
         SendGPSFixController.sharedManager.timer()
         return true
     }
