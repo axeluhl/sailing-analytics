@@ -97,15 +97,10 @@
             android:paddingLeft="20dp"
             android:text="@string/tracking_time" />
 
-        <View
-            android:layout_width="fill_parent"
-            android:layout_height="1dp"
-            android:background="@android:color/darker_gray" />
-
         <com.sap.sailing.android.tracking.app.views.AutoResizeTextView
             android:id="@+id/tracking_time_label"
             android:layout_width="match_parent"
-            android:layout_height="150dp"
+            android:layout_height="110dp"
             android:gravity="center"
             android:text="00:00:00"
             android:paddingLeft="20dp"
