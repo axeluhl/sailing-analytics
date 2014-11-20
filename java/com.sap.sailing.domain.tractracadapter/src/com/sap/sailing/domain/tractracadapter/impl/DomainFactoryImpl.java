@@ -232,7 +232,6 @@ public class DomainFactoryImpl implements DomainFactory {
 
     @Override
     public Competitor getOrCreateCompetitor(ICompetitor competitor) {
-        // TODO see bug 596; consider allowing for a new competitor (check for use of == throughout the code) or update existing one
         final UUID competitorId = competitor.getId();
         final String competitorClassName = competitor.getCompetitorClass()==null?null:competitor.getCompetitorClass().getName();
         final String nationalityAsString = competitor.getNationality();

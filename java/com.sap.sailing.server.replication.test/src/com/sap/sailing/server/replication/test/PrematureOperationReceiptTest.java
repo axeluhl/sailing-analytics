@@ -40,7 +40,7 @@ public class PrematureOperationReceiptTest extends AbstractServerReplicationTest
      * started in suspended mode and resumed only after the initial load was successfully installed.
      */
     @Test
-    public void testRaceColumnInLeaderboardReplicationAfterInitialLoad() throws InterruptedException, ClassNotFoundException, IOException {
+    public void testRaceColumnInLeaderboardReplicationAfterInitialLoad() throws InterruptedException, ClassNotFoundException, IOException, IllegalAccessException {
         final String leaderboardName = "My new leaderboard";
         final int[] discardThresholds = new int[] { 17, 23 };
         CreateFlexibleLeaderboard createTestLeaderboard = new CreateFlexibleLeaderboard(leaderboardName, null, discardThresholds, new LowPoint(), null);

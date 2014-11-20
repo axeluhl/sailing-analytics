@@ -9,25 +9,14 @@ import java.util.Map;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
-import com.sap.sailing.domain.base.Competitor;
-import com.sap.sailing.domain.base.Mark;
-import com.sap.sailing.domain.base.Waypoint;
 import com.sap.sailing.domain.common.RegattaAndRaceIdentifier;
-import com.sap.sailing.domain.common.WindSource;
-import com.sap.sailing.domain.tracking.GPSFix;
-import com.sap.sailing.domain.tracking.GPSFixMoving;
-import com.sap.sailing.domain.tracking.MarkPassing;
-import com.sap.sailing.domain.tracking.RaceChangeListener;
 import com.sap.sailing.domain.tracking.TrackedRace;
-import com.sap.sailing.domain.tracking.TrackedRaceStatus;
-import com.sap.sailing.domain.tracking.Wind;
 import com.sap.sailing.domain.tracking.impl.AbstractRaceChangeListener;
 import com.sap.sailing.gwt.ui.shared.QuickRankDTO;
 import com.sap.sailing.server.masterdata.DummyTrackedRace;
 import com.sap.sailing.util.SmartFutureCache;
 import com.sap.sailing.util.SmartFutureCache.AbstractCacheUpdater;
 import com.sap.sailing.util.SmartFutureCache.UpdateInterval;
-import com.sap.sse.common.TimePoint;
 
 /**
  * Calculating the quick ranks for many clients for a live race is expensive and therefore benefits from consolidation
@@ -41,7 +30,7 @@ import com.sap.sse.common.TimePoint;
  * @author Axel Uhl (D043530)
  *
  */
-public class QuickRanksLiveCache extends AbstractRaceChangeListener {
+public class QuickRanksLiveCache {
     private static final Logger logger = Logger.getLogger(QuickRanksLiveCache.class.getName());
     /**
      * For each weak reference to a tracked race, remembers the race's {@link RegattaAndRaceIdentifier} which is then the key
@@ -142,81 +131,15 @@ public class QuickRanksLiveCache extends AbstractRaceChangeListener {
         return result;
     }
 
-    private class Listener implements RaceChangeListener {
+    private class Listener extends AbstractRaceChangeListener {
         private final RegattaAndRaceIdentifier raceIdentifier;
 
         public Listener(RegattaAndRaceIdentifier raceIdentifier) {
             this.raceIdentifier = raceIdentifier;
         }
-
+        
         @Override
-        public void waypointAdded(int zeroBasedIndex, Waypoint waypointThatGotAdded) {
-            cache.triggerUpdate(raceIdentifier, CalculateOrPurge.CALCULATE);
-        }
-
-        @Override
-        public void waypointRemoved(int zeroBasedIndex, Waypoint waypointThatGotRemoved) {
-            cache.triggerUpdate(raceIdentifier, CalculateOrPurge.CALCULATE);
-        }
-
-        @Override
-        public void competitorPositionChanged(GPSFixMoving fix, Competitor competitor) {
-            cache.triggerUpdate(raceIdentifier, CalculateOrPurge.CALCULATE);
-        }
-
-        @Override
-        public void markPositionChanged(GPSFix fix, Mark mark, boolean firstInTrack) {
-            cache.triggerUpdate(raceIdentifier, CalculateOrPurge.CALCULATE);
-        }
-
-        @Override
-        public void markPassingReceived(Competitor competitor, Map<Waypoint, MarkPassing> oldMarkPassings,
-                Iterable<MarkPassing> markPassings) {
-            cache.triggerUpdate(raceIdentifier, CalculateOrPurge.CALCULATE);
-        }
-
-        @Override
-        public void speedAveragingChanged(long oldMillisecondsOverWhichToAverage, long newMillisecondsOverWhichToAverage) {
-            cache.triggerUpdate(raceIdentifier, CalculateOrPurge.CALCULATE);
-        }
-
-        @Override
-        public void windDataReceived(Wind wind, WindSource windSource) {
-            cache.triggerUpdate(raceIdentifier, CalculateOrPurge.CALCULATE);
-        }
-
-        @Override
-        public void windDataRemoved(Wind wind, WindSource windSource) {
-            cache.triggerUpdate(raceIdentifier, CalculateOrPurge.CALCULATE);
-        }
-
-        @Override
-        public void windAveragingChanged(long oldMillisecondsOverWhichToAverage, long newMillisecondsOverWhichToAverage) {
-            cache.triggerUpdate(raceIdentifier, CalculateOrPurge.CALCULATE);
-        }
-
-        @Override
-        public void raceTimesChanged(TimePoint startOfTracking, TimePoint endOfTracking, TimePoint startTimeReceived) {
-            cache.triggerUpdate(raceIdentifier, CalculateOrPurge.CALCULATE);
-        }
-
-        @Override
-        public void startOfRaceChanged(TimePoint oldStartOfRace, TimePoint newStartOfRace) {
-            cache.triggerUpdate(raceIdentifier, CalculateOrPurge.CALCULATE);
-        }
-
-        @Override
-        public void delayToLiveChanged(long delayToLiveInMillis) {
-            cache.triggerUpdate(raceIdentifier, CalculateOrPurge.CALCULATE);
-        }
-
-        @Override
-        public void windSourcesToExcludeChanged(Iterable<? extends WindSource> windSourcesToExclude) {
-            cache.triggerUpdate(raceIdentifier, CalculateOrPurge.CALCULATE);
-        }
-
-        @Override
-        public void statusChanged(TrackedRaceStatus newStatus) {
+        protected void defaultAction() {
             cache.triggerUpdate(raceIdentifier, CalculateOrPurge.CALCULATE);
         }
     }
