@@ -793,7 +793,7 @@ DynamicTrackedRace, GPSTrackListener<Competitor, GPSFixMoving> {
     }
     
     @Override
-    protected MarkPassingCalculator getMarkPassingCalculator() {
+    protected MarkPassingCalculator createMarkPassingCalculator() {
         return new MarkPassingCalculator(this, true); 
     }
 }

@@ -44,6 +44,4 @@ public interface CourseBase extends Named {
     void removeWaypoint(int zeroBasedPosition);
 
     Leg getFirstLeg();
-
-    int getNumberOfWaypoints();
 }

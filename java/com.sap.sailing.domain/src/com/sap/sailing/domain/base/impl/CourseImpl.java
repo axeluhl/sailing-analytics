@@ -373,9 +373,4 @@ public class CourseImpl extends NamedImpl implements Course {
             }
         }
     }
-    
-    @Override
-    public int getNumberOfWaypoints() {
-        return waypoints.size();
-    }
 }

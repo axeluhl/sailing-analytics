@@ -1000,7 +1000,7 @@ public class MockedTrackedRace implements DynamicTrackedRace {
     }
 
     @Override
-    public Boolean isUsingMarkPassingCalculator() {
+    public boolean isUsingMarkPassingCalculator() {
         // TODO Auto-generated method stub
         return null;
     }

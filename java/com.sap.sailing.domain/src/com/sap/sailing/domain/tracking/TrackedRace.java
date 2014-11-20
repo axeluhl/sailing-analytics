@@ -709,6 +709,6 @@ public interface TrackedRace extends Serializable {
      */
     Position getCenterOfCourse(TimePoint at);
 
-    Boolean isUsingMarkPassingCalculator();
+    boolean isUsingMarkPassingCalculator();
 
 }

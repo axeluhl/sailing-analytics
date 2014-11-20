@@ -403,8 +403,8 @@ public abstract class TrackedRaceImpl extends TrackedRaceWithWindEssentials impl
                 getOrCreateWindTrack(trackBasedWindSource, delayForWindEstimationCacheInvalidation));
         competitorRankings = createCompetitorRankingsCache();
         competitorRankingsLocks = createCompetitorRankingsLockMap();
-        if(useMarkPassingCalculator){
-        markPassingCalculator = getMarkPassingCalculator();
+        if (useMarkPassingCalculator){
+            markPassingCalculator = createMarkPassingCalculator();
         } else {
             markPassingCalculator = null;
         }
@@ -3135,12 +3135,12 @@ public abstract class TrackedRaceImpl extends TrackedRaceWithWindEssentials impl
     	return gpsFixStore;
     }
     
-    protected MarkPassingCalculator getMarkPassingCalculator() {
+    protected MarkPassingCalculator createMarkPassingCalculator() {
         return null;
     }
     
     @Override
-    public Boolean isUsingMarkPassingCalculator() {
+    public boolean isUsingMarkPassingCalculator() {
         return markPassingCalculator!=null;
     }
 

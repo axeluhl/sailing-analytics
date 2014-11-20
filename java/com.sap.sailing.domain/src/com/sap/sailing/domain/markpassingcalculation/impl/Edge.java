@@ -3,6 +3,7 @@ package com.sap.sailing.domain.markpassingcalculation.impl;
 import com.sap.sailing.domain.base.Course;
 import com.sap.sailing.domain.base.Waypoint;
 import com.sap.sailing.domain.markpassingcalculation.Candidate;
+import com.sap.sse.common.Util;
 
 /**
  * Represent the passage between two {@link Candidate}s, <code>start</code> and <code>end</code>. {@link #getCost()}
@@ -35,7 +36,7 @@ public class Edge implements Comparable<Edge> {
     }
 
     public Double getCost() {
-        double penalty = end.getOneBasedIndexOfWaypoint() == course.getNumberOfWaypoints() + 1 ? penaltyForSkippedToEnd : penaltyForSkipped;
+        double penalty = end.getOneBasedIndexOfWaypoint() == Util.size(course.getWaypoints()) + 1 ? penaltyForSkippedToEnd : penaltyForSkipped;
         return 1 - (start.getProbability() * end.getProbability() * estimatedDistanceProbability) + 2 * penalty
                 * (end.getOneBasedIndexOfWaypoint() - start.getOneBasedIndexOfWaypoint() - 1);
     }
