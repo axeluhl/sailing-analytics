@@ -1005,7 +1005,7 @@ public class MockedTrackedRace implements DynamicTrackedRace {
     @Override
     public boolean isUsingMarkPassingCalculator() {
         // TODO Auto-generated method stub
-        return null;
+        return false;
     }
 
 }
