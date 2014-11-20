@@ -15,9 +15,9 @@ import com.mongodb.DB;
 import com.mongodb.MongoException;
 import com.sap.sse.mongodb.MongoDBConfiguration;
 import com.sap.sse.mongodb.MongoDBService;
-import com.sap.sse.security.SecurityServiceImpl;
 import com.sap.sse.security.UsernamePasswordRealm;
 import com.sap.sse.security.impl.Activator;
+import com.sap.sse.security.impl.SecurityServiceImpl;
 import com.sap.sse.security.userstore.mongodb.UserStoreImpl;
 import com.sap.sse.security.userstore.mongodb.impl.CollectionNames;
 

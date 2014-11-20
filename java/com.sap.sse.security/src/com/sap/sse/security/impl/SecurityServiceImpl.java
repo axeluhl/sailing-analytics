@@ -1,6 +1,11 @@
-package com.sap.sse.security;
+package com.sap.sse.security.impl;
 
+import java.io.IOException;
+import java.io.InputStream;
+import java.io.OutputStream;
+import java.io.Serializable;
 import java.io.UnsupportedEncodingException;
+import java.net.MalformedURLException;
 import java.net.URLEncoder;
 import java.util.Arrays;
 import java.util.Collection;
@@ -64,6 +69,21 @@ import org.scribe.oauth.OAuthService;
 
 import com.google.gwt.user.server.rpc.RemoteServiceServlet;
 import com.sap.sse.common.Util;
+import com.sap.sse.replication.OperationExecutionListener;
+import com.sap.sse.replication.OperationWithResult;
+import com.sap.sse.security.ClientUtils;
+import com.sap.sse.security.Credential;
+import com.sap.sse.security.GithubApi;
+import com.sap.sse.security.InstagramApi;
+import com.sap.sse.security.OAuthRealm;
+import com.sap.sse.security.OAuthToken;
+import com.sap.sse.security.SecurityService;
+import com.sap.sse.security.SessionUtils;
+import com.sap.sse.security.Social;
+import com.sap.sse.security.SocialSettingsKeys;
+import com.sap.sse.security.User;
+import com.sap.sse.security.UserStore;
+import com.sap.sse.security.operations.SecurityOperation;
 import com.sap.sse.security.shared.Account.AccountType;
 import com.sap.sse.security.shared.DefaultRoles;
 import com.sap.sse.security.shared.MailException;
@@ -710,29 +730,6 @@ public class SecurityServiceImpl extends RemoteServiceServlet implements Securit
             for (String s : chainNames) {
                 System.out.println(s + ": " + Arrays.toString(filterChainManager.getChain(s).toArray(new Filter[0])));
             }
-
-            // Map<String, Class<?>> allSettingTypes = store.getAllSettingTypes();
-            // for (Entry<String, Class<?>> e : allSettingTypes.entrySet()){
-            // String[] classifier = e.getKey().split("_");
-            // if (classifier[0].equals("URLS") && !classifier[1].equals("AUTH")){
-            // String url = store.getSetting(e.getKey(), String.class);
-            // String n = classifier[0] + "_AUTH";
-            // for (int i = 1; i < classifier.length; i++){
-            // n += "_" + classifier[i];
-            // }
-            // String filter = store.getSetting(n, String.class);
-            // if (url != null && filter != null){
-            // if (!chainNames.contains(url)){
-            // filterChainManager.createChain(url, filter);
-            // logger.info("Created filter " + filter + " for " + url);
-            // }
-            // else {
-            // filterChainManager.addToChain(url, filter);
-            // logger.info("Updated filter " + filter + " for " + url);
-            // }
-            // }
-            // }
-            // }
         }
     }
 
@@ -776,6 +773,61 @@ public class SecurityServiceImpl extends RemoteServiceServlet implements Securit
             throw new SecurityException("User " + SessionUtils.loadUsername()
                     + " does not have permission to read preferences of user " + username);
         }
+    }
+
+    // ----------------- Replication -------------
+    @Override
+    public <T> T apply(OperationWithResult<SecurityService, T> operation) {
+        // TODO Auto-generated method stub
+        return null;
+    }
+
+    @Override
+    public void addOperationExecutionListener(OperationExecutionListener<SecurityService> listener) {
+        // TODO Auto-generated method stub
+        
+    }
+
+    @Override
+    public void removeOperationExecutionListener(OperationExecutionListener<SecurityService> listener) {
+        // TODO Auto-generated method stub
+        
+    }
+
+    @Override
+    public void clearReplicaState() throws MalformedURLException, IOException, InterruptedException {
+        // TODO Auto-generated method stub
+        
+    }
+
+    @Override
+    public void initiallyFillFrom(InputStream is) throws IOException, ClassNotFoundException, InterruptedException {
+        // TODO Auto-generated method stub
+        
+    }
+
+    @Override
+    public void serializeForInitialReplication(OutputStream os) throws IOException {
+        // TODO Auto-generated method stub
+        
+    }
+
+    @Override
+    public SecurityOperation<?> readOperation(InputStream inputStream) throws IOException, ClassNotFoundException {
+        // TODO Auto-generated method stub
+        return null;
+    }
+
+    @Override
+    public void writeOperation(OperationWithResult<?, ?> operation, OutputStream outputStream, boolean closeStream)
+            throws IOException {
+        // TODO Auto-generated method stub
+        
+    }
+
+    @Override
+    public Serializable getId() {
+        return getClass().getName();
     }
     
 }
