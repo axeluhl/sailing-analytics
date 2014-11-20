@@ -8,19 +8,14 @@ import com.sap.sailing.server.RacingEventService;
 import com.sap.sailing.server.RacingEventServiceOperation;
 import com.sap.sse.common.TimePoint;
 
-public class UpdateRaceTimes extends AbstractRaceOperation<Void> {
+public class UpdateStartOfTracking extends AbstractRaceOperation<Void> {
     private static final long serialVersionUID = 7054690983295760375L;
-    private static final Logger logger = Logger.getLogger(UpdateRaceTimes.class.getName());
+    private static final Logger logger = Logger.getLogger(UpdateStartOfTracking.class.getName());
     private final TimePoint startOfTracking;
-    private final TimePoint endOfTracking;
-    private final TimePoint startTimeReceived;
     
-    public UpdateRaceTimes(RegattaAndRaceIdentifier raceIdentifier, TimePoint startOfTracking, TimePoint endOfTracking,
-            TimePoint startTimeReceived) {
+    public UpdateStartOfTracking(RegattaAndRaceIdentifier raceIdentifier, TimePoint startOfTracking) {
         super(raceIdentifier);
         this.startOfTracking = startOfTracking;
-        this.endOfTracking = endOfTracking;
-        this.startTimeReceived = startTimeReceived;
     }
 
     @Override
@@ -28,10 +23,6 @@ public class UpdateRaceTimes extends AbstractRaceOperation<Void> {
         DynamicTrackedRace trackedRace = (DynamicTrackedRace) toState.getTrackedRace(getRaceIdentifier());
         logger.fine("applying startOfTracking="+startOfTracking+" for "+trackedRace.getRace().getName());
         trackedRace.setStartOfTrackingReceived(startOfTracking);
-        logger.fine("applying endOfTracking="+endOfTracking+" for "+trackedRace.getRace().getName());
-        trackedRace.setEndOfTrackingReceived(endOfTracking);
-        logger.fine("applying startTimeReceived="+startTimeReceived+" for "+trackedRace.getRace().getName());
-        trackedRace.setStartTimeReceived(startTimeReceived);
         return null;
     }
 
