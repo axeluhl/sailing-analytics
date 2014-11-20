@@ -81,6 +81,8 @@ public class RegattaListComposite extends Composite implements RegattasDisplayer
         this.regattaRefresher = regattaRefresher;
         this.errorReporter = errorReporter;
         this.stringMessages = stringMessages;
+        allRegattas = new ArrayList<RegattaDTO>();
+        
         mainPanel = new SimplePanel();
         panel = new VerticalPanel();
         mainPanel.setWidget(panel);
@@ -108,7 +110,7 @@ public class RegattaListComposite extends Composite implements RegattasDisplayer
                 return string;
             }
         };
-        filterablePanelRegattas.getTextBox().ensureDebugId("ReggatasFilterTextBox");
+        filterablePanelRegattas.getTextBox().ensureDebugId("RegattasFilterTextBox");
         panel.add(filterablePanelRegattas);
         
         @SuppressWarnings("unchecked")

@@ -7,10 +7,13 @@ import com.google.gwt.user.client.ui.CaptionPanel;
 import com.google.gwt.user.client.ui.SimplePanel;
 import com.google.gwt.user.client.ui.VerticalPanel;
 import com.sap.sailing.gwt.ui.client.EventSelectionChangeListener;
+import com.sap.sailing.gwt.ui.client.EventSelectionModel;
+import com.sap.sailing.gwt.ui.client.EventSelectionProvider;
 import com.sap.sailing.gwt.ui.client.EventsRefresher;
 import com.sap.sailing.gwt.ui.client.LeaderboardGroupsDisplayer;
 import com.sap.sailing.gwt.ui.client.SailingServiceAsync;
 import com.sap.sailing.gwt.ui.client.StringMessages;
+import com.sap.sailing.gwt.ui.shared.EventDTO;
 import com.sap.sailing.gwt.ui.shared.LeaderboardGroupDTO;
 import com.sap.sse.gwt.client.ErrorReporter;
 
@@ -24,6 +27,7 @@ public class EventManagementPanel extends SimplePanel implements EventsRefresher
     private EventListComposite eventListComposite;
     private EventDetailsComposite eventDetailsComposite;
     private final CaptionPanel eventsPanel;
+    private EventSelectionProvider eventSelectionProvider;
     
     public EventManagementPanel(final SailingServiceAsync sailingService, final ErrorReporter errorReporter,
             final StringMessages stringMessages) {
@@ -36,7 +40,10 @@ public class EventManagementPanel extends SimplePanel implements EventsRefresher
         VerticalPanel eventsContentPanel = new VerticalPanel();
         eventsPanel.setContentWidget(eventsContentPanel);
         
-        eventListComposite = new EventListComposite(sailingService, errorReporter, stringMessages);
+        eventSelectionProvider = new EventSelectionModel(true);
+        eventSelectionProvider.addEventSelectionChangeListener(this);
+
+        eventListComposite = new EventListComposite(sailingService, eventSelectionProvider, errorReporter, stringMessages);
         eventListComposite.ensureDebugId("EventListComposite");
         eventsContentPanel.add(eventListComposite);
         
@@ -58,5 +65,19 @@ public class EventManagementPanel extends SimplePanel implements EventsRefresher
 
     @Override
     public void onEventSelectionChange(List<UUID> selectedEvents) {
-    }        
+        final UUID selectedEventUUID;
+        if (selectedEvents.size() == 1 && eventListComposite.getAllEvents() != null) {
+            selectedEventUUID = selectedEvents.get(0);
+                for (EventDTO eventDTO : eventListComposite.getAllEvents()) {
+                    if (eventDTO.id.equals(selectedEventUUID)) {
+                        eventDetailsComposite.setEvent(eventDTO);
+                        eventDetailsComposite.setVisible(true);
+                        break;
+                    }
+            }
+        } else {
+            eventDetailsComposite.setEvent(null);
+            eventDetailsComposite.setVisible(false);
+        }
+    }
 }
