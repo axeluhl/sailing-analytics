@@ -7,6 +7,8 @@
     <color name="green">#00FF00</color>
     <color name="blue">#0000FF</color>
     <color name="gray">#333333</color>
+    <color name="sap_green">#8AB54E</color>
+    <color name="sap_red">#E94A1B</color>
     
     <color name="colorPrimary">@color/gray</color>
     <color name="colorPrimaryDark">@color/colorPrimary</color>

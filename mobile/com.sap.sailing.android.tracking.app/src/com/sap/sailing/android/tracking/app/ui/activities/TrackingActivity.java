@@ -1,29 +1,33 @@
 package com.sap.sailing.android.tracking.app.ui.activities;
 
-import android.annotation.TargetApi;
 import android.content.ComponentName;
 import android.content.Context;
 import android.content.Intent;
 import android.content.ServiceConnection;
-import android.os.Build;
 import android.os.Bundle;
 import android.os.IBinder;
-import android.provider.Settings;
-import android.provider.Settings.SettingNotFoundException;
 import android.support.v7.widget.Toolbar;
-import android.text.TextUtils;
 
+import com.sap.sailing.android.shared.logging.ExLog;
+import com.sap.sailing.android.tracking.app.BuildConfig;
 import com.sap.sailing.android.tracking.app.R;
 import com.sap.sailing.android.tracking.app.services.TrackingService;
 import com.sap.sailing.android.tracking.app.services.TrackingService.GPSQuality;
 import com.sap.sailing.android.tracking.app.services.TrackingService.GPSQualityListener;
 import com.sap.sailing.android.tracking.app.services.TrackingService.TrackingBinder;
+import com.sap.sailing.android.tracking.app.services.TransmittingService;
+import com.sap.sailing.android.tracking.app.services.TransmittingService.APIConnectivity;
+import com.sap.sailing.android.tracking.app.services.TransmittingService.APIConnectivityListener;
+import com.sap.sailing.android.tracking.app.services.TransmittingService.TransmittingBinder;
 import com.sap.sailing.android.tracking.app.ui.fragments.TrackingFragment;
 
-public class TrackingActivity extends BaseActivity implements GPSQualityListener {
+public class TrackingActivity extends BaseActivity implements GPSQualityListener, APIConnectivityListener {
 	
 	TrackingService trackingService;
 	boolean trackingServiceBound;
+	
+	TransmittingService transmittingService;
+	boolean transmittingServiceBound;
 	
 	private final static String TAG = TrackingActivity.class.getName();
 
@@ -51,8 +55,10 @@ public class TrackingActivity extends BaseActivity implements GPSQualityListener
     @Override
     protected void onStart() {
     	super.onStart();
-    	Intent intent = new Intent(this, TrackingService.class);
-        bindService(intent, trackingServiceConnection, Context.BIND_AUTO_CREATE);
+    	Intent transmittingServiceIntent = new Intent(this, TransmittingService.class);
+        bindService(transmittingServiceIntent, transmittingServiceConnection, Context.BIND_AUTO_CREATE);
+    	Intent trackingServiceIntent = new Intent(this, TrackingService.class);
+        bindService(trackingServiceIntent, trackingServiceConnection, Context.BIND_AUTO_CREATE);
     }
     
     @Override
@@ -62,14 +68,41 @@ public class TrackingActivity extends BaseActivity implements GPSQualityListener
         	trackingService.unregisterGPSQualityListener();
             unbindService(trackingServiceConnection);
             trackingServiceBound = false;
+            
+            if (BuildConfig.DEBUG)
+            {
+            	ExLog.i(this, TAG, "Unbound tracking Service");
+            }
+        }
+        
+        if (transmittingServiceBound)
+        {
+        	transmittingService.unregisterAPIConnectivityListener();
+        	unbindService(transmittingServiceConnection);
+        	
+        	transmittingServiceBound = false;
+        	
+        	if (BuildConfig.DEBUG)
+            {
+            	ExLog.i(this, TAG, "Unbound transmitting Service");
+            }
         }
     }
+    
+    
     
     @Override
     public void gpsQualityUpdated(GPSQuality quality) {
     	TrackingFragment trackingFragment = (TrackingFragment) getSupportFragmentManager()
 				.findFragmentById(R.id.content_frame);
     	trackingFragment.setGPSQuality(quality);
+    }
+    
+    @Override
+    public void apiConnectivityUpdated(APIConnectivity apiConnectivity) {
+		TrackingFragment trackingFragment = (TrackingFragment) getSupportFragmentManager()
+				.findFragmentById(R.id.content_frame);
+		trackingFragment.setAPIConnectivityStatus(apiConnectivity);
     }
     
     private void startTrackingService()
@@ -89,6 +122,29 @@ public class TrackingActivity extends BaseActivity implements GPSQualityListener
 	}
 	
 	/** Defines callbacks for service binding, passed to bindService() */
+    private ServiceConnection transmittingServiceConnection = new ServiceConnection() {
+
+        @Override
+        public void onServiceConnected(ComponentName className,
+                IBinder service) {
+            // We've bound to LocalService, cast the IBinder and get LocalService instance
+            TransmittingBinder binder = (TransmittingBinder) service;
+            transmittingService = binder.getService();
+            transmittingServiceBound = true;
+            transmittingService.registerAPIConnectivityListener(TrackingActivity.this);
+            if (BuildConfig.DEBUG)
+            {
+            	ExLog.i(TrackingActivity.this, TAG, "connected to transmitting service");
+            }
+        }
+
+        @Override
+        public void onServiceDisconnected(ComponentName arg0) {
+            transmittingServiceBound = false;
+        }
+    };
+    
+	/** Defines callbacks for service binding, passed to bindService() */
     private ServiceConnection trackingServiceConnection = new ServiceConnection() {
 
         @Override
@@ -99,6 +155,10 @@ public class TrackingActivity extends BaseActivity implements GPSQualityListener
             trackingService = binder.getService();
             trackingServiceBound = true;
             trackingService.registerGPSQualityListener(TrackingActivity.this);
+            if (BuildConfig.DEBUG)
+            {
+            	ExLog.i(TrackingActivity.this, TAG, "connected to tracking service");
+            }
         }
 
         @Override

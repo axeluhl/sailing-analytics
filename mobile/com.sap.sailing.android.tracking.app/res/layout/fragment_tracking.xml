@@ -25,6 +25,7 @@
         android:layout_alignBottom="@id/mode_label"
         android:layout_alignParentRight="true"
         android:paddingRight="20dp"
+        android:textColor="@color/sap_green"
         android:text="@string/tracking_mode_caching" />
 
     <TextView
@@ -45,6 +46,7 @@
         android:layout_alignParentBottom="true"
         android:layout_alignParentRight="true"
         android:paddingRight="20dp"
+        android:textColor="@color/sap_green"
         android:text="@string/tracking_status_tracking" />
 
     <Button
