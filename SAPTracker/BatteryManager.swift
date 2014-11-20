@@ -54,7 +54,5 @@ class BatteryManager: NSObject {
         
         // register for battery events
         device.batteryMonitoringEnabled = true;
-        NSNotificationCenter.defaultCenter().addObserver(self, selector:"batteryChanged", name:UIDeviceBatteryLevelDidChangeNotification, object:device);
-        NSNotificationCenter.defaultCenter().addObserver(self, selector:"batteryChanged", name:UIDeviceBatteryStateDidChangeNotification, object:device);
     }
  }
