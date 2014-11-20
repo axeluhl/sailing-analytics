@@ -1,17 +1,19 @@
-<?xml version="1.0" encoding="utf-8"?><RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
+<?xml version="1.0" encoding="utf-8"?>
+<RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:custom="http://schemas.android.com/apk/res/com.sap.sailing.android.tracking.app.views"
     xmlns:tools="http://schemas.android.com/tools"
+    xmlns:app="http://schemas.android.com/apk/res/com.sap.sailing.android.tracking.app"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    android:background="@color/black" xmlns:app="http://schemas.android.com/apk/res/com.sap.sailing.android.tracking.app">
+    android:background="@color/black" >
 
     <TextView
         android:id="@+id/mode_label"
         android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
         android:layout_alignParentLeft="true"
         android:layout_below="@+id/qps_quality"
-        android:layout_marginTop="26dp"
+        android:layout_height="50dp"
+        android:gravity="center_vertical"
         android:text="@string/tracking_mode" />
 
     <TextView
@@ -24,13 +26,22 @@
         android:text="@string/tracking_mode_caching" />
 
     <TextView
-        android:id="@+id/tracking_time_label"
+        android:id="@+id/tracking_status_label"
+        android:layout_width="wrap_content"
+        android:layout_below="@+id/mode_label"
+        android:layout_height="50dp"
+        android:gravity="center_vertical"
+        android:text="@string/tracking_status" />
+
+    <TextView
+        android:id="@+id/tracking_status"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:layout_alignParentLeft="true"
-        android:layout_below="@id/mode_label"
-        android:layout_marginTop="30dp"
-        android:text="@string/tracking_time" />
+        android:layout_alignBaseline="@id/tracking_status_label"
+        android:layout_alignBottom="@id/tracking_status_label"
+        android:layout_alignParentBottom="true"
+        android:layout_alignParentRight="true"
+        android:text="@string/tracking_status_tracking" />
 
     <Button
         android:id="@+id/stop_tracking"
@@ -39,31 +50,80 @@
         android:layout_alignParentBottom="true"
         android:layout_alignParentLeft="true"
         android:layout_alignParentRight="true"
-        android:text="@string/stop_tracking"
-        android:background="#e94a1b" 
-        android:layout_marginLeft="4px"
-        android:layout_marginRight="4px"
-        />
+        android:layout_marginLeft="4sp"
+        android:layout_marginRight="4sp"
+        android:background="#e94a1b"
+        android:text="@string/stop_tracking" />
 
-    
-    <com.sap.sailing.android.tracking.app.views.SignalQualityIndicatorView 
-        app:signalQuality="good"
+    <com.sap.sailing.android.tracking.app.views.SignalQualityIndicatorView
         android:id="@+id/qps_quality_indicator"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:layout_alignBaseline="@id/qps_quality"
-        android:layout_alignBottom="@id/qps_quality"
         android:layout_alignParentRight="true"
         android:contentDescription="@string/signal_quality_indicator_view_description"
+        android:gravity="center_vertical"
         android:focusable="true"
-        />
+        app:signalQuality="good" />
 
     <TextView
         android:id="@+id/qps_quality"
         android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:layout_alignParentLeft="true"
+        android:layout_height="50dp"
+        android:gravity="center_vertical"
         android:layout_alignParentTop="true"
-        android:text="@string/tracking_qps_quality" /> 
+        android:text="@string/tracking_qps_quality" />
+
+    <LinearLayout
+        android:layout_width="fill_parent"
+        android:layout_height="wrap_content"
+        android:layout_alignTop="@+id/tracking_status_label"
+        android:layout_gravity="center"
+        android:baselineAligned="false"
+        android:orientation="vertical"
+        android:paddingTop="20sp" >
+
+        <TextView
+            android:id="@+id/tracking_time_info_label"
+            android:layout_width="fill_parent"
+            android:layout_marginTop="30dp"
+            android:layout_height="50dp"
+        android:gravity="center_vertical"
+            android:text="@string/tracking_time" />
+
+        <View
+            android:layout_width="fill_parent"
+            android:layout_height="1dp"
+            android:background="@android:color/darker_gray" />
+
+        <TextView
+            android:id="@+id/tracking_time_label"
+            android:layout_width="fill_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="10dp"
+            android:gravity="center"
+            android:text="00:00:00"
+            android:textSize="80sp" />
+    </LinearLayout>
+
+    <!-- Separators -->
+
+    <View
+        android:layout_width="fill_parent"
+        android:layout_height="1dp"
+        android:layout_below="@id/mode_label"
+        android:background="@android:color/darker_gray" />
+
+    <View
+        android:layout_width="fill_parent"
+        android:layout_height="1dp"
+        android:layout_below="@id/tracking_status_label"
+        android:background="@android:color/darker_gray" />
+
+    <View
+        android:layout_width="fill_parent"
+        android:layout_height="1dp"
+        android:layout_below="@id/qps_quality"
+        android:background="@android:color/darker_gray" />
 
 </RelativeLayout>
