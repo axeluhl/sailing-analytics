@@ -34,5 +34,10 @@
     <string name="tracking_status">Status</string>
 	<string name="tracking_status_tracking">Tracking läuft</string>
 	<string name="tracking_status_not_tracking">Tracking gestoppt</string>
+	<string name="tracking_status_no_gps_signal">Kein GPS Signal!</string>
+	<string name="tracking_mode">Modus</string>
+	<string name="tracking_mode_live">Live</string>
+	<string name="tracking_mode_caching">Caching</string>
+	<string name="tracking_mode_api_error">API-Fehler</string>
 
 </resources>

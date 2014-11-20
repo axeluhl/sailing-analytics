@@ -5,9 +5,11 @@ import android.app.AlertDialog;
 import android.content.Context;
 import android.content.DialogInterface;
 import android.content.Intent;
+import android.graphics.Color;
+import android.net.ConnectivityManager;
+import android.net.NetworkInfo;
 import android.os.Build;
 import android.os.Bundle;
-import android.os.Handler;
 import android.provider.Settings;
 import android.provider.Settings.SettingNotFoundException;
 import android.text.TextUtils;
@@ -16,12 +18,14 @@ import android.view.View;
 import android.view.View.OnClickListener;
 import android.view.ViewGroup;
 import android.widget.Button;
+import android.widget.TextView;
 
 import com.sap.sailing.android.shared.logging.ExLog;
 import com.sap.sailing.android.tracking.app.BuildConfig;
 import com.sap.sailing.android.tracking.app.R;
 import com.sap.sailing.android.tracking.app.services.TrackingService;
 import com.sap.sailing.android.tracking.app.services.TrackingService.GPSQuality;
+import com.sap.sailing.android.tracking.app.services.TransmittingService.APIConnectivity;
 import com.sap.sailing.android.tracking.app.utils.AppPreferences;
 import com.sap.sailing.android.tracking.app.views.AutoResizeTextView;
 import com.sap.sailing.android.tracking.app.views.SignalQualityIndicatorView;
@@ -105,6 +109,56 @@ public class TrackingFragment extends BaseFragment implements OnClickListener {
 		}
 	}
 	
+	/**
+	 * Update tracking status string in UI
+	 * @param quality
+	 */
+	public void updateTrackingStatus( GPSQuality quality )
+	{
+		TextView textView = (TextView)getActivity().findViewById(R.id.tracking_status);
+		
+		if (quality == GPSQuality.noSignal)
+		{
+			textView.setText(getString(R.string.tracking_status_no_gps_signal));
+			textView.setTextColor(Color.parseColor(getString(R.color.sap_red)));
+		}
+		else
+		{
+			textView.setText(getString(R.string.tracking_status_tracking));
+			textView.setTextColor(Color.parseColor(getString(R.color.sap_green)));
+		}
+	}
+	
+	/**
+	 * Update UI and tell user if app is caching or sending fixes to api
+	 * @param apiIsReachable
+	 */
+	public void setAPIConnectivityStatus(APIConnectivity apiConnectivity)
+	{
+		TextView textView = (TextView)getActivity().findViewById(R.id.mode);
+		
+		if (apiConnectivity == APIConnectivity.reachableTransmissionSuccess)
+		{
+			textView.setText(getString(R.string.tracking_mode_live));
+			textView.setTextColor(Color.parseColor(getString(R.color.sap_green)));
+		}
+		else if  (apiConnectivity == APIConnectivity.reachableTransmissionError)
+		{
+			textView.setText(getString(R.string.tracking_mode_api_error));
+			textView.setTextColor(Color.parseColor(getString(R.color.sap_red)));
+		}
+		else
+		{
+			textView.setText(getString(R.string.tracking_mode_caching));
+			textView.setTextColor(Color.parseColor(getString(R.color.sap_green)));
+		}
+	}
+	
+	/**
+	 * Returns if location is enabled on the device
+	 * @param context
+	 * @return true if location is enabled, false otherwise
+	 */
     @TargetApi(Build.VERSION_CODES.KITKAT)
     @SuppressWarnings("deprecation")
     private boolean isLocationEnabled(Context context) {
@@ -126,6 +180,19 @@ public class TrackingFragment extends BaseFragment implements OnClickListener {
             return !TextUtils.isEmpty(locationProviders);
         }
     } 
+    
+    /**
+	 * Returns if network connection is available on the device
+	 * @param context
+	 * @return true if network connection is available, false otherwise
+	 */
+    private boolean isNetworkAvailable() {
+        ConnectivityManager connectivityManager 
+              = (ConnectivityManager) getActivity().getSystemService(Context.CONNECTIVITY_SERVICE);
+        NetworkInfo activeNetworkInfo = connectivityManager.getActiveNetworkInfo();
+        return activeNetworkInfo != null && activeNetworkInfo.isConnected();
+    }
+    
 	public void userTappedBackButton()
 	{
 		showStopTrackingConfirmationDialog();
@@ -163,10 +230,12 @@ public class TrackingFragment extends BaseFragment implements OnClickListener {
 		return String.format(getResources().getConfiguration().locale, "%02d:%02d:%02d", hours, minutes, seconds);
 	}
 	
-	public void setGPSQuality( GPSQuality quality )
+	public void setGPSQuality(GPSQuality quality)
 	{
 		SignalQualityIndicatorView indicatorView = (SignalQualityIndicatorView) getActivity().findViewById(R.id.qps_quality_indicator);
 		indicatorView.setSignalQuality( quality.toInt() );
+		
+		updateTrackingStatus(quality);
 		
 		lastGPSQualityUpdate = System.currentTimeMillis();
 	}

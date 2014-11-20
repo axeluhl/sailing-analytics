@@ -19,6 +19,7 @@ import android.net.ConnectivityManager;
 import android.net.NetworkInfo;
 import android.net.Uri;
 import android.os.BatteryManager;
+import android.os.Binder;
 import android.os.IBinder;
 
 import com.android.volley.Response.ErrorListener;
@@ -29,6 +30,9 @@ import com.sap.sailing.android.shared.logging.ExLog;
 import com.sap.sailing.android.tracking.app.BuildConfig;
 import com.sap.sailing.android.tracking.app.R;
 import com.sap.sailing.android.tracking.app.provider.AnalyticsContract.SensorGps;
+import com.sap.sailing.android.tracking.app.services.TrackingService.GPSQuality;
+import com.sap.sailing.android.tracking.app.services.TrackingService.GPSQualityListener;
+import com.sap.sailing.android.tracking.app.services.TrackingService.TrackingBinder;
 import com.sap.sailing.android.tracking.app.services.sending.ConnectivityChangedReceiver;
 import com.sap.sailing.android.tracking.app.utils.AppPreferences;
 import com.sap.sailing.android.tracking.app.utils.VolleyHelper;
@@ -72,9 +76,12 @@ public class TransmittingService extends Service {
 	private AppPreferences prefs;
 	private Timer timer;
 	
+    private APIConnectivityListener apiConnectivityListener;
+    private final IBinder transmittingBinder = new TransmittingBinder();
+	
 	@Override
 	public IBinder onBind(Intent intent) {
-		return null;
+		return transmittingBinder;
 	}
 	
 	@Override
@@ -127,6 +134,8 @@ public class TransmittingService extends Service {
 		
 		lastTransmissionFailed = false;
 		lastTransmissionTimestamp = System.nanoTime();
+		
+		reportApiConnectivity(APIConnectivity.reachableTransmissionSuccess);
 	}
 	
 	private void markFailedTransmission()
@@ -137,6 +146,16 @@ public class TransmittingService extends Service {
 		
 		lastTransmissionFailed = true;
 		lastTransmissionTimestamp = 0;
+		
+		if (isConnected())
+		{
+			reportApiConnectivity(APIConnectivity.reachableTransmissionError);
+		}
+		else
+		{
+			reportApiConnectivity(APIConnectivity.notReachable);	
+		}
+		
 	}
 	
 	/**
@@ -345,6 +364,18 @@ public class TransmittingService extends Service {
     {
     	ConnectivityChangedReceiver.enable(this);
     }
+    
+    /**
+     * Report API connectivity to listening activity
+     * @param apiConnectivity
+     */
+    private void reportApiConnectivity( APIConnectivity apiConnectivity )
+    {
+    	if (apiConnectivityListener != null)
+    	{
+    		apiConnectivityListener.apiConnectivityUpdated( apiConnectivity );
+    	}
+    }
 	
 //  might need this class in the future:  
 //
@@ -462,4 +493,44 @@ public class TransmittingService extends Service {
 			endExecution = true;
 		}
 	}
+	
+	public void registerAPIConnectivityListener( APIConnectivityListener listener )
+	{
+		apiConnectivityListener = listener;
+	}
+	
+	public void unregisterAPIConnectivityListener()
+	{
+		apiConnectivityListener = null;
+	}
+	
+    
+	public class TransmittingBinder extends Binder {
+		public TransmittingService getService() {
+			return TransmittingService.this;
+		}
+	}
+	
+	public enum APIConnectivity {
+		notReachable (0),
+		reachableTransmissionSuccess (1),
+		reachableTransmissionError(2);
+		
+		private final int apiConnectivity;
+		
+		APIConnectivity(int connectivity)
+		{
+			this.apiConnectivity = connectivity;
+		}
+		
+		public int toInt()
+		{
+			return this.apiConnectivity;
+		}
+	}
+	
+	public interface APIConnectivityListener {
+		public void apiConnectivityUpdated( APIConnectivity apiConnectivity );
+	}
+	
 }

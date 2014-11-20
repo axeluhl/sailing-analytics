@@ -21,10 +21,12 @@
 	<string name="tracking_mode">Mode</string>
 	<string name="tracking_mode_live">Live</string>
 	<string name="tracking_mode_caching">Caching</string>
+	<string name="tracking_mode_api_error">API-Error</string>
 	<string name="tracking_time">Tracking Time</string>
 	<string name="regatta_name">RegattaName</string>
 	<string name="event_name">EventName</string>
 	<string name="tracking_status">Status</string>
 	<string name="tracking_status_tracking">Tracking running</string>
 	<string name="tracking_status_not_tracking">Tracking stopped</string>
+	<string name="tracking_status_no_gps_signal">No GPS Signal!</string>
 </resources>
