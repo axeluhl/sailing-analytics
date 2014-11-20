@@ -68,7 +68,7 @@
         android:contentDescription="@string/signal_quality_indicator_view_description"
         android:focusable="true"
         android:paddingRight="20dp"
-        app:signalQuality="good" />
+        app:signalQuality="none" />
 
     <TextView
         android:id="@+id/qps_quality"

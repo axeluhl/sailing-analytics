@@ -18,6 +18,7 @@ import android.content.ContentValues;
 import android.content.Context;
 import android.content.Intent;
 import android.location.Location;
+import android.os.Binder;
 import android.os.Build;
 import android.os.Bundle;
 import android.os.IBinder;
@@ -47,6 +48,9 @@ public class TrackingService extends Service implements ConnectionCallbacks, OnC
     private boolean locationUpdateRequested = false;
     private AppPreferences prefs;
     private ScheduledExecutorService scheduler;
+    
+    private GPSQualityListener gpsQualityListener;
+    private final IBinder trackingBinder = new TrackingBinder();
 
     private static final String TAG = TrackingService.class.getName();
 
@@ -124,11 +128,39 @@ public class TrackingService extends Service implements ConnectionCallbacks, OnC
     public void onDisconnected() {
         ExLog.i(this, TAG, "LocationClient was disconnected");
     }
+    
+    public void reportGPSQuality( float gpsAccurracy )
+    {
+    	GPSQuality quality = GPSQuality.noSignal;
+    	
+    	if (gpsQualityListener != null)
+    	{
+    		if (gpsAccurracy > 163)
+    		{
+    			quality = GPSQuality.poor;
+    		}
+    		else if (gpsAccurracy > 48)
+    		{
+    			quality = GPSQuality.good;
+    		}
+    		else if (gpsAccurracy < 48)
+    		{
+    			quality = GPSQuality.great;
+    		}
+    		
+    		gpsQualityListener.gpsQualityUpdated(quality);
+    	}
+    }
+    
 
     @TargetApi(Build.VERSION_CODES.JELLY_BEAN_MR1)
     @Override
     public void onLocationChanged(Location location) {
+    	
+    	reportGPSQuality(location.getAccuracy());
+    	
         JSONObject json = new JSONObject();
+        
         try {
             json.put(FlatSmartphoneUuidAndGPSFixMovingJsonDeserializer.DEVICE_UUID,
                     prefs.getDeviceIdentifier());
@@ -193,7 +225,7 @@ public class TrackingService extends Service implements ConnectionCallbacks, OnC
 
     @Override
     public IBinder onBind(Intent intent) {
-        return null;
+        return trackingBinder;
     }
 
     @Override
@@ -213,4 +245,45 @@ public class TrackingService extends Service implements ConnectionCallbacks, OnC
         notification.flags |= Notification.FLAG_NO_CLEAR;
         startForeground(NOTIFICATION_ID, notification);
     }
+    
+	public void registerGPSQualityListener( GPSQualityListener listener )
+	{
+		gpsQualityListener = listener;
+	}
+	
+	public void unregisterGPSQualityListener()
+	{
+		gpsQualityListener = null;
+	}
+	
+    
+	public class TrackingBinder extends Binder {
+		public TrackingService getService() {
+			return TrackingService.this;
+		}
+	}
+	
+	public enum GPSQuality {
+		noSignal (0),
+		poor (2),
+		good (3),
+		great (4);
+		
+		private final int gpsQuality;
+		
+		GPSQuality(int quality)
+		{
+			this.gpsQuality = quality;
+		}
+		
+		public int toInt()
+		{
+			return this.gpsQuality;
+		}
+	}
+	
+	public interface GPSQualityListener {
+		public void gpsQualityUpdated( GPSQuality quality );
+	}
+	
 }

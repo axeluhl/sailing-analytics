@@ -279,7 +279,6 @@ public class TransmittingService extends Service {
 			
 			
 			sendingAttempted = true;
-			
 			VolleyHelper.getInstance(this).addRequest(
 					new JsonObjectRequest(prefs.getServerURL()
 							+ prefs.getServerGpsFixesPostPath(), requestObject,
