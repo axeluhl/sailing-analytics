@@ -16,6 +16,10 @@ class AppDelegate: UIResponder, UIApplicationDelegate {
 
     func application(application: UIApplication, didFinishLaunchingWithOptions launchOptions: [NSObject: AnyObject]?) -> Bool {
         // Override point for customization after application launch.
+        BITHockeyManager.sharedHockeyManager().configureWithIdentifier("8c2070839f98ada3aff80a0882dd29e0")
+        BITHockeyManager.sharedHockeyManager().startManager()
+        BITHockeyManager.sharedHockeyManager().authenticator.authenticateInstallation()
+
         DataManager.sharedManager
         SendGPSFixController.sharedManager.timer()
         return true

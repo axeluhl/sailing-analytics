@@ -11,5 +11,6 @@
 
 #import <AFNetworking/AFNetworking.h>
 #import "UIImageView+AFNetworking.h"
+#import "HockeySDK.h"
 
 #endif

@@ -20,11 +20,14 @@ PODS:
   - AFNetworking/UIKit (2.4.1):
     - AFNetworking/NSURLConnection
     - AFNetworking/NSURLSession
+  - HockeySDK (3.6.1)
 
 DEPENDENCIES:
   - AFNetworking (~> 2.4)
+  - HockeySDK (~> 3.6.1)
 
 SPEC CHECKSUMS:
   AFNetworking: 0aabc6fae66d6e5d039eeb21c315843c7aae51ab
+  HockeySDK: 15b24068466aa5ee421eed0cc1d58428d698edf6
 
 COCOAPODS: 0.34.2
