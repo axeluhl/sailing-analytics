@@ -126,6 +126,10 @@ public class SignalQualityIndicatorView extends View {
 	    this.height = (float)h - ypad;
 	}
 	
+	@Override
+	public int getBaseline() {
+		return getMeasuredHeight() / 2;
+	}	
 
 	/**
 	 * Must be 0,2,3 or 4, otherwise 1 will be set

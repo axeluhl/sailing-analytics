@@ -30,6 +30,9 @@
     <string name="poor">schwach</string>
     <string name="good">gut</string>
     <string name="great">sehr gut</string>
-    <string name="no_signal">kein signal</string>
+    <string name="no_signal">kein Signal</string>
+    <string name="tracking_status">Status</string>
+	<string name="tracking_status_tracking">Tracking läuft</string>
+	<string name="tracking_status_not_tracking">Tracking gestoppt</string>
 
 </resources>

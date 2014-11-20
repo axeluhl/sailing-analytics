@@ -41,6 +41,11 @@ public class ConnectivityChangedReceiver extends BroadcastReceiver {
 		final ConnectivityManager connManager = (ConnectivityManager) context.getSystemService(Context.CONNECTIVITY_SERVICE);
 		final NetworkInfo networkInfo = connManager.getActiveNetworkInfo();
 
+		if (networkInfo == null)
+		{
+			return; // was null when restarted router..
+		}
+		
 		if (!networkInfo.isConnected()) {
 			return;
 		}
