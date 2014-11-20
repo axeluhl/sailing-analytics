@@ -10,7 +10,7 @@ body {
 	vertical-align: middle;
 }
 
-.loginform {
+.registrationform {
 	display: table; /* shrinks to fit conntent */
 	margin: auto;
 	border: 1px solid gray;
@@ -18,7 +18,7 @@ body {
 	background-color: white;
 }
 
-.loginform_header {
+.registrationform_header {
 	height: 40px;
 	background-color: #333333;
 	border-bottom: 4px solid #f0ab00;
@@ -26,7 +26,7 @@ body {
 	position: relative
 }
 
-.loginform_header_appname {
+.registrationform_header_appname {
 	display: inline;
 	font-size: 20px;
 	margin: 0;
@@ -35,7 +35,7 @@ body {
 	transform: translate(0, -50%)
 }
 
-.loginform_content {
+.registrationform_content {
 	padding: 10px;
 }
 
@@ -45,6 +45,11 @@ body {
 
 .passwordTextInput_watermark {
 	color:;
+}
+
+.errormessage {
+	font-weight: bold;
+	color:red;
 }
 
 .glowing_border {
@@ -79,4 +84,11 @@ body {
 	background-color: #d89a00;
 	outline: none;
 	text-decoration: none;
+}
+
+.buttoninactive {
+  background-color: #ccc;
+}
+.buttoninactive:hover {
+  background-color: #b8b8b8;
 }
