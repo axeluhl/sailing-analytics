@@ -2,10 +2,10 @@ package com.sap.sailing.gwt.home.client.shared;
 
 import com.google.gwt.core.client.GWT;
 import com.google.gwt.user.client.Timer;
-import com.sap.sailing.domain.common.Duration;
-import com.sap.sailing.domain.common.TimePoint;
-import com.sap.sailing.domain.common.impl.MillisecondsTimePoint;
 import com.sap.sailing.gwt.common.client.i18n.TextMessages;
+import com.sap.sse.common.Duration;
+import com.sap.sse.common.TimePoint;
+import com.sap.sse.common.impl.MillisecondsTimePoint;
 
 /**
  * A countdown notifying about changes in the two most significant time units. I.e. days+hours or hours+minutes or minutes+seconds or seconds only.

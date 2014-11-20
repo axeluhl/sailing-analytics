@@ -2,8 +2,7 @@ package com.sap.sailing.domain.tractracadapter;
 
 import java.util.UUID;
 
-import com.sap.sailing.domain.common.Position;
-import com.sap.sailing.domain.common.WithID;
+import com.sap.sse.common.WithID;
 import com.tractrac.model.lib.api.event.IEvent;
 import com.tractrac.model.lib.api.route.IControlPoint;
 
@@ -28,8 +27,4 @@ public interface TracTracControlPoint extends WithID {
     String getShortName();
     
     boolean getHasTwoPoints();
-    
-    Position getMark1Position();
-    
-    Position getMark2Position();
 }

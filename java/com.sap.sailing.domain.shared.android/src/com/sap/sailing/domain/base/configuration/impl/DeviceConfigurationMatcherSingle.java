@@ -3,11 +3,11 @@ package com.sap.sailing.domain.base.configuration.impl;
 import java.io.Serializable;
 import java.util.Arrays;
 
-import com.sap.sailing.domain.base.IsManagedBySharedDomainFactory;
 import com.sap.sailing.domain.base.SharedDomainFactory;
 import com.sap.sailing.domain.base.configuration.DeviceConfigurationIdentifier;
 import com.sap.sailing.domain.base.configuration.DeviceConfigurationMatcher;
 import com.sap.sailing.domain.common.configuration.DeviceConfigurationMatcherType;
+import com.sap.sse.common.IsManagedByCache;
 
 /**
  * Matches a single {@link DeviceConfigurationIdentifier}.
@@ -51,7 +51,7 @@ public class DeviceConfigurationMatcherSingle implements DeviceConfigurationMatc
     }
 
     @Override
-    public IsManagedBySharedDomainFactory resolve(SharedDomainFactory domainFactory) {
+    public IsManagedByCache<SharedDomainFactory> resolve(SharedDomainFactory domainFactory) {
         return domainFactory.getOrCreateDeviceConfigurationMatcher(getMatcherType(), Arrays.asList(clientIdentifier));
     }
 

@@ -2,6 +2,9 @@ package com.sap.sailing.domain.common;
 
 import java.io.Serializable;
 
+import com.sap.sse.common.Duration;
+import com.sap.sse.common.TimePoint;
+
 public interface TimeRange extends Comparable<TimeRange>, Serializable {
     /**
      * @return {@code null}, if the timepoint is at the beginning of time

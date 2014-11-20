@@ -1,8 +1,8 @@
 package com.sap.sailing.domain.racelog.state.racingprocedure.gate.impl;
 
-import com.sap.sailing.domain.common.TimePoint;
 import com.sap.sailing.domain.racelog.state.racingprocedure.RacingProcedurePrerequisite;
 import com.sap.sailing.domain.racelog.state.racingprocedure.gate.GateStartRacingProcedure;
+import com.sap.sse.common.TimePoint;
 
 public class GateLaunchTimePrerequisite extends BaseGateStartPrerequisite implements RacingProcedurePrerequisite {
 

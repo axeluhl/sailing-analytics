@@ -5,8 +5,8 @@ import java.util.List;
 
 import com.sap.sailing.domain.base.Competitor;
 import com.sap.sailing.domain.base.Timed;
-import com.sap.sailing.domain.common.TimePoint;
-import com.sap.sailing.domain.common.WithID;
+import com.sap.sse.common.TimePoint;
+import com.sap.sse.common.WithID;
 
 /**
  * <p>

@@ -4,10 +4,10 @@ import java.util.Set;
 
 import com.sap.sailing.domain.common.Bearing;
 import com.sap.sailing.domain.common.SpeedWithBearing;
-import com.sap.sailing.domain.common.TimePoint;
 import com.sap.sailing.domain.tracking.GPSFix;
 import com.sap.sailing.domain.tracking.GPSFixMoving;
 import com.sap.sailing.udpconnector.UDPMessage;
+import com.sap.sse.common.TimePoint;
 
 public interface ExpeditionMessage extends UDPMessage {
     /* Here is a typical sequence of data as received from Expedition

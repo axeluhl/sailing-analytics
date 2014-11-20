@@ -2,7 +2,7 @@ package com.sap.sailing.domain.common.dto;
 
 import java.io.Serializable;
 
-import com.sap.sailing.domain.common.Duration;
+import com.sap.sse.common.Duration;
 
 public class TrackedRaceStatisticsDTO implements Serializable {
     private static final long serialVersionUID = -2123085927945474642L;

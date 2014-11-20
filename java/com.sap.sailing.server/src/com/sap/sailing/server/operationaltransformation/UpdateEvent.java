@@ -3,9 +3,9 @@ package com.sap.sailing.server.operationaltransformation;
 import java.net.URL;
 import java.util.UUID;
 
-import com.sap.sailing.domain.common.TimePoint;
 import com.sap.sailing.server.RacingEventService;
 import com.sap.sailing.server.RacingEventServiceOperation;
+import com.sap.sse.common.TimePoint;
 
 public class UpdateEvent extends AbstractEventOperation<Void> {
     private static final long serialVersionUID = -8271559266421161532L;

@@ -2,9 +2,9 @@ package com.sap.sailing.domain.tracking.impl;
 
 import com.sap.sailing.domain.base.Competitor;
 import com.sap.sailing.domain.base.Waypoint;
-import com.sap.sailing.domain.common.TimePoint;
 import com.sap.sailing.domain.tracking.MarkPassing;
 import com.sap.sailing.domain.tracking.MarkPassingForOffsetWaypoint;
+import com.sap.sse.common.TimePoint;
 
 public class MarkPassingForOffsetImpl extends MarkPassingImpl implements MarkPassingForOffsetWaypoint {
 

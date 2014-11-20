@@ -6,9 +6,9 @@ import org.json.simple.JSONObject;
 import com.sap.sailing.domain.base.Fleet;
 import com.sap.sailing.domain.base.RaceColumn;
 import com.sap.sailing.domain.base.Series;
-import com.sap.sailing.domain.common.impl.MillisecondsTimePoint;
 import com.sap.sailing.domain.tracking.TrackedRace;
 import com.sap.sailing.server.gateway.serialization.JsonSerializer;
+import com.sap.sse.common.impl.MillisecondsTimePoint;
 
 public class SeriesJsonSerializer implements JsonSerializer<Series> {
     public static final String FIELD_NAME = "name";

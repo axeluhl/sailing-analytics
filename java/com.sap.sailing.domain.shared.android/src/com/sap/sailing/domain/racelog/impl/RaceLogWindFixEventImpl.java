@@ -4,11 +4,11 @@ import java.io.Serializable;
 import java.util.List;
 
 import com.sap.sailing.domain.base.Competitor;
-import com.sap.sailing.domain.common.TimePoint;
 import com.sap.sailing.domain.racelog.RaceLogEventAuthor;
 import com.sap.sailing.domain.racelog.RaceLogEventVisitor;
 import com.sap.sailing.domain.racelog.RaceLogWindFixEvent;
 import com.sap.sailing.domain.tracking.Wind;
+import com.sap.sse.common.TimePoint;
 
 public class RaceLogWindFixEventImpl extends RaceLogEventImpl implements RaceLogWindFixEvent {
     private static final long serialVersionUID = 7879094280634905183L;
