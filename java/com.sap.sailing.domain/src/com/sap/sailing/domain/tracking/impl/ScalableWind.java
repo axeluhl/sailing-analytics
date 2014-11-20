@@ -2,11 +2,11 @@ package com.sap.sailing.domain.tracking.impl;
 
 import com.sap.sailing.domain.common.AbstractPosition;
 import com.sap.sailing.domain.common.Position;
-import com.sap.sailing.domain.common.impl.MillisecondsTimePoint;
 import com.sap.sailing.domain.common.scalablevalue.ScalableValue;
 import com.sap.sailing.domain.common.scalablevalue.impl.ScalablePosition;
 import com.sap.sailing.domain.common.scalablevalue.impl.ScalableSpeedWithBearing;
 import com.sap.sailing.domain.tracking.Wind;
+import com.sap.sse.common.impl.MillisecondsTimePoint;
 
 /**
  * Wind values are scaled by separately scaling their speed and bearing, and separately scaling their time point, and

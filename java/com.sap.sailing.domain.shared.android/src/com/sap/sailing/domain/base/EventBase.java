@@ -5,9 +5,9 @@ import java.util.concurrent.ExecutionException;
 
 import com.sap.sailing.domain.common.ImageSize;
 import com.sap.sailing.domain.common.Renamable;
-import com.sap.sailing.domain.common.TimePoint;
-import com.sap.sailing.domain.common.WithID;
 import com.sap.sse.common.Named;
+import com.sap.sse.common.TimePoint;
+import com.sap.sse.common.WithID;
 
 /**
  * Base interface for an Event consisting of all static information, which might be shared

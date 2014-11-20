@@ -3,8 +3,8 @@ package com.sap.sailing.domain.base.impl;
 import java.util.UUID;
 
 import com.sap.sailing.domain.base.CourseArea;
-import com.sap.sailing.domain.base.IsManagedBySharedDomainFactory;
 import com.sap.sailing.domain.base.SharedDomainFactory;
+import com.sap.sse.common.IsManagedByCache;
 import com.sap.sse.common.impl.NamedImpl;
 
 public class CourseAreaImpl extends NamedImpl implements CourseArea {
@@ -23,7 +23,7 @@ public class CourseAreaImpl extends NamedImpl implements CourseArea {
     }
 
     @Override
-    public IsManagedBySharedDomainFactory resolve(SharedDomainFactory domainFactory) {
+    public IsManagedByCache<SharedDomainFactory> resolve(SharedDomainFactory domainFactory) {
         return domainFactory.getOrCreateCourseArea(id, getName());
     }
 }

@@ -2,12 +2,12 @@ package com.sap.sailing.domain.markpassingcalculation;
 
 import com.sap.sailing.domain.base.Competitor;
 import com.sap.sailing.domain.base.Waypoint;
-import com.sap.sailing.domain.common.TimePoint;
 import com.sap.sailing.domain.markpassingcalculation.impl.CandidateImpl;
 import com.sap.sailing.domain.tracking.DynamicTrackedRace;
 import com.sap.sailing.domain.tracking.MarkPassing;
 
 public interface CandidateChooser {
+import com.sap.sse.common.TimePoint;
 
     /**
      * Calculates any new {@link MarkPassing}s and notifies the {@link DynamicTrackedRace}.

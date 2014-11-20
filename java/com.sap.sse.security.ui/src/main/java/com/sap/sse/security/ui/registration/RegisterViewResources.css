@@ -1,0 +1,94 @@
+body, html {
+	width: 100%;
+	height: 100%;
+	display: table;
+	background-color: lightgray;
+}
+
+body {
+	display: table-cell;
+	vertical-align: middle;
+}
+
+.registrationform {
+	display: table; /* shrinks to fit conntent */
+	margin: auto;
+	border: 1px solid gray;
+	line-height: 2.0;
+	background-color: white;
+}
+
+.registrationform_header {
+	height: 40px;
+	background-color: #333333;
+	border-bottom: 4px solid #f0ab00;
+	color: white;
+	position: relative
+}
+
+.registrationform_header_appname {
+	display: inline;
+	font-size: 20px;
+	margin: 0;
+	position: absolute;
+	top: 50%;
+	transform: translate(0, -50%)
+}
+
+.registrationform_content {
+	padding: 10px;
+}
+
+.textInput_watermark {
+	color: gray;
+}
+
+.passwordTextInput_watermark {
+	color:;
+}
+
+.errormessage {
+	font-weight: bold;
+	color:red;
+}
+
+.glowing_border {
+	border: 2px solid #dadada;
+}
+
+.glowing_border:focus {
+	outline: none;
+	border-color: #9ecaed;
+	box-shadow: 0 0 10px #9ecaed;
+}
+
+.button {
+	font-size: 15px;
+	font-size: 1rem;
+	font-weight: 400;
+	line-height: 1.7em;
+	color: #fff;
+	border: none;
+	background-color: #f0ab00;
+	padding-left: 20px;
+	padding-right: 20px;
+	-webkit-transition: background-color 0.2s;
+	-moz-transition: background-color 0.2s;
+	-o-transition: background-color 0.2s;
+	-ms-transition: background-color 0.2s;
+	transition: background-color 0.2s;
+	text-decoration: none;
+}
+
+.button:hover, .button:focus {
+	background-color: #d89a00;
+	outline: none;
+	text-decoration: none;
+}
+
+.buttoninactive {
+  background-color: #ccc;
+}
+.buttoninactive:hover {
+  background-color: #b8b8b8;
+}

@@ -1,22 +1,23 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources xmlns:tools="http://schemas.android.com/tools">
-	<string name="options_menu_live">Connection Information</string>
-	
+
+    <string name="options_menu_live">Connection Information</string>
     <string name="remove">Remove</string>
-	<string name="enter_new_item">Enter new item</string>
-	<string name="add">Add</string>
-	<string name="there_are_no_items_yet_">There are no items yet.</string>
-	
-	<!-- SystemInformationActivity -->
-	<string name="application_information" translatable="false">Application Information</string>
-	<string name="application_identifier" translatable="false">Identifier</string>
-	<string name="application_install_date" translatable="false">Install Date</string>
-	<string name="persistence_information" translatable="false">Persistence Status</string>
-	<string name="persistence_waiting_clear_events" translatable="false">Clear events</string>
-	<string name="persistence_waiting_events" translatable="false">Waiting events</string>
-	<string name="application_version" translatable="false">Version</string>
-	
-	<!-- Generic -->
+    <string name="enter_new_item">Enter new item</string>
+    <string name="add">Add</string>
+    <string name="there_are_no_items_yet_">There are no items yet.</string>
+
+    <!-- SystemInformationActivity -->
+    <string name="application_information" translatable="false">Application Information</string>
+    <string name="application_identifier" translatable="false">Identifier</string>
+    <string name="application_install_date" translatable="false">Install Date</string>
+    <string name="persistence_information" translatable="false">Persistence Status</string>
+    <string name="persistence_waiting_clear_events" translatable="false">Clear events</string>
+    <string name="persistence_waiting_events" translatable="false">Waiting events</string>
+    <string name="application_version" translatable="false">Version</string>
+
+    <!-- Generic -->
     <string name="empty"></string>
-	<string name="generic_error">Error</string>
+    <string name="generic_error">Error</string>
+
 </resources>

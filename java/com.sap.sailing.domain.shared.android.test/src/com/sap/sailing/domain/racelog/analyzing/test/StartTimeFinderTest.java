@@ -9,12 +9,12 @@ import java.util.Arrays;
 
 import org.junit.Test;
 
-import com.sap.sailing.domain.common.TimePoint;
 import com.sap.sailing.domain.racelog.RaceLog;
 import com.sap.sailing.domain.racelog.RaceLogEvent;
 import com.sap.sailing.domain.racelog.RaceLogEventAuthor;
 import com.sap.sailing.domain.racelog.RaceLogStartTimeEvent;
 import com.sap.sailing.domain.racelog.analyzing.impl.StartTimeFinder;
+import com.sap.sse.common.TimePoint;
 
 public class StartTimeFinderTest extends PassAwareRaceLogAnalyzerTest<StartTimeFinder, TimePoint> {
 

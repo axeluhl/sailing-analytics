@@ -2,8 +2,8 @@ package com.sap.sailing.racecommittee.app.utils;
 
 import android.text.format.DateFormat;
 
-import com.sap.sailing.domain.common.TimePoint;
-import com.sap.sailing.domain.common.impl.MillisecondsTimePoint;
+import com.sap.sse.common.TimePoint;
+import com.sap.sse.common.impl.MillisecondsTimePoint;
 
 public class TimeUtils {
 

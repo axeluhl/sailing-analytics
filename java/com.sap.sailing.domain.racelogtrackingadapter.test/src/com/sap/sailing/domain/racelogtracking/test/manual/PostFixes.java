@@ -15,7 +15,6 @@ import com.sap.sailing.domain.common.SpeedWithBearing;
 import com.sap.sailing.domain.common.impl.DegreeBearingImpl;
 import com.sap.sailing.domain.common.impl.DegreePosition;
 import com.sap.sailing.domain.common.impl.KnotSpeedWithBearingImpl;
-import com.sap.sailing.domain.common.impl.MillisecondsTimePoint;
 import com.sap.sailing.domain.racelog.tracking.test.mock.SmartphoneImeiIdentifier;
 import com.sap.sailing.domain.racelog.tracking.test.mock.SmartphoneImeiJsonHandler;
 import com.sap.sailing.domain.racelogtracking.test.AbstractJsonOverHttpTest;
@@ -27,6 +26,7 @@ import com.sap.sailing.server.gateway.serialization.impl.DeviceAndSessionIdentif
 import com.sap.sailing.server.gateway.serialization.impl.DeviceIdentifierJsonSerializer;
 import com.sap.sailing.server.gateway.serialization.impl.GPSFixMovingNmeaDTOJsonSerializer;
 import com.sap.sse.common.Util;
+import com.sap.sse.common.impl.MillisecondsTimePoint;
 
 public class PostFixes extends AbstractJsonOverHttpTest {
     protected static final SmartphoneImeiIdentifier device = new SmartphoneImeiIdentifier("a");

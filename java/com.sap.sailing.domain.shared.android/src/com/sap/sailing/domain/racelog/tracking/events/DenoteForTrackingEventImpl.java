@@ -5,11 +5,11 @@ import java.util.Collections;
 
 import com.sap.sailing.domain.base.BoatClass;
 import com.sap.sailing.domain.base.Competitor;
-import com.sap.sailing.domain.common.TimePoint;
 import com.sap.sailing.domain.racelog.RaceLogEventAuthor;
 import com.sap.sailing.domain.racelog.RaceLogEventVisitor;
 import com.sap.sailing.domain.racelog.impl.RaceLogEventImpl;
 import com.sap.sailing.domain.racelog.tracking.DenoteForTrackingEvent;
+import com.sap.sse.common.TimePoint;
 
 public class DenoteForTrackingEventImpl extends RaceLogEventImpl implements
 DenoteForTrackingEvent {

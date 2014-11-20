@@ -25,7 +25,7 @@ import com.sap.sailing.domain.markpassingcalculation.impl.CandidateFinderImpl;
 import com.sap.sailing.domain.tracking.DynamicTrackedRace;
 import com.sap.sailing.domain.tracking.GPSFix;
 import com.sap.sailing.domain.tracking.MarkPassing;
-import com.sap.sailing.util.impl.ThreadFactoryWithPriority;
+import com.sap.sse.util.impl.ThreadFactoryWithPriority;
 import com.sap.sse.common.Util;
 import com.sap.sse.common.Util.Pair;
 import com.sap.sse.common.Util.Triple;
