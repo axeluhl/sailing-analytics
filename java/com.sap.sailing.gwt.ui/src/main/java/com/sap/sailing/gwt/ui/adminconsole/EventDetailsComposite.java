@@ -16,6 +16,14 @@ public class EventDetailsComposite extends Composite {
     private final StringMessages stringMessages;
     private final ErrorReporter errorReporter;
     private final Label eventName;
+    private final Label venueName;
+    private final Label description;
+    private final Label startDate;
+    private final Label endDate;
+    private final Label isPublic;
+    private final Label officialWebsiteURL;
+    private final Label logoImageURL;
+
     private final CaptionPanel mainPanel;
 
     public EventDetailsComposite(final SailingServiceAsync sailingService, final ErrorReporter errorReporter,
@@ -30,15 +38,27 @@ public class EventDetailsComposite extends Composite {
         VerticalPanel vPanel = new VerticalPanel();
         mainPanel.add(vPanel);
 
-        Grid grid = new Grid(6, 2);
+        Grid grid = new Grid(8, 2);
         vPanel.add(grid);
         
-        eventName = new Label();
-        eventName.ensureDebugId("NameLabel");
-        grid.setWidget(0 , 0, new Label(stringMessages.eventName() + ":"));
-        grid.setWidget(0 , 1, eventName);
+        eventName = createLabelAndValueWidget(grid, 0, stringMessages.eventName(), "NameLabel");
+        description = createLabelAndValueWidget(grid, 1, stringMessages.description(), "DescriptionLabel");
+        venueName = createLabelAndValueWidget(grid, 2, stringMessages.venue(), "VenueLabel");
+        startDate = createLabelAndValueWidget(grid, 3, stringMessages.startDate(), "StartDateLabel");
+        endDate = createLabelAndValueWidget(grid, 4, stringMessages.endDate(), "EndDateLabel");
+        isPublic = createLabelAndValueWidget(grid, 5, stringMessages.isPublic(), "IsPublicLabel");
+        officialWebsiteURL = createLabelAndValueWidget(grid, 6, stringMessages.eventOfficialWebsiteURL(), "OfficialWebsiteURLLabel");
+        logoImageURL = createLabelAndValueWidget(grid, 7, stringMessages.eventLogoImageURL(), "LogoImageURLLabel");
         
         initWidget(mainPanel);
+    }
+    
+    private Label createLabelAndValueWidget(Grid grid, int row, String label, String debugId) {
+        Label valueLabel = new Label();
+        valueLabel.ensureDebugId(debugId);
+        grid.setWidget(row , 0, new Label(label + ":"));
+        grid.setWidget(row , 1, valueLabel);
+        return valueLabel;
     }
     
     public EventDTO getEvent() {
@@ -54,6 +74,13 @@ public class EventDetailsComposite extends Composite {
         if (event != null) {
             mainPanel.setCaptionText(stringMessages.event() + " " + event.getName());
             eventName.setText(event.getName());
+            venueName.setText(event.venue.getName());
+            description.setText(event.getDescription());
+            startDate.setText(event.startDate != null ? event.startDate.toString() : "");
+            endDate.setText(event.endDate != null ? event.endDate.toString() : "");
+            isPublic.setText(String.valueOf(event.isPublic));
+            officialWebsiteURL.setText(event.getOfficialWebsiteURL());
+            logoImageURL.setText(event.getLogoImageURL());
         }
     }
 
