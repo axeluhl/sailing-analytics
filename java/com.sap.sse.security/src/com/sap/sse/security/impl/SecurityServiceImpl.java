@@ -2,7 +2,8 @@ package com.sap.sse.security.impl;
 
 import java.io.IOException;
 import java.io.InputStream;
-import java.io.OutputStream;
+import java.io.ObjectInputStream;
+import java.io.ObjectOutputStream;
 import java.io.Serializable;
 import java.io.UnsupportedEncodingException;
 import java.net.MalformedURLException;
@@ -15,6 +16,7 @@ import java.util.Map.Entry;
 import java.util.Properties;
 import java.util.Set;
 import java.util.UUID;
+import java.util.concurrent.ConcurrentHashMap;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
@@ -70,7 +72,6 @@ import org.scribe.oauth.OAuthService;
 import com.google.gwt.user.server.rpc.RemoteServiceServlet;
 import com.sap.sse.common.Util;
 import com.sap.sse.replication.OperationExecutionListener;
-import com.sap.sse.replication.OperationWithResult;
 import com.sap.sse.security.ClientUtils;
 import com.sap.sse.security.Credential;
 import com.sap.sse.security.GithubApi;
@@ -83,7 +84,6 @@ import com.sap.sse.security.Social;
 import com.sap.sse.security.SocialSettingsKeys;
 import com.sap.sse.security.User;
 import com.sap.sse.security.UserStore;
-import com.sap.sse.security.operations.SecurityOperation;
 import com.sap.sse.security.shared.Account.AccountType;
 import com.sap.sse.security.shared.DefaultRoles;
 import com.sap.sse.security.shared.MailException;
@@ -99,8 +99,9 @@ public class SecurityServiceImpl extends RemoteServiceServlet implements Securit
 
     private SecurityManager securityManager;
     private final CacheManager cacheManager = new EhCacheManager();
-    private final UserStore store;
+    private UserStore store;
     private final Properties mailProperties;
+    private final ConcurrentHashMap<OperationExecutionListener<SecurityService>, OperationExecutionListener<SecurityService>> operationExecutionListeners;
     
     private static Ini shiroConfiguration;
     static {
@@ -114,6 +115,7 @@ public class SecurityServiceImpl extends RemoteServiceServlet implements Securit
     public SecurityServiceImpl(UserStore store, Properties mailProperties) {
         assert mailProperties != null;
         logger.info("Initializing Security Service with user store " + store+" and mail properties "+mailProperties);
+        this.operationExecutionListeners = new ConcurrentHashMap<>();
         this.store = store;
         this.mailProperties = mailProperties;
         // Create default users if no users exist yet.
@@ -777,52 +779,9 @@ public class SecurityServiceImpl extends RemoteServiceServlet implements Securit
 
     // ----------------- Replication -------------
     @Override
-    public <T> T apply(OperationWithResult<SecurityService, T> operation) {
-        // TODO Auto-generated method stub
-        return null;
-    }
-
-    @Override
-    public void addOperationExecutionListener(OperationExecutionListener<SecurityService> listener) {
-        // TODO Auto-generated method stub
-        
-    }
-
-    @Override
-    public void removeOperationExecutionListener(OperationExecutionListener<SecurityService> listener) {
-        // TODO Auto-generated method stub
-        
-    }
-
-    @Override
     public void clearReplicaState() throws MalformedURLException, IOException, InterruptedException {
-        // TODO Auto-generated method stub
-        
-    }
-
-    @Override
-    public void initiallyFillFrom(InputStream is) throws IOException, ClassNotFoundException, InterruptedException {
-        // TODO Auto-generated method stub
-        
-    }
-
-    @Override
-    public void serializeForInitialReplication(OutputStream os) throws IOException {
-        // TODO Auto-generated method stub
-        
-    }
-
-    @Override
-    public SecurityOperation<?> readOperation(InputStream inputStream) throws IOException, ClassNotFoundException {
-        // TODO Auto-generated method stub
-        return null;
-    }
-
-    @Override
-    public void writeOperation(OperationWithResult<?, ?> operation, OutputStream outputStream, boolean closeStream)
-            throws IOException {
-        // TODO Auto-generated method stub
-        
+        mailProperties.clear();
+        store.clear();
     }
 
     @Override
@@ -830,4 +789,36 @@ public class SecurityServiceImpl extends RemoteServiceServlet implements Securit
         return getClass().getName();
     }
     
+    @Override
+    public ObjectInputStream createObjectInputStreamResolvingAgainstCache(InputStream is) throws IOException {
+        return new ObjectInputStreamResolvingAgainstSecurityCache(is, store);
+    }
+
+    @Override
+    public void initiallyFillFromInternal(ObjectInputStream is) throws IOException, ClassNotFoundException,
+            InterruptedException {
+        UserStore newUserStore = (UserStore) is.readObject();
+        store = newUserStore;
+    }
+
+    @Override
+    public void serializeForInitialReplicationInternal(ObjectOutputStream objectOutputStream) throws IOException {
+        objectOutputStream.writeObject(store);
+    }
+
+    @Override
+    public Iterable<OperationExecutionListener<SecurityService>> getOperationExecutionListeners() {
+        return operationExecutionListeners.keySet();
+    }
+
+    @Override
+    public void addOperationExecutionListener(OperationExecutionListener<SecurityService> listener) {
+        operationExecutionListeners.put(listener, listener);
+    }
+
+    @Override
+    public void removeOperationExecutionListener(OperationExecutionListener<SecurityService> listener) {
+        operationExecutionListeners.remove(listener);
+    }
+
 }

@@ -193,9 +193,7 @@ import com.sap.sse.common.impl.MillisecondsTimePoint;
 import com.sap.sse.common.search.KeywordQuery;
 import com.sap.sse.common.search.Result;
 import com.sap.sse.common.search.ResultImpl;
-import com.sap.sse.operationaltransformation.Operation;
 import com.sap.sse.replication.OperationExecutionListener;
-import com.sap.sse.replication.OperationWithResult;
 
 public class RacingEventServiceImpl implements RacingEventServiceWithTestSupport, RegattaListener, LeaderboardRegistry,
         Replicator {
@@ -2087,25 +2085,6 @@ public class RacingEventServiceImpl implements RacingEventServiceWithTestSupport
         return scheduler;
     }
 
-    /**
-     * The operation is executed by immediately {@link Operation#internalApplyTo(Object) applying} it to this
-     * service object. It is then replicated to all replicas.
-     * 
-     * @see {@link #replicate(RacingEventServiceOperation)}
-     */
-    @Override
-    public <T> T apply(OperationWithResult<RacingEventService, T> operation) {
-        RacingEventServiceOperation<T> reso = (RacingEventServiceOperation<T>) operation;
-        try {
-            T result = reso.internalApplyTo(this);
-            replicate(reso);
-            return result;
-        } catch (Exception e) {
-            logger.log(Level.SEVERE, "apply", e);
-            throw new RuntimeException(e);
-        }
-    }
-
     @Override
     public ObjectInputStream createObjectInputStreamResolvingAgainstCache(InputStream is) throws IOException {
         return getBaseDomainFactory().createObjectInputStreamResolvingAgainstThisFactory(is);
@@ -2118,7 +2097,7 @@ public class RacingEventServiceImpl implements RacingEventServiceWithTestSupport
 
     @Override
     public <T> void replicate(RacingEventServiceOperation<T> operation) {
-        for (OperationExecutionListener<RacingEventService> listener : operationExecutionListeners.keySet()) {
+        for (OperationExecutionListener<RacingEventService> listener : getOperationExecutionListeners()) {
             try {
                 listener.executed(operation);
             } catch (Exception e) {
@@ -2127,6 +2106,11 @@ public class RacingEventServiceImpl implements RacingEventServiceWithTestSupport
                 logger.log(Level.SEVERE, "replicate", e);
             }
         }
+    }
+    
+    @Override
+    public Iterable<OperationExecutionListener<RacingEventService>> getOperationExecutionListeners() {
+        return operationExecutionListeners.keySet();
     }
 
     @Override

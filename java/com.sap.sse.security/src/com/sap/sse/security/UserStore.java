@@ -5,13 +5,11 @@ import java.util.Map;
 import java.util.Set;
 import java.util.UUID;
 
+import com.sap.sse.common.Named;
 import com.sap.sse.security.shared.Account;
 import com.sap.sse.security.shared.UserManagementException;
 
-public interface UserStore {
-
-    String getName();
-
+public interface UserStore extends Named {
     Collection<User> getUserCollection();
 
     User getUserByName(String name);
@@ -66,5 +64,10 @@ public interface UserStore {
     Map<String, Object> getAllSettings();
 
     Map<String, Class<?>> getAllSettingTypes();
+
+    /**
+     * Removes all users and all their preferences and all settings from this store. Use with due care.
+     */
+    void clear();
 
 }

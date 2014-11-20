@@ -12,6 +12,7 @@ Bundle-ClassPath: .
 Require-Bundle: com.sap.sse.security,
  com.mongodb.driver;bundle-version="2.6.2",
  org.apache.shiro.core;bundle-version="1.2.2",
- com.sap.sse.mongodb
+ com.sap.sse.mongodb,
+ com.sap.sse.common
 Export-Package: com.sap.sse.security.userstore.mongodb,
  com.sap.sse.security.userstore.mongodb.impl;x-friends:="com.sap.sse.security.test"

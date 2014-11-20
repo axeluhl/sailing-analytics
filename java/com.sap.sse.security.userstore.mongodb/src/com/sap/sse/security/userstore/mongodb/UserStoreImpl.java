@@ -15,7 +15,18 @@ import com.sap.sse.security.UserStore;
 import com.sap.sse.security.shared.Account;
 import com.sap.sse.security.shared.UserManagementException;
 
+/**
+ * An implementation of the {@link UserStore} interface, intended to store its state durably in a MongoDB instance.
+ * A de-serialized copy, however, will have its {@link #mongoObjectFactory} field set to <code>null</code> and will
+ * therefore not perform any changes to the database. This is also the reason why all access to the
+ * {@link #mongoObjectFactory} field needs to be <code>null</code>-safe.<p>
+ * 
+ * @author Axel Uhl (D043530)
+ *
+ */
 public class UserStoreImpl implements UserStore {
+    private static final long serialVersionUID = -3860868283827473187L;
+
     private static final Logger logger = Logger.getLogger(UserStoreImpl.class.getName());
 
     private String name = "MongoDB user store";
@@ -26,8 +37,11 @@ public class UserStoreImpl implements UserStore {
     private final ConcurrentHashMap<String, Object> settings;
     private final ConcurrentHashMap<String, Class<?>> settingTypes;
     private final ConcurrentHashMap<String, Map<String, String>> preferences;
-    private final DomainObjectFactory domainObjectFactory;
-    private final MongoObjectFactory mongoObjectFactory;
+    
+    /**
+     * Won't be serialized and remains <code>null</code> on the de-serializing end.
+     */
+    private final transient MongoObjectFactory mongoObjectFactory;
 
     public UserStoreImpl() {
         users = new ConcurrentHashMap<>();
@@ -36,7 +50,7 @@ public class UserStoreImpl implements UserStore {
         settings = new ConcurrentHashMap<>();
         settingTypes = new ConcurrentHashMap<String, Class<?>>();
         preferences = new ConcurrentHashMap<>();
-        domainObjectFactory = PersistenceFactory.INSTANCE.getDefaultDomainObjectFactory();
+        final DomainObjectFactory domainObjectFactory = PersistenceFactory.INSTANCE.getDefaultDomainObjectFactory();
         mongoObjectFactory = PersistenceFactory.INSTANCE.getDefaultMongoObjectFactory();
         for (Entry<String, Class<?>> e : domainObjectFactory.loadSettingTypes().entrySet()) {
             settingTypes.put(e.getKey(), e.getValue());
@@ -105,7 +119,9 @@ public class UserStoreImpl implements UserStore {
         }
         User user = new User(name, email, accounts);
         logger.info("Creating user: " + user);
-        mongoObjectFactory.storeUser(user);
+        if (mongoObjectFactory != null) {
+            mongoObjectFactory.storeUser(user);
+        }
         users.put(name, user);
         addToUsersByEmail(user);
         return user;
@@ -116,7 +132,9 @@ public class UserStoreImpl implements UserStore {
         logger.info("Updating user "+user+" in DB");
         removeFromUsersByEmail(user);
         addToUsersByEmail(user);
-        mongoObjectFactory.storeUser(user);
+        if (mongoObjectFactory != null) {
+            mongoObjectFactory.storeUser(user);
+        }
     }
 
     @Override
@@ -163,7 +181,9 @@ public class UserStoreImpl implements UserStore {
             throw new UserManagementException(UserManagementException.USER_DOES_NOT_EXIST);
         }
         user.addRole(role);
-        mongoObjectFactory.storeUser(user);
+        if (mongoObjectFactory != null) {
+            mongoObjectFactory.storeUser(user);
+        }
     }
 
     @Override
@@ -172,7 +192,9 @@ public class UserStoreImpl implements UserStore {
             throw new UserManagementException(UserManagementException.USER_DOES_NOT_EXIST);
         }
         users.get(name).removeRole(role);
-        mongoObjectFactory.storeUser(users.get(name));
+        if (mongoObjectFactory != null) {
+            mongoObjectFactory.storeUser(users.get(name));
+        }
     }
 
     @Override
@@ -181,7 +203,9 @@ public class UserStoreImpl implements UserStore {
             throw new UserManagementException(UserManagementException.USER_DOES_NOT_EXIST);
         }
         logger.info("Deleting user: " + users.get(name).toString());
-        mongoObjectFactory.deleteUser(users.get(name));
+        if (mongoObjectFactory != null) {
+            mongoObjectFactory.deleteUser(users.get(name));
+        }
         removeFromUsersByEmail(users.remove(name));
     }
 
@@ -200,7 +224,9 @@ public class UserStoreImpl implements UserStore {
     @Override
     public void addSetting(String key, Class<?> type) {
         settingTypes.put(key, type);
-        mongoObjectFactory.storeSettingTypes(settingTypes);
+        if (mongoObjectFactory != null) {
+            mongoObjectFactory.storeSettingTypes(settingTypes);
+        }
     }
 
     @Override
@@ -211,7 +237,9 @@ public class UserStoreImpl implements UserStore {
             result = false;
         } else {
             settings.put(key, setting);
-            mongoObjectFactory.storeSettings(settings);
+            if (mongoObjectFactory != null) {
+                mongoObjectFactory.storeSettings(settings);
+            }
             result = true;
         }
         return result;
@@ -231,7 +259,9 @@ public class UserStoreImpl implements UserStore {
             }
         }
         userMap.put(key, value);
-        mongoObjectFactory.storePreferences(username, userMap);
+        if (mongoObjectFactory != null) {
+            mongoObjectFactory.storePreferences(username, userMap);
+        }
     }
 
     @Override
@@ -239,7 +269,9 @@ public class UserStoreImpl implements UserStore {
         Map<String, String> userMap = preferences.get(username);
         if (userMap != null) {
             userMap.remove(key);
-            mongoObjectFactory.storePreferences(username, userMap);
+            if (mongoObjectFactory != null) {
+                mongoObjectFactory.storePreferences(username, userMap);
+            }
         }
     }
 
@@ -265,4 +297,16 @@ public class UserStoreImpl implements UserStore {
         return settingTypes;
     }
 
+    @Override
+    public void clear() {
+        preferences.clear();
+        emailForUser.clear();
+        settings.clear();
+        settingTypes.clear();
+        users.clear();
+        usersByEmail.clear();
+        mongoObjectFactory.clearAllPreferences();
+        mongoObjectFactory.clearAllUsers();
+        mongoObjectFactory.clearAllSettings();
+    }
 }
