@@ -6,6 +6,7 @@ import java.io.EOFException;
 import java.io.IOException;
 import java.io.ObjectInputStream;
 import java.lang.reflect.Field;
+import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.Iterator;
 import java.util.List;
@@ -311,7 +312,12 @@ public class Replicator implements Runnable {
     }
     
     private synchronized void queue(OperationWithResult<?, ?> operation, Replicable<?, ?> replicable) {
-        List<Pair<String, OperationWithResult<?, ?>>> queue = queueByReplicableIdAsString.get(replicable.getId().toString());
+        final String replicableIdAsString = replicable.getId().toString();
+        List<Pair<String, OperationWithResult<?, ?>>> queue = queueByReplicableIdAsString.get(replicableIdAsString);
+        if (queue == null) {
+            queue = new ArrayList<>();
+            queueByReplicableIdAsString.put(replicableIdAsString, queue);
+        }
         if (queue.isEmpty()) {
             notifyAll();
         }

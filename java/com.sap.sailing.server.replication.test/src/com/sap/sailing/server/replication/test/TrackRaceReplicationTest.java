@@ -163,7 +163,7 @@ public class TrackRaceReplicationTest extends AbstractServerReplicationTest {
             receivedStartAndEndOfTracking = master.getTrackedRace(raceIdentifier).getStartOfTracking() != null &&
                     master.getTrackedRace(raceIdentifier).getEndOfTracking() != null;
         }
-        Thread.sleep(3000); // kept failing several times for a 1000ms timeout
+        Thread.sleep(1000);
         logger.info("verifying replica's state");
         TrackedRace replicaTrackedRace = replica.getTrackedRace(raceIdentifier);
         assertEquals(masterTrackedRace.getStartOfTracking(), replicaTrackedRace.getStartOfTracking());
@@ -171,7 +171,7 @@ public class TrackRaceReplicationTest extends AbstractServerReplicationTest {
         MillisecondsTimePoint now = MillisecondsTimePoint.now();
         assertFalse(now.equals(replicaTrackedRace.getStartOfRace()));
         ((DynamicTrackedRace) masterTrackedRace).setStartTimeReceived(now);
-        Thread.sleep(3000);
+        Thread.sleep(1000);
         assertEquals(now, replicaTrackedRace.getStartOfRace());
     }
 
