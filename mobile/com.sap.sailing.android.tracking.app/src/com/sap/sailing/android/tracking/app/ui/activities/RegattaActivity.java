@@ -1,25 +1,37 @@
 package com.sap.sailing.android.tracking.app.ui.activities;
 
+import java.io.File;
+import java.io.FileInputStream;
+import java.io.FileNotFoundException;
+import java.io.FileOutputStream;
+import java.io.IOException;
+import java.io.InputStream;
 import java.util.Locale;
 
 import android.content.Intent;
 import android.database.Cursor;
+import android.graphics.Bitmap;
+import android.graphics.BitmapFactory;
 import android.graphics.Typeface;
 import android.graphics.drawable.Drawable;
+import android.os.AsyncTask;
 import android.os.Bundle;
+import android.os.Environment;
 import android.support.v4.app.NavUtils;
 import android.support.v7.widget.Toolbar;
 import android.text.Spannable;
 import android.text.SpannableString;
 import android.text.style.StyleSpan;
+import android.util.Log;
 import android.view.MenuItem;
+import android.view.View;
 import android.widget.ImageView;
+import android.widget.LinearLayout;
 import android.widget.TextView;
 
 import com.sap.sailing.android.tracking.app.R;
 import com.sap.sailing.android.tracking.app.provider.AnalyticsContract.Competitor;
 import com.sap.sailing.android.tracking.app.provider.AnalyticsContract.Event;
-import com.sap.sailing.android.tracking.app.provider.AnalyticsContract.Leaderboard;
 import com.sap.sailing.android.tracking.app.ui.fragments.RegattaFragment;
 
 public class RegattaActivity extends BaseActivity {
@@ -89,6 +101,16 @@ public class RegattaActivity extends BaseActivity {
 		ec.close();
     }
 
+	private void userImageUpdated() {
+		runOnUiThread(new Runnable() {
+			@Override
+			public void run() {
+				LinearLayout addTeamPhotoTextView = (LinearLayout) findViewById(R.id.addFoto);
+				addTeamPhotoTextView.setVisibility(View.INVISIBLE);
+			}
+		});
+    }
+
     @Override
     protected void onResume() {
         TextView competitorNameTextView = (TextView)findViewById(R.id.competitor_name);
@@ -110,6 +132,22 @@ public class RegattaActivity extends BaseActivity {
 		} catch (Exception e) {
 			e.printStackTrace();
 		}
+		
+		if (eventImageUrl != null)
+		{
+			ImageView imageView = (ImageView) findViewById(R.id.userImage);
+	        Bitmap storedImage = getStoredImage();
+	        if (storedImage != null)
+	        {
+	        	imageView.setImageBitmap(storedImage);
+	        	userImageUpdated();
+	        }
+	        else
+	        {
+	        	new DownloadImageTask(imageView).execute(eventImageUrl);
+	        }
+			
+		}
         
     	super.onResume();
     }
@@ -123,4 +161,103 @@ public class RegattaActivity extends BaseActivity {
         }
         return super.onOptionsItemSelected(item);
     }
+    
+    /**
+     * Store image for quicker retrieval later.
+     * @param images
+     */
+    private void storeImage(Bitmap image) {
+        File pictureFile = getMediaFile();
+        if (pictureFile == null) {
+            Log.d(TAG,
+                    "Error creating media file, check storage permissions: ");// e.getMessage());
+            return;
+        } 
+        try {
+            FileOutputStream fos = new FileOutputStream(pictureFile);
+            image.compress(Bitmap.CompressFormat.PNG, 90, fos);
+            fos.close();
+        } catch (FileNotFoundException e) {
+            Log.d(TAG, "File not found: " + e.getMessage());
+        } catch (IOException e) {
+            Log.d(TAG, "Error accessing file: " + e.getMessage());
+        }  
+    }
+    
+    /**
+     * Get leaderboard image if there's one saved.
+     * @return
+     */
+    private Bitmap getStoredImage()
+    {
+    	File pictureFile = getMediaFile();
+    	if (pictureFile == null)
+    	{
+    		return null;
+    	}
+    	
+		BitmapFactory.Options options = new BitmapFactory.Options();
+		options.inPreferredConfig = Bitmap.Config.ARGB_8888;
+		Bitmap image = BitmapFactory.decodeFile(pictureFile.getAbsolutePath(),
+				options);
+		return image;
+
+    }
+    
+    /**
+     * Get Path for cached leaderbaord image.
+     * @return
+     */
+    private  File getMediaFile(){
+    	
+		File mediaStorageDir;
+
+		if (Environment.MEDIA_MOUNTED.equals(Environment
+				.getExternalStorageState())) {
+			mediaStorageDir = new File(
+					Environment.getExternalStorageDirectory()
+							+ "/Android/data/"
+							+ getApplicationContext().getPackageName()
+							+ "/Files");
+		} else {
+			mediaStorageDir = getApplicationContext().getCacheDir();
+		}
+
+        if (! mediaStorageDir.exists()){
+            if (! mediaStorageDir.mkdirs()){
+                return null;
+            }
+        }
+
+        File mediaFile;
+            String mImageName="MI_"+ leaderboardName +".png";
+            mediaFile = new File(mediaStorageDir.getPath() + File.separator + mImageName);  
+        return mediaFile;
+    } 
+    
+	private class DownloadImageTask extends AsyncTask<String, Void, Bitmap> {
+		ImageView bmImage;
+
+		public DownloadImageTask(ImageView bmImage) {
+			this.bmImage = bmImage;
+		}
+
+		protected Bitmap doInBackground(String... urls) {
+			String urldisplay = urls[0];
+			Bitmap mIcon11 = null;
+			try {
+				InputStream in = new java.net.URL(urldisplay).openStream();
+				mIcon11 = BitmapFactory.decodeStream(in);
+			} catch (Exception e) {
+				e.printStackTrace();
+			}
+			return mIcon11;
+		}
+
+		protected void onPostExecute(Bitmap result) {
+			bmImage.setImageBitmap(result);
+			storeImage(result);
+			userImageUpdated();
+		}
+	}
 }
