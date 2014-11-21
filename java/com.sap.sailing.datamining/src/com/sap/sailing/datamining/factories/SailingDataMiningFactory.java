@@ -71,15 +71,12 @@ public class SailingDataMiningFactory {
                 DataRetrieverChainDefinition<RacingEventService> dataRetrieverChainDefinition = dataRetrieverChainDefinitionProvider.get(queryDefinition.getDataRetrieverChainDefinition().getId());
                 DataRetrieverChainBuilder<RacingEventService> chainBuilder = dataRetrieverChainDefinition.startBuilding(executorService);
                 Map<Integer, FilterCriterion<?>> criteriaMappedByDataType = createFilterCriteria(queryDefinition.getFilterSelection());
-                do {
+                while (chainBuilder.canStepFurther()) {
+                    chainBuilder.stepFurther();
+                    
                     if (criteriaMappedByDataType.containsKey(chainBuilder.getCurrentRetrieverLevel())) {
                         chainBuilder.setFilter(criteriaMappedByDataType.get(chainBuilder.getCurrentRetrieverLevel()));
                     }
-                    
-                    chainBuilder.stepDeeper();
-                } while (chainBuilder.canStepDeeper());
-                if (criteriaMappedByDataType.containsKey(chainBuilder.getCurrentRetrieverLevel())) {
-                    chainBuilder.setFilter(criteriaMappedByDataType.get(chainBuilder.getCurrentRetrieverLevel()));
                 }
                 chainBuilder.addResultReceiver(groupingProcessor);
                 
@@ -126,10 +123,11 @@ public class SailingDataMiningFactory {
                 Processor<GroupedDataEntry<Object>, Map<GroupKey, Set<Object>>> valueCollector = processorFactory.createGroupedDataCollectingAsSetProcessor(/*query*/ this);
 
                 DataRetrieverChainDefinition<RacingEventService> dataRetrieverChainDefinition = dataRetrieverChainDefinitionProvider.get(dataRetrieverChainDefinitionDTO.getId());
-                DataRetrieverChainBuilder<RacingEventService> chainBuilder = dataRetrieverChainDefinition.startBuilding(executorService);
                 Collection<Function<?>> dimensions = convertDTOsToFunctions(dimensionDTOs);
+                DataRetrieverChainBuilder<RacingEventService> chainBuilder = dataRetrieverChainDefinition.startBuilding(executorService);
+                chainBuilder.stepFurther(); //Initialization
                 for (int level = 0; level < retrieverLevel; level++) {
-                    chainBuilder.stepDeeper();
+                    chainBuilder.stepFurther();
                 }
                 for (Processor<?, ?> resultReceiver : processorFactory.createGroupingExtractorsForDimensions(
                         chainBuilder.getCurrentRetrievedDataType(), valueCollector, dimensions, stringMessages, locale)) {

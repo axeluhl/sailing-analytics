@@ -83,12 +83,14 @@ public class TestDimensionsValuesQuery {
                 raceDimensions.add(dimensionYear);
                 
                 DataRetrieverChainBuilder<Collection<Test_Regatta>> chainBuilder = dataRetrieverChainDefinition.startBuilding(ConcurrencyTestsUtil.getExecutor());
-                chainBuilder.stepDeeper();
+                chainBuilder.stepFurther(); //Initialization
+                
+                chainBuilder.stepFurther();
                 for (Processor<?, ?> resultReceiver : ComponentTestsUtil.getProcessorFactory().createGroupingExtractorsForDimensions(Test_HasRaceContext.class, resultCollector, raceDimensions, stringMessages, locale)) {
                     chainBuilder.addResultReceiver(resultReceiver);
                 }
                 
-                chainBuilder.stepDeeper();
+                chainBuilder.stepFurther();
                 for (Processor<?, ?> resultReceiver : ComponentTestsUtil.getProcessorFactory().createGroupingExtractorsForDimensions(Test_HasLegOfCompetitorContext.class, resultCollector, legDimensions, stringMessages, locale)) {
                     chainBuilder.addResultReceiver(resultReceiver);
                 }

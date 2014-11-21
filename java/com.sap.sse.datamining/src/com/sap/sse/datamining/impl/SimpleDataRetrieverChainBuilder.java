@@ -27,7 +27,7 @@ public class SimpleDataRetrieverChainBuilder<DataSourceType> implements DataRetr
 
     /**
      * Creates a data retriever chain builder for the given list of {@link DataRetrieverTypeWithInformation}.</br>
-     * The list has the match the following conditions to build a valid data retriever chain:
+     * The list has to match the following conditions to build a valid data retriever chain:
      * <ul>
      *  <li>The first data retriever type has the <code>DataSourceType</code> as <code>InputType</code>.</li>
      *  <li>The order of the data retriever types has to be valid.</br>
@@ -48,11 +48,26 @@ public class SimpleDataRetrieverChainBuilder<DataSourceType> implements DataRetr
         
         filters = new HashMap<>();
         receivers = new HashMap<>();
-        currentRetrieverTypeIndex = 0;
+        currentRetrieverTypeIndex = -1;
+    }
+    
+    @Override
+    public boolean canStepFurther() {
+        return currentRetrieverTypeIndex + 1 < dataRetrieverTypesWithInformation.size();
+    }
+
+    @Override
+    public DataRetrieverChainBuilder<DataSourceType> stepFurther() {
+        currentRetrieverTypeIndex++;
+        return this;
     }
 
     @Override
     public DataRetrieverChainBuilder<DataSourceType> setFilter(FilterCriterion<?> filter) {
+        if (!hasBeenInitialized()) {
+            throw new IllegalStateException();
+        }
+        
         if (!filter.getElementType().isAssignableFrom(getCurrentRetrievedDataType())) {
             throw new IllegalArgumentException("The given filter (with element type '" + filter.getElementType().getSimpleName()
                                                + "') isn't able to match the current retrieved data type '" + getCurrentRetrievedDataType().getSimpleName() + "'");
@@ -64,6 +79,10 @@ public class SimpleDataRetrieverChainBuilder<DataSourceType> implements DataRetr
 
     @Override
     public DataRetrieverChainBuilder<DataSourceType> addResultReceiver(Processor<?, ?> resultReceiver) {
+        if (!hasBeenInitialized()) {
+            throw new IllegalStateException();
+        }
+        
         if (!resultReceiver.getInputType().isAssignableFrom(getCurrentRetrievedDataType())) {
             throw new IllegalArgumentException("The given result receiver (with input type '" + resultReceiver.getInputType().getSimpleName()
                     + "') isn't able to process the current retrieved data type '" + getCurrentRetrievedDataType().getSimpleName() + "'");
@@ -75,31 +94,32 @@ public class SimpleDataRetrieverChainBuilder<DataSourceType> implements DataRetr
         receivers.get(currentRetrieverTypeIndex).add(resultReceiver);
         return this;
     }
-    
-    @Override
-    public boolean canStepDeeper() {
-        return currentRetrieverTypeIndex + 1 < dataRetrieverTypesWithInformation.size();
-    }
-
-    @Override
-    public DataRetrieverChainBuilder<DataSourceType> stepDeeper() {
-        currentRetrieverTypeIndex++;
-        return this;
-    }
 
     @Override
     public Class<?> getCurrentRetrievedDataType() {
+        if (!hasBeenInitialized()) {
+            throw new IllegalStateException();
+        }
+        
         return dataRetrieverTypesWithInformation.get(currentRetrieverTypeIndex).getRetrievedDataType();
     }
     
     @Override
     public int getCurrentRetrieverLevel() {
+        if (!hasBeenInitialized()) {
+            throw new IllegalStateException();
+        }
+        
         return currentRetrieverTypeIndex;
     }
 
     @SuppressWarnings("unchecked")
     @Override
     public Processor<DataSourceType, ?> build() {
+        if (!hasBeenInitialized()) {
+            throw new IllegalStateException();
+        }
+        
         Processor<?, ?> firstRetriever = null;
         for (int retrieverTypeIndex = currentRetrieverTypeIndex; retrieverTypeIndex >= 0; retrieverTypeIndex--) {
             DataRetrieverTypeWithInformation<?, ?> dataRetrieverTypeWithInformation = dataRetrieverTypesWithInformation.get(retrieverTypeIndex);
@@ -107,6 +127,10 @@ public class SimpleDataRetrieverChainBuilder<DataSourceType> implements DataRetr
         }
         
         return (Processor<DataSourceType, ?>) firstRetriever;
+    }
+
+    private boolean hasBeenInitialized() {
+        return currentRetrieverTypeIndex >= 0;
     }
     
     @SuppressWarnings("unchecked")

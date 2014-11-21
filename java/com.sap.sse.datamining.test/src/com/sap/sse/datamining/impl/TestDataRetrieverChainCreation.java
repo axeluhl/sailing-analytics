@@ -116,20 +116,48 @@ public class TestDataRetrieverChainCreation {
                                                Test_HasLegOfCompetitorContext.class, "legOfCompetitor");
         assertThat(dataRetrieverChainDefinition.getRetrievedDataType().equals(Test_HasLegOfCompetitorContext.class), is(true));
     }
+    
+    @Test
+    public void testThatTheDataRetrieverChainBuilderHasToBeInitialized() {
+        DataRetrieverChainBuilder<Collection<Test_Regatta>> chainBuilder = dataRetrieverChainDefinition.startBuilding(ConcurrencyTestsUtil.getExecutor());
+
+        try {
+            chainBuilder.getCurrentRetrievedDataType();
+        } catch (IllegalStateException e) {
+        }
+        try {
+            chainBuilder.getCurrentRetrieverLevel();
+        } catch (IllegalStateException e) {
+        }
+        try {
+            chainBuilder.setFilter(null);
+        } catch (IllegalStateException e) {
+        }
+        try {
+            chainBuilder.addResultReceiver(null);
+        } catch (IllegalStateException e) {
+        }
+        try {
+            chainBuilder.build();
+        } catch (IllegalStateException e) {
+        }
+    }
 
     @Test
     public void testStepByStepDataRetrieverChainCreation() throws InterruptedException {
         DataRetrieverChainBuilder<Collection<Test_Regatta>> chainBuilder = dataRetrieverChainDefinition.startBuilding(ConcurrencyTestsUtil.getExecutor());
+        chainBuilder.stepFurther(); //Initialization
+        
         assertThat(chainBuilder.getCurrentRetrievedDataType().equals(Test_Regatta.class), is(true));
-        assertThat(chainBuilder.canStepDeeper(), is(true));
+        assertThat(chainBuilder.canStepFurther(), is(true));
         
-        chainBuilder.stepDeeper().setFilter(raceFilter);
+        chainBuilder.stepFurther().setFilter(raceFilter);
         assertThat(chainBuilder.getCurrentRetrievedDataType().equals(Test_HasRaceContext.class), is(true));
-        assertThat(chainBuilder.canStepDeeper(), is(true));
+        assertThat(chainBuilder.canStepFurther(), is(true));
         
-        chainBuilder.stepDeeper().setFilter(legOfCompetitorFilter).addResultReceiver(legReceiver);
+        chainBuilder.stepFurther().setFilter(legOfCompetitorFilter).addResultReceiver(legReceiver);
         assertThat(chainBuilder.getCurrentRetrievedDataType().equals(Test_HasLegOfCompetitorContext.class), is(true));
-        assertThat(chainBuilder.canStepDeeper(), is(false));
+        assertThat(chainBuilder.canStepFurther(), is(false));
         
         Processor<Collection<Test_Regatta>, ?> firstRetrieverInChain = chainBuilder.build();
         firstRetrieverInChain.processElement(ComponentTestsUtil.createExampleDataSource());
@@ -197,12 +225,18 @@ public class TestDataRetrieverChainCreation {
     
     @Test(expected=IllegalArgumentException.class)
     public void testSettingAFilterWithWrongElementType() {
-        dataRetrieverChainDefinition.startBuilding(ConcurrencyTestsUtil.getExecutor()).setFilter(raceFilter);
+        DataRetrieverChainBuilder<Collection<Test_Regatta>> chainBuilder = dataRetrieverChainDefinition.startBuilding(ConcurrencyTestsUtil.getExecutor());
+        chainBuilder.stepFurther(); //Initialization
+        
+        chainBuilder.setFilter(raceFilter);
     }
     
     @Test(expected=IllegalArgumentException.class)
     public void testSettingAResultReceiverWithWrongInputType() {
-        dataRetrieverChainDefinition.startBuilding(ConcurrencyTestsUtil.getExecutor()).addResultReceiver(legReceiver);
+        DataRetrieverChainBuilder<Collection<Test_Regatta>> chainBuilder = dataRetrieverChainDefinition.startBuilding(ConcurrencyTestsUtil.getExecutor());
+        chainBuilder.stepFurther(); //Initialization
+        
+        chainBuilder.addResultReceiver(legReceiver);
     }
 
 }
