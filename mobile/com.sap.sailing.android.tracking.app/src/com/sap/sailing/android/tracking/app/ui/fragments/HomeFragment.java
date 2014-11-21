@@ -532,10 +532,8 @@ public class HomeFragment extends BaseFragment implements
 
 			JsonObjectRequest checkinRequest = new JsonObjectRequest(
 					checkinData.checkinURL, requestObject, new CheckinListener(
-							checkinData.leaderboardName,
-							checkinData.competitorCountryCode,
-							checkinData.competitorDisplayName,
-							checkinData.competitorSailId),
+							checkinData.leaderboardName, checkinData.eventId,
+							checkinData.competitorId),
 					new CheckinErrorListener());
 
 			VolleyHelper.getInstance(getActivity()).addRequest(checkinRequest);
@@ -595,14 +593,12 @@ public class HomeFragment extends BaseFragment implements
 	 * @param regattaName
 	 * @param eventName
 	 */
-	private void startRegatta(String regattaName, String eventName,
-			String countryCode, String competitorName, String sailId) {
+	private void startRegatta(String leaderboardName, String eventId,
+			String competitorId) {
 		Intent intent = new Intent(getActivity(), RegattaActivity.class);
-		intent.putExtra(getString(R.string.regatta_name), regattaName);
-		intent.putExtra(getString(R.string.event_name), eventName);
-		intent.putExtra(getString(R.string.competitor_name), competitorName);
-		intent.putExtra(getString(R.string.country_code), countryCode);
-		intent.putExtra(getString(R.string.sail_id), sailId);
+		intent.putExtra(getString(R.string.leaderboard_name), leaderboardName);
+		intent.putExtra(getString(R.string.event_id), eventId);
+		intent.putExtra(getString(R.string.competitor_id), competitorId);
 		getActivity().startActivity(intent);
 	}
 
@@ -698,54 +694,38 @@ public class HomeFragment extends BaseFragment implements
 																		// a
 																		// header
 																		// row
-
+		
+			
 			prefs.setServerURL(cursor.getString(cursor
 					.getColumnIndex(Event.EVENT_SERVER)));
 
-			// String competitorId =
-			// cursor.getString(cursor.getColumnIndex("competitor_id"));
-			// String eventServer =
-			// cursor.getString(cursor.getColumnIndex("event_server"));
 			String leaderboardName = cursor.getString(cursor
 					.getColumnIndex("leaderboard_name"));
-			String competitorName = cursor.getString(cursor
-					.getColumnIndex("competitor_display_name"));
-			String countryCode = cursor.getString(cursor
-					.getColumnIndex("competitor_country_code"));
-			String sailId = cursor.getString(cursor
-					.getColumnIndex("competitor_sail_id"));
+			String competitorId = cursor.getString(cursor
+					.getColumnIndex("competitor_id"));
+			String eventId = cursor.getString(cursor
+					.getColumnIndex("event_id"));
 
-			startRegatta(leaderboardName, leaderboardName, countryCode,
-					competitorName, sailId);
+			startRegatta(leaderboardName, eventId, competitorId);
 		}
 	}
 
 	private class CheckinListener implements Listener<JSONObject> {
 
 		public String leaderboardName;
-		public String countryCode;
-		public String sailId;
-		public String competitorName;
+		public String eventId;
+		public String competitorId;
 
-		public CheckinListener(String leaderboardName, String countryCode,
-				String competitorName, String sailId) {
-			try {
-				this.leaderboardName = URLDecoder.decode(leaderboardName,
-						"UTF-8");
-				this.countryCode = countryCode;
-				this.competitorName = competitorName;
-				this.sailId = sailId;
-			} catch (UnsupportedEncodingException e) {
-				ExLog.e(getActivity(), TAG, "UnsupportedEncodingException: "
-						+ e.getMessage());
-			}
+		public CheckinListener(String leaderboardName, String eventId,
+				String competitorId) {
+			this.leaderboardName = leaderboardName;
+			this.eventId = eventId;
+			this.competitorId = competitorId;
 		}
 
 		@Override
 		public void onResponse(JSONObject response) {
-			// TODO: twice the same string here
-			startRegatta(leaderboardName, leaderboardName, countryCode,
-					competitorName, sailId);
+			startRegatta(leaderboardName, eventId, competitorId);
 		}
 	}
 

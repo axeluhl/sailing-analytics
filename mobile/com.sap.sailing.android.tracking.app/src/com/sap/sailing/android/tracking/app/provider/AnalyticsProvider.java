@@ -106,6 +106,7 @@ public class AnalyticsProvider extends ContentProvider {
             	cursor = qb.query(db, projection, selection, selectionArgs, null, null, sortOrder);
             	return cursor;
             	
+            	
             default:
             	final SelectionBuilder builder = buildExpandedSelection(uri);
                 

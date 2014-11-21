@@ -32,5 +32,8 @@
     <string name="good">good</string>
     <string name="great">great</string>
     <string name="no_signal">no signal</string>
+    <string name="competitor_id">CompetitorId</string>
+	<string name="event_id">EventId</string>
+	<string name="leaderboard_name">LeaderboardName</string>
 
 </resources>
