@@ -26,7 +26,7 @@
 	<string name="tracking_time">Tracking Time</string>
 	<string name="regatta_name">RegattaName</string>
 	<string name="event_name">EventName</string>
-	<string name="competitor_name">CompetitorName</string>
+	<string name="competitor_name">CompetitorName</string>	
 	<string name="country_code">Country Code</string>
 	<string name="sail_id">SailId</string>
 	<string name="tracking_status">Status</string>
