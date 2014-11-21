@@ -148,7 +148,7 @@ public class TrackingFragment extends BaseFragment implements OnClickListener {
 				else if (apiConnectivity == APIConnectivity.noAttempt)
 				{
 					textView.setText(getString(R.string.tracking_mode_offline));
-					textView.setTextColor(Color.parseColor(getString(R.color.white)));
+					textView.setTextColor(Color.parseColor(getString(R.color.sap_green)));
 				}
 				else if  (apiConnectivity == APIConnectivity.reachableTransmissionError)
 				{
