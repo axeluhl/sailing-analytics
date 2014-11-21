@@ -91,7 +91,7 @@ public abstract class AbstractServerReplicationTest<ReplicableInterface extends 
      *            service will be created as replica
      */
     protected Pair<ReplicationServiceTestImpl<ReplicableInterface>, ReplicationMasterDescriptor> basicSetUp(boolean dropDB,
-            ReplicableImpl master, ReplicableImpl replica) throws IOException, InterruptedException {
+            ReplicableImpl master, ReplicableImpl replica) throws Exception {
         persistenceSetUp(dropDB);
         String exchangeName = "test-sapsailinganalytics-exchange";
         String exchangeHost = "localhost";
@@ -129,7 +129,7 @@ public abstract class AbstractServerReplicationTest<ReplicableInterface extends 
      * any initialization that {@link #persistenceSetUp(boolean)} may have performed can be assumed to have taken place in the implementations
      * of this method.
      */
-    abstract protected ReplicableImpl createNewMaster();
+    abstract protected ReplicableImpl createNewMaster() throws Exception;
 
     /**
      * Creates a new replica replicable instance. This method is called only after {@link #persistenceSetUp(boolean)} has been called. Therefore,

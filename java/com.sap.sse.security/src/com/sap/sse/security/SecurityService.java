@@ -11,13 +11,14 @@ import org.apache.shiro.cache.CacheManager;
 import org.apache.shiro.mgt.SecurityManager;
 
 import com.sap.sse.replication.impl.ReplicableWithObjectInputStream;
+import com.sap.sse.security.impl.ReplicableSecurityService;
 import com.sap.sse.security.operations.SecurityOperation;
 import com.sap.sse.security.shared.DefaultRoles;
 import com.sap.sse.security.shared.MailException;
 import com.sap.sse.security.shared.SocialUserAccount;
 import com.sap.sse.security.shared.UserManagementException;
 
-public interface SecurityService extends ReplicableWithObjectInputStream<SecurityService, SecurityOperation<?>> {
+public interface SecurityService extends ReplicableWithObjectInputStream<ReplicableSecurityService, SecurityOperation<?>> {
 
     SecurityManager getSecurityManager();
 

@@ -78,12 +78,12 @@ import com.sap.sse.security.GithubApi;
 import com.sap.sse.security.InstagramApi;
 import com.sap.sse.security.OAuthRealm;
 import com.sap.sse.security.OAuthToken;
-import com.sap.sse.security.SecurityService;
 import com.sap.sse.security.SessionUtils;
 import com.sap.sse.security.Social;
 import com.sap.sse.security.SocialSettingsKeys;
 import com.sap.sse.security.User;
 import com.sap.sse.security.UserStore;
+import com.sap.sse.security.operations.SecurityOperation;
 import com.sap.sse.security.shared.Account.AccountType;
 import com.sap.sse.security.shared.DefaultRoles;
 import com.sap.sse.security.shared.MailException;
@@ -91,7 +91,7 @@ import com.sap.sse.security.shared.SocialUserAccount;
 import com.sap.sse.security.shared.UserManagementException;
 import com.sap.sse.security.shared.UsernamePasswordAccount;
 
-public class SecurityServiceImpl extends RemoteServiceServlet implements SecurityService {
+public class SecurityServiceImpl extends RemoteServiceServlet implements ReplicableSecurityService {
 
     private static final long serialVersionUID = -3490163216601311858L;
 
@@ -101,7 +101,7 @@ public class SecurityServiceImpl extends RemoteServiceServlet implements Securit
     private final CacheManager cacheManager = new EhCacheManager();
     private UserStore store;
     private final Properties mailProperties;
-    private final ConcurrentHashMap<OperationExecutionListener<SecurityService>, OperationExecutionListener<SecurityService>> operationExecutionListeners;
+    private final ConcurrentHashMap<OperationExecutionListener<ReplicableSecurityService>, OperationExecutionListener<ReplicableSecurityService>> operationExecutionListeners;
     
     private static Ini shiroConfiguration;
     static {
@@ -275,18 +275,11 @@ public class SecurityServiceImpl extends RemoteServiceServlet implements Securit
     @Override
     public User createSimpleUser(final String username, final String email, String password,
             final String validationBaseURL) throws UserManagementException, MailException {
-        return apply(thiz -> internalCreateSimpleUser(username, email, password, validationBaseURL));
+        return apply((SecurityOperation<User>) thiz -> thiz.internalCreateSimpleUser(username, email, password, validationBaseURL));
     }
 
-    /**
-     * @param username
-     * @param email
-     * @param password
-     * @param validationBaseURL
-     * @return
-     * @throws UserManagementException
-     */
-    private User internalCreateSimpleUser(final String username, final String email, String password,
+    @Override
+    public User internalCreateSimpleUser(final String username, final String email, String password,
             final String validationBaseURL) throws UserManagementException {
         if (store.getUserByName(username) != null) {
             throw new UserManagementException(UserManagementException.USER_ALREADY_EXISTS);
@@ -320,6 +313,11 @@ public class SecurityServiceImpl extends RemoteServiceServlet implements Securit
 
     @Override
     public void updateSimpleUserPassword(String username, String newPassword) throws UserManagementException {
+        internalUpdateSimpleUserPassword(username, newPassword);
+    }
+
+    @Override
+    public void internalUpdateSimpleUserPassword(String username, String newPassword) throws UserManagementException {
         final User user = store.getUserByName(username);
         if (user == null) {
             throw new UserManagementException(UserManagementException.USER_DOES_NOT_EXIST);
@@ -827,17 +825,17 @@ public class SecurityServiceImpl extends RemoteServiceServlet implements Securit
     }
 
     @Override
-    public Iterable<OperationExecutionListener<SecurityService>> getOperationExecutionListeners() {
+    public Iterable<OperationExecutionListener<ReplicableSecurityService>> getOperationExecutionListeners() {
         return operationExecutionListeners.keySet();
     }
 
     @Override
-    public void addOperationExecutionListener(OperationExecutionListener<SecurityService> listener) {
+    public void addOperationExecutionListener(OperationExecutionListener<ReplicableSecurityService> listener) {
         operationExecutionListeners.put(listener, listener);
     }
 
     @Override
-    public void removeOperationExecutionListener(OperationExecutionListener<SecurityService> listener) {
+    public void removeOperationExecutionListener(OperationExecutionListener<ReplicableSecurityService> listener) {
         operationExecutionListeners.remove(listener);
     }
 

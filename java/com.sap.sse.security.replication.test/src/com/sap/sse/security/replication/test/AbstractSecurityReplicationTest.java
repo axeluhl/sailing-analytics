@@ -1,5 +1,7 @@
 package com.sap.sse.security.replication.test;
 
+import java.io.IOException;
+import java.net.MalformedURLException;
 import java.util.Properties;
 
 import com.sap.sse.mongodb.MongoDBService;
@@ -25,8 +27,10 @@ public abstract class AbstractSecurityReplicationTest extends AbstractServerRepl
     }
 
     @Override
-    protected SecurityServiceImpl createNewMaster() {
-        return new SecurityServiceImpl(new UserStoreImpl(), new Properties());
+    protected SecurityServiceImpl createNewMaster() throws MalformedURLException, IOException, InterruptedException {
+        SecurityServiceImpl result = new SecurityServiceImpl(new UserStoreImpl(), new Properties());
+        result.clearReplicaState();
+        return result;
     }
 
     @Override
