@@ -3135,9 +3135,7 @@ public abstract class TrackedRaceImpl extends TrackedRaceWithWindEssentials impl
     	return gpsFixStore;
     }
     
-    protected MarkPassingCalculator createMarkPassingCalculator() {
-        return null;
-    }
+    protected abstract MarkPassingCalculator createMarkPassingCalculator();
     
     @Override
     public boolean isUsingMarkPassingCalculator() {
