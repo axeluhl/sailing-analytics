@@ -4,13 +4,19 @@ import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNotSame;
 import static org.junit.Assert.assertSame;
 import static org.junit.Assert.assertTrue;
+import static org.junit.Assert.fail;
 
+import java.io.ByteArrayOutputStream;
 import java.io.IOException;
+import java.io.NotSerializableException;
+import java.io.ObjectOutputStream;
+import java.io.Serializable;
 import java.util.Arrays;
 import java.util.Collections;
 import java.util.HashSet;
 import java.util.Set;
 import java.util.UUID;
+import java.util.logging.Logger;
 
 import org.junit.Test;
 
@@ -41,6 +47,8 @@ import com.sap.sse.common.Util;
 import com.sap.sse.common.impl.MillisecondsTimePoint;
 
 public class OfflineSerializationTest extends AbstractSerializationTest {
+    private static final Logger logger = Logger.getLogger(OfflineSerializationTest.class.getName());
+    
     /**
      * Bug 769 was based on an inconsistency of a cached hash code in Pair. The same problem existed for Triple.
      * Serialization changes the Object IDs of the objects contained and therefore the hash code based on this
@@ -197,5 +205,31 @@ public class OfflineSerializationTest extends AbstractSerializationTest {
         assertSame(copies[0], copies[1]);
         assertNotSame(n, copies[0]);
         assertEquals(n.getName(), ((Nationality) copies[0]).getName());
+    }
+
+    private static interface Op extends Serializable {
+        String internalApplyTo(String s);
+    }
+    
+    /**
+     * To make absolutely sure that even if for strange reasons the test class was serializable, it would throw an
+     * exception during serialization
+     */
+    private void writeObject(ObjectOutputStream oos) {
+        fail("This class should not be serializable.");
+    }
+
+    @Test
+    public void testLambdaDoesNotSerializeEnclosingInstance() throws IOException {
+        Op op = s -> s+s;
+        new ObjectOutputStream(new ByteArrayOutputStream()).writeObject(op); // the test case is not serializable; if it were, its writeObject() would thrown an exception
+        Op opWithRefToEnclosingInstance = s -> s+this.toString();
+        try {
+            new ObjectOutputStream(new ByteArrayOutputStream()).writeObject(opWithRefToEnclosingInstance);
+            fail("Expected the lambda not to be serializable because it references the non-serializable enclosing instance");
+        } catch (NotSerializableException nse) {
+            // this is expected
+            logger.info("Caught expected exception "+nse);
+        }
     }
 }
