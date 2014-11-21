@@ -2,6 +2,7 @@ package com.sap.sse.security.userstore.mongodb;
 
 import java.util.Map;
 
+import com.mongodb.DB;
 import com.sap.sse.security.User;
 
 public interface MongoObjectFactory {
@@ -21,4 +22,6 @@ public interface MongoObjectFactory {
     public void clearAllSettings();
     
     public void clearAllPreferences();
+
+    public DB getDatabase();
 }

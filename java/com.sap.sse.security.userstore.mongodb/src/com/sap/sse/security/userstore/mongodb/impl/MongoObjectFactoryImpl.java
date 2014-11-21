@@ -28,6 +28,11 @@ public class MongoObjectFactoryImpl implements MongoObjectFactory {
     }
 
     @Override
+    public DB getDatabase() {
+        return db;
+    }
+
+    @Override
     public void storeUser(User user) {
         DBCollection usersCollection = db.getCollection(CollectionNames.USERS.name());
         usersCollection.ensureIndex(FieldNames.User.NAME.name());

@@ -50,6 +50,7 @@ import com.sap.sailing.domain.racelog.RaceLogEventFactory;
 import com.sap.sailing.domain.racelog.RaceLogIdentifier;
 import com.sap.sailing.domain.racelog.RaceLogRaceStatusEvent;
 import com.sap.sailing.domain.racelog.impl.RaceLogEventAuthorImpl;
+import com.sap.sailing.server.RacingEventService;
 import com.sap.sailing.server.impl.RacingEventServiceImpl;
 import com.sap.sailing.server.operationaltransformation.AddColumnToLeaderboard;
 import com.sap.sailing.server.operationaltransformation.AddColumnToSeries;
@@ -58,25 +59,26 @@ import com.sap.sailing.server.operationaltransformation.CreateFlexibleLeaderboar
 import com.sap.sailing.server.operationaltransformation.CreateRegattaLeaderboard;
 import com.sap.sailing.server.operationaltransformation.RenameLeaderboard;
 import com.sap.sse.common.Util;
+import com.sap.sse.common.Util.Pair;
 import com.sap.sse.common.impl.MillisecondsTimePoint;
-import com.sap.sse.mongodb.MongoDBService;
 import com.sap.sse.replication.ReplicationMasterDescriptor;
 
 public class RaceLogReplicationTest extends AbstractServerReplicationTest {
     private static final String BOAT_CLASS_NAME_49er = "49er";
 
-    private com.sap.sse.common.Util.Pair<ReplicationServiceTestImpl, ReplicationMasterDescriptor> replicationDescriptorPair;
+    private Pair<com.sap.sse.replication.testsupport.AbstractServerReplicationTest.ReplicationServiceTestImpl<RacingEventService>, ReplicationMasterDescriptor> replicationDescriptorPair;
     
     private RaceLogEvent raceLogEvent;
     private RaceLogEvent anotherRaceLogEvent;
     private RaceLogEventAuthor author = new RaceLogEventAuthorImpl("Test Author", 1);
     
     @Before
+    @Override
     public void setUp() throws Exception {
         raceLogEvent = RaceLogEventFactory.INSTANCE.createRaceStatusEvent(new MillisecondsTimePoint(1), author, 42, RaceLogRaceStatus.UNKNOWN);
         anotherRaceLogEvent = RaceLogEventFactory.INSTANCE.createRaceStatusEvent(new MillisecondsTimePoint(2), author, 42, RaceLogRaceStatus.UNKNOWN);
         try {
-            replicationDescriptorPair = basicSetUp(true, null, null);
+            replicationDescriptorPair = basicSetUp(/* dropDB */ true, null, null);
         } catch (Exception e) {
             e.printStackTrace();
             tearDown();
@@ -265,7 +267,7 @@ public class RaceLogReplicationTest extends AbstractServerReplicationTest {
     private void addEventToDB(RaceLogIdentifier raceLogIdentifier, RaceLogRaceStatusEvent createRaceStatusEvent, String regattaName, String raceColumnName, String fleetName) {
         final MongoObjectFactory defaultMongoObjectFactory = PersistenceFactory.INSTANCE.getDefaultMongoObjectFactory();
         defaultMongoObjectFactory.getDatabase().getLastError(); // wait for regatta write operation to complete
-        final RacingEventServiceImpl temporaryMaster = createNewMaster(MongoDBService.INSTANCE, defaultMongoObjectFactory);
+        final RacingEventServiceImpl temporaryMaster = createNewMaster();
         Regatta regatta = temporaryMaster.getRegatta(new RegattaName(regattaName+" ("+BOAT_CLASS_NAME_49er+")"));
         Series series = regatta.getSeries().iterator().next();
         RaceLog masterLog = series.getRaceColumnByName(raceColumnName).getRaceLog(series.getFleetByName(fleetName));
