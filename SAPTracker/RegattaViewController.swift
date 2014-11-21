@@ -26,10 +26,16 @@ class RegattaViewController : UIViewController, UIActionSheetDelegate, UINavigat
     @IBOutlet weak var flagImageView: UIImageView!
     @IBOutlet weak var sailLabel: UILabel!
     @IBOutlet weak var lastSyncLabel: UILabel!
+    @IBOutlet weak var startLabel: UILabel!
     @IBOutlet weak var startDateLabel: UILabel!
+    @IBOutlet weak var endLabel: UILabel!
     @IBOutlet weak var endDateLabel: UILabel!
+    @IBOutlet weak var finishedLabel: UILabel!
+    @IBOutlet weak var startTrackingButton: UIButton!
     
     var dateFormatter: NSDateFormatter
+    
+    var isFinished: Bool = false
     
     /* Setup date formatter for last sync. */
     required init(coder aDecoder: NSCoder) {
@@ -79,6 +85,8 @@ class RegattaViewController : UIViewController, UIActionSheetDelegate, UINavigat
         
         // point to events API server
         APIManager.sharedManager.initManager(DataManager.sharedManager.selectedEvent!.serverUrl)
+        
+        checkRegattaIsFinished()
     }
     
     override func viewDidAppear(animated: Bool) {
@@ -91,6 +99,29 @@ class RegattaViewController : UIViewController, UIActionSheetDelegate, UINavigat
             lastSyncLabel.text = "Last sync: " + dateFormatter.stringFromDate(DataManager.sharedManager.selectedEvent!.lastSyncDate!)
         } else {
             lastSyncLabel.text = nil
+        }
+    }
+    
+    private func checkRegattaIsFinished() {
+        let now = NSDate()
+        if now.timeIntervalSinceDate(DataManager.sharedManager.selectedEvent!.endDate) > 0 {
+            isFinished = true
+            startLabel.hidden = true
+            startDateLabel.hidden = true
+            endLabel.hidden = true
+            endDateLabel.hidden = true
+            lastSyncLabel.hidden = true
+            finishedLabel.hidden = false
+            startTrackingButton.setTitle("Close", forState: UIControlState.Normal)
+        } else {
+            isFinished = false
+            endLabel.hidden = false
+            endDateLabel.hidden = false
+            startLabel.hidden = false
+            startDateLabel.hidden = false
+            lastSyncLabel.hidden = false
+            finishedLabel.hidden = true
+            startTrackingButton.setTitle("Start Tracking", forState: UIControlState.Normal)
         }
     }
     
@@ -127,6 +158,12 @@ class RegattaViewController : UIViewController, UIActionSheetDelegate, UINavigat
     // MARK: - Start tracking
     
     @IBAction func startTrackingButtonTapped(sender: AnyObject) {
+        if isFinished {
+            DataManager.sharedManager.deleteEvent(DataManager.sharedManager.selectedEvent!)
+            DataManager.sharedManager.saveContext()
+            navigationController!.popViewControllerAnimated(true)
+            return
+        }
         let errorMessage = LocationManager.sharedManager.startTracking()
         if errorMessage != nil {
             let alertView = UIAlertView(title: errorMessage, message: nil, delegate: nil, cancelButtonTitle: "Cancel")

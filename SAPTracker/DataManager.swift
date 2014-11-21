@@ -40,6 +40,9 @@ class DataManager: NSObject {
 
     /* New location detected, store to database. */
     func newLocation(notification: NSNotification) {
+        if notification == NSNull() {
+            return
+        }
         let gpsFix = NSEntityDescription.insertNewObjectForEntityForName("GPSFix", inManagedObjectContext: self.managedObjectContext!) as GPSFix
         gpsFix.initWithDictionary(notification.userInfo!)
         gpsFix.event = selectedEvent!

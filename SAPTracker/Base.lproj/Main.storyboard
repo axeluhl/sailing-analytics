@@ -205,6 +205,19 @@
                                 <color key="textColor" cocoaTouchSystemColor="darkTextColor"/>
                                 <nil key="highlightedColor"/>
                             </label>
+                            <imageView userInteractionEnabled="NO" contentMode="scaleAspectFit" horizontalHuggingPriority="251" verticalHuggingPriority="251" image="DE.png" translatesAutoresizingMaskIntoConstraints="NO" id="szG-Mg-huO">
+                                <rect key="frame" x="485" y="227" width="32" height="32"/>
+                                <constraints>
+                                    <constraint firstAttribute="height" constant="32" id="6vF-l4-zmw"/>
+                                    <constraint firstAttribute="width" constant="32" id="FqC-Te-9As"/>
+                                </constraints>
+                            </imageView>
+                            <label opaque="NO" userInteractionEnabled="NO" contentMode="left" horizontalHuggingPriority="251" verticalHuggingPriority="251" text="GER 17" textAlignment="right" lineBreakMode="tailTruncation" baselineAdjustment="alignBaselines" adjustsFontSizeToFit="NO" translatesAutoresizingMaskIntoConstraints="NO" id="iIf-9z-7fe">
+                                <rect key="frame" x="525" y="232" width="59" height="21"/>
+                                <fontDescription key="fontDescription" type="system" pointSize="17"/>
+                                <color key="textColor" cocoaTouchSystemColor="darkTextColor"/>
+                                <nil key="highlightedColor"/>
+                            </label>
                             <label opaque="NO" userInteractionEnabled="NO" contentMode="left" horizontalHuggingPriority="251" verticalHuggingPriority="251" text="Start" lineBreakMode="tailTruncation" baselineAdjustment="alignBaselines" adjustsFontSizeToFit="NO" translatesAutoresizingMaskIntoConstraints="NO" id="3Cm-ER-9UI">
                                 <rect key="frame" x="16" y="261" width="37" height="21"/>
                                 <fontDescription key="fontDescription" type="system" pointSize="17"/>
@@ -217,34 +230,18 @@
                                 <color key="textColor" cocoaTouchSystemColor="darkTextColor"/>
                                 <nil key="highlightedColor"/>
                             </label>
+                            <label opaque="NO" userInteractionEnabled="NO" contentMode="left" horizontalHuggingPriority="251" verticalHuggingPriority="251" text="End" lineBreakMode="tailTruncation" baselineAdjustment="alignBaselines" adjustsFontSizeToFit="NO" translatesAutoresizingMaskIntoConstraints="NO" id="yH4-OG-heq">
+                                <rect key="frame" x="16" y="290" width="31" height="21"/>
+                                <fontDescription key="fontDescription" type="system" pointSize="17"/>
+                                <color key="textColor" cocoaTouchSystemColor="darkTextColor"/>
+                                <nil key="highlightedColor"/>
+                            </label>
                             <label opaque="NO" userInteractionEnabled="NO" contentMode="left" horizontalHuggingPriority="251" verticalHuggingPriority="251" text="01.01.2015" textAlignment="right" lineBreakMode="tailTruncation" baselineAdjustment="alignBaselines" minimumScaleFactor="0.5" adjustsLetterSpacingToFitWidth="YES" translatesAutoresizingMaskIntoConstraints="NO" id="vTo-Mg-F7O">
                                 <rect key="frame" x="498" y="290" width="86" height="21"/>
                                 <fontDescription key="fontDescription" type="system" pointSize="17"/>
                                 <color key="textColor" cocoaTouchSystemColor="darkTextColor"/>
                                 <nil key="highlightedColor"/>
                             </label>
-                            <label opaque="NO" userInteractionEnabled="NO" contentMode="left" horizontalHuggingPriority="251" verticalHuggingPriority="251" text="GER 17" textAlignment="right" lineBreakMode="tailTruncation" baselineAdjustment="alignBaselines" adjustsFontSizeToFit="NO" translatesAutoresizingMaskIntoConstraints="NO" id="iIf-9z-7fe">
-                                <rect key="frame" x="525" y="232" width="59" height="21"/>
-                                <fontDescription key="fontDescription" type="system" pointSize="17"/>
-                                <color key="textColor" cocoaTouchSystemColor="darkTextColor"/>
-                                <nil key="highlightedColor"/>
-                            </label>
-                            <imageView userInteractionEnabled="NO" contentMode="scaleAspectFit" horizontalHuggingPriority="251" verticalHuggingPriority="251" image="DE.png" translatesAutoresizingMaskIntoConstraints="NO" id="szG-Mg-huO">
-                                <rect key="frame" x="485" y="227" width="32" height="32"/>
-                                <constraints>
-                                    <constraint firstAttribute="height" constant="32" id="6vF-l4-zmw"/>
-                                    <constraint firstAttribute="width" constant="32" id="FqC-Te-9As"/>
-                                </constraints>
-                            </imageView>
-                            <button opaque="NO" contentMode="scaleToFill" contentHorizontalAlignment="center" contentVerticalAlignment="center" buttonType="roundedRect" lineBreakMode="middleTruncation" translatesAutoresizingMaskIntoConstraints="NO" id="mj9-m1-nYY">
-                                <rect key="frame" x="16" y="550" width="568" height="30"/>
-                                <state key="normal" title="Start Tracking">
-                                    <color key="titleShadowColor" white="0.5" alpha="1" colorSpace="calibratedWhite"/>
-                                </state>
-                                <connections>
-                                    <action selector="startTrackingButtonTapped:" destination="G3a-SV-Maf" eventType="touchUpInside" id="x7w-dz-qiZ"/>
-                                </connections>
-                            </button>
                             <label opaque="NO" userInteractionEnabled="NO" contentMode="left" horizontalHuggingPriority="251" verticalHuggingPriority="251" text="Last Sync" textAlignment="center" lineBreakMode="tailTruncation" baselineAdjustment="alignBaselines" minimumScaleFactor="0.5" adjustsLetterSpacingToFitWidth="YES" translatesAutoresizingMaskIntoConstraints="NO" id="gHJ-am-Ulb">
                                 <rect key="frame" x="16" y="319" width="568" height="21"/>
                                 <constraints>
@@ -254,8 +251,17 @@
                                 <color key="textColor" white="0.33333333333333331" alpha="1" colorSpace="calibratedWhite"/>
                                 <nil key="highlightedColor"/>
                             </label>
-                            <label opaque="NO" userInteractionEnabled="NO" contentMode="left" horizontalHuggingPriority="251" verticalHuggingPriority="251" text="End" lineBreakMode="tailTruncation" baselineAdjustment="alignBaselines" adjustsFontSizeToFit="NO" translatesAutoresizingMaskIntoConstraints="NO" id="yH4-OG-heq">
-                                <rect key="frame" x="16" y="290" width="31" height="21"/>
+                            <button opaque="NO" contentMode="scaleToFill" contentHorizontalAlignment="center" contentVerticalAlignment="center" buttonType="roundedRect" lineBreakMode="middleTruncation" translatesAutoresizingMaskIntoConstraints="NO" id="mj9-m1-nYY">
+                                <rect key="frame" x="16" y="550" width="568" height="30"/>
+                                <state key="normal" title="Start Tracking">
+                                    <color key="titleShadowColor" white="0.5" alpha="1" colorSpace="calibratedWhite"/>
+                                </state>
+                                <connections>
+                                    <action selector="startTrackingButtonTapped:" destination="G3a-SV-Maf" eventType="touchUpInside" id="x7w-dz-qiZ"/>
+                                </connections>
+                            </button>
+                            <label hidden="YES" opaque="NO" userInteractionEnabled="NO" contentMode="left" horizontalHuggingPriority="251" verticalHuggingPriority="251" text="Thank you for participating in the regatta" textAlignment="center" lineBreakMode="tailTruncation" numberOfLines="2" baselineAdjustment="alignBaselines" adjustsLetterSpacingToFitWidth="YES" adjustsFontSizeToFit="NO" translatesAutoresizingMaskIntoConstraints="NO" id="LsQ-jX-29W">
+                                <rect key="frame" x="16" y="521" width="568" height="21"/>
                                 <fontDescription key="fontDescription" type="system" pointSize="17"/>
                                 <color key="textColor" cocoaTouchSystemColor="darkTextColor"/>
                                 <nil key="highlightedColor"/>
@@ -267,14 +273,17 @@
                             <constraint firstItem="mj9-m1-nYY" firstAttribute="centerX" secondItem="D89-pe-zpv" secondAttribute="centerX" id="5tP-Ko-XGd"/>
                             <constraint firstItem="vTo-Mg-F7O" firstAttribute="baseline" secondItem="yH4-OG-heq" secondAttribute="baseline" id="EEN-c4-Wnk"/>
                             <constraint firstItem="3Cm-ER-9UI" firstAttribute="leading" secondItem="oJS-dM-2B6" secondAttribute="leading" id="JT3-xg-eQQ"/>
+                            <constraint firstItem="LsQ-jX-29W" firstAttribute="leading" secondItem="mj9-m1-nYY" secondAttribute="leading" id="Nb3-iw-72S"/>
                             <constraint firstItem="L5y-fZ-gz6" firstAttribute="baseline" secondItem="3Cm-ER-9UI" secondAttribute="baseline" id="Phn-az-MyQ"/>
                             <constraint firstItem="iIf-9z-7fe" firstAttribute="leading" secondItem="szG-Mg-huO" secondAttribute="trailing" constant="8" symbolic="YES" id="SuJ-xb-y9x"/>
                             <constraint firstAttribute="trailing" secondItem="D89-pe-zpv" secondAttribute="trailing" id="UhM-Sv-R4W"/>
                             <constraint firstItem="D89-pe-zpv" firstAttribute="top" secondItem="wYi-P2-UTF" secondAttribute="bottom" id="WBW-Lw-5P6">
                                 <variation key="heightClass=compact-widthClass=compact" constant="-64"/>
                             </constraint>
+                            <constraint firstItem="LsQ-jX-29W" firstAttribute="trailing" secondItem="mj9-m1-nYY" secondAttribute="trailing" id="Y8c-3v-4m8"/>
                             <constraint firstItem="qVe-AE-cJY" firstAttribute="leading" secondItem="D89-pe-zpv" secondAttribute="leading" id="b0x-d3-irS"/>
                             <constraint firstItem="yH4-OG-heq" firstAttribute="leading" secondItem="gHJ-am-Ulb" secondAttribute="leading" id="bGC-cH-FaB"/>
+                            <constraint firstItem="mj9-m1-nYY" firstAttribute="top" secondItem="LsQ-jX-29W" secondAttribute="bottom" constant="8" symbolic="YES" id="dU2-P2-kiz"/>
                             <constraint firstItem="qVe-AE-cJY" firstAttribute="top" secondItem="D89-pe-zpv" secondAttribute="top" id="gFt-eL-RcX"/>
                             <constraint firstItem="yH4-OG-heq" firstAttribute="top" secondItem="3Cm-ER-9UI" secondAttribute="bottom" constant="8" symbolic="YES" id="hg8-AG-bl7"/>
                             <constraint firstItem="3Cm-ER-9UI" firstAttribute="leading" secondItem="yH4-OG-heq" secondAttribute="leading" id="hzs-xK-Eyq"/>
@@ -304,12 +313,16 @@
                     </navigationItem>
                     <connections>
                         <outlet property="endDateLabel" destination="vTo-Mg-F7O" id="V4a-5b-fUh"/>
+                        <outlet property="endLabel" destination="yH4-OG-heq" id="eyx-F5-xy7"/>
+                        <outlet property="finishedLabel" destination="LsQ-jX-29W" id="SXd-mJ-mur"/>
                         <outlet property="flagImageView" destination="szG-Mg-huO" id="m3b-Wx-2on"/>
                         <outlet property="imageView" destination="D89-pe-zpv" id="tE7-Fb-xBq"/>
                         <outlet property="lastSyncLabel" destination="gHJ-am-Ulb" id="EfM-eF-R1s"/>
                         <outlet property="nameLabel" destination="oJS-dM-2B6" id="fXn-FX-UbJ"/>
                         <outlet property="sailLabel" destination="iIf-9z-7fe" id="xPM-y9-Tjg"/>
                         <outlet property="startDateLabel" destination="L5y-fZ-gz6" id="AZj-ok-wGE"/>
+                        <outlet property="startLabel" destination="3Cm-ER-9UI" id="ApG-cy-lSs"/>
+                        <outlet property="startTrackingButton" destination="mj9-m1-nYY" id="eUX-Yd-aix"/>
                         <segue destination="4Fb-v3-mkB" kind="presentation" identifier="Settings" id="Irs-ey-Uhs"/>
                         <segue destination="dfN-Ch-vpm" kind="presentation" identifier="About" id="tzB-PL-31j"/>
                         <segue destination="I54-NN-JAf" kind="presentation" identifier="Tracking" id="fgS-yf-c3u"/>
