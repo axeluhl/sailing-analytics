@@ -6,6 +6,7 @@ import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.logging.Logger;
 
 import com.sap.sailing.domain.abstractlog.race.RaceLog;
 import com.sap.sailing.domain.abstractlog.race.RaceLogEvent;
@@ -34,6 +35,8 @@ import com.sap.sailing.domain.common.impl.TimeRangeImpl;
  * according {@code CloseOpenEndedDeviceMappingEvent} exists.
  */
 public class DeviceMappingFinder<ItemT extends WithID> extends RaceLogAnalyzer<Map<ItemT, List<DeviceMapping<ItemT>>>> {
+    private static Logger logger = Logger.getLogger(DeviceMappingFinder.class.getName());
+    
     public DeviceMappingFinder(RaceLog raceLog) {
         super(raceLog);
     }
@@ -90,7 +93,7 @@ public class DeviceMappingFinder<ItemT extends WithID> extends RaceLogAnalyzer<M
             TimePoint to = event.getTo();
             TimePoint closingTimePoint = closingEvents.containsKey(event.getId()) ?
                     closingEvents.get(event.getId()).getClosingTimePoint() : null;
-            if (from == null) from = closingTimePoint;
+            if (from == null) logger.severe("No start time set for DeviceMappingEvent with ID: "+event.getId());
             if (to == null) to = closingTimePoint;
             
             result.add(getMapping(event.getDevice(), item, from, to, event.getId()));
