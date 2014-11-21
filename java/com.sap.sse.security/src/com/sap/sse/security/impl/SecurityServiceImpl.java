@@ -275,6 +275,19 @@ public class SecurityServiceImpl extends RemoteServiceServlet implements Securit
     @Override
     public User createSimpleUser(final String username, final String email, String password,
             final String validationBaseURL) throws UserManagementException, MailException {
+        return apply(thiz -> internalCreateSimpleUser(username, email, password, validationBaseURL));
+    }
+
+    /**
+     * @param username
+     * @param email
+     * @param password
+     * @param validationBaseURL
+     * @return
+     * @throws UserManagementException
+     */
+    private User internalCreateSimpleUser(final String username, final String email, String password,
+            final String validationBaseURL) throws UserManagementException {
         if (store.getUserByName(username) != null) {
             throw new UserManagementException(UserManagementException.USER_ALREADY_EXISTS);
         }
