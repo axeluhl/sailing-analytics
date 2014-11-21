@@ -89,7 +89,7 @@ public class DataMiningServiceImpl extends RemoteServiceServlet implements DataM
     
     @Override
     public Iterable<FunctionDTO> getDimensionsFor(DataRetrieverChainDefinitionDTO dataRetrieverChainDefinitionDTO, String localeInfoName) {
-        DataRetrieverChainDefinition<?> dataRetrieverChainDefinition = getDataMiningServer().getDataRetrieverChainDefinition(RacingEventService.class, dataRetrieverChainDefinitionDTO.getId());
+        DataRetrieverChainDefinition<?> dataRetrieverChainDefinition = getDataMiningServer().getDataRetrieverChainDefinition(dataRetrieverChainDefinitionDTO.getId());
         Iterable<Function<?>> dimensions = getDataMiningServer().getDimensionsFor(dataRetrieverChainDefinition);
         return functionsAsFunctionDTOs(dimensions, localeInfoName);
     }
@@ -132,7 +132,7 @@ public class DataMiningServiceImpl extends RemoteServiceServlet implements DataM
                 LocalizedTypeDTO localizedRetrievedDataType = new LocalizedTypeDTO(typeName, displayName);
                 retrievedDataTypesChain.add(localizedRetrievedDataType);
             }
-            DTOs.add(new DataRetrieverChainDefinitionDTO(dataRetrieverChainDefinition.getUUID(), dataRetrieverChainDefinition.getLocalizedName(locale, dataMiningStringMessages),
+            DTOs.add(new DataRetrieverChainDefinitionDTO(dataRetrieverChainDefinition.getID(), dataRetrieverChainDefinition.getLocalizedName(locale, dataMiningStringMessages),
                                                          dataRetrieverChainDefinition.getDataSourceType().getSimpleName(), retrievedDataTypesChain));
         }
         return DTOs;

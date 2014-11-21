@@ -35,7 +35,7 @@ public class SimpleDataRetrieverChainDefinition<DataSourceType> implements
     }
     
     @Override
-    public UUID getUUID() {
+    public UUID getID() {
         return id;
     }
     

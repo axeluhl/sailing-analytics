@@ -89,7 +89,7 @@ public class TestDataRetrieverChainCreation {
         List<DataRetrieverTypeWithInformation<?, ?>> cloneDataRetrieverTypesWithInformation = (List<DataRetrieverTypeWithInformation<?, ?>>) chainClone.getDataRetrieverTypesWithInformation();
         assertThat(cloneDataRetrieverTypesWithInformation, is(dataRetrieverChainDefinition.getDataRetrieverTypesWithInformation()));
         
-        assertThat(chainClone.getUUID(), not(dataRetrieverChainDefinition.getUUID()));
+        assertThat(chainClone.getID(), not(dataRetrieverChainDefinition.getID()));
     }
 
     @SuppressWarnings("unchecked")

@@ -66,15 +66,12 @@ public class TestDataRetrieverChainDefinitionRegistry {
         assertThat(dataRetrieverChainDefinitionRegistry.get(dataSourceType, Test_HasLegOfCompetitorContext.class), is(expectedDataRetrieverChainDefinitions));
     }
     
-    @SuppressWarnings("unchecked")
     @Test
     public void testSingleGetDataRetrieverChainDefinition() {
-        Class<Collection<Test_Regatta>> dataSourceType = (Class<Collection<Test_Regatta>>)(Class<?>) Collection.class;
-        
-        assertThat(dataRetrieverChainDefinitionRegistry.get(dataSourceType, raceRetrieverChainDefinition.getUUID()),
+        assertThat(dataRetrieverChainDefinitionRegistry.get(raceRetrieverChainDefinition.getID()),
                 is(raceRetrieverChainDefinition));
         
-        assertThat(dataRetrieverChainDefinitionRegistry.get(dataSourceType, legRetrieverChainDefinition.getUUID()),
+        assertThat(dataRetrieverChainDefinitionRegistry.get(legRetrieverChainDefinition.getID()),
                 is(legRetrieverChainDefinition));
     }
     

@@ -11,7 +11,7 @@ import com.sap.sse.datamining.impl.DataRetrieverTypeWithInformation;
 
 public interface DataRetrieverChainDefinition<DataSourceType> {
     
-    public UUID getUUID();
+    public UUID getID();
     
     public Class<DataSourceType> getDataSourceType();
     

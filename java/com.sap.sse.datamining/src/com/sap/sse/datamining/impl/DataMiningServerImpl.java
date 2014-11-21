@@ -119,6 +119,12 @@ public class DataMiningServerImpl implements ModifiableDataMiningServer {
     public void unregisterDataRetrieverChainDefinition(DataRetrieverChainDefinition<?> dataRetrieverChainDefinition) {
         dataRetrieverChainDefinitionRegistry.unregister(dataRetrieverChainDefinition);
     }
+    
+    @Override
+    public <DataSourceType> Iterable<DataRetrieverChainDefinition<DataSourceType>> getDataRetrieverChainDefinitions(
+            Class<DataSourceType> dataSourceType) {
+        return dataRetrieverChainDefinitionRegistry.get(dataSourceType);
+    }
 
     @Override
     public <DataSourceType> Iterable<DataRetrieverChainDefinition<DataSourceType>> getDataRetrieverChainDefinitions(
@@ -127,9 +133,8 @@ public class DataMiningServerImpl implements ModifiableDataMiningServer {
     }
 
     @Override
-    public <DataSourceType> DataRetrieverChainDefinition<DataSourceType> getDataRetrieverChainDefinition(
-            Class<DataSourceType> dataSourceType, UUID id) {
-        return dataRetrieverChainDefinitionRegistry.get(dataSourceType, id);
+    public <DataSourceType> DataRetrieverChainDefinition<DataSourceType> getDataRetrieverChainDefinition(UUID id) {
+        return dataRetrieverChainDefinitionRegistry.get(id);
     }
     
 }

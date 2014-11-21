@@ -8,8 +8,11 @@ import com.sap.sse.datamining.DataRetrieverChainDefinition;
 public interface DataRetrieverChainDefinitionProvider {
 
     public <DataSourceType> Collection<DataRetrieverChainDefinition<DataSourceType>> get(
+            Class<DataSourceType> dataSourceType);
+
+    public <DataSourceType> Collection<DataRetrieverChainDefinition<DataSourceType>> get(
             Class<DataSourceType> dataSourceType, Class<?> retrievedDataType);
 
-    public <DataSourceType> DataRetrieverChainDefinition<DataSourceType> get(Class<DataSourceType> dataSourceType, UUID id);
+    public <DataSourceType> DataRetrieverChainDefinition<DataSourceType> get(UUID id);
 
 }
