@@ -8,6 +8,7 @@
     <string name="options_menu_settings">Einstellungen</string>
     <string name="settings_category_general">General</string>
     <string name="settings_category_connection">Verbindung</string>
+    <string name="scan_hint">Der QR-Code befindet sich auf Ihrer Teilnahmebestätigung</string>
     <string name="server_url">Server</string>
     <string name="device_identifier">Geräte-ID</string>
     <string name="play_services_available">Google Play Services sind verfügbar</string>
@@ -19,7 +20,7 @@
     <string name="scan_race_barcode">Scan Race Barcode</string>
     <string name="gps_fix_interval">GPS Fix Interval</string>
     <string name="title_activity_regatta">Regatta</string>
-    <string name="title_activity_start">GPS Tracker gestartetp</string>
+    <string name="title_activity_start">GPS Tracker einstellen</string>
     <string name="title_activity_tracking">Tracking</string>
     <string name="hello_world">Hello wörld!</string>
     <string name="action_settings">Einstellungen</string>
@@ -41,5 +42,6 @@
 	<string name="tracking_mode_live">Live</string>
 	<string name="tracking_mode_caching">Caching</string>
 	<string name="tracking_mode_api_error">API-Fehler</string>
+	<string name="add_team_photo">Team Foto hinzufügen</string>
 
 </resources>

@@ -20,7 +20,7 @@
     <string name="scan_race_barcode">Scan Race Barcode</string>
     <string name="gps_fix_interval">GPS fix interval</string>
     <string name="title_activity_regatta">Regatta</string>
-    <string name="title_activity_start">GPS Tracker Set-Up</string>
+    <string name="title_activity_start">Setup GPS-Tracker</string>
     <string name="title_activity_tracking">Tracking</string>
     <string name="hello_world">Hello world!</string>
     <string name="action_settings">Settings</string>
@@ -35,5 +35,6 @@
     <string name="competitor_id">CompetitorId</string>
 	<string name="event_id">EventId</string>
 	<string name="leaderboard_name">LeaderboardName</string>
+	<string name="add_team_photo">Add Team Photo</string>
 
 </resources>
