@@ -189,7 +189,7 @@ public class SecurityServiceImpl extends RemoteServiceServlet implements Replica
     }
     
     @Override
-    public void resetPassword(final String username, String baseURL) throws UserManagementException, MailException {
+    public void resetPassword(final String username, String passwordResetBaseURL) throws UserManagementException, MailException {
         final User user = store.getUserByName(username);
         if (user == null) {
             throw new UserManagementException(UserManagementException.USER_DOES_NOT_EXIST);
@@ -198,13 +198,13 @@ public class SecurityServiceImpl extends RemoteServiceServlet implements Replica
             throw new UserManagementException(UserManagementException.CANNOT_RESET_PASSWORD_WITHOUT_VALIDATED_EMAIL);
         }
         final String passwordResetSecret = user.startPasswordReset();
-        store.updateUser(user); // durably storing the password reset secret
+        apply(s->s.internalStoreUser(user)); // durably storing the password reset secret
         Map<String, String> urlParameters = new HashMap<>();
         try {
             urlParameters.put("u", URLEncoder.encode(user.getName(), "UTF-8"));
             urlParameters.put("e", URLEncoder.encode(user.getEmail(), "UTF-8"));
             urlParameters.put("s", URLEncoder.encode(passwordResetSecret, "UTF-8"));
-            final StringBuilder url = buildURL(baseURL, urlParameters);
+            final StringBuilder url = buildURL(passwordResetBaseURL, urlParameters);
             new Thread("sending password reset e-mail to user " + username) {
                 @Override
                 public void run() {
@@ -385,7 +385,7 @@ public class SecurityServiceImpl extends RemoteServiceServlet implements Replica
             throw new UserManagementException(UserManagementException.USER_DOES_NOT_EXIST);
         }
         final boolean result = user.validate(validationSecret);
-        store.updateUser(user);
+        apply(s->s.internalStoreUser(user));
         return result;
     }
 

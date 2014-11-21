@@ -14,11 +14,6 @@ import com.sap.sse.security.shared.MailException;
 import com.sap.sse.security.shared.UserManagementException;
 
 public class SimpleSecurityReplicationTest extends AbstractSecurityReplicationTest {
-    /**
-     * It's too bad that we can't use this inside a GWT bundle which is currently constrained to Java7... If it was only possible
-     * to extract the *.server package such that it could be compiled with Java8.
-     * @throws IllegalAccessException 
-     */
     @Test
     public void testSimpleReplicationOfUserCreation() throws InterruptedException, UserManagementException, MailException, IllegalAccessException {
         final String username = "Ernie";
@@ -43,11 +38,6 @@ public class SimpleSecurityReplicationTest extends AbstractSecurityReplicationTe
         assertEquals(emailValidationSecret, replicatedErnie.getValidationSecret());
     }
 
-    /**
-     * It's too bad that we can't use this inside a GWT bundle which is currently constrained to Java7... If it was only possible
-     * to extract the *.server package such that it could be compiled with Java8.
-     * @throws IllegalAccessException 
-     */
     @Test
     public void testSimpleReplicationOfUserEmailChange() throws InterruptedException, UserManagementException, MailException, IllegalAccessException {
         final String username = "Ernie";
@@ -72,11 +62,6 @@ public class SimpleSecurityReplicationTest extends AbstractSecurityReplicationTe
         assertEquals(emailValidationSecretAfterChangingEmail, replicatedErnie.getValidationSecret());
     }
 
-    /**
-     * It's too bad that we can't use this inside a GWT bundle which is currently constrained to Java7... If it was only possible
-     * to extract the *.server package such that it could be compiled with Java8.
-     * @throws IllegalAccessException 
-     */
     @Test
     public void testSimpleReplicationOfUserPasswordChange() throws InterruptedException, UserManagementException, MailException, IllegalAccessException {
         final String username = "Ernie";
@@ -96,5 +81,27 @@ public class SimpleSecurityReplicationTest extends AbstractSecurityReplicationTe
         assertEquals(username, replicatedErnie.getName());
         assertFalse(replica.checkPassword(username, password));
         assertTrue(replica.checkPassword(username, newPassword));
+    }
+
+    @Test
+    public void testReplicationOfPasswordReset() throws InterruptedException, UserManagementException, MailException, IllegalAccessException {
+        final String username = "Ernie";
+        final String email = "ernie@sesame-street.com";
+        final String password = "BertMyFriend";
+        final String validationBaseURL = "http://me.to.back.com/validateemail";
+        final String passwordResetBaseURL = "http://me.to.back.com/passwordreset";
+        User user = master.createSimpleUser(username, email, password, validationBaseURL);
+        master.validateEmail(username, user.getValidationSecret());
+        assertTrue(user.isEmailValidated());
+        master.resetPassword(username, passwordResetBaseURL);
+        String passwordResetSecret = user.getPasswordResetSecret();
+        
+        replicaReplicator.waitUntilQueueIsEmpty();
+        Thread.sleep(3000);
+        
+        User replicatedErnie = replica.getUserByName(username);
+        assertNotNull(replicatedErnie);
+        assertTrue(replicatedErnie.isEmailValidated());
+        assertEquals(passwordResetSecret, replicatedErnie.getPasswordResetSecret());
     }
 }

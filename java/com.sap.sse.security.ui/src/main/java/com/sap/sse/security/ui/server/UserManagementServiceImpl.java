@@ -174,11 +174,11 @@ public class UserManagementServiceImpl extends RemoteServiceServlet implements U
     }
     
     @Override
-    public void resetPassword(String username, String email, String baseURL) throws UserManagementException, MailException {
+    public void resetPassword(String username, String email, String passwordResetBaseURL) throws UserManagementException, MailException {
         if (username == null || username.isEmpty()) {
             username = getSecurityService().getUserByEmail(email).getName();
         }
-        getSecurityService().resetPassword(username, baseURL);
+        getSecurityService().resetPassword(username, passwordResetBaseURL);
     }
 
     @Override
