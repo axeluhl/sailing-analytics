@@ -11,11 +11,10 @@ import org.apache.shiro.authc.UsernamePasswordToken;
 import org.apache.shiro.authz.AuthorizationInfo;
 import org.apache.shiro.authz.SimpleAuthorizationInfo;
 import org.apache.shiro.subject.PrincipalCollection;
-import org.apache.shiro.util.ByteSource;
 
+import com.sap.sse.security.shared.Account.AccountType;
 import com.sap.sse.security.shared.UserManagementException;
 import com.sap.sse.security.shared.UsernamePasswordAccount;
-import com.sap.sse.security.shared.Account.AccountType;
 
 public class UsernamePasswordRealm extends AbstractUserStoreBasedRealm {
     
@@ -63,7 +62,7 @@ public class UsernamePasswordRealm extends AbstractUserStoreBasedRealm {
 
         // read password hash and salt from db
         String saltedPassword = null;
-        ByteSource salt = null;
+        byte[] salt = null;
         User user = getUserStore().getUserByName(username);
         if (user == null){
             return null;
@@ -73,7 +72,7 @@ public class UsernamePasswordRealm extends AbstractUserStoreBasedRealm {
             return null;
         }
         saltedPassword = upa.getSaltedPassword();
-        salt = (ByteSource) upa.getSalt();
+        salt = upa.getSalt();
         if (saltedPassword == null) {
             return null;
         }

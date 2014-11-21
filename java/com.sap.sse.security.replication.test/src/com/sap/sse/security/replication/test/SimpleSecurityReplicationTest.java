@@ -1,5 +1,10 @@
 package com.sap.sse.security.replication.test;
 
-public class SimpleSecurityReplicationTest extends AbstractSecurityReplicationTest {
+import org.junit.Test;
 
+public class SimpleSecurityReplicationTest extends AbstractSecurityReplicationTest {
+    @Test
+    public void testSimpleReplication() {
+        
+    }
 }

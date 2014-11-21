@@ -277,7 +277,7 @@ public class SecurityServiceImpl extends RemoteServiceServlet implements Securit
             throw new UserManagementException(UserManagementException.PASSWORD_DOES_NOT_MEET_REQUIREMENTS);
         }
         RandomNumberGenerator rng = new SecureRandomNumberGenerator();
-        Object salt = rng.nextBytes();
+        byte[] salt = rng.nextBytes().getBytes();
         String hashedPasswordBase64 = hashPassword(password, salt);
         UsernamePasswordAccount upa = new UsernamePasswordAccount(username, hashedPasswordBase64, salt);
         final User result = store.createUser(username, email, upa);
@@ -314,7 +314,7 @@ public class SecurityServiceImpl extends RemoteServiceServlet implements Securit
         // for non-admins, check that the old password is correct
         final UsernamePasswordAccount account = (UsernamePasswordAccount) user.getAccount(AccountType.USERNAME_PASSWORD);
         RandomNumberGenerator rng = new SecureRandomNumberGenerator();
-        Object salt = rng.nextBytes();
+        byte[] salt = rng.nextBytes().getBytes();
         String hashedPasswordBase64 = hashPassword(newPassword, salt);
         account.setSalt(salt);
         account.setSaltedPassword(hashedPasswordBase64);

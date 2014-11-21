@@ -10,6 +10,8 @@ import com.sap.sse.security.SecurityService;
  * {@link SecurityService#createSocialUser(String, SocialUserAccount)}.
  */
 public class SocialUserAccount implements Account {
+    private static final long serialVersionUID = -1702877798960390855L;
+
     private String sessionId;
 
     private Map<String, String> properties = new HashMap<String, String>();

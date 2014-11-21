@@ -3,8 +3,6 @@ package com.sap.sse.security.userstore.mongodb.impl;
 import java.util.Map;
 import java.util.Map.Entry;
 
-import org.apache.shiro.util.SimpleByteSource;
-
 import com.mongodb.BasicDBList;
 import com.mongodb.BasicDBObject;
 import com.mongodb.DB;
@@ -71,7 +69,7 @@ public class MongoObjectFactoryImpl implements MongoObjectFactory {
             UsernamePasswordAccount upa = (UsernamePasswordAccount) a;
             dbAccount.put(FieldNames.UsernamePassword.NAME.name(), upa.getName());
             dbAccount.put(FieldNames.UsernamePassword.SALTED_PW.name(), upa.getSaltedPassword());
-            dbAccount.put(FieldNames.UsernamePassword.SALT.name(), ((SimpleByteSource) upa.getSalt()).getBytes());
+            dbAccount.put(FieldNames.UsernamePassword.SALT.name(), upa.getSalt());
         }
         if (a instanceof SocialUserAccount) {
             SocialUserAccount account = (SocialUserAccount) a;
