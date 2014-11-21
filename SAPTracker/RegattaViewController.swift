@@ -72,6 +72,9 @@ class RegattaViewController : UIViewController, UIActionSheetDelegate, UINavigat
             sourceTypes.append(UIImagePickerControllerSourceType.PhotoLibrary)
             sourceTypeNames.append("Photo Library")
         }
+        
+        // point to events API server
+        APIManager.sharedManager.initManager(DataManager.sharedManager.selectedEvent!.serverUrl)
     }
     
     override func viewDidAppear(animated: Bool) {

@@ -33,7 +33,6 @@ class TrackingViewController : UIViewController, UIAlertViewDelegate {
     override func viewDidLoad() {
         super.viewDidLoad()
         
-        APIManager.sharedManager.initManager(DataManager.sharedManager.selectedEvent!.serverUrl)
         SendGPSFixController.sharedManager.trackingEvent = DataManager.sharedManager.selectedEvent
         
         // set online/buffering label
