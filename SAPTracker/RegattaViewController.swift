@@ -26,6 +26,8 @@ class RegattaViewController : UIViewController, UIActionSheetDelegate, UINavigat
     @IBOutlet weak var flagImageView: UIImageView!
     @IBOutlet weak var sailLabel: UILabel!
     @IBOutlet weak var lastSyncLabel: UILabel!
+    @IBOutlet weak var startDateLabel: UILabel!
+    @IBOutlet weak var endDateLabel: UILabel!
     
     var dateFormatter: NSDateFormatter
     
@@ -60,6 +62,8 @@ class RegattaViewController : UIViewController, UIActionSheetDelegate, UINavigat
         nameLabel.text = DataManager.sharedManager.selectedEvent!.leaderBoard!.competitor!.displayName
         flagImageView.image = UIImage(named: DataManager.sharedManager.selectedEvent!.leaderBoard!.competitor!.countryCode)
         sailLabel.text = DataManager.sharedManager.selectedEvent!.leaderBoard!.competitor!.sailId
+        startDateLabel.text = dateFormatter.stringFromDate(DataManager.sharedManager.selectedEvent!.startDate)
+        endDateLabel.text = dateFormatter.stringFromDate(DataManager.sharedManager.selectedEvent!.endDate)
         showLastSync()
         
         // get image sources
