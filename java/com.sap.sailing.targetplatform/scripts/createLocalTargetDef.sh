@@ -1,3 +1,6 @@
+#!/bin/bash
+# generate a target definition pointing to the locally built p2 repo from the race-analysis-p2-remote target defintion
+
 base="../definitions/race-analysis-p2"
 remote_repo="http://p2.sapsailing.com/p2/sailing/"
 local_repo="file://$(readlink -f ../../com.sap.sailing.targetplatform.base/gen/p2/)"

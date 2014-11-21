@@ -513,6 +513,18 @@ echo "Starting $@ of server..."
 
 if [[ "$@" == "build" ]] || [[ "$@" == "all" ]]; then
 	# yield build so that we get updated product
+        if [ $offline -eq 1 ]; then
+            echo "INFO: Activating offline mode"
+            extra="$extra -o"
+        fi
+
+        if [ $proxy -eq 1 ]; then
+            echo "INFO: Activating proxy profile"
+            extra="$extra -P no-debug.with-proxy"
+            MAVEN_SETTINGS=$MAVEN_SETTINGS_PROXY
+        else
+            extra="$extra -P no-debug.without-proxy"
+        fi
 
 	cd $PROJECT_HOME/java
 	if [ $gwtcompile -eq 1 ]; then
@@ -543,7 +555,15 @@ if [[ "$@" == "build" ]] || [[ "$@" == "all" ]]; then
 
 	if [ $p2local -eq 1 ]; then
 	    echo "INFO: Building and using local p2 repo"
-	    (cd com.sap.$PROJECT_TYPE.targetplatform/scripts; ./createLocalBaseP2repositoryLinux.sh; ./createLocalTargetDef.sh)
+	    #build local p2 repo
+	    echo "Using following command (pwd: java/com.sap.sailing.targetplatform.base): mvn -fae -s $MAVEN_SETTINGS $clean tycho-p2-extras:publish-features-and-bundles"
+	    echo "Maven version used: `mvn --version`"
+	    (cd com.sap.$PROJECT_TYPE.targetplatform.base; mvn -fae -s $MAVEN_SETTINGS $clean tycho-p2-extras:publish-features-and-bundles 2>&1 | tee $START_DIR/build.log)
+	    # now get the exit status from mvn, and not that of tee which is what $? contains now
+	    MVN_EXIT_CODE=${PIPESTATUS[0]}
+	    echo "Maven exit code is $MVN_EXIT_CODE"
+	    #create local target definition
+	    (cd com.sap.$PROJECT_TYPE.targetplatform/scripts; ./createLocalTargetDef.sh)
 	    extra="$extra -Dp2-local" # activates the p2-target.local profile in java/pom.xml
 	else
 	    echo "INFO: Using remote p2 repo (http://p2.sapsailing.com/p2/sailing/)"
@@ -558,19 +578,6 @@ if [[ "$@" == "build" ]] || [[ "$@" == "all" ]]; then
     else
         extra="$extra -DskipTests=false"
         # TODO: Think about http://maven.apache.org/surefire/maven-surefire-plugin/examples/fork-options-and-parallel-execution.html
-	fi
-
-	if [ $offline -eq 1 ]; then
-	    echo "INFO: Activating offline mode"
-	    extra="$extra -o"
-	fi
-
-	if [ $proxy -eq 1 ]; then
-	    echo "INFO: Activating proxy profile"
-	    extra="$extra -P no-debug.with-proxy"
-	    MAVEN_SETTINGS=$MAVEN_SETTINGS_PROXY
-	else
-	    extra="$extra -P no-debug.without-proxy"
 	fi
 
     if [ $android -eq 0 ] && [ $gwtcompile -eq 0 ] && [ $testing -eq 0 ]; then
