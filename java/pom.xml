@@ -26,6 +26,7 @@
 		<module>com.sap.sse.security</module>
 		<module>com.sap.sse.security.replication.test</module>
 		<module>com.sap.sse.security.test</module>
+		<module>com.sap.sse.security.common</module>
 		<module>com.sap.sse.security.ui</module>
 		<module>com.sap.sse.security.userstore.mongodb</module>
 		<module>com.sap.sse.operationaltransformation</module>

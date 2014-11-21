@@ -35,6 +35,10 @@ public class SimpleSecurityReplicationTest extends AbstractSecurityReplicationTe
         assertTrue(replica.checkPassword(username, password));
     }
 
+    /**
+     * It's too bad that we can't use this inside a GWT bundle which is currently constrained to Java7... If it was only possible
+     * to extract the *.server package such that it could be compiled with Java8.
+     */
     @Test
     public void testSimpleReplicationWithLambda() throws InterruptedException, UserManagementException {
         final String username = "Ernie";

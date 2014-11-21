@@ -3,8 +3,6 @@ package com.sap.sse.security.shared;
 import java.util.HashMap;
 import java.util.Map;
 
-import com.sap.sse.security.SecurityService;
-
 /**
  * The object we send back and forth between client and server. See also
  * {@link SecurityService#createSocialUser(String, SocialUserAccount)}.

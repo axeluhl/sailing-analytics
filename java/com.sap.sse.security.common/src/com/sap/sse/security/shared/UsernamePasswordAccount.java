@@ -2,6 +2,7 @@ package com.sap.sse.security.shared;
 
 import com.sap.sse.common.Named;
 
+
 public class UsernamePasswordAccount implements Named, Account {
     private static final long serialVersionUID = 5986653173215900637L;
     private String name;
