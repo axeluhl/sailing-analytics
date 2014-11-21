@@ -33,7 +33,7 @@ public class UserStoreImpl implements UserStore {
 
     private final ConcurrentHashMap<String, User> users;
     private final ConcurrentHashMap<String, Set<User>> usersByEmail;
-    private final ConcurrentHashMap<User, String> emailForUser;
+    private final ConcurrentHashMap<String, String> emailForUsername;
     private final ConcurrentHashMap<String, Object> settings;
     private final ConcurrentHashMap<String, Class<?>> settingTypes;
     private final ConcurrentHashMap<String, Map<String, String>> preferences;
@@ -46,7 +46,7 @@ public class UserStoreImpl implements UserStore {
     public UserStoreImpl() {
         users = new ConcurrentHashMap<>();
         usersByEmail = new ConcurrentHashMap<>();
-        emailForUser = new ConcurrentHashMap<>();
+        emailForUsername = new ConcurrentHashMap<>();
         settings = new ConcurrentHashMap<>();
         settingTypes = new ConcurrentHashMap<String, Class<?>>();
         preferences = new ConcurrentHashMap<>();
@@ -81,17 +81,19 @@ public class UserStoreImpl implements UserStore {
                 usersByEmail.put(u.getEmail(), set);
             }
             set.add(u);
-            emailForUser.put(u, u.getEmail());
+            emailForUsername.put(u.getName(), u.getEmail());
         }
     }
 
     private void removeFromUsersByEmail(User u) {
         if (u != null) {
-            Set<User> set = usersByEmail.get(emailForUser.get(u)); // this also works if the user's e-mail has changed meanwhile
-            if (set != null) {
-                set.remove(u);
+            final String email = emailForUsername.remove(u.getName());
+            if (email != null) {
+                Set<User> set = usersByEmail.get(email); // this also works if the user's e-mail has changed meanwhile
+                if (set != null) {
+                    set.remove(u);
+                }
             }
-            emailForUser.remove(u);
         }
     }
     
@@ -130,6 +132,7 @@ public class UserStoreImpl implements UserStore {
     @Override
     public void updateUser(User user) {
         logger.info("Updating user "+user+" in DB");
+        users.put(user.getName(), user);
         removeFromUsersByEmail(user);
         addToUsersByEmail(user);
         if (mongoObjectFactory != null) {
@@ -300,7 +303,7 @@ public class UserStoreImpl implements UserStore {
     @Override
     public void clear() {
         preferences.clear();
-        emailForUser.clear();
+        emailForUsername.clear();
         settings.clear();
         settingTypes.clear();
         users.clear();

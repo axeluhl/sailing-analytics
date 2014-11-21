@@ -2,7 +2,6 @@ package com.sap.sse.security.impl;
 
 import com.sap.sse.security.SecurityService;
 import com.sap.sse.security.User;
-import com.sap.sse.security.shared.UserManagementException;
 
 /**
  * Publishes those methods of {@link SecurityServiceImpl} that are required by operations implemented as lambda
@@ -14,13 +13,5 @@ import com.sap.sse.security.shared.UserManagementException;
  *
  */
 public interface ReplicableSecurityService extends SecurityService {
-
-    User internalCreateSimpleUser(String username, String email, String password, String validationBaseURL)
-            throws UserManagementException;
-
-    Void internalUpdateSimpleUserPassword(String username, String newPassword) throws UserManagementException;
-
-    Void internalUpdateSimpleUserEmail(String username, String newEmail, String validationBaseURL)
-            throws UserManagementException;
-
+    Void internalStoreUser(User user);
 }

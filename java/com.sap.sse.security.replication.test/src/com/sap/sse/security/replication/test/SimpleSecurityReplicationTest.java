@@ -1,6 +1,7 @@
 package com.sap.sse.security.replication.test;
 
 import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertNull;
 import static org.junit.Assert.assertSame;
@@ -29,6 +30,7 @@ public class SimpleSecurityReplicationTest extends AbstractSecurityReplicationTe
         assertNotNull(user);
         assertSame(user, master.getUserByName(username));
         assertTrue(master.checkPassword(username, password));
+        final String emailValidationSecret = user.getValidationSecret();
         
         replicaReplicator.waitUntilQueueIsEmpty();
         Thread.sleep(3000);
@@ -38,6 +40,7 @@ public class SimpleSecurityReplicationTest extends AbstractSecurityReplicationTe
         assertEquals(username, replicatedErnie.getName());
         assertEquals(email, replicatedErnie.getEmail());
         assertTrue(replica.checkPassword(username, password));
+        assertEquals(emailValidationSecret, replicatedErnie.getValidationSecret());
     }
 
     /**
@@ -53,7 +56,10 @@ public class SimpleSecurityReplicationTest extends AbstractSecurityReplicationTe
         final String password = "BertMyFriend";
         final String validationBaseURL = "http://me.to.back.com";
         User user = master.createSimpleUser(username, email, password, validationBaseURL);
+        final String emailValidationSecretAfterCreation = user.getValidationSecret();
         master.updateSimpleUserEmail(username, newEmail, validationBaseURL);
+        final String emailValidationSecretAfterChangingEmail = user.getValidationSecret();
+        assertFalse(emailValidationSecretAfterChangingEmail.equals(emailValidationSecretAfterCreation));
         assertEquals(newEmail, user.getEmail());
         
         replicaReplicator.waitUntilQueueIsEmpty();
@@ -63,5 +69,32 @@ public class SimpleSecurityReplicationTest extends AbstractSecurityReplicationTe
         assertNotNull(replicatedErnie);
         assertEquals(username, replicatedErnie.getName());
         assertEquals(newEmail, replicatedErnie.getEmail());
+        assertEquals(emailValidationSecretAfterChangingEmail, replicatedErnie.getValidationSecret());
+    }
+
+    /**
+     * It's too bad that we can't use this inside a GWT bundle which is currently constrained to Java7... If it was only possible
+     * to extract the *.server package such that it could be compiled with Java8.
+     * @throws IllegalAccessException 
+     */
+    @Test
+    public void testSimpleReplicationOfUserPasswordChange() throws InterruptedException, UserManagementException, MailException, IllegalAccessException {
+        final String username = "Ernie";
+        final String email = "ernie@sesame-street.com";
+        final String password = "BertMyFriend";
+        final String newPassword = "ErnieAndBert";
+        final String validationBaseURL = "http://me.to.back.com";
+        master.createSimpleUser(username, email, password, validationBaseURL);
+        master.updateSimpleUserPassword(username, newPassword);
+        assertTrue(master.checkPassword(username, newPassword));
+        
+        replicaReplicator.waitUntilQueueIsEmpty();
+        Thread.sleep(3000);
+        
+        User replicatedErnie = replica.getUserByName(username);
+        assertNotNull(replicatedErnie);
+        assertEquals(username, replicatedErnie.getName());
+        assertFalse(replica.checkPassword(username, password));
+        assertTrue(replica.checkPassword(username, newPassword));
     }
 }

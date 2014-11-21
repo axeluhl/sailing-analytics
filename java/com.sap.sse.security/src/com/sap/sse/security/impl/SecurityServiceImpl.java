@@ -274,12 +274,6 @@ public class SecurityServiceImpl extends RemoteServiceServlet implements Replica
     @Override
     public User createSimpleUser(final String username, final String email, String password,
             final String validationBaseURL) throws UserManagementException, MailException {
-        return apply(thiz -> thiz.internalCreateSimpleUser(username, email, password, validationBaseURL));
-    }
-
-    @Override
-    public User internalCreateSimpleUser(final String username, final String email, String password,
-            final String validationBaseURL) throws UserManagementException {
         if (store.getUserByName(username) != null) {
             throw new UserManagementException(UserManagementException.USER_ALREADY_EXISTS);
         }
@@ -293,13 +287,15 @@ public class SecurityServiceImpl extends RemoteServiceServlet implements Replica
         String hashedPasswordBase64 = hashPassword(password, salt);
         UsernamePasswordAccount upa = new UsernamePasswordAccount(username, hashedPasswordBase64, salt);
         final User result = store.createUser(username, email, upa);
-        store.updateUser(result); // store user with unvalidated e-mail
+        final String emailValidationSecret = result.startEmailValidation();
+        // don't replicate exception handling; replicate only the effect on the user store
+        apply(s->s.internalStoreUser(result));
         if (validationBaseURL != null) {
             new Thread("e-mail validation for user " + username + " with e-mail address " + email) {
                 @Override
                 public void run() {
                     try {
-                        startEmailValidation(result, validationBaseURL);
+                        startEmailValidation(result, emailValidationSecret, validationBaseURL);
                     } catch (MailException e) {
                         logger.log(Level.SEVERE, "Error sending mail for new account validation of user " + username
                                 + " to address " + email, e);
@@ -311,18 +307,18 @@ public class SecurityServiceImpl extends RemoteServiceServlet implements Replica
     }
 
     @Override
-    public void updateSimpleUserPassword(String username, String newPassword) throws UserManagementException {
-        apply(s->s.internalUpdateSimpleUserPassword(username, newPassword));
+    public Void internalStoreUser(User user) {
+        store.updateUser(user);
+        return null;
     }
 
     @Override
-    public Void internalUpdateSimpleUserPassword(String username, String newPassword) throws UserManagementException {
+    public void updateSimpleUserPassword(String username, String newPassword) throws UserManagementException {
         final User user = store.getUserByName(username);
         if (user == null) {
             throw new UserManagementException(UserManagementException.USER_DOES_NOT_EXIST);
         }
         updateSimpleUserPassword(user, newPassword);
-        return null;
     }
 
     private void updateSimpleUserPassword(final User user, String newPassword) throws UserManagementException {
@@ -337,7 +333,7 @@ public class SecurityServiceImpl extends RemoteServiceServlet implements Replica
         account.setSalt(salt);
         account.setSaltedPassword(hashedPasswordBase64);
         user.passwordWasReset();
-        store.updateUser(user);
+        apply(s->s.internalStoreUser(user));
     }
 
     @Override
@@ -362,33 +358,26 @@ public class SecurityServiceImpl extends RemoteServiceServlet implements Replica
 
     @Override
     public void updateSimpleUserEmail(final String username, final String newEmail, final String validationBaseURL) throws UserManagementException {
-        apply(s->s.internalUpdateSimpleUserEmail(username, newEmail, validationBaseURL));
-    }
-
-    @Override
-    public Void internalUpdateSimpleUserEmail(final String username, final String newEmail,
-            final String validationBaseURL) throws UserManagementException {
         final User user = store.getUserByName(username);
         if (user == null) {
             throw new UserManagementException(UserManagementException.USER_DOES_NOT_EXIST);
         }
         logger.info("Changing e-mail address of user "+username+" to "+newEmail);
-        user.setEmail(newEmail);
+        final String validationSecret = user.setEmail(newEmail);
         new Thread("e-mail validation after changing e-mail of user " + username + " to " + newEmail) {
             @Override
             public void run() {
                 try {
-                    startEmailValidation(user, validationBaseURL);
+                    startEmailValidation(user, validationSecret, validationBaseURL);
                 } catch (MailException e) {
                     logger.log(Level.SEVERE, "Error sending mail to validate e-mail address change for user "
                             + username + " to address " + newEmail, e);
                 }
             }
         }.start();
-        store.updateUser(user);
-        return null;
+        apply(s->s.internalStoreUser(user));
     }
-    
+
     @Override
     public boolean validateEmail(String username, String validationSecret) throws UserManagementException {
         final User user = store.getUserByName(username);
@@ -404,17 +393,18 @@ public class SecurityServiceImpl extends RemoteServiceServlet implements Replica
      * {@link User#startEmailValidation() Triggers} e-mail validation for the <code>user</code> object and sends out a
      * URL to the user's e-mail that has the validation secret ready for validation by clicking.
      * 
+     * @param validationSecret
+     *            the result of either {@link User#startEmailValidation()} or {@link User#setEmail(String)}.
      * @param baseURL
-     *            the URL under which the user can reach the e-mail validation service; this URL is required to assemble a
-     *            validation URL that is sent by e-mail to the user, to make the user return the validation secret
-     *            to the right server again.
+     *            the URL under which the user can reach the e-mail validation service; this URL is required to assemble
+     *            a validation URL that is sent by e-mail to the user, to make the user return the validation secret to
+     *            the right server again.
      */
-    private void startEmailValidation(User user, String baseURL) throws MailException {
-        String secret = user.startEmailValidation();
+    private void startEmailValidation(User user, String validationSecret, String baseURL) throws MailException {
         try {
             Map<String, String> urlParameters = new HashMap<>();
             urlParameters.put("u", URLEncoder.encode(user.getName(), "UTF-8"));
-            urlParameters.put("v", URLEncoder.encode(secret, "UTF-8"));
+            urlParameters.put("v", URLEncoder.encode(validationSecret, "UTF-8"));
             StringBuilder url = buildURL(baseURL, urlParameters);
             sendMail(user.getName(), "e-Mail Validation",
                     "Please click on the link below to validate your e-mail address for user "+user.getName()+".\n   "+url.toString());
