@@ -25,6 +25,9 @@ class HomeViewController: UIViewController, UITableViewDataSource, UITableViewDe
         fetchedResultsController = DataManager.sharedManager.eventsFetchedResultsController()
         fetchedResultsController!.delegate = self
         fetchedResultsController!.performFetch(nil)
+        
+        // open custom url
+        NSNotificationCenter.defaultCenter().addObserver(self, selector: "openUrl:", name: AppDelegate.NotificationType.openUrl, object: nil)
     }
     
     override func viewWillAppear(animated: Bool) {
@@ -32,13 +35,11 @@ class HomeViewController: UIViewController, UITableViewDataSource, UITableViewDe
         DataManager.sharedManager.selectedEvent = nil;
     }
     
-    // MARK: - QR code
-
-    func openUrl(url: NSURL) {
-        println(url)
-        qrCodeManager!.parseUrl(url.absoluteString!)
+    func openUrl(notification: NSNotification) {
+        let url = notification.userInfo!["url"] as String
+        qrCodeManager!.parseUrl(url)
     }
-
+    
     // MARK: - UIActionSheetDelegate
     
     @IBAction func showActionSheet(sender: AnyObject) {

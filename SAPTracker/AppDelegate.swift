@@ -11,7 +11,10 @@ import CoreData
 
 @UIApplicationMain
 class AppDelegate: UIResponder, UIApplicationDelegate {
-
+    struct NotificationType {
+        static let openUrl = "openUrl"
+    }
+    
     var window: UIWindow?
 
     func application(application: UIApplication, didFinishLaunchingWithOptions launchOptions: [NSObject: AnyObject]?) -> Bool {
@@ -33,7 +36,8 @@ class AppDelegate: UIResponder, UIApplicationDelegate {
         rootViewController.popToRootViewControllerAnimated(false)
         rootViewController.dismissViewControllerAnimated(false, completion: nil)
         var homeViewController = rootViewController.viewControllers[0] as HomeViewController
-        homeViewController.openUrl(url)
+        let notification = NSNotification(name: NotificationType.openUrl, object: self, userInfo:["url": url.absoluteString!])
+        NSNotificationQueue.defaultQueue().enqueueNotification(notification, postingStyle: NSPostingStyle.PostASAP)
         return true
     }
 
