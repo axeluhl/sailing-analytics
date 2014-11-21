@@ -31,7 +31,11 @@ public interface RaceChangeListener extends CourseListener {
 
     void windAveragingChanged(long oldMillisecondsOverWhichToAverage, long newMillisecondsOverWhichToAverage);
 
-    void raceTimesChanged(TimePoint startOfTracking, TimePoint endOfTracking, TimePoint startTimeReceived);
+    void startOfTrackingChanged(TimePoint startOfTracking);
+    
+    void endOfTrackingChanged(TimePoint endOfTracking);
+    
+    void startTimeReceivedChanged(TimePoint startTimeReceived);
     
     /**
      * Fired when the {@link TrackedRace#getStartOfRace() start of race} time point has changed for the tracked race

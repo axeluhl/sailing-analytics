@@ -258,6 +258,10 @@ public class ReplicationServiceImpl implements ReplicationService {
         return replicablesProvider;
     }
     
+    protected Replicator getReplicator() {
+        return replicator;
+    }
+    
     private Channel createMasterChannelAndDeclareFanoutExchange() throws IOException {
         Channel result = createMasterChannel();
         result.exchangeDeclare(exchangeName, "fanout");

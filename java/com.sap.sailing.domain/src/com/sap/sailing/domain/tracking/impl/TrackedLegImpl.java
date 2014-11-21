@@ -2,6 +2,7 @@ package com.sap.sailing.domain.tracking.impl;
 
 import java.io.IOException;
 import java.io.ObjectInputStream;
+import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.HashMap;
@@ -14,8 +15,6 @@ import java.util.logging.Logger;
 
 import com.sap.sailing.domain.base.Competitor;
 import com.sap.sailing.domain.base.Leg;
-import com.sap.sailing.domain.base.Mark;
-import com.sap.sailing.domain.base.Waypoint;
 import com.sap.sailing.domain.common.Bearing;
 import com.sap.sailing.domain.common.Distance;
 import com.sap.sailing.domain.common.LegType;
@@ -24,10 +23,6 @@ import com.sap.sailing.domain.common.Position;
 import com.sap.sailing.domain.common.WindSource;
 import com.sap.sailing.domain.common.WindSourceType;
 import com.sap.sailing.domain.common.impl.MeterDistance;
-import com.sap.sailing.domain.tracking.GPSFix;
-import com.sap.sailing.domain.tracking.GPSFixMoving;
-import com.sap.sailing.domain.tracking.MarkPassing;
-import com.sap.sailing.domain.tracking.RaceChangeListener;
 import com.sap.sailing.domain.tracking.TrackedLeg;
 import com.sap.sailing.domain.tracking.TrackedLegOfCompetitor;
 import com.sap.sailing.domain.tracking.TrackedRace;
@@ -38,7 +33,7 @@ import com.sap.sailing.domain.tracking.WindPositionMode;
 import com.sap.sse.common.TimePoint;
 import com.sap.sse.common.Util;
 
-public class TrackedLegImpl implements TrackedLeg, RaceChangeListener {
+public class TrackedLegImpl implements TrackedLeg {
     private static final long serialVersionUID = -1944668527284130545L;
 
     private final static Logger logger = Logger.getLogger(TrackedLegImpl.class.getName());
@@ -58,7 +53,7 @@ public class TrackedLegImpl implements TrackedLeg, RaceChangeListener {
         for (Competitor competitor : competitors) {
             trackedLegsOfCompetitors.put(competitor, new TrackedLegOfCompetitorImpl(this, competitor));
         }
-        trackedRace.addListener(this);
+        trackedRace.addListener(new CacheClearingRaceChangeListener());
         competitorTracksOrderedByRank = new HashMap<>();
     }
     
@@ -250,82 +245,50 @@ public class TrackedLegImpl implements TrackedLeg, RaceChangeListener {
         return getTrackedRace().getWind(p, at, windSourcesToExclude);
     }
 
-    @Override
-    public void competitorPositionChanged(GPSFixMoving fix, Competitor competitor) {
-        clearCaches();
-    }
+    /**
+     * The default action of this listener is to {@link #clearCaches clear the tracked leg's caches} when anything on
+     * the race changes. There are a few exceptions that don't necessitate a cache clearing, so these methods are
+     * overridden here to not call the {@link #defaultAction} which here delegates to {@link #clearCaches}. For
+     * {@link #waypointAdded} clearing the caches is necessary because the competitor tracks ordered by rank may change
+     * for legs adjacent to the waypoint added } // and because the leg's from/to waypoints may have changed. For
+     * {@link #waypointRemoved} it is necessary because the competitor tracks ordered by rank may change for legs
+     * adjacent to the waypoint removed.
+     * 
+     * @author Axel Uhl (D043530)
+     *
+     */
+    private class CacheClearingRaceChangeListener extends AbstractRaceChangeListener implements Serializable {
+        private static final long serialVersionUID = 4455608396760152359L;
 
-    @Override
-    public void waypointAdded(int zeroBasedIndex, Waypoint waypointThatGotAdded) {
-        clearCaches(); // necessary because the competitor tracks ordered by rank may change for legs adjacent to the waypoint added
-    }                  // and because the leg's from/to waypoints may have changed
+        @Override
+        protected void defaultAction() {
+            clearCaches();
+        }
 
-    @Override
-    public void waypointRemoved(int zeroBasedIndex, Waypoint waypointThatGotRemoved) {
-        clearCaches(); // necessary because the competitor tracks ordered by rank may change for legs adjacent to the waypoint removed
-    }
+        /**
+         * no-op; the leg doesn't mind the tracked race's status being updated
+         */
+        @Override
+        public void statusChanged(TrackedRaceStatus newStatus) {
+        }
 
-    @Override
-    public void statusChanged(TrackedRaceStatus newStatus) {
-        // no-op; the leg doesn't mind the tracked race's status being updated
-    }
-
-    @Override
-    public void windSourcesToExcludeChanged(Iterable<? extends WindSource> windSourcesToExclude) {
-        clearCaches();
-    }
-
-    @Override
-    public void speedAveragingChanged(long oldMillisecondsOverWhichToAverage, long newMillisecondsOverWhichToAverage) {
-        clearCaches();
-    }
-
-    @Override
-    public void windAveragingChanged(long oldMillisecondsOverWhichToAverage, long newMillisecondsOverWhichToAverage) {
-        clearCaches();
-    }
-
-    @Override
-    public void markPassingReceived(Competitor competitor, Map<Waypoint, MarkPassing> oldMarkPassing, Iterable<MarkPassing> markPassing) {
-        clearCaches();
-    }
-
-    @Override
-    public void markPositionChanged(GPSFix fix, Mark mark, boolean firstInTrack) {
-        clearCaches();
-    }
-
-    @Override
-    public void windDataReceived(Wind wind, WindSource windSource) {
-        clearCaches();
-    }
-    
-    @Override
-    public void windDataRemoved(Wind wind, WindSource windSource) {
-        clearCaches();
-    }
-    
-    @Override
-    public void raceTimesChanged(TimePoint startOfTracking, TimePoint endOfTracking, TimePoint startTimeReceived) {
-    }
-
-    @Override
-    public void delayToLiveChanged(long delayToLiveInMillis) {
-    }
-
-    @Override
-    public void startOfRaceChanged(TimePoint oldStartOfRace, TimePoint newStartOfRace) {
-    }
-
-    @Override
-    public void waypointsMayHaveChanges() {
-        clearCaches();
+        /**
+         * no-op; no change of competitorTracksOrderedByRank necessary
+         */
+        @Override
+        public void delayToLiveChanged(long delayToLiveInMillis) {
+        }
     }
 
     private void clearCaches() {
         synchronized (competitorTracksOrderedByRank) {
             competitorTracksOrderedByRank.clear();
         }
+    }
+
+    @Override
+    public void waypointsMayHaveChanges() {
+        clearCaches();
     }
 
     @Override
