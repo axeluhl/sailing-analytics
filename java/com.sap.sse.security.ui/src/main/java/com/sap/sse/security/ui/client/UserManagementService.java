@@ -1,4 +1,4 @@
-package com.sap.sse.security.ui.shared;
+package com.sap.sse.security.ui.client;
 
 import java.util.Collection;
 import java.util.Map;
@@ -9,6 +9,8 @@ import com.sap.sse.security.shared.MailException;
 import com.sap.sse.security.shared.UserManagementException;
 import com.sap.sse.security.ui.oauth.client.CredentialDTO;
 import com.sap.sse.security.ui.oauth.shared.OAuthException;
+import com.sap.sse.security.ui.shared.SuccessInfo;
+import com.sap.sse.security.ui.shared.UserDTO;
 
 public interface UserManagementService extends RemoteService {
     Collection<UserDTO> getUserList();

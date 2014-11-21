@@ -10,9 +10,9 @@ import com.sap.sailing.gwt.ui.client.MediaServiceAsync;
 import com.sap.sailing.gwt.ui.client.SailingService;
 import com.sap.sailing.gwt.ui.client.SailingServiceAsync;
 import com.sap.sse.gwt.client.mvp.ClientFactoryImpl;
+import com.sap.sse.security.ui.client.UserManagementService;
+import com.sap.sse.security.ui.client.UserManagementServiceAsync;
 import com.sap.sse.security.ui.client.UserService;
-import com.sap.sse.security.ui.shared.UserManagementService;
-import com.sap.sse.security.ui.shared.UserManagementServiceAsync;
 
 
 public abstract class AbstractApplicationClientFactory extends ClientFactoryImpl implements AutoPlayAppClientFactory {

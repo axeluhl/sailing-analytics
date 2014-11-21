@@ -15,13 +15,13 @@ import com.google.gwt.user.client.ui.Widget;
 import com.sap.sse.gwt.client.EntryPointHelper;
 import com.sap.sse.security.ui.client.RemoteServiceMappingConstants;
 import com.sap.sse.security.ui.client.UserChangeEventHandler;
+import com.sap.sse.security.ui.client.UserManagementService;
+import com.sap.sse.security.ui.client.UserManagementServiceAsync;
 import com.sap.sse.security.ui.client.UserService;
 import com.sap.sse.security.ui.client.i18n.StringMessages;
 import com.sap.sse.security.ui.client.shared.oauthlogin.OAuthLogin;
 import com.sap.sse.security.ui.oauth.client.util.ClientUtils;
 import com.sap.sse.security.ui.shared.UserDTO;
-import com.sap.sse.security.ui.shared.UserManagementService;
-import com.sap.sse.security.ui.shared.UserManagementServiceAsync;
 
 public class OAuthLoginEntryPoint implements EntryPoint, UserChangeEventHandler {
     private final UserManagementServiceAsync userManagementService = GWT.create(UserManagementService.class);

@@ -158,27 +158,34 @@ public class SecurityServiceImpl extends RemoteServiceServlet implements Securit
 
     @Override
     public void sendMail(String username, String subject, String body) throws MailException {
-        final User user = getUserByName(username);
-        if (user != null) {
-            final String toAddress = user.getEmail();
-            if (toAddress != null) {
-                Session session = Session.getInstance(this.mailProperties, new SMTPAuthenticator());
-                MimeMessage msg = new MimeMessage(session);
-                try {
-                    msg.setFrom(new InternetAddress(mailProperties.getProperty("mail.from", "root@sapsailing.com")));
-                    msg.setSubject(subject);
-                    msg.setContent(body, "text/plain");
-                    msg.addRecipient(RecipientType.TO, new InternetAddress(toAddress.trim()));
-                    Transport ts = session.getTransport();
-                    ts.connect();
-                    ts.sendMessage(msg, msg.getRecipients(RecipientType.TO));
-                    ts.close();
-                    logger.info("mail sent to user "+username+" with e-mail address "+toAddress+" with subject "+subject);
-                } catch (MessagingException e) {
-                    logger.log(Level.SEVERE, "Error trying to send mail to user "+username+" with e-mail address "+toAddress, e);
-                    throw new MailException(e.getMessage());
+        if (this.mailProperties != null && this.mailProperties.containsKey("mail.transport.protocol")) {
+            final User user = getUserByName(username);
+            if (user != null) {
+                final String toAddress = user.getEmail();
+                if (toAddress != null) {
+                    Session session = Session.getInstance(this.mailProperties, new SMTPAuthenticator());
+                    MimeMessage msg = new MimeMessage(session);
+                    try {
+                        msg.setFrom(new InternetAddress(mailProperties.getProperty("mail.from", "root@sapsailing.com")));
+                        msg.setSubject(subject);
+                        msg.setContent(body, "text/plain");
+                        msg.addRecipient(RecipientType.TO, new InternetAddress(toAddress.trim()));
+                        Transport ts = session.getTransport();
+                        ts.connect();
+                        ts.sendMessage(msg, msg.getRecipients(RecipientType.TO));
+                        ts.close();
+                        logger.info("mail sent to user " + username + " with e-mail address " + toAddress
+                                + " with subject " + subject);
+                    } catch (MessagingException e) {
+                        logger.log(Level.SEVERE, "Error trying to send mail to user " + username
+                                + " with e-mail address " + toAddress, e);
+                        throw new MailException(e.getMessage());
+                    }
                 }
             }
+        } else {
+            logger.warning("No mail properties provided. Cannot send e-mail about "+subject+" to user "+username+
+                    ". This could also mean that this is running on a replica server in which case this is perfectly fine.");
         }
     }
     
