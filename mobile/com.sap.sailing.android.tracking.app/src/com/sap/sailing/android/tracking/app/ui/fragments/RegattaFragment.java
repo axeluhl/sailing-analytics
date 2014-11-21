@@ -51,20 +51,4 @@ public class RegattaFragment extends BaseFragment implements OnClickListener {
 		getActivity().startService(intent);
 	}
 
-	private void showStopTrackingConfirmationDialog() {
-		AlertDialog dialog = new AlertDialog.Builder(getActivity())
-				.setTitle(R.string.please_confirm)
-				.setMessage(R.string.do_you_really_want_to_stop_tracking)
-				.setIcon(android.R.drawable.ic_dialog_alert)
-				.setPositiveButton(android.R.string.yes,
-						new DialogInterface.OnClickListener() {
-
-							public void onClick(DialogInterface dialog,
-									int whichButton) {
-								stopTracking();
-							}
-						}).setNegativeButton(android.R.string.no, null).create();
-		
-		dialog.show();
-	}
 }
