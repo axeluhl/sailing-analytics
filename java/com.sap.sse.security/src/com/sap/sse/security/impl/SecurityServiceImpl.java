@@ -83,7 +83,6 @@ import com.sap.sse.security.Social;
 import com.sap.sse.security.SocialSettingsKeys;
 import com.sap.sse.security.User;
 import com.sap.sse.security.UserStore;
-import com.sap.sse.security.operations.SecurityOperation;
 import com.sap.sse.security.shared.Account.AccountType;
 import com.sap.sse.security.shared.DefaultRoles;
 import com.sap.sse.security.shared.MailException;
@@ -275,7 +274,7 @@ public class SecurityServiceImpl extends RemoteServiceServlet implements Replica
     @Override
     public User createSimpleUser(final String username, final String email, String password,
             final String validationBaseURL) throws UserManagementException, MailException {
-        return apply((SecurityOperation<User>) thiz -> thiz.internalCreateSimpleUser(username, email, password, validationBaseURL));
+        return apply(thiz -> thiz.internalCreateSimpleUser(username, email, password, validationBaseURL));
     }
 
     @Override
@@ -313,16 +312,17 @@ public class SecurityServiceImpl extends RemoteServiceServlet implements Replica
 
     @Override
     public void updateSimpleUserPassword(String username, String newPassword) throws UserManagementException {
-        internalUpdateSimpleUserPassword(username, newPassword);
+        apply(s->s.internalUpdateSimpleUserPassword(username, newPassword));
     }
 
     @Override
-    public void internalUpdateSimpleUserPassword(String username, String newPassword) throws UserManagementException {
+    public Void internalUpdateSimpleUserPassword(String username, String newPassword) throws UserManagementException {
         final User user = store.getUserByName(username);
         if (user == null) {
             throw new UserManagementException(UserManagementException.USER_DOES_NOT_EXIST);
         }
         updateSimpleUserPassword(user, newPassword);
+        return null;
     }
 
     private void updateSimpleUserPassword(final User user, String newPassword) throws UserManagementException {
@@ -362,6 +362,12 @@ public class SecurityServiceImpl extends RemoteServiceServlet implements Replica
 
     @Override
     public void updateSimpleUserEmail(final String username, final String newEmail, final String validationBaseURL) throws UserManagementException {
+        apply(s->s.internalUpdateSimpleUserEmail(username, newEmail, validationBaseURL));
+    }
+
+    @Override
+    public Void internalUpdateSimpleUserEmail(final String username, final String newEmail,
+            final String validationBaseURL) throws UserManagementException {
         final User user = store.getUserByName(username);
         if (user == null) {
             throw new UserManagementException(UserManagementException.USER_DOES_NOT_EXIST);
@@ -380,6 +386,7 @@ public class SecurityServiceImpl extends RemoteServiceServlet implements Replica
             }
         }.start();
         store.updateUser(user);
+        return null;
     }
     
     @Override

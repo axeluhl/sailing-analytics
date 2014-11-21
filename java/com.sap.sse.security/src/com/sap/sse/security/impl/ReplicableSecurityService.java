@@ -18,6 +18,9 @@ public interface ReplicableSecurityService extends SecurityService {
     User internalCreateSimpleUser(String username, String email, String password, String validationBaseURL)
             throws UserManagementException;
 
-    void internalUpdateSimpleUserPassword(String username, String newPassword) throws UserManagementException;
+    Void internalUpdateSimpleUserPassword(String username, String newPassword) throws UserManagementException;
+
+    Void internalUpdateSimpleUserEmail(String username, String newEmail, String validationBaseURL)
+            throws UserManagementException;
 
 }
