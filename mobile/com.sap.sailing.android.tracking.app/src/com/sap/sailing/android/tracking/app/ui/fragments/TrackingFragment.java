@@ -133,25 +133,35 @@ public class TrackingFragment extends BaseFragment implements OnClickListener {
 	 * Update UI and tell user if app is caching or sending fixes to api
 	 * @param apiIsReachable
 	 */
-	public void setAPIConnectivityStatus(APIConnectivity apiConnectivity)
+	public void setAPIConnectivityStatus(final APIConnectivity apiConnectivity)
 	{
-		TextView textView = (TextView)getActivity().findViewById(R.id.mode);
-		
-		if (apiConnectivity == APIConnectivity.reachableTransmissionSuccess)
-		{
-			textView.setText(getString(R.string.tracking_mode_live));
-			textView.setTextColor(Color.parseColor(getString(R.color.sap_green)));
-		}
-		else if  (apiConnectivity == APIConnectivity.reachableTransmissionError)
-		{
-			textView.setText(getString(R.string.tracking_mode_api_error));
-			textView.setTextColor(Color.parseColor(getString(R.color.sap_red)));
-		}
-		else
-		{
-			textView.setText(getString(R.string.tracking_mode_caching));
-			textView.setTextColor(Color.parseColor(getString(R.color.sap_green)));
-		}
+		getActivity().runOnUiThread(new Runnable() {
+			@Override
+			public void run() {
+				TextView textView = (TextView)getActivity().findViewById(R.id.mode);
+				
+				if (apiConnectivity == APIConnectivity.reachableTransmissionSuccess)
+				{
+					textView.setText(getString(R.string.tracking_mode_live));
+					textView.setTextColor(Color.parseColor(getString(R.color.sap_green)));
+				}
+				else if (apiConnectivity == APIConnectivity.noAttempt)
+				{
+					textView.setText(getString(R.string.tracking_mode_offline));
+					textView.setTextColor(Color.parseColor(getString(R.color.white)));
+				}
+				else if  (apiConnectivity == APIConnectivity.reachableTransmissionError)
+				{
+					textView.setText(getString(R.string.tracking_mode_api_error));
+					textView.setTextColor(Color.parseColor(getString(R.color.sap_red)));
+				}
+				else
+				{
+					textView.setText(getString(R.string.tracking_mode_caching));
+					textView.setTextColor(Color.parseColor(getString(R.color.sap_green)));
+				}
+			}
+		});
 	}
 	
 	/**

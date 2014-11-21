@@ -1,10 +1,10 @@
 package com.sap.sailing.android.tracking.app.ui.activities;
 
-import com.sap.sailing.android.tracking.app.R;
-import com.sap.sailing.android.tracking.app.ui.fragments.RegattaFragment;
+import java.util.Locale;
 
 import android.content.Intent;
 import android.graphics.Typeface;
+import android.graphics.drawable.Drawable;
 import android.os.Bundle;
 import android.support.v4.app.NavUtils;
 import android.support.v7.widget.Toolbar;
@@ -12,6 +12,11 @@ import android.text.Spannable;
 import android.text.SpannableString;
 import android.text.style.StyleSpan;
 import android.view.MenuItem;
+import android.widget.ImageView;
+import android.widget.TextView;
+
+import com.sap.sailing.android.tracking.app.R;
+import com.sap.sailing.android.tracking.app.ui.fragments.RegattaFragment;
 
 public class RegattaActivity extends BaseActivity {
 
@@ -25,6 +30,7 @@ public class RegattaActivity extends BaseActivity {
         
         String regattaName = intent.getStringExtra(getString(R.string.regatta_name));
         String eventName 	= intent.getStringExtra(getString(R.string.event_name));
+
 
         setContentView(R.layout.fragment_container);
         Toolbar toolbar = (Toolbar) findViewById(R.id.toolbar);
@@ -45,6 +51,39 @@ public class RegattaActivity extends BaseActivity {
         replaceFragment(R.id.content_frame, new RegattaFragment());
     }
 
+    @Override
+    protected void onResume() {
+    	
+    	Intent intent = getIntent();
+    	
+        String countryCode = intent.getStringExtra(getString(R.string.country_code));
+        String competitorName = intent.getStringExtra(getString(R.string.competitor_name));
+        String sailId = intent.getStringExtra(getString(R.string.sail_id));
+        
+        TextView competitorNameTextView = (TextView)findViewById(R.id.competitor_name);
+        competitorNameTextView.setText(competitorName);
+        
+        TextView sailIdTextView = (TextView)findViewById(R.id.sail_id);
+        sailIdTextView.setText(sailId);
+        
+        
+        ImageView flagImageView = (ImageView)findViewById(R.id.flag_image);
+        //String flagStr = String.format("%s.png", countryCode);
+        String uri = "@drawable/" + countryCode.toLowerCase(Locale.getDefault());
+        
+        int imageResource = getResources().getIdentifier(uri, null, getPackageName());
+        
+        try {
+        Drawable res = getResources().getDrawable(imageResource);
+        flagImageView.setImageDrawable(res);
+        } catch (Exception e)
+        {
+        	e.printStackTrace();
+        }
+        
+    	super.onResume();
+    }
+    
     @Override
     public boolean onOptionsItemSelected(MenuItem item) {
         switch (item.getItemId()) {

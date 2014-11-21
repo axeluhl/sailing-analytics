@@ -11,7 +11,7 @@ public class AnalyticsContract {
 		String COMPETITOR_DISPLAY_NAME = "competitor_display_name";
 		String COMPETITOR_COUNTRY_CODE = "competitor_country_code";
 		String COMPETITOR_NATIONALITY = "competitor_nationality";
-		String COMPETITOR_SAIL_ID = "competitor_saild_id";
+		String COMPETITOR_SAIL_ID = "competitor_sail_id";
 		String COMPETITOR_LEADERBOARD_FK = "leaderboard_id";
 	}
 
