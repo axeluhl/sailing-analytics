@@ -54,7 +54,7 @@ import com.sap.sailing.android.tracking.app.utils.VolleyHelper;
  * not do so, if the device is plugged in (= when it is charging). The power saving mode causes the
  * time-interval between check- and transmit-cycles to be increased to conserve power.
  * 
- * @author lukas
+ * @author Lukas Zielinski
  *
  */
 public class TransmittingService extends Service {
@@ -75,12 +75,20 @@ public class TransmittingService extends Service {
 	
 	private AppPreferences prefs;
 	private Timer timer;
+	private boolean timerRunning;
 	
     private APIConnectivityListener apiConnectivityListener;
     private final IBinder transmittingBinder = new TransmittingBinder();
 	
 	@Override
 	public IBinder onBind(Intent intent) {
+		prefs = new AppPreferences(this);
+		
+		if (!timerRunning)
+		{
+			startTimer();
+		}
+		
 		return transmittingBinder;
 	}
 	
@@ -92,7 +100,10 @@ public class TransmittingService extends Service {
 		if (intent != null) {
 			if (intent.getAction() != null) {
 				if (intent.getAction().equals(getString(R.string.transmitting_service_start))) {
-					startTimer();
+					if (!timerRunning)
+					{
+						startTimer();	
+					}
 				} else {
 					stopTimer();
 				}
@@ -109,6 +120,7 @@ public class TransmittingService extends Service {
 	private void startTimer() {
 		timer = new Timer();
 		timer.start();
+		timerRunning = true;
 		if (BuildConfig.DEBUG) {
 			ExLog.i(this, "TIMER", "Background update-timer start");
 		}
@@ -119,6 +131,7 @@ public class TransmittingService extends Service {
 		if (timer != null)
 		{
 			timer.stop();	
+			timerRunning = false;
 			if (BuildConfig.DEBUG) {
 				ExLog.i(this, "TIMER", "Background update-timer stop");
 			}
@@ -479,6 +492,7 @@ public class TransmittingService extends Service {
 				
 				timerFired();
 			}
+			reportApiConnectivity(APIConnectivity.noAttempt);
 		}
 
 		public void start() {
@@ -514,7 +528,8 @@ public class TransmittingService extends Service {
 	public enum APIConnectivity {
 		notReachable (0),
 		reachableTransmissionSuccess (1),
-		reachableTransmissionError(2);
+		reachableTransmissionError(2),
+		noAttempt(4);
 		
 		private final int apiConnectivity;
 		

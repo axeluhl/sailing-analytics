@@ -149,15 +149,13 @@ public class HomeFragment extends BaseFragment implements
 		}
 	}
 
-	public void handleScannedOrUrlMatchedUri(Uri uri)
-	{
+	public void handleScannedOrUrlMatchedUri(Uri uri) {
 		// TODO: assuming scheme is http, is this valid?
 		String scheme = uri.getScheme();
-		if (scheme != "http" && scheme != "https")
-		{
+		if (scheme != "http" && scheme != "https") {
 			scheme = "http";
 		}
-		
+
 		final String server = scheme + "://" + uri.getHost();
 		final int port = (uri.getPort() == -1) ? 80 : uri.getPort();
 		final String hostWithPort = server + ":" + port;
@@ -170,13 +168,16 @@ public class HomeFragment extends BaseFragment implements
 					uri.getQueryParameter(CheckinHelper.LEADERBOARD_NAME),
 					"UTF-8").replace("+", "%20");
 		} catch (UnsupportedEncodingException e) {
-			ExLog.e(getActivity(), TAG,
-					"Failed to encode leaderboard name: " + e.getMessage());
+			ExLog.e(getActivity(), TAG, "Failed to encode leaderboard name: "
+					+ e.getMessage());
 			leaderboardNameFromQR = "";
 		}
 
-		final String competitorId = uri.getQueryParameter(CheckinHelper.COMPETITOR_ID);
-		final String checkinURLStr = prefs.getServerURL() + prefs.getServerCheckinPath().replace("{leaderboard-name}", leaderboardNameFromQR);
+		final String competitorId = uri
+				.getQueryParameter(CheckinHelper.COMPETITOR_ID);
+		final String checkinURLStr = prefs.getServerURL()
+				+ prefs.getServerCheckinPath().replace("{leaderboard-name}",
+						leaderboardNameFromQR);
 		final String eventId = uri.getQueryParameter(CheckinHelper.EVENT_ID);
 		final String leaderboardName = leaderboardNameFromQR;
 
@@ -190,9 +191,12 @@ public class HomeFragment extends BaseFragment implements
 		// 4. Let user confirm that the information is correct
 		// 5. Checkin
 
-		final String getEventUrl = prefs.getServerURL() + prefs.getServerEventPath(eventId);
-		final String getLeaderboardUrl = prefs.getServerURL() + prefs.getServerLeaderboardPath(leaderboardName);
-		final String getCompetitorUrl = prefs.getServerURL() + prefs.getServerCompetitorPath(competitorId);
+		final String getEventUrl = prefs.getServerURL()
+				+ prefs.getServerEventPath(eventId);
+		final String getLeaderboardUrl = prefs.getServerURL()
+				+ prefs.getServerLeaderboardPath(leaderboardName);
+		final String getCompetitorUrl = prefs.getServerURL()
+				+ prefs.getServerCompetitorPath(competitorId);
 
 		JsonObjectRequest getLeaderboardRequest = new JsonObjectRequest(
 				getLeaderboardUrl, null, new Listener<JSONObject>() {
@@ -207,19 +211,17 @@ public class HomeFragment extends BaseFragment implements
 						} catch (JSONException e) {
 							ExLog.e(getActivity(), TAG,
 									"Error getting data from call on URL: "
-											+ getLeaderboardUrl
-											+ ", Error: " + e.getMessage());
+											+ getLeaderboardUrl + ", Error: "
+											+ e.getMessage());
 							displayAPIErrorRecommendRetry();
 							return;
 						}
 
 						JsonObjectRequest getEventRequest = new JsonObjectRequest(
-								getEventUrl, null,
-								new Listener<JSONObject>() {
+								getEventUrl, null, new Listener<JSONObject>() {
 
 									@Override
-									public void onResponse(
-											JSONObject response) {
+									public void onResponse(JSONObject response) {
 										final String eventId;
 										final String eventName;
 										final String eventStartDateStr;
@@ -227,8 +229,7 @@ public class HomeFragment extends BaseFragment implements
 										final String eventFirstImageUrl;
 
 										try {
-											eventId = response
-													.getString("id");
+											eventId = response.getString("id");
 											eventName = response
 													.getString("name");
 											eventStartDateStr = response
@@ -318,16 +319,15 @@ public class HomeFragment extends BaseFragment implements
 													}
 												});
 
-										VolleyHelper.getInstance(
-												getActivity()).addRequest(
-												getCompetitorRequest);
+										VolleyHelper.getInstance(getActivity())
+												.addRequest(
+														getCompetitorRequest);
 									}
 								}, new ErrorListener() {
 									@Override
 									public void onErrorResponse(
 											VolleyError error) {
-										ExLog.e(getActivity(),
-												TAG,
+										ExLog.e(getActivity(), TAG,
 												"Failed to get leaderboard from API: "
 														+ error.getMessage());
 										displayAPIErrorRecommendRetry();
@@ -351,7 +351,7 @@ public class HomeFragment extends BaseFragment implements
 		VolleyHelper.getInstance(getActivity()).addRequest(
 				getLeaderboardRequest);
 	}
-	
+
 	@Override
 	public void onDetach() {
 		super.onDetach();
@@ -529,10 +529,13 @@ public class HomeFragment extends BaseFragment implements
 			JSONObject requestObject = CheckinHelper.getCheckinJson(
 					checkinData.competitorId, checkinData.deviceUid, "TODO!!",
 					date.getTime());
-			
+
 			JsonObjectRequest checkinRequest = new JsonObjectRequest(
-					checkinData.checkinURL, requestObject,
-					new CheckinListener(checkinData.leaderboardName),
+					checkinData.checkinURL, requestObject, new CheckinListener(
+							checkinData.leaderboardName,
+							checkinData.competitorCountryCode,
+							checkinData.competitorDisplayName,
+							checkinData.competitorSailId),
 					new CheckinErrorListener());
 
 			VolleyHelper.getInstance(getActivity()).addRequest(checkinRequest);
@@ -592,10 +595,14 @@ public class HomeFragment extends BaseFragment implements
 	 * @param regattaName
 	 * @param eventName
 	 */
-	private void startRegatta(String regattaName, String eventName) {
+	private void startRegatta(String regattaName, String eventName,
+			String countryCode, String competitorName, String sailId) {
 		Intent intent = new Intent(getActivity(), RegattaActivity.class);
 		intent.putExtra(getString(R.string.regatta_name), regattaName);
 		intent.putExtra(getString(R.string.event_name), eventName);
+		intent.putExtra(getString(R.string.competitor_name), competitorName);
+		intent.putExtra(getString(R.string.country_code), countryCode);
+		intent.putExtra(getString(R.string.sail_id), sailId);
 		getActivity().startActivity(intent);
 	}
 
@@ -605,7 +612,11 @@ public class HomeFragment extends BaseFragment implements
 		case REGATTA_LOADER:
 			String[] projection = new String[] { "events.event_id",
 					"events._id", "events.event_name", "events.event_server",
-					"competitors.competitor_id", "leaderboards.leaderboard_name" };
+					"competitors.competitor_display_name",
+					"competitors.competitor_id",
+					"leaderboards.leaderboard_name",
+					"competitors.competitor_country_code",
+					"competitors.competitor_sail_id" };
 			return new CursorLoader(
 					getActivity(),
 					AnalyticsContract.EventLeaderboardCompetitorJoined.CONTENT_URI,
@@ -675,33 +686,55 @@ public class HomeFragment extends BaseFragment implements
 		@Override
 		public void onItemClick(AdapterView<?> parent, View view, int position,
 				long id) {
-			
+
 			if (position < 1) // tapped header
 			{
 				return;
 			}
-			
-			Cursor cursor = (Cursor) mAdapter.getItem(position - 1); // -1, because there's a header row
 
-			prefs.setServerURL(cursor.getString(cursor.getColumnIndex(Event.EVENT_SERVER)));
+			Cursor cursor = (Cursor) mAdapter.getItem(position - 1); // -1,
+																		// because
+																		// there's
+																		// a
+																		// header
+																		// row
 
-//			String competitorId = cursor.getString(cursor.getColumnIndex("competitor_id"));
-//			String eventServer = cursor.getString(cursor.getColumnIndex("event_server"));
-			String leaderboardName = cursor.getString(cursor.getColumnIndex("leaderboard_name"));
+			prefs.setServerURL(cursor.getString(cursor
+					.getColumnIndex(Event.EVENT_SERVER)));
 
+			// String competitorId =
+			// cursor.getString(cursor.getColumnIndex("competitor_id"));
+			// String eventServer =
+			// cursor.getString(cursor.getColumnIndex("event_server"));
+			String leaderboardName = cursor.getString(cursor
+					.getColumnIndex("leaderboard_name"));
+			String competitorName = cursor.getString(cursor
+					.getColumnIndex("competitor_display_name"));
+			String countryCode = cursor.getString(cursor
+					.getColumnIndex("competitor_country_code"));
+			String sailId = cursor.getString(cursor
+					.getColumnIndex("competitor_sail_id"));
 
-			startRegatta(leaderboardName, leaderboardName);
+			startRegatta(leaderboardName, leaderboardName, countryCode,
+					competitorName, sailId);
 		}
 	}
 
 	private class CheckinListener implements Listener<JSONObject> {
 
 		public String leaderboardName;
+		public String countryCode;
+		public String sailId;
+		public String competitorName;
 
-		public CheckinListener(String leaderboardName) {
+		public CheckinListener(String leaderboardName, String countryCode,
+				String competitorName, String sailId) {
 			try {
 				this.leaderboardName = URLDecoder.decode(leaderboardName,
 						"UTF-8");
+				this.countryCode = countryCode;
+				this.competitorName = competitorName;
+				this.sailId = sailId;
 			} catch (UnsupportedEncodingException e) {
 				ExLog.e(getActivity(), TAG, "UnsupportedEncodingException: "
 						+ e.getMessage());
@@ -711,7 +744,8 @@ public class HomeFragment extends BaseFragment implements
 		@Override
 		public void onResponse(JSONObject response) {
 			// TODO: twice the same string here
-			startRegatta(leaderboardName, leaderboardName);
+			startRegatta(leaderboardName, leaderboardName, countryCode,
+					competitorName, sailId);
 		}
 	}
 

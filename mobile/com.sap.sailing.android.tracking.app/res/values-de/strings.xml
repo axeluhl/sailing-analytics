@@ -26,6 +26,7 @@
     <string name="please_confirm">Bitte bestätigen</string>
     <string name="do_you_really_want_to_stop_tracking">Soll das Tracking wirklich beendet werden?</string>
     <string name="ok">OK</string>
+    <string name="tracking_qps_quality">GPS Signal</string>
     <string name="signal_quality_indicator_view_description">GPS Qualität</string>
     <string name="poor">schwach</string>
     <string name="good">gut</string>
@@ -35,6 +36,7 @@
 	<string name="tracking_status_tracking">Tracking läuft</string>
 	<string name="tracking_status_not_tracking">Tracking gestoppt</string>
 	<string name="tracking_status_no_gps_signal">Kein GPS Signal!</string>
+	<string name="tracking_mode_offline">Offline</string>
 	<string name="tracking_mode">Modus</string>
 	<string name="tracking_mode_live">Live</string>
 	<string name="tracking_mode_caching">Caching</string>
