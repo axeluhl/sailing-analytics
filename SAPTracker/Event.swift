@@ -21,7 +21,8 @@ class Event: NSManagedObject {
     @NSManaged var leaderBoard: LeaderBoard?
     @NSManaged var userImage: NSData?
     @NSManaged var gpsFixes: NSSet?
-
+    @NSManaged var lastGpsSendDate: NSDate?
+    
     func initWithDictionary(dictionary: [String: AnyObject]) {
         eventId = dictionary["id"] as String
         name = dictionary["name"] as String

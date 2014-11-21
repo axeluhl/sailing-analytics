@@ -42,7 +42,7 @@
                                     <constraint firstAttribute="height" constant="21" id="UpW-GM-YWn"/>
                                 </constraints>
                                 <fontDescription key="fontDescription" type="system" pointSize="13"/>
-                                <color key="textColor" cocoaTouchSystemColor="darkTextColor"/>
+                                <color key="textColor" white="0.33333333333333331" alpha="1" colorSpace="calibratedWhite"/>
                                 <nil key="highlightedColor"/>
                             </label>
                             <tableView clipsSubviews="YES" contentMode="scaleToFill" alwaysBounceVertical="YES" dataMode="prototypes" style="plain" separatorStyle="default" rowHeight="44" sectionHeaderHeight="22" sectionFooterHeight="22" translatesAutoresizingMaskIntoConstraints="NO" id="OXU-ft-TXZ">
@@ -229,14 +229,26 @@
                                     <action selector="startTrackingButtonTapped:" destination="G3a-SV-Maf" eventType="touchUpInside" id="x7w-dz-qiZ"/>
                                 </connections>
                             </button>
+                            <label opaque="NO" userInteractionEnabled="NO" contentMode="left" horizontalHuggingPriority="251" verticalHuggingPriority="251" text="Last Sync" textAlignment="center" lineBreakMode="tailTruncation" baselineAdjustment="alignBaselines" minimumScaleFactor="0.5" adjustsLetterSpacingToFitWidth="YES" translatesAutoresizingMaskIntoConstraints="NO" id="gHJ-am-Ulb">
+                                <rect key="frame" x="16" y="521" width="568" height="21"/>
+                                <constraints>
+                                    <constraint firstAttribute="height" constant="21" id="bX2-Is-Q6f"/>
+                                </constraints>
+                                <fontDescription key="fontDescription" type="system" pointSize="13"/>
+                                <color key="textColor" white="0.33333333333333331" alpha="1" colorSpace="calibratedWhite"/>
+                                <nil key="highlightedColor"/>
+                            </label>
                         </subviews>
                         <color key="backgroundColor" white="1" alpha="1" colorSpace="calibratedWhite"/>
                         <constraints>
                             <constraint firstItem="oJS-dM-2B6" firstAttribute="top" secondItem="qVe-AE-cJY" secondAttribute="bottom" constant="8" symbolic="YES" id="5Qk-UM-Jco"/>
                             <constraint firstItem="mj9-m1-nYY" firstAttribute="centerX" secondItem="D89-pe-zpv" secondAttribute="centerX" id="5tP-Ko-XGd"/>
+                            <constraint firstItem="gHJ-am-Ulb" firstAttribute="leading" secondItem="mj9-m1-nYY" secondAttribute="leading" id="QgE-vv-9vr"/>
+                            <constraint firstItem="mj9-m1-nYY" firstAttribute="top" secondItem="gHJ-am-Ulb" secondAttribute="bottom" constant="8" symbolic="YES" id="RH8-nf-Ugj"/>
                             <constraint firstItem="iIf-9z-7fe" firstAttribute="leading" secondItem="szG-Mg-huO" secondAttribute="trailing" constant="8" symbolic="YES" id="SuJ-xb-y9x"/>
                             <constraint firstAttribute="trailing" secondItem="D89-pe-zpv" secondAttribute="trailing" id="UhM-Sv-R4W"/>
                             <constraint firstItem="D89-pe-zpv" firstAttribute="top" secondItem="wYi-P2-UTF" secondAttribute="bottom" id="WBW-Lw-5P6"/>
+                            <constraint firstItem="gHJ-am-Ulb" firstAttribute="trailing" secondItem="mj9-m1-nYY" secondAttribute="trailing" id="XX2-ho-gDm"/>
                             <constraint firstItem="qVe-AE-cJY" firstAttribute="leading" secondItem="D89-pe-zpv" secondAttribute="leading" id="b0x-d3-irS"/>
                             <constraint firstItem="oJS-dM-2B6" firstAttribute="baseline" secondItem="iIf-9z-7fe" secondAttribute="baseline" id="cHp-rQ-M9R"/>
                             <constraint firstItem="qVe-AE-cJY" firstAttribute="top" secondItem="D89-pe-zpv" secondAttribute="top" id="gFt-eL-RcX"/>
@@ -261,6 +273,7 @@
                     <connections>
                         <outlet property="flagImageView" destination="szG-Mg-huO" id="m3b-Wx-2on"/>
                         <outlet property="imageView" destination="D89-pe-zpv" id="tE7-Fb-xBq"/>
+                        <outlet property="lastSyncLabel" destination="gHJ-am-Ulb" id="EfM-eF-R1s"/>
                         <outlet property="nameLabel" destination="oJS-dM-2B6" id="fXn-FX-UbJ"/>
                         <outlet property="sailLabel" destination="iIf-9z-7fe" id="xPM-y9-Tjg"/>
                         <segue destination="4Fb-v3-mkB" kind="presentation" identifier="Settings" id="Irs-ey-Uhs"/>
@@ -582,7 +595,7 @@
         <image name="settings" width="22" height="22"/>
     </resources>
     <inferredMetricsTieBreakers>
-        <segue reference="tzB-PL-31j"/>
         <segue reference="Irs-ey-Uhs"/>
+        <segue reference="tzB-PL-31j"/>
     </inferredMetricsTieBreakers>
 </document>

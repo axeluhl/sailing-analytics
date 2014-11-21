@@ -147,6 +147,7 @@ class APIManager: NSObject {
                 // delete GPS fixes from database
                 println("sent GPS fixes")
                 for gpsFix in gpsFixes {
+                    gpsFix.event.lastGpsSendDate = NSDate()
                     DataManager.sharedManager.managedObjectContext!.deleteObject(gpsFix)
                 }
             }, failure: { (AFHTTPRequestOperation operation, NSError error) -> Void in

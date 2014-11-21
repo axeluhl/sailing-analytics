@@ -25,26 +25,42 @@ class RegattaViewController : UIViewController, UIActionSheetDelegate, UINavigat
     @IBOutlet weak var nameLabel: UILabel!
     @IBOutlet weak var flagImageView: UIImageView!
     @IBOutlet weak var sailLabel: UILabel!
+    @IBOutlet weak var lastSyncLabel: UILabel!
+    
+    var dateFormatter: NSDateFormatter
+    
+    /* Setup date formatter for last sync. */
+    required init(coder aDecoder: NSCoder) {
+        dateFormatter = NSDateFormatter()
+        dateFormatter.timeStyle = NSDateFormatterStyle.ShortStyle
+        dateFormatter.dateStyle = NSDateFormatterStyle.MediumStyle
+        super.init(coder: aDecoder)
+    }
     
     override func viewDidLoad() {
         
         // set values
         navigationItem.title = DataManager.sharedManager.selectedEvent!.leaderBoard!.name
         
+        // set regatta image, either load it from server or load from core data
         if DataManager.sharedManager.selectedEvent!.userImage != nil {
             imageView.image = UIImage(data:  DataManager.sharedManager.selectedEvent!.userImage!)
         } else if DataManager.sharedManager.selectedEvent!.imageUrl != nil {
             let imageUrl = NSURL(string: DataManager.sharedManager.selectedEvent!.imageUrl!)
             let urlRequest = NSURLRequest(URL: imageUrl!)
-            imageView.setImageWithURLRequest(urlRequest, placeholderImage: nil, success: { (request:NSURLRequest!,response:NSHTTPURLResponse!, image:UIImage!) -> Void in
-                self.imageView.image = image
-                }, failure: {
-                    (request:NSURLRequest!,response:NSHTTPURLResponse!, error:NSError!) -> Void in
-            })
+            imageView.setImageWithURLRequest(urlRequest,
+                placeholderImage: nil,
+                success: { (request:NSURLRequest!,response:NSHTTPURLResponse!, image:UIImage!) -> Void in
+                    self.imageView.image = image
+                },
+                failure: { (request:NSURLRequest!,response:NSHTTPURLResponse!, error:NSError!) -> Void in
+                }
+            )
         }
         nameLabel.text = DataManager.sharedManager.selectedEvent!.leaderBoard!.competitor!.displayName
         flagImageView.image = UIImage(named: DataManager.sharedManager.selectedEvent!.leaderBoard!.competitor!.countryCode)
         sailLabel.text = DataManager.sharedManager.selectedEvent!.leaderBoard!.competitor!.sailId
+        showLastSync()
         
         // get image sources
         super.viewDidLoad()
@@ -55,6 +71,19 @@ class RegattaViewController : UIViewController, UIActionSheetDelegate, UINavigat
         if UIImagePickerController.isSourceTypeAvailable(UIImagePickerControllerSourceType.PhotoLibrary) {
             sourceTypes.append(UIImagePickerControllerSourceType.PhotoLibrary)
             sourceTypeNames.append("Photo Library")
+        }
+    }
+    
+    override func viewDidAppear(animated: Bool) {
+        super.viewDidAppear(animated)
+        showLastSync()
+    }
+
+    private func showLastSync() {
+        if DataManager.sharedManager.selectedEvent!.lastGpsSendDate != nil {
+            lastSyncLabel.text = "Last sync: " + dateFormatter.stringFromDate(DataManager.sharedManager.selectedEvent!.lastGpsSendDate!)
+        } else {
+            lastSyncLabel.text = nil
         }
     }
     
@@ -146,15 +175,20 @@ class RegattaViewController : UIViewController, UIActionSheetDelegate, UINavigat
             default:
                 let now = NSDate()
                 let toMillis = round(now.timeIntervalSince1970 * 1000)
-                APIManager.sharedManager.checkOut(DataManager.sharedManager.selectedEvent!.leaderBoard!.name, competitorId: DataManager.sharedManager.selectedEvent!.leaderBoard!.competitor!.competitorId, deviceUuid: DeviceUDIDManager.UDID, toMillis: toMillis,
+                APIManager.sharedManager.checkOut(DataManager.sharedManager.selectedEvent!.leaderBoard!.name,
+                    competitorId: DataManager.sharedManager.selectedEvent!.leaderBoard!.competitor!.competitorId,
+                    deviceUuid: DeviceUDIDManager.UDID,
+                    toMillis: toMillis,
                     success: { (AFHTTPRequestOperation operation, AnyObject competitorResponseObject) -> Void in
                         DataManager.sharedManager.deleteEvent(DataManager.sharedManager.selectedEvent!)
                         DataManager.sharedManager.saveContext()
                         self.navigationController!.popViewControllerAnimated(true)
-                    }, failure: { (AFHTTPRequestOperation operation, NSError error) -> Void in
+                    },
+                    failure: { (AFHTTPRequestOperation operation, NSError error) -> Void in
                         let alertView = UIAlertView(title: "Couldn't check-out", message: "", delegate: nil, cancelButtonTitle: "Cancel")
                         alertView.show()
-                })
+                    }
+                )
                 break
             }
             break

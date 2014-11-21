@@ -13,6 +13,7 @@
         <attribute name="endDate" optional="YES" attributeType="Date" syncable="YES"/>
         <attribute name="eventId" optional="YES" attributeType="String" indexed="YES" syncable="YES"/>
         <attribute name="imageUrl" optional="YES" attributeType="String" syncable="YES"/>
+        <attribute name="lastGpsSendDate" optional="YES" attributeType="Date" syncable="YES"/>
         <attribute name="name" optional="YES" attributeType="String" syncable="YES"/>
         <attribute name="serverUrl" optional="YES" attributeType="String" syncable="YES"/>
         <attribute name="startDate" optional="YES" attributeType="Date" syncable="YES"/>
@@ -35,7 +36,7 @@
     </entity>
     <elements>
         <element name="Competitor" positionX="-9" positionY="81" width="128" height="148"/>
-        <element name="Event" positionX="-63" positionY="27" width="128" height="180"/>
+        <element name="Event" positionX="-63" positionY="27" width="128" height="193"/>
         <element name="GPSFix" positionX="-63" positionY="-18" width="128" height="133"/>
         <element name="LeaderBoard" positionX="-36" positionY="72" width="128" height="90"/>
     </elements>
