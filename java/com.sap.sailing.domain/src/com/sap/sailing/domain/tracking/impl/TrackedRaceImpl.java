@@ -50,7 +50,6 @@ import com.sap.sailing.domain.common.Bearing;
 import com.sap.sailing.domain.common.BearingChangeAnalyzer;
 import com.sap.sailing.domain.common.CourseChange;
 import com.sap.sailing.domain.common.Distance;
-import com.sap.sailing.domain.common.Duration;
 import com.sap.sailing.domain.common.LegType;
 import com.sap.sailing.domain.common.ManeuverType;
 import com.sap.sailing.domain.common.NauticalSide;
@@ -62,7 +61,6 @@ import com.sap.sailing.domain.common.RegattaNameAndRaceName;
 import com.sap.sailing.domain.common.Speed;
 import com.sap.sailing.domain.common.SpeedWithBearing;
 import com.sap.sailing.domain.common.Tack;
-import com.sap.sailing.domain.common.TimePoint;
 import com.sap.sailing.domain.common.TimingConstants;
 import com.sap.sailing.domain.common.TrackedRaceStatusEnum;
 import com.sap.sailing.domain.common.WindSource;
@@ -77,7 +75,6 @@ import com.sap.sailing.domain.common.confidence.impl.PositionAndTimePointWeigher
 import com.sap.sailing.domain.common.impl.CentralAngleDistance;
 import com.sap.sailing.domain.common.impl.KnotSpeedImpl;
 import com.sap.sailing.domain.common.impl.KnotSpeedWithBearingImpl;
-import com.sap.sailing.domain.common.impl.MillisecondsTimePoint;
 import com.sap.sailing.domain.common.impl.NauticalMileDistance;
 import com.sap.sailing.domain.common.impl.WindSourceImpl;
 import com.sap.sailing.domain.common.racelog.tracking.NoCorrespondingServiceRegisteredException;
@@ -117,8 +114,11 @@ import com.sap.sailing.util.SmartFutureCache.EmptyUpdateInterval;
 import com.sap.sailing.util.impl.ArrayListNavigableSet;
 import com.sap.sailing.util.impl.LockUtil;
 import com.sap.sailing.util.impl.NamedReentrantReadWriteLock;
+import com.sap.sse.common.Duration;
+import com.sap.sse.common.TimePoint;
 import com.sap.sse.common.Util;
 import com.sap.sse.common.Util.Pair;
+import com.sap.sse.common.impl.MillisecondsTimePoint;
 
 import difflib.DiffUtils;
 import difflib.Patch;
@@ -403,8 +403,8 @@ public abstract class TrackedRaceImpl extends TrackedRaceWithWindEssentials impl
                 getOrCreateWindTrack(trackBasedWindSource, delayForWindEstimationCacheInvalidation));
         competitorRankings = createCompetitorRankingsCache();
         competitorRankingsLocks = createCompetitorRankingsLockMap();
-        if(useMarkPassingCalculator){
-        markPassingCalculator = getMarkPassingCalculator();
+        if (useMarkPassingCalculator){
+            markPassingCalculator = createMarkPassingCalculator();
         } else {
             markPassingCalculator = null;
         }
@@ -3135,12 +3135,12 @@ public abstract class TrackedRaceImpl extends TrackedRaceWithWindEssentials impl
     	return gpsFixStore;
     }
     
-    protected MarkPassingCalculator getMarkPassingCalculator() {
+    protected MarkPassingCalculator createMarkPassingCalculator() {
         return null;
     }
     
     @Override
-    public Boolean isUsingMarkPassingCalculator() {
+    public boolean isUsingMarkPassingCalculator() {
         return markPassingCalculator!=null;
     }
 

@@ -34,6 +34,8 @@ public interface TextMessages extends Messages {
     String chooseChart();
     String series();
     String regattaLeaderboards();
+    String sapSailing();
+    String search();
     
     String countdownDays();
     String countdownHours();

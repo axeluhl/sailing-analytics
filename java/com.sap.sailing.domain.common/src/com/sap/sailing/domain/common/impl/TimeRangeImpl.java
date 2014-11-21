@@ -1,9 +1,10 @@
 package com.sap.sailing.domain.common.impl;
 
-import com.sap.sailing.domain.common.Duration;
-import com.sap.sailing.domain.common.TimePoint;
 import com.sap.sailing.domain.common.TimeRange;
+import com.sap.sse.common.Duration;
+import com.sap.sse.common.TimePoint;
 import com.sap.sse.common.Util;
+import com.sap.sse.common.impl.MillisecondsTimePoint;
 
 public class TimeRangeImpl extends Util.Pair<TimePoint, TimePoint> implements TimeRange {
     public static final TimePoint BeginningOfTime = new MillisecondsTimePoint(Long.MIN_VALUE);

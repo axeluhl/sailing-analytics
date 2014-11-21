@@ -21,7 +21,6 @@ import com.sap.sailing.domain.base.Regatta;
 import com.sap.sailing.domain.base.Sideline;
 import com.sap.sailing.domain.base.Waypoint;
 import com.sap.sailing.domain.common.PassingInstruction;
-import com.sap.sailing.domain.common.TimePoint;
 import com.sap.sailing.domain.racelog.RaceLogStore;
 import com.sap.sailing.domain.racelog.tracking.GPSFixStore;
 import com.sap.sailing.domain.tracking.DynamicRaceDefinitionSet;
@@ -41,6 +40,7 @@ import com.sap.sailing.domain.tractracadapter.impl.DomainFactoryImpl;
 import com.sap.sailing.domain.tractracadapter.impl.RaceCourseReceiver;
 import com.sap.sailing.domain.tractracadapter.impl.Simulator;
 import com.tractrac.model.lib.api.data.IPosition;
+import com.sap.sse.common.TimePoint;
 import com.sap.sse.common.Util;
 import com.tractrac.model.lib.api.event.CreateModelException;
 import com.tractrac.model.lib.api.event.ICompetitor;
@@ -64,7 +64,7 @@ public interface DomainFactory {
 
     com.sap.sailing.domain.common.Position createPosition(IPosition position);
 
-    com.sap.sailing.domain.common.TimePoint createTimePoint(long timestamp);
+    com.sap.sse.common.TimePoint createTimePoint(long timestamp);
 
     Course createCourse(String name, Iterable<Util.Pair<TracTracControlPoint, PassingInstruction>> controlPoints);
 

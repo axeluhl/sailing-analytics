@@ -7,9 +7,9 @@ import java.util.List;
 
 import com.sap.sailing.domain.base.LeaderboardSearchResultBase;
 import com.sap.sailing.domain.base.Regatta;
-import com.sap.sailing.domain.common.TimePoint;
 import com.sap.sailing.domain.tracking.TrackedRace;
 import com.sap.sailing.domain.tracking.TrackedRegatta;
+import com.sap.sse.common.TimePoint;
 import com.sap.sse.common.Util;
 
 public class LeaderboardSearchResultBaseRanker<T extends LeaderboardSearchResultBase> implements Comparator<T> {

@@ -30,7 +30,6 @@ import com.sap.sailing.domain.common.RegattaIdentifier;
 import com.sap.sailing.domain.common.Speed;
 import com.sap.sailing.domain.common.SpeedWithBearing;
 import com.sap.sailing.domain.common.Tack;
-import com.sap.sailing.domain.common.TimePoint;
 import com.sap.sailing.domain.common.WindSource;
 import com.sap.sailing.domain.common.WindSourceType;
 import com.sap.sailing.domain.common.racelog.Flags;
@@ -62,6 +61,7 @@ import com.sap.sailing.domain.tracking.WindStore;
 import com.sap.sailing.domain.tracking.WindTrack;
 import com.sap.sailing.domain.tracking.WindWithConfidence;
 import com.sap.sailing.domain.tracking.impl.WindTrackImpl;
+import com.sap.sse.common.TimePoint;
 import com.sap.sse.common.Util;
 
 public class MockedTrackedRace implements DynamicTrackedRace {
@@ -1000,9 +1000,9 @@ public class MockedTrackedRace implements DynamicTrackedRace {
     }
 
     @Override
-    public Boolean isUsingMarkPassingCalculator() {
+    public boolean isUsingMarkPassingCalculator() {
         // TODO Auto-generated method stub
-        return null;
+        return false;
     }
 
 }

@@ -3,10 +3,10 @@ package com.sap.sailing.domain.common.dto;
 import java.io.Serializable;
 import java.util.List;
 
-import com.sap.sailing.domain.common.Duration;
 import com.sap.sailing.domain.common.MaxPointsReason;
 import com.sap.sailing.domain.common.RaceIdentifier;
 import com.sap.sailing.domain.common.Tack;
+import com.sap.sse.common.Duration;
 
 /**
  * Holds a single competitor's scoring details for a single race. It may optionally contain

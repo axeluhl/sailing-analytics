@@ -1,12 +1,12 @@
 package com.sap.sailing.gwt.ui.test;
 
-import static org.mockito.Mockito.doReturn;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
 
 import java.io.IOException;
 import java.net.UnknownHostException;
 import java.text.ParseException;
+import java.util.Collections;
 import java.util.List;
 
 import javax.xml.bind.JAXBException;
@@ -34,10 +34,12 @@ import com.sap.sailing.domain.tractracadapter.TracTracAdapterFactory;
 import com.sap.sailing.gwt.ui.server.SailingServiceImpl;
 import com.sap.sailing.server.RacingEventService;
 import com.sap.sailing.server.impl.RacingEventServiceImpl;
-import com.sap.sailing.server.replication.ReplicationService;
-import com.sap.sailing.server.replication.impl.ReplicationInstancesManager;
-import com.sap.sailing.server.replication.impl.ReplicationServiceImpl;
 import com.sap.sailing.xrr.resultimport.schema.RegattaResults;
+import com.sap.sse.replication.Replicable;
+import com.sap.sse.replication.ReplicationService;
+import com.sap.sse.replication.impl.AbstractReplicablesProvider;
+import com.sap.sse.replication.impl.ReplicationInstancesManager;
+import com.sap.sse.replication.impl.ReplicationServiceImpl;
 
 public class SailingServiceImplMock extends SailingServiceImpl {
     private static final long serialVersionUID = 8564037671550730455L;
@@ -63,16 +65,15 @@ public class SailingServiceImplMock extends SailingServiceImpl {
         @SuppressWarnings("unchecked")
         ServiceTracker<ReplicationService, ReplicationService> result = mock(ServiceTracker.class);
         try {
-            final ReplicationServiceImpl replicationService = new ReplicationServiceImpl("test exchange", "localhost", 0, new ReplicationInstancesManager()) {
-                @Override
-                protected ServiceTracker<RacingEventService, RacingEventService> getRacingEventServiceTracker() {
-                    @SuppressWarnings("unchecked")
-                    ServiceTracker<RacingEventService, RacingEventService> result = (ServiceTracker<RacingEventService, RacingEventService>) mock(ServiceTracker.class);
-                    doReturn("Humba Humba").when(result).toString();
-                    when(result.getService()).thenReturn(new RacingEventServiceImpl());
-                    return result;
-                }
-            };
+            final RacingEventService replicable = new RacingEventServiceImpl();
+            final ReplicationServiceImpl replicationService =
+                    new ReplicationServiceImpl("test exchange", "localhost", 0,
+                            new ReplicationInstancesManager(), new AbstractReplicablesProvider() {
+                                @Override
+                                public Iterable<Replicable<?, ?>> getReplicables() {
+                                    return Collections.<Replicable<?, ?>>singleton(replicable);
+                                }
+                            });
             when(result.getService()).thenReturn(replicationService);
         } catch (IOException e) {
             throw new RuntimeException();

@@ -9,4 +9,5 @@ Bundle-ClassPath: .
 Export-Package: com.sap.sailing.nmeaconnector
 Require-Bundle: com.sap.sailing.domain,
  com.sap.sailing.domain.common,
- net.sf.marineapi;bundle-version="0.5.0"
+ net.sf.marineapi;bundle-version="0.5.0",
+ com.sap.sse.common

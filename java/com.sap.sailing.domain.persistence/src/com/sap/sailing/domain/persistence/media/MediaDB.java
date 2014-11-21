@@ -4,11 +4,11 @@ import java.util.Collections;
 import java.util.List;
 import java.util.Set;
 
-import com.sap.sailing.domain.common.Duration;
 import com.sap.sailing.domain.common.RegattaAndRaceIdentifier;
-import com.sap.sailing.domain.common.TimePoint;
 import com.sap.sailing.domain.common.media.MediaTrack;
 import com.sap.sailing.domain.common.media.MediaTrack.MimeType;
+import com.sap.sse.common.Duration;
+import com.sap.sse.common.TimePoint;
 
 /**
  * Offers CRUD methods for mongo representation of media track objects.

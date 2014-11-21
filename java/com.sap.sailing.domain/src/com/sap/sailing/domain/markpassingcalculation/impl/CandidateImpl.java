@@ -1,8 +1,8 @@
 package com.sap.sailing.domain.markpassingcalculation.impl;
 
 import com.sap.sailing.domain.base.Waypoint;
-import com.sap.sailing.domain.common.TimePoint;
 import com.sap.sailing.domain.markpassingcalculation.Candidate;
+import com.sap.sse.common.TimePoint;
 
 public class CandidateImpl implements Candidate {
     private final Waypoint w;

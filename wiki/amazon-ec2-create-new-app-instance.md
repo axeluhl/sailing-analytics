@@ -22,7 +22,7 @@ Leave Kernel and RAM disk to Default. Then put the configuration for this server
 <pre>
 INSTALL_FROM_RELEASE=name-of-release
 USE_ENVIRONMENT=live-server
-MONGODB_PORT=10201
+MONGODB_PORT=10202
 MONGODB_NAME=myspecificevent
 REPLICATION_CHANNEL=myspecificevent
 SERVER_NAME=MYSPECIFICEVENT

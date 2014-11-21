@@ -11,10 +11,13 @@ import com.google.gwt.event.dom.client.ClickEvent;
 import com.google.gwt.uibinder.client.UiBinder;
 import com.google.gwt.uibinder.client.UiField;
 import com.google.gwt.uibinder.client.UiHandler;
+import com.google.gwt.user.client.Event;
+import com.google.gwt.user.client.History;
 import com.google.gwt.user.client.ui.Anchor;
 import com.google.gwt.user.client.ui.Composite;
 import com.google.gwt.user.client.ui.HTMLPanel;
 import com.google.gwt.user.client.ui.Widget;
+import com.google.gwt.user.client.ui.impl.HyperlinkImpl;
 import com.sap.sailing.domain.common.DetailType;
 import com.sap.sailing.domain.common.LeaderboardNameConstants;
 import com.sap.sailing.domain.common.RaceIdentifier;
@@ -24,11 +27,14 @@ import com.sap.sailing.domain.common.dto.LeaderboardDTO;
 import com.sap.sailing.domain.common.dto.RaceColumnDTO;
 import com.sap.sailing.gwt.common.client.SharedResources;
 import com.sap.sailing.gwt.home.client.app.HomePlacesNavigator;
+import com.sap.sailing.gwt.home.client.app.PlaceNavigation;
 import com.sap.sailing.gwt.home.client.place.event.header.CompactEventHeader;
 import com.sap.sailing.gwt.home.client.place.event.oldcompetitorcharts.OldCompetitorCharts;
 import com.sap.sailing.gwt.home.client.place.event.oldleaderboard.OldLeaderboard;
 import com.sap.sailing.gwt.home.client.place.event.oldmultileaderboard.OldMultiLeaderboard;
 import com.sap.sailing.gwt.home.client.place.event.regattaleaderboard.EventRegattaLeaderboardResources;
+import com.sap.sailing.gwt.home.client.place.series.SeriesPlace;
+import com.sap.sailing.gwt.home.client.place.series.SeriesPlace.SeriesNavigationTabs;
 import com.sap.sailing.gwt.ui.client.LeaderboardUpdateListener;
 import com.sap.sailing.gwt.ui.client.SailingServiceAsync;
 import com.sap.sailing.gwt.ui.client.StringMessages;
@@ -46,6 +52,8 @@ public class EventSeriesAnalytics extends Composite implements LeaderboardUpdate
     interface EventSeriesAnalyticsUiBinder extends UiBinder<Widget, EventSeriesAnalytics> {
     }
 
+    private static final HyperlinkImpl HYPERLINK_IMPL = GWT.create(HyperlinkImpl.class);
+
     @UiField OldLeaderboard oldOverallLeaderboardComposite;
     @UiField OldCompetitorCharts oldCompetitorChartsComposite;
     @UiField OldMultiLeaderboard oldRegattaLeaderboardsComposite;
@@ -57,19 +65,25 @@ public class EventSeriesAnalytics extends Composite implements LeaderboardUpdate
     @UiField HTMLPanel overallLeaderboardTabPanel;
     @UiField HTMLPanel regattaLeaderboardsTabPanel;
     @UiField HTMLPanel competitorChartsTabPanel;
-    private HTMLPanel activeTabPanel;
-    private Widget activeContentWidget;
-    private Anchor activeAnchor;
-
     @UiField Anchor overallLeaderboardAnchor;
     @UiField Anchor regattaLeaderboardsAnchor;
     @UiField Anchor competitorChartsAnchor;
     
+    private final PlaceNavigation<SeriesPlace> overallLeaderboardNavigation; 
+    private final PlaceNavigation<SeriesPlace> regattaLeaderboardsNavigation; 
+    private final PlaceNavigation<SeriesPlace> competitorChartsNavigation; 
+
+    private HTMLPanel activeTabPanel;
+    private Widget activeContentWidget;
+    private Anchor activeAnchor;
     private EventSeriesAnalyticsDataManager eventSeriesAnalyticsManager;
     private Timer autoRefreshTimer;
+    private SeriesNavigationTabs navigationTab;
         
-    public EventSeriesAnalytics(EventDTO event, String leaderboardName, Timer timerForClientServerOffset, HomePlacesNavigator placeNavigator) {
-        eventHeader = new CompactEventHeader(event, leaderboardName, placeNavigator);
+    public EventSeriesAnalytics(EventDTO event, String leaderboardName, SeriesNavigationTabs navigationTab, Timer timerForClientServerOffset, HomePlacesNavigator placesNavigator) {
+        this.navigationTab = navigationTab;
+        
+        eventHeader = new CompactEventHeader(event, leaderboardName, placesNavigator);
     
         EventRegattaLeaderboardResources.INSTANCE.css().ensureInjected();
         EventSeriesAnalyticsResources.INSTANCE.css().ensureInjected();
@@ -83,14 +97,21 @@ public class EventSeriesAnalytics extends Composite implements LeaderboardUpdate
         }
         title.setInnerText(seriesTitle);
 
-        activeAnchor = overallLeaderboardAnchor;
-        activeTabPanel = overallLeaderboardTabPanel;
-        activeContentWidget = null;
-        activeAnchor.addStyleName(SharedResources.INSTANCE.mainCss().navbar_buttonactive());
-
+        overallLeaderboardTabPanel.setVisible(false);
         regattaLeaderboardsTabPanel.setVisible(false);
         competitorChartsTabPanel.setVisible(false);
         liveRaceDiv.getStyle().setVisibility(Visibility.HIDDEN);
+        
+        overallLeaderboardNavigation = placesNavigator.getSeriesAnalyticsNavigation(event.id.toString(), SeriesNavigationTabs.OverallLeaderboard, leaderboardName, 
+                event.getBaseURL(), event.isOnRemoteServer());
+        regattaLeaderboardsNavigation = placesNavigator.getSeriesAnalyticsNavigation(event.id.toString(), SeriesNavigationTabs.RegattaLeaderboards, leaderboardName, 
+                event.getBaseURL(), event.isOnRemoteServer());
+        competitorChartsNavigation = placesNavigator.getSeriesAnalyticsNavigation(event.id.toString(), SeriesNavigationTabs.CompetitorAnalytics, leaderboardName, 
+                event.getBaseURL(), event.isOnRemoteServer());
+        
+        overallLeaderboardAnchor.setHref(overallLeaderboardNavigation.getTargetUrl());
+        regattaLeaderboardsAnchor.setHref(regattaLeaderboardsNavigation.getTargetUrl());
+        competitorChartsAnchor.setHref(competitorChartsNavigation.getTargetUrl());
     }
     
     public void createSeriesAnalyticsViewer(SailingServiceAsync sailingService, AsyncActionsExecutor asyncActionsExecutor, 
@@ -118,7 +139,21 @@ public class EventSeriesAnalytics extends Composite implements LeaderboardUpdate
 
         eventSeriesAnalyticsManager.getLeaderboardPanel().addLeaderboardUpdateListener(this);
         eventSeriesAnalyticsManager.getMultiLeaderboardPanel().addLeaderboardUpdateListener(this);
-        
+
+        switch(navigationTab) {
+        case OverallLeaderboard:
+            setActiveTabPanel(overallLeaderboardTabPanel, eventSeriesAnalyticsManager.getLeaderboardPanel(), overallLeaderboardAnchor);
+            break;
+        case RegattaLeaderboards:
+            setActiveTabPanel(regattaLeaderboardsTabPanel, eventSeriesAnalyticsManager.getMultiLeaderboardPanel(), regattaLeaderboardsAnchor);
+            break;
+        case CompetitorAnalytics:
+            setActiveTabPanel(competitorChartsTabPanel, eventSeriesAnalyticsManager.getMultiCompetitorChart(), competitorChartsAnchor);
+            DetailType selectedChartDetailType = oldCompetitorChartsComposite.getSelectedChartDetailType();
+            eventSeriesAnalyticsManager.showCompetitorChart(selectedChartDetailType);
+            break;
+    }
+
         activeContentWidget = eventSeriesAnalyticsManager.getLeaderboardPanel();
     }
 
@@ -164,11 +199,13 @@ public class EventSeriesAnalytics extends Composite implements LeaderboardUpdate
     @UiHandler("overallLeaderboardAnchor")
     void overallLeaderboardTabClicked(ClickEvent event) {
         setActiveTabPanel(overallLeaderboardTabPanel, eventSeriesAnalyticsManager.getLeaderboardPanel(), overallLeaderboardAnchor);
+        handleClickEvent(event, overallLeaderboardNavigation);
     }
 
     @UiHandler("regattaLeaderboardsAnchor")
     void regattaLeaderboardsTabClicked(ClickEvent event) {
         setActiveTabPanel(regattaLeaderboardsTabPanel, eventSeriesAnalyticsManager.getMultiLeaderboardPanel(), regattaLeaderboardsAnchor);
+        handleClickEvent(event, regattaLeaderboardsNavigation);
     }
 
     @UiHandler("competitorChartsAnchor")
@@ -176,6 +213,7 @@ public class EventSeriesAnalytics extends Composite implements LeaderboardUpdate
         setActiveTabPanel(competitorChartsTabPanel, eventSeriesAnalyticsManager.getMultiCompetitorChart(), competitorChartsAnchor);
         DetailType selectedChartDetailType = oldCompetitorChartsComposite.getSelectedChartDetailType();
         eventSeriesAnalyticsManager.showCompetitorChart(selectedChartDetailType);
+        handleClickEvent(event, competitorChartsNavigation);
     }
 
     private void setActiveTabPanel(HTMLPanel newActivePanel, Widget newActiveContentWidget, Anchor newActiveAnchor) {
@@ -193,5 +231,13 @@ public class EventSeriesAnalytics extends Composite implements LeaderboardUpdate
         activeTabPanel.setVisible(true);
         activeContentWidget.setVisible(true);
         activeAnchor.addStyleName(SharedResources.INSTANCE.mainCss().navbar_buttonactive());
+    }
+    
+    private void handleClickEvent(ClickEvent e, PlaceNavigation<?> placeNavigation) {
+        if (HYPERLINK_IMPL.handleAsClick((Event) e.getNativeEvent())) {
+            // don't use the placecontroller for navigation here as we want to avoid a page reload
+            History.newItem(placeNavigation.getHistoryUrl(), false);
+            e.preventDefault();
+         }
     }
 }

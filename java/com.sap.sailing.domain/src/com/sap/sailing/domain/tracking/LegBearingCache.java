@@ -1,7 +1,7 @@
 package com.sap.sailing.domain.tracking;
 
 import com.sap.sailing.domain.common.Bearing;
-import com.sap.sailing.domain.common.TimePoint;
+import com.sap.sse.common.TimePoint;
 
 /**
  * When comprehensive calculations are prone to query a leg's bearing several times for the same leg for

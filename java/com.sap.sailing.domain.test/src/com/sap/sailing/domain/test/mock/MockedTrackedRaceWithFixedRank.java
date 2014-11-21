@@ -12,7 +12,7 @@ import com.sap.sailing.domain.base.RaceDefinition;
 import com.sap.sailing.domain.base.Waypoint;
 import com.sap.sailing.domain.base.impl.CourseImpl;
 import com.sap.sailing.domain.common.NoWindException;
-import com.sap.sailing.domain.common.TimePoint;
+import com.sap.sse.common.TimePoint;
 
 public class MockedTrackedRaceWithFixedRank extends MockedTrackedRace {
     private static final long serialVersionUID = -8587203762630194172L;

@@ -4,12 +4,12 @@ import java.io.Serializable;
 import java.util.Collections;
 
 import com.sap.sailing.domain.base.Competitor;
-import com.sap.sailing.domain.common.TimePoint;
-import com.sap.sailing.domain.common.WithID;
 import com.sap.sailing.domain.racelog.RaceLogEventAuthor;
 import com.sap.sailing.domain.racelog.impl.RaceLogEventImpl;
 import com.sap.sailing.domain.racelog.tracking.DeviceIdentifier;
 import com.sap.sailing.domain.racelog.tracking.DeviceMappingEvent;
+import com.sap.sse.common.TimePoint;
+import com.sap.sse.common.WithID;
 
 public abstract class AbstractDeviceMappingEventImpl<ItemType extends WithID> extends RaceLogEventImpl implements
 DeviceMappingEvent<ItemType> {

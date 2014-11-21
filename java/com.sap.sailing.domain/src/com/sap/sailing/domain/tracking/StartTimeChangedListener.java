@@ -3,7 +3,7 @@ package com.sap.sailing.domain.tracking;
 import java.io.IOException;
 import java.net.MalformedURLException;
 
-import com.sap.sailing.domain.common.TimePoint;
+import com.sap.sse.common.TimePoint;
 
 
 public interface StartTimeChangedListener {

@@ -4,10 +4,10 @@ import java.io.Serializable;
 import java.util.List;
 
 import com.sap.sailing.domain.base.Competitor;
-import com.sap.sailing.domain.common.TimePoint;
 import com.sap.sailing.domain.racelog.CompetitorResults;
 import com.sap.sailing.domain.racelog.RaceLogEventAuthor;
 import com.sap.sailing.domain.racelog.RaceLogFinishPositioningEvent;
+import com.sap.sse.common.TimePoint;
 
 public abstract class RaceLogFinishPositioningEventImpl extends RaceLogEventImpl implements RaceLogFinishPositioningEvent {
 

@@ -10,9 +10,9 @@ import java.util.List;
 import java.util.TimeZone;
 
 import com.sap.sailing.domain.common.ManeuverType;
-import com.sap.sailing.domain.common.TimePoint;
-import com.sap.sailing.domain.common.impl.MillisecondsTimePoint;
 import com.sap.sailing.domain.tracking.Maneuver;
+import com.sap.sse.common.TimePoint;
+import com.sap.sse.common.impl.MillisecondsTimePoint;
 
 public abstract class AbstractManeuverDetectionTestCase extends OnlineTracTracBasedTest {
     protected SimpleDateFormat dateFormat;

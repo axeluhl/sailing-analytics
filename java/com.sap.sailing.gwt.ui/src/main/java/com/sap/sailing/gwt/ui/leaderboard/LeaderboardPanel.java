@@ -169,7 +169,6 @@ public class LeaderboardPanel extends SimplePanel implements TimeListener, PlayS
     private final SelectionCheckboxColumn<LeaderboardRowDTO> selectionCheckboxColumn;
 
     private final EditMarkPassingsPanel markPassingsPanel;
-    
 
     /**
      * Passed to the {@link ManeuverCountRaceColumn}. Modifications to this list will modify the column's children list
@@ -1715,19 +1714,22 @@ public class LeaderboardPanel extends SimplePanel implements TimeListener, PlayS
         leaderboardTable.setSelectionModel(leaderboardSelectionModel, selectionCheckboxColumn.getSelectionManager());
         setShowAddedScores(settings.isShowAddedScores());
         setShowOverallColumnWithNumberOfRacesCompletedPerCompetitor(settings.isShowOverallColumnWithNumberOfRacesCompletedPerCompetitor());
+        // the mark passings panel needs to be created before createToolbarPanel and before loadCompleteLeaderboard(...), but added after the information panel
+        if (preSelectedRace != null) {
+            markPassingsPanel = new EditMarkPassingsPanel(sailingService, asyncActionsExecutor, preSelectedRace,
+                    stringMessages, competitorSelectionProvider, errorReporter, timer);
+        } else {
+            markPassingsPanel = null;
+        }
         if (timer.isInitialized()) {
             loadCompleteLeaderboard(getLeaderboardDisplayDate());
         }
 
         contentPanel = new VerticalPanel();
         contentPanel.setStyleName(STYLE_LEADERBOARD_CONTENT);
-        
         busyIndicator = new SimpleBusyIndicator(false, 0.8f);
         busyIndicator.ensureDebugId("BusyIndicator");
         
-        // the mark passings panel
-        markPassingsPanel = new EditMarkPassingsPanel(sailingService, asyncActionsExecutor, preSelectedRace, stringMessages,
-                competitorSelectionProvider, errorReporter, timer);
 
         // the information panel
         if (!isEmbedded) {
@@ -1745,8 +1747,10 @@ public class LeaderboardPanel extends SimplePanel implements TimeListener, PlayS
             });
             this.competitorFilterPanel = competitorSearchTextBox;
         }
-        contentPanel.add(markPassingsPanel);
-        contentPanel.add(markPassingsPanel.getEditButton());
+        if (markPassingsPanel != null) {
+            contentPanel.add(markPassingsPanel);
+            contentPanel.add(markPassingsPanel.getEditButton());
+        }
         SortedCellTable<LeaderboardRowDTO> leaderboardTable = getLeaderboardTable();
         leaderboardTable.getElement().getStyle().setMarginTop(5, Unit.PX);
         filterControlPanel = new HorizontalPanel();
@@ -1812,7 +1816,9 @@ public class LeaderboardPanel extends SimplePanel implements TimeListener, PlayS
 
         refreshAndSettingsPanel.add(refreshPanel);
         toolbarPanel.add(refreshAndSettingsPanel, DockPanel.EAST);
-        contentPanel.add(markPassingsPanel.getEditButton());
+        if (markPassingsPanel != null) {
+            contentPanel.add(markPassingsPanel.getEditButton());
+        }
         return toolbarPanel;
     }
 
@@ -2196,7 +2202,9 @@ public class LeaderboardPanel extends SimplePanel implements TimeListener, PlayS
             }
             raceColumnSelection.autoUpdateRaceColumnSelectionForUpdatedLeaderboard(getLeaderboard(), leaderboard);
             setLeaderboard(leaderboard);
-            markPassingsPanel.setLeaderboard(leaderboard);
+            if (markPassingsPanel != null) {
+                markPassingsPanel.setLeaderboard(leaderboard);
+            }
             adjustColumnLayout(leaderboard);
             updateRaceColumnDTOsToRaceColumns(leaderboard);
             for (RaceColumn<?> columnToCollapseAndExpandAgain : columnsToCollapseAndExpandAgain) {
