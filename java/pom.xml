@@ -31,6 +31,7 @@
 		<module>com.sap.sse.operationaltransformation</module>
 		<module>com.sap.sse.operationaltransformation.test</module>
 		<module>com.sap.sse.replication</module>
+		<module>com.sap.sse.replication.testsupport</module>
 		<module>com.sap.sse.common.test</module>
 		<module>com.sap.sailing.domain.common</module>
 		<module>com.sap.sailing.domain.shared.android</module>

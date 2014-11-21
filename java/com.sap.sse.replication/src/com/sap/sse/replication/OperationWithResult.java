@@ -24,4 +24,18 @@ public interface OperationWithResult<S, R> extends Operation<S>, Serializable {
      * returned.
      */
     R internalApplyTo(S toState) throws Exception;
+
+    /**
+     * Ignores the actual result of {@link #internalApplyTo(Object)} and returns <code>toState</code> which
+     * for the operational transformation algorithm is the "next state reached."
+     */
+    @Override
+    default S applyTo(S toState) {
+        try {
+            internalApplyTo(toState);
+            return toState;
+        } catch (Exception e) {
+            throw new RuntimeException(e);
+        }
+    }
 }

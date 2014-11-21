@@ -54,7 +54,11 @@ public abstract class AbstractServerReplicationTest<ReplicableInterface extends 
 
     /**
      * Sets up master and replica, starts the JMS message broker and registers the replica with the master. If you want
-     * to drop the DB in your particular test case first, override {@link #persistenceSetUp(boolean)}.
+     * to drop the DB in your particular test case first, override {@link #persistenceSetUp(boolean)}. If you don't want
+     * replication to start right away for your test, override this method, execute only {@link #basicSetUp(boolean, Replicable, Replicable)},
+     * do what you need to do and then explicitly call {@link ReplicationServiceTestImpl#startToReplicateFrom(ReplicationMasterDescriptor)}
+     * or {@link ReplicationServiceTestImpl#startToReplicateFromButDontYetFetchInitialLoad(ReplicationMasterDescriptor, boolean)}
+     * on the first component returned by {@link #basicSetUp(boolean, Replicable, Replicable)}.
      */
     @Before
     public void setUp() throws Exception {

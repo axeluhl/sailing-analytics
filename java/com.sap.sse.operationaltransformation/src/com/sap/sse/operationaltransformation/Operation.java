@@ -20,6 +20,11 @@ public interface Operation<S> extends Cloneable {
     
     /**
      * Tells if this operation needs to be executed in order with other operations requesting synchronous execution.
+     * This default implementation returns <code>true</code> which is safe but may be slower and using less concurrency
+     * than possible. Implementations may make the assertion that parallel execution will do no harm by overriding this
+     * method, returning <code>true</code>.
      */
-    boolean requiresSynchronousExecution();
+    default boolean requiresSynchronousExecution() {
+        return true;
+    }
 }
