@@ -13,7 +13,7 @@
         <attribute name="endDate" optional="YES" attributeType="Date" syncable="YES"/>
         <attribute name="eventId" optional="YES" attributeType="String" indexed="YES" syncable="YES"/>
         <attribute name="imageUrl" optional="YES" attributeType="String" syncable="YES"/>
-        <attribute name="lastGpsSendDate" optional="YES" attributeType="Date" syncable="YES"/>
+        <attribute name="lastSyncDate" optional="YES" attributeType="Date" syncable="YES"/>
         <attribute name="name" optional="YES" attributeType="String" syncable="YES"/>
         <attribute name="serverUrl" optional="YES" attributeType="String" syncable="YES"/>
         <attribute name="startDate" optional="YES" attributeType="Date" syncable="YES"/>

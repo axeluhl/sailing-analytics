@@ -127,7 +127,7 @@ class APIManager: NSObject {
     }
     
     /* Send GPS location to server. Delete row from cache. */
-    func postGPSFixes(deviceUuid: String!, gpsFixes: [GPSFix]!) {
+    func postGPSFixes(deviceUuid: String!, gpsFixes: [GPSFix]!, success: (AFHTTPRequestOperation!, AnyObject!) -> Void, failure: (AFHTTPRequestOperation!, AnyObject!) -> Void) {
         if gpsFixes.count == 0 {
             return
         }
@@ -142,17 +142,7 @@ class APIManager: NSObject {
         }
         body["fixes"] = array
         
-        manager!.POST(urlString, parameters: array,
-            success: { (AFHTTPRequestOperation operation, AnyObject responseObject) -> Void in
-                // delete GPS fixes from database
-                println("sent GPS fixes")
-                for gpsFix in gpsFixes {
-                    gpsFix.event.lastGpsSendDate = NSDate()
-                    DataManager.sharedManager.managedObjectContext!.deleteObject(gpsFix)
-                }
-            }, failure: { (AFHTTPRequestOperation operation, NSError error) -> Void in
-                println("error sending GPS fixes")
-        })
+        manager!.POST(urlString, parameters: array, success: success, failure: failure)
     }
     
 }

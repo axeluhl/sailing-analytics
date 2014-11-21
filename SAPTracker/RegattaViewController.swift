@@ -80,8 +80,8 @@ class RegattaViewController : UIViewController, UIActionSheetDelegate, UINavigat
     }
 
     private func showLastSync() {
-        if DataManager.sharedManager.selectedEvent!.lastGpsSendDate != nil {
-            lastSyncLabel.text = "Last sync: " + dateFormatter.stringFromDate(DataManager.sharedManager.selectedEvent!.lastGpsSendDate!)
+        if DataManager.sharedManager.selectedEvent!.lastSyncDate != nil {
+            lastSyncLabel.text = "Last sync: " + dateFormatter.stringFromDate(DataManager.sharedManager.selectedEvent!.lastSyncDate!)
         } else {
             lastSyncLabel.text = nil
         }

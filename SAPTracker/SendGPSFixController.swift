@@ -10,6 +10,10 @@ import Foundation
 
 class SendGPSFixController: NSObject {
     
+    struct NotificationType {
+        static let GpsFixesSynced = "GpsFixesSynced"
+    }
+    
     private struct SyncPeriod {
         /* Normal rate of upload is every 3s */
         static let Normal: NSTimeInterval = 3
@@ -75,7 +79,18 @@ class SendGPSFixController: NSObject {
     func sendGPSFixes(serverUrl: String, gpsFixes:[GPSFix]) {
         APIManager.sharedManager.initManager(serverUrl)
         if APIManager.sharedManager.networkAvailable {
-            APIManager.sharedManager.postGPSFixes(DeviceUDIDManager.UDID, gpsFixes: gpsFixes)
+            APIManager.sharedManager.postGPSFixes(DeviceUDIDManager.UDID, gpsFixes: gpsFixes,
+                success: { (AFHTTPRequestOperation operation, AnyObject competitorResponseObject) -> Void in
+                    println("sent GPS fixes")
+                    for gpsFix in gpsFixes {
+                        DataManager.sharedManager.managedObjectContext!.deleteObject(gpsFix)
+                    }
+                    let notification = NSNotification(name: NotificationType.GpsFixesSynced, object: self)
+                    NSNotificationQueue.defaultQueue().enqueueNotification(notification, postingStyle: NSPostingStyle.PostASAP)
+                },
+                failure: { (AFHTTPRequestOperation operation, NSError error) -> Void in
+                    println("error sending GPS fixes")
+            })
         }
     }
     

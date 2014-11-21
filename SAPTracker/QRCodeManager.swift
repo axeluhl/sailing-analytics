@@ -122,6 +122,7 @@ class QRCodeManager: NSObject, UIAlertViewDelegate {
                 var event = DataManager.sharedManager.event(self.qrcodeData!.eventId!)
                 event.serverUrl = self.qrcodeData!.serverUrl!
                 event.initWithDictionary(self.eventDictionary!)
+                event.lastSyncDate = NSDate()
                 var leaderBoard = DataManager.sharedManager.leaderBoard(event)
                 leaderBoard.initWithDictionary(self.leaderBoardDictionary!)
                 var competitor = DataManager.sharedManager.competitor(leaderBoard)
