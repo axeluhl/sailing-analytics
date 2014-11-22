@@ -19,8 +19,6 @@
 				<artifactId>tycho-p2-extras-plugin</artifactId>
 				<version>${tycho-version}</version>
 				<configuration>
-					<artifactRepositoryLocation>${basedir}/gen/p2</artifactRepositoryLocation>
-					<metadataRepositoryLocation>${basedir}/gen/p2</metadataRepositoryLocation>
 					<sourceLocation>${basedir}</sourceLocation>
 				</configuration>
 			</plugin>
