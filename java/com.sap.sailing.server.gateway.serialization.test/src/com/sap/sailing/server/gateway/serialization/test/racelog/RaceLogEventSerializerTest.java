@@ -9,10 +9,10 @@ import org.junit.Before;
 import org.junit.Test;
 
 import com.sap.sailing.domain.abstractlog.AbstractLogEventAuthor;
+import com.sap.sailing.domain.abstractlog.impl.AbstractLogEventAuthorImpl;
 import com.sap.sailing.domain.abstractlog.race.RaceLogEvent;
 import com.sap.sailing.domain.abstractlog.race.RaceLogEventFactory;
 import com.sap.sailing.domain.abstractlog.race.RaceLogEventRestoreFactory;
-import com.sap.sailing.domain.abstractlog.race.impl.RaceLogEventAuthorImpl;
 import com.sap.sailing.domain.base.DomainFactory;
 import com.sap.sailing.domain.common.racelog.RaceLogRaceStatus;
 import com.sap.sailing.domain.common.racelog.RacingProcedureType;
@@ -48,7 +48,7 @@ public class RaceLogEventSerializerTest {
     private JsonSerializer<RaceLogEvent> additionalScoringInformationSerializer;
 
     private RaceLogEventFactory factory;
-    private AbstractLogEventAuthor author = new RaceLogEventAuthorImpl("Test Author", 1);
+    private AbstractLogEventAuthor author = new AbstractLogEventAuthorImpl("Test Author", 1);
 
     @SuppressWarnings("unchecked")
     @Before

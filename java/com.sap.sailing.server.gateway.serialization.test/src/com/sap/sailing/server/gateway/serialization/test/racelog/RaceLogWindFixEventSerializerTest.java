@@ -8,9 +8,9 @@ import org.junit.Before;
 import org.junit.Test;
 
 import com.sap.sailing.domain.abstractlog.AbstractLogEventAuthor;
+import com.sap.sailing.domain.abstractlog.impl.AbstractLogEventAuthorImpl;
 import com.sap.sailing.domain.abstractlog.race.RaceLogEventFactory;
 import com.sap.sailing.domain.abstractlog.race.RaceLogWindFixEvent;
-import com.sap.sailing.domain.abstractlog.race.impl.RaceLogEventAuthorImpl;
 import com.sap.sailing.domain.base.DomainFactory;
 import com.sap.sailing.domain.base.SharedDomainFactory;
 import com.sap.sailing.domain.common.Bearing;
@@ -43,7 +43,7 @@ public class RaceLogWindFixEventSerializerTest {
     private RaceLogWindFixEventDeserializer deserializer;
     private RaceLogWindFixEvent event;
     private TimePoint now;
-    private AbstractLogEventAuthor author = new RaceLogEventAuthorImpl("Test Author", 1);
+    private AbstractLogEventAuthor author = new AbstractLogEventAuthorImpl("Test Author", 1);
     
     @Before
     public void setUp() {

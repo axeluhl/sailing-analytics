@@ -14,9 +14,9 @@ import org.junit.Before;
 import org.junit.Test;
 
 import com.sap.sailing.domain.abstractlog.AbstractLogEventAuthor;
+import com.sap.sailing.domain.abstractlog.impl.AbstractLogEventAuthorImpl;
 import com.sap.sailing.domain.abstractlog.race.RaceLog;
 import com.sap.sailing.domain.abstractlog.race.RaceLogEventFactory;
-import com.sap.sailing.domain.abstractlog.race.impl.RaceLogEventAuthorImpl;
 import com.sap.sailing.domain.abstractlog.race.impl.RaceLogImpl;
 import com.sap.sailing.domain.abstractlog.race.impl.RaceLogStartProcedureChangedEventImpl;
 import com.sap.sailing.domain.abstractlog.race.state.RaceState;
@@ -54,7 +54,7 @@ public class RaceStateTest {
     @Before
     public void setUp() {
         raceLog = new RaceLogImpl("test-log");
-        author = new RaceLogEventAuthorImpl("Test", 1);
+        author = new AbstractLogEventAuthorImpl("Test", 1);
         factory = RaceLogEventFactory.INSTANCE;
         defaultRacingProcedureType = RacingProcedureType.RRS26;
         configuration = new EmptyRegattaConfiguration();

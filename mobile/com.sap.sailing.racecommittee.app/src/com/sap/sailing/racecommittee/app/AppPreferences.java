@@ -12,7 +12,7 @@ import android.preference.PreferenceManager;
 import android.provider.Settings.Secure;
 
 import com.sap.sailing.domain.abstractlog.AbstractLogEventAuthor;
-import com.sap.sailing.domain.abstractlog.race.impl.RaceLogEventAuthorImpl;
+import com.sap.sailing.domain.abstractlog.impl.AbstractLogEventAuthorImpl;
 import com.sap.sailing.domain.common.CourseDesignerMode;
 import com.sap.sailing.domain.common.racelog.Flags;
 import com.sap.sailing.domain.common.racelog.RacingProcedureType;
@@ -82,7 +82,7 @@ public class AppPreferences {
     public AbstractLogEventAuthor getAuthor() {
         String authorName = preferences.getString(HIDDEN_PREFERENCE_AUTHOR_NAME, "<anonymous>");
         int authorPriority = preferences.getInt(HIDDEN_PREFERENCE_AUTHOR_PRIORITY, 0);
-        return new RaceLogEventAuthorImpl(authorName, authorPriority);
+        return new AbstractLogEventAuthorImpl(authorName, authorPriority);
     }
 
     public BoatClassType getBoatClass() {

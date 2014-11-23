@@ -9,7 +9,7 @@ import org.junit.Before;
 
 import com.mongodb.MongoException;
 import com.sap.sailing.domain.abstractlog.AbstractLogEventAuthor;
-import com.sap.sailing.domain.abstractlog.race.impl.RaceLogEventAuthorImpl;
+import com.sap.sailing.domain.abstractlog.impl.AbstractLogEventAuthorImpl;
 import com.sap.sailing.domain.base.BoatClass;
 import com.sap.sailing.domain.base.CourseArea;
 import com.sap.sailing.domain.base.DomainFactory;
@@ -36,7 +36,7 @@ public abstract class AbstractTestStoringAndRetrievingRaceLogInRegatta extends R
     protected MongoObjectFactory mongoObjectFactory = null;
     protected DomainObjectFactory domainObjectFactory = null;
     protected Regatta regatta = null;
-    protected AbstractLogEventAuthor author = new RaceLogEventAuthorImpl("Test Author", 1);
+    protected AbstractLogEventAuthor author = new AbstractLogEventAuthorImpl("Test Author", 1);
 
     public AbstractTestStoringAndRetrievingRaceLogInRegatta() throws UnknownHostException, MongoException {
         super();

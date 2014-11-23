@@ -1,17 +1,17 @@
-package com.sap.sailing.domain.abstractlog.race.impl;
+package com.sap.sailing.domain.abstractlog.impl;
 
 import com.sap.sailing.domain.abstractlog.AbstractLogEventAuthor;
 import com.sap.sse.common.impl.NamedImpl;
 
-public class RaceLogEventAuthorImpl extends NamedImpl implements AbstractLogEventAuthor {
+public class AbstractLogEventAuthorImpl extends NamedImpl implements AbstractLogEventAuthor {
     private static final long serialVersionUID = -5602802911563685812L;
     private final int priority;
     
     public static AbstractLogEventAuthor createCompatibilityAuthor() {
-        return new RaceLogEventAuthorImpl(NAME_COMPATIBILITY, PRIORITY_COMPATIBILITY);
+        return new AbstractLogEventAuthorImpl(NAME_COMPATIBILITY, PRIORITY_COMPATIBILITY);
     }
     
-    public RaceLogEventAuthorImpl(String name, int priority) {
+    public AbstractLogEventAuthorImpl(String name, int priority) {
         super(name);
         this.priority = priority;
     }
