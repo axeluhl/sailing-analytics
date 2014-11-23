@@ -1,50 +1,22 @@
 package com.sap.sailing.domain.abstractlog.race.analyzing.impl;
 
+import com.sap.sailing.domain.abstractlog.AbstractLogAnalyzer;
 import com.sap.sailing.domain.abstractlog.race.RaceLog;
 import com.sap.sailing.domain.abstractlog.race.RaceLogEvent;
+import com.sap.sailing.domain.abstractlog.race.RaceLogEventVisitor;
 
-/**
- * Analyzer to perform a query over a given {@link RaceLog}. Each subclass defines its <code>ResultType</code>.
- * 
- * @param <ResultType>
- *            type of analyzation's result.
- */
-public abstract class RaceLogAnalyzer<ResultType> {
-
-    protected RaceLog raceLog;
+public abstract class RaceLogAnalyzer<ResultType> extends AbstractLogAnalyzer
+<RaceLog, RaceLogEvent, RaceLogEventVisitor, ResultType> {
 
     public RaceLogAnalyzer(RaceLog raceLog) {
-        this.raceLog = raceLog;
+        super(raceLog);
     }
-
-    public RaceLog getRaceLog() {
-        return raceLog;
-    }
-
-    public ResultType analyze() {
-        raceLog.lockForRead();
-        try {
-            return performAnalysis();
-        } finally {
-            raceLog.unlockAfterRead();
-        }
-    }
-
-    protected abstract ResultType performAnalysis();
 
     protected Iterable<RaceLogEvent> getPassEvents() {
-        return raceLog.getFixes();
+        return log.getFixes();
     }
-
-    protected Iterable<RaceLogEvent> getAllEvents() {
-        return raceLog.getRawFixes();
-    }
-
+        
     protected Iterable<RaceLogEvent> getPassEventsDescending() {
-        return raceLog.getFixesDescending();
-    }
-
-    protected Iterable<RaceLogEvent> getAllEventsDescending() {
-        return raceLog.getRawFixesDescending();
+        return log.getFixesDescending();
     }
 }

@@ -65,7 +65,7 @@ public class DeviceMappingFinder<ItemT extends WithID> extends RaceLogAnalyzer<M
         Map<ItemT, List<DeviceMapping<ItemT>>> mappings = new HashMap<ItemT, List<DeviceMapping<ItemT>>>();
         Map<Serializable, CloseOpenEndedDeviceMappingEvent> closingEvents = new HashMap<Serializable, CloseOpenEndedDeviceMappingEvent>();
 
-        for (RaceLogEvent e : raceLog.getUnrevokedEvents()) {
+        for (RaceLogEvent e : getLog().getUnrevokedEvents()) {
             if (e instanceof DeviceMappingEvent && isValidMapping(((DeviceMappingEvent<?>) e))) {
                 @SuppressWarnings("unchecked")
                 DeviceMappingEvent<ItemT> mappingEvent = (DeviceMappingEvent<ItemT>) e;

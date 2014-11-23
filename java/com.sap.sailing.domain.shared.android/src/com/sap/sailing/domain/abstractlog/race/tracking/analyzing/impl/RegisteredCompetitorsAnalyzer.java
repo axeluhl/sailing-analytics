@@ -25,7 +25,7 @@ public class RegisteredCompetitorsAnalyzer extends RaceLogAnalyzer<Set<Competito
     protected Set<Competitor> performAnalysis() {
         Set<Competitor> result = new HashSet<Competitor>();
 
-        for (RaceLogEvent event : getRaceLog().getUnrevokedEvents()) {
+        for (RaceLogEvent event : getLog().getUnrevokedEvents()) {
             if (event instanceof RegisterCompetitorEvent) {
                 result.add(((RegisterCompetitorEvent) event).getCompetitor());
             }

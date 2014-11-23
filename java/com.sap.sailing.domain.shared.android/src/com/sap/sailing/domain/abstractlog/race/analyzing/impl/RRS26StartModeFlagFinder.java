@@ -29,7 +29,7 @@ public class RRS26StartModeFlagFinder extends RaceLogAnalyzer<Flags> {
     
     public RRS26StartModeFlagFinder(RacingProcedureTypeAnalyzer procedureAnalyzer, RaceLog raceLog, List<Flags> startModeFlags) {
         super(raceLog);
-        if (raceLog != procedureAnalyzer.getRaceLog()) {
+        if (raceLog != procedureAnalyzer.getLog()) {
             throw new IllegalArgumentException("Both analyzers must operate on the same race log.");
         }
         this.procedureAnalyzer = procedureAnalyzer;

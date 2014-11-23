@@ -16,7 +16,7 @@ public class LastPingMappingEventFinder<T extends WithID> extends RaceLogAnalyze
 
     @Override
     protected DeviceMappingEvent<T> performAnalysis() {
-        for (RaceLogEvent e : raceLog.getUnrevokedEventsDescending()) {
+        for (RaceLogEvent e : getLog().getUnrevokedEventsDescending()) {
             if (e instanceof DeviceMappingEvent) {
                 DeviceMappingEvent<?> mappingEvent = (DeviceMappingEvent<?>) e;
                 if (item.equals(mappingEvent.getMappedTo()) && mappingEvent.getFrom() != null &&

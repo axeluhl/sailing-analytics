@@ -38,10 +38,10 @@ public class OpenEndedDeviceMappingCloser extends RaceLogAnalyzer<List<CloseOpen
         List<CloseOpenEndedDeviceMappingEvent> result = new ArrayList<CloseOpenEndedDeviceMappingEvent>();
 
         for (Serializable eventId : mapping.getOriginalRaceLogEventIds()) {
-            DeviceMappingEvent<?> event = (DeviceMappingEvent<?>) raceLog.getEventById(eventId);
+            DeviceMappingEvent<?> event = (DeviceMappingEvent<?>) getLog().getEventById(eventId);
             if (event.getFrom() == null || event.getTo() == null) {
                 result.add(RaceLogEventFactory.INSTANCE.createCloseOpenEndedDeviceMappingEvent(
-                        MillisecondsTimePoint.now(), author, raceLog.getCurrentPassId(), event.getId(), closingTimePoint));
+                        MillisecondsTimePoint.now(), author, getLog().getCurrentPassId(), event.getId(), closingTimePoint));
             }
         }
         return result;

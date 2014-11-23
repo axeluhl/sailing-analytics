@@ -47,7 +47,7 @@ public class AdditionalScoringInformationFinder extends RaceLogAnalyzer<List<Add
     protected List<AdditionalScoringInformationEvent> performAnalysis() {
         final List<AdditionalScoringInformationEvent> result = new ArrayList<AdditionalScoringInformationEvent>();
         // fetch all unrevoked events starting with newest going to oldest
-        for (RaceLogEvent event : getRaceLog().getUnrevokedEventsDescending()) {
+        for (RaceLogEvent event : getLog().getUnrevokedEventsDescending()) {
             if (event instanceof AdditionalScoringInformationEvent) {
                 result.add((AdditionalScoringInformationEvent) event);
             }

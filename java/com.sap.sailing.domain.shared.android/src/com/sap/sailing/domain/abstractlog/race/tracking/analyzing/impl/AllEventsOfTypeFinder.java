@@ -25,7 +25,7 @@ public class AllEventsOfTypeFinder extends RaceLogAnalyzer<List<RaceLogEvent>> {
     @Override
     protected List<RaceLogEvent> performAnalysis() {
         List<RaceLogEvent> result = new ArrayList<RaceLogEvent>();
-        Iterable<RaceLogEvent> set = onlyUnrevoked ? raceLog.getUnrevokedEventsDescending() : getAllEventsDescending();
+        Iterable<RaceLogEvent> set = onlyUnrevoked ? getLog().getUnrevokedEventsDescending() : getAllEventsDescending();
         for (RaceLogEvent event : set) {
             if (ofType.isAssignableFrom(event.getClass())) {
                 result.add(event);
