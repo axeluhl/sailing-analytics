@@ -8,7 +8,7 @@ import com.sap.sailing.domain.abstractlog.race.RaceLogEventVisitor;
 import com.sap.sailing.domain.abstractlog.race.impl.RaceLogEventImpl;
 import com.sap.sailing.domain.abstractlog.race.tracking.RegisterCompetitorEvent;
 import com.sap.sailing.domain.base.Competitor;
-import com.sap.sailing.domain.common.TimePoint;
+import com.sap.sse.common.TimePoint;
 
 public class RegisterCompetitorEventImpl extends RaceLogEventImpl implements RegisterCompetitorEvent {
     private static final long serialVersionUID = -30864810737555657L;

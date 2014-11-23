@@ -36,13 +36,11 @@ import com.sap.sailing.domain.base.Course;
 import com.sap.sailing.domain.base.DomainFactory;
 import com.sap.sailing.domain.base.Fleet;
 import com.sap.sailing.domain.base.Leg;
-import com.sap.sailing.domain.base.Mark;
 import com.sap.sailing.domain.base.RaceColumn;
 import com.sap.sailing.domain.base.RaceColumnInSeries;
 import com.sap.sailing.domain.base.RaceColumnListener;
 import com.sap.sailing.domain.base.Waypoint;
 import com.sap.sailing.domain.common.Distance;
-import com.sap.sailing.domain.common.Duration;
 import com.sap.sailing.domain.common.LegType;
 import com.sap.sailing.domain.common.ManeuverType;
 import com.sap.sailing.domain.common.MaxPointsReason;
@@ -52,8 +50,6 @@ import com.sap.sailing.domain.common.RegattaAndRaceIdentifier;
 import com.sap.sailing.domain.common.RegattaNameAndRaceName;
 import com.sap.sailing.domain.common.Speed;
 import com.sap.sailing.domain.common.SpeedWithBearing;
-import com.sap.sailing.domain.common.TimePoint;
-import com.sap.sailing.domain.common.WindSource;
 import com.sap.sailing.domain.common.dto.CompetitorDTO;
 import com.sap.sailing.domain.common.dto.FleetDTO;
 import com.sap.sailing.domain.common.dto.LeaderboardDTO;
@@ -61,7 +57,6 @@ import com.sap.sailing.domain.common.dto.LeaderboardEntryDTO;
 import com.sap.sailing.domain.common.dto.LeaderboardRowDTO;
 import com.sap.sailing.domain.common.dto.LegEntryDTO;
 import com.sap.sailing.domain.common.dto.RaceDTO;
-import com.sap.sailing.domain.common.impl.MillisecondsTimePoint;
 import com.sap.sailing.domain.leaderboard.Leaderboard;
 import com.sap.sailing.domain.leaderboard.NumberOfCompetitorsInLeaderboardFetcher;
 import com.sap.sailing.domain.leaderboard.ResultDiscardingRule;
@@ -72,7 +67,6 @@ import com.sap.sailing.domain.leaderboard.caching.LeaderboardDTOCache;
 import com.sap.sailing.domain.leaderboard.caching.LeaderboardDTOCalculationReuseCache;
 import com.sap.sailing.domain.leaderboard.caching.LiveLeaderboardUpdater;
 import com.sap.sailing.domain.racelog.RaceLogIdentifier;
-import com.sap.sailing.domain.tracking.GPSFix;
 import com.sap.sailing.domain.tracking.GPSFixMoving;
 import com.sap.sailing.domain.tracking.GPSFixTrack;
 import com.sap.sailing.domain.tracking.Maneuver;
@@ -82,16 +76,18 @@ import com.sap.sailing.domain.tracking.RaceChangeListener;
 import com.sap.sailing.domain.tracking.TrackedLeg;
 import com.sap.sailing.domain.tracking.TrackedLegOfCompetitor;
 import com.sap.sailing.domain.tracking.TrackedRace;
-import com.sap.sailing.domain.tracking.TrackedRaceStatus;
 import com.sap.sailing.domain.tracking.TrackedRegattaRegistry;
-import com.sap.sailing.domain.tracking.Wind;
 import com.sap.sailing.domain.tracking.WindLegTypeAndLegBearingCache;
 import com.sap.sailing.domain.tracking.WindPositionMode;
+import com.sap.sailing.domain.tracking.impl.AbstractRaceChangeListener;
 import com.sap.sailing.util.impl.LockUtil;
 import com.sap.sailing.util.impl.NamedReentrantReadWriteLock;
 import com.sap.sailing.util.impl.RaceColumnListeners;
-import com.sap.sailing.util.impl.ThreadFactoryWithPriority;
+import com.sap.sse.common.Duration;
+import com.sap.sse.common.TimePoint;
 import com.sap.sse.common.Util;
+import com.sap.sse.common.impl.MillisecondsTimePoint;
+import com.sap.sse.util.impl.ThreadFactoryWithPriority;
 
 /**
  * Base implementation for various types of leaderboards. The {@link RaceColumnListener} implementation forwards events
@@ -262,13 +258,14 @@ public abstract class AbstractSimpleLeaderboardImpl implements Leaderboard, Race
     }
 
     /**
-     * Handles the invalidation of the {@link SailingServiceImpl#raceDetailsAtEndOfTrackingCache} entries if the tracked race
-     * changes in any way.
+     * Handles the invalidation of the {@link SailingServiceImpl#raceDetailsAtEndOfTrackingCache} entries if the tracked
+     * race changes in any way. In particular, for {@link #statusChanged}, when the status changes away from LOADING,
+     * calculations may start or resume, making it necessary to clear the cache.
      * 
      * @author Axel Uhl (D043530)
      *
      */
-    private class CacheInvalidationListener implements RaceChangeListener {
+    private class CacheInvalidationListener extends AbstractRaceChangeListener {
         private final TrackedRace trackedRace;
         private final Competitor competitor;
 
@@ -291,76 +288,9 @@ public abstract class AbstractSimpleLeaderboardImpl implements Leaderboard, Race
                 removeFromTrackedRace();
             }
         }
-
+        
         @Override
-        public void competitorPositionChanged(GPSFixMoving fix, Competitor competitor) {
-            invalidateCacheAndRemoveThisListenerFromTrackedRace();
-        }
-
-        @Override
-        public void waypointAdded(int zeroBasedIndex, Waypoint waypointThatGotAdded) {
-            invalidateCacheAndRemoveThisListenerFromTrackedRace();
-        }
-
-        @Override
-        public void waypointRemoved(int zeroBasedIndex, Waypoint waypointThatGotRemoved) {
-            invalidateCacheAndRemoveThisListenerFromTrackedRace();
-        }
-
-        @Override
-        public void statusChanged(TrackedRaceStatus newStatus) {
-            // when the status changes away from LOADING, calculations may start or resume, making it necessary to clear the cache
-            invalidateCacheAndRemoveThisListenerFromTrackedRace();
-        }
-
-        @Override
-        public void markPositionChanged(GPSFix fix, Mark mark, boolean firstInTrack) {
-            invalidateCacheAndRemoveThisListenerFromTrackedRace();
-        }
-
-        @Override
-        public void markPassingReceived(Competitor competitor, Map<Waypoint, MarkPassing> oldMarkPassings,
-                Iterable<MarkPassing> markPassings) {
-            invalidateCacheAndRemoveThisListenerFromTrackedRace();
-        }
-
-        @Override
-        public void speedAveragingChanged(long oldMillisecondsOverWhichToAverage, long newMillisecondsOverWhichToAverage) {
-            invalidateCacheAndRemoveThisListenerFromTrackedRace();
-        }
-
-        @Override
-        public void windDataReceived(Wind wind, WindSource windSource) {
-            invalidateCacheAndRemoveThisListenerFromTrackedRace();
-        }
-
-        @Override
-        public void windDataRemoved(Wind wind, WindSource windSource) {
-            invalidateCacheAndRemoveThisListenerFromTrackedRace();
-        }
-
-        @Override
-        public void windAveragingChanged(long oldMillisecondsOverWhichToAverage, long newMillisecondsOverWhichToAverage) {
-            invalidateCacheAndRemoveThisListenerFromTrackedRace();
-        }
-
-        @Override
-        public void raceTimesChanged(TimePoint startOfTracking, TimePoint endOfTracking, TimePoint startTimeReceived) {
-            invalidateCacheAndRemoveThisListenerFromTrackedRace();
-        }
-
-        @Override
-        public void startOfRaceChanged(TimePoint oldStartOfRace, TimePoint newStartOfRace) {
-            invalidateCacheAndRemoveThisListenerFromTrackedRace();
-        }
-
-        @Override
-        public void delayToLiveChanged(long delayToLiveInMillis) {
-            invalidateCacheAndRemoveThisListenerFromTrackedRace();
-        }
-
-        @Override
-        public void windSourcesToExcludeChanged(Iterable<? extends WindSource> windSourcesToExclude) {
+        protected void defaultAction() {
             invalidateCacheAndRemoveThisListenerFromTrackedRace();
         }
     }

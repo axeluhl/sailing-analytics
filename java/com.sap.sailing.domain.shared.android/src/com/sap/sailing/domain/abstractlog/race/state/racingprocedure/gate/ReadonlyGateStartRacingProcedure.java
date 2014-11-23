@@ -2,7 +2,7 @@ package com.sap.sailing.domain.abstractlog.race.state.racingprocedure.gate;
 
 import com.sap.sailing.domain.abstractlog.race.state.racingprocedure.ReadonlyRacingProcedure;
 import com.sap.sailing.domain.base.configuration.procedures.GateStartConfiguration;
-import com.sap.sailing.domain.common.TimePoint;
+import com.sap.sse.common.TimePoint;
 
 
 public interface ReadonlyGateStartRacingProcedure extends ReadonlyRacingProcedure {

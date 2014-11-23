@@ -17,6 +17,45 @@ It contains also some files:
  - Manifest.txt -> manifest used to create the test.jar file
  
 ********************************************
+************* TracAPI 3.0.7 ****************
+********************************************
+This is a final version. It fixes bugs in the implementation and it adds a some features. 
+These features add methods to the API, but they keep the backward compatibility. 
+This version provides a new JavaDoc version.
+
+Release date: 19/11/2014
+Build number: 9436
+
+1) New features
+
+ - The IRace interface implements the method getStartTimeType that returns the type of start time. It is an enumerated 
+ value with the values: Individual (if the competitors have an individual start time), RaceStart (if the race
+ has a race start time) and FirstControl (if the start of the race happens when the competitor passes for
+ the first control). The value by default is RaceStart. At this moment this value only can be managed at an event
+ level (in the event manager) but in a future we will add this functionality at a race level (Requested by 
+ Jérome Soussens, 14/10/2014)  
+ - The method IControlPoint.getPosition is deprecated. Use the IControlPointPositionListener.gotControlPointPosition()
+ to know the position of a control point (Reported by Jorge Piera, 28/10/2014)   
+ - Adding the isNonCompeting() method to the ICompetitor interface. If a competitor is a non competing competitor
+ doesn't receive control passings attached to it. It only receives positions (Requested by Jérome Soussens, 15/10/2014 and
+ Axel Uhl, 22/10/2014) 
+
+2) Bugs
+
+ - It checks that the system of messages doesn't generates a BufferOverflow exception. We added a bug on the server
+ sending wrong strings to the clients and this error thrown an exception on the clients that killed one of threads.
+ Now the tracapi checks if there is an error encoding the strings and in this case, logs the exeption discarding
+ the message but the thread, continues running. Anyway the error has been fixed in the server side. (Reported by 
+ Jorge Piera, 30/09/2014)   
+ - If there is a control point without coordinates the lat,lon values are not included in the parameters file
+ and the library doesn't create the IControlPoint. Now, the library creates the IControlPoint and it returns
+ the values Double.MAX_VALUE for both the lat and the lon. This position is not sent by the 
+ IControlPointPositionListener.gotControlPointPosition(). (Reported by Jakob Odum, 28/10/2014)    
+ - There is a synchronization bug registering and sending messages using the General Message System. The list
+ that is used to register the listeners is not a synchronized list. This bug has been fixed (Reported by Axel Uhl, 19/11/2014,
+ http://bugzilla.sapsailing.com/bugzilla/show_bug.cgi?id=2474)
+ 
+********************************************
 ************* TracAPI 3.0.6 ****************
 ********************************************
 This is a final version. It fixes bugs in the implementation and it adds a new feature. 

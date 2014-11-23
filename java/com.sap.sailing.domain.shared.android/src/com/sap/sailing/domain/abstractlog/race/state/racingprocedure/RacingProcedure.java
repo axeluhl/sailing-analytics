@@ -1,6 +1,6 @@
 package com.sap.sailing.domain.abstractlog.race.state.racingprocedure;
 
-import com.sap.sailing.domain.common.TimePoint;
+import com.sap.sse.common.TimePoint;
 
 /**
  * Base interface for all write-enabled {@link RacingProcedure}s.

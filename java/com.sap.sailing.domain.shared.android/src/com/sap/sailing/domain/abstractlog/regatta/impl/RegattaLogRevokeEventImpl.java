@@ -6,7 +6,7 @@ import com.sap.sailing.domain.abstractlog.AbstractLogEventAuthor;
 import com.sap.sailing.domain.abstractlog.impl.RevokeEventImpl;
 import com.sap.sailing.domain.abstractlog.regatta.RegattaLogEventVisitor;
 import com.sap.sailing.domain.abstractlog.regatta.RegattaLogRevokeEvent;
-import com.sap.sailing.domain.common.TimePoint;
+import com.sap.sse.common.TimePoint;
 
 public class RegattaLogRevokeEventImpl extends RevokeEventImpl<RegattaLogEventVisitor> implements RegattaLogRevokeEvent {
     private static final long serialVersionUID = -3470191515219206588L;

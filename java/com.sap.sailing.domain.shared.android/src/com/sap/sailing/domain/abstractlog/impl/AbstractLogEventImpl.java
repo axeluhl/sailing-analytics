@@ -4,7 +4,7 @@ import java.io.Serializable;
 
 import com.sap.sailing.domain.abstractlog.AbstractLogEvent;
 import com.sap.sailing.domain.abstractlog.AbstractLogEventAuthor;
-import com.sap.sailing.domain.common.TimePoint;
+import com.sap.sse.common.TimePoint;
 
 public abstract class AbstractLogEventImpl<VisitorT> implements AbstractLogEvent<VisitorT> {
 

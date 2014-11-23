@@ -1,7 +1,7 @@
 package com.sap.sailing.domain.abstractlog.race.state.impl;
 
 import com.sap.sailing.domain.abstractlog.race.state.RaceStateEvent;
-import com.sap.sailing.domain.common.TimePoint;
+import com.sap.sse.common.TimePoint;
 
 public class RaceStateEventImpl implements RaceStateEvent {
     

@@ -8,8 +8,8 @@ import com.sap.sailing.domain.abstractlog.race.state.RaceStateEventProcessor;
 import com.sap.sailing.domain.abstractlog.race.state.RaceStateEventScheduler;
 import com.sap.sailing.domain.abstractlog.race.state.ReadonlyRaceState;
 import com.sap.sailing.domain.base.configuration.RacingProcedureConfiguration;
-import com.sap.sailing.domain.common.TimePoint;
 import com.sap.sailing.domain.common.racelog.RacingProcedureType;
+import com.sap.sse.common.TimePoint;
 
 /**
  * Read-only interface for every racing procedure. A racing procedure defines the starting sequence of a race various

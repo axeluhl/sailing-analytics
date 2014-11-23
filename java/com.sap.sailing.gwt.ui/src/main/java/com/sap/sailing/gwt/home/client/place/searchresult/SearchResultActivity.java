@@ -42,6 +42,8 @@ public class SearchResultActivity extends AbstractActivity {
 
         view = clientFactory.createSearchResultView();
         panel.setWidget(view.asWidget());
+        Window.setTitle(searchResultPlace.getTitle());
+
         doSearch(searchResultPlace.getSearchText());
     }
 

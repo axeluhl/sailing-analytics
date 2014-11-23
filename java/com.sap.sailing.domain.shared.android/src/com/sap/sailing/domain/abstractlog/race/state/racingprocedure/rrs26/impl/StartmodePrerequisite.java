@@ -2,8 +2,8 @@ package com.sap.sailing.domain.abstractlog.race.state.racingprocedure.rrs26.impl
 
 import com.sap.sailing.domain.abstractlog.race.state.racingprocedure.RacingProcedurePrerequisite;
 import com.sap.sailing.domain.abstractlog.race.state.racingprocedure.rrs26.RRS26RacingProcedure;
-import com.sap.sailing.domain.common.TimePoint;
 import com.sap.sailing.domain.common.racelog.Flags;
+import com.sap.sse.common.TimePoint;
 
 public class StartmodePrerequisite extends BaseRRS26Prerequisite implements RacingProcedurePrerequisite {
 

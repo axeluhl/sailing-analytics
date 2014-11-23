@@ -1,8 +1,8 @@
 package com.sap.sailing.domain.persistence.media;
 
-import com.sap.sailing.domain.common.Duration;
 import com.sap.sailing.domain.common.RegattaAndRaceIdentifier;
-import com.sap.sailing.domain.common.TimePoint;
+import com.sap.sse.common.Duration;
+import com.sap.sse.common.TimePoint;
 
 public class DBMediaTrack {
     

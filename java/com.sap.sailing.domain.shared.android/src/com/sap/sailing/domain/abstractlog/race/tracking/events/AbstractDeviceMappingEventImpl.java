@@ -8,8 +8,8 @@ import com.sap.sailing.domain.abstractlog.race.impl.RaceLogEventImpl;
 import com.sap.sailing.domain.abstractlog.race.tracking.DeviceIdentifier;
 import com.sap.sailing.domain.abstractlog.race.tracking.DeviceMappingEvent;
 import com.sap.sailing.domain.base.Competitor;
-import com.sap.sailing.domain.common.TimePoint;
-import com.sap.sailing.domain.common.WithID;
+import com.sap.sse.common.TimePoint;
+import com.sap.sse.common.WithID;
 
 public abstract class AbstractDeviceMappingEventImpl<ItemType extends WithID> extends RaceLogEventImpl implements
 DeviceMappingEvent<ItemType> {

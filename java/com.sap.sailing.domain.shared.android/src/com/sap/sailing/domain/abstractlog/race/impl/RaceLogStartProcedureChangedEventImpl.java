@@ -7,8 +7,8 @@ import com.sap.sailing.domain.abstractlog.AbstractLogEventAuthor;
 import com.sap.sailing.domain.abstractlog.race.RaceLogEventVisitor;
 import com.sap.sailing.domain.abstractlog.race.RaceLogStartProcedureChangedEvent;
 import com.sap.sailing.domain.base.Competitor;
-import com.sap.sailing.domain.common.TimePoint;
 import com.sap.sailing.domain.common.racelog.RacingProcedureType;
+import com.sap.sse.common.TimePoint;
 
 public class RaceLogStartProcedureChangedEventImpl extends RaceLogEventImpl implements
         RaceLogStartProcedureChangedEvent {

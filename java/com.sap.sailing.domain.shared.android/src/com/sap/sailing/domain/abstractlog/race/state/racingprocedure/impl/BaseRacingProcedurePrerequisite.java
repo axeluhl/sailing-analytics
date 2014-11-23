@@ -2,7 +2,7 @@ package com.sap.sailing.domain.abstractlog.race.state.racingprocedure.impl;
 
 import com.sap.sailing.domain.abstractlog.race.state.racingprocedure.RacingProcedure;
 import com.sap.sailing.domain.abstractlog.race.state.racingprocedure.RacingProcedurePrerequisite;
-import com.sap.sailing.domain.common.TimePoint;
+import com.sap.sse.common.TimePoint;
 
 /**
  * Base class for all {@link RacingProcedurePrerequisite}.

@@ -1,8 +1,6 @@
 package com.sap.sailing.server;
 
 import java.io.IOException;
-import java.io.ObjectInputStream;
-import java.io.ObjectOutputStream;
 import java.io.Serializable;
 import java.net.MalformedURLException;
 import java.net.SocketException;
@@ -43,7 +41,6 @@ import com.sap.sailing.domain.common.RegattaFetcher;
 import com.sap.sailing.domain.common.RegattaIdentifier;
 import com.sap.sailing.domain.common.RegattaName;
 import com.sap.sailing.domain.common.ScoringSchemeType;
-import com.sap.sailing.domain.common.TimePoint;
 import com.sap.sailing.domain.common.media.MediaTrack;
 import com.sap.sailing.domain.common.racelog.RacingProcedureType;
 import com.sap.sailing.domain.common.racelog.tracking.TypeBasedServiceFinderFactory;
@@ -59,7 +56,6 @@ import com.sap.sailing.domain.persistence.DomainObjectFactory;
 import com.sap.sailing.domain.persistence.MongoObjectFactory;
 import com.sap.sailing.domain.racelog.tracking.GPSFixStore;
 import com.sap.sailing.domain.tracking.DynamicTrackedRace;
-import com.sap.sailing.domain.tracking.RaceListener;
 import com.sap.sailing.domain.tracking.RaceTracker;
 import com.sap.sailing.domain.tracking.TrackedRace;
 import com.sap.sailing.domain.tracking.TrackedRegatta;
@@ -67,32 +63,43 @@ import com.sap.sailing.domain.tracking.TrackedRegattaRegistry;
 import com.sap.sailing.domain.tracking.TrackerManager;
 import com.sap.sailing.domain.tracking.WindStore;
 import com.sap.sailing.server.masterdata.DataImportLockWithProgress;
+import com.sap.sse.common.TimePoint;
 import com.sap.sse.common.Util;
 import com.sap.sse.common.Util.Triple;
 import com.sap.sse.common.search.KeywordQuery;
 import com.sap.sse.common.search.Result;
 import com.sap.sse.common.search.Searchable;
+import com.sap.sse.replication.impl.ReplicableWithObjectInputStream;
 
 /**
- * An OSGi service that can be used to track boat races using a TracTrac connector that pushes
- * live GPS boat location, waypoint, coarse and mark passing data.<p>
+ * An OSGi service that can be used to track boat races using a TracTrac connector that pushes live GPS boat location,
+ * waypoint, coarse and mark passing data.
+ * <p>
  * 
  * If a race/regatta is already being tracked, another {@link #addTracTracRace(URL, URI, URI, WindStore, long)} or
- * {@link #addRegatta(URL, URI, URI, WindStore, long)} call will have no effect, even if a different
- * {@link WindStore} is requested.<p>
+ * {@link #addRegatta(URL, URI, URI, WindStore, long)} call will have no effect, even if a different {@link WindStore}
+ * is requested.
+ * <p>
  * 
- * When the tracking of a race/regatta is {@link #stopTracking(Regatta, RaceDefinition) stopped}, the next
- * time it's started to be tracked, a new {@link TrackedRace} at least will be constructed. This also
- * means that when a {@link TrackedRegatta} exists that still holds other {@link TrackedRace}s, the
- * no longer tracked {@link TrackedRace} will be removed from the {@link TrackedRegatta}.
- * corresponding information is removed also from the {@link DomainFactory}'s caches to ensure that
- * clean, fresh data is received should another tracking request be issued later.
+ * When the tracking of a race/regatta is {@link #stopTracking(Regatta, RaceDefinition) stopped}, the next time it's
+ * started to be tracked, a new {@link TrackedRace} at least will be constructed. This also means that when a
+ * {@link TrackedRegatta} exists that still holds other {@link TrackedRace}s, the no longer tracked {@link TrackedRace}
+ * will be removed from the {@link TrackedRegatta}. corresponding information is removed also from the
+ * {@link DomainFactory}'s caches to ensure that clean, fresh data is received should another tracking request be issued
+ * later.
+ * <p>
+ * 
+ * During receiving the initial load for a replication in {@link #initiallyFillFromInternal(java.io.ObjectInputStream)},
+ * tracked regattas read from the stream are observed (see {@link RaceListener}) by this object for automatic updates to
+ * the default leaderboard and for automatic linking to leaderboard columns. It is assumed that no explicit replication
+ * of these operations will happen based on the changes performed on the replication master.
  * 
  * @author Axel Uhl (d043530)
  *
  */
 public interface RacingEventService extends TrackedRegattaRegistry, RegattaFetcher, RegattaRegistry, RaceFetcher,
-        LeaderboardRegistry, EventResolver, LeaderboardGroupResolver, TrackerManager, Searchable<LeaderboardSearchResult, KeywordQuery> {
+        LeaderboardRegistry, EventResolver, LeaderboardGroupResolver, TrackerManager, Searchable<LeaderboardSearchResult, KeywordQuery>,
+        ReplicableWithObjectInputStream<RacingEventService, RacingEventServiceOperation<?>> {
     @Override
     Regatta getRegatta(RegattaName regattaName);
 
@@ -292,53 +299,6 @@ public interface RacingEventService extends TrackedRegattaRegistry, RegattaFetch
 
     void updateLeaderboardGroup(String oldName, String newName, String description, String displayName,
             List<String> leaderboardNames, int[] overallLeaderboardDiscardThresholds, ScoringSchemeType overallLeaderboardScoringSchemeType);
-
-    /**
-     * Executes an operation whose effects need to be replicated to any replica of this service known and
-     * {@link OperationExecutionListener#executed(RacingEventServiceOperation) notifies} all registered
-     * operation execution listeners about the execution of the operation.
-     */
-    <T> T apply(RacingEventServiceOperation<T> operation);
-
-    void addOperationExecutionListener(OperationExecutionListener listener);
-
-    void removeOperationExecutionListener(OperationExecutionListener listener);
-
-    /**
-     * Produces a one-shot serializable copy of those elements required for replication into <code>oos</code> so that
-     * afterwards the {@link RacingEventServiceOperation}s can be {@link #apply(RacingEventServiceOperation) applied} to
-     * maintain consistency with the master copy of the service. The dual operation is {@link #initiallyFillFrom}.
-     */
-    void serializeForInitialReplication(ObjectOutputStream oos) throws IOException;
-
-    /**
-     * Before {@link #initiallyFillFrom(ObjectInputStream) initially loading a replica's state from a master instance},
-     * the replica's old state needs to be "detached". This method clears all top-level data structures and stops all
-     * tracking currently going on.<p>
-     * 
-     * The reason this operation needs to be callable separate from {@link #initiallyFillFrom(ObjectInputStream)} is that
-     * it needs to happen before subscribing to the operation feed received from the master instance through the message bus
-     * which in turn needs to happen before receiving the initial load.
-     */
-    void clearReplicaState() throws MalformedURLException, IOException, InterruptedException;
-
-    /**
-     * Dual, reading operation for {@link #serializeForInitialReplication(ObjectOutputStream)}. In other words, when
-     * this operation returns, this service instance is in a state "equivalent" to that of the service instance that
-     * produced the stream contents in its {@link #serializeForInitialReplication(ObjectOutputStream)}. "Equivalent"
-     * here means that a replica will have equal sets of regattas, tracked regattas, leaderboards and leaderboard groups but
-     * will not have any active trackers for wind or positions because it relies on these elements to be sent through
-     * the replication channel.
-     * <p>
-     * 
-     * Tracked regattas read from the stream are observed (see {@link RaceListener}) by this object for automatic updates
-     * to the default leaderboard and for automatic linking to leaderboard columns. It is assumed that no explicit
-     * replication of these operations will happen based on the changes performed on the replication master.<p>
-     * 
-     * <b>Caution:</b> All relevant contents of this service instance needs to be cleared before by a call to
-     * {@link #clearReplicaState()}. It will be replaced by the stream contents.
-     */
-    void initiallyFillFrom(ObjectInputStream ois) throws IOException, ClassNotFoundException, InterruptedException;
 
     /**
      * @return a thread-safe copy of the events currently known by the service; it's safe for callers to iterate over

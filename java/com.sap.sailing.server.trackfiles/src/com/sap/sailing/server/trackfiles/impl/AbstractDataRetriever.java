@@ -27,10 +27,10 @@ import slash.navigation.tcx.Tcx1Format;
 import slash.navigation.tcx.Tcx2Format;
 
 import com.sap.sailing.domain.base.Timed;
-import com.sap.sailing.domain.common.TimePoint;
 import com.sap.sailing.domain.common.trackfiles.TrackFilesFormat;
 import com.sap.sailing.domain.trackimport.FormatNotSupportedException;
 import com.sap.sailing.domain.tracking.TrackedRace;
+import com.sap.sse.common.TimePoint;
 
 public abstract class AbstractDataRetriever implements DataRetriever {
 

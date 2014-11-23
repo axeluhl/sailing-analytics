@@ -2,7 +2,7 @@ package com.sap.sailing.domain.abstractlog.race.state.racingprocedure.gate.impl;
 
 import com.sap.sailing.domain.abstractlog.race.state.racingprocedure.RacingProcedurePrerequisite;
 import com.sap.sailing.domain.abstractlog.race.state.racingprocedure.gate.GateStartRacingProcedure;
-import com.sap.sailing.domain.common.TimePoint;
+import com.sap.sse.common.TimePoint;
 
 
 public class PathfinderPrerequisite extends BaseGateStartPrerequisite implements RacingProcedurePrerequisite {

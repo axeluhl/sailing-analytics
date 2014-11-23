@@ -6,7 +6,7 @@ import com.sap.sailing.domain.abstractlog.AbstractLogEventAuthor;
 import com.sap.sailing.domain.abstractlog.regatta.RegattaLogEvent;
 import com.sap.sailing.domain.abstractlog.regatta.RegattaLogEventFactory;
 import com.sap.sailing.domain.abstractlog.regatta.RegattaLogRevokeEvent;
-import com.sap.sailing.domain.common.impl.MillisecondsTimePoint;
+import com.sap.sse.common.impl.MillisecondsTimePoint;
 
 public class RegattaLogEventFactoryImpl implements RegattaLogEventFactory {
 

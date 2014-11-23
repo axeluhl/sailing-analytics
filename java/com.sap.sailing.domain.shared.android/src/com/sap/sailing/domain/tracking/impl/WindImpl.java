@@ -3,9 +3,9 @@ package com.sap.sailing.domain.tracking.impl;
 import com.sap.sailing.domain.common.Bearing;
 import com.sap.sailing.domain.common.Position;
 import com.sap.sailing.domain.common.SpeedWithBearing;
-import com.sap.sailing.domain.common.TimePoint;
 import com.sap.sailing.domain.common.impl.KnotSpeedWithBearingImpl;
 import com.sap.sailing.domain.tracking.Wind;
+import com.sap.sse.common.TimePoint;
 
 public class WindImpl extends KnotSpeedWithBearingImpl implements Wind {
     private static final long serialVersionUID = 5431592324949471980L;

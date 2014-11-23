@@ -3,7 +3,7 @@ package com.sap.sailing.domain.racelog;
 import java.util.Calendar;
 import java.util.Date;
 
-import com.sap.sailing.domain.common.TimePoint;
+import com.sap.sse.common.TimePoint;
 
 public class RaceStateOfSameDayHelper {
     

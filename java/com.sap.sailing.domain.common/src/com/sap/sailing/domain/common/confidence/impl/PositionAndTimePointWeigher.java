@@ -2,9 +2,9 @@ package com.sap.sailing.domain.common.confidence.impl;
 
 import com.sap.sailing.domain.common.Distance;
 import com.sap.sailing.domain.common.Position;
-import com.sap.sailing.domain.common.TimePoint;
 import com.sap.sailing.domain.common.confidence.ConfidenceFactory;
 import com.sap.sailing.domain.common.confidence.Weigher;
+import com.sap.sse.common.TimePoint;
 import com.sap.sse.common.Util;
 
 /**

@@ -6,7 +6,7 @@ import java.util.List;
 import com.sap.sailing.domain.abstractlog.race.tracking.analyzing.impl.DeviceMappingFinder;
 import com.sap.sailing.domain.base.Timed;
 import com.sap.sailing.domain.common.TimeRange;
-import com.sap.sailing.domain.common.WithID;
+import com.sap.sse.common.WithID;
 
 /**
  * @see DeviceMappingFinder {@code DeviceMappings} are derived from {@code DeviceMappingEvents}. The {@link Timed} interface

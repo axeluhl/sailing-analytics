@@ -7,13 +7,13 @@ import static org.junit.Assert.assertThat;
 
 import org.junit.Test;
 
-import com.sap.sailing.domain.common.Duration;
-import com.sap.sailing.domain.common.TimePoint;
-import com.sap.sailing.domain.common.impl.MillisecondsTimePoint;
 import com.sap.sailing.gwt.home.client.shared.Countdown;
 import com.sap.sailing.gwt.home.client.shared.Countdown.CountdownListener;
 import com.sap.sailing.gwt.home.client.shared.Countdown.RemainingTime;
 import com.sap.sailing.gwt.home.client.shared.Countdown.Unit;
+import com.sap.sse.common.Duration;
+import com.sap.sse.common.TimePoint;
+import com.sap.sse.common.impl.MillisecondsTimePoint;
 
 public class CountdownTest {
     

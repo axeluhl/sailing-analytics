@@ -4,7 +4,7 @@ import java.io.Serializable;
 
 import com.sap.sailing.domain.abstractlog.Revokable;
 import com.sap.sailing.domain.abstractlog.race.RaceLogEvent;
-import com.sap.sailing.domain.common.TimePoint;
+import com.sap.sse.common.TimePoint;
 
 /**
  * Closes the time range of a {@link DeviceMappingEvent}. This means that the {@link #getClosingTimePoint() timepoint} provided

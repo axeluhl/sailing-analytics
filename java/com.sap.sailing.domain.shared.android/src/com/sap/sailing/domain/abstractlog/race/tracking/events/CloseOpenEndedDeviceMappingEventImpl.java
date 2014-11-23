@@ -8,7 +8,7 @@ import com.sap.sailing.domain.abstractlog.race.RaceLogEventVisitor;
 import com.sap.sailing.domain.abstractlog.race.impl.RaceLogEventImpl;
 import com.sap.sailing.domain.abstractlog.race.tracking.CloseOpenEndedDeviceMappingEvent;
 import com.sap.sailing.domain.base.Competitor;
-import com.sap.sailing.domain.common.TimePoint;
+import com.sap.sse.common.TimePoint;
 
 public class CloseOpenEndedDeviceMappingEventImpl extends RaceLogEventImpl implements CloseOpenEndedDeviceMappingEvent {
     private static final long serialVersionUID = -2401732623610224918L;

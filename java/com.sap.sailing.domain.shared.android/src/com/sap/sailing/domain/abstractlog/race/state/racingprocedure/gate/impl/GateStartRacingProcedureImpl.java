@@ -23,10 +23,10 @@ import com.sap.sailing.domain.abstractlog.race.state.racingprocedure.impl.BaseRa
 import com.sap.sailing.domain.abstractlog.race.state.racingprocedure.impl.NoMorePrerequisite;
 import com.sap.sailing.domain.abstractlog.race.state.racingprocedure.impl.RacingProcedureChangedListeners;
 import com.sap.sailing.domain.base.configuration.procedures.GateStartConfiguration;
-import com.sap.sailing.domain.common.TimePoint;
 import com.sap.sailing.domain.common.racelog.FlagPole;
 import com.sap.sailing.domain.common.racelog.Flags;
 import com.sap.sailing.domain.common.racelog.RacingProcedureType;
+import com.sap.sse.common.TimePoint;
 import com.sap.sse.common.Util;
 
 public class GateStartRacingProcedureImpl extends BaseRacingProcedure implements GateStartRacingProcedure {

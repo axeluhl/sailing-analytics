@@ -2,10 +2,11 @@ package com.sap.sailing.domain.base;
 
 import com.sap.sailing.domain.common.BoatHullType;
 import com.sap.sailing.domain.common.Distance;
-import com.sap.sailing.domain.common.TimePoint;
+import com.sap.sse.common.IsManagedByCache;
 import com.sap.sse.common.Named;
+import com.sap.sse.common.TimePoint;
 
-public interface BoatClass extends Named, IsManagedBySharedDomainFactory {
+public interface BoatClass extends Named, IsManagedByCache<SharedDomainFactory> {
     /**
      * The distance returned by this method should be appropriate for use in
      * {@link TrackedRace#approximate(Competitor, Distance, TimePoint, TimePoint)} so that penalty circles and other

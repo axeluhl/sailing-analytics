@@ -13,8 +13,8 @@ import com.sap.sailing.domain.abstractlog.race.RaceLog;
 import com.sap.sailing.domain.abstractlog.race.RaceLogEvent;
 import com.sap.sailing.domain.abstractlog.race.RaceLogRaceStatusEvent;
 import com.sap.sailing.domain.abstractlog.race.analyzing.impl.FinishedTimeFinder;
-import com.sap.sailing.domain.common.TimePoint;
 import com.sap.sailing.domain.common.racelog.RaceLogRaceStatus;
+import com.sap.sse.common.TimePoint;
 
 public class FinishedTimeFinderTest extends PassAwareRaceLogAnalyzerTest<FinishedTimeFinder, TimePoint> {
 

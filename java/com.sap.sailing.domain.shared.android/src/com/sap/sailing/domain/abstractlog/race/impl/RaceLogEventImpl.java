@@ -8,7 +8,7 @@ import com.sap.sailing.domain.abstractlog.impl.AbstractLogEventImpl;
 import com.sap.sailing.domain.abstractlog.race.RaceLogEvent;
 import com.sap.sailing.domain.abstractlog.race.RaceLogEventVisitor;
 import com.sap.sailing.domain.base.Competitor;
-import com.sap.sailing.domain.common.TimePoint;
+import com.sap.sse.common.TimePoint;
 
 public abstract class RaceLogEventImpl extends AbstractLogEventImpl<RaceLogEventVisitor> implements RaceLogEvent {
     private final List<Competitor> involvedBoats;

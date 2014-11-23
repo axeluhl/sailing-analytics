@@ -4,7 +4,7 @@ import com.sap.sailing.domain.abstractlog.race.RaceLog;
 import com.sap.sailing.domain.abstractlog.race.RaceLogEvent;
 import com.sap.sailing.domain.abstractlog.race.analyzing.impl.RaceLogAnalyzer;
 import com.sap.sailing.domain.abstractlog.race.tracking.DeviceMappingEvent;
-import com.sap.sailing.domain.common.WithID;
+import com.sap.sse.common.WithID;
 
 public class LastPingMappingEventFinder<T extends WithID> extends RaceLogAnalyzer<DeviceMappingEvent<T>> {
     private final WithID item;

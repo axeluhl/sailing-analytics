@@ -4,7 +4,7 @@ import java.io.Serializable;
 
 import com.sap.sailing.domain.abstractlog.AbstractLogEventAuthor;
 import com.sap.sailing.domain.abstractlog.RevokeEvent;
-import com.sap.sailing.domain.common.TimePoint;
+import com.sap.sse.common.TimePoint;
 
 public abstract class RevokeEventImpl<VisitorT> extends AbstractLogEventImpl<VisitorT> implements RevokeEvent<VisitorT> {
     private static final long serialVersionUID = -30864810737555657L;

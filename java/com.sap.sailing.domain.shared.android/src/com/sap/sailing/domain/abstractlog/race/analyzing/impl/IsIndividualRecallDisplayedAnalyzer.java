@@ -1,7 +1,7 @@
 package com.sap.sailing.domain.abstractlog.race.analyzing.impl;
 
 import com.sap.sailing.domain.abstractlog.race.RaceLog;
-import com.sap.sailing.domain.common.TimePoint;
+import com.sap.sse.common.TimePoint;
 
 public class IsIndividualRecallDisplayedAnalyzer extends RaceLogAnalyzer<Boolean> {
 

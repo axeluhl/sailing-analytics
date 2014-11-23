@@ -5,7 +5,7 @@ import java.io.Serializable;
 import com.sap.sailing.domain.abstractlog.AbstractLogEventAuthor;
 import com.sap.sailing.domain.abstractlog.regatta.RegattaLogEventRestoreFactory;
 import com.sap.sailing.domain.abstractlog.regatta.RegattaLogRevokeEvent;
-import com.sap.sailing.domain.common.TimePoint;
+import com.sap.sse.common.TimePoint;
 
 public class RegattaLogEventRestoreFactoryImpl extends RegattaLogEventFactoryImpl implements RegattaLogEventRestoreFactory {
     @Override

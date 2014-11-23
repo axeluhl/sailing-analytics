@@ -13,8 +13,8 @@ import com.sap.sailing.domain.abstractlog.race.RaceLog;
 import com.sap.sailing.domain.abstractlog.race.RaceLogEvent;
 import com.sap.sailing.domain.abstractlog.race.RaceLogFlagEvent;
 import com.sap.sailing.domain.abstractlog.race.analyzing.impl.IndividualRecallFinder;
-import com.sap.sailing.domain.common.TimePoint;
 import com.sap.sailing.domain.common.racelog.Flags;
+import com.sap.sse.common.TimePoint;
 
 public class IndividualRecallFinderTest extends PassAwareRaceLogAnalyzerTest<IndividualRecallFinder, TimePoint> {
 

@@ -5,10 +5,10 @@ import java.util.HashSet;
 import java.util.NavigableSet;
 import java.util.UUID;
 
-import com.sap.sailing.domain.common.TimePoint;
-import com.sap.sailing.domain.common.WithID;
 import com.sap.sailing.domain.common.racelog.tracking.NotRevokableException;
 import com.sap.sailing.domain.tracking.Track;
+import com.sap.sse.common.TimePoint;
+import com.sap.sse.common.WithID;
 
 /**
  * Special kind of {@link Track} for recording {@link AbstractLogEvent}s.

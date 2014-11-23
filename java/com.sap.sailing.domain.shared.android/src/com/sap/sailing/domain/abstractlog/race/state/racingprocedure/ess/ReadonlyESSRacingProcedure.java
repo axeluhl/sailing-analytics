@@ -1,7 +1,7 @@
 package com.sap.sailing.domain.abstractlog.race.state.racingprocedure.ess;
 
 import com.sap.sailing.domain.abstractlog.race.state.racingprocedure.ReadonlyRacingProcedure;
-import com.sap.sailing.domain.common.TimePoint;
+import com.sap.sse.common.TimePoint;
 
 
 public interface ReadonlyESSRacingProcedure extends ReadonlyRacingProcedure {

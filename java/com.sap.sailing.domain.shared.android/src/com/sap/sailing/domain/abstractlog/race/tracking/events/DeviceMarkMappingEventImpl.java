@@ -7,7 +7,7 @@ import com.sap.sailing.domain.abstractlog.race.RaceLogEventVisitor;
 import com.sap.sailing.domain.abstractlog.race.tracking.DeviceIdentifier;
 import com.sap.sailing.domain.abstractlog.race.tracking.DeviceMarkMappingEvent;
 import com.sap.sailing.domain.base.Mark;
-import com.sap.sailing.domain.common.TimePoint;
+import com.sap.sse.common.TimePoint;
 
 public class DeviceMarkMappingEventImpl extends AbstractDeviceMappingEventImpl<Mark>
 implements DeviceMarkMappingEvent {

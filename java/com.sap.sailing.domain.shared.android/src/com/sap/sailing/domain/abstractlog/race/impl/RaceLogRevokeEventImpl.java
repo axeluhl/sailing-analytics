@@ -9,7 +9,7 @@ import com.sap.sailing.domain.abstractlog.impl.RevokeEventImpl;
 import com.sap.sailing.domain.abstractlog.race.RaceLogEventVisitor;
 import com.sap.sailing.domain.abstractlog.race.RaceLogRevokeEvent;
 import com.sap.sailing.domain.base.Competitor;
-import com.sap.sailing.domain.common.TimePoint;
+import com.sap.sse.common.TimePoint;
 
 public class RaceLogRevokeEventImpl extends RevokeEventImpl<RaceLogEventVisitor> implements RaceLogRevokeEvent {
     private final int passId;

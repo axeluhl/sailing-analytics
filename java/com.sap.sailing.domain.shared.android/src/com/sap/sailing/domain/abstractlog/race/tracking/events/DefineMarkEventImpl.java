@@ -9,7 +9,7 @@ import com.sap.sailing.domain.abstractlog.race.impl.RaceLogEventImpl;
 import com.sap.sailing.domain.abstractlog.race.tracking.DefineMarkEvent;
 import com.sap.sailing.domain.base.Competitor;
 import com.sap.sailing.domain.base.Mark;
-import com.sap.sailing.domain.common.TimePoint;
+import com.sap.sse.common.TimePoint;
 
 public class DefineMarkEventImpl extends RaceLogEventImpl implements DefineMarkEvent {
     private static final long serialVersionUID = 277007856878002208L;

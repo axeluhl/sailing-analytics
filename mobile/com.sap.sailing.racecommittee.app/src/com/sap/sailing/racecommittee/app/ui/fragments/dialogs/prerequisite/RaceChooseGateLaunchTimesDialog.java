@@ -13,8 +13,8 @@ import com.sap.sailing.domain.abstractlog.race.RaceLogGateLineOpeningTimeEvent;
 import com.sap.sailing.domain.abstractlog.race.RaceLogGateLineOpeningTimeEvent.GateLineOpeningTimes;
 import com.sap.sailing.domain.abstractlog.race.state.racingprocedure.gate.GateStartRacingProcedure;
 import com.sap.sailing.domain.abstractlog.race.state.racingprocedure.gate.impl.GateLaunchTimePrerequisite;
-import com.sap.sailing.domain.common.impl.MillisecondsTimePoint;
 import com.sap.sailing.racecommittee.app.R;
+import com.sap.sse.common.impl.MillisecondsTimePoint;
 
 public class RaceChooseGateLaunchTimesDialog extends PrerequisiteRaceDialog<GateLaunchTimePrerequisite, RaceLogGateLineOpeningTimeEvent.GateLineOpeningTimes> {
 

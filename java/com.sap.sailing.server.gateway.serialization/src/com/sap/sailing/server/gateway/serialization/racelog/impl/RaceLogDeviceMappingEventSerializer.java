@@ -6,8 +6,8 @@ import com.sap.sailing.domain.abstractlog.race.RaceLogEvent;
 import com.sap.sailing.domain.abstractlog.race.tracking.DeviceIdentifier;
 import com.sap.sailing.domain.abstractlog.race.tracking.DeviceMappingEvent;
 import com.sap.sailing.domain.base.Competitor;
-import com.sap.sailing.domain.common.WithID;
 import com.sap.sailing.server.gateway.serialization.JsonSerializer;
+import com.sap.sse.common.WithID;
 
 public abstract class RaceLogDeviceMappingEventSerializer<ItemT extends WithID> extends BaseRaceLogEventSerializer {
     private final JsonSerializer<DeviceIdentifier> deviceSerializer;

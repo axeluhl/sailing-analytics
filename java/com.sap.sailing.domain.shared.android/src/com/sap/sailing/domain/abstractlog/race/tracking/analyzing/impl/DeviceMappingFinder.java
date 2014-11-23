@@ -16,10 +16,10 @@ import com.sap.sailing.domain.abstractlog.race.tracking.DeviceIdentifier;
 import com.sap.sailing.domain.abstractlog.race.tracking.DeviceMapping;
 import com.sap.sailing.domain.abstractlog.race.tracking.DeviceMappingEvent;
 import com.sap.sailing.domain.abstractlog.race.tracking.impl.DeviceMappingImpl;
-import com.sap.sailing.domain.common.TimePoint;
 import com.sap.sailing.domain.common.TimeRange;
-import com.sap.sailing.domain.common.WithID;
 import com.sap.sailing.domain.common.impl.TimeRangeImpl;
+import com.sap.sse.common.TimePoint;
+import com.sap.sse.common.WithID;
 
 /**
  * Extracts the {@link DeviceMapping}s with the appropriate {@link TimeRange}s from the {@link RaceLog}.

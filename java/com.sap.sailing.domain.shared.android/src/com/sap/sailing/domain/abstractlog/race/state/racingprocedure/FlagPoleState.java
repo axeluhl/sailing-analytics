@@ -4,8 +4,8 @@ import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
 
-import com.sap.sailing.domain.common.TimePoint;
 import com.sap.sailing.domain.common.racelog.FlagPole;
+import com.sap.sse.common.TimePoint;
 
 /**
  * Allows you to query the current state of displayed and removed flags.

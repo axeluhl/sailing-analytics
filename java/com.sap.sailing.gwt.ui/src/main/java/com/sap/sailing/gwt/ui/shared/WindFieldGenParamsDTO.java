@@ -3,8 +3,8 @@ package com.sap.sailing.gwt.ui.shared;
 import java.util.Date;
 
 import com.google.gwt.user.client.rpc.IsSerializable;
-import com.sap.sailing.domain.common.Duration;
 import com.sap.sailing.domain.common.dto.PositionDTO;
+import com.sap.sse.common.Duration;
 
 public class WindFieldGenParamsDTO implements IsSerializable {
 

@@ -9,7 +9,7 @@ import com.sap.sailing.domain.abstractlog.race.impl.RaceLogEventImpl;
 import com.sap.sailing.domain.abstractlog.race.scoring.AdditionalScoringInformationEvent;
 import com.sap.sailing.domain.abstractlog.race.scoring.AdditionalScoringInformationType;
 import com.sap.sailing.domain.base.Competitor;
-import com.sap.sailing.domain.common.TimePoint;
+import com.sap.sse.common.TimePoint;
 
 public class AdditionalScoringInformationEventImpl extends RaceLogEventImpl implements AdditionalScoringInformationEvent {
     private static final long serialVersionUID = -7627714111951381979L;
