@@ -235,7 +235,7 @@ public class RegattaActivity extends BaseActivity {
      * Get Path for cached leaderbaord image.
      * @return
      */
-    private  File getMediaFile(){
+    private File getMediaFile(){
     	
 		File mediaStorageDir;
 
