@@ -3,23 +3,15 @@
     android:layout_width="match_parent"
     android:layout_height="match_parent" >
 
-    <LinearLayout
-        android:id="@+id/header"
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:background="@color/colorPrimary"
-        android:clickable="true"
-        android:orientation="vertical" >
-
-        <include layout="@layout/toolbar" />
-
-    </LinearLayout>
+    <include
+        android:id="@+id/toolbar"
+        layout="@layout/toolbar" />
 
     <android.support.v4.widget.DrawerLayout
         android:id="@+id/drawer_layout"
         android:layout_width="match_parent"
         android:layout_height="match_parent"
-        android:layout_below="@id/header" >
+        android:layout_below="@id/toolbar" >
 
         <LinearLayout
             android:id="@+id/racingLayout"

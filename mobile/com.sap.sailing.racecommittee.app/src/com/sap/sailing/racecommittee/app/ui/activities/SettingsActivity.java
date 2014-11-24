@@ -7,11 +7,6 @@ import android.content.Intent;
 import android.content.SharedPreferences;
 import android.os.Bundle;
 import android.preference.PreferenceActivity;
-import android.support.v7.widget.Toolbar;
-import android.view.View;
-import android.view.ViewGroup;
-import android.view.Window;
-import android.widget.LinearLayout;
 import android.widget.Toast;
 
 import com.sap.sailing.domain.base.configuration.RegattaConfiguration;
@@ -25,83 +20,35 @@ import com.sap.sailing.racecommittee.app.ui.fragments.preference.RegattaPreferen
 import com.sap.sailing.racecommittee.app.utils.PreferenceHelper;
 
 public class SettingsActivity extends PreferenceActivity {
-    
+
     private static final String TAG = SettingsActivity.class.getName();
     
-    public static final String specificRegattaPreferencesName = "TEMP_PREFERENCE_KEY";
-    public static final String EXTRA_SPECIFIC_REGATTA_NAME = "EXTRA_SPECIFIC_REGATTA_NAME";
-    public static final String EXTRA_SPECIFIC_REGATTA_PREFERENCES_NAME = "EXTRA_SPECIFIC_REGATTA_PREFERENCE_KEY";
-    
-    public static void openSpecificRegattaConfiguration(Context context, RaceGroup raceGroup) {
-        // reset temp preferences
-        PreferenceHelper helper = new PreferenceHelper(context, "TEMP_PREFERENCE_KEY");
-        helper.clearPreferences();
-        helper.resetPreferences(true);
-        
-        // store local configuration in temp preferences
-        RegattaConfiguration configuration = raceGroup.getRegattaConfiguration();
-        AppPreferences preferences = AppPreferences.on(context, "TEMP_PREFERENCE_KEY");
-        PreferencesRegattaConfigurationLoader preferencesLoader = new PreferencesRegattaConfigurationLoader(configuration, preferences);
-        preferencesLoader.store();
-        
-        Intent intent = new Intent(context, SettingsActivity.class);
-        intent.putExtra(SettingsActivity.EXTRA_SHOW_FRAGMENT, RegattaPreferenceFragment.class.getName());
-        intent.putExtra(SettingsActivity.EXTRA_NO_HEADERS, true);
-        Bundle info = new Bundle();
-        info.putString(EXTRA_SPECIFIC_REGATTA_PREFERENCES_NAME, specificRegattaPreferencesName);
-        info.putString(EXTRA_SPECIFIC_REGATTA_NAME, raceGroup.getName());
-        intent.putExtra(SettingsActivity.EXTRA_SHOW_FRAGMENT_ARGUMENTS, info);
-        context.startActivity(intent);
-    }
 
-    public static void commitSpecificRegattaConfiguration(Context context, String preferencesName, String raceGroupName) {
-        
-        ReadonlyDataManager dataManager = DataManager.create(context);
-        RaceGroup group = dataManager.getDataStore().getRaceGroup(raceGroupName);
-        if (group != null) {
-            RegattaConfiguration localConfiguration = group.getRegattaConfiguration();
-            AppPreferences preferences = AppPreferences.on(context, preferencesName);
-            PreferencesRegattaConfigurationLoader loader = new PreferencesRegattaConfigurationLoader(localConfiguration, preferences);
-            loader.load();
-        } else {
-            Toast.makeText(context, "No fitting race group found.", Toast.LENGTH_SHORT).show();
-        }
-    }
-    
+
     private boolean isRedirectedToTemp;
     private String sharedPreferencesName;
-    private Toolbar toolbar;
-    
+
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        
+
         Bundle arguments = getIntent().getExtras();
-        
-        //the additional null-check seems to be necessary (see bug 2377)
-        this.isRedirectedToTemp = arguments != null && arguments.containsKey(PreferenceActivity.EXTRA_SHOW_FRAGMENT_ARGUMENTS)
+
+        // the additional null-check seems to be necessary (see bug 2377)
+        this.isRedirectedToTemp = arguments != null
+                && arguments.containsKey(PreferenceActivity.EXTRA_SHOW_FRAGMENT_ARGUMENTS)
                 && arguments.get(PreferenceActivity.EXTRA_SHOW_FRAGMENT_ARGUMENTS) != null;
         if (isRedirectedToTemp) {
             Bundle info = arguments.getBundle(PreferenceActivity.EXTRA_SHOW_FRAGMENT_ARGUMENTS);
             if (info != null) {
-            sharedPreferencesName = info.getString(EXTRA_SPECIFIC_REGATTA_PREFERENCES_NAME);
-            String raceGroupName = info.getString(EXTRA_SPECIFIC_REGATTA_NAME);
-            String title = getString(R.string.preference_regatta_specific_title, raceGroupName);
-            showBreadCrumbs(title, title);
+//                sharedPreferencesName = info.getString(EXTRA_SPECIFIC_REGATTA_PREFERENCES_NAME);
+//                String raceGroupName = info.getString(EXTRA_SPECIFIC_REGATTA_NAME);
+//                String title = getString(R.string.preference_regatta_specific_title, raceGroupName);
+//                showBreadCrumbs(title, title);
             }
         }
-        
-//        ViewGroup root = ((ViewGroup) findViewById(android.R.id.content));
-//        LinearLayout content = (LinearLayout) root.getChildAt(0);
-//        LinearLayout toolbarContainer = (LinearLayout) View.inflate(this, R.layout.activity_settings, null);
-//        
-//        root.removeAllViews();
-//        toolbarContainer.addView(content);
-//        root.addView(toolbar);
-//        
-//        toolbar = (Toolbar) toolbarContainer.findViewById(R.id.toolbar);
     }
-   
+
     @Override
     public SharedPreferences getSharedPreferences(String name, int mode) {
         if (isRedirectedToTemp) {
@@ -109,7 +56,7 @@ public class SettingsActivity extends PreferenceActivity {
         }
         return super.getSharedPreferences(name, mode);
     }
-    
+
     @Override
     public void onBuildHeaders(List<Header> target) {
         loadHeadersFromResource(R.xml.preference_headers, target);
@@ -118,7 +65,7 @@ public class SettingsActivity extends PreferenceActivity {
     public boolean isRedirected() {
         return isRedirectedToTemp;
     }
-    
+
     protected boolean isValidFragment(String fragmentName) {
         return true;
     }

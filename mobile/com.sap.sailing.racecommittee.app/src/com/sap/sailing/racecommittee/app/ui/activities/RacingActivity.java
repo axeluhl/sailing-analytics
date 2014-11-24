@@ -1,8 +1,10 @@
 package com.sap.sailing.racecommittee.app.ui.activities;
 
 import java.io.Serializable;
+import java.text.SimpleDateFormat;
+import java.util.Calendar;
 import java.util.Collection;
-
+import android.annotation.SuppressLint;
 import android.app.Activity;
 import android.app.AlertDialog;
 import android.app.FragmentTransaction;
@@ -19,7 +21,6 @@ import android.view.Window;
 import android.widget.Button;
 import android.widget.TextView;
 import android.widget.Toast;
-
 import com.sap.sailing.android.shared.logging.ExLog;
 import com.sap.sailing.android.shared.util.CollectionUtils;
 import com.sap.sailing.domain.base.CourseArea;
@@ -109,7 +110,7 @@ public class RacingActivity extends SessionActivity implements RaceInfoListener,
     private RaceInfoFragment infoFragment;
     private NavigationDrawerFragment navDrawerFragment;
     private ManagedRace selectedRace;
-    private TextView systemTime;
+    private Button currentTime;
     private Button windButton;
 
     private Serializable getCourseAreaIdFromIntent() {
@@ -134,12 +135,12 @@ public class RacingActivity extends SessionActivity implements RaceInfoListener,
                 dataManager.createRacesLoader(courseArea.getId(), new RaceLoadClient(courseArea)));
     }
 
+    @SuppressLint("SimpleDateFormat")
     @Override
     public void notifyTick() {
-        if (systemTime != null) {
-            Time now = new Time();
-            now.setToNow();
-            systemTime.setText(now.format2445());
+        if (currentTime != null) {
+            SimpleDateFormat format = new SimpleDateFormat("HH:mm:ss");
+            currentTime.setText(format.format(Calendar.getInstance().getTime()));
         }
     }
 
@@ -212,7 +213,7 @@ public class RacingActivity extends SessionActivity implements RaceInfoListener,
             Toast.makeText(this, getString(R.string.racing_course_area_missing), Toast.LENGTH_LONG).show();
         }
 
-        systemTime = (TextView) findViewById(R.id.time);
+        currentTime = (Button) findViewById(R.id.currentTime);
         windButton = (Button) findViewById(R.id.windButton);
         if (windButton != null) {
             windButton.setOnClickListener(this);

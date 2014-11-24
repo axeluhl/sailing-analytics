@@ -1,5 +1,6 @@
 package com.sap.sailing.racecommittee.app.ui.activities;
 
+import android.content.Intent;
 import android.os.Bundle;
 import android.view.MenuItem;
 
@@ -8,6 +9,7 @@ import com.sap.sailing.racecommittee.app.AppPreferences;
 import com.sap.sailing.racecommittee.app.R;
 import com.sap.sailing.racecommittee.app.RaceApplication;
 import com.sap.sailing.racecommittee.app.data.InMemoryDataStore;
+import com.sap.sailing.racecommittee.app.ui.fragments.preference.RegattaPreferenceFragment;
 
 /**
  * Base activity for all race committee cockpit activities enabling basic menu functionality.
@@ -33,7 +35,15 @@ public class BaseActivity extends SendingServiceAwareActivity {
         switch (item.getItemId()) {
         case R.id.options_menu_settings:
             ExLog.i(this, TAG, "Clicked SETTINGS.");
-            fadeActivity(SettingsActivity.class, false);
+            fadeActivity(PreferenceActivity.class, false);
+//            Intent intent = new Intent(this, PreferenceActivity.class);
+//            Bundle info = new Bundle();
+//            intent.putExtra(PreferenceActivity.EXTRA_SHOW_FRAGMENT, RegattaPreferenceFragment.class.getName());
+//            info.putString(PreferenceActivity.EXTRA_SPECIFIC_REGATTA_PREFERENCES_NAME, PreferenceActivity.SPECIFIC_REGATTA_PREFERENCES_NAME);
+//            info.putString(PreferenceActivity.EXTRA_SPECIFIC_REGATTA_NAME, "Test");
+//            intent.putExtra(PreferenceActivity.EXTRA_SHOW_FRAGMENT_ARGUMENTS, info);
+//            startActivity(intent);
+
             return true;
         case R.id.options_menu_reload:
             ExLog.i(this, TAG, "Clicked RESET.");

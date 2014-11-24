@@ -128,6 +128,7 @@
     <string name="store_wind">Store wind</string>
     
 	<!-- SETTINGS -->
+	<string name="settings_activity_title">Settings</string>
     <string name="settings_category_general">Other</string>    
     <string name="settings_general_manageareas_header">Managed Course Areas</string>
     <string name="settings_general_language_header">Select Language</string>

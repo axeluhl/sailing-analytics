@@ -52,9 +52,13 @@
         <activity android:name=".ui.activities.RacingActivity" />
         <activity android:name=".ui.activities.ResultsCapturingActivity" />
         <activity android:name=".ui.activities.WindActivity" />
-        <activity
-            android:name=".ui.activities.SettingsActivity"
-            android:theme="@style/Theme.Welter" />
+        <activity android:name=".ui.activities.PreferenceActivity" >
+            <intent-filter>
+                <action android:name="android.intent.action.MANAGE_NETWORK_USAGE" />
+
+                <category android:name="android.intent.category.DEFAULT" />
+            </intent-filter>
+        </activity>
         <activity android:name=".ui.activities.SystemInformationActivity" />
 
         <service

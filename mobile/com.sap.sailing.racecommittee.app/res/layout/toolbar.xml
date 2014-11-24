@@ -10,23 +10,28 @@
         android:id="@+id/toolbar_extended"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:layout_gravity="right"
+        android:layout_gravity="end"
         android:gravity="center"
         android:minHeight="?attr/actionBarSize"
         android:orientation="horizontal"
         android:visibility="gone" >
 
-        <TextView
-            android:id="@+id/time"
+        <Button
+            android:id="@+id/currentTime"
+            style="?android:attr/borderlessButtonStyle"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:text="Uhrzeit" />
+            android:drawableLeft="@drawable/ic_access_time_grey600_36dp"
+            android:drawableStart="@drawable/ic_access_time_grey600_36dp" />
 
         <Button
             android:id="@+id/windButton"
+            style="?android:attr/borderlessButtonStyle"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:text="Wind" />
+            android:drawableLeft="@drawable/ic_call_made_grey600_36dp"
+            android:drawableStart="@drawable/ic_call_made_grey600_36dp"
+            android:text="@string/wind_unknown" />
     </LinearLayout>
 
 </android.support.v7.widget.Toolbar>
