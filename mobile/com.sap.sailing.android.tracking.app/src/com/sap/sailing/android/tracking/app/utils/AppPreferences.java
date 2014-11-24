@@ -33,7 +33,11 @@ public class AppPreferences {
     }
     
     public String getServerCheckinPath() {
-        return PrefUtils.getString(context, R.string.preference_server_gps_checkin_path, R.string.preference_server_gps_checkin_path);
+        return PrefUtils.getString(context, R.string.preference_server_checkin_path, R.string.preference_server_checkin_path);
+    }
+    
+    public String getServerCheckoutPath() {
+    	return PrefUtils.getString(context, R.string.preference_server_checkout_path, R.string.preference_server_checkout_path);
     }
     
     public String getServerEventPath(String eventId) {

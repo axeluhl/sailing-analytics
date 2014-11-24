@@ -6,6 +6,7 @@
     <string name="tracking">Tracking nicht aktiv</string>
     <string name="options_menu_info">Technische Informationen</string>
     <string name="options_menu_settings">Einstellungen</string>
+    <string name="options_menu_checkout">Checkout</string>
     <string name="settings_category_general">General</string>
     <string name="settings_category_connection">Verbindung</string>
     <string name="scan_hint">Der QR-Code befindet sich auf Ihrer Teilnahmebestätigung</string>
@@ -47,5 +48,14 @@
 	<string name="existing_image">Auswählen</string>
 	<string name="take_photo">Foto aufnehmen</string>
 	<string name="add_photo_select">Foto</string>
+	<string name="please_wait">Bitte warten</string>
+	<string name="checking_in">Checke ein..</string>
+	<string name="checking_out">Checke aus..</string>
+	<string name="getting_event">Hole Event-Daten..</string>
+	<string name="getting_leaderboard">Hole Leaderboard-Daten..</string>
+	<string name="getting_competitor">Hole Teilnehmer-Daten..</string>
+	<string name="contacting_server">Verbindung mit server..</string>
+	<string name="error">Fehler</string>
+	<string name="error_could_not_complete_operation_on_server_try_again">Konnte Operation nicht durchführen. Bitte versuchen Sie es noch einmal.</string>
 
 </resources>

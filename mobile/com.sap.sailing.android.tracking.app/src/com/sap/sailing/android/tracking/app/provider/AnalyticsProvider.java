@@ -208,6 +208,21 @@ public class AnalyticsProvider extends ContentProvider {
 		    int numRowsDeleted = db.delete(Tables.SENSOR_GPS, where, selectionArgs);
 			notifyChange(uri);
 			return numRowsDeleted;
+			
+        case COMPETITOR:
+        	int numCompetitorRowsDeleted = db.delete(Tables.COMPETITORS, selection, selectionArgs);
+            notifyChange(uri);
+            return numCompetitorRowsDeleted;
+            
+        case EVENT:
+        	int numEventRowsDeleted = db.delete(Tables.EVENTS, selection, selectionArgs);
+            notifyChange(uri);
+            return numEventRowsDeleted;
+            
+        case LEADERBOARD:
+        	int numLeaderboardRowsDeleted = db.delete(Tables.LEADERBOARDS, selection, selectionArgs);
+            notifyChange(uri);
+            return numLeaderboardRowsDeleted;
 
 		default:
 			throw new UnsupportedOperationException("Unknown uri: " + uri);
