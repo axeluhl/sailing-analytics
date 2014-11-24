@@ -108,7 +108,7 @@ public class TestProcessorQuery {
      */
     private Query<Double> createQueryWithStandardWorkflow(Collection<Number> dataSource) {
         final ThreadPoolExecutor executor = ConcurrencyTestsUtil.getExecutor();
-        ProcessorQuery<Double, Iterable<Number>> query = new ProcessorQuery<Double, Iterable<Number>>(executor, dataSource, stringMessages, Locale.ENGLISH) {
+        ProcessorQuery<Double, Iterable<Number>> query = new ProcessorQuery<Double, Iterable<Number>>(dataSource, stringMessages, Locale.ENGLISH) {
             @Override
             protected Processor<Iterable<Number>, ?> createFirstProcessor() {
                 Processor<GroupedDataEntry<Double>, Map<GroupKey, Double>> sumAggregator = processorFactory.createAggregationProcessor(this, AggregatorType.Sum);
@@ -167,10 +167,13 @@ public class TestProcessorQuery {
         assertThat("Value decimals aren't correct.", result.getValueDecimals(), is(expectedResult.getValueDecimals()));
     }
 
-    @Test(timeout=2000)
+    @Test//(timeout=2000)
     public void testQueryTimeouting() throws TimeoutException {
+        receivedElementOrFinished = false;
+        receivedAbort = false;
+        
         ProcessorQuery<Double, Iterable<Number>> query = new ProcessorQuery<Double, Iterable<Number>>(
-                ConcurrencyTestsUtil.getExecutor(), createDataSource(), stringMessages, Locale.ENGLISH) {
+                createDataSource(), stringMessages, Locale.ENGLISH) {
             @SuppressWarnings("unchecked")
             @Override
             protected Processor<Iterable<Number>, ?> createFirstProcessor() {
@@ -190,7 +193,7 @@ public class TestProcessorQuery {
                 };
                 Collection<Processor<Double, ?>> resultReceivers = new ArrayList<>();
                 resultReceivers.add(resultReceiver);
-                return new BlockingProcessor<Iterable<Number>, Double>((Class<Iterable<Number>>)(Class<?>) Iterable.class, Double.class, ConcurrencyTestsUtil.getExecutor(), resultReceivers, (long) 1000);
+                return new BlockingProcessor<Iterable<Number>, Double>((Class<Iterable<Number>>)(Class<?>) Iterable.class, Double.class, ConcurrencyTestsUtil.getExecutor(), resultReceivers, 1000);
             }
         };
         
@@ -210,7 +213,7 @@ public class TestProcessorQuery {
     public void testQueryWithTimeoutAndNonBlockingProcess() throws TimeoutException {
         final String keyValue = "Sum";
         ProcessorQuery<Double, Iterable<Number>> query = new ProcessorQuery<Double, Iterable<Number>>(
-                ConcurrencyTestsUtil.getExecutor(), createDataSource(), stringMessages, Locale.ENGLISH) {
+                createDataSource(), stringMessages, Locale.ENGLISH) {
             @Override
             protected Processor<Iterable<Number>, ?> createFirstProcessor() {
                 return createSumBuildingProcessor(/*query*/ this, keyValue);

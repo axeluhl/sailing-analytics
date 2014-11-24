@@ -7,7 +7,6 @@ import java.util.Locale;
 import java.util.Map;
 import java.util.Timer;
 import java.util.TimerTask;
-import java.util.concurrent.Executor;
 import java.util.concurrent.ThreadPoolExecutor;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.TimeoutException;
@@ -31,13 +30,13 @@ public abstract class ProcessorQuery<AggregatedType, DataSourceType> implements 
     private final DataSourceType dataSource;
     private final Processor<DataSourceType, ?> firstProcessor;
 
-    private final Executor executor;
     private final ProcessResultReceiver resultReceiver;
     
     private final DataMiningStringMessages stringMessages;
     private final Locale locale;
 
     private final Object monitorObject = new Object();
+    private Thread workingThread;
     private boolean workIsDone = false;
     private boolean processorTimedOut = false;
     
@@ -46,14 +45,13 @@ public abstract class ProcessorQuery<AggregatedType, DataSourceType> implements 
      * This is useful for non user specific queries, like retrieving the dimension values.
      */
     public ProcessorQuery(ThreadPoolExecutor executor, DataSourceType dataSource) {
-        this(executor, dataSource, null, null);
+        this(dataSource, null, null);
     }
 
     /**
      * Creates a query that returns a result with additional data.
      */
-    public ProcessorQuery(Executor executor, DataSourceType dataSource, DataMiningStringMessages stringMessages, Locale locale) {
-        this.executor = executor;
+    public ProcessorQuery(DataSourceType dataSource, DataMiningStringMessages stringMessages, Locale locale) {
         this.dataSource = dataSource;
         this.stringMessages = stringMessages;
         this.locale = locale;
@@ -90,21 +88,7 @@ public abstract class ProcessorQuery<AggregatedType, DataSourceType> implements 
     private QueryResult<AggregatedType> processQuery(long timeoutInMillis) throws InterruptedException, TimeoutException {
         processorTimedOut = false;
         final long startTime = System.nanoTime();
-        new Thread(new Runnable() {
-            @Override
-            public void run() {
-                try {
-                    firstProcessor.processElement(dataSource);
-                    firstProcessor.finish();
-                } catch (InterruptedException e) {
-                    if (processorTimedOut) {
-                        LOGGER.log(Level.INFO, "The query processing timed out.");
-                    } else {
-                        LOGGER.log(Level.WARNING, "The query processing got interrupted.", e);
-                    }
-                }
-            }
-        }).start();
+        startWorking();
         waitTillWorkIsDone(timeoutInMillis);
         final long endTime = System.nanoTime();
         
@@ -122,10 +106,23 @@ public abstract class ProcessorQuery<AggregatedType, DataSourceType> implements 
         }
     }
 
-    private void logOccuredFailures() {
-        for (Throwable failure : resultReceiver.getOccuredFailures()) {
-            LOGGER.log(Level.SEVERE, "An error occured during the processing of an instruction: ", failure);
-        }
+    private void startWorking() {
+        workingThread = new Thread(new Runnable() {
+            @Override
+            public void run() {
+                try {
+                    firstProcessor.processElement(dataSource);
+                    firstProcessor.finish();
+                } catch (InterruptedException e) {
+                    if (processorTimedOut) {
+                        LOGGER.log(Level.INFO, "The query processing timed out.");
+                    } else {
+                        LOGGER.log(Level.WARNING, "The query processing got interrupted.", e);
+                    }
+                }
+            }
+        });
+        workingThread.start();
     }
 
     private void waitTillWorkIsDone(long timeoutInMillis) throws InterruptedException, TimeoutException {
@@ -135,6 +132,7 @@ public abstract class ProcessorQuery<AggregatedType, DataSourceType> implements 
                 monitorObject.wait();
                 if (processorTimedOut && !workIsDone) {
                     firstProcessor.abort();
+                    workingThread.interrupt();
                     throw new TimeoutException("The query processing timed out");
                 }
             }
@@ -154,6 +152,12 @@ public abstract class ProcessorQuery<AggregatedType, DataSourceType> implements 
                     }
                 }
             }, timeoutInMillis);
+        }
+    }
+
+    private void logOccuredFailures() {
+        for (Throwable failure : resultReceiver.getOccuredFailures()) {
+            LOGGER.log(Level.SEVERE, "An error occured during the processing of an instruction: ", failure);
         }
     }
 

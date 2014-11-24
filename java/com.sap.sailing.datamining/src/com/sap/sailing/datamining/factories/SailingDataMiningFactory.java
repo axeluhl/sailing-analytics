@@ -53,8 +53,8 @@ public class SailingDataMiningFactory {
     }
 
     public <ElementType> Query<Double> createQuery(RacingEventService dataSource, final QueryDefinition queryDefinition) {
-        return new ProcessorQuery<Double, RacingEventService>(executorService, dataSource,
-                stringMessages, DataMiningStringMessages.Util.getLocaleFor(queryDefinition.getLocaleInfoName())) {
+        return new ProcessorQuery<Double, RacingEventService>(dataSource, stringMessages,
+                DataMiningStringMessages.Util.getLocaleFor(queryDefinition.getLocaleInfoName())) {
             @Override
             protected Processor<RacingEventService, ?> createFirstProcessor() {
                 @SuppressWarnings("unchecked") // TODO Clean, after the deprecated components have been removed
@@ -117,7 +117,7 @@ public class SailingDataMiningFactory {
             DataRetrieverChainDefinitionDTO dataRetrieverChainDefinitionDTO, int retrieverLevel,
             Collection<FunctionDTO> dimensionDTOs, String localeInfoName) {
         final Locale locale = DataMiningStringMessages.Util.getLocaleFor(localeInfoName);
-        return new ProcessorQuery<Set<Object>, RacingEventService>(executorService, dataSource, stringMessages, locale) {
+        return new ProcessorQuery<Set<Object>, RacingEventService>(dataSource, stringMessages, locale) {
             @Override
             protected Processor<RacingEventService, ?> createFirstProcessor() {
                 Processor<GroupedDataEntry<Object>, Map<GroupKey, Set<Object>>> valueCollector = processorFactory.createGroupedDataCollectingAsSetProcessor(/*query*/ this);
