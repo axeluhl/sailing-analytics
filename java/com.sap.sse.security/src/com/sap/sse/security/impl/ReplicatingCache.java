@@ -1,5 +1,7 @@
 package com.sap.sse.security.impl;
 
+import java.io.IOException;
+import java.io.ObjectInputStream;
 import java.util.Collection;
 import java.util.Set;
 import java.util.concurrent.ConcurrentHashMap;
@@ -18,7 +20,7 @@ import com.sap.sse.common.Named;
  */
 public class ReplicatingCache<K, V> implements Cache<K, V>, Named {
     private static final long serialVersionUID = 6628512191363526330L;
-    private final ReplicableSecurityService securityService;
+    private transient ReplicableSecurityService securityService;
     private final String name;
     private final ConcurrentHashMap<K, V> cache;
 
@@ -29,6 +31,11 @@ public class ReplicatingCache<K, V> implements Cache<K, V>, Named {
         this.cache = new ConcurrentHashMap<K, V>();
     }
 
+    private void readObject(ObjectInputStream ois) throws ClassNotFoundException, IOException {
+        ois.defaultReadObject();
+        securityService = (ReplicableSecurityService) Activator.getSecurityService();
+    }
+    
     @Override
     public String getName() {
         return name;
