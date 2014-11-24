@@ -90,7 +90,7 @@ public abstract class ProcessorQuery<AggregatedType, DataSourceType> implements 
     private QueryResult<AggregatedType> processQuery(long timeoutInMillis) throws InterruptedException, TimeoutException {
         processorTimedOut = false;
         final long startTime = System.nanoTime();
-        executor.execute(new Runnable() {
+        new Thread(new Runnable() {
             @Override
             public void run() {
                 try {
@@ -104,7 +104,7 @@ public abstract class ProcessorQuery<AggregatedType, DataSourceType> implements 
                     }
                 }
             }
-        });
+        }).start();
         waitTillWorkIsDone(timeoutInMillis);
         final long endTime = System.nanoTime();
         

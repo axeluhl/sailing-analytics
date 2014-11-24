@@ -70,12 +70,12 @@ public class SailingDataMiningFactory {
 
                 DataRetrieverChainDefinition<RacingEventService> dataRetrieverChainDefinition = dataRetrieverChainDefinitionProvider.get(queryDefinition.getDataRetrieverChainDefinition().getId());
                 DataRetrieverChainBuilder<RacingEventService> chainBuilder = dataRetrieverChainDefinition.startBuilding(executorService);
-                Map<Integer, FilterCriterion<?>> criteriaMappedByDataType = createFilterCriteria(queryDefinition.getFilterSelection());
+                Map<Integer, FilterCriterion<?>> criteriaMappedByRetrieverLevel = createFilterCriteria(queryDefinition.getFilterSelection());
                 while (chainBuilder.canStepFurther()) {
                     chainBuilder.stepFurther();
                     
-                    if (criteriaMappedByDataType.containsKey(chainBuilder.getCurrentRetrieverLevel())) {
-                        chainBuilder.setFilter(criteriaMappedByDataType.get(chainBuilder.getCurrentRetrieverLevel()));
+                    if (criteriaMappedByRetrieverLevel.containsKey(chainBuilder.getCurrentRetrieverLevel())) {
+                        chainBuilder.setFilter(criteriaMappedByRetrieverLevel.get(chainBuilder.getCurrentRetrieverLevel()));
                     }
                 }
                 chainBuilder.addResultReceiver(groupingProcessor);
