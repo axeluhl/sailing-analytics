@@ -126,6 +126,7 @@
     <string name="store_wind">Windeingaben speichern</string>
     
     <!-- SETTINGS -->
+	<string name="settings_activity_title">Einstellungen</string>
     <string name="settings_category_general">Weitere Einstellungen</string>
     <string name="settings_general_manageareas_header">Verwaltete Bahnen</string>
     <string name="settings_general_language_header">Sprache auswählen</string>

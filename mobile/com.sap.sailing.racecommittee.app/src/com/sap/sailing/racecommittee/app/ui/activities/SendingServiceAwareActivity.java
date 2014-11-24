@@ -95,7 +95,7 @@ public abstract class SendingServiceAwareActivity extends ResilientActivity {
             sendingServiceStatus = String.format("Currently %d events waiting to be sent.\nLast successful sent was at %s", 
                     errorCount, lastSuccessfulSend == null ? "never" : lastSuccessfulSend);
         } else {
-            menuItemLive.setIcon(R.drawable.ic_menu_share);
+            menuItemLive.setIcon(R.drawable.ic_share_grey600_36dp);
             sendingServiceStatus = String.format("Currently no event waiting to be sent.", errorCount);
         }
     }
