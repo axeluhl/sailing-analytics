@@ -239,8 +239,17 @@ public class HomeFragment extends BaseFragment implements
 
 											JSONArray imageUrls = response
 													.getJSONArray("imageURLs");
-											eventFirstImageUrl = imageUrls
-													.getString(0);
+											
+											if (imageUrls.length() > 0)
+											{
+												eventFirstImageUrl = imageUrls
+														.getString(0);	
+											}
+											else
+											{
+												eventFirstImageUrl = null;
+											}
+
 
 										} catch (JSONException e) {
 											ExLog.e(getActivity(),
