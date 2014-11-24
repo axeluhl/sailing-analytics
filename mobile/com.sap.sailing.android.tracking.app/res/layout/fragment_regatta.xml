@@ -42,6 +42,8 @@
                 android:textColor="@color/white" />
         </LinearLayout>
     
+        
+        
         <LinearLayout
             android:id="@+id/competitor_info_layout"
             android:layout_width="match_parent"
@@ -85,6 +87,26 @@
                 android:padding="0dp"
                 android:text="GER 13"
                 android:textColor="@color/white" />
+        </LinearLayout>	
+        
+        <LinearLayout
+            android:id="@+id/change_photo"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+			android:layout_above="@id/competitor_info_layout"
+			android:layout_alignParentRight="true"
+			android:layout_marginRight="15dp"
+			android:layout_marginBottom="15dp"
+			android:padding="5dp"
+			android:background="@drawable/background_box"
+            android:orientation="horizontal" >
+            
+            <ImageButton
+                android:background="@android:color/transparent"
+                android:id="@+id/change_photo_button"
+                android:layout_width="25dp"
+                android:layout_height="25dp"
+                android:src="@android:drawable/ic_menu_edit" />
         </LinearLayout>
 
         <View
