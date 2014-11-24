@@ -852,8 +852,18 @@ public class SecurityServiceImpl extends RemoteServiceServlet implements Replica
     @Override
     public void initiallyFillFromInternal(ObjectInputStream is) throws IOException, ClassNotFoundException,
             InterruptedException {
-        UserStore newUserStore = (UserStore) is.readObject();
-        store = newUserStore;
+        // overriding thread context class loader because the user store may be provided by a different bundle;
+        // We're assuming here that the user store service is provided by the same bundle in the replica as on the master.
+        ClassLoader oldCCL = Thread.currentThread().getContextClassLoader();
+        if (store != null) {
+            Thread.currentThread().setContextClassLoader(store.getClass().getClassLoader());
+        }
+        try {
+            UserStore newUserStore = (UserStore) is.readObject();
+            store = newUserStore;
+        } finally {
+            Thread.currentThread().setContextClassLoader(oldCCL);
+        }
     }
 
     @Override

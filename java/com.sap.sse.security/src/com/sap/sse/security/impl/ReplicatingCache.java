@@ -41,24 +41,27 @@ public class ReplicatingCache<K, V> implements Cache<K, V>, Named {
     @Override
     public V put(K key, V value) throws CacheException {
         V result = cache.put(key, value);
+        final String myName = name;
         securityService.replicate(s->
-            s.getCacheManager().getCache(name).put(key, value));
+            s.getCacheManager().getCache(myName).put(key, value));
         return result;
     }
 
     @Override
     public V remove(K key) throws CacheException {
         V result = cache.remove(key);
+        final String myName = name;
         securityService.replicate(s->
-            s.getCacheManager().getCache(name).remove(key));
+            s.getCacheManager().getCache(myName).remove(key));
         return result;
     }
 
     @Override
     public void clear() throws CacheException {
         cache.clear();
+        final String myName = name;
         securityService.replicate(s->{ 
-            s.getCacheManager().getCache(name).clear(); return null;
+            s.getCacheManager().getCache(myName).clear(); return null;
         });
     }
 
