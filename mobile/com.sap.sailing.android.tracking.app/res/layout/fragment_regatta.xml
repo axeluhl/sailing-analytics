@@ -17,7 +17,7 @@
             android:src="@drawable/picture" />
 
         <LinearLayout
-            android:id="@+id/addFoto"
+            android:id="@+id/add_photo"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:layout_centerHorizontal="true"
@@ -25,15 +25,16 @@
             android:background="@color/white_transparent"
             android:orientation="horizontal" >
 
-            <ImageView
-                android:id="@+id/photo"
+            <ImageButton
+                android:id="@+id/add_photo_button"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:paddingLeft="@dimen/activity_horizontal_margin"
+                android:background="@android:color/transparent"
                 android:src="@drawable/ic_menu_camera" />
 
             <TextView
-                android:id="@+id/add_team_photo"
+                android:id="@+id/add_photo_text"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:layout_gravity="center"

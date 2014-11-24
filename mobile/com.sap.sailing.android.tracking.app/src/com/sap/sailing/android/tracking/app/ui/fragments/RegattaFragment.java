@@ -11,6 +11,7 @@ import android.view.ViewGroup;
 import android.widget.Button;
 import android.widget.ImageButton;
 import android.widget.LinearLayout;
+import android.widget.TextView;
 
 import com.sap.sailing.android.tracking.app.R;
 import com.sap.sailing.android.tracking.app.ui.activities.RegattaActivity;
@@ -33,6 +34,12 @@ public class RegattaFragment extends BaseFragment implements OnClickListener {
 		ImageButton changePhotoButton = (ImageButton) view.findViewById(R.id.change_photo_button);
 		changePhotoButton.setOnClickListener(this);
 		
+		ImageButton addPhotoButton = (ImageButton) view.findViewById(R.id.add_photo_button);
+		addPhotoButton.setOnClickListener(this);
+		
+		TextView addPhotoText = (TextView) view.findViewById(R.id.add_photo_text);
+		addPhotoText.setOnClickListener(this);
+		
 		return view;
 	}
 
@@ -41,6 +48,12 @@ public class RegattaFragment extends BaseFragment implements OnClickListener {
 		switch (view.getId()) {
 		case R.id.start_tracking:
 			showTrackingActivity();
+			break;
+		case R.id.add_photo_button:
+			showTakePhotoActivity();
+			break;
+		case R.id.add_photo_text:
+			showTakePhotoActivity();
 			break;
 		case R.id.change_photo_button:
 			showTakePhotoActivity();

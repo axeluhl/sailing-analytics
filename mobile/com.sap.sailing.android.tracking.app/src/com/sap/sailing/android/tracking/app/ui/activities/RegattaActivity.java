@@ -110,7 +110,7 @@ public class RegattaActivity extends BaseActivity {
 		runOnUiThread(new Runnable() {
 			@Override
 			public void run() {
-				LinearLayout addTeamPhotoTextView = (LinearLayout) findViewById(R.id.addFoto);
+				LinearLayout addTeamPhotoTextView = (LinearLayout) findViewById(R.id.add_photo);
 				addTeamPhotoTextView.setVisibility(View.INVISIBLE);
 				
 				getRegattaFragment().setChangePhotoButtonHidden(false);
