@@ -1,7 +1,7 @@
 package com.sap.sse.security.userstore.mongodb;
 
 import java.util.ArrayList;
-import java.util.Collection;
+import java.util.Collections;
 import java.util.HashSet;
 import java.util.Map;
 import java.util.Map.Entry;
@@ -73,6 +73,34 @@ public class UserStoreImpl implements UserStore {
         }
     }
 
+    @Override
+    public void clear() {
+        preferences.clear();
+        emailForUsername.clear();
+        settings.clear();
+        settingTypes.clear();
+        users.clear();
+        usersByEmail.clear();
+    }
+
+    @Override
+    public void replaceContentsFrom(UserStore newUserStore) {
+        clear();
+        for (User user : newUserStore.getUsers()) {
+            users.put(user.getName(), user);
+            addToUsersByEmail(user);
+            for (Entry<String, String> userPref : newUserStore.getAllPreferences(user.getName()).entrySet()) {
+                setPreference(user.getName(), userPref.getKey(), userPref.getValue());
+            }
+        }
+        for (Entry<String, Object> setting : newUserStore.getAllSettings().entrySet()) {
+            settings.put(setting.getKey(), setting.getValue());
+        }
+        for (Entry<String, Class<?>> settingType : newUserStore.getAllSettingTypes().entrySet()) {
+            settingTypes.put(settingType.getKey(), settingType.getValue());
+        }
+    }
+
     private void addToUsersByEmail(User u) {
         if (u.getEmail() != null && !u.getEmail().isEmpty()) {
             Set<User> set = usersByEmail.get(u.getEmail());
@@ -141,7 +169,7 @@ public class UserStoreImpl implements UserStore {
     }
 
     @Override
-    public Collection<User> getUserCollection() {
+    public Iterable<User> getUsers() {
         return new ArrayList<User>(users.values());
     }
 
@@ -291,6 +319,18 @@ public class UserStoreImpl implements UserStore {
     }
 
     @Override
+    public Map<String, String> getAllPreferences(String username) {
+        final Map<String, String> userPrefs = preferences.get(username);
+        final Map<String, String> result;
+        if (userPrefs == null) {
+            result = Collections.emptyMap();
+        } else {
+            result = Collections.unmodifiableMap(userPrefs);
+        }
+        return result;
+    }
+
+    @Override
     public Map<String, Object> getAllSettings() {
         return settings;
     }
@@ -298,18 +338,5 @@ public class UserStoreImpl implements UserStore {
     @Override
     public Map<String, Class<?>> getAllSettingTypes() {
         return settingTypes;
-    }
-
-    @Override
-    public void clear() {
-        preferences.clear();
-        emailForUsername.clear();
-        settings.clear();
-        settingTypes.clear();
-        users.clear();
-        usersByEmail.clear();
-        mongoObjectFactory.clearAllPreferences();
-        mongoObjectFactory.clearAllUsers();
-        mongoObjectFactory.clearAllSettings();
     }
 }

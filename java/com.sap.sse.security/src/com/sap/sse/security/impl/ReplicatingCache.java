@@ -1,6 +1,7 @@
 package com.sap.sse.security.impl;
 
 import java.util.Collection;
+import java.util.Map;
 import java.util.Set;
 
 import org.apache.shiro.cache.Cache;
@@ -19,9 +20,9 @@ public class ReplicatingCache<K, V> implements Cache<K, V>, Named {
     private static final long serialVersionUID = 6628512191363526330L;
     private final ReplicableSecurityService securityService;
     private final String name;
-    private final Cache<K, V> cache;
+    private final Map<K, V> cache;
 
-    public ReplicatingCache(ReplicableSecurityService securityService, String name, Cache<K, V> cache) {
+    public ReplicatingCache(ReplicableSecurityService securityService, String name, Map<K, V> cache) {
         super();
         this.securityService = securityService;
         this.name = name;
@@ -72,7 +73,7 @@ public class ReplicatingCache<K, V> implements Cache<K, V>, Named {
 
     @Override
     public Set<K> keys() {
-        return cache.keys();
+        return cache.keySet();
     }
 
     @Override

@@ -83,8 +83,11 @@ public interface Replicable<S, O extends OperationWithResult<S, ?>> extends With
 
     /**
      * Before {@link #initiallyFillFrom(ObjectInputStream) initially loading a replica's state from a master instance},
-     * the replica's old state needs to be "detached". This method clears all top-level data structures and stops all
-     * tracking currently going on.<p>
+     * the replica's old state needs to be "detached". This method clears all top-level in-memory data structures and stops all
+     * tracking currently going on. It may choose to leave any persistent content unchanged as the persistence layer is in
+     * an undefined state on a replica anyhow. This seems like the safer bet, particularly in case of an accidental
+     * mis-configuration of the replica's DB connection parameters which may lead to an inadvertent overwriting of the
+     * master's DB contents.<p>
      * 
      * The reason this operation needs to be callable separate from {@link #initiallyFillFrom(ObjectInputStream)} is that
      * it needs to happen before subscribing to the operation feed received from the master instance through the message bus

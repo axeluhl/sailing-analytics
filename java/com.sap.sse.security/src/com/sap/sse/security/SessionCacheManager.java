@@ -3,15 +3,16 @@ package com.sap.sse.security;
 import org.apache.shiro.cache.Cache;
 import org.apache.shiro.cache.CacheException;
 import org.apache.shiro.cache.CacheManager;
+import org.apache.shiro.mgt.SecurityManager;
 
 import com.sap.sse.security.impl.Activator;
 import com.sap.sse.security.impl.ReplicableSecurityService;
-import com.sap.sse.security.impl.ReplicatingCache;
 
 /**
- * Obtains the singleton cache manager instance from the singleton {@link SecurityService} instance. The cache manager
- * returned will replicate all modifying operations to the {@link SecurityService} in any replica listening. Using an instance
- * of this class as the cache manager in your Shiro configuration as in
+ * A {@link CacheManager} implementation that can be used in a <code>shiro.ini</code> configuration for a
+ * {@link SecurityManager}. {@link SecurityService#getCacheManager() Obtains} the singleton cache manager instance from
+ * the singleton {@link SecurityService} instance. Using an instance of this class as the cache manager in your
+ * Shiro configuration as in
  * 
  * <pre>
  *      sessionDAO = org.apache.shiro.session.mgt.eis.EnterpriseCacheSessionDAO
@@ -25,16 +26,19 @@ import com.sap.sse.security.impl.ReplicatingCache;
  * 
  * @see SecurityService#getCacheManager()
  * 
- * @author Benjamin Ebling
+ * @author Benjamin Ebling, Axel Uhl
  *
  */
 public class SessionCacheManager implements CacheManager {
     @Override
     public <K, V> Cache<K, V> getCache(String name) throws CacheException {
         final ReplicableSecurityService securityService = (ReplicableSecurityService) Activator.getSecurityService();
+        final Cache<K, V> result;
         if (securityService == null) {
-            return null;
+            result = null;
+        } else {
+            result = securityService.getCacheManager().getCache(name);
         }
-        return new ReplicatingCache<K, V>(securityService, name, securityService.getCacheManager().getCache(name));
+        return result;
     }
 }

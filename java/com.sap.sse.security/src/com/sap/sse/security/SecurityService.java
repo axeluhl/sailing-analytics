@@ -1,6 +1,5 @@
 package com.sap.sse.security;
 
-import java.util.Collection;
 import java.util.Map;
 import java.util.Set;
 import java.util.UUID;
@@ -22,7 +21,7 @@ public interface SecurityService extends ReplicableWithObjectInputStream<Replica
 
     SecurityManager getSecurityManager();
 
-    Collection<User> getUserList();
+    Iterable<User> getUserList();
 
     User getUserByName(String username);
 

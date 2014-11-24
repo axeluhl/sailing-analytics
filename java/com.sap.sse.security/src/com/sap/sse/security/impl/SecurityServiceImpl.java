@@ -9,7 +9,6 @@ import java.io.UnsupportedEncodingException;
 import java.net.MalformedURLException;
 import java.net.URLEncoder;
 import java.util.Arrays;
-import java.util.Collection;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.Map.Entry;
@@ -38,12 +37,12 @@ import org.apache.shiro.authc.LockedAccountException;
 import org.apache.shiro.authc.UnknownAccountException;
 import org.apache.shiro.authc.UsernamePasswordToken;
 import org.apache.shiro.cache.CacheManager;
-import org.apache.shiro.cache.ehcache.EhCacheManager;
 import org.apache.shiro.config.Ini;
 import org.apache.shiro.config.Ini.Section;
 import org.apache.shiro.crypto.RandomNumberGenerator;
 import org.apache.shiro.crypto.SecureRandomNumberGenerator;
 import org.apache.shiro.crypto.hash.Sha256Hash;
+import org.apache.shiro.mgt.CachingSecurityManager;
 import org.apache.shiro.mgt.SecurityManager;
 import org.apache.shiro.subject.Subject;
 import org.apache.shiro.util.Factory;
@@ -78,6 +77,7 @@ import com.sap.sse.security.GithubApi;
 import com.sap.sse.security.InstagramApi;
 import com.sap.sse.security.OAuthRealm;
 import com.sap.sse.security.OAuthToken;
+import com.sap.sse.security.SessionCacheManager;
 import com.sap.sse.security.SessionUtils;
 import com.sap.sse.security.Social;
 import com.sap.sse.security.SocialSettingsKeys;
@@ -96,8 +96,15 @@ public class SecurityServiceImpl extends RemoteServiceServlet implements Replica
 
     private static final Logger logger = Logger.getLogger(SecurityServiceImpl.class.getName());
 
-    private SecurityManager securityManager;
-    private final CacheManager cacheManager = new EhCacheManager();
+    private CachingSecurityManager securityManager;
+    
+    /**
+     * A cache manager that the {@link SessionCacheManager} delegates to. This way, multiple Shiro configurations can
+     * share the cache manager provided as a singleton within this bundle instance. The cache manager is replicating,
+     * forwarding changes to the caches to all replicas registered.
+     */
+    private final ReplicatingCacheManager cacheManager;
+    
     private UserStore store;
     private final Properties mailProperties;
     private final ConcurrentHashMap<OperationExecutionListener<ReplicableSecurityService>, OperationExecutionListener<ReplicableSecurityService>> operationExecutionListeners;
@@ -114,11 +121,12 @@ public class SecurityServiceImpl extends RemoteServiceServlet implements Replica
     public SecurityServiceImpl(UserStore store, Properties mailProperties) {
         assert mailProperties != null;
         logger.info("Initializing Security Service with user store " + store+" and mail properties "+mailProperties);
+        cacheManager = new ReplicatingCacheManager();
         this.operationExecutionListeners = new ConcurrentHashMap<>();
         this.store = store;
         this.mailProperties = mailProperties;
         // Create default users if no users exist yet.
-        if (store.getUserCollection().isEmpty()) {
+        if (Util.isEmpty(store.getUsers())) {
             try {
                 logger.info("No users found, creating default user \"admin\" with password \"admin\"");
                 createSimpleUser("admin", "nobody@sapsailing.com", "admin", /* validationBaseURL */ null);
@@ -141,7 +149,7 @@ public class SecurityServiceImpl extends RemoteServiceServlet implements Replica
         }
         logger.info(logMessage.toString());
         System.setProperty("java.net.useSystemProxies", "true");
-        SecurityManager securityManager = factory.getInstance();
+        CachingSecurityManager securityManager = (CachingSecurityManager) factory.getInstance();
         logger.info("Created: " + securityManager);
         SecurityUtils.setSecurityManager(securityManager);
         this.securityManager = securityManager;
@@ -226,13 +234,13 @@ public class SecurityServiceImpl extends RemoteServiceServlet implements Replica
     }
 
     @Override
-    public SecurityManager getSecurityManager() {
+    public CachingSecurityManager getSecurityManager() {
         return this.securityManager;
     }
 
     @Override
-    public Collection<User> getUserList() {
-        return store.getUserCollection();
+    public Iterable<User> getUserList() {
+        return store.getUsers();
     }
 
     @Override
@@ -852,6 +860,8 @@ public class SecurityServiceImpl extends RemoteServiceServlet implements Replica
     @Override
     public void initiallyFillFromInternal(ObjectInputStream is) throws IOException, ClassNotFoundException,
             InterruptedException {
+        ReplicatingCacheManager newCacheManager = (ReplicatingCacheManager) is.readObject();
+        cacheManager.replaceContentsFrom(newCacheManager);
         // overriding thread context class loader because the user store may be provided by a different bundle;
         // We're assuming here that the user store service is provided by the same bundle in the replica as on the master.
         ClassLoader oldCCL = Thread.currentThread().getContextClassLoader();
@@ -860,7 +870,7 @@ public class SecurityServiceImpl extends RemoteServiceServlet implements Replica
         }
         try {
             UserStore newUserStore = (UserStore) is.readObject();
-            store = newUserStore;
+            store.replaceContentsFrom(newUserStore);
         } finally {
             Thread.currentThread().setContextClassLoader(oldCCL);
         }
@@ -868,6 +878,7 @@ public class SecurityServiceImpl extends RemoteServiceServlet implements Replica
 
     @Override
     public void serializeForInitialReplicationInternal(ObjectOutputStream objectOutputStream) throws IOException {
+        objectOutputStream.writeObject(cacheManager);
         objectOutputStream.writeObject(store);
     }
 
