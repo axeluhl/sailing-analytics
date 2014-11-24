@@ -1,7 +1,6 @@
 package com.sap.sse.security.impl;
 
 import java.io.Serializable;
-import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
 
 import org.apache.shiro.cache.Cache;
@@ -17,7 +16,7 @@ import org.apache.shiro.cache.CacheManager;
  */
 public class ReplicatingCacheManager implements CacheManager, Serializable {
     private static final long serialVersionUID = -8035346668009900228L;
-    private ConcurrentHashMap<String, ConcurrentHashMap<Object, Object>> caches;
+    private ConcurrentHashMap<String, ReplicatingCache<?, ?>> caches;
     
     public ReplicatingCacheManager() {
         this.caches = new ConcurrentHashMap<>();
@@ -29,15 +28,13 @@ public class ReplicatingCacheManager implements CacheManager, Serializable {
         if (securityService == null) {
             return null;
         }
-        ConcurrentHashMap<Object, Object> cache = this.caches.get(name);
+        @SuppressWarnings("unchecked")
+        ReplicatingCache<K, V> cache = (ReplicatingCache<K, V>) this.caches.get(name);
         if (cache == null) {
-            cache = new ConcurrentHashMap<>();
+            cache = new ReplicatingCache<K, V>(securityService, name);
             caches.put(name, cache);
         }
-        @SuppressWarnings("unchecked")
-        final Map<K, V> castCache = (Map<K, V>) cache;
-        ReplicatingCache<K, V> result = new ReplicatingCache<K, V>(securityService, name, castCache);
-        return result;
+        return cache;
     }
     
     public void replaceContentsFrom(ReplicatingCacheManager other) {
