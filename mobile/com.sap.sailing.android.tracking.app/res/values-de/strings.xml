@@ -43,5 +43,9 @@
 	<string name="tracking_mode_caching">Caching</string>
 	<string name="tracking_mode_api_error">API-Fehler</string>
 	<string name="add_team_photo">Team Foto hinzufügen</string>
+	<string name="do_you_want_to_choose_existing_img_or_take_a_new_one">Bild auswählen oder neues Foto aufnehmen?</string>
+	<string name="existing_image">Auswählen</string>
+	<string name="take_photo">Foto aufnehmen</string>
+	<string name="add_photo_select">Foto</string>
 
 </resources>
