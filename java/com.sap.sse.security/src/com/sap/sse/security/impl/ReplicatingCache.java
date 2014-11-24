@@ -5,9 +5,12 @@ import java.io.ObjectInputStream;
 import java.util.Collection;
 import java.util.Set;
 import java.util.concurrent.ConcurrentHashMap;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 
 import org.apache.shiro.cache.Cache;
 import org.apache.shiro.cache.CacheException;
+import org.apache.shiro.session.Session;
 
 import com.sap.sse.common.Named;
 
@@ -19,6 +22,7 @@ import com.sap.sse.common.Named;
  *
  */
 public class ReplicatingCache<K, V> implements Cache<K, V>, Named {
+    private static final Logger logger = Logger.getLogger(ReplicatingCache.class.getName());
     private static final long serialVersionUID = 6628512191363526330L;
     private transient ReplicableSecurityService securityService;
     private final String name;
@@ -43,16 +47,39 @@ public class ReplicatingCache<K, V> implements Cache<K, V>, Named {
 
     @Override
     public V get(K key) throws CacheException {
+        if (logger.isLoggable(Level.FINE)) {
+            logger.fine("get("+key+") on "+name+"@"+System.identityHashCode(this)+"="+cache.get(key));
+        }
         return cache.get(key);
     }
 
     @Override
     public V put(K key, V value) throws CacheException {
+        if (logger.isLoggable(Level.FINE)) {
+            logger.fine("put("+key+", "+value+") into cache "+name+"@"+System.identityHashCode(this));
+            if (value instanceof Session) {
+                Session session = (Session) value;
+                logSession(session);
+            }
+        }
         V result = cache.put(key, value);
         final String myName = name;
         securityService.replicate(s->
             s.getCacheManager().getCache(myName).put(key, value));
         return result;
+    }
+
+    private void logSession(Session session) {
+        final StringBuilder sb = new StringBuilder();
+        for (Object key : session.getAttributeKeys()) {
+            sb.append("  ");
+            sb.append(key);
+            sb.append("=");
+            sb.append(session.getAttribute(key));
+            sb.append("\n");
+        }
+        logger.fine("Session:\n"+sb.toString());
+        
     }
 
     @Override

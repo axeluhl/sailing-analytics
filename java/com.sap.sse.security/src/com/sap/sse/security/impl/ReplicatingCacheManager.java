@@ -1,6 +1,7 @@
 package com.sap.sse.security.impl;
 
 import java.io.Serializable;
+import java.util.Map.Entry;
 import java.util.concurrent.ConcurrentHashMap;
 
 import org.apache.shiro.cache.Cache;
@@ -38,6 +39,25 @@ public class ReplicatingCacheManager implements CacheManager, Serializable {
     }
     
     public void replaceContentsFrom(ReplicatingCacheManager other) {
-        this.caches = other.caches;
+        for (Entry<String, ReplicatingCache<?, ?>> i : other.caches.entrySet()) {
+            replaceOrUpdate(i.getKey(), i.getValue());
+        }
+    }
+
+    private <K, V> void replaceOrUpdate(String name, ReplicatingCache<K, V> otherCache) {
+        @SuppressWarnings("unchecked")
+        ReplicatingCache<K, V> castCache = (ReplicatingCache<K, V>) this.caches.get(name);
+        if (castCache == null) {
+            this.caches.put(name, otherCache);
+        } else {
+            putAll(castCache, otherCache);
+        }
+    }
+
+    private <K, V> void putAll(final ReplicatingCache<K, V> from, ReplicatingCache<K, V> into) {
+        from.clear();
+        for (K k:into.keys()) {
+            from.put(k, into.get(k));
+        }
     }
 }
