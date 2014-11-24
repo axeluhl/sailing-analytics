@@ -443,21 +443,44 @@ public class SecurityServiceImpl extends RemoteServiceServlet implements Replica
 
     @Override
     public void addRoleForUser(String username, String role) throws UserManagementException {
+        apply(s->s.internalAddRoleForUser(username, role));
+    }
+
+    @Override
+    public Void internalAddRoleForUser(String username, String role) throws UserManagementException {
         store.addRoleForUser(username, role);
+        return null;
     }
 
     @Override
     public void removeRoleFromUser(String username, String role) throws UserManagementException {
+        apply(s->s.internalRemoveRoleFromUser(username, role));
+    }
+
+    @Override
+    public Void internalRemoveRoleFromUser(String username, String role) throws UserManagementException {
         store.removeRoleFromUser(username, role);
+        return null;
     }
 
     @Override
     public void deleteUser(String username) throws UserManagementException {
+        apply(s->s.internalDeleteUser(username));
+    }
+
+    @Override
+    public Void internalDeleteUser(String username) throws UserManagementException {
         store.deleteUser(username);
+        return null;
     }
 
     @Override
     public boolean setSetting(String key, Object setting) {
+        return apply(s->s.internalSetSetting(key, setting));
+    }
+
+    @Override
+    public Boolean internalSetSetting(String key, Object setting) {
         return store.setSetting(key, setting);
     }
 
@@ -567,7 +590,6 @@ public class SecurityServiceImpl extends RemoteServiceServlet implements Replica
         logger.info("Getting Authorization url...");
         try {
             authorizationUrl = service.getAuthorizationUrl(requestToken);
-
             // Facebook has optional state var to protect against CSFR.
             // We'll use it
             if (authProvider == ClientUtils.FACEBOOK || authProvider == ClientUtils.GITHUB
@@ -716,7 +738,13 @@ public class SecurityServiceImpl extends RemoteServiceServlet implements Replica
         if (!isValidSettingsKey(key)) {
             throw new UserManagementException("Invalid key!");
         }
+        apply(s->s.internalAddSetting(key, clazz));
+    }
+
+    @Override
+    public Void internalAddSetting(String key, Class<?> clazz) {
         store.addSetting(key, clazz);
+        return null;
     }
 
     public static boolean isValidSettingsKey(String key) {
@@ -760,25 +788,37 @@ public class SecurityServiceImpl extends RemoteServiceServlet implements Replica
     }
 
     @Override
-    public void setPreference(String username, String key, String value) {
-        Subject subject = SecurityUtils.getSubject();
+    public void setPreference(final String username, final String key, final String value) {
+        final Subject subject = SecurityUtils.getSubject();
         if (subject.hasRole(DefaultRoles.ADMIN.name()) || username.equals(SessionUtils.loadUsername())) {
-            store.setPreference(username, key, value);
+            apply(s->s.internalSetPreference(username, key, value));
         } else {
             throw new SecurityException("User " + SessionUtils.loadUsername()
                     + " does not have permission to set preference for user " + username);
         }
+    }
+
+    @Override
+    public Void internalSetPreference(final String username, final String key, final String value) {
+        store.setPreference(username, key, value);
+        return null;
     }
     
     @Override
     public void unsetPreference(String username, String key) {
         Subject subject = SecurityUtils.getSubject();
         if (subject.hasRole(DefaultRoles.ADMIN.name()) || username.equals(SessionUtils.loadUsername())) {
-            store.unsetPreference(username, key);
+            apply(s->s.internalUnsetPreference(username, key));
         } else {
             throw new SecurityException("User " + SessionUtils.loadUsername()
                     + " does not have permission to unset preference for user " + username);
         }
+    }
+
+    @Override
+    public Void internalUnsetPreference(String username, String key) {
+        store.unsetPreference(username, key);
+        return null;
     }
 
     @Override

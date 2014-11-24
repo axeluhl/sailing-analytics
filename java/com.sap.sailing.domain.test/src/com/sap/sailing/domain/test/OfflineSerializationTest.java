@@ -6,9 +6,11 @@ import static org.junit.Assert.assertSame;
 import static org.junit.Assert.assertTrue;
 import static org.junit.Assert.fail;
 
+import java.io.ByteArrayInputStream;
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 import java.io.NotSerializableException;
+import java.io.ObjectInputStream;
 import java.io.ObjectOutputStream;
 import java.io.Serializable;
 import java.util.Arrays;
@@ -231,5 +233,22 @@ public class OfflineSerializationTest extends AbstractSerializationTest {
             // this is expected
             logger.info("Caught expected exception "+nse);
         }
+    }
+    
+    private static class NonSerializableFieldDeclaration implements Serializable {
+        private static final long serialVersionUID = 1806419236999145531L;
+        public Object nonSerializable;
+    }
+    @Test
+    public void testSerializingSerializableFieldValueOfNonSerializableDeclaredType() throws IOException, ClassNotFoundException {
+        final NonSerializableFieldDeclaration o = new NonSerializableFieldDeclaration();
+        o.nonSerializable = "A serializable String object";
+        final ByteArrayOutputStream bos = new ByteArrayOutputStream();
+        final ObjectOutputStream oos = new ObjectOutputStream(bos);
+        oos.writeObject(o);
+        oos.close();
+        final ObjectInputStream ois = new ObjectInputStream(new ByteArrayInputStream(bos.toByteArray()));
+        NonSerializableFieldDeclaration o2 = (NonSerializableFieldDeclaration) ois.readObject();
+        assertEquals(o.nonSerializable, o2.nonSerializable);
     }
 }

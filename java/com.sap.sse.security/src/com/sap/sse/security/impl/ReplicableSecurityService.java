@@ -2,6 +2,7 @@ package com.sap.sse.security.impl;
 
 import com.sap.sse.security.SecurityService;
 import com.sap.sse.security.User;
+import com.sap.sse.security.shared.UserManagementException;
 
 /**
  * Publishes those methods of {@link SecurityServiceImpl} that are required by operations implemented as lambda
@@ -14,4 +15,18 @@ import com.sap.sse.security.User;
  */
 public interface ReplicableSecurityService extends SecurityService {
     Void internalStoreUser(User user);
+
+    Void internalSetPreference(String username, String key, String value);
+
+    Void internalUnsetPreference(String username, String key);
+
+    Boolean internalSetSetting(String key, Object setting);
+
+    Void internalAddSetting(String key, Class<?> clazz);
+
+    Void internalAddRoleForUser(String username, String role) throws UserManagementException;
+
+    Void internalRemoveRoleFromUser(String username, String role) throws UserManagementException;
+
+    Void internalDeleteUser(String username) throws UserManagementException;
 }
