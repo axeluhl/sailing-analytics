@@ -2188,102 +2188,95 @@ public class RacingEventServiceImpl implements RacingEventServiceWithTestSupport
     @Override
     public void initiallyFillFromInternal(ObjectInputStream ois) throws IOException, ClassNotFoundException, InterruptedException {
         logger.info("Performing initial replication load on " + this);
-        ClassLoader oldContextClassloader = Thread.currentThread().getContextClassLoader();
-        try {
-            // Use this object's class's class loader as the context class loader which will then be used for
-            // de-serialization; this will cause all classes to be visible that this bundle
-            // (com.sap.sailing.server) can see
-            Thread.currentThread().setContextClassLoader(getClass().getClassLoader());
-            StringBuffer logoutput = new StringBuffer();
-            logger.info("Reading all events...");
-            eventsById.putAll((Map<Serializable, Event>) ois.readObject());
-            logoutput.append("\nReceived " + eventsById.size() + " NEW events\n");
-            for (Event event : eventsById.values()) {
-                logoutput.append(String.format("%3s\n", event.toString()));
-            }
-
-            logger.info("Reading all regattas...");
-            regattasByName.putAll((Map<String, Regatta>) ois.readObject());
-            logoutput.append("Received " + regattasByName.size() + " NEW regattas\n");
-            for (Regatta regatta : regattasByName.values()) {
-                logoutput.append(String.format("%3s\n", regatta.toString()));
-            }
-
-            // it is important that the leaderboards and tracked regattas are cleared before auto-linking to
-            // old leaderboards takes place which then don't match the new ones
-            logger.info("Reading all dynamic tracked regattas...");
-            for (DynamicTrackedRegatta trackedRegattaToObserve : (Set<DynamicTrackedRegatta>) ois.readObject()) {
-                ensureRegattaIsObservedForDefaultLeaderboardAndAutoLeaderboardLinking(trackedRegattaToObserve);
-            }
-
-            logger.info("Reading all of the regatta tracking cache...");
-            regattaTrackingCache.putAll((Map<Regatta, DynamicTrackedRegatta>) ois.readObject());
-            logoutput.append("Received " + regattaTrackingCache.size() + " NEW regatta tracking cache entries\n");
-
-            logger.info("Reading leaderboard groups...");
-            leaderboardGroupsByName.putAll((Map<String, LeaderboardGroup>) ois.readObject());
-            logoutput.append("Received " + leaderboardGroupsByName.size() + " NEW leaderboard groups\n");
-            for (LeaderboardGroup lg : leaderboardGroupsByName.values()) {
-                leaderboardGroupsByID.put(lg.getId(), lg);
-                logoutput.append(String.format("%3s\n", lg.toString()));
-            }
-
-            logger.info("Reading leaderboards by name...");
-            leaderboardsByName.putAll((Map<String, Leaderboard>) ois.readObject());
-            logoutput.append("Received " + leaderboardsByName.size() + " NEW leaderboards\n");
-            for (Leaderboard leaderboard : leaderboardsByName.values()) {
-                logoutput.append(String.format("%3s\n", leaderboard.toString()));
-            }
-
-            // now fix ScoreCorrectionListener setup for LeaderboardGroupMetaLeaderboard instances:
-            for (Leaderboard leaderboard : leaderboardsByName.values()) {
-                if (leaderboard instanceof LeaderboardGroupMetaLeaderboard) {
-                    ((LeaderboardGroupMetaLeaderboard) leaderboard)
-                            .registerAsScoreCorrectionChangeForwarderAndRaceColumnListenerOnAllLeaderboards();
-                }
-            }
-
-            logger.info("Reading media library...");
-            mediaLibrary.deserialize(ois);
-            logoutput.append("Received " + mediaLibrary.allTracks().size() + " NEW media tracks\n");
-            for (MediaTrack mediatrack : mediaLibrary.allTracks()) {
-                logoutput.append(String.format("%3s\n", mediatrack.toString()));
-            }
-
-            // only copy the competitors from the deserialized competitor store; don't use it because it will have set
-            // a default Mongo object factory
-            logger.info("Reading competitors...");
-            for (Competitor competitor : ((CompetitorStore) ois.readObject()).getCompetitors()) {
-                DynamicCompetitor dynamicCompetitor = (DynamicCompetitor) competitor;
-                competitorStore.getOrCreateCompetitor(dynamicCompetitor.getId(), dynamicCompetitor.getName(),
-                        dynamicCompetitor.getColor(), dynamicCompetitor.getTeam(), dynamicCompetitor.getBoat());
-            }
-            logoutput.append("Received " + competitorStore.size() + " NEW competitors\n");
-
-            logger.info("Reading device configurations...");
-            configurationMap.putAll((DeviceConfigurationMapImpl) ois.readObject());
-            logoutput.append("Received " + configurationMap.size() + " NEW configuration entries\n");
-            for (DeviceConfigurationMatcher matcher : configurationMap.keySet()) {
-                logoutput.append(String.format("%3s\n", matcher.toString()));
-            }
-
-            logger.info("Reading remote sailing server references...");
-            for (RemoteSailingServerReference remoteSailingServerReference : (Iterable<RemoteSailingServerReference>) ois
-                    .readObject()) {
-                remoteSailingServerSet.add(remoteSailingServerReference);
-                logoutput.append("Received remote sailing server reference " + remoteSailingServerReference);
-            }
-
-            // make sure to initialize listeners correctly
-            for (Regatta regatta : regattasByName.values()) {
-                RegattaImpl regattaImpl = (RegattaImpl) regatta;
-                regattaImpl.initializeSeriesAfterDeserialize();
-            }
-
-            logger.info(logoutput.toString());
-        } finally {
-            Thread.currentThread().setContextClassLoader(oldContextClassloader);
+        // Use this object's class's class loader as the context class loader which will then be used for
+        // de-serialization; this will cause all classes to be visible that this bundle
+        // (com.sap.sailing.server) can see
+        StringBuffer logoutput = new StringBuffer();
+        logger.info("Reading all events...");
+        eventsById.putAll((Map<Serializable, Event>) ois.readObject());
+        logoutput.append("\nReceived " + eventsById.size() + " NEW events\n");
+        for (Event event : eventsById.values()) {
+            logoutput.append(String.format("%3s\n", event.toString()));
         }
+
+        logger.info("Reading all regattas...");
+        regattasByName.putAll((Map<String, Regatta>) ois.readObject());
+        logoutput.append("Received " + regattasByName.size() + " NEW regattas\n");
+        for (Regatta regatta : regattasByName.values()) {
+            logoutput.append(String.format("%3s\n", regatta.toString()));
+        }
+
+        // it is important that the leaderboards and tracked regattas are cleared before auto-linking to
+        // old leaderboards takes place which then don't match the new ones
+        logger.info("Reading all dynamic tracked regattas...");
+        for (DynamicTrackedRegatta trackedRegattaToObserve : (Set<DynamicTrackedRegatta>) ois.readObject()) {
+            ensureRegattaIsObservedForDefaultLeaderboardAndAutoLeaderboardLinking(trackedRegattaToObserve);
+        }
+
+        logger.info("Reading all of the regatta tracking cache...");
+        regattaTrackingCache.putAll((Map<Regatta, DynamicTrackedRegatta>) ois.readObject());
+        logoutput.append("Received " + regattaTrackingCache.size() + " NEW regatta tracking cache entries\n");
+
+        logger.info("Reading leaderboard groups...");
+        leaderboardGroupsByName.putAll((Map<String, LeaderboardGroup>) ois.readObject());
+        logoutput.append("Received " + leaderboardGroupsByName.size() + " NEW leaderboard groups\n");
+        for (LeaderboardGroup lg : leaderboardGroupsByName.values()) {
+            leaderboardGroupsByID.put(lg.getId(), lg);
+            logoutput.append(String.format("%3s\n", lg.toString()));
+        }
+
+        logger.info("Reading leaderboards by name...");
+        leaderboardsByName.putAll((Map<String, Leaderboard>) ois.readObject());
+        logoutput.append("Received " + leaderboardsByName.size() + " NEW leaderboards\n");
+        for (Leaderboard leaderboard : leaderboardsByName.values()) {
+            logoutput.append(String.format("%3s\n", leaderboard.toString()));
+        }
+
+        // now fix ScoreCorrectionListener setup for LeaderboardGroupMetaLeaderboard instances:
+        for (Leaderboard leaderboard : leaderboardsByName.values()) {
+            if (leaderboard instanceof LeaderboardGroupMetaLeaderboard) {
+                ((LeaderboardGroupMetaLeaderboard) leaderboard)
+                        .registerAsScoreCorrectionChangeForwarderAndRaceColumnListenerOnAllLeaderboards();
+            }
+        }
+
+        logger.info("Reading media library...");
+        mediaLibrary.deserialize(ois);
+        logoutput.append("Received " + mediaLibrary.allTracks().size() + " NEW media tracks\n");
+        for (MediaTrack mediatrack : mediaLibrary.allTracks()) {
+            logoutput.append(String.format("%3s\n", mediatrack.toString()));
+        }
+
+        // only copy the competitors from the deserialized competitor store; don't use it because it will have set
+        // a default Mongo object factory
+        logger.info("Reading competitors...");
+        for (Competitor competitor : ((CompetitorStore) ois.readObject()).getCompetitors()) {
+            DynamicCompetitor dynamicCompetitor = (DynamicCompetitor) competitor;
+            competitorStore.getOrCreateCompetitor(dynamicCompetitor.getId(), dynamicCompetitor.getName(),
+                    dynamicCompetitor.getColor(), dynamicCompetitor.getTeam(), dynamicCompetitor.getBoat());
+        }
+        logoutput.append("Received " + competitorStore.size() + " NEW competitors\n");
+
+        logger.info("Reading device configurations...");
+        configurationMap.putAll((DeviceConfigurationMapImpl) ois.readObject());
+        logoutput.append("Received " + configurationMap.size() + " NEW configuration entries\n");
+        for (DeviceConfigurationMatcher matcher : configurationMap.keySet()) {
+            logoutput.append(String.format("%3s\n", matcher.toString()));
+        }
+
+        logger.info("Reading remote sailing server references...");
+        for (RemoteSailingServerReference remoteSailingServerReference : (Iterable<RemoteSailingServerReference>) ois
+                .readObject()) {
+            remoteSailingServerSet.add(remoteSailingServerReference);
+            logoutput.append("Received remote sailing server reference " + remoteSailingServerReference);
+        }
+
+        // make sure to initialize listeners correctly
+        for (Regatta regatta : regattasByName.values()) {
+            RegattaImpl regattaImpl = (RegattaImpl) regatta;
+            regattaImpl.initializeSeriesAfterDeserialize();
+        }
+        logger.info(logoutput.toString());
     }
 
     @Override

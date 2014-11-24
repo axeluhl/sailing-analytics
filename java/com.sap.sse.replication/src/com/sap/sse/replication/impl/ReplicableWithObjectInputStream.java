@@ -45,7 +45,15 @@ public interface ReplicableWithObjectInputStream<S, O extends OperationWithResul
 
     @Override
     default void initiallyFillFrom(InputStream is) throws IOException, ClassNotFoundException, InterruptedException {
-        initiallyFillFromInternal(createObjectInputStreamResolvingAgainstCache(is));
+        final ObjectInputStream objectInputStream = createObjectInputStreamResolvingAgainstCache(is);
+        ClassLoader oldContextClassloader = Thread.currentThread().getContextClassLoader();
+        Thread.currentThread().setContextClassLoader(getClass().getClassLoader());
+        try {
+            initiallyFillFromInternal(objectInputStream);
+        } finally {
+            Thread.currentThread().setContextClassLoader(oldContextClassloader);
+        }
+        
     }
     
     /**
