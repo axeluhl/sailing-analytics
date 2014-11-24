@@ -1,7 +1,6 @@
 package com.sap.sailing.android.tracking.app.ui.fragments;
 
 import java.io.UnsupportedEncodingException;
-import java.net.URLDecoder;
 import java.net.URLEncoder;
 import java.util.ArrayList;
 import java.util.Date;
@@ -54,6 +53,7 @@ import com.sap.sailing.android.tracking.app.provider.AnalyticsContract.Competito
 import com.sap.sailing.android.tracking.app.provider.AnalyticsContract.Event;
 import com.sap.sailing.android.tracking.app.provider.AnalyticsContract.Leaderboard;
 import com.sap.sailing.android.tracking.app.ui.activities.RegattaActivity;
+import com.sap.sailing.android.tracking.app.ui.activities.StartActivity;
 import com.sap.sailing.android.tracking.app.utils.AppPreferences;
 import com.sap.sailing.android.tracking.app.utils.CheckinHelper;
 import com.sap.sailing.android.tracking.app.utils.VolleyHelper;
@@ -71,7 +71,11 @@ public class HomeFragment extends BaseFragment implements
 
 	private Button scan;
 	private int requestCodeQRCode = 442;
-	private RegattaAdapter mAdapter;
+	private RegattaAdapter adapter;
+	
+	private int eventRowId;
+	private int competitorRowId;
+	private int leaderboardRowId;
 
 	@SuppressLint("InflateParams")
 	@Override
@@ -94,15 +98,21 @@ public class HomeFragment extends BaseFragment implements
 		if (listView != null) {
 			listView.addHeaderView(inflater.inflate(
 					R.layout.regatta_listview_header, null));
-			mAdapter = new RegattaAdapter(getActivity(),
+			adapter = new RegattaAdapter(getActivity(),
 					R.layout.ragatta_listview_row, null, 0);
-			listView.setAdapter(mAdapter);
+			listView.setAdapter(adapter);
 			listView.setOnItemClickListener(new ItemClickListener());
 		}
 
 		getLoaderManager().initLoader(REGATTA_LOADER, null, this);
 
 		return view;
+	}
+	
+	@Override
+	public void onResume() {
+		super.onResume();
+		adapter.notifyDataSetChanged();
 	}
 
 	private boolean requestQRCodeScan() {
@@ -190,6 +200,8 @@ public class HomeFragment extends BaseFragment implements
 		// 3. Get Competitor
 		// 4. Let user confirm that the information is correct
 		// 5. Checkin
+		
+		final StartActivity startActivity = (StartActivity)getActivity();
 
 		final String getEventUrl = prefs.getServerURL()
 				+ prefs.getServerEventPath(eventId);
@@ -198,12 +210,14 @@ public class HomeFragment extends BaseFragment implements
 		final String getCompetitorUrl = prefs.getServerURL()
 				+ prefs.getServerCompetitorPath(competitorId);
 
+		startActivity.showProgressDialog(R.string.please_wait, R.string.getting_leaderboard);
 		JsonObjectRequest getLeaderboardRequest = new JsonObjectRequest(
 				getLeaderboardUrl, null, new Listener<JSONObject>() {
 
 					@Override
 					public void onResponse(JSONObject response) {
-
+						startActivity.dismissProgressDialog();
+						
 						final String leaderboardName;
 
 						try {
@@ -216,12 +230,16 @@ public class HomeFragment extends BaseFragment implements
 							displayAPIErrorRecommendRetry();
 							return;
 						}
-
+						
+						startActivity.showProgressDialog(R.string.please_wait, R.string.getting_event);
+						
 						JsonObjectRequest getEventRequest = new JsonObjectRequest(
 								getEventUrl, null, new Listener<JSONObject>() {
 
 									@Override
 									public void onResponse(JSONObject response) {
+										startActivity.dismissProgressDialog();
+										
 										final String eventId;
 										final String eventName;
 										final String eventStartDateStr;
@@ -261,13 +279,17 @@ public class HomeFragment extends BaseFragment implements
 											displayAPIErrorRecommendRetry();
 											return;
 										}
-
+										
+										startActivity.showProgressDialog(R.string.please_wait, R.string.getting_competitor);
+										
 										JsonObjectRequest getCompetitorRequest = new JsonObjectRequest(
 												getCompetitorUrl, null,
 												new Listener<JSONObject>() {
 													@Override
 													public void onResponse(
 															JSONObject response) {
+														startActivity.dismissProgressDialog();
+														
 														final String competitorDisplayName;
 														final String competitorId;
 														final String competitorSailId;
@@ -396,6 +418,7 @@ public class HomeFragment extends BaseFragment implements
 
 					@Override
 					public void onClick(DialogInterface dialog, int which) {
+						
 						dialog.cancel();
 
 					}
@@ -403,6 +426,18 @@ public class HomeFragment extends BaseFragment implements
 
 		AlertDialog alert = builder.create();
 		alert.show();
+	}
+	
+	/**
+	 * Delete Event, Competitor and Leaderboard
+	 */
+	private void deleteRegttaFromDatabase()
+	{
+		ContentResolver cr = getActivity().getContentResolver();
+		
+		cr.delete(Event.CONTENT_URI, BaseColumns._ID + " = " + eventRowId, null);
+		cr.delete(Competitor.CONTENT_URI, BaseColumns._ID + " = " + competitorRowId, null);
+		cr.delete(Leaderboard.CONTENT_URI, BaseColumns._ID + " = " + leaderboardRowId, null);
 	}
 
 	/**
@@ -502,6 +537,7 @@ public class HomeFragment extends BaseFragment implements
 				}
 
 				cr.applyBatch(AnalyticsContract.CONTENT_AUTHORITY, opList);
+				adapter.notifyDataSetChanged();
 			} catch (RemoteException e1) {
 				ExLog.e(getActivity(), TAG,
 						"Batch insert failed: " + e1.getMessage());
@@ -533,6 +569,10 @@ public class HomeFragment extends BaseFragment implements
 	 */
 	private void performAPICheckin(CheckinData checkinData) {
 		Date date = new Date();
+		
+		StartActivity startActivity = (StartActivity)getActivity();
+		
+		startActivity.showProgressDialog(R.string.please_wait, R.string.checking_in);
 
 		try {
 			JSONObject requestObject = CheckinHelper.getCheckinJson(
@@ -636,7 +676,7 @@ public class HomeFragment extends BaseFragment implements
 	public void onLoadFinished(Loader<Cursor> loader, Cursor cursor) {
 		switch (loader.getId()) {
 		case REGATTA_LOADER:
-			mAdapter.changeCursor(cursor);
+			adapter.changeCursor(cursor);
 			break;
 
 		default:
@@ -648,7 +688,7 @@ public class HomeFragment extends BaseFragment implements
 	public void onLoaderReset(Loader<Cursor> loader) {
 		switch (loader.getId()) {
 		case REGATTA_LOADER:
-			mAdapter.changeCursor(null);
+			adapter.changeCursor(null);
 			break;
 
 		default:
@@ -697,7 +737,7 @@ public class HomeFragment extends BaseFragment implements
 				return;
 			}
 
-			Cursor cursor = (Cursor) mAdapter.getItem(position - 1); // -1,
+			Cursor cursor = (Cursor) adapter.getItem(position - 1); // -1,
 																		// because
 																		// there's
 																		// a
@@ -705,15 +745,11 @@ public class HomeFragment extends BaseFragment implements
 																		// row
 		
 			
-			prefs.setServerURL(cursor.getString(cursor
-					.getColumnIndex(Event.EVENT_SERVER)));
+			prefs.setServerURL(cursor.getString(cursor.getColumnIndex(Event.EVENT_SERVER)));
 
-			String leaderboardName = cursor.getString(cursor
-					.getColumnIndex("leaderboard_name"));
-			String competitorId = cursor.getString(cursor
-					.getColumnIndex("competitor_id"));
-			String eventId = cursor.getString(cursor
-					.getColumnIndex("event_id"));
+			String leaderboardName = cursor.getString(cursor.getColumnIndex("leaderboard_name"));
+			String competitorId = cursor.getString(cursor.getColumnIndex("competitor_id"));
+			String eventId = cursor.getString(cursor.getColumnIndex("event_id"));
 
 			startRegatta(leaderboardName, eventId, competitorId);
 		}
@@ -725,8 +761,7 @@ public class HomeFragment extends BaseFragment implements
 		public String eventId;
 		public String competitorId;
 
-		public CheckinListener(String leaderboardName, String eventId,
-				String competitorId) {
+		public CheckinListener(String leaderboardName, String eventId, String competitorId) {
 			this.leaderboardName = leaderboardName;
 			this.eventId = eventId;
 			this.competitorId = competitorId;
@@ -734,6 +769,8 @@ public class HomeFragment extends BaseFragment implements
 
 		@Override
 		public void onResponse(JSONObject response) {
+			StartActivity startActivity = (StartActivity)getActivity();
+			startActivity.dismissProgressDialog();
 			startRegatta(leaderboardName, eventId, competitorId);
 		}
 	}
@@ -742,6 +779,9 @@ public class HomeFragment extends BaseFragment implements
 
 		@Override
 		public void onErrorResponse(VolleyError error) {
+			StartActivity startActivity = (StartActivity)getActivity();
+			startActivity.dismissProgressDialog();
+			startActivity.showErrorPopup(R.string.error, R.string.error_could_not_complete_operation_on_server_try_again);
 			ExLog.e(getActivity(), TAG, error.getMessage().toString());
 			Toast.makeText(getActivity(), "Error while receiving server data",
 					Toast.LENGTH_LONG).show();
