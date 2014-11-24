@@ -1,7 +1,6 @@
 package com.sap.sailing.android.tracking.app.ui.activities;
 
 import java.io.File;
-import java.io.FileInputStream;
 import java.io.FileNotFoundException;
 import java.io.FileOutputStream;
 import java.io.IOException;
@@ -33,6 +32,7 @@ import com.sap.sailing.android.tracking.app.R;
 import com.sap.sailing.android.tracking.app.provider.AnalyticsContract.Competitor;
 import com.sap.sailing.android.tracking.app.provider.AnalyticsContract.Event;
 import com.sap.sailing.android.tracking.app.ui.fragments.RegattaFragment;
+import com.sap.sailing.android.tracking.app.ui.fragments.TrackingFragment;
 
 public class RegattaActivity extends BaseActivity {
 
@@ -81,6 +81,11 @@ public class RegattaActivity extends BaseActivity {
         replaceFragment(R.id.content_frame, new RegattaFragment());
     }
     
+    private RegattaFragment getRegattaFragment()
+    {
+    	return (RegattaFragment) getSupportFragmentManager().findFragmentById(R.id.content_frame);
+    }
+    
     private void fetchData(String eventId, String competitorId)
     {
     	Cursor cc = getContentResolver().query(Competitor.CONTENT_URI, null, "competitor_id = \"" + competitorId + "\"", null, null);
@@ -107,6 +112,8 @@ public class RegattaActivity extends BaseActivity {
 			public void run() {
 				LinearLayout addTeamPhotoTextView = (LinearLayout) findViewById(R.id.addFoto);
 				addTeamPhotoTextView.setVisibility(View.INVISIBLE);
+				
+				getRegattaFragment().setChangePhotoButtonHidden(false);
 			}
 		});
     }
@@ -133,6 +140,8 @@ public class RegattaActivity extends BaseActivity {
 			e.printStackTrace();
 		}
 		
+		getRegattaFragment().setChangePhotoButtonHidden(true);
+		
 		if (eventImageUrl != null)
 		{
 			ImageView imageView = (ImageView) findViewById(R.id.userImage);
@@ -148,8 +157,27 @@ public class RegattaActivity extends BaseActivity {
 	        }
 			
 		}
-        
+		
     	super.onResume();
+    }
+    
+    /**
+     * 
+     * @param bitmap
+     */
+    public void updatePictureChosenByUser(final Bitmap bitmap)
+    {
+    	storeImage(bitmap);
+    	
+    	runOnUiThread(new Runnable() {
+			@Override
+			public void run() {
+				ImageView imageView = (ImageView) findViewById(R.id.userImage);
+		    	imageView.setImageBitmap(bitmap);
+			}
+		});
+    	
+    	userImageUpdated();
     }
     
     @Override
@@ -201,7 +229,6 @@ public class RegattaActivity extends BaseActivity {
 		Bitmap image = BitmapFactory.decodeFile(pictureFile.getAbsolutePath(),
 				options);
 		return image;
-
     }
     
     /**
