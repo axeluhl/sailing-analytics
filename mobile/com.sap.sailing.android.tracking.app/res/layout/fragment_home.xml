@@ -32,6 +32,19 @@
     </RelativeLayout>
 
     <Button
+        android:id="@+id/scanQr"
+        android:layout_width="fill_parent"
+        android:layout_height="80dp"
+        android:layout_marginLeft="10dp"
+        android:layout_marginRight="10dp"
+        android:layout_marginBottom="10dp"
+        android:layout_above="@+id/noQrCode"
+        android:background="@drawable/rounded_btn_yellow"
+        android:textAllCaps="true"
+        android:textStyle="bold"
+        android:text="@string/scan_qr" />
+        
+    <Button
         android:id="@+id/noQrCode"
         android:layout_width="fill_parent"
         android:layout_height="wrap_content"
@@ -40,22 +53,9 @@
         android:layout_marginRight="10dp"
         android:paddingLeft="@dimen/activity_horizontal_margin"
         android:paddingRight="@dimen/activity_horizontal_margin"
-        android:background="@color/white_less_transparent"
+        android:background="@drawable/rounded_btn_white"
         android:textColor="@color/black"
         android:text="@string/no_qr_code" />
-
-    <Button
-        android:id="@+id/scanQr"
-        android:layout_width="fill_parent"
-        android:layout_height="80dp"
-        android:layout_marginLeft="10dp"
-        android:layout_marginRight="10dp"
-        android:layout_marginBottom="10dp"
-        android:layout_above="@+id/noQrCode"
-        android:background="@color/sap_yellow"
-        android:textAllCaps="true"
-        android:textStyle="bold"
-        android:text="@string/scan_qr" />
 
     <ListView
         android:id="@+id/listRegatta"
