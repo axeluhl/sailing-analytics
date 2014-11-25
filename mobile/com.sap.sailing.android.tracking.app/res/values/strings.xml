@@ -57,5 +57,6 @@
 	<string name="hour">Hour</string>
 	<string name="minute">Minute</string>
 	<string name="day">Day</string>
+	<string name="please_listen_to_announcements">Please listen to the announcements</string>
 	
 </resources>

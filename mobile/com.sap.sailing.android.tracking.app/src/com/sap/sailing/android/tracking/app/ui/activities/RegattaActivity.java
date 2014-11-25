@@ -90,6 +90,8 @@ public class RegattaActivity extends BaseActivity {
         if (getSupportActionBar() != null) {
             getSupportActionBar().setDisplayHomeAsUpEnabled(true);
             getSupportActionBar().setHomeButtonEnabled(true);
+            toolbar.setNavigationIcon(R.drawable.sap_logo_64_sq);
+            toolbar.setPadding(20, 0, 0, 0);
             getSupportActionBar().setTitle(leaderboardName);
             Spannable subtitle = new SpannableString("Registered for: " + eventName);
             StyleSpan styleBold = new StyleSpan(Typeface.BOLD);
