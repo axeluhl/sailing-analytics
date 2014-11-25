@@ -8,7 +8,6 @@
     <string name="stop_race_question">Do you want to stop the race tracking?</string>
     <string name="confirm_profile">Hello #USERNAME#\nYou are listed on #EVENT#.</string>
 	<string name="checkout_regatta">Checkout Regatta</string>
-	<string name="stop_tracking">Disable tracking of this regatta?</string>
 	<string name="confirm_picture">Declaration of consent</string>
 	<string name="confirm_picture_usage">I agree that the pictures made by me in the tracking app can be used by SAP.</string>
 	<string name="notify_user_api_call_failed">An error occurred while contacting the server. Please try again.</string>
