@@ -57,5 +57,9 @@
 	<string name="contacting_server">Verbindung mit server..</string>
 	<string name="error">Fehler</string>
 	<string name="error_could_not_complete_operation_on_server_try_again">Konnte Operation nicht durchführen. Bitte versuchen Sie es noch einmal.</string>
+	<string name="regatta_starts_in">Regatta beginnt in:</string>
+	<string name="hours">Stunden</string>
+	<string name="minutes">Minuten</string>
+	<string name="days">Tage</string>
 
 </resources>
