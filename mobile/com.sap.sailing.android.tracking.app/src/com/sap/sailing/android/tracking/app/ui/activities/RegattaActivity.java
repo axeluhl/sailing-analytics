@@ -64,6 +64,7 @@ public class RegattaActivity extends BaseActivity {
     private String eventName;
     private int eventRowId;
     private String eventImageUrl;
+    private long eventStartMillis;
     
     private String leaderboardName;
     private int leaderboardRowId;
@@ -146,7 +147,8 @@ public class RegattaActivity extends BaseActivity {
 		if (ec.moveToFirst()) {
 			eventName = ec.getString(ec.getColumnIndex(Event.EVENT_NAME));
 			eventImageUrl = ec.getString(ec.getColumnIndex(Event.EVENT_IMAGE_URL));
-			eventRowId = ec.getInt(cc.getColumnIndex(BaseColumns._ID));
+			eventStartMillis = ec.getLong(ec.getColumnIndex(Event.EVENT_DATE_START));
+			eventRowId = ec.getInt(ec.getColumnIndex(BaseColumns._ID));
         }
 		
 		ec.close();
@@ -379,7 +381,14 @@ public class RegattaActivity extends BaseActivity {
 		VolleyHelper.getInstance(this).addRequest(checkoutRequest);
 	}
 	
-
+	/**
+	 * So the fragment can get the value for its countdown-display.
+	 * @return
+	 */
+	public long getEventStartMillis()
+	{
+		return eventStartMillis;
+	}
 	
 	/**
 	 * Delete Event, Competitor and Leaderboard
