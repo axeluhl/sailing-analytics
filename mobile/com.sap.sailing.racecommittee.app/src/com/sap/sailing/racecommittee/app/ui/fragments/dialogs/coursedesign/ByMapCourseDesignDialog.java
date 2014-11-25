@@ -4,6 +4,7 @@ import java.text.DecimalFormat;
 
 import android.app.Activity;
 import android.app.DialogFragment;
+import android.app.FragmentTransaction;
 import android.content.Intent;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
@@ -48,7 +49,7 @@ import com.sap.sailing.racecommittee.app.domain.coursedesign.CourseLayouts;
 import com.sap.sailing.racecommittee.app.domain.coursedesign.NumberOfRounds;
 import com.sap.sailing.racecommittee.app.domain.coursedesign.PositionedMark;
 import com.sap.sailing.racecommittee.app.domain.coursedesign.TargetTime;
-import com.sap.sailing.racecommittee.app.ui.activities.WindActivity;
+import com.sap.sailing.racecommittee.app.ui.fragments.WindFragment;
 import com.sap.sailing.racecommittee.app.ui.fragments.dialogs.RaceDialogFragment;
 import com.sap.sse.common.Util;
 
@@ -76,6 +77,8 @@ public class ByMapCourseDesignDialog extends RaceDialogFragment {
     private ArrayAdapter<CourseLayouts> courseLayoutAdapter;
     private ArrayAdapter<TargetTime> targetTimeAdapter;
 
+    private WindFragment windFragment;
+    
     public ByMapCourseDesignDialog() {
         super();
         // handle bug "Dark overlay of MapFragment in Activity with Dialog theme" -
@@ -139,9 +142,15 @@ public class ByMapCourseDesignDialog extends RaceDialogFragment {
 
             @Override
             public void onClick(View arg0) {
-                Intent intent = new Intent(getActivity(), WindActivity.class);
-                startActivityForResult(intent, WIND_ACTIVITY_REQUEST_CODE);
-                getActivity().overridePendingTransition(android.R.anim.fade_in, android.R.anim.fade_out);
+            	if ( (windFragment != null && ! windFragment.isFragmentUIActive()) || windFragment == null ){
+                	windFragment = new WindFragment();
+                    getFragmentManager().beginTransaction().setCustomAnimations(R.animator.slide_in, R.animator.slide_out)
+                            .replace(R.id.racing_view_right_container, windFragment)
+                            .setTransition(FragmentTransaction.TRANSIT_FRAGMENT_FADE).commit();
+                    
+                }
+            	
+            	//TODO: catch result WIND_ACTIVITY_REQUEST_CODE !
             }
 
         });
@@ -170,17 +179,6 @@ public class ByMapCourseDesignDialog extends RaceDialogFragment {
         }
     }
 
-    @Override
-    public void onActivityResult(int requestCode, int resultCode, Intent data) {
-        if (requestCode == WIND_ACTIVITY_REQUEST_CODE) {
-            if (resultCode == Activity.RESULT_OK) {
-                if (data.getExtras().containsKey(AppConstants.EXTRAS_WIND_FIX)) {
-                    Wind windFix = (Wind) data.getSerializableExtra(AppConstants.EXTRAS_WIND_FIX);
-                    onWindEntered(windFix);
-                }
-            }
-        }
-    }
 
     private void onWindEntered(Wind windFix) {
         getRaceState().setWindFix(MillisecondsTimePoint.now(), windFix);

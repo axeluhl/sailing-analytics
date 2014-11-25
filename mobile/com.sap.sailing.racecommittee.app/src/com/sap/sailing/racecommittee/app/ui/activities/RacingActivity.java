@@ -157,18 +157,14 @@ public class RacingActivity extends SessionActivity implements RaceInfoListener,
     public void onClick(View view) {
         switch (view.getId()) {
         case R.id.windButton:
-            //Intent intent = new Intent(this, WindActivity.class);
-            //startActivityForResult(intent, WIND_ACTIVITY_REQUEST_CODE);
-           // overridePendingTransition(android.R.anim.fade_in, android.R.anim.fade_out);
-            
-            
-            
-            windFragment = new WindFragment();
-            getFragmentManager().beginTransaction().setCustomAnimations(R.animator.slide_in, R.animator.slide_out)
-                    .replace(R.id.racing_view_right_container, windFragment)
-                    .setTransition(FragmentTransaction.TRANSIT_FRAGMENT_FADE).commit();
-            
-            
+        	// check if the fragment is actively shown already, otherwise show it
+            if ( (windFragment != null && ! windFragment.isFragmentUIActive()) || windFragment == null ){
+            	windFragment = new WindFragment();
+                getFragmentManager().beginTransaction().setCustomAnimations(R.animator.slide_in, R.animator.slide_out)
+                        .replace(R.id.racing_view_right_container, windFragment)
+                        .setTransition(FragmentTransaction.TRANSIT_FRAGMENT_FADE).commit();
+                
+            }
             break;
 
         default:
@@ -177,7 +173,7 @@ public class RacingActivity extends SessionActivity implements RaceInfoListener,
     }
 
     
-    public void setWind(Wind windFix){
+    public void onWindEntered(Wind windFix){
     	windButton.setText(String.format(getString(R.string.wind_info), windFix.getKnots(), windFix.getBearing().reverse().toString()));
         if (selectedRace != null) {
             selectedRace.getState().setWindFix(MillisecondsTimePoint.now(), windFix);
@@ -289,7 +285,7 @@ public class RacingActivity extends SessionActivity implements RaceInfoListener,
 
         TickSingleton.INSTANCE.unregisterListener(this);
     }
-
+    
     private void registerOnService(Collection<ManagedRace> races) {
         // since the service is the long-living component
         // he should decide whether these races are already

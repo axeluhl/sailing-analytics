@@ -1,17 +1,14 @@
 package com.sap.sailing.racecommittee.app.ui.fragments;
 
-import android.app.Activity;
 import android.app.AlertDialog;
 import android.app.FragmentTransaction;
 import android.content.Context;
 import android.content.DialogInterface;
-import android.content.Intent;
 import android.os.Bundle;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.View.OnClickListener;
 import android.view.ViewGroup;
-import android.webkit.WebView.FindListener;
 import android.widget.Button;
 import android.widget.TextView;
 
@@ -22,11 +19,9 @@ import com.sap.sailing.domain.racelog.state.RaceStateChangedListener;
 import com.sap.sailing.domain.racelog.state.ReadonlyRaceState;
 import com.sap.sailing.domain.racelog.state.impl.BaseRaceStateChangedListener;
 import com.sap.sailing.domain.tracking.Wind;
-import com.sap.sailing.racecommittee.app.AppConstants;
 import com.sap.sailing.racecommittee.app.R;
 import com.sap.sailing.racecommittee.app.domain.ManagedRace;
 import com.sap.sailing.racecommittee.app.logging.LogEvent;
-import com.sap.sailing.racecommittee.app.ui.activities.WindActivity;
 import com.sap.sailing.racecommittee.app.ui.fragments.chooser.RaceInfoFragmentChooser;
 import com.sap.sailing.racecommittee.app.ui.fragments.raceinfo.RaceInfoListener;
 import com.sap.sailing.racecommittee.app.ui.fragments.raceinfo.SetStartTimeRaceFragment;
@@ -47,6 +42,8 @@ public class RaceInfoFragment extends RaceFragment implements RaceInfoListener {
 
     private View resetRaceDialogView;
 
+    private WindFragment windFragment;
+    
     public RaceInfoFragment() {
         this.infoFragmentChooser = null;
         this.infoFragment = null; // will be set later by switchToInfoFragment()
@@ -77,11 +74,18 @@ public class RaceInfoFragment extends RaceFragment implements RaceInfoListener {
         windInfoHeader.setOnClickListener(new OnClickListener() {
 
             @Override
-            public void onClick(View arg0) {
-                Intent intent = new Intent(getActivity(), WindActivity.class);
-                startActivityForResult(intent, WIND_ACTIVITY_REQUEST_CODE);
-                getActivity().overridePendingTransition(android.R.anim.fade_in, android.R.anim.fade_out);
+            public void onClick(View arg0) {              
+            	
+            	if ( (windFragment != null && ! windFragment.isFragmentUIActive()) || windFragment == null ){
+                	windFragment = new WindFragment();
+                    getFragmentManager().beginTransaction().setCustomAnimations(R.animator.slide_in, R.animator.slide_out)
+                            .replace(R.id.racing_view_right_container, windFragment)
+                            .setTransition(FragmentTransaction.TRANSIT_FRAGMENT_FADE).commit();
+                    
+                }
             }
+            
+            //TODO: catch result WIND_ACTIVITY_REQUEST_CODE ;
 
         });
 
@@ -194,17 +198,10 @@ public class RaceInfoFragment extends RaceFragment implements RaceInfoListener {
         }
     }
     
-    @Override
-    public void onActivityResult(int requestCode, int resultCode, Intent data) {
-        if (requestCode == WIND_ACTIVITY_REQUEST_CODE) {
-            if (resultCode == Activity.RESULT_OK) {
-                if (data.getExtras().containsKey(AppConstants.EXTRAS_WIND_FIX)) {
-                    Wind windFix = (Wind) data.getSerializableExtra(AppConstants.EXTRAS_WIND_FIX);
-                    getRaceState().setWindFix(MillisecondsTimePoint.now(), windFix);
-                    windInfoHeader.setText(String.format(getString(R.string.wind_info), windFix.getKnots(), windFix.getBearing().reverse().toString()));
-                }
-            }
-        }
+    
+    public void onWindEntered(Wind windFix){
+        getRaceState().setWindFix(MillisecondsTimePoint.now(), windFix);
+        windInfoHeader.setText(String.format(getString(R.string.wind_info), windFix.getKnots(), windFix.getBearing().reverse().toString()));
     }
     
     @Override

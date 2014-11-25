@@ -6,10 +6,12 @@ import java.text.DecimalFormatSymbols;
 import java.util.Locale;
 
 import android.app.Fragment;
+import android.app.FragmentManager.BackStackEntry;
 import android.content.Intent;
 import android.location.Location;
 import android.os.Bundle;
 import android.text.Layout;
+import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -120,8 +122,13 @@ public class WindFragment extends LoggableFragment implements CompassDirectionLi
                     }
                     
                     saveEntriesInPreferences(wind);
-                    ((RacingActivity)getActivity()).setWind(wind);
+                    ((RacingActivity)getActivity()).onWindEntered(wind);
                     
+                    int backstackCount = getActivity().getFragmentManager().getBackStackEntryCount();
+                    if ( backstackCount > 0 ){
+                    	 BackStackEntry lastFragment = getActivity().getFragmentManager().getBackStackEntryAt( backstackCount - 1);
+                         Log.d(TAG, lastFragment.getClass().toString());
+                    }                  
                     getActivity().getFragmentManager().beginTransaction().remove(thisFragment).commit();
                 } catch (NumberFormatException nfe) {
                     Toast.makeText(getActivity(), R.string.wind_speed_direction_not_a_valid_number, Toast.LENGTH_LONG).show();
@@ -231,6 +238,10 @@ public class WindFragment extends LoggableFragment implements CompassDirectionLi
 	
 	
 	// HELPERS
+	
+	public boolean isFragmentUIActive() {
+	    return isAdded() && !isDetached() && !isRemoving();
+	}
 	
 	protected static float round(float unrounded, int precision) {
         BigDecimal decimal = new BigDecimal(unrounded);
