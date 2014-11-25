@@ -136,22 +136,4 @@ public class MongoObjectFactoryImpl implements MongoObjectFactory {
         }
         return dbSettingTypes;
     }
-
-    @Override
-    public void clearAllUsers() {
-        DBCollection usersCollection = db.getCollection(CollectionNames.USERS.name());
-        usersCollection.drop();
-    }
-
-    @Override
-    public void clearAllSettings() {
-        DBCollection settingsCollection = db.getCollection(CollectionNames.SETTINGS.name());
-        settingsCollection.drop();
-    }
-
-    @Override
-    public void clearAllPreferences() {
-        DBCollection preferencesCollection = db.getCollection(CollectionNames.PREFERENCES.name());
-        preferencesCollection.drop();
-    }
 }

@@ -17,11 +17,5 @@ public interface MongoObjectFactory {
 
     public void storePreferences(String username, Map<String, String> userMap);
 
-    public void clearAllUsers();
-    
-    public void clearAllSettings();
-    
-    public void clearAllPreferences();
-
     public DB getDatabase();
 }
