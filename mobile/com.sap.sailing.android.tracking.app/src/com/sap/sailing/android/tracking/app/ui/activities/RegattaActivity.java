@@ -179,7 +179,6 @@ public class RegattaActivity extends BaseActivity {
         TextView sailIdTextView = (TextView)findViewById(R.id.sail_id);
         sailIdTextView.setText(competitorSailId);
         
-        
         ImageView flagImageView = (ImageView)findViewById(R.id.flag_image);
         //String flagStr = String.format("%s.png", countryCode);
         String uri = "@drawable/" + competitorCountryCode.toLowerCase(Locale.getDefault());
