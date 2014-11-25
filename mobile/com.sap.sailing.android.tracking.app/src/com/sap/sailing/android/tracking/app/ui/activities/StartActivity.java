@@ -24,7 +24,8 @@ public class StartActivity extends BaseActivity {
         if (toolbar != null) {
             setSupportActionBar(toolbar);
             
-            toolbar.setNavigationIcon(R.drawable.ic_launcher);
+            toolbar.setNavigationIcon(R.drawable.sap_logo_64_sq);
+            toolbar.setPadding(20, 0, 0, 0);
             toolbar.setBackgroundColor(getResources().getColor(R.color.colorPrimary));
         }
         if (getSupportActionBar() != null) {
