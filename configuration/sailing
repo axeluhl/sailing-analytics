@@ -19,11 +19,21 @@ start_tmux() {
 }
 
 start_servers() {
+	NUMBER_OF_INSTANCES=`echo "$JAVA_START_INSTANCES" | wc -w`
+	MEMORY_PER_INSTANCE_IN_MB=`cat /proc/meminfo  | grep MemTotal | awk '{printf("%i\n", ($2 / 1024 - 1500) / '$NUMBER_OF_INSTANCES' );}'`
+	echo "Using ${MEMORY_PER_INSTANCE_IN_MB}MB as default heap size per instance."
 	for conf in $JAVA_START_INSTANCES; do
 		echo "Checking for amazon update..."
+		echo "MEMORY=\"${MEMORY_PER_INSTANCE_IN_MB}m\"" >>/home/sailing/servers/$conf/env.sh
 		su - sailing -c "cd /home/sailing/servers/$conf && $GIT_REPOSITORY/java/target/refreshInstance.sh auto-install" 2>/var/log/sailing.err >/var/log/sailing.out
-		echo "Starting Java server $conf"
-		su - sailing -c "cd /home/sailing/servers/$conf && ./start" 2>/var/log/sailing.err >/var/log/sailing.out
+		(
+			# execute env.sh in a subshell which now has the same set of variables that the server will see
+			source /home/sailing/servers/$conf/env.sh
+			launch_httpd
+			echo "Starting Java server $conf"
+			su - sailing -c "cd /home/sailing/servers/$conf && ./start" 2>/var/log/sailing.err >/var/log/sailing.out
+			# terminating the subshell will forget all the variable assignments brought in by env.sh, clearing for the next server instance
+		)
 		RETVAL=$?
 		[ $RETVAL -eq 0 ] && success || failure
 	done
@@ -36,7 +46,21 @@ stop_servers() {
 		RETVAL=$?
 		[ $RETVAL -eq 0 ] && success || failure
 	done
+}
 
+# launch_httpd(server_name, port, event_id)
+launch_httpd() {
+	if [ "$REPLICATE_ON_START" != "" ]; then
+		echo "REPLICATE_ON_START is $REPLICATE_ON_START. Will try to launch httpd so this replica can work with an ELB easily."
+		if [ -x /etc/init.d/httpd ]; then
+			server_name="`echo $SERVER_NAME | tr [A-Z] [a-z]`"
+			echo "Use Event $server_name.sapsailing.com \"$EVENT_ID\" 127.0.0.1 $SERVER_PORT" >>/etc/httpd/conf.d/001-events.conf
+			echo "Launching httpd to map ${server_name}.sapsailing.com to event with ID $EVENT_ID with server running on local port $SERVER_PORT..."
+			service httpd start
+		else
+			echo Can't launch httpd; start script doesn't seem to be installed at /etc/init.d/httpd
+		fi
+	fi
 }
 
 # See how we were called.

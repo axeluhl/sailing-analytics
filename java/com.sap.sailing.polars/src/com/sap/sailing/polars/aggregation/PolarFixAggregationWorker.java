@@ -11,7 +11,6 @@ import java.util.Set;
 import com.sap.sailing.domain.base.Competitor;
 import com.sap.sailing.domain.common.PolarSheetGenerationSettings;
 import com.sap.sailing.domain.common.Position;
-import com.sap.sailing.domain.common.TimePoint;
 import com.sap.sailing.domain.common.WindSource;
 import com.sap.sailing.domain.common.WindSourceType;
 import com.sap.sailing.domain.tracking.GPSFixMoving;
@@ -21,6 +20,7 @@ import com.sap.sailing.domain.tracking.TrackedRace;
 import com.sap.sailing.domain.tracking.WindWithConfidence;
 import com.sap.sailing.polars.data.PolarFix;
 import com.sap.sailing.polars.data.impl.PolarFixImpl;
+import com.sap.sse.common.TimePoint;
 import com.sap.sse.common.Util.Pair;
 
 /**

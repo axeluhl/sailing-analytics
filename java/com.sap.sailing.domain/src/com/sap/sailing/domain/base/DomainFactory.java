@@ -9,7 +9,6 @@ import com.sap.sailing.domain.base.impl.DomainFactoryImpl;
 import com.sap.sailing.domain.common.Placemark;
 import com.sap.sailing.domain.common.RegattaAndRaceIdentifier;
 import com.sap.sailing.domain.common.ScoringSchemeType;
-import com.sap.sailing.domain.common.TimePoint;
 import com.sap.sailing.domain.common.dto.CompetitorDTO;
 import com.sap.sailing.domain.common.dto.FleetDTO;
 import com.sap.sailing.domain.common.dto.PlacemarkDTO;
@@ -22,6 +21,9 @@ import com.sap.sailing.domain.leaderboard.ScoringScheme;
 import com.sap.sailing.domain.tracking.MarkPassing;
 import com.sap.sailing.domain.tracking.TrackedRace;
 import com.sap.sailing.domain.tracking.TrackedRegattaRegistry;
+import com.sap.sse.common.IsManagedByCache;
+import com.sap.sse.common.TimePoint;
+import com.sap.sse.replication.impl.ObjectInputStreamResolvingAgainstCache;
 
 public interface DomainFactory extends SharedDomainFactory {
     /**
@@ -35,10 +37,22 @@ public interface DomainFactory extends SharedDomainFactory {
     
     /**
      * When de-serializing objects of types whose instances that are managed and cached by this domain factory,
-     * de-serialized instances need to be replaced by / resolved to the counterparts already known by this factory.
-     * The stream returned by this method can be used 
+     * de-serialized instances need to be replaced by / resolved to the counterparts already known by this factory. The
+     * stream returned by this method can be used to have objects implementing the {@link IsManagedByCache} interface
+     * {@link IsManagedByCache#resolve(Object) resolve} against this domain factory as their cache.
+     * <p>
+     * 
+     * <b>Note:</b> In order to allow the deserialization process to find all the classes required, it is a good idea to
+     * {@link Thread#setContextClassLoader(ClassLoader) set the context class loader} on the
+     * {@link Thread#currentThread() current thread} to one that can see and resolve all the classes that have instances
+     * in the stream. Example:<pre>
+     *          ClassLoader oldContextClassLoader = Thread.currentThread().getContextClassLoader();
+     *          Thread.currentThread().setContextClassLoader(TopLevelMasterData.class.getClassLoader());
+     *          Object o = domainFactory.createObjectInputStreamResolvingAgainstThisFactory(inputStream).readObject();
+     *          Thread.currentThread().setContextClassLoader(oldContextClassLoader);
+     * </pre>
      */
-    ObjectInputStreamResolvingAgainstDomainFactory createObjectInputStreamResolvingAgainstThisFactory(InputStream inputStream) throws IOException;
+    ObjectInputStreamResolvingAgainstCache<DomainFactory> createObjectInputStreamResolvingAgainstThisFactory(InputStream inputStream) throws IOException;
     
     ScoringScheme createScoringScheme(ScoringSchemeType scoringSchemeType);
 

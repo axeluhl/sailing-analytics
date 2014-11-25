@@ -4,11 +4,11 @@ import java.io.Serializable;
 import java.util.List;
 
 import com.sap.sailing.domain.base.Competitor;
-import com.sap.sailing.domain.common.TimePoint;
 import com.sap.sailing.domain.common.racelog.RaceLogRaceStatus;
 import com.sap.sailing.domain.racelog.RaceLogEventAuthor;
 import com.sap.sailing.domain.racelog.RaceLogEventVisitor;
 import com.sap.sailing.domain.racelog.RaceLogStartTimeEvent;
+import com.sap.sse.common.TimePoint;
 
 public class RaceLogStartTimeEventImpl extends RaceLogRaceStatusEventImpl implements RaceLogStartTimeEvent {
 

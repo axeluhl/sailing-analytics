@@ -72,7 +72,7 @@ public class TrackedRacesListComposite extends AbstractTrackedRacesListComposite
                     public void onSuccess(Void result) {
                         regattaRefresher.fillRegattas();
                         for (TrackedRaceChangedListener listener : raceIsTrackedRaceChangeListener) {
-                            listener.changeTrackingRace(racesToStopTracking, false);
+                            listener.racesStoppedTracking(racesToStopTracking);
                         }
                     }
                 }));
@@ -95,7 +95,7 @@ public class TrackedRacesListComposite extends AbstractTrackedRacesListComposite
                     public void onSuccess(Void result) {
                         regattaRefresher.fillRegattas();
                         for (TrackedRaceChangedListener listener : raceIsTrackedRaceChangeListener) {
-                            listener.changeTrackingRace(regattaNamesAndRaceNames, false);
+                            listener.racesRemoved(regattaNamesAndRaceNames);
                         }
                     }
                 }));

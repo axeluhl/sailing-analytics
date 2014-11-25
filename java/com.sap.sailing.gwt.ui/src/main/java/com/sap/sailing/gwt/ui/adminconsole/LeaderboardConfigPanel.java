@@ -312,7 +312,6 @@ TrackedRaceChangedListener, LeaderboardsDisplayer {
                     @Override
                     public boolean isEnabled() {
                         return getSelectedLeaderboard() != null && !getSelectedLeaderboard().type.isRegattaLeaderboard();
-
                     }
                 })) {
             @Override

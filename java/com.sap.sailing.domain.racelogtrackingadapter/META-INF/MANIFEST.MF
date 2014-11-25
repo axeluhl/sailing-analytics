@@ -15,14 +15,14 @@ Require-Bundle: com.sap.sailing.domain,
  com.sap.sailing.server;bundle-version="1.0.0",
  com.googlecode.java-diff-utils;bundle-version="1.3.0",
  com.mongodb.driver,
- com.sap.sse.common
+ com.sap.sse.common,
+ com.sap.sse.replication,
+ com.sap.sse
 Import-Package: com.mongodb,
  javax.servlet;version="2.6.0",
  org.json.simple,
  org.json.simple.parser,
  org.osgi.framework;version="1.6.0"
 Export-Package: com.sap.sailing.domain.racelogtracking,
- com.sap.sailing.domain.racelogtracking.impl;x-friends:="com.sap.sailing.domain.racelogtrackingadapter.testsupport,com.sap.sailing.gwt.ui.test",
- com.sap.sailing.domain.racelogtracking.servlet;x-friends:="com.sap.sailing.domain.racelogtrackingadapter.test"
-Web-ContextPath: /tracking
+ com.sap.sailing.domain.racelogtracking.impl;x-friends:="com.sap.sailing.domain.racelogtrackingadapter.testsupport,com.sap.sailing.gwt.ui.test"
 Bundle-Activator: com.sap.sailing.domain.racelogtracking.impl.Activator

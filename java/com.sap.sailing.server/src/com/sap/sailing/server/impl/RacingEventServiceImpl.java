@@ -2,6 +2,7 @@ package com.sap.sailing.server.impl;
 
 import java.io.BufferedReader;
 import java.io.IOException;
+import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.io.ObjectInputStream;
 import java.io.ObjectOutputStream;
@@ -78,14 +79,12 @@ import com.sap.sailing.domain.common.RegattaIdentifier;
 import com.sap.sailing.domain.common.RegattaName;
 import com.sap.sailing.domain.common.Renamable;
 import com.sap.sailing.domain.common.ScoringSchemeType;
-import com.sap.sailing.domain.common.TimePoint;
 import com.sap.sailing.domain.common.TrackedRaceStatusEnum;
 import com.sap.sailing.domain.common.WindSource;
 import com.sap.sailing.domain.common.dto.FleetDTO;
 import com.sap.sailing.domain.common.dto.RegattaCreationParametersDTO;
 import com.sap.sailing.domain.common.dto.SeriesCreationParametersDTO;
 import com.sap.sailing.domain.common.impl.DataImportProgressImpl;
-import com.sap.sailing.domain.common.impl.MillisecondsTimePoint;
 import com.sap.sailing.domain.common.media.MediaTrack;
 import com.sap.sailing.domain.common.racelog.RacingProcedureType;
 import com.sap.sailing.domain.common.racelog.tracking.TypeBasedServiceFinderFactory;
@@ -143,10 +142,8 @@ import com.sap.sailing.domain.tracking.WindTrackerFactory;
 import com.sap.sailing.domain.tracking.impl.AbstractRaceChangeListener;
 import com.sap.sailing.domain.tracking.impl.DynamicTrackedRegattaImpl;
 import com.sap.sailing.expeditionconnector.ExpeditionWindTrackerFactory;
-import com.sap.sailing.operationaltransformation.Operation;
 import com.sap.sailing.polars.PolarDataService;
 import com.sap.sailing.polars.factory.PolarDataServiceFactory;
-import com.sap.sailing.server.OperationExecutionListener;
 import com.sap.sailing.server.RacingEventService;
 import com.sap.sailing.server.RacingEventServiceOperation;
 import com.sap.sailing.server.Replicator;
@@ -180,6 +177,7 @@ import com.sap.sailing.server.operationaltransformation.RenameEvent;
 import com.sap.sailing.server.operationaltransformation.SetDataImportDeleteProgressFromMapTimer;
 import com.sap.sailing.server.operationaltransformation.TrackRegatta;
 import com.sap.sailing.server.operationaltransformation.UpdateCompetitor;
+import com.sap.sailing.server.operationaltransformation.UpdateEndOfTracking;
 import com.sap.sailing.server.operationaltransformation.UpdateMarkPassings;
 import com.sap.sailing.server.operationaltransformation.UpdateMediaTrackDurationOperation;
 import com.sap.sailing.server.operationaltransformation.UpdateMediaTrackRacesOperation;
@@ -187,18 +185,24 @@ import com.sap.sailing.server.operationaltransformation.UpdateMediaTrackStartTim
 import com.sap.sailing.server.operationaltransformation.UpdateMediaTrackTitleOperation;
 import com.sap.sailing.server.operationaltransformation.UpdateMediaTrackUrlOperation;
 import com.sap.sailing.server.operationaltransformation.UpdateRaceDelayToLive;
-import com.sap.sailing.server.operationaltransformation.UpdateRaceTimes;
+import com.sap.sailing.server.operationaltransformation.UpdateStartOfTracking;
+import com.sap.sailing.server.operationaltransformation.UpdateStartTimeReceived;
 import com.sap.sailing.server.operationaltransformation.UpdateTrackedRaceStatus;
 import com.sap.sailing.server.operationaltransformation.UpdateWindAveragingTime;
 import com.sap.sailing.server.operationaltransformation.UpdateWindSourcesToExclude;
 import com.sap.sailing.server.test.support.RacingEventServiceWithTestSupport;
-import com.sap.sailing.util.BuildVersion;
 import com.sap.sailing.util.impl.LockUtil;
 import com.sap.sailing.util.impl.NamedReentrantReadWriteLock;
+import com.sap.sse.BuildVersion;
+import com.sap.sse.common.TimePoint;
 import com.sap.sse.common.Util;
+import com.sap.sse.common.impl.MillisecondsTimePoint;
 import com.sap.sse.common.search.KeywordQuery;
 import com.sap.sse.common.search.Result;
 import com.sap.sse.common.search.ResultImpl;
+import com.sap.sse.operationaltransformation.Operation;
+import com.sap.sse.replication.OperationExecutionListener;
+import com.sap.sse.replication.OperationWithResult;
 
 public class RacingEventServiceImpl implements RacingEventServiceWithTestSupport, RegattaListener, LeaderboardRegistry,
         Replicator {
@@ -302,7 +306,7 @@ public class RacingEventServiceImpl implements RacingEventServiceWithTestSupport
      */
     private final NamedReentrantReadWriteLock regattaTrackingCacheLock;
 
-    private final ConcurrentHashMap<OperationExecutionListener, OperationExecutionListener> operationExecutionListeners;
+    private final ConcurrentHashMap<OperationExecutionListener<RacingEventService>, OperationExecutionListener<RacingEventService>> operationExecutionListeners;
 
     /**
      * Keys are the toString() representation of the {@link RaceDefinition#getId() IDs} of races passed to
@@ -330,8 +334,7 @@ public class RacingEventServiceImpl implements RacingEventServiceWithTestSupport
     /**
      * This author should be used for server generated race log events
      */
-    private final RaceLogEventAuthor raceLogEventAuthorForServer = new RaceLogEventAuthorImpl(
-            RacingEventService.class.getName(), 0);
+    private final RaceLogEventAuthor raceLogEventAuthorForServer = new RaceLogEventAuthorImpl(RacingEventService.class.getName(), 0);
 
     private final PolarDataService polarDataService;
 
@@ -1408,8 +1411,18 @@ public class RacingEventServiceImpl implements RacingEventServiceWithTestSupport
         }
 
         @Override
-        public void raceTimesChanged(TimePoint startOfTracking, TimePoint endOfTracking, TimePoint startTimeReceived) {
-            replicate(new UpdateRaceTimes(getRaceIdentifier(), startOfTracking, endOfTracking, startTimeReceived));
+        public void startOfTrackingChanged(TimePoint startOfTracking) {
+            replicate(new UpdateStartOfTracking(getRaceIdentifier(), startOfTracking));            
+        }
+
+        @Override
+        public void endOfTrackingChanged(TimePoint endOfTracking) {
+            replicate(new UpdateEndOfTracking(getRaceIdentifier(), endOfTracking));            
+        }
+
+        @Override
+        public void startTimeReceivedChanged(TimePoint startTimeReceived) {
+            replicate(new UpdateStartTimeReceived(getRaceIdentifier(), startTimeReceived));            
         }
 
         @Override
@@ -2148,18 +2161,17 @@ public class RacingEventServiceImpl implements RacingEventServiceWithTestSupport
     }
 
     /**
-     * Currently, the operation is executed by immediately {@link Operation#internalApplyTo(Object) applying} it to this
-     * service object.
-     * <p>
+     * The operation is executed by immediately {@link Operation#internalApplyTo(Object) applying} it to this
+     * service object. It is then replicated to all replicas.
      * 
-     * Future implementations of this method will need to also replicate the effects of the operation to all replica of
-     * this service known.
+     * @see {@link #replicate(RacingEventServiceOperation)}
      */
     @Override
-    public <T> T apply(RacingEventServiceOperation<T> operation) {
+    public <T> T apply(OperationWithResult<RacingEventService, T> operation) {
+        RacingEventServiceOperation<T> reso = (RacingEventServiceOperation<T>) operation;
         try {
-            T result = operation.internalApplyTo(this);
-            replicate(operation);
+            T result = reso.internalApplyTo(this);
+            replicate(reso);
             return result;
         } catch (Exception e) {
             logger.log(Level.SEVERE, "apply", e);
@@ -2168,8 +2180,18 @@ public class RacingEventServiceImpl implements RacingEventServiceWithTestSupport
     }
 
     @Override
+    public ObjectInputStream createObjectInputStreamResolvingAgainstCache(InputStream is) throws IOException {
+        return getBaseDomainFactory().createObjectInputStreamResolvingAgainstThisFactory(is);
+    }
+
+    @Override
+    public Serializable getId() {
+        return getClass().getName();
+    }
+
+    @Override
     public <T> void replicate(RacingEventServiceOperation<T> operation) {
-        for (OperationExecutionListener listener : operationExecutionListeners.keySet()) {
+        for (OperationExecutionListener<RacingEventService> listener : operationExecutionListeners.keySet()) {
             try {
                 listener.executed(operation);
             } catch (Exception e) {
@@ -2181,17 +2203,17 @@ public class RacingEventServiceImpl implements RacingEventServiceWithTestSupport
     }
 
     @Override
-    public void addOperationExecutionListener(OperationExecutionListener listener) {
+    public void addOperationExecutionListener(OperationExecutionListener<RacingEventService> listener) {
         operationExecutionListeners.put(listener, listener);
     }
 
     @Override
-    public void removeOperationExecutionListener(OperationExecutionListener listener) {
+    public void removeOperationExecutionListener(OperationExecutionListener<RacingEventService> listener) {
         operationExecutionListeners.remove(listener);
     }
 
     @Override
-    public void serializeForInitialReplication(ObjectOutputStream oos) throws IOException {
+    public void serializeForInitialReplicationInternal(ObjectOutputStream oos) throws IOException {
         StringBuffer logoutput = new StringBuffer();
 
         logger.info("Serializing events...");
@@ -2253,8 +2275,7 @@ public class RacingEventServiceImpl implements RacingEventServiceWithTestSupport
     @SuppressWarnings("unchecked") // all the casts of ois.readObject()'s return value to Map<..., ...>
     // the type-parameters in the casts of the de-serialized collection objects can't be checked
     @Override
-    public void initiallyFillFrom(ObjectInputStream ois) throws IOException, ClassNotFoundException,
-            InterruptedException {
+    public void initiallyFillFromInternal(ObjectInputStream ois) throws IOException, ClassNotFoundException, InterruptedException {
         logger.info("Performing initial replication load on " + this);
         ClassLoader oldContextClassloader = Thread.currentThread().getContextClassLoader();
         try {

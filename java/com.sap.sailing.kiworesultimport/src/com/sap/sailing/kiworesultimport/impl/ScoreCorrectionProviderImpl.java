@@ -14,13 +14,13 @@ import javax.xml.parsers.ParserConfigurationException;
 import org.xml.sax.SAXException;
 
 import com.sap.sailing.domain.common.RegattaScoreCorrections;
-import com.sap.sailing.domain.common.TimePoint;
 import com.sap.sailing.kiworesultimport.ParserFactory;
 import com.sap.sailing.kiworesultimport.RegattaSummary;
 import com.sap.sailing.kiworesultimport.ZipFile;
 import com.sap.sailing.kiworesultimport.ZipFileParser;
 import com.sap.sailing.resultimport.ResultDocumentDescriptor;
 import com.sap.sailing.resultimport.impl.AbstractFileBasedScoreCorrectionProvider;
+import com.sap.sse.common.TimePoint;
 import com.sap.sse.common.Util;
 
 public class ScoreCorrectionProviderImpl extends AbstractFileBasedScoreCorrectionProvider {

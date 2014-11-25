@@ -2,21 +2,15 @@
 <!-- Could not determine the version of your GWT SDK; using the module DTD from GWT 1.6.4. You may want to change this. -->
 <!DOCTYPE module PUBLIC "-//Google Inc.//DTD Google Web Toolkit 2.4.0//EN" "http://google-web-toolkit.googlecode.com/svn/tags/2.4.0/distro-source/core/src/gwt-module.dtd">
 <module>
+  <stylesheet src="../base.css" />
 
-  <!-- Inherit the core Web Toolkit stuff.                        -->
-  <inherits name='com.google.gwt.user.User'/> 
-
-  <!-- Inherit the default GWT style sheet. You can change       -->
-  <!-- the theme of your GWT application by uncommenting          -->
-  <!-- any one of the following lines.                            -->
+  <!-- Inherit the core Web Toolkit stuff. -->
+  <inherits name='com.google.gwt.user.User' />
   <inherits name='com.google.gwt.user.theme.clean.Clean'/>
-  <inherits name='com.google.gwt.debug.Debug'/>
-  <!-- <inherits name='com.google.gwt.user.theme.standard.Standard'/> -->
-  <!-- <inherits name='com.google.gwt.user.theme.chrome.Chrome'/> -->
-  <!-- <inherits name='com.google.gwt.user.theme.dark.Dark'/>     -->
+  
   <stylesheet src="../Register.css" />
   
-  
+  <inherits name='com.google.gwt.debug.Debug'/>
   <inherits name="com.google.gwt.resources.Resources" />
   <inherits name="com.google.gwt.logging.Logging"/>
   

@@ -15,6 +15,7 @@ public class RestApiApplication extends Application {
         classes.add(LeaderboardsResource.class);
         classes.add(PolarResource.class);
         classes.add(SearchResource.class);
+        classes.add(GPSFixesResource.class);
         return classes;
     }
 }

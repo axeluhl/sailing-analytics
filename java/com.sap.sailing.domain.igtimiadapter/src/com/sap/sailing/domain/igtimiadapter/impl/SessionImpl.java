@@ -5,11 +5,11 @@ import java.io.IOException;
 import org.apache.http.client.ClientProtocolException;
 import org.json.simple.parser.ParseException;
 
-import com.sap.sailing.domain.common.TimePoint;
 import com.sap.sailing.domain.igtimiadapter.IgtimiConnection;
 import com.sap.sailing.domain.igtimiadapter.Permission;
 import com.sap.sailing.domain.igtimiadapter.Session;
 import com.sap.sailing.domain.igtimiadapter.User;
+import com.sap.sse.common.TimePoint;
 
 public class SessionImpl extends HasIdImpl implements Session {
     private final long ownerId;

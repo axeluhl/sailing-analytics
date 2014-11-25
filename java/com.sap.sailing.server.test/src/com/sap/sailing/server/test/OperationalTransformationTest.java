@@ -14,10 +14,6 @@ import com.sap.sailing.domain.common.LeaderboardNameConstants;
 import com.sap.sailing.domain.leaderboard.FlexibleLeaderboard;
 import com.sap.sailing.domain.leaderboard.Leaderboard;
 import com.sap.sailing.domain.leaderboard.impl.LowPoint;
-import com.sap.sailing.operationaltransformation.OperationalTransformer;
-import com.sap.sailing.operationaltransformation.Peer;
-import com.sap.sailing.operationaltransformation.Peer.Role;
-import com.sap.sailing.operationaltransformation.PeerImpl;
 import com.sap.sailing.server.RacingEventService;
 import com.sap.sailing.server.RacingEventServiceOperation;
 import com.sap.sailing.server.impl.RacingEventServiceImpl;
@@ -26,6 +22,10 @@ import com.sap.sailing.server.operationaltransformation.CreateFlexibleLeaderboar
 import com.sap.sailing.server.operationaltransformation.MoveLeaderboardColumnUp;
 import com.sap.sailing.server.operationaltransformation.RemoveLeaderboard;
 import com.sap.sse.mongodb.MongoDBService;
+import com.sap.sse.operationaltransformation.OperationalTransformer;
+import com.sap.sse.operationaltransformation.Peer;
+import com.sap.sse.operationaltransformation.PeerImpl;
+import com.sap.sse.operationaltransformation.Peer.Role;
 
 public class OperationalTransformationTest {
     private static final String LEADERBOARDNAME = "TESTBOARD";

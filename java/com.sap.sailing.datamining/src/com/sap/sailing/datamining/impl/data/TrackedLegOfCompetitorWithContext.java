@@ -3,8 +3,8 @@ package com.sap.sailing.datamining.impl.data;
 import com.sap.sailing.datamining.data.HasTrackedLegContext;
 import com.sap.sailing.datamining.data.HasTrackedLegOfCompetitorContext;
 import com.sap.sailing.domain.base.Competitor;
-import com.sap.sailing.domain.common.TimePoint;
 import com.sap.sailing.domain.tracking.TrackedLegOfCompetitor;
+import com.sap.sse.common.TimePoint;
 
 public class TrackedLegOfCompetitorWithContext implements HasTrackedLegOfCompetitorContext {
 

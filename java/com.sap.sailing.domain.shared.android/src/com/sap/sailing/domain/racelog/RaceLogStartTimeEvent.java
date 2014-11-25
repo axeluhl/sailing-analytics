@@ -1,7 +1,7 @@
 package com.sap.sailing.domain.racelog;
 
-import com.sap.sailing.domain.common.TimePoint;
 import com.sap.sailing.domain.common.racelog.RaceLogRaceStatus;
+import com.sap.sse.common.TimePoint;
 
 /**
  * A {@link RaceLogStartTimeEvent} denotes a new start time.

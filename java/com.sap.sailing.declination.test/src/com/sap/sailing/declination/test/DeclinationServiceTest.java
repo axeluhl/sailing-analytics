@@ -15,7 +15,7 @@ import com.sap.sailing.declination.DeclinationService;
 import com.sap.sailing.declination.impl.DeclinationServiceImpl;
 import com.sap.sailing.domain.common.impl.CentralAngleDistance;
 import com.sap.sailing.domain.common.impl.DegreePosition;
-import com.sap.sailing.domain.common.impl.MillisecondsTimePoint;
+import com.sap.sse.common.impl.MillisecondsTimePoint;
 
 public class DeclinationServiceTest extends AbstractDeclinationTest {
     private DeclinationService service;

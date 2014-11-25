@@ -25,13 +25,12 @@ import org.openqa.selenium.WebDriver;
 import org.openqa.selenium.remote.Augmenter;
 import org.openqa.selenium.remote.RemoteWebDriver;
 
-import com.sap.sailing.domain.common.Duration;
-import com.sap.sailing.domain.common.impl.MillisecondsTimePoint;
+import com.sap.sse.common.Duration;
+import com.sap.sse.common.impl.MillisecondsTimePoint;
 import com.sap.sailing.selenium.core.Managed;
 import com.sap.sailing.selenium.core.SeleniumRunner;
 import com.sap.sailing.selenium.core.TestEnvironment;
 import com.sap.sailing.selenium.core.WindowManager;
-import com.sap.sailing.selenium.pages.HostPage;
 
 /**
  * <p>Abstract base class for unit tests with Selenium. This class is already annotated as required to get executed
@@ -89,7 +88,7 @@ public abstract class AbstractSeleniumTest {
     public void setUpAuthenticatedSession() {
         logger.info("Authenticating session...");
         Cookie sessionCookie = authenticate(getContextRoot());
-        getWebDriver().get(getContextRoot() + "security/ui/Login.html?" + HostPage.getGWTCodeServer()); // initialize web driver so setting a cookie for the local domain is possible
+        getWebDriver().get(getContextRoot() + "index.html"); // initialize web driver so setting a cookie for the local domain is possible
         getWebDriver().manage().addCookie(sessionCookie);
         logger.info("...obtained session cookie "+sessionCookie);
     }

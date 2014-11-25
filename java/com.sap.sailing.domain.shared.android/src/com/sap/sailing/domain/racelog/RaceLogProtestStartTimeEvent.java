@@ -1,6 +1,6 @@
 package com.sap.sailing.domain.racelog;
 
-import com.sap.sailing.domain.common.TimePoint;
+import com.sap.sse.common.TimePoint;
 
 /**
  * Indicates that the protest start time for the related race has changed.

@@ -2,6 +2,7 @@ package com.sap.sailing.domain.common;
 
 import java.io.Serializable;
 
+import com.sap.sse.common.TimePoint;
 import com.sap.sse.datamining.shared.Unit;
 import com.sap.sse.datamining.shared.annotations.Statistic;
 
