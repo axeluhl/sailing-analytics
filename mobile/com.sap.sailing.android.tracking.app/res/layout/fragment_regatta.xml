@@ -29,8 +29,8 @@
                 android:id="@+id/add_photo_button"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:paddingLeft="@dimen/activity_horizontal_margin"
                 android:background="@android:color/transparent"
+                android:paddingLeft="@dimen/activity_horizontal_margin"
                 android:src="@drawable/ic_menu_camera" />
 
             <TextView
@@ -42,9 +42,7 @@
                 android:text="Add Team Photo"
                 android:textColor="@color/white" />
         </LinearLayout>
-    
-        
-        
+
         <LinearLayout
             android:id="@+id/competitor_info_layout"
             android:layout_width="match_parent"
@@ -55,7 +53,7 @@
             android:baselineAligned="false"
             android:measureWithLargestChild="false"
             android:orientation="horizontal"
-            android:padding="10dp">
+            android:padding="10dp" >
 
             <TextView
                 android:id="@+id/competitor_name"
@@ -74,10 +72,10 @@
                 android:layout_weight="0.53"
                 android:cropToPadding="true"
                 android:gravity="right|center_vertical"
+                android:paddingBottom="2dp"
+                android:paddingRight="5dp"
                 android:scaleType="fitEnd"
                 android:src="@drawable/ar"
-                android:paddingRight="5dp"
-                android:paddingBottom="2dp"
                 android:textColor="@color/white" />
 
             <TextView
@@ -88,25 +86,25 @@
                 android:padding="0dp"
                 android:text="GER 13"
                 android:textColor="@color/white" />
-        </LinearLayout>	
-        
+        </LinearLayout>
+
         <LinearLayout
             android:id="@+id/change_photo"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-			android:layout_above="@id/competitor_info_layout"
-			android:layout_alignParentRight="true"
-			android:layout_marginRight="15dp"
-			android:layout_marginBottom="15dp"
-			android:padding="5dp"
-			android:background="@drawable/background_box"
-            android:orientation="horizontal" >
-            
+            android:layout_above="@id/competitor_info_layout"
+            android:layout_alignParentRight="true"
+            android:layout_marginBottom="15dp"
+            android:layout_marginRight="15dp"
+            android:background="@drawable/background_box"
+            android:orientation="horizontal"
+            android:padding="5dp" >
+
             <ImageButton
-                android:background="@android:color/transparent"
                 android:id="@+id/change_photo_button"
                 android:layout_width="25dp"
                 android:layout_height="25dp"
+                android:background="@android:color/transparent"
                 android:src="@android:drawable/ic_menu_edit" />
         </LinearLayout>
 
@@ -125,9 +123,136 @@
             android:layout_alignParentLeft="true"
             android:layout_alignParentTop="true"
             android:background="@color/sap_yellow" />
-        
     </RelativeLayout>
-    
+
+    <RelativeLayout
+        android:id="@+id/start_date_layout"
+        android:layout_width="match_parent"
+        android:layout_height="fill_parent"
+        android:layout_above="@+id/start_tracking"
+        android:layout_below="@id/image"
+        android:background="@color/white_transparent"
+        android:baselineAligned="false"
+        android:measureWithLargestChild="false"
+        android:orientation="horizontal"
+        android:padding="10dp" >
+
+        <TextView
+            android:id="@+id/regatta_starts_in"
+            android:layout_width="fill_parent"
+            android:layout_height="wrap_content"
+            android:gravity="center"
+            android:padding="0dp"
+            android:text="@string/regatta_starts_in"
+            android:textColor="@color/white" />
+
+        <LinearLayout
+            android:id="@+id/three_boxes_regatta_starts"
+            android:layout_width="match_parent"
+            android:layout_height="fill_parent"
+            android:layout_below="@id/regatta_starts_in"
+            android:background="@color/white_transparent"
+            android:baselineAligned="false"
+            android:gravity="center|top"
+            android:measureWithLargestChild="false"
+            android:orientation="horizontal"
+            android:padding="10dp" >
+
+            <LinearLayout
+                android:id="@+id/three_boxes_days_box"
+                android:layout_width="80dp"
+                android:layout_height="wrap_content"
+                android:layout_below="@id/regatta_starts_in"
+                android:layout_margin="5dp"
+                android:background="@color/white_transparent"
+                android:baselineAligned="false"
+                android:gravity="center"
+                android:measureWithLargestChild="false"
+                android:orientation="vertical"
+                android:padding="5dp" >
+
+                <TextView
+                    android:id="@+id/starts_in_days"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:padding="0dp"
+                    android:text="00"
+                    android:textColor="@color/white"
+                    android:textSize="40sp" />
+
+                <TextView
+                    android:id="@+id/starts_in_days_label"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:padding="0dp"
+                    android:text="@string/days"
+                    android:textColor="@color/white" />
+            </LinearLayout>
+
+            <LinearLayout
+                android:id="@+id/three_boxes_hours_box"
+                android:layout_width="80dp"
+                android:layout_height="wrap_content"
+                android:layout_below="@id/regatta_starts_in"
+                android:layout_margin="5dp"
+                android:background="@color/white_transparent"
+                android:baselineAligned="false"
+                android:gravity="center"
+                android:measureWithLargestChild="false"
+                android:orientation="vertical"
+                android:padding="5dp" >
+
+                <TextView
+                    android:id="@+id/starts_in_hours"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:padding="0dp"
+                    android:text="00"
+                    android:textColor="@color/white"
+                    android:textSize="40sp" />
+
+                <TextView
+                    android:id="@+id/starts_in_hours_label"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:padding="0dp"
+                    android:text="@string/hours"
+                    android:textColor="@color/white" />
+            </LinearLayout>
+
+            <LinearLayout
+                android:id="@+id/three_boxes_minutes_box"
+                android:layout_width="80dp"
+                android:layout_height="wrap_content"
+                android:layout_below="@id/regatta_starts_in"
+                android:layout_margin="5dp"
+                android:background="@color/white_transparent"
+                android:baselineAligned="false"
+                android:gravity="center"
+                android:measureWithLargestChild="false"
+                android:orientation="vertical"
+                android:padding="5dp" >
+
+                <TextView
+                    android:id="@+id/starts_in_minutes"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:padding="0dp"
+                    android:text="00"
+                    android:textColor="@color/white"
+                    android:textSize="40sp" />
+
+                <TextView
+                    android:id="@+id/starts_in_minutes_label"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:padding="0dp"
+                    android:text="@string/minutes"
+                    android:textColor="@color/white" />
+            </LinearLayout>
+        </LinearLayout>
+    </RelativeLayout>
+
     <Button
         android:id="@+id/start_tracking"
         android:layout_width="wrap_content"
@@ -135,11 +260,11 @@
         android:layout_alignParentBottom="true"
         android:layout_alignParentLeft="true"
         android:layout_alignParentRight="true"
+        android:layout_margin="10dp"
         android:layout_marginLeft="4px"
         android:layout_marginRight="4px"
         android:background="#8ab54e"
         android:padding="10dp"
-        android:layout_margin="10dp"
         android:text="@string/start_tracking" />
 
 </RelativeLayout>
