@@ -2,5 +2,6 @@
 <resources>
 
     <dimen name="navigation_drawer_width">500dp</dimen>
-
+	<dimen name="navigation_drawer_right_box">150dp</dimen>
+    
 </resources>

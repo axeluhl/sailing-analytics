@@ -35,6 +35,6 @@ public class LoadFailedDialog extends FragmentAttachedDialogFragment {
                         getString(R.string.generic_load_failure), 
                         getArguments().getString(ARGS_ERROR_MSG)))
                         .setTitle(getString(R.string.loading_failure))
-                        .setIcon(R.drawable.ic_dialog_alert_holo_light);
+                        .setIcon(R.drawable.ic_warning_grey600_36dp);
     }
 }

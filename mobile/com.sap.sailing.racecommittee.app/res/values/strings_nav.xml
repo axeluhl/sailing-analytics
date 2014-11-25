@@ -4,4 +4,14 @@
     <string name="nav_drawer_open">Open Navigation Drawer</string>
     <string name="nav_drawer_close">Close Navigation Drawer</string>
     
+    <string name="available_races">Available Races</string>
+    
+    <string name="race_started">Started %s</string>
+    <string name="race_finished">Finished %s</string>
+    <string name="race_starts">Starts %s</string>
+    <string name="race_unscheduled">Unscheduled</string>
+    
+    <string name="race_show_all">show all</string>
+    <string name="race_show_less">show less</string>
+        
 </resources>

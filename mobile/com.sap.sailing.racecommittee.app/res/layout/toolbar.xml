@@ -7,31 +7,49 @@
     android:minHeight="?attr/actionBarSize" >
 
     <LinearLayout
-        android:id="@+id/toolbar_extended"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:layout_gravity="end"
         android:gravity="center"
         android:minHeight="?attr/actionBarSize"
-        android:orientation="horizontal"
-        android:visibility="gone" >
+        android:orientation="horizontal" >
 
-        <Button
-            android:id="@+id/currentTime"
-            style="?android:attr/borderlessButtonStyle"
+        <ProgressBar
+            android:id="@+id/progress_spinner"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:drawableLeft="@drawable/ic_access_time_grey600_36dp"
-            android:drawableStart="@drawable/ic_access_time_grey600_36dp" />
+            android:gravity="center"
+            android:indeterminate="true"
+            android:visibility="gone" />
 
-        <Button
-            android:id="@+id/windButton"
-            style="?android:attr/borderlessButtonStyle"
+        <LinearLayout
+            android:id="@+id/toolbar_extended"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:drawableLeft="@drawable/ic_call_made_grey600_36dp"
-            android:drawableStart="@drawable/ic_call_made_grey600_36dp"
-            android:text="@string/wind_unknown" />
+            android:gravity="center"
+            android:minHeight="?attr/actionBarSize"
+            android:orientation="horizontal"
+            android:visibility="gone" >
+
+            <Button
+                android:id="@+id/currentTime"
+                style="?android:attr/borderlessButtonStyle"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:drawableLeft="@drawable/ic_access_time_grey600_36dp"
+                android:drawableStart="@drawable/ic_access_time_grey600_36dp"
+                android:textAppearance="?android:attr/textAppearanceLarge" />
+
+            <Button
+                android:id="@+id/windButton"
+                style="?android:attr/borderlessButtonStyle"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:drawableLeft="@drawable/ic_call_made_grey600_36dp"
+                android:drawableStart="@drawable/ic_call_made_grey600_36dp"
+                android:text="@string/wind_unknown"
+                android:textAppearance="?android:attr/textAppearanceLarge" />
+        </LinearLayout>
     </LinearLayout>
 
 </android.support.v7.widget.Toolbar>
