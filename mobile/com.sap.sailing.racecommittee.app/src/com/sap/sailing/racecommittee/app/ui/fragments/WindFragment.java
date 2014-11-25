@@ -128,8 +128,11 @@ public class WindFragment extends LoggableFragment implements CompassDirectionLi
                     if ( backstackCount > 0 ){
                     	 BackStackEntry lastFragment = getActivity().getFragmentManager().getBackStackEntryAt( backstackCount - 1);
                          Log.d(TAG, lastFragment.getClass().toString());
-                    }                  
-                    getActivity().getFragmentManager().beginTransaction().remove(thisFragment).commit();
+                    }               
+                    
+                    getActivity().getFragmentManager().popBackStack();
+                    
+                    
                 } catch (NumberFormatException nfe) {
                     Toast.makeText(getActivity(), R.string.wind_speed_direction_not_a_valid_number, Toast.LENGTH_LONG).show();
                     ExLog.i(getActivity(), this.getClass().getCanonicalName(), nfe.getMessage());

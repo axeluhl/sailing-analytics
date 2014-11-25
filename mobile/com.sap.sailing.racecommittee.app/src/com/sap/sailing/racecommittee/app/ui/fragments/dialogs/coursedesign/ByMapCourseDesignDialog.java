@@ -49,6 +49,7 @@ import com.sap.sailing.racecommittee.app.domain.coursedesign.CourseLayouts;
 import com.sap.sailing.racecommittee.app.domain.coursedesign.NumberOfRounds;
 import com.sap.sailing.racecommittee.app.domain.coursedesign.PositionedMark;
 import com.sap.sailing.racecommittee.app.domain.coursedesign.TargetTime;
+import com.sap.sailing.racecommittee.app.ui.activities.RacingActivity;
 import com.sap.sailing.racecommittee.app.ui.fragments.WindFragment;
 import com.sap.sailing.racecommittee.app.ui.fragments.dialogs.RaceDialogFragment;
 import com.sap.sse.common.Util;
@@ -138,23 +139,16 @@ public class ByMapCourseDesignDialog extends RaceDialogFragment {
         });
 
         windButton = (ImageButton) getView().findViewById(R.id.windButton);
-        windButton.setOnClickListener(new OnClickListener() {
+        /*windButton.setOnClickListener(new OnClickListener() {
 
             @Override
             public void onClick(View arg0) {
-            	if ( (windFragment != null && ! windFragment.isFragmentUIActive()) || windFragment == null ){
-                	windFragment = new WindFragment();
-                    getFragmentManager().beginTransaction().setCustomAnimations(R.animator.slide_in, R.animator.slide_out)
-                            .replace(R.id.racing_view_right_container, windFragment)
-                            .setTransition(FragmentTransaction.TRANSIT_FRAGMENT_FADE).commit();
-                    
-                }
-            	
+            	((RacingActivity)getActivity()).loadWindFragment();
             	//TODO: catch result WIND_ACTIVITY_REQUEST_CODE !
             }
 
         });
-
+		*/
         courseDesignComputer = new CourseDesignComputer();
 
         spinnerBoatClass = (Spinner) getView().findViewById(R.id.classic_course_designer_boat_class);

@@ -28,6 +28,7 @@ import com.sap.sailing.android.shared.util.CollectionUtils;
 import com.sap.sailing.domain.base.CourseArea;
 import com.sap.sailing.domain.common.impl.MillisecondsTimePoint;
 import com.sap.sailing.domain.racelog.RaceLogEventAuthor;
+import com.sap.sailing.domain.racelog.analyzing.impl.LastWindFixFinder;
 import com.sap.sailing.domain.tracking.Wind;
 import com.sap.sailing.racecommittee.app.AppConstants;
 import com.sap.sailing.racecommittee.app.R;
@@ -116,6 +117,8 @@ public class RacingActivity extends SessionActivity implements RaceInfoListener,
     private ManagedRace selectedRace;
     private Button currentTime;
     private Button windButton;
+    
+    private Wind mWind;
 
     private Serializable getCourseAreaIdFromIntent() {
         if (getIntent() == null || getIntent().getExtras() == null) {
@@ -157,14 +160,7 @@ public class RacingActivity extends SessionActivity implements RaceInfoListener,
     public void onClick(View view) {
         switch (view.getId()) {
         case R.id.windButton:
-        	// check if the fragment is actively shown already, otherwise show it
-            if ( (windFragment != null && ! windFragment.isFragmentUIActive()) || windFragment == null ){
-            	windFragment = new WindFragment();
-                getFragmentManager().beginTransaction().setCustomAnimations(R.animator.slide_in, R.animator.slide_out)
-                        .replace(R.id.racing_view_right_container, windFragment)
-                        .setTransition(FragmentTransaction.TRANSIT_FRAGMENT_FADE).commit();
-                
-            }
+        	loadWindFragment();
             break;
 
         default:
@@ -178,24 +174,11 @@ public class RacingActivity extends SessionActivity implements RaceInfoListener,
         if (selectedRace != null) {
             selectedRace.getState().setWindFix(MillisecondsTimePoint.now(), windFix);
         }
-    	
+        
+        mWind = windFix;
     }
     
     
-    @Override
-    public void onActivityResult(int requestCode, int resultCode, Intent data) {
-        if (requestCode == WIND_ACTIVITY_REQUEST_CODE) {
-            if (resultCode == Activity.RESULT_OK) {
-                if (data.getExtras().containsKey(AppConstants.EXTRAS_WIND_FIX)) {
-                    Wind windFix = (Wind) data.getSerializableExtra(AppConstants.EXTRAS_WIND_FIX);
-                    windButton.setText(String.format(getString(R.string.wind_info), windFix.getKnots(), windFix.getBearing().reverse().toString()));
-                    if (selectedRace != null) {
-                        selectedRace.getState().setWindFix(MillisecondsTimePoint.now(), windFix);
-                    }
-                }
-            }
-        }
-    }
 
     @Override
     public void onCreate(Bundle savedInstanceState) {
@@ -236,6 +219,14 @@ public class RacingActivity extends SessionActivity implements RaceInfoListener,
         windButton = (Button) findViewById(R.id.windButton);
         if (windButton != null) {
             windButton.setOnClickListener(this);
+        }
+        
+
+        if (savedInstanceState != null) {
+        	mWind = (Wind) savedInstanceState.getSerializable("wind");
+        	if ( mWind != null ){
+        		onWindEntered(mWind);
+        	}
         }
     }
 
@@ -284,6 +275,33 @@ public class RacingActivity extends SessionActivity implements RaceInfoListener,
         super.onStop();
 
         TickSingleton.INSTANCE.unregisterListener(this);
+    }
+    
+    @Override
+    public void onSaveInstanceState(Bundle outState) {
+        super.onSaveInstanceState(outState);
+        
+        outState.putSerializable("wind", mWind);
+    }
+    
+    
+    @Override
+	public void onResume() {
+		// TODO Auto-generated method stub
+		super.onResume();
+	}
+
+	public void loadWindFragment(){
+    	// check if the fragment is actively shown already, otherwise show it
+    	if ( (windFragment != null && ! windFragment.isFragmentUIActive()) || windFragment == null ){
+        	windFragment = new WindFragment();
+            getFragmentManager().beginTransaction().setCustomAnimations(R.animator.slide_in, R.animator.slide_out)
+                    .replace(R.id.racing_view_right_container, windFragment)
+                    .setTransition(FragmentTransaction.TRANSIT_FRAGMENT_FADE)
+                    .addToBackStack(null)
+                    .commit();
+            
+        }
     }
     
     private void registerOnService(Collection<ManagedRace> races) {
