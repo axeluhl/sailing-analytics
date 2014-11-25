@@ -22,7 +22,6 @@ import com.sap.sailing.domain.tracking.Wind;
 import com.sap.sailing.racecommittee.app.R;
 import com.sap.sailing.racecommittee.app.domain.ManagedRace;
 import com.sap.sailing.racecommittee.app.logging.LogEvent;
-import com.sap.sailing.racecommittee.app.ui.activities.RacingActivity;
 import com.sap.sailing.racecommittee.app.ui.fragments.chooser.RaceInfoFragmentChooser;
 import com.sap.sailing.racecommittee.app.ui.fragments.raceinfo.RaceInfoListener;
 import com.sap.sailing.racecommittee.app.ui.fragments.raceinfo.SetStartTimeRaceFragment;
@@ -42,8 +41,6 @@ public class RaceInfoFragment extends RaceFragment implements RaceInfoListener {
     private Button windInfoHeader;
 
     private View resetRaceDialogView;
-
-    private WindFragment windFragment;
     
     public RaceInfoFragment() {
         this.infoFragmentChooser = null;
@@ -58,7 +55,7 @@ public class RaceInfoFragment extends RaceFragment implements RaceInfoListener {
     @Override
     public void onActivityCreated(Bundle savedInstanceState) {
         super.onActivityCreated(savedInstanceState);
-
+        
         infoFragmentChooser = RaceInfoFragmentChooser.on(getRaceState().getRacingProcedure().getType());
 
         fleetInfoHeader = (TextView) getView().findViewById(R.id.regattaGroupInfoHeader);
@@ -72,17 +69,7 @@ public class RaceInfoFragment extends RaceFragment implements RaceInfoListener {
                 .getName()));
         raceInfoHeader.setText(String.format("%s", getRace().getName()));
 
-        /*windInfoHeader.setOnClickListener(new OnClickListener() {
-
-            @Override
-            public void onClick(View arg0) {              
-            	if ( getActivity() != null){
-            		((RacingActivity)getActivity()).loadWindFragment();
-            	}
-            }
-            //TODO: catch result WIND_ACTIVITY_REQUEST_CODE ;
-
-        });*/
+        //TODO: catch result WIND_ACTIVITY_REQUEST_CODE ;
 
         Button resetButton = (Button) getView().findViewById(R.id.btnResetRace);
         resetButton.setOnClickListener(new OnClickListener() {
@@ -98,11 +85,11 @@ public class RaceInfoFragment extends RaceFragment implements RaceInfoListener {
         updateWindLabel();
     }
 
-    @Override
-    public void onStart() {
-        super.onStart();
-        getRace().getState().addChangedListener(stateChangedListener);
-        switchToInfoFragment();
+    
+    public void onResume(){
+    	super.onResume();
+    	getRace().getState().addChangedListener(stateChangedListener);
+    	switchToInfoFragment();
     }
 
     @Override
