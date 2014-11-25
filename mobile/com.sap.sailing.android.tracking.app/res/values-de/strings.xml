@@ -61,5 +61,8 @@
 	<string name="hours">Stunden</string>
 	<string name="minutes">Minuten</string>
 	<string name="days">Tage</string>
+	<string name="hour">Stunde</string>
+	<string name="minute">Minute</string>
+	<string name="day">Tag</string>
 
 </resources>

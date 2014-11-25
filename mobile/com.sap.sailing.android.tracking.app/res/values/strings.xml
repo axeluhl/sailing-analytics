@@ -54,5 +54,8 @@
 	<string name="hours">Hours</string>
 	<string name="minutes">Minutes</string>
 	<string name="days">Days</string>
+	<string name="hour">Hour</string>
+	<string name="minute">Minute</string>
+	<string name="day">Day</string>
 	
 </resources>

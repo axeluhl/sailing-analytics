@@ -131,7 +131,6 @@
         android:layout_height="fill_parent"
         android:layout_above="@+id/start_tracking"
         android:layout_below="@id/image"
-        android:background="@color/white_transparent"
         android:baselineAligned="false"
         android:measureWithLargestChild="false"
         android:orientation="horizontal"
@@ -151,7 +150,6 @@
             android:layout_width="match_parent"
             android:layout_height="fill_parent"
             android:layout_below="@id/regatta_starts_in"
-            android:background="@color/white_transparent"
             android:baselineAligned="false"
             android:gravity="center|top"
             android:measureWithLargestChild="false"
@@ -164,11 +162,11 @@
                 android:layout_height="wrap_content"
                 android:layout_below="@id/regatta_starts_in"
                 android:layout_margin="5dp"
-                android:background="@color/white_transparent"
                 android:baselineAligned="false"
                 android:gravity="center"
                 android:measureWithLargestChild="false"
                 android:orientation="vertical"
+                android:background="@drawable/background_box"
                 android:padding="5dp" >
 
                 <TextView
@@ -195,11 +193,11 @@
                 android:layout_height="wrap_content"
                 android:layout_below="@id/regatta_starts_in"
                 android:layout_margin="5dp"
-                android:background="@color/white_transparent"
                 android:baselineAligned="false"
                 android:gravity="center"
                 android:measureWithLargestChild="false"
                 android:orientation="vertical"
+                android:background="@drawable/background_box"
                 android:padding="5dp" >
 
                 <TextView
@@ -226,11 +224,11 @@
                 android:layout_height="wrap_content"
                 android:layout_below="@id/regatta_starts_in"
                 android:layout_margin="5dp"
-                android:background="@color/white_transparent"
                 android:baselineAligned="false"
                 android:gravity="center"
                 android:measureWithLargestChild="false"
                 android:orientation="vertical"
+                android:background="@drawable/background_box"
                 android:padding="5dp" >
 
                 <TextView
