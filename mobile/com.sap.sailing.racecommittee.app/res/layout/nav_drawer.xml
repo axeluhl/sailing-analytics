@@ -4,15 +4,37 @@
     android:layout_height="match_parent"
     android:background="@color/welter_light_gray_transparent" >
 
-    <Spinner
-        android:id="@+id/nav_filter"
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content" />
+    <Button
+        android:id="@+id/change_filter"
+        style="?android:attr/borderlessButtonStyle"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_alignParentEnd="true"
+        android:layout_alignParentRight="true"
+        android:layout_alignParentTop="true"
+        android:drawableEnd="@drawable/ic_arrow_drop_down_grey600_24dp"
+        android:drawableRight="@drawable/ic_arrow_drop_down_grey600_24dp"
+        android:text="@string/race_show_all" />
 
+    <TextView
+        android:id="@+id/area_name"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_alignBaseline="@+id/change_filter"
+        android:layout_alignBottom="@+id/change_filter"
+        android:layout_alignParentLeft="true"
+        android:layout_alignParentStart="true"
+        android:layout_marginLeft="4dp"
+        android:layout_marginStart="4dp"
+        android:text="@string/available_races"
+        android:textAppearance="?android:attr/textAppearanceMedium" />
+    
     <ListView
         android:id="@+id/listView"
         android:layout_width="match_parent"
         android:layout_height="match_parent"
-        android:layout_below="@id/nav_filter" />
+        android:layout_below="@+id/change_filter"
+        android:divider="@null"
+        android:dividerHeight="0dp" />
 
 </RelativeLayout>

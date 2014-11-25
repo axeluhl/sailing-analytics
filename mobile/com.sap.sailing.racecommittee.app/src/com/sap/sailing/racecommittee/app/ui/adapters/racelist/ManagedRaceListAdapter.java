@@ -5,18 +5,20 @@ import java.util.Calendar;
 import java.util.Collection;
 import java.util.Date;
 import java.util.List;
-import java.util.Locale;
 import java.util.concurrent.TimeUnit;
 
 import android.content.Context;
+import android.content.res.Resources;
 import android.text.TextUtils;
 import android.view.LayoutInflater;
 import android.view.View;
+import android.view.View.OnClickListener;
 import android.view.ViewGroup;
 import android.widget.ArrayAdapter;
+import android.widget.Button;
 import android.widget.ImageView;
 import android.widget.LinearLayout;
-import android.widget.Spinner;
+import android.widget.RelativeLayout;
 import android.widget.TextView;
 
 import com.sap.sailing.domain.racelog.state.RaceState;
@@ -52,16 +54,17 @@ public class ManagedRaceListAdapter extends ArrayAdapter<RaceListDataType> imple
     }
 
     private class ViewHolder {
-        TextView area_name;
-        ImageView current_flag;
+        RelativeLayout panel_left;
+        RelativeLayout panel_right;
         
+        LinearLayout race_flag;
+        ImageView current_flag;
         TextView flag_timer;
         
         TextView group_name;
-        RaceListDataTypeHeader header;
         
         RaceListDataTypeRace race;
-        Spinner race_filter;
+        Button change_filter;
         TextView race_finished;
         TextView race_name;
         
@@ -90,17 +93,20 @@ public class ManagedRaceListAdapter extends ArrayAdapter<RaceListDataType> imple
 
     private final Object lockObject = new Object();
     private LayoutInflater mInflater;
+    private Resources mResources;
 
     private List<RaceListDataType> shownViewItems;
 
     public ManagedRaceListAdapter(Context context, List<RaceListDataType> viewItems,
             JuryFlagClickedListener juryListener) {
         super(context, 0);
+        
         this.allViewItems = viewItems;
         this.shownViewItems = viewItems;
-
         this.juryListener = juryListener;
-        this.mInflater = (LayoutInflater) (getContext().getSystemService(Context.LAYOUT_INFLATER_SERVICE));
+        
+        mInflater = (LayoutInflater) (getContext().getSystemService(Context.LAYOUT_INFLATER_SERVICE));
+        mResources = getContext().getResources();
     }
 
     public String fill2(int value)
@@ -179,12 +185,13 @@ public class ManagedRaceListAdapter extends ArrayAdapter<RaceListDataType> imple
         if (convertView == null) {
             holder = new ViewHolder();
             if (type == ViewType.HEADER.index) {
-                convertView = mInflater.inflate(R.layout.race_list_area_header, parent, false);
-                holder.area_name = (TextView) convertView.findViewById(R.id.area_name);
-                holder.race_filter = (Spinner) convertView.findViewById(R.id.race_filter);
+                // TODO
             } else if (type == ViewType.RACE.index) {
                 convertView = mInflater.inflate(R.layout.race_list_area_item, parent, false);
+                holder.panel_left = (RelativeLayout) convertView.findViewById(R.id.panel_left);
+                holder.panel_right = (RelativeLayout) convertView.findViewById(R.id.panel_right);
                 holder.group_name = (TextView) convertView.findViewById(R.id.group_name);
+                holder.race_flag = (LinearLayout) convertView.findViewById(R.id.race_flag);
                 holder.race_name = (TextView) convertView.findViewById(R.id.race_name);
                 holder.current_flag = (ImageView) convertView.findViewById(R.id.current_flag);
                 holder.flag_timer = (TextView) convertView.findViewById(R.id.flag_timer);
@@ -201,7 +208,6 @@ public class ManagedRaceListAdapter extends ArrayAdapter<RaceListDataType> imple
         }
 
         if (type == ViewType.HEADER.index) {
-            holder.header = (RaceListDataTypeHeader) raceListElement;
             // TODO
         } else if (type == ViewType.RACE.index) {
             SimpleDateFormat format = new SimpleDateFormat("HH:mm", getContext().getResources().getConfiguration().locale);
@@ -209,16 +215,17 @@ public class ManagedRaceListAdapter extends ArrayAdapter<RaceListDataType> imple
             holder.race = race;
             resetValues(holder);
             
+            holder.group_name.setText(race.getRace().getSeries().getName());
             if (!TextUtils.isEmpty(race.getRaceName())) {
                 holder.race_name.setText(race.getRaceName());
             }
             if (race.getRace().getState().getStartTime() != null) {
-                holder.race_started.setText(format.format(race.getRace().getState().getStartTime().asDate()));
+                holder.race_started.setText(String.format(mResources.getString(R.string.race_started, format.format(race.getRace().getState().getStartTime().asDate()))));
             }
             if (race.getRace().getState().getFinishedTime() != null) {
                 holder.time.setVisibility(View.GONE);
                 holder.race_finished.setVisibility(View.VISIBLE);
-                holder.race_finished.setText(format.format(race.getRace().getState().getFinishedTime().asDate()));
+                holder.race_finished.setText(String.format(mResources.getString(R.string.race_finished, format.format(race.getRace().getState().getFinishedTime().asDate()))));
             }
             if (race.getRace().getState().getStartTime() == null && race.getRace().getState().getFinishedTime() == null) {
                 holder.race_scheduled.setVisibility(View.GONE);
@@ -227,18 +234,50 @@ public class ManagedRaceListAdapter extends ArrayAdapter<RaceListDataType> imple
             if (race.isUpdateIndicatorVisible()) {
                 holder.update_badge.setVisibility(View.VISIBLE);
             }
+            updateFlag();
         }
 
         return convertView;
     }
 
     private void resetValues(ViewHolder holder) {
-        holder.time.setVisibility(View.VISIBLE);
-        holder.race_started.setText("");
-        holder.race_finished.setText("");
-        holder.race_finished.setVisibility(View.GONE);
-        holder.race_scheduled.setVisibility(View.VISIBLE);
-        holder.race_unscheduled.setVisibility(View.GONE);
+        if (holder != null) {
+            if (holder.panel_left != null) {
+                holder.panel_left.setBackgroundColor(mResources.getColor(R.color.colorGreyDark));
+            }
+            if (holder.panel_right != null) {
+                holder.panel_right.setBackgroundColor(mResources.getColor(R.color.colorGreyDark));
+            }
+            
+            if (holder.update_badge != null) {
+                holder.update_badge.setVisibility(View.GONE);
+            }
+            if (holder.race_flag != null) {
+                holder.race_flag.setVisibility(View.GONE);
+            }
+            if (holder.time != null) {
+                holder.time.setVisibility(View.VISIBLE);
+            }
+            if (holder.race_started != null) {
+                holder.race_started.setText("");
+            }
+            if (holder.race_finished != null) {
+                holder.race_finished.setText("");
+            }
+            if (holder.race_finished != null) {
+            holder.race_finished.setVisibility(View.GONE);
+            }
+            if (holder.race_scheduled != null) {
+                holder.race_scheduled.setVisibility(View.VISIBLE);
+            }
+            if (holder.race_unscheduled != null) {
+                holder.race_unscheduled.setVisibility(View.GONE);
+            }
+        }
+    }
+    
+    private void updateFlag() {
+        //TODO
     }
     
     @Override

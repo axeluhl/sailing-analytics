@@ -10,7 +10,9 @@ import android.app.ProgressDialog;
 import android.content.Intent;
 import android.os.Bundle;
 import android.support.v7.widget.Toolbar;
+import android.view.View;
 import android.view.Window;
+import android.widget.ProgressBar;
 import android.widget.Toast;
 
 import com.sap.sailing.android.shared.logging.ExLog;
@@ -45,6 +47,7 @@ public class LoginActivity extends BaseActivity implements EventSelectedListener
 
     private LoginDialog loginDialog;
     private CourseArea selectedCourseArea;
+    private ProgressBar mProgressSpinner;
 
     public LoginActivity() {
         this.loginDialog = new LoginDialog();
@@ -75,6 +78,7 @@ public class LoginActivity extends BaseActivity implements EventSelectedListener
         Toolbar toolbar = (Toolbar) findViewById(R.id.toolbar);
         if (toolbar != null) {
             setSupportActionBar(toolbar);
+            mProgressSpinner = (ProgressBar) findViewById(R.id.progress_spinner);
         }
 
         // on first create add event list fragment
@@ -233,5 +237,18 @@ public class LoginActivity extends BaseActivity implements EventSelectedListener
                 /* nothing here... */
             }
         };
+    }
+    
+    @Override
+    public void setSupportProgressBarIndeterminateVisibility(boolean visible) {
+        super.setSupportProgressBarIndeterminateVisibility(visible);
+        
+        if (mProgressSpinner != null) {
+            if (visible) {
+                mProgressSpinner.setVisibility(View.VISIBLE);
+            } else {
+                mProgressSpinner.setVisibility(View.GONE);
+            }
+        }
     }
 }
