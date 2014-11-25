@@ -4,6 +4,7 @@ import java.io.Serializable;
 import java.text.SimpleDateFormat;
 import java.util.Calendar;
 import java.util.Collection;
+
 import android.annotation.SuppressLint;
 import android.app.Activity;
 import android.app.AlertDialog;
@@ -21,6 +22,7 @@ import android.view.Window;
 import android.widget.Button;
 import android.widget.TextView;
 import android.widget.Toast;
+
 import com.sap.sailing.android.shared.logging.ExLog;
 import com.sap.sailing.android.shared.util.CollectionUtils;
 import com.sap.sailing.domain.base.CourseArea;
@@ -42,6 +44,7 @@ import com.sap.sailing.racecommittee.app.ui.fragments.NavigationDrawerFragment;
 import com.sap.sailing.racecommittee.app.ui.fragments.NavigationDrawerFragment.NavigationDrawerCallbacks;
 import com.sap.sailing.racecommittee.app.ui.fragments.RaceFragment;
 import com.sap.sailing.racecommittee.app.ui.fragments.RaceInfoFragment;
+import com.sap.sailing.racecommittee.app.ui.fragments.WindFragment;
 import com.sap.sailing.racecommittee.app.ui.fragments.raceinfo.RaceInfoListener;
 import com.sap.sailing.racecommittee.app.utils.TickListener;
 import com.sap.sailing.racecommittee.app.utils.TickSingleton;
@@ -108,6 +111,7 @@ public class RacingActivity extends SessionActivity implements RaceInfoListener,
 
     private ReadonlyDataManager dataManager;
     private RaceInfoFragment infoFragment;
+    private WindFragment windFragment;
     private NavigationDrawerFragment navDrawerFragment;
     private ManagedRace selectedRace;
     private Button currentTime;
@@ -153,9 +157,18 @@ public class RacingActivity extends SessionActivity implements RaceInfoListener,
     public void onClick(View view) {
         switch (view.getId()) {
         case R.id.windButton:
-            Intent intent = new Intent(this, WindActivity.class);
-            startActivityForResult(intent, WIND_ACTIVITY_REQUEST_CODE);
-            overridePendingTransition(android.R.anim.fade_in, android.R.anim.fade_out);
+            //Intent intent = new Intent(this, WindActivity.class);
+            //startActivityForResult(intent, WIND_ACTIVITY_REQUEST_CODE);
+           // overridePendingTransition(android.R.anim.fade_in, android.R.anim.fade_out);
+            
+            
+            
+            windFragment = new WindFragment();
+            getFragmentManager().beginTransaction().setCustomAnimations(R.animator.slide_in, R.animator.slide_out)
+                    .replace(R.id.racing_view_right_container, windFragment)
+                    .setTransition(FragmentTransaction.TRANSIT_FRAGMENT_FADE).commit();
+            
+            
             break;
 
         default:
@@ -163,6 +176,16 @@ public class RacingActivity extends SessionActivity implements RaceInfoListener,
         }
     }
 
+    
+    public void setWind(Wind windFix){
+    	windButton.setText(String.format(getString(R.string.wind_info), windFix.getKnots(), windFix.getBearing().reverse().toString()));
+        if (selectedRace != null) {
+            selectedRace.getState().setWindFix(MillisecondsTimePoint.now(), windFix);
+        }
+    	
+    }
+    
+    
     @Override
     public void onActivityResult(int requestCode, int resultCode, Intent data) {
         if (requestCode == WIND_ACTIVITY_REQUEST_CODE) {
