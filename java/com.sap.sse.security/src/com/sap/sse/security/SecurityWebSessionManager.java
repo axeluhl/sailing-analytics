@@ -28,11 +28,10 @@ public class SecurityWebSessionManager extends DefaultWebSessionManager {
     private static final TimerWithRunnable timer = new TimerWithRunnable("Timer delaying Session.touch() onChange(s) notifications", /* isDaemon */ true);
     private static final Duration MAX_DURATION_ASSUMED_FOR_MESSAGE_DELIVERY = Duration.ONE_SECOND.times(30);
     
-    private final WeakHashMap<Session, Void> sessionsAlreadyScheduledForOnChange;
+    private static final WeakHashMap<Session, Void> sessionsAlreadyScheduledForOnChange = new WeakHashMap<>();
     
     public SecurityWebSessionManager() {
         super();
-        this.sessionsAlreadyScheduledForOnChange = new WeakHashMap<>();
         getSessionIdCookie().setPath(Cookie.ROOT_PATH);
     }
 
@@ -47,7 +46,8 @@ public class SecurityWebSessionManager extends DefaultWebSessionManager {
         Duration sendDurationLatestIn = new MillisecondsDurationImpl(s.getTimeout()).minus(MAX_DURATION_ASSUMED_FOR_MESSAGE_DELIVERY);
         if (!sessionsAlreadyScheduledForOnChange.containsKey(s)) {
             sessionsAlreadyScheduledForOnChange.put(s, null);
-            timer.schedule(()->onChange(s), MillisecondsTimePoint.now().plus(sendDurationLatestIn).asMillis());
+            timer.schedule(()->{ onChange(s); sessionsAlreadyScheduledForOnChange.remove(s); },
+                    MillisecondsTimePoint.now().plus(sendDurationLatestIn).asDate());
         }
     }
 
