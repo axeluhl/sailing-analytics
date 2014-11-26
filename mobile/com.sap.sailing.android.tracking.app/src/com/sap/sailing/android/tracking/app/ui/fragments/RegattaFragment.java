@@ -20,6 +20,7 @@ import android.view.ViewGroup;
 import android.widget.Button;
 import android.widget.ImageButton;
 import android.widget.LinearLayout;
+import android.widget.RelativeLayout;
 import android.widget.TextView;
 
 import com.sap.sailing.android.shared.logging.ExLog;
@@ -30,12 +31,14 @@ import com.sap.sailing.android.tracking.app.ui.activities.TrackingActivity;
 public class RegattaFragment extends BaseFragment implements OnClickListener {
 
 	private final String TAG = RegattaFragment.class.toString();
-	
+
 	private final int CAMERA_REQUEST_CODE = 3118;
 	private final int SELECT_PHOTO_REQUEST_CODE = 1693;
+
+	private boolean showingThankYouNote;
 	
 	private TimerRunnable timer;
-	
+
 	@Override
 	public View onCreateView(LayoutInflater inflater, ViewGroup container,
 			Bundle savedInstanceState) {
@@ -63,24 +66,76 @@ public class RegattaFragment extends BaseFragment implements OnClickListener {
 		return view;
 	}
 
+	private void switchToThankYouScreen() {
+		showingThankYouNote = true;
+		
+		RelativeLayout startsInLayout = (RelativeLayout) getActivity()
+				.findViewById(R.id.start_date_layout);
+		startsInLayout.setVisibility(View.INVISIBLE);
+
+		Button startTrackingButton = (Button) getActivity().findViewById(
+				R.id.start_tracking);
+		startTrackingButton.setBackgroundColor(getActivity().getResources()
+				.getColor(R.color.sap_yellow));
+		startTrackingButton.setText(getActivity().getString(R.string.close));
+
+		TextView bottomAnnouncement = (TextView) getActivity().findViewById(R.id.bottom_announcement);
+		bottomAnnouncement.setVisibility(View.INVISIBLE);
+		
+		RelativeLayout thankYouLayout = (RelativeLayout)getActivity().findViewById(R.id.thank_you_layout);
+		thankYouLayout.setVisibility(View.VISIBLE);
+	}
+
 	@Override
 	public void onResume() {
 		super.onResume();
 		timer = new TimerRunnable();
 		timer.start();
+
+		// TODO delete test
+
+		new Thread(new Runnable() {
+
+			@Override
+			public void run() {
+				try {
+					Thread.sleep(5000);
+				} catch (InterruptedException e) {
+					e.printStackTrace();
+				}
+
+				getActivity().runOnUiThread(new Runnable() {
+
+					@Override
+					public void run() {
+						switchToThankYouScreen();
+
+					}
+				});
+
+			}
+		}).start();
 	}
-	
+
 	@Override
 	public void onPause() {
 		super.onPause();
 		timer.stop();
 	}
-	
+
 	@Override
 	public void onClick(View view) {
 		switch (view.getId()) {
 		case R.id.start_tracking:
-			showTrackingActivity();
+			if (showingThankYouNote)
+			{
+				RegattaActivity regattaActivity = (RegattaActivity)getActivity();
+				regattaActivity.checkout();
+			}
+			else
+			{
+				showTrackingActivity();	
+			}
 			break;
 		case R.id.add_photo_button:
 			showChooseExistingPictureOrTakeNewPhotoAlert();
@@ -112,7 +167,8 @@ public class RegattaFragment extends BaseFragment implements OnClickListener {
 	private void showChooseExistingPictureOrTakeNewPhotoAlert() {
 		AlertDialog dialog = new AlertDialog.Builder(getActivity())
 				.setTitle(R.string.add_photo_select)
-				.setMessage(R.string.do_you_want_to_choose_existing_img_or_take_a_new_one)
+				.setMessage(
+						R.string.do_you_want_to_choose_existing_img_or_take_a_new_one)
 				.setIcon(android.R.drawable.ic_dialog_alert)
 				.setPositiveButton(R.string.existing_image,
 						new DialogInterface.OnClickListener() {
@@ -128,17 +184,15 @@ public class RegattaFragment extends BaseFragment implements OnClickListener {
 									int which) {
 								showTakePhotoActivity();
 							}
-						})
-				.create();
+						}).create();
 
 		dialog.show();
 	}
-	
-	private void pickExistingImage()
-	{
+
+	private void pickExistingImage() {
 		Intent photoPickerIntent = new Intent(Intent.ACTION_PICK);
 		photoPickerIntent.setType("image/*");
-		startActivityForResult(photoPickerIntent, SELECT_PHOTO_REQUEST_CODE);   
+		startActivityForResult(photoPickerIntent, SELECT_PHOTO_REQUEST_CODE);
 	}
 
 	private void showTakePhotoActivity() {
@@ -148,23 +202,23 @@ public class RegattaFragment extends BaseFragment implements OnClickListener {
 
 	@Override
 	public void onActivityResult(int requestCode, int resultCode, Intent data) {
-		if (resultCode == Activity.RESULT_OK)
-		{
+		if (resultCode == Activity.RESULT_OK) {
 			RegattaActivity activity = (RegattaActivity) getActivity();
-			
+
 			if (requestCode == CAMERA_REQUEST_CODE) {
 				Bitmap photo = (Bitmap) data.getExtras().get("data");
 				activity.updatePictureChosenByUser(photo);
-			}
-			else if (requestCode == SELECT_PHOTO_REQUEST_CODE) {
+			} else if (requestCode == SELECT_PHOTO_REQUEST_CODE) {
 				Uri selectedImage = data.getData();
-	            InputStream imageStream;
+				InputStream imageStream;
 				try {
-					imageStream = getActivity().getContentResolver().openInputStream(selectedImage);
+					imageStream = getActivity().getContentResolver()
+							.openInputStream(selectedImage);
 					Bitmap photo = BitmapFactory.decodeStream(imageStream);
 					activity.updatePictureChosenByUser(photo);
 				} catch (FileNotFoundException e) {
-					ExLog.e(getActivity(), TAG, "File not found exception after picking image from gallery");
+					ExLog.e(getActivity(), TAG,
+							"File not found exception after picking image from gallery");
 					return;
 				}
 			}
@@ -178,74 +232,67 @@ public class RegattaFragment extends BaseFragment implements OnClickListener {
 		Intent intent = new Intent(getActivity(), TrackingActivity.class);
 		getActivity().startActivity(intent);
 	}
-	
-	private void timerFired()
-	{
-		RegattaActivity regattaActivity = (RegattaActivity)getActivity();
+
+	private void timerFired() {
+		RegattaActivity regattaActivity = (RegattaActivity) getActivity();
 		updateCountdownTimer(regattaActivity.getEventStartMillis());
 	}
-	
-	private void updateCountdownTimer(long startTime)
-	{
+
+	private void updateCountdownTimer(long startTime) {
 		long diff = startTime - System.currentTimeMillis();
 		if (diff < 0) // event is in the past
 		{
 			setCountdownTime(0, 0, 0);
-		}
-		else
-		{
-			int days = (int)TimeUnit.MILLISECONDS.toDays(diff);
-			int hours = (int)TimeUnit.MILLISECONDS.toHours(diff) - (days * 24);
-			int minutes = (int)TimeUnit.MILLISECONDS.toMinutes(diff) - (hours * 60) - (days * 24 * 60);
-			
-			setCountdownTime(days, hours, minutes);			
+		} else {
+			int days = (int) TimeUnit.MILLISECONDS.toDays(diff);
+			int hours = (int) TimeUnit.MILLISECONDS.toHours(diff) - (days * 24);
+			int minutes = (int) TimeUnit.MILLISECONDS.toMinutes(diff)
+					- (hours * 60) - (days * 24 * 60);
+
+			setCountdownTime(days, hours, minutes);
 		}
 	}
-	
-	private void setCountdownTime(int days, int hours, int minutes)
-	{
-		TextView daysTextView = (TextView)getActivity().findViewById(R.id.starts_in_days);
-		TextView hoursTextView = (TextView)getActivity().findViewById(R.id.starts_in_hours);
-		TextView minutesTextView = (TextView)getActivity().findViewById(R.id.starts_in_minutes);
-		
-		TextView daysTextViewLabel = (TextView)getActivity().findViewById(R.id.starts_in_days_label);
-		TextView hoursTextViewLabel = (TextView)getActivity().findViewById(R.id.starts_in_hours_label);
-		TextView minutesTextViewLabel = (TextView)getActivity().findViewById(R.id.starts_in_minutes_label);
-		
+
+	private void setCountdownTime(int days, int hours, int minutes) {
+		TextView daysTextView = (TextView) getActivity().findViewById(
+				R.id.starts_in_days);
+		TextView hoursTextView = (TextView) getActivity().findViewById(
+				R.id.starts_in_hours);
+		TextView minutesTextView = (TextView) getActivity().findViewById(
+				R.id.starts_in_minutes);
+
+		TextView daysTextViewLabel = (TextView) getActivity().findViewById(
+				R.id.starts_in_days_label);
+		TextView hoursTextViewLabel = (TextView) getActivity().findViewById(
+				R.id.starts_in_hours_label);
+		TextView minutesTextViewLabel = (TextView) getActivity().findViewById(
+				R.id.starts_in_minutes_label);
+
 		daysTextView.setText(String.format("%02d", days));
 		hoursTextView.setText(String.format("%02d", hours));
 		minutesTextView.setText(String.format("%02d", minutes));
-		
-		if (days == 1)
-		{
+
+		if (days == 1) {
 			daysTextViewLabel.setText(R.string.day);
-		}
-		else
-		{
+		} else {
 			daysTextViewLabel.setText(R.string.days);
 		}
-		
-		if (hours == 1)
-		{
+
+		if (hours == 1) {
 			hoursTextViewLabel.setText(R.string.hour);
-		}
-		else
-		{
+		} else {
 			hoursTextViewLabel.setText(R.string.hours);
 		}
-		
-		if (minutes == 1)
-		{
+
+		if (minutes == 1) {
 			minutesTextViewLabel.setText(R.string.minute);
-		}
-		else
-		{
+		} else {
 			minutesTextViewLabel.setText(R.string.minutes);
 		}
 	}
-	
+
 	private class TimerRunnable implements Runnable {
-		
+
 		public Thread t;
 		public volatile boolean running = true;
 

@@ -67,5 +67,7 @@
     <string name="no_qr_code">Sie haben keinen QR-Code?</string>
     <string name="scan_qr">QR-Code scannen</string>
     <string name="your_regattas">Ihre Regattas:</string>
+    <string name="close">Schließen</string>
+    <string name="thank_you_you_successfully_participated">Vielen Dank, Sie haben erfolgreich an der Regatta teilgenommen.\n\nIhr SAP Sailing Team</string>
 
 </resources>

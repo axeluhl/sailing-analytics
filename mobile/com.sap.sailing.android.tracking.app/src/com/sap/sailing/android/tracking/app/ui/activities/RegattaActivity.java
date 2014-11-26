@@ -338,7 +338,7 @@ public class RegattaActivity extends BaseActivity {
 	/**
 	 * Check out from regatta;
 	 */
-	private void checkout()
+	public void checkout()
 	{
 		final String checkoutURLStr = prefs.getServerURL()
 				+ prefs.getServerCheckoutPath().replace("{leaderboard-name}",

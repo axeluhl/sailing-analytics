@@ -59,5 +59,7 @@
 	<string name="day">Day</string>
 	<string name="please_listen_to_announcements">Please listen to the announcements</string>
 	<string name="your_regattas">Your Regattas:</string>
+	<string name="close">Close</string>
+	<string name="thank_you_you_successfully_participated">Thank you, you have successfully taken part in the regatta.\n\nYour SAP Sailing Team</string>
 	
 </resources>
