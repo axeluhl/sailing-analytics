@@ -42,7 +42,11 @@ import com.sap.sailing.android.tracking.app.utils.VolleyHelper;
  * Service that handles sending of GPS-fixes (fixes) to the Sailing-API.
  * 
  * It checks, after a certain time-interval has passed, if any fixes are available in the database 
- * and attempts to send them batch-wise.
+ * and attempts to send them batch-wise. 
+ * 
+ * (There are two strategies for sending, depending on whether tracking is running. If it's running,
+ * only fixes for the current event are being sent. If not, it tries to send fixes for previous events, 
+ * as well. Assuming there are older unsent fixes that for some reason have not been sent.) 
  * 
  * It keeps track of when the last successful sending occurred and, if no new data is available 
  * (i.e., if tracking is disabled), ends itself after a certain period. It relies on being restarted 

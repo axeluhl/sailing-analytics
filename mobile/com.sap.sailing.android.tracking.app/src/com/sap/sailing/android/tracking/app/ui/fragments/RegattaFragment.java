@@ -210,14 +210,15 @@ public class RegattaFragment extends BaseFragment implements OnClickListener {
 					return;
 				}
 			}
-
 		}
 
 		super.onActivityResult(requestCode, resultCode, data);
 	}
 
 	private void showTrackingActivity() {
+		RegattaActivity regattaActivity = (RegattaActivity) getActivity();
 		Intent intent = new Intent(getActivity(), TrackingActivity.class);
+		intent.putExtra(getString(R.string.tracking_activity_event_id_parameter), regattaActivity.getEventId());
 		getActivity().startActivity(intent);
 	}
 
