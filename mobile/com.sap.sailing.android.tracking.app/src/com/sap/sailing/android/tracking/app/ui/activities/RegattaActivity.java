@@ -47,6 +47,7 @@ import com.sap.sailing.android.tracking.app.provider.AnalyticsContract.Competito
 import com.sap.sailing.android.tracking.app.provider.AnalyticsContract.Event;
 import com.sap.sailing.android.tracking.app.provider.AnalyticsContract.Leaderboard;
 import com.sap.sailing.android.tracking.app.ui.fragments.RegattaFragment;
+import com.sap.sailing.android.tracking.app.utils.UniqueDeviceUuid;
 import com.sap.sailing.android.tracking.app.utils.VolleyHelper;
 
 public class RegattaActivity extends BaseActivity {
@@ -348,7 +349,7 @@ public class RegattaActivity extends BaseActivity {
 		JSONObject checkoutData = new JSONObject();
 		try {
 			checkoutData.put("competitorId", competitorId);
-			checkoutData.put("deviceUuid", prefs.getDeviceIdentifier());
+			checkoutData.put("deviceUuid", UniqueDeviceUuid.getUniqueId(this));
 			checkoutData.put("toMillis", String.valueOf(System.currentTimeMillis()));
 		} catch (JSONException e) {
 			showErrorPopup(

@@ -9,7 +9,7 @@
     <string name="options_menu_settings">Settings</string>
     <string name="settings_category_general">General</string>
     <string name="options_menu_checkout">Checkout</string>
-    <string name="settings_category_connection">Connection</string>
+    <string name="settings_category_other">Other Settings</string>
     <string name="server_url">Server</string>
     <string name="device_identifier">Device Identifier</string>
     <string name="play_services_available">Google Play services is available</string>
