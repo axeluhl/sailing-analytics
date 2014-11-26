@@ -65,6 +65,17 @@ public class RegattaFragment extends BaseFragment implements OnClickListener {
 
 		return view;
 	}
+	
+	private void checkAndSwitchToThankYouScreenIfRegattaOver()
+	{
+		RegattaActivity regattaActivity = (RegattaActivity) getActivity();
+		long regattaEnd = regattaActivity.getEventEndMillis();
+		
+		if (System.currentTimeMillis() > regattaEnd)
+		{
+			switchToThankYouScreen();
+		}
+	}
 
 	private void switchToThankYouScreen() {
 		showingThankYouNote = true;
@@ -91,30 +102,7 @@ public class RegattaFragment extends BaseFragment implements OnClickListener {
 		super.onResume();
 		timer = new TimerRunnable();
 		timer.start();
-
-		// TODO delete test
-
-		new Thread(new Runnable() {
-
-			@Override
-			public void run() {
-				try {
-					Thread.sleep(5000);
-				} catch (InterruptedException e) {
-					e.printStackTrace();
-				}
-
-				getActivity().runOnUiThread(new Runnable() {
-
-					@Override
-					public void run() {
-						switchToThankYouScreen();
-
-					}
-				});
-
-			}
-		}).start();
+		checkAndSwitchToThankYouScreenIfRegattaOver();
 	}
 
 	@Override
