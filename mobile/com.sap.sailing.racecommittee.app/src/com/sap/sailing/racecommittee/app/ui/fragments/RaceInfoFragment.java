@@ -1,17 +1,16 @@
 package com.sap.sailing.racecommittee.app.ui.fragments;
 
-import android.app.Activity;
+import java.io.Serializable;
+
 import android.app.AlertDialog;
 import android.app.FragmentTransaction;
 import android.content.Context;
 import android.content.DialogInterface;
-import android.content.Intent;
 import android.os.Bundle;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.View.OnClickListener;
 import android.view.ViewGroup;
-import android.webkit.WebView.FindListener;
 import android.widget.Button;
 import android.widget.TextView;
 
@@ -24,9 +23,9 @@ import com.sap.sailing.domain.racelog.state.impl.BaseRaceStateChangedListener;
 import com.sap.sailing.domain.tracking.Wind;
 import com.sap.sailing.racecommittee.app.AppConstants;
 import com.sap.sailing.racecommittee.app.R;
+import com.sap.sailing.racecommittee.app.data.OnlineDataManager;
 import com.sap.sailing.racecommittee.app.domain.ManagedRace;
 import com.sap.sailing.racecommittee.app.logging.LogEvent;
-import com.sap.sailing.racecommittee.app.ui.activities.WindActivity;
 import com.sap.sailing.racecommittee.app.ui.fragments.chooser.RaceInfoFragmentChooser;
 import com.sap.sailing.racecommittee.app.ui.fragments.raceinfo.RaceInfoListener;
 import com.sap.sailing.racecommittee.app.ui.fragments.raceinfo.SetStartTimeRaceFragment;
@@ -46,7 +45,7 @@ public class RaceInfoFragment extends RaceFragment implements RaceInfoListener {
     private Button windInfoHeader;
 
     private View resetRaceDialogView;
-
+    
     public RaceInfoFragment() {
         this.infoFragmentChooser = null;
         this.infoFragment = null; // will be set later by switchToInfoFragment()
@@ -60,7 +59,7 @@ public class RaceInfoFragment extends RaceFragment implements RaceInfoListener {
     @Override
     public void onActivityCreated(Bundle savedInstanceState) {
         super.onActivityCreated(savedInstanceState);
-
+        
         infoFragmentChooser = RaceInfoFragmentChooser.on(getRaceState().getRacingProcedure().getType());
 
         fleetInfoHeader = (TextView) getView().findViewById(R.id.regattaGroupInfoHeader);
@@ -69,21 +68,12 @@ public class RaceInfoFragment extends RaceFragment implements RaceInfoListener {
         //windInfoHeader = (TextView) getView().findViewById(R.id.windInfoHeader);
         windInfoHeader = (Button) getActivity().findViewById(R.id.windButton);
 
-        windInfoHeader.setText(getString(R.string.wind_unknown));
+        //windInfoHeader.setText(getString(R.string.wind_unknown));
         fleetInfoHeader.setText(String.format("%s - %s", getRace().getRaceGroup().getName(), getRace().getFleet()
                 .getName()));
         raceInfoHeader.setText(String.format("%s", getRace().getName()));
 
-        windInfoHeader.setOnClickListener(new OnClickListener() {
-
-            @Override
-            public void onClick(View arg0) {
-                Intent intent = new Intent(getActivity(), WindActivity.class);
-                startActivityForResult(intent, WIND_ACTIVITY_REQUEST_CODE);
-                getActivity().overridePendingTransition(android.R.anim.fade_in, android.R.anim.fade_out);
-            }
-
-        });
+        //TODO: catch result WIND_ACTIVITY_REQUEST_CODE ;
 
         Button resetButton = (Button) getView().findViewById(R.id.btnResetRace);
         resetButton.setOnClickListener(new OnClickListener() {
@@ -98,12 +88,11 @@ public class RaceInfoFragment extends RaceFragment implements RaceInfoListener {
         updateCourseDesignLabel();
         updateWindLabel();
     }
-
-    @Override
-    public void onStart() {
-        super.onStart();
-        getRace().getState().addChangedListener(stateChangedListener);
-        switchToInfoFragment();
+    
+    public void onResume(){
+    	super.onResume();
+    	getRace().getState().addChangedListener(stateChangedListener);
+    	switchToInfoFragment();
     }
 
     @Override
@@ -194,17 +183,19 @@ public class RaceInfoFragment extends RaceFragment implements RaceInfoListener {
         }
     }
     
-    @Override
-    public void onActivityResult(int requestCode, int resultCode, Intent data) {
-        if (requestCode == WIND_ACTIVITY_REQUEST_CODE) {
-            if (resultCode == Activity.RESULT_OK) {
-                if (data.getExtras().containsKey(AppConstants.EXTRAS_WIND_FIX)) {
-                    Wind windFix = (Wind) data.getSerializableExtra(AppConstants.EXTRAS_WIND_FIX);
-                    getRaceState().setWindFix(MillisecondsTimePoint.now(), windFix);
-                    windInfoHeader.setText(String.format(getString(R.string.wind_info), windFix.getKnots(), windFix.getBearing().reverse().toString()));
-                }
-            }
+    public void updateArguments(Bundle args){
+    	Serializable raceId = args.getSerializable(AppConstants.RACE_ID_KEY);
+    	managedRace = OnlineDataManager.create(getActivity()).getDataStore().getRace(raceId);
+        if (managedRace == null) {
+            throw new IllegalStateException(
+                    String.format("Unable to obtain ManagedRace from datastore on start of race fragment."));
         }
+    }
+    
+    
+    public void onWindEntered(Wind windFix){
+        getRaceState().setWindFix(MillisecondsTimePoint.now(), windFix);
+        windInfoHeader.setText(String.format(getString(R.string.wind_info), windFix.getKnots(), windFix.getBearing().reverse().toString()));
     }
     
     @Override

@@ -9,6 +9,7 @@ import android.annotation.SuppressLint;
 import android.app.Activity;
 import android.app.AlertDialog;
 import android.app.FragmentTransaction;
+import android.app.FragmentManager.BackStackEntry;
 import android.content.DialogInterface;
 import android.content.Intent;
 import android.os.Bundle;
@@ -27,6 +28,7 @@ import com.sap.sailing.android.shared.util.CollectionUtils;
 import com.sap.sailing.domain.base.CourseArea;
 import com.sap.sailing.domain.common.impl.MillisecondsTimePoint;
 import com.sap.sailing.domain.racelog.RaceLogEventAuthor;
+import com.sap.sailing.domain.racelog.analyzing.impl.LastWindFixFinder;
 import com.sap.sailing.domain.tracking.Wind;
 import com.sap.sailing.racecommittee.app.AppConstants;
 import com.sap.sailing.racecommittee.app.R;
@@ -43,6 +45,7 @@ import com.sap.sailing.racecommittee.app.ui.fragments.NavigationDrawerFragment;
 import com.sap.sailing.racecommittee.app.ui.fragments.NavigationDrawerFragment.NavigationDrawerCallbacks;
 import com.sap.sailing.racecommittee.app.ui.fragments.RaceFragment;
 import com.sap.sailing.racecommittee.app.ui.fragments.RaceInfoFragment;
+import com.sap.sailing.racecommittee.app.ui.fragments.WindFragment;
 import com.sap.sailing.racecommittee.app.ui.fragments.raceinfo.RaceInfoListener;
 import com.sap.sailing.racecommittee.app.utils.TickListener;
 import com.sap.sailing.racecommittee.app.utils.TickSingleton;
@@ -109,10 +112,13 @@ public class RacingActivity extends SessionActivity implements RaceInfoListener,
 
     private ReadonlyDataManager dataManager;
     private RaceInfoFragment infoFragment;
+    private WindFragment windFragment;
     private NavigationDrawerFragment navDrawerFragment;
     private ManagedRace selectedRace;
     private Button currentTime;
     private Button windButton;
+    
+    private Wind mWind;
 
     private Serializable getCourseAreaIdFromIntent() {
         if (getIntent() == null || getIntent().getExtras() == null) {
@@ -136,6 +142,19 @@ public class RacingActivity extends SessionActivity implements RaceInfoListener,
                 dataManager.createRacesLoader(courseArea.getId(), new RaceLoadClient(courseArea)));
     }
 
+
+	public void loadWindFragment(){
+    	// check if the fragment is actively shown already, otherwise show it
+    	if ( (windFragment != null && ! windFragment.isFragmentUIActive()) || windFragment == null ){
+        	windFragment = new WindFragment();
+            getFragmentManager().beginTransaction().setCustomAnimations(R.animator.slide_in, R.animator.slide_out)
+                    .replace(R.id.racing_view_right_container, windFragment)
+                    .setTransition(FragmentTransaction.TRANSIT_FRAGMENT_FADE)
+                    .addToBackStack(null)
+                    .commit();
+        }
+    }
+    
     @SuppressLint("SimpleDateFormat")
     @Override
     public void notifyTick() {
@@ -145,18 +164,31 @@ public class RacingActivity extends SessionActivity implements RaceInfoListener,
         }
     }
 
+
     @Override
     public void onBackPressed() {
-        logoutSession();
+        if (getFragmentManager().getBackStackEntryCount() > 0) {
+            getFragmentManager().popBackStackImmediate();
+            getFragmentManager().beginTransaction().commit();
+            
+            // fix for filled out RaceInfoFragment
+            if ( infoFragment != null && infoFragment.isFragmentUIActive() && selectedRace != null){
+           	 ExLog.i(this, this.getClass().getCanonicalName(), "Returning to RaceInfoFragment");
+           	 getFragmentManager().popBackStackImmediate();
+           	 
+           	 onRaceItemClicked(selectedRace);
+           }
+        } else {
+        	logoutSession();
+        }
     }
+    
 
     @Override
     public void onClick(View view) {
         switch (view.getId()) {
         case R.id.windButton:
-            Intent intent = new Intent(this, WindActivity.class);
-            startActivityForResult(intent, WIND_ACTIVITY_REQUEST_CODE);
-            overridePendingTransition(android.R.anim.fade_in, android.R.anim.fade_out);
+        	loadWindFragment();
             break;
 
         default:
@@ -164,20 +196,28 @@ public class RacingActivity extends SessionActivity implements RaceInfoListener,
         }
     }
 
-    @Override
-    public void onActivityResult(int requestCode, int resultCode, Intent data) {
-        if (requestCode == WIND_ACTIVITY_REQUEST_CODE) {
-            if (resultCode == Activity.RESULT_OK) {
-                if (data.getExtras().containsKey(AppConstants.EXTRAS_WIND_FIX)) {
-                    Wind windFix = (Wind) data.getSerializableExtra(AppConstants.EXTRAS_WIND_FIX);
-                    windButton.setText(String.format(getString(R.string.wind_info), windFix.getKnots(), windFix.getBearing().reverse().toString()));
-                    if (selectedRace != null) {
-                        selectedRace.getState().setWindFix(MillisecondsTimePoint.now(), windFix);
-                    }
-                }
-            }
+    
+    public void onWindEntered(Wind windFix){
+    	if ( windFix != null ){ 
+	    	windButton.setText(String.format(getString(R.string.wind_info), windFix.getKnots(), windFix.getBearing().reverse().toString()));
+	        if (selectedRace != null) {
+	            selectedRace.getState().setWindFix(MillisecondsTimePoint.now(), windFix);
+	        }
+	        
+	        mWind = windFix;
+    	}
+        
+        getFragmentManager().popBackStackImmediate();
+        
+        if ( infoFragment != null && infoFragment.isFragmentUIActive() ){
+        	 ExLog.i(this, this.getClass().getCanonicalName(), "Returning to RaceInfoFragment from WindFragment");
+        	 getFragmentManager().popBackStackImmediate();
+
+        	 onRaceItemClicked(selectedRace);
         }
     }
+    
+    
 
     @Override
     public void onCreate(Bundle savedInstanceState) {
@@ -220,6 +260,14 @@ public class RacingActivity extends SessionActivity implements RaceInfoListener,
         if (windButton != null) {
             windButton.setOnClickListener(this);
         }
+        
+
+        if (savedInstanceState != null) {
+        	mWind = (Wind) savedInstanceState.getSerializable("wind");
+        	if ( mWind != null ){
+        		onWindEntered(mWind);
+        	}
+        }
     }
 
     @Override
@@ -246,8 +294,14 @@ public class RacingActivity extends SessionActivity implements RaceInfoListener,
 
         getFragmentManager().beginTransaction().setCustomAnimations(R.animator.slide_in, R.animator.slide_out)
                 .replace(R.id.racing_view_right_container, infoFragment)
-                .setTransition(FragmentTransaction.TRANSIT_FRAGMENT_FADE).commit();
+                .setTransition(FragmentTransaction.TRANSIT_FRAGMENT_FADE)
+                .addToBackStack(null)
+                .commit();
+        
+        
+        
     }
+    
 
     @Override
     public void onResetTime() {
@@ -268,7 +322,22 @@ public class RacingActivity extends SessionActivity implements RaceInfoListener,
 
         TickSingleton.INSTANCE.unregisterListener(this);
     }
+    
+    @Override
+    public void onSaveInstanceState(Bundle outState) {
+        super.onSaveInstanceState(outState);
+        
+        outState.putSerializable("wind", mWind);
+    }
+    
+    
+    @Override
+	public void onResume() {
+		// TODO Auto-generated method stub
+		super.onResume();
+	}
 
+    
     private void registerOnService(Collection<ManagedRace> races) {
         // since the service is the long-living component
         // he should decide whether these races are already
