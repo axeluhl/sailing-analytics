@@ -6,6 +6,7 @@ import java.util.List;
 
 import com.sap.sailing.domain.abstractlog.AbstractLogEventAuthor;
 import com.sap.sailing.domain.abstractlog.impl.RevokeEventImpl;
+import com.sap.sailing.domain.abstractlog.race.RaceLogEvent;
 import com.sap.sailing.domain.abstractlog.race.RaceLogEventVisitor;
 import com.sap.sailing.domain.abstractlog.race.RaceLogRevokeEvent;
 import com.sap.sailing.domain.base.Competitor;
@@ -13,6 +14,11 @@ import com.sap.sse.common.TimePoint;
 
 public class RaceLogRevokeEventImpl extends RevokeEventImpl<RaceLogEventVisitor> implements RaceLogRevokeEvent {
     private final int passId;
+    
+    public RaceLogRevokeEventImpl(AbstractLogEventAuthor author, int passId, RaceLogEvent toRevoke, String reason) {
+        super(author, toRevoke, reason);
+        this.passId = passId;
+    }
     
     public RaceLogRevokeEventImpl(TimePoint createdAt, AbstractLogEventAuthor author, TimePoint logicalTimePoint,
             Serializable pId, int passId, Serializable revokedEventId, String revokedEventType, String revokedEventShortInfo,

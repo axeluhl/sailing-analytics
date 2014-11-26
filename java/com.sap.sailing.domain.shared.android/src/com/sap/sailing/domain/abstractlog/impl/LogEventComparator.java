@@ -14,11 +14,11 @@ import com.sap.sailing.domain.tracking.impl.TimedComparator;
  * 
  * If one of the passed objects is not a {@link RaceLogEvent}, sorting is done by {@link Timed#getTimePoint()}.
  */
-public class AbstractLogEventComparator implements Comparator<Timed>, Serializable {
+public class LogEventComparator implements Comparator<Timed>, Serializable {
     private static final long serialVersionUID = -1337219742246147546L;
     private Comparator<Timed> timedComparator;
 
-    public AbstractLogEventComparator() {
+    public LogEventComparator() {
         this.timedComparator = TimedComparator.INSTANCE;
     }
 
