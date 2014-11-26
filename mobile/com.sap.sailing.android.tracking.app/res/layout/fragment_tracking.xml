@@ -49,18 +49,6 @@
         android:textColor="@color/sap_green"
         android:text="@string/tracking_status_tracking" />
 
-    <Button
-        android:id="@+id/stop_tracking"
-        android:layout_width="fill_parent"
-        android:layout_height="wrap_content"
-        android:layout_alignParentBottom="true"
-        android:layout_alignParentLeft="true"
-        android:layout_alignParentRight="true"
-        android:background="#e94a1b"
-        android:padding="10dp"
-        android:layout_margin="10dp"
-        android:text="@string/stop_tracking" />
-
     <com.sap.sailing.android.tracking.app.views.SignalQualityIndicatorView
         android:id="@+id/qps_quality_indicator"
         android:layout_width="wrap_content"
@@ -129,5 +117,53 @@
         android:layout_height="1dp"
         android:layout_below="@id/qps_quality"
         android:background="@android:color/darker_gray" />
+    
+        <RelativeLayout
+        android:id="@+id/start_tracking_box"
+        android:layout_width="fill_parent"
+        android:layout_height="100dp"
+        android:layout_above="@id/bottomLayout"
+        android:background="@color/gray" >
+
+        <View
+            android:id="@+id/white_bar"
+            android:layout_width="fill_parent"
+            android:layout_height="1dp"
+            android:layout_alignParentLeft="true"
+            android:layout_alignParentTop="true"
+            android:background="@color/white_transparent" />
+        
+        
+    <Button
+        android:id="@+id/stop_tracking"
+        android:layout_width="fill_parent"
+            android:layout_height="fill_parent"
+            android:layout_margin="10dp"
+            android:layout_marginLeft="4dp"
+            android:layout_marginRight="4dp"
+            android:background="@drawable/rounded_btn_red"
+            android:padding="10dp"
+            android:text="@string/stop_tracking"
+            android:textAllCaps="true"
+            android:textStyle="bold"/>
+
+    </RelativeLayout>
+    
+    <RelativeLayout
+        android:id="@+id/bottomLayout"
+        android:layout_width="match_parent"
+        android:layout_height="40dp"
+        android:background="@color/darker_gray"
+        android:layout_alignParentBottom="true"
+        android:layout_alignParentLeft="true" >
+
+        <TextView
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_centerHorizontal="true"
+            android:layout_centerVertical="true"
+            android:gravity="center"
+            android:textColor="@color/white" />
+    </RelativeLayout>
 
 </RelativeLayout>

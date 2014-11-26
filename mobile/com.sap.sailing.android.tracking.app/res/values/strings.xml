@@ -50,5 +50,14 @@
 	<string name="contacting_server">Contacting server..</string>
 	<string name="error">Error</string>
 	<string name="error_could_not_complete_operation_on_server_try_again">Could not complete operation on server. Please try again.</string>
+	<string name="regatta_starts_in">Regatta starts in:</string>
+	<string name="hours">Hours</string>
+	<string name="minutes">Minutes</string>
+	<string name="days">Days</string>
+	<string name="hour">Hour</string>
+	<string name="minute">Minute</string>
+	<string name="day">Day</string>
+	<string name="please_listen_to_announcements">Please listen to the announcements</string>
+	<string name="your_regattas">Your Regattas:</string>
 	
 </resources>

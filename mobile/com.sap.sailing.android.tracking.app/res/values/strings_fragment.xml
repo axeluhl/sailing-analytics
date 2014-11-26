@@ -5,7 +5,7 @@
     <string name="scan_intro">GPS-Tracker Configuration for Regatta</string>
     <string name="scan_qr">Scan QR-Code</string>
     <string name="scan_hint">The QR-code can be found on your confirmation of participation</string>
-    <string name="no_qr_code">Didn\'t received a QR-code?</string>
+    <string name="no_qr_code">You got no QR-Code?</string>
     <string name="add_team_picture">Add team picture</string>
     <string name="messages">Messages:</string>
     <string name="last_refresh">(last refresh XX min ago)</string>

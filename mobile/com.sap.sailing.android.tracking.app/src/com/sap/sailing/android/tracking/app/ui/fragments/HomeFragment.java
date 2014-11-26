@@ -112,7 +112,7 @@ public class HomeFragment extends BaseFragment implements
 	@Override
 	public void onResume() {
 		super.onResume();
-		adapter.notifyDataSetChanged();
+		getLoaderManager().restartLoader(REGATTA_LOADER, null, this);
 	}
 
 	private boolean requestQRCodeScan() {

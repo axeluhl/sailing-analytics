@@ -2,6 +2,7 @@ package com.sap.sailing.android.tracking.app.ui.fragments;
 
 import java.io.FileNotFoundException;
 import java.io.InputStream;
+import java.util.concurrent.TimeUnit;
 
 import android.app.Activity;
 import android.app.AlertDialog;
@@ -32,7 +33,9 @@ public class RegattaFragment extends BaseFragment implements OnClickListener {
 	
 	private final int CAMERA_REQUEST_CODE = 3118;
 	private final int SELECT_PHOTO_REQUEST_CODE = 1693;
-
+	
+	private TimerRunnable timer;
+	
 	@Override
 	public View onCreateView(LayoutInflater inflater, ViewGroup container,
 			Bundle savedInstanceState) {
@@ -60,6 +63,19 @@ public class RegattaFragment extends BaseFragment implements OnClickListener {
 		return view;
 	}
 
+	@Override
+	public void onResume() {
+		super.onResume();
+		timer = new TimerRunnable();
+		timer.start();
+	}
+	
+	@Override
+	public void onPause() {
+		super.onPause();
+		timer.stop();
+	}
+	
 	@Override
 	public void onClick(View view) {
 		switch (view.getId()) {
@@ -161,6 +177,106 @@ public class RegattaFragment extends BaseFragment implements OnClickListener {
 	private void showTrackingActivity() {
 		Intent intent = new Intent(getActivity(), TrackingActivity.class);
 		getActivity().startActivity(intent);
+	}
+	
+	private void timerFired()
+	{
+		RegattaActivity regattaActivity = (RegattaActivity)getActivity();
+		updateCountdownTimer(regattaActivity.getEventStartMillis());
+	}
+	
+	private void updateCountdownTimer(long startTime)
+	{
+		long diff = startTime - System.currentTimeMillis();
+		if (diff < 0) // event is in the past
+		{
+			setCountdownTime(0, 0, 0);
+		}
+		else
+		{
+			int days = (int)TimeUnit.MILLISECONDS.toDays(diff);
+			int hours = (int)TimeUnit.MILLISECONDS.toHours(diff) - (days * 24);
+			int minutes = (int)TimeUnit.MILLISECONDS.toMinutes(diff) - (hours * 60) - (days * 24 * 60);
+			
+			setCountdownTime(days, hours, minutes);			
+		}
+	}
+	
+	private void setCountdownTime(int days, int hours, int minutes)
+	{
+		TextView daysTextView = (TextView)getActivity().findViewById(R.id.starts_in_days);
+		TextView hoursTextView = (TextView)getActivity().findViewById(R.id.starts_in_hours);
+		TextView minutesTextView = (TextView)getActivity().findViewById(R.id.starts_in_minutes);
+		
+		TextView daysTextViewLabel = (TextView)getActivity().findViewById(R.id.starts_in_days_label);
+		TextView hoursTextViewLabel = (TextView)getActivity().findViewById(R.id.starts_in_hours_label);
+		TextView minutesTextViewLabel = (TextView)getActivity().findViewById(R.id.starts_in_minutes_label);
+		
+		daysTextView.setText(String.format("%02d", days));
+		hoursTextView.setText(String.format("%02d", hours));
+		minutesTextView.setText(String.format("%02d", minutes));
+		
+		if (days == 1)
+		{
+			daysTextViewLabel.setText(R.string.day);
+		}
+		else
+		{
+			daysTextViewLabel.setText(R.string.days);
+		}
+		
+		if (hours == 1)
+		{
+			hoursTextViewLabel.setText(R.string.hour);
+		}
+		else
+		{
+			hoursTextViewLabel.setText(R.string.hours);
+		}
+		
+		if (minutes == 1)
+		{
+			minutesTextViewLabel.setText(R.string.minute);
+		}
+		else
+		{
+			minutesTextViewLabel.setText(R.string.minutes);
+		}
+	}
+	
+	private class TimerRunnable implements Runnable {
+		
+		public Thread t;
+		public volatile boolean running = true;
+
+		public void start() {
+			running = true;
+			if (t == null) {
+				t = new Thread(this);
+				t.start();
+			}
+		}
+
+		@Override
+		public void run() {
+			while (running) {
+				getActivity().runOnUiThread(new Runnable() {
+					@Override
+					public void run() {
+						timerFired();
+					}
+				});
+				try {
+					Thread.sleep(1000);
+				} catch (InterruptedException e) {
+					e.printStackTrace();
+				}
+			}
+		}
+
+		public void stop() {
+			running = false;
+		}
 	}
 
 }
