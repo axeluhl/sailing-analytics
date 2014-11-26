@@ -34,7 +34,7 @@ public abstract class RaceFragment extends LoggableFragment implements TickListe
         return args;
     }
 
-    private ManagedRace managedRace;
+    protected ManagedRace managedRace;
     protected AppPreferences preferences;
     
     @Override

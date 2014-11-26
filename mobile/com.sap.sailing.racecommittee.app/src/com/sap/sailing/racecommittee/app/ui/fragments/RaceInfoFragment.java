@@ -1,5 +1,7 @@
 package com.sap.sailing.racecommittee.app.ui.fragments;
 
+import java.io.Serializable;
+
 import android.app.AlertDialog;
 import android.app.FragmentTransaction;
 import android.content.Context;
@@ -19,7 +21,9 @@ import com.sap.sailing.domain.racelog.state.RaceStateChangedListener;
 import com.sap.sailing.domain.racelog.state.ReadonlyRaceState;
 import com.sap.sailing.domain.racelog.state.impl.BaseRaceStateChangedListener;
 import com.sap.sailing.domain.tracking.Wind;
+import com.sap.sailing.racecommittee.app.AppConstants;
 import com.sap.sailing.racecommittee.app.R;
+import com.sap.sailing.racecommittee.app.data.OnlineDataManager;
 import com.sap.sailing.racecommittee.app.domain.ManagedRace;
 import com.sap.sailing.racecommittee.app.logging.LogEvent;
 import com.sap.sailing.racecommittee.app.ui.fragments.chooser.RaceInfoFragmentChooser;
@@ -176,6 +180,15 @@ public class RaceInfoFragment extends RaceFragment implements RaceInfoListener {
         Wind wind = getRaceState().getWindFix();
         if (wind != null){
             windInfoHeader.setText(String.format(getString(R.string.wind_info), wind.getKnots(), wind.getBearing().reverse().toString()));
+        }
+    }
+    
+    public void updateArguments(Bundle args){
+    	Serializable raceId = args.getSerializable(AppConstants.RACE_ID_KEY);
+    	managedRace = OnlineDataManager.create(getActivity()).getDataStore().getRace(raceId);
+        if (managedRace == null) {
+            throw new IllegalStateException(
+                    String.format("Unable to obtain ManagedRace from datastore on start of race fragment."));
         }
     }
     

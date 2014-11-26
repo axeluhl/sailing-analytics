@@ -9,6 +9,7 @@ import android.annotation.SuppressLint;
 import android.app.Activity;
 import android.app.AlertDialog;
 import android.app.FragmentTransaction;
+import android.app.FragmentManager.BackStackEntry;
 import android.content.DialogInterface;
 import android.content.Intent;
 import android.os.Bundle;
@@ -142,6 +143,19 @@ public class RacingActivity extends SessionActivity implements RaceInfoListener,
                 dataManager.createRacesLoader(courseArea.getId(), new RaceLoadClient(courseArea)));
     }
 
+
+	public void loadWindFragment(){
+    	// check if the fragment is actively shown already, otherwise show it
+    	if ( (windFragment != null && ! windFragment.isFragmentUIActive()) || windFragment == null ){
+        	windFragment = new WindFragment();
+            getFragmentManager().beginTransaction().setCustomAnimations(R.animator.slide_in, R.animator.slide_out)
+                    .replace(R.id.racing_view_right_container, windFragment)
+                    .setTransition(FragmentTransaction.TRANSIT_FRAGMENT_FADE)
+                    .addToBackStack(null)
+                    .commit();
+        }
+    }
+    
     @SuppressLint("SimpleDateFormat")
     @Override
     public void notifyTick() {
@@ -176,6 +190,15 @@ public class RacingActivity extends SessionActivity implements RaceInfoListener,
         }
         
         mWind = windFix;
+        
+        getFragmentManager().popBackStackImmediate();
+        
+        if ( infoFragment != null && infoFragment.isFragmentUIActive() ){
+        	 ExLog.i(this, this.getClass().getCanonicalName(), "Returning to RaceInfoFragment from WindFragment");
+        	 getFragmentManager().popBackStackImmediate();
+
+        	 onRaceItemClicked(selectedRace);
+        }
     }
     
     
@@ -254,8 +277,14 @@ public class RacingActivity extends SessionActivity implements RaceInfoListener,
 
         getFragmentManager().beginTransaction().setCustomAnimations(R.animator.slide_in, R.animator.slide_out)
                 .replace(R.id.racing_view_right_container, infoFragment)
-                .setTransition(FragmentTransaction.TRANSIT_FRAGMENT_FADE).commit();
+                .setTransition(FragmentTransaction.TRANSIT_FRAGMENT_FADE)
+                .addToBackStack(null)
+                .commit();
+        
+        
+        
     }
+    
 
     @Override
     public void onResetTime() {
@@ -291,17 +320,6 @@ public class RacingActivity extends SessionActivity implements RaceInfoListener,
 		super.onResume();
 	}
 
-	public void loadWindFragment(){
-    	// check if the fragment is actively shown already, otherwise show it
-    	if ( (windFragment != null && ! windFragment.isFragmentUIActive()) || windFragment == null ){
-        	windFragment = new WindFragment();
-            getFragmentManager().beginTransaction().setCustomAnimations(R.animator.slide_in, R.animator.slide_out)
-                    .replace(R.id.racing_view_right_container, windFragment)
-                    .setTransition(FragmentTransaction.TRANSIT_FRAGMENT_FADE)
-                    .addToBackStack(null)
-                    .commit();
-        }
-    }
     
     private void registerOnService(Collection<ManagedRace> races) {
         // since the service is the long-living component

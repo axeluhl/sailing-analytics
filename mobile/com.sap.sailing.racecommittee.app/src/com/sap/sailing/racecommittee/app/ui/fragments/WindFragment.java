@@ -123,14 +123,7 @@ public class WindFragment extends LoggableFragment implements CompassDirectionLi
                     
                     saveEntriesInPreferences(wind);
                     ((RacingActivity)getActivity()).onWindEntered(wind);
-                    
-                    int backstackCount = getActivity().getFragmentManager().getBackStackEntryCount();
-                    if ( backstackCount > 0 ){
-                    	 BackStackEntry lastFragment = getActivity().getFragmentManager().getBackStackEntryAt( backstackCount - 1);
-                         Log.d(TAG, lastFragment.getClass().toString());
-                    }               
-                    
-                    getActivity().getFragmentManager().popBackStack();
+
                     
                     
                 } catch (NumberFormatException nfe) {
@@ -242,9 +235,7 @@ public class WindFragment extends LoggableFragment implements CompassDirectionLi
 	
 	// HELPERS
 	
-	public boolean isFragmentUIActive() {
-	    return isAdded() && !isDetached() && !isRemoving();
-	}
+
 	
 	protected static float round(float unrounded, int precision) {
         BigDecimal decimal = new BigDecimal(unrounded);
