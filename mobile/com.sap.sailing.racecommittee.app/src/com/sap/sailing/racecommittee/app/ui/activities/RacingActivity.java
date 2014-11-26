@@ -300,7 +300,6 @@ public class RacingActivity extends SessionActivity implements RaceInfoListener,
                     .setTransition(FragmentTransaction.TRANSIT_FRAGMENT_FADE)
                     .addToBackStack(null)
                     .commit();
-            
         }
     }
     

@@ -84,7 +84,6 @@ public class RaceInfoFragment extends RaceFragment implements RaceInfoListener {
         updateCourseDesignLabel();
         updateWindLabel();
     }
-
     
     public void onResume(){
     	super.onResume();
