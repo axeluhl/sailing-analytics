@@ -226,5 +226,10 @@ class SAPTrackerAPITests: XCTestCase {
         DataManager.sharedManager.managedObjectContext!.deleteObject(competitor)
     }
     
+    func testParseUrl() {
+        let url = "comsapsailingtracker://95.85.58.11:8000?event_id=35dc9389-b59d-4ebd-8f6b-432065642f40&leaderboard_name=505%20Worlds%202013&competitor_id=92d06f15-1d61-fc2d-4e64-dae37577d3d2"
+        var qrcodeData = QRCodeData()
+        XCTAssertTrue(qrcodeData.parseString(url), "cannot parse QR code URL "+url)
+    }
     
 }
