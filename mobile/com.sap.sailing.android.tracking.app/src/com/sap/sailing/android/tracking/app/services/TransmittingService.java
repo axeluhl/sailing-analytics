@@ -35,6 +35,7 @@ import com.sap.sailing.android.tracking.app.services.TrackingService.GPSQualityL
 import com.sap.sailing.android.tracking.app.services.TrackingService.TrackingBinder;
 import com.sap.sailing.android.tracking.app.services.sending.ConnectivityChangedReceiver;
 import com.sap.sailing.android.tracking.app.utils.AppPreferences;
+import com.sap.sailing.android.tracking.app.utils.UniqueDeviceUuid;
 import com.sap.sailing.android.tracking.app.utils.VolleyHelper;
 
 /**
@@ -299,7 +300,7 @@ public class TransmittingService extends Service {
 			
 			try {
 				requestObject.put("fixes", jsonArray);
-				requestObject.put("deviceUuid", prefs.getDeviceIdentifier());
+				requestObject.put("deviceUuid", UniqueDeviceUuid.getUniqueId(this));
 			} catch (JSONException e) {
 				e.printStackTrace();
 			}

@@ -56,6 +56,7 @@ import com.sap.sailing.android.tracking.app.ui.activities.RegattaActivity;
 import com.sap.sailing.android.tracking.app.ui.activities.StartActivity;
 import com.sap.sailing.android.tracking.app.utils.AppPreferences;
 import com.sap.sailing.android.tracking.app.utils.CheckinHelper;
+import com.sap.sailing.android.tracking.app.utils.UniqueDeviceUuid;
 import com.sap.sailing.android.tracking.app.utils.VolleyHelper;
 import com.sap.sailing.domain.racelog.tracking.DeviceIdentifier;
 import com.sap.sailing.domain.racelog.tracking.impl.SmartphoneUUIDIdentifierImpl;
@@ -192,7 +193,7 @@ public class HomeFragment extends BaseFragment implements
 		final String leaderboardName = leaderboardNameFromQR;
 
 		final DeviceIdentifier deviceUuid = new SmartphoneUUIDIdentifierImpl(
-				UUID.fromString(prefs.getDeviceIdentifier()));
+				UUID.fromString(UniqueDeviceUuid.getUniqueId(this.getActivity())));
 
 		// There are 5 Stages after the QR-Code scan is complete:
 		// 1. Get Event
@@ -227,6 +228,7 @@ public class HomeFragment extends BaseFragment implements
 									"Error getting data from call on URL: "
 											+ getLeaderboardUrl + ", Error: "
 											+ e.getMessage());
+							startActivity.dismissProgressDialog();
 							displayAPIErrorRecommendRetry();
 							return;
 						}
@@ -346,7 +348,9 @@ public class HomeFragment extends BaseFragment implements
 																TAG,
 																"Failed to get competitor from API: "
 																		+ error.getMessage());
+														startActivity.dismissProgressDialog();
 														displayAPIErrorRecommendRetry();
+														return;
 													}
 												});
 
@@ -361,7 +365,9 @@ public class HomeFragment extends BaseFragment implements
 										ExLog.e(getActivity(), TAG,
 												"Failed to get leaderboard from API: "
 														+ error.getMessage());
+										startActivity.dismissProgressDialog();
 										displayAPIErrorRecommendRetry();
+										return;
 									}
 								});
 
@@ -375,6 +381,7 @@ public class HomeFragment extends BaseFragment implements
 								TAG,
 								"Failed to get event from API: "
 										+ error.getMessage());
+						startActivity.dismissProgressDialog();
 						displayAPIErrorRecommendRetry();
 					}
 				});

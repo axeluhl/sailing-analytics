@@ -14,25 +14,12 @@
     </PreferenceCategory>
     
     <!--  Connection -->
-    <PreferenceCategory android:title="@string/settings_category_connection" >
+    <PreferenceCategory android:title="@string/settings_category_other" >
         <EditTextPreference
             android:defaultValue="@string/preference_device_identifier_default"
             android:key="@string/preference_device_identifier_key"
             android:summary="@string/empty"
-            android:title="@string/device_identifier" />
-        <EditTextPreference
-            android:defaultValue="@string/preference_server_url_default"
-            android:key="@string/preference_server_url_key"
-            android:summary="@string/empty"
-            android:title="@string/server_url" />
-        
-        <EditTextPreference
-            android:defaultValue="@string/preference_gps_fix_interval_ms_default"
-            android:key="@string/preference_gps_fix_interval_ms_key"
-            android:summary="@string/empty"
-            android:title="@string/gps_fix_interval" 
-        	android:inputType="number"
-        />
+            android:title="@string/device_identifier" android:selectable="false"/>
     </PreferenceCategory>
 
 </PreferenceScreen>
