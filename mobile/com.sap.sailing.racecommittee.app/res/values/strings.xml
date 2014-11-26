@@ -116,9 +116,9 @@
     <string name="results_mail_subject">[Race Committee] %s</string>
     <string name="results_mail_body">Results for race %s are attached.</string>
     <string name="wind_direction_degrees">Wind direction from (degrees)</string>
-    <string name="wind_speed_knots">Wind speed (knots)</string>
-    <string name="enter_wind_direction">1. Enter the wind direction</string>
-    <string name="enter_wind_speed">2. Enter the wind speed</string>
+    <string name="enter_wind_direction">Direction (from)</string>
+    <string name="enter_wind_speed">Speed (kts)</string>
+    <string name="enter_wind_gps">Wind Measuring Position</string>
     <string name="check_all_data">3. Check all data</string>
     <string name="in_degrees">in degrees</string>
     <string name="in_knots">in knots</string>

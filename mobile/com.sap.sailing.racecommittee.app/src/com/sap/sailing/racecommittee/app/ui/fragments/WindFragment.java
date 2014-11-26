@@ -7,6 +7,7 @@ import java.util.Locale;
 
 import android.app.Fragment;
 import android.app.FragmentManager.BackStackEntry;
+import android.app.FragmentTransaction;
 import android.content.Intent;
 import android.location.Location;
 import android.os.Bundle;
@@ -187,6 +188,16 @@ public class WindFragment extends LoggableFragment implements CompassDirectionLi
         
         super.onPause();
     }
+    
+    @Override
+    public void onDestroyView() 
+    {
+       super.onDestroyView(); 
+       Fragment fragment = (getFragmentManager().findFragmentById(R.id.windMap));  
+       FragmentTransaction ft = getActivity().getFragmentManager().beginTransaction();
+       ft.remove(fragment);
+       ft.commit();
+   }
     
 	@Override
 	public void onLocationChanged(Location location) {

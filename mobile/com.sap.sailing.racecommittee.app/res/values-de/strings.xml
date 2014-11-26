@@ -114,9 +114,9 @@
     <string name="results_mail_subject">[Race Committee] %s</string>
     <string name="results_mail_body">Ergebnislisten für Rennen %s sind angehängt.</string>
     <string name="wind_direction_degrees">Windrichtung (Grad)</string>
-    <string name="wind_speed_knots">Windgeschwindigkeit (Knoten)</string>
-    <string name="enter_wind_direction">1. Windrichtung eingeben</string>
-    <string name="enter_wind_speed">2. Windgeschwindigkeit eingeben</string>
+    <string name="enter_wind_direction">Windrichtung (kommt von)</string>
+    <string name="enter_wind_speed">Geschwindigkeit (kn)</string>
+    <string name="enter_wind_gps">Messposition</string>
     <string name="check_all_data">3. Eingaben prüfen</string>
     <string name="in_degrees">in Grad</string>
     <string name="in_knots">in Knoten</string>
