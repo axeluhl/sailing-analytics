@@ -66,6 +66,7 @@ public class RegattaActivity extends BaseActivity {
     private int eventRowId;
     private String eventImageUrl;
     private long eventStartMillis;
+    private long eventEndMillis;
     
     private String leaderboardName;
     private int leaderboardRowId;
@@ -151,6 +152,7 @@ public class RegattaActivity extends BaseActivity {
 			eventName = ec.getString(ec.getColumnIndex(Event.EVENT_NAME));
 			eventImageUrl = ec.getString(ec.getColumnIndex(Event.EVENT_IMAGE_URL));
 			eventStartMillis = ec.getLong(ec.getColumnIndex(Event.EVENT_DATE_START));
+			eventEndMillis = ec.getLong(ec.getColumnIndex(Event.EVENT_DATE_END));
 			eventRowId = ec.getInt(ec.getColumnIndex(BaseColumns._ID));
         }
 		
@@ -391,6 +393,15 @@ public class RegattaActivity extends BaseActivity {
 	public long getEventStartMillis()
 	{
 		return eventStartMillis;
+	}
+	
+	/**
+	 * So the fragment can get the value to decide if thank you note should be shown.
+	 * @return
+	 */
+	public long getEventEndMillis()
+	{
+		return eventEndMillis;
 	}
 	
 	/**
