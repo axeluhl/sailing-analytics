@@ -154,7 +154,7 @@
     
     <string name="racing_course_area_missing">Die Bahn konnte nicht geladen werden. Bitte neu anmelden.</string>
     <string name="racing_load_success">%d Rennen erfolgreich geladen.</string>
-    <string name="generic_load_failure">Beim Laden der Daten ist ein Fehler aufgetreten:\n\"%s\"\nErneut versuchen?</string>
+    <string name="generic_load_failure">Beim Laden der Daten ist ein Fehler aufgetreten:\n\n\"%s\"\n\nErneut versuchen?</string>
     <string name="set_course_layout">Kurs setzen</string>
     
     <string name="loading_failure">Fehler beim Laden</string>

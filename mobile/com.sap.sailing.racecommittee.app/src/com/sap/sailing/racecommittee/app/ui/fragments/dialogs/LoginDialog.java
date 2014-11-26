@@ -55,7 +55,7 @@ public class LoginDialog extends ActivityAttachedDialogFragment {
     protected Builder createDialog(Builder builder) {
         return builder
                 .setTitle(getString(R.string.login))
-                .setIcon(R.drawable.ic_menu_login)
+                .setIcon(R.drawable.ic_assignment_ind_grey600_36dp)
                 .setSingleChoiceItems(loginTypeDescriptions, -1, new OnClickListener() {
                     public void onClick(DialogInterface dialog, int which) {
                         switch (which) {

@@ -132,7 +132,7 @@ public class RaceInfoFragment extends RaceFragment implements RaceInfoListener {
         prepareResetRaceView();
         AlertDialog.Builder builder = new AlertDialog.Builder(getActivity());
         builder.setView(resetRaceDialogView).setTitle(R.string.race_reset_confirmation_title)
-                .setIcon(R.drawable.ic_dialog_alert_holo_light).setCancelable(true)
+                .setIcon(R.drawable.ic_warning_grey600_36dp).setCancelable(true)
                 .setPositiveButton(getString(R.string.race_reset_reset_button), new DialogInterface.OnClickListener() {
                     public void onClick(DialogInterface dialog, int id) {
                         ExLog.i(getActivity(), LogEvent.RACE_RESET_YES, getRace().getId().toString());

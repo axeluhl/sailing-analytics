@@ -15,13 +15,12 @@ import android.content.Intent;
 import android.os.Bundle;
 import android.support.v4.widget.DrawerLayout;
 import android.support.v7.widget.Toolbar;
-import android.text.format.Time;
 import android.util.Log;
 import android.view.View;
 import android.view.View.OnClickListener;
 import android.view.Window;
 import android.widget.Button;
-import android.widget.TextView;
+import android.widget.ProgressBar;
 import android.widget.Toast;
 
 import com.sap.sailing.android.shared.logging.ExLog;
@@ -63,12 +62,11 @@ public class RacingActivity extends SessionActivity implements RaceInfoListener,
         }
 
         @Override
-        public void onLoadFailed(Exception reason) {
+        public void onLoadFailed(Exception ex) {
             setSupportProgressBarIndeterminateVisibility(false);
-
             AlertDialog.Builder builder = new AlertDialog.Builder(RacingActivity.this);
-            builder.setMessage(String.format(getString(R.string.generic_load_failure), reason.getMessage()))
-                    .setTitle(getString(R.string.loading_failure)).setIcon(R.drawable.ic_dialog_alert_holo_light)
+            builder.setMessage(String.format(getString(R.string.generic_load_failure), ex.getMessage()))
+                    .setTitle(getString(R.string.loading_failure)).setIcon(R.drawable.ic_warning_grey600_36dp)
                     .setCancelable(true)
                     .setPositiveButton(getString(R.string.retry), new DialogInterface.OnClickListener() {
                         public void onClick(DialogInterface dialog, int id) {
@@ -89,8 +87,6 @@ public class RacingActivity extends SessionActivity implements RaceInfoListener,
 
         @Override
         public void onLoadSucceded(Collection<ManagedRace> data, boolean isCached) {
-            setSupportProgressBarIndeterminateVisibility(false);
-
             // Let's do the setup stuff only when the data is changed (or its the first time)
             if (lastSeenRaces != null && CollectionUtils.isEqualCollection(data, lastSeenRaces)) {
                 ExLog.i(RacingActivity.this, TAG, "Same races are already loaded...");
@@ -103,13 +99,16 @@ public class RacingActivity extends SessionActivity implements RaceInfoListener,
                 Toast.makeText(RacingActivity.this,
                         String.format(getString(R.string.racing_load_success), data.size()), Toast.LENGTH_SHORT).show();
             }
+
+            setSupportProgressBarIndeterminateVisibility(false);
         }
     }
 
     private static int WIND_ACTIVITY_REQUEST_CODE = 7331;
     private static final int RacesLoaderId = 0;
 
-    private static final String TAG = RacingActivity.class.getName();;
+    private static final String TAG = RacingActivity.class.getName();
+    private static ProgressBar mProgressSpinner;
 
     private ReadonlyDataManager dataManager;
     private RaceInfoFragment infoFragment;
@@ -221,6 +220,7 @@ public class RacingActivity extends SessionActivity implements RaceInfoListener,
             if (view != null) {
                 view.setVisibility(View.VISIBLE);
             }
+            mProgressSpinner = (ProgressBar) findViewById(R.id.progress_spinner);
         }
 
         navDrawerFragment = (NavigationDrawerFragment) getFragmentManager().findFragmentById(R.id.navigation_drawer);
@@ -339,5 +339,18 @@ public class RacingActivity extends SessionActivity implements RaceInfoListener,
         title += " (" + author.getName() + ")";
 
         getSupportActionBar().setTitle(title);
+    }
+    
+    @Override
+    public void setSupportProgressBarIndeterminateVisibility(boolean visible) {
+        super.setSupportProgressBarIndeterminateVisibility(visible);
+        
+        if (mProgressSpinner != null) {
+            if (visible) {
+                mProgressSpinner.setVisibility(View.VISIBLE);
+            } else {
+                mProgressSpinner.setVisibility(View.GONE);
+            }
+        }
     }
 }

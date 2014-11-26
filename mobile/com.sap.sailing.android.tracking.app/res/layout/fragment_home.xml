@@ -32,26 +32,30 @@
     </RelativeLayout>
 
     <Button
+        android:id="@+id/scanQr"
+        android:layout_width="fill_parent"
+        android:layout_height="80dp"
+        android:layout_marginLeft="10dp"
+        android:layout_marginRight="10dp"
+        android:layout_marginBottom="10dp"
+        android:layout_above="@+id/noQrCode"
+        android:background="@drawable/rounded_btn_yellow"
+        android:textAllCaps="true"
+        android:textStyle="bold"
+        android:text="@string/scan_qr" />
+        
+    <Button
         android:id="@+id/noQrCode"
-        android:layout_width="wrap_content"
+        android:layout_width="fill_parent"
         android:layout_height="wrap_content"
         android:layout_above="@+id/bottomLayout"
-        android:layout_alignParentLeft="true"
-        android:layout_alignParentRight="true"
+        android:layout_marginLeft="10dp"
+        android:layout_marginRight="10dp"
         android:paddingLeft="@dimen/activity_horizontal_margin"
         android:paddingRight="@dimen/activity_horizontal_margin"
+        android:background="@drawable/rounded_btn_white"
+        android:textColor="@color/black"
         android:text="@string/no_qr_code" />
-
-    <Button
-        android:id="@+id/scanQr"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:layout_above="@+id/noQrCode"
-        android:layout_alignParentLeft="true"
-        android:layout_alignParentRight="true"
-        android:paddingLeft="@dimen/activity_horizontal_margin"
-        android:paddingRight="@dimen/activity_horizontal_margin"
-        android:text="@string/scan_qr" />
 
     <ListView
         android:id="@+id/listRegatta"
@@ -59,9 +63,7 @@
         android:layout_height="wrap_content"
         android:layout_above="@id/scanQr"
         android:layout_alignParentTop="true"
-        android:paddingLeft="@dimen/activity_horizontal_margin"
-        android:paddingRight="@dimen/activity_horizontal_margin"
-        android:paddingTop="@dimen/activity_vertical_margin" >
+        >
     </ListView>
 
 </RelativeLayout>

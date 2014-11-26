@@ -17,13 +17,13 @@ import android.support.v7.app.ActionBarDrawerToggle;
 import android.support.v7.widget.Toolbar;
 import android.view.LayoutInflater;
 import android.view.View;
+import android.view.View.OnClickListener;
 import android.view.ViewGroup;
 import android.widget.AdapterView;
 import android.widget.AdapterView.OnItemClickListener;
 import android.widget.AdapterView.OnItemSelectedListener;
-import android.widget.ArrayAdapter;
+import android.widget.Button;
 import android.widget.ListView;
-import android.widget.Spinner;
 
 import com.sap.sailing.android.shared.logging.ExLog;
 import com.sap.sailing.domain.racelog.state.ReadonlyRaceState;
@@ -38,6 +38,7 @@ import com.sap.sailing.racecommittee.app.ui.adapters.racelist.RaceListDataType;
 import com.sap.sailing.racecommittee.app.ui.adapters.racelist.RaceListDataTypeHeader;
 import com.sap.sailing.racecommittee.app.ui.adapters.racelist.RaceListDataTypeRace;
 import com.sap.sailing.racecommittee.app.ui.comparators.BoatClassSeriesDataFleetComparator;
+import com.sap.sailing.racecommittee.app.ui.comparators.ManagedRaceStartTimeComparator;
 import com.sap.sailing.racecommittee.app.ui.comparators.NaturalNamedComparator;
 import com.sap.sailing.racecommittee.app.ui.fragments.dialogs.ProtestTimeDialogFragment;
 
@@ -66,15 +67,14 @@ public class NavigationDrawerFragment extends LoggableFragment implements OnItem
     private final static String TAG = NavigationDrawerFragment.class.getName();
     private ManagedRaceListAdapter mAdapter;
     private NavigationDrawerCallbacks mCallbacks;
+    private Button mChangeFilter;
     private DrawerLayout mDrawerLayout;
     private ActionBarDrawerToggle mDrawerToggle;
     private FilterMode mFilterMode;
-    private View mFragmentControllerView;
     private ListView mListView;
     private HashMap<Serializable, ManagedRace> mManagedRacesById;
     private TreeMap<BoatClassSeriesFleet, List<ManagedRace>> mRacesByGroup;
     private ManagedRace mSelectedRace;
-    private Spinner mSpinner;
 
     private ArrayList<RaceListDataType> mViewItems;
 
@@ -158,6 +158,14 @@ public class NavigationDrawerFragment extends LoggableFragment implements OnItem
                 mViewItems.add(new RaceListDataTypeRace(race));
             }
         }
+
+        // 1. Remove previous view items
+        mViewItems.clear();
+
+        // 2. Create view elements from tree
+        for (ManagedRace race : mManagedRacesById.values()) {
+            mViewItems.add(new RaceListDataTypeRace(race));
+        }
     }
 
     @Override
@@ -171,14 +179,6 @@ public class NavigationDrawerFragment extends LoggableFragment implements OnItem
             mListView.setAdapter(mAdapter);
             mListView.setChoiceMode(ListView.CHOICE_MODE_SINGLE);
             mListView.setOnItemClickListener(this);
-        }
-
-        if (mSpinner != null) {
-            ArrayAdapter<FilterMode> adapter = new ArrayAdapter<FilterMode>(getActivity(),
-                    R.layout.action_bar_spinner_item, FilterMode.values());
-            adapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item);
-            mSpinner.setAdapter(adapter);
-            mSpinner.setOnItemSelectedListener(this);
         }
     }
 
@@ -198,7 +198,27 @@ public class NavigationDrawerFragment extends LoggableFragment implements OnItem
         View view = inflater.inflate(R.layout.nav_drawer, container);
 
         mListView = (ListView) view.findViewById(R.id.listView);
-        mSpinner = (Spinner) view.findViewById(R.id.nav_filter);
+        mChangeFilter = (Button) view.findViewById(R.id.change_filter);
+        mChangeFilter.setOnClickListener(new OnClickListener() {
+
+            @Override
+            public void onClick(View view) {
+                Button button = (Button) view;
+                String text = button.getText().toString();
+                if (text.equals(getActivity().getResources().getString(R.string.race_show_all))) {
+                    button.setText(R.string.race_show_less);
+                    button.setCompoundDrawablesWithIntrinsicBounds(null, null, getActivity().getResources()
+                            .getDrawable(R.drawable.ic_arrow_drop_up_grey600_24dp), null);
+                    setFilterMode(FilterMode.ALL);
+                } else {
+                    button.setText(R.string.race_show_all);
+                    button.setCompoundDrawablesWithIntrinsicBounds(null, null, getActivity().getResources()
+                            .getDrawable(R.drawable.ic_arrow_drop_down_grey600_24dp), null);
+                    setFilterMode(FilterMode.ACTIVE);
+                }
+                filterChanged();
+            }
+        });
 
         return view;
     }
@@ -285,15 +305,20 @@ public class NavigationDrawerFragment extends LoggableFragment implements OnItem
                 String.format("Setting up %s with %d races.", this.getClass().getSimpleName(), races.size()));
 
         unregisterOnAllRaces();
-        mManagedRacesById.clear();
 
-        for (ManagedRace managedRace : races) {
+        mManagedRacesById.clear();
+        mViewItems.clear();
+        List<ManagedRace> raceList = (List<ManagedRace>) races;
+        Collections.sort(raceList, new ManagedRaceStartTimeComparator());
+        for (ManagedRace managedRace : raceList) {
             mManagedRacesById.put(managedRace.getId(), managedRace);
+            mViewItems.add(new RaceListDataTypeRace(managedRace));
         }
+
         registerOnAllRaces();
 
         // prepare views and do initial filtering
-        initializeViewElements();
+        // initializeViewElements();
         filterChanged();
         mAdapter.notifyDataSetChanged();
     }
