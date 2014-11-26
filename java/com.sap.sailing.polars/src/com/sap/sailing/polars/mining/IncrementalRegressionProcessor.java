@@ -94,7 +94,7 @@ public class IncrementalRegressionProcessor implements Processor<GroupedDataEntr
     }
 
     public Pair<SpeedWithConfidence<Void>, Integer> estimateBoatSpeed(final BoatClass boatClass, final Speed windSpeed,
-            final Bearing angleToTheWind)
+            final Bearing angleToTheWind, boolean useLinearRegression)
             throws NotEnoughDataHasBeenAddedException {
         int dataCount = 0;
         PolarClusterKey key = new PolarClusterKey() {
@@ -126,7 +126,7 @@ public class IncrementalRegressionProcessor implements Processor<GroupedDataEntr
             throw new NotEnoughDataHasBeenAddedException();
         }
         KnotSpeedImpl speedWithoutConfidence = new KnotSpeedImpl(boatSpeedEstimator.estimateSpeed(windSpeed.getKnots(),
-                angleToTheWind.getDegrees()));
+                angleToTheWind.getDegrees(), useLinearRegression));
         dataCount = boatSpeedEstimator.getDataCount();
         double confidence = boatSpeedEstimator.getConfidence();
         return new Pair<SpeedWithConfidence<Void>, Integer>(new SpeedWithConfidenceImpl<Void>(

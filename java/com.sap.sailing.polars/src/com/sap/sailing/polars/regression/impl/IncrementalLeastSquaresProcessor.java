@@ -119,4 +119,12 @@ public class IncrementalLeastSquaresProcessor implements IncrementalLinearRegres
         return numberOfPointsAdded;
     }
 
+    @Override
+    public double getMeanOfY() throws NotEnoughDataHasBeenAddedException {
+        if (numberOfPointsAdded < 1) {
+            throw new NotEnoughDataHasBeenAddedException();
+        }
+        return meanOfY;
+    }
+
 }

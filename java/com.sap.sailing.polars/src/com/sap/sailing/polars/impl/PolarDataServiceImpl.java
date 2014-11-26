@@ -59,9 +59,9 @@ public class PolarDataServiceImpl implements PolarDataService {
     }
 
     @Override
-    public SpeedWithConfidence<Void> getSpeed(BoatClass boatClass, Speed windSpeed, Bearing bearingToTheWind)
-            throws NotEnoughDataHasBeenAddedException {
-        return polarDataMiner.estimateBoatSpeed(boatClass, windSpeed, bearingToTheWind);
+    public SpeedWithConfidence<Void> getSpeed(BoatClass boatClass, Speed windSpeed, Bearing bearingToTheWind,
+            boolean useLinearRegression) throws NotEnoughDataHasBeenAddedException {
+        return polarDataMiner.estimateBoatSpeed(boatClass, windSpeed, bearingToTheWind, useLinearRegression);
     }
     
     @Override
