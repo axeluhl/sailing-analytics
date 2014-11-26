@@ -164,10 +164,25 @@ public class RacingActivity extends SessionActivity implements RaceInfoListener,
         }
     }
 
+
     @Override
     public void onBackPressed() {
-        logoutSession();
+        if (getFragmentManager().getBackStackEntryCount() > 0) {
+            getFragmentManager().popBackStackImmediate();
+            getFragmentManager().beginTransaction().commit();
+            
+            // fix for filled out RaceInfoFragment
+            if ( infoFragment != null && infoFragment.isFragmentUIActive() && selectedRace != null){
+           	 ExLog.i(this, this.getClass().getCanonicalName(), "Returning to RaceInfoFragment");
+           	 getFragmentManager().popBackStackImmediate();
+           	 
+           	 onRaceItemClicked(selectedRace);
+           }
+        } else {
+        	logoutSession();
+        }
     }
+    
 
     @Override
     public void onClick(View view) {
@@ -183,12 +198,14 @@ public class RacingActivity extends SessionActivity implements RaceInfoListener,
 
     
     public void onWindEntered(Wind windFix){
-    	windButton.setText(String.format(getString(R.string.wind_info), windFix.getKnots(), windFix.getBearing().reverse().toString()));
-        if (selectedRace != null) {
-            selectedRace.getState().setWindFix(MillisecondsTimePoint.now(), windFix);
-        }
-        
-        mWind = windFix;
+    	if ( windFix != null ){ 
+	    	windButton.setText(String.format(getString(R.string.wind_info), windFix.getKnots(), windFix.getBearing().reverse().toString()));
+	        if (selectedRace != null) {
+	            selectedRace.getState().setWindFix(MillisecondsTimePoint.now(), windFix);
+	        }
+	        
+	        mWind = windFix;
+    	}
         
         getFragmentManager().popBackStackImmediate();
         

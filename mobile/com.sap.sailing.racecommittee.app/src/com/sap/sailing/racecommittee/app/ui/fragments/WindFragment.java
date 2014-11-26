@@ -109,8 +109,6 @@ public class WindFragment extends LoggableFragment implements CompassDirectionLi
             }
         });
         
-        final Fragment thisFragment = this;
-        
         sendButton.setOnClickListener(new OnClickListener() {
 
             public void onClick(View v) {
@@ -169,6 +167,8 @@ public class WindFragment extends LoggableFragment implements CompassDirectionLi
         compassView.setDirection((float)enteredWindBearingFrom);
         windBearingEditText.setText(bearingFormat.format(enteredWindBearingFrom));
     }
+    
+    
     
     @Override
     public void onStart() {
