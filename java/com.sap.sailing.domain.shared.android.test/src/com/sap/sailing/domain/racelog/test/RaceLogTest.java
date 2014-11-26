@@ -20,7 +20,7 @@ import org.mockito.invocation.InvocationOnMock;
 import org.mockito.stubbing.Answer;
 
 import com.sap.sailing.domain.abstractlog.AbstractLogEventAuthor;
-import com.sap.sailing.domain.abstractlog.impl.AbstractLogEventAuthorImpl;
+import com.sap.sailing.domain.abstractlog.impl.LogEventAuthorImpl;
 import com.sap.sailing.domain.abstractlog.race.RaceLog;
 import com.sap.sailing.domain.abstractlog.race.RaceLogEvent;
 import com.sap.sailing.domain.abstractlog.race.RaceLogEventFactory;
@@ -40,7 +40,7 @@ public class RaceLogTest {
     private static class MockRaceLogEventForSorting extends RaceLogEventImpl {
         public MockRaceLogEventForSorting(long createdAtMillis) {
             super(new MillisecondsTimePoint(createdAtMillis),
-                    /* author */ new AbstractLogEventAuthorImpl("Dummy Author", /* priority */ 0),
+                    /* author */ new LogEventAuthorImpl("Dummy Author", /* priority */ 0),
                     MillisecondsTimePoint.now(), /* ID */ UUID.randomUUID(), /* pInvolvedBoats */ null, /* pass ID */ 1);
         }
 
@@ -425,7 +425,7 @@ public class RaceLogTest {
         assertEquals(event2, Util.get(raceLog.getFixesDescending(), 2));
         raceLog.unlockAfterRead();
     }
-    private AbstractLogEventAuthor author = new AbstractLogEventAuthorImpl("Test Author", 1);
+    private AbstractLogEventAuthor author = new LogEventAuthorImpl("Test Author", 1);
     
     @Test
     public void testAddingEventsFromMultipleClients() {

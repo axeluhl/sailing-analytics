@@ -3,15 +3,15 @@ package com.sap.sailing.domain.abstractlog.impl;
 import com.sap.sailing.domain.abstractlog.AbstractLogEventAuthor;
 import com.sap.sse.common.impl.NamedImpl;
 
-public class AbstractLogEventAuthorImpl extends NamedImpl implements AbstractLogEventAuthor {
+public class LogEventAuthorImpl extends NamedImpl implements AbstractLogEventAuthor {
     private static final long serialVersionUID = -5602802911563685812L;
     private final int priority;
     
     public static AbstractLogEventAuthor createCompatibilityAuthor() {
-        return new AbstractLogEventAuthorImpl(NAME_COMPATIBILITY, PRIORITY_COMPATIBILITY);
+        return new LogEventAuthorImpl(NAME_COMPATIBILITY, PRIORITY_COMPATIBILITY);
     }
     
-    public AbstractLogEventAuthorImpl(String name, int priority) {
+    public LogEventAuthorImpl(String name, int priority) {
         super(name);
         this.priority = priority;
     }

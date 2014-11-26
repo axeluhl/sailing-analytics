@@ -13,7 +13,7 @@ import org.junit.Before;
 import org.junit.Test;
 
 import com.sap.sailing.domain.abstractlog.AbstractLogEventAuthor;
-import com.sap.sailing.domain.abstractlog.impl.AbstractLogEventAuthorImpl;
+import com.sap.sailing.domain.abstractlog.impl.LogEventAuthorImpl;
 import com.sap.sailing.domain.abstractlog.race.RaceLog;
 import com.sap.sailing.domain.abstractlog.race.RaceLogEventFactory;
 import com.sap.sailing.domain.abstractlog.race.RaceLogWindFixEvent;
@@ -70,7 +70,7 @@ public class WindByRaceLogTest {
     private Fleet defaultFleet;
     
     private RacingEventService service;
-    private AbstractLogEventAuthor author = new AbstractLogEventAuthorImpl("Test Author", 1);
+    private AbstractLogEventAuthor author = new LogEventAuthorImpl("Test Author", 1);
     
     @Before
     public void setup() throws Exception {

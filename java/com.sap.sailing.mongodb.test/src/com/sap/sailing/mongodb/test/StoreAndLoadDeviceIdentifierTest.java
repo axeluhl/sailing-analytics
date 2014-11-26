@@ -13,7 +13,7 @@ import org.junit.Test;
 
 import com.mongodb.MongoException;
 import com.sap.sailing.domain.abstractlog.AbstractLogEventAuthor;
-import com.sap.sailing.domain.abstractlog.impl.AbstractLogEventAuthorImpl;
+import com.sap.sailing.domain.abstractlog.impl.LogEventAuthorImpl;
 import com.sap.sailing.domain.abstractlog.race.RaceLog;
 import com.sap.sailing.domain.abstractlog.race.RaceLogEventFactory;
 import com.sap.sailing.domain.abstractlog.race.tracking.DeviceCompetitorMappingEvent;
@@ -46,7 +46,7 @@ public class StoreAndLoadDeviceIdentifierTest extends AbstractMongoDBTest {
     protected static final String group = "group";
     protected static final String column = "column";
     protected static final String fleet = "fleet";
-    protected final AbstractLogEventAuthor author = new AbstractLogEventAuthorImpl("author", 0);
+    protected final AbstractLogEventAuthor author = new LogEventAuthorImpl("author", 0);
     protected RaceLogIdentifier logIdentifier;
 
     protected MongoObjectFactoryImpl mongoFactory;

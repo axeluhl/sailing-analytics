@@ -19,7 +19,7 @@ import org.junit.Test;
 import com.mongodb.DBObject;
 import com.mongodb.MongoException;
 import com.sap.sailing.domain.abstractlog.AbstractLogEventAuthor;
-import com.sap.sailing.domain.abstractlog.impl.AbstractLogEventAuthorImpl;
+import com.sap.sailing.domain.abstractlog.impl.LogEventAuthorImpl;
 import com.sap.sailing.domain.abstractlog.race.RaceLogCourseAreaChangedEvent;
 import com.sap.sailing.domain.abstractlog.race.RaceLogEvent;
 import com.sap.sailing.domain.abstractlog.race.RaceLogEventRestoreFactory;
@@ -67,7 +67,7 @@ public class StoreAndLoadRaceLogEventsTest extends AbstractMongoDBTest {
     protected Serializable expectedId = UUID.randomUUID();
     protected List<Competitor> expectedInvolvedBoats = Collections.emptyList();
     protected int expectedPassId = 42;
-    private AbstractLogEventAuthor author = new AbstractLogEventAuthorImpl("Test Author", 1);
+    private AbstractLogEventAuthor author = new LogEventAuthorImpl("Test Author", 1);
 
     public StoreAndLoadRaceLogEventsTest() throws UnknownHostException, MongoException {
         super();

@@ -7,7 +7,7 @@ import android.os.Bundle;
 
 import com.sap.sailing.android.shared.logging.ExLog;
 import com.sap.sailing.domain.abstractlog.AbstractLogEventAuthor;
-import com.sap.sailing.domain.abstractlog.impl.AbstractLogEventAuthorImpl;
+import com.sap.sailing.domain.abstractlog.impl.LogEventAuthorImpl;
 import com.sap.sailing.racecommittee.app.R;
 import com.sap.sailing.racecommittee.app.logging.LogEvent;
 
@@ -62,19 +62,19 @@ public class LoginDialog extends ActivityAttachedDialogFragment {
                         // see loginTypeDescriptions for the indices of the login types
                         case 0:
                             selectedLoginType = LoginType.OFFICER;
-                            author = new AbstractLogEventAuthorImpl("Race Officer on Start Vessel", 0);
+                            author = new LogEventAuthorImpl("Race Officer on Start Vessel", 0);
                             break;
                         case 1:
                             selectedLoginType = LoginType.OFFICER;
-                            author = new AbstractLogEventAuthorImpl("Race Officer on Finish Vessel", 1);
+                            author = new LogEventAuthorImpl("Race Officer on Finish Vessel", 1);
                             break;
                         case 2:
                             selectedLoginType = LoginType.OFFICER;
-                            author = new AbstractLogEventAuthorImpl("Shore Control", 2);
+                            author = new LogEventAuthorImpl("Shore Control", 2);
                             break;
                         case 3:
                             selectedLoginType = LoginType.VIEWER;
-                            author = new AbstractLogEventAuthorImpl("Viewer", 3);
+                            author = new LogEventAuthorImpl("Viewer", 3);
                             break;
                         default:
                             selectedLoginType = LoginType.NONE;

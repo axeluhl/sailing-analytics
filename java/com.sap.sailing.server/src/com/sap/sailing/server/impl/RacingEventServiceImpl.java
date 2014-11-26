@@ -40,7 +40,7 @@ import org.osgi.framework.BundleContext;
 import org.osgi.util.tracker.ServiceTracker;
 
 import com.sap.sailing.domain.abstractlog.AbstractLogEventAuthor;
-import com.sap.sailing.domain.abstractlog.impl.AbstractLogEventAuthorImpl;
+import com.sap.sailing.domain.abstractlog.impl.LogEventAuthorImpl;
 import com.sap.sailing.domain.abstractlog.race.RaceLog;
 import com.sap.sailing.domain.abstractlog.race.RaceLogEvent;
 import com.sap.sailing.domain.abstractlog.race.RaceLogEventVisitor;
@@ -327,7 +327,7 @@ public class RacingEventServiceImpl implements RacingEventServiceWithTestSupport
     /**
      * This author should be used for server generated race log events
      */
-    private final AbstractLogEventAuthor raceLogEventAuthorForServer = new AbstractLogEventAuthorImpl(
+    private final AbstractLogEventAuthor raceLogEventAuthorForServer = new LogEventAuthorImpl(
             RacingEventService.class.getName(), 0);
 
     /**
@@ -2688,7 +2688,7 @@ public class RacingEventServiceImpl implements RacingEventServiceWithTestSupport
             RacingProcedureType racingProcedure) {
         RaceLog raceLog = getRaceLog(leaderboardName, raceColumnName, fleetName);
         if (raceLog != null) {
-            RaceState state = RaceStateImpl.create(raceLog, new AbstractLogEventAuthorImpl(authorName, authorPriority));
+            RaceState state = RaceStateImpl.create(raceLog, new LogEventAuthorImpl(authorName, authorPriority));
             if (passId > raceLog.getCurrentPassId()) {
                 state.setAdvancePass(logicalTimePoint);
             }

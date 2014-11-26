@@ -7,7 +7,7 @@ import org.junit.After;
 import org.junit.Before;
 
 import com.sap.sailing.domain.abstractlog.AbstractLogEventAuthor;
-import com.sap.sailing.domain.abstractlog.impl.AbstractLogEventAuthorImpl;
+import com.sap.sailing.domain.abstractlog.impl.LogEventAuthorImpl;
 import com.sap.sailing.domain.abstractlog.race.RaceLog;
 import com.sap.sailing.domain.abstractlog.race.RaceLogEventFactory;
 import com.sap.sailing.domain.abstractlog.race.impl.RaceLogImpl;
@@ -43,7 +43,7 @@ public class AbstractGPSFixStoreTest {
     protected final Competitor comp = DomainFactory.INSTANCE.getOrCreateCompetitor("comp", "comp", null, null, null);
     protected final Mark mark = DomainFactory.INSTANCE.getOrCreateMark("mark");
 
-    private final AbstractLogEventAuthor author = new AbstractLogEventAuthorImpl("author", 0);
+    private final AbstractLogEventAuthor author = new LogEventAuthorImpl("author", 0);
 
     protected GPSFixMoving createFix(long millis, double lat, double lng, double knots, double degrees) {
         return new GPSFixMovingImpl(new DegreePosition(lat, lng),

@@ -20,7 +20,7 @@ import com.mongodb.BasicDBObject;
 import com.mongodb.DBObject;
 import com.mongodb.MongoException;
 import com.sap.sailing.domain.abstractlog.AbstractLogEventAuthor;
-import com.sap.sailing.domain.abstractlog.impl.AbstractLogEventAuthorImpl;
+import com.sap.sailing.domain.abstractlog.impl.LogEventAuthorImpl;
 import com.sap.sailing.domain.abstractlog.race.CompetitorResults;
 import com.sap.sailing.domain.abstractlog.race.RaceLog;
 import com.sap.sailing.domain.abstractlog.race.RaceLogCourseAreaChangedEvent;
@@ -71,7 +71,7 @@ public class TestStoringAndRetrievingRaceLogInLeaderboards extends RaceLogMongoD
     String leaderboardName = "TestLeaderboard";
     final int[] discardIndexResultsStartingWithHowManyRaces = new int[] { 5, 8 };
     FlexibleLeaderboardImpl leaderboard = null;
-    private AbstractLogEventAuthor author = new AbstractLogEventAuthorImpl("Test Author", 1);
+    private AbstractLogEventAuthor author = new LogEventAuthorImpl("Test Author", 1);
     
     public TestStoringAndRetrievingRaceLogInLeaderboards() throws UnknownHostException, MongoException {
         super();

@@ -34,7 +34,7 @@ import org.junit.Before;
 import org.junit.Test;
 
 import com.sap.sailing.domain.abstractlog.AbstractLogEventAuthor;
-import com.sap.sailing.domain.abstractlog.impl.AbstractLogEventAuthorImpl;
+import com.sap.sailing.domain.abstractlog.impl.LogEventAuthorImpl;
 import com.sap.sailing.domain.abstractlog.race.CompetitorResults;
 import com.sap.sailing.domain.abstractlog.race.RaceLog;
 import com.sap.sailing.domain.abstractlog.race.RaceLogEventFactory;
@@ -124,7 +124,7 @@ public class MasterDataImportTest {
     private static final String TEST_GROUP_NAME2 = "testGroup2";
 
     private final UUID eventUUID = UUID.randomUUID();
-    private AbstractLogEventAuthor author = new AbstractLogEventAuthorImpl("Test Author", 1);
+    private AbstractLogEventAuthor author = new LogEventAuthorImpl("Test Author", 1);
 
     private final TimePoint eventStartDate = new MillisecondsTimePoint(new Date());
     private final TimePoint eventEndDate = new MillisecondsTimePoint(new Date());

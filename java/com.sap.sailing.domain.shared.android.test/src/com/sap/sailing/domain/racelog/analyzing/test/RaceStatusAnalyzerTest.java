@@ -13,7 +13,7 @@ import org.mockito.invocation.InvocationOnMock;
 import org.mockito.stubbing.Answer;
 
 import com.sap.sailing.domain.abstractlog.AbstractLogEventAuthor;
-import com.sap.sailing.domain.abstractlog.impl.AbstractLogEventAuthorImpl;
+import com.sap.sailing.domain.abstractlog.impl.LogEventAuthorImpl;
 import com.sap.sailing.domain.abstractlog.race.RaceLog;
 import com.sap.sailing.domain.abstractlog.race.RaceLogEvent;
 import com.sap.sailing.domain.abstractlog.race.RaceLogEventVisitor;
@@ -128,8 +128,8 @@ public class RaceStatusAnalyzerTest extends PassAwareRaceLogAnalyzerTest<RaceSta
     }
 
     public void testStartSetByStartVesselAndFinishSetByShoreControl() {
-        AbstractLogEventAuthor authorStartVessel = new AbstractLogEventAuthorImpl("Race Officer on Finish Vessel", 1);
-        AbstractLogEventAuthor authorShoreControl = new AbstractLogEventAuthorImpl("Shore Control", 2);
+        AbstractLogEventAuthor authorStartVessel = new LogEventAuthorImpl("Race Officer on Finish Vessel", 1);
+        AbstractLogEventAuthor authorShoreControl = new LogEventAuthorImpl("Shore Control", 2);
         
         RaceLogRaceStatusEvent event1 = createEvent(RaceLogRaceStatusEvent.class, 1, 1 /** passId*/, authorStartVessel);
         when(event1.getNextStatus()).thenReturn(RaceLogRaceStatus.SCHEDULED);

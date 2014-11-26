@@ -18,7 +18,7 @@ import com.mongodb.BasicDBObject;
 import com.mongodb.DBCollection;
 import com.mongodb.DBObject;
 import com.mongodb.MongoException;
-import com.sap.sailing.domain.abstractlog.impl.AbstractLogEventAuthorImpl;
+import com.sap.sailing.domain.abstractlog.impl.LogEventAuthorImpl;
 import com.sap.sailing.domain.abstractlog.race.RaceLog;
 import com.sap.sailing.domain.abstractlog.race.RaceLogEventFactory;
 import com.sap.sailing.domain.abstractlog.race.RaceLogFlagEvent;
@@ -194,7 +194,7 @@ public class StoreAndLoadRaceLogsTest extends AbstractMongoDBTest {
     }
 
     private RaceLogFlagEvent createRaceLogFlagEvent(Serializable id) {
-        return eventFactory.createFlagEvent(new MillisecondsTimePoint(42), new AbstractLogEventAuthorImpl("Test author", /* priority */ 1), id, Collections.<Competitor> emptyList(),
+        return eventFactory.createFlagEvent(new MillisecondsTimePoint(42), new LogEventAuthorImpl("Test author", /* priority */ 1), id, Collections.<Competitor> emptyList(),
                 42, Flags.ALPHA, Flags.BRAVO, true);
     }
 

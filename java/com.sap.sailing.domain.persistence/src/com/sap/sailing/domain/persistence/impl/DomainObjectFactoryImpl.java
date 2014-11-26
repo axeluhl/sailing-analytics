@@ -31,7 +31,7 @@ import com.mongodb.MongoException;
 import com.mongodb.util.JSON;
 import com.sap.sailing.domain.abstractlog.AbstractLogEventAuthor;
 import com.sap.sailing.domain.abstractlog.RevokeEvent;
-import com.sap.sailing.domain.abstractlog.impl.AbstractLogEventAuthorImpl;
+import com.sap.sailing.domain.abstractlog.impl.LogEventAuthorImpl;
 import com.sap.sailing.domain.abstractlog.race.CompetitorResults;
 import com.sap.sailing.domain.abstractlog.race.RaceLog;
 import com.sap.sailing.domain.abstractlog.race.RaceLogCourseAreaChangedEvent;
@@ -1296,9 +1296,9 @@ public class DomainObjectFactoryImpl implements DomainObjectFactory {
         String authorName = (String) dbObject.get(FieldNames.RACE_LOG_EVENT_AUTHOR_NAME.name());
         Number authorPriority = (Number) dbObject.get(FieldNames.RACE_LOG_EVENT_AUTHOR_PRIORITY.name());
         if (authorName != null && authorPriority != null) {
-            author = new AbstractLogEventAuthorImpl(authorName, authorPriority.intValue());
+            author = new LogEventAuthorImpl(authorName, authorPriority.intValue());
         } else {
-            author = AbstractLogEventAuthorImpl.createCompatibilityAuthor();
+            author = LogEventAuthorImpl.createCompatibilityAuthor();
         }
 
         String eventClass = (String) dbObject.get(FieldNames.RACE_LOG_EVENT_CLASS.name());

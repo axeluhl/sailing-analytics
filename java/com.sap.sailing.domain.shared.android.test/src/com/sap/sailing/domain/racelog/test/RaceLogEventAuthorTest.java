@@ -6,13 +6,13 @@ import static org.junit.Assert.assertTrue;
 import org.junit.Test;
 
 import com.sap.sailing.domain.abstractlog.AbstractLogEventAuthor;
-import com.sap.sailing.domain.abstractlog.impl.AbstractLogEventAuthorImpl;
+import com.sap.sailing.domain.abstractlog.impl.LogEventAuthorImpl;
 
 public class RaceLogEventAuthorTest {
     
     @Test
     public void testCompareToSame() {
-        AbstractLogEventAuthor author = new AbstractLogEventAuthorImpl("", 1);
+        AbstractLogEventAuthor author = new LogEventAuthorImpl("", 1);
         int result = author.compareTo(author);
         
         assertEquals(0, result);
@@ -20,8 +20,8 @@ public class RaceLogEventAuthorTest {
     
     @Test
     public void testCompareToMinor() {
-        AbstractLogEventAuthor author = new AbstractLogEventAuthorImpl("", 1);
-        AbstractLogEventAuthor minor = new AbstractLogEventAuthorImpl("", 2);
+        AbstractLogEventAuthor author = new LogEventAuthorImpl("", 1);
+        AbstractLogEventAuthor minor = new LogEventAuthorImpl("", 2);
         int result = author.compareTo(minor);
         
         assertTrue(result > 0);
@@ -29,8 +29,8 @@ public class RaceLogEventAuthorTest {
     
     @Test
     public void testCompareToMajor() {
-        AbstractLogEventAuthor author = new AbstractLogEventAuthorImpl("", 3);
-        AbstractLogEventAuthor major = new AbstractLogEventAuthorImpl("", 2);
+        AbstractLogEventAuthor author = new LogEventAuthorImpl("", 3);
+        AbstractLogEventAuthor major = new LogEventAuthorImpl("", 2);
         int result = author.compareTo(major);
         
         assertTrue(result < 0);

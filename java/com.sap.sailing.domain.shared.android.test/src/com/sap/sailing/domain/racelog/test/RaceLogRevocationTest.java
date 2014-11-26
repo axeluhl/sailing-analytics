@@ -10,7 +10,7 @@ import org.junit.Before;
 import org.junit.Test;
 
 import com.sap.sailing.domain.abstractlog.AbstractLogEventAuthor;
-import com.sap.sailing.domain.abstractlog.impl.AbstractLogEventAuthorImpl;
+import com.sap.sailing.domain.abstractlog.impl.LogEventAuthorImpl;
 import com.sap.sailing.domain.abstractlog.race.RaceLog;
 import com.sap.sailing.domain.abstractlog.race.RaceLogChangedListener;
 import com.sap.sailing.domain.abstractlog.race.RaceLogEvent;
@@ -25,16 +25,16 @@ import com.sap.sse.common.impl.MillisecondsTimePoint;
 
 public class RaceLogRevocationTest {
     private RaceLog serverRaceLog;
-    private AbstractLogEventAuthor serverAuthor = new AbstractLogEventAuthorImpl("server", 2);
+    private AbstractLogEventAuthor serverAuthor = new LogEventAuthorImpl("server", 2);
     private RaceLog clientARaceLog;
     private UUID clientAUUID = UUID.randomUUID();
-    private AbstractLogEventAuthor clientAAuthor = new AbstractLogEventAuthorImpl("clientA", 3);
+    private AbstractLogEventAuthor clientAAuthor = new LogEventAuthorImpl("clientA", 3);
     private RaceLog clientBRaceLog;
     private UUID clientBUUID = UUID.randomUUID();
-    private AbstractLogEventAuthor clientBAuthor = new AbstractLogEventAuthorImpl("clientB", 1);
+    private AbstractLogEventAuthor clientBAuthor = new LogEventAuthorImpl("clientB", 1);
     private RaceLog clientCRaceLog;
     private UUID clientCUUID = UUID.randomUUID();
-    private AbstractLogEventAuthor clientCAuthor = new AbstractLogEventAuthorImpl("clientC", 0);
+    private AbstractLogEventAuthor clientCAuthor = new LogEventAuthorImpl("clientC", 0);
     
     @Before
     public void setup() {

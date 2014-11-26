@@ -11,7 +11,7 @@ import java.io.ObjectOutputStream;
 import org.junit.Before;
 import org.junit.Test;
 
-import com.sap.sailing.domain.abstractlog.impl.AbstractLogEventAuthorImpl;
+import com.sap.sailing.domain.abstractlog.impl.LogEventAuthorImpl;
 import com.sap.sailing.domain.abstractlog.race.RaceLog;
 import com.sap.sailing.domain.abstractlog.race.RaceLogEventFactory;
 import com.sap.sailing.domain.abstractlog.race.RaceLogStartTimeEvent;
@@ -60,7 +60,7 @@ public class SerializeRaceLogEventsTest {
     @Test
     public void testRaceLogSerializationWithSingleEvent() throws IOException, ClassNotFoundException {
         RaceLogStartTimeEvent startTimeEvent = eventFactory.createStartTimeEvent(MillisecondsTimePoint.now(),
-                new AbstractLogEventAuthorImpl("Author Name", /* priority */0), /* passId */1, /* startTime */
+                new LogEventAuthorImpl("Author Name", /* priority */0), /* passId */1, /* startTime */
                 MillisecondsTimePoint.now());
         raceLog.add(startTimeEvent);
         oos.writeObject(raceLog);
@@ -80,7 +80,7 @@ public class SerializeRaceLogEventsTest {
     @Test
     public void testRaceLogSerializationWithEventContainingDeviceIdentifier() throws IOException, ClassNotFoundException {
     	DeviceCompetitorMappingEvent mappingEvent = eventFactory.createDeviceCompetitorMappingEvent(
-        		MillisecondsTimePoint.now(), new AbstractLogEventAuthorImpl("Author Name", /* priority */0), new SmartphoneImeiIdentifier("1948364938463903"),
+        		MillisecondsTimePoint.now(), new LogEventAuthorImpl("Author Name", /* priority */0), new SmartphoneImeiIdentifier("1948364938463903"),
         		AbstractLeaderboardTest.createCompetitor("Test Competitor"), 0, new MillisecondsTimePoint(0), new MillisecondsTimePoint(10));
         raceLog.add(mappingEvent);
         oos.writeObject(raceLog);

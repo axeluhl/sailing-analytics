@@ -8,7 +8,7 @@ import org.json.simple.JSONArray;
 import org.json.simple.JSONObject;
 
 import com.sap.sailing.domain.abstractlog.AbstractLogEventAuthor;
-import com.sap.sailing.domain.abstractlog.impl.AbstractLogEventAuthorImpl;
+import com.sap.sailing.domain.abstractlog.impl.LogEventAuthorImpl;
 import com.sap.sailing.domain.abstractlog.race.RaceLogEvent;
 import com.sap.sailing.domain.abstractlog.race.RaceLogEventRestoreFactory;
 import com.sap.sailing.domain.base.Competitor;
@@ -52,9 +52,9 @@ public abstract class BaseRaceLogEventDeserializer implements JsonDeserializer<R
         final Number authorPriority = (Number) object.get(BaseRaceLogEventSerializer.FIELD_AUTHOR_PRIORITY);
         final AbstractLogEventAuthor author;
         if (authorName != null && authorPriority != null) {
-            author = new AbstractLogEventAuthorImpl(authorName, authorPriority.intValue());
+            author = new LogEventAuthorImpl(authorName, authorPriority.intValue());
         } else {
-            author = new AbstractLogEventAuthorImpl("default", 4);
+            author = new LogEventAuthorImpl("default", 4);
         }
         return deserialize(
                 object, 
