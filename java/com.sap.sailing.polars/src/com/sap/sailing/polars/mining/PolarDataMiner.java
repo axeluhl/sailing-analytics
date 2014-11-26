@@ -116,7 +116,7 @@ public class PolarDataMiner {
 
 
     public PolarSheetsData createFullSheetForBoatClass(BoatClass boatClass) {
-        Integer[] defaultWindSpeeds = defaultPolarSheetGenerationSettings.getWindStepping().getRawStepping();
+        Double[] defaultWindSpeeds = defaultPolarSheetGenerationSettings.getWindStepping().getRawStepping();
         Number[][] averagedPolarDataByWindSpeed = new Number[defaultWindSpeeds.length][360];
         
         Map<Integer, Integer[]> dataCountPerAngleForWindspeed = new HashMap<>();
@@ -125,7 +125,7 @@ public class PolarDataMiner {
         int totalDataCount = 0;
         
         for (int windIndex = 0; windIndex < defaultWindSpeeds.length; windIndex++) {
-            Integer windSpeed = defaultWindSpeeds[windIndex];
+            Double windSpeed = defaultWindSpeeds[windIndex];
             
             Integer[] perAngle = new Integer[360];
             Map<Integer, PolarSheetsHistogramData> perWindSpeed = new HashMap<>();

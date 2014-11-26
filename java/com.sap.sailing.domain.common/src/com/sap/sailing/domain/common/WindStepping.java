@@ -6,9 +6,9 @@ public interface WindStepping extends Serializable{
 
     public abstract int getLevelIndexForValue(double speed);
 
-    public abstract int getSteppedValueForValue(double speed);
+    public abstract Double getSteppedValueForValue(double speed);
 
-    Integer[] getRawStepping();
+    Double[] getRawStepping();
 
     public abstract int getLevelIndexFloorForValue(double speed);
 

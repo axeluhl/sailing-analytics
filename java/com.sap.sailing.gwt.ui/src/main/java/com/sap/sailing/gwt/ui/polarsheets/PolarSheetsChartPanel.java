@@ -121,7 +121,7 @@ public class PolarSheetsChartPanel extends DockLayoutPanel {
             for (int i = 0; i < stepCount; i++) {
                 if (hasSufficientDataForWindspeed(result.getDataCountPerAngleForWindspeed(i))) {
                     if (seriesMap.get(seriesId)[i] == null) {
-                        createSeriesForWindspeed(seriesId, i, result.getStepping().getRawStepping()[i]);
+                        createSeriesForWindspeed(seriesId, i, (int) Math.round(result.getStepping().getRawStepping()[i]));
                     }
                     Series series = seriesMap.get(seriesId)[i];
                     //series.setPoints(result.getAveragedPolarDataByWindSpeed()[i], false);

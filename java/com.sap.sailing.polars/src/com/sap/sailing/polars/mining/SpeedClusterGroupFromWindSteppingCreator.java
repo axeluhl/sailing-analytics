@@ -9,7 +9,7 @@ public class SpeedClusterGroupFromWindSteppingCreator {
     
     public static ClusterGroup<Speed> createSpeedClusterGroupFrom(WindSteppingWithMaxDistance windStepping) {
         double maxDistance = windStepping.getMaxDistance();
-        Integer[] rawIntegerStepping = windStepping.getRawStepping();
+        Double[] rawIntegerStepping = windStepping.getRawStepping();
         double[] rawDoubleLevelMids = new double[rawIntegerStepping.length];
         for (int i = 0; i < rawIntegerStepping.length; i++) {
             rawDoubleLevelMids[i] = rawIntegerStepping[i];
