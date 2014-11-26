@@ -106,7 +106,7 @@ if [ $# -eq 0 ]; then
     echo "-s <target server> Name of server you want to use as target for install, hot-deploy or remote-reploy. This overrides default behaviour."
     echo "-w <ssh target> Target for remote-deploy and release. Must comply with the following format: user@server."
     echo "-u Run without confirmation messages. Use with extreme care."
-    echo "-v Build local p2 respository, and use this instead of p2.sapsailing.com. Requires \$ECLIPSE_HOME to be set"
+    echo "-v Build local p2 respository, and use this instead of p2.sapsailing.com"
     echo ""
     echo "build: builds the server code using Maven to $PROJECT_HOME (log to $START_DIR/build.log)"
     echo ""
@@ -135,7 +135,6 @@ if [ $# -eq 0 ]; then
     echo "Server home is $SERVERS_HOME"
     echo "Version info: $VERSION_INFO"
     echo "P2 home is $p2PluginRepository"
-    echo "Eclipse home is $ECLIPSE_HOME"
     exit 2
 fi
 
@@ -143,7 +142,6 @@ echo PROJECT_HOME is $PROJECT_HOME
 echo SERVERS_HOME is $SERVERS_HOME
 echo BRANCH is $active_branch
 echo VERSION is $VERSION_INFO
-echo Eclipse home is $ECLIPSE_HOME
 
 options=':bgtocparvm:n:l:s:w:u'
 while getopts $options option
