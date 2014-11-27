@@ -5,10 +5,10 @@ import java.util.List;
 
 import org.json.simple.JSONObject;
 
+import com.sap.sailing.domain.abstractlog.AbstractLogEventAuthor;
+import com.sap.sailing.domain.abstractlog.race.RaceLogEvent;
 import com.sap.sailing.domain.base.Competitor;
 import com.sap.sailing.domain.common.racelog.RacingProcedureType;
-import com.sap.sailing.domain.racelog.RaceLogEvent;
-import com.sap.sailing.domain.racelog.RaceLogEventAuthor;
 import com.sap.sailing.server.gateway.deserialization.JsonDeserializationException;
 import com.sap.sailing.server.gateway.deserialization.JsonDeserializer;
 import com.sap.sailing.server.gateway.serialization.racelog.impl.RaceLogStartProcedureChangedEventSerializer;
@@ -21,7 +21,7 @@ public class RaceLogStartProcedureChangedEventDeserializer extends BaseRaceLogEv
     }
 
     @Override
-    protected RaceLogEvent deserialize(JSONObject object, Serializable id, TimePoint createdAt, RaceLogEventAuthor author,
+    protected RaceLogEvent deserialize(JSONObject object, Serializable id, TimePoint createdAt, AbstractLogEventAuthor author,
             TimePoint timePoint, int passId, List<Competitor> competitors) throws JsonDeserializationException {
         RacingProcedureType type = RacingProcedureType.valueOf(object.get(RaceLogStartProcedureChangedEventSerializer.FIELD_START_PROCEDURE_TYPE).toString());
         return factory.createStartProcedureChangedEvent(createdAt, author, timePoint, id, competitors, passId, type);

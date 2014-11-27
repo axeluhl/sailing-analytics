@@ -7,11 +7,11 @@ import java.util.List;
 import org.json.simple.JSONArray;
 import org.json.simple.JSONObject;
 
+import com.sap.sailing.domain.abstractlog.AbstractLogEventAuthor;
+import com.sap.sailing.domain.abstractlog.impl.LogEventAuthorImpl;
+import com.sap.sailing.domain.abstractlog.race.RaceLogEvent;
+import com.sap.sailing.domain.abstractlog.race.RaceLogEventRestoreFactory;
 import com.sap.sailing.domain.base.Competitor;
-import com.sap.sailing.domain.racelog.RaceLogEvent;
-import com.sap.sailing.domain.racelog.RaceLogEventAuthor;
-import com.sap.sailing.domain.racelog.RaceLogEventRestoreFactory;
-import com.sap.sailing.domain.racelog.impl.RaceLogEventAuthorImpl;
 import com.sap.sailing.server.gateway.deserialization.JsonDeserializationException;
 import com.sap.sailing.server.gateway.deserialization.JsonDeserializer;
 import com.sap.sailing.server.gateway.deserialization.impl.Helpers;
@@ -29,7 +29,7 @@ public abstract class BaseRaceLogEventDeserializer implements JsonDeserializer<R
         this.competitorDeserializer = competitorDeserializer;
     }
     
-    protected abstract RaceLogEvent deserialize(JSONObject object, Serializable id, TimePoint createdAt, RaceLogEventAuthor author, TimePoint timePoint, int passId, List<Competitor> competitors)
+    protected abstract RaceLogEvent deserialize(JSONObject object, Serializable id, TimePoint createdAt, AbstractLogEventAuthor author, TimePoint timePoint, int passId, List<Competitor> competitors)
             throws JsonDeserializationException;
 
     @Override
@@ -50,11 +50,11 @@ public abstract class BaseRaceLogEventDeserializer implements JsonDeserializer<R
         }
         final String authorName = (String) object.get(BaseRaceLogEventSerializer.FIELD_AUTHOR_NAME);
         final Number authorPriority = (Number) object.get(BaseRaceLogEventSerializer.FIELD_AUTHOR_PRIORITY);
-        final RaceLogEventAuthor author;
+        final AbstractLogEventAuthor author;
         if (authorName != null && authorPriority != null) {
-            author = new RaceLogEventAuthorImpl(authorName, authorPriority.intValue());
+            author = new LogEventAuthorImpl(authorName, authorPriority.intValue());
         } else {
-            author = new RaceLogEventAuthorImpl("default", 4);
+            author = new LogEventAuthorImpl("default", 4);
         }
         return deserialize(
                 object, 

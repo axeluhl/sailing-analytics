@@ -2,10 +2,10 @@ package com.sap.sailing.server.gateway.serialization.racelog.impl;
 
 import org.json.simple.JSONObject;
 
+import com.sap.sailing.domain.abstractlog.race.RaceLogEvent;
+import com.sap.sailing.domain.abstractlog.race.tracking.DeviceIdentifier;
+import com.sap.sailing.domain.abstractlog.race.tracking.DeviceMappingEvent;
 import com.sap.sailing.domain.base.Competitor;
-import com.sap.sailing.domain.racelog.RaceLogEvent;
-import com.sap.sailing.domain.racelog.tracking.DeviceIdentifier;
-import com.sap.sailing.domain.racelog.tracking.DeviceMappingEvent;
 import com.sap.sailing.server.gateway.serialization.JsonSerializer;
 import com.sap.sse.common.WithID;
 

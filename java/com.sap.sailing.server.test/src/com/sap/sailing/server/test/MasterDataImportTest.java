@@ -33,6 +33,16 @@ import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
 
+import com.sap.sailing.domain.abstractlog.AbstractLogEventAuthor;
+import com.sap.sailing.domain.abstractlog.impl.LogEventAuthorImpl;
+import com.sap.sailing.domain.abstractlog.race.CompetitorResults;
+import com.sap.sailing.domain.abstractlog.race.RaceLog;
+import com.sap.sailing.domain.abstractlog.race.RaceLogEventFactory;
+import com.sap.sailing.domain.abstractlog.race.RaceLogFinishPositioningConfirmedEvent;
+import com.sap.sailing.domain.abstractlog.race.RaceLogStartTimeEvent;
+import com.sap.sailing.domain.abstractlog.race.RaceLogWindFixEvent;
+import com.sap.sailing.domain.abstractlog.race.impl.CompetitorResultsImpl;
+import com.sap.sailing.domain.abstractlog.race.impl.RaceLogEventFactoryImpl;
 import com.sap.sailing.domain.base.BoatClass;
 import com.sap.sailing.domain.base.Competitor;
 import com.sap.sailing.domain.base.CourseArea;
@@ -84,16 +94,6 @@ import com.sap.sailing.domain.leaderboard.impl.LowPoint;
 import com.sap.sailing.domain.leaderboard.meta.LeaderboardGroupMetaLeaderboard;
 import com.sap.sailing.domain.persistence.PersistenceFactory;
 import com.sap.sailing.domain.persistence.media.MediaDBFactory;
-import com.sap.sailing.domain.racelog.CompetitorResults;
-import com.sap.sailing.domain.racelog.RaceLog;
-import com.sap.sailing.domain.racelog.RaceLogEventAuthor;
-import com.sap.sailing.domain.racelog.RaceLogEventFactory;
-import com.sap.sailing.domain.racelog.RaceLogFinishPositioningConfirmedEvent;
-import com.sap.sailing.domain.racelog.RaceLogStartTimeEvent;
-import com.sap.sailing.domain.racelog.RaceLogWindFixEvent;
-import com.sap.sailing.domain.racelog.impl.CompetitorResultsImpl;
-import com.sap.sailing.domain.racelog.impl.RaceLogEventAuthorImpl;
-import com.sap.sailing.domain.racelog.impl.RaceLogEventFactoryImpl;
 import com.sap.sailing.domain.racelog.tracking.EmptyGPSFixStore;
 import com.sap.sailing.domain.tracking.DynamicTrackedRegatta;
 import com.sap.sailing.domain.tracking.TrackedRace;
@@ -124,7 +124,7 @@ public class MasterDataImportTest {
     private static final String TEST_GROUP_NAME2 = "testGroup2";
 
     private final UUID eventUUID = UUID.randomUUID();
-    private RaceLogEventAuthor author = new RaceLogEventAuthorImpl("Test Author", 1);
+    private AbstractLogEventAuthor author = new LogEventAuthorImpl("Test Author", 1);
 
     private final TimePoint eventStartDate = new MillisecondsTimePoint(new Date());
     private final TimePoint eventEndDate = new MillisecondsTimePoint(new Date());

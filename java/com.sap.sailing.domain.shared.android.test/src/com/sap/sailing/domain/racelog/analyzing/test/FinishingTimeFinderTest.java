@@ -8,12 +8,12 @@ import java.util.Arrays;
 
 import org.junit.Test;
 
+import com.sap.sailing.domain.abstractlog.AbstractLogEventAuthor;
+import com.sap.sailing.domain.abstractlog.race.RaceLog;
+import com.sap.sailing.domain.abstractlog.race.RaceLogEvent;
+import com.sap.sailing.domain.abstractlog.race.RaceLogRaceStatusEvent;
+import com.sap.sailing.domain.abstractlog.race.analyzing.impl.FinishingTimeFinder;
 import com.sap.sailing.domain.common.racelog.RaceLogRaceStatus;
-import com.sap.sailing.domain.racelog.RaceLog;
-import com.sap.sailing.domain.racelog.RaceLogEvent;
-import com.sap.sailing.domain.racelog.RaceLogEventAuthor;
-import com.sap.sailing.domain.racelog.RaceLogRaceStatusEvent;
-import com.sap.sailing.domain.racelog.analyzing.impl.FinishingTimeFinder;
 import com.sap.sse.common.TimePoint;
 
 public class FinishingTimeFinderTest extends PassAwareRaceLogAnalyzerTest<FinishingTimeFinder, TimePoint> {
@@ -24,7 +24,7 @@ public class FinishingTimeFinderTest extends PassAwareRaceLogAnalyzerTest<Finish
     }
 
     @Override
-    protected TargetPair getTargetEventsAndResultForPassAwareTests(int passId, RaceLogEventAuthor author) {
+    protected TargetPair getTargetEventsAndResultForPassAwareTests(int passId, AbstractLogEventAuthor author) {
         RaceLogRaceStatusEvent event = createEvent(RaceLogRaceStatusEvent.class, 1, passId, author);
         when(event.getNextStatus()).thenReturn(RaceLogRaceStatus.FINISHING);
         return new TargetPair(Arrays.asList(event), event.getLogicalTimePoint());
