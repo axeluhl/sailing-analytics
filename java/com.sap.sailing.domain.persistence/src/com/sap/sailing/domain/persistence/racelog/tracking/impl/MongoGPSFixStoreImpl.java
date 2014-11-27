@@ -15,10 +15,8 @@ import com.mongodb.DBCursor;
 import com.mongodb.DBObject;
 import com.mongodb.QueryBuilder;
 import com.sap.sailing.domain.abstractlog.race.RaceLog;
-import com.sap.sailing.domain.abstractlog.race.tracking.DeviceIdentifier;
-import com.sap.sailing.domain.abstractlog.race.tracking.DeviceMapping;
-import com.sap.sailing.domain.abstractlog.race.tracking.analyzing.impl.DeviceCompetitorMappingFinder;
-import com.sap.sailing.domain.abstractlog.race.tracking.analyzing.impl.DeviceMarkMappingFinder;
+import com.sap.sailing.domain.abstractlog.race.tracking.analyzing.impl.RaceLogDeviceCompetitorMappingFinder;
+import com.sap.sailing.domain.abstractlog.race.tracking.analyzing.impl.RaceLogDeviceMarkMappingFinder;
 import com.sap.sailing.domain.base.Competitor;
 import com.sap.sailing.domain.base.Mark;
 import com.sap.sailing.domain.common.TimeRange;
@@ -36,6 +34,8 @@ import com.sap.sailing.domain.persistence.racelog.tracking.DeviceIdentifierMongo
 import com.sap.sailing.domain.persistence.racelog.tracking.GPSFixMongoHandler;
 import com.sap.sailing.domain.persistence.racelog.tracking.MongoGPSFixStore;
 import com.sap.sailing.domain.racelog.tracking.GPSFixReceivedListener;
+import com.sap.sailing.domain.racelogtracking.DeviceIdentifier;
+import com.sap.sailing.domain.racelogtracking.DeviceMapping;
 import com.sap.sailing.domain.tracking.DynamicGPSFixTrack;
 import com.sap.sailing.domain.tracking.GPSFix;
 import com.sap.sailing.domain.tracking.GPSFixMoving;
@@ -107,7 +107,7 @@ public class MongoGPSFixStoreImpl implements MongoGPSFixStore {
     @Override
     public void loadCompetitorTrack(DynamicGPSFixTrack<Competitor, GPSFixMoving> track, RaceLog raceLog, Competitor competitor)
     throws NoCorrespondingServiceRegisteredException, TransformationException{
-        List<DeviceMapping<Competitor>> mappings = new DeviceCompetitorMappingFinder(raceLog).analyze().get(competitor);
+        List<DeviceMapping<Competitor>> mappings = new RaceLogDeviceCompetitorMappingFinder(raceLog).analyze().get(competitor);
 
         if (mappings != null) {
             for (DeviceMapping<Competitor> mapping : mappings) {
@@ -119,7 +119,7 @@ public class MongoGPSFixStoreImpl implements MongoGPSFixStore {
     @Override
     public void loadMarkTrack(DynamicGPSFixTrack<Mark, GPSFix> track, RaceLog raceLog, Mark mark)
     throws NoCorrespondingServiceRegisteredException, TransformationException{
-        List<DeviceMapping<Mark>> mappings = new DeviceMarkMappingFinder(raceLog).analyze().get(mark);
+        List<DeviceMapping<Mark>> mappings = new RaceLogDeviceMarkMappingFinder(raceLog).analyze().get(mark);
 
         if (mappings != null) {
             for (DeviceMapping<Mark> mapping : mappings) {

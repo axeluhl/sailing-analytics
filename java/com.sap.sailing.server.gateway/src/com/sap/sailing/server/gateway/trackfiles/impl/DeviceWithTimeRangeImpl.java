@@ -1,8 +1,8 @@
 package com.sap.sailing.server.gateway.trackfiles.impl;
 
-import com.sap.sailing.domain.abstractlog.race.tracking.DeviceIdentifier;
-import com.sap.sailing.domain.abstractlog.race.tracking.DeviceWithTimeRange;
+import com.sap.sailing.domain.abstractlog.shared.events.DeviceWithTimeRange;
 import com.sap.sailing.domain.common.TimeRange;
+import com.sap.sailing.domain.racelogtracking.DeviceIdentifier;
 import com.sap.sse.common.TimePoint;
 
 public class DeviceWithTimeRangeImpl implements DeviceWithTimeRange {

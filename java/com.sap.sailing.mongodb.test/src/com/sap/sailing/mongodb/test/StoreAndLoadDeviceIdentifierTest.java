@@ -16,9 +16,7 @@ import com.sap.sailing.domain.abstractlog.AbstractLogEventAuthor;
 import com.sap.sailing.domain.abstractlog.impl.LogEventAuthorImpl;
 import com.sap.sailing.domain.abstractlog.race.RaceLog;
 import com.sap.sailing.domain.abstractlog.race.RaceLogEventFactory;
-import com.sap.sailing.domain.abstractlog.race.tracking.DeviceCompetitorMappingEvent;
-import com.sap.sailing.domain.abstractlog.race.tracking.DeviceIdentifier;
-import com.sap.sailing.domain.abstractlog.race.tracking.PlaceHolderDeviceIdentifier;
+import com.sap.sailing.domain.abstractlog.race.tracking.RaceLogDeviceCompetitorMappingEvent;
 import com.sap.sailing.domain.base.Competitor;
 import com.sap.sailing.domain.base.DomainFactory;
 import com.sap.sailing.domain.base.impl.CompetitorImpl;
@@ -33,6 +31,8 @@ import com.sap.sailing.domain.racelog.RaceLogIdentifier;
 import com.sap.sailing.domain.racelog.tracking.test.mock.MockEmptyServiceFinderFactory;
 import com.sap.sailing.domain.racelog.tracking.test.mock.MockSmartphoneImeiServiceFinderFactory;
 import com.sap.sailing.domain.racelog.tracking.test.mock.SmartphoneImeiIdentifier;
+import com.sap.sailing.domain.racelogtracking.DeviceIdentifier;
+import com.sap.sailing.domain.racelogtracking.PlaceHolderDeviceIdentifier;
 import com.sap.sailing.domain.trackfiles.TrackFileImportDeviceIdentifierImpl;
 import com.sap.sse.common.TimePoint;
 import com.sap.sse.common.Util;
@@ -92,7 +92,7 @@ public class StoreAndLoadDeviceIdentifierTest extends AbstractMongoDBTest {
         RaceLog loadedRaceLog = loadRaceLog();
         loadedRaceLog.lockForRead();
         assertEquals(1, Util.size(loadedRaceLog.getRawFixes()));
-        DeviceCompetitorMappingEvent mapping = (DeviceCompetitorMappingEvent) loadedRaceLog.getRawFixes().iterator().next();
+        RaceLogDeviceCompetitorMappingEvent mapping = (RaceLogDeviceCompetitorMappingEvent) loadedRaceLog.getRawFixes().iterator().next();
         loadedRaceLog.unlockAfterRead();
         
         return mapping.getDevice();

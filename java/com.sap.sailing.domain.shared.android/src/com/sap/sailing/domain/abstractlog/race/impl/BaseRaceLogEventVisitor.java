@@ -15,14 +15,14 @@ import com.sap.sailing.domain.abstractlog.race.RaceLogRevokeEvent;
 import com.sap.sailing.domain.abstractlog.race.RaceLogStartProcedureChangedEvent;
 import com.sap.sailing.domain.abstractlog.race.RaceLogStartTimeEvent;
 import com.sap.sailing.domain.abstractlog.race.RaceLogWindFixEvent;
-import com.sap.sailing.domain.abstractlog.race.scoring.AdditionalScoringInformationEvent;
-import com.sap.sailing.domain.abstractlog.race.tracking.CloseOpenEndedDeviceMappingEvent;
-import com.sap.sailing.domain.abstractlog.race.tracking.DefineMarkEvent;
-import com.sap.sailing.domain.abstractlog.race.tracking.DenoteForTrackingEvent;
-import com.sap.sailing.domain.abstractlog.race.tracking.DeviceCompetitorMappingEvent;
-import com.sap.sailing.domain.abstractlog.race.tracking.DeviceMarkMappingEvent;
-import com.sap.sailing.domain.abstractlog.race.tracking.RegisterCompetitorEvent;
-import com.sap.sailing.domain.abstractlog.race.tracking.StartTrackingEvent;
+import com.sap.sailing.domain.abstractlog.race.scoring.RaceLogAdditionalScoringInformationEvent;
+import com.sap.sailing.domain.abstractlog.race.tracking.RaceLogCloseOpenEndedDeviceMappingEvent;
+import com.sap.sailing.domain.abstractlog.race.tracking.RaceLogDefineMarkEvent;
+import com.sap.sailing.domain.abstractlog.race.tracking.RaceLogDenoteForTrackingEvent;
+import com.sap.sailing.domain.abstractlog.race.tracking.RaceLogDeviceCompetitorMappingEvent;
+import com.sap.sailing.domain.abstractlog.race.tracking.RaceLogDeviceMarkMappingEvent;
+import com.sap.sailing.domain.abstractlog.race.tracking.RaceLogRegisterCompetitorEvent;
+import com.sap.sailing.domain.abstractlog.race.tracking.RaceLogStartTrackingEvent;
 
 /**
  * Base class implementing {@link RaceLogEventVisitor}. Every method is implemented as a no-op.
@@ -95,22 +95,22 @@ public abstract class BaseRaceLogEventVisitor implements RaceLogEventVisitor {
     }
     
     @Override
-    public void visit(DeviceCompetitorMappingEvent event) {
+    public void visit(RaceLogDeviceCompetitorMappingEvent event) {
     	
     }
     
     @Override
-    public void visit(DeviceMarkMappingEvent event) {
+    public void visit(RaceLogDeviceMarkMappingEvent event) {
     	
     }
     
     @Override
-    public void visit(DenoteForTrackingEvent event) {
+    public void visit(RaceLogDenoteForTrackingEvent event) {
     	
     }
     
     @Override
-    public void visit(StartTrackingEvent event) {
+    public void visit(RaceLogStartTrackingEvent event) {
     	
     }
     
@@ -120,22 +120,22 @@ public abstract class BaseRaceLogEventVisitor implements RaceLogEventVisitor {
     }
     
     @Override
-    public void visit(RegisterCompetitorEvent event) {
+    public void visit(RaceLogRegisterCompetitorEvent event) {
 
     }
     
     @Override
-    public void visit(DefineMarkEvent event) {
+    public void visit(RaceLogDefineMarkEvent event) {
          
     }
 
     @Override
-    public void visit(CloseOpenEndedDeviceMappingEvent event) {
+    public void visit(RaceLogCloseOpenEndedDeviceMappingEvent event) {
         
     }
     
     @Override
-    public void visit(AdditionalScoringInformationEvent event) {
+    public void visit(RaceLogAdditionalScoringInformationEvent event) {
         
     }
 }

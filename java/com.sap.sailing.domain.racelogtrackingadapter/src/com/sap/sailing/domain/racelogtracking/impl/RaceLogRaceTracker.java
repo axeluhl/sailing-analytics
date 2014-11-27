@@ -14,18 +14,16 @@ import com.sap.sailing.domain.abstractlog.race.RaceLog;
 import com.sap.sailing.domain.abstractlog.race.RaceLogCourseDesignChangedEvent;
 import com.sap.sailing.domain.abstractlog.race.analyzing.impl.LastPublishedCourseDesignFinder;
 import com.sap.sailing.domain.abstractlog.race.impl.BaseRaceLogEventVisitor;
-import com.sap.sailing.domain.abstractlog.race.tracking.DenoteForTrackingEvent;
-import com.sap.sailing.domain.abstractlog.race.tracking.DeviceCompetitorMappingEvent;
-import com.sap.sailing.domain.abstractlog.race.tracking.DeviceIdentifier;
-import com.sap.sailing.domain.abstractlog.race.tracking.DeviceMapping;
-import com.sap.sailing.domain.abstractlog.race.tracking.DeviceMarkMappingEvent;
-import com.sap.sailing.domain.abstractlog.race.tracking.StartTrackingEvent;
-import com.sap.sailing.domain.abstractlog.race.tracking.analyzing.impl.DeviceCompetitorMappingFinder;
-import com.sap.sailing.domain.abstractlog.race.tracking.analyzing.impl.DeviceMappingFinder;
-import com.sap.sailing.domain.abstractlog.race.tracking.analyzing.impl.DeviceMarkMappingFinder;
+import com.sap.sailing.domain.abstractlog.race.tracking.RaceLogDenoteForTrackingEvent;
+import com.sap.sailing.domain.abstractlog.race.tracking.RaceLogDeviceCompetitorMappingEvent;
+import com.sap.sailing.domain.abstractlog.race.tracking.RaceLogDeviceMarkMappingEvent;
+import com.sap.sailing.domain.abstractlog.race.tracking.RaceLogStartTrackingEvent;
 import com.sap.sailing.domain.abstractlog.race.tracking.analyzing.impl.RaceInformationFinder;
+import com.sap.sailing.domain.abstractlog.race.tracking.analyzing.impl.RaceLogDeviceCompetitorMappingFinder;
+import com.sap.sailing.domain.abstractlog.race.tracking.analyzing.impl.RaceLogDeviceMappingFinder;
+import com.sap.sailing.domain.abstractlog.race.tracking.analyzing.impl.RaceLogDeviceMarkMappingFinder;
 import com.sap.sailing.domain.abstractlog.race.tracking.analyzing.impl.RaceLogTrackingStateAnalyzer;
-import com.sap.sailing.domain.abstractlog.race.tracking.analyzing.impl.RegisteredCompetitorsAnalyzer;
+import com.sap.sailing.domain.abstractlog.shared.analyzing.RegisteredCompetitorsAnalyzer;
 import com.sap.sailing.domain.base.BoatClass;
 import com.sap.sailing.domain.base.Competitor;
 import com.sap.sailing.domain.base.ControlPoint;
@@ -52,6 +50,8 @@ import com.sap.sailing.domain.common.racelog.tracking.TransformationException;
 import com.sap.sailing.domain.markpassingcalculation.MarkPassingCalculator;
 import com.sap.sailing.domain.racelog.tracking.GPSFixReceivedListener;
 import com.sap.sailing.domain.racelog.tracking.GPSFixStore;
+import com.sap.sailing.domain.racelogtracking.DeviceIdentifier;
+import com.sap.sailing.domain.racelogtracking.DeviceMapping;
 import com.sap.sailing.domain.tracking.DynamicGPSFixTrack;
 import com.sap.sailing.domain.tracking.DynamicTrackedRace;
 import com.sap.sailing.domain.tracking.DynamicTrackedRegatta;
@@ -74,7 +74,7 @@ import difflib.PatchFailedException;
  * {@link RaceLogTrackingState#TRACKING} state, tracking commences immediately and existing fixes are loaded immediately
  * from the database.
  * <p>
- * Otherwise, the tracker waits until a {@link StartTrackingEvent} is received to perform these tasks.
+ * Otherwise, the tracker waits until a {@link RaceLogStartTrackingEvent} is received to perform these tasks.
  * 
  * @author Fredrik Teschke
  * 
@@ -170,11 +170,11 @@ public class RaceLogRaceTracker extends BaseRaceLogEventVisitor implements RaceT
     }
 
     private Map<Competitor, List<DeviceMapping<Competitor>>> getNewCompetitorMappings() {
-        return new DeviceCompetitorMappingFinder(params.getRaceLog()).analyze();
+        return new RaceLogDeviceCompetitorMappingFinder(params.getRaceLog()).analyze();
     }
 
     private Map<Mark, List<DeviceMapping<Mark>>> getNewMarkMappings() {
-        return new DeviceMarkMappingFinder(params.getRaceLog()).analyze();
+        return new RaceLogDeviceMarkMappingFinder(params.getRaceLog()).analyze();
     }
 
     /**
@@ -283,7 +283,7 @@ public class RaceLogRaceTracker extends BaseRaceLogEventVisitor implements RaceT
     }
 
     @Override
-    public void visit(DeviceMarkMappingEvent event) {
+    public void visit(RaceLogDeviceMarkMappingEvent event) {
         if (trackedRace != null) {
             updateMarkMappings(true);
             gpsFixStore.addListener(this, event.getDevice());
@@ -325,7 +325,7 @@ public class RaceLogRaceTracker extends BaseRaceLogEventVisitor implements RaceT
     }
 
     @Override
-    public void visit(DeviceCompetitorMappingEvent event) {
+    public void visit(RaceLogDeviceCompetitorMappingEvent event) {
         if (trackedRace != null) {
             updateCompetitorMappings(true);
             gpsFixStore.addListener(this, event.getDevice());
@@ -333,7 +333,7 @@ public class RaceLogRaceTracker extends BaseRaceLogEventVisitor implements RaceT
     }
 
     @Override
-    public void visit(StartTrackingEvent event) {
+    public void visit(RaceLogStartTrackingEvent event) {
         if (trackedRace == null)
             startTracking(event);
     }
@@ -356,12 +356,12 @@ public class RaceLogRaceTracker extends BaseRaceLogEventVisitor implements RaceT
         }
     }
 
-    private void startTracking(StartTrackingEvent event) {
+    private void startTracking(RaceLogStartTrackingEvent event) {
         RaceLog raceLog = params.getRaceLog();
         RaceColumn raceColumn = params.getRaceColumn();
         Fleet fleet = params.getFleet();
 
-        DenoteForTrackingEvent denoteEvent = new RaceInformationFinder(raceLog).analyze();
+        RaceLogDenoteForTrackingEvent denoteEvent = new RaceInformationFinder(raceLog).analyze();
         BoatClass boatClass = denoteEvent.getBoatClass();
         String raceName = denoteEvent.getRaceName();
         CourseBase courseBase = new LastPublishedCourseDesignFinder(raceLog).analyze();
@@ -397,7 +397,8 @@ public class RaceLogRaceTracker extends BaseRaceLogEventVisitor implements RaceT
         trackedRace.setStatus(new TrackedRaceStatusImpl(TrackedRaceStatusEnum.TRACKING, 0));
         
         //add listeners for devices in mappings
-        for (List<DeviceMapping<WithID>> mappings : new DeviceMappingFinder<WithID>(params.getRaceLog()).analyze().values()) {
+        for (List<DeviceMapping<WithID>> mappings :
+            new RaceLogDeviceMappingFinder<WithID>(params.getRaceLog()).analyze().values()) {
             for (DeviceMapping<WithID> mapping : mappings) {
                 gpsFixStore.addListener(this, mapping.getDevice());
             }
