@@ -6,7 +6,6 @@ import java.util.Arrays;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.HashMap;
-import java.util.LinkedList;
 import java.util.List;
 import java.util.TreeMap;
 
@@ -19,6 +18,8 @@ import android.view.LayoutInflater;
 import android.view.View;
 import android.view.View.OnClickListener;
 import android.view.ViewGroup;
+import android.widget.AbsListView;
+import android.widget.AbsListView.OnScrollListener;
 import android.widget.AdapterView;
 import android.widget.AdapterView.OnItemClickListener;
 import android.widget.AdapterView.OnItemSelectedListener;
@@ -35,15 +36,16 @@ import com.sap.sailing.racecommittee.app.domain.impl.BoatClassSeriesFleet;
 import com.sap.sailing.racecommittee.app.ui.adapters.racelist.ManagedRaceListAdapter;
 import com.sap.sailing.racecommittee.app.ui.adapters.racelist.ManagedRaceListAdapter.JuryFlagClickedListener;
 import com.sap.sailing.racecommittee.app.ui.adapters.racelist.RaceListDataType;
-import com.sap.sailing.racecommittee.app.ui.adapters.racelist.RaceListDataTypeHeader;
 import com.sap.sailing.racecommittee.app.ui.adapters.racelist.RaceListDataTypeRace;
 import com.sap.sailing.racecommittee.app.ui.comparators.BoatClassSeriesDataFleetComparator;
 import com.sap.sailing.racecommittee.app.ui.comparators.ManagedRaceStartTimeComparator;
-import com.sap.sailing.racecommittee.app.ui.comparators.NaturalNamedComparator;
+import com.sap.sailing.racecommittee.app.ui.comparators.RaceListDataTypeComparator;
 import com.sap.sailing.racecommittee.app.ui.fragments.dialogs.ProtestTimeDialogFragment;
+import com.sap.sailing.racecommittee.app.utils.TickListener;
+import com.sap.sailing.racecommittee.app.utils.TickSingleton;
 
 public class NavigationDrawerFragment extends LoggableFragment implements OnItemClickListener, JuryFlagClickedListener,
-        OnItemSelectedListener {
+        OnItemSelectedListener, TickListener, OnScrollListener {
 
     public enum FilterMode {
         ACTIVE(R.string.race_list_filter_show_active), ALL(R.string.race_list_filter_show_all);
@@ -75,7 +77,7 @@ public class NavigationDrawerFragment extends LoggableFragment implements OnItem
     private HashMap<Serializable, ManagedRace> mManagedRacesById;
     private TreeMap<BoatClassSeriesFleet, List<ManagedRace>> mRacesByGroup;
     private ManagedRace mSelectedRace;
-
+    private boolean mUpdateList;
     private ArrayList<RaceListDataType> mViewItems;
 
     private BaseRaceStateChangedListener stateListener = new BaseRaceStateChangedListener() {
@@ -115,10 +117,12 @@ public class NavigationDrawerFragment extends LoggableFragment implements OnItem
                 }
             }
         }
+        mAdapter.sort(new RaceListDataTypeComparator());
         mAdapter.notifyDataSetChanged();
     }
 
     private void filterChanged() {
+        mAdapter.sort(new RaceListDataTypeComparator());
         mAdapter.getFilter().filterByMode(getFilterMode());
         mAdapter.notifyDataSetChanged();
     }
@@ -127,44 +131,11 @@ public class NavigationDrawerFragment extends LoggableFragment implements OnItem
         return mFilterMode;
     }
 
-    private void initializeRacesByGroup() {
-        mRacesByGroup.clear();
-        for (ManagedRace race : mManagedRacesById.values()) {
-            BoatClassSeriesFleet container = new BoatClassSeriesFleet(race);
-
-            if (!mRacesByGroup.containsKey(container)) {
-                mRacesByGroup.put(container, new LinkedList<ManagedRace>());
-            }
-            mRacesByGroup.get(container).add(race);
-        }
-    }
-
-    private void initializeViewElements() {
-        // 1. Group races by <boat class, series, fleet>
-        initializeRacesByGroup();
-
-        // 2. Remove previous view items
-        mViewItems.clear();
-
-        // 3. Create view elements from tree
-        for (BoatClassSeriesFleet key : mRacesByGroup.navigableKeySet()) {
-            // ... add the header view...
-            mViewItems.add(new RaceListDataTypeHeader(key));
-
-            List<ManagedRace> races = mRacesByGroup.get(key);
-            Collections.sort(races, new NaturalNamedComparator());
-            for (ManagedRace race : races) {
-                // ... and add the race view!
-                mViewItems.add(new RaceListDataTypeRace(race));
-            }
-        }
-
-        // 1. Remove previous view items
-        mViewItems.clear();
-
-        // 2. Create view elements from tree
-        for (ManagedRace race : mManagedRacesById.values()) {
-            mViewItems.add(new RaceListDataTypeRace(race));
+    @Override
+    public void notifyTick() {
+        if (mAdapter != null && mUpdateList) {
+            ExLog.i(getActivity(), TAG, "notifyTick() on mAdapter called");
+            mAdapter.notifyDataSetChanged();
         }
     }
 
@@ -198,27 +169,30 @@ public class NavigationDrawerFragment extends LoggableFragment implements OnItem
         View view = inflater.inflate(R.layout.nav_drawer, container);
 
         mListView = (ListView) view.findViewById(R.id.listView);
+        mListView.setOnScrollListener(this);
         mChangeFilter = (Button) view.findViewById(R.id.change_filter);
-        mChangeFilter.setOnClickListener(new OnClickListener() {
+        if (mChangeFilter != null) {
+            mChangeFilter.setOnClickListener(new OnClickListener() {
 
-            @Override
-            public void onClick(View view) {
-                Button button = (Button) view;
-                String text = button.getText().toString();
-                if (text.equals(getActivity().getResources().getString(R.string.race_show_all))) {
-                    button.setText(R.string.race_show_less);
-                    button.setCompoundDrawablesWithIntrinsicBounds(null, null, getActivity().getResources()
-                            .getDrawable(R.drawable.ic_arrow_drop_up_grey600_24dp), null);
-                    setFilterMode(FilterMode.ALL);
-                } else {
-                    button.setText(R.string.race_show_all);
-                    button.setCompoundDrawablesWithIntrinsicBounds(null, null, getActivity().getResources()
-                            .getDrawable(R.drawable.ic_arrow_drop_down_grey600_24dp), null);
-                    setFilterMode(FilterMode.ACTIVE);
+                @Override
+                public void onClick(View view) {
+                    Button button = (Button) view;
+                    String text = button.getText().toString();
+                    if (text.equals(getActivity().getResources().getString(R.string.race_show_all))) {
+                        button.setText(R.string.race_show_less);
+                        button.setCompoundDrawablesWithIntrinsicBounds(null, null, getActivity().getResources()
+                                .getDrawable(R.drawable.ic_arrow_drop_up_grey600_24dp), null);
+                        setFilterMode(FilterMode.ALL);
+                    } else {
+                        button.setText(R.string.race_show_all);
+                        button.setCompoundDrawablesWithIntrinsicBounds(null, null, getActivity().getResources()
+                                .getDrawable(R.drawable.ic_arrow_drop_down_grey600_24dp), null);
+                        setFilterMode(FilterMode.ACTIVE);
+                    }
+                    filterChanged();
                 }
-                filterChanged();
-            }
-        });
+            });
+        }
 
         return view;
     }
@@ -255,12 +229,45 @@ public class NavigationDrawerFragment extends LoggableFragment implements OnItem
     @Override
     public void onNothingSelected(AdapterView<?> parent) {
         // TODO Auto-generated method stub
+    }
 
+    @Override
+    public void onPause() {
+        super.onPause();
+
+        TickSingleton.INSTANCE.unregisterListener(this);
+    }
+
+    @Override
+    public void onResume() {
+        super.onResume();
+
+        TickSingleton.INSTANCE.registerListener(this);
+    }
+
+    @Override
+    public void onScroll(AbsListView view, int firstVisibleItem, int visibleItemCount, int totalItemCount) {
+        // TODO Auto-generated method stub
+
+    }
+
+    @Override
+    public void onScrollStateChanged(AbsListView view, int scrollState) {
+        switch (scrollState) {
+        case SCROLL_STATE_FLING:
+        case SCROLL_STATE_TOUCH_SCROLL:
+            mUpdateList = false;
+            break;
+
+        default:
+            mUpdateList = true;
+        }
     }
 
     @Override
     public void onStart() {
         super.onStart();
+
         unregisterOnAllRaces();
         registerOnAllRaces();
         for (ManagedRace race : mManagedRacesById.values()) {
@@ -288,7 +295,21 @@ public class NavigationDrawerFragment extends LoggableFragment implements OnItem
     public void setUp(DrawerLayout drawerLayout) {
         mDrawerLayout = drawerLayout;
         mDrawerToggle = new ActionBarDrawerToggle(getActivity(), mDrawerLayout, (Toolbar) getActivity().findViewById(
-                R.id.toolbar), R.string.nav_drawer_open, R.string.nav_drawer_close);
+                R.id.toolbar), R.string.nav_drawer_open, R.string.nav_drawer_close) {
+            @Override
+            public void onDrawerClosed(View drawerView) {
+                super.onDrawerClosed(drawerView);
+
+                mUpdateList = false;
+            }
+
+            @Override
+            public void onDrawerOpened(View drawerView) {
+                super.onDrawerOpened(drawerView);
+
+                mUpdateList = true;
+            }
+        };
 
         mDrawerLayout.post(new Runnable() {
 
@@ -318,8 +339,8 @@ public class NavigationDrawerFragment extends LoggableFragment implements OnItem
         registerOnAllRaces();
 
         // prepare views and do initial filtering
-        // initializeViewElements();
         filterChanged();
+        mAdapter.sort(new RaceListDataTypeComparator());
         mAdapter.notifyDataSetChanged();
     }
 
