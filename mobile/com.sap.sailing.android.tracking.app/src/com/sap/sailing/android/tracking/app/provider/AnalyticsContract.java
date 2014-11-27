@@ -34,7 +34,6 @@ public class AnalyticsContract {
 		String GPS_ALTITUDE = "gps_altitude";
 		String GPS_BEARING = "gps_bearing";
 		String GPS_DEVICE = "gps_device";
-		String GPS_ELAPSED_REALTIME = "gps_elapsedrealtime";
 		String GPS_LATITUDE = "gps_latitude";
 		String GPS_LONGITUDE = "gps_longitude";
 		String GPS_PROVIDER = "gps_provider";

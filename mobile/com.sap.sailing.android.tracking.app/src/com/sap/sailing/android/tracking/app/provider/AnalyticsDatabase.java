@@ -32,7 +32,7 @@ public class AnalyticsDatabase extends SQLiteOpenHelper {
         String EVENTS_JOIN_LEADERBOARDS_JOIN_COMPETITORS = Tables.LEADERBOARDS +
         " INNER JOIN " + Tables.EVENTS + " ON (" + Tables.LEADERBOARDS + "." + BaseColumns._ID + " = " + Tables.EVENTS + ".leaderboard_id ) " +
         " INNER JOIN " + Tables.COMPETITORS + " ON (" + Tables.LEADERBOARDS + "."+ BaseColumns._ID + " = " + Tables.COMPETITORS + ".leaderboard_id ) ";
-        String GPS_FIXES_JOIN_EVENTS = Tables.EVENTS + " INNER JOIN " + Tables.SENSOR_GPS;
+        String GPS_FIXES_JOIN_EVENTS = "sensor_gps LEFT JOIN events ON sensor_gps.event_id = events._id ";
     }
     
     public AnalyticsDatabase(Context context) {
@@ -71,17 +71,16 @@ public class AnalyticsDatabase extends SQLiteOpenHelper {
 
         db.execSQL("CREATE TABLE " + Tables.SENSOR_GPS + " ( "
                 + BaseColumns._ID + " INTEGER PRIMARY KEY AUTOINCREMENT, "
-                + SensorGpsColumns.GPS_ACCURACY + " TEXT, "
-                + SensorGpsColumns.GPS_ALTITUDE + " TEXT, "
-                + SensorGpsColumns.GPS_BEARING + " TEXT, "
+                + SensorGpsColumns.GPS_ACCURACY + " DOUBLE, "
+                + SensorGpsColumns.GPS_ALTITUDE + " DOUBLE, "
+                + SensorGpsColumns.GPS_BEARING + " DOUBLE, "
                 + SensorGpsColumns.GPS_DEVICE + " TEXT, "
-                + SensorGpsColumns.GPS_ELAPSED_REALTIME + " TEXT, "
-                + SensorGpsColumns.GPS_LATITUDE + " TEXT, "
-                + SensorGpsColumns.GPS_LONGITUDE + " TEXT, "
+                + SensorGpsColumns.GPS_LATITUDE + " DOUBLE, "
+                + SensorGpsColumns.GPS_LONGITUDE + " DOUBLE, "
                 + SensorGpsColumns.GPS_PROVIDER + " TEXT, "
-                + SensorGpsColumns.GPS_SPEED + " TEXT, "
+                + SensorGpsColumns.GPS_SPEED + " DOUBLE, "
                 + SensorGpsColumns.GPS_SYNCED + " INTEGER DEFAULT 0, "
-                + SensorGpsColumns.GPS_TIME + " TEXT, "
+                + SensorGpsColumns.GPS_TIME + " INTEGER, "
                 + SensorGpsColumns.GPS_EVENT_FK + " INTEGER, "
                 + "FOREIGN KEY (" + SensorGpsColumns.GPS_EVENT_FK + ") " 
                 + "REFERENCES " + Tables.EVENTS + "( " + EventColumns.EVENT_ID  + " ))");
