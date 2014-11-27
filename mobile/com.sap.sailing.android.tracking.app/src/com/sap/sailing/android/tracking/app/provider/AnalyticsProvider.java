@@ -11,7 +11,6 @@ import android.database.sqlite.SQLiteDatabase;
 import android.database.sqlite.SQLiteQueryBuilder;
 import android.net.Uri;
 import android.provider.BaseColumns;
-import android.widget.BaseExpandableListAdapter;
 
 import com.sap.sailing.android.shared.logging.ExLog;
 import com.sap.sailing.android.shared.util.SelectionBuilder;
@@ -47,6 +46,8 @@ public class AnalyticsProvider extends ContentProvider {
     
     private static final int EVENT_LEADERBOARD_COMPETITOR_JOINED = 600;
     
+    private static final int EVENT_GPS_FIXES_JOINED = 700;
+    
     private static UriMatcher buildUriMatcher() {
         final UriMatcher matcher = new UriMatcher(UriMatcher.NO_MATCH);
         final String authority = AnalyticsContract.CONTENT_AUTHORITY;
@@ -68,6 +69,8 @@ public class AnalyticsProvider extends ContentProvider {
         
         matcher.addURI(authority, "event_leaderboard_competitor_joined", EVENT_LEADERBOARD_COMPETITOR_JOINED);
         
+        matcher.addURI(authority, "event_gps_fix_joined",  EVENT_GPS_FIXES_JOINED);
+        
         return matcher;
     }
 
@@ -83,8 +86,6 @@ public class AnalyticsProvider extends ContentProvider {
 //        AnalyticsDatabase.deleteDatabase(context);
 //        mOpenHelper = new AnalyticsDatabase(context);
 //    }
-    
-    
 
     @Override
     public Cursor query(Uri uri, String[] projection, String selection, String[] selectionArgs, String sortOrder) {
@@ -106,6 +107,11 @@ public class AnalyticsProvider extends ContentProvider {
             	cursor = qb.query(db, projection, selection, selectionArgs, null, null, sortOrder);
             	return cursor;
             	
+            case EVENT_GPS_FIXES_JOINED:
+            	SQLiteQueryBuilder eb = new SQLiteQueryBuilder();
+            	eb.setTables(Tables.GPS_FIXES_JOIN_EVENTS);
+            	cursor = eb.query(db, projection, selection, selectionArgs, null, null, sortOrder);
+            	return cursor;
             	
             default:
             	final SelectionBuilder builder = buildExpandedSelection(uri);

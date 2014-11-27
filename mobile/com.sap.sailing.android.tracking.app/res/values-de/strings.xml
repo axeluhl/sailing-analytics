@@ -8,7 +8,7 @@
     <string name="options_menu_settings">Einstellungen</string>
     <string name="options_menu_checkout">Checkout</string>
     <string name="settings_category_general">General</string>
-    <string name="settings_category_connection">Verbindung</string>
+    <string name="settings_category_other">Andere Einstellungen</string>
     <string name="scan_hint">Der QR-Code befindet sich auf Ihrer Teilnahmebestätigung</string>
     <string name="server_url">Server</string>
     <string name="device_identifier">Geräte-ID</string>
@@ -67,5 +67,7 @@
     <string name="no_qr_code">Sie haben keinen QR-Code?</string>
     <string name="scan_qr">QR-Code scannen</string>
     <string name="your_regattas">Ihre Regattas:</string>
+    <string name="close">Schließen</string>
+    <string name="thank_you_you_successfully_participated">Vielen Dank, Sie haben erfolgreich an der Regatta teilgenommen.\n\nIhr SAP Sailing Team</string>
 
 </resources>

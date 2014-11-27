@@ -32,6 +32,7 @@ public class AnalyticsDatabase extends SQLiteOpenHelper {
         String EVENTS_JOIN_LEADERBOARDS_JOIN_COMPETITORS = Tables.LEADERBOARDS +
         " INNER JOIN " + Tables.EVENTS + " ON (" + Tables.LEADERBOARDS + "." + BaseColumns._ID + " = " + Tables.EVENTS + ".leaderboard_id ) " +
         " INNER JOIN " + Tables.COMPETITORS + " ON (" + Tables.LEADERBOARDS + "."+ BaseColumns._ID + " = " + Tables.COMPETITORS + ".leaderboard_id ) ";
+        String GPS_FIXES_JOIN_EVENTS = Tables.EVENTS + " INNER JOIN " + Tables.SENSOR_GPS;
     }
     
     public AnalyticsDatabase(Context context) {

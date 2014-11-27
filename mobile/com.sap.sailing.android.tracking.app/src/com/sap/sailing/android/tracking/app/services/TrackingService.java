@@ -34,6 +34,7 @@ import com.sap.sailing.android.tracking.app.R;
 import com.sap.sailing.android.tracking.app.provider.AnalyticsContract.SensorGps;
 import com.sap.sailing.android.tracking.app.ui.activities.RegattaActivity;
 import com.sap.sailing.android.tracking.app.utils.AppPreferences;
+import com.sap.sailing.android.tracking.app.utils.UniqueDeviceUuid;
 import com.sap.sailing.server.gateway.deserialization.impl.FlatSmartphoneUuidAndGPSFixMovingJsonDeserializer;
 
 public class TrackingService extends Service implements ConnectionCallbacks, OnConnectionFailedListener,
@@ -55,7 +56,9 @@ public class TrackingService extends Service implements ConnectionCallbacks, OnC
     // Unique Identification Number for the Notification.
     // We use it on Notification start, and to cancel it.
     private int NOTIFICATION_ID = R.string.tracker_started;
-
+    
+    private int eventId;
+    
     @Override
     public void onCreate() {
         super.onCreate();
@@ -75,11 +78,19 @@ public class TrackingService extends Service implements ConnectionCallbacks, OnC
     public int onStartCommand(Intent intent, int flags, int startId) {
 
         if (intent != null) {
+			if (BuildConfig.DEBUG) {
+        		ExLog.i(this, TAG, "Starting Tracking Service with eventId: " + eventId);
+        	}
+        		
             if (intent.getAction() != null) {
                 if (intent.getAction().equals(getString(R.string.tracking_service_stop))) {
                     stopTracking();
                 } else {
-                    startTracking();
+                	if (intent.getExtras() != null)
+                	{
+                		eventId = intent.getExtras().getInt(getString(R.string.tracking_service_event_id_parameter));
+                		startTracking();
+                	}
                 }
             } else {
                 stopTracking();
@@ -156,23 +167,6 @@ public class TrackingService extends Service implements ConnectionCallbacks, OnC
     	
     	reportGPSQuality(location.getAccuracy());
     	
-        JSONObject json = new JSONObject();
-        
-        try {
-            json.put(FlatSmartphoneUuidAndGPSFixMovingJsonDeserializer.DEVICE_UUID,
-                    prefs.getDeviceIdentifier());
-            JSONArray fixes = new JSONArray();
-            JSONObject fix = new JSONObject();
-            fix.put(FlatSmartphoneUuidAndGPSFixMovingJsonDeserializer.LAT_DEG, location.getLatitude());
-            fix.put(FlatSmartphoneUuidAndGPSFixMovingJsonDeserializer.LON_DEG, location.getLongitude());
-            fix.put(FlatSmartphoneUuidAndGPSFixMovingJsonDeserializer.TIME_MILLIS, location.getTime());
-            fix.put(FlatSmartphoneUuidAndGPSFixMovingJsonDeserializer.SPEED_M_PER_S, location.getSpeed());
-            fix.put(FlatSmartphoneUuidAndGPSFixMovingJsonDeserializer.BEARING_DEG, location.getBearing());
-            fixes.put(0, fix);
-            json.put(FlatSmartphoneUuidAndGPSFixMovingJsonDeserializer.FIXES, fixes);
-        } catch (JSONException e) {
-            ExLog.e(this, TAG, "Error serializing fix: " + e.getMessage());
-        }
         ContentResolver cr = getContentResolver();
         ContentValues cv = new ContentValues();
         cv.put(SensorGps.GPS_LATITUDE, location.getLatitude());
@@ -180,6 +174,7 @@ public class TrackingService extends Service implements ConnectionCallbacks, OnC
         cv.put(SensorGps.GPS_PROVIDER, location.getProvider());
         cv.put(SensorGps.GPS_SPEED, location.getSpeed());
         cv.put(SensorGps.GPS_TIME, location.getTime());
+        cv.put(SensorGps.GPS_EVENT_FK, eventId);
 
         cr.insert(SensorGps.CONTENT_URI, cv);
         

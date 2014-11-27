@@ -18,10 +18,17 @@ public class AppPreferences {
         this.context = context;
         this.preferences = PreferenceManager.getDefaultSharedPreferences(context);
     }
+    
+    public void setDeviceIdentifier(String deviceId)
+    {
+    	preferences.edit().putString(context.getString(R.string.preference_device_identifier_key), deviceId).commit();
+    }
 
     public String getDeviceIdentifier() {
-        return PrefUtils.getString(context, R.string.preference_device_identifier_key,
+        String DeviceIdentifier = PrefUtils.getString(context, R.string.preference_device_identifier_key,
                 R.string.preference_device_identifier_default);
+        System.out.println("Get DEVice Identifier: " + DeviceIdentifier);
+        return DeviceIdentifier;
     }
 
     public String getServerURL() {

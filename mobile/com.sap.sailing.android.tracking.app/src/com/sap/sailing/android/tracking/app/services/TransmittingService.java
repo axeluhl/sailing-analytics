@@ -13,7 +13,6 @@ import android.content.ContentValues;
 import android.content.Context;
 import android.content.Intent;
 import android.content.IntentFilter;
-import android.content.pm.PackageManager;
 import android.database.Cursor;
 import android.net.ConnectivityManager;
 import android.net.NetworkInfo;
@@ -29,19 +28,23 @@ import com.android.volley.toolbox.JsonObjectRequest;
 import com.sap.sailing.android.shared.logging.ExLog;
 import com.sap.sailing.android.tracking.app.BuildConfig;
 import com.sap.sailing.android.tracking.app.R;
+import com.sap.sailing.android.tracking.app.provider.AnalyticsContract.Event;
+import com.sap.sailing.android.tracking.app.provider.AnalyticsContract.EventGpsFixesJoined;
 import com.sap.sailing.android.tracking.app.provider.AnalyticsContract.SensorGps;
-import com.sap.sailing.android.tracking.app.services.TrackingService.GPSQuality;
-import com.sap.sailing.android.tracking.app.services.TrackingService.GPSQualityListener;
-import com.sap.sailing.android.tracking.app.services.TrackingService.TrackingBinder;
 import com.sap.sailing.android.tracking.app.services.sending.ConnectivityChangedReceiver;
 import com.sap.sailing.android.tracking.app.utils.AppPreferences;
+import com.sap.sailing.android.tracking.app.utils.UniqueDeviceUuid;
 import com.sap.sailing.android.tracking.app.utils.VolleyHelper;
 
 /**
  * Service that handles sending of GPS-fixes (fixes) to the Sailing-API.
  * 
  * It checks, after a certain time-interval has passed, if any fixes are available in the database 
- * and attempts to send them batch-wise.
+ * and attempts to send them batch-wise. 
+ * 
+ * (There are two strategies for sending, depending on whether tracking is running. If it's running,
+ * only fixes for the current event are being sent. If not, it tries to send fixes for previous events, 
+ * as well. Assuming there are older unsent fixes that for some reason have not been sent.) 
  * 
  * It keeps track of when the last successful sending occurred and, if no new data is available 
  * (i.e., if tracking is disabled), ends itself after a certain period. It relies on being restarted 
@@ -270,10 +273,12 @@ public class TransmittingService extends Service {
 		
 		// create JSON
         JSONArray jsonArray = new JSONArray();
+        String host = null;
 		
 		for (GpsFix fix : fixes)
 		{
 			ids.add(String.valueOf(fix.id));
+			host = fix.host;
 			
 			JSONObject json = new JSONObject();
 	        try {
@@ -299,7 +304,7 @@ public class TransmittingService extends Service {
 			
 			try {
 				requestObject.put("fixes", jsonArray);
-				requestObject.put("deviceUuid", prefs.getDeviceIdentifier());
+				requestObject.put("deviceUuid", UniqueDeviceUuid.getUniqueId(this));
 			} catch (JSONException e) {
 				e.printStackTrace();
 			}
@@ -309,13 +314,21 @@ public class TransmittingService extends Service {
 				ExLog.i(this, TAG, "url: " + prefs.getServerURL() + prefs.getServerGpsFixesPostPath());
 			}
 			
-			
 			sendingAttempted = true;
-			VolleyHelper.getInstance(this).addRequest(
-					new JsonObjectRequest(prefs.getServerURL()
-							+ prefs.getServerGpsFixesPostPath(), requestObject,
-							new FixSubmitListener(ids.toArray(idsArr)),
-							new FixSubmitErrorListener()));
+			
+			if (host != null)
+			{
+				VolleyHelper.getInstance(this).addRequest(
+						new JsonObjectRequest(host
+								+ prefs.getServerGpsFixesPostPath(), requestObject,
+								new FixSubmitListener(ids.toArray(idsArr)),
+								new FixSubmitErrorListener()));	
+			}
+			else
+			{
+				ExLog.w(this, TAG, "Warning, can't send fixes, host is null!");
+			}
+			
 		} else {
 			
 			if (serviceCanShutItselfDown())
@@ -410,7 +423,7 @@ public class TransmittingService extends Service {
 		
 		ArrayList<GpsFix> list = new ArrayList<GpsFix>();
 		
-		Cursor cur = getContentResolver().query(SensorGps.CONTENT_URI, null, selectionClause, null, sortAndLimitClause);
+		Cursor cur = getContentResolver().query(EventGpsFixesJoined.CONTENT_URI, null, selectionClause, null, sortAndLimitClause);
 		while (cur.moveToNext()) {
 			GpsFix gpsFix = new GpsFix();
 			
@@ -421,6 +434,7 @@ public class TransmittingService extends Service {
 			gpsFix.speed  = cur.getDouble(cur.getColumnIndex(SensorGps.GPS_SPEED));
 			gpsFix.course  = cur.getDouble(cur.getColumnIndex(SensorGps.GPS_BEARING));
 			gpsFix.synced = cur.getInt(cur.getColumnIndex(SensorGps.GPS_SYNCED));
+			gpsFix.host = cur.getString(cur.getColumnIndex(Event.EVENT_SERVER));
 			
 			list.add(gpsFix);
 			
@@ -468,12 +482,13 @@ public class TransmittingService extends Service {
 		public double speed;
 		public double course;
 		public int synced;
+		public String host;
 
 		@Override
 		public String toString() {
 			return "ID: " + id + ", T: " + timestamp + ", LAT: " + latitude
 					+ ", LON: " + longitude + ", SPD: " + speed + ", CRS: "
-					+ course + ", SYN: " + synced;
+					+ course + ", SYN: " + synced + ", HOST: " + host;
 		}
 	}
 	
