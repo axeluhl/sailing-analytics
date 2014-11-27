@@ -105,7 +105,6 @@ import com.sap.sailing.domain.common.CountryCode;
 import com.sap.sailing.domain.common.DataImportProgress;
 import com.sap.sailing.domain.common.DetailType;
 import com.sap.sailing.domain.common.Distance;
-import com.sap.sailing.domain.common.Duration;
 import com.sap.sailing.domain.common.LeaderboardNameConstants;
 import com.sap.sailing.domain.common.LeaderboardType;
 import com.sap.sailing.domain.common.LegType;
@@ -133,7 +132,6 @@ import com.sap.sailing.domain.common.ScoringSchemeType;
 import com.sap.sailing.domain.common.Speed;
 import com.sap.sailing.domain.common.SpeedWithBearing;
 import com.sap.sailing.domain.common.Tack;
-import com.sap.sailing.domain.common.TimePoint;
 import com.sap.sailing.domain.common.TimeRange;
 import com.sap.sailing.domain.common.WindSource;
 import com.sap.sailing.domain.common.WindSourceType;
@@ -159,8 +157,6 @@ import com.sap.sailing.domain.common.impl.KilometersPerHourSpeedImpl;
 import com.sap.sailing.domain.common.impl.KnotSpeedImpl;
 import com.sap.sailing.domain.common.impl.KnotSpeedWithBearingImpl;
 import com.sap.sailing.domain.common.impl.MeterDistance;
-import com.sap.sailing.domain.common.impl.MillisecondsDurationImpl;
-import com.sap.sailing.domain.common.impl.MillisecondsTimePoint;
 import com.sap.sailing.domain.common.impl.PolarSheetGenerationResponseImpl;
 import com.sap.sailing.domain.common.impl.TimeRangeImpl;
 import com.sap.sailing.domain.common.impl.WindSourceImpl;
@@ -169,6 +165,7 @@ import com.sap.sailing.domain.common.racelog.FlagPole;
 import com.sap.sailing.domain.common.racelog.Flags;
 import com.sap.sailing.domain.common.racelog.RaceLogRaceStatus;
 import com.sap.sailing.domain.common.racelog.RacingProcedureType;
+import com.sap.sailing.domain.common.racelog.tracking.MappableToDevice;
 import com.sap.sailing.domain.common.racelog.tracking.NoCorrespondingServiceRegisteredException;
 import com.sap.sailing.domain.common.racelog.tracking.NotDenotedForRaceLogTrackingException;
 import com.sap.sailing.domain.common.racelog.tracking.NotRevokableException;
@@ -335,7 +332,6 @@ import com.sap.sailing.polars.PolarDataService;
 import com.sap.sailing.resultimport.ResultUrlProvider;
 import com.sap.sailing.resultimport.ResultUrlRegistry;
 import com.sap.sailing.server.RacingEventService;
-import com.sap.sailing.server.RacingEventServiceOperation;
 import com.sap.sailing.server.masterdata.MasterDataImporter;
 import com.sap.sailing.server.operationaltransformation.AddColumnToLeaderboard;
 import com.sap.sailing.server.operationaltransformation.AddColumnToSeries;
@@ -386,10 +382,6 @@ import com.sap.sailing.server.operationaltransformation.UpdateLeaderboardScoreCo
 import com.sap.sailing.server.operationaltransformation.UpdateRaceDelayToLive;
 import com.sap.sailing.server.operationaltransformation.UpdateSeries;
 import com.sap.sailing.server.operationaltransformation.UpdateSpecificRegatta;
-import com.sap.sailing.server.replication.ReplicationFactory;
-import com.sap.sailing.server.replication.ReplicationMasterDescriptor;
-import com.sap.sailing.server.replication.ReplicationService;
-import com.sap.sailing.server.replication.impl.ReplicaDescriptor;
 import com.sap.sailing.simulator.Path;
 import com.sap.sailing.simulator.PolarDiagram;
 import com.sap.sailing.simulator.SailingSimulator;
@@ -401,13 +393,22 @@ import com.sap.sailing.simulator.impl.SimulationParametersImpl;
 import com.sap.sailing.simulator.util.SailingSimulatorConstants;
 import com.sap.sailing.simulator.windfield.WindFieldGenerator;
 import com.sap.sailing.simulator.windfield.impl.WindFieldTrackedRaceImpl;
-import com.sap.sailing.util.BuildVersion;
 import com.sap.sailing.xrr.resultimport.schema.RegattaResults;
+import com.sap.sse.BuildVersion;
+import com.sap.sse.common.Duration;
+import com.sap.sse.common.TimePoint;
 import com.sap.sse.common.Util;
 import com.sap.sse.common.Util.Pair;
 import com.sap.sse.common.Util.Triple;
+import com.sap.sse.common.impl.MillisecondsDurationImpl;
+import com.sap.sse.common.impl.MillisecondsTimePoint;
 import com.sap.sse.common.search.KeywordQuery;
 import com.sap.sse.common.search.Result;
+import com.sap.sse.replication.OperationWithResult;
+import com.sap.sse.replication.ReplicationFactory;
+import com.sap.sse.replication.ReplicationMasterDescriptor;
+import com.sap.sse.replication.ReplicationService;
+import com.sap.sse.replication.impl.ReplicaDescriptor;
 
 /**
  * The server side implementation of the RPC service.
@@ -663,7 +664,8 @@ public class SailingServiceImpl extends ProxiedRemoteServiceServlet implements S
 
     protected ServiceTracker<ReplicationService, ReplicationService> createAndOpenReplicationServiceTracker(
             BundleContext context) {
-        ServiceTracker<ReplicationService, ReplicationService> result = new ServiceTracker<ReplicationService, ReplicationService>(
+        ServiceTracker<ReplicationService, ReplicationService> result =
+                new ServiceTracker<ReplicationService, ReplicationService>(
                 context, ReplicationService.class.getName(), null);
         result.open();
         return result;
@@ -3197,9 +3199,9 @@ public class SailingServiceImpl extends ProxiedRemoteServiceServlet implements S
         ReplicationService service = getReplicationService();
         Set<ReplicaDTO> replicaDTOs = new HashSet<ReplicaDTO>();
         for (ReplicaDescriptor replicaDescriptor : service.getReplicaInfo()) {
-            final Map<Class<? extends RacingEventServiceOperation<?>>, Integer> statistics = service.getStatistics(replicaDescriptor);
+            final Map<Class<? extends OperationWithResult<?, ?>>, Integer> statistics = service.getStatistics(replicaDescriptor);
             Map<String, Integer> replicationCountByOperationClassName = new HashMap<String, Integer>();
-            for (Map.Entry<Class<? extends RacingEventServiceOperation<?>>, Integer> e : statistics.entrySet()) {
+            for (Entry<Class<? extends OperationWithResult<?, ?>>, Integer> e : statistics.entrySet()) {
                 replicationCountByOperationClassName.put(e.getKey().getName(), e.getValue());
             }
             replicaDTOs.add(new ReplicaDTO(replicaDescriptor.getIpAddress().getHostName(), replicaDescriptor
@@ -3208,7 +3210,7 @@ public class SailingServiceImpl extends ProxiedRemoteServiceServlet implements S
                     service.getNumberOfMessagesSent(replicaDescriptor), service.getNumberOfBytesSent(replicaDescriptor), service.getAverageNumberOfBytesPerMessage(replicaDescriptor)));
         }
         ReplicationMasterDTO master;
-        ReplicationMasterDescriptor replicatingFromMaster = service.isReplicatingFromMaster();
+        ReplicationMasterDescriptor replicatingFromMaster = service.getReplicatingFromMaster();
         if (replicatingFromMaster == null) {
             master = null;
         } else {
@@ -4883,7 +4885,7 @@ public class SailingServiceImpl extends ProxiedRemoteServiceServlet implements S
                 null : mapping.getTimeRange().from().asDate();
         Date to = mapping.getTimeRange().to() == null || mapping.getTimeRange().to().asMillis() == Long.MAX_VALUE ?
                 null : mapping.getTimeRange().to().asDate();
-        Serializable item = null;
+        MappableToDevice item = null;
         if (mapping.getMappedTo() instanceof Competitor) {
             item = baseDomainFactory.convertToCompetitorDTO((Competitor) mapping.getMappedTo());
         } else if (mapping.getMappedTo() instanceof Mark) {
@@ -4891,8 +4893,20 @@ public class SailingServiceImpl extends ProxiedRemoteServiceServlet implements S
         } else {
             throw new RuntimeException("Can only handle Competitor or Mark as mapped item type");
         }
+        //Only deal with UUIDs - otherwise we would have to pass Serializable to browser context - which
+        //has a large performance implact for GWT.
+        //As any Serializable subclass is converted to String by the BaseRaceLogEventSerializer, and only UUIDs are
+        //recovered by the BaseRaceLogEventDeserializer, only UUIDs are safe to use anyway.
+        List<UUID> originalRaceLogEventUUIDs = new ArrayList<UUID>();
+        for (Serializable id : mapping.getOriginalRaceLogEventIds()) {
+            if (! (id instanceof UUID)) {
+                logger.log(Level.WARNING, "Got RaceLogEvent with id that was not UUID, but " + id.getClass().getName());
+                throw new TransformationException("Could not send device mapping to browser: can only deal with UUIDs");
+            }
+            originalRaceLogEventUUIDs.add((UUID) id);
+        }
         return new DeviceMappingDTO(new DeviceIdentifierDTO(mapping.getDevice().getIdentifierType(),
-                deviceId), from, to, item, mapping.getOriginalRaceLogEventIds());
+                deviceId), from, to, item, originalRaceLogEventUUIDs);
     }
     
     @Override
@@ -4963,8 +4977,9 @@ public class SailingServiceImpl extends ProxiedRemoteServiceServlet implements S
         TimePoint to = dto.to == null ? null : new MillisecondsTimePoint(dto.to);
         TimeRange timeRange = new TimeRangeImpl(from, to);
         if (dto.mappedTo instanceof MarkDTO) {
-            Mark mark = convertToMark(((MarkDTO) dto.mappedTo), true); 
-            return new DeviceMappingImpl<Mark>(mark, device, timeRange,dto.originalRaceLogEventIds);
+            Mark mark = convertToMark(((MarkDTO) dto.mappedTo), true);
+            //expect UUIDs
+            return new DeviceMappingImpl<Mark>(mark, device, timeRange, dto.originalRaceLogEventIds);
         } else if (dto.mappedTo instanceof CompetitorDTO) {
             Competitor competitor = getService().getCompetitorStore().getExistingCompetitorByIdAsString(
                     ((CompetitorDTO) dto.mappedTo).getIdAsString());
@@ -4990,7 +5005,7 @@ public class SailingServiceImpl extends ProxiedRemoteServiceServlet implements S
     
     @Override
     public void revokeRaceLogEvents(String leaderboardName, String raceColumnName, String fleetName,
-            List<Serializable> eventIds) throws NotRevokableException {
+            List<UUID> eventIds) throws NotRevokableException {
         RaceLog raceLog = getRaceLog(leaderboardName, raceColumnName, fleetName);
         for (Serializable idToRevoke : eventIds) {
             raceLog.lockForRead();

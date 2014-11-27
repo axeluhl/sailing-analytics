@@ -22,6 +22,4 @@ public abstract class AbstractDeviceConfigurationOperation extends AbstractRacin
     public RacingEventServiceOperation<?> transformServerOp(RacingEventServiceOperation<?> clientOp) {
         return null;
     }
-
-
 }

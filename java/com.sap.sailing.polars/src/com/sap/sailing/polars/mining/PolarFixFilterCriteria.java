@@ -2,11 +2,11 @@ package com.sap.sailing.polars.mining;
 
 import com.sap.sailing.domain.base.Competitor;
 import com.sap.sailing.domain.base.Course;
-import com.sap.sailing.domain.common.TimePoint;
 import com.sap.sailing.domain.tracking.GPSFixMoving;
 import com.sap.sailing.domain.tracking.GPSFixTrack;
 import com.sap.sailing.domain.tracking.MarkPassing;
 import com.sap.sailing.domain.tracking.TrackedRace;
+import com.sap.sse.common.TimePoint;
 import com.sap.sse.datamining.components.FilterCriterion;
 
 public class PolarFixFilterCriteria implements FilterCriterion<GPSFixMovingWithPolarContext> {

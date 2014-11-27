@@ -8,7 +8,6 @@ import java.util.Map.Entry;
 import java.util.NavigableSet;
 
 import com.sap.sailing.domain.common.Speed;
-import com.sap.sailing.domain.common.TimePoint;
 import com.sap.sailing.domain.tracking.GPSFix;
 import com.sap.sailing.domain.tracking.GPSFixMoving;
 import com.sap.sailing.domain.tracking.GPSFixTrack;
@@ -16,6 +15,7 @@ import com.sap.sailing.domain.tracking.GPSTrackListener;
 import com.sap.sailing.util.impl.ArrayListNavigableSet;
 import com.sap.sailing.util.impl.LockUtil;
 import com.sap.sailing.util.impl.NamedReentrantReadWriteLock;
+import com.sap.sse.common.TimePoint;
 import com.sap.sse.common.Util;
 import com.sap.sse.common.Util.Pair;
 
@@ -23,7 +23,7 @@ import com.sap.sse.common.Util.Pair;
  * Re-calculating the maximum speed over a {@link GPSFixTrack} is time consuming. When the track grows the way it
  * usually grows (extending at the end), caching can help to reduce the computational effort. The API for computing the
  * maximum speed (
- * {@link GPSFixTrack#getMaximumSpeedOverGround(com.sap.sailing.domain.common.TimePoint, com.sap.sailing.domain.common.TimePoint)}
+ * {@link GPSFixTrack#getMaximumSpeedOverGround(com.sap.sse.common.TimePoint, com.sap.sse.common.TimePoint)}
  * ) allows clients to specify an interval for which the top speed is to be computed. Therefore, this cache offers a
  * similar API which supports interval-based queries.
  * <p>

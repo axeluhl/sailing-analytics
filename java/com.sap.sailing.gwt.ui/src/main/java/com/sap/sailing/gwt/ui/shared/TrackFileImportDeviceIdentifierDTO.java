@@ -5,7 +5,6 @@ import java.util.Date;
 import com.sap.sailing.domain.trackfiles.TrackFileImportDeviceIdentifier;
 
 public class TrackFileImportDeviceIdentifierDTO extends DeviceIdentifierDTO {
-    private static final long serialVersionUID = 5409142940941055516L;
     public String uuidAsString;
     public String fileName;
     public String trackName;

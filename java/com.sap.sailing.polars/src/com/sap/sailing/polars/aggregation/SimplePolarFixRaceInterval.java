@@ -5,8 +5,8 @@ import java.util.Map;
 import java.util.Set;
 
 import com.sap.sailing.domain.base.Competitor;
-import com.sap.sailing.domain.common.TimePoint;
 import com.sap.sailing.domain.tracking.TrackedRace;
+import com.sap.sse.common.TimePoint;
 import com.sap.sse.common.Util.Pair;
 
 public class SimplePolarFixRaceInterval implements PolarFixRaceInterval {

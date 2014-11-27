@@ -13,7 +13,8 @@ Require-Bundle: com.sap.sailing.domain.common;bundle-version="1.0.0",
  org.apache.httpcomponents.httpclient;bundle-version="4.2.6",
  org.json.simple;bundle-version="1.1.0",
  com.sap.sailing.polars;bundle-version="1.0.0"
-Import-Package: org.osgi.framework;version="1.7.0"
+Bundle-ActivationPolicy: lazy
+Import-Package: org.osgi.framework;version="1.6.0"
 Bundle-ClassPath: .,
  lib/ssj.jar
 Export-Package: com.sap.sailing.simulator,

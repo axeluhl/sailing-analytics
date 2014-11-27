@@ -5,7 +5,6 @@ import java.util.Collection;
 import java.util.Collections;
 
 import com.sap.sailing.domain.base.configuration.procedures.RRS26Configuration;
-import com.sap.sailing.domain.common.TimePoint;
 import com.sap.sailing.domain.common.racelog.FlagPole;
 import com.sap.sailing.domain.common.racelog.Flags;
 import com.sap.sailing.domain.common.racelog.RacingProcedureType;
@@ -26,6 +25,7 @@ import com.sap.sailing.domain.racelog.state.racingprocedure.impl.NoMorePrerequis
 import com.sap.sailing.domain.racelog.state.racingprocedure.impl.RacingProcedureChangedListeners;
 import com.sap.sailing.domain.racelog.state.racingprocedure.rrs26.RRS26ChangedListener;
 import com.sap.sailing.domain.racelog.state.racingprocedure.rrs26.RRS26RacingProcedure;
+import com.sap.sse.common.TimePoint;
 
 public class RRS26RacingProcedureImpl extends BaseRacingProcedure implements RRS26RacingProcedure {
 

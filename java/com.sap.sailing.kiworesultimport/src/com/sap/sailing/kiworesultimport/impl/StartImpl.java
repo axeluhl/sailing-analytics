@@ -7,9 +7,9 @@ import java.text.SimpleDateFormat;
 import org.w3c.dom.Element;
 import org.w3c.dom.Node;
 
-import com.sap.sailing.domain.common.TimePoint;
-import com.sap.sailing.domain.common.impl.MillisecondsTimePoint;
 import com.sap.sailing.kiworesultimport.Start;
+import com.sap.sse.common.TimePoint;
+import com.sap.sse.common.impl.MillisecondsTimePoint;
 
 public class StartImpl extends AbstractNodeWrapper implements Start {
     private static final DateFormat df = new SimpleDateFormat("yyyy-MM-ddX");

@@ -19,9 +19,9 @@ import java.util.regex.Pattern;
 import com.sap.sailing.domain.common.Base64Utils;
 import com.sap.sailing.domain.common.RegattaScoreCorrections;
 import com.sap.sailing.domain.common.ScoreCorrectionProvider;
-import com.sap.sailing.domain.common.TimePoint;
-import com.sap.sailing.domain.common.impl.MillisecondsTimePoint;
+import com.sap.sse.common.TimePoint;
 import com.sap.sse.common.Util;
+import com.sap.sse.common.impl.MillisecondsTimePoint;
 
 public class ScoreCorrectionProviderImpl implements ScoreCorrectionProvider {
     private static final long serialVersionUID = -4870646572106575667L;

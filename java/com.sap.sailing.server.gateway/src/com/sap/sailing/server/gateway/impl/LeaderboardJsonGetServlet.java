@@ -27,8 +27,6 @@ import com.sap.sailing.domain.base.RaceColumn;
 import com.sap.sailing.domain.base.Waypoint;
 import com.sap.sailing.domain.common.MaxPointsReason;
 import com.sap.sailing.domain.common.NoWindException;
-import com.sap.sailing.domain.common.TimePoint;
-import com.sap.sailing.domain.common.impl.MillisecondsTimePoint;
 import com.sap.sailing.domain.leaderboard.Leaderboard;
 import com.sap.sailing.domain.leaderboard.LeaderboardCacheManager;
 import com.sap.sailing.domain.leaderboard.SettableScoreCorrection;
@@ -41,7 +39,9 @@ import com.sap.sailing.server.gateway.ParseHttpParameterException;
 import com.sap.sailing.util.SmartFutureCache;
 import com.sap.sailing.util.SmartFutureCache.CacheUpdater;
 import com.sap.sailing.util.SmartFutureCache.UpdateInterval;
+import com.sap.sse.common.TimePoint;
 import com.sap.sse.common.Util;
+import com.sap.sse.common.impl.MillisecondsTimePoint;
 
 /**
  * Exports a leaderboard to the JSON format. Uses a {@link SmartFutureCache}.

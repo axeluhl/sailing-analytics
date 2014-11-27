@@ -13,8 +13,8 @@ import org.json.simple.parser.JSONParser;
 import org.json.simple.parser.ParseException;
 
 import com.sap.sailing.domain.common.CompetitorGenderType;
-import com.sap.sailing.util.DateParser;
-import com.sap.sailing.util.InvalidDateException;
+import com.sap.sse.InvalidDateException;
+import com.sap.sse.util.DateParser;
 
 public class Manage2SailEventResultsParserImpl implements Manage2SailEventResultsParser {
 

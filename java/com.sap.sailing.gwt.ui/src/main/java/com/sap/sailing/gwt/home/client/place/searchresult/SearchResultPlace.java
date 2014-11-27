@@ -2,6 +2,7 @@ package com.sap.sailing.gwt.home.client.place.searchresult;
 
 import com.google.gwt.place.shared.Place;
 import com.google.gwt.place.shared.PlaceTokenizer;
+import com.sap.sailing.gwt.common.client.i18n.TextMessages;
 
 public class SearchResultPlace extends Place {
     private final String searchText;
@@ -11,6 +12,10 @@ public class SearchResultPlace extends Place {
         this.searchText = searchText;
     }
 
+    public String getTitle() {
+        return TextMessages.INSTANCE.sapSailing() + " - " + TextMessages.INSTANCE.search();
+    }
+    
     public String getSearchText() {
         return searchText;
     }

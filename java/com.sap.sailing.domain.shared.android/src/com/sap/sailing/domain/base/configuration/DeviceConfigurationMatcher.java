@@ -2,9 +2,10 @@ package com.sap.sailing.domain.base.configuration;
 
 import java.io.Serializable;
 
-import com.sap.sailing.domain.base.IsManagedBySharedDomainFactory;
+import com.sap.sailing.domain.base.SharedDomainFactory;
 import com.sap.sailing.domain.base.configuration.impl.DeviceConfigurationMapImpl;
 import com.sap.sailing.domain.common.configuration.DeviceConfigurationMatcherType;
+import com.sap.sse.common.IsManagedByCache;
 
 /**
  * <p>
@@ -15,7 +16,7 @@ import com.sap.sailing.domain.common.configuration.DeviceConfigurationMatcherTyp
  * <p>The rank (see {@link DeviceConfigurationMatcher#getMatchingRank()}) is used as a priority when multiple matchers
  *  are matching a {@link DeviceConfigurationIdentifier} (see also {@link DeviceConfigurationMapImpl}) (lower wins).</p> 
  */
-public interface DeviceConfigurationMatcher extends IsManagedBySharedDomainFactory, Serializable {
+public interface DeviceConfigurationMatcher extends IsManagedByCache<SharedDomainFactory>, Serializable {
 
     /**
      * Returns the kind of matching used by this matcher.

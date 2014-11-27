@@ -3,8 +3,8 @@ package com.sap.sailing.resultimport.impl;
 import java.io.InputStream;
 
 import com.sap.sailing.domain.common.CompetitorGenderType;
-import com.sap.sailing.domain.common.TimePoint;
 import com.sap.sailing.resultimport.ResultDocumentDescriptor;
+import com.sap.sse.common.TimePoint;
 
 public class ResultDocumentDescriptorImpl implements ResultDocumentDescriptor {
     private InputStream inputStream;

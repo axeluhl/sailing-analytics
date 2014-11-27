@@ -22,11 +22,13 @@ Require-Bundle: com.sap.sailing.domain,
  com.sap.sailing.domain.persistence,
  com.sap.sailing.domain.common,
  com.sap.sailing.udpconnector,
- com.sap.sailing.operationaltransformation,
  com.sap.sailing.domain.shared.android,
  com.sap.sailing.server.gateway.serialization,
  com.sap.sailing.polars,
- com.sap.sse.common
+ com.sap.sse.common,
+ com.sap.sse.operationaltransformation,
+ com.sap.sse.replication,
+ com.sap.sse
 Bundle-ClassPath: .
 Export-Package: com.sap.sailing.server,
  com.sap.sailing.server.impl;

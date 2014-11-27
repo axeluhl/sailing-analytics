@@ -12,11 +12,11 @@ import java.util.Map;
 import org.junit.Test;
 
 import com.sap.sailing.domain.base.Competitor;
-import com.sap.sailing.domain.common.TimePoint;
-import com.sap.sailing.domain.common.impl.MillisecondsTimePoint;
 import com.sap.sailing.domain.tracking.TrackedRace;
 import com.sap.sailing.polars.caching.PolarFixCacheRaceInterval;
+import com.sap.sse.common.TimePoint;
 import com.sap.sse.common.Util.Pair;
+import com.sap.sse.common.impl.MillisecondsTimePoint;
 
 public class PolarFixCacheRaceIntervalTest {
 	

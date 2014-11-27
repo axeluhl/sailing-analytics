@@ -26,4 +26,9 @@ public class RaceLogStartTimeEventWithTransformationSupport extends RaceLogEvent
             RaceLogStartTimeEventWithTransformationSupport raceLogStartTimeServerEventWithTransformationSupport) {
         return null;
     }
+
+    @Override
+    public boolean requiresSynchronousExecution() {
+        return true;
+    }
 }

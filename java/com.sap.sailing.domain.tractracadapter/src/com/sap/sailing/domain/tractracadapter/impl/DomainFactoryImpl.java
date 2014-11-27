@@ -45,10 +45,8 @@ import com.sap.sailing.domain.base.impl.TeamImpl;
 import com.sap.sailing.domain.common.PassingInstruction;
 import com.sap.sailing.domain.common.Position;
 import com.sap.sailing.domain.common.ScoringSchemeType;
-import com.sap.sailing.domain.common.TimePoint;
 import com.sap.sailing.domain.common.impl.DegreeBearingImpl;
 import com.sap.sailing.domain.common.impl.DegreePosition;
-import com.sap.sailing.domain.common.impl.MillisecondsTimePoint;
 import com.sap.sailing.domain.markpassingcalculation.MarkPassingCalculator;
 import com.sap.sailing.domain.racelog.RaceLogStore;
 import com.sap.sailing.domain.racelog.tracking.EmptyGPSFixStore;
@@ -76,8 +74,10 @@ import com.sap.sailing.domain.tractracadapter.TracTracControlPoint;
 import com.sap.sailing.domain.tractracadapter.TracTracRaceTracker;
 import com.sap.sailing.util.WeakIdentityHashMap;
 import com.tractrac.model.lib.api.data.IPosition;
+import com.sap.sse.common.TimePoint;
 import com.sap.sse.common.Util;
 import com.sap.sse.common.Util.Pair;
+import com.sap.sse.common.impl.MillisecondsTimePoint;
 import com.tractrac.model.lib.api.event.CreateModelException;
 import com.tractrac.model.lib.api.event.ICompetitor;
 import com.tractrac.model.lib.api.event.ICompetitorClass;
@@ -232,7 +232,6 @@ public class DomainFactoryImpl implements DomainFactory {
 
     @Override
     public Competitor getOrCreateCompetitor(ICompetitor competitor) {
-        // TODO see bug 596; consider allowing for a new competitor (check for use of == throughout the code) or update existing one
         final UUID competitorId = competitor.getId();
         final String competitorClassName = competitor.getCompetitorClass()==null?null:competitor.getCompetitorClass().getName();
         final String nationalityAsString = competitor.getNationality();

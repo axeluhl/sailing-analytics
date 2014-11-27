@@ -1,7 +1,7 @@
 package com.sap.sailing.domain.racelog.analyzing.impl;
 
-import com.sap.sailing.domain.common.TimePoint;
 import com.sap.sailing.domain.racelog.RaceLog;
+import com.sap.sse.common.TimePoint;
 
 public class IsInFinishingPhaseAnalyzer extends RaceLogAnalyzer<Boolean> {
 

@@ -1,0 +1,39 @@
+<!DOCTYPE ui:UiBinder SYSTEM "http://dl.google.com/gwt/DTD/xhtml.ent">
+<ui:UiBinder xmlns:ui="urn:ui:com.google.gwt.uibinder" 
+	xmlns:g="urn:import:com.google.gwt.user.client.ui"
+	xmlns:s="urn:import:com.sap.sse.gwt.client.controls">
+    <ui:with field="i18n" type="com.sap.sse.security.ui.client.i18n.StringMessages"/>
+    <ui:with field="icon_res" type="com.sap.sse.security.ui.client.IconResources" />
+    <ui:with field="local_res" type="com.sap.sse.security.ui.registration.RegisterViewResources" />
+	<g:HTMLPanel styleName="{local_res.css.registrationform}">
+	    <div class="{local_res.css.registrationform_header}">
+			<img src="{icon_res.sapLogo.getSafeUri}" />
+			<g:Label styleName="{local_res.css.registrationform_header_appname}" ui:field="appNameLabel" />
+	    </div>
+	    <div class="{local_res.css.registrationform_content}">
+		    <div><ui:text from="{i18n.generalWelcome}" /></div>
+		    <div><g:Label styleName="{local_res.css.errormessage}" ui:field="errorMessageLabel" /></div>
+		    <table>
+		    	<tr>
+		    		<td><ui:text from="{i18n.username}" /></td>
+		    		<td><s:TextBoxWithWatermark ui:field="usernameTextBox" styleName="{local_res.css.glowing_border}" /></td>
+		    	</tr>
+		    	<tr>
+		    		<td><ui:text from="{i18n.email}" /></td>
+		    		<td><s:TextBoxWithWatermark ui:field="emailTextBox" styleName="{local_res.css.glowing_border}" /></td>
+		    	</tr>
+		    	<tr>
+		    		<td><ui:text from="{i18n.password}" /></td>
+		    		<td><s:PasswordTextBoxWithWatermark ui:field="passwordTextBox" styleName="{local_res.css.glowing_border}" /></td>
+		    	</tr>
+		    	<tr>
+		    		<td><ui:text from="{i18n.passwordRepeat}" /></td>
+		    		<td><s:PasswordTextBoxWithWatermark ui:field="password2TextBox" styleName="{local_res.css.glowing_border}" /></td>
+		    	</tr>
+		    </table>
+			<div>
+			    <g:Button ui:field="signUpButton" text="{i18n.signUp}" styleName="{local_res.css.button}" />
+			</div>
+		</div>
+	</g:HTMLPanel>     
+</ui:UiBinder>
