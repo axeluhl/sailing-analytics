@@ -9,11 +9,14 @@ import java.util.List;
 import java.util.UUID;
 
 import com.google.gwt.core.client.GWT;
+import com.google.gwt.dom.client.Style.Unit;
 import com.google.gwt.event.logical.shared.ValueChangeEvent;
 import com.google.gwt.event.logical.shared.ValueChangeHandler;
 import com.google.gwt.user.client.ui.CheckBox;
 import com.google.gwt.user.client.ui.Grid;
 import com.google.gwt.user.client.ui.Label;
+import com.google.gwt.user.client.ui.ScrollPanel;
+import com.google.gwt.user.client.ui.TabLayoutPanel;
 import com.google.gwt.user.client.ui.TextArea;
 import com.google.gwt.user.client.ui.TextBox;
 import com.google.gwt.user.client.ui.VerticalPanel;
@@ -25,6 +28,7 @@ import com.sap.sailing.gwt.ui.shared.CourseAreaDTO;
 import com.sap.sailing.gwt.ui.shared.EventDTO;
 import com.sap.sailing.gwt.ui.shared.LeaderboardGroupDTO;
 import com.sap.sailing.gwt.ui.shared.VenueDTO;
+import com.sap.sse.gwt.client.controls.listedit.StringConstantsListEditorComposite;
 import com.sap.sse.gwt.client.controls.listedit.StringListInlineEditorComposite;
 
 public abstract class EventDialog extends DataEntryDialogWithBootstrap<EventDTO> {
@@ -43,13 +47,9 @@ public abstract class EventDialog extends DataEntryDialogWithBootstrap<EventDTO>
     protected StringListInlineEditorComposite imageURLList;
     protected StringListInlineEditorComposite videoURLList;
     protected StringListInlineEditorComposite sponsorImageURLList;
+    protected StringConstantsListEditorComposite leaderboardGroupList;
+    protected List<LeaderboardGroupDTO> availableLeaderboardGroups;
     
-    /**
-     * Allows subclasses to "park" a set of associated leaderboard groups for re-attachment to the new {@link EventDTO} produced
-     * by {@link #getResult()}.
-     */
-    private final Iterable<LeaderboardGroupDTO> leaderboardGroups;
-
     protected static class EventParameterValidator implements Validator<EventDTO> {
 
         private StringMessages stringMessages;
@@ -113,21 +113,23 @@ public abstract class EventDialog extends DataEntryDialogWithBootstrap<EventDTO>
     }
 
     /**
-     * @param leaderboardGroups even though not editable in this dialog, this parameter gives an editing subclass a chance to "park" the leaderboard group
+     * @param leaderboardGroupsOfEvent even though not editable in this dialog, this parameter gives an editing subclass a chance to "park" the leaderboard group
      * assignments for re-association with the new {@link EventDTO} created by the {@link #getResult} method.
      */
-    public EventDialog(EventParameterValidator validator, StringMessages stringMessages, Iterable<LeaderboardGroupDTO> leaderboardGroups,
-            DialogCallback<EventDTO> callback) {
+    public EventDialog(EventParameterValidator validator, StringMessages stringMessages, List<LeaderboardGroupDTO> availableLeaderboardGroups,
+            Iterable<LeaderboardGroupDTO> leaderboardGroupsOfEvent, DialogCallback<EventDTO> callback) {
         super(stringMessages.event(), null, stringMessages.ok(), stringMessages.cancel(), validator,
                 callback);
-        this.leaderboardGroups = leaderboardGroups;
         this.stringMessages = stringMessages;
+        this.availableLeaderboardGroups = availableLeaderboardGroups;
+        getDialogBox().setWidth("750px");
         final ValueChangeHandler<Iterable<String>> valueChangeHandler = new ValueChangeHandler<Iterable<String>>() {
             @Override
             public void onValueChange(ValueChangeEvent<Iterable<String>> event) {
                 validate();
             }
         };
+
         courseAreaNameList = new StringListInlineEditorComposite(Collections.<String> emptyList(),
                 new StringListInlineEditorComposite.ExpandedUi(stringMessages, resources.removeIcon(), /* suggestValues */
                         SuggestedCourseAreaNames.suggestedCourseAreaNames, stringMessages.enterCourseAreaName(), 50));
@@ -147,13 +149,24 @@ public abstract class EventDialog extends DataEntryDialogWithBootstrap<EventDTO>
                 new StringListInlineEditorComposite.ExpandedUi(stringMessages, resources.removeIcon(),
                 /* suggestValues */ imageSuggestionURLs, stringMessages.enterSponsorImageURL(), 80));
         sponsorImageURLList.addValueChangeHandler(valueChangeHandler);
+        List<String> leaderboardGroupNames = new ArrayList<>();
+        for(LeaderboardGroupDTO leaderboardGroupDTO: availableLeaderboardGroups) {
+            leaderboardGroupNames.add(leaderboardGroupDTO.getName());
+        }
+        leaderboardGroupList = new StringConstantsListEditorComposite(Collections.<String> emptyList(),
+                new StringConstantsListEditorComposite.ExpandedUi(stringMessages, resources.removeIcon(),
+                        leaderboardGroupNames, "Select a leaderboard group..."));
+        leaderboardGroupList.addValueChangeHandler(valueChangeHandler);
     }
 
     @Override
     protected EventDTO getResult() {
         EventDTO result = new EventDTO();
-        for (LeaderboardGroupDTO lg : leaderboardGroups) {
-            result.addLeaderboardGroup(lg);
+        List<String> leaderboardGroupNames = leaderboardGroupList.getValue();
+        for(LeaderboardGroupDTO lg: availableLeaderboardGroups) {
+            if(leaderboardGroupNames.contains(lg.getName())) {
+                result.addLeaderboardGroup(lg);
+            }                
         }
         result.setName(nameEntryField.getText());
         result.setDescription(descriptionEntryField.getText());
@@ -186,6 +199,7 @@ public abstract class EventDialog extends DataEntryDialogWithBootstrap<EventDTO>
     @Override
     protected Widget getAdditionalWidget() {
         final VerticalPanel panel = new VerticalPanel();
+        panel.setWidth("100%");
         Widget additionalWidget = super.getAdditionalWidget();
         if (additionalWidget != null) {
             panel.add(additionalWidget);
@@ -211,14 +225,16 @@ public abstract class EventDialog extends DataEntryDialogWithBootstrap<EventDTO>
         formGrid.setWidget(7, 0, new Label(stringMessages.eventLogoImageURL() + ":"));
         formGrid.setWidget(7, 1, logoImageURLEntryField);
 
-        panel.add(createHeadlineLabel(stringMessages.courseAreas()));
-        panel.add(courseAreaNameList);
-        panel.add(createHeadlineLabel(stringMessages.imageURLs()));
-        panel.add(imageURLList);
-        panel.add(createHeadlineLabel(stringMessages.videoURLs()));
-        panel.add(videoURLList);
-        panel.add(createHeadlineLabel(stringMessages.sponsorImageURLs()));
-        panel.add(sponsorImageURLList);
+        TabLayoutPanel tabPanel =  new TabLayoutPanel(30, Unit.PX);
+        tabPanel.setHeight("250px");
+        panel.add(tabPanel);
+        tabPanel.add(new ScrollPanel(leaderboardGroupList), stringMessages.leaderboardGroups());
+        tabPanel.add(new ScrollPanel(courseAreaNameList), stringMessages.courseAreas());
+        tabPanel.add(new ScrollPanel(imageURLList), stringMessages.imageURLs());
+        tabPanel.add(new ScrollPanel(videoURLList), stringMessages.videoURLs());
+        tabPanel.add(new ScrollPanel(sponsorImageURLList), stringMessages.sponsorImageURLs());
+
+//        tabPanel.add(new ScrollPanel(leaderboardGroupSelectorComposite), stringMessages.leaderboardGroups());
         return panel;
     }
 

@@ -5,6 +5,7 @@ import java.util.List;
 
 import com.google.gwt.dom.client.Document;
 import com.google.gwt.dom.client.Element;
+import com.google.gwt.user.client.ui.Anchor;
 import com.google.gwt.user.client.ui.CaptionPanel;
 import com.google.gwt.user.client.ui.Composite;
 import com.google.gwt.user.client.ui.FlowPanel;
@@ -14,61 +15,68 @@ import com.google.gwt.user.client.ui.Label;
 import com.google.gwt.user.client.ui.SimplePanel;
 import com.google.gwt.user.client.ui.VerticalPanel;
 import com.google.gwt.user.client.ui.Widget;
+import com.sap.sailing.gwt.ui.client.SailingServiceAsync;
 import com.sap.sailing.gwt.ui.client.StringMessages;
 import com.sap.sailing.gwt.ui.shared.CourseAreaDTO;
 import com.sap.sailing.gwt.ui.shared.EventDTO;
+import com.sap.sailing.gwt.ui.shared.LeaderboardGroupDTO;
 import com.sap.sse.common.Util;
+import com.sap.sse.gwt.client.ErrorReporter;
 
-public class EventDetailsComposite extends Composite {
+public class EventDetailsComposite extends Composite  {
     private EventDTO event;
     private final StringMessages stringMessages;
+    private final Label eventId;
     private final Label eventName;
     private final Label venueName;
     private final Label description;
     private final Label startDate;
     private final Label endDate;
     private final Label isPublic;
-    private final Label officialWebsiteURL;
-    private final Label logoImageURL;
+    private final Anchor officialWebsiteURL;
+    private final Anchor logoImageURL;
     private final SimpleStringListComposite courseAreaNamesList;
     private final SimpleStringListComposite imageURLList;
     private final SimpleStringListComposite videoURLList;
     private final SimpleStringListComposite sponsorImageURLList;
+    private final SimpleStringListComposite leaderboardGroupList;
     
     private final CaptionPanel mainPanel;
 
-    public EventDetailsComposite(final StringMessages stringMessages) {
+    public EventDetailsComposite(final SailingServiceAsync sailingService, final ErrorReporter errorReporter, final StringMessages stringMessages) {
         super();
         this.stringMessages = stringMessages;
-        
+
         event = null;
         mainPanel = new CaptionPanel(stringMessages.regatta());
         VerticalPanel vPanel = new VerticalPanel();
         mainPanel.add(vPanel);
 
-        int rows = 12;
+        int rows = 14;
         Grid grid = new Grid(rows, 2);
         vPanel.add(grid);
         
         int currentRow = 0;
+        eventId = createLabelAndValueWidget(grid, currentRow++, stringMessages.id(), "IdLabel");
         eventName = createLabelAndValueWidget(grid, currentRow++, stringMessages.eventName(), "NameLabel");
         description = createLabelAndValueWidget(grid, currentRow++, stringMessages.description(), "DescriptionLabel");
         venueName = createLabelAndValueWidget(grid, currentRow++, stringMessages.venue(), "VenueLabel");
         startDate = createLabelAndValueWidget(grid, currentRow++, stringMessages.startDate(), "StartDateLabel");
         endDate = createLabelAndValueWidget(grid, currentRow++, stringMessages.endDate(), "EndDateLabel");
         isPublic = createLabelAndValueWidget(grid, currentRow++, stringMessages.isPublic(), "IsPublicLabel");
-        officialWebsiteURL = createLabelAndValueWidget(grid, currentRow++, stringMessages.eventOfficialWebsiteURL(), "OfficialWebsiteURLLabel");
-        logoImageURL = createLabelAndValueWidget(grid, currentRow++, stringMessages.eventLogoImageURL(), "LogoImageURLLabel");
+        officialWebsiteURL = createAnchorAndValueWidget(grid, currentRow++, stringMessages.eventOfficialWebsiteURL(), "OfficialWebsiteURLLabel");
+        logoImageURL = createAnchorAndValueWidget(grid, currentRow++, stringMessages.eventLogoImageURL(), "LogoImageURLLabel");
         courseAreaNamesList = createLableAndValueListWidget(grid, currentRow++, stringMessages.courseAreas(), "CourseAreaValueList");
         imageURLList = createLableAndValueListWidget(grid, currentRow++, stringMessages.imageURLs(), "ImageURLValueList");
         videoURLList = createLableAndValueListWidget(grid, currentRow++, stringMessages.videoURLs(), "VideoURLValueList");
         sponsorImageURLList = createLableAndValueListWidget(grid, currentRow++, stringMessages.sponsorImageURLs(), "SponsorImageURLValueList");
+        leaderboardGroupList = createLableAndValueListWidget(grid, currentRow++, stringMessages.leaderboardGroups(), "LeaderboardGroupValueList");
         
         for(int i=0; i < rows; i++) {
             grid.getCellFormatter().setVerticalAlignment(i, 0, HasVerticalAlignment.ALIGN_TOP);
             grid.getCellFormatter().setVerticalAlignment(i, 1, HasVerticalAlignment.ALIGN_TOP);
         }
-        
+
         initWidget(mainPanel);
     }
     
@@ -78,6 +86,15 @@ public class EventDetailsComposite extends Composite {
         grid.setWidget(row , 0, new Label(label + ":"));
         grid.setWidget(row , 1, valueLabel);
         return valueLabel;
+    }
+
+    private Anchor createAnchorAndValueWidget(Grid grid, int row, String label, String debugId) {
+        Anchor valueAnchor = new Anchor();
+        valueAnchor.setTarget("_blank");
+        valueAnchor.ensureDebugId(debugId);
+        grid.setWidget(row , 0, new Label(label + ":"));
+        grid.setWidget(row , 1, valueAnchor);
+        return valueAnchor;
     }
 
     private SimpleStringListComposite createLableAndValueListWidget(Grid grid, int row, String label, String debugId) {
@@ -101,13 +118,16 @@ public class EventDetailsComposite extends Composite {
         if (event != null) {
             mainPanel.setCaptionText(stringMessages.event() + " " + event.getName());
             eventName.setText(event.getName());
+            eventId.setText(event.id.toString());
             venueName.setText(event.venue.getName());
             description.setText(event.getDescription());
             startDate.setText(event.startDate != null ? event.startDate.toString() : "");
             endDate.setText(event.endDate != null ? event.endDate.toString() : "");
             isPublic.setText(String.valueOf(event.isPublic));
             officialWebsiteURL.setText(event.getOfficialWebsiteURL());
+            officialWebsiteURL.setHref(event.getOfficialWebsiteURL());
             logoImageURL.setText(event.getLogoImageURL());
+            logoImageURL.setHref(event.getLogoImageURL());
      
             List<String> courseAreaNames = new ArrayList<>();
             if (event.venue.getCourseAreas() != null && event.venue.getCourseAreas().size() > 0) {
@@ -126,9 +146,14 @@ public class EventDetailsComposite extends Composite {
             List<String> sponsorImageURLStringsAsList = new ArrayList<>();
             Util.addAll(event.getSponsorImageURLs(), sponsorImageURLStringsAsList);
             sponsorImageURLList.setValues(sponsorImageURLStringsAsList);
+            List<String> leaderboardGroupNamesAsList = new ArrayList<>();
+            for(LeaderboardGroupDTO leaderboardGroupDTO: event.getLeaderboardGroups()) {
+                leaderboardGroupNamesAsList.add(leaderboardGroupDTO.getName());
+            }
+            leaderboardGroupList.setValues(leaderboardGroupNamesAsList);
         }
     }
-    
+
     private class SimpleStringListComposite extends Composite {
         private final FlowPanel panel;
             
