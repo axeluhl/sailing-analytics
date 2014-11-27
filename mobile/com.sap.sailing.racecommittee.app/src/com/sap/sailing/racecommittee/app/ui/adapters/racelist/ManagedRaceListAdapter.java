@@ -10,6 +10,8 @@ import android.content.Context;
 import android.content.res.Resources;
 import android.graphics.Bitmap;
 import android.graphics.Typeface;
+import android.graphics.drawable.BitmapDrawable;
+import android.graphics.drawable.Drawable;
 import android.text.Spannable;
 import android.text.SpannableString;
 import android.text.TextUtils;
@@ -18,7 +20,6 @@ import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.ArrayAdapter;
-import android.widget.Button;
 import android.widget.ImageView;
 import android.widget.LinearLayout;
 import android.widget.RelativeLayout;
@@ -26,6 +27,7 @@ import android.widget.TextView;
 
 import com.sap.sailing.android.shared.logging.ExLog;
 import com.sap.sailing.android.shared.util.ViewHolder;
+import com.sap.sailing.domain.common.TimePoint;
 import com.sap.sailing.domain.common.impl.MillisecondsTimePoint;
 import com.sap.sailing.domain.common.racelog.FlagPole;
 import com.sap.sailing.domain.racelog.state.RaceState;
@@ -75,6 +77,8 @@ public class ManagedRaceListAdapter extends ArrayAdapter<RaceListDataType> imple
     private ImageView current_flag;
     private TextView group_name;
     private TextView race_name;
+    private TextView flag_timer;
+    private ImageView arrow_direction;
 
     public ManagedRaceListAdapter(Context context, List<RaceListDataType> viewItems,
             JuryFlagClickedListener juryListener) {
@@ -253,6 +257,7 @@ public class ManagedRaceListAdapter extends ArrayAdapter<RaceListDataType> imple
     }
 
     private void findViews(View convertView) {
+        arrow_direction = ViewHolder.get(convertView, R.id.arrow_direction);
         current_flag = ViewHolder.get(convertView, R.id.current_flag);
         group_name = ViewHolder.get(convertView, R.id.group_name);
         panel_left = ViewHolder.get(convertView, R.id.panel_left);
@@ -265,6 +270,7 @@ public class ManagedRaceListAdapter extends ArrayAdapter<RaceListDataType> imple
         race_started = ViewHolder.get(convertView, R.id.race_started);
         race_scheduled = ViewHolder.get(convertView, R.id.race_scheduled);
         race_unscheduled = ViewHolder.get(convertView, R.id.race_unscheduled);
+        flag_timer = ViewHolder.get(convertView, R.id.flag_timer);
     }
 
     private void resetValues(View convertView) {
@@ -304,16 +310,25 @@ public class ManagedRaceListAdapter extends ArrayAdapter<RaceListDataType> imple
         if (state == null || state.getStartTime() == null) {
             return;
         }
-        Resources resources = getContext().getResources();
         FlagPoleState flagPoleState = state.getTypedRacingProcedure().getActiveFlags(state.getStartTime(),
                 MillisecondsTimePoint.now());
-        for (FlagPole flagPole : flagPoleState.getCurrentState()) {
-            if (flagPole.getUpperFlag() != null) {
-                ExLog.i(getContext(), TAG, " Race: " + race.getName() + " upperFlag: " + flagPole.getUpperFlag().name());
-                Bitmap flag = new FlagsBitmapCache(getContext()).getBitmap(flagPole.getUpperFlag(), null);
-                current_flag.setImageBitmap(flag);
-                race_flag.setVisibility(View.VISIBLE);
+        List<FlagPole> flagChanges = flagPoleState.computeUpcomingChanges();
+        if (!flagChanges.isEmpty()) {
+            TimePoint changeAt = flagPoleState.getNextStateValidFrom();
+            FlagPole changePole = FlagPoleState.getMostInterestingFlagPole(flagChanges);
+            
+            Bitmap flag = new FlagsBitmapCache(getContext()).getBitmap(changePole.getUpperFlag(), changePole.getLowerFlag());
+            current_flag.setImageBitmap(flag);
+            String text = getDuration(changeAt.asDate(), Calendar.getInstance().getTime());
+            flag_timer.setText(text.replace("-", ""));
+            Drawable arrow;
+            if (changePole.isDisplayed()) {
+                arrow = getContext().getResources().getDrawable(R.drawable.ic_expand_less_grey600_18dp);
+            } else {
+                arrow = getContext().getResources().getDrawable(R.drawable.ic_expand_more_black_18dp);
             }
+            arrow_direction.setImageBitmap(((BitmapDrawable) arrow).getBitmap());
+            race_flag.setVisibility(View.VISIBLE);
         }
     }
 }
