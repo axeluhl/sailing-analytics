@@ -53,7 +53,12 @@ public class AnalyticsContract {
 	private static final String PATH_EVENT = "events";
 	private static final String PATH_LEADERBOARD = "leaderboards";
 	private static final String PATH_SENSOR_GPS = "sensor_gps";
-
+	
+	public static class EventGpsFixesJoined {
+		public final static Uri CONTENT_URI = BASE_CONTENT_URI.buildUpon()
+				.appendPath("event_gps_fix_joined").build();
+	}
+	
 	public static class EventLeaderboardCompetitorJoined {
 		public final static Uri CONTENT_URI = BASE_CONTENT_URI.buildUpon()
 				.appendPath("event_leaderboard_competitor_joined")

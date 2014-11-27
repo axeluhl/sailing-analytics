@@ -64,5 +64,7 @@ public class StartActivity extends BaseActivity {
         Intent serviceIntent = new Intent(this, TransmittingService.class);
         serviceIntent.setAction(getString(R.string.transmitting_service_start));
         this.startService(serviceIntent);
+        
+        intent.setData(null);
     }
 }

@@ -31,10 +31,15 @@ public class TrackingActivity extends BaseActivity implements GPSQualityListener
 	
 	private final static String TAG = TrackingActivity.class.getName();
 
+	private int eventId;
+	
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-
+        
+        Intent intent = getIntent();
+        eventId = intent.getExtras().getInt(getString(R.string.tracking_activity_event_id_parameter));
+        
         setContentView(R.layout.fragment_container);
         
         Toolbar toolbar = (Toolbar) findViewById(R.id.toolbar);
@@ -51,7 +56,7 @@ public class TrackingActivity extends BaseActivity implements GPSQualityListener
         }
 
         replaceFragment(R.id.content_frame, new TrackingFragment());
-        startTrackingService();
+        startTrackingService(eventId);
     }
     
     @Override
@@ -107,10 +112,11 @@ public class TrackingActivity extends BaseActivity implements GPSQualityListener
 		trackingFragment.setAPIConnectivityStatus(apiConnectivity);
     }
     
-    private void startTrackingService()
+    private void startTrackingService(int eventId)
     {
     	Intent intent = new Intent(this, TrackingService.class);
 		intent.setAction(getString(R.string.tracking_service_start));
+		intent.putExtra(getString(R.string.tracking_service_event_id_parameter), eventId);
 		startService(intent);
     }
     
