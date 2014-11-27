@@ -233,8 +233,6 @@ public abstract class EventDialog extends DataEntryDialogWithBootstrap<EventDTO>
         tabPanel.add(new ScrollPanel(imageURLList), stringMessages.imageURLs());
         tabPanel.add(new ScrollPanel(videoURLList), stringMessages.videoURLs());
         tabPanel.add(new ScrollPanel(sponsorImageURLList), stringMessages.sponsorImageURLs());
-
-//        tabPanel.add(new ScrollPanel(leaderboardGroupSelectorComposite), stringMessages.leaderboardGroups());
         return panel;
     }
 
