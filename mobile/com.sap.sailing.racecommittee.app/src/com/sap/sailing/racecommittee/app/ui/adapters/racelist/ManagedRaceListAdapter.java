@@ -25,7 +25,6 @@ import android.widget.LinearLayout;
 import android.widget.RelativeLayout;
 import android.widget.TextView;
 
-import com.sap.sailing.android.shared.logging.ExLog;
 import com.sap.sailing.android.shared.util.ViewHolder;
 import com.sap.sailing.domain.common.TimePoint;
 import com.sap.sailing.domain.common.impl.MillisecondsTimePoint;
@@ -54,11 +53,8 @@ public class ManagedRaceListAdapter extends ArrayAdapter<RaceListDataType> imple
         }
     }
 
-    private static final String TAG = ManagedRaceListAdapter.class.getName();
-
     private List<RaceListDataType> mAllViewItems;
     private RaceFilter mFilter;
-    private JuryFlagClickedListener mJuryListener;
     private final Object mLockObject = new Object();
 
     private LayoutInflater mInflater;
@@ -86,8 +82,6 @@ public class ManagedRaceListAdapter extends ArrayAdapter<RaceListDataType> imple
 
         mAllViewItems = viewItems;
         mShownViewItems = viewItems;
-        mJuryListener = juryListener;
-
         mInflater = (LayoutInflater) (getContext().getSystemService(Context.LAYOUT_INFLATER_SERVICE));
         mResources = getContext().getResources();
     }
