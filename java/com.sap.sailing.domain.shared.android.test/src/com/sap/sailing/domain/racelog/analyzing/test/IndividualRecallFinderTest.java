@@ -8,19 +8,19 @@ import java.util.Arrays;
 
 import org.junit.Test;
 
-import com.sap.sailing.domain.common.TimePoint;
+import com.sap.sailing.domain.abstractlog.AbstractLogEventAuthor;
+import com.sap.sailing.domain.abstractlog.race.RaceLog;
+import com.sap.sailing.domain.abstractlog.race.RaceLogEvent;
+import com.sap.sailing.domain.abstractlog.race.RaceLogFlagEvent;
+import com.sap.sailing.domain.abstractlog.race.analyzing.impl.IndividualRecallFinder;
 import com.sap.sailing.domain.common.racelog.Flags;
-import com.sap.sailing.domain.racelog.RaceLog;
-import com.sap.sailing.domain.racelog.RaceLogEvent;
-import com.sap.sailing.domain.racelog.RaceLogEventAuthor;
-import com.sap.sailing.domain.racelog.RaceLogFlagEvent;
-import com.sap.sailing.domain.racelog.analyzing.impl.IndividualRecallFinder;
+import com.sap.sse.common.TimePoint;
 
 public class IndividualRecallFinderTest extends PassAwareRaceLogAnalyzerTest<IndividualRecallFinder, TimePoint> {
 
     @Override
     protected TargetPair getTargetEventsAndResultForPassAwareTests(
-            int passId, RaceLogEventAuthor author) {
+            int passId, AbstractLogEventAuthor author) {
         RaceLogFlagEvent event = createEvent(RaceLogFlagEvent.class, 1, passId, author);
         when(event.getUpperFlag()).thenReturn(Flags.XRAY);
         when(event.isDisplayed()).thenReturn(true);

@@ -2,6 +2,11 @@ package com.sap.sailing.domain.racelogtracking;
 
 import java.util.Set;
 
+import com.sap.sailing.domain.abstractlog.race.RaceLog;
+import com.sap.sailing.domain.abstractlog.race.RaceLogCourseDesignChangedEvent;
+import com.sap.sailing.domain.abstractlog.race.tracking.DefineMarkEvent;
+import com.sap.sailing.domain.abstractlog.race.tracking.DenoteForTrackingEvent;
+import com.sap.sailing.domain.abstractlog.race.tracking.StartTrackingEvent;
 import com.sap.sailing.domain.base.Competitor;
 import com.sap.sailing.domain.base.ControlPoint;
 import com.sap.sailing.domain.base.Fleet;
@@ -13,12 +18,7 @@ import com.sap.sailing.domain.common.racelog.tracking.NotDenotedForRaceLogTracki
 import com.sap.sailing.domain.common.racelog.tracking.RaceLogTrackingState;
 import com.sap.sailing.domain.leaderboard.Leaderboard;
 import com.sap.sailing.domain.leaderboard.RegattaLeaderboard;
-import com.sap.sailing.domain.racelog.RaceLog;
-import com.sap.sailing.domain.racelog.RaceLogCourseDesignChangedEvent;
-import com.sap.sailing.domain.racelog.tracking.DefineMarkEvent;
-import com.sap.sailing.domain.racelog.tracking.DenoteForTrackingEvent;
 import com.sap.sailing.domain.racelog.tracking.GPSFixStore;
-import com.sap.sailing.domain.racelog.tracking.StartTrackingEvent;
 import com.sap.sailing.domain.racelogtracking.impl.RaceLogRaceTracker;
 import com.sap.sailing.domain.tracking.GPSFix;
 import com.sap.sailing.domain.tracking.TrackedRace;

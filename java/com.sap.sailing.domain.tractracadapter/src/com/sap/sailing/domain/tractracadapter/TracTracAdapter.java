@@ -12,11 +12,11 @@ import java.util.List;
 import com.sap.sailing.domain.base.RaceDefinition;
 import com.sap.sailing.domain.base.Regatta;
 import com.sap.sailing.domain.common.RegattaIdentifier;
-import com.sap.sailing.domain.common.TimePoint;
 import com.sap.sailing.domain.racelog.RaceLogStore;
 import com.sap.sailing.domain.tracking.RaceHandle;
 import com.sap.sailing.domain.tracking.TrackerManager;
 import com.sap.sailing.domain.tracking.WindStore;
+import com.sap.sse.common.TimePoint;
 import com.sap.sse.common.Util;
 
 public interface TracTracAdapter {

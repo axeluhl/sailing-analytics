@@ -1,9 +1,11 @@
 package com.sap.sailing.domain.racelog.tracking;
 
+import com.sap.sailing.domain.abstractlog.race.RaceLog;
+import com.sap.sailing.domain.abstractlog.race.tracking.DeviceIdentifier;
+import com.sap.sailing.domain.abstractlog.race.tracking.DeviceMapping;
 import com.sap.sailing.domain.base.Competitor;
 import com.sap.sailing.domain.base.Mark;
 import com.sap.sailing.domain.common.TimeRange;
-import com.sap.sailing.domain.racelog.RaceLog;
 import com.sap.sailing.domain.tracking.DynamicGPSFixTrack;
 import com.sap.sailing.domain.tracking.GPSFix;
 import com.sap.sailing.domain.tracking.GPSFixMoving;

@@ -15,10 +15,10 @@ import java.util.logging.Logger;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
-import com.sap.sailing.domain.common.TimePoint;
-import com.sap.sailing.domain.common.impl.MillisecondsTimePoint;
-import com.sap.sailing.util.DateParser;
-import com.sap.sailing.util.InvalidDateException;
+import com.sap.sse.InvalidDateException;
+import com.sap.sse.common.TimePoint;
+import com.sap.sse.common.impl.MillisecondsTimePoint;
+import com.sap.sse.util.DateParser;
 
 public class RaceRecord {
     private static final Logger logger = Logger.getLogger(RaceRecord.class.getName());

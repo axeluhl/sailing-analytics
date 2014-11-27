@@ -14,13 +14,13 @@ import java.util.Iterator;
 import org.junit.Test;
 
 import com.sap.sailing.domain.common.Position;
-import com.sap.sailing.domain.common.TimePoint;
 import com.sap.sailing.domain.deckmanadapter.DeckmanAdapter;
 import com.sap.sailing.domain.deckmanadapter.DeckmanAdapterFactory;
 import com.sap.sailing.domain.deckmanadapter.Record;
 import com.sap.sailing.domain.deckmanadapter.impl.FieldType;
 import com.sap.sailing.domain.tracking.GPSFixMoving;
 import com.sap.sailing.domain.tracking.Wind;
+import com.sap.sse.common.TimePoint;
 
 public class TestDeckmanLogfileParsing {
     private static final DateFormat dateFormat = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss z");

@@ -2,6 +2,7 @@ body, html {
 	width: 100%;
 	height: 100%;
 	display: table;
+	background-color: lightgray;
 }
 
 body {
@@ -14,6 +15,7 @@ body {
 	margin: auto;
 	border: 1px solid gray;
 	line-height: 2.0;
+	background-color: white;
 }
 
 .loginform_header {

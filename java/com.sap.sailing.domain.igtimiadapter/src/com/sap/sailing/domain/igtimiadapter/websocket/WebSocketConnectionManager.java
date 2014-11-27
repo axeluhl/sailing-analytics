@@ -19,15 +19,15 @@ import org.json.simple.JSONObject;
 import org.json.simple.parser.JSONParser;
 import org.json.simple.parser.ParseException;
 
-import com.sap.sailing.domain.common.TimePoint;
-import com.sap.sailing.domain.common.impl.MillisecondsTimePoint;
 import com.sap.sailing.domain.igtimiadapter.Account;
 import com.sap.sailing.domain.igtimiadapter.BulkFixReceiver;
 import com.sap.sailing.domain.igtimiadapter.LiveDataConnection;
 import com.sap.sailing.domain.igtimiadapter.datatypes.Fix;
 import com.sap.sailing.domain.igtimiadapter.impl.FixFactory;
 import com.sap.sailing.domain.igtimiadapter.impl.IgtimiConnectionFactoryImpl;
+import com.sap.sse.common.TimePoint;
 import com.sap.sse.common.Util;
+import com.sap.sse.common.impl.MillisecondsTimePoint;
 
 public class WebSocketConnectionManager extends WebSocketAdapter implements LiveDataConnection {
     private static final Logger logger = Logger.getLogger(WebSocketConnectionManager.class.getName());

@@ -6,13 +6,13 @@ import java.util.Map;
 import org.apache.http.client.ClientProtocolException;
 import org.json.simple.parser.ParseException;
 
-import com.sap.sailing.domain.common.TimePoint;
 import com.sap.sailing.domain.igtimiadapter.datatypes.Fix;
 import com.sap.sailing.domain.igtimiadapter.datatypes.Type;
 import com.sap.sailing.domain.tracking.DynamicTrack;
 import com.sap.sailing.domain.tracking.DynamicTrackedRace;
 import com.sap.sailing.domain.tracking.Track;
 import com.sap.sailing.domain.tracking.TrackedRace;
+import com.sap.sse.common.TimePoint;
 
 /**
  * A connection to the Igtimi system for one {@link Client} and one {@link Account}.

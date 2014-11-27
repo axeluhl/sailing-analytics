@@ -3,9 +3,9 @@ package com.sap.sailing.domain.igtimiadapter.impl;
 import org.json.simple.JSONArray;
 import org.json.simple.JSONObject;
 
-import com.sap.sailing.domain.common.impl.MillisecondsTimePoint;
 import com.sap.sailing.domain.igtimiadapter.IgtimiConnection;
 import com.sap.sailing.domain.igtimiadapter.Resource;
+import com.sap.sse.common.impl.MillisecondsTimePoint;
 
 public class ResourceDeserializer extends HasPermissionsDeserializer {
     public Resource createResourceFromJson(JSONObject resourceJson, IgtimiConnection conn) {

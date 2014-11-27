@@ -11,11 +11,11 @@ import android.widget.Button;
 import android.widget.TimePicker;
 import android.widget.Toast;
 
-import com.sap.sailing.domain.common.TimePoint;
-import com.sap.sailing.domain.common.impl.MillisecondsTimePoint;
+import com.sap.sailing.domain.abstractlog.race.analyzing.impl.StartTimeFinder;
 import com.sap.sailing.domain.common.racelog.RaceLogRaceStatus;
-import com.sap.sailing.domain.racelog.analyzing.impl.StartTimeFinder;
 import com.sap.sailing.racecommittee.app.R;
+import com.sap.sse.common.TimePoint;
+import com.sap.sse.common.impl.MillisecondsTimePoint;
 
 public class RaceFinishingTimeDialog extends RaceDialogFragment {
 

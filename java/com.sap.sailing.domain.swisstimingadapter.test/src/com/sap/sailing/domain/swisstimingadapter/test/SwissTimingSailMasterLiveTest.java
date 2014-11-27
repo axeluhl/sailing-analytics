@@ -20,7 +20,6 @@ import org.junit.Test;
 
 import com.sap.sailing.domain.common.Distance;
 import com.sap.sailing.domain.common.Speed;
-import com.sap.sailing.domain.common.TimePoint;
 import com.sap.sailing.domain.swisstimingadapter.Competitor;
 import com.sap.sailing.domain.swisstimingadapter.Course;
 import com.sap.sailing.domain.swisstimingadapter.Fix;
@@ -31,6 +30,7 @@ import com.sap.sailing.domain.swisstimingadapter.SailMasterConnector;
 import com.sap.sailing.domain.swisstimingadapter.SailMasterListener;
 import com.sap.sailing.domain.swisstimingadapter.StartList;
 import com.sap.sailing.domain.swisstimingadapter.SwissTimingFactory;
+import com.sap.sse.common.TimePoint;
 import com.sap.sse.common.Util;
 
 @Ignore("This test doesn't work as long as the server doesn't play an actual race")

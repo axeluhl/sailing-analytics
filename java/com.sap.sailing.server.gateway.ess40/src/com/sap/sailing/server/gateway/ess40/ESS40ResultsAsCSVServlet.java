@@ -18,11 +18,11 @@ import javax.servlet.http.HttpServletResponse;
 import com.sap.sailing.domain.base.Competitor;
 import com.sap.sailing.domain.base.RaceColumn;
 import com.sap.sailing.domain.common.MaxPointsReason;
-import com.sap.sailing.domain.common.TimePoint;
-import com.sap.sailing.domain.common.impl.MillisecondsTimePoint;
 import com.sap.sailing.domain.leaderboard.Leaderboard;
 import com.sap.sailing.server.RacingEventService;
 import com.sap.sailing.server.gateway.AbstractCSVHttpServlet;
+import com.sap.sse.common.TimePoint;
+import com.sap.sse.common.impl.MillisecondsTimePoint;
 
 /**
  * Exports leaderboards of the ESS40 Series to a specific .csv format which is used by a native iOS app to show them.

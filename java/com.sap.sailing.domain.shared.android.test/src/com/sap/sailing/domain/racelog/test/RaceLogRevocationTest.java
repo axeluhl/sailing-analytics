@@ -1,5 +1,7 @@
 package com.sap.sailing.domain.racelog.test;
 
+import static org.hamcrest.MatcherAssert.assertThat;
+import static org.hamcrest.Matchers.isIn;
 import static org.junit.Assert.assertEquals;
 
 import java.util.UUID;
@@ -7,31 +9,32 @@ import java.util.UUID;
 import org.junit.Before;
 import org.junit.Test;
 
-import com.sap.sailing.domain.common.TimePoint;
-import com.sap.sailing.domain.common.impl.MillisecondsTimePoint;
-import com.sap.sailing.domain.common.racelog.tracking.NotRevokableException;
-import com.sap.sailing.domain.racelog.RaceLog;
-import com.sap.sailing.domain.racelog.RaceLogEvent;
-import com.sap.sailing.domain.racelog.RaceLogEventAuthor;
-import com.sap.sailing.domain.racelog.RaceLogEventFactory;
-import com.sap.sailing.domain.racelog.RevokeEvent;
-import com.sap.sailing.domain.racelog.impl.RaceLogEventAuthorImpl;
-import com.sap.sailing.domain.racelog.impl.RaceLogImpl;
-import com.sap.sailing.domain.racelog.tracking.DenoteForTrackingEvent;
+import com.sap.sailing.domain.abstractlog.AbstractLogEventAuthor;
+import com.sap.sailing.domain.abstractlog.impl.LogEventAuthorImpl;
+import com.sap.sailing.domain.abstractlog.race.RaceLog;
+import com.sap.sailing.domain.abstractlog.race.RaceLogChangedListener;
+import com.sap.sailing.domain.abstractlog.race.RaceLogEvent;
+import com.sap.sailing.domain.abstractlog.race.RaceLogEventFactory;
+import com.sap.sailing.domain.abstractlog.race.impl.RaceLogChangedVisitor;
+import com.sap.sailing.domain.abstractlog.race.impl.RaceLogImpl;
+import com.sap.sailing.domain.abstractlog.race.tracking.DenoteForTrackingEvent;
+import com.sap.sailing.domain.common.abstractlog.NotRevokableException;
+import com.sap.sse.common.TimePoint;
 import com.sap.sse.common.Util;
+import com.sap.sse.common.impl.MillisecondsTimePoint;
 
 public class RaceLogRevocationTest {
     private RaceLog serverRaceLog;
-    private RaceLogEventAuthor serverAuthor = new RaceLogEventAuthorImpl("server", 2);
+    private AbstractLogEventAuthor serverAuthor = new LogEventAuthorImpl("server", 2);
     private RaceLog clientARaceLog;
     private UUID clientAUUID = UUID.randomUUID();
-    private RaceLogEventAuthor clientAAuthor = new RaceLogEventAuthorImpl("clientA", 3);
+    private AbstractLogEventAuthor clientAAuthor = new LogEventAuthorImpl("clientA", 3);
     private RaceLog clientBRaceLog;
     private UUID clientBUUID = UUID.randomUUID();
-    private RaceLogEventAuthor clientBAuthor = new RaceLogEventAuthorImpl("clientB", 1);
+    private AbstractLogEventAuthor clientBAuthor = new LogEventAuthorImpl("clientB", 1);
     private RaceLog clientCRaceLog;
     private UUID clientCUUID = UUID.randomUUID();
-    private RaceLogEventAuthor clientCAuthor = new RaceLogEventAuthorImpl("clientC", 0);
+    private AbstractLogEventAuthor clientCAuthor = new LogEventAuthorImpl("clientC", 0);
     
     @Before
     public void setup() {
@@ -39,6 +42,19 @@ public class RaceLogRevocationTest {
         clientARaceLog = new RaceLogImpl("clientA");
         clientBRaceLog = new RaceLogImpl("clientB");
         clientCRaceLog = new RaceLogImpl("clientC");
+        
+        addSendingListener(clientARaceLog, clientAUUID);
+        addSendingListener(clientBRaceLog, clientBUUID);
+        addSendingListener(clientCRaceLog, clientCUUID); 
+    }
+    
+    private void addSendingListener(RaceLog raceLog, UUID uuid) {
+        raceLog.addListener(new RaceLogChangedVisitor(new RaceLogChangedListener() {
+            @Override
+            public void eventAdded(RaceLogEvent event) {
+                sendClientEvent(raceLog, event, uuid);
+            }
+        }));
     }
     
     private static TimePoint now() {
@@ -51,6 +67,7 @@ public class RaceLogRevocationTest {
         if (clientEvent == null) {
             eventsToAdd = serverRaceLog.getEventsToDeliver(clientUUID);
         } else {
+            clientRaceLog.add(clientEvent);
             eventsToAdd = serverRaceLog.add(clientEvent, clientUUID);
         }
         for (RaceLogEvent eventToAdd : eventsToAdd) {
@@ -98,18 +115,17 @@ public class RaceLogRevocationTest {
         sendClientAEvent(null);
         sendClientBEvent(null);
         sendClientCEvent(null);
-        
+
         //they revoke the event independently
         try {
             clientARaceLog.revokeEvent(clientAAuthor, event);
         } catch (NotRevokableException e) {
-            //expected, because A does not have sufficient priority
+            //expected
         }
-        RevokeEvent revokeEventB = clientBRaceLog.revokeEvent(clientBAuthor, event);
-        RevokeEvent revokeEventC = clientCRaceLog.revokeEvent(clientCAuthor, event);
-        
-        sendClientBEvent(revokeEventB);
-        sendClientCEvent(revokeEventC);
+        clientBRaceLog.revokeEvent(clientBAuthor, event);
+        clientCRaceLog.revokeEvent(clientCAuthor, event);
+        //expected, because A does not have sufficient priority
+        assertThat("event not revoked due to insufficient author priority", event, isIn(clientARaceLog.getUnrevokedEvents()));
         
         //update clients
         sendClientAEvent(null);

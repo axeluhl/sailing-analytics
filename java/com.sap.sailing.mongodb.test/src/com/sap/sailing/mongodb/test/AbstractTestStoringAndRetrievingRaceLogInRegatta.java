@@ -8,6 +8,8 @@ import java.util.List;
 import org.junit.Before;
 
 import com.mongodb.MongoException;
+import com.sap.sailing.domain.abstractlog.AbstractLogEventAuthor;
+import com.sap.sailing.domain.abstractlog.impl.LogEventAuthorImpl;
 import com.sap.sailing.domain.base.BoatClass;
 import com.sap.sailing.domain.base.CourseArea;
 import com.sap.sailing.domain.base.DomainFactory;
@@ -17,15 +19,13 @@ import com.sap.sailing.domain.base.Series;
 import com.sap.sailing.domain.base.impl.RegattaImpl;
 import com.sap.sailing.domain.base.impl.SeriesImpl;
 import com.sap.sailing.domain.common.ScoringSchemeType;
-import com.sap.sailing.domain.common.impl.MillisecondsTimePoint;
 import com.sap.sailing.domain.leaderboard.ScoringScheme;
 import com.sap.sailing.domain.persistence.DomainObjectFactory;
 import com.sap.sailing.domain.persistence.MongoObjectFactory;
 import com.sap.sailing.domain.persistence.MongoRaceLogStoreFactory;
 import com.sap.sailing.domain.persistence.PersistenceFactory;
-import com.sap.sailing.domain.racelog.RaceLogEventAuthor;
 import com.sap.sailing.domain.racelog.RaceLogStore;
-import com.sap.sailing.domain.racelog.impl.RaceLogEventAuthorImpl;
+import com.sap.sse.common.impl.MillisecondsTimePoint;
 
 public abstract class AbstractTestStoringAndRetrievingRaceLogInRegatta extends RaceLogMongoDBTest {
 
@@ -36,7 +36,7 @@ public abstract class AbstractTestStoringAndRetrievingRaceLogInRegatta extends R
     protected MongoObjectFactory mongoObjectFactory = null;
     protected DomainObjectFactory domainObjectFactory = null;
     protected Regatta regatta = null;
-    protected RaceLogEventAuthor author = new RaceLogEventAuthorImpl("Test Author", 1);
+    protected AbstractLogEventAuthor author = new LogEventAuthorImpl("Test Author", 1);
 
     public AbstractTestStoringAndRetrievingRaceLogInRegatta() throws UnknownHostException, MongoException {
         super();

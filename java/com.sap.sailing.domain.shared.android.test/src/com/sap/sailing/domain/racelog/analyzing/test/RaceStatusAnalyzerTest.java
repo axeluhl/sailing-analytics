@@ -12,18 +12,18 @@ import org.junit.Test;
 import org.mockito.invocation.InvocationOnMock;
 import org.mockito.stubbing.Answer;
 
-import com.sap.sailing.domain.common.TimePoint;
-import com.sap.sailing.domain.common.impl.MillisecondsTimePoint;
+import com.sap.sailing.domain.abstractlog.AbstractLogEventAuthor;
+import com.sap.sailing.domain.abstractlog.impl.LogEventAuthorImpl;
+import com.sap.sailing.domain.abstractlog.race.RaceLog;
+import com.sap.sailing.domain.abstractlog.race.RaceLogEvent;
+import com.sap.sailing.domain.abstractlog.race.RaceLogEventVisitor;
+import com.sap.sailing.domain.abstractlog.race.RaceLogRaceStatusEvent;
+import com.sap.sailing.domain.abstractlog.race.RaceLogStartTimeEvent;
+import com.sap.sailing.domain.abstractlog.race.analyzing.impl.RaceStatusAnalyzer;
+import com.sap.sailing.domain.abstractlog.race.state.racingprocedure.RacingProcedure;
 import com.sap.sailing.domain.common.racelog.RaceLogRaceStatus;
-import com.sap.sailing.domain.racelog.RaceLog;
-import com.sap.sailing.domain.racelog.RaceLogEvent;
-import com.sap.sailing.domain.racelog.RaceLogEventAuthor;
-import com.sap.sailing.domain.racelog.RaceLogEventVisitor;
-import com.sap.sailing.domain.racelog.RaceLogRaceStatusEvent;
-import com.sap.sailing.domain.racelog.RaceLogStartTimeEvent;
-import com.sap.sailing.domain.racelog.analyzing.impl.RaceStatusAnalyzer;
-import com.sap.sailing.domain.racelog.impl.RaceLogEventAuthorImpl;
-import com.sap.sailing.domain.racelog.state.racingprocedure.RacingProcedure;
+import com.sap.sse.common.TimePoint;
+import com.sap.sse.common.impl.MillisecondsTimePoint;
 
 public class RaceStatusAnalyzerTest extends PassAwareRaceLogAnalyzerTest<RaceStatusAnalyzer, RaceLogRaceStatus> {
 
@@ -35,7 +35,7 @@ public class RaceStatusAnalyzerTest extends PassAwareRaceLogAnalyzerTest<RaceSta
     }
 
     @Override
-    protected TargetPair getTargetEventsAndResultForPassAwareTests(int passId, RaceLogEventAuthor author) {
+    protected TargetPair getTargetEventsAndResultForPassAwareTests(int passId, AbstractLogEventAuthor author) {
         RaceLogRaceStatusEvent event = createEvent(RaceLogRaceStatusEvent.class, 1, passId, author);
         when(event.getNextStatus()).thenReturn(RaceLogRaceStatus.RUNNING);
         doAnswer(new StatusVisitorAnswer()).when(event).accept(any(RaceLogEventVisitor.class));
@@ -44,7 +44,7 @@ public class RaceStatusAnalyzerTest extends PassAwareRaceLogAnalyzerTest<RaceSta
     
     @Override
     protected TargetPair getBlockingEventsAndResultForPassAwareTests(
-            int passId, RaceLogEventAuthor author) {
+            int passId, AbstractLogEventAuthor author) {
         RaceLogRaceStatusEvent event = createEvent(RaceLogRaceStatusEvent.class, 1, passId, author);
         when(event.getNextStatus()).thenReturn(RaceLogRaceStatus.FINISHING);
         doAnswer(new StatusVisitorAnswer()).when(event).accept(any(RaceLogEventVisitor.class));
@@ -128,8 +128,8 @@ public class RaceStatusAnalyzerTest extends PassAwareRaceLogAnalyzerTest<RaceSta
     }
 
     public void testStartSetByStartVesselAndFinishSetByShoreControl() {
-        RaceLogEventAuthor authorStartVessel = new RaceLogEventAuthorImpl("Race Officer on Finish Vessel", 1);
-        RaceLogEventAuthor authorShoreControl = new RaceLogEventAuthorImpl("Shore Control", 2);
+        AbstractLogEventAuthor authorStartVessel = new LogEventAuthorImpl("Race Officer on Finish Vessel", 1);
+        AbstractLogEventAuthor authorShoreControl = new LogEventAuthorImpl("Shore Control", 2);
         
         RaceLogRaceStatusEvent event1 = createEvent(RaceLogRaceStatusEvent.class, 1, 1 /** passId*/, authorStartVessel);
         when(event1.getNextStatus()).thenReturn(RaceLogRaceStatus.SCHEDULED);

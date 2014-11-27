@@ -3,7 +3,8 @@ package com.sap.sailing.domain.racelog.impl;
 
 import java.util.UUID;
 
-import com.sap.sailing.domain.racelog.RaceLog;
+import com.sap.sailing.domain.abstractlog.race.RaceLog;
+import com.sap.sailing.domain.abstractlog.race.impl.RaceLogImpl;
 import com.sap.sailing.domain.racelog.RaceLogIdentifier;
 import com.sap.sailing.domain.racelog.RaceLogStore;
 

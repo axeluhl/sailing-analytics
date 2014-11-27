@@ -2,12 +2,12 @@ package com.sap.sailing.domain.base.configuration;
 
 import java.io.Serializable;
 
+import com.sap.sailing.domain.abstractlog.race.state.racingprocedure.RacingProcedure;
 import com.sap.sailing.domain.base.configuration.procedures.ESSConfiguration;
 import com.sap.sailing.domain.base.configuration.procedures.GateStartConfiguration;
 import com.sap.sailing.domain.base.configuration.procedures.RRS26Configuration;
 import com.sap.sailing.domain.common.CourseDesignerMode;
 import com.sap.sailing.domain.common.racelog.RacingProcedureType;
-import com.sap.sailing.domain.racelog.state.racingprocedure.RacingProcedure;
 
 /**
  * Interface holding configuration options for a Regatta, including configurations for 

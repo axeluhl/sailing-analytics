@@ -7,6 +7,7 @@ import java.util.NavigableSet;
 import java.util.Set;
 import java.util.TreeSet;
 
+import com.sap.sailing.domain.abstractlog.race.RaceLog;
 import com.sap.sailing.domain.base.BoatClass;
 import com.sap.sailing.domain.base.Competitor;
 import com.sap.sailing.domain.base.CourseArea;
@@ -31,12 +32,10 @@ import com.sap.sailing.domain.common.RegattaIdentifier;
 import com.sap.sailing.domain.common.Speed;
 import com.sap.sailing.domain.common.SpeedWithBearing;
 import com.sap.sailing.domain.common.Tack;
-import com.sap.sailing.domain.common.TimePoint;
 import com.sap.sailing.domain.common.WindSource;
 import com.sap.sailing.domain.common.WindSourceType;
 import com.sap.sailing.domain.common.racelog.Flags;
 import com.sap.sailing.domain.leaderboard.ScoringScheme;
-import com.sap.sailing.domain.racelog.RaceLog;
 import com.sap.sailing.domain.racelog.tracking.GPSFixStore;
 import com.sap.sailing.domain.tracking.CourseDesignChangedListener;
 import com.sap.sailing.domain.tracking.DynamicGPSFixTrack;
@@ -63,6 +62,7 @@ import com.sap.sailing.domain.tracking.WindStore;
 import com.sap.sailing.domain.tracking.WindTrack;
 import com.sap.sailing.domain.tracking.WindWithConfidence;
 import com.sap.sailing.domain.tracking.impl.WindTrackImpl;
+import com.sap.sse.common.TimePoint;
 import com.sap.sse.common.Util;
 
 public class MockedTrackedRace implements DynamicTrackedRace {

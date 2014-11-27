@@ -8,17 +8,17 @@ import static org.mockito.Mockito.when;
 import org.junit.Before;
 import org.junit.Test;
 
+import com.sap.sailing.domain.abstractlog.AbstractLogEventAuthor;
+import com.sap.sailing.domain.abstractlog.race.RaceLogEvent;
+import com.sap.sailing.domain.abstractlog.race.impl.RaceLogEventComparator;
 import com.sap.sailing.domain.base.Timed;
-import com.sap.sailing.domain.common.impl.MillisecondsTimePoint;
-import com.sap.sailing.domain.racelog.RaceLogEvent;
-import com.sap.sailing.domain.racelog.RaceLogEventAuthor;
-import com.sap.sailing.domain.racelog.impl.RaceLogEventComparator;
+import com.sap.sse.common.impl.MillisecondsTimePoint;
 
 public class RaceLogEventComparatorTest {
 
     private RaceLogEvent eventOne;
     private RaceLogEvent eventTwo;
-    private RaceLogEventAuthor author;
+    private AbstractLogEventAuthor author;
     
     private RaceLogEventComparator comparator;
     
@@ -26,15 +26,16 @@ public class RaceLogEventComparatorTest {
     public void setUp() {
         eventOne = mock(RaceLogEvent.class);
         eventTwo = mock(RaceLogEvent.class);
-        author = mock(RaceLogEventAuthor.class);
+        author = mock(AbstractLogEventAuthor.class);
         
-        comparator = RaceLogEventComparator.INSTANCE;
+        comparator = new RaceLogEventComparator();
     }
     
     @Test
     public void testEqualsOnSame() {
-        when(eventOne.getAuthor()).thenReturn(mock(RaceLogEventAuthor.class));
+        when(eventOne.getAuthor()).thenReturn(mock(AbstractLogEventAuthor.class));
         when(eventOne.getCreatedAt()).thenReturn(new MillisecondsTimePoint(1));
+        when(eventOne.getLogicalTimePoint()).thenReturn(new MillisecondsTimePoint(1));
         when(eventOne.getId()).thenReturn("a");
         
         int result = comparator.compare(eventOne, eventOne);
@@ -46,10 +47,12 @@ public class RaceLogEventComparatorTest {
         when(eventOne.getPassId()).thenReturn(0);
         when(eventOne.getAuthor()).thenReturn(author);
         when(eventOne.getCreatedAt()).thenReturn(new MillisecondsTimePoint(0));
+        when(eventOne.getLogicalTimePoint()).thenReturn(new MillisecondsTimePoint(1));
         when(eventOne.getId()).thenReturn("a");
         when(eventTwo.getPassId()).thenReturn(0);
         when(eventTwo.getAuthor()).thenReturn(author);
         when(eventTwo.getCreatedAt()).thenReturn(new MillisecondsTimePoint(0));
+        when(eventTwo.getLogicalTimePoint()).thenReturn(new MillisecondsTimePoint(1));
         when(eventTwo.getId()).thenReturn("a");
         
         int result = comparator.compare(eventOne, eventTwo);
@@ -61,10 +64,12 @@ public class RaceLogEventComparatorTest {
         when(eventOne.getPassId()).thenReturn(0);
         when(eventOne.getAuthor()).thenReturn(author);
         when(eventOne.getCreatedAt()).thenReturn(new MillisecondsTimePoint(0));
+        when(eventOne.getLogicalTimePoint()).thenReturn(new MillisecondsTimePoint(1));
         when(eventOne.getId()).thenReturn("a");
         when(eventTwo.getPassId()).thenReturn(0);
         when(eventTwo.getAuthor()).thenReturn(author);
         when(eventTwo.getCreatedAt()).thenReturn(new MillisecondsTimePoint(0));
+        when(eventTwo.getLogicalTimePoint()).thenReturn(new MillisecondsTimePoint(1));
         when(eventTwo.getId()).thenReturn("b");
         
         int result = comparator.compare(eventOne, eventTwo);
@@ -76,9 +81,11 @@ public class RaceLogEventComparatorTest {
         when(eventOne.getPassId()).thenReturn(0);
         when(eventOne.getAuthor()).thenReturn(author);
         when(eventOne.getCreatedAt()).thenReturn(new MillisecondsTimePoint(1));
+        when(eventOne.getLogicalTimePoint()).thenReturn(new MillisecondsTimePoint(1));
         when(eventTwo.getPassId()).thenReturn(0);
         when(eventTwo.getAuthor()).thenReturn(author);
         when(eventTwo.getCreatedAt()).thenReturn(new MillisecondsTimePoint(2));
+        when(eventTwo.getLogicalTimePoint()).thenReturn(new MillisecondsTimePoint(2));
         
         int result = comparator.compare(eventOne, eventTwo);
         assertTrue(result < 0);
@@ -89,9 +96,11 @@ public class RaceLogEventComparatorTest {
         when(eventOne.getPassId()).thenReturn(0);
         when(eventOne.getAuthor()).thenReturn(author);
         when(eventOne.getCreatedAt()).thenReturn(new MillisecondsTimePoint(2));
+        when(eventOne.getLogicalTimePoint()).thenReturn(new MillisecondsTimePoint(2));
         when(eventTwo.getPassId()).thenReturn(0);
         when(eventTwo.getAuthor()).thenReturn(author);
         when(eventTwo.getCreatedAt()).thenReturn(new MillisecondsTimePoint(1));
+        when(eventTwo.getLogicalTimePoint()).thenReturn(new MillisecondsTimePoint(1));
         
         int result = comparator.compare(eventOne, eventTwo);
         assertTrue(result > 0);
@@ -99,15 +108,19 @@ public class RaceLogEventComparatorTest {
     
     @Test
     public void testSamePassButLowerHigherAuthor() {
-        RaceLogEventAuthor minorAuthor = mock(RaceLogEventAuthor.class);
-        RaceLogEventAuthor majorAuthor = mock(RaceLogEventAuthor.class);
+        AbstractLogEventAuthor minorAuthor = mock(AbstractLogEventAuthor.class);
+        AbstractLogEventAuthor majorAuthor = mock(AbstractLogEventAuthor.class);
         when(minorAuthor.compareTo(majorAuthor)).thenReturn(-1);
         when(majorAuthor.compareTo(minorAuthor)).thenReturn(1);
         
         when(eventOne.getPassId()).thenReturn(0);
         when(eventOne.getAuthor()).thenReturn(minorAuthor);
+        when(eventOne.getCreatedAt()).thenReturn(new MillisecondsTimePoint(1));
+        when(eventOne.getLogicalTimePoint()).thenReturn(new MillisecondsTimePoint(1));
         when(eventTwo.getPassId()).thenReturn(0);
         when(eventTwo.getAuthor()).thenReturn(majorAuthor);
+        when(eventTwo.getCreatedAt()).thenReturn(new MillisecondsTimePoint(1));
+        when(eventTwo.getLogicalTimePoint()).thenReturn(new MillisecondsTimePoint(1));
         
         int result = comparator.compare(eventOne, eventTwo);
         assertTrue(result < 0);
@@ -115,15 +128,19 @@ public class RaceLogEventComparatorTest {
     
     @Test
     public void testSamePassButHigherLowerAuthor() {
-        RaceLogEventAuthor minorAuthor = mock(RaceLogEventAuthor.class);
-        RaceLogEventAuthor majorAuthor = mock(RaceLogEventAuthor.class);
+        AbstractLogEventAuthor minorAuthor = mock(AbstractLogEventAuthor.class);
+        AbstractLogEventAuthor majorAuthor = mock(AbstractLogEventAuthor.class);
         when(minorAuthor.compareTo(majorAuthor)).thenReturn(-1);
         when(majorAuthor.compareTo(minorAuthor)).thenReturn(1);
         
         when(eventOne.getPassId()).thenReturn(0);
         when(eventOne.getAuthor()).thenReturn(majorAuthor);
+        when(eventOne.getCreatedAt()).thenReturn(new MillisecondsTimePoint(1));
+        when(eventOne.getLogicalTimePoint()).thenReturn(new MillisecondsTimePoint(1));
         when(eventTwo.getPassId()).thenReturn(0);
         when(eventTwo.getAuthor()).thenReturn(minorAuthor);
+        when(eventTwo.getCreatedAt()).thenReturn(new MillisecondsTimePoint(1));
+        when(eventTwo.getLogicalTimePoint()).thenReturn(new MillisecondsTimePoint(1));
         
         int result = comparator.compare(eventOne, eventTwo);
         assertTrue(result > 0);

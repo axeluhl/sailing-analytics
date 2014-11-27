@@ -5,7 +5,6 @@ import java.util.List;
 
 import com.google.gwt.core.client.GWT;
 import com.sap.sailing.domain.common.Bounds;
-import com.sap.sailing.domain.common.Duration;
 import com.sap.sailing.domain.common.Position;
 import com.sap.sailing.domain.common.impl.BoundsImpl;
 import com.sap.sailing.domain.common.impl.DegreePosition;
@@ -13,6 +12,7 @@ import com.sap.sailing.gwt.ui.shared.SimulatorWindDTO;
 import com.sap.sailing.gwt.ui.shared.WindFieldDTO;
 import com.sap.sailing.gwt.ui.shared.WindFieldGenParamsDTO;
 import com.sap.sailing.gwt.ui.simulator.StreamletParameters;
+import com.sap.sse.common.Duration;
 
 public class SimulatorField implements VectorField {
     private boolean swarmDebug = false;

@@ -2,7 +2,7 @@ package com.sap.sailing.domain.racelogtracking;
 
 import java.util.UUID;
 
-import com.sap.sailing.domain.racelog.tracking.DeviceIdentifier;
+import com.sap.sailing.domain.abstractlog.race.tracking.DeviceIdentifier;
 
 /**
  * A device identifier used to identify a non-existent, virtual device, which is used only once as an

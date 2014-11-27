@@ -7,29 +7,21 @@ import java.util.Set;
 import java.util.WeakHashMap;
 import java.util.concurrent.ConcurrentHashMap;
 
+import com.sap.sailing.domain.abstractlog.race.RaceLogEvent;
 import com.sap.sailing.domain.base.Competitor;
 import com.sap.sailing.domain.base.CompetitorChangeListener;
 import com.sap.sailing.domain.base.Fleet;
-import com.sap.sailing.domain.base.Mark;
 import com.sap.sailing.domain.base.Nationality;
 import com.sap.sailing.domain.base.RaceColumn;
 import com.sap.sailing.domain.base.RaceColumnListener;
-import com.sap.sailing.domain.base.Waypoint;
 import com.sap.sailing.domain.base.WithNationality;
 import com.sap.sailing.domain.common.Color;
 import com.sap.sailing.domain.common.MaxPointsReason;
-import com.sap.sailing.domain.common.TimePoint;
-import com.sap.sailing.domain.common.WindSource;
 import com.sap.sailing.domain.leaderboard.caching.LeaderboardCache;
-import com.sap.sailing.domain.racelog.RaceLogEvent;
 import com.sap.sailing.domain.racelog.RaceLogIdentifier;
-import com.sap.sailing.domain.tracking.GPSFix;
-import com.sap.sailing.domain.tracking.GPSFixMoving;
-import com.sap.sailing.domain.tracking.MarkPassing;
 import com.sap.sailing.domain.tracking.RaceChangeListener;
 import com.sap.sailing.domain.tracking.TrackedRace;
-import com.sap.sailing.domain.tracking.TrackedRaceStatus;
-import com.sap.sailing.domain.tracking.Wind;
+import com.sap.sailing.domain.tracking.impl.AbstractRaceChangeListener;
 import com.sap.sailing.util.impl.ConcurrentWeakHashMap;
 import com.sap.sailing.util.impl.LockUtil;
 import com.sap.sailing.util.impl.NamedReentrantReadWriteLock;
@@ -50,7 +42,7 @@ public class LeaderboardCacheManager {
     private final ConcurrentWeakHashMap<Leaderboard, ConcurrentHashMap<TrackedRace, Set<CacheInvalidationListener>>> invalidationListenersPerLeaderboard;
     private final WeakHashMap<Leaderboard, RaceColumnListener> raceColumnListeners;
     
-    private class CacheInvalidationListener implements RaceChangeListener {
+    private class CacheInvalidationListener extends AbstractRaceChangeListener {
         private final Leaderboard leaderboard;
         private final TrackedRace trackedRace;
         
@@ -60,76 +52,10 @@ public class LeaderboardCacheManager {
         }
         
         @Override
-        public void competitorPositionChanged(GPSFixMoving fix, Competitor competitor) {
+        protected void defaultAction() {
             removeFromCache(leaderboard);
         }
-
-        @Override
-        public void statusChanged(TrackedRaceStatus newStatus) {
-            removeFromCache(leaderboard);
-        }
-
-        @Override
-        public void markPositionChanged(GPSFix fix, Mark mark, boolean firstInTrack) {
-            removeFromCache(leaderboard);
-        }
-
-        @Override
-        public void markPassingReceived(Competitor competitor, Map<Waypoint, MarkPassing> oldMarkPassings,
-                Iterable<MarkPassing> markPassings) {
-            removeFromCache(leaderboard);
-        }
-
-        @Override
-        public void speedAveragingChanged(long oldMillisecondsOverWhichToAverage, long newMillisecondsOverWhichToAverage) {
-            removeFromCache(leaderboard);
-        }
-
-        @Override
-        public void windDataReceived(Wind wind, WindSource windSource) {
-            removeFromCache(leaderboard);
-        }
-
-        @Override
-        public void windDataRemoved(Wind wind, WindSource windSource) {
-            removeFromCache(leaderboard);
-        }
-
-        @Override
-        public void windAveragingChanged(long oldMillisecondsOverWhichToAverage, long newMillisecondsOverWhichToAverage) {
-            removeFromCache(leaderboard);
-        }
-
-        @Override
-        public void raceTimesChanged(TimePoint startOfTracking, TimePoint endOfTracking, TimePoint startTimeReceived) {
-            removeFromCache(leaderboard);
-        }
-
-        @Override
-        public void startOfRaceChanged(TimePoint oldStartOfRace, TimePoint newStartOfRace) {
-            removeFromCache(leaderboard);
-        }
-
-        @Override
-        public void waypointAdded(int zeroBasedIndex, Waypoint waypointThatGotAdded) {
-            removeFromCache(leaderboard);
-        }
-
-        @Override
-        public void waypointRemoved(int zeroBasedIndex, Waypoint waypointThatGotRemoved) {
-            removeFromCache(leaderboard);
-        }
-
-        @Override
-        public void delayToLiveChanged(long delayToLiveInMillis) {
-            removeFromCache(leaderboard);
-        }
-
-        @Override
-        public void windSourcesToExcludeChanged(Iterable<? extends WindSource> windSourcesToExclude) {
-            removeFromCache(leaderboard);
-        }
-
+        
         private void removeFromTrackedRace() {
             trackedRace.removeListener(this);
         }

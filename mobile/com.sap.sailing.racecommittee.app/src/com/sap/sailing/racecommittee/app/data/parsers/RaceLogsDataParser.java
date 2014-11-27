@@ -7,7 +7,7 @@ import java.util.Map;
 
 import org.json.simple.JSONValue;
 
-import com.sap.sailing.domain.racelog.RaceLogEvent;
+import com.sap.sailing.domain.abstractlog.race.RaceLogEvent;
 import com.sap.sailing.racecommittee.app.domain.ManagedRace;
 
 public class RaceLogsDataParser implements
