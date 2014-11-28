@@ -14,6 +14,14 @@ public class RecordRaceLogEventOnRegatta extends AbstractRaceLogOnRegattaOperati
         this.event = event;
     }
 
+    /**
+     * {@link #internalApplyTo(RacingEventService)} already replicates the effects
+     */
+    @Override
+    public boolean isRequiresExplicitTransitiveReplication() {
+        return false;
+    }
+    
     @Override
     public RaceLogEvent internalApplyTo(RacingEventService toState) throws Exception {
         RaceColumn raceColumn = getRaceColumn(toState);

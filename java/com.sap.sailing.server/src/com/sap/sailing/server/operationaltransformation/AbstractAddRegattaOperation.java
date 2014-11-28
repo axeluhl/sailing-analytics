@@ -17,6 +17,15 @@ public abstract class AbstractAddRegattaOperation extends AbstractRacingEventSer
         this.id = id;
     }
 
+    /**
+     * Implementations are expected to replicate their effects during
+     * {@link #internalApplyTo(com.sap.sailing.server.RacingEventService)}.
+     */
+    @Override
+    public boolean isRequiresExplicitTransitiveReplication() {
+        return false;
+    }
+
     protected String getRegattaName() {
         return regattaName;
     }

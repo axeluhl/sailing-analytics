@@ -2,7 +2,6 @@ package com.sap.sailing.server;
 
 import com.sap.sailing.server.operationaltransformation.AddColumnToLeaderboard;
 import com.sap.sailing.server.operationaltransformation.CreateFlexibleLeaderboard;
-import com.sap.sailing.server.operationaltransformation.CreatePersistentCompetitor;
 import com.sap.sailing.server.operationaltransformation.CreateRegattaLeaderboard;
 import com.sap.sailing.server.operationaltransformation.MoveLeaderboardColumnDown;
 import com.sap.sailing.server.operationaltransformation.MoveLeaderboardColumnUp;
@@ -52,7 +51,4 @@ OperationWithTransformationSupport<RacingEventService, RacingEventServiceOperati
 
     RacingEventServiceOperation<?> transformMoveLeaderboardColumnUpServerOp(MoveLeaderboardColumnUp moveLeaderboardColumnUp);
 
-    RacingEventServiceOperation<?> transformCreatePersistentCompetitorClientOp(CreatePersistentCompetitor createPersistentCompetitor);
-
-    RacingEventServiceOperation<?> transformCreatePersistentCompetitorServerOp(CreatePersistentCompetitor createPersistentCompetitor);
 }
