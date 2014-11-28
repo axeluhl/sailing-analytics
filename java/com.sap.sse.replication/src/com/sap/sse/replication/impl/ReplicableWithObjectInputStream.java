@@ -98,7 +98,8 @@ public interface ReplicableWithObjectInputStream<S, O extends OperationWithResul
 
     /**
      * The operation is executed by immediately {@link Operation#internalApplyTo(Object) applying} it to this
-     * service object. It is then replicated to all replicas.
+     * service object. It is then replicated to all replicas if and only if the operation is marked as
+     * {@link OperationWithResult#isRequiresExplicitTransitiveReplication()}.
      * 
      * @see {@link #replicate(RacingEventServiceOperation)}
      */
@@ -110,7 +111,9 @@ public interface ReplicableWithObjectInputStream<S, O extends OperationWithResul
             T result = reso.internalApplyTo(replicable);
             @SuppressWarnings("unchecked") // This is necessary because otherwise apply(...) couldn't bind the result type T
             O oo = (O) operation;
-            replicate(oo);
+            if (oo.isRequiresExplicitTransitiveReplication()) {
+                replicate(oo);
+            }
             return result;
         } catch (Exception e) {
             logger.log(Level.SEVERE, "apply", e);
