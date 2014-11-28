@@ -118,10 +118,10 @@ public class RegattaActivity extends BaseActivity {
             ExLog.i(this, TAG, "Clicked SETTINGS.");
             startActivity(new Intent(this, SettingsActivity.class));
             return true;
-        case R.id.options_menu_info:
-            ExLog.i(this, TAG, "Clicked INFO.");
-            startActivity(new Intent(this, SystemInformationActivity.class));
-            return true;
+//        case R.id.options_menu_info:
+//            ExLog.i(this, TAG, "Clicked INFO.");
+//            startActivity(new Intent(this, SystemInformationActivity.class));
+//            return true;
         case R.id.options_menu_checkout:
         	ExLog.i(this, TAG, "Clicked CHECKOUT.");
         	checkout();
