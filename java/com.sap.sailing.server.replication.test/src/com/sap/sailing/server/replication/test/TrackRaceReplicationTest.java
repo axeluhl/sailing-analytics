@@ -12,6 +12,7 @@ import java.net.URL;
 import java.util.Collections;
 import java.util.GregorianCalendar;
 import java.util.TimeZone;
+import java.util.logging.Logger;
 
 import org.junit.After;
 import org.junit.Before;
@@ -43,6 +44,7 @@ import com.sap.sse.replication.OperationExecutionListener;
 import com.sap.sse.replication.OperationWithResult;
 
 public class TrackRaceReplicationTest extends AbstractServerReplicationTest {
+    private static final Logger logger = Logger.getLogger(TrackRaceReplicationTest.class.getName());
     private TrackedRace masterTrackedRace;
     private RegattaAndRaceIdentifier raceIdentifier;
     private RaceHandle racesHandle;
@@ -98,12 +100,13 @@ public class TrackRaceReplicationTest extends AbstractServerReplicationTest {
         racesHandle = master.addRace(/* regattaToAddTo */ null, trackingParams, /* timeoutInMilliseconds */ 60000);
     }
 
-    private void waitForTrackRaceReplicationTrigger() throws InterruptedException {
+    private void waitForTrackRaceReplicationTrigger() throws InterruptedException, IllegalAccessException {
         while (!notifier[0]) {
             synchronized (notifier) {
                 notifier.wait();
             }
         }
+        replicaReplicator.waitUntilQueueIsEmpty();
     }
     
     @Test
@@ -160,14 +163,15 @@ public class TrackRaceReplicationTest extends AbstractServerReplicationTest {
             receivedStartAndEndOfTracking = master.getTrackedRace(raceIdentifier).getStartOfTracking() != null &&
                     master.getTrackedRace(raceIdentifier).getEndOfTracking() != null;
         }
-        Thread.sleep(3000); // kept failing several times for a 1000ms timeout
+        Thread.sleep(1000);
+        logger.info("verifying replica's state");
         TrackedRace replicaTrackedRace = replica.getTrackedRace(raceIdentifier);
         assertEquals(masterTrackedRace.getStartOfTracking(), replicaTrackedRace.getStartOfTracking());
         assertEquals(masterTrackedRace.getEndOfTracking(), replicaTrackedRace.getEndOfTracking());
         MillisecondsTimePoint now = MillisecondsTimePoint.now();
         assertFalse(now.equals(replicaTrackedRace.getStartOfRace()));
         ((DynamicTrackedRace) masterTrackedRace).setStartTimeReceived(now);
-        Thread.sleep(3000);
+        Thread.sleep(1000);
         assertEquals(now, replicaTrackedRace.getStartOfRace());
     }
 

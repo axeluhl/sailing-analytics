@@ -2,9 +2,9 @@ package com.sap.sailing.server.gateway.serialization.racelog.impl;
 
 import org.json.simple.JSONObject;
 
+import com.sap.sailing.domain.abstractlog.race.RaceLogEvent;
+import com.sap.sailing.domain.abstractlog.race.RaceLogPassChangeEvent;
 import com.sap.sailing.domain.base.Competitor;
-import com.sap.sailing.domain.racelog.RaceLogEvent;
-import com.sap.sailing.domain.racelog.RaceLogPassChangeEvent;
 import com.sap.sailing.server.gateway.serialization.JsonSerializer;
 
 public class RaceLogPassChangeEventSerializer extends BaseRaceLogEventSerializer {

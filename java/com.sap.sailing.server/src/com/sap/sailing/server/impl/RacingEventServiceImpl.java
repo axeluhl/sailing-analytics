@@ -39,6 +39,16 @@ import org.json.simple.parser.ParseException;
 import org.osgi.framework.BundleContext;
 import org.osgi.util.tracker.ServiceTracker;
 
+import com.sap.sailing.domain.abstractlog.AbstractLogEventAuthor;
+import com.sap.sailing.domain.abstractlog.impl.LogEventAuthorImpl;
+import com.sap.sailing.domain.abstractlog.race.RaceLog;
+import com.sap.sailing.domain.abstractlog.race.RaceLogEvent;
+import com.sap.sailing.domain.abstractlog.race.RaceLogEventVisitor;
+import com.sap.sailing.domain.abstractlog.race.state.RaceState;
+import com.sap.sailing.domain.abstractlog.race.state.ReadonlyRaceState;
+import com.sap.sailing.domain.abstractlog.race.state.impl.RaceStateImpl;
+import com.sap.sailing.domain.abstractlog.race.state.impl.ReadonlyRaceStateImpl;
+import com.sap.sailing.domain.abstractlog.race.tracking.DeviceIdentifier;
 import com.sap.sailing.domain.base.Competitor;
 import com.sap.sailing.domain.base.CompetitorStore;
 import com.sap.sailing.domain.base.CompetitorStore.CompetitorUpdateListener;
@@ -105,18 +115,8 @@ import com.sap.sailing.domain.persistence.PersistenceFactory;
 import com.sap.sailing.domain.persistence.media.MediaDB;
 import com.sap.sailing.domain.persistence.media.MediaDBFactory;
 import com.sap.sailing.domain.persistence.racelog.tracking.MongoGPSFixStoreFactory;
-import com.sap.sailing.domain.racelog.RaceLog;
-import com.sap.sailing.domain.racelog.RaceLogEvent;
-import com.sap.sailing.domain.racelog.RaceLogEventAuthor;
-import com.sap.sailing.domain.racelog.RaceLogEventVisitor;
 import com.sap.sailing.domain.racelog.RaceLogIdentifier;
 import com.sap.sailing.domain.racelog.RaceLogStore;
-import com.sap.sailing.domain.racelog.impl.RaceLogEventAuthorImpl;
-import com.sap.sailing.domain.racelog.state.RaceState;
-import com.sap.sailing.domain.racelog.state.ReadonlyRaceState;
-import com.sap.sailing.domain.racelog.state.impl.RaceStateImpl;
-import com.sap.sailing.domain.racelog.state.impl.ReadonlyRaceStateImpl;
-import com.sap.sailing.domain.racelog.tracking.DeviceIdentifier;
 import com.sap.sailing.domain.racelog.tracking.GPSFixStore;
 import com.sap.sailing.domain.tracking.DynamicTrackedRace;
 import com.sap.sailing.domain.tracking.DynamicTrackedRegatta;
@@ -170,6 +170,7 @@ import com.sap.sailing.server.operationaltransformation.RenameEvent;
 import com.sap.sailing.server.operationaltransformation.SetDataImportDeleteProgressFromMapTimer;
 import com.sap.sailing.server.operationaltransformation.TrackRegatta;
 import com.sap.sailing.server.operationaltransformation.UpdateCompetitor;
+import com.sap.sailing.server.operationaltransformation.UpdateEndOfTracking;
 import com.sap.sailing.server.operationaltransformation.UpdateMarkPassings;
 import com.sap.sailing.server.operationaltransformation.UpdateMediaTrackDurationOperation;
 import com.sap.sailing.server.operationaltransformation.UpdateMediaTrackRacesOperation;
@@ -177,7 +178,8 @@ import com.sap.sailing.server.operationaltransformation.UpdateMediaTrackStartTim
 import com.sap.sailing.server.operationaltransformation.UpdateMediaTrackTitleOperation;
 import com.sap.sailing.server.operationaltransformation.UpdateMediaTrackUrlOperation;
 import com.sap.sailing.server.operationaltransformation.UpdateRaceDelayToLive;
-import com.sap.sailing.server.operationaltransformation.UpdateRaceTimes;
+import com.sap.sailing.server.operationaltransformation.UpdateStartOfTracking;
+import com.sap.sailing.server.operationaltransformation.UpdateStartTimeReceived;
 import com.sap.sailing.server.operationaltransformation.UpdateTrackedRaceStatus;
 import com.sap.sailing.server.operationaltransformation.UpdateWindAveragingTime;
 import com.sap.sailing.server.operationaltransformation.UpdateWindSourcesToExclude;
@@ -325,7 +327,8 @@ public class RacingEventServiceImpl implements RacingEventServiceWithTestSupport
     /**
      * This author should be used for server generated race log events
      */
-    private final RaceLogEventAuthor raceLogEventAuthorForServer = new RaceLogEventAuthorImpl(RacingEventService.class.getName(), 0);
+    private final AbstractLogEventAuthor raceLogEventAuthorForServer = new LogEventAuthorImpl(
+            RacingEventService.class.getName(), 0);
 
     /**
      * Allow only one master data import at a time to avoid situation where multiple Imports override each other in
@@ -1359,8 +1362,18 @@ public class RacingEventServiceImpl implements RacingEventServiceWithTestSupport
         }
 
         @Override
-        public void raceTimesChanged(TimePoint startOfTracking, TimePoint endOfTracking, TimePoint startTimeReceived) {
-            replicate(new UpdateRaceTimes(getRaceIdentifier(), startOfTracking, endOfTracking, startTimeReceived));
+        public void startOfTrackingChanged(TimePoint startOfTracking) {
+            replicate(new UpdateStartOfTracking(getRaceIdentifier(), startOfTracking));            
+        }
+
+        @Override
+        public void endOfTrackingChanged(TimePoint endOfTracking) {
+            replicate(new UpdateEndOfTracking(getRaceIdentifier(), endOfTracking));            
+        }
+
+        @Override
+        public void startTimeReceivedChanged(TimePoint startTimeReceived) {
+            replicate(new UpdateStartTimeReceived(getRaceIdentifier(), startTimeReceived));            
         }
 
         @Override
@@ -2675,7 +2688,7 @@ public class RacingEventServiceImpl implements RacingEventServiceWithTestSupport
             RacingProcedureType racingProcedure) {
         RaceLog raceLog = getRaceLog(leaderboardName, raceColumnName, fleetName);
         if (raceLog != null) {
-            RaceState state = RaceStateImpl.create(raceLog, new RaceLogEventAuthorImpl(authorName, authorPriority));
+            RaceState state = RaceStateImpl.create(raceLog, new LogEventAuthorImpl(authorName, authorPriority));
             if (passId > raceLog.getCurrentPassId()) {
                 state.setAdvancePass(logicalTimePoint);
             }
@@ -2737,7 +2750,7 @@ public class RacingEventServiceImpl implements RacingEventServiceWithTestSupport
     }
 
     @Override
-    public RaceLogEventAuthor getServerAuthor() {
+    public AbstractLogEventAuthor getServerAuthor() {
         return raceLogEventAuthorForServer;
     }
 

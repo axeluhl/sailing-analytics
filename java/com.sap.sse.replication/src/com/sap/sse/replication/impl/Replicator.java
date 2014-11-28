@@ -6,6 +6,7 @@ import java.io.EOFException;
 import java.io.IOException;
 import java.io.ObjectInputStream;
 import java.lang.reflect.Field;
+import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.Iterator;
 import java.util.List;
@@ -50,7 +51,12 @@ import com.sap.sse.replication.ReplicationMasterDescriptor;
  * <p>
  * 
  * The receiver takes care of synchronizing receiving, suspending/resuming and queuing. Waiters are notified whenever
- * the result of {@link #isQueueEmpty} changes.
+ * the result of {@link #isQueueEmpty} changes.<p>
+ * 
+ * Clients can {@link Object#wait()} on this object and will be {@link Object#notify() notified} when one of the queues
+ * for one {@link Replicable} has been consumed so that it is empty. As new operations may arrive at any time, this is
+ * no guarantee for the queue remaining empty; however, it is a possible way to get informed about this interesting change
+ * in state, particularly in case it was really the last operation that was received.
  * 
  * @author Axel Uhl (d043530)
  * 
@@ -92,6 +98,12 @@ public class Replicator implements Runnable {
     private static final int THREAD_POOL_SIZE = Math.max(Runtime.getRuntime().availableProcessors()-1, 3);
 
     /**
+     * If permitted by the security manager, this is the <code>_queue</code> field accessor for the {@link QueueingConsumer}
+     * class, enabling an inspection of the message queueing system's queue size of unprocessed messages.
+     */
+    private Field _queue;
+
+    /**
      * Used for the parallel execution of operations that don't
      * {@link RacingEventServiceOperation#requiresSynchronousExecution()}.
      */
@@ -117,6 +129,12 @@ public class Replicator implements Runnable {
         this.replicableProvider = replicableProvider;
         this.suspended = startSuspended;
         this.consumer = consumer;
+        try {
+            _queue = QueueingConsumer.class.getDeclaredField("_queue");
+            _queue.setAccessible(true);
+        } catch (Exception e) {
+            _queue = null;
+        }
     }
     
     /**
@@ -132,13 +150,6 @@ public class Replicator implements Runnable {
         ClassLoader oldClassLoader = Thread.currentThread().getContextClassLoader();
         long messageCount = 0;
         long operationCount = 0;
-        Field _queue;
-        try {
-            _queue = QueueingConsumer.class.getDeclaredField("_queue");
-            _queue.setAccessible(true);
-        } catch (Exception e) {
-            _queue = null;
-        }
         final boolean logsFine = logger.isLoggable(Level.FINE);
         while (!isBeingStopped()) {
            try {
@@ -148,10 +159,10 @@ public class Replicator implements Runnable {
                     if (logsFine || messageCount % 10l == 0) {
                         try {
                             logger.log(messageCount%10l==0 ? Level.INFO : Level.FINE,
-                                    "Inbound replication queue size: "+((BlockingQueue<?>) _queue.get(consumer)).size());
+                                    "Received "+messageCount+" replication messages with "+operationCount+" operations in total. Inbound replication queue size: "+getMessageQueueSize());
                         } catch (Exception e) {
                             // it didn't work; but it's a log message only...
-                            logger.info("Received another 10000 replication messages");
+                            logger.info("Received "+messageCount+" replication messages with "+operationCount+" operations in total.");
                         }
                     }
                 }
@@ -243,6 +254,21 @@ public class Replicator implements Runnable {
         }
         logger.info("Stopped replicator thread. This server will no longer receive events from a master.");
     }
+
+    /**
+     * @return the number of unprocessed messages in the inbound message queue
+     */
+    private int getMessageQueueSize() throws IllegalAccessException {
+        return getInboundMessageQueue().size();
+    }
+
+    /**
+     * @return the message queueing system's message queue from which this replicator reads messages; can be used
+     * to check if the queue is empty or to determine the number of elements in the queue
+     */
+    private BlockingQueue<?> getInboundMessageQueue() throws IllegalAccessException {
+        return (BlockingQueue<?>) _queue.get(consumer);
+    }
     
     private <S, O extends OperationWithResult<S, ?>> void readOperationAndApplyOrQueueIt(Replicable<S, O> replicable,
             byte[] serializedOperation) throws ClassNotFoundException, IOException {
@@ -286,7 +312,12 @@ public class Replicator implements Runnable {
     }
     
     private synchronized void queue(OperationWithResult<?, ?> operation, Replicable<?, ?> replicable) {
-        List<Pair<String, OperationWithResult<?, ?>>> queue = queueByReplicableIdAsString.get(replicable.getId().toString());
+        final String replicableIdAsString = replicable.getId().toString();
+        List<Pair<String, OperationWithResult<?, ?>>> queue = queueByReplicableIdAsString.get(replicableIdAsString);
+        if (queue == null) {
+            queue = new ArrayList<>();
+            queueByReplicableIdAsString.put(replicableIdAsString, queue);
+        }
         if (queue.isEmpty()) {
             notifyAll();
         }
@@ -348,8 +379,8 @@ public class Replicator implements Runnable {
     /**
      * @return <code>true</code> if all queues for all replicables are empty
      */
-    public boolean isQueueEmpty() {
-        return !queueByReplicableIdAsString.values().stream().anyMatch(q->!q.isEmpty());
+    public boolean isQueueEmpty() throws IllegalAccessException {
+        return (_queue == null || getInboundMessageQueue().isEmpty()) && !queueByReplicableIdAsString.values().stream().anyMatch(q->!q.isEmpty());
     }
 
 }

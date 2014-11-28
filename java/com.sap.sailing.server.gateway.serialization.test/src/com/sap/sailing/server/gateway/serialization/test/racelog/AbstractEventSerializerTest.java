@@ -13,10 +13,10 @@ import org.json.simple.parser.ParseException;
 import org.junit.Before;
 import org.junit.Test;
 
+import com.sap.sailing.domain.abstractlog.AbstractLogEventAuthor;
+import com.sap.sailing.domain.abstractlog.impl.LogEventAuthorImpl;
+import com.sap.sailing.domain.abstractlog.race.RaceLogEvent;
 import com.sap.sailing.domain.base.Competitor;
-import com.sap.sailing.domain.racelog.RaceLogEvent;
-import com.sap.sailing.domain.racelog.RaceLogEventAuthor;
-import com.sap.sailing.domain.racelog.impl.RaceLogEventAuthorImpl;
 import com.sap.sailing.server.gateway.serialization.JsonSerializer;
 import com.sap.sailing.server.gateway.serialization.racelog.impl.BaseRaceLogEventSerializer;
 import com.sap.sse.common.TimePoint;
@@ -31,7 +31,7 @@ public abstract class AbstractEventSerializerTest<EventType extends RaceLogEvent
     private JsonSerializer<Competitor> competitorSerializer;
     protected JsonSerializer<RaceLogEvent> serializer;
     protected EventType event;
-    protected final RaceLogEventAuthor author = new RaceLogEventAuthorImpl("Test author", 1);
+    protected final AbstractLogEventAuthor author = new LogEventAuthorImpl("Test author", 1);
 
     protected abstract EventType createMockEvent();
 

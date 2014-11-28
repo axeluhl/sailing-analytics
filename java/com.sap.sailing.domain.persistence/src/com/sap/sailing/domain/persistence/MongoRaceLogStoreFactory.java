@@ -1,8 +1,8 @@
 package com.sap.sailing.domain.persistence;
 
 
+import com.sap.sailing.domain.abstractlog.race.RaceLogEventVisitor;
 import com.sap.sailing.domain.persistence.impl.MongoRaceLogStoreFactoryImpl;
-import com.sap.sailing.domain.racelog.RaceLogEventVisitor;
 import com.sap.sailing.domain.racelog.RaceLogIdentifier;
 import com.sap.sailing.domain.racelog.RaceLogStore;
 

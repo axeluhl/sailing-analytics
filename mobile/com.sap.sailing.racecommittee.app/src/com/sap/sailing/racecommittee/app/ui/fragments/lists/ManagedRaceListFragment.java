@@ -17,8 +17,8 @@ import android.widget.ImageView;
 import android.widget.ListView;
 
 import com.sap.sailing.android.shared.logging.ExLog;
-import com.sap.sailing.domain.racelog.state.ReadonlyRaceState;
-import com.sap.sailing.domain.racelog.state.impl.BaseRaceStateChangedListener;
+import com.sap.sailing.domain.abstractlog.race.state.ReadonlyRaceState;
+import com.sap.sailing.domain.abstractlog.race.state.impl.BaseRaceStateChangedListener;
 import com.sap.sailing.racecommittee.app.R;
 import com.sap.sailing.racecommittee.app.RaceApplication;
 import com.sap.sailing.racecommittee.app.domain.ManagedRace;

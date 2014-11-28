@@ -5,7 +5,7 @@ import android.view.View;
 import android.view.View.OnClickListener;
 import android.widget.Button;
 
-import com.sap.sailing.domain.racelog.state.racingprocedure.ess.ESSRacingProcedure;
+import com.sap.sailing.domain.abstractlog.race.state.racingprocedure.ess.ESSRacingProcedure;
 import com.sap.sailing.racecommittee.app.R;
 import com.sap.sailing.racecommittee.app.ui.fragments.dialogs.PositioningFragment;
 import com.sap.sailing.racecommittee.app.utils.TimeUtils;

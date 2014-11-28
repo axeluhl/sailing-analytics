@@ -279,5 +279,13 @@ public abstract class AbstractServerReplicationTest {
             }
             pis.close();
         }
+        
+        public void waitUntilQueueIsEmpty() throws InterruptedException, IllegalAccessException {
+            synchronized (getReplicator()) {
+                while (!getReplicator().isQueueEmpty()) {
+                    getReplicator().wait();
+                }
+            }
+        }
     }
 }

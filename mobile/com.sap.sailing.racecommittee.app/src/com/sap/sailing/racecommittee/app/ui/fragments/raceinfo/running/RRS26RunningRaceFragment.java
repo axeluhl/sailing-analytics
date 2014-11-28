@@ -3,10 +3,10 @@ package com.sap.sailing.racecommittee.app.ui.fragments.raceinfo.running;
 import android.view.View;
 import android.widget.Toast;
 
-import com.sap.sailing.domain.racelog.state.racingprocedure.impl.BaseRacingProcedureChangedListener;
-import com.sap.sailing.domain.racelog.state.racingprocedure.rrs26.RRS26ChangedListener;
-import com.sap.sailing.domain.racelog.state.racingprocedure.rrs26.RRS26RacingProcedure;
-import com.sap.sailing.domain.racelog.state.racingprocedure.rrs26.ReadonlyRRS26RacingProcedure;
+import com.sap.sailing.domain.abstractlog.race.state.racingprocedure.impl.BaseRacingProcedureChangedListener;
+import com.sap.sailing.domain.abstractlog.race.state.racingprocedure.rrs26.RRS26ChangedListener;
+import com.sap.sailing.domain.abstractlog.race.state.racingprocedure.rrs26.RRS26RacingProcedure;
+import com.sap.sailing.domain.abstractlog.race.state.racingprocedure.rrs26.ReadonlyRRS26RacingProcedure;
 import com.sap.sailing.racecommittee.app.R;
 
 public class RRS26RunningRaceFragment extends BaseRunningRaceFragment<RRS26RacingProcedure> {

@@ -40,26 +40,34 @@ public class PrematureOperationReceiptTest extends AbstractServerReplicationTest
      * started in suspended mode and resumed only after the initial load was successfully installed.
      */
     @Test
-    public void testRaceColumnInLeaderboardReplicationAfterInitialLoad() throws InterruptedException, ClassNotFoundException, IOException {
+    public void testRaceColumnInLeaderboardReplicationAfterInitialLoad() throws InterruptedException, ClassNotFoundException, IOException, IllegalAccessException {
         final String leaderboardName = "My new leaderboard";
         final int[] discardThresholds = new int[] { 17, 23 };
         CreateFlexibleLeaderboard createTestLeaderboard = new CreateFlexibleLeaderboard(leaderboardName, null, discardThresholds, new LowPoint(), null);
         assertNull(master.getLeaderboardByName(leaderboardName));
+        replicationService.initialLoad(); // serialize the master state before the operation has been applied
         master.apply(createTestLeaderboard);
         final Leaderboard masterLeaderboard = master.getLeaderboardByName(leaderboardName);
         assertNotNull(masterLeaderboard);
         Thread.sleep(1000); // wait 1s for JMS to deliver the message and the message to be applied
-        final Leaderboard nonExistingReplicaLeaderboard = replica.getLeaderboardByName(leaderboardName);
-        assertNull(nonExistingReplicaLeaderboard); // because replicator is still suspended
-        replicationService.initialLoad();
+        {
+            final Leaderboard nonExistingReplicaLeaderboard = replica.getLeaderboardByName(leaderboardName);
+            assertNull(nonExistingReplicaLeaderboard); // because replicator is still suspended
+        }
+        {
+            final Leaderboard replicaLeaderboard = replica.getLeaderboardByName(leaderboardName);
+            assertNull(replicaLeaderboard); // because replicator is still suspended
+        }
         replicator.setSuspended(false);
         synchronized (replicator) {
             while (!replicator.isQueueEmpty()) {
                 replicator.wait();
             }
         }
-        final Leaderboard replicaLeaderboard = replica.getLeaderboardByName(leaderboardName);
-        assertNotNull(replicaLeaderboard);
+        {
+            final Leaderboard replicaLeaderboard = replica.getLeaderboardByName(leaderboardName);
+            assertNotNull(replicaLeaderboard);
+        }
     }
 
 }

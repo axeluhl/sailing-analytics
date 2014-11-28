@@ -10,13 +10,13 @@ import junit.framework.Assert;
 
 import org.junit.Test;
 
+import com.sap.sailing.domain.abstractlog.AbstractLogEventAuthor;
+import com.sap.sailing.domain.abstractlog.race.RaceLogEvent;
+import com.sap.sailing.domain.abstractlog.race.tracking.DeviceIdentifier;
+import com.sap.sailing.domain.abstractlog.race.tracking.DeviceMapping;
+import com.sap.sailing.domain.abstractlog.race.tracking.analyzing.impl.DeviceCompetitorMappingFinder;
 import com.sap.sailing.domain.base.Competitor;
 import com.sap.sailing.domain.base.impl.CompetitorImpl;
-import com.sap.sailing.domain.racelog.RaceLogEvent;
-import com.sap.sailing.domain.racelog.RaceLogEventAuthor;
-import com.sap.sailing.domain.racelog.tracking.DeviceIdentifier;
-import com.sap.sailing.domain.racelog.tracking.DeviceMapping;
-import com.sap.sailing.domain.racelog.tracking.analyzing.impl.DeviceCompetitorMappingFinder;
 import com.sap.sailing.domain.racelog.tracking.test.mock.SmartphoneImeiIdentifier;
 import com.sap.sse.common.TimePoint;
 import com.sap.sse.common.impl.MillisecondsTimePoint;
@@ -40,14 +40,14 @@ public class DeviceMappingFinderTest extends AbstractRaceLogTrackingTest {
         return millis == null ? null : new MillisecondsTimePoint(millis);
     }
     
-    private Serializable addMapping(RaceLogEventAuthor author, DeviceIdentifier device, Long from, Long to, Competitor item) {
+    private Serializable addMapping(AbstractLogEventAuthor author, DeviceIdentifier device, Long from, Long to, Competitor item) {
         RaceLogEvent mapping = factory.createDeviceCompetitorMappingEvent(t(), author, t(), UUID.randomUUID(), device, item, 0,
                 t(from), t(to));
         log.add(mapping);
         return mapping.getId();
     }
     
-    private void closeMapping(RaceLogEventAuthor author, DeviceIdentifier device, Serializable mappingId, long millis) {
+    private void closeMapping(AbstractLogEventAuthor author, DeviceIdentifier device, Serializable mappingId, long millis) {
         RaceLogEvent mapping = factory.createCloseOpenEndedDeviceMappingEvent(t(), author, t(), UUID.randomUUID(), 0, mappingId,
                 new MillisecondsTimePoint(millis));
         log.add(mapping);
