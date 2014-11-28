@@ -122,7 +122,7 @@ public class RegattaFragment extends BaseFragment implements OnClickListener {
 			}
 			else
 			{
-				showTrackingActivity();	
+				startTrackingActivity();	
 			}
 			break;
 		case R.id.add_photo_button:
@@ -215,7 +215,7 @@ public class RegattaFragment extends BaseFragment implements OnClickListener {
 		super.onActivityResult(requestCode, resultCode, data);
 	}
 
-	private void showTrackingActivity() {
+	private void startTrackingActivity() {
 		RegattaActivity regattaActivity = (RegattaActivity) getActivity();
 		Intent intent = new Intent(getActivity(), TrackingActivity.class);
 		intent.putExtra(getString(R.string.tracking_activity_event_id_parameter), regattaActivity.getEventId());

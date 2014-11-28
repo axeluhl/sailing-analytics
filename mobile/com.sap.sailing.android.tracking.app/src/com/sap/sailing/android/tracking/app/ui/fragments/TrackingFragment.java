@@ -26,6 +26,7 @@ import com.sap.sailing.android.tracking.app.R;
 import com.sap.sailing.android.tracking.app.services.TrackingService;
 import com.sap.sailing.android.tracking.app.services.TrackingService.GPSQuality;
 import com.sap.sailing.android.tracking.app.services.TransmittingService.APIConnectivity;
+import com.sap.sailing.android.tracking.app.ui.activities.TrackingActivity;
 import com.sap.sailing.android.tracking.app.utils.AppPreferences;
 import com.sap.sailing.android.tracking.app.views.AutoResizeTextView;
 import com.sap.sailing.android.tracking.app.views.SignalQualityIndicatorView;
@@ -49,7 +50,11 @@ public class TrackingFragment extends BaseFragment implements OnClickListener {
 		stopTracking.setOnClickListener(this);
 	
 		prefs = new AppPreferences(getActivity());
-		prefs.setTrackingTimerStarted(System.currentTimeMillis());
+		
+		if (((TrackingActivity)getActivity()).getStartedByStartActivity() == false)
+		{
+			prefs.setTrackingTimerStarted(System.currentTimeMillis());	
+		}
 		
 		return view;
 	}

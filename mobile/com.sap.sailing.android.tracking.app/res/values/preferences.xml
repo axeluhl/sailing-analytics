@@ -24,4 +24,6 @@
     <string name="preference_gps_fastest_fix_interval_ms_default">100</string>
     <string name="preference_battery_is_charging">batteryIsCharging</string>
     <string name="preference_tracking_timer_started">trackingTimerStarted</string>
+    <string name="preference_tracker_is_tracking">trackerIsTracking</string>
+    <string name="preference_tracker_is_tracking_event_id">trackerIsTrackingEventId</string>
 </resources>
