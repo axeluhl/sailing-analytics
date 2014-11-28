@@ -10,17 +10,17 @@ import Foundation
 import CoreData
 
 @objc(Competitor)
-class Competitor: NSManagedObject {
+public class Competitor: NSManagedObject {
 
-    @NSManaged var competitorId: String
-    @NSManaged var countryCode: String
-    @NSManaged var displayName: String
-    @NSManaged var name: String
-    @NSManaged var nationality: String
-    @NSManaged var sailId: String
-    @NSManaged var leaderBoard: LeaderBoard?
+    @NSManaged public var competitorId: String
+    @NSManaged public var countryCode: String
+    @NSManaged public var displayName: String
+    @NSManaged public var name: String
+    @NSManaged public var nationality: String
+    @NSManaged public var sailId: String
+    @NSManaged public var leaderBoard: LeaderBoard?
     
-    func initWithDictionary(dictionary: Dictionary<NSObject, AnyObject>) {
+    public func initWithDictionary(dictionary: Dictionary<NSObject, AnyObject>) {
         competitorId = dictionary["id"] as String
         displayName = dictionary["displayName"] as String
         name = dictionary["name"] as String

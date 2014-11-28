@@ -10,7 +10,7 @@ import Foundation
 import CoreData
 
 @objc(GPSFix)
-class GPSFix: NSManagedObject {
+public class GPSFix: NSManagedObject {
 
     @NSManaged var bearingDeg: Double
     @NSManaged var latDeg: Double

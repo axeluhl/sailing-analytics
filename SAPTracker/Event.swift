@@ -10,20 +10,20 @@ import Foundation
 import CoreData
 
 @objc(Event)
-class Event: NSManagedObject {
+public class Event: NSManagedObject {
 
-    @NSManaged var serverUrl: String
-    @NSManaged var eventId: String
-    @NSManaged var name: String
-    @NSManaged var startDate: NSDate
-    @NSManaged var endDate: NSDate
-    @NSManaged var imageUrl: String?
-    @NSManaged var leaderBoard: LeaderBoard?
-    @NSManaged var userImage: NSData?
-    @NSManaged var gpsFixes: NSSet?
-    @NSManaged var lastSyncDate: NSDate?
+    @NSManaged public var serverUrl: String
+    @NSManaged public var eventId: String
+    @NSManaged public var name: String
+    @NSManaged public var startDate: NSDate
+    @NSManaged public var endDate: NSDate
+    @NSManaged public var imageUrl: String?
+    @NSManaged public var leaderBoard: LeaderBoard?
+    @NSManaged public var userImage: NSData?
+    @NSManaged public var gpsFixes: NSSet?
+    @NSManaged public var lastSyncDate: NSDate?
     
-    func initWithDictionary(dictionary: [String: AnyObject]) {
+    public func initWithDictionary(dictionary: [String: AnyObject]) {
         eventId = dictionary["id"] as String
         name = dictionary["name"] as String
         startDate = NSDate(timeIntervalSince1970: (dictionary["startDate"] as Double)/1000)

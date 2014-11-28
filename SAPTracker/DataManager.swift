@@ -9,11 +9,11 @@
 import Foundation
 import CoreData
 
-class DataManager: NSObject {
+public class DataManager: NSObject {
 
     var selectedEvent: Event?
 
-    class var sharedManager: DataManager {
+    public class var sharedManager: DataManager {
         struct Singleton {
             static let sharedManager = DataManager()
         }
@@ -105,7 +105,7 @@ class DataManager: NSObject {
         return NSFetchedResultsController(fetchRequest: fetchRequest, managedObjectContext: self.managedObjectContext!, sectionNameKeyPath: nil, cacheName: nil)
     }
     
-    func deleteEvent(event: Event) {
+    public func deleteEvent(event: Event) {
         self.managedObjectContext!.deleteObject(event)
     }
     
@@ -167,7 +167,7 @@ class DataManager: NSObject {
         return coordinator
         }()
     
-    lazy var managedObjectContext: NSManagedObjectContext? = {
+    public lazy var managedObjectContext: NSManagedObjectContext? = {
         // Returns the managed object context for the application (which is already bound to the persistent store coordinator for the application.) This property is optional since there are legitimate error conditions that could cause the creation of the context to fail.
         let coordinator = self.persistentStoreCoordinator
         if coordinator == nil {

@@ -8,7 +8,7 @@
 
 import Foundation
 
-class QRCodeData {
+public class QRCodeData {
     
     struct Keys {
         static let eventId = "event_id"
@@ -16,15 +16,15 @@ class QRCodeData {
         static let competitorId = "competitor_id"        
     }
     
-    var serverUrl: String?
-    var eventId: String?
-    var leaderBoardName: String?
-    var competitorId: String?
+    public var serverUrl: String?
+    public var eventId: String?
+    public var leaderBoardName: String?
+    public var competitorId: String?
  
-    init() {
+    public init() {
     }
     
-    func parseString(urlString: String) -> Bool {
+    public func parseString(urlString: String) -> Bool {
         let url = NSURL(string: urlString)
         
         if (url == nil || url!.scheme == nil || url!.host == nil) {

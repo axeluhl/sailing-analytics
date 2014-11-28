@@ -10,13 +10,13 @@ import Foundation
 import CoreData
 
 @objc(LeaderBoard)
-class LeaderBoard: NSManagedObject {
+public class LeaderBoard: NSManagedObject {
 
-    @NSManaged var name: String
-    @NSManaged var competitor: Competitor?
-    @NSManaged var event: Event?
+    @NSManaged public var name: String
+    @NSManaged public var competitor: Competitor?
+    @NSManaged public var event: Event?
     
-    func initWithDictionary(dictionary: Dictionary<NSObject, AnyObject>) {
+    public func initWithDictionary(dictionary: Dictionary<NSObject, AnyObject>) {
         name = dictionary["name"] as String
     }
 

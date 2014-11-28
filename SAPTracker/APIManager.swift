@@ -9,7 +9,7 @@
 import Foundation
 import CoreData
 
-class APIManager: NSObject {
+public class APIManager: NSObject {
     
     struct NotificationType {
         static let networkAvailabilityChanged = "networkAvailabilityChanged"
@@ -40,7 +40,7 @@ class APIManager: NSObject {
     }
     
     /* Singleton */
-    class var sharedManager: APIManager {
+    public class var sharedManager: APIManager {
         struct Singleton {
             static let sharedManager = APIManager()
         }
@@ -48,7 +48,7 @@ class APIManager: NSObject {
     }
     
     /* Sets base URL for all requests. Request and response are JSON. Starts reachability listener. Starts timer for uploading data. */
-    func initManager(serverUrlString: String) {
+    public func initManager(serverUrlString: String) {
         if self.serverUrlString == serverUrlString {
             return
         }
@@ -82,25 +82,25 @@ class APIManager: NSObject {
     // MARK: - REST API
     
     /* Get event */
-    func getEvent(eventId: String!, success: (AFHTTPRequestOperation!, AnyObject!) -> Void, failure: (AFHTTPRequestOperation!, AnyObject!) -> Void) {
+    public func getEvent(eventId: String!, success: (AFHTTPRequestOperation!, AnyObject!) -> Void, failure: (AFHTTPRequestOperation!, AnyObject!) -> Void) {
         let urlString = baseUrlString + "/events/\(eventId)"
         manager!.GET(urlString, parameters: nil, success: success, failure: failure)
     }
     
     /* Get leader board */
-    func getLeaderBoard(leaderBoardName: String!, success: (AFHTTPRequestOperation!, AnyObject!) -> Void, failure: (AFHTTPRequestOperation!, AnyObject!) -> Void) {
+    public func getLeaderBoard(leaderBoardName: String!, success: (AFHTTPRequestOperation!, AnyObject!) -> Void, failure: (AFHTTPRequestOperation!, AnyObject!) -> Void) {
         let urlString = baseUrlString + "/leaderboards/\(leaderBoardName)"
         manager!.GET(urlString, parameters: nil, success: success, failure: failure)
     }
     
     /* Get competitor */
-    func getCompetitor(competitorId: String!, success: (AFHTTPRequestOperation!, AnyObject!) -> Void, failure: (AFHTTPRequestOperation!, AnyObject!) -> Void) {
+    public func getCompetitor(competitorId: String!, success: (AFHTTPRequestOperation!, AnyObject!) -> Void, failure: (AFHTTPRequestOperation!, AnyObject!) -> Void) {
         let urlString = baseUrlString + "/competitors/\(competitorId)"
         manager!.GET(urlString, parameters: nil, success: success, failure: failure)
     }
     
     /* Map a device to competitor. */
-    func checkIn(leaderBoardName: String!, competitorId: String!, deviceUuid: String!, pushId: String!, fromMillis: Double!, success: (AFHTTPRequestOperation!, AnyObject!) -> Void, failure: (AFHTTPRequestOperation!, AnyObject!) -> Void) {
+    public func checkIn(leaderBoardName: String!, competitorId: String!, deviceUuid: String!, pushId: String!, fromMillis: Double!, success: (AFHTTPRequestOperation!, AnyObject!) -> Void, failure: (AFHTTPRequestOperation!, AnyObject!) -> Void) {
         
         let urlString = baseUrlString + "/leaderboards/\(leaderBoardName.stringByAddingPercentEncodingWithAllowedCharacters(.URLHostAllowedCharacterSet())!)/device_mappings/start"
         
@@ -114,7 +114,7 @@ class APIManager: NSObject {
     }
     
     /* Disconnect a device from competitor. */
-    func checkOut(leaderBoardName: String!, competitorId: String!, deviceUuid: String!, toMillis: Double!, success:(AFHTTPRequestOperation!, AnyObject!) -> Void, failure: (AFHTTPRequestOperation!, AnyObject!) -> Void) {
+    public func checkOut(leaderBoardName: String!, competitorId: String!, deviceUuid: String!, toMillis: Double!, success:(AFHTTPRequestOperation!, AnyObject!) -> Void, failure: (AFHTTPRequestOperation!, AnyObject!) -> Void) {
         
         let urlString = baseUrlString + "/leaderboards/\(leaderBoardName.stringByAddingPercentEncodingWithAllowedCharacters(.URLHostAllowedCharacterSet())!)/device_mappings/end"
         
@@ -127,7 +127,7 @@ class APIManager: NSObject {
     }
     
     /* Send GPS location to server. Delete row from cache. */
-    func postGPSFixes(deviceUuid: String!, gpsFixes: [GPSFix]!, success: (AFHTTPRequestOperation!, AnyObject!) -> Void, failure: (AFHTTPRequestOperation!, AnyObject!) -> Void) {
+    public func postGPSFixes(deviceUuid: String!, gpsFixes: [GPSFix]!, success: (AFHTTPRequestOperation!, AnyObject!) -> Void, failure: (AFHTTPRequestOperation!, AnyObject!) -> Void) {
         if gpsFixes.count == 0 {
             return
         }

@@ -9,6 +9,7 @@
 import UIKit
 import XCTest
 import CoreData
+import SAPTracker
 
 class SAPTrackerAPITests: XCTestCase {
     
@@ -56,8 +57,8 @@ class SAPTrackerAPITests: XCTestCase {
     "description": "",
     "officialWebsiteURL": null,
     "logoImageURL": null,
-    "startDate": 1366581600000,
-    "endDate": 1367532000000,
+    "startDate": 1429653600000,
+    "endDate": 1430604000000,
     "venue": {
     "name": "Barbados",
     "courseAreas": [{
@@ -95,8 +96,8 @@ class SAPTrackerAPITests: XCTestCase {
         // test values
         XCTAssertEqual(event.eventId, "35dc9389-b59d-4ebd-8f6b-432065642f40")
         XCTAssertEqual(event.name, "505 Worlds 2013")
-        XCTAssertEqual(event.startDate, NSDate(timeIntervalSince1970: 1366581600))
-        XCTAssertEqual(event.endDate, NSDate(timeIntervalSince1970: 1367532000))
+        XCTAssertEqual(event.startDate, NSDate(timeIntervalSince1970: 1429653600))
+        XCTAssertEqual(event.endDate, NSDate(timeIntervalSince1970: 1430604000))
         XCTAssertEqual(event.imageUrl!, "http://static.sapsailing.com/ubilabsimages/505Worlds2013_eventteaser.jpg")
         
         // delete test object
