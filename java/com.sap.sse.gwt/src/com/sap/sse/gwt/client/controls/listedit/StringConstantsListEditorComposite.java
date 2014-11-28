@@ -1,6 +1,7 @@
 package com.sap.sse.gwt.client.controls.listedit;
 
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.List;
 
 import com.google.gwt.event.dom.client.ChangeEvent;
@@ -71,6 +72,24 @@ public class StringConstantsListEditorComposite extends ListEditorComposite<Stri
 
     public static class ExpandedUi extends ExpandedListEditorUi<String> {
 
+        protected final String placeholderTextForAddListbox;
+        protected final List<String> availableConstantValuesToAdd;
+        private ListBox selectionBox;
+        
+        public ExpandedUi(StringMessages stringMessages, ImageResource removeImage, Iterable<String> availableConstantValuesToAdd) {
+            this(stringMessages, removeImage, availableConstantValuesToAdd, /* placeholderTextForAddTextbox */ null);
+        }
+        
+        public ExpandedUi(StringMessages stringMessages, ImageResource removeImage, Iterable<String> constantValuesToAdd, String placeholderTextForAddListbox) {
+            super(stringMessages, removeImage, /*canRemoveItems*/true);
+            this.availableConstantValuesToAdd = new ArrayList<String>();
+            Util.addAll(constantValuesToAdd, availableConstantValuesToAdd);
+            Collections.sort(availableConstantValuesToAdd);
+            
+            this.placeholderTextForAddListbox = placeholderTextForAddListbox;
+            this.selectionBox = null;
+        }
+
         @Override
         public void setContext(final ListEditorComposite<String> context) {
             super.setContext(context);
@@ -82,25 +101,11 @@ public class StringConstantsListEditorComposite extends ListEditorComposite<Stri
                         List<String> diffList = new ArrayList<>();
                         Util.addAll(availableConstantValuesToAdd, diffList);
                         diffList.removeAll(context.getValue());
+                        Collections.sort(diffList);
                         updateSelectionListBox(selectionBox, diffList);
                     }
                 }
             });
-        }
-
-        protected final String placeholderTextForAddListbox;
-        protected final Iterable<String> availableConstantValuesToAdd;
-        private ListBox selectionBox;
-        
-        public ExpandedUi(StringMessages stringMessages, ImageResource removeImage, Iterable<String> availableConstantValuesToAdd) {
-            this(stringMessages, removeImage, availableConstantValuesToAdd, /* placeholderTextForAddTextbox */ null);
-        }
-        
-        public ExpandedUi(StringMessages stringMessages, ImageResource removeImage, Iterable<String> availableConstantValuesToAdd, String placeholderTextForAddListbox) {
-            super(stringMessages, removeImage, /*canRemoveItems*/true);
-            this.availableConstantValuesToAdd = availableConstantValuesToAdd;
-            this.placeholderTextForAddListbox = placeholderTextForAddListbox;
-            this.selectionBox = null;
         }
 
         private void updateSelectionListBox(ListBox listBox, Iterable<String> values) {
