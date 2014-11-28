@@ -49,6 +49,7 @@ import com.sap.sailing.domain.abstractlog.race.state.ReadonlyRaceState;
 import com.sap.sailing.domain.abstractlog.race.state.impl.RaceStateImpl;
 import com.sap.sailing.domain.abstractlog.race.state.impl.ReadonlyRaceStateImpl;
 import com.sap.sailing.domain.abstractlog.race.tracking.DeviceIdentifier;
+import com.sap.sailing.domain.abstractlog.regatta.RegattaLogEvent;
 import com.sap.sailing.domain.base.Competitor;
 import com.sap.sailing.domain.base.CompetitorStore;
 import com.sap.sailing.domain.base.CompetitorStore.CompetitorUpdateListener;
@@ -308,6 +309,7 @@ public class RacingEventServiceImpl implements RacingEventServiceWithTestSupport
     private final ConcurrentHashMap<String, Regatta> persistentRegattasForRaceIDs;
 
     private final RaceLogReplicator raceLogReplicator;
+    private final RegattaLogReplicator regattaLogReplicator;
 
     private final RaceLogScoringReplicator raceLogScoringReplicator;
 
@@ -463,6 +465,7 @@ public class RacingEventServiceImpl implements RacingEventServiceWithTestSupport
         courseListeners = new ConcurrentHashMap<>();
         persistentRegattasForRaceIDs = new ConcurrentHashMap<>();
         this.raceLogReplicator = new RaceLogReplicator(this);
+        this.regattaLogReplicator = new RegattaLogReplicator(this);
         this.raceLogScoringReplicator = new RaceLogScoringReplicator(this);
         this.mediaLibrary = new MediaLibrary();
         if (gpsFixStore == null) {
@@ -545,6 +548,7 @@ public class RacingEventServiceImpl implements RacingEventServiceWithTestSupport
                         + ") into regattasByName");
                 regattasByName.put(regatta.getName(), regatta);
                 regatta.addRegattaListener(this);
+                regatta.addRegattaListener(regattaLogReplicator);
                 regatta.addRaceColumnListener(raceLogReplicator);
                 regatta.addRaceColumnListener(raceLogScoringReplicator);
             }
@@ -601,6 +605,7 @@ public class RacingEventServiceImpl implements RacingEventServiceWithTestSupport
         }
         // RaceColumns of RegattaLeaderboards are tracked via its Regatta!
         if (leaderboard instanceof FlexibleLeaderboard) {
+            // FIXME: add listener for regattaLogReplicator
             leaderboard.addRaceColumnListener(raceLogReplicator);
             leaderboard.addRaceColumnListener(raceLogScoringReplicator);
         }
@@ -996,6 +1001,7 @@ public class RacingEventServiceImpl implements RacingEventServiceWithTestSupport
             result = new RegattaImpl(raceLogStore, name, getBaseDomainFactory().getOrCreateBoatClass(boatClassName),
                     this, getBaseDomainFactory().createScoringScheme(ScoringSchemeType.LOW_POINT), id, null);
             logger.info("Created default regatta " + result.getName() + " (" + hashCode() + ") on " + this);
+            result.addRegattaListener(regattaLogReplicator);
             cacheAndReplicateDefaultRegatta(result);
         }
         return result;
@@ -1010,6 +1016,7 @@ public class RacingEventServiceImpl implements RacingEventServiceWithTestSupport
                 useStartTimeInference);
         Regatta regatta = regattaWithCreatedFlag.getA();
         if (regattaWithCreatedFlag.getB()) {
+            regatta.addRegattaListener(regattaLogReplicator);
             replicateSpecificRegattaWithoutRaceColumns(regatta);
         }
         return regatta;
@@ -1363,17 +1370,17 @@ public class RacingEventServiceImpl implements RacingEventServiceWithTestSupport
 
         @Override
         public void startOfTrackingChanged(TimePoint startOfTracking) {
-            replicate(new UpdateStartOfTracking(getRaceIdentifier(), startOfTracking));            
+            replicate(new UpdateStartOfTracking(getRaceIdentifier(), startOfTracking));
         }
 
         @Override
         public void endOfTrackingChanged(TimePoint endOfTracking) {
-            replicate(new UpdateEndOfTracking(getRaceIdentifier(), endOfTracking));            
+            replicate(new UpdateEndOfTracking(getRaceIdentifier(), endOfTracking));
         }
 
         @Override
         public void startTimeReceivedChanged(TimePoint startTimeReceived) {
-            replicate(new UpdateStartTimeReceived(getRaceIdentifier(), startTimeReceived));            
+            replicate(new UpdateStartTimeReceived(getRaceIdentifier(), startTimeReceived));
         }
 
         @Override
@@ -2089,8 +2096,8 @@ public class RacingEventServiceImpl implements RacingEventServiceWithTestSupport
     }
 
     /**
-     * The operation is executed by immediately {@link Operation#internalApplyTo(Object) applying} it to this
-     * service object. It is then replicated to all replicas.
+     * The operation is executed by immediately {@link Operation#internalApplyTo(Object) applying} it to this service
+     * object. It is then replicated to all replicas.
      * 
      * @see {@link #replicate(RacingEventServiceOperation)}
      */
@@ -2200,10 +2207,12 @@ public class RacingEventServiceImpl implements RacingEventServiceWithTestSupport
         logger.info(logoutput.toString());
     }
 
-    @SuppressWarnings("unchecked") // all the casts of ois.readObject()'s return value to Map<..., ...>
+    @SuppressWarnings("unchecked")
+    // all the casts of ois.readObject()'s return value to Map<..., ...>
     // the type-parameters in the casts of the de-serialized collection objects can't be checked
     @Override
-    public void initiallyFillFromInternal(ObjectInputStream ois) throws IOException, ClassNotFoundException, InterruptedException {
+    public void initiallyFillFromInternal(ObjectInputStream ois) throws IOException, ClassNotFoundException,
+            InterruptedException {
         logger.info("Performing initial replication load on " + this);
         ClassLoader oldContextClassloader = Thread.currentThread().getContextClassLoader();
         try {
@@ -2498,7 +2507,7 @@ public class RacingEventServiceImpl implements RacingEventServiceWithTestSupport
     public CourseArea removeCourseAreaWithoutReplication(UUID eventId, UUID courseAreaId) {
         final CourseArea courseArea = getBaseDomainFactory().getExistingCourseAreaById(courseAreaId);
         if (courseArea == null) {
-            throw new IllegalArgumentException("No course area with ID "+courseAreaId+" found.");
+            throw new IllegalArgumentException("No course area with ID " + courseAreaId + " found.");
         }
         final Event event = eventsById.get(eventId);
         if (event == null) {
@@ -2605,7 +2614,7 @@ public class RacingEventServiceImpl implements RacingEventServiceWithTestSupport
     public Collection<MediaTrack> getMediaTracksForRace(RegattaAndRaceIdentifier regattaAndRaceIdentifier) {
         return mediaLibrary.findMediaTracksForRace(regattaAndRaceIdentifier);
     }
-    
+
     @Override
     public Collection<MediaTrack> getMediaTracksInTimeRange(RegattaAndRaceIdentifier regattaAndRaceIdentifier) {
         TrackedRace trackedRace = getExistingTrackedRace(regattaAndRaceIdentifier);
@@ -2613,8 +2622,10 @@ public class RacingEventServiceImpl implements RacingEventServiceWithTestSupport
             if (trackedRace.isLive(MillisecondsTimePoint.now())) {
                 return mediaLibrary.findLiveMediaTracks();
             } else {
-                TimePoint raceStart = trackedRace.getStartOfRace() == null ? trackedRace.getStartOfTracking() : trackedRace.getStartOfRace();
-                TimePoint raceEnd = trackedRace.getEndOfRace() == null ? trackedRace.getEndOfTracking() : trackedRace.getEndOfRace();
+                TimePoint raceStart = trackedRace.getStartOfRace() == null ? trackedRace.getStartOfTracking()
+                        : trackedRace.getStartOfRace();
+                TimePoint raceEnd = trackedRace.getEndOfRace() == null ? trackedRace.getEndOfTracking() : trackedRace
+                        .getEndOfRace();
                 return mediaLibrary.findMediaTracksInTimeRange(raceStart, raceEnd);
             }
         } else {
@@ -2880,6 +2891,11 @@ public class RacingEventServiceImpl implements RacingEventServiceWithTestSupport
         logger.fine("Remote search on " + remoteRef + " for " + query + " took " + (System.currentTimeMillis() - start)
                 + "ms");
         return result;
+    }
+
+    @Override
+    public void regattaLogEventAdded(Regatta regatta, RegattaLogEvent event) {
+        // FIXME: replicate
     }
 
 }
