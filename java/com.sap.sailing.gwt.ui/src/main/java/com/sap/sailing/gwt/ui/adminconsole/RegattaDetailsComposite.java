@@ -48,6 +48,8 @@ public class RegattaDetailsComposite extends Composite {
     
     private final Label regattaId;
     private final Label regattaName;
+    private final Label startDate;
+    private final Label endDate;
     private final Label boatClassName;
     private final Label scoringSystem;
     private final Label defaultCourseArea;
@@ -71,13 +73,15 @@ public class RegattaDetailsComposite extends Composite {
         VerticalPanel vPanel = new VerticalPanel();
         mainPanel.add(vPanel);
 
-        int rows = 7;
+        int rows = 9;
         Grid grid = new Grid(rows, 2);
         vPanel.add(grid);
         
         int currentRow = 0;
         regattaId = createLabelAndValueWidget(grid, currentRow++, stringMessages.id(), "RegattaIdLabel");
         regattaName = createLabelAndValueWidget(grid, currentRow++, stringMessages.regattaName(), "NameLabel");
+        startDate = createLabelAndValueWidget(grid, currentRow++, stringMessages.startDate(), "StartDateLabel");
+        endDate = createLabelAndValueWidget(grid, currentRow++, stringMessages.endDate(), "EndDateLabel");
         boatClassName = createLabelAndValueWidget(grid, currentRow++, stringMessages.boatClass(), "BoatClassLabel");
         defaultCourseArea = createLabelAndValueWidget(grid, currentRow++, stringMessages.courseArea(), "CourseAreaLabel");
         useStartTimeInference = createLabelAndValueWidget(grid, currentRow++, stringMessages.useStartTimeInference(), "UseStartTimeInferenceLabel");
@@ -367,6 +371,8 @@ public class RegattaDetailsComposite extends Composite {
             mainPanel.setCaptionText(stringMessages.regatta() + " " + regatta.getName());
             regattaId.setText(regatta.getName());
             regattaName.setText(regatta.getName());
+            startDate.setText(regatta.startDate != null ? regatta.startDate.toString() : "");
+            endDate.setText(regatta.endDate != null ? regatta.endDate.toString() : "");
             boatClassName.setText(regatta.boatClass != null ? regatta.boatClass.getName() : "");
             defaultCourseArea.setText(regatta.defaultCourseAreaUuid == null ? "" : regatta.defaultCourseAreaName);
             useStartTimeInference.setText(regatta.useStartTimeInference ? stringMessages.yes() : stringMessages.no());
