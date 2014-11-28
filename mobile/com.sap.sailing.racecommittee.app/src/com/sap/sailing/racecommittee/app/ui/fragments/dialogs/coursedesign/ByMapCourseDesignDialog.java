@@ -87,11 +87,6 @@ public class ByMapCourseDesignDialog extends RaceDialogFragment {
     public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
         // Inflate the layout for this fragment
         View view = inflater.inflate(R.layout.race_choose_classic_course_design_view, container);
-        try {
-            MapsInitializer.initialize(getActivity());
-        } catch (GooglePlayServicesNotAvailableException e) {
-            // TODO handle this situation
-        }
 
         mMapView = (MapView) view.findViewById(R.id.mapView);
         mMapView.onCreate(mBundle);
