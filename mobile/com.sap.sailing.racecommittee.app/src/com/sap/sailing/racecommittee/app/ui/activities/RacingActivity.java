@@ -162,23 +162,22 @@ public class RacingActivity extends SessionActivity implements RaceInfoListener,
     @Override
     public void onBackPressed() {
         Fragment fragment = getFragmentManager().findFragmentById(R.id.racing_view_right_container);
-        if (fragment instanceof RaceInfoFragment) {
-            return;
-        }
-        if (getFragmentManager().getBackStackEntryCount() > 0) {
-            getFragmentManager().popBackStackImmediate();
-            getFragmentManager().beginTransaction().commit();
-
-            // fix for filled out RaceInfoFragment
-            if (infoFragment != null && infoFragment.isFragmentUIActive() && selectedRace != null) {
-                ExLog.i(this, this.getClass().getCanonicalName(), "Returning to RaceInfoFragment");
+        if (!(fragment instanceof RaceInfoFragment)) {
+            if (getFragmentManager().getBackStackEntryCount() > 0) {
                 getFragmentManager().popBackStackImmediate();
+                getFragmentManager().beginTransaction().commit();
 
-                onRaceItemClicked(selectedRace);
+                // fix for filled out RaceInfoFragment
+                if (infoFragment != null && infoFragment.isFragmentUIActive() && selectedRace != null) {
+                    ExLog.i(this, this.getClass().getCanonicalName(), "Returning to RaceInfoFragment");
+                    getFragmentManager().popBackStackImmediate();
+
+                    onRaceItemClicked(selectedRace);
+                    return;
+                }
             }
-        } else {
-            logoutSession();
         }
+        logoutSession();
     }
 
     @Override
