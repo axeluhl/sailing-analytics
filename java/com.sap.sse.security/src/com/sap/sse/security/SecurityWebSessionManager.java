@@ -11,9 +11,9 @@ import org.apache.shiro.web.servlet.Cookie;
 import org.apache.shiro.web.session.mgt.DefaultWebSessionManager;
 
 import com.sap.sse.common.Duration;
-import com.sap.sse.common.TimerWithRunnable;
 import com.sap.sse.common.impl.MillisecondsDurationImpl;
 import com.sap.sse.common.impl.MillisecondsTimePoint;
+import com.sap.sse.util.TimerWithRunnable;
 
 /**
  * Uses the {@link Cookie#ROOT_PATH} for the session ID cookie and delays the {@link #onChange(Session) onChange}

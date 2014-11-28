@@ -1,4 +1,4 @@
-package com.sap.sse.common;
+package com.sap.sse.util;
 
 import java.util.Date;
 import java.util.Timer;

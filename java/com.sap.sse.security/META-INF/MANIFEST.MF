@@ -30,6 +30,7 @@ Require-Bundle: javax.servlet;bundle-version="2.5.0",
  com.sap.sse.common,
  com.sap.sse.replication,
  com.sap.sse.operationaltransformation,
- com.sap.sse.security.common
+ com.sap.sse.security.common,
+ com.sap.sse
 Web-ContextPath: /security
 Export-Package: com.sap.sse.security
