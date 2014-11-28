@@ -40,7 +40,7 @@ public class ReplicationServlet extends AbstractHttpServlet {
     
     private static final long serialVersionUID = 4835516998934433846L;
     
-    public enum Action { REGISTER, INITIAL_LOAD, DEREGISTER }
+    public enum Action { REGISTER, INITIAL_LOAD, DEREGISTER, APPLY_OPERATION }
     
     public static final String ACTION = "action";
     public static final String SERVER_UUID = "uuid";
@@ -51,7 +51,9 @@ public class ReplicationServlet extends AbstractHttpServlet {
      */
     private static final int INITIAL_LOAD_PACKAGE_SIZE = 1024*1024;
 
-    public static final String REPLICA_IDS_AS_STRINGS_COMMA_SEPARATED = "replicaIdsAsStringsCommaSeparated";
+    public static final String REPLICABLES_IDS_AS_STRINGS_COMMA_SEPARATED = "replicaIdsAsStringsCommaSeparated";
+
+    public static final String REPLICABLE_ID_AS_STRING = "replicaIdAsString";
 
     private final ServiceTracker<ReplicationService, ReplicationService> replicationServiceTracker;
     
@@ -87,7 +89,7 @@ public class ReplicationServlet extends AbstractHttpServlet {
             deregisterClientWithReplicationService(req, resp);
             break;
         case INITIAL_LOAD:
-            String[] replicableIdsAsStrings = req.getParameter(REPLICA_IDS_AS_STRINGS_COMMA_SEPARATED).split(",");
+            String[] replicableIdsAsStrings = req.getParameter(REPLICABLES_IDS_AS_STRINGS_COMMA_SEPARATED).split(",");
             Channel channel = getReplicationService().createMasterChannel();
             RabbitOutputStream ros = new RabbitOutputStream(INITIAL_LOAD_PACKAGE_SIZE, channel,
                     /* queueName */ "initialLoad-for-"+req.getRemoteHost()+"@"+new Date()+"-"+UUID.randomUUID(),
@@ -115,6 +117,9 @@ public class ReplicationServlet extends AbstractHttpServlet {
             }
             gzipOutputStream.finish();
             countingOutputStream.close();
+            break;
+        case APPLY_OPERATION:
+            // TODO bug 2408: implement the APPLY_OPERATION by de-serializing the operation and applying it to the Replicable identified by the REPLICABLE_ID_AS_STRING parameter
             break;
         default:
             resp.sendError(HttpServletResponse.SC_BAD_REQUEST, "Action " + action + " not understood. Must be one of "

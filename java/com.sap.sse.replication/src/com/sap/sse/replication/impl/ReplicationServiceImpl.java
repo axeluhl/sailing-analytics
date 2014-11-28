@@ -7,7 +7,9 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.io.ObjectOutputStream;
+import java.io.OutputStream;
 import java.net.ConnectException;
+import java.net.HttpURLConnection;
 import java.net.URL;
 import java.net.URLConnection;
 import java.util.ArrayList;
@@ -522,6 +524,21 @@ public class ReplicationServiceImpl implements ReplicationService {
             DeleteOk deleteOk = consumer.getChannel().queueDelete(queueName);
             logger.info("Deleted queue " + queueName + " used for initial load: " + deleteOk.toString());
         }
+    }
+    
+    @Override
+    public void sendReplicaInitiatedOperationToMaster(Replicable<?, ?> replicable, OperationWithResult<?, ?> operation) throws IOException {
+        ReplicationMasterDescriptor masterDescriptor = getReplicatingFromMaster();
+        URL url = masterDescriptor.getSendReplicaInitiatedOperationToMasterURL(replicable.getId().toString());
+        HttpURLConnection connection = (HttpURLConnection) url.openConnection();
+        connection.setDoOutput(true); // we want to post the serialized operation
+        connection.setRequestMethod("POST");
+        logger.info("Sending operation "+operation+" to master "+masterDescriptor+"'s replicable with ID "+replicable+" for initial execution and replication");
+        connection.connect();
+        OutputStream outputStream = connection.getOutputStream();
+        replicable.writeOperation(operation, outputStream, /* closeStream */ true);
+        BufferedReader bufferedReader = new BufferedReader(new InputStreamReader(connection.getInputStream()));
+        bufferedReader.close();
     }
 
     /**
