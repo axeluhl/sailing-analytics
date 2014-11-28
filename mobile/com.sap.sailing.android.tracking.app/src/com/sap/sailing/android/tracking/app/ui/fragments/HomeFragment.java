@@ -70,7 +70,6 @@ public class HomeFragment extends BaseFragment implements
 
 	private AppPreferences prefs;
 
-	private Button scan;
 	private int requestCodeQRCode = 442;
 	private RegattaAdapter adapter;
 	
@@ -90,10 +89,16 @@ public class HomeFragment extends BaseFragment implements
 
 		View view = inflater.inflate(R.layout.fragment_home, container, false);
 
-		scan = (Button) view.findViewById(R.id.scanQr);
-		if (scan != null) {
-			scan.setOnClickListener(new ClickListener());
+		Button scanButton = (Button) view.findViewById(R.id.scanQr);
+		if (scanButton != null) {
+			scanButton.setOnClickListener(new ClickListener());
 		}
+		
+		Button noQrCodeButton = (Button) view.findViewById(R.id.noQrCode);
+		if (noQrCodeButton != null) {
+			noQrCodeButton.setOnClickListener(new ClickListener());
+		}
+		
 
 		ListView listView = (ListView) view.findViewById(R.id.listRegatta);
 		if (listView != null) {
@@ -114,6 +119,11 @@ public class HomeFragment extends BaseFragment implements
 	public void onResume() {
 		super.onResume();
 		getLoaderManager().restartLoader(REGATTA_LOADER, null, this);
+	}
+	
+	private void showNoQRCodeMessage()
+	{
+		((StartActivity)getActivity()).showErrorPopup(R.string.no_qr_code_popup_title, R.string.no_qr_code_popup_message);
 	}
 
 	private boolean requestQRCodeScan() {
@@ -728,6 +738,9 @@ public class HomeFragment extends BaseFragment implements
 			switch (v.getId()) {
 			case R.id.scanQr:
 				requestQRCodeScan();
+				break;
+			case R.id.noQrCode:
+				showNoQRCodeMessage();
 				break;
 			}
 		}
