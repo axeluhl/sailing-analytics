@@ -1,4 +1,5 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
     <string name="tracking_activity_event_id_parameter">trackingActivityEventId</string> 
+    <string name="tracking_activity_started_by_start_activity_parameter">startedByStartActivity</string> 
 </resources>
