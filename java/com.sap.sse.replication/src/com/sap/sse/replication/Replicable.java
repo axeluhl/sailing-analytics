@@ -6,6 +6,7 @@ import java.io.ObjectInputStream;
 import java.io.ObjectOutputStream;
 import java.io.OutputStream;
 import java.net.MalformedURLException;
+import java.util.logging.Logger;
 
 import org.osgi.framework.BundleContext;
 
@@ -13,6 +14,7 @@ import com.sap.sse.common.WithID;
 import com.sap.sse.operationaltransformation.Operation;
 import com.sap.sse.operationaltransformation.OperationWithTransformationSupport;
 import com.sap.sse.replication.impl.ObjectInputStreamResolvingAgainstCache;
+import com.sap.sse.replication.impl.OperationWithResultWithIdWrapper;
 
 /**
  * Represents a replicable part of an application. Such a replicable part is usually holder of application state and a
@@ -56,7 +58,9 @@ import com.sap.sse.replication.impl.ObjectInputStreamResolvingAgainstCache;
  * @author Axel Uhl (D043530)
  *
  */
-public interface Replicable<S, O extends OperationWithResult<S, ?>> extends WithID {
+public interface Replicable<S, O extends OperationWithResult<S, ?>> extends Replicator<S, O>, WithID {
+    static final Logger logger = Logger.getLogger(Replicable.class.getName());
+    
     /**
      * The name of the property to use in the <code>properties</code> dictionary in a call to
      * {@link BundleContext#registerService(Class, Object, java.util.Dictionary)} when registering a {@link Replicable}.
@@ -66,11 +70,38 @@ public interface Replicable<S, O extends OperationWithResult<S, ?>> extends With
     final String OSGi_Service_Registry_ID_Property_Name = "ID";
     
     /**
-     * Executes an operation whose effects need to be replicated to any replica of this service known and
-     * {@link OperationExecutionListener#executed(OperationWithTransformationSupport) notifies} all registered
-     * operation execution listeners about the execution of the operation.
+     * If this object is not a replica, executes the <code>operation</code>. By
+     * {@link OperationExecutionListener#executed(OperationWithTransformationSupport) notifying} all registered
+     * operation execution listeners about the execution of the operation, the <code>operation</code> will in particular
+     * be replicated to all replicas registered.
+     * <p>
+     * 
+     * If this object is a replica, the operation will not be executed locally and will instead be forwarded to the
+     * master server for execution from where it is expected to replicate to all replicas including this object where
+     * the {@link #applyReplicated(OperationWithResult)} method will then carry out the operation.
+     * <p>
+     * 
+     * To determine whether this {@link Replicable} is a replica, this method uses the
+     * {@link ReplicationService#getReplicatingFromMaster()} method which also provides the master server's connectivity
+     * information required to forward the <code>operation</code>.
      */
     <T> T apply(OperationWithResult<S, T> operation);
+
+    /**
+     * Executes an operation received from another (usually "master") server where this object lives on a replica. The
+     * <code>operation</code>'s effects also need to be replicated to any replica of this service known and
+     * {@link OperationExecutionListener#executed(OperationWithTransformationSupport) notifies} all registered operation
+     * execution listeners about the execution of the operation.<p>
+     * 
+     * One important difference to {@link #apply(OperationWithResult)} is that the operation will be applied immediately
+     * in any case whereas {@link #apply(OperationWithResult)} will check first if this is a replica and in that case
+     * forward the operation to the master for first execution instead of initiating the execution on the replica.
+     */
+    <T> T applyReplicated(OperationWithResult<S, T> operation);
+    
+    void startedReplicatingFrom(ReplicationMasterDescriptor master);
+    
+    void stoppedReplicatingFrom(ReplicationMasterDescriptor master);
 
     /**
      * An operation execution listener must be able to process notifications of operations being executed that have
@@ -133,4 +164,25 @@ public interface Replicable<S, O extends OperationWithResult<S, ?>> extends With
      *            invoke this method for other operations and/or on other replicables without producing corrupt data.
      */
     void writeOperation(OperationWithResult<?, ?> operation, OutputStream outputStream, boolean closeStream) throws IOException;
+
+    /**
+     * Checks if {@link #hasSentOperationToMaster(OperationWithResultWithIdWrapper) the operation was previously
+     * sent to the master}. If so, the operation is ignored because it has been applied before to this replica.
+     * Otherwise, it is locally applied and replicated, using a call to {@link #applyReplicated(OperationWithResult)}. 
+     */
+    default void applyReceivedReplicated(OperationWithResult<S, ?> operation) {
+        if (!hasSentOperationToMaster(operation)) {
+            applyReplicated(operation);
+        } else {
+            logger.fine("Ignoring operation "+operation+" received back from master after having sent it there for execution and replication earlier");
+        }
+    }
+
+    /**
+     * If an operation equal to <code>operationWithResultWithIdWrapper</code> has previously been passed to a call to
+     * {@link #addOperationSentToMasterForReplication(OperationWithResultWithIdWrapper)}, the call returns <code>true</code>
+     * exactly once.
+     */
+    boolean hasSentOperationToMaster(OperationWithResult<S, ?> operation);
+    
 }

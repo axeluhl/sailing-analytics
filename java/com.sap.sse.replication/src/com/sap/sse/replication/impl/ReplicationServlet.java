@@ -1,6 +1,9 @@
 package com.sap.sse.replication.impl;
 
+import java.io.DataInputStream;
 import java.io.IOException;
+import java.io.InputStream;
+import java.io.ObjectInputStream;
 import java.io.OutputStreamWriter;
 import java.io.PrintWriter;
 import java.net.InetAddress;
@@ -21,6 +24,7 @@ import org.osgi.util.tracker.ServiceTracker;
 
 import com.rabbitmq.client.Channel;
 import com.sap.sse.gateway.AbstractHttpServlet;
+import com.sap.sse.replication.OperationWithResult;
 import com.sap.sse.replication.Replicable;
 import com.sap.sse.replication.ReplicationService;
 import com.sap.sse.util.impl.CountingOutputStream;
@@ -119,11 +123,37 @@ public class ReplicationServlet extends AbstractHttpServlet {
             countingOutputStream.close();
             break;
         case APPLY_OPERATION:
-            // TODO bug 2408: implement the APPLY_OPERATION by de-serializing the operation and applying it to the Replicable identified by the REPLICABLE_ID_AS_STRING parameter
+            InputStream is = req.getInputStream();
+            DataInputStream dis = new DataInputStream(is);
+            String replicableIdAsString = dis.readUTF();
+            OperationWithResult<?, ?> operation;
+            try {
+                operation = (OperationWithResult<?, ?>) new ObjectInputStream(is).readObject();
+                applyOperationToReplicable(replicableIdAsString, operation);
+            } catch (ClassNotFoundException e) {
+                logger.log(Level.SEVERE, "Exception occurred while trying to receive and apply operation initiated on replica", e);
+                resp.sendError(HttpServletResponse.SC_BAD_REQUEST, "Exception "+e+
+                        " occurred while trying to receive and apply operation initiated on replica");
+            }
             break;
         default:
             resp.sendError(HttpServletResponse.SC_BAD_REQUEST, "Action " + action + " not understood. Must be one of "
                     + Arrays.toString(Action.values()));
+        }
+    }
+
+    /**
+     * Applies <code>operation</code> to the replicable identified by <code>replicableIdAsString</code>. If such a
+     * replicable cannot be found on this server instance, a warning is logged and the operation is ignored.
+     */
+    private <S, R> void applyOperationToReplicable(String replicableIdAsString, OperationWithResult<S, R> operation) {
+        @SuppressWarnings("unchecked")
+        Replicable<S, ?> replicable = (Replicable<S, ?>) replicablesProvider.getReplicable(replicableIdAsString, /* wait */ false);
+        if (replicable != null) {
+            replicable.apply(operation);
+        } else {
+            logger.warning("Received operation "+operation+" for replicable "+replicableIdAsString+
+                    ", but a replicable with that ID couldn't be found. Ignoring the operation.");
         }
     }
 

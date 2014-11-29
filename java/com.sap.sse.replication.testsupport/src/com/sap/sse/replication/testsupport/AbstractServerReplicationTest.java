@@ -37,7 +37,7 @@ import com.sap.sse.replication.impl.ReplicaDescriptor;
 import com.sap.sse.replication.impl.ReplicationInstancesManager;
 import com.sap.sse.replication.impl.ReplicationMasterDescriptorImpl;
 import com.sap.sse.replication.impl.ReplicationServiceImpl;
-import com.sap.sse.replication.impl.Replicator;
+import com.sap.sse.replication.impl.ReplicationReceiver;
 import com.sap.sse.replication.impl.SingletonReplicablesProvider;
 
 public abstract class AbstractServerReplicationTest<ReplicableInterface extends Replicable<?, ?>, ReplicableImpl extends ReplicableInterface> {
@@ -249,12 +249,12 @@ public abstract class AbstractServerReplicationTest<ReplicableInterface extends 
             return initialLoadTestServerThread;
         }
 
-        public Replicator startToReplicateFromButDontYetFetchInitialLoad(ReplicationMasterDescriptor master, boolean startReplicatorSuspended)
+        public ReplicationReceiver startToReplicateFromButDontYetFetchInitialLoad(ReplicationMasterDescriptor master, boolean startReplicatorSuspended)
                 throws IOException {
             masterReplicationService.registerReplica(replicaDescriptor);
             registerReplicaUuidForMaster(replicaDescriptor.getUuid().toString(), master);
             QueueingConsumer consumer = master.getConsumer();
-            final Replicator replicator = new Replicator(master, getReplicablesProvider(), startReplicatorSuspended, consumer);
+            final ReplicationReceiver replicator = new ReplicationReceiver(master, getReplicablesProvider(), startReplicatorSuspended, consumer);
             new Thread(replicator).start();
             return replicator;
         }

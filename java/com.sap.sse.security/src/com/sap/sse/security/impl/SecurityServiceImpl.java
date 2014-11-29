@@ -10,6 +10,7 @@ import java.net.MalformedURLException;
 import java.net.URLEncoder;
 import java.util.Arrays;
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.Map;
 import java.util.Map.Entry;
 import java.util.Properties;
@@ -71,6 +72,9 @@ import org.scribe.oauth.OAuthService;
 import com.google.gwt.user.server.rpc.RemoteServiceServlet;
 import com.sap.sse.common.Util;
 import com.sap.sse.replication.OperationExecutionListener;
+import com.sap.sse.replication.OperationWithResult;
+import com.sap.sse.replication.ReplicationMasterDescriptor;
+import com.sap.sse.replication.impl.OperationWithResultWithIdWrapper;
 import com.sap.sse.security.ClientUtils;
 import com.sap.sse.security.Credential;
 import com.sap.sse.security.GithubApi;
@@ -108,6 +112,14 @@ public class SecurityServiceImpl extends RemoteServiceServlet implements Replica
     private UserStore store;
     private final Properties mailProperties;
     private final ConcurrentHashMap<OperationExecutionListener<ReplicableSecurityService>, OperationExecutionListener<ReplicableSecurityService>> operationExecutionListeners;
+
+    /**
+     * The master from which this replicable is currently replicating, or <code>null</code> if this replicable is not currently
+     * replicated from any master.
+     */
+    private ReplicationMasterDescriptor replicatingFromMaster;
+    
+    private Set<OperationWithResultWithIdWrapper<?, ?>> operationsSentToMasterForReplication;
     
     private static Ini shiroConfiguration;
     static {
@@ -121,6 +133,7 @@ public class SecurityServiceImpl extends RemoteServiceServlet implements Replica
     public SecurityServiceImpl(UserStore store, Properties mailProperties) {
         assert mailProperties != null;
         logger.info("Initializing Security Service with user store " + store+" and mail properties "+mailProperties);
+        operationsSentToMasterForReplication = new HashSet<>();
         cacheManager = new ReplicatingCacheManager();
         this.operationExecutionListeners = new ConcurrentHashMap<>();
         this.store = store;
@@ -897,4 +910,29 @@ public class SecurityServiceImpl extends RemoteServiceServlet implements Replica
         operationExecutionListeners.remove(listener);
     }
 
+    @Override
+    public ReplicationMasterDescriptor getMasterDescriptor() {
+        return replicatingFromMaster;
+    }
+
+    @Override
+    public void startedReplicatingFrom(ReplicationMasterDescriptor master) {
+        this.replicatingFromMaster = master;
+    }
+
+    @Override
+    public void stoppedReplicatingFrom(ReplicationMasterDescriptor master) {
+        this.replicatingFromMaster = null;
+    }
+
+    @Override
+    public void addOperationSentToMasterForReplication(
+            OperationWithResultWithIdWrapper<ReplicableSecurityService, ?> operationWithResultWithIdWrapper) {
+        this.operationsSentToMasterForReplication.add(operationWithResultWithIdWrapper);
+    }
+
+    @Override
+    public boolean hasSentOperationToMaster(OperationWithResult<ReplicableSecurityService, ?> operation) {
+        return this.operationsSentToMasterForReplication.remove(operation);
+    }
 }

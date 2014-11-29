@@ -138,7 +138,6 @@ import com.sap.sailing.domain.tracking.WindTrackerFactory;
 import com.sap.sailing.domain.tracking.impl.DynamicTrackedRegattaImpl;
 import com.sap.sailing.expeditionconnector.ExpeditionWindTrackerFactory;
 import com.sap.sailing.server.RacingEventService;
-import com.sap.sailing.server.RacingEventServiceOperation;
 import com.sap.sailing.server.Replicator;
 import com.sap.sailing.server.gateway.deserialization.impl.CourseAreaJsonDeserializer;
 import com.sap.sailing.server.gateway.deserialization.impl.EventBaseJsonDeserializer;
@@ -194,6 +193,9 @@ import com.sap.sse.common.search.KeywordQuery;
 import com.sap.sse.common.search.Result;
 import com.sap.sse.common.search.ResultImpl;
 import com.sap.sse.replication.OperationExecutionListener;
+import com.sap.sse.replication.OperationWithResult;
+import com.sap.sse.replication.ReplicationMasterDescriptor;
+import com.sap.sse.replication.impl.OperationWithResultWithIdWrapper;
 
 public class RacingEventServiceImpl implements RacingEventServiceWithTestSupport, RegattaListener, LeaderboardRegistry,
         Replicator {
@@ -343,6 +345,14 @@ public class RacingEventServiceImpl implements RacingEventServiceWithTestSupport
     private TypeBasedServiceFinderFactory serviceFinderFactory;
 
     /**
+     * The master from which this replicable is currently replicating, or <code>null</code> if this replicable is not currently
+     * replicated from any master.
+     */
+    private ReplicationMasterDescriptor replicatingFromMaster;
+    
+    private Set<OperationWithResultWithIdWrapper<?, ?>> operationsSentToMasterForReplication;
+
+    /**
      * Constructs a {@link DomainFactory base domain factory} that uses this object's {@link #competitorStore competitor
      * store} for competitor management. This base domain factory is then also used for the construction of the
      * {@link DomainObjectFactory}. This constructor variant initially clears the persistent competitor collection,
@@ -418,6 +428,7 @@ public class RacingEventServiceImpl implements RacingEventServiceWithTestSupport
             CompetitorStore competitorStore, WindStore windStore, GPSFixStore gpsFixStore,
             TypeBasedServiceFinderFactory serviceFinderFactory) {
         logger.info("Created " + this);
+        this.operationsSentToMasterForReplication = new HashSet<>();
         if (windStore == null) {
             try {
                 windStore = MongoWindStoreFactory.INSTANCE.getMongoWindStore(mongoObjectFactory, domainObjectFactory);
@@ -2097,19 +2108,6 @@ public class RacingEventServiceImpl implements RacingEventServiceWithTestSupport
     }
 
     @Override
-    public <T> void replicate(RacingEventServiceOperation<T> operation) {
-        for (OperationExecutionListener<RacingEventService> listener : getOperationExecutionListeners()) {
-            try {
-                listener.executed(operation);
-            } catch (Exception e) {
-                // don't risk the master's operation only because replication to a listener/replica doesn't work
-                logger.severe("Error replicating operation " + operation + " to replication listener " + listener);
-                logger.log(Level.SEVERE, "replicate", e);
-            }
-        }
-    }
-    
-    @Override
     public Iterable<OperationExecutionListener<RacingEventService>> getOperationExecutionListeners() {
         return operationExecutionListeners.keySet();
     }
@@ -2859,4 +2857,29 @@ public class RacingEventServiceImpl implements RacingEventServiceWithTestSupport
         return result;
     }
 
+    @Override
+    public ReplicationMasterDescriptor getMasterDescriptor() {
+        return replicatingFromMaster;
+    }
+
+    @Override
+    public void startedReplicatingFrom(ReplicationMasterDescriptor master) {
+        this.replicatingFromMaster = master;
+    }
+
+    @Override
+    public void stoppedReplicatingFrom(ReplicationMasterDescriptor master) {
+        this.replicatingFromMaster = null;
+    }
+
+    @Override
+    public void addOperationSentToMasterForReplication(
+            OperationWithResultWithIdWrapper<RacingEventService, ?> operationWithResultWithIdWrapper) {
+        this.operationsSentToMasterForReplication.add(operationWithResultWithIdWrapper);
+    }
+
+    @Override
+    public boolean hasSentOperationToMaster(OperationWithResult<RacingEventService, ?> operation) {
+        return this.operationsSentToMasterForReplication.remove(operation);
+    }
 }

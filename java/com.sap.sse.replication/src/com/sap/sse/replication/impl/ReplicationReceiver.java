@@ -61,8 +61,8 @@ import com.sap.sse.replication.ReplicationMasterDescriptor;
  * @author Axel Uhl (d043530)
  * 
  */
-public class Replicator implements Runnable {
-    private final static Logger logger = Logger.getLogger(Replicator.class.getName());
+public class ReplicationReceiver implements Runnable {
+    private final static Logger logger = Logger.getLogger(ReplicationReceiver.class.getName());
     
     private static final long CHECK_INTERVAL_MILLIS = 2000; // how long (milliseconds) to pause before checking connection again
     private static final int CHECK_COUNT = 150; // how long to check, value is CHECK_INTERVAL second steps
@@ -123,7 +123,7 @@ public class Replicator implements Runnable {
      * @param consumer
      *            the RabbitMQ consumer from which to load messages
      */
-    public Replicator(ReplicationMasterDescriptor master, ReplicablesProvider replicableProvider, boolean startSuspended, QueueingConsumer consumer) {
+    public ReplicationReceiver(ReplicationMasterDescriptor master, ReplicablesProvider replicableProvider, boolean startSuspended, QueueingConsumer consumer) {
         this.queueByReplicableIdAsString = new HashMap<>();
         this.master = master;
         this.replicableProvider = replicableProvider;
@@ -301,7 +301,7 @@ public class Replicator implements Runnable {
         Runnable runnable = new Runnable() {
             @Override
             public void run() {
-                replicable.apply(operation);
+                replicable.applyReceivedReplicated(operation);
             }
         };
         if (operation.requiresSynchronousExecution()) {

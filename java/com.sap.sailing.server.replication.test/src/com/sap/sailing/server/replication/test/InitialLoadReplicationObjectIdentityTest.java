@@ -52,7 +52,7 @@ import com.sap.sse.common.Util.Pair;
 import com.sap.sse.common.impl.MillisecondsDurationImpl;
 import com.sap.sse.common.impl.MillisecondsTimePoint;
 import com.sap.sse.replication.ReplicationMasterDescriptor;
-import com.sap.sse.replication.impl.Replicator;
+import com.sap.sse.replication.impl.ReplicationReceiver;
 
 public class InitialLoadReplicationObjectIdentityTest extends AbstractServerReplicationTest {
     private Pair<com.sap.sse.replication.testsupport.AbstractServerReplicationTest.ReplicationServiceTestImpl<RacingEventService>, ReplicationMasterDescriptor> replicationDescriptorPair;
@@ -139,7 +139,7 @@ public class InitialLoadReplicationObjectIdentityTest extends AbstractServerRepl
         /* fire up replication */
         performReplicationSetup();
         ReplicationMasterDescriptor the_master = replicationDescriptorPair.getB(); /* master descriptor */
-        Replicator replicator = replicationDescriptorPair.getA().startToReplicateFromButDontYetFetchInitialLoad(the_master, /* startReplicatorSuspended */ true);
+        ReplicationReceiver replicator = replicationDescriptorPair.getA().startToReplicateFromButDontYetFetchInitialLoad(the_master, /* startReplicatorSuspended */ true);
         replicationDescriptorPair.getA().initialLoad();
         replicator.setSuspended(false);
         synchronized (replicator) {

@@ -14,10 +14,10 @@ import com.sap.sailing.server.RacingEventService;
 import com.sap.sailing.server.operationaltransformation.CreateFlexibleLeaderboard;
 import com.sap.sse.common.Util.Pair;
 import com.sap.sse.replication.ReplicationMasterDescriptor;
-import com.sap.sse.replication.impl.Replicator;
+import com.sap.sse.replication.impl.ReplicationReceiver;
 
 public class PrematureOperationReceiptTest extends AbstractServerReplicationTest {
-    private Replicator replicator;
+    private ReplicationReceiver replicator;
 
     /**
      * Drops the test DB. Sets up master and replica, starts the JMS message broker and registers the replica with the master.

@@ -84,10 +84,4 @@ public interface ReplicationService {
     long getNumberOfBytesSent(ReplicaDescriptor replica);
 
     double getAverageNumberOfBytesPerMessage(ReplicaDescriptor replica);
-
-    /**
-     * When a replica has initiated (not received through replication) an operation, this operation needs to be
-     * sent to the master for execution from where it will replicate across the replication tree.
-     */
-    void sendReplicaInitiatedOperationToMaster(Replicable<?, ?> replicable, OperationWithResult<?, ?> operation) throws IOException;
 }

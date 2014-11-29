@@ -7,9 +7,7 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.io.ObjectOutputStream;
-import java.io.OutputStream;
 import java.net.ConnectException;
-import java.net.HttpURLConnection;
 import java.net.URL;
 import java.net.URLConnection;
 import java.util.ArrayList;
@@ -50,7 +48,7 @@ import com.sap.sse.replication.ReplicationService;
  * 
  * The observers are registered only when there are replicas registered. If the last replica is de-registered, the
  * service stops observing the {@link Replicable}. Operations received that require replication are sent to the
- * {@link Exchange} to which replica queues can bind, using a {@link Replicator}. By prefixing each message with the
+ * {@link Exchange} to which replica queues can bind, using a {@link ReplicationReceiver}. By prefixing each message with the
  * {@link Object#toString()} representation of the {@link Replicable}'s {@link Replicable#getId() ID} the receiver can
  * determine to which {@link Replicable} to forward the operation. As such, this service multiplexes the replication
  * channels for potentially many {@link Replicable}s living in this server instance.
@@ -115,7 +113,7 @@ public class ReplicationServiceImpl implements ReplicationService {
      * For this instance running as a replica, the replicator receives messages from the master's queue and applies them
      * to the local replica.
      */
-    private Replicator replicator;
+    private ReplicationReceiver replicator;
     
     private final Map<String, ReplicationServiceExecutionListener<?>> executionListenersByReplicableIdAsString;
     
@@ -260,7 +258,7 @@ public class ReplicationServiceImpl implements ReplicationService {
         return replicablesProvider;
     }
     
-    protected Replicator getReplicator() {
+    protected ReplicationReceiver getReplicator() {
         return replicator;
     }
     
@@ -498,11 +496,12 @@ public class ReplicationServiceImpl implements ReplicationService {
         URL initialLoadURL = master.getInitialLoadURL(replicables);
         logger.info("Initial load URL is "+initialLoadURL);
         // start receiving messages already now, but start in suspended mode
-        replicator = new Replicator(master, replicablesProvider, /* startSuspended */true, consumer);
+        replicator = new ReplicationReceiver(master, replicablesProvider, /* startSuspended */true, consumer);
         // clear Replicable state here, before starting to receive and de-serialized operations which builds up
         // new state, e.g., in competitor store
         for (Replicable<?, ?> r : getReplicables()) {
             r.clearReplicaState();
+            r.startedReplicatingFrom(master);
         }
         replicatorThread = new Thread(replicator, "Replicator receiving from " + master.getMessagingHostname() + "/"
                 + master.getExchangeName());
@@ -526,21 +525,6 @@ public class ReplicationServiceImpl implements ReplicationService {
         }
     }
     
-    @Override
-    public void sendReplicaInitiatedOperationToMaster(Replicable<?, ?> replicable, OperationWithResult<?, ?> operation) throws IOException {
-        ReplicationMasterDescriptor masterDescriptor = getReplicatingFromMaster();
-        URL url = masterDescriptor.getSendReplicaInitiatedOperationToMasterURL(replicable.getId().toString());
-        HttpURLConnection connection = (HttpURLConnection) url.openConnection();
-        connection.setDoOutput(true); // we want to post the serialized operation
-        connection.setRequestMethod("POST");
-        logger.info("Sending operation "+operation+" to master "+masterDescriptor+"'s replicable with ID "+replicable+" for initial execution and replication");
-        connection.connect();
-        OutputStream outputStream = connection.getOutputStream();
-        replicable.writeOperation(operation, outputStream, /* closeStream */ true);
-        BufferedReader bufferedReader = new BufferedReader(new InputStreamReader(connection.getInputStream()));
-        bufferedReader.close();
-    }
-
     /**
      * @return the UUID that the master generated for this client which is also entered into {@link #replicaUUIDs}
      */
@@ -575,6 +559,9 @@ public class ReplicationServiceImpl implements ReplicationService {
                 read = content.read(buf);
             }
             content.close();
+            for (Replicable<?, ?> r : getReplicables()) {
+                r.stoppedReplicatingFrom(master);
+            }
         } catch (Exception ex) {
             // ignore exceptions here - they will mostly be caused by an incompatible server
             // it is also not problematic if the server does not get this deregistration
