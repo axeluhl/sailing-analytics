@@ -35,7 +35,6 @@ import com.sap.sailing.domain.common.impl.NaturalComparator;
 import com.sap.sailing.gwt.ui.client.StringMessages;
 import com.sap.sailing.gwt.ui.shared.LeaderboardGroupDTO;
 import com.sap.sailing.gwt.ui.shared.StrippedLeaderboardDTO;
-import com.sap.sse.common.Util;
 import com.sap.sse.gwt.client.panels.LabeledAbstractFilterablePanel;
 
 public class LeaderboardGroupSelectorComposite extends Composite implements HasValueChangeHandlers<Iterable<LeaderboardGroupDTO>> {
@@ -198,30 +197,6 @@ public class LeaderboardGroupSelectorComposite extends Composite implements HasV
         });
         availableLeaderboardGroupsTable.addColumnSortHandler(sortHandler);
         return result;
-    }
-
-    private void updateLeaderboardGroupAssignmentPanel() {
-        selectedEventLeaderboardGroupsProvider.getList().clear();
-        Util.addAll(leaderboardGroups, selectedEventLeaderboardGroupsProvider.getList());
-        // deselect all items that are no longer in the list; this shall adjust the switch button enablement
-        for (LeaderboardGroupDTO lg : selectedEventLeaderboardGroupsSelectionModel.getSelectedSet()) {
-            if (!selectedEventLeaderboardGroupsProvider.getList().contains(lg)) {
-                selectedEventLeaderboardGroupsSelectionModel.setSelected(lg, false);
-            }
-        }
-        selectedEventLeaderboardGroupsProvider.refresh();
-        List<LeaderboardGroupDTO> allButEventsLeaderboardGroups = new ArrayList<>();
-        Util.addAll(availableLeaderboardGroups, allButEventsLeaderboardGroups);
-        Util.removeAll(leaderboardGroups, allButEventsLeaderboardGroups);
-        availableLeaderboardGroupsFilterablePanel.updateAll(allButEventsLeaderboardGroups);
-        // deselect all items that are no longer in the list; this shall adjust the switch button enablement
-        for (LeaderboardGroupDTO lg : availableLeaderboardGroupsSelectionModel.getSelectedSet()) {
-            if (!allButEventsLeaderboardGroups.contains(lg)) {
-                availableLeaderboardGroupsSelectionModel.setSelected(lg, false);
-            }
-        }
-        addToEventButton.setEnabled(!availableLeaderboardGroupsSelectionModel.getSelectedSet().isEmpty());
-        removeFromEventButton.setEnabled(!selectedEventLeaderboardGroupsSelectionModel.getSelectedSet().isEmpty());
     }
 
     private Widget createSwitchLeaderboardGroupsGUI() {
