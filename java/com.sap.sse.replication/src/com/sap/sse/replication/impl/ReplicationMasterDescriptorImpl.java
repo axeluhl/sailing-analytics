@@ -85,9 +85,7 @@ public class ReplicationMasterDescriptorImpl implements ReplicationMasterDescrip
     
     @Override
     public URL getSendReplicaInitiatedOperationToMasterURL(String replicableIdAsString) throws MalformedURLException {
-        return new URL("http", getHostname(), servletPort, REPLICATION_SERVLET + "?" + ReplicationServlet.ACTION + "="
-                + ReplicationServlet.Action.APPLY_OPERATION.name() + "&" + ReplicationServlet.REPLICABLE_ID_AS_STRING
-                + "=" + replicableIdAsString);
+        return new URL("http", getHostname(), servletPort, REPLICATION_SERVLET);
     }
 
     @Override

@@ -18,14 +18,26 @@ import com.sap.sse.replication.OperationWithResult;
  */
 public class OperationWithResultWithIdWrapper<S, R> implements OperationWithResult<S, R>, WithID {
     private static final long serialVersionUID = -5435955633510008283L;
-    private final UUID id;
+    private final Serializable id;
     private final OperationWithResult<S, R> delegate;
-    
+
+    /**
+     * Creates a new UUID for this wrapper operation
+     */
     public OperationWithResultWithIdWrapper(OperationWithResult<S, R> delegate) {
         this.delegate = delegate;
         this.id = UUID.randomUUID();
     }
-    
+
+    /**
+     * Allows the caller to define the ID for this wrapper.
+     */
+    protected OperationWithResultWithIdWrapper(OperationWithResult<S, R> delegate, Serializable id) {
+        super();
+        this.id = id;
+        this.delegate = delegate;
+    }
+
     @Override
     public int hashCode() {
         final int prime = 31;
@@ -74,5 +86,10 @@ public class OperationWithResultWithIdWrapper<S, R> implements OperationWithResu
     @Override
     public Serializable getId() {
         return id;
+    }
+    
+    @Override
+    public String toString() {
+        return ""+delegate+" with ID "+getId();
     }
 }

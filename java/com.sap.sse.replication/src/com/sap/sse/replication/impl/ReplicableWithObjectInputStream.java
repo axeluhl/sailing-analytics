@@ -8,6 +8,7 @@ import java.io.InputStreamReader;
 import java.io.ObjectInputStream;
 import java.io.ObjectOutputStream;
 import java.io.OutputStream;
+import java.io.Serializable;
 import java.net.HttpURLConnection;
 import java.net.URL;
 import java.util.logging.Level;
@@ -21,6 +22,18 @@ import com.sap.sse.replication.ReplicationMasterDescriptor;
 
 public interface ReplicableWithObjectInputStream<S, O extends OperationWithResult<S, ?>> extends Replicable<S, O> {
     static final Logger logger = Logger.getLogger(ReplicableWithObjectInputStream.class.getName());
+    
+    /**
+     * When an operation is applied that is an {@link OperationWithResultWithIdWrapper} then its ID is stored
+     * in this thread local and removed when the local execution of that operation has finished. When during the
+     * execution of the operation another operation is fired to the replicas registered, it will be wrapped
+     * by an {@link OperationWithResultWithIdWrapper} that has this ID. This will let the replica that originally
+     * passed this operation to this master recognize that it is receiving the operation it triggered itself, so
+     * it can safely be ignored on that replica. This procedure is important for operations that have
+     * {@link OperationWithResult#isRequiresExplicitTransitiveReplication()} return <code>false</code> because they
+     * implicitly replicate their effects while being executed.
+     */
+    static final ThreadLocal<Serializable> idOfOperationBeingExecuted = new ThreadLocal<Serializable>();
     
     /**
      * Produces an object input stream that can choose to resolve objects against a cache so that duplicate instances
@@ -105,14 +118,21 @@ public interface ReplicableWithObjectInputStream<S, O extends OperationWithResul
      * which would also send the operation to a master if this is a replica.
      */
     default <T> void replicateReplicated(O operation) {
+        @SuppressWarnings("unchecked")
+        final OperationWithResult<S, T> owr = (OperationWithResult<S, T>) operation;
+        final Serializable idOfCurrentlyExecutingOperation = idOfOperationBeingExecuted.get();
+        final OperationWithResult<S, T> operationToNotify;
+        if (!(owr instanceof OperationWithResultWithIdWrapper<?, ?>) && idOfCurrentlyExecutingOperation != null) {
+            operationToNotify = new OperationWithResultWithIdWrapper<S, T>(owr, idOfCurrentlyExecutingOperation);
+        } else {
+            operationToNotify = owr;
+        }
         for (OperationExecutionListener<S> listener : getOperationExecutionListeners()) {
             try {
-                @SuppressWarnings("unchecked")
-                final OperationWithResult<S, T> owr = (OperationWithResult<S, T>) operation;
-                listener.executed(owr);
+                listener.executed(operationToNotify);
             } catch (Exception e) {
                 // don't risk the master's operation only because replication to a listener/replica doesn't work
-                logger.severe("Error replicating operation " + operation + " to replication listener " + listener);
+                logger.severe("Error replicating operation " + operationToNotify + " to replication listener " + listener);
                 logger.log(Level.SEVERE, "replicate", e);
             }
         }
@@ -131,7 +151,8 @@ public interface ReplicableWithObjectInputStream<S, O extends OperationWithResul
     default <T> void sendReplicaInitiatedOperationToMaster(OperationWithResult<S, T> operation) throws IOException {
         ReplicationMasterDescriptor masterDescriptor = getMasterDescriptor();
         assert masterDescriptor != null;
-        addOperationSentToMasterForReplication(new OperationWithResultWithIdWrapper<S, T>(operation));
+        final OperationWithResultWithIdWrapper<S, T> operationWithResultWithIdWrapper = new OperationWithResultWithIdWrapper<S, T>(operation);
+        addOperationSentToMasterForReplication(operationWithResultWithIdWrapper);
         URL url = masterDescriptor.getSendReplicaInitiatedOperationToMasterURL(this.getId().toString());
         HttpURLConnection connection = (HttpURLConnection) url.openConnection();
         connection.setDoOutput(true); // we want to post the serialized operation
@@ -141,7 +162,7 @@ public interface ReplicableWithObjectInputStream<S, O extends OperationWithResul
         OutputStream outputStream = connection.getOutputStream();
         DataOutputStream dos = new DataOutputStream(outputStream);
         dos.writeUTF(getId().toString());
-        this.writeOperation(operation, outputStream, /* closeStream */ true);
+        this.writeOperation(operationWithResultWithIdWrapper, outputStream, /* closeStream */ true);
         BufferedReader bufferedReader = new BufferedReader(new InputStreamReader(connection.getInputStream()));
         bufferedReader.close();
     }
@@ -152,7 +173,12 @@ public interface ReplicableWithObjectInputStream<S, O extends OperationWithResul
      * and replicates the operation immediately.
      */
     default <T> T apply(OperationWithResult<S, T> operation) {
+        boolean needToRemoveThreadLocal = false;
         try {
+            if (operation instanceof OperationWithResultWithIdWrapper<?, ?>) {
+                idOfOperationBeingExecuted.set(((OperationWithResultWithIdWrapper<?, ?>) operation).getId());
+                needToRemoveThreadLocal = true;
+            }
             ReplicationMasterDescriptor masterDescriptor = getMasterDescriptor();
             final T result = applyReplicated(operation);
             if (masterDescriptor != null) {
@@ -162,6 +188,10 @@ public interface ReplicableWithObjectInputStream<S, O extends OperationWithResul
         } catch (Exception e) {
             logger.log(Level.SEVERE, "apply", e);
             throw new RuntimeException(e);
+        } finally {
+            if (needToRemoveThreadLocal) {
+                idOfOperationBeingExecuted.remove();
+            }
         }
     }
 
