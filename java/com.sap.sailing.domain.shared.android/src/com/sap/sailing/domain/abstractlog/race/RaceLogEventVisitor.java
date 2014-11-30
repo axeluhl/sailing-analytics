@@ -7,9 +7,7 @@ import com.sap.sailing.domain.abstractlog.race.tracking.DenoteForTrackingEvent;
 import com.sap.sailing.domain.abstractlog.race.tracking.DeviceCompetitorMappingEvent;
 import com.sap.sailing.domain.abstractlog.race.tracking.DeviceMarkMappingEvent;
 import com.sap.sailing.domain.abstractlog.race.tracking.RegisterCompetitorEvent;
-import com.sap.sailing.domain.racelog.tracking.FixedMarkPassingEvent;
 import com.sap.sailing.domain.abstractlog.race.tracking.StartTrackingEvent;
-import com.sap.sailing.domain.racelog.tracking.SuppressedMarkPassingsEvent;
 
 
 public interface RaceLogEventVisitor {

@@ -1,13 +1,12 @@
-package com.sap.sailing.domain.racelog.tracking.events;
+package com.sap.sailing.domain.abstractlog.race.impl;
 
 import java.io.Serializable;
 import java.util.List;
 
+import com.sap.sailing.domain.abstractlog.AbstractLogEventAuthor;
+import com.sap.sailing.domain.abstractlog.race.FixedMarkPassingEvent;
+import com.sap.sailing.domain.abstractlog.race.RaceLogEventVisitor;
 import com.sap.sailing.domain.base.Competitor;
-import com.sap.sailing.domain.racelog.RaceLogEventAuthor;
-import com.sap.sailing.domain.racelog.RaceLogEventVisitor;
-import com.sap.sailing.domain.racelog.impl.RaceLogEventImpl;
-import com.sap.sailing.domain.racelog.tracking.FixedMarkPassingEvent;
 import com.sap.sse.common.TimePoint;
 
 
@@ -17,7 +16,7 @@ public class FixedMarkPassingEventImpl extends RaceLogEventImpl implements Fixed
     
     private final TimePoint timePointOfPassing;
 
-    public FixedMarkPassingEventImpl(TimePoint createdAt, RaceLogEventAuthor author, TimePoint logicalTimePoint,
+    public FixedMarkPassingEventImpl(TimePoint createdAt, AbstractLogEventAuthor author, TimePoint logicalTimePoint,
             Serializable pId, List<Competitor> pInvolvedBoats, int pPassId, TimePoint timePoint, Integer zeroBasedIndexOfWaypointOfPassing) {
         super(createdAt, author, logicalTimePoint, pId, pInvolvedBoats, pPassId);
         this.timePointOfPassing = timePoint;

@@ -1,7 +1,6 @@
-package com.sap.sailing.domain.racelog.tracking;
+package com.sap.sailing.domain.abstractlog.race;
 
-import com.sap.sailing.domain.racelog.RaceLogEvent;
-import com.sap.sailing.domain.racelog.Revokable;
+import com.sap.sailing.domain.abstractlog.Revokable;
 import com.sap.sse.common.TimePoint;
 
 public interface FixedMarkPassingEvent extends RaceLogEvent, Revokable {

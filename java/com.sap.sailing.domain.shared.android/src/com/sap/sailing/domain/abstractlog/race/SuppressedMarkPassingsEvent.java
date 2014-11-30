@@ -1,7 +1,6 @@
-package com.sap.sailing.domain.racelog.tracking;
+package com.sap.sailing.domain.abstractlog.race;
 
-import com.sap.sailing.domain.racelog.RaceLogEvent;
-import com.sap.sailing.domain.racelog.Revokable;
+import com.sap.sailing.domain.abstractlog.Revokable;
 
 public interface SuppressedMarkPassingsEvent extends RaceLogEvent, Revokable {
     

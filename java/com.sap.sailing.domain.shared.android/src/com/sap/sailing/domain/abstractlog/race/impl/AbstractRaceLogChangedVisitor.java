@@ -1,5 +1,6 @@
 package com.sap.sailing.domain.abstractlog.race.impl;
 
+import com.sap.sailing.domain.abstractlog.race.FixedMarkPassingEvent;
 import com.sap.sailing.domain.abstractlog.race.RaceLogCourseAreaChangedEvent;
 import com.sap.sailing.domain.abstractlog.race.RaceLogCourseDesignChangedEvent;
 import com.sap.sailing.domain.abstractlog.race.RaceLogEvent;
@@ -16,6 +17,7 @@ import com.sap.sailing.domain.abstractlog.race.RaceLogRevokeEvent;
 import com.sap.sailing.domain.abstractlog.race.RaceLogStartProcedureChangedEvent;
 import com.sap.sailing.domain.abstractlog.race.RaceLogStartTimeEvent;
 import com.sap.sailing.domain.abstractlog.race.RaceLogWindFixEvent;
+import com.sap.sailing.domain.abstractlog.race.SuppressedMarkPassingsEvent;
 import com.sap.sailing.domain.abstractlog.race.scoring.AdditionalScoringInformationEvent;
 import com.sap.sailing.domain.abstractlog.race.tracking.CloseOpenEndedDeviceMappingEvent;
 import com.sap.sailing.domain.abstractlog.race.tracking.DefineMarkEvent;
@@ -23,9 +25,7 @@ import com.sap.sailing.domain.abstractlog.race.tracking.DenoteForTrackingEvent;
 import com.sap.sailing.domain.abstractlog.race.tracking.DeviceCompetitorMappingEvent;
 import com.sap.sailing.domain.abstractlog.race.tracking.DeviceMarkMappingEvent;
 import com.sap.sailing.domain.abstractlog.race.tracking.RegisterCompetitorEvent;
-import com.sap.sailing.domain.racelog.tracking.FixedMarkPassingEvent;
 import com.sap.sailing.domain.abstractlog.race.tracking.StartTrackingEvent;
-import com.sap.sailing.domain.racelog.tracking.SuppressedMarkPassingsEvent;
 
 public abstract class AbstractRaceLogChangedVisitor implements RaceLogEventVisitor {
     protected abstract void notifyListenerAboutEventAdded(RaceLogEvent event);

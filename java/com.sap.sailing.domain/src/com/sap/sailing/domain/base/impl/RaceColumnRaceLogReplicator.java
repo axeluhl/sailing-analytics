@@ -2,6 +2,7 @@ package com.sap.sailing.domain.base.impl;
 
 import java.io.Serializable;
 
+import com.sap.sailing.domain.abstractlog.race.FixedMarkPassingEvent;
 import com.sap.sailing.domain.abstractlog.race.RaceLogCourseAreaChangedEvent;
 import com.sap.sailing.domain.abstractlog.race.RaceLogCourseDesignChangedEvent;
 import com.sap.sailing.domain.abstractlog.race.RaceLogEvent;
@@ -18,6 +19,7 @@ import com.sap.sailing.domain.abstractlog.race.RaceLogRevokeEvent;
 import com.sap.sailing.domain.abstractlog.race.RaceLogStartProcedureChangedEvent;
 import com.sap.sailing.domain.abstractlog.race.RaceLogStartTimeEvent;
 import com.sap.sailing.domain.abstractlog.race.RaceLogWindFixEvent;
+import com.sap.sailing.domain.abstractlog.race.SuppressedMarkPassingsEvent;
 import com.sap.sailing.domain.abstractlog.race.scoring.AdditionalScoringInformationEvent;
 import com.sap.sailing.domain.abstractlog.race.tracking.CloseOpenEndedDeviceMappingEvent;
 import com.sap.sailing.domain.abstractlog.race.tracking.DefineMarkEvent;
@@ -28,8 +30,6 @@ import com.sap.sailing.domain.abstractlog.race.tracking.RegisterCompetitorEvent;
 import com.sap.sailing.domain.abstractlog.race.tracking.StartTrackingEvent;
 import com.sap.sailing.domain.base.RaceColumn;
 import com.sap.sailing.domain.racelog.RaceLogIdentifier;
-import com.sap.sailing.domain.racelog.tracking.FixedMarkPassingEvent;
-import com.sap.sailing.domain.racelog.tracking.SuppressedMarkPassingsEvent;
 
 public class RaceColumnRaceLogReplicator implements RaceLogEventVisitor, Serializable {
     private static final long serialVersionUID = 4752330236765192592L;

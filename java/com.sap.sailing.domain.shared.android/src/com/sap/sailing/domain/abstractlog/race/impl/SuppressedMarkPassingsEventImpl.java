@@ -1,13 +1,12 @@
-package com.sap.sailing.domain.racelog.tracking.events;
+package com.sap.sailing.domain.abstractlog.race.impl;
 
 import java.io.Serializable;
 import java.util.List;
 
+import com.sap.sailing.domain.abstractlog.AbstractLogEventAuthor;
+import com.sap.sailing.domain.abstractlog.race.RaceLogEventVisitor;
+import com.sap.sailing.domain.abstractlog.race.SuppressedMarkPassingsEvent;
 import com.sap.sailing.domain.base.Competitor;
-import com.sap.sailing.domain.racelog.RaceLogEventAuthor;
-import com.sap.sailing.domain.racelog.RaceLogEventVisitor;
-import com.sap.sailing.domain.racelog.impl.RaceLogEventImpl;
-import com.sap.sailing.domain.racelog.tracking.SuppressedMarkPassingsEvent;
 import com.sap.sse.common.TimePoint;
 
 public class SuppressedMarkPassingsEventImpl extends RaceLogEventImpl implements SuppressedMarkPassingsEvent {
@@ -16,7 +15,7 @@ public class SuppressedMarkPassingsEventImpl extends RaceLogEventImpl implements
 
     private final Integer indexOfFirstSuppressedWaypoint;
 
-    public SuppressedMarkPassingsEventImpl(TimePoint createdAt, RaceLogEventAuthor author, TimePoint logicalTimePoint, Serializable pId,
+    public SuppressedMarkPassingsEventImpl(TimePoint createdAt, AbstractLogEventAuthor author, TimePoint logicalTimePoint, Serializable pId,
             List<Competitor> pInvolvedBoats, int pPassId, Integer indexOfFirstSuppressedWaypoint) {
         super(createdAt, author, logicalTimePoint, pId, pInvolvedBoats, pPassId);
         this.indexOfFirstSuppressedWaypoint = indexOfFirstSuppressedWaypoint;
