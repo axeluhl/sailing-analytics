@@ -762,6 +762,7 @@ public class CandidateFinderImpl implements CandidateFinder {
             if (instruction == PassingInstruction.FixedBearing) {
                 b = w.getFixedBearing();
             } else {
+                // TODO Mark at start or end of race
                 Bearing before = race.getTrackedLegFinishingAt(w).getLegBearing(t);
                 Bearing after = race.getTrackedLegStartingAt(w).getLegBearing(t);
                 if (before != null && after != null) {

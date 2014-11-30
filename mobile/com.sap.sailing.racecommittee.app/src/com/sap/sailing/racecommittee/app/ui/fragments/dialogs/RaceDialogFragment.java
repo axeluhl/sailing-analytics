@@ -5,7 +5,7 @@ import java.io.Serializable;
 import android.app.Activity;
 import android.os.Bundle;
 
-import com.sap.sailing.domain.racelog.state.RaceState;
+import com.sap.sailing.domain.abstractlog.race.state.RaceState;
 import com.sap.sailing.racecommittee.app.AppConstants;
 import com.sap.sailing.racecommittee.app.AppPreferences;
 import com.sap.sailing.racecommittee.app.data.OnlineDataManager;

@@ -2,7 +2,7 @@ package com.sap.sailing.racecommittee.app.ui.fragments.raceinfo.finishing;
 
 import android.os.Bundle;
 
-import com.sap.sailing.domain.racelog.state.racingprocedure.ess.ESSRacingProcedure;
+import com.sap.sailing.domain.abstractlog.race.state.racingprocedure.ess.ESSRacingProcedure;
 import com.sap.sailing.racecommittee.app.R;
 import com.sap.sailing.racecommittee.app.ui.fragments.dialogs.PositioningFragment;
 import com.sap.sailing.racecommittee.app.utils.TimeUtils;

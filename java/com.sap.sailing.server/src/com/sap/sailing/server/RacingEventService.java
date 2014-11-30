@@ -13,6 +13,9 @@ import java.util.Map;
 import java.util.UUID;
 import java.util.concurrent.ConcurrentHashMap;
 
+import com.sap.sailing.domain.abstractlog.AbstractLogEventAuthor;
+import com.sap.sailing.domain.abstractlog.race.RaceLog;
+import com.sap.sailing.domain.abstractlog.race.RaceLogStartTimeEvent;
 import com.sap.sailing.domain.base.CompetitorStore;
 import com.sap.sailing.domain.base.CourseArea;
 import com.sap.sailing.domain.base.DomainFactory;
@@ -51,9 +54,6 @@ import com.sap.sailing.domain.leaderboard.RegattaLeaderboard;
 import com.sap.sailing.domain.leaderboard.ScoringScheme;
 import com.sap.sailing.domain.persistence.DomainObjectFactory;
 import com.sap.sailing.domain.persistence.MongoObjectFactory;
-import com.sap.sailing.domain.racelog.RaceLog;
-import com.sap.sailing.domain.racelog.RaceLogEventAuthor;
-import com.sap.sailing.domain.racelog.RaceLogStartTimeEvent;
 import com.sap.sailing.domain.racelog.tracking.GPSFixStore;
 import com.sap.sailing.domain.tracking.DynamicTrackedRace;
 import com.sap.sailing.domain.tracking.RaceTracker;
@@ -476,7 +476,7 @@ public interface RacingEventService extends TrackedRegattaRegistry, RegattaFetch
      * @param leaderboardName name of the RaceLog's leaderboard.
      * @param raceColumnName name of the RaceLog's column
      * @param fleetName name of the RaceLog's fleet
-     * @param authorName name of the {@link RaceLogEventAuthor} the {@link RaceLogStartTimeEvent} will be created with
+     * @param authorName name of the {@link AbstractLogEventAuthor} the {@link RaceLogStartTimeEvent} will be created with
      * @param authorPriority priority of the author.
      * @param passId Pass identifier of the new start time event.
      * @param logicalTimePoint logical {@link TimePoint} of the new event.
@@ -501,7 +501,7 @@ public interface RacingEventService extends TrackedRegattaRegistry, RegattaFetch
     
     RaceTracker getRaceTrackerById(Object id);
     
-    RaceLogEventAuthor getServerAuthor();
+    AbstractLogEventAuthor getServerAuthor();
     
     CompetitorStore getCompetitorStore();
     
