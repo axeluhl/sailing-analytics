@@ -24,8 +24,8 @@ import org.junit.Test;
 import com.sap.sailing.domain.abstractlog.impl.LogEventAuthorImpl;
 import com.sap.sailing.domain.abstractlog.race.RaceLog;
 import com.sap.sailing.domain.abstractlog.race.analyzing.impl.AdditionalScoringInformationFinder;
-import com.sap.sailing.domain.abstractlog.race.scoring.RaceLogAdditionalScoringInformationEvent;
 import com.sap.sailing.domain.abstractlog.race.scoring.AdditionalScoringInformationType;
+import com.sap.sailing.domain.abstractlog.race.scoring.RaceLogAdditionalScoringInformationEvent;
 import com.sap.sailing.domain.abstractlog.race.scoring.impl.RaceLogAdditionalScoringInformationEventImpl;
 import com.sap.sailing.domain.abstractlog.race.state.RaceState;
 import com.sap.sailing.domain.abstractlog.race.state.impl.RaceStateImpl;
@@ -65,6 +65,7 @@ import com.sap.sailing.domain.leaderboard.impl.RegattaLeaderboardImpl;
 import com.sap.sailing.domain.leaderboard.impl.ThresholdBasedResultDiscardingRuleImpl;
 import com.sap.sailing.domain.leaderboard.meta.LeaderboardGroupMetaLeaderboard;
 import com.sap.sailing.domain.racelog.impl.EmptyRaceLogStore;
+import com.sap.sailing.domain.regattalog.impl.EmptyRegattaLogStore;
 import com.sap.sailing.domain.test.mock.MockedTrackedRaceWithStartTimeAndRanks;
 import com.sap.sailing.domain.tracking.MarkPassing;
 import com.sap.sailing.domain.tracking.TrackedRace;
@@ -812,7 +813,10 @@ public class LeaderboardScoringAndRankingTest extends AbstractLeaderboardTest {
     @Test
     public void testAdditionalScoreInformationLeadsToChangedScoreForOneColumn() throws NoWindException {
         TrackedRegattaRegistry trackedRegattaRegistry = mock(TrackedRegattaRegistry.class);
-        Regatta dummyRegatta = new RegattaImpl(EmptyRaceLogStore.INSTANCE , "Dummy", new BoatClassImpl("Extreme40", false), trackedRegattaRegistry, new HighPointFirstGets10Or8AndLastBreaksTie(), "578876345345", new CourseAreaImpl("Humba", UUID.randomUUID()));
+        Regatta dummyRegatta = new RegattaImpl(EmptyRaceLogStore.INSTANCE, EmptyRegattaLogStore.INSTANCE, "Dummy",
+                new BoatClassImpl("Extreme40", false), trackedRegattaRegistry,
+                new HighPointFirstGets10Or8AndLastBreaksTie(), "578876345345",
+                new CourseAreaImpl("Humba", UUID.randomUUID()));
         trackedRegattaRegistry.getOrCreateTrackedRegatta(dummyRegatta);
         Competitor[] competitors = createCompetitors(10).toArray(new Competitor[0]);
         TimePoint now = MillisecondsTimePoint.now();
@@ -912,7 +916,9 @@ public class LeaderboardScoringAndRankingTest extends AbstractLeaderboardTest {
         LeaderboardGroup leaderboardGroup = new LeaderboardGroupImpl("ESS", "ESS", /* displayName */ null,
                 /* displayGroupsInReverseOrder */ false, Arrays.asList(new Leaderboard[] { leaderboardHighPoint10LastBreaksTie }));
         LeaderboardGroupMetaLeaderboard leaderboardHighPointESSOverall = new LeaderboardGroupMetaLeaderboard(
-                leaderboardGroup, new HighPointExtremeSailingSeriesOverall(), new ThresholdBasedResultDiscardingRuleImpl(/* discarding thresholds */ new int[0]));
+                leaderboardGroup, new HighPointExtremeSailingSeriesOverall(),
+                new ThresholdBasedResultDiscardingRuleImpl(/* discarding thresholds */ new int[0]),
+                EmptyRegattaLogStore.INSTANCE);
         assertEquals(16, leaderboardHighPointESSOverall.getCompetitorsFromBestToWorst(later).size());
         assertEquals(new Double(10), leaderboardHighPointESSOverall.getTotalPoints(competitors[0], later));
         assertEquals(new Double(9), leaderboardHighPointESSOverall.getTotalPoints(competitors[1], later));
@@ -969,7 +975,7 @@ public class LeaderboardScoringAndRankingTest extends AbstractLeaderboardTest {
         LeaderboardGroup leaderboardGroup = new LeaderboardGroupImpl("Leaderboard Group", "Leaderboard Group", /* displayName */ null, false, Arrays.asList(leaderboard1,
                 leaderboard2, leaderboard3));
         leaderboardGroup.setOverallLeaderboard(new LeaderboardGroupMetaLeaderboard(leaderboardGroup, new HighPointExtremeSailingSeriesOverall(),
-                new ThresholdBasedResultDiscardingRuleImpl(new int[0])));
+                new ThresholdBasedResultDiscardingRuleImpl(new int[0]), EmptyRegattaLogStore.INSTANCE));
         leaderboardGroup.getOverallLeaderboard().setSuppressed(c[1], true);
         leaderboardGroup.getOverallLeaderboard().setSuppressed(c[2], true);
         List<Competitor> rankedCompetitors = leaderboardGroup.getOverallLeaderboard().getCompetitorsFromBestToWorst(later);
@@ -1090,7 +1096,7 @@ public class LeaderboardScoringAndRankingTest extends AbstractLeaderboardTest {
         LeaderboardGroup leaderboardGroup = new LeaderboardGroupImpl("Leaderboard Group ESS Overall", "Leaderboard Group", /* displayName */ null,
                 false, Arrays.asList(leaderboard1, leaderboard2));
         leaderboardGroup.setOverallLeaderboard(new LeaderboardGroupMetaLeaderboard(leaderboardGroup, new HighPointExtremeSailingSeriesOverall(),
-                new ThresholdBasedResultDiscardingRuleImpl(new int[0])));
+                new ThresholdBasedResultDiscardingRuleImpl(new int[0]), EmptyRegattaLogStore.INSTANCE));
         leaderboardGroup.getOverallLeaderboard().setSuppressed(c[c.length-1], true);
         // ranking must match the regatta ranks - as for 11 competitors the ranking is random
         // in the faulty implementation we test with many iterations to make sure that

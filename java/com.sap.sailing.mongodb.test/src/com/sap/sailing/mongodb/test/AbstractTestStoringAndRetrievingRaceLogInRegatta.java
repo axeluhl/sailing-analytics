@@ -22,9 +22,7 @@ import com.sap.sailing.domain.common.ScoringSchemeType;
 import com.sap.sailing.domain.leaderboard.ScoringScheme;
 import com.sap.sailing.domain.persistence.DomainObjectFactory;
 import com.sap.sailing.domain.persistence.MongoObjectFactory;
-import com.sap.sailing.domain.persistence.MongoRaceLogStoreFactory;
 import com.sap.sailing.domain.persistence.PersistenceFactory;
-import com.sap.sailing.domain.racelog.RaceLogStore;
 import com.sap.sse.common.impl.MillisecondsTimePoint;
 
 public abstract class AbstractTestStoringAndRetrievingRaceLogInRegatta extends RaceLogMongoDBTest {
@@ -61,9 +59,7 @@ public abstract class AbstractTestStoringAndRetrievingRaceLogInRegatta extends R
     private Regatta createRegattaWithoutRaceColumns(final String regattaBaseName, BoatClass boatClass,
             boolean persistent, ScoringScheme scoringScheme, CourseArea courseArea) {
         List<Series> series = createSeriesForTestRegatta();
-        RaceLogStore raceLogStore = MongoRaceLogStoreFactory.INSTANCE.getMongoRaceLogStore(mongoObjectFactory,
-                domainObjectFactory);
-        Regatta regatta = new RegattaImpl(raceLogStore, RegattaImpl.getDefaultName(regattaBaseName,
+        Regatta regatta = new RegattaImpl(getRaceLogStore(), getRegattaLogStore(), RegattaImpl.getDefaultName(regattaBaseName,
                 boatClass == null ? null : boatClass.getName()), boatClass, series, persistent, scoringScheme, "123",
                 courseArea, /* useStartTimeInference */true);
         return regatta;

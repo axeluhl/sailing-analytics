@@ -42,6 +42,7 @@ import com.sap.sailing.domain.common.impl.KnotSpeedWithBearingImpl;
 import com.sap.sailing.domain.common.impl.WindSourceImpl;
 import com.sap.sailing.domain.racelog.impl.EmptyRaceLogStore;
 import com.sap.sailing.domain.racelog.tracking.EmptyGPSFixStore;
+import com.sap.sailing.domain.regattalog.impl.EmptyRegattaLogStore;
 import com.sap.sailing.domain.tracking.MarkPassing;
 import com.sap.sailing.domain.tracking.TrackedLeg;
 import com.sap.sailing.domain.tracking.TrackedRegatta;
@@ -86,7 +87,8 @@ public class ReachingLegTest extends TrackBasedTest {
     protected DynamicTrackedRaceImpl createTrackedRace(String regattaName, String raceName, String boatClassName,
             Iterable<Competitor> competitors, TimePoint timePointForFixes) {
         BoatClassImpl boatClass = new BoatClassImpl(boatClassName, /* typicallyStartsUpwind */ true);
-        Regatta regatta = new RegattaImpl(EmptyRaceLogStore.INSTANCE, RegattaImpl.getDefaultName(regattaName, boatClass.getName()), boatClass, /* trackedRegattaRegistry */ null,
+        Regatta regatta = new RegattaImpl(EmptyRaceLogStore.INSTANCE, EmptyRegattaLogStore.INSTANCE,
+                RegattaImpl.getDefaultName(regattaName, boatClass.getName()), boatClass, /* trackedRegattaRegistry */ null,
                 DomainFactory.INSTANCE.createScoringScheme(ScoringSchemeType.LOW_POINT), "123", null);
         TrackedRegatta trackedRegatta = new DynamicTrackedRegattaImpl(regatta);
         List<Waypoint> waypoints = new ArrayList<Waypoint>();

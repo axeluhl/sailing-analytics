@@ -12,6 +12,7 @@ import java.util.Map;
 import java.util.Set;
 import java.util.WeakHashMap;
 
+import com.sap.sailing.domain.abstractlog.regatta.RegattaLog;
 import com.sap.sailing.domain.base.Competitor;
 import com.sap.sailing.domain.base.Fleet;
 import com.sap.sailing.domain.base.RaceColumn;
@@ -25,6 +26,7 @@ import com.sap.sailing.domain.leaderboard.ScoringScheme;
 import com.sap.sailing.domain.leaderboard.SettableScoreCorrection;
 import com.sap.sailing.domain.leaderboard.ThresholdBasedResultDiscardingRule;
 import com.sap.sailing.domain.leaderboard.impl.AbstractSimpleLeaderboardImpl;
+import com.sap.sailing.domain.regattalog.RegattaLogStore;
 import com.sap.sailing.domain.tracking.TrackedRace;
 import com.sap.sse.common.TimePoint;
 import com.sap.sse.common.Util;
@@ -52,6 +54,7 @@ public abstract class AbstractMetaLeaderboard extends AbstractSimpleLeaderboardI
     private final Fleet metaFleet;
     private final ScoringScheme scoringScheme;
     private final String name;
+    private final RegattaLog regattaLog;
     
     /**
      * Weak hash maps cannot be serialized. Therefore, this field is serialized as a {@link HashMap} in {@link #writeObject(ObjectOutputStream)}
@@ -90,13 +93,15 @@ public abstract class AbstractMetaLeaderboard extends AbstractSimpleLeaderboardI
         }
     }
     
-    public AbstractMetaLeaderboard(String name, ScoringScheme scoringScheme, ThresholdBasedResultDiscardingRule resultDiscardingRule) {
+    public AbstractMetaLeaderboard(String name, ScoringScheme scoringScheme,
+            ThresholdBasedResultDiscardingRule resultDiscardingRule, RegattaLogStore regattaLogStore) {
         super(resultDiscardingRule);
         metaFleet = new FleetImpl("MetaFleet");
         this.scoringScheme = scoringScheme;
         this.name = name;
         columnsForLeaderboards = new WeakHashMap<>();
         scoreCorrectionChangeForwardersByLeaderboard = new WeakHashMap<Leaderboard, ScoreCorrectionListener>();
+        regattaLog = regattaLogStore.getRegattaLog(name, /*ignoreCache*/ true);
     }
     
     @Override
@@ -222,6 +227,11 @@ public abstract class AbstractMetaLeaderboard extends AbstractSimpleLeaderboardI
     @Override
     public String getName() {
         return name;
+    }
+    
+    @Override
+    public RegattaLog getRegattaLog() {
+        return regattaLog;
     }
 
 }

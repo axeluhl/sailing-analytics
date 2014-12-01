@@ -118,6 +118,7 @@ import com.sap.sailing.domain.racelog.RaceLogIdentifier;
 import com.sap.sailing.domain.racelog.RaceLogStore;
 import com.sap.sailing.domain.racelog.tracking.GPSFixStore;
 import com.sap.sailing.domain.racelogtracking.DeviceIdentifier;
+import com.sap.sailing.domain.regattalog.RegattaLogStore;
 import com.sap.sailing.domain.tracking.DynamicTrackedRace;
 import com.sap.sailing.domain.tracking.DynamicTrackedRegatta;
 import com.sap.sailing.domain.tracking.GPSFix;
@@ -628,10 +629,8 @@ public class RacingEventServiceImpl implements RacingEventServiceWithTestSupport
     public FlexibleLeaderboard addFlexibleLeaderboard(String leaderboardName, String leaderboardDisplayName,
             int[] discardThresholds, ScoringScheme scoringScheme, Serializable courseAreaId) {
         logger.info("adding flexible leaderboard " + leaderboardName);
-        RaceLogStore raceLogStore = MongoRaceLogStoreFactory.INSTANCE.getMongoRaceLogStore(mongoObjectFactory,
-                domainObjectFactory);
         CourseArea courseArea = getCourseArea(courseAreaId);
-        FlexibleLeaderboard result = new FlexibleLeaderboardImpl(raceLogStore, leaderboardName,
+        FlexibleLeaderboard result = new FlexibleLeaderboardImpl(getRaceLogStore(), getRegattaLogStore(), leaderboardName,
                 new ThresholdBasedResultDiscardingRuleImpl(discardThresholds), scoringScheme, courseArea);
         result.setDisplayName(leaderboardDisplayName);
         if (getLeaderboardByName(leaderboardName) != null) {
@@ -991,10 +990,9 @@ public class RacingEventServiceImpl implements RacingEventServiceWithTestSupport
     public Regatta getOrCreateDefaultRegatta(String name, String boatClassName, Serializable id) {
         Regatta result = regattasByName.get(name);
         if (result == null) {
-            RaceLogStore raceLogStore = MongoRaceLogStoreFactory.INSTANCE.getMongoRaceLogStore(mongoObjectFactory,
-                    domainObjectFactory);
-            result = new RegattaImpl(raceLogStore, name, getBaseDomainFactory().getOrCreateBoatClass(boatClassName),
-                    this, getBaseDomainFactory().createScoringScheme(ScoringSchemeType.LOW_POINT), id, null);
+            result = new RegattaImpl(getRaceLogStore(), getRegattaLogStore(), name, getBaseDomainFactory().getOrCreateBoatClass(
+                    boatClassName), this, getBaseDomainFactory().createScoringScheme(ScoringSchemeType.LOW_POINT), id,
+                    null);
             logger.info("Created default regatta " + result.getName() + " (" + hashCode() + ") on " + this);
             cacheAndReplicateDefaultRegatta(result);
         }
@@ -1026,15 +1024,21 @@ public class RacingEventServiceImpl implements RacingEventServiceWithTestSupport
             logger.info("Regatta with name " + regatta.getName() + " already existed, so it hasn't been added.");
         }
     }
+    
+    private RaceLogStore getRaceLogStore() {
+        return MongoRaceLogStoreFactory.INSTANCE.getMongoRaceLogStore(mongoObjectFactory, domainObjectFactory);
+    }
+
+    private RegattaLogStore getRegattaLogStore() {
+        return MongoRegattaLogStoreFactory.INSTANCE.getMongoRegattaLogStore(mongoObjectFactory, domainObjectFactory);
+    }
 
     @Override
     public com.sap.sse.common.Util.Pair<Regatta, Boolean> getOrCreateRegattaWithoutReplication(String fullRegattaName,
             String boatClassName, Serializable id, Iterable<? extends Series> series, boolean persistent,
             ScoringScheme scoringScheme, Serializable defaultCourseAreaId, boolean useStartTimeInference) {
-        RaceLogStore raceLogStore = MongoRaceLogStoreFactory.INSTANCE.getMongoRaceLogStore(mongoObjectFactory,
-                domainObjectFactory);
         CourseArea courseArea = getCourseArea(defaultCourseAreaId);
-        Regatta regatta = new RegattaImpl(raceLogStore, fullRegattaName, getBaseDomainFactory().getOrCreateBoatClass(
+        Regatta regatta = new RegattaImpl(getRaceLogStore(), getRegattaLogStore(), fullRegattaName, getBaseDomainFactory().getOrCreateBoatClass(
                 boatClassName), series, persistent, scoringScheme, id, courseArea, useStartTimeInference);
         boolean wasCreated = addAndConnectRegatta(persistent, defaultCourseAreaId, regatta);
         if (wasCreated) {
@@ -2073,7 +2077,7 @@ public class RacingEventServiceImpl implements RacingEventServiceWithTestSupport
     private void addOverallLeaderboardToLeaderboardGroup(LeaderboardGroup leaderboardGroup,
             ScoringScheme scoringScheme, int[] discardThresholds) {
         Leaderboard overallLeaderboard = new LeaderboardGroupMetaLeaderboard(leaderboardGroup, scoringScheme,
-                new ThresholdBasedResultDiscardingRuleImpl(discardThresholds));
+                new ThresholdBasedResultDiscardingRuleImpl(discardThresholds), getRegattaLogStore());
         leaderboardGroup.setOverallLeaderboard(overallLeaderboard);
         addLeaderboard(overallLeaderboard);
         updateStoredLeaderboard(overallLeaderboard);

@@ -1,5 +1,6 @@
 package com.sap.sailing.domain.base;
 
+import com.sap.sailing.domain.abstractlog.regatta.RegattaLog;
 import com.sap.sailing.domain.base.configuration.RegattaConfiguration;
 import com.sap.sailing.domain.common.RegattaAndRaceIdentifier;
 import com.sap.sailing.domain.common.RegattaIdentifier;
@@ -148,4 +149,8 @@ public interface Regatta extends Named, WithID {
      */
     void setUseStartTimeInference(boolean useStartTimeInference);
 
+    /**
+     * @return The RegattaLog associated with this regatta.
+     */
+    RegattaLog getRegattaLog();
 }

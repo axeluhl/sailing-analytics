@@ -209,6 +209,7 @@ import com.sap.sailing.domain.persistence.DomainObjectFactory;
 import com.sap.sailing.domain.persistence.MongoObjectFactory;
 import com.sap.sailing.domain.persistence.MongoRaceLogStoreFactory;
 import com.sap.sailing.domain.polarsheets.PolarSheetGenerationWorker;
+import com.sap.sailing.domain.racelog.RaceLogStore;
 import com.sap.sailing.domain.racelog.RaceStateOfSameDayHelper;
 import com.sap.sailing.domain.racelogtracking.DeviceIdentifier;
 import com.sap.sailing.domain.racelogtracking.DeviceIdentifierStringSerializationHandler;
@@ -216,6 +217,7 @@ import com.sap.sailing.domain.racelogtracking.DeviceMapping;
 import com.sap.sailing.domain.racelogtracking.RaceLogTrackingAdapter;
 import com.sap.sailing.domain.racelogtracking.RaceLogTrackingAdapterFactory;
 import com.sap.sailing.domain.racelogtracking.impl.DeviceMappingImpl;
+import com.sap.sailing.domain.regattalog.RegattaLogStore;
 import com.sap.sailing.domain.swisstimingadapter.StartList;
 import com.sap.sailing.domain.swisstimingadapter.SwissTimingAdapter;
 import com.sap.sailing.domain.swisstimingadapter.SwissTimingAdapterFactory;
@@ -1073,7 +1075,7 @@ public class SailingServiceImpl extends ProxiedRemoteServiceServlet implements S
                     new URI(effectiveStoredURI), new URI(courseDesignUpdateURI),
                     new MillisecondsTimePoint(record.getTrackingStartTime().asMillis()),
                     new MillisecondsTimePoint(record.getTrackingEndTime().asMillis()),
-                    MongoRaceLogStoreFactory.INSTANCE.getMongoRaceLogStore(mongoObjectFactory, domainObjectFactory),
+                    getRaceLogStore(), getRegattaLogStore(),
                     RaceTracker.TIMEOUT_FOR_RECEIVING_RACE_DEFINITION_IN_MILLISECONDS, simulateWithStartTimeNow, 
                     tracTracUsername, tracTracPassword,
                     record.getRaceStatus(), record.getRaceVisibility());
@@ -2615,6 +2617,16 @@ public class SailingServiceImpl extends ProxiedRemoteServiceServlet implements S
             swissTimingAdapterPersistence.storeSwissTimingConfiguration(swissTimingFactory.createSwissTimingConfiguration(configName, jsonURL, hostname, port));
         }
     }
+    
+    private RaceLogStore getRaceLogStore() {
+        return MongoRaceLogStoreFactory.INSTANCE.getMongoRaceLogStore(mongoObjectFactory,
+                domainObjectFactory);
+    }
+    
+    private RegattaLogStore getRegattaLogStore() {
+        return MongoRegattaLogStoreFactory.INSTANCE.getMongoRegattaLogStore(
+                mongoObjectFactory, domainObjectFactory);
+    }
 
     @Override
     public void trackWithSwissTiming(RegattaIdentifier regattaToAddTo, Iterable<SwissTimingRaceRecordDTO> rrs, String hostname, int port,
@@ -2640,9 +2652,10 @@ public class SailingServiceImpl extends ProxiedRemoteServiceServlet implements S
             	startList = getSwissTimingAdapter().readStartListForRace(rr.raceId, regattaResults);
             }
             // now read the entry list for the race from the result
-            final RaceHandle raceHandle = getSwissTimingAdapter().addSwissTimingRace(getService(), regattaToAddTo, rr.raceId, rr.getName(), raceDescription, 
-                    boatClass, hostname, port, startList,
-                    MongoRaceLogStoreFactory.INSTANCE.getMongoRaceLogStore(mongoObjectFactory, domainObjectFactory), RaceTracker.TIMEOUT_FOR_RECEIVING_RACE_DEFINITION_IN_MILLISECONDS);
+            final RaceHandle raceHandle = getSwissTimingAdapter().addSwissTimingRace(getService(), regattaToAddTo,
+                    rr.raceId, rr.getName(), raceDescription, boatClass, hostname, port, startList,
+                    getRaceLogStore(), getRegattaLogStore(),
+                    RaceTracker.TIMEOUT_FOR_RECEIVING_RACE_DEFINITION_IN_MILLISECONDS);
             if (trackWind) {
                 new Thread("Wind tracking starter for race " + rr.raceId + "/" + rr.getName()) {
                     public void run() {

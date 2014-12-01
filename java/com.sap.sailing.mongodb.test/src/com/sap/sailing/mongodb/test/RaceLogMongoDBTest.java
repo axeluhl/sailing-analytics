@@ -26,6 +26,9 @@ import com.sap.sailing.domain.common.impl.DegreePosition;
 import com.sap.sailing.domain.common.impl.KnotSpeedWithBearingImpl;
 import com.sap.sailing.domain.persistence.DomainObjectFactory;
 import com.sap.sailing.domain.persistence.MongoObjectFactory;
+import com.sap.sailing.domain.persistence.MongoRaceLogStoreFactory;
+import com.sap.sailing.domain.racelog.RaceLogStore;
+import com.sap.sailing.domain.regattalog.RegattaLogStore;
 import com.sap.sailing.domain.tracking.Wind;
 import com.sap.sailing.domain.tracking.impl.WindImpl;
 import com.sap.sse.common.TimePoint;
@@ -105,6 +108,14 @@ public abstract class RaceLogMongoDBTest extends AbstractMongoDBTest {
         Bearing bearing = new DegreeBearingImpl(25.5);
         SpeedWithBearing speedBearing = new KnotSpeedWithBearingImpl(10.4, bearing);
         return new WindImpl(position, now, speedBearing);
+    }
+    
+    protected RaceLogStore getRaceLogStore() {
+        return MongoRaceLogStoreFactory.INSTANCE.getMongoRaceLogStore(mongoObjectFactory, domainObjectFactory);
+    }
+
+    protected RegattaLogStore getRegattaLogStore() {
+        return MongoRegattaLogStoreFactory.INSTANCE.getMongoRegattaLogStore(mongoObjectFactory, domainObjectFactory);
     }
 
 }

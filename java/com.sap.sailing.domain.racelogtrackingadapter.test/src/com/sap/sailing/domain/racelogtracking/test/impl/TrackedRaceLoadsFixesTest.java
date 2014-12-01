@@ -28,6 +28,7 @@ import com.sap.sailing.domain.racelog.impl.EmptyRaceLogStore;
 import com.sap.sailing.domain.racelog.tracking.test.mock.SmartphoneImeiIdentifier;
 import com.sap.sailing.domain.racelogtracking.DeviceIdentifier;
 import com.sap.sailing.domain.racelogtracking.test.AbstractGPSFixStoreTest;
+import com.sap.sailing.domain.regattalog.impl.EmptyRegattaLogStore;
 import com.sap.sailing.domain.tracking.GPSFixMoving;
 import com.sap.sailing.domain.tracking.TrackedRegatta;
 import com.sap.sailing.domain.tracking.impl.AbstractRaceChangeListener;
@@ -68,7 +69,9 @@ public class TrackedRaceLoadsFixesTest extends AbstractGPSFixStoreTest {
             store.storeFix(device, createFix(i+1000, 10, 20, 30, 40));
         }
 
-        TrackedRegatta regatta = new DynamicTrackedRegattaImpl(new RegattaImpl(EmptyRaceLogStore.INSTANCE, RegattaImpl.getDefaultName("regatta", boatClass.getName()), boatClass, null, null, "a", null));
+        TrackedRegatta regatta = new DynamicTrackedRegattaImpl(new RegattaImpl(EmptyRaceLogStore.INSTANCE,
+                EmptyRegattaLogStore.INSTANCE, RegattaImpl.getDefaultName("regatta", boatClass.getName()),
+                boatClass, null, null, "a", null));
         DynamicTrackedRaceImpl trackedRace = new DynamicTrackedRaceImpl(regatta, race, Collections.<Sideline>emptyList(),
                 EmptyWindStore.INSTANCE, store, 0, 0, 0);
         
@@ -110,7 +113,9 @@ public class TrackedRaceLoadsFixesTest extends AbstractGPSFixStoreTest {
             store.storeFix(device, createFix(i, 10, 20, 30, 40));
         }
 
-        TrackedRegatta regatta = new DynamicTrackedRegattaImpl(new RegattaImpl(EmptyRaceLogStore.INSTANCE, RegattaImpl.getDefaultName("regatta", boatClass.getName()), boatClass, null, null, "a", null));
+        TrackedRegatta regatta = new DynamicTrackedRegattaImpl(new RegattaImpl(EmptyRaceLogStore.INSTANCE,
+                EmptyRegattaLogStore.INSTANCE, RegattaImpl.getDefaultName("regatta", boatClass.getName()),
+                boatClass, null, null, "a", null));
         DynamicTrackedRaceImpl trackedRace = new DynamicTrackedRaceImpl(regatta, race, Collections.<Sideline>emptyList(),
                 EmptyWindStore.INSTANCE, store, 0, 0, 0);
         
