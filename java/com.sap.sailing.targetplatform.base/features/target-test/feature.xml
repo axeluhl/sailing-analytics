@@ -58,7 +58,7 @@
          id="org.mockito.mockito-core"
          download-size="0"
          install-size="0"
-         version="1.9.5"
+         version="1.10.14"
          unpack="false"/>
 
    <plugin
