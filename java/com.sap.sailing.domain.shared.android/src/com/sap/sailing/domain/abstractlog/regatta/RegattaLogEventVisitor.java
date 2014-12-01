@@ -1,4 +1,5 @@
-package com.sap.sailing.domain.abstractlog.regattalog;
+package com.sap.sailing.domain.abstractlog.regatta;
+
 
 
 

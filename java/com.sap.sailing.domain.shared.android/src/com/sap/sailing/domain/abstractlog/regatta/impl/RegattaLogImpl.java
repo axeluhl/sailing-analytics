@@ -1,13 +1,13 @@
-package com.sap.sailing.domain.abstractlog.regattalog.impl;
+package com.sap.sailing.domain.abstractlog.regatta.impl;
 
 import java.io.Serializable;
 
 import com.sap.sailing.domain.abstractlog.AbstractLogEventAuthor;
 import com.sap.sailing.domain.abstractlog.impl.LogEventComparator;
 import com.sap.sailing.domain.abstractlog.impl.AbstractLogImpl;
-import com.sap.sailing.domain.abstractlog.regattalog.RegattaLog;
-import com.sap.sailing.domain.abstractlog.regattalog.RegattaLogEvent;
-import com.sap.sailing.domain.abstractlog.regattalog.RegattaLogEventVisitor;
+import com.sap.sailing.domain.abstractlog.regatta.RegattaLog;
+import com.sap.sailing.domain.abstractlog.regatta.RegattaLogEvent;
+import com.sap.sailing.domain.abstractlog.regatta.RegattaLogEventVisitor;
 
 public class RegattaLogImpl extends AbstractLogImpl<RegattaLogEvent, RegattaLogEventVisitor> implements RegattaLog {
 
