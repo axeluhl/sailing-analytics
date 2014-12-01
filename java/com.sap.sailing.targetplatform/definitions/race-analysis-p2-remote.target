@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="UTF-8" standalone="no"?>
-<?pde version="3.8"?><target name="Race Analysis Target (IDE)" sequenceNumber="82">
+<?pde version="3.8"?><target name="Race Analysis Target" sequenceNumber="82">
 <locations>
 <location includeAllPlatforms="false" includeConfigurePhase="false" includeMode="slicer" includeSource="true" type="InstallableUnit">
 <unit id="com.sap.sailing.target.base.feature.group" version="1.0.0"/>
@@ -7,30 +7,6 @@
 <unit id="com.sap.sailing.target.shiro.feature.group" version="1.0.0"/>
 <unit id="com.sap.sailing.target.test.feature.group" version="1.0.0"/>
 <repository location="http://p2.sapsailing.com/p2/sailing/"/>
-</location>
-<location includeAllPlatforms="false" includeConfigurePhase="false" includeMode="slicer" includeSource="true" type="InstallableUnit">
-<unit id="org.apache.commons.fileupload" version="1.2.2.v20111214-1400"/>
-<unit id="org.apache.commons.fileupload.source" version="1.2.2.v20111214-1400"/>
-<unit id="org.apache.commons.io" version="2.2.0.v201405211200"/>
-<unit id="org.apache.commons.io.source" version="2.2.0.v201405211200"/>
-<unit id="org.apache.commons.lang" version="2.6.0.v201404270220"/>
-<unit id="org.apache.commons.lang.source" version="2.6.0.v201404270220"/>
-<unit id="org.jdom" version="1.1.1.v201101151400"/>
-<unit id="org.jdom.source" version="1.1.1.v201101151400"/>
-<unit id="javax.validation" version="1.0.0.GA_v201205091237"/>
-<unit id="javax.validation.source" version="1.0.0.GA_v201205091237"/>
-<unit id="com.sun.jersey" version="1.17.0.v20130314-2020"/>
-<unit id="com.sun.jersey.source" version="1.17.0.v20130314-2020"/>
-<unit id="javax.ws.rs" version="1.1.1.v20130318-1750"/>
-<unit id="javax.ws.rs.source" version="1.1.1.v20130318-1750"/>
-<unit id="org.objectweb.asm" version="5.0.1.v201404251740"/>
-<unit id="org.objectweb.asm.source" version="5.0.1.v201404251740"/>
-<unit id="org.apache.httpcomponents.httpclient" version="4.2.6.v201311072007"/>
-<unit id="org.apache.httpcomponents.httpcore" version="4.2.5.v201311072007"/>
-<unit id="org.apache.commons.logging" version="1.1.1.v201101211721"/>
-<unit id="javax.servlet" version="3.1.0.v20140303-1611"/>
-<unit id="javax.servlet.source" version="3.1.0.v20140303-1611"/>
-<repository location="http://download.eclipse.org/tools/orbit/downloads/drops/R20140525021250/repository/"/>
 </location>
 <location includeAllPlatforms="false" includeConfigurePhase="false" includeMode="slicer" includeSource="true" type="InstallableUnit">
 <unit id="org.eclipse.jetty.bundles.f.feature.group" version="9.2.2.201407241931"/>
@@ -63,6 +39,30 @@
 <unit id="org.apache.commons.beanutils.source" version="1.8.0.v201205091237"/>
 <repository location="http://download.eclipse.org/releases/luna"/>
 </location>
+<location includeAllPlatforms="false" includeConfigurePhase="false" includeMode="slicer" includeSource="true" type="InstallableUnit">
+<unit id="org.apache.commons.fileupload" version="1.2.2.v20111214-1400"/>
+<unit id="org.apache.commons.fileupload.source" version="1.2.2.v20111214-1400"/>
+<unit id="org.apache.commons.io" version="2.2.0.v201405211200"/>
+<unit id="org.apache.commons.io.source" version="2.2.0.v201405211200"/>
+<unit id="org.apache.commons.lang" version="2.6.0.v201404270220"/>
+<unit id="org.apache.commons.lang.source" version="2.6.0.v201404270220"/>
+<unit id="org.jdom" version="1.1.1.v201101151400"/>
+<unit id="org.jdom.source" version="1.1.1.v201101151400"/>
+<unit id="javax.validation" version="1.0.0.GA_v201205091237"/>
+<unit id="javax.validation.source" version="1.0.0.GA_v201205091237"/>
+<unit id="com.sun.jersey" version="1.17.0.v20130314-2020"/>
+<unit id="com.sun.jersey.source" version="1.17.0.v20130314-2020"/>
+<unit id="javax.ws.rs" version="1.1.1.v20130318-1750"/>
+<unit id="javax.ws.rs.source" version="1.1.1.v20130318-1750"/>
+<unit id="org.objectweb.asm" version="5.0.1.v201404251740"/>
+<unit id="org.objectweb.asm.source" version="5.0.1.v201404251740"/>
+<unit id="org.apache.httpcomponents.httpclient" version="4.2.6.v201311072007"/>
+<unit id="org.apache.httpcomponents.httpcore" version="4.2.5.v201311072007"/>
+<unit id="org.apache.commons.logging" version="1.1.1.v201101211721"/>
+<unit id="javax.servlet" version="3.1.0.v20140303-1611"/>
+<unit id="javax.servlet.source" version="3.1.0.v20140303-1611"/>
+<repository location="http://download.eclipse.org/tools/orbit/downloads/drops/R20140525021250/repository/"/>
+</location>
 </locations>
 <includeBundles>
 <plugin id="com.rabbitmq.client"/>
@@ -80,10 +80,8 @@
 <plugin id="jcl.over.slf4j"/>
 <plugin id="jul.to.slf4j"/>
 <plugin id="org.apache.commons.beanutils"/>
-<plugin id="org.apache.commons.beanutils"/>
 <plugin id="org.apache.commons.beanutils.source"/>
 <plugin id="org.apache.commons.codec"/>
-<plugin id="org.apache.commons.collections"/>
 <plugin id="org.apache.commons.collections"/>
 <plugin id="org.apache.commons.collections.source"/>
 <plugin id="org.apache.commons.fileupload"/>
@@ -92,7 +90,6 @@
 <plugin id="org.apache.commons.io.source"/>
 <plugin id="org.apache.commons.lang"/>
 <plugin id="org.apache.commons.lang.source"/>
-<plugin id="org.apache.commons.logging"/>
 <plugin id="org.apache.commons.logging"/>
 <plugin id="org.apache.commons.logging.source"/>
 <plugin id="org.apache.felix.gogo.command"/>

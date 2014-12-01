@@ -19,7 +19,7 @@ echo "Removing old p2-repository"
 ssh $USER@$SERVER "rm -rf $REPO_HOME/sailing"
 
 echo "Uploading local repository to $REPO_HOME/sailing"
-scp -r ../../com.sap.sailing.targetplatform.base/gen/p2 $USER@$SERVER:$REPO_HOME/sailing
+scp -r ../../com.sap.sailing.targetplatform.base/target/repository $USER@$SERVER:$REPO_HOME/sailing
 
 echo "Making readable for everyone..."
 ssh $USER@$SERVER "chmod -R a+r $REPO_HOME/sailing/*"
