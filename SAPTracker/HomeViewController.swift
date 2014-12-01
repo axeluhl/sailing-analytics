@@ -20,14 +20,22 @@ class HomeViewController: UIViewController, UITableViewDataSource, UITableViewDe
     private var qrCodeManager: QRCodeManager?
     
     override func viewDidLoad() {
+        
+        // set QR manager, needed in case app is being open by custom URL
         qrCodeManager = QRCodeManager(delegate: self)
         
+        // set up data source for list
         fetchedResultsController = DataManager.sharedManager.eventsFetchedResultsController()
         fetchedResultsController!.delegate = self
         fetchedResultsController!.performFetch(nil)
         
-        // open custom url
+        // register for open custom URL events
         NSNotificationCenter.defaultCenter().addObserver(self, selector: "openUrl:", name: AppDelegate.NotificationType.openUrl, object: nil)
+        
+        // add logo to top left
+        let imageView = UIImageView(image: UIImage(named: "sap_logo"))
+        let barButtonItem = UIBarButtonItem(customView: imageView)
+        self.navigationItem.leftBarButtonItem = barButtonItem
     }
     
     override func viewWillAppear(animated: Bool) {

@@ -28,6 +28,13 @@ class AppDelegate: UIResponder, UIApplicationDelegate {
         
         // start timer in case GPS fixes need to be sent
         SendGPSFixController.sharedManager.timer()
+        
+        // set up styling
+        UINavigationBar.appearance().setBackgroundImage(UIImage(named: "navbar_bg"), forBarMetrics: UIBarMetrics.Default)
+        UINavigationBar.appearance().titleTextAttributes = [NSForegroundColorAttributeName: UIColor.whiteColor()]
+        UINavigationBar.appearance().tintColor = UIColor.whiteColor()
+        UIApplication.sharedApplication().statusBarStyle = UIStatusBarStyle.LightContent
+        
         return true
     }
     
