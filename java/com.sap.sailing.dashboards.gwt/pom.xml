@@ -10,9 +10,6 @@
 	</parent>
 	<artifactId>com.sap.sailing.dashboards.gwt</artifactId>
 	<packaging>eclipse-plugin</packaging>
-	<properties>
-		<gwt.version>2.6.1</gwt.version>
-	</properties>
 
 	<repositories>
 		<repository>
