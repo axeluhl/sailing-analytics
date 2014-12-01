@@ -12,6 +12,7 @@ import android.os.Bundle;
 import android.support.v7.widget.Toolbar;
 import android.view.View;
 import android.view.Window;
+import android.view.WindowManager;
 import android.widget.ProgressBar;
 import android.widget.Toast;
 
@@ -69,6 +70,10 @@ public class LoginActivity extends BaseActivity implements EventSelectedListener
     public void onCreate(Bundle savedInstanceState) {
         // features must be requested before anything else
         getWindow().requestFeature(Window.FEATURE_INDETERMINATE_PROGRESS);
+        preferences = AppPreferences.on(this);
+        if (preferences.wakelockEnabled()) {
+            getWindow().addFlags(WindowManager.LayoutParams.FLAG_KEEP_SCREEN_ON);
+        }
 
         super.onCreate(savedInstanceState);
 
@@ -238,11 +243,11 @@ public class LoginActivity extends BaseActivity implements EventSelectedListener
             }
         };
     }
-    
+
     @Override
     public void setSupportProgressBarIndeterminateVisibility(boolean visible) {
         super.setSupportProgressBarIndeterminateVisibility(visible);
-        
+
         if (mProgressSpinner != null) {
             if (visible) {
                 mProgressSpinner.setVisibility(View.VISIBLE);

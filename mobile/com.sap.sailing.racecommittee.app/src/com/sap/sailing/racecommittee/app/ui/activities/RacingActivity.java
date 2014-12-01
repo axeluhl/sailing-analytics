@@ -11,10 +11,12 @@ import android.app.FragmentTransaction;
 import android.content.DialogInterface;
 import android.content.Intent;
 import android.os.Bundle;
+import android.preference.PreferenceManager;
 import android.support.v4.widget.DrawerLayout;
 import android.support.v7.widget.Toolbar;
 import android.util.Log;
 import android.view.View;
+import android.view.WindowManager;
 import android.view.View.OnClickListener;
 import android.view.Window;
 import android.widget.Button;
@@ -28,6 +30,7 @@ import com.sap.sailing.domain.common.impl.MillisecondsTimePoint;
 import com.sap.sailing.domain.racelog.RaceLogEventAuthor;
 import com.sap.sailing.domain.tracking.Wind;
 import com.sap.sailing.racecommittee.app.AppConstants;
+import com.sap.sailing.racecommittee.app.AppPreferences;
 import com.sap.sailing.racecommittee.app.R;
 import com.sap.sailing.racecommittee.app.data.DataManager;
 import com.sap.sailing.racecommittee.app.data.ReadonlyDataManager;
@@ -177,7 +180,6 @@ public class RacingActivity extends SessionActivity implements RaceInfoListener,
         }
     }
     
-
     @Override
     public void onClick(View view) {
         switch (view.getId()) {
@@ -190,7 +192,6 @@ public class RacingActivity extends SessionActivity implements RaceInfoListener,
         }
     }
 
-    
     public void onWindEntered(Wind windFix){
     	if ( windFix != null ){ 
 	    	windButton.setText(String.format(getString(R.string.wind_info), windFix.getKnots(), windFix.getBearing().reverse().toString()));
@@ -215,6 +216,10 @@ public class RacingActivity extends SessionActivity implements RaceInfoListener,
     public void onCreate(Bundle savedInstanceState) {
         // features must be requested before anything else
         getWindow().requestFeature(Window.FEATURE_INDETERMINATE_PROGRESS);
+        preferences = AppPreferences.on(this);
+        if (preferences.wakelockEnabled()) {
+            getWindow().addFlags(WindowManager.LayoutParams.FLAG_KEEP_SCREEN_ON);
+        }
 
         super.onCreate(savedInstanceState);
 
