@@ -21,11 +21,9 @@ import android.widget.ImageButton;
 import android.widget.Spinner;
 import android.widget.Toast;
 
-import com.google.android.gms.common.GooglePlayServicesNotAvailableException;
 import com.google.android.gms.maps.CameraUpdateFactory;
 import com.google.android.gms.maps.GoogleMap;
 import com.google.android.gms.maps.MapView;
-import com.google.android.gms.maps.MapsInitializer;
 import com.google.android.gms.maps.model.BitmapDescriptor;
 import com.google.android.gms.maps.model.BitmapDescriptorFactory;
 import com.google.android.gms.maps.model.LatLng;
@@ -87,11 +85,6 @@ public class ByMapCourseDesignDialog extends RaceDialogFragment {
     public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
         // Inflate the layout for this fragment
         View view = inflater.inflate(R.layout.race_choose_classic_course_design_view, container);
-        try {
-            MapsInitializer.initialize(getActivity());
-        } catch (GooglePlayServicesNotAvailableException e) {
-            // TODO handle this situation
-        }
 
         mMapView = (MapView) view.findViewById(R.id.mapView);
         mMapView.onCreate(mBundle);
