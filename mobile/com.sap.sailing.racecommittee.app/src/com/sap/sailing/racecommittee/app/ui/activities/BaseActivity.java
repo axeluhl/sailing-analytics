@@ -2,6 +2,7 @@ package com.sap.sailing.racecommittee.app.ui.activities;
 
 import android.os.Bundle;
 import android.view.MenuItem;
+import android.view.WindowManager;
 
 import com.sap.sailing.android.shared.logging.ExLog;
 import com.sap.sailing.racecommittee.app.AppPreferences;
@@ -18,16 +19,20 @@ public class BaseActivity extends SendingServiceAwareActivity {
     protected AppPreferences preferences;
     
     @Override
+    protected int getOptionsMenuResId() {
+        return R.menu.options_menu;
+    }
+
+    public RaceApplication getRaceApplication() {
+        return (RaceApplication) getApplication();
+    }
+
+    @Override
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         this.preferences = AppPreferences.on(getApplicationContext());
     }
-
-    protected boolean onReset() {
-        fadeActivity(LoginActivity.class, true);
-        return true;
-    }
-
+    
     @Override
     public boolean onOptionsItemSelected(MenuItem item) {
         switch (item.getItemId()) {
@@ -55,13 +60,26 @@ public class BaseActivity extends SendingServiceAwareActivity {
             return super.onOptionsItemSelected(item);
         }
     }
-    
-    public RaceApplication getRaceApplication() {
-        return (RaceApplication) getApplication();
-    }
 
     @Override
-    protected int getOptionsMenuResId() {
-        return R.menu.options_menu;
+    public void onPause() {
+        super.onPause();
+        
+        getWindow().clearFlags(WindowManager.LayoutParams.FLAG_KEEP_SCREEN_ON);
+    }
+    
+    protected boolean onReset() {
+        fadeActivity(LoginActivity.class, true);
+        return true;
+    }
+    
+    @Override
+    public void onResume() {
+        super.onResume();
+        
+        preferences = AppPreferences.on(this);
+        if (preferences.wakelockEnabled()) {
+            getWindow().addFlags(WindowManager.LayoutParams.FLAG_KEEP_SCREEN_ON);
+        }
     }
 }
