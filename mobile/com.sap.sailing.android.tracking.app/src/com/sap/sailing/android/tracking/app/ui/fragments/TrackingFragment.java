@@ -83,12 +83,6 @@ public class TrackingFragment extends BaseFragment implements OnClickListener {
 		timer.stop();
 	}
 	
-	@Override
-	public void onDestroy() {
-		super.onDestroy();
-		timer.stop();
-	}
-	
 	/**
 	 * Update UI with a string containing the time since tracking started, e.g. 01:22:45
 	 */
