@@ -60,7 +60,7 @@ First of all, make sure you've looked at http://www.amazon.de/Patterns-Elements-
   * Go to Windows->Preferences->Google->Errors/Warnings and set "Missing SDK" to "Ignore"
   * Import all Race Analysis projects from the `java/` subdirectory of the git main folder
   * Import all projects from the `mobile/` subdirectory of the git main folder; this in particular contains the race committee app projects
-  * Set the Eclipse target platform to race-analysis-p2-ide-local.target (located in com.sap.sailing.targetplatform/definitions)
+  * Set the Eclipse target platform to race-analysis-p2-remote.target (located in com.sap.sailing.targetplatform/definitions)
   * Wait until the target platform has been resolved completely
   * In the project com.sap.sailing.gwt.ui create a new subfolder "classes" in the folder WEB-INF
   * Rebuild all projects

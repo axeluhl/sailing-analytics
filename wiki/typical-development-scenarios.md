@@ -11,8 +11,11 @@ Add a New Library which can not be found in any SAP Repository
 *	In case the library is not OSGi-enabled someone has to create such a OSGi-enabled version (ask the technical lead of the project)
 *	Add the library to an appropriate target folder under plugins/ in the project com.sap.sailing.targetplatform.base (e.g. target-base)
 *	Add a corresponding entry to the corresponding feature.xml in the project com.sap.sailing.targetplatform.base
-*	Rebuild the base target platform by running the script `createLocalBaseP2repository.sh` (com.sap.sailing.targetplatform/scripts). The script needs to be adjusted to your local paths for your Eclipse and GIT workspace directories.
-*	Test the new overall target platform by settings the race-analysis-p2-ide-p2admin.target as target platform in the IDE
+*	Rebuild the base target platform by running the script `createLocalBaseP2repository.sh` (com.sap.sailing.targetplatform/scripts).
+*	Generate the target definition for this local repository by running the script `createLocalTargetDef.sh` (same folder as above)
+*	Test the new overall target platform
+	* by setting the race-analysis-p2-local.target as target platform in the IDE
+	* by running the local maven build via ``buildAndUpdateProduct.sh -v build`` (the ``-v`` switch builds and uses the local p2 repository)
 *	The admin of the central p2 repository (currently at sapsailing.com) must now replace the content of the central server /home/trac/p2-repositories/sailing with the content of the new local base p2 repository (com.sap.sailing.targetplatform/base/gen/p2), using the `uploadRepositoryToServer.sh` script
 *	Reload the target platform in the IDE
 
