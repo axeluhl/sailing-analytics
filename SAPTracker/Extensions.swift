@@ -22,3 +22,21 @@ extension UIColor {
         self.init(red:(hex >> 16) & 0xff, green:(hex >> 8) & 0xff, blue:hex & 0xff)
     }
 }
+
+extension CALayer {
+    var borderUIColor: UIColor {
+        get {
+            return UIColor(CGColor: self.borderColor)
+        }
+        set {
+            self.borderColor = newValue.CGColor
+        }
+    }
+}
+
+class PaddedLabel : UILabel {
+    override func drawTextInRect(rect: CGRect) {
+        let insets = UIEdgeInsets(top: 0, left: 5, bottom: 0, right: 5)
+        return super.drawTextInRect(UIEdgeInsetsInsetRect(rect, insets))
+    }
+}

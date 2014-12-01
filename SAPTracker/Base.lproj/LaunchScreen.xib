@@ -3,7 +3,6 @@
     <dependencies>
         <deployment identifier="iOS"/>
         <plugIn identifier="com.apple.InterfaceBuilder.IBCocoaTouchPlugin" version="6244"/>
-        <capability name="Constraints to layout margins" minToolsVersion="6.0"/>
     </dependencies>
     <objects>
         <placeholder placeholderIdentifier="IBFilesOwner" id="-1" userLabel="File's Owner"/>
@@ -13,82 +12,54 @@
             <autoresizingMask key="autoresizingMask" widthSizable="YES" heightSizable="YES"/>
             <subviews>
                 <imageView userInteractionEnabled="NO" contentMode="scaleAspectFill" horizontalHuggingPriority="251" verticalHuggingPriority="251" image="home_bg" translatesAutoresizingMaskIntoConstraints="NO" id="xW9-IB-N8v">
-                    <rect key="frame" x="0.0" y="0.0" width="480" height="480"/>
+                    <rect key="frame" x="0.0" y="64" width="480" height="416"/>
                 </imageView>
                 <view contentMode="scaleToFill" translatesAutoresizingMaskIntoConstraints="NO" id="xlm-Lq-17D">
                     <rect key="frame" x="0.0" y="0.0" width="480" height="64"/>
                     <subviews>
-                        <label opaque="NO" clipsSubviews="YES" userInteractionEnabled="NO" contentMode="left" horizontalHuggingPriority="1000" verticalHuggingPriority="1000" text="Tracker" textAlignment="center" lineBreakMode="middleTruncation" baselineAdjustment="alignBaselines" adjustsFontSizeToFit="NO" translatesAutoresizingMaskIntoConstraints="NO" id="2AI-iM-b3E">
-                            <rect key="frame" x="211" y="8" width="59" height="64"/>
+                        <imageView userInteractionEnabled="NO" contentMode="redraw" horizontalHuggingPriority="251" verticalHuggingPriority="251" image="navbar_bg" translatesAutoresizingMaskIntoConstraints="NO" id="QeW-RC-iez">
+                            <rect key="frame" x="0.0" y="0.0" width="480" height="64"/>
+                        </imageView>
+                        <label opaque="NO" userInteractionEnabled="NO" contentMode="left" horizontalHuggingPriority="251" verticalHuggingPriority="251" text="Tracker" lineBreakMode="tailTruncation" baselineAdjustment="alignBaselines" adjustsFontSizeToFit="NO" translatesAutoresizingMaskIntoConstraints="NO" id="1bE-0c-6BN">
+                            <rect key="frame" x="211" y="32" width="59" height="21"/>
                             <fontDescription key="fontDescription" type="boldSystem" pointSize="17"/>
+                            <color key="textColor" white="1" alpha="1" colorSpace="calibratedWhite"/>
                             <nil key="highlightedColor"/>
                         </label>
-                        <imageView userInteractionEnabled="NO" contentMode="scaleAspectFit" horizontalHuggingPriority="251" verticalHuggingPriority="251" image="sap_logo" translatesAutoresizingMaskIntoConstraints="NO" id="l6c-ii-VxH">
-                            <rect key="frame" x="8" y="16" width="64" height="48"/>
-                            <constraints>
-                                <constraint firstAttribute="width" constant="64" id="ZYm-9z-AOd"/>
-                            </constraints>
+                        <imageView userInteractionEnabled="NO" contentMode="center" horizontalHuggingPriority="251" verticalHuggingPriority="251" image="sap_logo" translatesAutoresizingMaskIntoConstraints="NO" id="l6c-ii-VxH">
+                            <rect key="frame" x="16" y="30" width="48" height="24"/>
                         </imageView>
                     </subviews>
-                    <color key="backgroundColor" red="1" green="1" blue="1" alpha="0.5" colorSpace="calibratedRGB"/>
                     <constraints>
-                        <constraint firstItem="2AI-iM-b3E" firstAttribute="centerX" secondItem="xlm-Lq-17D" secondAttribute="centerX" id="J41-Zh-xXy"/>
-                        <constraint firstItem="l6c-ii-VxH" firstAttribute="top" secondItem="xlm-Lq-17D" secondAttribute="top" constant="16" id="Jgd-ox-e9K"/>
-                        <constraint firstItem="l6c-ii-VxH" firstAttribute="centerY" secondItem="2AI-iM-b3E" secondAttribute="centerY" id="OA0-NG-Ame"/>
-                        <constraint firstItem="l6c-ii-VxH" firstAttribute="leading" secondItem="xlm-Lq-17D" secondAttribute="leadingMargin" id="f1A-fm-t5X"/>
-                        <constraint firstAttribute="height" constant="64" id="lQP-gW-eCe"/>
-                        <constraint firstAttribute="bottom" secondItem="l6c-ii-VxH" secondAttribute="bottom" id="p5E-tx-2bZ"/>
-                        <constraint firstItem="2AI-iM-b3E" firstAttribute="top" secondItem="xlm-Lq-17D" secondAttribute="topMargin" id="tnS-IM-VjK"/>
-                    </constraints>
-                </view>
-                <view contentMode="scaleToFill" translatesAutoresizingMaskIntoConstraints="NO" id="M8D-bv-seN">
-                    <rect key="frame" x="0.0" y="438" width="480" height="42"/>
-                    <subviews>
-                        <label opaque="NO" clipsSubviews="YES" userInteractionEnabled="NO" contentMode="left" horizontalHuggingPriority="251" verticalHuggingPriority="251" text="  Copyright © 2014 SAP Sailing. All rights reserved." textAlignment="center" lineBreakMode="tailTruncation" baselineAdjustment="alignBaselines" minimumFontSize="9" adjustsLetterSpacingToFitWidth="YES" translatesAutoresizingMaskIntoConstraints="NO" id="xsV-NT-Tsf">
-                            <rect key="frame" x="8" y="10" width="464" height="21"/>
-                            <fontDescription key="fontDescription" type="system" pointSize="14"/>
-                            <nil key="highlightedColor"/>
-                        </label>
-                    </subviews>
-                    <color key="backgroundColor" red="1" green="1" blue="1" alpha="0.5" colorSpace="calibratedRGB"/>
-                    <constraints>
-                        <constraint firstAttribute="height" constant="42" id="0wg-Kq-IPb"/>
-                        <constraint firstItem="xsV-NT-Tsf" firstAttribute="top" secondItem="M8D-bv-seN" secondAttribute="top" constant="10" id="Pyq-Rt-Ug9"/>
-                        <constraint firstItem="xsV-NT-Tsf" firstAttribute="leading" secondItem="M8D-bv-seN" secondAttribute="leadingMargin" id="Sbo-Eu-NkI"/>
-                        <constraint firstAttribute="bottom" secondItem="xsV-NT-Tsf" secondAttribute="bottom" constant="11" id="TGb-0n-h8Y"/>
-                        <constraint firstItem="xsV-NT-Tsf" firstAttribute="trailing" secondItem="M8D-bv-seN" secondAttribute="trailingMargin" id="fqH-rd-zNT"/>
+                        <constraint firstAttribute="trailing" secondItem="QeW-RC-iez" secondAttribute="trailing" id="0F6-TX-1nh"/>
+                        <constraint firstItem="1bE-0c-6BN" firstAttribute="centerX" secondItem="QeW-RC-iez" secondAttribute="centerX" id="5Ur-iF-nf3"/>
+                        <constraint firstItem="QeW-RC-iez" firstAttribute="leading" secondItem="xlm-Lq-17D" secondAttribute="leading" id="6TR-iB-vQQ"/>
+                        <constraint firstItem="l6c-ii-VxH" firstAttribute="leading" secondItem="xlm-Lq-17D" secondAttribute="leading" constant="16" id="DBc-id-wwh"/>
+                        <constraint firstItem="1bE-0c-6BN" firstAttribute="centerY" secondItem="l6c-ii-VxH" secondAttribute="centerY" id="M7k-Xa-kCA"/>
+                        <constraint firstItem="l6c-ii-VxH" firstAttribute="top" secondItem="xlm-Lq-17D" secondAttribute="top" constant="30" id="n22-Um-mw2"/>
+                        <constraint firstAttribute="height" constant="64" id="qqb-DH-b9q"/>
+                        <constraint firstAttribute="centerY" secondItem="QeW-RC-iez" secondAttribute="centerY" id="viL-EM-vry"/>
                     </constraints>
                 </view>
             </subviews>
             <color key="backgroundColor" white="1" alpha="1" colorSpace="custom" customColorSpace="calibratedWhite"/>
             <constraints>
-                <constraint firstAttribute="bottom" secondItem="xlm-Lq-17D" secondAttribute="bottom" constant="416" id="AxZ-9Q-xTE"/>
-                <constraint firstItem="xW9-IB-N8v" firstAttribute="leading" secondItem="M8D-bv-seN" secondAttribute="leading" id="HMY-K1-nBl"/>
-                <constraint firstItem="xlm-Lq-17D" firstAttribute="top" secondItem="xW9-IB-N8v" secondAttribute="top" id="NtU-zq-PJj"/>
-                <constraint firstItem="M8D-bv-seN" firstAttribute="top" secondItem="aUI-WX-4F1" secondAttribute="top" constant="438" id="h6g-gh-KET"/>
-                <constraint firstAttribute="trailing" secondItem="M8D-bv-seN" secondAttribute="trailing" id="hYA-le-iG8"/>
-                <constraint firstAttribute="bottom" secondItem="M8D-bv-seN" secondAttribute="bottom" id="khF-i2-3Yj"/>
-                <constraint firstItem="xW9-IB-N8v" firstAttribute="bottom" secondItem="M8D-bv-seN" secondAttribute="bottom" id="new-KJ-Qu1"/>
-                <constraint firstItem="M8D-bv-seN" firstAttribute="trailing" secondItem="xlm-Lq-17D" secondAttribute="trailing" id="olK-uG-pyW"/>
-                <constraint firstItem="M8D-bv-seN" firstAttribute="trailing" secondItem="xW9-IB-N8v" secondAttribute="trailing" id="pD6-A6-nhM"/>
-                <constraint firstAttribute="bottom" secondItem="xW9-IB-N8v" secondAttribute="bottom" id="tV1-M1-GHZ"/>
-                <constraint firstItem="xlm-Lq-17D" firstAttribute="leading" secondItem="M8D-bv-seN" secondAttribute="leading" id="ukj-Lk-915"/>
-                <constraint firstItem="xlm-Lq-17D" firstAttribute="top" secondItem="aUI-WX-4F1" secondAttribute="top" id="w3Q-vf-2EJ"/>
-                <constraint firstItem="xW9-IB-N8v" firstAttribute="leading" secondItem="aUI-WX-4F1" secondAttribute="leading" id="zEs-eI-BDI"/>
+                <constraint firstAttribute="bottom" secondItem="xW9-IB-N8v" secondAttribute="bottom" id="2Qb-tM-r2b"/>
+                <constraint firstItem="xW9-IB-N8v" firstAttribute="trailing" secondItem="xlm-Lq-17D" secondAttribute="trailing" id="Cgj-8G-YlR"/>
+                <constraint firstAttribute="trailing" secondItem="xlm-Lq-17D" secondAttribute="trailing" id="U2T-th-e3C"/>
+                <constraint firstItem="xlm-Lq-17D" firstAttribute="leading" secondItem="aUI-WX-4F1" secondAttribute="leading" id="kag-ZC-1my"/>
+                <constraint firstItem="xlm-Lq-17D" firstAttribute="top" secondItem="aUI-WX-4F1" secondAttribute="top" id="tbf-6Z-wU8"/>
+                <constraint firstItem="xW9-IB-N8v" firstAttribute="top" secondItem="xlm-Lq-17D" secondAttribute="bottom" id="vkZ-O5-ndx"/>
+                <constraint firstItem="xW9-IB-N8v" firstAttribute="leading" secondItem="xlm-Lq-17D" secondAttribute="leading" id="yyI-vp-mba"/>
             </constraints>
             <nil key="simulatedStatusBarMetrics"/>
             <freeformSimulatedSizeMetrics key="simulatedDestinationMetrics"/>
-            <variation key="default">
-                <mask key="constraints">
-                    <exclude reference="AxZ-9Q-xTE"/>
-                    <exclude reference="h6g-gh-KET"/>
-                </mask>
-            </variation>
             <point key="canvasLocation" x="548" y="504"/>
         </view>
     </objects>
     <resources>
         <image name="home_bg" width="434" height="289"/>
+        <image name="navbar_bg" width="320" height="64"/>
         <image name="sap_logo" width="48" height="24"/>
     </resources>
 </document>

@@ -20,7 +20,8 @@ class HomeViewController: UIViewController, UITableViewDataSource, UITableViewDe
     private var qrCodeManager: QRCodeManager?
     
     override func viewDidLoad() {
-        
+        super.viewDidLoad()
+
         // set QR manager, needed in case app is being open by custom URL
         qrCodeManager = QRCodeManager(delegate: self)
         
@@ -35,14 +36,14 @@ class HomeViewController: UIViewController, UITableViewDataSource, UITableViewDe
         // add logo to top left
         let imageView = UIImageView(image: UIImage(named: "sap_logo"))
         let barButtonItem = UIBarButtonItem(customView: imageView)
-        self.navigationItem.leftBarButtonItem = barButtonItem
+        navigationItem.leftBarButtonItem = barButtonItem
     }
     
     override func viewWillAppear(animated: Bool) {
         super.viewWillAppear(animated)
         DataManager.sharedManager.selectedEvent = nil;
     }
-    
+
     func openUrl(notification: NSNotification) {
         let url = notification.userInfo!["url"] as String
         qrCodeManager!.parseUrl(url)
@@ -53,7 +54,7 @@ class HomeViewController: UIViewController, UITableViewDataSource, UITableViewDe
     @IBAction func showActionSheet(sender: AnyObject) {
         let actionSheet = UIActionSheet(title: nil, delegate: self, cancelButtonTitle: nil, destructiveButtonTitle: nil, otherButtonTitles: "Feedback", "Settings", "About", "Cancel")
         actionSheet.cancelButtonIndex = 3
-        actionSheet.showInView(self.view)
+        actionSheet.showInView(view)
     }
     
     func actionSheet(actionSheet: UIActionSheet!, clickedButtonAtIndex buttonIndex: Int) {
@@ -62,7 +63,7 @@ class HomeViewController: UIViewController, UITableViewDataSource, UITableViewDe
             let feedbackComposeViewController = BITHockeyManager.sharedHockeyManager().feedbackManager.feedbackComposeViewController()
             let navController = UINavigationController(rootViewController: feedbackComposeViewController)
             navController.modalPresentationStyle = UIModalPresentationStyle.FormSheet;
-            self.presentViewController(navController, animated: true, completion: nil)
+            presentViewController(navController, animated: true, completion: nil)
         case 1:
             performSegueWithIdentifier("Settings", sender: actionSheet)
             break
@@ -107,23 +108,23 @@ class HomeViewController: UIViewController, UITableViewDataSource, UITableViewDe
         newIndexPath: NSIndexPath) {
             switch type {
             case .Insert:
-                self.tableView.insertRowsAtIndexPaths([newIndexPath], withRowAnimation: .Automatic)
+                tableView.insertRowsAtIndexPaths([newIndexPath], withRowAnimation: .Automatic)
             case .Update:
-                let cell = self.tableView.cellForRowAtIndexPath(indexPath)
-                self.configureCell(cell!, atIndexPath: indexPath)
-                self.tableView.reloadRowsAtIndexPaths([indexPath], withRowAnimation: .Automatic)
+                let cell = tableView.cellForRowAtIndexPath(indexPath)
+                configureCell(cell!, atIndexPath: indexPath)
+                tableView.reloadRowsAtIndexPaths([indexPath], withRowAnimation: .Automatic)
             case .Move:
-                self.tableView.deleteRowsAtIndexPaths([indexPath], withRowAnimation: .Automatic)
-                self.tableView.insertRowsAtIndexPaths([newIndexPath], withRowAnimation: .Automatic)
+                tableView.deleteRowsAtIndexPaths([indexPath], withRowAnimation: .Automatic)
+                tableView.insertRowsAtIndexPaths([newIndexPath], withRowAnimation: .Automatic)
             case .Delete:
-                self.tableView.deleteRowsAtIndexPaths([indexPath], withRowAnimation: .Automatic)
+                tableView.deleteRowsAtIndexPaths([indexPath], withRowAnimation: .Automatic)
             default:
                 return
             }
     }
     
     func controllerDidChangeContent(controller: NSFetchedResultsController) {
-        self.tableView.endUpdates()
+        tableView.endUpdates()
     }
     
     
