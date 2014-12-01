@@ -18,6 +18,7 @@ import com.sap.sse.operationaltransformation.Operation;
  * @author Axel Uhl (D043530)
  *
  */
+@FunctionalInterface
 public interface OperationWithResult<S, R> extends Operation<S>, Serializable {
     /**
      * Performs the actual operation, applying it to the <code>toState</code> service. The operation's result is

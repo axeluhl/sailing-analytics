@@ -14,6 +14,7 @@ import java.net.URL;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
+import com.sap.sse.common.WithID;
 import com.sap.sse.operationaltransformation.Operation;
 import com.sap.sse.replication.OperationExecutionListener;
 import com.sap.sse.replication.OperationWithResult;
@@ -115,7 +116,13 @@ public interface ReplicableWithObjectInputStream<S, O extends OperationWithResul
 
     /**
      * Replicates <code>operation</code> to any replica registered. This is different from {@link #replicate(OperationWithResult)}
-     * which would also send the operation to a master if this is a replica.
+     * which would also send the operation to a master if this is a replica. If on the current call stack there is an operation
+     * being {@link #apply(OperationWithResult) applied} that was received from a replica (indicated by the operation
+     * being a {@link WithID} instance) and the operation to be sent to the replicas does not {@link WithID carry an ID},
+     * a new {@link OperationWithResultWithIdWrapper ID decorator} is wrapped around the <code>operation</code> with the ID
+     * of the call stack's operation currently being {@link #apply(OperationWithResult) applied}. This will tell the replicas
+     * that <code>operation</code> is just replicating the effects of another operation, and the replica where the original
+     * operation was initiated can therefore safely ignore <code>operation</code> when receiving it.
      */
     default <T> void replicateReplicated(O operation) {
         @SuppressWarnings("unchecked")
