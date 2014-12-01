@@ -140,15 +140,7 @@ public class SecurityServiceImpl extends RemoteServiceServlet implements Replica
         this.store = store;
         this.mailProperties = mailProperties;
         // Create default users if no users exist yet.
-        if (Util.isEmpty(store.getUsers())) {
-            try {
-                logger.info("No users found, creating default user \"admin\" with password \"admin\"");
-                createSimpleUser("admin", "nobody@sapsailing.com", "admin", /* validationBaseURL */ null);
-                addRoleForUser("admin", DefaultRoles.ADMIN.getRolename());
-            } catch (UserManagementException | MailException e) {
-                logger.log(Level.SEVERE, "Exception while creating default admin user", e);
-            }
-        }
+        initEmptyStore();
         Factory<SecurityManager> factory = new WebIniSecurityManagerFactory(shiroConfiguration);
         logger.info("Loaded shiro.ini file from: classpath:shiro.ini");
         StringBuilder logMessage = new StringBuilder("[urls] section from Shiro configuration:");
@@ -167,6 +159,22 @@ public class SecurityServiceImpl extends RemoteServiceServlet implements Replica
         logger.info("Created: " + securityManager);
         SecurityUtils.setSecurityManager(securityManager);
         this.securityManager = securityManager;
+    }
+
+    /**
+     * Creates a default "admin" user with initial password "admin" and initial role "admin" if the user <code>store</code>
+     * is empty.
+     */
+    private void initEmptyStore() {
+        if (Util.isEmpty(store.getUsers())) {
+            try {
+                logger.info("No users found, creating default user \"admin\" with password \"admin\"");
+                createSimpleUser("admin", "nobody@sapsailing.com", "admin", /* validationBaseURL */ null);
+                addRoleForUser("admin", DefaultRoles.ADMIN.getRolename());
+            } catch (UserManagementException | MailException e) {
+                logger.log(Level.SEVERE, "Exception while creating default admin user", e);
+            }
+        }
     }
 
     private class SMTPAuthenticator extends javax.mail.Authenticator {
@@ -967,6 +975,7 @@ public class SecurityServiceImpl extends RemoteServiceServlet implements Replica
     @Override
     public void clearState() throws Exception {
         store.clear();
+        initEmptyStore();
         CacheManager cm = getSecurityManager().getCacheManager();
         if (cm instanceof ReplicatingCacheManager) {
             ((ReplicatingCacheManager) cm).clear();
