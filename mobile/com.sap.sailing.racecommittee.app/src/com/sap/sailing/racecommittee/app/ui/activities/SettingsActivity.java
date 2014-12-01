@@ -3,27 +3,13 @@ package com.sap.sailing.racecommittee.app.ui.activities;
 import java.util.List;
 
 import android.content.Context;
-import android.content.Intent;
 import android.content.SharedPreferences;
 import android.os.Bundle;
 import android.preference.PreferenceActivity;
-import android.widget.Toast;
 
-import com.sap.sailing.domain.base.configuration.RegattaConfiguration;
-import com.sap.sailing.domain.base.racegroup.RaceGroup;
-import com.sap.sailing.racecommittee.app.AppPreferences;
 import com.sap.sailing.racecommittee.app.R;
-import com.sap.sailing.racecommittee.app.data.DataManager;
-import com.sap.sailing.racecommittee.app.data.ReadonlyDataManager;
-import com.sap.sailing.racecommittee.app.domain.configuration.impl.PreferencesRegattaConfigurationLoader;
-import com.sap.sailing.racecommittee.app.ui.fragments.preference.RegattaPreferenceFragment;
-import com.sap.sailing.racecommittee.app.utils.PreferenceHelper;
 
 public class SettingsActivity extends PreferenceActivity {
-
-    private static final String TAG = SettingsActivity.class.getName();
-    
-
 
     private boolean isRedirectedToTemp;
     private String sharedPreferencesName;

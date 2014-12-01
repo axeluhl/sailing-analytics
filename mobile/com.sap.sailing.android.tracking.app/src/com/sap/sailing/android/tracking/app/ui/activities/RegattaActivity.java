@@ -47,6 +47,7 @@ import com.sap.sailing.android.tracking.app.provider.AnalyticsContract.Competito
 import com.sap.sailing.android.tracking.app.provider.AnalyticsContract.Event;
 import com.sap.sailing.android.tracking.app.provider.AnalyticsContract.Leaderboard;
 import com.sap.sailing.android.tracking.app.ui.fragments.RegattaFragment;
+import com.sap.sailing.android.tracking.app.utils.UniqueDeviceUuid;
 import com.sap.sailing.android.tracking.app.utils.VolleyHelper;
 
 public class RegattaActivity extends BaseActivity {
@@ -65,6 +66,7 @@ public class RegattaActivity extends BaseActivity {
     private int eventRowId;
     private String eventImageUrl;
     private long eventStartMillis;
+    private long eventEndMillis;
     
     private String leaderboardName;
     private int leaderboardRowId;
@@ -116,10 +118,10 @@ public class RegattaActivity extends BaseActivity {
             ExLog.i(this, TAG, "Clicked SETTINGS.");
             startActivity(new Intent(this, SettingsActivity.class));
             return true;
-        case R.id.options_menu_info:
-            ExLog.i(this, TAG, "Clicked INFO.");
-            startActivity(new Intent(this, SystemInformationActivity.class));
-            return true;
+//        case R.id.options_menu_info:
+//            ExLog.i(this, TAG, "Clicked INFO.");
+//            startActivity(new Intent(this, SystemInformationActivity.class));
+//            return true;
         case R.id.options_menu_checkout:
         	ExLog.i(this, TAG, "Clicked CHECKOUT.");
         	checkout();
@@ -150,6 +152,7 @@ public class RegattaActivity extends BaseActivity {
 			eventName = ec.getString(ec.getColumnIndex(Event.EVENT_NAME));
 			eventImageUrl = ec.getString(ec.getColumnIndex(Event.EVENT_IMAGE_URL));
 			eventStartMillis = ec.getLong(ec.getColumnIndex(Event.EVENT_DATE_START));
+			eventEndMillis = ec.getLong(ec.getColumnIndex(Event.EVENT_DATE_END));
 			eventRowId = ec.getInt(ec.getColumnIndex(BaseColumns._ID));
         }
 		
@@ -337,7 +340,7 @@ public class RegattaActivity extends BaseActivity {
 	/**
 	 * Check out from regatta;
 	 */
-	private void checkout()
+	public void checkout()
 	{
 		final String checkoutURLStr = prefs.getServerURL()
 				+ prefs.getServerCheckoutPath().replace("{leaderboard-name}",
@@ -348,7 +351,7 @@ public class RegattaActivity extends BaseActivity {
 		JSONObject checkoutData = new JSONObject();
 		try {
 			checkoutData.put("competitorId", competitorId);
-			checkoutData.put("deviceUuid", prefs.getDeviceIdentifier());
+			checkoutData.put("deviceUuid", UniqueDeviceUuid.getUniqueId(this));
 			checkoutData.put("toMillis", String.valueOf(System.currentTimeMillis()));
 		} catch (JSONException e) {
 			showErrorPopup(
@@ -390,6 +393,24 @@ public class RegattaActivity extends BaseActivity {
 	public long getEventStartMillis()
 	{
 		return eventStartMillis;
+	}
+	
+	/**
+	 * So the fragment can get the value to decide if thank you note should be shown.
+	 * @return
+	 */
+	public long getEventEndMillis()
+	{
+		return eventEndMillis;
+	}
+	
+	/**
+	 * Id of row for this event, so tracking-service can link GPS fixes to event.
+	 * @return
+	 */
+	public int getEventId()
+	{
+		return eventRowId;
 	}
 	
 	/**

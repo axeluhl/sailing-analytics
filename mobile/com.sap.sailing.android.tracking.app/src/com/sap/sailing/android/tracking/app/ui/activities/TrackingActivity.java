@@ -28,13 +28,20 @@ public class TrackingActivity extends BaseActivity implements GPSQualityListener
 	
 	TransmittingService transmittingService;
 	boolean transmittingServiceBound;
+	boolean startedByStartActivity;
 	
 	private final static String TAG = TrackingActivity.class.getName();
 
+	private int eventId;
+	
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-
+        
+        Intent intent = getIntent();
+        eventId = intent.getExtras().getInt(getString(R.string.tracking_activity_event_id_parameter));
+        startedByStartActivity = intent.getExtras().getBoolean(getString(R.string.tracking_activity_started_by_start_activity_parameter)); 
+        		
         setContentView(R.layout.fragment_container);
         
         Toolbar toolbar = (Toolbar) findViewById(R.id.toolbar);
@@ -51,7 +58,7 @@ public class TrackingActivity extends BaseActivity implements GPSQualityListener
         }
 
         replaceFragment(R.id.content_frame, new TrackingFragment());
-        startTrackingService();
+        startTrackingService(eventId);
     }
     
     @Override
@@ -107,10 +114,11 @@ public class TrackingActivity extends BaseActivity implements GPSQualityListener
 		trackingFragment.setAPIConnectivityStatus(apiConnectivity);
     }
     
-    private void startTrackingService()
+    private void startTrackingService(int eventId)
     {
     	Intent intent = new Intent(this, TrackingService.class);
 		intent.setAction(getString(R.string.tracking_service_start));
+		intent.putExtra(getString(R.string.tracking_service_event_id_parameter), eventId);
 		startService(intent);
     }
     
@@ -168,4 +176,13 @@ public class TrackingActivity extends BaseActivity implements GPSQualityListener
             trackingServiceBound = false;
         }
     };
+    
+    /**
+     * the fragment can call this to know if tracking was running before, so it doesn't reset the timer.
+     * @return
+     */
+    public boolean getStartedByStartActivity()
+    {
+    	return startedByStartActivity;
+    }
 }
