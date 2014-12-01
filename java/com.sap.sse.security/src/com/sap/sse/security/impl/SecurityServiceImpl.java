@@ -93,8 +93,9 @@ import com.sap.sse.security.shared.MailException;
 import com.sap.sse.security.shared.SocialUserAccount;
 import com.sap.sse.security.shared.UserManagementException;
 import com.sap.sse.security.shared.UsernamePasswordAccount;
+import com.sap.sse.util.ClearStateTestSupport;
 
-public class SecurityServiceImpl extends RemoteServiceServlet implements ReplicableSecurityService {
+public class SecurityServiceImpl extends RemoteServiceServlet implements ReplicableSecurityService, ClearStateTestSupport {
 
     private static final long serialVersionUID = -3490163216601311858L;
 
@@ -961,5 +962,14 @@ public class SecurityServiceImpl extends RemoteServiceServlet implements Replica
     @Override
     public boolean hasSentOperationToMaster(OperationWithResult<ReplicableSecurityService, ?> operation) {
         return this.operationsSentToMasterForReplication.remove(operation);
+    }
+
+    @Override
+    public void clearState() throws Exception {
+        store.clear();
+        CacheManager cm = getSecurityManager().getCacheManager();
+        if (cm instanceof ReplicatingCacheManager) {
+            ((ReplicatingCacheManager) cm).clear();
+        }
     }
 }
