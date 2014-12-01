@@ -39,7 +39,8 @@ public class TrackingActivity extends BaseActivity implements GPSQualityListener
 	boolean transmittingServiceBound;
 	
 	private final static String TAG = TrackingActivity.class.getName();
-
+	private final static String SIS_FRAGMENT = "savedInstanceTrackingFragment";
+	
 	private int eventId;
 	
     @Override
@@ -86,8 +87,27 @@ public class TrackingActivity extends BaseActivity implements GPSQualityListener
             getSupportActionBar().setSubtitle(subtitle);
         }
         
-        replaceFragment(R.id.content_frame, new TrackingFragment());
+        TrackingFragment fragment;
+        if (savedInstanceState != null)
+        {
+        	fragment = (TrackingFragment)getSupportFragmentManager().getFragment(savedInstanceState, SIS_FRAGMENT);
+        }
+        else
+        {
+        	fragment = new TrackingFragment();
+        }
+        
+        replaceFragment(R.id.content_frame, fragment);
         startTrackingService(eventId);
+    }
+    
+    @Override
+    protected void onSaveInstanceState(Bundle outState) {
+    	super.onSaveInstanceState(outState);
+    	
+    	TrackingFragment fragment = (TrackingFragment)getSupportFragmentManager()
+				.findFragmentById(R.id.content_frame);
+    	getSupportFragmentManager().putFragment(outState, SIS_FRAGMENT, fragment);
     }
     
     @Override
