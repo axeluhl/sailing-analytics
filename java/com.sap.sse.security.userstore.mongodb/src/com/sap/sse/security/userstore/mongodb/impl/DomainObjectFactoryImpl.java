@@ -70,10 +70,17 @@ public class DomainObjectFactoryImpl implements DomainObjectFactory {
         String passwordResetSecret = (String) userDBObject.get(FieldNames.User.PASSWORD_RESET_SECRET.name());
         String validationSecret = (String) userDBObject.get(FieldNames.User.VALIDATION_SECRET.name());
         Set<String> roles = new HashSet<String>();
+        Set<String> permissions = new HashSet<String>();
         BasicDBList rolesO = (BasicDBList) userDBObject.get(FieldNames.User.ROLES.name());
-        if (rolesO != null){
-            for (Object o : rolesO){
+        if (rolesO != null) {
+            for (Object o : rolesO) {
                 roles.add((String) o);
+            }
+        }
+        BasicDBList permissionsO = (BasicDBList) userDBObject.get(FieldNames.User.PERMISSIONS.name());
+        if (permissionsO != null) {
+            for (Object o : permissionsO) {
+                permissions.add((String) o);
             }
         }
         DBObject accountsMap = (DBObject) userDBObject.get(FieldNames.User.ACCOUNTS.name());
@@ -81,6 +88,9 @@ public class DomainObjectFactoryImpl implements DomainObjectFactory {
         User result = new User(name, email, emailValidated==null?false:emailValidated, passwordResetSecret, validationSecret, accounts.values());
         for (String role : roles) {
             result.addRole(role);
+        }
+        for (String permission : permissions) {
+            result.addPermission(permission);
         }
         return result;
     }

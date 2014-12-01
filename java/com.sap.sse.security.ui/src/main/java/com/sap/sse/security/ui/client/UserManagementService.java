@@ -41,6 +41,8 @@ public interface UserManagementService extends RemoteService {
 
     SuccessInfo setRolesForUser(String username, Iterable<String> roles);
 
+    SuccessInfo setPermissionsForUser(String username, Iterable<String> permissions);
+
     Map<String, String> getSettings();
 
     Map<String, String> getSettingTypes();

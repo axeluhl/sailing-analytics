@@ -31,6 +31,8 @@ public interface UserManagementServiceAsync {
 
     void setRolesForUser(String username, Iterable<String> roles, AsyncCallback<SuccessInfo> callback);
 
+    void setPermissionsForUser(String username, Iterable<String> permissions, AsyncCallback<SuccessInfo> callback);
+
     void deleteUser(String username, AsyncCallback<SuccessInfo> callback);
 
     void getSettings(AsyncCallback<Map<String, String>> callback);
@@ -39,12 +41,6 @@ public interface UserManagementServiceAsync {
 
     void getSettingTypes(AsyncCallback<Map<String, String>> callback);
     
-  //------------------------------------------------ OAuth Interface ----------------------------------------------------------------------
-
-    void getAuthorizationUrl(CredentialDTO credential, AsyncCallback<String> callback);
-
-    void verifySocialUser(CredentialDTO credential, AsyncCallback<UserDTO> callback);
-
     void addSetting(String key, String clazz, String setting, AsyncCallback<Void> callback);
 
     void setPreference(String username, String key, String value, AsyncCallback<Void> callback);
@@ -52,5 +48,11 @@ public interface UserManagementServiceAsync {
     void unsetPreference(String username, String key, AsyncCallback<Void> callback);
 
     void getPreference(String username, String key, AsyncCallback<String> callback);
+
+  //------------------------------------------------ OAuth Interface ----------------------------------------------------------------------
+
+    void getAuthorizationUrl(CredentialDTO credential, AsyncCallback<String> callback);
+
+    void verifySocialUser(CredentialDTO credential, AsyncCallback<UserDTO> callback);
 
 }

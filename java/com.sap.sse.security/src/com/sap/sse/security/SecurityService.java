@@ -1,7 +1,6 @@
 package com.sap.sse.security;
 
 import java.util.Map;
-import java.util.Set;
 import java.util.UUID;
 
 import javax.servlet.ServletContext;
@@ -53,11 +52,17 @@ public interface SecurityService extends ReplicableWithObjectInputStream<Replica
 
     void deleteUser(String username) throws UserManagementException;
 
-    Set<String> getRolesFromUser(String username) throws UserManagementException;
+    Iterable<String> getRolesFromUser(String username) throws UserManagementException;
 
-    void addRoleForUser(String username, String role) throws UserManagementException;
+    void addRoleForUser(String username, String role);
 
-    void removeRoleFromUser(String username, String role) throws UserManagementException;
+    void removeRoleFromUser(String username, String role);
+
+    Iterable<String> getPermissionsFromUser(String username) throws UserManagementException;
+    
+    void removePermissionFromUser(String username, String permissionToRemove);
+
+    void addPermissionForUser(String username, String permissionToAdd);
 
     /**
      * Registers a settings key together with its type. Calling this method is necessary for {@link #setSetting(String, Object)}

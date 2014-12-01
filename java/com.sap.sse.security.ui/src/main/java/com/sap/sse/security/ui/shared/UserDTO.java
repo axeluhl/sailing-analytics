@@ -1,11 +1,11 @@
 package com.sap.sse.security.ui.shared;
 
-import java.util.Collection;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
 
 import com.google.gwt.user.client.rpc.IsSerializable;
+import com.sap.sse.common.Util;
 
 public class UserDTO implements IsSerializable {
     private String name;
@@ -35,8 +35,8 @@ public class UserDTO implements IsSerializable {
         return roles.contains(role);
     }
 
-    public void addRoles(Collection<String> roles) {
-        this.roles.addAll(roles);
+    public void addRoles(Iterable<String> roles) {
+        Util.addAll(roles, this.roles);
     }
 
     public List<AccountDTO> getAccounts() {

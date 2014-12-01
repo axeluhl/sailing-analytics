@@ -458,12 +458,12 @@ public class SecurityServiceImpl extends RemoteServiceServlet implements Replica
     }
 
     @Override
-    public Set<String> getRolesFromUser(String name) throws UserManagementException {
+    public Iterable<String> getRolesFromUser(String name) throws UserManagementException {
         return store.getRolesFromUser(name);
     }
 
     @Override
-    public void addRoleForUser(String username, String role) throws UserManagementException {
+    public void addRoleForUser(String username, String role) {
         apply(s->s.internalAddRoleForUser(username, role));
     }
 
@@ -474,13 +474,40 @@ public class SecurityServiceImpl extends RemoteServiceServlet implements Replica
     }
 
     @Override
-    public void removeRoleFromUser(String username, String role) throws UserManagementException {
+    public void removeRoleFromUser(String username, String role) {
         apply(s->s.internalRemoveRoleFromUser(username, role));
     }
 
     @Override
     public Void internalRemoveRoleFromUser(String username, String role) throws UserManagementException {
         store.removeRoleFromUser(username, role);
+        return null;
+    }
+
+    @Override
+    public Iterable<String> getPermissionsFromUser(String username) throws UserManagementException {
+        return store.getPermissionsFromUser(username);
+    }
+
+    @Override
+    public void removePermissionFromUser(String username, String permissionToRemove) {
+        apply(s->s.internalRemovePermissionForUser(username, permissionToRemove));
+    }
+
+    @Override
+    public Void internalRemovePermissionForUser(String username, String permissionToRemove) throws UserManagementException {
+        store.removePermissionFromUser(username, permissionToRemove);
+        return null;
+    }
+
+    @Override
+    public void addPermissionForUser(String username, String permissionToAdd) {
+        apply(s->s.internalAddPermissionForUser(username, permissionToAdd));
+    }
+
+    @Override
+    public Void internalAddPermissionForUser(String username, String permissionToAdd) throws UserManagementException {
+        store.addPermissionForUser(username, permissionToAdd);
         return null;
     }
 

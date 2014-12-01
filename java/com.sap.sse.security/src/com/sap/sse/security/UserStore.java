@@ -1,7 +1,6 @@
 package com.sap.sse.security;
 
 import java.util.Map;
-import java.util.Set;
 import java.util.UUID;
 
 import com.sap.sse.common.Named;
@@ -19,11 +18,17 @@ public interface UserStore extends Named {
 
     void updateUser(User user);
 
-    Set<String> getRolesFromUser(String username) throws UserManagementException;
+    Iterable<String> getRolesFromUser(String username) throws UserManagementException;
 
     void addRoleForUser(String name, String role) throws UserManagementException;
 
     void removeRoleFromUser(String name, String role) throws UserManagementException;
+
+    Iterable<String> getPermissionsFromUser(String username) throws UserManagementException;
+
+    void removePermissionFromUser(String name, String permission) throws UserManagementException;
+
+    void addPermissionForUser(String name, String permission) throws UserManagementException;
 
     void deleteUser(String name) throws UserManagementException;
 

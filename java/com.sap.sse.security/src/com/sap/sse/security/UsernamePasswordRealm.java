@@ -12,6 +12,7 @@ import org.apache.shiro.authz.AuthorizationInfo;
 import org.apache.shiro.authz.SimpleAuthorizationInfo;
 import org.apache.shiro.subject.PrincipalCollection;
 
+import com.sap.sse.common.Util;
 import com.sap.sse.security.shared.Account.AccountType;
 import com.sap.sse.security.shared.UserManagementException;
 import com.sap.sse.security.shared.UsernamePasswordAccount;
@@ -39,15 +40,18 @@ public class UsernamePasswordRealm extends AbstractUserStoreBasedRealm {
     protected AuthorizationInfo doGetAuthorizationInfo(PrincipalCollection principals) {
         final SimpleAuthorizationInfo ai = new SimpleAuthorizationInfo();
         final List<String> roles = new ArrayList<>();
-        for (Object r : principals.asList()){
+        final List<String> permissions = new ArrayList<>();
+        for (Object r : principals) {
             String username = r.toString();
             try {
-                roles.addAll(getUserStore().getRolesFromUser(username));
+                Util.addAll(getUserStore().getRolesFromUser(username), roles);
+                Util.addAll(getUserStore().getPermissionsFromUser(username), permissions);
             } catch (UserManagementException e) {
                throw new AuthenticationException(e.getMessage());
             }
         }
         ai.addRoles(roles);
+        ai.addStringPermissions(permissions);
         return ai;
     }
 
