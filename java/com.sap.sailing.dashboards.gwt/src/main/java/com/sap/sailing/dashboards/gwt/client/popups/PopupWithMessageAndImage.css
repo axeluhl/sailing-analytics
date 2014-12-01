@@ -1,5 +1,4 @@
 /* @CHARSET "UTF-8"; */
-
 .popup {
 	position: absolute;
 	left: 50%;
@@ -11,6 +10,8 @@
 	background-color: white;
 	border-color: grey;
 	z-index: 300;
+	border-radius: 2px;
+	overflow: hidden;
 }
 
 .popup_shown {
