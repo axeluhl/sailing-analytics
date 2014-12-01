@@ -1,6 +1,5 @@
 package com.sap.sailing.gwt.home.client.shared.recentevent;
 
-import java.util.List;
 
 import com.google.gwt.core.client.GWT;
 import com.google.gwt.dom.client.DivElement;
@@ -62,11 +61,12 @@ public class RecentEvent extends Composite {
         }
         venueName.setInnerText(event.venue.getName());
         eventStartDate.setInnerText(EventDatesFormatterUtil.formatDateRangeWithoutYear(event.startDate, event.endDate));
-        List<String> photoGalleryImageURLs = event.getPhotoGalleryImageURLs();
-        if (photoGalleryImageURLs.isEmpty()) {
+        
+        final String thumbnailUrl =  event.getEventThumbnailImageUrl();
+        if (thumbnailUrl== null ) {
             eventImage.setSrc(RecentEventResources.INSTANCE.defaultEventPhotoImage().getSafeUri().asString());
         } else {
-            eventImage.setSrc(photoGalleryImageURLs.get(0));
+            eventImage.setSrc(thumbnailUrl);
         }
     }
     

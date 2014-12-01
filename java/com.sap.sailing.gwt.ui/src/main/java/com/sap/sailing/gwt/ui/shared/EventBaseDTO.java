@@ -17,6 +17,8 @@ import com.sap.sse.common.Util;
 public class EventBaseDTO extends NamedDTO implements IsSerializable {
     private static final long serialVersionUID = 818666323178097939L;
     private static final String STAGE_IMAGE_URL_SUBSTRING_INDICATOR_CASE_INSENSITIVE = "stage";
+    private static final String THUMBNAIL_IMAGE_URL_SUBSTRING_INDICATOR_CASE_INSENSITIVE = "eventteaser";
+
     public VenueDTO venue;
     public Date startDate;
     public Date endDate;
@@ -33,6 +35,9 @@ public class EventBaseDTO extends NamedDTO implements IsSerializable {
     /** placeholder for social media URL's -> attributes will be implemented later on */
     private String facebookURL;
     private String twitterURL;
+    
+   
+    
     /**
      * For the image URL keys holds the sizes of these images if known. An image size is "known" by this object if it was
      * provided to the {@link #setImageSize} method.
@@ -188,6 +193,125 @@ public class EventBaseDTO extends NamedDTO implements IsSerializable {
             }
         }
         return result;
+    }
+    
+    /**
+     * 
+     * @return
+     */
+    private String lastThumbnail;
+    public String getEventThumbnailImageUrl() {
+        if (lastThumbnail == null) {
+            lastThumbnail = findEventThumbnailImageUrl();
+        }
+        return lastThumbnail;
+    }
+    
+    
+    private String findEventThumbnailImageUrl() {
+        
+        final class ImageHolder {
+            
+            final int PERFECT_HEIGHT = 240;
+            final int PERFECT_WIDTH = 370;
+            final double PERFECT_RATIO = PERFECT_HEIGHT / (double) PERFECT_WIDTH;
+            final String url;
+            final int height;
+            final int width;
+            final int size;
+            final double ratio;
+            
+            ImageHolder() {
+                this.url = "";
+                this.height = -1;
+                this.width = -1;
+                this.size = -1;
+                this.ratio = -1;                    
+            }
+            ImageHolder(String url, ImageSize imageSize) {
+                assert url != null: "url must not be null";
+                assert imageSize != null : "imageSize must not be null";
+                this.url = url;
+                this.height = imageSize.getHeight();
+                this.width = imageSize.getWidth();
+                this.size = height * width;
+                this.ratio = height/ (double)width;
+            }
+            
+            boolean isBetterWorstcaseThan(ImageHolder otherImageHolder) {
+                if (isNull()) {
+                    return false;
+                }
+                if (otherImageHolder.isNull()) {
+                    return true;
+                }
+                if (!isBigEnough() && otherImageHolder.isBigEnough()) {
+                    return true;
+                }
+                if (this.fitsRatio() &&  otherImageHolder.fitsRatio() && otherImageHolder.isBigEnough() && otherImageHolder.isSmallerThan(this)) {
+                        return true;
+                } 
+                return false;
+            }
+            
+            boolean isSmallerThan(ImageHolder otherImageHolder) {
+                return size < otherImageHolder.size;
+            }
+            
+            boolean isBigEnough() {
+                return height >= PERFECT_HEIGHT && width >= PERFECT_WIDTH;
+            }
+            
+            boolean fitsRatio() {
+                return ratio == PERFECT_RATIO;
+            }
+            
+            boolean isPerfectFit() {
+                return ( height == PERFECT_HEIGHT && width ==PERFECT_WIDTH );
+            }
+            
+            boolean isNull() {
+                return size == -1;
+            }
+        }
+       
+        // search for name pattern
+        for (String imageUrl : imageURLs) {
+           if (imageUrl != null && imageUrl.toLowerCase().contains(THUMBNAIL_IMAGE_URL_SUBSTRING_INDICATOR_CASE_INSENSITIVE)) {
+               return imageUrl;
+           }
+        } 
+        
+       
+        ImageHolder actualWorstcase = new ImageHolder( );
+        ImageHolder bestFit = new ImageHolder( );
+       
+        for (String candidateImageUrl : getPhotoGalleryImageURLs()) {
+            final ImageHolder candidate = new ImageHolder(candidateImageUrl, getImageSize(candidateImageUrl));
+            
+            if (candidate.isPerfectFit()) {
+                return candidate.url;
+            }
+            
+            if (candidate.fitsRatio() && candidate.isBigEnough()) {
+                if (candidate.isSmallerThan(bestFit)) {
+                    bestFit = candidate;
+                }
+            }
+
+            if (candidate.isBetterWorstcaseThan(actualWorstcase)) {
+                actualWorstcase = candidate;
+           }
+             
+        }
+       
+        if (!bestFit.isNull()) {
+            return bestFit.url;
+        }
+        if (!actualWorstcase.isNull()) {
+            return actualWorstcase.url;
+        }
+        return null;
     }
 
     public List<String> getVideoURLs() {

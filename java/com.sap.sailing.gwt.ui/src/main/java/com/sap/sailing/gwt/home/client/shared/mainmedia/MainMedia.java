@@ -23,6 +23,7 @@ import com.sap.sailing.gwt.idangerous.Swiper;
 import com.sap.sailing.gwt.ui.common.client.YoutubeApi;
 import com.sap.sailing.gwt.ui.shared.EventBaseDTO;
 import com.sap.sse.common.Util.Pair;
+import com.sap.sse.gwt.client.controls.carousel.ImageCarousel;
 
 public class MainMedia extends Composite {
     
@@ -33,9 +34,9 @@ public class MainMedia extends Composite {
     @UiField HTMLPanel videosPanel;
     @UiField DivElement videoLightBoxData;
     
-    @UiField HTMLPanel mediaSlides;
+    @UiField ImageCarousel imageCarousel;
 
-    private Swiper swiper;
+   // private Swiper swiper;
     private int videoCounter;
     
     interface MainMediaUiBinder extends UiBinder<Widget, MainMedia> {
@@ -73,20 +74,22 @@ public class MainMedia extends Composite {
             Collections.swap(photoGalleryUrls, i, random.nextInt(gallerySize));
         }
         for (String url : photoGalleryUrls) {
-            SimplePanel imageContainer = new SimplePanel();
-            imageContainer.addStyleName(STYLES.media_swiperslide());
-            String image = "url(" + url + ")";
-            imageContainer.getElement().getStyle().setBackgroundImage(image);
-            mediaSlides.add(imageContainer);
+            
+//            SimplePanel imageContainer = new SimplePanel();
+//            imageContainer.addStyleName(STYLES.media_swiperslide());
+//            String image = "url(" + url + ")";
+//            imageContainer.getElement().getStyle().setBackgroundImage(image);
+             imageCarousel.addImage(url);
         }
-        this.swiper = Swiper.createWithLoopOption(STYLES.media_swipecontainer(), STYLES.media_swipewrapper(), STYLES.media_swiperslide());
+        imageCarousel.init();
+      //  this.swiper = Swiper.createWithLoopOption(STYLES.media_swipecontainer(), STYLES.media_swipewrapper(), STYLES.media_swiperslide());
         // See bug 2232: the stage image sizes are scaled incorrectly. https://github.com/ubilabs/sap-sailing-analytics/issues/421 and
         // http://bugzilla.sapsailing.com/bugzilla/show_bug.cgi?id=2232 have the details. A quick fix may be to send a resize event
         // after everything has been rendered.
         Scheduler.get().scheduleDeferred(new ScheduledCommand() {
             @Override
             public void execute() {
-                swiper.reInit();
+          //      swiper.reInit();
             }
         });
     }
@@ -113,17 +116,4 @@ public class MainMedia extends Composite {
         return result;
     }
 
-    @UiHandler("nextPictureLink")
-    public void nextStageTeaserLinkClicked(ClickEvent e) {
-        if (this.swiper != null) {
-            this.swiper.swipeNext();
-        }
-    }
-
-    @UiHandler("prevPictureLink")
-    public void prevStageTeaserLinkClicked(ClickEvent e) {
-        if (this.swiper != null) {
-            this.swiper.swipePrev();
-        }
-    }
 }

@@ -1,0 +1,52 @@
+<ui:UiBinder xmlns:ui='urn:ui:com.google.gwt.uibinder'>
+	<ui:style>
+        .slider {
+			width: 100%;
+
+        }
+        .slider > ul > li > button:before {
+            font-size: 15px;
+        }
+        .slider img {
+            margin: 10px;
+        }
+		.slider slick-track {
+	    }
+
+	
+		.slider  button {
+			height: 40px;
+			width: 40px;
+			right: -40px
+		} 
+		.slick-prev:before {
+			color: #dddddd;
+			font-size: 30px;
+			height: 30px;
+			width: 30px;
+			left: -50px;
+		} 
+		.slick-prev {
+			left: -50px;
+		}
+ 
+		
+
+		.slick-next {
+			right: -50px;
+		} 
+		.slick-next:before {
+			color: #dddddd;
+			font-size: 30px;
+			height: 30px;
+			width: 30px;
+			right: -50px;
+		} 
+
+    </ui:style>
+    
+	<div class="{style.slider}" ui:field="sliderMainUi" >
+	    <button ui:field="slickPrev" class="slick-prev {style.slick-prev}" data-role="none" type="button" style="display: block;">Previous</button>
+	    <button ui:field="slickNext" class="slick-next {style.slick-next}" data-role="none" type="button" style="display: block;">Next</button>
+	</div>
+</ui:UiBinder>
