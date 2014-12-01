@@ -8,7 +8,7 @@
     android:orientation="vertical" >
 
    <LinearLayout
-        android:layout_width="wrap_content"
+        android:layout_width="fill_parent"
         android:layout_height="0dp"
         android:layout_margin="12dp"
         android:layout_weight="0.6"
@@ -20,7 +20,7 @@
 	        android:layout_width="0dp"
 	        android:layout_height="wrap_content"
 	        android:layout_margin="12dp"
-	        android:layout_weight="0.66"
+	        android:layout_weight="0.59"
 	        android:orientation="vertical" >
 	
 	        <TextView
@@ -46,16 +46,17 @@
 	    </LinearLayout>
 	    
 		<LinearLayout
-	        android:layout_width="8dp"
+	        android:layout_width="0dp"
 	        android:layout_height="match_parent"
+	        android:layout_weight="0.01"
 	        android:orientation="vertical"
-	         android:background="@color/white" />
+	        android:background="@color/white" />
 	    
 	    
 	   <LinearLayout
 	        android:layout_width="0dp"
 	        android:layout_height="wrap_content"
-	        android:layout_weight="0.33"
+	        android:layout_weight="0.4"
 	        android:layout_margin="12dp"
 	        android:orientation="vertical" >
 	
