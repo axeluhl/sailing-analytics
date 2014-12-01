@@ -81,10 +81,7 @@ public class TrackingActivity extends BaseActivity implements GPSQualityListener
             toolbar.setNavigationIcon(R.drawable.sap_logo_64_sq);
             toolbar.setPadding(20, 0, 0, 0);
             getSupportActionBar().setTitle(leaderboardName);
-            Spannable subtitle = new SpannableString(getString(R.string.tracking_colon) + " " + eventName);
-            StyleSpan styleBold = new StyleSpan(Typeface.BOLD);
-            subtitle.setSpan(styleBold, 16, 20, Spannable.SPAN_EXCLUSIVE_EXCLUSIVE);
-            getSupportActionBar().setSubtitle(subtitle);
+            getSupportActionBar().setSubtitle(getString(R.string.tracking_colon) + " " + eventName);
         }
         
         TrackingFragment fragment;
