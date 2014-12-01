@@ -5,10 +5,12 @@ import java.text.DecimalFormat;
 import java.text.DecimalFormatSymbols;
 import java.util.Locale;
 
+import android.R.color;
 import android.app.Fragment;
 import android.app.FragmentManager.BackStackEntry;
 import android.app.FragmentTransaction;
 import android.content.Intent;
+import android.graphics.Color;
 import android.location.Location;
 import android.os.Bundle;
 import android.text.Layout;
@@ -20,6 +22,7 @@ import android.view.View.OnClickListener;
 import android.view.View.OnFocusChangeListener;
 import android.widget.Button;
 import android.widget.EditText;
+import android.widget.RelativeLayout;
 import android.widget.SeekBar;
 import android.widget.TextView;
 import android.widget.Toast;
@@ -60,6 +63,8 @@ public class WindFragment extends LoggableFragment implements CompassDirectionLi
     private Button sendButton;
     private TextView waitingForGpsTextView;
     
+    private RelativeLayout rl_gpsOverlay;
+    
     private LocationClient locationClient;
     private LocationRequest locationRequest;
     private Location currentLocation;
@@ -77,7 +82,8 @@ public class WindFragment extends LoggableFragment implements CompassDirectionLi
         windSpeedSeekBar = (SeekBar) windFragmentView.findViewById(R.id.seekbar_wind_speed);
         sendButton = (Button) windFragmentView.findViewById(R.id.btn_wind_send);
         waitingForGpsTextView = (TextView) windFragmentView.findViewById(R.id.textWaitingForGPS);
-
+        rl_gpsOverlay = (RelativeLayout) windFragmentView.findViewById(R.id.rl_gpsOverlay);
+        
         return windFragmentView;
     }
 
@@ -202,7 +208,9 @@ public class WindFragment extends LoggableFragment implements CompassDirectionLi
 	@Override
 	public void onLocationChanged(Location location) {
 		currentLocation = location;
-        waitingForGpsTextView.setText("");
+		waitingForGpsTextView.setTextColor(Color.GRAY);
+        waitingForGpsTextView.setText(R.string.found_gps_position);
+        rl_gpsOverlay.setVisibility(View.INVISIBLE);
         sendButton.setEnabled(true);
 	}
 

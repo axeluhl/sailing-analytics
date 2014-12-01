@@ -101,7 +101,6 @@ public class RacingActivity extends SessionActivity implements RaceInfoListener,
         }
     }
 
-    private static int WIND_ACTIVITY_REQUEST_CODE = 7331;
     private static final int RacesLoaderId = 0;
 
     private static final String TAG = RacingActivity.class.getName();
