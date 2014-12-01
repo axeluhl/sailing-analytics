@@ -100,10 +100,11 @@ public class RegattaActivity extends BaseActivity {
             subtitle.setSpan(styleBold, 16, 20, Spannable.SPAN_EXCLUSIVE_EXCLUSIVE);
             getSupportActionBar().setSubtitle(subtitle);
         }
-
-        replaceFragment(R.id.content_frame, new RegattaFragment());
+        
+        replaceFragment(R.id.content_frame, new RegattaFragment());	
+        
     }
-    
+
     @Override
     public boolean onCreateOptionsMenu(Menu menu) {
         MenuInflater inflater = getMenuInflater();

@@ -14,7 +14,6 @@
 
     <uses-permission android:name="android.permission.ACCESS_NETWORK_STATE" />
     <uses-permission android:name="android.permission.ACCESS_FINE_LOCATION" />
-    <uses-permission android:name="android.permission.GET_ACCOUNTS" />
     <uses-permission android:name="android.permission.INTERNET" />
     <uses-permission android:name="android.permission.WRITE_EXTERNAL_STORAGE" />
     <uses-permission android:name="android.permission.READ_PHONE_STATE" />
@@ -36,7 +35,7 @@
         <activity
             android:name=".ui.activities.StartActivity"
             android:label="@string/title_activity_start"
-            android:screenOrientation="portrait" >
+            android:screenOrientation="unspecified" >
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />
                 <category android:name="android.intent.category.LAUNCHER" />
@@ -52,7 +51,7 @@
         <activity
             android:name=".ui.activities.RegattaActivity"
             android:label="@string/title_activity_regatta"
-            android:screenOrientation="portrait" >
+            android:screenOrientation="unspecified" >
             <meta-data
                 android:name="android.support.PARENT_ACTIVITY"
                 android:value=".ui.activities.StartActivity" />
@@ -60,14 +59,14 @@
         <activity
             android:name=".ui.activities.TrackingActivity"
             android:label="@string/title_activity_tracking"
-            android:screenOrientation="portrait" >
+            android:screenOrientation="unspecified" >
             <meta-data
                 android:name="android.support.PARENT_ACTIVITY"
                 android:value=".ui.activities.StartActivity" />
         </activity>
         <activity
             android:name=".ui.activities.StartTrackingActivity"
-            android:screenOrientation="portrait" >
+            android:screenOrientation="unspecified" >
             <intent-filter>
                 <action android:name="android.intent.action.VIEW" />
 
@@ -82,13 +81,13 @@
         </activity>
         <activity
             android:name=".ui.activities.SystemInformationActivity"
-            android:screenOrientation="portrait" />
+            android:screenOrientation="unspecified" />
         <activity
             android:name=".ui.activities.SettingsActivity"
-            android:screenOrientation="portrait" />
+            android:screenOrientation="unspecified" />
         <activity
             android:name=".ui.activities.StopTrackingActivity"
-            android:screenOrientation="portrait" />
+            android:screenOrientation="unspecified" />
 
         <service
             android:name=".services.TrackingService"
