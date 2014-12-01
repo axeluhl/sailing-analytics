@@ -18,10 +18,16 @@ public class AppPreferences {
         this.context = context;
         this.preferences = PreferenceManager.getDefaultSharedPreferences(context);
     }
+    
+    public void setDeviceIdentifier(String deviceId)
+    {
+    	preferences.edit().putString(context.getString(R.string.preference_device_identifier_key), deviceId).commit();
+    }
 
     public String getDeviceIdentifier() {
-        return PrefUtils.getString(context, R.string.preference_device_identifier_key,
+        String DeviceIdentifier = PrefUtils.getString(context, R.string.preference_device_identifier_key,
                 R.string.preference_device_identifier_default);
+        return DeviceIdentifier;
     }
 
     public String getServerURL() {
@@ -106,5 +112,25 @@ public class AppPreferences {
     public long getTrackingTimerStarted()
     {
     	return preferences.getLong(context.getString(R.string.preference_tracking_timer_started), 0);
+    }
+    
+    public void setTrackerIsTracking(boolean isTracking)
+    {
+    	preferences.edit().putBoolean(context.getString(R.string.preference_tracker_is_tracking), isTracking).commit();
+    }
+    
+    public boolean getTrackerIsTracking()
+    {
+    	return preferences.getBoolean(context.getString(R.string.preference_tracker_is_tracking), false);
+    }
+    
+    public void setTrackerIsTrackingEventId(int eventId)
+    {
+    	preferences.edit().putInt(context.getString(R.string.preference_tracker_is_tracking_event_id), eventId).commit();
+    }
+    
+    public Integer getTrackerIsTrackingEventId()
+    {
+    	return preferences.getInt(context.getString(R.string.preference_tracker_is_tracking_event_id), -1);
     }
 }

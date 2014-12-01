@@ -29,9 +29,6 @@ public class BaseActivity extends ActionBarActivity {
 	protected void onCreate(Bundle savedInstanceState) {
 		super.onCreate(savedInstanceState);
 		prefs = new AppPreferences(this);
-
-		// TODO: Remove debug string
-		SqlDebugHelper.dumpAllTablesToConsole(this);
 	}
 
 	@Override
@@ -39,6 +36,14 @@ public class BaseActivity extends ActionBarActivity {
 		MenuInflater inflater = getMenuInflater();
 		inflater.inflate(R.menu.options_menu, menu);
 		return true;
+	}
+	
+	@Override
+	protected void onResume() {
+		super.onResume();
+
+		// TODO: Remove debug string
+		SqlDebugHelper.dumpAllTablesToConsole(this);
 	}
 
 	@Override
@@ -48,10 +53,10 @@ public class BaseActivity extends ActionBarActivity {
 			ExLog.i(this, TAG, "Clicked SETTINGS.");
 			startActivity(new Intent(this, SettingsActivity.class));
 			return true;
-		case R.id.options_menu_info:
-			ExLog.i(this, TAG, "Clicked INFO.");
-			startActivity(new Intent(this, SystemInformationActivity.class));
-			return true;
+//		case R.id.options_menu_info:
+//			ExLog.i(this, TAG, "Clicked INFO.");
+//			startActivity(new Intent(this, SystemInformationActivity.class));
+//			return true;
 		default:
 			return super.onOptionsItemSelected(item);
 		}

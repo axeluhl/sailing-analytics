@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources xmlns:tools="http://schemas.android.com/tools" tools:ignore="MissingTranslation">
     <string name="preference_device_identifier_key">deviceIdentifier</string>
-    <string name="preference_device_identifier_default">147d8230-4db0-11e4-916c-0800200c9a66</string>
+    <string name="preference_device_identifier_default"></string>
     
     <!-- override default values of android.shared -->
     <string name="app_folder">tracking</string>
@@ -24,4 +24,6 @@
     <string name="preference_gps_fastest_fix_interval_ms_default">100</string>
     <string name="preference_battery_is_charging">batteryIsCharging</string>
     <string name="preference_tracking_timer_started">trackingTimerStarted</string>
+    <string name="preference_tracker_is_tracking">trackerIsTracking</string>
+    <string name="preference_tracker_is_tracking_event_id">trackerIsTrackingEventId</string>
 </resources>

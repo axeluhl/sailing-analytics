@@ -7,10 +7,5 @@
         android:icon="@drawable/settings_grey"
         android:title="@string/options_menu_settings"
         app:showAsAction=""/>
-    <item
-        android:id="@+id/options_menu_info"
-        android:icon="@drawable/ic_menu_info_details"
-        android:title="@string/options_menu_info"
-        app:showAsAction=""/>
 
 </menu>
