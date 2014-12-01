@@ -32,4 +32,8 @@ implements CloseOpenEndedDeviceMappingEvent<VisitorT> {
         return closingTimePoint;
     }
 
+    @Override
+    public String getShortInfo() {
+        return "closing mapping (id: " + deviceMappingEventId + ") at " + closingTimePoint;
+    }
 }

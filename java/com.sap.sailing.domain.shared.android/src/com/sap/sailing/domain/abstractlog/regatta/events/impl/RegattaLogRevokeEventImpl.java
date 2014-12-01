@@ -1,4 +1,4 @@
-package com.sap.sailing.domain.abstractlog.regatta.impl;
+package com.sap.sailing.domain.abstractlog.regatta.events.impl;
 
 import java.io.Serializable;
 
@@ -6,7 +6,7 @@ import com.sap.sailing.domain.abstractlog.AbstractLogEventAuthor;
 import com.sap.sailing.domain.abstractlog.impl.RevokeEventImpl;
 import com.sap.sailing.domain.abstractlog.regatta.RegattaLogEvent;
 import com.sap.sailing.domain.abstractlog.regatta.RegattaLogEventVisitor;
-import com.sap.sailing.domain.abstractlog.regatta.RegattaLogRevokeEvent;
+import com.sap.sailing.domain.abstractlog.regatta.events.RegattaLogRevokeEvent;
 import com.sap.sse.common.TimePoint;
 
 public class RegattaLogRevokeEventImpl extends RevokeEventImpl<RegattaLogEventVisitor> implements RegattaLogRevokeEvent {

@@ -8,6 +8,7 @@ import com.sap.sailing.domain.abstractlog.impl.AbstractLogImpl;
 import com.sap.sailing.domain.abstractlog.regatta.RegattaLog;
 import com.sap.sailing.domain.abstractlog.regatta.RegattaLogEvent;
 import com.sap.sailing.domain.abstractlog.regatta.RegattaLogEventVisitor;
+import com.sap.sailing.domain.abstractlog.regatta.events.impl.RegattaLogRevokeEventImpl;
 
 public class RegattaLogImpl extends AbstractLogImpl<RegattaLogEvent, RegattaLogEventVisitor> implements RegattaLog {
 

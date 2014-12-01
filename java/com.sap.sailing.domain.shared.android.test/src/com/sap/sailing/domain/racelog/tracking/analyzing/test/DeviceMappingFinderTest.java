@@ -12,7 +12,7 @@ import org.junit.Test;
 
 import com.sap.sailing.domain.abstractlog.AbstractLogEventAuthor;
 import com.sap.sailing.domain.abstractlog.race.RaceLogEvent;
-import com.sap.sailing.domain.abstractlog.race.tracking.analyzing.impl.RaceLogDeviceCompetitorMappingFinder;
+import com.sap.sailing.domain.abstractlog.shared.analyzing.DeviceCompetitorMappingFinder;
 import com.sap.sailing.domain.base.Competitor;
 import com.sap.sailing.domain.base.impl.CompetitorImpl;
 import com.sap.sailing.domain.racelog.tracking.test.mock.SmartphoneImeiIdentifier;
@@ -29,7 +29,7 @@ public class DeviceMappingFinderTest extends AbstractRaceLogTrackingTest {
     private int time = 0;
     
     private List<DeviceMapping<Competitor>> getMappings() {
-        return new RaceLogDeviceCompetitorMappingFinder(log).analyze().get(competitor);
+        return new DeviceCompetitorMappingFinder<>(log).analyze().get(competitor);
     }
     
     private TimePoint t() {

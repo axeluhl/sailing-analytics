@@ -68,11 +68,11 @@ import com.sap.sailing.domain.abstractlog.race.state.racingprocedure.gate.Readon
 import com.sap.sailing.domain.abstractlog.race.state.racingprocedure.rrs26.ReadonlyRRS26RacingProcedure;
 import com.sap.sailing.domain.abstractlog.race.tracking.RaceLogCloseOpenEndedDeviceMappingEvent;
 import com.sap.sailing.domain.abstractlog.race.tracking.analyzing.impl.DefinedMarkFinder;
-import com.sap.sailing.domain.abstractlog.race.tracking.analyzing.impl.RaceLogDeviceCompetitorMappingFinder;
-import com.sap.sailing.domain.abstractlog.race.tracking.analyzing.impl.RaceLogDeviceMarkMappingFinder;
 import com.sap.sailing.domain.abstractlog.race.tracking.analyzing.impl.RaceLogLastPingMappingEventFinder;
 import com.sap.sailing.domain.abstractlog.race.tracking.analyzing.impl.RaceLogOpenEndedDeviceMappingCloser;
 import com.sap.sailing.domain.abstractlog.race.tracking.analyzing.impl.RaceLogTrackingStateAnalyzer;
+import com.sap.sailing.domain.abstractlog.shared.analyzing.DeviceCompetitorMappingFinder;
+import com.sap.sailing.domain.abstractlog.shared.analyzing.DeviceMarkMappingFinder;
 import com.sap.sailing.domain.abstractlog.shared.analyzing.RegisteredCompetitorsAnalyzer;
 import com.sap.sailing.domain.abstractlog.shared.events.DeviceMappingEvent;
 import com.sap.sailing.domain.base.BoatClass;
@@ -4894,12 +4894,12 @@ public class SailingServiceImpl extends ProxiedRemoteServiceServlet implements S
             String fleetName) throws TransformationException {
         RaceLog raceLog = getRaceLog(leaderboardName, raceColumnName, fleetName);
         List<DeviceMappingDTO> result = new ArrayList<DeviceMappingDTO>();
-        for (List<? extends DeviceMapping<Competitor>> list : new RaceLogDeviceCompetitorMappingFinder(raceLog).analyze().values()) {
+        for (List<? extends DeviceMapping<Competitor>> list : new DeviceCompetitorMappingFinder<>(raceLog).analyze().values()) {
             for (DeviceMapping<Competitor> mapping : list) {
                 result.add(convertToDeviceMappingDTO(mapping));
             }
         }
-        for (List<? extends DeviceMapping<Mark>> list : new RaceLogDeviceMarkMappingFinder(raceLog).analyze().values()) {
+        for (List<? extends DeviceMapping<Mark>> list : new DeviceMarkMappingFinder<>(raceLog).analyze().values()) {
             for (DeviceMapping<Mark> mapping : list) {
                 result.add(convertToDeviceMappingDTO(mapping));
             }
