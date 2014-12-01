@@ -104,6 +104,7 @@ public class HomeFragment extends BaseFragment implements
 		if (listView != null) {
 			listView.addHeaderView(inflater.inflate(
 					R.layout.regatta_listview_header, null));
+			
 			adapter = new RegattaAdapter(getActivity(),
 					R.layout.ragatta_listview_row, null, 0);
 			listView.setAdapter(adapter);
