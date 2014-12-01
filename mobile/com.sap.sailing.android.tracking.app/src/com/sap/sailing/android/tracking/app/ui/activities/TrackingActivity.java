@@ -37,7 +37,6 @@ public class TrackingActivity extends BaseActivity implements GPSQualityListener
 	
 	TransmittingService transmittingService;
 	boolean transmittingServiceBound;
-	boolean startedByStartActivity;
 	
 	private final static String TAG = TrackingActivity.class.getName();
 
@@ -48,8 +47,7 @@ public class TrackingActivity extends BaseActivity implements GPSQualityListener
         super.onCreate(savedInstanceState);
         
         Intent intent = getIntent();
-        eventId = intent.getExtras().getInt(getString(R.string.tracking_activity_event_id_parameter));
-        startedByStartActivity = intent.getExtras().getBoolean(getString(R.string.tracking_activity_started_by_start_activity_parameter)); 
+        eventId = intent.getExtras().getInt(getString(R.string.tracking_activity_event_id_parameter)); 
         		
         setContentView(R.layout.fragment_container);
         
@@ -207,13 +205,4 @@ public class TrackingActivity extends BaseActivity implements GPSQualityListener
             trackingServiceBound = false;
         }
     };
-    
-    /**
-     * the fragment can call this to know if tracking was running before, so it doesn't reset the timer.
-     * @return
-     */
-    public boolean getStartedByStartActivity()
-    {
-    	return startedByStartActivity;
-    }
 }
