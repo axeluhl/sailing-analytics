@@ -130,6 +130,7 @@
     <string name="found_gps_position">GPS Based Position</string>
     <string name="set_position_manually">Add Position Manually</string>
     <string name="searchPosition">Location search &#8230;</string>
+    <string name="no_location_found">Could not find a location based on your query.</string>
     <string name="store_wind">Store wind</string>
     
 	<!-- SETTINGS -->

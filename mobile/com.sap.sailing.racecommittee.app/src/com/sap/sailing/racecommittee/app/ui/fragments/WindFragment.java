@@ -55,6 +55,10 @@ import com.google.android.gms.internal.et;
 import com.google.android.gms.location.LocationClient;
 import com.google.android.gms.location.LocationListener;
 import com.google.android.gms.location.LocationRequest;
+import com.google.android.gms.maps.CameraUpdate;
+import com.google.android.gms.maps.CameraUpdateFactory;
+import com.google.android.gms.maps.GoogleMap;
+import com.google.android.gms.maps.model.LatLng;
 import com.sap.sailing.android.shared.logging.ExLog;
 import com.sap.sailing.domain.common.Bearing;
 import com.sap.sailing.domain.common.Position;
@@ -86,7 +90,9 @@ public class WindFragment extends LoggableFragment implements CompassDirectionLi
     private TextView waitingForGpsTextView;
     
     private LinearLayout ll_topContainer;
-    private RelativeLayout rl_bottomContainer;
+    private GoogleMap windMap;
+    @SuppressWarnings("unused")
+	private RelativeLayout rl_bottomContainer;
     private RelativeLayout rl_gpsOverlay;
     private EditText et_location;
     
@@ -96,6 +102,7 @@ public class WindFragment extends LoggableFragment implements CompassDirectionLi
     private DecimalFormat speedFormat;
     private DecimalFormat bearingFormat;
 	
+    // stuff to save during rotation/ ect
     private boolean bigMap = false;
     
     @Override
@@ -112,6 +119,7 @@ public class WindFragment extends LoggableFragment implements CompassDirectionLi
         rl_bottomContainer = (RelativeLayout) windFragmentView.findViewById(R.id.rl_bottomContainer);
         rl_gpsOverlay = (RelativeLayout) windFragmentView.findViewById(R.id.rl_gpsOverlay);
         et_location = (EditText) windFragmentView.findViewById(R.id.et_location);
+        windMap = ((com.google.android.gms.maps.MapFragment) getActivity().getFragmentManager().findFragmentById(R.id.windMap)).getMap();
         btn_set_manual_position = (Button) windFragmentView.findViewById(R.id.btn_set_manual_position);
         
         return windFragmentView;
@@ -152,9 +160,7 @@ public class WindFragment extends LoggableFragment implements CompassDirectionLi
 			@Override
 			public boolean onEditorAction(TextView v, int actionId, KeyEvent event) {
 				  if (actionId == EditorInfo.IME_ACTION_DONE) {
-
 					  new GeoCodeTask().execute(v.getText()+"");
-	                  return true;
 	              }
 	              return false;
 			}
@@ -201,6 +207,7 @@ public class WindFragment extends LoggableFragment implements CompassDirectionLi
         
         if ( bigMap ){
         	showBigMap();
+        	centerMap(savedInstanceState.getDouble("lat"),savedInstanceState.getDouble("lng"),savedInstanceState.getFloat("zoom"));
         }
     }
     
@@ -233,6 +240,9 @@ public class WindFragment extends LoggableFragment implements CompassDirectionLi
     public void onSaveInstanceState(Bundle outState) {
         super.onSaveInstanceState(outState);
         outState.putBoolean("bigMap", bigMap);
+        outState.putDouble("lat", windMap.getCameraPosition().target.latitude);
+        outState.putDouble("lng", windMap.getCameraPosition().target.longitude);
+        outState.putFloat("zoom", windMap.getCameraPosition().zoom);
     }
     
 	@Override
@@ -308,23 +318,36 @@ public class WindFragment extends LoggableFragment implements CompassDirectionLi
 	     protected void onPostExecute(JSONObject locJSON) {
 	    	 if (locJSON == null){
 	    		 ExLog.i(getActivity(),  this.getClass().getCanonicalName(), "No Location found for " + location );
+	    		 Toast.makeText(getActivity(), R.string.no_location_found, Toast.LENGTH_SHORT).show();
 	    		 return;
 	    	 }
 	    	 try {
 	    		 ExLog.i(getActivity(),  this.getClass().getCanonicalName(), "Location found for " + location + ": " + locJSON.getDouble("lat") + "," + locJSON.getDouble("lng") );
+	    		 centerMap(locJSON.getDouble("lat"),locJSON.getDouble("lng"));
 			} catch (JSONException e) {
-				// TODO Auto-generated catch block
 				e.printStackTrace();
 			}
 	     }
 	 }
-
+	
+	
+	
+	private void centerMap(double lat, double lng, float zoom){
+		CameraUpdate center = CameraUpdateFactory.newLatLng(new LatLng(lat,lng));
+		CameraUpdate czoom   = CameraUpdateFactory.zoomTo(zoom);
+		windMap.moveCamera(center);
+		windMap.animateCamera(czoom);
+	}
+	private void centerMap(double lat, double lng){
+		centerMap(lat,lng,15);
+	}
 	
 	
 	private void showBigMap(){
 		ll_topContainer.setVisibility(View.GONE);
 		rl_gpsOverlay.setVisibility(View.GONE);
 		et_location.setVisibility(View.VISIBLE);
+		et_location.setAlpha(1f);
 	}
 	
 	private void hideView(final View v, int animationDuration){
@@ -356,6 +379,7 @@ public class WindFragment extends LoggableFragment implements CompassDirectionLi
 	@Override
 	public void onLocationChanged(Location location) {
 		currentLocation = location;
+		centerMap(location.getLatitude(), location.getLongitude());
 		waitingForGpsTextView.setTextColor(Color.GRAY);
         waitingForGpsTextView.setText(R.string.found_gps_position);
         rl_gpsOverlay.setVisibility(View.GONE);
