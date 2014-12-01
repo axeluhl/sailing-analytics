@@ -6,6 +6,8 @@ import java.text.DecimalFormatSymbols;
 import java.util.Locale;
 
 import android.R.color;
+import android.animation.Animator;
+import android.animation.Animator.AnimatorListener;
 import android.app.Fragment;
 import android.app.FragmentManager.BackStackEntry;
 import android.app.FragmentTransaction;
@@ -22,6 +24,7 @@ import android.view.View.OnClickListener;
 import android.view.View.OnFocusChangeListener;
 import android.widget.Button;
 import android.widget.EditText;
+import android.widget.LinearLayout;
 import android.widget.RelativeLayout;
 import android.widget.SeekBar;
 import android.widget.TextView;
@@ -50,7 +53,7 @@ import com.sap.sailing.racecommittee.app.ui.activities.RacingActivity;
 import com.sap.sailing.racecommittee.app.ui.views.CompassView;
 import com.sap.sailing.racecommittee.app.ui.views.CompassView.CompassDirectionListener;
 
-public class WindFragment extends LoggableFragment implements CompassDirectionListener, ConnectionCallbacks, OnConnectionFailedListener, LocationListener {
+public class WindFragment extends LoggableFragment implements CompassDirectionListener, ConnectionCallbacks, OnConnectionFailedListener, LocationListener, OnClickListener {
 
 	private final static String TAG = WindFragment.class.getName();
     private final static int FIVE_SEC = 5000;
@@ -61,8 +64,11 @@ public class WindFragment extends LoggableFragment implements CompassDirectionLi
     private EditText windSpeedEditText;
     private SeekBar windSpeedSeekBar;
     private Button sendButton;
+    private Button btn_set_manual_position;
     private TextView waitingForGpsTextView;
     
+    private LinearLayout ll_topContainer;
+    private RelativeLayout rl_bottomContainer;
     private RelativeLayout rl_gpsOverlay;
     
     private LocationClient locationClient;
@@ -71,6 +77,7 @@ public class WindFragment extends LoggableFragment implements CompassDirectionLi
     private DecimalFormat speedFormat;
     private DecimalFormat bearingFormat;
 	
+    private boolean bigMap = false;
     
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
@@ -82,7 +89,10 @@ public class WindFragment extends LoggableFragment implements CompassDirectionLi
         windSpeedSeekBar = (SeekBar) windFragmentView.findViewById(R.id.seekbar_wind_speed);
         sendButton = (Button) windFragmentView.findViewById(R.id.btn_wind_send);
         waitingForGpsTextView = (TextView) windFragmentView.findViewById(R.id.textWaitingForGPS);
+        ll_topContainer = (LinearLayout) windFragmentView.findViewById(R.id.ll_topContainer);
+        rl_bottomContainer = (RelativeLayout) windFragmentView.findViewById(R.id.rl_bottomContainer);
         rl_gpsOverlay = (RelativeLayout) windFragmentView.findViewById(R.id.rl_gpsOverlay);
+        btn_set_manual_position = (Button) windFragmentView.findViewById(R.id.btn_set_manual_position);
         
         return windFragmentView;
     }
@@ -116,30 +126,11 @@ public class WindFragment extends LoggableFragment implements CompassDirectionLi
             }
         });
         
-        sendButton.setOnClickListener(new OnClickListener() {
-
-            public void onClick(View v) {
-                try {
-                    Wind wind = getResultingWindFix();
-                    if (wind == null) {
-                        Toast.makeText(getActivity(), R.string.wind_location_or_fields_not_valid, Toast.LENGTH_LONG).show();
-                        return;
-                    }
-                    
-                    saveEntriesInPreferences(wind);
-                    ((RacingActivity)getActivity()).onWindEntered(wind);
-
-                    
-                    
-                } catch (NumberFormatException nfe) {
-                    Toast.makeText(getActivity(), R.string.wind_speed_direction_not_a_valid_number, Toast.LENGTH_LONG).show();
-                    ExLog.i(getActivity(), this.getClass().getCanonicalName(), nfe.getMessage());
-                }
-            }
-
-        });
+        sendButton.setOnClickListener(this);
         sendButton.setEnabled(false);
-
+        btn_set_manual_position.setOnClickListener(this);
+        
+        
         windBearingEditText.setOnFocusChangeListener(new OnFocusChangeListener() {
             @Override
             public void onFocusChange(View v, boolean hasFocus) {
@@ -173,6 +164,15 @@ public class WindFragment extends LoggableFragment implements CompassDirectionLi
         double enteredWindBearingFrom = preferences.getWindBearingFromDirection();
         compassView.setDirection((float)enteredWindBearingFrom);
         windBearingEditText.setText(bearingFormat.format(enteredWindBearingFrom));
+        
+        
+        if ( savedInstanceState != null){
+        	bigMap = savedInstanceState.getBoolean("bigMap", false);
+        }
+        
+        if ( bigMap ){
+        	showBigMap();
+        }
     }
     
     
@@ -192,25 +192,96 @@ public class WindFragment extends LoggableFragment implements CompassDirectionLi
         }
         locationClient.disconnect();
         
+        Fragment fragment = (getFragmentManager().findFragmentById(R.id.windMap));  
+        FragmentTransaction ft = getActivity().getFragmentManager().beginTransaction();
+        ft.remove(fragment);
+        ft.commit();
+        
         super.onPause();
     }
     
     @Override
-    public void onDestroyView() 
-    {
-       super.onDestroyView(); 
-       Fragment fragment = (getFragmentManager().findFragmentById(R.id.windMap));  
-       FragmentTransaction ft = getActivity().getFragmentManager().beginTransaction();
-       ft.remove(fragment);
-       ft.commit();
-   }
+    public void onSaveInstanceState(Bundle outState) {
+        super.onSaveInstanceState(outState);
+        outState.putBoolean("bigMap", bigMap);
+    }
     
+	@Override
+	public void onClick(View v) {
+		int id = v.getId();
+		if  (id == sendButton.getId()){
+			onSendClick();
+
+		} else if (id == btn_set_manual_position.getId()){
+			onSetPositionClick();
+		}
+	}
+    
+	
+	private void onSendClick(){
+		try {
+            Wind wind = getResultingWindFix();
+            if (wind == null) {
+                Toast.makeText(getActivity(), R.string.wind_location_or_fields_not_valid, Toast.LENGTH_LONG).show();
+                return;
+            }
+            
+            saveEntriesInPreferences(wind);
+            ((RacingActivity)getActivity()).onWindEntered(wind);
+
+            
+            
+        } catch (NumberFormatException nfe) {
+            Toast.makeText(getActivity(), R.string.wind_speed_direction_not_a_valid_number, Toast.LENGTH_LONG).show();
+            ExLog.i(getActivity(), this.getClass().getCanonicalName(), nfe.getMessage());
+        }
+	}
+	
+	private void onSetPositionClick(){
+		int shortAnimationDuration = getResources().getInteger(
+                android.R.integer.config_mediumAnimTime);
+		bigMap = true;
+		hideView(ll_topContainer, shortAnimationDuration);
+		hideView(rl_gpsOverlay, shortAnimationDuration);
+	}
+	
+	private void showBigMap(){
+		ll_topContainer.setVisibility(View.GONE);
+		rl_gpsOverlay.setVisibility(View.GONE);
+	}
+	
+	private void hideView(final View v, int animationDuration){
+		v.animate()
+		.alpha(0f)
+		.setDuration(animationDuration)
+		.setListener(new AnimatorListener() {
+			@Override
+			public void onAnimationStart(Animator animation) {}
+			@Override
+			public void onAnimationRepeat(Animator animation) {}
+			@Override
+			public void onAnimationEnd(Animator animation) {
+				v.setVisibility(View.GONE);
+			}
+			@Override
+			public void onAnimationCancel(Animator animation) {}
+		});
+	}
+	
+	private void showView(final View v, int animationDuration){
+		v.setVisibility(View.VISIBLE);
+		v.animate()
+		.alpha(1f)
+		.setDuration(animationDuration)
+		.setListener(null);
+	}
+	
 	@Override
 	public void onLocationChanged(Location location) {
 		currentLocation = location;
 		waitingForGpsTextView.setTextColor(Color.GRAY);
         waitingForGpsTextView.setText(R.string.found_gps_position);
-        rl_gpsOverlay.setVisibility(View.INVISIBLE);
+        rl_gpsOverlay.setVisibility(View.GONE);
         sendButton.setEnabled(true);
 	}
 
@@ -269,4 +340,6 @@ public class WindFragment extends LoggableFragment implements CompassDirectionLi
         preferences.setWindBearingFromDirection(wind.getBearing().reverse().getDegrees());
         preferences.setWindSpeed(wind.getKnots());
     }
+
+
 }
