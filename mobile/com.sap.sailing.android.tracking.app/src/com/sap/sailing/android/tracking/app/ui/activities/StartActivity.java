@@ -77,7 +77,6 @@ public class StartActivity extends BaseActivity {
     private void startTrackingActivity(int eventId) {
 		Intent intent = new Intent(this, TrackingActivity.class);
 		intent.putExtra(getString(R.string.tracking_activity_event_id_parameter), eventId);
-		intent.putExtra(getString(R.string.tracking_activity_started_by_start_activity_parameter), true);
 		startActivity(intent);
 	}
 

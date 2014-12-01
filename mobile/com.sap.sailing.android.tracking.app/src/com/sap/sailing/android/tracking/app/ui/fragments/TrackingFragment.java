@@ -50,8 +50,7 @@ public class TrackingFragment extends BaseFragment implements OnClickListener {
 		stopTracking.setOnClickListener(this);
 	
 		prefs = new AppPreferences(getActivity());
-		
-		if (((TrackingActivity)getActivity()).getStartedByStartActivity() == false)
+		if (prefs.getTrackingTimerStarted() == 0)
 		{
 			prefs.setTrackingTimerStarted(System.currentTimeMillis());	
 		}
@@ -208,6 +207,8 @@ public class TrackingFragment extends BaseFragment implements OnClickListener {
 	}
 	
 	private void stopTracking() {
+		prefs.setTrackingTimerStarted(0);
+		
 		Intent intent = new Intent(getActivity(), TrackingService.class);
 		intent.setAction(getString(R.string.tracking_service_stop));
 		getActivity().startService(intent);
