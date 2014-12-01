@@ -33,6 +33,7 @@ public class AnalyticsDatabase extends SQLiteOpenHelper {
         " INNER JOIN " + Tables.EVENTS + " ON (" + Tables.LEADERBOARDS + "." + BaseColumns._ID + " = " + Tables.EVENTS + ".leaderboard_id ) " +
         " INNER JOIN " + Tables.COMPETITORS + " ON (" + Tables.LEADERBOARDS + "."+ BaseColumns._ID + " = " + Tables.COMPETITORS + ".leaderboard_id ) ";
         String GPS_FIXES_JOIN_EVENTS = "sensor_gps LEFT JOIN events ON sensor_gps.event_id = events._id ";
+        String LEADERBOARDS_JOIN_EVENTS = "events LEFT JOIN leaderboards ON events.leaderboard_id = leaderboards._id ";
     }
     
     public AnalyticsDatabase(Context context) {

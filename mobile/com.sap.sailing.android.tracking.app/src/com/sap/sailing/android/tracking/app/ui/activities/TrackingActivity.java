@@ -1,16 +1,25 @@
 package com.sap.sailing.android.tracking.app.ui.activities;
 
 import android.content.ComponentName;
+import android.content.ContentResolver;
 import android.content.Context;
 import android.content.Intent;
 import android.content.ServiceConnection;
+import android.database.Cursor;
+import android.graphics.Typeface;
 import android.os.Bundle;
 import android.os.IBinder;
+import android.provider.BaseColumns;
 import android.support.v7.widget.Toolbar;
+import android.text.Spannable;
+import android.text.SpannableString;
+import android.text.style.StyleSpan;
 
 import com.sap.sailing.android.shared.logging.ExLog;
 import com.sap.sailing.android.tracking.app.BuildConfig;
 import com.sap.sailing.android.tracking.app.R;
+import com.sap.sailing.android.tracking.app.provider.AnalyticsContract.Event;
+import com.sap.sailing.android.tracking.app.provider.AnalyticsContract.LeaderboardsEventsJoined;
 import com.sap.sailing.android.tracking.app.services.TrackingService;
 import com.sap.sailing.android.tracking.app.services.TrackingService.GPSQuality;
 import com.sap.sailing.android.tracking.app.services.TrackingService.GPSQualityListener;
@@ -51,12 +60,34 @@ public class TrackingActivity extends BaseActivity implements GPSQualityListener
             toolbar.setPadding(20, 0, 0, 0);
             toolbar.setBackgroundColor(getResources().getColor(R.color.colorPrimary));
         }
+        
         if (getSupportActionBar() != null) {
-            getSupportActionBar().setDisplayHomeAsUpEnabled(false);
-            getSupportActionBar().setHomeButtonEnabled(false);
-            getSupportActionBar().setTitle(R.string.title_activity_tracking);
+        	
+        	String leaderboardName = "";
+        	String eventName = "";
+        	ContentResolver cr = getContentResolver();
+        	String projectionStr = "events._id,leaderboards.leaderboard_name,events.event_name";
+        	String[] projection = projectionStr.split(",");
+        	Cursor cursor = cr.query(LeaderboardsEventsJoined.CONTENT_URI, projection, "events._id = " + eventId, null, null);
+        	if (cursor.moveToFirst())
+        	{
+        		eventName = cursor.getString(cursor.getColumnIndex("event_name"));
+        		leaderboardName = cursor.getString(cursor.getColumnIndex("leaderboard_name"));
+        	}
+        	
+        	cursor.close();
+        	
+            getSupportActionBar().setDisplayHomeAsUpEnabled(true);
+            getSupportActionBar().setHomeButtonEnabled(true);
+            toolbar.setNavigationIcon(R.drawable.sap_logo_64_sq);
+            toolbar.setPadding(20, 0, 0, 0);
+            getSupportActionBar().setTitle(leaderboardName);
+            Spannable subtitle = new SpannableString(getString(R.string.tracking_colon) + " " + eventName);
+            StyleSpan styleBold = new StyleSpan(Typeface.BOLD);
+            subtitle.setSpan(styleBold, 16, 20, Spannable.SPAN_EXCLUSIVE_EXCLUSIVE);
+            getSupportActionBar().setSubtitle(subtitle);
         }
-
+        
         replaceFragment(R.id.content_frame, new TrackingFragment());
         startTrackingService(eventId);
     }

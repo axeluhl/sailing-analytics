@@ -63,5 +63,7 @@
 	<string name="thank_you_you_successfully_participated">Thank you, you have successfully taken part in the regatta.\n\nYour SAP Sailing Team</string>
 	<string name="no_qr_code_popup_title">No QR-Code?</string>
 	<string name="no_qr_code_popup_message">Please contact race management if you have not received a QR-Code.</string>
+	<string name="tracking_colon">Tracking:</string>
+	<string name="registered_for_colon">Registered for:</string>
 	
 </resources>
