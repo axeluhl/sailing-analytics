@@ -1,9 +1,21 @@
 package com.sap.sailing.racecommittee.app.ui.fragments;
 
+import java.io.BufferedReader;
+import java.io.InputStreamReader;
 import java.math.BigDecimal;
+import java.net.URI;
+import java.net.URL;
+import java.net.URLEncoder;
 import java.text.DecimalFormat;
 import java.text.DecimalFormatSymbols;
 import java.util.Locale;
+
+import org.apache.http.HttpResponse;
+import org.apache.http.client.HttpClient;
+import org.apache.http.client.methods.HttpGet;
+import org.apache.http.impl.client.DefaultHttpClient;
+import org.json.JSONException;
+import org.json.JSONObject;
 
 import android.R.color;
 import android.animation.Animator;
@@ -14,14 +26,19 @@ import android.app.FragmentTransaction;
 import android.content.Intent;
 import android.graphics.Color;
 import android.location.Location;
+import android.os.AsyncTask;
 import android.os.Bundle;
+import android.text.Editable;
 import android.text.Layout;
+import android.text.TextWatcher;
 import android.util.Log;
+import android.view.KeyEvent;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.view.View.OnClickListener;
 import android.view.View.OnFocusChangeListener;
+import android.view.inputmethod.EditorInfo;
 import android.widget.Button;
 import android.widget.EditText;
 import android.widget.LinearLayout;
@@ -34,6 +51,7 @@ import android.widget.SeekBar.OnSeekBarChangeListener;
 import com.google.android.gms.common.ConnectionResult;
 import com.google.android.gms.common.GooglePlayServicesClient.ConnectionCallbacks;
 import com.google.android.gms.common.GooglePlayServicesClient.OnConnectionFailedListener;
+import com.google.android.gms.internal.et;
 import com.google.android.gms.location.LocationClient;
 import com.google.android.gms.location.LocationListener;
 import com.google.android.gms.location.LocationRequest;
@@ -70,6 +88,7 @@ public class WindFragment extends LoggableFragment implements CompassDirectionLi
     private LinearLayout ll_topContainer;
     private RelativeLayout rl_bottomContainer;
     private RelativeLayout rl_gpsOverlay;
+    private EditText et_location;
     
     private LocationClient locationClient;
     private LocationRequest locationRequest;
@@ -92,6 +111,7 @@ public class WindFragment extends LoggableFragment implements CompassDirectionLi
         ll_topContainer = (LinearLayout) windFragmentView.findViewById(R.id.ll_topContainer);
         rl_bottomContainer = (RelativeLayout) windFragmentView.findViewById(R.id.rl_bottomContainer);
         rl_gpsOverlay = (RelativeLayout) windFragmentView.findViewById(R.id.rl_gpsOverlay);
+        et_location = (EditText) windFragmentView.findViewById(R.id.et_location);
         btn_set_manual_position = (Button) windFragmentView.findViewById(R.id.btn_set_manual_position);
         
         return windFragmentView;
@@ -119,17 +139,26 @@ public class WindFragment extends LoggableFragment implements CompassDirectionLi
                 }
             }
 
-            public void onStartTrackingTouch(SeekBar seekBar) {
-            }
-
-            public void onStopTrackingTouch(SeekBar seekBar) {
-            }
+            public void onStartTrackingTouch(SeekBar seekBar) {}
+            public void onStopTrackingTouch(SeekBar seekBar) {}
         });
         
         sendButton.setOnClickListener(this);
         sendButton.setEnabled(false);
         btn_set_manual_position.setOnClickListener(this);
         
+        et_location.setOnEditorActionListener(new TextView.OnEditorActionListener() {
+
+			@Override
+			public boolean onEditorAction(TextView v, int actionId, KeyEvent event) {
+				  if (actionId == EditorInfo.IME_ACTION_DONE) {
+
+					  new GeoCodeTask().execute(v.getText()+"");
+	                  return true;
+	              }
+	              return false;
+			}
+        });
         
         windBearingEditText.setOnFocusChangeListener(new OnFocusChangeListener() {
             @Override
@@ -243,11 +272,59 @@ public class WindFragment extends LoggableFragment implements CompassDirectionLi
 		bigMap = true;
 		hideView(ll_topContainer, shortAnimationDuration);
 		hideView(rl_gpsOverlay, shortAnimationDuration);
+		showView(et_location, shortAnimationDuration);
 	}
+	
+	private class GeoCodeTask extends AsyncTask<String, String, JSONObject> {
+		String location = "";
+	     protected JSONObject doInBackground(String... urls) {
+	    	 location = urls[0];
+	    	 StringBuilder responseBody = new StringBuilder();
+	    	 JSONObject locJSON = null;
+	    	 try{
+		           HttpClient httpclient = new DefaultHttpClient();
+		           HttpGet request = new HttpGet();
+		           URI website = new URI(getString(R.string.url_google_geocoder)+URLEncoder.encode(location, "UTF-8")+getString(R.string.urlpart_google_geocoder_sensor));
+		           ExLog.i(getActivity(), 1, website.toString());
+		           request.setURI(website);
+		           HttpResponse response = httpclient.execute(request);
+		           BufferedReader in = new BufferedReader(new InputStreamReader(
+		                   response.getEntity().getContent()));
+
+		           String line;
+		           while ((line = in.readLine()) != null) {
+		        	   responseBody.append(line);
+		           }
+		           JSONObject jObject = new JSONObject(responseBody+"");
+		           locJSON =  jObject.getJSONArray("results").getJSONObject(0).getJSONObject("geometry").getJSONObject("location");
+		           
+			} catch (Exception e){
+				e.printStackTrace();
+			} 
+	    	 
+	    	return (locJSON);
+	     }
+
+	     protected void onPostExecute(JSONObject locJSON) {
+	    	 if (locJSON == null){
+	    		 ExLog.i(getActivity(),  this.getClass().getCanonicalName(), "No Location found for " + location );
+	    		 return;
+	    	 }
+	    	 try {
+	    		 ExLog.i(getActivity(),  this.getClass().getCanonicalName(), "Location found for " + location + ": " + locJSON.getDouble("lat") + "," + locJSON.getDouble("lng") );
+			} catch (JSONException e) {
+				// TODO Auto-generated catch block
+				e.printStackTrace();
+			}
+	     }
+	 }
+
+	
 	
 	private void showBigMap(){
 		ll_topContainer.setVisibility(View.GONE);
 		rl_gpsOverlay.setVisibility(View.GONE);
+		et_location.setVisibility(View.VISIBLE);
 	}
 	
 	private void hideView(final View v, int animationDuration){

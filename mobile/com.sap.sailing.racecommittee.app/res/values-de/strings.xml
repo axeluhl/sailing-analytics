@@ -125,6 +125,7 @@
     <string name="waiting_for_gps">Warte auf GPS Signal&#8230;</string>
     <string name="found_gps_position">GPS basierende Positionierung</string>
     <string name="set_position_manually">Manuelle Eingabe</string>
+    <string name="searchPosition">Standortsuche &#8230;</string>
     <string name="store_wind">Windeingaben speichern</string>
     
     <!-- SETTINGS -->
