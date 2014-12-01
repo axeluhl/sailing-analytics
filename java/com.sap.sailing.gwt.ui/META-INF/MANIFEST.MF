@@ -61,5 +61,6 @@ Bundle-ClassPath: WEB-INF/classes/,
 TrackLifecycle: true
 Export-Package: com.sap.sailing.gwt.ui.client.shared.charts,
  com.sap.sailing.gwt.ui.client.shared.racemap,
+ com.sap.sailing.gwt.ui.server,
  com.sap.sailing.gwt.ui.shared,
  com.sap.sailing.gwt.ui.shared.racemap

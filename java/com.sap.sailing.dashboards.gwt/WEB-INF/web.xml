@@ -15,6 +15,16 @@
 		<url-pattern>/com.sap.sailing.dashboards.gwt.RibDashboard/ribdashboards
 		</url-pattern>
 	</servlet-mapping>
+
+	<servlet>
+		<display-name>Sailing Service</display-name>
+		<servlet-name>SailingService</servlet-name>
+		<servlet-class>com.sap.sailing.gwt.ui.server.SailingServiceImpl</servlet-class>
+	</servlet>
+	<servlet-mapping>
+		<servlet-name>SailingService</servlet-name>
+		<url-pattern>/service/sailing</url-pattern>
+	</servlet-mapping>
 	
 		<!-- enabling remote logging -->
 	<servlet>
