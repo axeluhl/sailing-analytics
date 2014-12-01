@@ -1,33 +1,21 @@
 package com.sap.sse.gwt.client.controls.carousel;
 
-import java.util.LinkedList;
-
 import com.google.gwt.core.client.GWT;
 import com.google.gwt.core.client.Scheduler;
-import com.google.gwt.core.client.ScriptInjector;
 import com.google.gwt.dom.client.ButtonElement;
 import com.google.gwt.dom.client.DivElement;
 import com.google.gwt.dom.client.Document;
 import com.google.gwt.dom.client.Element;
-import com.google.gwt.dom.client.HeadElement;
-import com.google.gwt.dom.client.LinkElement;
-import com.google.gwt.dom.client.Node;
-import com.google.gwt.dom.client.ScriptElement;
 import com.google.gwt.dom.client.Style;
 import com.google.gwt.dom.client.Style.Unit;
-import com.google.gwt.dom.client.StyleInjector;
-import com.google.gwt.resources.client.ClientBundle;
-import com.google.gwt.resources.client.TextResource;
 import com.google.gwt.safecss.shared.SafeStyles;
 import com.google.gwt.safecss.shared.SafeStylesBuilder;
 import com.google.gwt.safehtml.client.SafeHtmlTemplates;
 import com.google.gwt.safehtml.shared.SafeHtml;
 import com.google.gwt.safehtml.shared.UriUtils;
-import com.google.gwt.thirdparty.guava.common.base.Strings;
 import com.google.gwt.uibinder.client.UiBinder;
 import com.google.gwt.uibinder.client.UiField;
 import com.google.gwt.user.client.Command;
-import com.google.gwt.user.client.Timer;
 import com.google.gwt.user.client.ui.Widget;
 
 /**
@@ -37,8 +25,8 @@ import com.google.gwt.user.client.ui.Widget;
  *
  * @see <a href="http://kenwheeler.github.io/slick/">Slick homepage</a>.
  * @see <a href="https://github.com/kenwheeler/slick/">Slick github page</a>.
- *      
- *     
+ * 
+ * 
  *      <p/>
  *
  *      This class uses JSNI to wrap the JS slick carousel.
@@ -57,13 +45,13 @@ import com.google.gwt.user.client.ui.Widget;
  *      slider.addImage("http://demotivators.despair.com/demotivational/destinyrockdemotivator.jpg");
  *      slider.addImage("http://demotivators.despair.com/demotivational/aspirationdemotivator.jpg");
  *
- *   
+ * 
  *      The widget depends on css and js resources, as well as jquery 1.7+.
  *
  *      To use the CDN resources, include:
- *    
- *      <link rel="stylesheet" type="text/css" href="//cdn.jsdelivr.net/jquery.slick/1.3.15/slick.css"/>
- *      <script type="text/javascript" src="//cdn.jsdelivr.net/jquery.slick/1.3.15/slick.min.js"></script>      
+ * 
+ *      <link rel="stylesheet" type="text/css" href="//cdn.jsdelivr.net/jquery.slick/1.3.15/slick.css"/> <script
+ *      type="text/javascript" src="//cdn.jsdelivr.net/jquery.slick/1.3.15/slick.min.js"></script>
  *
  *      Created by pgtaboada on 10.11.14.
  */
@@ -74,10 +62,10 @@ public class ImageCarousel extends Widget {
 
     @UiField
     ButtonElement slickPrev;
-    
+
     @UiField
     ButtonElement slickNext;
-    
+
     /**
      * slick slider property: dots
      */
@@ -107,21 +95,18 @@ public class ImageCarousel extends Widget {
      * The height of the images
      */
     private int imagesHeight = 400;
-    
+
     private final String uniqueId;
 
-
-    
     /**
      * Widget constructor
      */
     public ImageCarousel() {
         setElement(ourUiBinder.createAndBindUi(this));
 
-        uniqueId = "slider_"+Document.get().createUniqueId();
+        uniqueId = "slider_" + Document.get().createUniqueId();
         getElement().addClassName(uniqueId);
 
-      
     }
 
     /**
@@ -131,33 +116,42 @@ public class ImageCarousel extends Widget {
      */
     native void setupSlider(ImageCarousel sliderReference, ButtonElement prevArrowEl, ButtonElement nextArrowEl) /*-{
 
-	$wnd.$(document).ready(function() {
-	        $wnd.$('.'+ (sliderReference.@com.sap.sse.gwt.client.controls.carousel.ImageCarousel::uniqueId)).slick(
-		{
-	            dots : (sliderReference.@com.sap.sse.gwt.client.controls.carousel.ImageCarousel::showDots),
-                    infinite : (sliderReference.@com.sap.sse.gwt.client.controls.carousel.ImageCarousel::infiniteScrolling),
-		    centerMode : (sliderReference.@com.sap.sse.gwt.client.controls.carousel.ImageCarousel::centerMode),
-		    variableWidth : (sliderReference.@com.sap.sse.gwt.client.controls.carousel.ImageCarousel::variableWidth),
-		    lazyLoad : (sliderReference.@com.sap.sse.gwt.client.controls.carousel.ImageCarousel::lazyload),
-		    swipeToSlide : false,
-		    arrows : true,
-		    responsive: true,
-		    slidesToShow: 3,
-		    prevArrow : prevArrowEl,
-		    nextArrow : nextArrowEl
-                 });
-	   });
+		$wnd
+				.$(document)
+				.ready(
+						function() {
+							$wnd
+									.$(
+											'.'
+													+ (sliderReference.@com.sap.sse.gwt.client.controls.carousel.ImageCarousel::uniqueId))
+									.slick(
+											{
+												dots : (sliderReference.@com.sap.sse.gwt.client.controls.carousel.ImageCarousel::showDots),
+												infinite : (sliderReference.@com.sap.sse.gwt.client.controls.carousel.ImageCarousel::infiniteScrolling),
+												centerMode : (sliderReference.@com.sap.sse.gwt.client.controls.carousel.ImageCarousel::centerMode),
+												variableWidth : (sliderReference.@com.sap.sse.gwt.client.controls.carousel.ImageCarousel::variableWidth),
+												lazyLoad : (sliderReference.@com.sap.sse.gwt.client.controls.carousel.ImageCarousel::lazyload),
+												swipeToSlide : false,
+												arrows : true,
+												responsive : true,
+												slidesToShow : 3,
+												prevArrow : prevArrowEl,
+												nextArrow : nextArrowEl
+											});
+						});
 
     }-*/;
 
-    
-    native void addImage(ImageCarousel sliderReference, final DivElement el ) /*-{
-        
-        $wnd.$( '.' + (sliderReference.@com.sap.sse.gwt.client.controls.carousel.ImageCarousel::uniqueId)).slickAdd(el);
-        
+    native void addImage(ImageCarousel sliderReference, final DivElement el) /*-{
+
+		$wnd
+				.$(
+						'.'
+								+ (sliderReference.@com.sap.sse.gwt.client.controls.carousel.ImageCarousel::uniqueId))
+				.slickAdd(el);
+
     }-*/;
 
-    
     /**
      * Add new image to carousel.
      *
@@ -173,14 +167,9 @@ public class ImageCarousel extends Widget {
 
         ssb.height(imagesHeight, Unit.PX);
         ssb.margin(contentMarginInPixels, Style.Unit.PX);
-        
-        final ImageCarousel reference = this;
+
         imageHolder.setInnerSafeHtml(myTemplate.imageDiv(UriUtils.fromString(url).asString(), ssb.toSafeStyles()));
-        
-        
         getElement().appendChild(imageHolder);
-            //addImage( reference, imageHolder );
-        
 
     }
 
@@ -268,8 +257,6 @@ public class ImageCarousel extends Widget {
         }
     }
 
-   
-
     /**
      * Template used to create image element
      */
@@ -277,7 +264,6 @@ public class ImageCarousel extends Widget {
         @Template("<div><img style='{1}' data-lazy='{0}'/></div>")
         SafeHtml imageDiv(String uri, SafeStyles imageStyles);
     }
-
 
     /**
      * Apply slick js to constructed dom tree.
