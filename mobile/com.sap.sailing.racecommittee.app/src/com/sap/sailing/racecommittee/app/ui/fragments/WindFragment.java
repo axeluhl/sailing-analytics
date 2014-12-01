@@ -4,7 +4,6 @@ import java.io.BufferedReader;
 import java.io.InputStreamReader;
 import java.math.BigDecimal;
 import java.net.URI;
-import java.net.URL;
 import java.net.URLEncoder;
 import java.text.DecimalFormat;
 import java.text.DecimalFormatSymbols;
@@ -17,21 +16,14 @@ import org.apache.http.impl.client.DefaultHttpClient;
 import org.json.JSONException;
 import org.json.JSONObject;
 
-import android.R.color;
 import android.animation.Animator;
 import android.animation.Animator.AnimatorListener;
 import android.app.Fragment;
-import android.app.FragmentManager.BackStackEntry;
 import android.app.FragmentTransaction;
-import android.content.Intent;
 import android.graphics.Color;
 import android.location.Location;
 import android.os.AsyncTask;
 import android.os.Bundle;
-import android.text.Editable;
-import android.text.Layout;
-import android.text.TextWatcher;
-import android.util.Log;
 import android.view.KeyEvent;
 import android.view.LayoutInflater;
 import android.view.View;
@@ -51,14 +43,16 @@ import android.widget.SeekBar.OnSeekBarChangeListener;
 import com.google.android.gms.common.ConnectionResult;
 import com.google.android.gms.common.GooglePlayServicesClient.ConnectionCallbacks;
 import com.google.android.gms.common.GooglePlayServicesClient.OnConnectionFailedListener;
-import com.google.android.gms.internal.et;
 import com.google.android.gms.location.LocationClient;
 import com.google.android.gms.location.LocationListener;
 import com.google.android.gms.location.LocationRequest;
 import com.google.android.gms.maps.CameraUpdate;
 import com.google.android.gms.maps.CameraUpdateFactory;
 import com.google.android.gms.maps.GoogleMap;
+import com.google.android.gms.maps.GoogleMap.OnMapClickListener;
 import com.google.android.gms.maps.model.LatLng;
+import com.google.android.gms.maps.model.Marker;
+import com.google.android.gms.maps.model.MarkerOptions;
 import com.sap.sailing.android.shared.logging.ExLog;
 import com.sap.sailing.domain.common.Bearing;
 import com.sap.sailing.domain.common.Position;
@@ -104,6 +98,7 @@ public class WindFragment extends LoggableFragment implements CompassDirectionLi
 	
     // stuff to save during rotation/ ect
     private boolean bigMap = false;
+    private Marker windMarker;
     
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
@@ -200,14 +195,26 @@ public class WindFragment extends LoggableFragment implements CompassDirectionLi
         compassView.setDirection((float)enteredWindBearingFrom);
         windBearingEditText.setText(bearingFormat.format(enteredWindBearingFrom));
         
+        windMap.setOnMapClickListener(new OnMapClickListener() {
+			
+			@Override
+			public void onMapClick(LatLng arg0) {
+				moveMarker(arg0);
+			}
+		});
         
+        double markerLat = -1;
         if ( savedInstanceState != null){
         	bigMap = savedInstanceState.getBoolean("bigMap", false);
+        	markerLat = savedInstanceState.getDouble("markerLat", -1);
         }
         
         if ( bigMap ){
         	showBigMap();
         	centerMap(savedInstanceState.getDouble("lat"),savedInstanceState.getDouble("lng"),savedInstanceState.getFloat("zoom"));
+        	if( markerLat != -1){
+        		moveMarker(new LatLng(markerLat, savedInstanceState.getDouble("markerLng")));
+        	}
         }
     }
     
@@ -243,6 +250,10 @@ public class WindFragment extends LoggableFragment implements CompassDirectionLi
         outState.putDouble("lat", windMap.getCameraPosition().target.latitude);
         outState.putDouble("lng", windMap.getCameraPosition().target.longitude);
         outState.putFloat("zoom", windMap.getCameraPosition().zoom);
+        if ( windMarker != null ){
+        	outState.putDouble("markerLat", windMarker.getPosition().latitude);
+        	outState.putDouble("markerLng", windMarker.getPosition().longitude);
+        }
     }
     
 	@Override
@@ -331,17 +342,28 @@ public class WindFragment extends LoggableFragment implements CompassDirectionLi
 	 }
 	
 	
-	
 	private void centerMap(double lat, double lng, float zoom){
 		CameraUpdate center = CameraUpdateFactory.newLatLng(new LatLng(lat,lng));
 		CameraUpdate czoom   = CameraUpdateFactory.zoomTo(zoom);
 		windMap.moveCamera(center);
 		windMap.animateCamera(czoom);
+		moveMarker(new LatLng(lat,lng));
 	}
+
 	private void centerMap(double lat, double lng){
 		centerMap(lat,lng,15);
-	}
+	}		
 	
+	private void moveMarker(LatLng latlng){
+		if ( windMarker != null ){
+			windMarker.remove();
+		}
+		MarkerOptions mOptions = new MarkerOptions();
+		mOptions.position(latlng);
+		
+		windMarker = windMap.addMarker(mOptions);
+		
+	}
 	
 	private void showBigMap(){
 		ll_topContainer.setVisibility(View.GONE);
