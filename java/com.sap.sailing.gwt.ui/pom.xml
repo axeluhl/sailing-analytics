@@ -131,7 +131,7 @@
 		        <module>com.sap.sailing.gwt.ui.PolarSheets</module>
 		      </modules>
 		      <gen>${basedir}/.generated</gen>
-		      <localWorkers>3</localWorkers>
+		      <localWorkers>7</localWorkers>
 		      <webappDirectory>${basedir}</webappDirectory>
 		      <warSourceDirectory>${basedir}/src/main/resources</warSourceDirectory>
                 <!-- Uncomment the following to obtain details split-point reports
