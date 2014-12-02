@@ -1002,7 +1002,7 @@ public class RacingEventServiceImpl implements RacingEventService, ClearStateTes
         if (result == null) {
             RaceLogStore raceLogStore = MongoRaceLogStoreFactory.INSTANCE.getMongoRaceLogStore(mongoObjectFactory,
                     domainObjectFactory);
-            result = new RegattaImpl(raceLogStore, name, getBaseDomainFactory().getOrCreateBoatClass(boatClassName),
+            result = new RegattaImpl(raceLogStore, name, getBaseDomainFactory().getOrCreateBoatClass(boatClassName), /*startDate*/ null, /*endDate*/ null,
                     this, getBaseDomainFactory().createScoringScheme(ScoringSchemeType.LOW_POINT), id, null);
             logger.info("Created default regatta " + result.getName() + " (" + hashCode() + ") on " + this);
             cacheAndReplicateDefaultRegatta(result);
@@ -1011,11 +1011,11 @@ public class RacingEventServiceImpl implements RacingEventService, ClearStateTes
     }
 
     @Override
-    public Regatta createRegatta(String fullRegattaName, String boatClassName, Serializable id,
+    public Regatta createRegatta(String fullRegattaName, String boatClassName, TimePoint startDate, TimePoint endDate, Serializable id,
             Iterable<? extends Series> series, boolean persistent, ScoringScheme scoringScheme,
             Serializable defaultCourseAreaId, boolean useStartTimeInference) {
         com.sap.sse.common.Util.Pair<Regatta, Boolean> regattaWithCreatedFlag = getOrCreateRegattaWithoutReplication(
-                fullRegattaName, boatClassName, id, series, persistent, scoringScheme, defaultCourseAreaId,
+                fullRegattaName, boatClassName, startDate, endDate, id, series, persistent, scoringScheme, defaultCourseAreaId,
                 useStartTimeInference);
         Regatta regatta = regattaWithCreatedFlag.getA();
         if (regattaWithCreatedFlag.getB()) {
@@ -1038,13 +1038,13 @@ public class RacingEventServiceImpl implements RacingEventService, ClearStateTes
 
     @Override
     public com.sap.sse.common.Util.Pair<Regatta, Boolean> getOrCreateRegattaWithoutReplication(String fullRegattaName,
-            String boatClassName, Serializable id, Iterable<? extends Series> series, boolean persistent,
+            String boatClassName, TimePoint startDate, TimePoint endDate, Serializable id, Iterable<? extends Series> series, boolean persistent,
             ScoringScheme scoringScheme, Serializable defaultCourseAreaId, boolean useStartTimeInference) {
         RaceLogStore raceLogStore = MongoRaceLogStoreFactory.INSTANCE.getMongoRaceLogStore(mongoObjectFactory,
                 domainObjectFactory);
         CourseArea courseArea = getCourseArea(defaultCourseAreaId);
         Regatta regatta = new RegattaImpl(raceLogStore, fullRegattaName, getBaseDomainFactory().getOrCreateBoatClass(
-                boatClassName), series, persistent, scoringScheme, id, courseArea, useStartTimeInference);
+                boatClassName), startDate, endDate, series, persistent, scoringScheme, id, courseArea, useStartTimeInference);
         boolean wasCreated = addAndConnectRegatta(persistent, defaultCourseAreaId, regatta);
         if (wasCreated) {
             logger.info("Created regatta " + regatta.getName() + " (" + hashCode() + ") on " + this);
@@ -1226,7 +1226,7 @@ public class RacingEventServiceImpl implements RacingEventService, ClearStateTes
             courseAreaId = regatta.getDefaultCourseArea().getId();
         }
         replicate(new AddSpecificRegatta(regatta.getName(), regatta.getBoatClass() == null ? null : regatta
-                .getBoatClass().getName(), regatta.getId(),
+                .getBoatClass().getName(), regatta.getStartDate(), regatta.getEndDate(), regatta.getId(),
                 getSeriesWithoutRaceColumnsConstructionParametersAsMap(regatta), regatta.isPersistent(),
                 regatta.getScoringScheme(), courseAreaId, regatta.useStartTimeInference()));
         RegattaIdentifier regattaIdentifier = regatta.getRegattaIdentifier();
@@ -1275,7 +1275,7 @@ public class RacingEventServiceImpl implements RacingEventService, ClearStateTes
                     regatta.addRaceColumnListener(raceLogScoringReplicator);
 
                     replicate(new AddDefaultRegatta(regatta.getName(), regatta.getBoatClass() == null ? null : regatta
-                            .getBoatClass().getName(), regatta.getId()));
+                            .getBoatClass().getName(), regatta.getStartDate(), regatta.getEndDate(), regatta.getId()));
                     RegattaIdentifier regattaIdentifier = regatta.getRegattaIdentifier();
                     for (RaceDefinition race : regatta.getAllRaces()) {
                         replicate(new AddRaceDefinition(regattaIdentifier, race));
@@ -1667,7 +1667,7 @@ public class RacingEventServiceImpl implements RacingEventService, ClearStateTes
     }
 
     @Override
-    public Regatta updateRegatta(RegattaIdentifier regattaIdentifier, Serializable newDefaultCourseAreaId,
+    public Regatta updateRegatta(RegattaIdentifier regattaIdentifier, TimePoint startDate, TimePoint endDate, Serializable newDefaultCourseAreaId,
             RegattaConfiguration newRegattaConfiguration, Iterable<? extends Series> series,
             boolean useStartTimeInference) {
         // We're not doing any renaming of the regatta itself, therefore we don't have to sync on the maps.
@@ -1676,6 +1676,8 @@ public class RacingEventServiceImpl implements RacingEventService, ClearStateTes
         if (newCourseArea != regatta.getDefaultCourseArea()) {
             regatta.setDefaultCourseArea(newCourseArea);
         }
+        regatta.setStartDate(startDate);
+        regatta.setEndDate(endDate);
         if (regatta.useStartTimeInference() != useStartTimeInference) {
             regatta.setUseStartTimeInference(useStartTimeInference);
             if (getTrackedRegatta(regatta) != null) {
