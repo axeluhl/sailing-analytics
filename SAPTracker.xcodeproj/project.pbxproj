@@ -697,18 +697,8 @@
 				7F8CC2071A10D47A00C56D7F /* SettingsViewController.swift */,
 				7F1875B21A10F1B800C25BE0 /* TrackingViewController.swift */,
 				7FAFA7941A126B5700D230F1 /* AboutViewController.swift */,
-				7FD9D3021A1236080058FEAD /* Extensions.swift */,
-				7F87CAA51A2CD6BA0076C617 /* Appearance.h */,
-				7F87CAA61A2CD6BA0076C617 /* Appearance.m */,
-				7F87CAA81A2CDA870076C617 /* AppearanceFontButton.h */,
-				7F87CAA91A2CDA870076C617 /* AppearanceFontButton.m */,
-				7F83F15919F154F000C53328 /* Main.storyboard */,
-				7F4D2F531A1C8EE50038E7D1 /* Images.xcassets */,
-				7F87CA9D1A2CCE8B0076C617 /* OpenSans-Bold.ttf */,
-				7F87CA9E1A2CCE8B0076C617 /* OpenSans-Light.ttf */,
-				7F87CA9F1A2CCE8B0076C617 /* OpenSans-Regular.ttf */,
-				7F87CAA01A2CCE8B0076C617 /* OpenSans-Semibold.ttf */,
-				7F72C7391A2DC51900F48EE8 /* SplashScreenDummy.swift */,
+				7F72C7401A2DEA3300F48EE8 /* Helpers */,
+				7F72C73F1A2DEA2100F48EE8 /* Resources */,
 			);
 			name = View;
 			sourceTree = "<group>";
@@ -994,6 +984,32 @@
 				7F14A1091A13B9A6001C1ECB /* ZW.png */,
 			);
 			path = flags;
+			sourceTree = "<group>";
+		};
+		7F72C73F1A2DEA2100F48EE8 /* Resources */ = {
+			isa = PBXGroup;
+			children = (
+				7F83F15919F154F000C53328 /* Main.storyboard */,
+				7F4D2F531A1C8EE50038E7D1 /* Images.xcassets */,
+				7F87CA9D1A2CCE8B0076C617 /* OpenSans-Bold.ttf */,
+				7F87CA9E1A2CCE8B0076C617 /* OpenSans-Light.ttf */,
+				7F87CA9F1A2CCE8B0076C617 /* OpenSans-Regular.ttf */,
+				7F87CAA01A2CCE8B0076C617 /* OpenSans-Semibold.ttf */,
+			);
+			name = Resources;
+			sourceTree = "<group>";
+		};
+		7F72C7401A2DEA3300F48EE8 /* Helpers */ = {
+			isa = PBXGroup;
+			children = (
+				7FD9D3021A1236080058FEAD /* Extensions.swift */,
+				7F87CAA51A2CD6BA0076C617 /* Appearance.h */,
+				7F87CAA61A2CD6BA0076C617 /* Appearance.m */,
+				7F87CAA81A2CDA870076C617 /* AppearanceFontButton.h */,
+				7F87CAA91A2CDA870076C617 /* AppearanceFontButton.m */,
+				7F72C7391A2DC51900F48EE8 /* SplashScreenDummy.swift */,
+			);
+			name = Helpers;
 			sourceTree = "<group>";
 		};
 		7F83F14719F154F000C53328 = {
