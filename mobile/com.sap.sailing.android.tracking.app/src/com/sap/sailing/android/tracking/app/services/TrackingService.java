@@ -107,8 +107,8 @@ public class TrackingService extends Service implements ConnectionCallbacks,
 		locationUpdateRequested = true;
 
 		ExLog.i(this, TAG, "Started Tracking");
-		//showNotification();
-		
+		// showNotification();
+
 		prefs.setTrackerIsTracking(true);
 		prefs.setTrackerIsTrackingEventId(eventId);
 	}
@@ -119,14 +119,14 @@ public class TrackingService extends Service implements ConnectionCallbacks,
 		}
 		locationClient.disconnect();
 		locationUpdateRequested = false;
-		
+
 		if (scheduler != null) {
 			scheduler.shutdown();
 		}
-		
+
 		prefs.setTrackerIsTracking(false);
 		prefs.setTrackerIsTrackingEventId(-1);
-		
+
 		stopSelf();
 		ExLog.i(this, TAG, "Stopped Tracking");
 	}
@@ -161,7 +161,8 @@ public class TrackingService extends Service implements ConnectionCallbacks,
 				quality = GPSQuality.great;
 			}
 
-			gpsQualityListener.gpsQualityUpdated(quality);
+			gpsQualityListener.gpsQualityAndAccurracyUpdated(quality,
+					gpsAccurracy);
 		}
 	}
 
@@ -213,19 +214,19 @@ public class TrackingService extends Service implements ConnectionCallbacks,
 				.show();
 	}
 
-//	private void showNotification() {
-//		Intent intent = new Intent(this, RegattaActivity.class);
-//		intent.setFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP
-//				| Intent.FLAG_ACTIVITY_SINGLE_TOP);
-//		PendingIntent pi = PendingIntent.getActivity(this, 0, intent, 0);
-//		CharSequence text = getText(R.string.tracker_started);
-//		Notification notification = new NotificationCompat.Builder(this)
-//				.setContentTitle(getText(R.string.app_name))
-//				.setContentText(text).setContentIntent(pi)
-//				.setSmallIcon(R.drawable.icon).build();
-//		notification.flags |= Notification.FLAG_NO_CLEAR;
-//		startForeground(NOTIFICATION_ID, notification);
-//	}
+	// private void showNotification() {
+	// Intent intent = new Intent(this, RegattaActivity.class);
+	// intent.setFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP
+	// | Intent.FLAG_ACTIVITY_SINGLE_TOP);
+	// PendingIntent pi = PendingIntent.getActivity(this, 0, intent, 0);
+	// CharSequence text = getText(R.string.tracker_started);
+	// Notification notification = new NotificationCompat.Builder(this)
+	// .setContentTitle(getText(R.string.app_name))
+	// .setContentText(text).setContentIntent(pi)
+	// .setSmallIcon(R.drawable.icon).build();
+	// notification.flags |= Notification.FLAG_NO_CLEAR;
+	// startForeground(NOTIFICATION_ID, notification);
+	// }
 
 	public void registerGPSQualityListener(GPSQualityListener listener) {
 		gpsQualityListener = listener;
@@ -256,7 +257,8 @@ public class TrackingService extends Service implements ConnectionCallbacks,
 	}
 
 	public interface GPSQualityListener {
-		public void gpsQualityUpdated(GPSQuality quality);
+		public void gpsQualityAndAccurracyUpdated(GPSQuality quality,
+				float gpsAccurracy);
 	}
 
 }

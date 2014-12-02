@@ -27,7 +27,7 @@
                 android:layout_width="wrap_content"
                 android:layout_height="35dp"
                 android:layout_alignParentLeft="true"
-                android:layout_below="@+id/qps_quality"
+                android:layout_below="@+id/gps_quality"
                 android:gravity="center_vertical"
                 android:paddingLeft="10dp"
                 android:text="@string/tracking_mode" />
@@ -84,13 +84,13 @@
                 android:textColor="@color/sap_green" />
 
             <com.sap.sailing.android.tracking.app.customviews.OpenSansTextView
-                android:id="@+id/tracking_time"
+                android:id="@+id/gps_quality"
                 android:layout_width="wrap_content"
                 android:layout_height="35dp"
-                android:layout_below="@+id/tracking_status_label"
+                android:layout_alignParentTop="true"
                 android:gravity="center_vertical"
                 android:paddingLeft="10dp"
-                android:text="@string/tracking_qps_quality" />
+                android:text="@string/tracking_gps_quality" />
 
             <!-- Separators -->
 
@@ -111,9 +111,14 @@
                 android:layout_height="1dp"
                 android:layout_below="@id/tracking_status_label"
                 android:background="@android:color/darker_gray" />
+            
+            <View
+                android:layout_width="fill_parent"
+                android:layout_height="1dp"
+                android:layout_below="@id/gps_quality"
+                android:background="@android:color/darker_gray" />
 
             <View
-                android:id="@+id/white_bar"
                 android:layout_width="fill_parent"
                 android:layout_height="1dp"
                 android:layout_alignParentLeft="true"
@@ -125,7 +130,7 @@
                 android:layout_width="fill_parent"
                 android:layout_height="35dp"
                 android:layout_alignParentLeft="true"
-                android:layout_below="@+id/tracking_time"
+                android:layout_below="@+id/tracking_status_label"
                 android:gravity="center_vertical"
                 android:paddingLeft="10dp"
                 android:text="@string/tracking_time" />
@@ -142,17 +147,33 @@
                 android:paddingRight="10dp"
                 android:text="00:00:00" />
 
-            <com.sap.sailing.android.tracking.app.views.SignalQualityIndicatorView
-                android:id="@+id/qps_quality_indicator"
+           <LinearLayout
+                android:id="@+id/gps_quality_info_layout"
                 android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:layout_alignBaseline="@+id/tracking_time"
-                android:layout_alignBottom="@+id/tracking_time"
+                android:layout_height="35dp"
+                android:gravity="center_vertical"
                 android:layout_alignParentRight="true"
-                android:contentDescription="@string/signal_quality_indicator_view_description"
-                android:focusable="true"
-                android:paddingRight="10dp"
-                app:signalQuality="none" />
+                android:orientation="horizontal" >
+                
+                <com.sap.sailing.android.tracking.app.customviews.OpenSansTextView
+                    android:id="@+id/gps_accuracy"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_alignBaseline="@id/gps_quality"
+                    android:layout_alignLeft="@+id/gps_quality_indicator"
+                    android:paddingRight="5dp"
+                    android:text="" />
+
+                <com.sap.sailing.android.tracking.app.views.SignalQualityIndicatorView
+                    android:id="@+id/gps_quality_indicator"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:contentDescription="@string/signal_quality_indicator_view_description"
+                    android:focusable="true"
+                    android:paddingRight="10dp"
+                    app:signalQuality="none" />
+                
+            </LinearLayout>
         </RelativeLayout>
     </ScrollView>
 

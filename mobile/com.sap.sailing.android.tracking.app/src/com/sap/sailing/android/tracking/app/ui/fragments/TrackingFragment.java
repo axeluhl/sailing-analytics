@@ -17,6 +17,7 @@ import android.view.LayoutInflater;
 import android.view.View;
 import android.view.View.OnClickListener;
 import android.view.ViewGroup;
+import android.webkit.WebView.FindListener;
 import android.widget.Button;
 import android.widget.TextView;
 
@@ -50,7 +51,7 @@ public class TrackingFragment extends BaseFragment implements OnClickListener {
 
 		View view = inflater.inflate(R.layout.fragment_tracking, container, false);
 		
-		Button stopTracking = (Button) view.findViewById(R.id.stop_tracking);
+		Button stopTracking = (Button)view.findViewById(R.id.stop_tracking);
 		stopTracking.setOnClickListener(this);
 	
 		prefs = new AppPreferences(getActivity());
@@ -90,14 +91,13 @@ public class TrackingFragment extends BaseFragment implements OnClickListener {
 	
 	@Override
 	public void onActivityCreated(Bundle savedInstanceState) {
-		System.out.println("ON ACTIVITY CREATED");
 		super.onActivityCreated(savedInstanceState);
 		if (savedInstanceState != null)
 		{
 			System.out.println("NOT NULL");
 			TextView modeText = (TextView)getActivity().findViewById(R.id.mode);
 			TextView statusText = (TextView)getActivity().findViewById(R.id.tracking_status);
-			SignalQualityIndicatorView qualityIndicator = (SignalQualityIndicatorView)getActivity().findViewById(R.id.qps_quality_indicator);
+			SignalQualityIndicatorView qualityIndicator = (SignalQualityIndicatorView)getActivity().findViewById(R.id.gps_quality_indicator);
 			
 			modeText.setText(savedInstanceState.getString(SIS_MODE));
 			statusText.setText(savedInstanceState.getString(SIS_STATUS));
@@ -116,7 +116,7 @@ public class TrackingFragment extends BaseFragment implements OnClickListener {
 		
 		TextView modeText = (TextView)getActivity().findViewById(R.id.mode);
 		TextView statusText = (TextView)getActivity().findViewById(R.id.tracking_status);
-		SignalQualityIndicatorView qualityIndicator = (SignalQualityIndicatorView)getActivity().findViewById(R.id.qps_quality_indicator);
+		SignalQualityIndicatorView qualityIndicator = (SignalQualityIndicatorView)getActivity().findViewById(R.id.gps_quality_indicator);
 		
 		outState.putString(SIS_MODE, modeText.getText().toString());
 		outState.putString(SIS_STATUS, statusText.getText().toString());
@@ -144,7 +144,7 @@ public class TrackingFragment extends BaseFragment implements OnClickListener {
 			{
 				ExLog.i(getActivity(), TAG, "Setting GPS Quality to 0 because timeout occurred and location is reported as disabled.");
 			}
-			setGPSQuality(GPSQuality.noSignal);
+			setGPSQualityAndAcurracy(GPSQuality.noSignal, 0);
 		}
 	}
 	
@@ -278,10 +278,13 @@ public class TrackingFragment extends BaseFragment implements OnClickListener {
 		return String.format(getResources().getConfiguration().locale, "%02d:%02d:%02d", hours, minutes, seconds);
 	}
 	
-	public void setGPSQuality(GPSQuality quality)
+	public void setGPSQualityAndAcurracy(GPSQuality quality, float gpsAccurracy)
 	{
-		SignalQualityIndicatorView indicatorView = (SignalQualityIndicatorView) getActivity().findViewById(R.id.qps_quality_indicator);
+		SignalQualityIndicatorView indicatorView = (SignalQualityIndicatorView) getActivity().findViewById(R.id.gps_quality_indicator);
 		indicatorView.setSignalQuality( quality.toInt() );
+		
+		TextView accuracyTextView = (TextView)getActivity().findViewById(R.id.gps_accuracy);
+		accuracyTextView.setText(String.valueOf(gpsAccurracy) + "m");
 		
 		updateTrackingStatus(quality);
 		
