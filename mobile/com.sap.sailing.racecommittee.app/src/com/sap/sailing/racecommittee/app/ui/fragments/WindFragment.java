@@ -80,6 +80,7 @@ public class WindFragment extends LoggableFragment implements CompassDirectionLi
     private EditText windSpeedEditText;
     private SeekBar windSpeedSeekBar;
     private Button sendButton;
+    private Button btn_position_set;
     private Button btn_set_manual_position;
     private TextView waitingForGpsTextView;
     
@@ -116,6 +117,7 @@ public class WindFragment extends LoggableFragment implements CompassDirectionLi
         et_location = (EditText) windFragmentView.findViewById(R.id.et_location);
         windMap = ((com.google.android.gms.maps.MapFragment) getActivity().getFragmentManager().findFragmentById(R.id.windMap)).getMap();
         btn_set_manual_position = (Button) windFragmentView.findViewById(R.id.btn_set_manual_position);
+        btn_position_set = (Button) windFragmentView.findViewById(R.id.btn_position_set);
         
         return windFragmentView;
     }
@@ -149,6 +151,7 @@ public class WindFragment extends LoggableFragment implements CompassDirectionLi
         sendButton.setOnClickListener(this);
         sendButton.setEnabled(false);
         btn_set_manual_position.setOnClickListener(this);
+        btn_position_set.setEnabled(false);
         
         et_location.setOnEditorActionListener(new TextView.OnEditorActionListener() {
 
@@ -294,6 +297,8 @@ public class WindFragment extends LoggableFragment implements CompassDirectionLi
 		hideView(ll_topContainer, shortAnimationDuration);
 		hideView(rl_gpsOverlay, shortAnimationDuration);
 		showView(et_location, shortAnimationDuration);
+		sendButton.setVisibility(View.GONE);
+		btn_position_set.setVisibility(View.VISIBLE);
 	}
 	
 	private class GeoCodeTask extends AsyncTask<String, String, JSONObject> {
@@ -370,6 +375,8 @@ public class WindFragment extends LoggableFragment implements CompassDirectionLi
 		rl_gpsOverlay.setVisibility(View.GONE);
 		et_location.setVisibility(View.VISIBLE);
 		et_location.setAlpha(1f);
+		sendButton.setVisibility(View.GONE);
+		btn_position_set.setVisibility(View.VISIBLE);
 	}
 	
 	private void hideView(final View v, int animationDuration){
@@ -447,9 +454,6 @@ public class WindFragment extends LoggableFragment implements CompassDirectionLi
 	
 	
 	// HELPERS
-	
-
-	
 	protected static float round(float unrounded, int precision) {
         BigDecimal decimal = new BigDecimal(unrounded);
         BigDecimal round = decimal.setScale(precision, BigDecimal.ROUND_UP);

@@ -306,7 +306,6 @@ public class RacingActivity extends SessionActivity implements RaceInfoListener,
     @Override
     public void onSaveInstanceState(Bundle outState) {
         super.onSaveInstanceState(outState);
-
         outState.putSerializable("wind", mWind);
     }
 

@@ -169,10 +169,20 @@
 		      android:alpha="1"
 		      android:text="@string/set_position_manually" />
 	        
-	    </RelativeLayout>"
+	    </RelativeLayout>
 	   
 	    
 	</RelativeLayout>
+	
+	 <Button
+      android:id="@+id/btn_position_set"
+      android:layout_width="match_parent"
+      android:layout_height="0dp"
+      android:layout_weight="0.1"
+      android:layout_gravity="center"
+      android:layout_margin="8dp"
+      android:text="@string/store_position" 
+      android:visibility="gone"/>
 	
     <Button
       android:id="@+id/btn_wind_send"

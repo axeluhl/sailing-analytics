@@ -110,9 +110,10 @@
     <string name="results_capturing_view_add_photo">Foto hinzufügen</string>
     <string name="results_capturing_view_list_header">Angehängte Fotos</string>
     <string name="results_capturing_view_list_empty">Bisher keine Fotos</string>
-    
     <string name="results_mail_subject">[Race Committee] %s</string>
     <string name="results_mail_body">Ergebnislisten für Rennen %s sind angehängt.</string>
+    
+    <!-- WIND FRAGMENT -->
     <string name="wind_direction_degrees">Windrichtung (Grad)</string>
     <string name="enter_wind_direction">Windrichtung (kommt von)</string>
     <string name="enter_wind_speed">Geschwindigkeit (kn)</string>
@@ -127,6 +128,7 @@
     <string name="set_position_manually">Manuelle Eingabe</string>
     <string name="searchPosition">Standortsuche &#8230;</string>
     <string name="no_location_found">Zu ihrer Suche konnte keine passende Position bestimmt werden.</string>
+    <string name="store_position">Diese Position verwenden</string>
     <string name="store_wind">Windeingaben speichern</string>
     
     <!-- SETTINGS -->

@@ -116,6 +116,8 @@
     <string name="results_capturing_view_list_empty">No photos yet</string>
     <string name="results_mail_subject">[Race Committee] %s</string>
     <string name="results_mail_body">Results for race %s are attached.</string>
+    
+    <!-- WIND FRAGMENT -->
     <string name="wind_direction_degrees">Wind direction from (degrees)</string>
     <string name="enter_wind_direction">Direction (from)</string>
     <string name="enter_wind_speed">Speed (kts)</string>
@@ -130,6 +132,7 @@
     <string name="set_position_manually">Add Position Manually</string>
     <string name="searchPosition">Location search &#8230;</string>
     <string name="no_location_found">Could not find a location based on your query.</string>
+    <string name="store_position">Use this position</string>
     <string name="store_wind">Store wind</string>
 
     <!-- SETTINGS -->
