@@ -7,6 +7,7 @@ import java.util.Collection;
 
 import android.annotation.SuppressLint;
 import android.app.AlertDialog;
+import android.app.Fragment;
 import android.app.FragmentTransaction;
 import android.content.DialogInterface;
 import android.content.Intent;
@@ -158,25 +159,26 @@ public class RacingActivity extends SessionActivity implements RaceInfoListener,
         }
     }
 
-
     @Override
     public void onBackPressed() {
-        if (getFragmentManager().getBackStackEntryCount() > 0) {
-            getFragmentManager().popBackStackImmediate();
-            getFragmentManager().beginTransaction().commit();
-            
-            // fix for filled out RaceInfoFragment
-            if ( infoFragment != null && infoFragment.isFragmentUIActive() && selectedRace != null){
-           	 ExLog.i(this, this.getClass().getCanonicalName(), "Returning to RaceInfoFragment");
-           	 getFragmentManager().popBackStackImmediate();
-           	 
-           	 onRaceItemClicked(selectedRace);
-           }
-        } else {
-        	logoutSession();
+        Fragment fragment = getFragmentManager().findFragmentById(R.id.racing_view_right_container);
+        if (!(fragment instanceof RaceInfoFragment)) {
+            if (getFragmentManager().getBackStackEntryCount() > 0) {
+                getFragmentManager().popBackStackImmediate();
+                getFragmentManager().beginTransaction().commit();
+
+                // fix for filled out RaceInfoFragment
+                if (infoFragment != null && infoFragment.isFragmentUIActive() && selectedRace != null) {
+                    ExLog.i(this, this.getClass().getCanonicalName(), "Returning to RaceInfoFragment");
+                    getFragmentManager().popBackStackImmediate();
+
+                    onRaceItemClicked(selectedRace);
+                    return;
+                }
+            }
         }
+        logoutSession();
     }
-    
 
     @Override
     public void onClick(View view) {
@@ -190,16 +192,16 @@ public class RacingActivity extends SessionActivity implements RaceInfoListener,
         }
     }
 
-    
-    public void onWindEntered(Wind windFix){
-    	if ( windFix != null ){ 
-	    	windButton.setText(String.format(getString(R.string.wind_info), windFix.getKnots(), windFix.getBearing().reverse().toString()));
-	        if (selectedRace != null) {
-	            selectedRace.getState().setWindFix(MillisecondsTimePoint.now(), windFix);
-	        }
-	        
-	        mWind = windFix;
-    	}
+    public void onWindEntered(Wind windFix) {
+        if (windFix != null) {
+            windButton.setText(String.format(getString(R.string.wind_info), windFix.getKnots(), windFix.getBearing()
+                    .reverse().toString()));
+            if (selectedRace != null) {
+                selectedRace.getState().setWindFix(MillisecondsTimePoint.now(), windFix);
+            }
+
+            mWind = windFix;
+        }
 
         getFragmentManager().popBackStackImmediate();
 
