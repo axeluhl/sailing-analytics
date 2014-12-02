@@ -1,5 +1,8 @@
 package com.sap.sse.gwt.client.controls.carousel;
 
+import java.util.Iterator;
+import java.util.LinkedList;
+
 import com.google.gwt.core.client.GWT;
 import com.google.gwt.core.client.Scheduler;
 import com.google.gwt.dom.client.ButtonElement;
@@ -95,6 +98,8 @@ public class WidgetCarousel extends Composite {
 
     private final String uniqueId;
 
+    private LinkedList<Widget> items = new LinkedList<Widget>();
+
     /**
      * Widget constructor
      */
@@ -117,6 +122,30 @@ public class WidgetCarousel extends Composite {
                 }
             }
         });
+
+    }
+
+    public void onAfterChange() {
+
+        for (Iterator<Widget> iterator = items.iterator(); iterator.hasNext();) {
+            Widget widget = (Widget) iterator.next();
+            final Element parent = widget.getElement();
+            GWT.log("checking widget...." + parent);
+            if (parent != null && parent.getClassName().contains("slick-active")) {
+                GWT.log("active widget....");
+                if (iterator.hasNext()) {
+                    Widget nextOne = iterator.next();
+                    if (nextOne instanceof LazyLoadable) {
+                        LazyLoadable lazyLoadable = (LazyLoadable) nextOne;
+                        GWT.log("Widgetcarousel lazy load trigger for: " + nextOne.getClass().getName());
+                        lazyLoadable.doInitializeLazyComponents();
+                    } else {
+                        GWT.log("Next component ist not lazy loadable: " + nextOne.getClass().getName());
+                    }
+                    return;
+                }
+            }
+        }
     }
 
     /**
@@ -126,35 +155,47 @@ public class WidgetCarousel extends Composite {
      */
     native void setupSlider(WidgetCarousel sliderReference, ButtonElement prevArrowEl, ButtonElement nextArrowEl) /*-{
 
-		$wnd
-				.$(document)
-				.ready(
-						function() {
-							$wnd
-									.$(
-											'.'
-													+ (sliderReference.@com.sap.sse.gwt.client.controls.carousel.WidgetCarousel::uniqueId))
-									.slick(
-											{
-												dots : (sliderReference.@com.sap.sse.gwt.client.controls.carousel.WidgetCarousel::showDots),
-												infinite : (sliderReference.@com.sap.sse.gwt.client.controls.carousel.WidgetCarousel::infiniteScrolling),
-												swipeToSlide : false,
-												arrows : true,
-												responsive : false,
-												prevArrow : prevArrowEl,
-												nextArrow : nextArrowEl
-											});
-						});
+	$wnd
+		.$(document)
+		.ready(
+			function() {
+			    $wnd
+				    .$(
+					    '.'
+						    + (sliderReference.@com.sap.sse.gwt.client.controls.carousel.WidgetCarousel::uniqueId))
+				    .slick(
+					    {
+						dots : (sliderReference.@com.sap.sse.gwt.client.controls.carousel.WidgetCarousel::showDots),
+						infinite : (sliderReference.@com.sap.sse.gwt.client.controls.carousel.WidgetCarousel::infiniteScrolling),
+						swipeToSlide : false,
+						arrows : true,
+						responsive : false,
+						prevArrow : prevArrowEl,
+						nextArrow : nextArrowEl,
+						onAfterChange : function() {
+						    sliderReference.@com.sap.sse.gwt.client.controls.carousel.WidgetCarousel::onAfterChange()();
+						},
+						onInit : function() {
+						    sliderReference.@com.sap.sse.gwt.client.controls.carousel.WidgetCarousel::onAfterChange()();
+						}
+					    });
+			});
 
     }-*/;
 
     /**
-     * Add new image to carousel.
+     * ƒ Add new image to carousel.
      *
-     * @param url
+     * @param urlƒ
      */
     public void addWidget(Widget slide) {
-
+        if (items.isEmpty()) {
+            if (slide instanceof LazyLoadable) {
+                LazyLoadable lazyLoadable = (LazyLoadable) slide;
+                lazyLoadable.doInitializeLazyComponents();
+            }
+        }
+        items.add(slide);
         sliderMainUi.add(slide);
 
     }
