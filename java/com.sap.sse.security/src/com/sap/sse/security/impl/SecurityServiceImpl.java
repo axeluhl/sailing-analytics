@@ -93,8 +93,9 @@ import com.sap.sse.security.shared.MailException;
 import com.sap.sse.security.shared.SocialUserAccount;
 import com.sap.sse.security.shared.UserManagementException;
 import com.sap.sse.security.shared.UsernamePasswordAccount;
+import com.sap.sse.util.ClearStateTestSupport;
 
-public class SecurityServiceImpl extends RemoteServiceServlet implements ReplicableSecurityService {
+public class SecurityServiceImpl extends RemoteServiceServlet implements ReplicableSecurityService, ClearStateTestSupport {
 
     private static final long serialVersionUID = -3490163216601311858L;
 
@@ -139,15 +140,7 @@ public class SecurityServiceImpl extends RemoteServiceServlet implements Replica
         this.store = store;
         this.mailProperties = mailProperties;
         // Create default users if no users exist yet.
-        if (Util.isEmpty(store.getUsers())) {
-            try {
-                logger.info("No users found, creating default user \"admin\" with password \"admin\"");
-                createSimpleUser("admin", "nobody@sapsailing.com", "admin", /* validationBaseURL */ null);
-                addRoleForUser("admin", DefaultRoles.ADMIN.getRolename());
-            } catch (UserManagementException | MailException e) {
-                logger.log(Level.SEVERE, "Exception while creating default admin user", e);
-            }
-        }
+        initEmptyStore();
         Factory<SecurityManager> factory = new WebIniSecurityManagerFactory(shiroConfiguration);
         logger.info("Loaded shiro.ini file from: classpath:shiro.ini");
         StringBuilder logMessage = new StringBuilder("[urls] section from Shiro configuration:");
@@ -166,6 +159,22 @@ public class SecurityServiceImpl extends RemoteServiceServlet implements Replica
         logger.info("Created: " + securityManager);
         SecurityUtils.setSecurityManager(securityManager);
         this.securityManager = securityManager;
+    }
+
+    /**
+     * Creates a default "admin" user with initial password "admin" and initial role "admin" if the user <code>store</code>
+     * is empty.
+     */
+    private void initEmptyStore() {
+        if (Util.isEmpty(store.getUsers())) {
+            try {
+                logger.info("No users found, creating default user \"admin\" with password \"admin\"");
+                createSimpleUser("admin", "nobody@sapsailing.com", "admin", /* validationBaseURL */ null);
+                addRoleForUser("admin", DefaultRoles.ADMIN.getRolename());
+            } catch (UserManagementException | MailException e) {
+                logger.log(Level.SEVERE, "Exception while creating default admin user", e);
+            }
+        }
     }
 
     private class SMTPAuthenticator extends javax.mail.Authenticator {
@@ -458,12 +467,12 @@ public class SecurityServiceImpl extends RemoteServiceServlet implements Replica
     }
 
     @Override
-    public Set<String> getRolesFromUser(String name) throws UserManagementException {
+    public Iterable<String> getRolesFromUser(String name) throws UserManagementException {
         return store.getRolesFromUser(name);
     }
 
     @Override
-    public void addRoleForUser(String username, String role) throws UserManagementException {
+    public void addRoleForUser(String username, String role) {
         apply(s->s.internalAddRoleForUser(username, role));
     }
 
@@ -474,13 +483,40 @@ public class SecurityServiceImpl extends RemoteServiceServlet implements Replica
     }
 
     @Override
-    public void removeRoleFromUser(String username, String role) throws UserManagementException {
+    public void removeRoleFromUser(String username, String role) {
         apply(s->s.internalRemoveRoleFromUser(username, role));
     }
 
     @Override
     public Void internalRemoveRoleFromUser(String username, String role) throws UserManagementException {
         store.removeRoleFromUser(username, role);
+        return null;
+    }
+
+    @Override
+    public Iterable<String> getPermissionsFromUser(String username) throws UserManagementException {
+        return store.getPermissionsFromUser(username);
+    }
+
+    @Override
+    public void removePermissionFromUser(String username, String permissionToRemove) {
+        apply(s->s.internalRemovePermissionForUser(username, permissionToRemove));
+    }
+
+    @Override
+    public Void internalRemovePermissionForUser(String username, String permissionToRemove) throws UserManagementException {
+        store.removePermissionFromUser(username, permissionToRemove);
+        return null;
+    }
+
+    @Override
+    public void addPermissionForUser(String username, String permissionToAdd) {
+        apply(s->s.internalAddPermissionForUser(username, permissionToAdd));
+    }
+
+    @Override
+    public Void internalAddPermissionForUser(String username, String permissionToAdd) throws UserManagementException {
+        store.addPermissionForUser(username, permissionToAdd);
         return null;
     }
 
@@ -934,5 +970,15 @@ public class SecurityServiceImpl extends RemoteServiceServlet implements Replica
     @Override
     public boolean hasSentOperationToMaster(OperationWithResult<ReplicableSecurityService, ?> operation) {
         return this.operationsSentToMasterForReplication.remove(operation);
+    }
+
+    @Override
+    public void clearState() throws Exception {
+        store.clear();
+        initEmptyStore();
+        CacheManager cm = getSecurityManager().getCacheManager();
+        if (cm instanceof ReplicatingCacheManager) {
+            ((ReplicatingCacheManager) cm).clear();
+        }
     }
 }

@@ -60,4 +60,11 @@ public class ReplicatingCacheManager implements CacheManager, Serializable {
             from.put(k, into.get(k));
         }
     }
+    
+    /**
+     * For test purposes; clears all state held by this cache manager.
+     */
+    public void clear() {
+        this.caches.clear();
+    }
 }

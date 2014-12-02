@@ -18,6 +18,7 @@ import com.sap.sse.replication.Replicable;
 import com.sap.sse.security.SecurityService;
 import com.sap.sse.security.UserStore;
 import com.sap.sse.security.UsernamePasswordRealm;
+import com.sap.sse.util.ClearStateTestSupport;
 
 public class Activator implements BundleActivator {
     private static final Logger logger = Logger.getLogger(Activator.class.getName());
@@ -80,6 +81,7 @@ public class Activator implements BundleActivator {
         final Dictionary<String, String> replicableServiceProperties = new Hashtable<>();
         replicableServiceProperties.put(Replicable.OSGi_Service_Registry_ID_Property_Name, securityService.getId().toString());
         context.registerService(Replicable.class.getName(), securityService, replicableServiceProperties);
+        context.registerService(ClearStateTestSupport.class.getName(), securityService, null);
         Logger.getLogger(Activator.class.getName()).info("Security Service registered.");
     }
 

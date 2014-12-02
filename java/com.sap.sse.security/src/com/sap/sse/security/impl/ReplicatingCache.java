@@ -47,16 +47,16 @@ public class ReplicatingCache<K, V> implements Cache<K, V>, Named {
 
     @Override
     public V get(K key) throws CacheException {
-        if (logger.isLoggable(Level.FINE)) {
-            logger.fine("get("+key+") on "+name+"@"+System.identityHashCode(this)+"="+cache.get(key));
+        if (logger.isLoggable(Level.FINER)) {
+            logger.finer("get("+key+") on "+name+"@"+System.identityHashCode(this)+"="+cache.get(key));
         }
         return cache.get(key);
     }
 
     @Override
     public V put(K key, V value) throws CacheException {
-        if (logger.isLoggable(Level.FINE)) {
-            logger.fine("put("+key+", "+value+") into cache "+name+"@"+System.identityHashCode(this));
+        if (logger.isLoggable(Level.FINER)) {
+            logger.finer("put("+key+", "+value+") into cache "+name+"@"+System.identityHashCode(this));
             if (value instanceof Session) {
                 Session session = (Session) value;
                 logSession(session);
@@ -78,7 +78,7 @@ public class ReplicatingCache<K, V> implements Cache<K, V>, Named {
             sb.append(session.getAttribute(key));
             sb.append("\n");
         }
-        logger.fine("Session:\n"+sb.toString());
+        logger.finer("Session:\n"+sb.toString());
         
     }
 

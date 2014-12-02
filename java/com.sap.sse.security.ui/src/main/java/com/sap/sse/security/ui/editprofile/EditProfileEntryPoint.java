@@ -68,6 +68,9 @@ public class EditProfileEntryPoint implements EntryPoint {
         rolesPanel.add(new Label(stringMessages.roles()));
         final Label rolesLabel = new Label();
         rolesPanel.add(rolesLabel);
+        rolesPanel.add(new Label(stringMessages.permissions()));
+        final Label permissionsLabel = new Label();
+        rolesPanel.add(permissionsLabel);
         fp.add(rolesPanel);
         final Label emailLabel = new Label(stringMessages.email());
         fp.add(emailLabel);
@@ -116,6 +119,7 @@ public class EditProfileEntryPoint implements EntryPoint {
                         nameText.setText(user.getName());
                         emailText.setText(user.getEmail());
                         rolesLabel.setText(user.getRoles().toString());
+                        permissionsLabel.setText(user.getPermissions().toString());
                     }
                 }
             });

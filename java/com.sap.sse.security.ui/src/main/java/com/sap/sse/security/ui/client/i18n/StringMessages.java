@@ -45,7 +45,9 @@ public interface StringMessages extends com.sap.sse.gwt.client.StringMessages {
     String add();
     String edit();
     String errorUpdatingRoles(String username, String message);
+    String errorUpdatingPermissions(String name, String message);
     String enterRoleName();
+    String enterPermissionName();
     String errorCreatingUser(String username, String message);
     String signedUpSuccessfully(String username);
     String unknownErrorCreatingUser(String username);
@@ -69,6 +71,7 @@ public interface StringMessages extends com.sap.sse.gwt.client.StringMessages {
     String failedToSignIn();
     String emailValidationUnsuccessful(String username);
     String roles();
+    String permissions();
     String signInWith();
     String generalWelcome();
     String newUser();

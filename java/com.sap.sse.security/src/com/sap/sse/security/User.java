@@ -43,6 +43,7 @@ public class User implements Named, WithID {
     private boolean emailValidated;
 
     private final Set<String> roles;
+    private final Set<String> permissions;
     private final Map<AccountType, Account> accounts;
 
     public User(String name, String email, Account... accounts) {
@@ -58,6 +59,7 @@ public class User implements Named, WithID {
         super();
         this.name = name;
         this.roles = new HashSet<>();
+        this.permissions = new HashSet<>();
         this.email = email;
         this.passwordResetSecret = passwordResetSecret;
         this.validationSecret = validationSecret;
@@ -84,7 +86,7 @@ public class User implements Named, WithID {
         this.name = name;
     }
 
-    public Set<String> getRoles() {
+    public Iterable<String> getRoles() {
         return roles;
     }
 
@@ -100,6 +102,22 @@ public class User implements Named, WithID {
         roles.remove(role);
     }
 
+    public Iterable<String> getPermissions() {
+        return permissions;
+    }
+
+    public void addPermission(String permission) {
+        permissions.add(permission);
+    }
+    
+    public boolean hasPermission(String permission) {
+        return permissions.contains(permission);
+    }
+    
+    public void removePermission(String permission) {
+        permissions.remove(permission);
+    }
+    
     public Account getAccount(AccountType type) {
         return accounts.get(type);
     }

@@ -214,25 +214,49 @@ public class UserManagementServiceImpl extends RemoteServiceServlet implements U
         if (currentSubject.hasRole(DefaultRoles.ADMIN.getRolename())) {
             User u = getSecurityService().getUserByName(username);
             if (u == null) {
-                return new SuccessInfo(false, "User does not exist.", /* redirectURL */ null, null);
+                return new SuccessInfo(false, "User does not exist.", /* redirectURL */null, null);
             }
-            try {
-                Set<String> rolesToRemove = new HashSet<>();
-                Util.addAll(u.getRoles(), rolesToRemove);
-                Util.removeAll(roles, rolesToRemove);
-                for (String roleToRemove : rolesToRemove) {
-                    getSecurityService().removeRoleFromUser(username, roleToRemove);
-                }
-                Set<String> rolesToAdd = new HashSet<>();
-                Util.addAll(roles, rolesToAdd);
-                Util.removeAll(u.getRoles(), rolesToAdd);
-                for (String roleToAdd : rolesToAdd) {
-                    getSecurityService().addRoleForUser(username, roleToAdd);
-                }
-                return new SuccessInfo(true, "Added role: " + roles + ".", /* redirectURL */ null, createUserDTOFromUser(u));
-            } catch (UserManagementException e) {
-                return new SuccessInfo(false, e.getMessage(), /* redirectURL */ null, null);
+            Set<String> rolesToRemove = new HashSet<>();
+            Util.addAll(u.getRoles(), rolesToRemove);
+            Util.removeAll(roles, rolesToRemove);
+            for (String roleToRemove : rolesToRemove) {
+                getSecurityService().removeRoleFromUser(username, roleToRemove);
             }
+            Set<String> rolesToAdd = new HashSet<>();
+            Util.addAll(roles, rolesToAdd);
+            Util.removeAll(u.getRoles(), rolesToAdd);
+            for (String roleToAdd : rolesToAdd) {
+                getSecurityService().addRoleForUser(username, roleToAdd);
+            }
+            return new SuccessInfo(true, "Set roles " + roles + " for user " + username, /* redirectURL */null,
+                    createUserDTOFromUser(u));
+        } else {
+            return new SuccessInfo(false, "You don't have the required permissions to add a role.", /* redirectURL */ null, null);
+        }
+    }
+
+    @Override
+    public SuccessInfo setPermissionsForUser(String username, Iterable<String> permissions) {
+        Subject currentSubject = SecurityUtils.getSubject();
+        if (currentSubject.hasRole(DefaultRoles.ADMIN.getRolename())) {
+            User u = getSecurityService().getUserByName(username);
+            if (u == null) {
+                return new SuccessInfo(false, "User does not exist.", /* redirectURL */null, null);
+            }
+            Set<String> permissionsToRemove = new HashSet<>();
+            Util.addAll(u.getPermissions(), permissionsToRemove);
+            Util.removeAll(permissions, permissionsToRemove);
+            for (String permissionToRemove : permissionsToRemove) {
+                getSecurityService().removePermissionFromUser(username, permissionToRemove);
+            }
+            Set<String> permissionsToAdd = new HashSet<>();
+            Util.addAll(permissions, permissionsToAdd);
+            Util.removeAll(u.getPermissions(), permissionsToAdd);
+            for (String permissionToAdd : permissionsToAdd) {
+                getSecurityService().addPermissionForUser(username, permissionToAdd);
+            }
+            return new SuccessInfo(true, "Set roles " + permissions + " for user " + username, /* redirectURL */null,
+                    createUserDTOFromUser(u));
         } else {
             return new SuccessInfo(false, "You don't have the required permissions to add a role.", /* redirectURL */ null, null);
         }
@@ -266,6 +290,7 @@ public class UserManagementServiceImpl extends RemoteServiceServlet implements U
         }
         userDTO = new UserDTO(user.getName(), user.getEmail(), user.isEmailValidated(), accountDTOs);
         userDTO.addRoles(user.getRoles());
+        userDTO.addPermissions(user.getPermissions());
         return userDTO;
     }
 

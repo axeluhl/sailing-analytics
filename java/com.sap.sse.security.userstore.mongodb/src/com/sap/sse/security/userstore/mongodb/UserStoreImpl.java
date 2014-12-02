@@ -198,7 +198,7 @@ public class UserStoreImpl implements UserStore {
     }
 
     @Override
-    public Set<String> getRolesFromUser(String username) throws UserManagementException {
+    public Iterable<String> getRolesFromUser(String username) throws UserManagementException {
         if (users.get(username) == null) {
             throw new UserManagementException(UserManagementException.USER_DOES_NOT_EXIST);
         }
@@ -223,6 +223,37 @@ public class UserStoreImpl implements UserStore {
             throw new UserManagementException(UserManagementException.USER_DOES_NOT_EXIST);
         }
         users.get(name).removeRole(role);
+        if (mongoObjectFactory != null) {
+            mongoObjectFactory.storeUser(users.get(name));
+        }
+    }
+
+    @Override
+    public Iterable<String> getPermissionsFromUser(String username) throws UserManagementException {
+        if (users.get(username) == null) {
+            throw new UserManagementException(UserManagementException.USER_DOES_NOT_EXIST);
+        }
+        return users.get(username).getPermissions();
+    }
+
+    @Override
+    public void addPermissionForUser(String name, String permission) throws UserManagementException {
+        final User user = users.get(name);
+        if (user == null) {
+            throw new UserManagementException(UserManagementException.USER_DOES_NOT_EXIST);
+        }
+        user.addPermission(permission);
+        if (mongoObjectFactory != null) {
+            mongoObjectFactory.storeUser(user);
+        }
+    }
+
+    @Override
+    public void removePermissionFromUser(String name, String permission) throws UserManagementException {
+        if (users.get(name) == null) {
+            throw new UserManagementException(UserManagementException.USER_DOES_NOT_EXIST);
+        }
+        users.get(name).removePermission(permission);
         if (mongoObjectFactory != null) {
             mongoObjectFactory.storeUser(users.get(name));
         }

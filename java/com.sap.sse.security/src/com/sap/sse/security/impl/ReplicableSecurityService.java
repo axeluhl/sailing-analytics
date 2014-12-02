@@ -28,5 +28,10 @@ public interface ReplicableSecurityService extends SecurityService {
 
     Void internalRemoveRoleFromUser(String username, String role) throws UserManagementException;
 
+    Void internalAddPermissionForUser(String username, String permissionToAdd) throws UserManagementException;
+
+    Void internalRemovePermissionForUser(String username, String permissionToRemove) throws UserManagementException;
+
     Void internalDeleteUser(String username) throws UserManagementException;
+
 }

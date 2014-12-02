@@ -47,11 +47,13 @@ public class TestStartAndStopTrackingForTracTracEvents extends AbstractSeleniumT
     
 //    private static final String BMW_CUP_RACE_8 = "BMW Cup Race 8";
     
+    @Override
     @Before
     public void setUp() {
         this.trackableRace = new TrackableRaceDescriptor(BMW_CUP_EVENT, String.format(RACE, 1), BMW_CUP_BOAT_CLASS);
         this.trackedRace = new TrackedRaceDescriptor(BMW_CUP_REGATTA, BMW_CUP_BOAT_CLASS, String.format(RACE, 1));
         clearState(getContextRoot());
+        super.setUp();
     }
     
     /**

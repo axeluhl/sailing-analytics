@@ -43,6 +43,7 @@ public class MongoObjectFactoryImpl implements MongoObjectFactory {
         dbUser.put(FieldNames.User.VALIDATION_SECRET.name(), user.getValidationSecret());
         dbUser.put(FieldNames.User.ACCOUNTS.name(), createAccountMapObject(user.getAllAccounts()));
         dbUser.put(FieldNames.User.ROLES.name(), user.getRoles());
+        dbUser.put(FieldNames.User.PERMISSIONS.name(), user.getPermissions());
         usersCollection.update(query, dbUser, /* upsrt */true, /* multi */false, WriteConcern.SAFE);
     }
 
