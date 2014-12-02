@@ -78,9 +78,12 @@ DynamicTrackedRace, GPSTrackListener<Competitor, GPSFixMoving> {
             long delayForCacheInvalidationOfWindEstimation, boolean useMarkPassingCalculator) {
         super(trackedRegatta, race, sidelines, windStore, gpsFixStore, delayToLiveInMillis, millisecondsOverWhichToAverageWind, millisecondsOverWhichToAverageSpeed,
                 delayForCacheInvalidationOfWindEstimation, useMarkPassingCalculator);
-        this.logListener = new DynamicTrackedRaceLogListener(this);
-        this.courseDesignChangedListeners = new HashSet<>();
-        this.startTimeChangedListeners = new HashSet<>();
+		this.logListener = new DynamicTrackedRaceLogListener(this);
+		if (markPassingCalculator != null) {
+			logListener.setMarkPassingUpdateListener(markPassingCalculator.getListener());
+		}
+		this.courseDesignChangedListeners = new HashSet<>();
+		this.startTimeChangedListeners = new HashSet<>();
         this.raceAbortedListeners = new HashSet<>();
         this.raceIsKnownToStartUpwind = race.getBoatClass().typicallyStartsUpwind();
         if (!raceIsKnownToStartUpwind) {
