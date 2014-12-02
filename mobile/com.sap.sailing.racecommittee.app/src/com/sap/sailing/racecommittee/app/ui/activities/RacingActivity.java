@@ -189,15 +189,12 @@ public class RacingActivity extends SessionActivity implements RaceInfoListener,
 	            if (infoFragment != null && infoFragment.isFragmentUIActive() && selectedRace != null) {
 	                ExLog.i(this, this.getClass().getCanonicalName(), "Returning to RaceInfoFragment");
 	                getFragmentManager().popBackStackImmediate();
-	
 	                onRaceItemClicked(selectedRace);
 	            }
 	        } 
         } else {
-        	ExLog.i(this, this.getClass().getCanonicalName(), "logging out!");
         	logoutSession();
 	    }
-	   
     }
 
     @Override
@@ -211,7 +208,6 @@ public class RacingActivity extends SessionActivity implements RaceInfoListener,
             break;
         }
     }
-
 
     @Override
     public void onCreate(Bundle savedInstanceState) {
