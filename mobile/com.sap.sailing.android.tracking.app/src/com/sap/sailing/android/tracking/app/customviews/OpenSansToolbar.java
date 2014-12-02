@@ -33,7 +33,7 @@ public class OpenSansToolbar extends Toolbar {
 		if (titleTextView != null)
 		{
 			System.out.println("NOT NULL");
-			titleTextView.setTypeface(Typeface.createFromAsset(getContext().getAssets(), "fonts/Admiration Pains.ttf"));
+			titleTextView.setTypeface(Typeface.createFromAsset(getContext().getAssets(), "fonts/OpenSans-Regular.ttf"));
 		}
 		System.out.println("NULL");
 	}
@@ -46,7 +46,7 @@ public class OpenSansToolbar extends Toolbar {
 	      System.out.println(" " + fld);
 	    
 		try {
-			Field f = this.getClass().getSuperclass().getDeclaredField("mTitleTextView");
+			Field f = this.getClass().getSuperclass().getDeclaredField("android.widget.TextView.android.support.v7.widget.Toolbar.mTitleTextView");
 			f.setAccessible(true);
 			titleTextView = (TextView) f.get(this);
 		} catch (NoSuchFieldException e) {
