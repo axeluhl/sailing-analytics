@@ -286,6 +286,12 @@
 		7F83F16019F154F000C53328 /* LaunchScreen.xib in Resources */ = {isa = PBXBuildFile; fileRef = 7F83F15E19F154F000C53328 /* LaunchScreen.xib */; };
 		7F83F16C19F154F000C53328 /* SAPTrackerAPITests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 7F83F16B19F154F000C53328 /* SAPTrackerAPITests.swift */; };
 		7F83F17619F1574700C53328 /* CoreLocation.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 7F83F17519F1574700C53328 /* CoreLocation.framework */; };
+		7F87CAA11A2CCE8B0076C617 /* OpenSans-Bold.ttf in Resources */ = {isa = PBXBuildFile; fileRef = 7F87CA9D1A2CCE8B0076C617 /* OpenSans-Bold.ttf */; };
+		7F87CAA21A2CCE8B0076C617 /* OpenSans-Light.ttf in Resources */ = {isa = PBXBuildFile; fileRef = 7F87CA9E1A2CCE8B0076C617 /* OpenSans-Light.ttf */; };
+		7F87CAA31A2CCE8B0076C617 /* OpenSans-Regular.ttf in Resources */ = {isa = PBXBuildFile; fileRef = 7F87CA9F1A2CCE8B0076C617 /* OpenSans-Regular.ttf */; };
+		7F87CAA41A2CCE8B0076C617 /* OpenSans-Semibold.ttf in Resources */ = {isa = PBXBuildFile; fileRef = 7F87CAA01A2CCE8B0076C617 /* OpenSans-Semibold.ttf */; };
+		7F87CAA71A2CD6BA0076C617 /* Appearance.m in Sources */ = {isa = PBXBuildFile; fileRef = 7F87CAA61A2CD6BA0076C617 /* Appearance.m */; };
+		7F87CAAA1A2CDA870076C617 /* AppearanceFontButton.m in Sources */ = {isa = PBXBuildFile; fileRef = 7F87CAA91A2CDA870076C617 /* AppearanceFontButton.m */; };
 		7F8CC2081A10D47A00C56D7F /* SettingsViewController.swift in Sources */ = {isa = PBXBuildFile; fileRef = 7F8CC2071A10D47A00C56D7F /* SettingsViewController.swift */; };
 		7F99DE3C1A126554009B3619 /* RegattaViewController.swift in Sources */ = {isa = PBXBuildFile; fileRef = 7F99DE3B1A126554009B3619 /* RegattaViewController.swift */; };
 		7FA2220A1A25E54F00FD364B /* libPods.a in Frameworks */ = {isa = PBXBuildFile; fileRef = 06377F0B2F2854497073FC0E /* libPods.a */; };
@@ -601,6 +607,14 @@
 		7F83F16A19F154F000C53328 /* Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist.xml; path = Info.plist; sourceTree = "<group>"; };
 		7F83F16B19F154F000C53328 /* SAPTrackerAPITests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SAPTrackerAPITests.swift; sourceTree = "<group>"; };
 		7F83F17519F1574700C53328 /* CoreLocation.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = CoreLocation.framework; path = System/Library/Frameworks/CoreLocation.framework; sourceTree = SDKROOT; };
+		7F87CA9D1A2CCE8B0076C617 /* OpenSans-Bold.ttf */ = {isa = PBXFileReference; lastKnownFileType = file; path = "OpenSans-Bold.ttf"; sourceTree = "<group>"; };
+		7F87CA9E1A2CCE8B0076C617 /* OpenSans-Light.ttf */ = {isa = PBXFileReference; lastKnownFileType = file; path = "OpenSans-Light.ttf"; sourceTree = "<group>"; };
+		7F87CA9F1A2CCE8B0076C617 /* OpenSans-Regular.ttf */ = {isa = PBXFileReference; lastKnownFileType = file; path = "OpenSans-Regular.ttf"; sourceTree = "<group>"; };
+		7F87CAA01A2CCE8B0076C617 /* OpenSans-Semibold.ttf */ = {isa = PBXFileReference; lastKnownFileType = file; path = "OpenSans-Semibold.ttf"; sourceTree = "<group>"; };
+		7F87CAA51A2CD6BA0076C617 /* Appearance.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = Appearance.h; sourceTree = "<group>"; };
+		7F87CAA61A2CD6BA0076C617 /* Appearance.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = Appearance.m; sourceTree = "<group>"; };
+		7F87CAA81A2CDA870076C617 /* AppearanceFontButton.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = AppearanceFontButton.h; sourceTree = "<group>"; };
+		7F87CAA91A2CDA870076C617 /* AppearanceFontButton.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = AppearanceFontButton.m; sourceTree = "<group>"; };
 		7F8CC2071A10D47A00C56D7F /* SettingsViewController.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = SettingsViewController.swift; sourceTree = "<group>"; };
 		7F99DE3B1A126554009B3619 /* RegattaViewController.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = RegattaViewController.swift; sourceTree = "<group>"; };
 		7FA6551919F6661900A1B92D /* DataManager.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; lineEnding = 0; path = DataManager.swift; sourceTree = "<group>"; xcLanguageSpecificationIdentifier = xcode.lang.swift; };
@@ -684,9 +698,17 @@
 				7F1875B21A10F1B800C25BE0 /* TrackingViewController.swift */,
 				7FAFA7941A126B5700D230F1 /* AboutViewController.swift */,
 				7FD9D3021A1236080058FEAD /* Extensions.swift */,
+				7F87CAA51A2CD6BA0076C617 /* Appearance.h */,
+				7F87CAA61A2CD6BA0076C617 /* Appearance.m */,
+				7F87CAA81A2CDA870076C617 /* AppearanceFontButton.h */,
+				7F87CAA91A2CDA870076C617 /* AppearanceFontButton.m */,
 				7F83F15919F154F000C53328 /* Main.storyboard */,
 				7F83F15E19F154F000C53328 /* LaunchScreen.xib */,
 				7F4D2F531A1C8EE50038E7D1 /* Images.xcassets */,
+				7F87CA9D1A2CCE8B0076C617 /* OpenSans-Bold.ttf */,
+				7F87CA9E1A2CCE8B0076C617 /* OpenSans-Light.ttf */,
+				7F87CA9F1A2CCE8B0076C617 /* OpenSans-Regular.ttf */,
+				7F87CAA01A2CCE8B0076C617 /* OpenSans-Semibold.ttf */,
 			);
 			name = View;
 			sourceTree = "<group>";
@@ -1304,6 +1326,7 @@
 				7F14A1C71A13B9A6001C1ECB /* OM.png in Resources */,
 				7F14A1F21A13B9A6001C1ECB /* TJ.png in Resources */,
 				7F14A12C1A13B9A6001C1ECB /* AX.png in Resources */,
+				7F87CAA11A2CCE8B0076C617 /* OpenSans-Bold.ttf in Resources */,
 				7F14A1951A13B9A6001C1ECB /* KW.png in Resources */,
 				7F14A1C21A13B9A6001C1ECB /* NO.png in Resources */,
 				7F14A16E1A13B9A6001C1ECB /* GI.png in Resources */,
@@ -1366,10 +1389,13 @@
 				7F14A10F1A13B9A6001C1ECB /* _gosquared.png in Resources */,
 				7F14A1171A13B9A6001C1ECB /* _scotland.png in Resources */,
 				7F14A1FB1A13B9A6001C1ECB /* TW.png in Resources */,
+				7F87CAA41A2CCE8B0076C617 /* OpenSans-Semibold.ttf in Resources */,
 				7F14A1451A13B9A6001C1ECB /* CG.png in Resources */,
 				7F14A1F11A13B9A6001C1ECB /* TH.png in Resources */,
 				7F14A1AC1A13B9A6001C1ECB /* ML.png in Resources */,
+				7F87CAA31A2CCE8B0076C617 /* OpenSans-Regular.ttf in Resources */,
 				7F14A1AE1A13B9A6001C1ECB /* MN.png in Resources */,
+				7F87CAA21A2CCE8B0076C617 /* OpenSans-Light.ttf in Resources */,
 				7F14A1D41A13B9A6001C1ECB /* PY.png in Resources */,
 				7F14A1E11A13B9A6001C1ECB /* SI.png in Resources */,
 				7F14A1921A13B9A6001C1ECB /* KN.png in Resources */,
@@ -1470,6 +1496,7 @@
 				7F2C605A19F160E400C32D93 /* LocationManager.swift in Sources */,
 				7FCDB6631A1636610075D7D9 /* Event.swift in Sources */,
 				7FCDB6621A1636610075D7D9 /* GPSFix.swift in Sources */,
+				7F87CAAA1A2CDA870076C617 /* AppearanceFontButton.m in Sources */,
 				7F99DE3C1A126554009B3619 /* RegattaViewController.swift in Sources */,
 				7F8CC2081A10D47A00C56D7F /* SettingsViewController.swift in Sources */,
 				7F06590419F8094C0077FF95 /* DeviceUDIDManager.swift in Sources */,
@@ -1478,6 +1505,7 @@
 				7FD9D3031A1236080058FEAD /* Extensions.swift in Sources */,
 				7F0658FD19F7D6700077FF95 /* ScanViewController.swift in Sources */,
 				7FCDB6651A1636610075D7D9 /* Competitor.swift in Sources */,
+				7F87CAA71A2CD6BA0076C617 /* Appearance.m in Sources */,
 				7F83F15619F154F000C53328 /* AppDelegate.swift in Sources */,
 				7F0658FF19F7EE910077FF95 /* QRCodeData.swift in Sources */,
 			);

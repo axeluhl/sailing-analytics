@@ -31,9 +31,12 @@ class AppDelegate: UIResponder, UIApplicationDelegate {
         
         // set up styling
         UINavigationBar.appearance().setBackgroundImage(UIImage(named: "navbar_bg"), forBarMetrics: UIBarMetrics.Default)
-        UINavigationBar.appearance().titleTextAttributes = [NSForegroundColorAttributeName: UIColor.whiteColor()]
         UINavigationBar.appearance().tintColor = UIColor.whiteColor()
-
+        UINavigationBar.appearance().titleTextAttributes = [NSForegroundColorAttributeName: UIColor.whiteColor(), NSFontAttributeName: UIFont(name: "OpenSans-Bold", size: CGFloat(17.0))!]
+        UILabel.appearance().font = UIFont(name: "OpenSans", size: 15)
+        UIButton.appearance().titleLabel?.font = UIFont(name: "OpenSans-Bold", size: 15)
+        // needed for missing Swift method
+        Appearance.setAppearance()
         return true
     }
     
