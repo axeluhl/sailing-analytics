@@ -387,6 +387,9 @@ public class WindFragment extends LoggableFragment implements
 		currentLocation = new Location("set");
 		currentLocation.setLatitude(windMarker.getPosition().latitude);
 		currentLocation.setLongitude(windMarker.getPosition().longitude);
+		AppPreferences preferences = AppPreferences.on(getActivity()
+				.getApplicationContext());
+		preferences.setWindPosition(windMarker.getPosition());
 		txt_waitingForGPS.setTextColor(Color.GRAY);
 		sendButton.setEnabled(true);
 
@@ -476,10 +479,8 @@ public class WindFragment extends LoggableFragment implements
 			windMarker.remove();
 		}
 
-		MarkerOptions mOptions = new MarkerOptions();
-		mOptions.position(latlng);
-		windMarker = windMap.addMarker(mOptions);
 
+		windMarker = windMap.addMarker(new MarkerOptions().position(latlng).draggable(true));
 		AppPreferences preferences = AppPreferences.on(getActivity()
 				.getApplicationContext());
 		preferences.setWindPosition(latlng);
