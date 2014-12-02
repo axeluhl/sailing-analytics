@@ -65,6 +65,8 @@ public class TrackingFragment extends BaseFragment implements OnClickListener {
 	@Override
 	public void onResume() {
 		super.onResume();
+		// so it initally updates to "battery-saving" etc.
+		setAPIConnectivityStatus(APIConnectivity.noAttempt);
 		timer = new TimerRunnable();
 		timer.start();
 	}
@@ -179,8 +181,17 @@ public class TrackingFragment extends BaseFragment implements OnClickListener {
 				
 				if (apiConnectivity == APIConnectivity.reachableTransmissionSuccess)
 				{
-					textView.setText(getString(R.string.tracking_mode_live));
-					textView.setTextColor(Color.parseColor(getString(R.color.sap_green)));
+					if (prefs.getEnergySavingEnabledByUser())
+					{
+						textView.setText(getString(R.string.tracking_mode_battery_saving));
+						textView.setTextColor(Color.parseColor(getString(R.color.sap_yellow)));
+					}
+					else
+					{
+						textView.setText(getString(R.string.tracking_mode_live));
+						textView.setTextColor(Color.parseColor(getString(R.color.sap_green)));	
+					}
+					
 				}
 				else if (apiConnectivity == APIConnectivity.noAttempt)
 				{
@@ -227,18 +238,6 @@ public class TrackingFragment extends BaseFragment implements OnClickListener {
             return !TextUtils.isEmpty(locationProviders);
         }
     } 
-    
-    /**
-	 * Returns if network connection is available on the device
-	 * @param context
-	 * @return true if network connection is available, false otherwise
-	 */
-    private boolean isNetworkAvailable() {
-        ConnectivityManager connectivityManager 
-              = (ConnectivityManager) getActivity().getSystemService(Context.CONNECTIVITY_SERVICE);
-        NetworkInfo activeNetworkInfo = connectivityManager.getActiveNetworkInfo();
-        return activeNetworkInfo != null && activeNetworkInfo.isConnected();
-    }
     
 	public void userTappedBackButton()
 	{
