@@ -17,7 +17,7 @@
         android:layout_marginRight="10dp"
         android:textColor="@color/white" />
 
-    <TextView
+    <com.sap.sailing.android.tracking.app.customviews.OpenSansTextView
         android:id="@+id/regattaName"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"

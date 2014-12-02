@@ -11,7 +11,7 @@
             android:layout_alignParentTop="true"
             android:background="@color/sap_yellow" />
 
-    <TextView
+    <com.sap.sailing.android.tracking.app.customviews.OpenSansTextView
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:layout_below="@id/top_bar"

@@ -10,7 +10,7 @@
     <com.sap.sailing.android.tracking.app.customviews.OpenSansTextView
         android:id="@+id/mode_label"
         android:layout_width="wrap_content"
-        android:layout_height="50dp"
+        android:layout_height="40dp"
         android:layout_alignParentLeft="true"
         android:layout_below="@+id/qps_quality"
         android:gravity="center_vertical"
@@ -25,13 +25,13 @@
         android:layout_alignBottom="@id/mode_label"
         android:layout_alignParentRight="true"
         android:paddingRight="10dp"
-        android:textColor="@color/sap_green"
-        android:text="@string/tracking_mode_caching" />
+        android:text="@string/tracking_mode_caching"
+        android:textColor="@color/sap_green" />
 
     <com.sap.sailing.android.tracking.app.customviews.OpenSansTextView
         android:id="@+id/tracking_status_label"
         android:layout_width="wrap_content"
-        android:layout_height="50dp"
+        android:layout_height="40dp"
         android:layout_below="@+id/mode_label"
         android:gravity="center_vertical"
         android:paddingLeft="10dp"
@@ -46,57 +46,17 @@
         android:layout_alignParentBottom="true"
         android:layout_alignParentRight="true"
         android:paddingRight="10dp"
-        android:textColor="@color/sap_green"
-        android:text="@string/tracking_status_tracking" />
-
-    <com.sap.sailing.android.tracking.app.views.SignalQualityIndicatorView
-        android:id="@+id/qps_quality_indicator"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:layout_alignBaseline="@id/qps_quality"
-        android:layout_alignParentRight="true"
-        android:contentDescription="@string/signal_quality_indicator_view_description"
-        android:focusable="true"
-        android:paddingRight="10dp"
-        app:signalQuality="none" />
+        android:text="@string/tracking_status_tracking"
+        android:textColor="@color/sap_green" />
 
     <com.sap.sailing.android.tracking.app.customviews.OpenSansTextView
-        android:id="@+id/qps_quality"
+        android:id="@+id/tracking_time"
         android:layout_width="wrap_content"
-        android:layout_height="50dp"
-        android:layout_alignParentTop="true"
+        android:layout_height="40dp"
+        android:layout_below="@+id/tracking_status_label"
         android:gravity="center_vertical"
         android:paddingLeft="10dp"
         android:text="@string/tracking_qps_quality" />
-
-    <LinearLayout
-        android:layout_width="fill_parent"
-        android:layout_height="wrap_content"
-        android:layout_alignTop="@+id/tracking_status_label"
-        android:layout_gravity="center"
-        android:baselineAligned="false"
-        android:orientation="vertical"
-        android:paddingTop="20sp" >
-
-        <com.sap.sailing.android.tracking.app.customviews.OpenSansTextView
-            android:id="@+id/tracking_time_info_label"
-            android:layout_width="fill_parent"
-            android:layout_height="50dp"
-            android:layout_marginTop="30dp"
-            android:gravity="center_vertical"
-            android:paddingLeft="10dp"
-            android:text="@string/tracking_time" />
-
-        <com.sap.sailing.android.tracking.app.views.AutoResizeTextView
-            android:id="@+id/tracking_time_label"
-            android:layout_width="match_parent"
-            android:layout_height="110dp"
-            android:gravity="center"
-            android:text="00:00:00"
-            android:paddingLeft="10dp"
-            android:paddingRight="10dp"
-            android:textSize="128sp" />
-    </LinearLayout>
 
     <!-- Separators -->
 
@@ -111,32 +71,25 @@
         android:layout_height="1dp"
         android:layout_below="@id/tracking_status_label"
         android:background="@android:color/darker_gray" />
-
+    
     <View
+        android:id="@+id/white_bar"
         android:layout_width="fill_parent"
         android:layout_height="1dp"
-        android:layout_below="@id/qps_quality"
+        android:layout_alignParentLeft="true"
+        android:layout_alignTop="@+id/tracking_time_info_label"
         android:background="@android:color/darker_gray" />
-    
-        <RelativeLayout
+
+    <RelativeLayout
         android:id="@+id/start_tracking_box"
         android:layout_width="fill_parent"
-        android:layout_height="100dp"
+        android:layout_height="60dp"
         android:layout_above="@id/bottomLayout"
         android:background="@color/gray" >
 
-        <View
-            android:id="@+id/white_bar"
+        <com.sap.sailing.android.tracking.app.customviews.OpenSansButton
+            android:id="@+id/stop_tracking"
             android:layout_width="fill_parent"
-            android:layout_height="1dp"
-            android:layout_alignParentLeft="true"
-            android:layout_alignParentTop="true"
-            android:background="@color/white_transparent" />
-        
-        
-    <com.sap.sailing.android.tracking.app.customviews.OpenSansButton
-        android:id="@+id/stop_tracking"
-        android:layout_width="fill_parent"
             android:layout_height="fill_parent"
             android:layout_margin="10dp"
             android:layout_marginLeft="4dp"
@@ -145,17 +98,16 @@
             android:padding="10dp"
             android:text="@string/stop_tracking"
             android:textAllCaps="true"
-            android:textStyle="bold"/>
-
+            android:textStyle="bold" />
     </RelativeLayout>
-    
+
     <RelativeLayout
         android:id="@+id/bottomLayout"
         android:layout_width="match_parent"
         android:layout_height="40dp"
-        android:background="@color/darker_gray"
         android:layout_alignParentBottom="true"
-        android:layout_alignParentLeft="true" >
+        android:layout_alignParentLeft="true"
+        android:background="@color/darker_gray" >
 
         <com.sap.sailing.android.tracking.app.customviews.OpenSansTextView
             android:layout_width="wrap_content"
@@ -165,5 +117,46 @@
             android:gravity="center"
             android:textColor="@color/white" />
     </RelativeLayout>
+
+    <com.sap.sailing.android.tracking.app.customviews.OpenSansTextView
+        android:id="@+id/tracking_time_info_label"
+        android:layout_width="fill_parent"
+        android:layout_height="40dp"
+        android:layout_alignParentLeft="true"
+        android:layout_below="@+id/tracking_time"
+        android:gravity="center_vertical"
+        android:paddingLeft="10dp"
+        android:text="@string/tracking_time" />
+
+    <com.sap.sailing.android.tracking.app.views.AutoResizeTextView
+        android:id="@+id/tracking_time_label"
+        android:layout_width="match_parent"
+        android:layout_height="40dp"
+        android:layout_alignBaseline="@+id/tracking_time_info_label"
+        android:layout_alignBottom="@+id/tracking_time_info_label"
+        android:layout_alignParentLeft="true"
+        android:gravity="right"
+        android:paddingLeft="10dp"
+        android:paddingRight="10dp"
+        android:text="00:00:00" />
+
+    <com.sap.sailing.android.tracking.app.views.SignalQualityIndicatorView
+        android:id="@+id/qps_quality_indicator"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_alignBaseline="@+id/tracking_time"
+        android:layout_alignBottom="@+id/tracking_time"
+        android:layout_alignParentRight="true"
+        android:contentDescription="@string/signal_quality_indicator_view_description"
+        android:focusable="true"
+        android:paddingRight="10dp"
+        app:signalQuality="none" />
+
+    <View
+        android:layout_width="fill_parent"
+        android:layout_height="1dp"
+        android:layout_above="@+id/start_tracking_box"
+        android:layout_alignParentLeft="true"
+        android:background="@color/white_transparent" />
 
 </RelativeLayout>

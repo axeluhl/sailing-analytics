@@ -15,7 +15,6 @@ import android.content.Intent;
 import android.database.Cursor;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
-import android.graphics.Typeface;
 import android.graphics.drawable.Drawable;
 import android.net.Uri;
 import android.os.AsyncTask;
@@ -23,9 +22,6 @@ import android.os.Bundle;
 import android.os.Environment;
 import android.provider.BaseColumns;
 import android.support.v7.widget.Toolbar;
-import android.text.Spannable;
-import android.text.SpannableString;
-import android.text.style.StyleSpan;
 import android.util.Log;
 import android.view.Menu;
 import android.view.MenuInflater;
@@ -35,7 +31,6 @@ import android.widget.ImageView;
 import android.widget.LinearLayout;
 import android.widget.TextView;
 
-import com.android.volley.Request.Method;
 import com.android.volley.Response.ErrorListener;
 import com.android.volley.Response.Listener;
 import com.android.volley.VolleyError;
@@ -95,15 +90,13 @@ public class RegattaActivity extends BaseActivity {
             toolbar.setNavigationIcon(R.drawable.sap_logo_64_sq);
             toolbar.setPadding(20, 0, 0, 0);
             getSupportActionBar().setTitle(leaderboardName);
-            Spannable subtitle = new SpannableString("Registered for: " + eventName);
-            StyleSpan styleBold = new StyleSpan(Typeface.BOLD);
-            subtitle.setSpan(styleBold, 16, 20, Spannable.SPAN_EXCLUSIVE_EXCLUSIVE);
-            getSupportActionBar().setSubtitle(subtitle);
+            getSupportActionBar().setSubtitle(eventName);
         }
-
-        replaceFragment(R.id.content_frame, new RegattaFragment());
+        
+        replaceFragment(R.id.content_frame, new RegattaFragment());	
+        
     }
-    
+
     @Override
     public boolean onCreateOptionsMenu(Menu menu) {
         MenuInflater inflater = getMenuInflater();
