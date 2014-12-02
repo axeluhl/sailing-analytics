@@ -101,7 +101,7 @@ public class DomainFactoryImpl implements DomainFactory {
             Calendar calendar = Calendar.getInstance();
             result = new RegattaImpl(raceLogStore, RegattaImpl.getDefaultName(
                     "ST Regatta " + calendar.get(Calendar.YEAR) + " for race " + raceID, regattaBoatClass.getName()),
-                    regattaBoatClass, trackedRegattaRegistry, getBaseDomainFactory().createScoringScheme(
+                    regattaBoatClass, /*startDate*/ null, /*endDate*/ null, trackedRegattaRegistry, getBaseDomainFactory().createScoringScheme(
                             ScoringSchemeType.LOW_POINT), raceID, null);
             logger.info("Created regatta "+result.getName()+" ("+result.hashCode()+")");
             raceIDToRegattaCache.put(raceID, result);

@@ -21,6 +21,8 @@ public class RegattaDTO extends NamedDTO {
      * May be <code>null</code> in case the boat class is not known
      */
     public BoatClassDTO boatClass;
+    public Date startDate;
+    public Date endDate;
     public List<RaceWithCompetitorsDTO> races;
     public List<SeriesDTO> series;
     public ScoringSchemeType scoringScheme;

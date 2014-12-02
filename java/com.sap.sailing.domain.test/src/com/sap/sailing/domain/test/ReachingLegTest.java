@@ -86,7 +86,8 @@ public class ReachingLegTest extends TrackBasedTest {
     protected DynamicTrackedRaceImpl createTrackedRace(String regattaName, String raceName, String boatClassName,
             Iterable<Competitor> competitors, TimePoint timePointForFixes) {
         BoatClassImpl boatClass = new BoatClassImpl(boatClassName, /* typicallyStartsUpwind */ true);
-        Regatta regatta = new RegattaImpl(EmptyRaceLogStore.INSTANCE, RegattaImpl.getDefaultName(regattaName, boatClass.getName()), boatClass, /* trackedRegattaRegistry */ null,
+        Regatta regatta = new RegattaImpl(EmptyRaceLogStore.INSTANCE, RegattaImpl.getDefaultName(regattaName, boatClass.getName()),
+                boatClass, /*startDate*/ null, /*endDate*/ null, /* trackedRegattaRegistry */ null,
                 DomainFactory.INSTANCE.createScoringScheme(ScoringSchemeType.LOW_POINT), "123", null);
         TrackedRegatta trackedRegatta = new DynamicTrackedRegattaImpl(regatta);
         List<Waypoint> waypoints = new ArrayList<Waypoint>();
