@@ -19,6 +19,7 @@ package com.sap.sailing.android.tracking.app.views;
  */
 
 import android.content.Context;
+import android.graphics.Typeface;
 import android.text.Layout.Alignment;
 import android.text.StaticLayout;
 import android.text.TextPaint;
@@ -85,6 +86,7 @@ public class AutoResizeTextView extends TextView {
 	// Default constructor override
 	public AutoResizeTextView(Context context, AttributeSet attrs, int defStyle) {
 		super(context, attrs, defStyle);
+		setTypeface(Typeface.createFromAsset(getContext().getAssets(), "fonts/OpenSans-Regular.ttf"));
 		mTextSize = getTextSize();
 	}
 

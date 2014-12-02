@@ -33,7 +33,7 @@
                 android:paddingLeft="@dimen/activity_horizontal_margin"
                 android:src="@drawable/ic_menu_camera" />
 
-            <TextView
+            <com.sap.sailing.android.tracking.app.customviews.OpenSansTextView
                 android:id="@+id/add_photo_text"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
@@ -55,7 +55,7 @@
             android:orientation="horizontal"
             android:padding="10dp" >
 
-            <TextView
+            <com.sap.sailing.android.tracking.app.customviews.OpenSansTextView
                 android:id="@+id/competitor_name"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
@@ -78,7 +78,7 @@
                 android:src="@drawable/ar"
                 android:textColor="@color/white" />
 
-            <TextView
+            <com.sap.sailing.android.tracking.app.customviews.OpenSansTextView
                 android:id="@+id/sail_id"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
@@ -124,8 +124,8 @@
             android:layout_alignParentTop="true"
             android:background="@color/sap_yellow" />
     </RelativeLayout>
-    
-      <RelativeLayout
+
+    <RelativeLayout
         android:id="@+id/thank_you_layout"
         android:layout_width="match_parent"
         android:layout_height="fill_parent"
@@ -134,10 +134,10 @@
         android:baselineAligned="false"
         android:measureWithLargestChild="false"
         android:orientation="horizontal"
-        android:visibility="invisible"
-        android:padding="10dp" >
+        android:padding="10dp"
+        android:visibility="invisible" >
 
-        <TextView
+        <com.sap.sailing.android.tracking.app.customviews.OpenSansTextView
             android:id="@+id/thank_you_note"
             android:layout_width="fill_parent"
             android:layout_height="wrap_content"
@@ -146,7 +146,6 @@
             android:text="@string/thank_you_you_successfully_participated"
             android:textColor="@color/white"
             android:textStyle="bold" />
-
     </RelativeLayout>
 
     <RelativeLayout
@@ -160,7 +159,7 @@
         android:orientation="horizontal"
         android:padding="10dp" >
 
-        <TextView
+        <com.sap.sailing.android.tracking.app.customviews.OpenSansTextView
             android:id="@+id/regatta_starts_in"
             android:layout_width="fill_parent"
             android:layout_height="wrap_content"
@@ -194,7 +193,7 @@
                 android:orientation="vertical"
                 android:padding="5dp" >
 
-                <TextView
+                <com.sap.sailing.android.tracking.app.customviews.OpenSansTextView
                     android:id="@+id/starts_in_days"
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
@@ -202,7 +201,7 @@
                     android:textColor="@color/white"
                     android:textSize="40sp" />
 
-                <TextView
+                <com.sap.sailing.android.tracking.app.customviews.OpenSansTextView
                     android:id="@+id/starts_in_days_label"
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
@@ -224,7 +223,7 @@
                 android:orientation="vertical"
                 android:padding="5dp" >
 
-                <TextView
+                <com.sap.sailing.android.tracking.app.customviews.OpenSansTextView
                     android:id="@+id/starts_in_hours"
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
@@ -232,7 +231,7 @@
                     android:textColor="@color/white"
                     android:textSize="40sp" />
 
-                <TextView
+                <com.sap.sailing.android.tracking.app.customviews.OpenSansTextView
                     android:id="@+id/starts_in_hours_label"
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
@@ -254,7 +253,7 @@
                 android:orientation="vertical"
                 android:padding="5dp" >
 
-                <TextView
+                <com.sap.sailing.android.tracking.app.customviews.OpenSansTextView
                     android:id="@+id/starts_in_minutes"
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
@@ -262,7 +261,7 @@
                     android:textColor="@color/white"
                     android:textSize="40sp" />
 
-                <TextView
+                <com.sap.sailing.android.tracking.app.customviews.OpenSansTextView
                     android:id="@+id/starts_in_minutes_label"
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
@@ -288,7 +287,7 @@
             android:layout_alignParentTop="true"
             android:background="@color/white_transparent" />
 
-        <Button
+        <com.sap.sailing.android.tracking.app.customviews.OpenSansButton
             android:id="@+id/start_tracking"
             android:layout_width="fill_parent"
             android:layout_height="fill_parent"
@@ -301,16 +300,16 @@
             android:textAllCaps="true"
             android:textStyle="bold" />
     </RelativeLayout>
-    
+
     <RelativeLayout
         android:id="@+id/bottomLayout"
         android:layout_width="match_parent"
         android:layout_height="40dp"
-        android:background="@color/darker_gray"
         android:layout_alignParentBottom="true"
-        android:layout_alignParentLeft="true" >
+        android:layout_alignParentLeft="true"
+        android:background="@color/darker_gray" >
 
-        <TextView
+        <com.sap.sailing.android.tracking.app.customviews.OpenSansTextView
             android:id="@+id/bottom_announcement"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"

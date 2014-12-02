@@ -26,12 +26,17 @@ import com.sap.sailing.android.tracking.app.R;
 import com.sap.sailing.android.tracking.app.services.TrackingService;
 import com.sap.sailing.android.tracking.app.services.TrackingService.GPSQuality;
 import com.sap.sailing.android.tracking.app.services.TransmittingService.APIConnectivity;
+import com.sap.sailing.android.tracking.app.ui.activities.TrackingActivity;
 import com.sap.sailing.android.tracking.app.utils.AppPreferences;
 import com.sap.sailing.android.tracking.app.views.AutoResizeTextView;
 import com.sap.sailing.android.tracking.app.views.SignalQualityIndicatorView;
 
 public class TrackingFragment extends BaseFragment implements OnClickListener {
 
+	static final String SIS_MODE = "instanceStateMode";
+	static final String SIS_STATUS = "instanceStateStatus";
+	static final String SIS_GPS_QUALITY = "instanceStateGpsQuality";
+	
 	private TimerRunnable timer;
 	private AppPreferences prefs;
 	private long lastGPSQualityUpdate;
@@ -49,7 +54,10 @@ public class TrackingFragment extends BaseFragment implements OnClickListener {
 		stopTracking.setOnClickListener(this);
 	
 		prefs = new AppPreferences(getActivity());
-		prefs.setTrackingTimerStarted(System.currentTimeMillis());
+		if (prefs.getTrackingTimerStarted() == 0)
+		{
+			prefs.setTrackingTimerStarted(System.currentTimeMillis());	
+		}
 		
 		return view;
 	}
@@ -79,9 +87,38 @@ public class TrackingFragment extends BaseFragment implements OnClickListener {
 	}
 	
 	@Override
-	public void onDestroy() {
-		super.onDestroy();
-		timer.stop();
+	public void onActivityCreated(Bundle savedInstanceState) {
+		System.out.println("ON ACTIVITY CREATED");
+		super.onActivityCreated(savedInstanceState);
+		if (savedInstanceState != null)
+		{
+			System.out.println("NOT NULL");
+			TextView modeText = (TextView)getActivity().findViewById(R.id.mode);
+			TextView statusText = (TextView)getActivity().findViewById(R.id.tracking_status);
+			SignalQualityIndicatorView qualityIndicator = (SignalQualityIndicatorView)getActivity().findViewById(R.id.qps_quality_indicator);
+			
+			modeText.setText(savedInstanceState.getString(SIS_MODE));
+			statusText.setText(savedInstanceState.getString(SIS_STATUS));
+			qualityIndicator.setSignalQuality(savedInstanceState.getInt(SIS_GPS_QUALITY));
+		}
+		else
+		{
+			System.out.println("NULL");
+		}
+	}
+	
+	@Override
+	public void onSaveInstanceState(Bundle outState) {
+		System.out.println("ON SAVE INSTANCE STATE");
+		super.onSaveInstanceState(outState);
+		
+		TextView modeText = (TextView)getActivity().findViewById(R.id.mode);
+		TextView statusText = (TextView)getActivity().findViewById(R.id.tracking_status);
+		SignalQualityIndicatorView qualityIndicator = (SignalQualityIndicatorView)getActivity().findViewById(R.id.qps_quality_indicator);
+		
+		outState.putString(SIS_MODE, modeText.getText().toString());
+		outState.putString(SIS_STATUS, statusText.getText().toString());
+		outState.putInt(SIS_GPS_QUALITY, qualityIndicator.getSignalQuality());
 	}
 	
 	/**
@@ -209,6 +246,8 @@ public class TrackingFragment extends BaseFragment implements OnClickListener {
 	}
 	
 	private void stopTracking() {
+		prefs.setTrackingTimerStarted(0);
+		
 		Intent intent = new Intent(getActivity(), TrackingService.class);
 		intent.setAction(getString(R.string.tracking_service_stop));
 		getActivity().startService(intent);

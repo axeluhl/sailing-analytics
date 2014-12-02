@@ -113,4 +113,24 @@ public class AppPreferences {
     {
     	return preferences.getLong(context.getString(R.string.preference_tracking_timer_started), 0);
     }
+    
+    public void setTrackerIsTracking(boolean isTracking)
+    {
+    	preferences.edit().putBoolean(context.getString(R.string.preference_tracker_is_tracking), isTracking).commit();
+    }
+    
+    public boolean getTrackerIsTracking()
+    {
+    	return preferences.getBoolean(context.getString(R.string.preference_tracker_is_tracking), false);
+    }
+    
+    public void setTrackerIsTrackingEventId(int eventId)
+    {
+    	preferences.edit().putInt(context.getString(R.string.preference_tracker_is_tracking_event_id), eventId).commit();
+    }
+    
+    public Integer getTrackerIsTrackingEventId()
+    {
+    	return preferences.getInt(context.getString(R.string.preference_tracker_is_tracking_event_id), -1);
+    }
 }
