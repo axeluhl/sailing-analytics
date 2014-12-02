@@ -2,52 +2,43 @@
 	xmlns:g="urn:import:com.google.gwt.user.client.ui">
 	<ui:style>
 
- 		.slider {
-		}
-	
-		.slick-prev:before {
-			color: #dddddd;
-			font-size: 30px;
-			height: 30px;
-			width: 30px;
-			left: 0px;
-		}
- 
+ 	.slider {
+			width: 100%;
+    }
+
 		.slick-prev {
-			left: 0px;
-			z-index: 1;
+			left: 20px;
+			z-index:1;
+			height: 60px;
+			width: 60px;
+
 		}
-
-		.slick-next {
-			right: 0px;
-			z-index: 1;
+		.slick-prev:before {
+			color: #000000;
+			font-size: 60px;
+			left: -60px;
 		} 
-
+		.slick-next {
+			right: 20px;
+			z-index:1;
+			height: 60px;
+			width: 60px;
+		} 
 		.slick-next:before {
-			color: #dddddd;
-			font-size: 30px;
-			height: 30px;
-			width: 30px;
-			right: 0px;
+			color: #000000;
+			font-size: 60px;
+			left: -60px;
 		} 
 
     </ui:style>
 
 	<g:HTMLPanel styleName="{style.slider}" ui:field="sliderMainUi">
 
-	    <button 
-	        ui:field="slickPrev" 
-	        class="slick-prev {style.slick-prev}"
-			data-role="none" 
-			type="button" 
-			style="display: block;">Previous</button>
-	    
-		<button 
-		    ui:field="slickNext" 
-		    class="slick-next {style.slick-next}"
-			data-role="none" 
-			type="button" 
-			style="display: block;">Next</button>
+		<button ui:field="slickPrev" class="slick-prev {style.slick-prev}"
+			data-role="none" type="button" style="display: block;">Previous</button>
+		<button ui:field="slickNext" class="slick-next {style.slick-next}"
+			data-role="none" type="button" style="display: block;">Next</button>
+
 
 	</g:HTMLPanel>
 

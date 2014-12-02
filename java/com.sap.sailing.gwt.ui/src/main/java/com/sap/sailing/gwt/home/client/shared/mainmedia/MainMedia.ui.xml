@@ -24,10 +24,7 @@
    </div>
    <div class="{res.mainCss.grid}">
     <div class="{res.mediaCss.small12} {res.mediaCss.columns}">
-        
-     <div class="{local_res.css.media_swipecontainer}">
         <sse:carousel.ImageCarousel ui:field="imageCarousel" /> 
-     </div>
     </div>
    </div>
   </div>

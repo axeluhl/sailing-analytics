@@ -7,41 +7,42 @@
         .slider > ul > li > button:before {
             font-size: 15px;
         }
+
         .slider img {
             margin: 10px;
         }
-		.slider slick-track {
-	    }
+	
 
 	
-		.slider  button {
-			height: 40px;
-			width: 40px;
-			right: -40px
-		} 
-		.slick-prev:before {
-			color: #aaaaaa;
-			font-size: 30px;
-			height: 30px;
-			width: 30px;
-			left: -50px;
-		} 
-		.slick-prev {
-			left: -50px;
-		}
- 
-		
+ 	.slider {
+			width: 100%;
+    }
 
+		.slick-prev {
+			left: 20px;
+			z-index:1;
+			height: 60px;
+			width: 60px;
+
+		}
+		.slick-prev:before {
+			color: #000000;
+			font-size: 60px;
+			left: -60px;
+		} 
 		.slick-next {
-			right: -50px;
+			right: 20px;
+			z-index:1;
+			height: 60px;
+			width: 60px;
 		} 
 		.slick-next:before {
-			color: #aaaaaa;
-			font-size: 30px;
-			height: 30px;
-			width: 30px;
-			right: -50px;
+			color: #000000;
+			font-size: 60px;
+			left: -60px;
 		} 
+
+
 
     </ui:style>
     
