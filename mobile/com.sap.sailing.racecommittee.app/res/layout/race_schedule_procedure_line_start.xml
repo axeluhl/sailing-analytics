@@ -4,11 +4,12 @@
     android:layout_height="match_parent"
     android:orientation="vertical" >
 
-    <TextView
+    <Button
         android:id="@+id/header"
-        android:layout_width="match_parent"
+        style="?android:attr/borderlessButtonStyle"
+        android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:gravity="center"
+        android:layout_centerHorizontal="true"
         android:text="@string/start_procedure_line_start"
         android:textAppearance="?android:attr/textAppearanceLarge" />
 
