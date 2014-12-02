@@ -124,6 +124,7 @@
     <string name="wind_speed_direction_not_a_valid_number">Die Windgeschwindigkeit oder -richtung ist keine valide Zahl. Bitte korrigieren Sie den Wert.</string>
     <string name="wind_location_or_fields_not_valid">Die eingegebene Position, Windgeschwindigkeit oder -richtung ist leer. Bitte korrigieren Sie die Werte.</string>
     <string name="waiting_for_gps">Warte auf GPS Signal&#8230;</string>
+    <string name="manual_entry">Manuelle Positionseingabe</string>
     <string name="found_gps_position">GPS basierende Positionierung</string>
     <string name="set_position_manually">Manuelle Eingabe</string>
     <string name="searchPosition">Standortsuche &#8230;</string>

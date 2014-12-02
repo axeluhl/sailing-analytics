@@ -82,7 +82,7 @@ public class WindFragment extends LoggableFragment implements CompassDirectionLi
     private Button sendButton;
     private Button btn_position_set;
     private Button btn_set_manual_position;
-    private TextView waitingForGpsTextView;
+    private TextView txt_waitingForGPS;
     
     private LinearLayout ll_topContainer;
     private GoogleMap windMap;
@@ -110,7 +110,7 @@ public class WindFragment extends LoggableFragment implements CompassDirectionLi
         windSpeedEditText = (EditText) windFragmentView.findViewById(R.id.editTextWindSpeed);
         windSpeedSeekBar = (SeekBar) windFragmentView.findViewById(R.id.seekbar_wind_speed);
         sendButton = (Button) windFragmentView.findViewById(R.id.btn_wind_send);
-        waitingForGpsTextView = (TextView) windFragmentView.findViewById(R.id.textWaitingForGPS);
+        txt_waitingForGPS = (TextView) windFragmentView.findViewById(R.id.txt_waitingForGPS);
         ll_topContainer = (LinearLayout) windFragmentView.findViewById(R.id.ll_topContainer);
         rl_bottomContainer = (RelativeLayout) windFragmentView.findViewById(R.id.rl_bottomContainer);
         rl_gpsOverlay = (RelativeLayout) windFragmentView.findViewById(R.id.rl_gpsOverlay);
@@ -148,10 +148,12 @@ public class WindFragment extends LoggableFragment implements CompassDirectionLi
             public void onStopTrackingTouch(SeekBar seekBar) {}
         });
         
+        // buttons
         sendButton.setOnClickListener(this);
         sendButton.setEnabled(false);
         btn_set_manual_position.setOnClickListener(this);
         btn_position_set.setEnabled(false);
+        btn_position_set.setOnClickListener(this);
         
         et_location.setOnEditorActionListener(new TextView.OnEditorActionListener() {
 
@@ -197,6 +199,12 @@ public class WindFragment extends LoggableFragment implements CompassDirectionLi
         double enteredWindBearingFrom = preferences.getWindBearingFromDirection();
         compassView.setDirection((float)enteredWindBearingFrom);
         windBearingEditText.setText(bearingFormat.format(enteredWindBearingFrom));
+        
+        LatLng enteredWindLocation = preferences.getWindPosition();
+        if ( enteredWindLocation.latitude != 0 && enteredWindLocation.longitude != 0 ){
+        	moveMarker(enteredWindLocation);
+        	centerMap(enteredWindLocation);
+        }
         
         windMap.setOnMapClickListener(new OnMapClickListener() {
 			
@@ -261,12 +269,22 @@ public class WindFragment extends LoggableFragment implements CompassDirectionLi
     
 	@Override
 	public void onClick(View v) {
-		int id = v.getId();
-		if  (id == sendButton.getId()){
-			onSendClick();
-
-		} else if (id == btn_set_manual_position.getId()){
-			onSetPositionClick();
+		switch ( v.getId() ){
+			case R.id.btn_wind_send:{
+				onSendClick();
+				break;
+			}
+			case R.id.btn_set_manual_position:{
+				onSetPositionClick();
+				break; 
+			}
+			case R.id.btn_position_set:{
+				onPositionSetClick();
+				break; 
+			}
+			default:{
+				break;
+			}
 		}
 	}
     
@@ -278,12 +296,8 @@ public class WindFragment extends LoggableFragment implements CompassDirectionLi
                 Toast.makeText(getActivity(), R.string.wind_location_or_fields_not_valid, Toast.LENGTH_LONG).show();
                 return;
             }
-            
             saveEntriesInPreferences(wind);
             ((RacingActivity)getActivity()).onWindEntered(wind);
-
-            
-            
         } catch (NumberFormatException nfe) {
             Toast.makeText(getActivity(), R.string.wind_speed_direction_not_a_valid_number, Toast.LENGTH_LONG).show();
             ExLog.i(getActivity(), this.getClass().getCanonicalName(), nfe.getMessage());
@@ -294,11 +308,36 @@ public class WindFragment extends LoggableFragment implements CompassDirectionLi
 		int shortAnimationDuration = getResources().getInteger(
                 android.R.integer.config_mediumAnimTime);
 		bigMap = true;
+		
+		txt_waitingForGPS.setText(R.string.manual_entry);
+		txt_waitingForGPS.setTextColor(Color.GRAY);
+			
 		hideView(ll_topContainer, shortAnimationDuration);
 		hideView(rl_gpsOverlay, shortAnimationDuration);
 		showView(et_location, shortAnimationDuration);
 		sendButton.setVisibility(View.GONE);
 		btn_position_set.setVisibility(View.VISIBLE);
+	}
+	
+	
+	private void onPositionSetClick(){
+		int shortAnimationDuration = getResources().getInteger(
+                android.R.integer.config_mediumAnimTime);
+		bigMap = false;
+		
+		currentLocation = new Location("set");
+		currentLocation.setLatitude(windMarker.getPosition().latitude);
+		currentLocation.setLongitude(windMarker.getPosition().longitude);
+		txt_waitingForGPS.setTextColor(Color.GRAY);
+        sendButton.setEnabled(true);
+		
+		showView(ll_topContainer, shortAnimationDuration);
+		showView(rl_gpsOverlay, shortAnimationDuration);
+		hideView(et_location, shortAnimationDuration);
+		sendButton.setVisibility(View.VISIBLE);
+		btn_position_set.setVisibility(View.GONE);
+		
+		centerMap(currentLocation.getLatitude(), currentLocation.getLongitude());
 	}
 	
 	private class GeoCodeTask extends AsyncTask<String, String, JSONObject> {
@@ -354,20 +393,28 @@ public class WindFragment extends LoggableFragment implements CompassDirectionLi
 		windMap.animateCamera(czoom);
 		moveMarker(new LatLng(lat,lng));
 	}
-
 	private void centerMap(double lat, double lng){
-		centerMap(lat,lng,15);
+		centerMap(lat,lng,12);
 	}		
+	private void centerMap(LatLng latLng){
+		centerMap(latLng.latitude,latLng.longitude,12);
+	}
+	
+	
 	
 	private void moveMarker(LatLng latlng){
 		if ( windMarker != null ){
 			windMarker.remove();
 		}
+		
 		MarkerOptions mOptions = new MarkerOptions();
 		mOptions.position(latlng);
-		
 		windMarker = windMap.addMarker(mOptions);
 		
+		AppPreferences preferences = AppPreferences.on(getActivity().getApplicationContext());
+		preferences.setWindPosition(latlng);
+		
+		btn_position_set.setEnabled(true);
 	}
 	
 	private void showBigMap(){
@@ -409,8 +456,8 @@ public class WindFragment extends LoggableFragment implements CompassDirectionLi
 	public void onLocationChanged(Location location) {
 		currentLocation = location;
 		centerMap(location.getLatitude(), location.getLongitude());
-		waitingForGpsTextView.setTextColor(Color.GRAY);
-        waitingForGpsTextView.setText(R.string.found_gps_position);
+		txt_waitingForGPS.setTextColor(Color.GRAY);
+        txt_waitingForGPS.setText(R.string.found_gps_position);
         rl_gpsOverlay.setVisibility(View.GONE);
         sendButton.setEnabled(true);
 	}
@@ -467,6 +514,4 @@ public class WindFragment extends LoggableFragment implements CompassDirectionLi
         preferences.setWindBearingFromDirection(wind.getBearing().reverse().getDegrees());
         preferences.setWindSpeed(wind.getKnots());
     }
-
-
 }
