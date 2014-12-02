@@ -160,6 +160,13 @@ public class TrackingActivity extends BaseActivity implements GPSQualityListener
 		trackingFragment.setAPIConnectivityStatus(apiConnectivity);
     }
     
+    @Override
+    public void setUnsentGPSFixesCount(int count) {
+    	TrackingFragment trackingFragment = (TrackingFragment) getSupportFragmentManager()
+				.findFragmentById(R.id.content_frame);
+		trackingFragment.setUnsentGPSFixesCount(count);
+    }
+    
     private void startTrackingService(int eventId)
     {
     	Intent intent = new Intent(this, TrackingService.class);

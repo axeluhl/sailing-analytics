@@ -8,6 +8,7 @@ import org.json.JSONException;
 import org.json.JSONObject;
 
 import android.app.Service;
+import android.content.ContentProvider;
 import android.content.ContentUris;
 import android.content.ContentValues;
 import android.content.Context;
@@ -261,6 +262,7 @@ public class TransmittingService extends Service {
 		}
 		
 		sendFixesToAPI(null);
+		reportUnsentGPSFixesCount(getNumberOfUnsentGPSFixes());
 	}
 	
 	private boolean getTrackingServiceIsCurrentlyTracking()
@@ -362,6 +364,54 @@ public class TransmittingService extends Service {
 		}
 	}
 	
+	/**
+	 * Get a count of ALL unsent GPS-fixes.
+	 * 
+	 * This method is only interested in the GPS-fixes for the currently tracked event,
+	 * and needs to find out the id of that event first.
+	 * @return
+	 */
+	private int getNumberOfUnsentGPSFixes()
+	{
+		String selectionClause = SensorGps.GPS_SYNCED + " = 0";
+		String sortAndLimitClause = SensorGps.GPS_TIME + " DESC LIMIT 1";
+	
+		int eventId = -1;
+
+		Cursor cur = getContentResolver().query(
+				EventGpsFixesJoined.CONTENT_URI,
+				new String[] { "events._id as _eid" }, 
+				selectionClause, 
+				null,
+				sortAndLimitClause);
+		
+		while (cur.moveToNext()) {
+			eventId = cur.getInt(0);
+		}
+		
+		cur.close();
+	
+		if (eventId == -1)
+		{
+			if (BuildConfig.DEBUG)
+			{
+				ExLog.i(this, TAG, "no event id, reporting 0 gps-fixes.");
+			}
+			return 0;
+		}
+		
+		String selectionClause2 = "events._id = " + eventId;
+		Cursor countCursor = getContentResolver().query(
+				EventGpsFixesJoined.CONTENT_URI,
+				new String[] { "count(*) AS count" }, selectionClause2, null, null);
+
+		countCursor.moveToFirst();
+		int count = countCursor.getInt(0);
+		countCursor.close();
+
+		return count;
+	}
+	
 	private float getBatteryPercentage()
 	{
 		IntentFilter ifilter = new IntentFilter(Intent.ACTION_BATTERY_CHANGED);
@@ -419,6 +469,18 @@ public class TransmittingService extends Service {
     	if (apiConnectivityListener != null)
     	{
     		apiConnectivityListener.apiConnectivityUpdated( apiConnectivity );
+    	}
+    }
+    
+    /**
+     * Report the number of currently unsent GPS-fixes
+     * @param unsentGPSFixesCount
+     */
+    private void reportUnsentGPSFixesCount( int unsentGPSFixesCount )
+    {
+    	if (apiConnectivityListener != null)
+    	{
+    		apiConnectivityListener.setUnsentGPSFixesCount(unsentGPSFixesCount);
     	}
     }
 	
@@ -627,6 +689,7 @@ public class TransmittingService extends Service {
 	
 	public interface APIConnectivityListener {
 		public void apiConnectivityUpdated( APIConnectivity apiConnectivity );
+		public void setUnsentGPSFixesCount( int count );
 	}
 	
 }

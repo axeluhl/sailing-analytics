@@ -288,6 +288,16 @@ public class TrackingFragment extends BaseFragment implements OnClickListener {
 		lastGPSQualityUpdate = System.currentTimeMillis();
 	}
 	
+	public void setUnsentGPSFixesCount(final int count)
+	{
+		getActivity().runOnUiThread(new Runnable() {
+			@Override
+			public void run() {
+				TextView unsentGpsFixesTextView = (TextView)getActivity().findViewById(R.id.tracking_unsent_fixes);
+				unsentGpsFixesTextView.setText(String.valueOf(count));		
+			}});
+	}
+	
 	private class TimerRunnable implements Runnable {
 		
 		public Thread t;
