@@ -16,4 +16,5 @@
     [[UIBarButtonItem appearanceWhenContainedIn:[UINavigationBar class], nil]setTitleTextAttributes:@{NSFontAttributeName:[UIFont fontWithName:@"OpenSans" size:17]} forState:UIControlStateNormal];
     [[AppearanceFontButton appearance] setTitleFont:[UIFont fontWithName:@"OpenSans-Bold" size:15]];
 }
+
 @end

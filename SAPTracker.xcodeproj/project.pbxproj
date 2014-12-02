@@ -280,10 +280,10 @@
 		7F3AA7C81A1CD7D700F8861F /* SendGPSFixController.swift in Sources */ = {isa = PBXBuildFile; fileRef = 7F3AA7C71A1CD7D700F8861F /* SendGPSFixController.swift */; };
 		7F44095B19F65B5B0021BF22 /* CoreData.xcdatamodeld in Sources */ = {isa = PBXBuildFile; fileRef = 7F44095919F65B5B0021BF22 /* CoreData.xcdatamodeld */; };
 		7F4D2F541A1C8EE50038E7D1 /* Images.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = 7F4D2F531A1C8EE50038E7D1 /* Images.xcassets */; };
+		7F72C73A1A2DC51900F48EE8 /* SplashScreenDummy.swift in Sources */ = {isa = PBXBuildFile; fileRef = 7F72C7391A2DC51900F48EE8 /* SplashScreenDummy.swift */; };
 		7F83F15619F154F000C53328 /* AppDelegate.swift in Sources */ = {isa = PBXBuildFile; fileRef = 7F83F15519F154F000C53328 /* AppDelegate.swift */; };
 		7F83F15819F154F000C53328 /* HomeViewController.swift in Sources */ = {isa = PBXBuildFile; fileRef = 7F83F15719F154F000C53328 /* HomeViewController.swift */; };
 		7F83F15B19F154F000C53328 /* Main.storyboard in Resources */ = {isa = PBXBuildFile; fileRef = 7F83F15919F154F000C53328 /* Main.storyboard */; };
-		7F83F16019F154F000C53328 /* LaunchScreen.xib in Resources */ = {isa = PBXBuildFile; fileRef = 7F83F15E19F154F000C53328 /* LaunchScreen.xib */; };
 		7F83F16C19F154F000C53328 /* SAPTrackerAPITests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 7F83F16B19F154F000C53328 /* SAPTrackerAPITests.swift */; };
 		7F83F17619F1574700C53328 /* CoreLocation.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 7F83F17519F1574700C53328 /* CoreLocation.framework */; };
 		7F87CAA11A2CCE8B0076C617 /* OpenSans-Bold.ttf in Resources */ = {isa = PBXBuildFile; fileRef = 7F87CA9D1A2CCE8B0076C617 /* OpenSans-Bold.ttf */; };
@@ -597,12 +597,12 @@
 		7F3AA7C71A1CD7D700F8861F /* SendGPSFixController.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = SendGPSFixController.swift; sourceTree = "<group>"; };
 		7F44095A19F65B5B0021BF22 /* CoreData.xcdatamodel */ = {isa = PBXFileReference; lastKnownFileType = wrapper.xcdatamodel; path = CoreData.xcdatamodel; sourceTree = "<group>"; };
 		7F4D2F531A1C8EE50038E7D1 /* Images.xcassets */ = {isa = PBXFileReference; lastKnownFileType = folder.assetcatalog; path = Images.xcassets; sourceTree = "<group>"; };
+		7F72C7391A2DC51900F48EE8 /* SplashScreenDummy.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = SplashScreenDummy.swift; sourceTree = "<group>"; };
 		7F83F15019F154F000C53328 /* SAPTracker.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = SAPTracker.app; sourceTree = BUILT_PRODUCTS_DIR; };
 		7F83F15419F154F000C53328 /* Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist.xml; path = Info.plist; sourceTree = "<group>"; };
 		7F83F15519F154F000C53328 /* AppDelegate.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AppDelegate.swift; sourceTree = "<group>"; };
 		7F83F15719F154F000C53328 /* HomeViewController.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = HomeViewController.swift; sourceTree = "<group>"; };
 		7F83F15A19F154F000C53328 /* Base */ = {isa = PBXFileReference; lastKnownFileType = file.storyboard; name = Base; path = Base.lproj/Main.storyboard; sourceTree = "<group>"; };
-		7F83F15F19F154F000C53328 /* Base */ = {isa = PBXFileReference; lastKnownFileType = file.xib; name = Base; path = Base.lproj/LaunchScreen.xib; sourceTree = "<group>"; };
 		7F83F16519F154F000C53328 /* SAPTrackerTests.xctest */ = {isa = PBXFileReference; explicitFileType = wrapper.cfbundle; includeInIndex = 0; path = SAPTrackerTests.xctest; sourceTree = BUILT_PRODUCTS_DIR; };
 		7F83F16A19F154F000C53328 /* Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist.xml; path = Info.plist; sourceTree = "<group>"; };
 		7F83F16B19F154F000C53328 /* SAPTrackerAPITests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SAPTrackerAPITests.swift; sourceTree = "<group>"; };
@@ -703,12 +703,12 @@
 				7F87CAA81A2CDA870076C617 /* AppearanceFontButton.h */,
 				7F87CAA91A2CDA870076C617 /* AppearanceFontButton.m */,
 				7F83F15919F154F000C53328 /* Main.storyboard */,
-				7F83F15E19F154F000C53328 /* LaunchScreen.xib */,
 				7F4D2F531A1C8EE50038E7D1 /* Images.xcassets */,
 				7F87CA9D1A2CCE8B0076C617 /* OpenSans-Bold.ttf */,
 				7F87CA9E1A2CCE8B0076C617 /* OpenSans-Light.ttf */,
 				7F87CA9F1A2CCE8B0076C617 /* OpenSans-Regular.ttf */,
 				7F87CAA01A2CCE8B0076C617 /* OpenSans-Semibold.ttf */,
+				7F72C7391A2DC51900F48EE8 /* SplashScreenDummy.swift */,
 			);
 			name = View;
 			sourceTree = "<group>";
@@ -1277,7 +1277,6 @@
 				7F14A1571A13B9A6001C1ECB /* DM.png in Resources */,
 				7F14A1F51A13B9A6001C1ECB /* TM.png in Resources */,
 				7F14A1601A13B9A6001C1ECB /* ET.png in Resources */,
-				7F83F16019F154F000C53328 /* LaunchScreen.xib in Resources */,
 				7F14A20E1A13B9A6001C1ECB /* ZM.png in Resources */,
 				7F14A20B1A13B9A6001C1ECB /* YE.png in Resources */,
 				7F14A1181A13B9A6001C1ECB /* _somaliland.png in Resources */,
@@ -1502,6 +1501,7 @@
 				7F06590419F8094C0077FF95 /* DeviceUDIDManager.swift in Sources */,
 				7F3AA7C81A1CD7D700F8861F /* SendGPSFixController.swift in Sources */,
 				7FCDB6641A1636610075D7D9 /* LeaderBoard.swift in Sources */,
+				7F72C73A1A2DC51900F48EE8 /* SplashScreenDummy.swift in Sources */,
 				7FD9D3031A1236080058FEAD /* Extensions.swift in Sources */,
 				7F0658FD19F7D6700077FF95 /* ScanViewController.swift in Sources */,
 				7FCDB6651A1636610075D7D9 /* Competitor.swift in Sources */,
@@ -1536,14 +1536,6 @@
 				7F83F15A19F154F000C53328 /* Base */,
 			);
 			name = Main.storyboard;
-			sourceTree = "<group>";
-		};
-		7F83F15E19F154F000C53328 /* LaunchScreen.xib */ = {
-			isa = PBXVariantGroup;
-			children = (
-				7F83F15F19F154F000C53328 /* Base */,
-			);
-			name = LaunchScreen.xib;
 			sourceTree = "<group>";
 		};
 /* End PBXVariantGroup section */
@@ -1631,6 +1623,7 @@
 			baseConfigurationReference = EA431711E588F5A2B31A62AC /* Pods.debug.xcconfig */;
 			buildSettings = {
 				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
+				ASSETCATALOG_COMPILER_LAUNCHIMAGE_NAME = LaunchImage;
 				CODE_SIGN_IDENTITY = "iPhone Developer";
 				"CODE_SIGN_IDENTITY[sdk=iphoneos*]" = "iPhone Developer";
 				INFOPLIST_FILE = SAPTracker/Info.plist;
@@ -1648,6 +1641,7 @@
 			baseConfigurationReference = CF98F25F363113C51C7CB1F3 /* Pods.release.xcconfig */;
 			buildSettings = {
 				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
+				ASSETCATALOG_COMPILER_LAUNCHIMAGE_NAME = LaunchImage;
 				CODE_SIGN_IDENTITY = "iPhone Distribution";
 				"CODE_SIGN_IDENTITY[sdk=iphoneos*]" = "iPhone Distribution";
 				INFOPLIST_FILE = SAPTracker/Info.plist;
