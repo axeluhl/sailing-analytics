@@ -14,8 +14,8 @@ import com.sap.sailing.racecommittee.app.utils.TickListener;
 import com.sap.sailing.racecommittee.app.utils.TickSingleton;
 
 public abstract class RaceFragment extends LoggableFragment implements TickListener {
-    
-    //private static final String TAG = RaceFragment.class.getName();
+
+    // private static final String TAG = RaceFragment.class.getName();
 
     public static Bundle createArguments(ManagedRace race) {
         Bundle arguments = new Bundle();
@@ -36,7 +36,7 @@ public abstract class RaceFragment extends LoggableFragment implements TickListe
 
     protected ManagedRace managedRace;
     protected AppPreferences preferences;
-    
+
     @Override
     public void onAttach(Activity activity) {
         super.onAttach(activity);
@@ -47,14 +47,16 @@ public abstract class RaceFragment extends LoggableFragment implements TickListe
     public void onActivityCreated(Bundle savedInstanceState) {
         super.onActivityCreated(savedInstanceState);
 
-        Serializable raceId = getArguments().getSerializable(AppConstants.RACE_ID_KEY);
-        managedRace = OnlineDataManager.create(getActivity()).getDataStore().getRace(raceId);
-        if (managedRace == null) {
-            throw new IllegalStateException(
-                    String.format("Unable to obtain ManagedRace from datastore on start of race fragment."));
+        if (getArguments() != null) {
+            Serializable raceId = getArguments().getSerializable(AppConstants.RACE_ID_KEY);
+            managedRace = OnlineDataManager.create(getActivity()).getDataStore().getRace(raceId);
+            if (managedRace == null) {
+                throw new IllegalStateException(
+                        String.format("Unable to obtain ManagedRace from datastore on start of race fragment."));
+            }
         }
     }
-    
+
     @Override
     public void onStart() {
         super.onStart();
@@ -71,11 +73,11 @@ public abstract class RaceFragment extends LoggableFragment implements TickListe
     public ManagedRace getRace() {
         return managedRace;
     }
-    
+
     public RaceState getRaceState() {
         return getRace().getState();
     }
-    
+
     @Override
     public void notifyTick() {
         // see subclasses.

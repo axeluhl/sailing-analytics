@@ -8,7 +8,7 @@
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:layout_alignParentBottom="true"
-        android:text="Confirm Start Mode" />
+        android:text="@string/confirm_start_mode" />
 
     <ListView
         android:id="@+id/listMode"

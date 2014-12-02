@@ -87,8 +87,8 @@
         <item>Port</item>
         <item>Starboard</item>
         <item>Gate</item>
-        <item >Line</item>
-        <item >Offset</item>
+        <item>Line</item>
+        <item>Offset</item>
     </string-array>
 
     <string name="publish">Publish</string>
@@ -245,4 +245,15 @@
 	<string name="toggle_group_race_mode">Group Race?</string>
 	<string name="toggle_group_race_mode_off">No Group Racing</string>
 	<string name="toggle_group_race_mode_on">Group Racing</string>
+	
+	<string name="confirm_start_time">Confirm Start Time</string>
+	<string name="confirm_start_mode">Confirm Start Mode</string>
+	
+	<string name="start_procedure_change">Change Start Procedure</string>
+	<string name="start_procedure_confirm">Confirm Start Procedure</string>
+	<string name="start_procedure_line_start">Line Start</string>
+	<string name="start_procedure_gate_start">Gate Start</string>
+	<string name="start_procedure_ess">ESS</string>
+	<string name="start_procedure_simplified">Simplified</string>
+	
 </resources>

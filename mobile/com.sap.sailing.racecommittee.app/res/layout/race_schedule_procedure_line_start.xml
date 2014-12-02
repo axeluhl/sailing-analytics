@@ -9,7 +9,7 @@
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:gravity="center"
-        android:text="Line Start"
+        android:text="@string/start_procedure_line_start"
         android:textAppearance="?android:attr/textAppearanceLarge" />
 
     <LinearLayout
@@ -51,7 +51,7 @@
             android:id="@+id/confirm"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:text="Confirm Start Time" />
+            android:text="@string/confirm_start_time" />
     </LinearLayout>
 
     <android.widget.TimePicker

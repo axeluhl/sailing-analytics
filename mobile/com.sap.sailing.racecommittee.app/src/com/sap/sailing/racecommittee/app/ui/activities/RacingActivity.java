@@ -143,7 +143,8 @@ public class RacingActivity extends SessionActivity implements RaceInfoListener,
         // check if the fragment is actively shown already, otherwise show it
         if ((windFragment != null && !windFragment.isFragmentUIActive()) || windFragment == null) {
             windFragment = new WindFragment();
-            getFragmentManager().beginTransaction().setCustomAnimations(R.animator.slide_in, R.animator.slide_out)
+            getFragmentManager().beginTransaction()
+                    //.setCustomAnimations(R.animator.slide_in, R.animator.slide_out)
                     .replace(R.id.racing_view_right_container, windFragment)
                     .setTransition(FragmentTransaction.TRANSIT_FRAGMENT_FADE).addToBackStack(null).commit();
         }
@@ -241,7 +242,6 @@ public class RacingActivity extends SessionActivity implements RaceInfoListener,
         }
         CourseArea courseArea = dataManager.getDataStore().getCourseArea(courseAreaId);
         if (courseArea != null) {
-            setupActionBar(courseArea);
             loadRaces(courseArea);
         } else {
             Toast.makeText(this, getString(R.string.racing_course_area_missing), Toast.LENGTH_LONG).show();
@@ -279,14 +279,13 @@ public class RacingActivity extends SessionActivity implements RaceInfoListener,
     }
 
     public void onRaceItemClicked(ManagedRace managedRace) {
-        getSupportActionBar().setSubtitle(managedRace.getSeries().getName() + " (" + managedRace.getRaceName() + ")");
         infoFragment = new RaceInfoFragment();
         infoFragment.setArguments(RaceFragment.createArguments(managedRace));
 
-        getFragmentManager().beginTransaction().setCustomAnimations(R.animator.slide_in, R.animator.slide_out)
+        getFragmentManager().beginTransaction()
+                //.setCustomAnimations(R.animator.slide_in, R.animator.slide_out)
                 .replace(R.id.racing_view_right_container, infoFragment)
                 .setTransition(FragmentTransaction.TRANSIT_FRAGMENT_FADE).addToBackStack(null).commit();
-
     }
 
     @Override
@@ -326,14 +325,6 @@ public class RacingActivity extends SessionActivity implements RaceInfoListener,
             registerIntent.putExtra(AppConstants.RACE_ID_KEY, race.getId());
             this.startService(registerIntent);
         }
-    }
-
-    private void setupActionBar(CourseArea courseArea) {
-        RaceLogEventAuthor author = preferences.getAuthor();
-        String title = String.format(getString(R.string.racingview_header), courseArea.getName());
-        title += " (" + author.getName() + ")";
-
-        getSupportActionBar().setTitle(title);
     }
 
     @Override

@@ -60,7 +60,7 @@ public class ManagedRaceListAdapter extends ArrayAdapter<RaceListDataType> imple
     private LayoutInflater mInflater;
     private Resources mResources;
     private List<RaceListDataType> mShownViewItems;
-    
+
     private RelativeLayout panel_right;
     private RelativeLayout panel_left;
     private ImageView update_badge;
@@ -134,7 +134,7 @@ public class ManagedRaceListAdapter extends ArrayAdapter<RaceListDataType> imple
         if (days != 0) {
             dates = days + ":";
         }
-        
+
         dates += fill2((int) hrs) + ":";
         dates += fill2((int) min) + ":";
         dates += fill2((int) sec);
@@ -209,8 +209,7 @@ public class ManagedRaceListAdapter extends ArrayAdapter<RaceListDataType> imple
                     race_started.setText(String.format(mResources.getString(R.string.race_started,
                             format.format(state.getStartTime().asDate()))));
                     if (state.getFinishedTime() == null) {
-                        time
-                                .setText(getDuration(state.getStartTime().asDate(), Calendar.getInstance().getTime()));
+                        time.setText(getDuration(state.getStartTime().asDate(), Calendar.getInstance().getTime()));
                     }
                 }
                 if (state.getFinishedTime() != null) {
@@ -223,9 +222,9 @@ public class ManagedRaceListAdapter extends ArrayAdapter<RaceListDataType> imple
                     race_scheduled.setVisibility(View.GONE);
                     race_unscheduled.setVisibility(View.VISIBLE);
                 }
-//                if (race.isUpdateIndicatorVisible()) {
-//                    update_badge.setVisibility(View.VISIBLE);
-//                }
+                // if (race.isUpdateIndicatorVisible()) {
+                // update_badge.setVisibility(View.VISIBLE);
+                // }
             }
             updateFlag(race.getRace());
         }
@@ -310,8 +309,9 @@ public class ManagedRaceListAdapter extends ArrayAdapter<RaceListDataType> imple
         if (!flagChanges.isEmpty()) {
             TimePoint changeAt = flagPoleState.getNextStateValidFrom();
             FlagPole changePole = FlagPoleState.getMostInterestingFlagPole(flagChanges);
-            
-            Bitmap flag = new FlagsBitmapCache(getContext()).getBitmap(changePole.getUpperFlag(), changePole.getLowerFlag());
+
+            Bitmap flag = new FlagsBitmapCache(getContext()).getBitmap(changePole.getUpperFlag(),
+                    changePole.getLowerFlag());
             current_flag.setImageBitmap(flag);
             String text = getDuration(changeAt.asDate(), Calendar.getInstance().getTime());
             flag_timer.setText(text.replace("-", ""));
