@@ -291,7 +291,6 @@
 		7F87CAA31A2CCE8B0076C617 /* OpenSans-Regular.ttf in Resources */ = {isa = PBXBuildFile; fileRef = 7F87CA9F1A2CCE8B0076C617 /* OpenSans-Regular.ttf */; };
 		7F87CAA41A2CCE8B0076C617 /* OpenSans-Semibold.ttf in Resources */ = {isa = PBXBuildFile; fileRef = 7F87CAA01A2CCE8B0076C617 /* OpenSans-Semibold.ttf */; };
 		7F87CAA71A2CD6BA0076C617 /* Appearance.m in Sources */ = {isa = PBXBuildFile; fileRef = 7F87CAA61A2CD6BA0076C617 /* Appearance.m */; };
-		7F87CAAA1A2CDA870076C617 /* AppearanceFontButton.m in Sources */ = {isa = PBXBuildFile; fileRef = 7F87CAA91A2CDA870076C617 /* AppearanceFontButton.m */; };
 		7F8CC2081A10D47A00C56D7F /* SettingsViewController.swift in Sources */ = {isa = PBXBuildFile; fileRef = 7F8CC2071A10D47A00C56D7F /* SettingsViewController.swift */; };
 		7F99DE3C1A126554009B3619 /* RegattaViewController.swift in Sources */ = {isa = PBXBuildFile; fileRef = 7F99DE3B1A126554009B3619 /* RegattaViewController.swift */; };
 		7FA2220A1A25E54F00FD364B /* libPods.a in Frameworks */ = {isa = PBXBuildFile; fileRef = 06377F0B2F2854497073FC0E /* libPods.a */; };
@@ -613,8 +612,6 @@
 		7F87CAA01A2CCE8B0076C617 /* OpenSans-Semibold.ttf */ = {isa = PBXFileReference; lastKnownFileType = file; path = "OpenSans-Semibold.ttf"; sourceTree = "<group>"; };
 		7F87CAA51A2CD6BA0076C617 /* Appearance.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = Appearance.h; sourceTree = "<group>"; };
 		7F87CAA61A2CD6BA0076C617 /* Appearance.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = Appearance.m; sourceTree = "<group>"; };
-		7F87CAA81A2CDA870076C617 /* AppearanceFontButton.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = AppearanceFontButton.h; sourceTree = "<group>"; };
-		7F87CAA91A2CDA870076C617 /* AppearanceFontButton.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = AppearanceFontButton.m; sourceTree = "<group>"; };
 		7F8CC2071A10D47A00C56D7F /* SettingsViewController.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = SettingsViewController.swift; sourceTree = "<group>"; };
 		7F99DE3B1A126554009B3619 /* RegattaViewController.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = RegattaViewController.swift; sourceTree = "<group>"; };
 		7FA6551919F6661900A1B92D /* DataManager.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; lineEnding = 0; path = DataManager.swift; sourceTree = "<group>"; xcLanguageSpecificationIdentifier = xcode.lang.swift; };
@@ -1005,8 +1002,6 @@
 				7FD9D3021A1236080058FEAD /* Extensions.swift */,
 				7F87CAA51A2CD6BA0076C617 /* Appearance.h */,
 				7F87CAA61A2CD6BA0076C617 /* Appearance.m */,
-				7F87CAA81A2CDA870076C617 /* AppearanceFontButton.h */,
-				7F87CAA91A2CDA870076C617 /* AppearanceFontButton.m */,
 				7F72C7391A2DC51900F48EE8 /* SplashScreenDummy.swift */,
 			);
 			name = Helpers;
@@ -1511,7 +1506,6 @@
 				7F2C605A19F160E400C32D93 /* LocationManager.swift in Sources */,
 				7FCDB6631A1636610075D7D9 /* Event.swift in Sources */,
 				7FCDB6621A1636610075D7D9 /* GPSFix.swift in Sources */,
-				7F87CAAA1A2CDA870076C617 /* AppearanceFontButton.m in Sources */,
 				7F99DE3C1A126554009B3619 /* RegattaViewController.swift in Sources */,
 				7F8CC2081A10D47A00C56D7F /* SettingsViewController.swift in Sources */,
 				7F06590419F8094C0077FF95 /* DeviceUDIDManager.swift in Sources */,

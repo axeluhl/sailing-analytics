@@ -26,10 +26,6 @@ class RegattaViewController : UIViewController, UIActionSheetDelegate, UINavigat
     @IBOutlet weak var flagImageView: UIImageView!
     @IBOutlet weak var sailLabel: UILabel!
     @IBOutlet weak var lastSyncLabel: UILabel!
-    @IBOutlet weak var startLabel: UILabel!
-    @IBOutlet weak var startDateLabel: UILabel!
-    @IBOutlet weak var endLabel: UILabel!
-    @IBOutlet weak var endDateLabel: UILabel!
     @IBOutlet weak var finishedLabel: UILabel!
     @IBOutlet weak var startTrackingButton: UIButton!
     
@@ -68,8 +64,6 @@ class RegattaViewController : UIViewController, UIActionSheetDelegate, UINavigat
         nameLabel.text = DataManager.sharedManager.selectedEvent!.leaderBoard!.competitor!.displayName
         flagImageView.image = UIImage(named: DataManager.sharedManager.selectedEvent!.leaderBoard!.competitor!.countryCode)
         sailLabel.text = DataManager.sharedManager.selectedEvent!.leaderBoard!.competitor!.sailId
-        startDateLabel.text = dateFormatter.stringFromDate(DataManager.sharedManager.selectedEvent!.startDate)
-        endDateLabel.text = dateFormatter.stringFromDate(DataManager.sharedManager.selectedEvent!.endDate)
         showLastSync()
         
         // get image sources
@@ -106,19 +100,11 @@ class RegattaViewController : UIViewController, UIActionSheetDelegate, UINavigat
         let now = NSDate()
         if now.timeIntervalSinceDate(DataManager.sharedManager.selectedEvent!.endDate) > 0 {
             isFinished = true
-            startLabel.hidden = true
-            startDateLabel.hidden = true
-            endLabel.hidden = true
-            endDateLabel.hidden = true
             lastSyncLabel.hidden = true
             finishedLabel.hidden = false
             startTrackingButton.setTitle("Close", forState: UIControlState.Normal)
         } else {
             isFinished = false
-            endLabel.hidden = false
-            endDateLabel.hidden = false
-            startLabel.hidden = false
-            startDateLabel.hidden = false
             lastSyncLabel.hidden = false
             finishedLabel.hidden = true
             startTrackingButton.setTitle("Start Tracking", forState: UIControlState.Normal)
