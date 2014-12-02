@@ -238,8 +238,8 @@ public class AppPreferences {
     }
     
     public LatLng getWindPosition(){
-    	long lat = preferences.getLong(HIDDEN_PREFERENCE_WIND_LAT, 0);
-    	long lng = preferences.getLong(HIDDEN_PREFERENCE_WIND_LNG, 0);
+    	double lat = Double.longBitsToDouble(preferences.getLong(HIDDEN_PREFERENCE_WIND_LAT, 0));
+    	double lng = Double.longBitsToDouble(preferences.getLong(HIDDEN_PREFERENCE_WIND_LNG, 0));
     	return new LatLng(lat,lng);
     }
 
