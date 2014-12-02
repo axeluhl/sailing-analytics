@@ -43,6 +43,7 @@ import com.sap.sailing.racecommittee.app.ui.fragments.NavigationDrawerFragment;
 import com.sap.sailing.racecommittee.app.ui.fragments.NavigationDrawerFragment.NavigationDrawerCallbacks;
 import com.sap.sailing.racecommittee.app.ui.fragments.RaceFragment;
 import com.sap.sailing.racecommittee.app.ui.fragments.RaceInfoFragment;
+import com.sap.sailing.racecommittee.app.ui.fragments.WelcomeFragment;
 import com.sap.sailing.racecommittee.app.ui.fragments.WindFragment;
 import com.sap.sailing.racecommittee.app.ui.fragments.raceinfo.RaceInfoListener;
 import com.sap.sailing.racecommittee.app.utils.TickListener;
@@ -102,21 +103,21 @@ public class RacingActivity extends SessionActivity implements RaceInfoListener,
         }
     }
 
-    private static int WIND_ACTIVITY_REQUEST_CODE = 7331;
+    private static ProgressBar mProgressSpinner;
     private static final int RacesLoaderId = 0;
 
     private static final String TAG = RacingActivity.class.getName();
-    private static ProgressBar mProgressSpinner;
+    private static int WIND_ACTIVITY_REQUEST_CODE = 7331;
 
+    private Button currentTime;
     private ReadonlyDataManager dataManager;
     private RaceInfoFragment infoFragment;
-    private WindFragment windFragment;
+    private Wind mWind;
     private NavigationDrawerFragment navDrawerFragment;
     private ManagedRace selectedRace;
-    private Button currentTime;
     private Button windButton;
 
-    private Wind mWind;
+    private WindFragment windFragment;
 
     private Serializable getCourseAreaIdFromIntent() {
         if (getIntent() == null || getIntent().getExtras() == null) {
@@ -130,6 +131,19 @@ public class RacingActivity extends SessionActivity implements RaceInfoListener,
             return null;
         }
         return courseId;
+    }
+
+    private Serializable getEventIdFromItent() {
+        if (getIntent() == null || getIntent().getExtras() == null) {
+            Log.e(getClass().getName(), "Expected an intent carrying event extras.");
+        }
+
+        final Serializable eventId = getIntent().getExtras().getSerializable(AppConstants.EventIdTag);
+        if (eventId == null) {
+            Log.e(getClass().getName(), "Expected an intent carrying the event id.");
+            return null;
+        }
+        return eventId;
     }
 
     private void loadRaces(final CourseArea courseArea) {
@@ -150,6 +164,10 @@ public class RacingActivity extends SessionActivity implements RaceInfoListener,
         }
     }
 
+    public void logout() {
+        logoutSession();
+    }
+
     @SuppressLint("SimpleDateFormat")
     @Override
     public void notifyTick() {
@@ -162,22 +180,24 @@ public class RacingActivity extends SessionActivity implements RaceInfoListener,
     @Override
     public void onBackPressed() {
         Fragment fragment = getFragmentManager().findFragmentById(R.id.racing_view_right_container);
-        if (!(fragment instanceof RaceInfoFragment)) {
-            if (getFragmentManager().getBackStackEntryCount() > 0) {
-                getFragmentManager().popBackStackImmediate();
-                getFragmentManager().beginTransaction().commit();
-
-                // fix for filled out RaceInfoFragment
-                if (infoFragment != null && infoFragment.isFragmentUIActive() && selectedRace != null) {
-                    ExLog.i(this, this.getClass().getCanonicalName(), "Returning to RaceInfoFragment");
-                    getFragmentManager().popBackStackImmediate();
-
-                    onRaceItemClicked(selectedRace);
-                    return;
-                }
-            }
-        }
-        logoutSession();
+        if (!(fragment instanceof RaceInfoFragment || fragment instanceof WelcomeFragment)) {
+	        if (getFragmentManager().getBackStackEntryCount() > 0) {
+	            getFragmentManager().popBackStackImmediate();
+	            getFragmentManager().beginTransaction().commit();
+	
+	            // fix for filled out RaceInfoFragment
+	            if (infoFragment != null && infoFragment.isFragmentUIActive() && selectedRace != null) {
+	                ExLog.i(this, this.getClass().getCanonicalName(), "Returning to RaceInfoFragment");
+	                getFragmentManager().popBackStackImmediate();
+	
+	                onRaceItemClicked(selectedRace);
+	            }
+	        } 
+        } else {
+        	ExLog.i(this, this.getClass().getCanonicalName(), "logging out!");
+        	logoutSession();
+	    }
+	   
     }
 
     @Override
@@ -192,26 +212,6 @@ public class RacingActivity extends SessionActivity implements RaceInfoListener,
         }
     }
 
-    public void onWindEntered(Wind windFix) {
-        if (windFix != null) {
-            windButton.setText(String.format(getString(R.string.wind_info), windFix.getKnots(), windFix.getBearing()
-                    .reverse().toString()));
-            if (selectedRace != null) {
-                selectedRace.getState().setWindFix(MillisecondsTimePoint.now(), windFix);
-            }
-
-            mWind = windFix;
-        }
-
-        getFragmentManager().popBackStackImmediate();
-
-        if (infoFragment != null && infoFragment.isFragmentUIActive()) {
-            ExLog.i(this, this.getClass().getCanonicalName(), "Returning to RaceInfoFragment from WindFragment");
-            getFragmentManager().popBackStackImmediate();
-
-            onRaceItemClicked(selectedRace);
-        }
-    }
 
     @Override
     public void onCreate(Bundle savedInstanceState) {
@@ -261,6 +261,17 @@ public class RacingActivity extends SessionActivity implements RaceInfoListener,
                 onWindEntered(mWind);
             }
         }
+
+        Serializable eventId = getEventIdFromItent();
+        if (eventId == null) {
+            throw new IllegalStateException("There was no event id transmitted...");
+        }
+        getFragmentManager()
+                .beginTransaction()
+                .replace(R.id.racing_view_right_container,
+                        new WelcomeFragment(dataManager.getDataStore(), courseAreaId, eventId, preferences.getAuthor()))
+                .commit();
+
     }
 
     @Override
@@ -297,6 +308,13 @@ public class RacingActivity extends SessionActivity implements RaceInfoListener,
     }
 
     @Override
+    public void onSaveInstanceState(Bundle outState) {
+        super.onSaveInstanceState(outState);
+
+        outState.putSerializable("wind", mWind);
+    }
+
+    @Override
     public void onStart() {
         super.onStart();
 
@@ -311,11 +329,25 @@ public class RacingActivity extends SessionActivity implements RaceInfoListener,
         TickSingleton.INSTANCE.unregisterListener(this);
     }
 
-    @Override
-    public void onSaveInstanceState(Bundle outState) {
-        super.onSaveInstanceState(outState);
+    public void onWindEntered(Wind windFix) {
+        if (windFix != null) {
+            windButton.setText(String.format(getString(R.string.wind_info), windFix.getKnots(), windFix.getBearing()
+                    .reverse().toString()));
+            if (selectedRace != null) {
+                selectedRace.getState().setWindFix(MillisecondsTimePoint.now(), windFix);
+            }
 
-        outState.putSerializable("wind", mWind);
+            mWind = windFix;
+        }
+
+        getFragmentManager().popBackStackImmediate();
+
+        if (infoFragment != null && infoFragment.isFragmentUIActive()) {
+            ExLog.i(this, this.getClass().getCanonicalName(), "Returning to RaceInfoFragment from WindFragment");
+            getFragmentManager().popBackStackImmediate();
+
+            onRaceItemClicked(selectedRace);
+        }
     }
 
     private void registerOnService(Collection<ManagedRace> races) {
@@ -330,14 +362,6 @@ public class RacingActivity extends SessionActivity implements RaceInfoListener,
         }
     }
 
-    private void setupActionBar(CourseArea courseArea) {
-        RaceLogEventAuthor author = preferences.getAuthor();
-        String title = String.format(getString(R.string.racingview_header), courseArea.getName());
-        title += " (" + author.getName() + ")";
-
-        getSupportActionBar().setTitle(title);
-    }
-
     @Override
     public void setSupportProgressBarIndeterminateVisibility(boolean visible) {
         super.setSupportProgressBarIndeterminateVisibility(visible);
@@ -349,5 +373,13 @@ public class RacingActivity extends SessionActivity implements RaceInfoListener,
                 mProgressSpinner.setVisibility(View.GONE);
             }
         }
+    }
+
+    private void setupActionBar(CourseArea courseArea) {
+        RaceLogEventAuthor author = preferences.getAuthor();
+        String title = String.format(getString(R.string.racingview_header), courseArea.getName());
+        title += " (" + author.getName() + ")";
+
+        getSupportActionBar().setTitle(title);
     }
 }
