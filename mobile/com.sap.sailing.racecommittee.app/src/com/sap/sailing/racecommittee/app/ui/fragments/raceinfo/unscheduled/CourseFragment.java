@@ -15,6 +15,10 @@ public class CourseFragment extends RaceFragment {
     
     private NextFragmentListener mListener;
     
+    public CourseFragment() {
+        
+    }
+    
     public CourseFragment(NextFragmentListener listener) {
         mListener = listener;
     }

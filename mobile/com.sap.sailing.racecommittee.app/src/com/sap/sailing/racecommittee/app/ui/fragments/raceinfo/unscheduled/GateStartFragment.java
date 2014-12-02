@@ -10,6 +10,9 @@ import com.sap.sailing.racecommittee.app.ui.fragments.RaceFragment;
 
 public class GateStartFragment extends RaceFragment{
     
+    public GateStartFragment() {
+    }
+    
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
         View view = inflater.inflate(R.layout.race_schedule_procedure_gate_start, container, false);

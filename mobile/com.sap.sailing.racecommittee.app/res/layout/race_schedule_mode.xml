@@ -14,6 +14,10 @@
         android:id="@+id/listMode"
         android:layout_width="match_parent"
         android:layout_height="match_parent"
-        android:layout_above="@id/confirm" />
+        android:layout_above="@id/confirm"
+        android:paddingEnd="100dp"
+        android:paddingLeft="100dp"
+        android:paddingRight="100dp"
+        android:paddingStart="100dp" />
 
 </RelativeLayout>

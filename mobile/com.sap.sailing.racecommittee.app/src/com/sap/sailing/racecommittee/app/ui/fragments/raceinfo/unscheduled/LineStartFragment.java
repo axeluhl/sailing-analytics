@@ -15,6 +15,10 @@ public class LineStartFragment extends RaceFragment {
 
     private NextFragmentListener mListener;
 
+    public LineStartFragment() {
+        
+    }
+    
     public LineStartFragment(NextFragmentListener listener) {
         mListener = listener;
     }
