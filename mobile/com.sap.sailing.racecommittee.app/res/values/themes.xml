@@ -7,13 +7,8 @@
     <style name="AppTheme.Base" parent="Theme.AppCompat.Light.NoActionBar">
         <item name="windowActionModeOverlay">true</item>
         
-        <!-- colorPrimary is used for the default action bar background -->
         <item name="colorPrimary">@color/colorPrimary</item>
-
-        <!-- colorPrimaryDark is used for the status bar -->
         <item name="colorPrimaryDark">@color/colorPrimaryDark</item>
-
-        <!-- colorAccent is used as the default value for colorControlActivated which is used to tint widgets -->
         <item name="colorAccent">@color/colorAccent</item>
 
         <!-- control style -->
