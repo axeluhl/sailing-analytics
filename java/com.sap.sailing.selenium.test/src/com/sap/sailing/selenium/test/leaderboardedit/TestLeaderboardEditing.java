@@ -35,11 +35,13 @@ public class TestLeaderboardEditing extends AbstractSeleniumTest {
             BMW_CUP_REGATTA + " (" + BMW_CUP_BOAT_CLASS + ")", BMW_CUP_BOAT_CLASS, BMW_CUP_RACE_8);
     private static final RaceDescriptor RACE_COLUMN = new RaceDescriptor("R1", "Default", false, false, 0.0);
     
+    @Override
     @Before
-    public void clearDatabase() {
+    public void setUp() {
         clearState(getContextRoot());
+        super.setUp();
     }
-    
+
     @Test
     public void testSimpleLeaderboardEditing() {
         createNewLeaderboardLoadRaceAndLink(LEADERBOARD);

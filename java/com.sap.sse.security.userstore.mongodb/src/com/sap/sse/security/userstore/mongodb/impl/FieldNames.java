@@ -6,7 +6,7 @@ public class FieldNames {
         NAME,
         EMAIL,
         ACCOUNTS,
-        ROLES,
+        ROLES, PERMISSIONS,
         EMAIL_VALIDATED,
         PASSWORD_RESET_SECRET,
         VALIDATION_SECRET;

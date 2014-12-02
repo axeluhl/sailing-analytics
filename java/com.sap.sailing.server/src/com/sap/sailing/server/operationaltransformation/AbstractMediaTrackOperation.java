@@ -1,6 +1,7 @@
 package com.sap.sailing.server.operationaltransformation;
 
 import com.sap.sailing.domain.common.media.MediaTrack;
+import com.sap.sailing.server.RacingEventService;
 import com.sap.sailing.server.RacingEventServiceOperation;
 
 public abstract class AbstractMediaTrackOperation extends AbstractRacingEventServiceOperation<Void> {
@@ -13,6 +14,14 @@ public abstract class AbstractMediaTrackOperation extends AbstractRacingEventSer
         this.mediaTrack = mediaTrack;
     }
 
+    /**
+     * {@link #internalApplyTo(RacingEventService)} already replicates the effects
+     */
+    @Override
+    public boolean isRequiresExplicitTransitiveReplication() {
+        return false;
+    }
+    
     @Override
     public RacingEventServiceOperation<?> transformClientOp(RacingEventServiceOperation<?> serverOp) {
         return null;

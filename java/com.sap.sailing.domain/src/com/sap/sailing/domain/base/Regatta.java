@@ -7,6 +7,7 @@ import com.sap.sailing.domain.leaderboard.ScoringScheme;
 import com.sap.sailing.domain.tracking.TrackedRace;
 import com.sap.sailing.domain.tracking.TrackedRegatta;
 import com.sap.sse.common.Named;
+import com.sap.sse.common.TimePoint;
 import com.sap.sse.common.WithID;
 
 /**
@@ -19,7 +20,21 @@ import com.sap.sse.common.WithID;
  */
 public interface Regatta extends Named, WithID {
     ScoringScheme getScoringScheme();
-    
+
+    /**
+     *  @return the (optional) start date of this regatta 
+     */
+    TimePoint getStartDate();
+
+    void setStartDate(TimePoint startDate);
+
+    /**
+     *  @return the (optional) end date of this regatta 
+     */
+    TimePoint getEndDate();
+
+    void setEndDate(TimePoint startDate);
+
     /**
      * Gets the course area for all races of this {@link Regatta}.
      * @return the {@link CourseArea} object.
