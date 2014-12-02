@@ -3,13 +3,13 @@ package com.sap.sse.security.shared;
 import java.util.HashMap;
 import java.util.Map;
 
-import com.sap.sse.security.SecurityService;
-
 /**
  * The object we send back and forth between client and server. See also
  * {@link SecurityService#createSocialUser(String, SocialUserAccount)}.
  */
 public class SocialUserAccount implements Account {
+    private static final long serialVersionUID = -1702877798960390855L;
+
     private String sessionId;
 
     private Map<String, String> properties = new HashMap<String, String>();

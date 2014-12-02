@@ -21,7 +21,6 @@ import javax.servlet.http.HttpSession;
 import org.apache.shiro.SecurityUtils;
 import org.apache.shiro.authc.AuthenticationException;
 import org.apache.shiro.subject.Subject;
-import org.apache.shiro.util.ByteSource;
 import org.osgi.framework.BundleContext;
 import org.osgi.util.tracker.ServiceTracker;
 
@@ -40,13 +39,13 @@ import com.sap.sse.security.shared.MailException;
 import com.sap.sse.security.shared.SocialUserAccount;
 import com.sap.sse.security.shared.UserManagementException;
 import com.sap.sse.security.shared.UsernamePasswordAccount;
+import com.sap.sse.security.ui.client.UserManagementService;
 import com.sap.sse.security.ui.oauth.client.CredentialDTO;
 import com.sap.sse.security.ui.oauth.client.SocialUserDTO;
 import com.sap.sse.security.ui.oauth.shared.OAuthException;
 import com.sap.sse.security.ui.shared.AccountDTO;
 import com.sap.sse.security.ui.shared.SuccessInfo;
 import com.sap.sse.security.ui.shared.UserDTO;
-import com.sap.sse.security.ui.shared.UserManagementService;
 import com.sap.sse.security.ui.shared.UsernamePasswordAccountDTO;
 
 public class UserManagementServiceImpl extends RemoteServiceServlet implements UserManagementService {
@@ -175,11 +174,11 @@ public class UserManagementServiceImpl extends RemoteServiceServlet implements U
     }
     
     @Override
-    public void resetPassword(String username, String email, String baseURL) throws UserManagementException, MailException {
+    public void resetPassword(String username, String email, String passwordResetBaseURL) throws UserManagementException, MailException {
         if (username == null || username.isEmpty()) {
             username = getSecurityService().getUserByEmail(email).getName();
         }
-        getSecurityService().resetPassword(username, baseURL);
+        getSecurityService().resetPassword(username, passwordResetBaseURL);
     }
 
     @Override
@@ -261,7 +260,7 @@ public class UserManagementServiceImpl extends RemoteServiceServlet implements U
 
             default:
                 UsernamePasswordAccount upa = (UsernamePasswordAccount) a;
-                accountDTOs.add(new UsernamePasswordAccountDTO(upa.getName(), upa.getSaltedPassword(), ((ByteSource) upa.getSalt()).getBytes()));
+                accountDTOs.add(new UsernamePasswordAccountDTO(upa.getName(), upa.getSaltedPassword(), upa.getSalt()));
                 break;
             }
         }

@@ -1,7 +1,8 @@
 package com.sap.sse.security.shared;
 
+import java.io.Serializable;
 
-public interface Account {
+public interface Account extends Serializable {
 
     public AccountType getAccountType();
     

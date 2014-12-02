@@ -42,37 +42,37 @@ import com.sap.sailing.domain.persistence.media.MediaDBFactory;
 import com.sap.sailing.domain.racelog.tracking.EmptyGPSFixStore;
 import com.sap.sailing.domain.test.TrackBasedTest;
 import com.sap.sailing.domain.tracking.impl.EmptyWindStore;
+import com.sap.sailing.server.RacingEventService;
 import com.sap.sailing.server.impl.RacingEventServiceImpl;
 import com.sap.sailing.server.operationaltransformation.AddDefaultRegatta;
 import com.sap.sailing.server.operationaltransformation.AddRaceDefinition;
 import com.sap.sailing.server.operationaltransformation.CreateFlexibleLeaderboard;
 import com.sap.sse.common.TimePoint;
-import com.sap.sse.common.Util;
+import com.sap.sse.common.Util.Pair;
 import com.sap.sse.common.impl.MillisecondsDurationImpl;
 import com.sap.sse.common.impl.MillisecondsTimePoint;
-import com.sap.sse.mongodb.MongoDBService;
 import com.sap.sse.replication.ReplicationMasterDescriptor;
-import com.sap.sse.replication.impl.Replicator;
+import com.sap.sse.replication.impl.ReplicationReceiver;
 
 public class InitialLoadReplicationObjectIdentityTest extends AbstractServerReplicationTest {
-    private Util.Pair<ReplicationServiceTestImpl, ReplicationMasterDescriptor> replicationDescriptorPair;
+    private Pair<com.sap.sse.replication.testsupport.AbstractServerReplicationTest.ReplicationServiceTestImpl<RacingEventService>, ReplicationMasterDescriptor> replicationDescriptorPair;
     
     /**
      * Drops the test DB. Sets up master and replica, starts the JMS message broker and registers the replica with the master.
      */
     @Before
+    @Override
     public void setUp() throws Exception {
-        final MongoDBService mongoDBService = MongoDBService.INSTANCE;
-        mongoDBService.getDB().dropDatabase();
+        persistenceSetUp(/* dropDB */ true);
         this.master = new RacingEventServiceImpl(PersistenceFactory.INSTANCE.getDomainObjectFactory(mongoDBService, DomainFactory.INSTANCE), PersistenceFactory.INSTANCE
                 .getMongoObjectFactory(mongoDBService), MediaDBFactory.INSTANCE.getMediaDB(mongoDBService), EmptyWindStore.INSTANCE, EmptyGPSFixStore.INSTANCE);
         this.replica = new RacingEventServiceImpl(PersistenceFactory.INSTANCE.getDomainObjectFactory(mongoDBService, DomainFactory.INSTANCE), PersistenceFactory.INSTANCE
                 .getMongoObjectFactory(mongoDBService), MediaDBFactory.INSTANCE.getMediaDB(mongoDBService), EmptyWindStore.INSTANCE, EmptyGPSFixStore.INSTANCE);
     }
     
-    public void performReplicationSetup() throws Exception {
+    private void performReplicationSetup() throws Exception {
         try {
-            replicationDescriptorPair = basicSetUp(false, this.master, this.replica);
+            replicationDescriptorPair = basicSetUp(/* dropDB */ false, this.master, this.replica);
         } catch (Exception e) {
             e.printStackTrace();
             tearDown();
@@ -81,7 +81,6 @@ public class InitialLoadReplicationObjectIdentityTest extends AbstractServerRepl
     
     @Test
     public void testInitialLoad() throws Exception {
-        
         /* Event */
         String eventName = "Monster Event";
         String venue = "Default Venue";
@@ -140,7 +139,7 @@ public class InitialLoadReplicationObjectIdentityTest extends AbstractServerRepl
         /* fire up replication */
         performReplicationSetup();
         ReplicationMasterDescriptor the_master = replicationDescriptorPair.getB(); /* master descriptor */
-        Replicator replicator = replicationDescriptorPair.getA().startToReplicateFromButDontYetFetchInitialLoad(the_master, /* startReplicatorSuspended */ true);
+        ReplicationReceiver replicator = replicationDescriptorPair.getA().startToReplicateFromButDontYetFetchInitialLoad(the_master, /* startReplicatorSuspended */ true);
         replicationDescriptorPair.getA().initialLoad();
         replicator.setSuspended(false);
         synchronized (replicator) {

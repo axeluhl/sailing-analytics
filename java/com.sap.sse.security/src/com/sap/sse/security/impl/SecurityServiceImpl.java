@@ -1,15 +1,22 @@
-package com.sap.sse.security;
+package com.sap.sse.security.impl;
 
+import java.io.IOException;
+import java.io.InputStream;
+import java.io.ObjectInputStream;
+import java.io.ObjectOutputStream;
+import java.io.Serializable;
 import java.io.UnsupportedEncodingException;
+import java.net.MalformedURLException;
 import java.net.URLEncoder;
 import java.util.Arrays;
-import java.util.Collection;
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.Map;
 import java.util.Map.Entry;
 import java.util.Properties;
 import java.util.Set;
 import java.util.UUID;
+import java.util.concurrent.ConcurrentHashMap;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
@@ -31,12 +38,12 @@ import org.apache.shiro.authc.LockedAccountException;
 import org.apache.shiro.authc.UnknownAccountException;
 import org.apache.shiro.authc.UsernamePasswordToken;
 import org.apache.shiro.cache.CacheManager;
-import org.apache.shiro.cache.ehcache.EhCacheManager;
 import org.apache.shiro.config.Ini;
 import org.apache.shiro.config.Ini.Section;
 import org.apache.shiro.crypto.RandomNumberGenerator;
 import org.apache.shiro.crypto.SecureRandomNumberGenerator;
 import org.apache.shiro.crypto.hash.Sha256Hash;
+import org.apache.shiro.mgt.CachingSecurityManager;
 import org.apache.shiro.mgt.SecurityManager;
 import org.apache.shiro.subject.Subject;
 import org.apache.shiro.util.Factory;
@@ -64,6 +71,22 @@ import org.scribe.oauth.OAuthService;
 
 import com.google.gwt.user.server.rpc.RemoteServiceServlet;
 import com.sap.sse.common.Util;
+import com.sap.sse.replication.OperationExecutionListener;
+import com.sap.sse.replication.OperationWithResult;
+import com.sap.sse.replication.ReplicationMasterDescriptor;
+import com.sap.sse.replication.impl.OperationWithResultWithIdWrapper;
+import com.sap.sse.security.ClientUtils;
+import com.sap.sse.security.Credential;
+import com.sap.sse.security.GithubApi;
+import com.sap.sse.security.InstagramApi;
+import com.sap.sse.security.OAuthRealm;
+import com.sap.sse.security.OAuthToken;
+import com.sap.sse.security.SessionCacheManager;
+import com.sap.sse.security.SessionUtils;
+import com.sap.sse.security.Social;
+import com.sap.sse.security.SocialSettingsKeys;
+import com.sap.sse.security.User;
+import com.sap.sse.security.UserStore;
 import com.sap.sse.security.shared.Account.AccountType;
 import com.sap.sse.security.shared.DefaultRoles;
 import com.sap.sse.security.shared.MailException;
@@ -71,16 +94,32 @@ import com.sap.sse.security.shared.SocialUserAccount;
 import com.sap.sse.security.shared.UserManagementException;
 import com.sap.sse.security.shared.UsernamePasswordAccount;
 
-public class SecurityServiceImpl extends RemoteServiceServlet implements SecurityService {
+public class SecurityServiceImpl extends RemoteServiceServlet implements ReplicableSecurityService {
 
     private static final long serialVersionUID = -3490163216601311858L;
 
     private static final Logger logger = Logger.getLogger(SecurityServiceImpl.class.getName());
 
-    private SecurityManager securityManager;
-    private final CacheManager cacheManager = new EhCacheManager();
-    private final UserStore store;
+    private CachingSecurityManager securityManager;
+    
+    /**
+     * A cache manager that the {@link SessionCacheManager} delegates to. This way, multiple Shiro configurations can
+     * share the cache manager provided as a singleton within this bundle instance. The cache manager is replicating,
+     * forwarding changes to the caches to all replicas registered.
+     */
+    private final ReplicatingCacheManager cacheManager;
+    
+    private UserStore store;
     private final Properties mailProperties;
+    private final ConcurrentHashMap<OperationExecutionListener<ReplicableSecurityService>, OperationExecutionListener<ReplicableSecurityService>> operationExecutionListeners;
+
+    /**
+     * The master from which this replicable is currently replicating, or <code>null</code> if this replicable is not currently
+     * replicated from any master.
+     */
+    private ReplicationMasterDescriptor replicatingFromMaster;
+    
+    private Set<OperationWithResultWithIdWrapper<?, ?>> operationsSentToMasterForReplication;
     
     private static Ini shiroConfiguration;
     static {
@@ -94,10 +133,13 @@ public class SecurityServiceImpl extends RemoteServiceServlet implements Securit
     public SecurityServiceImpl(UserStore store, Properties mailProperties) {
         assert mailProperties != null;
         logger.info("Initializing Security Service with user store " + store+" and mail properties "+mailProperties);
+        operationsSentToMasterForReplication = new HashSet<>();
+        cacheManager = new ReplicatingCacheManager();
+        this.operationExecutionListeners = new ConcurrentHashMap<>();
         this.store = store;
         this.mailProperties = mailProperties;
         // Create default users if no users exist yet.
-        if (store.getUserCollection().isEmpty()) {
+        if (Util.isEmpty(store.getUsers())) {
             try {
                 logger.info("No users found, creating default user \"admin\" with password \"admin\"");
                 createSimpleUser("admin", "nobody@sapsailing.com", "admin", /* validationBaseURL */ null);
@@ -120,7 +162,7 @@ public class SecurityServiceImpl extends RemoteServiceServlet implements Securit
         }
         logger.info(logMessage.toString());
         System.setProperty("java.net.useSystemProxies", "true");
-        SecurityManager securityManager = factory.getInstance();
+        CachingSecurityManager securityManager = (CachingSecurityManager) factory.getInstance();
         logger.info("Created: " + securityManager);
         SecurityUtils.setSecurityManager(securityManager);
         this.securityManager = securityManager;
@@ -136,32 +178,39 @@ public class SecurityServiceImpl extends RemoteServiceServlet implements Securit
 
     @Override
     public void sendMail(String username, String subject, String body) throws MailException {
-        final User user = getUserByName(username);
-        if (user != null) {
-            final String toAddress = user.getEmail();
-            if (toAddress != null) {
-                Session session = Session.getInstance(this.mailProperties, new SMTPAuthenticator());
-                MimeMessage msg = new MimeMessage(session);
-                try {
-                    msg.setFrom(new InternetAddress(mailProperties.getProperty("mail.from", "root@sapsailing.com")));
-                    msg.setSubject(subject);
-                    msg.setContent(body, "text/plain");
-                    msg.addRecipient(RecipientType.TO, new InternetAddress(toAddress.trim()));
-                    Transport ts = session.getTransport();
-                    ts.connect();
-                    ts.sendMessage(msg, msg.getRecipients(RecipientType.TO));
-                    ts.close();
-                    logger.info("mail sent to user "+username+" with e-mail address "+toAddress+" with subject "+subject);
-                } catch (MessagingException e) {
-                    logger.log(Level.SEVERE, "Error trying to send mail to user "+username+" with e-mail address "+toAddress, e);
-                    throw new MailException(e.getMessage());
+        if (this.mailProperties != null && this.mailProperties.containsKey("mail.transport.protocol")) {
+            final User user = getUserByName(username);
+            if (user != null) {
+                final String toAddress = user.getEmail();
+                if (toAddress != null) {
+                    Session session = Session.getInstance(this.mailProperties, new SMTPAuthenticator());
+                    MimeMessage msg = new MimeMessage(session);
+                    try {
+                        msg.setFrom(new InternetAddress(mailProperties.getProperty("mail.from", "root@sapsailing.com")));
+                        msg.setSubject(subject);
+                        msg.setContent(body, "text/plain");
+                        msg.addRecipient(RecipientType.TO, new InternetAddress(toAddress.trim()));
+                        Transport ts = session.getTransport();
+                        ts.connect();
+                        ts.sendMessage(msg, msg.getRecipients(RecipientType.TO));
+                        ts.close();
+                        logger.info("mail sent to user " + username + " with e-mail address " + toAddress
+                                + " with subject " + subject);
+                    } catch (MessagingException e) {
+                        logger.log(Level.SEVERE, "Error trying to send mail to user " + username
+                                + " with e-mail address " + toAddress, e);
+                        throw new MailException(e.getMessage());
+                    }
                 }
             }
+        } else {
+            logger.warning("No mail properties provided. Cannot send e-mail about "+subject+" to user "+username+
+                    ". This could also mean that this is running on a replica server in which case this is perfectly fine.");
         }
     }
     
     @Override
-    public void resetPassword(final String username, String baseURL) throws UserManagementException, MailException {
+    public void resetPassword(final String username, String passwordResetBaseURL) throws UserManagementException, MailException {
         final User user = store.getUserByName(username);
         if (user == null) {
             throw new UserManagementException(UserManagementException.USER_DOES_NOT_EXIST);
@@ -170,13 +219,13 @@ public class SecurityServiceImpl extends RemoteServiceServlet implements Securit
             throw new UserManagementException(UserManagementException.CANNOT_RESET_PASSWORD_WITHOUT_VALIDATED_EMAIL);
         }
         final String passwordResetSecret = user.startPasswordReset();
-        store.updateUser(user); // durably storing the password reset secret
+        apply(s->s.internalStoreUser(user)); // durably storing the password reset secret
         Map<String, String> urlParameters = new HashMap<>();
         try {
             urlParameters.put("u", URLEncoder.encode(user.getName(), "UTF-8"));
             urlParameters.put("e", URLEncoder.encode(user.getEmail(), "UTF-8"));
             urlParameters.put("s", URLEncoder.encode(passwordResetSecret, "UTF-8"));
-            final StringBuilder url = buildURL(baseURL, urlParameters);
+            final StringBuilder url = buildURL(passwordResetBaseURL, urlParameters);
             new Thread("sending password reset e-mail to user " + username) {
                 @Override
                 public void run() {
@@ -198,13 +247,13 @@ public class SecurityServiceImpl extends RemoteServiceServlet implements Securit
     }
 
     @Override
-    public SecurityManager getSecurityManager() {
+    public CachingSecurityManager getSecurityManager() {
         return this.securityManager;
     }
 
     @Override
-    public Collection<User> getUserList() {
-        return store.getUserCollection();
+    public Iterable<User> getUserList() {
+        return store.getUsers();
     }
 
     @Override
@@ -255,17 +304,19 @@ public class SecurityServiceImpl extends RemoteServiceServlet implements Securit
             throw new UserManagementException(UserManagementException.PASSWORD_DOES_NOT_MEET_REQUIREMENTS);
         }
         RandomNumberGenerator rng = new SecureRandomNumberGenerator();
-        Object salt = rng.nextBytes();
+        byte[] salt = rng.nextBytes().getBytes();
         String hashedPasswordBase64 = hashPassword(password, salt);
         UsernamePasswordAccount upa = new UsernamePasswordAccount(username, hashedPasswordBase64, salt);
         final User result = store.createUser(username, email, upa);
-        store.updateUser(result); // store user with unvalidated e-mail
+        final String emailValidationSecret = result.startEmailValidation();
+        // don't replicate exception handling; replicate only the effect on the user store
+        apply(s->s.internalStoreUser(result));
         if (validationBaseURL != null) {
             new Thread("e-mail validation for user " + username + " with e-mail address " + email) {
                 @Override
                 public void run() {
                     try {
-                        startEmailValidation(result, validationBaseURL);
+                        startEmailValidation(result, emailValidationSecret, validationBaseURL);
                     } catch (MailException e) {
                         logger.log(Level.SEVERE, "Error sending mail for new account validation of user " + username
                                 + " to address " + email, e);
@@ -274,6 +325,12 @@ public class SecurityServiceImpl extends RemoteServiceServlet implements Securit
             }.start();
         }
         return result;
+    }
+
+    @Override
+    public Void internalStoreUser(User user) {
+        store.updateUser(user);
+        return null;
     }
 
     @Override
@@ -292,12 +349,12 @@ public class SecurityServiceImpl extends RemoteServiceServlet implements Securit
         // for non-admins, check that the old password is correct
         final UsernamePasswordAccount account = (UsernamePasswordAccount) user.getAccount(AccountType.USERNAME_PASSWORD);
         RandomNumberGenerator rng = new SecureRandomNumberGenerator();
-        Object salt = rng.nextBytes();
+        byte[] salt = rng.nextBytes().getBytes();
         String hashedPasswordBase64 = hashPassword(newPassword, salt);
         account.setSalt(salt);
         account.setSaltedPassword(hashedPasswordBase64);
         user.passwordWasReset();
-        store.updateUser(user);
+        apply(s->s.internalStoreUser(user));
     }
 
     @Override
@@ -327,21 +384,21 @@ public class SecurityServiceImpl extends RemoteServiceServlet implements Securit
             throw new UserManagementException(UserManagementException.USER_DOES_NOT_EXIST);
         }
         logger.info("Changing e-mail address of user "+username+" to "+newEmail);
-        user.setEmail(newEmail);
+        final String validationSecret = user.setEmail(newEmail);
         new Thread("e-mail validation after changing e-mail of user " + username + " to " + newEmail) {
             @Override
             public void run() {
                 try {
-                    startEmailValidation(user, validationBaseURL);
+                    startEmailValidation(user, validationSecret, validationBaseURL);
                 } catch (MailException e) {
                     logger.log(Level.SEVERE, "Error sending mail to validate e-mail address change for user "
                             + username + " to address " + newEmail, e);
                 }
             }
         }.start();
-        store.updateUser(user);
+        apply(s->s.internalStoreUser(user));
     }
-    
+
     @Override
     public boolean validateEmail(String username, String validationSecret) throws UserManagementException {
         final User user = store.getUserByName(username);
@@ -349,7 +406,7 @@ public class SecurityServiceImpl extends RemoteServiceServlet implements Securit
             throw new UserManagementException(UserManagementException.USER_DOES_NOT_EXIST);
         }
         final boolean result = user.validate(validationSecret);
-        store.updateUser(user);
+        apply(s->s.internalStoreUser(user));
         return result;
     }
 
@@ -357,17 +414,18 @@ public class SecurityServiceImpl extends RemoteServiceServlet implements Securit
      * {@link User#startEmailValidation() Triggers} e-mail validation for the <code>user</code> object and sends out a
      * URL to the user's e-mail that has the validation secret ready for validation by clicking.
      * 
+     * @param validationSecret
+     *            the result of either {@link User#startEmailValidation()} or {@link User#setEmail(String)}.
      * @param baseURL
-     *            the URL under which the user can reach the e-mail validation service; this URL is required to assemble a
-     *            validation URL that is sent by e-mail to the user, to make the user return the validation secret
-     *            to the right server again.
+     *            the URL under which the user can reach the e-mail validation service; this URL is required to assemble
+     *            a validation URL that is sent by e-mail to the user, to make the user return the validation secret to
+     *            the right server again.
      */
-    private void startEmailValidation(User user, String baseURL) throws MailException {
-        String secret = user.startEmailValidation();
+    private void startEmailValidation(User user, String validationSecret, String baseURL) throws MailException {
         try {
             Map<String, String> urlParameters = new HashMap<>();
             urlParameters.put("u", URLEncoder.encode(user.getName(), "UTF-8"));
-            urlParameters.put("v", URLEncoder.encode(secret, "UTF-8"));
+            urlParameters.put("v", URLEncoder.encode(validationSecret, "UTF-8"));
             StringBuilder url = buildURL(baseURL, urlParameters);
             sendMail(user.getName(), "e-Mail Validation",
                     "Please click on the link below to validate your e-mail address for user "+user.getName()+".\n   "+url.toString());
@@ -406,21 +464,44 @@ public class SecurityServiceImpl extends RemoteServiceServlet implements Securit
 
     @Override
     public void addRoleForUser(String username, String role) throws UserManagementException {
+        apply(s->s.internalAddRoleForUser(username, role));
+    }
+
+    @Override
+    public Void internalAddRoleForUser(String username, String role) throws UserManagementException {
         store.addRoleForUser(username, role);
+        return null;
     }
 
     @Override
     public void removeRoleFromUser(String username, String role) throws UserManagementException {
+        apply(s->s.internalRemoveRoleFromUser(username, role));
+    }
+
+    @Override
+    public Void internalRemoveRoleFromUser(String username, String role) throws UserManagementException {
         store.removeRoleFromUser(username, role);
+        return null;
     }
 
     @Override
     public void deleteUser(String username) throws UserManagementException {
+        apply(s->s.internalDeleteUser(username));
+    }
+
+    @Override
+    public Void internalDeleteUser(String username) throws UserManagementException {
         store.deleteUser(username);
+        return null;
     }
 
     @Override
     public boolean setSetting(String key, Object setting) {
+        return apply(s->s.internalSetSetting(key, setting));
+    }
+
+    @Override
+    public Boolean internalSetSetting(String key, Object setting) {
         return store.setSetting(key, setting);
     }
 
@@ -530,7 +611,6 @@ public class SecurityServiceImpl extends RemoteServiceServlet implements Securit
         logger.info("Getting Authorization url...");
         try {
             authorizationUrl = service.getAuthorizationUrl(requestToken);
-
             // Facebook has optional state var to protect against CSFR.
             // We'll use it
             if (authProvider == ClientUtils.FACEBOOK || authProvider == ClientUtils.GITHUB
@@ -679,7 +759,13 @@ public class SecurityServiceImpl extends RemoteServiceServlet implements Securit
         if (!isValidSettingsKey(key)) {
             throw new UserManagementException("Invalid key!");
         }
+        apply(s->s.internalAddSetting(key, clazz));
+    }
+
+    @Override
+    public Void internalAddSetting(String key, Class<?> clazz) {
         store.addSetting(key, clazz);
+        return null;
     }
 
     public static boolean isValidSettingsKey(String key) {
@@ -710,29 +796,6 @@ public class SecurityServiceImpl extends RemoteServiceServlet implements Securit
             for (String s : chainNames) {
                 System.out.println(s + ": " + Arrays.toString(filterChainManager.getChain(s).toArray(new Filter[0])));
             }
-
-            // Map<String, Class<?>> allSettingTypes = store.getAllSettingTypes();
-            // for (Entry<String, Class<?>> e : allSettingTypes.entrySet()){
-            // String[] classifier = e.getKey().split("_");
-            // if (classifier[0].equals("URLS") && !classifier[1].equals("AUTH")){
-            // String url = store.getSetting(e.getKey(), String.class);
-            // String n = classifier[0] + "_AUTH";
-            // for (int i = 1; i < classifier.length; i++){
-            // n += "_" + classifier[i];
-            // }
-            // String filter = store.getSetting(n, String.class);
-            // if (url != null && filter != null){
-            // if (!chainNames.contains(url)){
-            // filterChainManager.createChain(url, filter);
-            // logger.info("Created filter " + filter + " for " + url);
-            // }
-            // else {
-            // filterChainManager.addToChain(url, filter);
-            // logger.info("Updated filter " + filter + " for " + url);
-            // }
-            // }
-            // }
-            // }
         }
     }
 
@@ -746,25 +809,37 @@ public class SecurityServiceImpl extends RemoteServiceServlet implements Securit
     }
 
     @Override
-    public void setPreference(String username, String key, String value) {
-        Subject subject = SecurityUtils.getSubject();
+    public void setPreference(final String username, final String key, final String value) {
+        final Subject subject = SecurityUtils.getSubject();
         if (subject.hasRole(DefaultRoles.ADMIN.name()) || username.equals(SessionUtils.loadUsername())) {
-            store.setPreference(username, key, value);
+            apply(s->s.internalSetPreference(username, key, value));
         } else {
             throw new SecurityException("User " + SessionUtils.loadUsername()
                     + " does not have permission to set preference for user " + username);
         }
+    }
+
+    @Override
+    public Void internalSetPreference(final String username, final String key, final String value) {
+        store.setPreference(username, key, value);
+        return null;
     }
     
     @Override
     public void unsetPreference(String username, String key) {
         Subject subject = SecurityUtils.getSubject();
         if (subject.hasRole(DefaultRoles.ADMIN.name()) || username.equals(SessionUtils.loadUsername())) {
-            store.unsetPreference(username, key);
+            apply(s->s.internalUnsetPreference(username, key));
         } else {
             throw new SecurityException("User " + SessionUtils.loadUsername()
                     + " does not have permission to unset preference for user " + username);
         }
+    }
+
+    @Override
+    public Void internalUnsetPreference(String username, String key) {
+        store.unsetPreference(username, key);
+        return null;
     }
 
     @Override
@@ -777,5 +852,87 @@ public class SecurityServiceImpl extends RemoteServiceServlet implements Securit
                     + " does not have permission to read preferences of user " + username);
         }
     }
+
+    // ----------------- Replication -------------
+    @Override
+    public void clearReplicaState() throws MalformedURLException, IOException, InterruptedException {
+        mailProperties.clear();
+        store.clear();
+    }
+
+    @Override
+    public Serializable getId() {
+        return getClass().getName();
+    }
     
+    @Override
+    public ObjectInputStream createObjectInputStreamResolvingAgainstCache(InputStream is) throws IOException {
+        return new ObjectInputStreamResolvingAgainstSecurityCache(is, store);
+    }
+
+    @Override
+    public void initiallyFillFromInternal(ObjectInputStream is) throws IOException, ClassNotFoundException,
+            InterruptedException {
+        ReplicatingCacheManager newCacheManager = (ReplicatingCacheManager) is.readObject();
+        cacheManager.replaceContentsFrom(newCacheManager);
+        // overriding thread context class loader because the user store may be provided by a different bundle;
+        // We're assuming here that the user store service is provided by the same bundle in the replica as on the master.
+        ClassLoader oldCCL = Thread.currentThread().getContextClassLoader();
+        if (store != null) {
+            Thread.currentThread().setContextClassLoader(store.getClass().getClassLoader());
+        }
+        try {
+            UserStore newUserStore = (UserStore) is.readObject();
+            store.replaceContentsFrom(newUserStore);
+        } finally {
+            Thread.currentThread().setContextClassLoader(oldCCL);
+        }
+    }
+
+    @Override
+    public void serializeForInitialReplicationInternal(ObjectOutputStream objectOutputStream) throws IOException {
+        objectOutputStream.writeObject(cacheManager);
+        objectOutputStream.writeObject(store);
+    }
+
+    @Override
+    public Iterable<OperationExecutionListener<ReplicableSecurityService>> getOperationExecutionListeners() {
+        return operationExecutionListeners.keySet();
+    }
+
+    @Override
+    public void addOperationExecutionListener(OperationExecutionListener<ReplicableSecurityService> listener) {
+        operationExecutionListeners.put(listener, listener);
+    }
+
+    @Override
+    public void removeOperationExecutionListener(OperationExecutionListener<ReplicableSecurityService> listener) {
+        operationExecutionListeners.remove(listener);
+    }
+
+    @Override
+    public ReplicationMasterDescriptor getMasterDescriptor() {
+        return replicatingFromMaster;
+    }
+
+    @Override
+    public void startedReplicatingFrom(ReplicationMasterDescriptor master) {
+        this.replicatingFromMaster = master;
+    }
+
+    @Override
+    public void stoppedReplicatingFrom(ReplicationMasterDescriptor master) {
+        this.replicatingFromMaster = null;
+    }
+
+    @Override
+    public void addOperationSentToMasterForReplication(
+            OperationWithResultWithIdWrapper<ReplicableSecurityService, ?> operationWithResultWithIdWrapper) {
+        this.operationsSentToMasterForReplication.add(operationWithResultWithIdWrapper);
+    }
+
+    @Override
+    public boolean hasSentOperationToMaster(OperationWithResult<ReplicableSecurityService, ?> operation) {
+        return this.operationsSentToMasterForReplication.remove(operation);
+    }
 }

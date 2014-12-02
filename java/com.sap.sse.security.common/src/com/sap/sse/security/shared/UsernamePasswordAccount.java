@@ -1,13 +1,15 @@
 package com.sap.sse.security.shared;
 
+import com.sap.sse.common.Named;
 
-public class UsernamePasswordAccount implements Account {
 
+public class UsernamePasswordAccount implements Named, Account {
+    private static final long serialVersionUID = 5986653173215900637L;
     private String name;
     private String saltedPassword;
-    private Object salt;
+    private byte[] salt;
     
-    public UsernamePasswordAccount(String name, String saltedPassword, Object salt) {
+    public UsernamePasswordAccount(String name, String saltedPassword, byte[] salt) {
         this.name = name;
         this.saltedPassword = saltedPassword;
         this.salt = salt;
@@ -21,20 +23,17 @@ public class UsernamePasswordAccount implements Account {
         this.saltedPassword = saltedPassword;
     }
 
-    public Object getSalt() {
+    public byte[] getSalt() {
         return salt;
     }
 
-    public void setSalt(Object salt) {
+    public void setSalt(byte[] salt) {
         this.salt = salt;
     }
 
+    @Override
     public String getName() {
         return name;
-    }
-
-    public void setName(String name) {
-        this.name = name;
     }
 
     @Override

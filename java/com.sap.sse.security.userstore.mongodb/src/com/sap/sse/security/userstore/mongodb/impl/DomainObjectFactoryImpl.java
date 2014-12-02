@@ -9,8 +9,6 @@ import java.util.Set;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
-import org.apache.shiro.util.SimpleByteSource;
-
 import com.mongodb.BasicDBList;
 import com.mongodb.BasicDBObject;
 import com.mongodb.DB;
@@ -19,9 +17,9 @@ import com.mongodb.DBObject;
 import com.sap.sse.security.Social;
 import com.sap.sse.security.User;
 import com.sap.sse.security.shared.Account;
+import com.sap.sse.security.shared.Account.AccountType;
 import com.sap.sse.security.shared.SocialUserAccount;
 import com.sap.sse.security.shared.UsernamePasswordAccount;
-import com.sap.sse.security.shared.Account.AccountType;
 import com.sap.sse.security.userstore.mongodb.DomainObjectFactory;
 
 public class DomainObjectFactoryImpl implements DomainObjectFactory {
@@ -103,7 +101,7 @@ public class DomainObjectFactoryImpl implements DomainObjectFactory {
         case USERNAME_PASSWORD:
             String name = (String) dbAccount.get(FieldNames.UsernamePassword.NAME.name());
             String saltedPassword = (String) dbAccount.get(FieldNames.UsernamePassword.SALTED_PW.name());
-            Object salt = new SimpleByteSource((byte[]) dbAccount.get(FieldNames.UsernamePassword.SALT.name()));
+            byte[] salt = (byte[]) dbAccount.get(FieldNames.UsernamePassword.SALT.name());
             return new UsernamePasswordAccount(name, saltedPassword, salt);
             //TODO [D056866] add other Account-types
         case SOCIAL_USER:

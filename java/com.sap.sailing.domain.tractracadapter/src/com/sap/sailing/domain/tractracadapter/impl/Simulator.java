@@ -104,7 +104,7 @@ public class Simulator {
      * {@link #setAdvanceInMillis(long)}.
      */
     private synchronized long getAdvanceInMillis() {
-        while (!isAdvanceInMilliseSet()) {
+        while (!isAdvanceInMillisSet()) {
             if (trackedRace.getStartOfRace() != null) {
                 setAdvanceInMillis(System.currentTimeMillis() - trackedRace.getStartOfRace().asMillis());
             } else {
@@ -173,7 +173,7 @@ public class Simulator {
     }
 
     private TimePoint advanceTimePointAndUseAsStartTimeIfNeeded(TimePoint time){
-        if (isAdvanceInMilliseSet()) {
+        if (isAdvanceInMillisSet()) {
             return advance(time);
         } else {
             setAdvanceInMillis(System.currentTimeMillis() - time.asMillis());
@@ -181,7 +181,7 @@ public class Simulator {
         }
     }
 
-    private boolean isAdvanceInMilliseSet() {
+    private boolean isAdvanceInMillisSet() {
         return advanceInMillis != -1;
     }
 

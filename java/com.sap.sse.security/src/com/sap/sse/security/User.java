@@ -1,5 +1,6 @@
 package com.sap.sse.security;
 
+import java.io.Serializable;
 import java.util.Arrays;
 import java.util.Collection;
 import java.util.HashMap;
@@ -10,10 +11,13 @@ import java.util.Set;
 
 import org.apache.shiro.crypto.hash.Sha256Hash;
 
+import com.sap.sse.common.Named;
+import com.sap.sse.common.WithID;
 import com.sap.sse.security.shared.Account;
 import com.sap.sse.security.shared.Account.AccountType;
 
-public class User {
+public class User implements Named, WithID {
+    private static final long serialVersionUID = 1788215575606546042L;
 
     private String name;
 
@@ -62,6 +66,14 @@ public class User {
         for (Account a : accounts) {
             this.accounts.put(a.getAccountType(), a);
         }
+    }
+
+    /**
+     * For the time being, the user {@link #getName() name} is used as ID
+     */
+    @Override
+    public Serializable getId() {
+        return getName();
     }
 
     public String getName() {

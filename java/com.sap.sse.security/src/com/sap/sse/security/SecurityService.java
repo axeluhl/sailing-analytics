@@ -1,6 +1,5 @@
 package com.sap.sse.security;
 
-import java.util.Collection;
 import java.util.Map;
 import java.util.Set;
 import java.util.UUID;
@@ -10,16 +9,19 @@ import javax.servlet.ServletContext;
 import org.apache.shiro.cache.CacheManager;
 import org.apache.shiro.mgt.SecurityManager;
 
+import com.sap.sse.replication.impl.ReplicableWithObjectInputStream;
+import com.sap.sse.security.impl.ReplicableSecurityService;
+import com.sap.sse.security.operations.SecurityOperation;
 import com.sap.sse.security.shared.DefaultRoles;
 import com.sap.sse.security.shared.MailException;
 import com.sap.sse.security.shared.SocialUserAccount;
 import com.sap.sse.security.shared.UserManagementException;
 
-public interface SecurityService {
+public interface SecurityService extends ReplicableWithObjectInputStream<ReplicableSecurityService, SecurityOperation<?>> {
 
     SecurityManager getSecurityManager();
 
-    Collection<User> getUserList();
+    Iterable<User> getUserList();
 
     User getUserByName(String username);
 

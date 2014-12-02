@@ -6,12 +6,12 @@ import com.google.gwt.user.client.ui.Anchor;
 import com.google.gwt.user.client.ui.Grid;
 import com.google.gwt.user.client.ui.Label;
 import com.google.gwt.user.client.ui.Widget;
+import com.sap.sse.security.ui.client.UserManagementServiceAsync;
 import com.sap.sse.security.ui.client.UserService;
 import com.sap.sse.security.ui.client.component.AbstractUserDialog;
 import com.sap.sse.security.ui.client.component.ForgotPasswordDialog;
 import com.sap.sse.security.ui.client.i18n.StringMessages;
 import com.sap.sse.security.ui.client.shared.oauthlogin.OAuthLogin;
-import com.sap.sse.security.ui.shared.UserManagementServiceAsync;
 
 public class SignInDialog extends AbstractUserDialog {
     private final UserService userService;

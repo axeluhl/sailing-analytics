@@ -1,10 +1,12 @@
-package com.sap.sse.security.ui.shared;
+package com.sap.sse.security.ui.client;
 
 import java.util.Collection;
 import java.util.Map;
 
 import com.google.gwt.user.client.rpc.AsyncCallback;
 import com.sap.sse.security.ui.oauth.client.CredentialDTO;
+import com.sap.sse.security.ui.shared.SuccessInfo;
+import com.sap.sse.security.ui.shared.UserDTO;
 
 public interface UserManagementServiceAsync {
     void getUserList(AsyncCallback<Collection<UserDTO>> callback);
