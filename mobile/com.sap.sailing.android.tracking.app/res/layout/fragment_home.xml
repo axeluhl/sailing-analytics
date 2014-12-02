@@ -13,15 +13,17 @@
         android:contentDescription="@string/empty"
         android:scaleType="centerCrop"
         android:src="@drawable/working_title" />
+         
 
     <RelativeLayout
         android:id="@+id/bottomLayout"
         android:layout_width="match_parent"
         android:layout_height="50dp"
         android:layout_alignParentBottom="true"
+        android:background="@+color/black_transparent"
         android:layout_alignParentLeft="true" >
 
-        <TextView
+        <com.sap.sailing.android.tracking.app.customviews.OpenSansTextView
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:layout_centerHorizontal="true"
@@ -31,7 +33,7 @@
             android:textColor="@color/white" />
     </RelativeLayout>
 
-    <Button
+    <com.sap.sailing.android.tracking.app.customviews.OpenSansButton
         android:id="@+id/scanQr"
         android:layout_width="fill_parent"
         android:layout_height="80dp"
@@ -44,7 +46,7 @@
         android:textStyle="bold"
         android:text="@string/scan_qr" />
         
-    <Button
+    <com.sap.sailing.android.tracking.app.customviews.OpenSansButton
         android:id="@+id/noQrCode"
         android:layout_width="fill_parent"
         android:layout_height="wrap_content"

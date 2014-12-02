@@ -48,6 +48,8 @@ public class AnalyticsProvider extends ContentProvider {
     
     private static final int EVENT_GPS_FIXES_JOINED = 700;
     
+    private static final int LEADERBOARDS_EVENTS_JOINED = 800;
+    
     private static UriMatcher buildUriMatcher() {
         final UriMatcher matcher = new UriMatcher(UriMatcher.NO_MATCH);
         final String authority = AnalyticsContract.CONTENT_AUTHORITY;
@@ -70,6 +72,8 @@ public class AnalyticsProvider extends ContentProvider {
         matcher.addURI(authority, "event_leaderboard_competitor_joined", EVENT_LEADERBOARD_COMPETITOR_JOINED);
         
         matcher.addURI(authority, "event_gps_fix_joined",  EVENT_GPS_FIXES_JOINED);
+        
+        matcher.addURI(authority, "leaderboards_events_joined", LEADERBOARDS_EVENTS_JOINED);
         
         return matcher;
     }
@@ -111,6 +115,12 @@ public class AnalyticsProvider extends ContentProvider {
             	SQLiteQueryBuilder eb = new SQLiteQueryBuilder();
             	eb.setTables(Tables.GPS_FIXES_JOIN_EVENTS);
             	cursor = eb.query(db, projection, selection, selectionArgs, null, null, sortOrder);
+            	return cursor;
+            	
+            case LEADERBOARDS_EVENTS_JOINED:
+            	SQLiteQueryBuilder el = new SQLiteQueryBuilder();
+            	el.setTables(Tables.LEADERBOARDS_JOIN_EVENTS);
+            	cursor = el.query(db, projection, selection, selectionArgs, null, null, sortOrder);
             	return cursor;
             	
             default:

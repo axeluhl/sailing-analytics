@@ -78,4 +78,7 @@
     <!-- override android.shared default value -->
     <string name="app_folder">racecommittee</string>
     <bool name="preference_isSendingActive_default">false</bool>
+    
+    <string name="preference_wakelock_key">enable_wakelock</string>
+    <bool name="preference_wakelock_default">true</bool>
 </resources>

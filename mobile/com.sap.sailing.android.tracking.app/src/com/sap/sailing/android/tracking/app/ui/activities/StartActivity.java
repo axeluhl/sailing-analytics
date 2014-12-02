@@ -18,18 +18,18 @@ public class StartActivity extends BaseActivity {
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-
+       
         setContentView(R.layout.fragment_container);
         Toolbar toolbar = (Toolbar) findViewById(R.id.toolbar);
         if (toolbar != null) {
             setSupportActionBar(toolbar);
-            
             toolbar.setNavigationIcon(R.drawable.sap_logo_64_sq);
             toolbar.setPadding(20, 0, 0, 0);
             toolbar.setBackgroundColor(getResources().getColor(R.color.colorPrimary));
         }
         if (getSupportActionBar() != null) {
-            getSupportActionBar().setHomeButtonEnabled(false);
+			getSupportActionBar().setTitle(getString(R.string.title_activity_start));
+			getSupportActionBar().setHomeButtonEnabled(false);
         }
         
         replaceFragment(R.id.content_frame, new HomeFragment());
@@ -77,7 +77,6 @@ public class StartActivity extends BaseActivity {
     private void startTrackingActivity(int eventId) {
 		Intent intent = new Intent(this, TrackingActivity.class);
 		intent.putExtra(getString(R.string.tracking_activity_event_id_parameter), eventId);
-		intent.putExtra(getString(R.string.tracking_activity_started_by_start_activity_parameter), true);
 		startActivity(intent);
 	}
 
