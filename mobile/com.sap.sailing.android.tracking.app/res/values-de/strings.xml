@@ -44,6 +44,7 @@
     <string name="tracking_mode_battery_saving">Energie sparen</string>
     <string name="tracking_mode_caching">Offline</string>
     <string name="tracking_mode_api_error">API-Fehler</string>
+    <string name="tracking_unsent_fixes">Ungesendete Tracking-Fixes</string>
     <string name="add_team_photo">Team Foto hinzufügen</string>
     <string name="do_you_want_to_choose_existing_img_or_take_a_new_one">Bild auswählen oder neues Foto aufnehmen?</string>
     <string name="existing_image">Auswählen</string>
