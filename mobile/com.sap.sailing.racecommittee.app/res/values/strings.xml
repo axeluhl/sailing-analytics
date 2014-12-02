@@ -1,13 +1,13 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources xmlns:tools="http://schemas.android.com/tools">
-    <string-array name="empty_array" tools:ignore="UnusedResources"/>
+
+    <string-array name="empty_array" tools:ignore="UnusedResources" />
 
     <string name="running_on_course">(on course %s)</string>
     <string name="course_design_number_waypoints">Course has %s waypoints</string>
     <string name="service_info">SAP Race Committee Service</string>
     <string name="service_text_no_races">Waiting for races to monitor&#8230;</string>
     <string name="service_text_num_races">Currently monitoring %d races.</string>
-    
     <string name="app_name">SAP Race Committee Cockpit</string>
     <string name="set_time">Start</string>
     <string name="reset_time">Restart</string>
@@ -87,8 +87,8 @@
         <item>Port</item>
         <item>Starboard</item>
         <item>Gate</item>
-        <item >Line</item>
-        <item >Offset</item>
+        <item>Line</item>
+        <item>Offset</item>
     </string-array>
 
     <string name="publish">Publish</string>
@@ -112,7 +112,6 @@
     <string name="results_capturing_view_add_photo">Add photo</string>
     <string name="results_capturing_view_list_header">Attached photos</string>
     <string name="results_capturing_view_list_empty">No photos yet</string>
-    
     <string name="results_mail_subject">[Race Committee] %s</string>
     <string name="results_mail_body">Results for race %s are attached.</string>
     <string name="wind_direction_degrees">Wind direction from (degrees)</string>
@@ -126,34 +125,29 @@
     <string name="wind_location_or_fields_not_valid">The entered location, wind speed or direction is empty. Please correct the values.</string>
     <string name="waiting_for_gps">Waiting for GPS Signal&#8230;</string>
     <string name="store_wind">Store wind</string>
-    
-	<!-- SETTINGS -->
-	<string name="settings_activity_title">Settings</string>
-    <string name="settings_category_general">Other</string>    
+
+    <!-- SETTINGS -->
+    <string name="settings_activity_title">Settings</string>
+    <string name="settings_category_general">Other</string>
     <string name="settings_general_manageareas_header">Managed Course Areas</string>
     <string name="settings_general_language_header">Select Language</string>
     <string name="settings_general_language_description">Select the language. You might need to restart the app to have changes applied.</string>
-    
     <string name="override_default_start_procedure_type_select_header">Default start procedure type when overriden</string>
     <string name="override_default_start_procedure_type_select_description">Races will use selected start procedure type as a default. For this option to be active override checkbox has to be enabled.</string>
-    
     <string name="settings_please_reload">Please execute action \'Reload\' to apply changes.</string>
     <string name="settings_advanced_service_header">Webservice URL</string>
     <string name="settings_advanced_mail_header">Positioning mail recipient</string>
-    
     <string name="settings_category_polling">Polling</string>
     <string name="settings_polling_active_header">Activate Polling</string>
     <string name="settings_polling_active_description">When active the server will be polled for changes.</string>
     <string name="settings_polling_interval_header">Polling Interval (seconds)</string>
-    
     <string name="compass_view_compass">Compass</string>
     <string name="compass_view_needle">Needle</string>
-    
     <string name="racing_course_area_missing">Course area could not be loaded. Please go back to the login page.</string>
     <string name="racing_load_success">Successfully loaded %d races.</string>
     <string name="generic_load_failure">There was an error loading the requested data:\n\n\"%s\"\n\nDo you want to retry?</string>
     <string name="set_course_layout">Set the course layout</string>
-    
+
     <string name="loading_failure">Load failure</string>
 	<string name="wind_unknown">(click to set wind)</string>
 	<string name="wind_info">(%1$s kn, %2$s)</string>
@@ -205,6 +199,8 @@
 	<string name="synchronize_connection_settings_description">When creating a configuration on the server, click here to synchronize your app and connection settings via QRCode.</string>
 	<string name="update_app_header">Force update</string>
 	<string name="update_app_description">Force an update from the server. It\'s a better idea to use the synchronize option.</string>
+	<string name="preference_wakelock_header">Stay screen on</string>
+	<string name="preference_wakelock_summary">Force the screen to stay awake. Caution: Uses more battery.</string>
 	
 	<string name="options_menu_info">Expert Information</string>
 	
@@ -245,4 +241,7 @@
 	<string name="toggle_group_race_mode">Group Race?</string>
 	<string name="toggle_group_race_mode_off">No Group Racing</string>
 	<string name="toggle_group_race_mode_on">Group Racing</string>
+	
+	<string name="welcome">WELCOME</string>
+    <string name="change">CHANGE</string>
 </resources>
