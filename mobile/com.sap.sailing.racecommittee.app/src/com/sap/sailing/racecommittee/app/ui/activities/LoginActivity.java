@@ -112,6 +112,7 @@ public class LoginActivity extends BaseActivity implements EventSelectedListener
         }
     };
 
+
     private LoginDialog mLoginDialog;
     private ProgressBar mProgressSpinner;
 
@@ -234,10 +235,12 @@ public class LoginActivity extends BaseActivity implements EventSelectedListener
         return true;
     }
 
+
     private void selectCourseArea(CourseArea courseArea) {
         mSelectedCourseArea = courseArea;
         mLoginDialog.show(getFragmentManager(), "LoginDialog");
     }
+    
     @Override
     public void setSupportProgressBarIndeterminateVisibility(boolean visible) {
         super.setSupportProgressBarIndeterminateVisibility(visible);
