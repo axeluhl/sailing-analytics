@@ -1,21 +1,13 @@
 package com.sap.sse.security;
 
-import java.util.ArrayList;
-import java.util.List;
-
 import org.apache.shiro.authc.AuthenticationException;
 import org.apache.shiro.authc.AuthenticationInfo;
 import org.apache.shiro.authc.AuthenticationToken;
 import org.apache.shiro.authc.SaltedAuthenticationInfo;
 import org.apache.shiro.authc.UsernamePasswordToken;
-import org.apache.shiro.authz.AuthorizationInfo;
-import org.apache.shiro.authz.SimpleAuthorizationInfo;
-import org.apache.shiro.subject.PrincipalCollection;
-import org.apache.shiro.util.ByteSource;
 
-import com.sap.sse.security.shared.UserManagementException;
-import com.sap.sse.security.shared.UsernamePasswordAccount;
 import com.sap.sse.security.shared.Account.AccountType;
+import com.sap.sse.security.shared.UsernamePasswordAccount;
 
 public class UsernamePasswordRealm extends AbstractUserStoreBasedRealm {
     
@@ -37,22 +29,6 @@ public class UsernamePasswordRealm extends AbstractUserStoreBasedRealm {
     }
 
     @Override
-    protected AuthorizationInfo doGetAuthorizationInfo(PrincipalCollection principals) {
-        final SimpleAuthorizationInfo ai = new SimpleAuthorizationInfo();
-        final List<String> roles = new ArrayList<>();
-        for (Object r : principals.asList()){
-            String username = r.toString();
-            try {
-                roles.addAll(getUserStore().getRolesFromUser(username));
-            } catch (UserManagementException e) {
-               throw new AuthenticationException(e.getMessage());
-            }
-        }
-        ai.addRoles(roles);
-        return ai;
-    }
-
-    @Override
     protected AuthenticationInfo doGetAuthenticationInfo(AuthenticationToken token) throws AuthenticationException {
         UsernamePasswordToken userPassToken = (UsernamePasswordToken) token;
         final String username = userPassToken.getUsername();
@@ -63,7 +39,7 @@ public class UsernamePasswordRealm extends AbstractUserStoreBasedRealm {
 
         // read password hash and salt from db
         String saltedPassword = null;
-        ByteSource salt = null;
+        byte[] salt = null;
         User user = getUserStore().getUserByName(username);
         if (user == null){
             return null;
@@ -73,7 +49,7 @@ public class UsernamePasswordRealm extends AbstractUserStoreBasedRealm {
             return null;
         }
         saltedPassword = upa.getSaltedPassword();
-        salt = (ByteSource) upa.getSalt();
+        salt = upa.getSalt();
         if (saltedPassword == null) {
             return null;
         }

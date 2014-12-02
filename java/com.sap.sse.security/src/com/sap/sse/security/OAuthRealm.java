@@ -1,7 +1,5 @@
 package com.sap.sse.security;
 
-import java.util.ArrayList;
-import java.util.Collection;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.UUID;
@@ -12,9 +10,6 @@ import org.apache.shiro.authc.AuthenticationException;
 import org.apache.shiro.authc.AuthenticationInfo;
 import org.apache.shiro.authc.AuthenticationToken;
 import org.apache.shiro.authc.SimpleAuthenticationInfo;
-import org.apache.shiro.authz.AuthorizationInfo;
-import org.apache.shiro.authz.Permission;
-import org.apache.shiro.subject.PrincipalCollection;
 import org.apache.shiro.subject.SimplePrincipalCollection;
 import org.json.simple.JSONObject;
 import org.json.simple.parser.JSONParser;
@@ -47,37 +42,6 @@ public class OAuthRealm extends AbstractUserStoreBasedRealm {
     
     public OAuthRealm() {
         super();
-    }
-
-    @Override
-    protected AuthorizationInfo doGetAuthorizationInfo(PrincipalCollection token) {
-        AuthorizationInfo info = new AuthorizationInfo() {
-            private static final long serialVersionUID = 1L;
-
-            @Override
-            public Collection<String> getStringPermissions() {
-                return new ArrayList<String>();
-            }
-
-            @Override
-            public Collection<String> getRoles() {
-                ArrayList<String> roles = new ArrayList<>();
-                return roles;
-            }
-
-            @Override
-            public Collection<Permission> getObjectPermissions() {
-                ArrayList<Permission> permissions = new ArrayList<>();
-                permissions.add(new Permission() {
-                    @Override
-                    public boolean implies(Permission arg0) {
-                        return false;
-                    }
-                });
-                return permissions;
-            }
-        };
-        return info;
     }
 
     @Override

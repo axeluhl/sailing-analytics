@@ -9,6 +9,7 @@ import java.util.UUID;
 import com.rabbitmq.client.Channel;
 import com.rabbitmq.client.QueueingConsumer;
 import com.sap.sse.replication.impl.RabbitInputStreamProvider;
+import com.sap.sse.replication.impl.ReplicationServlet;
 
 /**
  * Identifies a master server instance from which a replica can obtain an initial load and continuous updates.
@@ -24,12 +25,20 @@ public interface ReplicationMasterDescriptor {
 
     /**
      * The content produced by the URL returned is the name of the queue from which the client can read the initial load
-     * using a {@link RabbitInputStreamProvider}.
+     * using a {@link RabbitInputStreamProvider}. Handled by the {@link ReplicationServlet}.
      * 
      * @param replicables
      *            the replicables for which to request the initial load
      */
     URL getInitialLoadURL(Iterable<Replicable<?, ?>> replicables) throws MalformedURLException;
+
+    /**
+     * The {@link ReplicationServlet} handles sending an operation for execution from a replica that initiated it to
+     * a master where processing and replication along the complete replica tree shall start. This method returns the
+     * {@link URL} that must be used in POST mode to send the serialized operation to the servlet where it will be
+     * de-serialized and applied to the {@link Replicable} identified by the <code>replicableIdAsString</code>.
+     */
+    URL getSendReplicaInitiatedOperationToMasterURL(String replicableIdAsString) throws MalformedURLException;
 
     int getMessagingPort();
     
@@ -54,4 +63,5 @@ public interface ReplicationMasterDescriptor {
      * @return a RabbitMQ channel created with the replication connectivity parameters defined by this descriptor
      */
     Channel createChannel() throws IOException;
+
 }

@@ -184,7 +184,7 @@ public interface SailingService extends RemoteService {
     
     void moveLeaderboardColumnDown(String leaderboardName, String columnName);
     
-    RegattaDTO createRegatta(String regattaName, String boatClassName,
+    RegattaDTO createRegatta(String regattaName, String boatClassName, Date startDate, Date endDate,
             RegattaCreationParametersDTO seriesNamesWithFleetNamesAndFleetOrderingAndMedal, boolean persistent,
             ScoringSchemeType scoringSchemeType, UUID defaultCourseAreaId, boolean useStartTimeInference);
     
@@ -194,7 +194,8 @@ public interface SailingService extends RemoteService {
 
     void removeRegattas(Collection<RegattaIdentifier> regattas);
     
-    void updateRegatta(RegattaIdentifier regattaIdentifier, UUID defaultCourseAreaUuid, RegattaConfigurationDTO regattaConfiguration, boolean useStartTimeInference);
+    void updateRegatta(RegattaIdentifier regattaIdentifier, Date startDate, Date endDate, UUID defaultCourseAreaUuid, 
+            RegattaConfigurationDTO regattaConfiguration, boolean useStartTimeInference);
     
     List<RaceColumnInSeriesDTO> addRaceColumnsToSeries(RegattaIdentifier regattaIdentifier, String seriesName, List<String> columnNames);
 

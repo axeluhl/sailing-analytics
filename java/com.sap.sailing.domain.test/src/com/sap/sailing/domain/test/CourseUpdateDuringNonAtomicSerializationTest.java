@@ -72,7 +72,7 @@ public class CourseUpdateDuringNonAtomicSerializationTest implements Serializabl
         removeCalls = new HashMap<>();
         course = new CourseImpl("Test Course", waypoints);
         Regatta regatta = new RegattaImpl(EmptyRaceLogStore.INSTANCE, "Test Regatta",
-                new BoatClassImpl("505", BoatClassMasterdata._5O5), /* trackedRegattaRegistry */ null,
+                new BoatClassImpl("505", BoatClassMasterdata._5O5), /*startDate*/ null, /*endDate*/ null, /* trackedRegattaRegistry */ null,
                 new LowPoint(), UUID.randomUUID(), new CourseAreaImpl("Alpha", UUID.randomUUID()));
         TrackedRegatta trackedRegatta = new TrackedRegattaImpl(regatta);
         RaceDefinition race = new RaceDefinitionImpl("Test Race", course, regatta.getBoatClass(), Collections.<Competitor>emptySet());

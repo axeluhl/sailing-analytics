@@ -70,7 +70,8 @@ public class CompetitorReplicationTest extends AbstractServerReplicationTest {
         String boatClassName = "Kielzugvogel";
         Integer regattaId = 12345;
         Iterable<Series> series = Collections.emptyList();
-        Regatta masterRegatta = master.createRegatta(RegattaImpl.getDefaultName(baseEventName, boatClassName), boatClassName, regattaId, series,
+        Regatta masterRegatta = master.createRegatta(RegattaImpl.getDefaultName(baseEventName, boatClassName), boatClassName, 
+                /*startDate*/ null, /*endDate*/ null, regattaId, series,
                 /* persistent */ true, DomainFactory.INSTANCE.createScoringScheme(ScoringSchemeType.LOW_POINT), null, /* useStartTimeInference */ true);
         Iterable<Waypoint> emptyWaypointList = Collections.emptyList();
         final String competitorName = "Der mit dem Kiel zieht";

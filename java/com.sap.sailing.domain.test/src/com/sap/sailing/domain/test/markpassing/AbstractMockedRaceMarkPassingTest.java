@@ -62,7 +62,8 @@ public class AbstractMockedRaceMarkPassingTest {
         Waypoint w5 = new WaypointImpl(cp, PassingInstruction.Line);
         waypoints = Arrays.asList(w1, w2, w3, w4, w5);
         final BoatClassImpl boatClass = new BoatClassImpl("boat", true);
-        Regatta r = new RegattaImpl(RegattaImpl.getDefaultName("regatta", boatClass.getName()), boatClass, Arrays.asList(new SeriesImpl("Series", true, Arrays.asList(new FleetImpl("fleet")),
+        Regatta r = new RegattaImpl(RegattaImpl.getDefaultName("regatta", boatClass.getName()), boatClass, 
+                /*startDate*/ null, /*endDate*/ null, Arrays.asList(new SeriesImpl("Series", true, Arrays.asList(new FleetImpl("fleet")),
                 new ArrayList<String>(), null)), true, new HighPoint(), "ID", new CourseAreaImpl("area", new UUID(5, 5)));
         Course course = new CourseImpl("course", waypoints);
         RaceDefinition raceDef = new RaceDefinitionImpl("Performance Race", course, boatClass, Arrays.asList(ron, tom, ben));

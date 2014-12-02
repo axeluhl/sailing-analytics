@@ -64,7 +64,7 @@ public abstract class AbstractTestStoringAndRetrievingRaceLogInRegatta extends R
         RaceLogStore raceLogStore = MongoRaceLogStoreFactory.INSTANCE.getMongoRaceLogStore(mongoObjectFactory,
                 domainObjectFactory);
         Regatta regatta = new RegattaImpl(raceLogStore, RegattaImpl.getDefaultName(regattaBaseName,
-                boatClass == null ? null : boatClass.getName()), boatClass, series, persistent, scoringScheme, "123",
+                boatClass == null ? null : boatClass.getName()), boatClass, /*startDate*/ null, /*endDate*/ null, series, persistent, scoringScheme, "123",
                 courseArea, /* useStartTimeInference */true);
         return regatta;
     }
