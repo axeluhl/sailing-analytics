@@ -6,7 +6,7 @@ import java.util.Map;
 import com.sap.sailing.dashboards.gwt.shared.dto.startanalysis.StartAnalysisDTO;
 
 
-public interface StartAnalyisisRacesStoreListener {
+public interface StartAnalysisRacesStoreListener {
 
     public void startAnalyisisRacesChanged(Map<String , List<StartAnalysisDTO>> startAnalysisDTOs);
 }

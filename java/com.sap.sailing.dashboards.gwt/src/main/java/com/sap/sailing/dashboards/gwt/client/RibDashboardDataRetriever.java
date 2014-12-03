@@ -87,6 +87,7 @@ public class RibDashboardDataRetriever implements RacingNotYetStartedPopupListen
     }
 
     private void requestLiveRaceInfoFromRibDashboadService() {
+    	System.out.println("Request with team "+selectedTeamName);
         ribDashboardService.getLiveRaceInfo(leaderboardGroupName, selectedTeamName,
                 new AsyncCallback<RibDashboardRaceInfoDTO>() {
                     @Override
@@ -177,14 +178,13 @@ public class RibDashboardDataRetriever implements RacingNotYetStartedPopupListen
 
     @Override
     public void popupButtonClicked() {
-        // TODO Auto-generated method stub
         startRequestingData();
     }
 
     @Override
     public void didClickedOKWithCompetitorName(String competitorName) {
-        // TODO Auto-generated method stub
-        selectedTeamName = competitorName;
+    	System.out.println("Did clicked with competitor "+competitorName);
+        this.selectedTeamName = competitorName;
         startRequestingData();
     }
 }

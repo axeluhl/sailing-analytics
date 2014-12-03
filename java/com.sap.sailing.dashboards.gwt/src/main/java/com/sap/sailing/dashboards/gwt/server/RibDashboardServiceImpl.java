@@ -56,7 +56,7 @@ import com.sap.sse.common.impl.MillisecondsTimePoint;
  */
 @SuppressWarnings("serial")
 public class RibDashboardServiceImpl extends RemoteServiceServlet implements
-		RibDashboardService, StartAnalyisisRacesStoreListener {
+		RibDashboardService, StartAnalysisRacesStoreListener {
 
 	private final ServiceTracker<RacingEventService, RacingEventService> racingEventServiceTracker;
 	private final com.sap.sailing.domain.base.DomainFactory baseDomainFactory;
@@ -95,12 +95,16 @@ public class RibDashboardServiceImpl extends RemoteServiceServlet implements
 	private Map<String, Pair<MovingAverage, MovingAverage>> speedAndDirectionAverageForWindBotID;
 
 	private Map<String, List<StartAnalysisDTO>> startAnalysisDTOsForCompetitor;
+	private StartAnalysisRacesStore startAnalysisRacesStore;
 
 	public RibDashboardServiceImpl() {
 		context = Activator.getDefault();
 		racingEventServiceTracker = createAndOpenRacingEventServiceTracker(context);
 		baseDomainFactory = getRacingEventService().getBaseDomainFactory();
 
+		startAnalysisRacesStore = new StartAnalysisRacesStore(getRacingEventService());
+		startAnalysisRacesStore.addStartAnalyisisRacesStoreListener(this);
+		
 		startAnalysisDTOsForCompetitor = new HashMap<String, List<StartAnalysisDTO>>();
 		averageStartLineAdvantageByWind = new MovingAverage(400);
 		averageStartLineAdvantageByGeometry = new MovingAverage(400);
@@ -142,8 +146,8 @@ public class RibDashboardServiceImpl extends RemoteServiceServlet implements
 					return lRInfo;
 				} else {
 					fillLiveRaceInfoDTOWithRaceData(lRInfo, timePointOfRequest);
-					fillLiveRaceInfoDTOWithWindBotData(lRInfo,
-							timePointOfRequest);
+					//fillLiveRaceInfoDTOWithWindBotData(lRInfo,
+						//	timePointOfRequest);
 					fillLiveRaceInfoDTOWithStartLineAdavantageData(lRInfo,
 							timePointOfRequest);
 					fillLiveRaceInfoDTOWithStartAnalysisData(lRInfo,
@@ -266,6 +270,7 @@ public class RibDashboardServiceImpl extends RemoteServiceServlet implements
 			if (runningRace == null) {
 				return false;
 			} else {
+				startAnalysisRacesStore.addAsListener(runningRace);
 				return true;
 			}
 		} else {
