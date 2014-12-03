@@ -27,8 +27,8 @@
 
 .logo {
 	position: absolute;
-	width: 50pt;
-	height: 22.5pt;
+	width: 48pt;
+	height: 23.5pt;
 	margin-top: 17.5pt;
 	margin-left: 10pt;
 	z-index: 1;
@@ -142,14 +142,14 @@
 	height: 200%;
 }
 
-.startlineadvantagepanel{
+.startlineadvantagepanel {
 	position: absolute;
 	background-color: white;
 	top: 0pt;
 	right: 0pt;
 	left: 0pt;
 	bottom: 70%;
-	margin-bottom:5pt;
+	margin-bottom: 5pt;
 }
 
 .hintpanel {
@@ -161,13 +161,13 @@
 	bottom: 0pt;
 }
 
-.leaderboardpanel{
-    position: absolute;
+.leaderboardpanel {
+	position: absolute;
 	top: 30%;
 	right: 0pt;
 	left: 0pt;
 	bottom: 0pt;
-	margin-top:5pt;
+	margin-top: 5pt;
 }
 
 .hint {

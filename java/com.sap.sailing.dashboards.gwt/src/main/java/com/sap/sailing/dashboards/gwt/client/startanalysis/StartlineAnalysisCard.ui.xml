@@ -16,6 +16,8 @@
 				class="{style.startanalysis_card_data} {style.startanalysis_card_wind_data_direction}"></div>
 			<div ui:field="startanalysis_card_wind_data_speed"
 				class="{style.startanalysis_card_data} {style.startanalysis_card_wind_data_speed}"></div>
+			<div ui:field="startanalysis_card_line_data"
+				class="{style.startanalysis_card_data} {style.startanalysis_card_line_data}"></div>
 			<div ui:field="startanalysis_card_line_data_wind"
 				class="{style.startanalysis_card_data} {style.startanalysis_card_line_data_wind}"></div>
 			<div ui:field="startanalysis_card_line_data_geo"

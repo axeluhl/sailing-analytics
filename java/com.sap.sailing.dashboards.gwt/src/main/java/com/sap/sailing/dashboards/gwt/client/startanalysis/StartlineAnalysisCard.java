@@ -53,6 +53,9 @@ public class StartlineAnalysisCard extends Composite implements HasWidgets, Star
     DivElement startanalysis_card_wind_data_speed;
 
     @UiField
+    DivElement startanalysis_card_line_data;
+    
+    @UiField
     DivElement startanalysis_card_line_data_geo;
 
     @UiField
@@ -105,10 +108,10 @@ public class StartlineAnalysisCard extends Composite implements HasWidgets, Star
                     .setInnerHTML(NumberFormat.getFormat("#0.0").format(startAnalysisDTO.startAnalysisWindLineInfoDTO.windDirectionInDegrees) + "°");
             this.startanalysis_card_wind_data_speed
                     .setInnerHTML(NumberFormat.getFormat("#0.0").format(startAnalysisDTO.startAnalysisWindLineInfoDTO.windSpeedInKnots) + " kts");
-            this.startanalysis_card_line_data_geo
-                    .setInnerHTML(NumberFormat.getFormat("#0.0").format(startAnalysisDTO.startAnalysisWindLineInfoDTO.startLineAdvantageByGeometry) + " m");
-            this.startanalysis_card_line_data_wind
-                    .setInnerHTML(NumberFormat.getFormat("#0.0").format(startAnalysisDTO.startAnalysisWindLineInfoDTO.startLineAdvantageAtPinEnd) + " m");
+            this.startanalysis_card_line_data
+            .setInnerHTML("Startline Advantage");
+            this.startanalysis_card_line_data_wind.setInnerHTML("Wind: "+NumberFormat.getFormat("#0.0").format(startAnalysisDTO.startAnalysisWindLineInfoDTO.startLineAdvantageAtPinEnd) + " m");
+            this.startanalysis_card_line_data_geo.setInnerHTML("Geometry: "+NumberFormat.getFormat("#0.0").format(startAnalysisDTO.startAnalysisWindLineInfoDTO.startLineAdvantageByGeometry) + " m");
         }
     }
 

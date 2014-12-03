@@ -142,12 +142,27 @@
 	top: 100pt;
 }
 
+.startanalysis_card_line_data {
+	top: 0pt;
+	left: 60pt;
+	width: 120pt;
+	text-align: left;
+	padding-left: 7pt;
+}
+
 .startanalysis_card_line_data_wind {
-	top: 140pt;
+	top: 0pt;
+	left: 180pt;
+	width: 90pt;
+	text-align: left;
+	padding-left: 7pt;
 }
 
 .startanalysis_card_line_data_geo {
-	top: 180pt;
+	top: 0pt;
+	left: 275pt;
+	width: 120pt;
+	text-align: left;
 }
 
 .left_focus_panel {
