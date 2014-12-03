@@ -16,7 +16,6 @@ import com.sap.sse.security.ui.client.i18n.StringMessages;
 import com.sap.sse.security.ui.oauth.client.util.ClientUtils;
 import com.sap.sse.security.ui.shared.SuccessInfo;
 import com.sap.sse.security.ui.shared.UserDTO;
-import com.sap.sse.security.ui.shared.UserManagementServiceAsync;
 
 /**
  * Encapsulates the current user, remembered as a {@link UserDTO} object. The current user is determined by a call to

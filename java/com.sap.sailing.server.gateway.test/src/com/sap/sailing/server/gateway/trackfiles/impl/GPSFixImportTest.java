@@ -11,7 +11,7 @@ import java.util.Collection;
 
 import org.junit.Test;
 
-import com.sap.sailing.domain.racelog.tracking.DeviceIdentifier;
+import com.sap.sailing.domain.abstractlog.race.tracking.DeviceIdentifier;
 import com.sap.sailing.domain.trackimport.GPSFixImporter;
 import com.sap.sailing.domain.tracking.GPSFix;
 import com.sap.sailing.server.trackfiles.RouteConverterGPSFixImporterFactory;

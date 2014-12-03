@@ -3,6 +3,8 @@ package com.sap.sailing.server.gateway.test.jaxrs;
 import static org.junit.Assert.assertTrue;
 
 import java.util.ArrayList;
+import java.util.Calendar;
+import java.util.GregorianCalendar;
 import java.util.List;
 import java.util.UUID;
 
@@ -22,6 +24,8 @@ import com.sap.sailing.domain.base.impl.RegattaImpl;
 import com.sap.sailing.domain.base.impl.SeriesImpl;
 import com.sap.sailing.domain.common.ScoringSchemeType;
 import com.sap.sailing.server.gateway.jaxrs.api.RegattasResource;
+import com.sap.sse.common.TimePoint;
+import com.sap.sse.common.impl.MillisecondsTimePoint;
 
 public class RegattasResourceTest extends AbstractJaxRsApiTest {
     private String boatClassName = "49er";
@@ -35,10 +39,15 @@ public class RegattasResourceTest extends AbstractJaxRsApiTest {
         List<String> raceColumnNames = new ArrayList<String>();
         fleets.add(new FleetImpl("Fleet1"));
         fleets.add(new FleetImpl("Fleet2"));
-        Series testSeries = new SeriesImpl("TestSeries", /* isMedal */false, fleets,
-                raceColumnNames, /* trackedRegattaRegistry */null);
+        final Calendar cal = new GregorianCalendar();
+        cal.set(2014, 5, 6, 10, 00);
+        final TimePoint startDate = new MillisecondsTimePoint(cal.getTime());
+        cal.set(2014, 5, 8, 16, 00);
+        final TimePoint endDate = new MillisecondsTimePoint(cal.getTime());
+        Series testSeries = new SeriesImpl("TestSeries", /* isMedal */false, fleets, raceColumnNames, /* trackedRegattaRegistry */null);
         series.add(testSeries);
-        racingEventService.createRegatta(RegattaImpl.getDefaultName(regattaName, boatClassName), boatClassName, UUID.randomUUID(), series, /*persistent*/ true,
+        racingEventService.createRegatta(RegattaImpl.getDefaultName(regattaName, boatClassName), boatClassName, 
+                startDate, endDate, UUID.randomUUID(), series, /*persistent*/ true,
                 DomainFactory.INSTANCE.createScoringScheme(ScoringSchemeType.LOW_POINT), null, /* useStartTimeInference */ true);
         testSeries.addRaceColumn("R1", /* trackedRegattaRegistry */ null);
         testSeries.addRaceColumn("R2", /* trackedRegattaRegistry */ null);

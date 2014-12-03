@@ -43,7 +43,13 @@
 			<version>1.0.0-SNAPSHOT</version>
 			<classifier>sources</classifier>
 		</dependency>
-	</dependencies>
+		<dependency>
+			<groupId>com.sap.sailing</groupId>
+			<artifactId>com.sap.sse.security.common</artifactId>
+			<version>1.0.0-SNAPSHOT</version>
+			<classifier>sources</classifier>
+		</dependency>
+			</dependencies>
 	<build>
 		<plugins>
 			<plugin>
@@ -80,7 +86,7 @@
 								<module>com.sap.sse.security.ui.EmailValidation</module>
 							</modules>
 							<gen>${basedir}/.generated</gen>
-							<localWorkers>3</localWorkers>
+							<localWorkers>7</localWorkers>
 							<webappDirectory>${basedir}</webappDirectory>
 							<warSourceDirectory>${basedir}/src/main/resources
 							</warSourceDirectory>

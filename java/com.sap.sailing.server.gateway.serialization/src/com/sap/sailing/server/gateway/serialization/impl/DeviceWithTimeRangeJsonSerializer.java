@@ -2,7 +2,7 @@ package com.sap.sailing.server.gateway.serialization.impl;
 
 import org.json.simple.JSONObject;
 
-import com.sap.sailing.domain.racelog.tracking.DeviceWithTimeRange;
+import com.sap.sailing.domain.abstractlog.race.tracking.DeviceWithTimeRange;
 import com.sap.sailing.server.gateway.serialization.JsonSerializer;
 
 public class DeviceWithTimeRangeJsonSerializer implements JsonSerializer<DeviceWithTimeRange> {
