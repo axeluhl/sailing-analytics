@@ -167,28 +167,6 @@ public class WindFragment extends LoggableFragment implements
 
 		locationClient = new LocationClient(getActivity(), this, this);
 
-//		windSpeedSeekBar
-//				.setOnSeekBarChangeListener(new OnSeekBarChangeListener() {
-//
-//					public void onProgressChanged(SeekBar seekBar,
-//							int progress, boolean fromUser) {
-//						float speed = round(progress / 10.0f, 1);
-//						int displayedValue = Integer.getInteger(
-//								windSpeedEditText.getText().toString(), 0)
-//								.intValue();
-//						int progressValue = Float.valueOf(speed).intValue();
-//						if (displayedValue != progressValue) {
-//							windSpeedEditText.setText(speedFormat.format(speed));
-//						}
-//					}
-//
-//					public void onStartTrackingTouch(SeekBar seekBar) {
-//					}
-//
-//					public void onStopTrackingTouch(SeekBar seekBar) {
-//					}
-//				});
-
 		// buttons
 		sendButton.setOnClickListener(this);
 		sendButton.setEnabled(false);
@@ -211,7 +189,8 @@ public class WindFragment extends LoggableFragment implements
 				windSpeedEditText.setText(text);
 			}
 		});
-		
+
+		// map suche
 		et_location
 				.setOnEditorActionListener(new TextView.OnEditorActionListener() {
 
@@ -388,6 +367,9 @@ public class WindFragment extends LoggableFragment implements
 		sendButton.setVisibility(View.GONE);
 		btn_position_set.setVisibility(View.VISIBLE);
 		windMap.getUiSettings().setAllGesturesEnabled(true);
+		if ( windMarker != null ){
+			windMarker.setDraggable(true);
+		}
 	}
 
 	private void onPositionSetClick() {
@@ -410,7 +392,8 @@ public class WindFragment extends LoggableFragment implements
 		hideView(et_location, shortAnimationDuration);
 		sendButton.setVisibility(View.VISIBLE);
 		btn_position_set.setVisibility(View.GONE);
-
+		windMap.getUiSettings().setAllGesturesEnabled(false);
+		windMarker.setDraggable(false);
 		centerMap(currentLocation.getLatitude(), currentLocation.getLongitude());
 	}
 
@@ -508,6 +491,9 @@ public class WindFragment extends LoggableFragment implements
 		sendButton.setVisibility(View.GONE);
 		btn_position_set.setVisibility(View.VISIBLE);
 		windMap.getUiSettings().setAllGesturesEnabled(true);
+		if ( windMarker != null ){
+			windMarker.setDraggable(true);
+		}
 	}
 
 	private void hideView(final View v, int animationDuration) {
@@ -541,11 +527,15 @@ public class WindFragment extends LoggableFragment implements
 	public void onLocationChanged(Location location) {
 		currentLocation = location;
 		centerMap(location.getLatitude(), location.getLongitude());
+		windMap.getUiSettings().setAllGesturesEnabled(false);
 		addAccuracyCircle(location);
 		txt_waitingForGPS.setTextColor(Color.GRAY);
 		txt_waitingForGPS.setText(R.string.found_gps_position);
 		rl_gpsOverlay.setVisibility(View.GONE);
 		sendButton.setEnabled(true);
+		if ( windMarker != null ){
+			windMarker.setDraggable(false);
+		}
 	}
 
 	private void addAccuracyCircle(Location location){
