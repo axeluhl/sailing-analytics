@@ -371,7 +371,8 @@ public class DomainFactoryImpl implements DomainFactory {
                 // This is particularly bad if a persistent regatta was loaded but a default regatta was accidentally created.
                 // Then, there is no way but restart the server to get rid of this stale cache entry here.
                 if (result == null) {
-                    result = new RegattaImpl(raceLogStore, RegattaImpl.getDefaultName(defaultRegattaNameAndBoatClass.getA(), boatClass.getName()), boatClass, trackedRegattaRegistry,
+                    result = new RegattaImpl(raceLogStore, RegattaImpl.getDefaultName(defaultRegattaNameAndBoatClass.getA(), boatClass.getName()), boatClass, 
+                            /*startDate*/ null, /*endDate*/ null, trackedRegattaRegistry,
                             // use the low-point system as the default scoring scheme
                             getBaseDomainFactory().createScoringScheme(ScoringSchemeType.LOW_POINT), race.getId(), null);
                     regattaCache.put(key, result);

@@ -24,4 +24,5 @@ Require-Bundle: com.sap.sailing.server,
  com.sap.sailing.polars;bundle-version="1.0.0",
  com.sap.sse.common,
  org.mockito.mockito-core;bundle-version="1.9.5",
- com.sap.sailing.domain.shared.android
+ com.sap.sailing.domain.shared.android,
+ com.sap.sse.replication.testsupport

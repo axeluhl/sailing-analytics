@@ -2,10 +2,10 @@ package com.sap.sailing.server.operationaltransformation;
 
 import java.io.Serializable;
 
+import com.sap.sailing.domain.abstractlog.race.RaceLog;
+import com.sap.sailing.domain.abstractlog.race.RaceLogEvent;
 import com.sap.sailing.domain.base.Fleet;
 import com.sap.sailing.domain.base.RaceColumn;
-import com.sap.sailing.domain.racelog.RaceLog;
-import com.sap.sailing.domain.racelog.RaceLogEvent;
 
 public class RaceLogEventRecorder implements Serializable {
     private static final long serialVersionUID = -5426128599743917274L;

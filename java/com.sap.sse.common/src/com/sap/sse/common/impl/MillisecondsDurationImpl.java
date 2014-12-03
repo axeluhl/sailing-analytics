@@ -51,7 +51,7 @@ public class MillisecondsDurationImpl implements Duration {
     @Override
     public String toString() {
         StringBuffer result = new StringBuffer();
-        result.append(asSeconds()).append("seconds ").append(asMillis()).append("millis");
+        result.append(asSeconds()).append("s==").append(asMillis()).append("ms");
         return result.toString();
     }
 

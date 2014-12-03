@@ -65,7 +65,8 @@ public class RaceTrackerStartStopTest {
     public void setUp() {
         racingEventService = new RacingEventServiceImplMock();
         boatClass = new BoatClassImpl(BOATCLASSNAME, /* typicallyStartsUpwind */ true);
-        regatta = new RegattaImpl(EmptyRaceLogStore.INSTANCE, RegattaImpl.getDefaultName(EVENTNAME, boatClass.getName()), boatClass, /* trackedRegattaRegistry */ null,
+        regatta = new RegattaImpl(EmptyRaceLogStore.INSTANCE, RegattaImpl.getDefaultName(EVENTNAME, boatClass.getName()), boatClass, 
+                /*startDate*/ null, /*endDate*/ null, /* trackedRegattaRegistry */ null,
                 DomainFactory.INSTANCE.createScoringScheme(ScoringSchemeType.LOW_POINT), UUID.randomUUID(), null);
         racingEventService.getRegattasByName().put(EVENTNAME, regatta);
         TrackedRegatta trackedRegatta1 = racingEventService.getOrCreateTrackedRegatta(regatta);

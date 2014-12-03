@@ -3,6 +3,7 @@ package com.sap.sailing.gwt.ui.adminconsole;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Collections;
+import java.util.Date;
 import java.util.HashSet;
 import java.util.List;
 
@@ -45,7 +46,21 @@ public class RegattaWithSeriesAndFleetsCreateDialog extends RegattaWithSeriesAnd
                 }
             }
 
-            if (!nameNotEmpty) {
+            Date startDate = regattaToValidate.startDate;
+            Date endDate = regattaToValidate.endDate;
+            String datesErrorMessage = null;
+            // remark: startDate == null and endDate == null is valid
+            if(startDate != null && endDate != null) {
+                if(startDate.after(endDate)) {
+                    datesErrorMessage = stringMessages.pleaseEnterStartAndEndDate(); 
+                }
+            } else if((startDate != null && endDate == null) || (startDate == null && endDate != null)) {
+                datesErrorMessage = stringMessages.pleaseEnterStartAndEndDate();
+            }
+            
+            if(datesErrorMessage != null) {
+                errorMessage = datesErrorMessage;
+            } else if (!nameNotEmpty) {
                 errorMessage = stringMessages.pleaseEnterAName();
             } else if (regattaToValidate.getName().contains("/")) {
                 errorMessage = stringMessages.regattaNameMustNotContainSlashes();

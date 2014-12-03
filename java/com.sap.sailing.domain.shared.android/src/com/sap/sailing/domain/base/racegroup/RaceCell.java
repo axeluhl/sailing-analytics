@@ -1,6 +1,6 @@
 package com.sap.sailing.domain.base.racegroup;
 
-import com.sap.sailing.domain.racelog.RaceLog;
+import com.sap.sailing.domain.abstractlog.race.RaceLog;
 import com.sap.sse.common.Named;
 
 /**

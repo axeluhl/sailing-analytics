@@ -1,18 +1,14 @@
 package com.sap.sse.security;
 
-import java.util.Collection;
 import java.util.Map;
-import java.util.Set;
 import java.util.UUID;
 
+import com.sap.sse.common.Named;
 import com.sap.sse.security.shared.Account;
 import com.sap.sse.security.shared.UserManagementException;
 
-public interface UserStore {
-
-    String getName();
-
-    Collection<User> getUserCollection();
+public interface UserStore extends Named {
+    Iterable<User> getUsers();
 
     User getUserByName(String name);
 
@@ -22,11 +18,17 @@ public interface UserStore {
 
     void updateUser(User user);
 
-    Set<String> getRolesFromUser(String username) throws UserManagementException;
+    Iterable<String> getRolesFromUser(String username) throws UserManagementException;
 
     void addRoleForUser(String name, String role) throws UserManagementException;
 
     void removeRoleFromUser(String name, String role) throws UserManagementException;
+
+    Iterable<String> getPermissionsFromUser(String username) throws UserManagementException;
+
+    void removePermissionFromUser(String name, String permission) throws UserManagementException;
+
+    void addPermissionForUser(String name, String permission) throws UserManagementException;
 
     void deleteUser(String name) throws UserManagementException;
 
@@ -39,6 +41,11 @@ public interface UserStore {
     void addSetting(String key, Class<?> type);
     
     void setPreference(String username, String key, String value);
+    
+    /**
+     * Always returns a valid map which may be empty.
+     */
+    Map<String, String> getAllPreferences(String username);
     
     void unsetPreference(String username, String key);
 
@@ -64,7 +71,20 @@ public interface UserStore {
     <T> T getSetting(String key, Class<T> clazz);
 
     Map<String, Object> getAllSettings();
-
+    
     Map<String, Class<?>> getAllSettingTypes();
+
+    /**
+     * Removes all users and all their preferences and all settings from this store's in-memory representation.
+     * For safety reasons and because a replica's DB state is undefined anyhow, leaves persistent content in place.
+     * Use with due care.
+     */
+    void clear();
+
+    /**
+     * Replaces all existing contents by those provided by the <code>newUserStore</code>. This has no impact on the persistent
+     * representation of this store and is meant for use on a replica only; the replica's database state is undefined.
+     */
+    void replaceContentsFrom(UserStore newUserStore);
 
 }
