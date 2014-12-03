@@ -266,8 +266,7 @@ public class TransmittingService extends Service {
 	
 	private boolean getTrackingServiceIsCurrentlyTracking()
 	{
-		// TODO: IMPLEMENT THIS METHOD PROPERLY!!
-		return false;
+		return prefs.getTrackerIsTracking();
 	}
 	
 	private void sendFixesToAPI(List<String> failedHosts) {
