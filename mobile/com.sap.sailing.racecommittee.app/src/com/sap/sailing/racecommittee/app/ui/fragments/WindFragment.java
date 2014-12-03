@@ -132,7 +132,7 @@ public class WindFragment extends LoggableFragment implements CompassDirectionLi
         et_location = (EditText) windFragmentView.findViewById(R.id.et_location);
 
         FragmentManager fragmentManager;
-        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.JELLY_BEAN_MR1) {
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.LOLLIPOP) {
             fragmentManager = getChildFragmentManager();
         } else {
             fragmentManager = getActivity().getFragmentManager();
