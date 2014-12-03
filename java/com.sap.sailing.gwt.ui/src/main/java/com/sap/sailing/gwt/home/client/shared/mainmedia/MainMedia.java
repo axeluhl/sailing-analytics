@@ -6,8 +6,6 @@ import java.util.List;
 import java.util.Random;
 
 import com.google.gwt.core.client.GWT;
-import com.google.gwt.core.client.Scheduler;
-import com.google.gwt.core.client.Scheduler.ScheduledCommand;
 import com.google.gwt.dom.client.DivElement;
 import com.google.gwt.uibinder.client.UiBinder;
 import com.google.gwt.uibinder.client.UiField;
@@ -61,41 +59,23 @@ public class MainMedia extends Composite {
     public void setRecentEvents(List<EventBaseDTO> recentEvents) {
         List<String> photoGalleryUrls = new ArrayList<String>();
         for (EventBaseDTO event : recentEvents) {
-
-            photoGalleryUrls.addAll(event.getPhotoGalleryImageURLs());
-
+            photoGalleryUrls.addAll(event.getSailingLovesPhotographyImages());
             if (!event.getVideoURLs().isEmpty() && videoCounter < MAX_VIDEO_COUNT) {
                 addVideoToVideoPanel(event);
             }
         }
+
         // shuffle the image url list (Remark: Collections.shuffle() is not implemented in GWT)
-        int gallerySize = photoGalleryUrls.size();
+        final int gallerySize = photoGalleryUrls.size();
         Random random = new Random(gallerySize);
         for (int i = 0; i < gallerySize; i++) {
             Collections.swap(photoGalleryUrls, i, random.nextInt(gallerySize));
         }
-        for (String url : photoGalleryUrls) {
 
-            // SimplePanel imageContainer = new SimplePanel();
-            // imageContainer.addStyleName(STYLES.media_swiperslide());
-            // String image = "url(" + url + ")";
-            // imageContainer.getElement().getStyle().setBackgroundImage(image);
+        for (String url : photoGalleryUrls) {
             imageCarousel.addImage(url);
         }
         imageCarousel.init();
-        // this.swiper = Swiper.createWithLoopOption(STYLES.media_swipecontainer(), STYLES.media_swipewrapper(),
-        // STYLES.media_swiperslide());
-        // See bug 2232: the stage image sizes are scaled incorrectly.
-        // https://github.com/ubilabs/sap-sailing-analytics/issues/421 and
-        // http://bugzilla.sapsailing.com/bugzilla/show_bug.cgi?id=2232 have the details. A quick fix may be to send a
-        // resize event
-        // after everything has been rendered.
-        Scheduler.get().scheduleDeferred(new ScheduledCommand() {
-            @Override
-            public void execute() {
-                // swiper.reInit();
-            }
-        });
     }
 
     private void addVideoToVideoPanel(EventBaseDTO event) {

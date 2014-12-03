@@ -116,39 +116,39 @@ public class ImageCarousel extends Widget {
      */
     native void setupSlider(ImageCarousel sliderReference, ButtonElement prevArrowEl, ButtonElement nextArrowEl) /*-{
 
-		$wnd
-				.$(document)
-				.ready(
-						function() {
-							$wnd
-									.$(
-											'.'
-													+ (sliderReference.@com.sap.sse.gwt.client.controls.carousel.ImageCarousel::uniqueId))
-									.slick(
-											{
-												dots : (sliderReference.@com.sap.sse.gwt.client.controls.carousel.ImageCarousel::showDots),
-												infinite : (sliderReference.@com.sap.sse.gwt.client.controls.carousel.ImageCarousel::infiniteScrolling),
-												centerMode : (sliderReference.@com.sap.sse.gwt.client.controls.carousel.ImageCarousel::centerMode),
-												variableWidth : (sliderReference.@com.sap.sse.gwt.client.controls.carousel.ImageCarousel::variableWidth),
-												lazyLoad : (sliderReference.@com.sap.sse.gwt.client.controls.carousel.ImageCarousel::lazyload),
-												swipeToSlide : false,
-												arrows : true,
-												responsive : true,
-												slidesToShow : 3,
-												prevArrow : prevArrowEl,
-												nextArrow : nextArrowEl
-											});
-						});
+	$wnd
+		.$(document)
+		.ready(
+			function() {
+			    $wnd
+				    .$(
+					    '.'
+						    + (sliderReference.@com.sap.sse.gwt.client.controls.carousel.ImageCarousel::uniqueId))
+				    .slick(
+					    {
+						dots : (sliderReference.@com.sap.sse.gwt.client.controls.carousel.ImageCarousel::showDots),
+						infinite : (sliderReference.@com.sap.sse.gwt.client.controls.carousel.ImageCarousel::infiniteScrolling),
+						centerMode : (sliderReference.@com.sap.sse.gwt.client.controls.carousel.ImageCarousel::centerMode),
+						variableWidth : (sliderReference.@com.sap.sse.gwt.client.controls.carousel.ImageCarousel::variableWidth),
+						lazyLoad : (sliderReference.@com.sap.sse.gwt.client.controls.carousel.ImageCarousel::lazyload),
+						swipeToSlide : false,
+						arrows : true,
+						responsive : true,
+						slidesToShow : 3,
+						prevArrow : prevArrowEl,
+						nextArrow : nextArrowEl
+					    });
+			});
 
     }-*/;
 
     native void addImage(ImageCarousel sliderReference, final DivElement el) /*-{
 
-		$wnd
-				.$(
-						'.'
-								+ (sliderReference.@com.sap.sse.gwt.client.controls.carousel.ImageCarousel::uniqueId))
-				.slickAdd(el);
+	$wnd
+		.$(
+			'.'
+				+ (sliderReference.@com.sap.sse.gwt.client.controls.carousel.ImageCarousel::uniqueId))
+		.slickAdd(el);
 
     }-*/;
 
@@ -158,8 +158,6 @@ public class ImageCarousel extends Widget {
      * @param url
      */
     public void addImage(String url) {
-
-        GWT.log("Add image: " + url);
 
         DivElement imageHolder = Document.get().createDivElement();
 
@@ -282,7 +280,6 @@ public class ImageCarousel extends Widget {
                             child.getStyle().setHeight(imagesHeight, Unit.PX);
                         }
                     }
-                    GWT.log("Finished to init slider");
                 } catch (Exception e) {
                     GWT.log("Catched Exception on slider init", e);
                 }

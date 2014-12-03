@@ -10,6 +10,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.UUID;
 
+import com.google.gwt.core.client.GWT;
 import com.google.gwt.user.client.rpc.IsSerializable;
 import com.sap.sailing.domain.common.ImageSize;
 import com.sap.sailing.domain.common.dto.NamedDTO;
@@ -204,13 +205,13 @@ public class EventBaseDTO extends NamedDTO implements IsSerializable {
     public LinkedList<String> getSailingLovesPhotographyImages() {
 
         final LinkedList<String> acceptedImages = new LinkedList<String>();
-        for (String candidateImageUrl : acceptedImages) {
+        for (String candidateImageUrl : imageURLs) {
             ImageSize imageSize = getImageSize(candidateImageUrl);
             if (imageSize.getHeight() > MINIMUM_IMAGE_HEIGHT_FOR_SAILING_PHOTOGRAPHY_IN_PIXELS
                     && !candidateImageUrl.toLowerCase().contains(STAGE_IMAGE_URL_SUBSTRING_INDICATOR_CASE_INSENSITIVE)) {
-
                 acceptedImages.add(candidateImageUrl);
-
+            } else {
+                GWT.log("Rejected: " + candidateImageUrl);
             }
         }
         return acceptedImages;

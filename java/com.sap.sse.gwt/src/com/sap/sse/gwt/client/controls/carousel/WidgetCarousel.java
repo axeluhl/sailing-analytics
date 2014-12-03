@@ -116,7 +116,6 @@ public class WidgetCarousel extends Composite {
             public void execute() {
                 try {
                     setupSlider(reference, slickPrev, slickNext);
-                    GWT.log("Finished to init slider");
                 } catch (Exception e) {
                     GWT.log("Catched Exception on slider init", e);
                 }
@@ -130,17 +129,13 @@ public class WidgetCarousel extends Composite {
         for (Iterator<Widget> iterator = items.iterator(); iterator.hasNext();) {
             Widget widget = (Widget) iterator.next();
             final Element parent = widget.getElement();
-            GWT.log("checking widget...." + parent);
             if (parent != null && parent.getClassName().contains("slick-active")) {
-                GWT.log("active widget....");
                 if (iterator.hasNext()) {
                     Widget nextOne = iterator.next();
                     if (nextOne instanceof LazyLoadable) {
                         LazyLoadable lazyLoadable = (LazyLoadable) nextOne;
-                        GWT.log("Widgetcarousel lazy load trigger for: " + nextOne.getClass().getName());
                         lazyLoadable.doInitializeLazyComponents();
                     } else {
-                        GWT.log("Next component ist not lazy loadable: " + nextOne.getClass().getName());
                     }
                     return;
                 }
@@ -184,9 +179,10 @@ public class WidgetCarousel extends Composite {
     }-*/;
 
     /**
-     * ƒ Add new image to carousel.
+     * Add new image to carousel.
      *
-     * @param urlƒ
+     * @param url
+     * 
      */
     public void addWidget(Widget slide) {
         if (items.isEmpty()) {
@@ -301,7 +297,6 @@ public class WidgetCarousel extends Composite {
                             child.getStyle().setHeight(imagesHeight, Unit.PX);
                         }
                     }
-                    GWT.log("Finished to init slider");
                 } catch (Exception e) {
                     GWT.log("Catched Exception on slider init", e);
                 }
