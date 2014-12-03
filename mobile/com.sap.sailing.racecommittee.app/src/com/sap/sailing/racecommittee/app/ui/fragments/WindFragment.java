@@ -49,6 +49,8 @@ import com.google.android.gms.location.LocationRequest;
 import com.google.android.gms.maps.CameraUpdate;
 import com.google.android.gms.maps.CameraUpdateFactory;
 import com.google.android.gms.maps.GoogleMap;
+import com.google.android.gms.maps.GoogleMap.OnMarkerClickListener;
+import com.google.android.gms.maps.GoogleMap.OnMarkerDragListener;
 import com.google.android.gms.maps.MapFragment;
 import com.google.android.gms.maps.GoogleMap.OnMapClickListener;
 import com.google.android.gms.maps.model.Circle;
@@ -74,7 +76,9 @@ import com.sap.sailing.racecommittee.app.ui.views.CompassView.CompassDirectionLi
 
 public class WindFragment extends LoggableFragment implements
 		CompassDirectionListener, ConnectionCallbacks,
-		OnConnectionFailedListener, LocationListener, OnClickListener {
+		OnConnectionFailedListener, LocationListener, 
+		OnClickListener, OnMarkerDragListener, OnMapClickListener, 
+		TextView.OnEditorActionListener, OnFocusChangeListener {
 
 	private final static String TAG = WindFragment.class.getName();
 	private final static int FIVE_SEC = 5000;
@@ -191,34 +195,9 @@ public class WindFragment extends LoggableFragment implements
 		});
 
 		// map suche
-		et_location
-				.setOnEditorActionListener(new TextView.OnEditorActionListener() {
+		et_location.setOnEditorActionListener(this);
 
-					@Override
-					public boolean onEditorAction(TextView v, int actionId,
-							KeyEvent event) {
-						if (actionId == EditorInfo.IME_ACTION_DONE) {
-							new GeoCodeTask().execute(v.getText() + "");
-						}
-						return false;
-					}
-				});
-
-		windBearingEditText
-				.setOnFocusChangeListener(new OnFocusChangeListener() {
-					@Override
-					public void onFocusChange(View v, boolean hasFocus) {
-						if (!hasFocus) {
-							String windBearingText = windBearingEditText
-									.getText().toString();
-							if (windBearingText.length() > 0) {
-								compassView.setDirection(Float
-										.valueOf(windBearingText));
-							}
-
-						}
-					}
-				});
+		windBearingEditText.setOnFocusChangeListener(this);
 
 		speedFormat = new DecimalFormat("#0.0", new DecimalFormatSymbols(
 				Locale.US));
@@ -245,13 +224,8 @@ public class WindFragment extends LoggableFragment implements
 			centerMap(enteredWindLocation);
 		}
 
-		windMap.setOnMapClickListener(new OnMapClickListener() {
-
-			@Override
-			public void onMapClick(LatLng arg0) {
-				moveMarker(arg0);
-			}
-		});
+		windMap.setOnMapClickListener(this);
+		windMap.setOnMarkerDragListener(this);
 
 		double markerLat = -1;
 		if (savedInstanceState != null) {
@@ -500,12 +474,10 @@ public class WindFragment extends LoggableFragment implements
 		v.animate().alpha(0f).setDuration(animationDuration)
 			.setListener(new AnimatorListener() {
 				@Override
-				public void onAnimationStart(Animator animation) {
-				}
+				public void onAnimationStart(Animator animation) {}
 	
 				@Override
-				public void onAnimationRepeat(Animator animation) {
-				}
+				public void onAnimationRepeat(Animator animation) {}
 	
 				@Override
 				public void onAnimationEnd(Animator animation) {
@@ -513,8 +485,7 @@ public class WindFragment extends LoggableFragment implements
 				}
 	
 				@Override
-				public void onAnimationCancel(Animator animation) {
-				}
+				public void onAnimationCancel(Animator animation) {}
 			});
 	}
 
@@ -523,6 +494,20 @@ public class WindFragment extends LoggableFragment implements
 		v.animate().alpha(1f).setDuration(animationDuration).setListener(null);
 	}
 
+	
+	private void addAccuracyCircle(Location location){
+		if (windCircle != null) {
+			windCircle.remove();
+		}
+		CircleOptions co = new CircleOptions()
+								.center(new LatLng(location.getLatitude(),location.getLongitude()))
+								.radius(location.getAccuracy())
+								.fillColor(Color.parseColor("#33ff0000"))
+								.strokeWidth(1)
+								.strokeColor(Color.RED);
+		windCircle = windMap.addCircle(co);
+	}
+	
 	@Override
 	public void onLocationChanged(Location location) {
 		currentLocation = location;
@@ -537,19 +522,52 @@ public class WindFragment extends LoggableFragment implements
 			windMarker.setDraggable(false);
 		}
 	}
+	
+	@Override
+	public void onFocusChange(View v, boolean hasFocus) {
+		if (!hasFocus) {
+			String windBearingText = windBearingEditText
+					.getText().toString();
+			if (windBearingText.length() > 0) {
+				compassView.setDirection(Float
+						.valueOf(windBearingText));
+			}
 
-	private void addAccuracyCircle(Location location){
-		if (windCircle != null) {
-			windCircle.remove();
 		}
-		CircleOptions co = new CircleOptions()
-								.center(new LatLng(location.getLatitude(),location.getLongitude()))
-								.radius(location.getAccuracy())
-								.fillColor(Color.parseColor("#33ff0000"))
-								.strokeWidth(1)
-								.strokeColor(Color.RED);
-		windCircle = windMap.addCircle(co);
 	}
+	
+	@Override
+	public boolean onEditorAction(TextView v, int actionId,
+			KeyEvent event) {
+		if (actionId == EditorInfo.IME_ACTION_DONE) {
+			new GeoCodeTask().execute(v.getText() + "");
+		}
+		return false;
+	}
+	
+	@Override
+	public void onMarkerDragStart(Marker arg0) {}
+	
+	@Override
+	public void onMarkerDragEnd(Marker marker) {
+		currentLocation = new Location("set");
+		currentLocation.setLatitude(marker.getPosition().latitude);
+		currentLocation.setLongitude(marker.getPosition().longitude);
+		AppPreferences preferences = AppPreferences.on(getActivity()
+				.getApplicationContext());
+		preferences.setWindPosition(marker.getPosition());
+
+	}
+	
+	@Override
+	public void onMarkerDrag(Marker arg0) {}
+	
+	@Override
+	public void onMapClick(LatLng arg0) {
+		moveMarker(arg0);
+	}
+
+
 	
 	
 	@Override
@@ -574,6 +592,9 @@ public class WindFragment extends LoggableFragment implements
 		windBearingEditText.setText(bearingFormat.format(direction));
 	}
 
+	
+	
+	
 	private Wind getResultingWindFix() throws NumberFormatException {
 		if (currentLocation == null
 				|| windSpeedEditText.getText().toString().isEmpty()
