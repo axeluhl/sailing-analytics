@@ -242,6 +242,8 @@ public class WindFragment extends LoggableFragment implements
 				moveMarker(new LatLng(markerLat,
 						savedInstanceState.getDouble("markerLng")));
 			}
+		} else if ( windMarker != null ){
+				windMarker.setDraggable(false);
 		}
 	}
 
