@@ -37,10 +37,8 @@ import android.widget.LinearLayout;
 import android.widget.NumberPicker;
 import android.widget.NumberPicker.OnValueChangeListener;
 import android.widget.RelativeLayout;
-import android.widget.SeekBar;
 import android.widget.TextView;
 import android.widget.Toast;
-import android.widget.SeekBar.OnSeekBarChangeListener;
 
 import com.google.android.gms.common.ConnectionResult;
 import com.google.android.gms.common.GooglePlayServicesClient.ConnectionCallbacks;
@@ -242,19 +240,7 @@ public class WindFragment extends LoggableFragment implements
 						}
 					}
 				});
-//		windSpeedEditText.setOnFocusChangeListener(new OnFocusChangeListener() {
-//			@Override
-//			public void onFocusChange(View v, boolean hasFocus) {
-//				if (!hasFocus) {
-//					String windSpeedText = windSpeedEditText.getText()
-//							.toString();
-//					if (windSpeedText.length() > 0) {
-//						np_windSpeed.setValue(Double.valueOf(
-//								windSpeedText).intValue() * 2);
-//					}
-//				}
-//			}
-//		});
+
 		speedFormat = new DecimalFormat("#0.0", new DecimalFormatSymbols(
 				Locale.US));
 		bearingFormat = new DecimalFormat("###", new DecimalFormatSymbols(
@@ -263,8 +249,7 @@ public class WindFragment extends LoggableFragment implements
 		AppPreferences preferences = AppPreferences.on(getActivity()
 				.getApplicationContext());
 		double enteredWindSpeed = preferences.getWindSpeed();
-//		windSpeedSeekBar.setProgress(Double.valueOf(enteredWindSpeed)
-//				.intValue() * 10);
+
 		windSpeedEditText.setText(speedFormat.format(enteredWindSpeed));
 		
 		double enteredWindBearingFrom = preferences
@@ -324,10 +309,13 @@ public class WindFragment extends LoggableFragment implements
 
 		Fragment fragment = (getFragmentManager()
 				.findFragmentById(R.id.windMap));
-		FragmentTransaction ft = getActivity().getFragmentManager()
-				.beginTransaction();
-		ft.remove(fragment);
-		ft.commit();
+		
+		if ( fragment instanceof Fragment){
+			FragmentTransaction ft = getActivity().getFragmentManager()
+					.beginTransaction();
+			ft.remove(fragment);
+			ft.commit();
+		}
 
 		super.onPause();
 	}
