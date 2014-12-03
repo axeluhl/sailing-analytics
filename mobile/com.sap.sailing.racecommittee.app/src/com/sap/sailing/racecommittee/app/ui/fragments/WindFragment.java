@@ -564,7 +564,7 @@ public class WindFragment extends LoggableFragment implements
 	
 	@Override
 	public void onMapClick(LatLng arg0) {
-		moveMarker(arg0);
+		if (bigMap) moveMarker(arg0);
 	}
 
 
