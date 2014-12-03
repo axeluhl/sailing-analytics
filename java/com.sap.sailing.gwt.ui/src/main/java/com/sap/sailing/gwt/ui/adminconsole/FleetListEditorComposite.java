@@ -23,11 +23,10 @@ import com.sap.sse.gwt.client.controls.listedit.ListEditorComposite;
 
 public class FleetListEditorComposite extends ListEditorComposite<FleetDTO> {
     public FleetListEditorComposite(Iterable<FleetDTO> initialValues, StringMessages stringMessages, ImageResource removeImage) {
-        super(initialValues);
-        setActiveUi(getExpandedUI(stringMessages, removeImage));
+        super(initialValues, getExpandedUI(stringMessages, removeImage));
     }
     
-    protected ExpandedListEditorUi<FleetDTO> getExpandedUI(StringMessages stringMessages, ImageResource removeImage){
+    private static ExpandedListEditorUi<FleetDTO> getExpandedUI(StringMessages stringMessages, ImageResource removeImage){
     	return new ExpandedUi(stringMessages, removeImage);
     }
 

@@ -1,17 +1,12 @@
 package com.sap.sailing.gwt.ui.adminconsole;
 
-import java.util.ArrayList;
 import java.util.Comparator;
-import java.util.List;
 
 import com.google.gwt.user.cellview.client.CellTable;
 import com.google.gwt.user.cellview.client.ColumnSortEvent.ListHandler;
 import com.google.gwt.user.cellview.client.TextColumn;
 import com.google.gwt.view.client.ListDataProvider;
-import com.google.gwt.view.client.SelectionChangeEvent;
-import com.sap.sailing.domain.common.RegattaIdentifier;
 import com.sap.sailing.domain.common.impl.NaturalComparator;
-import com.sap.sailing.gwt.ui.client.ErrorReporter;
 import com.sap.sailing.gwt.ui.client.RegattaRefresher;
 import com.sap.sailing.gwt.ui.client.RegattaSelectionProvider;
 import com.sap.sailing.gwt.ui.client.RegattasDisplayer;
@@ -19,6 +14,7 @@ import com.sap.sailing.gwt.ui.client.SailingServiceAsync;
 import com.sap.sailing.gwt.ui.client.StringMessages;
 import com.sap.sailing.gwt.ui.client.shared.controls.SelectionCheckboxColumn;
 import com.sap.sailing.gwt.ui.shared.RegattaDTO;
+import com.sap.sse.gwt.client.ErrorReporter;
 
 public class StructureImportListComposite extends RegattaListComposite implements RegattasDisplayer {
 
@@ -28,19 +24,6 @@ public class StructureImportListComposite extends RegattaListComposite implement
             final RegattaSelectionProvider regattaSelectionProvider, RegattaRefresher regattaRefresher,
             final ErrorReporter errorReporter, final StringMessages stringMessages) {
         super(sailingService,regattaSelectionProvider,regattaRefresher,errorReporter,stringMessages);
-        regattaSelectionModel = this.selectionCheckboxColumn.getSelectionModel();
-        regattaTable.setSelectionModel(regattaSelectionModel, this.selectionCheckboxColumn.getSelectionManager());
-        regattaSelectionModel.addSelectionChangeHandler(new SelectionChangeEvent.Handler() {
-            @Override
-            public void onSelectionChange(SelectionChangeEvent event) {
-                List<RegattaDTO> selectedRegattas = getSelectedRegattas();
-                List<RegattaIdentifier> selectedRaceIdentifiers = new ArrayList<RegattaIdentifier>();
-                for (RegattaDTO selectedRegatta : selectedRegattas) {
-                    selectedRaceIdentifiers.add(selectedRegatta.getRegattaIdentifier());
-                }
-                StructureImportListComposite.this.regattaSelectionProvider.setSelection(selectedRaceIdentifiers);
-            }
-        });
     }
 
     // create Regatta Table in StructureImportManagementPanel

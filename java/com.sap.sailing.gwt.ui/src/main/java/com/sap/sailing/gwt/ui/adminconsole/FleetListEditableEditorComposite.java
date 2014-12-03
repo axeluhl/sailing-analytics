@@ -16,23 +16,28 @@ import com.sap.sailing.domain.common.Color;
 import com.sap.sailing.domain.common.FleetColors;
 import com.sap.sailing.domain.common.dto.FleetDTO;
 import com.sap.sailing.gwt.ui.client.StringMessages;
-import com.sap.sailing.gwt.ui.client.shared.controls.listedit.ExpandedListEditorUi;
+import com.sap.sse.gwt.client.controls.listedit.ExpandedListEditorUi;
 
 public class FleetListEditableEditorComposite extends FleetListEditorComposite {
 
-	public FleetListEditableEditorComposite(List<FleetDTO> initialValues,
-			StringMessages stringMessages, ImageResource removeImage) {
-		super(initialValues, stringMessages, removeImage);
-	}
-	
-	protected ExpandedListEditorUi<FleetDTO> getExpandedUI(StringMessages stringMessages, ImageResource editImage){
-    	return new ExpandedEditableUi(stringMessages, editImage);
+    public FleetListEditableEditorComposite(List<FleetDTO> initialValues, StringMessages stringMessages,
+            ImageResource removeImage) {
+        super(initialValues, stringMessages, removeImage);
     }
 
-	private static class ExpandedEditableUi extends ExpandedListEditorUi<FleetDTO> {
+    protected ExpandedListEditorUi<FleetDTO> getExpandedUI(StringMessages stringMessages, ImageResource editImage) {
+        return new ExpandedEditableUi(stringMessages, editImage);
+    }
+
+    private static class ExpandedEditableUi extends ExpandedListEditorUi<FleetDTO> {
 
         public ExpandedEditableUi(StringMessages stringMessages, ImageResource editImage) {
             super(stringMessages, editImage, false);
+        }
+        
+        @Override
+        protected StringMessages getStringMessages() {
+            return (StringMessages) super.getStringMessages();
         }
 
         @Override
@@ -44,43 +49,43 @@ public class FleetListEditableEditorComposite extends FleetListEditorComposite {
         protected Widget createValueWidget(int rowIndex, final FleetDTO fleet) {
             HorizontalPanel hPanel = new HorizontalPanel();
             hPanel.setSpacing(4);
-            Label fleetLabel = new Label(stringMessages.fleet() + " ");
+            Label fleetLabel = new Label(getStringMessages().fleet() + " ");
             fleetLabel.getElement().getStyle().setFontWeight(FontWeight.BOLD);
             hPanel.add(fleetLabel);
             final TextBox nameBox = createNameBox(fleet.getName());
-            nameBox.addChangeHandler(new ChangeHandler(){
-				@Override
-				public void onChange(ChangeEvent event) {
-					fleet.setName(nameBox.getText());
-				}
+            nameBox.addChangeHandler(new ChangeHandler() {
+                @Override
+                public void onChange(ChangeEvent event) {
+                    fleet.setName(nameBox.getText());
+                }
             });
             nameBox.ensureDebugId("NameTextBox");
             hPanel.add(nameBox);
-            
+
             final IntegerBox orderNoBox = createOrderNoBox(fleet.getOrderNo());
             orderNoBox.ensureDebugId("OrderNoIntegerBox");
             orderNoBox.addChangeHandler(new ChangeHandler() {
-				@Override
-				public void onChange(ChangeEvent event) {
-					fleet.setOrderNo(orderNoBox.getValue());
-				}
-			});
-            
+                @Override
+                public void onChange(ChangeEvent event) {
+                    fleet.setOrderNo(orderNoBox.getValue());
+                }
+            });
+
             final ListBox colorListBox = createColorListBox(nameBox, orderNoBox, fleet.getColor());
             colorListBox.ensureDebugId("ColorListBox");
             colorListBox.addChangeHandler(new ChangeHandler() {
-				@Override
-				public void onChange(ChangeEvent event) {
-					fleet.setColor(getSelectedColor(colorListBox));
-				}
-			});
-            hPanel.add(new Label(stringMessages.color() + " "));
+                @Override
+                public void onChange(ChangeEvent event) {
+                    fleet.setColor(getSelectedColor(colorListBox));
+                }
+            });
+            hPanel.add(new Label(getStringMessages().color() + " "));
             hPanel.add(colorListBox);
-            hPanel.add(new Label(stringMessages.rank() + " " ));
+            hPanel.add(new Label(getStringMessages().rank() + " "));
             hPanel.add(orderNoBox);
             return hPanel;
         }
-        
+
         private IntegerBox createOrderNoBox(final int orderNo) {
             IntegerBox orderNoBox = new IntegerBox();
             orderNoBox.setVisibleLength(3);
@@ -113,14 +118,14 @@ public class FleetListEditableEditorComposite extends FleetListEditorComposite {
                     }
                 }
             });
-            colorListBox.addItem(stringMessages.noColor());
+            colorListBox.addItem(getStringMessages().noColor());
             int index = 0;
             int i = 0;
             for (FleetColors value : FleetColors.values()) {
-            	i++;
+                i++;
                 colorListBox.addItem(value.name());
-                if(value.getColor().equals(color)){
-                	index = i;
+                if (value.getColor().equals(color)) {
+                    index = i;
                 }
             }
             colorListBox.setSelectedIndex(index);
@@ -145,7 +150,7 @@ public class FleetListEditableEditorComposite extends FleetListEditorComposite {
 
         private String getColorText(FleetColors color) {
             if (color == null) {
-                return stringMessages.noColor();
+                return getStringMessages().noColor();
             }
             return color.name().charAt(0) + color.name().toLowerCase().substring(1);
         }

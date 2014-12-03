@@ -36,7 +36,7 @@ import com.sap.sse.common.Util;
 public class ListEditorComposite<ValueType> extends Composite implements HasValue<Iterable<ValueType>>,
         HasValueChangeHandlers<Iterable<ValueType>> {
 
-    private ListEditorUiStrategy<ValueType> activeUi = null;
+    private final ListEditorUiStrategy<ValueType> activeUi;
 
     private List<ValueType> values;
 
@@ -49,7 +49,7 @@ public class ListEditorComposite<ValueType> extends Composite implements HasValu
 
         initWidget(activeUi.initWidget());
         activeUi.refresh();
-	}
+    }
 
     @Override
     public List<ValueType> getValue() {

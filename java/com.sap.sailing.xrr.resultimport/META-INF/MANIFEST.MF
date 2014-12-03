@@ -4,7 +4,7 @@ Bundle-Name: Resultimport
 Bundle-SymbolicName: com.sap.sailing.xrr.resultimport
 Bundle-Version: 1.0.0.qualifier
 Bundle-Vendor: SAP
-Bundle-RequiredExecutionEnvironment: JavaSE-1.7
+Bundle-RequiredExecutionEnvironment: JavaSE-1.8
 Export-Package: com.sap.sailing.xrr.resultimport,
  com.sap.sailing.xrr.resultimport.impl
 Import-Package: com.google.gwt.json.client,

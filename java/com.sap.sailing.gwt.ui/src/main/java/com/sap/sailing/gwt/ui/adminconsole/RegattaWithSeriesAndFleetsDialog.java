@@ -7,7 +7,6 @@ import com.google.gwt.user.client.ui.Label;
 import com.google.gwt.user.client.ui.TextBox;
 import com.google.gwt.user.client.ui.VerticalPanel;
 import com.sap.sailing.domain.common.dto.BoatClassDTO;
-import com.sap.sailing.gwt.ui.client.DataEntryDialogWithBootstrap;
 import com.sap.sailing.gwt.ui.client.StringMessages;
 import com.sap.sailing.gwt.ui.shared.BetterDateTimeBox;
 import com.sap.sailing.gwt.ui.shared.EventDTO;
@@ -38,11 +37,7 @@ public abstract class RegattaWithSeriesAndFleetsDialog extends AbstractRegattaWi
         if (regatta.boatClass != null) {
             boatClassEntryField.setText(regatta.boatClass.getName());
         }
-		setSeriesEditor();
-        formGrid.setWidget(6, 0, new Label(stringMessages.courseArea() + ":"));
-        formGrid.setWidget(6, 1, courseAreaListBox);
-        formGrid.setWidget(7, 0, new Label(stringMessages.useStartTimeInference() + ":"));
-        formGrid.setWidget(7, 1, useStartTimeInferenceCheckBox);
+        setSeriesEditor();
     }
 
     @Override

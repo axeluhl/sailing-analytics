@@ -7,11 +7,9 @@ import java.net.URL;
 import java.net.URLConnection;
 import java.util.ArrayList;
 import java.util.Collections;
-import java.util.HashMap;
 import java.util.HashSet;
 import java.util.LinkedHashMap;
 import java.util.List;
-import java.util.Map;
 import java.util.Set;
 import java.util.UUID;
 import java.util.logging.Logger;
@@ -41,8 +39,6 @@ import com.sap.sailing.domain.base.impl.TeamImpl;
 import com.sap.sailing.domain.common.Color;
 import com.sap.sailing.domain.common.FleetColors;
 import com.sap.sailing.domain.common.ScoringSchemeType;
-import com.sap.sailing.domain.common.dto.FleetDTO;
-import com.sap.sailing.domain.common.dto.SeriesCreationParametersDTO;
 import com.sap.sailing.xrr.resultimport.ParserFactory;
 import com.sap.sailing.xrr.schema.Boat;
 import com.sap.sailing.xrr.schema.Crew;
@@ -52,6 +48,7 @@ import com.sap.sailing.xrr.schema.Person;
 import com.sap.sailing.xrr.schema.Race;
 import com.sap.sailing.xrr.schema.RegattaResults;
 import com.sap.sailing.xrr.schema.Team;
+import com.sap.sse.common.TimePoint;
 
 import eventimport.EventImport;
 import eventimport.RegattaJSON;
@@ -94,10 +91,14 @@ public class StructureImporter {
                 }
             }
             BuildStructure buildStructure = new BuildStructure(races);
-            RegattaImpl regatta = new RegattaImpl(RegattaImpl.getDefaultName(event.getTitle(),
-                    ((Division) event.getRaceOrDivisionOrRegattaSeriesResult().get(0)).getTitle()), new BoatClassImpl(((Division) event
-                    .getRaceOrDivisionOrRegattaSeriesResult().get(0)).getTitle(),true), setSeries(buildStructure), false, this.baseDomainFactory
-                            .createScoringScheme(ScoringSchemeType.LOW_POINT), event.getEventID(), null);
+            final TimePoint startDate = null; // FIXME
+            final TimePoint endDate = null; // FIXME
+            RegattaImpl regatta = new RegattaImpl(
+                    RegattaImpl.getDefaultName(event.getTitle(), ((Division) event.getRaceOrDivisionOrRegattaSeriesResult().get(0)).getTitle()),
+                    new BoatClassImpl(((Division) event.getRaceOrDivisionOrRegattaSeriesResult().get(0)).getTitle(), true),
+                    startDate, endDate,
+                    setSeries(buildStructure), false, this.baseDomainFactory.createScoringScheme(ScoringSchemeType.LOW_POINT), event.getEventID(),
+                    null);
             addSpecificRegattas.add(regatta);
         }
         return addSpecificRegattas;

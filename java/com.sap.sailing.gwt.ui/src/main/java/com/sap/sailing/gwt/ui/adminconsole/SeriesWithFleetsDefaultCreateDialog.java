@@ -2,7 +2,6 @@ package com.sap.sailing.gwt.ui.adminconsole;
 
 import java.util.Arrays;
 import java.util.Collections;
-import java.util.List;
 
 import com.google.gwt.event.logical.shared.ValueChangeEvent;
 import com.google.gwt.event.logical.shared.ValueChangeHandler;
@@ -22,9 +21,7 @@ public class SeriesWithFleetsDefaultCreateDialog extends
 			StringMessages stringMessages,
 			com.sap.sse.gwt.client.dialog.DataEntryDialog.DialogCallback<SeriesDTO> callback) {
 		super(Collections.<SeriesDTO> emptyList(), stringMessages, callback);
-		nameEntryField.setText(defaultSeries.getName());// Otherwise an
-														// errorMessage will pop
-														// up
+		nameEntryField.setText(defaultSeries.getName());// Otherwise an errorMessage will pop up
 		isMedalSeriesCheckbox.setValue(defaultSeries
 				.isFirstColumnIsNonDiscardableCarryForward());
 		startsWithZeroScoreCheckbox.setValue(defaultSeries
@@ -52,13 +49,12 @@ public class SeriesWithFleetsDefaultCreateDialog extends
 	protected void initializeFleetListComposite(StringMessages stringMessages) {
 		fleetListComposite = new FleetListEditableEditorComposite(Arrays.asList(new FleetDTO(LeaderboardNameConstants.DEFAULT_FLEET_NAME, 0, null)), stringMessages, resources.removeIcon());
         fleetListComposite.ensureDebugId("FleetListEditableEditorComposite");
-        fleetListComposite.addValueChangeHandler(new ValueChangeHandler<List<FleetDTO>>() {
-            
+        fleetListComposite.addValueChangeHandler(new ValueChangeHandler<Iterable<FleetDTO>>() {
             @Override
-            public void onValueChange(ValueChangeEvent<List<FleetDTO>> event) {
+            public void onValueChange(ValueChangeEvent<Iterable<FleetDTO>> event) {
                 validate();
             }
         });
-	}
+    }
 
 }

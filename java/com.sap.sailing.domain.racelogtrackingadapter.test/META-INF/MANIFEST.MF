@@ -17,5 +17,4 @@ Import-Package: com.sap.sailing.domain.persistence.impl,
  com.sap.sailing.domain.persistence.racelog.tracking.impl,
  com.sap.sailing.domain.tractracadapter,
  com.sap.sailing.server.impl,
- javax.servlet.http;version="2.5.0",
- org.junit;version="4.11.0"
+ javax.servlet.http;version="2.5.0"

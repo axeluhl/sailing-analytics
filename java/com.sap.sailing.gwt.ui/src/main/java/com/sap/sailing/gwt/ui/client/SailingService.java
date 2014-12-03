@@ -523,8 +523,7 @@ public interface SailingService extends RemoteService {
      * Revoke the events in the {@code RaceLog} that are identified by the {@code eventIds}. This only affects such
      * events that implement {@link Revokable}.
      */
-    void revokeRaceLogEvents(String leaderboardName, String raceColumnName, String fleetName, List<UUID> eventIds)
-            List<Serializable> eventIds) throws NotRevokableException;
+    void revokeRaceLogEvents(String leaderboardName, String raceColumnName, String fleetName, List<UUID> eventIds) throws NotRevokableException;
 
     Collection<String> getGPSFixImporterTypes();
 

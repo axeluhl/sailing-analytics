@@ -15,8 +15,8 @@ import com.google.gwt.user.client.ui.Label;
 import com.google.gwt.user.client.ui.Widget;
 import com.sap.sailing.domain.common.dto.FleetDTO;
 import com.sap.sailing.gwt.ui.client.StringMessages;
-import com.sap.sailing.gwt.ui.client.shared.controls.listedit.ListEditorUiStrategy;
 import com.sap.sailing.gwt.ui.shared.SeriesDTO;
+import com.sap.sse.gwt.client.controls.listedit.ListEditorUiStrategy;
 import com.sap.sse.gwt.client.dialog.DataEntryDialog.DialogCallback;
 
 public class SeriesWithFleetsDefaultListEditor extends
@@ -92,7 +92,7 @@ public class SeriesWithFleetsDefaultListEditor extends
 					}
 					final List<SeriesDTO> oldSeries = seriesNames.remove(temp);
 					SeriesWithFleetsDefaultCreateDialog dialog = new SeriesWithFleetsDefaultCreateDialog(
-							seriesDTO, stringMessages,
+							seriesDTO, getStringMessages(),
 							new DialogCallback<SeriesDTO>() {
 								@Override
 								public void cancel() {
@@ -138,7 +138,7 @@ public class SeriesWithFleetsDefaultListEditor extends
 		protected Widget createValueWidget(int rowIndex, SeriesDTO seriesDTO) {
 			HorizontalPanel hPanel = new HorizontalPanel();
 			hPanel.setSpacing(5);
-			Label seriesLabel = new Label(stringMessages.series() + " '"
+			Label seriesLabel = new Label(getStringMessages().series() + " '"
 					+ seriesDTO.getName() + "' :");
 			seriesLabel.setWordWrap(false);
 			seriesLabel.getElement().getStyle().setFontWeight(FontWeight.BOLD);
@@ -154,10 +154,10 @@ public class SeriesWithFleetsDefaultListEditor extends
 			if (seriesDTO.getFleets() != null
 					&& seriesDTO.getFleets().size() > 0) {
 				if (seriesDTO.getFleets().size() == 1) {
-					fleetText = "1 " + stringMessages.fleet();
+					fleetText = "1 " + getStringMessages().fleet();
 				} else {
 					fleetText = seriesDTO.getFleets().size() + " "
-							+ stringMessages.fleets();
+							+ getStringMessages().fleets();
 				}
 				fleetText += ": " + seriesDTO.getFleets().toString();
 			} else {

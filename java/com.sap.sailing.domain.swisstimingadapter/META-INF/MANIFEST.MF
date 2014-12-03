@@ -4,7 +4,7 @@ Bundle-Name: Swisstimingadapter
 Bundle-SymbolicName: com.sap.sailing.domain.swisstimingadapter
 Bundle-Version: 1.0.0.qualifier
 Bundle-Vendor: SAP
-Bundle-RequiredExecutionEnvironment: JavaSE-1.7
+Bundle-RequiredExecutionEnvironment: JavaSE-1.8
 Bundle-ActivationPolicy: lazy
 Require-Bundle: com.sap.sailing.domain,
  com.sap.sailing.udpconnector,
@@ -17,5 +17,5 @@ Require-Bundle: com.sap.sailing.domain,
 Export-Package: com.sap.sailing.domain.swisstimingadapter,
  com.sap.sailing.domain.swisstimingadapter.impl;x-friends:="com.sap.sailing.server.test"
 Import-Package: com.sap.sailing.xrr.schema,
- org.osgi.framework;version="1.7.0"
+ org.osgi.framework
 Bundle-Activator: com.sap.sailing.domain.swisstimingadapter.impl.Activator
