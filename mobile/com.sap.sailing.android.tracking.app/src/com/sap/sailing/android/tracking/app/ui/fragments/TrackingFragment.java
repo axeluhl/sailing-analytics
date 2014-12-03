@@ -37,6 +37,8 @@ public class TrackingFragment extends BaseFragment implements OnClickListener {
 	static final String SIS_MODE = "instanceStateMode";
 	static final String SIS_STATUS = "instanceStateStatus";
 	static final String SIS_GPS_QUALITY = "instanceStateGpsQuality";
+	static final String SIS_GPS_ACCURACY = "instanceStateGpsAccuracy";
+	static final String SIS_GPS_UNSENT_FIXES = "instanceStateGpsUnsentFixes";
 	
 	private TimerRunnable timer;
 	private AppPreferences prefs;
@@ -98,10 +100,14 @@ public class TrackingFragment extends BaseFragment implements OnClickListener {
 			TextView modeText = (TextView)getActivity().findViewById(R.id.mode);
 			TextView statusText = (TextView)getActivity().findViewById(R.id.tracking_status);
 			SignalQualityIndicatorView qualityIndicator = (SignalQualityIndicatorView)getActivity().findViewById(R.id.gps_quality_indicator);
-			
+			TextView accuracyText = (TextView)getActivity().findViewById(R.id.gps_accuracy_label);
+			TextView unsentFixesText = (TextView)getActivity().findViewById(R.id.tracking_unsent_fixes);
+					
 			modeText.setText(savedInstanceState.getString(SIS_MODE));
 			statusText.setText(savedInstanceState.getString(SIS_STATUS));
 			qualityIndicator.setSignalQuality(savedInstanceState.getInt(SIS_GPS_QUALITY));
+			accuracyText.setText(savedInstanceState.getString(SIS_GPS_ACCURACY));
+			unsentFixesText.setText(savedInstanceState.getString(SIS_GPS_UNSENT_FIXES));
 		}
 		else
 		{
@@ -117,10 +123,14 @@ public class TrackingFragment extends BaseFragment implements OnClickListener {
 		TextView modeText = (TextView)getActivity().findViewById(R.id.mode);
 		TextView statusText = (TextView)getActivity().findViewById(R.id.tracking_status);
 		SignalQualityIndicatorView qualityIndicator = (SignalQualityIndicatorView)getActivity().findViewById(R.id.gps_quality_indicator);
+		TextView accuracyText = (TextView)getActivity().findViewById(R.id.gps_accuracy_label);
+		TextView unsentFixesText = (TextView)getActivity().findViewById(R.id.tracking_unsent_fixes);
 		
 		outState.putString(SIS_MODE, modeText.getText().toString());
 		outState.putString(SIS_STATUS, statusText.getText().toString());
 		outState.putInt(SIS_GPS_QUALITY, qualityIndicator.getSignalQuality());
+		outState.putString(SIS_GPS_ACCURACY, accuracyText.getText().toString());
+		outState.putString(SIS_GPS_UNSENT_FIXES, unsentFixesText.getText().toString());
 	}
 	
 	/**
@@ -283,8 +293,8 @@ public class TrackingFragment extends BaseFragment implements OnClickListener {
 		SignalQualityIndicatorView indicatorView = (SignalQualityIndicatorView) getActivity().findViewById(R.id.gps_quality_indicator);
 		indicatorView.setSignalQuality( quality.toInt() );
 		
-		TextView accuracyTextView = (TextView)getActivity().findViewById(R.id.gps_accuracy);
-		accuracyTextView.setText(String.valueOf(gpsAccurracy) + "m");
+		TextView accuracyTextView = (TextView)getActivity().findViewById(R.id.gps_accuracy_label);
+		accuracyTextView.setText("~ " + String.valueOf(Math.round(gpsAccurracy)) + " m");
 		
 		updateTrackingStatus(quality);
 		
@@ -313,6 +323,7 @@ public class TrackingFragment extends BaseFragment implements OnClickListener {
 				t.start();
 			}
 		}
+		
 		@Override
 		public void run() {
 			while (running) {

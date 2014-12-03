@@ -155,14 +155,20 @@ public class TrackingActivity extends BaseActivity implements GPSQualityListener
     public void apiConnectivityUpdated(APIConnectivity apiConnectivity) {
 		TrackingFragment trackingFragment = (TrackingFragment) getSupportFragmentManager()
 				.findFragmentById(R.id.content_frame);
-		trackingFragment.setAPIConnectivityStatus(apiConnectivity);
+		if (trackingFragment != null)
+		{
+			trackingFragment.setAPIConnectivityStatus(apiConnectivity);	
+		}
     }
     
     @Override
     public void setUnsentGPSFixesCount(int count) {
     	TrackingFragment trackingFragment = (TrackingFragment) getSupportFragmentManager()
 				.findFragmentById(R.id.content_frame);
-		trackingFragment.setUnsentGPSFixesCount(count);
+    	if (trackingFragment != null)
+		{
+    		trackingFragment.setUnsentGPSFixesCount(count);
+		}
     }
     
     private void startTrackingService(int eventId)

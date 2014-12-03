@@ -90,7 +90,7 @@
                 android:layout_alignParentTop="true"
                 android:gravity="center_vertical"
                 android:paddingLeft="10dp"
-                android:text="@string/tracking_gps_quality" />
+                android:text="@string/tracking_gps_accuracy" />
 
             <!-- Separators -->
 
@@ -156,19 +156,19 @@
                 android:orientation="horizontal" >
                 
                 <com.sap.sailing.android.tracking.app.customviews.OpenSansTextView
-                    android:id="@+id/gps_accuracy"
+                    android:id="@+id/gps_accuracy_label"
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
                     android:layout_alignBaseline="@id/gps_quality"
                     android:layout_alignLeft="@+id/gps_quality_indicator"
-                    android:paddingRight="5dp"
+                    android:paddingRight="9dp"
                     android:text="" />
 
                 <com.sap.sailing.android.tracking.app.views.SignalQualityIndicatorView
                     android:id="@+id/gps_quality_indicator"
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
-                    android:contentDescription="@string/signal_quality_indicator_view_description"
+                    android:contentDescription="@string/signal_accuracy_indicator_view_description"
                     android:focusable="true"
                     android:paddingRight="10dp"
                     app:signalQuality="none" />

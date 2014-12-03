@@ -29,7 +29,7 @@
     <string name="do_you_really_want_to_stop_tracking">Soll das Tracking wirklich beendet werden?</string>
     <string name="ok">OK</string>
     <string name="tracking_qps_quality">GPS Signal</string>
-    <string name="signal_quality_indicator_view_description">GPS Qualität</string>
+    <string name="signal_accuracy_indicator_view_description">GPS Genauigkeit</string>
     <string name="poor">schwach</string>
     <string name="good">gut</string>
     <string name="great">sehr gut</string>
@@ -74,5 +74,6 @@
     <string name="no_qr_code_popup_title">Kein QR-Code?</string>
 	<string name="no_qr_code_popup_message">Bitte kontaktieren Sie die Rennleitung, falls Sie keinen QR-Code erhalten haben.</string>
 	<string name="tracking_colon">Tracke:</string>
+	<string name="tracking_gps_accuracy">GPS Genauigkeit</string>
 
 </resources>
