@@ -14,8 +14,8 @@ import android.view.accessibility.AccessibilityEvent;
 import com.sap.sailing.android.tracking.app.R;
 
 /**
- * Draws 4 boxes that can be filled or empty, depending on the value passed for
- * singal-quality;
+ * Draws one vertical indicator that can is filled green up to a point, 
+ * depending on the value passed for signal-quality;
  * 
  * @author Lukas Zielinski
  *
@@ -25,13 +25,12 @@ public class SignalQualityIndicatorView extends View {
 	private int signalQuality;
 	
 	private Paint paint; 
-	private Paint paintBlack;
+	private Paint paintDark;
 	
 	private float height;
 	private float width;
 	private Rect rect;
 	
-
 	public SignalQualityIndicatorView(Context context, AttributeSet attrs) {
 		super(context, attrs);
 
@@ -55,60 +54,49 @@ public class SignalQualityIndicatorView extends View {
 	{
 		if (this.signalQuality == 2)
 		{
-			this.setContentDescription(getContext().getString(R.string.signal_quality_indicator_view_description) + getContext().getString(R.string.poor));
+			this.setContentDescription(getContext().getString(R.string.signal_accuracy_indicator_view_description) + getContext().getString(R.string.poor));
 		}
 		else if (this.signalQuality == 3)
 		{
-			this.setContentDescription(getContext().getString(R.string.signal_quality_indicator_view_description) + getContext().getString(R.string.good));
+			this.setContentDescription(getContext().getString(R.string.signal_accuracy_indicator_view_description) + getContext().getString(R.string.good));
 		}
 		else if (this.signalQuality == 4)
 		{
-			this.setContentDescription(getContext().getString(R.string.signal_quality_indicator_view_description) + getContext().getString(R.string.great));
+			this.setContentDescription(getContext().getString(R.string.signal_accuracy_indicator_view_description) + getContext().getString(R.string.great));
 		}
 		else
 		{
-			this.setContentDescription(getContext().getString(R.string.signal_quality_indicator_view_description) + getContext().getString(R.string.no_signal));
+			this.setContentDescription(getContext().getString(R.string.signal_accuracy_indicator_view_description) + getContext().getString(R.string.no_signal));
 		}
-
 	}
 
 	private void initPaint() {
 		paint = new Paint(Paint.ANTI_ALIAS_FLAG);
 		paint.setColor(Color.parseColor("#8ab54e"));
-		paintBlack = new Paint(Paint.ANTI_ALIAS_FLAG);
-		paintBlack.setColor(Color.BLACK);
+		paintDark = new Paint(Paint.ANTI_ALIAS_FLAG);
+		paintDark.setColor(Color.parseColor("#455B27"));
 	}
 	
 	@Override
 	protected void onDraw(Canvas canvas) {
 		super.onDraw(canvas);
+		float boxHeight = this.height / 4;
 		
-		float boxWidthWithPadding = width / 4;
-		float boxWidth = width / 4.5f;
+		// first draw gray background
 		
-		for (int i = 0; i < 4; i++)
-		{
-			// first draw green
-			
-			rect.top = 0;
-			rect.left = (int)(i * boxWidthWithPadding);
-			rect.right = (int)(rect.left + boxWidth);
-			rect.bottom = (int)this.height;
-			canvas.drawRect(rect, paint);	
-			
-			if (i >= signalQuality)
-			{
-				// draw smaller black to make it appear like an empty green box
-				
-				rect.top = 3;
-				rect.left = (int)(i * boxWidthWithPadding + 3);
-				rect.right = (int)(rect.left + boxWidth - 6);
-				rect.bottom = (int)this.height - 3;
-				canvas.drawRect(rect, paintBlack);	
-			}
-			
-			
-		}
+		rect.top = 0;
+		rect.left = 0;
+		rect.right = (int) this.width;
+		rect.bottom = (int) this.height;
+		canvas.drawRect(rect, paintDark);
+
+		// then draw green box on tom
+		
+		rect.top = (int) (this.height - (signalQuality * boxHeight));
+		rect.left = 0;
+		rect.right = (int) this.width;
+		rect.bottom = (int) this.height;
+		canvas.drawRect(rect, paint);
 	}
 	
 	@Override
@@ -164,7 +152,7 @@ public class SignalQualityIndicatorView extends View {
 	
 	@Override
 	protected void onMeasure(int widthMeasureSpec, int heightMeasureSpec) {
-	   int minw = getPaddingLeft() + getPaddingRight() + 200;
+	   int minw = getPaddingLeft() + getPaddingRight() + 40;
 	   int w = resolveSizeAndState(minw, widthMeasureSpec, 1);
 	   int minh = 50;
 	   setMeasuredDimension(w, minh);
