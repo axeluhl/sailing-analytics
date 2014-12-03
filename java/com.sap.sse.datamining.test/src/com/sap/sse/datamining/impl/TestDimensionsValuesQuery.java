@@ -66,7 +66,7 @@ public class TestDimensionsValuesQuery {
     }
 
     private Query<Set<Object>> createDimensionsValuesQuery() {
-        return new ProcessorQuery<Set<Object>, Collection<Test_Regatta>>(ConcurrencyTestsUtil.getExecutor(), dataSource) {
+        return new ProcessorQuery<Set<Object>, Collection<Test_Regatta>>(dataSource) {
             @Override
             protected Processor<Collection<Test_Regatta>, ?> createFirstProcessor() {
                 Processor<GroupedDataEntry<Object>, Map<GroupKey, Set<Object>>> resultCollector = ComponentTestsUtil.getProcessorFactory().createGroupedDataCollectingAsSetProcessor(this); 

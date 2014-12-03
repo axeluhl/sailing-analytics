@@ -1,15 +1,22 @@
 package com.sap.sse.datamining.impl;
 
+import java.io.Serializable;
+import java.util.Collection;
+import java.util.Locale;
+import java.util.Map;
+import java.util.Map.Entry;
 import java.util.UUID;
 import java.util.concurrent.ExecutorService;
 
 import com.sap.sse.datamining.DataRetrieverChainDefinition;
 import com.sap.sse.datamining.ModifiableDataMiningServer;
+import com.sap.sse.datamining.QueryDefinition;
 import com.sap.sse.datamining.functions.Function;
 import com.sap.sse.datamining.functions.FunctionProvider;
 import com.sap.sse.datamining.functions.FunctionRegistry;
 import com.sap.sse.datamining.i18n.DataMiningStringMessages;
 import com.sap.sse.datamining.impl.i18n.CompoundDataMiningStringMessages;
+import com.sap.sse.datamining.shared.QueryDefinitionDTO;
 import com.sap.sse.datamining.shared.dto.FunctionDTO;
 
 public class DataMiningServerImpl implements ModifiableDataMiningServer {
@@ -135,6 +142,38 @@ public class DataMiningServerImpl implements ModifiableDataMiningServer {
     @Override
     public <DataSourceType> DataRetrieverChainDefinition<DataSourceType> getDataRetrieverChainDefinition(UUID id) {
         return dataRetrieverChainDefinitionRegistry.get(id);
+    }
+    
+    @Override
+    public QueryDefinition<?, ?> getQueryDefinitionForDTO(QueryDefinitionDTO queryDefinitionDTO) {
+        ModifiableQueryDefinition<?, ?> queryDefinition = null;
+        
+        Locale locale = DataMiningStringMessages.Util.getLocaleFor(queryDefinitionDTO.getLocaleInfoName());
+        DataRetrieverChainDefinition<?> retrieverChain = getDataRetrieverChainDefinition(queryDefinitionDTO.getDataRetrieverChainDefinition().getId());
+        Function<?> statisticToCalculate = getFunctionForDTO(queryDefinitionDTO.getStatisticToCalculate());
+        
+        if (locale != null && retrieverChain != null && statisticToCalculate != null) {
+             queryDefinition = new ModifiableQueryDefinition<>(locale, retrieverChain, statisticToCalculate, queryDefinitionDTO.getAggregatorType());
+             
+             for (Entry<Integer, Map<FunctionDTO, Collection<? extends Serializable>>> levelSpecificFilterSelection : queryDefinitionDTO.getFilterSelection().entrySet()) {
+                Integer retrieverLevel = levelSpecificFilterSelection.getKey();
+                for (Entry<FunctionDTO, Collection<? extends Serializable>> levelSpecificFilterSelectionEntry : levelSpecificFilterSelection.getValue().entrySet()) {
+                    Function<?> dimensionToFilterBy = getFunctionForDTO(levelSpecificFilterSelectionEntry.getKey());
+                    if (dimensionToFilterBy != null) {
+                        queryDefinition.setFilterSelection(retrieverLevel, dimensionToFilterBy, levelSpecificFilterSelectionEntry.getValue());
+                    }
+                }
+            }
+             
+            for (FunctionDTO dimensionToGroupByDTO : queryDefinitionDTO.getDimensionsToGroupBy()) {
+                Function<?> dimensionToGroupBy = getFunctionForDTO(dimensionToGroupByDTO);
+                if (dimensionToGroupBy != null) {
+                    queryDefinition.addDimensionToGroupBy(dimensionToGroupBy);
+                }
+            }
+        }
+        
+        return queryDefinition;
     }
     
 }

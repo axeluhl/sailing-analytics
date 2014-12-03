@@ -7,12 +7,12 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
-import com.sap.sse.datamining.shared.QueryDefinition;
+import com.sap.sse.datamining.shared.QueryDefinitionDTO;
 import com.sap.sse.datamining.shared.components.AggregatorType;
 import com.sap.sse.datamining.shared.dto.FunctionDTO;
 import com.sap.sse.datamining.shared.impl.dto.DataRetrieverChainDefinitionDTO;
 
-public class QueryDefinitionImpl implements QueryDefinition {
+public class QueryDefinitionDTOImpl implements QueryDefinitionDTO {
     private static final long serialVersionUID = -6438771277564908352L;
     
     private String localeInfoName;
@@ -26,9 +26,9 @@ public class QueryDefinitionImpl implements QueryDefinition {
      * <b>Constructor for the GWT-Serialization. Don't use this!</b>
      */
     @Deprecated
-    QueryDefinitionImpl() { }
+    QueryDefinitionDTOImpl() { }
 
-    public QueryDefinitionImpl(String localeInfoName, FunctionDTO statisticToCalculate, AggregatorType aggregatorType, DataRetrieverChainDefinitionDTO dataRetrieverChainDefinition) {
+    public QueryDefinitionDTOImpl(String localeInfoName, FunctionDTO statisticToCalculate, AggregatorType aggregatorType, DataRetrieverChainDefinitionDTO dataRetrieverChainDefinition) {
         this.localeInfoName = localeInfoName;
         this.statisticToCalculate = statisticToCalculate;
         this.aggregatorType = aggregatorType;

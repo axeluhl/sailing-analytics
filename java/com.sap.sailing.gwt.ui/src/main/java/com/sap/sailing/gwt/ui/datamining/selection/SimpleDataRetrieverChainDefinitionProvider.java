@@ -23,7 +23,7 @@ import com.sap.sailing.gwt.ui.datamining.DataRetrieverChainDefinitionChangedList
 import com.sap.sailing.gwt.ui.datamining.DataRetrieverChainDefinitionProvider;
 import com.sap.sailing.gwt.ui.datamining.StatisticChangedListener;
 import com.sap.sailing.gwt.ui.datamining.StatisticProvider;
-import com.sap.sse.datamining.shared.QueryDefinition;
+import com.sap.sse.datamining.shared.QueryDefinitionDTO;
 import com.sap.sse.datamining.shared.components.AggregatorType;
 import com.sap.sse.datamining.shared.dto.FunctionDTO;
 import com.sap.sse.datamining.shared.impl.dto.DataRetrieverChainDefinitionDTO;
@@ -141,7 +141,7 @@ public class SimpleDataRetrieverChainDefinitionProvider implements DataRetriever
     }
 
     @Override
-    public void applyQueryDefinition(QueryDefinition queryDefinition) {
+    public void applyQueryDefinition(QueryDefinitionDTO queryDefinition) {
         retrieverChainsListBox.setValue(queryDefinition.getDataRetrieverChainDefinition(), false);
     }
 

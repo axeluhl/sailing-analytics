@@ -7,7 +7,6 @@ import java.util.Locale;
 import java.util.Map;
 import java.util.Timer;
 import java.util.TimerTask;
-import java.util.concurrent.ThreadPoolExecutor;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.TimeoutException;
 import java.util.concurrent.locks.ReentrantLock;
@@ -44,7 +43,7 @@ public abstract class ProcessorQuery<AggregatedType, DataSourceType> implements 
      * Creates a query that returns a result without any additional data (like the calculation time or the retrieved data amount).<br>
      * This is useful for non user specific queries, like retrieving the dimension values.
      */
-    public ProcessorQuery(ThreadPoolExecutor executor, DataSourceType dataSource) {
+    public ProcessorQuery(DataSourceType dataSource) {
         this(dataSource, null, null);
     }
 

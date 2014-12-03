@@ -23,7 +23,7 @@ import com.sap.sailing.gwt.ui.client.shared.components.SimpleObjectRenderer;
 import com.sap.sailing.gwt.ui.datamining.DataMiningServiceAsync;
 import com.sap.sailing.gwt.ui.datamining.StatisticChangedListener;
 import com.sap.sailing.gwt.ui.datamining.StatisticProvider;
-import com.sap.sse.datamining.shared.QueryDefinition;
+import com.sap.sse.datamining.shared.QueryDefinitionDTO;
 import com.sap.sse.datamining.shared.components.AggregatorType;
 import com.sap.sse.datamining.shared.dto.FunctionDTO;
 import com.sap.sse.gwt.client.ErrorReporter;
@@ -185,7 +185,7 @@ public class SimpleStatisticProvider implements StatisticProvider {
     }
 
     @Override
-    public void applyQueryDefinition(QueryDefinition queryDefinition) {
+    public void applyQueryDefinition(QueryDefinitionDTO queryDefinition) {
         extractionFunctionListBox.setValue(new StrippedFunctionDTO(queryDefinition.getStatisticToCalculate()), false);
         aggregatorListBox.setValue(queryDefinition.getAggregatorType(), false);
     }

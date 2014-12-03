@@ -28,7 +28,7 @@ import com.sap.sse.datamining.impl.criterias.AndCompoundFilterCriterion;
 import com.sap.sse.datamining.impl.criterias.CompoundFilterCriterion;
 import com.sap.sse.datamining.impl.criterias.NullaryFunctionValuesFilterCriterion;
 import com.sap.sse.datamining.shared.GroupKey;
-import com.sap.sse.datamining.shared.QueryDefinition;
+import com.sap.sse.datamining.shared.QueryDefinitionDTO;
 import com.sap.sse.datamining.shared.dto.FunctionDTO;
 import com.sap.sse.datamining.shared.impl.dto.DataRetrieverChainDefinitionDTO;
 
@@ -52,7 +52,7 @@ public class SailingDataMiningFactory {
         this.dataRetrieverChainDefinitionProvider = dataRetrieverChainDefinitionRegistry;
     }
 
-    public <ElementType> Query<Double> createQuery(RacingEventService dataSource, final QueryDefinition queryDefinition) {
+    public <ElementType> Query<Double> createQuery(RacingEventService dataSource, final QueryDefinitionDTO queryDefinition) {
         return new ProcessorQuery<Double, RacingEventService>(dataSource, stringMessages,
                 DataMiningStringMessages.Util.getLocaleFor(queryDefinition.getLocaleInfoName())) {
             @Override

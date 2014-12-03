@@ -24,7 +24,7 @@ import com.sap.sailing.gwt.ui.datamining.GroupingChangedListener;
 import com.sap.sailing.gwt.ui.datamining.GroupingProvider;
 import com.sap.sailing.gwt.ui.datamining.StatisticChangedListener;
 import com.sap.sailing.gwt.ui.datamining.StatisticProvider;
-import com.sap.sse.datamining.shared.QueryDefinition;
+import com.sap.sse.datamining.shared.QueryDefinitionDTO;
 import com.sap.sse.datamining.shared.components.AggregatorType;
 import com.sap.sse.datamining.shared.dto.FunctionDTO;
 import com.sap.sse.gwt.client.ErrorReporter;
@@ -176,7 +176,7 @@ public class MultiDimensionalGroupingProvider implements GroupingProvider, Stati
     }
 
     @Override
-    public void applyQueryDefinition(QueryDefinition queryDefinition) {
+    public void applyQueryDefinition(QueryDefinitionDTO queryDefinition) {
         int index = 0;
         for (FunctionDTO dimension : queryDefinition.getDimensionsToGroupBy()) {
             dimensionToGroupByBoxes.get(index).setValue(dimension, true);

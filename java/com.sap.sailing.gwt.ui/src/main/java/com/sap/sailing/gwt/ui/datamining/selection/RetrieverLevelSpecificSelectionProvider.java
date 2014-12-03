@@ -22,7 +22,7 @@ import com.sap.sailing.gwt.ui.datamining.DataRetrieverChainDefinitionChangedList
 import com.sap.sailing.gwt.ui.datamining.DataRetrieverChainDefinitionProvider;
 import com.sap.sailing.gwt.ui.datamining.SelectionChangedListener;
 import com.sap.sailing.gwt.ui.datamining.SelectionProvider;
-import com.sap.sse.datamining.shared.QueryDefinition;
+import com.sap.sse.datamining.shared.QueryDefinitionDTO;
 import com.sap.sse.datamining.shared.dto.FunctionDTO;
 import com.sap.sse.datamining.shared.impl.dto.DataRetrieverChainDefinitionDTO;
 import com.sap.sse.datamining.shared.impl.dto.LocalizedTypeDTO;
@@ -143,8 +143,14 @@ public class RetrieverLevelSpecificSelectionProvider implements SelectionProvide
     }
 
     @Override
-    public void applySelection(QueryDefinition queryDefinition) {
-        // TODO
+    public void applySelection(QueryDefinitionDTO queryDefinition) {
+        for (SingleRetrieverLevelSelectionProviderPrototype singleRetrieverLevelSelectionProvider : singleRetrieverLevelSelectionProviders) {
+            Map<Integer, Map<FunctionDTO, Collection<? extends Serializable>>> filterSelection = queryDefinition.getFilterSelection();
+            int retrieverLevel = singleRetrieverLevelSelectionProvider.getRetrieverLevel();
+            if (filterSelection.containsKey(retrieverLevel)) {
+                singleRetrieverLevelSelectionProvider.applySelection(filterSelection.get(retrieverLevel));
+            }
+        }
     }
 
     @Override

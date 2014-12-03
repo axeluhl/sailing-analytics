@@ -27,10 +27,10 @@ import com.sap.sailing.gwt.ui.datamining.SelectionChangedListener;
 import com.sap.sailing.gwt.ui.datamining.SelectionProvider;
 import com.sap.sailing.gwt.ui.datamining.StatisticChangedListener;
 import com.sap.sailing.gwt.ui.datamining.StatisticProvider;
-import com.sap.sse.datamining.shared.QueryDefinition;
+import com.sap.sse.datamining.shared.QueryDefinitionDTO;
 import com.sap.sse.datamining.shared.components.AggregatorType;
 import com.sap.sse.datamining.shared.dto.FunctionDTO;
-import com.sap.sse.datamining.shared.impl.QueryDefinitionImpl;
+import com.sap.sse.datamining.shared.impl.QueryDefinitionDTOImpl;
 import com.sap.sse.datamining.shared.impl.dto.DataRetrieverChainDefinitionDTO;
 import com.sap.sse.gwt.client.ErrorReporter;
 
@@ -142,8 +142,8 @@ public class BufferingQueryDefinitionProviderWithControls extends AbstractQueryD
     }
     
     @Override
-    public QueryDefinition getQueryDefinition() {
-        QueryDefinitionImpl queryDTO = new QueryDefinitionImpl(LocaleInfo.getCurrentLocale().getLocaleName(), statisticProvider.getStatisticToCalculate(),
+    public QueryDefinitionDTO getQueryDefinition() {
+        QueryDefinitionDTOImpl queryDTO = new QueryDefinitionDTOImpl(LocaleInfo.getCurrentLocale().getLocaleName(), statisticProvider.getStatisticToCalculate(),
                                                                statisticProvider.getAggregatorType(), retrieverChainProvider.getDataRetrieverChainDefinition());
         
         for (FunctionDTO dimension : groupBySelectionPanel.getDimensionsToGroupBy()) {
@@ -158,7 +158,7 @@ public class BufferingQueryDefinitionProviderWithControls extends AbstractQueryD
     }
 
     @Override
-    public void applyQueryDefinition(QueryDefinition queryDefinition) {
+    public void applyQueryDefinition(QueryDefinitionDTO queryDefinition) {
         setBlockChangeNotification(true);
         statisticProvider.applyQueryDefinition(queryDefinition);
         retrieverChainProvider.applyQueryDefinition(queryDefinition);

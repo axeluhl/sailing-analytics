@@ -7,6 +7,7 @@ import com.sap.sse.datamining.functions.Function;
 import com.sap.sse.datamining.functions.FunctionProvider;
 import com.sap.sse.datamining.i18n.DataMiningStringMessages;
 import com.sap.sse.datamining.impl.DataRetrieverChainDefinitionProvider;
+import com.sap.sse.datamining.shared.QueryDefinitionDTO;
 import com.sap.sse.datamining.shared.dto.FunctionDTO;
 
 public interface DataMiningServer {
@@ -41,5 +42,7 @@ public interface DataMiningServer {
             Class<DataSourceType> dataSourceType, Class<?> retrievedDataType);
 
     public <DataSourceType> DataRetrieverChainDefinition<DataSourceType> getDataRetrieverChainDefinition(UUID id);
-
+    
+    public QueryDefinition<?, ?> getQueryDefinitionForDTO(QueryDefinitionDTO queryDefinitionDTO);
+    
 }

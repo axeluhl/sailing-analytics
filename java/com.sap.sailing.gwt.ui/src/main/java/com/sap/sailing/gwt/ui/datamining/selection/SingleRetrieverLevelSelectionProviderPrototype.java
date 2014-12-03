@@ -8,6 +8,7 @@ import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
+import java.util.Map.Entry;
 import java.util.Set;
 
 import com.google.gwt.event.logical.shared.ValueChangeEvent;
@@ -47,6 +48,8 @@ public class SingleRetrieverLevelSelectionProviderPrototype extends HorizontalPa
     private final List<FunctionDTO> availableDimensions;
     private final Map<GroupKey, Set<Object>> dimensionValuesMappedByDimension;
     private final SelectionChangeEvent.Handler selectionTablesChangedListener;
+    
+    private Map<FunctionDTO, Collection<? extends Serializable>> filterSelectionToBeApplied;
     
     private final Label filterByLabel;
     private final HorizontalPanel filterSelectionPanel;
@@ -117,6 +120,11 @@ public class SingleRetrieverLevelSelectionProviderPrototype extends HorizontalPa
                     ValueListBox<FunctionDTO> firstDimensionToFilterByBox = createDimensionToGroupByBox();
                     addDimensionToFilterByBox(firstDimensionToFilterByBox);
                     updateAcceptableValues();
+                    
+                    if (filterSelectionToBeApplied != null) {
+                        applySelection(filterSelectionToBeApplied);
+                        filterSelectionToBeApplied = null;
+                    }
                 }
                 @Override
                 public void onFailure(Throwable caught) {
@@ -247,6 +255,29 @@ public class SingleRetrieverLevelSelectionProviderPrototype extends HorizontalPa
             }
         }
         return filterSelection;
+    }
+
+    public void applySelection(Map<FunctionDTO, Collection<? extends Serializable>> filterSelection) {
+        if (!isDataAvailable()) {
+            filterSelectionToBeApplied = filterSelection;
+        } else {
+            clearFilterSelectionComponents();
+
+            ValueListBox<FunctionDTO> firstDimensionToFilterByBox = createDimensionToGroupByBox();
+            addDimensionToFilterByBox(firstDimensionToFilterByBox);
+            updateAcceptableValues();
+            
+            int filterBoxIndex = 0;
+            for (Entry<FunctionDTO, Collection<? extends Serializable>> singleDimensionFilterSelection : filterSelection.entrySet()) {
+                ValueListBox<FunctionDTO> dimensionToFilterByBox = dimensionToFilterByBoxes.get(filterBoxIndex);
+                dimensionToFilterByBox.setValue(singleDimensionFilterSelection.getKey(), true);
+                selectionTablesMappedBySelectionBox.get(dimensionToFilterByBox).setSelection(singleDimensionFilterSelection.getValue());
+            }
+        }
+    }
+    
+    private boolean isDataAvailable() {
+        return !dimensionValuesMappedByDimension.isEmpty();
     }
 
     public void clearSelection() {
