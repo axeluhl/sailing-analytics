@@ -217,13 +217,18 @@ public class AnalyticsProvider extends ContentProvider {
         final SQLiteDatabase db = mOpenHelper.getWritableDatabase();
 
 		switch (sUriMatcher.match(uri)) {
+		
+		case SENSOR_GPS:
+			int numGpsFixesDeleted = db.delete(Tables.SENSOR_GPS, selection, selectionArgs);
+			notifyChange(uri);
+			return numGpsFixesDeleted;
 
 		case SENSOR_GPS_ID:
 			String idStr = uri.getLastPathSegment();
 		    String where = SensorGps._ID + " = " + idStr;
-		    int numRowsDeleted = db.delete(Tables.SENSOR_GPS, where, selectionArgs);
+		    int numGpsFixesWithIdDeleted = db.delete(Tables.SENSOR_GPS, where, selectionArgs);
 			notifyChange(uri);
-			return numRowsDeleted;
+			return numGpsFixesWithIdDeleted;
 			
         case COMPETITOR:
         	int numCompetitorRowsDeleted = db.delete(Tables.COMPETITORS, selection, selectionArgs);

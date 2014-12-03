@@ -12,6 +12,7 @@
         android:name="com.sap.sailing.android.tracking.app.permission.C2D_MESSAGE"
         android:protectionLevel="signature" />
 
+    <uses-permission android:name="android.permission.ACCESS_MOCK_LOCATION" />
     <uses-permission android:name="android.permission.ACCESS_NETWORK_STATE" />
     <uses-permission android:name="android.permission.ACCESS_FINE_LOCATION" />
     <uses-permission android:name="android.permission.INTERNET" />
@@ -38,14 +39,17 @@
             android:screenOrientation="unspecified" >
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />
+
                 <category android:name="android.intent.category.LAUNCHER" />
                 <category android:name="android.intent.category.DEFAULT" />
             </intent-filter>
             <intent-filter>
                 <action android:name="android.intent.action.VIEW" />
+
                 <category android:name="android.intent.category.DEFAULT" />
                 <category android:name="android.intent.category.BROWSABLE" />
-                <data android:scheme="comsapsailingtracker"/>
+
+                <data android:scheme="comsapsailingtracker" />
             </intent-filter>
         </activity>
         <activity
@@ -99,14 +103,16 @@
             android:exported="false"
             android:icon="@drawable/icon"
             android:label="@string/transmitting_service" />
-        <!-- <service
+        <!--
+        <service
             android:name="com.sap.sailing.android.tracking.app.services.sending.MessageSendingService"
             android:exported="false" >
             <intent-filter>
                 <action android:name="com.sap.sailing.android.tracking.app.action.sendSavedIntents" />
                 <action android:name="com.sap.sailing.android.tracking.app.action.sendMessage" />
             </intent-filter>
-        </service> -->
+        </service>
+        -->
         <service android:name=".service.GcmIntentService" />
 
         <receiver android:name="com.sap.sailing.android.tracking.app.services.sending.ConnectivityChangedReceiver" >
