@@ -26,7 +26,7 @@ import com.sap.sailing.polars.regression.NotEnoughDataHasBeenAddedException;
  * It uses a {@link PolarSheetAnalyzer} for more advanced analysis. It's methods are facaded in this interface for
  * central access.
  * 
- * The interesting methods for a user are {@link #getSpeed(BoatClass, Speed, Bearing)} if data for a specific angle is
+ * The interesting methods for a user are {@link #getSpeed(BoatClass, Speed, Bearing, boolean)} if data for a specific angle is
  * needed and {@link #getAverageSpeedWithBearing(BoatClass, Speed, LegType, Tack)} 
  *  which also returns the average angle for the provided parameters.
  * 
@@ -41,10 +41,11 @@ public interface PolarDataService {
      * @param windSpeed
      * @param bearingToTheWind
      *            Boat's direction relative to the wind. either in -180 -> +180 or 0 -> 359 degrees
+     * @param useLinearRegression if true uses lin. Regression for estimation in the wind interval, if false simple arithm. mean in interval
      * @return The speed the boat is moving at for the specified wind and bearing according to the polar diagram.
      * @throws NotEnoughDataHasBeenAddedException
      */
-    SpeedWithConfidence<Void> getSpeed(BoatClass boatClass, Speed windSpeed, Bearing bearingToTheWind)
+    SpeedWithConfidence<Void> getSpeed(BoatClass boatClass, Speed windSpeed, Bearing bearingToTheWind, boolean useLinearRegression)
             throws NotEnoughDataHasBeenAddedException;
     
     /**
@@ -125,6 +126,9 @@ public interface PolarDataService {
      * @return array with datacount for all angles in the given area, else null
      */
     Integer[] getDataCountsForWindSpeed(BoatClass boatClass, Speed windSpeed, int startAngleInclusive, int endAngleExclusive);
+
+    SpeedWithBearingWithConfidence<Void> getAverageSpeedWithBearing(BoatClass boatClass, Speed windSpeed,
+            LegType legType, Tack tack, boolean useLinReg) throws NotEnoughDataHasBeenAddedException;
     
 
 }

@@ -30,15 +30,31 @@ public class BoatSpeedEstimator {
     
     private int dataCount = 0;
 
-    public double estimateSpeed(double windSpeed, double angleToTheWind) throws NotEnoughDataHasBeenAddedException {
+    /**
+     * 
+     * @param windSpeed
+     * @param angleToTheWind
+     * @param useLinearRegression if false mean of wind interval is used, otherwise lin. regression
+     * @return
+     * @throws NotEnoughDataHasBeenAddedException
+     */
+    public double estimateSpeed(double windSpeed, double angleToTheWind, boolean useLinearRegression) throws NotEnoughDataHasBeenAddedException {
         lock.readLock().lock();
+        double result;
         try {
-            double angleEstimated = angleRegression.getEstimatedY(angleToTheWind);
-            double windSpeedEstimated = windSpeedRegression.getEstimatedY(windSpeed);
-            return (angleEstimated + windSpeedEstimated) / 2.0;
+            if (useLinearRegression) {
+                double angleEstimated = angleRegression.getEstimatedY(angleToTheWind);
+                double windSpeedEstimated = windSpeedRegression.getEstimatedY(windSpeed);
+
+                result = (angleEstimated + windSpeedEstimated) / 2.0;
+            } else {
+                //Return average for that wind interval
+                result = windSpeedRegression.getMeanOfY();
+            }
         } finally {
             lock.readLock().unlock();
         }
+        return result;
     }
 
     public void addData(double windSpeed, double angleToTheWind, double boatSpeed, double confidence) {

@@ -26,6 +26,7 @@ import com.sap.sailing.domain.common.PolarSheetGenerationResponse;
 import com.sap.sailing.domain.common.PolarSheetGenerationSettings;
 import com.sap.sailing.domain.common.PolarSheetsData;
 import com.sap.sailing.domain.common.PolarSheetsHistogramData;
+import com.sap.sailing.domain.common.PolarSheetsXYDiagramData;
 import com.sap.sailing.domain.common.RegattaAndRaceIdentifier;
 import com.sap.sailing.domain.common.WindStepping;
 import com.sap.sailing.domain.common.impl.PolarSheetGenerationSettingsImpl;
@@ -158,6 +159,29 @@ public class PolarSheetsPanel extends SplitLayoutPanel implements RaceSelectionC
             }
         });
         leftPanel.add(showBoatClassDiagramButton);
+        
+        Button showXYDiagramsButton = new Button(stringMessages.showXYDiagram());
+        showXYDiagramsButton.addClickHandler(new ClickHandler() {
+            
+            @Override
+            public void onClick(ClickEvent event) {
+                sailingService.createXYDiagramForBoatClass(
+                        boatClassListBox.getItemText(boatClassListBox.getSelectedIndex()), new AsyncCallback<PolarSheetsXYDiagramData>() {
+
+                            @Override
+                            public void onFailure(Throwable caught) {
+                                errorReporter.reportError(caught.getLocalizedMessage());
+                            }
+
+                            @Override
+                            public void onSuccess(PolarSheetsXYDiagramData result) {
+                                PolarSheetsXYDiagramPopupPanel popupPanel = new PolarSheetsXYDiagramPopupPanel(stringMessages, result);
+                                popupPanel.show();
+                            }
+                        });
+            }
+        });
+        leftPanel.add(showXYDiagramsButton);
     }
 
     private ListBox createBoatClassListBox() {

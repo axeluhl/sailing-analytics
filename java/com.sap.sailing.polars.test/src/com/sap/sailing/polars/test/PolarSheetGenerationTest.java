@@ -58,14 +58,14 @@ import com.sap.sailing.domain.tracking.impl.WindImpl;
 import com.sap.sailing.domain.tracking.impl.WindWithConfidenceImpl;
 import com.sap.sailing.polars.aggregation.PolarFixAggregationWorker;
 import com.sap.sailing.polars.aggregation.PolarFixAggregator;
-import com.sap.sse.common.TimePoint;
-import com.sap.sse.common.impl.MillisecondsTimePoint;
 import com.sap.sailing.polars.aggregation.SimplePolarFixRaceInterval;
 import com.sap.sailing.polars.data.DataPointWithOriginInfo;
 import com.sap.sailing.polars.data.PolarFix;
 import com.sap.sailing.polars.data.impl.DataPointWithOriginInfoImpl;
 import com.sap.sailing.polars.generation.PolarSheetGenerator;
 import com.sap.sailing.polars.generation.PolarSheetHistogramBuilder;
+import com.sap.sse.common.TimePoint;
+import com.sap.sse.common.impl.MillisecondsTimePoint;
 
 public class PolarSheetGenerationTest {
     
@@ -78,7 +78,7 @@ public class PolarSheetGenerationTest {
 
         MockTrackedRaceForPolarSheetGeneration race = new MockTrackedRaceForPolarSheetGeneration();
         
-        Integer[] levels = { 4, 6, 8, 10, 12, 14, 16, 20, 25, 30 };
+        Double[] levels = { 4., 6., 8., 10., 12., 14., 16., 20., 25., 30. };
         WindSteppingWithMaxDistance windStepping = new WindSteppingWithMaxDistance(levels, 2.0);
         PolarSheetGenerationSettings settings = new PolarSheetGenerationSettingsImpl(1, 0, 1, 20, 0, false, true, 5,
                 0.05, false, windStepping, false);
@@ -118,7 +118,7 @@ public class PolarSheetGenerationTest {
     
     @Test
     public void testHistogramBuilder() {
-        Integer[] levels = { 4, 6, 8, 10, 12, 14, 16, 20, 25, 30 };
+        Double[] levels = { 4., 6., 8., 10., 12., 14., 16., 20., 25., 30. };
         WindSteppingWithMaxDistance windStepping = new WindSteppingWithMaxDistance(levels, 2.0);
         PolarSheetGenerationSettings settings = new PolarSheetGenerationSettingsImpl(1, 0, 1, 10, 0, false, true, 5,
                 0.05, false, windStepping, false);

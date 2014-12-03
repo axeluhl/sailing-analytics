@@ -11,5 +11,7 @@ public interface IncrementalLinearRegressionProcessor {
     double getIntercept();
 
     int getDataCount();
+    
+    double getMeanOfY() throws NotEnoughDataHasBeenAddedException;
 
 }
