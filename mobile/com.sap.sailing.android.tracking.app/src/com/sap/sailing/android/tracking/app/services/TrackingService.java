@@ -8,11 +8,13 @@ import android.app.Service;
 import android.content.ContentResolver;
 import android.content.ContentValues;
 import android.content.Intent;
+import android.database.Cursor;
 import android.location.Location;
 import android.os.Binder;
 import android.os.Build;
 import android.os.Bundle;
 import android.os.IBinder;
+import android.provider.BaseColumns;
 import android.widget.Toast;
 
 import com.google.android.gms.common.ConnectionResult;
@@ -24,6 +26,7 @@ import com.google.android.gms.location.LocationRequest;
 import com.sap.sailing.android.shared.logging.ExLog;
 import com.sap.sailing.android.tracking.app.BuildConfig;
 import com.sap.sailing.android.tracking.app.R;
+import com.sap.sailing.android.tracking.app.provider.AnalyticsContract.Event;
 import com.sap.sailing.android.tracking.app.provider.AnalyticsContract.SensorGps;
 import com.sap.sailing.android.tracking.app.utils.AppPreferences;
 
@@ -47,7 +50,8 @@ public class TrackingService extends Service implements ConnectionCallbacks,
 	// We use it on Notification start, and to cancel it.
 	private int NOTIFICATION_ID = R.string.tracker_started;
 
-	private int eventId;
+	private String eventId;
+	private long eventRowId;
 
 	@Override
 	public void onCreate() {
@@ -81,11 +85,15 @@ public class TrackingService extends Service implements ConnectionCallbacks,
 					if (intent.getExtras() != null) {
 						eventId = intent
 								.getExtras()
-								.getInt(getString(R.string.tracking_service_event_id_parameter));
+								.getString(getString(R.string.tracking_service_event_id_parameter));
+						
+						eventRowId = getRowIdForEventId(eventId);
+						
 						if (BuildConfig.DEBUG) {
-							ExLog.i(this, TAG, "Starting Tracking Service with eventId: "
-									+ eventId);
+							ExLog.i(this, TAG, "Starting Tracking Service with eventId: "+ eventId);
+							ExLog.i(this, TAG, "And with event._id: " + eventRowId);
 						}
+						
 						startTracking();
 					}
 				}
@@ -94,6 +102,18 @@ public class TrackingService extends Service implements ConnectionCallbacks,
 			}
 		}
 		return Service.START_STICKY;
+	}
+	
+	private long getRowIdForEventId(String eventId)
+	{
+		int result = 0;
+		
+		ContentResolver cr = getContentResolver();
+		Cursor cursor = cr.query(Event.CONTENT_URI, null, "event_id = \"" + eventId + "\"", null, null);
+		cursor.moveToFirst();
+		result = cursor.getInt(cursor.getColumnIndex(BaseColumns._ID));
+		cursor.close();
+		return result;
 	}
 
 	public void startTracking() {
@@ -119,7 +139,7 @@ public class TrackingService extends Service implements ConnectionCallbacks,
 		}
 
 		prefs.setTrackerIsTracking(false);
-		prefs.setTrackerIsTrackingEventId(-1);
+		prefs.setTrackerIsTrackingEventId(null);
 
 		stopSelf();
 		ExLog.i(this, TAG, "Stopped Tracking");
@@ -174,7 +194,7 @@ public class TrackingService extends Service implements ConnectionCallbacks,
 		cv.put(SensorGps.GPS_SPEED, location.getSpeed());
 		cv.put(SensorGps.GPS_TIME, location.getTime());
 		cv.put(SensorGps.GPS_BEARING, location.getBearing());
-		cv.put(SensorGps.GPS_EVENT_FK, eventId);
+		cv.put(SensorGps.GPS_EVENT_FK, eventRowId);
 
 		cr.insert(SensorGps.CONTENT_URI, cv);
 
