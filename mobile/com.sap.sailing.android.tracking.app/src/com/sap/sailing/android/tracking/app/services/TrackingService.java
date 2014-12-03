@@ -2,14 +2,8 @@ package com.sap.sailing.android.tracking.app.services;
 
 import java.util.concurrent.ScheduledExecutorService;
 
-import org.json.JSONArray;
-import org.json.JSONException;
-import org.json.JSONObject;
-
 import android.annotation.TargetApi;
-import android.app.Notification;
 import android.app.NotificationManager;
-import android.app.PendingIntent;
 import android.app.Service;
 import android.content.ContentResolver;
 import android.content.ContentValues;
@@ -19,7 +13,6 @@ import android.os.Binder;
 import android.os.Build;
 import android.os.Bundle;
 import android.os.IBinder;
-import android.support.v4.app.NotificationCompat;
 import android.widget.Toast;
 
 import com.google.android.gms.common.ConnectionResult;
@@ -32,10 +25,7 @@ import com.sap.sailing.android.shared.logging.ExLog;
 import com.sap.sailing.android.tracking.app.BuildConfig;
 import com.sap.sailing.android.tracking.app.R;
 import com.sap.sailing.android.tracking.app.provider.AnalyticsContract.SensorGps;
-import com.sap.sailing.android.tracking.app.ui.activities.RegattaActivity;
 import com.sap.sailing.android.tracking.app.utils.AppPreferences;
-import com.sap.sailing.android.tracking.app.utils.UniqueDeviceUuid;
-import com.sap.sailing.server.gateway.deserialization.impl.FlatSmartphoneUuidAndGPSFixMovingJsonDeserializer;
 
 public class TrackingService extends Service implements ConnectionCallbacks,
 		OnConnectionFailedListener, LocationListener {
@@ -92,6 +82,10 @@ public class TrackingService extends Service implements ConnectionCallbacks,
 						eventId = intent
 								.getExtras()
 								.getInt(getString(R.string.tracking_service_event_id_parameter));
+						if (BuildConfig.DEBUG) {
+							ExLog.i(this, TAG, "Starting Tracking Service with eventId: "
+									+ eventId);
+						}
 						startTracking();
 					}
 				}
@@ -179,6 +173,7 @@ public class TrackingService extends Service implements ConnectionCallbacks,
 		cv.put(SensorGps.GPS_PROVIDER, location.getProvider());
 		cv.put(SensorGps.GPS_SPEED, location.getSpeed());
 		cv.put(SensorGps.GPS_TIME, location.getTime());
+		cv.put(SensorGps.GPS_BEARING, location.getBearing());
 		cv.put(SensorGps.GPS_EVENT_FK, eventId);
 
 		cr.insert(SensorGps.CONTENT_URI, cv);
