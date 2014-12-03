@@ -41,14 +41,14 @@ public class TrackingActivity extends BaseActivity implements GPSQualityListener
 	private final static String TAG = TrackingActivity.class.getName();
 	private final static String SIS_FRAGMENT = "savedInstanceTrackingFragment";
 	
-	private int eventId;
+	private String eventId;
 	
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         
         Intent intent = getIntent();
-        eventId = intent.getExtras().getInt(getString(R.string.tracking_activity_event_id_parameter)); 
+        eventId = intent.getExtras().getString(getString(R.string.tracking_activity_event_id_parameter)); 
         		
         setContentView(R.layout.fragment_container);
         
@@ -67,7 +67,7 @@ public class TrackingActivity extends BaseActivity implements GPSQualityListener
         	ContentResolver cr = getContentResolver();
         	String projectionStr = "events._id,leaderboards.leaderboard_name,events.event_name";
         	String[] projection = projectionStr.split(",");
-        	Cursor cursor = cr.query(LeaderboardsEventsJoined.CONTENT_URI, projection, "events._id = " + eventId, null, null);
+        	Cursor cursor = cr.query(LeaderboardsEventsJoined.CONTENT_URI, projection, "events.event_id = \"" + eventId + "\"", null, null);
         	if (cursor.moveToFirst())
         	{
         		eventName = cursor.getString(cursor.getColumnIndex("event_name"));
@@ -171,7 +171,7 @@ public class TrackingActivity extends BaseActivity implements GPSQualityListener
 		}
     }
     
-    private void startTrackingService(int eventId)
+    private void startTrackingService(String eventId)
     {
     	Intent intent = new Intent(this, TrackingService.class);
 		intent.setAction(getString(R.string.tracking_service_start));

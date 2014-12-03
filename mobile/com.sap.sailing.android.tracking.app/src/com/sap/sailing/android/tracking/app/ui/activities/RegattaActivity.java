@@ -398,12 +398,12 @@ public class RegattaActivity extends BaseActivity {
 	}
 	
 	/**
-	 * Id of row for this event, so tracking-service can link GPS fixes to event.
+	 * Event-id for event, so tracking-service can link GPS fixes to event.
 	 * @return
 	 */
-	public int getEventId()
+	public String getEventId()
 	{
-		return eventRowId;
+		return eventId;
 	}
 	
 	/**
