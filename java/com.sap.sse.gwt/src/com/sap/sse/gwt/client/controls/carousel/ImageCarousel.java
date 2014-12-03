@@ -164,6 +164,7 @@ public class ImageCarousel extends Widget {
         SafeStylesBuilder ssb = new SafeStylesBuilder();
 
         ssb.height(imagesHeight, Unit.PX);
+        ssb.appendTrustedString("width:auto;");
         ssb.margin(contentMarginInPixels, Style.Unit.PX);
 
         imageHolder.setInnerSafeHtml(myTemplate.imageDiv(UriUtils.fromString(url).asString(), ssb.toSafeStyles()));
