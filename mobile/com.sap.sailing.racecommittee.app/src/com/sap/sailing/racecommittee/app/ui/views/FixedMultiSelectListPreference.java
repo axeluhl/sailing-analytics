@@ -26,7 +26,7 @@ import android.preference.MultiSelectListPreference;
 import android.preference.Preference;
 import android.util.AttributeSet;
 
-import com.sap.sailing.racecommittee.app.logging.ExLog;
+import com.sap.sailing.android.shared.logging.ExLog;
 
 /**
  * Applies the fix of
@@ -70,11 +70,11 @@ public class FixedMultiSelectListPreference extends MultiSelectListPreference {
                 persistStringSetMethod.setAccessible(true);
 
                 injectionSuccessful = true;
-                ExLog.i(TAG, "Obtained all reflection information needed for fix.");
+                ExLog.i(getContext(), TAG, "Obtained all reflection information needed for fix.");
             } catch (Exception e) {
-                ExLog.e(TAG,
+                ExLog.e(getContext(), TAG,
                         "Exception while trying to obtain reflection information for MultiSelectList-fix.. Falling back.");
-                ExLog.ex(TAG, e);
+                ExLog.ex(getContext(), TAG, e);
             }
         }
     }
@@ -86,8 +86,8 @@ public class FixedMultiSelectListPreference extends MultiSelectListPreference {
                 fixedSetValues(values);
                 return;
             } catch (Exception e) {
-                ExLog.e(TAG, "Exception while trying to execute MultiSelectList-fix. Falling back.");
-                ExLog.ex(TAG, e);
+                ExLog.e(getContext(), TAG, "Exception while trying to execute MultiSelectList-fix. Falling back.");
+                ExLog.ex(getContext(), TAG, e);
             }
         }
         super.setValues(values);

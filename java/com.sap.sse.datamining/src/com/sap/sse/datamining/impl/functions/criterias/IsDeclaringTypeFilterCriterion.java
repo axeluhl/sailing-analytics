@@ -4,10 +4,9 @@ import java.util.Arrays;
 import java.util.Collection;
 import java.util.HashSet;
 
-import com.sap.sse.datamining.components.FilterCriterion;
 import com.sap.sse.datamining.functions.Function;
 
-public class IsDeclaringTypeFilterCriterion implements FilterCriterion<Function<?>> {
+public class IsDeclaringTypeFilterCriterion extends AbstractFunctionFilterCriterion {
 
     private final Collection<Class<?>> expectingTypes;
 

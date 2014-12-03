@@ -1,3 +1,7 @@
+Planning 2014 / 2015
+
+See [http://wiki.sapsailing.com/wiki/planning/offseason-2014-2015](http://wiki.sapsailing.com/wiki/planning/offseason-2014-2015).
+
 # Planning 2013 / 2014
 
 During our workshop of 2013-09-30, three major areas of development were identified as candidates for focus topics for the next few months. These are:
@@ -44,7 +48,7 @@ The links above lead to short write-ups of the respective business case behind t
 
 [[Live Audio Streaming Support|wiki/planning/LiveAudioStreaming]]
 
-[[Renewing the Map (Maps v2.0 discontinued) |wiki/planning/GoogleEarth]]
+[[Renewing the Map |wiki/planning/MapRenewal]]
 
 [[Mobile Version SAP Sailing Analytics|wiki/planning/MobileSailingAnalytics]]
 

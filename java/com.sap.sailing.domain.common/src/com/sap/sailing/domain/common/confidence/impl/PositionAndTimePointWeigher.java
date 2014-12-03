@@ -2,9 +2,9 @@ package com.sap.sailing.domain.common.confidence.impl;
 
 import com.sap.sailing.domain.common.Distance;
 import com.sap.sailing.domain.common.Position;
-import com.sap.sailing.domain.common.TimePoint;
 import com.sap.sailing.domain.common.confidence.ConfidenceFactory;
 import com.sap.sailing.domain.common.confidence.Weigher;
+import com.sap.sse.common.TimePoint;
 import com.sap.sse.common.Util;
 
 /**
@@ -28,7 +28,7 @@ public class PositionAndTimePointWeigher implements Weigher<Util.Pair<Position, 
     public PositionAndTimePointWeigher(long halfConfidenceAfterMilliseconds, Distance halfConfidenceDistance) {
         timeWeigher = ConfidenceFactory.INSTANCE.createHyperbolicTimeDifferenceWeigher(halfConfidenceAfterMilliseconds);
         distanceWeigher = ConfidenceFactory.INSTANCE.createHyperbolicDistanceWeigher(halfConfidenceDistance);
-        this.usePosition = Boolean.valueOf(System.getProperty(USE_POSITION_SYSTEM_PROPERTY_NAME, "false"));
+        this.usePosition = Boolean.valueOf(System.getProperty(USE_POSITION_SYSTEM_PROPERTY_NAME, "true"));
     }
     
     @Override

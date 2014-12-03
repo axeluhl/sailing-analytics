@@ -4,11 +4,8 @@ import com.google.gwt.dom.client.Style;
 import com.google.gwt.user.client.ui.FlowPanel;
 import com.google.gwt.user.client.ui.Label;
 import com.google.gwt.user.client.ui.Widget;
-import com.sap.sailing.gwt.ui.shared.UserDTO;
 
 public class UserStatusPanel extends FlowPanel {
-
-    private final UserDTO user;
 
     private final Label userNameLabel;
 
@@ -16,17 +13,14 @@ public class UserStatusPanel extends FlowPanel {
 
     private final Label userRolesText;
     
-    public UserStatusPanel(UserDTO user) {
+    public UserStatusPanel() {
         super();
-        this.user = user;
         userNameLabel = new Label("User:");
         userNameText = new Label("");
         userRolesText = new Label("");
-
         addFloatingWidget(userNameLabel);
         addFloatingWidget(userNameText);
         addFloatingWidget(userRolesText);
-
         updateUser();
     }
 
@@ -37,12 +31,13 @@ public class UserStatusPanel extends FlowPanel {
     }
     
     private void updateUser() {
-        if(user != null) {
-            userNameText.setText(user.principalName);
-            userRolesText.setText(user.roles.toString());
-        } else {
-            userNameText.setText("Unknown");
-            userRolesText.setText("Unknown");
-        }
+//        if(user != null) {
+//            userNameText.setText(user.principalName);
+//            userRolesText.setText(user.roles.toString());
+//        } else {
+//            userNameText.setText("Unknown");
+//            userRolesText.setText("Unknown");
+//        }
+//    }
     }
 }

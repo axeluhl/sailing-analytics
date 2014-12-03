@@ -1,6 +1,5 @@
 package com.sap.sailing.gwt.ui.adminconsole;
 
-import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.HashMap;
@@ -15,13 +14,14 @@ import com.google.gwt.user.client.ui.Widget;
 import com.google.gwt.view.client.SelectionChangeEvent;
 import com.google.gwt.view.client.SingleSelectionModel;
 import com.sap.sailing.domain.common.dto.CompetitorDTO;
-import com.sap.sailing.gwt.ui.client.ErrorReporter;
+import com.sap.sailing.domain.common.racelog.tracking.MappableToDevice;
 import com.sap.sailing.gwt.ui.client.SailingServiceAsync;
 import com.sap.sailing.gwt.ui.client.StringMessages;
 import com.sap.sailing.gwt.ui.shared.DeviceIdentifierDTO;
 import com.sap.sailing.gwt.ui.shared.DeviceMappingDTO;
 import com.sap.sailing.gwt.ui.shared.MarkDTO;
 import com.sap.sailing.gwt.ui.shared.TrackFileImportDeviceIdentifierDTO;
+import com.sap.sse.gwt.client.ErrorReporter;
 import com.sap.sse.gwt.client.dialog.DataEntryDialog;
 
 public class ImportFixesAndAddMappingsDialog extends DataEntryDialog<Collection<DeviceMappingDTO>> {
@@ -31,7 +31,7 @@ public class ImportFixesAndAddMappingsDialog extends DataEntryDialog<Collection<
     private final MarkTableWrapper<SingleSelectionModel<MarkDTO>> markTable;
     private final StringMessages stringMessages;
     
-    private final Map<TrackFileImportDeviceIdentifierDTO, Serializable> mappings = new HashMap<>();
+    private final Map<TrackFileImportDeviceIdentifierDTO, MappableToDevice> mappings = new HashMap<>();
     
     private TrackFileImportDeviceIdentifierDTO deviceToSelect;
     private CompetitorDTO compToSelect;
@@ -130,7 +130,7 @@ public class ImportFixesAndAddMappingsDialog extends DataEntryDialog<Collection<
         }
     }
     
-    private void mappedToSelectionChanged(Serializable mappedTo) {
+    private void mappedToSelectionChanged(MappableToDevice mappedTo) {
         if (! inInstableTransitionState) {
             TrackFileImportDeviceIdentifierDTO device = deviceIdTable.getSelectionModel().getSelectedObject();
             if (device != null) {
@@ -155,7 +155,7 @@ public class ImportFixesAndAddMappingsDialog extends DataEntryDialog<Collection<
             markToSelect = null;
             
             if (deviceId != null) {
-                Serializable mappedTo = mappings.get(deviceId);
+                MappableToDevice mappedTo = mappings.get(deviceId);
                 if (mappedTo instanceof CompetitorDTO) {
                     compToSelect = (CompetitorDTO) mappedTo;
                 } else if (mappedTo instanceof MarkDTO) {
@@ -192,7 +192,7 @@ public class ImportFixesAndAddMappingsDialog extends DataEntryDialog<Collection<
         List<DeviceMappingDTO> result = new ArrayList<>();
         for (TrackFileImportDeviceIdentifierDTO device : mappings.keySet()) {
             DeviceIdentifierDTO deviceIdDto = new DeviceIdentifierDTO("FILE", device.uuidAsString);
-            Serializable mappedTo = mappings.get(device);
+            MappableToDevice mappedTo = mappings.get(device);
             DeviceMappingDTO mapping = new DeviceMappingDTO(deviceIdDto, device.from, device.to,
                     mappedTo, null);
             result.add(mapping);

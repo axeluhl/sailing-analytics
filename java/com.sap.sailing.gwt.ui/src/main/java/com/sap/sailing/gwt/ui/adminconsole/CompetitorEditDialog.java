@@ -10,6 +10,7 @@ import com.google.gwt.user.client.ui.Label;
 import com.google.gwt.user.client.ui.ListBox;
 import com.google.gwt.user.client.ui.TextBox;
 import com.google.gwt.user.client.ui.Widget;
+import com.sap.sailing.domain.common.BoatClassMasterdata;
 import com.sap.sailing.domain.common.Color;
 import com.sap.sailing.domain.common.CountryCode;
 import com.sap.sailing.domain.common.CountryCodeFactory;
@@ -67,8 +68,8 @@ public class CompetitorEditDialog extends DataEntryDialog<CompetitorDTO> {
         this.boatClassName = createListBox(/* isMultipleSelect */ false);
         int i=0;
         List<String> boatClassNamesList = new ArrayList<String>();
-        for (BoatTypes t : BoatTypes.values()) {
-            boatClassNamesList.add(t.getName());
+        for (BoatClassMasterdata t : BoatClassMasterdata.values()) {
+            boatClassNamesList.add(t.getDisplayName());
         }
         String competitorsBoatClassName = competitorToEdit.getBoatClass() != null ? competitorToEdit.getBoatClass().getName() : null;
         Collections.sort(boatClassNamesList);

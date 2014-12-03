@@ -1,10 +1,9 @@
 <!DOCTYPE ui:UiBinder SYSTEM "http://dl.google.com/gwt/DTD/xhtml.ent">
 <ui:UiBinder xmlns:ui="urn:ui:com.google.gwt.uibinder" 
     xmlns:s="urn:import:com.sap.sailing.gwt.home.client.place.event"
-    xmlns:p="urn:import:com.sap.sailing.gwt.home.client.place.leaderboard"
 	xmlns:g="urn:import:com.google.gwt.user.client.ui">
-    <ui:with field="i18n" type="com.sap.sailing.gwt.home.client.i18n.TextMessages"/>
-	<ui:with field="res" type="com.sap.sailing.gwt.home.client.HomeResources" />
+    <ui:with field="i18n" type="com.sap.sailing.gwt.common.client.i18n.TextMessages"/>
+	<ui:with field="res" type="com.sap.sailing.gwt.common.client.SharedResources" />
     <ui:with field="local_res" type="com.sap.sailing.gwt.home.client.place.event.regattaleaderboard.EventRegattaLeaderboardResources" />
     <ui:with field="local_res2" type="com.sap.sailing.gwt.home.client.place.event.regattaanalytics.RegattaAnalyticsResources" />
 		<g:HTMLPanel>

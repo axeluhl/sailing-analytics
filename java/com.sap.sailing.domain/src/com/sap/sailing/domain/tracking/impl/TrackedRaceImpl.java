@@ -31,6 +31,9 @@ import java.util.concurrent.FutureTask;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
+import com.sap.sailing.domain.abstractlog.race.RaceLog;
+import com.sap.sailing.domain.abstractlog.race.analyzing.impl.StartTimeFinder;
+import com.sap.sailing.domain.abstractlog.race.tracking.DeviceMapping;
 import com.sap.sailing.domain.base.BoatClass;
 import com.sap.sailing.domain.base.Competitor;
 import com.sap.sailing.domain.base.Course;
@@ -49,7 +52,6 @@ import com.sap.sailing.domain.common.Bearing;
 import com.sap.sailing.domain.common.BearingChangeAnalyzer;
 import com.sap.sailing.domain.common.CourseChange;
 import com.sap.sailing.domain.common.Distance;
-import com.sap.sailing.domain.common.Duration;
 import com.sap.sailing.domain.common.LegType;
 import com.sap.sailing.domain.common.ManeuverType;
 import com.sap.sailing.domain.common.NauticalSide;
@@ -61,7 +63,6 @@ import com.sap.sailing.domain.common.RegattaNameAndRaceName;
 import com.sap.sailing.domain.common.Speed;
 import com.sap.sailing.domain.common.SpeedWithBearing;
 import com.sap.sailing.domain.common.Tack;
-import com.sap.sailing.domain.common.TimePoint;
 import com.sap.sailing.domain.common.TimingConstants;
 import com.sap.sailing.domain.common.TrackedRaceStatusEnum;
 import com.sap.sailing.domain.common.WindSource;
@@ -76,7 +77,6 @@ import com.sap.sailing.domain.common.confidence.impl.PositionAndTimePointWeigher
 import com.sap.sailing.domain.common.impl.CentralAngleDistance;
 import com.sap.sailing.domain.common.impl.KnotSpeedImpl;
 import com.sap.sailing.domain.common.impl.KnotSpeedWithBearingImpl;
-import com.sap.sailing.domain.common.impl.MillisecondsTimePoint;
 import com.sap.sailing.domain.common.impl.NauticalMileDistance;
 import com.sap.sailing.domain.common.impl.WindSourceImpl;
 import com.sap.sailing.domain.common.racelog.tracking.NoCorrespondingServiceRegisteredException;
@@ -84,9 +84,6 @@ import com.sap.sailing.domain.common.racelog.tracking.TransformationException;
 import com.sap.sailing.domain.common.scalablevalue.impl.ScalablePosition;
 import com.sap.sailing.domain.confidence.ConfidenceBasedWindAverager;
 import com.sap.sailing.domain.confidence.ConfidenceFactory;
-import com.sap.sailing.domain.racelog.RaceLog;
-import com.sap.sailing.domain.racelog.analyzing.impl.StartTimeFinder;
-import com.sap.sailing.domain.racelog.tracking.DeviceMapping;
 import com.sap.sailing.domain.racelog.tracking.GPSFixStore;
 import com.sap.sailing.domain.tracking.DynamicGPSFixTrack;
 import com.sap.sailing.domain.tracking.GPSFix;
@@ -114,8 +111,11 @@ import com.sap.sailing.util.SmartFutureCache.EmptyUpdateInterval;
 import com.sap.sailing.util.impl.ArrayListNavigableSet;
 import com.sap.sailing.util.impl.LockUtil;
 import com.sap.sailing.util.impl.NamedReentrantReadWriteLock;
+import com.sap.sse.common.Duration;
+import com.sap.sse.common.TimePoint;
 import com.sap.sse.common.Util;
 import com.sap.sse.common.Util.Pair;
+import com.sap.sse.common.impl.MillisecondsTimePoint;
 
 import difflib.DiffUtils;
 import difflib.Patch;
@@ -1323,7 +1323,7 @@ public abstract class TrackedRaceImpl extends TrackedRaceWithWindEssentials impl
     }
 
     @Override
-    public Wind getWind(Position p, TimePoint at, Iterable<WindSource> windSourcesToExclude) {
+    public Wind getWind(Position p, TimePoint at, Set<WindSource> windSourcesToExclude) {
         final WindWithConfidence<com.sap.sse.common.Util.Pair<Position, TimePoint>> windWithConfidence = getWindWithConfidence(p, at,
                 windSourcesToExclude);
         return windWithConfidence == null ? null : windWithConfidence.getObject();
@@ -1335,9 +1335,9 @@ public abstract class TrackedRaceImpl extends TrackedRaceWithWindEssentials impl
     }
 
     @Override
-    public Iterable<WindSource> getWindSourcesToExclude() {
+    public Set<WindSource> getWindSourcesToExclude() {
         synchronized (windSourcesToExclude) {
-            return Collections.unmodifiableCollection(windSourcesToExclude);
+            return Collections.unmodifiableSet(windSourcesToExclude);
         }
     }
 
@@ -1363,7 +1363,7 @@ public abstract class TrackedRaceImpl extends TrackedRaceWithWindEssentials impl
 
     @Override
     public WindWithConfidence<com.sap.sse.common.Util.Pair<Position, TimePoint>> getWindWithConfidence(Position p, TimePoint at,
-            Iterable<WindSource> windSourcesToExclude) {
+            Set<WindSource> windSourcesToExclude) {
         return shortTimeWindCache.getWindWithConfidence(p, at, windSourcesToExclude);
     }
     

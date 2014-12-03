@@ -4,24 +4,29 @@ import java.util.ArrayList;
 import java.util.List;
 
 import com.google.gwt.core.client.GWT;
-import com.google.gwt.dom.client.AnchorElement;
 import com.google.gwt.dom.client.DivElement;
 import com.google.gwt.dom.client.HeadingElement;
 import com.google.gwt.dom.client.SpanElement;
 import com.google.gwt.dom.client.Style.Display;
 import com.google.gwt.dom.client.StyleInjector;
+import com.google.gwt.event.dom.client.ClickEvent;
 import com.google.gwt.uibinder.client.UiBinder;
 import com.google.gwt.uibinder.client.UiField;
-import com.google.gwt.user.client.DOM;
+import com.google.gwt.uibinder.client.UiHandler;
 import com.google.gwt.user.client.Event;
-import com.google.gwt.user.client.EventListener;
+import com.google.gwt.user.client.ui.Anchor;
 import com.google.gwt.user.client.ui.Composite;
 import com.google.gwt.user.client.ui.Image;
 import com.google.gwt.user.client.ui.Widget;
-import com.sap.sailing.gwt.home.client.BoatClassImageResolver;
-import com.sap.sailing.gwt.home.client.BoatClassImageResources;
-import com.sap.sailing.gwt.home.client.app.PlaceNavigator;
-import com.sap.sailing.gwt.home.client.place.event.EventPageNavigator;
+import com.google.gwt.user.client.ui.impl.HyperlinkImpl;
+import com.sap.sailing.gwt.common.client.BoatClassImageResolver;
+import com.sap.sailing.gwt.common.client.BoatClassImageResources;
+import com.sap.sailing.gwt.home.client.app.HomePlacesNavigator;
+import com.sap.sailing.gwt.home.client.app.PlaceNavigation;
+import com.sap.sailing.gwt.home.client.place.event.EventPlace;
+import com.sap.sailing.gwt.home.client.place.event.EventPlaceNavigator;
+import com.sap.sailing.gwt.home.client.place.regatta.RegattaPlace;
+import com.sap.sailing.gwt.home.client.place.regatta.RegattaPlace.RegattaNavigationTabs;
 import com.sap.sailing.gwt.home.client.shared.LongNamesUtil;
 import com.sap.sailing.gwt.ui.shared.EventDTO;
 import com.sap.sailing.gwt.ui.shared.LeaderboardGroupDTO;
@@ -36,11 +41,10 @@ public class Regatta extends Composite {
     interface RegattaUiBinder extends UiBinder<Widget, Regatta> {
     }
 
+    private static final HyperlinkImpl HYPERLINK_IMPL = GWT.create(HyperlinkImpl.class);
+
     private final EventDTO event;
     private final Timer timerForClientServerOffset;
-    private final EventPageNavigator pageNavigator;
-    private final PlaceNavigator placeNavigator;
-    private StrippedLeaderboardDTO leaderboard;
     private RaceGroupDTO raceGroup;
     private final List<RegattaPhase> phasesElements;
     private LeaderboardGroupDTO leaderboardGroup;
@@ -69,17 +73,22 @@ public class Regatta extends Composite {
 //    @UiField(provided=true) RegattaCompetitor competitorWithRank2;
 //    @UiField(provided=true) RegattaCompetitor competitorWithRank3;
 
-    @UiField AnchorElement regattaDetailsLink;
-    @UiField AnchorElement leaderboardLink;
+    @UiField Anchor regattaDetailsLink;
+    @UiField Anchor leaderboardLink;
     
     @UiField Image boatClassImage;
+
+    private PlaceNavigation<RegattaPlace> leaderboardNavigation;
+    private PlaceNavigation<EventPlace> regattaNavigation;
+    private final HomePlacesNavigator placesNavigator;
+    private final EventPlaceNavigator eventPlaceNavigator;
     
-    public Regatta(EventDTO event, Timer timerForClientServerOffset, boolean isSingleView, PlaceNavigator placeNavigator, EventPageNavigator pageNavigator) {
+    public Regatta(EventDTO event, Timer timerForClientServerOffset, boolean isSingleView, HomePlacesNavigator placesNavigator, EventPlaceNavigator eventPlaceNavigator) {
         this.event = event;
         this.timerForClientServerOffset = timerForClientServerOffset;
         this.isSingleView = isSingleView;
-        this.placeNavigator = placeNavigator;
-        this.pageNavigator = pageNavigator;
+        this.placesNavigator = placesNavigator;
+        this.eventPlaceNavigator = eventPlaceNavigator;
         
         phasesElements = new ArrayList<RegattaPhase>();
         
@@ -96,10 +105,18 @@ public class Regatta extends Composite {
     public void setData(LeaderboardGroupDTO leaderboardGroup, boolean hasMultipleLeaderboardGroups, StrippedLeaderboardDTO leaderboard,
             RaceGroupDTO raceGroup) {
         this.raceGroup = raceGroup;
-        this.leaderboard = leaderboard;
         this.leaderboardGroup = leaderboardGroup;
 
-        registerEvents(leaderboardGroup);
+        if(isSingleView) {
+            regattaDetailsLink.setVisible(false);
+            leaderboardNavigation = placesNavigator.getRegattaAnalyticsNavigation(event.id.toString(), RegattaNavigationTabs.Leaderboard, 
+                    leaderboard.name, event.getBaseURL(), event.isOnRemoteServer());
+            leaderboardLink.setHref(leaderboardNavigation.getTargetUrl());
+        } else {
+            leaderboardLink.setVisible(false);
+            regattaNavigation = placesNavigator.getRegattaNavigation(event.id.toString(), leaderboard.name, event.getBaseURL(), event.isOnRemoteServer());
+            regattaDetailsLink.setHref(regattaNavigation.getTargetUrl());
+        }
 
         boolean hasLiveRace = leaderboard.hasLiveRace(timerForClientServerOffset.getLiveTimePointInMillis());
         if(!hasLiveRace) {
@@ -141,7 +158,7 @@ public class Regatta extends Composite {
             } else {
                 for(RaceGroupSeriesDTO series: raceGroup.getSeries()) {
                     RegattaPhase regattaPhase = new RegattaPhase(series, leaderboardGroup,
-                            leaderboard, raceGroup, pageNavigator, timerForClientServerOffset); 
+                            leaderboard, raceGroup, eventPlaceNavigator, timerForClientServerOffset); 
                     regattaPhasesPanel.appendChild(regattaPhase.getElement());
                     phasesElements.add(regattaPhase);
                 }
@@ -152,35 +169,20 @@ public class Regatta extends Composite {
         trackedRacesCount.setInnerText(String.valueOf(leaderboard.getTrackedRacesCount()));
     }
 
-    private void registerEvents(final LeaderboardGroupDTO leaderboardGroup) {
-        if(isSingleView) {
-            regattaDetailsLink.getStyle().setDisplay(Display.NONE);
+    @UiHandler("regattaDetailsLink")
+    void regattaDetailsLinkClicked(ClickEvent e) {
+        handleClickEvent(e, regattaNavigation);
+    }
 
-            Event.sinkEvents(leaderboardLink, Event.ONCLICK);
-            Event.setEventListener(leaderboardLink, new EventListener() {
-                @Override
-                public void onBrowserEvent(Event browserEvent) {
-                    switch (DOM.eventGetType(browserEvent)) {
-                        case Event.ONCLICK:
-                            placeNavigator.goToLeaderboard(event.id.toString(), leaderboard.name, event.getBaseURL(), event.isOnRemoteServer());
-                            break;
-                    }
-                }
-            });
-        } else {
-            leaderboardLink.getStyle().setDisplay(Display.NONE);
-
-            Event.sinkEvents(regattaDetailsLink, Event.ONCLICK);
-            Event.setEventListener(regattaDetailsLink, new EventListener() {
-                @Override
-                public void onBrowserEvent(Event browserEvent) {
-                    switch (DOM.eventGetType(browserEvent)) {
-                        case Event.ONCLICK:
-                            pageNavigator.goToRegattaRaces(leaderboardGroup, leaderboard, raceGroup);
-                            break;
-                    }
-                }
-            });
-        }
+    @UiHandler("leaderboardLink")
+    void leaderboardLinkClicked(ClickEvent e) {
+        handleClickEvent(e, leaderboardNavigation);
+    }
+    
+    private void handleClickEvent(ClickEvent e, PlaceNavigation<?> placeNavigation) {
+        if (HYPERLINK_IMPL.handleAsClick((Event) e.getNativeEvent())) {
+            placesNavigator.goToPlace(placeNavigation);
+            e.preventDefault();
+         }
     }
 }

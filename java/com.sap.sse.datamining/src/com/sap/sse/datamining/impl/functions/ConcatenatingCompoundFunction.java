@@ -156,6 +156,10 @@ public class ConcatenatingCompoundFunction<ReturnType> extends AbstractFunction<
     public int getOrdinal() {
         return ordinal;
     }
+    
+    public List<Function<?>> getFunctions() {
+        return functions;
+    }
 
     private Function<?> getFirstFunction() {
         return functions.get(0);

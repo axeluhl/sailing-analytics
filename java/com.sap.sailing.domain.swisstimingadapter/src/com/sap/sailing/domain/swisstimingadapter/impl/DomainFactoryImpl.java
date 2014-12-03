@@ -29,9 +29,6 @@ import com.sap.sailing.domain.base.impl.RegattaImpl;
 import com.sap.sailing.domain.base.impl.TeamImpl;
 import com.sap.sailing.domain.common.PassingInstruction;
 import com.sap.sailing.domain.common.ScoringSchemeType;
-import com.sap.sailing.domain.common.TimePoint;
-import com.sap.sailing.domain.common.WithID;
-import com.sap.sailing.domain.common.impl.MillisecondsTimePoint;
 import com.sap.sailing.domain.racelog.RaceLogStore;
 import com.sap.sailing.domain.swisstimingadapter.Course;
 import com.sap.sailing.domain.swisstimingadapter.CrewMember;
@@ -50,7 +47,10 @@ import com.sap.sailing.domain.tracking.RaceTrackingConnectivityParameters;
 import com.sap.sailing.domain.tracking.TrackedRegattaRegistry;
 import com.sap.sailing.domain.tracking.impl.GPSFixMovingImpl;
 import com.sap.sse.common.Named;
+import com.sap.sse.common.TimePoint;
 import com.sap.sse.common.Util;
+import com.sap.sse.common.WithID;
+import com.sap.sse.common.impl.MillisecondsTimePoint;
 
 import difflib.PatchFailedException;
 
@@ -101,7 +101,7 @@ public class DomainFactoryImpl implements DomainFactory {
             Calendar calendar = Calendar.getInstance();
             result = new RegattaImpl(raceLogStore, RegattaImpl.getDefaultName(
                     "ST Regatta " + calendar.get(Calendar.YEAR) + " for race " + raceID, regattaBoatClass.getName()),
-                    regattaBoatClass, trackedRegattaRegistry, getBaseDomainFactory().createScoringScheme(
+                    regattaBoatClass, /*startDate*/ null, /*endDate*/ null, trackedRegattaRegistry, getBaseDomainFactory().createScoringScheme(
                             ScoringSchemeType.LOW_POINT), raceID, null);
             logger.info("Created regatta "+result.getName()+" ("+result.hashCode()+")");
             raceIDToRegattaCache.put(raceID, result);

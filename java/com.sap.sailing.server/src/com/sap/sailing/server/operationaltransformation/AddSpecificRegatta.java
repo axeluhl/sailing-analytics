@@ -19,6 +19,7 @@ import com.sap.sailing.domain.leaderboard.impl.ThresholdBasedResultDiscardingRul
 import com.sap.sailing.domain.tracking.TrackedRegattaRegistry;
 import com.sap.sailing.server.RacingEventService;
 import com.sap.sailing.server.RacingEventServiceOperation;
+import com.sap.sse.common.TimePoint;
 
 public class AddSpecificRegatta extends AbstractAddRegattaOperation {
     private static final long serialVersionUID = -8018855620167669352L;
@@ -28,10 +29,10 @@ public class AddSpecificRegatta extends AbstractAddRegattaOperation {
     private final Serializable defaultCourseAreaId;
     private final boolean useStartTimeInference;
     
-    public AddSpecificRegatta(String regattaName, String boatClassName, Serializable id,
+    public AddSpecificRegatta(String regattaName, String boatClassName, TimePoint startDate, TimePoint endDate, Serializable id,
             RegattaCreationParametersDTO seriesNamesWithFleetNamesAndFleetOrderingAndMedalAndDiscardingThresholds,
             boolean persistent, ScoringScheme scoringScheme, Serializable defaultCourseAreaId, boolean useStartTimeInference) {
-        super(regattaName, boatClassName, id);
+        super(regattaName, boatClassName, startDate, endDate, id);
         this.seriesNamesWithFleetNamesAndFleetOrderingAndMedalAndStartsWithZeroScoreAndDiscardingThresholds = seriesNamesWithFleetNamesAndFleetOrderingAndMedalAndDiscardingThresholds;
         this.persistent = persistent;
         this.scoringScheme = scoringScheme;
@@ -41,7 +42,7 @@ public class AddSpecificRegatta extends AbstractAddRegattaOperation {
 
     @Override
     public Regatta internalApplyTo(RacingEventService toState) throws Exception {
-        Regatta regatta = toState.createRegatta(getRegattaName(), getBoatClassName(), getId(), createSeries(toState),
+        Regatta regatta = toState.createRegatta(getRegattaName(), getBoatClassName(), getStartDate(), getEndDate(), getId(), createSeries(toState),
                 persistent, scoringScheme, defaultCourseAreaId, useStartTimeInference);
         return regatta;
     }

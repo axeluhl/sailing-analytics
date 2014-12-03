@@ -61,7 +61,8 @@ public class GlobalNavigationPanel extends FlowPanel {
             }
             String leaderBoardLink = EntryPointLinkFactory.createLeaderboardLink(leaderboardLinkParameters);
             addNavigationLink(leaderboardName, leaderBoardLink, "leaderBoard", stringMessages.goToOverviewAndSeeLeaderboard());
-        }        
+        }
+        addLoginPanel();
     }
 
     private void addNavigationLink(String linkName, String linkUrl, String styleNameExtension, String htmlTitle) {
@@ -71,5 +72,9 @@ public class GlobalNavigationPanel extends FlowPanel {
         linkHtml.addStyleName(styleName+"-"+styleNameExtension);
         linkHtml.setTitle(setHtmlTitle);
         add(linkHtml);
+    }
+    
+    private void addLoginPanel(){
+        
     }
 }

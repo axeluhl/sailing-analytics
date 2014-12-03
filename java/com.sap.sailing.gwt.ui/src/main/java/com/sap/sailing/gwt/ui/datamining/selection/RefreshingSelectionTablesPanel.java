@@ -22,24 +22,25 @@ import com.google.gwt.user.client.rpc.AsyncCallback;
 import com.google.gwt.user.client.ui.HorizontalPanel;
 import com.google.gwt.user.client.ui.Widget;
 import com.google.gwt.view.client.SelectionChangeEvent;
-import com.sap.sailing.gwt.ui.client.ErrorReporter;
 import com.sap.sailing.gwt.ui.client.StringMessages;
 import com.sap.sailing.gwt.ui.client.shared.components.SettingsDialogComponent;
 import com.sap.sailing.gwt.ui.datamining.DataMiningServiceAsync;
+import com.sap.sailing.gwt.ui.datamining.DataRetrieverChainDefinitionChangedListener;
+import com.sap.sailing.gwt.ui.datamining.DataRetrieverChainDefinitionProvider;
 import com.sap.sailing.gwt.ui.datamining.SelectionChangedListener;
 import com.sap.sailing.gwt.ui.datamining.SelectionProvider;
-import com.sap.sailing.gwt.ui.datamining.StatisticChangedListener;
-import com.sap.sailing.gwt.ui.datamining.StatisticProvider;
 import com.sap.sailing.gwt.ui.datamining.settings.RefreshingSelectionTablesSettings;
 import com.sap.sailing.gwt.ui.datamining.settings.RefreshingSelectionTablesSettingsDialogComponent;
+import com.sap.sse.datamining.shared.GroupKey;
 import com.sap.sse.datamining.shared.QueryDefinition;
 import com.sap.sse.datamining.shared.QueryResult;
-import com.sap.sse.datamining.shared.components.AggregatorType;
 import com.sap.sse.datamining.shared.dto.FunctionDTO;
 import com.sap.sse.datamining.shared.impl.GenericGroupKey;
+import com.sap.sse.datamining.shared.impl.dto.DataRetrieverChainDefinitionDTO;
+import com.sap.sse.gwt.client.ErrorReporter;
 
 public class RefreshingSelectionTablesPanel implements SelectionProvider<RefreshingSelectionTablesSettings>,
-                                                       StatisticChangedListener {
+                                                       DataRetrieverChainDefinitionChangedListener {
     
     private static final int resizeDelay = 100;
     private static final double relativeWidthInPercent = 1;
@@ -57,18 +58,18 @@ public class RefreshingSelectionTablesPanel implements SelectionProvider<Refresh
     private Map<GenericGroupKey<FunctionDTO>, SelectionTable<?>> tablesMappedByDimensionAsKeys;
     private Set<SelectionChangedListener> listeners;
     
-    private FunctionDTO currentStatisticToCalculate;
+    private DataRetrieverChainDefinitionDTO currentDataRetrieverChainDefinition;
     
     public RefreshingSelectionTablesPanel(StringMessages stringMessages, DataMiningServiceAsync dataMiningService, ErrorReporter errorReporter,
-                                          StatisticProvider statisticProvider) {
+                                          DataRetrieverChainDefinitionProvider dataRetrieverChainDefinitionProvider) {
         this.stringMessages = stringMessages;
         this.dataMiningService = dataMiningService;
         this.errorReporter = errorReporter;
         settings = new RefreshingSelectionTablesSettings();
         listeners = new HashSet<SelectionChangedListener>();
-        currentStatisticToCalculate = null;
+        currentDataRetrieverChainDefinition = null;
 
-        tablesMappedByDimensionAsKeys = new HashMap<GenericGroupKey<FunctionDTO>, SelectionTable<?>>();
+        tablesMappedByDimensionAsKeys = new HashMap<>();
         
         tablesPanel = new HorizontalPanel();
         
@@ -93,66 +94,77 @@ public class RefreshingSelectionTablesPanel implements SelectionProvider<Refresh
         });
 
         doLayout(Window.getClientWidth(), Window.getClientHeight());
-        statisticProvider.addStatisticChangedListener(this);
+        dataRetrieverChainDefinitionProvider.addDataRetrieverChainDefinitionChangedListener(this);
     }
     
     @Override
-    public void statisticChanged(FunctionDTO newStatisticToCalculate, AggregatorType newAggregatorType) {
-        if (!Objects.equals(currentStatisticToCalculate, newStatisticToCalculate)) {
-            currentStatisticToCalculate = newStatisticToCalculate;
-            updateAvailableTables();
+    public void dataRetrieverChainDefinitionChanged(DataRetrieverChainDefinitionDTO newDataRetrieverChainDefinition) {
+        if (!Objects.equals(currentDataRetrieverChainDefinition, newDataRetrieverChainDefinition)) {
+            currentDataRetrieverChainDefinition = newDataRetrieverChainDefinition;
+            timer.cancel();
+            updateTables();
         }
     }
     
-    private void updateAvailableTables() {
-        dataMiningService.getDimensionsFor(currentStatisticToCalculate, LocaleInfo.getCurrentLocale().getLocaleName(), new AsyncCallback<Collection<FunctionDTO>>() {
+    private void updateTables() {
+        dataMiningService.getDimensionValuesFor(currentDataRetrieverChainDefinition, LocaleInfo.getCurrentLocale().getLocaleName(), new AsyncCallback<QueryResult<Set<Object>>>() {
             @Override
             public void onFailure(Throwable caught) {
                 errorReporter.reportError("Error fetching the dimensions from the server: " + caught.getMessage());
             }
             @Override
-            public void onSuccess(Collection<FunctionDTO> dimensions) {
-                Collection<GenericGroupKey<FunctionDTO>> dimensionsAsKeys = new HashSet<>();
-                for (FunctionDTO dimension : dimensions) {
-                    dimensionsAsKeys.add(new GenericGroupKey<FunctionDTO>(dimension));
-                }
+            public void onSuccess(QueryResult<Set<Object>> dimensionValues) {
+                @SuppressWarnings("unchecked")
+                Collection<GenericGroupKey<FunctionDTO>> dimensionsAsKeys = (Collection<GenericGroupKey<FunctionDTO>>)(Collection<?>) dimensionValues.getResults().keySet();
+                updateAvailableTables(dimensionsAsKeys);
                 
-                Collection<GenericGroupKey<FunctionDTO>> dimensionTablesToBeRemoved = new HashSet<>(tablesMappedByDimensionAsKeys.keySet());
-                dimensionTablesToBeRemoved.removeAll(dimensionsAsKeys);
-                for (GenericGroupKey<FunctionDTO> dimensionToBeRemoved : dimensionTablesToBeRemoved) {
-                    tablesMappedByDimensionAsKeys.remove(dimensionToBeRemoved);
+                boolean tableContentChanged = updateTableValues(dimensionValues.getResults());
+                if (settings.isRerunQueryAfterRefresh() && tableContentChanged) {
+                    notifySelectionChanged();
+                    // TODO query is executed, before the data is ready to be analyzed
+                    // TODO does this error still appear with the new concept?
                 }
-                
-                for (GenericGroupKey<FunctionDTO> dimensionAsKey : dimensionsAsKeys) {
-                    if (!tablesMappedByDimensionAsKeys.containsKey(dimensionAsKey)) {
-                        SelectionTable<?> table = new SelectionTable<>(dimensionAsKey.getValue());
-                        table.addSelectionChangeHandler(new SelectionChangeEvent.Handler() {
-                            @Override
-                            public void onSelectionChange(SelectionChangeEvent event) {
-                                notifySelectionChanged();
-                            }
-                        });
-                        
-                        tablesMappedByDimensionAsKeys.put(dimensionAsKey, table);
-                    }
+                if (settings.isRefreshAutomatically()) {
+                    timer.schedule(settings.getRefreshIntervalInMilliseconds());
                 }
-                
-                List<GenericGroupKey<FunctionDTO>> sortedDimensions = new ArrayList<>(tablesMappedByDimensionAsKeys.keySet());
-                Collections.sort(sortedDimensions, new Comparator<GenericGroupKey<FunctionDTO>>() {
-                    @Override
-                    public int compare(GenericGroupKey<FunctionDTO> k1, GenericGroupKey<FunctionDTO> k2) {
-                        return k1.getValue().compareTo(k2.getValue());
-                    }
-                });
-                tablesPanel.clear();
-                for (GenericGroupKey<FunctionDTO> dimension : sortedDimensions) {
-                    tablesPanel.add(tablesMappedByDimensionAsKeys.get(dimension));
-                }
-
-                updateTables();
-                doLayout(Window.getClientWidth(), Window.getClientHeight());
             }
         });
+    }
+
+    private void updateAvailableTables(Collection<GenericGroupKey<FunctionDTO>> dimensionsAsKeys) {
+        Collection<GenericGroupKey<FunctionDTO>> dimensionTablesToBeRemoved = new HashSet<>(tablesMappedByDimensionAsKeys.keySet());
+        dimensionTablesToBeRemoved.removeAll(dimensionsAsKeys);
+        for (GenericGroupKey<FunctionDTO> dimensionToBeRemoved : dimensionTablesToBeRemoved) {
+            tablesMappedByDimensionAsKeys.remove(dimensionToBeRemoved);
+        }
+        
+        for (GenericGroupKey<FunctionDTO> dimensionAsKey : dimensionsAsKeys) {
+            if (!tablesMappedByDimensionAsKeys.containsKey(dimensionAsKey)) {
+                SelectionTable<?> table = new SelectionTable<>(dimensionAsKey.getValue());
+                table.addSelectionChangeHandler(new SelectionChangeEvent.Handler() {
+                    @Override
+                    public void onSelectionChange(SelectionChangeEvent event) {
+                        notifySelectionChanged();
+                    }
+                });
+                
+                tablesMappedByDimensionAsKeys.put(dimensionAsKey, table);
+            }
+        }
+        
+        List<GenericGroupKey<FunctionDTO>> sortedDimensions = new ArrayList<>(tablesMappedByDimensionAsKeys.keySet());
+        Collections.sort(sortedDimensions, new Comparator<GenericGroupKey<FunctionDTO>>() {
+            @Override
+            public int compare(GenericGroupKey<FunctionDTO> k1, GenericGroupKey<FunctionDTO> k2) {
+                return k1.getValue().compareTo(k2.getValue());
+            }
+        });
+        tablesPanel.clear();
+        for (GenericGroupKey<FunctionDTO> dimension : sortedDimensions) {
+            tablesPanel.add(tablesMappedByDimensionAsKeys.get(dimension));
+        }
+
+        doLayout(Window.getClientWidth(), Window.getClientHeight());
     }
 
     private void doLayout(int newWindowWidth, int newWindowHeight) {
@@ -169,48 +181,28 @@ public class RefreshingSelectionTablesPanel implements SelectionProvider<Refresh
         }
     }
 
-    private void updateTables() {
-        Collection<FunctionDTO> dimensions = new HashSet<>();
+    private boolean updateTableValues(Map<GroupKey, Set<Object>> newValues) {
+        boolean tableContentChanged = false;
         for (GenericGroupKey<FunctionDTO> dimensionAsKey : tablesMappedByDimensionAsKeys.keySet()) {
-            dimensions.add(dimensionAsKey.getValue());
+            List<?> sortedDimensionValues = new ArrayList<>();
+            if (newValues.containsKey(dimensionAsKey)) {
+                sortedDimensionValues = new ArrayList<>(newValues.get(dimensionAsKey));
+                Collections.sort(sortedDimensionValues, new Comparator<Object>() {
+                    @Override
+                    public int compare(Object o1, Object o2) {
+                        return o1.toString().compareTo(o2.toString());
+                    }
+                });
+            }
+
+            boolean currentTableContentChanged = tablesMappedByDimensionAsKeys.get(dimensionAsKey).updateContent(
+                    sortedDimensionValues);
+            if (!tableContentChanged) {
+                tableContentChanged = currentTableContentChanged;
+            }
         }
-        
-        dataMiningService.getDimensionValuesFor(dimensions, new AsyncCallback<QueryResult<Set<Object>>>() {
-            @Override
-            public void onFailure(Throwable caught) {
-                errorReporter.reportError("Error fetching the dimension values from the server: " + caught.getMessage());
-            }
-            @Override
-            public void onSuccess(QueryResult<Set<Object>> result) {
-                boolean tableContentChanged = false;
-                for (GenericGroupKey<FunctionDTO> dimensionAsKey : tablesMappedByDimensionAsKeys.keySet()) {
-                    List<?> sortedDimensionValues = new ArrayList<>();
-                    if (result.getResults().containsKey(dimensionAsKey)) {
-                        sortedDimensionValues = new ArrayList<>(result.getResults().get(dimensionAsKey));
-                        Collections.sort(sortedDimensionValues, new Comparator<Object>() {
-                            @Override
-                            public int compare(Object o1, Object o2) {
-                                return o1.toString().compareTo(o2.toString());
-                            }
-                        });
-                    }
-                    
-                    boolean currentTableContentChanged = tablesMappedByDimensionAsKeys.get(dimensionAsKey).updateContent(sortedDimensionValues);
-                    if (!tableContentChanged) {
-                        tableContentChanged = currentTableContentChanged;
-                    }
-                }
-                
-                if (settings.isRerunQueryAfterRefresh() && tableContentChanged) {
-                    notifySelectionChanged();
-                    // TODO query is executed, before the data is ready to be analyzed
-                    // TODO does this error still appear with the new concept?
-                }
-                if (settings.isRefreshAutomatically()) {
-                    timer.schedule(settings.getRefreshIntervalInMilliseconds());
-                }
-            }
-        });
+
+        return tableContentChanged;
     }
 
     @Override

@@ -29,7 +29,7 @@ public abstract class ProcessorQuery<AggregatedType, DataSourceType> implements 
     private static final Logger LOGGER = Logger.getLogger(ProcessorQuery.class.getSimpleName());
     
     private final DataSourceType dataSource;
-    private final Processor<DataSourceType> firstProcessor;
+    private final Processor<DataSourceType, ?> firstProcessor;
 
     private final Executor executor;
     private final ProcessResultReceiver resultReceiver;
@@ -62,7 +62,7 @@ public abstract class ProcessorQuery<AggregatedType, DataSourceType> implements 
         firstProcessor = createFirstProcessor();
     }
 
-    protected abstract Processor<DataSourceType> createFirstProcessor();
+    protected abstract Processor<DataSourceType, ?> createFirstProcessor();
 
     @Override
     public QueryResult<AggregatedType> run() {
@@ -157,11 +157,11 @@ public abstract class ProcessorQuery<AggregatedType, DataSourceType> implements 
         }
     }
 
-    public Processor<Map<GroupKey, AggregatedType>> getResultReceiver() {
+    public Processor<Map<GroupKey, AggregatedType>, Void> getResultReceiver() {
         return resultReceiver;
     }
     
-    private class ProcessResultReceiver implements Processor<Map<GroupKey, AggregatedType>> {
+    private class ProcessResultReceiver implements Processor<Map<GroupKey, AggregatedType>, Void> {
         
         private final ReentrantLock resultsLock;
         private Map<GroupKey, AggregatedType> results;
@@ -213,6 +213,17 @@ public abstract class ProcessorQuery<AggregatedType, DataSourceType> implements 
         @Override
         public AdditionalResultDataBuilder getAdditionalResultData(AdditionalResultDataBuilder additionalDataBuilder) {
             return additionalDataBuilder;
+        }
+
+        @SuppressWarnings("unchecked")
+        @Override
+        public Class<Map<GroupKey, AggregatedType>> getInputType() {
+            return (Class<Map<GroupKey, AggregatedType>>)(Class<?>) Map.class;
+        }
+
+        @Override
+        public Class<Void> getResultType() {
+            return Void.class;
         }
         
     }

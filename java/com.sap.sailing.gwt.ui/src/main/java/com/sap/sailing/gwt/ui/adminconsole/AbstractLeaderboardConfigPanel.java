@@ -29,7 +29,6 @@ import com.sap.sailing.domain.common.RegattaNameAndRaceName;
 import com.sap.sailing.domain.common.dto.FleetDTO;
 import com.sap.sailing.domain.common.dto.NamedDTO;
 import com.sap.sailing.domain.common.dto.RaceColumnDTO;
-import com.sap.sailing.gwt.ui.client.ErrorReporter;
 import com.sap.sailing.gwt.ui.client.LeaderboardsDisplayer;
 import com.sap.sailing.gwt.ui.client.LeaderboardsRefresher;
 import com.sap.sailing.gwt.ui.client.RaceSelectionChangeListener;
@@ -43,6 +42,7 @@ import com.sap.sailing.gwt.ui.client.shared.controls.SelectionCheckboxColumn;
 import com.sap.sailing.gwt.ui.shared.RegattaDTO;
 import com.sap.sailing.gwt.ui.shared.StrippedLeaderboardDTO;
 import com.sap.sse.common.Util;
+import com.sap.sse.gwt.client.ErrorReporter;
 import com.sap.sse.gwt.client.async.MarkedAsyncCallback;
 import com.sap.sse.gwt.client.panels.LabeledAbstractFilterablePanel;
 
@@ -137,7 +137,6 @@ public abstract class AbstractLeaderboardConfigPanel extends FormPanel implement
         //Create leaderboards list and functionality
         CaptionPanel leaderboardsCaptionPanel = new CaptionPanel(stringMessages.leaderboards());
         leaderboardsCaptionPanel.setStyleName("bold");
-        leaderboardsCaptionPanel.setWidth("75%");
         mainPanel.add(leaderboardsCaptionPanel);
 
         VerticalPanel leaderboardsPanel = new VerticalPanel();
@@ -184,20 +183,21 @@ public abstract class AbstractLeaderboardConfigPanel extends FormPanel implement
 
         // caption panels for the selected leaderboard and tracked races
         HorizontalPanel splitPanel = new HorizontalPanel();
+        splitPanel.setWidth("100%");
         splitPanel.ensureDebugId("LeaderboardDetailsPanel");
         mainPanel.add(splitPanel);
 
         selectedLeaderBoardPanel = new CaptionPanel(stringMessages.leaderboard());
-        selectedLeaderBoardPanel.setWidth("50%");
         splitPanel.add(selectedLeaderBoardPanel);
-
+        splitPanel.setCellWidth(selectedLeaderBoardPanel, "50%");
+        
         VerticalPanel vPanel = new VerticalPanel();
         vPanel.setWidth("100%");
         selectedLeaderBoardPanel.setContentWidget(vPanel);
 
         trackedRacesCaptionPanel = new CaptionPanel(stringMessages.trackedRaces());
-        trackedRacesCaptionPanel.setWidth("50%");
         splitPanel.add(trackedRacesCaptionPanel);
+        splitPanel.setCellWidth(trackedRacesCaptionPanel, "50%");
 
         VerticalPanel trackedRacesPanel = new VerticalPanel();
         trackedRacesPanel.setWidth("100%");
@@ -234,7 +234,7 @@ public abstract class AbstractLeaderboardConfigPanel extends FormPanel implement
         
         raceColumnTable = new RaceTableWrapper<SetSelectionModel<RaceColumnDTOAndFleetDTOWithNameBasedEquality>>(
                 sailingService, stringMessages, errorReporter, raceColumnTableSelectionModel);
-        raceColumnTable.getTable().setWidth("500px");
+        raceColumnTable.getTable().setWidth("100%");
         addColumnsToRacesTable(raceColumnTable.getTable());
         this.raceColumnTableSelectionModel = raceColumnTableSelectionModel;
         raceColumnTableSelectionModel.addSelectionChangeHandler(new SelectionChangeEvent.Handler() {
@@ -449,12 +449,20 @@ public abstract class AbstractLeaderboardConfigPanel extends FormPanel implement
     }
 
     @Override
-    public void changeTrackingRace(Iterable<? extends RegattaAndRaceIdentifier> regattaAndRaceIdentifiers, boolean isTracked) {
+    public void racesStoppedTracking(Iterable<? extends RegattaAndRaceIdentifier> regattaAndRaceIdentifiers) {
+        // nothing needs to be done here; the race doesn't change its linkedness status only because it stopped tracking
+    }
+
+    /**
+     * When a race is removed from the server, it will also have been unlinked. Represent the unlinking by clearing the
+     * tracked race link for any race column / fleet that points to it:
+     */
+    @Override
+    public void racesRemoved(Iterable<? extends RegattaAndRaceIdentifier> regattaAndRaceIdentifiers) {
         for (RegattaAndRaceIdentifier regattaAndRaceIdentifier : regattaAndRaceIdentifiers) {
             for (RaceColumnDTOAndFleetDTOWithNameBasedEquality raceColumnAndFleetName : raceColumnTable.getDataProvider().getList()) {
-                if (raceColumnAndFleetName.getA().getRaceColumnName().equals(regattaAndRaceIdentifier.getRaceName())) {
-                    raceColumnAndFleetName.getA().setRaceIdentifier(raceColumnAndFleetName.getB(),
-                            regattaAndRaceIdentifier);
+                if (Util.equalsWithNull(raceColumnAndFleetName.getA().getRaceIdentifier(raceColumnAndFleetName.getB()), regattaAndRaceIdentifier)) {
+                    raceColumnAndFleetName.getA().setRaceIdentifier(raceColumnAndFleetName.getB(), null);
                 }
             }
             raceColumnTable.getDataProvider().refresh();

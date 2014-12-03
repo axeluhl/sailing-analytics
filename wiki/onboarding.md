@@ -8,15 +8,16 @@ First of all, make sure you've looked at http://www.amazon.de/Patterns-Elements-
 
 #### Installations
 
-1. Eclipse (e.g. Eclipse Classic 4.3.x (Kepler)), http://www.eclipse.org
+1. Eclipse (e.g. Eclipse Luna for Eclipse Committers), http://www.eclipse.org
 2. Eclipse Extensions
-  * Install Eclipse GWT should be version 2.6 (https://developers.google.com/eclipse/docs/download)
+  * Install Eclipse GWT should be version 2.6.1 (https://developers.google.com/eclipse/docs/download)
 3. Git (e.g. msysGit for Windows v1.7.10), http://git-scm.com
 4. MongoDB (e.g. Production Release 2.0.4), download: http://www.mongodb.org/
 5. RabbitMQ, download from http://www.rabbitmq.com/. Requires Erlang to be installed. RabbitMQ installer will assist in installing Erlang.
-6. JDK 1.6 (Java SE 6), http://jdk6.java.net (for GWT)
+6. JDK 1.6 (Java SE 6), http://jdk6.java.net (for Android)
 7. JDK 1.7 (Java SE 7), http://jdk7.java.net
-8. Maven 3.1.1 (or higher), http://maven.apache.org
+8. JDK 1.8 (Java SE 8), http://jdk8.java.net
+9. Maven 3.1.1 (or higher), http://maven.apache.org
 
 #### Further optional but recommended installations
 
@@ -59,7 +60,7 @@ First of all, make sure you've looked at http://www.amazon.de/Patterns-Elements-
   * Go to Windows->Preferences->Google->Errors/Warnings and set "Missing SDK" to "Ignore"
   * Import all Race Analysis projects from the `java/` subdirectory of the git main folder
   * Import all projects from the `mobile/` subdirectory of the git main folder; this in particular contains the race committee app projects
-  * Set the Eclipse target platform to race-analysis-p2-ide-local.target (located in com.sap.sailing.targetplatform/definitions)
+  * Set the Eclipse target platform to race-analysis-p2-remote.target (located in com.sap.sailing.targetplatform/definitions)
   * Wait until the target platform has been resolved completely
   * In the project com.sap.sailing.gwt.ui create a new subfolder "classes" in the folder WEB-INF
   * Rebuild all projects

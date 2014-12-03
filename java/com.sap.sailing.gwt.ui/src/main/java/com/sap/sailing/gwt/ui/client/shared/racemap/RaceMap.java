@@ -86,7 +86,6 @@ import com.sap.sailing.gwt.ui.actions.GetWindInfoAction;
 import com.sap.sailing.gwt.ui.client.ClientResources;
 import com.sap.sailing.gwt.ui.client.CompetitorSelectionChangeListener;
 import com.sap.sailing.gwt.ui.client.CompetitorSelectionProvider;
-import com.sap.sailing.gwt.ui.client.ErrorReporter;
 import com.sap.sailing.gwt.ui.client.NumberFormatterFactory;
 import com.sap.sailing.gwt.ui.client.RaceSelectionChangeListener;
 import com.sap.sailing.gwt.ui.client.RaceTimesInfoProviderListener;
@@ -116,11 +115,13 @@ import com.sap.sailing.gwt.ui.shared.WindInfoForRaceDTO;
 import com.sap.sailing.gwt.ui.shared.WindTrackInfoDTO;
 import com.sap.sailing.gwt.ui.shared.racemap.GoogleMapAPIKey;
 import com.sap.sailing.gwt.ui.shared.racemap.GoogleMapStyleHelper;
+import com.sap.sailing.gwt.ui.shared.racemap.RaceSimulationOverlay;
 import com.sap.sailing.gwt.ui.shared.racemap.WindStreamletsRaceboardOverlay;
 import com.sap.sse.common.Util;
 import com.sap.sse.common.Util.Triple;
 import com.sap.sse.common.filter.Filter;
 import com.sap.sse.common.filter.FilterSet;
+import com.sap.sse.gwt.client.ErrorReporter;
 import com.sap.sse.gwt.client.async.AsyncActionsExecutor;
 import com.sap.sse.gwt.client.player.TimeListener;
 import com.sap.sse.gwt.client.player.Timer;
@@ -304,13 +305,15 @@ public class RaceMap extends AbsolutePanel implements TimeListener, CompetitorSe
     private int autoZoomLevel;           // zoom-level to which auto-zoom-in/-out is zooming
     LatLngBounds autoZoomLatLngBounds;   // bounds to which auto-zoom-in/-out is panning&zooming
     
+    private RaceSimulationOverlay simulationOverlay;
     private WindStreamletsRaceboardOverlay streamletOverlay;
     private final boolean showViewStreamlets;
+    private final boolean showViewSimulation;
     private final RegattaAndRaceIdentifier raceIdentifier;
 
     public RaceMap(SailingServiceAsync sailingService, AsyncActionsExecutor asyncActionsExecutor,
             ErrorReporter errorReporter, Timer timer, CompetitorSelectionProvider competitorSelection,
-            StringMessages stringMessages, boolean showMapControls, boolean showViewStreamlets,
+            StringMessages stringMessages, boolean showMapControls, boolean showViewStreamlets, boolean showViewSimulation,
             RegattaAndRaceIdentifier raceIdentifier) {
         this.setSize("100%", "100%");
         this.stringMessages = stringMessages;
@@ -334,6 +337,7 @@ public class RaceMap extends AbsolutePanel implements TimeListener, CompetitorSe
         lastTimeChangeBeforeInitialization = null;
         isMapInitialized = false;
         this.showViewStreamlets = showViewStreamlets;
+        this.showViewSimulation = showViewSimulation;
         headerPanel = new FlowPanel();
         headerPanel.setStyleName("RaceMap-HeaderPanel");
         panelForLeftHeaderLabels = new AbsolutePanel();
@@ -392,7 +396,9 @@ public class RaceMap extends AbsolutePanel implements TimeListener, CompetitorSe
               RaceMap.this.add(map, 0, 0);
               Image sapLogo = createSAPLogo();
               RaceMap.this.add(sapLogo);
-              RaceMap.this.add(combinedWindPanel, 10, 10+sapLogo.getHeight()+/*spacing*/15);
+              map.setControls(ControlPosition.LEFT_TOP, combinedWindPanel);
+              combinedWindPanel.getParent().addStyleName("CombinedWindPanelParentDiv");
+
               RaceMap.this.raceMapImageManager.loadMapIcons(map);
               map.setSize("100%", "100%");
               map.addZoomChangeHandler(new ZoomChangeMapHandler() {
@@ -441,6 +447,9 @@ public class RaceMap extends AbsolutePanel implements TimeListener, CompetitorSe
                       if ((streamletOverlay != null) && !map.getBounds().equals(currentMapBounds)) {
                           streamletOverlay.onBoundsChanged(newZoomLevel != currentZoomLevel);
                       }
+                      if ((simulationOverlay != null) && !map.getBounds().equals(currentMapBounds)) {
+                          simulationOverlay.onBoundsChanged(newZoomLevel != currentZoomLevel);
+                      }
                       currentMapBounds = map.getBounds();
                       currentZoomLevel = newZoomLevel;
                       headerPanel.getElement().getStyle().setWidth(map.getOffsetWidth(), Unit.PX);
@@ -459,6 +468,13 @@ public class RaceMap extends AbsolutePanel implements TimeListener, CompetitorSe
               if (showViewStreamlets) {
                   streamletOverlay.setVisible(true);
               }
+
+              if (showViewSimulation) {
+                  // initialize simulation canvas
+                  simulationOverlay = new RaceSimulationOverlay(getMap(), /* zIndex */ 0, timer, raceIdentifier, sailingService, stringMessages, asyncActionsExecutor);
+                  simulationOverlay.addToMap();
+              }
+              
               createHeaderPanel(map);
               createSettingsButton(map);
 
@@ -1902,7 +1918,7 @@ public class RaceMap extends AbsolutePanel implements TimeListener, CompetitorSe
 
     @Override
     public SettingsDialogComponent<RaceMapSettings> getSettingsDialogComponent() {
-        return new RaceMapSettingsDialogComponent(settings, stringMessages);
+        return new RaceMapSettingsDialogComponent(settings, stringMessages, this.showViewSimulation);
     }
 
     @Override
@@ -1961,6 +1977,11 @@ public class RaceMap extends AbsolutePanel implements TimeListener, CompetitorSe
         if (newSettings.isShowWindStreamletOverlay() != settings.isShowWindStreamletOverlay()) {
             settings.setShowWindStreamletOverlay(newSettings.isShowWindStreamletOverlay());
             streamletOverlay.setVisible(newSettings.isShowWindStreamletOverlay());
+        }
+        if (newSettings.isShowSimulationOverlay() != settings.isShowSimulationOverlay()) {
+            settings.setShowSimulationOverlay(newSettings.isShowSimulationOverlay());
+            simulationOverlay.setVisible(newSettings.isShowSimulationOverlay());
+            simulationOverlay.timeChanged(timer.getTime(), null);
         }
         if (requiredRedraw) {
             redraw();

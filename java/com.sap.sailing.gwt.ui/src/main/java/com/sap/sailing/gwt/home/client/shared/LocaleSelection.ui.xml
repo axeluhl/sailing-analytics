@@ -1,7 +1,7 @@
 <!DOCTYPE ui:UiBinder SYSTEM "http://dl.google.com/gwt/DTD/xhtml.ent">
 <ui:UiBinder xmlns:ui="urn:ui:com.google.gwt.uibinder"
   xmlns:g="urn:import:com.google.gwt.user.client.ui">
-  <ui:with field='i18n' type='com.sap.sailing.gwt.home.client.i18n.TextMessages'/>
+    <ui:with field="i18n" type="com.sap.sailing.gwt.common.client.i18n.TextMessages"/>
     <g:HorizontalPanel>
     	<g:Label text="{i18n.chooseALanguage}:" />
     	<g:ListBox ui:field="localeSelection" />

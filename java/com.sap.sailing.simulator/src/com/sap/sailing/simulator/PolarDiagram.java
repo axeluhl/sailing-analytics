@@ -10,50 +10,46 @@ import com.sap.sailing.domain.common.SpeedWithBearing;
 
 public interface PolarDiagram extends Serializable {
 
-    // TO BE REVIEWED
-    // not sure whether I use the right terms
     enum WindSide {
-        RIGHT, LEFT, FACING, OPPOSING
+        RIGHT, LEFT, UPWIND, DOWNWIND
     };
 
-    SpeedWithBearing getWind();
+    // scales
+    void setSpeedScale(double scaleSpeed);
+    double getSpeedScale();
+    void setBearingScale(double scaleBearing);
+    double getBearingScale();
 
+    // wind
+    SpeedWithBearing getWind();
     void setWind(SpeedWithBearing newWind);
 
+    // current
     void setCurrent(SpeedWithBearing newCurrent);
-
     SpeedWithBearing getCurrent();
 
+    // target direction
+    //     default is target bearing = 0;
+    //     for target bearing != 0, optimal angles and VMG are specifically calculated 
     Bearing getTargetDirection();
-
     void setTargetDirection(Bearing newTargetDirection);
-
+    
+    // boat
     SpeedWithBearing getSpeedAtBearing(Bearing bearing);
-
     SpeedWithBearing getSpeedAtBearingOverGround(Bearing bearing);
-
     SpeedWithBearing[] optimalVMGUpwind();
-
     Bearing[] optimalDirectionsUpwind();
-
     Bearing[] optimalDirectionsDownwind();
-
     long getTurnLoss();
-
     WindSide getWindSide(Bearing bearing);
 
+    // polar raw data
     NavigableMap<Speed, NavigableMap<Bearing, Speed>> polarDiagramPlot(Double bearingStep, Set<Speed> extraSpeeds);
-
     NavigableMap<Speed, NavigableMap<Bearing, Speed>> polarDiagramPlot(Double bearingStep);
-
     NavigableMap<Speed, NavigableMap<Bearing, Speed>> getSpeedTable();
-
     NavigableMap<Speed, Bearing> getBeatAngles();
-
     NavigableMap<Speed, Bearing> getGybeAngles();
-
     NavigableMap<Speed, Speed> getBeatSOG();
-
     NavigableMap<Speed, Speed> getGybeSOG();
 
 }

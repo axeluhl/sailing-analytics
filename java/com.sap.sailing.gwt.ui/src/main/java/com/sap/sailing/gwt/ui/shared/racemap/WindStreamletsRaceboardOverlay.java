@@ -34,7 +34,7 @@ import com.sap.sse.gwt.client.player.Timer;
  * A Google Maps overlay based on an HTML5 canvas for drawing a wind field. The {@link VectorField} implementation used is the
  * {@link WindInfoForRaceVectorField} which takes a {@link WindInfoForRaceDTO} as its basis.
  * 
- * @author Nidhi Sawhney (D054070)
+ * @author Christopher Ronnewinkel (D036654)
  * @author Axel Uhl (D043530)
  * 
  */

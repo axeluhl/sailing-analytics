@@ -11,8 +11,8 @@ import com.google.gwt.uibinder.client.UiField;
 import com.google.gwt.user.client.ui.UIObject;
 import com.sap.sailing.domain.common.LeaderboardNameConstants;
 import com.sap.sailing.domain.common.dto.FleetDTO;
-import com.sap.sailing.gwt.home.client.i18n.TextMessages;
-import com.sap.sailing.gwt.home.client.place.event.EventPageNavigator;
+import com.sap.sailing.gwt.common.client.i18n.TextMessages;
+import com.sap.sailing.gwt.home.client.place.event.EventPlaceNavigator;
 import com.sap.sailing.gwt.ui.shared.RaceGroupSeriesDTO;
 import com.sap.sailing.gwt.ui.shared.StrippedLeaderboardDTO;
 import com.sap.sse.gwt.client.player.Timer;
@@ -26,7 +26,7 @@ public class EventRegattaRacesPhase extends UIObject {
     @UiField SpanElement phaseName;
     @UiField DivElement fleetGroupsPanel;
 
-    public EventRegattaRacesPhase(StrippedLeaderboardDTO leaderboard, RaceGroupSeriesDTO series, Timer timerForClientServerOffset, EventPageNavigator pageNavigator) {
+    public EventRegattaRacesPhase(StrippedLeaderboardDTO leaderboard, RaceGroupSeriesDTO series, Timer timerForClientServerOffset, EventPlaceNavigator pageNavigator) {
         EventRegattaRacesResources.INSTANCE.css().ensureInjected();
         setElement(uiBinder.createAndBindUi(this));
         

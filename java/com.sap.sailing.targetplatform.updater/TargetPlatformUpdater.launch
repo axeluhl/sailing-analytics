@@ -7,7 +7,7 @@
 <listEntry value="4"/>
 </listAttribute>
 <stringAttribute key="org.eclipse.jdt.launching.MAIN_TYPE" value="org.eclipse.equinox.launcher.Main"/>
-<stringAttribute key="org.eclipse.jdt.launching.PROGRAM_ARGUMENTS" value="-consolelog -nosplash -verbose -application org.eclipse.equinox.p2.publisher.UpdateSitePublisher -metadataRepository &quot;file:/${project_loc:com.sap.sailing.targetplatform.base}/gen/p2&quot; -artifactRepository &quot;file:/${project_loc:com.sap.sailing.targetplatform.base}/gen/p2&quot; -source &quot;${project_loc:com.sap.sailing.targetplatform.base}&quot; -publishArtifacts -publishArtifactRepository -compress -noDefaultIUs"/>
+<stringAttribute key="org.eclipse.jdt.launching.PROGRAM_ARGUMENTS" value="-consolelog -nosplash -verbose -application org.eclipse.equinox.p2.publisher.UpdateSitePublisher -metadataRepository &quot;file:/${project_loc:com.sap.sailing.targetplatform.base}/target/repository&quot; -artifactRepository &quot;file:/${project_loc:com.sap.sailing.targetplatform.base}/target/repository&quot; -source &quot;${project_loc:com.sap.sailing.targetplatform.base}&quot; -publishArtifacts -publishArtifactRepository -compress -noDefaultIUs"/>
 <stringAttribute key="org.eclipse.jdt.launching.PROJECT_ATTR" value="com.sap.sailing.targetplatform.updater"/>
-<stringAttribute key="org.eclipse.jdt.launching.VM_ARGUMENTS" value="-jar ${eclipse_home}plugins/org.eclipse.equinox.launcher_1.3.0.v20120522-1813.jar"/>
+<stringAttribute key="org.eclipse.jdt.launching.VM_ARGUMENTS" value="-jar ${eclipse_home}plugins/org.eclipse.equinox.launcher_1.3.0.v20140415-2008.jar"/>
 </launchConfiguration>

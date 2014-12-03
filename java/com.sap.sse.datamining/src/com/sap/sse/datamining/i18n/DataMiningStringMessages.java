@@ -24,21 +24,7 @@ public interface DataMiningStringMessages {
         private static final Locale DEFAULT_LOCALE = Locale.ENGLISH;
         private static final Map<String, Locale> supportedLocalesMappedByLocaleInfo = new HashMap<>();
         
-        private static final String DEFAULT_STRING_MESSAGES_BASE_NAME = "stringmessages/StringMessages";
-        
-        private static DataMiningStringMessages defaultStringMessages;
         private static Map<String, DataMiningStringMessages> stringMessagesMappedByResourceBaseName = new HashMap<>();
-        
-        public static String getDefaultStringMessagesBaseName() {
-            return DEFAULT_STRING_MESSAGES_BASE_NAME;
-        }
-        
-        public static DataMiningStringMessages getDefaultStringMessages() {
-            if (defaultStringMessages == null) {
-                defaultStringMessages = new DataMiningStringMessagesImpl(DEFAULT_STRING_MESSAGES_BASE_NAME);
-            }
-            return defaultStringMessages;
-        }
         
         public static DataMiningStringMessages getInstanceFor(String resourceBaseName) {
             String key = resourceBaseName;

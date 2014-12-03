@@ -7,12 +7,12 @@ import com.sap.sailing.domain.base.Competitor;
 import com.sap.sailing.domain.base.Leg;
 import com.sap.sailing.domain.common.Bearing;
 import com.sap.sailing.domain.common.Distance;
-import com.sap.sailing.domain.common.Duration;
 import com.sap.sailing.domain.common.LegType;
 import com.sap.sailing.domain.common.NoWindException;
 import com.sap.sailing.domain.common.Speed;
 import com.sap.sailing.domain.common.SpeedWithBearing;
-import com.sap.sailing.domain.common.TimePoint;
+import com.sap.sse.common.Duration;
+import com.sap.sse.common.TimePoint;
 import com.sap.sse.common.Util;
 
 public interface TrackedLegOfCompetitor extends Serializable {
@@ -101,19 +101,22 @@ public interface TrackedLegOfCompetitor extends Serializable {
     List<Maneuver> getManeuvers(TimePoint timePoint, boolean waitForLatest) throws NoWindException;
     
     /**
+     * @param waitForLatest TODO
      * @return <code>null</code> if the competitor hasn't started this leg yet
      */
-    Integer getNumberOfTacks(TimePoint timePoint) throws NoWindException;
+    Integer getNumberOfTacks(TimePoint timePoint, boolean waitForLatest) throws NoWindException;
 
     /**
+     * @param waitForLatest TODO
      * @return <code>null</code> if the competitor hasn't started this leg yet
      */
-    Integer getNumberOfJibes(TimePoint timePoint) throws NoWindException;
+    Integer getNumberOfJibes(TimePoint timePoint, boolean waitForLatest) throws NoWindException;
 
     /**
+     * @param waitForLatest TODO
      * @return <code>null</code> if the competitor hasn't started this leg yet
      */
-    Integer getNumberOfPenaltyCircles(TimePoint timePoint) throws NoWindException;
+    Integer getNumberOfPenaltyCircles(TimePoint timePoint, boolean waitForLatest) throws NoWindException;
 
     /**
      * Computes the competitor's rank within this leg. If the competitor has already finished this leg at

@@ -3,7 +3,7 @@ package com.sap.sailing.racecommittee.app.ui.fragments.dialogs;
 import android.app.DialogFragment;
 import android.os.Bundle;
 
-import com.sap.sailing.racecommittee.app.logging.LifecycleLogger;
+import com.sap.sailing.android.shared.logging.LifecycleLogger;
 
 /**
  * Simple base class for {@link DialogFragment}'s to add some logging.

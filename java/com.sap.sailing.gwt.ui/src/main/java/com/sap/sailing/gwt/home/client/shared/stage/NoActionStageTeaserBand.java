@@ -1,6 +1,6 @@
 package com.sap.sailing.gwt.home.client.shared.stage;
 
-import com.sap.sailing.gwt.home.client.app.PlaceNavigator;
+import com.sap.sailing.gwt.home.client.app.HomePlacesNavigator;
 import com.sap.sailing.gwt.home.client.shared.EventDatesFormatterUtil;
 import com.sap.sailing.gwt.ui.shared.EventBaseDTO;
 
@@ -10,7 +10,7 @@ import com.sap.sailing.gwt.ui.shared.EventBaseDTO;
  */
 public class NoActionStageTeaserBand extends StageTeaserBand {
 
-    public NoActionStageTeaserBand(EventBaseDTO event, PlaceNavigator placeNavigator) {
+    public NoActionStageTeaserBand(EventBaseDTO event, HomePlacesNavigator placeNavigator) {
         super(event, placeNavigator);
  
         bandTitle.setInnerText(event.getName());

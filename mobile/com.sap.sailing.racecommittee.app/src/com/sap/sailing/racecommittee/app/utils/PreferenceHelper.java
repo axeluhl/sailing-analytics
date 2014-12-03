@@ -5,7 +5,7 @@ import android.content.SharedPreferences;
 import android.preference.PreferenceManager;
 
 import com.sap.sailing.racecommittee.app.R;
-import com.sap.sailing.racecommittee.app.logging.ExLog;
+import com.sap.sailing.android.shared.logging.ExLog;
 
 /**
  * Helps you with maintaining preferences over different app builds
@@ -47,14 +47,14 @@ public class PreferenceHelper {
 
     public void setupPreferences(boolean forceReset) {
         if (forceReset) {
-            ExLog.i(TAG, "A preferences reset and read will be forced.");
+            ExLog.i(context, TAG, "A preferences reset and read will be forced.");
         }
 
         boolean isCleared = clearPreferencesIfNeeded(forceReset);
         boolean hasSetDefaultsBefore = hasSetDefaultsBefore();
         boolean readAgain = forceReset || isCleared || !hasSetDefaultsBefore;
 
-        ExLog.i(TAG, String.format("Preference state: {cleared=%s, setDefaultsBefore=%s, readAgain=%s}", isCleared,
+        ExLog.i(context, TAG, String.format("Preference state: {cleared=%s, setDefaultsBefore=%s, readAgain=%s}", isCleared,
                 hasSetDefaultsBefore, readAgain));
 
         resetPreferences(readAgain);
@@ -75,11 +75,11 @@ public class PreferenceHelper {
         SharedPreferences versionPreferences = getSharedPreferences(HIDDEN_PREFERENCE_VERSION_CODE_KEY);
         int preferencesVersion = versionPreferences.getInt(HIDDEN_PREFERENCE_VERSION_CODE_KEY, 0);
         if (preferencesVersion < LAST_COMPATIBLE_VERSION) {
-            ExLog.i(TAG, "Clearing the preference cache");
+            ExLog.i(context, TAG, "Clearing the preference cache");
 
             clearPreferences();
 
-            ExLog.i(TAG, String.format("Bumping preference version code to %d", LAST_COMPATIBLE_VERSION));
+            ExLog.i(context, TAG, String.format("Bumping preference version code to %d", LAST_COMPATIBLE_VERSION));
             versionPreferences.edit().putInt(HIDDEN_PREFERENCE_VERSION_CODE_KEY, LAST_COMPATIBLE_VERSION).commit();
             return true;
         }

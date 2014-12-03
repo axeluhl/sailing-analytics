@@ -29,11 +29,9 @@ import com.sap.sailing.domain.common.Bearing;
 import com.sap.sailing.domain.common.Distance;
 import com.sap.sailing.domain.common.PassingInstruction;
 import com.sap.sailing.domain.common.Position;
-import com.sap.sailing.domain.common.TimePoint;
 import com.sap.sailing.domain.common.WindSourceType;
 import com.sap.sailing.domain.common.impl.DegreeBearingImpl;
 import com.sap.sailing.domain.common.impl.KnotSpeedWithBearingImpl;
-import com.sap.sailing.domain.common.impl.MillisecondsTimePoint;
 import com.sap.sailing.domain.common.impl.WindSourceImpl;
 import com.sap.sailing.domain.test.OnlineTracTracBasedTest;
 import com.sap.sailing.domain.tracking.DynamicGPSFixTrack;
@@ -41,8 +39,11 @@ import com.sap.sailing.domain.tracking.DynamicTrackedRace;
 import com.sap.sailing.domain.tracking.GPSFix;
 import com.sap.sailing.domain.tracking.GPSFixMoving;
 import com.sap.sailing.domain.tracking.MarkPassing;
+import com.sap.sailing.domain.tracking.impl.DynamicTrackedRaceImpl;
 import com.sap.sailing.domain.tracking.impl.WindImpl;
 import com.sap.sailing.domain.tractracadapter.ReceiverType;
+import com.sap.sse.common.TimePoint;
+import com.sap.sse.common.impl.MillisecondsTimePoint;
 import com.tractrac.model.lib.api.event.CreateModelException;
 import com.tractrac.subscription.lib.api.SubscriberInitializationException;
 
@@ -137,8 +138,8 @@ public abstract class MartinAbstractMarkPassingTest extends OnlineTracTracBasedT
             }
         }
 
-        if (obj != null && obj instanceof DynamicTrackedRace) {
-            setTrackedRace((DynamicTrackedRace) obj);
+        if (obj != null && obj instanceof DynamicTrackedRaceImpl) {
+            setTrackedRace((DynamicTrackedRaceImpl) obj);
             setRace(getTrackedRace().getRace());
             return true;
         }

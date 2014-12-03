@@ -40,7 +40,5 @@ public enum ComparisonStrategy {
         return signifier;
     }
 
-    public boolean verifyComparisonResult(int comparisonResult) {
-        throw new UnsupportedOperationException("No implementation for the strategy " + this);
-    }
+    public abstract boolean verifyComparisonResult(int comparisonResult);
 }

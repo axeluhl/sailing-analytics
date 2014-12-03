@@ -6,19 +6,20 @@ import java.util.concurrent.ConcurrentHashMap;
 
 import com.sap.sse.datamining.components.FilterCriterion;
 
-public abstract class CompoundFilterCriterion<DataType> implements FilterCriterion<DataType> {
+public abstract class CompoundFilterCriterion<ElementType> extends AbstractFilterCriterion<ElementType> {
     
-    private Collection<FilterCriterion<DataType>> criterias;
+    private Collection<FilterCriterion<ElementType>> criterias;
 
-    public CompoundFilterCriterion() {
-        this.criterias = Collections.newSetFromMap(new ConcurrentHashMap<FilterCriterion<DataType>, Boolean>());
+    public CompoundFilterCriterion(Class<ElementType> elementType) {
+        super(elementType);
+        this.criterias = Collections.newSetFromMap(new ConcurrentHashMap<FilterCriterion<ElementType>, Boolean>());
     }
     
-    public void addCriteria(FilterCriterion<DataType> criteria) {
+    public void addCriteria(FilterCriterion<ElementType> criteria) {
         criterias.add(criteria);
     }
     
-    protected Collection<FilterCriterion<DataType>> getCriterias() {
+    protected Collection<FilterCriterion<ElementType>> getCriterias() {
         return criterias;
     }
 

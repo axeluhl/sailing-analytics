@@ -7,13 +7,14 @@ import android.view.View.OnClickListener;
 import android.view.ViewGroup;
 import android.widget.ImageButton;
 
-import com.sap.sailing.domain.common.TimePoint;
-import com.sap.sailing.domain.common.impl.MillisecondsTimePoint;
+import com.sap.sailing.android.shared.logging.ExLog;
+import com.sap.sailing.domain.abstractlog.race.state.RaceState;
 import com.sap.sailing.domain.common.racelog.Flags;
-import com.sap.sailing.domain.racelog.state.RaceState;
 import com.sap.sailing.racecommittee.app.AppConstants;
 import com.sap.sailing.racecommittee.app.R;
-import com.sap.sailing.racecommittee.app.logging.ExLog;
+import com.sap.sailing.racecommittee.app.logging.LogEvent;
+import com.sap.sse.common.TimePoint;
+import com.sap.sse.common.impl.MillisecondsTimePoint;
 
 public class AbortModeSelectionDialog extends RaceDialogFragment {
     Flags abortFlag;
@@ -61,7 +62,7 @@ public class AbortModeSelectionDialog extends RaceDialogFragment {
         abortFlagOverAlpha.setOnClickListener(new OnClickListener() {
 
             public void onClick(View arg0) {
-                ExLog.i(ExLog.RACE_CHOOSE_ABORT_ALPHA, getRace().getId().toString(), getActivity());
+                ExLog.i(getActivity(), LogEvent.RACE_CHOOSE_ABORT_ALPHA, getRace().getId().toString());
                 signalAbort(Flags.ALPHA);
             }
 
@@ -70,7 +71,7 @@ public class AbortModeSelectionDialog extends RaceDialogFragment {
         abortFlagOverHotel.setOnClickListener(new OnClickListener() {
 
             public void onClick(View arg0) {
-                ExLog.i(ExLog.RACE_CHOOSE_ABORT_HOTEL, getRace().getId().toString(), getActivity());
+                ExLog.i(getActivity(), LogEvent.RACE_CHOOSE_ABORT_HOTEL, getRace().getId().toString());
                 signalAbort(Flags.HOTEL);
             }
 
@@ -79,7 +80,7 @@ public class AbortModeSelectionDialog extends RaceDialogFragment {
         abortFlagOnly.setOnClickListener(new OnClickListener() {
 
             public void onClick(View arg0) {
-                ExLog.i(ExLog.RACE_CHOOSE_ABORT_NONE, getRace().getId().toString(), getActivity());
+                ExLog.i(getActivity(), LogEvent.RACE_CHOOSE_ABORT_NONE, getRace().getId().toString());
                 signalAbort(Flags.NONE);
             }
 

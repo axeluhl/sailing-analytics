@@ -36,7 +36,6 @@ import com.sap.sailing.domain.common.Bearing;
 import com.sap.sailing.domain.common.Color;
 import com.sap.sailing.domain.common.Position;
 import com.sap.sailing.domain.common.ScoringSchemeType;
-import com.sap.sailing.domain.common.TimePoint;
 import com.sap.sailing.domain.confidence.ConfidenceFactory;
 import com.sap.sailing.domain.common.confidence.Weigher;
 import com.sap.sailing.domain.common.confidence.impl.PositionAndTimePointWeigher;
@@ -44,7 +43,6 @@ import com.sap.sailing.domain.common.impl.DegreeBearingImpl;
 import com.sap.sailing.domain.common.impl.DegreePosition;
 import com.sap.sailing.domain.common.impl.KnotSpeedWithBearingImpl;
 import com.sap.sailing.domain.common.impl.MeterDistance;
-import com.sap.sailing.domain.common.impl.MillisecondsTimePoint;
 import com.sap.sailing.domain.confidence.ConfidenceBasedWindAverager;
 import com.sap.sailing.domain.racelog.impl.EmptyRaceLogStore;
 import com.sap.sailing.domain.racelog.tracking.EmptyGPSFixStore;
@@ -60,8 +58,10 @@ import com.sap.sailing.domain.tracking.impl.MarkPassingImpl;
 import com.sap.sailing.domain.tracking.impl.WindImpl;
 import com.sap.sailing.domain.tracking.impl.WindTrackImpl;
 import com.sap.sailing.domain.tracking.impl.WindWithConfidenceImpl;
+import com.sap.sse.common.TimePoint;
 import com.sap.sse.common.Util;
 import com.sap.sse.common.Util.Pair;
+import com.sap.sse.common.impl.MillisecondsTimePoint;
 
 public class WindTest {
     private static final int AVERAGING_INTERVAL_MILLIS = 30000 /* 30s averaging interval */;
@@ -278,7 +278,7 @@ public class WindTest {
         final BoatClass boatClass = domainFactory.getOrCreateBoatClass("ESS40");
         DynamicTrackedRace trackedRace = new DynamicTrackedRaceImpl(new DynamicTrackedRegattaImpl(
                 new RegattaImpl(EmptyRaceLogStore.INSTANCE, RegattaImpl.getDefaultName("Test Regatta", boatClass.getName()), boatClass,
-                /* trackedRegattaRegistry */ null, domainFactory.createScoringScheme(ScoringSchemeType.LOW_POINT), "123", null)),
+                        /*startDate*/ null, /*endDate*/ null, /* trackedRegattaRegistry */ null, domainFactory.createScoringScheme(ScoringSchemeType.LOW_POINT), "123", null)),
                 new RaceDefinitionImpl("Test Race",
                         new CourseImpl("Test Course", Arrays.asList(new Waypoint[] { w1, w2, w3 })),
                         boatClass, Collections.singleton(competitor)), Collections.<Sideline> emptyList(),

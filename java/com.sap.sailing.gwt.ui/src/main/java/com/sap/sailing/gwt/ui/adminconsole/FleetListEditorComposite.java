@@ -1,7 +1,5 @@
 package com.sap.sailing.gwt.ui.adminconsole;
 
-import java.util.List;
-
 import com.google.gwt.dom.client.Style.FontWeight;
 import com.google.gwt.event.dom.client.ChangeEvent;
 import com.google.gwt.event.dom.client.ChangeHandler;
@@ -20,11 +18,11 @@ import com.sap.sailing.domain.common.Color;
 import com.sap.sailing.domain.common.FleetColors;
 import com.sap.sailing.domain.common.dto.FleetDTO;
 import com.sap.sailing.gwt.ui.client.StringMessages;
-import com.sap.sailing.gwt.ui.client.shared.controls.listedit.ExpandedListEditorUi;
-import com.sap.sailing.gwt.ui.client.shared.controls.listedit.ListEditorComposite;
+import com.sap.sse.gwt.client.controls.listedit.ExpandedListEditorUi;
+import com.sap.sse.gwt.client.controls.listedit.ListEditorComposite;
 
 public class FleetListEditorComposite extends ListEditorComposite<FleetDTO> {
-    public FleetListEditorComposite(List<FleetDTO> initialValues, StringMessages stringMessages, ImageResource removeImage) {
+    public FleetListEditorComposite(Iterable<FleetDTO> initialValues, StringMessages stringMessages, ImageResource removeImage) {
         super(initialValues);
         setActiveUi(getExpandedUI(stringMessages, removeImage));
     }
@@ -37,6 +35,12 @@ public class FleetListEditorComposite extends ListEditorComposite<FleetDTO> {
 
         public ExpandedUi(StringMessages stringMessages, ImageResource removeImage) {
             super(stringMessages, removeImage, /*canRemoveItems*/true);
+        }
+
+        
+        @Override
+        protected StringMessages getStringMessages() {
+            return (StringMessages) super.getStringMessages();
         }
 
         @Override
@@ -54,7 +58,7 @@ public class FleetListEditorComposite extends ListEditorComposite<FleetDTO> {
             final ListBox colorListBox = createColorListBox(nameBox, orderNoBox);
             colorListBox.ensureDebugId("ColorListBox");
             
-            final Button addButton = new Button(stringMessages.add());
+            final Button addButton = new Button(getStringMessages().add());
             addButton.ensureDebugId("AddButton");
             addButton.addClickHandler(new ClickHandler() {
                 @Override
@@ -63,11 +67,11 @@ public class FleetListEditorComposite extends ListEditorComposite<FleetDTO> {
                 }
             });
 
-            hPanel.add(new Label(stringMessages.color() + ":"));
+            hPanel.add(new Label(getStringMessages().color() + ":"));
             hPanel.add(colorListBox);
-            hPanel.add(new Label(stringMessages.name() + ":"));
+            hPanel.add(new Label(getStringMessages().name() + ":"));
             hPanel.add(nameBox);
-            hPanel.add(new Label(stringMessages.rank() + ":"));
+            hPanel.add(new Label(getStringMessages().rank() + ":"));
             hPanel.add(orderNoBox);
             hPanel.add(addButton);
             return hPanel;
@@ -77,17 +81,17 @@ public class FleetListEditorComposite extends ListEditorComposite<FleetDTO> {
         protected Widget createValueWidget(int rowIndex, FleetDTO fleet) {
             HorizontalPanel hPanel = new HorizontalPanel();
             hPanel.setSpacing(4);
-            Label fleetLabel = new Label(stringMessages.fleet() + " '" + fleet.getName() + "' :");
+            Label fleetLabel = new Label(getStringMessages().fleet() + " '" + fleet.getName() + "' :");
             fleetLabel.getElement().getStyle().setFontWeight(FontWeight.BOLD);
             hPanel.add(fleetLabel);
             
             String valueText = "";
             if(fleet.getColor() != null) {
-                valueText += stringMessages.color() + " '" + fleet.getColor().toString() + "'";
+                valueText += getStringMessages().color() + " '" + fleet.getColor().toString() + "'";
             } else {
-                valueText += stringMessages.noColor();
+                valueText += getStringMessages().noColor();
             }
-            valueText += ", " + stringMessages.rank() + " " + fleet.getOrderNo();
+            valueText += ", " + getStringMessages().rank() + " " + fleet.getOrderNo();
             
             hPanel.add(new Label(valueText));
             
@@ -127,7 +131,7 @@ public class FleetListEditorComposite extends ListEditorComposite<FleetDTO> {
                     }
                 }
             });
-            colorListBox.addItem(stringMessages.noColor());
+            colorListBox.addItem(getStringMessages().noColor());
             for (FleetColors value : FleetColors.values()) {
                 colorListBox.addItem(value.name());
             }
@@ -153,7 +157,7 @@ public class FleetListEditorComposite extends ListEditorComposite<FleetDTO> {
 
         private String getColorText(FleetColors color) {
             if (color == null) {
-                return stringMessages.noColor();
+                return getStringMessages().noColor();
             }
             return color.name().charAt(0) + color.name().toLowerCase().substring(1);
         }

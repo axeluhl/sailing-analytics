@@ -1,8 +1,8 @@
 package com.sap.sailing.server.gateway.serialization.racelog.tracking.impl;
 
+import com.sap.sailing.domain.abstractlog.race.tracking.DeviceIdentifier;
+import com.sap.sailing.domain.abstractlog.race.tracking.SmartphoneUUIDSerializationHandler;
 import com.sap.sailing.domain.common.racelog.tracking.TransformationException;
-import com.sap.sailing.domain.racelog.tracking.DeviceIdentifier;
-import com.sap.sailing.domain.racelog.tracking.SmartphoneUUIDSerializationHandler;
 import com.sap.sailing.server.gateway.serialization.racelog.tracking.DeviceIdentifierJsonHandler;
 
 

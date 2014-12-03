@@ -19,6 +19,8 @@ import com.sap.sse.datamining.shared.annotations.Statistic;
 
 public class SimpleFunctionRegistry implements FunctionRegistry {
     
+    private final FunctionFactory functionFactory;
+    
     private final Map<Class<?>, Set<Function<?>>> statistics;
     private final Map<Class<?>, Set<Function<?>>> dimensions;
     private final Map<Class<?>, Set<Function<?>>> externalFunctions;
@@ -26,6 +28,8 @@ public class SimpleFunctionRegistry implements FunctionRegistry {
     private final Collection<Map<Class<?>, Set<Function<?>>>> functionMaps;
 
     public SimpleFunctionRegistry() {
+        functionFactory = new FunctionFactory();
+        
         statistics = new HashMap<>();
         dimensions = new HashMap<>();
         externalFunctions = new HashMap<>();
@@ -61,9 +65,9 @@ public class SimpleFunctionRegistry implements FunctionRegistry {
     }
 
     private void registerFunction(List<Function<?>> previousFunctions, Method method) {
-        Function<?> function = FunctionFactory.createMethodWrappingFunction(method);
+        Function<?> function = functionFactory.createMethodWrappingFunction(method);
         if (!previousFunctions.isEmpty()) {
-            function = FunctionFactory.createCompoundFunction(null, previousFunctions, function);
+            function = functionFactory.createCompoundFunction(null, previousFunctions, function);
         }
         
         if (function.isDimension()) {
@@ -90,7 +94,7 @@ public class SimpleFunctionRegistry implements FunctionRegistry {
     }
 
     private void handleConnectorMethod(Method method, List<Function<?>> previousFunctions) {
-        Function<?> function = FunctionFactory.createMethodWrappingFunction(method);
+        Function<?> function = functionFactory.createMethodWrappingFunction(method);
         Class<?> returnType = method.getReturnType();
         List<Function<?>> previousFunctionsClone = new ArrayList<>(previousFunctions);
         previousFunctionsClone.add(function);
@@ -120,7 +124,7 @@ public class SimpleFunctionRegistry implements FunctionRegistry {
         for (Class<?> externalClass : externalClassesToScan) {
             for (Method method : externalClass.getMethods()) {
                 if (isValidExternalFunction(method)) {
-                    Function<?> function = FunctionFactory.createMethodWrappingFunction(method);
+                    Function<?> function = functionFactory.createMethodWrappingFunction(method);
                     addExternalFunction(function);
                 }
             }
@@ -165,7 +169,10 @@ public class SimpleFunctionRegistry implements FunctionRegistry {
     public Collection<Function<?>> getAllFunctionsOf(Class<?> declaringType) {
         Collection<Function<?>> allFunctions = new HashSet<>();
         for (Map<Class<?>, Set<Function<?>>> functionMap : functionMaps) {
-            allFunctions.addAll(functionMap.get(declaringType));
+            Collection<Function<?>> functions = functionMap.get(declaringType);
+            if (functions != null) {
+                allFunctions.addAll(functions);
+            }
         }
         return allFunctions;
     }

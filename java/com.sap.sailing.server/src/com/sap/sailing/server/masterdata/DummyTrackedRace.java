@@ -5,7 +5,9 @@ import java.util.Collections;
 import java.util.HashSet;
 import java.util.List;
 import java.util.NavigableSet;
+import java.util.Set;
 
+import com.sap.sailing.domain.abstractlog.race.RaceLog;
 import com.sap.sailing.domain.base.Competitor;
 import com.sap.sailing.domain.base.Leg;
 import com.sap.sailing.domain.base.Mark;
@@ -23,9 +25,7 @@ import com.sap.sailing.domain.common.RegattaAndRaceIdentifier;
 import com.sap.sailing.domain.common.Speed;
 import com.sap.sailing.domain.common.SpeedWithBearing;
 import com.sap.sailing.domain.common.Tack;
-import com.sap.sailing.domain.common.TimePoint;
 import com.sap.sailing.domain.common.WindSource;
-import com.sap.sailing.domain.racelog.RaceLog;
 import com.sap.sailing.domain.racelog.tracking.GPSFixStore;
 import com.sap.sailing.domain.tracking.CourseDesignChangedListener;
 import com.sap.sailing.domain.tracking.GPSFix;
@@ -49,6 +49,7 @@ import com.sap.sailing.domain.tracking.WindStore;
 import com.sap.sailing.domain.tracking.WindWithConfidence;
 import com.sap.sailing.domain.tracking.impl.DynamicTrackedRegattaImpl;
 import com.sap.sailing.domain.tracking.impl.EmptyWindStore;
+import com.sap.sse.common.TimePoint;
 import com.sap.sse.common.Util;
 
 public class DummyTrackedRace extends TrackedRaceWithWindEssentials {
@@ -202,7 +203,7 @@ public class DummyTrackedRace extends TrackedRaceWithWindEssentials {
     }
 
     @Override
-    public Wind getWind(Position p, TimePoint at, Iterable<WindSource> windSourcesToExclude) {
+    public Wind getWind(Position p, TimePoint at, Set<WindSource> windSourcesToExclude) {
         return null;
     }
 
@@ -377,14 +378,14 @@ public class DummyTrackedRace extends TrackedRaceWithWindEssentials {
     }
 
     @Override
-    public Iterable<WindSource> getWindSourcesToExclude() {
+    public Set<WindSource> getWindSourcesToExclude() {
         // TODO Auto-generated method stub
         return null;
     }
 
     @Override
     public WindWithConfidence<Util.Pair<Position, TimePoint>> getWindWithConfidence(Position p, TimePoint at,
-            Iterable<WindSource> windSourcesToExclude) {
+            Set<WindSource> windSourcesToExclude) {
         // TODO Auto-generated method stub
         return null;
     }

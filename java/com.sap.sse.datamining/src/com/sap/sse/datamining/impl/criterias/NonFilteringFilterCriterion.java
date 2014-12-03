@@ -1,11 +1,13 @@
 package com.sap.sse.datamining.impl.criterias;
 
-import com.sap.sse.datamining.components.FilterCriterion;
+public class NonFilteringFilterCriterion<ElementType> extends AbstractFilterCriterion<ElementType> {
 
-public class NonFilteringFilterCriterion<T> implements FilterCriterion<T> {
+    public NonFilteringFilterCriterion(Class<ElementType> elementType) {
+        super(elementType);
+    }
 
     @Override
-    public boolean matches(T element) {
+    public boolean matches(ElementType element) {
         return true;
     }
 

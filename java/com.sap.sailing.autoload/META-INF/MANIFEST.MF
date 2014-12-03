@@ -9,14 +9,15 @@ Bundle-ActivationPolicy: lazy
 Export-Package: com.sap.sailing.autoload
 Import-Package: org.json.simple,
  org.json.simple.parser,
- org.osgi.framework;version="1.7.0"
-Require-Bundle: com.sap.sailing.gwt.ui;bundle-version="1.0.0",
- com.sap.sse.common;bundle-version="1.0.0",
- com.sap.sailing.domain.shared.android;bundle-version="1.0.0",
+ org.osgi.framework;version="1.7.0",
+ org.osgi.util.tracker;version="1.5.1"
+Require-Bundle: com.sap.sailing.gwt.ui,
+ com.sap.sse.common,
+ com.sap.sailing.domain.shared.android,
  com.sap.sailing.domain.tractracadapter,
- org.eclipse.osgi,
  com.sap.sailing.server,
- com.sap.sailing.domain;bundle-version="1.0.0",
+ com.sap.sailing.domain,
  com.sap.sailing.domain.common,
- com.sap.sailing.domain.persistence
+ com.sap.sailing.domain.persistence,
+ com.sap.sse.replication
 Bundle-Activator: com.sap.sailing.autoload.Activator

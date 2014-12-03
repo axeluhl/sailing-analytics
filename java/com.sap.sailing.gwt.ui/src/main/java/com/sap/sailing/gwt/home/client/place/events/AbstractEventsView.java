@@ -8,7 +8,7 @@ import java.util.List;
 import java.util.Map;
 
 import com.google.gwt.user.client.ui.Composite;
-import com.sap.sailing.gwt.home.client.DateUtil;
+import com.sap.sailing.gwt.common.client.DateUtil;
 import com.sap.sailing.gwt.ui.shared.EventBaseDTO;
 
 public abstract class AbstractEventsView extends Composite implements EventsView {

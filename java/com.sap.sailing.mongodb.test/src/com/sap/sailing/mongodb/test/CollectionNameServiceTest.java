@@ -2,8 +2,8 @@ package com.sap.sailing.mongodb.test;
 
 import org.junit.Test;
 
-import com.sap.sailing.mongodb.AlreadyRegisteredException;
-import com.sap.sailing.mongodb.MongoDBService;
+import com.sap.sse.mongodb.AlreadyRegisteredException;
+import com.sap.sse.mongodb.MongoDBService;
 
 public class CollectionNameServiceTest {
 

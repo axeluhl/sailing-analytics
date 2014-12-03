@@ -1,16 +1,16 @@
 package com.sap.sse.datamining.factories;
 
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.Collection;
 import java.util.List;
+import java.util.Locale;
 import java.util.Map;
 import java.util.Set;
 import java.util.concurrent.ExecutorService;
 
 import com.sap.sse.datamining.components.Processor;
 import com.sap.sse.datamining.functions.Function;
-import com.sap.sse.datamining.impl.DataMiningActivator;
+import com.sap.sse.datamining.i18n.DataMiningStringMessages;
 import com.sap.sse.datamining.impl.ProcessorQuery;
 import com.sap.sse.datamining.impl.components.GroupedDataEntry;
 import com.sap.sse.datamining.impl.components.ParallelByDimensionGroupingProcessor;
@@ -25,27 +25,22 @@ import com.sap.sse.datamining.shared.components.AggregatorType;
 
 public class ProcessorFactory {
     
-    private ProcessorFactory() {
+    private final ExecutorService executor;
+
+    public ProcessorFactory(ExecutorService executor) {
+        this.executor = executor;
     }
     
     /**
-     * Creates a aggregation processor of the given aggregator type, with the given ProcessorQuery as result receiver.<br />
-     * The {@link DataMiningActivator} will be used to get the missing objects for the construction (like
-     * the executor).
+     * Creates a aggregation processor of the given aggregator type, with the given ProcessorQuery as result receiver.
      */
-    public static Processor<GroupedDataEntry<Double>> createAggregationProcessor(ProcessorQuery<Double, ?> query, AggregatorType aggregatorType) {
-        Collection<Processor<Map<GroupKey, Double>>> resultReceivers = Arrays.asList(query.getResultReceiver());
+    public Processor<GroupedDataEntry<Double>, Map<GroupKey, Double>> createAggregationProcessor(ProcessorQuery<Double, ?> query, AggregatorType aggregatorType) {
+        Collection<Processor<Map<GroupKey, Double>, ?>> resultReceivers = new ArrayList<>();
+        resultReceivers.add(query.getResultReceiver());
         return createAggregationProcessor(resultReceivers, aggregatorType);
     }
 
-    
-    /**
-     * Creates an aggregation processor.<br />
-     * The {@link DataMiningActivator} will be used to get the missing objects for the construction (like
-     * the executor).
-     */
-    public static Processor<GroupedDataEntry<Double>> createAggregationProcessor(Collection<Processor<Map<GroupKey, Double>>> resultReceivers, AggregatorType aggregatorType) {
-        ExecutorService executor = DataMiningActivator.getExecutor();
+    public Processor<GroupedDataEntry<Double>, Map<GroupKey, Double>> createAggregationProcessor(Collection<Processor<Map<GroupKey, Double>, ?>> resultReceivers, AggregatorType aggregatorType) {
         switch (aggregatorType) {
         case Average:
             return new ParallelGroupedDoubleDataAverageAggregationProcessor(executor, resultReceivers);
@@ -60,68 +55,60 @@ public class ProcessorFactory {
     
     /**
      * Creates a collecting processor with the given ProcessorQuery as result receiver, that stores all received grouped
-     * data in a Set.<br />
-     * The {@link DataMiningActivator} will be used to get the missing objects for the construction (like the executor).
+     * data in a Set.
      */
-    public static Processor<GroupedDataEntry<Object>> createGroupedDataCollectingAsSetProcessor(ProcessorQuery<Set<Object>, ?> query) {
-        Collection<Processor<Map<GroupKey, Set<Object>>>> resultReceivers = Arrays.asList(query.getResultReceiver());
-        return new ParallelGroupedDataCollectingAsSetProcessor<>(DataMiningActivator.getExecutor(), resultReceivers);
+    public Processor<GroupedDataEntry<Object>, Map<GroupKey, Set<Object>>> createGroupedDataCollectingAsSetProcessor(ProcessorQuery<Set<Object>, ?> query) {
+        Collection<Processor<Map<GroupKey, Set<Object>>, ?>> resultReceivers = new ArrayList<>();
+        resultReceivers.add(query.getResultReceiver());
+        return new ParallelGroupedDataCollectingAsSetProcessor<>(executor, resultReceivers);
     }
 
     /**
-     * Creates an extraction processor with the given aggregation processor as result receiver.<br />
-     * The {@link DataMiningActivator} will be used to get the missing objects for the construction (like
-     * the executor).
+     * Creates an extraction processor with the given aggregation processor as result receiver.
      */
-    public static <ElementType> Processor<GroupedDataEntry<ElementType>> createExtractionProcessor(
-            Processor<GroupedDataEntry<Double>> aggregationProcessor, Function<Double> extractionFunction) {
-        return createExtractionProcessor(Arrays.asList(aggregationProcessor), extractionFunction);
+    public <ElementType> Processor<GroupedDataEntry<ElementType>, GroupedDataEntry<Double>> createExtractionProcessor(
+            Processor<GroupedDataEntry<Double>, ?> aggregationProcessor, Function<Double> extractionFunction) {
+        Collection<Processor<GroupedDataEntry<Double>, ?>> resultReceivers = new ArrayList<>();
+        resultReceivers.add(aggregationProcessor);
+        return createExtractionProcessor(resultReceivers, extractionFunction);
     }
 
-    /**
-     * Creates a extraction processor.<br />
-     * The {@link DataMiningActivator} will be used to get the missing objects for the construction (like
-     * the executor).
-     */
-    public static <ElementType> Processor<GroupedDataEntry<ElementType>> createExtractionProcessor(
-            Collection<Processor<GroupedDataEntry<Double>>> resultReceivers, Function<Double> extractionFunction) {
-        return new ParallelGroupedElementsValueExtractionProcessor<ElementType, Double>(DataMiningActivator.getExecutor(),
+    public <ElementType> Processor<GroupedDataEntry<ElementType>, GroupedDataEntry<Double>> createExtractionProcessor(
+            Collection<Processor<GroupedDataEntry<Double>, ?>> resultReceivers, Function<Double> extractionFunction) {
+        return new ParallelGroupedElementsValueExtractionProcessor<ElementType, Double>(executor,
                 resultReceivers, extractionFunction);
     }
 
     /**
-     * Creates a grouping processor with the given extraction processor as result receiver.<br />
-     * The {@link DataMiningActivator} will be used to get the missing objects for the construction (like
-     * the executor).
+     * Creates a grouping processor with the given extraction processor as result receiver.
      */
-    public static <ElementType> Processor<ElementType> createGroupingProcessor(Processor<GroupedDataEntry<ElementType>> extractionProcessor, List<Function<?>> dimensionsToGroupBy) {
-        return createGroupingProcessor(Arrays.asList(extractionProcessor), dimensionsToGroupBy);
+    public <DataType> Processor<DataType, GroupedDataEntry<DataType>> createGroupingProcessor(Class<DataType> dataType, Processor<GroupedDataEntry<DataType>, ?> extractionProcessor,  List<Function<?>> dimensionsToGroupBy) {
+        Collection<Processor<GroupedDataEntry<DataType>, ?>> resultReceivers = new ArrayList<>();
+        resultReceivers.add(extractionProcessor);
+        return createGroupingProcessor(dataType, resultReceivers, dimensionsToGroupBy);
+    }
+
+    public <DataType> Processor<DataType, GroupedDataEntry<DataType>> createGroupingProcessor(Class<DataType> dataType, Collection<Processor<GroupedDataEntry<DataType>, ?>> resultReceivers, List<Function<?>> dimensionsToGroupBy) {
+        return new ParallelMultiDimensionsValueNestingGroupingProcessor<>(dataType, executor, resultReceivers, dimensionsToGroupBy);
     }
 
     /**
-     * Creates a grouping processor.<br />
-     * The {@link DataMiningActivator} will be used to get the missing objects for the construction (like
-     * the executor).
-     */
-    public static <ElementType> Processor<ElementType> createGroupingProcessor(Collection<Processor<GroupedDataEntry<ElementType>>> resultReceivers, List<Function<?>> dimensionsToGroupBy) {
-        return new ParallelMultiDimensionsValueNestingGroupingProcessor<>(DataMiningActivator.getExecutor(), resultReceivers, dimensionsToGroupBy);
-    }
-
-    /**
-     * Creates a dimension grouping processor followed by a function value extraction processor for each given dimension.<br>
-     * The {@link DataMiningActivator} will be used to get the missing objects for the construction (like
-     * the executor).
+     * Creates a dimension grouping processor followed by a function value extraction processor for each given dimension.
      */
     @SuppressWarnings("unchecked")
-    public static <DataType> Collection<Processor<?>> createGroupingExtractorsForDimensions(
-            Processor<GroupedDataEntry<Object>> valueCollector, Collection<Function<?>> dimensions) {
-        Collection<Processor<GroupedDataEntry<Object>>> extractionResultReceivers = new ArrayList<>();
+    public <DataType> Collection<Processor<DataType, GroupedDataEntry<DataType>>> createGroupingExtractorsForDimensions(Class<DataType> dataType,
+            Processor<GroupedDataEntry<Object>, ?> valueCollector, Collection<Function<?>> dimensions,
+            DataMiningStringMessages stringMessages, Locale locale) {
+        Collection<Processor<GroupedDataEntry<Object>, ?>> extractionResultReceivers = new ArrayList<>();
         extractionResultReceivers.add(valueCollector);
 
-        Collection<Processor<?>> groupingExtractors = new ArrayList<>();
+        Collection<Processor<DataType, GroupedDataEntry<DataType>>> groupingExtractors = new ArrayList<>();
         for (Function<?> dimension : dimensions) {
-            Processor<GroupedDataEntry<DataType>> dimensionValueExtractor = new ParallelGroupedElementsValueExtractionProcessor<DataType, Object>(DataMiningActivator.getExecutor(), extractionResultReceivers, (Function<Object>) dimension);
-            Processor<DataType> byDimensionGrouper = new ParallelByDimensionGroupingProcessor<>(DataMiningActivator.getExecutor(), Arrays.asList(dimensionValueExtractor), dimension);
+            Processor<GroupedDataEntry<DataType>, GroupedDataEntry<Object>> dimensionValueExtractor = new ParallelGroupedElementsValueExtractionProcessor<DataType, Object>(executor, extractionResultReceivers, (Function<Object>) dimension);
+            Collection<Processor<GroupedDataEntry<DataType>, ?>> groupingResultReceivers = new ArrayList<>();
+            groupingResultReceivers.add(dimensionValueExtractor);
+            
+            Processor<DataType, GroupedDataEntry<DataType>> byDimensionGrouper = new ParallelByDimensionGroupingProcessor<>(dataType, executor, groupingResultReceivers, dimension, stringMessages, locale);
             groupingExtractors.add(byDimensionGrouper);
         }
         return groupingExtractors;

@@ -4,21 +4,21 @@ import java.util.Collection;
 import java.util.HashSet;
 import java.util.Objects;
 
-import com.sap.sse.datamining.components.FilterCriterion;
 import com.sap.sse.datamining.functions.Function;
 
-public class NullaryFunctionValuesFilterCriterion<DataType> implements FilterCriterion<DataType> {
+public class NullaryFunctionValuesFilterCriterion<ElementType> extends AbstractFilterCriterion<ElementType> {
 
     private Function<?> function;
     private Collection<?> valuesToMatch;
 
-    public NullaryFunctionValuesFilterCriterion(Function<?> function, Collection<?> valuesToMatch) {
+    public NullaryFunctionValuesFilterCriterion(Class<ElementType> elementType, Function<?> function, Collection<?> valuesToMatch) {
+        super(elementType);
         this.function = function;
         this.valuesToMatch = new HashSet<>(valuesToMatch);
     }
 
     @Override
-    public boolean matches(DataType dataEntry) {
+    public boolean matches(ElementType dataEntry) {
         Object value = function.tryToInvoke(dataEntry);
         
         for (Object valueToMatch : valuesToMatch) {

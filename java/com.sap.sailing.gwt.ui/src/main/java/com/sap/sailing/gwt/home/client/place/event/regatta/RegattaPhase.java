@@ -12,7 +12,7 @@ import com.google.gwt.user.client.EventListener;
 import com.google.gwt.user.client.ui.UIObject;
 import com.sap.sailing.domain.common.LeaderboardNameConstants;
 import com.sap.sailing.domain.common.dto.RaceColumnDTO;
-import com.sap.sailing.gwt.home.client.place.event.EventPageNavigator;
+import com.sap.sailing.gwt.home.client.place.event.EventPlaceNavigator;
 import com.sap.sailing.gwt.ui.shared.LeaderboardGroupDTO;
 import com.sap.sailing.gwt.ui.shared.RaceGroupDTO;
 import com.sap.sailing.gwt.ui.shared.RaceGroupSeriesDTO;
@@ -30,7 +30,7 @@ public class RegattaPhase extends UIObject {
     @UiField AnchorElement phaseRacesAnchor;
     
     public RegattaPhase(RaceGroupSeriesDTO series, final LeaderboardGroupDTO leaderboardGroup,
-            final StrippedLeaderboardDTO leaderboard, final RaceGroupDTO raceGroup, final EventPageNavigator pageNavigator, Timer timerForClientServerOffset) {
+            final StrippedLeaderboardDTO leaderboard, final RaceGroupDTO raceGroup, final EventPlaceNavigator pageNavigator, Timer timerForClientServerOffset) {
         RegattaResources.INSTANCE.css().ensureInjected();
         setElement(uiBinder.createAndBindUi(this));
 

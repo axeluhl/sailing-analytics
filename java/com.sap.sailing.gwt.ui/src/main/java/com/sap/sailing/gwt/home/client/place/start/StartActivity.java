@@ -10,9 +10,10 @@ import com.google.gwt.activity.shared.AbstractActivity;
 import com.google.gwt.core.client.Scheduler;
 import com.google.gwt.core.client.Scheduler.ScheduledCommand;
 import com.google.gwt.event.shared.EventBus;
+import com.google.gwt.user.client.Window;
 import com.google.gwt.user.client.rpc.AsyncCallback;
 import com.google.gwt.user.client.ui.AcceptsOneWidget;
-import com.sap.sailing.gwt.home.client.DateUtil;
+import com.sap.sailing.gwt.common.client.DateUtil;
 import com.sap.sailing.gwt.home.client.shared.placeholder.Placeholder;
 import com.sap.sailing.gwt.home.client.shared.stage.StageEventType;
 import com.sap.sailing.gwt.ui.shared.EventBaseDTO;
@@ -20,9 +21,11 @@ import com.sap.sse.common.Util.Pair;
 
 public class StartActivity extends AbstractActivity {
     private final StartClientFactory clientFactory;
+    private final StartPlace place;
 
     public StartActivity(StartPlace place, StartClientFactory clientFactory) {
         this.clientFactory = clientFactory;
+        this.place = place;
     }
 
     @Override
@@ -33,6 +36,7 @@ public class StartActivity extends AbstractActivity {
             public void onSuccess(List<EventBaseDTO> result) {
                 final StartView view = clientFactory.createStartView();
                 panel.setWidget(view.asWidget());
+                Window.setTitle(place.getTitle());
                 fillStartPageEvents(view, result);
             }
             
@@ -107,8 +111,13 @@ public class StartActivity extends AbstractActivity {
         public int compare(Pair<StageEventType, EventBaseDTO> eventAndStageType1,
                 Pair<StageEventType, EventBaseDTO> eventAndStageType2) {
             int result;
+            Date now = new Date();
             if (eventAndStageType1.getA().ordinal() == eventAndStageType2.getA().ordinal()) {
-                result = eventAndStageType1.getB().startDate.compareTo(eventAndStageType2.getB().startDate);
+                if(eventAndStageType1.getB().startDate.before(now)) {
+                    result = eventAndStageType2.getB().startDate.compareTo(eventAndStageType1.getB().startDate);
+                } else {
+                    result = eventAndStageType1.getB().startDate.compareTo(eventAndStageType2.getB().startDate);
+                }
             } else {
                 result = eventAndStageType1.getA().ordinal() - eventAndStageType2.getA().ordinal();
             }

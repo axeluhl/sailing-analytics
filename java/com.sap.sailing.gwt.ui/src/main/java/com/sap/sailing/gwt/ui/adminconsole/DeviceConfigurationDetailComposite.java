@@ -23,14 +23,14 @@ import com.google.gwt.user.client.ui.Image;
 import com.google.gwt.user.client.ui.Label;
 import com.google.gwt.user.client.ui.TextBox;
 import com.google.gwt.user.client.ui.VerticalPanel;
-import com.sap.sailing.gwt.ui.client.ErrorReporter;
 import com.sap.sailing.gwt.ui.client.SailingServiceAsync;
 import com.sap.sailing.gwt.ui.client.StringMessages;
-import com.sap.sailing.gwt.ui.client.shared.controls.listedit.ListEditorComposite;
-import com.sap.sailing.gwt.ui.client.shared.controls.listedit.StringListEditorComposite;
 import com.sap.sailing.gwt.ui.shared.DeviceConfigurationDTO;
 import com.sap.sailing.gwt.ui.shared.DeviceConfigurationDTO.RegattaConfigurationDTO;
 import com.sap.sailing.gwt.ui.shared.DeviceConfigurationMatcherDTO;
+import com.sap.sse.gwt.client.ErrorReporter;
+import com.sap.sse.gwt.client.controls.listedit.ListEditorComposite;
+import com.sap.sse.gwt.client.controls.listedit.StringListEditorComposite;
 import com.sap.sse.gwt.client.dialog.DataEntryDialog.DialogCallback;
 
 public class DeviceConfigurationDetailComposite extends Composite {
@@ -207,7 +207,7 @@ public class DeviceConfigurationDetailComposite extends Composite {
                 .<String> emptyList() : originalConfiguration.allowedCourseAreaNames;
                 
         allowedCourseAreasList = new StringListEditorComposite(initialValues, stringMessages, stringMessages.courseAreas(), resources.removeIcon(),
-                SuggestedCourseAreaNames.suggestedCourseAreaNames);
+                SuggestedCourseAreaNames.suggestedCourseAreaNames, stringMessages.enterCourseAreaName());
         allowedCourseAreasList.setWidth("80%");
         allowedCourseAreasList.addValueChangeHandler(dirtyValueMarker);
                 
@@ -219,7 +219,8 @@ public class DeviceConfigurationDetailComposite extends Composite {
         List<String> initialValues = originalConfiguration.byNameDesignerCourseNames == null ? Collections
                 .<String> emptyList() : originalConfiguration.byNameDesignerCourseNames;
         
-        courseNamesList = new StringListEditorComposite(initialValues, stringMessages, stringMessages.courseNames(), resources.removeIcon(), suggestedCourseNames);
+        courseNamesList = new StringListEditorComposite(initialValues, stringMessages, stringMessages.courseNames(), resources.removeIcon(), suggestedCourseNames,
+                stringMessages.enterCourseName());
         courseNamesList.setWidth("80%");
         courseNamesList.addValueChangeHandler(dirtyValueMarker);
         grid.setWidget(gridRow, 0, new Label(stringMessages.courseNames()));
@@ -300,9 +301,9 @@ public class DeviceConfigurationDetailComposite extends Composite {
         }
     };
     
-    private ValueChangeHandler<List<String>> dirtyValueMarker = new ValueChangeHandler<List<String>>() {
+    private ValueChangeHandler<Iterable<String>> dirtyValueMarker = new ValueChangeHandler<Iterable<String>>() {
         @Override
-        public void onValueChange(ValueChangeEvent<List<String>> event) {
+        public void onValueChange(ValueChangeEvent<Iterable<String>> event) {
             markAsDirty(true);
         }
     };

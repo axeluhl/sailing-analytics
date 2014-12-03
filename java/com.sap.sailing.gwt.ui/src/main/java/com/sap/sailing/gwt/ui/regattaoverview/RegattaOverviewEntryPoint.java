@@ -16,17 +16,17 @@ import com.google.gwt.user.client.ui.Panel;
 import com.google.gwt.user.client.ui.RootLayoutPanel;
 import com.google.gwt.user.client.ui.RootPanel;
 import com.google.gwt.user.client.ui.ScrollPanel;
-import com.sap.sailing.gwt.ui.client.AbstractEntryPoint;
+import com.sap.sailing.gwt.ui.client.AbstractSailingEntryPoint;
 import com.sap.sailing.gwt.ui.client.LogoAndTitlePanel;
 import com.sap.sailing.gwt.ui.client.RemoteServiceMappingConstants;
 import com.sap.sailing.gwt.ui.client.SailingService;
 import com.sap.sailing.gwt.ui.client.SailingServiceAsync;
-import com.sap.sailing.gwt.ui.client.URLEncoder;
 import com.sap.sailing.gwt.ui.regattaoverview.RegattaRaceStatesComponent.EntryHandler;
 import com.sap.sailing.gwt.ui.shared.RegattaOverviewEntryDTO;
 import com.sap.sse.gwt.client.EntryPointHelper;
+import com.sap.sse.gwt.client.URLEncoder;
 
-public class RegattaOverviewEntryPoint extends AbstractEntryPoint  {
+public class RegattaOverviewEntryPoint extends AbstractSailingEntryPoint  {
 
     private final static String PARAM_EVENT = "event";
     private final static String PARAM_ONLY_RUNNING_RACES = "onlyrunningraces";
@@ -53,7 +53,7 @@ public class RegattaOverviewEntryPoint extends AbstractEntryPoint  {
         boolean embedded = Window.Location.getParameter("embedded") != null
                 && Window.Location.getParameter("embedded").equalsIgnoreCase("true");
         if (!embedded) {
-            LogoAndTitlePanel logoAndTitlePanel = new LogoAndTitlePanel(stringMessages.eventOverview(), stringMessages, this);
+            LogoAndTitlePanel logoAndTitlePanel = new LogoAndTitlePanel(getStringMessages().eventOverview(), getStringMessages(), this, getUserService());
             logoAndTitlePanel.addStyleName("LogoAndTitlePanel");
             containerPanel.addNorth(logoAndTitlePanel, 68);
         } else {
@@ -91,7 +91,7 @@ public class RegattaOverviewEntryPoint extends AbstractEntryPoint  {
 
     private void createAndAddRegattaPanel(UUID eventId) {
         RegattaRaceStatesSettings settings = createRegattaRaceStatesSettingsFromURL();
-        regattaPanel = new RegattaOverviewPanel(sailingService, this, stringMessages, eventId, settings, userAgent);
+        regattaPanel = new RegattaOverviewPanel(sailingService, this, getStringMessages(), eventId, settings, userAgent);
         Panel centerPanel = new FlowPanel();
         centerPanel.add(regattaPanel);
         ScrollPanel scrollPanel = new ScrollPanel(centerPanel);
@@ -99,7 +99,7 @@ public class RegattaOverviewEntryPoint extends AbstractEntryPoint  {
     }
 
     private void createAndAddDetailPanel() {
-        detailPanel = new RaceDetailPanel(stringMessages, new ClickHandler() {
+        detailPanel = new RaceDetailPanel(getStringMessages(), new ClickHandler() {
             @Override
             public void onClick(ClickEvent event) {
                 toggleDetailPanel(false);

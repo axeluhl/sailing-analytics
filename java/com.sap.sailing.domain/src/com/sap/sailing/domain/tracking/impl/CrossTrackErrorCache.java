@@ -17,9 +17,7 @@ import com.sap.sailing.domain.base.Waypoint;
 import com.sap.sailing.domain.common.Distance;
 import com.sap.sailing.domain.common.LegType;
 import com.sap.sailing.domain.common.NoWindException;
-import com.sap.sailing.domain.common.TimePoint;
 import com.sap.sailing.domain.common.impl.MeterDistance;
-import com.sap.sailing.domain.common.impl.MillisecondsTimePoint;
 import com.sap.sailing.domain.tracking.GPSFix;
 import com.sap.sailing.domain.tracking.GPSFixMoving;
 import com.sap.sailing.domain.tracking.GPSFixTrack;
@@ -31,6 +29,8 @@ import com.sap.sailing.domain.tracking.TrackedRace;
 import com.sap.sailing.util.SmartFutureCache;
 import com.sap.sailing.util.SmartFutureCache.CacheUpdater;
 import com.sap.sailing.util.SmartFutureCache.UpdateInterval;
+import com.sap.sse.common.TimePoint;
+import com.sap.sse.common.impl.MillisecondsTimePoint;
 
 /**
  * (Re-)computing the cross track error for a competitor causes significant amounts of CPU cycles. The cross track error

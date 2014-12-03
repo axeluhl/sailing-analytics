@@ -1,10 +1,10 @@
 <!DOCTYPE ui:UiBinder SYSTEM "http://dl.google.com/gwt/DTD/xhtml.ent">
 <ui:UiBinder xmlns:ui="urn:ui:com.google.gwt.uibinder" 
     xmlns:s="urn:import:com.sap.sailing.gwt.home.client.place.event"
-    xmlns:p="urn:import:com.sap.sailing.gwt.home.client.place.leaderboard"
+    xmlns:p="urn:import:com.sap.sailing.gwt.home.client.place.series"
 	xmlns:g="urn:import:com.google.gwt.user.client.ui">
-    <ui:with field="i18n" type="com.sap.sailing.gwt.home.client.i18n.TextMessages"/>
-	<ui:with field="res" type="com.sap.sailing.gwt.home.client.HomeResources" />
+    <ui:with field="i18n" type="com.sap.sailing.gwt.common.client.i18n.TextMessages"/>
+	<ui:with field="res" type="com.sap.sailing.gwt.common.client.SharedResources" />
     <ui:with field="local_res" type="com.sap.sailing.gwt.home.client.place.event.regattaleaderboard.EventRegattaLeaderboardResources" />
     <ui:with field="local_res2" type="com.sap.sailing.gwt.home.client.place.event.seriesanalytics.EventSeriesAnalyticsResources" />
 	<g:HTMLPanel>
@@ -20,9 +20,9 @@
 		      </div>
 		  </div>
 		  <div class="{res.mediaCss.small12} {res.mediaCss.columns} {local_res.css.regattaleaderboard_meta_navigation}">
-			<g:Anchor ui:field="overallLeaderboardAnchor" href="javascript:;" styleName="{res.mainCss.navbar_button}"><ui:text from="{i18n.overallLeaderboard}" /></g:Anchor>
-		    <g:Anchor ui:field="regattaLeaderboardsAnchor" href="javascript:;" styleName="{res.mainCss.navbar_button}"><ui:text from="{i18n.regattaLeaderboards}" /></g:Anchor>
-			<g:Anchor ui:field="competitorChartsAnchor" href="javascript:;" styleName="{res.mainCss.navbar_button}"><ui:text from="{i18n.competitorsAnalytics}" /></g:Anchor>
+			<g:Anchor ui:field="overallLeaderboardAnchor" styleName="{res.mainCss.navbar_button}"><ui:text from="{i18n.overallLeaderboard}" /></g:Anchor>
+		    <g:Anchor ui:field="regattaLeaderboardsAnchor" styleName="{res.mainCss.navbar_button}"><ui:text from="{i18n.regattaLeaderboards}" /></g:Anchor>
+			<g:Anchor ui:field="competitorChartsAnchor" styleName="{res.mainCss.navbar_button}"><ui:text from="{i18n.competitorsAnalytics}" /></g:Anchor>
 		  </div>
 		</div>
 		<g:HTMLPanel ui:field="overallLeaderboardTabPanel">

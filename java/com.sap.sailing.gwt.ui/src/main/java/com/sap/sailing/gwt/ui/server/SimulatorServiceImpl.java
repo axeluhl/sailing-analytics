@@ -14,16 +14,13 @@ import java.util.logging.Logger;
 import com.google.gwt.user.server.rpc.RemoteServiceServlet;
 import com.sap.sailing.domain.common.Bearing;
 import com.sap.sailing.domain.common.Distance;
-import com.sap.sailing.domain.common.Duration;
 import com.sap.sailing.domain.common.Position;
 import com.sap.sailing.domain.common.Speed;
 import com.sap.sailing.domain.common.SpeedWithBearing;
-import com.sap.sailing.domain.common.TimePoint;
 import com.sap.sailing.domain.common.dto.BoatClassDTO;
 import com.sap.sailing.domain.common.dto.PositionDTO;
 import com.sap.sailing.domain.common.impl.DegreeBearingImpl;
 import com.sap.sailing.domain.common.impl.DegreePosition;
-import com.sap.sailing.domain.common.impl.MillisecondsTimePoint;
 import com.sap.sailing.domain.common.impl.NauticalMileDistance;
 import com.sap.sailing.domain.tracking.Wind;
 import com.sap.sailing.gwt.ui.client.SimulatorService;
@@ -77,7 +74,10 @@ import com.sap.sailing.simulator.windfield.WindControlParameters;
 import com.sap.sailing.simulator.windfield.WindFieldGenerator;
 import com.sap.sailing.simulator.windfield.WindFieldGeneratorFactory;
 import com.sap.sailing.simulator.windfield.impl.WindFieldGeneratorMeasured;
+import com.sap.sse.common.Duration;
+import com.sap.sse.common.TimePoint;
 import com.sap.sse.common.Util;
+import com.sap.sse.common.impl.MillisecondsTimePoint;
 public class SimulatorServiceImpl extends RemoteServiceServlet implements SimulatorService {
 
     private static final long serialVersionUID = 4445427185387524086L;
@@ -180,13 +180,13 @@ public class SimulatorServiceImpl extends RemoteServiceServlet implements Simula
     public WindFieldDTO getWindField(WindFieldGenParamsDTO params, WindPatternDisplay pattern)
             throws WindPatternNotFoundException {
         LOGGER.info("Entering getWindField");
-        Position nw = new DegreePosition(params.getNorthWest().latDeg, params.getNorthWest().lngDeg);
-        Position se = new DegreePosition(params.getSouthEast().latDeg, params.getSouthEast().lngDeg);
+        Position start = new DegreePosition(params.getRaceCourseStart().latDeg, params.getRaceCourseStart().lngDeg);
+        Position end = new DegreePosition(params.getRaceCourseEnd().latDeg, params.getRaceCourseEnd().lngDeg);
         List<Position> course = new ArrayList<Position>();
-        course.add(nw);
-        course.add(se);
+        course.add(start);
+        course.add(end);
 
-        Grid bd = new CurvedGrid(nw, se);
+        Grid bd = new CurvedGrid(start, end);
 
         controlParameters.resetBlastRandomStream = params.isKeepState();
         retreiveWindControlParameters(pattern);
@@ -260,11 +260,11 @@ public class SimulatorServiceImpl extends RemoteServiceServlet implements Simula
         }
 
         if (mode != SailingSimulatorConstants.ModeMeasured) {
-            Position nw = new DegreePosition(params.getNorthWest().latDeg, params.getNorthWest().lngDeg);
-            Position se = new DegreePosition(params.getSouthEast().latDeg, params.getSouthEast().lngDeg);
+            Position start = new DegreePosition(params.getRaceCourseStart().latDeg, params.getRaceCourseStart().lngDeg);
+            Position end = new DegreePosition(params.getRaceCourseEnd().latDeg, params.getRaceCourseEnd().lngDeg);
             course = new ArrayList<Position>();
-            course.add(nw);
-            course.add(se);
+            course.add(start);
+            course.add(end);
             Position[] gridAreaGps = new Position[2];
             gridAreaGps = course.toArray(gridAreaGps);
             wf.setGridAreaGps(gridAreaGps);
@@ -301,7 +301,7 @@ public class SimulatorServiceImpl extends RemoteServiceServlet implements Simula
             windFieldDTO = this.createWindFieldDTO(wf, startTime, endTime, timeStep, params); // params.isShowStreamlets2(), params.isShowLines(), params.getSeedLines());
         }
 
-        return new SimulatorResultsDTO(rcDTO, pathDTOs, windFieldDTO, simulatedPaths.notificationMessage);
+        return new SimulatorResultsDTO(null, 0, rcDTO, pathDTOs, windFieldDTO, simulatedPaths.notificationMessage);
     }
 
     @Override
@@ -749,8 +749,8 @@ public class SimulatorServiceImpl extends RemoteServiceServlet implements Simula
         windFieldDTO.curSpeed = wf.getWindParameters().curSpeed;
         if (params.isShowStreamlets()) {
             WindData windData = new WindData();
-            windData.rcStart = params.getNorthWest();
-            windData.rcEnd = params.getSouthEast();
+            windData.rcStart = params.getRaceCourseStart();
+            windData.rcEnd = params.getRaceCourseEnd();
             windData.resX = params.getxRes();
             windData.resY = params.getyRes();
             windData.borderX = params.getBorderX();

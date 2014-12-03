@@ -1,7 +1,7 @@
 package com.sap.sailing.domain.markpassingcalculation;
 
 import com.sap.sailing.domain.base.Waypoint;
-import com.sap.sailing.domain.common.TimePoint;
+import com.sap.sse.common.TimePoint;
 
 /**
  * A possible passing of a {@link Waypoint}. It contains the {@link Waypoint} that it might be passing, a

@@ -39,7 +39,7 @@ public class ConcurrencyTestsUtil extends TestsUtil {
         }
     }
 
-    public static <T> void processElements(Processor<T> processor, Collection<T> elements) {
+    public static <T> void processElements(Processor<T, ?> processor, Collection<T> elements) {
         for (T element : elements) {
             processor.processElement(element);
         }
@@ -56,7 +56,7 @@ public class ConcurrencyTestsUtil extends TestsUtil {
         }
     }
 
-    public static void tryToFinishTheProcessorInAnotherThread(final Processor<?> processor) {
+    public static void tryToFinishTheProcessorInAnotherThread(final Processor<?, ?> processor) {
         Runnable finishingRunnable = new Runnable() {
             @Override
             public void run() {

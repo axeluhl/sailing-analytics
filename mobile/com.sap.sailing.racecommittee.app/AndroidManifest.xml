@@ -30,7 +30,7 @@
     <uses-feature android:name="android.hardware.camera.autofocus" />
 
     <application
-        android:name="RaceApplication"
+        android:name=".RaceApplication"
         android:allowBackup="true"
         android:hardwareAccelerated="true"
         android:icon="@drawable/sap_sailing_app_icon"
@@ -68,7 +68,7 @@
              >
         </activity>
         <activity
-            android:name=".ui.activities.SystemInformationActivity"
+            android:name="com.sap.sailing.racecommittee.app.ui.activities.SystemInformationActivity"
             android:screenOrientation="sensorLandscape" >
         </activity>
 
@@ -84,15 +84,17 @@
             </intent-filter>
         </service>
         <service
-            android:name=".services.sending.EventSendingService"
+            android:name="com.sap.sailing.android.shared.services.sending.MessageSendingService"
             android:exported="false" >
             <intent-filter>
                 <action android:name="com.sap.sailing.racecommittee.app.action.sendSavedIntents" />
-                <action android:name="com.sap.sailing.racecommittee.app.action.sendEvent" />
+                <action android:name="com.sap.sailing.racecommittee.app.action.sendMessage" />
             </intent-filter>
+            <meta-data android:name="com.sap.sailing.android.shared.services.sending.messageRestorer"
+                android:value="com.sap.sailing.racecommittee.app.services.sending.EventRestorer" />
         </service>
 
-        <receiver android:name=".receiver.ConnectivityChangedReceiver" >
+        <receiver android:name="com.sap.sailing.android.shared.services.sending.ConnectivityChangedReceiver" >
             <intent-filter>
                 <action android:name="android.net.conn.CONNECTIVITY_CHANGE" />
             </intent-filter>

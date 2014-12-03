@@ -14,7 +14,7 @@ import com.google.gwt.user.client.ui.Label;
 import com.google.gwt.user.client.ui.RootLayoutPanel;
 import com.google.gwt.user.client.ui.SplitLayoutPanel;
 import com.google.gwt.user.client.ui.Widget;
-import com.sap.sailing.gwt.ui.client.AbstractEntryPoint;
+import com.sap.sailing.gwt.ui.client.AbstractSailingEntryPoint;
 import com.sap.sailing.gwt.ui.client.GlobalNavigationPanel;
 import com.sap.sailing.gwt.ui.client.LogoAndTitlePanel;
 import com.sap.sailing.gwt.ui.client.RemoteServiceMappingConstants;
@@ -31,7 +31,7 @@ import com.sap.sailing.gwt.ui.datamining.settings.RefreshingSelectionTablesSetti
 import com.sap.sse.gwt.client.EntryPointHelper;
 import com.sap.sse.gwt.shared.GwtHttpRequestUtils;
 
-public class DataMiningEntryPoint extends AbstractEntryPoint {
+public class DataMiningEntryPoint extends AbstractSailingEntryPoint {
     private final SailingServiceAsync sailingService = GWT.create(SailingService.class);
 
     private static DataMiningResources resources = GWT.create(DataMiningResources.class);
@@ -51,13 +51,13 @@ public class DataMiningEntryPoint extends AbstractEntryPoint {
 
         DockLayoutPanel dockPanel = new DockLayoutPanel(Unit.PX);
         dockPanel.addNorth(createLogoAndTitlePanel(), 68);
-        QueryDefinitionProviderWithControls queryDefinitionProviderWithControls = new QueryDefinitionProviderWithControls(stringMessages, sailingService, dataMiningService, this);
+        QueryDefinitionProviderWithControls queryDefinitionProviderWithControls = new QueryDefinitionProviderWithControls(getStringMessages(), sailingService, dataMiningService, this);
         queryDefinitionProviderWithControls.getEntryWidget().addStyleName("dataMiningPanel");
         dockPanel.add(queryDefinitionProviderWithControls.getEntryWidget());
         
-        ResultsPresenter<Number> resultsPresenter = new ResultsChart(stringMessages);
+        ResultsPresenter<Number> resultsPresenter = new ResultsChart(getStringMessages());
         if (GwtHttpRequestUtils.getBooleanParameter("benchmark", false)) {
-            BenchmarkResultsPanel benchmarkResultsPanel = new BenchmarkResultsPanel(stringMessages, dataMiningService, this, queryDefinitionProviderWithControls);
+            BenchmarkResultsPanel benchmarkResultsPanel = new BenchmarkResultsPanel(getStringMessages(), dataMiningService, this, queryDefinitionProviderWithControls);
             splitPanel.addSouth(benchmarkResultsPanel, 500);
         } else {
             splitPanel.addSouth(resultsPresenter.getWidget(), 400);
@@ -65,15 +65,15 @@ public class DataMiningEntryPoint extends AbstractEntryPoint {
         
         splitPanel.add(dockPanel);
         
-        QueryRunner queryRunner = new SimpleQueryRunner(stringMessages, dataMiningService, this, queryDefinitionProviderWithControls, resultsPresenter);
+        QueryRunner queryRunner = new SimpleQueryRunner(getStringMessages(), dataMiningService, this, queryDefinitionProviderWithControls, resultsPresenter);
         queryDefinitionProviderWithControls.addControl(queryRunner.getEntryWidget());
         queryDefinitionProviderWithControls.addControl(createSettingsControlWidget(queryRunner, queryDefinitionProviderWithControls));
     }
 
     private LogoAndTitlePanel createLogoAndTitlePanel() {
-        LogoAndTitlePanel logoAndTitlePanel = new LogoAndTitlePanel(stringMessages.dataMining(), stringMessages, this);
+        LogoAndTitlePanel logoAndTitlePanel = new LogoAndTitlePanel(getStringMessages().dataMining(), getStringMessages(), this, getUserService());
         logoAndTitlePanel.addStyleName("LogoAndTitlePanel");
-        FlowPanel globalNavigationPanel = new GlobalNavigationPanel(stringMessages, true, null, null, /* event */ null, null);
+        FlowPanel globalNavigationPanel = new GlobalNavigationPanel(getStringMessages(), true, null, null, /* event */ null, null);
         logoAndTitlePanel.add(globalNavigationPanel);
         return logoAndTitlePanel;
     }
@@ -85,11 +85,11 @@ public class DataMiningEntryPoint extends AbstractEntryPoint {
         Label runnerSettingsLabel = new Label(queryRunner.getLocalizedShortName() + ":");
         panel.add(runnerSettingsLabel);
         Anchor runnerSettingsAnchor = new Anchor(AbstractImagePrototype.create(resources.settingsIcon()).getSafeHtml());
-        runnerSettingsAnchor.setTitle(stringMessages.settings());
+        runnerSettingsAnchor.setTitle(getStringMessages().settings());
         runnerSettingsAnchor.addClickHandler(new ClickHandler() {
             @Override
             public void onClick(ClickEvent event) {
-                new SettingsDialog<QueryRunnerSettings>(queryRunner, stringMessages).show();
+                new SettingsDialog<QueryRunnerSettings>(queryRunner, getStringMessages()).show();
             }
         });
         panel.add(runnerSettingsAnchor);
@@ -97,12 +97,12 @@ public class DataMiningEntryPoint extends AbstractEntryPoint {
         Label selectionTablesSettingsLabel = new Label(queryDefinitionProvider.getSelectionProvider().getLocalizedShortName() + ":");
         panel.add(selectionTablesSettingsLabel);
         Anchor selectionTablesSettingsAnchor = new Anchor(AbstractImagePrototype.create(resources.settingsIcon()).getSafeHtml());
-        selectionTablesSettingsAnchor.setTitle(stringMessages.settings());
+        selectionTablesSettingsAnchor.setTitle(getStringMessages().settings());
         selectionTablesSettingsAnchor.addClickHandler(new ClickHandler() {
             @SuppressWarnings("unchecked")
             @Override
             public void onClick(ClickEvent event) {
-                new SettingsDialog<RefreshingSelectionTablesSettings>((Component<RefreshingSelectionTablesSettings>) queryDefinitionProvider.getSelectionProvider(), stringMessages).show();
+                new SettingsDialog<RefreshingSelectionTablesSettings>((Component<RefreshingSelectionTablesSettings>) queryDefinitionProvider.getSelectionProvider(), getStringMessages()).show();
             }
         });
         panel.add(selectionTablesSettingsAnchor);

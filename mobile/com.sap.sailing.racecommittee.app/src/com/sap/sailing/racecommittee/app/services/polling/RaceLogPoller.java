@@ -14,13 +14,13 @@ import android.content.Context;
 import android.os.Handler;
 import android.os.Looper;
 
+import com.sap.sailing.android.shared.logging.ExLog;
+import com.sap.sailing.android.shared.services.sending.MessageSendingService;
 import com.sap.sailing.racecommittee.app.AppPreferences;
 import com.sap.sailing.racecommittee.app.AppPreferences.PollingActiveChangedListener;
 import com.sap.sailing.racecommittee.app.domain.ManagedRace;
 import com.sap.sailing.racecommittee.app.domain.racelog.impl.RaceLogEventsCallback;
-import com.sap.sailing.racecommittee.app.logging.ExLog;
 import com.sap.sailing.racecommittee.app.services.polling.RaceLogPollerTask.PollingResultListener;
-import com.sap.sailing.racecommittee.app.services.sending.EventSendingService;
 import com.sap.sse.common.Util;
 
 /**
@@ -47,7 +47,7 @@ public class RaceLogPoller implements PollingActiveChangedListener {
         this.context = context;
         // We want to use the main (UI) loop
         this.pollingHandler = new Handler(Looper.getMainLooper());
-        this.pollingWorker = new PollingWorker(this);
+        this.pollingWorker = new PollingWorker(this, context);
         this.races = new HashMap<ManagedRace, URL>();
         this.appPreferences = AppPreferences.on(context);
         this.appPreferences.registerPollingActiveChangedListener(this);
@@ -62,15 +62,15 @@ public class RaceLogPoller implements PollingActiveChangedListener {
             long pollingInterval = getPollingIntervalInMs();
             pollingHandler.postDelayed(pollingWorker, pollingInterval);
             this.hasRacesToPoll = true;
-            ExLog.i(TAG, String.format("Registered race %s for polling, will start in %d milliseconds.", race.getId(),
+            ExLog.i(context, TAG, String.format("Registered race %s for polling, will start in %d milliseconds.", race.getId(),
                     pollingInterval));
         } catch (MalformedURLException e) {
-            ExLog.e(TAG, String.format("Unable to create polling URL for race %s: %s", race.getId(), e.getMessage()));
+            ExLog.e(context, TAG, String.format("Unable to create polling URL for race %s: %s", race.getId(), e.getMessage()));
         }
     }
 
     private URL createURL(ManagedRace race) throws MalformedURLException {
-        return new URL(EventSendingService.getRaceLogEventSendAndReceiveUrl(context, race.getRaceGroup().getName(),
+        return new URL(MessageSendingService.getRaceLogEventSendAndReceiveUrl(context, race.getRaceGroup().getName(),
                 race.getName(), race.getFleet().getName()));
     }
 
@@ -79,7 +79,7 @@ public class RaceLogPoller implements PollingActiveChangedListener {
         pollingHandler.removeCallbacksAndMessages(null);
         races.clear();
         appPreferences.unregisterPollingActiveChangedListener(this);
-        ExLog.i(TAG, "Polling will be stopped.");
+        ExLog.i(context, TAG, "Polling will be stopped.");
     }
 
     protected boolean isPollingActive() {
@@ -95,9 +95,9 @@ public class RaceLogPoller implements PollingActiveChangedListener {
         if (isActive) {
             long pollingInterval = getPollingIntervalInMs();
             pollingHandler.postDelayed(pollingWorker, pollingInterval);
-            ExLog.i(TAG, String.format("Polling has been activated, will start in %d milliseconds.", pollingInterval));
+            ExLog.i(context, TAG, String.format("Polling has been activated, will start in %d milliseconds.", pollingInterval));
         } else {
-            ExLog.i(TAG, "Polling has been deactivated, next polling attempt will be aborted."); 
+            ExLog.i(context, TAG, "Polling has been deactivated, next polling attempt will be aborted."); 
         }
     };
 
@@ -109,23 +109,25 @@ public class RaceLogPoller implements PollingActiveChangedListener {
         private final RaceLogPoller poller;
         private final RaceLogEventsCallback processor;
         private RaceLogPollerTask task;
+        private Context context;
         
-        public PollingWorker(RaceLogPoller poller) {
+        public PollingWorker(RaceLogPoller poller, Context context) {
             this.poller = poller;
             this.processor = new RaceLogEventsCallback();
+            this.context = context;
         }
 
         @SuppressWarnings("unchecked")
         @Override
         public void run() {
-            ExLog.i(TAG, "Polling for server-side race log changes...");
+            ExLog.i(context, TAG, "Polling for server-side race log changes...");
             if (!poller.isPollingActive()) {
-                ExLog.i(TAG, "Polling aborted.");
+                ExLog.i(context, TAG, "Polling aborted.");
                 return;
             }
             
             List<Util.Pair<Serializable, URL>> queries = getPollingQueries();
-            task = new RaceLogPollerTask(this);
+            task = new RaceLogPollerTask(this, context);
             task.execute(queries.toArray(new Util.Pair[0]));
         }
 
@@ -133,26 +135,26 @@ public class RaceLogPoller implements PollingActiveChangedListener {
         public void onPollingResult(PollingResult result) {
             if (!poller.isPollingActive()) {
                 task.cancel(true);
-                ExLog.i(TAG, "Polling aborted.");
+                ExLog.i(context, TAG, "Polling aborted.");
                 return;
             }
             if (result.isSuccess) {
                 Serializable raceId = result.resultStreamForRaceId.getA();
                 InputStream responseStream = result.resultStreamForRaceId.getB();
-                processor.processResponse(poller.context, responseStream, raceId);
+                processor.processResponse(poller.context, responseStream, raceId.toString());
             } else {
-                ExLog.i(TAG, "Polling attempt not successful.");
+                ExLog.i(context, TAG, "Polling attempt not successful.");
             }
         }
         
         @Override
         public void onPollingFinished() {
             if (!poller.isPollingActive()) {
-                ExLog.i(TAG, "Polling aborted.");
+                ExLog.i(context, TAG, "Polling aborted.");
                 return;
             }
             long pollingInterval = poller.getPollingIntervalInMs();
-            ExLog.i(TAG, String.format("Polling done. Will poll again in %d milliseconds.", pollingInterval));
+            ExLog.i(context, TAG, String.format("Polling done. Will poll again in %d milliseconds.", pollingInterval));
             poller.pollingHandler.postDelayed(this, pollingInterval);
         }
 

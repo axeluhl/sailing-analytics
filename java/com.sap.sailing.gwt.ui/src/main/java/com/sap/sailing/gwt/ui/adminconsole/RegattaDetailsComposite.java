@@ -25,13 +25,13 @@ import com.sap.sailing.domain.common.ScoringSchemeType;
 import com.sap.sailing.domain.common.dto.FleetDTO;
 import com.sap.sailing.domain.common.dto.RaceColumnDTO;
 import com.sap.sailing.domain.common.dto.RaceColumnInSeriesDTO;
-import com.sap.sailing.gwt.ui.client.ErrorReporter;
 import com.sap.sailing.gwt.ui.client.RegattaRefresher;
 import com.sap.sailing.gwt.ui.client.SailingServiceAsync;
 import com.sap.sailing.gwt.ui.client.StringMessages;
 import com.sap.sailing.gwt.ui.leaderboard.ScoringSchemeTypeFormatter;
 import com.sap.sailing.gwt.ui.shared.RegattaDTO;
 import com.sap.sailing.gwt.ui.shared.SeriesDTO;
+import com.sap.sse.gwt.client.ErrorReporter;
 import com.sap.sse.gwt.client.async.MarkedAsyncCallback;
 import com.sap.sse.gwt.client.dialog.DataEntryDialog.DialogCallback;
 
@@ -46,7 +46,10 @@ public class RegattaDetailsComposite extends Composite {
     private final StringMessages stringMessages;
     private final RegattaRefresher regattaRefresher;
     
+    private final Label regattaId;
     private final Label regattaName;
+    private final Label startDate;
+    private final Label endDate;
     private final Label boatClassName;
     private final Label scoringSystem;
     private final Label defaultCourseArea;
@@ -69,38 +72,21 @@ public class RegattaDetailsComposite extends Composite {
         mainPanel = new CaptionPanel(stringMessages.regatta());
         VerticalPanel vPanel = new VerticalPanel();
         mainPanel.add(vPanel);
-        Grid grid = new Grid(6, 2);
+
+        int rows = 9;
+        Grid grid = new Grid(rows, 2);
         vPanel.add(grid);
         
-        regattaName = new Label();
-        regattaName.ensureDebugId("NameLabel");
-        grid.setWidget(0 , 0, new Label(stringMessages.regattaName() + ":"));
-        grid.setWidget(0 , 1, regattaName);
-        
-        boatClassName = new Label();
-        boatClassName.ensureDebugId("BoatClassLabel");
-        grid.setWidget(1 , 0, new Label(stringMessages.boatClass() + ":"));
-        grid.setWidget(1 , 1, boatClassName);
-        
-        defaultCourseArea = new Label();
-        defaultCourseArea.ensureDebugId("CourseAreaLabel");
-        grid.setWidget(2 , 0, new Label(stringMessages.courseArea() + ":"));
-        grid.setWidget(2 , 1, defaultCourseArea);
-        
-        useStartTimeInference = new Label();
-        useStartTimeInference.ensureDebugId("UseStartTimeInferenceLabel");
-        grid.setWidget(3 , 0, new Label(stringMessages.useStartTimeInference() + ":"));
-        grid.setWidget(3 , 1, useStartTimeInference);
-        
-        configuration = new Label();
-        configuration.ensureDebugId("RacingProcedureLabel");
-        grid.setWidget(4, 0, new Label(stringMessages.racingProcedureConfiguration() + ":"));
-        grid.setWidget(4, 1, configuration);
-        
-        scoringSystem = new Label();
-        scoringSystem.ensureDebugId("ScoringSystemLabel");
-        grid.setWidget(5 , 0, new Label(stringMessages.scoringSystem() + ":"));
-        grid.setWidget(5 , 1, scoringSystem);
+        int currentRow = 0;
+        regattaId = createLabelAndValueWidget(grid, currentRow++, stringMessages.id(), "RegattaIdLabel");
+        regattaName = createLabelAndValueWidget(grid, currentRow++, stringMessages.regattaName(), "NameLabel");
+        startDate = createLabelAndValueWidget(grid, currentRow++, stringMessages.startDate(), "StartDateLabel");
+        endDate = createLabelAndValueWidget(grid, currentRow++, stringMessages.endDate(), "EndDateLabel");
+        boatClassName = createLabelAndValueWidget(grid, currentRow++, stringMessages.boatClass(), "BoatClassLabel");
+        defaultCourseArea = createLabelAndValueWidget(grid, currentRow++, stringMessages.courseArea(), "CourseAreaLabel");
+        useStartTimeInference = createLabelAndValueWidget(grid, currentRow++, stringMessages.useStartTimeInference(), "UseStartTimeInferenceLabel");
+        configuration = createLabelAndValueWidget(grid, currentRow++, stringMessages.racingProcedureConfiguration(), "RacingProcedureLabel");
+        scoringSystem = createLabelAndValueWidget(grid, currentRow++, stringMessages.scoringSystem(), "ScoringSystemLabel");
         
         seriesTable = createRegattaSeriesTable();
         seriesTable.ensureDebugId("SeriesCellTable");
@@ -115,6 +101,14 @@ public class RegattaDetailsComposite extends Composite {
         seriesListDataProvider.addDataDisplay(seriesTable);
         vPanel.add(seriesTable);
         initWidget(mainPanel);
+    }
+
+    private Label createLabelAndValueWidget(Grid grid, int row, String label, String debugId) {
+        Label valueLabel = new Label();
+        valueLabel.ensureDebugId(debugId);
+        grid.setWidget(row , 0, new Label(label + ":"));
+        grid.setWidget(row , 1, valueLabel);
+        return valueLabel;
     }
 
     private CellTable<SeriesDTO> createRegattaSeriesTable() {
@@ -374,7 +368,11 @@ public class RegattaDetailsComposite extends Composite {
 
     private void updateRegattaDetails() {
         if (regatta != null) {
+            mainPanel.setCaptionText(stringMessages.regatta() + " " + regatta.getName());
+            regattaId.setText(regatta.getName());
             regattaName.setText(regatta.getName());
+            startDate.setText(regatta.startDate != null ? regatta.startDate.toString() : "");
+            endDate.setText(regatta.endDate != null ? regatta.endDate.toString() : "");
             boatClassName.setText(regatta.boatClass != null ? regatta.boatClass.getName() : "");
             defaultCourseArea.setText(regatta.defaultCourseAreaUuid == null ? "" : regatta.defaultCourseAreaName);
             useStartTimeInference.setText(regatta.useStartTimeInference ? stringMessages.yes() : stringMessages.no());

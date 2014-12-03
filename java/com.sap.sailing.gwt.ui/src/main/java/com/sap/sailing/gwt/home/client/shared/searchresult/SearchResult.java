@@ -18,7 +18,9 @@ import com.google.gwt.user.client.ui.Composite;
 import com.google.gwt.user.client.ui.HTMLPanel;
 import com.google.gwt.user.client.ui.TextBox;
 import com.google.gwt.user.client.ui.Widget;
-import com.sap.sailing.gwt.home.client.app.PlaceNavigator;
+import com.sap.sailing.gwt.home.client.app.HomePlacesNavigator;
+import com.sap.sailing.gwt.home.client.app.PlaceNavigation;
+import com.sap.sailing.gwt.home.client.place.searchresult.SearchResultPlace;
 import com.sap.sailing.gwt.ui.shared.LeaderboardSearchResultDTO;
 
 public class SearchResult extends Composite {
@@ -37,11 +39,11 @@ public class SearchResult extends Composite {
     @UiField HTMLPanel searchResultItemPanel;
 
     private final List<SearchResultItem> searchResultItemComposites;
-    private final PlaceNavigator navigator;
+    private final HomePlacesNavigator navigator;
 
     private int resultCounter;
 
-    public SearchResult(PlaceNavigator navigator) {
+    public SearchResult(HomePlacesNavigator navigator) {
         this.navigator = navigator;
         this.searchResultItemComposites = new ArrayList<SearchResultItem>();
         
@@ -82,7 +84,8 @@ public class SearchResult extends Composite {
         if(searchText.isEmpty()) {
             Window.alert("Please enter a search term.");
         } else {
-            navigator.goToSearchResult(searchText);
+            PlaceNavigation<SearchResultPlace> searchResultNavigation = navigator.getSearchResultNavigation(searchText);
+            navigator.goToPlace(searchResultNavigation);
         }
     }
 

@@ -3,7 +3,9 @@ package com.sap.sailing.gwt.ui.test;
 import java.io.Serializable;
 import java.util.List;
 import java.util.NavigableSet;
+import java.util.Set;
 
+import com.sap.sailing.domain.abstractlog.race.RaceLog;
 import com.sap.sailing.domain.base.BoatClass;
 import com.sap.sailing.domain.base.Competitor;
 import com.sap.sailing.domain.base.CourseArea;
@@ -28,12 +30,10 @@ import com.sap.sailing.domain.common.RegattaIdentifier;
 import com.sap.sailing.domain.common.Speed;
 import com.sap.sailing.domain.common.SpeedWithBearing;
 import com.sap.sailing.domain.common.Tack;
-import com.sap.sailing.domain.common.TimePoint;
 import com.sap.sailing.domain.common.WindSource;
 import com.sap.sailing.domain.common.WindSourceType;
 import com.sap.sailing.domain.common.racelog.Flags;
 import com.sap.sailing.domain.leaderboard.ScoringScheme;
-import com.sap.sailing.domain.racelog.RaceLog;
 import com.sap.sailing.domain.racelog.tracking.GPSFixStore;
 import com.sap.sailing.domain.tracking.CourseDesignChangedListener;
 import com.sap.sailing.domain.tracking.DynamicGPSFixTrack;
@@ -60,6 +60,7 @@ import com.sap.sailing.domain.tracking.WindStore;
 import com.sap.sailing.domain.tracking.WindTrack;
 import com.sap.sailing.domain.tracking.WindWithConfidence;
 import com.sap.sailing.domain.tracking.impl.WindTrackImpl;
+import com.sap.sse.common.TimePoint;
 import com.sap.sse.common.Util;
 
 public class MockedTrackedRace implements DynamicTrackedRace {
@@ -465,6 +466,30 @@ public class MockedTrackedRace implements DynamicTrackedRace {
                         // TODO Auto-generated method stub
                         
                     }
+
+                    @Override
+                    public TimePoint getStartDate() {
+                        // TODO Auto-generated method stub
+                        return null;
+                    }
+
+                    @Override
+                    public void setStartDate(TimePoint startDate) {
+                        // TODO Auto-generated method stub
+                        
+                    }
+
+                    @Override
+                    public TimePoint getEndDate() {
+                        // TODO Auto-generated method stub
+                        return null;
+                    }
+
+                    @Override
+                    public void setEndDate(TimePoint startDate) {
+                        // TODO Auto-generated method stub
+                        
+                    }
                 };
             }
 
@@ -611,26 +636,26 @@ public class MockedTrackedRace implements DynamicTrackedRace {
     }
 
     @Override
-    public Wind getWind(Position p, TimePoint at, Iterable<WindSource> windSourcesToExclude) {
+    public Wind getWind(Position p, TimePoint at, Set<WindSource> windSourcesToExclude) {
         // TODO Auto-generated method stub
         return null;
     }
 
     @Override
-    public Iterable<WindSource> getWindSources(WindSourceType type) {
+    public Set<WindSource> getWindSources(WindSourceType type) {
         // TODO Auto-generated method stub
         return null;
     }
 
     @Override
-    public Iterable<WindSource> getWindSources() {
+    public Set<WindSource> getWindSources() {
         // TODO Auto-generated method stub
         return null;
     }
 
     @Override
     public WindWithConfidence<Util.Pair<Position, TimePoint>> getWindWithConfidence(Position p, TimePoint at,
-            Iterable<WindSource> windSourcesToExclude) {
+            Set<WindSource> windSourcesToExclude) {
         // TODO Auto-generated method stub
         return null;
     }
@@ -648,7 +673,7 @@ public class MockedTrackedRace implements DynamicTrackedRace {
     }
 
     @Override
-    public Iterable<WindSource> getWindSourcesToExclude() {
+    public Set<WindSource> getWindSourcesToExclude() {
         // TODO Auto-generated method stub
         return null;
     }

@@ -11,7 +11,9 @@ import com.google.gwt.uibinder.client.UiHandler;
 import com.google.gwt.user.client.ui.Anchor;
 import com.google.gwt.user.client.ui.Composite;
 import com.google.gwt.user.client.ui.Widget;
-import com.sap.sailing.gwt.home.client.app.PlaceNavigator;
+import com.sap.sailing.gwt.home.client.app.HomePlacesNavigator;
+import com.sap.sailing.gwt.home.client.app.PlaceNavigation;
+import com.sap.sailing.gwt.home.client.place.event.EventPlace;
 import com.sap.sailing.gwt.ui.shared.CourseAreaDTO;
 import com.sap.sailing.gwt.ui.shared.EventDTO;
 import com.sap.sailing.gwt.ui.shared.LeaderboardGroupDTO;
@@ -29,20 +31,22 @@ public class CompactEventHeader extends Composite {
     @UiField SpanElement eventNameSpan;
     
     private final EventDTO event;
-    private final PlaceNavigator placeNavigator;
-    private final String leaderboardName;
-    
-    private final String defaultLogoUrl = "http://static.sapsailing.com/ubilabsimages/default/default_event_logo.jpg";
+    private final HomePlacesNavigator placeNavigator;
+    private final PlaceNavigation<EventPlace> regattaNavigation;
 
-    public CompactEventHeader(EventDTO event, String leaderboardName, PlaceNavigator placeNavigator) {
+    public CompactEventHeader(EventDTO event, String leaderboardName, HomePlacesNavigator placeNavigator) {
         this.event = event;
-        this.leaderboardName = leaderboardName;
         this.placeNavigator = placeNavigator;
         
         EventHeaderResources.INSTANCE.css().ensureInjected();
         StyleInjector.injectAtEnd("@media (min-width: 50em) { "+EventHeaderResources.INSTANCE.largeCss().getText()+"}");
         
         initWidget(uiBinder.createAndBindUi(this));
+        
+        regattaNavigation = placeNavigator.getRegattaNavigation(event.id.toString(), leaderboardName, event.getBaseURL(), event.isOnRemoteServer());
+        regattaLink.setHref(regattaNavigation.getTargetUrl());
+        regattaLink2.setHref(regattaNavigation.getTargetUrl());
+        
         updateUI();
     }
 
@@ -74,22 +78,20 @@ public class CompactEventHeader extends Composite {
         } else {
         }
         eventNameSpan.setInnerText(eventName);
-        String logoUrl = event.getLogoImageURL() != null ? event.getLogoImageURL() : defaultLogoUrl;
+        String logoUrl = event.getLogoImageURL() != null ? event.getLogoImageURL() : EventHeaderResources.INSTANCE.defaultEventLogoImage().getSafeUri().asString();
         eventLogo.setSrc(logoUrl);
     }
     
     @UiHandler("regattaLink")
     void gotoRegattaClicked(ClickEvent event) {
-        showRegattaOfEvent();        
+        placeNavigator.goToPlace(regattaNavigation);
+        event.preventDefault();
     }
 
     @UiHandler("regattaLink2")
     void gotoRegatta2Clicked(ClickEvent event) {
-        showRegattaOfEvent();        
+        placeNavigator.goToPlace(regattaNavigation);
+        event.preventDefault();
     }
 
-    private void showRegattaOfEvent() {
-        placeNavigator.goToRegattaOfEvent(event.id.toString(), leaderboardName, event.getBaseURL(), event.isOnRemoteServer());
-    }
-    
 }

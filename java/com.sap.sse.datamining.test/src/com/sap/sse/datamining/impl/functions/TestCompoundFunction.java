@@ -10,13 +10,13 @@ import java.util.Locale;
 import org.junit.Before;
 import org.junit.Test;
 
-import com.sap.sse.datamining.factories.FunctionFactory;
 import com.sap.sse.datamining.functions.Function;
 import com.sap.sse.datamining.shared.Unit;
 import com.sap.sse.datamining.test.functions.test_classes.ContainerElement;
 import com.sap.sse.datamining.test.functions.test_classes.ContainerElementImpl;
 import com.sap.sse.datamining.test.functions.test_classes.MarkedContainer;
 import com.sap.sse.datamining.test.functions.test_classes.MarkedContainerImpl;
+import com.sap.sse.datamining.test.util.FunctionTestsUtil;
 import com.sap.sse.datamining.test.util.TestsUtil;
 
 public class TestCompoundFunction {
@@ -29,12 +29,12 @@ public class TestCompoundFunction {
     @Before
     public void initializeCompoundFunction() throws ClassCastException, NoSuchMethodException, SecurityException {
         List<Function<?>> functions = new ArrayList<>();
-        getContainerElementFunction = FunctionFactory.createMethodWrappingFunction(MarkedContainer.class.getMethod("getContainerElement", new Class<?>[0]));
+        getContainerElementFunction = FunctionTestsUtil.getFunctionFactory().createMethodWrappingFunction(MarkedContainer.class.getMethod("getContainerElement", new Class<?>[0]));
         functions.add(getContainerElementFunction);
-        getNameFunction = FunctionFactory.createMethodWrappingFunction(ContainerElement.class.getMethod("getName", new Class<?>[0]));
+        getNameFunction = FunctionTestsUtil.getFunctionFactory().createMethodWrappingFunction(ContainerElement.class.getMethod("getName", new Class<?>[0]));
         functions.add(getNameFunction);
         
-        compoundFunction = FunctionFactory.createCompoundFunction("TestCompoundFunction", functions);
+        compoundFunction = FunctionTestsUtil.getFunctionFactory().createCompoundFunction("TestCompoundFunction", functions);
     }
 
     @Test(expected=IllegalArgumentException.class)

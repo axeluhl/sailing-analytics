@@ -1,6 +1,6 @@
 # GPS Import
 
-Somewhat similar to [[Smartphone Tracking|wiki/smartphone-tracking]] where sailors' smartphones would be used as position capturing devices, positions can as well be captures by a variety of different GPS devices. Using a common core set of features also necessary for smartphone tracking, we could allow sailors to import arbitrary tracks from any standard GPS file format, such as GPX or KML.
+Somewhat similar to [[Racelog Tracking|wiki/racelog-tracking]] where sailors' smartphones would be used as position capturing devices, positions can as well be captured by a variety of different GPS devices. Using a common core set of features also necessary for smartphone tracking, we could allow sailors to import arbitrary tracks from any standard GPS file format, such as GPX or KML.
 
 Since usually the marks will not have been tracked, manual addition of course information will be necessary in this case. Once done, other tracks may be added to the course. A mark passing algorithm can then cut the track into legs and perform our standard analyses.
 

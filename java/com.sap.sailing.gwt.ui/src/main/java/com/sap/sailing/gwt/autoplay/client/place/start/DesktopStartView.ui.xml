@@ -1,0 +1,75 @@
+<!DOCTYPE ui:UiBinder SYSTEM "http://dl.google.com/gwt/DTD/xhtml.ent">
+<ui:UiBinder xmlns:ui="urn:ui:com.google.gwt.uibinder" 
+    xmlns:s="urn:import:com.sap.sailing.gwt.autoplay.client.shared"
+	xmlns:g="urn:import:com.google.gwt.user.client.ui">
+	<ui:with field="res" type="com.sap.sailing.gwt.common.client.SharedResources" />
+    <ui:with field="i18n" type="com.sap.sailing.gwt.common.client.i18n.TextMessages"/>
+    <g:HTMLPanel>
+        <s:header.SAPHeader ui:field="sapHeader" />
+        <div style="height:1em;" />
+		<div class="{res.mainCss.grid}" style="padding-bottom:1em;">
+			<div class="{res.mediaCss.small2} {res.mediaCss.columns}">
+			    <span>Display language:</span>
+	        </div>
+		    <div class="{res.mediaCss.small2} {res.mediaCss.columns}">
+				<g:ListBox ui:field="localeSelectionBox" />
+	        </div>
+		</div>
+		<div class="{res.mainCss.grid}" style="padding-bottom:1em;">
+			<div class="{res.mediaCss.small2} {res.mediaCss.columns}">
+			    <span>Start browser in full screen mode:</span>
+	        </div>
+		    <div class="{res.mediaCss.small2} {res.mediaCss.columns}">
+				<g:CheckBox ui:field="startInFullscreenModeBox" />
+	        </div>
+		</div>
+        <div class="{res.mainCss.grid}" style="padding-bottom:1em;">
+			<div class="{res.mediaCss.small2} {res.mediaCss.columns}">
+			    <span>Event:</span>
+	        </div>
+		    <div class="{res.mediaCss.small2} {res.mediaCss.columns}">
+				<g:ListBox ui:field="eventSelectionBox" />
+	        </div>
+		</div>
+		<div ui:field="leaderboardSelectionDiv" class="{res.mainCss.grid}" style="padding-bottom:1em;">
+			<div class="{res.mediaCss.small2} {res.mediaCss.columns}">
+			    <span>Leaderboard:</span>
+	        </div>
+		    <div class="{res.mediaCss.small2} {res.mediaCss.columns}">
+				<g:ListBox ui:field="leaderboardSelectionBox" />
+	        </div>
+		</div>
+		<div ui:field="leaderboardAutoZoomDiv" class="{res.mainCss.grid}" style="padding-bottom:1em;">
+			<div class="{res.mediaCss.small2} {res.mediaCss.columns}">
+			    <span>Leaderboard Auto-Zoom:</span>
+	        </div>
+		    <div class="{res.mediaCss.small2} {res.mediaCss.columns}">
+				<g:CheckBox ui:field="leaderboardAutoZoomBox" />
+	        </div>
+		</div>
+		<div ui:field="leaderboardZoomDiv" class="{res.mainCss.grid}" style="padding-bottom:1em;">
+			<div class="{res.mediaCss.small2} {res.mediaCss.columns}">
+			    <span>Leaderboard Zoom-Factor:</span>
+	        </div>
+		    <div class="{res.mediaCss.small2} {res.mediaCss.columns}">
+				<g:TextBox ui:field="leaderboardZoomBox" />
+	        </div>
+		</div>
+		<div class="{res.mainCss.grid}" style="padding-bottom:1em;">
+			<div class="{res.mediaCss.small2} {res.mediaCss.columns}">
+			    <span>Auto-Play video:</span>
+	        </div>
+		    <div class="{res.mediaCss.small2} {res.mediaCss.columns}">
+				<g:CheckBox ui:field="autoSelectMediaBox" />
+	        </div>
+		</div>
+		<div class="{res.mainCss.grid}">
+			<div class="{res.mediaCss.small2} {res.mediaCss.columns}">
+			    &nbsp;
+	        </div>
+		    <div class="{res.mediaCss.small2} {res.mediaCss.columns}">
+	    		<g:Button ui:field="startAutoPlayButton" text="Start autoplay" styleName="{res.mainCss.button}" />
+		    </div>
+		</div>
+	</g:HTMLPanel>
+</ui:UiBinder>    

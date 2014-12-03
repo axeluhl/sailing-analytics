@@ -3,9 +3,9 @@ package com.sap.sailing.racecommittee.app.ui.fragments.dialogs.prerequisite;
 import android.app.Activity;
 import android.os.Bundle;
 
-import com.sap.sailing.domain.racelog.state.racingprocedure.RacingProcedurePrerequisite;
+import com.sap.sailing.domain.abstractlog.race.state.racingprocedure.RacingProcedurePrerequisite;
 import com.sap.sailing.racecommittee.app.domain.ManagedRace;
-import com.sap.sailing.racecommittee.app.logging.ExLog;
+import com.sap.sailing.android.shared.logging.ExLog;
 import com.sap.sailing.racecommittee.app.ui.fragments.dialogs.RaceDialogFragment;
 
 public abstract class PrerequisiteRaceDialog<PrerequisiteType extends RacingProcedurePrerequisite, ChosenType> extends
@@ -43,7 +43,7 @@ public abstract class PrerequisiteRaceDialog<PrerequisiteType extends RacingProc
 
         if (isInPrerequisiteMode()) {
             if (prerequisite == null) {
-                ExLog.w(TAG, "Fragment not initialized correctly. Restored?");
+                ExLog.w(getActivity(), TAG, "Fragment not initialized correctly. Restored?");
                 this.dismissAllowingStateLoss();
             }
             setCancelable(false);

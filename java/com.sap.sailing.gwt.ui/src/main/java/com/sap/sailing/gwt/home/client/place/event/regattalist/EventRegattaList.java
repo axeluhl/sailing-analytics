@@ -16,11 +16,12 @@ import com.google.gwt.uibinder.client.UiField;
 import com.google.gwt.user.client.DOM;
 import com.google.gwt.user.client.Event;
 import com.google.gwt.user.client.EventListener;
+import com.google.gwt.user.client.ui.HTMLPanel;
 import com.google.gwt.user.client.ui.Widget;
-import com.sap.sailing.gwt.home.client.HomeResources;
-import com.sap.sailing.gwt.home.client.app.PlaceNavigator;
+import com.sap.sailing.gwt.common.client.SharedResources;
+import com.sap.sailing.gwt.home.client.app.HomePlacesNavigator;
 import com.sap.sailing.gwt.home.client.place.event.AbstractEventComposite;
-import com.sap.sailing.gwt.home.client.place.event.EventPageNavigator;
+import com.sap.sailing.gwt.home.client.place.event.EventPlaceNavigator;
 import com.sap.sailing.gwt.home.client.place.event.regatta.Regatta;
 import com.sap.sailing.gwt.home.client.shared.LongNamesUtil;
 import com.sap.sailing.gwt.ui.shared.EventDTO;
@@ -41,7 +42,7 @@ public class EventRegattaList extends AbstractEventComposite {
     
     @UiField DivElement regattaGroupsNavigationPanel;
     @UiField DivElement regattaListNavigationDiv;
-    @UiField DivElement regattaListItemsDiv;
+    @UiField HTMLPanel regattaListItemsPanel;
     @UiField AnchorElement filterNoLeaderboardGroupsAnchor;
     @UiField SpanElement allBoatClassesSelected;
     
@@ -49,7 +50,7 @@ public class EventRegattaList extends AbstractEventComposite {
     private final List<AnchorElement> leaderboardGroupFilterAnchors;
     
     public EventRegattaList(EventDTO event, Map<String, Triple<RaceGroupDTO, StrippedLeaderboardDTO, LeaderboardGroupDTO>> regattaStructure, 
-            Timer timerForClientServerOffset,  PlaceNavigator placeNavigator, EventPageNavigator pageNavigator) {
+            Timer timerForClientServerOffset, HomePlacesNavigator placeNavigator, EventPlaceNavigator pageNavigator) {
         super(event, pageNavigator);
         
         EventRegattaListResources.INSTANCE.css().ensureInjected();
@@ -68,7 +69,7 @@ public class EventRegattaList extends AbstractEventComposite {
                 registerFilterLeaderboardGroupEvent(filterNoLeaderboardGroupsAnchor, null);
                 for(LeaderboardGroupDTO leaderboardGroup: event.getLeaderboardGroups()) {
                     AnchorElement filterLeaderboardGroupAnchor = Document.get().createAnchorElement();
-                    filterLeaderboardGroupAnchor.setClassName(HomeResources.INSTANCE.mainCss().navbar_button());
+                    filterLeaderboardGroupAnchor.setClassName(SharedResources.INSTANCE.mainCss().navbar_button());
                     filterLeaderboardGroupAnchor.setHref("javascript:;");
                     
                     String leaderboardGroupName = LongNamesUtil.shortenLeaderboardGroupName(event.getName(), leaderboardGroup.getName());
@@ -89,7 +90,7 @@ public class EventRegattaList extends AbstractEventComposite {
                 if (r != null) {
                     Regatta regatta = new Regatta(event, timerForClientServerOffset, false, placeNavigator, pageNavigator);
                     regatta.setData(r.getC(), hasMultipleLeaderboardGroups, r.getB(), r.getA());
-                    regattaListItemsDiv.appendChild(regatta.getElement());
+                    regattaListItemsPanel.add(regatta);
                     List<Regatta> regattaElements = regattaElementsByLeaderboardGroup.get(leaderboardGroup.getName());
                     if (regattaElements == null) {
                         regattaElements = new ArrayList<Regatta>();
@@ -99,7 +100,7 @@ public class EventRegattaList extends AbstractEventComposite {
                 }
             }
         }
-    }
+    }   
     
     private void registerFilterLeaderboardGroupEvent(final AnchorElement filterLeaderboardGroupAnchor, final LeaderboardGroupDTO leaderboardGroup) {
         Event.sinkEvents(filterLeaderboardGroupAnchor, Event.ONCLICK);
@@ -111,9 +112,9 @@ public class EventRegattaList extends AbstractEventComposite {
                          filterRegattaListByLeaderboardGroup(leaderboardGroup);
                          
                          for(AnchorElement anchor: leaderboardGroupFilterAnchors) {
-                             anchor.removeClassName(HomeResources.INSTANCE.mainCss().navbar_buttonactive());
+                             anchor.removeClassName(SharedResources.INSTANCE.mainCss().navbar_buttonactive());
                          }
-                         filterLeaderboardGroupAnchor.addClassName(HomeResources.INSTANCE.mainCss().navbar_buttonactive());
+                         filterLeaderboardGroupAnchor.addClassName(SharedResources.INSTANCE.mainCss().navbar_buttonactive());
                          break;
                 }
             }
@@ -123,7 +124,7 @@ public class EventRegattaList extends AbstractEventComposite {
     private void filterRegattaListByLeaderboardGroup(LeaderboardGroupDTO leaderboardGroup) {
         if (leaderboardGroup != null) {
             allBoatClassesSelected.getStyle().setDisplay(Display.NONE);
-            filterNoLeaderboardGroupsAnchor.removeClassName(HomeResources.INSTANCE.mainCss().navbar_buttonactive());
+            filterNoLeaderboardGroupsAnchor.removeClassName(SharedResources.INSTANCE.mainCss().navbar_buttonactive());
             // hide all regattas of the not selected leaderboardgroup
             for (LeaderboardGroupDTO lg : getEvent().getLeaderboardGroups()) {
                 boolean isVisible = leaderboardGroup.getName().equals(lg.getName());
@@ -135,7 +136,7 @@ public class EventRegattaList extends AbstractEventComposite {
         } else {
             // make all regattas visible
             allBoatClassesSelected.getStyle().setDisplay(Display.INLINE_BLOCK);
-            filterNoLeaderboardGroupsAnchor.addClassName(HomeResources.INSTANCE.mainCss().navbar_buttonactive());
+            filterNoLeaderboardGroupsAnchor.addClassName(SharedResources.INSTANCE.mainCss().navbar_buttonactive());
             for (LeaderboardGroupDTO lg : getEvent().getLeaderboardGroups()) {
                 List<Regatta> regattaElements = regattaElementsByLeaderboardGroup.get(lg.getName());
                 for (Regatta regatta : regattaElements) {

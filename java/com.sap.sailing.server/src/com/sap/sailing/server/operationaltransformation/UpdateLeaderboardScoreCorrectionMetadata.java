@@ -1,11 +1,11 @@
 package com.sap.sailing.server.operationaltransformation;
 
 import com.sap.sailing.domain.common.NoWindException;
-import com.sap.sailing.domain.common.TimePoint;
 import com.sap.sailing.domain.leaderboard.Leaderboard;
 import com.sap.sailing.domain.leaderboard.SettableScoreCorrection;
 import com.sap.sailing.server.RacingEventService;
 import com.sap.sailing.server.RacingEventServiceOperation;
+import com.sap.sse.common.TimePoint;
 
 public class UpdateLeaderboardScoreCorrectionMetadata extends AbstractLeaderboardOperation<Void> {
     private static final long serialVersionUID = -977025759476022993L;

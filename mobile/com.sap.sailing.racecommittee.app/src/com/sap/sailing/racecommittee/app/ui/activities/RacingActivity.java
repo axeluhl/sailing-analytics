@@ -18,21 +18,21 @@ import android.view.Window;
 import android.widget.ArrayAdapter;
 import android.widget.Toast;
 
+import com.sap.sailing.android.shared.logging.ExLog;
+import com.sap.sailing.android.shared.util.CollectionUtils;
+import com.sap.sailing.domain.abstractlog.AbstractLogEventAuthor;
 import com.sap.sailing.domain.base.CourseArea;
-import com.sap.sailing.domain.racelog.RaceLogEventAuthor;
 import com.sap.sailing.racecommittee.app.AppConstants;
 import com.sap.sailing.racecommittee.app.R;
 import com.sap.sailing.racecommittee.app.data.DataManager;
 import com.sap.sailing.racecommittee.app.data.ReadonlyDataManager;
 import com.sap.sailing.racecommittee.app.data.clients.LoadClient;
 import com.sap.sailing.racecommittee.app.domain.ManagedRace;
-import com.sap.sailing.racecommittee.app.logging.ExLog;
 import com.sap.sailing.racecommittee.app.ui.fragments.RaceFragment;
 import com.sap.sailing.racecommittee.app.ui.fragments.RaceInfoFragment;
 import com.sap.sailing.racecommittee.app.ui.fragments.lists.ManagedRaceListFragment;
 import com.sap.sailing.racecommittee.app.ui.fragments.lists.ManagedRaceListFragment.FilterMode;
 import com.sap.sailing.racecommittee.app.ui.fragments.raceinfo.RaceInfoListener;
-import com.sap.sailing.racecommittee.app.utils.CollectionUtils;
 
 public class RacingActivity extends SessionActivity implements RaceInfoListener {
     // private final static String TAG = RacingActivity.class.getName();
@@ -87,7 +87,7 @@ public class RacingActivity extends SessionActivity implements RaceInfoListener 
 
             // Let's do the setup stuff only when the data is changed (or its the first time)
             if (lastSeenRaces != null && CollectionUtils.isEqualCollection(data, lastSeenRaces)) {
-                ExLog.i(TAG, "Same races are already loaded...");
+                ExLog.i(RacingActivity.this, TAG, "Same races are already loaded...");
             } else {
                 lastSeenRaces = data;
 
@@ -111,7 +111,7 @@ public class RacingActivity extends SessionActivity implements RaceInfoListener 
                         public void onClick(DialogInterface dialog, int id) {
                             setProgressBarIndeterminateVisibility(true);
 
-                            ExLog.i(TAG, "Issuing a reload of managed races");
+                            ExLog.i(RacingActivity.this, TAG, "Issuing a reload of managed races");
                             getLoaderManager().restartLoader(RacesLoaderId, null,
                                     dataManager.createRacesLoader(courseArea.getId(), RaceLoadClient.this));
                             dialog.cancel();
@@ -203,7 +203,7 @@ public class RacingActivity extends SessionActivity implements RaceInfoListener 
 
     private void setupActionBar(CourseArea courseArea) {
         ActionBar actionBar = getActionBar();
-        RaceLogEventAuthor author = preferences.getAuthor();
+        AbstractLogEventAuthor author = preferences.getAuthor();
         String title = String.format(getString(R.string.racingview_header), courseArea.getName());
         title += " (" + author.getName() + ")";
 
@@ -219,7 +219,7 @@ public class RacingActivity extends SessionActivity implements RaceInfoListener 
     private void loadRaces(final CourseArea courseArea) {
         setProgressBarIndeterminateVisibility(true);
 
-        ExLog.i(TAG, "Issuing loading of managed races from data manager");
+        ExLog.i(this, TAG, "Issuing loading of managed races from data manager");
         getLoaderManager().initLoader(RacesLoaderId, null,
                 dataManager.createRacesLoader(courseArea.getId(), new RaceLoadClient(courseArea)));
     }

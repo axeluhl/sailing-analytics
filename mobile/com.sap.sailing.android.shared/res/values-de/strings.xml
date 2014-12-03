@@ -1,0 +1,13 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources xmlns:tools="http://schemas.android.com/tools">
+
+    <string name="options_menu_live">Verbindungsinformationen</string>
+    <string name="remove">Entfernen</string>
+    <string name="enter_new_item">Neues Element eingeben</string>
+    <string name="add">Hinzufügen</string>
+    <string name="there_are_no_items_yet_">Bisher keine Elemente.</string>
+
+    <!-- Generic -->
+    <string name="generic_error">Fehler</string>
+
+</resources>

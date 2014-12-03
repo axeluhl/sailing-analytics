@@ -13,7 +13,6 @@ import com.sap.sailing.domain.base.CompetitorStore;
 import com.sap.sailing.domain.base.DomainFactory;
 import com.sap.sailing.domain.base.Fleet;
 import com.sap.sailing.domain.base.Mark;
-import com.sap.sailing.domain.base.ObjectInputStreamResolvingAgainstDomainFactory;
 import com.sap.sailing.domain.base.RaceColumn;
 import com.sap.sailing.domain.base.RaceDefinition;
 import com.sap.sailing.domain.base.Waypoint;
@@ -23,7 +22,6 @@ import com.sap.sailing.domain.common.Placemark;
 import com.sap.sailing.domain.common.Position;
 import com.sap.sailing.domain.common.RegattaAndRaceIdentifier;
 import com.sap.sailing.domain.common.ScoringSchemeType;
-import com.sap.sailing.domain.common.TimePoint;
 import com.sap.sailing.domain.common.WindSourceType;
 import com.sap.sailing.domain.common.dto.CompetitorDTO;
 import com.sap.sailing.domain.common.dto.FleetDTO;
@@ -34,7 +32,6 @@ import com.sap.sailing.domain.common.dto.RaceDTO;
 import com.sap.sailing.domain.common.dto.RaceStatusDTO;
 import com.sap.sailing.domain.common.dto.TrackedRaceDTO;
 import com.sap.sailing.domain.common.dto.TrackedRaceStatisticsDTO;
-import com.sap.sailing.domain.common.impl.MillisecondsTimePoint;
 import com.sap.sailing.domain.common.media.MediaTrack;
 import com.sap.sailing.domain.leaderboard.Leaderboard;
 import com.sap.sailing.domain.leaderboard.ScoringScheme;
@@ -44,6 +41,8 @@ import com.sap.sailing.domain.leaderboard.impl.HighPointFirstGets10LastBreaksTie
 import com.sap.sailing.domain.leaderboard.impl.HighPointFirstGets10Or8AndLastBreaksTie;
 import com.sap.sailing.domain.leaderboard.impl.HighPointFirstGets1LastBreaksTie;
 import com.sap.sailing.domain.leaderboard.impl.HighPointLastBreaksTie;
+import com.sap.sailing.domain.leaderboard.impl.HighPointWinnerGetsEight;
+import com.sap.sailing.domain.leaderboard.impl.HighPointWinnerGetsEightAndInterpolation;
 import com.sap.sailing.domain.leaderboard.impl.HighPointWinnerGetsFive;
 import com.sap.sailing.domain.leaderboard.impl.HighPointWinnerGetsSix;
 import com.sap.sailing.domain.leaderboard.impl.LowPoint;
@@ -58,7 +57,10 @@ import com.sap.sailing.domain.tracking.TrackedRegattaRegistry;
 import com.sap.sailing.domain.tracking.impl.MarkPassingImpl;
 import com.sap.sailing.domain.tracking.impl.TrackedRaceImpl;
 import com.sap.sailing.geocoding.ReverseGeocoder;
+import com.sap.sse.common.TimePoint;
 import com.sap.sse.common.Util;
+import com.sap.sse.common.impl.MillisecondsTimePoint;
+import com.sap.sse.replication.impl.ObjectInputStreamResolvingAgainstCache;
 
 public class DomainFactoryImpl extends SharedDomainFactoryImpl implements DomainFactory {
     private static Logger logger = Logger.getLogger(DomainFactoryImpl.class.getName());
@@ -80,7 +82,7 @@ public class DomainFactoryImpl extends SharedDomainFactoryImpl implements Domain
     }
 
     @Override
-    public ObjectInputStreamResolvingAgainstDomainFactory createObjectInputStreamResolvingAgainstThisFactory(InputStream inputStream) throws IOException {
+    public ObjectInputStreamResolvingAgainstCache<DomainFactory> createObjectInputStreamResolvingAgainstThisFactory(InputStream inputStream) throws IOException {
         return new ObjectInputStreamResolvingAgainstDomainFactoryImpl(inputStream, this);
     }
 
@@ -105,6 +107,10 @@ public class DomainFactoryImpl extends SharedDomainFactoryImpl implements Domain
             return new HighPointWinnerGetsFive();
         case HIGH_POINT_WINNER_GETS_SIX:
             return new HighPointWinnerGetsSix();
+        case HIGH_POINT_WINNER_GETS_EIGHT:
+            return new HighPointWinnerGetsEight();
+        case HIGH_POINT_WINNER_GETS_EIGHT_AND_INTERPOLATION:
+            return new HighPointWinnerGetsEightAndInterpolation();
         case HIGH_POINT_FIRST_GETS_TEN_OR_EIGHT:
             return new HighPointFirstGets10Or8AndLastBreaksTie();
         }

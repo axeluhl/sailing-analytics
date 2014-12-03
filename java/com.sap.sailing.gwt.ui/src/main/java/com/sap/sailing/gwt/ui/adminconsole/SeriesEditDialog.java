@@ -29,10 +29,10 @@ import com.sap.sailing.domain.common.LeaderboardNameConstants;
 import com.sap.sailing.domain.common.dto.RaceColumnDTO;
 import com.sap.sailing.domain.common.dto.RaceColumnInSeriesDTO;
 import com.sap.sailing.gwt.ui.client.StringMessages;
-import com.sap.sailing.gwt.ui.client.shared.controls.listedit.StringListEditorComposite;
-import com.sap.sailing.gwt.ui.client.shared.controls.listedit.StringListInlineEditorComposite;
 import com.sap.sailing.gwt.ui.shared.RegattaDTO;
 import com.sap.sailing.gwt.ui.shared.SeriesDTO;
+import com.sap.sse.gwt.client.controls.listedit.StringListEditorComposite;
+import com.sap.sse.gwt.client.controls.listedit.StringListInlineEditorComposite;
 import com.sap.sse.gwt.client.dialog.DataEntryDialog;
 
 public class SeriesEditDialog extends DataEntryDialog<SeriesDescriptor> {
@@ -206,9 +206,9 @@ public class SeriesEditDialog extends DataEntryDialog<SeriesDescriptor> {
         
         raceNamesEditor = new StringListInlineEditorComposite(getExistingRacesOfSeries(), new RaceNamesEditorUi(regatta, stringMessages, resources.removeIcon(), seriesName));
         raceNamesEditor.ensureDebugId("RaceNamesStringListEditorComposite");
-        raceNamesEditor.addValueChangeHandler(new ValueChangeHandler<List<String>>() {
+        raceNamesEditor.addValueChangeHandler(new ValueChangeHandler<Iterable<String>>() {
             @Override
-            public void onValueChange(ValueChangeEvent<List<String>> event) {
+            public void onValueChange(ValueChangeEvent<Iterable<String>> event) {
                 validate();
             }
         });
@@ -249,7 +249,7 @@ public class SeriesEditDialog extends DataEntryDialog<SeriesDescriptor> {
         private final Label addRacesHintLabel;
         
         public RaceNamesEditorUi(RegattaDTO regatta, StringMessages stringMessages, ImageResource removeImage, String seriesName) {
-            super(stringMessages, removeImage, /* suggest values */ Collections.<String>emptyList(), 40);
+            super(stringMessages, removeImage, /* suggest values */ Collections.<String>emptyList(), stringMessages.enterRaceName(), 40);
 
             this.seriesName = seriesName;
             this.regatta = regatta;
@@ -269,6 +269,11 @@ public class SeriesEditDialog extends DataEntryDialog<SeriesDescriptor> {
             this.addRacesHintLabel = new Label("");
         }
         
+        @Override
+        protected StringMessages getStringMessages() {
+            return (StringMessages) super.getStringMessages();
+        }
+
         private List<String> resolveRaceNamesToAdd() {
             List<String> result = new ArrayList<String>();
             String racePrefix = raceNamePrefixTextBox.getText();
@@ -346,7 +351,7 @@ public class SeriesEditDialog extends DataEntryDialog<SeriesDescriptor> {
             HorizontalPanel addRacesPanel = new HorizontalPanel();
             addRacesPanel.setVerticalAlignment(HasVerticalAlignment.ALIGN_MIDDLE);
             addRacesPanel.setSpacing(5);
-            addRacesPanel.add(new Label(stringMessages.addRaces()));
+            addRacesPanel.add(new Label(getStringMessages().addRaces()));
 
             for(int i = 1; i <= 50; i++) {
                 addRacesFromListBox.addItem("" + i);
@@ -368,9 +373,9 @@ public class SeriesEditDialog extends DataEntryDialog<SeriesDescriptor> {
             });
             
             addRacesPanel.add(addRacesFromListBox);
-            addRacesPanel.add(new Label(stringMessages.to()));
+            addRacesPanel.add(new Label(getStringMessages().to()));
             addRacesPanel.add(addRacesToListBox);
-            addRacesPanel.add(new Label(stringMessages.withNamePrefix()));
+            addRacesPanel.add(new Label(getStringMessages().withNamePrefix()));
 
             raceNamePrefixTextBox.setWidth("20px");
             if (LeaderboardNameConstants.DEFAULT_SERIES_NAME.equals(seriesName)) {
@@ -399,7 +404,7 @@ public class SeriesEditDialog extends DataEntryDialog<SeriesDescriptor> {
                         }
                         validate();
                     } else {
-                        Window.alert(stringMessages.pleaseSelectASeriesFirst());
+                        Window.alert(getStringMessages().pleaseSelectASeriesFirst());
                     }
                 }
             });

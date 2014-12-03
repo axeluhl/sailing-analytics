@@ -9,9 +9,9 @@ import com.google.gwt.uibinder.client.UiBinder;
 import com.google.gwt.uibinder.client.UiField;
 import com.google.gwt.user.client.ui.HTMLPanel;
 import com.google.gwt.user.client.ui.Widget;
-import com.sap.sailing.gwt.home.client.app.PlaceNavigator;
+import com.sap.sailing.gwt.home.client.app.HomePlacesNavigator;
 import com.sap.sailing.gwt.home.client.place.event.AbstractEventComposite;
-import com.sap.sailing.gwt.home.client.place.event.EventPageNavigator;
+import com.sap.sailing.gwt.home.client.place.event.EventPlaceNavigator;
 import com.sap.sailing.gwt.home.client.place.event.regatta.Regatta;
 import com.sap.sailing.gwt.ui.shared.EventDTO;
 import com.sap.sailing.gwt.ui.shared.LeaderboardGroupDTO;
@@ -34,7 +34,7 @@ public class EventRegattaRaces extends AbstractEventComposite {
     private final Timer timerForClientServerOffset;
     private final List<EventRegattaRacesPhase> phaseElements;
 
-    public EventRegattaRaces(EventDTO event, Timer timerForClientServerOffset, PlaceNavigator placeNavigator, EventPageNavigator pageNavigator) {
+    public EventRegattaRaces(EventDTO event, Timer timerForClientServerOffset, HomePlacesNavigator placeNavigator, EventPlaceNavigator pageNavigator) {
         super(event, pageNavigator);
         this.timerForClientServerOffset = timerForClientServerOffset;
         

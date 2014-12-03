@@ -22,7 +22,6 @@ import com.sap.sailing.domain.base.impl.DynamicCompetitor;
 import com.sap.sailing.domain.common.MaxPointsReason;
 import com.sap.sailing.domain.common.RegattaAndRaceIdentifier;
 import com.sap.sailing.domain.common.RegattaNameAndRaceName;
-import com.sap.sailing.domain.common.impl.MillisecondsTimePoint;
 import com.sap.sailing.domain.leaderboard.DelayedLeaderboardCorrections;
 import com.sap.sailing.domain.leaderboard.Leaderboard;
 import com.sap.sailing.domain.leaderboard.SettableScoreCorrection;
@@ -35,15 +34,18 @@ import com.sap.sailing.domain.test.mock.MockedTrackedRaceWithFixedRank;
 import com.sap.sailing.domain.tracking.DynamicTrackedRace;
 import com.sap.sailing.domain.tracking.TrackedRace;
 import com.sap.sailing.domain.tracking.impl.EmptyWindStore;
-import com.sap.sailing.mongodb.MongoDBService;
+import com.sap.sailing.server.RacingEventService;
 import com.sap.sailing.server.impl.RacingEventServiceImpl;
 import com.sap.sailing.server.operationaltransformation.AddColumnToLeaderboard;
 import com.sap.sailing.server.operationaltransformation.ConnectTrackedRaceToLeaderboardColumn;
 import com.sap.sailing.server.operationaltransformation.CreateFlexibleLeaderboard;
 import com.sap.sailing.server.operationaltransformation.UpdateLeaderboardMaxPointsReason;
-import com.sap.sailing.server.replication.ReplicationMasterDescriptor;
-import com.sap.sailing.server.replication.ReplicationService;
 import com.sap.sse.common.Util;
+import com.sap.sse.common.Util.Pair;
+import com.sap.sse.common.impl.MillisecondsTimePoint;
+import com.sap.sse.mongodb.MongoDBService;
+import com.sap.sse.replication.ReplicationMasterDescriptor;
+import com.sap.sse.replication.ReplicationService;
 
 public class DelayedLeaderboardCorrectionsReplicationTest extends AbstractServerReplicationTest {
     private static final Logger logger = Logger.getLogger(DelayedLeaderboardCorrectionsReplicationTest.class.getName());
@@ -113,7 +115,8 @@ public class DelayedLeaderboardCorrectionsReplicationTest extends AbstractServer
                 masterLeaderboardReloaded.getRaceColumnByName(Q2), MillisecondsTimePoint.now()));
 
         // replicate the re-loaded environment
-        com.sap.sse.common.Util.Pair<ReplicationServiceTestImpl, ReplicationMasterDescriptor> descriptors = basicSetUp(/* dropDB */ false, master, replica);
+        Pair<com.sap.sse.replication.testsupport.AbstractServerReplicationTest.ReplicationServiceTestImpl<RacingEventService>, ReplicationMasterDescriptor> descriptors = basicSetUp(
+                /* dropDB */false, master, replica);
         replicaReplicator = descriptors.getA();
         masterDescriptor = descriptors.getB();
         // starting to replicate will clear the competitor store used by the replica in this test;

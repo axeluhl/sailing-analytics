@@ -1,0 +1,39 @@
+.oldLeaderboardPanel {
+  background-color:#f8f8f8;
+  width: 100%;
+  font-weight: bold;
+}
+
+.leaderboardAndTitlePanel {
+	display: inline-block;
+}
+
+.leaderboardAndTitleTable {
+	margin-left: 0.75em;
+	margin-right: 0.75em;
+	margin-bottom: 0.75em;
+}
+
+.regattaleaderboard_meta_scoring_comment {
+	margin: 0;
+	font-weight: bold;
+	padding-top: 0.25em;
+	padding-bottom: 0.25em;
+}
+.regattaleaderboard_meta_scoring_type {
+	margin: 0;
+	font-weight: bold;
+}
+
+.regattaleaderboard_meta_update_timestamp {
+	margin: 0;
+	font-weight: bold;
+	text-align: right;
+}
+.regattaleaderboard_meta_update_text {
+	margin: 0;
+	font-weight: bold;
+	text-align: right;
+	padding-bottom: 0.25em;
+	padding-top: 0.25em;
+}

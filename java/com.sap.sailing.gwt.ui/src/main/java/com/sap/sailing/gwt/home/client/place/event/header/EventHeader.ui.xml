@@ -2,8 +2,8 @@
 <ui:UiBinder xmlns:ui="urn:ui:com.google.gwt.uibinder"
   xmlns:g="urn:import:com.google.gwt.user.client.ui"
     xmlns:s="urn:import:com.sap.sailing.gwt.home.client.shared">
-    <ui:with field="i18n" type="com.sap.sailing.gwt.home.client.i18n.TextMessages"/>
-    <ui:with field="res" type="com.sap.sailing.gwt.home.client.HomeResources" />
+    <ui:with field="i18n" type="com.sap.sailing.gwt.common.client.i18n.TextMessages"/>
+	<ui:with field="res" type="com.sap.sailing.gwt.common.client.SharedResources" />
     <ui:with field="local_res" type="com.sap.sailing.gwt.home.client.place.event.header.EventHeaderResources" />
     <ui:style>
         .action {
@@ -53,7 +53,7 @@
         </div>
         <div ui:field="seriesLeaderboardDiv" class="{local_res.css.eventheader_sharing}">
             <div class="{style.action}">
-               <g:Anchor ui:field="seriesLeaderboardAnchor" href="javascript:;" styleName="{res.mainCss.button} {style.action_link}"><ui:text from='{i18n.overallLeaderboard}'/></g:Anchor>
+               <g:Anchor ui:field="seriesLeaderboardAnchor" styleName="{res.mainCss.button} {style.action_link}"><ui:text from='{i18n.overallLeaderboard}'/></g:Anchor>
             </div>
 		</div>	          
       </div>
@@ -62,10 +62,10 @@
   <div class="{local_res.css.eventnavigation} {local_res.css.eventnavigationcompact}">
     <div class="{res.mainCss.grid}">
         <div class="{res.mediaCss.columns}">
-            <g:Anchor href="javascript:;" ui:field="regattasLink">
+            <g:Anchor ui:field="regattasLink">
               	<img ui:field='eventLogo2' alt="" height="41" width="41" class="{local_res.css.eventnavigationcompact_logo}"></img>
 			</g:Anchor>
-            <g:Anchor href="javascript:;" ui:field="regattasLink2" styleName="{res.mainCss.button} {local_res.css.eventnavigation_link}">
+            <g:Anchor ui:field="regattasLink2" styleName="{res.mainCss.button} {local_res.css.eventnavigation_link}">
                 <span ui:field='eventName2Span' />
             </g:Anchor>
       </div>

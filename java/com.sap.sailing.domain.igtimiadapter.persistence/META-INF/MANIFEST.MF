@@ -5,6 +5,8 @@ Bundle-SymbolicName: com.sap.sailing.domain.igtimiadapter.persistence
 Bundle-Version: 1.0.0.qualifier
 Bundle-Vendor: SAP
 Bundle-RequiredExecutionEnvironment: JavaSE-1.8
-Require-Bundle: com.sap.sailing.mongodb,
+Require-Bundle: com.sap.sse.mongodb,
  com.mongodb.driver;bundle-version="2.6.2"
 Export-Package: com.sap.sailing.domain.igtimiadapter.persistence
+Import-Package: org.osgi.framework
+Bundle-Activator: com.sap.sailing.domain.igtimiadapter.persistence.impl.Activator

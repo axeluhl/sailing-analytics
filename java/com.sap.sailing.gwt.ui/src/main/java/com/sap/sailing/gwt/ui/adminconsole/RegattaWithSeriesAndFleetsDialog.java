@@ -7,12 +7,15 @@ import com.google.gwt.user.client.ui.Label;
 import com.google.gwt.user.client.ui.TextBox;
 import com.google.gwt.user.client.ui.VerticalPanel;
 import com.sap.sailing.domain.common.dto.BoatClassDTO;
+import com.sap.sailing.gwt.ui.client.DataEntryDialogWithBootstrap;
 import com.sap.sailing.gwt.ui.client.StringMessages;
+import com.sap.sailing.gwt.ui.shared.BetterDateTimeBox;
 import com.sap.sailing.gwt.ui.shared.EventDTO;
 import com.sap.sailing.gwt.ui.shared.RegattaDTO;
 
 public abstract class RegattaWithSeriesAndFleetsDialog extends AbstractRegattaWithSeriesAndFleetsDialog<RegattaDTO> {
-
+    protected BetterDateTimeBox startDateBox;
+    protected BetterDateTimeBox endDateBox;
     protected TextBox nameEntryField;
     protected TextBox boatClassEntryField;
 
@@ -25,6 +28,10 @@ public abstract class RegattaWithSeriesAndFleetsDialog extends AbstractRegattaWi
         nameEntryField.ensureDebugId("NameTextBox");
         nameEntryField.setVisibleLength(40);
         nameEntryField.setText(regatta.getName());
+        startDateBox = createDateTimeBox(regatta.startDate);
+        startDateBox.setFormat("dd/mm/yyyy hh:ii"); 
+        endDateBox = createDateTimeBox(regatta.endDate);
+        endDateBox.setFormat("dd/mm/yyyy hh:ii"); 
         boatClassEntryField = createTextBox(null);
         boatClassEntryField.ensureDebugId("BoatClassTextBox");
         boatClassEntryField.setVisibleLength(20);
@@ -32,11 +39,17 @@ public abstract class RegattaWithSeriesAndFleetsDialog extends AbstractRegattaWi
             boatClassEntryField.setText(regatta.boatClass.getName());
         }
 		setSeriesEditor();
+        formGrid.setWidget(6, 0, new Label(stringMessages.courseArea() + ":"));
+        formGrid.setWidget(6, 1, courseAreaListBox);
+        formGrid.setWidget(7, 0, new Label(stringMessages.useStartTimeInference() + ":"));
+        formGrid.setWidget(7, 1, useStartTimeInferenceCheckBox);
     }
 
     @Override
     protected RegattaDTO getResult() {
         regatta.setName(nameEntryField.getText());
+        regatta.startDate = startDateBox.getValue();
+        regatta.endDate = endDateBox.getValue();
         regatta.boatClass = new BoatClassDTO(boatClassEntryField.getText(), 0.0);
         regatta.scoringScheme = getSelectedScoringSchemeType();
         regatta.useStartTimeInference = useStartTimeInferenceCheckBox.getValue();

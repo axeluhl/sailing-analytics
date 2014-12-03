@@ -26,6 +26,31 @@
 
     <build>
         <plugins>
+			<plugin>
+				<groupId>org.eclipse.tycho</groupId>
+				<artifactId>target-platform-configuration</artifactId>
+				<configuration>
+					<dependency-resolution>
+						<extraRequirements>
+							<requirement>
+								<type>eclipse-feature</type>
+								<id>com.sap.sailing.feature</id>
+								<versionRange>0.0.0</versionRange>
+							</requirement>
+							<requirement>
+								<type>eclipse-feature</type>
+								<id>com.sap.sailing.feature.runtime</id>
+								<versionRange>0.0.0</versionRange>
+							</requirement>
+							<requirement>
+								<type>eclipse-plugin</type>
+								<id>com.sap.sailing.server.gateway.test.support</id>
+								<versionRange>0.0.0</versionRange>
+							</requirement>
+						</extraRequirements>
+					</dependency-resolution>
+				</configuration>
+			</plugin>
             <plugin>
                 <groupId>org.eclipse.tycho</groupId>
                 <artifactId>tycho-surefire-plugin</artifactId>
@@ -52,39 +77,32 @@
                             <product>raceanalysis.product</product>
                             <application>raceanalysis.application</application>
                             
-                            <!--
-                              TODO: The "dependencies" as well as the "bundleStartLevel" should not be needed, since we
-                                    start a product for which a definition exists. However at the moment this definition
-                                    seems to be ignored by tycho.
-                                    
-                                    See also https://bugs.eclipse.org/bugs/show_bug.cgi?id=386988
-                            -->
-	                    <dependencies>
-                                <dependency>
-                                    <type>eclipse-feature</type>
-                                    <artifactId>com.sap.sailing.feature</artifactId>
-                                    <version>0.0.0</version>
-                                </dependency>
-                                <dependency>
-                                    <type>eclipse-feature</type>
-                                    <artifactId>com.sap.sailing.feature.runtime</artifactId>
-                                   <version>0.0.0</version>
-                                </dependency>
-                                <!-- This bundle should only be deployed in a test environment! -->
-                                <dependency>
-                                    <type>eclipse-plugin</type>
-                                    <artifactId>com.sap.sailing.server.gateway.test.support</artifactId>
-                                    <version>0.0.0</version>
-                                </dependency>
-                            </dependencies>
-                            
                             <bundleStartLevel>
                                 <bundle>
                                     <id>com.sap.sailing.server.gateway.test.support</id>
                                     <level>4</level>
                                     <autoStart>true</autoStart>
                                 </bundle>
-                                
+                                <bundle>
+                                    <id>com.sap.sse.security</id>
+                                    <level>3</level>
+                                    <autoStart>true</autoStart>
+                                </bundle>
+                                <bundle>
+                                    <id>com.sap.sse.security.ui</id>
+                                    <level>5</level>
+                                    <autoStart>true</autoStart>
+                                </bundle>
+                                <bundle>
+                                    <id>com.sap.sse.security.userstore</id>
+                                    <level>3</level>
+                                    <autoStart>true</autoStart>
+                                </bundle>
+                                <bundle>
+                                    <id>com.sap.sse.security.userstore.mongodb</id>
+                                    <level>3</level>
+                                    <autoStart>true</autoStart>
+                                </bundle>
                                 <bundle>
                                     <id>com.sap.sailing.ess40.resultimport</id>
                                     <level>3</level>
@@ -100,7 +118,7 @@
                                     <level>4</level>
                                     <autoStart>true</autoStart>
                                 </bundle>
-								<bundle>
+				<bundle>
                                     <id>com.sap.sailing.gwt.home</id>
                                     <level>5</level>
                                     <autoStart>true</autoStart>

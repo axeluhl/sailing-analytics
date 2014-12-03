@@ -2,12 +2,12 @@
 <ui:UiBinder xmlns:ui="urn:ui:com.google.gwt.uibinder"
   xmlns:g="urn:import:com.google.gwt.user.client.ui"
     xmlns:s="urn:import:com.sap.sailing.gwt.home.client.shared">
-    <ui:with field="i18n" type="com.sap.sailing.gwt.home.client.i18n.TextMessages"/>
-    <ui:with field="res" type="com.sap.sailing.gwt.home.client.HomeResources" />
+	<ui:with field="i18n" type="com.sap.sailing.gwt.common.client.i18n.TextMessages" />
+	<ui:with field="res" type="com.sap.sailing.gwt.common.client.SharedResources" />
     <ui:with field="local_res" type="com.sap.sailing.gwt.home.client.shared.recentevent.RecentEventResources" />
-    <div class="{res.mediaCss.small12} {res.mediaCss.medium6} {res.mediaCss.large4} {res.mediaCss.columns}">
+    <g:HTMLPanel styleName="{res.mediaCss.small12} {res.mediaCss.medium6} {res.mediaCss.large4} {res.mediaCss.columns}">
 	    <div class="{local_res.css.eventteasercontainer}">
-	        <a href="javascript:;" ui:field="eventOverviewLink" class="{local_res.css.eventteaser}">
+	        <g:Anchor ui:field="eventOverviewLink" styleName="{local_res.css.eventteaser}">
 		        <figure class="{local_res.css.eventteaser_image}"><img ui:field="eventImage" />
 		          <div ui:field="isLiveDiv" data-labeltype="live" class="{local_res.css.eventteaser_series} {res.mainCss.label}"><ui:text from='{i18n.live}'/></div>
 		        </figure>
@@ -15,7 +15,7 @@
 		        <div class="{local_res.css.eventteaser_location}">
 		            <span ui:field="venueName" />,&nbsp;<span ui:field="eventStartDate" />
 		        </div>
-	        </a>
+	        </g:Anchor>
 	    </div>
-    </div>
+    </g:HTMLPanel>
 </ui:UiBinder>

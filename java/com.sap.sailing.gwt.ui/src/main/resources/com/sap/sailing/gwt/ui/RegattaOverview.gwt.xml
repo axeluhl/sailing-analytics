@@ -20,7 +20,9 @@
 	<inherits name="com.sap.sse.gwt.SSESharedGWT" />
 	<inherits name="com.sap.sse.SSECommon" />
 	<inherits name="com.sap.sailing.domain.SailingDomain" />
-	
+	<inherits name="com.sap.sse.gwt.AdminConsole" />
+	<inherits name="com.sap.sse.security.ui.LoginPanel" />
+		
 	<!-- Highcharts API -->
 	<inherits name="org.moxieapps.gwt.highcharts.Highcharts" />
 	  
@@ -52,6 +54,9 @@
 	<source path='common'/> 
 	<source path='client'/>
 	<source path='controls'/>
+	<source path='adminconsole'/>
+	<source path='usermanagement'/>
+	<source path='masterdataimport'/>
 	<source path='components'/>
 	<source path='leaderboard'/>
 	<source path='regattaoverview'/>

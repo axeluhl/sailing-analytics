@@ -2,8 +2,8 @@
 <ui:UiBinder xmlns:ui="urn:ui:com.google.gwt.uibinder"
   xmlns:g="urn:import:com.google.gwt.user.client.ui"
     xmlns:s="urn:import:com.sap.sailing.gwt.home.client.shared">
-    <ui:with field="i18n" type="com.sap.sailing.gwt.home.client.i18n.TextMessages"/>
-    <ui:with field="res" type="com.sap.sailing.gwt.home.client.HomeResources" />
+    <ui:with field="i18n" type="com.sap.sailing.gwt.common.client.i18n.TextMessages"/>
+	<ui:with field="res" type="com.sap.sailing.gwt.common.client.SharedResources" />
     <ui:with field="local_res" type="com.sap.sailing.gwt.home.client.shared.mainsponsors.MainSponsorsResources" />
     <g:HTMLPanel>
 <!-- A box with a sponsoring and solution teaser-->
@@ -11,14 +11,14 @@
   <div class="{res.mainCss.grid}">
     <div class="{res.mediaCss.small6} {res.mediaCss.columns}">
       <h3>Solutions</h3>
-      <figure><g:Image resource="{local_res.solutionTeaserImage}" altText="Solutions" />
-        <figcaption>Here goes the solution description short text <g:Anchor ui:field="solutionsPageLink" text="Read more..." href="javascript:;" /></figcaption>
+      <figure><!--<g:Image resource="{local_res.solutionTeaserImage}" altText="Solutions" />-->
+        <figcaption>Here goes the solution description short text <g:Anchor ui:field="solutionsPageLink" text="Read more..." /></figcaption>
       </figure>
     </div>
     <div class="{res.mediaCss.small6} {res.mediaCss.columns}">
       <h3>Sponsored Teams</h3>
-      <figure><g:Image resource="{local_res.sponsorTeaserImage}" altText="Sponsoring" />
-        <figcaption>Here goes the solution description short text <g:Anchor ui:field="sponsoringPageLink" text="Read more..." href="javascript:;" /></figcaption>
+      <figure><!--<g:Image resource="{local_res.sponsorTeaserImage}" altText="Sponsoring" />-->
+        <figcaption>Here goes the solution description short text <g:Anchor ui:field="sponsoringPageLink" text="Read more..." /></figcaption>
       </figure>
     </div>
   </div>

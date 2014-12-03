@@ -1,8 +1,10 @@
 package com.sap.sailing.domain.tracking.impl;
 
 import com.sap.sailing.domain.common.Position;
-import com.sap.sailing.domain.common.TimePoint;
+import com.sap.sailing.domain.common.impl.DegreePosition;
 import com.sap.sailing.domain.tracking.GPSFix;
+import com.sap.sse.common.TimePoint;
+import com.sap.sse.common.impl.MillisecondsTimePoint;
 
 /**
  * Equality / hash code are based on {@link #getPosition()}'s and {@link #getTimePoint()}'s equality / hash code.
@@ -36,4 +38,8 @@ public class GPSFixImpl extends AbstractGPSFixImpl implements GPSFix {
         return getTimePoint()+": "+getPosition();
     }
 
+    
+    public static GPSFixImpl create(double lonDeg, double latDeg, long timeMillis) {
+        return new GPSFixImpl(new DegreePosition(latDeg, lonDeg), new MillisecondsTimePoint(timeMillis));
+    }
 }

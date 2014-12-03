@@ -12,6 +12,7 @@ Require-Bundle: com.sap.sailing.domain,
  com.sap.sailing.domain.common,
  com.sap.sailing.xrr.resultimport,
  com.sap.sse.common,
+ com.sap.sse,
  com.sap.sailing.xrr.schema
 Export-Package: com.sap.sailing.domain.swisstimingadapter,
  com.sap.sailing.domain.swisstimingadapter.impl;x-friends:="com.sap.sailing.server.test"

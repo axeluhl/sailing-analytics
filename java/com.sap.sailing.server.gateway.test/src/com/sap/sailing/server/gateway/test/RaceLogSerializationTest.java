@@ -10,6 +10,13 @@ import org.json.simple.JSONObject;
 import org.junit.Before;
 import org.junit.Test;
 
+import com.sap.sailing.domain.abstractlog.AbstractLogEventAuthor;
+import com.sap.sailing.domain.abstractlog.impl.LogEventAuthorImpl;
+import com.sap.sailing.domain.abstractlog.race.RaceLogEvent;
+import com.sap.sailing.domain.abstractlog.race.RaceLogEventFactory;
+import com.sap.sailing.domain.abstractlog.race.tracking.DeviceCompetitorMappingEvent;
+import com.sap.sailing.domain.abstractlog.race.tracking.DeviceIdentifier;
+import com.sap.sailing.domain.abstractlog.race.tracking.PlaceHolderDeviceIdentifier;
 import com.sap.sailing.domain.base.Competitor;
 import com.sap.sailing.domain.base.DomainFactory;
 import com.sap.sailing.domain.base.impl.BoatClassImpl;
@@ -18,16 +25,7 @@ import com.sap.sailing.domain.base.impl.CompetitorImpl;
 import com.sap.sailing.domain.base.impl.NationalityImpl;
 import com.sap.sailing.domain.base.impl.PersonImpl;
 import com.sap.sailing.domain.base.impl.TeamImpl;
-import com.sap.sailing.domain.common.TimePoint;
-import com.sap.sailing.domain.common.impl.MillisecondsTimePoint;
 import com.sap.sailing.domain.common.racelog.tracking.TypeBasedServiceFinder;
-import com.sap.sailing.domain.racelog.RaceLogEvent;
-import com.sap.sailing.domain.racelog.RaceLogEventAuthor;
-import com.sap.sailing.domain.racelog.RaceLogEventFactory;
-import com.sap.sailing.domain.racelog.impl.RaceLogEventAuthorImpl;
-import com.sap.sailing.domain.racelog.tracking.DeviceCompetitorMappingEvent;
-import com.sap.sailing.domain.racelog.tracking.DeviceIdentifier;
-import com.sap.sailing.domain.racelog.tracking.PlaceHolderDeviceIdentifier;
 import com.sap.sailing.domain.racelog.tracking.test.mock.MockEmptyServiceFinder;
 import com.sap.sailing.domain.racelog.tracking.test.mock.SmartphoneImeiIdentifier;
 import com.sap.sailing.domain.racelog.tracking.test.mock.SmartphoneImeiJsonHandler;
@@ -42,11 +40,13 @@ import com.sap.sailing.server.gateway.serialization.impl.DeviceIdentifierJsonSer
 import com.sap.sailing.server.gateway.serialization.racelog.impl.RaceLogEventSerializer;
 import com.sap.sailing.server.gateway.serialization.racelog.tracking.DeviceIdentifierJsonHandler;
 import com.sap.sailing.server.gateway.serialization.racelog.tracking.impl.PlaceHolderDeviceIdentifierJsonHandler;
+import com.sap.sse.common.TimePoint;
+import com.sap.sse.common.impl.MillisecondsTimePoint;
 
 public class RaceLogSerializationTest {
     private JsonSerializer<RaceLogEvent> serializer;
     private JsonDeserializer<RaceLogEvent> deserializer;
-    private final RaceLogEventAuthor author = new RaceLogEventAuthorImpl("test", 0);
+    private final AbstractLogEventAuthor author = new LogEventAuthorImpl("test", 0);
     private static final Competitor competitor = new CompetitorImpl("a", "b", null,
             new TeamImpl("a", Collections.singletonList(new PersonImpl("a", new NationalityImpl("GER"), new Date(), "abc")), null),
             new BoatImpl("a", new BoatClassImpl("a", true), "abc"));

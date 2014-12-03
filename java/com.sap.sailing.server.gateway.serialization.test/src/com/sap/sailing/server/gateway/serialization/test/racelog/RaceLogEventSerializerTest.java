@@ -3,18 +3,22 @@ package com.sap.sailing.server.gateway.serialization.test.racelog;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.verify;
 
+import java.util.UUID;
+
 import org.junit.Before;
 import org.junit.Test;
 
+import com.sap.sailing.domain.abstractlog.AbstractLogEventAuthor;
+import com.sap.sailing.domain.abstractlog.impl.LogEventAuthorImpl;
+import com.sap.sailing.domain.abstractlog.race.RaceLogEvent;
+import com.sap.sailing.domain.abstractlog.race.RaceLogEventFactory;
+import com.sap.sailing.domain.abstractlog.race.RaceLogEventRestoreFactory;
 import com.sap.sailing.domain.base.DomainFactory;
 import com.sap.sailing.domain.common.racelog.RaceLogRaceStatus;
 import com.sap.sailing.domain.common.racelog.RacingProcedureType;
-import com.sap.sailing.domain.racelog.RaceLogEvent;
-import com.sap.sailing.domain.racelog.RaceLogEventAuthor;
-import com.sap.sailing.domain.racelog.RaceLogEventFactory;
-import com.sap.sailing.domain.racelog.impl.RaceLogEventAuthorImpl;
 import com.sap.sailing.server.gateway.serialization.JsonSerializer;
 import com.sap.sailing.server.gateway.serialization.racelog.impl.RaceLogEventSerializer;
+import com.sap.sse.common.impl.MillisecondsTimePoint;
 
 public class RaceLogEventSerializerTest {
 
@@ -44,7 +48,7 @@ public class RaceLogEventSerializerTest {
     private JsonSerializer<RaceLogEvent> additionalScoringInformationSerializer;
 
     private RaceLogEventFactory factory;
-    private RaceLogEventAuthor author = new RaceLogEventAuthorImpl("Test Author", 1);
+    private AbstractLogEventAuthor author = new LogEventAuthorImpl("Test Author", 1);
 
     @SuppressWarnings("unchecked")
     @Before
@@ -223,7 +227,8 @@ public class RaceLogEventSerializerTest {
     @Test
     public void testRevokeEventSerializer() {
         // we use the real event type here because we do not want to re-implement the dispatching.
-        RaceLogEvent event = factory.createRevokeEvent(null, author, 0, null);
+        RaceLogEvent event = RaceLogEventRestoreFactory.INSTANCE.createRevokeEvent(MillisecondsTimePoint.now(),
+                author, MillisecondsTimePoint.now(), 0, 0, UUID.randomUUID(), "type", "short info", "reason");
         serializer.serialize(event);
         verify(revokeEventSerializer).serialize(event);
     }

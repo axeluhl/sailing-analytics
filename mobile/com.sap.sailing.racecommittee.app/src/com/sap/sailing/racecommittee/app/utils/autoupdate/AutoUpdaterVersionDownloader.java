@@ -6,19 +6,21 @@ import java.io.InputStream;
 import java.net.URL;
 import java.nio.charset.Charset;
 
-import com.sap.sailing.racecommittee.app.data.http.HttpGetRequest;
+import android.content.Context;
+
+import com.sap.sailing.android.shared.data.http.HttpGetRequest;
 import com.sap.sailing.racecommittee.app.utils.autoupdate.AutoUpdaterChecker.AutoUpdaterState;
 import com.sap.sse.common.Util;
 
 public class AutoUpdaterVersionDownloader extends AutoUpdaterDownloader<Util.Pair<Integer, String>> {
 
-    public AutoUpdaterVersionDownloader(AutoUpdaterState state) {
-        super(state);
+    public AutoUpdaterVersionDownloader(AutoUpdaterState state, Context context) {
+        super(state, context);
     }
 
     @Override
     protected Util.Pair<Integer, String> downloadInBackground(URL url) {
-        HttpGetRequest request = new HttpGetRequest(url);
+        HttpGetRequest request = new HttpGetRequest(url, context);
         InputStream stream = null;
         try {
             stream = request.execute();

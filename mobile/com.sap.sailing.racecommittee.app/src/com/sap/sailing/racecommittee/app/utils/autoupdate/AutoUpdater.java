@@ -13,10 +13,10 @@ import android.content.Intent;
 import android.content.SharedPreferences;
 import android.net.Uri;
 
-import com.sap.sailing.racecommittee.app.AppConstants;
+import com.sap.sailing.android.shared.logging.ExLog;
+import com.sap.sailing.android.shared.util.FileHandlerUtils;
 import com.sap.sailing.racecommittee.app.AppPreferences;
 import com.sap.sailing.racecommittee.app.R;
-import com.sap.sailing.racecommittee.app.logging.ExLog;
 import com.sap.sailing.racecommittee.app.ui.activities.SettingsActivity;
 import com.sap.sailing.racecommittee.app.ui.fragments.preference.GeneralPreferenceFragment;
 
@@ -40,13 +40,13 @@ public class AutoUpdater {
             new AutoUpdaterChecker(context, this, forceUpdate).check(new URL(serverUrl));
         } catch (MalformedURLException e) {
             // ServerBaseURL in preferences is defect? App will crash...
-            ExLog.ex(TAG, e);
+            ExLog.ex(context, TAG, e);
         }
     }
 
     public void updateFromFile(File result) {
         // install it!
-        ExLog.i(TAG, String.format("Installing auto-update file %s.", result.getAbsolutePath()));
+        ExLog.i(context, TAG, String.format("Installing auto-update file %s.", result.getAbsolutePath()));
 
         setWasUpdated(getUpdatedPreferences(), true);
         Intent intent = new Intent(Intent.ACTION_VIEW);
@@ -100,19 +100,19 @@ public class AutoUpdater {
     }
 
     private void clearUpdateCache() {
-        for (File file : AppConstants.getExternalApplicationFolder().listFiles()) {
+        for (File file : FileHandlerUtils.getExternalApplicationFolder(context).listFiles()) {
             if (file.getName().startsWith("auto-update-") &&
                     file.getName().endsWith(".apk")) {
                 boolean result = file.delete();
                 if (result) {
-                    ExLog.i(TAG, String.format("Deleted old update file %s", file.getName()));
+                    ExLog.i(context, TAG, String.format("Deleted old update file %s", file.getName()));
                 }
             }
         }
     }
 
     public File createApkTargetFile() throws IOException {
-        return File.createTempFile("auto-update-", ".apk", AppConstants.getExternalApplicationFolder());
+        return File.createTempFile("auto-update-", ".apk", FileHandlerUtils.getExternalApplicationFolder(context));
     }
 
 }

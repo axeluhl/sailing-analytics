@@ -122,7 +122,7 @@ public abstract class TrackedRaceWithWindEssentials implements TrackedRace {
     }
     
     @Override
-    public Iterable<WindSource> getWindSources(WindSourceType type) {
+    public Set<WindSource> getWindSources(WindSourceType type) {
         Set<WindSource> result = new HashSet<WindSource>();
         for (WindSource windSource : getWindSources()) {
             if (windSource.getType() == type) {
@@ -133,7 +133,7 @@ public abstract class TrackedRaceWithWindEssentials implements TrackedRace {
     }
 
     @Override
-    public Iterable<WindSource> getWindSources() {
+    public Set<WindSource> getWindSources() {
         while (true) {
             try {
                 return new HashSet<WindSource>(windTracks.keySet());

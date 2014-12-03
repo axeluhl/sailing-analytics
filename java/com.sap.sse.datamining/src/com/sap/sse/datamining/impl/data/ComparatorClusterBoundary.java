@@ -11,7 +11,7 @@ public class ComparatorClusterBoundary<ElementType> implements ClusterBoundary<E
     private final ComparisonStrategy strategy;
 
     public ComparatorClusterBoundary(Comparator<ElementType> comparator, ElementType boundaryValue,
-            ComparisonStrategy strategy) {
+                                     ComparisonStrategy strategy) {
         this.comparator = comparator;
         this.boundaryValue = boundaryValue;
         this.strategy = strategy;

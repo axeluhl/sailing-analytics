@@ -24,12 +24,10 @@ import com.sap.sailing.domain.common.Distance;
 import com.sap.sailing.domain.common.LegType;
 import com.sap.sailing.domain.common.NoWindException;
 import com.sap.sailing.domain.common.Position;
-import com.sap.sailing.domain.common.TimePoint;
 import com.sap.sailing.domain.common.WindSourceType;
 import com.sap.sailing.domain.common.impl.DegreeBearingImpl;
 import com.sap.sailing.domain.common.impl.DegreePosition;
 import com.sap.sailing.domain.common.impl.KnotSpeedWithBearingImpl;
-import com.sap.sailing.domain.common.impl.MillisecondsTimePoint;
 import com.sap.sailing.domain.common.impl.NauticalMileDistance;
 import com.sap.sailing.domain.common.impl.WindSourceImpl;
 import com.sap.sailing.domain.tracking.DynamicGPSFixTrack;
@@ -44,7 +42,9 @@ import com.sap.sailing.domain.tracking.impl.GPSFixMovingImpl;
 import com.sap.sailing.domain.tracking.impl.MarkPassingImpl;
 import com.sap.sailing.domain.tracking.impl.TrackBasedEstimationWindTrackImpl;
 import com.sap.sailing.domain.tracking.impl.WindImpl;
+import com.sap.sse.common.TimePoint;
 import com.sap.sse.common.Util;
+import com.sap.sse.common.impl.MillisecondsTimePoint;
 
 public class WindEstimationOnConstructedTracksTest extends StoredTrackBasedTest {
     private List<Competitor> competitors;
@@ -117,14 +117,14 @@ public class WindEstimationOnConstructedTracksTest extends StoredTrackBasedTest 
         setBearingForCompetitor(competitors.get(0), now, 305);
         setBearingForCompetitor(competitors.get(1), now, 35);
         WindWithConfidence<Util.Pair<Position, TimePoint>> combinedWindDirectionMinClusterSizeOne = getTrackedRace()
-                .getWindWithConfidence(/* position */null, now);
+                .getWindWithConfidenceUncached(/* position */null, now, getTrackedRace().getWindSourcesToExclude());
         final double combinedDegreesMinClusterSizeOne = combinedWindDirectionMinClusterSizeOne.getObject().getBearing().getDegrees();
         assertTrue(combinedDegreesMinClusterSizeOne > 170 && combinedDegreesMinClusterSizeOne < 180);
         // now produce a minimum cluster size of 2, raising the estimation's confidence
         setBearingForCompetitor(competitors.get(2), now, 305);
         setBearingForCompetitor(competitors.get(3), now, 35);
         WindWithConfidence<Util.Pair<Position, TimePoint>> combinedWindDirectionMinClusterSizeTwo = getTrackedRace()
-                .getWindWithConfidence(/* position */null, now);
+                .getWindWithConfidenceUncached(/* position */null, now, getTrackedRace().getWindSourcesToExclude());
         final double combinedDegreesNow = combinedWindDirectionMinClusterSizeTwo.getObject().getBearing().getDegrees();
         assertTrue(combinedDegreesNow > 170 && combinedDegreesNow < 180);
         // we expect the combined direction now to be closer to the estimation as compared to before because the estimation is more confident

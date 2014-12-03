@@ -18,6 +18,33 @@ import com.mongodb.DBCollection;
 import com.mongodb.DBObject;
 import com.mongodb.WriteConcern;
 import com.mongodb.util.JSON;
+import com.sap.sailing.domain.abstractlog.AbstractLogEventAuthor;
+import com.sap.sailing.domain.abstractlog.RevokeEvent;
+import com.sap.sailing.domain.abstractlog.race.RaceLogCourseAreaChangedEvent;
+import com.sap.sailing.domain.abstractlog.race.RaceLogCourseDesignChangedEvent;
+import com.sap.sailing.domain.abstractlog.race.RaceLogEvent;
+import com.sap.sailing.domain.abstractlog.race.RaceLogFinishPositioningConfirmedEvent;
+import com.sap.sailing.domain.abstractlog.race.RaceLogFinishPositioningListChangedEvent;
+import com.sap.sailing.domain.abstractlog.race.RaceLogFlagEvent;
+import com.sap.sailing.domain.abstractlog.race.RaceLogGateLineOpeningTimeEvent;
+import com.sap.sailing.domain.abstractlog.race.RaceLogPassChangeEvent;
+import com.sap.sailing.domain.abstractlog.race.RaceLogPathfinderEvent;
+import com.sap.sailing.domain.abstractlog.race.RaceLogProtestStartTimeEvent;
+import com.sap.sailing.domain.abstractlog.race.RaceLogRaceStatusEvent;
+import com.sap.sailing.domain.abstractlog.race.RaceLogRevokeEvent;
+import com.sap.sailing.domain.abstractlog.race.RaceLogStartProcedureChangedEvent;
+import com.sap.sailing.domain.abstractlog.race.RaceLogStartTimeEvent;
+import com.sap.sailing.domain.abstractlog.race.RaceLogWindFixEvent;
+import com.sap.sailing.domain.abstractlog.race.scoring.AdditionalScoringInformationEvent;
+import com.sap.sailing.domain.abstractlog.race.tracking.CloseOpenEndedDeviceMappingEvent;
+import com.sap.sailing.domain.abstractlog.race.tracking.DefineMarkEvent;
+import com.sap.sailing.domain.abstractlog.race.tracking.DenoteForTrackingEvent;
+import com.sap.sailing.domain.abstractlog.race.tracking.DeviceCompetitorMappingEvent;
+import com.sap.sailing.domain.abstractlog.race.tracking.DeviceIdentifier;
+import com.sap.sailing.domain.abstractlog.race.tracking.DeviceMappingEvent;
+import com.sap.sailing.domain.abstractlog.race.tracking.DeviceMarkMappingEvent;
+import com.sap.sailing.domain.abstractlog.race.tracking.RegisterCompetitorEvent;
+import com.sap.sailing.domain.abstractlog.race.tracking.StartTrackingEvent;
 import com.sap.sailing.domain.base.Competitor;
 import com.sap.sailing.domain.base.ControlPoint;
 import com.sap.sailing.domain.base.ControlPointWithTwoMarks;
@@ -46,11 +73,8 @@ import com.sap.sailing.domain.common.PassingInstruction;
 import com.sap.sailing.domain.common.RaceIdentifier;
 import com.sap.sailing.domain.common.Speed;
 import com.sap.sailing.domain.common.SpeedWithBearing;
-import com.sap.sailing.domain.common.TimePoint;
 import com.sap.sailing.domain.common.TimeRange;
 import com.sap.sailing.domain.common.WindSource;
-import com.sap.sailing.domain.common.WithID;
-import com.sap.sailing.domain.common.impl.MillisecondsTimePoint;
 import com.sap.sailing.domain.common.racelog.tracking.NoCorrespondingServiceRegisteredException;
 import com.sap.sailing.domain.common.racelog.tracking.TransformationException;
 import com.sap.sailing.domain.common.racelog.tracking.TypeBasedServiceFinder;
@@ -65,33 +89,7 @@ import com.sap.sailing.domain.leaderboard.ThresholdBasedResultDiscardingRule;
 import com.sap.sailing.domain.persistence.MongoObjectFactory;
 import com.sap.sailing.domain.persistence.racelog.tracking.DeviceIdentifierMongoHandler;
 import com.sap.sailing.domain.persistence.racelog.tracking.impl.PlaceHolderDeviceIdentifierMongoHandler;
-import com.sap.sailing.domain.racelog.RaceLogCourseAreaChangedEvent;
-import com.sap.sailing.domain.racelog.RaceLogCourseDesignChangedEvent;
-import com.sap.sailing.domain.racelog.RaceLogEvent;
-import com.sap.sailing.domain.racelog.RaceLogEventAuthor;
-import com.sap.sailing.domain.racelog.RaceLogFinishPositioningConfirmedEvent;
-import com.sap.sailing.domain.racelog.RaceLogFinishPositioningListChangedEvent;
-import com.sap.sailing.domain.racelog.RaceLogFlagEvent;
-import com.sap.sailing.domain.racelog.RaceLogGateLineOpeningTimeEvent;
 import com.sap.sailing.domain.racelog.RaceLogIdentifier;
-import com.sap.sailing.domain.racelog.RaceLogPassChangeEvent;
-import com.sap.sailing.domain.racelog.RaceLogPathfinderEvent;
-import com.sap.sailing.domain.racelog.RaceLogProtestStartTimeEvent;
-import com.sap.sailing.domain.racelog.RaceLogRaceStatusEvent;
-import com.sap.sailing.domain.racelog.RaceLogStartProcedureChangedEvent;
-import com.sap.sailing.domain.racelog.RaceLogStartTimeEvent;
-import com.sap.sailing.domain.racelog.RaceLogWindFixEvent;
-import com.sap.sailing.domain.racelog.RevokeEvent;
-import com.sap.sailing.domain.racelog.scoring.AdditionalScoringInformationEvent;
-import com.sap.sailing.domain.racelog.tracking.CloseOpenEndedDeviceMappingEvent;
-import com.sap.sailing.domain.racelog.tracking.DefineMarkEvent;
-import com.sap.sailing.domain.racelog.tracking.DenoteForTrackingEvent;
-import com.sap.sailing.domain.racelog.tracking.DeviceCompetitorMappingEvent;
-import com.sap.sailing.domain.racelog.tracking.DeviceIdentifier;
-import com.sap.sailing.domain.racelog.tracking.DeviceMappingEvent;
-import com.sap.sailing.domain.racelog.tracking.DeviceMarkMappingEvent;
-import com.sap.sailing.domain.racelog.tracking.RegisterCompetitorEvent;
-import com.sap.sailing.domain.racelog.tracking.StartTrackingEvent;
 import com.sap.sailing.domain.tracking.Positioned;
 import com.sap.sailing.domain.tracking.TrackedRace;
 import com.sap.sailing.domain.tracking.TrackedRegatta;
@@ -101,7 +99,10 @@ import com.sap.sailing.server.gateway.serialization.JsonSerializer;
 import com.sap.sailing.server.gateway.serialization.impl.CompetitorJsonSerializer;
 import com.sap.sailing.server.gateway.serialization.impl.DeviceConfigurationJsonSerializer;
 import com.sap.sailing.server.gateway.serialization.impl.RegattaConfigurationJsonSerializer;
+import com.sap.sse.common.TimePoint;
 import com.sap.sse.common.Util;
+import com.sap.sse.common.WithID;
+import com.sap.sse.common.impl.MillisecondsTimePoint;
 
 public class MongoObjectFactoryImpl implements MongoObjectFactory {
     private static Logger logger = Logger.getLogger(MongoObjectFactoryImpl.class.getName());
@@ -588,6 +589,8 @@ public class MongoObjectFactoryImpl implements MongoObjectFactory {
         DBObject query = new BasicDBObject(FieldNames.REGATTA_NAME.name(), regatta.getName());
         dbRegatta.put(FieldNames.REGATTA_NAME.name(), regatta.getName());
         dbRegatta.put(FieldNames.REGATTA_ID.name(), regatta.getId());
+        storeTimePoint(regatta.getStartDate(), dbRegatta, FieldNames.REGATTA_START_DATE);
+        storeTimePoint(regatta.getEndDate(), dbRegatta, FieldNames.REGATTA_END_DATE);
         dbRegatta.put(FieldNames.SCORING_SCHEME_TYPE.name(), regatta.getScoringScheme().getType().name());
         if (regatta.getBoatClass() != null) {
             dbRegatta.put(FieldNames.BOAT_CLASS_NAME.name(), regatta.getBoatClass().getName());
@@ -686,7 +689,7 @@ public class MongoObjectFactoryImpl implements MongoObjectFactory {
         return result;
     }
     
-    private void storeRaceLogEventAuthor(DBObject dbObject, RaceLogEventAuthor author) {
+    private void storeRaceLogEventAuthor(DBObject dbObject, AbstractLogEventAuthor author) {
         if (author != null) {
             dbObject.put(FieldNames.RACE_LOG_EVENT_AUTHOR_NAME.name(), author.getName());
             dbObject.put(FieldNames.RACE_LOG_EVENT_AUTHOR_PRIORITY.name(), author.getPriority());
@@ -816,7 +819,7 @@ public class MongoObjectFactoryImpl implements MongoObjectFactory {
         return result;
     }
 
-    public DBObject storeRaceLogEntry(RaceLogIdentifier raceLogIdentifier, RevokeEvent event) {
+    public DBObject storeRaceLogEntry(RaceLogIdentifier raceLogIdentifier, RaceLogRevokeEvent event) {
         BasicDBObject result = new BasicDBObject();
         storeRaceLogIdentifier(raceLogIdentifier, result);
         result.put(FieldNames.RACE_LOG_EVENT.name(), storeRaceLogRevokeEvent(event));
@@ -943,11 +946,14 @@ public class MongoObjectFactoryImpl implements MongoObjectFactory {
         return result;
     }
 
-    private Object storeRaceLogRevokeEvent(RevokeEvent event) {
+    private Object storeRaceLogRevokeEvent(RaceLogRevokeEvent event) {
         DBObject result = new BasicDBObject();
         storeRaceLogEventProperties(event, result);
         result.put(FieldNames.RACE_LOG_EVENT_CLASS.name(), RevokeEvent.class.getSimpleName());
         result.put(FieldNames.RACE_LOG_REVOKED_EVENT_ID.name(), event.getRevokedEventId());
+        result.put(FieldNames.RACE_LOG_REVOKED_EVENT_TYPE.name(), event.getRevokedEventType());
+        result.put(FieldNames.RACE_LOG_REVOKED_EVENT_SHORT_INFO.name(), event.getRevokedEventShortInfo());
+        result.put(FieldNames.RACE_LOG_REVOKED_REASON.name(), event.getReason());
         return result;
     }
 

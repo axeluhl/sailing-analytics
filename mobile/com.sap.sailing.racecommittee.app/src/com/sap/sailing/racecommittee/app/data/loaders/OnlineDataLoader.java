@@ -9,11 +9,11 @@ import android.content.AsyncTaskLoader;
 import android.content.Context;
 import android.content.Loader;
 
+import com.sap.sailing.android.shared.data.http.HttpGetRequest;
+import com.sap.sailing.android.shared.data.http.HttpRequest;
+import com.sap.sailing.android.shared.logging.ExLog;
 import com.sap.sailing.racecommittee.app.data.handlers.DataHandler;
-import com.sap.sailing.racecommittee.app.data.http.HttpGetRequest;
-import com.sap.sailing.racecommittee.app.data.http.HttpRequest;
 import com.sap.sailing.racecommittee.app.data.parsers.DataParser;
-import com.sap.sailing.racecommittee.app.logging.ExLog;
 
 /**
  * <p>
@@ -44,7 +44,7 @@ public class OnlineDataLoader<T> extends AsyncTaskLoader<DataLoaderResult<T>> {
      * Initializes a new {@link OnlineDataLoader} which initiates HTTP GET requests to load the remote data.
      */
     public OnlineDataLoader(Context context, URL requestUrl, DataParser<T> dataParser, DataHandler<T> dataHandler) {
-        this(context, new HttpGetRequest(requestUrl), dataParser, dataHandler);
+        this(context, new HttpGetRequest(requestUrl, context), dataParser, dataHandler);
     }
 
     /**
@@ -56,23 +56,23 @@ public class OnlineDataLoader<T> extends AsyncTaskLoader<DataLoaderResult<T>> {
         this.dataParser = dataParser;
         this.dataHandler = dataHandler;
 
-        ExLog.i(TAG, String.format("Loader created: %s", Integer.toHexString(this.hashCode())));
+        ExLog.i(getContext(), TAG, String.format("Loader created: %s", Integer.toHexString(this.hashCode())));
     }
 
     @Override
     protected void onStartLoading() {
         if (dataHandler.hasCachedResults()) {
-            ExLog.i(TAG, String.format("Using cached results... %s", Integer.toHexString(this.hashCode())));
+            ExLog.i(getContext(), TAG, String.format("Using cached results... %s", Integer.toHexString(this.hashCode())));
             deliverResult(new DataLoaderResult<T>(dataHandler.getCachedResults(), true));
         } else {
-            ExLog.i(TAG, String.format("No cached results. Forcing load now %s", Integer.toHexString(this.hashCode())));
+            ExLog.i(getContext(), TAG, String.format("No cached results. Forcing load now %s", Integer.toHexString(this.hashCode())));
             forceLoad();
         }
     }
 
     @Override
     protected void onForceLoad() {
-        ExLog.i(TAG, String.format("Forcing load %s", Integer.toHexString(this.hashCode())));
+        ExLog.i(getContext(), TAG, String.format("Forcing load %s", Integer.toHexString(this.hashCode())));
         super.onForceLoad();
     }
 
@@ -89,7 +89,7 @@ public class OnlineDataLoader<T> extends AsyncTaskLoader<DataLoaderResult<T>> {
         try {
             return new DataLoaderResult<T>(loadDataInBackground(), false);
         } catch (Exception e) {
-            ExLog.ex(TAG, e);
+            ExLog.ex(getContext(), TAG, e);
             return new DataLoaderResult<T>(e);
         }
     }

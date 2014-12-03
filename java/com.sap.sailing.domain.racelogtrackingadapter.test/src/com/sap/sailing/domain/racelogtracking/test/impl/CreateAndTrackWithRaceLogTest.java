@@ -17,6 +17,10 @@ import org.junit.Rule;
 import org.junit.Test;
 import org.junit.rules.ExpectedException;
 
+import com.sap.sailing.domain.abstractlog.AbstractLogEventAuthor;
+import com.sap.sailing.domain.abstractlog.race.RaceLog;
+import com.sap.sailing.domain.abstractlog.race.RaceLogEventFactory;
+import com.sap.sailing.domain.abstractlog.race.tracking.DeviceIdentifier;
 import com.sap.sailing.domain.base.Competitor;
 import com.sap.sailing.domain.base.DomainFactory;
 import com.sap.sailing.domain.base.Fleet;
@@ -26,18 +30,12 @@ import com.sap.sailing.domain.base.Series;
 import com.sap.sailing.domain.base.impl.FleetImpl;
 import com.sap.sailing.domain.base.impl.RegattaImpl;
 import com.sap.sailing.domain.base.impl.SeriesImpl;
-import com.sap.sailing.domain.common.TimePoint;
 import com.sap.sailing.domain.common.impl.DegreeBearingImpl;
 import com.sap.sailing.domain.common.impl.DegreePosition;
 import com.sap.sailing.domain.common.impl.KnotSpeedWithBearingImpl;
-import com.sap.sailing.domain.common.impl.MillisecondsTimePoint;
 import com.sap.sailing.domain.common.racelog.tracking.NotDenotedForRaceLogTrackingException;
 import com.sap.sailing.domain.leaderboard.RegattaLeaderboard;
 import com.sap.sailing.domain.leaderboard.impl.HighPoint;
-import com.sap.sailing.domain.racelog.RaceLog;
-import com.sap.sailing.domain.racelog.RaceLogEventAuthor;
-import com.sap.sailing.domain.racelog.RaceLogEventFactory;
-import com.sap.sailing.domain.racelog.tracking.DeviceIdentifier;
 import com.sap.sailing.domain.racelog.tracking.GPSFixStore;
 import com.sap.sailing.domain.racelog.tracking.test.mock.MockSmartphoneImeiServiceFinderFactory;
 import com.sap.sailing.domain.racelog.tracking.test.mock.SmartphoneImeiIdentifier;
@@ -48,6 +46,8 @@ import com.sap.sailing.domain.tracking.TrackedRace;
 import com.sap.sailing.domain.tracking.impl.GPSFixMovingImpl;
 import com.sap.sailing.server.RacingEventService;
 import com.sap.sailing.server.impl.RacingEventServiceImpl;
+import com.sap.sse.common.TimePoint;
+import com.sap.sse.common.impl.MillisecondsTimePoint;
 
 public class CreateAndTrackWithRaceLogTest {
     private RacingEventService service;
@@ -57,7 +57,7 @@ public class CreateAndTrackWithRaceLogTest {
     private RegattaLeaderboard leaderboard;
     private RaceLogTrackingAdapter adapter;
     private Regatta regatta;
-    private RaceLogEventAuthor author;
+    private AbstractLogEventAuthor author;
     private GPSFixStore gpsFixStore;
 
     private long time = 0;
@@ -70,10 +70,11 @@ public class CreateAndTrackWithRaceLogTest {
         gpsFixStore = service.getGPSFixStore();
         service.getMongoObjectFactory().getDatabase().dropDatabase();
         author = service.getServerAuthor();
-        Series series = new SeriesImpl("series", false, Collections.singletonList(fleet),
-                Collections.singletonList(columnName), service);
-        regatta = service.createRegatta(RegattaImpl.getDefaultName("regatta", "Laser"), "Laser", UUID.randomUUID(), Collections.<Series>singletonList(series),
+        Series series = new SeriesImpl("series", false, Collections.singletonList(fleet), Collections.emptySet(), service);
+        regatta = service.createRegatta(RegattaImpl.getDefaultName("regatta", "Laser"), "Laser",
+                /*startDate*/ null, /*endDate*/ null, UUID.randomUUID(), Collections.<Series>singletonList(series),
                 false, new HighPoint(), UUID.randomUUID(), /* useStartTimeInference */ true);
+        series.addRaceColumn(columnName, /* trackedRegattaRegistry */ null);
         leaderboard = service.addRegattaLeaderboard(regatta.getRegattaIdentifier(), "RegattaLeaderboard", new int[] {});
         adapter = RaceLogTrackingAdapterFactoryImpl.INSTANCE.getAdapter(DomainFactory.INSTANCE);
     }

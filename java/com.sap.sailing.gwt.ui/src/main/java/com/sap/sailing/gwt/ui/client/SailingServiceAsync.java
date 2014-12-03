@@ -1,6 +1,5 @@
 package com.sap.sailing.gwt.ui.client;
 
-import java.io.Serializable;
 import java.util.Collection;
 import java.util.Date;
 import java.util.List;
@@ -61,6 +60,7 @@ import com.sap.sailing.gwt.ui.shared.RegattaScoreCorrectionDTO;
 import com.sap.sailing.gwt.ui.shared.RemoteSailingServerReferenceDTO;
 import com.sap.sailing.gwt.ui.shared.ReplicationStateDTO;
 import com.sap.sailing.gwt.ui.shared.ScoreCorrectionProviderDTO;
+import com.sap.sailing.gwt.ui.shared.SimulatorResultsDTO;
 import com.sap.sailing.gwt.ui.shared.StrippedLeaderboardDTO;
 import com.sap.sailing.gwt.ui.shared.SwissTimingArchiveConfigurationDTO;
 import com.sap.sailing.gwt.ui.shared.SwissTimingConfigurationDTO;
@@ -75,11 +75,12 @@ import com.sap.sailing.gwt.ui.shared.WindDTO;
 import com.sap.sailing.gwt.ui.shared.WindInfoForRaceDTO;
 import com.sap.sse.common.Util;
 import com.sap.sse.common.search.KeywordQuery;
+import com.sap.sse.gwt.client.BuildVersionRetriever;
 
 /**
  * The async counterpart of {@link SailingService}
  */
-public interface SailingServiceAsync {
+public interface SailingServiceAsync extends BuildVersionRetriever {
 
     void getRegattas(AsyncCallback<List<RegattaDTO>> callback);
 
@@ -181,6 +182,8 @@ public interface SailingServiceAsync {
             int numberOfFixes, Collection<String> windSourceTypeNames, boolean onlyUpToNewestEvent,
             boolean includeCombinedWindForAllLegMiddles, AsyncCallback<WindInfoForRaceDTO> callback);
 
+    void getSimulatorResults(RegattaAndRaceIdentifier raceIdentifier, Date from, Date prevStartTime, AsyncCallback<SimulatorResultsDTO> callback);
+    
     void setWind(RegattaAndRaceIdentifier raceIdentifier, WindDTO wind, AsyncCallback<Void> callback);
 
     void removeWind(RegattaAndRaceIdentifier raceIdentifier, WindDTO windDTO, AsyncCallback<Void> callback);
@@ -380,7 +383,7 @@ public interface SailingServiceAsync {
     void moveRaceColumnInSeriesDown(RegattaIdentifier regattaIdentifier, String seriesName, String columnName,
             AsyncCallback<Void> callback);
 
-    void createRegatta(String regattaName, String boatClassName,
+    void createRegatta(String regattaName, String boatClassName, Date startDate, Date endDate,
             RegattaCreationParametersDTO seriesNamesWithFleetNamesAndFleetOrderingAndMedal, boolean persistent,
             ScoringSchemeType scoringSchemeType, UUID defaultCourseAreaId, boolean useStartTimeInference, AsyncCallback<RegattaDTO> callback);
 
@@ -456,7 +459,7 @@ public interface SailingServiceAsync {
             PolarSheetGenerationSettings settings, String name, AsyncCallback<PolarSheetGenerationResponse> asyncCallback);
 
 
-    void updateRegatta(RegattaIdentifier regattaIdentifier, UUID defaultCourseAreaUuid,
+    void updateRegatta(RegattaIdentifier regattaIdentifier, Date startDate, Date endDate, UUID defaultCourseAreaUuid,
             RegattaConfigurationDTO regattaConfiguration, boolean useStartTimeInference, AsyncCallback<Void> callback);
 
     /**
@@ -596,7 +599,7 @@ public interface SailingServiceAsync {
     void closeOpenEndedDeviceMapping(String leaderboardName, String raceColumnName, String fleetName,
             DeviceMappingDTO mapping, Date closingTimePoint, AsyncCallback<Void> callback);
 
-    void revokeRaceLogEvents(String leaderboardName, String raceColumnName, String fleetName, List<Serializable> eventIds,
+    void revokeRaceLogEvents(String leaderboardName, String raceColumnName, String fleetName, List<UUID> eventIds,
             AsyncCallback<Void> callback);
 
     void removeSeries(RegattaIdentifier regattaIdentifier, String seriesName, AsyncCallback<Void> callback);

@@ -7,9 +7,11 @@ Bundle-Vendor: SAP
 Bundle-RequiredExecutionEnvironment: JavaSE-1.8
 Bundle-ActivationPolicy: lazy
 Require-Bundle: com.mongodb.driver;bundle-version="2.6.2",
- com.sap.sailing.mongodb,
+ com.sap.sse.mongodb,
  com.sap.sailing.domain.tractracadapter,
  com.sap.sailing.domain,
  com.sap.sailing.domain.common,
  com.sap.sse.common
 Export-Package: com.sap.sailing.domain.tractracadapter.persistence
+Import-Package: org.osgi.framework
+Bundle-Activator: com.sap.sailing.domain.tractracadapter.persistence.impl.Activator

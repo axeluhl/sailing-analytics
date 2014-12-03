@@ -9,18 +9,24 @@ import java.net.URL;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.StandardCopyOption;
+import java.util.List;
 import java.util.UUID;
+import java.util.logging.Logger;
 
+import org.junit.Before;
 import org.junit.Rule;
 import org.junit.rules.TestWatchman;
 import org.junit.runner.RunWith;
 import org.junit.runners.model.FrameworkMethod;
+import org.openqa.selenium.Cookie;
 import org.openqa.selenium.OutputType;
 import org.openqa.selenium.TakesScreenshot;
 import org.openqa.selenium.WebDriver;
 import org.openqa.selenium.remote.Augmenter;
 import org.openqa.selenium.remote.RemoteWebDriver;
 
+import com.sap.sse.common.Duration;
+import com.sap.sse.common.impl.MillisecondsTimePoint;
 import com.sap.sailing.selenium.core.Managed;
 import com.sap.sailing.selenium.core.SeleniumRunner;
 import com.sap.sailing.selenium.core.TestEnvironment;
@@ -36,6 +42,8 @@ import com.sap.sailing.selenium.core.WindowManager;
  */
 @RunWith(SeleniumRunner.class)
 public abstract class AbstractSeleniumTest {
+    private static final Logger logger = Logger.getLogger(AbstractSeleniumTest.class.getName());
+    
     /**
      * <p>File extension for screenshots captured with a Selenium web driver.</p>
      */
@@ -47,7 +55,11 @@ public abstract class AbstractSeleniumTest {
     
     private static final String CLEAR_STATE_URL = "sailingserver/test-support/clearState"; //$NON-NLS-1$
     
+    private static final String LOGIN_URL = "security/api/restsecurity/login";
+    
     private static final int CLEAR_STATE_SUCCESFUL_STATUS_CODE = 204;
+
+    private static final String SESSION_COOKIE_NAME = "JSESSIONID";
     
     /**
      * <p></p>
@@ -57,7 +69,8 @@ public abstract class AbstractSeleniumTest {
      * @return
      *   <code>true</code> if the state was reseted successfully and <code>false</code> otherwise.
      */
-    protected static void clearState(String contextRoot) {
+    protected void clearState(String contextRoot) {
+        logger.info("clearing server state");
         try {
             URL url = new URL(contextRoot + CLEAR_STATE_URL);
             HttpURLConnection connection = (HttpURLConnection) url.openConnection();
@@ -66,6 +79,58 @@ public abstract class AbstractSeleniumTest {
             if (connection.getResponseCode() != CLEAR_STATE_SUCCESFUL_STATUS_CODE) {
                 throw new RuntimeException(connection.getResponseMessage());
             }
+        } catch (IOException exception) {
+            throw new RuntimeException(exception);
+        }
+    }
+    
+    protected void setUpAuthenticatedSession() {
+        logger.info("Authenticating session...");
+        Cookie sessionCookie = authenticate(getContextRoot());
+        getWebDriver().get(getContextRoot() + "index.html"); // initialize web driver so setting a cookie for the local domain is possible
+        getWebDriver().manage().addCookie(sessionCookie);
+        logger.info("...obtained session cookie "+sessionCookie);
+    }
+
+    /**
+     * If subclasses want to clear the state using {@link #clearState(String)}, they must re-define this method and
+     * first invoke {@link #clearState(String)} before calling this implementation using <code>super.setUp()</code>.
+     * This is important because {@link #clearState(String)} will also clear all session state that has been constructed
+     * by {@link #setUpAuthenticatedSession()}.
+     */
+    @Before
+    public void setUp() {
+        setUpAuthenticatedSession();
+    }
+    
+    /**
+     * Obtains a session cookie for a session authenticated using the default admin user.
+     * 
+     * @return the cookie that represents the authenticated session or <code>null</code> if the session
+     * couldn't successfully be authenticated
+     */
+    protected Cookie authenticate(String contextRoot) {
+        try {
+            Cookie result = null;
+            URL url = new URL(contextRoot + LOGIN_URL);
+            HttpURLConnection connection = (HttpURLConnection) url.openConnection();
+            connection.setRequestMethod("POST");
+            connection.setDoOutput(true);
+            connection.connect();
+            connection.getOutputStream().write("username=admin&password=admin".getBytes());
+            if (connection.getResponseCode() != 200) {
+                throw new RuntimeException(connection.getResponseMessage());
+            }
+            List<String> cookies = connection.getHeaderFields().get("Set-Cookie");
+            if (cookies != null) {
+                for (String cookie : cookies) {
+                    if (cookie.startsWith(SESSION_COOKIE_NAME + "=")) {
+                        String cookieValue = cookie.substring(cookie.indexOf('=')+1, cookie.indexOf(';'));
+                        result = new Cookie(SESSION_COOKIE_NAME, cookieValue, /* domain */ "localhost", /* path */ "/", MillisecondsTimePoint.now().plus(Duration.ONE_WEEK).asDate());
+                    }
+                }
+            }
+            return result;
         } catch (IOException exception) {
             throw new RuntimeException(exception);
         }

@@ -12,6 +12,16 @@ SAP is at the center of today’s technology revolution, developing innovations 
 
 * [[Information about this Wiki and HowTo|wiki/howto]]
 * [[General Project Information|wiki/general-information]]
+* General Information
+  * [[Architecture and Infrastructure|wiki/architecture-and-infrastructure]]
+  * [[Big Data - Numbers|wiki/big-data-numbers]]
+  * [[Sailing Domain Algorithms|wiki/sailing-domain-algorithms]]
+  * [[Inventory|wiki/inventar-liste]]
+  * [[RaceLog tracking|wiki/racelog-tracking]]
+  * [[Racecommittee App|wiki/racecommittee-app]]
+  * [[Web Services API|wiki/sailing-webservices]]
+  * [[Theses (Bachelor, Master, ...)|wiki/theses]]
+  * [[Google Analytics (Web Page Tracking)|wiki/ganalytics]]
 * Production Environment
   * [[Amazon EC2|wiki/amazon-ec2]]
   * [[EC2 Backup Strategy|wiki/amazon-ec2-backup-strategy]]
@@ -35,21 +45,13 @@ SAP is at the center of today’s technology revolution, developing innovations 
   * [[Working with GWT UI Binder|wiki/gwt-ui-binder]]
   * [[Working with GWT Locally|wiki/local-gwt]]
   * [[Mobile Development|wiki/mobile-development]]
+  * [[Security|wiki/security]]
   * [[Java De(Serialization) and Circular Dependencies|wiki/java-de-serialization-and-circular-dependencies]]
 * Information for Webdesigners
   * [[Layout repository|wiki/webdesign]]
   * [[Create boat graphics for the 2D race viewer|wiki/boatGraphicsSVG]]
   * [[Create clickable UI prototypes with Axure|wiki/ui-clickable-prototypes]]
   * [[Uploading Media Content|wiki/uploading-media-content]]
-* General Information
-  * [[Architecture and Infrastructure|wiki/architecture-and-infrastructure]]
-  * [[Sailing Domain Algorithms|wiki/sailing-domain-algorithms]]
-  * [[Inventory|wiki/inventar-liste]]
-  * [[RaceLog tracking|wiki/racelog-tracking]]
-  * [[Racecommittee App|wiki/racecommittee-app]]
-  * [[Web Services API|wiki/sailing-webservices]]
-  * [[Theses (Bachelor, Master, ...)|wiki/theses]]
-  * [[Google Analytics (Web Page Tracking)|wiki/ganalytics]]
 * Planning and Event Information
   * [[Project Planning (bigger development)|wiki/planning]]
   * [[General Event Planning|wiki/general-event-planning]]

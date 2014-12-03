@@ -21,7 +21,7 @@ Require-Bundle: com.sap.sailing.domain,
  com.sap.sailing.declination,
  com.sap.sailing.domain.tractracadapter,
  com.sap.sailing.domain.persistence,
- com.sap.sailing.mongodb,
+ com.sap.sse.mongodb,
  com.mongodb.driver;bundle-version="2.6.2",
  javax.servlet;bundle-version="2.6.0",
  com.sap.sailing.domain.common,
@@ -40,7 +40,9 @@ Require-Bundle: com.sap.sailing.domain,
  org.objectweb.asm;bundle-version="3.3.1",
  org.apache.commons.fileupload;bundle-version="1.2.2",
  com.sap.sailing.domain.igtimiadapter;bundle-version="1.0.0",
- com.sap.sse.common
+ com.sap.sse.common,
+ com.sap.sse.replication,
+ com.sap.sse
 Bundle-ClassPath: .
 Web-ContextPath: /sailingserver
 Export-Package: com.sap.sailing.server.gateway,

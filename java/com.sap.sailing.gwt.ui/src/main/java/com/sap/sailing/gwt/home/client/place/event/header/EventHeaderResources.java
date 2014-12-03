@@ -4,6 +4,7 @@ import com.google.gwt.core.client.GWT;
 import com.google.gwt.resources.client.ClientBundle;
 import com.google.gwt.resources.client.CssResource;
 import com.google.gwt.resources.client.CssResource.Shared;
+import com.google.gwt.resources.client.ImageResource;
 
 public interface EventHeaderResources extends ClientBundle {
     public static final EventHeaderResources INSTANCE = GWT.create(EventHeaderResources.class);
@@ -54,5 +55,8 @@ public interface EventHeaderResources extends ClientBundle {
         String eventnavigationcompactfloating_logo();
         String eventnavigationfixed();
     }
+
+    @Source("com/sap/sailing/gwt/home/images/default_event_logo.jpg")
+    ImageResource defaultEventLogoImage();
 
 }

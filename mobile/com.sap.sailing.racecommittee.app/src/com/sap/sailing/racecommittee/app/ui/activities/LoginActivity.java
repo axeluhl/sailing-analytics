@@ -12,6 +12,7 @@ import android.os.Bundle;
 import android.view.Window;
 import android.widget.Toast;
 
+import com.sap.sailing.android.shared.logging.ExLog;
 import com.sap.sailing.domain.base.CourseArea;
 import com.sap.sailing.domain.base.EventBase;
 import com.sap.sailing.domain.base.configuration.DeviceConfiguration;
@@ -24,7 +25,7 @@ import com.sap.sailing.racecommittee.app.data.OnlineDataManager;
 import com.sap.sailing.racecommittee.app.data.ReadonlyDataManager;
 import com.sap.sailing.racecommittee.app.data.clients.LoadClient;
 import com.sap.sailing.racecommittee.app.domain.configuration.impl.PreferencesDeviceConfigurationLoader;
-import com.sap.sailing.racecommittee.app.logging.ExLog;
+import com.sap.sailing.racecommittee.app.logging.LogEvent;
 import com.sap.sailing.racecommittee.app.ui.fragments.dialogs.AttachedDialogFragment;
 import com.sap.sailing.racecommittee.app.ui.fragments.dialogs.DialogListenerHost;
 import com.sap.sailing.racecommittee.app.ui.fragments.dialogs.LoginDialog;
@@ -72,7 +73,7 @@ public class LoginActivity extends BaseActivity implements EventSelectedListener
 
         // on first create add event list fragment
         if (savedInstanceState == null) {
-            ExLog.i(TAG, "Seems to be first start. Creating event fragment.");
+            ExLog.i(this, TAG, "Seems to be first start. Creating event fragment.");
             addEventListFragment();
         }
 
@@ -96,14 +97,14 @@ public class LoginActivity extends BaseActivity implements EventSelectedListener
         transaction.setCustomAnimations(R.animator.slide_in, R.animator.slide_out);
         transaction.replace(R.id.login_view_right_container, fragment, CourseAreaListFragmentTag);
         transaction.commitAllowingStateLoss();
-        ExLog.i("LoginActivity", "CourseFragment created.");
+        ExLog.i(this, "LoginActivity", "CourseFragment created.");
     }
 
     private ItemSelectedListener<EventBase> eventSelectionListener = new ItemSelectedListener<EventBase>() {
 
         public void itemSelected(Fragment sender, EventBase event) {
             final Serializable eventId = event.getId();
-            ExLog.i(ExLog.EVENT_SELECTED, eventId.toString(), getBaseContext());
+            ExLog.i(LoginActivity.this, LogEvent.EVENT_SELECTED, eventId.toString());
 
             setProgressBarIndeterminateVisibility(true);
             final ProgressDialog progressDialog = new ProgressDialog(LoginActivity.this);
@@ -139,10 +140,10 @@ public class LoginActivity extends BaseActivity implements EventSelectedListener
 
                             if (reason instanceof FileNotFoundException) {
                                 Toast.makeText(getApplicationContext(), getString(R.string.loading_configuration_not_found), Toast.LENGTH_LONG).show();
-                                ExLog.w(TAG, String.format("There seems to be no configuration for this device: %s", reason.toString()));
+                                ExLog.w(LoginActivity.this, TAG, String.format("There seems to be no configuration for this device: %s", reason.toString()));
                             } else {
                                 Toast.makeText(getApplicationContext(), getString(R.string.loading_configuration_failed), Toast.LENGTH_LONG).show();
-                                ExLog.ex(TAG, reason);
+                                ExLog.ex(LoginActivity.this, TAG, reason);
                             }
 
                             showCourseAreaListFragment(eventId);
@@ -164,8 +165,8 @@ public class LoginActivity extends BaseActivity implements EventSelectedListener
     private ItemSelectedListener<CourseArea> courseAreaSelectionListener = new ItemSelectedListener<CourseArea>() {
 
         public void itemSelected(Fragment sender, CourseArea courseArea) {
-            ExLog.i(TAG, "Starting view for " + courseArea.getName());
-            ExLog.i(ExLog.COURSE_SELECTED, courseArea.getName(), getBaseContext());
+            ExLog.i(LoginActivity.this, TAG, "Starting view for " + courseArea.getName());
+            ExLog.i(LoginActivity.this, LogEvent.COURSE_SELECTED, courseArea.getName());
             selectCourseArea(courseArea);
         }
     };
@@ -189,15 +190,15 @@ public class LoginActivity extends BaseActivity implements EventSelectedListener
                 LoginDialog localLoginDialog = (LoginDialog) dialog;
                 switch (localLoginDialog.getSelectedLoginType()) {
                 case OFFICER:
-                    ExLog.i(TAG, "Communication with backend is active.");
+                    ExLog.i(LoginActivity.this, TAG, "Communication with backend is active.");
                     preferences.setSendingActive(true);
                     break;
                 case VIEWER:
-                    ExLog.i(TAG, "Communication with backend is inactive.");
+                    ExLog.i(LoginActivity.this, TAG, "Communication with backend is inactive.");
                     preferences.setSendingActive(false);
                     break;
                 default:
-                    ExLog.i(TAG, "An invalid log type, e.g. NONE, was selected");
+                    ExLog.i(LoginActivity.this, TAG, "An invalid log type, e.g. NONE, was selected");
                     Toast.makeText(LoginActivity.this, getString(R.string.please_select_a_login_type),
                             Toast.LENGTH_LONG).show();
                     return;
@@ -206,7 +207,7 @@ public class LoginActivity extends BaseActivity implements EventSelectedListener
 
                 if (selectedCourseArea == null) {
                     Toast.makeText(LoginActivity.this, "The selected course area was lost.", Toast.LENGTH_LONG).show();
-                    ExLog.e(TAG, "Course area reference was not set - cannot start racing activity.");
+                    ExLog.e(LoginActivity.this, TAG, "Course area reference was not set - cannot start racing activity.");
                     return;
                 }
 

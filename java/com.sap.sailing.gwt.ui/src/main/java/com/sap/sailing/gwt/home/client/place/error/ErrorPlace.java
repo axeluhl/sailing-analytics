@@ -1,7 +1,7 @@
 package com.sap.sailing.gwt.home.client.place.error;
 
 import com.google.gwt.place.shared.PlaceTokenizer;
-import com.sap.sailing.gwt.home.client.AbstractBasePlace;
+import com.sap.sailing.gwt.common.client.AbstractBasePlace;
 
 public class ErrorPlace extends AbstractBasePlace {
     

@@ -13,9 +13,11 @@ import java.util.List;
 import java.util.Map;
 import java.util.NavigableSet;
 import java.util.Set;
+import java.util.function.Consumer;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
+import com.sap.sailing.domain.abstractlog.race.RaceLog;
 import com.sap.sailing.domain.base.BoatClass;
 import com.sap.sailing.domain.base.Competitor;
 import com.sap.sailing.domain.base.CourseBase;
@@ -28,14 +30,11 @@ import com.sap.sailing.domain.common.Bearing;
 import com.sap.sailing.domain.common.Distance;
 import com.sap.sailing.domain.common.PassingInstruction;
 import com.sap.sailing.domain.common.Position;
-import com.sap.sailing.domain.common.TimePoint;
 import com.sap.sailing.domain.common.TimingConstants;
 import com.sap.sailing.domain.common.WindSource;
 import com.sap.sailing.domain.common.WindSourceType;
-import com.sap.sailing.domain.common.impl.MillisecondsTimePoint;
 import com.sap.sailing.domain.common.impl.WindSourceImpl;
 import com.sap.sailing.domain.common.racelog.Flags;
-import com.sap.sailing.domain.racelog.RaceLog;
 import com.sap.sailing.domain.racelog.tracking.GPSFixStore;
 import com.sap.sailing.domain.tracking.CourseDesignChangedListener;
 import com.sap.sailing.domain.tracking.DynamicGPSFixTrack;
@@ -57,7 +56,9 @@ import com.sap.sailing.domain.tracking.WindStore;
 import com.sap.sailing.domain.tracking.WindTrack;
 import com.sap.sailing.util.impl.LockUtil;
 import com.sap.sailing.util.impl.NamedReentrantReadWriteLock;
+import com.sap.sse.common.TimePoint;
 import com.sap.sse.common.Util;
+import com.sap.sse.common.impl.MillisecondsTimePoint;
 
 public class DynamicTrackedRaceImpl extends TrackedRaceImpl implements
 DynamicTrackedRace, GPSTrackListener<Competitor, GPSFixMoving> {
@@ -351,80 +352,47 @@ DynamicTrackedRace, GPSTrackListener<Competitor, GPSFixMoving> {
         notifyListenersWindSourcesToExcludeChanged(windSourcesToExclude);
     }
 
-    private void notifyListenersWindSourcesToExcludeChanged(Iterable<? extends WindSource> windSourcesToExclude) {
+    private void notifyListeners(Consumer<RaceChangeListener> notifyAction) {
         RaceChangeListener[] listeners;
         synchronized (getListeners()) {
             listeners = getListeners().toArray(new RaceChangeListener[getListeners().size()]);
         }
         for (RaceChangeListener listener : listeners) {
             try {
-                listener.windSourcesToExcludeChanged(windSourcesToExclude);
+                notifyAction.accept(listener);
             } catch (Exception e) {
                 logger.log(Level.SEVERE, "RaceChangeListener " + listener + " threw exception " + e.getMessage());
-                logger.log(Level.SEVERE, "notifyListenersWindSourcesToExcludeChanged(Iterable<WindSource>)", e);
+                logger.log(Level.SEVERE, "notifyListeners(Consumer<RaceChangeListener> notifyAction", e);
             }
         }
     }
 
-    private void notifyListenersRaceTimesChanged(TimePoint startOfTracking, TimePoint endOfTracking,
-            TimePoint startTimeReceived) {
-        RaceChangeListener[] listeners;
-        synchronized (getListeners()) {
-            listeners = getListeners().toArray(new RaceChangeListener[getListeners().size()]);
-        }
-        for (RaceChangeListener listener : listeners) {
-            try {
-                listener.raceTimesChanged(startOfTracking, endOfTracking, startTimeReceived);
-            } catch (Exception e) {
-                logger.log(Level.SEVERE, "RaceChangeListener " + listener + " threw exception " + e.getMessage());
-                logger.log(Level.SEVERE, "notifyListenersRaceTimesChanged(TimePoint, TimePoint, TimePoint)", e);
-            }
-        }
+    private void notifyListenersWindSourcesToExcludeChanged(Iterable<? extends WindSource> windSourcesToExclude) {
+        notifyListeners(listener -> listener.windSourcesToExcludeChanged(windSourcesToExclude));
+    }
+
+    private void notifyListenersStartOfTrackingChanged(TimePoint startOfTracking) {
+        notifyListeners(listener -> listener.startOfTrackingChanged(startOfTracking));
+    }
+
+    private void notifyListenersEndOfTrackingChanged(TimePoint endOfTracking) {
+        notifyListeners(listener -> listener.endOfTrackingChanged(endOfTracking));
+    }
+
+    private void notifyListenersStartTimeReceivedChanged(TimePoint startTimeReceived) {
+        notifyListeners(listener -> listener.startTimeReceivedChanged(startTimeReceived));
     }
 
     private void notifyListenersStartOfRaceChanged(TimePoint oldStartOfRace, TimePoint newStartOfRace) {
-        RaceChangeListener[] listeners;
-        synchronized (getListeners()) {
-            listeners = getListeners().toArray(new RaceChangeListener[getListeners().size()]);
-        }
-        for (RaceChangeListener listener : listeners) {
-            try {
-                listener.startOfRaceChanged(oldStartOfRace, newStartOfRace);
-            } catch (Exception e) {
-                logger.log(Level.SEVERE, "RaceChangeListener " + listener + " threw exception " + e.getMessage());
-                logger.log(Level.SEVERE, "notifyListenersStartOfRaceChanged(TimePoint, TimePoint)", e);
-            }
-        }
+        notifyListeners(listener -> listener.startOfRaceChanged(oldStartOfRace, newStartOfRace));
     }
 
     private void notifyListenersWaypointAdded(int zeroBasedIndex, Waypoint waypointThatGotAdded) {
-        RaceChangeListener[] listeners;
-        synchronized (getListeners()) {
-            listeners = getListeners().toArray(new RaceChangeListener[getListeners().size()]);
-        }
-        for (RaceChangeListener listener : listeners) {
-            try {
-                listener.waypointAdded(zeroBasedIndex, waypointThatGotAdded);
-            } catch (Exception e) {
-                logger.log(Level.SEVERE, "RaceChangeListener " + listener + " threw exception " + e.getMessage());
-                logger.log(Level.SEVERE, "notifyListenersWaypointAdded(int, Waypoint)", e);
-            }
-        }
+        notifyListeners(listener -> listener.waypointAdded(zeroBasedIndex, waypointThatGotAdded));
     }
 
     private void notifyListenersWaypointRemoved(int zeroBasedIndex, Waypoint waypointThatGotRemoved) {
-        RaceChangeListener[] listeners;
-        synchronized (getListeners()) {
-            listeners = getListeners().toArray(new RaceChangeListener[getListeners().size()]);
-        }
-        for (RaceChangeListener listener : listeners) {
-            try {
-                listener.waypointRemoved(zeroBasedIndex, waypointThatGotRemoved);
-            } catch (Exception e) {
-                logger.log(Level.SEVERE, "RaceChangeListener " + listener + " threw exception " + e.getMessage());
-                logger.log(Level.SEVERE, "notifyListenersWaypointRemoved(int, Waypoint)", e);
-            }
-        }
+        notifyListeners(listener -> listener.waypointRemoved(zeroBasedIndex, waypointThatGotRemoved));
     }
 
     @Override
@@ -440,143 +408,39 @@ DynamicTrackedRace, GPSTrackListener<Competitor, GPSFixMoving> {
     }
 
     private void notifyListeners(GPSFix fix, Mark mark, boolean firstInTrack) {
-        RaceChangeListener[] listeners;
-        synchronized (getListeners()) {
-            listeners = getListeners().toArray(new RaceChangeListener[getListeners().size()]);
-        }
-        for (RaceChangeListener listener : listeners) {
-            try {
-                listener.markPositionChanged(fix, mark, firstInTrack);
-            } catch (Exception e) {
-                logger.log(Level.SEVERE, "RaceChangeListener " + listener + " threw exception " + e.getMessage());
-                logger.log(Level.SEVERE, "notifyListeners(GPSFix, Competitor)", e);
-            }
-        }
+        notifyListeners(listener -> listener.markPositionChanged(fix, mark, firstInTrack));
     }
 
     private void notifyListeners(GPSFixMoving fix, Competitor competitor) {
-        RaceChangeListener[] listeners;
-        synchronized (getListeners()) {
-            listeners = getListeners().toArray(new RaceChangeListener[getListeners().size()]);
-        }
-        for (RaceChangeListener listener : listeners) {
-            try {
-                listener.competitorPositionChanged(fix, competitor);
-            } catch (Exception e) {
-                logger.log(Level.SEVERE, "RaceChangeListener " + listener + " threw exception " + e.getMessage());
-                logger.log(Level.SEVERE, "notifyListeners(GPSFix, Competitor)", e);
-            }
-        }
+        notifyListeners(listener -> listener.competitorPositionChanged(fix, competitor));
     }
 
     private void notifyListeners(TrackedRaceStatus status) {
-        RaceChangeListener[] listeners;
-        synchronized (getListeners()) {
-            listeners = getListeners().toArray(new RaceChangeListener[getListeners().size()]);
-        }
-        for (RaceChangeListener listener : listeners) {
-            try {
-                listener.statusChanged(status);
-            } catch (Exception e) {
-                logger.log(Level.SEVERE, "RaceChangeListener " + listener + " threw exception " + e.getMessage());
-                logger.log(Level.SEVERE, "notifyListeners(TrackedRaceStatus)", e);
-            }
-        }
+        notifyListeners(listener -> listener.statusChanged(status));
     }
 
     private void notifyListeners(Wind wind, WindSource windSource) {
-        RaceChangeListener[] listeners;
-        synchronized (getListeners()) {
-            listeners = getListeners().toArray(new RaceChangeListener[getListeners().size()]);
-        }
-        for (RaceChangeListener listener : listeners) {
-            try {
-                listener.windDataReceived(wind, windSource);
-            } catch (Exception e) {
-                logger.log(Level.SEVERE, "RaceChangeListener " + listener + " threw exception " + e.getMessage());
-                logger.log(Level.SEVERE, "notifyListeners(Wind)", e);
-            }
-        }
+        notifyListeners(listener -> listener.windDataReceived(wind, windSource));
     }
 
     private void notifyListenersSpeedAveragingChanged(long oldMillisecondsOverWhichToAverageSpeed, long newMillisecondsOverWhichToAverageSpeed) {
-        RaceChangeListener[] listeners;
-        synchronized (getListeners()) {
-            listeners = getListeners().toArray(new RaceChangeListener[getListeners().size()]);
-        }
-        for (RaceChangeListener listener : listeners) {
-            try {
-                listener.speedAveragingChanged(oldMillisecondsOverWhichToAverageSpeed,
-                        newMillisecondsOverWhichToAverageSpeed);
-            } catch (Exception e) {
-                logger.log(Level.SEVERE, "RaceChangeListener " + listener + " threw exception " + e.getMessage());
-                logger.log(Level.SEVERE,
-                        "notifyListenersSpeedAveragingChanged(long, long)", e);
-            }
-        }
+        notifyListeners(listener -> listener.speedAveragingChanged(oldMillisecondsOverWhichToAverageSpeed, newMillisecondsOverWhichToAverageSpeed));
     }
 
     private void notifyListenersWindAveragingChanged(long oldMillisecondsOverWhichToAverageWind, long newMillisecondsOverWhichToAverageWind) {
-        RaceChangeListener[] listeners;
-        synchronized (getListeners()) {
-            listeners = getListeners().toArray(new RaceChangeListener[getListeners().size()]);
-        }
-        for (RaceChangeListener listener : listeners) {
-            try {
-                listener.windAveragingChanged(oldMillisecondsOverWhichToAverageWind,
-                        newMillisecondsOverWhichToAverageWind);
-            } catch (Exception e) {
-                logger.log(Level.SEVERE, "RaceChangeListener " + listener + " threw exception " + e.getMessage());
-                logger.log(Level.SEVERE,
-                        "notifyListenersWindAveragingChanged(long, long)", e);
-            }
-        }
+        notifyListeners(listener -> listener.windAveragingChanged(oldMillisecondsOverWhichToAverageWind, newMillisecondsOverWhichToAverageWind));
     }
 
     private void notifyListenersDelayToLiveChanged(long delayToLiveInMillis) {
-        RaceChangeListener[] listeners;
-        synchronized (getListeners()) {
-            listeners = getListeners().toArray(new RaceChangeListener[getListeners().size()]);
-        }
-        for (RaceChangeListener listener : listeners) {
-            try {
-                listener.delayToLiveChanged(delayToLiveInMillis);
-            } catch (Exception e) {
-                logger.log(Level.SEVERE, "RaceChangeListener " + listener + " threw exception " + e.getMessage());
-                logger.log(Level.SEVERE,
-                        "notifyListenersDelayToLiveChanged(long)", e);
-            }
-        }
+        notifyListeners(listener -> listener.delayToLiveChanged(delayToLiveInMillis));
     }
 
     private void notifyListenersWindRemoved(Wind wind, WindSource windSource) {
-        RaceChangeListener[] listeners;
-        synchronized (getListeners()) {
-            listeners = getListeners().toArray(new RaceChangeListener[getListeners().size()]);
-        }
-        for (RaceChangeListener listener : listeners) {
-            try {
-                listener.windDataRemoved(wind, windSource);
-            } catch (Exception e) {
-                logger.log(Level.SEVERE, "RaceChangeListener " + listener + " threw exception " + e.getMessage());
-                logger.log(Level.SEVERE, "notifyListenersWindRemoved(Wind)", e);
-            }
-        }
+        notifyListeners(listener -> listener.windDataRemoved(wind, windSource));
     }
 
     private void notifyListeners(Competitor competitor, Map<Waypoint, MarkPassing> oldMarkPassings, Iterable<MarkPassing> markPassings) {
-        RaceChangeListener[] listeners;
-        synchronized (getListeners()) {
-            listeners = getListeners().toArray(new RaceChangeListener[getListeners().size()]);
-        }
-        for (RaceChangeListener listener : listeners) {
-            try {
-                listener.markPassingReceived(competitor, oldMarkPassings, markPassings);
-            } catch (Exception e) {
-                logger.log(Level.SEVERE, "RaceChangeListener " + listener + " threw exception " + e.getMessage());
-                logger.log(Level.SEVERE, "notifyListeners(MarkPassing)", e);
-            }
-        }
+        notifyListeners(listener -> listener.markPassingReceived(competitor, oldMarkPassings, markPassings));
     }
 
     @Override
@@ -731,7 +595,7 @@ DynamicTrackedRace, GPSTrackListener<Competitor, GPSFixMoving> {
         if (!Util.equalsWithNull(startTimeReceived, getStartTimeReceived())) {
             TimePoint oldStartOfRace = getStartOfRace();
             super.setStartTimeReceived(startTimeReceived);
-            notifyListenersRaceTimesChanged(getStartOfTracking(), getEndOfTracking(), getStartTimeReceived());
+            notifyListenersStartTimeReceivedChanged(getStartTimeReceived());
             TimePoint newStartOfRace = getStartOfRace();
             if (!Util.equalsWithNull(oldStartOfRace, newStartOfRace)) {
                 notifyListenersStartOfRaceChanged(oldStartOfRace, newStartOfRace);
@@ -744,7 +608,7 @@ DynamicTrackedRace, GPSTrackListener<Competitor, GPSFixMoving> {
         if ((getStartOfTracking() == null) != (startOfTrackingReceived == null)
                 || (startOfTrackingReceived != null && !getStartOfTracking().equals(startOfTrackingReceived))) {
             super.setStartOfTrackingReceived(startOfTrackingReceived);
-            notifyListenersRaceTimesChanged(getStartOfTracking(), getEndOfTracking(), getStartTimeReceived());
+            notifyListenersStartOfTrackingChanged(getStartOfTracking());
         }
     }
 
@@ -753,7 +617,7 @@ DynamicTrackedRace, GPSTrackListener<Competitor, GPSFixMoving> {
         if ((getEndOfTracking() == null) != (endOfTrackingReceived == null)
                 || (endOfTrackingReceived != null && !getEndOfTracking().equals(endOfTrackingReceived))) {
             super.setEndOfTrackingReceived(endOfTrackingReceived);
-            notifyListenersRaceTimesChanged(getStartOfTracking(), getEndOfTracking(), getStartTimeReceived());
+            notifyListenersEndOfTrackingChanged(getEndOfTracking());
         }
     }
 

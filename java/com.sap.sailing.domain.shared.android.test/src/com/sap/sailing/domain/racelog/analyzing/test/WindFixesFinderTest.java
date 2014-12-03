@@ -9,11 +9,11 @@ import java.util.List;
 
 import org.junit.Test;
 
-import com.sap.sailing.domain.racelog.RaceLog;
-import com.sap.sailing.domain.racelog.RaceLogEvent;
-import com.sap.sailing.domain.racelog.RaceLogFlagEvent;
-import com.sap.sailing.domain.racelog.RaceLogWindFixEvent;
-import com.sap.sailing.domain.racelog.analyzing.impl.WindFixesFinder;
+import com.sap.sailing.domain.abstractlog.race.RaceLog;
+import com.sap.sailing.domain.abstractlog.race.RaceLogEvent;
+import com.sap.sailing.domain.abstractlog.race.RaceLogFlagEvent;
+import com.sap.sailing.domain.abstractlog.race.RaceLogWindFixEvent;
+import com.sap.sailing.domain.abstractlog.race.analyzing.impl.WindFixesFinder;
 import com.sap.sailing.domain.tracking.Wind;
 
 public class WindFixesFinderTest extends RaceLogAnalyzerTest<WindFixesFinder> {

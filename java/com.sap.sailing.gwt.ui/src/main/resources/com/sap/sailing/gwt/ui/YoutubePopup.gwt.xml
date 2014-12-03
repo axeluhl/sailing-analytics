@@ -7,11 +7,16 @@
 	<inherits name="com.sap.sailing.gwt.ui.EmulatedJRE" />
 	<inherits name="com.sap.sse.gwt.SSESharedGWT" />
 	<inherits name="com.sap.sse.SSECommon" />
-
+	<inherits name="com.sap.sse.security.ui.LoginPanel" />
 	<inherits name="com.sap.sailing.domain.SailingDomain" />
+	<inherits name="com.sap.sse.gwt.AdminConsole" />
 	<!-- Highcharts API -->
 	<inherits name="org.moxieapps.gwt.highcharts.Highcharts" />
-	<!-- Google Maps API -->
+	<!-- Fancy DateTimePicker (without the rest of Bootstrap!) -->
+	<!-- GWT-Bootstrap License: Apache License, Version 2.0 -->
+	<inherits name="com.github.gwtbootstrap.BootstrapNoResources" />
+	<inherits name='com.github.gwtbootstrap.datetimepicker.DatetimepickerNoResources' />
+		<!-- Google Maps API -->
 	<inherits name='com.google.gwt.ajaxloader.AjaxLoader' />
 	<inherits name='com.google.gwt.maps.Maps' />
 	<!-- GWT JSON Support -->
@@ -19,11 +24,14 @@
 				
 	<entry-point class="com.sap.sailing.gwt.ui.client.media.popup.YoutubePopupWindow" />
 
-<extend-property name="locale" values="de"/>
+	<extend-property name="locale" values="de"/>
 	<source path='client'/>
 	<source path='shared'/>
 	<source path='actions'/>
 	<source path='common'/>
 	<source path='simulator'/>
+	<source path='adminconsole'/>
+	<source path='usermanagement'/>
+	<source path='masterdataimport'/>
 	<source path='leaderboard'/>
 </module>

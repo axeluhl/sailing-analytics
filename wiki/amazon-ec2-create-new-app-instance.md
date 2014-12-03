@@ -20,15 +20,17 @@ Leave Kernel and RAM disk to Default. Then put the configuration for this server
 <img src="/wiki/images/amazon/UserDataDetails.JPG" width="70%" height="70%"/>
 
 <pre>
-INSTALL_FROM_RELEASE=master-201311062138
+INSTALL_FROM_RELEASE=name-of-release
 USE_ENVIRONMENT=live-server
-BUILD_COMPLETE_NOTIFY=simon.marcel.pamies@sap.com
-SERVER_STARTUP_NOTIFY=simon.marcel.pamies@sap.com
+MONGODB_PORT=10202
+MONGODB_NAME=myspecificevent
+REPLICATION_CHANNEL=myspecificevent
+SERVER_NAME=MYSPECIFICEVENT
+BUILD_COMPLETE_NOTIFY=youe.name@sap.com
+SERVER_STARTUP_NOTIFY=your.name@sap.com
 </pre>
 
-It does not really matter which SERVER_PORT (if you specify one) you use because there is only one app per instance. But this makes it easier to configure instances for Apache, a Load Balancer or other uses. If you want to create a cluster that is self-replicating and has a load balancer in front of it then make sure that all your instances are running on the same port!
-
-Provide your instance with an useful name.
+Provide your instance with an useful name. Usually, an SAP Sailing Analytics server instance should have a name that starts with "SL".
 
 <img src="/wiki/images/amazon/StartInstance5.JPG" width="70%" height="70%"/>
 

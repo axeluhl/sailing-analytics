@@ -2,17 +2,16 @@ package com.sap.sailing.datamining.impl.data;
 
 import com.sap.sailing.datamining.data.HasTrackedLegContext;
 import com.sap.sailing.datamining.data.HasTrackedRaceContext;
-import com.sap.sailing.domain.base.Fleet;
-import com.sap.sailing.domain.base.Regatta;
 import com.sap.sailing.domain.common.LegType;
 import com.sap.sailing.domain.common.NoWindException;
-import com.sap.sailing.domain.common.TimePoint;
-import com.sap.sailing.domain.common.impl.MillisecondsTimePoint;
 import com.sap.sailing.domain.tracking.TrackedLeg;
 import com.sap.sailing.domain.tracking.TrackedLegOfCompetitor;
-import com.sap.sailing.domain.tracking.TrackedRace;
+import com.sap.sse.common.TimePoint;
+import com.sap.sse.common.impl.MillisecondsTimePoint;
 
-public class TrackedLegWithContext extends TrackedRaceWithContext implements HasTrackedLegContext {
+public class TrackedLegWithContext implements HasTrackedLegContext {
+
+    private final HasTrackedRaceContext trackedRaceContext;
     
     private final TrackedLeg trackedLeg;
     private final int legNumber;
@@ -20,14 +19,14 @@ public class TrackedLegWithContext extends TrackedRaceWithContext implements Has
     private boolean legTypeHasBeenInitialized;
 
     public TrackedLegWithContext(HasTrackedRaceContext trackedRaceContext, TrackedLeg trackedLeg, int legNumber) {
-        this(trackedRaceContext.getRegatta(), trackedRaceContext.getFleet(),
-                trackedRaceContext.getTrackedRace(), trackedLeg, legNumber);
-    }
-    
-    public TrackedLegWithContext(Regatta regatta, Fleet fleet, TrackedRace trackedRace, TrackedLeg trackedLeg, int legNumber) {
-        super(regatta, fleet, trackedRace);
+        this.trackedRaceContext = trackedRaceContext;
         this.trackedLeg = trackedLeg;
         this.legNumber = legNumber;
+    }
+
+    @Override
+    public HasTrackedRaceContext getTrackedRaceContext() {
+        return trackedRaceContext;
     }
     
     @Override

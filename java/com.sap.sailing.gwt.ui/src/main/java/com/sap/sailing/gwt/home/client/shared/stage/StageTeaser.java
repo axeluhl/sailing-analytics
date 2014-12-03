@@ -10,12 +10,12 @@ import com.google.gwt.uibinder.client.UiField;
 import com.google.gwt.user.client.ui.Composite;
 import com.google.gwt.user.client.ui.HTMLPanel;
 import com.google.gwt.user.client.ui.Widget;
-import com.sap.sailing.domain.common.TimePoint;
-import com.sap.sailing.domain.common.impl.MillisecondsTimePoint;
 import com.sap.sailing.gwt.home.client.shared.Countdown;
 import com.sap.sailing.gwt.home.client.shared.Countdown.CountdownListener;
 import com.sap.sailing.gwt.home.client.shared.Countdown.RemainingTime;
 import com.sap.sailing.gwt.ui.shared.EventBaseDTO;
+import com.sap.sse.common.TimePoint;
+import com.sap.sse.common.impl.MillisecondsTimePoint;
 
 public abstract class StageTeaser extends Composite {
     @UiField DivElement bandCount;
@@ -31,8 +31,6 @@ public abstract class StageTeaser extends Composite {
     @UiField HTMLPanel stageTeaserBandsPanel;
     @UiField DivElement teaserImage;
 
-    private final static String DEFAULT_STAGE_IMAGE_URL = "http://static.sapsailing.com/ubilabsimages/default/default_stage_event_teaser.jpg"; 
-    
     interface StageTeaserUiBinder extends UiBinder<Widget, StageTeaser> {
     }
     
@@ -42,8 +40,8 @@ public abstract class StageTeaser extends Composite {
         StageResources.INSTANCE.css().ensureInjected();
         initWidget(uiBinder.createAndBindUi(this));
         
-        String stageImageUrl = event.getStageImageURL() != null ? event.getStageImageURL() : DEFAULT_STAGE_IMAGE_URL;
-
+        String stageImageUrl = event.getStageImageURL() != null ? event.getStageImageURL() : StageResources.INSTANCE.defaultStageEventTeaserImage().getSafeUri().asString();;
+        
         String backgroundImage = "url(" + stageImageUrl + ")";
         teaserImage.getStyle().setBackgroundImage(backgroundImage);
         

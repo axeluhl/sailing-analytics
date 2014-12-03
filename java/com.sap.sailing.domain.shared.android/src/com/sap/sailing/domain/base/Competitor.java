@@ -1,15 +1,16 @@
 package com.sap.sailing.domain.base;
 
 import com.sap.sailing.domain.common.Color;
-import com.sap.sailing.domain.common.WithID;
 import com.sap.sse.datamining.shared.annotations.Connector;
+import com.sap.sse.common.IsManagedByCache;
 import com.sap.sse.common.Named;
+import com.sap.sse.common.WithID;
 
-public interface Competitor extends Named, WithID, IsManagedBySharedDomainFactory {
-    @Connector(messageKey="Team", ordinal=8)
+public interface Competitor extends Named, WithID, IsManagedByCache<SharedDomainFactory> {
+    @Connector(messageKey="Team", ordinal=9)
     Team getTeam();
 
-    @Connector(messageKey="Boat", ordinal=9)
+    @Connector(messageKey="Boat", ordinal=10)
     Boat getBoat();
     
     Color getColor();

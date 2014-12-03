@@ -18,9 +18,11 @@ import com.sap.sailing.selenium.pages.gwt.DataEntryPO;
 import com.sap.sailing.selenium.test.AbstractSeleniumTest;
 
 public class TestLeaderboardFilterInLeaderboardGroupConfig extends AbstractSeleniumTest {
+    @Override
     @Before
-    public void clearDatabase() {
+    public void setUp() {
         clearState(getContextRoot());
+        super.setUp();
     }
     
     @Test

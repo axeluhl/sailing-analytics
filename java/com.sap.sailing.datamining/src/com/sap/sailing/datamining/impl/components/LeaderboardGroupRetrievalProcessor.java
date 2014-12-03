@@ -17,8 +17,8 @@ public class LeaderboardGroupRetrievalProcessor extends
         AbstractSimpleRetrievalProcessor<RacingEventService, LeaderboardGroup> {
 
     public LeaderboardGroupRetrievalProcessor(ExecutorService executor,
-            Collection<Processor<LeaderboardGroup>> resultReceivers) {
-        super(executor, resultReceivers);
+            Collection<Processor<LeaderboardGroup, ?>> resultReceivers) {
+        super(RacingEventService.class, LeaderboardGroup.class, executor, resultReceivers);
     }
 
     @Override

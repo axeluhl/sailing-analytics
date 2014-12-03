@@ -11,7 +11,6 @@ import java.util.Set;
 import com.sap.sailing.domain.base.Competitor;
 import com.sap.sailing.domain.common.PolarSheetGenerationSettings;
 import com.sap.sailing.domain.common.Position;
-import com.sap.sailing.domain.common.TimePoint;
 import com.sap.sailing.domain.common.WindSource;
 import com.sap.sailing.domain.common.WindSourceType;
 import com.sap.sailing.domain.tracking.GPSFixMoving;
@@ -19,6 +18,7 @@ import com.sap.sailing.domain.tracking.GPSFixTrack;
 import com.sap.sailing.domain.tracking.MarkPassing;
 import com.sap.sailing.domain.tracking.TrackedRace;
 import com.sap.sailing.domain.tracking.WindWithConfidence;
+import com.sap.sse.common.TimePoint;
 import com.sap.sse.common.Util;
 
 /**
@@ -172,7 +172,7 @@ public class PerRaceAndCompetitorPolarSheetGenerationWorker implements Runnable 
                             = new ArrayList<Util.Pair<String, WindWithConfidence<Util.Pair<Position, TimePoint>>>>();
         for (WindSource windGaugeSource : windGaugeSources) {
             Iterable<WindSource> allSources = race.getWindSources();
-            List<WindSource> allSourcesButTheSingleWindGaugeSource = new ArrayList<WindSource>();
+            Set<WindSource> allSourcesButTheSingleWindGaugeSource = new HashSet<WindSource>();
             for (WindSource windSource : allSources) {
                 if (windSource != windGaugeSource) {
                     allSourcesButTheSingleWindGaugeSource.add(windSource);
@@ -202,7 +202,7 @@ public class PerRaceAndCompetitorPolarSheetGenerationWorker implements Runnable 
         return done;
     }
     
-    private Iterable<WindSource> collectWindSourcesToIgnoreForSpeed() {
+    private Set<WindSource> collectWindSourcesToIgnoreForSpeed() {
         Set<WindSource> windSourcesToExclude = new HashSet<WindSource>();
         Iterable<WindSource> combinedSources = race.getWindSources(WindSourceType.COMBINED);
         for (WindSource combinedSource : combinedSources) {

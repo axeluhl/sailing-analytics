@@ -10,7 +10,7 @@ import android.util.Pair;
 
 import com.sap.sailing.domain.common.racelog.Flags;
 import com.sap.sailing.racecommittee.app.R;
-import com.sap.sailing.racecommittee.app.logging.ExLog;
+import com.sap.sailing.android.shared.logging.ExLog;
 
 public class FlagsBitmapCache {
 
@@ -29,7 +29,7 @@ public class FlagsBitmapCache {
         Pair<Flags, Flags> query = new Pair<Flags, Flags>(upperFlag, lowerFlag);
         Bitmap flagBitmap = bitmapCache.get(query);
         if (flagBitmap == null) {
-            ExLog.i(FlagsBitmapCache.class.getSimpleName(), 
+            ExLog.i(context, FlagsBitmapCache.class.getSimpleName(), 
                     String.format("Creating Bitmap for %s|%s flag.", upperFlag, lowerFlag));
             flagBitmap = createFlagBitmap(upperFlag, lowerFlag);
             bitmapCache.put(query, flagBitmap);

@@ -23,7 +23,7 @@ import com.sap.sailing.domain.common.LeaderboardType;
 import com.sap.sailing.domain.common.RaceIdentifier;
 import com.sap.sailing.domain.common.RegattaNameAndRaceName;
 import com.sap.sailing.domain.common.dto.AbstractLeaderboardDTO;
-import com.sap.sailing.gwt.ui.client.AbstractEntryPoint;
+import com.sap.sailing.gwt.ui.client.AbstractSailingEntryPoint;
 import com.sap.sailing.gwt.ui.client.GlobalNavigationPanel;
 import com.sap.sailing.gwt.ui.client.LogoAndTitlePanel;
 import com.sap.sailing.gwt.ui.client.RemoteServiceMappingConstants;
@@ -43,7 +43,7 @@ import com.sap.sse.gwt.client.player.Timer.PlayStates;
 import com.sap.sse.gwt.shared.GwtHttpRequestUtils;
 
 
-public class LeaderboardEntryPoint extends AbstractEntryPoint {
+public class LeaderboardEntryPoint extends AbstractSailingEntryPoint {
     private static final Logger logger = Logger.getLogger(LeaderboardEntryPoint.class.getName());
 
     private String leaderboardName;
@@ -57,9 +57,7 @@ public class LeaderboardEntryPoint extends AbstractEntryPoint {
     @Override
     protected void doOnModuleLoad() {
         super.doOnModuleLoad();
-        
         EntryPointHelper.registerASyncService((ServiceDefTarget) sailingService, RemoteServiceMappingConstants.sailingServiceRemotePath);
-
         final boolean showRaceDetails = GwtHttpRequestUtils.getBooleanParameter(LeaderboardUrlSettings.PARAM_SHOW_RACE_DETAILS, false /* default*/);
         final boolean embedded = GwtHttpRequestUtils.getBooleanParameter(LeaderboardUrlSettings.PARAM_EMBEDDED, false /* default*/); 
         final boolean hideToolbar = GwtHttpRequestUtils.getBooleanParameter(LeaderboardUrlSettings.PARAM_HIDE_TOOLBAR, false /* default*/); 
@@ -84,7 +82,7 @@ public class LeaderboardEntryPoint extends AbstractEntryPoint {
                                                 leaderboardType = leaderboardNameAndType.getB();
                                                 createUI(showRaceDetails, embedded, hideToolbar, event);
                                             } else {
-                                                RootPanel.get().add(new Label(stringMessages.noSuchLeaderboard()));
+                                                RootPanel.get().add(new Label(getStringMessages().noSuchLeaderboard()));
                                             }
                                         }
 
@@ -114,11 +112,16 @@ public class LeaderboardEntryPoint extends AbstractEntryPoint {
                         }));
             }
         } else {
-            RootPanel.get().add(new Label(stringMessages.noSuchLeaderboard()));
+            RootPanel.get().add(new Label(getStringMessages().noSuchLeaderboard()));
         }
         final String zoomTo = Window.Location.getParameter(LeaderboardUrlSettings.PARAM_ZOOM_TO);
         if (zoomTo != null) {
-            RootPanel.getBodyElement().setAttribute("style", "zoom: "+zoomTo+";-moz-transform: scale("+zoomTo+");-moz-transform-origin: 0 0;-o-transform: scale("+zoomTo+");-o-transform-origin: 0 0;-webkit-transform: scale("+zoomTo+");-webkit-transform-origin: 0 0;");
+            RootPanel.getBodyElement().setAttribute(
+                    "style",
+                    "zoom: " + zoomTo + ";-moz-transform: scale(" + zoomTo
+                            + ");-moz-transform-origin: 0 0;-o-transform: scale(" + zoomTo
+                            + ");-o-transform-origin: 0 0;-webkit-transform: scale(" + zoomTo
+                            + ");-webkit-transform-origin: 0 0;");
         }
     }
     
@@ -132,8 +135,8 @@ public class LeaderboardEntryPoint extends AbstractEntryPoint {
             if (leaderboardDisplayName == null || leaderboardDisplayName.isEmpty()) {
                 leaderboardDisplayName = leaderboardName;
             }
-            globalNavigationPanel = new GlobalNavigationPanel(stringMessages, true, null, leaderboardGroupName, event, null);
-            logoAndTitlePanel = new LogoAndTitlePanel(leaderboardGroupName, leaderboardDisplayName, stringMessages, this) {
+            globalNavigationPanel = new GlobalNavigationPanel(getStringMessages(), true, null, leaderboardGroupName, event, null);
+            logoAndTitlePanel = new LogoAndTitlePanel(leaderboardGroupName, leaderboardDisplayName, getStringMessages(), this, getUserService()) {
                 @Override
                 public void onResize() {
                     super.onResize();
@@ -164,7 +167,7 @@ public class LeaderboardEntryPoint extends AbstractEntryPoint {
         boolean showOverallLeaderboard = GwtHttpRequestUtils.getBooleanParameter(LeaderboardUrlSettings.PARAM_SHOW_OVERALL_LEADERBOARD, false);
         boolean showSeriesLeaderboards = GwtHttpRequestUtils.getBooleanParameter(LeaderboardUrlSettings.PARAM_SHOW_SERIES_LEADERBOARDS, false);
         String chartDetailParam = GwtHttpRequestUtils.getStringParameter(LeaderboardUrlSettings.PARAM_CHART_DETAIL, null);
-        DetailType chartDetailType;
+        final DetailType chartDetailType;
         if (chartDetailParam != null && (DetailType.REGATTA_RANK.name().equals(chartDetailParam) || DetailType.OVERALL_RANK.name().equals(chartDetailParam) || 
                 DetailType.REGATTA_TOTAL_POINTS_SUM.name().equals(chartDetailParam))) {
             chartDetailType = DetailType.valueOf(chartDetailParam);
@@ -175,11 +178,11 @@ public class LeaderboardEntryPoint extends AbstractEntryPoint {
         final Widget leaderboardViewer;
         if (leaderboardType.isMetaLeaderboard()) {
             leaderboardViewer = new MetaLeaderboardViewer(sailingService, new AsyncActionsExecutor(),
-                    timer, leaderboardSettings, null, preselectedRace, leaderboardGroupName, leaderboardName, this, stringMessages,
+                    timer, leaderboardSettings, null, preselectedRace, leaderboardGroupName, leaderboardName, this, getStringMessages(),
                     userAgent, showRaceDetails, hideToolbar, autoExpandLastRaceColumn, showCharts, chartDetailType, showSeriesLeaderboards);
         } else {
             leaderboardViewer = new LeaderboardViewer(sailingService, new AsyncActionsExecutor(),
-                    timer, leaderboardSettings, preselectedRace, leaderboardGroupName, leaderboardName, this, stringMessages,
+                    timer, leaderboardSettings, preselectedRace, leaderboardGroupName, leaderboardName, this, getStringMessages(),
                     userAgent, showRaceDetails, hideToolbar, autoExpandLastRaceColumn, showCharts, chartDetailType, showOverallLeaderboard);
         }
         contentScrollPanel.setWidget(leaderboardViewer);

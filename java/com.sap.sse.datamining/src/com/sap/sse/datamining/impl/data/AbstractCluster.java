@@ -41,7 +41,7 @@ public abstract class AbstractCluster<ElementType> implements Cluster<ElementTyp
         return getName() + boundaries;
     }
 
-    public Collection<ClusterBoundary<ElementType>> getClusterBoundaries() {
+    protected Collection<ClusterBoundary<ElementType>> getClusterBoundaries() {
         return boundaries;
     }
 

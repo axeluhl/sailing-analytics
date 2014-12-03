@@ -15,7 +15,6 @@ import org.xml.sax.SAXException;
 
 import com.sap.sailing.domain.common.RegattaScoreCorrections;
 import com.sap.sailing.domain.common.ScoreCorrectionProvider;
-import com.sap.sailing.domain.common.TimePoint;
 import com.sap.sailing.resultimport.ResultDocumentDescriptor;
 import com.sap.sailing.resultimport.ResultDocumentProvider;
 import com.sap.sailing.resultimport.ResultUrlProvider;
@@ -27,6 +26,7 @@ import com.sap.sailing.xrr.schema.Division;
 import com.sap.sailing.xrr.schema.Event;
 import com.sap.sailing.xrr.schema.EventGender;
 import com.sap.sailing.xrr.schema.RegattaResults;
+import com.sap.sse.common.TimePoint;
 import com.sap.sse.common.Util;
 
 public class ScoreCorrectionProviderImpl implements ScoreCorrectionProvider, ResultUrlProvider {

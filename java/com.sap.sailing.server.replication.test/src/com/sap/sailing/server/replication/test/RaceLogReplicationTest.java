@@ -16,6 +16,13 @@ import org.junit.Before;
 import org.junit.Ignore;
 import org.junit.Test;
 
+import com.sap.sailing.domain.abstractlog.AbstractLogEventAuthor;
+import com.sap.sailing.domain.abstractlog.impl.LogEventAuthorImpl;
+import com.sap.sailing.domain.abstractlog.race.RaceLog;
+import com.sap.sailing.domain.abstractlog.race.RaceLogCourseDesignChangedEvent;
+import com.sap.sailing.domain.abstractlog.race.RaceLogEvent;
+import com.sap.sailing.domain.abstractlog.race.RaceLogEventFactory;
+import com.sap.sailing.domain.abstractlog.race.RaceLogRaceStatusEvent;
 import com.sap.sailing.domain.base.ControlPointWithTwoMarks;
 import com.sap.sailing.domain.base.CourseBase;
 import com.sap.sailing.domain.base.Fleet;
@@ -35,7 +42,6 @@ import com.sap.sailing.domain.common.RegattaName;
 import com.sap.sailing.domain.common.dto.FleetDTO;
 import com.sap.sailing.domain.common.dto.RegattaCreationParametersDTO;
 import com.sap.sailing.domain.common.dto.SeriesCreationParametersDTO;
-import com.sap.sailing.domain.common.impl.MillisecondsTimePoint;
 import com.sap.sailing.domain.common.racelog.RaceLogRaceStatus;
 import com.sap.sailing.domain.leaderboard.FlexibleLeaderboard;
 import com.sap.sailing.domain.leaderboard.Leaderboard;
@@ -43,15 +49,8 @@ import com.sap.sailing.domain.leaderboard.RegattaLeaderboard;
 import com.sap.sailing.domain.leaderboard.impl.LowPoint;
 import com.sap.sailing.domain.persistence.MongoObjectFactory;
 import com.sap.sailing.domain.persistence.PersistenceFactory;
-import com.sap.sailing.domain.racelog.RaceLog;
-import com.sap.sailing.domain.racelog.RaceLogCourseDesignChangedEvent;
-import com.sap.sailing.domain.racelog.RaceLogEvent;
-import com.sap.sailing.domain.racelog.RaceLogEventAuthor;
-import com.sap.sailing.domain.racelog.RaceLogEventFactory;
 import com.sap.sailing.domain.racelog.RaceLogIdentifier;
-import com.sap.sailing.domain.racelog.RaceLogRaceStatusEvent;
-import com.sap.sailing.domain.racelog.impl.RaceLogEventAuthorImpl;
-import com.sap.sailing.mongodb.MongoDBService;
+import com.sap.sailing.server.RacingEventService;
 import com.sap.sailing.server.impl.RacingEventServiceImpl;
 import com.sap.sailing.server.operationaltransformation.AddColumnToLeaderboard;
 import com.sap.sailing.server.operationaltransformation.AddColumnToSeries;
@@ -59,24 +58,27 @@ import com.sap.sailing.server.operationaltransformation.AddSpecificRegatta;
 import com.sap.sailing.server.operationaltransformation.CreateFlexibleLeaderboard;
 import com.sap.sailing.server.operationaltransformation.CreateRegattaLeaderboard;
 import com.sap.sailing.server.operationaltransformation.RenameLeaderboard;
-import com.sap.sailing.server.replication.ReplicationMasterDescriptor;
 import com.sap.sse.common.Util;
+import com.sap.sse.common.Util.Pair;
+import com.sap.sse.common.impl.MillisecondsTimePoint;
+import com.sap.sse.replication.ReplicationMasterDescriptor;
 
 public class RaceLogReplicationTest extends AbstractServerReplicationTest {
     private static final String BOAT_CLASS_NAME_49er = "49er";
 
-    private com.sap.sse.common.Util.Pair<ReplicationServiceTestImpl, ReplicationMasterDescriptor> replicationDescriptorPair;
+    private Pair<com.sap.sse.replication.testsupport.AbstractServerReplicationTest.ReplicationServiceTestImpl<RacingEventService>, ReplicationMasterDescriptor> replicationDescriptorPair;
     
     private RaceLogEvent raceLogEvent;
     private RaceLogEvent anotherRaceLogEvent;
-    private RaceLogEventAuthor author = new RaceLogEventAuthorImpl("Test Author", 1);
+    private AbstractLogEventAuthor author = new LogEventAuthorImpl("Test Author", 1);
     
     @Before
+    @Override
     public void setUp() throws Exception {
         raceLogEvent = RaceLogEventFactory.INSTANCE.createRaceStatusEvent(new MillisecondsTimePoint(1), author, 42, RaceLogRaceStatus.UNKNOWN);
         anotherRaceLogEvent = RaceLogEventFactory.INSTANCE.createRaceStatusEvent(new MillisecondsTimePoint(2), author, 42, RaceLogRaceStatus.UNKNOWN);
         try {
-            replicationDescriptorPair = basicSetUp(true, null, null);
+            replicationDescriptorPair = basicSetUp(/* dropDB */ true, null, null);
         } catch (Exception e) {
             e.printStackTrace();
             tearDown();
@@ -265,7 +267,7 @@ public class RaceLogReplicationTest extends AbstractServerReplicationTest {
     private void addEventToDB(RaceLogIdentifier raceLogIdentifier, RaceLogRaceStatusEvent createRaceStatusEvent, String regattaName, String raceColumnName, String fleetName) {
         final MongoObjectFactory defaultMongoObjectFactory = PersistenceFactory.INSTANCE.getDefaultMongoObjectFactory();
         defaultMongoObjectFactory.getDatabase().getLastError(); // wait for regatta write operation to complete
-        final RacingEventServiceImpl temporaryMaster = createNewMaster(MongoDBService.INSTANCE, defaultMongoObjectFactory);
+        final RacingEventServiceImpl temporaryMaster = createNewMaster();
         Regatta regatta = temporaryMaster.getRegatta(new RegattaName(regattaName+" ("+BOAT_CLASS_NAME_49er+")"));
         Series series = regatta.getSeries().iterator().next();
         RaceLog masterLog = series.getRaceColumnByName(raceColumnName).getRaceLog(series.getFleetByName(fleetName));
@@ -344,7 +346,8 @@ public class RaceLogReplicationTest extends AbstractServerReplicationTest {
         seriesCreationParameters.put(seriesName, creationParametersForDefaultSeries);
         // 1. Install some race column on master...
         RegattaCreationParametersDTO regattaCreationParams = new RegattaCreationParametersDTO(seriesCreationParameters);
-        AddSpecificRegatta addRegattaOperation = new AddSpecificRegatta(regattaName, boatClassName, /* regatta ID */ UUID.randomUUID(), regattaCreationParams, /* persistent */ true,
+        AddSpecificRegatta addRegattaOperation = new AddSpecificRegatta(regattaName, boatClassName, 
+                /*startDate*/ null, /*endDate*/ null, /* regatta ID */ UUID.randomUUID(), regattaCreationParams, /* persistent */ true,
                 new LowPoint(), /* default course area ID */ UUID.randomUUID(), /* useStartTimeInference */ true);
         return master.apply(addRegattaOperation);
     }

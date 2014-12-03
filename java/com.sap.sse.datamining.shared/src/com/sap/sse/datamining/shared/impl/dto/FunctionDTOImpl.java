@@ -47,8 +47,13 @@ public class FunctionDTOImpl implements FunctionDTO {
     }
 
     @Override
-    public List<String> getParameters() {
+    public List<String> getParameterTypeNames() {
         return parameterTypeNames;
+    }
+    
+    @Override
+    public String getFunctionName() {
+        return functionName;
     }
 
     @Override

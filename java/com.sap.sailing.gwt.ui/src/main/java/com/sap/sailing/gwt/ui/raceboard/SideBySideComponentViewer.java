@@ -26,7 +26,6 @@ import com.sap.sailing.gwt.ui.client.shared.components.Component;
 import com.sap.sailing.gwt.ui.client.shared.components.ComponentViewer;
 import com.sap.sailing.gwt.ui.client.shared.components.SettingsDialog;
 import com.sap.sailing.gwt.ui.leaderboard.LeaderboardPanel;
-import com.sap.sailing.gwt.ui.shared.UserDTO;
 import com.sap.sse.common.Util.Pair;
 
 /**
@@ -70,7 +69,7 @@ public class SideBySideComponentViewer implements ComponentViewer {
 
     public SideBySideComponentViewer(final LeaderboardPanel leftComponentP, final Component<?> rightComponentP,
             final MediaPlayerManagerComponent mediaPlayerManagerComponent, List<Component<?>> components,
-            final StringMessages stringMessages, UserDTO user) {
+            final StringMessages stringMessages) {
         this.stringMessages = stringMessages;
         this.leftComponent = leftComponentP;
         this.rightComponent = rightComponentP;
@@ -143,7 +142,7 @@ public class SideBySideComponentViewer implements ComponentViewer {
         List<Pair<Button, Component<?>>> additionalVerticalButtons = new ArrayList<Pair<Button, Component<?>>>();
         additionalVerticalButtons.add(new Pair<Button, Component<?>>(mediaSelectionButton,
                 mediaPlayerManagerComponent));
-        if (user != null) {
+        if (/* TODO check for correct role; was: user != null */ true) {
             additionalVerticalButtons.add(new Pair<Button, Component<?>>(mediaManagementButton,
                     mediaPlayerManagerComponent));
         }

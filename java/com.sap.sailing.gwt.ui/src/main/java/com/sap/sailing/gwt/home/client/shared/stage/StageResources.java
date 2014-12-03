@@ -3,6 +3,7 @@ package com.sap.sailing.gwt.home.client.shared.stage;
 import com.google.gwt.core.client.GWT;
 import com.google.gwt.resources.client.ClientBundle;
 import com.google.gwt.resources.client.CssResource;
+import com.google.gwt.resources.client.ImageResource;
 
 public interface StageResources extends ClientBundle {
     public static final StageResources INSTANCE = GWT.create(StageResources.class);
@@ -41,4 +42,7 @@ public interface StageResources extends ClientBundle {
         String stage_progress();
         String stage_progress_bar();
     }
+    
+    @Source("com/sap/sailing/gwt/home/images/default_stage_event_teaser.jpg")
+    ImageResource defaultStageEventTeaserImage();
 }

@@ -9,7 +9,7 @@ import com.google.gwt.user.client.rpc.ServiceDefTarget;
 import com.google.gwt.user.client.ui.DockLayoutPanel;
 import com.google.gwt.user.client.ui.FlowPanel;
 import com.google.gwt.user.client.ui.RootLayoutPanel;
-import com.sap.sailing.gwt.ui.client.AbstractEntryPoint;
+import com.sap.sailing.gwt.ui.client.AbstractSailingEntryPoint;
 import com.sap.sailing.gwt.ui.client.LogoAndTitlePanel;
 import com.sap.sailing.gwt.ui.client.RemoteServiceMappingConstants;
 import com.sap.sailing.gwt.ui.client.SimulatorService;
@@ -17,7 +17,7 @@ import com.sap.sailing.gwt.ui.client.SimulatorServiceAsync;
 import com.sap.sailing.simulator.util.SailingSimulatorConstants;
 import com.sap.sse.gwt.client.EntryPointHelper;
 
-public class SimulatorEntryPoint extends AbstractEntryPoint {
+public class SimulatorEntryPoint extends AbstractSailingEntryPoint {
 
     private final String titleName = "Strategy Simulator";
 
@@ -182,7 +182,7 @@ public class SimulatorEntryPoint extends AbstractEntryPoint {
     }
 
     private FlowPanel createLogoAndTitlePanel(SimulatorMainPanel simulatorPanel) {
-        LogoAndTitlePanel logoAndTitlePanel = new LogoAndTitlePanel(titleName, null, stringMessages, this);
+        LogoAndTitlePanel logoAndTitlePanel = new LogoAndTitlePanel(titleName, null, getStringMessages(), this, getUserService());
         /*{
             @Override
             public void onResize() {
@@ -200,7 +200,7 @@ public class SimulatorEntryPoint extends AbstractEntryPoint {
     }
 
     private void createSimulatorPanel() {
-        SimulatorMainPanel simulatorPanel = new SimulatorMainPanel(simulatorService, stringMessages, this, xRes, yRes, border, streamletPars,
+        SimulatorMainPanel simulatorPanel = new SimulatorMainPanel(simulatorService, getStringMessages(), this, xRes, yRes, border, streamletPars,
                 autoUpdate, mode, event, showGrid, showLines, seedLines, showArrows, showLineGuides, showStreamlets, showMapControls);
 
         DockLayoutPanel p = new DockLayoutPanel(Unit.PX);

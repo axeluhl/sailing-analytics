@@ -7,15 +7,15 @@ import com.google.gwt.uibinder.client.UiField;
 import com.google.gwt.uibinder.client.UiHandler;
 import com.google.gwt.user.client.ui.Anchor;
 import com.google.gwt.user.client.ui.Widget;
-import com.sap.sailing.gwt.home.client.HomeResources;
-import com.sap.sailing.gwt.home.client.app.PlaceNavigator;
+import com.sap.sailing.gwt.common.client.SharedResources;
+import com.sap.sailing.gwt.home.client.app.HomePlacesNavigator;
 import com.sap.sailing.gwt.home.client.place.events.recent.EventsOverviewRecent;
 import com.sap.sailing.gwt.home.client.place.events.upcoming.EventsOverviewUpcoming;
 
 public class TabletAndDesktopEventsView extends AbstractEventsView {
     private static EventsPageViewUiBinder uiBinder = GWT.create(EventsPageViewUiBinder.class);
 
-    private final HomeResources homeRes = GWT.create(HomeResources.class);
+    private final SharedResources homeRes = GWT.create(SharedResources.class);
     
     interface EventsPageViewUiBinder extends UiBinder<Widget, TabletAndDesktopEventsView> {
     }
@@ -25,7 +25,7 @@ public class TabletAndDesktopEventsView extends AbstractEventsView {
     @UiField Anchor recentEventsLink;
     @UiField Anchor upcomingEventsLink;
     
-    public TabletAndDesktopEventsView(PlaceNavigator navigator) {
+    public TabletAndDesktopEventsView(HomePlacesNavigator navigator) {
         super();
         recentEventsWidget = new EventsOverviewRecent(navigator);
         upcomingEventsWidget = new EventsOverviewUpcoming(navigator);

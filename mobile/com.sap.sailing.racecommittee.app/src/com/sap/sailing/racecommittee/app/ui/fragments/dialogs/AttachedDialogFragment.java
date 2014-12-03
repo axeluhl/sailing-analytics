@@ -7,7 +7,7 @@ import android.content.DialogInterface;
 import android.content.DialogInterface.OnClickListener;
 import android.os.Bundle;
 
-import com.sap.sailing.racecommittee.app.logging.ExLog;
+import com.sap.sailing.android.shared.logging.ExLog;
 
 public abstract class AttachedDialogFragment extends LoggableDialogFragment {
     private final static String TAG = AttachedDialogFragment.class.getName();
@@ -38,7 +38,7 @@ public abstract class AttachedDialogFragment extends LoggableDialogFragment {
         if (getHost() != null) {
             getHost().getListener().onDialogNegativeButton(this);
         } else {
-            ExLog.w(TAG, "Dialog host was null.");
+            ExLog.w(getActivity(), TAG, "Dialog host was null.");
         }
     }
 
@@ -46,7 +46,7 @@ public abstract class AttachedDialogFragment extends LoggableDialogFragment {
         if (getHost() != null) {
             getHost().getListener().onDialogPositiveButton(this);
         } else {
-            ExLog.w(TAG, "Dialog host was null.");
+            ExLog.w(getActivity(), TAG, "Dialog host was null.");
         }
     }
 

@@ -1,0 +1,13 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="not_tracking">Tracking aktiv</string>
+    <string name="tracking">Tracking nicht aktiv</string>
+    
+    <string name="options_menu_settings">Einstellungen</string>
+	<string name="options_menu_info">Technische Informationen</string>
+    
+    <string name="settings_category_general">General</string>
+    <string name="settings_category_connection">Verbindung</string>
+    <string name="server_url">Server</string>
+    <string name="device_identifier">Geräte-ID</string>
+</resources>

@@ -16,7 +16,7 @@ public class FunctionDTOFactory {
     /**
      * Creates the corresponding DTO for the given function, with the functions simple name as display name.
      */
-    public static FunctionDTO createFunctionDTO(Function<?> function) {
+    public FunctionDTO createFunctionDTO(Function<?> function) {
         return createFunctionDTO(function, function.getSimpleName());
     }
     
@@ -26,11 +26,11 @@ public class FunctionDTOFactory {
      * annotation.<br>
      * If the function has no message key, the function name is used as display name.
      */
-    public static FunctionDTO createFunctionDTO(Function<?> function, Locale locale, DataMiningStringMessages stringMessages) {
+    public FunctionDTO createFunctionDTO(Function<?> function, DataMiningStringMessages stringMessages, Locale locale) {
         return createFunctionDTO(function, function.getLocalizedName(locale, stringMessages));
     }
     
-    private static FunctionDTO createFunctionDTO(Function<?> function, String displayName) {
+    private FunctionDTO createFunctionDTO(Function<?> function, String displayName) {
         String functionName = function.getSimpleName();
         String sourceTypeName = function.getDeclaringType().getSimpleName();
         String returnTypeName = function.getReturnType().getSimpleName();
@@ -38,15 +38,12 @@ public class FunctionDTOFactory {
         return new FunctionDTOImpl(function.isDimension(), functionName, sourceTypeName, returnTypeName, parameterTypeNames, displayName, function.getOrdinal());
     }
 
-    private static List<String> getParameterTypeNames(Function<?> function) {
+    private List<String> getParameterTypeNames(Function<?> function) {
         List<String> parameterTypeNames = new ArrayList<>();
         for (Class<?> parameterType : function.getParameters()) {
             parameterTypeNames.add(parameterType.getSimpleName());
         }
         return parameterTypeNames;
     }
-
-    
-    private FunctionDTOFactory() { }
 
 }

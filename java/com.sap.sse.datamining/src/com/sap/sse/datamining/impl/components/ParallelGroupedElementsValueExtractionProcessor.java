@@ -2,7 +2,7 @@ package com.sap.sse.datamining.impl.components;
 
 import java.util.Collection;
 import java.util.concurrent.Callable;
-import java.util.concurrent.ThreadPoolExecutor;
+import java.util.concurrent.ExecutorService;
 
 import com.sap.sse.datamining.AdditionalResultDataBuilder;
 import com.sap.sse.datamining.components.Processor;
@@ -13,10 +13,11 @@ public class ParallelGroupedElementsValueExtractionProcessor<DataType, FunctionR
 
     private final Function<FunctionReturnType> extractionFunction;
     
-    public ParallelGroupedElementsValueExtractionProcessor(ThreadPoolExecutor executor,
-            Collection<Processor<GroupedDataEntry<FunctionReturnType>>> resultReceivers,
-            Function<FunctionReturnType> extractionFunction) {
-        super(executor, resultReceivers);
+    @SuppressWarnings("unchecked")
+    public ParallelGroupedElementsValueExtractionProcessor(ExecutorService executor,
+                                                           Collection<Processor<GroupedDataEntry<FunctionReturnType>, ?>> resultReceivers,
+                                                           Function<FunctionReturnType> extractionFunction) {
+        super((Class<GroupedDataEntry<DataType>>)(Class<?>) GroupedDataEntry.class, (Class<GroupedDataEntry<FunctionReturnType>>)(Class<?>) GroupedDataEntry.class, executor, resultReceivers);
         this.extractionFunction = extractionFunction;
     }
 

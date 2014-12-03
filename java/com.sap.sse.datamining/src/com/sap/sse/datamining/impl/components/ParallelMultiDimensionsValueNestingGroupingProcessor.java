@@ -20,9 +20,11 @@ import com.sap.sse.datamining.shared.impl.GenericGroupKey;
 public class ParallelMultiDimensionsValueNestingGroupingProcessor<DataType>
              extends AbstractParallelMultiDimensionalGroupingProcessor<DataType> {
 
-    public ParallelMultiDimensionsValueNestingGroupingProcessor(ExecutorService executor, Collection<Processor<GroupedDataEntry<DataType>>> resultReceivers,
-                                                     Iterable<Function<?>> dimensions) {
-        super(executor, resultReceivers, dimensions);
+    public ParallelMultiDimensionsValueNestingGroupingProcessor(Class<DataType> dataType,
+                                                                ExecutorService executor,
+                                                                Collection<Processor<GroupedDataEntry<DataType>, ?>> resultReceivers,
+                                                                Iterable<Function<?>> dimensions) {
+        super(dataType, executor, resultReceivers, dimensions);
     }
 
     protected GroupKey createGroupKeyFor(DataType input, Function<?> mainDimension) {

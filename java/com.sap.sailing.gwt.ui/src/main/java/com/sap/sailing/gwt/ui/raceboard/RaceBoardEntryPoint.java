@@ -15,10 +15,13 @@ import com.google.gwt.user.client.rpc.ServiceDefTarget;
 import com.google.gwt.user.client.ui.Button;
 import com.google.gwt.user.client.ui.DockLayoutPanel;
 import com.google.gwt.user.client.ui.FlowPanel;
+import com.google.gwt.user.client.ui.Label;
 import com.google.gwt.user.client.ui.RootLayoutPanel;
+import com.google.gwt.user.client.ui.RootPanel;
 import com.sap.sailing.domain.common.RegattaAndRaceIdentifier;
 import com.sap.sailing.domain.common.dto.RaceDTO;
-import com.sap.sailing.gwt.ui.client.AbstractEntryPoint;
+import com.sap.sailing.gwt.ui.client.AbstractSailingEntryPoint;
+import com.sap.sailing.gwt.ui.client.LogoAndTitlePanel;
 import com.sap.sailing.gwt.ui.client.MediaService;
 import com.sap.sailing.gwt.ui.client.MediaServiceAsync;
 import com.sap.sailing.gwt.ui.client.ParallelExecutionCallback;
@@ -28,20 +31,17 @@ import com.sap.sailing.gwt.ui.client.RaceTimesInfoProvider;
 import com.sap.sailing.gwt.ui.client.RemoteServiceMappingConstants;
 import com.sap.sailing.gwt.ui.client.SailingService;
 import com.sap.sailing.gwt.ui.client.SailingServiceAsync;
-import com.sap.sailing.gwt.ui.client.UserManagementService;
-import com.sap.sailing.gwt.ui.client.UserManagementServiceAsync;
 import com.sap.sailing.gwt.ui.shared.EventDTO;
 import com.sap.sailing.gwt.ui.shared.LeaderboardGroupDTO;
 import com.sap.sailing.gwt.ui.shared.RegattaDTO;
 import com.sap.sailing.gwt.ui.shared.StrippedLeaderboardDTO;
-import com.sap.sailing.gwt.ui.shared.UserDTO;
 import com.sap.sse.gwt.client.EntryPointHelper;
 import com.sap.sse.gwt.client.async.AsyncActionsExecutor;
 import com.sap.sse.gwt.client.player.Timer;
 import com.sap.sse.gwt.client.player.Timer.PlayModes;
 import com.sap.sse.gwt.shared.GwtHttpRequestUtils;
 
-public class RaceBoardEntryPoint extends AbstractEntryPoint {
+public class RaceBoardEntryPoint extends AbstractSailingEntryPoint {
     private RaceDTO selectedRace;
 
     private static final String PARAM_REGATTA_NAME = "regattaName";
@@ -59,13 +59,11 @@ public class RaceBoardEntryPoint extends AbstractEntryPoint {
 
     private final SailingServiceAsync sailingService = GWT.create(SailingService.class);
     private final MediaServiceAsync mediaService = GWT.create(MediaService.class);
-    private final UserManagementServiceAsync userManagementService = GWT.create(UserManagementService.class);
 
     @Override
     protected void doOnModuleLoad() {    
         super.doOnModuleLoad();
      
-        EntryPointHelper.registerASyncService((ServiceDefTarget) userManagementService, RemoteServiceMappingConstants.userManagementServiceRemotePath);
         EntryPointHelper.registerASyncService((ServiceDefTarget) sailingService, RemoteServiceMappingConstants.sailingServiceRemotePath);
         EntryPointHelper.registerASyncService((ServiceDefTarget) mediaService, RemoteServiceMappingConstants.mediaServiceRemotePath);
 
@@ -98,23 +96,22 @@ public class RaceBoardEntryPoint extends AbstractEntryPoint {
         boolean showWindChart = GwtHttpRequestUtils.getBooleanParameter(RaceBoardViewConfiguration.PARAM_VIEW_SHOW_WINDCHART, false /* default*/);
         boolean showCompetitorsChart = GwtHttpRequestUtils.getBooleanParameter(RaceBoardViewConfiguration.PARAM_VIEW_SHOW_COMPETITORSCHART, false /* default*/);
         boolean showViewStreamlets = GwtHttpRequestUtils.getBooleanParameter(RaceBoardViewConfiguration.PARAM_VIEW_SHOW_STREAMLETS, false /* default*/);
+        boolean showViewSimulation = GwtHttpRequestUtils.getBooleanParameter(RaceBoardViewConfiguration.PARAM_VIEW_SHOW_SIMULATION, false /* default*/);
         String activeCompetitorsFilterSetName = GwtHttpRequestUtils.getStringParameter(RaceBoardViewConfiguration.PARAM_VIEW_COMPETITOR_FILTER, null /* default*/);
         final boolean canReplayWhileLiveIsPossible = GwtHttpRequestUtils.getBooleanParameter(RaceBoardViewConfiguration.PARAM_CAN_REPLAY_DURING_LIVE_RACES, false);
         final boolean autoSelectMedia = GwtHttpRequestUtils.getBooleanParameter(RaceBoardViewConfiguration.PARAM_AUTOSELECT_MEDIA, false);
         final String defaultMedia = GwtHttpRequestUtils.getStringParameter(RaceBoardViewConfiguration.PARAM_DEFAULT_MEDIA, null /* default*/);
         final boolean showMapControls = GwtHttpRequestUtils.getBooleanParameter(RaceBoardViewConfiguration.PARAM_VIEW_SHOW_MAPCONTROLS, true /* default*/);
         raceboardViewConfig = new RaceBoardViewConfiguration(activeCompetitorsFilterSetName, showLeaderboard,
-                showWindChart, showCompetitorsChart, showViewStreamlets, canReplayWhileLiveIsPossible, autoSelectMedia, defaultMedia);
+                showWindChart, showCompetitorsChart, showViewStreamlets, showViewSimulation, canReplayWhileLiveIsPossible, autoSelectMedia, defaultMedia);
 
         final ParallelExecutionCallback<List<String>> getLeaderboardNamesCallback = new ParallelExecutionCallback<List<String>>();
         final ParallelExecutionCallback<List<RegattaDTO>> getRegattasCallback = new ParallelExecutionCallback<List<RegattaDTO>>();
         final ParallelExecutionCallback<LeaderboardGroupDTO> getLeaderboardGroupByNameCallback = new ParallelExecutionCallback<LeaderboardGroupDTO>();
         final ParallelExecutionCallback<EventDTO> getEventByIdCallback = new ParallelExecutionCallback<EventDTO>();
-        final ParallelExecutionCallback<UserDTO> getUserCallback = new ParallelExecutionCallback<UserDTO>();
         List<ParallelExecutionCallback<?>> callbacks = new ArrayList<>();
         callbacks.add(getLeaderboardNamesCallback);
         callbacks.add(getRegattasCallback);
-        callbacks.add(getUserCallback);
         if (leaderboardGroupName != null) {
             callbacks.add(getLeaderboardGroupByNameCallback);
         }
@@ -128,7 +125,7 @@ public class RaceBoardEntryPoint extends AbstractEntryPoint {
                 checkUrlParameters(getLeaderboardNamesCallback.getData(),
                         leaderboardGroupName == null ? null : getLeaderboardGroupByNameCallback.getData(),
                         canReplayWhileLiveIsPossible, getRegattasCallback.getData(), eventId == null ? null : getEventByIdCallback.getData(),
-                        getUserCallback.getData(), showMapControls);
+                        showMapControls);
             }
 
             @Override
@@ -144,18 +141,24 @@ public class RaceBoardEntryPoint extends AbstractEntryPoint {
         if (leaderboardGroupName != null) {
             sailingService.getLeaderboardGroupByName(leaderboardGroupNameParamValue, false /*withGeoLocationData*/, getLeaderboardGroupByNameCallback);
         }
-        userManagementService.getUser(getUserCallback);
+    }
+    
+    private void createErrorPage(String message) {
+        LogoAndTitlePanel logoAndTitlePanel = new LogoAndTitlePanel(getStringMessages(), this, getUserService());
+        logoAndTitlePanel.addStyleName("LogoAndTitlePanel");
+        RootPanel.get().add(logoAndTitlePanel);
+        RootPanel.get().add(new Label(message));
     }
 
     private void checkUrlParameters(List<String> leaderboardNames, LeaderboardGroupDTO leaderboardGroup,
-            boolean canReplayWhileLiveIsPossible, List<RegattaDTO> regattas, EventDTO event, UserDTO user,
+            boolean canReplayWhileLiveIsPossible, List<RegattaDTO> regattas, EventDTO event,
             boolean showMapControls) {
         if (!leaderboardNames.contains(leaderboardName)) {
-            createErrorPage(stringMessages.noSuchLeaderboard());
-          return;
+            createErrorPage(getStringMessages().noSuchLeaderboard());
+            return;
         }
         if (eventId != null && event == null) {
-            createErrorPage(stringMessages.noSuchEvent());
+            createErrorPage(getStringMessages().noSuchEvent());
         }
         if (leaderboardGroupName != null && leaderboardGroup != null) {
             boolean foundLeaderboard = false;
@@ -166,7 +169,7 @@ public class RaceBoardEntryPoint extends AbstractEntryPoint {
                 }
             }
             if (!foundLeaderboard) {
-                createErrorPage(stringMessages.leaderboardNotContainedInLeaderboardGroup(leaderboardName, leaderboardGroupName));
+                createErrorPage(getStringMessages().leaderboardNotContainedInLeaderboardGroup(leaderboardName, leaderboardGroupName));
                 return;
             }
             if (event != null) {
@@ -178,7 +181,7 @@ public class RaceBoardEntryPoint extends AbstractEntryPoint {
                     }
                 }
                 if (!foundLeaderboardGroupInEvent) {
-                    createErrorPage(stringMessages.leaderboardGroupNotContainedInEvent(leaderboardGroupName, event.getName()));
+                    createErrorPage(getStringMessages().leaderboardGroupNotContainedInEvent(leaderboardGroupName, event.getName()));
                 }
             }
         }
@@ -195,8 +198,8 @@ public class RaceBoardEntryPoint extends AbstractEntryPoint {
         Timer timer = new Timer(PlayModes.Replay, 1000l);
         AsyncActionsExecutor asyncActionsExecutor = new AsyncActionsExecutor();
         RaceTimesInfoProvider raceTimesInfoProvider = new RaceTimesInfoProvider(sailingService, asyncActionsExecutor, this, singletonList, 5000l /* requestInterval*/);
-        RaceBoardPanel raceBoardPanel = new RaceBoardPanel(sailingService, mediaService, asyncActionsExecutor, user, timer, raceSelectionModel, leaderboardName,
-                leaderboardGroupName, event, raceboardViewConfig, RaceBoardEntryPoint.this, stringMessages, userAgent, raceTimesInfoProvider, showMapControls);
+        RaceBoardPanel raceBoardPanel = new RaceBoardPanel(sailingService, mediaService, getUserService(), asyncActionsExecutor, timer, raceSelectionModel,
+                leaderboardName, leaderboardGroupName, event, raceboardViewConfig, RaceBoardEntryPoint.this, getStringMessages(), userAgent, raceTimesInfoProvider, showMapControls);
         raceBoardPanel.fillRegattas(regattas);
         createRaceBoardInOneScreenMode(raceBoardPanel, raceboardViewConfig);
     }  

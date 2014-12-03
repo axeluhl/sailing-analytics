@@ -49,8 +49,8 @@ ARCH=x86_64
 START_DIR=`pwd`
 
 # needed for maven on sapsailing.com to work correctly
-if [ -f $USER_HOME/.bash_profile ]; then
-    source $USER_HOME/.bash_profile
+if [ -f "$USER_HOME/.bash_profile" ]; then
+    source "$USER_HOME/.bash_profile"
 fi
 
 cd "$PROJECT_HOME"
@@ -85,9 +85,10 @@ reporting=0
 suppress_confirmation=0
 extra=''
 parallelexecution=0
+p2local=0
 
 if [ $# -eq 0 ]; then
-    echo "buildAndUpdateProduct [-b -u -g -t -a -o -c -m <config> -n <package> -l <port>] [build|install|all|hot-deploy|remote-deploy|local-deploy|release]"
+    echo "buildAndUpdateProduct [-b -u -g -t -a -r -o -c -p -v -m <config> -n <package> -l <port>] [build|install|all|hot-deploy|remote-deploy|local-deploy|release]"
     echo ""
     echo "-g Disable GWT compile, no gwt files will be generated, old ones will be preserved."
     echo "-b Build GWT permutation only for one browser and English language."
@@ -105,6 +106,7 @@ if [ $# -eq 0 ]; then
     echo "-s <target server> Name of server you want to use as target for install, hot-deploy or remote-reploy. This overrides default behaviour."
     echo "-w <ssh target> Target for remote-deploy and release. Must comply with the following format: user@server."
     echo "-u Run without confirmation messages. Use with extreme care."
+    echo "-v Build local p2 respository, and use this instead of p2.sapsailing.com"
     echo ""
     echo "build: builds the server code using Maven to $PROJECT_HOME (log to $START_DIR/build.log)"
     echo ""
@@ -126,6 +128,8 @@ if [ $# -eq 0 ]; then
     echo "remote-deploy: performs hot deployment of the java code to a remote server"
     echo "Example: $0 -s dev -w trac@sapsailing.com remote-deploy"
     echo ""
+    echo "clean: cleans all code and GWT files"
+    echo ""
     echo "Active branch is $active_branch"
     echo "Project home is $PROJECT_HOME"
     echo "Server home is $SERVERS_HOME"
@@ -139,7 +143,7 @@ echo SERVERS_HOME is $SERVERS_HOME
 echo BRANCH is $active_branch
 echo VERSION is $VERSION_INFO
 
-options=':bgtocparm:n:l:s:w:u'
+options=':bgtocparvm:n:l:s:w:u'
 while getopts $options option
 do
     case $option in
@@ -158,6 +162,7 @@ do
            HAS_OVERWRITTEN_TARGET=1;;
         w) REMOTE_SERVER_LOGIN=$OPTARG;;
         u) suppress_confirmation=1;;
+        v) p2local=1;;
         \?) echo "Invalid option"
             exit 4;;
     esac
@@ -173,6 +178,19 @@ if [[ $@ == "" ]]; then
 	exit 2
 fi
 
+
+if [[ "$@" == "clean" ]]; then
+    cd $PROJECT_HOME/java
+    rm -rf com.sap.$PROJECT_TYPE.gwt.ui/com.sap.$PROJECT_TYPE.*
+    rm -rf com.sap.sse.security.ui/com.sap.sse.security.ui.*
+    cd $PROJECT_HOME
+    echo "Using following command: mvn $extra -DargLine=\"$APP_PARAMETERS\" -fae -s $MAVEN_SETTINGS $clean"
+    echo "Maven version used: `mvn --version`"
+    mvn $extra -DargLine="$APP_PARAMETERS" -fae -s $MAVEN_SETTINGS $clean 2>&1 | tee $START_DIR/build.log
+    MVN_EXIT_CODE=${PIPESTATUS[0]}
+    echo "Maven exit code is $MVN_EXIT_CODE"
+    exit 0
+fi
 
 if [[ "$@" == "release" ]]; then
     if [ ! -d $p2PluginRepository/plugins ]; then
@@ -231,6 +249,7 @@ if [[ "$@" == "release" ]]; then
     cp -v $PROJECT_HOME/java/target/configuration/jetty/etc/jetty-deployer.xml configuration/jetty/etc
     cp -v $PROJECT_HOME/java/target/configuration/jetty/etc/realm.properties configuration/jetty/etc
     cp -v $PROJECT_HOME/java/target/configuration/monitoring.properties configuration/
+    cp -v $PROJECT_HOME/java/target/configuration/security.properties configuration/
     cp -v $PROJECT_HOME/configuration/mongodb.cfg $ACDIR/
     cp -v $PROJECT_HOME/java/target/udpmirror $ACDIR/
     cp -v $PROJECT_HOME/java/target/http2udpmirror $ACDIR
@@ -252,11 +271,23 @@ if [[ "$@" == "release" ]]; then
     mkdir $PROJECT_HOME/dist/$SIMPLE_VERSION_INFO
     echo "MONGODB_NAME=myspecificevent
 REPLICATION_CHANNEL=myspecificevent
-SERVER_STARTUP_NOTIFY=simon.marcel.pamies@sap.com
 SERVER_NAME=MYSPECIFICEVENT
 USE_ENVIRONMENT=live-server
+MEMORY=4096m
 INSTALL_FROM_RELEASE=$SIMPLE_VERSION_INFO
     " >> $PROJECT_HOME/dist/$SIMPLE_VERSION_INFO/amazon-launch-config.txt
+
+    echo "MONGODB_NAME=myspecificevent
+REPLICATION_CHANNEL=name_of_replication_channel_matching_master_config
+REPLICATE_MASTER_EXCHANGE_NAME=myspecificevent_name_used_as_channel
+REPLICATE_MASTER_SERVLET_HOST=ip_of_master_host
+SERVER_NAME=subdomain_name_in_elb
+EVENT_ID=event_uid_this_replica_is_serving
+USE_ENVIRONMENT=replica
+MEMORY=4096m
+REPLICATE_ON_START=com.sap.sailing.server.impl.RacingEventServiceImpl
+INSTALL_FROM_RELEASE=$SIMPLE_VERSION_INFO
+    " >> $PROJECT_HOME/dist/$SIMPLE_VERSION_INFO/amazon-launch-config_replica.txt
      
     `which tar` cvzf $PROJECT_HOME/dist/$SIMPLE_VERSION_INFO/$SIMPLE_VERSION_INFO.tar.gz *
     cp $ACDIR/env.sh $PROJECT_HOME/dist/$SIMPLE_VERSION_INFO
@@ -480,6 +511,18 @@ echo "Starting $@ of server..."
 
 if [[ "$@" == "build" ]] || [[ "$@" == "all" ]]; then
 	# yield build so that we get updated product
+        if [ $offline -eq 1 ]; then
+            echo "INFO: Activating offline mode"
+            extra="$extra -o"
+        fi
+
+        if [ $proxy -eq 1 ]; then
+            echo "INFO: Activating proxy profile"
+            extra="$extra -P no-debug.with-proxy"
+            MAVEN_SETTINGS=$MAVEN_SETTINGS_PROXY
+        else
+            extra="$extra -P no-debug.without-proxy"
+        fi
 
 	cd $PROJECT_HOME/java
 	if [ $gwtcompile -eq 1 ]; then
@@ -505,8 +548,24 @@ if [[ "$@" == "build" ]] || [[ "$@" == "all" ]]; then
 
 	else
 	    echo "INFO: GWT Compilation disabled"
-	    extra="-Pdebug.no-gwt-compile"
+	    extra="$extra -Pdebug.no-gwt-compile"
 	fi
+
+	if [ $p2local -eq 1 ]; then
+	    echo "INFO: Building and using local p2 repo"
+	    #build local p2 repo
+	    echo "Using following command (pwd: java/com.sap.sailing.targetplatform.base): mvn -fae -s $MAVEN_SETTINGS $clean compile"
+	    echo "Maven version used: `mvn --version`"
+	    (cd com.sap.$PROJECT_TYPE.targetplatform.base; mvn -fae -s $MAVEN_SETTINGS $clean compile 2>&1 | tee $START_DIR/build.log)
+	    # now get the exit status from mvn, and not that of tee which is what $? contains now
+	    MVN_EXIT_CODE=${PIPESTATUS[0]}
+	    echo "Maven exit code is $MVN_EXIT_CODE"
+	    #create local target definition
+	    (cd com.sap.$PROJECT_TYPE.targetplatform/scripts; ./createLocalTargetDef.sh)
+	    extra="$extra -Dp2-local" # activates the p2-target.local profile in java/pom.xml
+	else
+	    echo "INFO: Using remote p2 repo (http://p2.sapsailing.com/p2/sailing/)"
+        fi
 
     # back to root!
     cd $PROJECT_HOME
@@ -517,19 +576,6 @@ if [[ "$@" == "build" ]] || [[ "$@" == "all" ]]; then
     else
         extra="$extra -DskipTests=false"
         # TODO: Think about http://maven.apache.org/surefire/maven-surefire-plugin/examples/fork-options-and-parallel-execution.html
-	fi
-
-	if [ $offline -eq 1 ]; then
-	    echo "INFO: Activating offline mode"
-	    extra="$extra -o"
-	fi
-
-	if [ $proxy -eq 1 ]; then
-	    echo "INFO: Activating proxy profile"
-	    extra="$extra -P no-debug.with-proxy"
-	    MAVEN_SETTINGS=$MAVEN_SETTINGS_PROXY
-	else
-	    extra="$extra -P no-debug.without-proxy"
 	fi
 
     if [ $android -eq 0 ] && [ $gwtcompile -eq 0 ] && [ $testing -eq 0 ]; then
@@ -638,6 +684,10 @@ if [[ "$@" == "install" ]] || [[ "$@" == "all" ]]; then
         mkdir $ACDIR/configuration
     fi
 
+    if [ ! -d "$ACDIR/configuration/jetty/etc" ]; then
+        mkdir -p $ACDIR/configuration/jetty/etc
+    fi
+
     cd $ACDIR
 
     rm -rf $ACDIR/plugins/*.*
@@ -649,22 +699,23 @@ if [[ "$@" == "install" ]] || [[ "$@" == "all" ]]; then
     cp -v $PROJECT_HOME/java/target/start $ACDIR/
     cp -v $PROJECT_HOME/java/target/stop $ACDIR/
     cp -v $PROJECT_HOME/java/target/status $ACDIR/
+
     cp -v $PROJECT_HOME/java/target/refreshInstance.sh $ACDIR/
+    cp -v $PROJECT_HOME/java/target/udpmirror $ACDIR/
+    cp -v $PROJECT_HOME/java/target/http2udpmirror $ACDIR
+
+    # overwrite configurations that should never be customized and belong to the build
+    cp -v $p2PluginRepository/configuration/config.ini configuration/
+    cp -v $PROJECT_HOME/java/target/configuration/jetty/etc/jetty.xml configuration/jetty/etc
+    cp -v $PROJECT_HOME/java/target/configuration/jetty/etc/jetty-selector.xml configuration/jetty/etc
+    cp -v $PROJECT_HOME/java/target/configuration/jetty/etc/jetty-deployer.xml configuration/jetty/etc
+    cp -v $PROJECT_HOME/java/target/configuration/jetty/etc/realm.properties configuration/jetty/etc
 
     if [ ! -f "$ACDIR/env.sh" ]; then
         cp -v $PROJECT_HOME/java/target/env.sh $ACDIR/
-        cp -v $p2PluginRepository/configuration/config.ini configuration/
-
-        mkdir -p configuration/jetty/etc
-        cp -v $PROJECT_HOME/java/target/configuration/jetty/etc/jetty.xml configuration/jetty/etc
-        cp -v $PROJECT_HOME/java/target/configuration/jetty/etc/jetty-selector.xml configuration/jetty/etc
-        cp -v $PROJECT_HOME/java/target/configuration/jetty/etc/jetty-deployer.xml configuration/jetty/etc
-        cp -v $PROJECT_HOME/java/target/configuration/jetty/etc/realm.properties configuration/jetty/etc
-        cp -v $PROJECT_HOME/java/target/configuration/monitoring.properties configuration/
-
-        cp -v $PROJECT_HOME/java/target/udpmirror $ACDIR/
-        cp -v $PROJECT_HOME/java/target/http2udpmirror $ACDIR
-        cp -v $PROJECT_HOME/java/target/configuration/logging.properties $ACDIR/configuration
+        cp -v $PROJECT_HOME/java/target/configuration/monitoring.properties $ACDIR/configuration/
+        cp -v $PROJECT_HOME/java/target/configuration/security.properties $ACDIR/configuration/
+        cp -v $PROJECT_HOME/java/target/configuration/logging.properties $ACDIR/configuration/
     fi
 
     cp -r -v $p2PluginRepository/configuration/org.eclipse.equinox.simpleconfigurator configuration/
@@ -744,6 +795,7 @@ if [[ "$@" == "remote-deploy" ]]; then
         $SCP_CMD $PROJECT_HOME/java/target/configuration/jetty/etc/jetty-deployer.xml $REMOTE_SERVER_LOGIN:$REMOTE_SERVER/configuration/jetty/etc
         $SCP_CMD $PROJECT_HOME/java/target/configuration/jetty/etc/realm.properties $REMOTE_SERVER_LOGIN:$REMOTE_SERVER/configuration/jetty/etc
         $SCP_CMD $PROJECT_HOME/java/target/configuration/monitoring.properties $REMOTE_SERVER_LOGIN:$REMOTE_SERVER/configuration/
+        $SCP_CMD $PROJECT_HOME/java/target/configuration/security.properties $REMOTE_SERVER_LOGIN:$REMOTE_SERVER/configuration/
  
         $SCP_CMD $PROJECT_HOME/java/target/env.sh $REMOTE_SERVER_LOGIN:$REMOTE_SERVER/
         $SCP_CMD $PROJECT_HOME/java/target/start $REMOTE_SERVER_LOGIN:$REMOTE_SERVER/

@@ -6,8 +6,10 @@ public class TestsUtil {
     
     private static final String TEST_STRING_MESSAGES_BASE_NAME = "stringmessages/Test_StringMessages";
     private static final DataMiningStringMessages TEST_STRING_MESSAGES = DataMiningStringMessages.Util.getInstanceFor(TEST_STRING_MESSAGES_BASE_NAME);
+
+    private static final String PRODUCTIVE_STRING_MESSAGES_BASE_NAME = "stringmessages/StringMessages";
     private static final DataMiningStringMessages EXTENDED_STRING_MESSAGES = DataMiningStringMessages.Util.getCompoundStringMessages(
-                                                                                DataMiningStringMessages.Util.getDefaultStringMessagesBaseName(),
+                                                                                PRODUCTIVE_STRING_MESSAGES_BASE_NAME,
                                                                                 TEST_STRING_MESSAGES_BASE_NAME);
     
     public static DataMiningStringMessages getTestStringMessages() {

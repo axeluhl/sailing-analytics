@@ -28,6 +28,14 @@ public class AddRaceDefinition extends AbstractRacingEventServiceOperation<Void>
         return null;
     }
 
+    /**
+     * {@link #internalApplyTo(RacingEventService)} already replicates the effects
+     */
+    @Override
+    public boolean isRequiresExplicitTransitiveReplication() {
+        return false;
+    }
+    
     @Override
     public Void internalApplyTo(RacingEventService toState) {
         toState.addRace(regattaIdentifier, raceDefinition);

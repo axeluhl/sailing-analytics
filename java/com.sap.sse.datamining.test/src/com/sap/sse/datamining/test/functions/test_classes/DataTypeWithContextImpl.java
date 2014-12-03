@@ -1,6 +1,7 @@
 package com.sap.sse.datamining.test.functions.test_classes;
 
-public class DataTypeWithContextImpl implements DataTypeWithContext, ExtendingInterface {
+//This class needs to extend SuperType to increase the test coverage
+public class DataTypeWithContextImpl extends SuperType implements DataTypeWithContext, ExtendingInterface {
 
     private String regattaName;
     private String raceName;

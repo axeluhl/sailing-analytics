@@ -1,8 +1,8 @@
 package com.sap.sailing.domain.base.racegroup.impl;
 
+import com.sap.sailing.domain.abstractlog.race.RaceLog;
 import com.sap.sailing.domain.base.racegroup.RaceCell;
-import com.sap.sailing.domain.common.impl.NamedImpl;
-import com.sap.sailing.domain.racelog.RaceLog;
+import com.sap.sse.common.impl.NamedImpl;
 
 public class RaceCellImpl extends NamedImpl implements RaceCell {
     private static final long serialVersionUID = 971598420407273594L;

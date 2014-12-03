@@ -26,6 +26,8 @@ public class RaceMapSettings {
     
     private boolean showWindStreamletOverlay = false;
 
+    private boolean showSimulationOverlay = false;
+
     public RaceMapSettings() {
         // empty default settings; don't show maneuvers by default
         maneuverTypesToShow = new HashSet<ManeuverType>();
@@ -66,6 +68,14 @@ public class RaceMapSettings {
 
     public void setShowWindStreamletOverlay(boolean showWindStreamletOverlay) {
         this.showWindStreamletOverlay = showWindStreamletOverlay;
+    }
+
+    public boolean isShowSimulationOverlay() {
+        return showSimulationOverlay;
+    }
+
+    public void setShowSimulationOverlay(boolean showSimulationOverlay) {
+        this.showSimulationOverlay = showSimulationOverlay;
     }
 
     public void showManeuverType(ManeuverType maneuverType, boolean show) {

@@ -2,7 +2,7 @@ package com.sap.sse.datamining.components;
 
 import com.sap.sse.datamining.AdditionalResultDataBuilder;
 
-public interface Processor<InputType> {
+public interface Processor<InputType, ResultType> {
 
     /**
      * Processes the given element and forwards the result.
@@ -33,6 +33,10 @@ public interface Processor<InputType> {
      * To shut down the process cleanly use {@link #finish()}.
      */
     public void abort();
+    
+    public Class<InputType> getInputType();
+    
+    public Class<ResultType> getResultType();
 
     /**
      * Takes a result builder and fills it with its additional data and the data of its result receivers.

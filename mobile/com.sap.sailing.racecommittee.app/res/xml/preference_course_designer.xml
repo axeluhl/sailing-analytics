@@ -3,7 +3,7 @@
     
     <PreferenceCategory android:title="By-Name Course Designer" >
 		
-	    <com.sap.sailing.racecommittee.app.ui.views.EditSetPreference
+	    <com.sap.sailing.android.shared.ui.views.EditSetPreference
 	        android:key="@string/preference_course_designer_by_name_course_names_key"
 	        android:defaultValue="@array/preference_course_designer_by_name_course_names_default"
 	        android:title="@string/settings_course_designer_by_name_course_names_header"

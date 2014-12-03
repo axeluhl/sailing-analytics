@@ -32,8 +32,6 @@ import com.sap.sailing.domain.common.NoWindException;
 import com.sap.sailing.domain.common.RegattaName;
 import com.sap.sailing.domain.common.Speed;
 import com.sap.sailing.domain.common.Tack;
-import com.sap.sailing.domain.common.TimePoint;
-import com.sap.sailing.domain.common.impl.MillisecondsTimePoint;
 import com.sap.sailing.domain.tracking.GPSFix;
 import com.sap.sailing.domain.tracking.GPSFixMoving;
 import com.sap.sailing.domain.tracking.GPSFixTrack;
@@ -59,8 +57,10 @@ import com.sap.sailing.server.gateway.serialization.impl.PersonJsonSerializer;
 import com.sap.sailing.server.gateway.serialization.impl.RegattaJsonSerializer;
 import com.sap.sailing.server.gateway.serialization.impl.SeriesJsonSerializer;
 import com.sap.sailing.server.gateway.serialization.impl.TeamJsonSerializer;
-import com.sap.sailing.util.InvalidDateException;
+import com.sap.sse.InvalidDateException;
+import com.sap.sse.common.TimePoint;
 import com.sap.sse.common.Util;
+import com.sap.sse.common.impl.MillisecondsTimePoint;
 
 @Path("/v1/regattas")
 public class RegattasResource extends AbstractSailingServerResource {
@@ -134,7 +134,13 @@ public class RegattasResource extends AbstractSailingServerResource {
     
     /**
      * Gets all GPS positions of the competitors for a given race.
-     * @param regattaName the name of the regatta
+     * 
+     * @param regattaName
+     *            the name of the regatta
+     * @param tack
+     *            whether or not to include the tack in the output for each fix. Determining tack requires an expensive
+     *            wind calculation for the competitor's position for each fix's time point. If this value is not
+     *            absolutely required, <code>false</code> should be provided here which is also the default.
      * @return
      */
     @GET
@@ -142,7 +148,8 @@ public class RegattasResource extends AbstractSailingServerResource {
     @Path("{regattaname}/races/{racename}/competitors/positions")
     public Response getCompetitorPositions(@PathParam("regattaname") String regattaName, @PathParam("racename") String raceName,
         @QueryParam("fromtime") String fromtime, @QueryParam("fromtimeasmillis") Long fromtimeasmillis,
-        @QueryParam("totime") String totime, @QueryParam("totimeasmillis") Long totimeasmillis) {
+        @QueryParam("totime") String totime, @QueryParam("totimeasmillis") Long totimeasmillis, @QueryParam("withtack") Boolean withTack,
+        @QueryParam("competitorId") Set<String> competitorIds) {
         Response response;
         Regatta regatta = findRegattaByName(regattaName);
         if (regatta == null) {
@@ -174,50 +181,56 @@ public class RegattasResource extends AbstractSailingServerResource {
                 jsonRace.put("regatta", regatta.getName());
                 JSONArray jsonCompetitors = new JSONArray();
                 for (Competitor competitor : trackedRace.getRace().getCompetitors()) {
-                    JSONObject jsonCompetitor = new JSONObject();
-                    jsonCompetitor.put("id", competitor.getId() != null ? competitor.getId().toString() : null);
-                    jsonCompetitor.put("name", competitor.getName());
-                    jsonCompetitor.put("sailNumber", competitor.getBoat().getSailID());
-                    jsonCompetitor.put("color", competitor.getColor() != null ? competitor.getColor().getAsHtml() : null);
-                    
-                    GPSFixTrack<Competitor, GPSFixMoving> track = trackedRace.getTrack(competitor);
-                    JSONArray jsonFixes = new JSONArray();
-                    track.lockForRead();
-                    try {
-                        Iterator<GPSFixMoving> fixIter;
-                        if (from == null) {
-                            fixIter = track.getFixes().iterator();
-                        } else {
-                            fixIter = track.getFixesIterator(from, /* inclusive */true);
-                        }
-                        while (fixIter.hasNext()) {
-                            GPSFixMoving fix = fixIter.next();
-                            if (to != null && fix.getTimePoint() != null && to.compareTo(fix.getTimePoint()) < 0) {
-                                break;
+                    if (competitorIds == null || competitorIds.isEmpty() || competitorIds.contains(competitor.getId().toString())) {
+                        JSONObject jsonCompetitor = new JSONObject();
+                        jsonCompetitor.put("id", competitor.getId() != null ? competitor.getId().toString() : null);
+                        jsonCompetitor.put("name", competitor.getName());
+                        jsonCompetitor.put("sailNumber", competitor.getBoat().getSailID());
+                        jsonCompetitor.put("color", competitor.getColor() != null ? competitor.getColor().getAsHtml() : null);
+                        GPSFixTrack<Competitor, GPSFixMoving> track = trackedRace.getTrack(competitor);
+                        JSONArray jsonFixes = new JSONArray();
+                        track.lockForRead();
+                        try {
+                            Iterator<GPSFixMoving> fixIter;
+                            if (from == null) {
+                                fixIter = track.getFixes().iterator();
+                            } else {
+                                fixIter = track.getFixesIterator(from, /* inclusive */true);
                             }
-                            JSONObject jsonFix = new JSONObject();
-                            jsonFix.put("timepoint-ms", fix.getTimePoint().asMillis());
-                            jsonFix.put("lat-deg", UnitSerializationUtil.latLngDecimalFormatter.format(fix.getPosition().getLatDeg()));
-                            jsonFix.put("lng-deg", UnitSerializationUtil.latLngDecimalFormatter.format(fix.getPosition().getLngDeg()));
-                            jsonFix.put("truebearing-deg", fix.getSpeed().getBearing().getDegrees());
-                            jsonFix.put("speed-kts", UnitSerializationUtil.knotsDecimalFormatter.format(fix.getSpeed().getKnots()));
-                            String tackName;
-                            try {
-                                final Tack tack = trackedRace.getTack(competitor, fix.getTimePoint());
-                                if (tack != null) {
-                                    tackName = tack.name();
-                                    jsonFix.put("tack", tackName);
+                            while (fixIter.hasNext()) {
+                                GPSFixMoving fix = fixIter.next();
+                                if (to != null && fix.getTimePoint() != null && to.compareTo(fix.getTimePoint()) < 0) {
+                                    break;
                                 }
-                            } catch (NoWindException e) {
-                                // don't output tack
+                                JSONObject jsonFix = new JSONObject();
+                                jsonFix.put("timepoint-ms", fix.getTimePoint().asMillis());
+                                jsonFix.put("lat-deg", UnitSerializationUtil.latLngDecimalFormatter.format(fix
+                                        .getPosition().getLatDeg()));
+                                jsonFix.put("lng-deg", UnitSerializationUtil.latLngDecimalFormatter.format(fix
+                                        .getPosition().getLngDeg()));
+                                jsonFix.put("truebearing-deg", fix.getSpeed().getBearing().getDegrees());
+                                jsonFix.put("speed-kts",
+                                        UnitSerializationUtil.knotsDecimalFormatter.format(fix.getSpeed().getKnots()));
+                                if (withTack != null && withTack) {
+                                    String tackName;
+                                    try {
+                                        final Tack tack = trackedRace.getTack(competitor, fix.getTimePoint());
+                                        if (tack != null) {
+                                            tackName = tack.name();
+                                            jsonFix.put("tack", tackName);
+                                        }
+                                    } catch (NoWindException e) {
+                                        // don't output tack
+                                    }
+                                }
+                                jsonFixes.add(jsonFix);
                             }
-                            jsonFixes.add(jsonFix);
+                        } finally {
+                            track.unlockAfterRead();
                         }
-                    } finally {
-                        track.unlockAfterRead();
+                        jsonCompetitor.put("track", jsonFixes);
+                        jsonCompetitors.add(jsonCompetitor);
                     }
-                    jsonCompetitor.put("track", jsonFixes);
-                    jsonCompetitors.add(jsonCompetitor);
                 }
                 jsonRace.put("competitors", jsonCompetitors);
 
@@ -598,10 +611,10 @@ public class RegattasResource extends AbstractSailingServerResource {
                                 jsonCompetitorInLeg.put("averageSOG-kts", UnitSerializationUtil.knotsDecimalFormatter.format(averageSpeedOverGround.getKnots()));
                             }
                             try {
-                                Integer numberOfTacks = trackedLegOfCompetitor.getNumberOfTacks(timePoint);
-                                Integer numberOfJibes = trackedLegOfCompetitor.getNumberOfJibes(timePoint);
+                                Integer numberOfTacks = trackedLegOfCompetitor.getNumberOfTacks(timePoint, /* waitForLatest */ false);
+                                Integer numberOfJibes = trackedLegOfCompetitor.getNumberOfJibes(timePoint, /* waitForLatest */ false);
                                 Integer numberOfPenaltyCircles = trackedLegOfCompetitor
-                                        .getNumberOfPenaltyCircles(timePoint);
+                                        .getNumberOfPenaltyCircles(timePoint, /* waitForLatest */ false);
                                 jsonCompetitorInLeg.put("tacks", numberOfTacks);
                                 jsonCompetitorInLeg.put("jibes", numberOfJibes);
                                 jsonCompetitorInLeg.put("penaltyCircles", numberOfPenaltyCircles);

@@ -10,7 +10,6 @@ import java.util.concurrent.ExecutorService;
 import com.sap.sse.datamining.components.Processor;
 import com.sap.sse.datamining.impl.components.GroupedDataEntry;
 import com.sap.sse.datamining.shared.GroupKey;
-import com.sap.sse.datamining.shared.Message;
 
 /**
  * An aggregator, that stores the received elements in Sets mapped by the {@link GroupKey GroupKeys}.<br>
@@ -25,9 +24,12 @@ public class ParallelGroupedDataCollectingAsSetProcessor<DataType>
 
     private final Map<GroupKey, Set<DataType>> collectedDataMappedByGroupKey;
     
+    @SuppressWarnings("unchecked")
     public ParallelGroupedDataCollectingAsSetProcessor(ExecutorService executor,
-            Collection<Processor<Map<GroupKey, Set<DataType>>>> resultReceivers) {
-        super(executor, resultReceivers, Message.Collecting.toString());
+            Collection<Processor<Map<GroupKey, Set<DataType>>, ?>> resultReceivers) {
+        super((Class<GroupedDataEntry<DataType>>)(Class<?>) GroupedDataEntry.class,
+              (Class<Map<GroupKey, Set<DataType>>>)(Class<?>) Map.class,
+              executor, resultReceivers, "Collecting");
         collectedDataMappedByGroupKey = new HashMap<>();
     }
 

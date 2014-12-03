@@ -37,7 +37,6 @@ import com.google.gwt.user.client.rpc.AsyncCallback;
 import com.google.gwt.user.client.ui.AbsolutePanel;
 import com.sap.sailing.domain.common.dto.PositionDTO;
 import com.sap.sailing.domain.common.impl.RGBColor;
-import com.sap.sailing.gwt.ui.client.ErrorReporter;
 import com.sap.sailing.gwt.ui.client.RequiresDataInitialization;
 import com.sap.sailing.gwt.ui.client.SimulatorServiceAsync;
 import com.sap.sailing.gwt.ui.client.StringMessages;
@@ -55,6 +54,7 @@ import com.sap.sailing.gwt.ui.simulator.util.ColorPaletteGenerator;
 import com.sap.sailing.gwt.ui.simulator.util.SimulatorResources;
 import com.sap.sailing.gwt.ui.simulator.windpattern.WindPatternDisplay;
 import com.sap.sailing.simulator.util.SailingSimulatorConstants;
+import com.sap.sse.gwt.client.ErrorReporter;
 import com.sap.sse.gwt.client.controls.busyindicator.SimpleBusyIndicator;
 import com.sap.sse.gwt.client.player.Timer;
 
@@ -637,8 +637,8 @@ public class SimulatorMap extends AbsolutePanel implements RequiresDataInitializ
         PositionDTO endPointDTO = new PositionDTO(raceCourseCanvasOverlay.getEndPoint().getLatitude(),
                 raceCourseCanvasOverlay.getEndPoint().getLongitude());
         LOGGER.info("StartPoint:" + startPointDTO);
-        windParams.setNorthWest(startPointDTO);
-        windParams.setSouthEast(endPointDTO);
+        windParams.setRaceCourseStart(startPointDTO);
+        windParams.setRaceCourseEnd(endPointDTO);
         windParams.setxRes(xRes);
         windParams.setyRes(yRes);
         windParams.setBorder(border);
@@ -754,11 +754,11 @@ public class SimulatorMap extends AbsolutePanel implements RequiresDataInitializ
         if (mode != SailingSimulatorConstants.ModeMeasured) {
             PositionDTO startPointDTO = new PositionDTO(raceCourseCanvasOverlay.getStartPoint().getLatitude(), 
                     raceCourseCanvasOverlay.getStartPoint().getLongitude());
-            windParams.setNorthWest(startPointDTO);
+            windParams.setRaceCourseStart(startPointDTO);
 
             PositionDTO endPointDTO = new PositionDTO(raceCourseCanvasOverlay.getEndPoint().getLatitude(), 
                     raceCourseCanvasOverlay.getEndPoint().getLongitude());
-            windParams.setSouthEast(endPointDTO);
+            windParams.setRaceCourseEnd(endPointDTO);
         }
 
         windParams.setxRes(xRes);

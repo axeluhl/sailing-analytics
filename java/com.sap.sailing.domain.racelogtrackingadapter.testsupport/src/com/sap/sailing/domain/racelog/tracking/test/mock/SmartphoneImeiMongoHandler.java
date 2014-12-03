@@ -1,8 +1,8 @@
 package com.sap.sailing.domain.racelog.tracking.test.mock;
 
+import com.sap.sailing.domain.abstractlog.race.tracking.DeviceIdentifier;
 import com.sap.sailing.domain.common.racelog.tracking.TransformationException;
 import com.sap.sailing.domain.persistence.racelog.tracking.DeviceIdentifierMongoHandler;
-import com.sap.sailing.domain.racelog.tracking.DeviceIdentifier;
 
 public class SmartphoneImeiMongoHandler extends SmartphoneImeiSerializationHandler
 implements DeviceIdentifierMongoHandler {

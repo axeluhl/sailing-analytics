@@ -15,6 +15,7 @@ import com.google.gwt.user.client.ui.FlowPanel;
 import com.google.gwt.user.client.ui.Label;
 import com.google.gwt.user.client.ui.MenuBar;
 import com.google.gwt.user.client.ui.SimplePanel;
+import com.google.gwt.user.client.ui.UIObject;
 import com.sap.sailing.domain.common.LeaderboardNameConstants;
 import com.sap.sailing.domain.common.RaceIdentifier;
 import com.sap.sailing.domain.common.RegattaAndRaceIdentifier;
@@ -24,7 +25,6 @@ import com.sap.sailing.domain.common.dto.LeaderboardDTO;
 import com.sap.sailing.domain.common.dto.RaceColumnDTO;
 import com.sap.sailing.domain.common.dto.RaceDTO;
 import com.sap.sailing.gwt.ui.client.CompetitorSelectionModel;
-import com.sap.sailing.gwt.ui.client.ErrorReporter;
 import com.sap.sailing.gwt.ui.client.GlobalNavigationPanel;
 import com.sap.sailing.gwt.ui.client.LeaderboardUpdateListener;
 import com.sap.sailing.gwt.ui.client.MediaServiceAsync;
@@ -36,6 +36,7 @@ import com.sap.sailing.gwt.ui.client.RegattasDisplayer;
 import com.sap.sailing.gwt.ui.client.SailingServiceAsync;
 import com.sap.sailing.gwt.ui.client.StringMessages;
 import com.sap.sailing.gwt.ui.client.media.MediaPlayerManagerComponent;
+import com.sap.sailing.gwt.ui.client.media.PopupPositionProvider;
 import com.sap.sailing.gwt.ui.client.shared.charts.MultiCompetitorRaceChart;
 import com.sap.sailing.gwt.ui.client.shared.charts.WindChart;
 import com.sap.sailing.gwt.ui.client.shared.charts.WindChartSettings;
@@ -52,12 +53,13 @@ import com.sap.sailing.gwt.ui.leaderboard.LeaderboardSettings;
 import com.sap.sailing.gwt.ui.leaderboard.LeaderboardSettingsFactory;
 import com.sap.sailing.gwt.ui.shared.EventDTO;
 import com.sap.sailing.gwt.ui.shared.RegattaDTO;
-import com.sap.sailing.gwt.ui.shared.UserDTO;
 import com.sap.sse.common.filter.FilterSet;
+import com.sap.sse.gwt.client.ErrorReporter;
 import com.sap.sse.gwt.client.async.AsyncActionsExecutor;
 import com.sap.sse.gwt.client.player.TimeRangeWithZoomModel;
 import com.sap.sse.gwt.client.player.Timer;
 import com.sap.sse.gwt.client.useragent.UserAgentDetails;
+import com.sap.sse.security.ui.client.UserService;
 
 /**
  * A view showing a list of components visualizing a race from the regattas announced by calls to {@link #fillRegattas(List)}.
@@ -68,10 +70,9 @@ import com.sap.sse.gwt.client.useragent.UserAgentDetails;
  * @author Frank Mittag, Axel Uhl (d043530)
  *
  */
-public class RaceBoardPanel extends SimplePanel implements RegattasDisplayer, RaceSelectionChangeListener, LeaderboardUpdateListener {
+public class RaceBoardPanel extends SimplePanel implements RegattasDisplayer, RaceSelectionChangeListener, LeaderboardUpdateListener, PopupPositionProvider {
     private final SailingServiceAsync sailingService;
     private final MediaServiceAsync mediaService;
-    private final UserDTO user;
     private final EventDTO event;
     private final StringMessages stringMessages;
     private final ErrorReporter errorReporter;
@@ -117,14 +118,13 @@ public class RaceBoardPanel extends SimplePanel implements RegattasDisplayer, Ra
      *            context of an event; may be <code>null</code>.
      */
     public RaceBoardPanel(SailingServiceAsync sailingService, MediaServiceAsync mediaService,
-            AsyncActionsExecutor asyncActionsExecutor, UserDTO theUser, Timer timer,
-            RaceSelectionProvider theRaceSelectionProvider, String leaderboardName, String leaderboardGroupName,
-            EventDTO event, RaceBoardViewConfiguration raceboardViewConfiguration, ErrorReporter errorReporter,
-            final StringMessages stringMessages, UserAgentDetails userAgent,
-            RaceTimesInfoProvider raceTimesInfoProvider, boolean showMapControls) {
+            UserService userService, AsyncActionsExecutor asyncActionsExecutor,
+            Timer timer, RaceSelectionProvider theRaceSelectionProvider, String leaderboardName,
+            String leaderboardGroupName, EventDTO event, RaceBoardViewConfiguration raceboardViewConfiguration,
+            ErrorReporter errorReporter, final StringMessages stringMessages,
+            UserAgentDetails userAgent, RaceTimesInfoProvider raceTimesInfoProvider, boolean showMapControls) {
         this.sailingService = sailingService;
         this.mediaService = mediaService;
-        this.user = theUser;
         this.stringMessages = stringMessages;
         this.raceboardViewConfiguration = raceboardViewConfiguration;
         this.raceSelectionProvider = theRaceSelectionProvider;
@@ -152,7 +152,7 @@ public class RaceBoardPanel extends SimplePanel implements RegattasDisplayer, Ra
         competitorSelectionModel = new CompetitorSelectionModel(/* hasMultiSelection */ true);
                 
         raceMap = new RaceMap(sailingService, asyncActionsExecutor, errorReporter, timer,
-                competitorSelectionModel, stringMessages, showMapControls, getConfiguration().isShowViewStreamlets(), selectedRaceIdentifier);
+                competitorSelectionModel, stringMessages, showMapControls, getConfiguration().isShowViewStreamlets(), getConfiguration().isShowViewSimulation(), selectedRaceIdentifier);
         CompetitorFilterPanel competitorSearchTextBox = new CompetitorFilterPanel(competitorSelectionModel, stringMessages, raceMap,
                 new LeaderboardFetcher() {
                     @Override
@@ -167,7 +167,7 @@ public class RaceBoardPanel extends SimplePanel implements RegattasDisplayer, Ra
         leaderboardPanel.setTitle(stringMessages.leaderboard());
         leaderboardPanel.getElement().getStyle().setMarginLeft(6, Unit.PX);
         leaderboardPanel.getElement().getStyle().setMarginTop(4, Unit.PX);
-        createOneScreenView(leaderboardName, leaderboardGroupName, event, mainPanel, showMapControls, raceMap); // initializes the raceMap field
+        createOneScreenView(leaderboardName, leaderboardGroupName, event, mainPanel, showMapControls, raceMap, userService); // initializes the raceMap field
         leaderboardPanel.addLeaderboardUpdateListener(this);
         // in case the URL configuration contains the name of a competitors filter set we try to activate it
         // FIXME the competitorsFilterSets has now moved to CompetitorSearchTextBox (which should probably be renamed); pass on the parameters to the LeaderboardPanel and see what it does with it
@@ -193,7 +193,7 @@ public class RaceBoardPanel extends SimplePanel implements RegattasDisplayer, Ra
      * the {@link GlobalNavigationPanel}.
      */
     private void createOneScreenView(String leaderboardName, String leaderboardGroupName, EventDTO event, FlowPanel mainPanel,
-            boolean showMapControls, RaceMap raceMap) {
+            boolean showMapControls, RaceMap raceMap, UserService userService) {
         // create the default leaderboard and select the right race
         raceTimesInfoProvider.addRaceTimesInfoProviderListener(raceMap);
         raceMap.onRaceSelectionChange(Collections.singletonList(selectedRaceIdentifier));
@@ -211,8 +211,10 @@ public class RaceBoardPanel extends SimplePanel implements RegattasDisplayer, Ra
         windChart.getEntryWidget().setTitle(stringMessages.windChart());
         components.add(windChart);
         boolean autoSelectMedia = getConfiguration().isAutoSelectMedia();
-        MediaPlayerManagerComponent mediaPlayerManagerComponent = new MediaPlayerManagerComponent(selectedRaceIdentifier, raceTimesInfoProvider, timer, mediaService, stringMessages, errorReporter, userAgent, user, autoSelectMedia);
-        leaderboardAndMapViewer = new SideBySideComponentViewer(leaderboardPanel, raceMap, mediaPlayerManagerComponent, components, stringMessages, this.user);
+        MediaPlayerManagerComponent mediaPlayerManagerComponent = new MediaPlayerManagerComponent(
+                selectedRaceIdentifier, raceTimesInfoProvider, timer, mediaService, userService, stringMessages,
+                errorReporter, userAgent, this, autoSelectMedia);
+        leaderboardAndMapViewer = new SideBySideComponentViewer(leaderboardPanel, raceMap, mediaPlayerManagerComponent, components, stringMessages);
         componentViewers.add(leaderboardAndMapViewer);
         for (ComponentViewer componentViewer : componentViewers) {
             mainPanel.add(componentViewer.getViewerWidget());
@@ -378,7 +380,17 @@ public class RaceBoardPanel extends SimplePanel implements RegattasDisplayer, Ra
             currentRaceHasBeenSelectedOnce = true;
         }
     }
-    
+
+    @Override
+    public UIObject getXPositionUiObject() {
+        return timePanel;
+    }
+
+    @Override
+    public UIObject getYPositionUiObject() {
+        return timePanel;
+    }
+
     private Label computeRaceInformation(RaceColumnDTO raceColumn, FleetDTO fleet) {
         Label raceInformationLabel = new Label();
         raceInformationLabel.setStyleName("Race-Time-Label");
@@ -386,5 +398,6 @@ public class RaceBoardPanel extends SimplePanel implements RegattasDisplayer, Ra
         raceInformationLabel.setText(formatter.format(raceColumn.getStartDate(fleet)));
         return raceInformationLabel;
     }
+
 }
 

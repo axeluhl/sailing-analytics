@@ -5,17 +5,17 @@ import java.util.List;
 
 import org.json.simple.JSONObject;
 
+import com.sap.sailing.domain.abstractlog.AbstractLogEventAuthor;
+import com.sap.sailing.domain.abstractlog.race.RaceLogEvent;
+import com.sap.sailing.domain.abstractlog.race.tracking.DeviceIdentifier;
 import com.sap.sailing.domain.base.Competitor;
-import com.sap.sailing.domain.common.TimePoint;
-import com.sap.sailing.domain.common.WithID;
-import com.sap.sailing.domain.common.impl.MillisecondsTimePoint;
-import com.sap.sailing.domain.racelog.RaceLogEvent;
-import com.sap.sailing.domain.racelog.RaceLogEventAuthor;
-import com.sap.sailing.domain.racelog.tracking.DeviceIdentifier;
 import com.sap.sailing.server.gateway.deserialization.JsonDeserializationException;
 import com.sap.sailing.server.gateway.deserialization.JsonDeserializer;
 import com.sap.sailing.server.gateway.deserialization.impl.Helpers;
 import com.sap.sailing.server.gateway.serialization.racelog.impl.RaceLogDeviceMappingEventSerializer;
+import com.sap.sse.common.TimePoint;
+import com.sap.sse.common.WithID;
+import com.sap.sse.common.impl.MillisecondsTimePoint;
 
 public abstract class RaceLogDeviceMappingEventDeserializer<ItemT extends WithID>
 extends BaseRaceLogEventDeserializer {
@@ -29,12 +29,12 @@ extends BaseRaceLogEventDeserializer {
     }
 
     protected abstract RaceLogEvent furtherDeserialize(JSONObject itemObject, TimePoint from, TimePoint to,
-            DeviceIdentifier device, Serializable id, TimePoint createdAt, RaceLogEventAuthor author,
+            DeviceIdentifier device, Serializable id, TimePoint createdAt, AbstractLogEventAuthor author,
             TimePoint timePoint, int passId) throws JsonDeserializationException;
 
     @Override
     protected RaceLogEvent deserialize(JSONObject object, Serializable id,
-            TimePoint createdAt, RaceLogEventAuthor author,
+            TimePoint createdAt, AbstractLogEventAuthor author,
             TimePoint timePoint, int passId, List<Competitor> competitors)
                     throws JsonDeserializationException {
         JSONObject deviceJson = Helpers.toJSONObjectSafe(object.get(RaceLogDeviceMappingEventSerializer.FIELD_DEVICE));

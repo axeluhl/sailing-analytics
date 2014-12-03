@@ -22,11 +22,13 @@ import com.rabbitmq.client.ConsumerCancelledException;
 import com.rabbitmq.client.QueueingConsumer;
 import com.rabbitmq.client.ShutdownSignalException;
 import com.sap.sailing.domain.base.Event;
-import com.sap.sailing.domain.common.TimePoint;
-import com.sap.sailing.domain.common.impl.MillisecondsTimePoint;
-import com.sap.sailing.server.replication.ReplicationMasterDescriptor;
-import com.sap.sailing.server.replication.impl.ReplicationMasterDescriptorImpl;
+import com.sap.sailing.server.RacingEventService;
+import com.sap.sse.common.TimePoint;
 import com.sap.sse.common.Util;
+import com.sap.sse.common.Util.Pair;
+import com.sap.sse.common.impl.MillisecondsTimePoint;
+import com.sap.sse.replication.ReplicationMasterDescriptor;
+import com.sap.sse.replication.impl.ReplicationMasterDescriptorImpl;
 
 public class ConnectionResetAndReconnectTest extends AbstractServerReplicationTest {
     static final Logger logger = Logger.getLogger(ConnectionResetAndReconnectTest.class.getName());
@@ -79,17 +81,13 @@ public class ConnectionResetAndReconnectTest extends AbstractServerReplicationTe
         
     }
 
-    private MasterReplicationDescriptorMock masterReplicationDescriptor;
-    private ReplicationServiceTestImpl replicaReplicationDescriptor;
-
     @Before
+    @Override
     public void setUp() throws Exception {
         try {
-            com.sap.sse.common.Util.Pair<ReplicationServiceTestImpl, ReplicationMasterDescriptor> result = basicSetUp(
-                    true, /* master=null means create a new one */ null,
-            /* replica=null means create a new one */null);
-            masterReplicationDescriptor = MasterReplicationDescriptorMock.from(result.getB());
-            replicaReplicationDescriptor = result.getA();
+            Pair<com.sap.sse.replication.testsupport.AbstractServerReplicationTest.ReplicationServiceTestImpl<RacingEventService>, ReplicationMasterDescriptor> result = basicSetUp(/* dropDB */ true,
+                    /* master=null means create a new one */ null, /* replica=null means create a new one */null);
+            masterDescriptor = MasterReplicationDescriptorMock.from(result.getB());
         } catch (Exception e) {
             e.printStackTrace();
             tearDown();
@@ -104,7 +102,7 @@ public class ConnectionResetAndReconnectTest extends AbstractServerReplicationTe
         /* until here both instances should have the same in-memory state.
          * now lets add an event on master and stop the messaging queue. */
         stopMessagingExchange();
-        replicaReplicationDescriptor.startToReplicateFrom(masterReplicationDescriptor);
+        replicaReplicator.startToReplicateFrom(masterDescriptor);
         Event event = addEventOnMaster();
         Thread.sleep(1000); // wait for master queue to get filled
         assertNull(replica.getEvent(event.getId()));

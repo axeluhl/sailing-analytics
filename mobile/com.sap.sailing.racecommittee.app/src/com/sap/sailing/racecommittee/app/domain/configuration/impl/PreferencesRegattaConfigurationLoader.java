@@ -17,7 +17,7 @@ import com.sap.sailing.domain.base.configuration.procedures.RRS26Configuration;
 import com.sap.sailing.domain.common.racelog.Flags;
 import com.sap.sailing.domain.common.racelog.RacingProcedureType;
 import com.sap.sailing.racecommittee.app.AppPreferences;
-import com.sap.sailing.racecommittee.app.logging.ExLog;
+import com.sap.sailing.android.shared.logging.ExLog;
 
 public class PreferencesRegattaConfigurationLoader implements ConfigurationLoader<RegattaConfiguration> {
 
@@ -74,7 +74,7 @@ public class PreferencesRegattaConfigurationLoader implements ConfigurationLoade
 
     @Override
     public void store() {
-        ExLog.i(TAG, "Storing new racing procedure configuration.");
+        ExLog.i(preferences.getContext(), TAG, "Storing new racing procedure configuration.");
         
         if (configuration.getDefaultRacingProcedureType() != null) {
             preferences.setDefaultRacingProcedureType(configuration.getDefaultRacingProcedureType());

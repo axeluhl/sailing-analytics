@@ -12,6 +12,8 @@ import java.util.Map;
 import java.util.Set;
 import java.util.UUID;
 import java.util.concurrent.ConcurrentHashMap;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 
 import com.sap.sailing.domain.base.BoatClass;
 import com.sap.sailing.domain.base.Competitor;
@@ -30,10 +32,11 @@ import com.sap.sailing.domain.common.BoatClassMasterdata;
 import com.sap.sailing.domain.common.Color;
 import com.sap.sailing.domain.common.MarkType;
 import com.sap.sailing.domain.common.PassingInstruction;
-import com.sap.sailing.domain.common.WithID;
 import com.sap.sailing.domain.common.configuration.DeviceConfigurationMatcherType;
+import com.sap.sse.common.WithID;
 
 public class SharedDomainFactoryImpl implements SharedDomainFactory {
+    private static final Logger logger = Logger.getLogger(SharedDomainFactoryImpl.class.getName());
     
     /**
      * Ensure that the <em>same</em> string is used as key that is also used to set the {@link Nationality}
@@ -269,9 +272,9 @@ public class SharedDomainFactoryImpl implements SharedDomainFactory {
     public BoatClass getOrCreateBoatClass(String name, boolean typicallyStartsUpwind) {
         synchronized (boatClassCache) {
             BoatClass result = boatClassCache.get(name);
-            if(result == null) {
+            if (result == null && name != null) {
                 BoatClassMasterdata boatClassMasterdata = BoatClassMasterdata.resolveBoatClass(name);
-                if(boatClassMasterdata != null) {
+                if (boatClassMasterdata != null) {
                     result = new BoatClassImpl(name, boatClassMasterdata);
                     boatClassCache.put(name, result);
                 }
@@ -286,7 +289,7 @@ public class SharedDomainFactoryImpl implements SharedDomainFactory {
     
     @Override
     public BoatClass getOrCreateBoatClass(String name) {
-        return getOrCreateBoatClass(name, /* typicallyStartsUpwind */!mayStartWithNoUpwindLeg.contains(name.toLowerCase()));
+        return getOrCreateBoatClass(name, name == null || /* typicallyStartsUpwind */!mayStartWithNoUpwindLeg.contains(name.toLowerCase()));
     }
     
     @Override
@@ -321,6 +324,9 @@ public class SharedDomainFactoryImpl implements SharedDomainFactory {
 
     @Override
     public Competitor getOrCreateCompetitor(Serializable competitorId, String name, Color displayColor, DynamicTeam team, DynamicBoat boat) {
+        if (logger.isLoggable(Level.FINEST)) {
+            logger.log(Level.FINEST, "getting or creating competitor "+name+" with ID "+competitorId+" in domain factory "+this);
+        }
         return getCompetitorStore().getOrCreateCompetitor(competitorId, name, displayColor, team, boat);
     }
 

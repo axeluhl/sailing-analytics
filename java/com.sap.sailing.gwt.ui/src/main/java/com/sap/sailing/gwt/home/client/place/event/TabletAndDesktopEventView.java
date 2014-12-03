@@ -6,19 +6,16 @@ import java.util.List;
 import java.util.Map;
 
 import com.google.gwt.core.client.GWT;
-import com.google.gwt.place.shared.Place;
-import com.google.gwt.place.shared.PlaceTokenizer;
 import com.google.gwt.uibinder.client.UiBinder;
 import com.google.gwt.uibinder.client.UiField;
-import com.google.gwt.user.client.History;
 import com.google.gwt.user.client.Window;
 import com.google.gwt.user.client.ui.Composite;
 import com.google.gwt.user.client.ui.Widget;
 import com.sap.sailing.domain.common.LeaderboardNameConstants;
 import com.sap.sailing.domain.common.RegattaAndRaceIdentifier;
 import com.sap.sailing.domain.common.dto.RaceDTO;
-import com.sap.sailing.gwt.home.client.place.event.EventPlace.NavigationTabs;
-import com.sap.sailing.gwt.home.client.app.PlaceNavigator;
+import com.sap.sailing.gwt.home.client.app.HomePlacesNavigator;
+import com.sap.sailing.gwt.home.client.place.event.EventPlace.EventNavigationTabs;
 import com.sap.sailing.gwt.home.client.place.event.header.EventHeader;
 import com.sap.sailing.gwt.home.client.place.event.media.EventMedia;
 import com.sap.sailing.gwt.home.client.place.event.overview.EventOverview;
@@ -37,7 +34,7 @@ import com.sap.sailing.gwt.ui.shared.StrippedLeaderboardDTO;
 import com.sap.sse.common.Util.Triple;
 import com.sap.sse.gwt.client.player.Timer;
 
-public class TabletAndDesktopEventView extends Composite implements EventView, EventPageNavigator {
+public class TabletAndDesktopEventView extends Composite implements EventView, EventPlaceNavigator {
     private static EventViewUiBinder uiBinder = GWT.create(EventViewUiBinder.class);
 
     interface EventViewUiBinder extends UiBinder<Widget, TabletAndDesktopEventView> {
@@ -55,8 +52,11 @@ public class TabletAndDesktopEventView extends Composite implements EventView, E
     private final List<Widget> pageElements;
     private final EventDTO event;
     
-    public TabletAndDesktopEventView(SailingServiceAsync sailingService, EventDTO event, List<RaceGroupDTO> raceGroups, String leaderboardName,   
-            Timer timerForClientServerOffset, PlaceNavigator navigator) {
+    @SuppressWarnings("unused")
+    private EventPlace currentInternalPlace;
+    
+    public TabletAndDesktopEventView(SailingServiceAsync sailingService, EventDTO event, EventNavigationTabs navigationTab, List<RaceGroupDTO> raceGroups, String leaderboardName,   
+            Timer timerForClientServerOffset, HomePlacesNavigator navigator) {
         this.event = event;
         Map<String, Triple<RaceGroupDTO, StrippedLeaderboardDTO, LeaderboardGroupDTO>> regattaStructure = getRegattaStructure(event, raceGroups);
 
@@ -81,7 +81,7 @@ public class TabletAndDesktopEventView extends Composite implements EventView, E
             selectedRegatta = regattaStructure.get(0);
         }
 
-        if(selectedRegatta != null && !event.isFakeSeries()) {
+        if(selectedRegatta != null && (navigationTab == EventNavigationTabs.Regatta || !event.isFakeSeries())) {
             goToRegattaRaces(selectedRegatta.getC(), selectedRegatta.getB(), selectedRegatta.getA());
         } else {
             goToRegattas();
@@ -103,54 +103,47 @@ public class TabletAndDesktopEventView extends Composite implements EventView, E
     @Override
     public void goToOverview() {
         setVisibleEventElement(eventOverview);
-        eventHeader.setDataNavigationType("normal");
+        eventHeader.setFullsizeHeader();
         
-        EventPlace place = new EventPlace(event.id.toString(), NavigationTabs.Overview, null);
-        pushPlaceToHistoryStack(place, new EventPlace.Tokenizer());
+        currentInternalPlace = new EventPlace(event.id.toString(), EventNavigationTabs.Overview, null);
     }
 
     @Override
     public void goToRegattas() {
         setVisibleEventElement(eventRegattaList);
-        eventHeader.setDataNavigationType("normal");
+        eventHeader.setFullsizeHeader();
         
-        EventPlace place = new EventPlace(event.id.toString(), NavigationTabs.Regattas, null);
-        pushPlaceToHistoryStack(place, new EventPlace.Tokenizer());
+        currentInternalPlace = new EventPlace(event.id.toString(), EventNavigationTabs.Regattas, null);
     }
 
     @Override
     public void goToRegattaRaces(LeaderboardGroupDTO leaderboardGroup, StrippedLeaderboardDTO leaderboard, RaceGroupDTO raceGroup) {
         eventRegattaRaces.setRaces(leaderboardGroup, false, leaderboard, raceGroup);
-        eventHeader.setDataNavigationType("compact");
+        eventHeader.setCompactHeader();
         setVisibleEventElement(eventRegattaRaces);
-        
-        EventPlace place = new EventPlace(event.id.toString(), NavigationTabs.Regatta, leaderboard.name);
-        pushPlaceToHistoryStack(place, new EventPlace.Tokenizer());
+
+        currentInternalPlace = new EventPlace(event.id.toString(), EventNavigationTabs.Regatta, leaderboard.name);
     }
 
     @Override
     public void goToSchedule() {
         setVisibleEventElement(eventSchedule);
-        eventHeader.setDataNavigationType("normal");
+        eventHeader.setFullsizeHeader();
         
-        EventPlace place = new EventPlace(event.id.toString(), NavigationTabs.Schedule, null);
-        pushPlaceToHistoryStack(place, new EventPlace.Tokenizer());
+        currentInternalPlace = new EventPlace(event.id.toString(), EventNavigationTabs.Schedule, null);
     }
 
     @Override
     public void goToMedia() {
         setVisibleEventElement(eventMedia);
-        eventHeader.setDataNavigationType("normal");
+        eventHeader.setFullsizeHeader();
         
-        EventPlace place = new EventPlace(event.id.toString(), NavigationTabs.Media, null);
-        pushPlaceToHistoryStack(place, new EventPlace.Tokenizer());
+        currentInternalPlace = new EventPlace(event.id.toString(), EventNavigationTabs.Media, null);
     }
 
-    @Override
-    public void openRaceViewer(StrippedLeaderboardDTO leaderboard, RaceDTO race) {
+    public String getRaceViewerURL(StrippedLeaderboardDTO leaderboard, RaceDTO race) {
         RegattaAndRaceIdentifier raceIdentifier = race.getRaceIdentifier();
-        String link = EntryPointLinkFactory.createRaceBoardLink(createRaceBoardLinkParameters(leaderboard.name, raceIdentifier));
-        Window.open(link, "_blank", "");
+        return EntryPointLinkFactory.createRaceBoardLink(createRaceBoardLinkParameters(leaderboard.name, raceIdentifier));
     }
     
     @Override
@@ -225,11 +218,6 @@ public class TabletAndDesktopEventView extends Composite implements EventView, E
             }
         }
         return result;
-    }
-    
-    private  <T extends Place> void pushPlaceToHistoryStack(T destinationPlace, PlaceTokenizer<T> tokenizer) {
-        String placeHistoryToken = destinationPlace.getClass().getSimpleName() + ":" + tokenizer.getToken(destinationPlace);
-        History.newItem(placeHistoryToken, false);
     }
 
 }

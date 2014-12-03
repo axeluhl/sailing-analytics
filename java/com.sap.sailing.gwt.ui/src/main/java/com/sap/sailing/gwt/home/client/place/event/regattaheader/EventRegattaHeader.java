@@ -11,7 +11,7 @@ import com.google.gwt.uibinder.client.UiHandler;
 import com.google.gwt.user.client.ui.Anchor;
 import com.google.gwt.user.client.ui.Composite;
 import com.google.gwt.user.client.ui.Widget;
-import com.sap.sailing.gwt.home.client.place.event.EventPageNavigator;
+import com.sap.sailing.gwt.home.client.place.event.EventPlaceNavigator;
 import com.sap.sailing.gwt.ui.shared.EventDTO;
 import com.sap.sailing.gwt.ui.shared.LeaderboardGroupDTO;
 import com.sap.sailing.gwt.ui.shared.StrippedLeaderboardDTO;
@@ -26,7 +26,7 @@ public class EventRegattaHeader extends Composite {
     @SuppressWarnings("unused")
     private final EventDTO event;
     private final Timer timerForClientServerOffset;
-    private final EventPageNavigator pageNavigator;
+    private final EventPlaceNavigator pageNavigator;
     private StrippedLeaderboardDTO leaderboard;
 
     @UiField SpanElement regattaName;
@@ -36,7 +36,7 @@ public class EventRegattaHeader extends Composite {
     @UiField DivElement isLiveDiv;
     @UiField Anchor leaderboardLink;
 
-    public EventRegattaHeader(EventDTO event,  Timer timerForClientServerOffset, EventPageNavigator pageNavigator) {
+    public EventRegattaHeader(EventDTO event,  Timer timerForClientServerOffset, EventPlaceNavigator pageNavigator) {
         this.event = event;
         this.timerForClientServerOffset = timerForClientServerOffset;
         this.pageNavigator = pageNavigator;

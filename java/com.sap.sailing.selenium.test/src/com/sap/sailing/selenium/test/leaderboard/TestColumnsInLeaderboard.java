@@ -1,7 +1,10 @@
 package com.sap.sailing.selenium.test.leaderboard;
 
-import static org.hamcrest.Matchers.*;
-import static org.junit.Assert.*;
+import static org.hamcrest.Matchers.equalTo;
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertFalse;
+import static org.junit.Assert.assertThat;
+import static org.junit.Assert.assertTrue;
 
 import java.util.List;
 
@@ -42,6 +45,7 @@ public class TestColumnsInLeaderboard extends AbstractSeleniumTest {
     private RaceDescriptor raceColumn;
     
     
+    @Override
     @Before
     public void setUp() {
         this.regatta = new RegattaDescriptor(REGATTA, BOAT_CLASS);
@@ -49,6 +53,7 @@ public class TestColumnsInLeaderboard extends AbstractSeleniumTest {
         this.trackedRace = new TrackedRaceDescriptor(this.regatta.toString(), BOAT_CLASS, RACE);
         this.raceColumn = new RaceDescriptor("R1", "Default", false, false, 0.0);
         clearState(getContextRoot());
+        super.setUp();
         configureLeaderboard();
     }
     
@@ -82,6 +87,34 @@ public class TestColumnsInLeaderboard extends AbstractSeleniumTest {
         } while (stateHasChanged);
     }
     
+    /**
+     * See bug 2425, comments 5, 6 and 7. This is testing that the leaderboard panel receives a refresh when shown.
+     */
+    @Test
+    public void testLeaderboardPanelRefresh() {
+        // Open the admin console
+        AdminConsolePage adminConsole = AdminConsolePage.goToPage(getWebDriver(), getContextRoot());
+        // Remove the tracked race, expecting the column in the leaderboard configuration page to show linked=No after the refresh
+        TracTracEventManagementPanelPO tracTracEvents = adminConsole.goToTracTracEvents();
+        tracTracEvents.getTrackedRacesList().remove(trackedRace);
+        {
+            LeaderboardConfigurationPanelPO leaderboardConfiguration = adminConsole.goToLeaderboardConfiguration();
+            LeaderboardDetailsPanelPO leaderboardDetails = leaderboardConfiguration.getLeaderboardDetails(LEADERBOARD);
+            final List<RaceDescriptor> races = leaderboardDetails.getRaces();
+            assertEquals(1, races.size());
+            assertFalse(races.iterator().next().isLinked()); // removing the race must make the race column unlinked.
+        }
+        // now back to the TracTrac management panel, load the race again and make sure it is auto-linked to the column
+        startTrackingRaceAndStopWhenFinished(adminConsole);
+        {
+            LeaderboardConfigurationPanelPO leaderboardConfiguration = adminConsole.goToLeaderboardConfiguration();
+            LeaderboardDetailsPanelPO details = leaderboardConfiguration.getLeaderboardDetails(LEADERBOARD);
+            final List<RaceDescriptor> races = details.getRaces();
+            assertEquals(1, races.size());
+            assertTrue(races.iterator().next().isLinked()); // removing the race must make the race column unlinked.
+        }
+    }
+    
     private void configureLeaderboard() {
         // Open the admin console for some configuration steps
         AdminConsolePage adminConsole = AdminConsolePage.goToPage(getWebDriver(), getContextRoot());
@@ -93,6 +126,17 @@ public class TestColumnsInLeaderboard extends AbstractSeleniumTest {
         seriesDialog.addRaces(1, 1);
         seriesDialog.pressOk();
         // Start the tracking for the races and wait until they are ready to use
+        startTrackingRaceAndStopWhenFinished(adminConsole);
+        LeaderboardConfigurationPanelPO leaderboardConfiguration = adminConsole.goToLeaderboardConfiguration();
+        leaderboardConfiguration.createRegattaLeaderboard(this.regatta);
+        LeaderboardDetailsPanelPO leaderboardDetails = leaderboardConfiguration.getLeaderboardDetails(LEADERBOARD);
+        leaderboardDetails.linkRace(this.raceColumn, this.trackedRace);
+    }
+
+    /**
+     * @param adminConsole
+     */
+    private void startTrackingRaceAndStopWhenFinished(AdminConsolePage adminConsole) {
         TracTracEventManagementPanelPO tracTracEvents = adminConsole.goToTracTracEvents();
         tracTracEvents.listTrackableRaces(KIELER_WOCHE_2013_JSON_URL);
         tracTracEvents.setReggataForTracking(this.regatta);
@@ -101,9 +145,7 @@ public class TestColumnsInLeaderboard extends AbstractSeleniumTest {
         TrackedRacesListPO trackedRacesList = tracTracEvents.getTrackedRacesList();
         trackedRacesList.waitForTrackedRace(this.trackedRace, Status.FINISHED); // TracAPI puts REPLAY races into FINISHED mode when done loading
         trackedRacesList.stopTracking(this.trackedRace);
-        LeaderboardConfigurationPanelPO leaderboardConfiguration = adminConsole.goToLeaderboardConfiguration();
-        leaderboardConfiguration.createRegattaLeaderboard(this.regatta);
-        LeaderboardDetailsPanelPO leaderboardDetails = leaderboardConfiguration.getLeaderboardDetails(LEADERBOARD);
-        leaderboardDetails.linkRace(this.raceColumn, this.trackedRace);
     }
+    
+    
 }

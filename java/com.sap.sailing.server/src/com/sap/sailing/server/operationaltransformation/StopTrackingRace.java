@@ -13,6 +13,14 @@ public class StopTrackingRace extends AbstractRaceOperation<Void> {
         super(raceIdentifier);
     }
 
+    /**
+     * {@link #internalApplyTo(RacingEventService)} does not replicate the effects
+     */
+    @Override
+    public boolean isRequiresExplicitTransitiveReplication() {
+        return true;
+    }
+    
     @Override
     public Void internalApplyTo(RacingEventService toState) throws Exception {
         Regatta regatta = toState.getRegatta(getRaceIdentifier());

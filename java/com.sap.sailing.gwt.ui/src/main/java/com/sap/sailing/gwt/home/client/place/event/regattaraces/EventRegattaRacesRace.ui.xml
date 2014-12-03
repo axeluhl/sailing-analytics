@@ -2,10 +2,10 @@
 <ui:UiBinder xmlns:ui="urn:ui:com.google.gwt.uibinder"
   xmlns:g="urn:import:com.google.gwt.user.client.ui"
     xmlns:s="urn:import:com.sap.sailing.gwt.home.client.shared">
-    <ui:with field="i18n" type="com.sap.sailing.gwt.home.client.i18n.TextMessages"/>
-    <ui:with field="res" type="com.sap.sailing.gwt.home.client.HomeResources" />
+    <ui:with field="i18n" type="com.sap.sailing.gwt.common.client.i18n.TextMessages"/>
+	<ui:with field="res" type="com.sap.sailing.gwt.common.client.SharedResources" />
     <ui:with field="local_res" type="com.sap.sailing.gwt.home.client.place.event.regattaraces.EventRegattaRacesResources" />
-<div class="{local_res.css.eventregattarace}">
+<g:HTMLPanel styleName="{local_res.css.eventregattarace}">
   <div ui:field="fleetColor" class="{local_res.css.eventregattarace_fleetindicator}"></div>
   <!-- race name  -->
   <div class="{local_res.css.eventregattarace_details} {local_res.css.eventregattarace_name}">
@@ -45,11 +45,11 @@
       <ui:text from='{i18n.raceNotScheduled}'/>
   </div>
   <div ui:field="watchRaceDiv" class="{local_res.css.eventregattarace_action}">
-      <a ui:field="watchRaceLink" class="{res.mainCss.button} {local_res.css.eventregattarace_action_watch}"><ui:text from='{i18n.eventRegattaRaceWatch}'/></a>
+      <g:Anchor ui:field="watchRaceLink" target="_blank" styleName="{res.mainCss.button} {local_res.css.eventregattarace_action_watch}"><ui:text from='{i18n.eventRegattaRaceWatch}'/></g:Anchor>
   </div>
   <div ui:field="analyzeRaceDiv" class="{local_res.css.eventregattarace_action}">
-      <a ui:field="analyzeRaceLink" class="{res.mainCss.button} {local_res.css.eventregattarace_action_analyze}"><ui:text from='{i18n.eventRegattaRaceAnalyse}'/></a>
+      <g:Anchor ui:field="analyzeRaceLink" target="_blank" styleName="{res.mainCss.button} {local_res.css.eventregattarace_action_analyze}"><ui:text from='{i18n.eventRegattaRaceAnalyse}'/></g:Anchor>
   </div>
-</div>
+</g:HTMLPanel>
 </ui:UiBinder>
 

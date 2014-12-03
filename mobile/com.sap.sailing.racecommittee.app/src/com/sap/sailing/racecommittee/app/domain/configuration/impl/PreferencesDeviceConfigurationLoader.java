@@ -1,12 +1,14 @@
 package com.sap.sailing.racecommittee.app.domain.configuration.impl;
 
+import android.content.Context;
+
+import com.sap.sailing.android.shared.logging.ExLog;
 import com.sap.sailing.domain.base.configuration.ConfigurationLoader;
 import com.sap.sailing.domain.base.configuration.DeviceConfiguration;
 import com.sap.sailing.domain.base.configuration.RegattaConfiguration;
 import com.sap.sailing.domain.base.configuration.impl.DeviceConfigurationImpl;
 import com.sap.sailing.domain.base.configuration.impl.RegattaConfigurationImpl;
 import com.sap.sailing.racecommittee.app.AppPreferences;
-import com.sap.sailing.racecommittee.app.logging.ExLog;
 
 public class PreferencesDeviceConfigurationLoader implements ConfigurationLoader<DeviceConfiguration> {
 
@@ -51,29 +53,30 @@ public class PreferencesDeviceConfigurationLoader implements ConfigurationLoader
 
     @Override
     public void store() {
-        ExLog.i(TAG, "Storing new device configuration.");
+        Context context = preferences.getContext();
+        ExLog.i(context, TAG, "Storing new device configuration.");
         
         if (regattaConfigurationLoader != null) {
             regattaConfigurationLoader.store();
-            logApply("regatta configuration", "[object]");
+            logApply(context, "regatta configuration", "[object]");
         }
         
         if (configuration.getAllowedCourseAreaNames() != null) {
             preferences.setManagedCourseAreaNames(configuration.getAllowedCourseAreaNames());
-            logApply("course areas", configuration.getAllowedCourseAreaNames());
+            logApply(context, "course areas", configuration.getAllowedCourseAreaNames());
         }
         if (configuration.getResultsMailRecipient() != null) {
             preferences.setMailRecipient(configuration.getResultsMailRecipient());
-            logApply("mail recipient", configuration.getResultsMailRecipient());
+            logApply(context, "mail recipient", configuration.getResultsMailRecipient());
         }
         if (configuration.getByNameCourseDesignerCourseNames() != null) {
             preferences.setByNameCourseDesignerCourseNames(configuration.getByNameCourseDesignerCourseNames());
-            logApply("by name course designer course names", configuration.getByNameCourseDesignerCourseNames());
+            logApply(context, "by name course designer course names", configuration.getByNameCourseDesignerCourseNames());
         }
     }
     
-    private static void logApply(String configurationName, Object value) {
-        ExLog.i(TAG, String.format("Applied '%s' configuration: %s.", configurationName, value==null?"null":value.toString()));
+    private static void logApply(Context context, String configurationName, Object value) {
+        ExLog.i(context, TAG, String.format("Applied '%s' configuration: %s.", configurationName, value==null?"null":value.toString()));
     }
 
 }

@@ -9,7 +9,7 @@ import android.os.Bundle;
 
 import com.sap.sailing.racecommittee.app.AppConstants;
 import com.sap.sailing.racecommittee.app.R;
-import com.sap.sailing.racecommittee.app.logging.ExLog;
+import com.sap.sailing.android.shared.logging.ExLog;
 
 public abstract class SessionActivity extends BaseActivity {
 
@@ -26,7 +26,7 @@ public abstract class SessionActivity extends BaseActivity {
     @Override
     public void onResume() {
         super.onResume();
-        ExLog.i(TAG, String.format("Logging in from activity %s", this.getClass().getSimpleName()));
+        ExLog.i(this, TAG, String.format("Logging in from activity %s", this.getClass().getSimpleName()));
     }
 
     @Override
@@ -40,7 +40,7 @@ public abstract class SessionActivity extends BaseActivity {
     }
     
     protected boolean logoutSession() {
-        ExLog.i(TAG, String.format("Logging out from activity %s", this.getClass().getSimpleName()));
+        ExLog.i(this, TAG, String.format("Logging out from activity %s", this.getClass().getSimpleName()));
         AlertDialog dialog = new AlertDialog.Builder(this)
             .setTitle(getString(R.string.logout_dialog_title))
             .setMessage(getString(R.string.logout_dialog_message))
@@ -67,7 +67,7 @@ public abstract class SessionActivity extends BaseActivity {
     }
 
     private void unloadAllRaces() {
-        ExLog.i(TAG, "Issuing intent action clear races");
+        ExLog.i(this, TAG, "Issuing intent action clear races");
         Intent intent = new Intent(AppConstants.INTENT_ACTION_CLEAR_RACES);
         this.startService(intent);
     }

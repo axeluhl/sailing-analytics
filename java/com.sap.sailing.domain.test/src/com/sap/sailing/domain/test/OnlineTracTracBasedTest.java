@@ -24,13 +24,12 @@ import com.sap.sailing.domain.base.RaceDefinition;
 import com.sap.sailing.domain.base.Regatta;
 import com.sap.sailing.domain.base.Waypoint;
 import com.sap.sailing.domain.common.Position;
-import com.sap.sailing.domain.common.TimePoint;
 import com.sap.sailing.domain.common.impl.DegreePosition;
-import com.sap.sailing.domain.common.impl.MillisecondsTimePoint;
 import com.sap.sailing.domain.racelog.impl.EmptyRaceLogStore;
 import com.sap.sailing.domain.tracking.DynamicRaceDefinitionSet;
 import com.sap.sailing.domain.tracking.DynamicTrackedRace;
 import com.sap.sailing.domain.tracking.DynamicTrackedRegatta;
+import com.sap.sailing.domain.tracking.impl.DynamicTrackedRaceImpl;
 import com.sap.sailing.domain.tracking.impl.DynamicTrackedRegattaImpl;
 import com.sap.sailing.domain.tracking.impl.EmptyWindStore;
 import com.sap.sailing.domain.tracking.impl.GPSFixImpl;
@@ -39,6 +38,8 @@ import com.sap.sailing.domain.tractracadapter.Receiver;
 import com.sap.sailing.domain.tractracadapter.ReceiverType;
 import com.sap.sailing.domain.tractracadapter.TracTracConnectionConstants;
 import com.sap.sailing.domain.tractracadapter.impl.DomainFactoryImpl;
+import com.sap.sse.common.TimePoint;
+import com.sap.sse.common.impl.MillisecondsTimePoint;
 import com.tractrac.model.lib.api.event.CreateModelException;
 import com.tractrac.model.lib.api.event.IRace;
 import com.tractrac.subscription.lib.api.SubscriberInitializationException;
@@ -63,7 +64,7 @@ public abstract class OnlineTracTracBasedTest extends AbstractTracTracLiveTest {
     private Regatta domainEvent;
     private DynamicTrackedRegatta trackedRegatta;
     private RaceDefinition race;
-    private DynamicTrackedRace trackedRace;
+    private DynamicTrackedRaceImpl trackedRace;
 
     private final Object semaphor = new Object();
     
@@ -159,7 +160,7 @@ public abstract class OnlineTracTracBasedTest extends AbstractTracTracLiveTest {
             receiver.join();
             logger.info("Joined receiver "+receiver);
         }
-        trackedRace = getTrackedRegatta().getTrackedRace(race);
+        trackedRace = (DynamicTrackedRaceImpl) getTrackedRegatta().getTrackedRace(race);
     }
 
     private void setStoredDataLoaded(boolean storedDataLoaded) {
@@ -232,11 +233,11 @@ public abstract class OnlineTracTracBasedTest extends AbstractTracTracLiveTest {
         this.race = race;
     }
 
-    protected DynamicTrackedRace getTrackedRace() {
+    protected DynamicTrackedRaceImpl getTrackedRace() {
         return trackedRace;
     }
     
-    protected void setTrackedRace(DynamicTrackedRace race) {
+    protected void setTrackedRace(DynamicTrackedRaceImpl race) {
         this.trackedRace = race;
     }
 

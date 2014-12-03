@@ -4,7 +4,7 @@ import com.google.gwt.core.client.GWT;
 import com.google.gwt.uibinder.client.UiBinder;
 import com.google.gwt.user.client.ui.Widget;
 import com.sap.sailing.gwt.home.client.place.event.AbstractEventComposite;
-import com.sap.sailing.gwt.home.client.place.event.EventPageNavigator;
+import com.sap.sailing.gwt.home.client.place.event.EventPlaceNavigator;
 import com.sap.sailing.gwt.ui.shared.EventDTO;
 
 public class EventMedia extends AbstractEventComposite {
@@ -13,7 +13,7 @@ public class EventMedia extends AbstractEventComposite {
     interface EventMediaUiBinder extends UiBinder<Widget, EventMedia> {
     }
 
-    public EventMedia(EventDTO event, EventPageNavigator placeNavigator) {
+    public EventMedia(EventDTO event, EventPlaceNavigator placeNavigator) {
         super(event, placeNavigator);
         
         EventMediaResources.INSTANCE.css().ensureInjected();

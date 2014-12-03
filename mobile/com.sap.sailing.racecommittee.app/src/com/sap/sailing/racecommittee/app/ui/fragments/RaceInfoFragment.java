@@ -14,21 +14,22 @@ import android.view.ViewGroup;
 import android.widget.Button;
 import android.widget.TextView;
 
+import com.sap.sailing.android.shared.logging.ExLog;
+import com.sap.sailing.domain.abstractlog.race.state.RaceStateChangedListener;
+import com.sap.sailing.domain.abstractlog.race.state.ReadonlyRaceState;
+import com.sap.sailing.domain.abstractlog.race.state.impl.BaseRaceStateChangedListener;
 import com.sap.sailing.domain.base.CourseBase;
-import com.sap.sailing.domain.common.impl.MillisecondsTimePoint;
-import com.sap.sailing.domain.racelog.state.RaceStateChangedListener;
-import com.sap.sailing.domain.racelog.state.ReadonlyRaceState;
-import com.sap.sailing.domain.racelog.state.impl.BaseRaceStateChangedListener;
 import com.sap.sailing.domain.tracking.Wind;
 import com.sap.sailing.racecommittee.app.AppConstants;
 import com.sap.sailing.racecommittee.app.R;
 import com.sap.sailing.racecommittee.app.domain.ManagedRace;
-import com.sap.sailing.racecommittee.app.logging.ExLog;
+import com.sap.sailing.racecommittee.app.logging.LogEvent;
 import com.sap.sailing.racecommittee.app.ui.activities.WindActivity;
 import com.sap.sailing.racecommittee.app.ui.fragments.chooser.RaceInfoFragmentChooser;
 import com.sap.sailing.racecommittee.app.ui.fragments.raceinfo.RaceInfoListener;
 import com.sap.sailing.racecommittee.app.ui.fragments.raceinfo.SetStartTimeRaceFragment;
 import com.sap.sse.common.Util;
+import com.sap.sse.common.impl.MillisecondsTimePoint;
 
 public class RaceInfoFragment extends RaceFragment implements RaceInfoListener {
     private final static String TAG = RaceInfoFragment.class.getName();
@@ -85,7 +86,7 @@ public class RaceInfoFragment extends RaceFragment implements RaceInfoListener {
         Button resetButton = (Button) getView().findViewById(R.id.btnResetRace);
         resetButton.setOnClickListener(new OnClickListener() {
             public void onClick(View arg0) {
-                ExLog.i(TAG, "Reset race button pressed");
+                ExLog.i(getActivity(), TAG, "Reset race button pressed");
                 showRaceResetConfirmationDialog();
             }
         });
@@ -114,14 +115,14 @@ public class RaceInfoFragment extends RaceFragment implements RaceInfoListener {
     }
 
     protected void switchToInfoFragment() {
-        RaceFragment newInfoFragment = infoFragmentChooser.choose(getRace());
+        RaceFragment newInfoFragment = infoFragmentChooser.choose(getActivity(), getRace());
         if (infoFragment == null || !newInfoFragment.getClass().equals(infoFragment.getClass())) {
             switchToInfoFragment(newInfoFragment);
         }
     }
 
     protected void switchToInfoFragment(RaceFragment chosenFragment) {
-        ExLog.i(TAG, String.format("Switched to %s fragment for race %s with status %s", chosenFragment.getClass()
+        ExLog.i(getActivity(), TAG, String.format("Switched to %s fragment for race %s with status %s", chosenFragment.getClass()
                 .getName(), getRace().getId(), getRace().getStatus()));
 
         this.infoFragment = chosenFragment;
@@ -143,19 +144,19 @@ public class RaceInfoFragment extends RaceFragment implements RaceInfoListener {
                 .setIcon(R.drawable.ic_dialog_alert_holo_light).setCancelable(true)
                 .setPositiveButton(getString(R.string.race_reset_reset_button), new DialogInterface.OnClickListener() {
                     public void onClick(DialogInterface dialog, int id) {
-                        ExLog.i(ExLog.RACE_RESET_YES, getRace().getId().toString(), getActivity());
-                        ExLog.w(TAG, String.format("Race %s is selected for reset.", getRace().getId()));
+                        ExLog.i(getActivity(), LogEvent.RACE_RESET_YES, getRace().getId().toString());
+                        ExLog.w(getActivity(), TAG, String.format("Race %s is selected for reset.", getRace().getId()));
 
                         getRace().getState().setAdvancePass(MillisecondsTimePoint.now());
                     }
                 }).setNegativeButton(getString(R.string.cancel), new DialogInterface.OnClickListener() {
                     public void onClick(DialogInterface dialog, int id) {
-                        ExLog.i(ExLog.RACE_RESET_NO, getRace().getId().toString(), getActivity());
+                        ExLog.i(getActivity(), LogEvent.RACE_RESET_NO, getRace().getId().toString());
                         dialog.cancel();
                     }
                 });
         AlertDialog alert = builder.create();
-        ExLog.i(ExLog.RACE_RESET_DIALOG_BUTTON, getRace().getId().toString(), getActivity());
+        ExLog.i(getActivity(), LogEvent.RACE_RESET_DIALOG_BUTTON, getRace().getId().toString());
         alert.show();
     }
 

@@ -2,7 +2,7 @@ package com.sap.sailing.domain.tracking;
 
 import com.sap.sailing.domain.common.LegType;
 import com.sap.sailing.domain.common.NoWindException;
-import com.sap.sailing.domain.common.TimePoint;
+import com.sap.sse.common.TimePoint;
 
 /**
  * When comprehensive calculations are prone to query the leg type several times for the same leg for the same time

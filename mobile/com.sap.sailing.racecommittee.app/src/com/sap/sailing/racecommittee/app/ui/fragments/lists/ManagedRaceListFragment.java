@@ -16,13 +16,14 @@ import android.view.ViewGroup;
 import android.widget.ImageView;
 import android.widget.ListView;
 
-import com.sap.sailing.domain.racelog.state.ReadonlyRaceState;
-import com.sap.sailing.domain.racelog.state.impl.BaseRaceStateChangedListener;
+import com.sap.sailing.android.shared.logging.ExLog;
+import com.sap.sailing.domain.abstractlog.race.state.ReadonlyRaceState;
+import com.sap.sailing.domain.abstractlog.race.state.impl.BaseRaceStateChangedListener;
 import com.sap.sailing.racecommittee.app.R;
 import com.sap.sailing.racecommittee.app.RaceApplication;
 import com.sap.sailing.racecommittee.app.domain.ManagedRace;
 import com.sap.sailing.racecommittee.app.domain.impl.BoatClassSeriesFleet;
-import com.sap.sailing.racecommittee.app.logging.ExLog;
+import com.sap.sailing.racecommittee.app.logging.LogEvent;
 import com.sap.sailing.racecommittee.app.ui.activities.RacingActivity;
 import com.sap.sailing.racecommittee.app.ui.adapters.racelist.ManagedRaceListAdapter;
 import com.sap.sailing.racecommittee.app.ui.adapters.racelist.ManagedRaceListAdapter.JuryFlagClickedListener;
@@ -112,7 +113,7 @@ public class ManagedRaceListFragment extends LoggableListFragment implements Jur
     }
 
     public void setupOn(Collection<ManagedRace> races) {
-        ExLog.i(TAG, String.format("Setting up %s with %d races.", this.getClass().getSimpleName(), races.size()));
+        ExLog.i(getActivity(), TAG, String.format("Setting up %s with %d races.", this.getClass().getSimpleName(), races.size()));
         
         unregisterOnAllRaces();
         managedRacesById.clear();
@@ -206,13 +207,13 @@ public class ManagedRaceListFragment extends LoggableListFragment implements Jur
             ((ImageView) view.findViewById(R.id.Welter_Cell_UpdateLabel)).setVisibility(View.GONE);
 
             selectedRace = selectedElement.getRace();
-            ExLog.i(ExLog.RACE_SELECTED_ELEMENT, selectedRace.getId() + " " + selectedRace.getStatus(), getActivity());
+            ExLog.i(getActivity(), LogEvent.RACE_SELECTED_ELEMENT, selectedRace.getId() + " " + selectedRace.getStatus());
             ((RacingActivity) getActivity()).onRaceItemClicked(selectedRace);
 
         } else if (selectedItem instanceof RaceListDataTypeHeader) {
             // This is for logging purposes only!
             RaceListDataTypeHeader selectedTitle = (RaceListDataTypeHeader) selectedItem;
-            ExLog.i(ExLog.RACE_SELECTED_TITLE, selectedTitle.toString(), getActivity());
+            ExLog.i(getActivity(), LogEvent.RACE_SELECTED_TITLE, selectedTitle.toString());
         }
     }
 

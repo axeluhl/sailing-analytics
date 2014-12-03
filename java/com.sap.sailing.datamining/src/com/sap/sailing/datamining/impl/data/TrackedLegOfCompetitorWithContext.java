@@ -3,31 +3,27 @@ package com.sap.sailing.datamining.impl.data;
 import com.sap.sailing.datamining.data.HasTrackedLegContext;
 import com.sap.sailing.datamining.data.HasTrackedLegOfCompetitorContext;
 import com.sap.sailing.domain.base.Competitor;
-import com.sap.sailing.domain.base.Fleet;
-import com.sap.sailing.domain.base.Regatta;
-import com.sap.sailing.domain.common.TimePoint;
-import com.sap.sailing.domain.tracking.TrackedLeg;
 import com.sap.sailing.domain.tracking.TrackedLegOfCompetitor;
-import com.sap.sailing.domain.tracking.TrackedRace;
+import com.sap.sse.common.TimePoint;
 
-public class TrackedLegOfCompetitorWithContext extends TrackedLegWithContext implements HasTrackedLegOfCompetitorContext {
+public class TrackedLegOfCompetitorWithContext implements HasTrackedLegOfCompetitorContext {
 
+    private final HasTrackedLegContext trackedLegContext;
+    
     private final TrackedLegOfCompetitor trackedLegOfCompetitor;
     private final Competitor competitor;
 
     public TrackedLegOfCompetitorWithContext(HasTrackedLegContext trackedLegContext, TrackedLegOfCompetitor trackedLegOfCompetitor) {
-        this(trackedLegContext.getRegatta(), trackedLegContext.getFleet(),
-                trackedLegContext.getTrackedRace(), trackedLegContext.getTrackedLeg(),
-                trackedLegContext.getLegNumber(), trackedLegOfCompetitor);
-    }
-
-    public TrackedLegOfCompetitorWithContext(Regatta regatta, Fleet fleet, TrackedRace trackedRace,
-            TrackedLeg trackedLeg, int legNumber, TrackedLegOfCompetitor trackedLegOfCompetitor) {
-        super(regatta, fleet, trackedRace, trackedLeg, legNumber);
+        this.trackedLegContext = trackedLegContext;
         this.trackedLegOfCompetitor = trackedLegOfCompetitor;
         this.competitor = trackedLegOfCompetitor.getCompetitor();
     }
     
+    @Override
+    public HasTrackedLegContext getTrackedLegContext() {
+        return trackedLegContext;
+    }
+
     @Override
     public TrackedLegOfCompetitor getTrackedLegOfCompetitor() {
         return trackedLegOfCompetitor;
@@ -40,7 +36,7 @@ public class TrackedLegOfCompetitorWithContext extends TrackedLegWithContext imp
     
     @Override
     public Double getDistanceTraveled() {
-        TimePoint timePoint = getTrackedRace().getEndOfTracking();
+        TimePoint timePoint = getTrackedLegContext().getTrackedRaceContext().getTrackedRace().getEndOfTracking();
         return getTrackedLegOfCompetitor().getDistanceTraveled(timePoint).getMeters();
     }
 

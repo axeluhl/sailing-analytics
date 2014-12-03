@@ -1,8 +1,8 @@
 package com.sap.sailing.gwt.home.client.shared.stage;
 
-import com.google.gwt.dom.client.Style.Display;
-import com.sap.sailing.gwt.home.client.app.PlaceNavigator;
-import com.sap.sailing.gwt.home.client.i18n.TextMessages;
+import com.google.gwt.event.dom.client.ClickEvent;
+import com.sap.sailing.gwt.common.client.i18n.TextMessages;
+import com.sap.sailing.gwt.home.client.app.HomePlacesNavigator;
 import com.sap.sailing.gwt.home.client.shared.EventDatesFormatterUtil;
 import com.sap.sailing.gwt.ui.shared.EventBaseDTO;
 
@@ -13,19 +13,20 @@ import com.sap.sailing.gwt.ui.shared.EventBaseDTO;
  */
 public class PopularEventStageTeaserBand extends StageTeaserBand {
 
-    public PopularEventStageTeaserBand(EventBaseDTO event, PlaceNavigator placeNavigator) {
+    public PopularEventStageTeaserBand(EventBaseDTO event, HomePlacesNavigator placeNavigator) {
         super(event, placeNavigator);
  
         bandTitle.setInnerText(event.getName());
         bandSubtitle.setInnerText(EventDatesFormatterUtil.formatDateRangeWithYear(event.startDate, event.endDate));
 
-        actionLink.getStyle().setDisplay(Display.INLINE_BLOCK);
-        actionLink.setInnerText(TextMessages.INSTANCE.viewAnalysis());
+        actionLink.setVisible(true);
+        actionLink.setText(TextMessages.INSTANCE.viewAnalysis());
+        actionLink.setHref(getEventNavigation().getTargetUrl());
     }
 
     @Override
-    public void actionLinkClicked() {
-        EventBaseDTO event = getEvent();
-        getPlaceNavigator().goToEvent(event.id.toString(), event.getBaseURL(), event.isOnRemoteServer());
+    public void actionLinkClicked(ClickEvent e) {
+        getPlaceNavigator().goToPlace(getEventNavigation());
+        e.preventDefault();
     }
 }

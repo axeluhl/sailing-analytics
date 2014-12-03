@@ -23,10 +23,12 @@
 
 	<!-- Other module inherits -->
 	<inherits name="com.sap.sailing.gwt.ui.EmulatedJRE" />
-    <inherits name="com.sap.sse.gwt.SSESharedGWT" />
+   	<inherits name="com.sap.sse.gwt.SSESharedGWT" />
 	<inherits name="com.sap.sse.SSECommon" />    
    	<inherits name="com.sap.sailing.domain.SailingDomain" />
-  	<inherits name="com.sap.sse.datamining.DataMiningDomain" />
+	<inherits name="com.sap.sse.gwt.AdminConsole" />
+   	<inherits name="com.sap.sse.datamining.DataMiningDomain" />
+  	<inherits name="com.sap.sse.security.ui.LoginPanel" />
   	
   	<source path='common'/>
 	<source path="client" />

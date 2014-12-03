@@ -13,7 +13,7 @@ import com.google.gwt.user.client.ui.Composite;
 import com.google.gwt.user.client.ui.Widget;
 import com.sap.sailing.domain.common.dto.FleetDTO;
 import com.sap.sailing.domain.common.dto.RaceColumnDTO;
-import com.sap.sailing.gwt.home.client.place.event.EventPageNavigator;
+import com.sap.sailing.gwt.home.client.place.event.EventPlaceNavigator;
 import com.sap.sailing.gwt.home.client.shared.EventDatesFormatterUtil;
 import com.sap.sailing.gwt.ui.shared.RaceGroupSeriesDTO;
 import com.sap.sailing.gwt.ui.shared.StrippedLeaderboardDTO;
@@ -29,7 +29,7 @@ public class EventRegattaRacesFleetGroup extends Composite {
     @UiField DivElement racesFromToDate;
     @UiField DivElement racesFleetPanel;
     
-    public EventRegattaRacesFleetGroup(StrippedLeaderboardDTO leaderboard, RaceGroupSeriesDTO series, List<FleetDTO> fleetsToShow, Timer timerForClientServerOffset, EventPageNavigator pageNavigator) {
+    public EventRegattaRacesFleetGroup(StrippedLeaderboardDTO leaderboard, RaceGroupSeriesDTO series, List<FleetDTO> fleetsToShow, Timer timerForClientServerOffset, EventPlaceNavigator pageNavigator) {
         EventRegattaRacesResources.INSTANCE.css().ensureInjected();
         initWidget(uiBinder.createAndBindUi(this));
         
@@ -41,7 +41,7 @@ public class EventRegattaRacesFleetGroup extends Composite {
         }
     }
 
-    public EventRegattaRacesFleetGroup(StrippedLeaderboardDTO leaderboard, RaceGroupSeriesDTO series, Timer timerForClientServerOffset, EventPageNavigator pageNavigator) {
+    public EventRegattaRacesFleetGroup(StrippedLeaderboardDTO leaderboard, RaceGroupSeriesDTO series, Timer timerForClientServerOffset, EventPlaceNavigator pageNavigator) {
         EventRegattaRacesResources.INSTANCE.css().ensureInjected();
         initWidget(uiBinder.createAndBindUi(this));
         
@@ -51,7 +51,7 @@ public class EventRegattaRacesFleetGroup extends Composite {
         updateFleetRacesUI(leaderboard, series, defaultFleet, timerForClientServerOffset, pageNavigator);
     }
 
-    private void updateFleetRacesUI(StrippedLeaderboardDTO leaderboard, RaceGroupSeriesDTO series, FleetDTO fleet, Timer timerForClientServerOffset, EventPageNavigator pageNavigator) {
+    private void updateFleetRacesUI(StrippedLeaderboardDTO leaderboard, RaceGroupSeriesDTO series, FleetDTO fleet, Timer timerForClientServerOffset, EventPlaceNavigator pageNavigator) {
         Date fromDate = null;
         Date toDate = null;
 

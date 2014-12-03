@@ -6,6 +6,7 @@ import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.NavigableSet;
+import java.util.Set;
 import java.util.UUID;
 import java.util.concurrent.ConcurrentSkipListSet;
 import java.util.concurrent.Executor;
@@ -33,13 +34,11 @@ import com.sap.sailing.domain.common.PolarSheetsData;
 import com.sap.sailing.domain.common.PolarSheetsHistogramData;
 import com.sap.sailing.domain.common.Position;
 import com.sap.sailing.domain.common.SpeedWithBearing;
-import com.sap.sailing.domain.common.TimePoint;
 import com.sap.sailing.domain.common.WindSource;
 import com.sap.sailing.domain.common.WindSourceType;
 import com.sap.sailing.domain.common.impl.DegreeBearingImpl;
 import com.sap.sailing.domain.common.impl.DegreePosition;
 import com.sap.sailing.domain.common.impl.KnotSpeedWithBearingImpl;
-import com.sap.sailing.domain.common.impl.MillisecondsTimePoint;
 import com.sap.sailing.domain.common.impl.PolarSheetGenerationSettingsImpl;
 import com.sap.sailing.domain.common.impl.WindSourceImpl;
 import com.sap.sailing.domain.common.impl.WindSteppingWithMaxDistance;
@@ -60,6 +59,8 @@ import com.sap.sailing.domain.tracking.impl.MarkPassingByTimeComparator;
 import com.sap.sailing.domain.tracking.impl.MarkPassingImpl;
 import com.sap.sailing.domain.tracking.impl.WindImpl;
 import com.sap.sailing.domain.tracking.impl.WindWithConfidenceImpl;
+import com.sap.sse.common.TimePoint;
+import com.sap.sse.common.impl.MillisecondsTimePoint;
 
 public class PolarSheetGenerationTest {
     
@@ -216,7 +217,7 @@ public class PolarSheetGenerationTest {
         }
         
         @Override
-        public Wind getWind(Position p, TimePoint at, Iterable<WindSource> windSourcesToExclude) {
+        public Wind getWind(Position p, TimePoint at, Set<WindSource> windSourcesToExclude) {
             return getWind(p, at);
         }
         
@@ -229,7 +230,7 @@ public class PolarSheetGenerationTest {
         
         @Override
         public WindWithConfidence<com.sap.sse.common.Util.Pair<Position, TimePoint>> getWindWithConfidence(Position p, TimePoint at,
-                Iterable<WindSource> windSourcesToExclude) {
+                Set<WindSource> windSourcesToExclude) {
             return getWindWithConfidence(p, at);
         }
         
@@ -263,8 +264,8 @@ public class PolarSheetGenerationTest {
         }
         
         @Override
-        public Iterable<WindSource> getWindSources(WindSourceType type) {
-            List<WindSource> sources = new ArrayList<WindSource>();
+        public Set<WindSource> getWindSources(WindSourceType type) {
+            Set<WindSource> sources = new HashSet<>();
             sources.add(new WindSourceImpl(type));
             return sources;
         }

@@ -10,6 +10,7 @@ import java.util.List;
 import java.util.Set;
 import java.util.logging.Logger;
 
+import com.sap.sailing.domain.abstractlog.race.RaceLogEvent;
 import com.sap.sailing.domain.base.BoatClass;
 import com.sap.sailing.domain.base.Competitor;
 import com.sap.sailing.domain.base.CourseArea;
@@ -27,10 +28,8 @@ import com.sap.sailing.domain.common.RegattaAndRaceIdentifier;
 import com.sap.sailing.domain.common.RegattaIdentifier;
 import com.sap.sailing.domain.common.RegattaName;
 import com.sap.sailing.domain.common.RegattaNameAndRaceName;
-import com.sap.sailing.domain.common.impl.NamedImpl;
 import com.sap.sailing.domain.leaderboard.ResultDiscardingRule;
 import com.sap.sailing.domain.leaderboard.ScoringScheme;
-import com.sap.sailing.domain.racelog.RaceLogEvent;
 import com.sap.sailing.domain.racelog.RaceLogIdentifier;
 import com.sap.sailing.domain.racelog.RaceLogInformation;
 import com.sap.sailing.domain.racelog.RaceLogStore;
@@ -41,7 +40,9 @@ import com.sap.sailing.domain.tracking.TrackedRace;
 import com.sap.sailing.domain.tracking.TrackedRegatta;
 import com.sap.sailing.domain.tracking.TrackedRegattaRegistry;
 import com.sap.sailing.util.impl.RaceColumnListeners;
+import com.sap.sse.common.TimePoint;
 import com.sap.sse.common.Util;
+import com.sap.sse.common.impl.NamedImpl;
 
 public class RegattaImpl extends NamedImpl implements Regatta, RaceColumnListener {
 
@@ -67,6 +68,8 @@ public class RegattaImpl extends NamedImpl implements Regatta, RaceColumnListene
     private List<? extends Series> series;
     private final RaceColumnListeners raceColumnListeners;
     private final ScoringScheme scoringScheme;
+    private TimePoint startDate;
+    private TimePoint endDate;
     private final Serializable id;
     private transient RaceLogStore raceLogStore;
     
@@ -91,8 +94,8 @@ public class RegattaImpl extends NamedImpl implements Regatta, RaceColumnListene
     /**
      * Constructs a regatta with an empty {@link RaceLogStore}.
      */
-    public RegattaImpl(String name, BoatClass boatClass, Iterable<? extends Series> series, boolean persistent, ScoringScheme scoringScheme, Serializable id, CourseArea courseArea) {
-        this(EmptyRaceLogStore.INSTANCE, name, boatClass, series, persistent, scoringScheme, id, courseArea, /* useStartTimeInference */ true);
+    public RegattaImpl(String name, BoatClass boatClass, TimePoint startDate, TimePoint endDate, Iterable<? extends Series> series, boolean persistent, ScoringScheme scoringScheme, Serializable id, CourseArea courseArea) {
+        this(EmptyRaceLogStore.INSTANCE, name, boatClass, startDate, endDate, series, persistent, scoringScheme, id, courseArea, /* useStartTimeInference */ true);
     }
     
     /**
@@ -105,8 +108,8 @@ public class RegattaImpl extends NamedImpl implements Regatta, RaceColumnListene
      *            this column's series {@link Regatta}, respectively. If <code>null</code>, the re-association won't be
      *            carried out.
      */
-    public RegattaImpl(RaceLogStore raceLogStore, String name, BoatClass boatClass, TrackedRegattaRegistry trackedRegattaRegistry, ScoringScheme scoringScheme, Serializable id, CourseArea courseArea) {
-        this(raceLogStore, name, boatClass, Collections.singletonList(new SeriesImpl(LeaderboardNameConstants.DEFAULT_SERIES_NAME,
+    public RegattaImpl(RaceLogStore raceLogStore, String name, BoatClass boatClass, TimePoint startDate, TimePoint endDate, TrackedRegattaRegistry trackedRegattaRegistry, ScoringScheme scoringScheme, Serializable id, CourseArea courseArea) {
+        this(raceLogStore, name, boatClass, startDate, endDate, Collections.singletonList(new SeriesImpl(LeaderboardNameConstants.DEFAULT_SERIES_NAME,
                 /* isMedal */false, Collections
                 .singletonList(new FleetImpl(LeaderboardNameConstants.DEFAULT_FLEET_NAME)), /* race column names */new ArrayList<String>(),
                 trackedRegattaRegistry)), /* persistent */false, scoringScheme, id, courseArea, /* useStartTimeInference */ true);
@@ -117,7 +120,7 @@ public class RegattaImpl extends NamedImpl implements Regatta, RaceColumnListene
      *            all {@link Series} in this iterable will have their {@link Series#setRegatta(Regatta) regatta set} to
      *            this new regatta.
      */
-    public <S extends Series> RegattaImpl(RaceLogStore raceLogStore, String name, BoatClass boatClass, Iterable<S> series, boolean persistent, ScoringScheme scoringScheme, Serializable id, CourseArea courseArea, boolean useStartTimeInference) {
+    public <S extends Series> RegattaImpl(RaceLogStore raceLogStore, String name, BoatClass boatClass, TimePoint startDate, TimePoint endDate, Iterable<S> series, boolean persistent, ScoringScheme scoringScheme, Serializable id, CourseArea courseArea, boolean useStartTimeInference) {
         super(name);
         this.useStartTimeInference = useStartTimeInference;
         this.id = id;
@@ -126,6 +129,8 @@ public class RegattaImpl extends NamedImpl implements Regatta, RaceColumnListene
         regattaListeners = new HashSet<RegattaListener>();
         raceColumnListeners = new RaceColumnListeners();
         this.boatClass = boatClass;
+        this.startDate = startDate;
+        this.endDate = endDate;
         List<S> seriesList = new ArrayList<S>();
         for (S s : series) {
             seriesList.add(s);
@@ -399,6 +404,26 @@ public class RegattaImpl extends NamedImpl implements Regatta, RaceColumnListene
     @Override
     public ScoringScheme getScoringScheme() {
         return scoringScheme;
+    }
+
+    @Override
+    public TimePoint getStartDate() {
+        return startDate;
+    }
+
+    @Override
+    public void setStartDate(TimePoint startDate) {
+        this.startDate = startDate;
+    }
+
+    @Override
+    public TimePoint getEndDate() {
+        return endDate;
+    }
+
+    @Override
+    public void setEndDate(TimePoint endDate) {
+        this.endDate = endDate;
     }
 
     @Override

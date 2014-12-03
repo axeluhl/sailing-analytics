@@ -12,7 +12,7 @@ import com.google.gwt.uibinder.client.UiField;
 import com.google.gwt.user.client.ui.Composite;
 import com.google.gwt.user.client.ui.HTMLPanel;
 import com.google.gwt.user.client.ui.Widget;
-import com.sap.sailing.gwt.home.client.app.PlaceNavigator;
+import com.sap.sailing.gwt.home.client.app.HomePlacesNavigator;
 import com.sap.sailing.gwt.home.client.shared.recentevent.RecentEvent;
 import com.sap.sailing.gwt.ui.shared.EventBaseDTO;
 
@@ -34,7 +34,7 @@ public class EventsOverviewRecentYear extends Composite {
     
     private boolean isContentVisible;
     
-    public EventsOverviewRecentYear(Integer year, List<EventBaseDTO> events, PlaceNavigator navigator) {
+    public EventsOverviewRecentYear(Integer year, List<EventBaseDTO> events, HomePlacesNavigator navigator) {
         EventsOverviewRecentResources.INSTANCE.css().ensureInjected();
         initWidget(uiBinder.createAndBindUi(this));
         this.year.setInnerText(String.valueOf(year));

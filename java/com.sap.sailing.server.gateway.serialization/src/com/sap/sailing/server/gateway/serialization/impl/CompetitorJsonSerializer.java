@@ -67,7 +67,7 @@ public class CompetitorJsonSerializer implements JsonSerializer<Competitor> {
         result.put(FIELD_NAME, competitor.getName());
         result.put(FIELD_DISPLAY_COLOR, competitor.getColor() == null ? null : competitor.getColor().getAsHtml());
         result.put(FIELD_SAILID, competitor.getBoat() == null ? "" : competitor.getBoat().getSailID());
-        final Nationality nationality = competitor.getTeam().getNationality();
+        final Nationality nationality = competitor.getTeam() == null ? null : competitor.getTeam().getNationality();
         result.put(FIELD_NATIONALITY, nationality == null ? "" : nationality.getThreeLetterIOCAcronym());
         CountryCode countryCode = nationality == null ? null : nationality.getCountryCode();
         result.put(FIELD_NATIONALITY_ISO2, countryCode == null ? "" : countryCode.getTwoLetterISOCode());

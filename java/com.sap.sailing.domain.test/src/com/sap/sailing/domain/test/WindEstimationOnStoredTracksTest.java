@@ -7,6 +7,7 @@ import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.util.HashMap;
 import java.util.Map;
+import java.util.Set;
 
 import org.junit.Test;
 
@@ -14,19 +15,20 @@ import com.sap.sailing.domain.base.Competitor;
 import com.sap.sailing.domain.base.Mark;
 import com.sap.sailing.domain.common.NoWindException;
 import com.sap.sailing.domain.common.Position;
-import com.sap.sailing.domain.common.TimePoint;
+import com.sap.sailing.domain.common.WindSource;
 import com.sap.sailing.domain.common.WindSourceType;
 import com.sap.sailing.domain.common.impl.DegreeBearingImpl;
 import com.sap.sailing.domain.common.impl.DegreePosition;
 import com.sap.sailing.domain.common.impl.KnotSpeedWithBearingImpl;
-import com.sap.sailing.domain.common.impl.MillisecondsTimePoint;
 import com.sap.sailing.domain.common.impl.WindSourceImpl;
 import com.sap.sailing.domain.tracking.GPSFixMoving;
 import com.sap.sailing.domain.tracking.GPSFixTrack;
 import com.sap.sailing.domain.tracking.Wind;
 import com.sap.sailing.domain.tracking.impl.GPSFixImpl;
 import com.sap.sailing.domain.tracking.impl.WindImpl;
+import com.sap.sse.common.TimePoint;
 import com.sap.sse.common.Util;
+import com.sap.sse.common.impl.MillisecondsTimePoint;
 
 public class WindEstimationOnStoredTracksTest extends StoredTrackBasedTestWithTrackedRace {
     // ---------------- BearingWithConfidenceCluster -----------------
@@ -65,4 +67,17 @@ public class WindEstimationOnStoredTracksTest extends StoredTrackBasedTestWithTr
         assertNotNull(estimatedWindDirection);
     }
     
+    @Test
+    public void testWindSourcesAreEqualAcrossCalls() {
+        Set<WindSource> ws1 = getTrackedRace().getWindSources();
+        Set<WindSource> ws2 = getTrackedRace().getWindSources();
+        assertEquals(ws1, ws2);
+    }
+
+    @Test
+    public void testExcludedWindSourcesAreEqualAcrossCalls() {
+        Set<WindSource> ews1 = getTrackedRace().getWindSourcesToExclude();
+        Set<WindSource> ews2 = getTrackedRace().getWindSourcesToExclude();
+        assertEquals(ews1, ews2);
+    }
 }

@@ -5,15 +5,17 @@ import java.util.List;
 
 public interface FunctionDTO extends Serializable, Comparable<FunctionDTO> {
 
-    public boolean isDimension();
-
-    public String getDisplayName();
-
-    public List<String> getParameters();
+    public String getSourceTypeName();
 
     public String getReturnTypeName();
 
-    public String getSourceTypeName();
+    public String getFunctionName();
+
+    public String getDisplayName();
+
+    public List<String> getParameterTypeNames();
+
+    public boolean isDimension();
     
     public int getOrdinal();
 

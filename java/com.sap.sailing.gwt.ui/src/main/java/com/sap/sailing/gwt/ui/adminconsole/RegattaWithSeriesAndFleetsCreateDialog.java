@@ -3,6 +3,7 @@ package com.sap.sailing.gwt.ui.adminconsole;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Collections;
+import java.util.Date;
 import java.util.HashSet;
 import java.util.List;
 
@@ -13,6 +14,7 @@ import com.sap.sailing.gwt.ui.client.StringMessages;
 import com.sap.sailing.gwt.ui.shared.EventDTO;
 import com.sap.sailing.gwt.ui.shared.RegattaDTO;
 import com.sap.sailing.gwt.ui.shared.SeriesDTO;
+import com.sap.sse.gwt.client.controls.listedit.ListEditorComposite;
 
 public class RegattaWithSeriesAndFleetsCreateDialog extends RegattaWithSeriesAndFleetsDialog {
 
@@ -42,7 +44,21 @@ public class RegattaWithSeriesAndFleetsCreateDialog extends RegattaWithSeriesAnd
                 }
             }
 
-            if (!nameNotEmpty) {
+            Date startDate = regattaToValidate.startDate;
+            Date endDate = regattaToValidate.endDate;
+            String datesErrorMessage = null;
+            // remark: startDate == null and endDate == null is valid
+            if(startDate != null && endDate != null) {
+                if(startDate.after(endDate)) {
+                    datesErrorMessage = stringMessages.pleaseEnterStartAndEndDate(); 
+                }
+            } else if((startDate != null && endDate == null) || (startDate == null && endDate != null)) {
+                datesErrorMessage = stringMessages.pleaseEnterStartAndEndDate();
+            }
+            
+            if(datesErrorMessage != null) {
+                errorMessage = datesErrorMessage;
+            } else if (!nameNotEmpty) {
                 errorMessage = stringMessages.pleaseEnterAName();
             } else if (regattaToValidate.getName().contains("/")) {
                 errorMessage = stringMessages.regattaNameMustNotContainSlashes();
@@ -92,9 +108,9 @@ public class RegattaWithSeriesAndFleetsCreateDialog extends RegattaWithSeriesAnd
     }
 
     public RegattaWithSeriesAndFleetsCreateDialog(Collection<RegattaDTO> existingRegattas,
-            List<EventDTO> existingEvents, StringMessages stringConstants, DialogCallback<RegattaDTO> callback) {
-        super(new RegattaDTO(), existingEvents, stringConstants.addRegatta(), stringConstants.ok(), stringConstants,
-                new RegattaParameterValidator(stringConstants, existingRegattas), callback);
+            List<EventDTO> existingEvents, StringMessages stringMessages, DialogCallback<RegattaDTO> callback) {
+        super(new RegattaDTO(), existingEvents, stringMessages.addRegatta(), stringMessages.ok(), stringMessages,
+                new RegattaParameterValidator(stringMessages, existingRegattas), callback);
         setSeriesEditor();
     }
 

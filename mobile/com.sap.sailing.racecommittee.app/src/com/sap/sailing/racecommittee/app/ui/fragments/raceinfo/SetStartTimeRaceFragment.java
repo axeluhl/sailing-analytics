@@ -21,18 +21,17 @@ import android.widget.Spinner;
 import android.widget.TextView;
 import android.widget.TimePicker;
 
-import com.sap.sailing.domain.common.TimePoint;
-import com.sap.sailing.domain.common.impl.MillisecondsTimePoint;
+import com.sap.sailing.android.shared.logging.ExLog;
+import com.sap.sailing.domain.abstractlog.race.state.racingprocedure.RacingProcedurePrerequisite;
+import com.sap.sailing.domain.abstractlog.race.state.racingprocedure.gate.impl.GateLaunchTimePrerequisite;
+import com.sap.sailing.domain.abstractlog.race.state.racingprocedure.gate.impl.PathfinderPrerequisite;
+import com.sap.sailing.domain.abstractlog.race.state.racingprocedure.rrs26.impl.StartmodePrerequisite;
 import com.sap.sailing.domain.common.racelog.Flags;
 import com.sap.sailing.domain.common.racelog.RacingProcedureType;
-import com.sap.sailing.domain.racelog.state.racingprocedure.RacingProcedurePrerequisite;
-import com.sap.sailing.domain.racelog.state.racingprocedure.gate.impl.GateLaunchTimePrerequisite;
-import com.sap.sailing.domain.racelog.state.racingprocedure.gate.impl.PathfinderPrerequisite;
-import com.sap.sailing.domain.racelog.state.racingprocedure.rrs26.impl.StartmodePrerequisite;
 import com.sap.sailing.racecommittee.app.AppConstants;
 import com.sap.sailing.racecommittee.app.R;
 import com.sap.sailing.racecommittee.app.domain.ManagedRace;
-import com.sap.sailing.racecommittee.app.logging.ExLog;
+import com.sap.sailing.racecommittee.app.logging.LogEvent;
 import com.sap.sailing.racecommittee.app.ui.fragments.RaceFragment;
 import com.sap.sailing.racecommittee.app.ui.fragments.dialogs.AbortModeSelectionDialog;
 import com.sap.sailing.racecommittee.app.ui.fragments.dialogs.DatePickerFragment;
@@ -42,6 +41,8 @@ import com.sap.sailing.racecommittee.app.ui.fragments.dialogs.prerequisite.RaceC
 import com.sap.sailing.racecommittee.app.ui.fragments.dialogs.prerequisite.RaceChoosePathFinderDialog;
 import com.sap.sailing.racecommittee.app.ui.fragments.dialogs.prerequisite.RaceChooseStartModeDialog;
 import com.sap.sailing.racecommittee.app.ui.utils.CourseDesignerChooser;
+import com.sap.sse.common.TimePoint;
+import com.sap.sse.common.impl.MillisecondsTimePoint;
 
 public class SetStartTimeRaceFragment extends RaceFragment {
 
@@ -108,25 +109,29 @@ public class SetStartTimeRaceFragment extends RaceFragment {
             }
         });
         
-        btSetCourse.setOnClickListener(new OnClickListener() {
-            @Override
-            public void onClick(View paramView) {
-                showCourseDesignDialog();
-            }
-        });
+        if (btSetCourse != null) {
+            btSetCourse.setOnClickListener(new OnClickListener() {
+                @Override
+                public void onClick(View paramView) {
+                    showCourseDesignDialog();
+                }
+            });
+        }
 
-        btPostpone.setOnClickListener(new OnClickListener() {
-            @Override
-            public void onClick(View arg0) {
-                ExLog.i(ExLog.RACE_SET_TIME_BUTTON_AP, getRace().getId().toString(), getActivity());
-                showAPModeDialog();
-            }
-        });
+        if (btSetCourse != null) {
+            btPostpone.setOnClickListener(new OnClickListener() {
+                @Override
+                public void onClick(View arg0) {
+                    ExLog.i(getActivity(), LogEvent.RACE_SET_TIME_BUTTON_AP, getRace().getId().toString());
+                    showAPModeDialog();
+                }
+            });
+        }
 
         textInfoText = (TextView) getView().findViewById(R.id.race_reset_time_text_infotext);
         
         if (savedInstanceState != null && savedInstanceState.containsKey(KEY_STATE)) {
-            ExLog.i(TAG, "Restoring set start time state...");
+            ExLog.i(getActivity(), TAG, "Restoring set start time state...");
             this.state = savedInstanceState.getParcelable(KEY_STATE);
             setStartTime(this.state);
         }
@@ -200,7 +205,7 @@ public class SetStartTimeRaceFragment extends RaceFragment {
     @Override
     public void onStart() {
         super.onStart();
-        ExLog.i(SetStartTimeRaceFragment.class.getName(),
+        ExLog.i(getActivity(), SetStartTimeRaceFragment.class.getName(),
                 String.format("Fragment %s is now shown", SetStartTimeRaceFragment.class.getName()));
     }
 
@@ -208,7 +213,7 @@ public class SetStartTimeRaceFragment extends RaceFragment {
     public void onSaveInstanceState(Bundle outState) {
         super.onSaveInstanceState(outState);
         if (state != null) {
-            ExLog.i(TAG, "Storing start time state...");
+            ExLog.i(getActivity(), TAG, "Storing start time state...");
             outState.putParcelable(KEY_STATE, state);
         }
     }
@@ -268,9 +273,9 @@ public class SetStartTimeRaceFragment extends RaceFragment {
 
     protected void setStartTime() {
         if (isReset) {
-            ExLog.i(ExLog.RACE_RESET_TIME, getRace().getId().toString(), getActivity());
+            ExLog.i(getActivity(), LogEvent.RACE_RESET_TIME, getRace().getId().toString());
         } else {
-            ExLog.i(ExLog.RACE_SET_TIME, getRace().getId().toString(), getActivity());
+            ExLog.i(getActivity(), LogEvent.RACE_SET_TIME, getRace().getId().toString());
         }
         setStartTime(getStartTime());
     }

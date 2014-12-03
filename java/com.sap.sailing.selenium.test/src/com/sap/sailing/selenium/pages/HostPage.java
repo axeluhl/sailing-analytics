@@ -19,12 +19,11 @@ public class HostPage extends PageObject {
      */
     protected static final int DEFAULT_PAGE_LOAD_TIMEOUT = 60;
     
-    protected static final String getGWTCodeServer() {
+    public static final String getGWTCodeServer() {
         String codeServer = System.getProperty(GWT_CODE_SERVER_PARAMETER_NAME);
-        
-        if(codeServer == null)
+        if (codeServer == null) {
             return NO_CODE_SERVER_PARAMTER_VALUE;
-        
+        }
         return GWT_CODE_SERVER_PARAMETER_NAME + "=" + codeServer;
     }
     

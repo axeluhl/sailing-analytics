@@ -3,10 +3,10 @@ package com.sap.sailing.domain.igtimiadapter.datatypes;
 import java.util.Map;
 
 import com.sap.sailing.domain.common.Bearing;
-import com.sap.sailing.domain.common.TimePoint;
 import com.sap.sailing.domain.common.impl.DegreeBearingImpl;
 import com.sap.sailing.domain.igtimiadapter.IgtimiFixReceiver;
 import com.sap.sailing.domain.igtimiadapter.Sensor;
+import com.sap.sse.common.TimePoint;
 
 /**
  * Apparent wind angle, relative to the device's or vessel's orientation, in degrees from 0 to 360, with values 180-360

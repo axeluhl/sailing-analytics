@@ -1,0 +1,142 @@
+package com.sap.sse.security;
+
+import java.util.Map;
+import java.util.UUID;
+
+import javax.servlet.ServletContext;
+
+import org.apache.shiro.cache.CacheManager;
+import org.apache.shiro.mgt.SecurityManager;
+
+import com.sap.sse.replication.impl.ReplicableWithObjectInputStream;
+import com.sap.sse.security.impl.ReplicableSecurityService;
+import com.sap.sse.security.operations.SecurityOperation;
+import com.sap.sse.security.shared.DefaultRoles;
+import com.sap.sse.security.shared.MailException;
+import com.sap.sse.security.shared.SocialUserAccount;
+import com.sap.sse.security.shared.UserManagementException;
+
+public interface SecurityService extends ReplicableWithObjectInputStream<ReplicableSecurityService, SecurityOperation<?>> {
+
+    SecurityManager getSecurityManager();
+
+    Iterable<User> getUserList();
+
+    User getUserByName(String username);
+
+    User getUserByEmail(String email);
+
+    User getCurrentUser();
+
+    /**
+     * Returns the redirect URL
+     */
+    String login(String username, String password) throws UserManagementException;
+
+    String getAuthenticationUrl(Credential credential) throws UserManagementException;
+
+    User verifySocialUser(Credential credential) throws UserManagementException;
+
+    void logout();
+
+    /**
+     * @param validationBaseURL if <code>null</code>, no validation will be attempted
+     */
+    User createSimpleUser(String username, String email, String password, String validationBaseURL) throws UserManagementException, MailException;
+
+    void updateSimpleUserPassword(String name, String newPassword) throws UserManagementException;
+
+    void updateSimpleUserEmail(String username, String newEmail, String validationBaseURL) throws UserManagementException;
+
+    User createSocialUser(String username, SocialUserAccount socialUserAccount) throws UserManagementException;
+
+    void deleteUser(String username) throws UserManagementException;
+
+    Iterable<String> getRolesFromUser(String username) throws UserManagementException;
+
+    void addRoleForUser(String username, String role);
+
+    void removeRoleFromUser(String username, String role);
+
+    Iterable<String> getPermissionsFromUser(String username) throws UserManagementException;
+    
+    void removePermissionFromUser(String username, String permissionToRemove);
+
+    void addPermissionForUser(String username, String permissionToAdd);
+
+    /**
+     * Registers a settings key together with its type. Calling this method is necessary for {@link #setSetting(String, Object)}
+     * to have an effect for <code>key</code>. Calls to {@link #setSetting(String, Object)} will only accept values whose type
+     * is compatible with <code>type</code>. Note that the store implementation may impose constraints on the types supported.
+     * All store implementations are required to support at least {@link String} and {@link UUID} as types.
+     */
+    void addSetting(String key, Class<?> clazz) throws UserManagementException;
+
+    /**
+     * Sets a value for a key if that key was previously added to this store using {@link #addSetting(String, Class)}.
+     * For user store implementations that maintain their data persistently and make it available after a server
+     * restart, it is sufficient to register the settings key once because these registrations will be stored
+     * persistently, too.
+     * <p>
+     * 
+     * If the <code>key</code> was not registered before by a call to {@link #addSetting(String, Class)}, or if the
+     * <code>setting</code> object does not conform with the type passed to {@link #addSetting(String, Class)}, a call
+     * to this method will have no effect and return <code>false</code>.
+     * 
+     * @Return whether applying the setting was successful; <code>false</code> means that no update was performed to the
+     * setting because either the key was not registered before by {@link #addSetting(String, Class)} or the type of the
+     * <code>setting</code> object does not conform to the type used in {@link #addSetting(String, Class)}
+     */
+    boolean setSetting(String key, Object setting);
+
+    <T> T getSetting(String key, Class<T> clazz);
+
+    Map<String, Object> getAllSettings();
+
+    Map<String, Class<?>> getAllSettingTypes();
+
+    void refreshSecurityConfig(ServletContext context);
+
+    CacheManager getCacheManager();
+    
+    void sendMail(String username, String subject, String body) throws MailException;
+
+    /**
+     * Checks whether <code>password</code> is the correct password for the user identified by <code>username</code>
+     * 
+     * @throws UserManagementException
+     *             in a user by that name does not exist
+     */
+    boolean checkPassword(String username, String password) throws UserManagementException;
+
+    boolean checkPasswordResetSecret(String username, String passwordResetSecret) throws UserManagementException;
+
+    /**
+     * Generates a new random password for the user identified by <code>username</code> and sends it
+     * to the user's e-mail address.
+     */
+    void resetPassword(String username, String baseURL) throws UserManagementException, MailException;
+
+    boolean validateEmail(String username, String validationSecret) throws UserManagementException;
+
+    /**
+     * Permitted only for users with role {@link DefaultRoles#ADMIN} or when the subject's user name matches
+     * <code>username</code>.
+     * 
+     * @param key must not be <code>null</code>
+     * @param value must not be <code>null</code>
+     */
+    void setPreference(String username, String key, String value);
+
+    /**
+     * Permitted only for users with role {@link DefaultRoles#ADMIN} or when the subject's user name matches
+     * <code>username</code>.
+     */
+    void unsetPreference(String username, String key);
+
+    /**
+     * @return <code>null</code> if no preference for the user identified by <code>username</code> is found
+     */
+    String getPreference(String username, String key);
+
+}

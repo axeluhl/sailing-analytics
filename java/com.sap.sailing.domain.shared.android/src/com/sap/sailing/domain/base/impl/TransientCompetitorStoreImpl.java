@@ -10,6 +10,8 @@ import java.util.HashSet;
 import java.util.Map;
 import java.util.Set;
 import java.util.WeakHashMap;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 
 import com.sap.sailing.domain.base.Competitor;
 import com.sap.sailing.domain.base.CompetitorStore;
@@ -23,6 +25,7 @@ import com.sap.sailing.util.impl.LockUtil;
 import com.sap.sailing.util.impl.NamedReentrantReadWriteLock;
 
 public class TransientCompetitorStoreImpl implements CompetitorStore, Serializable {
+    private static final Logger logger = Logger.getLogger(TransientCompetitorStoreImpl.class.getName());
     private static final long serialVersionUID = -4198298775476586931L;
     private final Map<Serializable, Competitor> competitorCache;
     private final Map<String, Competitor> competitorsByIdAsString;
@@ -67,6 +70,9 @@ public class TransientCompetitorStoreImpl implements CompetitorStore, Serializab
     private Competitor createCompetitor(Serializable id, String name, Color displayColor, DynamicTeam team, DynamicBoat boat) {
         Competitor result = new CompetitorImpl(id, name, displayColor, team, boat);
         addNewCompetitor(id, result);
+        if (logger.isLoggable(Level.FINEST)) {
+            logger.log(Level.FINEST, "Created competitor "+name+" with ID "+id, new Exception("Here is where it happened"));
+        }
         return result;
     }
 
@@ -151,6 +157,9 @@ public class TransientCompetitorStoreImpl implements CompetitorStore, Serializab
             competitorCache.clear();
             competitorsByIdAsString.clear();
             competitorsToUpdateDuringGetOrCreate.clear();
+            if (logger.isLoggable(Level.FINEST)) {
+                logger.log(Level.FINEST, "Clearing competitor store "+this, new Exception("here is where it happened"));
+            }
         } finally {
             LockUtil.unlockAfterWrite(lock);
         }
@@ -170,6 +179,7 @@ public class TransientCompetitorStoreImpl implements CompetitorStore, Serializab
     public void removeCompetitor(Competitor competitor) {
         LockUtil.lockForWrite(lock);
         try {
+            logger.fine("removing competitor "+competitor+" from competitor store "+this);
             competitorCache.remove(competitor.getId());
             competitorsByIdAsString.remove(competitor.getId().toString());  
             weakCompetitorDTOCache.remove(competitor);

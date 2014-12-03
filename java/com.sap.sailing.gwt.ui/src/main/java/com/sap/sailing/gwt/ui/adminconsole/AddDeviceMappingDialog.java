@@ -1,6 +1,5 @@
 package com.sap.sailing.gwt.ui.adminconsole;
 
-import java.io.Serializable;
 import java.util.Collection;
 import java.util.Date;
 import java.util.List;
@@ -23,13 +22,15 @@ import com.google.gwt.view.client.SelectionChangeEvent;
 import com.google.gwt.view.client.SelectionModel;
 import com.google.gwt.view.client.SingleSelectionModel;
 import com.sap.sailing.domain.common.dto.CompetitorDTO;
-import com.sap.sailing.gwt.ui.client.ErrorReporter;
+import com.sap.sailing.domain.common.racelog.tracking.DeviceMappingConstants;
+import com.sap.sailing.domain.common.racelog.tracking.MappableToDevice;
 import com.sap.sailing.gwt.ui.client.SailingServiceAsync;
 import com.sap.sailing.gwt.ui.client.StringMessages;
 import com.sap.sailing.gwt.ui.shared.BetterDateTimeBox;
 import com.sap.sailing.gwt.ui.shared.DeviceIdentifierDTO;
 import com.sap.sailing.gwt.ui.shared.DeviceMappingDTO;
 import com.sap.sailing.gwt.ui.shared.MarkDTO;
+import com.sap.sse.gwt.client.ErrorReporter;
 import com.sap.sse.gwt.client.dialog.DataEntryDialog;
 
 public class AddDeviceMappingDialog extends DataEntryDialog<DeviceMappingDTO> {
@@ -37,11 +38,12 @@ public class AddDeviceMappingDialog extends DataEntryDialog<DeviceMappingDTO> {
     private final BetterDateTimeBox to;
     private final ListBox deviceType;
     private final TextBox deviceId;
+    private final DeviceMappingQRIdentifierWidget qrWidget;
     private final CompetitorTableWrapper<SingleSelectionModel<CompetitorDTO>> competitorTable;
     private final MarkTableWrapper<SingleSelectionModel<MarkDTO>> markTable;
     private final StringMessages stringMessages;
     
-    private Serializable selectedItem;
+    private MappableToDevice selectedItem;
 
     public AddDeviceMappingDialog(SailingServiceAsync sailingService, final ErrorReporter errorReporter,
             final StringMessages stringMessages, String leaderboardName, String raceColumnName, String fleetName,
@@ -76,7 +78,21 @@ public class AddDeviceMappingDialog extends DataEntryDialog<DeviceMappingDTO> {
         this.stringMessages = stringMessages;
         
         from = initTimeBox();
+        from.setValue(null);
         to = initTimeBox();
+        to.setValue(null);
+        from.addValueChangeHandler(new ValueChangeHandler<Date>() {
+            @Override
+            public void onValueChange(ValueChangeEvent<Date> event) {
+                qrWidget.setFromMillis(event.getValue().getTime());
+            }
+        });
+        to.addValueChangeHandler(new ValueChangeHandler<Date>() {
+            @Override
+            public void onValueChange(ValueChangeEvent<Date> event) {
+                qrWidget.setToMillis(event.getValue().getTime());
+            }
+        });
         
         deviceType = createListBox(false);
         sailingService.getDeserializableDeviceIdentifierTypes(new AsyncCallback<List<String>>() {
@@ -111,8 +127,12 @@ public class AddDeviceMappingDialog extends DataEntryDialog<DeviceMappingDTO> {
             @Override
             public void onSelectionChange(SelectionChangeEvent event) {
                 if (competitorTable.getSelectionModel().getSelectedSet().size() == 1) {
-                    selectedItem = competitorTable.getSelectionModel().getSelectedSet().iterator().next();
+                    CompetitorDTO selectedCompetitor = competitorTable.getSelectionModel().
+                            getSelectedSet().iterator().next();
+                    selectedItem = selectedCompetitor;
                     deselectAll(markTable.getSelectionModel(), markTable.getDataProvider().getList());
+                    qrWidget.setMappedItem(DeviceMappingConstants.COMPETITOR_ID_AS_STRING,
+                            selectedCompetitor.getIdAsString());
                     validate();
                 }
             }
@@ -122,8 +142,11 @@ public class AddDeviceMappingDialog extends DataEntryDialog<DeviceMappingDTO> {
             @Override
             public void onSelectionChange(SelectionChangeEvent event) {
                 if (markSelectionModel.getSelectedSet().size() == 1) {
-                    selectedItem = markSelectionModel.getSelectedSet().iterator().next();
+                    MarkDTO selectedMark = markSelectionModel.getSelectedSet().iterator().next();
+                    selectedItem = selectedMark;
                     deselectAll(competitorTable.getSelectionModel(), competitorTable.getAllCompetitors());
+                    qrWidget.setMappedItem(DeviceMappingConstants.MARK_ID_AS_STRING,
+                            selectedMark.getIdAsString());
                     validate();
                 }
             }
@@ -176,13 +199,19 @@ public class AddDeviceMappingDialog extends DataEntryDialog<DeviceMappingDTO> {
             from.setValue(mapping.from);
             to.setValue(mapping.to);
         }
+        
+        qrWidget = new DeviceMappingQRIdentifierWidget(leaderboardName, raceColumnName, fleetName, stringMessages);
+        qrWidget.generateQRCode();
     }
     
     @Override
     protected Widget getAdditionalWidget() {
         HorizontalPanel panel = new HorizontalPanel();
         VerticalPanel tablesPanel = new VerticalPanel();
+        VerticalPanel leftSidePanel = new VerticalPanel();
         Grid entryGrid = new Grid(4, 2);
+        CaptionPanel entryPanel = new CaptionPanel(stringMessages.mappingDetails());
+        CaptionPanel qrPanel = new CaptionPanel(stringMessages.qrCode());
         CaptionPanel marksPanel = new CaptionPanel(stringMessages.mark());
         CaptionPanel competitorsPanel = new CaptionPanel(stringMessages.competitor());
         
@@ -195,13 +224,23 @@ public class AddDeviceMappingDialog extends DataEntryDialog<DeviceMappingDTO> {
         entryGrid.setWidget(3, 0, new Label(stringMessages.to()));
         entryGrid.setWidget(3, 1, to);
         
-        panel.add(entryGrid);
+        VerticalPanel qrContentPanel = new VerticalPanel();
+        Label explanation = new Label(stringMessages.deviceMappingQrCodeExplanation());
+        explanation.setWidth("400px");
+        qrContentPanel.add(explanation);
+        qrContentPanel.add(qrWidget);
+        
+        panel.add(leftSidePanel);
         panel.add(tablesPanel);
         tablesPanel.add(marksPanel);
         tablesPanel.add(competitorsPanel);
+        leftSidePanel.add(entryPanel);
+        leftSidePanel.add(qrPanel);
         
         marksPanel.setContentWidget(markTable.asWidget());
         competitorsPanel.setContentWidget(competitorTable.asWidget());
+        entryPanel.setContentWidget(entryGrid);
+        qrPanel.setContentWidget(qrContentPanel);
         
         return panel;
     }
