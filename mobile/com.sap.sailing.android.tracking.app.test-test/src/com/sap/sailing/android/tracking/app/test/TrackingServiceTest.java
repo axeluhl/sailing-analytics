@@ -4,10 +4,14 @@ import java.util.ArrayList;
 import java.util.Date;
 
 import android.content.ContentResolver;
+import android.content.ContentUris;
+import android.content.ContentValues;
 import android.content.Intent;
 import android.database.Cursor;
 import android.location.Location;
+import android.net.Uri;
 import android.os.IBinder;
+import android.provider.CalendarContract.Events;
 import android.test.ServiceTestCase;
 
 import com.sap.sailing.android.shared.logging.ExLog;
@@ -21,7 +25,7 @@ import com.sap.sailing.android.tracking.app.services.TrackingService;
 public class TrackingServiceTest extends ServiceTestCase<TrackingService> {
 
 	static final String TAG = TrackingServiceTest.class.getName();
-	static final String GPS_MOCK_PROVIDER_NAME = "TestProvider";
+//	static final String GPS_MOCK_PROVIDER_NAME = "TestProvider";
 	
 	public TrackingServiceTest() {
 		super(TrackingService.class);
@@ -73,7 +77,7 @@ public class TrackingServiceTest extends ServiceTestCase<TrackingService> {
      * @throws InterruptedException 
      */
 	public void testGPSFixesStoredToDatabase() throws InterruptedException {
-		startService(998);
+		startService(789);
 		
 //		LocationManager locationManager = (LocationManager) this.getContext()
 //				.getSystemService(Context.LOCATION_SERVICE);
@@ -81,7 +85,7 @@ public class TrackingServiceTest extends ServiceTestCase<TrackingService> {
 		long timestamp = new Date().getTime();
 		long nanos = System.nanoTime();
 		
-        Location location = new Location(GPS_MOCK_PROVIDER_NAME);
+        Location location = new Location("Test");
         location.setLatitude(20.0);
         location.setLongitude(30.0);
         location.setAccuracy(0);
@@ -105,7 +109,7 @@ public class TrackingServiceTest extends ServiceTestCase<TrackingService> {
         assertEquals(123.0, fix.course);
         assertEquals(12.5, fix.speed);
         assertEquals(0, fix.synced);
-        assertEquals(String.valueOf(998), fix.eventId);
+        assertEquals(String.valueOf(789), fix.eventId);
 
         shutdownService();
     }
@@ -158,6 +162,11 @@ public class TrackingServiceTest extends ServiceTestCase<TrackingService> {
 		Cursor cursor = cr.query(EventGpsFixesJoined.CONTENT_URI, projectionClauseStr.split(","), selectionClause, null, null);
 		while (cursor.moveToNext()) {
 			GpsFix gpsFix = new GpsFix();
+			
+			for (int i = 0; i < cursor.getColumnCount(); i++)
+			{
+				System.out.println(cursor.getColumnName(i) + " -~> " + cursor.getString(i));
+			}
 			
 			gpsFix.id = cursor.getInt(cursor.getColumnIndex("_gid"));
 			gpsFix.timestamp = cursor.getLong(cursor.getColumnIndex(SensorGps.GPS_TIME));

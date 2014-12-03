@@ -187,9 +187,9 @@ public class AnalyticsProvider extends ContentProvider {
             return Competitor.buildCompetitorUri(values.getAsString(Competitor.COMPETITOR_ID));
             
         case EVENT:
-            db.insertOrThrow(Tables.EVENTS, null, values);
+            long eventId = db.insertOrThrow(Tables.EVENTS, null, values);
             notifyChange(uri);
-            return Event.buildEventUri(values.getAsString(Event.EVENT_ID));
+            return Event.buildEventUri(String.valueOf(eventId));
             
         case LEADERBOARD:
         	db.insertOrThrow(Tables.LEADERBOARDS, null, values);
