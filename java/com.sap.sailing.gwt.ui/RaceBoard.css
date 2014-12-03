@@ -648,13 +648,8 @@ img.openColumn {
 }
 
 .gwt-Button, .gwt-Button:visited, .test, .test:visited {
-<<<<<<< HEAD
-	background-color: #fcbb22;
-	background-image: none !important;
-=======
     background-color: #fcbb22;
     background-image: none !important;
->>>>>>> bd3cae080532f5e4232975e9d0752cb41f47486d
     -moz-box-shadow: none;
     -webkit-box-shadow: none;
     -o-box-shadow: none;
@@ -664,13 +659,6 @@ img.openColumn {
 }
 
 .gwt-Button:hover {
-<<<<<<< HEAD
-	background-color: #fcbb22 !important;
-}
-
-.test:hover {
-	
-=======
     background-color: #fcbb22 !important;
 }
 
@@ -716,5 +704,4 @@ img.openColumn {
 
 .Media-Select-Popup .Caption {
     padding: 4px 10px;
->>>>>>> bd3cae080532f5e4232975e9d0752cb41f47486d
 }
